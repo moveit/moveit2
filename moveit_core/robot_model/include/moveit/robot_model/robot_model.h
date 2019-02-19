@@ -40,7 +40,6 @@
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/exceptions/exceptions.h>
-#include <urdf/model.h>
 #include <srdfdom/model.h>
 
 // joint types
@@ -53,6 +52,7 @@
 
 #include <Eigen/Geometry>
 #include <iostream>
+#include <moveit/logging/logging.h>
 
 /** \brief Main namespace for MoveIt! */
 namespace moveit
