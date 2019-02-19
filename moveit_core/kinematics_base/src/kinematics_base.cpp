@@ -112,7 +112,7 @@ bool KinematicsBase::initialize(const std::string& robot_description, const std:
     return initialize(robot_description, group_name, base_frame, tip_frames[0], search_discretization);
   }
 
-  ROS_ERROR_NAMED(LOGNAME, "This solver does not support multiple tip frames");
+  ROS_ERROR_NAMED(LOGNAME.c_str(), "This solver does not support multiple tip frames");
   return false;
 }
 
@@ -120,7 +120,7 @@ bool KinematicsBase::initialize(const moveit::core::RobotModel& robot_model, con
                                 const std::string& base_frame, const std::vector<std::string>& tip_frames,
                                 double search_discretization)
 {
-  ROS_WARN_NAMED(LOGNAME, "IK plugin for group '%s' relies on deprecated API. "
+  ROS_WARN_NAMED(LOGNAME.c_str(), "IK plugin for group '%s' relies on deprecated API. "
                           "Please implement initialize(RobotModel, ...).",
                  group_name.c_str());
   return false;
@@ -190,7 +190,7 @@ KinematicsBase::~KinematicsBase()
 {
 }
 
-bool KinematicsBase::getPositionIK(const std::vector<geometry_msgs::Pose>& ik_poses,
+bool KinematicsBase::getPositionIK(const std::vector<geometry_msgs::msg::Pose>& ik_poses,
                                    const std::vector<double>& ik_seed_state,
                                    std::vector<std::vector<double> >& solutions, KinematicsResult& result,
                                    const KinematicsQueryOptions& options) const
@@ -207,19 +207,19 @@ bool KinematicsBase::getPositionIK(const std::vector<geometry_msgs::Pose>& ik_po
 
   if (ik_poses.size() != 1)
   {
-    ROS_ERROR_NAMED(LOGNAME, "This kinematic solver does not support getPositionIK for multiple tips");
+    ROS_ERROR_NAMED(LOGNAME.c_str(), "This kinematic solver does not support getPositionIK for multiple tips");
     result.kinematic_error = KinematicErrors::MULTIPLE_TIPS_NOT_SUPPORTED;
     return false;
   }
 
   if (ik_poses.empty())
   {
-    ROS_ERROR_NAMED(LOGNAME, "Input ik_poses array is empty");
+    ROS_ERROR_NAMED(LOGNAME.c_str(), "Input ik_poses array is empty");
     result.kinematic_error = KinematicErrors::EMPTY_TIP_POSES;
     return false;
   }
 
-  moveit_msgs::MoveItErrorCodes error_code;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
   if (getPositionIK(ik_poses[0], ik_seed_state, solution, error_code, options))
   {
     solutions.resize(1);
