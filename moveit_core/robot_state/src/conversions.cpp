@@ -116,7 +116,6 @@ static bool _multiDOFJointsToRobotState(const sensor_msgs::msg::MultiDOFJointSta
       error = true;
       continue;
     }
-    // Eigen::Isometry3d transf = tf2::transformToEigen(mjs.transforms[i]);
     // if frames do not mach, attempt to transform
 
     geometry_msgs::msg::TransformStamped tf_stamped;
