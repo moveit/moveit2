@@ -17,4 +17,4 @@ before_script:
 
 script:
   - docker build -t acutronicrobotics/moveit2 .
-  - docker run -v /tmp/moveit2:/home/root/ros2_ws/src/moveit2 acutronicbotics/moveit2
+  - docker run -v /tmp/moveit2:/home/root/ros2_ws/src/moveit2 acutronicrobotics/moveit2
