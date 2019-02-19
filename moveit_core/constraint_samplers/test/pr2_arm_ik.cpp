@@ -153,7 +153,7 @@ bool PR2ArmIK::init(const urdf::ModelInterface& robot_model, const std::string& 
 
 void PR2ArmIK::addJointToChainInfo(const urdf::JointConstSharedPtr& joint, moveit_msgs::KinematicSolverInfo& info)
 {
-  moveit_msgs::JointLimits limit;
+  moveit_msgs::msg::JointLimits limit;
   info.joint_names.push_back(joint->name);  // Joints are coming in reverse order
 
   if (joint->type != urdf::Joint::CONTINUOUS)
