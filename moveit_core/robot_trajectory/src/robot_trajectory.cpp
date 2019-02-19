@@ -42,12 +42,12 @@
 
 namespace robot_trajectory
 {
-RobotTrajectory::RobotTrajectory(const robot_model::RobotModelConstPtr& robot_model, const std::string& group)
+RobotTrajectory::msg::RobotTrajectory(const robot_model::RobotModelConstPtr& robot_model, const std::string& group)
   : robot_model_(robot_model), group_(group.empty() ? nullptr : robot_model->getJointModelGroup(group))
 {
 }
 
-RobotTrajectory::RobotTrajectory(const robot_model::RobotModelConstPtr& robot_model,
+RobotTrajectory::msg::RobotTrajectory(const robot_model::RobotModelConstPtr& robot_model,
                                  const robot_model::JointModelGroup* group)
   : robot_model_(robot_model), group_(group)
 {
@@ -101,11 +101,6 @@ void RobotTrajectory::append(const RobotTrajectory& source, double dt, size_t st
 void RobotTrajectory::reverse()
 {
   std::reverse(waypoints_.begin(), waypoints_.end());
-  for (robot_state::RobotStatePtr& waypoint : waypoints_)
-  {
-    // reversing the trajectory implies inverting the velocity profile
-    waypoint->invertVelocity();
-  }
   if (!duration_from_previous_.empty())
   {
     duration_from_previous_.push_back(duration_from_previous_.front());
@@ -201,9 +196,9 @@ void RobotTrajectory::clear()
   duration_from_previous_.clear();
 }
 
-void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::RobotTrajectory& trajectory) const
+void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory) const
 {
-  trajectory = moveit_msgs::RobotTrajectory();
+  trajectory = moveit_msgs::msg::RobotTrajectory();
   if (waypoints_.empty())
     return;
   const std::vector<const robot_model::JointModel*>& jnt =
@@ -228,18 +223,18 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::RobotTrajectory& trajec
   if (!onedof.empty())
   {
     trajectory.joint_trajectory.header.frame_id = robot_model_->getModelFrame();
-    trajectory.joint_trajectory.header.stamp = ros::Time(0);
+    trajectory.joint_trajectory.header.stamp = rclcpp::Time(0);
     trajectory.joint_trajectory.points.resize(waypoints_.size());
   }
 
   if (!mdof.empty())
   {
     trajectory.multi_dof_joint_trajectory.header.frame_id = robot_model_->getModelFrame();
-    trajectory.multi_dof_joint_trajectory.header.stamp = ros::Time(0);
+    trajectory.multi_dof_joint_trajectory.header.stamp = rclcpp::Time(0);
     trajectory.multi_dof_joint_trajectory.points.resize(waypoints_.size());
   }
 
-  static const ros::Duration ZERO_DURATION(0.0);
+  static const rclcpp::Duration ZERO_DURATION(0.0);
   double total_time = 0.0;
   for (std::size_t i = 0; i < waypoints_.size(); ++i)
   {
@@ -277,7 +272,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::RobotTrajectory& trajec
         trajectory.joint_trajectory.points[i].effort.clear();
 
       if (duration_from_previous_.size() > i)
-        trajectory.joint_trajectory.points[i].time_from_start = ros::Duration(total_time);
+        trajectory.joint_trajectory.points[i].time_from_start = rclcpp::Duration(total_time);
       else
         trajectory.joint_trajectory.points[i].time_from_start = ZERO_DURATION;
     }
@@ -286,7 +281,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::RobotTrajectory& trajec
       trajectory.multi_dof_joint_trajectory.points[i].transforms.resize(mdof.size());
       for (std::size_t j = 0; j < mdof.size(); ++j)
       {
-        geometry_msgs::TransformStamped ts = tf2::eigenToTransform(waypoints_[i]->getJointTransform(mdof[j]));
+        geometry_msgs::msg::TransformStamped ts = tf2::eigenToTransform(waypoints_[i]->getJointTransform(mdof[j]));
         trajectory.multi_dof_joint_trajectory.points[i].transforms[j] = ts.transform;
         // TODO: currently only checking for planar multi DOF joints / need to add check for floating
         if (waypoints_[i]->hasVelocities() && (mdof[j]->getType() == robot_model::JointModel::JointType::PLANAR))
@@ -294,7 +289,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::RobotTrajectory& trajec
           const std::vector<std::string> names = mdof[j]->getVariableNames();
           const double* velocities = waypoints_[i]->getJointVelocities(mdof[j]);
 
-          geometry_msgs::Twist point_velocity;
+          geometry_msgs::msg::Twist point_velocity;
 
           for (std::size_t k = 0; k < names.size(); ++k)
           {
@@ -319,7 +314,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::RobotTrajectory& trajec
         }
       }
       if (duration_from_previous_.size() > i)
-        trajectory.multi_dof_joint_trajectory.points[i].time_from_start = ros::Duration(total_time);
+        trajectory.multi_dof_joint_trajectory.points[i].time_from_start = rclcpp::Duration(total_time);
       else
         trajectory.multi_dof_joint_trajectory.points[i].time_from_start = ZERO_DURATION;
     }
@@ -327,14 +322,14 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::RobotTrajectory& trajec
 }
 
 void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& reference_state,
-                                            const trajectory_msgs::JointTrajectory& trajectory)
+                                            const trajectory_msgs::msg::JointTrajectory& trajectory)
 {
   // make a copy just in case the next clear() removes the memory for the reference passed in
   const robot_state::RobotState& copy = reference_state;
   clear();
   std::size_t state_count = trajectory.points.size();
-  ros::Time last_time_stamp = trajectory.header.stamp;
-  ros::Time this_time_stamp = last_time_stamp;
+  rclcpp::Time last_time_stamp = trajectory.header.stamp;
+  rclcpp::Time this_time_stamp = last_time_stamp;
 
   for (std::size_t i = 0; i < state_count; ++i)
   {
@@ -353,7 +348,7 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
 }
 
 void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& reference_state,
-                                            const moveit_msgs::RobotTrajectory& trajectory)
+                                            const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
   // make a copy just in case the next clear() removes the memory for the reference passed in
   const robot_state::RobotState& copy = reference_state;
@@ -361,10 +356,10 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
 
   std::size_t state_count =
       std::max(trajectory.joint_trajectory.points.size(), trajectory.multi_dof_joint_trajectory.points.size());
-  ros::Time last_time_stamp = trajectory.joint_trajectory.points.empty() ?
+  rclcpp::Time last_time_stamp = trajectory.joint_trajectory.points.empty() ?
                                   trajectory.multi_dof_joint_trajectory.header.stamp :
                                   trajectory.joint_trajectory.header.stamp;
-  ros::Time this_time_stamp = last_time_stamp;
+  rclcpp::Time this_time_stamp = last_time_stamp;
 
   for (std::size_t i = 0; i < state_count; ++i)
   {
@@ -401,8 +396,8 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
 }
 
 void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& reference_state,
-                                            const moveit_msgs::RobotState& state,
-                                            const moveit_msgs::RobotTrajectory& trajectory)
+                                            const moveit_msgs::msg::RobotState& state,
+                                            const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
   robot_state::RobotState st(reference_state);
   robot_state::robotStateMsgToRobotState(state, st);
