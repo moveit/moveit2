@@ -1,4 +1,14 @@
+cmake_minimum_required(VERSION 3.5)
 set(MOVEIT_LIB_NAME moveit_robot_model)
+
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
 add_library(${MOVEIT_LIB_NAME}
   src/aabb.cpp
@@ -12,20 +22,24 @@ add_library(${MOVEIT_LIB_NAME}
   src/revolute_joint_model.cpp
   src/robot_model.cpp
   )
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+# set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 
-target_link_libraries(${MOVEIT_LIB_NAME} moveit_profiler moveit_exceptions moveit_kinematics_base ${catkin_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${MOVEIT_LIB_NAME} moveit_profiler moveit_exceptions moveit_kinematics_base ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
+# add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  urdf
+  urdfdom_headers
+  visualization_msgs)
 
-if(CATKIN_ENABLE_TESTING)
+if(AMENT_ENABLE_TESTING)
   find_package(moveit_resources REQUIRED)
   include_directories(${moveit_resources_INCLUDE_DIRS})
 
   catkin_add_gtest(test_robot_model test/test.cpp)
-  target_link_libraries(test_robot_model moveit_test_utils ${catkin_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${MOVEIT_LIB_NAME})
+  target_link_libraries(test_robot_model moveit_test_utils ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${MOVEIT_LIB_NAME})
 endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+install(DIRECTORY include/ DESTINATION include)
