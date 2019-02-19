@@ -71,7 +71,7 @@ class JointModelGroup
 public:
   struct KinematicsSolver
   {
-    KinematicsSolver() : default_ik_timeout_(0.5)
+    KinematicsSolver() : default_ik_timeout_(0.5), default_ik_attempts_(2)
     {
     }
 
@@ -100,6 +100,8 @@ public:
     kinematics::KinematicsBasePtr solver_instance_;
 
     double default_ik_timeout_;
+
+    unsigned int default_ik_attempts_;
   };
 
   /// Map from group instances to allocator functions & bijections

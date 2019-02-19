@@ -87,7 +87,7 @@ static bool _multiDOFJointsToRobotState(const sensor_msgs::msg::MultiDOFJointSta
       try
       {
         // find the transform that takes the given frame_id to the desired fixed frame
-        const Eigen::Isometry3d& t2fixed_frame = tf->getTransform(mjs.header.frame_id);
+        const Eigen::Affine3d& t2fixed_frame = tf->getTransform(mjs.header.frame_id);
         // we update the value of the transform so that it transforms from the known fixed frame to the desired child
         // link
         inv_t = t2fixed_frame.inverse();
@@ -116,8 +116,15 @@ static bool _multiDOFJointsToRobotState(const sensor_msgs::msg::MultiDOFJointSta
       error = true;
       continue;
     }
-    Eigen::Isometry3d transf = tf2::transformToEigen(mjs.transforms[i]);
+    // Eigen::Isometry3d transf = tf2::transformToEigen(mjs.transforms[i]);
     // if frames do not mach, attempt to transform
+
+    geometry_msgs::msg::TransformStamped tf_stamped;
+    tf_stamped.header = mjs.header;
+    tf_stamped.child_frame_id = joint_name;
+    tf_stamped.transform = mjs.transforms[i];
+    Eigen::Affine3d transf = tf2::transformToEigen(tf_stamped);
+
     if (use_inv_t)
       transf = transf * inv_t;
 
