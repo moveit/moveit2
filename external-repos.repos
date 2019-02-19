@@ -35,3 +35,7 @@ repositories:
     type: git
     url: https://github.com/AcutronicRobotics/urdf_parser_py
     version: ros2
+  octomap:
+    type: git
+    url: https://github.com/AcutronicRobotics/octomap
+    version: ros2
