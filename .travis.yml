@@ -11,7 +11,10 @@ notifications:
       - lander@erlerobotics.com
       
 before_script:
+  - mkdir /tmp/moveit2
+  - mv * /tmp/moveit2
   - cd .docker/ci
 
 script:
   - docker build -t acutronicrobotics/moveit2 .
+  - docker run -v /tmp/moveit2:/home/root/ros2_ws/src/moveit2 acutronicbotics/moveit2
