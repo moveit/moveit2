@@ -37,7 +37,7 @@
 #include "moveit/profiler/profiler.h"
 #if MOVEIT_ENABLE_PROFILING
 
-#include <ros/console.h>
+// #include <ros/console.h>
 #include <vector>
 #include <algorithm>
 #include <sstream>
@@ -175,7 +175,7 @@ void Profiler::console()
   std::stringstream ss;
   ss << std::endl;
   status(ss, true);
-  ROS_INFO_STREAM_NAMED("profiler", ss.str());
+  ROS_INFO_STREAM_NAMED("profiler", ss.str().c_str());
 }
 
 /// @cond IGNORE
