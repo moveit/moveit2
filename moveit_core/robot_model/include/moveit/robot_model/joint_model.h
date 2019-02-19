@@ -47,9 +47,10 @@
 #include <random_numbers/random_numbers.h>
 #include <Eigen/Geometry>
 #include <rcutils/logging_macros.h>
+#include <moveit/logging/logging.h>
 
-#define ROS_DEBUG_NAMED RCUTILS_LOG_ERROR
-#define ROS_WARN_NAMED RCUTILS_LOG_ERROR
+// #define ROS_DEBUG_NAMED RCUTILS_LOG_ERROR
+// #define ROS_WARN_NAMED RCUTILS_LOG_ERROR
 
 namespace moveit
 {
