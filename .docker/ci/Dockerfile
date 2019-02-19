@@ -25,6 +25,7 @@ RUN /bin/bash -c "source /opt/ros/crystal/setup.bash \
 RUN mkdir -p ros2_ws/src
 WORKDIR ros2_ws
 RUN wget https://raw.githubusercontent.com/AcutronicRobotics/moveit2/master/external-repos.repos \
-    && vcs import src < external-repos.repos \
-    && cd src && git clone -b master https://github.com/AcutronicRobotics/moveit2
-RUN /bin/bash -c "source /opt/ros/crystal/setup.bash && colcon build --merge-install"
+    && vcs import src < external-repos.repos
+COPY ./docker-entrypoint.sh /
+ENTRYPOINT ["/docker-entrypoint.sh"] 
+
