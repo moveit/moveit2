@@ -40,8 +40,8 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/macros/deprecation.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit_msgs/RobotTrajectory.h>
-#include <moveit_msgs/RobotState.h>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <moveit_msgs/msg/robot_state.hpp>
 #include <deque>
 
 namespace robot_trajectory
@@ -204,7 +204,7 @@ public:
 
   double getAverageSegmentDuration() const;
 
-  void getRobotTrajectoryMsg(moveit_msgs::RobotTrajectory& trajectory) const;
+  void getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory) const;
 
   /** \brief Copy the content of the trajectory message into this class. The trajectory message itself is not required
      to contain the values
@@ -213,7 +213,7 @@ public:
       to be constructed internally is obtained by copying the reference state and overwriting the content from a
      trajectory point in \e trajectory. */
   void setRobotTrajectoryMsg(const robot_state::RobotState& reference_state,
-                             const trajectory_msgs::JointTrajectory& trajectory);
+                             const trajectory_msgs::msg::JointTrajectory& trajectory);
 
   /** \brief Copy the content of the trajectory message into this class. The trajectory message itself is not required
      to contain the values
@@ -222,7 +222,7 @@ public:
       to be constructed internally is obtained by copying the reference state and overwriting the content from a
      trajectory point in \e trajectory. */
   void setRobotTrajectoryMsg(const robot_state::RobotState& reference_state,
-                             const moveit_msgs::RobotTrajectory& trajectory);
+                             const moveit_msgs::msg::RobotTrajectory& trajectory);
 
   /** \brief Copy the content of the trajectory message into this class. The trajectory message itself is not required
      to contain the values
@@ -231,8 +231,8 @@ public:
       using \e state. Each point in the trajectory  to be constructed internally is obtained by copying the reference
      state and overwriting the content
       from a trajectory point in \e trajectory. */
-  void setRobotTrajectoryMsg(const robot_state::RobotState& reference_state, const moveit_msgs::RobotState& state,
-                             const moveit_msgs::RobotTrajectory& trajectory);
+  void setRobotTrajectoryMsg(const robot_state::RobotState& reference_state, const moveit_msgs::msg::RobotState& state,
+                             const moveit_msgs::msg::RobotTrajectory& trajectory);
 
   void reverse();
 
