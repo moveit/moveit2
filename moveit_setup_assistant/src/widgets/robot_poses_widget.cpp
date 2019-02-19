@@ -870,7 +870,7 @@ SliderWidget::SliderWidget(QWidget* parent, const robot_model::JointModel* joint
   row2->addWidget(joint_value_);
 
   // Joint Limits ----------------------------------------------------
-  const std::vector<moveit_msgs::JointLimits>& limits = joint_model_->getVariableBoundsMsg();
+  const std::vector<moveit_msgs::msg::JointLimits>& limits = joint_model_->getVariableBoundsMsg();
   if (limits.empty())
   {
     QMessageBox::critical(this, "Error Loading", "An internal error has occured while loading the joints");
@@ -878,7 +878,7 @@ SliderWidget::SliderWidget(QWidget* parent, const robot_model::JointModel* joint
   }
 
   // Only use the first limit, because there is only 1 variable (as checked earlier)
-  moveit_msgs::JointLimits joint_limit = limits[0];
+  moveit_msgs::msg::JointLimits joint_limit = limits[0];
   max_position_ = joint_limit.max_position;
   min_position_ = joint_limit.min_position;
 

@@ -173,10 +173,10 @@ bool KDLKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
     if (joint_model_group_->getJointModels()[i]->getType() == moveit::core::JointModel::REVOLUTE ||
         joint_model_group_->getJointModels()[i]->getType() == moveit::core::JointModel::PRISMATIC)
     {
-      solver_info_.joint_names.push_back(joint_model_group_->getJointModelNames()[i]);
-      const std::vector<moveit_msgs::JointLimits>& jvec =
-          joint_model_group_->getJointModels()[i]->getVariableBoundsMsg();
-      solver_info_.limits.insert(solver_info_.limits.end(), jvec.begin(), jvec.end());
+      ik_chain_info_.joint_names.push_back(joint_model_group->getJointModelNames()[i]);
+      const std::vector<moveit_msgs::msg::JointLimits>& jvec =
+          joint_model_group->getJointModels()[i]->getVariableBoundsMsg();
+      ik_chain_info_.limits.insert(ik_chain_info_.limits.end(), jvec.begin(), jvec.end());
     }
   }
 

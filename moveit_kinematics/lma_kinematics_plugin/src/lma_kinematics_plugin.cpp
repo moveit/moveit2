@@ -114,8 +114,10 @@ bool LMAKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
   {
     if (jm->getType() == moveit::core::JointModel::REVOLUTE || jm->getType() == moveit::core::JointModel::PRISMATIC)
     {
-      joints_.push_back(jm);
-      joint_names_.push_back(jm->getName());
+      ik_chain_info_.joint_names.push_back(joint_model_group->getJointModelNames()[i]);
+      const std::vector<moveit_msgs::msg::JointLimits>& jvec =
+          joint_model_group->getJointModels()[i]->getVariableBoundsMsg();
+      ik_chain_info_.limits.insert(ik_chain_info_.limits.end(), jvec.begin(), jvec.end());
     }
   }
   dimension_ = joints_.size();

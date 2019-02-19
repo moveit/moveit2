@@ -122,7 +122,7 @@ public:
     const robot_model::JointModel* jm = robot_model_->getJointModel(name);
     if (jm)
     {
-      const std::vector<moveit_msgs::JointLimits>& lim = jm->getVariableBoundsMsg();
+      const std::vector<moveit_msgs::msg::JointLimits>& lim = jm->getVariableBoundsMsg();
       for (std::size_t i = 0; i < lim.size(); ++i)
       {
         bp::list l;
