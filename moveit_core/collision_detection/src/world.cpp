@@ -35,7 +35,8 @@
 /* Author: Acorn Pooley, Ioan Sucan */
 
 #include <moveit/collision_detection/world.h>
-#include <ros/console.h>
+// #include <ros/console.h>
+#include <moveit/logging/logging.h>
 
 namespace collision_detection
 {

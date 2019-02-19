@@ -39,41 +39,43 @@
 
 namespace collision_detection
 {
-void getCostMarkers(visualization_msgs::MarkerArray& arr, const std::string& frame_id,
+void getCostMarkers(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
                     std::set<CostSource>& cost_sources)
 {
-  std_msgs::ColorRGBA color;
+  std_msgs::msg::ColorRGBA color;
   color.r = 1.0f;
   color.g = 0.5f;
   color.b = 0.0f;
   color.a = 0.4f;
-  getCostMarkers(arr, frame_id, cost_sources, color, ros::Duration(60.0));
+  getCostMarkers(arr, frame_id, cost_sources, color, rclcpp::Duration(60.0));
 }
 
-void getCollisionMarkersFromContacts(visualization_msgs::MarkerArray& arr, const std::string& frame_id,
+void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
                                      const CollisionResult::ContactMap& con)
 {
-  std_msgs::ColorRGBA color;
+  std_msgs::msg::ColorRGBA color;
   color.r = 1.0f;
   color.g = 0.0f;
   color.b = 0.0f;
   color.a = 0.8f;
-  getCollisionMarkersFromContacts(arr, frame_id, con, color, ros::Duration(60.0));
+  getCollisionMarkersFromContacts(arr, frame_id, con, color, rclcpp::Duration(60.0));
 }
 
-void getCostMarkers(visualization_msgs::MarkerArray& arr, const std::string& frame_id,
-                    std::set<CostSource>& cost_sources, const std_msgs::ColorRGBA& color, const ros::Duration& lifetime)
+void getCostMarkers(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
+                    std::set<CostSource>& cost_sources, const std_msgs::msg::ColorRGBA& color, const rclcpp::Duration& lifetime)
 {
   int id = 0;
   for (const auto& cost_source : cost_sources)
   {
-    visualization_msgs::Marker mk;
-    mk.header.stamp = ros::Time::now();
+    rclcpp::Clock ros_clock(RCL_ROS_TIME);
+
+    visualization_msgs::msg::Marker mk;
+    mk.header.stamp = ros_clock.now();
     mk.header.frame_id = frame_id;
     mk.ns = "cost_source";
     mk.id = id++;
-    mk.type = visualization_msgs::Marker::CUBE;
-    mk.action = visualization_msgs::Marker::ADD;
+    mk.type = visualization_msgs::msg::Marker::CUBE;
+    mk.action = visualization_msgs::msg::Marker::ADD;
     mk.pose.position.x = (cost_source.aabb_max[0] + cost_source.aabb_min[0]) / 2.0;
     mk.pose.position.y = (cost_source.aabb_max[1] + cost_source.aabb_min[1]) / 2.0;
     mk.pose.position.z = (cost_source.aabb_max[2] + cost_source.aabb_min[2]) / 2.0;
@@ -92,12 +94,14 @@ void getCostMarkers(visualization_msgs::MarkerArray& arr, const std::string& fra
   }
 }
 
-void getCollisionMarkersFromContacts(visualization_msgs::MarkerArray& arr, const std::string& frame_id,
-                                     const CollisionResult::ContactMap& con, const std_msgs::ColorRGBA& color,
-                                     const ros::Duration& lifetime, double radius)
+void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
+                                     const CollisionResult::ContactMap& con, const std_msgs::msg::ColorRGBA& color,
+                                     const rclcpp::Duration& lifetime, double radius)
 
 {
   std::map<std::string, unsigned> ns_counts;
+  rclcpp::Clock ros_clock(RCL_ROS_TIME);
+
   for (const auto& collision : con)
   {
     for (const auto& contact : collision.second)
@@ -107,13 +111,13 @@ void getCollisionMarkersFromContacts(visualization_msgs::MarkerArray& arr, const
         ns_counts[ns_name] = 0;
       else
         ns_counts[ns_name]++;
-      visualization_msgs::Marker mk;
-      mk.header.stamp = ros::Time::now();
+      visualization_msgs::msg::Marker mk;
+      mk.header.stamp = ros_clock.now();
       mk.header.frame_id = frame_id;
       mk.ns = ns_name;
       mk.id = ns_counts[ns_name];
-      mk.type = visualization_msgs::Marker::SPHERE;
-      mk.action = visualization_msgs::Marker::ADD;
+      mk.type = visualization_msgs::msg::Marker::SPHERE;
+      mk.action = visualization_msgs::msg::Marker::ADD;
       mk.pose.position.x = contact.pos.x();
       mk.pose.position.y = contact.pos.y();
       mk.pose.position.z = contact.pos.z();
@@ -131,7 +135,7 @@ void getCollisionMarkersFromContacts(visualization_msgs::MarkerArray& arr, const
   }
 }
 
-bool getSensorPositioning(geometry_msgs::Point& point, const std::set<CostSource>& cost_sources)
+bool getSensorPositioning(geometry_msgs::msg::Point& point, const std::set<CostSource>& cost_sources)
 {
   if (cost_sources.empty())
     return false;
@@ -259,7 +263,7 @@ void removeCostSources(std::set<CostSource>& cost_sources, const std::set<CostSo
   }
 }
 
-void costSourceToMsg(const CostSource& cost_source, moveit_msgs::CostSource& msg)
+void costSourceToMsg(const CostSource& cost_source, moveit_msgs::msg::CostSource& msg)
 {
   msg.cost_density = cost_source.cost;
   msg.aabb_min.x = cost_source.aabb_min[0];
@@ -270,25 +274,26 @@ void costSourceToMsg(const CostSource& cost_source, moveit_msgs::CostSource& msg
   msg.aabb_max.z = cost_source.aabb_max[2];
 }
 
-void contactToMsg(const Contact& contact, moveit_msgs::ContactInformation& msg)
+void contactToMsg(const Contact& contact, moveit_msgs::msg::ContactInformation& msg)
 {
   msg.position = tf2::toMsg(contact.pos);
-  tf2::toMsg(contact.normal, msg.normal);
+  // tf2::toMsg(contact.normal, msg.normal);
+  tf2::toMsg(contact.normal);
   msg.depth = contact.depth;
   msg.contact_body_1 = contact.body_name_1;
   msg.contact_body_2 = contact.body_name_2;
   if (contact.body_type_1 == BodyTypes::ROBOT_LINK)
-    msg.body_type_1 = moveit_msgs::ContactInformation::ROBOT_LINK;
+    msg.body_type_1 = moveit_msgs::msg::ContactInformation::ROBOT_LINK;
   else if (contact.body_type_1 == BodyTypes::ROBOT_ATTACHED)
-    msg.body_type_1 = moveit_msgs::ContactInformation::ROBOT_ATTACHED;
+    msg.body_type_1 = moveit_msgs::msg::ContactInformation::ROBOT_ATTACHED;
   else
-    msg.body_type_1 = moveit_msgs::ContactInformation::WORLD_OBJECT;
+    msg.body_type_1 = moveit_msgs::msg::ContactInformation::WORLD_OBJECT;
   if (contact.body_type_2 == BodyTypes::ROBOT_LINK)
-    msg.body_type_2 = moveit_msgs::ContactInformation::ROBOT_LINK;
+    msg.body_type_2 = moveit_msgs::msg::ContactInformation::ROBOT_LINK;
   else if (contact.body_type_2 == BodyTypes::ROBOT_ATTACHED)
-    msg.body_type_2 = moveit_msgs::ContactInformation::ROBOT_ATTACHED;
+    msg.body_type_2 = moveit_msgs::msg::ContactInformation::ROBOT_ATTACHED;
   else
-    msg.body_type_2 = moveit_msgs::ContactInformation::WORLD_OBJECT;
+    msg.body_type_2 = moveit_msgs::msg::ContactInformation::WORLD_OBJECT;
 }
 
 }  // end of namespace collision_detection

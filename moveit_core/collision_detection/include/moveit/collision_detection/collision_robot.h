@@ -40,8 +40,8 @@
 #include <moveit/collision_detection/collision_matrix.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit_msgs/LinkPadding.h>
-#include <moveit_msgs/LinkScale.h>
+#include <moveit_msgs/msg/link_padding.hpp>
+#include <moveit_msgs/msg/link_scale.hpp>
 
 namespace collision_detection
 {
@@ -279,16 +279,16 @@ public:
   void setScale(double scale);
 
   /** @brief Set the link padding from a vector of messages*/
-  void setPadding(const std::vector<moveit_msgs::LinkPadding>& padding);
+  void setPadding(const std::vector<moveit_msgs::msg::LinkPadding>& padding);
 
   /** @brief Get the link padding as a vector of messages*/
-  void getPadding(std::vector<moveit_msgs::LinkPadding>& padding) const;
+  void getPadding(std::vector<moveit_msgs::msg::LinkPadding>& padding) const;
 
   /** @brief Set the link scaling from a vector of messages*/
-  void setScale(const std::vector<moveit_msgs::LinkScale>& scale);
+  void setScale(const std::vector<moveit_msgs::msg::LinkScale>& scale);
 
   /** @brief Get the link scaling as a vector of messages*/
-  void getScale(std::vector<moveit_msgs::LinkScale>& scale) const;
+  void getScale(std::vector<moveit_msgs::msg::LinkScale>& scale) const;
 
 protected:
   /** @brief When the scale or padding is changed for a set of links by any of the functions in this class,

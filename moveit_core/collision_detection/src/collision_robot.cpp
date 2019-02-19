@@ -36,6 +36,7 @@
 
 #include <moveit/collision_detection/collision_robot.h>
 #include <limits>
+#include <moveit/logging/logging.h>
 
 static inline bool validateScale(double scale)
 {
@@ -202,7 +203,7 @@ const std::map<std::string, double>& CollisionRobot::getLinkScale() const
   return link_scale_;
 }
 
-void CollisionRobot::setPadding(const std::vector<moveit_msgs::LinkPadding>& padding)
+void CollisionRobot::setPadding(const std::vector<moveit_msgs::msg::LinkPadding>& padding)
 {
   std::vector<std::string> u;
   for (const auto& p : padding)
@@ -216,7 +217,7 @@ void CollisionRobot::setPadding(const std::vector<moveit_msgs::LinkPadding>& pad
     updatedPaddingOrScaling(u);
 }
 
-void CollisionRobot::setScale(const std::vector<moveit_msgs::LinkScale>& scale)
+void CollisionRobot::setScale(const std::vector<moveit_msgs::msg::LinkScale>& scale)
 {
   std::vector<std::string> u;
   for (const auto& s : scale)
@@ -230,24 +231,24 @@ void CollisionRobot::setScale(const std::vector<moveit_msgs::LinkScale>& scale)
     updatedPaddingOrScaling(u);
 }
 
-void CollisionRobot::getPadding(std::vector<moveit_msgs::LinkPadding>& padding) const
+void CollisionRobot::getPadding(std::vector<moveit_msgs::msg::LinkPadding>& padding) const
 {
   padding.clear();
   for (const auto& lp : link_padding_)
   {
-    moveit_msgs::LinkPadding lp_msg;
+    moveit_msgs::msg::LinkPadding lp_msg;
     lp_msg.link_name = lp.first;
     lp_msg.padding = lp.second;
     padding.push_back(lp_msg);
   }
 }
 
-void CollisionRobot::getScale(std::vector<moveit_msgs::LinkScale>& scale) const
+void CollisionRobot::getScale(std::vector<moveit_msgs::msg::LinkScale>& scale) const
 {
   scale.clear();
   for (const auto& ls : link_scale_)
   {
-    moveit_msgs::LinkScale ls_msg;
+    moveit_msgs::msg::LinkScale ls_msg;
     ls_msg.link_name = ls.first;
     ls_msg.scale = ls.second;
     scale.push_back(ls_msg);

@@ -42,6 +42,7 @@
 #include <octomap/octomap.h>
 #include <geometric_shapes/shapes.h>
 #include <memory>
+#include <moveit/logging/logging.h>
 
 // static const double ISO_VALUE  = 0.5; // TODO magic number! (though, probably a good one).
 // static const double R_MULTIPLE = 1.5; // TODO magic number! (though, probably a good one).
