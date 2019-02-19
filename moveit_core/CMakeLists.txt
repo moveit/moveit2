@@ -95,8 +95,8 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     # kinematics_metrics/include
     robot_model/include
     transforms/include
-    # robot_state/include
-    # robot_trajectory/include
+    robot_state/include
+    robot_trajectory/include
     # kinematic_constraints/include
     macros/include
     # planning_interface/include
@@ -122,7 +122,6 @@ set(dependencies
   kdl_parser
   moveit_msgs
   octomap_msgs
-  random_numbers
   sensor_msgs
   srdfdom
   std_msgs
@@ -179,8 +178,8 @@ add_subdirectory(controller_manager)
 add_subdirectory(sensor_manager)
 add_subdirectory(robot_model)
 add_subdirectory(transforms)
-	# add_subdirectory(robot_state)
-# add_subdirectory(robot_trajectory)
+add_subdirectory(robot_state)
+add_subdirectory(robot_trajectory)
 # add_subdirectory(collision_detection)
 # add_subdirectory(collision_detection_fcl)
 # add_subdirectory(kinematic_constraints)
