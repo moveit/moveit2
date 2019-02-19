@@ -63,7 +63,7 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
 
 ## Docker Containers
 
-WIP
+TODO [Create ROS2 Docker containers for MoveIt!](https://github.com/ros-planning/moveit2/issues/15)
 
 ## ROS Buildfarm
 
