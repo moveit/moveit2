@@ -2,17 +2,11 @@
 
 The MoveIt! Motion Planning Framework **for ROS 2.0**
 
-- [Legal disclaimer](#legal-disclaimer)
 - [Milestones](#milestones)
-- [Overview of MoveIt! for ROS 2.0](#)
-- [Installation Instructions](#)
-- [Documentation](#)
-- [Get Involved](#)
-
-## Legal disclaimer
-**WORK IN PROGRESS**
-
-*The material and information contained in this repository is published in good faith and is for the benefit of the general ROS 2.0 community only. You should not rely upon the material or information in this repository as a basis for making any business, legal or any other decisions. Acutronic Robotics makes no representations, claims, promises, guarantees or warranties of any kind, express or implied about the completeness, accuracy, reliability, suitability or adequacy with respect to the software, information or related graphics contained in this repository for any purpose. Acutronic Robotics is not liable for any loss, damage or injury that may arise in connection with this repository. Any action or reliance you take or place based upon the information in this repository is strictly at your own risk.*
+- [Overview of MoveIt!](http://moveit.ros.org)
+- [Installation Instructions](http://moveit.ros.org/install/)
+- [Documentation](http://moveit.ros.org/documentation/)
+- [Get Involved](http://moveit.ros.org/documentation/contributing/)
 
 ## Milestones
 - [ ] Setup instructions
@@ -73,4 +67,4 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
 
 ## ROS Buildfarm
 
-TODO
+Debian releases of MoveIt2 will not be available during the alpha development stage. Check back May 2019.
