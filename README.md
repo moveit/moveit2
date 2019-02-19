@@ -59,7 +59,7 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
 
 ## Continuous Integration Status
 
-[![Build Status](https://travis-ci.org/AcutronicRobotics/moveit2.svg?branch=ros2)](https://travis-ci.org/AcutronicRobotics/moveit2)
+[![Build Status](https://travis-ci.org/ros-planning/moveit2.svg?branch=master)](https://travis-ci.org/ros-planning/moveit2)
 
 ## Docker Containers
 
