@@ -69,7 +69,7 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
 
 ## Docker Containers
 
-WIP
+[WIP](https://github.com/AcutronicRobotics/moveit2/tree/master/.docker/ci)
 
 ## ROS Buildfarm
 
