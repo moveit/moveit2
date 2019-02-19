@@ -35,14 +35,20 @@
 /* Author: Acorn Pooley, Ioan Sucan */
 
 #include <moveit/exceptions/exceptions.h>
-#include <ros/console.h>
+// #include <ros/console.h>
+#include <rcutils/logging_macros.h>
+#include "rclcpp/rclcpp.hpp"
+
+#define ROS_ERROR RCUTILS_LOG_ERROR
 
 moveit::ConstructException::ConstructException(const std::string& what_arg) : std::runtime_error(what_arg)
 {
-  ROS_ERROR_NAMED("exceptions", "Error during construction of object: %s\nException thrown.", what_arg.c_str());
+  // ROS_ERROR_NAMED("exceptions", "Error during construction of object: %s\nException thrown.", what_arg.c_str());
+  ROS_ERROR("Error during construction of object: %s\nException thrown.", what_arg.c_str());
 }
 
 moveit::Exception::Exception(const std::string& what_arg) : std::runtime_error(what_arg)
 {
-  ROS_ERROR_NAMED("exceptions", "%s\nException thrown.", what_arg.c_str());
+  // ROS_ERROR_NAMED("exceptions", "%s\nException thrown.", what_arg.c_str());
+  ROS_ERROR("Exception thrown.", what_arg.c_str());
 }
