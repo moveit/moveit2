@@ -67,4 +67,4 @@ WIP
 
 ## ROS Buildfarm
 
-TODO
+Debian releases of MoveIt2 will not be available during the alpha development stage. Check back May 2019.
