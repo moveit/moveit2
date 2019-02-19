@@ -45,6 +45,8 @@
 #include <moveit/robot_model/aabb.h>
 #include <moveit/logging/logging.h>
 
+#include "rclcpp/rclcpp.hpp"
+
 namespace moveit
 {
 namespace core
@@ -1041,7 +1043,10 @@ void RobotState::getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, cons
 void RobotState::getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, const std::vector<std::string>& link_names,
                                  bool include_attached) const
 {
-  ros::Time tm = ros::Time::now();
+  // ros::Time tm = ros::Time::now();
+
+  builtin_interfaces::msg::Time tm = clock_ros.now();
+
   for (std::size_t i = 0; i < link_names.size(); ++i)
   {
     ROS_DEBUG_NAMED(LOGNAME.c_str(), "Trying to get marker for link '%s'", link_names[i].c_str());
@@ -1376,7 +1381,7 @@ bool RobotState::setToIKSolverFrame(Eigen::Isometry3d& pose, const std::string& 
     if (!lm)
     {
       // ROS_ERROR_STREAM_NAMED(LOGNAME, "IK frame '" << ik_frame << "' does not exist.");
-      ROS_ERROR_NAMED(LOGNAME.c_str(), "IK frame '" << ik_frame << "' does not exist.");
+      ROS_ERROR_NAMED(LOGNAME.c_str(), "The following IK frame does not exist:", ik_frame);
       return false;
     }
     pose = getGlobalLinkTransform(lm).inverse() * pose;
@@ -1534,7 +1539,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
           if (!lm)
           {
             // ROS_ERROR_STREAM_NAMED(LOGNAME, "Pose frame '" << pose_frame << "' does not exist.");
-            ROS_ERROR_NAMED(LOGNAME, "Pose frame '" << pose_frame << "' does not exist.");
+            ROS_ERROR_NAMED(LOGNAME.c_str(), "The following Pose Frame does not exist ", pose_frame);
             return false;
           }
           const robot_model::LinkTransformMap& fixed_links = lm->getAssociatedFixedTransforms();
@@ -1851,7 +1856,7 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
 
       // compute the IK solution
       std::vector<double> ik_sol;
-      moveit_msgs::MoveItErrorCodes error;
+      moveit_msgs::msg::MoveItErrorCodes error;
       const std::vector<double>& climits = consistency_limits.empty() ? std::vector<double>() : consistency_limits[sg];
       if (solvers[sg]->searchPositionIK(ik_queries[sg], seed, timeout, climits, ik_sol, error))
       {
