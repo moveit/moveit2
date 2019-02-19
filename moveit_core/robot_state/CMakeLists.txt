@@ -1,25 +1,20 @@
 set(MOVEIT_LIB_NAME moveit_robot_state)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  # clang is picky about typeid(*solver)
-  add_compile_options(-Wno-potentially-evaluated-expression)
-endif()
-
 add_library(${MOVEIT_LIB_NAME}
   src/attached_body.cpp
   src/conversions.cpp
   src/robot_state.cpp
 )
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 
 target_link_libraries(${MOVEIT_LIB_NAME} moveit_robot_model moveit_kinematics_base moveit_transforms ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
 
-add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+install(DIRECTORY include/ DESTINATION include)
 
 # Unit tests
 if(CATKIN_ENABLE_TESTING)

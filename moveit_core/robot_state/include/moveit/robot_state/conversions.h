@@ -38,9 +38,9 @@
 #define MOVEIT_ROBOT_STATE_CONVERSIONS_
 
 #include <moveit/robot_state/robot_state.h>
-#include <moveit/transforms/transforms.h>
-#include <moveit_msgs/RobotState.h>
-#include <moveit_msgs/RobotTrajectory.h>
+// #include <moveit/transforms/transforms.h>
+#include <moveit_msgs/msg/robot_state.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 
 namespace moveit
 {
@@ -52,7 +52,7 @@ namespace core
  * @param state The resultant MoveIt! robot state
  * @return True if successful, false if failed for any reason
  */
-bool jointStateToRobotState(const sensor_msgs::JointState& joint_state, RobotState& state);
+bool jointStateToRobotState(const sensor_msgs::msg::JointState& joint_state, RobotState& state);
 
 /**
  * @brief Convert a robot state msg (with accompanying extra transforms) to a MoveIt! robot state
@@ -62,7 +62,7 @@ bool jointStateToRobotState(const sensor_msgs::JointState& joint_state, RobotSta
  * @param copy_attached_bodies Flag to include attached objects in robot state copy
  * @return True if successful, false if failed for any reason
  */
-bool robotStateMsgToRobotState(const Transforms& tf, const moveit_msgs::RobotState& robot_state, RobotState& state,
+bool robotStateMsgToRobotState(const Transforms& tf, const moveit_msgs::msg::RobotState& robot_state, RobotState& state,
                                bool copy_attached_bodies = true);
 
 /**
@@ -72,7 +72,7 @@ bool robotStateMsgToRobotState(const Transforms& tf, const moveit_msgs::RobotSta
  * @param copy_attached_bodies Flag to include attached objects in robot state copy
  * @return True if successful, false if failed for any reason
  */
-bool robotStateMsgToRobotState(const moveit_msgs::RobotState& robot_state, RobotState& state,
+bool robotStateMsgToRobotState(const moveit_msgs::msg::RobotState& robot_state, RobotState& state,
                                bool copy_attached_bodies = true);
 
 /**
@@ -81,7 +81,7 @@ bool robotStateMsgToRobotState(const moveit_msgs::RobotState& robot_state, Robot
  * @param robot_state The resultant RobotState *message
  * @param copy_attached_bodies Flag to include attached objects in robot state copy
  */
-void robotStateToRobotStateMsg(const RobotState& state, moveit_msgs::RobotState& robot_state,
+void robotStateToRobotStateMsg(const RobotState& state, moveit_msgs::msg::RobotState& robot_state,
                                bool copy_attached_bodies = true);
 
 /**
@@ -91,13 +91,13 @@ void robotStateToRobotStateMsg(const RobotState& state, moveit_msgs::RobotState&
  */
 void attachedBodiesToAttachedCollisionObjectMsgs(
     const std::vector<const AttachedBody*>& attached_bodies,
-    std::vector<moveit_msgs::AttachedCollisionObject>& attached_collision_objs);
+    std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objs);
 /**
  * @brief Convert a MoveIt! robot state to a joint state message
  * @param state The input MoveIt! robot state object
  * @param robot_state The resultant JointState message
  */
-void robotStateToJointStateMsg(const RobotState& state, sensor_msgs::JointState& joint_state);
+void robotStateToJointStateMsg(const RobotState& state, sensor_msgs::msg::JointState& joint_state);
 
 /**
  * @brief Convert a joint trajectory point to a MoveIt! robot state
@@ -106,7 +106,7 @@ void robotStateToJointStateMsg(const RobotState& state, sensor_msgs::JointState&
  * @param state The resultant MoveIt! robot state
  * @return True if successful, false if failed for any reason
  */
-bool jointTrajPointToRobotState(const trajectory_msgs::JointTrajectory& trajectory, std::size_t point_id,
+bool jointTrajPointToRobotState(const trajectory_msgs::msg::JointTrajectory& trajectory, std::size_t point_id,
                                 RobotState& state);
 
 /**
