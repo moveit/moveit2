@@ -1,57 +1,91 @@
-<package format="2">
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>moveit_core</name>
-  <version>0.10.8</version>
-  <description>Core libraries used by MoveIt!</description>
+  <version>2.0.0</version>
+  <description>Core libraries used by MoveIt! in ROS 2.0</description>
   <author email="isucan@google.com">Ioan Sucan</author>
   <author email="robot.moveit@gmail.com">Sachin Chitta</author>
   <author email="acorn.pooley@sri.com">Acorn Pooley</author>
 
-  <maintainer email="dave@picknik.ai">Dave Coleman</maintainer>
+  <maintainer email="dave@dav.ee">Dave Coleman</maintainer>
   <maintainer email="me@v4hn.de">Michael Görner</maintainer>
   <maintainer email="mferguson@fetchrobotics.com">Michael Ferguson</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt! Release Team</maintainer>
+  <maintainer email="vmayoral@acutronicrobotics.com">Víctor Mayoral Vilches</maintainer>
 
   <license>BSD</license>
   <url type="website">http://moveit.ros.org</url>
   <url type="bugtracker">https://github.com/ros-planning/moveit/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>pkg-config</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>assimp</depend>
-  <depend>boost</depend>
-  <depend>eigen</depend>
-  <depend>eigen_stl_containers</depend>
-  <depend>libfcl-dev</depend>
-  <depend version_gte="0.5.2">geometric_shapes</depend>
-  <depend>geometry_msgs</depend>
-  <depend>kdl_parser</depend>
-  <depend>libconsole-bridge-dev</depend>
-  <depend>urdf</depend>
-  <depend>liburdfdom-dev</depend>
-  <depend>liburdfdom-headers-dev</depend>
-  <depend>moveit_msgs</depend>
-  <depend>octomap</depend>
-  <depend>octomap_msgs</depend>
-  <depend>random_numbers</depend>
-  <depend>roslib</depend>
-  <depend>rostime</depend>
-  <depend>rosconsole</depend>
-  <depend>sensor_msgs</depend>
-  <depend>shape_msgs</depend>
-  <depend>srdfdom</depend>
-  <depend>std_msgs</depend>
-  <depend>tf2_eigen</depend>
-  <depend>tf2_geometry_msgs</depend>
-  <depend>trajectory_msgs</depend>
-  <depend>visualization_msgs</depend>
-  <depend>xmlrpcpp</depend>
+  <build_depend>assimp</build_depend>
+  <build_depend>boost</build_depend>
+  <build_depend>eigen</build_depend>
+  <build_depend>eigen_stl_containers</build_depend>
+  <build_depend>libfcl-dev</build_depend>
+  <build_depend version_gte="0.5.2">geometric_shapes</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>kdl_parser</build_depend>
+  <build_depend>libconsole-bridge-dev</build_depend>
+  <build_depend>urdf</build_depend>
+  <build_depend>liburdfdom-dev</build_depend>
+  <build_depend>liburdfdom-headers-dev</build_depend>
+  <build_depend>moveit_msgs</build_depend>
+  <build_depend>octomap</build_depend>
+  <build_depend>octomap_msgs</build_depend>
+  <build_depend>random_numbers</build_depend>
+  <build_depend>roslib</build_depend>
+  <build_depend>rostime</build_depend>
+  <build_depend>rosconsole</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>shape_msgs</build_depend>
+  <build_depend>srdfdom</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>tf2_eigen</build_depend>
+  <build_depend>tf2_kdl</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+  <build_depend>trajectory_msgs</build_depend>
+  <build_depend>visualization_msgs</build_depend>
+  <build_depend>xmlrpcpp</build_depend>
+  <build_depend>rcutils</build_depend>
 
-  <test_depend>angles</test_depend>
+  <exec_depend>assimp</exec_depend>
+  <exec_depend>boost</exec_depend>
+  <exec_depend>eigen</exec_depend>
+  <exec_depend>eigen_stl_containers</exec_depend>
+  <exec_depend>libfcl-dev</exec_depend>
+  <exec_depend version_gte="0.5.2">geometric_shapes</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>kdl_parser</exec_depend>
+  <exec_depend>libconsole-bridge-dev</exec_depend>
+  <exec_depend>urdf</exec_depend>
+  <exec_depend>liburdfdom-dev</exec_depend>
+  <exec_depend>liburdfdom-headers-dev</exec_depend>
+  <exec_depend>moveit_msgs</exec_depend>
+  <exec_depend>octomap</exec_depend>
+  <exec_depend>octomap_msgs</exec_depend>
+  <exec_depend>random_numbers</exec_depend>
+  <exec_depend>rostime</exec_depend>
+  <exec_depend>rosconsole</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>srdfdom</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>tf2_eigen</exec_depend>
+  <exec_depend>tf2_kdl</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>trajectory_msgs</exec_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+  <exec_depend>xmlrpcpp</exec_depend>
+  <exec_depend>rcutils</exec_depend>
+  <!-- <test_depend>angles</test_depend>
   <test_depend>moveit_resources</test_depend>
   <test_depend>tf2_kdl</test_depend>
   <test_depend>orocos_kdl</test_depend>
-  <test_depend>rosunit</test_depend>
-  <test_depend>code_coverage</test_depend>
+  <test_depend>rosunit</test_depend> -->
+  <export>
+      <build_type>ament_cmake</build_type>
+  </export>
 </package>
