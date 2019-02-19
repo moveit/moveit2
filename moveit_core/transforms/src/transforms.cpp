@@ -37,7 +37,7 @@
 #include <moveit/transforms/transforms.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <boost/algorithm/string/trim.hpp>
-#include <ros/console.h>
+#include <moveit/logging/logging.h>
 
 namespace moveit
 {
@@ -50,7 +50,7 @@ Transforms::Transforms(const std::string& target_frame) : target_frame_(target_f
     ROS_ERROR_NAMED("transforms", "The target frame for MoveIt! Transforms cannot be empty.");
   else
   {
-    transforms_map_[target_frame_] = Eigen::Isometry3d::Identity();
+    transforms_map_[target_frame_] = Eigen::Affine3d::Identity();
   }
 }
 
@@ -86,7 +86,7 @@ bool Transforms::isFixedFrame(const std::string& frame) const
     return transforms_map_.find(frame) != transforms_map_.end();
 }
 
-const Eigen::Isometry3d& Transforms::getTransform(const std::string& from_frame) const
+const Eigen::Affine3d& Transforms::getTransform(const std::string& from_frame) const
 {
   if (!from_frame.empty())
   {
@@ -100,7 +100,7 @@ const Eigen::Isometry3d& Transforms::getTransform(const std::string& from_frame)
                   from_frame.c_str(), target_frame_.c_str());
 
   // return identity
-  static const Eigen::Isometry3d IDENTITY = Eigen::Isometry3d::Identity();
+  static const Eigen::Affine3d IDENTITY = Eigen::Affine3d::Identity();
   return IDENTITY;
 }
 
@@ -112,7 +112,7 @@ bool Transforms::canTransform(const std::string& from_frame) const
     return transforms_map_.find(from_frame) != transforms_map_.end();
 }
 
-void Transforms::setTransform(const Eigen::Isometry3d& t, const std::string& from_frame)
+void Transforms::setTransform(const Eigen::Affine3d& t, const std::string& from_frame)
 {
   if (from_frame.empty())
     ROS_ERROR_NAMED("transforms", "Cannot record transform with empty name");
@@ -120,11 +120,11 @@ void Transforms::setTransform(const Eigen::Isometry3d& t, const std::string& fro
     transforms_map_[from_frame] = t;
 }
 
-void Transforms::setTransform(const geometry_msgs::TransformStamped& transform)
+void Transforms::setTransform(const geometry_msgs::msg::TransformStamped& transform)
 {
   if (sameFrame(transform.child_frame_id, target_frame_))
   {
-    Eigen::Isometry3d t = tf2::transformToEigen(transform.transform);
+    Eigen::Affine3d t = tf2::transformToEigen(transform);
     setTransform(t, transform.header.frame_id);
   }
   else
@@ -134,13 +134,13 @@ void Transforms::setTransform(const geometry_msgs::TransformStamped& transform)
   }
 }
 
-void Transforms::setTransforms(const std::vector<geometry_msgs::TransformStamped>& transforms)
+void Transforms::setTransforms(const std::vector<geometry_msgs::msg::TransformStamped>& transforms)
 {
   for (std::size_t i = 0; i < transforms.size(); ++i)
     setTransform(transforms[i]);
 }
 
-void Transforms::copyTransforms(std::vector<geometry_msgs::TransformStamped>& transforms) const
+void Transforms::copyTransforms(std::vector<geometry_msgs::msg::TransformStamped>& transforms) const
 {
   transforms.resize(transforms_map_.size());
   std::size_t i = 0;
