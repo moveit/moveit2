@@ -43,7 +43,14 @@
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
 #include <deque>
+
+#include "rcl/error_handling.h"
+#include "rcl/time.h"
+#include "rclcpp/clock.hpp"
 #include "rclcpp/rclcpp.hpp"
+#include "rclcpp/time.hpp"
+#include "rclcpp/utilities.hpp"
+
 
 namespace robot_trajectory
 {
@@ -205,7 +212,7 @@ public:
 
   double getAverageSegmentDuration() const;
 
-  void getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory) const;
+  void getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory, rclcpp::Clock clock_ros_) const;
 
   /** \brief Copy the content of the trajectory message into this class. The trajectory message itself is not required
      to contain the values
@@ -262,6 +269,7 @@ private:
   const robot_model::JointModelGroup* group_;
   std::deque<robot_state::RobotStatePtr> waypoints_;
   std::deque<double> duration_from_previous_;
+  rclcpp::Clock clock_ros_;
 };
 }
 
