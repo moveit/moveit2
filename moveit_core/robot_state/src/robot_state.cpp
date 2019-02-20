@@ -1381,7 +1381,7 @@ bool RobotState::setToIKSolverFrame(Eigen::Affine3d& pose, const std::string& ik
     if (!lm)
     {
       // ROS_ERROR_STREAM_NAMED(LOGNAME, "IK frame '" << ik_frame << "' does not exist.");
-      ROS_ERROR_NAMED(LOGNAME.c_str(), "The following IK frame does not exist:", ik_frame);
+      ROS_ERROR_NAMED(LOGNAME.c_str(), "The following IK frame does not exist:", ik_frame.c_str());
       return false;
     }
     pose = getGlobalLinkTransform(lm).inverse() * pose;
@@ -1539,7 +1539,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Af
           if (!lm)
           {
             // ROS_ERROR_STREAM_NAMED(LOGNAME, "Pose frame '" << pose_frame << "' does not exist.");
-            ROS_ERROR_NAMED(LOGNAME.c_str(), "The following Pose Frame does not exist ", pose_frame);
+            ROS_ERROR_NAMED(LOGNAME.c_str(), "The following Pose Frame does not exist ", pose_frame.c_str());
             return false;
           }
           const robot_model::LinkTransformMap& fixed_links = lm->getAssociatedFixedTransforms();
