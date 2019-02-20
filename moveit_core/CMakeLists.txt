@@ -84,7 +84,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     background_processing/include
     exceptions/include
     backtrace/include
-    # collision_detection/include
+    collision_detection/include
     # collision_detection_fcl/include
     # constraint_samplers/include
     controller_manager/include
@@ -180,7 +180,7 @@ add_subdirectory(robot_model)
 add_subdirectory(transforms)
 add_subdirectory(robot_state)
 add_subdirectory(robot_trajectory)
-# add_subdirectory(collision_detection)
+add_subdirectory(collision_detection)
 # add_subdirectory(collision_detection_fcl)
 # add_subdirectory(kinematic_constraints)
 # add_subdirectory(planning_scene)

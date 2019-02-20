@@ -48,7 +48,7 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
       - [x] transforms
       - [x] robot_state
       - [x] robot_trajectory
-      - [ ] collision_detection
+      - [x] collision_detection
       - [ ] collision_detection_fcl
       - [ ] kinematic_constraints
       - [ ] planning_scene
