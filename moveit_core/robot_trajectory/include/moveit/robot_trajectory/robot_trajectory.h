@@ -212,7 +212,7 @@ public:
 
   double getAverageSegmentDuration() const;
 
-  void getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory, rclcpp::Clock clock_ros_) const;
+  void getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory);
 
   /** \brief Copy the content of the trajectory message into this class. The trajectory message itself is not required
      to contain the values

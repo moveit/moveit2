@@ -197,7 +197,7 @@ void RobotTrajectory::clear()
   duration_from_previous_.clear();
 }
 
-void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory, rclcpp::Clock clock_ros_) const
+void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory)
 {
   trajectory = moveit_msgs::msg::RobotTrajectory();
 
