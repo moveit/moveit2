@@ -543,12 +543,12 @@ public:
     updateMimicJoint(joint);
   }
 
-  void setJointPositions(const std::string& joint_name, const Eigen::Isometry3d& transform)
+  void setJointPositions(const std::string& joint_name, const Eigen::Affine3d& transform)
   {
     setJointPositions(robot_model_->getJointModel(joint_name), transform);
   }
 
-  void setJointPositions(const JointModel* joint, const Eigen::Isometry3d& transform)
+  void setJointPositions(const JointModel* joint, const Eigen::Affine3d& transform)
   {
     joint->computeVariablePositions(transform, position_ + joint->getFirstVariableIndex());
     markDirtyJointTransforms(joint);
@@ -933,7 +933,7 @@ as the new values that correspond to the group */
    * @param solver - a kin solver whose base frame is important to us
    * @return true if no error
    */
-  bool setToIKSolverFrame(Eigen::Isometry3d& pose, const kinematics::KinematicsBaseConstPtr& solver);
+  bool setToIKSolverFrame(Eigen::Affine3d& pose, const kinematics::KinematicsBaseConstPtr& solver);
 
   /**
    * \brief Convert the frame of reference of the pose to that same frame as the IK solver expects
@@ -941,7 +941,7 @@ as the new values that correspond to the group */
    * @param ik_frame - the name of frame of reference of base of ik solver
    * @return true if no error
    */
-  bool setToIKSolverFrame(Eigen::Isometry3d& pose, const std::string& ik_frame);
+  bool setToIKSolverFrame(Eigen::Affine3d& pose, const std::string& ik_frame);
 
   /** \brief If the group this state corresponds to is a chain and a solver is available, then the joint values can be
      set by computing inverse kinematics.
@@ -974,7 +974,7 @@ as the new values that correspond to the group */
       @param tip The name of the link the pose is specified for
       @param attempts The number of times IK is attempted
       @param timeout The timeout passed to the kinematics solver on each attempt */
-  bool setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, unsigned int attempts = 0,
+  bool setFromIK(const JointModelGroup* group, const Eigen::Affine3d& pose, unsigned int attempts = 0,
                  double timeout = 0.0, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
 
@@ -985,7 +985,7 @@ as the new values that correspond to the group */
       @param attempts The number of times IK is attempted
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, const std::string& tip,
+  bool setFromIK(const JointModelGroup* group, const Eigen::Affine3d& pose, const std::string& tip,
                  unsigned int attempts = 0, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
@@ -999,7 +999,7 @@ as the new values that correspond to the group */
       @param attempts The number of times IK is attempted
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, const std::string& tip,
+  bool setFromIK(const JointModelGroup* group, const Eigen::Affine3d& pose, const std::string& tip,
                  const std::vector<double>& consistency_limits, unsigned int attempts = 0, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
@@ -1014,7 +1014,7 @@ as the new values that correspond to the group */
       @param attempts The number of times IK is attempted
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIK(const JointModelGroup* group, const EigenSTL::vector_Isometry3d& poses,
+  bool setFromIK(const JointModelGroup* group, const EigenSTL::vector_Affine3d& poses,
                  const std::vector<std::string>& tips, unsigned int attempts = 0, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
@@ -1030,7 +1030,7 @@ as the new values that correspond to the group */
       @param attempts The number of times IK is attempted
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIK(const JointModelGroup* group, const EigenSTL::vector_Isometry3d& poses,
+  bool setFromIK(const JointModelGroup* group, const EigenSTL::vector_Affine3d& poses,
                  const std::vector<std::string>& tips, const std::vector<std::vector<double> >& consistency_limits,
                  unsigned int attempts = 0, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
@@ -1045,7 +1045,7 @@ as the new values that correspond to the group */
       @param attempts The number of times IK is attempted
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIKSubgroups(const JointModelGroup* group, const EigenSTL::vector_Isometry3d& poses,
+  bool setFromIKSubgroups(const JointModelGroup* group, const EigenSTL::vector_Affine3d& poses,
                           const std::vector<std::string>& tips,
                           const std::vector<std::vector<double> >& consistency_limits, unsigned int attempts = 0,
                           double timeout = 0.0,
@@ -1594,7 +1594,7 @@ as the new values that correspond to the group */
    * corresponding object from that world to avoid having collisions
    * detected against it. */
   void attachBody(const std::string& id, const std::vector<shapes::ShapeConstPtr>& shapes,
-                  const EigenSTL::vector_Isometry3d& attach_trans, const std::set<std::string>& touch_links,
+                  const EigenSTL::vector_Affine3d& attach_trans, const std::set<std::string>& touch_links,
                   const std::string& link_name,
                   const trajectory_msgs::msg::JointTrajectory& detach_posture = trajectory_msgs::msg::JointTrajectory());
 
@@ -1613,7 +1613,7 @@ as the new values that correspond to the group */
    * corresponding object from that world to avoid having collisions
    * detected against it. */
   void attachBody(const std::string& id, const std::vector<shapes::ShapeConstPtr>& shapes,
-                  const EigenSTL::vector_Isometry3d& attach_trans, const std::vector<std::string>& touch_links,
+                  const EigenSTL::vector_Affine3d& attach_trans, const std::vector<std::string>& touch_links,
                   const std::string& link_name,
                   const trajectory_msgs::msg::JointTrajectory& detach_posture = trajectory_msgs::msg::JointTrajectory())
   {
@@ -1673,10 +1673,10 @@ as the new values that correspond to the group */
   }
 
   /** \brief Get the transformation matrix from the model frame to the frame identified by \e id */
-  const Eigen::Isometry3d& getFrameTransform(const std::string& id);
+  const Eigen::Affine3d& getFrameTransform(const std::string& id);
 
   /** \brief Get the transformation matrix from the model frame to the frame identified by \e id */
-  const Eigen::Isometry3d& getFrameTransform(const std::string& id) const;
+  const Eigen::Affine3d& getFrameTransform(const std::string& id) const;
 
   /** \brief Check if a transformation matrix from the model frame to frame \e id is known */
   bool knowsFrameTransform(const std::string& id) const;

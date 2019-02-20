@@ -266,7 +266,7 @@ void RevoluteJointModel::computeTransform(const double* joint_values, Eigen::Iso
   //  transf = Eigen::Isometry3d(Eigen::AngleAxisd(joint_values[0], axis_));
 }
 
-void RevoluteJointModel::computeVariablePositions(const Eigen::Isometry3d& transf, double* joint_values) const
+void RevoluteJointModel::computeVariablePositions(const Eigen::Affine3d& transf, double* joint_values) const
 {
   Eigen::Quaterniond q(transf.rotation());
   q.normalize();
