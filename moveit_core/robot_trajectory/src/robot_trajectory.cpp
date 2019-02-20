@@ -279,7 +279,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
 
       if (duration_from_previous_.size() > i)
 
-        trajectory.joint_trajectory.points[i].time_from_start = dur_total;//rclcpp::Duration(total_time);
+        trajectory.joint_trajectory.points[i].time_from_start = dur_total;
       else
         trajectory.joint_trajectory.points[i].time_from_start = ZERO_DURATION;
     }
@@ -321,7 +321,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
         }
       }
       if (duration_from_previous_.size() > i)
-        trajectory.multi_dof_joint_trajectory.points[i].time_from_start = dur_total; //rclcpp::Duration(total_time);
+        trajectory.multi_dof_joint_trajectory.points[i].time_from_start = dur_total;
       else
         trajectory.multi_dof_joint_trajectory.points[i].time_from_start = ZERO_DURATION;
     }
