@@ -554,6 +554,15 @@ public:
     return group_kinematics_.first.default_ik_timeout_;
   }
 
+  /** \brief Get the default IK attempts */
+  unsigned int getDefaultIKAttempts() const
+  {
+    return group_kinematics_.first.default_ik_attempts_;
+  }
+
+   /** \brief Set the default IK attempts */
+  void setDefaultIKAttempts(unsigned int ik_attempts);
+  
   /** \brief Set the default IK timeout */
   void setDefaultIKTimeout(double ik_timeout);
 
