@@ -33,34 +33,34 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
         - [x]  octomap
         - [ ]  octovis
         - [ ]  dynamicEDT3D
-  - [ ] Convert moveit_core packages to ROS 2.0
-    - [x] version
-    - [x] macros
-    - [x] backtrace
-    - [x] exceptions
-    - [x] profiler
-    - [x] logging
-    - [x] background_processing
-    - [x] kinematics_base
-    - [x] controller_manager
-    - [x] sensor_manager
-    - [x] robot_model
-    - [x] transforms
-    - [x] robot_state
-    - [x] robot_trajectory
-    - [ ] collision_detection
-    - [ ] collision_detection_fcl
-    - [ ] kinematic_constraints
-    - [ ] planning_scene
-    - [ ] constraint_samplers
-    - [ ] planning_interface
-    - [ ] planning_request_adapter
-    - [ ] trajectory_processing
-    - [ ] distance_field
-    - [ ] collision_distance_field
-    - [ ] kinematics_metrics
-    - [ ] dynamics_solver
-    - [ ] utils
+    - [ ] Convert moveit_core packages to ROS 2.0
+      - [x] version
+      - [x] macros
+      - [x] backtrace
+      - [x] exceptions
+      - [x] profiler
+      - [x] logging
+      - [x] background_processing
+      - [x] kinematics_base
+      - [x] controller_manager
+      - [x] sensor_manager
+      - [x] robot_model
+      - [x] transforms
+      - [x] robot_state
+      - [x] robot_trajectory
+      - [ ] collision_detection
+      - [ ] collision_detection_fcl
+      - [ ] kinematic_constraints
+      - [ ] planning_scene
+      - [ ] constraint_samplers
+      - [ ] planning_interface
+      - [ ] planning_request_adapter
+      - [ ] trajectory_processing
+      - [ ] distance_field
+      - [ ] collision_distance_field
+      - [ ] kinematics_metrics
+      - [ ] dynamics_solver
+      - [ ] utils
   - [ ] Convert moveit_kinematics
   - [ ] Convert moveit_planners_ompl
   - [ ] Convert moveit_ros_planning
