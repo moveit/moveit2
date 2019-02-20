@@ -43,6 +43,7 @@
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
 #include <deque>
+#include "rclcpp/rclcpp.hpp"
 
 namespace robot_trajectory
 {

@@ -40,14 +40,16 @@
 #include <boost/math/constants/constants.hpp>
 #include <numeric>
 
+#include "rclcpp/rclcpp.hpp"
+
 namespace robot_trajectory
 {
-RobotTrajectory::msg::RobotTrajectory(const robot_model::RobotModelConstPtr& robot_model, const std::string& group)
+RobotTrajectory::RobotTrajectory(const robot_model::RobotModelConstPtr& robot_model, const std::string& group)
   : robot_model_(robot_model), group_(group.empty() ? nullptr : robot_model->getJointModelGroup(group))
 {
 }
 
-RobotTrajectory::msg::RobotTrajectory(const robot_model::RobotModelConstPtr& robot_model,
+RobotTrajectory::RobotTrajectory(const robot_model::RobotModelConstPtr& robot_model,
                                  const robot_model::JointModelGroup* group)
   : robot_model_(robot_model), group_(group)
 {
@@ -383,7 +385,7 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
     {
       for (std::size_t j = 0; j < trajectory.multi_dof_joint_trajectory.joint_names.size(); ++j)
       {
-        Eigen::Isometry3d t = tf2::transformToEigen(trajectory.multi_dof_joint_trajectory.points[i].transforms[j]);
+        Eigen::Affine3d t = tf2::transformToEigen(trajectory.multi_dof_joint_trajectory.points[i].transforms[j]);
         st->setJointPositions(trajectory.multi_dof_joint_trajectory.joint_names[j], t);
       }
       this_time_stamp = trajectory.multi_dof_joint_trajectory.header.stamp +
