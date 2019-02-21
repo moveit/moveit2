@@ -9,6 +9,7 @@ notifications:
   email:
     recipients:
       - lander@erlerobotics.com
+      - anasarrak@erlerobotics.com
       
 before_script:
   - mkdir /tmp/moveit2
