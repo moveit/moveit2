@@ -45,9 +45,9 @@ namespace kinematic_constraints
 {
 const std::string LOGNAME = "kinematic_constraint_utils";
 
-moveit_msgs::Constraints mergeConstraints(const moveit_msgs::Constraints& first, const moveit_msgs::Constraints& second)
+moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constraints& first, const moveit_msgs::msg::Constraints& second)
 {
-  moveit_msgs::Constraints r;
+  moveit_msgs::msg::Constraints r;
 
   // add all joint constraints that are in first but not in second
   // and merge joint constraints that are for the same joint
@@ -59,9 +59,9 @@ moveit_msgs::Constraints mergeConstraints(const moveit_msgs::Constraints& first,
       {
         add = false;
         // now we merge
-        moveit_msgs::JointConstraint m;
-        const moveit_msgs::JointConstraint& a = first.joint_constraints[i];
-        const moveit_msgs::JointConstraint& b = second.joint_constraints[j];
+        moveit_msgs::msg::JointConstraint m;
+        const moveit_msgs::msg::JointConstraint& a = first.joint_constraints[i];
+        const moveit_msgs::msg::JointConstraint& b = second.joint_constraints[j];
         double low = std::max(a.position - a.tolerance_below, b.position - b.tolerance_below);
         double high = std::min(a.position + a.tolerance_above, b.position + b.tolerance_above);
         if (low > high)
@@ -114,29 +114,29 @@ moveit_msgs::Constraints mergeConstraints(const moveit_msgs::Constraints& first,
   return r;
 }
 
-bool isEmpty(const moveit_msgs::Constraints& constr)
+bool isEmpty(const moveit_msgs::msg::Constraints& constr)
 {
   return constr.position_constraints.empty() && constr.orientation_constraints.empty() &&
          constr.visibility_constraints.empty() && constr.joint_constraints.empty();
 }
 
-std::size_t countIndividualConstraints(const moveit_msgs::Constraints& constr)
+std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& constr)
 {
   return constr.position_constraints.size() + constr.orientation_constraints.size() +
          constr.visibility_constraints.size() + constr.joint_constraints.size();
 }
 
-moveit_msgs::Constraints constructGoalConstraints(const robot_state::RobotState& state,
+moveit_msgs::msg::Constraints constructGoalConstraints(const robot_state::RobotState& state,
                                                   const robot_model::JointModelGroup* jmg, double tolerance)
 {
   return constructGoalConstraints(state, jmg, tolerance, tolerance);
 }
 
-moveit_msgs::Constraints constructGoalConstraints(const robot_state::RobotState& state,
+moveit_msgs::msg::Constraints constructGoalConstraints(const robot_state::RobotState& state,
                                                   const robot_model::JointModelGroup* jmg, double tolerance_below,
                                                   double tolerance_above)
 {
-  moveit_msgs::Constraints goal;
+  moveit_msgs::msg::Constraints goal;
   std::vector<double> vals;
   state.copyJointGroupPositions(jmg, vals);
   goal.joint_constraints.resize(vals.size());
@@ -152,22 +152,22 @@ moveit_msgs::Constraints constructGoalConstraints(const robot_state::RobotState&
   return goal;
 }
 
-moveit_msgs::Constraints constructGoalConstraints(const std::string& link_name, const geometry_msgs::PoseStamped& pose,
+moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name, const geometry_msgs::msg::PoseStamped& pose,
                                                   double tolerance_pos, double tolerance_angle)
 {
-  moveit_msgs::Constraints goal;
+  moveit_msgs::msg::Constraints goal;
 
   goal.position_constraints.resize(1);
-  moveit_msgs::PositionConstraint& pcm = goal.position_constraints[0];
+  moveit_msgs::msg::PositionConstraint& pcm = goal.position_constraints[0];
   pcm.link_name = link_name;
   pcm.target_point_offset.x = 0;
   pcm.target_point_offset.y = 0;
   pcm.target_point_offset.z = 0;
   pcm.constraint_region.primitives.resize(1);
-  shape_msgs::SolidPrimitive& bv = pcm.constraint_region.primitives[0];
-  bv.type = shape_msgs::SolidPrimitive::SPHERE;
-  bv.dimensions.resize(geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::SPHERE>::value);
-  bv.dimensions[shape_msgs::SolidPrimitive::SPHERE_RADIUS] = tolerance_pos;
+  shape_msgs::msg::SolidPrimitive& bv = pcm.constraint_region.primitives[0];
+  bv.type = shape_msgs::msg::SolidPrimitive::SPHERE;
+  bv.dimensions.resize(geometric_shapes::SolidPrimitiveDimCount<shape_msgs::msg::SolidPrimitive::SPHERE>::value);
+  bv.dimensions[shape_msgs::msg::SolidPrimitive::SPHERE_RADIUS] = tolerance_pos;
 
   pcm.header = pose.header;
   pcm.constraint_region.primitive_poses.resize(1);
@@ -181,7 +181,7 @@ moveit_msgs::Constraints constructGoalConstraints(const std::string& link_name, 
   pcm.weight = 1.0;
 
   goal.orientation_constraints.resize(1);
-  moveit_msgs::OrientationConstraint& ocm = goal.orientation_constraints[0];
+  moveit_msgs::msg::OrientationConstraint& ocm = goal.orientation_constraints[0];
   ocm.link_name = link_name;
   ocm.header = pose.header;
   ocm.orientation = pose.pose.orientation;
@@ -193,23 +193,23 @@ moveit_msgs::Constraints constructGoalConstraints(const std::string& link_name, 
   return goal;
 }
 
-moveit_msgs::Constraints constructGoalConstraints(const std::string& link_name, const geometry_msgs::PoseStamped& pose,
+moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name, const geometry_msgs::msg::PoseStamped& pose,
                                                   const std::vector<double>& tolerance_pos,
                                                   const std::vector<double>& tolerance_angle)
 {
-  moveit_msgs::Constraints goal = constructGoalConstraints(link_name, pose);
+  moveit_msgs::msg::Constraints goal = constructGoalConstraints(link_name, pose);
   if (tolerance_pos.size() == 3)
   {
-    shape_msgs::SolidPrimitive& bv = goal.position_constraints[0].constraint_region.primitives[0];
-    bv.type = shape_msgs::SolidPrimitive::BOX;
-    bv.dimensions.resize(geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::BOX>::value);
-    bv.dimensions[shape_msgs::SolidPrimitive::BOX_X] = tolerance_pos[0];
-    bv.dimensions[shape_msgs::SolidPrimitive::BOX_Y] = tolerance_pos[1];
-    bv.dimensions[shape_msgs::SolidPrimitive::BOX_Z] = tolerance_pos[2];
+    shape_msgs::msg::SolidPrimitive& bv = goal.position_constraints[0].constraint_region.primitives[0];
+    bv.type = shape_msgs::msg::SolidPrimitive::BOX;
+    bv.dimensions.resize(geometric_shapes::SolidPrimitiveDimCount<shape_msgs::msg::SolidPrimitive::BOX>::value);
+    bv.dimensions[shape_msgs::msg::SolidPrimitive::BOX_X] = tolerance_pos[0];
+    bv.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Y] = tolerance_pos[1];
+    bv.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Z] = tolerance_pos[2];
   }
   if (tolerance_angle.size() == 3)
   {
-    moveit_msgs::OrientationConstraint& ocm = goal.orientation_constraints[0];
+    moveit_msgs::msg::OrientationConstraint& ocm = goal.orientation_constraints[0];
     ocm.absolute_x_axis_tolerance = tolerance_angle[0];
     ocm.absolute_y_axis_tolerance = tolerance_angle[1];
     ocm.absolute_z_axis_tolerance = tolerance_angle[2];
@@ -217,12 +217,12 @@ moveit_msgs::Constraints constructGoalConstraints(const std::string& link_name, 
   return goal;
 }
 
-moveit_msgs::Constraints constructGoalConstraints(const std::string& link_name,
-                                                  const geometry_msgs::QuaternionStamped& quat, double tolerance)
+moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
+                                                  const geometry_msgs::msg::QuaternionStamped& quat, double tolerance)
 {
-  moveit_msgs::Constraints goal;
+  moveit_msgs::msg::Constraints goal;
   goal.orientation_constraints.resize(1);
-  moveit_msgs::OrientationConstraint& ocm = goal.orientation_constraints[0];
+  moveit_msgs::msg::OrientationConstraint& ocm = goal.orientation_constraints[0];
   ocm.link_name = link_name;
   ocm.header = quat.header;
   ocm.orientation = quat.quaternion;
@@ -233,32 +233,32 @@ moveit_msgs::Constraints constructGoalConstraints(const std::string& link_name,
   return goal;
 }
 
-moveit_msgs::Constraints constructGoalConstraints(const std::string& link_name,
-                                                  const geometry_msgs::PointStamped& goal_point, double tolerance)
+moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
+                                                  const geometry_msgs::msg::PointStamped& goal_point, double tolerance)
 {
-  geometry_msgs::Point p;
+  geometry_msgs::msg::Point p;
   p.x = 0;
   p.y = 0;
   p.z = 0;
   return constructGoalConstraints(link_name, p, goal_point, tolerance);
 }
 
-moveit_msgs::Constraints constructGoalConstraints(const std::string& link_name,
-                                                  const geometry_msgs::Point& reference_point,
-                                                  const geometry_msgs::PointStamped& goal_point, double tolerance)
+moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
+                                                  const geometry_msgs::msg::Point& reference_point,
+                                                  const geometry_msgs::msg::PointStamped& goal_point, double tolerance)
 {
-  moveit_msgs::Constraints goal;
+  moveit_msgs::msg::Constraints goal;
   goal.position_constraints.resize(1);
-  moveit_msgs::PositionConstraint& pcm = goal.position_constraints[0];
+  moveit_msgs::msg::PositionConstraint& pcm = goal.position_constraints[0];
   pcm.link_name = link_name;
   pcm.target_point_offset.x = reference_point.x;
   pcm.target_point_offset.y = reference_point.y;
   pcm.target_point_offset.z = reference_point.z;
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(
-      geometric_shapes::SolidPrimitiveDimCount<shape_msgs::SolidPrimitive::SPHERE>::value);
-  pcm.constraint_region.primitives[0].dimensions[shape_msgs::SolidPrimitive::SPHERE_RADIUS] = tolerance;
+      geometric_shapes::SolidPrimitiveDimCount<shape_msgs::msg::SolidPrimitive::SPHERE>::value);
+  pcm.constraint_region.primitives[0].dimensions[shape_msgs::msg::SolidPrimitive::SPHERE_RADIUS] = tolerance;
 
   pcm.header = goal_point.header;
   pcm.constraint_region.primitive_poses.resize(1);
@@ -274,7 +274,7 @@ moveit_msgs::Constraints constructGoalConstraints(const std::string& link_name,
   return goal;
 }
 
-static bool constructPoseStamped(XmlRpc::XmlRpcValue::iterator& it, geometry_msgs::PoseStamped& pose)
+static bool constructPoseStamped(XmlRpc::XmlRpcValue::iterator& it, geometry_msgs::msg::PoseStamped& pose)
 {
   if (!isStruct(it->second, { "frame_id", "position", "orientation" }, it->first))
     return false;
@@ -296,7 +296,7 @@ static bool constructPoseStamped(XmlRpc::XmlRpcValue::iterator& it, geometry_msg
   return true;
 }
 
-static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::JointConstraint& constraint)
+static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::JointConstraint& constraint)
 {
   for (XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it)
   {
@@ -343,7 +343,7 @@ static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::JointC
   return true;
 }
 
-static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::PositionConstraint& constraint)
+static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::PositionConstraint& constraint)
 {
   for (XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it)
   {
@@ -372,10 +372,10 @@ static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::Positi
       constraint.constraint_region.primitive_poses.emplace_back();
       constraint.constraint_region.primitives.emplace_back();
 
-      geometry_msgs::Pose& region_pose = constraint.constraint_region.primitive_poses.back();
-      shape_msgs::SolidPrimitive& region_primitive = constraint.constraint_region.primitives.back();
+      geometry_msgs::msg::Pose& region_pose = constraint.constraint_region.primitive_poses.back();
+      shape_msgs::msg::SolidPrimitive& region_primitive = constraint.constraint_region.primitives.back();
 
-      region_primitive.type = shape_msgs::SolidPrimitive::BOX;
+      region_primitive.type = shape_msgs::msg::SolidPrimitive::BOX;
       region_primitive.dimensions.resize(3);
 
       std::function<void(XmlRpc::XmlRpcValue&, double&, double&)> parse_dimension =
@@ -385,11 +385,11 @@ static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::Positi
           };
 
       parse_dimension(it->second["x"], region_pose.position.x,
-                      region_primitive.dimensions[shape_msgs::SolidPrimitive::BOX_X]);
+                      region_primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_X]);
       parse_dimension(it->second["y"], region_pose.position.y,
-                      region_primitive.dimensions[shape_msgs::SolidPrimitive::BOX_Y]);
+                      region_primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Y]);
       parse_dimension(it->second["z"], region_pose.position.z,
-                      region_primitive.dimensions[shape_msgs::SolidPrimitive::BOX_Z]);
+                      region_primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Z]);
 
       region_pose.orientation.w = 1.0;
     }
@@ -401,7 +401,7 @@ static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::Positi
   return true;
 }
 
-static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::OrientationConstraint& constraint)
+static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::OrientationConstraint& constraint)
 {
   for (XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it)
   {
@@ -439,7 +439,7 @@ static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::Orient
   return true;
 }
 
-static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::VisibilityConstraint& constraint)
+static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::VisibilityConstraint& constraint)
 {
   for (XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it)
   {
@@ -471,12 +471,12 @@ static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::Visibi
     }
   }
 
-  constraint.sensor_view_direction = moveit_msgs::VisibilityConstraint::SENSOR_X;
+  constraint.sensor_view_direction = moveit_msgs::msg::VisibilityConstraint::SENSOR_X;
 
   return true;
 }
 
-static bool collectConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::Constraints& constraints)
+static bool collectConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Constraints& constraints)
 {
   if (params.getType() != XmlRpc::XmlRpcValue::TypeArray)
   {
@@ -519,7 +519,7 @@ static bool collectConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::Constra
   return true;
 }
 
-bool constructConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::Constraints& constraints)
+bool constructConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Constraints& constraints)
 {
   if (!isStruct(params, { "name", "constraints" }, "Parameter"))
     return false;
