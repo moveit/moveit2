@@ -390,7 +390,7 @@ bool PositionConstraint::equal(const KinematicConstraint& other, double margin) 
       // need to check against all other regions
       for (std::size_t j = 0; j < o.constraint_region_.size(); ++j)
       {
-        Eigen::Isometry3d diff = constraint_region_pose_[i].inverse() * o.constraint_region_pose_[j];
+        Eigen::Affine3d diff = constraint_region_pose_[i].inverse() * o.constraint_region_pose_[j];
         if (diff.translation().norm() < margin && diff.rotation().isIdentity(margin) &&
             constraint_region_[i]->getType() == o.constraint_region_[j]->getType() &&
             fabs(constraint_region_[i]->computeVolume() - o.constraint_region_[j]->computeVolume()) < margin)
@@ -655,9 +655,9 @@ void VisibilityConstraint::clear()
   mobile_target_frame_ = false;
   target_frame_id_ = "";
   sensor_frame_id_ = "";
-  sensor_pose_ = Eigen::Isometry3d::Identity();
+  sensor_pose_ = Eigen::Affine3d::Identity();
   sensor_view_direction_ = 0;
-  target_pose_ = Eigen::Isometry3d::Identity();
+  target_pose_ = Eigen::Affine3d::Identity();
   cone_sides_ = 0;
   points_.clear();
   target_radius_ = -1.0;
@@ -848,14 +848,15 @@ shapes::Mesh* VisibilityConstraint::getVisibilityCone(const robot_state::RobotSt
 }
 
 void VisibilityConstraint::getMarkers(const robot_state::RobotState& state,
-                                      visualization_msgs::msg::MarkerArray& markers) const
+                                      visualization_msgs::msg::MarkerArray& markers)
 {
   shapes::Mesh* m = getVisibilityCone(state);
   visualization_msgs::msg::Marker mk;
   shapes::constructMarkerFromShape(m, mk);
+  rclcpp::Time stamp = clock_ros_.now();
   delete m;
   mk.header.frame_id = robot_model_->getModelFrame();
-  mk.header.stamp = ros::Time::now();
+  mk.header.stamp = stamp;
   mk.ns = "constraints";
   mk.id = 1;
   mk.action = visualization_msgs::msg::Marker::ADD;
@@ -866,7 +867,7 @@ void VisibilityConstraint::getMarkers(const robot_state::RobotState& state,
   mk.pose.orientation.y = 0;
   mk.pose.orientation.z = 0;
   mk.pose.orientation.w = 1;
-  mk.lifetime = ros::Duration(60);
+  mk.lifetime = rclcpp::Duration(60);
   // this scale necessary to make results look reasonable
   mk.scale.x = .01;
   mk.color.a = 1.0;
@@ -876,9 +877,9 @@ void VisibilityConstraint::getMarkers(const robot_state::RobotState& state,
 
   markers.markers.push_back(mk);
 
-  const Eigen::Isometry3d& sp =
+  const Eigen::Affine3d& sp =
       mobile_sensor_frame_ ? state.getFrameTransform(sensor_frame_id_) * sensor_pose_ : sensor_pose_;
-  const Eigen::Isometry3d& tp =
+  const Eigen::Affine3d& tp =
       mobile_target_frame_ ? state.getFrameTransform(target_frame_id_) * target_pose_ : target_pose_;
 
   visualization_msgs::msg::Marker mka;

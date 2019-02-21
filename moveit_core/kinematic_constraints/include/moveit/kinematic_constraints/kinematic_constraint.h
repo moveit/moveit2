@@ -49,6 +49,10 @@
 #include <iostream>
 #include <vector>
 
+#include "rclcpp/clock.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/duration.hpp"
+
 /** \brief Representation and evaluation of kinematic constraints */
 namespace kinematic_constraints
 {
@@ -642,7 +646,7 @@ protected:
   Eigen::Vector3d offset_;                         /**< \brief The target offset */
   bool has_offset_;                                /**< \brief Whether the offset is substantially different than 0.0 */
   std::vector<bodies::BodyPtr> constraint_region_; /**< \brief The constraint region vector */
-  EigenSTL::vector_Isometry3d constraint_region_pose_; /**< \brief The constraint region pose vector */
+  EigenSTL::vector_Affine3d constraint_region_pose_; /**< \brief The constraint region pose vector */
   bool mobile_frame_;                                  /**< \brief Whether or not a mobile frame is employed*/
   std::string constraint_frame_id_;                    /**< \brief The constraint frame id */
   const robot_model::LinkModel* link_model_;           /**< \brief The link model constraint subject */
@@ -816,6 +820,19 @@ public:
    */
   void getMarkers(const robot_state::RobotState& state, visualization_msgs::msg::MarkerArray& markers) const;
 
+  /**
+   * \brief Adds markers associated with the visibility cone, sensor
+   * and target to the visualization array
+   *
+   * The visibility cone and two arrows - a blue array that issues
+   * from the sensor_view_direction of the sensor, and a red arrow the
+   * issues along the Z axis of the the target frame.
+   *
+   * @param [in] state The state from which to produce the markers
+   * @param [out] markers The marker array to which the markers will be added
+   */
+  void getMarkers(const robot_state::RobotState& state, visualization_msgs::msg::MarkerArray& markers);
+
   bool enabled() const override;
   ConstraintEvaluationResult decide(const robot_state::RobotState& state, bool verbose = false) const override;
   void print(std::ostream& out = std::cout) const override;
@@ -838,14 +855,15 @@ protected:
   bool mobile_target_frame_;      /**< \brief True if the target is a non-fixed frame relative to the transform frame */
   std::string target_frame_id_;   /**< \brief The target frame id */
   std::string sensor_frame_id_;   /**< \brief The sensor frame id */
-  Eigen::Isometry3d sensor_pose_; /**< \brief The sensor pose transformed into the transform frame */
+  Eigen::Affine3d sensor_pose_; /**< \brief The sensor pose transformed into the transform frame */
   int sensor_view_direction_;     /**< \brief Storage for the sensor view direction */
-  Eigen::Isometry3d target_pose_; /**< \brief The target pose transformed into the transform frame */
+  Eigen::Affine3d target_pose_; /**< \brief The target pose transformed into the transform frame */
   unsigned int cone_sides_;       /**< \brief Storage for the cone sides  */
   EigenSTL::vector_Vector3d points_; /**< \brief A set of points along the base of the circle */
   double target_radius_;             /**< \brief Storage for the target radius */
   double max_view_angle_;            /**< \brief Storage for the max view angle */
   double max_range_angle_;           /**< \brief Storage for the max range angle */
+  rclcpp::Clock clock_ros_;         /**< \brief ros2 clock for the time */
 };
 
 MOVEIT_CLASS_FORWARD(KinematicConstraintSet);
