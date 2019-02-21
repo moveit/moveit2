@@ -41,6 +41,8 @@
 #include <fcl/broadphase/broadphase_dynamic_AABB_tree.h>
 #endif
 
+rclcpp::Logger logger = rclcpp::get_logger("collision_detection_fcl");
+
 namespace collision_detection
 {
 CollisionRobotFCL::CollisionRobotFCL(const robot_model::RobotModelConstPtr& model, double padding, double scale)
@@ -68,7 +70,7 @@ CollisionRobotFCL::CollisionRobotFCL(const robot_model::RobotModelConstPtr& mode
         fcl_objs_[index] = FCLCollisionObjectConstPtr(new fcl::CollisionObjectd(g->collision_geometry_));
       }
       else
-        ROS_ERROR_NAMED("collision_detection.fcl", "Unable to construct collision geometry for link '%s'",
+        RCLCPP_ERROR(logger, "Unable to construct collision geometry for link '%s'",
                         link->getName().c_str());
     }
 }
@@ -115,7 +117,7 @@ void CollisionRobotFCL::constructFCLObject(const robot_state::RobotState& state,
   {
     std::vector<FCLGeometryConstPtr> objs;
     getAttachedBodyObjects(body, objs);
-    const EigenSTL::vector_Isometry3d& ab_t = body->getGlobalCollisionBodyTransforms();
+    const EigenSTL::vector_Affine3d& ab_t = body->getGlobalCollisionBodyTransforms();
     for (std::size_t k = 0; k < objs.size(); ++k)
       if (objs[k]->collision_geometry_)
       {
@@ -156,14 +158,14 @@ void CollisionRobotFCL::checkSelfCollision(const CollisionRequest& req, Collisio
                                            const robot_state::RobotState& state1,
                                            const robot_state::RobotState& state2) const
 {
-  ROS_ERROR_NAMED("collision_detection.fcl", "FCL continuous collision checking not yet implemented");
+  RCLCPP_ERROR(logger, "FCL continuous collision checking not yet implemented");
 }
 
 void CollisionRobotFCL::checkSelfCollision(const CollisionRequest& req, CollisionResult& res,
                                            const robot_state::RobotState& state1, const robot_state::RobotState& state2,
                                            const AllowedCollisionMatrix& acm) const
 {
-  ROS_ERROR_NAMED("collision_detection.fcl", "FCL continuous collision checking not yet implemented");
+  RCLCPP_ERROR(logger, "FCL continuous collision checking not yet implemented");
 }
 
 void CollisionRobotFCL::checkSelfCollisionHelper(const CollisionRequest& req, CollisionResult& res,
@@ -209,7 +211,7 @@ void CollisionRobotFCL::checkOtherCollision(const CollisionRequest& req, Collisi
                                             const robot_state::RobotState& other_state1,
                                             const robot_state::RobotState& other_state2) const
 {
-  ROS_ERROR_NAMED("collision_detection.fcl", "FCL continuous collision checking not yet implemented");
+  RCLCPP_ERROR(logger, "FCL continuous collision checking not yet implemented");
 }
 
 void CollisionRobotFCL::checkOtherCollision(const CollisionRequest& req, CollisionResult& res,
@@ -219,7 +221,7 @@ void CollisionRobotFCL::checkOtherCollision(const CollisionRequest& req, Collisi
                                             const robot_state::RobotState& other_state2,
                                             const AllowedCollisionMatrix& acm) const
 {
-  ROS_ERROR_NAMED("collision_detection.fcl", "FCL continuous collision checking not yet implemented");
+  RCLCPP_ERROR(logger, "FCL continuous collision checking not yet implemented");
 }
 
 void CollisionRobotFCL::checkOtherCollisionHelper(const CollisionRequest& req, CollisionResult& res,
@@ -274,7 +276,7 @@ void CollisionRobotFCL::updatedPaddingOrScaling(const std::vector<std::string>& 
       }
     }
     else
-      ROS_ERROR_NAMED("collision_detection.fcl", "Updating padding or scaling for unknown link: '%s'", link.c_str());
+      RCLCPP_ERROR(logger, "Updating padding or scaling for unknown link: '%s'", link.c_str());
   }
 }
 

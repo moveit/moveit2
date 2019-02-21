@@ -85,7 +85,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     exceptions/include
     backtrace/include
     collision_detection/include
-    # collision_detection_fcl/include
+    collision_detection_fcl/include
     # constraint_samplers/include
     controller_manager/include
     # distance_field/include
@@ -113,6 +113,8 @@ set(dependencies
   moveit_kinematics_base
   moveit_robot_model
   moveit_robot_state
+  moveit_collision_detection
+  moveit_collision_detection_fcl
   random_numbers
   tf2_eigen
   tf2_kdl
@@ -181,7 +183,7 @@ add_subdirectory(transforms)
 add_subdirectory(robot_state)
 add_subdirectory(robot_trajectory)
 add_subdirectory(collision_detection)
-# add_subdirectory(collision_detection_fcl)
+add_subdirectory(collision_detection_fcl)
 # add_subdirectory(kinematic_constraints)
 # add_subdirectory(planning_scene)
 # add_subdirectory(constraint_samplers)
