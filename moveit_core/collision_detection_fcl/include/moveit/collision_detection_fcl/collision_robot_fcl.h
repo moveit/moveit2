@@ -38,7 +38,8 @@
 #define MOVEIT_COLLISION_DETECTION_FCL_COLLISION_ROBOT_
 
 #include <moveit/collision_detection_fcl/collision_common.h>
-#include <moveit/logging/logging.h>
+
+#include "rclcpp/rclcpp.hpp"
 
 namespace collision_detection
 {

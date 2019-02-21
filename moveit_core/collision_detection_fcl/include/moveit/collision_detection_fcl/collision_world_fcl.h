@@ -47,7 +47,7 @@
 #endif
 
 #include <memory>
-#include <moveit/logging/logging.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace collision_detection
 {
