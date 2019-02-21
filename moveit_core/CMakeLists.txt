@@ -100,7 +100,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     transforms/include
     robot_state/include
     robot_trajectory/include
-    # kinematic_constraints/include
+    kinematic_constraints/include
     macros/include
     # planning_interface/include
     # planning_request_adapter/include
