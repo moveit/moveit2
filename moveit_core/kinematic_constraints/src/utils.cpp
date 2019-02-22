@@ -45,6 +45,8 @@ namespace kinematic_constraints
 {
 const std::string LOGNAME = "kinematic_constraint_utils";
 
+  rclcpp::Logger logger_kinematic_constraints = rclcpp::get_logger(LOGNAME);
+
 moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constraints& first, const moveit_msgs::msg::Constraints& second)
 {
   moveit_msgs::msg::Constraints r;
@@ -65,7 +67,7 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
         double low = std::max(a.position - a.tolerance_below, b.position - b.tolerance_below);
         double high = std::min(a.position + a.tolerance_above, b.position + b.tolerance_above);
         if (low > high)
-          ROS_ERROR_NAMED("kinematic_constraints",
+          RCLCPP_ERROR(logger_kinematic_constraints,
                           "Attempted to merge incompatible constraints for joint '%s'. Discarding constraint.",
                           a.joint_name.c_str());
         else
@@ -337,7 +339,7 @@ static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::J
     }
     else
     {
-      ROS_WARN_STREAM_NAMED(LOGNAME, "joint constraint contains unknown entity '" << it->first << "'");
+      RCLCPP_WARN(logger_kinematic_constraints, "joint constraint contains unknown entity '" << it->first << "'");
     }
   }
   return true;
@@ -395,7 +397,7 @@ static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::P
     }
     else
     {
-      ROS_WARN_STREAM_NAMED(LOGNAME, "position constraint contains unknown entity '" << it->first << "'");
+      RCLCPP_WARN(logger_kinematic_constraints, "position constraint contains unknown entity '" << it->first << "'");
     }
   }
   return true;
@@ -433,7 +435,7 @@ static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::O
     }
     else
     {
-      ROS_WARN_STREAM_NAMED(LOGNAME, "orientation constraint contains unknown entity '" << it->first << "'");
+      RCLCPP_WARN(logger_kinematic_constraints, "orientation constraint contains unknown entity '" << it->first << "'");
     }
   }
   return true;
@@ -467,7 +469,7 @@ static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::V
       constraint.max_range_angle = parseDouble(it->second);
     else
     {
-      ROS_WARN_STREAM_NAMED(LOGNAME, "orientation constraint contains unknown entity '" << it->first << "'");
+      RCLCPP_WARN(logger_kinematic_constraints, "orientation constraint contains unknown entity '" << it->first << "'");
     }
   }
 
@@ -480,7 +482,7 @@ static bool collectConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Co
 {
   if (params.getType() != XmlRpc::XmlRpcValue::TypeArray)
   {
-    ROS_ERROR_NAMED(LOGNAME, "expected constraints as array");
+    RCLCPP_ERROR(logger_kinematic_constraints, "expected constraints as array");
     return false;
   }
 
@@ -488,7 +490,7 @@ static bool collectConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Co
   {
     if (!params[i].hasMember("type"))
     {
-      ROS_ERROR_NAMED(LOGNAME, "constraint parameter does not specify its type");
+      RCLCPP_ERROR(logger_kinematic_constraints, "constraint parameter does not specify its type");
     }
     else if (params[i]["type"] == "joint")
     {
