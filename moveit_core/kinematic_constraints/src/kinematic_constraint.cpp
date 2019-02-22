@@ -45,7 +45,7 @@
 #include <boost/bind.hpp>
 #include <limits>
 #include <memory>
-
+#include <typeinfo>
 namespace kinematic_constraints
 {
 static double normalizeAngle(double angle)
@@ -316,7 +316,7 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
         continue;
       }
       constraint_region_.push_back(bodies::BodyPtr(bodies::createBodyFromShape(shape.get())));
-      Eigen::Isometry3d t;
+      Eigen::Affine3d t;
       tf2::fromMsg(pc.constraint_region.primitive_poses[i], t);
       constraint_region_pose_.push_back(t);
       if (mobile_frame_)
@@ -343,7 +343,7 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
         continue;
       }
       constraint_region_.push_back(bodies::BodyPtr(bodies::createBodyFromShape(shape.get())));
-      Eigen::Isometry3d t;
+      Eigen::Affine3d t;
       tf2::fromMsg(pc.constraint_region.mesh_poses[i], t);
       constraint_region_pose_.push_back(t);
       if (mobile_frame_)
@@ -440,7 +440,7 @@ ConstraintEvaluationResult PositionConstraint::decide(const robot_state::RobotSt
   {
     for (std::size_t i = 0; i < constraint_region_.size(); ++i)
     {
-      Eigen::Isometry3d tmp = state.getFrameTransform(constraint_frame_id_) * constraint_region_pose_[i];
+      Eigen::Affine3d tmp = state.getFrameTransform(constraint_frame_id_) * constraint_region_pose_[i];
       bool result = constraint_region_[i]->cloneAt(tmp)->containsPoint(pt, verbose);
       if (result || (i + 1 == constraint_region_pose_.size()))
         return finishPositionConstraintDecision(pt, tmp.translation(), link_model_->getName(), constraint_weight_,
@@ -598,13 +598,13 @@ ConstraintEvaluationResult OrientationConstraint::decide(const robot_state::Robo
   if (mobile_frame_)
   {
     Eigen::Matrix3d tmp = state.getFrameTransform(desired_rotation_frame_id_).rotation() * desired_rotation_matrix_;
-    Eigen::Isometry3d diff(tmp.transpose() * state.getGlobalLinkTransform(link_model_).rotation());
+    Eigen::Affine3d diff(tmp.transpose() * state.getGlobalLinkTransform(link_model_).rotation());
     xyz = diff.rotation().eulerAngles(0, 1, 2);
     // 0,1,2 corresponds to XYZ, the convention used in sampling constraints
   }
   else
   {
-    Eigen::Isometry3d diff(desired_rotation_matrix_inv_ * state.getGlobalLinkTransform(link_model_).rotation());
+    Eigen::Affine3d diff(desired_rotation_matrix_inv_ * state.getGlobalLinkTransform(link_model_).rotation());
     xyz =
         diff.rotation().eulerAngles(0, 1, 2);  // 0,1,2 corresponds to XYZ, the convention used in sampling constraints
   }
@@ -753,7 +753,7 @@ bool VisibilityConstraint::equal(const KinematicConstraint& other, double margin
   {
     if (fabs(max_view_angle_ - o.max_view_angle_) > margin || fabs(target_radius_ - o.target_radius_) > margin)
       return false;
-    Eigen::Isometry3d diff = sensor_pose_.inverse() * o.sensor_pose_;
+    Eigen::Affine3d diff = sensor_pose_.inverse() * o.sensor_pose_;
     if (diff.translation().norm() > margin)
       return false;
     if (!diff.rotation().isIdentity(margin))
@@ -777,9 +777,9 @@ shapes::Mesh* VisibilityConstraint::getVisibilityCone(const robot_state::RobotSt
 {
   // the current pose of the sensor
 
-  const Eigen::Isometry3d& sp =
+  const Eigen::Affine3d& sp =
       mobile_sensor_frame_ ? state.getFrameTransform(sensor_frame_id_) * sensor_pose_ : sensor_pose_;
-  const Eigen::Isometry3d& tp =
+  const Eigen::Affine3d& tp =
       mobile_target_frame_ ? state.getFrameTransform(target_frame_id_) * target_pose_ : target_pose_;
 
   // transform the points on the disc to the desired target frame
@@ -927,9 +927,9 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const robot_state::Robot
 
   if (max_view_angle_ > 0.0 || max_range_angle_ > 0.0)
   {
-    const Eigen::Isometry3d& sp =
+    const Eigen::Affine3d& sp =
         mobile_sensor_frame_ ? state.getFrameTransform(sensor_frame_id_) * sensor_pose_ : sensor_pose_;
-    const Eigen::Isometry3d& tp =
+    const Eigen::Affine3d& tp =
         mobile_target_frame_ ? state.getFrameTransform(target_frame_id_) * target_pose_ : target_pose_;
 
     // necessary to do subtraction as SENSOR_Z is 0 and SENSOR_X is 2
@@ -986,7 +986,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const robot_state::Robot
 
   // add the visibility cone as an object
   collision_detection::CollisionWorldFCL collision_world;
-  collision_world.getWorld()->addToObject("cone", shapes::ShapeConstPtr(m), Eigen::Isometry3d::Identity());
+  collision_world.getWorld()->addToObject("cone", shapes::ShapeConstPtr(m), Eigen::Affine3d::Identity());
 
   // check for collisions between the robot and the cone
   collision_detection::CollisionRequest req;
