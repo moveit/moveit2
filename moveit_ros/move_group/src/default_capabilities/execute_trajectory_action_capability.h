@@ -56,13 +56,13 @@ public:
   void initialize() override;
 
 private:
-  void executePathCallback(const moveit_msgs::ExecuteTrajectoryGoalConstPtr& goal);
-  void executePath(const moveit_msgs::ExecuteTrajectoryGoalConstPtr& goal,
-                   moveit_msgs::ExecuteTrajectoryResult& action_res);
+  void executePathCallback(const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal);
+  void executePath(const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal,
+                   moveit_msgs::action::ExecuteTrajectoryResult& action_res);
   void preemptExecuteTrajectoryCallback();
   void setExecuteTrajectoryState(MoveGroupState state);
 
-  std::unique_ptr<actionlib::SimpleActionServer<moveit_msgs::ExecuteTrajectoryAction> > execute_action_server_;
+  std::unique_ptr<actionlib::SimpleActionServer<moveit_msgs::action::ExecuteTrajectoryAction> > execute_action_server_;
 };
 
 }  // namespace move_group
