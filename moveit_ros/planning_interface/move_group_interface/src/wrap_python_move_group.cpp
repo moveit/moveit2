@@ -267,7 +267,7 @@ public:
 
   bool placeLocation(const std::string& object_name, const std::string& location_str, bool plan_only = false)
   {
-    std::vector<moveit_msgs::PlaceLocation> locations(1);
+    std::vector<moveit_msgs::action::PlaceLocation> locations(1);
     py_bindings_tools::deserializeMsg(location_str, locations[0]);
     return place(object_name, locations, plan_only) == MoveItErrorCode::SUCCESS;
   }

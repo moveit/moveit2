@@ -54,21 +54,21 @@ public:
   void initialize() override;
 
 private:
-  void executePickupCallback(const moveit_msgs::PickupGoalConstPtr& goal);
-  void executePlaceCallback(const moveit_msgs::PlaceGoalConstPtr& goal);
+  void executePickupCallback(const moveit_msgs::action::PickupGoalConstPtr& goal);
+  void executePlaceCallback(const moveit_msgs::action::PlaceGoalConstPtr& goal);
 
-  void executePickupCallback_PlanOnly(const moveit_msgs::PickupGoalConstPtr& goal,
-                                      moveit_msgs::PickupResult& action_res);
-  void executePickupCallback_PlanAndExecute(const moveit_msgs::PickupGoalConstPtr& goal,
-                                            moveit_msgs::PickupResult& action_res);
+  void executePickupCallback_PlanOnly(const moveit_msgs::action::PickupGoalConstPtr& goal,
+                                      moveit_msgs::action::PickupResult& action_res);
+  void executePickupCallback_PlanAndExecute(const moveit_msgs::action::PickupGoalConstPtr& goal,
+                                            moveit_msgs::action::PickupResult& action_res);
 
-  void executePlaceCallback_PlanOnly(const moveit_msgs::PlaceGoalConstPtr& goal, moveit_msgs::PlaceResult& action_res);
-  void executePlaceCallback_PlanAndExecute(const moveit_msgs::PlaceGoalConstPtr& goal,
-                                           moveit_msgs::PlaceResult& action_res);
+  void executePlaceCallback_PlanOnly(const moveit_msgs::action::PlaceGoalConstPtr& goal, moveit_msgs::action::PlaceResult& action_res);
+  void executePlaceCallback_PlanAndExecute(const moveit_msgs::action::PlaceGoalConstPtr& goal,
+                                           moveit_msgs::action::PlaceResult& action_res);
 
-  bool planUsingPickPlace_Pickup(const moveit_msgs::PickupGoal& goal, moveit_msgs::PickupResult* action_res,
+  bool planUsingPickPlace_Pickup(const moveit_msgs::action::PickupGoal& goal, moveit_msgs::action::PickupResult* action_res,
                                  plan_execution::ExecutableMotionPlan& plan);
-  bool planUsingPickPlace_Place(const moveit_msgs::PlaceGoal& goal, moveit_msgs::PlaceResult* action_res,
+  bool planUsingPickPlace_Place(const moveit_msgs::action::PlaceGoal& goal, moveit_msgs::action::PlaceResult* action_res,
                                 plan_execution::ExecutableMotionPlan& plan);
 
   void preemptPickupCallback();
@@ -83,15 +83,15 @@ private:
   void setPickupState(MoveGroupState state);
   void setPlaceState(MoveGroupState state);
 
-  void fillGrasps(moveit_msgs::PickupGoal& goal);
+  void fillGrasps(moveit_msgs::action::PickupGoal& goal);
 
   pick_place::PickPlacePtr pick_place_;
 
-  std::unique_ptr<actionlib::SimpleActionServer<moveit_msgs::PickupAction> > pickup_action_server_;
-  moveit_msgs::PickupFeedback pickup_feedback_;
+  std::unique_ptr<actionlib::SimpleActionServer<moveit_msgs::action::PickupAction> > pickup_action_server_;
+  moveit_msgs::action::PickupFeedback pickup_feedback_;
 
-  std::unique_ptr<actionlib::SimpleActionServer<moveit_msgs::PlaceAction> > place_action_server_;
-  moveit_msgs::PlaceFeedback place_feedback_;
+  std::unique_ptr<actionlib::SimpleActionServer<moveit_msgs::action::PlaceAction> > place_action_server_;
+  moveit_msgs::action::PlaceFeedback place_feedback_;
 
   std::unique_ptr<moveit_msgs::AttachedCollisionObject> diff_attached_object_;
 
