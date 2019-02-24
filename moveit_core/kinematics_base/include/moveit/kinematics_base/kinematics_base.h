@@ -37,7 +37,6 @@
 #ifndef MOVEIT_KINEMATICS_BASE_KINEMATICS_BASE_
 #define MOVEIT_KINEMATICS_BASE_KINEMATICS_BASE_
 
-
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit/macros/class_forward.h>
@@ -55,8 +54,8 @@ namespace core
 MOVEIT_CLASS_FORWARD(JointModelGroup)
 MOVEIT_CLASS_FORWARD(RobotState)
 MOVEIT_CLASS_FORWARD(RobotModel)
-}
-}
+}  // namespace core
+}  // namespace moveit
 
 /** @brief API for forward and inverse kinematics */
 namespace kinematics
@@ -189,9 +188,9 @@ public:
    *                other will result in failure.
    * @return True if a valid set of solutions was found, false otherwise.
    */
-  virtual bool getPositionIK(const std::vector<geometry_msgs::msg::Pose>& ik_poses, const std::vector<double>& ik_seed_state,
-                             std::vector<std::vector<double> >& solutions, KinematicsResult& result,
-                             const kinematics::KinematicsQueryOptions& options) const;
+  virtual bool getPositionIK(const std::vector<geometry_msgs::msg::Pose>& ik_poses,
+                             const std::vector<double>& ik_seed_state, std::vector<std::vector<double> >& solutions,
+                             KinematicsResult& result, const kinematics::KinematicsQueryOptions& options) const;
 
   /**
    * @brief Given a desired pose of the end-effector, search for the joint angles required to reach it.
@@ -619,40 +618,50 @@ protected:
 
     auto parameters_lookup = std::make_shared<rclcpp::SyncParametersClient>(node);
 
-    auto groupname_param = parameters_lookup->get_parameters({group_name_ + "/" + param});
+    auto groupname_param = parameters_lookup->get_parameters({ group_name_ + "/" + param });
 
-    for (auto & parameter : groupname_param) {
-        if (!parameter.get_name().compare(group_name_ + "/" + param)) {
-          val = parameter.value_to_string();
-          return true;
-        }
+    for (auto& parameter : groupname_param)
+    {
+      if (!parameter.get_name().compare(group_name_ + "/" + param))
+      {
+        val = parameter.value_to_string();
+        return true;
+      }
     }
 
-    auto only_param = parameters_lookup->get_parameters({param});
+    auto only_param = parameters_lookup->get_parameters({ param });
 
-    for (auto & parameter : only_param) {
-        if (!parameter.get_name().compare(param)) {
-          val = parameter.value_to_string();
-          return true;
-        }
+    for (auto& parameter : only_param)
+    {
+      if (!parameter.get_name().compare(param))
+      {
+        val = parameter.value_to_string();
+        return true;
+      }
     }
 
-    auto robot_description_groupname_kinematics_param = parameters_lookup->get_parameters({"robot_description_kinematics/" + group_name_ + "/" + param});
+    auto robot_description_groupname_kinematics_param =
+        parameters_lookup->get_parameters({ "robot_description_kinematics/" + group_name_ + "/" + param });
 
-    for (auto & parameter : robot_description_groupname_kinematics_param) {
-        if (!parameter.get_name().compare("robot_description_kinematics/" + group_name_ + "/" + param)) {
-          val = parameter.value_to_string();
-          return true;
-        }
+    for (auto& parameter : robot_description_groupname_kinematics_param)
+    {
+      if (!parameter.get_name().compare("robot_description_kinematics/" + group_name_ + "/" + param))
+      {
+        val = parameter.value_to_string();
+        return true;
+      }
     }
 
-    auto robot_description_kinematics_param = parameters_lookup->get_parameters({"robot_description_kinematics/" + param});
+    auto robot_description_kinematics_param =
+        parameters_lookup->get_parameters({ "robot_description_kinematics/" + param });
 
-    for (auto & parameter : robot_description_kinematics_param) {
-        if (!parameter.get_name().compare("robot_description_kinematics/" + param)) {
-          val = parameter.value_to_string();
-          return true;
-        }
+    for (auto& parameter : robot_description_kinematics_param)
+    {
+      if (!parameter.get_name().compare("robot_description_kinematics/" + param))
+      {
+        val = parameter.value_to_string();
+        return true;
+      }
     }
     return false;
   }
@@ -672,6 +681,6 @@ protected:
 private:
   std::string removeSlash(const std::string& str) const;
 };
-}
+}  // namespace kinematics
 
 #endif
