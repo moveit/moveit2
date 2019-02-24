@@ -151,6 +151,7 @@ public:
   static const double DEFAULT_SEARCH_DISCRETIZATION; /* = 0.1 */
   static const double DEFAULT_TIMEOUT;               /* = 1.0 */
 
+  /** @brief Signature for a callback to validate an IK solution. Typically used for collision checking. */
   /** @brief The signature for a callback that can compute IK */
   typedef boost::function<void(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_solution,
                                moveit_msgs::msg::MoveItErrorCodes& error_code)>
