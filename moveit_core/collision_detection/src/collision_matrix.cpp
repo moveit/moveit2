@@ -144,7 +144,7 @@ void AllowedCollisionMatrix::setEntry(const std::string& name1, const std::strin
   }
 }
 
-void AllowedCollisionMatrix::setEntry(const std::string& name1, const std::string& name2, const DecideContactFn& fn)
+void AllowedCollisionMatrix::setEntry(const std::string& name1, const std::string& name2, DecideContactFn& fn)
 {
   entries_[name1][name2] = entries_[name2][name1] = AllowedCollision::CONDITIONAL;
   allowed_contacts_[name1][name2] = allowed_contacts_[name2][name1] = fn;
@@ -234,7 +234,7 @@ void AllowedCollisionMatrix::setDefaultEntry(const std::string& name, bool allow
   default_allowed_contacts_.erase(name);
 }
 
-void AllowedCollisionMatrix::setDefaultEntry(const std::string& name, const DecideContactFn& fn)
+void AllowedCollisionMatrix::setDefaultEntry(const std::string& name, DecideContactFn& fn)
 {
   default_entries_[name] = AllowedCollision::CONDITIONAL;
   default_allowed_contacts_[name] = fn;

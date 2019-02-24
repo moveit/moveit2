@@ -149,7 +149,7 @@ public:
    *  @param name2 name of second element
    *  @param fn A callback function that is used to decide if collisions are allowed between the two elements is
    * expected here */
-  void setEntry(const std::string& name1, const std::string& name2, const DecideContactFn& fn);
+  void setEntry(const std::string& name1, const std::string& name2, DecideContactFn& fn);
 
   /** @brief Set the entries corresponding to a name. With each of the the known names in the collision matrix, form a
    * pair using the name
@@ -222,7 +222,7 @@ public:
    *  @param name The name of the element for which to set the default value
    *  @param fn A callback function that is used to decide if collisions are allowed between \e name and some other
    * element is expected here. */
-  void setDefaultEntry(const std::string& name, const DecideContactFn& fn);
+  void setDefaultEntry(const std::string& name, DecideContactFn& fn);
 
   /** @brief Get the type of the allowed collision between to be considered by default for an element. Return true if a
    * default value was
