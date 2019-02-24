@@ -35,7 +35,6 @@
 /* Author: Acorn Pooley, Ioan Sucan */
 
 #include <moveit/exceptions/exceptions.h>
-// #include <ros/console.h>
 #include <rcutils/logging_macros.h>
 #include "rclcpp/rclcpp.hpp"
 
