@@ -469,8 +469,8 @@ void PlanningSceneMonitor::triggerSceneUpdateEvent(SceneUpdateType update_type)
 bool PlanningSceneMonitor::requestPlanningSceneState(const std::string& service_name)
 {
   // use global namespace for service
-  ros::ServiceClient client = ros::NodeHandle().serviceClient<moveit_msgs::GetPlanningScene>(service_name);
-  moveit_msgs::GetPlanningScene srv;
+  ros::ServiceClient client = ros::NodeHandle().serviceClient<moveit_msgs::srv::GetPlanningScene>(service_name);
+  moveit_msgs::srv::GetPlanningScene srv;
   srv.request.components.components =
       srv.request.components.SCENE_SETTINGS | srv.request.components.ROBOT_STATE |
       srv.request.components.ROBOT_STATE_ATTACHED_OBJECTS | srv.request.components.WORLD_OBJECT_NAMES |

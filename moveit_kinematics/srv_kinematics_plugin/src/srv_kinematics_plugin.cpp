@@ -116,7 +116,7 @@ bool SrvKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
   // Create the ROS service client
   ros::NodeHandle nonprivate_handle("");
   ik_service_client_ = std::make_shared<ros::ServiceClient>(
-      nonprivate_handle.serviceClient<moveit_msgs::GetPositionIK>(ik_service_name));
+      nonprivate_handle.serviceClient<moveit_msgs::srv::GetPositionIK>(ik_service_name));
   if (!ik_service_client_->waitForExistence(ros::Duration(0.1)))  // wait 0.1 seconds, blocking
     ROS_WARN_STREAM_NAMED("srv",
                           "Unable to connect to ROS service client with name: " << ik_service_client_->getService());
@@ -271,7 +271,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::Pose
   }
 
   // Create the service message
-  moveit_msgs::GetPositionIK ik_srv;
+  moveit_msgs::srv::GetPositionIK ik_srv;
   ik_srv.request.ik_request.avoid_collisions = true;
   ik_srv.request.ik_request.group_name = getGroupName();
 
