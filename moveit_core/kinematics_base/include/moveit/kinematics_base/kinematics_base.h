@@ -654,34 +654,6 @@ protected:
           return true;
         }
     }
-
-    // if (pnh.hasParam(group_name_ + "/" + param))
-    // {
-    //   val = pnh.param(group_name_ + "/" + param, default_val);
-    //   return true;
-    // }
-    //
-    // if (pnh.hasParam(param))
-    // {
-    //   val = pnh.param(param, default_val);
-    //   return true;
-    // }
-    //
-    // ros::NodeHandle nh;
-    // if (nh.hasParam("robot_description_kinematics/" + group_name_ + "/" + param))
-    // {
-    //   val = nh.param("robot_description_kinematics/" + group_name_ + "/" + param, default_val);
-    //   return true;
-    // }
-    //
-    // if (nh.hasParam("robot_description_kinematics/" + param))
-    // {
-    //   val = nh.param("robot_description_kinematics/" + param, default_val);
-    //   return true;
-    // }
-    //
-    // val = default_val;
-
     return false;
   }
 
