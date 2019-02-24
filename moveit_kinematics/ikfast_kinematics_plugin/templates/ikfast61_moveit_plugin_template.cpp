@@ -214,7 +214,7 @@ public:
   // Returns the IK solution that is within joint limits closest to ik_seed_state
   bool getPositionIK(
       const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, std::vector<double>& solution,
-      moveit_msgs::MoveItErrorCodes& error_code,
+      moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   /**
@@ -246,7 +246,7 @@ public:
    */
   bool searchPositionIK(
       const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-      std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+      std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   /**
@@ -261,7 +261,7 @@ public:
   bool searchPositionIK(
       const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
       const std::vector<double>& consistency_limits, std::vector<double>& solution,
-      moveit_msgs::MoveItErrorCodes& error_code,
+      moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   /**
@@ -274,7 +274,7 @@ public:
    */
   bool searchPositionIK(
       const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-      std::vector<double>& solution, const IKCallbackFn& solution_callback, moveit_msgs::MoveItErrorCodes& error_code,
+      std::vector<double>& solution, const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   /**
@@ -290,7 +290,7 @@ public:
   bool searchPositionIK(
       const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
       const std::vector<double>& consistency_limits, std::vector<double>& solution,
-      const IKCallbackFn& solution_callback, moveit_msgs::MoveItErrorCodes& error_code,
+      const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   /**
@@ -793,7 +793,7 @@ bool IKFastKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_
 
 bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose,
                                               const std::vector<double>& ik_seed_state, double timeout,
-                                              std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+                                              std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                               const kinematics::KinematicsQueryOptions& options) const
 {
   std::vector<double> consistency_limits;
@@ -804,7 +804,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
 bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose,
                                               const std::vector<double>& ik_seed_state, double timeout,
                                               const std::vector<double>& consistency_limits,
-                                              std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+                                              std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                               const kinematics::KinematicsQueryOptions& options) const
 {
   return searchPositionIK(ik_pose, ik_seed_state, timeout, consistency_limits, solution, IKCallbackFn(), error_code,
@@ -814,7 +814,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
 bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose,
                                               const std::vector<double>& ik_seed_state, double timeout,
                                               std::vector<double>& solution, const IKCallbackFn& solution_callback,
-                                              moveit_msgs::MoveItErrorCodes& error_code,
+                                              moveit_msgs::msg::MoveItErrorCodes& error_code,
                                               const kinematics::KinematicsQueryOptions& options) const
 {
   std::vector<double> consistency_limits;
@@ -826,7 +826,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
                                               const std::vector<double>& ik_seed_state, double timeout,
                                               const std::vector<double>& consistency_limits,
                                               std::vector<double>& solution, const IKCallbackFn& solution_callback,
-                                              moveit_msgs::MoveItErrorCodes& error_code,
+                                              moveit_msgs::msg::MoveItErrorCodes& error_code,
                                               const kinematics::KinematicsQueryOptions& options) const
 {
   // "SEARCH_MODE" is fixed during code generation
@@ -844,7 +844,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
     if (!getPositionIK(ik_poses, ik_seed_state, solutions, kinematic_result, options))
     {
       ROS_DEBUG_STREAM_NAMED(name_, "No solution whatsoever");
-      error_code.val = moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
+      error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
       return false;
     }
 
@@ -868,7 +868,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
       for (std::size_t i = 0; i < solutions_obey_limits.size(); ++i)
       {
         solution_callback(ik_pose, solutions_obey_limits[i].value, error_code);
-        if (error_code.val == moveit_msgs::MoveItErrorCodes::SUCCESS)
+        if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
         {
           solution = solutions_obey_limits[i].value;
           ROS_DEBUG_STREAM_NAMED(name_, "Solution passes callback");
@@ -882,7 +882,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
     else
     {
       solution = solutions_obey_limits[0].value;
-      error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+      error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       return true;  // no collision check callback provided
     }
   }
@@ -1030,7 +1030,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
     if (!getCount(counter, num_positive_increments, -num_negative_increments))
     {
       // Everything searched
-      error_code.val = moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
+      error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
       break;
     }
 
@@ -1048,13 +1048,13 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
   }
 
   // No solution found
-  error_code.val = moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
+  error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
   return false;
 }
 
 // Used when there are no redundant joints - aka no free params
 bool IKFastKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
-                                           std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+                                           std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   ROS_DEBUG_STREAM_NAMED(name_, "getPositionIK");
@@ -1154,11 +1154,11 @@ bool IKFastKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, c
   {
     std::sort(solutions_obey_limits.begin(), solutions_obey_limits.end());
     solution = solutions_obey_limits[0].value;
-    error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+    error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     return true;
   }
 
-  error_code.val = moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
+  error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
   return false;
 }
 

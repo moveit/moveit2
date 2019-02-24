@@ -59,8 +59,8 @@ SemanticWorld::SemanticWorld(const planning_scene::PlanningSceneConstPtr& planni
 {
   table_subscriber_ = node_handle_.subscribe("table_array", 1, &SemanticWorld::tableCallback, this);
   visualization_publisher_ = node_handle_.advertise<visualization_msgs::MarkerArray>("visualize_place", 20, true);
-  collision_object_publisher_ = node_handle_.advertise<moveit_msgs::CollisionObject>("/collision_object", 20);
-  planning_scene_diff_publisher_ = node_handle_.advertise<moveit_msgs::PlanningScene>("planning_scene", 1);
+  collision_object_publisher_ = node_handle_.advertise<moveit_msgs::msg::CollisionObject>("/collision_object", 20);
+  planning_scene_diff_publisher_ = node_handle_.advertise<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
 }
 
 visualization_msgs::MarkerArray
@@ -93,16 +93,16 @@ SemanticWorld::getPlaceLocationsMarker(const std::vector<geometry_msgs::PoseStam
 
 bool SemanticWorld::addTablesToCollisionWorld()
 {
-  moveit_msgs::PlanningScene planning_scene;
+  moveit_msgs::msg::PlanningScene planning_scene;
   planning_scene.is_diff = true;
 
   // Remove the existing tables
   std::map<std::string, object_recognition_msgs::Table>::iterator it;
   for (it = current_tables_in_collision_world_.begin(); it != current_tables_in_collision_world_.end(); ++it)
   {
-    moveit_msgs::CollisionObject co;
+    moveit_msgs::msg::CollisionObject co;
     co.id = it->first;
-    co.operation = moveit_msgs::CollisionObject::REMOVE;
+    co.operation = moveit_msgs::msg::CollisionObject::REMOVE;
     planning_scene.world.collision_objects.push_back(co);
     //    collision_object_publisher_.publish(co);
   }
@@ -113,12 +113,12 @@ bool SemanticWorld::addTablesToCollisionWorld()
   // Add the new tables
   for (std::size_t i = 0; i < table_array_.tables.size(); ++i)
   {
-    moveit_msgs::CollisionObject co;
+    moveit_msgs::msg::CollisionObject co;
     std::stringstream ss;
     ss << "table_" << i;
     co.id = ss.str();
     current_tables_in_collision_world_[co.id] = table_array_.tables[i];
-    co.operation = moveit_msgs::CollisionObject::ADD;
+    co.operation = moveit_msgs::msg::CollisionObject::ADD;
 
     const std::vector<geometry_msgs::Point>& convex_hull = table_array_.tables[i].convex_hull;
 

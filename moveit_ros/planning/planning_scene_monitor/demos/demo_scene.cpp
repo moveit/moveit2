@@ -42,9 +42,9 @@ static const std::string ROBOT_DESCRIPTION = "robot_description";
 void sendKnife()
 {
   ros::NodeHandle nh;
-  ros::Publisher pub_aco = nh.advertise<moveit_msgs::AttachedCollisionObject>("attached_collision_object", 10);
+  ros::Publisher pub_aco = nh.advertise<moveit_msgs::msg::AttachedCollisionObject>("attached_collision_object", 10);
 
-  moveit_msgs::AttachedCollisionObject aco;
+  moveit_msgs::msg::AttachedCollisionObject aco;
   aco.link_name = "r_wrist_roll_link";
   aco.touch_links.push_back("r_wrist_roll_link");
   aco.touch_links.push_back("r_gripper_palm_link");
@@ -59,11 +59,11 @@ void sendKnife()
   aco.touch_links.push_back("r_gripper_r_finger_tip_link");
   aco.touch_links.push_back("r_gripper_l_finger_tip_frame");
 
-  moveit_msgs::CollisionObject& co = aco.object;
+  moveit_msgs::msg::CollisionObject& co = aco.object;
   co.id = "knife";
   co.header.stamp = ros::Time::now();
   co.header.frame_id = aco.link_name;
-  co.operation = moveit_msgs::CollisionObject::ADD;
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
   co.primitives.resize(1);
   co.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
   co.primitives[0].dimensions.push_back(0.1);

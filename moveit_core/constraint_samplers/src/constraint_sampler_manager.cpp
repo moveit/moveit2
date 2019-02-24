@@ -42,7 +42,7 @@
 constraint_samplers::ConstraintSamplerPtr
 constraint_samplers::ConstraintSamplerManager::selectSampler(const planning_scene::PlanningSceneConstPtr& scene,
                                                              const std::string& group_name,
-                                                             const moveit_msgs::Constraints& constr) const
+                                                             const moveit_msgs::msg::Constraints& constr) const
 {
   for (std::size_t i = 0; i < sampler_alloc_.size(); ++i)
     if (sampler_alloc_[i]->canService(scene, group_name, constr))
@@ -55,7 +55,7 @@ constraint_samplers::ConstraintSamplerManager::selectSampler(const planning_scen
 constraint_samplers::ConstraintSamplerPtr
 constraint_samplers::ConstraintSamplerManager::selectDefaultSampler(const planning_scene::PlanningSceneConstPtr& scene,
                                                                     const std::string& group_name,
-                                                                    const moveit_msgs::Constraints& constr)
+                                                                    const moveit_msgs::msg::Constraints& constr)
 {
   const robot_model::JointModelGroup* jmg = scene->getRobotModel()->getJointModelGroup(group_name);
   if (!jmg)
@@ -301,7 +301,7 @@ constraint_samplers::ConstraintSamplerManager::selectDefaultSampler(const planni
          it != ik_subgroup_alloc.end(); ++it)
     {
       // construct a sub-set of constraints that operate on the sub-group for which we have an IK allocator
-      moveit_msgs::Constraints sub_constr;
+      moveit_msgs::msg::Constraints sub_constr;
       for (std::size_t p = 0; p < constr.position_constraints.size(); ++p)
         if (it->first->hasLinkModel(constr.position_constraints[p].link_name))
           if (used_p.find(p) == used_p.end())

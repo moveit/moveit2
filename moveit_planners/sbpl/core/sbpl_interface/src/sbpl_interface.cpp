@@ -89,19 +89,19 @@ bool SBPLInterface::solve(const planning_scene::PlanningSceneConstPtr& planning_
   std::cerr << "Path length is " << solution_state_ids.size() << std::endl;
   if (!b_ret)
   {
-    res.error_code.val = moveit_msgs::MoveItErrorCodes::PLANNING_FAILED;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
     return false;
   }
   if (solution_state_ids.size() == 0)
   {
     std::cerr << "Success but no path" << std::endl;
-    res.error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
   if (!env_chain->populateTrajectoryFromStateIDSequence(solution_state_ids, res.trajectory.joint_trajectory))
   {
     std::cerr << "Success but path bad" << std::endl;
-    res.error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
   ros::WallTime pre_short = ros::WallTime::now();
@@ -111,7 +111,7 @@ bool SBPLInterface::solve(const planning_scene::PlanningSceneConstPtr& planning_
   // std::cerr << "Num traj points after " << res.trajectory.joint_trajectory.points.size() << std::endl;
   // std::cerr << "Time " << (ros::WallTime::now()-pre_short).toSec() << std::endl;
   // env_chain->getPlaneBFSMarker(mark, env_chain->getGoalPose().translation().z());
-  res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+  res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   PlanningStatistics stats = env_chain->getPlanningStatistics();
   stats.total_planning_time_ = ros::WallDuration(el);
   (const_cast<SBPLInterface*>(this))->last_planning_statistics_ = stats;

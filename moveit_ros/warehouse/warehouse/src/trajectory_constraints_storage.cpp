@@ -55,7 +55,7 @@ moveit_warehouse::TrajectoryConstraintsStorage::TrajectoryConstraintsStorage(
 void moveit_warehouse::TrajectoryConstraintsStorage::createCollections(void)
 {
   constraints_collection_ =
-      conn_->openCollectionPtr<moveit_msgs::TrajectoryConstraints>(DATABASE_NAME, "trajectory_constraints");
+      conn_->openCollectionPtr<moveit_msgs::msg::TrajectoryConstraints>(DATABASE_NAME, "trajectory_constraints");
 }
 
 void moveit_warehouse::TrajectoryConstraintsStorage::reset(void)
@@ -66,7 +66,7 @@ void moveit_warehouse::TrajectoryConstraintsStorage::reset(void)
 }
 
 void moveit_warehouse::TrajectoryConstraintsStorage::addTrajectoryConstraints(
-    const moveit_msgs::TrajectoryConstraints& msg, const std::string& name, const std::string& robot,
+    const moveit_msgs::msg::TrajectoryConstraints& msg, const std::string& name, const std::string& robot,
     const std::string& group)
 {
   bool replace = false;

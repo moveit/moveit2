@@ -218,7 +218,7 @@ bool BenchmarkExecutor::runBenchmarks(const BenchmarkOptions& opts)
   }
 
   std::vector<BenchmarkRequest> queries;
-  moveit_msgs::PlanningScene scene_msg;
+  moveit_msgs::msg::PlanningScene scene_msg;
 
   if (initializeBenchmarks(opts, scene_msg, queries))
   {
@@ -281,7 +281,7 @@ bool BenchmarkExecutor::queriesAndPlannersCompatible(const std::vector<Benchmark
   return true;
 }
 
-bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& opts, moveit_msgs::PlanningScene& scene_msg,
+bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& opts, moveit_msgs::msg::PlanningScene& scene_msg,
                                              std::vector<BenchmarkRequest>& requests)
 {
   if (!plannerConfigurationsExist(opts.getPlannerConfigurations(), opts.getGroupName()))
@@ -333,7 +333,7 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& opts, movei
            start_states.size(), goal_constraints.size(), path_constraints.size(), traj_constraints.size(),
            queries.size());
 
-  moveit_msgs::WorkspaceParameters workspace_parameters = opts.getWorkspaceParameters();
+  moveit_msgs::msg::WorkspaceParameters workspace_parameters = opts.getWorkspaceParameters();
   // Make sure that workspace_parameters are set
   if (workspace_parameters.min_corner.x == workspace_parameters.max_corner.x &&
       workspace_parameters.min_corner.x == 0.0 &&
@@ -435,7 +435,7 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& opts, movei
   return true;
 }
 
-void BenchmarkExecutor::shiftConstraintsByOffset(moveit_msgs::Constraints& constraints,
+void BenchmarkExecutor::shiftConstraintsByOffset(moveit_msgs::msg::Constraints& constraints,
                                                  const std::vector<double> offset)
 {
   Eigen::Isometry3d offset_tf(Eigen::AngleAxis<double>(offset[3], Eigen::Vector3d::UnitX()) *
@@ -562,7 +562,7 @@ bool BenchmarkExecutor::plannerConfigurationsExist(const std::map<std::string, s
   return true;
 }
 
-bool BenchmarkExecutor::loadPlanningScene(const std::string& scene_name, moveit_msgs::PlanningScene& scene_msg)
+bool BenchmarkExecutor::loadPlanningScene(const std::string& scene_name, moveit_msgs::msg::PlanningScene& scene_msg)
 {
   bool ok = false;
   try
@@ -571,7 +571,7 @@ bool BenchmarkExecutor::loadPlanningScene(const std::string& scene_name, moveit_
     {
       moveit_warehouse::PlanningSceneWithMetadata pswm;
       ok = pss_->getPlanningScene(pswm, scene_name);
-      scene_msg = static_cast<moveit_msgs::PlanningScene>(*pswm);
+      scene_msg = static_cast<moveit_msgs::msg::PlanningScene>(*pswm);
 
       if (!ok)
         ROS_ERROR("Failed to load planning scene '%s'", scene_name.c_str());
@@ -580,7 +580,7 @@ bool BenchmarkExecutor::loadPlanningScene(const std::string& scene_name, moveit_
     {
       moveit_warehouse::PlanningSceneWorldWithMetadata pswwm;
       ok = psws_->getPlanningSceneWorld(pswwm, scene_name);
-      scene_msg.world = static_cast<moveit_msgs::PlanningSceneWorld>(*pswwm);
+      scene_msg.world = static_cast<moveit_msgs::msg::PlanningSceneWorld>(*pswwm);
       scene_msg.robot_model_name =
           "NO ROBOT INFORMATION. ONLY WORLD GEOMETRY";  // this will be fixed when running benchmark
 
@@ -636,7 +636,7 @@ bool BenchmarkExecutor::loadQueries(const std::string& regex, const std::string&
 
     BenchmarkRequest query;
     query.name = query_names[i];
-    query.request = static_cast<moveit_msgs::MotionPlanRequest>(*planning_query);
+    query.request = static_cast<moveit_msgs::msg::MotionPlanRequest>(*planning_query);
     queries.push_back(query);
   }
   ROS_INFO("Loaded queries successfully");
@@ -661,7 +661,7 @@ bool BenchmarkExecutor::loadStates(const std::string& regex, std::vector<StartSt
           if (rs_->getRobotState(robot_state, state_names[i]))
           {
             StartState start_state;
-            start_state.state = moveit_msgs::RobotState(*robot_state);
+            start_state.state = moveit_msgs::msg::RobotState(*robot_state);
             start_state.name = state_names[i];
             start_states.push_back(start_state);
           }
@@ -752,7 +752,7 @@ bool BenchmarkExecutor::loadTrajectoryConstraints(const std::string& regex,
   return true;
 }
 
-void BenchmarkExecutor::runBenchmark(moveit_msgs::MotionPlanRequest request,
+void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request,
                                      const std::map<std::string, std::vector<std::string>>& planners, int runs)
 {
   benchmark_data_.clear();
@@ -941,7 +941,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
   out << "Starting at " << start_time << std::endl;
 
   // Experiment setup
-  moveit_msgs::PlanningScene scene_msg;
+  moveit_msgs::msg::PlanningScene scene_msg;
   planning_scene_->getPlanningSceneMsg(scene_msg);
   out << "<<<|" << std::endl;
   out << "Motion plan request:" << std::endl << brequest.request << std::endl;

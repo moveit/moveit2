@@ -76,7 +76,7 @@ public:
       planning_interface::MotionPlanRequest req2 = req;
       req2.goal_constraints.resize(1);
       req2.goal_constraints[0] = req.path_constraints;
-      req2.path_constraints = moveit_msgs::Constraints();
+      req2.path_constraints = moveit_msgs::msg::Constraints();
       planning_interface::MotionPlanResponse res2;
       // we call the planner for this additional request, but we do not want to include potential
       // index information from that call

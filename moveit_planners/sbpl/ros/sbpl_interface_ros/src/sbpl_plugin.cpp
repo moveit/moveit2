@@ -72,7 +72,7 @@ public:
   }
 
   bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::MotionPlanDetailedResponse& res) const
+             const moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::msg::MotionPlanDetailedResponse& res) const
   {
     sbpl_interface::PlanningParameters params;
     params.use_bfs_ = false;

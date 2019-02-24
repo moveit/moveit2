@@ -168,7 +168,7 @@ bool SrvKinematicsPlugin::timedOut(const ros::WallTime& start_time, double durat
 }
 
 bool SrvKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
-                                        std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+                                        std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                         const kinematics::KinematicsQueryOptions& options) const
 {
   const IKCallbackFn solution_callback = 0;
@@ -180,7 +180,7 @@ bool SrvKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, cons
 
 bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   const IKCallbackFn solution_callback = 0;
@@ -192,7 +192,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 
 bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
-                                           std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+                                           std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   const IKCallbackFn solution_callback = 0;
@@ -203,7 +203,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   std::vector<double> consistency_limits;
@@ -214,7 +214,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
                                            std::vector<double>& solution, const IKCallbackFn& solution_callback,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   return searchPositionIK(ik_pose, ik_seed_state, timeout, solution, solution_callback, error_code, consistency_limits,
@@ -224,7 +224,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const std::vector<double>& consistency_limits,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
@@ -240,7 +240,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::Pose
                                            const std::vector<double>& ik_seed_state, double timeout,
                                            const std::vector<double>& consistency_limits, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   // Check if active
@@ -314,10 +314,10 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::Pose
                                         << ik_srv.response.solution);
       switch (error_code.val)
       {
-        case moveit_msgs::MoveItErrorCodes::FAILURE:
+        case moveit_msgs::msg::MoveItErrorCodes::FAILURE:
           ROS_ERROR_STREAM_NAMED("srv", "Service failed with with error code: FAILURE");
           break;
-        case moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION:
+        case moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION:
           ROS_ERROR_STREAM_NAMED("srv", "Service failed with with error code: NO IK SOLUTION");
           break;
         default:
@@ -357,10 +357,10 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::Pose
     {
       switch (error_code.val)
       {
-        case moveit_msgs::MoveItErrorCodes::FAILURE:
+        case moveit_msgs::msg::MoveItErrorCodes::FAILURE:
           ROS_ERROR_STREAM_NAMED("srv", "IK solution callback failed with with error code: FAILURE");
           break;
-        case moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION:
+        case moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION:
           ROS_ERROR_STREAM_NAMED("srv", "IK solution callback failed with with error code: "
                                         "NO IK SOLUTION");
           break;

@@ -77,14 +77,14 @@ int main(int argc, char** argv)
   if (!tem.waitForExecution())
     ROS_ERROR("Fail!");
 
-  moveit_msgs::RobotTrajectory traj1;
+  moveit_msgs::msg::RobotTrajectory traj1;
   traj1.joint_trajectory.joint_names.push_back("rj1");
   traj1.joint_trajectory.points.resize(1);
   traj1.joint_trajectory.points[0].positions.push_back(0.0);
   if (!tem.push(traj1))
     ROS_ERROR("Fail!");
 
-  moveit_msgs::RobotTrajectory traj2 = traj1;
+  moveit_msgs::msg::RobotTrajectory traj2 = traj1;
   traj2.joint_trajectory.joint_names.push_back("lj2");
   traj2.joint_trajectory.points[0].positions.push_back(1.0);
   traj2.multi_dof_joint_trajectory.joint_names.push_back("basej");

@@ -116,13 +116,13 @@ void move_group::MoveGroupPickPlaceAction::executePickupCallback_PlanOnly(const 
         action_res.trajectory_descriptions[i] = result->trajectories_[i].description_;
       if (result->id_ < goal->possible_grasps.size())
         action_res.grasp = goal->possible_grasps[result->id_];
-      action_res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+      action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       action_res.planning_time = plan->getLastPlanTime();
     }
   }
   else
   {
-    action_res.error_code.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+    action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 }
 
@@ -156,13 +156,13 @@ void move_group::MoveGroupPickPlaceAction::executePlaceCallback_PlanOnly(const m
         action_res.trajectory_descriptions[i] = result->trajectories_[i].description_;
       if (result->id_ < goal->place_locations.size())
         action_res.place_location = goal->place_locations[result->id_];
-      action_res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+      action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       action_res.planning_time = plan->getLastPlanTime();
     }
   }
   else
   {
-    action_res.error_code.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+    action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 }
 
@@ -197,16 +197,16 @@ bool move_group::MoveGroupPickPlaceAction::planUsingPickPlace_Pickup(const movei
       plan.plan_components_ = result->trajectories_;
       if (result->id_ < goal.possible_grasps.size())
         action_res->grasp = goal.possible_grasps[result->id_];
-      plan.error_code_.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+      plan.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       action_res->planning_time = pick_plan->getLastPlanTime();
     }
   }
   else
   {
-    plan.error_code_.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+    plan.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 
-  return plan.error_code_.val == moveit_msgs::MoveItErrorCodes::SUCCESS;
+  return plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
 }
 
 bool move_group::MoveGroupPickPlaceAction::planUsingPickPlace_Place(const moveit_msgs::PlaceGoal& goal,
@@ -240,16 +240,16 @@ bool move_group::MoveGroupPickPlaceAction::planUsingPickPlace_Place(const moveit
       plan.plan_components_ = result->trajectories_;
       if (result->id_ < goal.place_locations.size())
         action_res->place_location = goal.place_locations[result->id_];
-      plan.error_code_.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+      plan.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       action_res->planning_time = place_plan->getLastPlanTime();
     }
   }
   else
   {
-    plan.error_code_.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+    plan.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 
-  return plan.error_code_.val == moveit_msgs::MoveItErrorCodes::SUCCESS;
+  return plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
 }
 
 void move_group::MoveGroupPickPlaceAction::executePickupCallback_PlanAndExecute(
@@ -347,11 +347,11 @@ void move_group::MoveGroupPickPlaceAction::executePickupCallback(const moveit_ms
   bool planned_trajectory_empty = action_res.trajectory_stages.empty();
   std::string response =
       getActionResultString(action_res.error_code, planned_trajectory_empty, goal->planning_options.plan_only);
-  if (action_res.error_code.val == moveit_msgs::MoveItErrorCodes::SUCCESS)
+  if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
     pickup_action_server_->setSucceeded(action_res, response);
   else
   {
-    if (action_res.error_code.val == moveit_msgs::MoveItErrorCodes::PREEMPTED)
+    if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
       pickup_action_server_->setPreempted(action_res, response);
     else
       pickup_action_server_->setAborted(action_res, response);
@@ -384,11 +384,11 @@ void move_group::MoveGroupPickPlaceAction::executePlaceCallback(const moveit_msg
   bool planned_trajectory_empty = action_res.trajectory_stages.empty();
   std::string response =
       getActionResultString(action_res.error_code, planned_trajectory_empty, goal->planning_options.plan_only);
-  if (action_res.error_code.val == moveit_msgs::MoveItErrorCodes::SUCCESS)
+  if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
     place_action_server_->setSucceeded(action_res, response);
   else
   {
-    if (action_res.error_code.val == moveit_msgs::MoveItErrorCodes::PREEMPTED)
+    if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
       place_action_server_->setPreempted(action_res, response);
     else
       place_action_server_->setAborted(action_res, response);
@@ -428,7 +428,7 @@ void move_group::MoveGroupPickPlaceAction::fillGrasps(moveit_msgs::PickupGoal& g
 
   // add a number of default grasp points
   // \todo add more!
-  moveit_msgs::Grasp g;
+  moveit_msgs::msg::Grasp g;
   g.grasp_pose.header.frame_id = goal.target_name;
   g.grasp_pose.pose.position.x = -0.2;
   g.grasp_pose.pose.position.y = 0.0;

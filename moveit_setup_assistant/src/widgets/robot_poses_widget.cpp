@@ -90,7 +90,7 @@ RobotPosesWidget::RobotPosesWidget(QWidget* parent, moveit_setup_assistant::Move
   ros::NodeHandle nh;
 
   // Create scene publisher for later use
-  pub_robot_state_ = nh.advertise<moveit_msgs::DisplayRobotState>(MOVEIT_ROBOT_STATE, 1);
+  pub_robot_state_ = nh.advertise<moveit_msgs::msg::DisplayRobotState>(MOVEIT_ROBOT_STATE, 1);
 
   // Set the planning scene
   config_data_->getPlanningScene()->setName("MoveIt! Planning Scene");
@@ -808,7 +808,7 @@ void RobotPosesWidget::publishJoints()
   config_data_->getPlanningScene()->getCurrentStateNonConst().setVariablePositions(joint_state_map_);
 
   // Create a planning scene message
-  moveit_msgs::DisplayRobotState msg;
+  moveit_msgs::msg::DisplayRobotState msg;
   robot_state::robotStateToRobotStateMsg(config_data_->getPlanningScene()->getCurrentState(), msg.state);
 
   // Publish!
@@ -870,7 +870,7 @@ SliderWidget::SliderWidget(QWidget* parent, const robot_model::JointModel* joint
   row2->addWidget(joint_value_);
 
   // Joint Limits ----------------------------------------------------
-  const std::vector<moveit_msgs::JointLimits>& limits = joint_model_->getVariableBoundsMsg();
+  const std::vector<moveit_msgs::msg::JointLimits>& limits = joint_model_->getVariableBoundsMsg();
   if (limits.empty())
   {
     QMessageBox::critical(this, "Error Loading", "An internal error has occured while loading the joints");
@@ -878,7 +878,7 @@ SliderWidget::SliderWidget(QWidget* parent, const robot_model::JointModel* joint
   }
 
   // Only use the first limit, because there is only 1 variable (as checked earlier)
-  moveit_msgs::JointLimits joint_limit = limits[0];
+  moveit_msgs::msg::JointLimits joint_limit = limits[0];
   max_position_ = joint_limit.max_position;
   min_position_ = joint_limit.min_position;
 

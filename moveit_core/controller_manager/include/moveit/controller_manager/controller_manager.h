@@ -125,7 +125,7 @@ public:
    * The controller is expected to execute the trajectory, but this function call should not block.
    * Blocking is achievable by calling waitForExecution().
    * Return false when the controller cannot accept the trajectory. */
-  virtual bool sendTrajectory(const moveit_msgs::RobotTrajectory& trajectory) = 0;
+  virtual bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory) = 0;
 
   /** \brief Cancel the execution of any motion using this controller.
    *

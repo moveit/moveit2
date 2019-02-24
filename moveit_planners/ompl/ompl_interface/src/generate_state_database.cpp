@@ -106,7 +106,7 @@ struct GenerateStateDatabaseParameters
   bool use_current_scene;
 
   // constraints the approximation should satisfy
-  moveit_msgs::Constraints constraints;
+  moveit_msgs::msg::Constraints constraints;
 
   // internal parameters of approximation generator
   ompl_interface::ConstraintApproximationConstructionOptions construction_opts;

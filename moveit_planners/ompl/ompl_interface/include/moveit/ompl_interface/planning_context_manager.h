@@ -146,7 +146,7 @@ public:
 
   ModelBasedPlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                   const planning_interface::MotionPlanRequest& req,
-                                                  moveit_msgs::MoveItErrorCodes& error_code) const;
+                                                  moveit_msgs::msg::MoveItErrorCodes& error_code) const;
 
   void registerPlannerAllocator(const std::string& planner_id, const ConfiguredPlannerAllocator& pa)
   {
@@ -181,12 +181,12 @@ protected:
   /** \brief This is the function that constructs new planning contexts if no previous ones exist that are suitable */
   ModelBasedPlanningContextPtr getPlanningContext(const planning_interface::PlannerConfigurationSettings& config,
                                                   const StateSpaceFactoryTypeSelector& factory_selector,
-                                                  const moveit_msgs::MotionPlanRequest& req) const;
+                                                  const moveit_msgs::msg::MotionPlanRequest& req) const;
 
   const ModelBasedStateSpaceFactoryPtr& getStateSpaceFactory1(const std::string& group_name,
                                                               const std::string& factory_type) const;
   const ModelBasedStateSpaceFactoryPtr& getStateSpaceFactory2(const std::string& group_name,
-                                                              const moveit_msgs::MotionPlanRequest& req) const;
+                                                              const moveit_msgs::msg::MotionPlanRequest& req) const;
 
   /** \brief The kinematic model for which motion plans are computed */
   robot_model::RobotModelConstPtr robot_model_;
