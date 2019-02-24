@@ -37,7 +37,6 @@
 
 #include <moveit/robot_model/floating_joint_model.h>
 #include <boost/math/constants/constants.hpp>
-// #include <ros/console.h>
 #include <limits>
 #include <cmath>
 
