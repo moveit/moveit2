@@ -57,11 +57,11 @@ class PlanningPipeline
 {
 public:
   /** \brief When motion plans are computed and they are supposed to be automatically displayed, they are sent to this
-   * topic (moveit_msgs::DisplauTrajectory) */
+   * topic (moveit_msgs::msg::DisplauTrajectory) */
   static const std::string DISPLAY_PATH_TOPIC;
 
   /** \brief When motion planning requests are received and they are supposed to be automatically published, they are
-   * sent to this topic (moveit_msgs::MotionPlanRequest) */
+   * sent to this topic (moveit_msgs::msg::MotionPlanRequest) */
   static const std::string MOTION_PLAN_REQUEST_TOPIC;
 
   /** \brief When contacts are found in the solution path reported by a planner, they can be published as markers on
@@ -171,7 +171,7 @@ private:
 
   ros::NodeHandle nh_;
 
-  /// Flag indicating whether motion plans should be published as a moveit_msgs::DisplayTrajectory
+  /// Flag indicating whether motion plans should be published as a moveit_msgs::msg::DisplayTrajectory
   bool display_computed_motion_plans_;
   ros::Publisher display_path_publisher_;
 

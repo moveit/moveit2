@@ -272,7 +272,7 @@ bool KDLKinematicsPlugin::timedOut(const ros::WallTime& start_time, double durat
 }
 
 bool KDLKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
-                                        std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+                                        std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                         const kinematics::KinematicsQueryOptions& options) const
 {
   std::vector<double> consistency_limits;
@@ -284,7 +284,7 @@ bool KDLKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, cons
 
 bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   std::vector<double> consistency_limits;
@@ -295,7 +295,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 
 bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
-                                           std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+                                           std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   return searchPositionIK(ik_pose, ik_seed_state, timeout, solution, IKCallbackFn(), error_code, consistency_limits,
@@ -305,7 +305,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   std::vector<double> consistency_limits;
@@ -316,7 +316,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
                                            std::vector<double>& solution, const IKCallbackFn& solution_callback,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   return searchPositionIK(ik_pose, ik_seed_state, timeout, solution, solution_callback, error_code, consistency_limits,
@@ -326,7 +326,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const std::vector<double>& consistency_limits,
                                            const kinematics::KinematicsQueryOptions& options) const
 {

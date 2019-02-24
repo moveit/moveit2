@@ -43,9 +43,9 @@
 
 namespace moveit_warehouse
 {
-typedef warehouse_ros::MessageWithMetadata<moveit_msgs::TrajectoryConstraints>::ConstPtr
+typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::TrajectoryConstraints>::ConstPtr
     TrajectoryConstraintsWithMetadata;
-typedef warehouse_ros::MessageCollection<moveit_msgs::TrajectoryConstraints>::Ptr TrajectoryConstraintsCollection;
+typedef warehouse_ros::MessageCollection<moveit_msgs::msg::TrajectoryConstraints>::Ptr TrajectoryConstraintsCollection;
 
 MOVEIT_CLASS_FORWARD(TrajectoryConstraintsStorage);
 
@@ -60,7 +60,7 @@ public:
 
   TrajectoryConstraintsStorage(warehouse_ros::DatabaseConnection::Ptr conn);
 
-  void addTrajectoryConstraints(const moveit_msgs::TrajectoryConstraints& msg, const std::string& name,
+  void addTrajectoryConstraints(const moveit_msgs::msg::TrajectoryConstraints& msg, const std::string& name,
                                 const std::string& robot = "", const std::string& group = "");
   bool hasTrajectoryConstraints(const std::string& name, const std::string& robot = "",
                                 const std::string& group = "") const;

@@ -66,7 +66,7 @@ public:
     return pipeline_.getFailedManipulationPlans();
   }
 
-  const moveit_msgs::MoveItErrorCodes& getErrorCode() const
+  const moveit_msgs::msg::MoveItErrorCodes& getErrorCode() const
   {
     return error_code_;
   }
@@ -90,7 +90,7 @@ protected:
   bool pushed_all_poses_;
   boost::condition_variable done_condition_;
   boost::mutex done_mutex_;
-  moveit_msgs::MoveItErrorCodes error_code_;
+  moveit_msgs::msg::MoveItErrorCodes error_code_;
 };
 
 MOVEIT_CLASS_FORWARD(PickPlan);

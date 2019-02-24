@@ -94,8 +94,8 @@ public:
    * @return False if group_name is invalid or ik fails
    */
   bool getIK(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const moveit_msgs::GetConstraintAwarePositionIK::Request& request,
-             moveit_msgs::GetConstraintAwarePositionIK::Response& response) const;
+             const moveit_msgs::msg::GetConstraintAwarePositionIK::Request& request,
+             moveit_msgs::msg::GetConstraintAwarePositionIK::Response& response) const;
 
   const std::string& getGroupName() const
   {
@@ -114,7 +114,7 @@ private:
                                              const std::string& target_frame) const;
 
   bool convertServiceRequest(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                             const moveit_msgs::GetConstraintAwarePositionIK::Request& request,
+                             const moveit_msgs::msg::GetConstraintAwarePositionIK::Request& request,
                              kinematics_constraint_aware::KinematicsRequest& kinematics_request,
                              kinematics_constraint_aware::KinematicsResponse& kinematics_response) const;
 

@@ -81,7 +81,7 @@ TEST(PlanningScene, LoadRestore)
   loadRobotModel(urdf_model);
   srdf::ModelSharedPtr srdf_model(new srdf::Model());
   planning_scene::PlanningScene ps(urdf_model, srdf_model);
-  moveit_msgs::PlanningScene ps_msg;
+  moveit_msgs::msg::PlanningScene ps_msg;
   ps.getPlanningSceneMsg(ps_msg);
   EXPECT_EQ(ps.getName(), ps_msg.name);
   EXPECT_EQ(ps.getRobotModel()->getName(), ps_msg.robot_model_name);
@@ -102,7 +102,7 @@ TEST(PlanningScene, LoadRestoreDiff)
   Eigen::Isometry3d id = Eigen::Isometry3d::Identity();
   world.addToObject("sphere", shapes::ShapeConstPtr(new shapes::Sphere(0.4)), id);
 
-  moveit_msgs::PlanningScene ps_msg;
+  moveit_msgs::msg::PlanningScene ps_msg;
   ps_msg.robot_state.is_diff = true;
   EXPECT_TRUE(planning_scene::PlanningScene::isEmpty(ps_msg));
   ps->getPlanningSceneMsg(ps_msg);
@@ -118,7 +118,7 @@ TEST(PlanningScene, LoadRestoreDiff)
   next->getPlanningSceneDiffMsg(ps_msg);
   EXPECT_EQ(ps_msg.world.collision_objects.size(), 1u);
   next->decoupleParent();
-  moveit_msgs::PlanningScene ps_msg2;
+  moveit_msgs::msg::PlanningScene ps_msg2;
   next->getPlanningSceneDiffMsg(ps_msg2);
   EXPECT_EQ(ps_msg2.world.collision_objects.size(), 0u);
   next->getPlanningSceneMsg(ps_msg);
@@ -141,9 +141,9 @@ TEST(PlanningScene, MakeAttachedDiff)
 
   planning_scene::PlanningScenePtr attached_object_diff_scene = ps->diff();
 
-  moveit_msgs::AttachedCollisionObject att_obj;
+  moveit_msgs::msg::AttachedCollisionObject att_obj;
   att_obj.link_name = "r_wrist_roll_link";
-  att_obj.object.operation = moveit_msgs::CollisionObject::ADD;
+  att_obj.object.operation = moveit_msgs::msg::CollisionObject::ADD;
   att_obj.object.id = "sphere";
 
   collision_detection::CollisionRequest req;

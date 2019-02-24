@@ -247,8 +247,8 @@ bool KinematicsConstraintAware::validityCallbackFn(const planning_scene::Plannin
 }
 
 bool KinematicsConstraintAware::getIK(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                      const moveit_msgs::GetConstraintAwarePositionIK::Request& request,
-                                      moveit_msgs::GetConstraintAwarePositionIK::Response& response) const
+                                      const moveit_msgs::msg::GetConstraintAwarePositionIK::Request& request,
+                                      moveit_msgs::msg::GetConstraintAwarePositionIK::Response& response) const
 {
   if (!joint_model_group_)
   {
@@ -279,7 +279,7 @@ bool KinematicsConstraintAware::getIK(const planning_scene::PlanningSceneConstPt
 
 bool KinematicsConstraintAware::convertServiceRequest(
     const planning_scene::PlanningSceneConstPtr& planning_scene,
-    const moveit_msgs::GetConstraintAwarePositionIK::Request& request,
+    const moveit_msgs::msg::GetConstraintAwarePositionIK::Request& request,
     kinematics_constraint_aware::KinematicsRequest& kinematics_request,
     kinematics_constraint_aware::KinematicsResponse& kinematics_response) const
 {

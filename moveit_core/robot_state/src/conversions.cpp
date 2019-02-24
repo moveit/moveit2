@@ -306,7 +306,7 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
             poses[i] = t * poses[i];
         }
 
-        if (shapes.empty()) {          
+        if (shapes.empty()) {
           RCLCPP_ERROR(logger_robot_state, "There is no geometry to attach to link '%s' as part of attached body '%s'",
           aco.link_name.c_str(), aco.object.id.c_str());
         }

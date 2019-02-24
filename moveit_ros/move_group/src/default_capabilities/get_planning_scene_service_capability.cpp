@@ -51,7 +51,7 @@ void move_group::MoveGroupGetPlanningSceneService::initialize()
 bool move_group::MoveGroupGetPlanningSceneService::getPlanningSceneService(moveit_msgs::srv::GetPlanningScene::Request& req,
                                                                            moveit_msgs::srv::GetPlanningScene::Response& res)
 {
-  if (req.components.components & moveit_msgs::PlanningSceneComponents::TRANSFORMS)
+  if (req.components.components & moveit_msgs::msg::PlanningSceneComponents::TRANSFORMS)
     context_->planning_scene_monitor_->updateFrameTransforms();
   planning_scene_monitor::LockedPlanningSceneRO ps(context_->planning_scene_monitor_);
   ps->getPlanningSceneMsg(res.scene, req.components);

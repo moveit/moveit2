@@ -53,7 +53,7 @@ moveit_warehouse::ConstraintsStorage::ConstraintsStorage(warehouse_ros::Database
 
 void moveit_warehouse::ConstraintsStorage::createCollections()
 {
-  constraints_collection_ = conn_->openCollectionPtr<moveit_msgs::Constraints>(DATABASE_NAME, "constraints");
+  constraints_collection_ = conn_->openCollectionPtr<moveit_msgs::msg::Constraints>(DATABASE_NAME, "constraints");
 }
 
 void moveit_warehouse::ConstraintsStorage::reset()
@@ -63,7 +63,7 @@ void moveit_warehouse::ConstraintsStorage::reset()
   createCollections();
 }
 
-void moveit_warehouse::ConstraintsStorage::addConstraints(const moveit_msgs::Constraints& msg, const std::string& robot,
+void moveit_warehouse::ConstraintsStorage::addConstraints(const moveit_msgs::msg::Constraints& msg, const std::string& robot,
                                                           const std::string& group)
 {
   bool replace = false;
@@ -132,7 +132,7 @@ bool moveit_warehouse::ConstraintsStorage::getConstraints(ConstraintsWithMetadat
   {
     msg_m = constr.back();
     // in case the constraints were renamed, the name in the message may be out of date
-    const_cast<moveit_msgs::Constraints*>(static_cast<const moveit_msgs::Constraints*>(msg_m.get()))->name = name;
+    const_cast<moveit_msgs::msg::Constraints*>(static_cast<const moveit_msgs::msg::Constraints*>(msg_m.get()))->name = name;
     return true;
   }
 }

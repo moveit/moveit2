@@ -233,7 +233,7 @@ void TrajectoryExecutionManager::receiveEvent(const std_msgs::StringConstPtr& ev
   processEvent(event->data);
 }
 
-bool TrajectoryExecutionManager::push(const moveit_msgs::RobotTrajectory& trajectory, const std::string& controller)
+bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& trajectory, const std::string& controller)
 {
   if (controller.empty())
     return push(trajectory, std::vector<std::string>());
@@ -252,12 +252,12 @@ bool TrajectoryExecutionManager::push(const trajectory_msgs::JointTrajectory& tr
 bool TrajectoryExecutionManager::push(const trajectory_msgs::JointTrajectory& trajectory,
                                       const std::vector<std::string>& controllers)
 {
-  moveit_msgs::RobotTrajectory traj;
+  moveit_msgs::msg::RobotTrajectory traj;
   traj.joint_trajectory = trajectory;
   return push(traj, controllers);
 }
 
-bool TrajectoryExecutionManager::push(const moveit_msgs::RobotTrajectory& trajectory,
+bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& trajectory,
                                       const std::vector<std::string>& controllers)
 {
   if (!execution_complete_)
@@ -292,7 +292,7 @@ bool TrajectoryExecutionManager::push(const moveit_msgs::RobotTrajectory& trajec
   return false;
 }
 
-bool TrajectoryExecutionManager::pushAndExecute(const moveit_msgs::RobotTrajectory& trajectory,
+bool TrajectoryExecutionManager::pushAndExecute(const moveit_msgs::msg::RobotTrajectory& trajectory,
                                                 const std::string& controller)
 {
   if (controller.empty())
@@ -321,7 +321,7 @@ bool TrajectoryExecutionManager::pushAndExecute(const sensor_msgs::JointState& s
 bool TrajectoryExecutionManager::pushAndExecute(const trajectory_msgs::JointTrajectory& trajectory,
                                                 const std::vector<std::string>& controllers)
 {
-  moveit_msgs::RobotTrajectory traj;
+  moveit_msgs::msg::RobotTrajectory traj;
   traj.joint_trajectory = trajectory;
   return pushAndExecute(traj, controllers);
 }
@@ -329,7 +329,7 @@ bool TrajectoryExecutionManager::pushAndExecute(const trajectory_msgs::JointTraj
 bool TrajectoryExecutionManager::pushAndExecute(const sensor_msgs::JointState& state,
                                                 const std::vector<std::string>& controllers)
 {
-  moveit_msgs::RobotTrajectory traj;
+  moveit_msgs::msg::RobotTrajectory traj;
   traj.joint_trajectory.header = state.header;
   traj.joint_trajectory.joint_names = state.name;
   traj.joint_trajectory.points.resize(1);
@@ -340,7 +340,7 @@ bool TrajectoryExecutionManager::pushAndExecute(const sensor_msgs::JointState& s
   return pushAndExecute(traj, controllers);
 }
 
-bool TrajectoryExecutionManager::pushAndExecute(const moveit_msgs::RobotTrajectory& trajectory,
+bool TrajectoryExecutionManager::pushAndExecute(const moveit_msgs::msg::RobotTrajectory& trajectory,
                                                 const std::vector<std::string>& controllers)
 {
   if (!execution_complete_)
@@ -795,9 +795,9 @@ bool TrajectoryExecutionManager::selectControllers(const std::set<std::string>& 
   return false;
 }
 
-bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::RobotTrajectory& trajectory,
+bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory,
                                                       const std::vector<std::string>& controllers,
-                                                      std::vector<moveit_msgs::RobotTrajectory>& parts)
+                                                      std::vector<moveit_msgs::msg::RobotTrajectory>& parts)
 {
   parts.clear();
   parts.resize(controllers.size());
@@ -1027,7 +1027,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
 }
 
 bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
-                                           const moveit_msgs::RobotTrajectory& trajectory,
+                                           const moveit_msgs::msg::RobotTrajectory& trajectory,
                                            const std::vector<std::string>& controllers)
 {
   if (trajectory.multi_dof_joint_trajectory.points.empty() && trajectory.joint_trajectory.points.empty())

@@ -75,29 +75,29 @@ public:
 
   bool getPositionIK(
       const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, std::vector<double>& solution,
-      moveit_msgs::MoveItErrorCodes& error_code,
+      moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   bool searchPositionIK(
       const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-      std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
-      const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
-
-  bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-      const std::vector<double>& consistency_limits, std::vector<double>& solution,
-      moveit_msgs::MoveItErrorCodes& error_code,
-      const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
-
-  bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-      std::vector<double>& solution, const IKCallbackFn& solution_callback, moveit_msgs::MoveItErrorCodes& error_code,
+      std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   bool searchPositionIK(
       const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
       const std::vector<double>& consistency_limits, std::vector<double>& solution,
-      const IKCallbackFn& solution_callback, moveit_msgs::MoveItErrorCodes& error_code,
+      moveit_msgs::msg::MoveItErrorCodes& error_code,
+      const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
+
+  bool searchPositionIK(
+      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      std::vector<double>& solution, const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
+      const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
+
+  bool searchPositionIK(
+      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      const std::vector<double>& consistency_limits, std::vector<double>& solution,
+      const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   bool getPositionFK(const std::vector<std::string>& link_names, const std::vector<double>& joint_angles,
@@ -126,13 +126,13 @@ protected:
   virtual bool
   searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
                    std::vector<double>& solution, const IKCallbackFn& solution_callback,
-                   moveit_msgs::MoveItErrorCodes& error_code, const std::vector<double>& consistency_limits,
+                   moveit_msgs::msg::MoveItErrorCodes& error_code, const std::vector<double>& consistency_limits,
                    const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const;
 
   virtual bool
   searchPositionIK(const std::vector<geometry_msgs::Pose>& ik_poses, const std::vector<double>& ik_seed_state,
                    double timeout, const std::vector<double>& consistency_limits, std::vector<double>& solution,
-                   const IKCallbackFn& solution_callback, moveit_msgs::MoveItErrorCodes& error_code,
+                   const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
                    const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const;
 
   bool setRedundantJoints(const std::vector<unsigned int>& redundant_joint_indices) override;
@@ -146,7 +146,7 @@ private:
 
   bool active_; /** Internal variable that indicates whether solvers are configured and ready */
 
-  moveit_msgs::KinematicSolverInfo ik_group_info_; /** Stores information for the inverse kinematics solver */
+  moveit_msgs::msg::KinematicSolverInfo ik_group_info_; /** Stores information for the inverse kinematics solver */
 
   unsigned int dimension_; /** Dimension of the group */
 

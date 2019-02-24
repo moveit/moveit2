@@ -74,7 +74,7 @@ LastPointController::~LastPointController()
 {
 }
 
-bool LastPointController::sendTrajectory(const moveit_msgs::RobotTrajectory& t)
+bool LastPointController::sendTrajectory(const moveit_msgs::msg::RobotTrajectory& t)
 {
   ROS_INFO("Fake execution of trajectory");
   if (t.joint_trajectory.points.empty())
@@ -121,7 +121,7 @@ void ThreadedController::cancelTrajectory()
   thread_.join();
 }
 
-bool ThreadedController::sendTrajectory(const moveit_msgs::RobotTrajectory& t)
+bool ThreadedController::sendTrajectory(const moveit_msgs::msg::RobotTrajectory& t)
 {
   cancelTrajectory();  // cancel any previous fake motion
   cancel_ = false;
@@ -160,7 +160,7 @@ ViaPointController::~ViaPointController()
 {
 }
 
-void ViaPointController::execTrajectory(const moveit_msgs::RobotTrajectory& t)
+void ViaPointController::execTrajectory(const moveit_msgs::msg::RobotTrajectory& t)
 {
   ROS_INFO("Fake execution of trajectory");
   sensor_msgs::JointState js;
@@ -221,7 +221,7 @@ void interpolate(sensor_msgs::JointState& js, const trajectory_msgs::JointTrajec
 }
 }
 
-void InterpolatingController::execTrajectory(const moveit_msgs::RobotTrajectory& t)
+void InterpolatingController::execTrajectory(const moveit_msgs::msg::RobotTrajectory& t)
 {
   ROS_INFO("Fake execution of trajectory");
   if (t.joint_trajectory.points.empty())

@@ -94,13 +94,13 @@ int main(int argc, char** argv)
   rs.reset();
 
   // add default planning scenes
-  moveit_msgs::PlanningScene psmsg;
+  moveit_msgs::msg::PlanningScene psmsg;
   psm.getPlanningScene()->getPlanningSceneMsg(psmsg);
   psmsg.name = "default";
   pss.addPlanningScene(psmsg);
   ROS_INFO("Added default scene: '%s'", psmsg.name.c_str());
 
-  moveit_msgs::RobotState rsmsg;
+  moveit_msgs::msg::RobotState rsmsg;
   robot_state::robotStateToRobotStateMsg(psm.getPlanningScene()->getCurrentState(), rsmsg);
   rs.addRobotState(rsmsg, "default");
   ROS_INFO("Added default state");
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
     if (lnames.empty())
       continue;
 
-    moveit_msgs::OrientationConstraint ocm;
+    moveit_msgs::msg::OrientationConstraint ocm;
     ocm.link_name = lnames.back();
     ocm.header.frame_id = psm.getRobotModel()->getModelFrame();
     ocm.orientation.x = 0.0;
@@ -126,7 +126,7 @@ int main(int argc, char** argv)
     ocm.absolute_y_axis_tolerance = 0.1;
     ocm.absolute_z_axis_tolerance = boost::math::constants::pi<double>();
     ocm.weight = 1.0;
-    moveit_msgs::Constraints cmsg;
+    moveit_msgs::msg::Constraints cmsg;
     cmsg.orientation_constraints.resize(1, ocm);
     cmsg.name = ocm.link_name + ":upright";
     cs.addConstraints(cmsg, psm.getRobotModel()->getName(), jmg->getName());

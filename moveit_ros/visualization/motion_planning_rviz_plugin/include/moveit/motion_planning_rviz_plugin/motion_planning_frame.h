@@ -113,7 +113,7 @@ protected:
   static const int ITEM_TYPE_SCENE = 1;
   static const int ITEM_TYPE_QUERY = 2;
 
-  void constructPlanningRequest(moveit_msgs::MotionPlanRequest& mreq);
+  void constructPlanningRequest(moveit_msgs::msg::MotionPlanRequest& mreq);
 
   void updateSceneMarkers(float wall_dt, float ros_dt);
 
@@ -134,8 +134,8 @@ protected:
 
   std::shared_ptr<rviz::InteractiveMarker> scene_marker_;
 
-  typedef std::map<std::string, moveit_msgs::RobotState> RobotStateMap;
-  typedef std::pair<std::string, moveit_msgs::RobotState> RobotStatePair;
+  typedef std::map<std::string, moveit_msgs::msg::RobotState> RobotStateMap;
+  typedef std::pair<std::string, moveit_msgs::msg::RobotState> RobotStatePair;
   RobotStateMap robot_states_;
 
 Q_SIGNALS:
@@ -217,7 +217,7 @@ private:
   void computeDatabaseConnectButtonClicked();
   void computeDatabaseConnectButtonClickedHelper(int mode);
   void computeResetDbButtonClicked(const std::string& db);
-  void populatePlannersList(const moveit_msgs::PlannerInterfaceDescription& desc);
+  void populatePlannersList(const moveit_msgs::msg::PlannerInterfaceDescription& desc);
 
   // Planning tab
   void computePlanButtonClicked();
@@ -305,8 +305,8 @@ private:
   void remoteStopCallback(const std_msgs::EmptyConstPtr& msg);
   void remoteUpdateStartStateCallback(const std_msgs::EmptyConstPtr& msg);
   void remoteUpdateGoalStateCallback(const std_msgs::EmptyConstPtr& msg);
-  void remoteUpdateCustomStartStateCallback(const moveit_msgs::RobotStateConstPtr& msg);
-  void remoteUpdateCustomGoalStateCallback(const moveit_msgs::RobotStateConstPtr& msg);
+  void remoteUpdateCustomStartStateCallback(const moveit_msgs::msg::RobotStateConstPtr& msg);
+  void remoteUpdateCustomGoalStateCallback(const moveit_msgs::msg::RobotStateConstPtr& msg);
 
   /* Selects or unselects a item in a list by the item name */
   void setItemSelectionInList(const std::string& item_name, bool selection, QListWidget* list);

@@ -90,7 +90,7 @@ RobotPosesWidget::RobotPosesWidget(QWidget* parent, moveit_setup_assistant::Move
   ros::NodeHandle nh;
 
   // Create scene publisher for later use
-  pub_robot_state_ = nh.advertise<moveit_msgs::DisplayRobotState>(MOVEIT_ROBOT_STATE, 1);
+  pub_robot_state_ = nh.advertise<moveit_msgs::msg::DisplayRobotState>(MOVEIT_ROBOT_STATE, 1);
 
   // Set the planning scene
   config_data_->getPlanningScene()->setName("MoveIt! Planning Scene");
@@ -808,7 +808,7 @@ void RobotPosesWidget::publishJoints()
   config_data_->getPlanningScene()->getCurrentStateNonConst().setVariablePositions(joint_state_map_);
 
   // Create a planning scene message
-  moveit_msgs::DisplayRobotState msg;
+  moveit_msgs::msg::DisplayRobotState msg;
   robot_state::robotStateToRobotStateMsg(config_data_->getPlanningScene()->getCurrentState(), msg.state);
 
   // Publish!
