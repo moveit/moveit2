@@ -9,10 +9,16 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
 - [Get Involved](http://moveit.ros.org/documentation/contributing/)
 
 ## Milestones
-- [ ] Install instructions for Ubuntu 18.04 in README.md
+- [ ] Install instructions
+  - [ ] Ubuntu 18.04
+  - [ ] OS X 10.14
 - [ ] Upgrade continuous integration for ROS 2.0
 - [ ] Convert moveit packages to ROS 2.0
-  - [ ] Convert moveit_core (**in progress @vmayoral**)
+  - [x] Update/setup infrastructure for development
+    - [x] Delete metapackages
+    - [x] Upgrade continuous integration for ROS 2.0
+    - [x] Refactor/cleanup folder hierarchy
+  - [ ] Convert moveit_cor
     - [x] Convert all headers and link it to HRIM (contributed by @ibaiape)
     - [ ] Dependencies on other packages
       - [x] tf2_kdl https://github.com/ros2/geometry2/pull/90
@@ -72,17 +78,17 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
   - [ ] Convert moveit_task_constructor
   - [ ] Convert moveit_resources
   - [ ] Convert moveit_commander
-  - [ ] Convert moveit_fake_controller_manager  
+  - [ ] Convert moveit_fake_controller_manager
 - [ ] New features in ROS 2.0
   - [ ] Migrate plugin architecture to ROS2 nodelets
 - [ ] Documentation
-  - [ ] Update tutorials for MoveIt2
+  - [ ] Tutorials for MoveIt2
   - [ ] Create tutorial on using ros1/ros2 bridge to support ros1 hardware drivers
   - [ ] Move install instructions to moveit.ros.org
 - [ ] Major refactoring and divergence from moveit2
   - [ ] Run ROS2 C++ and python linters
   - [ ] Delete excesses packages that are left over from rosbuild stacks: moveit_runtime, moveit_plugins, moveit_ros
-  - [ ] Rename non-package folders: 
+  - [ ] Rename non-package folders:
     - [ ] rename moveit_planners to planners
     - [ ] rename moveit_plugins to controller_interfaces
   - [ ] Restructure folder layout of moveit repo:
