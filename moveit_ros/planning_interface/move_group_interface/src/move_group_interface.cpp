@@ -161,16 +161,16 @@ public:
     waitForAction(execute_action_client_, move_group::EXECUTE_ACTION_NAME, timeout_for_servers, allotted_time);
 
     query_service_ =
-        node_handle_.serviceClient<moveit_msgs::QueryPlannerInterfaces>(move_group::QUERY_PLANNERS_SERVICE_NAME);
+        node_handle_.serviceClient<moveit_msgs::srv::QueryPlannerInterfaces>(move_group::QUERY_PLANNERS_SERVICE_NAME);
     get_params_service_ =
-        node_handle_.serviceClient<moveit_msgs::GetPlannerParams>(move_group::GET_PLANNER_PARAMS_SERVICE_NAME);
+        node_handle_.serviceClient<moveit_msgs::srv::GetPlannerParams>(move_group::GET_PLANNER_PARAMS_SERVICE_NAME);
     set_params_service_ =
-        node_handle_.serviceClient<moveit_msgs::SetPlannerParams>(move_group::SET_PLANNER_PARAMS_SERVICE_NAME);
+        node_handle_.serviceClient<moveit_msgs::srv::SetPlannerParams>(move_group::SET_PLANNER_PARAMS_SERVICE_NAME);
 
     cartesian_path_service_ =
-        node_handle_.serviceClient<moveit_msgs::GetCartesianPath>(move_group::CARTESIAN_PATH_SERVICE_NAME);
+        node_handle_.serviceClient<moveit_msgs::srv::GetCartesianPath>(move_group::CARTESIAN_PATH_SERVICE_NAME);
 
-    plan_grasps_service_ = node_handle_.serviceClient<moveit_msgs::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
+    plan_grasps_service_ = node_handle_.serviceClient<moveit_msgs::srv::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
 
     ROS_INFO_STREAM_NAMED("move_group_interface", "Ready to take commands for planning group " << opt.group_name_
                                                                                                << ".");
@@ -265,8 +265,8 @@ public:
 
   bool getInterfaceDescription(moveit_msgs::PlannerInterfaceDescription& desc)
   {
-    moveit_msgs::QueryPlannerInterfaces::Request req;
-    moveit_msgs::QueryPlannerInterfaces::Response res;
+    moveit_msgs::srv::QueryPlannerInterfaces::Request req;
+    moveit_msgs::srv::QueryPlannerInterfaces::Response res;
     if (query_service_.call(req, res))
       if (!res.planner_interfaces.empty())
       {
@@ -278,8 +278,8 @@ public:
 
   std::map<std::string, std::string> getPlannerParams(const std::string& planner_id, const std::string& group = "")
   {
-    moveit_msgs::GetPlannerParams::Request req;
-    moveit_msgs::GetPlannerParams::Response res;
+    moveit_msgs::srv::GetPlannerParams::Request req;
+    moveit_msgs::srv::GetPlannerParams::Response res;
     req.planner_config = planner_id;
     req.group = group;
     std::map<std::string, std::string> result;
@@ -294,8 +294,8 @@ public:
   void setPlannerParams(const std::string& planner_id, const std::string& group,
                         const std::map<std::string, std::string>& params, bool replace = false)
   {
-    moveit_msgs::SetPlannerParams::Request req;
-    moveit_msgs::SetPlannerParams::Response res;
+    moveit_msgs::srv::SetPlannerParams::Request req;
+    moveit_msgs::srv::SetPlannerParams::Response res;
     req.planner_config = planner_id;
     req.group = group;
     req.replace = replace;
@@ -714,8 +714,8 @@ public:
       return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
     }
 
-    moveit_msgs::GraspPlanning::Request request;
-    moveit_msgs::GraspPlanning::Response response;
+    moveit_msgs::srv::GraspPlanning::Request request;
+    moveit_msgs::srv::GraspPlanning::Response response;
 
     request.group_name = opt_.group_name_;
     request.target = object;
@@ -851,8 +851,8 @@ public:
                               moveit_msgs::RobotTrajectory& msg, const moveit_msgs::Constraints& path_constraints,
                               bool avoid_collisions, moveit_msgs::MoveItErrorCodes& error_code)
   {
-    moveit_msgs::GetCartesianPath::Request req;
-    moveit_msgs::GetCartesianPath::Response res;
+    moveit_msgs::srv::GetCartesianPath::Request req;
+    moveit_msgs::srv::GetCartesianPath::Response res;
 
     if (considered_start_state_)
       robot_state::robotStateToRobotStateMsg(*considered_start_state_, req.start_state);

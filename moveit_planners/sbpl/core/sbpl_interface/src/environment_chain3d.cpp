@@ -424,8 +424,8 @@ void EnvironmentChain3D::SetAllPreds(CMDPSTATE* state)
 /////////////////////////////////////////////////////////////////////////////
 
 bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                            const moveit_msgs::GetMotionPlan::Request& mreq,
-                                            moveit_msgs::GetMotionPlan::Response& mres,
+                                            const moveit_msgs::srv::GetMotionPlan::Request& mreq,
+                                            moveit_msgs::srv::GetMotionPlan::Response& mres,
                                             const PlanningParameters& params)
 {
   std::cerr << "really here " << std::endl;

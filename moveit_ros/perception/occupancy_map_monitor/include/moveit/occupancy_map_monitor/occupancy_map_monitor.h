@@ -128,10 +128,10 @@ private:
   void initialize();
 
   /** @brief Save the current octree to a binary file */
-  bool saveMapCallback(moveit_msgs::SaveMap::Request& request, moveit_msgs::SaveMap::Response& response);
+  bool saveMapCallback(moveit_msgs::srv::SaveMap::Request& request, moveit_msgs::srv::SaveMap::Response& response);
 
   /** @brief Load octree from a binary file (gets rid of current octree data) */
-  bool loadMapCallback(moveit_msgs::LoadMap::Request& request, moveit_msgs::LoadMap::Response& response);
+  bool loadMapCallback(moveit_msgs::srv::LoadMap::Request& request, moveit_msgs::srv::LoadMap::Response& response);
 
   bool getShapeTransformCache(std::size_t index, const std::string& target_frame, const ros::Time& target_time,
                               ShapeTransformCache& cache) const;

@@ -54,7 +54,7 @@ public:
     sbpl_meta_interface_.reset(new sbpl_interface::SBPLMetaInterface(model));
   }
 
-  bool canServiceRequest(const moveit_msgs::GetMotionPlan::Request& req,
+  bool canServiceRequest(const moveit_msgs::srv::GetMotionPlan::Request& req,
                          planning_interface::PlannerCapability& capabilities) const
   {
     // TODO: this is a dummy implementation
@@ -63,16 +63,16 @@ public:
   }
 
   bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::GetMotionPlan::Response& res) const
+             const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res) const
   {
     bool solve_ok = sbpl_meta_interface_->solve(planning_scene, req, res);
     return solve_ok;
   }
 
   bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::MotionPlanDetailedResponse& res) const
+             const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::MotionPlanDetailedResponse& res) const
   {
-    moveit_msgs::GetMotionPlan::Response res2;
+    moveit_msgs::srv::GetMotionPlan::Response res2;
     if (sbpl_meta_interface_->solve(planning_scene, req, res2))
     {
       res.trajectory_start = res2.trajectory_start;
