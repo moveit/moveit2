@@ -27,9 +27,12 @@ find_package(Boost REQUIRED)
 
 find_package(Eigen3 REQUIRED)
 find_package(PkgConfig REQUIRED)
+
 pkg_check_modules(LIBFCL REQUIRED fcl)
+# replace LIBFCL_LIBRARIES with full path to the library
 find_library(LIBFCL_LIBRARIES_FULL ${LIBFCL_LIBRARIES} ${LIBFCL_LIBRARY_DIRS})
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
+
 find_package(octomap REQUIRED)
 find_package(urdfdom REQUIRED)
 find_package(urdf REQUIRED)
