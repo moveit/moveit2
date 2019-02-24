@@ -13,14 +13,14 @@ add_library(${MOVEIT_LIB_NAME}
   src/revolute_joint_model.cpp
   src/robot_model.cpp
   )
-# set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 
-target_link_libraries(${MOVEIT_LIB_NAME} moveit_profiler moveit_exceptions moveit_kinematics_base ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
-# add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
   urdfdom_headers
-  visualization_msgs)
+  visualization_msgs
+  moveit_profiler
+  moveit_exceptions
+  moveit_kinematics_base)
 
 if(AMENT_ENABLE_TESTING)
   find_package(moveit_resources REQUIRED)
