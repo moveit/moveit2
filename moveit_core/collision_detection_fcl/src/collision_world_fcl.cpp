@@ -52,7 +52,7 @@
 
 #include <boost/bind.hpp>
 
-rclcpp::Logger logger = rclcpp::get_logger("collision_detection_fcl");
+rclcpp::Logger logger = rclcpp::get_logger("collision_detection.fcl");
 
 namespace collision_detection
 {

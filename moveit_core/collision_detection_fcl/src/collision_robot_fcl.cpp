@@ -41,7 +41,7 @@
 #include <fcl/broadphase/broadphase_dynamic_AABB_tree.h>
 #endif
 
-rclcpp::Logger logger = rclcpp::get_logger("collision_detection_fcl");
+rclcpp::Logger logger = rclcpp::get_logger("collision_detection.fcl");
 
 namespace collision_detection
 {
