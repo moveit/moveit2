@@ -9,7 +9,9 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
 - [Get Involved](http://moveit.ros.org/documentation/contributing/)
 
 ## Milestones
-- [ ] Install instructions for Ubuntu 18.04 in README.md
+- [ ] Install instructions
+  - [ ] Ubuntu 18.04
+  - [ ] OS X 10.14
 - [ ] Upgrade continuous integration for ROS 2.0
 - [ ] Convert moveit packages to ROS 2.0
   - [ ] Convert moveit_core (**in progress @vmayoral**)
