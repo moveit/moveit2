@@ -34,8 +34,8 @@
 
 /* Author: Víctor Mayoral Vilches */
 
-#ifndef MOVEIT_LOGGING_
-#define MOVEIT_LOGGING_
+#ifndef MOVEIT_MACROS_LOGGING_
+#define MOVEIT_MACROS_LOGGING_
 #include <rcutils/logging_macros.h>
 
 #define ROS_ERROR_NAMED RCUTILS_LOG_ERROR
