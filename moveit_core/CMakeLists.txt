@@ -100,7 +100,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     transforms/include
     robot_state/include
     robot_trajectory/include
-    # kinematic_constraints/include
+    kinematic_constraints/include
     macros/include
     # planning_interface/include
     # planning_request_adapter/include
@@ -118,6 +118,7 @@ set(dependencies
   moveit_robot_state
   moveit_collision_detection
   moveit_collision_detection_fcl
+  moveit_kinematic_constraints
   random_numbers
   tf2_eigen
   tf2_kdl
@@ -187,7 +188,7 @@ add_subdirectory(robot_state)
 add_subdirectory(robot_trajectory)
 add_subdirectory(collision_detection)
 add_subdirectory(collision_detection_fcl)
-# add_subdirectory(kinematic_constraints)
+add_subdirectory(kinematic_constraints)
 # add_subdirectory(planning_scene)
 # add_subdirectory(constraint_samplers)
 # add_subdirectory(planning_interface)

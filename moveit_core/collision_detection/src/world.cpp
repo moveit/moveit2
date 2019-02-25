@@ -55,14 +55,14 @@ World::~World()
 }
 
 inline void World::addToObjectInternal(const ObjectPtr& obj, const shapes::ShapeConstPtr& shape,
-                                       const Eigen::Isometry3d& pose)
+                                       const Eigen::Affine3d& pose)
 {
   obj->shapes_.push_back(shape);
   obj->shape_poses_.push_back(pose);
 }
 
 void World::addToObject(const std::string& id, const std::vector<shapes::ShapeConstPtr>& shapes,
-                        const EigenSTL::vector_Isometry3d& poses)
+                        const EigenSTL::vector_Affine3d& poses)
 {
   if (shapes.size() != poses.size())
   {
@@ -91,7 +91,7 @@ void World::addToObject(const std::string& id, const std::vector<shapes::ShapeCo
   notify(obj, Action(action));
 }
 
-void World::addToObject(const std::string& id, const shapes::ShapeConstPtr& shape, const Eigen::Isometry3d& pose)
+void World::addToObject(const std::string& id, const shapes::ShapeConstPtr& shape, const Eigen::Affine3d& pose)
 {
   int action = ADD_SHAPE;
 

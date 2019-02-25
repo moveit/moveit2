@@ -44,10 +44,14 @@
 #include <moveit/macros/class_forward.h>
 
 #include <geometric_shapes/bodies.h>
-#include <moveit_msgs/Constraints.h>
+#include <moveit_msgs/msg/constraints.hpp>
 
 #include <iostream>
 #include <vector>
+
+#include "rclcpp/clock.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/duration.hpp"
 
 /** \brief Representation and evaluation of kinematic constraints */
 namespace kinematic_constraints
@@ -216,7 +220,7 @@ public:
 
   /**
    * \brief Configure the constraint based on a
-   * moveit_msgs::JointConstraint
+   * moveit_msgs::msg::JointConstraint
    *
    * For the configure command to be successful, the joint must exist
    * in the kinematic model, the joint must not be a multi-DOF joint
@@ -227,7 +231,7 @@ public:
    *
    * @return True if constraint can be configured from jc
    */
-  bool configure(const moveit_msgs::JointConstraint& jc);
+  bool configure(const moveit_msgs::msg::JointConstraint& jc);
 
   /**
    * \brief Check if two joint constraints are the same.
@@ -363,7 +367,7 @@ public:
 
   /**
    * \brief Configure the constraint based on a
-   * moveit_msgs::OrientationConstraint
+   * moveit_msgs::msg::OrientationConstraint
    *
    * For the configure command to be successful, the link must exist
    * in the kinematic model. Note that if the absolute tolerance
@@ -374,7 +378,7 @@ public:
    *
    * @return True if constraint can be configured from oc
    */
-  bool configure(const moveit_msgs::OrientationConstraint& oc, const robot_state::Transforms& tf);
+  bool configure(const moveit_msgs::msg::OrientationConstraint& oc, const robot_state::Transforms& tf);
 
   /**
    * \brief Check if two orientation constraints are the same.
@@ -520,7 +524,7 @@ public:
 
   /**
    * \brief Configure the constraint based on a
-   * moveit_msgs::PositionConstraint
+   * moveit_msgs::msg::PositionConstraint
    *
    * For the configure command to be successful, the link must be
    * specified in the model, and one or more constrained regions must
@@ -530,11 +534,11 @@ public:
    * quaternion is passed for a shape, the identity quaternion will be
    * substituted.
    *
-   * @param [in] pc moveit_msgs::PositionConstraint for configuration
+   * @param [in] pc moveit_msgs::msg::PositionConstraint for configuration
    *
    * @return True if constraint can be configured from pc
    */
-  bool configure(const moveit_msgs::PositionConstraint& pc, const robot_state::Transforms& tf);
+  bool configure(const moveit_msgs::msg::PositionConstraint& pc, const robot_state::Transforms& tf);
 
   /**
    * \brief Check if two constraints are the same.  For position
@@ -642,7 +646,7 @@ protected:
   Eigen::Vector3d offset_;                         /**< \brief The target offset */
   bool has_offset_;                                /**< \brief Whether the offset is substantially different than 0.0 */
   std::vector<bodies::BodyPtr> constraint_region_; /**< \brief The constraint region vector */
-  EigenSTL::vector_Isometry3d constraint_region_pose_; /**< \brief The constraint region pose vector */
+  EigenSTL::vector_Affine3d constraint_region_pose_; /**< \brief The constraint region pose vector */
   bool mobile_frame_;                                  /**< \brief Whether or not a mobile frame is employed*/
   std::string constraint_frame_id_;                    /**< \brief The constraint frame id */
   const robot_model::LinkModel* link_model_;           /**< \brief The link model constraint subject */
@@ -762,17 +766,17 @@ public:
 
   /**
    * \brief Configure the constraint based on a
-   * moveit_msgs::VisibilityConstraint
+   * moveit_msgs::msg::VisibilityConstraint
    *
    * For the configure command to be successful, the target radius
    * must be non-zero (negative values will have the absolute value
    * taken).  If cone sides are less than 3, a value of 3 will be used.
    *
-   * @param [in] vc moveit_msgs::VisibilityConstraint for configuration
+   * @param [in] vc moveit_msgs::msg::VisibilityConstraint for configuration
    *
    * @return True if constraint can be configured from vc
    */
-  bool configure(const moveit_msgs::VisibilityConstraint& vc, const robot_state::Transforms& tf);
+  bool configure(const moveit_msgs::msg::VisibilityConstraint& vc, const robot_state::Transforms& tf);
 
   /**
    * \brief Check if two constraints are the same.
@@ -814,7 +818,20 @@ public:
    * @param [in] state The state from which to produce the markers
    * @param [out] markers The marker array to which the markers will be added
    */
-  void getMarkers(const robot_state::RobotState& state, visualization_msgs::MarkerArray& markers) const;
+  void getMarkers(const robot_state::RobotState& state, visualization_msgs::msg::MarkerArray& markers) const;
+
+  /**
+   * \brief Adds markers associated with the visibility cone, sensor
+   * and target to the visualization array
+   *
+   * The visibility cone and two arrows - a blue array that issues
+   * from the sensor_view_direction of the sensor, and a red arrow the
+   * issues along the Z axis of the the target frame.
+   *
+   * @param [in] state The state from which to produce the markers
+   * @param [out] markers The marker array to which the markers will be added
+   */
+  void getMarkers(const robot_state::RobotState& state, visualization_msgs::msg::MarkerArray& markers);
 
   bool enabled() const override;
   ConstraintEvaluationResult decide(const robot_state::RobotState& state, bool verbose = false) const override;
@@ -838,14 +855,15 @@ protected:
   bool mobile_target_frame_;      /**< \brief True if the target is a non-fixed frame relative to the transform frame */
   std::string target_frame_id_;   /**< \brief The target frame id */
   std::string sensor_frame_id_;   /**< \brief The sensor frame id */
-  Eigen::Isometry3d sensor_pose_; /**< \brief The sensor pose transformed into the transform frame */
+  Eigen::Affine3d sensor_pose_; /**< \brief The sensor pose transformed into the transform frame */
   int sensor_view_direction_;     /**< \brief Storage for the sensor view direction */
-  Eigen::Isometry3d target_pose_; /**< \brief The target pose transformed into the transform frame */
+  Eigen::Affine3d target_pose_; /**< \brief The target pose transformed into the transform frame */
   unsigned int cone_sides_;       /**< \brief Storage for the cone sides  */
   EigenSTL::vector_Vector3d points_; /**< \brief A set of points along the base of the circle */
   double target_radius_;             /**< \brief Storage for the target radius */
   double max_view_angle_;            /**< \brief Storage for the max view angle */
   double max_range_angle_;           /**< \brief Storage for the max range angle */
+  rclcpp::Clock clock_ros_;         /**< \brief ros2 clock for the time */
 };
 
 MOVEIT_CLASS_FORWARD(KinematicConstraintSet);
@@ -891,7 +909,7 @@ public:
    * KinematicConstraintSet can still be used even if the addition
    * returns false.
    */
-  bool add(const moveit_msgs::Constraints& c, const robot_state::Transforms& tf);
+  bool add(const moveit_msgs::msg::Constraints& c, const robot_state::Transforms& tf);
 
   /**
    * \brief Add a vector of joint constraints
@@ -900,7 +918,7 @@ public:
    *
    * @return Will return true only if all constraints are valid, and false otherwise
    */
-  bool add(const std::vector<moveit_msgs::JointConstraint>& jc);
+  bool add(const std::vector<moveit_msgs::msg::JointConstraint>& jc);
 
   /**
    * \brief Add a vector of position constraints
@@ -909,7 +927,7 @@ public:
    *
    * @return Will return true only if all constraints are valid, and false otherwise
    */
-  bool add(const std::vector<moveit_msgs::PositionConstraint>& pc, const robot_state::Transforms& tf);
+  bool add(const std::vector<moveit_msgs::msg::PositionConstraint>& pc, const robot_state::Transforms& tf);
 
   /**
    * \brief Add a vector of orientation constraints
@@ -918,7 +936,7 @@ public:
    *
    * @return Will return true only if all constraints are valid, and false otherwise
    */
-  bool add(const std::vector<moveit_msgs::OrientationConstraint>& oc, const robot_state::Transforms& tf);
+  bool add(const std::vector<moveit_msgs::msg::OrientationConstraint>& oc, const robot_state::Transforms& tf);
 
   /**
    * \brief Add a vector of visibility constraints
@@ -927,7 +945,7 @@ public:
    *
    * @return Will return true only if all constraints are valid, and false otherwise
    */
-  bool add(const std::vector<moveit_msgs::VisibilityConstraint>& vc, const robot_state::Transforms& tf);
+  bool add(const std::vector<moveit_msgs::msg::VisibilityConstraint>& vc, const robot_state::Transforms& tf);
 
   /**
    * \brief Determines whether all constraints are satisfied by state,
@@ -993,7 +1011,7 @@ public:
    *
    * @return All position constraints
    */
-  const std::vector<moveit_msgs::PositionConstraint>& getPositionConstraints() const
+  const std::vector<moveit_msgs::msg::PositionConstraint>& getPositionConstraints() const
   {
     return position_constraints_;
   }
@@ -1004,7 +1022,7 @@ public:
    *
    * @return All orientation constraints
    */
-  const std::vector<moveit_msgs::OrientationConstraint>& getOrientationConstraints() const
+  const std::vector<moveit_msgs::msg::OrientationConstraint>& getOrientationConstraints() const
   {
     return orientation_constraints_;
   }
@@ -1015,7 +1033,7 @@ public:
    *
    * @return All joint constraints
    */
-  const std::vector<moveit_msgs::JointConstraint>& getJointConstraints() const
+  const std::vector<moveit_msgs::msg::JointConstraint>& getJointConstraints() const
   {
     return joint_constraints_;
   }
@@ -1026,7 +1044,7 @@ public:
    *
    * @return All visibility constraints
    */
-  const std::vector<moveit_msgs::VisibilityConstraint>& getVisibilityConstraints() const
+  const std::vector<moveit_msgs::msg::VisibilityConstraint>& getVisibilityConstraints() const
   {
     return visibility_constraints_;
   }
@@ -1037,7 +1055,7 @@ public:
    *
    * @return All constraints in a single message
    */
-  const moveit_msgs::Constraints& getAllConstraints() const
+  const moveit_msgs::msg::Constraints& getAllConstraints() const
   {
     return all_constraints_;
   }
@@ -1058,15 +1076,15 @@ protected:
   std::vector<KinematicConstraintPtr>
       kinematic_constraints_; /**<  \brief Shared pointers to all the member constraints */
 
-  std::vector<moveit_msgs::JointConstraint> joint_constraints_; /**<  \brief Messages corresponding to all internal
+  std::vector<moveit_msgs::msg::JointConstraint> joint_constraints_; /**<  \brief Messages corresponding to all internal
                                                                    joint constraints */
-  std::vector<moveit_msgs::PositionConstraint> position_constraints_;       /**<  \brief Messages corresponding to all
+  std::vector<moveit_msgs::msg::PositionConstraint> position_constraints_;       /**<  \brief Messages corresponding to all
                                                                                internal position constraints */
-  std::vector<moveit_msgs::OrientationConstraint> orientation_constraints_; /**<  \brief Messages corresponding to all
+  std::vector<moveit_msgs::msg::OrientationConstraint> orientation_constraints_; /**<  \brief Messages corresponding to all
                                                                                internal orientation constraints */
-  std::vector<moveit_msgs::VisibilityConstraint> visibility_constraints_;   /**<  \brief Messages corresponding to all
+  std::vector<moveit_msgs::msg::VisibilityConstraint> visibility_constraints_;   /**<  \brief Messages corresponding to all
                                                                                internal visibility constraints */
-  moveit_msgs::Constraints all_constraints_; /**<  \brief Messages corresponding to all internal constraints */
+  moveit_msgs::msg::Constraints all_constraints_; /**<  \brief Messages corresponding to all internal constraints */
 };
 }
 

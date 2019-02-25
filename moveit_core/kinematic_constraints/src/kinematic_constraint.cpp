@@ -45,9 +45,12 @@
 #include <boost/bind.hpp>
 #include <limits>
 #include <memory>
-
+#include <typeinfo>
 namespace kinematic_constraints
 {
+
+  rclcpp::Logger logger_kinematic_constraints = rclcpp::get_logger("kinematic_constraints");
+
 static double normalizeAngle(double angle)
 {
   double v = fmod(angle, 2.0 * boost::math::constants::pi<double>());
@@ -65,7 +68,7 @@ KinematicConstraint::KinematicConstraint(const robot_model::RobotModelConstPtr& 
 
 KinematicConstraint::~KinematicConstraint() = default;
 
-bool JointConstraint::configure(const moveit_msgs::JointConstraint& jc)
+bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
 {
   // clearing before we configure to get rid of any old data
   clear();
@@ -73,7 +76,7 @@ bool JointConstraint::configure(const moveit_msgs::JointConstraint& jc)
   // testing tolerances first
   if (jc.tolerance_above < 0.0 || jc.tolerance_below < 0.0)
   {
-    ROS_WARN_NAMED("kinematic_constraints", "JointConstraint tolerance values must be positive.");
+    RCLCPP_WARN(logger_kinematic_constraints, "JointConstraint tolerance values must be positive.");
     joint_model_ = nullptr;
     return false;
   }
@@ -102,12 +105,12 @@ bool JointConstraint::configure(const moveit_msgs::JointConstraint& jc)
       // check if the joint has 1 DOF (the only kind we can handle)
       if (joint_model_->getVariableCount() == 0)
       {
-        ROS_ERROR_NAMED("kinematic_constraints", "Joint '%s' has no parameters to constrain", jc.joint_name.c_str());
+        RCLCPP_ERROR(logger_kinematic_constraints, "Joint '%s' has no parameters to constrain", jc.joint_name.c_str());
         joint_model_ = nullptr;
       }
       else if (joint_model_->getVariableCount() > 1)
       {
-        ROS_ERROR_NAMED("kinematic_constraints", "Joint '%s' has more than one parameter to constrain. "
+        RCLCPP_ERROR(logger_kinematic_constraints, "Joint '%s' has more than one parameter to constrain. "
                                                  "This type of constraint is not supported.",
                         jc.joint_name.c_str());
         joint_model_ = nullptr;
@@ -125,7 +128,7 @@ bool JointConstraint::configure(const moveit_msgs::JointConstraint& jc)
         }
       if (found < 0)
       {
-        ROS_ERROR_NAMED("kinematic_constraints", "Local variable name '%s' is not known to joint '%s'",
+        RCLCPP_ERROR(logger_kinematic_constraints, "Local variable name '%s' is not known to joint '%s'",
                         local_variable_name_.c_str(), joint_model_->getName().c_str());
         joint_model_ = nullptr;
       }
@@ -166,7 +169,7 @@ bool JointConstraint::configure(const moveit_msgs::JointConstraint& jc)
       {
         joint_position_ = bounds.min_position_;
         joint_tolerance_above_ = std::numeric_limits<double>::epsilon();
-        ROS_WARN_NAMED("kinematic_constraints", "Joint %s is constrained to be below the minimum bounds. "
+        RCLCPP_WARN(logger_kinematic_constraints, "Joint %s is constrained to be below the minimum bounds. "
                                                 "Assuming minimum bounds instead.",
                        jc.joint_name.c_str());
       }
@@ -174,7 +177,7 @@ bool JointConstraint::configure(const moveit_msgs::JointConstraint& jc)
       {
         joint_position_ = bounds.max_position_;
         joint_tolerance_below_ = std::numeric_limits<double>::epsilon();
-        ROS_WARN_NAMED("kinematic_constraints", "Joint %s is constrained to be above the maximum bounds. "
+        RCLCPP_WARN(logger_kinematic_constraints, "Joint %s is constrained to be above the maximum bounds. "
                                                 "Assuming maximum bounds instead.",
                        jc.joint_name.c_str());
       }
@@ -182,7 +185,7 @@ bool JointConstraint::configure(const moveit_msgs::JointConstraint& jc)
 
     if (jc.weight <= std::numeric_limits<double>::epsilon())
     {
-      ROS_WARN_NAMED("kinematic_constraints",
+      RCLCPP_WARN(logger_kinematic_constraints,
                      "The weight on constraint for joint '%s' is very near zero.  Setting to 1.0.",
                      jc.joint_name.c_str());
       constraint_weight_ = 1.0;
@@ -230,7 +233,7 @@ ConstraintEvaluationResult JointConstraint::decide(const robot_state::RobotState
   bool result = dif <= (joint_tolerance_above_ + 2.0 * std::numeric_limits<double>::epsilon()) &&
                 dif >= (-joint_tolerance_below_ - 2.0 * std::numeric_limits<double>::epsilon());
   if (verbose)
-    ROS_INFO_NAMED("kinematic_constraints", "Constraint %s:: Joint name: '%s', actual value: %f, desired value: %f, "
+    RCLCPP_INFO(logger_kinematic_constraints, "Constraint %s:: Joint name: '%s', actual value: %f, desired value: %f, "
                                             "tolerance_above: %f, tolerance_below: %f",
                    result ? "satisfied" : "violated", joint_variable_name_.c_str(), current_joint_position,
                    joint_position_, joint_tolerance_above_, joint_tolerance_below_);
@@ -269,7 +272,7 @@ void JointConstraint::print(std::ostream& out) const
     out << "No constraint" << std::endl;
 }
 
-bool PositionConstraint::configure(const moveit_msgs::PositionConstraint& pc, const robot_state::Transforms& tf)
+bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& pc, const robot_state::Transforms& tf)
 {
   // clearing before we configure to get rid of any old data
   clear();
@@ -277,7 +280,7 @@ bool PositionConstraint::configure(const moveit_msgs::PositionConstraint& pc, co
   link_model_ = robot_model_->getLinkModel(pc.link_name);
   if (link_model_ == nullptr)
   {
-    ROS_WARN_NAMED("kinematic_constraints",
+    RCLCPP_WARN(logger_kinematic_constraints,
                    "Position constraint link model %s not found in kinematic model. Constraint invalid.",
                    pc.link_name.c_str());
     return false;
@@ -285,7 +288,7 @@ bool PositionConstraint::configure(const moveit_msgs::PositionConstraint& pc, co
 
   if (pc.header.frame_id.empty())
   {
-    ROS_WARN_NAMED("kinematic_constraints", "No frame specified for position constraint on link '%s'!",
+    RCLCPP_WARN(logger_kinematic_constraints, "No frame specified for position constraint on link '%s'!",
                    pc.link_name.c_str());
     return false;
   }
@@ -312,11 +315,11 @@ bool PositionConstraint::configure(const moveit_msgs::PositionConstraint& pc, co
     {
       if (pc.constraint_region.primitive_poses.size() <= i)
       {
-        ROS_WARN_NAMED("kinematic_constraints", "Constraint region message does not contain enough primitive poses");
+        RCLCPP_WARN(logger_kinematic_constraints, "Constraint region message does not contain enough primitive poses");
         continue;
       }
       constraint_region_.push_back(bodies::BodyPtr(bodies::createBodyFromShape(shape.get())));
-      Eigen::Isometry3d t;
+      Eigen::Affine3d t;
       tf2::fromMsg(pc.constraint_region.primitive_poses[i], t);
       constraint_region_pose_.push_back(t);
       if (mobile_frame_)
@@ -328,7 +331,7 @@ bool PositionConstraint::configure(const moveit_msgs::PositionConstraint& pc, co
       }
     }
     else
-      ROS_WARN_NAMED("kinematic_constraints", "Could not construct primitive shape %zu", i);
+      RCLCPP_WARN(logger_kinematic_constraints, "Could not construct primitive shape %zu", i);
   }
 
   // load meshes
@@ -339,11 +342,11 @@ bool PositionConstraint::configure(const moveit_msgs::PositionConstraint& pc, co
     {
       if (pc.constraint_region.mesh_poses.size() <= i)
       {
-        ROS_WARN_NAMED("kinematic_constraints", "Constraint region message does not contain enough primitive poses");
+        RCLCPP_WARN(logger_kinematic_constraints, "Constraint region message does not contain enough primitive poses");
         continue;
       }
       constraint_region_.push_back(bodies::BodyPtr(bodies::createBodyFromShape(shape.get())));
-      Eigen::Isometry3d t;
+      Eigen::Affine3d t;
       tf2::fromMsg(pc.constraint_region.mesh_poses[i], t);
       constraint_region_pose_.push_back(t);
       if (mobile_frame_)
@@ -356,13 +359,13 @@ bool PositionConstraint::configure(const moveit_msgs::PositionConstraint& pc, co
     }
     else
     {
-      ROS_WARN_NAMED("kinematic_constraints", "Could not construct mesh shape %zu", i);
+      RCLCPP_WARN(logger_kinematic_constraints, "Could not construct mesh shape %zu", i);
     }
   }
 
   if (pc.weight <= std::numeric_limits<double>::epsilon())
   {
-    ROS_WARN_NAMED("kinematic_constraints",
+    RCLCPP_WARN(logger_kinematic_constraints,
                    "The weight on position constraint for link '%s' is near zero.  Setting to 1.0.",
                    pc.link_name.c_str());
     constraint_weight_ = 1.0;
@@ -390,7 +393,7 @@ bool PositionConstraint::equal(const KinematicConstraint& other, double margin) 
       // need to check against all other regions
       for (std::size_t j = 0; j < o.constraint_region_.size(); ++j)
       {
-        Eigen::Isometry3d diff = constraint_region_pose_[i].inverse() * o.constraint_region_pose_[j];
+        Eigen::Affine3d diff = constraint_region_pose_[i].inverse() * o.constraint_region_pose_[j];
         if (diff.translation().norm() < margin && diff.rotation().isIdentity(margin) &&
             constraint_region_[i]->getType() == o.constraint_region_[j]->getType() &&
             fabs(constraint_region_[i]->computeVolume() - o.constraint_region_[j]->computeVolume()) < margin)
@@ -425,7 +428,7 @@ static inline ConstraintEvaluationResult finishPositionConstraintDecision(const 
     ROS_INFO_NAMED(
         "kinematic_constraints", "Position constraint %s on link '%s'. Desired: %f, %f, %f, current: %f, %f, %f",
         result ? "satisfied" : "violated", name.c_str(), desired.x(), desired.y(), desired.z(), pt.x(), pt.y(), pt.z());
-    ROS_INFO_NAMED("kinematic_constraints", "Differences %g %g %g", dx, dy, dz);
+    RCLCPP_INFO(logger_kinematic_constraints, "Differences %g %g %g", dx, dy, dz);
   }
   return ConstraintEvaluationResult(result, weight * sqrt(dx * dx + dy * dy + dz * dz));
 }
@@ -440,7 +443,7 @@ ConstraintEvaluationResult PositionConstraint::decide(const robot_state::RobotSt
   {
     for (std::size_t i = 0; i < constraint_region_.size(); ++i)
     {
-      Eigen::Isometry3d tmp = state.getFrameTransform(constraint_frame_id_) * constraint_region_pose_[i];
+      Eigen::Affine3d tmp = state.getFrameTransform(constraint_frame_id_) * constraint_region_pose_[i];
       bool result = constraint_region_[i]->cloneAt(tmp)->containsPoint(pt, verbose);
       if (result || (i + 1 == constraint_region_pose_.size()))
         return finishPositionConstraintDecision(pt, tmp.translation(), link_model_->getName(), constraint_weight_,
@@ -490,7 +493,7 @@ bool PositionConstraint::enabled() const
   return link_model_ && !constraint_region_.empty();
 }
 
-bool OrientationConstraint::configure(const moveit_msgs::OrientationConstraint& oc, const robot_state::Transforms& tf)
+bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstraint& oc, const robot_state::Transforms& tf)
 {
   // clearing out any old data
   clear();
@@ -498,21 +501,21 @@ bool OrientationConstraint::configure(const moveit_msgs::OrientationConstraint& 
   link_model_ = robot_model_->getLinkModel(oc.link_name);
   if (!link_model_)
   {
-    ROS_WARN_NAMED("kinematic_constraints", "Could not find link model for link name %s", oc.link_name.c_str());
+    RCLCPP_WARN(logger_kinematic_constraints, "Could not find link model for link name %s", oc.link_name.c_str());
     return false;
   }
   Eigen::Quaterniond q;
   tf2::fromMsg(oc.orientation, q);
   if (fabs(q.norm() - 1.0) > 1e-3)
   {
-    ROS_WARN_NAMED("kinematic_constraints", "Orientation constraint for link '%s' is probably incorrect: %f, %f, %f, "
+    RCLCPP_WARN(logger_kinematic_constraints, "Orientation constraint for link '%s' is probably incorrect: %f, %f, %f, "
                                             "%f. Assuming identity instead.",
                    oc.link_name.c_str(), oc.orientation.x, oc.orientation.y, oc.orientation.z, oc.orientation.w);
     q = Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0);
   }
 
   if (oc.header.frame_id.empty())
-    ROS_WARN_NAMED("kinematic_constraints", "No frame specified for position constraint on link '%s'!",
+    RCLCPP_WARN(logger_kinematic_constraints, "No frame specified for position constraint on link '%s'!",
                    oc.link_name.c_str());
 
   if (tf.isFixedFrame(oc.header.frame_id))
@@ -531,12 +534,12 @@ bool OrientationConstraint::configure(const moveit_msgs::OrientationConstraint& 
   }
   std::stringstream matrix_str;
   matrix_str << desired_rotation_matrix_;
-  ROS_DEBUG_NAMED("kinematic_constraints", "The desired rotation matrix for link '%s' in frame %s is:\n%s",
+  RCLCPP_DEBUG(logger_kinematic_constraints, "The desired rotation matrix for link '%s' in frame %s is:\n%s",
                   oc.link_name.c_str(), desired_rotation_frame_id_.c_str(), matrix_str.str().c_str());
 
   if (oc.weight <= std::numeric_limits<double>::epsilon())
   {
-    ROS_WARN_NAMED("kinematic_constraints",
+    RCLCPP_WARN(logger_kinematic_constraints,
                    "The weight on position constraint for link '%s' is near zero.  Setting to 1.0.",
                    oc.link_name.c_str());
     constraint_weight_ = 1.0;
@@ -545,13 +548,13 @@ bool OrientationConstraint::configure(const moveit_msgs::OrientationConstraint& 
     constraint_weight_ = oc.weight;
   absolute_x_axis_tolerance_ = fabs(oc.absolute_x_axis_tolerance);
   if (absolute_x_axis_tolerance_ < std::numeric_limits<double>::epsilon())
-    ROS_WARN_NAMED("kinematic_constraints", "Near-zero value for absolute_x_axis_tolerance");
+    RCLCPP_WARN(logger_kinematic_constraints, "Near-zero value for absolute_x_axis_tolerance");
   absolute_y_axis_tolerance_ = fabs(oc.absolute_y_axis_tolerance);
   if (absolute_y_axis_tolerance_ < std::numeric_limits<double>::epsilon())
-    ROS_WARN_NAMED("kinematic_constraints", "Near-zero value for absolute_y_axis_tolerance");
+    RCLCPP_WARN(logger_kinematic_constraints, "Near-zero value for absolute_y_axis_tolerance");
   absolute_z_axis_tolerance_ = fabs(oc.absolute_z_axis_tolerance);
   if (absolute_z_axis_tolerance_ < std::numeric_limits<double>::epsilon())
-    ROS_WARN_NAMED("kinematic_constraints", "Near-zero value for absolute_z_axis_tolerance");
+    RCLCPP_WARN(logger_kinematic_constraints, "Near-zero value for absolute_z_axis_tolerance");
 
   return link_model_ != nullptr;
 }
@@ -598,13 +601,13 @@ ConstraintEvaluationResult OrientationConstraint::decide(const robot_state::Robo
   if (mobile_frame_)
   {
     Eigen::Matrix3d tmp = state.getFrameTransform(desired_rotation_frame_id_).rotation() * desired_rotation_matrix_;
-    Eigen::Isometry3d diff(tmp.transpose() * state.getGlobalLinkTransform(link_model_).rotation());
+    Eigen::Affine3d diff(tmp.transpose() * state.getGlobalLinkTransform(link_model_).rotation());
     xyz = diff.rotation().eulerAngles(0, 1, 2);
     // 0,1,2 corresponds to XYZ, the convention used in sampling constraints
   }
   else
   {
-    Eigen::Isometry3d diff(desired_rotation_matrix_inv_ * state.getGlobalLinkTransform(link_model_).rotation());
+    Eigen::Affine3d diff(desired_rotation_matrix_inv_ * state.getGlobalLinkTransform(link_model_).rotation());
     xyz =
         diff.rotation().eulerAngles(0, 1, 2);  // 0,1,2 corresponds to XYZ, the convention used in sampling constraints
   }
@@ -620,7 +623,7 @@ ConstraintEvaluationResult OrientationConstraint::decide(const robot_state::Robo
   {
     Eigen::Quaterniond q_act(state.getGlobalLinkTransform(link_model_).rotation());
     Eigen::Quaterniond q_des(desired_rotation_matrix_);
-    ROS_INFO_NAMED("kinematic_constraints",
+    RCLCPP_INFO(logger_kinematic_constraints,
                    "Orientation constraint %s for link '%s'. Quaternion desired: %f %f %f %f, quaternion "
                    "actual: %f %f %f %f, error: x=%f, y=%f, z=%f, tolerance: x=%f, y=%f, z=%f",
                    result ? "satisfied" : "violated", link_model_->getName().c_str(), q_des.x(), q_des.y(), q_des.z(),
@@ -655,9 +658,9 @@ void VisibilityConstraint::clear()
   mobile_target_frame_ = false;
   target_frame_id_ = "";
   sensor_frame_id_ = "";
-  sensor_pose_ = Eigen::Isometry3d::Identity();
+  sensor_pose_ = Eigen::Affine3d::Identity();
   sensor_view_direction_ = 0;
-  target_pose_ = Eigen::Isometry3d::Identity();
+  target_pose_ = Eigen::Affine3d::Identity();
   cone_sides_ = 0;
   points_.clear();
   target_radius_ = -1.0;
@@ -665,18 +668,18 @@ void VisibilityConstraint::clear()
   max_range_angle_ = 0.0;
 }
 
-bool VisibilityConstraint::configure(const moveit_msgs::VisibilityConstraint& vc, const robot_state::Transforms& tf)
+bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstraint& vc, const robot_state::Transforms& tf)
 {
   clear();
   target_radius_ = fabs(vc.target_radius);
 
   if (vc.target_radius <= std::numeric_limits<double>::epsilon())
-    ROS_WARN_NAMED("kinematic_constraints",
+    RCLCPP_WARN(logger_kinematic_constraints,
                    "The radius of the target disc that must be visible should be strictly positive");
 
   if (vc.cone_sides < 3)
   {
-    ROS_WARN_NAMED("kinematic_constraints", "The number of sides for the visibility region must be 3 or more. "
+    RCLCPP_WARN(logger_kinematic_constraints, "The number of sides for the visibility region must be 3 or more. "
                                             "Assuming 3 sides instead of the specified %d",
                    vc.cone_sides);
     cone_sides_ = 3;
@@ -728,7 +731,7 @@ bool VisibilityConstraint::configure(const moveit_msgs::VisibilityConstraint& vc
 
   if (vc.weight <= std::numeric_limits<double>::epsilon())
   {
-    ROS_WARN_NAMED("kinematic_constraints", "The weight of visibility constraint is near zero.  Setting to 1.0.");
+    RCLCPP_WARN(logger_kinematic_constraints, "The weight of visibility constraint is near zero.  Setting to 1.0.");
     constraint_weight_ = 1.0;
   }
   else
@@ -753,7 +756,7 @@ bool VisibilityConstraint::equal(const KinematicConstraint& other, double margin
   {
     if (fabs(max_view_angle_ - o.max_view_angle_) > margin || fabs(target_radius_ - o.target_radius_) > margin)
       return false;
-    Eigen::Isometry3d diff = sensor_pose_.inverse() * o.sensor_pose_;
+    Eigen::Affine3d diff = sensor_pose_.inverse() * o.sensor_pose_;
     if (diff.translation().norm() > margin)
       return false;
     if (!diff.rotation().isIdentity(margin))
@@ -777,9 +780,9 @@ shapes::Mesh* VisibilityConstraint::getVisibilityCone(const robot_state::RobotSt
 {
   // the current pose of the sensor
 
-  const Eigen::Isometry3d& sp =
+  const Eigen::Affine3d& sp =
       mobile_sensor_frame_ ? state.getFrameTransform(sensor_frame_id_) * sensor_pose_ : sensor_pose_;
-  const Eigen::Isometry3d& tp =
+  const Eigen::Affine3d& tp =
       mobile_target_frame_ ? state.getFrameTransform(target_frame_id_) * target_pose_ : target_pose_;
 
   // transform the points on the disc to the desired target frame
@@ -848,17 +851,18 @@ shapes::Mesh* VisibilityConstraint::getVisibilityCone(const robot_state::RobotSt
 }
 
 void VisibilityConstraint::getMarkers(const robot_state::RobotState& state,
-                                      visualization_msgs::MarkerArray& markers) const
+                                      visualization_msgs::msg::MarkerArray& markers)
 {
   shapes::Mesh* m = getVisibilityCone(state);
-  visualization_msgs::Marker mk;
+  visualization_msgs::msg::Marker mk;
   shapes::constructMarkerFromShape(m, mk);
+  rclcpp::Time stamp = clock_ros_.now();
   delete m;
   mk.header.frame_id = robot_model_->getModelFrame();
-  mk.header.stamp = ros::Time::now();
+  mk.header.stamp = stamp;
   mk.ns = "constraints";
   mk.id = 1;
-  mk.action = visualization_msgs::Marker::ADD;
+  mk.action = visualization_msgs::msg::Marker::ADD;
   mk.pose.position.x = 0;
   mk.pose.position.y = 0;
   mk.pose.position.z = 0;
@@ -866,7 +870,7 @@ void VisibilityConstraint::getMarkers(const robot_state::RobotState& state,
   mk.pose.orientation.y = 0;
   mk.pose.orientation.z = 0;
   mk.pose.orientation.w = 1;
-  mk.lifetime = ros::Duration(60);
+  mk.lifetime = rclcpp::Duration(60);
   // this scale necessary to make results look reasonable
   mk.scale.x = .01;
   mk.color.a = 1.0;
@@ -876,14 +880,14 @@ void VisibilityConstraint::getMarkers(const robot_state::RobotState& state,
 
   markers.markers.push_back(mk);
 
-  const Eigen::Isometry3d& sp =
+  const Eigen::Affine3d& sp =
       mobile_sensor_frame_ ? state.getFrameTransform(sensor_frame_id_) * sensor_pose_ : sensor_pose_;
-  const Eigen::Isometry3d& tp =
+  const Eigen::Affine3d& tp =
       mobile_target_frame_ ? state.getFrameTransform(target_frame_id_) * target_pose_ : target_pose_;
 
-  visualization_msgs::Marker mka;
-  mka.type = visualization_msgs::Marker::ARROW;
-  mka.action = visualization_msgs::Marker::ADD;
+  visualization_msgs::msg::Marker mka;
+  mka.type = visualization_msgs::msg::Marker::ARROW;
+  mka.action = visualization_msgs::msg::Marker::ADD;
   mka.color = mk.color;
   mka.pose = mk.pose;
 
@@ -926,9 +930,9 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const robot_state::Robot
 
   if (max_view_angle_ > 0.0 || max_range_angle_ > 0.0)
   {
-    const Eigen::Isometry3d& sp =
+    const Eigen::Affine3d& sp =
         mobile_sensor_frame_ ? state.getFrameTransform(sensor_frame_id_) * sensor_pose_ : sensor_pose_;
-    const Eigen::Isometry3d& tp =
+    const Eigen::Affine3d& tp =
         mobile_target_frame_ ? state.getFrameTransform(target_frame_id_) * target_pose_ : target_pose_;
 
     // necessary to do subtraction as SENSOR_Z is 0 and SENSOR_X is 2
@@ -942,14 +946,14 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const robot_state::Robot
       if (dp < 0.0)
       {
         if (verbose)
-          ROS_INFO_NAMED("kinematic_constraints", "Visibility constraint is violated because the sensor is looking at "
+          RCLCPP_INFO(logger_kinematic_constraints, "Visibility constraint is violated because the sensor is looking at "
                                                   "the wrong side");
         return ConstraintEvaluationResult(false, 0.0);
       }
       if (max_view_angle_ < ang)
       {
         if (verbose)
-          ROS_INFO_NAMED("kinematic_constraints", "Visibility constraint is violated because the view angle is %lf "
+          RCLCPP_INFO(logger_kinematic_constraints, "Visibility constraint is violated because the view angle is %lf "
                                                   "(above the maximum allowed of %lf)",
                          ang, max_view_angle_);
         return ConstraintEvaluationResult(false, 0.0);
@@ -962,7 +966,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const robot_state::Robot
       if (dp < 0.0)
       {
         if (verbose)
-          ROS_INFO_NAMED("kinematic_constraints", "Visibility constraint is violated because the sensor is looking at "
+          RCLCPP_INFO(logger_kinematic_constraints, "Visibility constraint is violated because the sensor is looking at "
                                                   "the wrong side");
         return ConstraintEvaluationResult(false, 0.0);
       }
@@ -971,7 +975,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const robot_state::Robot
       if (max_range_angle_ < ang)
       {
         if (verbose)
-          ROS_INFO_NAMED("kinematic_constraints", "Visibility constraint is violated because the range angle is %lf "
+          RCLCPP_INFO(logger_kinematic_constraints, "Visibility constraint is violated because the range angle is %lf "
                                                   "(above the maximum allowed of %lf)",
                          ang, max_range_angle_);
         return ConstraintEvaluationResult(false, 0.0);
@@ -985,7 +989,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const robot_state::Robot
 
   // add the visibility cone as an object
   collision_detection::CollisionWorldFCL collision_world;
-  collision_world.getWorld()->addToObject("cone", shapes::ShapeConstPtr(m), Eigen::Isometry3d::Identity());
+  collision_world.getWorld()->addToObject("cone", shapes::ShapeConstPtr(m), Eigen::Affine3d::Identity());
 
   // check for collisions between the robot and the cone
   collision_detection::CollisionRequest req;
@@ -1001,7 +1005,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const robot_state::Robot
   {
     std::stringstream ss;
     m->print(ss);
-    ROS_INFO_NAMED("kinematic_constraints", "Visibility constraint %ssatisfied. Visibility cone approximation:\n %s",
+    RCLCPP_INFO(logger_kinematic_constraints, "Visibility constraint %ssatisfied. Visibility cone approximation:\n %s",
                    res.collision ? "not " : "", ss.str().c_str());
   }
 
@@ -1018,7 +1022,7 @@ bool VisibilityConstraint::decideContact(const collision_detection::Contact& con
       (robot_state::Transforms::sameFrame(contact.body_name_1, sensor_frame_id_) ||
        robot_state::Transforms::sameFrame(contact.body_name_1, target_frame_id_)))
   {
-    ROS_DEBUG_NAMED("kinematic_constraints", "Accepted collision with either sensor or target");
+    RCLCPP_DEBUG(logger_kinematic_constraints, "Accepted collision with either sensor or target");
     return true;
   }
   if (contact.body_type_2 == collision_detection::BodyTypes::ROBOT_LINK &&
@@ -1026,7 +1030,7 @@ bool VisibilityConstraint::decideContact(const collision_detection::Contact& con
       (robot_state::Transforms::sameFrame(contact.body_name_2, sensor_frame_id_) ||
        robot_state::Transforms::sameFrame(contact.body_name_2, target_frame_id_)))
   {
-    ROS_DEBUG_NAMED("kinematic_constraints", "Accepted collision with either sensor or target");
+    RCLCPP_DEBUG(logger_kinematic_constraints, "Accepted collision with either sensor or target");
     return true;
   }
   return false;
@@ -1046,7 +1050,7 @@ void VisibilityConstraint::print(std::ostream& out) const
 
 void KinematicConstraintSet::clear()
 {
-  all_constraints_ = moveit_msgs::Constraints();
+  all_constraints_ = moveit_msgs::msg::Constraints();
   kinematic_constraints_.clear();
   joint_constraints_.clear();
   position_constraints_.clear();
@@ -1054,7 +1058,7 @@ void KinematicConstraintSet::clear()
   visibility_constraints_.clear();
 }
 
-bool KinematicConstraintSet::add(const std::vector<moveit_msgs::JointConstraint>& jc)
+bool KinematicConstraintSet::add(const std::vector<moveit_msgs::msg::JointConstraint>& jc)
 {
   bool result = true;
   for (unsigned int i = 0; i < jc.size(); ++i)
@@ -1069,7 +1073,7 @@ bool KinematicConstraintSet::add(const std::vector<moveit_msgs::JointConstraint>
   return result;
 }
 
-bool KinematicConstraintSet::add(const std::vector<moveit_msgs::PositionConstraint>& pc,
+bool KinematicConstraintSet::add(const std::vector<moveit_msgs::msg::PositionConstraint>& pc,
                                  const robot_state::Transforms& tf)
 {
   bool result = true;
@@ -1085,7 +1089,7 @@ bool KinematicConstraintSet::add(const std::vector<moveit_msgs::PositionConstrai
   return result;
 }
 
-bool KinematicConstraintSet::add(const std::vector<moveit_msgs::OrientationConstraint>& oc,
+bool KinematicConstraintSet::add(const std::vector<moveit_msgs::msg::OrientationConstraint>& oc,
                                  const robot_state::Transforms& tf)
 {
   bool result = true;
@@ -1101,7 +1105,7 @@ bool KinematicConstraintSet::add(const std::vector<moveit_msgs::OrientationConst
   return result;
 }
 
-bool KinematicConstraintSet::add(const std::vector<moveit_msgs::VisibilityConstraint>& vc,
+bool KinematicConstraintSet::add(const std::vector<moveit_msgs::msg::VisibilityConstraint>& vc,
                                  const robot_state::Transforms& tf)
 {
   bool result = true;
@@ -1117,7 +1121,7 @@ bool KinematicConstraintSet::add(const std::vector<moveit_msgs::VisibilityConstr
   return result;
 }
 
-bool KinematicConstraintSet::add(const moveit_msgs::Constraints& c, const robot_state::Transforms& tf)
+bool KinematicConstraintSet::add(const moveit_msgs::msg::Constraints& c, const robot_state::Transforms& tf)
 {
   bool j = add(c.joint_constraints);
   bool p = add(c.position_constraints, tf);
