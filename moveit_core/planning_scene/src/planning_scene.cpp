@@ -43,7 +43,7 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/exceptions/exceptions.h>
 #include <moveit/robot_state/attached_body.h>
-#include <octomap_msgs/msg/conversions.h>
+#include <octomap_msgs/conversions.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <memory>
 #include <set>
@@ -750,7 +750,7 @@ void PlanningScene::getPlanningSceneDiffMsg(moveit_msgs::msg::PlanningScene& sce
   }
 
   scene_msg.world.collision_objects.clear();
-  scene_msg.world.octomap = octomap_msgs::msg::OctomapWithPose();
+  scene_msg.world.octomap = octomap_msg::OctomapWithPose();
 
   if (world_diff_)
   {
@@ -880,10 +880,10 @@ void PlanningScene::getAttachedCollisionObjectMsgs(
   attachedBodiesToAttachedCollisionObjectMsgs(attached_bodies, attached_collision_objs);
 }
 
-bool PlanningScene::getOctomapMsg(octomap_msgs::msg::OctomapWithPose& octomap) const
+bool PlanningScene::getOctomapMsg(octomap_msg::OctomapWithPose& octomap) const
 {
   octomap.header.frame_id = getPlanningFrame();
-  octomap.octomap = octomap_msgs::msg::Octomap();
+  octomap.octomap = octomap_msg::Octomap();
 
   collision_detection::CollisionWorld::ObjectConstPtr map = world_->getObject(OCTOMAP_NS);
   if (map)
@@ -891,7 +891,7 @@ bool PlanningScene::getOctomapMsg(octomap_msgs::msg::OctomapWithPose& octomap) c
     if (map->shapes_.size() == 1)
     {
       const shapes::OcTree* o = static_cast<const shapes::OcTree*>(map->shapes_[0].get());
-      octomap_msgs::msg::fullMapToMsg(*o->octree, octomap.octomap);
+      octomap_msg::fullMapToMsg(*o->octree, octomap.octomap);
       octomap.origin = tf2::toMsg(map->shape_poses_[0]);
       return true;
     }
@@ -1343,7 +1343,7 @@ bool PlanningScene::usePlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
     return setPlanningSceneMsg(scene_msg);
 }
 
-void PlanningScene::processOctomapMsg(const octomap_msgs::msg::Octomap& map)
+void PlanningScene::processOctomapMsg(const octomap_msg::Octomap& map)
 {
   // each octomap replaces any previous one
   world_->removeObject(OCTOMAP_NS);
@@ -1357,7 +1357,7 @@ void PlanningScene::processOctomapMsg(const octomap_msgs::msg::Octomap& map)
     return;
   }
 
-  std::shared_ptr<octomap::OcTree> om(static_cast<octomap::OcTree*>(octomap_msgs::msg::msgToMap(map)));
+  std::shared_ptr<octomap::OcTree> om(static_cast<octomap::OcTree*>(octomap_msg::msgToMap(map)));
   if (!map.header.frame_id.empty())
   {
     const Eigen::Isometry3d& t = getTransforms().getTransform(map.header.frame_id);
@@ -1381,7 +1381,7 @@ void PlanningScene::removeAllCollisionObjects()
     }
 }
 
-void PlanningScene::processOctomapMsg(const octomap_msgs::msg::OctomapWithPose& map)
+void PlanningScene::processOctomapMsg(const octomap_msg::OctomapWithPose& map)
 {
   // each octomap replaces any previous one
   world_->removeObject(OCTOMAP_NS);
@@ -1395,7 +1395,7 @@ void PlanningScene::processOctomapMsg(const octomap_msgs::msg::OctomapWithPose& 
     return;
   }
 
-  std::shared_ptr<octomap::OcTree> om(static_cast<octomap::OcTree*>(octomap_msgs::msg::msgToMap(map.octomap)));
+  std::shared_ptr<octomap::OcTree> om(static_cast<octomap::OcTree*>(octomap_msg::msgToMap(map.octomap)));
   const Eigen::Isometry3d& t = getTransforms().getTransform(map.header.frame_id);
   Eigen::Isometry3d p;
   tf2::fromMsg(map.origin, p);
