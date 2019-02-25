@@ -59,7 +59,7 @@ namespace
 void printPoint(const trajectory_msgs::msg::JointTrajectoryPoint& point, std::size_t i)
 {
   RCLCPP_DEBUG(logger, " time   [%zu]= %f", i,
-                  point.time_from_start.toSec());
+                  point.time_from_start.sec);
   if (point.positions.size() >= 7)
   {
     RCLCPP_DEBUG(logger, " pos_   [%zu]= %f %f %f %f %f %f %f", i,
