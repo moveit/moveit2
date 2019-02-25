@@ -35,7 +35,7 @@
 /* Author: Ken Anderson */
 
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
-#include <moveit_msgs/JointLimits.h>
+#include <moveit_msgs/msg/joint_limits.hpp>
 #include <moveit/robot_state/conversions.h>
 
 namespace trajectory_processing
@@ -43,6 +43,8 @@ namespace trajectory_processing
 static const double DEFAULT_VEL_MAX = 1.0;
 static const double DEFAULT_ACCEL_MAX = 1.0;
 static const double ROUNDING_THRESHOLD = 0.01;
+
+  rclcpp::Logger logger = rclcpp::get_logger("trajectory_processing.iterative_time_parameterization");
 
 IterativeParabolicTimeParameterization::IterativeParabolicTimeParameterization(unsigned int max_iterations,
                                                                                double max_time_change_per_it)
@@ -54,40 +56,40 @@ IterativeParabolicTimeParameterization::~IterativeParabolicTimeParameterization(
 
 namespace
 {
-void printPoint(const trajectory_msgs::JointTrajectoryPoint& point, std::size_t i)
+void printPoint(const trajectory_msgs::msg::JointTrajectoryPoint& point, std::size_t i)
 {
-  ROS_DEBUG_NAMED("trajectory_processing.iterative_time_parameterization", " time   [%zu]= %f", i,
+  RCLCPP_DEBUG(logger, " time   [%zu]= %f", i,
                   point.time_from_start.toSec());
   if (point.positions.size() >= 7)
   {
-    ROS_DEBUG_NAMED("trajectory_processing.iterative_time_parameterization", " pos_   [%zu]= %f %f %f %f %f %f %f", i,
+    RCLCPP_DEBUG(logger, " pos_   [%zu]= %f %f %f %f %f %f %f", i,
                     point.positions[0], point.positions[1], point.positions[2], point.positions[3], point.positions[4],
                     point.positions[5], point.positions[6]);
   }
   if (point.velocities.size() >= 7)
   {
-    ROS_DEBUG_NAMED("trajectory_processing.iterative_time_parameterization", "  vel_  [%zu]= %f %f %f %f %f %f %f", i,
+    RCLCPP_DEBUG(logger, "  vel_  [%zu]= %f %f %f %f %f %f %f", i,
                     point.velocities[0], point.velocities[1], point.velocities[2], point.velocities[3],
                     point.velocities[4], point.velocities[5], point.velocities[6]);
   }
   if (point.accelerations.size() >= 7)
   {
-    ROS_DEBUG_NAMED("trajectory_processing.iterative_time_parameterization", "   acc_ [%zu]= %f %f %f %f %f %f %f", i,
+    RCLCPP_DEBUG(logger, "   acc_ [%zu]= %f %f %f %f %f %f %f", i,
                     point.accelerations[0], point.accelerations[1], point.accelerations[2], point.accelerations[3],
                     point.accelerations[4], point.accelerations[5], point.accelerations[6]);
   }
 }
 
-void printStats(const trajectory_msgs::JointTrajectory& trajectory, const std::vector<moveit_msgs::msg::JointLimits>& limits)
+void printStats(const trajectory_msgs::msg::JointTrajectory& trajectory, const std::vector<moveit_msgs::msg::JointLimits>& limits)
 {
-  ROS_DEBUG_NAMED("trajectory_processing.iterative_time_parameterization", "jointNames= %s %s %s %s %s %s %s",
+  RCLCPP_DEBUG(logger, "jointNames= %s %s %s %s %s %s %s",
                   limits[0].joint_name.c_str(), limits[1].joint_name.c_str(), limits[2].joint_name.c_str(),
                   limits[3].joint_name.c_str(), limits[4].joint_name.c_str(), limits[5].joint_name.c_str(),
                   limits[6].joint_name.c_str());
-  ROS_DEBUG_NAMED("trajectory_processing.iterative_time_parameterization", "maxVelocities= %f %f %f %f %f %f %f",
+  RCLCPP_DEBUG(logger, "maxVelocities= %f %f %f %f %f %f %f",
                   limits[0].max_velocity, limits[1].max_velocity, limits[2].max_velocity, limits[3].max_velocity,
                   limits[4].max_velocity, limits[5].max_velocity, limits[6].max_velocity);
-  ROS_DEBUG_NAMED("trajectory_processing.iterative_time_parameterization", "maxAccelerations= %f %f %f %f %f %f %f",
+  RCLCPP_DEBUG(logger, "maxAccelerations= %f %f %f %f %f %f %f",
                   limits[0].max_acceleration, limits[1].max_acceleration, limits[2].max_acceleration,
                   limits[3].max_acceleration, limits[4].max_acceleration, limits[5].max_acceleration,
                   limits[6].max_acceleration);
@@ -112,15 +114,16 @@ void IterativeParabolicTimeParameterization::applyVelocityConstraints(robot_traj
 
   if (max_velocity_scaling_factor > 0.0 && max_velocity_scaling_factor <= 1.0)
     velocity_scaling_factor = max_velocity_scaling_factor;
-  else if (max_velocity_scaling_factor == 0.0)
-    ROS_DEBUG_NAMED("trajectory_processing.iterative_time_parameterization",
+  else if (max_velocity_scaling_factor == 0.0){
+    RCLCPP_DEBUG(logger,
                     "A max_velocity_scaling_factor of 0.0 was specified, defaulting to %f instead.",
                     velocity_scaling_factor);
-  else
-    ROS_WARN_NAMED("trajectory_processing.iterative_time_parameterization",
+  }
+  else{
+    RCLCPP_WARN(logger,
                    "Invalid max_velocity_scaling_factor %f specified, defaulting to %f instead.",
                    max_velocity_scaling_factor, velocity_scaling_factor);
-
+  }
   for (int i = 0; i < num_points - 1; ++i)
   {
     const robot_state::RobotStatePtr& curr_waypoint = rob_trajectory.getWayPointPtr(i);
@@ -328,15 +331,16 @@ void IterativeParabolicTimeParameterization::applyAccelerationConstraints(
 
   if (max_acceleration_scaling_factor > 0.0 && max_acceleration_scaling_factor <= 1.0)
     acceleration_scaling_factor = max_acceleration_scaling_factor;
-  else if (max_acceleration_scaling_factor == 0.0)
-    ROS_DEBUG_NAMED("trajectory_processing.iterative_time_parameterization",
+  else if (max_acceleration_scaling_factor == 0.0){
+    RCLCPP_DEBUG(logger,
                     "A max_acceleration_scaling_factor of 0.0 was specified, defaulting to %f instead.",
                     acceleration_scaling_factor);
-  else
-    ROS_WARN_NAMED("trajectory_processing.iterative_time_parameterization",
+  }
+  else{
+    RCLCPP_WARN(logger,
                    "Invalid max_acceleration_scaling_factor %f specified, defaulting to %f instead.",
                    max_acceleration_scaling_factor, acceleration_scaling_factor);
-
+  }
   do
   {
     num_updates = 0;
@@ -452,7 +456,7 @@ void IterativeParabolicTimeParameterization::applyAccelerationConstraints(
         backwards = !backwards;
       }
     }
-    // ROS_DEBUG_NAMED("trajectory_processing.iterative_time_parameterization", "applyAcceleration: num_updates=%i",
+    // RCLCPP_DEBUG(logger, "applyAcceleration: num_updates=%i",
     // num_updates);
   } while (num_updates > 0 && iteration < static_cast<int>(max_iterations_));
 }
@@ -467,7 +471,7 @@ bool IterativeParabolicTimeParameterization::computeTimeStamps(robot_trajectory:
   const robot_model::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    ROS_ERROR_NAMED("trajectory_processing.iterative_time_parameterization", "It looks like the planner did not set "
+    RCLCPP_ERROR(logger, "It looks like the planner did not set "
                                                                              "the group the plan was computed for");
     return false;
   }
