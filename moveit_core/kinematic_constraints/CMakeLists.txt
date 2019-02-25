@@ -5,9 +5,17 @@ add_library(${MOVEIT_LIB_NAME}
   src/utils.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-target_link_libraries(${MOVEIT_LIB_NAME}
-  moveit_robot_model moveit_kinematics_base moveit_robot_state moveit_collision_detection_fcl
-  ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  urdf
+  urdfdom
+  urdfdom_headers
+  moveit_robot_model
+  tf2_geometry_msgs
+  visualization_msgs
+  moveit_kinematics_base
+  moveit_robot_state
+  tf2_eigen
+  moveit_collision_detection_fcl)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
@@ -15,11 +23,12 @@ install(TARGETS ${MOVEIT_LIB_NAME}
 
 install(DIRECTORY include/ DESTINATION include)
 
-#TODO: Fix this so it can be built with colcon
+#TODO: Review once moveit_resources has been ported
 # if(BUILD_TESTING)
+#   find_package(ament_cmake_gtest REQUIRED)
 #   find_package(moveit_resources REQUIRED)
 #   include_directories(${moveit_resources_INCLUDE_DIRS})
 #
-#   catkin_add_gtest(test_constraints test/test_constraints.cpp)
+#   ament_add_gtest(test_constraints test/test_constraints.cpp)
 #   target_link_libraries(test_constraints moveit_test_utils ${MOVEIT_LIB_NAME})
 # endif()
