@@ -52,7 +52,7 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
       - [x] kinematic_constraints
       - [ ] planning_scene
       - [ ] constraint_samplers
-      - [ ] planning_interface
+      - [x] planning_interface
       - [ ] planning_request_adapter
       - [ ] trajectory_processing
       - [ ] distance_field
