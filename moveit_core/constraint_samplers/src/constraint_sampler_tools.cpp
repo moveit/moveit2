@@ -37,16 +37,16 @@
 #include <moveit/constraint_samplers/constraint_sampler_tools.h>
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 
-void constraint_samplers::visualizeDistribution(const moveit_msgs::Constraints& constr,
+void constraint_samplers::visualizeDistribution(const moveit_msgs::msg::Constraints& constr,
                                                 const planning_scene::PlanningSceneConstPtr& scene,
                                                 const std::string& group, const std::string& link_name,
-                                                unsigned int sample_count, visualization_msgs::MarkerArray& markers)
+                                                unsigned int sample_count, visualization_msgs::msg::MarkerArray& markers)
 {
   visualizeDistribution(ConstraintSamplerManager::selectDefaultSampler(scene, group, constr), scene->getCurrentState(),
                         link_name, sample_count, markers);
 }
 
-double constraint_samplers::countSamplesPerSecond(const moveit_msgs::Constraints& constr,
+double constraint_samplers::countSamplesPerSecond(const moveit_msgs::msg::Constraints& constr,
                                                   const planning_scene::PlanningSceneConstPtr& scene,
                                                   const std::string& group)
 {
@@ -82,7 +82,7 @@ double constraint_samplers::countSamplesPerSecond(const ConstraintSamplerPtr& sa
 void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& sampler,
                                                 const robot_state::RobotState& reference_state,
                                                 const std::string& link_name, unsigned int sample_count,
-                                                visualization_msgs::MarkerArray& markers)
+                                                visualization_msgs::msg::MarkerArray& markers)
 {
   if (!sampler)
   {
@@ -93,7 +93,7 @@ void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& samp
   if (!lm)
     return;
   robot_state::RobotState ks(reference_state);
-  std_msgs::ColorRGBA color;
+  std_msgs::msg::ColorRGBA color;
   color.r = 1.0f;
   color.g = 0.0f;
   color.b = 0.0f;
@@ -103,13 +103,13 @@ void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& samp
     if (!sampler->sample(ks))
       continue;
     const Eigen::Vector3d& pos = ks.getGlobalLinkTransform(lm).translation();
-    visualization_msgs::Marker mk;
+    visualization_msgs::msg::Marker mk;
     mk.header.stamp = ros::Time::now();
     mk.header.frame_id = sampler->getJointModelGroup()->getParentModel().getModelFrame();
     mk.ns = "constraint_samples";
     mk.id = i;
-    mk.type = visualization_msgs::Marker::SPHERE;
-    mk.action = visualization_msgs::Marker::ADD;
+    mk.type = visualization_msgs::msg::Marker::SPHERE;
+    mk.action = visualization_msgs::msg::Marker::ADD;
     mk.pose.position.x = pos.x();
     mk.pose.position.y = pos.y();
     mk.pose.position.z = pos.z();
