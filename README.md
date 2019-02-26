@@ -12,55 +12,54 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
 - [ ] Install instructions
   - [ ] Ubuntu 18.04
   - [ ] OS X 10.14
-- [ ] Upgrade continuous integration for ROS 2.0
+- [x] Upgrade continuous integration for ROS 2.0
 - [ ] Convert moveit packages to ROS 2.0
   - [x] Update/setup infrastructure for development
     - [x] Delete metapackages
     - [x] Upgrade continuous integration for ROS 2.0
     - [x] Refactor/cleanup folder hierarchy
-  - [ ] Convert moveit_cor
-    - [x] Convert all headers and link it to HRIM (contributed by @ibaiape)
-    - [ ] Dependencies on other packages
-      - [x] tf2_kdl https://github.com/ros2/geometry2/pull/90
-      - [x] eigen_stl_containers https://github.com/AcutronicRobotics/eigen_stl_containers/tree/ros2
-      - [x] geometric_shapes https://github.com/ros-planning/geometric_shapes/pull/96
-      - [x] random_numbers https://github.com/ros-planning/random_numbers/pull/12
-      - [x] srdfdom (contributed by @anasarrak, @vmayoral and @ahcorde) https://github.com/ros-planning/srdfdom/pull/45
-      - [x] urdf_parser_py https://github.com/ros/urdf_parser_py/pull/41
-      - [x] Created a ROS 2 version (with package.xml) of urdfdom_headers https://github.com/AcutronicRobotics/urdfdom_headers/tree/ros2
-      - [x] octomap https://github.com/AcutronicRobotics/octomap
-        - [x]  octomap
-        - [ ]  octovis
-        - [ ]  dynamicEDT3D
-    - [ ] Convert moveit_core packages to ROS 2.0
-      - [x] version
-      - [x] macros
-      - [x] backtrace
-      - [x] exceptions
-      - [x] profiler
-      - [x] logging
-      - [x] background_processing
-      - [x] kinematics_base
-      - [x] controller_manager
-      - [x] sensor_manager
-      - [x] robot_model
-      - [x] transforms
-      - [x] robot_state
-      - [x] robot_trajectory
-      - [x] collision_detection
-      - [x] collision_detection_fcl
-      - [x] kinematic_constraints
-      - [ ] planning_scene
-      - [ ] constraint_samplers
-      - [x] planning_interface
-      - [ ] planning_request_adapter
-      - [ ] trajectory_processing
-      - [ ] distance_field
-      - [ ] collision_distance_field
-      - [ ] kinematics_metrics
-      - [ ] dynamics_solver
-      - [ ] utils
-  - [ ] Necessary Ports for a Minimal Working Example
+  - [x] Convert all headers and link it to HRIM (contributed by @ibaiape)
+  - [ ] Dependencies on other packages
+    - [x] tf2_kdl https://github.com/ros2/geometry2/pull/90
+    - [x] eigen_stl_containers https://github.com/AcutronicRobotics/eigen_stl_containers/tree/ros2
+    - [x] geometric_shapes https://github.com/ros-planning/geometric_shapes/pull/96
+    - [x] random_numbers https://github.com/ros-planning/random_numbers/pull/12
+    - [x] srdfdom (contributed by @anasarrak, @vmayoral and @ahcorde) https://github.com/ros-planning/srdfdom/pull/45
+    - [x] urdf_parser_py https://github.com/ros/urdf_parser_py/pull/41
+    - [x] Created a ROS 2 version (with package.xml) of urdfdom_headers https://github.com/AcutronicRobotics/urdfdom_headers/tree/ros2
+    - [x] octomap https://github.com/AcutronicRobotics/octomap
+      - [x]  octomap
+      - [ ]  octovis
+      - [ ]  dynamicEDT3D
+  - [ ] Convert moveit_core packages to ROS 2.0
+    - [x] version
+    - [x] macros
+    - [x] backtrace
+    - [x] exceptions
+    - [x] profiler
+    - [x] logging
+    - [x] background_processing
+    - [x] kinematics_base
+    - [x] controller_manager
+    - [x] sensor_manager
+    - [x] robot_model
+    - [x] transforms
+    - [x] robot_state
+    - [x] robot_trajectory
+    - [x] collision_detection
+    - [x] collision_detection_fcl
+    - [x] kinematic_constraints
+    - [ ] planning_scene
+    - [ ] constraint_samplers
+    - [x] planning_interface
+    - [ ] planning_request_adapter
+    - [ ] trajectory_processing
+    - [ ] distance_field
+    - [ ] collision_distance_field
+    - [ ] kinematics_metrics
+    - [ ] dynamics_solver
+    - [ ] utils
+  - [ ] Necessary for a Minimal Working Example
       - [ ] moveit_ros_planning_interface
      -  [ ] moveit_ros_planning
          -   [ ] moveit_core
@@ -74,25 +73,26 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
          -   [ ] moveit_ros_move_group
              -   [ ] moveit_core
              -   [ ] moveit_ros_planning
-  - [ ] Convert moveit_kinematics
-  - [ ] Convert moveit_planners_ompl
-  - [ ] Convert moveit_ros_planning
-  - [ ] Convert moveit_ros_planning_interface
-  - [ ] Convert moveit_ros_benchmarks
-  - [ ] Convert moveit_ros_control_interface
-  - [ ] Convert moveit_ros_manipulation
-  - [ ] Convert moveit_ros_move_group
-  - [ ] Convert moveit_ros_perception
-  - [ ] Convert moveit_ros_robot_interaction
-  - [ ] Convert moveit_ros_visualization
-  - [ ] Convert moveit_ros_warehouse
-  - [ ] Convert moveit_setup_assistant
-  - [ ] Convert moveit_simple_controller_manager
-  - [ ] Convert moveit_visual_tools
-  - [ ] Convert moveit_task_constructor
-  - [ ] Convert moveit_resources
-  - [ ] Convert moveit_commander
-  - [ ] Convert moveit_fake_controller_manager
+  - [ ] Other pending dependencies in moveit2
+    - [ ] Convert moveit_kinematics
+    - [ ] Convert moveit_planners_ompl
+    - [ ] Convert moveit_ros_planning
+    - [ ] Convert moveit_ros_planning_interface
+    - [ ] Convert moveit_ros_benchmarks
+    - [ ] Convert moveit_ros_control_interface
+    - [ ] Convert moveit_ros_manipulation
+    - [ ] Convert moveit_ros_move_group
+    - [ ] Convert moveit_ros_perception
+    - [ ] Convert moveit_ros_robot_interaction
+    - [ ] Convert moveit_ros_visualization
+    - [ ] Convert moveit_ros_warehouse
+    - [ ] Convert moveit_setup_assistant
+    - [ ] Convert moveit_simple_controller_manager
+    - [ ] Convert moveit_visual_tools
+    - [ ] Convert moveit_task_constructor
+    - [ ] Convert moveit_resources
+    - [ ] Convert moveit_commander
+    - [ ] Convert moveit_fake_controller_manager
 - [ ] New features in ROS 2.0
   - [ ] Migrate plugin architecture to ROS2 nodelets
 - [ ] Documentation
@@ -125,13 +125,10 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
 
 
 ## Continuous Integration Status
-
-[![Build Status](https://travis-ci.org/ros-planning/moveit2.svg?branch=master)](https://travis-ci.org/ros-planning/moveit2)
+[![Build Status](https://travis-ci.org/AcutronicRobotics/moveit2.svg?branch=master)](https://travis-ci.org/AcutronicRobotics/moveit2)
 
 ## Docker Containers
-
 TODO [Create ROS2 Docker containers for MoveIt!](https://github.com/ros-planning/moveit2/issues/15)
 
 ## ROS Buildfarm
-
 Debian releases of MoveIt2 will not be available during the alpha development stage. Check back May 2019.
