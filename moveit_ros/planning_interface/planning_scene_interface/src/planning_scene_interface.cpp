@@ -52,16 +52,16 @@ public:
   {
     node_handle_ = ros::NodeHandle(ns);
     planning_scene_service_ =
-        node_handle_.serviceClient<moveit_msgs::GetPlanningScene>(move_group::GET_PLANNING_SCENE_SERVICE_NAME);
+        node_handle_.serviceClient<moveit_msgs::srv::GetPlanningScene>(move_group::GET_PLANNING_SCENE_SERVICE_NAME);
     apply_planning_scene_service_ =
-        node_handle_.serviceClient<moveit_msgs::ApplyPlanningScene>(move_group::APPLY_PLANNING_SCENE_SERVICE_NAME);
+        node_handle_.serviceClient<moveit_msgs::srv::ApplyPlanningScene>(move_group::APPLY_PLANNING_SCENE_SERVICE_NAME);
     planning_scene_diff_publisher_ = node_handle_.advertise<moveit_msgs::PlanningScene>("planning_scene", 1);
   }
 
   std::vector<std::string> getKnownObjectNames(bool with_type)
   {
-    moveit_msgs::GetPlanningScene::Request request;
-    moveit_msgs::GetPlanningScene::Response response;
+    moveit_msgs::srv::GetPlanningScene::Request request;
+    moveit_msgs::srv::GetPlanningScene::Response response;
     std::vector<std::string> result;
     request.components.components = request.components.WORLD_OBJECT_NAMES;
     if (!planning_scene_service_.call(request, response))
@@ -83,8 +83,8 @@ public:
   std::vector<std::string> getKnownObjectNamesInROI(double minx, double miny, double minz, double maxx, double maxy,
                                                     double maxz, bool with_type, std::vector<std::string>& types)
   {
-    moveit_msgs::GetPlanningScene::Request request;
-    moveit_msgs::GetPlanningScene::Response response;
+    moveit_msgs::srv::GetPlanningScene::Request request;
+    moveit_msgs::srv::GetPlanningScene::Response response;
     std::vector<std::string> result;
     request.components.components = request.components.WORLD_OBJECT_GEOMETRY;
     if (!planning_scene_service_.call(request, response))
@@ -135,8 +135,8 @@ public:
 
   std::map<std::string, geometry_msgs::Pose> getObjectPoses(const std::vector<std::string>& object_ids)
   {
-    moveit_msgs::GetPlanningScene::Request request;
-    moveit_msgs::GetPlanningScene::Response response;
+    moveit_msgs::srv::GetPlanningScene::Request request;
+    moveit_msgs::srv::GetPlanningScene::Response response;
     std::map<std::string, geometry_msgs::Pose> result;
     request.components.components = request.components.WORLD_OBJECT_GEOMETRY;
     if (!planning_scene_service_.call(request, response))
@@ -166,8 +166,8 @@ public:
 
   std::map<std::string, moveit_msgs::CollisionObject> getObjects(const std::vector<std::string>& object_ids)
   {
-    moveit_msgs::GetPlanningScene::Request request;
-    moveit_msgs::GetPlanningScene::Response response;
+    moveit_msgs::srv::GetPlanningScene::Request request;
+    moveit_msgs::srv::GetPlanningScene::Response response;
     std::map<std::string, moveit_msgs::CollisionObject> result;
     request.components.components = request.components.WORLD_OBJECT_GEOMETRY;
     if (!planning_scene_service_.call(request, response))
@@ -191,8 +191,8 @@ public:
   std::map<std::string, moveit_msgs::AttachedCollisionObject>
   getAttachedObjects(const std::vector<std::string>& object_ids)
   {
-    moveit_msgs::GetPlanningScene::Request request;
-    moveit_msgs::GetPlanningScene::Response response;
+    moveit_msgs::srv::GetPlanningScene::Request request;
+    moveit_msgs::srv::GetPlanningScene::Response response;
     std::map<std::string, moveit_msgs::AttachedCollisionObject> result;
     request.components.components = request.components.ROBOT_STATE_ATTACHED_OBJECTS;
     if (!planning_scene_service_.call(request, response))
@@ -217,8 +217,8 @@ public:
 
   bool applyPlanningScene(const moveit_msgs::PlanningScene& planning_scene)
   {
-    moveit_msgs::ApplyPlanningScene::Request request;
-    moveit_msgs::ApplyPlanningScene::Response response;
+    moveit_msgs::srv::ApplyPlanningScene::Request request;
+    moveit_msgs::srv::ApplyPlanningScene::Response response;
     request.scene = planning_scene;
     if (!apply_planning_scene_service_.call(request, response))
     {

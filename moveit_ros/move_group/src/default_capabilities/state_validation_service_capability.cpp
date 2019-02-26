@@ -51,8 +51,8 @@ void move_group::MoveGroupStateValidationService::initialize()
                                                          &MoveGroupStateValidationService::computeService, this);
 }
 
-bool move_group::MoveGroupStateValidationService::computeService(moveit_msgs::GetStateValidity::Request& req,
-                                                                 moveit_msgs::GetStateValidity::Response& res)
+bool move_group::MoveGroupStateValidationService::computeService(moveit_msgs::srv::GetStateValidity::Request& req,
+                                                                 moveit_msgs::srv::GetStateValidity::Response& res)
 {
   planning_scene_monitor::LockedPlanningSceneRO ls(context_->planning_scene_monitor_);
   robot_state::RobotState rs = ls->getCurrentState();

@@ -39,3 +39,7 @@ repositories:
     type: git
     url: https://github.com/AcutronicRobotics/octomap
     version: ros2
+  moveit_resources:
+    type: git
+    url: https://github.com/AcutronicRobotics/moveit_resources
+    version: master

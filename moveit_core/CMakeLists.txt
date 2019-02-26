@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10.2)
 project(moveit_core)
 
 # Default to C++14
@@ -102,7 +102,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     robot_trajectory/include
     kinematic_constraints/include
     macros/include
-    # planning_interface/include
+    planning_interface/include
     # planning_request_adapter/include
     planning_scene/include
     profiler/include
@@ -193,13 +193,13 @@ add_subdirectory(collision_detection_fcl)
 add_subdirectory(kinematic_constraints)
 add_subdirectory(planning_scene)
 # add_subdirectory(constraint_samplers)
-# add_subdirectory(planning_interface)
+add_subdirectory(planning_interface)
 # add_subdirectory(planning_request_adapter)
 add_subdirectory(trajectory_processing)
 # add_subdirectory(distance_field)
 # add_subdirectory(collision_distance_field)
 # add_subdirectory(kinematics_metrics)
 # add_subdirectory(dynamics_solver)
-# add_subdirectory(utils)
+add_subdirectory(utils)
 
 # ament_package()

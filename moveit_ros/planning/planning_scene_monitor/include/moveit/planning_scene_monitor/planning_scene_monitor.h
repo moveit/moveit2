@@ -335,7 +335,7 @@ public:
   /** @brief Request planning scene state using a service call
    *  @param service_name The name of the service to use for requesting the
    *     planning scene.  This must be a service of type
-   *     moveit_msgs::GetPlanningScene and is usually called
+   *     moveit_msgs::srv::GetPlanningScene and is usually called
    *     "/get_planning_scene".
    */
   bool requestPlanningSceneState(const std::string& service_name = DEFAULT_PLANNING_SCENE_SERVICE);
