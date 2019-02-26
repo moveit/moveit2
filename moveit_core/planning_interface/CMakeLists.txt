@@ -6,8 +6,6 @@ add_library(${MOVEIT_LIB_NAME}
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-# target_link_libraries(${MOVEIT_LIB_NAME} moveit_robot_state moveit_robot_trajectory ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
-
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   "moveit_robot_state"
   "moveit_robot_trajectory"
