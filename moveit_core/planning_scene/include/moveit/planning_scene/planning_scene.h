@@ -724,7 +724,7 @@ public:
   void getAttachedCollisionObjectMsgs(std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objs) const;
 
   /** \brief Construct a message (\e octomap) with the octomap data from the planning_scene */
-  bool getOctomapMsg(octomap_msgs::OctomapWithPose& octomap) const;
+  bool getOctomapMsg(octomap_msgs::msg::OctomapWithPose& octomap) const;
 
   /** \brief Construct a vector of messages (\e object_colors) with the colors of the objects from the planning_scene */
   void getObjectColorMsgs(std::vector<moveit_msgs::msg::ObjectColor>& object_colors) const;
