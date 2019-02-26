@@ -199,6 +199,6 @@ add_subdirectory(planning_request_adapter)
 # add_subdirectory(collision_distance_field)
 # add_subdirectory(kinematics_metrics)
 # add_subdirectory(dynamics_solver)
-# add_subdirectory(utils)
+add_subdirectory(utils)
 
 # ament_package()
