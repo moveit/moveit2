@@ -103,7 +103,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     kinematic_constraints/include
     macros/include
     planning_interface/include
-    # planning_request_adapter/include
+    planning_request_adapter/include
     # planning_scene/include
     profiler/include
     sensor_manager/include
@@ -119,6 +119,7 @@ set(dependencies
   moveit_collision_detection
   moveit_collision_detection_fcl
   moveit_kinematic_constraints
+  moveit_planning_request_adapter
   random_numbers
   tf2_eigen
   tf2_kdl
@@ -192,7 +193,7 @@ add_subdirectory(kinematic_constraints)
 # add_subdirectory(planning_scene)
 # add_subdirectory(constraint_samplers)
 add_subdirectory(planning_interface)
-# add_subdirectory(planning_request_adapter)
+add_subdirectory(planning_request_adapter)
 # add_subdirectory(trajectory_processing)
 # add_subdirectory(distance_field)
 # add_subdirectory(collision_distance_field)
