@@ -23,14 +23,14 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_exceptions
   moveit_kinematics_base)
 
-# if(BUILD_TESTING)
-#   find_package(ament_cmake_gtest REQUIRED)
-#   find_package(moveit_resources REQUIRED)
-#   include_directories(${moveit_resources_INCLUDE_DIRS})
-#
-#   ament_add_gtest(test_robot_model test/test.cpp)
-#   target_link_libraries(test_robot_model moveit_test_utils ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${MOVEIT_LIB_NAME})
-# endif()
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(moveit_resources REQUIRED)
+  include_directories(${moveit_resources_INCLUDE_DIRS})
+
+  ament_add_gtest(test_robot_model test/test.cpp)
+  target_link_libraries(test_robot_model moveit_test_utils ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${MOVEIT_LIB_NAME})
+endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
