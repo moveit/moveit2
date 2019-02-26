@@ -60,6 +60,20 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
       - [ ] kinematics_metrics
       - [ ] dynamics_solver
       - [ ] utils
+  - [ ] Necessary Ports for a Minimal Working Example
+      - [ ] moveit_ros_planning_interface
+     -  [ ] moveit_ros_planning
+         -   [ ] moveit_core
+         -   [ ] moveit_ros_perception
+     -  [ ] moveit_ros_warehouse
+       -  [ ] moveit_ros_planning
+       -  [ ] warehouse_ros
+     -  [ ] moveit_ros_manipulation
+         -   [ ] moveit_core
+         -   [ ] moveit_ros_planning
+         -   [ ] moveit_ros_move_group
+             -   [ ] moveit_core
+             -   [ ] moveit_ros_planning
   - [ ] Convert moveit_kinematics
   - [ ] Convert moveit_planners_ompl
   - [ ] Convert moveit_ros_planning
