@@ -38,9 +38,9 @@
 #define MOVEIT_PLANNING_INTERFACE_PLANNING_RESPONSE_
 
 #include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit_msgs/MoveItErrorCodes.h>
-#include <moveit_msgs/MotionPlanResponse.h>
-#include <moveit_msgs/MotionPlanDetailedResponse.h>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
+#include <moveit_msgs/msg/motion_plan_response.hpp>
+#include <moveit_msgs/msg/motion_plan_detailed_response.hpp>
 
 namespace planning_interface
 {
@@ -50,21 +50,21 @@ struct MotionPlanResponse
   {
   }
 
-  void getMessage(moveit_msgs::MotionPlanResponse& msg) const;
+  void getMessage(moveit_msgs::msg::MotionPlanResponse& msg) const;
 
   robot_trajectory::RobotTrajectoryPtr trajectory_;
   double planning_time_;
-  moveit_msgs::MoveItErrorCodes error_code_;
+  moveit_msgs::msg::MoveItErrorCodes error_code_;
 };
 
 struct MotionPlanDetailedResponse
 {
-  void getMessage(moveit_msgs::MotionPlanDetailedResponse& msg) const;
+  void getMessage(moveit_msgs::msg::MotionPlanDetailedResponse& msg) const;
 
   std::vector<robot_trajectory::RobotTrajectoryPtr> trajectory_;
   std::vector<std::string> description_;
   std::vector<double> processing_time_;
-  moveit_msgs::MoveItErrorCodes error_code_;
+  moveit_msgs::msg::MoveItErrorCodes error_code_;
 };
 
 }  // planning_interface
