@@ -145,18 +145,18 @@ public:
     double allotted_time = wait_for_servers.toSec();
 
     move_action_client_.reset(
-        new actionlib::SimpleActionClient<moveit_msgs::MoveGroupAction>(node_handle_, move_group::MOVE_ACTION, false));
+        new actionlib::SimpleActionClient<moveit_msgs::action::MoveGroupAction>(node_handle_, move_group::MOVE_ACTION, false));
     waitForAction(move_action_client_, move_group::MOVE_ACTION, timeout_for_servers, allotted_time);
 
     pick_action_client_.reset(
-        new actionlib::SimpleActionClient<moveit_msgs::PickupAction>(node_handle_, move_group::PICKUP_ACTION, false));
+        new actionlib::SimpleActionClient<moveit_msgs::action::PickupAction>(node_handle_, move_group::PICKUP_ACTION, false));
     waitForAction(pick_action_client_, move_group::PICKUP_ACTION, timeout_for_servers, allotted_time);
 
     place_action_client_.reset(
-        new actionlib::SimpleActionClient<moveit_msgs::PlaceAction>(node_handle_, move_group::PLACE_ACTION, false));
+        new actionlib::SimpleActionClient<moveit_msgs::action::PlaceAction>(node_handle_, move_group::PLACE_ACTION, false));
     waitForAction(place_action_client_, move_group::PLACE_ACTION, timeout_for_servers, allotted_time);
 
-    execute_action_client_.reset(new actionlib::SimpleActionClient<moveit_msgs::ExecuteTrajectoryAction>(
+    execute_action_client_.reset(new actionlib::SimpleActionClient<moveit_msgs::action::ExecuteTrajectoryAction>(
         node_handle_, move_group::EXECUTE_ACTION_NAME, false));
     waitForAction(execute_action_client_, move_group::EXECUTE_ACTION_NAME, timeout_for_servers, allotted_time);
 
@@ -258,7 +258,7 @@ public:
     return joint_model_group_;
   }
 
-  actionlib::SimpleActionClient<moveit_msgs::MoveGroupAction>& getMoveGroupClient() const
+  actionlib::SimpleActionClient<moveit_msgs::action::MoveGroupAction>& getMoveGroupClient() const
   {
     return *move_action_client_;
   }
@@ -580,10 +580,10 @@ public:
   MoveItErrorCode place(const std::string& object, const std::vector<geometry_msgs::PoseStamped>& poses,
                         bool plan_only = false)
   {
-    std::vector<moveit_msgs::PlaceLocation> locations;
+    std::vector<moveit_msgs::action::PlaceLocation> locations;
     for (std::size_t i = 0; i < poses.size(); ++i)
     {
-      moveit_msgs::PlaceLocation location;
+      moveit_msgs::action::PlaceLocation location;
       location.pre_place_approach.direction.vector.z = -1.0;
       location.post_place_retreat.direction.vector.x = -1.0;
       location.pre_place_approach.direction.header.frame_id = getRobotModel()->getModelFrame();
@@ -603,7 +603,7 @@ public:
     return place(object, locations, plan_only);
   }
 
-  MoveItErrorCode place(const std::string& object, const std::vector<moveit_msgs::PlaceLocation>& locations,
+  MoveItErrorCode place(const std::string& object, const std::vector<moveit_msgs::action::PlaceLocation>& locations,
                         bool plan_only = false)
   {
     if (!place_action_client_)
@@ -616,7 +616,7 @@ public:
       ROS_ERROR_STREAM_NAMED("move_group_interface", "Place action server not connected");
       return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
     }
-    moveit_msgs::PlaceGoal goal;
+    moveit_msgs::action::PlaceGoal goal;
     constructGoal(goal, object);
     goal.place_locations = locations;
     goal.planning_options.plan_only = plan_only;
@@ -656,7 +656,7 @@ public:
       ROS_ERROR_STREAM_NAMED("move_group_interface", "Pick action server not connected");
       return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
     }
-    moveit_msgs::PickupGoal goal;
+    moveit_msgs::action::PickupGoal goal;
     constructGoal(goal, object);
     goal.possible_grasps = grasps;
     goal.planning_options.plan_only = plan_only;
@@ -743,7 +743,7 @@ public:
       return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
     }
 
-    moveit_msgs::MoveGroupGoal goal;
+    moveit_msgs::action::MoveGroupGoal goal;
     constructGoal(goal);
     goal.planning_options.plan_only = true;
     goal.planning_options.look_around = false;
@@ -782,7 +782,7 @@ public:
       return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
     }
 
-    moveit_msgs::MoveGroupGoal goal;
+    moveit_msgs::action::MoveGroupGoal goal;
     constructGoal(goal);
     goal.planning_options.plan_only = false;
     goal.planning_options.look_around = can_look_;
@@ -821,7 +821,7 @@ public:
       return MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
     }
 
-    moveit_msgs::ExecuteTrajectoryGoal goal;
+    moveit_msgs::action::ExecuteTrajectoryGoal goal;
     goal.trajectory = plan.trajectory_;
 
     execute_action_client_->sendGoal(goal);
@@ -1070,14 +1070,14 @@ public:
       request.trajectory_constraints = *trajectory_constraints_;
   }
 
-  void constructGoal(moveit_msgs::MoveGroupGoal& goal)
+  void constructGoal(moveit_msgs::action::MoveGroupGoal& goal)
   {
     constructMotionPlanRequest(goal.request);
   }
 
-  void constructGoal(moveit_msgs::PickupGoal& goal_out, const std::string& object)
+  void constructGoal(moveit_msgs::action::PickupGoal& goal_out, const std::string& object)
   {
-    moveit_msgs::PickupGoal goal;
+    moveit_msgs::action::PickupGoal goal;
     goal.target_name = object;
     goal.group_name = opt_.group_name_;
     goal.end_effector = getEndEffector();
@@ -1093,9 +1093,9 @@ public:
     goal_out = goal;
   }
 
-  void constructGoal(moveit_msgs::PlaceGoal& goal_out, const std::string& object)
+  void constructGoal(moveit_msgs::action::PlaceGoal& goal_out, const std::string& object)
   {
-    moveit_msgs::PlaceGoal goal;
+    moveit_msgs::action::PlaceGoal goal;
     goal.attached_object_name = object;
     goal.group_name = opt_.group_name_;
     goal.allowed_planning_time = allowed_planning_time_;
@@ -1224,10 +1224,10 @@ private:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   robot_model::RobotModelConstPtr robot_model_;
   planning_scene_monitor::CurrentStateMonitorPtr current_state_monitor_;
-  std::unique_ptr<actionlib::SimpleActionClient<moveit_msgs::MoveGroupAction> > move_action_client_;
-  std::unique_ptr<actionlib::SimpleActionClient<moveit_msgs::ExecuteTrajectoryAction> > execute_action_client_;
-  std::unique_ptr<actionlib::SimpleActionClient<moveit_msgs::PickupAction> > pick_action_client_;
-  std::unique_ptr<actionlib::SimpleActionClient<moveit_msgs::PlaceAction> > place_action_client_;
+  std::unique_ptr<actionlib::SimpleActionClient<moveit_msgs::action::MoveGroupAction> > move_action_client_;
+  std::unique_ptr<actionlib::SimpleActionClient<moveit_msgs::action::ExecuteTrajectoryAction> > execute_action_client_;
+  std::unique_ptr<actionlib::SimpleActionClient<moveit_msgs::action::PickupAction> > pick_action_client_;
+  std::unique_ptr<actionlib::SimpleActionClient<moveit_msgs::action::PlaceAction> > place_action_client_;
 
   // general planning params
   robot_state::RobotStatePtr considered_start_state_;
@@ -1416,7 +1416,7 @@ moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveGrou
   return impl_->move(false);
 }
 
-actionlib::SimpleActionClient<moveit_msgs::MoveGroupAction>&
+actionlib::SimpleActionClient<moveit_msgs::action::MoveGroupAction>&
 moveit::planning_interface::MoveGroupInterface::getMoveGroupClient() const
 {
   return impl_->getMoveGroupClient();
@@ -1476,11 +1476,11 @@ moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveGrou
 moveit::planning_interface::MoveItErrorCode
 moveit::planning_interface::MoveGroupInterface::place(const std::string& object, bool plan_only)
 {
-  return impl_->place(object, std::vector<moveit_msgs::PlaceLocation>(), plan_only);
+  return impl_->place(object, std::vector<moveit_msgs::action::PlaceLocation>(), plan_only);
 }
 
 moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveGroupInterface::place(
-    const std::string& object, const std::vector<moveit_msgs::PlaceLocation>& locations, bool plan_only)
+    const std::string& object, const std::vector<moveit_msgs::action::PlaceLocation>& locations, bool plan_only)
 {
   return impl_->place(object, locations, plan_only);
 }
