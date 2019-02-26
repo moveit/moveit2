@@ -89,7 +89,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     backtrace/include
     collision_detection/include
     collision_detection_fcl/include
-    # constraint_samplers/include
+    constraint_samplers/include
     controller_manager/include
     # distance_field/include
     # collision_distance_field/include
@@ -191,7 +191,7 @@ add_subdirectory(collision_detection)
 add_subdirectory(collision_detection_fcl)
 add_subdirectory(kinematic_constraints)
 # add_subdirectory(planning_scene)
-# add_subdirectory(constraint_samplers)
+add_subdirectory(constraint_samplers)
 add_subdirectory(planning_interface)
 add_subdirectory(planning_request_adapter)
 # add_subdirectory(trajectory_processing)
