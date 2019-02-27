@@ -37,6 +37,8 @@
 #include <moveit/constraint_samplers/constraint_sampler_tools.h>
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 
+rclcpp::Logger logger = rclcpp::get_logger("constraint_samplers");
+
 void constraint_samplers::visualizeDistribution(const moveit_msgs::msg::Constraints& constr,
                                                 const planning_scene::PlanningSceneConstPtr& scene,
                                                 const std::string& group, const std::string& link_name,
@@ -59,13 +61,17 @@ double constraint_samplers::countSamplesPerSecond(const ConstraintSamplerPtr& sa
 {
   if (!sampler)
   {
-    ROS_ERROR_NAMED("constraint_samplers", "No sampler specified for counting samples per second");
+    RCLCPP_ERROR(logger, "No sampler specified for counting samples per second");
     return 0.0;
   }
   robot_state::RobotState ks(reference_state);
   unsigned long int valid = 0;
   unsigned long int total = 0;
-  ros::WallTime end = ros::WallTime::now() + ros::WallDuration(1.0);
+  //TODO RCLCPP::WallTimer has not a .now() function, and there is no wallDuration (they use std::chrono::nanoseconds)
+  // I'll use rclcpp::time, but this is something to fix.
+  rclcpp::Duration duration(1,0);
+  rclcpp::Time end = rclcpp::Clock().now() + duration;
+  // ros::WallTime end = ros::WallTime::now() + ros::WallDuration(1.0);
   do
   {
     static const unsigned int N = 10;
@@ -75,7 +81,7 @@ double constraint_samplers::countSamplesPerSecond(const ConstraintSamplerPtr& sa
       if (sampler->sample(ks, 1))
         valid++;
     }
-  } while (ros::WallTime::now() < end);
+  } while (rclcpp::Clock().now() < end);
   return (double)valid / (double)total;
 }
 
@@ -86,13 +92,14 @@ void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& samp
 {
   if (!sampler)
   {
-    ROS_ERROR_NAMED("constraint_samplers", "No sampler specified for visualizing distribution of samples");
+    RCLCPP_ERROR(logger, "No sampler specified for visualizing distribution of samples");
     return;
   }
   const robot_state::LinkModel* lm = reference_state.getLinkModel(link_name);
   if (!lm)
     return;
   robot_state::RobotState ks(reference_state);
+  rclcpp::Time stamp = rclcpp::Clock().now();
   std_msgs::msg::ColorRGBA color;
   color.r = 1.0f;
   color.g = 0.0f;
@@ -104,7 +111,7 @@ void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& samp
       continue;
     const Eigen::Vector3d& pos = ks.getGlobalLinkTransform(lm).translation();
     visualization_msgs::msg::Marker mk;
-    mk.header.stamp = ros::Time::now();
+    mk.header.stamp = stamp;
     mk.header.frame_id = sampler->getJointModelGroup()->getParentModel().getModelFrame();
     mk.ns = "constraint_samples";
     mk.id = i;
@@ -116,7 +123,7 @@ void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& samp
     mk.pose.orientation.w = 1.0;
     mk.scale.x = mk.scale.y = mk.scale.z = 0.035;
     mk.color = color;
-    mk.lifetime = ros::Duration(30.0);
+    mk.lifetime = rclcpp::Duration(30.0);
     markers.markers.push_back(mk);
   }
 }
