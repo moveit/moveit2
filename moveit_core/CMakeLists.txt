@@ -104,10 +104,10 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     macros/include
     planning_interface/include
     planning_request_adapter/include
-    # planning_scene/include
+    planning_scene/include
     profiler/include
     sensor_manager/include
-    # trajectory_processing/include
+    trajectory_processing/include
     # utils/include
     logging/include
 )
@@ -120,6 +120,8 @@ set(dependencies
   moveit_collision_detection_fcl
   moveit_kinematic_constraints
   moveit_planning_request_adapter
+  moveit_planning_scene
+  moveit_trajectory_processing
   random_numbers
   tf2_eigen
   tf2_kdl
@@ -190,15 +192,15 @@ add_subdirectory(robot_trajectory)
 add_subdirectory(collision_detection)
 add_subdirectory(collision_detection_fcl)
 add_subdirectory(kinematic_constraints)
-# add_subdirectory(planning_scene)
+add_subdirectory(planning_scene)
 add_subdirectory(constraint_samplers)
 add_subdirectory(planning_interface)
 add_subdirectory(planning_request_adapter)
-# add_subdirectory(trajectory_processing)
+add_subdirectory(trajectory_processing)
 # add_subdirectory(distance_field)
 # add_subdirectory(collision_distance_field)
 # add_subdirectory(kinematics_metrics)
 # add_subdirectory(dynamics_solver)
-# add_subdirectory(utils)
+add_subdirectory(utils)
 
 # ament_package()

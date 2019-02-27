@@ -1,21 +1,27 @@
-sudo: required
-
-dist: bionic
-
-services:
-  - docker
-  
 notifications:
   email:
     recipients:
       - lander@erlerobotics.com
       - anasarrak@erlerobotics.com
-      
+
+matrix:
+  include:
+    - os: linux
+      dist: bionic
+      services:
+        - docker
+      sudo:
+        - required
+    - os: osx
+      osx_image: xcode10.1
+
 before_script:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash ./osx-dependencies.sh; fi
   - mkdir /tmp/moveit2
   - mv * /tmp/moveit2
-  - cd .docker/ci
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd .docker/ci; fi
 
 script:
-  - docker build -t acutronicrobotics/moveit2 .
-  - docker run -v /tmp/moveit2:/ros2_ws/src/moveit2 acutronicrobotics/moveit2
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker build -t acutronicrobotics/moveit2 .; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run -v /tmp/moveit2:/ros2_ws/src/moveit2 acutronicrobotics/moveit2; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash /tmp/moveit2/osx-compile.sh; fi
