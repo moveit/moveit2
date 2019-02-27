@@ -48,7 +48,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit_msgs/srv/get_position_fk.hpp>
 #include <moveit_msgs/srv/get_position_ik.hpp>
-#include <moveit_msgs/msg/kinematics_solver_info.hpp>
+#include <moveit_msgs/msg/kinematic_solver_info.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 
 #include <kdl/chainfksolverpos_recursive.hpp>
@@ -92,7 +92,7 @@ public:
 #if KDL_VERSION_LESS(1, 4, 0)
   void updateInternalDataStructures();
 #else
-  void updateInternalDataStructures() override;
+  void updateInternalDataStructures();
 #endif
 #undef KDL_VERSION_LESS
 
