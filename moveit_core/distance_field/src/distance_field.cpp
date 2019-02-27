@@ -41,6 +41,8 @@
 #include <octomap/octomap.h>
 #include <octomap/OcTree.h>
 
+rclcpp::Logger logger = rclcpp::get_logger("distance_field");
+
 namespace distance_field
 {
 DistanceField::DistanceField(double size_x, double size_y, double size_z, double resolution, double origin_x,
@@ -200,7 +202,7 @@ bool DistanceField::getShapePoints(const shapes::Shape* shape, const Eigen::Isom
     const shapes::OcTree* oc = dynamic_cast<const shapes::OcTree*>(shape);
     if (!oc)
     {
-      ROS_ERROR_NAMED("distance_field", "Problem dynamic casting shape that claims to be OcTree");
+      RCLCPP_ERROR(logger, "Problem dynamic casting shape that claims to be OcTree");
       return false;
     }
     getOcTreePoints(oc->octree.get(), points);
@@ -288,7 +290,7 @@ void DistanceField::moveShapeInField(const shapes::Shape* shape, const Eigen::Is
 {
   if (shape->type == shapes::OCTREE)
   {
-    ROS_WARN_NAMED("distance_field", "Move shape not supported for Octree");
+    RCLCPP_WARN(logger, "Move shape not supported for Octree");
     return;
   }
   bodies::Body* body = bodies::createBodyFromShape(shape);
