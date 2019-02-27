@@ -43,3 +43,7 @@ repositories:
     type: git
     url: https://github.com/AcutronicRobotics/moveit_resources
     version: master
+  console_bridge_vendor:
+    type: git
+    url: https://github.com/ros2/console_bridge_vendor
+    version: crystal
