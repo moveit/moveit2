@@ -23,8 +23,8 @@ matrix:
 
 before_script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash osx.sh; fi
-  - mkdir /tmp/moveit2; fi
-  - mv * /tmp/moveit2; fi
+  - mkdir /tmp/moveit2
+  - mv * /tmp/moveit2
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd .docker/ci; fi
 
 script:
