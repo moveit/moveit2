@@ -22,7 +22,7 @@ matrix:
       osx_image: xcode10.1
 
 before_script:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash osx.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash ./osx.sh; fi
   - mkdir /tmp/moveit2
   - mv * /tmp/moveit2
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd .docker/ci; fi
@@ -30,4 +30,4 @@ before_script:
 script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker build -t acutronicrobotics/moveit2 .; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then docker run -v /tmp/moveit2:/ros2_ws/src/moveit2 acutronicrobotics/moveit2; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then osx-compile.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash ./osx-compile.sh; fi
