@@ -39,6 +39,7 @@
 
 #include <moveit/constraint_samplers/constraint_sampler.h>
 #include <visualization_msgs/msg/marker_array.hpp>
+#include "rclcpp/rclcpp.hpp"
 
 namespace constraint_samplers
 {
