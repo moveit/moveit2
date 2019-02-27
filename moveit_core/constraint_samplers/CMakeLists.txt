@@ -25,26 +25,26 @@ install(TARGETS ${MOVEIT_LIB_NAME}
 
 install(DIRECTORY include/ DESTINATION include)
 
-if(BUILD_TESTING)
-  find_package(orocos_kdl REQUIRED)
-  find_package(angles REQUIRED)
-  find_package(tf2_kdl REQUIRED)
-  find_package(moveit_resources REQUIRED)
-
-include_directories(${orocos_kdl_INCLUDE_DIRS} ${angles_INCLUDE_DIRS} ${tf2_kdl_INCLUDE_DIRS} ${moveit_resources_INCLUDE_DIRS})
-
-  ament_add_gtest(test_constraint_samplers
-    test/test_constraint_samplers.cpp
-    test/pr2_arm_kinematics_plugin.cpp
-    test/pr2_arm_ik.cpp
-  )
-  ament_target_dependencies(test_constraint_samplers
-    moveit_test_utils
-    ${MOVEIT_LIB_NAME}
-     angles
-     orcos_kdl
-     urdfdom
-     urdfdom_headers
-  )
-
-endif()
+# if(BUILD_TESTING)
+#   find_package(orocos_kdl REQUIRED)
+#   find_package(angles REQUIRED)
+#   find_package(tf2_kdl REQUIRED)
+#   find_package(moveit_resources REQUIRED)
+#
+# include_directories(${orocos_kdl_INCLUDE_DIRS} ${angles_INCLUDE_DIRS} ${tf2_kdl_INCLUDE_DIRS} ${moveit_resources_INCLUDE_DIRS})
+#
+#   ament_add_gtest(test_constraint_samplers
+#     test/test_constraint_samplers.cpp
+#     test/pr2_arm_kinematics_plugin.cpp
+#     test/pr2_arm_ik.cpp
+#   )
+#   ament_target_dependencies(test_constraint_samplers
+#     moveit_test_utils
+#     ${MOVEIT_LIB_NAME}
+#      angles
+#      orcos_kdl
+#      urdfdom
+#      urdfdom_headers
+#   )
+#
+# endif()
