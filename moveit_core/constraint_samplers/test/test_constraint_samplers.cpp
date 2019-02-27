@@ -44,7 +44,7 @@
 #include <moveit/utils/robot_model_test_utils.h>
 
 #include <geometric_shapes/shape_operations.h>
-#include <visualization/msg/marker_array.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 #include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
