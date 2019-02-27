@@ -7,8 +7,10 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   "moveit_planning_scene"
   "rclcpp"
   "rmw_implementation"
+  "urdf"
   "urdfdom"
   "urdfdom_headers"
+  "visualization_msgs"
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME}
