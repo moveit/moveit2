@@ -20,7 +20,7 @@ matrix:
       osx_image: xcode10.1
 
 before_script:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash ./osx.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then bash ./osx-dependencies.sh; fi
   - mkdir /tmp/moveit2
   - mv * /tmp/moveit2
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then cd .docker/ci; fi
