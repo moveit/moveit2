@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x #Debug
+#set -x #Debug
 set -e #exit on failure
 
 #Prepare for ros2
