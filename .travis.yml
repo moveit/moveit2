@@ -2,12 +2,6 @@ os:
   - linux
   - osx
 
-sudo:
-  - required
-
-services:
-  - docker
-
 notifications:
   email:
     recipients:
@@ -18,6 +12,10 @@ matrix:
   include:
     - os: linux
       dist: bionic
+      services:
+        - docker
+      sudo:
+        - required
     - os: osx
       osx_image: xcode10.1
 
