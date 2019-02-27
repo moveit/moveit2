@@ -47,15 +47,16 @@
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit/macros/deprecation.h>
-#include <moveit_msgs/PlanningScene.h>
-#include <moveit_msgs/RobotTrajectory.h>
-#include <moveit_msgs/Constraints.h>
-#include <moveit_msgs/PlanningSceneComponents.h>
-#include <octomap_msgs/OctomapWithPose.h>
+#include <moveit_msgs/msg/planning_scene.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <moveit_msgs/msg/constraints.hpp>
+#include <moveit_msgs/msg/planning_scene_components.hpp>
+#include <octomap_msgs/msg/octomap_with_pose.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 #include <boost/concept_check.hpp>
 #include <memory>
+#include "rclcpp/rclcpp.hpp"
 
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene
@@ -76,10 +77,10 @@ typedef boost::function<bool(const robot_state::RobotState&, bool)> StateFeasibi
 typedef boost::function<bool(const robot_state::RobotState&, const robot_state::RobotState&, bool)> MotionFeasibilityFn;
 
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their colors */
-typedef std::map<std::string, std_msgs::ColorRGBA> ObjectColorMap;
+typedef std::map<std::string, std_msgs::msg::ColorRGBA> ObjectColorMap;
 
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their types */
-typedef std::map<std::string, object_recognition_msgs::ObjectType> ObjectTypeMap;
+typedef std::map<std::string, object_recognition_msgs::msg::ObjectType> ObjectTypeMap;
 
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
@@ -127,7 +128,7 @@ public:
 
   /** \brief Return a new child PlanningScene that uses this one as parent and
    * has the diffs specified by \e msg applied. */
-  PlanningScenePtr diff(const moveit_msgs::PlanningScene& msg) const;
+  PlanningScenePtr diff(const moveit_msgs::msg::PlanningScene& msg) const;
 
   /** \brief Get the parent scene (whith respect to which the diffs are maintained). This may be empty */
   const PlanningSceneConstPtr& getParent() const
@@ -152,7 +153,7 @@ public:
   robot_state::RobotState& getCurrentStateNonConst();
 
   /** \brief Get a copy of the current state with components overwritten by the state message \e update */
-  robot_state::RobotStatePtr getCurrentStateUpdated(const moveit_msgs::RobotState& update) const;
+  robot_state::RobotStatePtr getCurrentStateUpdated(const moveit_msgs::msg::RobotState& update) const;
 
   /**
    * \name Reasoning about frames
@@ -189,21 +190,21 @@ public:
      body id or a collision object.
       Return identity when no transform is available. Use knowsFrameTransform() to test if this function will be
      successful or not. */
-  const Eigen::Isometry3d& getFrameTransform(const std::string& id) const;
+  const Eigen::Affine3d& getFrameTransform(const std::string& id) const;
 
   /** \brief Get the transform corresponding to the frame \e id. This will be known if \e id is a link name, an attached
      body id or a collision object.
       Return identity when no transform is available. Use knowsFrameTransform() to test if this function will be
      successful or not.
       Because this function is non-const, the current state transforms are also updated, if needed. */
-  const Eigen::Isometry3d& getFrameTransform(const std::string& id);
+  const Eigen::Affine3d& getFrameTransform(const std::string& id);
 
   /** \brief Get the transform corresponding to the frame \e id. This will be known if \e id is a link name, an attached
      body id or a collision object.
       Return identity when no transform is available. Use knowsFrameTransform() to test if this function will be
      successful or not. This function also
       updates the link transforms of \e state. */
-  const Eigen::Isometry3d& getFrameTransform(robot_state::RobotState& state, const std::string& id) const
+  const Eigen::Affine3d& getFrameTransform(robot_state::RobotState& state, const std::string& id) const
   {
     state.updateLinkTransforms();
     return getFrameTransform(static_cast<const robot_state::RobotState&>(state), id);
@@ -213,7 +214,7 @@ public:
      body id or a collision object.
       Return identity when no transform is available. Use knowsFrameTransform() to test if this function will be
      successful or not. */
-  const Eigen::Isometry3d& getFrameTransform(const robot_state::RobotState& state, const std::string& id) const;
+  const Eigen::Affine3d& getFrameTransform(const robot_state::RobotState& state, const std::string& id) const;
 
   /** \brief Check if a transform to the frame \e id is known. This will be known if \e id is a link name, an attached
    * body id or a collision object */
@@ -381,7 +382,7 @@ public:
 
   /** \brief Check if a given state is in collision (with the environment or self collision)
       If a group name is specified, collision checking is done for that group only. */
-  bool isStateColliding(const moveit_msgs::RobotState& state, const std::string& group = "",
+  bool isStateColliding(const moveit_msgs::msg::RobotState& state, const std::string& group = "",
                         bool verbose = false) const;
 
   /** \brief Check whether the current state is in collision, and if needed, updates the collision transforms of the
@@ -688,69 +689,69 @@ public:
   bool loadGeometryFromStream(std::istream& in);
 
   /** \brief Load the geometry of the planning scene from a stream at a certain location using offset*/
-  bool loadGeometryFromStream(std::istream& in, const Eigen::Isometry3d& offset);
+  bool loadGeometryFromStream(std::istream& in, const Eigen::Affine3d& offset);
 
   /** \brief Fill the message \e scene with the differences between this instance of PlanningScene with respect to the
      parent.
       If there is no parent, everything is considered to be a diff and the function behaves like getPlanningSceneMsg()
      */
-  void getPlanningSceneDiffMsg(moveit_msgs::PlanningScene& scene) const;
+  void getPlanningSceneDiffMsg(moveit_msgs::msg::PlanningScene& scene) const;
 
   /** \brief Construct a message (\e scene) with all the necessary data so that the scene can be later reconstructed to
      be
       exactly the same using setPlanningSceneMsg() */
-  void getPlanningSceneMsg(moveit_msgs::PlanningScene& scene) const;
+  void getPlanningSceneMsg(moveit_msgs::msg::PlanningScene& scene) const;
 
   /** \brief Construct a message (\e scene) with the data requested in \e comp. If all options in \e comp are filled,
       this will be a complete planning scene message */
-  void getPlanningSceneMsg(moveit_msgs::PlanningScene& scene, const moveit_msgs::PlanningSceneComponents& comp) const;
+  void getPlanningSceneMsg(moveit_msgs::msg::PlanningScene& scene, const moveit_msgs::msg::PlanningSceneComponents& comp) const;
 
   /** \brief Construct a message (\e collision_object) with the collision object data from the planning_scene for the
    * requested object*/
-  bool getCollisionObjectMsg(moveit_msgs::CollisionObject& collision_obj, const std::string& ns) const;
+  bool getCollisionObjectMsg(moveit_msgs::msg::CollisionObject& collision_obj, const std::string& ns) const;
 
   /** \brief Construct a vector of messages (\e collision_objects) with the collision object data for all objects in
    * planning_scene */
-  void getCollisionObjectMsgs(std::vector<moveit_msgs::CollisionObject>& collision_objs) const;
+  void getCollisionObjectMsgs(std::vector<moveit_msgs::msg::CollisionObject>& collision_objs) const;
 
   /** \brief Construct a message (\e attached_collision_object) with the attached collision object data from the
    * planning_scene for the requested object*/
-  bool getAttachedCollisionObjectMsg(moveit_msgs::AttachedCollisionObject& attached_collision_obj,
+  bool getAttachedCollisionObjectMsg(moveit_msgs::msg::AttachedCollisionObject& attached_collision_obj,
                                      const std::string& ns) const;
 
   /** \brief Construct a vector of messages (\e attached_collision_objects) with the attached collision object data for
    * all objects in planning_scene */
-  void getAttachedCollisionObjectMsgs(std::vector<moveit_msgs::AttachedCollisionObject>& attached_collision_objs) const;
+  void getAttachedCollisionObjectMsgs(std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objs) const;
 
   /** \brief Construct a message (\e octomap) with the octomap data from the planning_scene */
-  bool getOctomapMsg(octomap_msgs::OctomapWithPose& octomap) const;
+  bool getOctomapMsg(octomap_msgs::msg::OctomapWithPose& octomap) const;
 
   /** \brief Construct a vector of messages (\e object_colors) with the colors of the objects from the planning_scene */
-  void getObjectColorMsgs(std::vector<moveit_msgs::ObjectColor>& object_colors) const;
+  void getObjectColorMsgs(std::vector<moveit_msgs::msg::ObjectColor>& object_colors) const;
 
   /** \brief Apply changes to this planning scene as diffs, even if the message itself is not marked as being a diff
      (is_diff
       member). A parent is not required to exist. However, the existing data in the planning instance is not cleared.
      Data from
       the message is only appended (and in cases such as e.g., the robot state, is overwritten). */
-  bool setPlanningSceneDiffMsg(const moveit_msgs::PlanningScene& scene);
+  bool setPlanningSceneDiffMsg(const moveit_msgs::msg::PlanningScene& scene);
 
   /** \brief Set this instance of a planning scene to be the same as the one serialized in the \e scene message, even if
    * the message itself is marked as being a diff (is_diff member) */
-  bool setPlanningSceneMsg(const moveit_msgs::PlanningScene& scene);
+  bool setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& scene);
 
   /** \brief Call setPlanningSceneMsg() or setPlanningSceneDiffMsg() depending on how the is_diff member of the message
    * is set */
-  bool usePlanningSceneMsg(const moveit_msgs::PlanningScene& scene);
+  bool usePlanningSceneMsg(const moveit_msgs::msg::PlanningScene& scene);
 
-  bool processCollisionObjectMsg(const moveit_msgs::CollisionObject& object);
-  bool processAttachedCollisionObjectMsg(const moveit_msgs::AttachedCollisionObject& object);
+  bool processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject& object);
+  bool processAttachedCollisionObjectMsg(const moveit_msgs::msg::AttachedCollisionObject& object);
 
-  bool processPlanningSceneWorldMsg(const moveit_msgs::PlanningSceneWorld& world);
+  bool processPlanningSceneWorldMsg(const moveit_msgs::msg::PlanningSceneWorld& world);
 
-  void processOctomapMsg(const octomap_msgs::OctomapWithPose& map);
-  void processOctomapMsg(const octomap_msgs::Octomap& map);
-  void processOctomapPtr(const std::shared_ptr<const octomap::OcTree>& octree, const Eigen::Isometry3d& t);
+  void processOctomapMsg(const octomap_msgs::msg::OctomapWithPose& map);
+  void processOctomapMsg(const octomap_msgs::msg::Octomap& map);
+  void processOctomapPtr(const std::shared_ptr<const octomap::OcTree>& octree, const Eigen::Affine3d& t);
 
   /**
    * \brief Clear all collision objects in planning scene
@@ -760,7 +761,7 @@ public:
   /** \brief Set the current robot state to be \e state. If not
       all joint values are specified, the previously maintained
       joint values are kept. */
-  void setCurrentState(const moveit_msgs::RobotState& state);
+  void setCurrentState(const moveit_msgs::msg::RobotState& state);
 
   /** \brief Set the current robot state */
   void setCurrentState(const robot_state::RobotState& state);
@@ -773,15 +774,15 @@ public:
 
   bool hasObjectColor(const std::string& id) const;
 
-  const std_msgs::ColorRGBA& getObjectColor(const std::string& id) const;
-  void setObjectColor(const std::string& id, const std_msgs::ColorRGBA& color);
+  const std_msgs::msg::ColorRGBA& getObjectColor(const std::string& id) const;
+  void setObjectColor(const std::string& id, const std_msgs::msg::ColorRGBA& color);
   void removeObjectColor(const std::string& id);
   void getKnownObjectColors(ObjectColorMap& kc) const;
 
   bool hasObjectType(const std::string& id) const;
 
-  const object_recognition_msgs::ObjectType& getObjectType(const std::string& id) const;
-  void setObjectType(const std::string& id, const object_recognition_msgs::ObjectType& type);
+  const object_recognition_msgs::msg::ObjectType& getObjectType(const std::string& id) const;
+  void setObjectType(const std::string& id, const object_recognition_msgs::msg::ObjectType& type);
   void removeObjectType(const std::string& id);
   void getKnownObjectTypes(ObjectTypeMap& kc) const;
 
@@ -830,22 +831,22 @@ public:
 
   /** \brief Check if a given state is feasible, in accordance to the feasibility predicate specified by
    * setStateFeasibilityPredicate(). Returns true if no feasibility predicate was specified. */
-  bool isStateFeasible(const moveit_msgs::RobotState& state, bool verbose = false) const;
+  bool isStateFeasible(const moveit_msgs::msg::RobotState& state, bool verbose = false) const;
 
   /** \brief Check if a given state is feasible, in accordance to the feasibility predicate specified by
    * setStateFeasibilityPredicate(). Returns true if no feasibility predicate was specified. */
   bool isStateFeasible(const robot_state::RobotState& state, bool verbose = false) const;
 
   /** \brief Check if a given state satisfies a set of constraints */
-  bool isStateConstrained(const moveit_msgs::RobotState& state, const moveit_msgs::Constraints& constr,
+  bool isStateConstrained(const moveit_msgs::msg::RobotState& state, const moveit_msgs::msg::Constraints& constr,
                           bool verbose = false) const;
 
   /** \brief Check if a given state satisfies a set of constraints */
-  bool isStateConstrained(const robot_state::RobotState& state, const moveit_msgs::Constraints& constr,
+  bool isStateConstrained(const robot_state::RobotState& state, const moveit_msgs::msg::Constraints& constr,
                           bool verbose = false) const;
 
   /** \brief Check if a given state satisfies a set of constraints */
-  bool isStateConstrained(const moveit_msgs::RobotState& state,
+  bool isStateConstrained(const moveit_msgs::msg::RobotState& state,
                           const kinematic_constraints::KinematicConstraintSet& constr, bool verbose = false) const;
 
   /** \brief Check if a given state satisfies a set of constraints */
@@ -853,19 +854,19 @@ public:
                           const kinematic_constraints::KinematicConstraintSet& constr, bool verbose = false) const;
 
   /** \brief Check if a given state is valid. This means checking for collisions and feasibility */
-  bool isStateValid(const moveit_msgs::RobotState& state, const std::string& group = "", bool verbose = false) const;
+  bool isStateValid(const moveit_msgs::msg::RobotState& state, const std::string& group = "", bool verbose = false) const;
 
   /** \brief Check if a given state is valid. This means checking for collisions and feasibility */
   bool isStateValid(const robot_state::RobotState& state, const std::string& group = "", bool verbose = false) const;
 
   /** \brief Check if a given state is valid. This means checking for collisions, feasibility  and whether the user
    * specified validity conditions hold as well */
-  bool isStateValid(const moveit_msgs::RobotState& state, const moveit_msgs::Constraints& constr,
+  bool isStateValid(const moveit_msgs::msg::RobotState& state, const moveit_msgs::msg::Constraints& constr,
                     const std::string& group = "", bool verbose = false) const;
 
   /** \brief Check if a given state is valid. This means checking for collisions, feasibility  and whether the user
    * specified validity conditions hold as well */
-  bool isStateValid(const robot_state::RobotState& state, const moveit_msgs::Constraints& constr,
+  bool isStateValid(const robot_state::RobotState& state, const moveit_msgs::msg::Constraints& constr,
                     const std::string& group = "", bool verbose = false) const;
 
   /** \brief Check if a given state is valid. This means checking for collisions, feasibility  and whether the user
@@ -874,53 +875,53 @@ public:
                     const std::string& group = "", bool verbose = false) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance and feasibility) */
-  bool isPathValid(const moveit_msgs::RobotState& start_state, const moveit_msgs::RobotTrajectory& trajectory,
+  bool isPathValid(const moveit_msgs::msg::RobotState& start_state, const moveit_msgs::msg::RobotTrajectory& trajectory,
                    const std::string& group = "", bool verbose = false,
                    std::vector<std::size_t>* invalid_index = NULL) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
    * passed in trajectory. */
-  bool isPathValid(const moveit_msgs::RobotState& start_state, const moveit_msgs::RobotTrajectory& trajectory,
-                   const moveit_msgs::Constraints& path_constraints, const std::string& group = "",
+  bool isPathValid(const moveit_msgs::msg::RobotState& start_state, const moveit_msgs::msg::RobotTrajectory& trajectory,
+                   const moveit_msgs::msg::Constraints& path_constraints, const std::string& group = "",
                    bool verbose = false, std::vector<std::size_t>* invalid_index = NULL) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
    * passed in trajectory. */
-  bool isPathValid(const moveit_msgs::RobotState& start_state, const moveit_msgs::RobotTrajectory& trajectory,
-                   const moveit_msgs::Constraints& path_constraints, const moveit_msgs::Constraints& goal_constraints,
+  bool isPathValid(const moveit_msgs::msg::RobotState& start_state, const moveit_msgs::msg::RobotTrajectory& trajectory,
+                   const moveit_msgs::msg::Constraints& path_constraints, const moveit_msgs::msg::Constraints& goal_constraints,
                    const std::string& group = "", bool verbose = false,
                    std::vector<std::size_t>* invalid_index = NULL) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
    * passed in trajectory. */
-  bool isPathValid(const moveit_msgs::RobotState& start_state, const moveit_msgs::RobotTrajectory& trajectory,
-                   const moveit_msgs::Constraints& path_constraints,
-                   const std::vector<moveit_msgs::Constraints>& goal_constraints, const std::string& group = "",
+  bool isPathValid(const moveit_msgs::msg::RobotState& start_state, const moveit_msgs::msg::RobotTrajectory& trajectory,
+                   const moveit_msgs::msg::Constraints& path_constraints,
+                   const std::vector<moveit_msgs::msg::Constraints>& goal_constraints, const std::string& group = "",
                    bool verbose = false, std::vector<std::size_t>* invalid_index = NULL) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
    * passed in trajectory. */
   bool isPathValid(const robot_trajectory::RobotTrajectory& trajectory,
-                   const moveit_msgs::Constraints& path_constraints,
-                   const std::vector<moveit_msgs::Constraints>& goal_constraints, const std::string& group = "",
+                   const moveit_msgs::msg::Constraints& path_constraints,
+                   const std::vector<moveit_msgs::msg::Constraints>& goal_constraints, const std::string& group = "",
                    bool verbose = false, std::vector<std::size_t>* invalid_index = NULL) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
    * passed in trajectory. */
   bool isPathValid(const robot_trajectory::RobotTrajectory& trajectory,
-                   const moveit_msgs::Constraints& path_constraints, const moveit_msgs::Constraints& goal_constraints,
+                   const moveit_msgs::msg::Constraints& path_constraints, const moveit_msgs::msg::Constraints& goal_constraints,
                    const std::string& group = "", bool verbose = false,
                    std::vector<std::size_t>* invalid_index = NULL) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). */
   bool isPathValid(const robot_trajectory::RobotTrajectory& trajectory,
-                   const moveit_msgs::Constraints& path_constraints, const std::string& group = "",
+                   const moveit_msgs::msg::Constraints& path_constraints, const std::string& group = "",
                    bool verbose = false, std::vector<std::size_t>* invalid_index = NULL) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance and feasibility) */
@@ -952,14 +953,14 @@ public:
 
   /** \brief Check if a message includes any information about a planning scene, or it is just a default, empty message.
    */
-  static bool isEmpty(const moveit_msgs::PlanningScene& msg);
+  static bool isEmpty(const moveit_msgs::msg::PlanningScene& msg);
 
   /** \brief Check if a message includes any information about a planning scene world, or it is just a default, empty
    * message. */
-  static bool isEmpty(const moveit_msgs::PlanningSceneWorld& msg);
+  static bool isEmpty(const moveit_msgs::msg::PlanningSceneWorld& msg);
 
   /** \brief Check if a message includes any information about a robot state, or it is just a default, empty message. */
-  static bool isEmpty(const moveit_msgs::RobotState& msg);
+  static bool isEmpty(const moveit_msgs::msg::RobotState& msg);
 
   /** \brief Clone a planning scene. Even if the scene \e scene depends on a parent, the cloned scene will not. */
   static PlanningScenePtr clone(const PlanningSceneConstPtr& scene);
@@ -977,9 +978,9 @@ private:
                                                      const srdf::ModelConstSharedPtr& srdf_model);
 
   /* Helper functions for processing collision objects */
-  bool processCollisionObjectAdd(const moveit_msgs::CollisionObject& object);
-  bool processCollisionObjectRemove(const moveit_msgs::CollisionObject& object);
-  bool processCollisionObjectMove(const moveit_msgs::CollisionObject& object);
+  bool processCollisionObjectAdd(const moveit_msgs::msg::CollisionObject& object);
+  bool processCollisionObjectRemove(const moveit_msgs::msg::CollisionObject& object);
+  bool processCollisionObjectMove(const moveit_msgs::msg::CollisionObject& object);
 
   MOVEIT_STRUCT_FORWARD(CollisionDetector);
 

@@ -136,7 +136,7 @@ bool World::hasObject(const std::string& id) const
   return objects_.find(id) != objects_.end();
 }
 
-bool World::moveShapeInObject(const std::string& id, const shapes::ShapeConstPtr& shape, const Eigen::Isometry3d& pose)
+bool World::moveShapeInObject(const std::string& id, const shapes::ShapeConstPtr& shape, const Eigen::Affine3d& pose)
 {
   auto it = objects_.find(id);
   if (it != objects_.end())

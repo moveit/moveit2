@@ -37,12 +37,12 @@
 #ifndef MOVEIT_TRAJECTORY_PROCESSING_TRAJECTORY_TOOLS_
 #define MOVEIT_TRAJECTORY_PROCESSING_TRAJECTORY_TOOLS_
 
-#include <moveit_msgs/RobotTrajectory.h>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 
 namespace trajectory_processing
 {
-bool isTrajectoryEmpty(const moveit_msgs::RobotTrajectory& trajectory);
-std::size_t trajectoryWaypointCount(const moveit_msgs::RobotTrajectory& trajectory);
+bool isTrajectoryEmpty(const moveit_msgs::msg::RobotTrajectory& trajectory);
+std::size_t trajectoryWaypointCount(const moveit_msgs::msg::RobotTrajectory& trajectory);
 }
 
 #endif
