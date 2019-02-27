@@ -50,7 +50,7 @@ public:
   void initialize() override;
 
 private:
-  bool computePlanService(moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::GetMotionPlan::Response& res);
+  bool computePlanService(moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res);
 
   ros::ServiceServer plan_service_;
 };

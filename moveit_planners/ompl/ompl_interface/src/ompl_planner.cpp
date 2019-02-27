@@ -63,7 +63,7 @@ public:
     }
   }
 
-  bool computePlan(moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::GetMotionPlan::Response& res)
+  bool computePlan(moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res)
   {
     ROS_INFO("Received new planning request...");
     if (debug_)

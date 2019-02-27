@@ -52,7 +52,7 @@ public:
   }
 
   bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::GetMotionPlan::Response& res);
+             const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res);
 
   const PlanningStatistics& getLastPlanningStatistics() const
   {
@@ -61,7 +61,7 @@ public:
 
 protected:
   void runSolver(bool use_first, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                 const moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::GetMotionPlan::Response& res,
+                 const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res,
                  const PlanningParameters& params);
 
   boost::mutex planner_done_mutex_;

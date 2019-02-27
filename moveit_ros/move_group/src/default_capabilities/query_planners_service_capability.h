@@ -52,11 +52,11 @@ public:
   void initialize() override;
 
 private:
-  bool queryInterface(moveit_msgs::QueryPlannerInterfaces::Request& req,
-                      moveit_msgs::QueryPlannerInterfaces::Response& res);
+  bool queryInterface(moveit_msgs::srv::QueryPlannerInterfaces::Request& req,
+                      moveit_msgs::srv::QueryPlannerInterfaces::Response& res);
 
-  bool getParams(moveit_msgs::GetPlannerParams::Request& req, moveit_msgs::GetPlannerParams::Response& res);
-  bool setParams(moveit_msgs::SetPlannerParams::Request& req, moveit_msgs::SetPlannerParams::Response& res);
+  bool getParams(moveit_msgs::srv::GetPlannerParams::Request& req, moveit_msgs::srv::GetPlannerParams::Response& res);
+  bool setParams(moveit_msgs::srv::SetPlannerParams::Request& req, moveit_msgs::srv::SetPlannerParams::Response& res);
 
   ros::ServiceServer query_service_;
   ros::ServiceServer get_service_;
