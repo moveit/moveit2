@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x #Debug
+
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
   mkdir -p /tmp/ros2_ws/src
   cp -r /tmp/moveit2 /tmp/ros2_ws/src
