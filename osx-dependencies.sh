@@ -3,7 +3,7 @@
 #FROM https://index.ros.org/doc/ros2/Installation/OSX-Development-Setup/
 
 brew doctor
-brew install cppcheck pcre poco tinyxml
+brew install cppcheck pcre poco tinyxml openssl
 brew install asio tinyxml2
 brew install log4cxx
 python3 -m pip install argcomplete catkin_pkg colcon-common-extensions coverage empy flake8 flake8-blind-except \
