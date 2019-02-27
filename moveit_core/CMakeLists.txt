@@ -91,7 +91,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     collision_detection_fcl/include
     # constraint_samplers/include
     controller_manager/include
-    # distance_field/include
+    distance_field/include
     # collision_distance_field/include
     # dynamics_solver/include
     kinematics_base/include
@@ -196,7 +196,7 @@ add_subdirectory(planning_scene)
 add_subdirectory(planning_interface)
 # add_subdirectory(planning_request_adapter)
 add_subdirectory(trajectory_processing)
-# add_subdirectory(distance_field)
+add_subdirectory(distance_field)
 # add_subdirectory(collision_distance_field)
 # add_subdirectory(kinematics_metrics)
 # add_subdirectory(dynamics_solver)
