@@ -1120,7 +1120,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Affine
     }
     else
     {
-      RCLCPP_ERROR(logger, "Unknown marker in scene geometry file: %s ", marker);
+      RCLCPP_ERROR(logger, "Unknown marker in scene geometry file: %s ", marker.c_str());
       return false;
     }
   } while (true);
