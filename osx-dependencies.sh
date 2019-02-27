@@ -3,7 +3,6 @@
 #FROM https://index.ros.org/doc/ros2/Installation/OSX-Development-Setup/
 
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-  xcode-select --install
   brew doctor
   brew install cppcheck pcre poco tinyxml
   brew install asio tinyxml2
