@@ -38,7 +38,6 @@
 #include <moveit/distance_field/find_internal_points.h>
 #include <geometric_shapes/body_operations.h>
 #include <tf2_eigen/tf2_eigen.h>
-#include <ros/console.h>
 #include <octomap/octomap.h>
 #include <octomap/OcTree.h>
 
@@ -86,7 +85,7 @@ double DistanceField::getDistanceGradient(double x, double y, double z, double& 
 }
 
 void DistanceField::getIsoSurfaceMarkers(double min_distance, double max_distance, const std::string& frame_id,
-                                         const ros::Time stamp, visualization_msgs::msg::Marker& inf_marker) const
+                                         const rclcpp::Time stamp, visualization_msgs::msg::Marker& inf_marker) const
 {
   inf_marker.points.clear();
   inf_marker.header.frame_id = frame_id;
@@ -130,7 +129,7 @@ void DistanceField::getIsoSurfaceMarkers(double min_distance, double max_distanc
 }
 
 void DistanceField::getGradientMarkers(double min_distance, double max_distance, const std::string& frame_id,
-                                       const ros::Time& stamp, visualization_msgs::msg::MarkerArray& marker_array) const
+                                       const rclcpp::Time& stamp, visualization_msgs::msg::MarkerArray& marker_array) const
 {
   Eigen::Vector3d unit_x(1, 0, 0);
   Eigen::Vector3d unit_y(0, 1, 0);
@@ -332,7 +331,7 @@ void DistanceField::removeShapeFromField(const shapes::Shape* shape, const geome
 }
 
 void DistanceField::getPlaneMarkers(PlaneVisualizationType type, double length, double width, double height,
-                                    const Eigen::Vector3d& origin, const std::string& frame_id, const ros::Time stamp,
+                                    const Eigen::Vector3d& origin, const std::string& frame_id, const rclcpp::Time stamp,
                                     visualization_msgs::msg::Marker& plane_marker) const
 {
   plane_marker.header.frame_id = frame_id;
@@ -457,7 +456,7 @@ void DistanceField::setPoint(int xCell, int yCell, int zCell, double dist, geome
   color.b = dist / max_distance;  // dist/max_distance * 0.1;
 }
 
-void DistanceField::getProjectionPlanes(const std::string& frame_id, const ros::Time& stamp, double max_dist,
+void DistanceField::getProjectionPlanes(const std::string& frame_id, const rclcpp::Time& stamp, double max_dist,
                                         visualization_msgs::msg::Marker& marker) const
 {
   int max_x_cell = getXNumCells();
