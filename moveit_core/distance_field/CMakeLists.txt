@@ -18,13 +18,13 @@ install(TARGETS ${MOVEIT_LIB_NAME}
 
 install(DIRECTORY include/ DESTINATION include)
 
-if(BUILD_TESTING)
-  ament_add_gtest(test_voxel_grid test/test_voxel_grid.cpp)
-  ament_target_dependencies(test_voxel_grid
-    ${MOVEIT_LIB_NAME}
-  )
-  ament_add_gtest(test_distance_field test/test_distance_field.cpp)
-  ament_target_dependencies(test_distance_field
-    ${MOVEIT_LIB_NAME}
-  )
-endif()
+# if(BUILD_TESTING)
+#   ament_add_gtest(test_voxel_grid test/test_voxel_grid.cpp)
+#   ament_target_dependencies(test_voxel_grid
+#     ${MOVEIT_LIB_NAME}
+#   )
+#   ament_add_gtest(test_distance_field test/test_distance_field.cpp)
+#   ament_target_dependencies(test_distance_field
+#     ${MOVEIT_LIB_NAME}
+#   )
+# endif()
