@@ -66,7 +66,7 @@ bool transformToEndEffectorGoal(const geometry_msgs::PoseStamped& goal_pose,
 }
 }
 
-bool PlacePlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene, const moveit_msgs::PlaceGoal& goal)
+bool PlacePlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene, const moveit_msgs::action::PlaceGoal& goal)
 {
   double timeout = goal.allowed_planning_time;
   ros::WallTime endtime = ros::WallTime::now() + ros::WallDuration(timeout);
@@ -306,7 +306,7 @@ bool PlacePlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene
   for (std::size_t i = 0; i < goal.place_locations.size(); ++i)
   {
     ManipulationPlanPtr p(new ManipulationPlan(const_plan_data));
-    const moveit_msgs::PlaceLocation& pl = goal.place_locations[i];
+    const moveit_msgs::action::PlaceLocation& pl = goal.place_locations[i];
 
     if (goal.place_eef)
       p->goal_pose_ = pl.place_pose;
@@ -366,7 +366,7 @@ bool PlacePlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene
 }
 
 PlacePlanPtr PickPlace::planPlace(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                  const moveit_msgs::PlaceGoal& goal) const
+                                  const moveit_msgs::action::PlaceGoal& goal) const
 {
   PlacePlanPtr p(new PlacePlan(shared_from_this()));
   if (planning_scene::PlanningScene::isEmpty(goal.planning_options.planning_scene_diff))

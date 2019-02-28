@@ -39,7 +39,7 @@
 
 #include <vector>
 #include <string>
-#include <moveit_msgs/RobotTrajectory.h>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit/macros/class_forward.h>
 
 /// Namespace for the base class of a MoveIt! controller manager
@@ -121,6 +121,10 @@ public:
   }
 
   /** \brief Send a trajectory to the controller.
+   *
+   * The controller is expected to execute the trajectory, but this function call should not block.
+   * Blocking is achievable by calling waitForExecution().
+   * Return false when the controller cannot accept the trajectory. */
    *
    * The controller is expected to execute the trajectory, but this function call should not block.
    * Blocking is achievable by calling waitForExecution().

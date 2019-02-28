@@ -54,7 +54,7 @@ public:
     sbpl_interface_.reset(new sbpl_interface::SBPLInterface(model));
   }
 
-  bool canServiceRequest(const moveit_msgs::GetMotionPlan::Request& req,
+  bool canServiceRequest(const moveit_msgs::srv::GetMotionPlan::Request& req,
                          planning_interface::PlannerCapability& capabilities) const
   {
     // TODO: this is a dummy implementation
@@ -63,7 +63,7 @@ public:
   }
 
   bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::GetMotionPlan::Response& res) const
+             const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res) const
   {
     sbpl_interface::PlanningParameters params;
     params.use_bfs_ = false;
@@ -72,12 +72,12 @@ public:
   }
 
   bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::msg::MotionPlanDetailedResponse& res) const
+             const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::msg::MotionPlanDetailedResponse& res) const
   {
     sbpl_interface::PlanningParameters params;
     params.use_bfs_ = false;
 
-    moveit_msgs::GetMotionPlan::Response res2;
+    moveit_msgs::srv::GetMotionPlan::Response res2;
     if (sbpl_interface_->solve(planning_scene, req, res2, params))
     {
       res.trajectory_start = res2.trajectory_start;

@@ -693,7 +693,7 @@ public:
   /** \brief Get the move_group action client used by the \e MoveGroupInterface.
       The client can be used for querying the execution state of the trajectory and abort trajectory execution
       during asynchronous execution. */
-  actionlib::SimpleActionClient<moveit_msgs::MoveGroupAction>& getMoveGroupClient() const;
+  actionlib::SimpleActionClient<moveit_msgs::action::MoveGroupAction>& getMoveGroupClient() const;
 
   /** \brief Plan and execute a trajectory that takes the group of joints declared in the constructor to the specified
      target.
@@ -779,7 +779,7 @@ public:
 
   /** \brief Pick up an object
 
-      calls the external moveit_msgs::GraspPlanning service "plan_grasps" to compute possible grasps */
+      calls the external moveit_msgs::srv::GraspPlanning service "plan_grasps" to compute possible grasps */
   MoveItErrorCode planGraspsAndPick(const std::string& object = "", bool plan_only = false);
 
   /** \brief Pick up an object
@@ -790,7 +790,7 @@ public:
   MoveItErrorCode place(const std::string& object, bool plan_only = false);
 
   /** \brief Place an object at one of the specified possible locations */
-  MoveItErrorCode place(const std::string& object, const std::vector<moveit_msgs::PlaceLocation>& locations,
+  MoveItErrorCode place(const std::string& object, const std::vector<moveit_msgs::action::PlaceLocation>& locations,
                         bool plan_only = false);
 
   /** \brief Place an object at one of the specified possible locations */

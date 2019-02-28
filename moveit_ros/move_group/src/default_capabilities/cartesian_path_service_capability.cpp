@@ -70,8 +70,8 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene,
 }
 }
 
-bool move_group::MoveGroupCartesianPathService::computeService(moveit_msgs::GetCartesianPath::Request& req,
-                                                               moveit_msgs::GetCartesianPath::Response& res)
+bool move_group::MoveGroupCartesianPathService::computeService(moveit_msgs::srv::GetCartesianPath::Request& req,
+                                                               moveit_msgs::srv::GetCartesianPath::Response& res)
 {
   ROS_INFO("Received request to compute Cartesian path");
   context_->planning_scene_monitor_->updateFrameTransforms();

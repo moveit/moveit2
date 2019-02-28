@@ -140,8 +140,8 @@ void move_group::MoveGroupKinematicsService::computeIK(
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
 }
 
-bool move_group::MoveGroupKinematicsService::computeIKService(moveit_msgs::GetPositionIK::Request& req,
-                                                              moveit_msgs::GetPositionIK::Response& res)
+bool move_group::MoveGroupKinematicsService::computeIKService(moveit_msgs::srv::GetPositionIK::Request& req,
+                                                              moveit_msgs::srv::GetPositionIK::Response& res)
 {
   context_->planning_scene_monitor_->updateFrameTransforms();
 
@@ -169,8 +169,8 @@ bool move_group::MoveGroupKinematicsService::computeIKService(moveit_msgs::GetPo
   return true;
 }
 
-bool move_group::MoveGroupKinematicsService::computeFKService(moveit_msgs::GetPositionFK::Request& req,
-                                                              moveit_msgs::GetPositionFK::Response& res)
+bool move_group::MoveGroupKinematicsService::computeFKService(moveit_msgs::srv::GetPositionFK::Request& req,
+                                                              moveit_msgs::srv::GetPositionFK::Response& res)
 {
   if (req.fk_link_names.empty())
   {

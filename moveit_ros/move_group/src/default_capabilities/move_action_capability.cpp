@@ -51,20 +51,20 @@ move_group::MoveGroupMoveAction::MoveGroupMoveAction()
 void move_group::MoveGroupMoveAction::initialize()
 {
   // start the move action server
-  move_action_server_.reset(new actionlib::SimpleActionServer<moveit_msgs::MoveGroupAction>(
+  move_action_server_.reset(new actionlib::SimpleActionServer<moveit_msgs::action::MoveGroupAction>(
       root_node_handle_, MOVE_ACTION, boost::bind(&MoveGroupMoveAction::executeMoveCallback, this, _1), false));
   move_action_server_->registerPreemptCallback(boost::bind(&MoveGroupMoveAction::preemptMoveCallback, this));
   move_action_server_->start();
 }
 
-void move_group::MoveGroupMoveAction::executeMoveCallback(const moveit_msgs::MoveGroupGoalConstPtr& goal)
+void move_group::MoveGroupMoveAction::executeMoveCallback(const moveit_msgs::action::MoveGroupGoalConstPtr& goal)
 {
   setMoveState(PLANNING);
   // before we start planning, ensure that we have the latest robot state received...
   context_->planning_scene_monitor_->waitForCurrentRobotState(ros::Time::now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
-  moveit_msgs::MoveGroupResult action_res;
+  moveit_msgs::action::MoveGroupResult action_res;
   if (goal->planning_options.plan_only || !context_->allow_trajectory_execution_)
   {
     if (!goal->planning_options.plan_only)
@@ -93,8 +93,8 @@ void move_group::MoveGroupMoveAction::executeMoveCallback(const moveit_msgs::Mov
   preempt_requested_ = false;
 }
 
-void move_group::MoveGroupMoveAction::executeMoveCallback_PlanAndExecute(const moveit_msgs::MoveGroupGoalConstPtr& goal,
-                                                                         moveit_msgs::MoveGroupResult& action_res)
+void move_group::MoveGroupMoveAction::executeMoveCallback_PlanAndExecute(const moveit_msgs::action::MoveGroupGoalConstPtr& goal,
+                                                                         moveit_msgs::action::MoveGroupResult& action_res)
 {
   ROS_INFO("Combined planning and execution request received for MoveGroup action. Forwarding to planning and "
            "execution pipeline.");
@@ -157,8 +157,8 @@ void move_group::MoveGroupMoveAction::executeMoveCallback_PlanAndExecute(const m
   action_res.error_code = plan.error_code_;
 }
 
-void move_group::MoveGroupMoveAction::executeMoveCallback_PlanOnly(const moveit_msgs::MoveGroupGoalConstPtr& goal,
-                                                                   moveit_msgs::MoveGroupResult& action_res)
+void move_group::MoveGroupMoveAction::executeMoveCallback_PlanOnly(const moveit_msgs::action::MoveGroupGoalConstPtr& goal,
+                                                                   moveit_msgs::action::MoveGroupResult& action_res)
 {
   ROS_INFO("Planning request received for MoveGroup action. Forwarding to planning pipeline.");
 

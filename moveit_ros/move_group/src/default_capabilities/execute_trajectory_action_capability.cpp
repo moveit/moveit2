@@ -50,7 +50,7 @@ MoveGroupExecuteTrajectoryAction::MoveGroupExecuteTrajectoryAction() : MoveGroup
 void MoveGroupExecuteTrajectoryAction::initialize()
 {
   // start the move action server
-  execute_action_server_.reset(new actionlib::SimpleActionServer<moveit_msgs::ExecuteTrajectoryAction>(
+  execute_action_server_.reset(new actionlib::SimpleActionServer<moveit_msgs::action::ExecuteTrajectoryAction>(
       root_node_handle_, EXECUTE_ACTION_NAME,
       boost::bind(&MoveGroupExecuteTrajectoryAction::executePathCallback, this, _1), false));
   execute_action_server_->registerPreemptCallback(
@@ -58,9 +58,9 @@ void MoveGroupExecuteTrajectoryAction::initialize()
   execute_action_server_->start();
 }
 
-void MoveGroupExecuteTrajectoryAction::executePathCallback(const moveit_msgs::ExecuteTrajectoryGoalConstPtr& goal)
+void MoveGroupExecuteTrajectoryAction::executePathCallback(const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal)
 {
-  moveit_msgs::ExecuteTrajectoryResult action_res;
+  moveit_msgs::action::ExecuteTrajectoryResult action_res;
   if (!context_->trajectory_execution_manager_)
   {
     const std::string response = "Cannot execute trajectory since ~allow_trajectory_execution was set to false";
@@ -88,8 +88,8 @@ void MoveGroupExecuteTrajectoryAction::executePathCallback(const moveit_msgs::Ex
   setExecuteTrajectoryState(IDLE);
 }
 
-void MoveGroupExecuteTrajectoryAction::executePath(const moveit_msgs::ExecuteTrajectoryGoalConstPtr& goal,
-                                                   moveit_msgs::ExecuteTrajectoryResult& action_res)
+void MoveGroupExecuteTrajectoryAction::executePath(const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal,
+                                                   moveit_msgs::action::ExecuteTrajectoryResult& action_res)
 {
   ROS_INFO_NAMED(capability_name_, "Execution request received");
 
@@ -130,7 +130,7 @@ void MoveGroupExecuteTrajectoryAction::preemptExecuteTrajectoryCallback()
 
 void MoveGroupExecuteTrajectoryAction::setExecuteTrajectoryState(MoveGroupState state)
 {
-  moveit_msgs::ExecuteTrajectoryFeedback execute_feedback;
+  moveit_msgs::action::ExecuteTrajectoryFeedback execute_feedback;
   execute_feedback.state = stateToStr(state);
   execute_action_server_->publishFeedback(execute_feedback);
 }

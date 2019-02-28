@@ -51,8 +51,8 @@ public:
   void initialize() override;
 
 private:
-  bool computeIKService(moveit_msgs::GetPositionIK::Request& req, moveit_msgs::GetPositionIK::Response& res);
-  bool computeFKService(moveit_msgs::GetPositionFK::Request& req, moveit_msgs::GetPositionFK::Response& res);
+  bool computeIKService(moveit_msgs::srv::GetPositionIK::Request& req, moveit_msgs::srv::GetPositionIK::Response& res);
+  bool computeFKService(moveit_msgs::srv::GetPositionFK::Request& req, moveit_msgs::srv::GetPositionFK::Response& res);
 
   void computeIK(
       moveit_msgs::msg::PositionIKRequest& req, moveit_msgs::msg::RobotState& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
