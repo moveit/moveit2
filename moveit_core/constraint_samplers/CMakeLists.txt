@@ -15,9 +15,10 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_kinematic_constraints
   moveit_kinematics_base
   moveit_planning_scene
+  urdf
   urdfdom
   urdfdom_headers
-)
+  visualization_msgs)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
