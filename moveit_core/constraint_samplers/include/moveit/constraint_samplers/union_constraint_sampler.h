@@ -38,6 +38,7 @@
 #define MOVEIT_CONSTRAINT_SAMPLERS_DEFAULT_UNION_CONSTRAINT_SAMPLER_
 
 #include <moveit/constraint_samplers/constraint_sampler.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace constraint_samplers
 {
@@ -117,7 +118,7 @@ public:
    *
    * @return Always true
    */
-  bool configure(const moveit_msgs::Constraints& constr) override
+  bool configure(const moveit_msgs::msg::Constraints& constr) override
   {
     return true;
   }
@@ -129,7 +130,7 @@ public:
    *
    * @return Always true
    */
-  virtual bool canService(const moveit_msgs::Constraints& constr) const
+  virtual bool canService(const moveit_msgs::msg::Constraints& constr) const
   {
     return true;
   }

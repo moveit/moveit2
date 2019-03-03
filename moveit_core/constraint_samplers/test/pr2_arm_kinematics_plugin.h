@@ -46,10 +46,10 @@
 #include <angles/angles.h>
 
 #include <moveit/macros/class_forward.h>
-#include <moveit_msgs/GetPositionFK.h>
-#include <moveit_msgs/GetPositionIK.h>
-#include <moveit_msgs/KinematicSolverInfo.h>
-#include <moveit_msgs/MoveItErrorCodes.h>
+#include <moveit_msgs/srv/get_position_fk.hpp>
+#include <moveit_msgs/srv/get_position_ik.hpp>
+#include <moveit_msgs/msg/kinematic_solver_info.hpp>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
 
 #include <kdl/chainfksolverpos_recursive.hpp>
 
@@ -92,7 +92,7 @@ public:
 #if KDL_VERSION_LESS(1, 4, 0)
   void updateInternalDataStructures();
 #else
-  void updateInternalDataStructures() override;
+  void updateInternalDataStructures();
 #endif
 #undef KDL_VERSION_LESS
 
@@ -110,7 +110,7 @@ public:
 
   int cartToJntSearch(const KDL::JntArray& q_in, const KDL::Frame& p_in, KDL::JntArray& q_out, const double& timeout);
 
-  void getSolverInfo(moveit_msgs::KinematicSolverInfo& response)
+  void getSolverInfo(moveit_msgs::msg::KinematicSolverInfo& response)
   {
     pr2_arm_ik_.getSolverInfo(response);
   }
@@ -127,7 +127,7 @@ private:
 
 Eigen::Isometry3f KDLToEigenMatrix(const KDL::Frame& p);
 double computeEuclideanDistance(const std::vector<double>& array_1, const KDL::JntArray& array_2);
-void getKDLChainInfo(const KDL::Chain& chain, moveit_msgs::KinematicSolverInfo& chain_info);
+void getKDLChainInfo(const KDL::Chain& chain, moveit_msgs::msg::KinematicSolverInfo& chain_info);
 
 MOVEIT_CLASS_FORWARD(PR2ArmKinematicsPlugin);
 
@@ -153,8 +153,8 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   bool getPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, std::vector<double>& solution,
-      moveit_msgs::MoveItErrorCodes& error_code,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, std::vector<double>& solution,
+      moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   /**
@@ -166,8 +166,8 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-      std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
   /**
    * @brief Given a desired pose of the end-effector, search for the joint angles required to reach it.
@@ -179,9 +179,9 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
       const std::vector<double>& consistency_limits, std::vector<double>& solution,
-      moveit_msgs::MoveItErrorCodes& error_code,
+      moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   /**
@@ -193,8 +193,8 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-      std::vector<double>& solution, const IKCallbackFn& solution_callback, moveit_msgs::MoveItErrorCodes& error_code,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      std::vector<double>& solution, const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   /**
@@ -208,9 +208,9 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
       const std::vector<double>& consistency_limits, std::vector<double>& solution,
-      const IKCallbackFn& solution_callback, moveit_msgs::MoveItErrorCodes& error_code,
+      const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   /**
@@ -221,7 +221,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   bool getPositionFK(const std::vector<std::string>& link_names, const std::vector<double>& joint_angles,
-                     std::vector<geometry_msgs::Pose>& poses) const override;
+                     std::vector<geometry_msgs::msg::Pose>& poses) const override;
 
   /**
    * @brief  Initialization function for the kinematics
@@ -249,16 +249,16 @@ protected:
   int dimension_;
   std::shared_ptr<KDL::ChainFkSolverPos_recursive> jnt_to_pose_solver_;
   KDL::Chain kdl_chain_;
-  moveit_msgs::KinematicSolverInfo ik_solver_info_, fk_solver_info_;
+  moveit_msgs::msg::KinematicSolverInfo ik_solver_info_, fk_solver_info_;
 
   mutable IKCallbackFn desiredPoseCallback_;
   mutable IKCallbackFn solutionCallback_;
 
   void desiredPoseCallback(const KDL::JntArray& jnt_array, const KDL::Frame& ik_pose,
-                           moveit_msgs::MoveItErrorCodes& error_code) const;
+                           moveit_msgs::msg::MoveItErrorCodes& error_code) const;
 
   void jointSolutionCallback(const KDL::JntArray& jnt_array, const KDL::Frame& ik_pose,
-                             moveit_msgs::MoveItErrorCodes& error_code) const;
+                             moveit_msgs::msg::MoveItErrorCodes& error_code) const;
 };
 }
 

@@ -44,7 +44,7 @@
 #include <moveit/utils/robot_model_test_utils.h>
 
 #include <geometric_shapes/shape_operations.h>
-#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 #include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
@@ -118,7 +118,7 @@ TEST_F(LoadPlanningModelsPr2, JointConstraintsSamplerSimple)
   ks_const.setToDefaultValues();
 
   kinematic_constraints::JointConstraint jc1(robot_model_);
-  moveit_msgs::JointConstraint jcm1;
+  moveit_msgs::msg::JointConstraint jcm1;
   // leaving off joint name
   jcm1.position = 0.42;
   jcm1.tolerance_above = 0.01;
@@ -154,7 +154,7 @@ TEST_F(LoadPlanningModelsPr2, JointConstraintsSamplerSimple)
 
   kinematic_constraints::JointConstraint jc2(robot_model_);
 
-  moveit_msgs::JointConstraint jcm2;
+  moveit_msgs::msg::JointConstraint jcm2;
   jcm2.joint_name = "r_shoulder_pan_joint";
   jcm2.position = 0.54;
   jcm2.tolerance_above = 0.01;
@@ -256,14 +256,14 @@ TEST_F(LoadPlanningModelsPr2, IKConstraintsSamplerSimple)
   robot_state::Transforms& tf = ps_->getTransformsNonConst();
 
   kinematic_constraints::PositionConstraint pc(robot_model_);
-  moveit_msgs::PositionConstraint pcm;
+  moveit_msgs::msg::PositionConstraint pcm;
 
   pcm.link_name = "l_wrist_roll_link";
   pcm.target_point_offset.x = 0;
   pcm.target_point_offset.y = 0;
   pcm.target_point_offset.z = 0;
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
   pcm.constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -326,7 +326,7 @@ TEST_F(LoadPlanningModelsPr2, OrientationConstraintsSampler)
   robot_state::Transforms& tf = ps_->getTransformsNonConst();
 
   kinematic_constraints::OrientationConstraint oc(robot_model_);
-  moveit_msgs::OrientationConstraint ocm;
+  moveit_msgs::msg::OrientationConstraint ocm;
 
   ocm.link_name = "r_wrist_roll_link";
   ocm.header.frame_id = ocm.link_name;
@@ -369,14 +369,14 @@ TEST_F(LoadPlanningModelsPr2, IKConstraintsSamplerValid)
   robot_state::Transforms& tf = ps_->getTransformsNonConst();
 
   kinematic_constraints::PositionConstraint pc(robot_model_);
-  moveit_msgs::PositionConstraint pcm;
+  moveit_msgs::msg::PositionConstraint pcm;
 
   pcm.link_name = "l_wrist_roll_link";
   pcm.target_point_offset.x = 0;
   pcm.target_point_offset.y = 0;
   pcm.target_point_offset.z = 0;
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
   pcm.constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -395,7 +395,7 @@ TEST_F(LoadPlanningModelsPr2, IKConstraintsSamplerValid)
   EXPECT_TRUE(pc.configure(pcm, tf));
 
   kinematic_constraints::OrientationConstraint oc(robot_model_);
-  moveit_msgs::OrientationConstraint ocm;
+  moveit_msgs::msg::OrientationConstraint ocm;
 
   ocm.link_name = "l_wrist_roll_link";
   ocm.header.frame_id = robot_model_->getModelFrame();
@@ -452,7 +452,7 @@ TEST_F(LoadPlanningModelsPr2, UnionConstraintSampler)
 
   std::map<std::string, double> state_values;
 
-  moveit_msgs::JointConstraint torso_constraint;
+  moveit_msgs::msg::JointConstraint torso_constraint;
   torso_constraint.joint_name = "torso_lift_joint";
   torso_constraint.position = ks.getVariablePosition("torso_lift_joint");
   torso_constraint.tolerance_above = 0.01;
@@ -461,7 +461,7 @@ TEST_F(LoadPlanningModelsPr2, UnionConstraintSampler)
   EXPECT_TRUE(jc1.configure(torso_constraint));
 
   kinematic_constraints::JointConstraint jc2(robot_model_);
-  moveit_msgs::JointConstraint jcm2;
+  moveit_msgs::msg::JointConstraint jcm2;
   jcm2.joint_name = "r_elbow_flex_joint";
   jcm2.position = ks.getVariablePosition("r_elbow_flex_joint");
   jcm2.tolerance_above = 0.01;
@@ -469,14 +469,14 @@ TEST_F(LoadPlanningModelsPr2, UnionConstraintSampler)
   jcm2.weight = 1.0;
   EXPECT_TRUE(jc2.configure(jcm2));
 
-  moveit_msgs::PositionConstraint pcm;
+  moveit_msgs::msg::PositionConstraint pcm;
 
   pcm.link_name = "l_wrist_roll_link";
   pcm.target_point_offset.x = 0;
   pcm.target_point_offset.y = 0;
   pcm.target_point_offset.z = 0;
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
   pcm.constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -492,7 +492,7 @@ TEST_F(LoadPlanningModelsPr2, UnionConstraintSampler)
 
   pcm.header.frame_id = robot_model_->getModelFrame();
 
-  moveit_msgs::OrientationConstraint ocm;
+  moveit_msgs::msg::OrientationConstraint ocm;
 
   ocm.link_name = "l_wrist_roll_link";
   ocm.header.frame_id = robot_model_->getModelFrame();
@@ -615,13 +615,13 @@ TEST_F(LoadPlanningModelsPr2, PoseConstraintSamplerManager)
 
   kinematic_constraints::PositionConstraint pc(robot_model_);
 
-  moveit_msgs::PositionConstraint pcm;
+  moveit_msgs::msg::PositionConstraint pcm;
   pcm.link_name = "l_wrist_roll_link";
   pcm.target_point_offset.x = 0;
   pcm.target_point_offset.y = 0;
   pcm.target_point_offset.z = 0;
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
   pcm.constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -637,7 +637,7 @@ TEST_F(LoadPlanningModelsPr2, PoseConstraintSamplerManager)
   pcm.constraint_region.primitive_poses[0].orientation.w = 1.0;
   pcm.weight = 1.0;
 
-  moveit_msgs::OrientationConstraint ocm;
+  moveit_msgs::msg::OrientationConstraint ocm;
 
   ocm.link_name = "l_wrist_roll_link";
   ocm.header.frame_id = robot_model_->getModelFrame();
@@ -651,7 +651,7 @@ TEST_F(LoadPlanningModelsPr2, PoseConstraintSamplerManager)
   ocm.weight = 1.0;
 
   // test the automatic construction of constraint sampler
-  moveit_msgs::Constraints c;
+  moveit_msgs::msg::Constraints c;
   c.position_constraints.push_back(pcm);
   c.orientation_constraints.push_back(ocm);
 
@@ -696,7 +696,7 @@ TEST_F(LoadPlanningModelsPr2, JointVersusPoseConstraintSamplerManager)
   ks.setToDefaultValues();
   ks.update();
 
-  moveit_msgs::Constraints con;
+  moveit_msgs::msg::Constraints con;
   con.joint_constraints.resize(1);
 
   con.joint_constraints[0].joint_name = "l_shoulder_pan_joint";
@@ -761,7 +761,7 @@ TEST_F(LoadPlanningModelsPr2, JointVersusPoseConstraintSamplerManager)
   con.position_constraints[0].target_point_offset.y = 0;
   con.position_constraints[0].target_point_offset.z = 0;
   con.position_constraints[0].constraint_region.primitives.resize(1);
-  con.position_constraints[0].constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  con.position_constraints[0].constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   con.position_constraints[0].constraint_region.primitives[0].dimensions.resize(1);
   con.position_constraints[0].constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -868,7 +868,7 @@ TEST_F(LoadPlanningModelsPr2, MixedJointAndIkSamplerManager)
   ks_const.setToDefaultValues();
   ks_const.update();
 
-  moveit_msgs::Constraints con;
+  moveit_msgs::msg::Constraints con;
   con.joint_constraints.resize(1);
 
   con.joint_constraints[0].joint_name = "torso_lift_joint";
@@ -887,7 +887,7 @@ TEST_F(LoadPlanningModelsPr2, MixedJointAndIkSamplerManager)
   con.position_constraints[0].target_point_offset.y = 0;
   con.position_constraints[0].target_point_offset.z = 0;
   con.position_constraints[0].constraint_region.primitives.resize(1);
-  con.position_constraints[0].constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  con.position_constraints[0].constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   con.position_constraints[0].constraint_region.primitives[0].dimensions.resize(1);
   con.position_constraints[0].constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -945,7 +945,7 @@ TEST_F(LoadPlanningModelsPr2, SubgroupJointConstraintsSamplerManager)
   ks_const.update();
 
   kinematic_constraints::JointConstraint jc1(robot_model_);
-  moveit_msgs::JointConstraint jcm1;
+  moveit_msgs::msg::JointConstraint jcm1;
   jcm1.joint_name = "head_pan_joint";
   jcm1.position = 0.42;
   jcm1.tolerance_above = 0.01;
@@ -954,7 +954,7 @@ TEST_F(LoadPlanningModelsPr2, SubgroupJointConstraintsSamplerManager)
   EXPECT_TRUE(jc1.configure(jcm1));
 
   kinematic_constraints::JointConstraint jc2(robot_model_);
-  moveit_msgs::JointConstraint jcm2;
+  moveit_msgs::msg::JointConstraint jcm2;
   jcm2.joint_name = "l_shoulder_pan_joint";
   jcm2.position = 0.9;
   jcm2.tolerance_above = 0.1;
@@ -963,7 +963,7 @@ TEST_F(LoadPlanningModelsPr2, SubgroupJointConstraintsSamplerManager)
   EXPECT_TRUE(jc2.configure(jcm2));
 
   kinematic_constraints::JointConstraint jc3(robot_model_);
-  moveit_msgs::JointConstraint jcm3;
+  moveit_msgs::msg::JointConstraint jcm3;
   jcm3.joint_name = "r_wrist_roll_joint";
   jcm3.position = 0.7;
   jcm3.tolerance_above = 0.14;
@@ -972,7 +972,7 @@ TEST_F(LoadPlanningModelsPr2, SubgroupJointConstraintsSamplerManager)
   EXPECT_TRUE(jc3.configure(jcm3));
 
   kinematic_constraints::JointConstraint jc4(robot_model_);
-  moveit_msgs::JointConstraint jcm4;
+  moveit_msgs::msg::JointConstraint jcm4;
   jcm4.joint_name = "torso_lift_joint";
   jcm4.position = 0.2;
   jcm4.tolerance_above = 0.09;
@@ -999,7 +999,7 @@ TEST_F(LoadPlanningModelsPr2, SubgroupJointConstraintsSamplerManager)
   }
 
   // test the automatic construction of constraint sampler
-  moveit_msgs::Constraints c;
+  moveit_msgs::msg::Constraints c;
 
   // no constraints should give no sampler
   constraint_samplers::ConstraintSamplerPtr s0 =
@@ -1027,16 +1027,16 @@ TEST_F(LoadPlanningModelsPr2, SubgroupJointConstraintsSamplerManager)
 
 TEST_F(LoadPlanningModelsPr2, SubgroupPoseConstraintsSampler)
 {
-  moveit_msgs::Constraints c;
+  moveit_msgs::msg::Constraints c;
 
-  moveit_msgs::PositionConstraint pcm;
+  moveit_msgs::msg::PositionConstraint pcm;
   pcm.link_name = "l_wrist_roll_link";
   pcm.target_point_offset.x = 0;
   pcm.target_point_offset.y = 0;
   pcm.target_point_offset.z = 0;
 
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
   pcm.constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -1053,7 +1053,7 @@ TEST_F(LoadPlanningModelsPr2, SubgroupPoseConstraintsSampler)
   pcm.weight = 1.0;
   c.position_constraints.push_back(pcm);
 
-  moveit_msgs::OrientationConstraint ocm;
+  moveit_msgs::msg::OrientationConstraint ocm;
   ocm.link_name = "l_wrist_roll_link";
   ocm.header.frame_id = robot_model_->getModelFrame();
   ocm.orientation.x = 0.0;

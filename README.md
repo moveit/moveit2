@@ -50,7 +50,7 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
     - [x] collision_detection_fcl
     - [x] kinematic_constraints
     - [ ] planning_scene
-    - [ ] constraint_samplers
+    - [x] constraint_samplers
     - [x] planning_interface
     - [x] planning_request_adapter
     - [ ] trajectory_processing

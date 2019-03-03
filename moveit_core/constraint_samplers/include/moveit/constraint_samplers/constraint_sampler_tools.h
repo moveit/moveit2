@@ -38,21 +38,22 @@
 #define MOVEIT_CONSTRAINT_SAMPLERS_CONSTRAINT_SAMPLER_TOOLS_
 
 #include <moveit/constraint_samplers/constraint_sampler.h>
-#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/msg/marker_array.hpp>
+#include "rclcpp/rclcpp.hpp"
 
 namespace constraint_samplers
 {
 void visualizeDistribution(const ConstraintSamplerPtr& sampler, const robot_state::RobotState& reference_state,
                            const std::string& link_name, unsigned int sample_count,
-                           visualization_msgs::MarkerArray& markers);
+                           visualization_msgs::msg::MarkerArray& markers);
 
-void visualizeDistribution(const moveit_msgs::Constraints& constr, const planning_scene::PlanningSceneConstPtr& scene,
+void visualizeDistribution(const moveit_msgs::msg::Constraints& constr, const planning_scene::PlanningSceneConstPtr& scene,
                            const std::string& group, const std::string& link_name, unsigned int sample_count,
-                           visualization_msgs::MarkerArray& markers);
+                           visualization_msgs::msg::MarkerArray& markers);
 
 double countSamplesPerSecond(const ConstraintSamplerPtr& sampler, const robot_state::RobotState& reference_state);
 
-double countSamplesPerSecond(const moveit_msgs::Constraints& constr, const planning_scene::PlanningSceneConstPtr& scene,
+double countSamplesPerSecond(const moveit_msgs::msg::Constraints& constr, const planning_scene::PlanningSceneConstPtr& scene,
                              const std::string& group);
 }
 

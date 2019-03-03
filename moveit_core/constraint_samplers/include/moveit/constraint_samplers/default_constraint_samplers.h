@@ -40,6 +40,7 @@
 #include <moveit/constraint_samplers/constraint_sampler.h>
 #include <moveit/macros/class_forward.h>
 #include <random_numbers/random_numbers.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace constraint_samplers
 {
@@ -88,7 +89,7 @@ public:
    *
    * @return True if the conditions are met, otherwise false
    */
-  bool configure(const moveit_msgs::Constraints& constr) override;
+  bool configure(const moveit_msgs::msg::Constraints& constr) override;
 
   /**
    * \brief Configures a joint constraint given a vector of constraints.
@@ -332,7 +333,7 @@ public:
    * exist and the overloaded configuration function returns true.
    * Otherwise, returns false.
    */
-  bool configure(const moveit_msgs::Constraints& constr) override;
+  bool configure(const moveit_msgs::msg::Constraints& constr) override;
 
   /**
    * \brief Configures the Constraint given a IKSamplingPose.
@@ -507,7 +508,7 @@ protected:
    *
    * @return True if IK returns successfully with the timeout, and otherwise false.
    */
-  bool callIK(const geometry_msgs::Pose& ik_query,
+  bool callIK(const geometry_msgs::msg::Pose& ik_query,
               const kinematics::KinematicsBase::IKCallbackFn& adapted_ik_validity_callback, double timeout,
               robot_state::RobotState& state, bool use_as_seed);
   bool sampleHelper(robot_state::RobotState& state, const robot_state::RobotState& reference_state,
