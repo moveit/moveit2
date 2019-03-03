@@ -42,10 +42,10 @@
 #include <Eigen/Geometry>
 #include <Eigen/LU>  // provides LU decomposition
 #include <kdl/chainiksolver.hpp>
-#include <moveit_msgs/GetPositionFK.h>
-#include <moveit_msgs/GetPositionIK.h>
-#include <moveit_msgs/KinematicSolverInfo.h>
-
+#include <moveit_msgs/srv/get_position_fk.hpp>
+#include <moveit_msgs/srv/get_position_ik.hpp>
+#include <moveit_msgs/msg/kinematic_solver_info.hpp>
+#include "rclcpp/rclcpp.hpp"
 namespace pr2_arm_kinematics
 {
 static const int NUM_JOINTS_ARM7DOF = 7;
@@ -158,17 +158,17 @@ public:
      information including names and joint limits.
      @param The response structure to be filled in.
   */
-  void getSolverInfo(moveit_msgs::KinematicSolverInfo& info);
+  void getSolverInfo(moveit_msgs::msg::KinematicSolverInfo& info);
 
   /**
      @brief get chain information about the arm.
   */
-  moveit_msgs::KinematicSolverInfo solver_info_;
+  moveit_msgs::msg::KinematicSolverInfo solver_info_;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 private:
-  void addJointToChainInfo(const urdf::JointConstSharedPtr& joint, moveit_msgs::KinematicSolverInfo& info);
+  void addJointToChainInfo(const urdf::JointConstSharedPtr& joint, moveit_msgs::msg::KinematicSolverInfo& info);
 
   bool checkJointLimits(const std::vector<double>& joint_values) const;
 
