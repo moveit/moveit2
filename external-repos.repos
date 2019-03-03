@@ -6,7 +6,7 @@ repositories:
   geometry2:
     type: git
     url: https://github.com/AcutronicRobotics/geometry2
-    version: ros2
+    version: master
   geometric_shapes:
     type: git
     url: https://github.com/AcutronicRobotics/geometric_shapes
