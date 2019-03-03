@@ -18,14 +18,14 @@ install(TARGETS ${MOVEIT_LIB_NAME}
         ARCHIVE DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)
 
-if(BUILD_TESTING)
-  find_package(ament_cmake_gtest REQUIRED)
-  ament_add_gtest(test_voxel_grid test/test_voxel_grid.cpp)
-  ament_target_dependencies(test_voxel_grid
-    ${MOVEIT_LIB_NAME})
-  ament_add_gtest(test_distance_field test/test_distance_field.cpp)
-  ament_target_dependencies(test_distance_field
-    ${MOVEIT_LIB_NAME}
-    visualization_msgs
-    tf2_eigen)
-endif()
+# if(BUILD_TESTING)
+#   find_package(ament_cmake_gtest REQUIRED)
+#   ament_add_gtest(test_voxel_grid test/test_voxel_grid.cpp)
+#   ament_target_dependencies(test_voxel_grid
+#     ${MOVEIT_LIB_NAME})
+#   ament_add_gtest(test_distance_field test/test_distance_field.cpp)
+#   ament_target_dependencies(test_distance_field
+#     ${MOVEIT_LIB_NAME}
+#     visualization_msgs
+#     tf2_eigen)
+# endif()
