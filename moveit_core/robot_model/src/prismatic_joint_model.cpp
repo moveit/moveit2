@@ -143,7 +143,7 @@ void PrismaticJointModel::computeTransform(const double* joint_values, Eigen::Is
   //  transf.translation() = Eigen::Vector3d(axis_ * joint_values[0]);
 }
 
-void PrismaticJointModel::computeVariablePositions(const Eigen::Affine3d& transf, double* joint_values) const
+void PrismaticJointModel::computeVariablePositions(const Eigen::Isometry3d& transf, double* joint_values) const
 {
   joint_values[0] = transf.translation().dot(axis_);
 }

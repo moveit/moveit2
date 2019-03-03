@@ -219,7 +219,7 @@ void PlanarJointModel::computeTransform(const double* joint_values, Eigen::Isome
                              Eigen::AngleAxisd(joint_values[2], Eigen::Vector3d::UnitZ()));
 }
 
-void PlanarJointModel::computeVariablePositions(const Eigen::Affine3d& transf, double* joint_values) const
+void PlanarJointModel::computeVariablePositions(const Eigen::Isometry3d& transf, double* joint_values) const
 {
   joint_values[0] = transf.translation().x();
   joint_values[1] = transf.translation().y();

@@ -64,7 +64,7 @@ public:
   double distance(const double* values1, const double* values2) const override;
 
   void computeTransform(const double* joint_values, Eigen::Isometry3d& transf) const override;
-  void computeVariablePositions(const Eigen::Affine3d& transf, double* joint_values) const override;
+  void computeVariablePositions(const Eigen::Isometry3d& transf, double* joint_values) const override;
 
   double getAngularDistanceWeight() const
   {
