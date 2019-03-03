@@ -42,12 +42,13 @@
 #include <moveit/distance_field/voxel_grid.h>
 #include <vector>
 #include <list>
-#include <visualization_msgs/Marker.h>
-#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/msg/marker.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <eigen_stl_containers/eigen_stl_containers.h>
 #include <moveit/macros/class_forward.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace shapes
 {
@@ -192,7 +193,7 @@ public:
   void addShapeToField(const shapes::Shape* shape, const Eigen::Isometry3d& pose);
 
   // DEPRECATED form
-  MOVEIT_DEPRECATED void addShapeToField(const shapes::Shape* shape, const geometry_msgs::Pose& pose);
+  MOVEIT_DEPRECATED void addShapeToField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& pose);
 
   /**
    * \brief Adds an octree to the distance field.  Cells that are
@@ -231,8 +232,8 @@ public:
                         const Eigen::Isometry3d& new_pose);
 
   // DEPRECATED form
-  MOVEIT_DEPRECATED void moveShapeInField(const shapes::Shape* shape, const geometry_msgs::Pose& old_pose,
-                                          const geometry_msgs::Pose& new_pose);
+  MOVEIT_DEPRECATED void moveShapeInField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& old_pose,
+                                          const geometry_msgs::msg::Pose& new_pose);
 
   /**
    * \brief All points corresponding to the shape are removed from the
@@ -246,7 +247,7 @@ public:
   void removeShapeFromField(const shapes::Shape* shape, const Eigen::Isometry3d& pose);
 
   // DEPRECATED form
-  MOVEIT_DEPRECATED void removeShapeFromField(const shapes::Shape* shape, const geometry_msgs::Pose& pose);
+  MOVEIT_DEPRECATED void removeShapeFromField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& pose);
 
   /**
    * \brief Resets all points in the distance field to an uninitialize
@@ -430,7 +431,7 @@ public:
    * \brief Get an iso-surface for visualization in rviz.  The
    * iso-surface shows every cell that has a distance in a given
    * range in the distance field.  The cells are added as a
-   * visualization_msgs::Marker::CUBE_LIST in the namespace
+   * visualization_msgs::msg::Marker::CUBE_LIST in the namespace
    * "distance_field".
    *
    * @param [in] min_distance Cells of less than this distance will not be added to the marker
@@ -440,13 +441,13 @@ public:
    * @param [out] marker The marker that will contain the indicated cells.
    */
   void getIsoSurfaceMarkers(double min_distance, double max_distance, const std::string& frame_id,
-                            const ros::Time stamp, visualization_msgs::Marker& marker) const;
+                            const rclcpp::Time stamp, visualization_msgs::msg::Marker& marker) const;
 
   /**
    * \brief Populates the supplied marker array with a series of
    * arrows representing gradients of cells that are within the
    * supplied range in terms of distance.  The markers will be
-   * visualization_msgs::Marker::ARROW in the namespace
+   * visualization_msgs::msg::Marker::ARROW in the namespace
    * "distance_field_gradient".
    *
    * @param [in] min_distance Cells of less than this distance will not be added to the marker
@@ -455,8 +456,8 @@ public:
    * @param [in] stamp The stamp to use in the header of the marker
    * @param [out] marker_array The marker array to populate
    */
-  void getGradientMarkers(double min_radius, double max_radius, const std::string& frame_id, const ros::Time& stamp,
-                          visualization_msgs::MarkerArray& marker_array) const;
+  void getGradientMarkers(double min_radius, double max_radius, const std::string& frame_id, const rclcpp::Time& stamp,
+                          visualization_msgs::msg::MarkerArray& marker_array) const;
 
   /**
    * \brief Populates a marker with a slice of the distance field in a
@@ -484,8 +485,8 @@ public:
    * @param [out] marker The marker that will contain the indicated cells.
    */
   void getPlaneMarkers(PlaneVisualizationType type, double length, double width, double height,
-                       const Eigen::Vector3d& origin, const std::string& frame_id, const ros::Time stamp,
-                       visualization_msgs::Marker& marker) const;
+                       const Eigen::Vector3d& origin, const std::string& frame_id, const rclcpp::Time stamp,
+                       visualization_msgs::msg::Marker& marker) const;
   /**
    * \brief A function that populates the marker with three planes -
    * one each along the XY, XZ, and YZ axes.  For each of the planes,
@@ -500,10 +501,10 @@ public:
    * the marker.
    *
    * @param [out] marker The marker, which will be populated with a
-   * visualization_msgs::Marker::CUBE_LIST .
+   * visualization_msgs::msg::Marker::CUBE_LIST .
    */
-  void getProjectionPlanes(const std::string& frame_id, const ros::Time& stamp, double max_distance,
-                           visualization_msgs::Marker& marker) const;
+  void getProjectionPlanes(const std::string& frame_id, const rclcpp::Time& stamp, double max_distance,
+                           visualization_msgs::msg::Marker& marker) const;
 
   /**
    * \brief Gets the distance field size along the X dimension in meters
@@ -613,7 +614,7 @@ protected:
    *
    * @param [in] max_distance The distance past which all cells will be fully white
    */
-  void setPoint(int xCell, int yCell, int zCell, double dist, geometry_msgs::Point& point, std_msgs::ColorRGBA& color,
+  void setPoint(int xCell, int yCell, int zCell, double dist, geometry_msgs::msg::Point& point, std_msgs::msg::ColorRGBA& color,
                 double max_distance) const;
 
   double size_x_;            /**< \brief X size of the distance field */

@@ -54,7 +54,7 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
     - [x] planning_interface
     - [x] planning_request_adapter
     - [ ] trajectory_processing
-    - [ ] distance_field
+    - [x] distance_field
     - [ ] collision_distance_field
     - [ ] kinematics_metrics
     - [ ] dynamics_solver
