@@ -9,16 +9,11 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
 - [Get Involved](http://moveit.ros.org/documentation/contributing/)
 
 ## Milestones
-- [ ] Setup instructions
-  - [ ] Install instructions
-    - [ ] Ubuntu 18.04
-    - [ ] OS X 10.14
-- [ ] Update/setup infrastructure for development
-  - [x] Delete metapackages
-  - [x] Upgrade continuous integration for ROS 2.0
-  - [x] Refactor/cleanup folder hierarchy
+- [ ] Install instructions
+  - [ ] Ubuntu 18.04
+  - [ ] OS X 10.14
+- [ ] Upgrade continuous integration for ROS 2.0
 - [ ] Convert moveit packages to ROS 2.0
-  - [x] ~~Include moveit_msgs in HRIM (**@ibaiape**)~~
   - [ ] Convert moveit_core (**in progress @vmayoral**)
     - [x] Convert all headers and link it to HRIM (contributed by @ibaiape)
     - [ ] Dependencies on other packages
@@ -83,7 +78,33 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
 - [ ] New features in ROS 2.0
   - [ ] Migrate plugin architecture to ROS2 nodelets
 - [ ] Documentation
-  - [ ] Create tutorials
+  - [ ] Update tutorials for MoveIt2
+  - [ ] Create tutorial on using ros1/ros2 bridge to support ros1 hardware drivers
+  - [ ] Move install instructions to moveit.ros.org
+- [ ] Major refactoring and divergence from moveit2
+  - [ ] Run ROS2 C++ and python linters
+  - [ ] Delete excesses packages that are left over from rosbuild stacks: moveit_runtime, moveit_plugins, moveit_ros
+  - [ ] Rename non-package folders: 
+    - [ ] rename moveit_planners to planners
+    - [ ] rename moveit_plugins to controller_interfaces
+  - [ ] Restructure folder layout of moveit repo:
+    - [ ] flatten moveit_ros folder to root of repo
+    - [ ] rename all moveit_ros folders with moveit_ros prefix
+  - [ ] Rename major classes
+    - [ ] ControllerManagers become ControllerInterfaces
+    - [ ] Rename related packages
+  - [ ] Merge repos:
+    - [ ] moveit 9.6 MB
+    - [ ] moveit_task_constructor
+    - [ ] moveit_tutorials  28.6 MB
+    - [ ] moveit_msgs
+    - [ ] moveit_resources  61 MB
+    - [ ] moveit_visual_tools
+    - [ ] moveit_advanced?
+    - [ ] DELETE: moveit_kinematics_tests
+  - [ ] Remove large binaries from moveit repo
+  - [ ] Add gitlfs?
+
 
 ## Continuous Integration Status
 
