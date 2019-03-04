@@ -395,11 +395,7 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
     {
       for (std::size_t j = 0; j < trajectory.multi_dof_joint_trajectory.joint_names.size(); ++j)
       {
-        tf_stamped.header = trajectory.multi_dof_joint_trajectory.header;
-        //TODO: Review this, to check if the child_frame_id is the correct one
-        tf_stamped.child_frame_id = trajectory.multi_dof_joint_trajectory.joint_names[j];
-        tf_stamped.transform = trajectory.multi_dof_joint_trajectory.points[i].transforms[j];
-        Eigen::Isometry3d t = tf2::transformToEigen(tf_stamped);
+        Eigen::Isometry3d t = tf2::transformToEigen(trajectory.multi_dof_joint_trajectory.points[i].transforms[j]);
         st->setJointPositions(trajectory.multi_dof_joint_trajectory.joint_names[j], t);
       }
       this_time_stamp = rclcpp::Time(trajectory.multi_dof_joint_trajectory.header.stamp) +
