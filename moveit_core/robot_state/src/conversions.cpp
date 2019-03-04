@@ -118,12 +118,8 @@ static bool _multiDOFJointsToRobotState(const sensor_msgs::msg::MultiDOFJointSta
     }
     // if frames do not mach, attempt to transform
 
-    geometry_msgs::msg::TransformStamped tf_stamped;
-    tf_stamped.header = mjs.header;
-    tf_stamped.child_frame_id = joint_name;
-    tf_stamped.transform = mjs.transforms[i];
-    Eigen::Isometry3d transf = tf2::transformToEigen(tf_stamped);
-
+    Eigen::Isometry3d transf = tf2::transformToEigen(mjs.transforms[i]);
+    // if frames do not mach, attempt to transform
     if (use_inv_t)
       transf = transf * inv_t;
 
