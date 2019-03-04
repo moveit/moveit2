@@ -49,7 +49,7 @@
 namespace kinematic_constraints
 {
 
-  rclcpp::Logger logger_kinematic_constraints = rclcpp::get_logger("kinematic_constraints");
+rclcpp::Logger logger_kinematic_constraints = rclcpp::get_logger("kinematic_constraints");
 
 static double normalizeAngle(double angle)
 {
