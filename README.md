@@ -74,7 +74,7 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
   - [ ] Convert moveit_task_constructor
   - [ ] Convert moveit_resources
   - [ ] Convert moveit_commander
-  - [ ] Convert moveit_fake_controller_manager  
+  - [ ] Convert moveit_fake_controller_manager
 - [ ] New features in ROS 2.0
   - [ ] Migrate plugin architecture to ROS2 nodelets
 - [ ] Documentation
