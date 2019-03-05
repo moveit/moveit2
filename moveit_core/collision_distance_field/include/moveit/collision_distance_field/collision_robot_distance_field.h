@@ -43,6 +43,7 @@
 #include <moveit/collision_distance_field/collision_common_distance_field.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <boost/thread/mutex.hpp>
+#include "rclcpp/rclcpp.hpp"
 
 namespace collision_detection
 {
@@ -102,21 +103,21 @@ public:
   void checkSelfCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
                           const moveit::core::RobotState& state1, const moveit::core::RobotState& state2) const override
   {
-    ROS_ERROR_NAMED("collision_distance_field", "Not implemented");
+    RCLCPP_ERROR(logger, "Not implemented");
   };
 
   void checkSelfCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
                           const moveit::core::RobotState& state1, const moveit::core::RobotState& state2,
                           const collision_detection::AllowedCollisionMatrix& acm) const override
   {
-    ROS_ERROR_NAMED("collision_distance_field", "Not implemented");
+    RCLCPP_ERROR(logger, "Not implemented");
   };
 
   void checkOtherCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
                            const moveit::core::RobotState& state, const CollisionRobot& other_robot,
                            const moveit::core::RobotState& other_state) const override
   {
-    ROS_ERROR_NAMED("collision_distance_field", "Not implemented");
+    RCLCPP_ERROR(logger, "Not implemented");
   };
 
   void checkOtherCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
@@ -124,7 +125,7 @@ public:
                            const moveit::core::RobotState& other_state,
                            const collision_detection::AllowedCollisionMatrix& acm) const override
   {
-    ROS_ERROR_NAMED("collision_distance_field", "Not implemented");
+    RCLCPP_ERROR(logger, "Not implemented");
   };
 
   void checkOtherCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
@@ -132,7 +133,7 @@ public:
                            const CollisionRobot& other_robot, const moveit::core::RobotState& other_state1,
                            const moveit::core::RobotState& other_state2) const override
   {
-    ROS_ERROR_NAMED("collision_distance_field", "Not implemented");
+    RCLCPP_ERROR(logger, "Not implemented");
   };
 
   void checkOtherCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
@@ -141,11 +142,11 @@ public:
                            const moveit::core::RobotState& other_state2,
                            const collision_detection::AllowedCollisionMatrix& acm) const override
   {
-    ROS_ERROR_NAMED("collision_distance_field", "Not implemented");
+    RCLCPP_ERROR(logger, "Not implemented");
   };
 
   void createCollisionModelMarker(const moveit::core::RobotState& state,
-                                  visualization_msgs::MarkerArray& model_markers) const;
+                                  visualization_msgs::msg::MarkerArray& model_markers) const;
 
   virtual double distanceSelf(const moveit::core::RobotState& state) const
   {
@@ -171,13 +172,13 @@ public:
   void distanceSelf(const DistanceRequest& req, DistanceResult& res,
                     const robot_state::RobotState& state) const override
   {
-    ROS_ERROR_NAMED("collision_distance_field", "Not implemented");
+    RCLCPP_ERROR(logger, "Not implemented");
   }
 
   void distanceOther(const DistanceRequest& req, DistanceResult& res, const robot_state::RobotState& state,
                      const CollisionRobot& other_robot, const robot_state::RobotState& other_state) const override
   {
-    ROS_ERROR_NAMED("collision_distance_field", "Not implemented");
+    RCLCPP_ERROR(logger, "Not implemented");
   }
 
   DistanceFieldCacheEntryConstPtr getLastDistanceFieldEntry() const

@@ -92,10 +92,10 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     constraint_samplers/include
     controller_manager/include
     distance_field/include
-    # collision_distance_field/include
-    # dynamics_solver/include
+    collision_distance_field/include
+    dynamics_solver/include
     kinematics_base/include
-    # kinematics_metrics/include
+    kinematics_metrics/include
     robot_model/include
     transforms/include
     robot_state/include
@@ -108,7 +108,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     profiler/include
     sensor_manager/include
     trajectory_processing/include
-    # utils/include
+    utils/include
     logging/include
 )
 
@@ -198,9 +198,9 @@ add_subdirectory(planning_interface)
 add_subdirectory(planning_request_adapter)
 add_subdirectory(trajectory_processing)
 add_subdirectory(distance_field)
-# add_subdirectory(collision_distance_field)
-# add_subdirectory(kinematics_metrics)
-# add_subdirectory(dynamics_solver)
+add_subdirectory(collision_distance_field)
+add_subdirectory(kinematics_metrics)
+add_subdirectory(dynamics_solver)
 add_subdirectory(utils)
 
 # ament_package()
