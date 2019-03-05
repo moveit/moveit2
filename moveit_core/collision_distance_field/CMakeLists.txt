@@ -29,12 +29,13 @@ install(TARGETS ${MOVEIT_LIB_NAME}
 
 install(DIRECTORY include/ DESTINATION include)
 
+#TODO: Solve the problems with the test
 # if(BUILD_TESTING)
 #   ament_add_gtest(test_voxel_grid test/test_voxel_grid.cpp)
 #   find_package(moveit_resources REQUIRED)
 #   include_directories(${moveit_resources_INCLUDE_DIRS})
 #
-#   amet_add_gtest(test_collision_distance_field test/test_collision_distance_field.cpp)
+#   ament_add_gtest(test_collision_distance_field test/test_collision_distance_field.cpp)
 #   target_link_libraries(test_collision_distance_field  ${MOVEIT_LIB_NAME})
 # endif()
 #
