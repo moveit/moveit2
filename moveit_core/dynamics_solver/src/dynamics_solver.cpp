@@ -49,7 +49,7 @@ namespace dynamics_solver
 {
 namespace
 {
-inline geometry_msgs::Vector3 transformVector(const Eigen::Isometry3d& transform, const geometry_msgs::Vector3& vector)
+inline geometry_msgs::msg::Vector3 transformVector(const Eigen::Isometry3d& transform, const geometry_msgs::msg::Vector3& vector)
 {
   Eigen::Vector3d p;
   p = Eigen::Vector3d(vector.x, vector.y, vector.z);
