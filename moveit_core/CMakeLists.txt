@@ -112,42 +112,42 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     logging/include
 )
 
-set(dependencies
-  moveit_kinematics_base
-  moveit_robot_model
-  moveit_robot_state
-  moveit_collision_detection
-  moveit_collision_detection_fcl
-  moveit_kinematic_constraints
-  moveit_planning_request_adapter
-  moveit_planning_scene
-  moveit_trajectory_processing
-  random_numbers
-  tf2_eigen
-  tf2_kdl
-  eigen_stl_containers
-  geometric_shapes
-  geometry_msgs
-  kdl_parser
-  moveit_msgs
-  octomap_msgs
-  sensor_msgs
-  srdfdom
-  std_msgs
-  trajectory_msgs
-  visualization_msgs
-  Boost
-  EIGEN3
-  LIBFCL
-  OCTOMAP
-  urdfdom
-  urdf
-  urdfdom_headers
-  common_interfaces
-  rcutils
-)
-
-ament_export_dependencies(dependencies)
+# set(dependencies
+#   moveit_kinematics_base
+#   moveit_robot_model
+#   moveit_robot_state
+#   moveit_collision_detection
+#   moveit_collision_detection_fcl
+#   moveit_kinematic_constraints
+#   moveit_planning_request_adapter
+#   moveit_planning_scene
+#   moveit_trajectory_processing
+#   random_numbers
+#   tf2_eigen
+#   tf2_kdl
+#   eigen_stl_containers
+#   geometric_shapes
+#   geometry_msgs
+#   kdl_parser
+#   moveit_msgs
+#   octomap_msgs
+#   sensor_msgs
+#   srdfdom
+#   std_msgs
+#   trajectory_msgs
+#   visualization_msgs
+#   Boost
+#   EIGEN3
+#   LIBFCL
+#   OCTOMAP
+#   urdfdom
+#   urdf
+#   urdfdom_headers
+#   common_interfaces
+#   rcutils
+# )
+#
+# ament_export_dependencies(${dependencies})
 
 
 # to run: catkin_make -DENABLE_COVERAGE_TESTING=ON package_name_coverage
@@ -203,4 +203,4 @@ add_subdirectory(kinematics_metrics)
 add_subdirectory(dynamics_solver)
 add_subdirectory(utils)
 
-# ament_package()
+ament_package()
