@@ -95,7 +95,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     collision_distance_field/include
     # dynamics_solver/include
     kinematics_base/include
-    # kinematics_metrics/include
+    kinematics_metrics/include
     robot_model/include
     transforms/include
     robot_state/include
@@ -199,7 +199,7 @@ add_subdirectory(planning_request_adapter)
 add_subdirectory(trajectory_processing)
 add_subdirectory(distance_field)
 add_subdirectory(collision_distance_field)
-# add_subdirectory(kinematics_metrics)
+add_subdirectory(kinematics_metrics)
 # add_subdirectory(dynamics_solver)
 add_subdirectory(utils)
 
