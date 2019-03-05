@@ -170,7 +170,7 @@ bool FloatingJointModel::normalizeRotation(double* values) const
     double norm = sqrt(norm_sqr);
     if (norm < std::numeric_limits<double>::epsilon() * 100.0)
     {
-      ROS_WARN_NAMED("robot_model", "Quaternion is zero in RobotState representation. Setting to identity");
+      RCLCPP_WARN(logger_robot_model, "Quaternion is zero in RobotState representation. Setting to identity");
       values[3] = 0.0;
       values[4] = 0.0;
       values[5] = 0.0;
