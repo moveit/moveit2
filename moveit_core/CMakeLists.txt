@@ -93,7 +93,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     controller_manager/include
     distance_field/include
     collision_distance_field/include
-    # dynamics_solver/include
+    dynamics_solver/include
     kinematics_base/include
     kinematics_metrics/include
     robot_model/include
@@ -200,7 +200,7 @@ add_subdirectory(trajectory_processing)
 add_subdirectory(distance_field)
 add_subdirectory(collision_distance_field)
 add_subdirectory(kinematics_metrics)
-# add_subdirectory(dynamics_solver)
+add_subdirectory(dynamics_solver)
 add_subdirectory(utils)
 
 # ament_package()
