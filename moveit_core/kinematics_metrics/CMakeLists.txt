@@ -7,7 +7,8 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_robot_state
   urdf
-  urdfdom_headers)
+  urdfdom_headers
+  visualization_msgs)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
