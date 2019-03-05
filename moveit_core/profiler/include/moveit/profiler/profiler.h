@@ -60,9 +60,6 @@
 #include <boost/thread.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <rcutils/logging_macros.h>
-
-#define ROS_INFO_STREAM_NAMED RCUTILS_LOG_INFO
 
 namespace moveit
 {
