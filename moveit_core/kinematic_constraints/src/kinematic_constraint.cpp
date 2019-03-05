@@ -425,8 +425,8 @@ static inline ConstraintEvaluationResult finishPositionConstraintDecision(const 
   double dz = desired.z() - pt.z();
   if (verbose)
   {
-    ROS_INFO_NAMED(
-        "kinematic_constraints", "Position constraint %s on link '%s'. Desired: %f, %f, %f, current: %f, %f, %f",
+    RCLCPP_INFO(logger_kinematic_constraints,
+        "Position constraint %s on link '%s'. Desired: %f, %f, %f, current: %f, %f, %f",
         result ? "satisfied" : "violated", name.c_str(), desired.x(), desired.y(), desired.z(), pt.x(), pt.y(), pt.z());
     RCLCPP_INFO(logger_kinematic_constraints, "Differences %g %g %g", dx, dy, dz);
   }
