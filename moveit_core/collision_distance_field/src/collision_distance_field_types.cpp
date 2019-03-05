@@ -414,7 +414,6 @@ void collision_detection::getCollisionSphereMarkers(
 {
   unsigned int count = 0;
   rclcpp::Clock ros_clock;
-  rclcpp::Time ros_now = ros_clock.now();
   for (unsigned int i = 0; i < posed_decompositions.size(); i++)
   {
     if (posed_decompositions[i])
@@ -423,7 +422,7 @@ void collision_detection::getCollisionSphereMarkers(
       {
         visualization_msgs::msg::Marker sphere;
         sphere.type = visualization_msgs::msg::Marker::SPHERE;
-        sphere.header.stamp = ros_now;
+        sphere.header.stamp = ros_clock.now();
         sphere.header.frame_id = frame_id;
         sphere.ns = ns;
         sphere.id = count++;
@@ -447,7 +446,6 @@ void collision_detection::getProximityGradientMarkers(
     const std::vector<GradientInfo>& gradients, visualization_msgs::msg::MarkerArray& arr)
 {
   rclcpp::Clock ros_clock;
-  rclcpp::Time ros_now = ros_clock.now();
   if (gradients.size() != posed_decompositions.size() + posed_vector_decompositions.size())
   {
     RCLCPP_WARN(logger, "Size mismatch between gradients %u and decompositions %u",
@@ -461,7 +459,7 @@ void collision_detection::getProximityGradientMarkers(
     {
       visualization_msgs::msg::Marker arrow_mark;
       arrow_mark.header.frame_id = frame_id;
-      arrow_mark.header.stamp = ros_now;
+      arrow_mark.header.stamp = ros_clock.now();
       if (ns.empty())
       {
         arrow_mark.ns = "self_coll_gradients";
@@ -552,7 +550,6 @@ void collision_detection::getCollisionMarkers(
     const std::vector<GradientInfo>& gradients, visualization_msgs::msg::MarkerArray& arr)
 {
   rclcpp::Clock ros_clock;
-  rclcpp::Time ros_now = ros_clock.now();
   if (gradients.size() != posed_decompositions.size() + posed_vector_decompositions.size())
   {
     RCLCPP_WARN(logger, "Size mismatch between gradients %zu and decompositions %zu",
@@ -566,7 +563,7 @@ void collision_detection::getCollisionMarkers(
       visualization_msgs::msg::Marker sphere_mark;
       sphere_mark.type = visualization_msgs::msg::Marker::SPHERE;
       sphere_mark.header.frame_id = frame_id;
-      sphere_mark.header.stamp = ros_now;
+      sphere_mark.header.stamp = ros_clock.now();
       if (ns.empty())
       {
         sphere_mark.ns = "distance_collisions";
