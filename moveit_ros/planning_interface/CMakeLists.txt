@@ -60,7 +60,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDENCIES
       EIGEN3
 )
 
-# ament_export_libraries(${THIS_PACKAGE_INCLUDE_LIBRARIES})
+ament_export_libraries(${THIS_PACKAGE_INCLUDE_LIBRARIES})
 ament_export_include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDENCIES})
 
@@ -76,7 +76,7 @@ include_directories(SYSTEM
 # add_subdirectory(py_bindings_tools)
 # add_subdirectory(common_planning_interface_objects)
 # add_subdirectory(planning_scene_interface)
-add_subdirectory(move_group_interface)
+# add_subdirectory(move_group_interface)
 # add_subdirectory(robot_interface)
 # add_subdirectory(test)
 
