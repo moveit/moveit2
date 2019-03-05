@@ -3,7 +3,7 @@ FROM ros:crystal-ros-base-bionic
 MAINTAINER Lander Usategui  <lander@erlerobotics.com>
 
 ENV ROS_DISTRO crystal
-WORKDIR ros2_ws
+WORKDIR /ros2_ws
 
 RUN \
     apt-get update && apt-get install -y \
@@ -19,7 +19,7 @@ RUN \
         wget \
         && rm -rf /var/lib/apt/lists/* \
     # Setup ROS2 workspace
-    && mkdir -p ros2_ws/src \
+    && mkdir -p /ros2_ws/src && cd /ros2_ws \ 
     && wget https://raw.githubusercontent.com/AcutronicRobotics/moveit2/master/external-repos.repos \
     && vcs import src < external-repos.repos
 COPY ./docker-entrypoint.sh /
