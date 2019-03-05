@@ -42,6 +42,11 @@
 #include <moveit/trajectory_processing/iterative_spline_parameterization.h>
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit/utils/robot_model_test_utils.h>
+#include "rclcpp/rclcpp.hpp"
+
+// Logger
+rclcpp::Logger logger_trajectory_processing_test = rclcpp::get_logger("trajectory_processing");
+
 
 // Static variables used in all tests
 moveit::core::RobotModelConstPtr rmodel = moveit::core::loadTestingRobotModel("pr2_description");
@@ -56,7 +61,7 @@ int initRepeatedPointTrajectory(robot_trajectory::RobotTrajectory& trajectory)
   const robot_model::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    ROS_ERROR_NAMED("trajectory_processing", "Need to set the group");
+    RCLCPP_ERROR(logger_trajectory_processing_test, "Need to set the group");
     return -1;
   }
   // leave initial velocity/acceleration unset
@@ -86,7 +91,7 @@ int initStraightTrajectory(robot_trajectory::RobotTrajectory& trajectory, double
   const robot_model::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    ROS_ERROR_NAMED("trajectory_processing", "Need to set the group");
+    RCLCPP_ERROR(logger_trajectory_processing_test, "Need to set the group");
     return -1;
   }
   // leave initial velocity/acceleration unset
