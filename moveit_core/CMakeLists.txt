@@ -108,7 +108,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     profiler/include
     sensor_manager/include
     trajectory_processing/include
-    # utils/include
+    utils/include
     logging/include
 )
 
