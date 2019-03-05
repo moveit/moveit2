@@ -43,11 +43,11 @@ set(THIS_PACKAGE_INCLUDE_DIRS
   move_group_interface/include
 )
 
-set(THIS_PACKAGE_INCLUDE_LIBRARIES
-      moveit_common_planning_interface_objects
-      moveit_planning_scene_interface
-      moveit_move_group_interface
-)
+# set(THIS_PACKAGE_INCLUDE_LIBRARIES
+#       moveit_common_planning_interface_objects
+#       moveit_planning_scene_interface
+#       moveit_move_group_interface
+# )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDENCIES
       moveit_ros_planning
@@ -60,7 +60,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDENCIES
       EIGEN3
 )
 
-ament_export_libraries(${THIS_PACKAGE_INCLUDE_LIBRARIES})
+# ament_export_libraries(${THIS_PACKAGE_INCLUDE_LIBRARIES})
 ament_export_include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDENCIES})
 
@@ -76,7 +76,7 @@ include_directories(SYSTEM
 # add_subdirectory(py_bindings_tools)
 # add_subdirectory(common_planning_interface_objects)
 # add_subdirectory(planning_scene_interface)
-# add_subdirectory(move_group_interface)
+add_subdirectory(move_group_interface)
 # add_subdirectory(robot_interface)
 # add_subdirectory(test)
 
