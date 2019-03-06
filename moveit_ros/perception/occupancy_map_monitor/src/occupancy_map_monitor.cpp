@@ -34,9 +34,8 @@
 
 /* Author: Ioan Sucan, Jon Binney */
 
-#include <ros/ros.h>
-#include <moveit_msgs/SaveMap.h>
-#include <moveit_msgs/LoadMap.h>
+#include <moveit_msgs/msg/SaveMap.h>
+#include <moveit_msgs/msg/LoadMap.h>
 #include <moveit/occupancy_map_monitor/occupancy_map.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 #include <XmlRpcException.h>
