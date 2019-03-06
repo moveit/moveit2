@@ -219,7 +219,7 @@ bool KinematicsBase::getPositionIK(const std::vector<geometry_msgs::Pose>& ik_po
     return false;
   }
 
-  moveit_msgs::MoveItErrorCodes error_code;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
   if (getPositionIK(ik_poses[0], ik_seed_state, solution, error_code, options))
   {
     solutions.resize(1);

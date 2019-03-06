@@ -102,31 +102,31 @@ void plan_execution::PlanExecution::stop()
   preempt_requested_ = true;
 }
 
-std::string plan_execution::PlanExecution::getErrorCodeString(const moveit_msgs::MoveItErrorCodes& error_code)
+std::string plan_execution::PlanExecution::getErrorCodeString(const moveit_msgs::msg::MoveItErrorCodes& error_code)
 {
-  if (error_code.val == moveit_msgs::MoveItErrorCodes::SUCCESS)
+  if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
     return "Success";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME)
     return "Invalid group name";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::PLANNING_FAILED)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED)
     return "Planning failed.";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN)
     return "Invalid motion plan";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA)
     return "Unable to aquire sensor data";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
     return "Motion plan invalidated by environment change";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::CONTROL_FAILED)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED)
     return "Controller failed during execution";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::TIMED_OUT)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT)
     return "Timeout reached";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::PREEMPTED)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
     return "Preempted";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS)
     return "Invalid goal constraints";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::INVALID_OBJECT_NAME)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_OBJECT_NAME)
     return "Invalid object name";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::FAILURE)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::FAILURE)
     return "Catastrophic failure";
   return "Unknown event";
 }
@@ -139,7 +139,7 @@ void plan_execution::PlanExecution::planAndExecute(ExecutableMotionPlan& plan, c
 }
 
 void plan_execution::PlanExecution::planAndExecute(ExecutableMotionPlan& plan,
-                                                   const moveit_msgs::PlanningScene& scene_diff, const Options& opt)
+                                                   const moveit_msgs::msg::PlanningScene& scene_diff, const Options& opt)
 {
   if (planning_scene::PlanningScene::isEmpty(scene_diff))
     planAndExecute(plan, opt);
@@ -193,11 +193,11 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
 
     // if planning fails in a manner that is not recoverable, we exit the loop,
     // otherwise, we attempt to continue, if replanning attempts are left
-    if (plan.error_code_.val == moveit_msgs::MoveItErrorCodes::PLANNING_FAILED ||
-        plan.error_code_.val == moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN ||
-        plan.error_code_.val == moveit_msgs::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA)
+    if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED ||
+        plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN ||
+        plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA)
     {
-      if (plan.error_code_.val == moveit_msgs::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA &&
+      if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA &&
           opt.replan_delay_ > 0.0)
       {
         ros::WallDuration d(opt.replan_delay_);
@@ -212,7 +212,7 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
     else
       break;
 
-    if (plan.error_code_.val == moveit_msgs::MoveItErrorCodes::SUCCESS)
+    if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
     {
       if (opt.before_execution_callback_)
         opt.before_execution_callback_();
@@ -225,11 +225,11 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
     }
 
     // if we are done, then we exit the loop
-    if (plan.error_code_.val == moveit_msgs::MoveItErrorCodes::SUCCESS)
+    if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
       break;
 
     // if execution failed in a manner that we do not consider recoverable, we exit the loop (with failure)
-    if (plan.error_code_.val != moveit_msgs::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
+    if (plan.error_code_.val != moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
       break;
     else
     {
@@ -248,13 +248,13 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
   if (preempt_requested_)
   {
     ROS_DEBUG_NAMED("plan_execution", "PlanExecution was preempted");
-    plan.error_code_.val = moveit_msgs::MoveItErrorCodes::PREEMPTED;
+    plan.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
   }
 
   if (opt.done_callback_)
     opt.done_callback_();
 
-  if (plan.error_code_.val == moveit_msgs::MoveItErrorCodes::SUCCESS)
+  if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
     ROS_DEBUG_NAMED("plan_execution", "PlanExecution finished successfully.");
   else
     ROS_DEBUG_NAMED("plan_execution", "PlanExecution terminating with error code %d - '%s'", plan.error_code_.val,
@@ -314,14 +314,14 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
   return true;
 }
 
-moveit_msgs::MoveItErrorCodes plan_execution::PlanExecution::executeAndMonitor(ExecutableMotionPlan& plan)
+moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMonitor(ExecutableMotionPlan& plan)
 {
   if (!plan.planning_scene_monitor_)
     plan.planning_scene_monitor_ = planning_scene_monitor_;
   if (!plan.planning_scene_)
     plan.planning_scene_ = planning_scene_monitor_->getPlanningScene();
 
-  moveit_msgs::MoveItErrorCodes result;
+  moveit_msgs::msg::MoveItErrorCodes result;
 
   // try to execute the trajectory
   execution_complete_ = true;
@@ -329,13 +329,13 @@ moveit_msgs::MoveItErrorCodes plan_execution::PlanExecution::executeAndMonitor(E
   if (!trajectory_execution_manager_)
   {
     ROS_ERROR_NAMED("plan_execution", "No trajectory execution manager");
-    result.val = moveit_msgs::MoveItErrorCodes::CONTROL_FAILED;
+    result.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
     return result;
   }
 
   if (plan.plan_components_.empty())
   {
-    result.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+    result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     return result;
   }
 
@@ -378,14 +378,14 @@ moveit_msgs::MoveItErrorCodes plan_execution::PlanExecution::executeAndMonitor(E
       prev = i;
 
     // convert to message, pass along
-    moveit_msgs::RobotTrajectory msg;
+    moveit_msgs::msg::RobotTrajectory msg;
     plan.plan_components_[i].trajectory_->getRobotTrajectoryMsg(msg);
     if (!trajectory_execution_manager_->push(msg))
     {
       trajectory_execution_manager_->clear();
       ROS_ERROR_STREAM_NAMED("plan_execution", "Apparently trajectory initialization failed");
       execution_complete_ = true;
-      result.val = moveit_msgs::MoveItErrorCodes::CONTROL_FAILED;
+      result.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
       return result;
     }
   }
@@ -445,23 +445,23 @@ moveit_msgs::MoveItErrorCodes plan_execution::PlanExecution::executeAndMonitor(E
 
   // decide return value
   if (path_became_invalid_)
-    result.val = moveit_msgs::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE;
+    result.val = moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE;
   else
   {
     if (preempt_requested_)
     {
-      result.val = moveit_msgs::MoveItErrorCodes::PREEMPTED;
+      result.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
     }
     else
     {
       if (trajectory_execution_manager_->getLastExecutionStatus() ==
           moveit_controller_manager::ExecutionStatus::SUCCEEDED)
-        result.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+        result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       else if (trajectory_execution_manager_->getLastExecutionStatus() ==
                moveit_controller_manager::ExecutionStatus::TIMED_OUT)
-        result.val = moveit_msgs::MoveItErrorCodes::TIMED_OUT;
+        result.val = moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT;
       else
-        result.val = moveit_msgs::MoveItErrorCodes::CONTROL_FAILED;
+        result.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
     }
   }
   return result;

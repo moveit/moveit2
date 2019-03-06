@@ -69,8 +69,8 @@ TrajectoryVisualization::TrajectoryVisualization(rviz::Property* widget, rviz::D
 {
   trajectory_topic_property_ =
       new rviz::RosTopicProperty("Trajectory Topic", "/move_group/display_planned_path",
-                                 ros::message_traits::datatype<moveit_msgs::DisplayTrajectory>(),
-                                 "The topic on which the moveit_msgs::DisplayTrajectory messages are received", widget,
+                                 ros::message_traits::datatype<moveit_msgs::msg::DisplayTrajectory>(),
+                                 "The topic on which the moveit_msgs::msg::DisplayTrajectory messages are received", widget,
                                  SLOT(changedTrajectoryTopic()), this);
 
   display_path_visual_enabled_property_ =
@@ -460,7 +460,7 @@ void TrajectoryVisualization::update(float wall_dt, float ros_dt)
                                    (trajectory_slider_panel_ && trajectory_slider_panel_->isVisible())));
 }
 
-void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::DisplayTrajectory::ConstPtr& msg)
+void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::DisplayTrajectory::ConstPtr& msg)
 {
   // Error check
   if (!robot_state_ || !robot_model_)

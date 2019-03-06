@@ -60,10 +60,10 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     ros::Publisher pub_scene;
     if (full_scene)
-      pub_scene = nh.advertise<moveit_msgs::PlanningScene>(
+      pub_scene = nh.advertise<moveit_msgs::msg::PlanningScene>(
           planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC, 1);
     else
-      pub_scene = nh.advertise<moveit_msgs::PlanningSceneWorld>(
+      pub_scene = nh.advertise<moveit_msgs::msg::PlanningSceneWorld>(
           planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_WORLD_TOPIC, 1);
 
     robot_model_loader::RobotModelLoader::Options opt;
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     if (ps.loadGeometryFromStream(f))
     {
       ROS_INFO("Publishing geometry from '%s' ...", argv[filename_index]);
-      moveit_msgs::PlanningScene ps_msg;
+      moveit_msgs::msg::PlanningScene ps_msg;
       ps.getPlanningSceneMsg(ps_msg);
       ps_msg.is_diff = true;
 

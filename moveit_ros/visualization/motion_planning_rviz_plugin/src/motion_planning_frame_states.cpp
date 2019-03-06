@@ -143,7 +143,7 @@ void MotionPlanningFrame::saveRobotStateButtonClicked(const robot_state::RobotSt
       else
       {
         // Store the current start state
-        moveit_msgs::RobotState msg;
+        moveit_msgs::msg::RobotState msg;
         robot_state::robotStateToRobotStateMsg(state, msg);
         robot_states_.insert(RobotStatePair(name, msg));
 

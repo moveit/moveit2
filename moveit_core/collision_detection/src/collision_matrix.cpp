@@ -51,7 +51,7 @@ AllowedCollisionMatrix::AllowedCollisionMatrix(const std::vector<std::string>& n
       setEntry(names[i], names[j], allowed);
 }
 
-AllowedCollisionMatrix::AllowedCollisionMatrix(const moveit_msgs::AllowedCollisionMatrix& msg)
+AllowedCollisionMatrix::AllowedCollisionMatrix(const moveit_msgs::msg::AllowedCollisionMatrix& msg)
 {
   if (msg.entry_names.size() != msg.entry_values.size() ||
       msg.default_entry_names.size() != msg.default_entry_values.size())
@@ -332,7 +332,7 @@ void AllowedCollisionMatrix::getAllEntryNames(std::vector<std::string>& names) c
       names.push_back(entry.first);
 }
 
-void AllowedCollisionMatrix::getMessage(moveit_msgs::AllowedCollisionMatrix& msg) const
+void AllowedCollisionMatrix::getMessage(moveit_msgs::msg::AllowedCollisionMatrix& msg) const
 {
   msg.entry_names.clear();
   msg.entry_values.clear();

@@ -122,7 +122,7 @@ public:
     const robot_model::JointModel* jm = robot_model_->getJointModel(name);
     if (jm)
     {
-      const std::vector<moveit_msgs::JointLimits>& lim = jm->getVariableBoundsMsg();
+      const std::vector<moveit_msgs::msg::JointLimits>& lim = jm->getVariableBoundsMsg();
       for (std::size_t i = 0; i < lim.size(); ++i)
       {
         bp::list l;
@@ -228,7 +228,7 @@ public:
     if (!ensureCurrentState())
       return "";
     robot_state::RobotStatePtr s = current_state_monitor_->getCurrentState();
-    moveit_msgs::RobotState msg;
+    moveit_msgs::msg::RobotState msg;
     robot_state::robotStateToRobotStateMsg(*s, msg);
     return py_bindings_tools::serializeMsg(msg);
   }
@@ -281,7 +281,7 @@ public:
 
   std::string getRobotMarkersFromMsg(const std::string& state_str)
   {
-    moveit_msgs::RobotState state_msg;
+    moveit_msgs::msg::RobotState state_msg;
     robot_state::RobotState state(robot_model_);
     py_bindings_tools::deserializeMsg(state_str, state_msg);
     moveit::core::robotStateMsgToRobotState(state_msg, state);

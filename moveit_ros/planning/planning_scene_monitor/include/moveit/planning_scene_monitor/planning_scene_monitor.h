@@ -402,7 +402,7 @@ public:
   void clearOctomap();
 
   // Called to update the planning scene with a new message.
-  bool newPlanningSceneMessage(const moveit_msgs::PlanningScene& scene);
+  bool newPlanningSceneMessage(const moveit_msgs::msg::PlanningScene& scene);
 
 protected:
   /** @brief Initialize the planning scene monitor
@@ -417,20 +417,20 @@ protected:
   void configureDefaultPadding();
 
   /** @brief Callback for a new collision object msg*/
-  void collisionObjectCallback(const moveit_msgs::CollisionObjectConstPtr& obj);
+  void collisionObjectCallback(const moveit_msgs::msg::CollisionObjectConstPtr& obj);
 
   /** @brief Callback for a new collision object msg that failed to pass the TF filter */
-  void collisionObjectFailTFCallback(const moveit_msgs::CollisionObjectConstPtr& obj,
+  void collisionObjectFailTFCallback(const moveit_msgs::msg::CollisionObjectConstPtr& obj,
                                      tf2_ros::filter_failure_reasons::FilterFailureReason reason);
 
   /** @brief Callback for a new planning scene world*/
-  void newPlanningSceneWorldCallback(const moveit_msgs::PlanningSceneWorldConstPtr& world);
+  void newPlanningSceneWorldCallback(const moveit_msgs::msg::PlanningSceneWorldConstPtr& world);
 
   /** @brief Callback for octomap updates */
   void octomapUpdateCallback();
 
   /** @brief Callback for a new attached object msg*/
-  void attachObjectCallback(const moveit_msgs::AttachedCollisionObjectConstPtr& obj);
+  void attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObjectConstPtr& obj);
 
   /** @brief Callback for a change for an attached object of the current state of the planning scene */
   void currentStateAttachedBodyUpdateCallback(robot_state::AttachedBody* attached_body, bool just_attached);
@@ -501,8 +501,8 @@ protected:
 
   ros::Subscriber attached_collision_object_subscriber_;
 
-  std::unique_ptr<message_filters::Subscriber<moveit_msgs::CollisionObject> > collision_object_subscriber_;
-  std::unique_ptr<tf2_ros::MessageFilter<moveit_msgs::CollisionObject> > collision_object_filter_;
+  std::unique_ptr<message_filters::Subscriber<moveit_msgs::msg::CollisionObject> > collision_object_subscriber_;
+  std::unique_ptr<tf2_ros::MessageFilter<moveit_msgs::msg::CollisionObject> > collision_object_filter_;
 
   // include a octomap monitor
   std::unique_ptr<occupancy_map_monitor::OccupancyMapMonitor> octomap_monitor_;
@@ -542,7 +542,7 @@ private:
   void stateUpdateTimerCallback(const ros::WallTimerEvent& event);
 
   // Callback for a new planning scene msg
-  void newPlanningSceneCallback(const moveit_msgs::PlanningSceneConstPtr& scene);
+  void newPlanningSceneCallback(const moveit_msgs::msg::PlanningSceneConstPtr& scene);
 
   // Lock for state_update_pending_ and dt_state_update_
   boost::mutex state_pending_mutex_;

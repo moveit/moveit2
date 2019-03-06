@@ -83,7 +83,7 @@ void parseStart(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* 
       {
         robot_state::RobotState st = psm->getPlanningScene()->getCurrentState();
         st.setVariablePositions(v);
-        moveit_msgs::RobotState msg;
+        moveit_msgs::msg::RobotState msg;
         robot_state::robotStateToRobotStateMsg(st, msg);
         ROS_INFO("Parsed start state '%s'", name.c_str());
         rs->addRobotState(msg, name);
@@ -143,7 +143,7 @@ void parseLinkConstraint(std::istream& in, planning_scene_monitor::PlanningScene
     geometry_msgs::PoseStamped pose;
     pose.pose = tf2::toMsg(pos * rot);
     pose.header.frame_id = psm->getRobotModel()->getModelFrame();
-    moveit_msgs::Constraints constr = kinematic_constraints::constructGoalConstraints(link_name, pose);
+    moveit_msgs::msg::Constraints constr = kinematic_constraints::constructGoalConstraints(link_name, pose);
     constr.name = name;
     ROS_INFO("Parsed link constraint '%s'", name.c_str());
     cs->addConstraints(constr);
@@ -247,7 +247,7 @@ int main(int argc, char** argv)
     std::ifstream fin(vm["scene"].as<std::string>().c_str());
     psm.getPlanningScene()->loadGeometryFromStream(fin);
     fin.close();
-    moveit_msgs::PlanningScene psmsg;
+    moveit_msgs::msg::PlanningScene psmsg;
     psm.getPlanningScene()->getPlanningSceneMsg(psmsg);
     pss.addPlanningScene(psmsg);
   }

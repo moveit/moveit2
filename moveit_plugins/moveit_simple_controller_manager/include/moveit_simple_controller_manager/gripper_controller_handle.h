@@ -59,7 +59,7 @@ public:
   {
   }
 
-  bool sendTrajectory(const moveit_msgs::RobotTrajectory& trajectory) override
+  bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory) override
   {
     ROS_DEBUG_STREAM_NAMED("GripperController", "Received new trajectory for " << name_);
 

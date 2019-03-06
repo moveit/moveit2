@@ -73,7 +73,7 @@ public:
   void getPlannerPluginList(std::vector<std::string>& plugin_list) const;
 
   const std::string& getWorkspaceFrameID() const;
-  const moveit_msgs::WorkspaceParameters& getWorkspaceParameters() const;
+  const moveit_msgs::msg::WorkspaceParameters& getWorkspaceParameters() const;
 
 protected:
   void readBenchmarkOptions(const std::string& ros_namespace);
@@ -106,7 +106,7 @@ protected:
   /// planner configurations
   std::map<std::string, std::vector<std::string>> planners_;
 
-  moveit_msgs::WorkspaceParameters workspace_;
+  moveit_msgs::msg::WorkspaceParameters workspace_;
 };
 }
 

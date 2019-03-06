@@ -104,7 +104,7 @@ std::string PlannerManager::getDescription() const
 PlanningContextPtr PlannerManager::getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                       const MotionPlanRequest& req) const
 {
-  moveit_msgs::MoveItErrorCodes dummy;
+  moveit_msgs::msg::MoveItErrorCodes dummy;
   return getPlanningContext(planning_scene, req, dummy);
 }
 

@@ -116,7 +116,7 @@ public:
     return true;
   }
 
-  bool canServiceRequest(const moveit_msgs::MotionPlanRequest& req) const override
+  bool canServiceRequest(const moveit_msgs::msg::MotionPlanRequest& req) const override
   {
     return req.trajectory_constraints.constraints.empty();
   }
@@ -145,7 +145,7 @@ public:
 
   planning_interface::PlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                             const planning_interface::MotionPlanRequest& req,
-                                                            moveit_msgs::MoveItErrorCodes& error_code) const override
+                                                            moveit_msgs::msg::MoveItErrorCodes& error_code) const override
   {
     return ompl_interface_->getPlanningContext(planning_scene, req, error_code);
   }
@@ -190,7 +190,7 @@ private:
           continue;
         pc->getOMPLStateSpace()->copyToRobotState(robot_state, rstate1.get());
         robot_state.getJointStateGroup(pc->getJointModelGroupName())->updateLinkTransforms();
-        moveit_msgs::DisplayRobotState state_msg;
+        moveit_msgs::msg::DisplayRobotState state_msg;
         robot_state::robotStateToRobotStateMsg(robot_state, state_msg.state);
         pub_valid_states_.publish(state_msg);
         n = (n + 1) % 2;
@@ -204,7 +204,7 @@ private:
             pc->getOMPLStateSpace()->copyToRobotState(robot_state, sts[i]);
             traj.addSuffixWayPoint(robot_state, 0.0);
           }
-          moveit_msgs::DisplayTrajectory msg;
+          moveit_msgs::msg::DisplayTrajectory msg;
           msg.model_id = pc->getRobotModel()->getName();
           msg.trajectory.resize(1);
           traj.getRobotTrajectoryMsg(msg.trajectory[0]);
@@ -290,8 +290,8 @@ private:
     }
     else if (!display_random_valid_states_ && config.display_random_valid_states)
     {
-      pub_valid_states_ = nh_.advertise<moveit_msgs::DisplayRobotState>("ompl_planner_valid_states", 5);
-      pub_valid_traj_ = nh_.advertise<moveit_msgs::DisplayTrajectory>("ompl_planner_valid_trajectories", 5);
+      pub_valid_states_ = nh_.advertise<moveit_msgs::msg::DisplayRobotState>("ompl_planner_valid_states", 5);
+      pub_valid_traj_ = nh_.advertise<moveit_msgs::msg::DisplayTrajectory>("ompl_planner_valid_trajectories", 5);
       display_random_valid_states_ = true;
       //    pub_valid_states_thread_.reset(new boost::thread(boost::bind(&OMPLPlannerManager::displayRandomValidStates,
       //    this)));

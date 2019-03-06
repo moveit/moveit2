@@ -336,10 +336,10 @@ public:
   void setVariableBounds(const std::string& variable, const VariableBounds& bounds);
 
   /** \brief Override joint limits loaded from URDF. Unknown variables are ignored. */
-  void setVariableBounds(const std::vector<moveit_msgs::JointLimits>& jlim);
+  void setVariableBounds(const std::vector<moveit_msgs::msg::JointLimits>& jlim);
 
   /** \brief Get the joint limits known to this model, as a message. */
-  const std::vector<moveit_msgs::JointLimits>& getVariableBoundsMsg() const
+  const std::vector<moveit_msgs::msg::JointLimits>& getVariableBoundsMsg() const
   {
     return variable_bounds_msg_;
   }
@@ -470,7 +470,7 @@ protected:
   /** \brief The bounds for each variable (low, high) in the same order as variable_names_ */
   Bounds variable_bounds_;
 
-  std::vector<moveit_msgs::JointLimits> variable_bounds_msg_;
+  std::vector<moveit_msgs::msg::JointLimits> variable_bounds_msg_;
 
   /** \brief Map from variable names to the corresponding index in variable_names_ (indexing makes sense within the
    * JointModel only) */

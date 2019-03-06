@@ -51,7 +51,7 @@ moveit_warehouse::PlanningSceneWorldStorage::PlanningSceneWorldStorage(warehouse
 void moveit_warehouse::PlanningSceneWorldStorage::createCollections()
 {
   planning_scene_world_collection_ =
-      conn_->openCollectionPtr<moveit_msgs::PlanningSceneWorld>(DATABASE_NAME, "planning_scene_worlds");
+      conn_->openCollectionPtr<moveit_msgs::msg::PlanningSceneWorld>(DATABASE_NAME, "planning_scene_worlds");
 }
 
 void moveit_warehouse::PlanningSceneWorldStorage::reset()
@@ -61,7 +61,7 @@ void moveit_warehouse::PlanningSceneWorldStorage::reset()
   createCollections();
 }
 
-void moveit_warehouse::PlanningSceneWorldStorage::addPlanningSceneWorld(const moveit_msgs::PlanningSceneWorld& msg,
+void moveit_warehouse::PlanningSceneWorldStorage::addPlanningSceneWorld(const moveit_msgs::msg::PlanningSceneWorld& msg,
                                                                         const std::string& name)
 {
   bool replace = false;

@@ -65,8 +65,8 @@ RobotStateDisplay::RobotStateDisplay() : Display(), update_state_(false), load_r
       this, SLOT(changedRobotDescription()), this);
 
   robot_state_topic_property_ = new rviz::RosTopicProperty(
-      "Robot State Topic", "display_robot_state", ros::message_traits::datatype<moveit_msgs::DisplayRobotState>(),
-      "The topic on which the moveit_msgs::DisplayRobotState messages are received", this,
+      "Robot State Topic", "display_robot_state", ros::message_traits::datatype<moveit_msgs::msg::DisplayRobotState>(),
+      "The topic on which the moveit_msgs::msg::DisplayRobotState messages are received", this,
       SLOT(changedRobotStateTopic()), this);
 
   // Planning scene category -------------------------------------------------------------------------------------------
@@ -188,13 +188,13 @@ static bool operator!=(const std_msgs::ColorRGBA& a, const std_msgs::ColorRGBA& 
   return a.r != b.r || a.g != b.g || a.b != b.b || a.a != b.a;
 }
 
-void RobotStateDisplay::setRobotHighlights(const moveit_msgs::DisplayRobotState::_highlight_links_type& highlight_links)
+void RobotStateDisplay::setRobotHighlights(const moveit_msgs::msg::DisplayRobotState::_highlight_links_type& highlight_links)
 {
   if (highlight_links.empty() && highlights_.empty())
     return;
 
   std::map<std::string, std_msgs::ColorRGBA> highlights;
-  for (moveit_msgs::DisplayRobotState::_highlight_links_type::const_iterator it = highlight_links.begin();
+  for (moveit_msgs::msg::DisplayRobotState::_highlight_links_type::const_iterator it = highlight_links.begin();
        it != highlight_links.end(); ++it)
   {
     highlights[it->id] = it->color;
@@ -297,7 +297,7 @@ void RobotStateDisplay::changedRobotStateTopic()
                                                &RobotStateDisplay::newRobotStateCallback, this);
 }
 
-void RobotStateDisplay::newRobotStateCallback(const moveit_msgs::DisplayRobotStateConstPtr& state_msg)
+void RobotStateDisplay::newRobotStateCallback(const moveit_msgs::msg::DisplayRobotStateConstPtr& state_msg)
 {
   if (!robot_model_)
     return;
@@ -313,7 +313,7 @@ void RobotStateDisplay::newRobotStateCallback(const moveit_msgs::DisplayRobotSta
   catch (const moveit::Exception& e)
   {
     robot_state_->setToDefaultValues();
-    setRobotHighlights(moveit_msgs::DisplayRobotState::_highlight_links_type());
+    setRobotHighlights(moveit_msgs::msg::DisplayRobotState::_highlight_links_type());
     setStatus(rviz::StatusProperty::Error, "RobotState", e.what());
     return;
   }

@@ -51,7 +51,7 @@ move_group::MoveGroupCartesianPathService::MoveGroupCartesianPathService()
 
 void move_group::MoveGroupCartesianPathService::initialize()
 {
-  display_path_ = node_handle_.advertise<moveit_msgs::DisplayTrajectory>(
+  display_path_ = node_handle_.advertise<moveit_msgs::msg::DisplayTrajectory>(
       planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC, 10, true);
   cartesian_path_service_ = root_node_handle_.advertiseService(CARTESIAN_PATH_SERVICE_NAME,
                                                                &MoveGroupCartesianPathService::computeService, this);
@@ -118,7 +118,7 @@ bool move_group::MoveGroupCartesianPathService::computeService(moveit_msgs::srv:
       {
         ROS_ERROR("Maximum step to take between consecutive configrations along Cartesian path was not specified (this "
                   "value needs to be > 0)");
-        res.error_code.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+        res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       }
       else
       {
@@ -162,21 +162,21 @@ bool move_group::MoveGroupCartesianPathService::computeService(moveit_msgs::srv:
                    (unsigned int)traj.size(), res.fraction * 100.0);
           if (display_computed_paths_ && rt.getWayPointCount() > 0)
           {
-            moveit_msgs::DisplayTrajectory disp;
+            moveit_msgs::msg::DisplayTrajectory disp;
             disp.model_id = context_->planning_scene_monitor_->getRobotModel()->getName();
             disp.trajectory.resize(1, res.solution);
             robot_state::robotStateToRobotStateMsg(rt.getFirstWayPoint(), disp.trajectory_start);
             display_path_.publish(disp);
           }
         }
-        res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+        res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       }
     }
     else
-      res.error_code.val = moveit_msgs::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE;
+      res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE;
   }
   else
-    res.error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
 
   return true;
 }

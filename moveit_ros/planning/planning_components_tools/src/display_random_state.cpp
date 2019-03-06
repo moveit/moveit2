@@ -66,7 +66,7 @@ int main(int argc, char** argv)
   planning_scene_monitor::PlanningSceneMonitor psm(rml);
   psm.startWorldGeometryMonitor();
   psm.startSceneMonitor();
-  ros::Publisher pub_scene = nh.advertise<moveit_msgs::PlanningScene>("planning_scene", 1);
+  ros::Publisher pub_scene = nh.advertise<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
 
   ros::Duration(0.5).sleep();
 
@@ -131,7 +131,7 @@ int main(int argc, char** argv)
       else
         psm.getPlanningScene()->getCurrentStateNonConst().setToRandomPositions();
 
-      moveit_msgs::PlanningScene psmsg;
+      moveit_msgs::msg::PlanningScene psmsg;
       psm.getPlanningScene()->getPlanningSceneMsg(psmsg);
       pub_scene.publish(psmsg);
       std::cout << psm.getPlanningScene()->getCurrentState() << std::endl;

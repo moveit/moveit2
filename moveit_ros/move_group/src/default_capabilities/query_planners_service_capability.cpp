@@ -61,7 +61,7 @@ bool move_group::MoveGroupQueryPlannersService::queryInterface(moveit_msgs::srv:
   {
     std::vector<std::string> algs;
     planner_interface->getPlanningAlgorithms(algs);
-    moveit_msgs::PlannerInterfaceDescription pi_desc;
+    moveit_msgs::msg::PlannerInterfaceDescription pi_desc;
     pi_desc.name = planner_interface->getDescription();
     planner_interface->getPlanningAlgorithms(pi_desc.planner_ids);
     res.planner_interfaces.push_back(pi_desc);

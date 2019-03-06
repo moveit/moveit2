@@ -69,28 +69,28 @@ public:
   typedef std::vector<PlannerRunData> PlannerBenchmarkData;
 
   /// Definition of a query-start benchmark event function.  Invoked before a new query is benchmarked.
-  typedef boost::function<void(const moveit_msgs::MotionPlanRequest& request, planning_scene::PlanningScenePtr)>
+  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request, planning_scene::PlanningScenePtr)>
       QueryStartEventFunction;
 
   /// Definition of a query-end benchmark event function.  Invoked after a query has finished benchmarking.
-  typedef boost::function<void(const moveit_msgs::MotionPlanRequest& request, planning_scene::PlanningScenePtr)>
+  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request, planning_scene::PlanningScenePtr)>
       QueryCompletionEventFunction;
 
   /// Definition of a planner-switch benchmark event function. Invoked before a planner starts any runs for a particular
   /// query.
-  typedef boost::function<void(const moveit_msgs::MotionPlanRequest& request, PlannerBenchmarkData& benchmark_data)>
+  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request, PlannerBenchmarkData& benchmark_data)>
       PlannerStartEventFunction;
 
   /// Definition of a planner-switch benchmark event function. Invoked after a planner completes all runs for a
   /// particular query.
-  typedef boost::function<void(const moveit_msgs::MotionPlanRequest& request, PlannerBenchmarkData& benchmark_data)>
+  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request, PlannerBenchmarkData& benchmark_data)>
       PlannerCompletionEventFunction;
 
   /// Definition of a pre-run benchmark event function.  Invoked immediately before each planner calls solve().
-  typedef boost::function<void(moveit_msgs::MotionPlanRequest& request)> PreRunEventFunction;
+  typedef boost::function<void(moveit_msgs::msg::MotionPlanRequest& request)> PreRunEventFunction;
 
   /// Definition of a post-run benchmark event function.  Invoked immediately after each planner calls solve().
-  typedef boost::function<void(const moveit_msgs::MotionPlanRequest& request,
+  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request,
                                const planning_interface::MotionPlanDetailedResponse& response,
                                PlannerRunData& run_data)>
       PostRunEventFunction;
@@ -117,28 +117,28 @@ protected:
   struct BenchmarkRequest
   {
     std::string name;
-    moveit_msgs::MotionPlanRequest request;
+    moveit_msgs::msg::MotionPlanRequest request;
   };
 
   struct StartState
   {
-    moveit_msgs::RobotState state;
+    moveit_msgs::msg::RobotState state;
     std::string name;
   };
 
   struct PathConstraints
   {
-    std::vector<moveit_msgs::Constraints> constraints;
+    std::vector<moveit_msgs::msg::Constraints> constraints;
     std::string name;
   };
 
   struct TrajectoryConstraints
   {
-    moveit_msgs::TrajectoryConstraints constraints;
+    moveit_msgs::msg::TrajectoryConstraints constraints;
     std::string name;
   };
 
-  virtual bool initializeBenchmarks(const BenchmarkOptions& opts, moveit_msgs::PlanningScene& scene_msg,
+  virtual bool initializeBenchmarks(const BenchmarkOptions& opts, moveit_msgs::msg::PlanningScene& scene_msg,
                                     std::vector<BenchmarkRequest>& queries);
 
   virtual void collectMetrics(PlannerRunData& metrics, const planning_interface::MotionPlanDetailedResponse& mp_res,
@@ -146,7 +146,7 @@ protected:
 
   virtual void writeOutput(const BenchmarkRequest& brequest, const std::string& start_time, double benchmark_duration);
 
-  void shiftConstraintsByOffset(moveit_msgs::Constraints& constraints, const std::vector<double> offset);
+  void shiftConstraintsByOffset(moveit_msgs::msg::Constraints& constraints, const std::vector<double> offset);
 
   /// Check that the desired planner plugins and algorithms exist for the given group
   bool plannerConfigurationsExist(const std::map<std::string, std::vector<std::string>>& planners,
@@ -157,7 +157,7 @@ protected:
                                     const std::map<std::string, std::vector<std::string>>& planners);
 
   /// Load the planning scene with the given name from the warehouse
-  bool loadPlanningScene(const std::string& scene_name, moveit_msgs::PlanningScene& scene_msg);
+  bool loadPlanningScene(const std::string& scene_name, moveit_msgs::msg::PlanningScene& scene_msg);
 
   /// Load all states matching the given regular expression from the warehouse
   bool loadStates(const std::string& regex, std::vector<StartState>& start_states);
@@ -177,7 +177,7 @@ protected:
                                  std::vector<BenchmarkRequest>& combos);
 
   /// Execute the given motion plan request on the set of planners for the set number of runs
-  void runBenchmark(moveit_msgs::MotionPlanRequest request,
+  void runBenchmark(moveit_msgs::msg::MotionPlanRequest request,
                     const std::map<std::string, std::vector<std::string>>& planners, int runs);
 
   planning_scene_monitor::PlanningSceneMonitor* psm_;

@@ -78,11 +78,11 @@ void move_group::MoveGroupMoveAction::executeMoveCallback(const moveit_msgs::act
   bool planned_trajectory_empty = trajectory_processing::isTrajectoryEmpty(action_res.planned_trajectory);
   std::string response =
       getActionResultString(action_res.error_code, planned_trajectory_empty, goal->planning_options.plan_only);
-  if (action_res.error_code.val == moveit_msgs::MoveItErrorCodes::SUCCESS)
+  if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
     move_action_server_->setSucceeded(action_res, response);
   else
   {
-    if (action_res.error_code.val == moveit_msgs::MoveItErrorCodes::PREEMPTED)
+    if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
       move_action_server_->setPreempted(action_res, response);
     else
       move_action_server_->setAborted(action_res, response);
@@ -111,17 +111,17 @@ void move_group::MoveGroupMoveAction::executeMoveCallback_PlanAndExecute(const m
                                                                              goal->request.path_constraints)))
       {
         ROS_INFO("Goal constraints are already satisfied. No need to plan or execute any motions");
-        action_res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+        action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
         return;
       }
   }
 
   plan_execution::PlanExecution::Options opt;
 
-  const moveit_msgs::MotionPlanRequest& motion_plan_request =
+  const moveit_msgs::msg::MotionPlanRequest& motion_plan_request =
       planning_scene::PlanningScene::isEmpty(goal->request.start_state) ? goal->request :
                                                                           clearRequestStartState(goal->request);
-  const moveit_msgs::PlanningScene& planning_scene_diff =
+  const moveit_msgs::msg::PlanningScene& planning_scene_diff =
       planning_scene::PlanningScene::isEmpty(goal->planning_options.planning_scene_diff.robot_state) ?
           goal->planning_options.planning_scene_diff :
           clearSceneRobotState(goal->planning_options.planning_scene_diff);
@@ -145,7 +145,7 @@ void move_group::MoveGroupMoveAction::executeMoveCallback_PlanAndExecute(const m
   if (preempt_requested_)
   {
     ROS_INFO("Preempt requested before the goal is planned and executed.");
-    action_res.error_code.val = moveit_msgs::MoveItErrorCodes::PREEMPTED;
+    action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
     return;
   }
 
@@ -175,7 +175,7 @@ void move_group::MoveGroupMoveAction::executeMoveCallback_PlanOnly(const moveit_
   if (preempt_requested_)
   {
     ROS_INFO("Preempt requested before the goal is planned.");
-    action_res.error_code.val = moveit_msgs::MoveItErrorCodes::PREEMPTED;
+    action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
     return;
   }
 
@@ -186,7 +186,7 @@ void move_group::MoveGroupMoveAction::executeMoveCallback_PlanOnly(const moveit_
   catch (std::exception& ex)
   {
     ROS_ERROR("Planning pipeline threw an exception: %s", ex.what());
-    res.error_code_.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 
   convertToMsg(res.trajectory_, action_res.trajectory_start, action_res.planned_trajectory);
@@ -209,7 +209,7 @@ bool move_group::MoveGroupMoveAction::planUsingPlanningPipeline(const planning_i
   catch (std::exception& ex)
   {
     ROS_ERROR("Planning pipeline threw an exception: %s", ex.what());
-    res.error_code_.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
   if (res.trajectory_)
   {

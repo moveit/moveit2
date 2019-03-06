@@ -137,7 +137,7 @@ public:
    * produced by OMPL) and puts it into the appropriate trajectory format required for CHOMP
    * @param res
    */
-  bool fillInFromTrajectory(moveit_msgs::MotionPlanDetailedResponse& res);
+  bool fillInFromTrajectory(moveit_msgs::msg::MotionPlanDetailedResponse& res);
 
   /**
    * This function assigns the chomp_trajectory row / robot pose at index 'chomp_trajectory_point' obtained from input
@@ -147,7 +147,7 @@ public:
    * @param trajectory_msgs_point index of the input trajectory_msg's point to get joint values from
    * @param chomp_trajectory_point index of the chomp_trajectory's point to get joint values from
    */
-  void assignCHOMPTrajectoryPointFromInputTrajectoryPoint(moveit_msgs::RobotTrajectory trajectory_msg,
+  void assignCHOMPTrajectoryPointFromInputTrajectoryPoint(moveit_msgs::msg::RobotTrajectory trajectory_msg,
                                                           int num_joints_trajectory, int trajectory_msgs_point,
                                                           int chomp_trajectory_point);
 

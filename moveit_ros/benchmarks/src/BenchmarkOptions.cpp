@@ -162,7 +162,7 @@ const std::string& BenchmarkOptions::getWorkspaceFrameID() const
   return workspace_.header.frame_id;
 }
 
-const moveit_msgs::WorkspaceParameters& BenchmarkOptions::getWorkspaceParameters() const
+const moveit_msgs::msg::WorkspaceParameters& BenchmarkOptions::getWorkspaceParameters() const
 {
   return workspace_;
 }

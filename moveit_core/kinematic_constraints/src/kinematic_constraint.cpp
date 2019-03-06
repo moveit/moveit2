@@ -65,7 +65,7 @@ KinematicConstraint::KinematicConstraint(const robot_model::RobotModelConstPtr& 
 
 KinematicConstraint::~KinematicConstraint() = default;
 
-bool JointConstraint::configure(const moveit_msgs::JointConstraint& jc)
+bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
 {
   // clearing before we configure to get rid of any old data
   clear();
@@ -269,7 +269,7 @@ void JointConstraint::print(std::ostream& out) const
     out << "No constraint" << std::endl;
 }
 
-bool PositionConstraint::configure(const moveit_msgs::PositionConstraint& pc, const robot_state::Transforms& tf)
+bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& pc, const robot_state::Transforms& tf)
 {
   // clearing before we configure to get rid of any old data
   clear();
@@ -490,7 +490,7 @@ bool PositionConstraint::enabled() const
   return link_model_ && !constraint_region_.empty();
 }
 
-bool OrientationConstraint::configure(const moveit_msgs::OrientationConstraint& oc, const robot_state::Transforms& tf)
+bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstraint& oc, const robot_state::Transforms& tf)
 {
   // clearing out any old data
   clear();
@@ -665,7 +665,7 @@ void VisibilityConstraint::clear()
   max_range_angle_ = 0.0;
 }
 
-bool VisibilityConstraint::configure(const moveit_msgs::VisibilityConstraint& vc, const robot_state::Transforms& tf)
+bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstraint& vc, const robot_state::Transforms& tf)
 {
   clear();
   target_radius_ = fabs(vc.target_radius);
@@ -1046,7 +1046,7 @@ void VisibilityConstraint::print(std::ostream& out) const
 
 void KinematicConstraintSet::clear()
 {
-  all_constraints_ = moveit_msgs::Constraints();
+  all_constraints_ = moveit_msgs::msg::Constraints();
   kinematic_constraints_.clear();
   joint_constraints_.clear();
   position_constraints_.clear();
@@ -1054,7 +1054,7 @@ void KinematicConstraintSet::clear()
   visibility_constraints_.clear();
 }
 
-bool KinematicConstraintSet::add(const std::vector<moveit_msgs::JointConstraint>& jc)
+bool KinematicConstraintSet::add(const std::vector<moveit_msgs::msg::JointConstraint>& jc)
 {
   bool result = true;
   for (unsigned int i = 0; i < jc.size(); ++i)
@@ -1069,7 +1069,7 @@ bool KinematicConstraintSet::add(const std::vector<moveit_msgs::JointConstraint>
   return result;
 }
 
-bool KinematicConstraintSet::add(const std::vector<moveit_msgs::PositionConstraint>& pc,
+bool KinematicConstraintSet::add(const std::vector<moveit_msgs::msg::PositionConstraint>& pc,
                                  const robot_state::Transforms& tf)
 {
   bool result = true;
@@ -1085,7 +1085,7 @@ bool KinematicConstraintSet::add(const std::vector<moveit_msgs::PositionConstrai
   return result;
 }
 
-bool KinematicConstraintSet::add(const std::vector<moveit_msgs::OrientationConstraint>& oc,
+bool KinematicConstraintSet::add(const std::vector<moveit_msgs::msg::OrientationConstraint>& oc,
                                  const robot_state::Transforms& tf)
 {
   bool result = true;
@@ -1101,7 +1101,7 @@ bool KinematicConstraintSet::add(const std::vector<moveit_msgs::OrientationConst
   return result;
 }
 
-bool KinematicConstraintSet::add(const std::vector<moveit_msgs::VisibilityConstraint>& vc,
+bool KinematicConstraintSet::add(const std::vector<moveit_msgs::msg::VisibilityConstraint>& vc,
                                  const robot_state::Transforms& tf)
 {
   bool result = true;
@@ -1117,7 +1117,7 @@ bool KinematicConstraintSet::add(const std::vector<moveit_msgs::VisibilityConstr
   return result;
 }
 
-bool KinematicConstraintSet::add(const moveit_msgs::Constraints& c, const robot_state::Transforms& tf)
+bool KinematicConstraintSet::add(const moveit_msgs::msg::Constraints& c, const robot_state::Transforms& tf)
 {
   bool j = add(c.joint_constraints);
   bool p = add(c.position_constraints, tf);
