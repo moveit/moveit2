@@ -78,6 +78,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     ${X11_INCLUDE_DIR}
     ${rclcpp_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
+    ${OPENGL_INCLUDE_DIR}
 )
 
 ament_export_include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
@@ -103,3 +104,5 @@ install(
     depth_image_octomap_updater_plugin_description.xml
   DESTINATION
     share)
+
+ament_package()
