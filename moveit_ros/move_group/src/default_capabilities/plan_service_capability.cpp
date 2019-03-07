@@ -48,8 +48,8 @@ void move_group::MoveGroupPlanService::initialize()
       root_node_handle_.advertiseService(PLANNER_SERVICE_NAME, &MoveGroupPlanService::computePlanService, this);
 }
 
-bool move_group::MoveGroupPlanService::computePlanService(moveit_msgs::GetMotionPlan::Request& req,
-                                                          moveit_msgs::GetMotionPlan::Response& res)
+bool move_group::MoveGroupPlanService::computePlanService(moveit_msgs::srv::GetMotionPlan::Request& req,
+                                                          moveit_msgs::srv::GetMotionPlan::Response& res)
 {
   ROS_INFO("Received new planning service request...");
   // before we start planning, ensure that we have the latest robot state received...
@@ -67,7 +67,7 @@ bool move_group::MoveGroupPlanService::computePlanService(moveit_msgs::GetMotion
   catch (std::exception& ex)
   {
     ROS_ERROR("Planning pipeline threw an exception: %s", ex.what());
-    res.motion_plan_response.error_code.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+    res.motion_plan_response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 
   return true;

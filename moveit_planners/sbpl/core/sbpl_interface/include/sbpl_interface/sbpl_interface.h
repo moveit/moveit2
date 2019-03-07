@@ -53,7 +53,7 @@ public:
   }
 
   bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::GetMotionPlan::Response& res,
+             const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res,
              const PlanningParameters& params) const;
 
   const PlanningStatistics& getLastPlanningStatistics() const

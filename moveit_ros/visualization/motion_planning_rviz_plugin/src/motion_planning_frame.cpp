@@ -147,8 +147,8 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz::
 
   known_collision_objects_version_ = 0;
 
-  planning_scene_publisher_ = nh_.advertise<moveit_msgs::PlanningScene>("planning_scene", 1);
-  planning_scene_world_publisher_ = nh_.advertise<moveit_msgs::PlanningSceneWorld>("planning_scene_world", 1);
+  planning_scene_publisher_ = nh_.advertise<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
+  planning_scene_world_publisher_ = nh_.advertise<moveit_msgs::msg::PlanningSceneWorld>("planning_scene_world", 1);
 
   // object_recognition_trigger_publisher_ = nh_.advertise<std_msgs::Bool>("recognize_objects_switch", 1);
   object_recognition_client_.reset(new actionlib::SimpleActionClient<object_recognition_msgs::ObjectRecognitionAction>(
@@ -354,7 +354,7 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       move_group_->allowReplanning(ui_->allow_replanning->isChecked());
       bool hasUniqueEndeffector = !move_group_->getEndEffectorLink().empty();
       planning_display_->addMainLoopJob([=]() { ui_->use_cartesian_path->setEnabled(hasUniqueEndeffector); });
-      moveit_msgs::PlannerInterfaceDescription desc;
+      moveit_msgs::msg::PlannerInterfaceDescription desc;
       if (move_group_->getInterfaceDescription(desc))
         planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlannersList, this, desc));
       planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::populateConstraintsList, this),

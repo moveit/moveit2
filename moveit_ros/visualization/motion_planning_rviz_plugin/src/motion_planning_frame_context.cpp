@@ -62,7 +62,7 @@ void MotionPlanningFrame::publishSceneButtonClicked()
   const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
   if (ps)
   {
-    moveit_msgs::PlanningScene msg;
+    moveit_msgs::msg::PlanningScene msg;
     ps->getPlanningSceneMsg(msg);
     planning_scene_publisher_.publish(msg);
   }

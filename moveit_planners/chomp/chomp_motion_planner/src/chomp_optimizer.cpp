@@ -544,7 +544,7 @@ bool ChompOptimizer::optimize()
 
 bool ChompOptimizer::isCurrentTrajectoryMeshToMeshCollisionFree() const
 {
-  moveit_msgs::RobotTrajectory traj;
+  moveit_msgs::msg::RobotTrajectory traj;
   traj.joint_trajectory.joint_names = joint_names_;
 
   for (int i = 0; i < group_trajectory_.getNumPoints(); i++)
@@ -556,7 +556,7 @@ bool ChompOptimizer::isCurrentTrajectoryMeshToMeshCollisionFree() const
     }
     traj.joint_trajectory.points.push_back(point);
   }
-  moveit_msgs::RobotState start_state_msg;
+  moveit_msgs::msg::RobotState start_state_msg;
   moveit::core::robotStateToRobotStateMsg(start_state_, start_state_msg);
   return planning_scene_->isPathValid(start_state_msg, traj, planning_group_);
 }

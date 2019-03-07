@@ -83,10 +83,10 @@ public:
 
   bp::dict getObjectsPython(const bp::list& object_ids)
   {
-    std::map<std::string, moveit_msgs::CollisionObject> objs =
+    std::map<std::string, moveit_msgs::msg::CollisionObject> objs =
         getObjects(py_bindings_tools::stringFromList(object_ids));
     std::map<std::string, std::string> ser_objs;
-    for (std::map<std::string, moveit_msgs::CollisionObject>::const_iterator it = objs.begin(); it != objs.end(); ++it)
+    for (std::map<std::string, moveit_msgs::msg::CollisionObject>::const_iterator it = objs.begin(); it != objs.end(); ++it)
       ser_objs[it->first] = py_bindings_tools::serializeMsg(it->second);
 
     return py_bindings_tools::dictFromType(ser_objs);
@@ -94,10 +94,10 @@ public:
 
   bp::dict getAttachedObjectsPython(const bp::list& object_ids)
   {
-    std::map<std::string, moveit_msgs::AttachedCollisionObject> aobjs =
+    std::map<std::string, moveit_msgs::msg::AttachedCollisionObject> aobjs =
         getAttachedObjects(py_bindings_tools::stringFromList(object_ids));
     std::map<std::string, std::string> ser_aobjs;
-    for (std::map<std::string, moveit_msgs::AttachedCollisionObject>::const_iterator it = aobjs.begin();
+    for (std::map<std::string, moveit_msgs::msg::AttachedCollisionObject>::const_iterator it = aobjs.begin();
          it != aobjs.end(); ++it)
       ser_aobjs[it->first] = py_bindings_tools::serializeMsg(it->second);
 
@@ -106,7 +106,7 @@ public:
 
   bool applyPlanningScenePython(const std::string& ps_str)
   {
-    moveit_msgs::PlanningScene ps_msg;
+    moveit_msgs::msg::PlanningScene ps_msg;
     py_bindings_tools::deserializeMsg(ps_str, ps_msg);
     return applyPlanningScene(ps_msg);
   }

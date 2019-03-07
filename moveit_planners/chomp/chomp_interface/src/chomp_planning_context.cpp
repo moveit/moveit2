@@ -22,7 +22,7 @@ CHOMPPlanningContext::~CHOMPPlanningContext() = default;
 
 bool CHOMPPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
 {
-  moveit_msgs::MotionPlanDetailedResponse res2;
+  moveit_msgs::msg::MotionPlanDetailedResponse res2;
   if (chomp_interface_->solve(planning_scene_, request_, chomp_interface_->getParams(), res2))
   {
     res.trajectory_.resize(1);

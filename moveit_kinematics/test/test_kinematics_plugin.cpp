@@ -262,7 +262,7 @@ public:
   }
 
   void searchIKCallback(const geometry_msgs::Pose& ik_pose, const std::vector<double>& joint_state,
-                        moveit_msgs::MoveItErrorCodes& error_code)
+                        moveit_msgs::msg::MoveItErrorCodes& error_code)
   {
     std::vector<std::string> link_names = { tip_link_ };
     std::vector<geometry_msgs::Pose> poses;
@@ -339,7 +339,7 @@ TEST_F(KinematicsTest, randomWalkIK)
 
   bool publish_trajectory = false;
   getParam<bool>("publish_trajectory", publish_trajectory);
-  moveit_msgs::DisplayTrajectory msg;
+  moveit_msgs::msg::DisplayTrajectory msg;
   msg.model_id = robot_model_->getName();
   moveit::core::robotStateToRobotStateMsg(robot_state, msg.trajectory_start);
   msg.trajectory.resize(1);
@@ -361,7 +361,7 @@ TEST_F(KinematicsTest, randomWalkIK)
     ASSERT_TRUE(kinematics_solver_->getPositionFK(tip_frames, goal, poses));
 
     // compute IK
-    moveit_msgs::MoveItErrorCodes error_code;
+    moveit_msgs::msg::MoveItErrorCodes error_code;
     kinematics_solver_->searchPositionIK(poses[0], seed, 0.1, consistency_limits, solution, error_code);
     if (error_code.val != error_code.SUCCESS)
     {
@@ -394,7 +394,7 @@ TEST_F(KinematicsTest, randomWalkIK)
     ros::NodeHandle nh;
     ros::AsyncSpinner spinner(1);
     spinner.start();
-    ros::Publisher pub = nh.advertise<moveit_msgs::DisplayTrajectory>("display_random_walk", 1, true);
+    ros::Publisher pub = nh.advertise<moveit_msgs::msg::DisplayTrajectory>("display_random_walk", 1, true);
     traj.getRobotTrajectoryMsg(msg.trajectory[0]);
     pub.publish(msg);
     ros::WallDuration(0.1).sleep();
@@ -482,7 +482,7 @@ TEST_F(KinematicsTest, unitIK)
 
   auto validateIK = [&](const geometry_msgs::Pose& goal, std::vector<double>& truth) {
     // compute IK
-    moveit_msgs::MoveItErrorCodes error_code;
+    moveit_msgs::msg::MoveItErrorCodes error_code;
     kinematics_solver_->searchPositionIK(goal, seed, timeout_,
                                          const_cast<const std::vector<double>&>(consistency_limits_), sol, error_code);
     ASSERT_EQ(error_code.val, error_code.SUCCESS);
@@ -536,7 +536,7 @@ TEST_F(KinematicsTest, unitIK)
 TEST_F(KinematicsTest, searchIK)
 {
   std::vector<double> seed, fk_values, solution;
-  moveit_msgs::MoveItErrorCodes error_code;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
   solution.resize(kinematics_solver_->getJointNames().size(), 0.0);
   const std::vector<std::string>& fk_names = kinematics_solver_->getTipFrames();
   robot_state::RobotState robot_state(robot_model_);
@@ -570,7 +570,7 @@ TEST_F(KinematicsTest, searchIK)
 TEST_F(KinematicsTest, searchIKWithCallback)
 {
   std::vector<double> seed, fk_values, solution;
-  moveit_msgs::MoveItErrorCodes error_code;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
   solution.resize(kinematics_solver_->getJointNames().size(), 0.0);
   const std::vector<std::string>& fk_names = kinematics_solver_->getTipFrames();
   robot_state::RobotState robot_state(robot_model_);
@@ -610,7 +610,7 @@ TEST_F(KinematicsTest, searchIKWithCallback)
 TEST_F(KinematicsTest, getIK)
 {
   std::vector<double> fk_values, solution;
-  moveit_msgs::MoveItErrorCodes error_code;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
   solution.resize(kinematics_solver_->getJointNames().size(), 0.0);
   const std::vector<std::string>& fk_names = kinematics_solver_->getTipFrames();
   robot_state::RobotState robot_state(robot_model_);
@@ -683,7 +683,7 @@ TEST_F(KinematicsTest, getNearestIKSolution)
   kinematics::KinematicsResult result;
 
   std::vector<double> seed, fk_values, solution;
-  moveit_msgs::MoveItErrorCodes error_code;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
   const std::vector<std::string>& fk_names = kinematics_solver_->getTipFrames();
   robot_state::RobotState robot_state(robot_model_);
   robot_state.setToDefaultValues();

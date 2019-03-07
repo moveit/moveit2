@@ -77,7 +77,7 @@ struct ExecutableMotionPlan
   robot_trajectory::RobotTrajectoryPtr executed_trajectory_;
 
   /// An error code reflecting what went wrong (if anything)
-  moveit_msgs::MoveItErrorCodes error_code_;
+  moveit_msgs::msg::MoveItErrorCodes error_code_;
 };
 
 /// The signature of a function that can compute a motion plan

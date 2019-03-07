@@ -78,7 +78,7 @@ void printPoint(const trajectory_msgs::JointTrajectoryPoint& point, std::size_t 
   }
 }
 
-void printStats(const trajectory_msgs::JointTrajectory& trajectory, const std::vector<moveit_msgs::JointLimits>& limits)
+void printStats(const trajectory_msgs::JointTrajectory& trajectory, const std::vector<moveit_msgs::msg::JointLimits>& limits)
 {
   ROS_DEBUG_NAMED("trajectory_processing.iterative_time_parameterization", "jointNames= %s %s %s %s %s %s %s",
                   limits[0].joint_name.c_str(), limits[1].joint_name.c_str(), limits[2].joint_name.c_str(),

@@ -135,7 +135,7 @@ bool executeAttachObject(const ManipulationPlanSharedDataConstPtr& shared_plan_d
   bool ok = false;
   {
     planning_scene_monitor::LockedPlanningSceneRW ps(motion_plan->planning_scene_monitor_);
-    moveit_msgs::AttachedCollisionObject msg = shared_plan_data->diff_attached_object_;
+    moveit_msgs::msg::AttachedCollisionObject msg = shared_plan_data->diff_attached_object_;
     // remember the configuration of the gripper before the grasp;
     // this configuration will be set again when releasing the object
     msg.detach_posture = detach_posture;
@@ -353,7 +353,7 @@ bool ApproachAndTranslateStage::evaluate(const ManipulationPlanPtr& plan) const
   } while (plan->possible_goal_states_.size() < max_goal_count_ && !signal_stop_ &&
            samplePossibleGoalStates(plan, planning_scene_->getCurrentState(), min_distance, max_fail_));
 
-  plan->error_code_.val = moveit_msgs::MoveItErrorCodes::PLANNING_FAILED;
+  plan->error_code_.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
 
   return false;
 }

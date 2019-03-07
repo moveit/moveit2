@@ -46,7 +46,7 @@ MOVEIT_CLASS_FORWARD(ConstraintSamplerManager);
 
 /**
  * \brief This class assists in the generation of a ConstraintSampler for a
- * particular group from a moveit_msgs::Constraints.
+ * particular group from a moveit_msgs::msg::Constraints.
  *
  * It contains logic that will generate either a
  * JointConstraintSampler, an IKConstraintSampler, or a
@@ -90,7 +90,7 @@ public:
    * or an empty pointer if none could be allocated
    */
   ConstraintSamplerPtr selectSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name,
-                                     const moveit_msgs::Constraints& constr) const;
+                                     const moveit_msgs::msg::Constraints& constr) const;
 
   /**
    * \brief Default logic to select a ConstraintSampler given a
@@ -137,7 +137,7 @@ public:
    */
   static ConstraintSamplerPtr selectDefaultSampler(const planning_scene::PlanningSceneConstPtr& scene,
                                                    const std::string& group_name,
-                                                   const moveit_msgs::Constraints& constr);
+                                                   const moveit_msgs::msg::Constraints& constr);
 
 private:
   std::vector<ConstraintSamplerAllocatorPtr>

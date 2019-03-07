@@ -341,7 +341,7 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   ompl_simple_setup_->getSpaceInformation()->setup();
 }
 
-void ompl_interface::ModelBasedPlanningContext::setPlanningVolume(const moveit_msgs::WorkspaceParameters& wparams)
+void ompl_interface::ModelBasedPlanningContext::setPlanningVolume(const moveit_msgs::msg::WorkspaceParameters& wparams)
 {
   if (wparams.min_corner.x == wparams.max_corner.x && wparams.min_corner.x == 0.0 &&
       wparams.min_corner.y == wparams.max_corner.y && wparams.min_corner.y == 0.0 &&
@@ -461,8 +461,8 @@ void ompl_interface::ModelBasedPlanningContext::clear()
   getOMPLStateSpace()->setInterpolationFunction(InterpolationFunction());
 }
 
-bool ompl_interface::ModelBasedPlanningContext::setPathConstraints(const moveit_msgs::Constraints& path_constraints,
-                                                                   moveit_msgs::MoveItErrorCodes* error)
+bool ompl_interface::ModelBasedPlanningContext::setPathConstraints(const moveit_msgs::msg::Constraints& path_constraints,
+                                                                   moveit_msgs::msg::MoveItErrorCodes* error)
 {
   // ******************* set the path constraints to use
   path_constraints_.reset(new kinematic_constraints::KinematicConstraintSet(getRobotModel()));
@@ -473,14 +473,14 @@ bool ompl_interface::ModelBasedPlanningContext::setPathConstraints(const moveit_
 }
 
 bool ompl_interface::ModelBasedPlanningContext::setGoalConstraints(
-    const std::vector<moveit_msgs::Constraints>& goal_constraints, const moveit_msgs::Constraints& path_constraints,
-    moveit_msgs::MoveItErrorCodes* error)
+    const std::vector<moveit_msgs::msg::Constraints>& goal_constraints, const moveit_msgs::msg::Constraints& path_constraints,
+    moveit_msgs::msg::MoveItErrorCodes* error)
 {
   // ******************* check if the input is correct
   goal_constraints_.clear();
-  for (const moveit_msgs::Constraints& goal_constraint : goal_constraints)
+  for (const moveit_msgs::msg::Constraints& goal_constraint : goal_constraints)
   {
-    moveit_msgs::Constraints constr = kinematic_constraints::mergeConstraints(goal_constraint, path_constraints);
+    moveit_msgs::msg::Constraints constr = kinematic_constraints::mergeConstraints(goal_constraint, path_constraints);
     kinematic_constraints::KinematicConstraintSetPtr kset(
         new kinematic_constraints::KinematicConstraintSet(getRobotModel()));
     kset->add(constr, getPlanningScene()->getTransforms());
@@ -493,7 +493,7 @@ bool ompl_interface::ModelBasedPlanningContext::setGoalConstraints(
     ROS_WARN_NAMED("model_based_planning_context", "%s: No goal constraints specified. There is no problem to solve.",
                    name_.c_str());
     if (error)
-      error->val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
+      error->val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
     return false;
   }
 
@@ -586,7 +586,7 @@ bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::Motion
   else
   {
     ROS_INFO_NAMED("model_based_planning_context", "Unable to solve the planning problem");
-    res.error_code_.val = moveit_msgs::MoveItErrorCodes::PLANNING_FAILED;
+    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
     return false;
   }
 }
@@ -632,7 +632,7 @@ bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::Motion
   else
   {
     ROS_INFO_NAMED("model_based_planning_context", "Unable to solve the planning problem");
-    res.error_code_.val = moveit_msgs::MoveItErrorCodes::PLANNING_FAILED;
+    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
     return false;
   }
 }

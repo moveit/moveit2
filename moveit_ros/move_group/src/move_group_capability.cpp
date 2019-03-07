@@ -44,8 +44,8 @@ void move_group::MoveGroupCapability::setContext(const MoveGroupContextPtr& cont
 }
 
 void move_group::MoveGroupCapability::convertToMsg(const std::vector<plan_execution::ExecutableTrajectory>& trajectory,
-                                                   moveit_msgs::RobotState& first_state_msg,
-                                                   std::vector<moveit_msgs::RobotTrajectory>& trajectory_msg) const
+                                                   moveit_msgs::msg::RobotState& first_state_msg,
+                                                   std::vector<moveit_msgs::msg::RobotTrajectory>& trajectory_msg) const
 {
   if (!trajectory.empty())
   {
@@ -67,8 +67,8 @@ void move_group::MoveGroupCapability::convertToMsg(const std::vector<plan_execut
 }
 
 void move_group::MoveGroupCapability::convertToMsg(const robot_trajectory::RobotTrajectoryPtr& trajectory,
-                                                   moveit_msgs::RobotState& first_state_msg,
-                                                   moveit_msgs::RobotTrajectory& trajectory_msg) const
+                                                   moveit_msgs::msg::RobotState& first_state_msg,
+                                                   moveit_msgs::msg::RobotTrajectory& trajectory_msg) const
 {
   if (trajectory && !trajectory->empty())
   {
@@ -78,8 +78,8 @@ void move_group::MoveGroupCapability::convertToMsg(const robot_trajectory::Robot
 }
 
 void move_group::MoveGroupCapability::convertToMsg(const std::vector<plan_execution::ExecutableTrajectory>& trajectory,
-                                                   moveit_msgs::RobotState& first_state_msg,
-                                                   moveit_msgs::RobotTrajectory& trajectory_msg) const
+                                                   moveit_msgs::msg::RobotState& first_state_msg,
+                                                   moveit_msgs::msg::RobotTrajectory& trajectory_msg) const
 {
   if (trajectory.size() > 1)
     ROS_ERROR_STREAM("Internal logic error: trajectory component ignored. !!! THIS IS A SERIOUS ERROR !!!");
@@ -91,28 +91,28 @@ planning_interface::MotionPlanRequest
 move_group::MoveGroupCapability::clearRequestStartState(const planning_interface::MotionPlanRequest& request) const
 {
   planning_interface::MotionPlanRequest r = request;
-  r.start_state = moveit_msgs::RobotState();
+  r.start_state = moveit_msgs::msg::RobotState();
   r.start_state.is_diff = true;
   ROS_WARN("Execution of motions should always start at the robot's current state. Ignoring the state supplied as "
            "start state in the motion planning request");
   return r;
 }
 
-moveit_msgs::PlanningScene
-move_group::MoveGroupCapability::clearSceneRobotState(const moveit_msgs::PlanningScene& scene) const
+moveit_msgs::msg::PlanningScene
+move_group::MoveGroupCapability::clearSceneRobotState(const moveit_msgs::msg::PlanningScene& scene) const
 {
-  moveit_msgs::PlanningScene r = scene;
-  r.robot_state = moveit_msgs::RobotState();
+  moveit_msgs::msg::PlanningScene r = scene;
+  r.robot_state = moveit_msgs::msg::RobotState();
   r.robot_state.is_diff = true;
   ROS_WARN("Execution of motions should always start at the robot's current state. Ignoring the state supplied as "
            "difference in the planning scene diff");
   return r;
 }
 
-std::string move_group::MoveGroupCapability::getActionResultString(const moveit_msgs::MoveItErrorCodes& error_code,
+std::string move_group::MoveGroupCapability::getActionResultString(const moveit_msgs::msg::MoveItErrorCodes& error_code,
                                                                    bool planned_trajectory_empty, bool plan_only)
 {
-  if (error_code.val == moveit_msgs::MoveItErrorCodes::SUCCESS)
+  if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     if (planned_trajectory_empty)
       return "Requested path and goal constraints are already met.";
@@ -124,31 +124,31 @@ std::string move_group::MoveGroupCapability::getActionResultString(const moveit_
         return "Solution was found and executed.";
     }
   }
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME)
     return "Must specify group in motion plan request";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::PLANNING_FAILED ||
-           error_code.val == moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED ||
+           error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN)
   {
     if (planned_trajectory_empty)
       return "No motion plan found. No execution attempted.";
     else
       return "Motion plan was found but it seems to be invalid (possibly due to postprocessing). Not executing.";
   }
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA)
     return "Motion plan was found but it seems to be too costly and looking around did not help.";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
     return "Solution found but the environment changed during execution and the path was aborted";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::CONTROL_FAILED)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED)
     return "Solution found but controller failed during execution";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::TIMED_OUT)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT)
     return "Timeout reached";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::PREEMPTED)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
     return "Preempted";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS)
     return "Invalid goal constraints";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::INVALID_OBJECT_NAME)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_OBJECT_NAME)
     return "Invalid object name";
-  else if (error_code.val == moveit_msgs::MoveItErrorCodes::FAILURE)
+  else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::FAILURE)
     return "Catastrophic failure";
   return "Unknown event";
 }

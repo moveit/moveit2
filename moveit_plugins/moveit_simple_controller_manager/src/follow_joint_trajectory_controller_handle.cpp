@@ -43,7 +43,7 @@ static const std::string LOGNAME("SimpleControllerManager");
 
 namespace moveit_simple_controller_manager
 {
-bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::RobotTrajectory& trajectory)
+bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
   ROS_DEBUG_STREAM_NAMED(LOGNAME, "new trajectory to " << name_);
 

@@ -146,6 +146,6 @@ bool pick_place::ReachableAndValidPoseFilter::evaluate(const ManipulationPlanPtr
     else
       ROS_ERROR_THROTTLE_NAMED(1, "manipulation", "No sampler was constructed");
   }
-  plan->error_code_.val = moveit_msgs::MoveItErrorCodes::GOAL_IN_COLLISION;
+  plan->error_code_.val = moveit_msgs::msg::MoveItErrorCodes::GOAL_IN_COLLISION;
   return false;
 }

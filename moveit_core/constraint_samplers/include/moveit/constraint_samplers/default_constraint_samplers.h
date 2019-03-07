@@ -88,7 +88,7 @@ public:
    *
    * @return True if the conditions are met, otherwise false
    */
-  bool configure(const moveit_msgs::Constraints& constr) override;
+  bool configure(const moveit_msgs::msg::Constraints& constr) override;
 
   /**
    * \brief Configures a joint constraint given a vector of constraints.
@@ -332,7 +332,7 @@ public:
    * exist and the overloaded configuration function returns true.
    * Otherwise, returns false.
    */
-  bool configure(const moveit_msgs::Constraints& constr) override;
+  bool configure(const moveit_msgs::msg::Constraints& constr) override;
 
   /**
    * \brief Configures the Constraint given a IKSamplingPose.

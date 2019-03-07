@@ -78,7 +78,7 @@ public:
 
     // The trajectory to execute, split in different parts (by joints), each set of joints corresponding to one
     // controller
-    std::vector<moveit_msgs::RobotTrajectory> trajectory_parts_;
+    std::vector<moveit_msgs::msg::RobotTrajectory> trajectory_parts_;
   };
 
   /// Load the controller manager plugin, start listening for events on a topic.
@@ -131,7 +131,7 @@ public:
 
   /// Add a trajectory for future execution. Optionally specify a controller to use for the trajectory. If no controller
   /// is specified, a default is used.
-  bool push(const moveit_msgs::RobotTrajectory& trajectory, const std::string& controller = "");
+  bool push(const moveit_msgs::msg::RobotTrajectory& trajectory, const std::string& controller = "");
 
   /// Add a trajectory for future execution. Optionally specify a controller to use for the trajectory. If no controller
   /// is specified, a default is used.
@@ -149,7 +149,7 @@ public:
   /// to execute the different parts of the trajectory. If multiple controllers can be used, preference is given to the
   /// already loaded ones.
   /// If no controller is specified, a default is used.
-  bool push(const moveit_msgs::RobotTrajectory& trajectory, const std::vector<std::string>& controllers);
+  bool push(const moveit_msgs::msg::RobotTrajectory& trajectory, const std::vector<std::string>& controllers);
 
   /// Get the trajectories to be executed
   const std::vector<TrajectoryExecutionContext*>& getTrajectories() const;
@@ -168,7 +168,7 @@ public:
 
   /// Add a trajectory for immediate execution. Optionally specify a controller to use for the trajectory. If no
   /// controller is specified, a default is used. This call is non-blocking.
-  bool pushAndExecute(const moveit_msgs::RobotTrajectory& trajectory, const std::string& controller = "");
+  bool pushAndExecute(const moveit_msgs::msg::RobotTrajectory& trajectory, const std::string& controller = "");
 
   /// Add a trajectory for immediate execution. Optionally specify a controller to use for the trajectory. If no
   /// controller is specified, a default is used. This call is non-blocking.
@@ -191,7 +191,7 @@ public:
   /// to execute the different parts of the trajectory. If multiple controllers can be used, preference is given to the
   /// already loaded ones.
   /// If no controller is specified, a default is used. This call is non-blocking.
-  bool pushAndExecute(const moveit_msgs::RobotTrajectory& trajectory, const std::vector<std::string>& controllers);
+  bool pushAndExecute(const moveit_msgs::msg::RobotTrajectory& trajectory, const std::vector<std::string>& controllers);
 
   /// Add a trajectory that consists of a single state for immediate execution. Optionally specify a set of controllers
   /// to consider using for the trajectory.
@@ -266,15 +266,15 @@ private:
 
   /// Validate first point of trajectory matches current robot state
   bool validate(const TrajectoryExecutionContext& context) const;
-  bool configure(TrajectoryExecutionContext& context, const moveit_msgs::RobotTrajectory& trajectory,
+  bool configure(TrajectoryExecutionContext& context, const moveit_msgs::msg::RobotTrajectory& trajectory,
                  const std::vector<std::string>& controllers);
 
   void updateControllersState(const ros::Duration& age);
   void updateControllerState(const std::string& controller, const ros::Duration& age);
   void updateControllerState(ControllerInformation& ci, const ros::Duration& age);
 
-  bool distributeTrajectory(const moveit_msgs::RobotTrajectory& trajectory, const std::vector<std::string>& controllers,
-                            std::vector<moveit_msgs::RobotTrajectory>& parts);
+  bool distributeTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory, const std::vector<std::string>& controllers,
+                            std::vector<moveit_msgs::msg::RobotTrajectory>& parts);
 
   bool findControllers(const std::set<std::string>& actuated_joints, std::size_t controller_count,
                        const std::vector<std::string>& available_controllers,

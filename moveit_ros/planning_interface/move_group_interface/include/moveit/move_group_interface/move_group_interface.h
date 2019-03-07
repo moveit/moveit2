@@ -59,7 +59,7 @@ namespace moveit
 /** \brief Simple interface to MoveIt! components */
 namespace planning_interface
 {
-class MoveItErrorCode : public moveit_msgs::MoveItErrorCodes
+class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
 {
 public:
   MoveItErrorCode()
@@ -70,13 +70,13 @@ public:
   {
     val = code;
   }
-  MoveItErrorCode(const moveit_msgs::MoveItErrorCodes& code)
+  MoveItErrorCode(const moveit_msgs::msg::MoveItErrorCodes& code)
   {
     val = code.val;
   }
   explicit operator bool() const
   {
-    return val == moveit_msgs::MoveItErrorCodes::SUCCESS;
+    return val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   }
   bool operator==(const int c) const
   {
@@ -128,10 +128,10 @@ public:
   struct Plan
   {
     /// The full starting state used for planning
-    moveit_msgs::RobotState start_state_;
+    moveit_msgs::msg::RobotState start_state_;
 
     /// The trajectory of the robot (may not contain joints that are the same as for the start_state_)
-    moveit_msgs::RobotTrajectory trajectory_;
+    moveit_msgs::msg::RobotTrajectory trajectory_;
 
     /// The amount of time it took to generate the plan
     double planning_time_;
@@ -218,7 +218,7 @@ public:
   unsigned int getVariableCount() const;
 
   /** \brief Get the description of the planning plugin loaded by the action server */
-  bool getInterfaceDescription(moveit_msgs::PlannerInterfaceDescription& desc);
+  bool getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc);
 
   /** \brief Get the planner parameters for given group and planner_id */
   std::map<std::string, std::string> getPlannerParams(const std::string& planner_id, const std::string& group = "");
@@ -298,7 +298,7 @@ public:
 
   /** \brief If a different start state should be considered instead of the current state of the robot, this function
    * sets that state */
-  void setStartState(const moveit_msgs::RobotState& start_state);
+  void setStartState(const moveit_msgs::msg::RobotState& start_state);
 
   /** \brief If a different start state should be considered instead of the current state of the robot, this function
    * sets that state */
@@ -693,7 +693,7 @@ public:
   /** \brief Get the move_group action client used by the \e MoveGroupInterface.
       The client can be used for querying the execution state of the trajectory and abort trajectory execution
       during asynchronous execution. */
-  actionlib::SimpleActionClient<moveit_msgs::MoveGroupAction>& getMoveGroupClient() const;
+  actionlib::SimpleActionClient<moveit_msgs::action::MoveGroupAction>& getMoveGroupClient() const;
 
   /** \brief Plan and execute a trajectory that takes the group of joints declared in the constructor to the specified
      target.
@@ -722,8 +722,8 @@ public:
      waypoints.
       Return -1.0 in case of error. */
   double computeCartesianPath(const std::vector<geometry_msgs::Pose>& waypoints, double eef_step, double jump_threshold,
-                              moveit_msgs::RobotTrajectory& trajectory, bool avoid_collisions = true,
-                              moveit_msgs::MoveItErrorCodes* error_code = NULL);
+                              moveit_msgs::msg::RobotTrajectory& trajectory, bool avoid_collisions = true,
+                              moveit_msgs::msg::MoveItErrorCodes* error_code = NULL);
 
   /** \brief Compute a Cartesian path that follows specified waypoints with a step size of at most \e eef_step meters
       between end effector configurations of consecutive points in the result \e trajectory. The reference frame for the
@@ -738,9 +738,9 @@ public:
      waypoints.
       Return -1.0 in case of error. */
   double computeCartesianPath(const std::vector<geometry_msgs::Pose>& waypoints, double eef_step, double jump_threshold,
-                              moveit_msgs::RobotTrajectory& trajectory,
-                              const moveit_msgs::Constraints& path_constraints, bool avoid_collisions = true,
-                              moveit_msgs::MoveItErrorCodes* error_code = NULL);
+                              moveit_msgs::msg::RobotTrajectory& trajectory,
+                              const moveit_msgs::msg::Constraints& path_constraints, bool avoid_collisions = true,
+                              moveit_msgs::msg::MoveItErrorCodes* error_code = NULL);
 
   /** \brief Stop any trajectory execution, if one is active */
   void stop();
@@ -754,7 +754,7 @@ public:
 
   /** \brief Build the MotionPlanRequest that would be sent to the move_group action with plan() or move() and store it
       in \e request */
-  void constructMotionPlanRequest(moveit_msgs::MotionPlanRequest& request);
+  void constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& request);
 
   /**@}*/
 
@@ -769,29 +769,28 @@ public:
   MoveItErrorCode pick(const std::string& object, bool plan_only = false);
 
   /** \brief Pick up an object given a grasp pose */
-  MoveItErrorCode pick(const std::string& object, const moveit_msgs::Grasp& grasp, bool plan_only = false);
+  MoveItErrorCode pick(const std::string& object, const moveit_msgs::msg::Grasp& grasp, bool plan_only = false);
 
   /** \brief Pick up an object given possible grasp poses
 
       if the vector is left empty this behaves like pick(const std::string &object) */
-  MoveItErrorCode pick(const std::string& object, const std::vector<moveit_msgs::Grasp>& grasps,
+  MoveItErrorCode pick(const std::string& object, const std::vector<moveit_msgs::msg::Grasp>& grasps,
                        bool plan_only = false);
 
   /** \brief Pick up an object
 
-      calls the external moveit_msgs::GraspPlanning service "plan_grasps" to compute possible grasps */
+      calls the external moveit_msgs::srv::GraspPlanning service "plan_grasps" to compute possible grasps */
   MoveItErrorCode planGraspsAndPick(const std::string& object = "", bool plan_only = false);
 
   /** \brief Pick up an object
-
-      calls the external moveit_msgs::GraspPlanning service "plan_grasps" to compute possible grasps */
-  MoveItErrorCode planGraspsAndPick(const moveit_msgs::CollisionObject& object, bool plan_only = false);
+      calls the external moveit_msgs::srv::GraspPlanning service "plan_grasps" to compute possible grasps */
+  MoveItErrorCode planGraspsAndPick(const moveit_msgs::msg::CollisionObject& object, bool plan_only = false);
 
   /** \brief Place an object somewhere safe in the world (a safe location will be detected) */
   MoveItErrorCode place(const std::string& object, bool plan_only = false);
 
   /** \brief Place an object at one of the specified possible locations */
-  MoveItErrorCode place(const std::string& object, const std::vector<moveit_msgs::PlaceLocation>& locations,
+  MoveItErrorCode place(const std::string& object, const std::vector<moveit_msgs::action::PlaceLocation>& locations,
                         bool plan_only = false);
 
   /** \brief Place an object at one of the specified possible locations */
@@ -908,7 +907,7 @@ public:
   /** \brief Get the actual set of constraints in use with this MoveGroupInterface.
       @return A copy of the current path constraints set for this interface
       */
-  moveit_msgs::Constraints getPathConstraints() const;
+  moveit_msgs::msg::Constraints getPathConstraints() const;
 
   /** \brief Specify a set of path constraints to use.
       The constraints are looked up by name from the Mongo database server.
@@ -918,14 +917,14 @@ public:
   /** \brief Specify a set of path constraints to use.
       This version does not require a database server.
       This replaces any path constraints set in previous calls to setPathConstraints(). */
-  void setPathConstraints(const moveit_msgs::Constraints& constraint);
+  void setPathConstraints(const moveit_msgs::msg::Constraints& constraint);
 
   /** \brief Specify that no path constraints are to be used.
       This removes any path constraints set in previous calls to setPathConstraints(). */
   void clearPathConstraints();
 
-  moveit_msgs::TrajectoryConstraints getTrajectoryConstraints() const;
-  void setTrajectoryConstraints(const moveit_msgs::TrajectoryConstraints& constraint);
+  moveit_msgs::msg::TrajectoryConstraints getTrajectoryConstraints() const;
+  void setTrajectoryConstraints(const moveit_msgs::msg::TrajectoryConstraints& constraint);
   void clearTrajectoryConstraints();
 
   /**@}*/

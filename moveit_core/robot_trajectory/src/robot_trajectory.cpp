@@ -201,9 +201,9 @@ void RobotTrajectory::clear()
   duration_from_previous_.clear();
 }
 
-void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::RobotTrajectory& trajectory) const
+void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory) const
 {
-  trajectory = moveit_msgs::RobotTrajectory();
+  trajectory = moveit_msgs::msg::RobotTrajectory();
   if (waypoints_.empty())
     return;
   const std::vector<const robot_model::JointModel*>& jnt =
@@ -353,7 +353,7 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
 }
 
 void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& reference_state,
-                                            const moveit_msgs::RobotTrajectory& trajectory)
+                                            const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
   // make a copy just in case the next clear() removes the memory for the reference passed in
   const robot_state::RobotState& copy = reference_state;
@@ -401,8 +401,8 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
 }
 
 void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& reference_state,
-                                            const moveit_msgs::RobotState& state,
-                                            const moveit_msgs::RobotTrajectory& trajectory)
+                                            const moveit_msgs::msg::RobotState& state,
+                                            const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
   robot_state::RobotState st(reference_state);
   robot_state::robotStateMsgToRobotState(state, st);

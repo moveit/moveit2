@@ -250,10 +250,10 @@ void ChompTrajectory::fillInMinJerk()
   }
 }
 
-bool ChompTrajectory::fillInFromTrajectory(moveit_msgs::MotionPlanDetailedResponse& res)
+bool ChompTrajectory::fillInFromTrajectory(moveit_msgs::msg::MotionPlanDetailedResponse& res)
 {
   // create a RobotTrajectory msg to obtain the trajectory from the MotionPlanDetailedResponse object
-  moveit_msgs::RobotTrajectory trajectory_msg = res.trajectory[0];
+  moveit_msgs::msg::RobotTrajectory trajectory_msg = res.trajectory[0];
 
   // get the default number of points in the CHOMP trajectory
   int num_chomp_trajectory_points = (*this).getNumPoints();
@@ -308,7 +308,7 @@ bool ChompTrajectory::fillInFromTrajectory(moveit_msgs::MotionPlanDetailedRespon
   return true;
 }
 
-void ChompTrajectory::assignCHOMPTrajectoryPointFromInputTrajectoryPoint(moveit_msgs::RobotTrajectory trajectory_msg,
+void ChompTrajectory::assignCHOMPTrajectoryPointFromInputTrajectoryPoint(moveit_msgs::msg::RobotTrajectory trajectory_msg,
                                                                          int num_joints_trajectory,
                                                                          int trajectory_msgs_point_index,
                                                                          int chomp_trajectory_point_index)

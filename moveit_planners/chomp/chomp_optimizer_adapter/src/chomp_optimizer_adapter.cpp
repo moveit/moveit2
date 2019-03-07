@@ -180,12 +180,12 @@ public:
 
     chomp::ChompPlanner chompPlanner;
     planning_interface::MotionPlanDetailedResponse res_detailed;
-    moveit_msgs::MotionPlanDetailedResponse res_detailed_moveit_msgs;
+    moveit_msgs::msg::MotionPlanDetailedResponse res_detailed_moveit_msgs;
 
     // populate the trajectory to pass to CHOMPPlanner::solve() method. Obtain trajectory from OMPL's
     // planning_interface::MotionPlanResponse object and put / populate it in the
-    // moveit_msgs::MotionPlanDetailedResponse object
-    moveit_msgs::RobotTrajectory trajectory_msgs_from_response;
+    // moveit_msgs::msg::MotionPlanDetailedResponse object
+    moveit_msgs::msg::RobotTrajectory trajectory_msgs_from_response;
     res.trajectory_->getRobotTrajectoryMsg(trajectory_msgs_from_response);
     res_detailed_moveit_msgs.trajectory.resize(1);
     res_detailed_moveit_msgs.trajectory[0] = trajectory_msgs_from_response;

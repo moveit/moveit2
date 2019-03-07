@@ -41,7 +41,7 @@
 
 namespace constraint_samplers
 {
-bool JointConstraintSampler::configure(const moveit_msgs::Constraints& constr)
+bool JointConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
 {
   // construct the constraints
   std::vector<kinematic_constraints::JointConstraint> jc;
@@ -276,7 +276,7 @@ bool IKConstraintSampler::configure(const IKSamplingPose& sp)
   return is_valid_;
 }
 
-bool IKConstraintSampler::configure(const moveit_msgs::Constraints& constr)
+bool IKConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
 {
   for (std::size_t p = 0; p < constr.position_constraints.size(); ++p)
     for (std::size_t o = 0; o < constr.orientation_constraints.size(); ++o)
@@ -509,16 +509,16 @@ namespace
 void samplingIkCallbackFnAdapter(robot_state::RobotState* state, const robot_model::JointModelGroup* jmg,
                                  const robot_state::GroupStateValidityCallbackFn& constraint,
                                  const geometry_msgs::Pose& /*unused*/, const std::vector<double>& ik_sol,
-                                 moveit_msgs::MoveItErrorCodes& error_code)
+                                 moveit_msgs::msg::MoveItErrorCodes& error_code)
 {
   const std::vector<unsigned int>& bij = jmg->getKinematicsSolverJointBijection();
   std::vector<double> solution(bij.size());
   for (std::size_t i = 0; i < bij.size(); ++i)
     solution[i] = ik_sol[bij[i]];
   if (constraint(state, jmg, &solution[0]))
-    error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+    error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   else
-    error_code.val = moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
+    error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
 }
 }  // namespace
 
@@ -622,7 +622,7 @@ bool IKConstraintSampler::callIK(const geometry_msgs::Pose& ik_query,
     seed[i] = vals[ik_joint_bijection[i]];
 
   std::vector<double> ik_sol;
-  moveit_msgs::MoveItErrorCodes error;
+  moveit_msgs::msg::MoveItErrorCodes error;
 
   if (adapted_ik_validity_callback ?
           kb_->searchPositionIK(ik_query, seed, timeout, ik_sol, adapted_ik_validity_callback, error) :
@@ -638,9 +638,9 @@ bool IKConstraintSampler::callIK(const geometry_msgs::Pose& ik_query,
   }
   else
   {
-    if (error.val != moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION &&
-        error.val != moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE &&
-        error.val != moveit_msgs::MoveItErrorCodes::TIMED_OUT)
+    if (error.val != moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION &&
+        error.val != moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE &&
+        error.val != moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT)
       ROS_ERROR_NAMED("constraint_samplers", "IK solver failed with error %d", error.val);
     else if (verbose_)
       ROS_INFO_NAMED("constraint_samplers", "IK failed");

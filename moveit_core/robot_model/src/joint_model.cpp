@@ -133,7 +133,7 @@ void JointModel::setVariableBounds(const std::string& variable, const VariableBo
   computeVariableBoundsMsg();
 }
 
-void JointModel::setVariableBounds(const std::vector<moveit_msgs::JointLimits>& jlim)
+void JointModel::setVariableBounds(const std::vector<moveit_msgs::msg::JointLimits>& jlim)
 {
   for (std::size_t j = 0; j < variable_names_.size(); ++j)
     for (std::size_t i = 0; i < jlim.size(); ++i)
@@ -167,7 +167,7 @@ void JointModel::computeVariableBoundsMsg()
   variable_bounds_msg_.clear();
   for (std::size_t i = 0; i < variable_bounds_.size(); ++i)
   {
-    moveit_msgs::JointLimits lim;
+    moveit_msgs::msg::JointLimits lim;
     lim.joint_name = variable_names_[i];
     lim.has_position_limits = variable_bounds_[i].position_bounded_;
     lim.min_position = variable_bounds_[i].min_position_;

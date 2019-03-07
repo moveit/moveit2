@@ -152,7 +152,7 @@ static inline void _robotStateToMultiDOFJointState(const RobotState& state, sens
 class ShapeVisitorAddToCollisionObject : public boost::static_visitor<void>
 {
 public:
-  ShapeVisitorAddToCollisionObject(moveit_msgs::CollisionObject* obj) : boost::static_visitor<void>(), obj_(obj)
+  ShapeVisitorAddToCollisionObject(moveit_msgs::msg::CollisionObject* obj) : boost::static_visitor<void>(), obj_(obj)
   {
   }
 
@@ -181,11 +181,11 @@ public:
   }
 
 private:
-  moveit_msgs::CollisionObject* obj_;
+  moveit_msgs::msg::CollisionObject* obj_;
   const geometry_msgs::Pose* pose_;
 };
 
-static void _attachedBodyToMsg(const AttachedBody& attached_body, moveit_msgs::AttachedCollisionObject& aco)
+static void _attachedBodyToMsg(const AttachedBody& attached_body, moveit_msgs::msg::AttachedCollisionObject& aco)
 {
   aco.link_name = attached_body.getAttachedLinkName();
   aco.detach_posture = attached_body.getDetachPosture();
@@ -196,7 +196,7 @@ static void _attachedBodyToMsg(const AttachedBody& attached_body, moveit_msgs::A
   aco.object.header.frame_id = aco.link_name;
   aco.object.id = attached_body.getName();
 
-  aco.object.operation = moveit_msgs::CollisionObject::ADD;
+  aco.object.operation = moveit_msgs::msg::CollisionObject::ADD;
   const std::vector<shapes::ShapeConstPtr>& ab_shapes = attached_body.getShapes();
   const EigenSTL::vector_Isometry3d& ab_tf = attached_body.getFixedTransforms();
   ShapeVisitorAddToCollisionObject sv(&aco.object);
@@ -218,9 +218,9 @@ static void _attachedBodyToMsg(const AttachedBody& attached_body, moveit_msgs::A
   }
 }
 
-static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::AttachedCollisionObject& aco, RobotState& state)
+static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::AttachedCollisionObject& aco, RobotState& state)
 {
-  if (aco.object.operation == moveit_msgs::CollisionObject::ADD)
+  if (aco.object.operation == moveit_msgs::msg::CollisionObject::ADD)
   {
     if (!aco.object.primitives.empty() || !aco.object.meshes.empty() || !aco.object.planes.empty())
     {
@@ -321,7 +321,7 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::Attached
     else
       ROS_ERROR_NAMED(LOGNAME, "The attached body for link '%s' has no geometry", aco.link_name.c_str());
   }
-  else if (aco.object.operation == moveit_msgs::CollisionObject::REMOVE)
+  else if (aco.object.operation == moveit_msgs::msg::CollisionObject::REMOVE)
   {
     if (!state.clearAttachedBody(aco.object.id))
       ROS_ERROR_NAMED(LOGNAME, "The attached body '%s' can not be removed because it does not exist",
@@ -331,11 +331,11 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::Attached
     ROS_ERROR_NAMED(LOGNAME, "Unknown collision object operation: %d", aco.object.operation);
 }
 
-static bool _robotStateMsgToRobotStateHelper(const Transforms* tf, const moveit_msgs::RobotState& robot_state,
+static bool _robotStateMsgToRobotStateHelper(const Transforms* tf, const moveit_msgs::msg::RobotState& robot_state,
                                              RobotState& state, bool copy_attached_bodies)
 {
   bool valid;
-  const moveit_msgs::RobotState& rs = robot_state;
+  const moveit_msgs::msg::RobotState& rs = robot_state;
 
   if (!rs.is_diff && rs.joint_state.name.empty() && rs.multi_dof_joint_state.joint_names.empty())
   {
@@ -372,14 +372,14 @@ bool jointStateToRobotState(const sensor_msgs::JointState& joint_state, RobotSta
   return result;
 }
 
-bool robotStateMsgToRobotState(const moveit_msgs::RobotState& robot_state, RobotState& state, bool copy_attached_bodies)
+bool robotStateMsgToRobotState(const moveit_msgs::msg::RobotState& robot_state, RobotState& state, bool copy_attached_bodies)
 {
   bool result = _robotStateMsgToRobotStateHelper(nullptr, robot_state, state, copy_attached_bodies);
   state.update();
   return result;
 }
 
-bool robotStateMsgToRobotState(const Transforms& tf, const moveit_msgs::RobotState& robot_state, RobotState& state,
+bool robotStateMsgToRobotState(const Transforms& tf, const moveit_msgs::msg::RobotState& robot_state, RobotState& state,
                                bool copy_attached_bodies)
 {
   bool result = _robotStateMsgToRobotStateHelper(&tf, robot_state, state, copy_attached_bodies);
@@ -387,7 +387,7 @@ bool robotStateMsgToRobotState(const Transforms& tf, const moveit_msgs::RobotSta
   return result;
 }
 
-void robotStateToRobotStateMsg(const RobotState& state, moveit_msgs::RobotState& robot_state, bool copy_attached_bodies)
+void robotStateToRobotStateMsg(const RobotState& state, moveit_msgs::msg::RobotState& robot_state, bool copy_attached_bodies)
 {
   robot_state.is_diff = false;
   robotStateToJointStateMsg(state, robot_state.joint_state);
@@ -403,7 +403,7 @@ void robotStateToRobotStateMsg(const RobotState& state, moveit_msgs::RobotState&
 
 void attachedBodiesToAttachedCollisionObjectMsgs(
     const std::vector<const AttachedBody*>& attached_bodies,
-    std::vector<moveit_msgs::AttachedCollisionObject>& attached_collision_objs)
+    std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objs)
 {
   attached_collision_objs.resize(attached_bodies.size());
   for (std::size_t i = 0; i < attached_bodies.size(); ++i)

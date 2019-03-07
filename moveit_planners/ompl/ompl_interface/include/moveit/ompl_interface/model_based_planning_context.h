@@ -234,13 +234,13 @@ public:
 
   void setProjectionEvaluator(const std::string& peval);
 
-  void setPlanningVolume(const moveit_msgs::WorkspaceParameters& wparams);
+  void setPlanningVolume(const moveit_msgs::msg::WorkspaceParameters& wparams);
 
   void setCompleteInitialState(const robot_state::RobotState& complete_initial_robot_state);
 
-  bool setGoalConstraints(const std::vector<moveit_msgs::Constraints>& goal_constraints,
-                          const moveit_msgs::Constraints& path_constraints, moveit_msgs::MoveItErrorCodes* error);
-  bool setPathConstraints(const moveit_msgs::Constraints& path_constraints, moveit_msgs::MoveItErrorCodes* error);
+  bool setGoalConstraints(const std::vector<moveit_msgs::msg::Constraints>& goal_constraints,
+                          const moveit_msgs::msg::Constraints& path_constraints, moveit_msgs::msg::MoveItErrorCodes* error);
+  bool setPathConstraints(const moveit_msgs::msg::Constraints& path_constraints, moveit_msgs::msg::MoveItErrorCodes* error);
 
   void setConstraintsApproximations(const ConstraintsLibraryConstPtr& constraints_library)
   {
@@ -338,7 +338,7 @@ protected:
   std::vector<int> space_signature_;
 
   kinematic_constraints::KinematicConstraintSetPtr path_constraints_;
-  moveit_msgs::Constraints path_constraints_msg_;
+  moveit_msgs::msg::Constraints path_constraints_msg_;
   std::vector<kinematic_constraints::KinematicConstraintSetPtr> goal_constraints_;
 
   const ob::PlannerTerminationCondition* ptc_;

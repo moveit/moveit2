@@ -66,7 +66,7 @@ public:
     return pipeline_.getFailedManipulationPlans();
   }
 
-  const moveit_msgs::MoveItErrorCodes& getErrorCode() const
+  const moveit_msgs::msg::MoveItErrorCodes& getErrorCode() const
   {
     return error_code_;
   }
@@ -90,7 +90,7 @@ protected:
   bool pushed_all_poses_;
   boost::condition_variable done_condition_;
   boost::mutex done_mutex_;
-  moveit_msgs::MoveItErrorCodes error_code_;
+  moveit_msgs::msg::MoveItErrorCodes error_code_;
 };
 
 MOVEIT_CLASS_FORWARD(PickPlan);
@@ -99,7 +99,7 @@ class PickPlan : public PickPlacePlanBase
 {
 public:
   PickPlan(const PickPlaceConstPtr& pick_place);
-  bool plan(const planning_scene::PlanningSceneConstPtr& planning_scene, const moveit_msgs::PickupGoal& goal);
+  bool plan(const planning_scene::PlanningSceneConstPtr& planning_scene, const moveit_msgs::action::PickupGoal& goal);
 };
 
 MOVEIT_CLASS_FORWARD(PlacePlan);
@@ -108,7 +108,7 @@ class PlacePlan : public PickPlacePlanBase
 {
 public:
   PlacePlan(const PickPlaceConstPtr& pick_place);
-  bool plan(const planning_scene::PlanningSceneConstPtr& planning_scene, const moveit_msgs::PlaceGoal& goal);
+  bool plan(const planning_scene::PlanningSceneConstPtr& planning_scene, const moveit_msgs::action::PlaceGoal& goal);
 };
 
 class PickPlace : private boost::noncopyable, public std::enable_shared_from_this<PickPlace>
@@ -139,11 +139,11 @@ public:
 
   /** \brief Plan the sequence of motions that perform a pickup action */
   PickPlanPtr planPick(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                       const moveit_msgs::PickupGoal& goal) const;
+                       const moveit_msgs::action::PickupGoal& goal) const;
 
   /** \brief Plan the sequence of motions that perform a placement action */
   PlacePlanPtr planPlace(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                         const moveit_msgs::PlaceGoal& goal) const;
+                         const moveit_msgs::action::PlaceGoal& goal) const;
 
   void displayComputedMotionPlans(bool flag);
   void displayProcessedGrasps(bool flag);

@@ -1369,16 +1369,16 @@ namespace
 {
 bool ikCallbackFnAdapter(RobotState* state, const JointModelGroup* group,
                          const GroupStateValidityCallbackFn& constraint, const geometry_msgs::Pose& /*unused*/,
-                         const std::vector<double>& ik_sol, moveit_msgs::MoveItErrorCodes& error_code)
+                         const std::vector<double>& ik_sol, moveit_msgs::msg::MoveItErrorCodes& error_code)
 {
   const std::vector<unsigned int>& bij = group->getKinematicsSolverJointBijection();
   std::vector<double> solution(bij.size());
   for (std::size_t i = 0; i < bij.size(); ++i)
     solution[bij[i]] = ik_sol[i];
   if (constraint(state, group, &solution[0]))
-    error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+    error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   else
-    error_code.val = moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
+    error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
   return true;
 }
 }  // namespace
@@ -1653,7 +1653,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
 
   // compute the IK solution
   std::vector<double> ik_sol;
-  moveit_msgs::MoveItErrorCodes error;
+  moveit_msgs::msg::MoveItErrorCodes error;
 
   if (solver->searchPositionIK(ik_queries, seed, timeout, consistency_limits, ik_sol, ik_callback_fn, error, options,
                                this))
@@ -1839,7 +1839,7 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
 
       // compute the IK solution
       std::vector<double> ik_sol;
-      moveit_msgs::MoveItErrorCodes error;
+      moveit_msgs::msg::MoveItErrorCodes error;
       const std::vector<double>& climits = consistency_limits.empty() ? std::vector<double>() : consistency_limits[sg];
       if (solvers[sg]->searchPositionIK(ik_queries[sg], seed, (timeout - elapsed) / sub_groups.size(), climits, ik_sol,
                                         error))
