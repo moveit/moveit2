@@ -93,6 +93,7 @@ include_directories(lazy_free_space_updater/include
                     ${Boost_INCLUDE_DIRS}
                     ${rclcpp_INCLUDE_DIRS}
                     ${moveit_msgs_INCLUDE_DIRS}
+                    ${OPENGL_INCLUDE_DIR}
                     )
 include_directories(SYSTEM
                     include
