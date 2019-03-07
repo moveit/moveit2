@@ -81,10 +81,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     ${OPENGL_INCLUDE_DIR}
 )
 
-ament_export_include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_LIBRARIES}
-${THIS_PACKAGE_INCLUDE_DEPENDS})
-
 include_directories(lazy_free_space_updater/include
                     point_containment_filter/include
                     occupancy_map_monitor/include
@@ -92,13 +88,16 @@ include_directories(lazy_free_space_updater/include
                     semantic_world/include
                     ${perception_GL_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
-                    ${catkin_INCLUDE_DIRS}
+                    ${rclcpp_INCLUDE_DIRS}
+                    ${moveit_msgs_INCLUDE_DIRS}
                     )
 include_directories(SYSTEM
+                    include
                     ${OpenCV_INCLUDE_DIRS}
                     ${EIGEN3_INCLUDE_DIRS}
                     ${SYSTEM_GL_INCLUDE_DIR}
                     ${X11_INCLUDE_DIR}
+                    ${moveit_core_INCLUDE_DIRS}
                     )
 
 
