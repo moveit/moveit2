@@ -18,7 +18,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED system filesystem date_time thread iostreams)
+# find_package(Boost REQUIRED)
 # find_package(system  REQUIRED)
 # find_package(filesystem  REQUIRED)
 # find_package(date_time  REQUIRED)
@@ -112,43 +113,29 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     logging/include
 )
 
-# set(dependencies
-#   moveit_kinematics_base
-#   moveit_robot_model
-#   moveit_robot_state
-#   moveit_collision_detection
-#   moveit_collision_detection_fcl
-#   moveit_kinematic_constraints
-#   moveit_planning_request_adapter
-#   moveit_planning_scene
-#   moveit_trajectory_processing
-#   random_numbers
-#   tf2_eigen
-#   tf2_kdl
-#   eigen_stl_containers
-#   geometric_shapes
-#   geometry_msgs
-#   kdl_parser
-#   moveit_msgs
-#   octomap_msgs
-#   sensor_msgs
-#   srdfdom
-#   std_msgs
-#   trajectory_msgs
-#   visualization_msgs
-#   Boost
-#   EIGEN3
-#   LIBFCL
-#   OCTOMAP
-#   urdfdom
-#   urdf
-#   urdfdom_headers
-#   common_interfaces
-#   rcutils
-# )
-#
-# ament_export_dependencies(${dependencies})
-
+set(libraries
+  moveit_exceptions
+  moveit_background_processing
+  moveit_kinematics_base
+  moveit_robot_model
+  moveit_transforms
+  moveit_robot_state
+  moveit_robot_trajectory
+  moveit_planning_interface
+  moveit_collision_detection
+  moveit_collision_detection_fcl
+  moveit_kinematic_constraints
+  moveit_planning_scene
+  moveit_constraint_samplers
+  moveit_planning_request_adapter
+  moveit_profiler
+  moveit_trajectory_processing
+  moveit_distance_field
+  moveit_collision_distance_field
+  moveit_kinematics_metrics
+  moveit_dynamics_solver
+  moveit_utils
+)
 
 # to run: catkin_make -DENABLE_COVERAGE_TESTING=ON package_name_coverage
 if(CATKIN_ENABLE_TESTING AND ENABLE_COVERAGE_TESTING)
@@ -202,5 +189,8 @@ add_subdirectory(collision_distance_field)
 add_subdirectory(kinematics_metrics)
 add_subdirectory(dynamics_solver)
 add_subdirectory(utils)
+
+ament_export_include_directories(include)
+ament_export_libraries(${libraries})
 
 ament_package()
