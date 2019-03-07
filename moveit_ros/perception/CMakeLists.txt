@@ -46,6 +46,7 @@ find_package(moveit_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(octomap REQUIRED)
+find_package(octomap_msgs REQUIRED)
 find_package(OpenCV)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
@@ -79,6 +80,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     ${rclcpp_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
+    ${OCTOMAP_INCLUDE_DIR}
+    ${octomap_msgs_INCLUDE_DIR}
 )
 
 include_directories(lazy_free_space_updater/include
@@ -118,5 +121,8 @@ install(
     depth_image_octomap_updater_plugin_description.xml
   DESTINATION
     share)
+
+ament_export_include_directories(include)
+ament_export_libraries(${THIS_PACKAGE_INCLUDE_LIBRARIES})
 
 ament_package()
