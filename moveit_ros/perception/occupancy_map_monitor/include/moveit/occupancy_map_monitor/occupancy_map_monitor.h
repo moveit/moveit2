@@ -42,14 +42,18 @@
 #include <tf2_ros/buffer.h>
 #include <pluginlib/class_loader.hpp>
 
-#include <moveit_msgs/msg/SaveMap.h>
-#include <moveit_msgs/msg/LoadMap.h>
+#include <moveit_msgs/srv/save_map.hpp>
+#include <moveit_msgs/srv/load_map.hpp>
 #include <moveit/occupancy_map_monitor/occupancy_map.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
 
 #include <boost/thread/mutex.hpp>
 
 #include <memory>
+#include <boost/bind.hpp>
+#include <octomap_msgs/conversions.h>
+#include "rclcpp/rclcpp.hpp"
+
 
 namespace occupancy_map_monitor
 {
@@ -59,8 +63,8 @@ public:
   OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& map_frame = "",
                       double map_resolution = 0.0);
   OccupancyMapMonitor(double map_resolution = 0.0);
-  OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, ros::NodeHandle& nh,
-                      const std::string& map_frame = "", double map_resolution = 0.0);
+  // OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
+  //                     const std::string& map_frame = "", double map_resolution = 0.0);
 
   ~OccupancyMapMonitor();
 
@@ -132,7 +136,7 @@ private:
   /** @brief Load octree from a binary file (gets rid of current octree data) */
   bool loadMapCallback(moveit_msgs::srv::LoadMap::Request& request, moveit_msgs::srv::LoadMap::Response& response);
 
-  bool getShapeTransformCache(std::size_t index, const std::string& target_frame, const ros::Time& target_time,
+  bool getShapeTransformCache(std::size_t index, const std::string& target_frame, const rclcpp::Time& target_time,
                               ShapeTransformCache& cache) const;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -151,12 +155,9 @@ private:
 
   std::size_t mesh_handle_count_;
 
-  ros::NodeHandle root_nh_;
-  ros::NodeHandle nh_;
-  ros::ServiceServer save_map_srv_;
-  ros::ServiceServer load_map_srv_;
-
   bool active_;
+
+  // rclcpp::Publisher<octomap_msgs::msg::Octomap> octree_binary_pub_;
 };
 }
 
