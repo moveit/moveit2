@@ -131,10 +131,14 @@ private:
   void initialize();
 
   /** @brief Save the current octree to a binary file */
-  bool saveMapCallback(moveit_msgs::srv::SaveMap::Request& request, moveit_msgs::srv::SaveMap::Response& response);
+  bool saveMapCallback(std::shared_ptr<rmw_request_id_t> request_header,
+                       const std::shared_ptr<moveit_msgs::srv::SaveMap::Request> req,
+                       std::shared_ptr<moveit_msgs::srv::SaveMap::Response> res);
 
   /** @brief Load octree from a binary file (gets rid of current octree data) */
-  bool loadMapCallback(moveit_msgs::srv::LoadMap::Request& request, moveit_msgs::srv::LoadMap::Response& response);
+  bool loadMapCallback(const std::shared_ptr<rmw_request_id_t> request_header,
+                          const std::shared_ptr<moveit_msgs::srv::LoadMap::Request> req,
+                          std::shared_ptr<moveit_msgs::srv::LoadMap::Response> res);
 
   bool getShapeTransformCache(std::size_t index, const std::string& target_frame, const rclcpp::Time& target_time,
                               ShapeTransformCache& cache) const;
@@ -157,7 +161,11 @@ private:
 
   bool active_;
 
-  // rclcpp::Publisher<octomap_msgs::msg::Octomap> octree_binary_pub_;
+  rclcpp::Service<moveit_msgs::srv::SaveMap>::SharedPtr save_map_srv_;
+  rclcpp::Service<moveit_msgs::srv::LoadMap>::SharedPtr load_map_srv_;
+
+  // std::shared_ptr<rclcpp::Node> node_;
+
 };
 }
 

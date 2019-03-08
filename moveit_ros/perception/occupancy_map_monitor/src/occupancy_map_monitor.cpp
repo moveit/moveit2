@@ -75,7 +75,7 @@ OccupancyMapMonitor::OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>&
 
 void OccupancyMapMonitor::initialize()
 {
-  auto node_occupancy_map = rclcpp::Node::make_shared("ocupancy_map_monitor_parameters");
+  auto node_occupancy_map = rclcpp::Node::make_shared("occupancy_map_server");
   auto ocupancy_map_monitor_parameters = std::make_shared<rclcpp::SyncParametersClient>(node_occupancy_map);
 
   for (auto & parameter : ocupancy_map_monitor_parameters->get_parameters({"octomap_resolution"})) {
@@ -88,7 +88,7 @@ void OccupancyMapMonitor::initialize()
   RCLCPP_DEBUG(logger_occupancy_map_monitor,"Using resolution = %lf m for building octomap", map_resolution_);
 
   if (map_frame_.empty()){
-    for (auto & parameter : ocupancy_map_monitor_parameters->get_parameters({"octomap_frame"})) {
+    for (auto & parameter : ocupancy_map_monitor_parameters->get_parameters({"occupancy_map_server"})) {
         map_frame_ = parameter.value_to_string();
     }
     RCLCPP_WARN(logger_occupancy_map_monitor,"No target frame specified for Octomap. No transforms will be applied to received data.");
@@ -181,8 +181,20 @@ void OccupancyMapMonitor::initialize()
   // }
 
   /* advertise a service for loading octomaps from disk */
-  // save_map_srv_ = nh_.advertiseService("save_map", &OccupancyMapMonitor::saveMapCallback, this);
-  // load_map_srv_ = nh_.advertiseService("load_map", &OccupancyMapMonitor::loadMapCallback, this);
+
+  std::function<bool( std::shared_ptr<rmw_request_id_t>,
+                       const std::shared_ptr<moveit_msgs::srv::SaveMap::Request>,
+                       std::shared_ptr<moveit_msgs::srv::SaveMap::Response>)> cb_savemap_function = std::bind(
+         &OccupancyMapMonitor::saveMapCallback, this, std::placeholders::_1,  std::placeholders::_2,  std::placeholders::_3);
+
+  std::function<bool( std::shared_ptr<rmw_request_id_t>,
+                      const std::shared_ptr<moveit_msgs::srv::LoadMap::Request>,
+                      std::shared_ptr<moveit_msgs::srv::LoadMap::Response>)> cb_loadmap_function = std::bind(
+        &OccupancyMapMonitor::loadMapCallback, this, std::placeholders::_1,  std::placeholders::_2,  std::placeholders::_3);
+
+  save_map_srv_ = node_occupancy_map->create_service<moveit_msgs::srv::SaveMap>("save_map", cb_savemap_function);
+  load_map_srv_ = node_occupancy_map->create_service<moveit_msgs::srv::LoadMap>("load_map", cb_loadmap_function);
+
 }
 
 void OccupancyMapMonitor::addUpdater(const OccupancyMapUpdaterPtr& updater)
@@ -301,38 +313,44 @@ bool OccupancyMapMonitor::getShapeTransformCache(std::size_t index, const std::s
     return false;
 }
 
-bool OccupancyMapMonitor::saveMapCallback(moveit_msgs::srv::SaveMap::Request& request,
-                                          moveit_msgs::srv::SaveMap::Response& response)
+bool OccupancyMapMonitor::saveMapCallback(std::shared_ptr<rmw_request_id_t> request_header,
+                     const std::shared_ptr<moveit_msgs::srv::SaveMap::Request> req,
+                     std::shared_ptr<moveit_msgs::srv::SaveMap::Response> res)
 {
-  RCLCPP_INFO(logger_occupancy_map_monitor,"Writing map to %s", request.filename.c_str());
+  (void)request_header; // avoid warning
+
+  RCLCPP_INFO(logger_occupancy_map_monitor,"Writing map to %s", req->filename.c_str());
   tree_->lockRead();
   try
   {
-    response.success = tree_->writeBinary(request.filename);
+    res->success = tree_->writeBinary(req->filename);
   }
   catch (...)
   {
-    response.success = false;
+    res->success = false;
   }
   tree_->unlockRead();
   return true;
 }
 
-bool OccupancyMapMonitor::loadMapCallback(moveit_msgs::srv::LoadMap::Request& request,
-                                          moveit_msgs::srv::LoadMap::Response& response)
+bool OccupancyMapMonitor::loadMapCallback(const std::shared_ptr<rmw_request_id_t> request_header,
+                        const std::shared_ptr<moveit_msgs::srv::LoadMap::Request> req,
+                        std::shared_ptr<moveit_msgs::srv::LoadMap::Response> res)
 {
-  RCLCPP_INFO(logger_occupancy_map_monitor,"Reading map from %s", request.filename.c_str());
+  (void)request_header; // avoid warning
+
+  RCLCPP_INFO(logger_occupancy_map_monitor,"Reading map from %s", req->filename.c_str());
 
   /* load the octree from disk */
   tree_->lockWrite();
   try
   {
-    response.success = tree_->readBinary(request.filename);
+    res->success = tree_->readBinary(req->filename);
   }
   catch (...)
   {
     RCLCPP_ERROR(logger_occupancy_map_monitor,"Failed to load map from file");
-    response.success = false;
+    res->success = false;
   }
   tree_->unlockWrite();
 

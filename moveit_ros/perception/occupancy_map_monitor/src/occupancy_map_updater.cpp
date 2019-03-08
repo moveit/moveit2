@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan, Jon Binney */
 
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
+#include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
 
 rclcpp::Logger logger_occupancy_map_updater = rclcpp::get_logger("occupancy_map_monitor");
 
@@ -57,7 +58,7 @@ void OccupancyMapUpdater::setMonitor(OccupancyMapMonitor* monitor)
 void OccupancyMapUpdater::readXmlParam(const std::string& param_name, double* value)
 {
   std::string isInt ("integer");
-  auto node_occupancy_map = rclcpp::Node::make_shared("ocupancy_map_monitor_parameters");
+  auto node_occupancy_map = rclcpp::Node::make_shared("occupancy_map_server");
   auto ocupancy_map_monitor_parameters = std::make_shared<rclcpp::SyncParametersClient>(node_occupancy_map);
 
   for (auto & parameter : ocupancy_map_monitor_parameters->get_parameters({param_name})) {
@@ -72,7 +73,7 @@ void OccupancyMapUpdater::readXmlParam(const std::string& param_name, double* va
 
 void OccupancyMapUpdater::readXmlParam(const std::string& param_name, unsigned int* value)
 {
-  auto node_occupancy_map = rclcpp::Node::make_shared("ocupancy_map_monitor_parameters");
+  auto node_occupancy_map = rclcpp::Node::make_shared("occupancy_map_server");
   auto ocupancy_map_monitor_parameters = std::make_shared<rclcpp::SyncParametersClient>(node_occupancy_map);
 
   for (auto & parameter : ocupancy_map_monitor_parameters->get_parameters({param_name})) {
