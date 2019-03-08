@@ -87,11 +87,7 @@ bool OccupancyMapUpdater::updateTransformCache(const std::string& target_frame, 
     return transform_provider_callback_(target_frame, target_time, transform_cache_);
   else
   {
-    // ROS_WARN_THROTTLE(1, "No callback provided for updating the transform cache for octomap updaters");
-    while (true) {
-      RCLCPP_ERROR(logger_occupancy_map_updater,"Incorrect mapping of mesh handles");
-      boost::this_thread::sleep_for(boost::chrono::seconds(1));
-    }
+    RCUTILS_LOG_ERROR_THROTTLE(RCUTILS_STEADY_TIME,1, "No callback provided for updating the transform cache for octomap updaters");
     return false;
   }
 }

@@ -52,18 +52,12 @@ static void publishOctomap(rclcpp::Publisher<octomap_msgs::msg::Octomap>::Shared
   try
   {
     if (!octomap_msgs::binaryMapToMsgData(*server->getOcTreePtr(), map.data)){
-      while (true) {
-        RCLCPP_ERROR(logger_occupancy_map_server,"Could not generate OctoMap message");
-        boost::this_thread::sleep_for(boost::chrono::seconds(1));
-      }
+      RCUTILS_LOG_ERROR_THROTTLE(RCUTILS_STEADY_TIME,1, "Could not generate OctoMap message");
     }
   }
   catch (...)
   {
-    while (true) {
-      RCLCPP_ERROR(logger_occupancy_map_server,"Exception thrown while generating OctoMap message");
-      boost::this_thread::sleep_for(boost::chrono::seconds(1));
-    }
+    RCUTILS_LOG_ERROR_THROTTLE(RCUTILS_STEADY_TIME,1, "Exception thrown while generating OctoMap message");
   }
   server->getOcTreePtr()->unlockRead();
 

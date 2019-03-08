@@ -286,12 +286,7 @@ bool OccupancyMapMonitor::getShapeTransformCache(std::size_t index, const std::s
         std::map<ShapeHandle, ShapeHandle>::const_iterator jt = mesh_handles_[index].find(it->first);
         if (jt == mesh_handles_[index].end())
         {
-          // ROS_ERROR_THROTTLE(1, "Incorrect mapping of mesh handles");
-          //print every sec, something similar to ROS_ERROR_THROTTLE, there is nothing similar on ROS2
-          while (true) {
-            RCLCPP_ERROR(logger_occupancy_map_monitor,"Incorrect mapping of mesh handles");
-            boost::this_thread::sleep_for(boost::chrono::seconds(1));
-          }
+          RCUTILS_LOG_ERROR_THROTTLE(RCUTILS_STEADY_TIME,1, "Incorrect mapping of mesh handles");
           return false;
         }
         else

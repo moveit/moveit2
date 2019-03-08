@@ -53,7 +53,7 @@
 #include <boost/bind.hpp>
 #include <octomap_msgs/conversions.h>
 #include "rclcpp/rclcpp.hpp"
-
+#include "rcutils/logging_macros.h"
 
 namespace occupancy_map_monitor
 {
