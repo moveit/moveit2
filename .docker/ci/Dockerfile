@@ -7,6 +7,8 @@ ENV ROS_DISTRO crystal
 RUN apt-get update && apt-get install -y \
     python3-colcon-common-extensions \
     libboost-all-dev \
+    libglew-dev \
+    freeglut3-dev \
     pkg-config \
     libfcl-dev \
     libassimp-dev \
