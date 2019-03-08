@@ -17,7 +17,9 @@ RUN \
         libqhull-dev \
         ros-$ROS_DISTRO-action-msgs \
         ros-$ROS_DISTRO-resource-retriever \
+        ros-$ROS_DISTRO-image-transport \
         python3-vcstool \
+        libopencv-dev \
         wget \
         && rm -rf /var/lib/apt/lists/* \
     # Setup ROS2 workspace
