@@ -61,22 +61,22 @@ OccupancyMapMonitor::OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>&
   initialize();
 }
 
-// OccupancyMapMonitor::OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, rclcpp::Publisher<octomap_msgs::msg::Octomap>& octree_binary_pub_,
-//                                          const std::string& map_frame, double map_resolution)
-//   : tf_buffer_(tf_buffer)
-//   , map_frame_(map_frame)
-//   , map_resolution_(map_resolution)
-//   , debug_info_(false)
-//   , mesh_handle_count_(0)
-//   , octree_binary_pub_(octree_binary_pub_)
-// {
-//   initialize();
-// }
+OccupancyMapMonitor::OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, std::shared_ptr<rclcpp::Node> node,
+                                         const std::string& map_frame, double map_resolution)
+  : tf_buffer_(tf_buffer)
+  , map_frame_(map_frame)
+  , map_resolution_(map_resolution)
+  , debug_info_(false)
+  , mesh_handle_count_(0)
+  , node_(node)
+{
+  initialize();
+}
 
 void OccupancyMapMonitor::initialize()
 {
-  auto node_occupancy_map = rclcpp::Node::make_shared("occupancy_map_server");
-  auto ocupancy_map_monitor_parameters = std::make_shared<rclcpp::SyncParametersClient>(node_occupancy_map);
+  // auto node_occupancy_map = rclcpp::Node::make_shared("occupancy_map_server");
+  auto ocupancy_map_monitor_parameters = std::make_shared<rclcpp::SyncParametersClient>(node_);
 
   for (auto & parameter : ocupancy_map_monitor_parameters->get_parameters({"octomap_resolution"})) {
       if (map_resolution_ <= std::numeric_limits<double>::epsilon()){
@@ -192,8 +192,8 @@ void OccupancyMapMonitor::initialize()
                       std::shared_ptr<moveit_msgs::srv::LoadMap::Response>)> cb_loadmap_function = std::bind(
         &OccupancyMapMonitor::loadMapCallback, this, std::placeholders::_1,  std::placeholders::_2,  std::placeholders::_3);
 
-  save_map_srv_ = node_occupancy_map->create_service<moveit_msgs::srv::SaveMap>("save_map", cb_savemap_function);
-  load_map_srv_ = node_occupancy_map->create_service<moveit_msgs::srv::LoadMap>("load_map", cb_loadmap_function);
+  save_map_srv_ = node_->create_service<moveit_msgs::srv::SaveMap>("save_map", cb_savemap_function);
+  load_map_srv_ = node_->create_service<moveit_msgs::srv::LoadMap>("load_map", cb_loadmap_function);
 
 }
 

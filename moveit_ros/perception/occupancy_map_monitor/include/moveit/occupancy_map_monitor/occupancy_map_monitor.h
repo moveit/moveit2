@@ -63,8 +63,8 @@ public:
   OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& map_frame = "",
                       double map_resolution = 0.0);
   OccupancyMapMonitor(double map_resolution = 0.0);
-  // OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-  //                     const std::string& map_frame = "", double map_resolution = 0.0);
+  OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, std::shared_ptr<rclcpp::Node> node_,
+                      const std::string& map_frame = "", double map_resolution = 0.0);
 
   ~OccupancyMapMonitor();
 
@@ -164,7 +164,7 @@ private:
   rclcpp::Service<moveit_msgs::srv::SaveMap>::SharedPtr save_map_srv_;
   rclcpp::Service<moveit_msgs::srv::LoadMap>::SharedPtr load_map_srv_;
 
-  // std::shared_ptr<rclcpp::Node> node_;
+  std::shared_ptr<rclcpp::Node> node_;
 
 };
 }
