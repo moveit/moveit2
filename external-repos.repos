@@ -47,3 +47,7 @@ repositories:
     type: git
     url: https://github.com/ros2/console_bridge_vendor
     version: crystal
+  ros1_bridge:
+    type: git
+    url: https://github.com/ros2/ros1_bridge
+    branch: master
