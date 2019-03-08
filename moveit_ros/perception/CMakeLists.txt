@@ -59,11 +59,11 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 )
 
 set(THIS_PACKAGE_INCLUDE_LIBRARIES
-    moveit_lazy_free_space_updater
-    moveit_point_containment_filter
+    # moveit_lazy_free_space_updater
+    # moveit_point_containment_filter
     moveit_occupancy_map_monitor
-    moveit_pointcloud_octomap_updater_core
-    moveit_semantic_world
+    # moveit_pointcloud_octomap_updater_core
+    # moveit_semantic_world
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -93,13 +93,13 @@ include_directories(lazy_free_space_updater/include
                     ${Boost_INCLUDE_DIRS}
                     ${rclcpp_INCLUDE_DIRS}
                     ${moveit_msgs_INCLUDE_DIRS}
-                    ${OPENGL_INCLUDE_DIR}
                     )
 include_directories(SYSTEM
                     include
                     ${OpenCV_INCLUDE_DIRS}
                     ${EIGEN3_INCLUDE_DIRS}
                     ${SYSTEM_GL_INCLUDE_DIR}
+                    ${OPENGL_INCLUDE_DIR}
                     ${X11_INCLUDE_DIR}
                     ${moveit_core_INCLUDE_DIRS}
                     )
