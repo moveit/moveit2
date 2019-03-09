@@ -16,4 +16,7 @@ cp -r /tmp/moveit2 /tmp/ros2_ws/src
 cd /tmp/ros2_ws && wget https://raw.githubusercontent.com/AcutronicRobotics/moveit2/master/external-repos.repos
 vcs import src < external-repos.repos
 export OPENSSL_ROOT_DIR="/usr/local/opt/openssl"
+#Ignore packages
+touch src/image_common/camera_calibration_parsers/COLCON_IGNORE
+touch src/image_common/camera_info_manager/COLCON_IGNORE
 colcon build --merge-install
