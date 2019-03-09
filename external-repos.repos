@@ -50,8 +50,8 @@ repositories:
   ros1_bridge:
     type: git
     url: https://github.com/ros2/ros1_bridge
-    branch: master
+    version: master
   image_common:
     type: git
     url: https://github.com/ros-perception/image_common
-    branch: ros2
+    version: ros2
