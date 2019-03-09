@@ -2,4 +2,7 @@
 
 set -e
 
-/bin/bash -c "find /opt/ros/crystal/ -name tf2_eigen | xargs rm -rf && source /opt/ros/crystal/setup.bash && colcon build --merge-install"
+/bin/bash -c "find /opt/ros/crystal/ -name tf2_eigen | xargs rm -rf && source /opt/ros/crystal/setup.bash \
+              && touch src/image_common/camera_calibration_parsers/COLCON_IGNORE \
+              && touch src/image_common/camera_info_manager/COLCON_IGNORE \
+              && colcon build --merge-install"
