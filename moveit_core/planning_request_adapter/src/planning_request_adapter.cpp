@@ -57,7 +57,7 @@ bool callPlannerInterfaceSolve(const planning_interface::PlannerManager* planner
   else
     return false;
 }
-}
+}  // namespace
 
 bool PlanningRequestAdapter::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
                                           const planning_scene::PlanningSceneConstPtr& planning_scene,
@@ -117,7 +117,7 @@ bool callAdapter2(const PlanningRequestAdapter* adapter, const PlanningRequestAd
     return planner(planning_scene, req, res);
   }
 }
-}
+}  // namespace
 
 bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
                                                const planning_scene::PlanningSceneConstPtr& planning_scene,

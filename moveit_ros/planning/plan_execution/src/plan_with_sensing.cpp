@@ -68,7 +68,7 @@ private:
   PlanWithSensing* owner_;
   dynamic_reconfigure::Server<SenseForPlanDynamicReconfigureConfig> dynamic_reconfigure_server_;
 };
-}
+}  // namespace plan_execution
 
 plan_execution::PlanWithSensing::PlanWithSensing(
     const trajectory_execution_manager::TrajectoryExecutionManagerPtr& trajectory_execution)
@@ -163,7 +163,7 @@ bool plan_execution::PlanWithSensing::computePlan(ExecutableMotionPlan& plan,
   do
   {
     bool solved = motion_planner(plan);
-    if (!solved || plan.error_code_.val != moveit_msgs::MoveItErrorCodes::SUCCESS)
+    if (!solved || plan.error_code_.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
       return solved;
 
     // determine the sources of cost for this path
@@ -233,7 +233,7 @@ bool plan_execution::PlanWithSensing::computePlan(ExecutableMotionPlan& plan,
 
     if (cost > max_safe_path_cost)
     {
-      plan.error_code_.val = moveit_msgs::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA;
+      plan.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA;
       return true;
     }
     else
@@ -265,7 +265,7 @@ bool plan_execution::PlanWithSensing::lookAt(const std::set<collision_detection:
       point.header.stamp = ros::Time::now();
       point.header.frame_id = frame_id;
       ROS_DEBUG_STREAM("Pointing sensor " << names[i] << " to:\n" << point);
-      moveit_msgs::RobotTrajectory sensor_trajectory;
+      moveit_msgs::msg::RobotTrajectory sensor_trajectory;
       if (sensor_manager_->pointSensorTo(names[i], point, sensor_trajectory))
       {
         if (!trajectory_processing::isTrajectoryEmpty(sensor_trajectory))

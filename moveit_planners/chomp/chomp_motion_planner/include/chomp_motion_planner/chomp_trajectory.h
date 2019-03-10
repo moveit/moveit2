@@ -59,21 +59,21 @@ public:
    * \brief Constructs a trajectory for a given robot model, trajectory duration, and discretization
    */
   ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_model, double duration, double discretization,
-                  std::string groupName);
+                  const std::string& group_name);
 
   /**
    * \brief Constructs a trajectory for a given robot model, number of trajectory points, and discretization
    */
   ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_model, int num_points, double discretization,
-                  std::string groupName);
+                  const std::string& group_name);
 
   /**
    * \brief Creates a new containing only the joints of interest, and adds padding to the start
    * and end if needed, to have enough trajectory points for the differentiation rules
    */
-  ChompTrajectory(const ChompTrajectory& source_traj, const std::string& planning_group, int diff_rule_length);
+  ChompTrajectory(const ChompTrajectory& source_traj, const std::string& group_name, int diff_rule_length);
 
-  ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_model, const std::string& planning_group,
+  ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group_name,
                   const trajectory_msgs::JointTrajectory& traj);
 
   /**
@@ -137,7 +137,7 @@ public:
    * produced by OMPL) and puts it into the appropriate trajectory format required for CHOMP
    * @param res
    */
-  bool fillInFromTrajectory(moveit_msgs::MotionPlanDetailedResponse& res);
+  bool fillInFromTrajectory(moveit_msgs::msg::MotionPlanDetailedResponse& res);
 
   /**
    * This function assigns the chomp_trajectory row / robot pose at index 'chomp_trajectory_point' obtained from input
@@ -147,7 +147,7 @@ public:
    * @param trajectory_msgs_point index of the input trajectory_msg's point to get joint values from
    * @param chomp_trajectory_point index of the chomp_trajectory's point to get joint values from
    */
-  void assignCHOMPTrajectoryPointFromInputTrajectoryPoint(moveit_msgs::RobotTrajectory trajectory_msg,
+  void assignCHOMPTrajectoryPointFromInputTrajectoryPoint(moveit_msgs::msg::RobotTrajectory trajectory_msg,
                                                           int num_joints_trajectory, int trajectory_msgs_point,
                                                           int chomp_trajectory_point);
 

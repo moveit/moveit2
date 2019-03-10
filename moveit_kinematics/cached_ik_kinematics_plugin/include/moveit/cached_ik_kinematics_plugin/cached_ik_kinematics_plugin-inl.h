@@ -109,7 +109,7 @@ template <class KinematicsPlugin>
 bool CachedIKKinematicsPlugin<KinematicsPlugin>::getPositionIK(const geometry_msgs::Pose& ik_pose,
                                                                const std::vector<double>& ik_seed_state,
                                                                std::vector<double>& solution,
-                                                               moveit_msgs::MoveItErrorCodes& error_code,
+                                                               moveit_msgs::msg::MoveItErrorCodes& error_code,
                                                                const KinematicsQueryOptions& options) const
 {
   Pose pose(ik_pose);
@@ -125,7 +125,7 @@ template <class KinematicsPlugin>
 bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(const geometry_msgs::Pose& ik_pose,
                                                                   const std::vector<double>& ik_seed_state,
                                                                   double timeout, std::vector<double>& solution,
-                                                                  moveit_msgs::MoveItErrorCodes& error_code,
+                                                                  moveit_msgs::msg::MoveItErrorCodes& error_code,
                                                                   const KinematicsQueryOptions& options) const
 {
   std::chrono::time_point<std::chrono::system_clock> start(std::chrono::system_clock::now());
@@ -148,7 +148,7 @@ template <class KinematicsPlugin>
 bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(
     const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
     const std::vector<double>& consistency_limits, std::vector<double>& solution,
-    moveit_msgs::MoveItErrorCodes& error_code, const KinematicsQueryOptions& options) const
+    moveit_msgs::msg::MoveItErrorCodes& error_code, const KinematicsQueryOptions& options) const
 {
   std::chrono::time_point<std::chrono::system_clock> start(std::chrono::system_clock::now());
   Pose pose(ik_pose);
@@ -171,7 +171,7 @@ bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(const geometry
                                                                   const std::vector<double>& ik_seed_state,
                                                                   double timeout, std::vector<double>& solution,
                                                                   const IKCallbackFn& solution_callback,
-                                                                  moveit_msgs::MoveItErrorCodes& error_code,
+                                                                  moveit_msgs::msg::MoveItErrorCodes& error_code,
                                                                   const KinematicsQueryOptions& options) const
 {
   std::chrono::time_point<std::chrono::system_clock> start(std::chrono::system_clock::now());
@@ -194,7 +194,7 @@ template <class KinematicsPlugin>
 bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(
     const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
     const std::vector<double>& consistency_limits, std::vector<double>& solution, const IKCallbackFn& solution_callback,
-    moveit_msgs::MoveItErrorCodes& error_code, const KinematicsQueryOptions& options) const
+    moveit_msgs::msg::MoveItErrorCodes& error_code, const KinematicsQueryOptions& options) const
 {
   std::chrono::time_point<std::chrono::system_clock> start(std::chrono::system_clock::now());
   Pose pose(ik_pose);
@@ -216,7 +216,7 @@ template <class KinematicsPlugin>
 bool CachedMultiTipIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(
     const std::vector<geometry_msgs::Pose>& ik_poses, const std::vector<double>& ik_seed_state, double timeout,
     const std::vector<double>& consistency_limits, std::vector<double>& solution, const IKCallbackFn& solution_callback,
-    moveit_msgs::MoveItErrorCodes& error_code, const KinematicsQueryOptions& options,
+    moveit_msgs::msg::MoveItErrorCodes& error_code, const KinematicsQueryOptions& options,
     const moveit::core::RobotState* context_state) const
 {
   std::chrono::time_point<std::chrono::system_clock> start(std::chrono::system_clock::now());

@@ -36,6 +36,8 @@
 
 #include <moveit/warehouse/planning_scene_world_storage.h>
 
+#include <utility>
+
 const std::string moveit_warehouse::PlanningSceneWorldStorage::DATABASE_NAME = "moveit_planning_scene_worlds";
 const std::string moveit_warehouse::PlanningSceneWorldStorage::PLANNING_SCENE_WORLD_ID_NAME = "world_id";
 
@@ -43,7 +45,7 @@ using warehouse_ros::Metadata;
 using warehouse_ros::Query;
 
 moveit_warehouse::PlanningSceneWorldStorage::PlanningSceneWorldStorage(warehouse_ros::DatabaseConnection::Ptr conn)
-  : MoveItMessageStorage(conn)
+  : MoveItMessageStorage(std::move(conn))
 {
   createCollections();
 }
@@ -51,7 +53,7 @@ moveit_warehouse::PlanningSceneWorldStorage::PlanningSceneWorldStorage(warehouse
 void moveit_warehouse::PlanningSceneWorldStorage::createCollections()
 {
   planning_scene_world_collection_ =
-      conn_->openCollectionPtr<moveit_msgs::PlanningSceneWorld>(DATABASE_NAME, "planning_scene_worlds");
+      conn_->openCollectionPtr<moveit_msgs::msg::PlanningSceneWorld>(DATABASE_NAME, "planning_scene_worlds");
 }
 
 void moveit_warehouse::PlanningSceneWorldStorage::reset()
@@ -61,7 +63,7 @@ void moveit_warehouse::PlanningSceneWorldStorage::reset()
   createCollections();
 }
 
-void moveit_warehouse::PlanningSceneWorldStorage::addPlanningSceneWorld(const moveit_msgs::PlanningSceneWorld& msg,
+void moveit_warehouse::PlanningSceneWorldStorage::addPlanningSceneWorld(const moveit_msgs::msg::PlanningSceneWorld& msg,
                                                                         const std::string& name)
 {
   bool replace = false;

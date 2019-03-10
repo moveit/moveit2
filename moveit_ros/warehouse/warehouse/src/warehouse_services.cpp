@@ -85,13 +85,13 @@ bool getState(moveit_msgs::srv::GetRobotStateFromWarehouse::Request& request,
   if (!rs->hasRobotState(request.name, request.robot))
   {
     ROS_ERROR_STREAM("No state called '" << request.name << "' for robot '" << request.robot << "'.");
-    moveit_msgs::RobotState dummy;
+    moveit_msgs::msg::RobotState dummy;
     response.state = dummy;
     return false;
   }
   moveit_warehouse::RobotStateWithMetadata state_buffer;
   rs->getRobotState(state_buffer, request.name, request.robot);
-  response.state = static_cast<const moveit_msgs::RobotState&>(*state_buffer);
+  response.state = static_cast<const moveit_msgs::msg::RobotState&>(*state_buffer);
   return true;
 }
 

@@ -24,15 +24,6 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
-find_package(Boost REQUIRED COMPONENTS
-  date_time
-  filesystem
-  program_options
-  ${BOOST_PYTHON_COMPONENT}
-  system
-  thread
-)
-
 find_package(Eigen3 REQUIRED)
 
 find_package(PythonInterp REQUIRED)
@@ -44,6 +35,15 @@ if(Boost_VERSION LESS 106700)
 elseif()
   set(BOOST_PYTHON_COMPONENT python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
 endif()
+
+find_package(Boost REQUIRED COMPONENTS
+  date_time
+  filesystem
+  program_options
+  ${BOOST_PYTHON_COMPONENT}
+  system
+  thread
+)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
   py_bindings_tools/include

@@ -66,7 +66,7 @@ bool isStateCollisionFree(const planning_scene::PlanningScene* planning_scene,
   req.verbose = verbose;
   req.group_name = group->getName();
 
-  if (grasp_posture->joint_names.size() > 0)
+  if (!grasp_posture->joint_names.empty())
   {
     // apply the grasp posture for the end effector (we always apply it here since it could be the case the sampler
     // changes this posture)
@@ -135,7 +135,7 @@ bool executeAttachObject(const ManipulationPlanSharedDataConstPtr& shared_plan_d
   bool ok = false;
   {
     planning_scene_monitor::LockedPlanningSceneRW ps(motion_plan->planning_scene_monitor_);
-    moveit_msgs::AttachedCollisionObject msg = shared_plan_data->diff_attached_object_;
+    moveit_msgs::msg::AttachedCollisionObject msg = shared_plan_data->diff_attached_object_;
     // remember the configuration of the gripper before the grasp;
     // this configuration will be set again when releasing the object
     msg.detach_posture = detach_posture;
@@ -164,7 +164,7 @@ void addGripperTrajectory(const ManipulationPlanPtr& plan,
     ee_closed_traj->setRobotTrajectoryMsg(*ee_closed_state, plan->retreat_posture_);
     // If user has defined a time for it's gripper movement time, don't add the
     // DEFAULT_GRASP_POSTURE_COMPLETION_DURATION
-    if (plan->retreat_posture_.points.size() > 0 &&
+    if (!plan->retreat_posture_.points.empty() &&
         plan->retreat_posture_.points.back().time_from_start > ros::Duration(0.0))
     {
       ee_closed_traj->addPrefixWayPoint(ee_closed_state, 0.0);
@@ -190,7 +190,7 @@ void addGripperTrajectory(const ManipulationPlanPtr& plan,
   }
 }
 
-}  // annonymous namespace
+}  // namespace
 
 bool ApproachAndTranslateStage::evaluate(const ManipulationPlanPtr& plan) const
 {
@@ -353,8 +353,8 @@ bool ApproachAndTranslateStage::evaluate(const ManipulationPlanPtr& plan) const
   } while (plan->possible_goal_states_.size() < max_goal_count_ && !signal_stop_ &&
            samplePossibleGoalStates(plan, planning_scene_->getCurrentState(), min_distance, max_fail_));
 
-  plan->error_code_.val = moveit_msgs::MoveItErrorCodes::PLANNING_FAILED;
+  plan->error_code_.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
 
   return false;
 }
-}
+}  // namespace pick_place

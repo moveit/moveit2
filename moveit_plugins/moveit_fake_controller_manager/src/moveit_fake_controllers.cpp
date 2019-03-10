@@ -70,11 +70,9 @@ LastPointController::LastPointController(const std::string& name, const std::vec
 {
 }
 
-LastPointController::~LastPointController()
-{
-}
+LastPointController::~LastPointController() = default;
 
-bool LastPointController::sendTrajectory(const moveit_msgs::RobotTrajectory& t)
+bool LastPointController::sendTrajectory(const moveit_msgs::msg::RobotTrajectory& t)
 {
   ROS_INFO("Fake execution of trajectory");
   if (t.joint_trajectory.points.empty())
@@ -98,7 +96,7 @@ bool LastPointController::cancelExecution()
   return true;
 }
 
-bool LastPointController::waitForExecution(const ros::Duration&)
+bool LastPointController::waitForExecution(const ros::Duration& /*timeout*/)
 {
   ros::Duration(0.5).sleep();  // give some time to receive the published JointState
   return true;
@@ -121,7 +119,7 @@ void ThreadedController::cancelTrajectory()
   thread_.join();
 }
 
-bool ThreadedController::sendTrajectory(const moveit_msgs::RobotTrajectory& t)
+bool ThreadedController::sendTrajectory(const moveit_msgs::msg::RobotTrajectory& t)
 {
   cancelTrajectory();  // cancel any previous fake motion
   cancel_ = false;
@@ -138,7 +136,7 @@ bool ThreadedController::cancelExecution()
   return true;
 }
 
-bool ThreadedController::waitForExecution(const ros::Duration&)
+bool ThreadedController::waitForExecution(const ros::Duration& /*timeout*/)
 {
   thread_.join();
   status_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
@@ -156,11 +154,9 @@ ViaPointController::ViaPointController(const std::string& name, const std::vecto
 {
 }
 
-ViaPointController::~ViaPointController()
-{
-}
+ViaPointController::~ViaPointController() = default;
 
-void ViaPointController::execTrajectory(const moveit_msgs::RobotTrajectory& t)
+void ViaPointController::execTrajectory(const moveit_msgs::msg::RobotTrajectory& t)
 {
   ROS_INFO("Fake execution of trajectory");
   sensor_msgs::JointState js;
@@ -199,9 +195,7 @@ InterpolatingController::InterpolatingController(const std::string& name, const 
     rate_ = ros::WallRate(r);
 }
 
-InterpolatingController::~InterpolatingController()
-{
-}
+InterpolatingController::~InterpolatingController() = default;
 
 namespace
 {
@@ -219,9 +213,9 @@ void interpolate(sensor_msgs::JointState& js, const trajectory_msgs::JointTrajec
     js.position[i] = prev.positions[i] + alpha * (next.positions[i] - prev.positions[i]);
   }
 }
-}
+}  // namespace
 
-void InterpolatingController::execTrajectory(const moveit_msgs::RobotTrajectory& t)
+void InterpolatingController::execTrajectory(const moveit_msgs::msg::RobotTrajectory& t)
 {
   ROS_INFO("Fake execution of trajectory");
   if (t.joint_trajectory.points.empty())

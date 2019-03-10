@@ -43,7 +43,7 @@ static const std::string LOGNAME("SimpleControllerManager");
 
 namespace moveit_simple_controller_manager
 {
-bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::RobotTrajectory& trajectory)
+bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
   ROS_DEBUG_STREAM_NAMED(LOGNAME, "new trajectory to " << name_);
 
@@ -136,7 +136,7 @@ const char* errorCodeToMessage(int error_code)
       return "unknown error";
   }
 }
-}
+}  // namespace
 
 void FollowJointTrajectoryControllerHandle::configure(XmlRpc::XmlRpcValue& config, const std::string& config_name,
                                                       std::vector<control_msgs::JointTolerance>& tolerances)
@@ -164,7 +164,7 @@ void FollowJointTrajectoryControllerHandle::configure(XmlRpc::XmlRpcValue& confi
   }
   else if (isArray(config))  // or an array of JointTolerance msgs
   {
-    for (size_t i = 0; i < config.size(); ++i)
+    for (int i = 0; i < config.size(); ++i)
     {
       control_msgs::JointTolerance& tol = getTolerance(tolerances, config[i]["name"]);
       for (ToleranceVariables var : { POSITION, VELOCITY, ACCELERATION })

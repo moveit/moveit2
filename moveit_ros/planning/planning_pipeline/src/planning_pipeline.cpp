@@ -174,7 +174,7 @@ void planning_pipeline::PlanningPipeline::displayComputedMotionPlans(bool flag)
   if (display_computed_motion_plans_ && !flag)
     display_path_publisher_.shutdown();
   else if (!display_computed_motion_plans_ && flag)
-    display_path_publisher_ = nh_.advertise<moveit_msgs::DisplayTrajectory>(DISPLAY_PATH_TOPIC, 10, true);
+    display_path_publisher_ = nh_.advertise<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC, 10, true);
   display_computed_motion_plans_ = flag;
 }
 
@@ -183,7 +183,7 @@ void planning_pipeline::PlanningPipeline::publishReceivedRequests(bool flag)
   if (publish_received_requests_ && !flag)
     received_request_publisher_.shutdown();
   else if (!publish_received_requests_ && flag)
-    received_request_publisher_ = nh_.advertise<moveit_msgs::MotionPlanRequest>(MOTION_PLAN_REQUEST_TOPIC, 10, true);
+    received_request_publisher_ = nh_.advertise<moveit_msgs::msg::MotionPlanRequest>(MOTION_PLAN_REQUEST_TOPIC, 10, true);
   publish_received_requests_ = flag;
 }
 
@@ -279,7 +279,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
           else
           {
             valid = false;
-            res.error_code_.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
+            res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
 
             // display error messages
             std::stringstream ss;
@@ -331,7 +331,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   // display solution path if needed
   if (display_computed_motion_plans_ && solved)
   {
-    moveit_msgs::DisplayTrajectory disp;
+    moveit_msgs::msg::DisplayTrajectory disp;
     disp.model_id = robot_model_->getName();
     disp.trajectory.resize(1);
     res.trajectory_->getRobotTrajectoryMsg(disp.trajectory[0]);

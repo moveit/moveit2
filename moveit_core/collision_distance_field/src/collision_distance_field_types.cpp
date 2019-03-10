@@ -248,7 +248,7 @@ bool collision_detection::getCollisionSphereCollision(const distance_field::Dist
     }
   }
 
-  return colls.size() > 0;
+  return !colls.empty();
 }
 
 ///
@@ -338,7 +338,7 @@ collision_detection::PosedBodyPointDecomposition::PosedBodyPointDecomposition(
 }
 
 collision_detection::PosedBodyPointDecomposition::PosedBodyPointDecomposition(
-    std::shared_ptr<const octomap::OcTree> octree)
+    const std::shared_ptr<const octomap::OcTree>& octree)
   : body_decomposition_()
 {
   int num_nodes = octree->getNumLeafNodes();
@@ -401,11 +401,7 @@ bool collision_detection::doBoundingSpheresIntersect(const PosedBodySphereDecomp
   double p2_radius = p2->getBoundingSphereRadius();
 
   double dist = (p1_sphere_center - p2_sphere_center).squaredNorm();
-  if (dist < (p1_radius + p2_radius))
-  {
-    return true;
-  }
-  return false;
+  return dist < (p1_radius + p2_radius);
 }
 
 void collision_detection::getCollisionSphereMarkers(

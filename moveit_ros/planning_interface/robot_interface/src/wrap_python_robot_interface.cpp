@@ -228,12 +228,12 @@ public:
     if (!ensureCurrentState())
       return "";
     robot_state::RobotStatePtr s = current_state_monitor_->getCurrentState();
-    moveit_msgs::RobotState msg;
+    moveit_msgs::msg::RobotState msg;
     robot_state::robotStateToRobotStateMsg(*s, msg);
     return py_bindings_tools::serializeMsg(msg);
   }
 
-  bp::tuple getEndEffectorParentGroup(std::string group)
+  bp::tuple getEndEffectorParentGroup(const std::string& group)
   {
     // name of the group that is parent to this end-effector group;
     // Second: the link this in the parent group that this group attaches to
@@ -281,7 +281,7 @@ public:
 
   std::string getRobotMarkersFromMsg(const std::string& state_str)
   {
-    moveit_msgs::RobotState state_msg;
+    moveit_msgs::msg::RobotState state_msg;
     robot_state::RobotState state(robot_model_);
     py_bindings_tools::deserializeMsg(state_str, state_msg);
     moveit::core::robotStateMsgToRobotState(state_msg, state);
@@ -303,7 +303,7 @@ public:
     return py_bindings_tools::serializeMsg(msg);
   }
 
-  std::string getRobotMarkersPythonList(bp::list links)
+  std::string getRobotMarkersPythonList(const bp::list& links)
   {
     if (!ensureCurrentState())
       return "";
@@ -314,7 +314,7 @@ public:
     return py_bindings_tools::serializeMsg(msg);
   }
 
-  std::string getRobotMarkersGroup(std::string group)
+  std::string getRobotMarkersGroup(const std::string& group)
   {
     if (!ensureCurrentState())
       return "";
@@ -329,7 +329,7 @@ public:
     return py_bindings_tools::serializeMsg(msg);
   }
 
-  std::string getRobotMarkersGroupPythonDict(std::string group, bp::dict& values)
+  std::string getRobotMarkersGroupPythonDict(const std::string& group, bp::dict& values)
   {
     const robot_model::JointModelGroup* jmg = robot_model_->getJointModelGroup(group);
     if (!jmg)
@@ -367,7 +367,7 @@ private:
   planning_scene_monitor::CurrentStateMonitorPtr current_state_monitor_;
   ros::NodeHandle nh_;
 };
-}
+}  // namespace moveit
 
 static void wrap_robot_interface()
 {

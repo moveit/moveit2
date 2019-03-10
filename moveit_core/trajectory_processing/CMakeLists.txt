@@ -4,6 +4,7 @@ add_library(${MOVEIT_LIB_NAME}
   src/iterative_time_parameterization.cpp
   src/iterative_spline_parameterization.cpp
   src/trajectory_tools.cpp
+  src/time_optimal_trajectory_generation.cpp
 )
 #TODO: Fix the versioning
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")

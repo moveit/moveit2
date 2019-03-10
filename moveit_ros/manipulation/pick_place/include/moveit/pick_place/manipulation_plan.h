@@ -51,7 +51,7 @@
 
 namespace pick_place
 {
-MOVEIT_CLASS_FORWARD(ManipulationPlanSharedData);
+MOVEIT_STRUCT_FORWARD(ManipulationPlanSharedData);
 
 struct ManipulationPlanSharedData
 {
@@ -74,14 +74,14 @@ struct ManipulationPlanSharedData
 
   bool minimize_object_distance_;
 
-  moveit_msgs::Constraints path_constraints_;
+  moveit_msgs::msg::Constraints path_constraints_;
 
-  moveit_msgs::AttachedCollisionObject diff_attached_object_;
+  moveit_msgs::msg::AttachedCollisionObject diff_attached_object_;
 
   ros::WallTime timeout_;
 };
 
-MOVEIT_CLASS_FORWARD(ManipulationPlan);
+MOVEIT_STRUCT_FORWARD(ManipulationPlan);
 
 struct ManipulationPlan
 {
@@ -106,10 +106,10 @@ struct ManipulationPlan
   ManipulationPlanSharedDataConstPtr shared_data_;
 
   // the approach motion towards the goal
-  moveit_msgs::GripperTranslation approach_;
+  moveit_msgs::msg::GripperTranslation approach_;
 
   // the retreat motion away from the goal
-  moveit_msgs::GripperTranslation retreat_;
+  moveit_msgs::msg::GripperTranslation retreat_;
 
   // the kinematic configuration of the end effector when approaching the goal (an open gripper)
   trajectory_msgs::JointTrajectory approach_posture_;
@@ -121,7 +121,7 @@ struct ManipulationPlan
   geometry_msgs::PoseStamped goal_pose_;
   Eigen::Isometry3d transformed_goal_pose_;
 
-  moveit_msgs::Constraints goal_constraints_;
+  moveit_msgs::msg::Constraints goal_constraints_;
 
   // Allows for the sampling of a kineamtic state for a particular group of a robot
   constraint_samplers::ConstraintSamplerPtr goal_sampler_;
@@ -134,7 +134,7 @@ struct ManipulationPlan
   std::vector<plan_execution::ExecutableTrajectory> trajectories_;
 
   // An error code reflecting what went wrong (if anything)
-  moveit_msgs::MoveItErrorCodes error_code_;
+  moveit_msgs::msg::MoveItErrorCodes error_code_;
 
   // The processing stage that was last working on this plan, or was about to work on this plan
   std::size_t processing_stage_;
