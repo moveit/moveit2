@@ -35,7 +35,6 @@
 /* Author: Acorn Pooley, Ioan Sucan */
 
 #include <moveit/collision_detection/world.h>
-#include <ros/console.h>
 
 namespace collision_detection
 {
@@ -66,8 +65,7 @@ void World::addToObject(const std::string& id, const std::vector<shapes::ShapeCo
 {
   if (shapes.size() != poses.size())
   {
-    ROS_ERROR_NAMED("collision_detection", "Number of shapes and number of poses do not match. "
-                                           "Not adding this object to collision world.");
+    RCLCPP_ERROR(logger_collision_detection, "Number of shapes and number of poses do not match. Not adding this object to collision world.");
     return;
   }
 

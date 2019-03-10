@@ -40,6 +40,7 @@
 
 namespace collision_detection
 {
+
 AllowedCollisionMatrix::AllowedCollisionMatrix()
 {
 }
@@ -54,19 +55,22 @@ AllowedCollisionMatrix::AllowedCollisionMatrix(const std::vector<std::string>& n
 AllowedCollisionMatrix::AllowedCollisionMatrix(const moveit_msgs::msg::AllowedCollisionMatrix& msg)
 {
   if (msg.entry_names.size() != msg.entry_values.size() ||
-      msg.default_entry_names.size() != msg.default_entry_values.size())
-    ROS_ERROR_NAMED("collision_detection", "The number of links does not match the number of entries "
-                                           "in AllowedCollisionMatrix message");
+      msg.default_entry_names.size() != msg.default_entry_values.size()){
+        RCLCPP_ERROR(logger_collision_detection, "The number of links does not match the number of entries in AllowedCollisionMatrix message");
+      }
   else
   {
-    for (std::size_t i = 0; i < msg.entry_names.size(); ++i)
-      if (msg.entry_values[i].enabled.size() != msg.entry_names.size())
-        ROS_ERROR_NAMED("collision_detection",
-                        "Number of entries is incorrect for link '%s' in AllowedCollisionMatrix message",
-                        msg.entry_names[i].c_str());
-      else
-        for (std::size_t j = i + 1; j < msg.entry_values[i].enabled.size(); ++j)
+    for (std::size_t i = 0; i < msg.entry_names.size(); ++i) {
+      if (msg.entry_values[i].enabled.size() != msg.entry_names.size()){
+        RCLCPP_ERROR(logger_collision_detection,
+          "Number of entries is incorrect for link '%s' in AllowedCollisionMatrix message",
+          msg.entry_names[i].c_str());
+      } else {
+        for (std::size_t j = i + 1; j < msg.entry_values[i].enabled.size(); ++j){
           setEntry(msg.entry_names[i], msg.entry_names[j], msg.entry_values[i].enabled[j]);
+        }
+      }
+    }
 
     for (std::size_t i = 0; i < msg.default_entry_names.size(); ++i)
       setDefaultEntry(msg.default_entry_names[i], msg.default_entry_values[i]);
@@ -142,7 +146,7 @@ void AllowedCollisionMatrix::setEntry(const std::string& name1, const std::strin
   }
 }
 
-void AllowedCollisionMatrix::setEntry(const std::string& name1, const std::string& name2, const DecideContactFn& fn)
+void AllowedCollisionMatrix::setEntry(const std::string& name1, const std::string& name2, DecideContactFn& fn)
 {
   entries_[name1][name2] = entries_[name2][name1] = AllowedCollision::CONDITIONAL;
   allowed_contacts_[name1][name2] = allowed_contacts_[name2][name1] = fn;
@@ -232,7 +236,7 @@ void AllowedCollisionMatrix::setDefaultEntry(const std::string& name, bool allow
   default_allowed_contacts_.erase(name);
 }
 
-void AllowedCollisionMatrix::setDefaultEntry(const std::string& name, const DecideContactFn& fn)
+void AllowedCollisionMatrix::setDefaultEntry(const std::string& name, DecideContactFn& fn)
 {
   default_entries_[name] = AllowedCollision::CONDITIONAL;
   default_allowed_contacts_[name] = fn;

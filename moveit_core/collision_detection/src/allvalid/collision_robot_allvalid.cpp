@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan, Jia Pan */
 
 #include <moveit/collision_detection/allvalid/collision_robot_allvalid.h>
+#include <moveit/collision_detection/collision_log.h>
 
 collision_detection::CollisionRobotAllValid::CollisionRobotAllValid(const robot_model::RobotModelConstPtr& robot_model,
                                                                     double padding, double scale)
@@ -51,7 +52,7 @@ void collision_detection::CollisionRobotAllValid::checkSelfCollision(const Colli
 {
   res.collision = false;
   if (req.verbose)
-    ROS_INFO_NAMED("collision_detection", "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(collision_detection::logger_collision_detection, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 void collision_detection::CollisionRobotAllValid::checkSelfCollision(const CollisionRequest& req, CollisionResult& res,
@@ -60,7 +61,7 @@ void collision_detection::CollisionRobotAllValid::checkSelfCollision(const Colli
 {
   res.collision = false;
   if (req.verbose)
-    ROS_INFO_NAMED("collision_detection", "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(collision_detection::logger_collision_detection, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 void collision_detection::CollisionRobotAllValid::checkSelfCollision(const CollisionRequest& req, CollisionResult& res,
@@ -69,7 +70,7 @@ void collision_detection::CollisionRobotAllValid::checkSelfCollision(const Colli
 {
   res.collision = false;
   if (req.verbose)
-    ROS_INFO_NAMED("collision_detection", "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(collision_detection::logger_collision_detection, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 void collision_detection::CollisionRobotAllValid::checkSelfCollision(const CollisionRequest& req, CollisionResult& res,
@@ -79,7 +80,7 @@ void collision_detection::CollisionRobotAllValid::checkSelfCollision(const Colli
 {
   res.collision = false;
   if (req.verbose)
-    ROS_INFO_NAMED("collision_detection", "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(collision_detection::logger_collision_detection, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 void collision_detection::CollisionRobotAllValid::checkOtherCollision(const CollisionRequest& req, CollisionResult& res,
@@ -89,7 +90,7 @@ void collision_detection::CollisionRobotAllValid::checkOtherCollision(const Coll
 {
   res.collision = false;
   if (req.verbose)
-    ROS_INFO_NAMED("collision_detection", "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(collision_detection::logger_collision_detection, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 void collision_detection::CollisionRobotAllValid::checkOtherCollision(const CollisionRequest& req, CollisionResult& res,
@@ -100,7 +101,7 @@ void collision_detection::CollisionRobotAllValid::checkOtherCollision(const Coll
 {
   res.collision = false;
   if (req.verbose)
-    ROS_INFO_NAMED("collision_detection", "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(collision_detection::logger_collision_detection, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 void collision_detection::CollisionRobotAllValid::checkOtherCollision(const CollisionRequest& req, CollisionResult& res,
@@ -112,7 +113,7 @@ void collision_detection::CollisionRobotAllValid::checkOtherCollision(const Coll
 {
   res.collision = false;
   if (req.verbose)
-    ROS_INFO_NAMED("collision_detection", "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(collision_detection::logger_collision_detection, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 void collision_detection::CollisionRobotAllValid::checkOtherCollision(const CollisionRequest& req, CollisionResult& res,
@@ -125,7 +126,7 @@ void collision_detection::CollisionRobotAllValid::checkOtherCollision(const Coll
 {
   res.collision = false;
   if (req.verbose)
-    ROS_INFO_NAMED("collision_detection", "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(collision_detection::logger_collision_detection, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 double collision_detection::CollisionRobotAllValid::distanceSelf(const robot_state::RobotState& state) const
