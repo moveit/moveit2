@@ -40,7 +40,7 @@
 #include <moveit/robot_model/link_model.h>
 #include <eigen_stl_containers/eigen_stl_containers.h>
 #include <boost/function.hpp>
-#include <trajectory_msgs/JointTrajectory.h>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <set>
 
 namespace moveit
@@ -62,7 +62,7 @@ public:
      object is specified by \e touch_links. */
   AttachedBody(const LinkModel* link, const std::string& id, const std::vector<shapes::ShapeConstPtr>& shapes,
                const EigenSTL::vector_Isometry3d& attach_trans, const std::set<std::string>& touch_links,
-               const trajectory_msgs::JointTrajectory& attach_posture);
+               const trajectory_msgs::msg::JointTrajectory& attach_posture);
 
   ~AttachedBody();
 
@@ -99,7 +99,7 @@ public:
   /** \brief Return the posture that is necessary for the object to be released, (if any). This is useful for example
      when storing
       the configuration of a gripper holding an object */
-  const trajectory_msgs::JointTrajectory& getDetachPosture() const
+  const trajectory_msgs::msg::JointTrajectory& getDetachPosture() const
   {
     return detach_posture_;
   }
@@ -147,7 +147,7 @@ private:
 
   /** \brief Posture of links for releasing the object (if any). This is useful for example when storing
       the configuration of a gripper holding an object */
-  trajectory_msgs::JointTrajectory detach_posture_;
+  trajectory_msgs::msg::JointTrajectory detach_posture_;
 
   /** \brief The global transforms for these attached bodies (computed by forward kinematics) */
   EigenSTL::vector_Isometry3d global_collision_body_transforms_;
