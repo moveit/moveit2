@@ -55,6 +55,8 @@
 #include <memory>
 #include <set>
 
+#include "rclcpp/rclcpp.hpp"
+
 namespace collision_detection
 {
 MOVEIT_STRUCT_FORWARD(CollisionGeometryData);

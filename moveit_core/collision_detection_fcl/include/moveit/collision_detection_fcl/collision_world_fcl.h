@@ -47,6 +47,7 @@
 #endif
 
 #include <memory>
+#include "rclcpp/rclcpp.hpp"
 
 namespace collision_detection
 {
