@@ -36,6 +36,8 @@
 
 #include <moveit/warehouse/state_storage.h>
 
+#include <utility>
+
 const std::string moveit_warehouse::RobotStateStorage::DATABASE_NAME = "moveit_robot_states";
 
 const std::string moveit_warehouse::RobotStateStorage::STATE_NAME = "state_id";
@@ -45,14 +47,14 @@ using warehouse_ros::Metadata;
 using warehouse_ros::Query;
 
 moveit_warehouse::RobotStateStorage::RobotStateStorage(warehouse_ros::DatabaseConnection::Ptr conn)
-  : MoveItMessageStorage(conn)
+  : MoveItMessageStorage(std::move(conn))
 {
   createCollections();
 }
 
 void moveit_warehouse::RobotStateStorage::createCollections()
 {
-  state_collection_ = conn_->openCollectionPtr<moveit_msgs::RobotState>(DATABASE_NAME, "robot_states");
+  state_collection_ = conn_->openCollectionPtr<moveit_msgs::msg::RobotState>(DATABASE_NAME, "robot_states");
 }
 
 void moveit_warehouse::RobotStateStorage::reset()
@@ -62,7 +64,7 @@ void moveit_warehouse::RobotStateStorage::reset()
   createCollections();
 }
 
-void moveit_warehouse::RobotStateStorage::addRobotState(const moveit_msgs::RobotState& msg, const std::string& name,
+void moveit_warehouse::RobotStateStorage::addRobotState(const moveit_msgs::msg::RobotState& msg, const std::string& name,
                                                         const std::string& robot)
 {
   bool replace = false;

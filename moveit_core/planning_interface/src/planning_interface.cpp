@@ -56,7 +56,7 @@ static ActiveContexts& getActiveContexts()
   static ActiveContexts ac;
   return ac;
 }
-}
+}  // namespace
 
 PlanningContext::PlanningContext(const std::string& name, const std::string& group) : name_(name), group_(group)
 {

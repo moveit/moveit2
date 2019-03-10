@@ -86,5 +86,5 @@ float toFloat(const std::string& s)
 {
   return toRealImpl<float>(s);
 }
-}
-}
+}  // namespace core
+}  // namespace moveit

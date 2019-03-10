@@ -21,6 +21,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
   visualization_msgs
   tf2_eigen
+  angles
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME}

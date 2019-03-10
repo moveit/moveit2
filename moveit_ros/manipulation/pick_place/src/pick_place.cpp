@@ -56,9 +56,7 @@ PickPlacePlanBase::PickPlacePlanBase(const PickPlaceConstPtr& pick_place, const 
   pipeline_.setEmptyQueueCallback(boost::bind(&PickPlacePlanBase::emptyQueue, this));
 }
 
-PickPlacePlanBase::~PickPlacePlanBase()
-{
-}
+PickPlacePlanBase::~PickPlacePlanBase() = default;
 
 void PickPlacePlanBase::foundSolution()
 {
@@ -112,13 +110,13 @@ void PickPlace::displayComputedMotionPlans(bool flag)
   if (display_computed_motion_plans_ && !flag)
     display_path_publisher_.shutdown();
   else if (!display_computed_motion_plans_ && flag)
-    display_path_publisher_ = nh_.advertise<moveit_msgs::DisplayTrajectory>(DISPLAY_PATH_TOPIC, 10, true);
+    display_path_publisher_ = nh_.advertise<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC, 10, true);
   display_computed_motion_plans_ = flag;
 }
 
 void PickPlace::visualizePlan(const ManipulationPlanPtr& plan) const
 {
-  moveit_msgs::DisplayTrajectory dtraj;
+  moveit_msgs::msg::DisplayTrajectory dtraj;
   dtraj.model_id = getRobotModel()->getName();
   bool first = true;
   for (std::size_t i = 0; i < plan->trajectories_.size(); ++i)
@@ -174,7 +172,7 @@ std::vector<std_msgs::ColorRGBA> setupDefaultGraspColors()
   result[5].a = 0.75f;
   return result;
 }
-}
+}  // namespace
 
 void PickPlace::visualizeGrasps(const std::vector<ManipulationPlanPtr>& plans) const
 {
@@ -201,4 +199,4 @@ void PickPlace::visualizeGrasps(const std::vector<ManipulationPlanPtr>& plans) c
 
   grasps_publisher_.publish(ma);
 }
-}
+}  // namespace pick_place

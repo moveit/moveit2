@@ -771,4 +771,4 @@ bool PropagationDistanceField::readFromStream(std::istream& is)
   addNewObstacleVoxels(obs_points);
   return true;
 }
-}
+}  // namespace distance_field

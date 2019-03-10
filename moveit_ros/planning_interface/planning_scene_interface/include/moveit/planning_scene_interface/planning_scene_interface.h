@@ -86,42 +86,42 @@ public:
 
   /** \brief Get the objects identified by the given object ids list. If no ids are provided, return all the known
    * objects. */
-  std::map<std::string, moveit_msgs::CollisionObject>
+  std::map<std::string, moveit_msgs::msg::CollisionObject>
   getObjects(const std::vector<std::string>& object_ids = std::vector<std::string>());
 
   /** \brief Get the attached objects identified by the given object ids list. If no ids are provided, return all the
    * attached objects. */
-  std::map<std::string, moveit_msgs::AttachedCollisionObject>
+  std::map<std::string, moveit_msgs::msg::AttachedCollisionObject>
   getAttachedObjects(const std::vector<std::string>& object_ids = std::vector<std::string>());
 
   /** \brief Apply collision object to the planning scene of the move_group node synchronously.
       Other PlanningSceneMonitors will NOT receive the update unless they subscribe to move_group's monitored scene */
-  bool applyCollisionObject(const moveit_msgs::CollisionObject& collision_object);
+  bool applyCollisionObject(const moveit_msgs::msg::CollisionObject& collision_object);
 
   /** \brief Apply collision object to the planning scene of the move_group node synchronously.
       Other PlanningSceneMonitors will NOT receive the update unless they subscribe to move_group's monitored scene */
-  bool applyCollisionObject(const moveit_msgs::CollisionObject& collision_object,
+  bool applyCollisionObject(const moveit_msgs::msg::CollisionObject& collision_object,
                             const std_msgs::ColorRGBA& object_color);
 
   /** \brief Apply collision objects to the planning scene of the move_group node synchronously.
       Other PlanningSceneMonitors will NOT receive the update unless they subscribe to move_group's monitored scene.
       If object_colors do not specify an id, the corresponding object id from collision_objects is used. */
   bool applyCollisionObjects(
-      const std::vector<moveit_msgs::CollisionObject>& collision_objects,
-      const std::vector<moveit_msgs::ObjectColor>& object_colors = std::vector<moveit_msgs::ObjectColor>());
+      const std::vector<moveit_msgs::msg::CollisionObject>& collision_objects,
+      const std::vector<moveit_msgs::msg::ObjectColor>& object_colors = std::vector<moveit_msgs::msg::ObjectColor>());
 
   /** \brief Apply attached collision object to the planning scene of the move_group node synchronously.
       Other PlanningSceneMonitors will NOT receive the update unless they subscribe to move_group's monitored scene */
-  bool applyAttachedCollisionObject(const moveit_msgs::AttachedCollisionObject& attached_collision_object);
+  bool applyAttachedCollisionObject(const moveit_msgs::msg::AttachedCollisionObject& attached_collision_object);
 
   /** \brief Apply attached collision objects to the planning scene of the move_group node synchronously.
       Other PlanningSceneMonitors will NOT receive the update unless they subscribe to move_group's monitored scene */
   bool
-  applyAttachedCollisionObjects(const std::vector<moveit_msgs::AttachedCollisionObject>& attached_collision_objects);
+  applyAttachedCollisionObjects(const std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objects);
 
   /** \brief Update the planning_scene of the move_group node with the given ps synchronously.
       Other PlanningSceneMonitors will NOT receive the update unless they subscribe to move_group's monitored scene */
-  bool applyPlanningScene(const moveit_msgs::PlanningScene& ps);
+  bool applyPlanningScene(const moveit_msgs::msg::PlanningScene& ps);
 
   /** \brief Add collision objects to the world via /planning_scene.
       Make sure object.operation is set to object.ADD.
@@ -129,8 +129,8 @@ public:
       The update runs asynchronously. If you need the objects to be available *directly* after you called this function,
       consider using `applyCollisionObjects` instead. */
   void addCollisionObjects(
-      const std::vector<moveit_msgs::CollisionObject>& collision_objects,
-      const std::vector<moveit_msgs::ObjectColor>& object_colors = std::vector<moveit_msgs::ObjectColor>()) const;
+      const std::vector<moveit_msgs::msg::CollisionObject>& collision_objects,
+      const std::vector<moveit_msgs::msg::ObjectColor>& object_colors = std::vector<moveit_msgs::msg::ObjectColor>()) const;
 
   /** \brief Remove collision objects from the world via /planning_scene.
 

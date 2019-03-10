@@ -6,7 +6,10 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_robot_state
   urdf
-  urdfdom_headers)
+  urdfdom_headers
+  orocos_kdl
+  visualization_msgs
+  kdl_parser)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib

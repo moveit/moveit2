@@ -202,7 +202,7 @@ TEST_F(LoadPlanningModelsPr2, GroupInit)
   jv["base_joint/x"] = 0.433;
   jv["base_joint/theta"] = -0.5;
   ks.setVariablePositions(jv);
-  moveit_msgs::RobotState robot_state;
+  moveit_msgs::msg::RobotState robot_state;
   moveit::core::robotStateToRobotStateMsg(ks, robot_state);
 
   moveit::core::RobotState ks2(robot_model2);

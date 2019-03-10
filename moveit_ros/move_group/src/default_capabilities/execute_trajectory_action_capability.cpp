@@ -64,7 +64,7 @@ void MoveGroupExecuteTrajectoryAction::executePathCallback(const moveit_msgs::ac
   if (!context_->trajectory_execution_manager_)
   {
     const std::string response = "Cannot execute trajectory since ~allow_trajectory_execution was set to false";
-    action_res.error_code.val = moveit_msgs::MoveItErrorCodes::CONTROL_FAILED;
+    action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
     execute_action_server_->setAborted(action_res, response);
     return;
   }
@@ -72,11 +72,11 @@ void MoveGroupExecuteTrajectoryAction::executePathCallback(const moveit_msgs::ac
   executePath(goal, action_res);
 
   const std::string response = getActionResultString(action_res.error_code, false, false);
-  if (action_res.error_code.val == moveit_msgs::MoveItErrorCodes::SUCCESS)
+  if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     execute_action_server_->setSucceeded(action_res, response);
   }
-  else if (action_res.error_code.val == moveit_msgs::MoveItErrorCodes::PREEMPTED)
+  else if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
   {
     execute_action_server_->setPreempted(action_res, response);
   }
@@ -101,25 +101,25 @@ void MoveGroupExecuteTrajectoryAction::executePath(const moveit_msgs::action::Ex
     moveit_controller_manager::ExecutionStatus status = context_->trajectory_execution_manager_->waitForExecution();
     if (status == moveit_controller_manager::ExecutionStatus::SUCCEEDED)
     {
-      action_res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+      action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     }
     else if (status == moveit_controller_manager::ExecutionStatus::PREEMPTED)
     {
-      action_res.error_code.val = moveit_msgs::MoveItErrorCodes::PREEMPTED;
+      action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
     }
     else if (status == moveit_controller_manager::ExecutionStatus::TIMED_OUT)
     {
-      action_res.error_code.val = moveit_msgs::MoveItErrorCodes::TIMED_OUT;
+      action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT;
     }
     else
     {
-      action_res.error_code.val = moveit_msgs::MoveItErrorCodes::CONTROL_FAILED;
+      action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
     }
     ROS_INFO_STREAM_NAMED(capability_name_, "Execution completed: " << status.asString());
   }
   else
   {
-    action_res.error_code.val = moveit_msgs::MoveItErrorCodes::CONTROL_FAILED;
+    action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
   }
 }
 

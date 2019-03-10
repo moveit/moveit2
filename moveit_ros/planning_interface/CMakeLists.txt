@@ -12,6 +12,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(moveit_msgs REQUIRED)
+# TODO: uncomment this as submodules become available
 # find_package(moveit_ros_planning REQUIRED)
 # find_package(moveit_ros_warehouse REQUIRED)
 # find_package(moveit_ros_manipulation REQUIRED)
@@ -23,7 +24,6 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
-find_package(Boost REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 find_package(PythonInterp REQUIRED)
@@ -36,6 +36,15 @@ elseif()
   set(BOOST_PYTHON_COMPONENT python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
 endif()
 
+find_package(Boost REQUIRED COMPONENTS
+  date_time
+  filesystem
+  program_options
+  ${BOOST_PYTHON_COMPONENT}
+  system
+  thread
+)
+
 set(THIS_PACKAGE_INCLUDE_DIRS
   py_bindings_tools/include
   common_planning_interface_objects/include
@@ -43,11 +52,11 @@ set(THIS_PACKAGE_INCLUDE_DIRS
   move_group_interface/include
 )
 
-# set(THIS_PACKAGE_INCLUDE_LIBRARIES
-#       moveit_common_planning_interface_objects
-#       moveit_planning_scene_interface
-#       moveit_move_group_interface
-# )
+set(THIS_PACKAGE_INCLUDE_LIBRARIES
+      moveit_common_planning_interface_objects
+      moveit_planning_scene_interface
+      moveit_move_group_interface
+)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDENCIES
       moveit_ros_planning
@@ -60,11 +69,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDENCIES
       EIGEN3
 )
 
-ament_export_libraries(${THIS_PACKAGE_INCLUDE_LIBRARIES})
-ament_export_include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDENCIES})
-
-
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
                     ${catkin_INCLUDE_DIRS})
@@ -72,6 +76,10 @@ include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
 include_directories(SYSTEM
                     ${EIGEN3_INCLUDE_DIRS}
                     ${PYTHON_INCLUDE_DIRS})
+
+ament_export_libraries(${THIS_PACKAGE_INCLUDE_LIBRARIES})
+ament_export_include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDENCIES})
 
 # add_subdirectory(py_bindings_tools)
 # add_subdirectory(common_planning_interface_objects)
