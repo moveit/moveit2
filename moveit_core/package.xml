@@ -21,6 +21,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <build_depend>angles</build_depend>
   <build_depend>assimp</build_depend>
   <build_depend>boost</build_depend>
   <build_depend>eigen</build_depend>
@@ -52,6 +53,7 @@
   <build_depend>xmlrpcpp</build_depend>
   <build_depend>rcutils</build_depend>
 
+  <exec_depend>angles</exec_depend>
   <exec_depend>assimp</exec_depend>
   <exec_depend>boost</exec_depend>
   <exec_depend>eigen</exec_depend>

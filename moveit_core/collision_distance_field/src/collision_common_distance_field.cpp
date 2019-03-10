@@ -128,7 +128,7 @@ PosedBodyPointDecompositionVectorPtr getAttachedBodyPointDecomposition(const rob
 }
 
 void getBodySphereVisualizationMarkers(const GroupStateRepresentationConstPtr& gsr, const std::string& reference_frame,
-                                       visualization_msgs::MarkerArray& body_marker_array)
+                                       visualization_msgs::msg::MarkerArray& body_marker_array)
 {
   // creating namespaces
   std::string robot_ns = gsr->dfce_->group_name_ + "_sphere_decomposition";
