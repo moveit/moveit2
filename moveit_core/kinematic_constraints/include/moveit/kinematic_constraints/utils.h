@@ -37,10 +37,10 @@
 #ifndef MOVEIT_KINEMATIC_CONSTRAINTS_UTILS_
 #define MOVEIT_KINEMATIC_CONSTRAINTS_UTILS_
 
-#include <moveit_msgs/MotionPlanRequest.h>
-#include <geometry_msgs/PointStamped.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/QuaternionStamped.h>
+#include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <geometry_msgs/msg/point_stamped.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <geometry_msgs/msg/quaternion_stamped.hpp>
 #include <moveit/robot_state/robot_state.h>
 #include <limits>
 
@@ -118,7 +118,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const robot_state::RobotS
  *
  * @return A full constraint message containing both constraints
  */
-moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name, const geometry_msgs::PoseStamped& pose,
+moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name, const geometry_msgs::msg::PoseStamped& pose,
                                                   double tolerance_pos = 1e-3, double tolerance_angle = 1e-2);
 
 /**
@@ -136,7 +136,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  *
  * @return A full constraint message containing both constraints
  */
-moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name, const geometry_msgs::PoseStamped& pose,
+moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name, const geometry_msgs::msg::PoseStamped& pose,
                                                   const std::vector<double>& tolerance_pos,
                                                   const std::vector<double>& tolerance_angle);
 
@@ -152,7 +152,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  * @return A full constraint message containing the orientation constraint
  */
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
-                                                  const geometry_msgs::QuaternionStamped& quat,
+                                                  const geometry_msgs::msg::QuaternionStamped& quat,
                                                   double tolerance = 1e-2);
 
 /**
@@ -169,8 +169,8 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  * @return A full constraint message containing the position constraint
  */
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
-                                                  const geometry_msgs::Point& reference_point,
-                                                  const geometry_msgs::PointStamped& goal_point,
+                                                  const geometry_msgs::msg::Point& reference_point,
+                                                  const geometry_msgs::msg::PointStamped& goal_point,
                                                   double tolerance = 1e-3);
 
 /**
@@ -186,7 +186,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  * @return A full constraint message containing the position constraint
  */
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
-                                                  const geometry_msgs::PointStamped& goal_point,
+                                                  const geometry_msgs::msg::PointStamped& goal_point,
                                                   double tolerance = 1e-3);
 
 /**
@@ -200,7 +200,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  *
  * @return was the construction successful?
  */
-bool constructConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Constraints& constraints);
+// bool constructConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Constraints& constraints);
 }
 
 #endif

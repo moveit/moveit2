@@ -44,10 +44,14 @@
 #include <moveit/macros/class_forward.h>
 
 #include <geometric_shapes/bodies.h>
-#include <moveit_msgs/Constraints.h>
+#include <moveit_msgs/msg/constraints.hpp>
 
 #include <iostream>
 #include <vector>
+
+#include "rclcpp/clock.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/duration.hpp"
 
 /** \brief Representation and evaluation of kinematic constraints */
 namespace kinematic_constraints
@@ -814,7 +818,20 @@ public:
    * @param [in] state The state from which to produce the markers
    * @param [out] markers The marker array to which the markers will be added
    */
-  void getMarkers(const robot_state::RobotState& state, visualization_msgs::MarkerArray& markers) const;
+  void getMarkers(const robot_state::RobotState& state, visualization_msgs::msg::MarkerArray& markers) const;
+
+  /**
+   * \brief Adds markers associated with the visibility cone, sensor
+   * and target to the visualization array
+   *
+   * The visibility cone and two arrows - a blue array that issues
+   * from the sensor_view_direction of the sensor, and a red arrow the
+   * issues along the Z axis of the the target frame.
+   *
+   * @param [in] state The state from which to produce the markers
+   * @param [out] markers The marker array to which the markers will be added
+   */
+  void getMarkers(const robot_state::RobotState& state, visualization_msgs::msg::MarkerArray& markers);
 
   bool enabled() const override;
   ConstraintEvaluationResult decide(const robot_state::RobotState& state, bool verbose = false) const override;
@@ -846,6 +863,7 @@ protected:
   double target_radius_;             /**< \brief Storage for the target radius */
   double max_view_angle_;            /**< \brief Storage for the max view angle */
   double max_range_angle_;           /**< \brief Storage for the max range angle */
+  rclcpp::Clock clock_ros_;         /**< \brief ros2 clock for the time */
 };
 
 MOVEIT_CLASS_FORWARD(KinematicConstraintSet);
