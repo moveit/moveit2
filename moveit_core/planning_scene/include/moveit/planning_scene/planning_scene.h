@@ -47,15 +47,16 @@
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit/macros/deprecation.h>
-#include <moveit_msgs/PlanningScene.h>
-#include <moveit_msgs/RobotTrajectory.h>
-#include <moveit_msgs/Constraints.h>
-#include <moveit_msgs/PlanningSceneComponents.h>
-#include <octomap_msgs/OctomapWithPose.h>
+#include <moveit_msgs/msg/planning_scene.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <moveit_msgs/msg/constraints.hpp>
+#include <moveit_msgs/msg/planning_scene_components.hpp>
+#include <octomap_msgs/msg/octomap_with_pose.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 #include <boost/concept_check.hpp>
 #include <memory>
+#include "rclcpp/rclcpp.hpp"
 
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene
@@ -76,10 +77,10 @@ typedef boost::function<bool(const robot_state::RobotState&, bool)> StateFeasibi
 typedef boost::function<bool(const robot_state::RobotState&, const robot_state::RobotState&, bool)> MotionFeasibilityFn;
 
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their colors */
-typedef std::map<std::string, std_msgs::ColorRGBA> ObjectColorMap;
+typedef std::map<std::string, std_msgs::msg::ColorRGBA> ObjectColorMap;
 
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their types */
-typedef std::map<std::string, object_recognition_msgs::ObjectType> ObjectTypeMap;
+typedef std::map<std::string, object_recognition_msgs::msg::ObjectType> ObjectTypeMap;
 
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
@@ -88,13 +89,15 @@ class PlanningScene : private boost::noncopyable, public std::enable_shared_from
 {
 public:
   /** \brief construct using an existing RobotModel */
-  PlanningScene(const robot_model::RobotModelConstPtr& robot_model,
-                collision_detection::WorldPtr world = collision_detection::WorldPtr(new collision_detection::World()));
+  PlanningScene(
+      const robot_model::RobotModelConstPtr& robot_model,
+      const collision_detection::WorldPtr& world = collision_detection::WorldPtr(new collision_detection::World()));
 
   /** \brief construct using a urdf and srdf.
    * A RobotModel for the PlanningScene will be created using the urdf and srdf. */
-  PlanningScene(const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model,
-                collision_detection::WorldPtr world = collision_detection::WorldPtr(new collision_detection::World()));
+  PlanningScene(
+      const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model,
+      const collision_detection::WorldPtr& world = collision_detection::WorldPtr(new collision_detection::World()));
 
   static const std::string OCTOMAP_NS;
   static const std::string DEFAULT_SCENE_NAME;
@@ -723,7 +726,7 @@ public:
   void getAttachedCollisionObjectMsgs(std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objs) const;
 
   /** \brief Construct a message (\e octomap) with the octomap data from the planning_scene */
-  bool getOctomapMsg(octomap_msgs::OctomapWithPose& octomap) const;
+  bool getOctomapMsg(octomap_msgs::msg::OctomapWithPose& octomap) const;
 
   /** \brief Construct a vector of messages (\e object_colors) with the colors of the objects from the planning_scene */
   void getObjectColorMsgs(std::vector<moveit_msgs::msg::ObjectColor>& object_colors) const;
@@ -748,8 +751,8 @@ public:
 
   bool processPlanningSceneWorldMsg(const moveit_msgs::msg::PlanningSceneWorld& world);
 
-  void processOctomapMsg(const octomap_msgs::OctomapWithPose& map);
-  void processOctomapMsg(const octomap_msgs::Octomap& map);
+  void processOctomapMsg(const octomap_msgs::msg::OctomapWithPose& map);
+  void processOctomapMsg(const octomap_msgs::msg::Octomap& map);
   void processOctomapPtr(const std::shared_ptr<const octomap::OcTree>& octree, const Eigen::Isometry3d& t);
 
   /**
@@ -773,15 +776,15 @@ public:
 
   bool hasObjectColor(const std::string& id) const;
 
-  const std_msgs::ColorRGBA& getObjectColor(const std::string& id) const;
-  void setObjectColor(const std::string& id, const std_msgs::ColorRGBA& color);
+  const std_msgs::msg::ColorRGBA& getObjectColor(const std::string& id) const;
+  void setObjectColor(const std::string& id, const std_msgs::msg::ColorRGBA& color);
   void removeObjectColor(const std::string& id);
   void getKnownObjectColors(ObjectColorMap& kc) const;
 
   bool hasObjectType(const std::string& id) const;
 
-  const object_recognition_msgs::ObjectType& getObjectType(const std::string& id) const;
-  void setObjectType(const std::string& id, const object_recognition_msgs::ObjectType& type);
+  const object_recognition_msgs::msg::ObjectType& getObjectType(const std::string& id) const;
+  void setObjectType(const std::string& id, const object_recognition_msgs::msg::ObjectType& type);
   void removeObjectType(const std::string& id);
   void getKnownObjectTypes(ObjectTypeMap& kc) const;
 
