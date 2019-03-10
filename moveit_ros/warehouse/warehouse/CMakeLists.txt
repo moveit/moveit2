@@ -9,25 +9,25 @@ add_library(${MOVEIT_LIB_NAME}
   src/state_storage.cpp
   src/warehouse_connector.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(${MOVEIT_LIB_NAME} ${rclcpp_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(moveit_warehouse_broadcast src/broadcast.cpp)
-target_link_libraries(moveit_warehouse_broadcast ${catkin_LIBRARIES} ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES} )
+ament_target_dependencies(moveit_warehouse_broadcast ${rclcpp_LIBRARIES} ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES} )
 
 add_executable(moveit_save_to_warehouse src/save_to_warehouse.cpp)
-target_link_libraries(moveit_save_to_warehouse ${catkin_LIBRARIES} ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
+ament_target_dependencies(moveit_save_to_warehouse ${rclcpp_LIBRARIES} ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
 
 add_executable(moveit_warehouse_import_from_text src/import_from_text.cpp)
-target_link_libraries(moveit_warehouse_import_from_text ${catkin_LIBRARIES} ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
+ament_target_dependencies(moveit_warehouse_import_from_text ${rclcpp_LIBRARIES} ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
 
 add_executable(moveit_warehouse_save_as_text src/save_as_text.cpp)
-target_link_libraries(moveit_warehouse_save_as_text ${catkin_LIBRARIES} ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
+ament_target_dependencies(moveit_warehouse_save_as_text ${rclcpp_LIBRARIES} ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
 
 add_executable(moveit_init_demo_warehouse src/initialize_demo_db.cpp)
-target_link_libraries(moveit_init_demo_warehouse ${catkin_LIBRARIES} ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
+ament_target_dependencies(moveit_init_demo_warehouse ${rclcpp_LIBRARIES} ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
 
 add_executable(moveit_warehouse_services src/warehouse_services.cpp)
-target_link_libraries(moveit_warehouse_services ${catkin_LIBRARIES} ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
+ament_target_dependencies(moveit_warehouse_services ${rclcpp_LIBRARIES} ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
 
 install(
   TARGETS
@@ -38,6 +38,7 @@ install(
     moveit_warehouse_save_as_text
     moveit_init_demo_warehouse
     moveit_warehouse_services
-  LIBRARY DESTINATION ${CATKIN_GLOBAL_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY include/ DESTINATION include)
