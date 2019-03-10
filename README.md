@@ -19,7 +19,7 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
     - [x] Upgrade continuous integration for ROS 2.0
     - [x] Refactor/cleanup folder hierarchy
   - [x] Convert all headers and link it to HRIM (contributed by @ibaiape)
-  - [ ] Dependencies on other packages
+  - [x] Dependencies on other packages
     - [x] tf2_kdl https://github.com/ros2/geometry2/pull/90
     - [x] eigen_stl_containers https://github.com/AcutronicRobotics/eigen_stl_containers/tree/ros2
     - [x] geometric_shapes https://github.com/ros-planning/geometric_shapes/pull/96
@@ -31,7 +31,7 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
       - [x]  octomap
       - [ ]  octovis
       - [ ]  dynamicEDT3D
-  - [ ] Convert moveit_core packages to ROS 2.0
+  - [x] Convert moveit_core packages to ROS 2.0
     - [x] version
     - [x] macros
     - [x] backtrace
@@ -49,16 +49,18 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
     - [x] collision_detection
     - [x] collision_detection_fcl
     - [x] kinematic_constraints
-    - [ ] planning_scene
+    - [x] planning_scene
     - [x] constraint_samplers
     - [x] planning_interface
     - [x] planning_request_adapter
-    - [ ] trajectory_processing
+    - [x] trajectory_processing
     - [x] distance_field
-    - [ ] collision_distance_field
-    - [ ] kinematics_metrics
-    - [ ] dynamics_solver
-    - [ ] utils
+    - [x] collision_distance_field
+    - [x] kinematics_metrics
+    - [x] dynamics_solver
+    - [x] utils
+  - [ ] moveit_ros
+      - [x] planning_interface
   - [ ] Necessary for a Minimal Working Example
       - [ ] moveit_ros_planning_interface
      -  [ ] moveit_ros_planning
