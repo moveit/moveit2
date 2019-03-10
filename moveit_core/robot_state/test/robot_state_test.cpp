@@ -116,7 +116,7 @@ TEST(Loading, SimpleRobot)
 TEST(LoadingAndFK, SimpleRobot)
 {
   moveit::core::RobotModelBuilder builder("myrobot", "base_link");
-  geometry_msgs::Pose pose;
+  geometry_msgs::msg::Pose pose;
   tf2::toMsg(tf2::Vector3(-0.1, 0, 0), pose.position);
   tf2::Quaternion q;
   q.setRPY(0, 0, -1);
