@@ -1,0 +1,61 @@
+repositories:
+  moveit_msgs:
+    type: git
+    url: https://github.com/AcutronicRobotics/moveit_msgs
+    version: ros2
+  geometry2:
+    type: git
+    url: https://github.com/AcutronicRobotics/geometry2
+    version: master
+  geometric_shapes:
+    type: git
+    url: https://github.com/AcutronicRobotics/geometric_shapes
+    version: ros2
+  eigen_stl_containers:
+    type: git
+    url: https://github.com/AcutronicRobotics/eigen_stl_containers
+    version: ros2
+  object_recognition_msgs:
+    type: git
+    url: https://github.com/AcutronicRobotics/object_recognition_msgs
+    version: master
+  octomap_msgs:
+    type: git
+    url: https://github.com/AcutronicRobotics/octomap_msgs
+    version: ros2
+  random_numbers:
+    type: git
+    url: https://github.com/AcutronicRobotics/random_numbers
+    version: ros2
+  srdfdom:
+    type: git
+    url: https://github.com/AcutronicRobotics/srdfdom
+    version: ros2
+  urdf_parser_py:
+    type: git
+    url: https://github.com/AcutronicRobotics/urdf_parser_py
+    version: ros2
+  octomap:
+    type: git
+    url: https://github.com/AcutronicRobotics/octomap
+    version: ros2
+  moveit_resources:
+    type: git
+    url: https://github.com/AcutronicRobotics/moveit_resources
+    version: master
+  console_bridge_vendor:
+    type: git
+    url: https://github.com/ros2/console_bridge_vendor
+    version: crystal
+  ros1_bridge:
+    type: git
+    url: https://github.com/ros2/ros1_bridge
+    version: master
+  image_common:
+    type: git
+    url: https://github.com/ros-perception/image_common
+    version: ros2
+  angles:
+    type: git
+    url: https://github.com/ros/angles
+    version: ros2
