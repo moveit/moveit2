@@ -97,7 +97,7 @@ void printStats(const trajectory_msgs::msg::JointTrajectory& trajectory, const s
   for (std::size_t i = 0; i < trajectory.points.size(); ++i)
     printPoint(trajectory.points[i], i);
 }
-}
+}  // namespace
 
 // Applies velocity
 void IterativeParabolicTimeParameterization::applyVelocityConstraints(robot_trajectory::RobotTrajectory& rob_trajectory,
@@ -297,7 +297,7 @@ void updateTrajectory(robot_trajectory::RobotTrajectory& rob_trajectory, const s
     }
   }
 }
-}
+}  // namespace
 
 // Applies Acceleration constraints
 void IterativeParabolicTimeParameterization::applyAccelerationConstraints(
@@ -488,4 +488,4 @@ bool IterativeParabolicTimeParameterization::computeTimeStamps(robot_trajectory:
   updateTrajectory(trajectory, time_diff);
   return true;
 }
-}
+}  // namespace trajectory_processing

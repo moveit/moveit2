@@ -42,7 +42,7 @@ namespace kinematics
 const double KinematicsBase::DEFAULT_SEARCH_DISCRETIZATION = 0.1;
 const double KinematicsBase::DEFAULT_TIMEOUT = 1.0;
 
-static void noDeleter(const moveit::core::RobotModel*)
+static void noDeleter(const moveit::core::RobotModel* /*unused*/)
 {
 }
 
@@ -185,9 +185,7 @@ KinematicsBase::KinematicsBase()
   supported_methods_.push_back(DiscretizationMethods::NO_DISCRETIZATION);
 }
 
-KinematicsBase::~KinematicsBase()
-{
-}
+KinematicsBase::~KinematicsBase() = default;
 
 bool KinematicsBase::getPositionIK(const std::vector<geometry_msgs::msg::Pose>& ik_poses,
                                    const std::vector<double>& ik_seed_state,

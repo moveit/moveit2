@@ -41,6 +41,7 @@
 #include <memory>
 #include "rclcpp/rclcpp.hpp"
 #include <stdio.h>
+#include <utility>
 
 namespace collision_detection
 {
@@ -53,8 +54,8 @@ CollisionWorldDistanceField::CollisionWorldDistanceField(Eigen::Vector3d size, E
                                                          bool use_signed_distance_field, double resolution,
                                                          double collision_tolerance, double max_propogation_distance)
   : CollisionWorld()
-  , size_(size)
-  , origin_(origin)
+  , size_(std::move(size))
+  , origin_(std::move(origin))
   , use_signed_distance_field_(use_signed_distance_field)
   , resolution_(resolution)
   , collision_tolerance_(collision_tolerance)
@@ -72,8 +73,8 @@ CollisionWorldDistanceField::CollisionWorldDistanceField(const WorldPtr& world, 
                                                          double resolution, double collision_tolerance,
                                                          double max_propogation_distance)
   : CollisionWorld(world)
-  , size_(size)
-  , origin_(origin)
+  , size_(std::move(size))
+  , origin_(std::move(origin))
   , use_signed_distance_field_(use_signed_distance_field)
   , resolution_(resolution)
   , collision_tolerance_(collision_tolerance)
@@ -563,7 +564,7 @@ CollisionWorldDistanceField::DistanceFieldCacheEntryPtr CollisionWorldDistanceFi
   dfce->distance_field_->addPointsToField(add_points);
   return dfce;
 }
-}
+}  // namespace collision_detection
 
 #include <moveit/collision_distance_field/collision_detector_allocator_distance_field.h>
 const std::string collision_detection::CollisionDetectorAllocatorDistanceField::NAME_("DISTANCE_FIELD");

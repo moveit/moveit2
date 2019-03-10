@@ -362,4 +362,4 @@ const std::vector<std::string>& LMAKinematicsPlugin::getLinkNames() const
   return getTipFrames();
 }
 
-}  // namespace
+}  // namespace lma_kinematics_plugin
