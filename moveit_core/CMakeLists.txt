@@ -131,6 +131,25 @@ set(libraries
   moveit_utils
 )
 
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+  eigen_stl_containers
+  geometric_shapes
+  geometry_msgs
+  kdl_parser
+  moveit_msgs
+  octomap_msgs
+  random_numbers
+  sensor_msgs
+  shape_msgs
+  srdfdom
+  std_msgs
+  tf2_eigen
+  tf2_geometry_msgs
+  trajectory_msgs
+  visualization_msgs
+  Boost
+)
+
 # to run: catkin_make -DENABLE_COVERAGE_TESTING=ON package_name_coverage
 if(CATKIN_ENABLE_TESTING AND ENABLE_COVERAGE_TESTING)
   find_package(code_coverage REQUIRED)   # catkin package ros-*-code-coverage
@@ -186,5 +205,6 @@ add_subdirectory(utils)
 
 ament_export_include_directories(include)
 ament_export_libraries(${libraries})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 ament_package()
