@@ -39,18 +39,21 @@
 
 #include <vector>
 #include <string>
-#include <ros/ros.h>
 #include <tf2_ros/buffer.h>
 #include <pluginlib/class_loader.hpp>
 
-#include <moveit_msgs/SaveMap.h>
-#include <moveit_msgs/LoadMap.h>
+#include <moveit_msgs/srv/save_map.hpp>
+#include <moveit_msgs/srv/load_map.hpp>
 #include <moveit/occupancy_map_monitor/occupancy_map.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
 
 #include <boost/thread/mutex.hpp>
 
 #include <memory>
+#include <boost/bind.hpp>
+#include <octomap_msgs/conversions.h>
+#include "rclcpp/rclcpp.hpp"
+#include "rcutils/logging_macros.h"
 
 namespace occupancy_map_monitor
 {
@@ -60,7 +63,7 @@ public:
   OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& map_frame = "",
                       double map_resolution = 0.0);
   OccupancyMapMonitor(double map_resolution = 0.0);
-  OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, ros::NodeHandle& nh,
+  OccupancyMapMonitor(const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, std::shared_ptr<rclcpp::Node> node_,
                       const std::string& map_frame = "", double map_resolution = 0.0);
 
   ~OccupancyMapMonitor();
@@ -128,12 +131,16 @@ private:
   void initialize();
 
   /** @brief Save the current octree to a binary file */
-  bool saveMapCallback(moveit_msgs::srv::SaveMap::Request& request, moveit_msgs::srv::SaveMap::Response& response);
+  bool saveMapCallback(std::shared_ptr<rmw_request_id_t> request_header,
+                       const std::shared_ptr<moveit_msgs::srv::SaveMap::Request> req,
+                       std::shared_ptr<moveit_msgs::srv::SaveMap::Response> res);
 
   /** @brief Load octree from a binary file (gets rid of current octree data) */
-  bool loadMapCallback(moveit_msgs::srv::LoadMap::Request& request, moveit_msgs::srv::LoadMap::Response& response);
+  bool loadMapCallback(const std::shared_ptr<rmw_request_id_t> request_header,
+                          const std::shared_ptr<moveit_msgs::srv::LoadMap::Request> req,
+                          std::shared_ptr<moveit_msgs::srv::LoadMap::Response> res);
 
-  bool getShapeTransformCache(std::size_t index, const std::string& target_frame, const ros::Time& target_time,
+  bool getShapeTransformCache(std::size_t index, const std::string& target_frame, const rclcpp::Time& target_time,
                               ShapeTransformCache& cache) const;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -152,12 +159,13 @@ private:
 
   std::size_t mesh_handle_count_;
 
-  ros::NodeHandle root_nh_;
-  ros::NodeHandle nh_;
-  ros::ServiceServer save_map_srv_;
-  ros::ServiceServer load_map_srv_;
-
   bool active_;
+
+  rclcpp::Service<moveit_msgs::srv::SaveMap>::SharedPtr save_map_srv_;
+  rclcpp::Service<moveit_msgs::srv::LoadMap>::SharedPtr load_map_srv_;
+
+  std::shared_ptr<rclcpp::Node> node_;
+
 };
 }
 

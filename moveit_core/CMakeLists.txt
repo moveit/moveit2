@@ -18,12 +18,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(Boost REQUIRED)
-# find_package(system  REQUIRED)
-# find_package(filesystem  REQUIRED)
-# find_package(date_time  REQUIRED)
-# find_package(thread  REQUIRED)
-# find_package(iostreams REQUIRED)
+find_package(Boost REQUIRED system filesystem date_time thread iostreams)
 
 find_package(Eigen3 REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -188,8 +183,6 @@ add_subdirectory(collision_distance_field)
 add_subdirectory(kinematics_metrics)
 add_subdirectory(dynamics_solver)
 add_subdirectory(utils)
-
-
 
 ament_export_include_directories(include)
 ament_export_libraries(${libraries})
