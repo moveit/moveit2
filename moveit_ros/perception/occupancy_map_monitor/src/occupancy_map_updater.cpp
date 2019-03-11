@@ -56,6 +56,7 @@ void OccupancyMapUpdater::setMonitor(OccupancyMapMonitor* monitor)
 void OccupancyMapUpdater::readXmlParam(const std::string& param_name, double* value)
 {
   std::string isInt ("integer");
+  //TODO: (anasarrak) update this with the shared node
   auto node_occupancy_map = rclcpp::Node::make_shared("occupancy_map_server");
   auto ocupancy_map_monitor_parameters = std::make_shared<rclcpp::SyncParametersClient>(node_occupancy_map);
 
@@ -71,6 +72,7 @@ void OccupancyMapUpdater::readXmlParam(const std::string& param_name, double* va
 
 void OccupancyMapUpdater::readXmlParam(const std::string& param_name, unsigned int* value)
 {
+  //TODO: (anasarrak) update this with the shared node
   auto node_occupancy_map = rclcpp::Node::make_shared("occupancy_map_server");
   auto ocupancy_map_monitor_parameters = std::make_shared<rclcpp::SyncParametersClient>(node_occupancy_map);
 
