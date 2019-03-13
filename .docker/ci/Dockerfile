@@ -1,6 +1,6 @@
 FROM ros:crystal-ros-base-bionic
 
-MAINTAINER Lander Usategui  <lander@erlerobotics.com>
+LABEL maintainer="Dave Coleman dave@picknik.ai"
 
 ENV ROS_DISTRO crystal
 WORKDIR /ros2_ws
