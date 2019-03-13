@@ -3,6 +3,7 @@ FROM ros:crystal-ros-base-bionic
 LABEL maintainer="Dave Coleman dave@picknik.ai"
 
 ENV ROS_DISTRO crystal
+ENV TERM xterm
 WORKDIR /ros2_ws
 
 RUN \
