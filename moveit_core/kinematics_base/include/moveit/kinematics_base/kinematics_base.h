@@ -615,7 +615,7 @@ protected:
   template <typename T>
   inline bool lookupParam(const std::string& param, T& val, const T& default_val) const
   {
-    auto node = rclcpp::Node::make_shared("lookupparam");
+    auto node = rclcpp::Node::make_shared("lookup_param");
 
     auto parameters_lookup = std::make_shared<rclcpp::SyncParametersClient>(node);
 
