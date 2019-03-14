@@ -42,10 +42,8 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/macros/deprecation.h>
 #include "rclcpp/rclcpp.hpp"
-
 #include <boost/function.hpp>
 #include <string>
-#include <moveit/logging/logging.h>
 
 namespace moveit
 {
@@ -60,6 +58,9 @@ MOVEIT_CLASS_FORWARD(RobotModel)
 /** @brief API for forward and inverse kinematics */
 namespace kinematics
 {
+// Logger
+rclcpp::Logger logger_kinematics_base = rclcpp::get_logger("kinematics_base");
+
 /*
  * @enum DiscretizationMethods
  *
@@ -313,7 +314,7 @@ public:
     }
 
     // Otherwise throw error because this function should have been implemented
-    ROS_ERROR_NAMED("kinematics_base", "This kinematic solver does not support searchPositionIK with multiple poses");
+    RCLCPP_ERROR(kinematics::logger_kinematics_base, "This kinematic solver does not support searchPositionIK with multiple poses");
     return false;
   }
 
@@ -437,7 +438,7 @@ public:
   virtual const std::string& getTipFrame() const
   {
     if (tip_frames_.size() > 1)
-      ROS_ERROR_NAMED("kinematics_base", "This kinematic solver has more than one tip frame, "
+      RCLCPP_ERROR(kinematics::logger_kinematics_base, "This kinematic solver has more than one tip frame, "
                                          "do not call getTipFrame()");
 
     return tip_frames_[0];
