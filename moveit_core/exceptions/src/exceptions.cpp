@@ -48,5 +48,5 @@ moveit::ConstructException::ConstructException(const std::string& what_arg) : st
 
 moveit::Exception::Exception(const std::string& what_arg) : std::runtime_error(what_arg)
 {
-  RCLCPP_ERROR(logger_exceptions, "Exception thrown.", what_arg.c_str());
+  RCLCPP_ERROR(logger_exceptions, "%s\nException thrown.", what_arg.c_str());
 }
