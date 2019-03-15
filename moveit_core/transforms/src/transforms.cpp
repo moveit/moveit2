@@ -130,7 +130,7 @@ void Transforms::setTransform(const geometry_msgs::msg::TransformStamped& transf
 {
   if (sameFrame(transform.child_frame_id, target_frame_))
   {
-    Eigen::Isometry3d t = tf2::transformToEigen(transform.transform);
+    Eigen::Isometry3d t = tf2::transformToEigen(transform);
     setTransform(t, transform.header.frame_id);
   }
   else
