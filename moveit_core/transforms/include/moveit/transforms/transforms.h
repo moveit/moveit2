@@ -37,11 +37,12 @@
 #ifndef MOVEIT_TRANSFORMS_
 #define MOVEIT_TRANSFORMS_
 
-#include <geometry_msgs/TransformStamped.h>
-#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <geometry_msgs/msg/pose.hpp>
 #include <Eigen/Geometry>
 #include <boost/noncopyable.hpp>
 #include <moveit/macros/class_forward.h>
+#include <map>
 
 namespace moveit
 {
@@ -95,7 +96,7 @@ public:
    * @brief Get a vector of all the transforms as ROS messages
    * @param transforms The output transforms
    */
-  void copyTransforms(std::vector<geometry_msgs::TransformStamped>& transforms) const;
+  void copyTransforms(std::vector<geometry_msgs::msg::TransformStamped>& transforms) const;
 
   /**
    * @brief Set a transform in the transform tree (adding it if necessary)
@@ -108,13 +109,13 @@ public:
    * @brief Set a transform in the transform tree (adding it if necessary)
    * @param transform The input transform (the frame_id must match the target frame)
    */
-  void setTransform(const geometry_msgs::TransformStamped& transform);
+  void setTransform(const geometry_msgs::msg::TransformStamped& transform);
 
   /**
    * @brief Set a transform in the transform tree (adding it if necessary)
    * @param transform The input transforms (the frame_id must match the target frame)
    */
-  void setTransforms(const std::vector<geometry_msgs::TransformStamped>& transforms);
+  void setTransforms(const std::vector<geometry_msgs::msg::TransformStamped>& transforms);
 
   /**
    * @brief Set all the transforms: a map from string names of frames to corresponding Eigen::Isometry3d (w.r.t the
