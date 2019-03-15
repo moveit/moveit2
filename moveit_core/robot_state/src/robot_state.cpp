@@ -41,6 +41,7 @@
 #include <tf2_eigen/tf2_eigen.h>
 #include <moveit/backtrace/backtrace.h>
 #include <moveit/profiler/profiler.h>
+#include <moveit/macros/console_colors.h>
 #include <boost/bind.hpp>
 #include <moveit/robot_model/aabb.h>
 
@@ -1380,7 +1381,7 @@ bool ikCallbackFnAdapter(RobotState* state, const JointModelGroup* group,
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
   return true;
 }
-}
+}  // namespace
 
 bool RobotState::setToIKSolverFrame(Eigen::Isometry3d& pose, const kinematics::KinematicsBaseConstPtr& solver)
 {
@@ -2174,6 +2175,58 @@ void RobotState::printStatePositions(std::ostream& out) const
     out << nm[i] << "=" << position_[i] << std::endl;
 }
 
+void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointModelGroup* jmg, std::ostream& out) const
+{
+  // TODO(davetcoleman): support joints with multiple variables / multiple DOFs such as floating joints
+  // TODO(davetcoleman): support unbounded joints
+
+  const std::vector<const moveit::core::JointModel*>& joints = jmg->getActiveJointModels();
+
+  // Loop through joints
+  for (std::size_t i = 0; i < joints.size(); ++i)
+  {
+    // Ignore joints with more than one variable
+    if (joints[i]->getVariableCount() > 1)
+      continue;
+
+    double current_value = getVariablePosition(joints[i]->getName());
+
+    // check if joint is beyond limits
+    bool out_of_bounds = !satisfiesBounds(joints[i]);
+
+    const moveit::core::VariableBounds& bound = joints[i]->getVariableBounds()[0];
+
+    if (out_of_bounds)
+      out << MOVEIT_CONSOLE_COLOR_RED;
+
+    out << "   " << std::fixed << std::setprecision(5) << bound.min_position_ << "\t";
+    double delta = bound.max_position_ - bound.min_position_;
+    double step = delta / 20.0;
+
+    bool marker_shown = false;
+    for (double value = bound.min_position_; value < bound.max_position_; value += step)
+    {
+      // show marker of current value
+      if (!marker_shown && current_value < value)
+      {
+        out << "|";
+        marker_shown = true;
+      }
+      else
+        out << "-";
+    }
+    if (!marker_shown)
+      out << "|";
+
+    // show max position
+    out << " \t" << std::fixed << std::setprecision(5) << bound.max_position_ << "  \t" << joints[i]->getName()
+        << " current: " << std::fixed << std::setprecision(5) << current_value << std::endl;
+
+    if (out_of_bounds)
+      out << MOVEIT_CONSOLE_COLOR_RESET;
+  }
+}
+
 void RobotState::printDirtyInfo(std::ostream& out) const
 {
   out << "  * Dirty Joint Transforms: " << std::endl;
@@ -2290,7 +2343,7 @@ void getPoseString(std::ostream& ss, const Eigen::Isometry3d& pose, const std::s
     ss << std::endl;
   }
 }
-}
+}  // namespace
 
 void RobotState::getStateTreeJointString(std::ostream& ss, const JointModel* jm, const std::string& pfx0,
                                          bool last) const
