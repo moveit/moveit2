@@ -174,7 +174,7 @@ void Profiler::console()
   std::stringstream ss;
   ss << std::endl;
   status(ss, true);
-  ROS_INFO_STREAM_NAMED("profiler", ss.str().c_str());
+  RCUTILS_LOG_INFO("profiler", ss.str().c_str());
 }
 
 /// @cond IGNORE
