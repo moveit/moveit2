@@ -353,7 +353,7 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
       st->setVariableAccelerations(trajectory.joint_names, trajectory.points[i].accelerations);
     if (!trajectory.points[i].effort.empty())
       st->setVariableEffort(trajectory.joint_names, trajectory.points[i].effort);
-    addSuffixWayPoint(st, (this_time_stamp.seconds() - last_time_stamp.seconds()));
+    addSuffixWayPoint(st, (this_time_stamp - last_time_stamp).seconds());
     last_time_stamp = this_time_stamp;
   }
 }
@@ -402,7 +402,7 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
                         rclcpp::Duration(trajectory.multi_dof_joint_trajectory.points[i].time_from_start.sec,trajectory.multi_dof_joint_trajectory.points[i].time_from_start.nanosec);
     }
 
-    addSuffixWayPoint(st, (this_time_stamp.seconds() - last_time_stamp.seconds()));
+    addSuffixWayPoint(st, (this_time_stamp - last_time_stamp).seconds());
     last_time_stamp = this_time_stamp;
   }
 }
