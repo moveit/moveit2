@@ -187,7 +187,7 @@ class JointMotionWrapper
 public:
   JointMotionWrapper(const planning_models::RobotModel::JointModel* joint_model) : joint_model_(joint_model)
   {
-    std::vector<moveit_msgs::JointLimits> limits = joint_model->getLimits();
+    std::vector<moveit_msgs::msg::JointLimits> limits = joint_model->getLimits();
     joint_limit_ = limits.front();
   }
 
@@ -288,7 +288,7 @@ public:
 
 protected:
   const planning_models::RobotModel::JointModel* joint_model_;
-  moveit_msgs::JointLimits joint_limit_;
+  moveit_msgs::msg::JointLimits joint_limit_;
 };
 
 class JointMotionPrimitive

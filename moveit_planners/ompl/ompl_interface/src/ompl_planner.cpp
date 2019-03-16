@@ -58,12 +58,12 @@ public:
     plan_service_ = nh_.advertiseService(PLANNER_SERVICE_NAME, &OMPLPlannerService::computePlan, this);
     if (debug_)
     {
-      pub_plan_ = nh_.advertise<moveit_msgs::DisplayTrajectory>("display_motion_plan", 100);
-      pub_request_ = nh_.advertise<moveit_msgs::MotionPlanRequest>("motion_plan_request", 100);
+      pub_plan_ = nh_.advertise<moveit_msgs::msg::DisplayTrajectory>("display_motion_plan", 100);
+      pub_request_ = nh_.advertise<moveit_msgs::msg::MotionPlanRequest>("motion_plan_request", 100);
     }
   }
 
-  bool computePlan(moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::GetMotionPlan::Response& res)
+  bool computePlan(moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res)
   {
     ROS_INFO("Received new planning request...");
     if (debug_)
@@ -91,9 +91,9 @@ public:
     return result;
   }
 
-  void displaySolution(const moveit_msgs::MotionPlanResponse& mplan_res)
+  void displaySolution(const moveit_msgs::msg::MotionPlanResponse& mplan_res)
   {
-    moveit_msgs::DisplayTrajectory d;
+    moveit_msgs::msg::DisplayTrajectory d;
     d.model_id = psm_.getPlanningScene()->getRobotModel()->getName();
     d.trajectory_start = mplan_res.trajectory_start;
     d.trajectory.resize(1, mplan_res.trajectory);

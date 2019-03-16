@@ -148,7 +148,7 @@ bool LMAKinematicsPlugin::timedOut(const ros::WallTime& start_time, double durat
 }
 
 bool LMAKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
-                                        std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+                                        std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                         const kinematics::KinematicsQueryOptions& options) const
 {
   std::vector<double> consistency_limits;
@@ -160,7 +160,7 @@ bool LMAKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, cons
 
 bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   std::vector<double> consistency_limits;
@@ -171,7 +171,7 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 
 bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
-                                           std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+                                           std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   return searchPositionIK(ik_pose, ik_seed_state, timeout, solution, IKCallbackFn(), error_code, consistency_limits,
@@ -181,7 +181,7 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   std::vector<double> consistency_limits;
@@ -192,7 +192,7 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
                                            std::vector<double>& solution, const IKCallbackFn& solution_callback,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   return searchPositionIK(ik_pose, ik_seed_state, timeout, solution, solution_callback, error_code, consistency_limits,
@@ -218,7 +218,7 @@ bool LMAKinematicsPlugin::obeysLimits(const Eigen::VectorXd& values) const
 bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
-                                           moveit_msgs::MoveItErrorCodes& error_code,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const std::vector<double>& consistency_limits,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
@@ -360,4 +360,4 @@ const std::vector<std::string>& LMAKinematicsPlugin::getLinkNames() const
   return getTipFrames();
 }
 
-}  // namespace
+}  // namespace lma_kinematics_plugin

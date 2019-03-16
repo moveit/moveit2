@@ -246,7 +246,7 @@ double computeEuclideanDistance(const std::vector<double>& array_1, const KDL::J
   return sqrt(distance);
 }
 
-void getKDLChainInfo(const KDL::Chain& chain, moveit_msgs::KinematicSolverInfo& chain_info)
+void getKDLChainInfo(const KDL::Chain& chain, moveit_msgs::msg::KinematicSolverInfo& chain_info)
 {
   int i = 0;  // segment number
   while (i < (int)chain.getNrOfSegments())
@@ -321,7 +321,7 @@ bool PR2ArmKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_mo
 }
 
 bool PR2ArmKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
-                                           std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+                                           std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   return false;
@@ -329,7 +329,7 @@ bool PR2ArmKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, c
 
 bool PR2ArmKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose,
                                               const std::vector<double>& ik_seed_state, double timeout,
-                                              std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+                                              std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                               const kinematics::KinematicsQueryOptions& options) const
 {
   if (!active_)
@@ -378,7 +378,7 @@ bool PR2ArmKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
 bool PR2ArmKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose,
                                               const std::vector<double>& ik_seed_state, double timeout,
                                               const std::vector<double>& consistency_limit,
-                                              std::vector<double>& solution, moveit_msgs::MoveItErrorCodes& error_code,
+                                              std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                               const kinematics::KinematicsQueryOptions& options) const
 {
   return false;
@@ -387,7 +387,7 @@ bool PR2ArmKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
 bool PR2ArmKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose,
                                               const std::vector<double>& ik_seed_state, double timeout,
                                               std::vector<double>& solution, const IKCallbackFn& solution_callback,
-                                              moveit_msgs::MoveItErrorCodes& error_code,
+                                              moveit_msgs::msg::MoveItErrorCodes& error_code,
                                               const kinematics::KinematicsQueryOptions& options) const
 {
   return false;
@@ -397,7 +397,7 @@ bool PR2ArmKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
                                               const std::vector<double>& ik_seed_state, double timeout,
                                               const std::vector<double>& consistency_limit,
                                               std::vector<double>& solution, const IKCallbackFn& solution_callback,
-                                              moveit_msgs::MoveItErrorCodes& error_code,
+                                              moveit_msgs::msg::MoveItErrorCodes& error_code,
                                               const kinematics::KinematicsQueryOptions& options) const
 {
   return false;
@@ -428,4 +428,4 @@ const std::vector<std::string>& PR2ArmKinematicsPlugin::getLinkNames() const
   return fk_solver_info_.link_names;
 }
 
-}  // namespace
+}  // namespace pr2_arm_kinematics

@@ -56,10 +56,10 @@ public:
   }
 
   virtual ConstraintSamplerPtr alloc(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name,
-                                     const moveit_msgs::Constraints& constr) = 0;
+                                     const moveit_msgs::msg::Constraints& constr) = 0;
 
   virtual bool canService(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name,
-                          const moveit_msgs::Constraints& constr) const = 0;
+                          const moveit_msgs::msg::Constraints& constr) const = 0;
 };
 }
 

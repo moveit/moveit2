@@ -85,7 +85,7 @@ public:
                                                   const planning_interface::MotionPlanRequest& req) const;
   ModelBasedPlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                   const planning_interface::MotionPlanRequest& req,
-                                                  moveit_msgs::MoveItErrorCodes& error_code) const;
+                                                  moveit_msgs::msg::MoveItErrorCodes& error_code) const;
 
   ModelBasedPlanningContextPtr getPlanningContext(const std::string& config,
                                                   const std::string& factory_type = "") const;
@@ -172,7 +172,7 @@ protected:
   /** \brief Configure the OMPL planning context for a new planning request */
   ModelBasedPlanningContextPtr prepareForSolve(const planning_interface::MotionPlanRequest& req,
                                                const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                               moveit_msgs::MoveItErrorCodes* error_code, unsigned int* attempts,
+                                               moveit_msgs::msg::MoveItErrorCodes* error_code, unsigned int* attempts,
                                                double* timeout) const;
 
   ros::NodeHandle nh_;  /// The ROS node handle

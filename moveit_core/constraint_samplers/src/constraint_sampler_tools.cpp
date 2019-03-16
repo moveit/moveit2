@@ -37,7 +37,7 @@
 #include <moveit/constraint_samplers/constraint_sampler_tools.h>
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 
-void constraint_samplers::visualizeDistribution(const moveit_msgs::Constraints& constr,
+void constraint_samplers::visualizeDistribution(const moveit_msgs::msg::Constraints& constr,
                                                 const planning_scene::PlanningSceneConstPtr& scene,
                                                 const std::string& group, const std::string& link_name,
                                                 unsigned int sample_count, visualization_msgs::MarkerArray& markers)
@@ -46,7 +46,7 @@ void constraint_samplers::visualizeDistribution(const moveit_msgs::Constraints& 
                         link_name, sample_count, markers);
 }
 
-double constraint_samplers::countSamplesPerSecond(const moveit_msgs::Constraints& constr,
+double constraint_samplers::countSamplesPerSecond(const moveit_msgs::msg::Constraints& constr,
                                                   const planning_scene::PlanningSceneConstPtr& scene,
                                                   const std::string& group)
 {

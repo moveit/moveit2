@@ -59,8 +59,8 @@ SemanticWorld::SemanticWorld(const planning_scene::PlanningSceneConstPtr& planni
 {
   table_subscriber_ = node_handle_.subscribe("table_array", 1, &SemanticWorld::tableCallback, this);
   visualization_publisher_ = node_handle_.advertise<visualization_msgs::MarkerArray>("visualize_place", 20, true);
-  collision_object_publisher_ = node_handle_.advertise<moveit_msgs::CollisionObject>("/collision_object", 20);
-  planning_scene_diff_publisher_ = node_handle_.advertise<moveit_msgs::PlanningScene>("planning_scene", 1);
+  collision_object_publisher_ = node_handle_.advertise<moveit_msgs::msg::CollisionObject>("/collision_object", 20);
+  planning_scene_diff_publisher_ = node_handle_.advertise<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
 }
 
 visualization_msgs::MarkerArray
@@ -93,16 +93,16 @@ SemanticWorld::getPlaceLocationsMarker(const std::vector<geometry_msgs::PoseStam
 
 bool SemanticWorld::addTablesToCollisionWorld()
 {
-  moveit_msgs::PlanningScene planning_scene;
+  moveit_msgs::msg::PlanningScene planning_scene;
   planning_scene.is_diff = true;
 
   // Remove the existing tables
   std::map<std::string, object_recognition_msgs::Table>::iterator it;
   for (it = current_tables_in_collision_world_.begin(); it != current_tables_in_collision_world_.end(); ++it)
   {
-    moveit_msgs::CollisionObject co;
+    moveit_msgs::msg::CollisionObject co;
     co.id = it->first;
-    co.operation = moveit_msgs::CollisionObject::REMOVE;
+    co.operation = moveit_msgs::msg::CollisionObject::REMOVE;
     planning_scene.world.collision_objects.push_back(co);
     //    collision_object_publisher_.publish(co);
   }
@@ -113,12 +113,12 @@ bool SemanticWorld::addTablesToCollisionWorld()
   // Add the new tables
   for (std::size_t i = 0; i < table_array_.tables.size(); ++i)
   {
-    moveit_msgs::CollisionObject co;
+    moveit_msgs::msg::CollisionObject co;
     std::stringstream ss;
     ss << "table_" << i;
     co.id = ss.str();
     current_tables_in_collision_world_[co.id] = table_array_.tables[i];
-    co.operation = moveit_msgs::CollisionObject::ADD;
+    co.operation = moveit_msgs::msg::CollisionObject::ADD;
 
     const std::vector<geometry_msgs::Point>& convex_hull = table_array_.tables[i].convex_hull;
 
@@ -247,8 +247,8 @@ SemanticWorld::generatePlacePoses(const object_recognition_msgs::Table& chosen_t
 
   Eigen::Quaterniond rotation(object_orientation.x, object_orientation.y, object_orientation.z, object_orientation.w);
   Eigen::Isometry3d object_pose(rotation);
-  double min_distance_from_edge;
-  double height_above_table;
+  double min_distance_from_edge = 0;
+  double height_above_table = 0;
 
   if (object_shape->type == shapes::MESH)
   {
@@ -446,10 +446,7 @@ bool SemanticWorld::isInsideTableContour(const geometry_msgs::Pose& pose, const 
   double result = cv::pointPolygonTest(contours[0], point2f, true);
   ROS_DEBUG("table distance: %f", result);
 
-  if ((int)result >= (int)(min_distance_from_edge * scale_factor))
-    return true;
-
-  return false;
+  return (int)result >= (int)(min_distance_from_edge * scale_factor);
 }
 
 std::string SemanticWorld::findObjectTable(const geometry_msgs::Pose& pose, double min_distance_from_edge,
@@ -506,7 +503,7 @@ void SemanticWorld::transformTableArray(object_recognition_msgs::TableArray& tab
 shapes::Mesh* SemanticWorld::orientPlanarPolygon(const shapes::Mesh& polygon) const
 {
   if (polygon.vertex_count < 3 || polygon.triangle_count < 1)
-    return 0;
+    return nullptr;
   // first get the normal of the first triangle of the input polygon
   Eigen::Vector3d vec1, vec2, vec3, normal;
 
@@ -560,7 +557,7 @@ shapes::Mesh* SemanticWorld::orientPlanarPolygon(const shapes::Mesh& polygon) co
 shapes::Mesh* SemanticWorld::createSolidMeshFromPlanarPolygon(const shapes::Mesh& polygon, double thickness) const
 {
   if (polygon.vertex_count < 3 || polygon.triangle_count < 1 || thickness <= 0)
-    return 0;
+    return nullptr;
   // first get the normal of the first triangle of the input polygon
   Eigen::Vector3d vec1, vec2, vec3, normal;
 
@@ -629,5 +626,5 @@ shapes::Mesh* SemanticWorld::createSolidMeshFromPlanarPolygon(const shapes::Mesh
 
   return solid;
 }
-}
-}
+}  // namespace semantic_world
+}  // namespace moveit

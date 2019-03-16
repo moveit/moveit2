@@ -54,7 +54,7 @@ struct ConstraintApproximation
                           const std::string& factory, const std::string& serialization, const std::string& filename,
                           const ompl::base::StateStoragePtr& storage);
   ConstraintApproximation(const planning_models::RobotModelConstPtr& kinematic_model, const std::string& group,
-                          const std::string& factory, const moveit_msgs::Constraints& msg, const std::string& filename,
+                          const std::string& factory, const moveit_msgs::msg::Constraints& msg, const std::string& filename,
                           const ompl::base::StateStoragePtr& storage);
 
   void visualizeDistribution(const std::string& link_name, unsigned int count,
@@ -63,7 +63,7 @@ struct ConstraintApproximation
   std::string group_;
   std::string factory_;
   std::string serialization_;
-  moveit_msgs::Constraints constraint_msg_;
+  moveit_msgs::msg::Constraints constraint_msg_;
   planning_models::RobotModelConstPtr robot_model_;
   kinematic_constraints::KinematicConstraintSetPtr kconstraints_set_;
   std::vector<int> space_signature_;

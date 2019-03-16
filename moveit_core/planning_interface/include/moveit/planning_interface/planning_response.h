@@ -50,21 +50,21 @@ struct MotionPlanResponse
   {
   }
 
-  void getMessage(moveit_msgs::MotionPlanResponse& msg) const;
+  void getMessage(moveit_msgs::msg::MotionPlanResponse& msg) const;
 
   robot_trajectory::RobotTrajectoryPtr trajectory_;
   double planning_time_;
-  moveit_msgs::MoveItErrorCodes error_code_;
+  moveit_msgs::msg::MoveItErrorCodes error_code_;
 };
 
 struct MotionPlanDetailedResponse
 {
-  void getMessage(moveit_msgs::MotionPlanDetailedResponse& msg) const;
+  void getMessage(moveit_msgs::msg::MotionPlanDetailedResponse& msg) const;
 
   std::vector<robot_trajectory::RobotTrajectoryPtr> trajectory_;
   std::vector<std::string> description_;
   std::vector<double> processing_time_;
-  moveit_msgs::MoveItErrorCodes error_code_;
+  moveit_msgs::msg::MoveItErrorCodes error_code_;
 };
 
 }  // planning_interface

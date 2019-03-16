@@ -63,7 +63,7 @@ namespace moveit_benchmarks
 namespace
 {
 // update the constrained link for Position and Orientation constraints, if that link is empty
-void checkConstrainedLink(moveit_msgs::Constraints& c, const std::string& link_name)
+void checkConstrainedLink(moveit_msgs::msg::Constraints& c, const std::string& link_name)
 {
   for (std::size_t i = 0; i < c.position_constraints.size(); ++i)
     if (c.position_constraints[i].link_name.empty())
@@ -73,7 +73,7 @@ void checkConstrainedLink(moveit_msgs::Constraints& c, const std::string& link_n
       c.orientation_constraints[i].link_name = link_name;
 }
 
-void checkHeader(moveit_msgs::Constraints& c, const std::string& header_frame)
+void checkHeader(moveit_msgs::msg::Constraints& c, const std::string& header_frame)
 {
   for (std::size_t i = 0; i < c.position_constraints.size(); ++i)
     if (c.position_constraints[i].header.frame_id.empty())
@@ -196,12 +196,12 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
 
   if (world_only)
   {
-    req.scene.world = static_cast<const moveit_msgs::PlanningSceneWorld&>(*pswwm);
+    req.scene.world = static_cast<const moveit_msgs::msg::PlanningSceneWorld&>(*pswwm);
     req.scene.robot_model_name =
         "NO ROBOT INFORMATION. ONLY WORLD GEOMETRY";  // so that run_benchmark sees a different robot name
   }
   else
-    req.scene = static_cast<const moveit_msgs::PlanningScene&>(*pswm);
+    req.scene = static_cast<const moveit_msgs::msg::PlanningScene&>(*pswm);
 
   // check if this scene has associated queries
   req.scene.name = options_.scene;
@@ -247,7 +247,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
 
   unsigned int n_call = 0;
   bool have_more_start_states = true;
-  std::unique_ptr<moveit_msgs::RobotState> start_state_to_use;
+  std::unique_ptr<moveit_msgs::msg::RobotState> start_state_to_use;
   while (have_more_start_states)
   {
     start_state_to_use.reset();
@@ -274,7 +274,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
 
       if (got_robot_state)
       {
-        start_state_to_use.reset(new moveit_msgs::RobotState(*robot_state));
+        start_state_to_use.reset(new moveit_msgs::msg::RobotState(*robot_state));
         ROS_INFO("Loaded start state '%s'", state_name.c_str());
       }
       else
@@ -295,7 +295,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
         req.goal_name = planning_queries_names[i];
 
         // read request from db
-        req.motion_plan_request = static_cast<const moveit_msgs::MotionPlanRequest&>(*planning_query);
+        req.motion_plan_request = static_cast<const moveit_msgs::msg::MotionPlanRequest&>(*planning_query);
 
         // set the workspace bounds
         req.motion_plan_request.workspace_parameters = options_.workspace_parameters;
@@ -355,7 +355,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
           req.goal_name = cnames[i];
 
           // construct a planning request from the constraints message
-          req.motion_plan_request = moveit_msgs::MotionPlanRequest();
+          req.motion_plan_request = moveit_msgs::msg::MotionPlanRequest();
           req.motion_plan_request.goal_constraints.resize(1);
           if (start_state_to_use)
             req.motion_plan_request.start_state = *start_state_to_use;
@@ -434,7 +434,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
         if (got_constraints)
         {
           // construct a planning request from the trajectory constraints message
-          req.motion_plan_request = moveit_msgs::MotionPlanRequest();
+          req.motion_plan_request = moveit_msgs::msg::MotionPlanRequest();
           if (start_state_to_use)
             req.motion_plan_request.start_state = *start_state_to_use;
           req.motion_plan_request.trajectory_constraints = *constr;
@@ -525,7 +525,7 @@ bool moveit_benchmarks::BenchmarkExecution::readOptions(const std::string& filen
       ("scene.group", boost::program_options::value<std::string>()->default_value(""), "Override the group to plan for")
       ("scene.planning_frame", boost::program_options::value<std::string>()->default_value(""), "Override the planning frame to use")
       ("scene.default_constrained_link", boost::program_options::value<std::string>()->default_value(""),
-       "Specify the default link to consider as constrained when one is not specified in a moveit_msgs::Constraints message")
+       "Specify the default link to consider as constrained when one is not specified in a moveit_msgs::msg::Constraints message")
       ("scene.goal_offset_x", boost::program_options::value<std::string>()->default_value("0.0"), "Goal offset in x")
       ("scene.goal_offset_y", boost::program_options::value<std::string>()->default_value("0.0"), "Goal offset in y")
       ("scene.goal_offset_z", boost::program_options::value<std::string>()->default_value("0.0"), "Goal offset in z")

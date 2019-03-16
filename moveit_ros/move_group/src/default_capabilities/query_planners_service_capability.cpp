@@ -53,15 +53,15 @@ void move_group::MoveGroupQueryPlannersService::initialize()
                                                     &MoveGroupQueryPlannersService::setParams, this);
 }
 
-bool move_group::MoveGroupQueryPlannersService::queryInterface(moveit_msgs::QueryPlannerInterfaces::Request& req,
-                                                               moveit_msgs::QueryPlannerInterfaces::Response& res)
+bool move_group::MoveGroupQueryPlannersService::queryInterface(moveit_msgs::srv::QueryPlannerInterfaces::Request& req,
+                                                               moveit_msgs::srv::QueryPlannerInterfaces::Response& res)
 {
   const planning_interface::PlannerManagerPtr& planner_interface = context_->planning_pipeline_->getPlannerManager();
   if (planner_interface)
   {
     std::vector<std::string> algs;
     planner_interface->getPlanningAlgorithms(algs);
-    moveit_msgs::PlannerInterfaceDescription pi_desc;
+    moveit_msgs::msg::PlannerInterfaceDescription pi_desc;
     pi_desc.name = planner_interface->getDescription();
     planner_interface->getPlanningAlgorithms(pi_desc.planner_ids);
     res.planner_interfaces.push_back(pi_desc);
@@ -69,8 +69,8 @@ bool move_group::MoveGroupQueryPlannersService::queryInterface(moveit_msgs::Quer
   return true;
 }
 
-bool move_group::MoveGroupQueryPlannersService::getParams(moveit_msgs::GetPlannerParams::Request& req,
-                                                          moveit_msgs::GetPlannerParams::Response& res)
+bool move_group::MoveGroupQueryPlannersService::getParams(moveit_msgs::srv::GetPlannerParams::Request& req,
+                                                          moveit_msgs::srv::GetPlannerParams::Response& res)
 {
   const planning_interface::PlannerManagerPtr& planner_interface = context_->planning_pipeline_->getPlannerManager();
   if (planner_interface)
@@ -100,8 +100,8 @@ bool move_group::MoveGroupQueryPlannersService::getParams(moveit_msgs::GetPlanne
   return true;
 }
 
-bool move_group::MoveGroupQueryPlannersService::setParams(moveit_msgs::SetPlannerParams::Request& req,
-                                                          moveit_msgs::SetPlannerParams::Response& res)
+bool move_group::MoveGroupQueryPlannersService::setParams(moveit_msgs::srv::SetPlannerParams::Request& req,
+                                                          moveit_msgs::srv::SetPlannerParams::Response& res)
 {
   const planning_interface::PlannerManagerPtr& planner_interface = context_->planning_pipeline_->getPlannerManager();
   if (req.params.keys.size() != req.params.values.size())

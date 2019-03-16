@@ -131,7 +131,7 @@ bool MotionPlanningFrame::computeCartesianPlan()
   bool avoid_collisions = true;
 
   // compute trajectory
-  moveit_msgs::RobotTrajectory trajectory;
+  moveit_msgs::msg::RobotTrajectory trajectory;
   double fraction =
       move_group_->computeCartesianPath(waypoints, cart_step_size, cart_jump_thresh, trajectory, avoid_collisions);
 
@@ -349,7 +349,7 @@ void MotionPlanningFrame::updateQueryStateHelper(robot_state::RobotState& state,
     state.setToDefaultValues(jmg, v);
 }
 
-void MotionPlanningFrame::populatePlannersList(const moveit_msgs::PlannerInterfaceDescription& desc)
+void MotionPlanningFrame::populatePlannersList(const moveit_msgs::msg::PlannerInterfaceDescription& desc)
 {
   std::string group = planning_display_->getCurrentPlanningGroup();
   ui_->planning_algorithm_combo_box->clear();
@@ -406,7 +406,7 @@ void MotionPlanningFrame::populateConstraintsList(const std::vector<std::string>
     ui_->path_constraints_combo_box->addItem(QString::fromStdString(constr[i]));
 }
 
-void MotionPlanningFrame::constructPlanningRequest(moveit_msgs::MotionPlanRequest& mreq)
+void MotionPlanningFrame::constructPlanningRequest(moveit_msgs::msg::MotionPlanRequest& mreq)
 {
   mreq.group_name = planning_display_->getCurrentPlanningGroup();
   mreq.num_planning_attempts = ui_->planning_attempts->value();
@@ -522,9 +522,9 @@ void MotionPlanningFrame::remoteUpdateGoalStateCallback(const std_msgs::EmptyCon
   }
 }
 
-void MotionPlanningFrame::remoteUpdateCustomStartStateCallback(const moveit_msgs::RobotStateConstPtr& msg)
+void MotionPlanningFrame::remoteUpdateCustomStartStateCallback(const moveit_msgs::msg::RobotStateConstPtr& msg)
 {
-  moveit_msgs::RobotState msg_no_attached(*msg);
+  moveit_msgs::msg::RobotState msg_no_attached(*msg);
   msg_no_attached.attached_collision_objects.clear();
   msg_no_attached.is_diff = true;
   if (move_group_ && planning_display_)
@@ -540,9 +540,9 @@ void MotionPlanningFrame::remoteUpdateCustomStartStateCallback(const moveit_msgs
   }
 }
 
-void MotionPlanningFrame::remoteUpdateCustomGoalStateCallback(const moveit_msgs::RobotStateConstPtr& msg)
+void MotionPlanningFrame::remoteUpdateCustomGoalStateCallback(const moveit_msgs::msg::RobotStateConstPtr& msg)
 {
-  moveit_msgs::RobotState msg_no_attached(*msg);
+  moveit_msgs::msg::RobotState msg_no_attached(*msg);
   msg_no_attached.attached_collision_objects.clear();
   msg_no_attached.is_diff = true;
   if (move_group_ && planning_display_)
@@ -557,4 +557,4 @@ void MotionPlanningFrame::remoteUpdateCustomGoalStateCallback(const moveit_msgs:
     }
   }
 }
-}
+}  // namespace moveit_rviz_plugin

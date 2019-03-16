@@ -87,7 +87,7 @@ bool isStateCollisionFree(const planning_scene::PlanningScene* planning_scene,
     }
   return planning_scene->isStateFeasible(*state);
 }
-}
+}  // namespace
 
 bool pick_place::ReachableAndValidPoseFilter::isEndEffectorFree(const ManipulationPlanPtr& plan,
                                                                 robot_state::RobotState& token_state) const
@@ -101,7 +101,7 @@ bool pick_place::ReachableAndValidPoseFilter::isEndEffectorFree(const Manipulati
   collision_detection::CollisionResult res;
   req.group_name = plan->shared_data_->end_effector_group_->getName();
   planning_scene_->checkCollision(req, res, token_state, *collision_matrix_);
-  return res.collision == false;
+  return !res.collision;
 }
 
 bool pick_place::ReachableAndValidPoseFilter::evaluate(const ManipulationPlanPtr& plan) const
@@ -146,6 +146,6 @@ bool pick_place::ReachableAndValidPoseFilter::evaluate(const ManipulationPlanPtr
     else
       ROS_ERROR_THROTTLE_NAMED(1, "manipulation", "No sampler was constructed");
   }
-  plan->error_code_.val = moveit_msgs::MoveItErrorCodes::GOAL_IN_COLLISION;
+  plan->error_code_.val = moveit_msgs::msg::MoveItErrorCodes::GOAL_IN_COLLISION;
   return false;
 }

@@ -100,7 +100,7 @@ public:
 
   collision_detection::CollisionResult collision_result_;
 
-  moveit_msgs::MoveItErrorCodes error_code_;
+  moveit_msgs::msg::MoveItErrorCodes error_code_;
 
   bool result_;
 };

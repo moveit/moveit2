@@ -45,7 +45,7 @@ SBPLMetaInterface::SBPLMetaInterface(const planning_models::RobotModelConstPtr& 
 }
 
 bool SBPLMetaInterface::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                              const moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::GetMotionPlan::Response& res)
+                              const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res)
 {
   first_ok_ = false;
   first_done_ = false;
@@ -56,7 +56,7 @@ bool SBPLMetaInterface::solve(const planning_scene::PlanningSceneConstPtr& plann
   param_bfs.use_bfs_ = true;
   PlanningParameters param_no_bfs;
   param_no_bfs.use_bfs_ = false;
-  moveit_msgs::GetMotionPlan::Response res1, res2;
+  moveit_msgs::srv::GetMotionPlan::Response res1, res2;
   boost::thread thread1(boost::bind(&SBPLMetaInterface::runSolver, this, true, boost::cref(planning_scene),
                                     boost::cref(req), boost::ref(res1), param_bfs));
   boost::thread thread2(boost::bind(&SBPLMetaInterface::runSolver, this, false, boost::cref(planning_scene),
@@ -146,8 +146,8 @@ bool SBPLMetaInterface::solve(const planning_scene::PlanningSceneConstPtr& plann
 }
 
 void SBPLMetaInterface::runSolver(bool use_first, const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                  const moveit_msgs::GetMotionPlan::Request& req,
-                                  moveit_msgs::GetMotionPlan::Response& res, const PlanningParameters& params)
+                                  const moveit_msgs::srv::GetMotionPlan::Request& req,
+                                  moveit_msgs::srv::GetMotionPlan::Response& res, const PlanningParameters& params)
 {
   try
   {

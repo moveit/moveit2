@@ -211,7 +211,7 @@ public:
   virtual bool AreEquivalent(int StateID1, int StateID2);
 
   bool setupForMotionPlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                          const moveit_msgs::GetMotionPlan::Request& req, moveit_msgs::GetMotionPlan::Response& res,
+                          const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res,
                           const PlanningParameters& params);
 
   const EnvChain3DPlanningData& getPlanningData() const

@@ -239,10 +239,10 @@ bool ompl_interface::PoseModelStateSpace::PoseComponent::computeStateIK(StateTyp
 
   // run IK
   std::vector<double> solution(bijection_.size());
-  moveit_msgs::MoveItErrorCodes err_code;
+  moveit_msgs::msg::MoveItErrorCodes err_code;
   if (!kinematics_solver_->getPositionIK(pose, seed_values, solution, err_code))
   {
-    if (err_code.val != moveit_msgs::MoveItErrorCodes::TIMED_OUT ||
+    if (err_code.val != moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT ||
         !kinematics_solver_->searchPositionIK(pose, seed_values, kinematics_solver_->getDefaultTimeout() * 2.0,
                                               solution, err_code))
       return false;

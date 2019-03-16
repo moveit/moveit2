@@ -216,7 +216,7 @@ public:
 
   /**
    * \brief Configure the constraint based on a
-   * moveit_msgs::JointConstraint
+   * moveit_msgs::msg::JointConstraint
    *
    * For the configure command to be successful, the joint must exist
    * in the kinematic model, the joint must not be a multi-DOF joint
@@ -227,7 +227,7 @@ public:
    *
    * @return True if constraint can be configured from jc
    */
-  bool configure(const moveit_msgs::JointConstraint& jc);
+  bool configure(const moveit_msgs::msg::JointConstraint& jc);
 
   /**
    * \brief Check if two joint constraints are the same.
@@ -363,7 +363,7 @@ public:
 
   /**
    * \brief Configure the constraint based on a
-   * moveit_msgs::OrientationConstraint
+   * moveit_msgs::msg::OrientationConstraint
    *
    * For the configure command to be successful, the link must exist
    * in the kinematic model. Note that if the absolute tolerance
@@ -374,7 +374,7 @@ public:
    *
    * @return True if constraint can be configured from oc
    */
-  bool configure(const moveit_msgs::OrientationConstraint& oc, const robot_state::Transforms& tf);
+  bool configure(const moveit_msgs::msg::OrientationConstraint& oc, const robot_state::Transforms& tf);
 
   /**
    * \brief Check if two orientation constraints are the same.
@@ -520,7 +520,7 @@ public:
 
   /**
    * \brief Configure the constraint based on a
-   * moveit_msgs::PositionConstraint
+   * moveit_msgs::msg::PositionConstraint
    *
    * For the configure command to be successful, the link must be
    * specified in the model, and one or more constrained regions must
@@ -530,11 +530,11 @@ public:
    * quaternion is passed for a shape, the identity quaternion will be
    * substituted.
    *
-   * @param [in] pc moveit_msgs::PositionConstraint for configuration
+   * @param [in] pc moveit_msgs::msg::PositionConstraint for configuration
    *
    * @return True if constraint can be configured from pc
    */
-  bool configure(const moveit_msgs::PositionConstraint& pc, const robot_state::Transforms& tf);
+  bool configure(const moveit_msgs::msg::PositionConstraint& pc, const robot_state::Transforms& tf);
 
   /**
    * \brief Check if two constraints are the same.  For position
@@ -762,17 +762,17 @@ public:
 
   /**
    * \brief Configure the constraint based on a
-   * moveit_msgs::VisibilityConstraint
+   * moveit_msgs::msg::VisibilityConstraint
    *
    * For the configure command to be successful, the target radius
    * must be non-zero (negative values will have the absolute value
    * taken).  If cone sides are less than 3, a value of 3 will be used.
    *
-   * @param [in] vc moveit_msgs::VisibilityConstraint for configuration
+   * @param [in] vc moveit_msgs::msg::VisibilityConstraint for configuration
    *
    * @return True if constraint can be configured from vc
    */
-  bool configure(const moveit_msgs::VisibilityConstraint& vc, const robot_state::Transforms& tf);
+  bool configure(const moveit_msgs::msg::VisibilityConstraint& vc, const robot_state::Transforms& tf);
 
   /**
    * \brief Check if two constraints are the same.
@@ -891,7 +891,7 @@ public:
    * KinematicConstraintSet can still be used even if the addition
    * returns false.
    */
-  bool add(const moveit_msgs::Constraints& c, const robot_state::Transforms& tf);
+  bool add(const moveit_msgs::msg::Constraints& c, const robot_state::Transforms& tf);
 
   /**
    * \brief Add a vector of joint constraints
@@ -900,7 +900,7 @@ public:
    *
    * @return Will return true only if all constraints are valid, and false otherwise
    */
-  bool add(const std::vector<moveit_msgs::JointConstraint>& jc);
+  bool add(const std::vector<moveit_msgs::msg::JointConstraint>& jc);
 
   /**
    * \brief Add a vector of position constraints
@@ -909,7 +909,7 @@ public:
    *
    * @return Will return true only if all constraints are valid, and false otherwise
    */
-  bool add(const std::vector<moveit_msgs::PositionConstraint>& pc, const robot_state::Transforms& tf);
+  bool add(const std::vector<moveit_msgs::msg::PositionConstraint>& pc, const robot_state::Transforms& tf);
 
   /**
    * \brief Add a vector of orientation constraints
@@ -918,7 +918,7 @@ public:
    *
    * @return Will return true only if all constraints are valid, and false otherwise
    */
-  bool add(const std::vector<moveit_msgs::OrientationConstraint>& oc, const robot_state::Transforms& tf);
+  bool add(const std::vector<moveit_msgs::msg::OrientationConstraint>& oc, const robot_state::Transforms& tf);
 
   /**
    * \brief Add a vector of visibility constraints
@@ -927,7 +927,7 @@ public:
    *
    * @return Will return true only if all constraints are valid, and false otherwise
    */
-  bool add(const std::vector<moveit_msgs::VisibilityConstraint>& vc, const robot_state::Transforms& tf);
+  bool add(const std::vector<moveit_msgs::msg::VisibilityConstraint>& vc, const robot_state::Transforms& tf);
 
   /**
    * \brief Determines whether all constraints are satisfied by state,
@@ -993,7 +993,7 @@ public:
    *
    * @return All position constraints
    */
-  const std::vector<moveit_msgs::PositionConstraint>& getPositionConstraints() const
+  const std::vector<moveit_msgs::msg::PositionConstraint>& getPositionConstraints() const
   {
     return position_constraints_;
   }
@@ -1004,7 +1004,7 @@ public:
    *
    * @return All orientation constraints
    */
-  const std::vector<moveit_msgs::OrientationConstraint>& getOrientationConstraints() const
+  const std::vector<moveit_msgs::msg::OrientationConstraint>& getOrientationConstraints() const
   {
     return orientation_constraints_;
   }
@@ -1015,7 +1015,7 @@ public:
    *
    * @return All joint constraints
    */
-  const std::vector<moveit_msgs::JointConstraint>& getJointConstraints() const
+  const std::vector<moveit_msgs::msg::JointConstraint>& getJointConstraints() const
   {
     return joint_constraints_;
   }
@@ -1026,7 +1026,7 @@ public:
    *
    * @return All visibility constraints
    */
-  const std::vector<moveit_msgs::VisibilityConstraint>& getVisibilityConstraints() const
+  const std::vector<moveit_msgs::msg::VisibilityConstraint>& getVisibilityConstraints() const
   {
     return visibility_constraints_;
   }
@@ -1037,7 +1037,7 @@ public:
    *
    * @return All constraints in a single message
    */
-  const moveit_msgs::Constraints& getAllConstraints() const
+  const moveit_msgs::msg::Constraints& getAllConstraints() const
   {
     return all_constraints_;
   }
@@ -1058,15 +1058,15 @@ protected:
   std::vector<KinematicConstraintPtr>
       kinematic_constraints_; /**<  \brief Shared pointers to all the member constraints */
 
-  std::vector<moveit_msgs::JointConstraint> joint_constraints_; /**<  \brief Messages corresponding to all internal
+  std::vector<moveit_msgs::msg::JointConstraint> joint_constraints_; /**<  \brief Messages corresponding to all internal
                                                                    joint constraints */
-  std::vector<moveit_msgs::PositionConstraint> position_constraints_;       /**<  \brief Messages corresponding to all
+  std::vector<moveit_msgs::msg::PositionConstraint> position_constraints_;       /**<  \brief Messages corresponding to all
                                                                                internal position constraints */
-  std::vector<moveit_msgs::OrientationConstraint> orientation_constraints_; /**<  \brief Messages corresponding to all
+  std::vector<moveit_msgs::msg::OrientationConstraint> orientation_constraints_; /**<  \brief Messages corresponding to all
                                                                                internal orientation constraints */
-  std::vector<moveit_msgs::VisibilityConstraint> visibility_constraints_;   /**<  \brief Messages corresponding to all
+  std::vector<moveit_msgs::msg::VisibilityConstraint> visibility_constraints_;   /**<  \brief Messages corresponding to all
                                                                                internal visibility constraints */
-  moveit_msgs::Constraints all_constraints_; /**<  \brief Messages corresponding to all internal constraints */
+  moveit_msgs::msg::Constraints all_constraints_; /**<  \brief Messages corresponding to all internal constraints */
 };
 }
 

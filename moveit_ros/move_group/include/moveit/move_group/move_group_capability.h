@@ -76,21 +76,21 @@ public:
   }
 
 protected:
-  std::string getActionResultString(const moveit_msgs::MoveItErrorCodes& error_code, bool planned_trajectory_empty,
+  std::string getActionResultString(const moveit_msgs::msg::MoveItErrorCodes& error_code, bool planned_trajectory_empty,
                                     bool plan_only);
   std::string stateToStr(MoveGroupState state) const;
 
   void convertToMsg(const std::vector<plan_execution::ExecutableTrajectory>& trajectory,
-                    moveit_msgs::RobotState& first_state_msg,
-                    std::vector<moveit_msgs::RobotTrajectory>& trajectory_msg) const;
-  void convertToMsg(const robot_trajectory::RobotTrajectoryPtr& trajectory, moveit_msgs::RobotState& first_state_msg,
-                    moveit_msgs::RobotTrajectory& trajectory_msg) const;
+                    moveit_msgs::msg::RobotState& first_state_msg,
+                    std::vector<moveit_msgs::msg::RobotTrajectory>& trajectory_msg) const;
+  void convertToMsg(const robot_trajectory::RobotTrajectoryPtr& trajectory, moveit_msgs::msg::RobotState& first_state_msg,
+                    moveit_msgs::msg::RobotTrajectory& trajectory_msg) const;
   void convertToMsg(const std::vector<plan_execution::ExecutableTrajectory>& trajectory,
-                    moveit_msgs::RobotState& first_state_msg, moveit_msgs::RobotTrajectory& trajectory_msg) const;
+                    moveit_msgs::msg::RobotState& first_state_msg, moveit_msgs::msg::RobotTrajectory& trajectory_msg) const;
 
   planning_interface::MotionPlanRequest
   clearRequestStartState(const planning_interface::MotionPlanRequest& request) const;
-  moveit_msgs::PlanningScene clearSceneRobotState(const moveit_msgs::PlanningScene& scene) const;
+  moveit_msgs::msg::PlanningScene clearSceneRobotState(const moveit_msgs::msg::PlanningScene& scene) const;
   bool performTransform(geometry_msgs::PoseStamped& pose_msg, const std::string& target_frame) const;
 
   ros::NodeHandle root_node_handle_;

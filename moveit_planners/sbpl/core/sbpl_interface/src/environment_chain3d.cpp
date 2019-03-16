@@ -424,8 +424,8 @@ void EnvironmentChain3D::SetAllPreds(CMDPSTATE* state)
 /////////////////////////////////////////////////////////////////////////////
 
 bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                            const moveit_msgs::GetMotionPlan::Request& mreq,
-                                            moveit_msgs::GetMotionPlan::Response& mres,
+                                            const moveit_msgs::srv::GetMotionPlan::Request& mreq,
+                                            moveit_msgs::srv::GetMotionPlan::Response& mres,
                                             const PlanningParameters& params)
 {
   std::cerr << "really here " << std::endl;
@@ -441,7 +441,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
     if (!hy_world_)
     {
       ROS_WARN_STREAM("Could not initialize hybrid collision world from planning scene");
-      mres.error_code.val = moveit_msgs::MoveItErrorCodes::COLLISION_CHECKING_UNAVAILABLE;
+      mres.error_code.val = moveit_msgs::msg::MoveItErrorCodes::COLLISION_CHECKING_UNAVAILABLE;
       return false;
     }
 
@@ -450,7 +450,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
     if (!hy_robot_)
     {
       ROS_WARN_STREAM("Could not initialize hybrid collision robot from planning scene");
-      mres.error_code.val = moveit_msgs::MoveItErrorCodes::COLLISION_CHECKING_UNAVAILABLE;
+      mres.error_code.val = moveit_msgs::msg::MoveItErrorCodes::COLLISION_CHECKING_UNAVAILABLE;
       return false;
     }
   }
@@ -483,7 +483,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
   if (res.collision)
   {
     ROS_WARN_STREAM("Start state is in collision.  Can't plan");
-    mres.error_code.val = moveit_msgs::MoveItErrorCodes::START_STATE_IN_COLLISION;
+    mres.error_code.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_IN_COLLISION;
     return false;
   }
   if (!planning_parameters_.use_standard_collision_checking_)
@@ -514,7 +514,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
     {
       ROS_WARN_STREAM("Size mismatch between world and self distance fields");
       std::cerr << "Size mismatch between world and self distance fields" << std::endl;
-      mres.error_code.val = moveit_msgs::MoveItErrorCodes::COLLISION_CHECKING_UNAVAILABLE;
+      mres.error_code.val = moveit_msgs::msg::MoveItErrorCodes::COLLISION_CHECKING_UNAVAILABLE;
       return false;
     }
     // std::cerr << "BFS dimensions are "
@@ -556,7 +556,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
     if (!getGridXYZInt(start_pose, start_xyz))
     {
       std::cerr << "Bad start pose" << std::endl;
-      mres.error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
+      mres.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE;
       return false;
     }
   }
@@ -589,7 +589,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
   if (res.collision)
   {
     ROS_WARN_STREAM("Goal state is in collision.  Can't plan");
-    mres.error_code.val = moveit_msgs::MoveItErrorCodes::GOAL_IN_COLLISION;
+    mres.error_code.val = moveit_msgs::msg::MoveItErrorCodes::GOAL_IN_COLLISION;
     return false;
   }
   std::vector<double> goal_joint_values;
@@ -605,7 +605,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
     if (!getGridXYZInt(goal_pose_, goal_xyz))
     {
       std::cerr << "Bad goal pose" << std::endl;
-      mres.error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
+      mres.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
       return false;
     }
   }

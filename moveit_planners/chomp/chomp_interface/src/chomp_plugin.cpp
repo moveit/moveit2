@@ -62,21 +62,21 @@ public:
 
   planning_interface::PlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                             const planning_interface::MotionPlanRequest& req,
-                                                            moveit_msgs::MoveItErrorCodes& error_code) const override
+                                                            moveit_msgs::msg::MoveItErrorCodes& error_code) const override
   {
-    error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+    error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
 
     if (req.group_name.empty())
     {
       ROS_ERROR("No group specified to plan for");
-      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME;
+      error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
       return planning_interface::PlanningContextPtr();
     }
 
     if (!planning_scene)
     {
       ROS_ERROR("No planning scene supplied as input");
-      error_code.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+      error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       return planning_interface::PlanningContextPtr();
     }
 
@@ -88,7 +88,7 @@ public:
     const CHOMPPlanningContextPtr& context = planning_contexts_.at(req.group_name);
     context->setPlanningScene(ps);
     context->setMotionPlanRequest(req);
-    error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+    error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     return context;
   }
 
@@ -114,6 +114,6 @@ protected:
   std::map<std::string, CHOMPPlanningContextPtr> planning_contexts_;
 };
 
-}  // ompl_interface_ros
+}  // namespace chomp_interface
 
 PLUGINLIB_EXPORT_CLASS(chomp_interface::CHOMPPlannerManager, planning_interface::PlannerManager);

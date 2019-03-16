@@ -51,7 +51,7 @@ move_group::MoveGroupCartesianPathService::MoveGroupCartesianPathService()
 
 void move_group::MoveGroupCartesianPathService::initialize()
 {
-  display_path_ = node_handle_.advertise<moveit_msgs::DisplayTrajectory>(
+  display_path_ = node_handle_.advertise<moveit_msgs::msg::DisplayTrajectory>(
       planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC, 10, true);
   cartesian_path_service_ = root_node_handle_.advertiseService(CARTESIAN_PATH_SERVICE_NAME,
                                                                &MoveGroupCartesianPathService::computeService, this);
@@ -68,10 +68,10 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene,
   return (!planning_scene || !planning_scene->isStateColliding(*state, group->getName())) &&
          (!constraint_set || constraint_set->decide(*state).satisfied);
 }
-}
+}  // namespace
 
-bool move_group::MoveGroupCartesianPathService::computeService(moveit_msgs::GetCartesianPath::Request& req,
-                                                               moveit_msgs::GetCartesianPath::Response& res)
+bool move_group::MoveGroupCartesianPathService::computeService(moveit_msgs::srv::GetCartesianPath::Request& req,
+                                                               moveit_msgs::srv::GetCartesianPath::Response& res)
 {
   ROS_INFO("Received request to compute Cartesian path");
   context_->planning_scene_monitor_->updateFrameTransforms();
@@ -118,11 +118,11 @@ bool move_group::MoveGroupCartesianPathService::computeService(moveit_msgs::GetC
       {
         ROS_ERROR("Maximum step to take between consecutive configrations along Cartesian path was not specified (this "
                   "value needs to be > 0)");
-        res.error_code.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+        res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       }
       else
       {
-        if (waypoints.size() > 0)
+        if (!waypoints.empty())
         {
           robot_state::GroupStateValidityCallbackFn constraint_fn;
           std::unique_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
@@ -134,8 +134,8 @@ bool move_group::MoveGroupCartesianPathService::computeService(moveit_msgs::GetC
             kset->add(req.path_constraints, (*ls)->getTransforms());
             constraint_fn = boost::bind(
                 &isStateValid,
-                req.avoid_collisions ? static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get() : NULL,
-                kset->empty() ? NULL : kset.get(), _1, _2, _3);
+                req.avoid_collisions ? static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get() : nullptr,
+                kset->empty() ? nullptr : kset.get(), _1, _2, _3);
           }
           bool global_frame = !robot_state::Transforms::sameFrame(link_name, req.header.frame_id);
           ROS_INFO("Attempting to follow %u waypoints for link '%s' using a step of %lf m and jump threshold %lf (in "
@@ -162,21 +162,21 @@ bool move_group::MoveGroupCartesianPathService::computeService(moveit_msgs::GetC
                    (unsigned int)traj.size(), res.fraction * 100.0);
           if (display_computed_paths_ && rt.getWayPointCount() > 0)
           {
-            moveit_msgs::DisplayTrajectory disp;
+            moveit_msgs::msg::DisplayTrajectory disp;
             disp.model_id = context_->planning_scene_monitor_->getRobotModel()->getName();
             disp.trajectory.resize(1, res.solution);
             robot_state::robotStateToRobotStateMsg(rt.getFirstWayPoint(), disp.trajectory_start);
             display_path_.publish(disp);
           }
         }
-        res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+        res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       }
     }
     else
-      res.error_code.val = moveit_msgs::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE;
+      res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE;
   }
   else
-    res.error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME;
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
 
   return true;
 }

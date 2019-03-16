@@ -45,13 +45,13 @@
 
 namespace moveit_warehouse
 {
-typedef warehouse_ros::MessageWithMetadata<moveit_msgs::PlanningScene>::ConstPtr PlanningSceneWithMetadata;
-typedef warehouse_ros::MessageWithMetadata<moveit_msgs::MotionPlanRequest>::ConstPtr MotionPlanRequestWithMetadata;
-typedef warehouse_ros::MessageWithMetadata<moveit_msgs::RobotTrajectory>::ConstPtr RobotTrajectoryWithMetadata;
+typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::PlanningScene>::ConstPtr PlanningSceneWithMetadata;
+typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::MotionPlanRequest>::ConstPtr MotionPlanRequestWithMetadata;
+typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr RobotTrajectoryWithMetadata;
 
-typedef warehouse_ros::MessageCollection<moveit_msgs::PlanningScene>::Ptr PlanningSceneCollection;
-typedef warehouse_ros::MessageCollection<moveit_msgs::MotionPlanRequest>::Ptr MotionPlanRequestCollection;
-typedef warehouse_ros::MessageCollection<moveit_msgs::RobotTrajectory>::Ptr RobotTrajectoryCollection;
+typedef warehouse_ros::MessageCollection<moveit_msgs::msg::PlanningScene>::Ptr PlanningSceneCollection;
+typedef warehouse_ros::MessageCollection<moveit_msgs::msg::MotionPlanRequest>::Ptr MotionPlanRequestCollection;
+typedef warehouse_ros::MessageCollection<moveit_msgs::msg::RobotTrajectory>::Ptr RobotTrajectoryCollection;
 
 MOVEIT_CLASS_FORWARD(PlanningSceneStorage);
 
@@ -65,11 +65,11 @@ public:
 
   PlanningSceneStorage(warehouse_ros::DatabaseConnection::Ptr conn);
 
-  void addPlanningScene(const moveit_msgs::PlanningScene& scene);
-  void addPlanningQuery(const moveit_msgs::MotionPlanRequest& planning_query, const std::string& scene_name,
+  void addPlanningScene(const moveit_msgs::msg::PlanningScene& scene);
+  void addPlanningQuery(const moveit_msgs::msg::MotionPlanRequest& planning_query, const std::string& scene_name,
                         const std::string& query_name = "");
-  void addPlanningResult(const moveit_msgs::MotionPlanRequest& planning_query,
-                         const moveit_msgs::RobotTrajectory& result, const std::string& scene_name);
+  void addPlanningResult(const moveit_msgs::msg::MotionPlanRequest& planning_query,
+                         const moveit_msgs::msg::RobotTrajectory& result, const std::string& scene_name);
 
   bool hasPlanningScene(const std::string& name) const;
   void getPlanningSceneNames(std::vector<std::string>& names) const;
@@ -77,7 +77,7 @@ public:
 
   /** \brief Get the latest planning scene named \e scene_name */
   bool getPlanningScene(PlanningSceneWithMetadata& scene_m, const std::string& scene_name) const;
-  bool getPlanningSceneWorld(moveit_msgs::PlanningSceneWorld& world, const std::string& scene_name) const;
+  bool getPlanningSceneWorld(moveit_msgs::msg::PlanningSceneWorld& world, const std::string& scene_name) const;
 
   bool hasPlanningQuery(const std::string& scene_name, const std::string& query_name) const;
   bool getPlanningQuery(MotionPlanRequestWithMetadata& query_m, const std::string& scene_name,
@@ -91,7 +91,7 @@ public:
                           std::vector<std::string>& query_names, const std::string& scene_name) const;
 
   void getPlanningResults(std::vector<RobotTrajectoryWithMetadata>& planning_results, const std::string& scene_name,
-                          const moveit_msgs::MotionPlanRequest& planning_query) const;
+                          const moveit_msgs::msg::MotionPlanRequest& planning_query) const;
   void getPlanningResults(std::vector<RobotTrajectoryWithMetadata>& planning_results, const std::string& scene_name,
                           const std::string& query_name) const;
 
@@ -110,9 +110,9 @@ public:
 private:
   void createCollections();
 
-  std::string getMotionPlanRequestName(const moveit_msgs::MotionPlanRequest& planning_query,
+  std::string getMotionPlanRequestName(const moveit_msgs::msg::MotionPlanRequest& planning_query,
                                        const std::string& scene_name) const;
-  std::string addNewPlanningRequest(const moveit_msgs::MotionPlanRequest& planning_query, const std::string& scene_name,
+  std::string addNewPlanningRequest(const moveit_msgs::msg::MotionPlanRequest& planning_query, const std::string& scene_name,
                                     const std::string& query_name);
 
   PlanningSceneCollection planning_scene_collection_;

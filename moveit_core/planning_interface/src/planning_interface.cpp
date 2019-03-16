@@ -54,7 +54,7 @@ static ActiveContexts& getActiveContexts()
   static ActiveContexts ac;
   return ac;
 }
-}
+}  // namespace
 
 PlanningContext::PlanningContext(const std::string& name, const std::string& group) : name_(name), group_(group)
 {
@@ -104,7 +104,7 @@ std::string PlannerManager::getDescription() const
 PlanningContextPtr PlannerManager::getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                       const MotionPlanRequest& req) const
 {
-  moveit_msgs::MoveItErrorCodes dummy;
+  moveit_msgs::msg::MoveItErrorCodes dummy;
   return getPlanningContext(planning_scene, req, dummy);
 }
 

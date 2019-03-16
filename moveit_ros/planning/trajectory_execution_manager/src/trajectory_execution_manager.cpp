@@ -105,7 +105,7 @@ TrajectoryExecutionManager::~TrajectoryExecutionManager()
 
 void TrajectoryExecutionManager::initialize()
 {
-  reconfigure_impl_ = NULL;
+  reconfigure_impl_ = nullptr;
   verbose_ = false;
   execution_complete_ = true;
   stop_continuous_execution_ = false;
@@ -233,7 +233,7 @@ void TrajectoryExecutionManager::receiveEvent(const std_msgs::StringConstPtr& ev
   processEvent(event->data);
 }
 
-bool TrajectoryExecutionManager::push(const moveit_msgs::RobotTrajectory& trajectory, const std::string& controller)
+bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& trajectory, const std::string& controller)
 {
   if (controller.empty())
     return push(trajectory, std::vector<std::string>());
@@ -252,12 +252,12 @@ bool TrajectoryExecutionManager::push(const trajectory_msgs::JointTrajectory& tr
 bool TrajectoryExecutionManager::push(const trajectory_msgs::JointTrajectory& trajectory,
                                       const std::vector<std::string>& controllers)
 {
-  moveit_msgs::RobotTrajectory traj;
+  moveit_msgs::msg::RobotTrajectory traj;
   traj.joint_trajectory = trajectory;
   return push(traj, controllers);
 }
 
-bool TrajectoryExecutionManager::push(const moveit_msgs::RobotTrajectory& trajectory,
+bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& trajectory,
                                       const std::vector<std::string>& controllers)
 {
   if (!execution_complete_)
@@ -292,7 +292,7 @@ bool TrajectoryExecutionManager::push(const moveit_msgs::RobotTrajectory& trajec
   return false;
 }
 
-bool TrajectoryExecutionManager::pushAndExecute(const moveit_msgs::RobotTrajectory& trajectory,
+bool TrajectoryExecutionManager::pushAndExecute(const moveit_msgs::msg::RobotTrajectory& trajectory,
                                                 const std::string& controller)
 {
   if (controller.empty())
@@ -321,7 +321,7 @@ bool TrajectoryExecutionManager::pushAndExecute(const sensor_msgs::JointState& s
 bool TrajectoryExecutionManager::pushAndExecute(const trajectory_msgs::JointTrajectory& trajectory,
                                                 const std::vector<std::string>& controllers)
 {
-  moveit_msgs::RobotTrajectory traj;
+  moveit_msgs::msg::RobotTrajectory traj;
   traj.joint_trajectory = trajectory;
   return pushAndExecute(traj, controllers);
 }
@@ -329,7 +329,7 @@ bool TrajectoryExecutionManager::pushAndExecute(const trajectory_msgs::JointTraj
 bool TrajectoryExecutionManager::pushAndExecute(const sensor_msgs::JointState& state,
                                                 const std::vector<std::string>& controllers)
 {
-  moveit_msgs::RobotTrajectory traj;
+  moveit_msgs::msg::RobotTrajectory traj;
   traj.joint_trajectory.header = state.header;
   traj.joint_trajectory.joint_names = state.name;
   traj.joint_trajectory.points.resize(1);
@@ -340,7 +340,7 @@ bool TrajectoryExecutionManager::pushAndExecute(const sensor_msgs::JointState& s
   return pushAndExecute(traj, controllers);
 }
 
-bool TrajectoryExecutionManager::pushAndExecute(const moveit_msgs::RobotTrajectory& trajectory,
+bool TrajectoryExecutionManager::pushAndExecute(const moveit_msgs::msg::RobotTrajectory& trajectory,
                                                 const std::vector<std::string>& controllers)
 {
   if (!execution_complete_)
@@ -402,7 +402,7 @@ void TrajectoryExecutionManager::continuousExecutionThread()
 
     while (!continuous_execution_queue_.empty())
     {
-      TrajectoryExecutionContext* context = NULL;
+      TrajectoryExecutionContext* context = nullptr;
       {
         boost::mutex::scoped_lock slock(continuous_execution_mutex_);
         if (continuous_execution_queue_.empty())
@@ -666,7 +666,7 @@ struct OrderPotentialControllerCombination
   std::vector<std::size_t> nrjoints;
   std::vector<std::size_t> nractive;
 };
-}
+}  // namespace
 
 bool TrajectoryExecutionManager::findControllers(const std::set<std::string>& actuated_joints,
                                                  std::size_t controller_count,
@@ -795,9 +795,9 @@ bool TrajectoryExecutionManager::selectControllers(const std::set<std::string>& 
   return false;
 }
 
-bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::RobotTrajectory& trajectory,
+bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory,
                                                       const std::vector<std::string>& controllers,
-                                                      std::vector<moveit_msgs::RobotTrajectory>& parts)
+                                                      std::vector<moveit_msgs::msg::RobotTrajectory>& parts)
 {
   parts.clear();
   parts.resize(controllers.size());
@@ -811,7 +811,7 @@ bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::RobotTr
     const robot_model::JointModel* jm = robot_model_->getJointModel(trajectory.joint_trajectory.joint_names[i]);
     if (jm)
     {
-      if (jm->isPassive() || jm->getMimic() != NULL || jm->getType() == robot_model::JointModel::FIXED)
+      if (jm->isPassive() || jm->getMimic() != nullptr || jm->getType() == robot_model::JointModel::FIXED)
         continue;
       actuated_joints_single.insert(jm->getName());
     }
@@ -1027,7 +1027,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
 }
 
 bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
-                                           const moveit_msgs::RobotTrajectory& trajectory,
+                                           const moveit_msgs::msg::RobotTrajectory& trajectory,
                                            const std::vector<std::string>& controllers)
 {
   if (trajectory.multi_dof_joint_trajectory.points.empty() && trajectory.joint_trajectory.points.empty())
@@ -1200,7 +1200,7 @@ void TrajectoryExecutionManager::execute(const ExecutionCompleteCallback& callba
   stopExecution(false);
 
   // check whether first trajectory starts at current robot state
-  if (trajectories_.size() && !validate(*trajectories_.front()))
+  if (!trajectories_.empty() && !validate(*trajectories_.front()))
   {
     last_execution_status_ = moveit_controller_manager::ExecutionStatus::ABORTED;
     if (auto_clear)
@@ -1627,7 +1627,7 @@ bool TrajectoryExecutionManager::ensureActiveControllersForJoints(const std::vec
     const robot_model::JointModel* jm = robot_model_->getJointModel(joints[i]);
     if (jm)
     {
-      if (jm->isPassive() || jm->getMimic() != NULL || jm->getType() == robot_model::JointModel::FIXED)
+      if (jm->isPassive() || jm->getMimic() != nullptr || jm->getType() == robot_model::JointModel::FIXED)
         continue;
       jset.insert(joints[i]);
     }
@@ -1764,4 +1764,4 @@ void TrajectoryExecutionManager::loadControllerParams()
     }
   }
 }
-}
+}  // namespace trajectory_execution_manager

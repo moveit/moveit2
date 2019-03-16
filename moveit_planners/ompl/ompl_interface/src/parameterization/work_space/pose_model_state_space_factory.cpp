@@ -43,7 +43,7 @@ ompl_interface::PoseModelStateSpaceFactory::PoseModelStateSpaceFactory() : Model
 }
 
 int ompl_interface::PoseModelStateSpaceFactory::canRepresentProblem(
-    const std::string& group, const moveit_msgs::MotionPlanRequest& req,
+    const std::string& group, const moveit_msgs::msg::MotionPlanRequest& req,
     const robot_model::RobotModelConstPtr& robot_model) const
 {
   const robot_model::JointModelGroup* jmg = robot_model->getJointModelGroup(group);

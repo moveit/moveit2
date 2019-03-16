@@ -69,8 +69,8 @@ void removeOverlapping(std::set<CostSource>& cost_sources, double overlap_fracti
 
 bool getSensorPositioning(geometry_msgs::Point& point, const std::set<CostSource>& cost_sources);
 
-void costSourceToMsg(const CostSource& cost_source, moveit_msgs::CostSource& msg);
-void contactToMsg(const Contact& contact, moveit_msgs::ContactInformation& msg);
+void costSourceToMsg(const CostSource& cost_source, moveit_msgs::msg::CostSource& msg);
+void contactToMsg(const Contact& contact, moveit_msgs::msg::ContactInformation& msg);
 }
 
 #endif

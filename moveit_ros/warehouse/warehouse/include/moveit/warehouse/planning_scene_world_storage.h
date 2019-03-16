@@ -42,8 +42,8 @@
 
 namespace moveit_warehouse
 {
-typedef warehouse_ros::MessageWithMetadata<moveit_msgs::PlanningSceneWorld>::ConstPtr PlanningSceneWorldWithMetadata;
-typedef warehouse_ros::MessageCollection<moveit_msgs::PlanningSceneWorld>::Ptr PlanningSceneWorldCollection;
+typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::PlanningSceneWorld>::ConstPtr PlanningSceneWorldWithMetadata;
+typedef warehouse_ros::MessageCollection<moveit_msgs::msg::PlanningSceneWorld>::Ptr PlanningSceneWorldCollection;
 
 class PlanningSceneWorldStorage : public MoveItMessageStorage
 {
@@ -53,7 +53,7 @@ public:
 
   PlanningSceneWorldStorage(warehouse_ros::DatabaseConnection::Ptr conn);
 
-  void addPlanningSceneWorld(const moveit_msgs::PlanningSceneWorld& msg, const std::string& name);
+  void addPlanningSceneWorld(const moveit_msgs::msg::PlanningSceneWorld& msg, const std::string& name);
   bool hasPlanningSceneWorld(const std::string& name) const;
   void getKnownPlanningSceneWorlds(std::vector<std::string>& names) const;
   void getKnownPlanningSceneWorlds(const std::string& regex, std::vector<std::string>& names) const;
