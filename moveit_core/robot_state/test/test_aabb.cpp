@@ -275,7 +275,7 @@ TEST_F(TestAABB, TestSimple)
 {
   // Contains a link with simple geometry and an offset in the collision link
   moveit::core::RobotModelBuilder builder("simple", "base_footprint");
-  geometry_msgs::Pose origin;
+  geometry_msgs::msg::Pose origin;
   tf2::toMsg(tf2::Vector3(0, 0, 0.051), origin.position);
   origin.orientation.w = 1.0;
   builder.addChain("base_footprint->base_link", "fixed", { origin });
@@ -308,7 +308,7 @@ TEST_F(TestAABB, TestComplex)
 {
   // Contains a link with simple geometry and an offset and rotation in the collision link
   moveit::core::RobotModelBuilder builder("complex", "base_footprint");
-  geometry_msgs::Pose origin;
+  geometry_msgs::msg::Pose origin;
   tf2::toMsg(tf2::Vector3(0, 0, 1.0), origin.position);
   tf2::Quaternion q;
   q.setRPY(0, 0, 1.5708);
