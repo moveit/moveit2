@@ -49,7 +49,6 @@
 #include <moveit/robot_model/planar_joint_model.h>
 #include <moveit/robot_model/revolute_joint_model.h>
 #include <moveit/robot_model/prismatic_joint_model.h>
-#include <moveit/robot_model/log.h>
 #include <Eigen/Geometry>
 #include <iostream>
 

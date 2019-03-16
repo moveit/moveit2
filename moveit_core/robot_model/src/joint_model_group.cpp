@@ -42,6 +42,7 @@
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include "order_robot_model_items.inc"
+#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {
@@ -49,6 +50,8 @@ namespace core
 {
 namespace
 {
+rclcpp::Logger LOGGER = rclcpp::get_logger("robot_model.jmg");
+
 // check if a parent or ancestor of joint is included in this group
 bool includesParent(const JointModel* joint, const JointModelGroup* group)
 {
@@ -292,7 +295,7 @@ const LinkModel* JointModelGroup::getLinkModel(const std::string& name) const
   LinkModelMapConst::const_iterator it = link_model_map_.find(name);
   if (it == link_model_map_.end())
   {
-    RCLCPP_ERROR(logger_robot_model_jmg, "Link '%s' not found in group '%s'", name.c_str(), name_.c_str());
+    RCLCPP_ERROR(LOGGER, "Link '%s' not found in group '%s'", name.c_str(), name_.c_str());
     return nullptr;
   }
   return it->second;
@@ -303,7 +306,7 @@ const JointModel* JointModelGroup::getJointModel(const std::string& name) const
   JointModelMapConst::const_iterator it = joint_model_map_.find(name);
   if (it == joint_model_map_.end())
   {
-    RCLCPP_ERROR(logger_robot_model_jmg, "Joint '%s' not found in group '%s'", name.c_str(), name_.c_str());
+    RCLCPP_ERROR(LOGGER, "Joint '%s' not found in group '%s'", name.c_str(), name_.c_str());
     return nullptr;
   }
   return it->second;
@@ -345,7 +348,7 @@ void JointModelGroup::getVariableRandomPositionsNearBy(
     if (iter != distance_map.end())
       distance = iter->second;
     else {
-      RCLCPP_WARN(logger_robot_model_jmg, "Did not pass in distance for '%s'",
+      RCLCPP_WARN(LOGGER, "Did not pass in distance for '%s'",
       active_joint_model_vector_[i]->getName().c_str());
     }
     active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(
@@ -503,7 +506,7 @@ bool JointModelGroup::getEndEffectorTips(std::vector<const LinkModel*>& tips) co
     const JointModelGroup* eef = parent_model_->getEndEffector(name);
     if (!eef)
     {
-      RCLCPP_ERROR(logger_robot_model_jmg, "Unable to find joint model group for eef");
+      RCLCPP_ERROR(LOGGER, "Unable to find joint model group for eef");
       return false;
     }
     const std::string& eef_parent = eef->getEndEffectorParentGroup().second;
@@ -511,7 +514,7 @@ bool JointModelGroup::getEndEffectorTips(std::vector<const LinkModel*>& tips) co
     const LinkModel* eef_link = parent_model_->getLinkModel(eef_parent);
     if (!eef_link)
     {
-      RCLCPP_ERROR(logger_robot_model_jmg, "Unable to find end effector link for eef");
+      RCLCPP_ERROR(LOGGER, "Unable to find end effector link for eef");
       return false;
     }
     // insert eef_link into tips, maintaining a *sorted* vector, thus enabling use of std::lower_bound
@@ -529,10 +532,10 @@ const LinkModel* JointModelGroup::getOnlyOneEndEffectorTip() const
   if (tips.size() == 1)
     return tips.front();
   else if (tips.size() > 1) {
-    RCLCPP_ERROR(logger_robot_model_jmg, "More than one end effector tip found for joint model group, so cannot return only one");
+    RCLCPP_ERROR(LOGGER, "More than one end effector tip found for joint model group, so cannot return only one");
   }
   else {
-    RCLCPP_ERROR(logger_robot_model_jmg, "No end effector tips found in joint model group");
+    RCLCPP_ERROR(LOGGER, "No end effector tips found in joint model group");
   }
   return nullptr;
 }
@@ -542,7 +545,7 @@ int JointModelGroup::getVariableGroupIndex(const std::string& variable) const
   VariableIndexMap::const_iterator it = joint_variables_index_map_.find(variable);
   if (it == joint_variables_index_map_.end())
   {
-    RCLCPP_ERROR(logger_robot_model_jmg, "Variable '%s' is not part of group '%s'", variable.c_str(), name_.c_str());
+    RCLCPP_ERROR(LOGGER, "Variable '%s' is not part of group '%s'", variable.c_str(), name_.c_str());
     return -1;
   }
   return it->second;
@@ -576,7 +579,7 @@ bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik
       // skip reported fixed joints
       if (hasJointModel(ik_jnames[i]) && getJointModel(ik_jnames[i])->getType() == JointModel::FIXED)
         continue;
-      RCLCPP_ERROR(logger_robot_model_jmg, "IK solver computes joint values for joint '%s' "
+      RCLCPP_ERROR(LOGGER, "IK solver computes joint values for joint '%s' "
                                          "but group '%s' does not contain such a joint.",
                       ik_jnames[i].c_str(), getName().c_str());
       return false;
@@ -629,7 +632,7 @@ bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
 
   if (tip_frames.empty())
   {
-    RCLCPP_WARN(logger_robot_model_jmg, "Group %s has no tip frame(s)", name_.c_str());
+    RCLCPP_WARN(LOGGER, "Group %s has no tip frame(s)", name_.c_str());
     return false;
   }
 
@@ -639,7 +642,7 @@ bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
     // remove frame reference, if specified
     const std::string& tip_local = tip[0] == '/' ? tip.substr(1) : tip;
     const std::string& tip_frame_local = tip_frames[i][0] == '/' ? tip_frames[i].substr(1) : tip_frames[i];
-    RCLCPP_WARN(logger_robot_model_jmg, "comparing input tip: %s to this groups tip: %s ", tip_local.c_str(),
+    RCLCPP_WARN(LOGGER, "comparing input tip: %s to this groups tip: %s ", tip_local.c_str(),
                     tip_frame_local.c_str());
 
     // Check if the IK solver's tip is the same as the frame of inquiry
