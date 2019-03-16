@@ -108,7 +108,8 @@ void RobotModel::buildModel(const urdf::ModelInterface& urdf_model, const srdf::
     RCLCPP_DEBUG(LOGGER, "... computing joint indexing");
     buildJointInfo();
 
-    if (link_models_with_collision_geometry_vector_.empty()) {
+    if (link_models_with_collision_geometry_vector_.empty())
+    {
       RCLCPP_WARN(LOGGER, "No geometry is associated to any robot links");
     }
 
@@ -123,7 +124,8 @@ void RobotModel::buildModel(const urdf::ModelInterface& urdf_model, const srdf::
     // For debugging entire model
     // printModelInfo(std::cout);
   }
-  else {
+  else
+  {
     RCLCPP_WARN(LOGGER, "No root link found");
   }
 }
@@ -194,7 +196,7 @@ void computeCommonRootsHelper(const JointModel* joint, std::vector<int>& common_
     computeCommonRootsHelper(ch[i], common_roots, size);
   }
 }
-}
+}  // namespace
 
 void RobotModel::computeCommonRoots()
 {
@@ -342,23 +344,29 @@ void RobotModel::buildGroupStates(const srdf::Model& srdf_model)
           if (vn.size() == jt->second.size())
             for (std::size_t j = 0; j < vn.size(); ++j)
               state[vn[j]] = jt->second[j];
-          else {
-            RCLCPP_ERROR(LOGGER, "The model for joint '%s' requires %d variable values, but only %d variable values were supplied in default state '%s' for group '%s'",
-            jt->first.c_str(), (int)vn.size(), (int)jt->second.size(), ds[i].name_.c_str(),
-            jmg->getName().c_str());
+          else
+          {
+            RCLCPP_ERROR(LOGGER,
+                         "The model for joint '%s' requires %d variable values, but only %d variable values were "
+                         "supplied in default state '%s' for group '%s'",
+                         jt->first.c_str(), (int)vn.size(), (int)jt->second.size(), ds[i].name_.c_str(),
+                         jmg->getName().c_str());
           }
         }
-        else {
-          RCLCPP_ERROR(LOGGER, "Group state '%s' specifies value for joint '%s', but that joint is not part of group '%s'",
-          ds[i].name_.c_str(), jt->first.c_str(), jmg->getName().c_str());
+        else
+        {
+          RCLCPP_ERROR(LOGGER,
+                       "Group state '%s' specifies value for joint '%s', but that joint is not part of group '%s'",
+                       ds[i].name_.c_str(), jt->first.c_str(), jmg->getName().c_str());
         }
       }
       if (!state.empty())
         jmg->addDefaultState(ds[i].name_, state);
     }
-    else {
+    else
+    {
       RCLCPP_ERROR(LOGGER, "Group state '%s' specified for group '%s', but that group does not exist",
-                      ds[i].name_.c_str(), ds[i].group_.c_str());
+                   ds[i].name_.c_str(), ds[i].group_.c_str());
     }
   }
 }
@@ -377,14 +385,16 @@ void RobotModel::buildMimic(const urdf::ModelInterface& urdf_model)
         {
           if (joint_model_vector_[i]->getVariableCount() == jit->second->getVariableCount())
             joint_model_vector_[i]->setMimic(jit->second, jm->mimic->multiplier, jm->mimic->offset);
-          else {
+          else
+          {
             RCLCPP_ERROR(LOGGER, "Join '%s' cannot mimic joint '%s' because they have different number of DOF",
-            joint_model_vector_[i]->getName().c_str(), jm->mimic->joint_name.c_str());
+                         joint_model_vector_[i]->getName().c_str(), jm->mimic->joint_name.c_str());
           }
         }
-        else {
-          RCLCPP_ERROR(LOGGER, "Joint '%s' cannot mimic unknown joint '%s'",
-          joint_model_vector_[i]->getName().c_str(), jm->mimic->joint_name.c_str());
+        else
+        {
+          RCLCPP_ERROR(LOGGER, "Joint '%s' cannot mimic unknown joint '%s'", joint_model_vector_[i]->getName().c_str(),
+                       jm->mimic->joint_name.c_str());
         }
       }
   }
@@ -513,7 +523,8 @@ void RobotModel::buildGroups(const srdf::Model& srdf_model)
         {
           added = true;
           processed[i] = true;
-          if (!addJointModelGroup(group_configs[i])) {
+          if (!addJointModelGroup(group_configs[i]))
+          {
             RCLCPP_WARN(LOGGER, "Failed to add group '%s'", group_configs[i].name_.c_str());
           }
         }
@@ -521,9 +532,10 @@ void RobotModel::buildGroups(const srdf::Model& srdf_model)
   }
 
   for (std::size_t i = 0; i < processed.size(); ++i)
-    if (!processed[i]) {
+    if (!processed[i])
+    {
       RCLCPP_WARN(LOGGER, "Could not process group '%s' due to unmet subgroup dependencies",
-      group_configs[i].name_.c_str());
+                  group_configs[i].name_.c_str());
     }
 
   for (JointModelGroupMap::const_iterator it = joint_model_group_map_.begin(); it != joint_model_group_map_.end(); ++it)
@@ -608,19 +620,24 @@ void RobotModel::buildGroupsInfoEndEffectors(const srdf::Model& srdf_model)
             {
               if (jt->second != it->second)
                 eef_parent_group = jt->second;
-              else {
+              else
+              {
                 RCLCPP_ERROR(LOGGER, "Group '%s' for end-effector '%s' cannot be its own parent",
-                eefs[k].parent_group_.c_str(), eefs[k].name_.c_str());
+                             eefs[k].parent_group_.c_str(), eefs[k].name_.c_str());
               }
             }
-            else {
-              RCLCPP_ERROR(LOGGER, "Group '%s' was specified as parent group for end-effector '%s' but it does not include the parent link '%s'",
-              eefs[k].parent_group_.c_str(), eefs[k].name_.c_str(), eefs[k].parent_link_.c_str());
+            else
+            {
+              RCLCPP_ERROR(LOGGER,
+                           "Group '%s' was specified as parent group for end-effector '%s' but it does not include the "
+                           "parent link '%s'",
+                           eefs[k].parent_group_.c_str(), eefs[k].name_.c_str(), eefs[k].parent_link_.c_str());
             }
           }
-          else {
+          else
+          {
             RCLCPP_ERROR(LOGGER, "Group name '%s' not found (specified as parent group for end-effector '%s')",
-                            eefs[k].parent_group_.c_str(), eefs[k].name_.c_str());
+                         eefs[k].parent_group_.c_str(), eefs[k].name_.c_str());
           }
         }
 
@@ -850,7 +867,7 @@ static inline VariableBounds jointBoundsFromURDF(const urdf::Joint* urdf_joint)
   }
   return b;
 }
-}
+}  // namespace
 
 JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const urdf::Link* child_link,
                                             const srdf::Model& srdf_model)
@@ -909,14 +926,14 @@ JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const
     {
       if (virtual_joints[i].child_link_ != child_link->name)
       {
-        RCLCPP_WARN(LOGGER, "Skipping virtual joint '%s' because its child frame '%s' does not match the URDF frame '%s'",
-                       virtual_joints[i].name_.c_str(), virtual_joints[i].child_link_.c_str(),
-                       child_link->name.c_str());
+        RCLCPP_WARN(LOGGER,
+                    "Skipping virtual joint '%s' because its child frame '%s' does not match the URDF frame '%s'",
+                    virtual_joints[i].name_.c_str(), virtual_joints[i].child_link_.c_str(), child_link->name.c_str());
       }
       else if (virtual_joints[i].parent_frame_.empty())
       {
         RCLCPP_WARN(LOGGER, "Skipping virtual joint '%s' because its parent frame is empty",
-                       virtual_joints[i].name_.c_str());
+                    virtual_joints[i].name_.c_str());
       }
       else
       {
@@ -969,7 +986,7 @@ static inline Eigen::Isometry3d urdfPose2Isometry3d(const urdf::Pose& pose)
   Eigen::Isometry3d af(Eigen::Translation3d(pose.position.x, pose.position.y, pose.position.z) * q);
   return af;
 }
-}
+}  // namespace
 
 LinkModel* RobotModel::constructLinkModel(const urdf::Link* urdf_link)
 {
@@ -1340,7 +1357,7 @@ void RobotModel::setKinematicsAllocators(const std::map<std::string, SolverAlloc
           result.second[subs[i]] = allocators.find(subs[i]->getName())->second;
         }
         RCLCPP_DEBUG(LOGGER, "Added sub-group IK allocators for group '%s': [ %s]", jmg->getName().c_str(),
-                        ss.str().c_str());
+                     ss.str().c_str());
       }
       jmg->setSolverAllocators(result);
     }

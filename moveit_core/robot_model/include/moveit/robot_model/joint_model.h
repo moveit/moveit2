@@ -521,7 +521,7 @@ protected:
 
 /** \brief Operator overload for printing variable bounds to a stream */
 std::ostream& operator<<(std::ostream& out, const VariableBounds& b);
-}
-}
+}  // namespace core
+}  // namespace moveit
 
 #endif
