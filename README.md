@@ -4,7 +4,7 @@ The MoveIt! Motion Planning Framework **for ROS 2.0**
 
 - [Milestones](#milestones)
 - [Overview of MoveIt!](http://moveit.ros.org)
-- [Installation Instructions](http://moveit.ros.org/install/)
+- [Installation Instructions](https://acutronicrobotics.com/docs/products/robots/mara/moveit2/install)
 - [Documentation](http://moveit.ros.org/documentation/)
 - [Get Involved](http://moveit.ros.org/documentation/contributing/)
 
