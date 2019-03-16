@@ -439,7 +439,7 @@ public:
   {
     if (tip_frames_.size() > 1)
       RCLCPP_ERROR(kinematics::LOGGER, "This kinematic solver has more than one tip frame, "
-                                         "do not call getTipFrame()");
+                                       "do not call getTipFrame()");
 
     return tip_frames_[0];
   }

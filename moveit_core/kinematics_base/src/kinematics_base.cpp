@@ -119,9 +119,9 @@ bool KinematicsBase::initialize(const moveit::core::RobotModel& robot_model, con
                                 double search_discretization)
 {
   RCLCPP_WARN(kinematics::LOGGER,
-                 "IK plugin for group '%s' relies on deprecated API. "
-                 "Please implement initialize(RobotModel, ...).",
-                 group_name.c_str());
+              "IK plugin for group '%s' relies on deprecated API. "
+              "Please implement initialize(RobotModel, ...).",
+              group_name.c_str());
   return false;
 }
 
