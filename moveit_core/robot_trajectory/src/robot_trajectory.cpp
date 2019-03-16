@@ -245,8 +245,8 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
   {
     if (duration_from_previous_.size() > i)
       total_time += duration_from_previous_[i];
-      int seconds = static_cast<int>(total_time);
-      dur_total = rclcpp::Duration((int32_t)seconds, (int32_t)((total_time-seconds)*1.0e+9));
+    int seconds = static_cast<int>(total_time);
+    dur_total = rclcpp::Duration((int32_t)seconds, (int32_t)((total_time - seconds) * 1.0e+9));
     if (!onedof.empty())
     {
       trajectory.joint_trajectory.points[i].positions.resize(onedof.size());
@@ -344,7 +344,8 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
 
   for (std::size_t i = 0; i < state_count; ++i)
   {
-    this_time_stamp = trajStamp + rclcpp::Duration(trajectory.points[i].time_from_start.sec,trajectory.points[i].time_from_start.nanosec);
+    this_time_stamp = trajStamp + rclcpp::Duration(trajectory.points[i].time_from_start.sec,
+                                                   trajectory.points[i].time_from_start.nanosec);
     robot_state::RobotStatePtr st(new robot_state::RobotState(copy));
     st->setVariablePositions(trajectory.joint_names, trajectory.points[i].positions);
     if (!trajectory.points[i].velocities.empty())
@@ -369,8 +370,8 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
   std::size_t state_count =
       std::max(trajectory.joint_trajectory.points.size(), trajectory.multi_dof_joint_trajectory.points.size());
   rclcpp::Time last_time_stamp = trajectory.joint_trajectory.points.empty() ?
-                                  trajectory.multi_dof_joint_trajectory.header.stamp :
-                                  trajectory.joint_trajectory.header.stamp;
+                                     trajectory.multi_dof_joint_trajectory.header.stamp :
+                                     trajectory.joint_trajectory.header.stamp;
   rclcpp::Time this_time_stamp = last_time_stamp;
 
   for (std::size_t i = 0; i < state_count; ++i)
@@ -388,8 +389,9 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
                                      trajectory.joint_trajectory.points[i].accelerations);
       if (!trajectory.joint_trajectory.points[i].effort.empty())
         st->setVariableEffort(trajectory.joint_trajectory.joint_names, trajectory.joint_trajectory.points[i].effort);
-      this_time_stamp =
-          rclcpp::Time(trajectory.joint_trajectory.header.stamp) + rclcpp::Duration(trajectory.joint_trajectory.points[i].time_from_start.sec,trajectory.joint_trajectory.points[i].time_from_start.nanosec);
+      this_time_stamp = rclcpp::Time(trajectory.joint_trajectory.header.stamp) +
+                        rclcpp::Duration(trajectory.joint_trajectory.points[i].time_from_start.sec,
+                                         trajectory.joint_trajectory.points[i].time_from_start.nanosec);
     }
     if (trajectory.multi_dof_joint_trajectory.points.size() > i)
     {
@@ -399,7 +401,8 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
         st->setJointPositions(trajectory.multi_dof_joint_trajectory.joint_names[j], t);
       }
       this_time_stamp = rclcpp::Time(trajectory.multi_dof_joint_trajectory.header.stamp) +
-                        rclcpp::Duration(trajectory.multi_dof_joint_trajectory.points[i].time_from_start.sec,trajectory.multi_dof_joint_trajectory.points[i].time_from_start.nanosec);
+                        rclcpp::Duration(trajectory.multi_dof_joint_trajectory.points[i].time_from_start.sec,
+                                         trajectory.multi_dof_joint_trajectory.points[i].time_from_start.nanosec);
     }
 
     addSuffixWayPoint(st, (this_time_stamp - last_time_stamp).seconds());

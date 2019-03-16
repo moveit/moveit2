@@ -51,7 +51,6 @@
 #include "rclcpp/time.hpp"
 #include "rclcpp/utilities.hpp"
 
-
 namespace robot_trajectory
 {
 MOVEIT_CLASS_FORWARD(RobotTrajectory);
@@ -271,6 +270,6 @@ private:
   std::deque<double> duration_from_previous_;
   rclcpp::Clock clock_ros_;
 };
-}
+}  // namespace robot_trajectory
 
 #endif
