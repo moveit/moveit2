@@ -1004,7 +1004,7 @@ as the new values that correspond to the group */
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
 
-  /** \brief  ing: This function inefficiently copies all transforms around.
+  /** \brief Warning: This function inefficiently copies all transforms around.
       If the group consists of a set of sub-groups that are each a chain and a solver
       is available for each sub-group, then the joint values can be set by computing inverse kinematics.
       The poses are assumed to be in the reference frame of the kinematic model. The poses are assumed
