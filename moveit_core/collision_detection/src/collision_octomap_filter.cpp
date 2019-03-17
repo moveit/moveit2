@@ -42,6 +42,10 @@
 #include <octomap/octomap.h>
 #include <geometric_shapes/shapes.h>
 #include <memory>
+#include "rclcpp/rclcpp.hpp"
+
+// Logger
+rclcpp::Logger LOGGER = rclcpp::get_logger("collision_detection");
 
 // static const double ISO_VALUE  = 0.5; // TODO magic number! (though, probably a good one).
 // static const double R_MULTIPLE = 1.5; // TODO magic number! (though, probably a good one).
@@ -64,12 +68,12 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
 {
   if (!object)
   {
-    RCLCPP_ERROR(collision_detection::logger_collision_detection, "No valid Object passed in, cannot refine Normals!");
+    RCLCPP_ERROR(LOGGER, "No valid Object passed in, cannot refine Normals!");
     return 0;
   }
   if (res.contact_count < 1)
   {
-    RCLCPP_WARN(collision_detection::logger_collision_detection, "There do not appear to be any contacts, so there is nothing to refine!");
+    RCLCPP_WARN(LOGGER, "There do not appear to be any contacts, so there is nothing to refine!");
     return 0;
   }
 
@@ -125,16 +129,16 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
             {
               count++;
               node_centers.push_back(pt);
-              // RCLCPP_INFO(collision_detection::logger_collision_detection, "Adding point %d with prob %.3f at [%.3f, %.3f, %.3f]",
+              // RCLCPP_INFO(LOGGER, "Adding point %d with prob %.3f at [%.3f, %.3f, %.3f]",
               //                          count, prob, pt.x(), pt.y(), pt.z());
             }
           }
-          // RCLCPP_INFO(collision_detection::logger_collision_detection, "Contact point at [%.3f, %.3f, %.3f], cell size %.3f, occupied cells
+          // RCLCPP_INFO(LOGGER, "Contact point at [%.3f, %.3f, %.3f], cell size %.3f, occupied cells
           // %d",
           //                          contact_point.x(), contact_point.y(), contact_point.z(), cell_size, count);
 
           // octree->getOccupiedLeafsBBX(node_centers, bbx_min, bbx_max);
-          // RCLCPP_ERROR(collision_detection::logger_collision_detection, "bad stuff in collision_octomap_filter.cpp; need to port octomap
+          // RCLCPP_ERROR(LOGGER, "bad stuff in collision_octomap_filter.cpp; need to port octomap
           // call for groovy");
 
           octomath::Vector3 n;
@@ -147,7 +151,7 @@ int collision_detection::refineContactNormals(const World::ObjectConstPtr& objec
             if (divergence > allowed_angle_divergence)
             {
               modified++;
-              // RCLCPP_INFO(collision_detection::logger_collision_detection, "Normals differ by %.3f, changing: [%.3f, %.3f, %.3f] -> [%.3f,
+              // RCLCPP_INFO(LOGGER, "Normals differ by %.3f, changing: [%.3f, %.3f, %.3f] -> [%.3f,
               // %.3f, %.3f]",
               //                          divergence, contact_normal.x(), contact_normal.y(), contact_normal.z(),
               //                          n.x(), n.y(), n.z());
@@ -269,7 +273,7 @@ bool sampleCloud(const octomap::point3d_list& cloud, const double& spacing, cons
     }
     else
     {
-      RCLCPP_ERROR(collision_detection::logger_collision_detection, "This should not be called!");
+      RCLCPP_ERROR(LOGGER, "This should not be called!");
     }
 
     double f_val = 0;
@@ -295,7 +299,7 @@ bool sampleCloud(const octomap::point3d_list& cloud, const double& spacing, cons
     }
     else
     {
-      RCLCPP_ERROR(collision_detection::logger_collision_detection, "This should not be called!");
+      RCLCPP_ERROR(LOGGER, "This should not be called!");
       double r_scaled = r / r;
       // TODO still need to address the scaling...
       f_val = pow((1 - r_scaled), 4) * (4 * r_scaled + 1);

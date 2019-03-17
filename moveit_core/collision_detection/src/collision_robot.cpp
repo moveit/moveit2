@@ -36,17 +36,21 @@
 
 #include <moveit/collision_detection/collision_robot.h>
 #include <limits>
+#include "rclcpp/rclcpp.hpp"
+
+// Logger
+rclcpp::Logger LOGGER = rclcpp::get_logger("collision_detection");
 
 static inline bool validateScale(double scale)
 {
   if (scale < std::numeric_limits<double>::epsilon())
   {
-    RCLCPP_ERROR(collision_detection::logger_collision_detection, "Scale must be positive");
+    RCLCPP_ERROR(LOGGER, "Scale must be positive");
     return false;
   }
   if (scale > std::numeric_limits<double>::max())
   {
-    RCLCPP_ERROR(collision_detection::logger_collision_detection, "Scale must be finite");
+    RCLCPP_ERROR(LOGGER, "Scale must be finite");
     return false;
   }
   return true;
@@ -56,12 +60,12 @@ static inline bool validatePadding(double padding)
 {
   if (padding < 0.0)
   {
-    RCLCPP_ERROR(collision_detection::logger_collision_detection, "Padding cannot be negative");
+    RCLCPP_ERROR(LOGGER, "Padding cannot be negative");
     return false;
   }
   if (padding > std::numeric_limits<double>::max())
   {
-    RCLCPP_ERROR(collision_detection::logger_collision_detection, "Padding must be finite");
+    RCLCPP_ERROR(LOGGER, "Padding must be finite");
     return false;
   }
   return true;

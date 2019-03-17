@@ -38,7 +38,6 @@
 #define MOVEIT_COLLISION_DETECTION_COLLISION_ROBOT_
 
 #include <moveit/collision_detection/collision_matrix.h>
-#include <moveit/collision_detection/collision_log.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit_msgs/msg/link_padding.hpp>

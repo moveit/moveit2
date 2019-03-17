@@ -45,7 +45,6 @@
 #include <set>
 #include <Eigen/Core>
 #include <moveit/robot_model/robot_model.h>
-#include <moveit/collision_detection/collision_log.h>
 
 namespace collision_detection
 {
