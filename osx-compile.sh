@@ -13,8 +13,8 @@ find ros2-osx/ -name tf2_eigen | xargs rm -rf
 source ros2-osx/setup.bash
 mkdir -p /tmp/ros2_ws/src
 cp -r /tmp/moveit2 /tmp/ros2_ws/src
-cd /tmp/ros2_ws && wget https://raw.githubusercontent.com/AcutronicRobotics/moveit2/master/external-repos.repos
-vcs import src < external-repos.repos
+cd /tmp/ros2_ws && wget https://raw.githubusercontent.com/AcutronicRobotics/moveit2/master/moveit2.repos
+vcs import src < moveit2.repos
 export OPENSSL_ROOT_DIR="/usr/local/opt/openssl"
 #Ignore packages
 touch src/image_common/camera_calibration_parsers/COLCON_IGNORE
