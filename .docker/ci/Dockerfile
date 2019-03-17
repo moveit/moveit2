@@ -41,6 +41,7 @@ RUN \
          ros-$ROS_DISTRO-action-msgs \
          ros-$ROS_DISTRO-message-filters \
          ros-$ROS_DISTRO-rclcpp-action \
+         ros-$ROS_DISTRO-resource-retriever \
       && rm -rf /var/lib/apt/lists/* \
       && mkdir -p $ROS_WS/src \
       && wget https://raw.githubusercontent.com/AcutronicRobotics/moveit2/master/moveit2.repos \
