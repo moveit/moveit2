@@ -9,6 +9,9 @@ ENV ROS_DISTRO crystal
 
 WORKDIR $ROS_WS
 
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
 RUN \
      echo 'Etc/UTC' > /etc/timezone \
       && ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime \
