@@ -37,9 +37,12 @@
 #include <moveit/collision_detection/collision_matrix.h>
 #include <boost/bind.hpp>
 #include <iomanip>
+#include "rclcpp/rclcpp.hpp"
 
 namespace collision_detection
 {
+// Logger
+rclcpp::Logger LOGGER = rclcpp::get_logger("collision_detection");
 
 AllowedCollisionMatrix::AllowedCollisionMatrix()
 {
@@ -55,18 +58,23 @@ AllowedCollisionMatrix::AllowedCollisionMatrix(const std::vector<std::string>& n
 AllowedCollisionMatrix::AllowedCollisionMatrix(const moveit_msgs::msg::AllowedCollisionMatrix& msg)
 {
   if (msg.entry_names.size() != msg.entry_values.size() ||
-      msg.default_entry_names.size() != msg.default_entry_values.size()){
-        RCLCPP_ERROR(logger_collision_detection, "The number of links does not match the number of entries in AllowedCollisionMatrix message");
-      }
+      msg.default_entry_names.size() != msg.default_entry_values.size())
+  {
+    RCLCPP_ERROR(LOGGER, "The number of links does not match the number of entries in AllowedCollisionMatrix message");
+  }
   else
   {
-    for (std::size_t i = 0; i < msg.entry_names.size(); ++i) {
-      if (msg.entry_values[i].enabled.size() != msg.entry_names.size()){
-        RCLCPP_ERROR(logger_collision_detection,
-          "Number of entries is incorrect for link '%s' in AllowedCollisionMatrix message",
-          msg.entry_names[i].c_str());
-      } else {
-        for (std::size_t j = i + 1; j < msg.entry_values[i].enabled.size(); ++j){
+    for (std::size_t i = 0; i < msg.entry_names.size(); ++i)
+    {
+      if (msg.entry_values[i].enabled.size() != msg.entry_names.size())
+      {
+        RCLCPP_ERROR(LOGGER, "Number of entries is incorrect for link '%s' in AllowedCollisionMatrix message",
+                     msg.entry_names[i].c_str());
+      }
+      else
+      {
+        for (std::size_t j = i + 1; j < msg.entry_values[i].enabled.size(); ++j)
+        {
           setEntry(msg.entry_names[i], msg.entry_names[j], msg.entry_values[i].enabled[j]);
         }
       }

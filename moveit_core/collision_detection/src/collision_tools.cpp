@@ -62,7 +62,8 @@ void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, 
 }
 
 void getCostMarkers(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
-                    std::set<CostSource>& cost_sources, const std_msgs::msg::ColorRGBA& color, const rclcpp::Duration& lifetime)
+                    std::set<CostSource>& cost_sources, const std_msgs::msg::ColorRGBA& color,
+                    const rclcpp::Duration& lifetime)
 {
   int id = 0;
   for (const auto& cost_source : cost_sources)
@@ -277,7 +278,7 @@ void costSourceToMsg(const CostSource& cost_source, moveit_msgs::msg::CostSource
 void contactToMsg(const Contact& contact, moveit_msgs::msg::ContactInformation& msg)
 {
   msg.position = tf2::toMsg(contact.pos);
-  tf2::toMsg(contact.normal);
+  msg.normal = tf2::toMsg(contact.normal);
   msg.depth = contact.depth;
   msg.contact_body_1 = contact.body_name_1;
   msg.contact_body_2 = contact.body_name_2;

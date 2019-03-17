@@ -38,7 +38,6 @@
 #define MOVEIT_COLLISION_DETECTION_WORLD_
 
 #include <moveit/macros/class_forward.h>
-#include <moveit/collision_detection/collision_log.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -274,6 +273,6 @@ private:
   };
   std::vector<Observer*> observers_;
 };
-}
+}  // namespace collision_detection
 
 #endif
