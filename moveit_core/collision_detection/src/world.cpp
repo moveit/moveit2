@@ -69,7 +69,8 @@ void World::addToObject(const std::string& id, const std::vector<shapes::ShapeCo
 {
   if (shapes.size() != poses.size())
   {
-    RCLCPP_ERROR(LOGGER, "Number of shapes and number of poses do not match. Not adding this object to collision world.");
+    RCLCPP_ERROR(LOGGER,
+                 "Number of shapes and number of poses do not match. Not adding this object to collision world.");
     return;
   }
 
