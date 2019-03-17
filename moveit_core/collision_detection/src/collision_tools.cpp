@@ -277,7 +277,6 @@ void costSourceToMsg(const CostSource& cost_source, moveit_msgs::msg::CostSource
 void contactToMsg(const Contact& contact, moveit_msgs::msg::ContactInformation& msg)
 {
   msg.position = tf2::toMsg(contact.pos);
-  // tf2::toMsg(contact.normal, msg.normal);
   tf2::toMsg(contact.normal);
   msg.depth = contact.depth;
   msg.contact_body_1 = contact.body_name_1;
