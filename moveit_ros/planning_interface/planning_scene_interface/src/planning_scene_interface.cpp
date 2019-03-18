@@ -335,8 +335,9 @@ bool PlanningSceneInterface::applyCollisionObject(const moveit_msgs::msg::Collis
   return applyPlanningScene(ps);
 }
 
-bool PlanningSceneInterface::applyCollisionObjects(const std::vector<moveit_msgs::msg::CollisionObject>& collision_objects,
-                                                   const std::vector<moveit_msgs::msg::ObjectColor>& object_colors)
+bool PlanningSceneInterface::applyCollisionObjects(
+    const std::vector<moveit_msgs::msg::CollisionObject>& collision_objects,
+    const std::vector<moveit_msgs::msg::ObjectColor>& object_colors)
 {
   moveit_msgs::msg::PlanningScene ps;
   ps.robot_state.is_diff = true;
@@ -355,7 +356,8 @@ bool PlanningSceneInterface::applyCollisionObjects(const std::vector<moveit_msgs
   return applyPlanningScene(ps);
 }
 
-bool PlanningSceneInterface::applyAttachedCollisionObject(const moveit_msgs::msg::AttachedCollisionObject& collision_object)
+bool PlanningSceneInterface::applyAttachedCollisionObject(
+    const moveit_msgs::msg::AttachedCollisionObject& collision_object)
 {
   moveit_msgs::msg::PlanningScene ps;
   ps.robot_state.is_diff = true;
@@ -380,8 +382,9 @@ bool PlanningSceneInterface::applyPlanningScene(const moveit_msgs::msg::Planning
   return impl_->applyPlanningScene(ps);
 }
 
-void PlanningSceneInterface::addCollisionObjects(const std::vector<moveit_msgs::msg::CollisionObject>& collision_objects,
-                                                 const std::vector<moveit_msgs::msg::ObjectColor>& object_colors) const
+void PlanningSceneInterface::addCollisionObjects(
+    const std::vector<moveit_msgs::msg::CollisionObject>& collision_objects,
+    const std::vector<moveit_msgs::msg::ObjectColor>& object_colors) const
 {
   impl_->addCollisionObjects(collision_objects, object_colors);
 }

@@ -171,7 +171,8 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 
 bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
-                                           std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
+                                           std::vector<double>& solution,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   return searchPositionIK(ik_pose, ik_seed_state, timeout, solution, IKCallbackFn(), error_code, consistency_limits,

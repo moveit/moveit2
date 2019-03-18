@@ -39,8 +39,8 @@
 namespace sbpl_interface
 {
 bool SBPLInterface::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                          const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res,
-                          const PlanningParameters& params) const
+                          const moveit_msgs::srv::GetMotionPlan::Request& req,
+                          moveit_msgs::srv::GetMotionPlan::Response& res, const PlanningParameters& params) const
 {
   res.trajectory.joint_trajectory.points.clear();
   (const_cast<SBPLInterface*>(this))->last_planning_statistics_ = PlanningStatistics();

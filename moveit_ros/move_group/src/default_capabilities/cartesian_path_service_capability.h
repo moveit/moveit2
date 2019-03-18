@@ -50,7 +50,8 @@ public:
   void initialize() override;
 
 private:
-  bool computeService(moveit_msgs::srv::GetCartesianPath::Request& req, moveit_msgs::srv::GetCartesianPath::Response& res);
+  bool computeService(moveit_msgs::srv::GetCartesianPath::Request& req,
+                      moveit_msgs::srv::GetCartesianPath::Response& res);
 
   ros::ServiceServer cartesian_path_service_;
   ros::Publisher display_path_;

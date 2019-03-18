@@ -490,7 +490,8 @@ bool PositionConstraint::enabled() const
   return link_model_ && !constraint_region_.empty();
 }
 
-bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstraint& oc, const robot_state::Transforms& tf)
+bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstraint& oc,
+                                      const robot_state::Transforms& tf)
 {
   // clearing out any old data
   clear();
@@ -665,7 +666,8 @@ void VisibilityConstraint::clear()
   max_range_angle_ = 0.0;
 }
 
-bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstraint& vc, const robot_state::Transforms& tf)
+bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstraint& vc,
+                                     const robot_state::Transforms& tf)
 {
   clear();
   target_radius_ = fabs(vc.target_radius);

@@ -78,12 +78,14 @@ public:
 
   /// Definition of a planner-switch benchmark event function. Invoked before a planner starts any runs for a particular
   /// query.
-  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request, PlannerBenchmarkData& benchmark_data)>
+  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request,
+                               PlannerBenchmarkData& benchmark_data)>
       PlannerStartEventFunction;
 
   /// Definition of a planner-switch benchmark event function. Invoked after a planner completes all runs for a
   /// particular query.
-  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request, PlannerBenchmarkData& benchmark_data)>
+  typedef boost::function<void(const moveit_msgs::msg::MotionPlanRequest& request,
+                               PlannerBenchmarkData& benchmark_data)>
       PlannerCompletionEventFunction;
 
   /// Definition of a pre-run benchmark event function.  Invoked immediately before each planner calls solve().

@@ -45,7 +45,8 @@ SBPLMetaInterface::SBPLMetaInterface(const planning_models::RobotModelConstPtr& 
 }
 
 bool SBPLMetaInterface::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                              const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res)
+                              const moveit_msgs::srv::GetMotionPlan::Request& req,
+                              moveit_msgs::srv::GetMotionPlan::Response& res)
 {
   first_ok_ = false;
   first_done_ = false;

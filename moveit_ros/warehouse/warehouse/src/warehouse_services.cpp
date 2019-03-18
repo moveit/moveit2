@@ -46,7 +46,8 @@
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 bool storeState(moveit_msgs::srv::SaveRobotStateToWarehouse::Request& request,
-                moveit_msgs::srv::SaveRobotStateToWarehouse::Response& response, moveit_warehouse::RobotStateStorage* rs)
+                moveit_msgs::srv::SaveRobotStateToWarehouse::Response& response,
+                moveit_warehouse::RobotStateStorage* rs)
 {
   if (request.name.empty())
   {
@@ -58,7 +59,8 @@ bool storeState(moveit_msgs::srv::SaveRobotStateToWarehouse::Request& request,
 }
 
 bool listStates(moveit_msgs::srv::ListRobotStatesInWarehouse::Request& request,
-                moveit_msgs::srv::ListRobotStatesInWarehouse::Response& response, moveit_warehouse::RobotStateStorage* rs)
+                moveit_msgs::srv::ListRobotStatesInWarehouse::Response& response,
+                moveit_warehouse::RobotStateStorage* rs)
 {
   if (request.regex.empty())
   {
@@ -96,7 +98,8 @@ bool getState(moveit_msgs::srv::GetRobotStateFromWarehouse::Request& request,
 }
 
 bool renameState(moveit_msgs::srv::RenameRobotStateInWarehouse::Request& request,
-                 moveit_msgs::srv::RenameRobotStateInWarehouse::Response& response, moveit_warehouse::RobotStateStorage* rs)
+                 moveit_msgs::srv::RenameRobotStateInWarehouse::Response& response,
+                 moveit_warehouse::RobotStateStorage* rs)
 {
   if (!rs->hasRobotState(request.old_name, request.robot))
   {

@@ -308,10 +308,9 @@ bool ChompTrajectory::fillInFromTrajectory(moveit_msgs::msg::MotionPlanDetailedR
   return true;
 }
 
-void ChompTrajectory::assignCHOMPTrajectoryPointFromInputTrajectoryPoint(moveit_msgs::msg::RobotTrajectory trajectory_msg,
-                                                                         int num_joints_trajectory,
-                                                                         int trajectory_msgs_point_index,
-                                                                         int chomp_trajectory_point_index)
+void ChompTrajectory::assignCHOMPTrajectoryPointFromInputTrajectoryPoint(
+    moveit_msgs::msg::RobotTrajectory trajectory_msg, int num_joints_trajectory, int trajectory_msgs_point_index,
+    int chomp_trajectory_point_index)
 {
   // following loop iterates over all joints for a single robot pose, it assigns the corresponding input trajectory
   // points into CHOMP trajectory points

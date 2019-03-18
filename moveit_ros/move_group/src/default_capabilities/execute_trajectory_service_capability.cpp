@@ -57,15 +57,16 @@ void move_group::MoveGroupExecuteService::initialize()
   // execution of the main spinner thread.
   // Hence, we use our own asynchronous spinner listening to our own callback queue.
   ros::AdvertiseServiceOptions ops;
-  ops.template init<moveit_msgs::srv::ExecuteKnownTrajectory::Request, moveit_msgs::srv::ExecuteKnownTrajectory::Response>(
+  ops.template init<moveit_msgs::srv::ExecuteKnownTrajectory::Request,
+                    moveit_msgs::srv::ExecuteKnownTrajectory::Response>(
       EXECUTE_SERVICE_NAME, boost::bind(&MoveGroupExecuteService::executeTrajectoryService, this, _1, _2));
   ops.callback_queue = &callback_queue_;
   execute_service_ = root_node_handle_.advertiseService(ops);
   spinner_.start();
 }
 
-bool move_group::MoveGroupExecuteService::executeTrajectoryService(moveit_msgs::srv::ExecuteKnownTrajectory::Request& req,
-                                                                   moveit_msgs::srv::ExecuteKnownTrajectory::Response& res)
+bool move_group::MoveGroupExecuteService::executeTrajectoryService(
+    moveit_msgs::srv::ExecuteKnownTrajectory::Request& req, moveit_msgs::srv::ExecuteKnownTrajectory::Response& res)
 {
   ROS_INFO("Received new trajectory execution service request...");
   if (!context_->trajectory_execution_manager_)

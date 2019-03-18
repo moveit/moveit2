@@ -461,8 +461,8 @@ void ompl_interface::ModelBasedPlanningContext::clear()
   getOMPLStateSpace()->setInterpolationFunction(InterpolationFunction());
 }
 
-bool ompl_interface::ModelBasedPlanningContext::setPathConstraints(const moveit_msgs::msg::Constraints& path_constraints,
-                                                                   moveit_msgs::msg::MoveItErrorCodes* error)
+bool ompl_interface::ModelBasedPlanningContext::setPathConstraints(
+    const moveit_msgs::msg::Constraints& path_constraints, moveit_msgs::msg::MoveItErrorCodes* error)
 {
   // ******************* set the path constraints to use
   path_constraints_.reset(new kinematic_constraints::KinematicConstraintSet(getRobotModel()));
@@ -473,8 +473,8 @@ bool ompl_interface::ModelBasedPlanningContext::setPathConstraints(const moveit_
 }
 
 bool ompl_interface::ModelBasedPlanningContext::setGoalConstraints(
-    const std::vector<moveit_msgs::msg::Constraints>& goal_constraints, const moveit_msgs::msg::Constraints& path_constraints,
-    moveit_msgs::msg::MoveItErrorCodes* error)
+    const std::vector<moveit_msgs::msg::Constraints>& goal_constraints,
+    const moveit_msgs::msg::Constraints& path_constraints, moveit_msgs::msg::MoveItErrorCodes* error)
 {
   // ******************* check if the input is correct
   goal_constraints_.clear();

@@ -66,7 +66,8 @@ bool transformToEndEffectorGoal(const geometry_msgs::PoseStamped& goal_pose,
 }
 }  // namespace
 
-bool PlacePlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene, const moveit_msgs::action::PlaceGoal& goal)
+bool PlacePlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                     const moveit_msgs::action::PlaceGoal& goal)
 {
   double timeout = goal.allowed_planning_time;
   ros::WallTime endtime = ros::WallTime::now() + ros::WallDuration(timeout);

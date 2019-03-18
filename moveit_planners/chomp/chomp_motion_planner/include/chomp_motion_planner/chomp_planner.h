@@ -50,8 +50,9 @@ public:
   ChompPlanner();
   virtual ~ChompPlanner(){};
 
-  bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene, const moveit_msgs::msg::MotionPlanRequest& req,
-             const ChompParameters& params, moveit_msgs::msg::MotionPlanDetailedResponse& res) const;
+  bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
+             const moveit_msgs::msg::MotionPlanRequest& req, const ChompParameters& params,
+             moveit_msgs::msg::MotionPlanDetailedResponse& res) const;
 };
 }
 

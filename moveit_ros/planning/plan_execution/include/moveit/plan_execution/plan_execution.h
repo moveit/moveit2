@@ -128,7 +128,8 @@ public:
   }
 
   void planAndExecute(ExecutableMotionPlan& plan, const Options& opt);
-  void planAndExecute(ExecutableMotionPlan& plan, const moveit_msgs::msg::PlanningScene& scene_diff, const Options& opt);
+  void planAndExecute(ExecutableMotionPlan& plan, const moveit_msgs::msg::PlanningScene& scene_diff,
+                      const Options& opt);
 
   /** \brief Execute and monitor a previously created \e plan.
 

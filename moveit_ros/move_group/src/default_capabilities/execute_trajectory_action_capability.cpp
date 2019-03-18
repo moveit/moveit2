@@ -58,7 +58,8 @@ void MoveGroupExecuteTrajectoryAction::initialize()
   execute_action_server_->start();
 }
 
-void MoveGroupExecuteTrajectoryAction::executePathCallback(const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal)
+void MoveGroupExecuteTrajectoryAction::executePathCallback(
+    const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal)
 {
   moveit_msgs::action::ExecuteTrajectoryResult action_res;
   if (!context_->trajectory_execution_manager_)

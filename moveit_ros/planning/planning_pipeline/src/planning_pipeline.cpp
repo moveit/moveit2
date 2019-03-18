@@ -183,7 +183,8 @@ void planning_pipeline::PlanningPipeline::publishReceivedRequests(bool flag)
   if (publish_received_requests_ && !flag)
     received_request_publisher_.shutdown();
   else if (!publish_received_requests_ && flag)
-    received_request_publisher_ = nh_.advertise<moveit_msgs::msg::MotionPlanRequest>(MOTION_PLAN_REQUEST_TOPIC, 10, true);
+    received_request_publisher_ =
+        nh_.advertise<moveit_msgs::msg::MotionPlanRequest>(MOTION_PLAN_REQUEST_TOPIC, 10, true);
   publish_received_requests_ = flag;
 }
 

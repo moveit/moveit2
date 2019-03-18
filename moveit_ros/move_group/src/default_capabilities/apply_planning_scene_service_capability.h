@@ -54,7 +54,8 @@ public:
   void initialize() override;
 
 private:
-  bool applyScene(moveit_msgs::srv::ApplyPlanningScene::Request& req, moveit_msgs::srv::ApplyPlanningScene::Response& res);
+  bool applyScene(moveit_msgs::srv::ApplyPlanningScene::Request& req,
+                  moveit_msgs::srv::ApplyPlanningScene::Response& res);
 
   ros::ServiceServer service_;
 };

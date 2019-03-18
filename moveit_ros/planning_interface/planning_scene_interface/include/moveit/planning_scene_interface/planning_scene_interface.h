@@ -116,8 +116,8 @@ public:
 
   /** \brief Apply attached collision objects to the planning scene of the move_group node synchronously.
       Other PlanningSceneMonitors will NOT receive the update unless they subscribe to move_group's monitored scene */
-  bool
-  applyAttachedCollisionObjects(const std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objects);
+  bool applyAttachedCollisionObjects(
+      const std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objects);
 
   /** \brief Update the planning_scene of the move_group node with the given ps synchronously.
       Other PlanningSceneMonitors will NOT receive the update unless they subscribe to move_group's monitored scene */
@@ -128,9 +128,9 @@ public:
 
       The update runs asynchronously. If you need the objects to be available *directly* after you called this function,
       consider using `applyCollisionObjects` instead. */
-  void addCollisionObjects(
-      const std::vector<moveit_msgs::msg::CollisionObject>& collision_objects,
-      const std::vector<moveit_msgs::msg::ObjectColor>& object_colors = std::vector<moveit_msgs::msg::ObjectColor>()) const;
+  void addCollisionObjects(const std::vector<moveit_msgs::msg::CollisionObject>& collision_objects,
+                           const std::vector<moveit_msgs::msg::ObjectColor>& object_colors =
+                               std::vector<moveit_msgs::msg::ObjectColor>()) const;
 
   /** \brief Remove collision objects from the world via /planning_scene.
 

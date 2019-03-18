@@ -54,7 +54,8 @@ moveit_warehouse::PlanningSceneStorage::PlanningSceneStorage(warehouse_ros::Data
 
 void moveit_warehouse::PlanningSceneStorage::createCollections()
 {
-  planning_scene_collection_ = conn_->openCollectionPtr<moveit_msgs::msg::PlanningScene>(DATABASE_NAME, "planning_scene");
+  planning_scene_collection_ =
+      conn_->openCollectionPtr<moveit_msgs::msg::PlanningScene>(DATABASE_NAME, "planning_scene");
   motion_plan_request_collection_ =
       conn_->openCollectionPtr<moveit_msgs::msg::MotionPlanRequest>(DATABASE_NAME, "motion_plan_request");
   robot_trajectory_collection_ =
@@ -119,7 +120,8 @@ std::string moveit_warehouse::PlanningSceneStorage::getMotionPlanRequestName(
       continue;
     boost::shared_array<uint8_t> buffer(new uint8_t[serial_size]);
     ros::serialization::OStream stream(buffer.get(), serial_size);
-    ros::serialization::serialize(stream, static_cast<const moveit_msgs::msg::MotionPlanRequest&>(*existing_requests[i]));
+    ros::serialization::serialize(stream,
+                                  static_cast<const moveit_msgs::msg::MotionPlanRequest&>(*existing_requests[i]));
     const void* data = buffer.get();
     if (memcmp(data_arg, data, serial_size) == 0)
       // we found the same message twice
@@ -142,8 +144,10 @@ void moveit_warehouse::PlanningSceneStorage::addPlanningQuery(const moveit_msgs:
     addNewPlanningRequest(planning_query, scene_name, query_name);
 }
 
-std::string moveit_warehouse::PlanningSceneStorage::addNewPlanningRequest(
-    const moveit_msgs::msg::MotionPlanRequest& planning_query, const std::string& scene_name, const std::string& query_name)
+std::string
+moveit_warehouse::PlanningSceneStorage::addNewPlanningRequest(const moveit_msgs::msg::MotionPlanRequest& planning_query,
+                                                              const std::string& scene_name,
+                                                              const std::string& query_name)
 {
   std::string id = query_name;
   if (id.empty())
@@ -169,9 +173,9 @@ std::string moveit_warehouse::PlanningSceneStorage::addNewPlanningRequest(
   return id;
 }
 
-void moveit_warehouse::PlanningSceneStorage::addPlanningResult(const moveit_msgs::msg::MotionPlanRequest& planning_query,
-                                                               const moveit_msgs::msg::RobotTrajectory& result,
-                                                               const std::string& scene_name)
+void moveit_warehouse::PlanningSceneStorage::addPlanningResult(
+    const moveit_msgs::msg::MotionPlanRequest& planning_query, const moveit_msgs::msg::RobotTrajectory& result,
+    const std::string& scene_name)
 {
   std::string id = getMotionPlanRequestName(planning_query, scene_name);
   if (id.empty())
@@ -226,8 +230,8 @@ bool moveit_warehouse::PlanningSceneStorage::getPlanningScene(PlanningSceneWithM
   }
   scene_m = planning_scenes.back();
   // in case the scene was renamed, the name in the message may be out of date
-  const_cast<moveit_msgs::msg::PlanningScene*>(static_cast<const moveit_msgs::msg::PlanningScene*>(scene_m.get()))->name =
-      scene_name;
+  const_cast<moveit_msgs::msg::PlanningScene*>(static_cast<const moveit_msgs::msg::PlanningScene*>(scene_m.get()))
+      ->name = scene_name;
   return true;
 }
 

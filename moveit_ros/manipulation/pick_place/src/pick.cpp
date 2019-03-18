@@ -63,7 +63,8 @@ struct OrderGraspQuality
 };
 }  // namespace
 
-bool PickPlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene, const moveit_msgs::action::PickupGoal& goal)
+bool PickPlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                    const moveit_msgs::action::PickupGoal& goal)
 {
   double timeout = goal.allowed_planning_time;
   ros::WallTime endtime = ros::WallTime::now() + ros::WallDuration(timeout);

@@ -64,8 +64,8 @@ void moveit_warehouse::RobotStateStorage::reset()
   createCollections();
 }
 
-void moveit_warehouse::RobotStateStorage::addRobotState(const moveit_msgs::msg::RobotState& msg, const std::string& name,
-                                                        const std::string& robot)
+void moveit_warehouse::RobotStateStorage::addRobotState(const moveit_msgs::msg::RobotState& msg,
+                                                        const std::string& name, const std::string& robot)
 {
   bool replace = false;
   if (hasRobotState(name, robot))

@@ -70,8 +70,8 @@ TrajectoryVisualization::TrajectoryVisualization(rviz::Property* widget, rviz::D
   trajectory_topic_property_ =
       new rviz::RosTopicProperty("Trajectory Topic", "/move_group/display_planned_path",
                                  ros::message_traits::datatype<moveit_msgs::msg::DisplayTrajectory>(),
-                                 "The topic on which the moveit_msgs::msg::DisplayTrajectory messages are received", widget,
-                                 SLOT(changedTrajectoryTopic()), this);
+                                 "The topic on which the moveit_msgs::msg::DisplayTrajectory messages are received",
+                                 widget, SLOT(changedTrajectoryTopic()), this);
 
   display_path_visual_enabled_property_ =
       new rviz::BoolProperty("Show Robot Visual", true, "Indicates whether the geometry of the robot as defined for "

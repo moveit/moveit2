@@ -62,13 +62,16 @@ private:
   void executePickupCallback_PlanAndExecute(const moveit_msgs::action::PickupGoalConstPtr& goal,
                                             moveit_msgs::action::PickupResult& action_res);
 
-  void executePlaceCallback_PlanOnly(const moveit_msgs::action::PlaceGoalConstPtr& goal, moveit_msgs::action::PlaceResult& action_res);
+  void executePlaceCallback_PlanOnly(const moveit_msgs::action::PlaceGoalConstPtr& goal,
+                                     moveit_msgs::action::PlaceResult& action_res);
   void executePlaceCallback_PlanAndExecute(const moveit_msgs::action::PlaceGoalConstPtr& goal,
                                            moveit_msgs::action::PlaceResult& action_res);
 
-  bool planUsingPickPlace_Pickup(const moveit_msgs::action::PickupGoal& goal, moveit_msgs::action::PickupResult* action_res,
+  bool planUsingPickPlace_Pickup(const moveit_msgs::action::PickupGoal& goal,
+                                 moveit_msgs::action::PickupResult* action_res,
                                  plan_execution::ExecutableMotionPlan& plan);
-  bool planUsingPickPlace_Place(const moveit_msgs::action::PlaceGoal& goal, moveit_msgs::action::PlaceResult* action_res,
+  bool planUsingPickPlace_Place(const moveit_msgs::action::PlaceGoal& goal,
+                                moveit_msgs::action::PlaceResult* action_res,
                                 plan_execution::ExecutableMotionPlan& plan);
 
   void preemptPickupCallback();

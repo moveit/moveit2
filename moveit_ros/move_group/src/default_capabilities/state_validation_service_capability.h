@@ -50,7 +50,8 @@ public:
   void initialize() override;
 
 private:
-  bool computeService(moveit_msgs::srv::GetStateValidity::Request& req, moveit_msgs::srv::GetStateValidity::Response& res);
+  bool computeService(moveit_msgs::srv::GetStateValidity::Request& req,
+                      moveit_msgs::srv::GetStateValidity::Response& res);
 
   ros::ServiceServer validity_service_;
 };

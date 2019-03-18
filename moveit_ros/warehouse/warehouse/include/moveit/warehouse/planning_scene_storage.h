@@ -112,8 +112,8 @@ private:
 
   std::string getMotionPlanRequestName(const moveit_msgs::msg::MotionPlanRequest& planning_query,
                                        const std::string& scene_name) const;
-  std::string addNewPlanningRequest(const moveit_msgs::msg::MotionPlanRequest& planning_query, const std::string& scene_name,
-                                    const std::string& query_name);
+  std::string addNewPlanningRequest(const moveit_msgs::msg::MotionPlanRequest& planning_query,
+                                    const std::string& scene_name, const std::string& query_name);
 
   PlanningSceneCollection planning_scene_collection_;
   MotionPlanRequestCollection motion_plan_request_collection_;

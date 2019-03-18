@@ -274,7 +274,8 @@ public:
    */
   bool searchPositionIK(
       const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-      std::vector<double>& solution, const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
+      std::vector<double>& solution, const IKCallbackFn& solution_callback,
+      moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   /**
@@ -793,7 +794,8 @@ bool IKFastKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_
 
 bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose,
                                               const std::vector<double>& ik_seed_state, double timeout,
-                                              std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
+                                              std::vector<double>& solution,
+                                              moveit_msgs::msg::MoveItErrorCodes& error_code,
                                               const kinematics::KinematicsQueryOptions& options) const
 {
   std::vector<double> consistency_limits;
@@ -804,7 +806,8 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
 bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose,
                                               const std::vector<double>& ik_seed_state, double timeout,
                                               const std::vector<double>& consistency_limits,
-                                              std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
+                                              std::vector<double>& solution,
+                                              moveit_msgs::msg::MoveItErrorCodes& error_code,
                                               const kinematics::KinematicsQueryOptions& options) const
 {
   return searchPositionIK(ik_pose, ik_seed_state, timeout, consistency_limits, solution, IKCallbackFn(), error_code,
@@ -1054,7 +1057,8 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose
 
 // Used when there are no redundant joints - aka no free params
 bool IKFastKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
-                                           std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
+                                           std::vector<double>& solution,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   ROS_DEBUG_STREAM_NAMED(name_, "getPositionIK");

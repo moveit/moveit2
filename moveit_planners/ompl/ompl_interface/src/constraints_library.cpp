@@ -202,8 +202,9 @@ allocConstraintApproximationStateSampler(const ob::StateSpace* space, const std:
 }  // namespace ompl_interface
 
 ompl_interface::ConstraintApproximation::ConstraintApproximation(
-    std::string group, std::string state_space_parameterization, bool explicit_motions, moveit_msgs::msg::Constraints msg,
-    std::string filename, ompl::base::StateStoragePtr storage, std::size_t milestones)
+    std::string group, std::string state_space_parameterization, bool explicit_motions,
+    moveit_msgs::msg::Constraints msg, std::string filename, ompl::base::StateStoragePtr storage,
+    std::size_t milestones)
   : group_(std::move(group))
   , state_space_parameterization_(std::move(state_space_parameterization))
   , explicit_motions_(explicit_motions)

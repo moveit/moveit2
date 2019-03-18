@@ -218,7 +218,8 @@ static void _attachedBodyToMsg(const AttachedBody& attached_body, moveit_msgs::m
   }
 }
 
-static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::AttachedCollisionObject& aco, RobotState& state)
+static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::AttachedCollisionObject& aco,
+                               RobotState& state)
 {
   if (aco.object.operation == moveit_msgs::msg::CollisionObject::ADD)
   {
@@ -372,7 +373,8 @@ bool jointStateToRobotState(const sensor_msgs::JointState& joint_state, RobotSta
   return result;
 }
 
-bool robotStateMsgToRobotState(const moveit_msgs::msg::RobotState& robot_state, RobotState& state, bool copy_attached_bodies)
+bool robotStateMsgToRobotState(const moveit_msgs::msg::RobotState& robot_state, RobotState& state,
+                               bool copy_attached_bodies)
 {
   bool result = _robotStateMsgToRobotStateHelper(nullptr, robot_state, state, copy_attached_bodies);
   state.update();
@@ -387,7 +389,8 @@ bool robotStateMsgToRobotState(const Transforms& tf, const moveit_msgs::msg::Rob
   return result;
 }
 
-void robotStateToRobotStateMsg(const RobotState& state, moveit_msgs::msg::RobotState& robot_state, bool copy_attached_bodies)
+void robotStateToRobotStateMsg(const RobotState& state, moveit_msgs::msg::RobotState& robot_state,
+                               bool copy_attached_bodies)
 {
   robot_state.is_diff = false;
   robotStateToJointStateMsg(state, robot_state.joint_state);

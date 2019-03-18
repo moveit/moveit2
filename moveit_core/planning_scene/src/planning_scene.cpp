@@ -1146,7 +1146,8 @@ void PlanningScene::setCurrentState(const moveit_msgs::msg::RobotState& state)
 
   for (std::size_t i = 0; i < state.attached_collision_objects.size(); ++i)
   {
-    if (!state.is_diff && state.attached_collision_objects[i].object.operation != moveit_msgs::msg::CollisionObject::ADD)
+    if (!state.is_diff &&
+        state.attached_collision_objects[i].object.operation != moveit_msgs::msg::CollisionObject::ADD)
     {
       ROS_ERROR_NAMED(LOGNAME, "The specified RobotState is not marked as is_diff. "
                                "The request to modify the object '%s' is not supported. Object is ignored.",
@@ -1437,7 +1438,8 @@ void PlanningScene::processOctomapPtr(const std::shared_ptr<const octomap::OcTre
 
 bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::AttachedCollisionObject& object)
 {
-  if (object.object.operation == moveit_msgs::msg::CollisionObject::ADD && !getRobotModel()->hasLinkModel(object.link_name))
+  if (object.object.operation == moveit_msgs::msg::CollisionObject::ADD &&
+      !getRobotModel()->hasLinkModel(object.link_name))
   {
     ROS_ERROR_NAMED(LOGNAME, "Unable to attach a body to link '%s' (link not found)", object.link_name.c_str());
     return false;
@@ -1696,7 +1698,8 @@ bool PlanningScene::processCollisionObjectMsg(const moveit_msgs::msg::CollisionO
     return false;
   }
 
-  if (object.operation == moveit_msgs::msg::CollisionObject::ADD || object.operation == moveit_msgs::msg::CollisionObject::APPEND)
+  if (object.operation == moveit_msgs::msg::CollisionObject::ADD ||
+      object.operation == moveit_msgs::msg::CollisionObject::APPEND)
   {
     return processCollisionObjectAdd(object);
   }
@@ -2002,7 +2005,8 @@ void PlanningScene::removeObjectColor(const std::string& id)
     object_colors_->erase(id);
 }
 
-bool PlanningScene::isStateColliding(const moveit_msgs::msg::RobotState& state, const std::string& group, bool verbose) const
+bool PlanningScene::isStateColliding(const moveit_msgs::msg::RobotState& state, const std::string& group,
+                                     bool verbose) const
 {
   robot_state::RobotState s(getCurrentState());
   robot_state::robotStateMsgToRobotState(getTransforms(), state, s);
@@ -2045,16 +2049,16 @@ bool PlanningScene::isStateFeasible(const robot_state::RobotState& state, bool v
   return true;
 }
 
-bool PlanningScene::isStateConstrained(const moveit_msgs::msg::RobotState& state, const moveit_msgs::msg::Constraints& constr,
-                                       bool verbose) const
+bool PlanningScene::isStateConstrained(const moveit_msgs::msg::RobotState& state,
+                                       const moveit_msgs::msg::Constraints& constr, bool verbose) const
 {
   robot_state::RobotState s(getCurrentState());
   robot_state::robotStateMsgToRobotState(getTransforms(), state, s);
   return isStateConstrained(s, constr, verbose);
 }
 
-bool PlanningScene::isStateConstrained(const robot_state::RobotState& state, const moveit_msgs::msg::Constraints& constr,
-                                       bool verbose) const
+bool PlanningScene::isStateConstrained(const robot_state::RobotState& state,
+                                       const moveit_msgs::msg::Constraints& constr, bool verbose) const
 {
   kinematic_constraints::KinematicConstraintSetPtr ks(
       new kinematic_constraints::KinematicConstraintSet(getRobotModel()));
@@ -2085,7 +2089,8 @@ bool PlanningScene::isStateValid(const robot_state::RobotState& state, const std
   return isStateValid(state, EMP_CONSTRAINTS, group, verbose);
 }
 
-bool PlanningScene::isStateValid(const moveit_msgs::msg::RobotState& state, const std::string& group, bool verbose) const
+bool PlanningScene::isStateValid(const moveit_msgs::msg::RobotState& state, const std::string& group,
+                                 bool verbose) const
 {
   static const moveit_msgs::msg::Constraints EMP_CONSTRAINTS;
   return isStateValid(state, EMP_CONSTRAINTS, group, verbose);
@@ -2121,8 +2126,8 @@ bool PlanningScene::isStateValid(const robot_state::RobotState& state,
 }
 
 bool PlanningScene::isPathValid(const moveit_msgs::msg::RobotState& start_state,
-                                const moveit_msgs::msg::RobotTrajectory& trajectory, const std::string& group, bool verbose,
-                                std::vector<std::size_t>* invalid_index) const
+                                const moveit_msgs::msg::RobotTrajectory& trajectory, const std::string& group,
+                                bool verbose, std::vector<std::size_t>* invalid_index) const
 {
   static const moveit_msgs::msg::Constraints EMP_CONSTRAINTS;
   static const std::vector<moveit_msgs::msg::Constraints> EMP_CONSTRAINTS_VECTOR;
@@ -2151,8 +2156,8 @@ bool PlanningScene::isPathValid(const moveit_msgs::msg::RobotState& start_state,
 bool PlanningScene::isPathValid(const moveit_msgs::msg::RobotState& start_state,
                                 const moveit_msgs::msg::RobotTrajectory& trajectory,
                                 const moveit_msgs::msg::Constraints& path_constraints,
-                                const std::vector<moveit_msgs::msg::Constraints>& goal_constraints, const std::string& group,
-                                bool verbose, std::vector<std::size_t>* invalid_index) const
+                                const std::vector<moveit_msgs::msg::Constraints>& goal_constraints,
+                                const std::string& group, bool verbose, std::vector<std::size_t>* invalid_index) const
 {
   robot_trajectory::RobotTrajectory t(getRobotModel(), group);
   robot_state::RobotState start(getCurrentState());
@@ -2163,8 +2168,8 @@ bool PlanningScene::isPathValid(const moveit_msgs::msg::RobotState& start_state,
 
 bool PlanningScene::isPathValid(const robot_trajectory::RobotTrajectory& trajectory,
                                 const moveit_msgs::msg::Constraints& path_constraints,
-                                const std::vector<moveit_msgs::msg::Constraints>& goal_constraints, const std::string& group,
-                                bool verbose, std::vector<std::size_t>* invalid_index) const
+                                const std::vector<moveit_msgs::msg::Constraints>& goal_constraints,
+                                const std::string& group, bool verbose, std::vector<std::size_t>* invalid_index) const
 {
   bool result = true;
   if (invalid_index)

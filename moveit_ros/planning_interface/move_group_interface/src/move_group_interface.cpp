@@ -144,16 +144,16 @@ public:
       timeout_for_servers = ros::WallTime();  // wait for ever
     double allotted_time = wait_for_servers.toSec();
 
-    move_action_client_.reset(
-        new actionlib::SimpleActionClient<moveit_msgs::action::MoveGroupAction>(node_handle_, move_group::MOVE_ACTION, false));
+    move_action_client_.reset(new actionlib::SimpleActionClient<moveit_msgs::action::MoveGroupAction>(
+        node_handle_, move_group::MOVE_ACTION, false));
     waitForAction(move_action_client_, move_group::MOVE_ACTION, timeout_for_servers, allotted_time);
 
-    pick_action_client_.reset(
-        new actionlib::SimpleActionClient<moveit_msgs::action::PickupAction>(node_handle_, move_group::PICKUP_ACTION, false));
+    pick_action_client_.reset(new actionlib::SimpleActionClient<moveit_msgs::action::PickupAction>(
+        node_handle_, move_group::PICKUP_ACTION, false));
     waitForAction(pick_action_client_, move_group::PICKUP_ACTION, timeout_for_servers, allotted_time);
 
-    place_action_client_.reset(
-        new actionlib::SimpleActionClient<moveit_msgs::action::PlaceAction>(node_handle_, move_group::PLACE_ACTION, false));
+    place_action_client_.reset(new actionlib::SimpleActionClient<moveit_msgs::action::PlaceAction>(
+        node_handle_, move_group::PLACE_ACTION, false));
     waitForAction(place_action_client_, move_group::PLACE_ACTION, timeout_for_servers, allotted_time);
 
     execute_action_client_.reset(new actionlib::SimpleActionClient<moveit_msgs::action::ExecuteTrajectoryAction>(
@@ -644,7 +644,8 @@ public:
     }
   }
 
-  MoveItErrorCode pick(const std::string& object, const std::vector<moveit_msgs::msg::Grasp>& grasps, bool plan_only = false)
+  MoveItErrorCode pick(const std::string& object, const std::vector<moveit_msgs::msg::Grasp>& grasps,
+                       bool plan_only = false)
   {
     if (!pick_action_client_)
     {
@@ -691,7 +692,8 @@ public:
     }
     moveit::planning_interface::PlanningSceneInterface psi;
 
-    std::map<std::string, moveit_msgs::msg::CollisionObject> objects = psi.getObjects(std::vector<std::string>(1, object));
+    std::map<std::string, moveit_msgs::msg::CollisionObject> objects =
+        psi.getObjects(std::vector<std::string>(1, object));
 
     if (objects.empty())
     {
@@ -848,8 +850,9 @@ public:
   }
 
   double computeCartesianPath(const std::vector<geometry_msgs::Pose>& waypoints, double step, double jump_threshold,
-                              moveit_msgs::msg::RobotTrajectory& msg, const moveit_msgs::msg::Constraints& path_constraints,
-                              bool avoid_collisions, moveit_msgs::msg::MoveItErrorCodes& error_code)
+                              moveit_msgs::msg::RobotTrajectory& msg,
+                              const moveit_msgs::msg::Constraints& path_constraints, bool avoid_collisions,
+                              moveit_msgs::msg::MoveItErrorCodes& error_code)
   {
     moveit_msgs::srv::GetCartesianPath::Request req;
     moveit_msgs::srv::GetCartesianPath::Response res;
@@ -1499,7 +1502,8 @@ moveit::planning_interface::MoveItErrorCode moveit::planning_interface::MoveGrou
 
 double moveit::planning_interface::MoveGroupInterface::computeCartesianPath(
     const std::vector<geometry_msgs::Pose>& waypoints, double eef_step, double jump_threshold,
-    moveit_msgs::msg::RobotTrajectory& trajectory, bool avoid_collisions, moveit_msgs::msg::MoveItErrorCodes* error_code)
+    moveit_msgs::msg::RobotTrajectory& trajectory, bool avoid_collisions,
+    moveit_msgs::msg::MoveItErrorCodes* error_code)
 {
   moveit_msgs::msg::Constraints path_constraints_tmp;
   return computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, path_constraints_tmp, avoid_collisions,
@@ -1508,8 +1512,8 @@ double moveit::planning_interface::MoveGroupInterface::computeCartesianPath(
 
 double moveit::planning_interface::MoveGroupInterface::computeCartesianPath(
     const std::vector<geometry_msgs::Pose>& waypoints, double eef_step, double jump_threshold,
-    moveit_msgs::msg::RobotTrajectory& trajectory, const moveit_msgs::msg::Constraints& path_constraints, bool avoid_collisions,
-    moveit_msgs::msg::MoveItErrorCodes* error_code)
+    moveit_msgs::msg::RobotTrajectory& trajectory, const moveit_msgs::msg::Constraints& path_constraints,
+    bool avoid_collisions, moveit_msgs::msg::MoveItErrorCodes* error_code)
 {
   if (error_code)
   {

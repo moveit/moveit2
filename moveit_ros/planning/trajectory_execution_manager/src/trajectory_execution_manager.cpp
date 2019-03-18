@@ -233,7 +233,8 @@ void TrajectoryExecutionManager::receiveEvent(const std_msgs::StringConstPtr& ev
   processEvent(event->data);
 }
 
-bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& trajectory, const std::string& controller)
+bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& trajectory,
+                                      const std::string& controller)
 {
   if (controller.empty())
     return push(trajectory, std::vector<std::string>());

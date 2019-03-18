@@ -618,7 +618,8 @@ void PlanningSceneMonitor::collisionObjectFailTFCallback(const moveit_msgs::msg:
                                                          tf2_ros::filter_failure_reasons::FilterFailureReason reason)
 {
   // if we just want to remove objects, the frame does not matter
-  if (reason == tf2_ros::filter_failure_reasons::EmptyFrameID && obj->operation == moveit_msgs::msg::CollisionObject::REMOVE)
+  if (reason == tf2_ros::filter_failure_reasons::EmptyFrameID &&
+      obj->operation == moveit_msgs::msg::CollisionObject::REMOVE)
     collisionObjectCallback(obj);
 }
 
