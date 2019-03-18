@@ -1,7 +1,7 @@
-# moveit/moveit:crystal-source
+# moveit/moveit2:crystal-source
 # Downloads the moveit source code and install remaining debian dependencies
 
-FROM moveit/moveit:crystal-ci
+FROM moveit/moveit2:crystal-ci
 LABEL maintainer="mike@picknik.ai"
 
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
