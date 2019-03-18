@@ -50,10 +50,6 @@
     # TODO(mlautman): update to ros-planning once the package has been ported
     uri: https://github.com/AcutronicRobotics/moveit_resources
     version: master
-# - git:
-    # local-name: image_common
-    # uri: https://github.com/ros-perception/image_common
-    # version: ros2
 - git:
     local-name: joint_state_publisher
     uri: https://github.com/ros/joint_state_publisher
