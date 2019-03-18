@@ -71,7 +71,7 @@ void getCostMarkers(visualization_msgs::msg::MarkerArray& arr, const std::string
     rclcpp::Clock ros_clock(RCL_ROS_TIME);
 
     visualization_msgs::msg::Marker mk;
-    mk.header.stamp = ros_clock.now();
+    mk.header.stamp = rclcpp::Time::now(RCL_ROS_TIME);
     mk.header.frame_id = frame_id;
     mk.ns = "cost_source";
     mk.id = id++;
