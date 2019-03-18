@@ -39,7 +39,7 @@ matrix: # Add a separate config to the matrix, using clang as compiler
     - env: TEST=clang-tidy-fix  # need to fix clang-tidy issues
 
 before_script:
-  - git clone -q --depth=1 https://github.com/ros-planning/moveit_ci.git .moveit_ci
+  - git clone -b movet2-ci -q --depth=1 https://github.com/ros-planning/moveit_ci.git .moveit_ci
 
 script:
   - .moveit_ci/travis.sh
