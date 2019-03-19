@@ -199,7 +199,7 @@ commands:
 executors:
   docker_exec:
     docker:
-      - image: rosplanning/moveit2:master
+      - image: moveit/moveit2:master
     working_directory: /opt/moveit2_ws
     environment:
       MAKEFLAGS: "-j 1 -l 1"
