@@ -7,19 +7,19 @@ references:
           stat -c '%y' /opt/ros/$ROS_DISTRO/setup.sh | \
             sha256sum | \
             awk '{print "distro "$1}' > /opt/ros/$ROS_DISTRO/checksum.txt
-          cp $MOVEIT2_WS/src/moveit2/tools/ros2_dependencies.repos $ROS_WS/
+          cp $MOVEIT2_WS/src/moveit2/moveit2.repos $ROS_WS/
           rm -rf $MOVEIT2_WS/*
   post_checkout: &post_checkout
     run:
         name: Post Checkout
         command: |
           rm $MOVEIT2_WS/src/moveit2/nav2_system_tests/COLCON_IGNORE
-          if ! cmp $MOVEIT2_WS/src/moveit2/tools/ros2_dependencies.repos $ROS_WS/ros2_dependencies.repos >/dev/null 2>&1
+          if ! cmp $MOVEIT2_WS/src/moveit2/moveit2.repos $ROS_WS/moveit2.repos >/dev/null 2>&1
           then
             echo "Cleaning Upstream"
             rm -rf $ROS_WS/*
             mkdir -p $ROS_WS/src
-            vcs import $ROS_WS/src < $MOVEIT2_WS/src/moveit2/tools/ros2_dependencies.repos
+            vcs import $ROS_WS/src < $MOVEIT2_WS/src/moveit2/moveit2.repos
           fi
   install_upstream: &install_upstream
     run:
