@@ -104,7 +104,6 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     sensor_manager/include
     trajectory_processing/include
     utils/include
-    logging/include
 )
 
 set(libraries
@@ -180,7 +179,6 @@ add_subdirectory(macros)
 add_subdirectory(backtrace)
 add_subdirectory(exceptions)
 add_subdirectory(profiler)
-add_subdirectory(logging)
 add_subdirectory(background_processing)
 add_subdirectory(kinematics_base)
 add_subdirectory(controller_manager)
