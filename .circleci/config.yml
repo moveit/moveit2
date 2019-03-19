@@ -13,7 +13,6 @@ references:
     run:
         name: Post Checkout
         command: |
-          rm $MOVEIT2_WS/src/moveit2/nav2_system_tests/COLCON_IGNORE
           if ! cmp $MOVEIT2_WS/src/moveit2/moveit2.repos $ROS_WS/moveit2.repos >/dev/null 2>&1
           then
             echo "Cleaning Upstream"
