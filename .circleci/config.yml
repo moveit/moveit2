@@ -1,5 +1,5 @@
 # `checksum.txt` derives the key for the `save_cache` and `restore_cache` steps.
-# As we can't cache onpon the state of the file system directly,
+# As we can't cache upon the state of the file system directly,
 # we instead compute a checksum of the files we wish to cache indirectly.
 # CircleCI checksums this file, a simple list of checksum values itself,
 # as part of the key to restore or break the respective cache value.
