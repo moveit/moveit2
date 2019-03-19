@@ -54,7 +54,7 @@ namespace core
  * valid paths from paths with large joint space jumps. */
 static const std::size_t MIN_STEPS_FOR_JUMP_THRESH = 10;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.robot_state");
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.robot_state");
 
 RobotState::RobotState(const RobotModelConstPtr& robot_model)
   : robot_model_(robot_model)
