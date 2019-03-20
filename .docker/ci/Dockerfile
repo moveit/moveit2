@@ -67,7 +67,6 @@ RUN . $ROS_WS/install/setup.sh && \
     && rm -rf /var/lib/apt/lists/*
 
 # build moveit2 package source
-RUN rm $MOVEIT2_WS/src/moveit2/nav2_system_tests/COLCON_IGNORE
 ARG COVERAGE_ENABLED=False
 RUN . $ROS_WS/install/setup.sh && \
      colcon build \
