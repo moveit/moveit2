@@ -233,14 +233,15 @@ workflows:
     jobs:
       - debug_build
       - release_build
-# TODO: Add cron jobs for regular tracking upstream
-  # nightly:
-  #   triggers:
-  #     - schedule:
-  #         cron: "0 0 * * *"
-  #         filters:
-  #           branches:
-  #             only:
-  #               - master
-  #   jobs:
-  #     - build
+# TODO: Make PR jobs use docker image for target branch, this needs: https://circleci.com/ideas/?idea=CCI-I-894
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - debug_build
+      - release_build
