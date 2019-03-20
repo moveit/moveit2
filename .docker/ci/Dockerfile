@@ -3,7 +3,7 @@
 # Example build command:
 # export http_proxy=http://my.proxy.com:80
 # export CMAKE_BUILD_TYPE=Debug
-# docker build -t nav2:latest --build-arg http_proxy --build-arg CMAKE_BUILD_TYPE ./
+# docker build -t moveit2:master --build-arg http_proxy --build-arg CMAKE_BUILD_TYPE ./
 FROM osrf/ros2:nightly
 
 # setup keys
