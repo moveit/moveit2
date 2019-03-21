@@ -12,7 +12,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
     pluginlib)
 
 add_executable(moveit_occupancy_map_server src/occupancy_map_server.cpp)
-target_link_libraries(moveit_occupancy_map_server ${MOVEIT_LIB_NAME} ${rclcpp_LIBRARIES} ${Boost_LIBRARIES} ${tf2_ros_LIBRARIES}
+ament_target_dependencies(moveit_occupancy_map_server pluginlib ${MOVEIT_LIB_NAME} ${rclcpp_LIBRARIES} ${Boost_LIBRARIES} ${tf2_ros_LIBRARIES}
 ${OCTOMAP_LIBRARIES} ${octomap_msgs_LIBRARIES} ${pluginlib_LIBRARIES})
 
 install(TARGETS ${MOVEIT_LIB_NAME}
