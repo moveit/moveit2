@@ -41,8 +41,6 @@ find_package(image_transport REQUIRED)
 find_package(object_recognition_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(moveit_msgs REQUIRED)
-
-
 find_package(Eigen3 REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(octomap REQUIRED)
