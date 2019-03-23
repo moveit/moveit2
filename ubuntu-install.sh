@@ -34,9 +34,7 @@ function installCommonDependencies()
 	  	             build-essential \
 	                     cmake \
 	                     git \
-	                     python3-colcon-common-extensions \
 	                     python3-pip \
-	                     python3-vcstool \
 	                     wget \
 	      	             libboost-all-dev \
 	                     libglew-dev \
@@ -56,8 +54,8 @@ function checkROS()
 		sleep 2
       		sudo bash -c "apt-get update -qq && apt install -qq -y tzdata dirmngr gnupg2 curl \
                               && curl http://repo.ros2.org/repos.key | apt-key add - \
-      		              && echo "deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros2-latest.list \
-      		              && apt-get update -qq && apt-get install -qq -y \
+      		              && echo 'deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu `lsb_release -cs` main' > /etc/apt/sources.list.d/ros2-latest.list \
+      		              && apt-get update && apt-get install -y python3-vcstool python3-colcon-common-extensions \
          		                 	        	ros-$ROS_DISTRO-ros-base \
          			                  	        ros-$ROS_DISTRO-action-msgs \
          				                        ros-$ROS_DISTRO-message-filters \
@@ -69,6 +67,8 @@ function checkROS()
 		echo -e "${CYAN}ROS2 cystal is in your system, updating to fetch the latest version${RESET}"
 		sleep 2
 		sudo bash -c "apt update && apt install -y \
+			                        python3-vcstool \
+						python3-colcon-common-extensions \
 				                ros-$ROS_DISTRO-ros-base \
 			                        ros-$ROS_DISTRO-action-msgs \
 			                        ros-$ROS_DISTRO-message-filters \
@@ -120,8 +120,8 @@ function compileWS()
 }
 
 checkSystem
-prepareWS
-downloadSource
 installCommonDependencies
 checkROS
+prepareWS
+downloadSource
 compileWS
