@@ -99,6 +99,8 @@ bool jointPrecedes(const JointModel* a, const JointModel* b)
 }
 }  // namespace
 
+const std::string LOGNAME = "robot_model.jmg";
+
 JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Model::Group& config,
                                  const std::vector<const JointModel*>& unsorted_group_joints,
                                  const RobotModel* parent_model)
@@ -730,5 +732,48 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
   out << std::endl;
 }
 
+bool JointModelGroup::isValidVelocityMove(const std::vector<double>& from_joint_pose,
+                                          const std::vector<double>& to_joint_pose, double dt) const
+{
+  // Check for equal sized arrays
+  if (from_joint_pose.size() != to_joint_pose.size())
+  {
+    ROS_ERROR_NAMED(LOGNAME, "To and from joint poses are of different sizes.");
+    return false;
+  }
+
+  return isValidVelocityMove(&from_joint_pose[0], &to_joint_pose[0], from_joint_pose.size(), dt);
+}
+
+bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const double* to_joint_pose,
+                                          std::size_t array_size, double dt) const
+{
+  const std::vector<const JointModel::Bounds*>& bounds = getActiveJointModelsBounds();
+  const std::vector<unsigned int>& bij = getKinematicsSolverJointBijection();
+
+  for (std::size_t i = 0; i < array_size; ++i)
+  {
+    double dtheta = std::abs(from_joint_pose[i] - to_joint_pose[i]);
+    const std::vector<moveit::core::VariableBounds>* var_bounds = bounds[bij[i]];
+
+    if (var_bounds->size() != 1)
+    {
+      // TODO(davetcoleman) Support multiple variables
+      ROS_ERROR_NAMED(LOGNAME, "Attempting to check velocity bounds for waypoint move with joints that have multiple "
+                               "variables");
+      return false;
+    }
+    const double max_velocity = (*var_bounds)[0].max_velocity_;
+
+    double max_dtheta = dt * max_velocity;
+    if (dtheta > max_dtheta)
+    {
+      ROS_DEBUG_STREAM_NAMED(LOGNAME, "Not valid velocity move because of joint " << i);
+      return false;
+    }
+  }
+
+  return true;
+}
 }  // end of namespace core
 }  // end of namespace moveit
