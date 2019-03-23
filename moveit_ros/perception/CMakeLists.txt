@@ -27,7 +27,7 @@ if(APPLE)
 endif(APPLE)
 
 find_package(ament_cmake REQUIRED)
-find_package(ros1_bridge REQUIRED)
+# find_package(ros1_bridge REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(urdf REQUIRED)
