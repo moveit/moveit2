@@ -559,13 +559,6 @@ void JointModelGroup::setDefaultIKTimeout(double ik_timeout)
   for (KinematicsSolverMap::iterator it = group_kinematics_.second.begin(); it != group_kinematics_.second.end(); ++it)
     it->second.default_ik_timeout_ = ik_timeout;
 }
-// Re-added this as its needed to compile robot_state, this has been removed on https://github.com/ros-planning/moveit/pull/1288/files
-void JointModelGroup::setDefaultIKAttempts(unsigned int ik_attempts)
-{
-  group_kinematics_.first.default_ik_attempts_ = ik_attempts;
-  for (KinematicsSolverMap::iterator it = group_kinematics_.second.begin(); it != group_kinematics_.second.end(); ++it)
-    it->second.default_ik_attempts_ = ik_attempts;
-}
 
 bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik_jnames,
                                               std::vector<unsigned int>& joint_bijection) const
