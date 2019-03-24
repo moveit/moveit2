@@ -182,7 +182,7 @@ public:
   /// \param error_code This is where the error is set if constructing the planning context fails
   virtual PlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                 const MotionPlanRequest& req,
-                                                moveit_msgs::MoveItErrorCodes& error_code) const = 0;
+                                                moveit_msgs::msg::MoveItErrorCodes& error_code) const = 0;
 
   /// \brief Calls the function above but ignores the error_code
   PlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,

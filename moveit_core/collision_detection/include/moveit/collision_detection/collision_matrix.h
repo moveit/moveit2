@@ -90,7 +90,7 @@ public:
   AllowedCollisionMatrix(const std::vector<std::string>& names, bool allowed = false);
 
   /** @brief Construct the structure from a message representation */
-  AllowedCollisionMatrix(const moveit_msgs::AllowedCollisionMatrix& msg);
+  AllowedCollisionMatrix(const moveit_msgs::msg::AllowedCollisionMatrix& msg);
 
   /** @brief Copy constructor */
   AllowedCollisionMatrix(const AllowedCollisionMatrix& acm);
@@ -191,7 +191,7 @@ public:
   void getAllEntryNames(std::vector<std::string>& names) const;
 
   /** @brief Get the allowed collision matrix as a message */
-  void getMessage(moveit_msgs::AllowedCollisionMatrix& msg) const;
+  void getMessage(moveit_msgs::msg::AllowedCollisionMatrix& msg) const;
 
   /** @brief Clear the allowed collision matrix */
   void clear();

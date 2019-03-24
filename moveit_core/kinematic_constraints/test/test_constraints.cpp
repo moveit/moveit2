@@ -46,7 +46,7 @@ class LoadPlanningModelsPr2 : public testing::Test
 protected:
   void SetUp() override
   {
-    robot_model_ = moveit::core::loadTestingRobotModel("pr2_description");
+    robot_model_ = moveit::core::loadTestingRobotModel("pr2");
   }
 
   void TearDown() override
@@ -64,7 +64,7 @@ TEST_F(LoadPlanningModelsPr2, JointConstraintsSimple)
   robot_state::Transforms tf(robot_model_->getModelFrame());
 
   kinematic_constraints::JointConstraint jc(robot_model_);
-  moveit_msgs::JointConstraint jcm;
+  moveit_msgs::msg::JointConstraint jcm;
   jcm.joint_name = "head_pan_joint";
   jcm.position = 0.4;
   jcm.tolerance_above = 0.1;
@@ -180,7 +180,7 @@ TEST_F(LoadPlanningModelsPr2, JointConstraintsCont)
   robot_state::Transforms tf(robot_model_->getModelFrame());
 
   kinematic_constraints::JointConstraint jc(robot_model_);
-  moveit_msgs::JointConstraint jcm;
+  moveit_msgs::msg::JointConstraint jcm;
 
   jcm.joint_name = "l_wrist_roll_joint";
   jcm.position = 0.0;
@@ -296,7 +296,7 @@ TEST_F(LoadPlanningModelsPr2, JointConstraintsCont)
   EXPECT_TRUE(jc.decide(robot_state).satisfied);
 
   // should wrap to close and test to be near
-  moveit_msgs::JointConstraint jcm2 = jcm;
+  moveit_msgs::msg::JointConstraint jcm2 = jcm;
   jcm2.position = -6.28;
   kinematic_constraints::JointConstraint jc2(robot_model_);
   EXPECT_TRUE(jc.configure(jcm2));
@@ -309,7 +309,7 @@ TEST_F(LoadPlanningModelsPr2, JointConstraintsMultiDOF)
   robot_state.setToDefaultValues();
 
   kinematic_constraints::JointConstraint jc(robot_model_);
-  moveit_msgs::JointConstraint jcm;
+  moveit_msgs::msg::JointConstraint jcm;
   jcm.joint_name = "world_joint";
   jcm.position = 3.14;
   jcm.tolerance_above = 0.1;
@@ -361,7 +361,7 @@ TEST_F(LoadPlanningModelsPr2, PositionConstraintsFixed)
   robot_state.update(true);
   robot_state::Transforms tf(robot_model_->getModelFrame());
   kinematic_constraints::PositionConstraint pc(robot_model_);
-  moveit_msgs::PositionConstraint pcm;
+  moveit_msgs::msg::PositionConstraint pcm;
 
   // empty certainly means false
   EXPECT_FALSE(pc.configure(pcm, tf));
@@ -438,7 +438,7 @@ TEST_F(LoadPlanningModelsPr2, PositionConstraintsMobile)
   robot_state.update();
 
   kinematic_constraints::PositionConstraint pc(robot_model_);
-  moveit_msgs::PositionConstraint pcm;
+  moveit_msgs::msg::PositionConstraint pcm;
 
   pcm.link_name = "l_wrist_roll_link";
   pcm.target_point_offset.x = 0;
@@ -515,7 +515,7 @@ TEST_F(LoadPlanningModelsPr2, PositionConstraintsEquality)
 
   kinematic_constraints::PositionConstraint pc(robot_model_);
   kinematic_constraints::PositionConstraint pc2(robot_model_);
-  moveit_msgs::PositionConstraint pcm;
+  moveit_msgs::msg::PositionConstraint pcm;
 
   pcm.link_name = "l_wrist_roll_link";
   pcm.target_point_offset.x = 0;
@@ -551,7 +551,7 @@ TEST_F(LoadPlanningModelsPr2, PositionConstraintsEquality)
   EXPECT_TRUE(pc2.equal(pc, .001));
 
   // putting regions in different order
-  moveit_msgs::PositionConstraint pcm2 = pcm;
+  moveit_msgs::msg::PositionConstraint pcm2 = pcm;
   pcm2.constraint_region.primitives[0] = pcm.constraint_region.primitives[1];
   pcm2.constraint_region.primitives[1] = pcm.constraint_region.primitives[0];
 
@@ -602,7 +602,7 @@ TEST_F(LoadPlanningModelsPr2, OrientationConstraintsSimple)
 
   kinematic_constraints::OrientationConstraint oc(robot_model_);
 
-  moveit_msgs::OrientationConstraint ocm;
+  moveit_msgs::msg::OrientationConstraint ocm;
 
   EXPECT_FALSE(oc.configure(ocm, tf));
 
@@ -662,7 +662,7 @@ TEST_F(LoadPlanningModelsPr2, VisibilityConstraintsSimple)
   robot_state::Transforms tf(robot_model_->getModelFrame());
 
   kinematic_constraints::VisibilityConstraint vc(robot_model_);
-  moveit_msgs::VisibilityConstraint vcm;
+  moveit_msgs::msg::VisibilityConstraint vcm;
 
   EXPECT_FALSE(vc.configure(vcm, tf));
 
@@ -679,7 +679,7 @@ TEST_F(LoadPlanningModelsPr2, VisibilityConstraintsSimple)
   vcm.cone_sides = 10;
   vcm.max_view_angle = 0.0;
   vcm.max_range_angle = 0.0;
-  vcm.sensor_view_direction = moveit_msgs::VisibilityConstraint::SENSOR_Z;
+  vcm.sensor_view_direction = moveit_msgs::msg::VisibilityConstraint::SENSOR_Z;
   vcm.weight = 1.0;
 
   EXPECT_TRUE(vc.configure(vcm, tf));
@@ -713,7 +713,7 @@ TEST_F(LoadPlanningModelsPr2, VisibilityConstraintsPR2)
   robot_state::Transforms tf(robot_model_->getModelFrame());
 
   kinematic_constraints::VisibilityConstraint vc(robot_model_);
-  moveit_msgs::VisibilityConstraint vcm;
+  moveit_msgs::msg::VisibilityConstraint vcm;
 
   vcm.sensor_pose.header.frame_id = "narrow_stereo_optical_frame";
   vcm.sensor_pose.pose.position.z = 0.05;
@@ -726,7 +726,7 @@ TEST_F(LoadPlanningModelsPr2, VisibilityConstraintsPR2)
   vcm.cone_sides = 10;
   vcm.max_view_angle = 0.0;
   vcm.max_range_angle = 0.0;
-  vcm.sensor_view_direction = moveit_msgs::VisibilityConstraint::SENSOR_Z;
+  vcm.sensor_view_direction = moveit_msgs::msg::VisibilityConstraint::SENSOR_Z;
   vcm.weight = 1.0;
 
   // false because target radius is 0.0
@@ -761,7 +761,7 @@ TEST_F(LoadPlanningModelsPr2, VisibilityConstraintsPR2)
   EXPECT_TRUE(vc.decide(robot_state, true).satisfied);
 
   // this shouldn't matter
-  vcm.sensor_view_direction = moveit_msgs::VisibilityConstraint::SENSOR_X;
+  vcm.sensor_view_direction = moveit_msgs::msg::VisibilityConstraint::SENSOR_X;
   EXPECT_TRUE(vc.decide(robot_state, true).satisfied);
 
   robot_state.setToDefaultValues();
@@ -788,7 +788,7 @@ TEST_F(LoadPlanningModelsPr2, TestKinematicConstraintSet)
   kinematic_constraints::KinematicConstraintSet kcs(robot_model_);
   EXPECT_TRUE(kcs.empty());
 
-  moveit_msgs::JointConstraint jcm;
+  moveit_msgs::msg::JointConstraint jcm;
   jcm.joint_name = "head_pan_joint";
   jcm.position = 0.4;
   jcm.tolerance_above = 0.1;
@@ -796,7 +796,7 @@ TEST_F(LoadPlanningModelsPr2, TestKinematicConstraintSet)
   jcm.weight = 1.0;
 
   // this is a valid constraint
-  std::vector<moveit_msgs::JointConstraint> jcv;
+  std::vector<moveit_msgs::msg::JointConstraint> jcv;
   jcv.push_back(jcm);
   EXPECT_TRUE(kcs.add(jcv));
 
@@ -854,14 +854,14 @@ TEST_F(LoadPlanningModelsPr2, TestKinematicConstraintSetEquality)
   kinematic_constraints::KinematicConstraintSet kcs(robot_model_);
   kinematic_constraints::KinematicConstraintSet kcs2(robot_model_);
 
-  moveit_msgs::JointConstraint jcm;
+  moveit_msgs::msg::JointConstraint jcm;
   jcm.joint_name = "head_pan_joint";
   jcm.position = 0.4;
   jcm.tolerance_above = 0.1;
   jcm.tolerance_below = 0.05;
   jcm.weight = 1.0;
 
-  moveit_msgs::PositionConstraint pcm;
+  moveit_msgs::msg::PositionConstraint pcm;
   pcm.link_name = "l_wrist_roll_link";
   pcm.target_point_offset.x = 0;
   pcm.target_point_offset.y = 0;
@@ -884,11 +884,11 @@ TEST_F(LoadPlanningModelsPr2, TestKinematicConstraintSetEquality)
   pcm.header.frame_id = robot_model_->getModelFrame();
 
   // this is a valid constraint
-  std::vector<moveit_msgs::JointConstraint> jcv;
+  std::vector<moveit_msgs::msg::JointConstraint> jcv;
   jcv.push_back(jcm);
   EXPECT_TRUE(kcs.add(jcv));
 
-  std::vector<moveit_msgs::PositionConstraint> pcv;
+  std::vector<moveit_msgs::msg::PositionConstraint> pcv;
   pcv.push_back(pcm);
   EXPECT_TRUE(kcs.add(pcv, tf));
 

@@ -81,7 +81,7 @@ bool canSpecifyPosition(const robot_model::JointModel* jmodel, const unsigned in
     ok = true;
   return ok;
 }
-}
+}  // namespace
 
 void RobotModelLoader::configure(const Options& opt)
 {
@@ -110,7 +110,7 @@ void RobotModelLoader::configure(const Options& opt)
     for (std::size_t i = 0; i < model_->getJointModels().size(); ++i)
     {
       robot_model::JointModel* jmodel = model_->getJointModels()[i];
-      std::vector<moveit_msgs::JointLimits> jlim = jmodel->getVariableBoundsMsg();
+      std::vector<moveit_msgs::msg::JointLimits> jlim = jmodel->getVariableBoundsMsg();
       for (std::size_t j = 0; j < jlim.size(); ++j)
       {
         std::string prefix = rdf_loader_->getRobotDescription() + "_planning/joint_limits/" + jlim[j].joint_name + "/";
@@ -226,4 +226,4 @@ void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::Kin
     }
   }
 }
-}
+}  // namespace robot_model_loader

@@ -81,7 +81,7 @@ void MotionPlanningFrame::clearSceneButtonClicked()
   {
     ps->getWorldNonConst()->clearObjects();
     ps->getCurrentStateNonConst().clearAttachedBodies();
-    moveit_msgs::PlanningScene msg;
+    moveit_msgs::msg::PlanningScene msg;
     ps->getPlanningSceneMsg(msg);
     planning_scene_publisher_.publish(msg);
     planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populateCollisionObjectsList, this));
@@ -190,29 +190,29 @@ void MotionPlanningFrame::selectedCollisionObjectChanged()
   QList<QListWidgetItem*> sel = ui_->collision_objects_list->selectedItems();
   if (sel.empty())
   {
-    bool oldState = ui_->object_x->blockSignals(true);
+    bool old_state = ui_->object_x->blockSignals(true);
     ui_->object_x->setValue(0.0);
-    ui_->object_x->blockSignals(oldState);
+    ui_->object_x->blockSignals(old_state);
 
-    oldState = ui_->object_y->blockSignals(true);
+    old_state = ui_->object_y->blockSignals(true);
     ui_->object_y->setValue(0.0);
-    ui_->object_y->blockSignals(oldState);
+    ui_->object_y->blockSignals(old_state);
 
-    oldState = ui_->object_z->blockSignals(true);
+    old_state = ui_->object_z->blockSignals(true);
     ui_->object_z->setValue(0.0);
-    ui_->object_z->blockSignals(oldState);
+    ui_->object_z->blockSignals(old_state);
 
-    oldState = ui_->object_rx->blockSignals(true);
+    old_state = ui_->object_rx->blockSignals(true);
     ui_->object_rx->setValue(0.0);
-    ui_->object_rx->blockSignals(oldState);
+    ui_->object_rx->blockSignals(old_state);
 
-    oldState = ui_->object_ry->blockSignals(true);
+    old_state = ui_->object_ry->blockSignals(true);
     ui_->object_ry->setValue(0.0);
-    ui_->object_ry->blockSignals(oldState);
+    ui_->object_ry->blockSignals(old_state);
 
-    oldState = ui_->object_rz->blockSignals(true);
+    old_state = ui_->object_rz->blockSignals(true);
     ui_->object_rz->setValue(0.0);
-    ui_->object_rz->blockSignals(oldState);
+    ui_->object_rz->blockSignals(old_state);
 
     ui_->object_status->setText("");
     scene_marker_.reset();
@@ -240,29 +240,29 @@ void MotionPlanningFrame::selectedCollisionObjectChanged()
             Eigen::Vector3d xyz = obj_pose.rotation().eulerAngles(0, 1, 2);
             update_scene_marker = true;  // do the marker update outside locked scope to avoid deadlock
 
-            bool oldState = ui_->object_x->blockSignals(true);
+            bool old_state = ui_->object_x->blockSignals(true);
             ui_->object_x->setValue(obj_pose.translation()[0]);
-            ui_->object_x->blockSignals(oldState);
+            ui_->object_x->blockSignals(old_state);
 
-            oldState = ui_->object_y->blockSignals(true);
+            old_state = ui_->object_y->blockSignals(true);
             ui_->object_y->setValue(obj_pose.translation()[1]);
-            ui_->object_y->blockSignals(oldState);
+            ui_->object_y->blockSignals(old_state);
 
-            oldState = ui_->object_z->blockSignals(true);
+            old_state = ui_->object_z->blockSignals(true);
             ui_->object_z->setValue(obj_pose.translation()[2]);
-            ui_->object_z->blockSignals(oldState);
+            ui_->object_z->blockSignals(old_state);
 
-            oldState = ui_->object_rx->blockSignals(true);
+            old_state = ui_->object_rx->blockSignals(true);
             ui_->object_rx->setValue(xyz[0]);
-            ui_->object_rx->blockSignals(oldState);
+            ui_->object_rx->blockSignals(old_state);
 
-            oldState = ui_->object_ry->blockSignals(true);
+            old_state = ui_->object_ry->blockSignals(true);
             ui_->object_ry->setValue(xyz[1]);
-            ui_->object_ry->blockSignals(oldState);
+            ui_->object_ry->blockSignals(old_state);
 
-            oldState = ui_->object_rz->blockSignals(true);
+            old_state = ui_->object_rz->blockSignals(true);
             ui_->object_rz->setValue(xyz[2]);
-            ui_->object_rz->blockSignals(oldState);
+            ui_->object_rz->blockSignals(old_state);
           }
         }
         else
@@ -348,33 +348,33 @@ void MotionPlanningFrame::collisionObjectChanged(QListWidgetItem* item)
 /* Receives feedback from the interactive marker and updates the shape pose in the world accordingly */
 void MotionPlanningFrame::imProcessFeedback(visualization_msgs::InteractiveMarkerFeedback& feedback)
 {
-  bool oldState = ui_->object_x->blockSignals(true);
+  bool old_state = ui_->object_x->blockSignals(true);
   ui_->object_x->setValue(feedback.pose.position.x);
-  ui_->object_x->blockSignals(oldState);
+  ui_->object_x->blockSignals(old_state);
 
-  oldState = ui_->object_y->blockSignals(true);
+  old_state = ui_->object_y->blockSignals(true);
   ui_->object_y->setValue(feedback.pose.position.y);
-  ui_->object_y->blockSignals(oldState);
+  ui_->object_y->blockSignals(old_state);
 
-  oldState = ui_->object_z->blockSignals(true);
+  old_state = ui_->object_z->blockSignals(true);
   ui_->object_z->setValue(feedback.pose.position.z);
-  ui_->object_z->blockSignals(oldState);
+  ui_->object_z->blockSignals(old_state);
 
   Eigen::Quaterniond q;
   tf2::fromMsg(feedback.pose.orientation, q);
   Eigen::Vector3d xyz = q.matrix().eulerAngles(0, 1, 2);
 
-  oldState = ui_->object_rx->blockSignals(true);
+  old_state = ui_->object_rx->blockSignals(true);
   ui_->object_rx->setValue(xyz[0]);
-  ui_->object_rx->blockSignals(oldState);
+  ui_->object_rx->blockSignals(old_state);
 
-  oldState = ui_->object_ry->blockSignals(true);
+  old_state = ui_->object_ry->blockSignals(true);
   ui_->object_ry->setValue(xyz[1]);
-  ui_->object_ry->blockSignals(oldState);
+  ui_->object_ry->blockSignals(old_state);
 
-  oldState = ui_->object_rz->blockSignals(true);
+  old_state = ui_->object_rz->blockSignals(true);
   ui_->object_rz->setValue(xyz[2]);
-  ui_->object_rz->blockSignals(oldState);
+  ui_->object_rz->blockSignals(old_state);
 
   updateCollisionObjectPose(false);
 }
@@ -416,7 +416,7 @@ void MotionPlanningFrame::computeSaveSceneButtonClicked()
 {
   if (planning_scene_storage_)
   {
-    moveit_msgs::PlanningScene msg;
+    moveit_msgs::msg::PlanningScene msg;
     planning_display_->getPlanningSceneRO()->getPlanningSceneMsg(msg);
     try
     {
@@ -434,7 +434,7 @@ void MotionPlanningFrame::computeSaveSceneButtonClicked()
 
 void MotionPlanningFrame::computeSaveQueryButtonClicked(const std::string& scene, const std::string& query_name)
 {
-  moveit_msgs::MotionPlanRequest mreq;
+  moveit_msgs::msg::MotionPlanRequest mreq;
   constructPlanningRequest(mreq);
   if (planning_scene_storage_)
   {
@@ -596,16 +596,16 @@ void MotionPlanningFrame::computeLoadSceneButtonClicked()
                        planning_display_->getRobotModel()->getName().c_str());
               planning_scene_world_publisher_.publish(scene_m->world);
               // publish the parts that are not in the world
-              moveit_msgs::PlanningScene diff;
+              moveit_msgs::msg::PlanningScene diff;
               diff.is_diff = true;
               diff.name = scene_m->name;
               planning_scene_publisher_.publish(diff);
             }
             else
-              planning_scene_publisher_.publish(static_cast<const moveit_msgs::PlanningScene&>(*scene_m));
+              planning_scene_publisher_.publish(static_cast<const moveit_msgs::msg::PlanningScene&>(*scene_m));
           }
           else
-            planning_scene_publisher_.publish(static_cast<const moveit_msgs::PlanningScene&>(*scene_m));
+            planning_scene_publisher_.publish(static_cast<const moveit_msgs::msg::PlanningScene&>(*scene_m));
         }
         else
           ROS_WARN("Failed to load scene '%s'. Has the message format changed since the scene was saved?",
@@ -647,7 +647,7 @@ void MotionPlanningFrame::computeLoadQueryButtonClicked()
 
           robot_state::RobotStatePtr goal_state(new robot_state::RobotState(*planning_display_->getQueryGoalState()));
           for (std::size_t i = 0; i < mp->goal_constraints.size(); ++i)
-            if (mp->goal_constraints[i].joint_constraints.size() > 0)
+            if (!mp->goal_constraints[i].joint_constraints.empty())
             {
               std::map<std::string, double> vals;
               for (std::size_t j = 0; j < mp->goal_constraints[i].joint_constraints.size(); ++j)
@@ -794,7 +794,7 @@ void MotionPlanningFrame::attachDetachCollisionObject(QListWidgetItem* item)
   long unsigned int version = known_collision_objects_version_;
   bool checked = item->checkState() == Qt::Checked;
   std::pair<std::string, bool> data = known_collision_objects_[item->type()];
-  moveit_msgs::AttachedCollisionObject aco;
+  moveit_msgs::msg::AttachedCollisionObject aco;
 
   if (checked)  // we need to attach a known collision object
   {
@@ -813,7 +813,7 @@ void MotionPlanningFrame::attachDetachCollisionObject(QListWidgetItem* item)
     }
     aco.link_name = response.toStdString();
     aco.object.id = data.first;
-    aco.object.operation = moveit_msgs::CollisionObject::ADD;
+    aco.object.operation = moveit_msgs::msg::CollisionObject::ADD;
   }
   else  // we need to detach an attached object
   {
@@ -823,7 +823,7 @@ void MotionPlanningFrame::attachDetachCollisionObject(QListWidgetItem* item)
     {
       aco.link_name = attached_body->getAttachedLinkName();
       aco.object.id = attached_body->getName();
-      aco.object.operation = moveit_msgs::CollisionObject::REMOVE;
+      aco.object.operation = moveit_msgs::msg::CollisionObject::REMOVE;
     }
   }
   {
@@ -845,7 +845,7 @@ void MotionPlanningFrame::attachDetachCollisionObject(QListWidgetItem* item)
 void MotionPlanningFrame::populateCollisionObjectsList()
 {
   ui_->collision_objects_list->setUpdatesEnabled(false);
-  bool oldState = ui_->collision_objects_list->blockSignals(true);
+  bool old_state = ui_->collision_objects_list->blockSignals(true);
 
   {
     QList<QListWidgetItem*> sel = ui_->collision_objects_list->selectedItems();
@@ -895,7 +895,7 @@ void MotionPlanningFrame::populateCollisionObjectsList()
     }
   }
 
-  ui_->collision_objects_list->blockSignals(oldState);
+  ui_->collision_objects_list->blockSignals(old_state);
   ui_->collision_objects_list->setUpdatesEnabled(true);
   selectedCollisionObjectChanged();
 }
@@ -955,4 +955,4 @@ void MotionPlanningFrame::importFromTextButtonClicked()
     planning_display_->addBackgroundJob(
         boost::bind(&MotionPlanningFrame::computeImportFromText, this, path.toStdString()), "import from text");
 }
-}
+}  // namespace moveit_rviz_plugin

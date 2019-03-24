@@ -59,7 +59,7 @@ public:
    *  @param padding The padding to use for all objects/links on the robot
    *  @scale scale A common scaling to use for all objects/links on the robot
    */
-  CollisionRobot(const robot_model::RobotModelConstPtr& model, double padding = 0.0, double scale = 1.0);  // NOLINT
+  CollisionRobot(const robot_model::RobotModelConstPtr& model, double padding = 0.0, double scale = 1.0);
 
   /**  @brief A copy constructor*/
   CollisionRobot(const CollisionRobot& other);
@@ -279,16 +279,16 @@ public:
   void setScale(double scale);
 
   /** @brief Set the link padding from a vector of messages*/
-  void setPadding(const std::vector<moveit_msgs::LinkPadding>& padding);
+  void setPadding(const std::vector<moveit_msgs::msg::LinkPadding>& padding);
 
   /** @brief Get the link padding as a vector of messages*/
-  void getPadding(std::vector<moveit_msgs::LinkPadding>& padding) const;
+  void getPadding(std::vector<moveit_msgs::msg::LinkPadding>& padding) const;
 
   /** @brief Set the link scaling from a vector of messages*/
-  void setScale(const std::vector<moveit_msgs::LinkScale>& scale);
+  void setScale(const std::vector<moveit_msgs::msg::LinkScale>& scale);
 
   /** @brief Get the link scaling as a vector of messages*/
-  void getScale(std::vector<moveit_msgs::LinkScale>& scale) const;
+  void getScale(std::vector<moveit_msgs::msg::LinkScale>& scale) const;
 
 protected:
   /** @brief When the scale or padding is changed for a set of links by any of the functions in this class,

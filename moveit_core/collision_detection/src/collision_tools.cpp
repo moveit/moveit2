@@ -259,7 +259,7 @@ void removeCostSources(std::set<CostSource>& cost_sources, const std::set<CostSo
   }
 }
 
-void costSourceToMsg(const CostSource& cost_source, moveit_msgs::CostSource& msg)
+void costSourceToMsg(const CostSource& cost_source, moveit_msgs::msg::CostSource& msg)
 {
   msg.cost_density = cost_source.cost;
   msg.aabb_min.x = cost_source.aabb_min[0];
@@ -270,7 +270,7 @@ void costSourceToMsg(const CostSource& cost_source, moveit_msgs::CostSource& msg
   msg.aabb_max.z = cost_source.aabb_max[2];
 }
 
-void contactToMsg(const Contact& contact, moveit_msgs::ContactInformation& msg)
+void contactToMsg(const Contact& contact, moveit_msgs::msg::ContactInformation& msg)
 {
   msg.position = tf2::toMsg(contact.pos);
   tf2::toMsg(contact.normal, msg.normal);
@@ -278,17 +278,17 @@ void contactToMsg(const Contact& contact, moveit_msgs::ContactInformation& msg)
   msg.contact_body_1 = contact.body_name_1;
   msg.contact_body_2 = contact.body_name_2;
   if (contact.body_type_1 == BodyTypes::ROBOT_LINK)
-    msg.body_type_1 = moveit_msgs::ContactInformation::ROBOT_LINK;
+    msg.body_type_1 = moveit_msgs::msg::ContactInformation::ROBOT_LINK;
   else if (contact.body_type_1 == BodyTypes::ROBOT_ATTACHED)
-    msg.body_type_1 = moveit_msgs::ContactInformation::ROBOT_ATTACHED;
+    msg.body_type_1 = moveit_msgs::msg::ContactInformation::ROBOT_ATTACHED;
   else
-    msg.body_type_1 = moveit_msgs::ContactInformation::WORLD_OBJECT;
+    msg.body_type_1 = moveit_msgs::msg::ContactInformation::WORLD_OBJECT;
   if (contact.body_type_2 == BodyTypes::ROBOT_LINK)
-    msg.body_type_2 = moveit_msgs::ContactInformation::ROBOT_LINK;
+    msg.body_type_2 = moveit_msgs::msg::ContactInformation::ROBOT_LINK;
   else if (contact.body_type_2 == BodyTypes::ROBOT_ATTACHED)
-    msg.body_type_2 = moveit_msgs::ContactInformation::ROBOT_ATTACHED;
+    msg.body_type_2 = moveit_msgs::msg::ContactInformation::ROBOT_ATTACHED;
   else
-    msg.body_type_2 = moveit_msgs::ContactInformation::WORLD_OBJECT;
+    msg.body_type_2 = moveit_msgs::msg::ContactInformation::WORLD_OBJECT;
 }
 
 }  // end of namespace collision_detection

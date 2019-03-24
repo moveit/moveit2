@@ -50,7 +50,7 @@ namespace
 template <typename T>
 void msgToHex(const T& msg, std::string& hex)
 {
-  static const char symbol[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+  static const char SYMBOL[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
   const size_t serial_size_arg = ros::serialization::serializationLength(msg);
 
   boost::shared_array<uint8_t> buffer_arg(new uint8_t[serial_size_arg]);
@@ -59,8 +59,8 @@ void msgToHex(const T& msg, std::string& hex)
   hex.resize(serial_size_arg * 2);
   for (std::size_t i = 0; i < serial_size_arg; ++i)
   {
-    hex[i * 2] = symbol[buffer_arg[i] / 16];
-    hex[i * 2 + 1] = symbol[buffer_arg[i] % 16];
+    hex[i * 2] = SYMBOL[buffer_arg[i] / 16];
+    hex[i * 2 + 1] = SYMBOL[buffer_arg[i] % 16];
   }
 }
 
@@ -202,7 +202,7 @@ allocConstraintApproximationStateSampler(const ob::StateSpace* space, const std:
 }  // namespace ompl_interface
 
 ompl_interface::ConstraintApproximation::ConstraintApproximation(
-    std::string group, std::string state_space_parameterization, bool explicit_motions, moveit_msgs::Constraints msg,
+    std::string group, std::string state_space_parameterization, bool explicit_motions, moveit_msgs::msg::Constraints msg,
     std::string filename, ompl::base::StateStoragePtr storage, std::size_t milestones)
   : group_(std::move(group))
   , state_space_parameterization_(std::move(state_space_parameterization))
@@ -219,7 +219,7 @@ ompl_interface::ConstraintApproximation::ConstraintApproximation(
 }
 
 ompl::base::StateSamplerAllocator
-ompl_interface::ConstraintApproximation::getStateSamplerAllocator(const moveit_msgs::Constraints& msg) const
+ompl_interface::ConstraintApproximation::getStateSamplerAllocator(const moveit_msgs::msg::Constraints& msg) const
 {
   if (state_storage_->size() == 0)
     return ompl::base::StateSamplerAllocator();
@@ -306,7 +306,7 @@ void ompl_interface::ConstraintsLibrary::loadConstraintApproximations(const std:
     const ModelBasedPlanningContextPtr& pc = context_manager_.getPlanningContext(group, state_space_parameterization);
     if (pc)
     {
-      moveit_msgs::Constraints msg;
+      moveit_msgs::msg::Constraints msg;
       hexToMsg(serialization, msg);
       auto* cass = new ConstraintApproximationStateStorage(pc->getOMPLSimpleSetup()->getStateSpace());
       cass->load((path + "/" + filename).c_str());
@@ -381,7 +381,7 @@ void ompl_interface::ConstraintsLibrary::printConstraintApproximations(std::ostr
 }
 
 const ompl_interface::ConstraintApproximationPtr&
-ompl_interface::ConstraintsLibrary::getConstraintApproximation(const moveit_msgs::Constraints& msg) const
+ompl_interface::ConstraintsLibrary::getConstraintApproximation(const moveit_msgs::msg::Constraints& msg) const
 {
   auto it = constraint_approximations_.find(msg.name);
   if (it != constraint_approximations_.end())
@@ -393,7 +393,7 @@ ompl_interface::ConstraintsLibrary::getConstraintApproximation(const moveit_msgs
 
 ompl_interface::ConstraintApproximationConstructionResults
 ompl_interface::ConstraintsLibrary::addConstraintApproximation(
-    const moveit_msgs::Constraints& constr, const std::string& group,
+    const moveit_msgs::msg::Constraints& constr, const std::string& group,
     const planning_scene::PlanningSceneConstPtr& scene, const ConstraintApproximationConstructionOptions& options)
 {
   return addConstraintApproximation(constr, constr, group, scene, options);
@@ -401,7 +401,7 @@ ompl_interface::ConstraintsLibrary::addConstraintApproximation(
 
 ompl_interface::ConstraintApproximationConstructionResults
 ompl_interface::ConstraintsLibrary::addConstraintApproximation(
-    const moveit_msgs::Constraints& constr_sampling, const moveit_msgs::Constraints& constr_hard,
+    const moveit_msgs::msg::Constraints& constr_sampling, const moveit_msgs::msg::Constraints& constr_hard,
     const std::string& group, const planning_scene::PlanningSceneConstPtr& scene,
     const ConstraintApproximationConstructionOptions& options)
 {
@@ -437,8 +437,8 @@ ompl_interface::ConstraintsLibrary::addConstraintApproximation(
 }
 
 ompl::base::StateStoragePtr ompl_interface::ConstraintsLibrary::constructConstraintApproximation(
-    const ModelBasedPlanningContextPtr& pcontext, const moveit_msgs::Constraints& constr_sampling,
-    const moveit_msgs::Constraints& constr_hard, const ConstraintApproximationConstructionOptions& options,
+    const ModelBasedPlanningContextPtr& pcontext, const moveit_msgs::msg::Constraints& constr_sampling,
+    const moveit_msgs::msg::Constraints& constr_hard, const ConstraintApproximationConstructionOptions& options,
     ConstraintApproximationConstructionResults& result)
 {
   // state storage structure

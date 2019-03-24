@@ -87,7 +87,7 @@ public:
    * @return True if the configuration is successful.  If true, \ref isValid should also true.
    *         If false, \ref isValid should return false
    */
-  virtual bool configure(const moveit_msgs::Constraints& constr) = 0;
+  virtual bool configure(const moveit_msgs::msg::Constraints& constr) = 0;
 
   /**
    * \brief Gets the group name set in the constructor

@@ -272,10 +272,10 @@ bool OccupancyMapMonitor::getShapeTransformCache(std::size_t index, const std::s
 {
   if (transform_cache_callback_)
   {
-    ShapeTransformCache tempCache;
-    if (transform_cache_callback_(target_frame, target_time, tempCache))
+    ShapeTransformCache temp_cache;
+    if (transform_cache_callback_(target_frame, target_time, temp_cache))
     {
-      for (ShapeTransformCache::iterator it = tempCache.begin(); it != tempCache.end(); ++it)
+      for (ShapeTransformCache::iterator it = temp_cache.begin(); it != temp_cache.end(); ++it)
       {
         std::map<ShapeHandle, ShapeHandle>::const_iterator jt = mesh_handles_[index].find(it->first);
         if (jt == mesh_handles_[index].end())
@@ -295,8 +295,8 @@ bool OccupancyMapMonitor::getShapeTransformCache(std::size_t index, const std::s
     return false;
 }
 
-bool OccupancyMapMonitor::saveMapCallback(moveit_msgs::SaveMap::Request& request,
-                                          moveit_msgs::SaveMap::Response& response)
+bool OccupancyMapMonitor::saveMapCallback(moveit_msgs::srv::SaveMap::Request& request,
+                                          moveit_msgs::srv::SaveMap::Response& response)
 {
   ROS_INFO("Writing map to %s", request.filename.c_str());
   tree_->lockRead();
@@ -312,8 +312,8 @@ bool OccupancyMapMonitor::saveMapCallback(moveit_msgs::SaveMap::Request& request
   return true;
 }
 
-bool OccupancyMapMonitor::loadMapCallback(moveit_msgs::LoadMap::Request& request,
-                                          moveit_msgs::LoadMap::Response& response)
+bool OccupancyMapMonitor::loadMapCallback(moveit_msgs::srv::LoadMap::Request& request,
+                                          moveit_msgs::srv::LoadMap::Response& response)
 {
   ROS_INFO("Reading map from %s", request.filename.c_str());
 
@@ -352,4 +352,4 @@ OccupancyMapMonitor::~OccupancyMapMonitor()
 {
   stopMonitor();
 }
-}
+}  // namespace occupancy_map_monitor

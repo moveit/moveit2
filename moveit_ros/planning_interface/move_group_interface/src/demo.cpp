@@ -39,7 +39,7 @@
 
 void demoPick(moveit::planning_interface::MoveGroupInterface& group)
 {
-  std::vector<moveit_msgs::Grasp> grasps;
+  std::vector<moveit_msgs::msg::Grasp> grasps;
   for (std::size_t i = 0; i < 20; ++i)
   {
     geometry_msgs::PoseStamped p = group.getRandomPose();
@@ -47,7 +47,7 @@ void demoPick(moveit::planning_interface::MoveGroupInterface& group)
     p.pose.orientation.y = 0;
     p.pose.orientation.z = 0;
     p.pose.orientation.w = 1;
-    moveit_msgs::Grasp g;
+    moveit_msgs::msg::Grasp g;
     g.grasp_pose = p;
     g.pre_grasp_approach.direction.vector.x = 1.0;
     g.post_grasp_retreat.direction.vector.z = 1.0;
@@ -73,7 +73,7 @@ void demoPick(moveit::planning_interface::MoveGroupInterface& group)
 
 void demoPlace(moveit::planning_interface::MoveGroupInterface& group)
 {
-  std::vector<moveit_msgs::PlaceLocation> loc;
+  std::vector<moveit_msgs::action::PlaceLocation> loc;
   for (std::size_t i = 0; i < 20; ++i)
   {
     geometry_msgs::PoseStamped p = group.getRandomPose();
@@ -81,7 +81,7 @@ void demoPlace(moveit::planning_interface::MoveGroupInterface& group)
     p.pose.orientation.y = 0;
     p.pose.orientation.z = 0;
     p.pose.orientation.w = 1;
-    moveit_msgs::PlaceLocation g;
+    moveit_msgs::action::PlaceLocation g;
     g.place_pose = p;
     g.pre_place_approach.direction.vector.x = 1.0;
     g.post_place_retreat.direction.vector.z = 1.0;
@@ -101,7 +101,7 @@ void demoPlace(moveit::planning_interface::MoveGroupInterface& group)
   group.place("bubu", loc);
 }
 
-void attachObject(void)
+void attachObject()
 {
 }
 

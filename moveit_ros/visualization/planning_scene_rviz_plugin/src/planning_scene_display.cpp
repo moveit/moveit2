@@ -76,11 +76,11 @@ PlanningSceneDisplay::PlanningSceneDisplay(bool listen_to_planning_scene, bool s
   if (listen_to_planning_scene)
     planning_scene_topic_property_ =
         new rviz::RosTopicProperty("Planning Scene Topic", "move_group/monitored_planning_scene",
-                                   ros::message_traits::datatype<moveit_msgs::PlanningScene>(),
-                                   "The topic on which the moveit_msgs::PlanningScene messages are received", this,
+                                   ros::message_traits::datatype<moveit_msgs::msg::PlanningScene>(),
+                                   "The topic on which the moveit_msgs::msg::PlanningScene messages are received", this,
                                    SLOT(changedPlanningSceneTopic()), this);
   else
-    planning_scene_topic_property_ = NULL;
+    planning_scene_topic_property_ = nullptr;
 
   // Planning scene category -------------------------------------------------------------------------------------------
   scene_category_ = new rviz::Property("Scene Geometry", QVariant(), "", this);
@@ -145,11 +145,11 @@ PlanningSceneDisplay::PlanningSceneDisplay(bool listen_to_planning_scene, bool s
   }
   else
   {
-    robot_category_ = NULL;
-    scene_robot_visual_enabled_property_ = NULL;
-    scene_robot_collision_enabled_property_ = NULL;
-    robot_alpha_property_ = NULL;
-    attached_body_color_property_ = NULL;
+    robot_category_ = nullptr;
+    scene_robot_visual_enabled_property_ = nullptr;
+    scene_robot_collision_enabled_property_ = nullptr;
+    robot_alpha_property_ = nullptr;
+    attached_body_color_property_ = nullptr;
   }
 }
 
@@ -549,9 +549,9 @@ void PlanningSceneDisplay::onRobotModelLoaded()
     planning_scene_robot_->update(robot_state::RobotStateConstPtr(rs));
   }
 
-  bool oldState = scene_name_property_->blockSignals(true);
+  bool old_state = scene_name_property_->blockSignals(true);
   scene_name_property_->setStdString(ps->getName());
-  scene_name_property_->blockSignals(oldState);
+  scene_name_property_->blockSignals(old_state);
 }
 
 void PlanningSceneDisplay::sceneMonitorReceivedUpdate(
@@ -563,10 +563,10 @@ void PlanningSceneDisplay::sceneMonitorReceivedUpdate(
 void PlanningSceneDisplay::onSceneMonitorReceivedUpdate(
     planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type)
 {
-  bool oldState = scene_name_property_->blockSignals(true);
+  bool old_state = scene_name_property_->blockSignals(true);
   getPlanningSceneRW()->getCurrentStateNonConst().update();
   scene_name_property_->setStdString(getPlanningSceneRO()->getName());
-  scene_name_property_->blockSignals(oldState);
+  scene_name_property_->blockSignals(old_state);
 
   planning_scene_needs_render_ = true;
 }

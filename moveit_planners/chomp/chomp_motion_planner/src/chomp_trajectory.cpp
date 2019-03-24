@@ -41,7 +41,7 @@
 namespace chomp
 {
 ChompTrajectory::ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_model, double duration,
-                                 double discretization, std::string group_name)
+                                 double discretization, const std::string& group_name)
   : planning_group_name_(group_name)
   , num_points_((duration / discretization) + 1)
   , discretization_(discretization)
@@ -55,7 +55,7 @@ ChompTrajectory::ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_m
 }
 
 ChompTrajectory::ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_model, int num_points,
-                                 double discretization, std::string group_name)
+                                 double discretization, const std::string& group_name)
   : planning_group_name_(group_name)
   , num_points_(num_points)
   , discretization_(discretization)
@@ -68,9 +68,9 @@ ChompTrajectory::ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_m
   init();
 }
 
-ChompTrajectory::ChompTrajectory(const ChompTrajectory& source_traj, const std::string& planning_group,
+ChompTrajectory::ChompTrajectory(const ChompTrajectory& source_traj, const std::string& group_name,
                                  int diff_rule_length)
-  : planning_group_name_(planning_group), discretization_(source_traj.discretization_)
+  : planning_group_name_(group_name), discretization_(source_traj.discretization_)
 {
   num_joints_ = source_traj.getNumJoints();
 
@@ -105,9 +105,9 @@ ChompTrajectory::ChompTrajectory(const ChompTrajectory& source_traj, const std::
   }
 }
 
-ChompTrajectory::ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_model, const std::string& planning_group,
+ChompTrajectory::ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group_name,
                                  const trajectory_msgs::JointTrajectory& traj)
-  : planning_group_name_(planning_group)
+  : planning_group_name_(group_name)
 {
   const moveit::core::JointModelGroup* model_group = robot_model->getJointModelGroup(planning_group_name_);
   num_joints_ = model_group->getActiveJointModels().size();
@@ -139,9 +139,7 @@ ChompTrajectory::ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_m
   overwriteTrajectory(traj);
 }
 
-ChompTrajectory::~ChompTrajectory()
-{
-}
+ChompTrajectory::~ChompTrajectory() = default;
 
 void ChompTrajectory::overwriteTrajectory(const trajectory_msgs::JointTrajectory& traj)
 {
@@ -210,12 +208,12 @@ void ChompTrajectory::fillInMinJerk()
 {
   double start_index = start_index_ - 1;
   double end_index = end_index_ + 1;
-  double T[6];  // powers of the time duration
-  T[0] = 1.0;
-  T[1] = (end_index - start_index) * discretization_;
+  double td[6];  // powers of the time duration
+  td[0] = 1.0;
+  td[1] = (end_index - start_index) * discretization_;
 
   for (int i = 2; i <= 5; i++)
-    T[i] = T[i - 1] * T[1];
+    td[i] = td[i - 1] * td[1];
 
   // calculate the spline coefficients for each joint:
   // (these are for the special case of zero start and end vel and acc)
@@ -227,35 +225,35 @@ void ChompTrajectory::fillInMinJerk()
     coeff[i][0] = x0;
     coeff[i][1] = 0;
     coeff[i][2] = 0;
-    coeff[i][3] = (-20 * x0 + 20 * x1) / (2 * T[3]);
-    coeff[i][4] = (30 * x0 - 30 * x1) / (2 * T[4]);
-    coeff[i][5] = (-12 * x0 + 12 * x1) / (2 * T[5]);
+    coeff[i][3] = (-20 * x0 + 20 * x1) / (2 * td[3]);
+    coeff[i][4] = (30 * x0 - 30 * x1) / (2 * td[4]);
+    coeff[i][5] = (-12 * x0 + 12 * x1) / (2 * td[5]);
   }
 
   // now fill in the joint positions at each time step
   for (int i = start_index + 1; i < end_index; i++)
   {
-    double t[6];  // powers of the time index point
-    t[0] = 1.0;
-    t[1] = (i - start_index) * discretization_;
+    double ti[6];  // powers of the time index point
+    ti[0] = 1.0;
+    ti[1] = (i - start_index) * discretization_;
     for (int k = 2; k <= 5; k++)
-      t[k] = t[k - 1] * t[1];
+      ti[k] = ti[k - 1] * ti[1];
 
     for (int j = 0; j < num_joints_; j++)
     {
       (*this)(i, j) = 0.0;
       for (int k = 0; k <= 5; k++)
       {
-        (*this)(i, j) += t[k] * coeff[j][k];
+        (*this)(i, j) += ti[k] * coeff[j][k];
       }
     }
   }
 }
 
-bool ChompTrajectory::fillInFromTrajectory(moveit_msgs::MotionPlanDetailedResponse& res)
+bool ChompTrajectory::fillInFromTrajectory(moveit_msgs::msg::MotionPlanDetailedResponse& res)
 {
   // create a RobotTrajectory msg to obtain the trajectory from the MotionPlanDetailedResponse object
-  moveit_msgs::RobotTrajectory trajectory_msg = res.trajectory[0];
+  moveit_msgs::msg::RobotTrajectory trajectory_msg = res.trajectory[0];
 
   // get the default number of points in the CHOMP trajectory
   int num_chomp_trajectory_points = (*this).getNumPoints();
@@ -310,7 +308,7 @@ bool ChompTrajectory::fillInFromTrajectory(moveit_msgs::MotionPlanDetailedRespon
   return true;
 }
 
-void ChompTrajectory::assignCHOMPTrajectoryPointFromInputTrajectoryPoint(moveit_msgs::RobotTrajectory trajectory_msg,
+void ChompTrajectory::assignCHOMPTrajectoryPointFromInputTrajectoryPoint(moveit_msgs::msg::RobotTrajectory trajectory_msg,
                                                                          int num_joints_trajectory,
                                                                          int trajectory_msgs_point_index,
                                                                          int chomp_trajectory_point_index)

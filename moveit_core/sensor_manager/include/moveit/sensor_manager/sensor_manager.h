@@ -40,8 +40,8 @@
 #include <vector>
 #include <string>
 #include <moveit/macros/class_forward.h>
-#include <moveit_msgs/RobotTrajectory.h>
-#include <geometry_msgs/PointStamped.h>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <geometry_msgs/msg/point_stamped.hpp>
 
 /// Namespace for the base class of a MoveIt! sensor manager
 namespace moveit_sensor_manager
@@ -99,8 +99,8 @@ public:
   /// of this function can perform checks on the safety of the trajectory.
   /// The function returns true on success (either completing execution succesfully or computing a trajecotory
   /// successufully)
-  virtual bool pointSensorTo(const std::string& name, const geometry_msgs::PointStamped& target,
-                             moveit_msgs::RobotTrajectory& sensor_trajectory) = 0;
+  virtual bool pointSensorTo(const std::string& name, const geometry_msgs::msg::PointStamped& target,
+                             moveit_msgs::msg::msg::RobotTrajectory& sensor_trajectory) = 0;
 };
 }
 

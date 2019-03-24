@@ -72,7 +72,7 @@ bool PlanStage::evaluate(const ManipulationPlanPtr& plan) const
   {
     attempts++;
     if (!signal_stop_ && planning_pipeline_->generatePlan(planning_scene_, req, res) &&
-        res.error_code_.val == moveit_msgs::MoveItErrorCodes::SUCCESS && res.trajectory_ && !res.trajectory_->empty())
+        res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && res.trajectory_ && !res.trajectory_->empty())
     {
       // We have a valid motion plan, now apply pre-approach end effector posture (open gripper) if applicable
       if (!plan->approach_posture_.joint_names.empty())
@@ -85,7 +85,7 @@ bool PlanStage::evaluate(const ManipulationPlanPtr& plan) const
         // Apply the open gripper state to the waypoint
         // If user has defined a time for it's gripper movement time, don't add the
         // DEFAULT_GRASP_POSTURE_COMPLETION_DURATION
-        if (plan->approach_posture_.points.size() > 0 &&
+        if (!plan->approach_posture_.points.empty() &&
             plan->approach_posture_.points.back().time_from_start > ros::Duration(0.0))
         {
           pre_approach_traj->addPrefixWayPoint(pre_approach_state, 0.0);
@@ -116,8 +116,8 @@ bool PlanStage::evaluate(const ManipulationPlanPtr& plan) const
       plan->error_code_ = res.error_code_;
   }
   // if the planner reported an invalid plan, give it a second chance
-  while (!signal_stop_ && plan->error_code_.val == moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN && attempts < 2);
+  while (!signal_stop_ && plan->error_code_.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN && attempts < 2);
 
   return false;
 }
-}
+}  // namespace pick_place

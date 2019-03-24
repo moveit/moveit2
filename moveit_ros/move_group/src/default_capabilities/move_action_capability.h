@@ -52,11 +52,11 @@ public:
   void initialize() override;
 
 private:
-  void executeMoveCallback(const moveit_msgs::MoveGroupGoalConstPtr& goal);
-  void executeMoveCallback_PlanAndExecute(const moveit_msgs::MoveGroupGoalConstPtr& goal,
-                                          moveit_msgs::MoveGroupResult& action_res);
-  void executeMoveCallback_PlanOnly(const moveit_msgs::MoveGroupGoalConstPtr& goal,
-                                    moveit_msgs::MoveGroupResult& action_res);
+  void executeMoveCallback(const moveit_msgs::action::MoveGroupGoalConstPtr& goal);
+  void executeMoveCallbackPlanAndExecute(const moveit_msgs::action::MoveGroupGoalConstPtr& goal,
+                                         moveit_msgs::action::MoveGroupResult& action_res);
+  void executeMoveCallbackPlanOnly(const moveit_msgs::action::MoveGroupGoalConstPtr& goal,
+                                   moveit_msgs::action::MoveGroupResult& action_res);
   void startMoveExecutionCallback();
   void startMoveLookCallback();
   void preemptMoveCallback();
@@ -64,8 +64,8 @@ private:
   bool planUsingPlanningPipeline(const planning_interface::MotionPlanRequest& req,
                                  plan_execution::ExecutableMotionPlan& plan);
 
-  std::unique_ptr<actionlib::SimpleActionServer<moveit_msgs::MoveGroupAction> > move_action_server_;
-  moveit_msgs::MoveGroupFeedback move_feedback_;
+  std::unique_ptr<actionlib::SimpleActionServer<moveit_msgs::action::MoveGroupAction> > move_action_server_;
+  moveit_msgs::action::MoveGroupFeedback move_feedback_;
 
   MoveGroupState move_state_;
   bool preempt_requested_;

@@ -233,7 +233,7 @@ ompl_interface::ModelBasedPlanningContextPtr ompl_interface::PlanningContextMana
 
   if (pc != planner_configs_.end())
   {
-    moveit_msgs::MotionPlanRequest req;  // dummy request with default values
+    moveit_msgs::msg::MotionPlanRequest req;  // dummy request with default values
     return getPlanningContext(
         pc->second,
         std::bind(&PlanningContextManager::getStateSpaceFactory1, this, std::placeholders::_1, factory_type), req);
@@ -247,7 +247,7 @@ ompl_interface::ModelBasedPlanningContextPtr ompl_interface::PlanningContextMana
 
 ompl_interface::ModelBasedPlanningContextPtr ompl_interface::PlanningContextManager::getPlanningContext(
     const planning_interface::PlannerConfigurationSettings& config,
-    const StateSpaceFactoryTypeSelector& factory_selector, const moveit_msgs::MotionPlanRequest& req) const
+    const StateSpaceFactoryTypeSelector& factory_selector, const moveit_msgs::msg::MotionPlanRequest& req) const
 {
   const ompl_interface::ModelBasedStateSpaceFactoryPtr& factory = factory_selector(config.group);
 
@@ -332,13 +332,13 @@ const ompl_interface::ModelBasedStateSpaceFactoryPtr& ompl_interface::PlanningCo
   else
   {
     ROS_ERROR_NAMED("planning_context_manager", "Factory of type '%s' was not found", factory_type.c_str());
-    static const ModelBasedStateSpaceFactoryPtr empty;
-    return empty;
+    static const ModelBasedStateSpaceFactoryPtr EMPTY;
+    return EMPTY;
   }
 }
 
 const ompl_interface::ModelBasedStateSpaceFactoryPtr& ompl_interface::PlanningContextManager::getStateSpaceFactory2(
-    const std::string& group, const moveit_msgs::MotionPlanRequest& req) const
+    const std::string& group, const moveit_msgs::msg::MotionPlanRequest& req) const
 {
   // find the problem representation to use
   auto best = state_space_factories_.end();
@@ -358,8 +358,8 @@ const ompl_interface::ModelBasedStateSpaceFactoryPtr& ompl_interface::PlanningCo
   {
     ROS_ERROR_NAMED("planning_context_manager", "There are no known state spaces that can represent the given planning "
                                                 "problem");
-    static const ModelBasedStateSpaceFactoryPtr empty;
-    return empty;
+    static const ModelBasedStateSpaceFactoryPtr EMPTY;
+    return EMPTY;
   }
   else
   {
@@ -370,17 +370,17 @@ const ompl_interface::ModelBasedStateSpaceFactoryPtr& ompl_interface::PlanningCo
 
 ompl_interface::ModelBasedPlanningContextPtr
 ompl_interface::PlanningContextManager::getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                           const moveit_msgs::MotionPlanRequest& req,
-                                                           moveit_msgs::MoveItErrorCodes& error_code) const
+                                                           const moveit_msgs::msg::MotionPlanRequest& req,
+                                                           moveit_msgs::msg::MoveItErrorCodes& error_code) const
 {
   if (req.group_name.empty())
   {
     ROS_ERROR_NAMED("planning_context_manager", "No group specified to plan for");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME;
+    error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
     return ModelBasedPlanningContextPtr();
   }
 
-  error_code.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+  error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
 
   if (!planning_scene)
   {
@@ -452,7 +452,7 @@ ompl_interface::PlanningContextManager::getPlanningContext(const planning_scene:
     {
       context->configure();
       ROS_DEBUG_NAMED("planning_context_manager", "%s: New planning context is set.", context->getName().c_str());
-      error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+      error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     }
     catch (ompl::Exception& ex)
     {

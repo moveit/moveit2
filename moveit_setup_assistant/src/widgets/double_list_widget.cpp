@@ -50,8 +50,8 @@ namespace moveit_setup_assistant
 // ******************************************************************************************
 //
 // ******************************************************************************************
-DoubleListWidget::DoubleListWidget(QWidget* parent, moveit_setup_assistant::MoveItConfigDataPtr config_data,
-                                   QString long_name, QString short_name, bool add_ok_cancel)
+DoubleListWidget::DoubleListWidget(QWidget* parent, const MoveItConfigDataPtr& config_data, const QString& long_name,
+                                   const QString& short_name, bool add_ok_cancel)
   : QWidget(parent), long_name_(long_name), short_name_(short_name), config_data_(config_data)
 {
   // Basic widget container
@@ -250,8 +250,8 @@ void DoubleListWidget::selectDataButtonClicked()
   for (int i = 0; i < selected.size(); i++)
   {
     std::string name = selected[i]->text().toStdString();
-    bool alreadyExists = false;
-    int rowToAdd = 0;
+    bool already_exists = false;
+    int row_to_add = 0;
 
     // Check if this selected joint is already in the selected joint table
     for (int r = 0; r < selected_data_table_->rowCount(); r++)
@@ -260,19 +260,19 @@ void DoubleListWidget::selectDataButtonClicked()
 
       if (item->text().toStdString() == name)
       {
-        alreadyExists = true;
+        already_exists = true;
         break;
       }
-      rowToAdd = r + 1;
+      row_to_add = r + 1;
     }
 
     // This joint needs to be added to the selected joint table
-    if (!alreadyExists)
+    if (!already_exists)
     {
       selected_data_table_->setRowCount(selected_data_table_->rowCount() + 1);
-      QTableWidgetItem* newItem = new QTableWidgetItem(name.c_str());
-      newItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-      selected_data_table_->setItem(rowToAdd, 0, newItem);
+      QTableWidgetItem* new_item = new QTableWidgetItem(name.c_str());
+      new_item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+      selected_data_table_->setItem(row_to_add, 0, new_item);
     }
   }
 
@@ -320,16 +320,15 @@ void DoubleListWidget::previewSelectedRight(const QItemSelection& selected, cons
 void DoubleListWidget::previewSelected(const QList<QTableWidgetItem*>& selected)
 {
   // Check that an element was selected
-  if (!selected.size())
+  if (selected.empty())
     return;
 
   std::vector<std::string> selected_vector;
 
   // Convert QList to std vector
+  selected_vector.reserve(selected.size());
   for (int i = 0; i < selected.size(); ++i)
-  {
-    selected_vector.push_back(selected[i]->text().toStdString());
-  }
+    selected_vector.emplace_back(selected[i]->text().toStdString());
 
   // Send to shared function
   Q_EMIT(previewSelected(selected_vector));

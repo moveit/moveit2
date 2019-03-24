@@ -43,8 +43,8 @@
 
 namespace moveit_warehouse
 {
-typedef warehouse_ros::MessageWithMetadata<moveit_msgs::RobotState>::ConstPtr RobotStateWithMetadata;
-typedef warehouse_ros::MessageCollection<moveit_msgs::RobotState>::Ptr RobotStateCollection;
+typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotState>::ConstPtr RobotStateWithMetadata;
+typedef warehouse_ros::MessageCollection<moveit_msgs::msg::RobotState>::Ptr RobotStateCollection;
 
 MOVEIT_CLASS_FORWARD(RobotStateStorage);
 
@@ -58,7 +58,7 @@ public:
 
   RobotStateStorage(warehouse_ros::DatabaseConnection::Ptr conn);
 
-  void addRobotState(const moveit_msgs::RobotState& msg, const std::string& name, const std::string& robot = "");
+  void addRobotState(const moveit_msgs::msg::RobotState& msg, const std::string& name, const std::string& robot = "");
   bool hasRobotState(const std::string& name, const std::string& robot = "") const;
   void getKnownRobotStates(std::vector<std::string>& names, const std::string& robot = "") const;
   void getKnownRobotStates(const std::string& regex, std::vector<std::string>& names,
