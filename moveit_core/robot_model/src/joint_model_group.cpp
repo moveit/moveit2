@@ -96,8 +96,6 @@ bool jointPrecedes(const JointModel* a, const JointModel* b)
 }
 }  // namespace
 
-const std::string LOGNAME = "robot_model.jmg";
-
 JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Model::Group& config,
                                  const std::vector<const JointModel*>& unsorted_group_joints,
                                  const RobotModel* parent_model)
@@ -724,7 +722,7 @@ bool JointModelGroup::isValidVelocityMove(const std::vector<double>& from_joint_
   // Check for equal sized arrays
   if (from_joint_pose.size() != to_joint_pose.size())
   {
-    ROS_ERROR_NAMED(LOGNAME, "To and from joint poses are of different sizes.");
+    RCLCPP_ERROR(LOGGER, "To and from joint poses are of different sizes.");
     return false;
   }
 
@@ -745,7 +743,7 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
     if (var_bounds->size() != 1)
     {
       // TODO(davetcoleman) Support multiple variables
-      ROS_ERROR_NAMED(LOGNAME, "Attempting to check velocity bounds for waypoint move with joints that have multiple "
+      RCLCPP_ERROR(LOGGER, "Attempting to check velocity bounds for waypoint move with joints that have multiple "
                                "variables");
       return false;
     }
@@ -754,7 +752,7 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
     double max_dtheta = dt * max_velocity;
     if (dtheta > max_dtheta)
     {
-      ROS_DEBUG_STREAM_NAMED(LOGNAME, "Not valid velocity move because of joint " << i);
+      RCLCPP_DEBUG(LOGGER, "Not valid velocity move because of joint %lu", i);
       return false;
     }
   }
