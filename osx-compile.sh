@@ -4,6 +4,7 @@
 set -e #exit on failure
 
 #Prepare for ros2
+export dir=$(PWD)
 cd /tmp
 wget https://github.com/ros2/ros2/releases/download/release-crystal-20190314/ros2-crystal-20190314-macos-amd64.tar.bz2
 tar jxf ros2-crystal-20190314-macos-amd64.tar.bz2
@@ -12,7 +13,7 @@ find ros2-osx/ -name tf2_eigen | xargs rm -rf
 
 source ros2-osx/setup.bash
 mkdir -p /tmp/ros2_ws/src
-cp -r /tmp/moveit2 /tmp/ros2_ws/src
+cp -r $dir /tmp/ros2_ws/src/moveit2
 cd /tmp/ros2_ws && wget https://raw.githubusercontent.com/AcutronicRobotics/moveit2/master/moveit2.repos
 vcs import src < moveit2.repos
 export OPENSSL_ROOT_DIR="/usr/local/opt/openssl"
