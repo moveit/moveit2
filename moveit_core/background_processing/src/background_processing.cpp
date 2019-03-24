@@ -41,7 +41,6 @@ namespace moveit
 {
 namespace tools
 {
-
 // Logger
 rclcpp::Logger LOGGER = rclcpp::get_logger("background_processing");
 
@@ -87,8 +86,7 @@ void BackgroundProcessing::processingThread()
       }
       catch (std::exception& ex)
       {
-        RCLCPP_ERROR(LOGGER, "Exception caught while processing action '%s': %s",
-                        action_name.c_str(), ex.what());
+        RCLCPP_ERROR(LOGGER, "Exception caught while processing action '%s': %s", action_name.c_str(), ex.what());
       }
       processing_ = false;
       if (queue_change_event_)
