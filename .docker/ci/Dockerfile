@@ -70,7 +70,7 @@ RUN apt-get -qq update && \
 RUN mkdir src && \
     cd $ROS_WS/src && \
     # TODO(mlautman): This should be changed to use vcs in the future
-    wstool init --shallow . https://raw.githubusercontent.com/ros-planning/moveit2/moveit2-ci/moveit.rosinstall
+    wstool init --shallow . https://raw.githubusercontent.com/ros-planning/moveit2/master/moveit.rosinstall
 
 # Download all MoveIt dependencies
 RUN \

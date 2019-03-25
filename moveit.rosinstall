@@ -4,8 +4,7 @@
 - git:
     local-name: moveit2
     uri: https://github.com/ros-planning/moveit2.git
-    version: moveit2-ci
-
+    version: master
 - git:
     local-name: moveit_msgs
     # TODO(mlautman): update to ros-planning once the package has been merged back in
