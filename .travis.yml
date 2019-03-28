@@ -21,9 +21,18 @@ env:
     - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-unused-function"
     - WARNINGS_OK=false
   matrix:
-    # TODO(mlautman): Enable these later
+    # TODO(mlautman): Enable these in the future once they pass
     # - TEST="clang-format ament_lint"
     - ROS_DISTRO=crystal
+
+# TODO(mlautman): Enable once franka_ikfast_plugin and panda_ikfast_plugin are available
+# matrix: # Add a separate config to the matrix, using clang as compiler
+  # include:
+    # # add a config to the matrix using clang as compiler and also test ikfast plugin creation
+    # - compiler: clang
+      # env: ROS_REPO=ros
+           # BEFORE_DOCKER_SCRIPT="source moveit_kinematics/test/test_ikfast_plugins.sh"
+           # CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unused-parameter -Wno-unused-function -Wno-overloaded-virtual"
 
 before_script:
   - git clone -q -b ros2 --depth=1 https://github.com/ros-planning/moveit_ci.git .moveit_ci
