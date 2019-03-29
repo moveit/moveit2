@@ -66,23 +66,19 @@ RUN apt-get -qq update && \
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/*
 
-# Download moveit source, so that we can get necessary dependencies
+# Download moveit source and fetch all necessary dependencies
 RUN mkdir src && \
     cd $ROS_WS/src && \
     # TODO(mlautman): This should be changed to use vcs in the future
-    wstool init --shallow . https://raw.githubusercontent.com/ros-planning/moveit2/master/moveit.rosinstall
-
-# Download all MoveIt dependencies
-RUN \
+    wstool init --shallow . https://raw.githubusercontent.com/ros-planning/moveit2/master/moveit.rosinstall && \
     apt-get -qq update && \
     rosdep update -q && \
     rosdep install -q -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
     # Clear apt-cache to reduce image size
-    rm -rf /var/lib/apt/lists/*
-
-# Remove the source code from this container
-# TODO: in the future we may want to keep this here for further optimization of later containers
-RUN cd $ROS_WS && \
+    rm -rf /var/lib/apt/lists/* && \
+    #
+    # Remove the source code from this container
+    cd $ROS_WS && \
     rm -rf src/
 
 # Continous Integration Setting
