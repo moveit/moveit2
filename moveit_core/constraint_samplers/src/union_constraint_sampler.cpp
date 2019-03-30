@@ -40,7 +40,7 @@
 
 namespace constraint_samplers
 {
-  rclcpp::Logger logger = rclcpp::get_logger("constraint_samplers");
+  rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("constraint_samplers");
 
 struct OrderSamplers
 {
@@ -82,7 +82,7 @@ struct OrderSamplers
         }
     if (b_depends_on_a && a_depends_on_b)
     {
-      RCLCPP_WARN(logger,
+      RCLCPP_WARN(LOGGER,
                      "Circular frame dependency! "
                      "Sampling will likely produce invalid results (sampling for groups '%s' and '%s')",
                      a->getJointModelGroup()->getName().c_str(), b->getJointModelGroup()->getName().c_str());
@@ -120,7 +120,7 @@ UnionConstraintSampler::UnionConstraintSampler(const planning_scene::PlanningSce
     for (std::size_t j = 0; j < fd.size(); ++j)
       frame_depends_.push_back(fd[j]);
 
-    RCLCPP_DEBUG(logger, "Union sampler for group '%s' includes sampler for group '%s'",
+    RCLCPP_DEBUG(LOGGER, "Union sampler for group '%s' includes sampler for group '%s'",
                     jmg_->getName().c_str(), samplers_[i]->getJointModelGroup()->getName().c_str());
   }
 }
