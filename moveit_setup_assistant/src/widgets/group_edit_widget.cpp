@@ -48,7 +48,7 @@ namespace moveit_setup_assistant
 // ******************************************************************************************
 //
 // ******************************************************************************************
-GroupEditWidget::GroupEditWidget(QWidget* parent, moveit_setup_assistant::MoveItConfigDataPtr config_data)
+GroupEditWidget::GroupEditWidget(QWidget* parent, const MoveItConfigDataPtr& config_data)
   : QWidget(parent), config_data_(config_data)
 {
   // Basic widget container
@@ -285,10 +285,10 @@ void GroupEditWidget::setSelected(const std::string& group_name)
 void GroupEditWidget::loadKinematicPlannersComboBox()
 {
   // Only load this combo box once
-  static bool hasLoaded = false;
-  if (hasLoaded)
+  static bool has_loaded = false;
+  if (has_loaded)
     return;
-  hasLoaded = true;
+  has_loaded = true;
 
   // Remove all old items
   kinematics_solver_field_->clear();
@@ -338,4 +338,4 @@ void GroupEditWidget::loadKinematicPlannersComboBox()
   }
 }
 
-}  // namespace
+}  // namespace moveit_setup_assistant

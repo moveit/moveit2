@@ -166,7 +166,8 @@ public:
   {
     // following call to planner() calls the OMPL planner and stores the trajectory inside the MotionPlanResponse res
     // variable which is then used by CHOMP for optimization of the computed trajectory
-    bool solved = planner(ps, req, res);
+    if (!planner(ps, req, res))
+      return false;
 
     // create a hybrid collision detector to set the collision checker as hybrid
     collision_detection::CollisionDetectorAllocatorPtr hybrid_cd(
@@ -177,7 +178,7 @@ public:
     ROS_INFO_STREAM("Configuring Planning Scene for CHOMP ....");
     planning_scene->setActiveCollisionDetector(hybrid_cd, true);
 
-    chomp::ChompPlanner chompPlanner;
+    chomp::ChompPlanner chomp_planner;
     planning_interface::MotionPlanDetailedResponse res_detailed;
     moveit_msgs::msg::MotionPlanDetailedResponse res_detailed_moveit_msgs;
 
@@ -189,7 +190,7 @@ public:
     res_detailed_moveit_msgs.trajectory.resize(1);
     res_detailed_moveit_msgs.trajectory[0] = trajectory_msgs_from_response;
 
-    bool planning_success = chompPlanner.solve(planning_scene, req, params_, res_detailed_moveit_msgs);
+    bool planning_success = chomp_planner.solve(planning_scene, req, params_, res_detailed_moveit_msgs);
 
     if (planning_success)
     {
@@ -216,13 +217,13 @@ public:
       res.planning_time_ = res_detailed.processing_time_[0];
     }
 
-    return solved;
+    return planning_success;
   }
 
 private:
   ros::NodeHandle nh_;
   chomp::ChompParameters params_;
 };
-}
+}  // namespace chomp
 
 CLASS_LOADER_REGISTER_CLASS(chomp::OptimizerAdapter, planning_request_adapter::PlanningRequestAdapter);

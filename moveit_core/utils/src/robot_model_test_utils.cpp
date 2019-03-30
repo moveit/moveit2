@@ -57,7 +57,16 @@ moveit::core::RobotModelPtr loadTestingRobotModel(const std::string& robot_name)
 urdf::ModelInterfaceSharedPtr loadModelInterface(const std::string& robot_name)
 {
   boost::filesystem::path res_path(MOVEIT_TEST_RESOURCES_DIR);
-  urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDFFile((res_path / robot_name / "urdf/robot.xml").string());
+  std::string urdf_path;
+  if (robot_name == "pr2")
+  {
+    urdf_path = (res_path / "pr2_description/urdf/robot.xml").string();
+  }
+  else
+  {
+    urdf_path = (res_path / (robot_name + "_description") / "urdf" / (robot_name + ".urdf")).string();
+  }
+  urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDFFile(urdf_path);
   if (urdf_model == nullptr)
   {
     ROS_ERROR_NAMED(LOGNAME, "Cannot find URDF for %s. Make sure moveit_resources/your robot description is installed",
@@ -71,7 +80,16 @@ srdf::ModelSharedPtr loadSRDFModel(const std::string& robot_name)
   boost::filesystem::path res_path(MOVEIT_TEST_RESOURCES_DIR);
   urdf::ModelInterfaceSharedPtr urdf_model = loadModelInterface(robot_name);
   srdf::ModelSharedPtr srdf_model(new srdf::Model());
-  srdf_model->initFile(*urdf_model, (res_path / robot_name / "srdf/robot.xml").string());
+  std::string srdf_path;
+  if (robot_name == "pr2")
+  {
+    srdf_path = (res_path / "pr2_description/srdf/robot.xml").string();
+  }
+  else
+  {
+    srdf_path = (res_path / (robot_name + "_moveit_config") / "config" / (robot_name + ".srdf")).string();
+  }
+  srdf_model->initFile(*urdf_model, srdf_path);
   return srdf_model;
 }
 
@@ -237,7 +255,7 @@ void RobotModelBuilder::addCollisionMesh(const std::string& link_name, const std
   addLinkCollision(link_name, coll, origin);
 }
 
-void RobotModelBuilder::addLinkCollision(const std::string& link_name, urdf::CollisionSharedPtr collision,
+void RobotModelBuilder::addLinkCollision(const std::string& link_name, const urdf::CollisionSharedPtr& collision,
                                          geometry_msgs::Pose origin)
 {
   if (not urdf_model_->getLink(link_name))
@@ -255,7 +273,7 @@ void RobotModelBuilder::addLinkCollision(const std::string& link_name, urdf::Col
   link->collision_array.push_back(collision);
 }
 
-void RobotModelBuilder::addLinkVisual(const std::string& link_name, urdf::VisualSharedPtr vis,
+void RobotModelBuilder::addLinkVisual(const std::string& link_name, const urdf::VisualSharedPtr& vis,
                                       geometry_msgs::Pose origin)
 {
   if (not urdf_model_->getLink(link_name))
@@ -290,7 +308,7 @@ void RobotModelBuilder::addVirtualJoint(const std::string& parent_frame, const s
                                         const std::string& type, const std::string& name)
 {
   srdf::Model::VirtualJoint new_virtual_joint;
-  if (name == "")
+  if (name.empty())
     new_virtual_joint.name_ = parent_frame + "-" + child_link + "-virtual_joint";
   else
     new_virtual_joint.name_ = name;
@@ -304,7 +322,7 @@ void RobotModelBuilder::addGroupChain(const std::string& base_link, const std::s
                                       const std::string& name)
 {
   srdf::Model::Group new_group;
-  if (name == "")
+  if (name.empty())
     new_group.name_ = base_link + "-" + tip_link + "-chain-group";
   else
     new_group.name_ = name;

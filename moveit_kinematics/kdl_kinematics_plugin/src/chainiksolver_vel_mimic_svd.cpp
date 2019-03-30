@@ -40,7 +40,7 @@ unsigned int countMimicJoints(const std::vector<kdl_kinematics_plugin::JointMimi
   }
   return num_mimic;
 }
-}
+}  // namespace
 
 namespace KDL
 {
@@ -58,9 +58,10 @@ ChainIkSolverVelMimicSVD::ChainIkSolverVelMimicSVD(const Chain& chain,
   , jac_reduced_(svd_.cols())
 {
   assert(mimic_joints_.size() == chain.getNrOfJoints());
+#ifndef NDEBUG
   for (const auto& item : mimic_joints)
     assert(item.map_index < chain_.getNrOfJoints());
-
+#endif
   svd_.setThreshold(threshold);
 }
 
@@ -70,9 +71,7 @@ void ChainIkSolverVelMimicSVD::updateInternalDataStructures()
   // to react to changes in chain
 }
 
-ChainIkSolverVelMimicSVD::~ChainIkSolverVelMimicSVD()
-{
-}
+ChainIkSolverVelMimicSVD::~ChainIkSolverVelMimicSVD() = default;
 
 bool ChainIkSolverVelMimicSVD::jacToJacReduced(const Jacobian& jac, Jacobian& jac_reduced)
 {
@@ -87,6 +86,7 @@ bool ChainIkSolverVelMimicSVD::jacToJacReduced(const Jacobian& jac, Jacobian& ja
   return true;
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 int ChainIkSolverVelMimicSVD::CartToJnt(const JntArray& q_in, const Twist& v_in, JntArray& qdot_out,
                                         const Eigen::VectorXd& joint_weights,
                                         const Eigen::Matrix<double, 6, 1>& cartesian_weights)
@@ -102,10 +102,10 @@ int ChainIkSolverVelMimicSVD::CartToJnt(const JntArray& q_in, const Twist& v_in,
     jnt2jac_.JntToJac(q_in, jac_reduced_);
 
   // weight Jacobian
-  auto& J = jac_reduced_.data;
+  auto& jac = jac_reduced_.data;
   const Eigen::Index rows = svd_.rows();  // only operate on position rows?
-  J.topRows(rows) *= joint_weights.asDiagonal();
-  J.topRows(rows).transpose() *= cartesian_weights.topRows(rows).asDiagonal();
+  jac.topRows(rows) *= joint_weights.asDiagonal();
+  jac.topRows(rows).transpose() *= cartesian_weights.topRows(rows).asDiagonal();
 
   // transform v_in to 6D Eigen::Vector
   Eigen::Matrix<double, 6, 1> vin;
@@ -113,7 +113,7 @@ int ChainIkSolverVelMimicSVD::CartToJnt(const JntArray& q_in, const Twist& v_in,
   vin.bottomRows<3>() = Eigen::Map<const Eigen::Array3d>(v_in.rot.data, 3) * cartesian_weights.bottomRows<3>().array();
 
   // Do a singular value decomposition: J = U*S*V^t
-  svd_.compute(J.topRows(rows));
+  svd_.compute(jac.topRows(rows));
 
   if (num_mimic_joints_ > 0)
   {
@@ -130,4 +130,4 @@ int ChainIkSolverVelMimicSVD::CartToJnt(const JntArray& q_in, const Twist& v_in,
 
   return 0;
 }
-}
+}  // namespace KDL
