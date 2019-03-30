@@ -40,7 +40,7 @@
 
 namespace planning_interface
 {
-    rclcpp::Logger logger = rclcpp::get_logger("planning_interface");
+rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("planning_interface");
 
 namespace
 {
@@ -82,13 +82,13 @@ void PlanningContext::setMotionPlanRequest(const MotionPlanRequest& request)
   request_ = request;
   if (request_.allowed_planning_time <= 0.0)
   {
-    RCLCPP_INFO(logger,
+    RCLCPP_INFO(LOGGER,
                    "The timeout for planning must be positive (%lf specified). Assuming one second instead.",
                    request_.allowed_planning_time);
     request_.allowed_planning_time = 1.0;
   }
   if (request_.num_planning_attempts < 0)
-    RCLCPP_ERROR(logger, "The number of desired planning attempts should be positive. "
+    RCLCPP_ERROR(LOGGER, "The number of desired planning attempts should be positive. "
                                           "Assuming one attempt.");
   request_.num_planning_attempts = std::max(1, request_.num_planning_attempts);
 }
