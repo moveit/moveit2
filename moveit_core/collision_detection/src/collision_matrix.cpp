@@ -42,7 +42,7 @@
 namespace collision_detection
 {
 // Logger
-rclcpp::Logger LOGGER = rclcpp::get_logger("collision_detection");
+rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("collision_detection");;
 
 AllowedCollisionMatrix::AllowedCollisionMatrix()
 {

@@ -45,7 +45,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 // Logger
-rclcpp::Logger LOGGER = rclcpp::get_logger("collision_detection");
+rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("collision_detection");;
 
 // static const double ISO_VALUE  = 0.5; // TODO magic number! (though, probably a good one).
 // static const double R_MULTIPLE = 1.5; // TODO magic number! (though, probably a good one).

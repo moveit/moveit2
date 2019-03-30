@@ -38,7 +38,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 // Logger
-rclcpp::Logger LOGGER = rclcpp::get_logger("collision_detection");
+rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("collision_detection");;
 
 collision_detection::CollisionWorldAllValid::CollisionWorldAllValid() : CollisionWorld()
 {
