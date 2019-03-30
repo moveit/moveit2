@@ -6,8 +6,16 @@ add_library(${MOVEIT_LIB_NAME}
   src/collision_world_fcl.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-
-target_link_libraries(${MOVEIT_LIB_NAME} moveit_collision_detection ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${LIBFCL_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  moveit_collision_detection
+  rclcpp
+  rmw_implementation
+  urdf
+  urdfdom
+  urdfdom_headers
+  # LIBFCL
+  Boost
+  visualization_msgs)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
@@ -15,11 +23,14 @@ install(TARGETS ${MOVEIT_LIB_NAME}
 
 install(DIRECTORY include/ DESTINATION include)
 
-#TODO: Finish and build with gtest for colcon
 # if(BUILD_TESTING)
 #   find_package(moveit_resources REQUIRED)
 #   include_directories(${moveit_resources_INCLUDE_DIRS})
-#
-#   catkin_add_gtest(test_fcl_collision_detection test/test_fcl_collision_detection.cpp)
-#   target_link_libraries(test_fcl_collision_detection moveit_test_utils ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
+#   ament_add_gtest(test_fcl_collision_detection test/test_fcl_collision_detection.cpp)
+#   ament_target_dependencies(test_fcl_collision_detection
+#     urdf
+#     visualization_msgs
+#     moveit_test_utils
+#     ${MOVEIT_LIB_NAME}
+#     Boost)
 # endif()
