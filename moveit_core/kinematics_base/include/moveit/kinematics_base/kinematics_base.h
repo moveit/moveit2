@@ -616,10 +616,8 @@ protected:
   inline bool lookupParam(const std::string& param, T& val, const T& default_val) const
   {
     auto node = rclcpp::Node::make_shared("lookup_param");
-
-    auto parameters_lookup = std::make_shared<rclcpp::SyncParametersClient>(node);
-
-    auto groupname_param = parameters_lookup->get_parameters({ group_name_ + "/" + param });
+    rclcpp::SyncParametersClient parameters_lookup(node);
+    auto groupname_param = parameters_lookup.get_parameters({ group_name_ + "/" + param });
 
     for (auto& parameter : groupname_param)
     {
@@ -630,8 +628,7 @@ protected:
       }
     }
 
-    auto only_param = parameters_lookup->get_parameters({ param });
-
+    auto only_param = parameters_lookup.get_parameters({ param });    
     for (auto& parameter : only_param)
     {
       if (!parameter.get_name().compare(param))
@@ -642,7 +639,7 @@ protected:
     }
 
     auto robot_description_groupname_kinematics_param =
-        parameters_lookup->get_parameters({ "robot_description_kinematics/" + group_name_ + "/" + param });
+        parameters_lookup.get_parameters({ "robot_description_kinematics/" + group_name_ + "/" + param });
 
     for (auto& parameter : robot_description_groupname_kinematics_param)
     {
@@ -654,7 +651,7 @@ protected:
     }
 
     auto robot_description_kinematics_param =
-        parameters_lookup->get_parameters({ "robot_description_kinematics/" + param });
+        parameters_lookup.get_parameters({ "robot_description_kinematics/" + param });
 
     for (auto& parameter : robot_description_kinematics_param)
     {
