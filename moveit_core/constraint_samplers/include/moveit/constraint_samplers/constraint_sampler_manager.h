@@ -39,6 +39,9 @@
 
 #include <moveit/constraint_samplers/constraint_sampler_allocator.h>
 #include <moveit/macros/class_forward.h>
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/clock.hpp"
+#include "rclcpp/duration.hpp"
 
 namespace constraint_samplers
 {

@@ -44,7 +44,7 @@
 #include <moveit/utils/robot_model_test_utils.h>
 
 #include <geometric_shapes/shape_operations.h>
-#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 #include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
@@ -263,7 +263,7 @@ TEST_F(LoadPlanningModelsPr2, IKConstraintsSamplerSimple)
   pcm.target_point_offset.y = 0;
   pcm.target_point_offset.z = 0;
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
   pcm.constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -376,7 +376,7 @@ TEST_F(LoadPlanningModelsPr2, IKConstraintsSamplerValid)
   pcm.target_point_offset.y = 0;
   pcm.target_point_offset.z = 0;
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
   pcm.constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -476,7 +476,7 @@ TEST_F(LoadPlanningModelsPr2, UnionConstraintSampler)
   pcm.target_point_offset.y = 0;
   pcm.target_point_offset.z = 0;
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
   pcm.constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -621,7 +621,7 @@ TEST_F(LoadPlanningModelsPr2, PoseConstraintSamplerManager)
   pcm.target_point_offset.y = 0;
   pcm.target_point_offset.z = 0;
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
   pcm.constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -761,7 +761,7 @@ TEST_F(LoadPlanningModelsPr2, JointVersusPoseConstraintSamplerManager)
   con.position_constraints[0].target_point_offset.y = 0;
   con.position_constraints[0].target_point_offset.z = 0;
   con.position_constraints[0].constraint_region.primitives.resize(1);
-  con.position_constraints[0].constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  con.position_constraints[0].constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   con.position_constraints[0].constraint_region.primitives[0].dimensions.resize(1);
   con.position_constraints[0].constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -887,7 +887,7 @@ TEST_F(LoadPlanningModelsPr2, MixedJointAndIkSamplerManager)
   con.position_constraints[0].target_point_offset.y = 0;
   con.position_constraints[0].target_point_offset.z = 0;
   con.position_constraints[0].constraint_region.primitives.resize(1);
-  con.position_constraints[0].constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  con.position_constraints[0].constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   con.position_constraints[0].constraint_region.primitives[0].dimensions.resize(1);
   con.position_constraints[0].constraint_region.primitives[0].dimensions[0] = 0.001;
 
@@ -1036,7 +1036,7 @@ TEST_F(LoadPlanningModelsPr2, SubgroupPoseConstraintsSampler)
   pcm.target_point_offset.z = 0;
 
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
   pcm.constraint_region.primitives[0].dimensions[0] = 0.001;
 
