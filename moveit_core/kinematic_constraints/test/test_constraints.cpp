@@ -371,7 +371,7 @@ TEST_F(LoadPlanningModelsPr2, PositionConstraintsFixed)
   pcm.target_point_offset.y = 0;
   pcm.target_point_offset.z = 0;
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
 
   // no dimensions, so no valid regions
   EXPECT_FALSE(pc.configure(pcm, tf));
@@ -446,9 +446,9 @@ TEST_F(LoadPlanningModelsPr2, PositionConstraintsMobile)
   pcm.target_point_offset.z = 0;
 
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
-  pcm.constraint_region.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.38 * 2.0;
+  pcm.constraint_region.primitives[0].dimensions[shape_msgs::msg::SolidPrimitive::BOX_X] = 0.38 * 2.0;
 
   pcm.header.frame_id = "r_wrist_roll_link";
 
@@ -468,11 +468,11 @@ TEST_F(LoadPlanningModelsPr2, PositionConstraintsMobile)
 
   EXPECT_TRUE(pc.decide(robot_state).satisfied);
 
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::BOX;
   pcm.constraint_region.primitives[0].dimensions.resize(3);
-  pcm.constraint_region.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.1;
-  pcm.constraint_region.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.1;
-  pcm.constraint_region.primitives[0].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.1;
+  pcm.constraint_region.primitives[0].dimensions[shape_msgs::msg::SolidPrimitive::BOX_X] = 0.1;
+  pcm.constraint_region.primitives[0].dimensions[shape_msgs::msg::SolidPrimitive::BOX_Y] = 0.1;
+  pcm.constraint_region.primitives[0].dimensions[shape_msgs::msg::SolidPrimitive::BOX_Z] = 0.1;
   EXPECT_TRUE(pc.configure(pcm, tf));
 
   std::map<std::string, double> jvals;
@@ -498,11 +498,11 @@ TEST_F(LoadPlanningModelsPr2, PositionConstraintsMobile)
   pcm.constraint_region.primitive_poses[1].orientation.w = 1.0;
 
   pcm.constraint_region.primitives.resize(2);
-  pcm.constraint_region.primitives[1].type = shape_msgs::SolidPrimitive::BOX;
+  pcm.constraint_region.primitives[1].type = shape_msgs::msg::SolidPrimitive::BOX;
   pcm.constraint_region.primitives[1].dimensions.resize(3);
-  pcm.constraint_region.primitives[1].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 0.1;
-  pcm.constraint_region.primitives[1].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.1;
-  pcm.constraint_region.primitives[1].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.1;
+  pcm.constraint_region.primitives[1].dimensions[shape_msgs::msg::SolidPrimitive::BOX_X] = 0.1;
+  pcm.constraint_region.primitives[1].dimensions[shape_msgs::msg::SolidPrimitive::BOX_Y] = 0.1;
+  pcm.constraint_region.primitives[1].dimensions[shape_msgs::msg::SolidPrimitive::BOX_Z] = 0.1;
   EXPECT_TRUE(pc.configure(pcm, tf));
   EXPECT_TRUE(pc.decide(robot_state, false).satisfied);
 }
@@ -523,14 +523,14 @@ TEST_F(LoadPlanningModelsPr2, PositionConstraintsEquality)
   pcm.target_point_offset.z = 0;
 
   pcm.constraint_region.primitives.resize(2);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
   pcm.constraint_region.primitives[0].dimensions[0] = 0.38 * 2.0;
-  pcm.constraint_region.primitives[1].type = shape_msgs::SolidPrimitive::BOX;
+  pcm.constraint_region.primitives[1].type = shape_msgs::msg::SolidPrimitive::BOX;
   pcm.constraint_region.primitives[1].dimensions.resize(3);
-  pcm.constraint_region.primitives[1].dimensions[shape_msgs::SolidPrimitive::BOX_X] = 2.0;
-  pcm.constraint_region.primitives[1].dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 2.0;
-  pcm.constraint_region.primitives[1].dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 2.0;
+  pcm.constraint_region.primitives[1].dimensions[shape_msgs::msg::SolidPrimitive::BOX_X] = 2.0;
+  pcm.constraint_region.primitives[1].dimensions[shape_msgs::msg::SolidPrimitive::BOX_Y] = 2.0;
+  pcm.constraint_region.primitives[1].dimensions[shape_msgs::msg::SolidPrimitive::BOX_Z] = 2.0;
 
   pcm.header.frame_id = "r_wrist_roll_link";
   pcm.constraint_region.primitive_poses.resize(2);
@@ -588,7 +588,7 @@ TEST_F(LoadPlanningModelsPr2, PositionConstraintsEquality)
 
   // changing the shape also changes it
   pcm2.constraint_region.primitives[2].dimensions[0] = pcm2.constraint_region.primitives[0].dimensions[0];
-  pcm2.constraint_region.primitives[2].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm2.constraint_region.primitives[2].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   EXPECT_TRUE(pc2.configure(pcm2, tf));
   EXPECT_FALSE(pc.equal(pc2, .001));
 }
@@ -635,7 +635,7 @@ TEST_F(LoadPlanningModelsPr2, OrientationConstraintsSimple)
 
   ASSERT_TRUE(oc.getLinkModel());
 
-  geometry_msgs::Pose p = tf2::toMsg(robot_state.getGlobalLinkTransform(oc.getLinkModel()->getName()));
+  geometry_msgs::msg::Pose p = tf2::toMsg(robot_state.getGlobalLinkTransform(oc.getLinkModel()->getName()));
 
   ocm.orientation = p.orientation;
   ocm.header.frame_id = robot_model_->getModelFrame();
@@ -867,7 +867,7 @@ TEST_F(LoadPlanningModelsPr2, TestKinematicConstraintSetEquality)
   pcm.target_point_offset.y = 0;
   pcm.target_point_offset.z = 0;
   pcm.constraint_region.primitives.resize(1);
-  pcm.constraint_region.primitives[0].type = shape_msgs::SolidPrimitive::SPHERE;
+  pcm.constraint_region.primitives[0].type = shape_msgs::msg::SolidPrimitive::SPHERE;
   pcm.constraint_region.primitives[0].dimensions.resize(1);
   pcm.constraint_region.primitives[0].dimensions[0] = 0.2;
 
