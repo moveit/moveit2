@@ -48,7 +48,7 @@
 #include <memory>
 #include <set>
 
-rclcpp::Logger logger = rclcpp::get_logger("planning_scene");
+rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("planning_scene");
 
 namespace planning_scene
 {
@@ -354,7 +354,7 @@ bool PlanningScene::setActiveCollisionDetector(const std::string& collision_dete
   }
   else
   {
-    RCLCPP_ERROR(logger, "Cannot setActiveCollisionDetector to '%s' -- it has been added to PlanningScene. "
+    RCLCPP_ERROR(LOGGER, "Cannot setActiveCollisionDetector to '%s' -- it has been added to PlanningScene. "
                              "Keeping existing active collision detector '%s'",
                     collision_detector_name.c_str(), active_collision_->alloc_->getName().c_str());
     return false;
@@ -375,7 +375,7 @@ PlanningScene::getCollisionWorld(const std::string& collision_detector_name) con
   CollisionDetectorConstIterator it = collision_.find(collision_detector_name);
   if (it == collision_.end())
   {
-    RCLCPP_ERROR(logger, "Could not get CollisionWorld named '%s'.  Returning active CollisionWorld '%s' instead",
+    RCLCPP_ERROR(LOGGER, "Could not get CollisionWorld named '%s'.  Returning active CollisionWorld '%s' instead",
                     collision_detector_name.c_str(), active_collision_->alloc_->getName().c_str());
     return active_collision_->cworld_const_;
   }
@@ -389,7 +389,7 @@ PlanningScene::getCollisionRobot(const std::string& collision_detector_name) con
   CollisionDetectorConstIterator it = collision_.find(collision_detector_name);
   if (it == collision_.end())
   {
-    RCLCPP_ERROR(logger, "Could not get CollisionRobot named '%s'.  Returning active CollisionRobot '%s' instead",
+    RCLCPP_ERROR(LOGGER, "Could not get CollisionRobot named '%s'.  Returning active CollisionRobot '%s' instead",
                     collision_detector_name.c_str(), active_collision_->alloc_->getName().c_str());
     return active_collision_->getCollisionRobot();
   }
@@ -403,7 +403,7 @@ PlanningScene::getCollisionRobotUnpadded(const std::string& collision_detector_n
   CollisionDetectorConstIterator it = collision_.find(collision_detector_name);
   if (it == collision_.end())
   {
-    RCLCPP_ERROR(logger, "Could not get CollisionRobotUnpadded named '%s'. "
+    RCLCPP_ERROR(LOGGER, "Could not get CollisionRobotUnpadded named '%s'. "
                              "Returning active CollisionRobotUnpadded '%s' instead",
                     collision_detector_name.c_str(), active_collision_->alloc_->getName().c_str());
     return active_collision_->getCollisionRobotUnpadded();
@@ -896,7 +896,7 @@ bool PlanningScene::getOctomapMsg(octomap_msgs::msg::OctomapWithPose& octomap) c
       octomap.origin = tf2::toMsg(map->shape_poses_[0]);
       return true;
     }
-    RCLCPP_ERROR(logger, "Unexpected number of shapes in octomap collision object. Not including '%s' object",
+    RCLCPP_ERROR(LOGGER, "Unexpected number of shapes in octomap collision object. Not including '%s' object",
                     OCTOMAP_NS.c_str());
   }
   return false;
@@ -1046,7 +1046,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
 {
   if (!in.good() || in.eof())
   {
-    RCLCPP_ERROR(logger, "Bad input stream when loading scene geometry");
+    RCLCPP_ERROR(LOGGER, "Bad input stream when loading scene geometry");
     return false;
   }
   std::getline(in, name_);
@@ -1056,7 +1056,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
     in >> marker;
     if (!in.good() || in.eof())
     {
-      RCLCPP_ERROR(logger, "Bad input stream when loading marker in scene geometry");
+      RCLCPP_ERROR(LOGGER, "Bad input stream when loading marker in scene geometry");
       return false;
     }
     if (marker == "*")
@@ -1065,7 +1065,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
       std::getline(in, ns);
       if (!in.good() || in.eof())
       {
-        RCLCPP_ERROR(logger, "Bad input stream when loading ns in scene geometry");
+        RCLCPP_ERROR(LOGGER, "Bad input stream when loading ns in scene geometry");
         return false;
       }
       boost::algorithm::trim(ns);
@@ -1076,24 +1076,24 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
         shapes::Shape* s = shapes::constructShapeFromText(in);
         if (!s)
         {
-          RCLCPP_ERROR(logger, "Failed to load shape from scene file");
+          RCLCPP_ERROR(LOGGER, "Failed to load shape from scene file");
           return false;
         }
         double x, y, z, rx, ry, rz, rw;
         if (!(in >> x >> y >> z))
         {
-          RCLCPP_ERROR(logger, "Improperly formatted translation in scene geometry file");
+          RCLCPP_ERROR(LOGGER, "Improperly formatted translation in scene geometry file");
           return false;
         }
         if (!(in >> rx >> ry >> rz >> rw))
         {
-          RCLCPP_ERROR(logger, "Improperly formatted rotation in scene geometry file");
+          RCLCPP_ERROR(LOGGER, "Improperly formatted rotation in scene geometry file");
           return false;
         }
         float r, g, b, a;
         if (!(in >> r >> g >> b >> a))
         {
-          RCLCPP_ERROR(logger, "Improperly formatted color in scene geometry file");
+          RCLCPP_ERROR(LOGGER, "Improperly formatted color in scene geometry file");
           return false;
         }
         if (s)
@@ -1121,7 +1121,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
     }
     else
     {
-      RCLCPP_ERROR(logger, "Unknown marker in scene geometry file: %s ", marker.c_str());
+      RCLCPP_ERROR(LOGGER, "Unknown marker in scene geometry file: %s ", marker.c_str());
       return false;
     }
   } while (true);
@@ -1150,7 +1150,7 @@ void PlanningScene::setCurrentState(const moveit_msgs::msg::RobotState& state)
   {
     if (!state.is_diff && state.attached_collision_objects[i].object.operation != moveit_msgs::msg::CollisionObject::ADD)
     {
-      RCLCPP_ERROR(logger, "The specified RobotState is not marked as is_diff. "
+      RCLCPP_ERROR(LOGGER, "The specified RobotState is not marked as is_diff. "
                                "The request to modify the object '%s' is not supported. Object is ignored.",
                       state.attached_collision_objects[i].object.id.c_str());
       continue;
@@ -1239,12 +1239,12 @@ bool PlanningScene::setPlanningSceneDiffMsg(const moveit_msgs::msg::PlanningScen
 {
   bool result = true;
 
-  RCLCPP_DEBUG(logger, "Adding planning scene diff");
+  RCLCPP_DEBUG(LOGGER, "Adding planning scene diff");
   if (!scene_msg.name.empty())
     name_ = scene_msg.name;
 
   if (!scene_msg.robot_model_name.empty() && scene_msg.robot_model_name != getRobotModel()->getName())
-    RCLCPP_WARN(logger, "Setting the scene for model '%s' but model '%s' is loaded.",
+    RCLCPP_WARN(LOGGER, "Setting the scene for model '%s' but model '%s' is loaded.",
                    scene_msg.robot_model_name.c_str(), getRobotModel()->getName().c_str());
 
   // there is at least one transform in the list of fixed transform: from model frame to itself;
@@ -1296,11 +1296,11 @@ bool PlanningScene::setPlanningSceneDiffMsg(const moveit_msgs::msg::PlanningScen
 
 bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& scene_msg)
 {
-  RCLCPP_DEBUG(logger, "Setting new planning scene: '%s'", scene_msg.name.c_str());
+  RCLCPP_DEBUG(LOGGER, "Setting new planning scene: '%s'", scene_msg.name.c_str());
   name_ = scene_msg.name;
 
   if (!scene_msg.robot_model_name.empty() && scene_msg.robot_model_name != getRobotModel()->getName())
-    RCLCPP_WARN(logger, "Setting the scene for model '%s' but model '%s' is loaded.",
+    RCLCPP_WARN(LOGGER, "Setting the scene for model '%s' but model '%s' is loaded.",
                    scene_msg.robot_model_name.c_str(), getRobotModel()->getName().c_str());
 
   if (parent_)
@@ -1354,7 +1354,7 @@ void PlanningScene::processOctomapMsg(const octomap_msgs::msg::Octomap& map)
 
   if (map.id != "OcTree")
   {
-    RCLCPP_ERROR(logger, "Received octomap is of type '%s' but type 'OcTree' is expected.", map.id.c_str());
+    RCLCPP_ERROR(LOGGER, "Received octomap is of type '%s' but type 'OcTree' is expected.", map.id.c_str());
     return;
   }
 
@@ -1392,7 +1392,7 @@ void PlanningScene::processOctomapMsg(const octomap_msgs::msg::OctomapWithPose& 
 
   if (map.octomap.id != "OcTree")
   {
-    RCLCPP_ERROR(logger, "Received octomap is of type '%s' but type 'OcTree' is expected.", map.octomap.id.c_str());
+    RCLCPP_ERROR(LOGGER, "Received octomap is of type '%s' but type 'OcTree' is expected.", map.octomap.id.c_str());
     return;
   }
 
@@ -1441,13 +1441,13 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
 {
   if (object.object.operation == moveit_msgs::msg::CollisionObject::ADD && !getRobotModel()->hasLinkModel(object.link_name))
   {
-    RCLCPP_ERROR(logger, "Unable to attach a body to link '%s' (link not found)", object.link_name.c_str());
+    RCLCPP_ERROR(LOGGER, "Unable to attach a body to link '%s' (link not found)", object.link_name.c_str());
     return false;
   }
 
   if (object.object.id == OCTOMAP_NS)
   {
-    RCLCPP_ERROR(logger, "The ID '%s' cannot be used for collision objects (name reserved)", OCTOMAP_NS.c_str());
+    RCLCPP_ERROR(LOGGER, "The ID '%s' cannot be used for collision objects (name reserved)", OCTOMAP_NS.c_str());
     return false;
   }
 
@@ -1463,21 +1463,21 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
   {
     if (object.object.primitives.size() != object.object.primitive_poses.size())
     {
-      RCLCPP_ERROR(logger, "Number of primitive shapes does not match number of poses "
+      RCLCPP_ERROR(LOGGER, "Number of primitive shapes does not match number of poses "
                                "in attached collision object message");
       return false;
     }
 
     if (object.object.meshes.size() != object.object.mesh_poses.size())
     {
-      RCLCPP_ERROR(logger, "Number of meshes does not match number of poses "
+      RCLCPP_ERROR(LOGGER, "Number of meshes does not match number of poses "
                                "in attached collision object message");
       return false;
     }
 
     if (object.object.planes.size() != object.object.plane_poses.size())
     {
-      RCLCPP_ERROR(logger, "Number of planes does not match number of poses "
+      RCLCPP_ERROR(LOGGER, "Number of planes does not match number of poses "
                                "in attached collision object message");
       return false;
     }
@@ -1495,7 +1495,7 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
         collision_detection::CollisionWorld::ObjectConstPtr obj = world_->getObject(object.object.id);
         if (obj)
         {
-          RCLCPP_DEBUG(logger, "Attaching world object '%s' to link '%s'", object.object.id.c_str(),
+          RCLCPP_DEBUG(LOGGER, "Attaching world object '%s' to link '%s'", object.object.id.c_str(),
                           object.link_name.c_str());
 
           // extract the shapes from the world
@@ -1511,7 +1511,7 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
         }
         else
         {
-          RCLCPP_ERROR(logger, "Attempting to attach object '%s' to link '%s' but no geometry specified "
+          RCLCPP_ERROR(LOGGER, "Attempting to attach object '%s' to link '%s' but no geometry specified "
                                    "and such an object does not exist in the collision world",
                           object.object.id.c_str(), object.link_name.c_str());
           return false;
@@ -1523,11 +1523,11 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
         if (world_->removeObject(object.object.id))
         {
           if (object.object.operation == moveit_msgs::msg::CollisionObject::ADD){
-            RCLCPP_DEBUG(logger, "Removing world object with the same name as newly attached object: '%s'",
+            RCLCPP_DEBUG(LOGGER, "Removing world object with the same name as newly attached object: '%s'",
                             object.object.id.c_str());
           }
           else{
-            RCLCPP_WARN(logger,
+            RCLCPP_WARN(LOGGER,
                            "You tried to append geometry to an attached object that is actually a world object ('%s'). "
                            "World geometry is ignored.",
                            object.object.id.c_str());
@@ -1580,7 +1580,7 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
 
       if (shapes.empty())
       {
-        RCLCPP_ERROR(logger, "There is no geometry to attach to link '%s' as part of attached body '%s'",
+        RCLCPP_ERROR(LOGGER, "There is no geometry to attach to link '%s' as part of attached body '%s'",
                         object.link_name.c_str(), object.object.id.c_str());
         return false;
       }
@@ -1593,12 +1593,12 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
       {
         // there should not exist an attached object with this name
         if (robot_state_->clearAttachedBody(object.object.id))
-          RCLCPP_DEBUG(logger, "The robot state already had an object named '%s' attached to link '%s'. "
+          RCLCPP_DEBUG(LOGGER, "The robot state already had an object named '%s' attached to link '%s'. "
                                    "The object was replaced.",
                           object.object.id.c_str(), object.link_name.c_str());
         robot_state_->attachBody(object.object.id, shapes, poses, object.touch_links, object.link_name,
                                  object.detach_posture);
-        RCLCPP_DEBUG(logger, "Attached object '%s' to link '%s'", object.object.id.c_str(),
+        RCLCPP_DEBUG(LOGGER, "Attached object '%s' to link '%s'", object.object.id.c_str(),
                         object.link_name.c_str());
       }
       else
@@ -1615,14 +1615,14 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
         else
           robot_state_->attachBody(object.object.id, shapes, poses, object.touch_links, object.link_name,
                                    detach_posture);
-        RCLCPP_DEBUG(logger, "Added shapes to object '%s' attached to link '%s'", object.object.id.c_str(),
+        RCLCPP_DEBUG(LOGGER, "Added shapes to object '%s' attached to link '%s'", object.object.id.c_str(),
                         object.link_name.c_str());
       }
 
       return true;
     }
     else{
-      RCLCPP_ERROR(logger, "Robot state is not compatible with robot model. This could be fatal.");
+      RCLCPP_ERROR(LOGGER, "Robot state is not compatible with robot model. This could be fatal.");
     }
   }
   else if (object.object.operation == moveit_msgs::msg::CollisionObject::REMOVE)
@@ -1667,7 +1667,7 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
       robot_state_->clearAttachedBody(name);
 
       if (world_->hasObject(name)){
-        RCLCPP_WARN(logger,
+        RCLCPP_WARN(LOGGER,
                        "The collision world already has an object with the same name as the body about to be detached. "
                        "NOT adding the detached body '%s' to the collision world.",
                        object.object.id.c_str());
@@ -1675,7 +1675,7 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
       else
       {
         world_->addToObject(name, shapes, poses);
-        RCLCPP_DEBUG(logger, "Detached object '%s' from link '%s' and added it back in the collision world",
+        RCLCPP_DEBUG(LOGGER, "Detached object '%s' from link '%s' and added it back in the collision world",
                         name.c_str(), object.link_name.c_str());
       }
     }
@@ -1684,11 +1684,11 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
   }
   else if (object.object.operation == moveit_msgs::msg::CollisionObject::MOVE)
   {
-    RCLCPP_ERROR(logger, "Move for attached objects not yet implemented");
+    RCLCPP_ERROR(LOGGER, "Move for attached objects not yet implemented");
   }
   else
   {
-    RCLCPP_ERROR(logger, "Unknown collision object operation: %d", object.object.operation);
+    RCLCPP_ERROR(LOGGER, "Unknown collision object operation: %d", object.object.operation);
   }
 
   return false;
@@ -1698,7 +1698,7 @@ bool PlanningScene::processCollisionObjectMsg(const moveit_msgs::msg::CollisionO
 {
   if (object.id == OCTOMAP_NS)
   {
-    RCLCPP_ERROR(logger, "The ID '%s' cannot be used for collision objects (name reserved)", OCTOMAP_NS.c_str());
+    RCLCPP_ERROR(LOGGER, "The ID '%s' cannot be used for collision objects (name reserved)", OCTOMAP_NS.c_str());
     return false;
   }
 
@@ -1715,7 +1715,7 @@ bool PlanningScene::processCollisionObjectMsg(const moveit_msgs::msg::CollisionO
     return processCollisionObjectMove(object);
   }
 
-  RCLCPP_ERROR(logger, "Unknown collision object operation: %d", object.operation);
+  RCLCPP_ERROR(LOGGER, "Unknown collision object operation: %d", object.operation);
   return false;
 }
 
@@ -1723,26 +1723,26 @@ bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionO
 {
   if (object.primitives.empty() && object.meshes.empty() && object.planes.empty())
   {
-    RCLCPP_ERROR(logger, "There are no shapes specified in the collision object message");
+    RCLCPP_ERROR(LOGGER, "There are no shapes specified in the collision object message");
     return false;
   }
 
   if (object.primitives.size() != object.primitive_poses.size())
   {
-    RCLCPP_ERROR(logger, "Number of primitive shapes does not match number of poses "
+    RCLCPP_ERROR(LOGGER, "Number of primitive shapes does not match number of poses "
                              "in collision object message");
     return false;
   }
 
   if (object.meshes.size() != object.mesh_poses.size())
   {
-    RCLCPP_ERROR(logger, "Number of meshes does not match number of poses in collision object message");
+    RCLCPP_ERROR(LOGGER, "Number of meshes does not match number of poses in collision object message");
     return false;
   }
 
   if (object.planes.size() != object.plane_poses.size())
   {
-    RCLCPP_ERROR(logger, "Number of planes does not match number of poses in collision object message");
+    RCLCPP_ERROR(LOGGER, "Number of planes does not match number of poses in collision object message");
     return false;
   }
 
@@ -1807,7 +1807,7 @@ bool PlanningScene::processCollisionObjectMove(const moveit_msgs::msg::Collision
   if (world_->hasObject(object.id))
   {
     if (!object.primitives.empty() || !object.meshes.empty() || !object.planes.empty())
-      RCLCPP_WARN(logger, "Move operation for object '%s' ignores the geometry specified in the message.",
+      RCLCPP_WARN(LOGGER, "Move operation for object '%s' ignores the geometry specified in the message.",
                      object.id.c_str());
 
     const Eigen::Isometry3d& t = getTransforms().getTransform(object.header.frame_id);
@@ -1841,7 +1841,7 @@ bool PlanningScene::processCollisionObjectMove(const moveit_msgs::msg::Collision
     }
     else
     {
-      RCLCPP_ERROR(logger, "Number of supplied poses (%zu) for object '%s' does not match number of shapes (%zu). "
+      RCLCPP_ERROR(LOGGER, "Number of supplied poses (%zu) for object '%s' does not match number of shapes (%zu). "
                                "Not moving.",
                       new_poses.size(), object.id.c_str(), obj->shapes_.size());
       return false;
@@ -1849,7 +1849,7 @@ bool PlanningScene::processCollisionObjectMove(const moveit_msgs::msg::Collision
     return true;
   }
 
-  RCLCPP_ERROR(logger, "World object '%s' does not exist. Cannot move.", object.id.c_str());
+  RCLCPP_ERROR(LOGGER, "World object '%s' does not exist. Cannot move.", object.id.c_str());
   return false;
 }
 
@@ -1880,7 +1880,7 @@ const Eigen::Isometry3d& PlanningScene::getFrameTransform(const robot_state::Rob
     collision_detection::World::ObjectConstPtr obj = getWorld()->getObject(id);
     if (obj->shape_poses_.size() > 1)
     {
-      RCLCPP_WARN(logger, "More than one shapes in object '%s'. Using first one to decide transform", id.c_str());
+      RCLCPP_WARN(LOGGER, "More than one shapes in object '%s'. Using first one to decide transform", id.c_str());
       return obj->shape_poses_[0];
     }
     else if (obj->shape_poses_.size() == 1)
@@ -1994,7 +1994,7 @@ void PlanningScene::setObjectColor(const std::string& id, const std_msgs::msg::C
 {
   if (id.empty())
   {
-    RCLCPP_ERROR(logger, "Cannot set color of object with empty id.");
+    RCLCPP_ERROR(LOGGER, "Cannot set color of object with empty id.");
     return;
   }
   if (!object_colors_)
@@ -2214,7 +2214,7 @@ bool PlanningScene::isPathValid(const robot_trajectory::RobotTrajectory& traject
       if (!found)
       {
         if (verbose)
-          RCLCPP_INFO(logger, "Goal not satisfied");
+          RCLCPP_INFO(LOGGER, "Goal not satisfied");
         if (invalid_index)
           invalid_index->push_back(i);
         result = false;
