@@ -12,21 +12,49 @@ add_library(${MOVEIT_LIB_NAME}
   src/world_diff.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
+# target_link_libraries(${MOVEIT_LIB_NAME} moveit_robot_state ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  moveit_robot_state
+  rclcpp
+  rmw_implementation
+  urdf
+  urdfdom
+  urdfdom_headers
+  visualization_msgs
+  tf2_eigen
+  Boost)
 
-target_link_libraries(${MOVEIT_LIB_NAME} moveit_robot_state ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
-
-# unit tests
-if(CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(test_world test/test_world.cpp)
-  target_link_libraries(test_world ${MOVEIT_LIB_NAME} ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
-
-  catkin_add_gtest(test_world_diff test/test_world_diff.cpp)
-  target_link_libraries(test_world_diff ${MOVEIT_LIB_NAME} ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
-
-  catkin_add_gtest(test_all_valid test/test_all_valid.cpp)
-  target_link_libraries(test_all_valid ${MOVEIT_LIB_NAME} ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
-endif()
-
+# # unit tests
+# if(BUILD_TESTING)
+#   ament_add_gtest(test_world test/test_world.cpp)
+#   ament_target_dependencies(test_world
+#     ${MOVEIT_LIB_NAME}
+#     rclcpp
+#     rmw_implementation
+#     urdfdom
+#     urdfdom_headers
+#     Boost)
+#
+#   ament_add_gtest(test_world_diff test/test_world_diff.cpp)
+#   ament_target_dependencies(test_world_diff
+#     ${MOVEIT_LIB_NAME}
+#     rclcpp
+#     rmw_implementation
+#     urdfdom
+#     urdfdom_headers
+#     Boost)
+#
+#   ament_add_gtest(test_all_valid test/test_all_valid.cpp)
+#   ament_target_dependencies(test_all_valid
+#     ${MOVEIT_LIB_NAME}
+#     rclcpp
+#     rmw_implementation
+#     urdf
+#     urdfdom
+#     urdfdom_headers
+#     visualization_msgs
+#     Boost)
+# endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
