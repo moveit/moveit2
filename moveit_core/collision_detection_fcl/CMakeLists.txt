@@ -21,6 +21,9 @@ add_library(collision_detector_fcl_plugin src/collision_detector_fcl_plugin_load
 set_target_properties(collision_detector_fcl_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(collision_detector_fcl_plugin
   rclcpp
+  urdf
+  visualization_msgs
+  pluginlib
   rmw_implementation
   ${MOVEIT_LIB_NAME})
 
