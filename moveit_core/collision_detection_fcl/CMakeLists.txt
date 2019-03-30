@@ -17,11 +17,19 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   Boost
   visualization_msgs)
 
-install(TARGETS ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+add_library(collision_detector_fcl_plugin src/collision_detector_fcl_plugin_loader.cpp)
+set_target_properties(collision_detector_fcl_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(collision_detector_fcl_plugin
+  rclcpp
+  rmw_implementation
+  ${MOVEIT_LIB_NAME})
 
+install(TARGETS ${MOVEIT_LIB_NAME} collision_detector_fcl_plugin
+          LIBRARY DESTINATION lib
+          ARCHIVE DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)
+
+install(FILES ../collision_detector_fcl_description.xml DESTINATION share/${PROJECT_NAME})
 
 # if(BUILD_TESTING)
 #   find_package(moveit_resources REQUIRED)

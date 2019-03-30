@@ -60,6 +60,7 @@
 #include <boost/thread.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <rcutils/logging_macros.h>
 
 namespace moveit
 {
@@ -311,8 +312,8 @@ private:
   bool running_;
   bool printOnDestroy_;
 };
-}
-}
+}  // namespace tools
+}  // namespace moveit
 
 #else
 
@@ -444,8 +445,8 @@ public:
     return false;
   }
 };
-}
-}
+}  // namespace tools
+}  // namespace moveit
 
 #endif
 

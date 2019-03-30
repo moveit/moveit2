@@ -46,7 +46,7 @@
 
 namespace moveit_rviz_plugin
 {
-void MotionPlanningFrame::populateRobotStatesList(void)
+void MotionPlanningFrame::populateRobotStatesList()
 {
   ui_->list_states->clear();
   for (RobotStateMap::iterator it = robot_states_.begin(); it != robot_states_.end(); ++it)
@@ -211,12 +211,12 @@ void MotionPlanningFrame::removeStateButtonClicked()
   if (robot_state_storage_)
   {
     // Warn the user
-    QMessageBox msgBox;
-    msgBox.setText("All the selected states will be removed from the database");
-    msgBox.setInformativeText("Do you want to continue?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
-    msgBox.setDefaultButton(QMessageBox::No);
-    int ret = msgBox.exec();
+    QMessageBox msg_box;
+    msg_box.setText("All the selected states will be removed from the database");
+    msg_box.setInformativeText("Do you want to continue?");
+    msg_box.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+    msg_box.setDefaultButton(QMessageBox::No);
+    int ret = msg_box.exec();
 
     switch (ret)
     {
@@ -249,4 +249,4 @@ void MotionPlanningFrame::clearStatesButtonClicked()
   populateRobotStatesList();
 }
 
-}  // namespace
+}  // namespace moveit_rviz_plugin
