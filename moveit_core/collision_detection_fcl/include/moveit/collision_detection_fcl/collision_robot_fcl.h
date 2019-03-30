@@ -39,8 +39,6 @@
 
 #include <moveit/collision_detection_fcl/collision_common.h>
 
-#include "rclcpp/rclcpp.hpp"
-
 namespace collision_detection
 {
 class CollisionRobotFCL : public CollisionRobot
