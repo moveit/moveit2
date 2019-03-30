@@ -617,7 +617,7 @@ protected:
   {
     auto node = rclcpp::Node::make_shared("lookup_param");
     rclcpp::SyncParametersClient parameters_lookup(node);
-    auto groupname_param = parameters_lookup.get_parameters({ group_name_ + "/" + param });
+    std::vector<rclcpp::Parameter> groupname_param = parameters_lookup.get_parameters({ group_name_ + "/" + param });
 
     for (auto& parameter : groupname_param)
     {
@@ -628,7 +628,7 @@ protected:
       }
     }
 
-    auto only_param = parameters_lookup.get_parameters({ param });    
+    auto only_param = parameters_lookup.get_parameters({ param });
     for (auto& parameter : only_param)
     {
       if (!parameter.get_name().compare(param))
