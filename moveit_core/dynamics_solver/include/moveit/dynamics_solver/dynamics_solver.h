@@ -44,18 +44,13 @@
 #include <moveit/robot_state/robot_state.h>
 #include <geometry_msgs/msg/vector3.hpp>
 #include <geometry_msgs/msg/wrench.hpp>
-
 #include <memory>
-
-#include "rclcpp/rclcpp.hpp"
-
 
 /** \brief This namespace includes the dynamics_solver library */
 namespace dynamics_solver
 {
 MOVEIT_CLASS_FORWARD(DynamicsSolver);
 
-rclcpp::Logger logger = rclcpp::get_logger("dynamics_solver");
 /**
  * This solver currently computes the required torques given a
  * joint configuration, velocities, accelerations and external wrenches
