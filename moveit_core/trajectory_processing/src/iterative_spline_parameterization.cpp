@@ -35,7 +35,7 @@
 /* Author: Ken Anderson */
 
 #include <moveit/trajectory_processing/iterative_spline_parameterization.h>
-#include <moveit_msgs/JointLimits.h>
+#include <moveit_msgs/msg/joint_limits.hpp>
 #include <moveit/robot_state/conversions.h>
 #include <vector>
 
@@ -44,6 +44,9 @@ static const double ALIMIT = 1.0;  // default if not specified in model
 
 namespace trajectory_processing
 {
+
+rclcpp::Logger logger_trajectory_processing_spline = rclcpp::get_logger("trajectory_processing.iterative_spline_parameterization");
+
 static void fit_cubic_spline(const int n, const double dt[], const double x[], double x1[], double x2[]);
 static void adjust_two_positions(const int n, const double dt[], double x[], double x1[], double x2[],
                                  const double x2_i, const double x2_f);
@@ -90,7 +93,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   const robot_model::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    ROS_ERROR_NAMED("trajectory_processing.iterative_spline_parameterization", "It looks like the planner did not set "
+    RCLCPP_ERROR(logger_trajectory_processing_spline, "It looks like the planner did not set "
                                                                                "the group the plan was computed for");
     return false;
   }
@@ -105,26 +108,28 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   // Set scaling factors
   if (max_velocity_scaling_factor > 0.0 && max_velocity_scaling_factor <= 1.0)
     velocity_scaling_factor = max_velocity_scaling_factor;
-  else if (max_velocity_scaling_factor == 0.0)
-    ROS_DEBUG_NAMED("trajectory_processing.iterative_spline_parameterization",
+  else if (max_velocity_scaling_factor == 0.0){
+    RCLCPP_DEBUG(logger_trajectory_processing_spline,
                     "A max_velocity_scaling_factor of 0.0 was specified, defaulting to %f instead.",
                     velocity_scaling_factor);
-  else
-    ROS_WARN_NAMED("trajectory_processing.iterative_spline_parameterization",
+  }
+  else{
+    RCLCPP_WARN(logger_trajectory_processing_spline,
                    "Invalid max_velocity_scaling_factor %f specified, defaulting to %f instead.",
                    max_velocity_scaling_factor, velocity_scaling_factor);
-
+  }
   if (max_acceleration_scaling_factor > 0.0 && max_acceleration_scaling_factor <= 1.0)
     acceleration_scaling_factor = max_acceleration_scaling_factor;
-  else if (max_acceleration_scaling_factor == 0.0)
-    ROS_DEBUG_NAMED("trajectory_processing.iterative_spline_parameterization",
+  else if (max_acceleration_scaling_factor == 0.0){
+    RCLCPP_DEBUG(logger_trajectory_processing_spline,
                     "A max_acceleration_scaling_factor of 0.0 was specified, defaulting to %f instead.",
                     acceleration_scaling_factor);
-  else
-    ROS_WARN_NAMED("trajectory_processing.iterative_spline_parameterization",
+  }
+  else{
+    RCLCPP_WARN(logger_trajectory_processing_spline,
                    "Invalid max_acceleration_scaling_factor %f specified, defaulting to %f instead.",
                    max_acceleration_scaling_factor, acceleration_scaling_factor);
-
+  }
   // No wrapped angles.
   trajectory.unwind();
 
@@ -225,7 +230,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
     // Error out if bounds don't make sense
     if (t2[j].max_velocity_ <= 0.0 || t2[j].max_acceleration_ <= 0.0)
     {
-      ROS_ERROR_NAMED("trajectory_processing.iterative_spline_parameterization",
+      RCLCPP_ERROR(logger_trajectory_processing_spline,
                       "Joint %d max velocity %f and max acceleration %f must be greater than zero "
                       "or a solution won't be found.\n",
                       j, t2[j].max_velocity_, t2[j].max_acceleration_);
@@ -233,7 +238,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
     }
     if (t2[j].min_velocity_ >= 0.0 || t2[j].min_acceleration_ >= 0.0)
     {
-      ROS_ERROR_NAMED("trajectory_processing.iterative_spline_parameterization",
+      RCLCPP_ERROR(logger_trajectory_processing_spline,
                       "Joint %d min velocity %f and min acceleration %f must be less than zero "
                       "or a solution won't be found.\n",
                       j, t2[j].min_velocity_, t2[j].min_acceleration_);
@@ -244,7 +249,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   // Error check
   if (num_points < 4)
   {
-    ROS_ERROR_NAMED("trajectory_processing.iterative_spline_parameterization",
+    RCLCPP_ERROR(logger_trajectory_processing_spline,
                     "number of waypoints %d, needs to be greater than 3.\n", num_points);
     return false;
   }
@@ -252,27 +257,27 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   {
     if (t2[j].velocities_[0] > t2[j].max_velocity_ || t2[j].velocities_[0] < t2[j].min_velocity_)
     {
-      ROS_ERROR_NAMED("trajectory_processing.iterative_spline_parameterization", "Initial velocity %f out of bounds\n",
+      RCLCPP_ERROR(logger_trajectory_processing_spline, "Initial velocity %f out of bounds\n",
                       t2[j].velocities_[0]);
       return false;
     }
     else if (t2[j].velocities_[num_points - 1] > t2[j].max_velocity_ ||
              t2[j].velocities_[num_points - 1] < t2[j].min_velocity_)
     {
-      ROS_ERROR_NAMED("trajectory_processing.iterative_spline_parameterization", "Final velocity %f out of bounds\n",
+      RCLCPP_ERROR(logger_trajectory_processing_spline, "Final velocity %f out of bounds\n",
                       t2[j].velocities_[num_points - 1]);
       return false;
     }
     else if (t2[j].accelerations_[0] > t2[j].max_acceleration_ || t2[j].accelerations_[0] < t2[j].min_acceleration_)
     {
-      ROS_ERROR_NAMED("trajectory_processing.iterative_spline_parameterization",
+      RCLCPP_ERROR(logger_trajectory_processing_spline,
                       "Initial acceleration %f out of bounds\n", t2[j].accelerations_[0]);
       return false;
     }
     else if (t2[j].accelerations_[num_points - 1] > t2[j].max_acceleration_ ||
              t2[j].accelerations_[num_points - 1] < t2[j].min_acceleration_)
     {
-      ROS_ERROR_NAMED("trajectory_processing.iterative_spline_parameterization",
+      RCLCPP_ERROR(logger_trajectory_processing_spline,
                       "Final acceleration %f out of bounds\n", t2[j].accelerations_[num_points - 1]);
       return false;
     }
