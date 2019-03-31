@@ -39,11 +39,13 @@
 
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/planning_scene/planning_scene.h>
-
+#include "rclcpp/rclcpp.hpp"
 /** @brief Namespace for kinematics metrics */
 namespace kinematics_metrics
 {
 MOVEIT_CLASS_FORWARD(KinematicsMetrics);
+
+rclcpp::Logger logger = rclcpp::get_logger("kinematics_metrics");
 
 /**
  * \brief Compute different kinds of metrics for kinematics evaluation. Currently includes
