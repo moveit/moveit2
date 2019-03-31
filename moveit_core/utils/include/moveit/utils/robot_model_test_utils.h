@@ -47,7 +47,7 @@
 #include <boost/filesystem/path.hpp>
 #include <moveit_resources/config.h>
 #include <moveit/robot_model/robot_model.h>
-#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/msg/pose.hpp>
 
 namespace moveit
 {
@@ -110,7 +110,7 @@ public:
    * origins will default to the identity transform
    */
   void addChain(const std::string& section, const std::string& type,
-                const std::vector<geometry_msgs::Pose>& joint_origins = {});
+                const std::vector<geometry_msgs::msg::Pose>& joint_origins = {});
 
   /** \brief Adds a collision mesh to a specific link.
    *  \param[in] link_name The name of the link to which the mesh will be added. Must already be in the builder
@@ -118,20 +118,20 @@ public:
    * "package://moveit_resources/pr2_description/urdf/meshes/base_v0/base_L.stl"
    *  \param[in] origin The origin pose of this collision mesh relative to the link origin
    */
-  void addCollisionMesh(const std::string& link_name, const std::string& filename, geometry_msgs::Pose origin);
+  void addCollisionMesh(const std::string& link_name, const std::string& filename, geometry_msgs::msg::Pose origin);
   /** \brief Adds a collision box to a specific link.
    *  \param[in] link_name The name of the link to which the box will be added. Must already be in the builder.
    *  \param[in] size The dimensions of the box
    *  \param[in] origin The origin pose of this collision box relative to the link origin
    */
-  void addCollisionBox(const std::string& link_name, const std::vector<double>& dims, geometry_msgs::Pose origin);
+  void addCollisionBox(const std::string& link_name, const std::vector<double>& dims, geometry_msgs::msg::Pose origin);
 
   /** \brief Adds a visual box to a specific link.
    *  \param[in] link_name The name of the link to which the box will be added. Must already be in the builder.
    *  \param[in] size The dimensions of the box
    *  \param[in] origin The origin pose of this visual box relative to the link origin
    */
-  void addVisualBox(const std::string& link_name, const std::vector<double>& size, geometry_msgs::Pose origin);
+  void addVisualBox(const std::string& link_name, const std::vector<double>& size, geometry_msgs::msg::Pose origin);
 
   /**
    * Adds an inertial component to a link.
@@ -139,7 +139,7 @@ public:
    * \param[in] mass The mass of the link
    * \param[in] origin The origin center pose of the center of mass of this link
    */
-  void addInertial(const std::string& link_name, double mass, geometry_msgs::Pose origin, double ixx, double ixy,
+  void addInertial(const std::string& link_name, double mass, geometry_msgs::msg::Pose origin, double ixx, double ixy,
                    double ixz, double iyy, double iyz, double izz);
 
   /** \} */
@@ -182,10 +182,10 @@ public:
 
 private:
   /** \brief Adds different collision geometries to a link. */
-  void addLinkCollision(const std::string& link_name, const urdf::CollisionSharedPtr& coll, geometry_msgs::Pose origin);
+  void addLinkCollision(const std::string& link_name, urdf::CollisionSharedPtr coll, geometry_msgs::msg::Pose origin);
 
   /** \brief Adds different visual geometries to a link. */
-  void addLinkVisual(const std::string& link_name, const urdf::VisualSharedPtr& vis, geometry_msgs::Pose origin);
+  void addLinkVisual(const std::string& link_name, urdf::VisualSharedPtr vis, geometry_msgs::msg::Pose origin);
 
   /// The URDF model, holds all of the URDF components of the robot added so far.
   urdf::ModelInterfaceSharedPtr urdf_model_;
