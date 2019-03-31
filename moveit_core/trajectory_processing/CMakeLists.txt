@@ -6,10 +6,18 @@ add_library(${MOVEIT_LIB_NAME}
   src/trajectory_tools.cpp
   src/time_optimal_trajectory_generation.cpp
 )
-#TODO: Fix the versioning
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-target_link_libraries(${MOVEIT_LIB_NAME} moveit_robot_state moveit_robot_trajectory ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
+set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  moveit_robot_state
+  moveit_robot_trajectory
+  rclcpp
+  rmw_implementation
+  urdf
+  urdfdom
+  urdfdom_headers
+  visualization_msgs
+  Boost)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
   ARCHIVE DESTINATION lib
