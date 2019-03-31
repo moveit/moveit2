@@ -145,12 +145,12 @@ public:
   void distanceRobot(const DistanceRequest& req, DistanceResult& res, const CollisionRobot& robot,
                      const robot_state::RobotState& state) const override
   {
-    RCLCPP_ERROR(logger, "Not implemented");
+    RCLCPP_ERROR(LOGGER, "Not implemented");
   }
 
   void distanceWorld(const DistanceRequest& req, DistanceResult& res, const CollisionWorld& world) const override
   {
-    RCLCPP_ERROR(logger, "Not implemented");
+    RCLCPP_ERROR(LOGGER, "Not implemented");
   }
 
   void setWorld(const WorldPtr& world) override;
