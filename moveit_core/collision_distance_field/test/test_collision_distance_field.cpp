@@ -326,7 +326,7 @@ TEST_F(DistanceFieldCollisionDetectionTester, AttachedBodyTester)
   shapes.push_back(shapes::ShapeConstPtr(new shapes::Box(.25, .25, .25)));
   poses.push_back(Eigen::Isometry3d::Identity());
   std::set<std::string> touch_links;
-  trajectory_msgs::JointTrajectory empty_state;
+  trajectory_msgs::msg::JointTrajectory empty_state;
   robot_state::AttachedBody* attached_body = new robot_state::AttachedBody(
       robot_state.getLinkModel("r_gripper_palm_link"), "box", shapes, poses, touch_links, empty_state);
 

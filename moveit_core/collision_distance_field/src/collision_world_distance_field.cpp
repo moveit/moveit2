@@ -34,12 +34,13 @@
 
 /* Author: E. Gil Jones */
 
-#include <ros/console.h>
 #include <moveit/collision_distance_field/collision_world_distance_field.h>
 #include <moveit/collision_distance_field/collision_common_distance_field.h>
 #include <moveit/distance_field/propagation_distance_field.h>
 #include <boost/bind.hpp>
 #include <memory>
+#include "rclcpp/rclcpp.hpp"
+#include <stdio.h>
 #include <utility>
 
 namespace collision_detection
@@ -140,7 +141,7 @@ void CollisionWorldDistanceField::checkCollision(const CollisionRequest& req, Co
   }
   catch (const std::bad_cast& e)
   {
-    ROS_ERROR_STREAM("Could not cast CollisionRobot to CollisionRobotDistanceField, " << e.what());
+    RCLCPP_ERROR(logger, "Could not cast CollisionRobot to CollisionRobotDistanceField, %s", e.what());
     return;
   }
 
@@ -183,7 +184,7 @@ void CollisionWorldDistanceField::checkCollision(const CollisionRequest& req, Co
   }
   catch (const std::bad_cast& e)
   {
-    ROS_ERROR_STREAM("Could not cast CollisionRobot to CollisionRobotDistanceField, " << e.what());
+    RCLCPP_ERROR(logger, "Could not cast CollisionRobot to CollisionRobotDistanceField, %s " , e.what());
     return;
   }
 
@@ -222,7 +223,7 @@ void CollisionWorldDistanceField::checkRobotCollision(const CollisionRequest& re
   }
   catch (const std::bad_cast& e)
   {
-    ROS_ERROR_STREAM("Could not cast CollisionRobot to CollisionRobotDistanceField, " << e.what());
+    RCLCPP_ERROR(logger, "Could not cast CollisionRobot to CollisionRobotDistanceField, %s" , e.what());
     return;
   }
 }
@@ -260,7 +261,7 @@ void CollisionWorldDistanceField::checkRobotCollision(const CollisionRequest& re
   }
   catch (const std::bad_cast& e)
   {
-    ROS_ERROR_STREAM("Could not cast CollisionRobot to CollisionRobotDistanceField, " << e.what());
+    RCLCPP_ERROR(logger, "Could not cast CollisionRobot to CollisionRobotDistanceField, %s" , e.what());
     return;
   }
 }
@@ -289,7 +290,7 @@ void CollisionWorldDistanceField::getCollisionGradients(const CollisionRequest& 
   }
   catch (const std::bad_cast& e)
   {
-    ROS_ERROR_STREAM("Could not cast CollisionRobot to CollisionRobotDistanceField, " << e.what());
+    RCLCPP_ERROR(logger,"Could not cast CollisionRobot to CollisionRobotDistanceField, %s " , e.what());
     return;
   }
 
@@ -319,7 +320,7 @@ void CollisionWorldDistanceField::getAllCollisions(const CollisionRequest& req, 
   }
   catch (const std::bad_cast& e)
   {
-    ROS_ERROR_STREAM("Could not cast CollisionRobot to CollisionRobotDistanceField, " << e.what());
+    RCLCPP_ERROR(logger, "Could not cast CollisionRobot to CollisionRobotDistanceField, %s" , e.what());
     return;
   }
 
@@ -472,8 +473,8 @@ void CollisionWorldDistanceField::setWorld(const WorldPtr& world)
 void CollisionWorldDistanceField::notifyObjectChange(CollisionWorldDistanceField* self, const ObjectConstPtr& obj,
                                                      World::Action action)
 {
-  ros::WallTime n = ros::WallTime::now();
-
+  //WallTime
+  auto n = std::chrono::system_clock::now();
   EigenSTL::vector_Vector3d add_points;
   EigenSTL::vector_Vector3d subtract_points;
   self->updateDistanceObject(obj->id_, self->distance_field_cache_entry_, add_points, subtract_points);
@@ -492,8 +493,8 @@ void CollisionWorldDistanceField::notifyObjectChange(CollisionWorldDistanceField
     self->distance_field_cache_entry_->distance_field_->addPointsToField(add_points);
   }
 
-  ROS_DEBUG_NAMED("collision_distance_field", "Modifying object %s took %lf s", obj->id_.c_str(),
-                  (ros::WallTime::now() - n).toSec());
+  RCLCPP_DEBUG(logger, "Modifying object %s took %lf s", obj->id_.c_str(),
+                  std::chrono::system_clock::now() - n);
 }
 
 void CollisionWorldDistanceField::updateDistanceObject(const std::string& id, DistanceFieldCacheEntryPtr& dfce,
@@ -514,8 +515,8 @@ void CollisionWorldDistanceField::updateDistanceObject(const std::string& id, Di
   World::ObjectConstPtr object = getWorld()->getObject(id);
   if (object)
   {
-    ROS_DEBUG_STREAM("Updating/Adding Object '" << object->id_ << "' with " << object->shapes_.size()
-                                                << " shapes  to CollisionWorldDistanceField");
+    RCLCPP_DEBUG(logger, "Updating/Adding Object '%s' with %i  shapes  to CollisionWorldDistanceField",
+                      object->id_.c_str(), object->shapes_.size());
     std::vector<PosedBodyPointDecompositionPtr> shape_points;
     for (unsigned int i = 0; i < object->shapes_.size(); i++)
     {
@@ -542,7 +543,7 @@ void CollisionWorldDistanceField::updateDistanceObject(const std::string& id, Di
   }
   else
   {
-    ROS_DEBUG_STREAM("Removing Object '" << id << "' from CollisionWorldDistanceField");
+    RCLCPP_DEBUG(logger,("Removing Object '%s' from CollisionWorldDistanceField", id).c_str());
     dfce->posed_body_point_decompositions_.erase(id);
   }
 }
