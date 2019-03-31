@@ -38,9 +38,10 @@
 #include <moveit/distance_field/find_internal_points.h>
 #include <geometric_shapes/body_operations.h>
 #include <tf2_eigen/tf2_eigen.h>
-#include <ros/console.h>
 #include <octomap/octomap.h>
 #include <octomap/OcTree.h>
+
+rclcpp::Logger logger = rclcpp::get_logger("distance_field");
 
 namespace distance_field
 {
@@ -86,15 +87,15 @@ double DistanceField::getDistanceGradient(double x, double y, double z, double& 
 }
 
 void DistanceField::getIsoSurfaceMarkers(double min_distance, double max_distance, const std::string& frame_id,
-                                         const ros::Time stamp, visualization_msgs::Marker& inf_marker) const
+                                         const rclcpp::Time stamp, visualization_msgs::msg::Marker& inf_marker) const
 {
   inf_marker.points.clear();
   inf_marker.header.frame_id = frame_id;
   inf_marker.header.stamp = stamp;
   inf_marker.ns = "distance_field";
   inf_marker.id = 1;
-  inf_marker.type = visualization_msgs::Marker::CUBE_LIST;
-  inf_marker.action = visualization_msgs::Marker::MODIFY;
+  inf_marker.type = visualization_msgs::msg::Marker::CUBE_LIST;
+  inf_marker.action = visualization_msgs::msg::Marker::MODIFY;
   inf_marker.scale.x = resolution_;
   inf_marker.scale.y = resolution_;
   inf_marker.scale.z = resolution_;
@@ -130,7 +131,7 @@ void DistanceField::getIsoSurfaceMarkers(double min_distance, double max_distanc
 }
 
 void DistanceField::getGradientMarkers(double min_distance, double max_distance, const std::string& frame_id,
-                                       const ros::Time& stamp, visualization_msgs::MarkerArray& marker_array) const
+                                       const rclcpp::Time& stamp, visualization_msgs::msg::MarkerArray& marker_array) const
 {
   Eigen::Vector3d unit_x(1, 0, 0);
   Eigen::Vector3d unit_y(0, 1, 0);
@@ -154,15 +155,15 @@ void DistanceField::getGradientMarkers(double min_distance, double max_distance,
 
         if (in_bounds && distance >= min_distance && distance <= max_distance && gradient.norm() > 0)
         {
-          visualization_msgs::Marker marker;
+          visualization_msgs::msg::Marker marker;
 
           marker.header.frame_id = frame_id;
           marker.header.stamp = stamp;
 
           marker.ns = "distance_field_gradient";
           marker.id = id++;
-          marker.type = visualization_msgs::Marker::ARROW;
-          marker.action = visualization_msgs::Marker::ADD;
+          marker.type = visualization_msgs::msg::Marker::ARROW;
+          marker.action = visualization_msgs::msg::Marker::ADD;
 
           marker.pose.position.x = world_x;
           marker.pose.position.y = world_y;
@@ -201,7 +202,7 @@ bool DistanceField::getShapePoints(const shapes::Shape* shape, const Eigen::Isom
     const shapes::OcTree* oc = dynamic_cast<const shapes::OcTree*>(shape);
     if (!oc)
     {
-      ROS_ERROR_NAMED("distance_field", "Problem dynamic casting shape that claims to be OcTree");
+      RCLCPP_ERROR(logger, "Problem dynamic casting shape that claims to be OcTree");
       return false;
     }
     getOcTreePoints(oc->octree.get(), points);
@@ -224,7 +225,7 @@ void DistanceField::addShapeToField(const shapes::Shape* shape, const Eigen::Iso
 }
 
 // DEPRECATED
-void DistanceField::addShapeToField(const shapes::Shape* shape, const geometry_msgs::Pose& pose)
+void DistanceField::addShapeToField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& pose)
 {
   Eigen::Isometry3d pose_e;
   tf2::fromMsg(pose, pose_e);
@@ -289,7 +290,7 @@ void DistanceField::moveShapeInField(const shapes::Shape* shape, const Eigen::Is
 {
   if (shape->type == shapes::OCTREE)
   {
-    ROS_WARN_NAMED("distance_field", "Move shape not supported for Octree");
+    RCLCPP_WARN(logger, "Move shape not supported for Octree");
     return;
   }
   bodies::Body* body = bodies::createBodyFromShape(shape);
@@ -304,8 +305,8 @@ void DistanceField::moveShapeInField(const shapes::Shape* shape, const Eigen::Is
 }
 
 // DEPRECATED
-void DistanceField::moveShapeInField(const shapes::Shape* shape, const geometry_msgs::Pose& old_pose,
-                                     const geometry_msgs::Pose& new_pose)
+void DistanceField::moveShapeInField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& old_pose,
+                                     const geometry_msgs::msg::Pose& new_pose)
 {
   Eigen::Isometry3d old_pose_e, new_pose_e;
   tf2::fromMsg(old_pose, old_pose_e);
@@ -324,7 +325,7 @@ void DistanceField::removeShapeFromField(const shapes::Shape* shape, const Eigen
 }
 
 // DEPRECATED
-void DistanceField::removeShapeFromField(const shapes::Shape* shape, const geometry_msgs::Pose& pose)
+void DistanceField::removeShapeFromField(const shapes::Shape* shape, const geometry_msgs::msg::Pose& pose)
 {
   Eigen::Isometry3d pose_e;
   tf2::fromMsg(pose, pose_e);
@@ -332,15 +333,15 @@ void DistanceField::removeShapeFromField(const shapes::Shape* shape, const geome
 }
 
 void DistanceField::getPlaneMarkers(PlaneVisualizationType type, double length, double width, double height,
-                                    const Eigen::Vector3d& origin, const std::string& frame_id, const ros::Time stamp,
-                                    visualization_msgs::Marker& plane_marker) const
+                                    const Eigen::Vector3d& origin, const std::string& frame_id, const rclcpp::Time stamp,
+                                    visualization_msgs::msg::Marker& plane_marker) const
 {
   plane_marker.header.frame_id = frame_id;
   plane_marker.header.stamp = stamp;
   plane_marker.ns = "distance_field_plane";
   plane_marker.id = 1;
-  plane_marker.type = visualization_msgs::Marker::CUBE_LIST;
-  plane_marker.action = visualization_msgs::Marker::ADD;
+  plane_marker.type = visualization_msgs::msg::Marker::CUBE_LIST;
+  plane_marker.action = visualization_msgs::msg::Marker::ADD;
   plane_marker.scale.x = resolution_;
   plane_marker.scale.y = resolution_;
   plane_marker.scale.z = resolution_;
@@ -442,8 +443,8 @@ void DistanceField::getPlaneMarkers(PlaneVisualizationType type, double length, 
   }
 }
 
-void DistanceField::setPoint(int xCell, int yCell, int zCell, double dist, geometry_msgs::Point& point,
-                             std_msgs::ColorRGBA& color, double max_distance) const
+void DistanceField::setPoint(int xCell, int yCell, int zCell, double dist, geometry_msgs::msg::Point& point,
+                             std_msgs::msg::ColorRGBA& color, double max_distance) const
 {
   double wx, wy, wz;
   gridToWorld(xCell, yCell, zCell, wx, wy, wz);
@@ -457,8 +458,8 @@ void DistanceField::setPoint(int xCell, int yCell, int zCell, double dist, geome
   color.b = dist / max_distance;  // dist/max_distance * 0.1;
 }
 
-void DistanceField::getProjectionPlanes(const std::string& frame_id, const ros::Time& stamp, double max_dist,
-                                        visualization_msgs::Marker& marker) const
+void DistanceField::getProjectionPlanes(const std::string& frame_id, const rclcpp::Time& stamp, double max_dist,
+                                        visualization_msgs::msg::Marker& marker) const
 {
   int max_x_cell = getXNumCells();
   int max_y_cell = getYNumCells();
@@ -503,8 +504,8 @@ void DistanceField::getProjectionPlanes(const std::string& frame_id, const ros::
   marker.header.stamp = stamp;
   marker.ns = "distance_field_projection_plane";
   marker.id = 1;
-  marker.type = visualization_msgs::Marker::CUBE_LIST;
-  marker.action = visualization_msgs::Marker::MODIFY;
+  marker.type = visualization_msgs::msg::Marker::CUBE_LIST;
+  marker.action = visualization_msgs::msg::Marker::MODIFY;
   marker.scale.x = getResolution();
   marker.scale.y = getResolution();
   marker.scale.z = getResolution();
