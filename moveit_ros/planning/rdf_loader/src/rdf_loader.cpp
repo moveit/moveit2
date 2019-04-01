@@ -52,7 +52,7 @@
 #include <algorithm>
 #include <chrono>
 
-rclcpp::Logger LOGGER = rclcpp::get_logger("rdf_loader");
+rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("rdf_loader");
 
 rdf_loader::RDFLoader::RDFLoader(const std::string& robot_description)
 {
