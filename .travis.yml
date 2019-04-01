@@ -23,6 +23,7 @@ env:
   matrix:
     # TODO(mlautman): Enable these in the future once they pass
     # - TEST="clang-format ament_lint"
+    - TEST="ament_lint"
     - ROS_DISTRO=crystal
 
 # TODO(mlautman): Enable once franka_ikfast_plugin and panda_ikfast_plugin are available
