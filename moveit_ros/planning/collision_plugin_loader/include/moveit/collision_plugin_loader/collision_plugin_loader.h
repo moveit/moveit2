@@ -35,15 +35,17 @@
 #ifndef MOVEIT_COLLISION_PLUGIN_LOADER_COLLISION_PLUGIN_LOADER_H
 #define MOVEIT_COLLISION_PLUGIN_LOADER_COLLISION_PLUGIN_LOADER_H
 
-#include <ros/ros.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit/collision_detection/collision_plugin.h>
+#include "rclcpp/rclcpp.hpp"
+
 
 namespace collision_detection
 {
+ rclcpp::Logger logger = rclcpp::get_logger("collision_plugin_loader");
 /**
- * @brief This is used to load the collision plugin
- */
+* @brief This is used to load the collision plugin
+*/
 class CollisionPluginLoader
 {
 public:
@@ -51,7 +53,7 @@ public:
   ~CollisionPluginLoader();
 
   /** @brief This can be called on a new planning scene to setup the collision detector. */
-  void setupScene(ros::NodeHandle& nh, const planning_scene::PlanningScenePtr& scene);
+  void setupScene(std::shared_ptr<rclcpp::Node> node, const planning_scene::PlanningScenePtr& scene);
 
   /**
    * @brief Load a collision detection robot/world into a planning scene instance.

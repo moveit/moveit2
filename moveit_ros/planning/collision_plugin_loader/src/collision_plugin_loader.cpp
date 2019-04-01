@@ -49,7 +49,7 @@ public:
     }
     catch (pluginlib::PluginlibException& e)
     {
-      ROS_ERROR("Unable to construct colllision plugin loader. Error: %s", e.what());
+      RCLCPP_ERROR(logger, "Unable to construct colllision plugin loader. Error: %s", e.what());
     }
   }
 
@@ -63,7 +63,7 @@ public:
     }
     catch (pluginlib::PluginlibException& ex)
     {
-      ROS_ERROR_STREAM("Exception while loading " << name << ": " << ex.what());
+      RCLCPP_ERROR(logger, "Exception while loading %s : %s",name.c_str(), ex.what());
     }
     return plugin;
   }
@@ -97,7 +97,9 @@ CollisionPluginLoader::CollisionPluginLoader()
   loader_.reset(new CollisionPluginLoaderImpl());
 }
 
-CollisionPluginLoader::~CollisionPluginLoader() = default;
+CollisionPluginLoader::~CollisionPluginLoader()
+{
+}
 
 bool CollisionPluginLoader::activate(const std::string& name, const planning_scene::PlanningScenePtr& scene,
                                      bool exclusive)
@@ -105,27 +107,26 @@ bool CollisionPluginLoader::activate(const std::string& name, const planning_sce
   return loader_->activate(name, scene, exclusive);
 }
 
-void CollisionPluginLoader::setupScene(ros::NodeHandle& nh, const planning_scene::PlanningScenePtr& scene)
+void CollisionPluginLoader::setupScene(std::shared_ptr<rclcpp::Node> node, const planning_scene::PlanningScenePtr& scene)
 {
   if (!scene)
     return;
 
   std::string param_name;
   std::string collision_detector_name;
+  auto collision_pluggin_loader_parameters = std::make_shared<rclcpp::SyncParametersClient>(node);
 
-  if (nh.searchParam("collision_detector", param_name))
-  {
-    nh.getParam(param_name, collision_detector_name);
-  }
-  else if (nh.hasParam("/move_group/collision_detector"))
-  {
-    // Check for existence in move_group namespace
-    // mainly for rviz plugins to get same collision detector.
-    nh.getParam("/move_group/collision_detector", collision_detector_name);
-  }
-  else
-  {
-    return;
+  for (auto & parameter : collision_pluggin_loader_parameters->get_parameters({"collision_detector","/move_group/collision_detector"})) {
+    if(parameter.get_type_name().compare("collision_detector")){
+      collision_detector_name = parameter.value_to_string();
+    }else if(parameter.get_type_name().compare("/move_group/collision_detector")){
+      // Check for existence in move_group namespace
+      // mainly for rviz plugins to get same collision detector.
+      collision_detector_name = parameter.value_to_string();
+    }else{
+      // This is not a valid name for a collision detector plugin
+      return;
+    }
   }
 
   if (collision_detector_name.empty())
@@ -135,7 +136,7 @@ void CollisionPluginLoader::setupScene(ros::NodeHandle& nh, const planning_scene
   }
 
   activate(collision_detector_name, scene, true);
-  ROS_INFO_STREAM("Using collision detector:" << scene->getActiveCollisionDetectorName().c_str());
+  RCLCPP_INFO(logger, "Using collision detector: %s" , scene->getActiveCollisionDetectorName().c_str());
 }
 
 }  // namespace collision_detection
