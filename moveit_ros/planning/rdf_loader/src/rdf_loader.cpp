@@ -41,7 +41,6 @@
 // ROS 2
 #include "rclcpp/rclcpp.hpp"
 #include <ament_index_cpp/get_package_share_directory.hpp>
-// #include <ros/package.h>
 
 // Boost
 #include <boost/filesystem.hpp>
