@@ -49,7 +49,7 @@ public:
     }
     catch (pluginlib::PluginlibException& e)
     {
-      RCLCPP_ERROR(logger, "Unable to construct colllision plugin loader. Error: %s", e.what());
+      RCLCPP_ERROR(LOGGER, "Unable to construct colllision plugin loader. Error: %s", e.what());
     }
   }
 
@@ -63,7 +63,7 @@ public:
     }
     catch (pluginlib::PluginlibException& ex)
     {
-      RCLCPP_ERROR(logger, "Exception while loading %s : %s",name.c_str(), ex.what());
+      RCLCPP_ERROR(LOGGER, "Exception while loading %s : %s",name.c_str(), ex.what());
     }
     return plugin;
   }
@@ -136,7 +136,7 @@ void CollisionPluginLoader::setupScene(std::shared_ptr<rclcpp::Node> node, const
   }
 
   activate(collision_detector_name, scene, true);
-  RCLCPP_INFO(logger, "Using collision detector: %s" , scene->getActiveCollisionDetectorName().c_str());
+  RCLCPP_INFO(LOGGER, "Using collision detector: %s" , scene->getActiveCollisionDetectorName().c_str());
 }
 
 }  // namespace collision_detection

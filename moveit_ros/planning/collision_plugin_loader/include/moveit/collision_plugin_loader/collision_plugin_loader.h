@@ -42,7 +42,7 @@
 
 namespace collision_detection
 {
- rclcpp::Logger logger = rclcpp::get_logger("collision_plugin_loader");
+rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("collision_plugin_loader");
 /**
 * @brief This is used to load the collision plugin
 */
