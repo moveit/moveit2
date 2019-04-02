@@ -38,8 +38,8 @@ RUN apt-get -qq update && \
 # NOTE(mlautman): These pip installs are from the ros2 source install instructions. Seeing as not all of them
 #        are installed in the base image I added them here. I have not been able to verify that they are needed
 #        and if they aren't necessary they should be removed.
-RUN python3 -m pip install --upgrade pip && \
-    python3 -m pip install -U \
+RUN python3 -m pip install -q --upgrade pip && \
+    python3 -m pip install -q -U \
         argcomplete \
         flake8 \
         flake8-blind-except \
@@ -75,15 +75,15 @@ RUN mkdir src && \
 # Download all MoveIt dependencies
 RUN \
     apt-get -qq update && \
-    rosdep update && \
-    rosdep install -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
+    rosdep update -q && \
+    rosdep install -q -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/*
 
 # Remove the source code from this container
 # TODO: in the future we may want to keep this here for further optimization of later containers
 RUN cd $ROS_WS && \
-    rm -rf src/ && \
+    rm -rf src/
 
 # Continous Integration Setting
 ENV IN_DOCKER 1
