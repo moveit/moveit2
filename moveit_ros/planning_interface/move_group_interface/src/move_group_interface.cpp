@@ -57,8 +57,8 @@
 #include <moveit_msgs/QueryPlannerInterfaces.h>
 #include <moveit_msgs/GetCartesianPath.h>
 #include <moveit_msgs/GraspPlanning.h>
-#include <moveit_msgs/GetPlannerParams.h>
-#include <moveit_msgs/SetPlannerParams.h>
+#include <moveit_msgs/msg/get_planner_params.hpp>
+#include <moveit_msgs/msg/set_planner_params.hpp>
 
 #include <std_msgs/String.h>
 #include <geometry_msgs/TransformStamped.h>

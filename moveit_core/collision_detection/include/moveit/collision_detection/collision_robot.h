@@ -40,8 +40,8 @@
 #include <moveit/collision_detection/collision_matrix.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit_msgs/LinkPadding.h>
-#include <moveit_msgs/LinkScale.h>
+#include <moveit_msgs/msg/link_padding.hpp>
+#include <moveit_msgs/msg/link_scale.hpp>
 
 namespace collision_detection
 {

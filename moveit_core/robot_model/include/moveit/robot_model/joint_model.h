@@ -42,7 +42,7 @@
 #include <vector>
 #include <map>
 #include <iostream>
-#include <moveit_msgs/JointLimits.h>
+#include <moveit_msgs/msg/joint_limits.hpp>
 #include <random_numbers/random_numbers.h>
 #include <Eigen/Geometry>
 
