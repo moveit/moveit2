@@ -40,7 +40,9 @@
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <pluginlib/class_loader.hpp>
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
+#include <moveit_msgs/msg/display_trajectory.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 #include <memory>
 
@@ -76,7 +78,7 @@ public:
       \param adapter_plugins_param_name The name of the ROS parameter under which the names of the request adapter
      plugins are specified (plugin names separated by space; order matters)
   */
-  PlanningPipeline(const robot_model::RobotModelConstPtr& model, const ros::NodeHandle& nh = ros::NodeHandle("~"),
+  PlanningPipeline(const robot_model::RobotModelConstPtr& model, const std::shared_ptr<rclcpp::Node> node,
                    const std::string& planning_plugin_param_name = "planning_plugin",
                    const std::string& adapter_plugins_param_name = "request_adapters");
 
@@ -86,7 +88,7 @@ public:
       \param planning_plugin_name The name of the planning plugin to load
       \param adapter_plugins_names The names of the planning request adapter plugins to load
   */
-  PlanningPipeline(const robot_model::RobotModelConstPtr& model, const ros::NodeHandle& nh,
+  PlanningPipeline(const robot_model::RobotModelConstPtr& model, const std::shared_ptr<rclcpp::Node> node,
                    const std::string& planning_plugin_name, const std::vector<std::string>& adapter_plugin_names);
 
   /** \brief Pass a flag telling the pipeline whether or not to publish the computed motion plans on DISPLAY_PATH_TOPIC.
@@ -169,16 +171,15 @@ public:
 private:
   void configure();
 
-  ros::NodeHandle nh_;
-
+  std::shared_ptr<rclcpp::Node> node_;
   /// Flag indicating whether motion plans should be published as a moveit_msgs::msg::DisplayTrajectory
   bool display_computed_motion_plans_;
-  ros::Publisher display_path_publisher_;
+  rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>::SharedPtr display_path_publisher_;
 
   /// Flag indicating whether received requests should be published just before beginning processing (useful for
   /// debugging)
   bool publish_received_requests_;
-  ros::Publisher received_request_publisher_;
+  rclcpp::Publisher<moveit_msgs::msg::MotionPlanRequest>::SharedPtr received_request_publisher_;
 
   std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager> > planner_plugin_loader_;
   planning_interface::PlannerManagerPtr planner_instance_;
@@ -192,7 +193,7 @@ private:
 
   /// Flag indicating whether the reported plans should be checked once again, by the planning pipeline itself
   bool check_solution_paths_;
-  ros::Publisher contacts_publisher_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr contacts_publisher_;
 };
 
 MOVEIT_CLASS_FORWARD(PlanningPipeline);
