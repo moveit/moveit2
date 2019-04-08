@@ -37,7 +37,7 @@
 #ifndef MOVEIT_PLANNING_INTERFACE_PLANNING_REQUEST_
 #define MOVEIT_PLANNING_INTERFACE_PLANNING_REQUEST_
 
-#include <moveit_msgs/MotionPlanRequest.h>
+#include <moveit_msgs/msg/motion_plan_request.hpp>
 
 namespace planning_interface
 {

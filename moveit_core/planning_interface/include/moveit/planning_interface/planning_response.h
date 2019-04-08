@@ -38,9 +38,9 @@
 #define MOVEIT_PLANNING_INTERFACE_PLANNING_RESPONSE_
 
 #include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit_msgs/MoveItErrorCodes.h>
-#include <moveit_msgs/MotionPlanResponse.h>
-#include <moveit_msgs/MotionPlanDetailedResponse.h>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
+#include <moveit_msgs/msg/motion_plan_response.hpp>
+#include <moveit_msgs/msg/motion_plan_detailed_response.hpp>
 
 namespace planning_interface
 {
