@@ -38,7 +38,7 @@
 #define MOVEIT_KINEMATICS_BASE_KINEMATICS_BASE_
 
 #include <geometry_msgs/PoseStamped.h>
-#include <moveit_msgs/MoveItErrorCodes.h>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit/macros/class_forward.h>
 #include <moveit/macros/deprecation.h>
 #include <ros/node_handle.h>

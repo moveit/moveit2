@@ -41,7 +41,7 @@
 #include <tf2_eigen/tf2_eigen.h>
 #include <moveit/move_group/capability_names.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit_msgs/DisplayTrajectory.h>
+#include <moveit_msgs/msg/display_trajectory.hpp>
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 
 move_group::MoveGroupCartesianPathService::MoveGroupCartesianPathService()

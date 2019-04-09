@@ -39,9 +39,9 @@
 
 #include "moveit/warehouse/moveit_message_storage.h"
 #include <moveit/macros/class_forward.h>
-#include <moveit_msgs/PlanningScene.h>
-#include <moveit_msgs/MotionPlanRequest.h>
-#include <moveit_msgs/RobotTrajectory.h>
+#include <moveit_msgs/msg/planning_scene.hpp>
+#include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 
 namespace moveit_warehouse
 {
