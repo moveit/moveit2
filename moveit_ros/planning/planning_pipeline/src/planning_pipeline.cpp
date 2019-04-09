@@ -174,8 +174,11 @@ void planning_pipeline::PlanningPipeline::displayComputedMotionPlans(bool flag)
 {
   if (display_computed_motion_plans_ && !flag)
     display_path_publisher_.reset();
-  else if (!display_computed_motion_plans_ && flag)
-    display_path_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC);
+  else if (!display_computed_motion_plans_ && flag){
+    custom_qos_profile_ = rmw_qos_profile_default;
+    custom_qos_profile_.depth = 10;
+    display_path_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC,custom_qos_profile_);
+  }
   display_computed_motion_plans_ = flag;
 }
 
@@ -183,8 +186,11 @@ void planning_pipeline::PlanningPipeline::publishReceivedRequests(bool flag)
 {
   if (publish_received_requests_ && !flag)
     received_request_publisher_.reset();
-  else if (!publish_received_requests_ && flag)
-    received_request_publisher_ = node_->create_publisher<moveit_msgs::msg::MotionPlanRequest>(MOTION_PLAN_REQUEST_TOPIC);
+  else if (!publish_received_requests_ && flag){
+    custom_qos_profile_ = rmw_qos_profile_default;
+    custom_qos_profile_.depth = 10;
+    received_request_publisher_ = node_->create_publisher<moveit_msgs::msg::MotionPlanRequest>(MOTION_PLAN_REQUEST_TOPIC,custom_qos_profile_);
+  }
   publish_received_requests_ = flag;
 }
 
@@ -192,8 +198,11 @@ void planning_pipeline::PlanningPipeline::checkSolutionPaths(bool flag)
 {
   if (check_solution_paths_ && !flag)
     contacts_publisher_.reset();
-  else if (!check_solution_paths_ && flag)
-    contacts_publisher_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(MOTION_CONTACTS_TOPIC);
+  else if (!check_solution_paths_ && flag){
+    custom_qos_profile_ = rmw_qos_profile_default;
+    custom_qos_profile_.depth = 100;
+    contacts_publisher_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(MOTION_CONTACTS_TOPIC,custom_qos_profile_);
+  }
   check_solution_paths_ = flag;
 }
 
