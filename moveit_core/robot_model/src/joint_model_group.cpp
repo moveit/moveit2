@@ -760,7 +760,7 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
     double max_dtheta = dt * max_velocity;
     if (dtheta > max_dtheta)
     {
-      RCLCPP_DEBUG(LOGGER, "Not valid velocity move because of joint " << i);
+      RCLCPP_DEBUG(LOGGER, "Not valid velocity move because of joint %lu", i);
       return false;
     }
   }
