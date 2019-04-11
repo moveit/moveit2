@@ -41,7 +41,7 @@
 // MoveIt!
 #include <moveit/semantic_world/semantic_world.h>
 #include <geometric_shapes/shape_operations.h>
-#include <moveit_msgs/PlanningScene.h>
+#include <moveit_msgs/msg/planning_scene.hpp>
 
 // OpenCV
 #include <opencv2/imgproc/imgproc.hpp>

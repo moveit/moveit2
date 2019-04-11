@@ -41,7 +41,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <object_recognition_msgs/TableArray.h>
-#include <moveit_msgs/CollisionObject.h>
+#include <moveit_msgs/msg/collision_object.hpp>
 #include <boost/thread/mutex.hpp>
 #include <moveit/macros/class_forward.h>
 

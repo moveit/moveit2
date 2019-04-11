@@ -39,10 +39,10 @@
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit_msgs/ObjectColor.h>
-#include <moveit_msgs/CollisionObject.h>
+#include <moveit_msgs/msg/object_color.hpp>
+#include <moveit_msgs/msg/collision_object.hpp>
 #include <moveit_msgs/AttachedCollisionObject.h>
-#include <moveit_msgs/PlanningScene.h>
+#include <moveit_msgs/msg/planning_scene.hpp>
 
 namespace moveit
 {

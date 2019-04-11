@@ -51,7 +51,7 @@
 #include <moveit/semantic_world/semantic_world.h>
 #include <interactive_markers/interactive_marker_server.h>
 #include <rviz/default_plugin/interactive_markers/interactive_marker.h>
-#include <moveit_msgs/MotionPlanRequest.h>
+#include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <actionlib/client/simple_action_client.h>
 #include <object_recognition_msgs/ObjectRecognitionAction.h>
 

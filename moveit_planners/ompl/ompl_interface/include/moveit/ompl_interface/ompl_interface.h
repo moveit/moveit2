@@ -42,8 +42,8 @@
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 #include <moveit/constraint_sampler_manager_loader/constraint_sampler_manager_loader.h>
 #include <moveit/planning_interface/planning_interface.h>
-#include <moveit_msgs/MotionPlanRequest.h>
-#include <moveit_msgs/MotionPlanResponse.h>
+#include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit_msgs/msg/motion_plan_response.hpp>
 #include <string>
 #include <map>
 #include <ros/ros.h>

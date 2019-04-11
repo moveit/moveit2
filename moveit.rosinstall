@@ -1,34 +1,55 @@
 # This file is intended for users who want to build MoveIt! from source.
 # Used with wstool, users can download source of all packages of MoveIt!.
+
 - git:
-    local-name: moveit
-    uri: https://github.com/ros-planning/moveit.git
+    local-name: moveit2
+    uri: https://github.com/ros-planning/moveit2.git
     version: master
 - git:
     local-name: moveit_msgs
-    uri: https://github.com/ros-planning/moveit_msgs.git
-    version: melodic-devel
-- git:
-    local-name: moveit_resources
-    uri: https://github.com/ros-planning/moveit_resources.git
-    version: master
-- git:
-    local-name: moveit_visual_tools
-    uri: https://github.com/ros-planning/moveit_visual_tools.git
-    version: melodic-devel
-- git:
-    local-name: rviz_visual_tools
-    uri: https://github.com/PickNikRobotics/rviz_visual_tools
-    version: melodic-devel
+    # TODO(mlautman): update to ros-planning once the package has been merged back in
+    uri: https://github.com/AcutronicRobotics/moveit_msgs
+    version: ros2
 - git:
     local-name: geometric_shapes
-    uri: https://github.com/ros-planning/geometric_shapes.git
-    version: melodic-devel
+    # TODO(mlautman): update to ros-planning once the package has been ported
+    uri: https://github.com/AcutronicRobotics/geometric_shapes
+    version: ros2
+- git:
+    local-name: object_recognition_msgs
+    # TODO(mlautman): update to ros-planning once the package has been ported
+    uri: https://github.com/AcutronicRobotics/object_recognition_msgs
+    version: master
+- git:
+    local-name: octomap_msgs
+    # TODO(mlautman): update to ros-planning once the package has been ported
+    uri: https://github.com/AcutronicRobotics/octomap_msgs
+    version: ros2
+- git:
+    local-name: random_numbers
+    # TODO(mlautman): update to ros-planning once the package has been ported
+    uri: https://github.com/AcutronicRobotics/random_numbers
+    version: ros2
 - git:
     local-name: srdfdom
-    uri: https://github.com/ros-planning/srdfdom.git
-    version: melodic-devel
+    # TODO(mlautman): update to ros-planning once the package has been ported
+    uri: https://github.com/mlautman/srdfdom
+    version: ros2
 - git:
-    local-name: moveit_tutorials
-    uri: https://github.com/ros-planning/moveit_tutorials.git
-    version: melodic-devel
+    local-name: urdf_parser_py
+    # TODO(mlautman): update to ros-planning once the package has been ported
+    uri: https://github.com/AcutronicRobotics/urdf_parser_py
+    version: ros2
+- git:
+    local-name: octomap
+    uri: https://github.com/AcutronicRobotics/octomap
+    version: ros2
+- git:
+    local-name: moveit_resources
+    # TODO(mlautman): update to ros-planning once the package has been ported
+    uri: https://github.com/AcutronicRobotics/moveit_resources
+    version: master
+- git:
+    local-name: joint_state_publisher
+    uri: https://github.com/ros/joint_state_publisher.git
+    version: ros2-devel

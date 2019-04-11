@@ -38,8 +38,8 @@
 #define MOVEIT_COLLISION_DETECTION_COLLISION_TOOLS_
 
 #include <moveit/collision_detection/collision_common.h>
-#include <moveit_msgs/CostSource.h>
-#include <moveit_msgs/ContactInformation.h>
+#include <moveit_msgs/msg/cost_source.hpp>
+#include <moveit_msgs/msg/contact_information.hpp>
 #include <visualization_msgs/MarkerArray.h>
 
 namespace collision_detection

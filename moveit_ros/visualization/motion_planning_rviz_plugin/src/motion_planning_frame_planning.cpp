@@ -42,7 +42,7 @@
 #include <moveit/robot_state/conversions.h>
 
 #include <std_srvs/Empty.h>
-#include <moveit_msgs/RobotState.h>
+#include <moveit_msgs/msg/robot_state.hpp>
 #include <tf2_eigen/tf2_eigen.h>
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 

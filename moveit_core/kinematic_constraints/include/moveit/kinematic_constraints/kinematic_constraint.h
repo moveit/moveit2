@@ -44,7 +44,7 @@
 #include <moveit/macros/class_forward.h>
 
 #include <geometric_shapes/bodies.h>
-#include <moveit_msgs/Constraints.h>
+#include <moveit_msgs/msg/constraints.hpp>
 
 #include <iostream>
 #include <vector>
