@@ -622,7 +622,7 @@ protected:
           "robot_description_kinematics/" + param });
     if (!param_results.empty())
     {
-      val = param_results.get_value<T>();
+      val = param_results[0].get_value<T>();
       return true;
     }
     val = default_val;
