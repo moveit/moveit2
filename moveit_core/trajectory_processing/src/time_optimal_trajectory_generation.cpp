@@ -42,14 +42,13 @@
 #include <angles/angles.h>
 #include <cmath>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
-#include <ros/console.h>
 #include <vector>
-
+#include "rclcpp/rclcpp.hpp"
 #include <iostream>
 
 namespace trajectory_processing
 {
-const std::string LOGNAME = "trajectory_processing.time_optimal_trajectory_generation";
+rclcpp::Logger logger_trajectory_processing_optimal = rclcpp::get_logger("trajectory_processing.time_optimal_trajectory_generation");
 constexpr double EPS = 0.000001;
 class LinearPathSegment : public PathSegment
 {
@@ -59,29 +58,29 @@ public:
   {
   }
 
-  Eigen::VectorXd getConfig(double s) const
+  Eigen::VectorXd getConfig(double s) const override
   {
     s /= length_;
     s = std::max(0.0, std::min(1.0, s));
     return (1.0 - s) * start_ + s * end_;
   }
 
-  Eigen::VectorXd getTangent(double /* s */) const
+  Eigen::VectorXd getTangent(double /* s */) const override
   {
     return (end_ - start_) / length_;
   }
 
-  Eigen::VectorXd getCurvature(double /* s */) const
+  Eigen::VectorXd getCurvature(double /* s */) const override
   {
     return Eigen::VectorXd::Zero(start_.size());
   }
 
-  std::list<double> getSwitchingPoints() const
+  std::list<double> getSwitchingPoints() const override
   {
     return std::list<double>();
   }
 
-  LinearPathSegment* clone() const
+  LinearPathSegment* clone() const override
   {
     return new LinearPathSegment(*this);
   }
@@ -138,25 +137,25 @@ public:
     y = start_direction;
   }
 
-  Eigen::VectorXd getConfig(double s) const
+  Eigen::VectorXd getConfig(double s) const override
   {
     const double angle = s / radius;
     return center + radius * (x * cos(angle) + y * sin(angle));
   }
 
-  Eigen::VectorXd getTangent(double s) const
+  Eigen::VectorXd getTangent(double s) const override
   {
     const double angle = s / radius;
     return -x * sin(angle) + y * cos(angle);
   }
 
-  Eigen::VectorXd getCurvature(double s) const
+  Eigen::VectorXd getCurvature(double s) const override
   {
     const double angle = s / radius;
     return -1.0 / radius * (x * cos(angle) + y * sin(angle));
   }
 
-  std::list<double> getSwitchingPoints() const
+  std::list<double> getSwitchingPoints() const override
   {
     std::list<double> switching_points;
     const double dim = x.size();
@@ -177,7 +176,7 @@ public:
     return switching_points;
   }
 
-  CircularPathSegment* clone() const
+  CircularPathSegment* clone() const override
   {
     return new CircularPathSegment(*this);
   }
@@ -363,7 +362,7 @@ Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, co
   }
 }
 
-Trajectory::~Trajectory(void)
+Trajectory::~Trajectory()
 {
 }
 
@@ -553,7 +552,7 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
     else if (path_vel < 0.0)
     {
       valid_ = false;
-      ROS_ERROR_NAMED(LOGNAME, "Error while integrating forward: Negative path velocity");
+      RCLCPP_ERROR(logger_trajectory_processing_optimal, "Error while integrating forward: Negative path velocity");
       return true;
     }
 
@@ -650,7 +649,7 @@ void Trajectory::integrateBackward(std::list<TrajectoryStep>& start_trajectory, 
       if (path_vel < 0.0)
       {
         valid_ = false;
-        ROS_ERROR_NAMED(LOGNAME, "Error while integrating backward: Negative path velocity");
+        RCLCPP_ERROR(logger_trajectory_processing_optimal, "Error while integrating backward: Negative path velocity");
         end_trajectory_ = trajectory;
         return;
       }
@@ -679,7 +678,7 @@ void Trajectory::integrateBackward(std::list<TrajectoryStep>& start_trajectory, 
   }
 
   valid_ = false;
-  ROS_ERROR_NAMED(LOGNAME, "Error while integrating backward: Did not hit start trajectory");
+  RCLCPP_ERROR(logger_trajectory_processing_optimal, "Error while integrating backward: Did not hit start trajectory");
   end_trajectory_ = trajectory;
 }
 
@@ -719,12 +718,12 @@ double Trajectory::getAccelerationMaxPathVelocity(double path_pos) const
       {
         if (config_deriv[j] != 0.0)
         {
-          double A_ij = config_deriv2[i] / config_deriv[i] - config_deriv2[j] / config_deriv[j];
-          if (A_ij != 0.0)
+          double a_ij = config_deriv2[i] / config_deriv[i] - config_deriv2[j] / config_deriv[j];
+          if (a_ij != 0.0)
           {
             max_path_velocity = std::min(max_path_velocity, sqrt((max_acceleration_[i] / std::abs(config_deriv[i]) +
                                                                   max_acceleration_[j] / std::abs(config_deriv[j])) /
-                                                                 std::abs(A_ij)));
+                                                                 std::abs(a_ij)));
           }
         }
       }
@@ -880,7 +879,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   const robot_model::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    ROS_ERROR_NAMED(LOGNAME, "It looks like the planner did not set the group the plan was computed for");
+    RCLCPP_ERROR(logger_trajectory_processing_optimal, "It looks like the planner did not set the group the plan was computed for");
     return false;
   }
 
@@ -892,12 +891,12 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   }
   else if (max_velocity_scaling_factor == 0.0)
   {
-    ROS_DEBUG_NAMED(LOGNAME, "A max_velocity_scaling_factor of 0.0 was specified, defaulting to %f instead.",
+    RCLCPP_DEBUG(logger_trajectory_processing_optimal, "A max_velocity_scaling_factor of 0.0 was specified, defaulting to %f instead.",
                     velocity_scaling_factor);
   }
   else
   {
-    ROS_WARN_NAMED(LOGNAME, "Invalid max_velocity_scaling_factor %f specified, defaulting to %f instead.",
+    RCLCPP_WARN(logger_trajectory_processing_optimal, "Invalid max_velocity_scaling_factor %f specified, defaulting to %f instead.",
                    max_velocity_scaling_factor, velocity_scaling_factor);
   }
 
@@ -908,12 +907,12 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   }
   else if (max_acceleration_scaling_factor == 0.0)
   {
-    ROS_DEBUG_NAMED(LOGNAME, "A max_acceleration_scaling_factor of 0.0 was specified, defaulting to %f instead.",
+    RCLCPP_DEBUG(logger_trajectory_processing_optimal, "A max_acceleration_scaling_factor of 0.0 was specified, defaulting to %f instead.",
                     acceleration_scaling_factor);
   }
   else
   {
-    ROS_WARN_NAMED(LOGNAME, "Invalid max_acceleration_scaling_factor %f specified, defaulting to %f instead.",
+    RCLCPP_WARN(logger_trajectory_processing_optimal, "Invalid max_acceleration_scaling_factor %f specified, defaulting to %f instead.",
                    max_acceleration_scaling_factor, acceleration_scaling_factor);
   }
 
@@ -974,7 +973,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   // Return trajectory with only the first waypoint if there are not multiple diverse points
   if (points.size() == 1)
   {
-    ROS_WARN_NAMED(LOGNAME, "Trajectory is not being parameterized since it only contains a single distinct waypoint.");
+    RCLCPP_WARN(logger_trajectory_processing_optimal, "Trajectory is not being parameterized since it only contains a single distinct waypoint.");
     robot_state::RobotState waypoint = robot_state::RobotState(trajectory.getWayPoint(0));
     trajectory.clear();
     trajectory.addSuffixWayPoint(waypoint, 0.0);
@@ -985,7 +984,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   Trajectory parameterized(Path(points, path_tolerance_), max_velocity, max_acceleration, 0.001);
   if (!parameterized.isValid())
   {
-    ROS_ERROR_NAMED(LOGNAME, "Unable to parameterize trajectory.");
+    RCLCPP_ERROR(logger_trajectory_processing_optimal, "Unable to parameterize trajectory.");
     return false;
   }
 

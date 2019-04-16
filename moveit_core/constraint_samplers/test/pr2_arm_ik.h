@@ -44,7 +44,7 @@
 #include <kdl/chainiksolver.hpp>
 #include <moveit_msgs/GetPositionFK.h>
 #include <moveit_msgs/GetPositionIK.h>
-#include <moveit_msgs/KinematicSolverInfo.h>
+#include <moveit_msgs/msg/kinematic_solver_info.hpp>
 
 namespace pr2_arm_kinematics
 {

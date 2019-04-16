@@ -42,9 +42,11 @@
 #include <vector>
 #include <map>
 #include <iostream>
-#include <moveit_msgs/JointLimits.h>
+#include <moveit_msgs/msg/joint_limits.hpp>
 #include <random_numbers/random_numbers.h>
 #include <Eigen/Geometry>
+#include <rcutils/logging_macros.h>
+#include <moveit/robot_model/log.h>
 
 namespace moveit
 {
@@ -519,7 +521,7 @@ protected:
 
 /** \brief Operator overload for printing variable bounds to a stream */
 std::ostream& operator<<(std::ostream& out, const VariableBounds& b);
-}
-}
+}  // namespace core
+}  // namespace moveit
 
 #endif

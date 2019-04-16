@@ -38,7 +38,7 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/collision_detection/collision_tools.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit_msgs/DisplayTrajectory.h>
+#include <moveit_msgs/msg/display_trajectory.hpp>
 #include <visualization_msgs/MarkerArray.h>
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/join.hpp>

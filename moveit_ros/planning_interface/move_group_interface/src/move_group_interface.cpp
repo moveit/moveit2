@@ -57,8 +57,8 @@
 #include <moveit_msgs/QueryPlannerInterfaces.h>
 #include <moveit_msgs/GetCartesianPath.h>
 #include <moveit_msgs/GraspPlanning.h>
-#include <moveit_msgs/GetPlannerParams.h>
-#include <moveit_msgs/SetPlannerParams.h>
+#include <moveit_msgs/msg/get_planner_params.hpp>
+#include <moveit_msgs/msg/set_planner_params.hpp>
 
 #include <std_msgs/String.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -493,9 +493,9 @@ public:
         return jt->second.at(0);
 
     // or return an error
-    static const geometry_msgs::PoseStamped unknown;
+    static const geometry_msgs::PoseStamped UNKNOWN;
     ROS_ERROR_NAMED("move_group_interface", "Pose for end-effector '%s' not known.", eef.c_str());
-    return unknown;
+    return UNKNOWN;
   }
 
   const std::vector<geometry_msgs::PoseStamped>& getPoseTargets(const std::string& end_effector_link) const
@@ -508,9 +508,9 @@ public:
         return jt->second;
 
     // or return an error
-    static const std::vector<geometry_msgs::PoseStamped> empty;
+    static const std::vector<geometry_msgs::PoseStamped> EMPTY;
     ROS_ERROR_NAMED("move_group_interface", "Poses for end-effector '%s' are not known.", eef.c_str());
-    return empty;
+    return EMPTY;
   }
 
   void setPoseReferenceFrame(const std::string& pose_reference_frame)

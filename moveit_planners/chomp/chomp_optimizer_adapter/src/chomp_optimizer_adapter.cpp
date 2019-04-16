@@ -37,7 +37,7 @@
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit_msgs/RobotTrajectory.h>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <class_loader/class_loader.hpp>
 #include <ros/ros.h>
 
@@ -178,7 +178,7 @@ public:
     ROS_INFO_STREAM("Configuring Planning Scene for CHOMP ....");
     planning_scene->setActiveCollisionDetector(hybrid_cd, true);
 
-    chomp::ChompPlanner chompPlanner;
+    chomp::ChompPlanner chomp_planner;
     planning_interface::MotionPlanDetailedResponse res_detailed;
     moveit_msgs::msg::MotionPlanDetailedResponse res_detailed_moveit_msgs;
 
@@ -190,7 +190,7 @@ public:
     res_detailed_moveit_msgs.trajectory.resize(1);
     res_detailed_moveit_msgs.trajectory[0] = trajectory_msgs_from_response;
 
-    bool planning_success = chompPlanner.solve(planning_scene, req, params_, res_detailed_moveit_msgs);
+    bool planning_success = chomp_planner.solve(planning_scene, req, params_, res_detailed_moveit_msgs);
 
     if (planning_success)
     {

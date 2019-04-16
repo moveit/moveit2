@@ -42,9 +42,8 @@
 #include <kdl/chainidsolver_recursive_newton_euler.hpp>
 
 #include <moveit/robot_state/robot_state.h>
-#include <geometry_msgs/Vector3.h>
-#include <geometry_msgs/Wrench.h>
-
+#include <geometry_msgs/msg/vector3.hpp>
+#include <geometry_msgs/msg/wrench.hpp>
 #include <memory>
 
 /** \brief This namespace includes the dynamics_solver library */
@@ -68,7 +67,7 @@ public:
    * @return False if initialization failed
    */
   DynamicsSolver(const robot_model::RobotModelConstPtr& robot_model, const std::string& group_name,
-                 const geometry_msgs::Vector3& gravity_vector);
+                 const geometry_msgs::msg::Vector3& gravity_vector);
 
   /**
    * @brief Get the torques (the order of all input and output is the same
@@ -86,7 +85,7 @@ public:
    * @return False if any of the input vectors are of the wrong size
    */
   bool getTorques(const std::vector<double>& joint_angles, const std::vector<double>& joint_velocities,
-                  const std::vector<double>& joint_accelerations, const std::vector<geometry_msgs::Wrench>& wrenches,
+                  const std::vector<double>& joint_accelerations, const std::vector<geometry_msgs::msg::Wrench>& wrenches,
                   std::vector<double>& torques) const;
 
   /**
