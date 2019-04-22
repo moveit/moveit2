@@ -37,12 +37,11 @@
 #ifndef MOVEIT_KINEMATICS_BASE_KINEMATICS_BASE_
 #define MOVEIT_KINEMATICS_BASE_KINEMATICS_BASE_
 
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit/macros/class_forward.h>
 #include <moveit/macros/deprecation.h>
-#include <ros/node_handle.h>
-
+#include "rclcpp/rclcpp.hpp"
 #include <boost/function.hpp>
 #include <string>
 
@@ -53,12 +52,15 @@ namespace core
 MOVEIT_CLASS_FORWARD(JointModelGroup)
 MOVEIT_CLASS_FORWARD(RobotState)
 MOVEIT_CLASS_FORWARD(RobotModel)
-}
-}
+}  // namespace core
+}  // namespace moveit
 
 /** @brief API for forward and inverse kinematics */
 namespace kinematics
 {
+// Logger
+rclcpp::Logger LOGGER = rclcpp::get_logger("kinematics_base");
+
 /*
  * @enum DiscretizationMethods
  *
@@ -137,7 +139,7 @@ struct KinematicsResult
                                        of solutions explored. */
 };
 
-MOVEIT_CLASS_FORWARD(KinematicsBase);
+MOVEIT_CLASS_FORWARD(KinematicsBase)
 
 /**
  * @class KinematicsBase
@@ -150,7 +152,8 @@ public:
   static const double DEFAULT_TIMEOUT;               /* = 1.0 */
 
   /** @brief Signature for a callback to validate an IK solution. Typically used for collision checking. */
-  typedef boost::function<void(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_solution,
+  /** @brief The signature for a callback that can compute IK */
+  typedef boost::function<void(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_solution,
                                moveit_msgs::msg::MoveItErrorCodes& error_code)>
       IKCallbackFn;
 
@@ -167,7 +170,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   virtual bool
-  getPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+  getPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                 std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                 const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const = 0;
 
@@ -186,9 +189,9 @@ public:
    *                other will result in failure.
    * @return True if a valid set of solutions was found, false otherwise.
    */
-  virtual bool getPositionIK(const std::vector<geometry_msgs::Pose>& ik_poses, const std::vector<double>& ik_seed_state,
-                             std::vector<std::vector<double> >& solutions, KinematicsResult& result,
-                             const kinematics::KinematicsQueryOptions& options) const;
+  virtual bool getPositionIK(const std::vector<geometry_msgs::msg::Pose>& ik_poses,
+                             const std::vector<double>& ik_seed_state, std::vector<std::vector<double> >& solutions,
+                             KinematicsResult& result, const kinematics::KinematicsQueryOptions& options) const;
 
   /**
    * @brief Given a desired pose of the end-effector, search for the joint angles required to reach it.
@@ -203,7 +206,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   virtual bool
-  searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+  searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
                    std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                    const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const = 0;
 
@@ -222,7 +225,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   virtual bool
-  searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+  searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
                    const std::vector<double>& consistency_limits, std::vector<double>& solution,
                    moveit_msgs::msg::MoveItErrorCodes& error_code,
                    const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const = 0;
@@ -241,7 +244,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   virtual bool
-  searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+  searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
                    std::vector<double>& solution, const IKCallbackFn& solution_callback,
                    moveit_msgs::msg::MoveItErrorCodes& error_code,
                    const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const = 0;
@@ -262,7 +265,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   virtual bool
-  searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+  searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
                    const std::vector<double>& consistency_limits, std::vector<double>& solution,
                    const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
                    const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const = 0;
@@ -289,7 +292,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   virtual bool
-  searchPositionIK(const std::vector<geometry_msgs::Pose>& ik_poses, const std::vector<double>& ik_seed_state,
+  searchPositionIK(const std::vector<geometry_msgs::msg::Pose>& ik_poses, const std::vector<double>& ik_seed_state,
                    double timeout, const std::vector<double>& consistency_limits, std::vector<double>& solution,
                    const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
                    const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
@@ -311,7 +314,7 @@ public:
     }
 
     // Otherwise throw error because this function should have been implemented
-    ROS_ERROR_NAMED("kinematics_base", "This kinematic solver does not support searchPositionIK with multiple poses");
+    RCLCPP_ERROR(LOGGER, "This kinematic solver does not support searchPositionIK with multiple poses");
     return false;
   }
 
@@ -323,7 +326,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   virtual bool getPositionFK(const std::vector<std::string>& link_names, const std::vector<double>& joint_angles,
-                             std::vector<geometry_msgs::Pose>& poses) const = 0;
+                             std::vector<geometry_msgs::msg::Pose>& poses) const = 0;
 
   /**
    * @brief Set the parameters for the solver, for use with kinematic chain IK solvers
@@ -435,8 +438,8 @@ public:
   virtual const std::string& getTipFrame() const
   {
     if (tip_frames_.size() > 1)
-      ROS_ERROR_NAMED("kinematics_base", "This kinematic solver has more than one tip frame, "
-                                         "do not call getTipFrame()");
+      RCLCPP_ERROR(LOGGER, "This kinematic solver has more than one tip frame, "
+                           "do not call getTipFrame()");
 
     return tip_frames_[0];
   }
@@ -612,34 +615,17 @@ protected:
   template <typename T>
   inline bool lookupParam(const std::string& param, T& val, const T& default_val) const
   {
-    ros::NodeHandle pnh("~");
-    if (pnh.hasParam(group_name_ + "/" + param))
+    // TODO(henningkayser): reuse node and fix private namespace lookup from kinematics.yaml
+    auto node = rclcpp::Node::make_shared("kinematics_base.lookup_param");
+    std::vector<rclcpp::Parameter> param_results = node->get_parameters(
+        { group_name_ + "/" + param, param, "robot_description_kinematics/" + group_name_ + "/" + param,
+          "robot_description_kinematics/" + param });
+    if (!param_results.empty())
     {
-      val = pnh.param(group_name_ + "/" + param, default_val);
+      val = param_results[0].get_value<T>();
       return true;
     }
-
-    if (pnh.hasParam(param))
-    {
-      val = pnh.param(param, default_val);
-      return true;
-    }
-
-    ros::NodeHandle nh;
-    if (nh.hasParam("robot_description_kinematics/" + group_name_ + "/" + param))
-    {
-      val = nh.param("robot_description_kinematics/" + group_name_ + "/" + param, default_val);
-      return true;
-    }
-
-    if (nh.hasParam("robot_description_kinematics/" + param))
-    {
-      val = nh.param("robot_description_kinematics/" + param, default_val);
-      return true;
-    }
-
     val = default_val;
-
     return false;
   }
 
@@ -658,6 +644,6 @@ protected:
 private:
   std::string removeSlash(const std::string& str) const;
 };
-};
+}  // namespace kinematics
 
 #endif
