@@ -43,7 +43,7 @@
 #include <QColor>
 
 #include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/DisplayRobotState.h>
+#include <moveit_msgs/msg/display_robot_state.hpp>
 
 #include <regex>
 

@@ -40,7 +40,6 @@
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/exceptions/exceptions.h>
-#include <urdf/model.h>
 #include <srdfdom/model.h>
 
 // joint types
@@ -50,7 +49,6 @@
 #include <moveit/robot_model/planar_joint_model.h>
 #include <moveit/robot_model/revolute_joint_model.h>
 #include <moveit/robot_model/prismatic_joint_model.h>
-
 #include <Eigen/Geometry>
 #include <iostream>
 
@@ -614,8 +612,8 @@ protected:
   /** \brief Given a geometry spec from the URDF and a filename (for a mesh), construct the corresponding shape object*/
   shapes::ShapePtr constructShape(const urdf::Geometry* geom);
 };
-}
-}
+}  // namespace core
+}  // namespace moveit
 
 namespace robot_model = moveit::core;
 namespace robot_state = moveit::core;

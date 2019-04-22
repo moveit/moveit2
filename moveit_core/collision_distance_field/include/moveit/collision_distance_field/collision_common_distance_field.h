@@ -178,6 +178,6 @@ PosedBodyPointDecompositionVectorPtr getAttachedBodyPointDecomposition(const rob
                                                                        double resolution);
 
 void getBodySphereVisualizationMarkers(const GroupStateRepresentationPtr& gsr, const std::string& reference_frame,
-                                       visualization_msgs::MarkerArray& body_marker_array);
+                                       visualization_msgs::msg::MarkerArray& body_marker_array);
 }
 #endif
