@@ -53,8 +53,7 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotMo
   : node_(node), robot_model_(model)
 {
   auto planner_plugin_params = std::make_shared<rclcpp::SyncParametersClient>(node);
-
-  std::string planner;
+  
   if(planner_plugin_params->has_parameter({planner_plugin_param_name}))
       planner_plugin_name_ = node_->get_parameter(planner_plugin_param_name).get_value<std::string>();
 
