@@ -143,9 +143,12 @@ TEST(TestTimeParameterization, TestIterativeParabolic)
   trajectory_processing::IterativeParabolicTimeParameterization time_parameterization;
   EXPECT_EQ(initStraightTrajectory(TRAJECTORY), 0);
 
-  ros::WallTime wt = ros::WallTime::now();
+  auto wt = std::chrono::system_clock::now();
   EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
-  std::cout << "IterativeParabolicTimeParameterization  took " << (ros::WallTime::now() - wt).toSec() << std::endl;
+
+  auto diff_time = std::chrono::system_clock::now() - wt;
+
+  std::cout << "IterativeParabolicTimeParameterization  took " << (std::chrono::system_clock::now() - wt).count() << std::endl;
   printTrajectory(TRAJECTORY);
   ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 3.0);
 }
@@ -155,9 +158,9 @@ TEST(TestTimeParameterization, TestIterativeSpline)
   trajectory_processing::IterativeSplineParameterization time_parameterization(false);
   EXPECT_EQ(initStraightTrajectory(TRAJECTORY), 0);
 
-  ros::WallTime wt = ros::WallTime::now();
+  auto wt = std::chrono::system_clock::now();
   EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
-  std::cout << "IterativeSplineParameterization took " << (ros::WallTime::now() - wt).toSec() << std::endl;
+  std::cout << "IterativeSplineParameterization took " << (std::chrono::system_clock::now() - wt).count() << std::endl;
   printTrajectory(TRAJECTORY);
   ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 5.0);
 }
@@ -167,9 +170,9 @@ TEST(TestTimeParameterization, TestIterativeSplineAddPoints)
   trajectory_processing::IterativeSplineParameterization time_parameterization(true);
   EXPECT_EQ(initStraightTrajectory(TRAJECTORY), 0);
 
-  ros::WallTime wt = ros::WallTime::now();
+  auto wt = std::chrono::system_clock::now();
   EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
-  std::cout << "IterativeSplineParameterization with added points took " << (ros::WallTime::now() - wt).toSec()
+  std::cout << "IterativeSplineParameterization with added points took " << (std::chrono::system_clock::now() - wt).count()
             << std::endl;
   printTrajectory(TRAJECTORY);
   ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 5.0);

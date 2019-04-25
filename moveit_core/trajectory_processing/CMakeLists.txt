@@ -25,10 +25,32 @@ LIBRARY DESTINATION lib)
 
 install(DIRECTORY include/ DESTINATION include)
 
-#TODO: Fix this so it can be built with colcon
-# if(BUILD_TESTING)
-#   find_package(moveit_resources REQUIRED)
-#   include_directories(${moveit_resources_INCLUDE_DIRS})
-#   ament_add_gtest(test_time_parameterization test/test_time_parameterization.cpp)
-#   target_link_libraries(test_time_parameterization moveit_test_utils ${rclcpp_LIBRARIES} ${rmw_implementation_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${MOVEIT_LIB_NAME})
-# endif()
+if(BUILD_TESTING)
+  find_package(moveit_resources REQUIRED)
+  include_directories(${moveit_resources_INCLUDE_DIRS})
+  find_package(resource_retriever REQUIRED)
+
+  if(WIN32)
+    # set(append_library_dirs "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
+  else()
+    set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../robot_trajectory;${CMAKE_CURRENT_BINARY_DIR}/../robot_state;${CMAKE_CURRENT_BINARY_DIR}/../utils")
+  endif()
+
+  ament_add_gtest(test_time_parameterization test/test_time_parameterization.cpp
+            APPEND_LIBRARY_DIRS "${append_library_dirs}")
+
+  target_link_libraries(test_time_parameterization
+    moveit_test_utils
+    moveit_robot_state
+    moveit_robot_trajectory
+    moveit_trajectory_processing
+    ${rclcpp_LIBRARIES}
+    ${rmw_implementation_LIBRARIES}
+    ${urdfdom_LIBRARIES}
+    ${srdfdom_LIBRARIES}
+    ${urdfdom_headers_LIBRARIES}
+    ${MOVEIT_LIB_NAME}
+    ${geometric_shapes_LIBRARIES}
+    resource_retriever::resource_retriever
+  )
+endif()
