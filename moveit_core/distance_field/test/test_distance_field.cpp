@@ -86,7 +86,7 @@ void print(PropagationDistanceField& pdf, int numX, int numY, int numZ)
       {
         if (pdf.getCell(x, y, z).distance_square_ == 0)
         {
-          // RCLCPP_INFO("distance_field", "Obstacle cell %d %d %d", x, y, z);
+          // //RCLCPP_INFO("distance_field", "Obstacle cell %d %d %d", x, y, z);
         }
       }
     }
@@ -348,7 +348,7 @@ TEST(TestPropagationDistanceField, TestAddRemovePoints)
   EigenSTL::vector_Vector3d points;
   points.push_back(POINT1);
   points.push_back(POINT2);
-  RCLCPP_INFO("distance_field", "Adding %zu points", points.size());
+  //RCLCPP_INFO("distance_field", "Adding %zu points", points.size());
   df.addPointsToField(points);
   // print(df, numX, numY, numZ);
 
@@ -464,7 +464,7 @@ TEST(TestSignedPropagationDistanceField, TestSignedAddRemovePoints)
   }
 
   df.reset();
-  RCLCPP_INFO("distance_field", "Adding %zu points", points.size());
+  //RCLCPP_INFO("distance_field", "Adding %zu points", points.size());
   df.addPointsToField(points);
   // print(df, numX, numY, numZ);
   // printNeg(df, numX, numY, numZ);
@@ -665,13 +665,13 @@ TEST(TestSignedPropagationDistanceField, TestPerformance)
   auto dt = std::chrono::system_clock::now();
   PropagationDistanceField df(PERF_WIDTH, PERF_HEIGHT, PERF_DEPTH, PERF_RESOLUTION, PERF_ORIGIN_X, PERF_ORIGIN_Y,
                               PERF_ORIGIN_Z, PERF_MAX_DIST, false);
-  std::cout << "Creating unsigned took " << (std::chrono::system_clock::now() - dt).toSec() << std::endl;
+  std::cout << "Creating unsigned took " << (std::chrono::system_clock::now() - dt).count() << std::endl;
 
   dt = std::chrono::system_clock::now();
   PropagationDistanceField sdf(PERF_WIDTH, PERF_HEIGHT, PERF_DEPTH, PERF_RESOLUTION, PERF_ORIGIN_X, PERF_ORIGIN_Y,
                                PERF_ORIGIN_Z, PERF_MAX_DIST, true);
 
-  std::cout << "Creating signed took " << (std::chrono::system_clock::now() - dt).toSec() << std::endl;
+  std::cout << "Creating signed took " << (std::chrono::system_clock::now() - dt).count() << std::endl;
 
   shapes::Box big_table(2.0, 2.0, .5);
 
@@ -686,33 +686,33 @@ TEST(TestSignedPropagationDistanceField, TestPerformance)
 
   dt = std::chrono::system_clock::now();
   df.addShapeToField(&big_table, p);
-  std::cout << "Adding to unsigned took " << (std::chrono::system_clock::now() - dt).toSec() << " avg "
-            << (std::chrono::system_clock::now() - dt).toSec() / (big_num_points * 1.0) << std::endl;
+  std::cout << "Adding to unsigned took " << (std::chrono::system_clock::now() - dt).count() << " avg "
+            << (std::chrono::system_clock::now() - dt).count() / (big_num_points * 1.0) << std::endl;
 
   dt = std::chrono::system_clock::now();
   df.addShapeToField(&big_table, p);
-  std::cout << "Re-adding to unsigned took " << (std::chrono::system_clock::now() - dt).toSec() << std::endl;
+  std::cout << "Re-adding to unsigned took " << (std::chrono::system_clock::now() - dt).count() << std::endl;
 
   dt = std::chrono::system_clock::now();
   sdf.addShapeToField(&big_table, p);
-  std::cout << "Adding to signed took " << (std::chrono::system_clock::now() - dt).toSec() << " avg "
-            << (std::chrono::system_clock::now() - dt).toSec() / (big_num_points * 1.0) << std::endl;
+  std::cout << "Adding to signed took " << (std::chrono::system_clock::now() - dt).count() << " avg "
+            << (std::chrono::system_clock::now() - dt).count() / (big_num_points * 1.0) << std::endl;
 
   dt = std::chrono::system_clock::now();
   df.moveShapeInField(&big_table, p, np);
-  std::cout << "Moving in unsigned took " << (std::chrono::system_clock::now() - dt).toSec() << std::endl;
+  std::cout << "Moving in unsigned took " << (std::chrono::system_clock::now() - dt).count() << std::endl;
 
   dt = std::chrono::system_clock::now();
   sdf.moveShapeInField(&big_table, p, np);
-  std::cout << "Moving in signed took " << (std::chrono::system_clock::now() - dt).toSec() << std::endl;
+  std::cout << "Moving in signed took " << (std::chrono::system_clock::now() - dt).count() << std::endl;
 
   dt = std::chrono::system_clock::now();
   df.removeShapeFromField(&big_table, np);
-  std::cout << "Removing from unsigned took " << (std::chrono::system_clock::now() - dt).toSec() << std::endl;
+  std::cout << "Removing from unsigned took " << (std::chrono::system_clock::now() - dt).count() << std::endl;
 
   dt = std::chrono::system_clock::now();
   sdf.removeShapeFromField(&big_table, np);
-  std::cout << "Removing from signed took " << (std::chrono::system_clock::now() - dt).toSec() << std::endl;
+  std::cout << "Removing from signed took " << (std::chrono::system_clock::now() - dt).count() << std::endl;
 
   dt = std::chrono::system_clock::now();
   df.reset();
@@ -725,21 +725,21 @@ TEST(TestSignedPropagationDistanceField, TestPerformance)
 
   dt = std::chrono::system_clock::now();
   df.addShapeToField(&small_table, p);
-  std::cout << "Adding to unsigned took " << (std::chrono::system_clock::now() - dt).toSec() << " avg "
-            << (std::chrono::system_clock::now() - dt).toSec() / (small_num_points * 1.0) << std::endl;
+  std::cout << "Adding to unsigned took " << (std::chrono::system_clock::now() - dt).count() << " avg "
+            << (std::chrono::system_clock::now() - dt).count() / (small_num_points * 1.0) << std::endl;
 
   dt = std::chrono::system_clock::now();
   sdf.addShapeToField(&small_table, p);
-  std::cout << "Adding to signed took " << (std::chrono::system_clock::now() - dt).toSec() << " avg "
-            << (std::chrono::system_clock::now() - dt).toSec() / (small_num_points * 1.0) << std::endl;
+  std::cout << "Adding to signed took " << (std::chrono::system_clock::now() - dt).count() << " avg "
+            << (std::chrono::system_clock::now() - dt).count() / (small_num_points * 1.0) << std::endl;
 
   dt = std::chrono::system_clock::now();
   df.moveShapeInField(&small_table, p, np);
-  std::cout << "Moving in unsigned took " << (std::chrono::system_clock::now() - dt).toSec() << std::endl;
+  std::cout << "Moving in unsigned took " << (std::chrono::system_clock::now() - dt).count() << std::endl;
 
   dt = std::chrono::system_clock::now();
   sdf.moveShapeInField(&small_table, p, np);
-  std::cout << "Moving in signed took " << (std::chrono::system_clock::now() - dt).toSec() << std::endl;
+  std::cout << "Moving in signed took " << (std::chrono::system_clock::now() - dt).count() << std::endl;
 
   // uniformly spaced points - a worst case scenario
   PropagationDistanceField worstdfu(PERF_WIDTH, PERF_HEIGHT, PERF_DEPTH, PERF_RESOLUTION, PERF_ORIGIN_X, PERF_ORIGIN_Y,
@@ -762,7 +762,7 @@ TEST(TestSignedPropagationDistanceField, TestPerformance)
 
         if (!valid)
         {
-          RCLCPP_WARN("distance_field", "Something wrong");
+          //RCLCPP_WARN("distance_field", "Something wrong");
           continue;
         }
         bad_vec.push_back(loc);
@@ -772,14 +772,14 @@ TEST(TestSignedPropagationDistanceField, TestPerformance)
 
   dt = std::chrono::system_clock::now();
   worstdfu.addPointsToField(bad_vec);
-  ros::WallDuration wd = std::chrono::system_clock::now() - dt;
-  printf("Time for unsigned adding %u uniform points is %g average %g\n", (unsigned int)bad_vec.size(), wd.toSec(),
-         wd.toSec() / (bad_vec.size() * 1.0));
+  auto wd = std::chrono::system_clock::now() - dt;
+  printf("Time for unsigned adding %u uniform points is %g average %g\n", (unsigned int)bad_vec.size(), wd.count(),
+         wd.count() / (bad_vec.size() * 1.0));
   dt = std::chrono::system_clock::now();
   worstdfs.addPointsToField(bad_vec);
   wd = std::chrono::system_clock::now() - dt;
-  printf("Time for signed adding %u uniform points is %g average %g\n", (unsigned int)bad_vec.size(), wd.toSec(),
-         wd.toSec() / (bad_vec.size() * 1.0));
+  printf("Time for signed adding %u uniform points is %g average %g\n", (unsigned int)bad_vec.size(), wd.count(),
+         wd.count() / (bad_vec.size() * 1.0));
 }
 
 TEST(TestSignedPropagationDistanceField, TestOcTree)
@@ -921,9 +921,9 @@ TEST(TestSignedPropagationDistanceField, TestReadWrite)
   PropagationDistanceField dfx(i, PERF_MAX_DIST, false);
 
   std::ifstream i2("test_big.df", std::ios::in);
-  ros::WallTime wt = std::chrono::system_clock::now();
+  auto wt = std::chrono::system_clock::now();
   PropagationDistanceField df3(i2, PERF_MAX_DIST + .02, false);
-  std::cout << "Reconstruction for big file took " << (std::chrono::system_clock::now() - wt).toSec() << std::endl;
+  std::cout << "Reconstruction for big file took " << (std::chrono::system_clock::now() - wt).count() << std::endl;
   EXPECT_FALSE(areDistanceFieldsDistancesEqual(df, df3));
 }
 
