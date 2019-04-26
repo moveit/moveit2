@@ -10,7 +10,34 @@ add_library(${MOVEIT_LIB_NAME}
   src/conversions.cpp
   src/robot_state.cpp
 )
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
+target_link_libraries(${MOVEIT_LIB_NAME}
+  moveit_robot_model
+  moveit_kinematics_base
+  moveit_transforms
+  ${urdfdom_LIBRARIES}
+  ${geometric_shapes_LIBRARIES}
+  ${urdfdom_headers_LIBRARIES}
+  ${Boost_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  moveit_robot_model
+  moveit_kinematics_base
+  moveit_transforms
+  urdf
+  tf2_geometry_msgs
+)
+
+install(TARGETS ${MOVEIT_LIB_NAME}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+install(DIRECTORY include/ DESTINATION include)
+
+# # Unit tests
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+	find_package(moveit_resources REQUIRED)
+	find_package(tf2_geometry_msgs REQUIRED)
+	find_package(resource_retriever REQUIRED)
 
 target_link_libraries(${MOVEIT_LIB_NAME} moveit_robot_model moveit_kinematics_base moveit_transforms ${catkin_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
 
