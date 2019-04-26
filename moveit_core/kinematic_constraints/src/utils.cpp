@@ -45,7 +45,7 @@ namespace kinematic_constraints
 {
 const std::string LOGNAME = "kinematic_constraint_utils";
 
-  rclcpp::Logger logger_kinematic_constraints = rclcpp::get_logger(LOGNAME);
+  rclcpp::Logger LOGGER_KINEMATIC_CONSTRAINTS_UTILS = rclcpp::get_logger(LOGNAME);
 
 moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constraints& first, const moveit_msgs::msg::Constraints& second)
 {
@@ -67,7 +67,7 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
         double low = std::max(a.position - a.tolerance_below, b.position - b.tolerance_below);
         double high = std::min(a.position + a.tolerance_above, b.position + b.tolerance_above);
         if (low > high){
-          RCLCPP_ERROR(logger_kinematic_constraints,
+          RCLCPP_ERROR(LOGGER_KINEMATIC_CONSTRAINTS_UTILS,
                           "Attempted to merge incompatible constraints for joint '%s'. Discarding constraint.",
                           a.joint_name.c_str());
         }
@@ -340,7 +340,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //     }
 //     else
 //     {
-//       RCLCPP_WARN(logger_kinematic_constraints, "joint constraint contains unknown entity '" << it->first << "'");
+//       RCLCPP_WARN(LOGGER_KINEMATIC_CONSTRAINTS_UTILS, "joint constraint contains unknown entity '" << it->first << "'");
 //     }
 //   }
 //   return true;
@@ -398,7 +398,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //     }
 //     else
 //     {
-//       RCLCPP_WARN(logger_kinematic_constraints, "position constraint contains unknown entity '" << it->first << "'");
+//       RCLCPP_WARN(LOGGER_KINEMATIC_CONSTRAINTS_UTILS, "position constraint contains unknown entity '" << it->first << "'");
 //     }
 //   }
 //   return true;
@@ -436,7 +436,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //     }
 //     else
 //     {
-//       RCLCPP_WARN(logger_kinematic_constraints, "orientation constraint contains unknown entity '" << it->first << "'");
+//       RCLCPP_WARN(LOGGER_KINEMATIC_CONSTRAINTS_UTILS, "orientation constraint contains unknown entity '" << it->first << "'");
 //     }
 //   }
 //   return true;
@@ -470,7 +470,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //       constraint.max_range_angle = parseDouble(it->second);
 //     else
 //     {
-//       RCLCPP_WARN(logger_kinematic_constraints, "orientation constraint contains unknown entity '" << it->first << "'");
+//       RCLCPP_WARN(LOGGER_KINEMATIC_CONSTRAINTS_UTILS, "orientation constraint contains unknown entity '" << it->first << "'");
 //     }
 //   }
 //
@@ -483,7 +483,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 // {
 //   if (params.getType() != XmlRpc::XmlRpcValue::TypeArray)
 //   {
-//     RCLCPP_ERROR(logger_kinematic_constraints, "expected constraints as array");
+//     RCLCPP_ERROR(LOGGER_KINEMATIC_CONSTRAINTS_UTILS, "expected constraints as array");
 //     return false;
 //   }
 //
@@ -491,7 +491,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //   {
 //     if (!params[i].hasMember("type"))
 //     {
-//       RCLCPP_ERROR(logger_kinematic_constraints, "constraint parameter does not specify its type");
+//       RCLCPP_ERROR(LOGGER_KINEMATIC_CONSTRAINTS_UTILS, "constraint parameter does not specify its type");
 //     }
 //     else if (params[i]["type"] == "joint")
 //     {
