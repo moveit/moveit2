@@ -343,8 +343,10 @@ bool PR2ArmKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
     error_code.val = error_code.PLANNING_FAILED;
     return false;
   }
-  KDL::Frame pose_desired;
-  tf2::fromMsg(ik_pose, pose_desired);
+  KDL::Frame pose_desired = KDL::Frame(KDL::Rotation::Quaternion(ik_pose.orientation.x, ik_pose.orientation.y,
+                                                       ik_pose.orientation.z, ik_pose.orientation.w),
+                                                       KDL::Vector(ik_pose.position.x, ik_pose.position.y, ik_pose.position.z));
+  // tf2::fromMsg(ik_pose, pose_desired);
 
   // Do the IK
   KDL::JntArray jnt_pos_in;
