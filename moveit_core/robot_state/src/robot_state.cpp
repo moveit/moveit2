@@ -762,6 +762,18 @@ std::pair<double, const JointModel*> RobotState::getMinDistanceToPositionBounds(
   return getMinDistanceToPositionBounds(robot_model_->getActiveJointModels());
 }
 
+void RobotState::harmonizePositions()
+{
+  for (const JointModel* jm : robot_model_->getActiveJointModels())
+    harmonizePosition(jm);
+}
+
+void RobotState::harmonizePositions(const JointModelGroup* joint_group)
+{
+  for (const JointModel* jm : joint_group->getActiveJointModels())
+    harmonizePosition(jm);
+}
+
 std::pair<double, const JointModel*> RobotState::getMinDistanceToPositionBounds(const JointModelGroup* group) const
 {
   return getMinDistanceToPositionBounds(group->getActiveJointModels());
