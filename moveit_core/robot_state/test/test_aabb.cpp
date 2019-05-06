@@ -152,16 +152,16 @@ TEST_F(TestAABB, TestPR2)
   char* argv[0];
   int argc = 0;
   rclcpp::init(argc, argv);
-  auto node = rclcpp::Node::make_shared("visualize_pr2");
-  auto pub_aabb = node->create_publisher<visualization_msgs::Marker>("/visualization_aabb", rmw_qos_profile_default);
-  auto pub_obb = node->create_publisher<visualization_msgs::Marker>("/visualization_obb", rmw_qos_profile_default);
+  auto node = rclcpp::Node("visualize_pr2");
+  auto pub_aabb = node.create_publisher<visualization_msgs::Marker>("/visualization_aabb");
+  auto pub_obb = node.create_publisher<visualization_msgs::Marker>("/visualization_obb");
   rclcpp::Rate loop_rate(10);
 
   // Wait for the publishers to establish connections
   sleep(5);
 
   // Prepare the ROS message we will reuse throughout the rest of the function.
-  auto msg = std::make_shared<visualization_msgs::Marker>();
+  auto msg = new visualization_msgs::Marker();
 
   msg->header.frame_id = pr2_state.getRobotModel()->getRootLinkName();
   msg->type = visualization_msgs::Marker::CUBE;
@@ -276,15 +276,21 @@ TEST_F(TestAABB, TestSimple)
   // Contains a link with simple geometry and an offset in the collision link
   moveit::core::RobotModelBuilder builder("simple", "base_footprint");
   geometry_msgs::msg::Pose origin;
-  tf2::toMsg(tf2::Vector3(0, 0, 0.051), origin.position);
+  origin.position.x = 0;
+  origin.position.y = 0;
+  origin.position.z = 0.051;
   origin.orientation.w = 1.0;
   builder.addChain("base_footprint->base_link", "fixed", { origin });
 
-  tf2::toMsg(tf2::Vector3(0, 0, 0), origin.position);
+  origin.position.x = 0;
+  origin.position.y = 0;
+  origin.position.z = 0;
   builder.addCollisionMesh("base_link", "package://moveit_resources/pr2_description/urdf/meshes/base_v0/base_L.stl",
                            origin);
 
-  tf2::toMsg(tf2::Vector3(0, 0, 0.071), origin.position);
+  origin.position.x = 0;
+  origin.position.y = 0;
+  origin.position.z = 0.071;
   builder.addCollisionBox("base_footprint", { 0.001, 0.001, 0.001 }, origin);
 
   builder.addVirtualJoint("odom_combined", "base_footprint", "planar", "world_joint");
@@ -309,16 +315,24 @@ TEST_F(TestAABB, TestComplex)
   // Contains a link with simple geometry and an offset and rotation in the collision link
   moveit::core::RobotModelBuilder builder("complex", "base_footprint");
   geometry_msgs::msg::Pose origin;
-  tf2::toMsg(tf2::Vector3(0, 0, 1.0), origin.position);
+  origin.position.x = 0;
+  origin.position.y = 0;
+  origin.position.z = 1.0;
   tf2::Quaternion q;
   q.setRPY(0, 0, 1.5708);
   origin.orientation = tf2::toMsg(q);
   builder.addChain("base_footprint->base_link", "fixed", { origin });
-  tf2::toMsg(tf2::Vector3(5.0, 0, 1.0), origin.position);
+  origin.position.x = 5.0;
+  origin.position.y = 0;
+  origin.position.z = 1.0;
   builder.addCollisionBox("base_link", { 1.0, 0.1, 0.1 }, origin);
-  tf2::toMsg(tf2::Vector3(4.0, 0, 1.0), origin.position);
+  origin.position.x = 4.0;
+  origin.position.y = 0;
+  origin.position.z = 1.0;
   builder.addCollisionBox("base_link", { 1.0, 0.1, 0.1 }, origin);
-  tf2::toMsg(tf2::Vector3(-5.0, 0.0, -1.0), origin.position);
+  origin.position.x = -5.0;
+  origin.position.y = 0;
+  origin.position.z = -1.0;
   q.setRPY(0, 1.5708, 0);
   origin.orientation = tf2::toMsg(q);
   builder.addCollisionBox("base_footprint", { 0.1, 1.0, 0.1 }, origin);
