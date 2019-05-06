@@ -542,9 +542,7 @@ void streamToRobotState(RobotState& state, const std::string& line, const std::s
   {
     // Get a variable
     if (!std::getline(line_stream, cell, separator[0]))
-      // ROS_ERROR_STREAM_NAMED(LOGNAME.c_str(), "Missing variable " << state.getVariableNames()[i]);
-      RCLCPP_ERROR(LOGGER, "Missing variable ", state.getVariableNames()[i].c_str());
-    printf("show variablename %s\n", state.getVariableNames()[i].c_str());
+      RCLCPP_ERROR(LOGGER, "Missing variable " , state.getVariableNames()[i].c_str());
     state.getVariablePositions()[i] = boost::lexical_cast<double>(cell.c_str());
   }
 }

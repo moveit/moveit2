@@ -1398,7 +1398,6 @@ bool RobotState::setToIKSolverFrame(Eigen::Isometry3d& pose, const std::string& 
     const LinkModel* lm = getLinkModel((!ik_frame.empty() && ik_frame[0] == '/') ? ik_frame.substr(1) : ik_frame);
     if (!lm)
     {
-      // ROS_ERROR_STREAM_NAMED(LOGNAME, "IK frame '" << ik_frame << "' does not exist.");
       RCLCPP_ERROR(LOGGER, "The following IK frame does not exist:", ik_frame.c_str());
       return false;
     }
@@ -1462,8 +1461,8 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
     std::string error_msg;
     if (!solver->supportsGroup(jmg, &error_msg))
     {
-      RCLCPP_ERROR(LOGGER, "Kinematics solver %s does not support joint group %s.  Error: %s", typeid(*solver).name(),
-                   jmg->getName().c_str(), error_msg.c_str());
+      RCLCPP_ERROR(LOGGER, "Kinematics solver %s does not support joint group %s.  Error: %s",
+                      typeid(*solver).name(), jmg->getName().c_str(), error_msg.c_str());
       valid_solver = false;
     }
   }
@@ -1557,7 +1556,6 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
           const robot_model::LinkModel* lm = getLinkModel(pose_frame);
           if (!lm)
           {
-            // ROS_ERROR_STREAM_NAMED(LOGNAME, "Pose frame '" << pose_frame << "' does not exist.");
             RCLCPP_ERROR(LOGGER, "The following Pose Frame does not exist ", pose_frame.c_str());
             return false;
           }
