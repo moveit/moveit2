@@ -1061,9 +1061,7 @@ void RobotState::getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, cons
 void RobotState::getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, const std::vector<std::string>& link_names,
                                  bool include_attached) const
 {
-  // ros::Time tm = ros::Time::now();
-
-  builtin_interfaces::msg::Time tm = clock_ros.now();
+  builtin_interfaces::msg::Time tm = rclcpp::Clock().now();
 
   for (std::size_t i = 0; i < link_names.size(); ++i)
   {
