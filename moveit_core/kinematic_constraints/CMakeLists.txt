@@ -16,16 +16,16 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
   urdfdom
   urdfdom_headers
-  moveit_robot_model
   tf2_geometry_msgs
   visualization_msgs
-  moveit_kinematics_base
-  moveit_robot_state
   tf2_eigen
 )
 
 target_link_libraries(${MOVEIT_LIB_NAME}
 	moveit_collision_detection_fcl
+	moveit_kinematics_base
+	moveit_robot_state
+	moveit_robot_model
 )
 
 
