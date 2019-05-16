@@ -39,7 +39,7 @@ install(DIRECTORY include/ DESTINATION include)
 if(BUILD_TESTING)
   find_package(moveit_resources REQUIRED)
   include_directories(${moveit_resources_INCLUDE_DIRS})
-	find_package(resource_retriever REQUIRED)
+  find_package(resource_retriever REQUIRED)
 
 	if(WIN32)
 		# set(append_library_dirs "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
