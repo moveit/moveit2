@@ -1330,7 +1330,7 @@ bool RobotState::integrateVariableVelocity(const JointModelGroup* jmg, const Eig
     return true;
 }
 
-bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::Pose& pose, double timeout,
+bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg::Pose& pose, double timeout,
                            const GroupStateValidityCallbackFn& constraint,
                            const kinematics::KinematicsQueryOptions& options)
 {
@@ -1815,7 +1815,8 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
   // if no timeout has been specified, use the default one
   if (timeout < std::numeric_limits<double>::epsilon())
     timeout = jmg->getDefaultIKTimeout();
-  ros::WallTime start = ros::WallTime::now();
+
+  auto start = std::chrono::system_clock::now();
   double elapsed = 0;
 
   bool first_seed = true;
@@ -1875,7 +1876,7 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
         return true;
       }
     }
-    elapsed = (ros::WallTime::now() - start).toSec();
+    elapsed = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count();
     first_seed = false;
   } while (elapsed < timeout);
   return false;

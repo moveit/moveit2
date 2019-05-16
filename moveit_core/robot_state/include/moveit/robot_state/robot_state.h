@@ -952,7 +952,7 @@ as the new values that correspond to the group */
       @param pose The pose the last link in the chain needs to achieve
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIK(const JointModelGroup* group, const geometry_msgs::Pose& pose, double timeout = 0.0,
+  bool setFromIK(const JointModelGroup* group, const geometry_msgs::msg::Pose& pose, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
 
