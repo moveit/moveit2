@@ -216,12 +216,12 @@ bool getKDLChain(const urdf::ModelInterface& model, const std::string& root_name
   KDL::Tree tree;
   if (!kdl_parser::treeFromUrdfModel(model, tree))
   {
-    RCLCPP_ERROR(LOGGER,"Could not initialize tree object");
+    RCLCPP_ERROR(LOGGER_PR2_ARM_KINEMATICS_PLUGIN, "Could not initialize tree object");
     return false;
   }
   if (!tree.getChain(root_name, tip_name, kdl_chain))
   {
-    RCLCPP_ERROR(LOGGER,"Could not initialize chain object for base %s tip %s", root_name , tip_name);
+    RCLCPP_ERROR(LOGGER_PR2_ARM_KINEMATICS_PLUGIN, "Could not initialize chain object for base %s tip %s", root_name.c_str(), tip_name.c_str());
     return false;
   }
   return true;

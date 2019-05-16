@@ -19,6 +19,12 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdfdom
   urdfdom_headers
   visualization_msgs)
+  
+target_link_libraries(${MOVEIT_LIB_NAME}
+  moveit_robot_trajectory
+  moveit_robot_state
+  moveit_kinematic_constraints)
+
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
