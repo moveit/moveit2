@@ -55,7 +55,6 @@
 #include <memory>
 #include <set>
 
-
 namespace collision_detection
 {
 MOVEIT_STRUCT_FORWARD(CollisionGeometryData);
