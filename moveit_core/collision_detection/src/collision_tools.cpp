@@ -68,10 +68,8 @@ void getCostMarkers(visualization_msgs::msg::MarkerArray& arr, const std::string
   int id = 0;
   for (const auto& cost_source : cost_sources)
   {
-    rclcpp::Clock ros_clock(RCL_ROS_TIME);
-
     visualization_msgs::msg::Marker mk;
-    mk.header.stamp = rclcpp::Time::now(RCL_ROS_TIME);
+    mk.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     mk.header.frame_id = frame_id;
     mk.ns = "cost_source";
     mk.id = id++;
@@ -101,7 +99,6 @@ void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, 
 
 {
   std::map<std::string, unsigned> ns_counts;
-  rclcpp::Clock ros_clock(RCL_ROS_TIME);
 
   for (const auto& collision : con)
   {
@@ -113,7 +110,7 @@ void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, 
       else
         ns_counts[ns_name]++;
       visualization_msgs::msg::Marker mk;
-      mk.header.stamp = ros_clock.now();
+      mk.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
       mk.header.frame_id = frame_id;
       mk.ns = ns_name;
       mk.id = ns_counts[ns_name];
