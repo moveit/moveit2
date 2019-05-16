@@ -613,19 +613,54 @@ protected:
    * as the predominant configuration but also allows groupwise specifications.
    */
   template <typename T>
-  inline bool lookupParam(const std::string& param, T& val, const T& default_val) const
+  inline bool lookupParam(std::shared_ptr<rclcpp::Node>& node, const std::string& param, T& val, const T& default_val) const
   {
-    // TODO(henningkayser): reuse node and fix private namespace lookup from kinematics.yaml
-    auto node = rclcpp::Node::make_shared("kinematics_base.lookup_param");
-    std::vector<rclcpp::Parameter> param_results = node->get_parameters(
-        { group_name_ + "/" + param, param, "robot_description_kinematics/" + group_name_ + "/" + param,
-          "robot_description_kinematics/" + param });
-    if (!param_results.empty())
+    // TODO (ahcorde):
+    rclcpp::SyncParametersClient parameters_lookup(node);
+    std::vector<rclcpp::Parameter> groupname_param = parameters_lookup.get_parameters({ group_name_ + "/" + param });
+
+    for (auto& parameter : groupname_param)
     {
-      val = param_results[0].get_value<T>();
-      return true;
+      if (!parameter.get_name().compare(group_name_ + "/" + param))
+      {
+        val = parameter.value_to_string();
+        return true;
+      }
     }
-    val = default_val;
+
+    auto only_param = parameters_lookup.get_parameters({ param });
+    for (auto& parameter : only_param)
+    {
+      if (!parameter.get_name().compare(param))
+      {
+        val = parameter.value_to_string();
+        return true;
+      }
+    }
+
+    auto robot_description_groupname_kinematics_param =
+        parameters_lookup.get_parameters({ "robot_description_kinematics/" + group_name_ + "/" + param });
+
+    for (auto& parameter : robot_description_groupname_kinematics_param)
+    {
+      if (!parameter.get_name().compare("robot_description_kinematics/" + group_name_ + "/" + param))
+      {
+        val = parameter.value_to_string();
+        return true;
+      }
+    }
+
+    auto robot_description_kinematics_param =
+        parameters_lookup.get_parameters({ "robot_description_kinematics/" + param });
+
+    for (auto& parameter : robot_description_kinematics_param)
+    {
+      if (!parameter.get_name().compare("robot_description_kinematics/" + param))
+      {
+        val = parameter.value_to_string();
+        return true;
+      }
+    }
     return false;
   }
 
