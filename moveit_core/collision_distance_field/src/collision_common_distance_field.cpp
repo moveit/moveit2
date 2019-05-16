@@ -128,8 +128,8 @@ PosedBodyPointDecompositionVectorPtr getAttachedBodyPointDecomposition(const rob
   return ret;
 }
 
-void getBodySphereVisualizationMarkers(GroupStateRepresentationConstPtr& gsr, std::string reference_frame,
-                                       visualization_msgs::MarkerArray& body_marker_array)
+void getBodySphereVisualizationMarkers(const GroupStateRepresentationConstPtr& gsr, const std::string& reference_frame,
+                                       visualization_msgs::msg::MarkerArray& body_marker_array)
 {
   // creating namespaces
   std::string robot_ns = gsr->dfce_->group_name_ + "_sphere_decomposition";
@@ -220,4 +220,4 @@ void getBodySphereVisualizationMarkers(GroupStateRepresentationConstPtr& gsr, st
     }
   }
 }
-}
+}  // namespace collision_detection

@@ -37,7 +37,7 @@
 #ifndef MOVEIT_TRAJECTORY_PROCESSING_TRAJECTORY_TOOLS_
 #define MOVEIT_TRAJECTORY_PROCESSING_TRAJECTORY_TOOLS_
 
-#include <moveit_msgs/RobotTrajectory.h>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 
 namespace trajectory_processing
 {

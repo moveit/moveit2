@@ -44,9 +44,9 @@
 // ROS msgs
 #include <moveit_msgs/GetConstraintAwarePositionIK.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <moveit_msgs/MoveItErrorCodes.h>
-#include <moveit_msgs/Constraints.h>
-#include <moveit_msgs/RobotState.h>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
+#include <moveit_msgs/msg/constraints.hpp>
+#include <moveit_msgs/msg/robot_state.hpp>
 
 // Plugin
 #include <moveit/kinematics_base/kinematics_base.h>

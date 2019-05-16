@@ -105,7 +105,7 @@ TrajectoryExecutionManager::~TrajectoryExecutionManager()
 
 void TrajectoryExecutionManager::initialize()
 {
-  reconfigure_impl_ = NULL;
+  reconfigure_impl_ = nullptr;
   verbose_ = false;
   execution_complete_ = true;
   stop_continuous_execution_ = false;
@@ -402,7 +402,7 @@ void TrajectoryExecutionManager::continuousExecutionThread()
 
     while (!continuous_execution_queue_.empty())
     {
-      TrajectoryExecutionContext* context = NULL;
+      TrajectoryExecutionContext* context = nullptr;
       {
         boost::mutex::scoped_lock slock(continuous_execution_mutex_);
         if (continuous_execution_queue_.empty())
@@ -418,9 +418,9 @@ void TrajectoryExecutionManager::continuousExecutionThread()
       while (uit != used_handles.end())
         if ((*uit)->getLastExecutionStatus() != moveit_controller_manager::ExecutionStatus::RUNNING)
         {
-          std::set<moveit_controller_manager::MoveItControllerHandlePtr>::iterator toErase = uit;
+          std::set<moveit_controller_manager::MoveItControllerHandlePtr>::iterator to_erase = uit;
           ++uit;
-          used_handles.erase(toErase);
+          used_handles.erase(to_erase);
         }
         else
           ++uit;
@@ -666,7 +666,7 @@ struct OrderPotentialControllerCombination
   std::vector<std::size_t> nrjoints;
   std::vector<std::size_t> nractive;
 };
-}
+}  // namespace
 
 bool TrajectoryExecutionManager::findControllers(const std::set<std::string>& actuated_joints,
                                                  std::size_t controller_count,
@@ -811,7 +811,7 @@ bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::msg::Ro
     const robot_model::JointModel* jm = robot_model_->getJointModel(trajectory.joint_trajectory.joint_names[i]);
     if (jm)
     {
-      if (jm->isPassive() || jm->getMimic() != NULL || jm->getType() == robot_model::JointModel::FIXED)
+      if (jm->isPassive() || jm->getMimic() != nullptr || jm->getType() == robot_model::JointModel::FIXED)
         continue;
       actuated_joints_single.insert(jm->getName());
     }
@@ -1037,15 +1037,15 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
   }
   std::set<std::string> actuated_joints;
 
-  auto isActuated = [this](const std::string& joint_name) -> bool {
+  auto is_actuated = [this](const std::string& joint_name) -> bool {
     const robot_model::JointModel* jm = robot_model_->getJointModel(joint_name);
     return (jm && !jm->isPassive() && !jm->getMimic() && jm->getType() != robot_model::JointModel::FIXED);
   };
   for (const std::string& joint_name : trajectory.multi_dof_joint_trajectory.joint_names)
-    if (isActuated(joint_name))
+    if (is_actuated(joint_name))
       actuated_joints.insert(joint_name);
   for (const std::string& joint_name : trajectory.joint_trajectory.joint_names)
-    if (isActuated(joint_name))
+    if (is_actuated(joint_name))
       actuated_joints.insert(joint_name);
 
   if (actuated_joints.empty())
@@ -1200,7 +1200,7 @@ void TrajectoryExecutionManager::execute(const ExecutionCompleteCallback& callba
   stopExecution(false);
 
   // check whether first trajectory starts at current robot state
-  if (trajectories_.size() && !validate(*trajectories_.front()))
+  if (!trajectories_.empty() && !validate(*trajectories_.front()))
   {
     last_execution_status_ = moveit_controller_manager::ExecutionStatus::ABORTED;
     if (auto_clear)
@@ -1627,7 +1627,7 @@ bool TrajectoryExecutionManager::ensureActiveControllersForJoints(const std::vec
     const robot_model::JointModel* jm = robot_model_->getJointModel(joints[i]);
     if (jm)
     {
-      if (jm->isPassive() || jm->getMimic() != NULL || jm->getType() == robot_model::JointModel::FIXED)
+      if (jm->isPassive() || jm->getMimic() != nullptr || jm->getType() == robot_model::JointModel::FIXED)
         continue;
       jset.insert(joints[i]);
     }
@@ -1764,4 +1764,4 @@ void TrajectoryExecutionManager::loadControllerParams()
     }
   }
 }
-}
+}  // namespace trajectory_execution_manager

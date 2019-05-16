@@ -122,9 +122,9 @@ double RobotInteraction::computeLinkMarkerSize(const std::string& link)
   {
     Eigen::Vector3d ext = lm->getShapeExtentsAtOrigin();
     // drop largest extension and take norm of two remaining
-    Eigen::MatrixXd::Index maxIndex;
-    ext.maxCoeff(&maxIndex);
-    ext[maxIndex] = 0;
+    Eigen::MatrixXd::Index max_index;
+    ext.maxCoeff(&max_index);
+    ext[max_index] = 0;
     size = 1.01 * ext.norm();
     if (size > 0)
       break;  // break, if a non-empty shape was found
@@ -134,7 +134,7 @@ double RobotInteraction::computeLinkMarkerSize(const std::string& link)
     if (lm->getParentJointModel()->getType() == robot_model::JointModel::FIXED)
       lm = lm->getParentLinkModel();
     else
-      lm = 0;
+      lm = nullptr;
   }
   if (!lm)
     return DEFAULT_SCALE;  // no link with non-zero shape extends found
@@ -165,9 +165,9 @@ double RobotInteraction::computeGroupMarkerSize(const std::string& group)
     Eigen::Vector3d ext = lm->getShapeExtentsAtOrigin();
 
     // drop largest extension and take norm of two remaining
-    Eigen::MatrixXd::Index maxIndex;
-    ext.maxCoeff(&maxIndex);
-    ext[maxIndex] = 0;
+    Eigen::MatrixXd::Index max_index;
+    ext.maxCoeff(&max_index);
+    ext[max_index] = 0;
     size = std::max(size, 1.01 * ext.norm());
   }
 
@@ -553,7 +553,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
   }
 }
 
-void RobotInteraction::registerMoveInteractiveMarkerTopic(const std::string marker_name, const std::string& name)
+void RobotInteraction::registerMoveInteractiveMarkerTopic(const std::string& marker_name, const std::string& name)
 {
   ros::NodeHandle nh;
   std::stringstream ss;
@@ -568,7 +568,7 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
   if (enable)
   {
     boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
-    if (int_marker_move_subscribers_.size() == 0)
+    if (int_marker_move_subscribers_.empty())
     {
       ros::NodeHandle nh;
       for (size_t i = 0; i < int_marker_move_topics_.size(); i++)
@@ -678,7 +678,7 @@ bool RobotInteraction::showingMarkers(const InteractionHandlerPtr& handler)
   return true;
 }
 
-void RobotInteraction::moveInteractiveMarker(const std::string name, const geometry_msgs::PoseStampedConstPtr& msg)
+void RobotInteraction::moveInteractiveMarker(const std::string& name, const geometry_msgs::PoseStampedConstPtr& msg)
 {
   std::map<std::string, std::size_t>::const_iterator it = shown_markers_.find(name);
   if (it != shown_markers_.end())
@@ -709,7 +709,7 @@ void RobotInteraction::processInteractiveMarkerFeedback(
     return;
   }
 
-  std::size_t u = feedback->marker_name.find_first_of("_");
+  std::size_t u = feedback->marker_name.find_first_of('_');
   if (u == std::string::npos || u < 4)
   {
     ROS_ERROR("Invalid marker name: '%s'", feedback->marker_name.c_str());
@@ -744,7 +744,7 @@ void RobotInteraction::processingThread()
                   feedback->marker_name.c_str());
         continue;
       }
-      std::size_t u = feedback->marker_name.find_first_of("_");
+      std::size_t u = feedback->marker_name.find_first_of('_');
       if (u == std::string::npos || u < 4)
       {
         ROS_ERROR("Invalid marker name: '%s' (should never have ended up in the feedback_map!)",
@@ -820,4 +820,4 @@ void RobotInteraction::processingThread()
     }
   }
 }
-}
+}  // namespace robot_interaction

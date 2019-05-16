@@ -89,12 +89,12 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   // Create Qt Application
-  QApplication qtApp(argc, argv);
+  QApplication qt_app(argc, argv);
   // numeric values should always be POSIX
   setlocale(LC_NUMERIC, "C");
 
   // Load Qt Widget
-  moveit_setup_assistant::SetupAssistantWidget saw(NULL, vm);
+  moveit_setup_assistant::SetupAssistantWidget saw(nullptr, vm);
   saw.setMinimumWidth(980);
   saw.setMinimumHeight(550);
   //  saw.setWindowState( Qt::WindowMaximized );
@@ -104,7 +104,7 @@ int main(int argc, char** argv)
   signal(SIGINT, siginthandler);
 
   // Wait here until Qt App is finished
-  const int result = qtApp.exec();
+  const int result = qt_app.exec();
 
   // Shutdown ROS
   ros::shutdown();

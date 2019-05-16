@@ -1,37 +1,37 @@
 /*********************************************************************
-* Software License Agreement (BSD License)
-*
-*  Copyright (c) 2013, Ioan A. Sucan
-*  Copyright (c) 2013, Willow Garage, Inc.
-*  All rights reserved.
-*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
-*
-*   * Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   * Redistributions in binary form must reproduce the above
-*     copyright notice, this list of conditions and the following
-*     disclaimer in the documentation and/or other materials provided
-*     with the distribution.
-*   * Neither the name of the Willow Garage nor the names of its
-*     contributors may be used to endorse or promote products derived
-*     from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-*  POSSIBILITY OF SUCH DAMAGE.
-*********************************************************************/
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2013, Ioan A. Sucan
+ *  Copyright (c) 2013, Willow Garage, Inc.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the Willow Garage nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *********************************************************************/
 
 /* Author: Ioan Sucan, Dave Coleman */
 
@@ -42,6 +42,7 @@
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include "order_robot_model_items.inc"
+#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {
@@ -49,6 +50,8 @@ namespace core
 {
 namespace
 {
+rclcpp::Logger LOGGER = rclcpp::get_logger("robot_model.jmg");
+
 // check if a parent or ancestor of joint is included in this group
 bool includesParent(const JointModel* joint, const JointModelGroup* group)
 {
@@ -94,7 +97,7 @@ bool jointPrecedes(const JointModel* a, const JointModel* b)
 
   return false;
 }
-}
+}  // namespace
 
 JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Model::Group& config,
                                  const std::vector<const JointModel*>& unsorted_group_joints,
@@ -292,7 +295,7 @@ const LinkModel* JointModelGroup::getLinkModel(const std::string& name) const
   LinkModelMapConst::const_iterator it = link_model_map_.find(name);
   if (it == link_model_map_.end())
   {
-    ROS_ERROR_NAMED("robot_model.jmg", "Link '%s' not found in group '%s'", name.c_str(), name_.c_str());
+    RCLCPP_ERROR(LOGGER, "Link '%s' not found in group '%s'", name.c_str(), name_.c_str());
     return nullptr;
   }
   return it->second;
@@ -303,7 +306,7 @@ const JointModel* JointModelGroup::getJointModel(const std::string& name) const
   JointModelMapConst::const_iterator it = joint_model_map_.find(name);
   if (it == joint_model_map_.end())
   {
-    ROS_ERROR_NAMED("robot_model.jmg", "Joint '%s' not found in group '%s'", name.c_str(), name_.c_str());
+    RCLCPP_ERROR(LOGGER, "Joint '%s' not found in group '%s'", name.c_str(), name_.c_str());
     return nullptr;
   }
   return it->second;
@@ -345,8 +348,9 @@ void JointModelGroup::getVariableRandomPositionsNearBy(
     if (iter != distance_map.end())
       distance = iter->second;
     else
-      ROS_WARN_NAMED("robot_model.jmg", "Did not pass in distance for '%s'",
-                     active_joint_model_vector_[i]->getName().c_str());
+    {
+      RCLCPP_WARN(LOGGER, "Did not pass in distance for '%s'", active_joint_model_vector_[i]->getName().c_str());
+    }
     active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(
         rng, values + active_joint_model_start_index_[i], *active_joint_bounds[i],
         near + active_joint_model_start_index_[i], distance);
@@ -502,7 +506,7 @@ bool JointModelGroup::getEndEffectorTips(std::vector<const LinkModel*>& tips) co
     const JointModelGroup* eef = parent_model_->getEndEffector(name);
     if (!eef)
     {
-      ROS_ERROR_NAMED("robot_model.jmg", "Unable to find joint model group for eef");
+      RCLCPP_ERROR(LOGGER, "Unable to find joint model group for eef");
       return false;
     }
     const std::string& eef_parent = eef->getEndEffectorParentGroup().second;
@@ -510,7 +514,7 @@ bool JointModelGroup::getEndEffectorTips(std::vector<const LinkModel*>& tips) co
     const LinkModel* eef_link = parent_model_->getLinkModel(eef_parent);
     if (!eef_link)
     {
-      ROS_ERROR_NAMED("robot_model.jmg", "Unable to find end effector link for eef");
+      RCLCPP_ERROR(LOGGER, "Unable to find end effector link for eef");
       return false;
     }
     // insert eef_link into tips, maintaining a *sorted* vector, thus enabling use of std::lower_bound
@@ -528,10 +532,13 @@ const LinkModel* JointModelGroup::getOnlyOneEndEffectorTip() const
   if (tips.size() == 1)
     return tips.front();
   else if (tips.size() > 1)
-    ROS_ERROR_NAMED("robot_model.jmg", "More than one end effector tip found for joint model group, "
-                                       "so cannot return only one");
+  {
+    RCLCPP_ERROR(LOGGER, "More than one end effector tip found for joint model group, so cannot return only one");
+  }
   else
-    ROS_ERROR_NAMED("robot_model.jmg", "No end effector tips found in joint model group");
+  {
+    RCLCPP_ERROR(LOGGER, "No end effector tips found in joint model group");
+  }
   return nullptr;
 }
 
@@ -540,7 +547,7 @@ int JointModelGroup::getVariableGroupIndex(const std::string& variable) const
   VariableIndexMap::const_iterator it = joint_variables_index_map_.find(variable);
   if (it == joint_variables_index_map_.end())
   {
-    ROS_ERROR_NAMED("robot_model.jmg", "Variable '%s' is not part of group '%s'", variable.c_str(), name_.c_str());
+    RCLCPP_ERROR(LOGGER, "Variable '%s' is not part of group '%s'", variable.c_str(), name_.c_str());
     return -1;
   }
   return it->second;
@@ -567,9 +574,10 @@ bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik
       // skip reported fixed joints
       if (hasJointModel(ik_jnames[i]) && getJointModel(ik_jnames[i])->getType() == JointModel::FIXED)
         continue;
-      ROS_ERROR_NAMED("robot_model.jmg", "IK solver computes joint values for joint '%s' "
-                                         "but group '%s' does not contain such a joint.",
-                      ik_jnames[i].c_str(), getName().c_str());
+      RCLCPP_ERROR(LOGGER,
+                   "IK solver computes joint values for joint '%s' "
+                   "but group '%s' does not contain such a joint.",
+                   ik_jnames[i].c_str(), getName().c_str());
       return false;
     }
     const JointModel* jm = getJointModel(ik_jnames[i]);
@@ -620,7 +628,7 @@ bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
 
   if (tip_frames.empty())
   {
-    ROS_DEBUG_NAMED("robot_model.jmg", "Group %s has no tip frame(s)", name_.c_str());
+    RCLCPP_WARN(LOGGER, "Group %s has no tip frame(s)", name_.c_str());
     return false;
   }
 
@@ -630,8 +638,7 @@ bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
     // remove frame reference, if specified
     const std::string& tip_local = tip[0] == '/' ? tip.substr(1) : tip;
     const std::string& tip_frame_local = tip_frames[i][0] == '/' ? tip_frames[i].substr(1) : tip_frames[i];
-    ROS_DEBUG_NAMED("robot_model.jmg", "comparing input tip: %s to this groups tip: %s ", tip_local.c_str(),
-                    tip_frame_local.c_str());
+    RCLCPP_WARN(LOGGER, "comparing input tip: %s to this groups tip: %s ", tip_local.c_str(), tip_frame_local.c_str());
 
     // Check if the IK solver's tip is the same as the frame of inquiry
     if (tip_local != tip_frame_local)
@@ -717,5 +724,48 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
   out << std::endl;
 }
 
+bool JointModelGroup::isValidVelocityMove(const std::vector<double>& from_joint_pose,
+                                          const std::vector<double>& to_joint_pose, double dt) const
+{
+  // Check for equal sized arrays
+  if (from_joint_pose.size() != to_joint_pose.size())
+  {
+    RCLCPP_ERROR(LOGGER, "To and from joint poses are of different sizes.");
+    return false;
+  }
+
+  return isValidVelocityMove(&from_joint_pose[0], &to_joint_pose[0], from_joint_pose.size(), dt);
+}
+
+bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const double* to_joint_pose,
+                                          std::size_t array_size, double dt) const
+{
+  const std::vector<const JointModel::Bounds*>& bounds = getActiveJointModelsBounds();
+  const std::vector<unsigned int>& bij = getKinematicsSolverJointBijection();
+
+  for (std::size_t i = 0; i < array_size; ++i)
+  {
+    double dtheta = std::abs(from_joint_pose[i] - to_joint_pose[i]);
+    const std::vector<moveit::core::VariableBounds>* var_bounds = bounds[bij[i]];
+
+    if (var_bounds->size() != 1)
+    {
+      // TODO(davetcoleman) Support multiple variables
+      RCLCPP_ERROR(LOGGER, "Attempting to check velocity bounds for waypoint move with joints that have multiple "
+                               "variables");
+      return false;
+    }
+    const double max_velocity = (*var_bounds)[0].max_velocity_;
+
+    double max_dtheta = dt * max_velocity;
+    if (dtheta > max_dtheta)
+    {
+      RCLCPP_DEBUG(LOGGER, "Not valid velocity move because of joint %lu", i);
+      return false;
+    }
+  }
+
+  return true;
+}
 }  // end of namespace core
 }  // end of namespace moveit

@@ -1,50 +1,89 @@
-# moveit/moveit:melodic-ci
+# moveit/moveit2:crystal-ci
 # Sets up a base image to use for running Continuous Integration on Travis
+FROM ros:crystal-ros-base-bionic
 
-FROM ros:melodic-ros-base
-MAINTAINER Dave Coleman dave@picknik.ai
+LABEL maintainer="mike@picknik.ai"
 
 ENV TERM xterm
 
 # Setup catkin workspace
-ENV CATKIN_WS=/root/ws_moveit
-WORKDIR $CATKIN_WS
+ENV ROS_WS=/opt/ws_moveit
 
-# Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
-# https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers
-RUN \
-    mkdir src && \
-    cd src && \
-    #
-    # Download moveit source, so that we can get necessary dependencies
-    wstool init --shallow . https://raw.githubusercontent.com/ros-planning/moveit/${ROS_DISTRO}-devel/moveit.rosinstall && \
-    #
-    # Update apt package list as previous containers clear the cache
-    apt-get -qq update && \
-    apt-get -qq dist-upgrade && \
+WORKDIR $ROS_WS
+
+# Update apt package list as previous containers clear the cache
+RUN apt-get -qq update && \
+    apt-get -qq dist-upgrade -y && \
     #
     # Install some base dependencies
     apt-get -qq install -y \
-        # Some source builds require a package.xml be downloaded via wget from an external location
         wget \
         # Required for rosdep command
         sudo \
-        # Preferred build tools
-        python-catkin-tools \
         clang clang-format-3.9 clang-tidy clang-tools \
-        ccache && \
-    #
-    # Download all dependencies of MoveIt!
-    rosdep update && \
-    rosdep install -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
-    #
-    # Remove the source code from this container
-    # TODO: in the future we may want to keep this here for further optimization of later containers
-    cd .. && \
-    rm -rf src/ && \
-    #
+        ccache \
+        curl gnupg2 lsb-release \
+        # Some python dependencies for working with ROS2
+        python3-colcon-common-extensions \
+        python3-pip \
+        python-rosdep \
+        python3-wstool \
+        python3-rospkg-modules \
+        python3-rosdistro-modules \
+        && \
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/*
+
+# Upgrade Pip and install some packages needed for testing
+# NOTE(mlautman): These pip installs are from the ros2 source install instructions. Seeing as not all of them
+#        are installed in the base image I added them here. I have not been able to verify that they are needed
+#        and if they aren't necessary they should be removed.
+RUN python3 -m pip install -q --upgrade pip && \
+    python3 -m pip install -q -U \
+        argcomplete \
+        flake8 \
+        flake8-blind-except \
+        flake8-builtins \
+        flake8-class-newline \
+        flake8-comprehensions \
+        flake8-deprecated \
+        flake8-docstrings \
+        flake8-import-order \
+        flake8-quotes \
+        pytest-repeat \
+        pytest-rerunfailures \
+        pytest \
+        pytest-cov \
+        pytest-runner \
+        setuptools
+
+# Install Fast-RTPS dependencies
+RUN apt-get -qq update && \
+    apt-get install -qq --no-install-recommends -y \
+        libasio-dev \
+        libtinyxml2-dev \
+        && \
+    # Clear apt-cache to reduce image size
+    rm -rf /var/lib/apt/lists/*
+
+# Download moveit source, so that we can get necessary dependencies
+RUN mkdir src && \
+    cd $ROS_WS/src && \
+    # TODO(mlautman): This should be changed to use vcs in the future
+    wstool init --shallow . https://raw.githubusercontent.com/ros-planning/moveit2/master/moveit.rosinstall
+
+# Download all MoveIt dependencies
+RUN \
+    apt-get -qq update && \
+    rosdep update -q && \
+    rosdep install -q -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
+    # Clear apt-cache to reduce image size
+    rm -rf /var/lib/apt/lists/*
+
+# Remove the source code from this container
+# TODO: in the future we may want to keep this here for further optimization of later containers
+RUN cd $ROS_WS && \
+    rm -rf src/
 
 # Continous Integration Setting
 ENV IN_DOCKER 1

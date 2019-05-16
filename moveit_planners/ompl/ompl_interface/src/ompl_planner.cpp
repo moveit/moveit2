@@ -38,7 +38,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/ompl_interface/model_based_planning_context.h>
 #include <tf2_ros/transform_listener.h>
-#include <moveit_msgs/DisplayTrajectory.h>
+#include <moveit_msgs/msg/display_trajectory.hpp>
 #include <moveit/profiler/profiler.h>
 #include <moveit_msgs/GetMotionPlan.h>
 #include <memory>

@@ -37,11 +37,14 @@
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <boost/bind.hpp>
 #include <algorithm>
+#include "rclcpp/rclcpp.hpp"
 
 // we could really use some c++11 lambda functions here :)
 
 namespace planning_request_adapter
 {
+rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("planning_request_adapter");
+
 namespace
 {
 bool callPlannerInterfaceSolve(const planning_interface::PlannerManager* planner,
@@ -55,7 +58,7 @@ bool callPlannerInterfaceSolve(const planning_interface::PlannerManager* planner
   else
     return false;
 }
-}
+}  // namespace
 
 bool PlanningRequestAdapter::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
                                           const planning_scene::PlanningSceneConstPtr& planning_scene,
@@ -91,7 +94,7 @@ bool callAdapter1(const PlanningRequestAdapter* adapter, const planning_interfac
   }
   catch (std::exception& ex)
   {
-    ROS_ERROR_NAMED("planning_request_adapter", "Exception caught executing *final* adapter '%s': %s",
+    RCLCPP_ERROR(LOGGER, "Exception caught executing *final* adapter '%s': %s",
                     adapter->getDescription().c_str(), ex.what());
     added_path_index.clear();
     return callPlannerInterfaceSolve(planner.get(), planning_scene, req, res);
@@ -109,13 +112,13 @@ bool callAdapter2(const PlanningRequestAdapter* adapter, const PlanningRequestAd
   }
   catch (std::exception& ex)
   {
-    ROS_ERROR_NAMED("planning_request_adapter", "Exception caught executing *next* adapter '%s': %s",
+    RCLCPP_ERROR(LOGGER, "Exception caught executing *next* adapter '%s': %s",
                     adapter->getDescription().c_str(), ex.what());
     added_path_index.clear();
     return planner(planning_scene, req, res);
   }
 }
-}
+}  // namespace
 
 bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::PlannerManagerPtr& planner,
                                                const planning_scene::PlanningSceneConstPtr& planning_scene,

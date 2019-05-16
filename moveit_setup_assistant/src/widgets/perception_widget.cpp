@@ -46,7 +46,7 @@ namespace moveit_setup_assistant
 // ******************************************************************************************
 // Constructor
 // ******************************************************************************************
-PerceptionWidget::PerceptionWidget(QWidget* parent, moveit_setup_assistant::MoveItConfigDataPtr config_data)
+PerceptionWidget::PerceptionWidget(QWidget* parent, const MoveItConfigDataPtr& config_data)
   : SetupScreenWidget(parent), config_data_(config_data)
 {
   // Basic widget container
@@ -283,10 +283,10 @@ void PerceptionWidget::sensorPluginChanged(int index)
 void PerceptionWidget::loadSensorPluginsComboBox()
 {
   // Only load this combo box once
-  static bool hasLoaded = false;
-  if (hasLoaded)
+  static bool has_loaded = false;
+  if (has_loaded)
     return;
-  hasLoaded = true;
+  has_loaded = true;
 
   // Remove all old items
   sensor_plugin_field_->clear();
@@ -337,4 +337,4 @@ void PerceptionWidget::loadSensorPluginsComboBox()
   }
 }
 
-}  // namespace
+}  // namespace moveit_setup_assistant

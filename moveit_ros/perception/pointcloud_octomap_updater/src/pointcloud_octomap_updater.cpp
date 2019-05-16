@@ -55,8 +55,8 @@ PointCloudOctomapUpdater::PointCloudOctomapUpdater()
   , max_range_(std::numeric_limits<double>::infinity())
   , point_subsample_(1)
   , max_update_rate_(0)
-  , point_cloud_subscriber_(NULL)
-  , point_cloud_filter_(NULL)
+  , point_cloud_subscriber_(nullptr)
+  , point_cloud_filter_(nullptr)
 {
 }
 
@@ -132,8 +132,8 @@ void PointCloudOctomapUpdater::stopHelper()
 void PointCloudOctomapUpdater::stop()
 {
   stopHelper();
-  point_cloud_filter_ = NULL;
-  point_cloud_subscriber_ = NULL;
+  point_cloud_filter_ = nullptr;
+  point_cloud_subscriber_ = nullptr;
 }
 
 ShapeHandle PointCloudOctomapUpdater::excludeShape(const shapes::ShapeConstPtr& shape)
@@ -155,12 +155,11 @@ void PointCloudOctomapUpdater::forgetShape(ShapeHandle handle)
 bool PointCloudOctomapUpdater::getShapeTransform(ShapeHandle h, Eigen::Isometry3d& transform) const
 {
   ShapeTransformCache::const_iterator it = transform_cache_.find(h);
-  if (it == transform_cache_.end())
+  if (it != transform_cache_.end())
   {
-    return false;
+    transform = it->second;
   }
-  transform = it->second;
-  return true;
+  return it != transform_cache_.end();
 }
 
 void PointCloudOctomapUpdater::updateMask(const sensor_msgs::PointCloud2& cloud, const Eigen::Vector3d& sensor_origin,
@@ -185,9 +184,9 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::PointCloud2::
     monitor_->setMapFrame(cloud_msg->header.frame_id);
 
   /* get transform for cloud into map frame */
-  tf2::Stamped<tf2::Transform> map_H_sensor;
+  tf2::Stamped<tf2::Transform> map_h_sensor;
   if (monitor_->getMapFrame() == cloud_msg->header.frame_id)
-    map_H_sensor.setIdentity();
+    map_h_sensor.setIdentity();
   else
   {
     if (tf_buffer_)
@@ -196,7 +195,7 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::PointCloud2::
       {
         tf2::fromMsg(
             tf_buffer_->lookupTransform(monitor_->getMapFrame(), cloud_msg->header.frame_id, cloud_msg->header.stamp),
-            map_H_sensor);
+            map_h_sensor);
       }
       catch (tf2::TransformException& ex)
       {
@@ -209,7 +208,7 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::PointCloud2::
   }
 
   /* compute sensor origin in map frame */
-  const tf2::Vector3& sensor_origin_tf = map_H_sensor.getOrigin();
+  const tf2::Vector3& sensor_origin_tf = map_h_sensor.getOrigin();
   octomap::point3d sensor_origin(sensor_origin_tf.getX(), sensor_origin_tf.getY(), sensor_origin_tf.getZ());
   Eigen::Vector3d sensor_origin_eigen(sensor_origin_tf.getX(), sensor_origin_tf.getY(), sensor_origin_tf.getZ());
 
@@ -270,7 +269,7 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::PointCloud2::
         if (!std::isnan(pt_iter[0]) && !std::isnan(pt_iter[1]) && !std::isnan(pt_iter[2]))
         {
           /* transform to map frame */
-          tf2::Vector3 point_tf = map_H_sensor * tf2::Vector3(pt_iter[0], pt_iter[1], pt_iter[2]);
+          tf2::Vector3 point_tf = map_h_sensor * tf2::Vector3(pt_iter[0], pt_iter[1], pt_iter[2]);
 
           /* occupied cell at ray endpoint if ray is shorter than max range and this point
              isn't on a part of the robot*/
@@ -360,4 +359,4 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::PointCloud2::
     filtered_cloud_publisher_.publish(*filtered_cloud);
   }
 }
-}
+}  // namespace occupancy_map_monitor

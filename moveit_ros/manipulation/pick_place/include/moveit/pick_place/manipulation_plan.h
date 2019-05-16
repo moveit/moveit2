@@ -41,17 +41,17 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/constraint_samplers/constraint_sampler.h>
 #include <moveit/plan_execution/plan_representation.h>
-#include <moveit_msgs/GripperTranslation.h>
-#include <moveit_msgs/RobotState.h>
-#include <moveit_msgs/RobotTrajectory.h>
-#include <moveit_msgs/MoveItErrorCodes.h>
-#include <moveit_msgs/Constraints.h>
+#include <moveit_msgs/msg/gripper_translation.hpp>
+#include <moveit_msgs/msg/robot_state.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
+#include <moveit_msgs/msg/constraints.hpp>
 #include <string>
 #include <vector>
 
 namespace pick_place
 {
-MOVEIT_CLASS_FORWARD(ManipulationPlanSharedData);
+MOVEIT_STRUCT_FORWARD(ManipulationPlanSharedData);
 
 struct ManipulationPlanSharedData
 {
@@ -81,7 +81,7 @@ struct ManipulationPlanSharedData
   ros::WallTime timeout_;
 };
 
-MOVEIT_CLASS_FORWARD(ManipulationPlan);
+MOVEIT_STRUCT_FORWARD(ManipulationPlan);
 
 struct ManipulationPlan
 {

@@ -101,9 +101,7 @@ RobotStateDisplay::RobotStateDisplay() : Display(), update_state_(false), load_r
 // ******************************************************************************************
 // Deconstructor
 // ******************************************************************************************
-RobotStateDisplay::~RobotStateDisplay()
-{
-}
+RobotStateDisplay::~RobotStateDisplay() = default;
 
 void RobotStateDisplay::onInitialize()
 {
@@ -365,9 +363,9 @@ void RobotStateDisplay::loadRobotModel()
     robot_->load(*robot_model_->getURDF());
     robot_state_.reset(new robot_state::RobotState(robot_model_));
     robot_state_->setToDefaultValues();
-    bool oldState = root_link_name_property_->blockSignals(true);
+    bool old_state = root_link_name_property_->blockSignals(true);
     root_link_name_property_->setStdString(getRobotModel()->getRootLinkName());
-    root_link_name_property_->blockSignals(oldState);
+    root_link_name_property_->blockSignals(old_state);
     update_state_ = true;
     setStatus(rviz::StatusProperty::Ok, "RobotState", "Planning Model Loaded Successfully");
 
