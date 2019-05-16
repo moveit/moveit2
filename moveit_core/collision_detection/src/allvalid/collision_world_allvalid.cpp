@@ -38,7 +38,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 // Logger
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("collision_detection");;
+rclcpp::Logger LOGGER_COLLISION_WORLD_ALLVALID = rclcpp::get_logger("moveit").get_child("collision_detection");;
 
 collision_detection::CollisionWorldAllValid::CollisionWorldAllValid() : CollisionWorld()
 {
@@ -59,7 +59,7 @@ void collision_detection::CollisionWorldAllValid::checkRobotCollision(const Coll
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(LOGGER_COLLISION_WORLD_ALLVALID, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 void collision_detection::CollisionWorldAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
@@ -69,7 +69,7 @@ void collision_detection::CollisionWorldAllValid::checkRobotCollision(const Coll
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(LOGGER_COLLISION_WORLD_ALLVALID, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 void collision_detection::CollisionWorldAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
@@ -79,7 +79,7 @@ void collision_detection::CollisionWorldAllValid::checkRobotCollision(const Coll
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(LOGGER_COLLISION_WORLD_ALLVALID, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 void collision_detection::CollisionWorldAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
@@ -90,7 +90,7 @@ void collision_detection::CollisionWorldAllValid::checkRobotCollision(const Coll
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(LOGGER_COLLISION_WORLD_ALLVALID, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 void collision_detection::CollisionWorldAllValid::checkWorldCollision(const CollisionRequest& req, CollisionResult& res,
@@ -98,7 +98,7 @@ void collision_detection::CollisionWorldAllValid::checkWorldCollision(const Coll
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(LOGGER_COLLISION_WORLD_ALLVALID, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 void collision_detection::CollisionWorldAllValid::checkWorldCollision(const CollisionRequest& req, CollisionResult& res,
@@ -107,7 +107,7 @@ void collision_detection::CollisionWorldAllValid::checkWorldCollision(const Coll
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(LOGGER_COLLISION_WORLD_ALLVALID, "Using AllValid collision detection. No collision checking is performed.");
 }
 
 double collision_detection::CollisionWorldAllValid::distanceRobot(const CollisionRobot& robot,

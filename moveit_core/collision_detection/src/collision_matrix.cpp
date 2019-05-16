@@ -42,7 +42,7 @@
 namespace collision_detection
 {
 // Logger
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("collision_detection");;
+rclcpp::Logger LOGGER_MATRIX = rclcpp::get_logger("moveit").get_child("collision_detection");;
 
 AllowedCollisionMatrix::AllowedCollisionMatrix()
 {
@@ -60,7 +60,7 @@ AllowedCollisionMatrix::AllowedCollisionMatrix(const moveit_msgs::msg::AllowedCo
   if (msg.entry_names.size() != msg.entry_values.size() ||
       msg.default_entry_names.size() != msg.default_entry_values.size())
   {
-    RCLCPP_ERROR(LOGGER, "The number of links does not match the number of entries in AllowedCollisionMatrix message");
+    RCLCPP_ERROR(LOGGER_MATRIX, "The number of links does not match the number of entries in AllowedCollisionMatrix message");
   }
   else
   {
@@ -68,7 +68,7 @@ AllowedCollisionMatrix::AllowedCollisionMatrix(const moveit_msgs::msg::AllowedCo
     {
       if (msg.entry_values[i].enabled.size() != msg.entry_names.size())
       {
-        RCLCPP_ERROR(LOGGER, "Number of entries is incorrect for link '%s' in AllowedCollisionMatrix message",
+        RCLCPP_ERROR(LOGGER_MATRIX, "Number of entries is incorrect for link '%s' in AllowedCollisionMatrix message",
                      msg.entry_names[i].c_str());
       }
       else
