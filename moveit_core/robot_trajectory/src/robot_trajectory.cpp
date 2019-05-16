@@ -350,7 +350,7 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
 
   for (std::size_t i = 0; i < state_count; ++i)
   {
-    this_time_stamp = trajStamp + trajectory.points[i].time_from_start;
+    this_time_stamp = traj_stamp + trajectory.points[i].time_from_start;
     robot_state::RobotStatePtr st(new robot_state::RobotState(copy));
     st->setVariablePositions(trajectory.joint_names, trajectory.points[i].positions);
     if (!trajectory.points[i].velocities.empty())
