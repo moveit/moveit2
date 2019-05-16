@@ -52,7 +52,7 @@
 
 #include <boost/bind.hpp>
 
-rclcpp::Logger logger = rclcpp::get_logger("collision_detection.fcl");
+rclcpp::Logger LOGGER_COLLISION_WORLD = rclcpp::get_logger("collision_world.fcl");
 
 namespace collision_detection
 {
@@ -117,7 +117,7 @@ void CollisionWorldFCL::checkRobotCollision(const CollisionRequest& req, Collisi
                                             const CollisionRobot& robot, const robot_state::RobotState& state1,
                                             const robot_state::RobotState& state2) const
 {
-  RCLCPP_ERROR(logger, "FCL continuous collision checking not yet implemented");
+  RCLCPP_ERROR(LOGGER_COLLISION_WORLD, "FCL continuous collision checking not yet implemented");
 }
 
 void CollisionWorldFCL::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
@@ -125,7 +125,7 @@ void CollisionWorldFCL::checkRobotCollision(const CollisionRequest& req, Collisi
                                             const robot_state::RobotState& state2,
                                             const AllowedCollisionMatrix& acm) const
 {
-  RCLCPP_ERROR(logger, "FCL continuous collision checking not yet implemented");
+  RCLCPP_ERROR(LOGGER_COLLISION_WORLD, "FCL continuous collision checking not yet implemented");
 }
 
 void CollisionWorldFCL::checkRobotCollisionHelper(const CollisionRequest& req, CollisionResult& res,
