@@ -275,16 +275,22 @@ TEST_F(TestAABB, TestSimple)
 {
   // Contains a link with simple geometry and an offset in the collision link
   moveit::core::RobotModelBuilder builder("simple", "base_footprint");
-  geometry_msgs::Pose origin;
-  tf2::toMsg(tf2::Vector3(0, 0, 0.051), origin.position);
+  geometry_msgs::msg::Pose origin;
+  origin.position.x = 0;
+  origin.position.y = 0;
+  origin.position.z = 0.051;
   origin.orientation.w = 1.0;
   builder.addChain("base_footprint->base_link", "fixed", { origin });
 
-  tf2::toMsg(tf2::Vector3(0, 0, 0), origin.position);
+  origin.position.x = 0;
+  origin.position.y = 0;
+  origin.position.z = 0;
   builder.addCollisionMesh("base_link", "package://moveit_resources/pr2_description/urdf/meshes/base_v0/base_L.stl",
                            origin);
 
-  tf2::toMsg(tf2::Vector3(0, 0, 0.071), origin.position);
+  origin.position.x = 0;
+  origin.position.y = 0;
+  origin.position.z = 0.071;
   builder.addCollisionBox("base_footprint", { 0.001, 0.001, 0.001 }, origin);
 
   builder.addVirtualJoint("odom_combined", "base_footprint", "planar", "world_joint");
@@ -308,17 +314,25 @@ TEST_F(TestAABB, TestComplex)
 {
   // Contains a link with simple geometry and an offset and rotation in the collision link
   moveit::core::RobotModelBuilder builder("complex", "base_footprint");
-  geometry_msgs::Pose origin;
-  tf2::toMsg(tf2::Vector3(0, 0, 1.0), origin.position);
+  geometry_msgs::msg::Pose origin;
+  origin.position.x = 0;
+  origin.position.y = 0;
+  origin.position.z = 1.0;
   tf2::Quaternion q;
   q.setRPY(0, 0, 1.5708);
   origin.orientation = tf2::toMsg(q);
   builder.addChain("base_footprint->base_link", "fixed", { origin });
-  tf2::toMsg(tf2::Vector3(5.0, 0, 1.0), origin.position);
+  origin.position.x = 5.0;
+  origin.position.y = 0;
+  origin.position.z = 1.0;
   builder.addCollisionBox("base_link", { 1.0, 0.1, 0.1 }, origin);
-  tf2::toMsg(tf2::Vector3(4.0, 0, 1.0), origin.position);
+  origin.position.x = 4.0;
+  origin.position.y = 0;
+  origin.position.z = 1.0;
   builder.addCollisionBox("base_link", { 1.0, 0.1, 0.1 }, origin);
-  tf2::toMsg(tf2::Vector3(-5.0, 0.0, -1.0), origin.position);
+  origin.position.x = -5.0;
+  origin.position.y = 0;
+  origin.position.z = -1.0;
   q.setRPY(0, 1.5708, 0);
   origin.orientation = tf2::toMsg(q);
   builder.addCollisionBox("base_footprint", { 0.1, 1.0, 0.1 }, origin);
