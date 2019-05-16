@@ -251,7 +251,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
     if (duration_from_previous_.size() > i)
       total_time += duration_from_previous_[i];
 
-    dur_total = rclcpp::Duration(static_cast<int64_t>(total_time*1e+9));
+    dur_total = rclcpp::Duration(1, 0) * total_time;
 
     if (!onedof.empty())
     {
