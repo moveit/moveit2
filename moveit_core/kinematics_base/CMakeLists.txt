@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 set(MOVEIT_LIB_NAME moveit_kinematics_base)
 
-add_library(${MOVEIT_LIB_NAME} src/kinematics_base.cpp)
+add_library(${MOVEIT_LIB_NAME} SHARED src/kinematics_base.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 # Avoid warnings about deprecated members of KinematicsBase when building KinematicsBase itself.
