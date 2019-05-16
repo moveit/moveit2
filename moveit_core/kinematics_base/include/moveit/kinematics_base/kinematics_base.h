@@ -59,7 +59,7 @@ MOVEIT_CLASS_FORWARD(RobotModel)
 namespace kinematics
 {
 // Logger
-rclcpp::Logger LOGGER = rclcpp::get_logger("kinematics_base");
+static rclcpp::Logger LOGGER_KINEMATICS_BASE = rclcpp::get_logger("kinematics_base");
 
 /*
  * @enum DiscretizationMethods
@@ -314,7 +314,7 @@ public:
     }
 
     // Otherwise throw error because this function should have been implemented
-    RCLCPP_ERROR(LOGGER, "This kinematic solver does not support searchPositionIK with multiple poses");
+    RCLCPP_ERROR(LOGGER_KINEMATICS_BASE, "This kinematic solver does not support searchPositionIK with multiple poses");
     return false;
   }
 
@@ -438,7 +438,7 @@ public:
   virtual const std::string& getTipFrame() const
   {
     if (tip_frames_.size() > 1)
-      RCLCPP_ERROR(LOGGER, "This kinematic solver has more than one tip frame, "
+      RCLCPP_ERROR(LOGGER_KINEMATICS_BASE, "This kinematic solver has more than one tip frame, "
                            "do not call getTipFrame()");
 
     return tip_frames_[0];
