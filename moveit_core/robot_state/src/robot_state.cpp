@@ -44,6 +44,8 @@
 #include <moveit/macros/console_colors.h>
 #include <boost/bind.hpp>
 #include <moveit/robot_model/aabb.h>
+#include <moveit/robot_state/log.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {
@@ -54,8 +56,6 @@ namespace core
  * it is difficult to choose a jump_threshold parameter that effectively separates
  * valid paths from paths with large joint space jumps. */
 static const std::size_t MIN_STEPS_FOR_JUMP_THRESH = 10;
-
-const std::string LOGNAME = "robot_state";
 
 RobotState::RobotState(const RobotModelConstPtr& robot_model)
   : robot_model_(robot_model)
@@ -182,7 +182,7 @@ bool RobotState::checkJointTransforms(const JointModel* joint) const
 {
   if (dirtyJointTransform(joint))
   {
-    ROS_WARN_NAMED(LOGNAME, "Returning dirty joint transforms for joint '%s'", joint->getName().c_str());
+    RCLCPP_WARN(logger_robot_state, "Returning dirty joint transforms for joint '%s'", joint->getName().c_str());
     return false;
   }
   return true;
@@ -192,7 +192,7 @@ bool RobotState::checkLinkTransforms() const
 {
   if (dirtyLinkTransforms())
   {
-    ROS_WARN_NAMED(LOGNAME, "Returning dirty link transforms");
+    RCLCPP_WARN(logger_robot_state, "Returning dirty link transforms");
     return false;
   }
   return true;
@@ -202,7 +202,7 @@ bool RobotState::checkCollisionTransforms() const
 {
   if (dirtyCollisionBodyTransforms())
   {
-    ROS_WARN_NAMED(LOGNAME, "Returning dirty collision body transforms");
+    RCLCPP_WARN(logger_robot_state, "Returning dirty collision body transforms");
     return false;
   }
   return true;
@@ -451,7 +451,7 @@ void RobotState::setJointEfforts(const JointModel* joint, const double* effort)
 {
   if (has_acceleration_)
   {
-    ROS_ERROR_NAMED(LOGNAME, "Unable to set joint efforts because array is being used for accelerations");
+    RCLCPP_ERROR(logger_robot_state, "Unable to set joint efforts because array is being used for accelerations");
     return;
   }
   has_effort_ = true;
@@ -880,7 +880,7 @@ const AttachedBody* RobotState::getAttachedBody(const std::string& id) const
   std::map<std::string, AttachedBody*>::const_iterator it = attached_body_map_.find(id);
   if (it == attached_body_map_.end())
   {
-    ROS_ERROR_NAMED(LOGNAME, "Attached body '%s' not found", id.c_str());
+    RCLCPP_ERROR(logger_robot_state, "Attached body '%s' not found", id.c_str());
     return nullptr;
   }
   else
@@ -897,7 +897,7 @@ void RobotState::attachBody(AttachedBody* attached_body)
 
 void RobotState::attachBody(const std::string& id, const std::vector<shapes::ShapeConstPtr>& shapes,
                             const EigenSTL::vector_Isometry3d& attach_trans, const std::set<std::string>& touch_links,
-                            const std::string& link, const trajectory_msgs::JointTrajectory& detach_posture)
+                            const std::string& link, const trajectory_msgs::msg::JointTrajectory& detach_posture)
 {
   const LinkModel* l = robot_model_->getLinkModel(link);
   AttachedBody* ab = new AttachedBody(l, id, shapes, attach_trans, touch_links, detach_posture);
@@ -1021,7 +1021,7 @@ const Eigen::Isometry3d& RobotState::getFrameTransform(const std::string& id) co
   std::map<std::string, AttachedBody*>::const_iterator jt = attached_body_map_.find(id);
   if (jt == attached_body_map_.end())
   {
-    ROS_ERROR_NAMED(LOGNAME, "Transform from frame '%s' to frame '%s' is not known "
+    RCLCPP_ERROR(logger_robot_state, "Transform from frame '%s' to frame '%s' is not known "
                              "('%s' should be a link name or an attached body id).",
                     id.c_str(), robot_model_->getModelFrame().c_str(), id.c_str());
     return IDENTITY_TRANSFORM;
@@ -1029,12 +1029,12 @@ const Eigen::Isometry3d& RobotState::getFrameTransform(const std::string& id) co
   const EigenSTL::vector_Isometry3d& tf = jt->second->getGlobalCollisionBodyTransforms();
   if (tf.empty())
   {
-    ROS_ERROR_NAMED(LOGNAME, "Attached body '%s' has no geometry associated to it. No transform to return.",
+    RCLCPP_ERROR(logger_robot_state, "Attached body '%s' has no geometry associated to it. No transform to return.",
                     id.c_str());
     return IDENTITY_TRANSFORM;
   }
   if (tf.size() > 1)
-    ROS_DEBUG_NAMED(LOGNAME, "There are multiple geometries associated to attached body '%s'. "
+    RCLCPP_DEBUG(logger_robot_state, "There are multiple geometries associated to attached body '%s'. "
                              "Returning the transform for the first one.",
                     id.c_str());
   return tf[0];
@@ -1050,8 +1050,8 @@ bool RobotState::knowsFrameTransform(const std::string& id) const
   return it != attached_body_map_.end() && !it->second->getGlobalCollisionBodyTransforms().empty();
 }
 
-void RobotState::getRobotMarkers(visualization_msgs::MarkerArray& arr, const std::vector<std::string>& link_names,
-                                 const std_msgs::ColorRGBA& color, const std::string& ns, const ros::Duration& dur,
+void RobotState::getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, const std::vector<std::string>& link_names,
+                                 const std_msgs::msg::ColorRGBA& color, const std::string& ns, const rclcpp::Duration& dur,
                                  bool include_attached) const
 {
   std::size_t cur_num = arr.markers.size();
@@ -1066,13 +1066,14 @@ void RobotState::getRobotMarkers(visualization_msgs::MarkerArray& arr, const std
   }
 }
 
-void RobotState::getRobotMarkers(visualization_msgs::MarkerArray& arr, const std::vector<std::string>& link_names,
+void RobotState::getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, const std::vector<std::string>& link_names,
                                  bool include_attached) const
 {
-  ros::Time tm = ros::Time::now();
+  builtin_interfaces::msg::Time tm = rclcpp::Clock().now();
+
   for (std::size_t i = 0; i < link_names.size(); ++i)
   {
-    ROS_DEBUG_NAMED(LOGNAME, "Trying to get marker for link '%s'", link_names[i].c_str());
+    RCLCPP_DEBUG(logger_robot_state, "Trying to get marker for link '%s'", link_names[i].c_str());
     const LinkModel* lm = robot_model_->getLinkModel(link_names[i]);
     if (!lm)
       continue;
@@ -1083,7 +1084,7 @@ void RobotState::getRobotMarkers(visualization_msgs::MarkerArray& arr, const std
         {
           for (std::size_t j = 0; j < it->second->getShapes().size(); ++j)
           {
-            visualization_msgs::Marker att_mark;
+            visualization_msgs::msg::Marker att_mark;
             att_mark.header.frame_id = robot_model_->getModelFrame();
             att_mark.header.stamp = tm;
             if (shapes::constructMarkerFromShape(it->second->getShapes()[j].get(), att_mark))
@@ -1102,7 +1103,7 @@ void RobotState::getRobotMarkers(visualization_msgs::MarkerArray& arr, const std
 
     for (std::size_t j = 0; j < lm->getShapes().size(); ++j)
     {
-      visualization_msgs::Marker mark;
+      visualization_msgs::msg::Marker mark;
       mark.header.frame_id = robot_model_->getModelFrame();
       mark.header.stamp = tm;
 
@@ -1152,13 +1153,13 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
 
   if (!group->isChain())
   {
-    ROS_ERROR_NAMED(LOGNAME, "The group '%s' is not a chain. Cannot compute Jacobian.", group->getName().c_str());
+    RCLCPP_ERROR(logger_robot_state, "The group '%s' is not a chain. Cannot compute Jacobian.", group->getName().c_str());
     return false;
   }
 
   if (!group->isLinkUpdated(link->getName()))
   {
-    ROS_ERROR_NAMED(LOGNAME, "Link name '%s' does not exist in the chain '%s' or is not a child for this chain",
+    RCLCPP_ERROR(logger_robot_state, "Link name '%s' does not exist in the chain '%s' or is not a child for this chain",
                     link->getName().c_str(), group->getName().c_str());
     return false;
   }
@@ -1175,7 +1176,7 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
   Eigen::Vector3d point_transform = link_transform * reference_point_position;
 
   /*
-  ROS_DEBUG_NAMED(LOGNAME, "Point from reference origin expressed in world coordinates: %f %f %f",
+  RCLCPP_DEBUG(logger_robot_state, "Point from reference origin expressed in world coordinates: %f %f %f",
            point_transform.x(),
            point_transform.y(),
            point_transform.z());
@@ -1187,11 +1188,11 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
   while (link)
   {
     /*
-    ROS_DEBUG_NAMED(LOGNAME, "Link: %s, %f %f %f",link_state->getName().c_str(),
+    RCLCPP_DEBUG(logger_robot_state, "Link: %s, %f %f %f",link_state->getName().c_str(),
              link_state->getGlobalLinkTransform().translation().x(),
              link_state->getGlobalLinkTransform().translation().y(),
              link_state->getGlobalLinkTransform().translation().z());
-    ROS_DEBUG_NAMED(LOGNAME, "Joint: %s",link_state->getParentJointState()->getName().c_str());
+    RCLCPP_DEBUG(logger_robot_state, "Joint: %s",link_state->getParentJointState()->getName().c_str());
     */
     const JointModel* pjm = link->getParentJointModel();
     if (pjm->getVariableCount() > 0)
@@ -1229,7 +1230,7 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
         jacobian.block<3, 1>(3, joint_index + 2) = jacobian.block<3, 1>(3, joint_index + 2) + joint_axis;
       }
       else
-        ROS_ERROR_NAMED(LOGNAME, "Unknown type of joint in Jacobian computation");
+        RCLCPP_ERROR(logger_robot_state, "Unknown type of joint in Jacobian computation");
     }
     if (pjm == root_joint_model)
       break;
@@ -1259,7 +1260,7 @@ bool RobotState::setFromDiffIK(const JointModelGroup* jmg, const Eigen::VectorXd
   return integrateVariableVelocity(jmg, qdot, dt, constraint);
 }
 
-bool RobotState::setFromDiffIK(const JointModelGroup* jmg, const geometry_msgs::Twist& twist, const std::string& tip,
+bool RobotState::setFromDiffIK(const JointModelGroup* jmg, const geometry_msgs::msg::Twist& twist, const std::string& tip,
                                double dt, const GroupStateValidityCallbackFn& constraint)
 {
   Eigen::Matrix<double, 6, 1> t;
@@ -1334,13 +1335,13 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::Pose
   const kinematics::KinematicsBaseConstPtr& solver = jmg->getSolverInstance();
   if (!solver)
   {
-    ROS_ERROR_NAMED(LOGNAME, "No kinematics solver instantiated for group '%s'", jmg->getName().c_str());
+    RCLCPP_ERROR(logger_robot_state, "No kinematics solver instantiated for group '%s'", jmg->getName().c_str());
     return false;
   }
   return setFromIK(jmg, pose, solver->getTipFrame(), timeout, constraint, options);
 }
 
-bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::Pose& pose, const std::string& tip,
+bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg::Pose& pose, const std::string& tip,
                            double timeout, const GroupStateValidityCallbackFn& constraint,
                            const kinematics::KinematicsQueryOptions& options)
 {
@@ -1357,7 +1358,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& 
   const kinematics::KinematicsBaseConstPtr& solver = jmg->getSolverInstance();
   if (!solver)
   {
-    ROS_ERROR_NAMED(LOGNAME, "No kinematics solver instantiated for group '%s'", jmg->getName().c_str());
+    RCLCPP_ERROR(logger_robot_state, "No kinematics solver instantiated for group '%s'", jmg->getName().c_str());
     return false;
   }
   static std::vector<double> consistency_limits;
@@ -1375,7 +1376,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const Eigen::Isometry3d& 
 namespace
 {
 bool ikCallbackFnAdapter(RobotState* state, const JointModelGroup* group,
-                         const GroupStateValidityCallbackFn& constraint, const geometry_msgs::Pose& /*unused*/,
+                         const GroupStateValidityCallbackFn& constraint, const geometry_msgs::msg::Pose& /*unused*/,
                          const std::vector<double>& ik_sol, moveit_msgs::msg::MoveItErrorCodes& error_code)
 {
   const std::vector<unsigned int>& bij = group->getKinematicsSolverJointBijection();
@@ -1403,7 +1404,7 @@ bool RobotState::setToIKSolverFrame(Eigen::Isometry3d& pose, const std::string& 
     const LinkModel* lm = getLinkModel((!ik_frame.empty() && ik_frame[0] == '/') ? ik_frame.substr(1) : ik_frame);
     if (!lm)
     {
-      ROS_ERROR_STREAM_NAMED(LOGNAME, "IK frame '" << ik_frame << "' does not exist.");
+      RCLCPP_ERROR(logger_robot_state, "The following IK frame does not exist:", ik_frame.c_str());
       return false;
     }
     pose = getGlobalLinkTransform(lm).inverse() * pose;
@@ -1447,7 +1448,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
   // Error check
   if (poses_in.size() != tips_in.size())
   {
-    ROS_ERROR_NAMED(LOGNAME, "Number of poses must be the same as number of tips");
+    RCLCPP_ERROR(logger_robot_state, "Number of poses must be the same as number of tips");
     return false;
   }
 
@@ -1466,7 +1467,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
     std::string error_msg;
     if (!solver->supportsGroup(jmg, &error_msg))
     {
-      ROS_ERROR_NAMED(LOGNAME, "Kinematics solver %s does not support joint group %s.  Error: %s",
+      RCLCPP_ERROR(logger_robot_state, "Kinematics solver %s does not support joint group %s.  Error: %s",
                       typeid(*solver).name(), jmg->getName().c_str(), error_msg.c_str());
       valid_solver = false;
     }
@@ -1482,7 +1483,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
     }
     else
     {
-      ROS_ERROR_NAMED(LOGNAME, "No kinematics solver instantiated for group '%s'", jmg->getName().c_str());
+      RCLCPP_ERROR(logger_robot_state, "No kinematics solver instantiated for group '%s'", jmg->getName().c_str());
       return false;
     }
   }
@@ -1491,7 +1492,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
   std::vector<double> consistency_limits;
   if (consistency_limit_sets.size() > 1)
   {
-    ROS_ERROR_NAMED(LOGNAME, "Invalid number (%zu) of sets of consistency limits for a setFromIK request "
+    RCLCPP_ERROR(logger_robot_state, "Invalid number (%zu) of sets of consistency limits for a setFromIK request "
                              "that is being solved by a single IK solver",
                     consistency_limit_sets.size());
     return false;
@@ -1505,7 +1506,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
   std::vector<bool> tip_frames_used(solver_tip_frames.size(), false);
 
   // Create vector to hold the output frames in the same order as solver_tip_frames
-  std::vector<geometry_msgs::Pose> ik_queries(solver_tip_frames.size());
+  std::vector<geometry_msgs::msg::Pose> ik_queries(solver_tip_frames.size());
 
   // Bring each pose to the frame of the IK solver
   for (std::size_t i = 0; i < poses_in.size(); ++i)
@@ -1548,7 +1549,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
           const EigenSTL::vector_Isometry3d& ab_trans = ab->getFixedTransforms();
           if (ab_trans.size() != 1)
           {
-            ROS_ERROR_NAMED(LOGNAME, "Cannot use an attached body "
+            RCLCPP_ERROR(logger_robot_state, "Cannot use an attached body "
                                      "with multiple geometries as a reference frame.");
             return false;
           }
@@ -1560,7 +1561,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
           const robot_model::LinkModel* lm = getLinkModel(pose_frame);
           if (!lm)
           {
-            ROS_ERROR_STREAM_NAMED(LOGNAME, "Pose frame '" << pose_frame << "' does not exist.");
+            RCLCPP_ERROR(logger_robot_state, "The following Pose Frame does not exist ", pose_frame.c_str());
             return false;
           }
           const robot_model::LinkTransformMap& fixed_links = lm->getAssociatedFixedTransforms();
@@ -1587,12 +1588,12 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
     // Make sure one of the tip frames worked
     if (!found_valid_frame)
     {
-      ROS_ERROR_NAMED(LOGNAME, "Cannot compute IK for query %zu pose reference frame '%s'", i, pose_frame.c_str());
+      RCLCPP_ERROR(logger_robot_state, "Cannot compute IK for query %zu pose reference frame '%s'", i, pose_frame.c_str());
       // Debug available tip frames
       std::stringstream ss;
       for (solver_tip_id = 0; solver_tip_id < solver_tip_frames.size(); ++solver_tip_id)
         ss << solver_tip_frames[solver_tip_id] << ", ";
-      ROS_ERROR_NAMED(LOGNAME, "Available tip frames: [%s]", ss.str().c_str());
+      RCLCPP_ERROR(logger_robot_state, "Available tip frames: [%s]", ss.str().c_str());
       return false;
     }
 
@@ -1600,7 +1601,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
     tip_frames_used[solver_tip_id] = true;
 
     // Convert Eigen pose to geometry_msgs pose
-    geometry_msgs::Pose ik_query;
+    geometry_msgs::msg::Pose ik_query;
     ik_query = tf2::toMsg(pose);
 
     // Save into vectors
@@ -1630,7 +1631,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
       return false;
 
     // Convert Eigen pose to geometry_msgs pose
-    geometry_msgs::Pose ik_query;
+    geometry_msgs::msg::Pose ik_query;
     ik_query = tf2::toMsg(current_pose);
 
     // Save into vectors - but this needs to be ordered in the same order as the IK solver expects its tip frames
@@ -1689,21 +1690,21 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
   // Error check
   if (poses_in.size() != sub_groups.size())
   {
-    ROS_ERROR_NAMED(LOGNAME, "Number of poses (%zu) must be the same as number of sub-groups (%zu)", poses_in.size(),
+    RCLCPP_ERROR(logger_robot_state, "Number of poses (%zu) must be the same as number of sub-groups (%zu)", poses_in.size(),
                     sub_groups.size());
     return false;
   }
 
   if (tips_in.size() != sub_groups.size())
   {
-    ROS_ERROR_NAMED(LOGNAME, "Number of tip names (%zu) must be same as number of sub-groups (%zu)", tips_in.size(),
+    RCLCPP_ERROR(logger_robot_state, "Number of tip names (%zu) must be same as number of sub-groups (%zu)", tips_in.size(),
                     sub_groups.size());
     return false;
   }
 
   if (!consistency_limits.empty() && consistency_limits.size() != sub_groups.size())
   {
-    ROS_ERROR_NAMED(LOGNAME, "Number of consistency limit vectors must be the same as number of sub-groups");
+    RCLCPP_ERROR(logger_robot_state, "Number of consistency limit vectors must be the same as number of sub-groups");
     return false;
   }
 
@@ -1711,7 +1712,7 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
   {
     if (consistency_limits[i].size() != sub_groups[i]->getVariableCount())
     {
-      ROS_ERROR_NAMED(LOGNAME, "Number of joints in consistency_limits is %zu but it should be should be %u", i,
+      RCLCPP_ERROR(logger_robot_state, "Number of joints in consistency_limits is %zu but it should be should be %u", i,
                       sub_groups[i]->getVariableCount());
       return false;
     }
@@ -1724,7 +1725,7 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
     kinematics::KinematicsBaseConstPtr solver = sub_groups[i]->getSolverInstance();
     if (!solver)
     {
-      ROS_ERROR_NAMED(LOGNAME, "Could not find solver for group '%s'", sub_groups[i]->getName().c_str());
+      RCLCPP_ERROR(logger_robot_state, "Could not find solver for group '%s'", sub_groups[i]->getName().c_str());
       return false;
     }
     solvers.push_back(solver);
@@ -1760,7 +1761,7 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
         const EigenSTL::vector_Isometry3d& ab_trans = ab->getFixedTransforms();
         if (ab_trans.size() != 1)
         {
-          ROS_ERROR_NAMED(LOGNAME, "Cannot use an attached body with multiple geometries as a reference frame.");
+          RCLCPP_ERROR(logger_robot_state, "Cannot use an attached body with multiple geometries as a reference frame.");
           return false;
         }
         pose_frame = ab->getAttachedLinkName();
@@ -1784,14 +1785,14 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
 
     if (pose_frame != solver_tip_frame)
     {
-      ROS_ERROR_NAMED(LOGNAME, "Cannot compute IK for query pose reference frame '%s', desired: '%s'",
+      RCLCPP_ERROR(logger_robot_state, "Cannot compute IK for query pose reference frame '%s', desired: '%s'",
                       pose_frame.c_str(), solver_tip_frame.c_str());
       return false;
     }
   }
 
   // Convert Eigen poses to geometry_msg format
-  std::vector<geometry_msgs::Pose> ik_queries(poses_in.size());
+  std::vector<geometry_msgs::msg::Pose> ik_queries(poses_in.size());
   kinematics::KinematicsBase::IKCallbackFn ik_callback_fn;
   if (constraint)
     ik_callback_fn = boost::bind(&ikCallbackFnAdapter, this, jmg, constraint, _1, _2, _3);
@@ -1868,7 +1869,7 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
       copyJointGroupPositions(jmg, full_solution);
       if (constraint ? constraint(this, jmg, &full_solution[0]) : true)
       {
-        ROS_DEBUG_NAMED(LOGNAME, "Found IK solution");
+        RCLCPP_DEBUG(logger_robot_state, "Found IK solution");
         return true;
       }
     }
@@ -1923,7 +1924,7 @@ double RobotState::computeCartesianPath(const JointModelGroup* group, std::vecto
 
   if (max_step.translation <= 0.0 && max_step.rotation <= 0.0)
   {
-    ROS_ERROR_NAMED(LOGNAME,
+    RCLCPP_ERROR(logger_robot_state,
                     "Invalid MaxEEFStep passed into computeCartesianPath. Both the MaxEEFStep.rotation and "
                     "MaxEEFStep.translation components must be non-negative and at least one component must be "
                     "greater than zero");
@@ -2055,7 +2056,7 @@ double RobotState::testRelativeJointSpaceJump(const JointModelGroup* group, std:
 {
   if (traj.size() < MIN_STEPS_FOR_JUMP_THRESH)
   {
-    ROS_WARN_NAMED(LOGNAME, "The computed trajectory is too short to detect jumps in joint-space "
+    RCLCPP_WARN(logger_robot_state, "The computed trajectory is too short to detect jumps in joint-space "
                             "Need at least %zu steps, only got %zu. Try a lower max_step.",
                    MIN_STEPS_FOR_JUMP_THRESH, traj.size());
   }
@@ -2076,7 +2077,7 @@ double RobotState::testRelativeJointSpaceJump(const JointModelGroup* group, std:
   for (std::size_t i = 0; i < dist_vector.size(); ++i)
     if (dist_vector[i] > thres)
     {
-      ROS_DEBUG_NAMED(LOGNAME, "Truncating Cartesian path due to detected jump in joint-space distance");
+      RCLCPP_DEBUG(logger_robot_state, "Truncating Cartesian path due to detected jump in joint-space distance");
       percentage = (double)(i + 1) / (double)(traj.size());
       traj.resize(i + 1);
       break;
@@ -2111,7 +2112,7 @@ double RobotState::testAbsoluteJointSpaceJump(const JointModelGroup* group, std:
           type_index = 1;
           break;
         default:
-          ROS_WARN_NAMED(LOGNAME, "Joint %s has not supported type %s. \n"
+          RCLCPP_WARN(logger_robot_state, "Joint %s has not supported type %s. \n"
                                   "testAbsoluteJointSpaceJump only supports prismatic and revolute joints.",
                          joint->getName().c_str(), joint->getTypeName().c_str());
           continue;
@@ -2122,7 +2123,7 @@ double RobotState::testAbsoluteJointSpaceJump(const JointModelGroup* group, std:
       double distance = traj[traj_ix]->distance(*traj[traj_ix + 1], joint);
       if (distance > data[type_index].limit_)
       {
-        ROS_DEBUG_NAMED(LOGNAME, "Truncating Cartesian path due to detected jump of %.4f > %.4f in joint %s", distance,
+        RCLCPP_DEBUG(logger_robot_state, "Truncating Cartesian path due to detected jump of %.4f > %.4f in joint %s", distance,
                         data[type_index].limit_, joint->getName().c_str());
         still_valid = false;
         break;

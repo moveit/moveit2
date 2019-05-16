@@ -41,10 +41,10 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/attached_body.h>
 #include <moveit/macros/deprecation.h>
-#include <sensor_msgs/JointState.h>
-#include <visualization_msgs/MarkerArray.h>
-#include <std_msgs/ColorRGBA.h>
-#include <geometry_msgs/Twist.h>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
+#include <std_msgs/msg/color_rgba.hpp>
+#include <geometry_msgs/msg/twist.hpp>
 #include <cassert>
 
 #include <boost/assert.hpp>
@@ -955,13 +955,6 @@ as the new values that correspond to the group */
   bool setFromIK(const JointModelGroup* group, const geometry_msgs::Pose& pose, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-  [[deprecated("The attempts argument is not supported anymore.")]] bool
-  setFromIK(const JointModelGroup* group, const geometry_msgs::Pose& pose, unsigned int attempts, double timeout = 0.0,
-            const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-            const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions())
-  {
-    return setFromIK(group, pose, timeout, constraint, options);
-  }
 
   /** \brief If the group this state corresponds to is a chain and a solver is available, then the joint values can be
      set by computing inverse kinematics.
@@ -970,17 +963,9 @@ as the new values that correspond to the group */
       @param tip The name of the link the pose is specified for
       @param timeout The timeout passed to the kinematics solver on each attempt
       @param constraint A state validity constraint to be required for IK solutions */
-  bool setFromIK(const JointModelGroup* group, const geometry_msgs::Pose& pose, const std::string& tip,
+  bool setFromIK(const JointModelGroup* group, const geometry_msgs::msg::Pose& pose, const std::string& tip,
                  double timeout = 0.0, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-  [[deprecated("The attempts argument is not supported anymore.")]] bool
-  setFromIK(const JointModelGroup* group, const geometry_msgs::Pose& pose, const std::string& tip,
-            unsigned int attempts, double timeout = 0.0,
-            const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-            const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions())
-  {
-    return setFromIK(group, pose, tip, timeout, constraint, options);
-  }
 
   /** \brief If the group this state corresponds to is a chain and a solver is available, then the joint values can be
      set by computing inverse kinematics.
@@ -991,13 +976,6 @@ as the new values that correspond to the group */
   bool setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-  [[deprecated("The attempts argument is not supported anymore.")]] bool
-  setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, unsigned int attempts, double timeout = 0.0,
-            const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-            const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions())
-  {
-    return setFromIK(group, pose, timeout, constraint, options);
-  }
 
   /** \brief If the group this state corresponds to is a chain and a solver is available, then the joint values can be
      set by computing inverse kinematics.
@@ -1008,13 +986,6 @@ as the new values that correspond to the group */
   bool setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, const std::string& tip,
                  double timeout = 0.0, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-  [[deprecated("The attempts argument is not supported anymore.")]] bool
-  setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, const std::string& tip, unsigned int attempts,
-            double timeout = 0.0, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-            const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions())
-  {
-    return setFromIK(group, pose, tip, timeout, constraint, options);
-  }
 
   /** \brief If the group this state corresponds to is a chain and a solver is available, then the joint values can be
      set by computing inverse kinematics.
@@ -1028,14 +999,6 @@ as the new values that correspond to the group */
                  const std::vector<double>& consistency_limits, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-  [[deprecated("The attempts argument is not supported anymore.")]] bool
-  setFromIK(const JointModelGroup* group, const Eigen::Isometry3d& pose, const std::string& tip,
-            const std::vector<double>& consistency_limits, unsigned int attempts, double timeout = 0.0,
-            const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-            const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions())
-  {
-    return setFromIK(group, pose, tip, consistency_limits, timeout, constraint, options);
-  }
 
   /** \brief  Warning: This function inefficiently copies all transforms around.
       If the group consists of a set of sub-groups that are each a chain and a solver
@@ -1050,14 +1013,6 @@ as the new values that correspond to the group */
                  const std::vector<std::string>& tips, double timeout = 0.0,
                  const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-  [[deprecated("The attempts argument is not supported anymore.")]] bool
-  setFromIK(const JointModelGroup* group, const EigenSTL::vector_Isometry3d& poses,
-            const std::vector<std::string>& tips, unsigned int attempts, double timeout = 0.0,
-            const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-            const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions())
-  {
-    return setFromIK(group, poses, tips, timeout, constraint, options);
-  }
 
   /** \brief Warning: This function inefficiently copies all transforms around.
       If the group consists of a set of sub-groups that are each a chain and a solver
@@ -1073,15 +1028,6 @@ as the new values that correspond to the group */
                  const std::vector<std::string>& tips, const std::vector<std::vector<double> >& consistency_limits,
                  double timeout = 0.0, const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                  const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-  [[deprecated("The attempts argument is not supported anymore.")]] bool
-  setFromIK(const JointModelGroup* group, const EigenSTL::vector_Isometry3d& poses,
-            const std::vector<std::string>& tips, const std::vector<std::vector<double> >& consistency_limits,
-            unsigned int attempts, double timeout = 0.0,
-            const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-            const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions())
-  {
-    return setFromIK(group, poses, tips, consistency_limits, timeout, constraint, options);
-  }
 
   /**
       \brief setFromIK for multiple poses and tips (end effectors) when no solver exists for the jmg that can solver for
@@ -1096,15 +1042,6 @@ as the new values that correspond to the group */
                           const std::vector<std::vector<double> >& consistency_limits, double timeout = 0.0,
                           const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
                           const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions());
-  [[deprecated("The attempts argument is not supported anymore.")]] bool
-  setFromIKSubgroups(const JointModelGroup* group, const EigenSTL::vector_Isometry3d& poses,
-                     const std::vector<std::string>& tips, const std::vector<std::vector<double> >& consistency_limits,
-                     unsigned int attempts, double timeout = 0.0,
-                     const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn(),
-                     const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions())
-  {
-    return setFromIKSubgroups(group, poses, tips, consistency_limits, timeout, constraint, options);
-  }
 
   /** \brief Set the joint values from a Cartesian velocity applied during a time dt
    * @param group the group of joints this function operates on
@@ -1123,7 +1060,7 @@ as the new values that correspond to the group */
    * @param dt a time interval (seconds)
    * @param st a secondary task computation function
    */
-  bool setFromDiffIK(const JointModelGroup* group, const geometry_msgs::Twist& twist, const std::string& tip, double dt,
+  bool setFromDiffIK(const JointModelGroup* group, const geometry_msgs::msg::Twist& twist, const std::string& tip, double dt,
                      const GroupStateValidityCallbackFn& constraint = GroupStateValidityCallbackFn());
 
   /** \brief Compute the sequence of joint values that correspond to a straight Cartesian path for a particular group.
@@ -1340,7 +1277,7 @@ as the new values that correspond to the group */
    *  @{
    */
 
-  void setVariableValues(const sensor_msgs::JointState& msg)
+  void setVariableValues(const sensor_msgs::msg::JointState& msg)
   {
     if (!msg.position.empty())
       setVariablePositions(msg.name, msg.position);
@@ -1661,7 +1598,7 @@ as the new values that correspond to the group */
   void attachBody(const std::string& id, const std::vector<shapes::ShapeConstPtr>& shapes,
                   const EigenSTL::vector_Isometry3d& attach_trans, const std::set<std::string>& touch_links,
                   const std::string& link_name,
-                  const trajectory_msgs::JointTrajectory& detach_posture = trajectory_msgs::JointTrajectory());
+                  const trajectory_msgs::msg::JointTrajectory& detach_posture = trajectory_msgs::msg::JointTrajectory());
 
   /** @brief Add an attached body to a link
    * @param id The string id associated with the attached body
@@ -1680,7 +1617,7 @@ as the new values that correspond to the group */
   void attachBody(const std::string& id, const std::vector<shapes::ShapeConstPtr>& shapes,
                   const EigenSTL::vector_Isometry3d& attach_trans, const std::vector<std::string>& touch_links,
                   const std::string& link_name,
-                  const trajectory_msgs::JointTrajectory& detach_posture = trajectory_msgs::JointTrajectory())
+                  const trajectory_msgs::msg::JointTrajectory& detach_posture = trajectory_msgs::msg::JointTrajectory())
   {
     std::set<std::string> touch_links_set(touch_links.begin(), touch_links.end());
     attachBody(id, shapes, attach_trans, touch_links_set, link_name, detach_posture);
@@ -1751,10 +1688,10 @@ as the new values that correspond to the group */
    *  @param link_names The list of link names for which the markers should be created.
    *  @param color The color for the marker
    *  @param ns The namespace for the markers
-   *  @param dur The ros::Duration for which the markers should stay visible
+   *  @param dur The rclcpp::Duration for which the markers should stay visible
    */
-  void getRobotMarkers(visualization_msgs::MarkerArray& arr, const std::vector<std::string>& link_names,
-                       const std_msgs::ColorRGBA& color, const std::string& ns, const ros::Duration& dur,
+  void getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, const std::vector<std::string>& link_names,
+                       const std_msgs::msg::ColorRGBA& color, const std::string& ns, const rclcpp::Duration& dur,
                        bool include_attached = false) const;
 
   /** @brief Get a MarkerArray that fully describes the robot markers for a given robot. Update the state first.
@@ -1762,10 +1699,10 @@ as the new values that correspond to the group */
    *  @param link_names The list of link names for which the markers should be created.
    *  @param color The color for the marker
    *  @param ns The namespace for the markers
-   *  @param dur The ros::Duration for which the markers should stay visible
+   *  @param dur The rclcpp::Duration for which the markers should stay visible
    */
-  void getRobotMarkers(visualization_msgs::MarkerArray& arr, const std::vector<std::string>& link_names,
-                       const std_msgs::ColorRGBA& color, const std::string& ns, const ros::Duration& dur,
+  void getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, const std::vector<std::string>& link_names,
+                       const std_msgs::msg::ColorRGBA& color, const std::string& ns, const rclcpp::Duration& dur,
                        bool include_attached = false)
   {
     updateCollisionBodyTransforms();
@@ -1776,14 +1713,14 @@ as the new values that correspond to the group */
    *  @param arr The returned marker array
    *  @param link_names The list of link names for which the markers should be created.
    */
-  void getRobotMarkers(visualization_msgs::MarkerArray& arr, const std::vector<std::string>& link_names,
+  void getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, const std::vector<std::string>& link_names,
                        bool include_attached = false) const;
 
   /** @brief Get a MarkerArray that fully describes the robot markers for a given robot. Update the state first.
    *  @param arr The returned marker array
    *  @param link_names The list of link names for which the markers should be created.
    */
-  void getRobotMarkers(visualization_msgs::MarkerArray& arr, const std::vector<std::string>& link_names,
+  void getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, const std::vector<std::string>& link_names,
                        bool include_attached = false)
   {
     updateCollisionBodyTransforms();
