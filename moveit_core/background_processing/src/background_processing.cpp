@@ -42,7 +42,7 @@ namespace moveit
 namespace tools
 {
 // Logger
-rclcpp::Logger LOGGER = rclcpp::get_logger("background_processing");
+rclcpp::Logger LOGGER_BACKGROUND_PROCESSING = rclcpp::get_logger("background_processing");
 
 BackgroundProcessing::BackgroundProcessing()
 {
@@ -80,13 +80,13 @@ void BackgroundProcessing::processingThread()
       action_lock_.unlock();
       try
       {
-        RCLCPP_DEBUG(LOGGER, "Begin executing '%s'", action_name.c_str());
+        RCLCPP_DEBUG(LOGGER_BACKGROUND_PROCESSING, "Begin executing '%s'", action_name.c_str());
         fn();
-        RCLCPP_DEBUG(LOGGER, "Done executing '%s'", action_name.c_str());
+        RCLCPP_DEBUG(LOGGER_BACKGROUND_PROCESSING, "Done executing '%s'", action_name.c_str());
       }
       catch (std::exception& ex)
       {
-        RCLCPP_ERROR(LOGGER, "Exception caught while processing action '%s': %s", action_name.c_str(), ex.what());
+        RCLCPP_ERROR(LOGGER_BACKGROUND_PROCESSING, "Exception caught while processing action '%s': %s", action_name.c_str(), ex.what());
       }
       processing_ = false;
       if (queue_change_event_)
