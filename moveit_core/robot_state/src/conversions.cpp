@@ -45,7 +45,6 @@ namespace moveit
 {
 namespace core
 {
-
 // ********************************************
 // * Internal (hidden) functions
 // ********************************************
@@ -60,7 +59,7 @@ static bool _jointStateToRobotState(const sensor_msgs::msg::JointState& joint_st
   if (joint_state.name.size() != joint_state.position.size())
   {
     RCLCPP_ERROR(LOGGER, "Different number of names and positions in JointState message: %zu, %zu",
-                    joint_state.name.size(), joint_state.position.size());
+                 joint_state.name.size(), joint_state.position.size());
     return false;
   }
 
@@ -105,8 +104,8 @@ static bool _multiDOFJointsToRobotState(const sensor_msgs::msg::MultiDOFJointSta
 
     if (error)
       RCLCPP_WARN(LOGGER, "The transform for multi-dof joints was specified in frame '%s' "
-                              "but it was not possible to transform that to frame '%s'",
-                     mjs.header.frame_id.c_str(), state.getRobotModel()->getModelFrame().c_str());
+                          "but it was not possible to transform that to frame '%s'",
+                  mjs.header.frame_id.c_str(), state.getRobotModel()->getModelFrame().c_str());
   }
 
   for (std::size_t i = 0; i < nj; ++i)
@@ -221,7 +220,8 @@ static void _attachedBodyToMsg(const AttachedBody& attached_body, moveit_msgs::m
   }
 }
 
-static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::AttachedCollisionObject& aco, RobotState& state)
+static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::AttachedCollisionObject& aco,
+                               RobotState& state)
 {
   if (aco.object.operation == moveit_msgs::msg::CollisionObject::ADD)
   {
@@ -230,7 +230,7 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
       if (aco.object.primitives.size() != aco.object.primitive_poses.size())
       {
         RCLCPP_ERROR(LOGGER, "Number of primitive shapes does not match "
-                                 "number of poses in collision object message");
+                             "number of poses in collision object message");
         return;
       }
 
@@ -299,24 +299,25 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
           {
             t0.setIdentity();
             RCLCPP_ERROR(LOGGER, "Cannot properly transform from frame '%s'. "
-                                     "The pose of the attached body may be incorrect",
-                            aco.object.header.frame_id.c_str());
+                                 "The pose of the attached body may be incorrect",
+                         aco.object.header.frame_id.c_str());
           }
           Eigen::Isometry3d t = state.getGlobalLinkTransform(lm).inverse() * t0;
           for (std::size_t i = 0; i < poses.size(); ++i)
             poses[i] = t * poses[i];
         }
 
-        if (shapes.empty()) {
+        if (shapes.empty())
+        {
           RCLCPP_ERROR(LOGGER, "There is no geometry to attach to link '%s' as part of attached body '%s'",
-          aco.link_name.c_str(), aco.object.id.c_str());
+                       aco.link_name.c_str(), aco.object.id.c_str());
         }
         else
         {
           if (state.clearAttachedBody(aco.object.id))
             RCLCPP_DEBUG(LOGGER, "The robot state already had an object named '%s' attached to link '%s'. "
-                                     "The object was replaced.",
-                            aco.object.id.c_str(), aco.link_name.c_str());
+                                 "The object was replaced.",
+                         aco.object.id.c_str(), aco.link_name.c_str());
           state.attachBody(aco.object.id, shapes, poses, aco.touch_links, aco.link_name, aco.detach_posture);
           RCLCPP_DEBUG(LOGGER, "Attached object '%s' to link '%s'", aco.object.id.c_str(), aco.link_name.c_str());
         }
@@ -329,7 +330,7 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
   {
     if (!state.clearAttachedBody(aco.object.id))
       RCLCPP_ERROR(LOGGER, "The attached body '%s' can not be removed because it does not exist",
-                      aco.link_name.c_str());
+                   aco.link_name.c_str());
   }
   else
     RCLCPP_ERROR(LOGGER, "Unknown collision object operation: %d", aco.object.operation);
@@ -376,7 +377,8 @@ bool jointStateToRobotState(const sensor_msgs::msg::JointState& joint_state, Rob
   return result;
 }
 
-bool robotStateMsgToRobotState(const moveit_msgs::msg::RobotState& robot_state, RobotState& state, bool copy_attached_bodies)
+bool robotStateMsgToRobotState(const moveit_msgs::msg::RobotState& robot_state, RobotState& state,
+                               bool copy_attached_bodies)
 {
   bool result = _robotStateMsgToRobotStateHelper(nullptr, robot_state, state, copy_attached_bodies);
   state.update();
@@ -391,7 +393,8 @@ bool robotStateMsgToRobotState(const Transforms& tf, const moveit_msgs::msg::Rob
   return result;
 }
 
-void robotStateToRobotStateMsg(const RobotState& state, moveit_msgs::msg::RobotState& robot_state, bool copy_attached_bodies)
+void robotStateToRobotStateMsg(const RobotState& state, moveit_msgs::msg::RobotState& robot_state,
+                               bool copy_attached_bodies)
 {
   robot_state.is_diff = false;
   robotStateToJointStateMsg(state, robot_state.joint_state);
@@ -535,8 +538,7 @@ void streamToRobotState(RobotState& state, const std::string& line, const std::s
     // Get a variable
     if (!std::getline(line_stream, cell, separator[0]))
       // ROS_ERROR_STREAM_NAMED(LOGNAME.c_str(), "Missing variable " << state.getVariableNames()[i]);
-      RCLCPP_ERROR(LOGGER, "Missing variable " , state.getVariableNames()[i].c_str());
-      printf("show variablename %s\n", state.getVariableNames()[i].c_str());
+      RCLCPP_ERROR(LOGGER, "Missing variable ", state.getVariableNames()[i].c_str());
     state.getVariablePositions()[i] = boost::lexical_cast<double>(cell.c_str());
   }
 }
