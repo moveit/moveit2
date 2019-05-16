@@ -345,7 +345,7 @@ void RobotTrajectory::setRobotTrajectoryMsg(const robot_state::RobotState& refer
   rclcpp::Time last_time_stamp = trajectory.header.stamp;
   rclcpp::Time this_time_stamp = last_time_stamp;
 
-  rclcpp::Time trajStamp = trajectory.header.stamp;
+  rclcpp::Time traj_stamp = trajectory.header.stamp;
   rclcpp::Duration dur_from_start(0, 0);
 
   for (std::size_t i = 0; i < state_count; ++i)
