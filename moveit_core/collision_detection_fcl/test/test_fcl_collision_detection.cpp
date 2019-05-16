@@ -346,12 +346,12 @@ TEST_F(FclCollisionDetectionTester, DiffSceneTester)
   collision_detection::CollisionRobotFCL new_crobot(
       *(dynamic_cast<collision_detection::CollisionRobotFCL*>(crobot_.get())));
 
-  ros::WallTime before = ros::WallTime::now();
+  auto before = std::chrono::system_clock::now();
   new_crobot.checkSelfCollision(req, res, robot_state);
-  double first_check = (ros::WallTime::now() - before).toSec();
-  before = ros::WallTime::now();
+  double first_check = (std::chrono::system_clock::now() - before).count();
+  before = std::chrono::system_clock::now();
   new_crobot.checkSelfCollision(req, res, robot_state);
-  double second_check = (ros::WallTime::now() - before).toSec();
+  double second_check = (std::chrono::system_clock::now() - before).count();
 
   EXPECT_LT(fabs(first_check - second_check), .05);
 
@@ -366,24 +366,24 @@ TEST_F(FclCollisionDetectionTester, DiffSceneTester)
   std::vector<std::string> touch_links;
   robot_state.attachBody("kinect", shapes, poses, touch_links, "r_gripper_palm_link");
 
-  before = ros::WallTime::now();
+  before = std::chrono::system_clock::now();
   new_crobot.checkSelfCollision(req, res, robot_state);
-  first_check = (ros::WallTime::now() - before).toSec();
-  before = ros::WallTime::now();
+  first_check = (std::chrono::system_clock::now() - before).count();
+  before = std::chrono::system_clock::now();
   new_crobot.checkSelfCollision(req, res, robot_state);
-  second_check = (ros::WallTime::now() - before).toSec();
+  second_check = (std::chrono::system_clock::now() - before).count();
 
   // the first check is going to take a while, as data must be constructed
   EXPECT_LT(second_check, .1);
 
   collision_detection::CollisionRobotFCL other_new_crobot(
       *(dynamic_cast<collision_detection::CollisionRobotFCL*>(crobot_.get())));
-  before = ros::WallTime::now();
+  before = std::chrono::system_clock::now();
   new_crobot.checkSelfCollision(req, res, robot_state);
-  first_check = (ros::WallTime::now() - before).toSec();
-  before = ros::WallTime::now();
+  first_check = (std::chrono::system_clock::now() - before).count();
+  before = std::chrono::system_clock::now();
   new_crobot.checkSelfCollision(req, res, robot_state);
-  second_check = (ros::WallTime::now() - before).toSec();
+  second_check = (std::chrono::system_clock::now() - before).count();
 
   EXPECT_LT(fabs(first_check - second_check), .05);
 }
@@ -404,12 +404,12 @@ TEST_F(FclCollisionDetectionTester, ConvertObjectToAttached)
   robot_state.setToDefaultValues();
   robot_state.update();
 
-  ros::WallTime before = ros::WallTime::now();
+  auto before = std::chrono::system_clock::now();
   cworld_->checkRobotCollision(req, res, *crobot_, robot_state);
-  double first_check = (ros::WallTime::now() - before).toSec();
-  before = ros::WallTime::now();
+  double first_check = (std::chrono::system_clock::now() - before).count();
+  before = std::chrono::system_clock::now();
   cworld_->checkRobotCollision(req, res, *crobot_, robot_state);
-  double second_check = (ros::WallTime::now() - before).toSec();
+  double second_check = (std::chrono::system_clock::now() - before).count();
 
   EXPECT_LT(second_check, .05);
 
@@ -438,14 +438,14 @@ TEST_F(FclCollisionDetectionTester, ConvertObjectToAttached)
 
   EXPECT_TRUE(res.collision);
 
-  before = ros::WallTime::now();
+  before = std::chrono::system_clock::now();
   crobot_->checkSelfCollision(req, res, robot_state1, *acm_);
-  first_check = (ros::WallTime::now() - before).toSec();
-  before = ros::WallTime::now();
+  first_check = (std::chrono::system_clock::now() - before).count();
+  before = std::chrono::system_clock::now();
   req.verbose = true;
   res = collision_detection::CollisionResult();
   crobot_->checkSelfCollision(req, res, robot_state2, *acm_);
-  second_check = (ros::WallTime::now() - before).toSec();
+  second_check = (std::chrono::system_clock::now() - before).count();
 
   EXPECT_LT(first_check, .05);
   EXPECT_LT(fabs(first_check - second_check), .1);
@@ -460,13 +460,13 @@ TEST_F(FclCollisionDetectionTester, TestCollisionMapAdditionSpeed)
     poses.push_back(Eigen::Isometry3d::Identity());
     shapes.push_back(shapes::ShapeConstPtr(new shapes::Box(.01, .01, .01)));
   }
-  ros::WallTime start = ros::WallTime::now();
+  auto start = std::chrono::system_clock::now();
   cworld_->getWorld()->addToObject("map", shapes, poses);
-  double t = (ros::WallTime::now() - start).toSec();
+  double t = (std::chrono::system_clock::now() - start).count();
   EXPECT_GE(1.0, t);
   // this is not really a failure; it is just that slow;
   // looking into doing collision checking with a voxel grid.
-  ROS_INFO_NAMED("collision_detection.fcl", "Adding boxes took %g", t);
+  // ROS_INFO_NAMED("collision_detection.fcl", "Adding boxes took %g", t);
 }
 
 TEST_F(FclCollisionDetectionTester, MoveMesh)
