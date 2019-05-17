@@ -1,3 +1,7 @@
+# CircleCi Configuration for MoveIt
+# Historically MoveIt has used Travis for continuous integration testing, but we are starting to migrate
+# to CircleCi for its greater feature set. In particular, testing coverage metrics.
+#
 # `checksum.txt` derives the key for the `save_cache` and `restore_cache` steps.
 # As we can't cache upon the state of the file system directly,
 # we instead compute a checksum of the files we wish to cache indirectly.
