@@ -37,7 +37,6 @@
 #include "moveit/profiler/profiler.h"
 #if MOVEIT_ENABLE_PROFILING
 
-#include <ros/console.h>
 #include <vector>
 #include <algorithm>
 #include <sstream>
@@ -121,7 +120,7 @@ inline double to_seconds(const boost::posix_time::time_duration& d)
 {
   return (double)d.total_microseconds() / 1000000.0;
 }
-}
+}  // namespace
 
 void Profiler::status(std::ostream& out, bool merge)
 {
@@ -175,7 +174,7 @@ void Profiler::console()
   std::stringstream ss;
   ss << std::endl;
   status(ss, true);
-  ROS_INFO_STREAM_NAMED("profiler", ss.str());
+  RCUTILS_LOG_INFO("profiler", ss.str().c_str());
 }
 
 /// @cond IGNORE
@@ -208,7 +207,7 @@ struct SortDoubleByValue
     return a.value_ > b.value_;
   }
 };
-}
+}  // namespace
 /// @endcond
 
 void Profiler::printThreadInfo(std::ostream& out, const PerThread& data)

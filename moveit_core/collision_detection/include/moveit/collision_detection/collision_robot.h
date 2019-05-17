@@ -40,8 +40,8 @@
 #include <moveit/collision_detection/collision_matrix.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit_msgs/LinkPadding.h>
-#include <moveit_msgs/LinkScale.h>
+#include <moveit_msgs/msg/link_padding.hpp>
+#include <moveit_msgs/msg/link_scale.hpp>
 
 namespace collision_detection
 {
@@ -59,7 +59,7 @@ public:
    *  @param padding The padding to use for all objects/links on the robot
    *  @scale scale A common scaling to use for all objects/links on the robot
    */
-  CollisionRobot(const robot_model::RobotModelConstPtr& model, double padding = 0.0, double scale = 1.0);  // NOLINT
+  CollisionRobot(const robot_model::RobotModelConstPtr& model, double padding = 0.0, double scale = 1.0);
 
   /**  @brief A copy constructor*/
   CollisionRobot(const CollisionRobot& other);

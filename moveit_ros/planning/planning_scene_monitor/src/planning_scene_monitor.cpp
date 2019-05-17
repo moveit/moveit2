@@ -443,7 +443,7 @@ bool sceneIsParentOf(const planning_scene::PlanningSceneConstPtr& scene,
     return sceneIsParentOf(scene->getParent(), possible_parent);
   return false;
 }
-}
+}  // namespace
 
 bool PlanningSceneMonitor::updatesScene(const planning_scene::PlanningScenePtr& scene) const
 {
@@ -581,7 +581,7 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
       if (!planning_scene::PlanningScene::isEmpty(scene.robot_state))
       {
         upd = (SceneUpdateType)((int)upd | (int)UPDATE_STATE);
-        if (!scene.robot_state.attached_collision_objects.empty() || scene.robot_state.is_diff == false)
+        if (!scene.robot_state.attached_collision_objects.empty() || !static_cast<bool>(scene.robot_state.is_diff))
           upd = (SceneUpdateType)((int)upd | (int)UPDATE_GEOMETRY);
       }
     }
@@ -1398,7 +1398,7 @@ void PlanningSceneMonitor::configureDefaultPadding()
   }
 
   // Ensure no leading slash creates a bad param server address
-  static const std::string robot_description =
+  const std::string robot_description =
       (robot_description_[0] == '/') ? robot_description_.substr(1) : robot_description_;
 
   nh_.param(robot_description + "_planning/default_robot_padding", default_robot_padd_, 0.0);
@@ -1413,4 +1413,4 @@ void PlanningSceneMonitor::configureDefaultPadding()
   ROS_DEBUG_STREAM_NAMED(LOGNAME, "Loaded " << default_robot_link_padd_.size() << " default link paddings");
   ROS_DEBUG_STREAM_NAMED(LOGNAME, "Loaded " << default_robot_link_scale_.size() << " default link scales");
 }
-}
+}  // namespace planning_scene_monitor

@@ -125,6 +125,7 @@ bool PlanningScene::isEmpty(const moveit_msgs::msg::PlanningSceneWorld& msg)
 
 PlanningScene::PlanningScene(const robot_model::RobotModelConstPtr& robot_model,
                              collision_detection::WorldPtr world)
+
   : robot_model_(robot_model), world_(world), world_const_(world)
 {
   initialize();

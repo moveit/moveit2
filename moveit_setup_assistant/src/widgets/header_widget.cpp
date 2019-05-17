@@ -129,7 +129,7 @@ LoadPathWidget::LoadPathWidget(const QString& title, const QString& instructions
   // Button
   QPushButton* browse_button = new QPushButton(this);
   browse_button->setText("Browse");
-  connect(browse_button, SIGNAL(clicked()), this, SLOT(btn_file_dialog()));
+  connect(browse_button, SIGNAL(clicked()), this, SLOT(btnFileDialog()));
   hlayout->addWidget(browse_button);
 
   // Add horizontal layer to verticle layer
@@ -141,7 +141,7 @@ LoadPathWidget::LoadPathWidget(const QString& title, const QString& instructions
 // ******************************************************************************************
 // Load the file dialog
 // ******************************************************************************************
-void LoadPathWidget::btn_file_dialog()
+void LoadPathWidget::btnFileDialog()
 {
   QString path;
   if (dir_only_)  // only allow user to select a directory
@@ -166,7 +166,7 @@ void LoadPathWidget::btn_file_dialog()
   }
 
   // check they did not press cancel
-  if (path != NULL)
+  if (!path.isNull())
     path_box_->setText(path);
 }
 
@@ -229,4 +229,4 @@ void LoadPathArgsWidget::setArgsEnabled(bool enabled)
 {
   args_->setEnabled(enabled);
 }
-}
+}  // namespace moveit_setup_assistant

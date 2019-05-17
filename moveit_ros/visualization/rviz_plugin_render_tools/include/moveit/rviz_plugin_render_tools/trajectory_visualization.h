@@ -49,7 +49,7 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit_msgs/DisplayTrajectory.h>
+#include <moveit_msgs/msg/display_trajectory.hpp>
 #endif
 
 namespace rviz
@@ -89,8 +89,8 @@ public:
   virtual void update(float wall_dt, float ros_dt);
   virtual void reset();
 
-  void onInitialize(Ogre::SceneNode* scene_node, rviz::DisplayContext* context, ros::NodeHandle update_nh);
-  void onRobotModelLoaded(robot_model::RobotModelConstPtr robot_model);
+  void onInitialize(Ogre::SceneNode* scene_node, rviz::DisplayContext* context, const ros::NodeHandle& update_nh);
+  void onRobotModelLoaded(const robot_model::RobotModelConstPtr& robot_model);
   void onEnable();
   void onDisable();
   void setName(const QString& name);

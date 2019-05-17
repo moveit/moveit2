@@ -67,7 +67,7 @@ namespace fs = boost::filesystem;
 // ******************************************************************************************
 // Start screen user interface for MoveIt! Configuration Assistant
 // ******************************************************************************************
-StartScreenWidget::StartScreenWidget(QWidget* parent, moveit_setup_assistant::MoveItConfigDataPtr config_data)
+StartScreenWidget::StartScreenWidget(QWidget* parent, const MoveItConfigDataPtr& config_data)
   : SetupScreenWidget(parent), config_data_(config_data)
 {
   // Basic widget container
@@ -400,7 +400,7 @@ bool StartScreenWidget::loadExistingFiles()
   fs::path kinematics_yaml_path = config_data_->config_pkg_path_;
   kinematics_yaml_path /= "config/kinematics.yaml";
 
-  if (!config_data_->inputKinematicsYAML(kinematics_yaml_path.make_preferred().native().c_str()))
+  if (!config_data_->inputKinematicsYAML(kinematics_yaml_path.make_preferred().native()))
   {
     QMessageBox::warning(this, "No Kinematic YAML File",
                          QString("Failed to parse kinematics yaml file. This file is not critical but any previous "
@@ -416,11 +416,11 @@ bool StartScreenWidget::loadExistingFiles()
   // Load ros controllers yaml file if available-----------------------------------------------
   fs::path ros_controllers_yaml_path = config_data_->config_pkg_path_;
   ros_controllers_yaml_path /= "config/ros_controllers.yaml";
-  config_data_->inputROSControllersYAML(ros_controllers_yaml_path.make_preferred().native().c_str());
+  config_data_->inputROSControllersYAML(ros_controllers_yaml_path.make_preferred().native());
 
   fs::path ompl_yaml_path = config_data_->config_pkg_path_;
   ompl_yaml_path /= "config/ompl_planning.yaml";
-  config_data_->inputOMPLYAML(ompl_yaml_path.make_preferred().native().c_str());
+  config_data_->inputOMPLYAML(ompl_yaml_path.make_preferred().native());
 
   // DONE LOADING --------------------------------------------------------------------------
 
@@ -530,9 +530,9 @@ bool StartScreenWidget::loadNewFiles()
 // ******************************************************************************************
 bool StartScreenWidget::loadURDFFile(const std::string& urdf_file_path, const std::string& xacro_args)
 {
-  const std::vector<std::string> xacro_args_ = { xacro_args };
+  const std::vector<std::string> vec_xacro_args = { xacro_args };
 
-  if (!rdf_loader::RDFLoader::loadXmlFileToString(config_data_->urdf_string_, urdf_file_path, xacro_args_))
+  if (!rdf_loader::RDFLoader::loadXmlFileToString(config_data_->urdf_string_, urdf_file_path, vec_xacro_args))
   {
     QMessageBox::warning(this, "Error Loading Files",
                          QString("URDF/COLLADA file not found: ").append(urdf_file_path.c_str()));
@@ -647,7 +647,7 @@ bool StartScreenWidget::extractPackageNameFromPath()
   for (fs::path::iterator it = urdf_directory.begin(); it != urdf_directory.end(); ++it)
     path_parts.push_back(it->native());
 
-  bool packageFound = false;
+  bool package_found = false;
 
   // reduce the generated directoy path's folder count by 1 each loop
   for (int segment_length = path_parts.size(); segment_length > 0; --segment_length)
@@ -684,13 +684,13 @@ bool StartScreenWidget::extractPackageNameFromPath()
 
       // end the search
       segment_length = 0;
-      packageFound = true;
+      package_found = true;
       break;
     }
   }
 
   // Assign data to moveit_config_data
-  if (!packageFound)
+  if (!package_found)
   {
     // No package name found, we must be outside ROS
     config_data_->urdf_pkg_name_ = "";
@@ -781,12 +781,12 @@ bool StartScreenWidget::load3DSensorsFile()
 
   if (!fs::is_regular_file(sensors_3d_yaml_path))
   {
-    return config_data_->input3DSensorsYAML(default_sensors_3d_yaml_path.make_preferred().native().c_str());
+    return config_data_->input3DSensorsYAML(default_sensors_3d_yaml_path.make_preferred().native());
   }
   else
   {
-    return config_data_->input3DSensorsYAML(default_sensors_3d_yaml_path.make_preferred().native().c_str(),
-                                            sensors_3d_yaml_path.make_preferred().native().c_str());
+    return config_data_->input3DSensorsYAML(default_sensors_3d_yaml_path.make_preferred().native(),
+                                            sensors_3d_yaml_path.make_preferred().native());
   }
 }
 
@@ -852,4 +852,4 @@ SelectModeWidget::SelectModeWidget(QWidget* parent) : QFrame(parent)
   btn_new_->setCheckable(true);
 }
 
-}  // namespace
+}  // namespace moveit_setup_assistant

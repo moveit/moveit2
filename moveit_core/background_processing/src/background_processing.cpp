@@ -35,12 +35,15 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/background_processing/background_processing.h>
-#include <ros/console.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {
 namespace tools
 {
+// Logger
+rclcpp::Logger LOGGER = rclcpp::get_logger("background_processing");
+
 BackgroundProcessing::BackgroundProcessing()
 {
   // spin a thread that will process user events
@@ -77,14 +80,13 @@ void BackgroundProcessing::processingThread()
       action_lock_.unlock();
       try
       {
-        ROS_DEBUG_NAMED("background_processing", "Begin executing '%s'", action_name.c_str());
+        RCLCPP_DEBUG(LOGGER, "Begin executing '%s'", action_name.c_str());
         fn();
-        ROS_DEBUG_NAMED("background_processing", "Done executing '%s'", action_name.c_str());
+        RCLCPP_DEBUG(LOGGER, "Done executing '%s'", action_name.c_str());
       }
       catch (std::exception& ex)
       {
-        ROS_ERROR_NAMED("background_processing", "Exception caught while processing action '%s': %s",
-                        action_name.c_str(), ex.what());
+        RCLCPP_ERROR(LOGGER, "Exception caught while processing action '%s': %s", action_name.c_str(), ex.what());
       }
       processing_ = false;
       if (queue_change_event_)
