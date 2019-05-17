@@ -91,13 +91,13 @@ public:
   /** \brief construct using an existing RobotModel */
   PlanningScene(
       const robot_model::RobotModelConstPtr& robot_model,
-      const collision_detection::WorldPtr& world = collision_detection::WorldPtr(new collision_detection::World()));
+      collision_detection::WorldPtr world = collision_detection::WorldPtr(new collision_detection::World()));
 
   /** \brief construct using a urdf and srdf.
    * A RobotModel for the PlanningScene will be created using the urdf and srdf. */
   PlanningScene(
       const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model,
-      const collision_detection::WorldPtr& world = collision_detection::WorldPtr(new collision_detection::World()));
+      collision_detection::WorldPtr world = collision_detection::WorldPtr(new collision_detection::World()));
 
   static const std::string OCTOMAP_NS;
   static const std::string DEFAULT_SCENE_NAME;
