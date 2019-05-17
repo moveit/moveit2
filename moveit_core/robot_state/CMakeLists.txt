@@ -13,7 +13,8 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   ${urdfdom_LIBRARIES}
   ${geometric_shapes_LIBRARIES}
   ${urdfdom_headers_LIBRARIES}
-  ${Boost_LIBRARIES})
+  ${Boost_LIBRARIES}
+)
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_robot_model
   moveit_kinematics_base
