@@ -706,7 +706,8 @@ public:
 
   /** \brief Construct a message (\e scene) with the data requested in \e comp. If all options in \e comp are filled,
       this will be a complete planning scene message */
-  void getPlanningSceneMsg(moveit_msgs::msg::PlanningScene& scene, const moveit_msgs::msg::PlanningSceneComponents& comp) const;
+  void getPlanningSceneMsg(moveit_msgs::msg::PlanningScene& scene,
+                           const moveit_msgs::msg::PlanningSceneComponents& comp) const;
 
   /** \brief Construct a message (\e collision_object) with the collision object data from the planning_scene for the
    * requested object*/
@@ -723,7 +724,8 @@ public:
 
   /** \brief Construct a vector of messages (\e attached_collision_objects) with the attached collision object data for
    * all objects in planning_scene */
-  void getAttachedCollisionObjectMsgs(std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objs) const;
+  void
+  getAttachedCollisionObjectMsgs(std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objs) const;
 
   /** \brief Construct a message (\e octomap) with the octomap data from the planning_scene */
   bool getOctomapMsg(octomap_msgs::msg::OctomapWithPose& octomap) const;
@@ -856,7 +858,8 @@ public:
                           const kinematic_constraints::KinematicConstraintSet& constr, bool verbose = false) const;
 
   /** \brief Check if a given state is valid. This means checking for collisions and feasibility */
-  bool isStateValid(const moveit_msgs::msg::RobotState& state, const std::string& group = "", bool verbose = false) const;
+  bool isStateValid(const moveit_msgs::msg::RobotState& state, const std::string& group = "",
+                    bool verbose = false) const;
 
   /** \brief Check if a given state is valid. This means checking for collisions and feasibility */
   bool isStateValid(const robot_state::RobotState& state, const std::string& group = "", bool verbose = false) const;
@@ -892,9 +895,9 @@ public:
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
    * passed in trajectory. */
   bool isPathValid(const moveit_msgs::msg::RobotState& start_state, const moveit_msgs::msg::RobotTrajectory& trajectory,
-                   const moveit_msgs::msg::Constraints& path_constraints, const moveit_msgs::msg::Constraints& goal_constraints,
-                   const std::string& group = "", bool verbose = false,
-                   std::vector<std::size_t>* invalid_index = NULL) const;
+                   const moveit_msgs::msg::Constraints& path_constraints,
+                   const moveit_msgs::msg::Constraints& goal_constraints, const std::string& group = "",
+                   bool verbose = false, std::vector<std::size_t>* invalid_index = NULL) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
@@ -916,9 +919,9 @@ public:
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
    * passed in trajectory. */
   bool isPathValid(const robot_trajectory::RobotTrajectory& trajectory,
-                   const moveit_msgs::msg::Constraints& path_constraints, const moveit_msgs::msg::Constraints& goal_constraints,
-                   const std::string& group = "", bool verbose = false,
-                   std::vector<std::size_t>* invalid_index = NULL) const;
+                   const moveit_msgs::msg::Constraints& path_constraints,
+                   const moveit_msgs::msg::Constraints& goal_constraints, const std::string& group = "",
+                   bool verbose = false, std::vector<std::size_t>* invalid_index = NULL) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). */
