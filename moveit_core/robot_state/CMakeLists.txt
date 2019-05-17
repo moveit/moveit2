@@ -28,7 +28,7 @@ install(TARGETS ${MOVEIT_LIB_NAME}
         ARCHIVE DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)
 
-# # Unit tests
+# Unit tests
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
 	find_package(moveit_resources REQUIRED)
