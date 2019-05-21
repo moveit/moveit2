@@ -41,6 +41,7 @@
 #include <string>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit/macros/class_forward.h>
+#include "rclcpp/rclcpp.hpp"
 
 /// Namespace for the base class of a MoveIt! controller manager
 namespace moveit_controller_manager
@@ -125,10 +126,6 @@ public:
    * The controller is expected to execute the trajectory, but this function call should not block.
    * Blocking is achievable by calling waitForExecution().
    * Return false when the controller cannot accept the trajectory. */
-   *
-   * The controller is expected to execute the trajectory, but this function call should not block.
-   * Blocking is achievable by calling waitForExecution().
-   * Return false when the controller cannot accept the trajectory. */
   virtual bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory) = 0;
 
   /** \brief Cancel the execution of any motion using this controller.
@@ -142,7 +139,7 @@ public:
    * Return true if the execution is complete (whether successful or not).
    * Return false if timeout was reached.
    * If timeout is 0 (default argument), wait until the execution is complete (no timeout). */
-  virtual bool waitForExecution(const ros::Duration& timeout = ros::Duration(0)) = 0;
+  virtual bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(0.0)) = 0;
 
   /** \brief Return the execution status of the last trajectory sent to the controller. */
   virtual ExecutionStatus getLastExecutionStatus() = 0;
@@ -186,6 +183,8 @@ public:
   virtual ~MoveItControllerManager()
   {
   }
+
+  virtual void initialize(std::shared_ptr<rclcpp::Node>& node) = 0;
 
   /** \brief Return a given named controller. */
   virtual MoveItControllerHandlePtr getControllerHandle(const std::string& name) = 0;
