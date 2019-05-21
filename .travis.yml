@@ -1,6 +1,6 @@
 # This config file for Travis CI utilizes https://github.com/ros-planning/moveit_ci/ package.
 sudo: required
-dist: trusty  # distro used by Travis, moveit_ci uses the docker image's distro
+dist: xenial  # distro used by Travis (bionic not yet available), moveit_ci uses the docker image's distro
 services:
   - docker
 language: cpp
