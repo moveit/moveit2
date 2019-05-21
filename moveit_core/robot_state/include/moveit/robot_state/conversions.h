@@ -52,7 +52,7 @@ namespace core
  * @param state The resultant MoveIt! robot state
  * @return True if successful, false if failed for any reason
  */
-bool jointStateToRobotState(const sensor_msgs::JointState& joint_state, RobotState& state);
+bool jointStateToRobotState(const sensor_msgs::msg::JointState& joint_state, RobotState& state);
 
 /**
  * @brief Convert a robot state msg (with accompanying extra transforms) to a MoveIt! robot state
@@ -97,7 +97,7 @@ void attachedBodiesToAttachedCollisionObjectMsgs(
  * @param state The input MoveIt! robot state object
  * @param robot_state The resultant JointState message
  */
-void robotStateToJointStateMsg(const RobotState& state, sensor_msgs::JointState& joint_state);
+void robotStateToJointStateMsg(const RobotState& state, sensor_msgs::msg::JointState& joint_state);
 
 /**
  * @brief Convert a joint trajectory point to a MoveIt! robot state
@@ -106,7 +106,7 @@ void robotStateToJointStateMsg(const RobotState& state, sensor_msgs::JointState&
  * @param state The resultant MoveIt! robot state
  * @return True if successful, false if failed for any reason
  */
-bool jointTrajPointToRobotState(const trajectory_msgs::JointTrajectory& trajectory, std::size_t point_id,
+bool jointTrajPointToRobotState(const trajectory_msgs::msg::JointTrajectory& trajectory, std::size_t point_id,
                                 RobotState& state);
 
 /**

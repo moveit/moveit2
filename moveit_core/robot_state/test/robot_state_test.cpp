@@ -116,17 +116,24 @@ TEST(Loading, SimpleRobot)
 TEST(LoadingAndFK, SimpleRobot)
 {
   moveit::core::RobotModelBuilder builder("myrobot", "base_link");
-  geometry_msgs::Pose pose;
-  tf2::toMsg(tf2::Vector3(-0.1, 0, 0), pose.position);
+  geometry_msgs::msg::Pose pose;
+  pose.position.x = -0.1;
+  pose.position.y = 0;
+  pose.position.z = 0;
+
   tf2::Quaternion q;
   q.setRPY(0, 0, -1);
   pose.orientation = tf2::toMsg(q);
   builder.addCollisionBox("base_link", { 1, 2, 1 }, pose);
-  tf2::toMsg(tf2::Vector3(0, 0, 0), pose.position);
+  pose.position.x = 0;
+  pose.position.y = 0;
+  pose.position.z = 0;
   q.setRPY(0, 0, 0);
   pose.orientation = tf2::toMsg(q);
   builder.addVisualBox("base_link", { 1, 2, 1 }, pose);
-  tf2::toMsg(tf2::Vector3(0, 0.099, 0), pose.position);
+  pose.position.x = 0;
+  pose.position.y = 0.099;
+  pose.position.z = 0;
   q.setRPY(0, 0, 0);
   pose.orientation = tf2::toMsg(q);
   builder.addInertial("base_link", 2.81, pose, 0.1, -0.2, 0.5, -0.09, 1, 0.101);
