@@ -98,8 +98,9 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
       {
         always_allow_collision = true;
         if (cdata->req_->verbose)
-          RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION, "Collision between '%s' (type '%s') and '%s' (type '%s') is always allowed. "
-                                         "No contacts are computed.",
+          RCLCPP_DEBUG(
+              LOGGER_COLLISION_DETECTION, "Collision between '%s' (type '%s') and '%s' (type '%s') is always allowed. "
+                                          "No contacts are computed.",
               cd1->getID().c_str(), cd1->getTypeString().c_str(), cd2->getID().c_str(), cd2->getTypeString().c_str());
       }
       else if (type == AllowedCollision::CONDITIONAL)
@@ -107,7 +108,7 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
         cdata->acm_->getAllowedCollision(cd1->getID(), cd2->getID(), dcf);
         if (cdata->req_->verbose)
           RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION, "Collision between '%s' and '%s' is conditionally allowed",
-                          cd1->getID().c_str(), cd2->getID().c_str());
+                       cd1->getID().c_str(), cd2->getID().c_str());
       }
     }
   }
@@ -120,8 +121,9 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
     {
       always_allow_collision = true;
       if (cdata->req_->verbose)
-        RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION, "Robot link '%s' is allowed to touch attached object '%s'. No contacts are computed.",
-                        cd1->getID().c_str(), cd2->getID().c_str());
+        RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION,
+                     "Robot link '%s' is allowed to touch attached object '%s'. No contacts are computed.",
+                     cd1->getID().c_str(), cd2->getID().c_str());
     }
   }
   else if (cd2->type == BodyTypes::ROBOT_LINK && cd1->type == BodyTypes::ROBOT_ATTACHED)
@@ -131,8 +133,9 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
     {
       always_allow_collision = true;
       if (cdata->req_->verbose)
-        RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION, "Robot link '%s' is allowed to touch attached object '%s'. No contacts are computed.",
-                        cd2->getID().c_str(), cd1->getID().c_str());
+        RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION,
+                     "Robot link '%s' is allowed to touch attached object '%s'. No contacts are computed.",
+                     cd2->getID().c_str(), cd1->getID().c_str());
     }
   }
   // bodies attached to the same link should not collide
@@ -148,7 +151,7 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
 
   if (cdata->req_->verbose)
     RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION, "Actually checking collisions between %s and %s", cd1->getID().c_str(),
-                    cd2->getID().c_str());
+                 cd2->getID().c_str());
 
   // see if we need to compute a contact
   std::size_t want_contact_count = 0;
@@ -185,8 +188,8 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
     {
       if (cdata->req_->verbose)
         RCLCPP_INFO(LOGGER_COLLISION_DETECTION, "Found %d contacts between '%s' and '%s'. "
-                       "These contacts will be evaluated to check if they are accepted or not",
-                       num_contacts, cd1->getID().c_str(), cd2->getID().c_str());
+                                                "These contacts will be evaluated to check if they are accepted or not",
+                    num_contacts, cd1->getID().c_str(), cd2->getID().c_str());
       Contact c;
       const std::pair<std::string, std::string>& pc = cd1->getID() < cd2->getID() ?
                                                           std::make_pair(cd1->getID(), cd2->getID()) :
@@ -204,14 +207,15 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
             cdata->res_->contacts[pc].push_back(c);
             cdata->res_->contact_count++;
             if (cdata->req_->verbose)
-              RCLCPP_INFO(LOGGER_COLLISION_DETECTION, "Found unacceptable contact between '%s' and '%s'. Contact was stored.",
-                             cd1->getID().c_str(), cd2->getID().c_str());
+              RCLCPP_INFO(LOGGER_COLLISION_DETECTION,
+                          "Found unacceptable contact between '%s' and '%s'. Contact was stored.", cd1->getID().c_str(),
+                          cd2->getID().c_str());
           }
           else if (cdata->req_->verbose)
             RCLCPP_INFO(LOGGER_COLLISION_DETECTION, "Found unacceptable contact between '%s' (type '%s') and '%s' "
-                                                      "(type '%s'). Contact was stored.",
-                           cd1->getID().c_str(), cd1->getTypeString().c_str(), cd2->getID().c_str(),
-                           cd2->getTypeString().c_str());
+                                                    "(type '%s'). Contact was stored.",
+                        cd1->getID().c_str(), cd1->getTypeString().c_str(), cd2->getID().c_str(),
+                        cd2->getTypeString().c_str());
           cdata->res_->collision = true;
           if (want_contact_count == 0)
             break;
@@ -262,9 +266,9 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
 
         if (cdata->req_->verbose)
           RCLCPP_INFO(LOGGER_COLLISION_DETECTION, "Found %d contacts between '%s' (type '%s') and '%s' (type '%s'), "
-                                                    "which constitute a collision. %d contacts will be stored",
-                         num_contacts_initial, cd1->getID().c_str(), cd1->getTypeString().c_str(), cd2->getID().c_str(),
-                         cd2->getTypeString().c_str(), num_contacts);
+                                                  "which constitute a collision. %d contacts will be stored",
+                      num_contacts_initial, cd1->getID().c_str(), cd1->getTypeString().c_str(), cd2->getID().c_str(),
+                      cd2->getTypeString().c_str(), num_contacts);
 
         const std::pair<std::string, std::string>& pc = cd1->getID() < cd2->getID() ?
                                                             std::make_pair(cd1->getID(), cd2->getID()) :
@@ -307,10 +311,10 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
         cdata->res_->collision = true;
         if (cdata->req_->verbose)
           RCLCPP_INFO(LOGGER_COLLISION_DETECTION, "Found a contact between '%s' (type '%s') and '%s' (type '%s'), "
-                                                    "which constitutes a collision. "
-                                                    "Contact information is not stored.",
-                         cd1->getID().c_str(), cd1->getTypeString().c_str(), cd2->getID().c_str(),
-                         cd2->getTypeString().c_str());
+                                                  "which constitutes a collision. "
+                                                  "Contact information is not stored.",
+                      cd1->getID().c_str(), cd1->getTypeString().c_str(), cd2->getID().c_str(),
+                      cd2->getTypeString().c_str());
       }
 
       if (enable_cost)
@@ -336,8 +340,9 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
       if (!cdata->req_->cost)
         cdata->done_ = true;
       if (cdata->req_->verbose)
-        RCLCPP_INFO(LOGGER_COLLISION_DETECTION, "Collision checking is considered complete (collision was found and %u contacts are stored)",
-                       (unsigned int)cdata->res_->contact_count);
+        RCLCPP_INFO(LOGGER_COLLISION_DETECTION,
+                    "Collision checking is considered complete (collision was found and %u contacts are stored)",
+                    (unsigned int)cdata->res_->contact_count);
     }
 
   if (!cdata->done_ && cdata->req_->is_done)
@@ -345,8 +350,8 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
     cdata->done_ = cdata->req_->is_done(*cdata->res_);
     if (cdata->done_ && cdata->req_->verbose)
       RCLCPP_INFO(LOGGER_COLLISION_DETECTION, "Collision checking is considered complete due to external callback. "
-                                                "%s was found. %u contacts are stored.",
-                     cdata->res_->collision ? "Collision" : "No collision", (unsigned int)cdata->res_->contact_count);
+                                              "%s was found. %u contacts are stored.",
+                  cdata->res_->collision ? "Collision" : "No collision", (unsigned int)cdata->res_->contact_count);
   }
 
   return cdata->done_;
@@ -435,8 +440,9 @@ bool distanceCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void
       {
         always_allow_collision = true;
         if (cdata->req->verbose)
-          RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION, "Collision between '%s' and '%s' is always allowed. No distances are computed.",
-                          cd1->getID().c_str(), cd2->getID().c_str());
+          RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION,
+                       "Collision between '%s' and '%s' is always allowed. No distances are computed.",
+                       cd1->getID().c_str(), cd2->getID().c_str());
       }
     }
   }
@@ -449,8 +455,9 @@ bool distanceCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void
     {
       always_allow_collision = true;
       if (cdata->req->verbose)
-        RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION, "Robot link '%s' is allowed to touch attached object '%s'. No distances are computed.",
-                        cd1->getID().c_str(), cd2->getID().c_str());
+        RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION,
+                     "Robot link '%s' is allowed to touch attached object '%s'. No distances are computed.",
+                     cd1->getID().c_str(), cd2->getID().c_str());
     }
   }
   else
@@ -462,8 +469,9 @@ bool distanceCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void
       {
         always_allow_collision = true;
         if (cdata->req->verbose)
-          RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION, "Robot link '%s' is allowed to touch attached object '%s'. No distances are computed.",
-                          cd2->getID().c_str(), cd1->getID().c_str());
+          RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION,
+                       "Robot link '%s' is allowed to touch attached object '%s'. No distances are computed.",
+                       cd2->getID().c_str(), cd1->getID().c_str());
       }
     }
   }
@@ -474,7 +482,7 @@ bool distanceCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void
   }
   if (cdata->req->verbose)
     RCLCPP_DEBUG(LOGGER_COLLISION_DETECTION, "Actually checking collisions between %s and %s", cd1->getID().c_str(),
-                    cd2->getID().c_str());
+                 cd2->getID().c_str());
 
   fcl::DistanceResultd fcl_result;
   DistanceResultsData dist_result;
@@ -816,8 +824,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
     }
     break;
     default:
-      RCLCPP_ERROR(LOGGER_COLLISION_DETECTION, "This shape type (%d) is not supported using FCL yet",
-                      (int)shape->type);
+      RCLCPP_ERROR(LOGGER_COLLISION_DETECTION, "This shape type (%d) is not supported using FCL yet", (int)shape->type);
       cg_g = nullptr;
   }
 
