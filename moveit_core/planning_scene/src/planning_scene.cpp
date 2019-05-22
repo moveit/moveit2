@@ -48,10 +48,11 @@
 #include <memory>
 #include <set>
 
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("planning_scene");
 
 namespace planning_scene
 {
+rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("planning_scene");
+
 const std::string PlanningScene::OCTOMAP_NS = "<octomap>";
 const std::string PlanningScene::DEFAULT_SCENE_NAME = "(noname)";
 
