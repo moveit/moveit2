@@ -8,10 +8,16 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 ament_target_dependencies(${MOVEIT_LIB_NAME}
+  boost
   urdfdom
   urdfdom_headers
   visualization_msgs
   tf2_eigen)
+
+target_link_libraries(${MOVEIT_LIB_NAME}
+  ${Boost_LIBRARIES}
+  ${geometric_shapes_LIBRARIES}
+)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
