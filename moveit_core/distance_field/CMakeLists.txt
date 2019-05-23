@@ -1,6 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_distance_field)
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/distance_field.cpp
   src/find_internal_points.cpp
   src/propagation_distance_field.cpp
