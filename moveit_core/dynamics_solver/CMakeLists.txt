@@ -11,6 +11,10 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   visualization_msgs
   kdl_parser)
 
+target_link_libraries(${MOVEIT_LIB_NAME}  
+  moveit_robot_state
+)
+
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
