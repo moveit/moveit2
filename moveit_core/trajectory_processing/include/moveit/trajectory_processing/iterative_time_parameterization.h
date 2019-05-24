@@ -38,8 +38,8 @@
 #define MOVEIT_TRAJECTORY_PROCESSING_ITERATIVE_PARABOLIC_SMOOTHER_
 
 #include <trajectory_msgs/JointTrajectory.h>
-#include <moveit_msgs/JointLimits.h>
-#include <moveit_msgs/RobotState.h>
+#include <moveit_msgs/msg/joint_limits.hpp>
+#include <moveit_msgs/msg/robot_state.hpp>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 
 namespace trajectory_processing

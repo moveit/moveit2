@@ -47,10 +47,10 @@
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit/macros/deprecation.h>
-#include <moveit_msgs/PlanningScene.h>
-#include <moveit_msgs/RobotTrajectory.h>
-#include <moveit_msgs/Constraints.h>
-#include <moveit_msgs/PlanningSceneComponents.h>
+#include <moveit_msgs/msg/planning_scene.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <moveit_msgs/msg/constraints.hpp>
+#include <moveit_msgs/msg/planning_scene_components.hpp>
 #include <octomap_msgs/OctomapWithPose.h>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>

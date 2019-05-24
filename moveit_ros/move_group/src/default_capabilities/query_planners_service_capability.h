@@ -39,8 +39,8 @@
 
 #include <moveit/move_group/move_group_capability.h>
 #include <moveit_msgs/QueryPlannerInterfaces.h>
-#include <moveit_msgs/GetPlannerParams.h>
-#include <moveit_msgs/SetPlannerParams.h>
+#include <moveit_msgs/msg/get_planner_params.hpp>
+#include <moveit_msgs/msg/set_planner_params.hpp>
 
 namespace move_group
 {

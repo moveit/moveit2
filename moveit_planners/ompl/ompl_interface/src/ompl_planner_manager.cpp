@@ -44,8 +44,8 @@
 #include <dynamic_reconfigure/server.h>
 #include "moveit_planners_ompl/OMPLDynamicReconfigureConfig.h"
 
-#include <moveit_msgs/DisplayRobotState.h>
-#include <moveit_msgs/DisplayTrajectory.h>
+#include <moveit_msgs/msg/display_robot_state.hpp>
+#include <moveit_msgs/msg/display_trajectory.hpp>
 
 #include <ompl/util/Console.h>
 
