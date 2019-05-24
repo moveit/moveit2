@@ -49,7 +49,7 @@
 namespace dynamics_solver
 {
 
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("dynamics_solver");
+rclcpp::Logger LOGGER_DYNAMICS_SOLVER = rclcpp::get_logger("moveit").get_child("dynamics_solver");
 
 namespace
 {
@@ -78,7 +78,7 @@ DynamicsSolver::DynamicsSolver(const robot_model::RobotModelConstPtr& robot_mode
 
   if (!joint_model_group_->isChain())
   {
-    RCLCPP_ERROR(LOGGER, "Group '%s' is not a chain. Will not initialize dynamics solver",
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Group '%s' is not a chain. Will not initialize dynamics solver",
                     group_name.c_str());
     joint_model_group_ = nullptr;
     return;
@@ -86,7 +86,7 @@ DynamicsSolver::DynamicsSolver(const robot_model::RobotModelConstPtr& robot_mode
 
   if (!joint_model_group_->getMimicJointModels().empty())
   {
-    RCLCPP_ERROR(LOGGER, "Group '%s' has a mimic joint. Will not initialize dynamics solver",
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Group '%s' has a mimic joint. Will not initialize dynamics solver",
                     group_name.c_str());
     joint_model_group_ = nullptr;
     return;
@@ -95,7 +95,7 @@ DynamicsSolver::DynamicsSolver(const robot_model::RobotModelConstPtr& robot_mode
   const robot_model::JointModel* joint = joint_model_group_->getJointRoots()[0];
   if (!joint->getParentLinkModel())
   {
-    RCLCPP_ERROR(LOGGER, "Group '%s' does not have a parent link", group_name.c_str());
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Group '%s' does not have a parent link", group_name.c_str());
     joint_model_group_ = nullptr;
     return;
   }
@@ -103,7 +103,7 @@ DynamicsSolver::DynamicsSolver(const robot_model::RobotModelConstPtr& robot_mode
   base_name_ = joint->getParentLinkModel()->getName();
 
   tip_name_ = joint_model_group_->getLinkModelNames().back();
-  RCLCPP_DEBUG(LOGGER, "Base name: '%s', Tip name: '%s'", base_name_.c_str(), tip_name_.c_str());
+  RCLCPP_DEBUG(LOGGER_DYNAMICS_SOLVER, "Base name: '%s', Tip name: '%s'", base_name_.c_str(), tip_name_.c_str());
 
   const urdf::ModelInterfaceSharedPtr urdf_model = robot_model_->getURDF();
   const srdf::ModelConstSharedPtr srdf_model = robot_model_->getSRDF();
@@ -111,13 +111,13 @@ DynamicsSolver::DynamicsSolver(const robot_model::RobotModelConstPtr& robot_mode
 
   if (!kdl_parser::treeFromUrdfModel(*urdf_model, tree))
   {
-    RCLCPP_ERROR(LOGGER, "Could not initialize tree object");
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Could not initialize tree object");
     joint_model_group_ = nullptr;
     return;
   }
   if (!tree.getChain(base_name_, tip_name_, kdl_chain_))
   {
-    RCLCPP_ERROR(LOGGER, "Could not initialize chain object");
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Could not initialize chain object");
     joint_model_group_ = nullptr;
     return;
   }
@@ -140,7 +140,7 @@ DynamicsSolver::DynamicsSolver(const robot_model::RobotModelConstPtr& robot_mode
   KDL::Vector gravity(gravity_vector.x, gravity_vector.y,
                       gravity_vector.z);  // \todo Not sure if KDL expects the negative of this (Sachin)
   gravity_ = gravity.Norm();
-  RCLCPP_DEBUG(LOGGER, "Gravity norm set to %f", gravity_);
+  RCLCPP_DEBUG(LOGGER_DYNAMICS_SOLVER, "Gravity norm set to %f", gravity_);
 
   chain_id_solver_.reset(new KDL::ChainIdSolver_RNE(kdl_chain_, gravity));
 }
@@ -151,33 +151,33 @@ bool DynamicsSolver::getTorques(const std::vector<double>& joint_angles, const s
 {
   if (!joint_model_group_)
   {
-    RCLCPP_DEBUG(LOGGER, "Did not construct DynamicsSolver object properly. "
+    RCLCPP_DEBUG(LOGGER_DYNAMICS_SOLVER, "Did not construct DynamicsSolver object properly. "
                                        "Check error logs.");
     return false;
   }
   if (joint_angles.size() != num_joints_)
   {
-    RCLCPP_ERROR(LOGGER, "Joint angles vector should be size %d", num_joints_);
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Joint angles vector should be size %d", num_joints_);
     return false;
   }
   if (joint_velocities.size() != num_joints_)
   {
-    RCLCPP_ERROR(LOGGER, "Joint velocities vector should be size %d", num_joints_);
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Joint velocities vector should be size %d", num_joints_);
     return false;
   }
   if (joint_accelerations.size() != num_joints_)
   {
-    RCLCPP_ERROR(LOGGER, "Joint accelerations vector should be size %d", num_joints_);
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Joint accelerations vector should be size %d", num_joints_);
     return false;
   }
   if (wrenches.size() != num_segments_)
   {
-    RCLCPP_ERROR(LOGGER, "Wrenches vector should be size %d", num_segments_);
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Wrenches vector should be size %d", num_segments_);
     return false;
   }
   if (torques.size() != num_joints_)
   {
-    RCLCPP_ERROR(LOGGER, "Torques vector should be size %d", num_joints_);
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Torques vector should be size %d", num_joints_);
     return false;
   }
 
@@ -205,7 +205,7 @@ bool DynamicsSolver::getTorques(const std::vector<double>& joint_angles, const s
 
   if (chain_id_solver_->CartToJnt(kdl_angles, kdl_velocities, kdl_accelerations, kdl_wrenches, kdl_torques) < 0)
   {
-    RCLCPP_ERROR(LOGGER, "Something went wrong computing torques");
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Something went wrong computing torques");
     return false;
   }
 
@@ -220,13 +220,13 @@ bool DynamicsSolver::getMaxPayload(const std::vector<double>& joint_angles, doub
 {
   if (!joint_model_group_)
   {
-    RCLCPP_DEBUG(LOGGER, "Did not construct DynamicsSolver object properly. "
+    RCLCPP_DEBUG(LOGGER_DYNAMICS_SOLVER, "Did not construct DynamicsSolver object properly. "
                                        "Check error logs.");
     return false;
   }
   if (joint_angles.size() != num_joints_)
   {
-    RCLCPP_ERROR(LOGGER, "Joint angles vector should be size %d", num_joints_);
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Joint angles vector should be size %d", num_joints_);
     return false;
   }
   std::vector<double> joint_velocities(num_joints_, 0.0), joint_accelerations(num_joints_, 0.0);
@@ -254,7 +254,7 @@ bool DynamicsSolver::getMaxPayload(const std::vector<double>& joint_angles, doub
   wrenches.back().force = transformVector(transform, wrenches.back().force);
   wrenches.back().torque = transformVector(transform, wrenches.back().torque);
 
-  RCLCPP_DEBUG(LOGGER, "New wrench (local frame): %f %f %f", wrenches.back().force.x,
+  RCLCPP_DEBUG(LOGGER_DYNAMICS_SOLVER, "New wrench (local frame): %f %f %f", wrenches.back().force.x,
                   wrenches.back().force.y, wrenches.back().force.z);
 
   if (!getTorques(joint_angles, joint_velocities, joint_accelerations, wrenches, torques))
@@ -266,9 +266,9 @@ bool DynamicsSolver::getMaxPayload(const std::vector<double>& joint_angles, doub
     double payload_joint = std::max<double>((max_torques_[i] - zero_torques[i]) / (torques[i] - zero_torques[i]),
                                             (-max_torques_[i] - zero_torques[i]) /
                                                 (torques[i] - zero_torques[i]));  // because we set the payload to 1.0
-    RCLCPP_DEBUG(LOGGER, "Joint: %d, Actual Torque: %f, Max Allowed: %f, Gravity: %f", i, torques[i],
+    RCLCPP_DEBUG(LOGGER_DYNAMICS_SOLVER, "Joint: %d, Actual Torque: %f, Max Allowed: %f, Gravity: %f", i, torques[i],
                     max_torques_[i], zero_torques[i]);
-    RCLCPP_DEBUG(LOGGER, "Joint: %d, Payload Allowed (N): %f", i, payload_joint);
+    RCLCPP_DEBUG(LOGGER_DYNAMICS_SOLVER, "Joint: %d, Payload Allowed (N): %f", i, payload_joint);
     if (payload_joint < min_payload)
     {
       min_payload = payload_joint;
@@ -276,7 +276,7 @@ bool DynamicsSolver::getMaxPayload(const std::vector<double>& joint_angles, doub
     }
   }
   payload = min_payload / gravity_;
-  RCLCPP_DEBUG(LOGGER, "Max payload (kg): %f", payload);
+  RCLCPP_DEBUG(LOGGER_DYNAMICS_SOLVER, "Max payload (kg): %f", payload);
   return true;
 }
 
@@ -285,18 +285,18 @@ bool DynamicsSolver::getPayloadTorques(const std::vector<double>& joint_angles, 
 {
   if (!joint_model_group_)
   {
-    RCLCPP_DEBUG(LOGGER, "Did not construct DynamicsSolver object properly. "
+    RCLCPP_DEBUG(LOGGER_DYNAMICS_SOLVER, "Did not construct DynamicsSolver object properly. "
                                        "Check error logs.");
     return false;
   }
   if (joint_angles.size() != num_joints_)
   {
-    RCLCPP_ERROR(LOGGER, "Joint angles vector should be size %d", num_joints_);
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Joint angles vector should be size %d", num_joints_);
     return false;
   }
   if (joint_torques.size() != num_joints_)
   {
-    RCLCPP_ERROR(LOGGER, "Joint torques vector should be size %d", num_joints_);
+    RCLCPP_ERROR(LOGGER_DYNAMICS_SOLVER, "Joint torques vector should be size %d", num_joints_);
     return false;
   }
   std::vector<double> joint_velocities(num_joints_, 0.0), joint_accelerations(num_joints_, 0.0);
@@ -310,7 +310,7 @@ bool DynamicsSolver::getPayloadTorques(const std::vector<double>& joint_angles, 
   wrenches.back().force = transformVector(transform, wrenches.back().force);
   wrenches.back().torque = transformVector(transform, wrenches.back().torque);
 
-  RCLCPP_DEBUG(LOGGER, "New wrench (local frame): %f %f %f", wrenches.back().force.x,
+  RCLCPP_DEBUG(LOGGER_DYNAMICS_SOLVER, "New wrench (local frame): %f %f %f", wrenches.back().force.x,
                   wrenches.back().force.y, wrenches.back().force.z);
 
   return getTorques(joint_angles, joint_velocities, joint_accelerations, wrenches, joint_torques);
