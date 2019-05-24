@@ -1,6 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_collision_distance_field)
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/collision_distance_field_types.cpp
   src/collision_common_distance_field.cpp
   src/collision_robot_distance_field.cpp
