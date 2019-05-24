@@ -193,7 +193,7 @@ void getBodySphereVisualizationMarkers(const GroupStateRepresentationConstPtr& g
     const moveit::core::AttachedBody* att = state.getAttachedBody(gsr->dfce_->attached_body_names_[i]);
     if (!att)
     {
-      RCLCPP_WARN(LOGGER,"Attached body '%s' was not found, skipping sphere "
+      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD,"Attached body '%s' was not found, skipping sphere "
                "decomposition visualization",
                gsr->dfce_->attached_body_names_[i].c_str());
       continue;
@@ -201,7 +201,7 @@ void getBodySphereVisualizationMarkers(const GroupStateRepresentationConstPtr& g
 
     if (gsr->attached_body_decompositions_[i]->getSize() != att->getShapes().size())
     {
-      RCLCPP_WARN(LOGGER,"Attached body size discrepancy");
+      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD,"Attached body size discrepancy");
       continue;
     }
 

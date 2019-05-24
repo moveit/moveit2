@@ -57,7 +57,7 @@
 #include "rclcpp/time.hpp"
 #include "rclcpp/utilities.hpp"
 
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("collision_distance_field");
+static rclcpp::Logger LOGGER_COLLISION_DISTANCE_FIELD = rclcpp::get_logger("moveit").get_child("collision_distance_field");
 
 namespace collision_detection
 {
@@ -411,7 +411,7 @@ public:
   {
     if (i >= decomp_vector_.size())
     {
-      RCLCPP_INFO(LOGGER, "No body decomposition");
+      RCLCPP_INFO(LOGGER_COLLISION_DISTANCE_FIELD, "No body decomposition");
       return empty_ptr_;
     }
     return decomp_vector_[i];
@@ -421,7 +421,7 @@ public:
   {
     if (ind >= decomp_vector_.size())
     {
-      RCLCPP_WARN(LOGGER, "Can't update pose");
+      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Can't update pose");
       return;
     }
     decomp_vector_[ind]->updatePose(pose);
@@ -474,7 +474,7 @@ public:
   {
     if (i >= decomp_vector_.size())
     {
-      RCLCPP_INFO(LOGGER, "No body decomposition");
+      RCLCPP_INFO(LOGGER_COLLISION_DISTANCE_FIELD, "No body decomposition");
       return empty_ptr_;
     }
     return decomp_vector_[i];
@@ -488,7 +488,7 @@ public:
     }
     else
     {
-      RCLCPP_WARN(LOGGER, "Can't update pose");
+      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Can't update pose");
       return;
     }
   }
