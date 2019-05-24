@@ -52,10 +52,10 @@
 
 #include <boost/bind.hpp>
 
-rclcpp::Logger LOGGER_COLLISION_WORLD = rclcpp::get_logger("collision_world.fcl");
-
 namespace collision_detection
 {
+
+rclcpp::Logger LOGGER_COLLISION_WORLD = rclcpp::get_logger("collision_world.fcl");
 const std::string CollisionDetectorAllocatorFCL::NAME_("FCL");
 
 CollisionWorldFCL::CollisionWorldFCL() : CollisionWorld()

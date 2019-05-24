@@ -41,10 +41,12 @@
 #include <fcl/broadphase/broadphase_dynamic_AABB_tree.h>
 #endif
 
-rclcpp::Logger LOGGER_COLLISION_ROBOT_FCL = rclcpp::get_logger("collision_robot.fcl");
 
 namespace collision_detection
 {
+
+rclcpp::Logger LOGGER_COLLISION_ROBOT_FCL = rclcpp::get_logger("collision_robot.fcl");
+
 CollisionRobotFCL::CollisionRobotFCL(const robot_model::RobotModelConstPtr& model, double padding, double scale)
   : CollisionRobot(model, padding, scale)
 {
