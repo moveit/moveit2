@@ -38,7 +38,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 // Logger
-rclcpp::Logger LOGGER_COLLISION_ROBOT_ALLVALID = rclcpp::get_logger("moveit").get_child("collision_robot_allvalid");;
+rclcpp::Logger LOGGER_COLLISION_ROBOT_ALLVALID = rclcpp::get_logger("moveit").get_child("collision_robot_allvalid");
 
 collision_detection::CollisionRobotAllValid::CollisionRobotAllValid(const robot_model::RobotModelConstPtr& robot_model,
                                                                     double padding, double scale)
