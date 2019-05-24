@@ -12,6 +12,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/world_diff.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
+
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_robot_state
   rclcpp
@@ -27,48 +28,49 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 
 # unit tests
 if(BUILD_TESTING)
-	find_package(resource_retriever REQUIRED)
-	if(WIN32)
-		# set(append_library_dirs "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
-	else()
-		set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../utils")
-	endif()
+  find_package(resource_retriever REQUIRED)
+  if(WIN32)
+    # TODO add window paths
+  else()
+   set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../utils")
+  endif()
 
   ament_add_gtest(test_world test/test_world.cpp
-		APPEND_LIBRARY_DIRS "${append_library_dirs}")
+    APPEND_LIBRARY_DIRS "${append_library_dirs}")
   target_link_libraries(test_world
     ${MOVEIT_LIB_NAME}
     ${urdfdom}
     ${urdfdom_headers}
     ${Boost_LIBRARIES}
-		${geometric_shapes_LIBRARIES}
-	)
+    ${geometric_shapes_LIBRARIES}
+  )
 
-	ament_add_gtest(test_world_diff test/test_world_diff.cpp
-		APPEND_LIBRARY_DIRS "${append_library_dirs}")
+  ament_add_gtest(test_world_diff test/test_world_diff.cpp
+    APPEND_LIBRARY_DIRS "${append_library_dirs}")
   target_link_libraries(test_world_diff
     ${MOVEIT_LIB_NAME}
     ${urdfdom}
     ${urdfdom_headers}
     ${Boost_LIBRARIES}
-		${geometric_shapes_LIBRARIES}
-	)
+    ${geometric_shapes_LIBRARIES}
+  )
 
-	ament_add_gtest(test_all_valid test/test_all_valid.cpp
-		APPEND_LIBRARY_DIRS "${append_library_dirs}")
+  ament_add_gtest(test_all_valid test/test_all_valid.cpp
+     APPEND_LIBRARY_DIRS "${append_library_dirs}")
   target_link_libraries(test_all_valid
     ${MOVEIT_LIB_NAME}
-		moveit_robot_model
+    moveit_robot_model
     ${urdfdom}
     ${urdfdom_headers}
     ${Boost_LIBRARIES}
-		${geometric_shapes_LIBRARIES}
-		resource_retriever::resource_retriever
-	)
+    ${geometric_shapes_LIBRARIES}
+    resource_retriever::resource_retriever
+  )
 endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
 
 install(DIRECTORY include/ DESTINATION include)
