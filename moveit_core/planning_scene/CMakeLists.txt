@@ -1,11 +1,5 @@
 set(MOVEIT_LIB_NAME moveit_planning_scene)
 
-if(WIN32)
-  # set(append_library_dirs "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
-else()
-  set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR}:${CMAKE_CURRENT_BINARY_DIR}/../utils:${CMAKE_CURRENT_BINARY_DIR}/../collision_detection_fcl:${CMAKE_CURRENT_BINARY_DIR}/../collision_detection")
-endif()
-
 add_library(${MOVEIT_LIB_NAME} SHARED src/planning_scene.cpp)
 #TODO: Fix the versioning
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
@@ -42,7 +36,12 @@ install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
   find_package(moveit_resources REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
   include_directories(${moveit_resources_INCLUDE_DIRS})
+
+  if(UNIX OR APPLE)
+    set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR}:${CMAKE_CURRENT_BINARY_DIR}/../utils:${CMAKE_CURRENT_BINARY_DIR}/../collision_detection_fcl:${CMAKE_CURRENT_BINARY_DIR}/../collision_detection")
+  endif()
 
   ament_add_gtest(test_planning_scene test/test_planning_scene.cpp
 		APPEND_LIBRARY_DIRS "${append_library_dirs}")
