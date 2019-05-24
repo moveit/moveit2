@@ -19,6 +19,14 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   angles
 )
 
+target_link_libraries(${MOVEIT_LIB_NAME}  
+  moveit_planning_scene
+  moveit_distance_field
+  moveit_collision_detection
+  moveit_robot_state
+  ${geometric_shapes_LIBRARIES}
+)
+  
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
