@@ -48,7 +48,9 @@
 
 namespace trajectory_processing
 {
+
 rclcpp::Logger LOGGER_TIME_OPTIMAL_TRAJECTORY_GENERATION = rclcpp::get_logger("moveit").get_child("trajectory_processing.time_optimal_trajectory_generation");
+
 constexpr double EPS = 0.000001;
 class LinearPathSegment : public PathSegment
 {

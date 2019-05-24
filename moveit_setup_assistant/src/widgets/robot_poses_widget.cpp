@@ -36,7 +36,7 @@
 
 // SA
 #include "robot_poses_widget.h"
-#include <moveit_msgs/JointLimits.h>
+#include <moveit_msgs/msg/joint_limits.hpp>
 // Qt
 #include <QFormLayout>
 #include <QMessageBox>
@@ -44,7 +44,7 @@
 #include <QApplication>
 
 #include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/DisplayRobotState.h>
+#include <moveit_msgs/msg/display_robot_state.hpp>
 
 namespace moveit_setup_assistant
 {

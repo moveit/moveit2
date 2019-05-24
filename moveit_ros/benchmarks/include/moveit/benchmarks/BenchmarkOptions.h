@@ -41,7 +41,7 @@
 #include <map>
 #include <vector>
 #include <ros/ros.h>
-#include <moveit_msgs/WorkspaceParameters.h>
+#include <moveit_msgs/msg/workspace_parameters.hpp>
 
 namespace moveit_ros_benchmarks
 {
