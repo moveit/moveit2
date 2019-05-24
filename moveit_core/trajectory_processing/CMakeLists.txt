@@ -1,6 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_trajectory_processing)
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/iterative_time_parameterization.cpp
   src/iterative_spline_parameterization.cpp
   src/trajectory_tools.cpp
