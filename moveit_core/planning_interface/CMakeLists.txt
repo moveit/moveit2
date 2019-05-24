@@ -1,6 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_planning_interface)
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/planning_interface.cpp
   src/planning_response.cpp
 )
