@@ -52,7 +52,7 @@
 #endif
 
 #if VISUALIZE_PR2_RVIZ
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 #include <visualization_msgs/Marker.h>
 #include <geometric_shapes/shape_operations.h>
 #endif
@@ -151,32 +151,34 @@ TEST_F(TestAABB, TestPR2)
   // Initialize a ROS publisher
   char* argv[0];
   int argc = 0;
-  ros::init(argc, argv, "visualize_pr2");
-  ros::NodeHandle nh;
-  ros::Publisher pub_aabb = nh.advertise<visualization_msgs::Marker>("/visualization_aabb", 10);
-  ros::Publisher pub_obb = nh.advertise<visualization_msgs::Marker>("/visualization_obb", 10);
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("visualize_pr2");
+  auto pub_aabb = node->create_publisher<visualization_msgs::Marker>("/visualization_aabb", rmw_qos_profile_default);
+  auto pub_obb = node->create_publisher<visualization_msgs::Marker>("/visualization_obb", rmw_qos_profile_default);
+  rclcpp::Rate loop_rate(10);
 
   // Wait for the publishers to establish connections
   sleep(5);
 
   // Prepare the ROS message we will reuse throughout the rest of the function.
-  visualization_msgs::Marker msg;
-  msg.header.frame_id = pr2_state.getRobotModel()->getRootLinkName();
-  msg.type = visualization_msgs::Marker::CUBE;
-  msg.color.a = 0.5;
-  msg.lifetime.sec = 3000;
+  auto msg = std::make_shared<visualization_msgs::Marker>();
+
+  msg->header.frame_id = pr2_state.getRobotModel()->getRootLinkName();
+  msg->type = visualization_msgs::Marker::CUBE;
+  msg->color.a = 0.5;
+  msg->lifetime.sec = 3000;
 
   // Publish the AABB of the whole model
-  msg.ns = "pr2";
-  msg.pose.position.x = (pr2_aabb[0] + pr2_aabb[1]) / 2;
-  msg.pose.position.y = (pr2_aabb[2] + pr2_aabb[3]) / 2;
-  msg.pose.position.z = (pr2_aabb[4] + pr2_aabb[5]) / 2;
-  msg.pose.orientation.x = msg.pose.orientation.y = msg.pose.orientation.z = 0;
-  msg.pose.orientation.w = 1;
-  msg.scale.x = pr2_aabb[1] - pr2_aabb[0];
-  msg.scale.y = pr2_aabb[3] - pr2_aabb[2];
-  msg.scale.z = pr2_aabb[5] - pr2_aabb[4];
-  pub_aabb.publish(msg);
+  msg->ns = "pr2";
+  msg->pose.position.x = (pr2_aabb[0] + pr2_aabb[1]) / 2;
+  msg->pose.position.y = (pr2_aabb[2] + pr2_aabb[3]) / 2;
+  msg->pose.position.z = (pr2_aabb[4] + pr2_aabb[5]) / 2;
+  msg->pose.orientation.x = msg->pose.orientation.y = msg->pose.orientation.z = 0;
+  msg->pose.orientation.w = 1;
+  msg->scale.x = pr2_aabb[1] - pr2_aabb[0];
+  msg->scale.y = pr2_aabb[3] - pr2_aabb[2];
+  msg->scale.z = pr2_aabb[5] - pr2_aabb[4];
+  pub_aabb->publish(msg);
 
   // Publish BBs for all links
   std::vector<const moveit::core::LinkModel*> links = pr2_state.getRobotModel()->getLinkModelsWithCollisionGeometry();
@@ -189,35 +191,35 @@ TEST_F(TestAABB, TestPR2)
     aabb.extendWithTransformedBox(transform, extents);
 
     // Publish AABB
-    msg.ns = links[i]->getName();
-    msg.pose.position.x = transform.translation()[0];
-    msg.pose.position.y = transform.translation()[1];
-    msg.pose.position.z = transform.translation()[2];
-    msg.pose.orientation.x = msg.pose.orientation.y = msg.pose.orientation.z = 0;
-    msg.pose.orientation.w = 1;
-    msg.color.r = 1;
-    msg.color.b = 0;
-    msg.scale.x = aabb.sizes()[0];
-    msg.scale.y = aabb.sizes()[1];
-    msg.scale.z = aabb.sizes()[2];
-    pub_aabb.publish(msg);
+    msg->ns = links[i]->getName();
+    msg->pose.position.x = transform.translation()[0];
+    msg->pose.position.y = transform.translation()[1];
+    msg->pose.position.z = transform.translation()[2];
+    msg->pose.orientation.x = msg->pose.orientation.y = msg->pose.orientation.z = 0;
+    msg->pose.orientation.w = 1;
+    msg->color.r = 1;
+    msg->color.b = 0;
+    msg->scale.x = aabb.sizes()[0];
+    msg->scale.y = aabb.sizes()[1];
+    msg->scale.z = aabb.sizes()[2];
+    pub_aabb->publish(msg);
 
     // Publish OBB (oriented BB)
-    msg.ns += "-obb";
-    msg.pose.position.x = transform.translation()[0];
-    msg.pose.position.y = transform.translation()[1];
-    msg.pose.position.z = transform.translation()[2];
-    msg.scale.x = extents[0];
-    msg.scale.y = extents[1];
-    msg.scale.z = extents[2];
-    msg.color.r = 0;
-    msg.color.b = 1;
+    msg->ns += "-obb";
+    msg->pose.position.x = transform.translation()[0];
+    msg->pose.position.y = transform.translation()[1];
+    msg->pose.position.z = transform.translation()[2];
+    msg->scale.x = extents[0];
+    msg->scale.y = extents[1];
+    msg->scale.z = extents[2];
+    msg->color.r = 0;
+    msg->color.b = 1;
     Eigen::Quaterniond q(transform.rotation());
-    msg.pose.orientation.x = q.x();
-    msg.pose.orientation.y = q.y();
-    msg.pose.orientation.z = q.z();
-    msg.pose.orientation.w = q.w();
-    pub_obb.publish(msg);
+    msg->pose.orientation.x = q.x();
+    msg->pose.orientation.y = q.y();
+    msg->pose.orientation.z = q.z();
+    msg->pose.orientation.w = q.w();
+    pub_obb->publish(msg);
   }
 
   // Publish BBs for all attached bodies
@@ -235,35 +237,35 @@ TEST_F(TestAABB, TestPR2)
       aabb.extendWithTransformedBox(transforms[i], extents);
 
       // Publish AABB
-      msg.ns = (*it)->getName() + boost::lexical_cast<std::string>(i);
-      msg.pose.position.x = transforms[i].translation()[0];
-      msg.pose.position.y = transforms[i].translation()[1];
-      msg.pose.position.z = transforms[i].translation()[2];
-      msg.pose.orientation.x = msg.pose.orientation.y = msg.pose.orientation.z = 0;
-      msg.pose.orientation.w = 1;
-      msg.color.r = 1;
-      msg.color.b = 0;
-      msg.scale.x = aabb.sizes()[0];
-      msg.scale.y = aabb.sizes()[1];
-      msg.scale.z = aabb.sizes()[2];
-      pub_aabb.publish(msg);
+      msg->ns = (*it)->getName() + boost::lexical_cast<std::string>(i);
+      msg->pose.position.x = transforms[i].translation()[0];
+      msg->pose.position.y = transforms[i].translation()[1];
+      msg->pose.position.z = transforms[i].translation()[2];
+      msg->pose.orientation.x = msg->pose.orientation.y = msg->pose.orientation.z = 0;
+      msg->pose.orientation.w = 1;
+      msg->color.r = 1;
+      msg->color.b = 0;
+      msg->scale.x = aabb.sizes()[0];
+      msg->scale.y = aabb.sizes()[1];
+      msg->scale.z = aabb.sizes()[2];
+      pub_aabb->publish(msg);
 
       // Publish OBB (oriented BB)
-      msg.ns += "-obb";
-      msg.pose.position.x = transforms[i].translation()[0];
-      msg.pose.position.y = transforms[i].translation()[1];
-      msg.pose.position.z = transforms[i].translation()[2];
-      msg.scale.x = extents[0];
-      msg.scale.y = extents[1];
-      msg.scale.z = extents[2];
-      msg.color.r = 0;
-      msg.color.b = 1;
+      msg->ns += "-obb";
+      msg->pose.position.x = transforms[i].translation()[0];
+      msg->pose.position.y = transforms[i].translation()[1];
+      msg->pose.position.z = transforms[i].translation()[2];
+      msg->scale.x = extents[0];
+      msg->scale.y = extents[1];
+      msg->scale.z = extents[2];
+      msg->color.r = 0;
+      msg->color.b = 1;
       Eigen::Quaterniond q(transforms[i].rotation());
-      msg.pose.orientation.x = q.x();
-      msg.pose.orientation.y = q.y();
-      msg.pose.orientation.z = q.z();
-      msg.pose.orientation.w = q.w();
-      pub_obb.publish(msg);
+      msg->pose.orientation.x = q.x();
+      msg->pose.orientation.y = q.y();
+      msg->pose.orientation.z = q.z();
+      msg->pose.orientation.w = q.w();
+      pub_obb->publish(msg);
     }
   }
 #endif
@@ -273,16 +275,22 @@ TEST_F(TestAABB, TestSimple)
 {
   // Contains a link with simple geometry and an offset in the collision link
   moveit::core::RobotModelBuilder builder("simple", "base_footprint");
-  geometry_msgs::Pose origin;
-  tf2::toMsg(tf2::Vector3(0, 0, 0.051), origin.position);
+  geometry_msgs::msg::Pose origin;
+  origin.position.x = 0;
+  origin.position.y = 0;
+  origin.position.z = 0.051;
   origin.orientation.w = 1.0;
   builder.addChain("base_footprint->base_link", "fixed", { origin });
 
-  tf2::toMsg(tf2::Vector3(0, 0, 0), origin.position);
+  origin.position.x = 0;
+  origin.position.y = 0;
+  origin.position.z = 0;
   builder.addCollisionMesh("base_link", "package://moveit_resources/pr2_description/urdf/meshes/base_v0/base_L.stl",
                            origin);
 
-  tf2::toMsg(tf2::Vector3(0, 0, 0.071), origin.position);
+  origin.position.x = 0;
+  origin.position.y = 0;
+  origin.position.z = 0.071;
   builder.addCollisionBox("base_footprint", { 0.001, 0.001, 0.001 }, origin);
 
   builder.addVirtualJoint("odom_combined", "base_footprint", "planar", "world_joint");
@@ -306,17 +314,25 @@ TEST_F(TestAABB, TestComplex)
 {
   // Contains a link with simple geometry and an offset and rotation in the collision link
   moveit::core::RobotModelBuilder builder("complex", "base_footprint");
-  geometry_msgs::Pose origin;
-  tf2::toMsg(tf2::Vector3(0, 0, 1.0), origin.position);
+  geometry_msgs::msg::Pose origin;
+  origin.position.x = 0;
+  origin.position.y = 0;
+  origin.position.z = 1.0;
   tf2::Quaternion q;
   q.setRPY(0, 0, 1.5708);
   origin.orientation = tf2::toMsg(q);
   builder.addChain("base_footprint->base_link", "fixed", { origin });
-  tf2::toMsg(tf2::Vector3(5.0, 0, 1.0), origin.position);
+  origin.position.x = 5.0;
+  origin.position.y = 0;
+  origin.position.z = 1.0;
   builder.addCollisionBox("base_link", { 1.0, 0.1, 0.1 }, origin);
-  tf2::toMsg(tf2::Vector3(4.0, 0, 1.0), origin.position);
+  origin.position.x = 4.0;
+  origin.position.y = 0;
+  origin.position.z = 1.0;
   builder.addCollisionBox("base_link", { 1.0, 0.1, 0.1 }, origin);
-  tf2::toMsg(tf2::Vector3(-5.0, 0.0, -1.0), origin.position);
+  origin.position.x = -5.0;
+  origin.position.y = 0;
+  origin.position.z = -1.0;
   q.setRPY(0, 1.5708, 0);
   origin.orientation = tf2::toMsg(q);
   builder.addCollisionBox("base_footprint", { 0.1, 1.0, 0.1 }, origin);

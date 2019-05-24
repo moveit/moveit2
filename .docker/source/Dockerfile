@@ -20,5 +20,6 @@ RUN apt-get -qq update && \
     rosdep install -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
     rm -rf /var/lib/apt/lists/*
 
-    # Build the workspace
-RUN colcon build --symlink-install --event-handlers console_direct+
+# Build the workspace
+RUN . /opt/ros/crystal/setup.sh &&\
+    colcon build --symlink-install --event-handlers desktop_notification-

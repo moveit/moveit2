@@ -39,7 +39,7 @@
 
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit/macros/class_forward.h>
-#include <moveit_msgs/AllowedCollisionMatrix.h>
+#include <moveit_msgs/msg/allowed_collision_matrix.hpp>
 #include <boost/function.hpp>
 #include <iostream>
 #include <vector>
