@@ -40,8 +40,8 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/macros/deprecation.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit_msgs/RobotTrajectory.h>
-#include <moveit_msgs/RobotState.h>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <moveit_msgs/msg/robot_state.hpp>
 #include <deque>
 
 namespace robot_trajectory

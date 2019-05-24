@@ -41,7 +41,7 @@
 #include <tf2_eigen/tf2_eigen.h>
 #include <moveit/move_group/capability_names.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit_msgs/DisplayTrajectory.h>
+#include <moveit_msgs/msg/display_trajectory.hpp>
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 
 move_group::MoveGroupCartesianPathService::MoveGroupCartesianPathService()
@@ -68,7 +68,7 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene,
   return (!planning_scene || !planning_scene->isStateColliding(*state, group->getName())) &&
          (!constraint_set || constraint_set->decide(*state).satisfied);
 }
-}
+}  // namespace
 
 bool move_group::MoveGroupCartesianPathService::computeService(moveit_msgs::srv::GetCartesianPath::Request& req,
                                                                moveit_msgs::srv::GetCartesianPath::Response& res)
@@ -122,7 +122,7 @@ bool move_group::MoveGroupCartesianPathService::computeService(moveit_msgs::srv:
       }
       else
       {
-        if (waypoints.size() > 0)
+        if (!waypoints.empty())
         {
           robot_state::GroupStateValidityCallbackFn constraint_fn;
           std::unique_ptr<planning_scene_monitor::LockedPlanningSceneRO> ls;
@@ -134,8 +134,8 @@ bool move_group::MoveGroupCartesianPathService::computeService(moveit_msgs::srv:
             kset->add(req.path_constraints, (*ls)->getTransforms());
             constraint_fn = boost::bind(
                 &isStateValid,
-                req.avoid_collisions ? static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get() : NULL,
-                kset->empty() ? NULL : kset.get(), _1, _2, _3);
+                req.avoid_collisions ? static_cast<const planning_scene::PlanningSceneConstPtr&>(*ls).get() : nullptr,
+                kset->empty() ? nullptr : kset.get(), _1, _2, _3);
           }
           bool global_frame = !robot_state::Transforms::sameFrame(link_name, req.header.frame_id);
           ROS_INFO("Attempting to follow %u waypoints for link '%s' using a step of %lf m and jump threshold %lf (in "

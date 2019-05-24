@@ -39,7 +39,7 @@
 
 #include <moveit/warehouse/moveit_message_storage.h>
 #include <moveit/macros/class_forward.h>
-#include <moveit_msgs/RobotState.h>
+#include <moveit_msgs/msg/robot_state.hpp>
 
 namespace moveit_warehouse
 {

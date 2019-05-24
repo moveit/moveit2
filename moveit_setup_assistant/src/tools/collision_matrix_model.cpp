@@ -47,7 +47,7 @@
 using namespace moveit_setup_assistant;
 
 /// Boost mapping of reasons for disabling a link pair to strings
-static const boost::unordered_map<moveit_setup_assistant::DisabledReason, const char*> longReasonsToString =
+static const boost::unordered_map<moveit_setup_assistant::DisabledReason, const char*> LONG_REASONS_TO_STRING =
     boost::assign::map_list_of  // clang-format off
     ( moveit_setup_assistant::NEVER, "Never in Collision" )
     ( moveit_setup_assistant::DEFAULT, "Collision by Default" )
@@ -57,7 +57,7 @@ static const boost::unordered_map<moveit_setup_assistant::DisabledReason, const 
     ( moveit_setup_assistant::NOT_DISABLED, "");  // clang-format on
 
 /// Boost mapping of reasons to a background color
-static const boost::unordered_map<moveit_setup_assistant::DisabledReason, QVariant> longReasonsToBrush =
+static const boost::unordered_map<moveit_setup_assistant::DisabledReason, QVariant> LONG_REASONS_TO_BRUSH =
     boost::assign::map_list_of  // clang-format off
     ( moveit_setup_assistant::NEVER, QBrush(QColor("lightgreen")) )
     ( moveit_setup_assistant::DEFAULT, QBrush(QColor("lightpink")) )
@@ -116,9 +116,9 @@ QVariant CollisionMatrixModel::data(const QModelIndex& index, int role) const
     case Qt::CheckStateRole:
       return item->second.disable_check ? Qt::Checked : Qt::Unchecked;
     case Qt::ToolTipRole:
-      return longReasonsToString.at(item->second.reason);
+      return LONG_REASONS_TO_STRING.at(item->second.reason);
     case Qt::BackgroundRole:
-      return longReasonsToBrush.at(item->second.reason);
+      return LONG_REASONS_TO_BRUSH.at(item->second.reason);
   }
   return QVariant();
 }
@@ -146,11 +146,11 @@ bool CollisionMatrixModel::setData(const QModelIndex& index, const QVariant& val
     item->second.disable_check = new_value;
 
     // Handle USER Reasons: 1) pair is disabled by user
-    if (item->second.disable_check == true && item->second.reason == moveit_setup_assistant::NOT_DISABLED)
+    if (item->second.disable_check && item->second.reason == moveit_setup_assistant::NOT_DISABLED)
       item->second.reason = moveit_setup_assistant::USER;
 
     // Handle USER Reasons: 2) pair was disabled by user and now is enabled (not checked)
-    else if (item->second.disable_check == false && item->second.reason == moveit_setup_assistant::USER)
+    else if (!item->second.disable_check && item->second.reason == moveit_setup_assistant::USER)
       item->second.reason = moveit_setup_assistant::NOT_DISABLED;
 
     QModelIndex mirror = this->index(index.column(), index.row());
@@ -166,7 +166,7 @@ void CollisionMatrixModel::setEnabled(const QItemSelection& selection, bool valu
   // perform changes without signalling
   QItemSelection changes;
   blockSignals(true);
-  for (const auto range : selection)
+  for (const auto& range : selection)
   {
     setEnabled(range.indexes(), value);
 
@@ -179,7 +179,7 @@ void CollisionMatrixModel::setEnabled(const QItemSelection& selection, bool valu
   blockSignals(false);
 
   // emit changes
-  for (const auto range : changes)
+  for (const auto& range : changes)
     Q_EMIT dataChanged(range.topLeft(), range.bottomRight());
 }
 
@@ -202,7 +202,7 @@ void CollisionMatrixModel::setFilterRegExp(const QString& filter)
   endResetModel();
 }
 
-QVariant CollisionMatrixModel::headerData(int section, Qt::Orientation, int role) const
+QVariant CollisionMatrixModel::headerData(int section, Qt::Orientation /*orientation*/, int role) const
 {
   if (role == Qt::DisplayRole)
     return q_names[visual_to_index[section]];
@@ -212,7 +212,7 @@ QVariant CollisionMatrixModel::headerData(int section, Qt::Orientation, int role
 Qt::ItemFlags CollisionMatrixModel::flags(const QModelIndex& index) const
 {
   if (!index.isValid())
-    return 0;
+    return Qt::NoItemFlags;
 
   Qt::ItemFlags f = QAbstractTableModel::flags(index);
   if (index.row() != index.column())

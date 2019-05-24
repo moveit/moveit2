@@ -37,17 +37,22 @@
 #include <moveit/transforms/transforms.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <boost/algorithm/string/trim.hpp>
-#include <ros/console.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {
 namespace core
 {
+
+// Logger
+rclcpp::Logger logger_transforms = rclcpp::get_logger("transforms");
+
 Transforms::Transforms(const std::string& target_frame) : target_frame_(target_frame)
 {
   boost::trim(target_frame_);
-  if (target_frame_.empty())
-    ROS_ERROR_NAMED("transforms", "The target frame for MoveIt! Transforms cannot be empty.");
+  if (target_frame_.empty()){
+    RCLCPP_ERROR(logger_transforms, "The target frame for MoveIt! Transforms cannot be empty.");
+  }
   else
   {
     transforms_map_[target_frame_] = Eigen::Isometry3d::Identity();
@@ -96,7 +101,7 @@ const Eigen::Isometry3d& Transforms::getTransform(const std::string& from_frame)
     // If no transform found in map, return identity
   }
 
-  ROS_ERROR_NAMED("transforms", "Unable to transform from frame '%s' to frame '%s'. Returning identity.",
+  RCLCPP_ERROR(logger_transforms, "Unable to transform from frame '%s' to frame '%s'. Returning identity.",
                   from_frame.c_str(), target_frame_.c_str());
 
   // return identity
@@ -114,33 +119,34 @@ bool Transforms::canTransform(const std::string& from_frame) const
 
 void Transforms::setTransform(const Eigen::Isometry3d& t, const std::string& from_frame)
 {
-  if (from_frame.empty())
-    ROS_ERROR_NAMED("transforms", "Cannot record transform with empty name");
+  if (from_frame.empty()){
+    RCLCPP_ERROR(logger_transforms, "Cannot record transform with empty name");
+  }
   else
     transforms_map_[from_frame] = t;
 }
 
-void Transforms::setTransform(const geometry_msgs::TransformStamped& transform)
+void Transforms::setTransform(const geometry_msgs::msg::TransformStamped& transform)
 {
   if (sameFrame(transform.child_frame_id, target_frame_))
   {
-    Eigen::Isometry3d t = tf2::transformToEigen(transform.transform);
+    Eigen::Isometry3d t = tf2::transformToEigen(transform);
     setTransform(t, transform.header.frame_id);
   }
   else
   {
-    ROS_ERROR_NAMED("transforms", "Given transform is to frame '%s', but frame '%s' was expected.",
+    RCLCPP_ERROR(logger_transforms, "Given transform is to frame '%s', but frame '%s' was expected.",
                     transform.child_frame_id.c_str(), target_frame_.c_str());
   }
 }
 
-void Transforms::setTransforms(const std::vector<geometry_msgs::TransformStamped>& transforms)
+void Transforms::setTransforms(const std::vector<geometry_msgs::msg::TransformStamped>& transforms)
 {
   for (std::size_t i = 0; i < transforms.size(); ++i)
     setTransform(transforms[i]);
 }
 
-void Transforms::copyTransforms(std::vector<geometry_msgs::TransformStamped>& transforms) const
+void Transforms::copyTransforms(std::vector<geometry_msgs::msg::TransformStamped>& transforms) const
 {
   transforms.resize(transforms_map_.size());
   std::size_t i = 0;

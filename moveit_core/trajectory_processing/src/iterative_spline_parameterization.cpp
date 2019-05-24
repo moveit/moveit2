@@ -35,7 +35,7 @@
 /* Author: Ken Anderson */
 
 #include <moveit/trajectory_processing/iterative_spline_parameterization.h>
-#include <moveit_msgs/JointLimits.h>
+#include <moveit_msgs/msg/joint_limits.hpp>
 #include <moveit/robot_state/conversions.h>
 #include <vector>
 
@@ -602,4 +602,4 @@ void globalAdjustment(std::vector<SingleJointTrajectory>& t2, int num_joints, co
     fit_cubic_spline(num_points, &time_diff[0], &t2[j].positions_[0], &t2[j].velocities_[0], &t2[j].accelerations_[0]);
   }
 }
-}
+}  // namespace trajectory_processing

@@ -53,10 +53,10 @@ public:
 
 private:
   void executeMoveCallback(const moveit_msgs::action::MoveGroupGoalConstPtr& goal);
-  void executeMoveCallback_PlanAndExecute(const moveit_msgs::action::MoveGroupGoalConstPtr& goal,
-                                          moveit_msgs::action::MoveGroupResult& action_res);
-  void executeMoveCallback_PlanOnly(const moveit_msgs::action::MoveGroupGoalConstPtr& goal,
-                                    moveit_msgs::action::MoveGroupResult& action_res);
+  void executeMoveCallbackPlanAndExecute(const moveit_msgs::action::MoveGroupGoalConstPtr& goal,
+                                         moveit_msgs::action::MoveGroupResult& action_res);
+  void executeMoveCallbackPlanOnly(const moveit_msgs::action::MoveGroupGoalConstPtr& goal,
+                                   moveit_msgs::action::MoveGroupResult& action_res);
   void startMoveExecutionCallback();
   void startMoveLookCallback();
   void preemptMoveCallback();

@@ -429,6 +429,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
   return false;
 }
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 int KDLKinematicsPlugin::CartToJnt(KDL::ChainIkSolverVelMimicSVD& ik_solver, const KDL::JntArray& q_init,
                                    const KDL::Frame& p_in, KDL::JntArray& q_out, const unsigned int max_iter,
                                    const Eigen::VectorXd& joint_weights, const Twist& cartesian_weights) const
@@ -573,4 +574,4 @@ const std::vector<std::string>& KDLKinematicsPlugin::getLinkNames() const
   return solver_info_.link_names;
 }
 
-}  // namespace
+}  // namespace kdl_kinematics_plugin
