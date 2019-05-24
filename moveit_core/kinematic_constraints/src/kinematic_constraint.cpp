@@ -851,15 +851,14 @@ shapes::Mesh* VisibilityConstraint::getVisibilityCone(const robot_state::RobotSt
 }
 
 void VisibilityConstraint::getMarkers(const robot_state::RobotState& state,
-                                      visualization_msgs::msg::MarkerArray& markers)
+                                      visualization_msgs::msg::MarkerArray& markers) const
 {
   shapes::Mesh* m = getVisibilityCone(state);
   visualization_msgs::msg::Marker mk;
   shapes::constructMarkerFromShape(m, mk);
-  rclcpp::Time stamp = clock_ros_.now();
   delete m;
   mk.header.frame_id = robot_model_->getModelFrame();
-  mk.header.stamp = stamp;
+  mk.header.stamp = rclcpp::Clock().now();
   mk.ns = "constraints";
   mk.id = 1;
   mk.action = visualization_msgs::msg::Marker::ADD;

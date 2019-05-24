@@ -37,7 +37,6 @@
 #include <moveit/kinematic_constraints/utils.h>
 #include <geometric_shapes/solid_primitive_dims.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-//#include <moveit/utils/xmlrpc_casts.h>
 
 using namespace moveit::core;
 
@@ -276,6 +275,8 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 
   return goal;
 }
+//TODO ROS 2: Rework these functions
+
 // TODO: Is not getting called from anywhere, check if is necessary
 // static bool constructPoseStamped(XmlRpc::XmlRpcValue::iterator& it, geometry_msgs::msg::PoseStamped& pose)
 // {

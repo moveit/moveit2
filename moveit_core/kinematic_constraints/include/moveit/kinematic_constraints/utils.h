@@ -200,6 +200,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  *
  * @return was the construction successful?
  */
+ // TODO rework this function
 // bool constructConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Constraints& constraints);
 }
 
