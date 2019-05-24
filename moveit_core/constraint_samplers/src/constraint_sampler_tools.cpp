@@ -37,7 +37,7 @@
 #include <moveit/constraint_samplers/constraint_sampler_tools.h>
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("constraint_samplers");
+rclcpp::Logger LOGGER_CONTRAINT_SAMPLERS_TOOLS = rclcpp::get_logger("moveit").get_child("constraint_samplers");
 
 void constraint_samplers::visualizeDistribution(const moveit_msgs::msg::Constraints& constr,
                                                 const planning_scene::PlanningSceneConstPtr& scene,
@@ -61,7 +61,7 @@ double constraint_samplers::countSamplesPerSecond(const ConstraintSamplerPtr& sa
 {
   if (!sampler)
   {
-    RCLCPP_ERROR(LOGGER, "No sampler specified for counting samples per second");
+    RCLCPP_ERROR(LOGGER_CONTRAINT_SAMPLERS_TOOLS, "No sampler specified for counting samples per second");
     return 0.0;
   }
   robot_state::RobotState ks(reference_state);
@@ -92,7 +92,7 @@ void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& samp
 {
   if (!sampler)
   {
-    RCLCPP_ERROR(LOGGER, "No sampler specified for visualizing distribution of samples");
+    RCLCPP_ERROR(LOGGER_CONTRAINT_SAMPLERS_TOOLS, "No sampler specified for visualizing distribution of samples");
     return;
   }
   const robot_state::LinkModel* lm = reference_state.getLinkModel(link_name);
