@@ -9,6 +9,11 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdfdom_headers
   visualization_msgs)
 
+target_link_libraries(${MOVEIT_LIB_NAME}
+  moveit_robot_model
+  moveit_robot_state
+)
+
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
