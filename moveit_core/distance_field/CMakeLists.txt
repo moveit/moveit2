@@ -1,25 +1,47 @@
 set(MOVEIT_LIB_NAME moveit_distance_field)
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/distance_field.cpp
   src/find_internal_points.cpp
   src/propagation_distance_field.cpp
-  )
+)
+
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-target_link_libraries(${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  boost
+  urdfdom
+  urdfdom_headers
+  visualization_msgs
+  tf2_eigen)
+
+target_link_libraries(${MOVEIT_LIB_NAME}
+  ${Boost_LIBRARIES}
+  ${geometric_shapes_LIBRARIES}
+)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+install(DIRECTORY include/ DESTINATION include)
 
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
 
-if(CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(test_voxel_grid test/test_voxel_grid.cpp)
-  target_link_libraries(test_voxel_grid ${MOVEIT_LIB_NAME})
+  ament_add_gtest(test_voxel_grid test/test_voxel_grid.cpp)
+  target_link_libraries(test_voxel_grid
+    ${MOVEIT_LIB_NAME}
+  )
 
-  catkin_add_gtest(test_distance_field test/test_distance_field.cpp)
-  target_link_libraries(test_distance_field ${MOVEIT_LIB_NAME})
+  ament_add_gtest(test_distance_field test/test_distance_field.cpp)
+
+  target_link_libraries(test_distance_field
+    ${MOVEIT_LIB_NAME}
+    ${visualization_msgs_LIBRARIES}
+    ${tf2_eigen_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${geometric_shapes_LIBRARIES}
+    ${OCTOMAP_LIBRARIES}
+    ${console_bridge_LIBRARIES}
+  )
 endif()
