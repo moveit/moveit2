@@ -47,7 +47,7 @@
 /** \brief Generic interface to collision detection */
 namespace collision_detection
 {
-MOVEIT_CLASS_FORWARD(CollisionWorld);
+MOVEIT_CLASS_FORWARD(CollisionWorld)
 
 /** \brief Perform collision checking with the environment. The
  *  collision world maintains a representation of the environment

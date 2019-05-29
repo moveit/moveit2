@@ -45,7 +45,7 @@
 
 namespace robot_interaction
 {
-MOVEIT_CLASS_FORWARD(LockedRobotState);
+MOVEIT_CLASS_FORWARD(LockedRobotState)
 
 /// Maintain a RobotState in a multithreaded environment.
 //

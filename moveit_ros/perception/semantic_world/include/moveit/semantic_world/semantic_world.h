@@ -47,14 +47,14 @@
 
 namespace shapes
 {
-MOVEIT_CLASS_FORWARD(Shape);
+MOVEIT_CLASS_FORWARD(Shape)
 }
 
 namespace moveit
 {
 namespace semantic_world
 {
-MOVEIT_CLASS_FORWARD(SemanticWorld);
+MOVEIT_CLASS_FORWARD(SemanticWorld)
 
 /**
  * @brief A (simple) semantic world representation for pick and place and other tasks.

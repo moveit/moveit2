@@ -58,7 +58,7 @@ namespace moveit
 /** \brief Core components of MoveIt! */
 namespace core
 {
-MOVEIT_CLASS_FORWARD(RobotModel);
+MOVEIT_CLASS_FORWARD(RobotModel)
 
 /** \brief Definition of a kinematic model. This class is not thread
     safe, however multiple instances can be created */

@@ -42,7 +42,7 @@
 
 namespace collision_detection
 {
-MOVEIT_CLASS_FORWARD(CollisionPlugin);
+MOVEIT_CLASS_FORWARD(CollisionPlugin)
 
 /**
  * @brief Plugin API for loading a custom collision detection robot/world.

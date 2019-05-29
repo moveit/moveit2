@@ -44,8 +44,8 @@
 
 namespace moveit_rviz_plugin
 {
-MOVEIT_CLASS_FORWARD(RenderShapes);
-MOVEIT_CLASS_FORWARD(RobotStateVisualization);
+MOVEIT_CLASS_FORWARD(RenderShapes)
+MOVEIT_CLASS_FORWARD(RobotStateVisualization)
 
 /** \brief Update the links of an rviz::Robot using a robot_state::RobotState */
 class RobotStateVisualization

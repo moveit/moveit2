@@ -52,7 +52,7 @@ class GLRenderer;
 class SensorModel
 {
 public:
-  MOVEIT_CLASS_FORWARD(Parameters);
+  MOVEIT_CLASS_FORWARD(Parameters)
 
   /**
    * \brief Abstract Interface defining Sensor Parameters.

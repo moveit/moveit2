@@ -53,7 +53,7 @@ enum MoveGroupState
   LOOK
 };
 
-MOVEIT_CLASS_FORWARD(MoveGroupCapability);
+MOVEIT_CLASS_FORWARD(MoveGroupCapability)
 
 class MoveGroupCapability
 {

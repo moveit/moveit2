@@ -43,7 +43,7 @@
 
 namespace constraint_samplers
 {
-MOVEIT_CLASS_FORWARD(ConstraintSamplerAllocator);
+MOVEIT_CLASS_FORWARD(ConstraintSamplerAllocator)
 
 class ConstraintSamplerAllocator
 {

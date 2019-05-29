@@ -61,7 +61,7 @@
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene
 {
-MOVEIT_CLASS_FORWARD(PlanningScene);
+MOVEIT_CLASS_FORWARD(PlanningScene)
 
 /** \brief This is the function signature for additional feasibility checks to be imposed on states (in addition to
    respecting constraints and collision avoidance).

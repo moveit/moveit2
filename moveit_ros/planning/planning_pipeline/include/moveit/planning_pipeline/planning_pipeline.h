@@ -198,7 +198,7 @@ private:
   rmw_qos_profile_t custom_qos_profile_;
 };
 
-MOVEIT_CLASS_FORWARD(PlanningPipeline);
+MOVEIT_CLASS_FORWARD(PlanningPipeline)
 }
 
 #endif

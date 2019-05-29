@@ -121,7 +121,7 @@ private:
    */
   void updateTransforms();
 
-  MOVEIT_CLASS_FORWARD(TransformContext);
+  MOVEIT_CLASS_FORWARD(TransformContext)
 
   /**
    * \brief Context Object for registered frames

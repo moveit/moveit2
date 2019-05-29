@@ -63,7 +63,7 @@ class OMPLDynamicReconfigureConfigStatics;
 class OMPLDynamicReconfigureConfig
 {
 public:
-  MOVEIT_CLASS_FORWARD(AbstractParamDescription);
+  MOVEIT_CLASS_FORWARD(AbstractParamDescription)
   class AbstractParamDescription : public dynamic_reconfigure::ParamDescription
   {
   public:
@@ -142,7 +142,7 @@ public:
     }
   };
 
-  MOVEIT_CLASS_FORWARD(AbstractGroupDescription);
+  MOVEIT_CLASS_FORWARD(AbstractGroupDescription)
   class AbstractGroupDescription : public dynamic_reconfigure::Group
   {
   public:

@@ -55,7 +55,7 @@
 
 namespace planning_scene_monitor
 {
-MOVEIT_CLASS_FORWARD(PlanningSceneMonitor);
+MOVEIT_CLASS_FORWARD(PlanningSceneMonitor)
 
 /**
  * @brief PlanningSceneMonitor
@@ -641,7 +641,7 @@ protected:
       lock_.reset(new SingleUnlock(planning_scene_monitor_.get(), read_only));
   }
 
-  MOVEIT_STRUCT_FORWARD(SingleUnlock);
+  MOVEIT_CLASS_FORWARD(SingleUnlock)
 
   // we use this struct so that lock/unlock are called only once
   // even if the LockedPlanningScene instance is copied around

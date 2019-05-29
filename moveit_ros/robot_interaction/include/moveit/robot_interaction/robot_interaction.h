@@ -59,9 +59,9 @@ class InteractiveMarkerServer;
 
 namespace robot_interaction
 {
-MOVEIT_CLASS_FORWARD(InteractionHandler);
-MOVEIT_CLASS_FORWARD(KinematicOptionsMap);
-MOVEIT_CLASS_FORWARD(RobotInteraction);
+MOVEIT_CLASS_FORWARD(InteractionHandler)
+MOVEIT_CLASS_FORWARD(KinematicOptionsMap)
+MOVEIT_CLASS_FORWARD(RobotInteraction)
 
 // Manage interactive markers for controlling a robot state.
 //

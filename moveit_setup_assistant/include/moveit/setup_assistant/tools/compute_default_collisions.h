@@ -41,7 +41,7 @@
 #include <moveit/macros/class_forward.h>
 namespace planning_scene
 {
-MOVEIT_CLASS_FORWARD(PlanningScene);
+MOVEIT_CLASS_FORWARD(PlanningScene)
 }
 
 namespace moveit_setup_assistant

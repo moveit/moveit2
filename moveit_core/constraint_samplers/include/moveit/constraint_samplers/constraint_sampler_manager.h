@@ -45,7 +45,7 @@
 
 namespace constraint_samplers
 {
-MOVEIT_CLASS_FORWARD(ConstraintSamplerManager);
+MOVEIT_CLASS_FORWARD(ConstraintSamplerManager)
 
 /**
  * \brief This class assists in the generation of a ConstraintSampler for a

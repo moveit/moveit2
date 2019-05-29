@@ -100,7 +100,7 @@ private:
   Value status_;
 };
 
-MOVEIT_CLASS_FORWARD(MoveItControllerHandle);
+MOVEIT_CLASS_FORWARD(MoveItControllerHandle)
 
 /** \brief MoveIt! sends commands to a controller via a handle that satisfies this interface. */
 class MoveItControllerHandle
@@ -148,7 +148,7 @@ protected:
   std::string name_;
 };
 
-MOVEIT_CLASS_FORWARD(MoveItControllerManager);
+MOVEIT_CLASS_FORWARD(MoveItControllerManager)
 
 /** @brief MoveIt! does not enforce how controllers are implemented.
     To make your controllers usable by MoveIt, this interface needs to be implemented.
