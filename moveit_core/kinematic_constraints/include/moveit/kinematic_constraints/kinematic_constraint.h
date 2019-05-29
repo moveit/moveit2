@@ -820,19 +820,6 @@ public:
    */
   void getMarkers(const robot_state::RobotState& state, visualization_msgs::msg::MarkerArray& markers) const;
 
-  /**
-   * \brief Adds markers associated with the visibility cone, sensor
-   * and target to the visualization array
-   *
-   * The visibility cone and two arrows - a blue array that issues
-   * from the sensor_view_direction of the sensor, and a red arrow the
-   * issues along the Z axis of the the target frame.
-   *
-   * @param [in] state The state from which to produce the markers
-   * @param [out] markers The marker array to which the markers will be added
-   */
-  void getMarkers(const robot_state::RobotState& state, visualization_msgs::msg::MarkerArray& markers);
-
   bool enabled() const override;
   ConstraintEvaluationResult decide(const robot_state::RobotState& state, bool verbose = false) const override;
   void print(std::ostream& out = std::cout) const override;
