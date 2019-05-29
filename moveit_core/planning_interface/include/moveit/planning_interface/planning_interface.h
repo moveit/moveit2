@@ -162,9 +162,8 @@ public:
 
   /// Initialize a planner. This function will be called after the construction of the plugin, before any other call is
   /// made.
-  /// It is assumed that motion plans will be computed for the robot described by \e model and that any exposed ROS
-  /// functionality
-  /// or required ROS parameters are namespaced by \e ns
+  /// It is assumed that motion plans will be computed for the robot described by \e model
+  /// and the node is passed as an argument to get some ROS parameters
   virtual bool initialize(const robot_model::RobotModelConstPtr& model, std::shared_ptr<rclcpp::Node>& node);
 
   /// Get \brief a short string that identifies the planning interface
