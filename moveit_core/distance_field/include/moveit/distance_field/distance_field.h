@@ -614,8 +614,8 @@ protected:
    *
    * @param [in] max_distance The distance past which all cells will be fully white
    */
-  void setPoint(int xCell, int yCell, int zCell, double dist, geometry_msgs::msg::Point& point, std_msgs::msg::ColorRGBA& color,
-                double max_distance) const;
+  void setPoint(int xCell, int yCell, int zCell, double dist, geometry_msgs::msg::Point& point,
+                std_msgs::msg::ColorRGBA& color, double max_distance) const;
 
   double size_x_;            /**< \brief X size of the distance field */
   double size_y_;            /**< \brief Y size of the distance field */

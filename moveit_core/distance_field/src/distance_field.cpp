@@ -42,10 +42,8 @@
 #include <octomap/OcTree.h>
 #include "rclcpp/rclcpp.hpp"
 
-
 namespace distance_field
 {
-
 rclcpp::Logger LOGGER_DISTANCE_FIELD = rclcpp::get_logger("moveit").get_child("distance_field");
 
 DistanceField::DistanceField(double size_x, double size_y, double size_z, double resolution, double origin_x,
@@ -134,7 +132,8 @@ void DistanceField::getIsoSurfaceMarkers(double min_distance, double max_distanc
 }
 
 void DistanceField::getGradientMarkers(double min_distance, double max_distance, const std::string& frame_id,
-                                       const rclcpp::Time& stamp, visualization_msgs::msg::MarkerArray& marker_array) const
+                                       const rclcpp::Time& stamp,
+                                       visualization_msgs::msg::MarkerArray& marker_array) const
 {
   Eigen::Vector3d unit_x(1, 0, 0);
   Eigen::Vector3d unit_y(0, 1, 0);
@@ -336,8 +335,8 @@ void DistanceField::removeShapeFromField(const shapes::Shape* shape, const geome
 }
 
 void DistanceField::getPlaneMarkers(PlaneVisualizationType type, double length, double width, double height,
-                                    const Eigen::Vector3d& origin, const std::string& frame_id, const rclcpp::Time stamp,
-                                    visualization_msgs::msg::Marker& plane_marker) const
+                                    const Eigen::Vector3d& origin, const std::string& frame_id,
+                                    const rclcpp::Time stamp, visualization_msgs::msg::Marker& plane_marker) const
 {
   plane_marker.header.frame_id = frame_id;
   plane_marker.header.stamp = stamp;

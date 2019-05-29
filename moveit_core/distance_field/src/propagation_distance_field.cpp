@@ -41,10 +41,8 @@
 #include <boost/iostreams/filter/zlib.hpp>
 #include "rclcpp/rclcpp.hpp"
 
-
 namespace distance_field
 {
-
 rclcpp::Logger LOGGER_PROPAGATION_DISTANCE_FIELD = rclcpp::get_logger("moveit").get_child("distance_field");
 
 PropagationDistanceField::PropagationDistanceField(double size_x, double size_y, double size_z, double resolution,
@@ -412,7 +410,7 @@ void PropagationDistanceField::propagatePositive()
       if (vptr->update_direction_ < 0 || vptr->update_direction_ > 26)
       {
         RCLCPP_ERROR(LOGGER_PROPAGATION_DISTANCE_FIELD, "PROGRAMMING ERROR: Invalid update direction detected: %d",
-                        vptr->update_direction_);
+                     vptr->update_direction_);
         continue;
       }
 
@@ -471,7 +469,7 @@ void PropagationDistanceField::propagateNegative()
       if (vptr->negative_update_direction_ < 0 || vptr->negative_update_direction_ > 26)
       {
         RCLCPP_ERROR(LOGGER_PROPAGATION_DISTANCE_FIELD, "PROGRAMMING ERROR: Invalid update direction detected: %d",
-                        vptr->update_direction_);
+                     vptr->update_direction_);
         continue;
       }
 
