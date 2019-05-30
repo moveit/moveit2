@@ -850,7 +850,6 @@ protected:
   double target_radius_;             /**< \brief Storage for the target radius */
   double max_view_angle_;            /**< \brief Storage for the max view angle */
   double max_range_angle_;           /**< \brief Storage for the max range angle */
-  rclcpp::Clock clock_ros_;         /**< \brief ros2 clock for the time */
 };
 
 MOVEIT_CLASS_FORWARD(KinematicConstraintSet);
