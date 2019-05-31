@@ -21,7 +21,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 
 install(TARGETS ${MOVEIT_LIB_NAME}
   ARCHIVE DESTINATION lib
-LIBRARY DESTINATION lib)
+  LIBRARY DESTINATION lib)
 
 install(DIRECTORY include/ DESTINATION include)
 
@@ -31,17 +31,18 @@ if(BUILD_TESTING)
   find_package(resource_retriever REQUIRED)
 
   if(WIN32)
+    # TODO add windows paths
     # set(append_library_dirs "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
   else()
     set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../robot_trajectory;${CMAKE_CURRENT_BINARY_DIR}/../utils")
   endif()
 
   ament_add_gtest(test_time_parameterization test/test_time_parameterization.cpp
-            APPEND_LIBRARY_DIRS "${append_library_dirs}")
+    APPEND_LIBRARY_DIRS "${append_library_dirs}")
 
-	target_include_directories(test_time_parameterization PUBLIC
-		${geometric_shapes_INCLUDE_DIRS}
-	)
+  target_include_directories(test_time_parameterization PUBLIC
+    ${geometric_shapes_INCLUDE_DIRS}
+  )
 
   target_link_libraries(test_time_parameterization
     moveit_test_utils

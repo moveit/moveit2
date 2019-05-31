@@ -44,7 +44,8 @@ static const double ALIMIT = 1.0;  // default if not specified in model
 
 namespace trajectory_processing
 {
-rclcpp::Logger LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION = rclcpp::get_logger("moveit").get_child("trajectory_processing.iterative_spline_parameterization");
+rclcpp::Logger LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION =
+    rclcpp::get_logger("moveit").get_child("trajectory_processing.iterative_spline_parameterization");
 
 static void fit_cubic_spline(const int n, const double dt[], const double x[], double x1[], double x2[]);
 static void adjust_two_positions(const int n, const double dt[], double x[], double x1[], double x2[],
@@ -93,7 +94,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   if (!group)
   {
     RCLCPP_ERROR(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION, "It looks like the planner did not set "
-                                                                               "the group the plan was computed for");
+                                                           "the group the plan was computed for");
     return false;
   }
   const robot_model::RobotModel& rmodel = group->getParentModel();
@@ -107,27 +108,31 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   // Set scaling factors
   if (max_velocity_scaling_factor > 0.0 && max_velocity_scaling_factor <= 1.0)
     velocity_scaling_factor = max_velocity_scaling_factor;
-  else if (max_velocity_scaling_factor == 0.0){
+  else if (max_velocity_scaling_factor == 0.0)
+  {
     RCLCPP_DEBUG(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION,
-                    "A max_velocity_scaling_factor of 0.0 was specified, defaulting to %f instead.",
-                    velocity_scaling_factor);
+                 "A max_velocity_scaling_factor of 0.0 was specified, defaulting to %f instead.",
+                 velocity_scaling_factor);
   }
-  else{
+  else
+  {
     RCLCPP_WARN(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION,
-                   "Invalid max_velocity_scaling_factor %f specified, defaulting to %f instead.",
-                   max_velocity_scaling_factor, velocity_scaling_factor);
+                "Invalid max_velocity_scaling_factor %f specified, defaulting to %f instead.",
+                max_velocity_scaling_factor, velocity_scaling_factor);
   }
   if (max_acceleration_scaling_factor > 0.0 && max_acceleration_scaling_factor <= 1.0)
     acceleration_scaling_factor = max_acceleration_scaling_factor;
-  else if (max_acceleration_scaling_factor == 0.0){
+  else if (max_acceleration_scaling_factor == 0.0)
+  {
     RCLCPP_DEBUG(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION,
-                    "A max_acceleration_scaling_factor of 0.0 was specified, defaulting to %f instead.",
-                    acceleration_scaling_factor);
+                 "A max_acceleration_scaling_factor of 0.0 was specified, defaulting to %f instead.",
+                 acceleration_scaling_factor);
   }
-  else{
+  else
+  {
     RCLCPP_WARN(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION,
-                   "Invalid max_acceleration_scaling_factor %f specified, defaulting to %f instead.",
-                   max_acceleration_scaling_factor, acceleration_scaling_factor);
+                "Invalid max_acceleration_scaling_factor %f specified, defaulting to %f instead.",
+                max_acceleration_scaling_factor, acceleration_scaling_factor);
   }
   // No wrapped angles.
   trajectory.unwind();
@@ -230,17 +235,17 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
     if (t2[j].max_velocity_ <= 0.0 || t2[j].max_acceleration_ <= 0.0)
     {
       RCLCPP_ERROR(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION,
-                      "Joint %d max velocity %f and max acceleration %f must be greater than zero "
-                      "or a solution won't be found.\n",
-                      j, t2[j].max_velocity_, t2[j].max_acceleration_);
+                   "Joint %d max velocity %f and max acceleration %f must be greater than zero "
+                   "or a solution won't be found.\n",
+                   j, t2[j].max_velocity_, t2[j].max_acceleration_);
       return false;
     }
     if (t2[j].min_velocity_ >= 0.0 || t2[j].min_acceleration_ >= 0.0)
     {
       RCLCPP_ERROR(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION,
-                      "Joint %d min velocity %f and min acceleration %f must be less than zero "
-                      "or a solution won't be found.\n",
-                      j, t2[j].min_velocity_, t2[j].min_acceleration_);
+                   "Joint %d min velocity %f and min acceleration %f must be less than zero "
+                   "or a solution won't be found.\n",
+                   j, t2[j].min_velocity_, t2[j].min_acceleration_);
       return false;
     }
   }
@@ -248,8 +253,8 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   // Error check
   if (num_points < 4)
   {
-    RCLCPP_ERROR(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION,
-                    "number of waypoints %d, needs to be greater than 3.\n", num_points);
+    RCLCPP_ERROR(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION, "number of waypoints %d, needs to be greater than 3.\n",
+                 num_points);
     return false;
   }
   for (unsigned int j = 0; j < num_joints; j++)
@@ -257,27 +262,27 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
     if (t2[j].velocities_[0] > t2[j].max_velocity_ || t2[j].velocities_[0] < t2[j].min_velocity_)
     {
       RCLCPP_ERROR(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION, "Initial velocity %f out of bounds\n",
-                      t2[j].velocities_[0]);
+                   t2[j].velocities_[0]);
       return false;
     }
     else if (t2[j].velocities_[num_points - 1] > t2[j].max_velocity_ ||
              t2[j].velocities_[num_points - 1] < t2[j].min_velocity_)
     {
       RCLCPP_ERROR(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION, "Final velocity %f out of bounds\n",
-                      t2[j].velocities_[num_points - 1]);
+                   t2[j].velocities_[num_points - 1]);
       return false;
     }
     else if (t2[j].accelerations_[0] > t2[j].max_acceleration_ || t2[j].accelerations_[0] < t2[j].min_acceleration_)
     {
-      RCLCPP_ERROR(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION,
-                      "Initial acceleration %f out of bounds\n", t2[j].accelerations_[0]);
+      RCLCPP_ERROR(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION, "Initial acceleration %f out of bounds\n",
+                   t2[j].accelerations_[0]);
       return false;
     }
     else if (t2[j].accelerations_[num_points - 1] > t2[j].max_acceleration_ ||
              t2[j].accelerations_[num_points - 1] < t2[j].min_acceleration_)
     {
-      RCLCPP_ERROR(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION,
-                      "Final acceleration %f out of bounds\n", t2[j].accelerations_[num_points - 1]);
+      RCLCPP_ERROR(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION, "Final acceleration %f out of bounds\n",
+                   t2[j].accelerations_[num_points - 1]);
       return false;
     }
   }

@@ -42,7 +42,7 @@ if(BUILD_TESTING)
   include_directories(${moveit_resources_INCLUDE_DIRS})
 
   if(WIN32)
-     # TODO add windows paths
+    # TODO add windows paths
   else()
     set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../utils")
   endif()

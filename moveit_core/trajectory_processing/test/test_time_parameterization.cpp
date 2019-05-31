@@ -47,7 +47,6 @@
 // Logger
 rclcpp::Logger logger_trajectory_processing_test = rclcpp::get_logger("trajectory_processing");
 
-
 // Static variables used in all tests
 moveit::core::RobotModelConstPtr RMODEL = moveit::core::loadTestingRobotModel("pr2");
 robot_trajectory::RobotTrajectory TRAJECTORY(RMODEL, "right_arm");
@@ -148,7 +147,8 @@ TEST(TestTimeParameterization, TestIterativeParabolic)
 
   auto diff_time = std::chrono::system_clock::now() - wt;
 
-  std::cout << "IterativeParabolicTimeParameterization  took " << (std::chrono::system_clock::now() - wt).count() << std::endl;
+  std::cout << "IterativeParabolicTimeParameterization  took " << (std::chrono::system_clock::now() - wt).count()
+            << std::endl;
   printTrajectory(TRAJECTORY);
   ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 3.0);
 }
@@ -172,8 +172,8 @@ TEST(TestTimeParameterization, TestIterativeSplineAddPoints)
 
   auto wt = std::chrono::system_clock::now();
   EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
-  std::cout << "IterativeSplineParameterization with added points took " << (std::chrono::system_clock::now() - wt).count()
-            << std::endl;
+  std::cout << "IterativeSplineParameterization with added points took "
+            << (std::chrono::system_clock::now() - wt).count() << std::endl;
   printTrajectory(TRAJECTORY);
   ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 5.0);
 }
