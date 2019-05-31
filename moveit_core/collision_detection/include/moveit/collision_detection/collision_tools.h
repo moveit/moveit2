@@ -40,24 +40,29 @@
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit_msgs/msg/cost_source.hpp>
 #include <moveit_msgs/msg/contact_information.hpp>
-#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/msg/marker_array.hpp>
+
+#include "rclcpp/rclcpp.hpp"
+#include "rcl/time.h"
+#include "rclcpp/clock.hpp"
+#include "rclcpp/time.hpp"
 
 namespace collision_detection
 {
-void getCollisionMarkersFromContacts(visualization_msgs::MarkerArray& arr, const std::string& frame_id,
-                                     const CollisionResult::ContactMap& con, const std_msgs::ColorRGBA& color,
-                                     const ros::Duration& lifetime, const double radius = 0.035);
+void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
+                                     const CollisionResult::ContactMap& con, const std_msgs::msg::ColorRGBA& color,
+                                     const rclcpp::Duration& lifetime, const double radius = 0.035);
 
-void getCollisionMarkersFromContacts(visualization_msgs::MarkerArray& arr, const std::string& frame_id,
+void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
                                      const CollisionResult::ContactMap& con);
 
 /// \todo add a class for managing cost sources
-void getCostMarkers(visualization_msgs::MarkerArray& arr, const std::string& frame_id,
+void getCostMarkers(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
                     std::set<CostSource>& cost_sources);
 
-void getCostMarkers(visualization_msgs::MarkerArray& arr, const std::string& frame_id,
-                    std::set<CostSource>& cost_sources, const std_msgs::ColorRGBA& color,
-                    const ros::Duration& lifetime);
+void getCostMarkers(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
+                    std::set<CostSource>& cost_sources, const std_msgs::msg::ColorRGBA& color,
+                    const rclcpp::Duration& lifetime);
 
 double getTotalCost(const std::set<CostSource>& cost_sources);
 
@@ -67,10 +72,10 @@ void intersectCostSources(std::set<CostSource>& cost_sources, const std::set<Cos
                           const std::set<CostSource>& b);
 void removeOverlapping(std::set<CostSource>& cost_sources, double overlap_fraction);
 
-bool getSensorPositioning(geometry_msgs::Point& point, const std::set<CostSource>& cost_sources);
+bool getSensorPositioning(geometry_msgs::msg::Point& point, const std::set<CostSource>& cost_sources);
 
 void costSourceToMsg(const CostSource& cost_source, moveit_msgs::msg::CostSource& msg);
 void contactToMsg(const Contact& contact, moveit_msgs::msg::ContactInformation& msg);
-}
+}  // namespace collision_detection
 
 #endif
