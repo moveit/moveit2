@@ -85,8 +85,8 @@ public:
    * @return False if any of the input vectors are of the wrong size
    */
   bool getTorques(const std::vector<double>& joint_angles, const std::vector<double>& joint_velocities,
-                  const std::vector<double>& joint_accelerations, const std::vector<geometry_msgs::msg::Wrench>& wrenches,
-                  std::vector<double>& torques) const;
+                  const std::vector<double>& joint_accelerations,
+                  const std::vector<geometry_msgs::msg::Wrench>& wrenches, std::vector<double>& torques) const;
 
   /**
    * @brief Get the maximum payload for this group (in kg). Payload is
