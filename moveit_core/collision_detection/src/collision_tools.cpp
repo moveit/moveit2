@@ -47,7 +47,7 @@ void getCostMarkers(visualization_msgs::msg::MarkerArray& arr, const std::string
   color.g = 0.5f;
   color.b = 0.0f;
   color.a = 0.4f;
-  getCostMarkers(arr, frame_id, cost_sources, color, rclcpp::Duration(60.0));
+  getCostMarkers(arr, frame_id, cost_sources, color, rclcpp::Duration(60,0));
 }
 
 void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
@@ -58,7 +58,7 @@ void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, 
   color.g = 0.0f;
   color.b = 0.0f;
   color.a = 0.8f;
-  getCollisionMarkersFromContacts(arr, frame_id, con, color, rclcpp::Duration(60.0));
+  getCollisionMarkersFromContacts(arr, frame_id, con, color, rclcpp::Duration(60,0));
 }
 
 void getCostMarkers(visualization_msgs::msg::MarkerArray& arr, const std::string& frame_id,
