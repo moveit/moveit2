@@ -1,6 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_planning_interface)
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/planning_interface.cpp
   src/planning_response.cpp
 )
@@ -12,6 +12,10 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_robot_trajectory
   urdfdom
   urdfdom_headers)
+
+target_link_libraries(${MOVEIT_LIB_NAME}
+  moveit_robot_trajectory
+  moveit_robot_state)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
   ARCHIVE DESTINATION lib
