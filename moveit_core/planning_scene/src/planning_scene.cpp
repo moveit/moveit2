@@ -48,7 +48,6 @@
 #include <memory>
 #include <set>
 
-
 namespace planning_scene
 {
 rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("planning_scene");
@@ -124,7 +123,8 @@ bool PlanningScene::isEmpty(const moveit_msgs::msg::PlanningSceneWorld& msg)
   return msg.collision_objects.empty() && msg.octomap.octomap.data.empty();
 }
 
-PlanningScene::PlanningScene(const robot_model::RobotModelConstPtr& robot_model, const collision_detection::WorldPtr& world)
+PlanningScene::PlanningScene(const robot_model::RobotModelConstPtr& robot_model,
+                             const collision_detection::WorldPtr& world)
 
   : robot_model_(robot_model), world_(world), world_const_(world)
 {

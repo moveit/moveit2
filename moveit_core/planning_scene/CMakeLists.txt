@@ -26,7 +26,7 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   ${urdfdom_headers_LIBRARIES}
   ${Boost_LIBRARIES}
   ${octomap_msgs_LIBRARIES}
-	${OCTOMAP_LIBRARIES}
+  ${OCTOMAP_LIBRARIES}
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME}
@@ -44,12 +44,12 @@ if(BUILD_TESTING)
   endif()
 
   ament_add_gtest(test_planning_scene test/test_planning_scene.cpp
-		APPEND_LIBRARY_DIRS "${append_library_dirs}")
+    APPEND_LIBRARY_DIRS "${append_library_dirs}")
   target_link_libraries(test_planning_scene
-		${MOVEIT_LIB_NAME}
-		${srdfdom_LIBRARIES}
-		${urdf_LIBRARIES}
-		${geometric_shapes_LIBRARIES}
-		${OCTOMAP_LIBRARIES}
-	)
+    ${MOVEIT_LIB_NAME}
+    ${srdfdom_LIBRARIES}
+    ${urdf_LIBRARIES}
+    ${geometric_shapes_LIBRARIES}
+    ${OCTOMAP_LIBRARIES}
+  )
 endif()
