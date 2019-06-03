@@ -348,10 +348,10 @@ TEST_F(FclCollisionDetectionTester, DiffSceneTester)
 
   auto before = std::chrono::system_clock::now();
   new_crobot.checkSelfCollision(req, res, robot_state);
-  double first_check = (std::chrono::system_clock::now() - before).count();
+  double first_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
   before = std::chrono::system_clock::now();
   new_crobot.checkSelfCollision(req, res, robot_state);
-  double second_check = (std::chrono::system_clock::now() - before).count();
+  double second_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
 
   EXPECT_LT(fabs(first_check - second_check), .05);
 
@@ -368,10 +368,10 @@ TEST_F(FclCollisionDetectionTester, DiffSceneTester)
 
   before = std::chrono::system_clock::now();
   new_crobot.checkSelfCollision(req, res, robot_state);
-  first_check = (std::chrono::system_clock::now() - before).count();
+  first_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
   before = std::chrono::system_clock::now();
   new_crobot.checkSelfCollision(req, res, robot_state);
-  second_check = (std::chrono::system_clock::now() - before).count();
+  second_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
 
   // the first check is going to take a while, as data must be constructed
   EXPECT_LT(second_check, .1);
@@ -380,10 +380,10 @@ TEST_F(FclCollisionDetectionTester, DiffSceneTester)
       *(dynamic_cast<collision_detection::CollisionRobotFCL*>(crobot_.get())));
   before = std::chrono::system_clock::now();
   new_crobot.checkSelfCollision(req, res, robot_state);
-  first_check = (std::chrono::system_clock::now() - before).count();
+  first_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
   before = std::chrono::system_clock::now();
   new_crobot.checkSelfCollision(req, res, robot_state);
-  second_check = (std::chrono::system_clock::now() - before).count();
+  second_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
 
   EXPECT_LT(fabs(first_check - second_check), .05);
 }
@@ -406,10 +406,10 @@ TEST_F(FclCollisionDetectionTester, ConvertObjectToAttached)
 
   auto before = std::chrono::system_clock::now();
   cworld_->checkRobotCollision(req, res, *crobot_, robot_state);
-  double first_check = (std::chrono::system_clock::now() - before).count();
+  double first_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
   before = std::chrono::system_clock::now();
   cworld_->checkRobotCollision(req, res, *crobot_, robot_state);
-  double second_check = (std::chrono::system_clock::now() - before).count();
+  double second_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
 
   EXPECT_LT(second_check, .05);
 
@@ -440,12 +440,12 @@ TEST_F(FclCollisionDetectionTester, ConvertObjectToAttached)
 
   before = std::chrono::system_clock::now();
   crobot_->checkSelfCollision(req, res, robot_state1, *acm_);
-  first_check = (std::chrono::system_clock::now() - before).count();
+  first_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
   before = std::chrono::system_clock::now();
   req.verbose = true;
   res = collision_detection::CollisionResult();
   crobot_->checkSelfCollision(req, res, robot_state2, *acm_);
-  second_check = (std::chrono::system_clock::now() - before).count();
+  second_check = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - before).count();
 
   EXPECT_LT(first_check, .05);
   EXPECT_LT(fabs(first_check - second_check), .1);
@@ -462,7 +462,7 @@ TEST_F(FclCollisionDetectionTester, TestCollisionMapAdditionSpeed)
   }
   auto start = std::chrono::system_clock::now();
   cworld_->getWorld()->addToObject("map", shapes, poses);
-  double t = (std::chrono::system_clock::now() - start).count();
+  double t = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count();
   EXPECT_GE(1.0, t);
   // this is not really a failure; it is just that slow;
   // looking into doing collision checking with a voxel grid.
