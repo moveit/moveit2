@@ -54,11 +54,10 @@
 namespace collision_detection
 {
 
+  rclcpp::Logger LOGGER_COLLISION_DETECTION = rclcpp::get_logger("collision_detection.fcl");
 
 bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data)
 {
-
-  rclcpp::Logger LOGGER_COLLISION_DETECTION = rclcpp::get_logger("collision_detection.fcl");
 
   CollisionData* cdata = reinterpret_cast<CollisionData*>(data);
   if (cdata->done_)
