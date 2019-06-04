@@ -35,14 +35,16 @@
 /* Author: Mrinal Kalakrishnan, Ken Anderson */
 
 #include <moveit/distance_field/propagation_distance_field.h>
-#include <visualization_msgs/Marker.h>
-#include <ros/console.h>
+#include <visualization_msgs/msg/marker.h>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include "rclcpp/rclcpp.hpp"
 
 namespace distance_field
 {
+rclcpp::Logger LOGGER_PROPAGATION_DISTANCE_FIELD = rclcpp::get_logger("moveit").get_child("distance_field");
+
 PropagationDistanceField::PropagationDistanceField(double size_x, double size_y, double size_z, double resolution,
                                                    double origin_x, double origin_y, double origin_z,
                                                    double max_distance, bool propagate_negative)
@@ -102,26 +104,26 @@ int PropagationDistanceField::eucDistSq(Eigen::Vector3i point1, Eigen::Vector3i 
 
 void PropagationDistanceField::print(const VoxelSet& set)
 {
-  ROS_DEBUG_NAMED("distance_field", "[");
+  RCLCPP_DEBUG(LOGGER_PROPAGATION_DISTANCE_FIELD, "[");
   VoxelSet::const_iterator it;
   for (it = set.begin(); it != set.end(); ++it)
   {
     Eigen::Vector3i loc1 = *it;
-    ROS_DEBUG_NAMED("distance_field", "%d, %d, %d ", loc1.x(), loc1.y(), loc1.z());
+    RCLCPP_DEBUG(LOGGER_PROPAGATION_DISTANCE_FIELD, "%d, %d, %d ", loc1.x(), loc1.y(), loc1.z());
   }
-  ROS_DEBUG_NAMED("distance_field", "] size=%u\n", (unsigned int)set.size());
+  RCLCPP_DEBUG(LOGGER_PROPAGATION_DISTANCE_FIELD, "] size=%u\n", (unsigned int)set.size());
 }
 
 void PropagationDistanceField::print(const EigenSTL::vector_Vector3d& points)
 {
-  ROS_DEBUG_NAMED("distance_field", "[");
+  RCLCPP_DEBUG(LOGGER_PROPAGATION_DISTANCE_FIELD, "[");
   EigenSTL::vector_Vector3d::const_iterator it;
   for (it = points.begin(); it != points.end(); ++it)
   {
     Eigen::Vector3d loc1 = *it;
-    ROS_DEBUG_NAMED("distance_field", "%g, %g, %g ", loc1.x(), loc1.y(), loc1.z());
+    RCLCPP_DEBUG(LOGGER_PROPAGATION_DISTANCE_FIELD, "%g, %g, %g ", loc1.x(), loc1.y(), loc1.z());
   }
-  ROS_DEBUG_NAMED("distance_field", "] size=%u\n", (unsigned int)points.size());
+  RCLCPP_DEBUG(LOGGER_PROPAGATION_DISTANCE_FIELD, "] size=%u\n", (unsigned int)points.size());
 }
 
 void PropagationDistanceField::updatePointsInField(const EigenSTL::vector_Vector3d& old_points,
@@ -167,19 +169,10 @@ void PropagationDistanceField::updatePointsInField(const EigenSTL::vector_Vector
     {
       new_not_in_current.push_back(new_not_old[i]);
     }
-    // ROS_INFO_NAMED("distance_field", "Adding obstacle voxel %d %d %d", (*it).x(), (*it).y(), (*it).z());
   }
 
   removeObstacleVoxels(old_not_new);
   addNewObstacleVoxels(new_not_in_current);
-
-  // ROS_DEBUG_NAMED("distance_field",  "new=" );
-  // print(points_added);
-  // ROS_DEBUG_NAMED("distance_field",  "removed=" );
-  // print(points_removed);
-  // ROS_DEBUG_NAMED("distance_field",  "obstacle_voxel_locations_=" );
-  // print(object_voxel_locations_);
-  // ROS_DEBUG_NAMED("distance_field", "");
 }
 
 void PropagationDistanceField::addPointsToField(const EigenSTL::vector_Vector3d& points)
@@ -416,8 +409,8 @@ void PropagationDistanceField::propagatePositive()
       // This will never happen.  update_direction_ is always set before voxel is added to bucket queue.
       if (vptr->update_direction_ < 0 || vptr->update_direction_ > 26)
       {
-        ROS_ERROR_NAMED("distance_field", "PROGRAMMING ERROR: Invalid update direction detected: %d",
-                        vptr->update_direction_);
+        RCLCPP_ERROR(LOGGER_PROPAGATION_DISTANCE_FIELD, "PROGRAMMING ERROR: Invalid update direction detected: %d",
+                     vptr->update_direction_);
         continue;
       }
 
@@ -475,8 +468,8 @@ void PropagationDistanceField::propagateNegative()
       // negative_bucket_queue_.
       if (vptr->negative_update_direction_ < 0 || vptr->negative_update_direction_ > 26)
       {
-        ROS_ERROR_NAMED("distance_field", "PROGRAMMING ERROR: Invalid update direction detected: %d",
-                        vptr->update_direction_);
+        RCLCPP_ERROR(LOGGER_PROPAGATION_DISTANCE_FIELD, "PROGRAMMING ERROR: Invalid update direction detected: %d",
+                     vptr->update_direction_);
         continue;
       }
 

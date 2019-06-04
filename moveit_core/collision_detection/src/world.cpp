@@ -35,10 +35,13 @@
 /* Author: Acorn Pooley, Ioan Sucan */
 
 #include <moveit/collision_detection/world.h>
-#include <ros/console.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace collision_detection
 {
+// Logger
+rclcpp::Logger LOGGER_WORLD = rclcpp::get_logger("moveit").get_child("collision_detection");
+
 World::World()
 {
 }
@@ -66,8 +69,8 @@ void World::addToObject(const std::string& id, const std::vector<shapes::ShapeCo
 {
   if (shapes.size() != poses.size())
   {
-    ROS_ERROR_NAMED("collision_detection", "Number of shapes and number of poses do not match. "
-                                           "Not adding this object to collision world.");
+    RCLCPP_ERROR(LOGGER_WORLD,
+                 "Number of shapes and number of poses do not match. Not adding this object to collision world.");
     return;
   }
 

@@ -1,6 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_planning_request_adapter)
 
-add_library(${MOVEIT_LIB_NAME} src/planning_request_adapter.cpp)
+add_library(${MOVEIT_LIB_NAME} SHARED src/planning_request_adapter.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 ament_target_dependencies(${MOVEIT_LIB_NAME}

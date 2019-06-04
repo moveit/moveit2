@@ -1,6 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_collision_detection)
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/allvalid/collision_robot_allvalid.cpp
   src/allvalid/collision_world_allvalid.cpp
   src/collision_matrix.cpp
@@ -25,43 +25,64 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   geometric_shapes
 )
 
-target_link_libraries(${MOVEIT_LIB_NAME} moveit_robot_state ${catkin_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  moveit_robot_state
+  rclcpp
+  rmw_implementation
+  urdf
+  urdfdom
+  urdfdom_headers
+  visualization_msgs
+  tf2_eigen
+  Boost
+  geometric_shapes
+)
 
 # unit tests
-if(CATKIN_ENABLE_TESTING)
+if(BUILD_TESTING)
+  find_package(resource_retriever REQUIRED)
+  if(WIN32)
+    # TODO add window paths
+  else()
+   set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../utils")
+  endif()
+
   ament_add_gtest(test_world test/test_world.cpp
-		APPEND_LIBRARY_DIRS "${append_library_dirs}")
+    APPEND_LIBRARY_DIRS "${append_library_dirs}")
   target_link_libraries(test_world
     ${MOVEIT_LIB_NAME}
     ${urdfdom}
     ${urdfdom_headers}
-		${geometric_shapes_LIBRARIES}
-	)
+    ${Boost_LIBRARIES}
+    ${geometric_shapes_LIBRARIES}
+  )
 
-	ament_add_gtest(test_world_diff test/test_world_diff.cpp
-		APPEND_LIBRARY_DIRS "${append_library_dirs}")
+  ament_add_gtest(test_world_diff test/test_world_diff.cpp
+    APPEND_LIBRARY_DIRS "${append_library_dirs}")
   target_link_libraries(test_world_diff
     ${MOVEIT_LIB_NAME}
     ${urdfdom}
     ${urdfdom_headers}
-		${geometric_shapes_LIBRARIES}
-	)
+    ${Boost_LIBRARIES}
+    ${geometric_shapes_LIBRARIES}
+  )
 
-	ament_add_gtest(test_all_valid test/test_all_valid.cpp
-		APPEND_LIBRARY_DIRS "${append_library_dirs}")
+  ament_add_gtest(test_all_valid test/test_all_valid.cpp
+     APPEND_LIBRARY_DIRS "${append_library_dirs}")
   target_link_libraries(test_all_valid
     ${MOVEIT_LIB_NAME}
-		moveit_robot_model
+    moveit_robot_model
     ${urdfdom}
     ${urdfdom_headers}
-		${geometric_shapes_LIBRARIES}
-		resource_retriever::resource_retriever
-	)
+    ${Boost_LIBRARIES}
+    ${geometric_shapes_LIBRARIES}
+    resource_retriever::resource_retriever
+  )
 endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
 
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+install(DIRECTORY include/ DESTINATION include)

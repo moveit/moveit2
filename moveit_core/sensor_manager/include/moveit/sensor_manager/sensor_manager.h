@@ -100,7 +100,7 @@ public:
   /// The function returns true on success (either completing execution succesfully or computing a trajecotory
   /// successufully)
   virtual bool pointSensorTo(const std::string& name, const geometry_msgs::msg::PointStamped& target,
-                             moveit_msgs::msg::msg::RobotTrajectory& sensor_trajectory) = 0;
+                             moveit_msgs::msg::RobotTrajectory& sensor_trajectory) = 0;
 };
 }
 

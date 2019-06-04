@@ -94,8 +94,8 @@ bool callAdapter1(const PlanningRequestAdapter* adapter, const planning_interfac
   }
   catch (std::exception& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception caught executing *final* adapter '%s': %s",
-                    adapter->getDescription().c_str(), ex.what());
+    RCLCPP_ERROR(LOGGER, "Exception caught executing *final* adapter '%s': %s", adapter->getDescription().c_str(),
+                 ex.what());
     added_path_index.clear();
     return callPlannerInterfaceSolve(planner.get(), planning_scene, req, res);
   }
@@ -112,8 +112,8 @@ bool callAdapter2(const PlanningRequestAdapter* adapter, const PlanningRequestAd
   }
   catch (std::exception& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception caught executing *next* adapter '%s': %s",
-                    adapter->getDescription().c_str(), ex.what());
+    RCLCPP_ERROR(LOGGER, "Exception caught executing *next* adapter '%s': %s", adapter->getDescription().c_str(),
+                 ex.what());
     added_path_index.clear();
     return planner(planning_scene, req, res);
   }
