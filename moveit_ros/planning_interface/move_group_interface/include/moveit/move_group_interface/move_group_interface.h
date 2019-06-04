@@ -122,7 +122,7 @@ public:
     ros::NodeHandle node_handle_;
   };
 
-  MOVEIT_STRUCT_FORWARD(Plan);
+  MOVEIT_STRUCT_FORWARD(Plan)
 
   /// The representation of a motion plan (as ROS messasges)
   struct Plan

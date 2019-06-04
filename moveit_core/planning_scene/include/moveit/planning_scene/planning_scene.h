@@ -987,7 +987,7 @@ private:
   bool processCollisionObjectRemove(const moveit_msgs::msg::CollisionObject& object);
   bool processCollisionObjectMove(const moveit_msgs::msg::CollisionObject& object);
 
-  MOVEIT_STRUCT_FORWARD(CollisionDetector);
+  MOVEIT_STRUCT_FORWARD(CollisionDetector)
 
   /* \brief A set of compatible collision detectors */
   struct CollisionDetector

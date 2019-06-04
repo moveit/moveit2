@@ -73,7 +73,7 @@ public:
   /* Collision Bodies                                                   */
   /**********************************************************************/
 
-  MOVEIT_STRUCT_FORWARD(Object);
+  MOVEIT_STRUCT_FORWARD(Object)
 
   /** \brief A representation of an object */
   struct Object
