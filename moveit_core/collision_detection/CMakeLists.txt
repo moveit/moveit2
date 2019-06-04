@@ -11,23 +11,54 @@ add_library(${MOVEIT_LIB_NAME}
   src/world.cpp
   src/world_diff.cpp
 )
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+
+set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  moveit_robot_state
+  rclcpp
+  rmw_implementation
+  urdf
+  urdfdom
+  urdfdom_headers
+  visualization_msgs
+  tf2_eigen
+  geometric_shapes
+)
 
 target_link_libraries(${MOVEIT_LIB_NAME} moveit_robot_state ${catkin_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
 
 # unit tests
 if(CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(test_world test/test_world.cpp)
-  target_link_libraries(test_world ${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
+  ament_add_gtest(test_world test/test_world.cpp
+		APPEND_LIBRARY_DIRS "${append_library_dirs}")
+  target_link_libraries(test_world
+    ${MOVEIT_LIB_NAME}
+    ${urdfdom}
+    ${urdfdom_headers}
+		${geometric_shapes_LIBRARIES}
+	)
 
-  catkin_add_gtest(test_world_diff test/test_world_diff.cpp)
-  target_link_libraries(test_world_diff ${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
+	ament_add_gtest(test_world_diff test/test_world_diff.cpp
+		APPEND_LIBRARY_DIRS "${append_library_dirs}")
+  target_link_libraries(test_world_diff
+    ${MOVEIT_LIB_NAME}
+    ${urdfdom}
+    ${urdfdom_headers}
+		${geometric_shapes_LIBRARIES}
+	)
 
-  catkin_add_gtest(test_all_valid test/test_all_valid.cpp)
-  target_link_libraries(test_all_valid ${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
+	ament_add_gtest(test_all_valid test/test_all_valid.cpp
+		APPEND_LIBRARY_DIRS "${append_library_dirs}")
+  target_link_libraries(test_all_valid
+    ${MOVEIT_LIB_NAME}
+		moveit_robot_model
+    ${urdfdom}
+    ${urdfdom_headers}
+		${geometric_shapes_LIBRARIES}
+		resource_retriever::resource_retriever
+	)
 endif()
-
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}

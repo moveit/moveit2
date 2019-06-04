@@ -995,8 +995,9 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const robot_state::Robot
   collision_detection::CollisionRequest req;
   collision_detection::CollisionResult res;
   collision_detection::AllowedCollisionMatrix acm;
-  acm.setDefaultEntry("cone", (boost::function<bool(collision_detection::Contact&)>)
-    boost::bind(&VisibilityConstraint::decideContact, this, _1));
+  collision_detection::DecideContactFn fn = std::bind(&VisibilityConstraint::decideContact, this, std::placeholders::_1);
+  acm.setDefaultEntry(std::string("cone"), fn);
+
   req.contacts = true;
   req.verbose = verbose;
   req.max_contacts = 1;
