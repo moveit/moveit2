@@ -42,7 +42,6 @@
 
 namespace kinematics_metrics
 {
-
 rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("kinematics_metrics");
 
 double KinematicsMetrics::getJointLimitsPenalty(const robot_state::RobotState& state,
@@ -222,7 +221,8 @@ bool KinematicsMetrics::getManipulability(const robot_state::RobotState& state,
     Eigen::MatrixXd jacobian = state.getJacobian(joint_model_group);
     Eigen::JacobiSVD<Eigen::MatrixXd> svdsolver(jacobian.topLeftCorner(3, jacobian.cols()));
     Eigen::MatrixXd singular_values = svdsolver.singularValues();
-    for (int i = 0; i < singular_values.rows(); ++i){
+    for (int i = 0; i < singular_values.rows(); ++i)
+    {
       RCLCPP_DEBUG(LOGGER, "Singular value: %d %f", i, singular_values(i, 0));
     }
 
@@ -233,8 +233,9 @@ bool KinematicsMetrics::getManipulability(const robot_state::RobotState& state,
     Eigen::MatrixXd jacobian = state.getJacobian(joint_model_group);
     Eigen::JacobiSVD<Eigen::MatrixXd> svdsolver(jacobian);
     Eigen::MatrixXd singular_values = svdsolver.singularValues();
-    for (int i = 0; i < singular_values.rows(); ++i){
-          RCLCPP_DEBUG(LOGGER, "Singular value: %d %f", i, singular_values(i, 0));
+    for (int i = 0; i < singular_values.rows(); ++i)
+    {
+      RCLCPP_DEBUG(LOGGER, "Singular value: %d %f", i, singular_values(i, 0));
     }
     manipulability = penalty * singular_values.minCoeff() / singular_values.maxCoeff();
   }
