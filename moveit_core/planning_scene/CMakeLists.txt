@@ -1,7 +1,13 @@
 set(MOVEIT_LIB_NAME moveit_planning_scene)
 
-add_library(${MOVEIT_LIB_NAME} src/planning_scene.cpp)
+add_library(${MOVEIT_LIB_NAME} SHARED src/planning_scene.cpp)
+#TODO: Fix the versioning
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+
+target_include_directories(${MOVEIT_LIB_NAME} PUBLIC
+  ${octomap_msgs_INCLUDE_DIRS}
+  ${octomap_INCLUDE_DIRS}
+)
 
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_robot_model
@@ -9,22 +15,41 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_exceptions
   moveit_transforms
   moveit_collision_detection_fcl
+  moveit_collision_detection
   moveit_kinematic_constraints
   moveit_robot_trajectory
   moveit_trajectory_processing
-  ${LIBOCTOMAP_LIBRARIES} ${catkin_LIBRARIES} ${urdfdom_LIBRARIES} ${urdfdom_headers_LIBRARIES} ${Boost_LIBRARIES})
-
-add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
+  ${LIBOCTOMAP_LIBRARIES}
+  ${rclcpp_LIBRARIES}
+  ${rmw_implementation_LIBRARIES}
+  ${urdfdom_LIBRARIES}
+  ${urdfdom_headers_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${octomap_msgs_LIBRARIES}
+  ${OCTOMAP_LIBRARIES}
+)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+install(DIRECTORY include/ DESTINATION include)
 
-if(CATKIN_ENABLE_TESTING)
+if(BUILD_TESTING)
   find_package(moveit_resources REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
   include_directories(${moveit_resources_INCLUDE_DIRS})
 
-  catkin_add_gtest(test_planning_scene test/test_planning_scene.cpp)
-  target_link_libraries(test_planning_scene ${MOVEIT_LIB_NAME})
+  if(UNIX OR APPLE)
+    set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR}:${CMAKE_CURRENT_BINARY_DIR}/../utils:${CMAKE_CURRENT_BINARY_DIR}/../collision_detection_fcl:${CMAKE_CURRENT_BINARY_DIR}/../collision_detection")
+  endif()
+
+  ament_add_gtest(test_planning_scene test/test_planning_scene.cpp
+    APPEND_LIBRARY_DIRS "${append_library_dirs}")
+  target_link_libraries(test_planning_scene
+    ${MOVEIT_LIB_NAME}
+    ${srdfdom_LIBRARIES}
+    ${urdf_LIBRARIES}
+    ${geometric_shapes_LIBRARIES}
+    ${OCTOMAP_LIBRARIES}
+  )
 endif()

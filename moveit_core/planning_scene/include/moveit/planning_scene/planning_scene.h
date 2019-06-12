@@ -51,11 +51,12 @@
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/planning_scene_components.hpp>
-#include <octomap_msgs/OctomapWithPose.h>
+#include <octomap_msgs/msg/octomap_with_pose.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/function.hpp>
 #include <boost/concept_check.hpp>
 #include <memory>
+#include "rclcpp/rclcpp.hpp"
 
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene
@@ -76,10 +77,10 @@ typedef boost::function<bool(const robot_state::RobotState&, bool)> StateFeasibi
 typedef boost::function<bool(const robot_state::RobotState&, const robot_state::RobotState&, bool)> MotionFeasibilityFn;
 
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their colors */
-typedef std::map<std::string, std_msgs::ColorRGBA> ObjectColorMap;
+typedef std::map<std::string, std_msgs::msg::ColorRGBA> ObjectColorMap;
 
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their types */
-typedef std::map<std::string, object_recognition_msgs::ObjectType> ObjectTypeMap;
+typedef std::map<std::string, object_recognition_msgs::msg::ObjectType> ObjectTypeMap;
 
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
@@ -705,7 +706,8 @@ public:
 
   /** \brief Construct a message (\e scene) with the data requested in \e comp. If all options in \e comp are filled,
       this will be a complete planning scene message */
-  void getPlanningSceneMsg(moveit_msgs::msg::PlanningScene& scene, const moveit_msgs::msg::PlanningSceneComponents& comp) const;
+  void getPlanningSceneMsg(moveit_msgs::msg::PlanningScene& scene,
+                           const moveit_msgs::msg::PlanningSceneComponents& comp) const;
 
   /** \brief Construct a message (\e collision_object) with the collision object data from the planning_scene for the
    * requested object*/
@@ -722,10 +724,11 @@ public:
 
   /** \brief Construct a vector of messages (\e attached_collision_objects) with the attached collision object data for
    * all objects in planning_scene */
-  void getAttachedCollisionObjectMsgs(std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objs) const;
+  void
+  getAttachedCollisionObjectMsgs(std::vector<moveit_msgs::msg::AttachedCollisionObject>& attached_collision_objs) const;
 
   /** \brief Construct a message (\e octomap) with the octomap data from the planning_scene */
-  bool getOctomapMsg(octomap_msgs::OctomapWithPose& octomap) const;
+  bool getOctomapMsg(octomap_msgs::msg::OctomapWithPose& octomap) const;
 
   /** \brief Construct a vector of messages (\e object_colors) with the colors of the objects from the planning_scene */
   void getObjectColorMsgs(std::vector<moveit_msgs::msg::ObjectColor>& object_colors) const;
@@ -750,8 +753,8 @@ public:
 
   bool processPlanningSceneWorldMsg(const moveit_msgs::msg::PlanningSceneWorld& world);
 
-  void processOctomapMsg(const octomap_msgs::OctomapWithPose& map);
-  void processOctomapMsg(const octomap_msgs::Octomap& map);
+  void processOctomapMsg(const octomap_msgs::msg::OctomapWithPose& map);
+  void processOctomapMsg(const octomap_msgs::msg::Octomap& map);
   void processOctomapPtr(const std::shared_ptr<const octomap::OcTree>& octree, const Eigen::Isometry3d& t);
 
   /**
@@ -775,15 +778,15 @@ public:
 
   bool hasObjectColor(const std::string& id) const;
 
-  const std_msgs::ColorRGBA& getObjectColor(const std::string& id) const;
-  void setObjectColor(const std::string& id, const std_msgs::ColorRGBA& color);
+  const std_msgs::msg::ColorRGBA& getObjectColor(const std::string& id) const;
+  void setObjectColor(const std::string& id, const std_msgs::msg::ColorRGBA& color);
   void removeObjectColor(const std::string& id);
   void getKnownObjectColors(ObjectColorMap& kc) const;
 
   bool hasObjectType(const std::string& id) const;
 
-  const object_recognition_msgs::ObjectType& getObjectType(const std::string& id) const;
-  void setObjectType(const std::string& id, const object_recognition_msgs::ObjectType& type);
+  const object_recognition_msgs::msg::ObjectType& getObjectType(const std::string& id) const;
+  void setObjectType(const std::string& id, const object_recognition_msgs::msg::ObjectType& type);
   void removeObjectType(const std::string& id);
   void getKnownObjectTypes(ObjectTypeMap& kc) const;
 
@@ -855,7 +858,8 @@ public:
                           const kinematic_constraints::KinematicConstraintSet& constr, bool verbose = false) const;
 
   /** \brief Check if a given state is valid. This means checking for collisions and feasibility */
-  bool isStateValid(const moveit_msgs::msg::RobotState& state, const std::string& group = "", bool verbose = false) const;
+  bool isStateValid(const moveit_msgs::msg::RobotState& state, const std::string& group = "",
+                    bool verbose = false) const;
 
   /** \brief Check if a given state is valid. This means checking for collisions and feasibility */
   bool isStateValid(const robot_state::RobotState& state, const std::string& group = "", bool verbose = false) const;
@@ -891,9 +895,9 @@ public:
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
    * passed in trajectory. */
   bool isPathValid(const moveit_msgs::msg::RobotState& start_state, const moveit_msgs::msg::RobotTrajectory& trajectory,
-                   const moveit_msgs::msg::Constraints& path_constraints, const moveit_msgs::msg::Constraints& goal_constraints,
-                   const std::string& group = "", bool verbose = false,
-                   std::vector<std::size_t>* invalid_index = NULL) const;
+                   const moveit_msgs::msg::Constraints& path_constraints,
+                   const moveit_msgs::msg::Constraints& goal_constraints, const std::string& group = "",
+                   bool verbose = false, std::vector<std::size_t>* invalid_index = NULL) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
@@ -915,9 +919,9 @@ public:
    * constraint satisfaction). It is also checked that the goal constraints are satisfied by the last state on the
    * passed in trajectory. */
   bool isPathValid(const robot_trajectory::RobotTrajectory& trajectory,
-                   const moveit_msgs::msg::Constraints& path_constraints, const moveit_msgs::msg::Constraints& goal_constraints,
-                   const std::string& group = "", bool verbose = false,
-                   std::vector<std::size_t>* invalid_index = NULL) const;
+                   const moveit_msgs::msg::Constraints& path_constraints,
+                   const moveit_msgs::msg::Constraints& goal_constraints, const std::string& group = "",
+                   bool verbose = false, std::vector<std::size_t>* invalid_index = NULL) const;
 
   /** \brief Check if a given path is valid. Each state is checked for validity (collision avoidance, feasibility and
    * constraint satisfaction). */
