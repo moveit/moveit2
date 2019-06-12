@@ -439,7 +439,7 @@ public:
   {
     if (tip_frames_.size() > 1)
       RCLCPP_ERROR(LOGGER_KINEMATICS_BASE, "This kinematic solver has more than one tip frame, "
-                           "do not call getTipFrame()");
+                                           "do not call getTipFrame()");
 
     return tip_frames_[0];
   }
@@ -614,27 +614,32 @@ protected:
    * as the predominant configuration but also allows groupwise specifications.
    */
   template <typename T>
-  inline bool lookupParam(std::shared_ptr<rclcpp::Node>& node, const std::string& param, T& val, const T& default_val) const
+  inline bool lookupParam(std::shared_ptr<rclcpp::Node>& node, const std::string& param, T& val,
+                          const T& default_val) const
   {
     rclcpp::SyncParametersClient parameters_lookup(node);
 
-    if(parameters_lookup.has_parameter({ group_name_ + "/" + param })){
-      val = parameters_lookup.get_parameter( group_name_ + "/" + param, default_val);
+    if (parameters_lookup.has_parameter({ group_name_ + "/" + param }))
+    {
+      val = parameters_lookup.get_parameter(group_name_ + "/" + param, default_val);
       return true;
     }
 
-    if(parameters_lookup.has_parameter({ param })){
+    if (parameters_lookup.has_parameter({ param }))
+    {
       val = parameters_lookup.get_parameter(param, default_val);
       return true;
     }
 
-    if(parameters_lookup.has_parameter({  "robot_description_kinematics/" + group_name_ + "/" + param } )) {
-      val = parameters_lookup.get_parameter( "robot_description_kinematics/" + group_name_ + "/" + param , default_val);
+    if (parameters_lookup.has_parameter({ "robot_description_kinematics/" + group_name_ + "/" + param }))
+    {
+      val = parameters_lookup.get_parameter("robot_description_kinematics/" + group_name_ + "/" + param, default_val);
       return true;
     }
 
-    if(parameters_lookup.has_parameter({  "robot_description_kinematics/" + param } )) {
-      val = parameters_lookup.get_parameter( "robot_description_kinematics/" + param , default_val);
+    if (parameters_lookup.has_parameter({ "robot_description_kinematics/" + param }))
+    {
+      val = parameters_lookup.get_parameter("robot_description_kinematics/" + param, default_val);
       return true;
     }
     return false;

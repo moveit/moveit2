@@ -118,10 +118,9 @@ bool KinematicsBase::initialize(const moveit::core::RobotModel& robot_model, con
                                 const std::string& base_frame, const std::vector<std::string>& tip_frames,
                                 double search_discretization)
 {
-  RCLCPP_WARN(LOGGER_KINEMATICS_BASE,
-                 "IK plugin for group '%s' relies on deprecated API. "
-                 "Please implement initialize(RobotModel, ...).",
-                 group_name.c_str());
+  RCLCPP_WARN(LOGGER_KINEMATICS_BASE, "IK plugin for group '%s' relies on deprecated API. "
+                                      "Please implement initialize(RobotModel, ...).",
+              group_name.c_str());
   return false;
 }
 
