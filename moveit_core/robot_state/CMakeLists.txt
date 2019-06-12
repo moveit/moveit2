@@ -27,7 +27,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
   tf2_geometry_msgs
 )
-
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
@@ -43,7 +42,7 @@ if(BUILD_TESTING)
   include_directories(${moveit_resources_INCLUDE_DIRS})
 
   if(WIN32)
-    # set(append_library_dirs "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
+    # TODO add windows paths
   else()
     set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../utils")
   endif()

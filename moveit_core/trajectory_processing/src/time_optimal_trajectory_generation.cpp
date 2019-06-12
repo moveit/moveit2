@@ -48,7 +48,9 @@
 
 namespace trajectory_processing
 {
-rclcpp::Logger logger_trajectory_processing_optimal = rclcpp::get_logger("trajectory_processing.time_optimal_trajectory_generation");
+rclcpp::Logger LOGGER_TIME_OPTIMAL_TRAJECTORY_GENERATION =
+    rclcpp::get_logger("moveit").get_child("trajectory_processing.time_optimal_trajectory_generation");
+
 constexpr double EPS = 0.000001;
 class LinearPathSegment : public PathSegment
 {
@@ -552,7 +554,8 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
     else if (path_vel < 0.0)
     {
       valid_ = false;
-      RCLCPP_ERROR(logger_trajectory_processing_optimal, "Error while integrating forward: Negative path velocity");
+      RCLCPP_ERROR(LOGGER_TIME_OPTIMAL_TRAJECTORY_GENERATION,
+                   "Error while integrating forward: Negative path velocity");
       return true;
     }
 
@@ -649,7 +652,8 @@ void Trajectory::integrateBackward(std::list<TrajectoryStep>& start_trajectory, 
       if (path_vel < 0.0)
       {
         valid_ = false;
-        RCLCPP_ERROR(logger_trajectory_processing_optimal, "Error while integrating backward: Negative path velocity");
+        RCLCPP_ERROR(LOGGER_TIME_OPTIMAL_TRAJECTORY_GENERATION,
+                     "Error while integrating backward: Negative path velocity");
         end_trajectory_ = trajectory;
         return;
       }
@@ -678,7 +682,8 @@ void Trajectory::integrateBackward(std::list<TrajectoryStep>& start_trajectory, 
   }
 
   valid_ = false;
-  RCLCPP_ERROR(logger_trajectory_processing_optimal, "Error while integrating backward: Did not hit start trajectory");
+  RCLCPP_ERROR(LOGGER_TIME_OPTIMAL_TRAJECTORY_GENERATION,
+               "Error while integrating backward: Did not hit start trajectory");
   end_trajectory_ = trajectory;
 }
 
@@ -879,7 +884,8 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   const robot_model::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    RCLCPP_ERROR(logger_trajectory_processing_optimal, "It looks like the planner did not set the group the plan was computed for");
+    RCLCPP_ERROR(LOGGER_TIME_OPTIMAL_TRAJECTORY_GENERATION,
+                 "It looks like the planner did not set the group the plan was computed for");
     return false;
   }
 
@@ -891,13 +897,15 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   }
   else if (max_velocity_scaling_factor == 0.0)
   {
-    RCLCPP_DEBUG(logger_trajectory_processing_optimal, "A max_velocity_scaling_factor of 0.0 was specified, defaulting to %f instead.",
-                    velocity_scaling_factor);
+    RCLCPP_DEBUG(LOGGER_TIME_OPTIMAL_TRAJECTORY_GENERATION,
+                 "A max_velocity_scaling_factor of 0.0 was specified, defaulting to %f instead.",
+                 velocity_scaling_factor);
   }
   else
   {
-    RCLCPP_WARN(logger_trajectory_processing_optimal, "Invalid max_velocity_scaling_factor %f specified, defaulting to %f instead.",
-                   max_velocity_scaling_factor, velocity_scaling_factor);
+    RCLCPP_WARN(LOGGER_TIME_OPTIMAL_TRAJECTORY_GENERATION,
+                "Invalid max_velocity_scaling_factor %f specified, defaulting to %f instead.",
+                max_velocity_scaling_factor, velocity_scaling_factor);
   }
 
   double acceleration_scaling_factor = 1.0;
@@ -907,13 +915,15 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   }
   else if (max_acceleration_scaling_factor == 0.0)
   {
-    RCLCPP_DEBUG(logger_trajectory_processing_optimal, "A max_acceleration_scaling_factor of 0.0 was specified, defaulting to %f instead.",
-                    acceleration_scaling_factor);
+    RCLCPP_DEBUG(LOGGER_TIME_OPTIMAL_TRAJECTORY_GENERATION,
+                 "A max_acceleration_scaling_factor of 0.0 was specified, defaulting to %f instead.",
+                 acceleration_scaling_factor);
   }
   else
   {
-    RCLCPP_WARN(logger_trajectory_processing_optimal, "Invalid max_acceleration_scaling_factor %f specified, defaulting to %f instead.",
-                   max_acceleration_scaling_factor, acceleration_scaling_factor);
+    RCLCPP_WARN(LOGGER_TIME_OPTIMAL_TRAJECTORY_GENERATION,
+                "Invalid max_acceleration_scaling_factor %f specified, defaulting to %f instead.",
+                max_acceleration_scaling_factor, acceleration_scaling_factor);
   }
 
   // This lib does not actually work properly when angles wrap around, so we need to unwind the path first
@@ -973,7 +983,8 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   // Return trajectory with only the first waypoint if there are not multiple diverse points
   if (points.size() == 1)
   {
-    RCLCPP_WARN(logger_trajectory_processing_optimal, "Trajectory is not being parameterized since it only contains a single distinct waypoint.");
+    RCLCPP_WARN(LOGGER_TIME_OPTIMAL_TRAJECTORY_GENERATION,
+                "Trajectory is not being parameterized since it only contains a single distinct waypoint.");
     robot_state::RobotState waypoint = robot_state::RobotState(trajectory.getWayPoint(0));
     trajectory.clear();
     trajectory.addSuffixWayPoint(waypoint, 0.0);
@@ -984,7 +995,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   Trajectory parameterized(Path(points, path_tolerance_), max_velocity, max_acceleration, 0.001);
   if (!parameterized.isValid())
   {
-    RCLCPP_ERROR(logger_trajectory_processing_optimal, "Unable to parameterize trajectory.");
+    RCLCPP_ERROR(LOGGER_TIME_OPTIMAL_TRAJECTORY_GENERATION, "Unable to parameterize trajectory.");
     return false;
   }
 
