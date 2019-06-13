@@ -36,8 +36,6 @@
 
 #include <moveit/constraint_samplers/constraint_sampler.h>
 
-rclcpp::Logger LOGGER_CONSTRAINT_SAMPLERS = rclcpp::get_logger("moveit").get_child("constraint_samplers");
-
 constraint_samplers::ConstraintSampler::ConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene,
                                                           const std::string& group_name)
   : is_valid_(false), scene_(scene), jmg_(scene->getRobotModel()->getJointModelGroup(group_name)), verbose_(false)
