@@ -95,7 +95,6 @@ void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& samp
   if (!lm)
     return;
   robot_state::RobotState ks(reference_state);
-  rclcpp::Time stamp = rclcpp::Clock().now();
   std_msgs::msg::ColorRGBA color;
   color.r = 1.0f;
   color.g = 0.0f;
@@ -107,7 +106,7 @@ void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& samp
       continue;
     const Eigen::Vector3d& pos = ks.getGlobalLinkTransform(lm).translation();
     visualization_msgs::msg::Marker mk;
-    mk.header.stamp = stamp;
+    mk.header.stamp = rclcpp::Clock().now();
     mk.header.frame_id = sampler->getJointModelGroup()->getParentModel().getModelFrame();
     mk.ns = "constraint_samples";
     mk.id = i;
