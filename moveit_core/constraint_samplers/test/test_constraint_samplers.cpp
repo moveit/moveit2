@@ -673,8 +673,8 @@ TEST_F(LoadPlanningModelsPr2, PoseConstraintSamplerManager)
     if (s->sample(ks, ks_const, 1))
       succ++;
   }
-  // ROS_INFO("Success rate for IK Constraint Sampler with position & orientation constraints for one arm: %lf",
-  //          (double)succ / (double)NT);
+  RCLCPP_INFO(rclcpp::get_logger("test_constraint_samplers"),"Success rate for IK Constraint Sampler with position & orientation constraints for one arm: %lf",
+           (double)succ / (double)NT);
 
   // add additional ocm with smaller volume
   ocm.absolute_x_axis_tolerance = 0.1;
@@ -1105,9 +1105,9 @@ TEST_F(LoadPlanningModelsPr2, SubgroupPoseConstraintsSampler)
     if (s->sample(ks, ks_const, 1))
       succ++;
   }
-  // ROS_INFO_NAMED("pr2_arm_kinematics_plugin",
-  //                "Success rate for IK Constraint Sampler with position & orientation constraints for both arms: %lf",
-  //                (double)succ / (double)NT);
+  RCLCPP_INFO(rclcpp::get_logger("pr2_arm_kinematics_plugin"),
+                 "Success rate for IK Constraint Sampler with position & orientation constraints for both arms: %lf",
+                 (double)succ / (double)NT);
 }
 
 int main(int argc, char** argv)
