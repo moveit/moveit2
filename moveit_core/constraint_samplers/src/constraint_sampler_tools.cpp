@@ -67,11 +67,7 @@ double constraint_samplers::countSamplesPerSecond(const ConstraintSamplerPtr& sa
   robot_state::RobotState ks(reference_state);
   unsigned long int valid = 0;
   unsigned long int total = 0;
-  //TODO RCLCPP::WallTimer has not a .now() function, and there is no wallDuration (they use std::chrono::nanoseconds)
-  // I'll use rclcpp::time, but this is something to fix.
-  rclcpp::Duration duration(1,0);
-  rclcpp::Time end = rclcpp::Clock().now() + duration;
-  // ros::WallTime end = ros::WallTime::now() + ros::WallDuration(1.0);
+  rclcpp::Time end = rclcpp::Clock().now() + rclcpp::Duration(1.0);
   do
   {
     static const unsigned int N = 10;
