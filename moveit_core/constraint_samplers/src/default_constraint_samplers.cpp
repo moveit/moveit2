@@ -39,10 +39,9 @@
 #include <cassert>
 #include <boost/bind.hpp>
 
-rclcpp::Logger LOGGER_DEFAULT_CONTRAINT_SAMPLERS = rclcpp::get_logger("moveit").get_child("constraint_samplers");
-
 namespace constraint_samplers
 {
+  static rclcpp::Logger LOGGER_DEFAULT_CONTRAINT_SAMPLERS = rclcpp::get_logger("moveit").get_child("constraint_samplers");
 bool JointConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
 {
   // construct the constraints
