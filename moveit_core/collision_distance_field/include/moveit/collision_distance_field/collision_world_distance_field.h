@@ -48,7 +48,7 @@ namespace collision_detection
 {
 MOVEIT_CLASS_FORWARD(CollisionWorldDistanceField)
 static rclcpp::Logger LOGGER_COLLISION_WORLD_DISTANCE_FIELD =
-    rclcpp::get_logger("moveit").get_child("collision_world_distance_field");
+    LOGGER_COLLISION_DISTANCE_FIELD.get_child("collision_world_distance_field");
 class CollisionWorldDistanceField : public CollisionWorld
 {
 public:

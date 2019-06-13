@@ -56,7 +56,7 @@ static const double DEFAULT_COLLISION_TOLERANCE = 0.0;
 static const double DEFAULT_MAX_PROPOGATION_DISTANCE = .25;
 
 static rclcpp::Logger LOGGER_COLLISION_ROBOT_DISTANCE_FIELD =
-    rclcpp::get_logger("moveit").get_child("collision_robot_distance_field");
+    LOGGER_COLLISION_DISTANCE_FIELD.get_child("collision_robot_distance_field");
 
 MOVEIT_CLASS_FORWARD(CollisionRobotDistanceField);
 
