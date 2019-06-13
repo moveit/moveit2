@@ -47,14 +47,15 @@ void visualizeDistribution(const ConstraintSamplerPtr& sampler, const robot_stat
                            const std::string& link_name, unsigned int sample_count,
                            visualization_msgs::msg::MarkerArray& markers);
 
-void visualizeDistribution(const moveit_msgs::msg::Constraints& constr, const planning_scene::PlanningSceneConstPtr& scene,
-                           const std::string& group, const std::string& link_name, unsigned int sample_count,
+void visualizeDistribution(const moveit_msgs::msg::Constraints& constr,
+                           const planning_scene::PlanningSceneConstPtr& scene, const std::string& group,
+                           const std::string& link_name, unsigned int sample_count,
                            visualization_msgs::msg::MarkerArray& markers);
 
 double countSamplesPerSecond(const ConstraintSamplerPtr& sampler, const robot_state::RobotState& reference_state);
 
-double countSamplesPerSecond(const moveit_msgs::msg::Constraints& constr, const planning_scene::PlanningSceneConstPtr& scene,
-                             const std::string& group);
+double countSamplesPerSecond(const moveit_msgs::msg::Constraints& constr,
+                             const planning_scene::PlanningSceneConstPtr& scene, const std::string& group);
 }
 
 #endif

@@ -42,7 +42,8 @@ rclcpp::Logger LOGGER_CONTRAINT_SAMPLERS_TOOLS = rclcpp::get_logger("moveit").ge
 void constraint_samplers::visualizeDistribution(const moveit_msgs::msg::Constraints& constr,
                                                 const planning_scene::PlanningSceneConstPtr& scene,
                                                 const std::string& group, const std::string& link_name,
-                                                unsigned int sample_count, visualization_msgs::msg::MarkerArray& markers)
+                                                unsigned int sample_count,
+                                                visualization_msgs::msg::MarkerArray& markers)
 {
   visualizeDistribution(ConstraintSamplerManager::selectDefaultSampler(scene, group, constr), scene->getCurrentState(),
                         link_name, sample_count, markers);
