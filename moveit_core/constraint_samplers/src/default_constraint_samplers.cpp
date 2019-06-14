@@ -41,7 +41,7 @@
 
 namespace constraint_samplers
 {
-  static rclcpp::Logger LOGGER_DEFAULT_CONTRAINT_SAMPLERS = rclcpp::get_logger("moveit").get_child("constraint_samplers");
+static rclcpp::Logger LOGGER_DEFAULT_CONTRAINT_SAMPLERS = rclcpp::get_logger("moveit").get_child("constraint_samplers");
 bool JointConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
 {
   // construct the constraints
@@ -93,16 +93,16 @@ bool JointConstraintSampler::configure(const std::vector<kinematic_constraints::
         std::min(joint_bounds.max_position_, jc[i].getDesiredJointPosition() + jc[i].getJointToleranceAbove()));
 
     RCLCPP_DEBUG(LOGGER_DEFAULT_CONTRAINT_SAMPLERS, "Bounds for %s JointConstraint are %g %g",
-                    jc[i].getJointVariableName().c_str(), ji.min_bound_, ji.max_bound_);
+                 jc[i].getJointVariableName().c_str(), ji.min_bound_, ji.max_bound_);
 
     if (ji.min_bound_ > ji.max_bound_ + std::numeric_limits<double>::epsilon())
     {
       std::stringstream cs;
       jc[i].print(cs);
       RCLCPP_ERROR(LOGGER_DEFAULT_CONTRAINT_SAMPLERS,
-                      "The constraints for joint '%s' are such that "
-                      "there are no possible values for the joint: min_bound: %g, max_bound: %g. Failing.\n",
-                      jm->getName().c_str(), ji.min_bound_, ji.max_bound_);
+                   "The constraints for joint '%s' are such that "
+                   "there are no possible values for the joint: min_bound: %g, max_bound: %g. Failing.\n",
+                   jm->getName().c_str(), ji.min_bound_, ji.max_bound_);
       clear();
       return false;
     }
@@ -257,8 +257,8 @@ bool IKConstraintSampler::configure(const IKSamplingPose& sp)
         sampling_pose_.orientation_constraint_->getLinkModel()->getName())
     {
       RCLCPP_ERROR(LOGGER_DEFAULT_CONTRAINT_SAMPLERS,
-                      "Position and orientation constraints need to be specified for the same link "
-                      "in order to use IK-based sampling");
+                   "Position and orientation constraints need to be specified for the same link "
+                   "in order to use IK-based sampling");
       return false;
     }
 
@@ -354,9 +354,9 @@ bool IKConstraintSampler::loadIKSolver()
     if (!jmg_->getParentModel().hasLinkModel(ik_frame_))
     {
       RCLCPP_ERROR(LOGGER_DEFAULT_CONTRAINT_SAMPLERS,
-                      "The IK solver expects requests in frame '%s' but this frame is not known to the sampler. "
-                      "Ignoring transformation (IK may fail)",
-                      ik_frame_.c_str());
+                   "The IK solver expects requests in frame '%s' but this frame is not known to the sampler. "
+                   "Ignoring transformation (IK may fail)",
+                   ik_frame_.c_str());
       transform_ik_ = false;
     }
 
@@ -401,11 +401,11 @@ bool IKConstraintSampler::loadIKSolver()
   if (wrong_link)
   {
     RCLCPP_ERROR(LOGGER_DEFAULT_CONTRAINT_SAMPLERS,
-                    "IK cannot be performed for link '%s'. The solver can report IK solutions for link '%s'.",
-                    sampling_pose_.position_constraint_ ?
-                        sampling_pose_.position_constraint_->getLinkModel()->getName().c_str() :
-                        sampling_pose_.orientation_constraint_->getLinkModel()->getName().c_str(),
-                    kb_->getTipFrame().c_str());
+                 "IK cannot be performed for link '%s'. The solver can report IK solutions for link '%s'.",
+                 sampling_pose_.position_constraint_ ?
+                     sampling_pose_.position_constraint_->getLinkModel()->getName().c_str() :
+                     sampling_pose_.orientation_constraint_->getLinkModel()->getName().c_str(),
+                 kb_->getTipFrame().c_str());
     return false;
   }
   return true;
@@ -418,8 +418,8 @@ bool IKConstraintSampler::samplePose(Eigen::Vector3d& pos, Eigen::Quaterniond& q
   {
     // samplePose below requires accurate transforms
     RCLCPP_ERROR(LOGGER_DEFAULT_CONTRAINT_SAMPLERS,
-                    "IKConstraintSampler received dirty robot state, but valid transforms are required. "
-                    "Failing.");
+                 "IKConstraintSampler received dirty robot state, but valid transforms are required. "
+                 "Failing.");
     return false;
   }
 
@@ -445,7 +445,7 @@ bool IKConstraintSampler::samplePose(Eigen::Vector3d& pos, Eigen::Quaterniond& q
     else
     {
       RCLCPP_ERROR(LOGGER_DEFAULT_CONTRAINT_SAMPLERS, "Unable to sample a point inside the constraint region. "
-                                             "Constraint region is empty when it should not be.");
+                                                      "Constraint region is empty when it should not be.");
       return false;
     }
 
@@ -551,7 +551,8 @@ bool IKConstraintSampler::sampleHelper(robot_state::RobotState& state, const rob
     if (!samplePose(point, quat, reference_state, max_attempts))
     {
       if (verbose_)
-        RCLCPP_INFO(LOGGER_DEFAULT_CONTRAINT_SAMPLERS, "IK constraint sampler was unable to produce a pose to run IK for");
+        RCLCPP_INFO(LOGGER_DEFAULT_CONTRAINT_SAMPLERS,
+                    "IK constraint sampler was unable to produce a pose to run IK for");
       return false;
     }
 
@@ -641,10 +642,12 @@ bool IKConstraintSampler::callIK(const geometry_msgs::msg::Pose& ik_query,
   {
     if (error.val != moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION &&
         error.val != moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE &&
-        error.val != moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT){
+        error.val != moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT)
+    {
       RCLCPP_ERROR(LOGGER_DEFAULT_CONTRAINT_SAMPLERS, "IK solver failed with error %d", error.val);
     }
-    else if (verbose_){
+    else if (verbose_)
+    {
       RCLCPP_INFO(LOGGER_DEFAULT_CONTRAINT_SAMPLERS, "IK failed");
     }
   }

@@ -87,7 +87,6 @@ public:
 
   ~PR2ArmIKSolver() override{};
 
-
   /**
    * @brief The PR2 inverse kinematics solver
    */
@@ -186,7 +185,8 @@ public:
    */
   bool searchPositionIK(
       const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-      std::vector<double>& solution, const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
+      std::vector<double>& solution, const IKCallbackFn& solution_callback,
+      moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   /**

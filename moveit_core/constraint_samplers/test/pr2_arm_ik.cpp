@@ -65,9 +65,12 @@ bool PR2ArmIK::init(const urdf::ModelInterface& robot_model, const std::string& 
       joint = robot_model.getJoint(link->parent_joint->name);
     if (!joint)
     {
-      if (link->parent_joint){
+      if (link->parent_joint)
+      {
         RCLCPP_ERROR(LOGGER_PR2_ARM_IK, "Could not find joint: %s", link->parent_joint->name.c_str());
-      }else{
+      }
+      else
+      {
         RCLCPP_ERROR(LOGGER_PR2_ARM_IK, "Link %s has no parent joint", link->name.c_str());
       }
       return false;
@@ -77,8 +80,8 @@ bool PR2ArmIK::init(const urdf::ModelInterface& robot_model, const std::string& 
       link_offset.push_back(link->parent_joint->parent_to_joint_origin_transform);
       angle_multipliers_.push_back(joint->axis.x * fabs(joint->axis.x) + joint->axis.y * fabs(joint->axis.y) +
                                    joint->axis.z * fabs(joint->axis.z));
-      RCLCPP_DEBUG(LOGGER_PR2_ARM_IK, "Joint axis: %d, %f, %f, %f", 6 - num_joints, joint->axis.x,
-                      joint->axis.y, joint->axis.z);
+      RCLCPP_DEBUG(LOGGER_PR2_ARM_IK, "Joint axis: %d, %f, %f, %f", 6 - num_joints, joint->axis.x, joint->axis.y,
+                   joint->axis.z);
       if (joint->type != urdf::Joint::CONTINUOUS)
       {
         if (joint->safety)
@@ -129,8 +132,8 @@ bool PR2ArmIK::init(const urdf::ModelInterface& robot_model, const std::string& 
 
   if (num_joints != 7)
   {
-    RCLCPP_ERROR(LOGGER_PR2_ARM_IK, "PR2ArmIK:: Chain from %s to %s does not have 7 joints",
-                    root_name.c_str(), tip_name.c_str());
+    RCLCPP_ERROR(LOGGER_PR2_ARM_IK, "PR2ArmIK:: Chain from %s to %s does not have 7 joints", root_name.c_str(),
+                 tip_name.c_str());
     return false;
   }
 
