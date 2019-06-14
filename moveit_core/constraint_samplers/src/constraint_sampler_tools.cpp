@@ -105,7 +105,7 @@ void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& samp
       continue;
     const Eigen::Vector3d& pos = ks.getGlobalLinkTransform(lm).translation();
     visualization_msgs::msg::Marker mk;
-    mk.header.stamp = rclcpp::Clock().now();
+    mk.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     mk.header.frame_id = sampler->getJointModelGroup()->getParentModel().getModelFrame();
     mk.ns = "constraint_samples";
     mk.id = i;
