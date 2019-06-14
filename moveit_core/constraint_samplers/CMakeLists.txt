@@ -76,6 +76,6 @@ if(BUILD_TESTING)
     ${urdfdom_LIBRARIES}
     ${urdfdom_headers_LIBRARIES}
     ${rclcpp_headers_LIBRARIES}
-   ${geometric_shapes_LIBRARIES}
+    ${geometric_shapes_LIBRARIES}
   )
 endif()
