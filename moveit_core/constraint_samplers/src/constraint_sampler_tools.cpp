@@ -37,8 +37,6 @@
 #include <moveit/constraint_samplers/constraint_sampler_tools.h>
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 
-rclcpp::Logger LOGGER_CONTRAINT_SAMPLERS_TOOLS = rclcpp::get_logger("moveit").get_child("constraint_samplers");
-
 void constraint_samplers::visualizeDistribution(const moveit_msgs::msg::Constraints& constr,
                                                 const planning_scene::PlanningSceneConstPtr& scene,
                                                 const std::string& group, const std::string& link_name,

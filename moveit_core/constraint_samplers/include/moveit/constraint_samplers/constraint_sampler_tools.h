@@ -43,6 +43,9 @@
 
 namespace constraint_samplers
 {
+  
+  rclcpp::Logger LOGGER_CONTRAINT_SAMPLERS_TOOLS = rclcpp::get_logger("moveit").get_child("constraint_samplers");
+
 void visualizeDistribution(const ConstraintSamplerPtr& sampler, const robot_state::RobotState& reference_state,
                            const std::string& link_name, unsigned int sample_count,
                            visualization_msgs::msg::MarkerArray& markers);
