@@ -164,7 +164,7 @@ int PR2ArmIKSolver::cartToJntSearch(const KDL::JntArray& q_in, const KDL::Frame&
   KDL::JntArray q_init = q_in;
   double initial_guess = q_init(free_angle_);
 
-  rclcpp::Time start_time = rclcpp::Clock().now();
+  rclcpp::Time start_time = rclcpp::Clock(RCL_ROS_TIME).now();
   double loop_time = 0;
   int count = 0;
 
@@ -186,7 +186,7 @@ int PR2ArmIKSolver::cartToJntSearch(const KDL::JntArray& q_in, const KDL::Frame&
     q_init(free_angle_) = initial_guess + search_discretization_angle_ * count;
     if (verbose)
       RCLCPP_WARN(LOGGER_PR2_ARM_KINEMATICS_PLUGIN, "%d, %f", count, q_init(free_angle_));
-    loop_time = rclcpp::Clock().now().seconds() - start_time.seconds();
+    loop_time = rclcpp::Clock(RCL_ROS_TIME).now().seconds() - start_time.seconds();
   }
   if (loop_time >= timeout)
   {
