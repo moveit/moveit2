@@ -455,7 +455,7 @@ void collision_detection::getProximityGradientMarkers(
     {
       visualization_msgs::msg::Marker arrow_mark;
       arrow_mark.header.frame_id = frame_id;
-      arrow_mark.header.stamp = ros_clock.now();
+      arrow_mark.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
       if (ns.empty())
       {
         arrow_mark.ns = "self_coll_gradients";
@@ -559,7 +559,7 @@ void collision_detection::getCollisionMarkers(
       visualization_msgs::msg::Marker sphere_mark;
       sphere_mark.type = visualization_msgs::msg::Marker::SPHERE;
       sphere_mark.header.frame_id = frame_id;
-      sphere_mark.header.stamp = ros_clock.now();
+      sphere_mark.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
       if (ns.empty())
       {
         sphere_mark.ns = "distance_collisions";
