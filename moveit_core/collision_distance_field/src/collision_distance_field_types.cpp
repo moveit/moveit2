@@ -144,7 +144,8 @@ bool collision_detection::getCollisionSphereGradients(const distance_field::Dist
     double dist = distance_field->getDistanceGradient(p.x(), p.y(), p.z(), grad.x(), grad.y(), grad.z(), in_bounds);
     if (!in_bounds && grad.norm() > EPSILON)
     {
-      RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD, "Collision sphere point is out of bounds %lf, %lf, %lf", p.x(), p.y(), p.z());
+      RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD, "Collision sphere point is out of bounds %lf, %lf, %lf", p.x(),
+                   p.y(), p.z());
       return true;
     }
 
@@ -202,7 +203,7 @@ bool collision_detection::getCollisionSphereCollision(const distance_field::Dist
 
     if (!in_bounds && grad.norm() > 0)
     {
-      RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD,"Collision sphere point is out of bounds");
+      RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD, "Collision sphere point is out of bounds");
       return true;
     }
 
@@ -315,7 +316,7 @@ void collision_detection::BodyDecomposition::init(const std::vector<shapes::Shap
   bodies::mergeBoundingSpheres(bounding_spheres, relative_bounding_sphere_);
 
   RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD, "BodyDecomposition generated %i collision spheres out of %i shapes",
-                    collision_spheres_.size(), shapes.size());
+               collision_spheres_.size(), shapes.size());
 }
 
 collision_detection::BodyDecomposition::~BodyDecomposition()
@@ -405,8 +406,9 @@ bool collision_detection::doBoundingSpheresIntersect(const PosedBodySphereDecomp
 }
 
 void collision_detection::getCollisionSphereMarkers(
-    const std_msgs::msg::ColorRGBA& color, const std::string& frame_id, const std::string& ns, const rclcpp::Duration& dur,
-    const std::vector<PosedBodySphereDecompositionPtr>& posed_decompositions, visualization_msgs::msg::MarkerArray& arr)
+    const std_msgs::msg::ColorRGBA& color, const std::string& frame_id, const std::string& ns,
+    const rclcpp::Duration& dur, const std::vector<PosedBodySphereDecompositionPtr>& posed_decompositions,
+    visualization_msgs::msg::MarkerArray& arr)
 {
   unsigned int count = 0;
   rclcpp::Clock ros_clock;
@@ -445,8 +447,8 @@ void collision_detection::getProximityGradientMarkers(
   if (gradients.size() != posed_decompositions.size() + posed_vector_decompositions.size())
   {
     RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Size mismatch between gradients %u and decompositions %u",
-                   (unsigned int)gradients.size(),
-                   (unsigned int)(posed_decompositions.size() + posed_vector_decompositions.size()));
+                (unsigned int)gradients.size(),
+                (unsigned int)(posed_decompositions.size() + posed_vector_decompositions.size()));
     return;
   }
   for (unsigned int i = 0; i < gradients.size(); i++)
@@ -479,13 +481,13 @@ void collision_detection::getProximityGradientMarkers(
         else
         {
           RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD, "Negative length for %u %d %lf", i, arrow_mark.id,
-                          gradients[i].gradients[j].norm());
+                       gradients[i].gradients[j].norm());
         }
       }
       else
       {
-        RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD , "Negative dist %lf for %u %d", gradients[i].distances[j], i,
-                        arrow_mark.id);
+        RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD, "Negative dist %lf for %u %d", gradients[i].distances[j], i,
+                     arrow_mark.id);
       }
       arrow_mark.points.resize(2);
       if (i < posed_decompositions.size())
@@ -549,7 +551,7 @@ void collision_detection::getCollisionMarkers(
   if (gradients.size() != posed_decompositions.size() + posed_vector_decompositions.size())
   {
     RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Size mismatch between gradients %zu and decompositions %zu",
-                   gradients.size(), posed_decompositions.size() + posed_vector_decompositions.size());
+                gradients.size(), posed_decompositions.size() + posed_vector_decompositions.size());
     return;
   }
   for (unsigned int i = 0; i < gradients.size(); i++)

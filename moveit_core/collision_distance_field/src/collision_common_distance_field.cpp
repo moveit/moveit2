@@ -160,7 +160,7 @@ void getBodySphereVisualizationMarkers(const GroupStateRepresentationConstPtr& g
   sphere_marker.pose.orientation.z = 0;
   sphere_marker.pose.orientation.w = 1;
   sphere_marker.color = robot_color;
-  sphere_marker.lifetime = rclcpp::Duration(0,0);
+  sphere_marker.lifetime = rclcpp::Duration(0, 0);
 
   const moveit::core::RobotState& state = *(gsr->dfce_->state_);
   unsigned int id = 0;
@@ -193,15 +193,15 @@ void getBodySphereVisualizationMarkers(const GroupStateRepresentationConstPtr& g
     const moveit::core::AttachedBody* att = state.getAttachedBody(gsr->dfce_->attached_body_names_[i]);
     if (!att)
     {
-      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD,"Attached body '%s' was not found, skipping sphere "
-               "decomposition visualization",
-               gsr->dfce_->attached_body_names_[i].c_str());
+      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Attached body '%s' was not found, skipping sphere "
+                                                   "decomposition visualization",
+                  gsr->dfce_->attached_body_names_[i].c_str());
       continue;
     }
 
     if (gsr->attached_body_decompositions_[i]->getSize() != att->getShapes().size())
     {
-      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD,"Attached body size discrepancy");
+      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Attached body size discrepancy");
       continue;
     }
 

@@ -57,10 +57,10 @@
 #include "rclcpp/time.hpp"
 #include "rclcpp/utilities.hpp"
 
-
 namespace collision_detection
 {
-  static rclcpp::Logger LOGGER_COLLISION_DISTANCE_FIELD = rclcpp::get_logger("moveit").get_child("collision_distance_field");
+static rclcpp::Logger LOGGER_COLLISION_DISTANCE_FIELD =
+    rclcpp::get_logger("moveit").get_child("collision_distance_field");
 enum CollisionType
 {
   NONE = 0,
@@ -514,8 +514,8 @@ struct ProximityInfo
 bool doBoundingSpheresIntersect(const PosedBodySphereDecompositionConstPtr& p1,
                                 const PosedBodySphereDecompositionConstPtr& p2);
 
-void getCollisionSphereMarkers(const std_msgs::msg::ColorRGBA& color, const std::string& frame_id, const std::string& ns,
-                               const rclcpp::Duration& dur,
+void getCollisionSphereMarkers(const std_msgs::msg::ColorRGBA& color, const std::string& frame_id,
+                               const std::string& ns, const rclcpp::Duration& dur,
                                const std::vector<PosedBodySphereDecompositionPtr>& posed_decompositions,
                                visualization_msgs::msg::MarkerArray& arr);
 
