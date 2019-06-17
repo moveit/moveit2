@@ -480,7 +480,7 @@ void CollisionWorldDistanceField::notifyObjectChange(CollisionWorldDistanceField
                                                      World::Action action)
 {
   // WallTime
-  auto n = std::chrono::system_clock::now();
+  auto n = rclcpp::Clock(RCL_SYSTEM_TIME).now();
   EigenSTL::vector_Vector3d add_points;
   EigenSTL::vector_Vector3d subtract_points;
   self->updateDistanceObject(obj->id_, self->distance_field_cache_entry_, add_points, subtract_points);
@@ -500,7 +500,7 @@ void CollisionWorldDistanceField::notifyObjectChange(CollisionWorldDistanceField
   }
 
   RCLCPP_DEBUG(LOGGER_COLLISION_WORLD_DISTANCE_FIELD, "Modifying object %s took %lf s", obj->id_.c_str(),
-               std::chrono::system_clock::now() - n);
+               rclcpp::Clock(RCL_SYSTEM_TIME).now() - n);
 }
 
 void CollisionWorldDistanceField::updateDistanceObject(const std::string& id, DistanceFieldCacheEntryPtr& dfce,
