@@ -42,6 +42,7 @@
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit/collision_detection/collision_world.h>
 #include <moveit/collision_distance_field/collision_distance_field_types.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace collision_detection
 {

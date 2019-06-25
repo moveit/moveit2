@@ -1,11 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_collision_distance_field)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  # clang is picky about new virtual functions hiding existing ones
-  add_compile_options(-Wno-overloaded-virtual)
-endif()
-
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/collision_distance_field_types.cpp
   src/collision_common_distance_field.cpp
   src/collision_robot_distance_field.cpp
@@ -14,23 +9,54 @@ add_library(${MOVEIT_LIB_NAME}
   src/collision_world_hybrid.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME}
-  moveit_planning_scene moveit_distance_field
-  ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
 
-if(CATKIN_ENABLE_TESTING)
-  find_package(moveit_resources REQUIRED)
-  include_directories(${moveit_resources_INCLUDE_DIRS})
-
-  catkin_add_gtest(test_collision_distance_field test/test_collision_distance_field.cpp)
-  target_link_libraries(test_collision_distance_field  ${MOVEIT_LIB_NAME})
-endif()
-
-install(TARGETS ${MOVEIT_LIB_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  moveit_planning_scene
+  moveit_distance_field
+  urdf
+  visualization_msgs
+  tf2_eigen
+  angles
 )
 
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+target_link_libraries(${MOVEIT_LIB_NAME}  
+  moveit_planning_scene
+  moveit_distance_field
+  moveit_collision_detection
+  moveit_robot_state
+  ${geometric_shapes_LIBRARIES}
+)
+  
+install(TARGETS ${MOVEIT_LIB_NAME}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+)
+
+install(DIRECTORY include/ DESTINATION include)
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(moveit_resources REQUIRED)
+  include_directories(${moveit_resources_INCLUDE_DIRS})
+  find_package(resource_retriever REQUIRED)
+
+  if(WIN32)
+    # TODO add windows paths
+  else()
+    set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../planning_scene;${CMAKE_CURRENT_BINARY_DIR}/../distance_field;${CMAKE_CURRENT_BINARY_DIR}/../collision_detection;${CMAKE_CURRENT_BINARY_DIR}/../robot_state;${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../utils")
+  endif()
+
+  ament_add_gtest(test_collision_distance_field test/test_collision_distance_field.cpp)
+  target_link_libraries(test_collision_distance_field
+    ${MOVEIT_LIB_NAME}
+    moveit_collision_detection
+    moveit_collision_distance_field
+    moveit_robot_state
+    ${geometric_shapes_LIBRARIES}
+    ${OCTOMAP_LIBRARIES}
+    ${srdfdom_LIBRARIES}
+    resource_retriever::resource_retriever
+    moveit_distance_field
+    moveit_planning_scene
+  )
+endif()

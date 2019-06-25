@@ -51,11 +51,16 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/distance_field/distance_field.h>
 #include <moveit/distance_field/propagation_distance_field.h>
-#include <visualization_msgs/MarkerArray.h>
-#include <ros/console.h>
+#include <visualization_msgs/msg/marker_array.hpp>
+#include "rclcpp/clock.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/time.hpp"
+#include "rclcpp/utilities.hpp"
 
 namespace collision_detection
 {
+static rclcpp::Logger LOGGER_COLLISION_DISTANCE_FIELD =
+    rclcpp::get_logger("moveit").get_child("collision_distance_field");
 enum CollisionType
 {
   NONE = 0,
@@ -406,7 +411,7 @@ public:
   {
     if (i >= decomp_vector_.size())
     {
-      ROS_INFO_NAMED("collision_distance_field", "No body decomposition");
+      RCLCPP_INFO(LOGGER_COLLISION_DISTANCE_FIELD, "No body decomposition");
       return empty_ptr_;
     }
     return decomp_vector_[i];
@@ -416,7 +421,7 @@ public:
   {
     if (ind >= decomp_vector_.size())
     {
-      ROS_WARN_NAMED("collision_distance_field", "Can't update pose");
+      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Can't update pose");
       return;
     }
     decomp_vector_[ind]->updatePose(pose);
@@ -469,7 +474,7 @@ public:
   {
     if (i >= decomp_vector_.size())
     {
-      ROS_INFO_NAMED("collision_distance_field", "No body decomposition");
+      RCLCPP_INFO(LOGGER_COLLISION_DISTANCE_FIELD, "No body decomposition");
       return empty_ptr_;
     }
     return decomp_vector_[i];
@@ -483,7 +488,7 @@ public:
     }
     else
     {
-      ROS_WARN_NAMED("collision_distance_field", "Can't update pose");
+      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Can't update pose");
       return;
     }
   }
@@ -509,20 +514,20 @@ struct ProximityInfo
 bool doBoundingSpheresIntersect(const PosedBodySphereDecompositionConstPtr& p1,
                                 const PosedBodySphereDecompositionConstPtr& p2);
 
-void getCollisionSphereMarkers(const std_msgs::ColorRGBA& color, const std::string& frame_id, const std::string& ns,
-                               const ros::Duration& dur,
+void getCollisionSphereMarkers(const std_msgs::msg::ColorRGBA& color, const std::string& frame_id,
+                               const std::string& ns, const rclcpp::Duration& dur,
                                const std::vector<PosedBodySphereDecompositionPtr>& posed_decompositions,
-                               visualization_msgs::MarkerArray& arr);
+                               visualization_msgs::msg::MarkerArray& arr);
 
-void getProximityGradientMarkers(const std::string& frame_id, const std::string& ns, const ros::Duration& dur,
+void getProximityGradientMarkers(const std::string& frame_id, const std::string& ns, const rclcpp::Duration& dur,
                                  const std::vector<PosedBodySphereDecompositionPtr>& posed_decompositions,
                                  const std::vector<PosedBodySphereDecompositionVectorPtr>& posed_vector_decompositions,
-                                 const std::vector<GradientInfo>& gradients, visualization_msgs::MarkerArray& arr);
+                                 const std::vector<GradientInfo>& gradients, visualization_msgs::msg::MarkerArray& arr);
 
-void getCollisionMarkers(const std::string& frame_id, const std::string& ns, const ros::Duration& dur,
+void getCollisionMarkers(const std::string& frame_id, const std::string& ns, const rclcpp::Duration& dur,
                          const std::vector<PosedBodySphereDecompositionPtr>& posed_decompositions,
                          const std::vector<PosedBodySphereDecompositionVectorPtr>& posed_vector_decompositions,
-                         const std::vector<GradientInfo>& gradients, visualization_msgs::MarkerArray& arr);
+                         const std::vector<GradientInfo>& gradients, visualization_msgs::msg::MarkerArray& arr);
 }
 
 #endif

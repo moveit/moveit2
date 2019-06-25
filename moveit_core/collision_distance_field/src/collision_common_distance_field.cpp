@@ -35,7 +35,6 @@
 /* Author: E. Gil Jones */
 
 #include <moveit/collision_distance_field/collision_common_distance_field.h>
-#include <ros/console.h>
 #include <boost/thread/mutex.hpp>
 #include <tf2_eigen/tf2_eigen.h>
 #include <memory>
@@ -136,32 +135,32 @@ void getBodySphereVisualizationMarkers(const GroupStateRepresentationConstPtr& g
   std::string attached_ns = "attached_sphere_decomposition";
 
   // creating colors
-  std_msgs::ColorRGBA robot_color;
+  std_msgs::msg::ColorRGBA robot_color;
   robot_color.r = 0;
   robot_color.b = 0.8f;
   robot_color.g = 0;
   robot_color.a = 0.5;
 
-  std_msgs::ColorRGBA attached_color;
+  std_msgs::msg::ColorRGBA attached_color;
   attached_color.r = 1;
   attached_color.g = 1;
   attached_color.b = 0;
   attached_color.a = 0.5;
 
   // creating sphere marker
-  visualization_msgs::Marker sphere_marker;
+  visualization_msgs::msg::Marker sphere_marker;
   sphere_marker.header.frame_id = reference_frame;
-  sphere_marker.header.stamp = ros::Time(0);
+  sphere_marker.header.stamp = rclcpp::Time(0);
   sphere_marker.ns = robot_ns;
   sphere_marker.id = 0;
-  sphere_marker.type = visualization_msgs::Marker::SPHERE;
-  sphere_marker.action = visualization_msgs::Marker::ADD;
+  sphere_marker.type = visualization_msgs::msg::Marker::SPHERE;
+  sphere_marker.action = visualization_msgs::msg::Marker::ADD;
   sphere_marker.pose.orientation.x = 0;
   sphere_marker.pose.orientation.y = 0;
   sphere_marker.pose.orientation.z = 0;
   sphere_marker.pose.orientation.w = 1;
   sphere_marker.color = robot_color;
-  sphere_marker.lifetime = ros::Duration(0);
+  sphere_marker.lifetime = rclcpp::Duration(0, 0);
 
   const moveit::core::RobotState& state = *(gsr->dfce_->state_);
   unsigned int id = 0;
@@ -194,15 +193,15 @@ void getBodySphereVisualizationMarkers(const GroupStateRepresentationConstPtr& g
     const moveit::core::AttachedBody* att = state.getAttachedBody(gsr->dfce_->attached_body_names_[i]);
     if (!att)
     {
-      ROS_WARN("Attached body '%s' was not found, skipping sphere "
-               "decomposition visualization",
-               gsr->dfce_->attached_body_names_[i].c_str());
+      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Attached body '%s' was not found, skipping sphere "
+                                                   "decomposition visualization",
+                  gsr->dfce_->attached_body_names_[i].c_str());
       continue;
     }
 
     if (gsr->attached_body_decompositions_[i]->getSize() != att->getShapes().size())
     {
-      ROS_WARN("Attached body size discrepancy");
+      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Attached body size discrepancy");
       continue;
     }
 

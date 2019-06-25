@@ -41,11 +41,14 @@
 #include <moveit/collision_detection/collision_world.h>
 #include <moveit/collision_distance_field/collision_distance_field_types.h>
 #include <moveit/collision_distance_field/collision_robot_distance_field.h>
+#include <chrono>
+#include "rclcpp/rclcpp.hpp"
 
 namespace collision_detection
 {
 MOVEIT_CLASS_FORWARD(CollisionWorldDistanceField)
-
+static rclcpp::Logger LOGGER_COLLISION_WORLD_DISTANCE_FIELD =
+    LOGGER_COLLISION_DISTANCE_FIELD.get_child("collision_world_distance_field");
 class CollisionWorldDistanceField : public CollisionWorld
 {
 public:
@@ -143,12 +146,12 @@ public:
   void distanceRobot(const DistanceRequest& req, DistanceResult& res, const CollisionRobot& robot,
                      const robot_state::RobotState& state) const override
   {
-    ROS_ERROR_NAMED("collision_distance_field", "Not implemented");
+    RCLCPP_ERROR(LOGGER_COLLISION_DISTANCE_FIELD, "Not implemented");
   }
 
   void distanceWorld(const DistanceRequest& req, DistanceResult& res, const CollisionWorld& world) const override
   {
-    ROS_ERROR_NAMED("collision_distance_field", "Not implemented");
+    RCLCPP_ERROR(LOGGER_COLLISION_DISTANCE_FIELD, "Not implemented");
   }
 
   void setWorld(const WorldPtr& world) override;
