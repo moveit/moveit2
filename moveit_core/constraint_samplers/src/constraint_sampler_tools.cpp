@@ -40,7 +40,8 @@
 void constraint_samplers::visualizeDistribution(const moveit_msgs::msg::Constraints& constr,
                                                 const planning_scene::PlanningSceneConstPtr& scene,
                                                 const std::string& group, const std::string& link_name,
-                                                unsigned int sample_count, visualization_msgs::MarkerArray& markers)
+                                                unsigned int sample_count,
+                                                visualization_msgs::msg::MarkerArray& markers)
 {
   visualizeDistribution(ConstraintSamplerManager::selectDefaultSampler(scene, group, constr), scene->getCurrentState(),
                         link_name, sample_count, markers);
@@ -59,13 +60,13 @@ double constraint_samplers::countSamplesPerSecond(const ConstraintSamplerPtr& sa
 {
   if (!sampler)
   {
-    ROS_ERROR_NAMED("constraint_samplers", "No sampler specified for counting samples per second");
+    RCLCPP_ERROR(LOGGER_CONTRAINT_SAMPLERS_TOOLS, "No sampler specified for counting samples per second");
     return 0.0;
   }
   robot_state::RobotState ks(reference_state);
   unsigned long int valid = 0;
   unsigned long int total = 0;
-  ros::WallTime end = ros::WallTime::now() + ros::WallDuration(1.0);
+  rclcpp::Time end = rclcpp::Clock().now() + rclcpp::Duration(1.0);
   do
   {
     static const unsigned int N = 10;
@@ -75,25 +76,25 @@ double constraint_samplers::countSamplesPerSecond(const ConstraintSamplerPtr& sa
       if (sampler->sample(ks, 1))
         valid++;
     }
-  } while (ros::WallTime::now() < end);
+  } while (rclcpp::Clock().now() < end);
   return (double)valid / (double)total;
 }
 
 void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& sampler,
                                                 const robot_state::RobotState& reference_state,
                                                 const std::string& link_name, unsigned int sample_count,
-                                                visualization_msgs::MarkerArray& markers)
+                                                visualization_msgs::msg::MarkerArray& markers)
 {
   if (!sampler)
   {
-    ROS_ERROR_NAMED("constraint_samplers", "No sampler specified for visualizing distribution of samples");
+    RCLCPP_ERROR(LOGGER_CONTRAINT_SAMPLERS_TOOLS, "No sampler specified for visualizing distribution of samples");
     return;
   }
   const robot_state::LinkModel* lm = reference_state.getLinkModel(link_name);
   if (!lm)
     return;
   robot_state::RobotState ks(reference_state);
-  std_msgs::ColorRGBA color;
+  std_msgs::msg::ColorRGBA color;
   color.r = 1.0f;
   color.g = 0.0f;
   color.b = 0.0f;
@@ -103,20 +104,20 @@ void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& samp
     if (!sampler->sample(ks))
       continue;
     const Eigen::Vector3d& pos = ks.getGlobalLinkTransform(lm).translation();
-    visualization_msgs::Marker mk;
-    mk.header.stamp = ros::Time::now();
+    visualization_msgs::msg::Marker mk;
+    mk.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     mk.header.frame_id = sampler->getJointModelGroup()->getParentModel().getModelFrame();
     mk.ns = "constraint_samples";
     mk.id = i;
-    mk.type = visualization_msgs::Marker::SPHERE;
-    mk.action = visualization_msgs::Marker::ADD;
+    mk.type = visualization_msgs::msg::Marker::SPHERE;
+    mk.action = visualization_msgs::msg::Marker::ADD;
     mk.pose.position.x = pos.x();
     mk.pose.position.y = pos.y();
     mk.pose.position.z = pos.z();
     mk.pose.orientation.w = 1.0;
     mk.scale.x = mk.scale.y = mk.scale.z = 0.035;
     mk.color = color;
-    mk.lifetime = ros::Duration(30.0);
+    mk.lifetime = rclcpp::Duration(30.0);
     markers.markers.push_back(mk);
   }
 }

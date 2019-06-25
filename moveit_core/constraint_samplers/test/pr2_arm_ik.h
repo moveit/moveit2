@@ -42,15 +42,18 @@
 #include <Eigen/Geometry>
 #include <Eigen/LU>  // provides LU decomposition
 #include <kdl/chainiksolver.hpp>
-#include <moveit_msgs/GetPositionFK.h>
-#include <moveit_msgs/GetPositionIK.h>
+#include <moveit_msgs/srv/get_position_fk.hpp>
+#include <moveit_msgs/srv/get_position_ik.hpp>
 #include <moveit_msgs/msg/kinematic_solver_info.hpp>
+#include "rclcpp/rclcpp.hpp"
 
 namespace pr2_arm_kinematics
 {
 static const int NUM_JOINTS_ARM7DOF = 7;
 
 static const double IK_EPS = 1e-5;
+
+rclcpp::Logger LOGGER_PR2_ARM_IK = rclcpp::get_logger("pr2_arm_kinematics_plugin");
 
 inline double distance(const urdf::Pose& transform)
 {

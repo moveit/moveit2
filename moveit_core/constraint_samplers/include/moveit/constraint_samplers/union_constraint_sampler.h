@@ -38,6 +38,7 @@
 #define MOVEIT_CONSTRAINT_SAMPLERS_DEFAULT_UNION_CONSTRAINT_SAMPLER_
 
 #include <moveit/constraint_samplers/constraint_sampler.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace constraint_samplers
 {

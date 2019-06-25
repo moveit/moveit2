@@ -46,8 +46,8 @@
 #include <angles/angles.h>
 
 #include <moveit/macros/class_forward.h>
-#include <moveit_msgs/GetPositionFK.h>
-#include <moveit_msgs/GetPositionIK.h>
+#include <moveit_msgs/srv/get_position_fk.hpp>
+#include <moveit_msgs/srv/get_position_ik.hpp>
 #include <moveit_msgs/msg/kinematic_solver_info.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 
@@ -86,15 +86,6 @@ public:
                  const std::string& tip_frame_name, const double& search_discretization_angle, const int& free_angle);
 
   ~PR2ArmIKSolver() override{};
-
-// TODO: simplify after kinetic support is dropped
-#define KDL_VERSION_LESS(a, b, c) ((KDL_VERSION) < ((a << 16) | (b << 8) | c))
-#if KDL_VERSION_LESS(1, 4, 0)
-  void updateInternalDataStructures();
-#else
-  void updateInternalDataStructures() override;
-#endif
-#undef KDL_VERSION_LESS
 
   /**
    * @brief The PR2 inverse kinematics solver
@@ -153,7 +144,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   bool getPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, std::vector<double>& solution,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, std::vector<double>& solution,
       moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
@@ -166,7 +157,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
       std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
   /**
@@ -179,7 +170,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
       const std::vector<double>& consistency_limits, std::vector<double>& solution,
       moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
@@ -193,8 +184,9 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-      std::vector<double>& solution, const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      std::vector<double>& solution, const IKCallbackFn& solution_callback,
+      moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   /**
@@ -208,7 +200,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
       const std::vector<double>& consistency_limits, std::vector<double>& solution,
       const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
@@ -221,7 +213,7 @@ public:
    * @return True if a valid solution was found, false otherwise
    */
   bool getPositionFK(const std::vector<std::string>& link_names, const std::vector<double>& joint_angles,
-                     std::vector<geometry_msgs::Pose>& poses) const override;
+                     std::vector<geometry_msgs::msg::Pose>& poses) const override;
 
   /**
    * @brief  Initialization function for the kinematics

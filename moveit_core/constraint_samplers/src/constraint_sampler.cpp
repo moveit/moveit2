@@ -42,7 +42,7 @@ constraint_samplers::ConstraintSampler::ConstraintSampler(const planning_scene::
 {
   if (!jmg_)
   {
-    ROS_ERROR_NAMED("constraint_samplers", "A JointModelGroup should have been specified for the constraint sampler");
+    RCLCPP_ERROR(LOGGER_CONSTRAINT_SAMPLERS, "A JointModelGroup should have been specified for the constraint sampler");
   }
 }
 
