@@ -49,6 +49,10 @@
 #include <iostream>
 #include <vector>
 
+#include "rclcpp/clock.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/duration.hpp"
+
 /** \brief Representation and evaluation of kinematic constraints */
 namespace kinematic_constraints
 {
@@ -814,7 +818,7 @@ public:
    * @param [in] state The state from which to produce the markers
    * @param [out] markers The marker array to which the markers will be added
    */
-  void getMarkers(const robot_state::RobotState& state, visualization_msgs::MarkerArray& markers) const;
+  void getMarkers(const robot_state::RobotState& state, visualization_msgs::msg::MarkerArray& markers) const;
 
   bool enabled() const override;
   ConstraintEvaluationResult decide(const robot_state::RobotState& state, bool verbose = false) const override;

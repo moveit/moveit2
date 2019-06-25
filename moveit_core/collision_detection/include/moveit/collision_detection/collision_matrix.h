@@ -40,7 +40,6 @@
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit_msgs/msg/allowed_collision_matrix.hpp>
-#include <boost/function.hpp>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -70,7 +69,7 @@ enum Type
 
 /** \brief Signature of predicate that decides whether a contact is allowed or not (when AllowedCollision::Type is
  * CONDITIONAL) */
-typedef boost::function<bool(collision_detection::Contact&)> DecideContactFn;
+typedef std::function<bool(collision_detection::Contact&)> DecideContactFn;
 
 MOVEIT_CLASS_FORWARD(AllowedCollisionMatrix);
 
