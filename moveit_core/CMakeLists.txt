@@ -107,28 +107,28 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 )
 
 set(libraries
-  moveit_exceptions
-  moveit_background_processing
-  moveit_kinematics_base
-  moveit_robot_model
-  moveit_transforms
-  moveit_robot_state
-  moveit_robot_trajectory
-  moveit_planning_interface
-  moveit_collision_detection
-  moveit_collision_detection_fcl
-  moveit_kinematic_constraints
-  moveit_planning_scene
-  moveit_constraint_samplers
-  moveit_planning_request_adapter
-  moveit_profiler
-  moveit_trajectory_processing
-  moveit_distance_field
-  moveit_collision_distance_field
-  moveit_kinematics_metrics
-  moveit_dynamics_solver
-  moveit_utils
-  moveit_test_utils
+    moveit_exceptions
+    moveit_background_processing
+    moveit_kinematics_base
+    moveit_robot_model
+    moveit_transforms
+    moveit_robot_state
+    moveit_robot_trajectory
+    moveit_planning_interface
+    moveit_collision_detection
+    moveit_collision_detection_fcl
+    moveit_kinematic_constraints
+    moveit_planning_scene
+    moveit_constraint_samplers
+    moveit_planning_request_adapter
+    moveit_profiler
+    moveit_trajectory_processing
+    moveit_distance_field
+    moveit_collision_distance_field
+    moveit_kinematics_metrics
+    moveit_dynamics_solver
+    moveit_utils
+    moveit_test_utils
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -161,20 +161,20 @@ if(BUILD_TESTING AND ENABLE_COVERAGE_TESTING)
 endif()
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
-                           ${LIBFCL_INCLUDE_DIRS})
-
+                           ${LIBFCL_INCLUDE_DIRS}
+)
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
                     ${VERSION_FILE_PATH}
                     ${rclcpp_INCLUDE_DIRS}
-										${rcutils_INCLUDE_DIRS}
+                    ${rcutils_INCLUDE_DIRS}
                     ${rmw_implementation_INCLUDE_DIRS}
                     ${Boost_INCLUDE_DIRS}
                     ${urdfdom_INCLUDE_DIRS}
                     ${urdfdom_headers_INCLUDE_DIRS}
                     ${OCTOMAP_INCLUDE_DIRS}
-										${moveit_msgs_INCLUDE_DIRS})
-
+                    ${moveit_msgs_INCLUDE_DIRS}
+)
 
 add_subdirectory(version)
 add_subdirectory(macros)
