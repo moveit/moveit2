@@ -6,7 +6,10 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_rdf_loader
   rclcpp
   urdf
-  pluginlib)
+  class_loader
+  ament_index_cpp
+  moveit_core
+  Boost)
 
 
 install(TARGETS ${MOVEIT_LIB_NAME}
