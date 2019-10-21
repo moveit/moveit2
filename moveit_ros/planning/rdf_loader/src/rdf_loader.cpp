@@ -39,7 +39,8 @@
 #include <moveit/profiler/profiler.h>
 
 // ROS 2
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 // Boost
@@ -53,23 +54,31 @@
 
 rclcpp::Logger LOGGER_RDF_LOADER = rclcpp::get_logger("moveit").get_child("rdf_loader");
 
-rdf_loader::RDFLoader::RDFLoader(const std::string& robot_description)
+rdf_loader::RDFLoader::RDFLoader(std::shared_ptr<rclcpp::Node>& node, const std::string& robot_description)
 {
   moveit::tools::Profiler::ScopedStart prof_start;
   moveit::tools::Profiler::ScopedBlock prof_block("RDFLoader(robot_description)");
 
   auto start = std::chrono::system_clock::now();
-  // TODO (anasarrak): Add the correct node_handle name
-  auto node = rclcpp::Node::make_shared("/");
 
   std::string content;
 
   auto desc_parameters = std::make_shared<rclcpp::SyncParametersClient>(node);
 
-  if (!desc_parameters->has_parameter(robot_description))
-  {
-    RCLCPP_ERROR(LOGGER, "Robot model parameter not found! Did you remap '%s'?", robot_description.c_str());
-    return;
+  rmw_qos_profile_t qos = rmw_qos_profile_default;
+  qos.depth = 1;
+  qos.durability = RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL;
+
+  auto subscription_robot_description_ = node->create_subscription<std_msgs::msg::String>(
+    robot_description,
+    [&](std_msgs::msg::String::ConstSharedPtr msg) {
+      content = std::string(msg->data.c_str());
+  }, qos);
+
+  while(content.length()<1){
+    printf("Waiting for Robot model topic! Did you remap '%s'?\n", robot_description.c_str());
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    rclcpp::spin_some(node);
   }
 
   urdf::Model* umodel = new urdf::Model();
@@ -83,11 +92,16 @@ rdf_loader::RDFLoader::RDFLoader(const std::string& robot_description)
   const std::string srdf_description(robot_description_ + "_semantic");
   std::string scontent;
 
-  if (!desc_parameters->has_parameter(srdf_description))
-  {
-    RCLCPP_ERROR(LOGGER, "Robot semantic description not found. Did you forget to define or remap '%s'?",
-                    srdf_description.c_str());
-    return;
+  auto subscription_robot_description_semantic_ = node->create_subscription<std_msgs::msg::String>(
+    robot_description + "_semantic",
+    [&](std_msgs::msg::String::UniquePtr msg) {
+    scontent = std::string(msg->data.c_str());
+  }, qos);
+
+  while(scontent.length()<1){
+    printf("Waiting for Robot model semantic topic! Did you remap '%s'?\n", std::string(robot_description + "_semantic").c_str());
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    rclcpp::spin_some(node);
   }
 
   srdf_.reset(new srdf::Model());
