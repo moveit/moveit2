@@ -112,7 +112,7 @@ rdf_loader::RDFLoader::RDFLoader(std::shared_ptr<rclcpp::Node>& node, const std:
     return;
   }
 
-  RCLCPP_INFO(LOGGER_RDF_LOADER, "Loaded robot model in %d seconds",(std::chrono::system_clock::now() - start));
+  RCLCPP_INFO(LOGGER_RDF_LOADER, "Loaded robot model in %.4f seconds",std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start).count()*1e-9);
 }
 
 rdf_loader::RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_string)
