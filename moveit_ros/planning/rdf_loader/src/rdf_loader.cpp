@@ -76,7 +76,7 @@ rdf_loader::RDFLoader::RDFLoader(std::shared_ptr<rclcpp::Node>& node, const std:
   }, qos);
 
   while(content.length()<1){
-    printf("Waiting for Robot model topic! Did you remap '%s'?\n", robot_description.c_str());
+    RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model topic! Did you remap '%s'?\n", robot_description.c_str());
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     rclcpp::spin_some(node);
   }
@@ -99,7 +99,7 @@ rdf_loader::RDFLoader::RDFLoader(std::shared_ptr<rclcpp::Node>& node, const std:
   }, qos);
 
   while(scontent.length()<1){
-    printf("Waiting for Robot model semantic topic! Did you remap '%s'?\n", std::string(robot_description + "_semantic").c_str());
+    RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model semantic topic! Did you remap '%s'?\n", std::string(robot_description + "_semantic").c_str());
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     rclcpp::spin_some(node);
   }
