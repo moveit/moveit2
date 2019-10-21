@@ -51,7 +51,7 @@
 #include <algorithm>
 #include <chrono>
 
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("rdf_loader");
+rclcpp::Logger LOGGER_RDF_LOADER = rclcpp::get_logger("moveit").get_child("rdf_loader");
 
 rdf_loader::RDFLoader::RDFLoader(const std::string& robot_description)
 {
@@ -75,7 +75,7 @@ rdf_loader::RDFLoader::RDFLoader(const std::string& robot_description)
   urdf::Model* umodel = new urdf::Model();
   if (!umodel->initString(content))
   {
-    RCLCPP_ERROR(LOGGER, "Unable to parse URDF from parameter '%s'", robot_description_.c_str());
+    RCLCPP_INFO(LOGGER_RDF_LOADER, "Unable to parse URDF from parameter '%s'", robot_description_.c_str());
     return;
   }
   urdf_.reset(umodel);
@@ -93,12 +93,12 @@ rdf_loader::RDFLoader::RDFLoader(const std::string& robot_description)
   srdf_.reset(new srdf::Model());
   if (!srdf_->initString(*urdf_, scontent))
   {
-    RCLCPP_ERROR(LOGGER, "Unable to parse SRDF from parameter '%s'", srdf_description.c_str());
+    RCLCPP_ERROR(LOGGER_RDF_LOADER, "Unable to parse SRDF from parameter '%s'", srdf_description.c_str());
     srdf_.reset();
     return;
   }
 
-  RCLCPP_DEBUG(LOGGER, "Loaded robot model in %d seconds",(std::chrono::system_clock::now() - start));
+  RCLCPP_INFO(LOGGER_RDF_LOADER, "Loaded robot model in %d seconds",(std::chrono::system_clock::now() - start));
 }
 
 rdf_loader::RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_string)
@@ -113,13 +113,13 @@ rdf_loader::RDFLoader::RDFLoader(const std::string& urdf_string, const std::stri
     srdf_.reset(new srdf::Model());
     if (!srdf_->initString(*urdf_, srdf_string))
     {
-      RCLCPP_ERROR(LOGGER, "Unable to parse SRDF");
+      RCLCPP_ERROR(LOGGER_RDF_LOADER, "Unable to parse SRDF");
       srdf_.reset();
     }
   }
   else
   {
-    RCLCPP_ERROR(LOGGER, "Unable to parse URDF");
+    RCLCPP_ERROR(LOGGER_RDF_LOADER, "Unable to parse URDF");
     urdf_.reset();
   }
 }
@@ -136,20 +136,20 @@ bool rdf_loader::RDFLoader::loadFileToString(std::string& buffer, const std::str
 {
   if (path.empty())
   {
-    RCLCPP_ERROR(LOGGER, "Path is empty");
+    RCLCPP_ERROR(LOGGER_RDF_LOADER, "Path is empty");
     return false;
   }
 
   if (!boost::filesystem::exists(path))
   {
-    RCLCPP_ERROR(LOGGER, "File does not exist");
+    RCLCPP_ERROR(LOGGER_RDF_LOADER, "File does not exist");
     return false;
   }
 
   std::ifstream stream(path.c_str());
   if (!stream.good())
   {
-    RCLCPP_ERROR(LOGGER, "Unable to load path");
+    RCLCPP_ERROR(LOGGER_RDF_LOADER, "Unable to load path");
     return false;
   }
 
@@ -168,13 +168,13 @@ bool rdf_loader::RDFLoader::loadXacroFileToString(std::string& buffer, const std
 {
   if (path.empty())
   {
-    RCLCPP_ERROR(LOGGER, "Path is empty");
+    RCLCPP_ERROR(LOGGER_RDF_LOADER, "Path is empty");
     return false;
   }
 
   if (!boost::filesystem::exists(path))
   {
-    RCLCPP_ERROR(LOGGER, "File does not exist");
+    RCLCPP_ERROR(LOGGER_RDF_LOADER, "File does not exist");
     return false;
   }
   //TODO (anasarrak): Test ros2 xacro https://github.com/ros/xacro/tree/ros2 // https://github.com/bponsler/xacro
@@ -186,7 +186,7 @@ bool rdf_loader::RDFLoader::loadXacroFileToString(std::string& buffer, const std
   FILE* pipe = popen(cmd.c_str(), "r");
   if (!pipe)
   {
-    RCLCPP_ERROR(LOGGER, "Unable to load path");
+    RCLCPP_ERROR(LOGGER_RDF_LOADER, "Unable to load path");
     return false;
   }
 
@@ -219,7 +219,7 @@ bool rdf_loader::RDFLoader::loadPkgFileToString(std::string& buffer, const std::
   std::string package_path = ament_index_cpp::get_package_share_directory(package_name);
   if (package_path.empty())
   {
-    RCLCPP_ERROR(LOGGER, "ROS2 was unable to find the package name '%s'", package_name.c_str());
+    RCLCPP_ERROR(LOGGER_RDF_LOADER, "ROS2 was unable to find the package name '%s'", package_name.c_str());
     return false;
   }
 
