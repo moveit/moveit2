@@ -50,27 +50,29 @@ class KinematicsPluginLoader
 {
 public:
   /** \brief Load the kinematics solvers based on information on the
-      ROS parameter server. Take as optional argument the name of the
+      ROS parameter server. Take node as an argument and as optional argument the name of the
       ROS parameter under which the robot description can be
       found. This is passed to the kinematics solver initialization as
       well as used to read the SRDF document when needed. */
-  KinematicsPluginLoader(const std::string& robot_description = "robot_description",
+  KinematicsPluginLoader(const rclcpp::Node::SharedPtr& node,
+                         const std::string& robot_description = "robot_description",
                          double default_search_resolution = 0.0)
-    : robot_description_(robot_description), default_search_resolution_(default_search_resolution)
+    : node_(node), robot_description_(robot_description), default_search_resolution_(default_search_resolution)
   {
   }
 
   /** \brief Use a default kinematics solver (\e solver_plugin) for
       all the groups in the robot model. The default timeout for the
       solver is \e solve_timeout and the default number of IK attempts
-      is \e ik_attempts. Take as optional argument the name of the ROS
+      is \e ik_attempts. Take node as an argument and as optional argument the name of the ROS
       parameter under which the robot description can be found. This
       is passed to the kinematics solver initialization as well as
       used to read the SRDF document when needed. */
-  KinematicsPluginLoader(const std::string& solver_plugin, double solve_timeout, unsigned int /*ik_attempts*/,
+  KinematicsPluginLoader(const rclcpp::Node::SharedPtr& node, const std::string& solver_plugin, double solve_timeout,
                          const std::string& robot_description = "robot_description",
                          double default_search_resolution = 0.0)
-    : robot_description_(robot_description)
+    : node_(node)
+    , robot_description_(robot_description)
     , default_search_resolution_(default_search_resolution)
     , default_solver_plugin_(solver_plugin)
     , default_solver_timeout_(solve_timeout)
@@ -100,6 +102,7 @@ public:
   void status() const;
 
 private:
+  const rclcpp::Node::SharedPtr node_;
   std::string robot_description_;
   double default_search_resolution_;
 
