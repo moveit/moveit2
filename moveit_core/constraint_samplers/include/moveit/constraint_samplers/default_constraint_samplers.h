@@ -44,7 +44,7 @@
 
 namespace constraint_samplers
 {
-MOVEIT_CLASS_FORWARD(JointConstraintSampler);
+MOVEIT_CLASS_FORWARD(JointConstraintSampler)
 
 /**
  * \brief JointConstraintSampler is a class that allows the sampling
@@ -281,7 +281,7 @@ struct IKSamplingPose
       orientation_constraint_; /**< \brief Holds the orientation constraint for sampling */
 };
 
-MOVEIT_CLASS_FORWARD(IKConstraintSampler);
+MOVEIT_CLASS_FORWARD(IKConstraintSampler)
 
 /**
  * \brief A class that allows the sampling of IK constraints.

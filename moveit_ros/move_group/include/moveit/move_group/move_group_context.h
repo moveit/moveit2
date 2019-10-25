@@ -41,28 +41,28 @@
 
 namespace planning_scene_monitor
 {
-MOVEIT_CLASS_FORWARD(PlanningSceneMonitor);
+MOVEIT_CLASS_FORWARD(PlanningSceneMonitor)
 }
 
 namespace planning_pipeline
 {
-MOVEIT_CLASS_FORWARD(PlanningPipeline);
+MOVEIT_CLASS_FORWARD(PlanningPipeline)
 }
 
 namespace plan_execution
 {
-MOVEIT_CLASS_FORWARD(PlanExecution);
-MOVEIT_CLASS_FORWARD(PlanWithSensing);
+MOVEIT_CLASS_FORWARD(PlanExecution)
+MOVEIT_CLASS_FORWARD(PlanWithSensing)
 }
 
 namespace trajectory_execution_manager
 {
-MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager);
+MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager)
 }
 
 namespace move_group
 {
-MOVEIT_STRUCT_FORWARD(MoveGroupContext);
+MOVEIT_STRUCT_FORWARD(MoveGroupContext)
 
 struct MoveGroupContext
 {

@@ -66,7 +66,7 @@ namespace pr2_arm_kinematics
 static const int NO_IK_SOLUTION = -1;
 static const int TIMED_OUT = -2;
 
-MOVEIT_CLASS_FORWARD(PR2ArmIKSolver);
+MOVEIT_CLASS_FORWARD(PR2ArmIKSolver)
 
 // minimal stuff necessary
 class PR2ArmIKSolver : public KDL::ChainIkSolverPos
@@ -120,7 +120,7 @@ Eigen::Isometry3f KDLToEigenMatrix(const KDL::Frame& p);
 double computeEuclideanDistance(const std::vector<double>& array_1, const KDL::JntArray& array_2);
 void getKDLChainInfo(const KDL::Chain& chain, moveit_msgs::msg::KinematicSolverInfo& chain_info);
 
-MOVEIT_CLASS_FORWARD(PR2ArmKinematicsPlugin);
+MOVEIT_CLASS_FORWARD(PR2ArmKinematicsPlugin)
 
 class PR2ArmKinematicsPlugin : public kinematics::KinematicsBase
 {

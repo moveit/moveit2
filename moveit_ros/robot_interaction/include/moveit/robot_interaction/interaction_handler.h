@@ -46,9 +46,9 @@
 
 namespace robot_interaction
 {
-MOVEIT_CLASS_FORWARD(InteractionHandler);
-MOVEIT_CLASS_FORWARD(RobotInteraction);
-MOVEIT_CLASS_FORWARD(KinematicOptionsMap);
+MOVEIT_CLASS_FORWARD(InteractionHandler)
+MOVEIT_CLASS_FORWARD(RobotInteraction)
+MOVEIT_CLASS_FORWARD(KinematicOptionsMap)
 
 struct EndEffectorInteraction;
 struct JointInteraction;

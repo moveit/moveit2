@@ -69,7 +69,7 @@ class MovableText;
 
 namespace moveit_rviz_plugin
 {
-MOVEIT_CLASS_FORWARD(TrajectoryVisualization);
+MOVEIT_CLASS_FORWARD(TrajectoryVisualization)
 
 class TrajectoryVisualization : public QObject
 {

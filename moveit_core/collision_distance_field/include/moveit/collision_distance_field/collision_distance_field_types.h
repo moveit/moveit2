@@ -112,7 +112,7 @@ struct GradientInfo
 };
 
 MOVEIT_CLASS_FORWARD(PosedDistanceField)
-MOVEIT_CLASS_FORWARD(BodyDecomposition);
+MOVEIT_CLASS_FORWARD(BodyDecomposition)
 MOVEIT_CLASS_FORWARD(PosedBodySphereDecomposition)
 MOVEIT_CLASS_FORWARD(PosedBodyPointDecomposition)
 MOVEIT_CLASS_FORWARD(PosedBodySphereDecompositionVector)

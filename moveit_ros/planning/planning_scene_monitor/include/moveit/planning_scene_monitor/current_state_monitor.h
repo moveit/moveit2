@@ -211,7 +211,7 @@ private:
   std::shared_ptr<TFConnection> tf_connection_;
 };
 
-MOVEIT_CLASS_FORWARD(CurrentStateMonitor);
+MOVEIT_CLASS_FORWARD(CurrentStateMonitor)
 }
 
 #endif

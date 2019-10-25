@@ -48,12 +48,12 @@
 
 namespace shapes
 {
-MOVEIT_CLASS_FORWARD(Shape);
+MOVEIT_CLASS_FORWARD(Shape)
 }
 
 namespace collision_detection
 {
-MOVEIT_CLASS_FORWARD(World);
+MOVEIT_CLASS_FORWARD(World)
 
 /** \brief Maintain a representation of the environment */
 class World
@@ -73,7 +73,7 @@ public:
   /* Collision Bodies                                                   */
   /**********************************************************************/
 
-  MOVEIT_STRUCT_FORWARD(Object);
+  MOVEIT_STRUCT_FORWARD(Object)
 
   /** \brief A representation of an object */
   struct Object

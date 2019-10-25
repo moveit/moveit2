@@ -58,7 +58,7 @@ static const double DEFAULT_MAX_PROPOGATION_DISTANCE = .25;
 static rclcpp::Logger LOGGER_COLLISION_ROBOT_DISTANCE_FIELD =
     LOGGER_COLLISION_DISTANCE_FIELD.get_child("collision_robot_distance_field");
 
-MOVEIT_CLASS_FORWARD(CollisionRobotDistanceField);
+MOVEIT_CLASS_FORWARD(CollisionRobotDistanceField)
 
 class CollisionRobotDistanceField : public CollisionRobot
 {

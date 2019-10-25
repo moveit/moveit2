@@ -52,7 +52,7 @@
 
 namespace trajectory_execution_manager
 {
-MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager);
+MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager)
 
 // Two modes:
 // Managed controllers

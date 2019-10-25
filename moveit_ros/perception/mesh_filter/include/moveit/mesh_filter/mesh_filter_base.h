@@ -54,8 +54,8 @@ class Mesh;
 
 namespace mesh_filter
 {
-MOVEIT_CLASS_FORWARD(Job);
-MOVEIT_CLASS_FORWARD(GLMesh);
+MOVEIT_CLASS_FORWARD(Job)
+MOVEIT_CLASS_FORWARD(GLMesh)
 
 typedef unsigned int MeshHandle;
 typedef uint32_t LabelType;

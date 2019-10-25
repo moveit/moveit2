@@ -44,7 +44,7 @@
 
 namespace robot_model_loader
 {
-MOVEIT_CLASS_FORWARD(RobotModelLoader);
+MOVEIT_CLASS_FORWARD(RobotModelLoader)
 
 /** @class RobotModelLoader */
 class RobotModelLoader

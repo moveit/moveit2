@@ -42,7 +42,7 @@
 
 namespace chomp_interface
 {
-MOVEIT_CLASS_FORWARD(CHOMPPlanningContext);
+MOVEIT_CLASS_FORWARD(CHOMPPlanningContext)
 
 class CHOMPPlanningContext : public planning_interface::PlanningContext
 {

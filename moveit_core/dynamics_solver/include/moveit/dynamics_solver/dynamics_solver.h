@@ -49,7 +49,7 @@
 /** \brief This namespace includes the dynamics_solver library */
 namespace dynamics_solver
 {
-MOVEIT_CLASS_FORWARD(DynamicsSolver);
+MOVEIT_CLASS_FORWARD(DynamicsSolver)
 
 /**
  * This solver currently computes the required torques given a

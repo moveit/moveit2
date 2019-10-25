@@ -225,7 +225,7 @@ protected:
   unsigned int minimum_waypoint_count_;
 
 private:
-  MOVEIT_STRUCT_FORWARD(CachedContexts);
+  MOVEIT_STRUCT_FORWARD(CachedContexts)
   CachedContextsPtr cached_contexts_;
 };
 }

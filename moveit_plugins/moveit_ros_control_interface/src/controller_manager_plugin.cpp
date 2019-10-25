@@ -73,7 +73,7 @@ bool checkTimeout(ros::Time& t, double timeout, bool force = false)
   return false;
 }
 
-MOVEIT_CLASS_FORWARD(MoveItControllerManager);
+MOVEIT_CLASS_FORWARD(MoveItControllerManager)
 
 /**
  * \brief moveit_controller_manager::MoveItControllerManager sub class that interfaces one ros_control

@@ -58,8 +58,8 @@ class Shape;
 
 namespace moveit_rviz_plugin
 {
-MOVEIT_CLASS_FORWARD(OcTreeRender);
-MOVEIT_CLASS_FORWARD(RenderShapes);
+MOVEIT_CLASS_FORWARD(OcTreeRender)
+MOVEIT_CLASS_FORWARD(RenderShapes)
 
 class RenderShapes
 {

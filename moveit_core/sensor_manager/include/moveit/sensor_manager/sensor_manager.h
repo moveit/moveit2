@@ -71,7 +71,7 @@ struct SensorInfo
   double y_angle;
 };
 
-MOVEIT_CLASS_FORWARD(MoveItSensorManager);
+MOVEIT_CLASS_FORWARD(MoveItSensorManager)
 
 class MoveItSensorManager
 {

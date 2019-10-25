@@ -55,9 +55,9 @@ class DisplayContext;
 
 namespace moveit_rviz_plugin
 {
-MOVEIT_CLASS_FORWARD(RobotStateVisualization);
-MOVEIT_CLASS_FORWARD(RenderShapes);
-MOVEIT_CLASS_FORWARD(PlanningSceneRender);
+MOVEIT_CLASS_FORWARD(RobotStateVisualization)
+MOVEIT_CLASS_FORWARD(RenderShapes)
+MOVEIT_CLASS_FORWARD(PlanningSceneRender)
 
 class PlanningSceneRender
 {

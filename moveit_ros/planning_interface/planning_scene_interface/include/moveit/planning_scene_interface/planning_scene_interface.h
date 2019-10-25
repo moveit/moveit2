@@ -48,7 +48,7 @@ namespace moveit
 {
 namespace planning_interface
 {
-MOVEIT_CLASS_FORWARD(PlanningSceneInterface);
+MOVEIT_CLASS_FORWARD(PlanningSceneInterface)
 
 class PlanningSceneInterface
 {
