@@ -66,7 +66,7 @@ namespace pr2_arm_kinematics
 static const int NO_IK_SOLUTION = -1;
 static const int TIMED_OUT = -2;
 
-MOVEIT_CLASS_FORWARD(PR2ArmIKSolver);
+MOVEIT_CLASS_FORWARD(PR2ArmIKSolver)
 
 // minimal stuff necessary
 class PR2ArmIKSolver : public KDL::ChainIkSolverPos
