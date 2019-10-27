@@ -37,7 +37,6 @@
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 #include <class_loader/class_loader.hpp>
-#include <ros/console.h>
 
 namespace default_planner_request_adapters
 {
@@ -46,12 +45,15 @@ using namespace trajectory_processing;
 /** @brief This adapter uses the time-optimal trajectory generation method */
 class AddTimeOptimalParameterization : public planning_request_adapter::PlanningRequestAdapter
 {
+  rclcpp::Logger LOGGER_ADD_OPTIMAL_PARAMETERIZATION =
+      rclcpp::get_logger("moveit_planning_request_adapter_plugins").get_child("add_time_optimal_parameterization");
+
 public:
   AddTimeOptimalParameterization() : planning_request_adapter::PlanningRequestAdapter()
   {
   }
 
-  void initialize(const ros::NodeHandle& /*nh*/) override
+  void initialize(const rclcpp::Node::SharedPtr& /* node */) override
   {
   }
 
@@ -67,12 +69,12 @@ public:
     bool result = planner(planning_scene, req, res);
     if (result && res.trajectory_)
     {
-      ROS_DEBUG("Running '%s'", getDescription().c_str());
+      RCLCPP_DEBUG(LOGGER_ADD_OPTIMAL_PARAMETERIZATION, " Running '%s'", getDescription().c_str());
       TimeOptimalTrajectoryGeneration totg;
       if (!totg.computeTimeStamps(*res.trajectory_, req.max_velocity_scaling_factor,
                                   req.max_acceleration_scaling_factor))
       {
-        ROS_ERROR("Time parametrization for the solution path failed.");
+        RCLCPP_WARN(LOGGER_ADD_OPTIMAL_PARAMETERIZATION, " Time parametrization for the solution path failed.");
         result = false;
       }
     }

@@ -163,7 +163,7 @@ void planning_pipeline::PlanningPipeline::configure()
         }
         if (ad)
         {
-          ad->initialize(nh_);
+          ad->initialize(node_);
           ads.push_back(std::move(ad));
         }
       }

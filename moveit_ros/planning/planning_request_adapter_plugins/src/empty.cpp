@@ -54,7 +54,7 @@ public:
     return planner(planning_scene, req, res);
   }
 
-  void initialize(const ros::NodeHandle& /*nh*/) override
+  void initialize(const rclcpp::Node::SharedPtr& /* node */) override
   {
   }
 };
