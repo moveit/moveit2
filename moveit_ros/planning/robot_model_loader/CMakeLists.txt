@@ -4,9 +4,19 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_compile_options(-Wno-potentially-evaluated-expression)
 endif()
 
-add_library(${MOVEIT_LIB_NAME} src/robot_model_loader.cpp)
+add_library(${MOVEIT_LIB_NAME} SHARED src/robot_model_loader.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME} moveit_rdf_loader moveit_kinematics_plugin_loader ${catkin_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  moveit_rdf_loader
+  moveit_kinematics_plugin_loader
+  rclcpp
+  urdf
+  Boost
+  moveit_core)
 
-install(TARGETS ${MOVEIT_LIB_NAME} LIBRARY DESTINATION ${CATKIN_GLOBAL_LIB_DESTINATION})
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+install(TARGETS ${MOVEIT_LIB_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+install(DIRECTORY include/ DESTINATION include)
