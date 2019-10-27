@@ -31,7 +31,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     rdf_loader/include
     # kinematics_plugin_loader/include
     # robot_model_loader/include
-    # constraint_sampler_manager_loader/include
+    constraint_sampler_manager_loader/include
     # planning_pipeline/include
     # planning_scene_monitor/include
     # trajectory_execution_manager/include
@@ -43,7 +43,7 @@ set(libraries
   moveit_rdf_loader
   # moveit_kinematics_plugin_loader
   # moveit_robot_model_loader
-  # moveit_constraint_sampler_manager_loader
+  moveit_constraint_sampler_manager_loader
   # moveit_planning_pipeline
   # moveit_trajectory_execution_manager
   # moveit_plan_execution
@@ -73,7 +73,7 @@ add_subdirectory(rdf_loader)
 # add_subdirectory(collision_plugin_loader)
 # add_subdirectory(kinematics_plugin_loader)
 # add_subdirectory(robot_model_loader)
-# add_subdirectory(constraint_sampler_manager_loader)
+add_subdirectory(constraint_sampler_manager_loader)
 # add_subdirectory(planning_pipeline)
 # add_subdirectory(planning_request_adapter_plugins)
 # add_subdirectory(planning_scene_monitor)
