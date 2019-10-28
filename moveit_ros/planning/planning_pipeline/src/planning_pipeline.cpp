@@ -52,10 +52,11 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotMo
                                                       const std::string& adapter_plugins_param_name)
   : node_(node), robot_model_(model)
 {
-  auto planner_plugin_params = std::make_shared<rclcpp::SyncParametersClient>(node);
-  
+  auto planner_plugin_params = std::make_shared<rclcpp::SyncParametersClient>(node, "dummy_joint_states");
+
+  std::string planner;
   if(planner_plugin_params->has_parameter({planner_plugin_param_name}))
-      planner_plugin_name_ = node_->get_parameter(planner_plugin_param_name).get_value<std::string>();
+      planner_plugin_name_ = planner_plugin_params->get_parameter(planner_plugin_param_name, std::string("ompl_interface/OMPLPlanner"));
 
   std::string adapters;
   if (planner_plugin_params->has_parameter({adapter_plugins_param_name}))
@@ -66,6 +67,7 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotMo
     for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin(); beg != tok.end(); ++beg)
       adapter_plugin_names_.push_back(*beg);
   }
+  adapter_plugin_names_.push_back("default_planner_request_adapters/AddTimeParameterization");
 
   configure();
 }
@@ -114,7 +116,7 @@ void planning_pipeline::PlanningPipeline::configure()
   try
   {
     planner_instance_ = planner_plugin_loader_->createUniqueInstance(planner_plugin_name_);
-    if (!planner_instance_->initialize(robot_model_, node_->get_namespace()))
+    if (!planner_instance_->initialize(robot_model_, node_))
       throw std::runtime_error("Unable to initialize planning plugin");
     RCLCPP_INFO(node_->get_logger(),"Using planning interface '%s'", planner_instance_->getDescription().c_str());
   }
@@ -122,7 +124,7 @@ void planning_pipeline::PlanningPipeline::configure()
   {
     std::string classes_str = boost::algorithm::join(classes, ", ");
     RCLCPP_ERROR(node_->get_logger(),"Exception while loading planner '%s': %s"
-        "Available plugins: %s" ,planner_plugin_name_, ex.what(), classes_str.c_str());
+        "Available plugins: %s" ,planner_plugin_name_.c_str(), ex.what(), classes_str.c_str());
   }
 
   // load the planner request adapters
@@ -160,7 +162,7 @@ void planning_pipeline::PlanningPipeline::configure()
       adapter_chain_.reset(new planning_request_adapter::PlanningRequestAdapterChain());
       for (std::size_t i = 0; i < ads.size(); ++i)
       {
-        RCLCPP_ERROR(node_->get_logger(),"Using planning request adapter '%s'", ads[i]->getDescription());
+        RCLCPP_ERROR(node_->get_logger(),"Using planning request adapter '%s'", ads[i]->getDescription().c_str());
         adapter_chain_->addAdapter(ads[i]);
       }
     }
@@ -173,11 +175,8 @@ void planning_pipeline::PlanningPipeline::displayComputedMotionPlans(bool flag)
 {
   if (display_computed_motion_plans_ && !flag)
     display_path_publisher_.reset();
-  else if (!display_computed_motion_plans_ && flag){
-    custom_qos_profile_ = rmw_qos_profile_default;
-    custom_qos_profile_.depth = 10;
-    display_path_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC,custom_qos_profile_);
-  }
+  else if (!display_computed_motion_plans_ && flag)
+    display_path_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC);
   display_computed_motion_plans_ = flag;
 }
 
@@ -185,11 +184,8 @@ void planning_pipeline::PlanningPipeline::publishReceivedRequests(bool flag)
 {
   if (publish_received_requests_ && !flag)
     received_request_publisher_.reset();
-  else if (!publish_received_requests_ && flag){
-    custom_qos_profile_ = rmw_qos_profile_default;
-    custom_qos_profile_.depth = 10;
-    received_request_publisher_ = node_->create_publisher<moveit_msgs::msg::MotionPlanRequest>(MOTION_PLAN_REQUEST_TOPIC,custom_qos_profile_);
-  }
+  else if (!publish_received_requests_ && flag)
+    received_request_publisher_ = node_->create_publisher<moveit_msgs::msg::MotionPlanRequest>(MOTION_PLAN_REQUEST_TOPIC);
   publish_received_requests_ = flag;
 }
 
@@ -197,11 +193,8 @@ void planning_pipeline::PlanningPipeline::checkSolutionPaths(bool flag)
 {
   if (check_solution_paths_ && !flag)
     contacts_publisher_.reset();
-  else if (!check_solution_paths_ && flag){
-    custom_qos_profile_ = rmw_qos_profile_default;
-    custom_qos_profile_.depth = 100;
-    contacts_publisher_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(MOTION_CONTACTS_TOPIC,custom_qos_profile_);
-  }
+  else if (!check_solution_paths_ && flag)
+    contacts_publisher_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(MOTION_CONTACTS_TOPIC);
   check_solution_paths_ = flag;
 }
 
@@ -297,7 +290,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
               ss << index[i] << " ";
             RCLCPP_ERROR(node_->get_logger(),"Computed path is not valid. Invalid states at index locations: [%s] out of "
                           "%ld. Explanations follow in command line. Contacts are published on %s",
-                             ss.str(), state_count, contacts_publisher_->get_topic_name());
+                             ss.str().c_str(), state_count, contacts_publisher_->get_topic_name());
 
             // call validity checks in verbose mode for the problematic states
             visualization_msgs::msg::MarkerArray arr;
@@ -339,16 +332,17 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     }
   }
 
-  // display solution path if needed
-  if (display_computed_motion_plans_ && solved)
-  {
-    moveit_msgs::msg::DisplayTrajectory disp;
-    disp.model_id = robot_model_->getName();
-    disp.trajectory.resize(1);
-    res.trajectory_->getRobotTrajectoryMsg(disp.trajectory[0]);
-    robot_state::robotStateToRobotStateMsg(res.trajectory_->getFirstWayPoint(), disp.trajectory_start);
-    display_path_publisher_->publish(disp);
-  }
+  // TODO (ahcorde): lol
+  // // display solution path if needed
+  // if (display_computed_motion_plans_ && solved)
+  // {
+  //   moveit_msgs::msg::DisplayTrajectory disp;
+  //   disp.model_id = robot_model_->getName();
+  //   disp.trajectory.resize(1);
+  //   res.trajectory_->getRobotTrajectoryMsg(disp.trajectory[0]);
+  //   robot_state::robotStateToRobotStateMsg(res.trajectory_->getFirstWayPoint(), disp.trajectory_start, true);
+  //   display_path_publisher_->publish(disp);
+  // }
 
   return solved && valid;
 }

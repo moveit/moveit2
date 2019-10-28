@@ -93,14 +93,14 @@ public:
 
   bool setJointValueTargetFromPosePython(const std::string& pose_str, const std::string& eef, bool approx)
   {
-    geometry_msgs::Pose pose_msg;
+    geometry_msgs::msg::Pose pose_msg;
     py_bindings_tools::deserializeMsg(pose_str, pose_msg);
     return approx ? setApproximateJointValueTarget(pose_msg, eef) : setJointValueTarget(pose_msg, eef);
   }
 
   bool setJointValueTargetFromPoseStampedPython(const std::string& pose_str, const std::string& eef, bool approx)
   {
-    geometry_msgs::PoseStamped pose_msg;
+    geometry_msgs::msg::PoseStamped pose_msg;
     py_bindings_tools::deserializeMsg(pose_str, pose_msg);
     return approx ? setApproximateJointValueTarget(pose_msg, eef) : setJointValueTarget(pose_msg, eef);
   }
@@ -184,7 +184,7 @@ public:
     return d;
   }
 
-  bp::list convertPoseToList(const geometry_msgs::Pose& pose) const
+  bp::list convertPoseToList(const geometry_msgs::msg::Pose& pose) const
   {
     std::vector<double> v(7);
     v[0] = pose.position.x;
@@ -197,7 +197,7 @@ public:
     return moveit::py_bindings_tools::listFromDouble(v);
   }
 
-  bp::list convertTransformToList(const geometry_msgs::Transform& tr) const
+  bp::list convertTransformToList(const geometry_msgs::msg::Transform& tr) const
   {
     std::vector<double> v(7);
     v[0] = tr.translation.x;
@@ -210,7 +210,7 @@ public:
     return py_bindings_tools::listFromDouble(v);
   }
 
-  void convertListToTransform(const bp::list& l, geometry_msgs::Transform& tr) const
+  void convertListToTransform(const bp::list& l, geometry_msgs::msg::Transform& tr) const
   {
     std::vector<double> v = py_bindings_tools::doubleFromList(l);
     tr.translation.x = v[0];
@@ -222,7 +222,7 @@ public:
     tr.rotation.w = v[6];
   }
 
-  void convertListToPose(const bp::list& l, geometry_msgs::Pose& p) const
+  void convertListToPose(const bp::list& l, geometry_msgs::msg::Pose& p) const
   {
     std::vector<double> v = py_bindings_tools::doubleFromList(l);
     p.position.x = v[0];
@@ -241,13 +241,13 @@ public:
 
   bp::list getCurrentPosePython(const std::string& end_effector_link = "")
   {
-    geometry_msgs::PoseStamped pose = getCurrentPose(end_effector_link);
+    geometry_msgs::msg::PoseStamped pose = getCurrentPose(end_effector_link);
     return convertPoseToList(pose.pose);
   }
 
   bp::list getRandomPosePython(const std::string& end_effector_link = "")
   {
-    geometry_msgs::PoseStamped pose = getRandomPose(end_effector_link);
+    geometry_msgs::msg::PoseStamped pose = getRandomPose(end_effector_link);
     return convertPoseToList(pose.pose);
   }
 
@@ -258,7 +258,7 @@ public:
 
   bool placePose(const std::string& object_name, const bp::list& pose, bool plan_only = false)
   {
-    geometry_msgs::PoseStamped msg;
+    geometry_msgs::msg::PoseStamped msg;
     convertListToPose(pose, msg.pose);
     msg.header.frame_id = getPoseReferenceFrame();
     msg.header.stamp = ros::Time::now();
@@ -267,7 +267,7 @@ public:
 
   bool placeLocation(const std::string& object_name, const std::string& location_str, bool plan_only = false)
   {
-    std::vector<moveit_msgs::action::PlaceLocation> locations(1);
+    std::vector<moveit_msgs::action::::PlaceLocation> locations(1);
     py_bindings_tools::deserializeMsg(location_str, locations[0]);
     return place(object_name, locations, plan_only) == MoveItErrorCode::SUCCESS;
   }
@@ -277,7 +277,7 @@ public:
     return place(object_name, plan_only) == MoveItErrorCode::SUCCESS;
   }
 
-  void convertListToArrayOfPoses(const bp::list& poses, std::vector<geometry_msgs::Pose>& msg)
+  void convertListToArrayOfPoses(const bp::list& poses, std::vector<geometry_msgs::msg::Pose>& msg)
   {
     int l = bp::len(poses);
     for (int i = 0; i < l; ++i)
@@ -298,7 +298,7 @@ public:
         else
           p = Eigen::Isometry3d(Eigen::Quaterniond(v[6], v[3], v[4], v[5]));
         p.translation() = Eigen::Vector3d(v[0], v[1], v[2]);
-        geometry_msgs::Pose pm = tf2::toMsg(p);
+        geometry_msgs::msg::Pose pm = tf2::toMsg(p);
         msg.push_back(pm);
       }
       else
@@ -327,20 +327,20 @@ public:
 
   bool setPoseTargetsPython(bp::list& poses, const std::string& end_effector_link = "")
   {
-    std::vector<geometry_msgs::Pose> msg;
+    std::vector<geometry_msgs::msg::Pose> msg;
     convertListToArrayOfPoses(poses, msg);
     return setPoseTargets(msg, end_effector_link);
   }
   std::string getPoseTargetPython(const std::string& end_effector_link)
   {
-    geometry_msgs::PoseStamped pose = moveit::planning_interface::MoveGroupInterface::getPoseTarget(end_effector_link);
+    geometry_msgs::msg::PoseStamped pose = moveit::planning_interface::MoveGroupInterface::getPoseTarget(end_effector_link);
     return py_bindings_tools::serializeMsg(pose);
   }
 
   bool setPoseTargetPython(bp::list& pose, const std::string& end_effector_link = "")
   {
     std::vector<double> v = py_bindings_tools::doubleFromList(pose);
-    geometry_msgs::Pose msg;
+    geometry_msgs::msg::Pose msg;
     if (v.size() == 6)
     {
       tf2::Quaternion q;
@@ -428,7 +428,7 @@ public:
   bp::tuple planPython()
   {
     MoveGroupInterface::Plan plan;
-    moveit_msgs::MoveItErrorCodes res = MoveGroupInterface::plan(plan);
+    moveit_msgs::msgsMoveItErrorCodes res = MoveGroupInterface::plan(plan);
     return bp::make_tuple(py_bindings_tools::serializeMsg(res), py_bindings_tools::serializeMsg(plan.trajectory_),
                           plan.planning_time_);
   }
@@ -451,7 +451,7 @@ public:
   bp::tuple doComputeCartesianPathPython(const bp::list& waypoints, double eef_step, double jump_threshold,
                                          bool avoid_collisions, const moveit_msgs::msg::Constraints& path_constraints)
   {
-    std::vector<geometry_msgs::Pose> poses;
+    std::vector<geometry_msgs::msg::Pose> poses;
     convertListToArrayOfPoses(waypoints, poses);
     moveit_msgs::msg::RobotTrajectory trajectory;
     double fraction =

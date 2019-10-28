@@ -50,8 +50,9 @@ move_group::MoveGroupExecuteService::~MoveGroupExecuteService()
   spinner_.stop();
 }
 
-void move_group::MoveGroupExecuteService::initialize()
+void move_group::MoveGroupExecuteService::initialize(std::shared_ptr<rclcpp::Node>& node)
 {
+  this->node_ = node;
   // We need to serve each service request in a thread independent of the main spinner thread.
   // Otherwise, a synchronous execution request (i.e. waiting for the execution to finish) would block
   // execution of the main spinner thread.

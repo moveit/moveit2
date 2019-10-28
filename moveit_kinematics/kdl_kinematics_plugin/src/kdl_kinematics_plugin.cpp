@@ -45,13 +45,12 @@
 #include <kdl/frames_io.hpp>
 #include <kdl/kinfam_io.hpp>
 
-// register KDLKinematics as a KinematicsBase implementation
-#include <class_loader/class_loader.hpp>
-CLASS_LOADER_REGISTER_CLASS(kdl_kinematics_plugin::KDLKinematicsPlugin, kinematics::KinematicsBase)
-
 namespace kdl_kinematics_plugin
 {
-KDLKinematicsPlugin::KDLKinematicsPlugin() : initialized_(false)
+
+static rclcpp::Logger LOGGER_KDL_KINEMATICS_PLUGIN = rclcpp::get_logger("kdl_kinematics_plugin");
+
+KDLKinematicsPlugin::KDLKinematicsPlugin():initialized_(false)
 {
 }
 
@@ -84,16 +83,16 @@ void KDLKinematicsPlugin::getJointWeights()
   const std::vector<std::string>& active_names = joint_model_group_->getActiveJointModelNames();
   std::vector<std::string> names;
   std::vector<double> weights;
-  if (lookupParam("joint_weights/weights", weights, weights))
+  if (lookupParam(node_, "joint_weights/weights", weights, weights))
   {
-    if (!lookupParam("joint_weights/names", names, names) || names.size() != weights.size())
+    if (!lookupParam(node_, "joint_weights/names", names, names) || names.size() != weights.size())
     {
-      ROS_ERROR_NAMED("kdl", "Expecting list parameter joint_weights/names of same size as list joint_weights/weights");
+      RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN, "Expecting list parameter joint_weights/names of same size as list joint_weights/weights");
       // fall back to default weights
       weights.clear();
     }
   }
-  else if (lookupParam("joint_weights", weights, weights))  // try reading weight lists (for all active joints) directly
+  else if (lookupParam(node_, "joint_weights", weights, weights))  // try reading weight lists (for all active joints) directly
   {
     std::size_t num_active = active_names.size();
     if (weights.size() == num_active)
@@ -103,7 +102,7 @@ void KDLKinematicsPlugin::getJointWeights()
     }
     else if (!weights.empty())
     {
-      ROS_ERROR_NAMED("kdl", "Expecting parameter joint_weights to list weights for all active joints (%zu) in order",
+      RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN, "Expecting parameter joint_weights to list weights for all active joints (%zu) in order",
                       num_active);
       // fall back to default weights
       weights.clear();
@@ -121,17 +120,17 @@ void KDLKinematicsPlugin::getJointWeights()
   {
     auto it = std::find(active_names.begin(), active_names.end(), names[i]);
     if (it == active_names.cend())
-      ROS_WARN_NAMED("kdl", "Joint '%s' is not an active joint in group '%s'", names[i].c_str(),
+      RCLCPP_WARN(LOGGER_KDL_KINEMATICS_PLUGIN, "Joint '%s' is not an active joint in group '%s'", names[i].c_str(),
                      joint_model_group_->getName().c_str());
     else if (weights[i] < 0.0)
-      ROS_WARN_NAMED("kdl", "Negative weight %f for joint '%s' will be ignored", weights[i], names[i].c_str());
+      RCLCPP_WARN(LOGGER_KDL_KINEMATICS_PLUGIN, "Negative weight %f for joint '%s' will be ignored", weights[i], names[i].c_str());
     else
       joint_weights_[it - active_names.begin()] = weights[i];
   }
-  ROS_INFO_STREAM_NAMED("kdl", "Joint weights for group '"
-                                   << getGroupName() << "': \n"
-                                   << Eigen::Map<const Eigen::VectorXd>(joint_weights_.data(), joint_weights_.size())
-                                          .transpose());
+  // RCLCPP_INFO(LOGGER_KDL_KINEMATICS_PLUGIN, "Joint weights for group '%s' : ", getGroupName().c_str()
+  //                                  << getGroupName() << "': \n"
+  //                                  << Eigen::Map<const Eigen::VectorXd>(joint_weights_.data(), joint_weights_.size())
+  //                                         .transpose());
 }
 
 bool KDLKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model, const std::string& group_name,
@@ -145,12 +144,12 @@ bool KDLKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
 
   if (!joint_model_group_->isChain())
   {
-    ROS_ERROR_NAMED("kdl", "Group '%s' is not a chain", group_name.c_str());
+    RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN, "Group '%s' is not a chain", group_name.c_str());
     return false;
   }
   if (!joint_model_group_->isSingleDOFJoints())
   {
-    ROS_ERROR_NAMED("kdl", "Group '%s' includes joints that have more than 1 DOF", group_name.c_str());
+    RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN, "Group '%s' includes joints that have more than 1 DOF", group_name.c_str());
     return false;
   }
 
@@ -158,12 +157,12 @@ bool KDLKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
 
   if (!kdl_parser::treeFromUrdfModel(*robot_model.getURDF(), kdl_tree))
   {
-    ROS_ERROR_NAMED("kdl", "Could not initialize tree object");
+    RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN, "Could not initialize tree object");
     return false;
   }
   if (!kdl_tree.getChain(base_frame_, getTipFrame(), kdl_chain_))
   {
-    ROS_ERROR_NAMED("kdl", "Could not initialize chain object");
+    RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN, "Could not initialize chain object");
     return false;
   }
 
@@ -182,7 +181,7 @@ bool KDLKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
 
   if (!joint_model_group_->hasLinkModel(getTipFrame()))
   {
-    ROS_ERROR_NAMED("kdl", "Could not find tip name in joint group '%s'", group_name.c_str());
+    RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN, "Could not find tip name in joint group '%s'", group_name.c_str());
     return false;
   }
   solver_info_.link_names.push_back(getTipFrame());
@@ -197,16 +196,16 @@ bool KDLKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
   }
 
   // Get Solver Parameters
-  lookupParam("max_solver_iterations", max_solver_iterations_, 500);
-  lookupParam("epsilon", epsilon_, 1e-5);
-  lookupParam("orientation_vs_position", orientation_vs_position_weight_, 1.0);
+  lookupParam(node_, "max_solver_iterations", max_solver_iterations_, 500);
+  lookupParam(node_, "epsilon", epsilon_, 1e-5);
+  lookupParam(node_, "orientation_vs_position", orientation_vs_position_weight_, 1.0);
 
   bool position_ik;
-  lookupParam("position_only_ik", position_ik, false);
+  lookupParam(node_, "position_only_ik", position_ik, false);
   if (position_ik)  // position_only_ik overrules orientation_vs_position
     orientation_vs_position_weight_ = 0.0;
   if (orientation_vs_position_weight_ == 0.0)
-    ROS_INFO_NAMED("kdl", "Using position only ik");
+    RCLCPP_INFO(LOGGER_KDL_KINEMATICS_PLUGIN, "Using position only ik");
 
   getJointWeights();
 
@@ -262,16 +261,16 @@ bool KDLKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
   fk_solver_.reset(new KDL::ChainFkSolverPos_recursive(kdl_chain_));
 
   initialized_ = true;
-  ROS_DEBUG_NAMED("kdl", "KDL solver initialized");
+  RCLCPP_DEBUG(LOGGER_KDL_KINEMATICS_PLUGIN, "KDL solver initialized");
   return true;
 }
 
-bool KDLKinematicsPlugin::timedOut(const ros::WallTime& start_time, double duration) const
+bool KDLKinematicsPlugin::timedOut(const std::chrono::system_clock::time_point & start_time, double duration) const
 {
-  return ((ros::WallTime::now() - start_time).toSec() >= duration);
+  return (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start_time).count()*1e-9 >= duration);
 }
 
-bool KDLKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool KDLKinematicsPlugin::getPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                         std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                         const kinematics::KinematicsQueryOptions& options) const
 {
@@ -282,7 +281,7 @@ bool KDLKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, cons
                           options);
 }
 
-bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
@@ -293,7 +292,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
                           options);
 }
 
-bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
                                            std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
@@ -302,7 +301,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
                           options);
 }
 
-bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
@@ -313,7 +312,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
                           options);
 }
 
-bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
                                            std::vector<double>& solution, const IKCallbackFn& solution_callback,
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
@@ -323,25 +322,24 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
                           options);
 }
 
-bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const std::vector<double>& consistency_limits,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
-  ros::WallTime start_time = ros::WallTime::now();
+  auto start_time = std::chrono::system_clock::now();
   if (!initialized_)
   {
-    ROS_ERROR_NAMED("kdl", "kinematics solver not initialized");
+    RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN, "kinematics solver not initialized");
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
 
   if (ik_seed_state.size() != dimension_)
   {
-    ROS_ERROR_STREAM_NAMED("kdl", "Seed state must have size " << dimension_ << " instead of size "
-                                                               << ik_seed_state.size());
+    RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN, "Seed state must have size %d instead of size %d\n", dimension_, ik_seed_state.size());
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
@@ -352,8 +350,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
   {
     if (consistency_limits.size() != dimension_)
     {
-      ROS_ERROR_STREAM_NAMED("kdl", "Consistency limits must be empty or have size "
-                                        << dimension_ << " instead of size " << consistency_limits.size());
+      RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN,"Consistency limits must be empty or have size %d instead of size %d\n", dimension_,  consistency_limits.size());
       error_code.val = error_code.NO_IK_SOLUTION;
       return false;
     }
@@ -377,13 +374,14 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
   KDL::ChainIkSolverVelMimicSVD ik_solver_vel(kdl_chain_, mimic_joints_, orientation_vs_position_weight_ == 0.0);
   solution.resize(dimension_);
 
-  KDL::Frame pose_desired;
-  tf2::fromMsg(ik_pose, pose_desired);
+  KDL::Frame pose_desired(KDL::Rotation::Quaternion(ik_pose.orientation.x, ik_pose.orientation.y,
+                                               ik_pose.orientation.z, ik_pose.orientation.w),
+                      KDL::Vector(ik_pose.position.x, ik_pose.position.y, ik_pose.position.z));
 
-  ROS_DEBUG_STREAM_NAMED("kdl", "searchPositionIK: Position request pose is "
-                                    << ik_pose.position.x << " " << ik_pose.position.y << " " << ik_pose.position.z
-                                    << " " << ik_pose.orientation.x << " " << ik_pose.orientation.y << " "
-                                    << ik_pose.orientation.z << " " << ik_pose.orientation.w);
+  RCLCPP_DEBUG(LOGGER_KDL_KINEMATICS_PLUGIN, "searchPositionIK: Position request pose is %.4f %.4f %.4f %.4f %.4f %.4f %.4f",
+                                    ik_pose.position.x, ik_pose.position.y, ik_pose.position.z,
+                                    ik_pose.orientation.x, ik_pose.orientation.y,
+                                    ik_pose.orientation.z, ik_pose.orientation.w);
 
   unsigned int attempt = 0;
   do
@@ -395,7 +393,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
         getRandomConfiguration(jnt_seed_state.data, consistency_limits_mimic, jnt_pos_in.data);
       else
         getRandomConfiguration(jnt_pos_in.data);
-      ROS_DEBUG_STREAM_NAMED("kdl", "New random configuration (" << attempt << "): " << jnt_pos_in);
+      RCLCPP_DEBUG(LOGGER_KDL_KINEMATICS_PLUGIN, "New random configuration (%d): ", attempt);// << jnt_pos_in);
     }
 
     int ik_valid =
@@ -417,14 +415,12 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 
       // solution passed consistency check and solution callback
       error_code.val = error_code.SUCCESS;
-      ROS_DEBUG_STREAM_NAMED("kdl", "Solved after " << (ros::WallTime::now() - start_time).toSec() << " < " << timeout
-                                                    << "s and " << attempt << " attempts");
+      RCLCPP_DEBUG(LOGGER_KDL_KINEMATICS_PLUGIN,  "Solved after %d < %d s and %d attempts", (std::chrono::system_clock::now() - start_time).count(), timeout, attempt);
       return true;
     }
   } while (!timedOut(start_time, timeout));
 
-  ROS_DEBUG_STREAM_NAMED("kdl", "IK timed out after " << (ros::WallTime::now() - start_time).toSec() << " > " << timeout
-                                                      << "s and " << attempt << " attempts");
+  RCLCPP_DEBUG(LOGGER_KDL_KINEMATICS_PLUGIN, "IK timed out after %d < %d s and %d attempts", (std::chrono::system_clock::now() - start_time).count(),  timeout, attempt);
   error_code.val = error_code.TIMED_OUT;
   return false;
 }
@@ -443,7 +439,7 @@ int KDLKinematicsPlugin::CartToJnt(KDL::ChainIkSolverVelMimicSVD& ik_solver, con
   extra_joint_weights.setOnes(joint_weights.rows());
 
   q_out = q_init;
-  ROS_DEBUG_STREAM_NAMED("kdl", "Input: " << q_init);
+  // RCLCPP_DEBUG(LOGGER_KDL_KINEMATICS_PLUGIN, "Input: " << q_init);
 
   unsigned int i;
   bool success = false;
@@ -451,7 +447,7 @@ int KDLKinematicsPlugin::CartToJnt(KDL::ChainIkSolverVelMimicSVD& ik_solver, con
   {
     fk_solver_->JntToCart(q_out, f);
     delta_twist = diff(f, p_in);
-    ROS_DEBUG_STREAM_NAMED("kdl", "[" << std::setw(3) << i << "] delta_twist: " << delta_twist);
+    // ROS_DEBUG_STREAM_NAMED("kdl", "[" << std::setw(3) << i << "] delta_twist: " << delta_twist);
 
     // check norms of position and orientation errors
     const double position_error = delta_twist.vel.Norm();
@@ -469,7 +465,7 @@ int KDLKinematicsPlugin::CartToJnt(KDL::ChainIkSolverVelMimicSVD& ik_solver, con
       double old_step_size = step_size;
       step_size *= std::min(0.2, last_delta_twist_norm / delta_twist_norm);  // reduce scale;
       KDL::Multiply(delta_q, step_size / old_step_size, delta_q);
-      ROS_DEBUG_NAMED("kdl", "      error increased: %f -> %f, scale: %f", last_delta_twist_norm, delta_twist_norm,
+      RCLCPP_DEBUG(LOGGER_KDL_KINEMATICS_PLUGIN, "      error increased: %f -> %f, scale: %f", last_delta_twist_norm, delta_twist_norm,
                       step_size);
       q_out = q_backup;  // restore previous unclipped joint values
     }
@@ -485,7 +481,7 @@ int KDLKinematicsPlugin::CartToJnt(KDL::ChainIkSolverVelMimicSVD& ik_solver, con
     clipToJointLimits(q_out, delta_q, extra_joint_weights);
 
     const double delta_q_norm = delta_q.data.lpNorm<1>();
-    ROS_DEBUG_NAMED("kdl", "[%3d] pos err: %f  rot err: %f  delta_q: %f", i, position_error, orientation_error,
+    RCLCPP_DEBUG(LOGGER_KDL_KINEMATICS_PLUGIN, "[%3d] pos err: %f  rot err: %f  delta_q: %f", i, position_error, orientation_error,
                     delta_q_norm);
     if (delta_q_norm < epsilon_)  // stuck in singularity
     {
@@ -499,12 +495,12 @@ int KDLKinematicsPlugin::CartToJnt(KDL::ChainIkSolverVelMimicSVD& ik_solver, con
 
     KDL::Add(q_out, delta_q, q_out);
 
-    ROS_DEBUG_STREAM_NAMED("kdl", "      delta_q: " << delta_q);
-    ROS_DEBUG_STREAM_NAMED("kdl", "      q: " << q_out);
+    // ROS_DEBUG_STREAM_NAMED("kdl", "      delta_q: " << delta_q);
+    // ROS_DEBUG_STREAM_NAMED("kdl", "      q: " << q_out);
   }
 
   int result = (i == max_iter) ? -3 : (success ? 0 : -2);
-  ROS_DEBUG_STREAM_NAMED("kdl", "Result " << result << " after " << i << " iterations: " << q_out);
+  // ROS_DEBUG_STREAM_NAMED("kdl", "Result " << result << " after " << i << " iterations: " << q_out);
 
   return result;
 }
@@ -530,17 +526,17 @@ void KDLKinematicsPlugin::clipToJointLimits(const KDL::JntArray& q, KDL::JntArra
 
 bool KDLKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_names,
                                         const std::vector<double>& joint_angles,
-                                        std::vector<geometry_msgs::Pose>& poses) const
+                                        std::vector<geometry_msgs::msg::Pose>& poses) const
 {
   if (!initialized_)
   {
-    ROS_ERROR_NAMED("kdl", "kinematics solver not initialized");
+    RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN, "kinematics solver not initialized");
     return false;
   }
   poses.resize(link_names.size());
   if (joint_angles.size() != dimension_)
   {
-    ROS_ERROR_NAMED("kdl", "Joint angles vector must have size: %d", dimension_);
+    RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN, "Joint angles vector must have size: %d", dimension_);
     return false;
   }
 
@@ -553,11 +549,16 @@ bool KDLKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_nam
   {
     if (fk_solver_->JntToCart(jnt_pos_in, p_out) >= 0)
     {
-      poses[i] = tf2::toMsg(p_out);
+      // poses[i] = tf2::toMsg(p_out);
+      poses[i].position.x = p_out.p[0];
+      poses[i].position.y = p_out.p[1];
+      poses[i].position.z = p_out.p[2];
+      p_out.M.GetQuaternion(poses[i].orientation.x, poses[i].orientation.y,
+                            poses[i].orientation.z, poses[i].orientation.w);
     }
     else
     {
-      ROS_ERROR_NAMED("kdl", "Could not compute FK for %s", link_names[i].c_str());
+      RCLCPP_ERROR(LOGGER_KDL_KINEMATICS_PLUGIN, "Could not compute FK for %s", link_names[i].c_str());
       valid = false;
     }
   }
@@ -575,3 +576,7 @@ const std::vector<std::string>& KDLKinematicsPlugin::getLinkNames() const
 }
 
 }  // namespace kdl_kinematics_plugin
+
+// register KDLKinematics as a KinematicsBase implementation
+#include <class_loader/class_loader.hpp>
+CLASS_LOADER_REGISTER_CLASS(kdl_kinematics_plugin::KDLKinematicsPlugin, kinematics::KinematicsBase)

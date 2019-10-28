@@ -35,27 +35,29 @@
 /* Author: Jon Binney, Ioan Sucan */
 
 #include <memory>
-#include <ros/ros.h>
 #include <tf2_ros/transform_listener.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-#include <octomap_msgs/conversions.h>
 
-static void publishOctomap(ros::Publisher* octree_binary_pub, occupancy_map_monitor::OccupancyMapMonitor* server)
+rclcpp::Logger logger_occupancy_map_server = rclcpp::get_logger("occupancy_map_monitor");
+
+static void publishOctomap(rclcpp::Publisher<octomap_msgs::msg::Octomap>::SharedPtr octree_binary_pub, occupancy_map_monitor::OccupancyMapMonitor* server)
 {
-  octomap_msgs::Octomap map;
+  octomap_msgs::msg::Octomap map;
+  rclcpp::Clock ros_clock;
 
   map.header.frame_id = server->getMapFrame();
-  map.header.stamp = ros::Time::now();
+  map.header.stamp = ros_clock.now();
 
   server->getOcTreePtr()->lockRead();
   try
   {
-    if (!octomap_msgs::binaryMapToMsgData(*server->getOcTreePtr(), map.data))
-      ROS_ERROR_THROTTLE(1, "Could not generate OctoMap message");
+    if (!octomap_msgs::binaryMapToMsgData(*server->getOcTreePtr(), map.data)){
+      RCUTILS_LOG_ERROR_THROTTLE(RCUTILS_STEADY_TIME,1, "Could not generate OctoMap message");
+    }
   }
   catch (...)
   {
-    ROS_ERROR_THROTTLE(1, "Exception thrown while generating OctoMap message");
+    RCUTILS_LOG_ERROR_THROTTLE(RCUTILS_STEADY_TIME,1, "Exception thrown while generating OctoMap message");
   }
   server->getOcTreePtr()->unlockRead();
 
@@ -64,15 +66,17 @@ static void publishOctomap(ros::Publisher* octree_binary_pub, occupancy_map_moni
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "occupancy_map_server");
-  ros::NodeHandle nh;
-  ros::Publisher octree_binary_pub = nh.advertise<octomap_msgs::Octomap>("octomap_binary", 1);
-  std::shared_ptr<tf2_ros::Buffer> buffer = std::make_shared<tf2_ros::Buffer>(ros::Duration(5.0));
-  std::shared_ptr<tf2_ros::TransformListener> listener = std::make_shared<tf2_ros::TransformListener>(*buffer, nh);
+  rclcpp::init(argc, argv);
+  rclcpp::Clock::SharedPtr clock_ptr = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
+  auto node_ = rclcpp::Node::make_shared("occupancy_map_server");
+  auto octree_binary_pub = node_->create_publisher<octomap_msgs::msg::Octomap>("octomap_binary", rmw_qos_profile_default);
+  std::shared_ptr<tf2_ros::Buffer> buffer = std::make_shared<tf2_ros::Buffer>(clock_ptr,tf2::durationFromSec(5.0));
+  std::shared_ptr<tf2_ros::TransformListener> listener = std::make_shared<tf2_ros::TransformListener>(*buffer, node_);
   occupancy_map_monitor::OccupancyMapMonitor server(buffer);
-  server.setUpdateCallback(boost::bind(&publishOctomap, &octree_binary_pub, &server));
+  server.setUpdateCallback(
+    boost::bind(&publishOctomap, octree_binary_pub, &server));
   server.startMonitor();
 
-  ros::spin();
+  rclcpp::spin_some(node_);
   return 0;
 }

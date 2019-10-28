@@ -41,23 +41,26 @@ move_group::ClearOctomapService::ClearOctomapService() : MoveGroupCapability("Cl
 {
 }
 
-void move_group::ClearOctomapService::initialize()
+void move_group::ClearOctomapService::initialize(std::shared_ptr<rclcpp::Node>& node)
 {
-  service_ = root_node_handle_.advertiseService(CLEAR_OCTOMAP_SERVICE_NAME, &ClearOctomapService::clearOctomap, this);
+  this->node_ = node;
+  service_ = node_->create_service<std_srvs::srv::Empty>(
+      CLEAR_OCTOMAP_SERVICE_NAME, std::bind(&ClearOctomapService::clearOctomap, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3) );
 }
-
-bool move_group::ClearOctomapService::clearOctomap(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res)
+void move_group::ClearOctomapService::clearOctomap(const std::shared_ptr<rmw_request_id_t> request_header,
+   const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+   const std::shared_ptr<std_srvs::srv::Empty::Response> response)
 {
   if (!context_->planning_scene_monitor_)
   {
-    ROS_ERROR("Cannot clear octomap since planning_scene_monitor_ does not exist.");
-    return true;
+    RCLCPP_ERROR(rclcpp::get_logger("ClearOctomapService"), "Cannot clear octomap since planning_scene_monitor_ does not exist.");
+    return;
   }
 
-  ROS_INFO("Clearing octomap...");
+  RCLCPP_INFO(rclcpp::get_logger("ClearOctomapService"), "Clearing octomap...");
   context_->planning_scene_monitor_->clearOctomap();
-  ROS_INFO("Octomap cleared.");
-  return true;
+  RCLCPP_INFO(rclcpp::get_logger("ClearOctomapService"), "Octomap cleared.");
+  return;
 }
 
 #include <class_loader/class_loader.hpp>

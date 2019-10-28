@@ -38,13 +38,16 @@
 #ifndef MOVEIT_PLUGINS_ACTION_BASED_CONTROLLER_HANDLE
 #define MOVEIT_PLUGINS_ACTION_BASED_CONTROLLER_HANDLE
 
-#include <actionlib/client/simple_action_client.h>
+// #include <actionlib/client/simple_action_client.h>
+#include "rclcpp/rclcpp.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
 #include <moveit/controller_manager/controller_manager.h>
 #include <moveit/macros/class_forward.h>
 #include <memory>
 
 namespace moveit_simple_controller_manager
 {
+static rclcpp::Logger LOGGER_ACTION_BASED_CONTROLLER = rclcpp::get_logger("moveit_simple_controller_manager").get_child("action_based_controller");
 /*
  * This exist solely to inject addJoint/getJoints into base non-templated class.
  */
@@ -57,9 +60,10 @@ public:
 
   virtual void addJoint(const std::string& name) = 0;
   virtual void getJoints(std::vector<std::string>& joints) = 0;
-  virtual void configure(XmlRpc::XmlRpcValue& config)
-  {
-  }
+  //TODO (anasarrak)
+  // virtual void configure(XmlRpc::XmlRpcValue& config)
+  // {
+  // }
 };
 
 MOVEIT_CLASS_FORWARD(ActionBasedControllerHandleBase)
@@ -71,33 +75,40 @@ template <typename T>
 class ActionBasedControllerHandle : public ActionBasedControllerHandleBase
 {
 public:
-  ActionBasedControllerHandle(const std::string& name, const std::string& ns)
-    : ActionBasedControllerHandleBase(name), nh_("~"), done_(true), namespace_(ns)
+  ActionBasedControllerHandle(const std::string& name, std::shared_ptr<rclcpp::Node>& node)
+    : ActionBasedControllerHandleBase(name), node_(node), done_(true)
   {
-    controller_action_client_.reset(new actionlib::SimpleActionClient<T>(getActionName(), true));
+    auto trajectory_execution_params = std::make_shared<rclcpp::SyncParametersClient>(node_);
+    controller_action_client_.reset();
+    controller_action_client_ = rclcpp_action::create_client<T>(node_, getActionName());
+
     unsigned int attempts = 0;
-    double timeout;
-    nh_.param("trajectory_execution/controller_connection_timeout", timeout, 15.0);
+    rclcpp::Rate rate(std::chrono::milliseconds(1000));
+    double timeout = 0.0;
+    if (trajectory_execution_params->has_parameter({"trajectory_execution/controller_connection_timeout"}))
+    {
+      timeout = trajectory_execution_params->get_parameter("trajectory_execution/controller_connection_timeout", 15.0);
+    }
 
     if (timeout == 0.0)
     {
-      while (ros::ok() && !controller_action_client_->waitForServer(ros::Duration(5.0)))
+      while (rclcpp::ok() && !controller_action_client_->wait_for_action_server(std::chrono::seconds(5)))
       {
-        ROS_WARN_STREAM_NAMED("ActionBasedController", "Waiting for " << getActionName() << " to come up");
-        ros::Duration(1).sleep();
+        RCLCPP_WARN(LOGGER_ACTION_BASED_CONTROLLER, "Waiting for %s to come up", getActionName().c_str());
+        rate.sleep();
       }
     }
     else
     {
-      while (ros::ok() && !controller_action_client_->waitForServer(ros::Duration(timeout / 3)) && ++attempts < 3)
+      while (rclcpp::ok() && !controller_action_client_->wait_for_action_server(std::chrono::seconds( (int) timeout / 3)) && ++attempts < 3)
       {
-        ROS_WARN_STREAM_NAMED("ActionBasedController", "Waiting for " << getActionName() << " to come up");
-        ros::Duration(1).sleep();
+        RCLCPP_WARN(LOGGER_ACTION_BASED_CONTROLLER, "Waiting for %s to come up",getActionName().c_str());
+        rate.sleep();
       }
     }
-    if (!controller_action_client_->isServerConnected())
+    if (!controller_action_client_->action_server_is_ready())
     {
-      ROS_ERROR_STREAM_NAMED("ActionBasedController", "Action client not connected: " << getActionName());
+      RCLCPP_ERROR(LOGGER_ACTION_BASED_CONTROLLER, "Action client not connected: %s", getActionName().c_str());
       controller_action_client_.reset();
     }
 
@@ -111,22 +122,32 @@ public:
 
   bool cancelExecution() override
   {
-    if (!controller_action_client_)
-      return false;
-    if (!done_)
-    {
-      ROS_INFO_STREAM_NAMED("ActionBasedController", "Cancelling execution for " << name_);
-      controller_action_client_->cancelGoal();
-      last_exec_ = moveit_controller_manager::ExecutionStatus::PREEMPTED;
-      done_ = true;
-    }
+    //TODO (anasarrak)
+    // typename goal_msg = T::Goal();
+    // auto goal_handle_future = controller_action_client_->async_send_goal(T);
+    // typename rclcpp_action::ClientGoalHandle<T>::SharedPtr goal_handle = goal_handle_future.get();
+    // if (!controller_action_client_)
+    //   return false;
+    // if (!done_)
+    // {
+    //   auto cancel_result_future = controller_action_client_->async_cancel_goal(goal_handle);
+    //   if (rclcpp::spin_until_future_complete(node_, cancel_result_future) !=
+    //   rclcpp::executor::FutureReturnCode::SUCCESS)
+    //   {
+    //     RCLCPP_INFO(LOGGER_ACTION_BASED_CONTROLLER, "Cancelling execution for %s", name_.c_str());
+    //     last_exec_ = moveit_controller_manager::ExecutionStatus::PREEMPTED;
+    //   }
+    //   done_ = true;
+    // }
     return true;
   }
 
-  bool waitForExecution(const ros::Duration& timeout = ros::Duration(0)) override
+  bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(0,0)) override
   {
     if (controller_action_client_ && !done_)
-      return controller_action_client_->waitForResult(timeout);
+      // return controller_action_client_->waitForResult(timeout);
+      return controller_action_client_->wait_for_action_server(std::chrono::seconds((int) timeout.seconds()));
+
     return true;
   }
 
@@ -146,7 +167,7 @@ public:
   }
 
 protected:
-  ros::NodeHandle nh_;
+  rclcpp::Node::SharedPtr node_;
   std::string getActionName(void) const
   {
     if (namespace_.empty())
@@ -155,16 +176,17 @@ protected:
       return name_ + "/" + namespace_;
   }
 
-  void finishControllerExecution(const actionlib::SimpleClientGoalState& state)
+  void finishControllerExecution(const rclcpp_action::ResultCode& state)
   {
-    ROS_DEBUG_STREAM_NAMED("ActionBasedController", "Controller " << name_ << " is done with state " << state.toString()
-                                                                  << ": " << state.getText());
-    if (state == actionlib::SimpleClientGoalState::SUCCEEDED)
+    //TODO(anasarrak)
+    // RCLCPP_DEBUG(LOGGER_ACTION_BASED_CONTROLLER, "Controller %s is done with state %s:%s ",name_.c_str(), state.toString(), state.getText());
+    if (state == rclcpp_action::ResultCode::SUCCEEDED)
       last_exec_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
-    else if (state == actionlib::SimpleClientGoalState::ABORTED)
+    else if (state == rclcpp_action::ResultCode::ABORTED)
       last_exec_ = moveit_controller_manager::ExecutionStatus::ABORTED;
-    else if (state == actionlib::SimpleClientGoalState::PREEMPTED)
-      last_exec_ = moveit_controller_manager::ExecutionStatus::PREEMPTED;
+    //TODO(anasarrak) No preempt on ros2 resultCode
+    // else if (state == actionlib::SimpleClientGoalState::PREEMPTED)
+    //   last_exec_ = moveit_controller_manager::ExecutionStatus::PREEMPTED;
     else
       last_exec_ = moveit_controller_manager::ExecutionStatus::FAILED;
     done_ = true;
@@ -182,7 +204,7 @@ protected:
   std::vector<std::string> joints_;
 
   /* action client */
-  std::shared_ptr<actionlib::SimpleActionClient<T> > controller_action_client_;
+  std::shared_ptr<rclcpp_action::Client<T>> controller_action_client_;
 };
 
 }  // end namespace moveit_simple_controller_manager

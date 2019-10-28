@@ -45,24 +45,26 @@ move_group::MoveGroupStateValidationService::MoveGroupStateValidationService()
 {
 }
 
-void move_group::MoveGroupStateValidationService::initialize()
+void move_group::MoveGroupStateValidationService::initialize(std::shared_ptr<rclcpp::Node>& node)
 {
-  validity_service_ = root_node_handle_.advertiseService(STATE_VALIDITY_SERVICE_NAME,
-                                                         &MoveGroupStateValidationService::computeService, this);
+  this->node_ = node;
+  validity_service_ = node_->create_service<moveit_msgs::srv::GetStateValidity>(
+        STATE_VALIDITY_SERVICE_NAME, std::bind(&MoveGroupStateValidationService::computePlanService, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3) );
 }
 
-bool move_group::MoveGroupStateValidationService::computeService(moveit_msgs::srv::GetStateValidity::Request& req,
-                                                                 moveit_msgs::srv::GetStateValidity::Response& res)
+void move_group::MoveGroupStateValidationService::computePlanService(const std::shared_ptr<rmw_request_id_t> request_header,
+     const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request> request,
+     const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response> response)
 {
   planning_scene_monitor::LockedPlanningSceneRO ls(context_->planning_scene_monitor_);
   robot_state::RobotState rs = ls->getCurrentState();
-  robot_state::robotStateMsgToRobotState(req.robot_state, rs);
+  robot_state::robotStateMsgToRobotState(request->robot_state, rs);
 
-  res.valid = true;
+  response->valid = true;
 
   // configure collision request
   collision_detection::CollisionRequest creq;
-  creq.group_name = req.group_name;
+  creq.group_name = request->group_name;
   creq.cost = true;
   creq.contacts = true;
   creq.max_contacts = ls->getWorld()->size();
@@ -76,49 +78,49 @@ bool move_group::MoveGroupStateValidationService::computeService(moveit_msgs::sr
   // copy contacts if any
   if (cres.collision)
   {
-    ros::Time time_now = ros::Time::now();
-    res.contacts.reserve(cres.contact_count);
-    res.valid = false;
+    auto time_now = rclcpp::Clock().now();
+    response->contacts.reserve(cres.contact_count);
+    response->valid = false;
     for (collision_detection::CollisionResult::ContactMap::const_iterator it = cres.contacts.begin();
          it != cres.contacts.end(); ++it)
       for (std::size_t k = 0; k < it->second.size(); ++k)
       {
-        res.contacts.resize(res.contacts.size() + 1);
-        collision_detection::contactToMsg(it->second[k], res.contacts.back());
-        res.contacts.back().header.frame_id = ls->getPlanningFrame();
-        res.contacts.back().header.stamp = time_now;
+        response->contacts.resize(response->contacts.size() + 1);
+        collision_detection::contactToMsg(it->second[k], response->contacts.back());
+        response->contacts.back().header.frame_id = ls->getPlanningFrame();
+        response->contacts.back().header.stamp = time_now;
       }
   }
 
   // copy cost sources
-  res.cost_sources.reserve(cres.cost_sources.size());
+  response->cost_sources.reserve(cres.cost_sources.size());
   for (std::set<collision_detection::CostSource>::const_iterator it = cres.cost_sources.begin();
        it != cres.cost_sources.end(); ++it)
   {
-    res.cost_sources.resize(res.cost_sources.size() + 1);
-    collision_detection::costSourceToMsg(*it, res.cost_sources.back());
+    response->cost_sources.resize(response->cost_sources.size() + 1);
+    collision_detection::costSourceToMsg(*it, response->cost_sources.back());
   }
 
   // evaluate constraints
-  if (!kinematic_constraints::isEmpty(req.constraints))
+  if (!kinematic_constraints::isEmpty(request->constraints))
   {
     kinematic_constraints::KinematicConstraintSet kset(ls->getRobotModel());
-    kset.add(req.constraints, ls->getTransforms());
+    kset.add(request->constraints, ls->getTransforms());
     std::vector<kinematic_constraints::ConstraintEvaluationResult> kres;
     kinematic_constraints::ConstraintEvaluationResult total_result = kset.decide(rs, kres);
     if (!total_result.satisfied)
-      res.valid = false;
+      response->valid = false;
 
     // copy constraint results
-    res.constraint_result.resize(kres.size());
+    response->constraint_result.resize(kres.size());
     for (std::size_t k = 0; k < kres.size(); ++k)
     {
-      res.constraint_result[k].result = kres[k].satisfied;
-      res.constraint_result[k].distance = kres[k].distance;
+      response->constraint_result[k].result = kres[k].satisfied;
+      response->constraint_result[k].distance = kres[k].distance;
     }
   }
 
-  return true;
+  return;
 }
 
 #include <class_loader/class_loader.hpp>

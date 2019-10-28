@@ -79,8 +79,10 @@ public:
 
   /** @brief Default constructor */
   RobotModelLoader(const Options& opt = Options());
+  RobotModelLoader(std::shared_ptr<rclcpp::Node>& node, const Options& opt = Options());
 
   RobotModelLoader(const std::string& robot_description, bool load_kinematics_solvers = true);
+  RobotModelLoader(const std::string& robot_description, std::shared_ptr<rclcpp::Node>& node, bool load_kinematics_solvers = true);
 
   ~RobotModelLoader();
 
@@ -132,6 +134,7 @@ private:
   robot_model::RobotModelPtr model_;
   rdf_loader::RDFLoaderPtr rdf_loader_;
   kinematics_plugin_loader::KinematicsPluginLoaderPtr kinematics_loader_;
+  std::shared_ptr<rclcpp::Node> node_;
 };
 }
 #endif

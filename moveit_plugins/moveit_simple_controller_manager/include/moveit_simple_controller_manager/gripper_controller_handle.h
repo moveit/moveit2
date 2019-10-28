@@ -39,7 +39,7 @@
 #define MOVEIT_PLUGINS_GRIPPER_CONTROLLER_HANDLE
 
 #include <moveit_simple_controller_manager/action_based_controller_handle.h>
-#include <control_msgs/GripperCommandAction.h>
+#include <control_msgs/action/gripper_command.hpp>
 #include <set>
 
 namespace moveit_simple_controller_manager
@@ -48,12 +48,13 @@ namespace moveit_simple_controller_manager
  * This is an interface for a gripper using control_msgs/GripperCommandAction
  * action interface (single DOF).
  */
-class GripperControllerHandle : public ActionBasedControllerHandle<control_msgs::GripperCommandAction>
+class GripperControllerHandle : public ActionBasedControllerHandle<control_msgs::action::GripperCommand>
 {
+   rclcpp::Logger LOGGER_GRIPPER_CONTROL_HANDLE = rclcpp::get_logger("moveit_simple_controller_manager").get_child("GripperController");
 public:
   /* Topics will map to name/ns/goal, name/ns/result, etc */
-  GripperControllerHandle(const std::string& name, const std::string& ns)
-    : ActionBasedControllerHandle<control_msgs::GripperCommandAction>(name, ns)
+  GripperControllerHandle(const std::string& name, std::shared_ptr<rclcpp::Node>& node)
+    : ActionBasedControllerHandle<control_msgs::action::GripperCommand>(name, node)
     , allow_failure_(false)
     , parallel_jaw_gripper_(false)
   {
@@ -61,31 +62,33 @@ public:
 
   bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory) override
   {
-    ROS_DEBUG_STREAM_NAMED("GripperController", "Received new trajectory for " << name_);
+    RCLCPP_DEBUG(LOGGER_GRIPPER_CONTROL_HANDLE, "Received new trajectory for %s", name_.c_str());
 
     if (!controller_action_client_)
       return false;
 
     if (!trajectory.multi_dof_joint_trajectory.points.empty())
     {
-      ROS_ERROR_NAMED("GripperController", "Gripper cannot execute multi-dof trajectories.");
+      RCLCPP_ERROR(LOGGER_GRIPPER_CONTROL_HANDLE, "Gripper cannot execute multi-dof trajectories.");
       return false;
     }
 
     if (trajectory.joint_trajectory.points.empty())
     {
-      ROS_ERROR_NAMED("GripperController", "GripperController requires at least one joint trajectory point.");
+      RCLCPP_ERROR(LOGGER_GRIPPER_CONTROL_HANDLE, "GripperController requires at least one joint trajectory point.");
       return false;
     }
 
     if (trajectory.joint_trajectory.points.size() > 1)
     {
-      ROS_DEBUG_STREAM_NAMED("GripperController", "Trajectory: " << trajectory.joint_trajectory);
+      //TODO (ahcorde)
+      RCLCPP_DEBUG(LOGGER_GRIPPER_CONTROL_HANDLE, "Trajectory: ");
+      // RCLCPP_DEBUG(LOGGER_GRIPPER_CONTROL_HANDLE, "Trajectory: " << trajectory.joint_trajectory);
     }
 
     if (trajectory.joint_trajectory.joint_names.empty())
     {
-      ROS_ERROR_NAMED("GripperController", "No joint names specified");
+      RCLCPP_ERROR(LOGGER_GRIPPER_CONTROL_HANDLE, "No joint names specified");
       return false;
     }
 
@@ -102,20 +105,20 @@ public:
 
     if (gripper_joint_indexes.empty())
     {
-      ROS_WARN_NAMED("GripperController", "No command_joint was specified for the MoveIt! controller gripper handle. \
+      RCLCPP_WARN(LOGGER_GRIPPER_CONTROL_HANDLE, "No command_joint was specified for the MoveIt! controller gripper handle. \
                       Please see GripperControllerHandle::addCommandJoint() and \
                       GripperControllerHandle::setCommandJoint(). Assuming index 0.");
       gripper_joint_indexes.push_back(0);
     }
 
     // goal to be sent
-    control_msgs::GripperCommandGoal goal;
+    control_msgs::action::GripperCommand::Goal goal;
     goal.command.position = 0.0;
     goal.command.max_effort = 0.0;
 
     // send last point
     int tpoint = trajectory.joint_trajectory.points.size() - 1;
-    ROS_DEBUG_NAMED("GripperController", "Sending command from trajectory point %d", tpoint);
+    RCLCPP_DEBUG(LOGGER_GRIPPER_CONTROL_HANDLE, "Sending command from trajectory point %d", tpoint);
 
     // fill in goal from last point
     for (std::size_t i = 0; i < gripper_joint_indexes.size(); ++i)
@@ -124,7 +127,7 @@ public:
 
       if (trajectory.joint_trajectory.points[tpoint].positions.size() <= idx)
       {
-        ROS_ERROR_NAMED("GripperController", "GripperController expects a joint trajectory with one \
+        RCLCPP_ERROR(LOGGER_GRIPPER_CONTROL_HANDLE, "GripperController expects a joint trajectory with one \
                          point that specifies at least the position of joint \
                          '%s', but insufficient positions provided",
                         trajectory.joint_trajectory.joint_names[idx].c_str());
@@ -135,11 +138,11 @@ public:
       if (trajectory.joint_trajectory.points[tpoint].effort.size() > idx)
         goal.command.max_effort = trajectory.joint_trajectory.points[tpoint].effort[idx];
     }
-
-    controller_action_client_->sendGoal(goal,
-                                        boost::bind(&GripperControllerHandle::controllerDoneCallback, this, _1, _2),
-                                        boost::bind(&GripperControllerHandle::controllerActiveCallback, this),
-                                        boost::bind(&GripperControllerHandle::controllerFeedbackCallback, this, _1));
+    //TODO (anasarrak):
+    // controller_action_client_->sendGoal(goal,
+    //                                     std::bind(&GripperControllerHandle::controllerDoneCallback, this, _1, _2),
+    //                                     std::bind(&GripperControllerHandle::controllerActiveCallback, this),
+    //                                     std::bind(&GripperControllerHandle::controllerFeedbackCallback, this, _1));
 
     done_ = false;
     last_exec_ = moveit_controller_manager::ExecutionStatus::RUNNING;
@@ -170,21 +173,21 @@ public:
   }
 
 private:
-  void controllerDoneCallback(const actionlib::SimpleClientGoalState& state,
-                              const control_msgs::GripperCommandResultConstPtr& result)
+  void controllerDoneCallback(const rclcpp_action::ResultCode& state,
+                              const std::shared_ptr<const control_msgs::action::GripperCommand::Result>& result)
   {
-    if (state == actionlib::SimpleClientGoalState::ABORTED && allow_failure_)
-      finishControllerExecution(actionlib::SimpleClientGoalState::SUCCEEDED);
+    if (state == rclcpp_action::ResultCode::ABORTED && allow_failure_)
+      finishControllerExecution(rclcpp_action::ResultCode::ABORTED);
     else
       finishControllerExecution(state);
   }
 
   void controllerActiveCallback()
   {
-    ROS_DEBUG_STREAM_NAMED("GripperController", name_ << " started execution");
+    RCLCPP_DEBUG(LOGGER_GRIPPER_CONTROL_HANDLE, "%s started execution",name_.c_str());
   }
 
-  void controllerFeedbackCallback(const control_msgs::GripperCommandFeedbackConstPtr& feedback)
+  void controllerFeedbackCallback(const std::shared_ptr<const control_msgs::action::GripperCommand::Feedback>& feedback)
   {
   }
 

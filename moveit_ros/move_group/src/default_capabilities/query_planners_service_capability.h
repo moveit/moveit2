@@ -38,9 +38,9 @@
 #define MOVEIT_MOVE_GROUP_QUERY_PLANNERS_SERVICE_CAPABILITY_
 
 #include <moveit/move_group/move_group_capability.h>
-#include <moveit_msgs/QueryPlannerInterfaces.h>
-#include <moveit_msgs/msg/get_planner_params.hpp>
-#include <moveit_msgs/msg/set_planner_params.hpp>
+#include <moveit_msgs/srv/query_planner_interfaces.hpp>
+#include <moveit_msgs/srv/get_planner_params.hpp>
+#include <moveit_msgs/srv/set_planner_params.hpp>
 
 namespace move_group
 {
@@ -49,18 +49,24 @@ class MoveGroupQueryPlannersService : public MoveGroupCapability
 public:
   MoveGroupQueryPlannersService();
 
-  void initialize() override;
+  void initialize(std::shared_ptr<rclcpp::Node>& node) override;
 
 private:
-  bool queryInterface(moveit_msgs::srv::QueryPlannerInterfaces::Request& req,
-                      moveit_msgs::srv::QueryPlannerInterfaces::Response& res);
+  bool queryInterface(std::shared_ptr<rmw_request_id_t> request_header,
+    std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Request> req,
+    std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Response> res);
 
-  bool getParams(moveit_msgs::srv::GetPlannerParams::Request& req, moveit_msgs::srv::GetPlannerParams::Response& res);
-  bool setParams(moveit_msgs::srv::SetPlannerParams::Request& req, moveit_msgs::srv::SetPlannerParams::Response& res);
+  bool getParams(std::shared_ptr<rmw_request_id_t> request_header,
+    std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Request> req,
+    std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Response> res);
 
-  ros::ServiceServer query_service_;
-  ros::ServiceServer get_service_;
-  ros::ServiceServer set_service_;
+  bool setParams(std::shared_ptr<rmw_request_id_t> request_header,
+    std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Request> req,
+    std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Response> res);
+
+  rclcpp::Service<moveit_msgs::srv::QueryPlannerInterfaces>::SharedPtr query_service_;
+  rclcpp::Service<moveit_msgs::srv::GetPlannerParams>::SharedPtr get_service_;
+  rclcpp::Service<moveit_msgs::srv::SetPlannerParams>::SharedPtr set_service_;
 };
 }
 

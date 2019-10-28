@@ -37,7 +37,9 @@
 #include <moveit/ompl_interface/detail/state_validity_checker.h>
 #include <moveit/ompl_interface/model_based_planning_context.h>
 #include <moveit/profiler/profiler.h>
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
+
+rclcpp::Logger LOGGER_STATE_VALIDITY_CHECKER = rclcpp::get_logger("moveit_planner_ompl").get_child("state_validity_checker");
 
 ompl_interface::StateValidityChecker::StateValidityChecker(const ModelBasedPlanningContext* pc)
   : ompl::base::StateValidityChecker(pc->getOMPLSimpleSetup()->getSpaceInformation())
@@ -115,7 +117,7 @@ bool ompl_interface::StateValidityChecker::isValidWithoutCache(const ompl::base:
   if (!si_->satisfiesBounds(state))
   {
     if (verbose)
-      ROS_INFO_NAMED("state_validity_checker", "State outside bounds");
+      RCLCPP_INFO(LOGGER_STATE_VALIDITY_CHECKER, "State outside bounds");
     return false;
   }
 
@@ -145,7 +147,7 @@ bool ompl_interface::StateValidityChecker::isValidWithoutCache(const ompl::base:
   if (!si_->satisfiesBounds(state))
   {
     if (verbose)
-      ROS_INFO_NAMED("state_validity_checker", "State outside bounds");
+      RCLCPP_INFO(LOGGER_STATE_VALIDITY_CHECKER, "State outside bounds");
     return false;
   }
 
@@ -187,7 +189,7 @@ bool ompl_interface::StateValidityChecker::isValidWithCache(const ompl::base::St
   if (!si_->satisfiesBounds(state))
   {
     if (verbose)
-      ROS_INFO_NAMED("state_validity_checker", "State outside bounds");
+      RCLCPP_INFO(LOGGER_STATE_VALIDITY_CHECKER, "State outside bounds");
     const_cast<ob::State*>(state)->as<ModelBasedStateSpace::StateType>()->markInvalid();
     return false;
   }
@@ -238,7 +240,7 @@ bool ompl_interface::StateValidityChecker::isValidWithCache(const ompl::base::St
   if (!si_->satisfiesBounds(state))
   {
     if (verbose)
-      ROS_INFO_NAMED("state_validity_checker", "State outside bounds");
+      RCLCPP_INFO(LOGGER_STATE_VALIDITY_CHECKER, "State outside bounds");
     const_cast<ob::State*>(state)->as<ModelBasedStateSpace::StateType>()->markInvalid(0.0);
     return false;
   }

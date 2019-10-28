@@ -38,7 +38,9 @@
 #include <moveit/kinematic_constraints/utils.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <boost/bind.hpp>
-#include <ros/console.h>
+
+rclcpp::Logger LOGGER_REACHABLE_VALID_POSE_FILTER =
+    rclcpp::get_logger("moveit_ros_manipulation").get_child("reachable_valid_pose_filter");
 
 pick_place::ReachableAndValidPoseFilter::ReachableAndValidPoseFilter(
     const planning_scene::PlanningSceneConstPtr& scene,
@@ -141,10 +143,10 @@ bool pick_place::ReachableAndValidPoseFilter::evaluate(const ManipulationPlanPtr
         return true;
       }
       else if (verbose_)
-        ROS_INFO_NAMED("manipulation", "Sampler failed to produce a state");
+        RCLCPP_INFO(LOGGER_REACHABLE_VALID_POSE_FILTER, "Sampler failed to produce a state");
     }
     else
-      ROS_ERROR_THROTTLE_NAMED(1, "manipulation", "No sampler was constructed");
+      RCUTILS_LOG_ERROR_THROTTLE(RCUTILS_STEADY_TIME, 1, "No sampler was constructed");
   }
   plan->error_code_.val = moveit_msgs::msg::MoveItErrorCodes::GOAL_IN_COLLISION;
   return false;

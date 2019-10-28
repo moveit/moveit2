@@ -36,50 +36,68 @@
 /* Author: Michael Ferguson, Ioan Sucan, E. Gil Jones */
 
 #include <moveit_simple_controller_manager/follow_joint_trajectory_controller_handle.h>
-#include <moveit/utils/xmlrpc_casts.h>
-
-using namespace moveit::core;
-static const std::string LOGNAME("SimpleControllerManager");
 
 namespace moveit_simple_controller_manager
 {
 bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
-  ROS_DEBUG_STREAM_NAMED(LOGNAME, "new trajectory to " << name_);
+  RCLCPP_DEBUG(LOGGER_MOVEIT_SIMPLE_CONTROLLER_MANAGER, "new trajectory to %s", name_.c_str());
 
   if (!controller_action_client_)
     return false;
 
   if (!trajectory.multi_dof_joint_trajectory.points.empty())
   {
-    ROS_WARN_NAMED(LOGNAME, "%s cannot execute multi-dof trajectories.", name_.c_str());
+    RCLCPP_WARN(LOGGER_MOVEIT_SIMPLE_CONTROLLER_MANAGER, "%s cannot execute multi-dof trajectories.", name_.c_str());
   }
 
-  if (done_)
-    ROS_DEBUG_STREAM_NAMED(LOGNAME, "sending trajectory to " << name_);
-  else
-    ROS_DEBUG_STREAM_NAMED(LOGNAME, "sending continuation for the currently executed trajectory to " << name_);
-
-  control_msgs::FollowJointTrajectoryGoal goal = goal_template_;
+  if (done_){
+    RCLCPP_DEBUG(LOGGER_MOVEIT_SIMPLE_CONTROLLER_MANAGER, "sending trajectory to %s", name_.c_str());
+  }else{
+    RCLCPP_DEBUG(LOGGER_MOVEIT_SIMPLE_CONTROLLER_MANAGER, "sending continuation for the currently executed trajectory to %s", name_.c_str());
+  }
+  control_msgs::action::FollowJointTrajectory::Goal goal = goal_template_;
   goal.trajectory = trajectory.joint_trajectory;
-  controller_action_client_->sendGoal(
-      goal, boost::bind(&FollowJointTrajectoryControllerHandle::controllerDoneCallback, this, _1, _2),
-      boost::bind(&FollowJointTrajectoryControllerHandle::controllerActiveCallback, this),
-      boost::bind(&FollowJointTrajectoryControllerHandle::controllerFeedbackCallback, this, _1));
+  //TODO (anasarrak)
+
+  bool is_result_ready = false;
+  rclcpp_action::ResultCode code_error;
+
+  using namespace std::placeholders;
+
+  auto send_goal_options = rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SendGoalOptions();
+  send_goal_options.result_callback = std::bind(&FollowJointTrajectoryControllerHandle::controllerDoneCallback, this, _1);
+  send_goal_options.goal_response_callback = std::bind(&FollowJointTrajectoryControllerHandle::controllerActiveCallback, this, _1);
+  send_goal_options.feedback_callback =  std::bind(&FollowJointTrajectoryControllerHandle::controllerFeedbackCallback, this, _1, _2);
+  auto goal_handle_future = controller_action_client_->async_send_goal(goal, send_goal_options);
+
+  std::future_status status;
+  do {
+    status = goal_handle_future.wait_for(std::chrono::seconds(0));
+  } while (std::future_status::ready != status);
+
+  auto goal_handle = goal_handle_future.get();
+
+  if(!goal_handle)
+  {
+    RCLCPP_INFO(node_->get_logger(), "plan: Goal was rejected by server");
+    return false;
+  }
+
   done_ = false;
   last_exec_ = moveit_controller_manager::ExecutionStatus::RUNNING;
   return true;
 }
-
-void FollowJointTrajectoryControllerHandle::configure(XmlRpc::XmlRpcValue& config)
-{
-  if (config.hasMember("path_tolerance"))
-    configure(config["path_tolerance"], "path_tolerance", goal_template_.path_tolerance);
-  if (config.hasMember("goal_tolerance"))
-    configure(config["goal_tolerance"], "goal_tolerance", goal_template_.goal_tolerance);
-  if (config.hasMember("goal_time_tolerance"))
-    goal_template_.goal_time_tolerance = ros::Duration(parseDouble(config["goal_time_tolerance"]));
-}
+//TODO (anasarrak)
+// void FollowJointTrajectoryControllerHandle::configure(XmlRpc::XmlRpcValue& config)
+// {
+//   if (config.hasMember("path_tolerance"))
+//     configure(config["path_tolerance"], "path_tolerance", goal_template_.path_tolerance);
+//   if (config.hasMember("goal_tolerance"))
+//     configure(config["goal_tolerance"], "goal_tolerance", goal_template_.goal_tolerance);
+//   if (config.hasMember("goal_time_tolerance"))
+//     goal_template_.goal_time_tolerance = ros::Duration(parseDouble(config["goal_time_tolerance"]));
+// }
 
 namespace
 {
@@ -90,20 +108,20 @@ enum ToleranceVariables
   ACCELERATION
 };
 template <ToleranceVariables>
-double& variable(control_msgs::JointTolerance& msg);
+double& variable(control_msgs::msg::JointTolerance& msg);
 
 template <>
-inline double& variable<POSITION>(control_msgs::JointTolerance& msg)
+inline double& variable<POSITION>(control_msgs::msg::JointTolerance& msg)
 {
   return msg.position;
 }
 template <>
-inline double& variable<VELOCITY>(control_msgs::JointTolerance& msg)
+inline double& variable<VELOCITY>(control_msgs::msg::JointTolerance& msg)
 {
   return msg.velocity;
 }
 template <>
-inline double& variable<ACCELERATION>(control_msgs::JointTolerance& msg)
+inline double& variable<ACCELERATION>(control_msgs::msg::JointTolerance& msg)
 {
   return msg.acceleration;
 }
@@ -120,17 +138,17 @@ const char* errorCodeToMessage(int error_code)
 {
   switch (error_code)
   {
-    case control_msgs::FollowJointTrajectoryResult::SUCCESSFUL:
+    case control_msgs::action::FollowJointTrajectory::Result::SUCCESSFUL:
       return "SUCCESSFUL";
-    case control_msgs::FollowJointTrajectoryResult::INVALID_GOAL:
+    case control_msgs::action::FollowJointTrajectory::Result::INVALID_GOAL:
       return "INVALID_GOAL";
-    case control_msgs::FollowJointTrajectoryResult::INVALID_JOINTS:
+    case control_msgs::action::FollowJointTrajectory::Result::INVALID_JOINTS:
       return "INVALID_JOINTS";
-    case control_msgs::FollowJointTrajectoryResult::OLD_HEADER_TIMESTAMP:
+    case control_msgs::action::FollowJointTrajectory::Result::OLD_HEADER_TIMESTAMP:
       return "OLD_HEADER_TIMESTAMP";
-    case control_msgs::FollowJointTrajectoryResult::PATH_TOLERANCE_VIOLATED:
+    case control_msgs::action::FollowJointTrajectory::Result::PATH_TOLERANCE_VIOLATED:
       return "PATH_TOLERANCE_VIOLATED";
-    case control_msgs::FollowJointTrajectoryResult::GOAL_TOLERANCE_VIOLATED:
+    case control_msgs::action::FollowJointTrajectory::Result::GOAL_TOLERANCE_VIOLATED:
       return "GOAL_TOLERANCE_VIOLATED";
     default:
       return "unknown error";
@@ -138,83 +156,100 @@ const char* errorCodeToMessage(int error_code)
 }
 }  // namespace
 
-void FollowJointTrajectoryControllerHandle::configure(XmlRpc::XmlRpcValue& config, const std::string& config_name,
-                                                      std::vector<control_msgs::JointTolerance>& tolerances)
-{
-  if (isStruct(config))  // config should be either a struct of position, velocity, acceleration
-  {
-    for (ToleranceVariables var : { POSITION, VELOCITY, ACCELERATION })
-    {
-      if (!config.hasMember(VAR_NAME[var]))
-        continue;
-      XmlRpc::XmlRpcValue values = config[VAR_NAME[var]];
-      if (isArray(values, joints_.size()))
-      {
-        size_t i = 0;
-        for (const auto& joint_name : joints_)
-          VAR_ACCESS[var](getTolerance(tolerances, joint_name)) = parseDouble(values[i++]);
-      }
-      else
-      {  // use common value for all joints
-        double value = parseDouble(values);
-        for (const auto& joint_name : joints_)
-          VAR_ACCESS[var](getTolerance(tolerances, joint_name)) = value;
-      }
-    }
-  }
-  else if (isArray(config))  // or an array of JointTolerance msgs
-  {
-    for (int i = 0; i < config.size(); ++i)
-    {
-      control_msgs::JointTolerance& tol = getTolerance(tolerances, config[i]["name"]);
-      for (ToleranceVariables var : { POSITION, VELOCITY, ACCELERATION })
-      {
-        if (!config[i].hasMember(VAR_NAME[var]))
-          continue;
-        VAR_ACCESS[var](tol) = parseDouble(config[i][VAR_NAME[var]]);
-      }
-    }
-  }
-  else
-    ROS_WARN_STREAM_NAMED(LOGNAME, "Invalid " << config_name);
-}
+  //TODO (anasarrak)
+// void FollowJointTrajectoryControllerHandle::configure(XmlRpc::XmlRpcValue& config, const std::string& config_name,
+//                                                       std::vector<control_msgs::msg::JointTolerance>& tolerances)
+// {
 
-control_msgs::JointTolerance& FollowJointTrajectoryControllerHandle::getTolerance(
-    std::vector<control_msgs::JointTolerance>& tolerances, const std::string& name)
+  // if (isStruct(config))  // config should be either a struct of position, velocity, acceleration
+  // {d FollowJointTrajectoryControllerHandle::configure(XmlRpc::XmlRpcValue& config)
+// {
+//   if (config.hasMember("path_tolerance"))
+//     configure(config["path_tolerance"], "path_tolerance", goal_template_.path_tolerance);
+//   if (config.hasMember("goal_tolerance"))
+//     configure(config["goal_tolerance"], "goal_tolerance", goal_template_.goal_tolerance);
+//   if (config.hasMember("goal_time_tolerance"))
+//     goal_template_.goal_time_tolerance = ros::Duration(parseDouble(config["goal_time_tolerance"]));
+// }
+
+  //   for (ToleranceVariables var : { POSITION, VELOCITY, ACCELERATION })
+  //   {
+  //     if (!config.hasMember(VAR_NAME[var]))
+  //       continue;
+  //     XmlRpc::XmlRpcValue values = config[VAR_NAME[var]];
+  //     if (isArray(values, joints_.size()))
+  //     {
+  //       size_t i = 0;
+  //       for (const auto& joint_name : joints_)
+  //         VAR_ACCESS[var](getTolerance(tolerances, joint_name)) = parseDouble(values[i++]);
+  //     }
+  //     else
+  //     {  // use common value for all joints
+  //       double value = parseDouble(values);
+  //       for (const auto& joint_name : joints_)
+  //         VAR_ACCESS[var](getTolerance(tolerances, joint_name)) = value;
+  //     }
+  //   }
+  // }
+  // else if (isArray(config))  // or an array of JointTolerance msgs
+  // {
+  //   for (int i = 0; i < config.size(); ++i)
+  //   {
+  //     control_msgs::msg::JointTolerance& tol = getTolerance(tolerances, config[i]["name"]);
+  //     for (ToleranceVariables var : { POSITION, VELOCITY, ACCELERATION })
+  //     {
+  //       if (!config[i].hasMember(VAR_NAME[var]))
+  //         continue;
+  //       VAR_ACCESS[var](tol) = parseDouble(config[i][VAR_NAME[var]]);
+  //     }
+  //   }
+  // }
+  // else
+  //   RCLCPP_WARN(LOGGER_MOVEIT_SIMPLE_CONTROLLER_MANAGER, "Invalid " << config_name);
+// }
+
+control_msgs::msg::JointTolerance& FollowJointTrajectoryControllerHandle::getTolerance(
+    std::vector<control_msgs::msg::JointTolerance>& tolerances, const std::string& name)
 {
   auto it =
       std::lower_bound(tolerances.begin(), tolerances.end(), name,
-                       [](const control_msgs::JointTolerance& lhs, const std::string& rhs) { return lhs.name < rhs; });
+                       [](const control_msgs::msg::JointTolerance& lhs, const std::string& rhs) { return lhs.name < rhs; });
   if (it == tolerances.cend() || it->name != name)
   {  // insert new entry if not yet available
-    it = tolerances.insert(it, control_msgs::JointTolerance());
+    it = tolerances.insert(it, control_msgs::msg::JointTolerance());
     it->name = name;
   }
   return *it;
 }
 
-void FollowJointTrajectoryControllerHandle::controllerDoneCallback(
-    const actionlib::SimpleClientGoalState& state, const control_msgs::FollowJointTrajectoryResultConstPtr& result)
+void FollowJointTrajectoryControllerHandle::controllerDoneCallback(const rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::WrappedResult& result)
 {
   // Output custom error message for FollowJointTrajectoryResult if necessary
-  if (!result)
-    ROS_WARN_STREAM_NAMED(LOGNAME, "Controller " << name_ << " done, no result returned");
-  else if (result->error_code == control_msgs::FollowJointTrajectoryResult::SUCCESSFUL)
-    ROS_INFO_STREAM_NAMED(LOGNAME, "Controller " << name_ << " successfully finished");
+  if (result.result->error_code == control_msgs::action::FollowJointTrajectory::Result::SUCCESSFUL)
+    RCLCPP_INFO(LOGGER_MOVEIT_SIMPLE_CONTROLLER_MANAGER, "Controller %s successfully finished", name_.c_str());
   else
-    ROS_WARN_STREAM_NAMED(LOGNAME, "Controller " << name_ << "failed with error "
-                                                 << errorCodeToMessage(result->error_code) << ": "
-                                                 << result->error_string);
-  finishControllerExecution(state);
+    RCLCPP_WARN(LOGGER_MOVEIT_SIMPLE_CONTROLLER_MANAGER, "Controller %s failed with error %d: %s",
+                                                    name_.c_str(),
+                                                    errorCodeToMessage(result.result->error_code),
+                                                    result.result->error_string.c_str());
+  finishControllerExecution(result.code);
 }
 
-void FollowJointTrajectoryControllerHandle::controllerActiveCallback()
+void FollowJointTrajectoryControllerHandle::controllerActiveCallback(std::shared_future<rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::SharedPtr> future)
 {
-  ROS_DEBUG_STREAM_NAMED(LOGNAME, name_ << " started execution");
+  auto goal_handle = future.get();
+  if (!goal_handle) {
+    RCLCPP_ERROR(LOGGER_MOVEIT_SIMPLE_CONTROLLER_MANAGER, "Goal was rejected by server");
+  } else {
+    RCLCPP_INFO(LOGGER_MOVEIT_SIMPLE_CONTROLLER_MANAGER, "Goal accepted by server, waiting for result");
+  }
+
+  RCLCPP_DEBUG(LOGGER_MOVEIT_SIMPLE_CONTROLLER_MANAGER, "%s started execution", name_.c_str());
 }
 
 void FollowJointTrajectoryControllerHandle::controllerFeedbackCallback(
-    const control_msgs::FollowJointTrajectoryFeedbackConstPtr& feedback)
+    rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::SharedPtr,
+    const std::shared_ptr<const control_msgs::action::FollowJointTrajectory::Feedback> feedback)
 {
 }
 

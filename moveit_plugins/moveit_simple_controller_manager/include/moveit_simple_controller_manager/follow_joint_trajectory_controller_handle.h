@@ -39,7 +39,9 @@
 #define MOVEIT_PLUGINS_FOLLOW_TRAJECTORY_CONTROLLER_HANDLE
 
 #include <moveit_simple_controller_manager/action_based_controller_handle.h>
-#include <control_msgs/FollowJointTrajectoryAction.h>
+#include <control_msgs/action/follow_joint_trajectory.hpp>
+
+static rclcpp::Logger LOGGER_MOVEIT_SIMPLE_CONTROLLER_MANAGER = rclcpp::get_logger("moveit").get_child("SimpleControllerManager");
 
 namespace moveit_simple_controller_manager
 {
@@ -48,32 +50,35 @@ namespace moveit_simple_controller_manager
  * or anything using a control_mgs/FollowJointTrajectoryAction.
  */
 class FollowJointTrajectoryControllerHandle
-    : public ActionBasedControllerHandle<control_msgs::FollowJointTrajectoryAction>
+    : public ActionBasedControllerHandle<control_msgs::action::FollowJointTrajectory>
 {
 public:
-  FollowJointTrajectoryControllerHandle(const std::string& name, const std::string& action_ns)
-    : ActionBasedControllerHandle<control_msgs::FollowJointTrajectoryAction>(name, action_ns)
+  FollowJointTrajectoryControllerHandle(const std::string& name, std::shared_ptr<rclcpp::Node>& node)
+    : ActionBasedControllerHandle<control_msgs::action::FollowJointTrajectory>(name, node)
   {
+    printf("FollowJointTrajectoryControllerHandle::FollowJointTrajectoryControllerHandle \n");
   }
 
   bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory) override;
-
-  void configure(XmlRpc::XmlRpcValue& config) override;
+  // TODO(anasarrak)
+  // void configure(XmlRpc::XmlRpcValue& config) override;
 
 protected:
-  void configure(XmlRpc::XmlRpcValue& config, const std::string& config_name,
-                 std::vector<control_msgs::JointTolerance>& tolerances);
-  static control_msgs::JointTolerance& getTolerance(std::vector<control_msgs::JointTolerance>& tolerances,
+  // TODO(anasarrak)
+  // void configure(XmlRpc::XmlRpcValue& config, const std::string& config_name,
+  //                std::vector<control_msgs::msg::JointTolerance>& tolerances);
+  static control_msgs::msg::JointTolerance& getTolerance(std::vector<control_msgs::msg::JointTolerance>& tolerances,
                                                     const std::string& name);
 
-  void controllerDoneCallback(const actionlib::SimpleClientGoalState& state,
-                              const control_msgs::FollowJointTrajectoryResultConstPtr& result);
+  void controllerDoneCallback(const rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::WrappedResult& result);
 
-  void controllerActiveCallback();
+  void controllerActiveCallback(std::shared_future<rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::SharedPtr> future);
 
-  void controllerFeedbackCallback(const control_msgs::FollowJointTrajectoryFeedbackConstPtr& feedback);
+  void controllerFeedbackCallback(
+      rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::SharedPtr,
+      const std::shared_ptr<const control_msgs::action::FollowJointTrajectory::Feedback> feedback);
 
-  control_msgs::FollowJointTrajectoryGoal goal_template_;
+  control_msgs::action::FollowJointTrajectory::Goal goal_template_;
 };
 
 }  // end namespace moveit_simple_controller_manager

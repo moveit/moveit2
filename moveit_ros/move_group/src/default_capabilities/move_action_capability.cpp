@@ -48,57 +48,93 @@ move_group::MoveGroupMoveAction::MoveGroupMoveAction()
 {
 }
 
-void move_group::MoveGroupMoveAction::initialize()
+void move_group::MoveGroupMoveAction::initialize(std::shared_ptr<rclcpp::Node>& node)
 {
+  this->node_ = node;
   // start the move action server
-  move_action_server_.reset(new actionlib::SimpleActionServer<moveit_msgs::action::MoveGroupAction>(
-      root_node_handle_, MOVE_ACTION, boost::bind(&MoveGroupMoveAction::executeMoveCallback, this, _1), false));
-  move_action_server_->registerPreemptCallback(boost::bind(&MoveGroupMoveAction::preemptMoveCallback, this));
-  move_action_server_->start();
+  move_action_server_.reset();
+  move_action_server_ = rclcpp_action::create_server<moveit_msgs::action::MoveGroup>(
+      node, MOVE_ACTION,
+      std::bind(&move_group::MoveGroupMoveAction::handle_move_goal, this, std::placeholders::_1, std::placeholders::_2),
+      std::bind(&move_group::MoveGroupMoveAction::handle_move_cancel, this, std::placeholders::_1),
+      std::bind(&move_group::MoveGroupMoveAction::handle_move_accept, this, std::placeholders::_1));
+  // TODO(anasarrak): Preempt on ros2 actions?
+  // move_action_server_->registerPreemptCallback(std::bind(&MoveGroupMoveAction::preemptMoveCallback, this));
+  // move_action_server_->start();
+}
+rclcpp_action::GoalResponse move_group::MoveGroupMoveAction::handle_move_goal(
+    const std::array<uint8_t, 16>& uuid, std::shared_ptr<const moveit_msgs::action::MoveGroup::Goal> goal)
+{
+  (void)uuid;
+  // TODO (anasarrak): Add a REJECT
+  return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-void move_group::MoveGroupMoveAction::executeMoveCallback(const moveit_msgs::action::MoveGroupGoalConstPtr& goal)
+rclcpp_action::CancelResponse move_group::MoveGroupMoveAction::handle_move_cancel(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroup>> goal_handle)
 {
-  setMoveState(PLANNING);
-  // before we start planning, ensure that we have the latest robot state received...
-  context_->planning_scene_monitor_->waitForCurrentRobotState(ros::Time::now());
-  context_->planning_scene_monitor_->updateFrameTransforms();
+  RCLCPP_INFO(rclcpp::get_logger("move_action_capability"), "Got request to cancel goal");
+  (void)goal_handle;
 
-  moveit_msgs::action::MoveGroupResult action_res;
+  return rclcpp_action::CancelResponse::ACCEPT;
+}
+
+void move_group::MoveGroupMoveAction::handle_move_accept(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroup>> goal_handle)
+{
+  // this needs to return quickly to avoid blocking the executor, so spin up a new thread
+  std::thread(&move_group::MoveGroupMoveAction::executeMoveCallback, this, goal_handle).detach();
+}
+
+void move_group::MoveGroupMoveAction::executeMoveCallback(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroup>> goal_handle)
+{
+  setMoveState(PLANNING, goal_handle);
+  // before we start planning, ensure that we have the latest robot state received...
+  context_->planning_scene_monitor_->waitForCurrentRobotState(rclcpp::Clock().now());
+  context_->planning_scene_monitor_->updateFrameTransforms();
+  const auto goal = goal_handle->get_goal();
+  auto action_res = std::make_shared<moveit_msgs::action::MoveGroup::Result>();
   if (goal->planning_options.plan_only || !context_->allow_trajectory_execution_)
   {
     if (!goal->planning_options.plan_only)
-      ROS_WARN("This instance of MoveGroup is not allowed to execute trajectories but the goal request has plan_only "
-               "set to false. Only a motion plan will be computed anyway.");
-    executeMoveCallbackPlanOnly(goal, action_res);
+      RCLCPP_WARN(
+          node_->get_logger(),
+          "This instance of MoveGroup is not allowed to execute trajectories but the goal request has plan_only "
+          "set to false. Only a motion plan will be computed anyway.");
+    executeMoveCallbackPlanOnly(goal_handle, action_res);
   }
   else
-    executeMoveCallbackPlanAndExecute(goal, action_res);
+    executeMoveCallbackPlanAndExecute(goal_handle, action_res);
 
-  bool planned_trajectory_empty = trajectory_processing::isTrajectoryEmpty(action_res.planned_trajectory);
+  bool planned_trajectory_empty = trajectory_processing::isTrajectoryEmpty(action_res->planned_trajectory);
   std::string response =
-      getActionResultString(action_res.error_code, planned_trajectory_empty, goal->planning_options.plan_only);
-  if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
-    move_action_server_->setSucceeded(action_res, response);
+      getActionResultString(action_res->error_code, planned_trajectory_empty, goal->planning_options.plan_only);
+  if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+    goal_handle->succeed(action_res);
   else
   {
-    if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
-      move_action_server_->setPreempted(action_res, response);
-    else
-      move_action_server_->setAborted(action_res, response);
+    // TODO (anasarrak): there is no preempt implementation on
+    // https://github.com/ros2/rclcpp/blob/crystal/rclcpp_action/src/server_goal_handle.cpp
+    // if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
+    //   move_action_server_->setPreempted(action_res, response);
+    // else
+    goal_handle->abort(action_res);
   }
 
-  setMoveState(IDLE);
+  setMoveState(IDLE, goal_handle);
 
   preempt_requested_ = false;
 }
 
-void move_group::MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const moveit_msgs::action::MoveGroupGoalConstPtr& goal,
-                                                                        moveit_msgs::action::MoveGroupResult& action_res)
+void move_group::MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroup>> goal_handle,
+    std::shared_ptr<moveit_msgs::action::MoveGroup::Result> action_res)
 {
-  ROS_INFO("Combined planning and execution request received for MoveGroup action. Forwarding to planning and "
-           "execution pipeline.");
-
+  RCLCPP_INFO(node_->get_logger(),
+              "Combined planning and execution request received for MoveGroup action. Forwarding to planning and "
+              "execution pipeline.");
+  const auto goal = goal_handle->get_goal();
   if (planning_scene::PlanningScene::isEmpty(goal->planning_options.planning_scene_diff))
   {
     planning_scene_monitor::LockedPlanningSceneRO lscene(context_->planning_scene_monitor_);
@@ -110,8 +146,9 @@ void move_group::MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const mo
                                      kinematic_constraints::mergeConstraints(goal->request.goal_constraints[i],
                                                                              goal->request.path_constraints)))
       {
-        ROS_INFO("Goal constraints are already satisfied. No need to plan or execute any motions");
-        action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+        RCLCPP_INFO(node_->get_logger(),
+                    "Goal constraints are already satisfied. No need to plan or execute any motions");
+        action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
         return;
       }
   }
@@ -129,39 +166,41 @@ void move_group::MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const mo
   opt.replan_ = goal->planning_options.replan;
   opt.replan_attempts_ = goal->planning_options.replan_attempts;
   opt.replan_delay_ = goal->planning_options.replan_delay;
-  opt.before_execution_callback_ = boost::bind(&MoveGroupMoveAction::startMoveExecutionCallback, this);
+  opt.before_execution_callback_ = std::bind(&MoveGroupMoveAction::startMoveExecutionCallback, this, goal_handle);
 
-  opt.plan_callback_ =
-      boost::bind(&MoveGroupMoveAction::planUsingPlanningPipeline, this, boost::cref(motion_plan_request), _1);
+  opt.plan_callback_ = boost::bind(&MoveGroupMoveAction::planUsingPlanningPipeline, this,
+                                   std::cref(motion_plan_request), _1, goal_handle);
   if (goal->planning_options.look_around && context_->plan_with_sensing_)
   {
     opt.plan_callback_ = boost::bind(&plan_execution::PlanWithSensing::computePlan, context_->plan_with_sensing_.get(),
                                      _1, opt.plan_callback_, goal->planning_options.look_around_attempts,
                                      goal->planning_options.max_safe_execution_cost);
-    context_->plan_with_sensing_->setBeforeLookCallback(boost::bind(&MoveGroupMoveAction::startMoveLookCallback, this));
+    context_->plan_with_sensing_->setBeforeLookCallback(
+        std::bind(&MoveGroupMoveAction::startMoveLookCallback, this, goal_handle));
   }
 
   plan_execution::ExecutableMotionPlan plan;
   if (preempt_requested_)
   {
-    ROS_INFO("Preempt requested before the goal is planned and executed.");
-    action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+    RCLCPP_INFO(node_->get_logger(), "Preempt requested before the goal is planned and executed.");
+    action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
     return;
   }
 
   context_->plan_execution_->planAndExecute(plan, planning_scene_diff, opt);
 
-  convertToMsg(plan.plan_components_, action_res.trajectory_start, action_res.planned_trajectory);
+  convertToMsg(plan.plan_components_, action_res->trajectory_start, action_res->planned_trajectory);
   if (plan.executed_trajectory_)
-    plan.executed_trajectory_->getRobotTrajectoryMsg(action_res.executed_trajectory);
-  action_res.error_code = plan.error_code_;
+    plan.executed_trajectory_->getRobotTrajectoryMsg(action_res->executed_trajectory);
+  action_res->error_code = plan.error_code_;
 }
 
-void move_group::MoveGroupMoveAction::executeMoveCallbackPlanOnly(const moveit_msgs::action::MoveGroupGoalConstPtr& goal,
-                                                                  moveit_msgs::action::MoveGroupResult& action_res)
+void move_group::MoveGroupMoveAction::executeMoveCallbackPlanOnly(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroup>> goal_handle,
+    std::shared_ptr<moveit_msgs::action::MoveGroup::Result> action_res)
 {
-  ROS_INFO("Planning request received for MoveGroup action. Forwarding to planning pipeline.");
-
+  RCLCPP_INFO(node_->get_logger(), "Planning request received for MoveGroup action. Forwarding to planning pipeline.");
+  const auto goal = goal_handle->get_goal();
   planning_scene_monitor::LockedPlanningSceneRO lscene(context_->planning_scene_monitor_);  // lock the scene so that it
                                                                                             // does not modify the world
                                                                                             // representation while
@@ -174,8 +213,8 @@ void move_group::MoveGroupMoveAction::executeMoveCallbackPlanOnly(const moveit_m
 
   if (preempt_requested_)
   {
-    ROS_INFO("Preempt requested before the goal is planned.");
-    action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+    RCLCPP_INFO(node_->get_logger(), "Preempt requested before the goal is planned.");
+    action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
     return;
   }
 
@@ -185,19 +224,20 @@ void move_group::MoveGroupMoveAction::executeMoveCallbackPlanOnly(const moveit_m
   }
   catch (std::exception& ex)
   {
-    ROS_ERROR("Planning pipeline threw an exception: %s", ex.what());
+    RCLCPP_ERROR(node_->get_logger(), "Planning pipeline threw an exception: %s", ex.what());
     res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 
-  convertToMsg(res.trajectory_, action_res.trajectory_start, action_res.planned_trajectory);
-  action_res.error_code = res.error_code_;
-  action_res.planning_time = res.planning_time_;
+  convertToMsg(res.trajectory_, action_res->trajectory_start, action_res->planned_trajectory);
+  action_res->error_code = res.error_code_;
+  action_res->planning_time = res.planning_time_;
 }
 
-bool move_group::MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::MotionPlanRequest& req,
-                                                                plan_execution::ExecutableMotionPlan& plan)
+bool move_group::MoveGroupMoveAction::planUsingPlanningPipeline(
+    const planning_interface::MotionPlanRequest& req, plan_execution::ExecutableMotionPlan& plan,
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroup>> goal_handle)
 {
-  setMoveState(PLANNING);
+  setMoveState(PLANNING, goal_handle);
 
   planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor_);
   bool solved = false;
@@ -208,7 +248,7 @@ bool move_group::MoveGroupMoveAction::planUsingPlanningPipeline(const planning_i
   }
   catch (std::exception& ex)
   {
-    ROS_ERROR("Planning pipeline threw an exception: %s", ex.what());
+    RCLCPP_ERROR(node_->get_logger(), "Planning pipeline threw an exception: %s", ex.what());
     res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
   if (res.trajectory_)
@@ -221,14 +261,20 @@ bool move_group::MoveGroupMoveAction::planUsingPlanningPipeline(const planning_i
   return solved;
 }
 
-void move_group::MoveGroupMoveAction::startMoveExecutionCallback()
+void move_group::MoveGroupMoveAction::startMoveExecutionCallback(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroup>> goal_handle)
 {
-  setMoveState(MONITOR);
+  // TODO(anasarrak) remove the following error logs
+  RCLCPP_ERROR(node_->get_logger(), "Entering startMoveExecutionCallback");
+  setMoveState(MONITOR, goal_handle);
 }
 
-void move_group::MoveGroupMoveAction::startMoveLookCallback()
+void move_group::MoveGroupMoveAction::startMoveLookCallback(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroup>> goal_handle)
 {
-  setMoveState(LOOK);
+  // TODO(anasarrak) remove the following error logs
+  RCLCPP_ERROR(node_->get_logger(), "Entering StartMoveLookCallback");
+  setMoveState(LOOK, goal_handle);
 }
 
 void move_group::MoveGroupMoveAction::preemptMoveCallback()
@@ -237,11 +283,14 @@ void move_group::MoveGroupMoveAction::preemptMoveCallback()
   context_->plan_execution_->stop();
 }
 
-void move_group::MoveGroupMoveAction::setMoveState(MoveGroupState state)
+void move_group::MoveGroupMoveAction::setMoveState(
+    MoveGroupState state,
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroup>> goal_handle)
 {
   move_state_ = state;
-  move_feedback_.state = stateToStr(state);
-  move_action_server_->publishFeedback(move_feedback_);
+  auto move_feedback_ = std::make_shared<moveit_msgs::action::MoveGroup::Feedback>();
+  move_feedback_->state = stateToStr(state);
+  goal_handle->publish_feedback(move_feedback_);
 }
 
 #include <class_loader/class_loader.hpp>

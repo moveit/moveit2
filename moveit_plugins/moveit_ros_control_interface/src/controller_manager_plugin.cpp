@@ -34,7 +34,7 @@
 
 /* Author: Mathias Lüdtke */
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.h>
 
 #include <moveit/macros/class_forward.h>
 

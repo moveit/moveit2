@@ -49,7 +49,7 @@ typedef unsigned int ShapeHandle;
 typedef std::map<ShapeHandle, Eigen::Isometry3d, std::less<ShapeHandle>,
                  Eigen::aligned_allocator<std::pair<const ShapeHandle, Eigen::Isometry3d> > >
     ShapeTransformCache;
-typedef boost::function<bool(const std::string& target_frame, const ros::Time& target_time, ShapeTransformCache& cache)>
+typedef boost::function<bool(const std::string& target_frame, const rclcpp::Time& target_time, ShapeTransformCache& cache)>
     TransformCacheProvider;
 
 class OccupancyMapMonitor;
@@ -69,7 +69,7 @@ public:
 
   /** @brief Set updater params using struct that comes from parsing a yaml string. This must be called after
    * setMonitor() */
-  virtual bool setParams(XmlRpc::XmlRpcValue& params) = 0;
+  virtual bool setParams() = 0;
 
   /** @brief Do any necessary setup (subscribe to ros topics, etc.). This call assumes setMonitor() and setParams() have
    * been previously called. */
@@ -106,10 +106,10 @@ protected:
   ShapeTransformCache transform_cache_;
   bool debug_info_;
 
-  bool updateTransformCache(const std::string& target_frame, const ros::Time& target_time);
+  bool updateTransformCache(const std::string& target_frame, const rclcpp::Time& target_time);
 
-  static void readXmlParam(XmlRpc::XmlRpcValue& params, const std::string& param_name, double* value);
-  static void readXmlParam(XmlRpc::XmlRpcValue& params, const std::string& param_name, unsigned int* value);
+  static void readXmlParam(const std::string& param_name, double* value);
+  static void readXmlParam(const std::string& param_name, unsigned int* value);
 };
 }
 

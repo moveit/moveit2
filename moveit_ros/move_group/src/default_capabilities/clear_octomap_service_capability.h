@@ -38,7 +38,7 @@
 #define MOVEIT_MOVE_GROUP_CLEAR_OCTOMAP_SERVICE_CAPABILITY_
 
 #include <moveit/move_group/move_group_capability.h>
-#include <std_srvs/Empty.h>
+#include <std_srvs/srv/empty.hpp>
 
 namespace move_group
 {
@@ -47,12 +47,14 @@ class ClearOctomapService : public MoveGroupCapability
 public:
   ClearOctomapService();
 
-  void initialize() override;
+  void initialize(std::shared_ptr<rclcpp::Node>& node) override;
 
 private:
-  bool clearOctomap(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
+  void clearOctomap(const std::shared_ptr<rmw_request_id_t> request_header,
+     const std::shared_ptr<std_srvs::srv::Empty::Request> request,
+     const std::shared_ptr<std_srvs::srv::Empty::Response> response);
 
-  ros::ServiceServer service_;
+  std::shared_ptr<rclcpp::Service<std_srvs::srv::Empty>> service_;
 };
 }
 

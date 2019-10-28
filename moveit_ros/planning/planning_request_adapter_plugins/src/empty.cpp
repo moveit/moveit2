@@ -42,6 +42,9 @@ namespace default_planner_request_adapters
 class Empty : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
+  void initialize()
+  {
+  }
   std::string getDescription() const override
   {
     return "No Op";

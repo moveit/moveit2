@@ -37,10 +37,11 @@
 #include <moveit/pick_place/pick_place.h>
 #include <moveit/pick_place/plan_stage.h>
 #include <moveit/kinematic_constraints/utils.h>
-#include <ros/console.h>
 
 namespace pick_place
 {
+rclcpp::Logger LOGGER_PLAN_STAGE = rclcpp::get_logger("moveit_ros_manipulation").get_child("pick_place");
+
 PlanStage::PlanStage(const planning_scene::PlanningSceneConstPtr& scene,
                      const planning_pipeline::PlanningPipelinePtr& planning_pipeline)
   : ManipulationStage("plan"), planning_scene_(scene), planning_pipeline_(planning_pipeline)
@@ -60,7 +61,10 @@ bool PlanStage::evaluate(const ManipulationPlanPtr& plan) const
   planning_interface::MotionPlanResponse res;
   req.group_name = plan->shared_data_->planning_group_->getName();
   req.num_planning_attempts = 1;
-  req.allowed_planning_time = (plan->shared_data_->timeout_ - ros::WallTime::now()).toSec();
+  long time_out_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(plan->shared_data_->timeout_ -
+                                                                            std::chrono::system_clock::now())
+                           .count();
+  req.allowed_planning_time = (double)time_out_nsec * 1.0e-9;
   req.path_constraints = plan->shared_data_->path_constraints_;
   req.planner_id = plan->shared_data_->planner_id_;
   req.start_state.is_diff = true;
@@ -72,7 +76,8 @@ bool PlanStage::evaluate(const ManipulationPlanPtr& plan) const
   {
     attempts++;
     if (!signal_stop_ && planning_pipeline_->generatePlan(planning_scene_, req, res) &&
-        res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && res.trajectory_ && !res.trajectory_->empty())
+        res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && res.trajectory_ &&
+        !res.trajectory_->empty())
     {
       // We have a valid motion plan, now apply pre-approach end effector posture (open gripper) if applicable
       if (!plan->approach_posture_.joint_names.empty())
@@ -86,15 +91,16 @@ bool PlanStage::evaluate(const ManipulationPlanPtr& plan) const
         // If user has defined a time for it's gripper movement time, don't add the
         // DEFAULT_GRASP_POSTURE_COMPLETION_DURATION
         if (!plan->approach_posture_.points.empty() &&
-            plan->approach_posture_.points.back().time_from_start > ros::Duration(0.0))
+            rclcpp::Duration(plan->approach_posture_.points.back().time_from_start) > rclcpp::Duration(0.0))
         {
           pre_approach_traj->addPrefixWayPoint(pre_approach_state, 0.0);
         }
         else
         {  // Do what was done before
-          ROS_INFO_STREAM("Adding default duration of " << PickPlace::DEFAULT_GRASP_POSTURE_COMPLETION_DURATION
-                                                        << " seconds to the grasp closure time. Assign time_from_start "
-                                                        << "to your trajectory to avoid this.");
+          RCLCPP_INFO(LOGGER_PLAN_STAGE,
+                      "Adding default duration of %f seconds to the grasp closure time. Assign time_from_start "
+                      "to your trajectory to avoid this.",
+                      PickPlace::DEFAULT_GRASP_POSTURE_COMPLETION_DURATION);
           pre_approach_traj->addPrefixWayPoint(pre_approach_state,
                                                PickPlace::DEFAULT_GRASP_POSTURE_COMPLETION_DURATION);
         }
@@ -116,7 +122,8 @@ bool PlanStage::evaluate(const ManipulationPlanPtr& plan) const
       plan->error_code_ = res.error_code_;
   }
   // if the planner reported an invalid plan, give it a second chance
-  while (!signal_stop_ && plan->error_code_.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN && attempts < 2);
+  while (!signal_stop_ && plan->error_code_.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN &&
+         attempts < 2);
 
   return false;
 }

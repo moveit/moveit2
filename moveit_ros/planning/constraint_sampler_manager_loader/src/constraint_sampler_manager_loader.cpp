@@ -36,7 +36,7 @@
 
 #include <moveit/constraint_sampler_manager_loader/constraint_sampler_manager_loader.h>
 #include <pluginlib/class_loader.hpp>
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 #include <boost/tokenizer.hpp>
 #include <memory>
 
@@ -45,11 +45,15 @@ namespace constraint_sampler_manager_loader
 class ConstraintSamplerManagerLoader::Helper
 {
 public:
-  Helper(const constraint_samplers::ConstraintSamplerManagerPtr& csm) : nh_("~")
+  Helper(const constraint_samplers::ConstraintSamplerManagerPtr& csm, const std::shared_ptr<rclcpp::Node> node)
+    : node_(node)
   {
+    auto parameters_constraint_sampler = std::make_shared<rclcpp::SyncParametersClient>(node_);
+
     std::string constraint_samplers;
-    if (nh_.getParam("constraint_samplers", constraint_samplers))
+    if (parameters_constraint_sampler->has_parameter("constraint_samplers"))
     {
+      constraint_samplers = node_->get_parameter("constraint_samplers").get_value<std::string>();
       try
       {
         constraint_sampler_plugin_loader_.reset(
@@ -58,7 +62,7 @@ public:
       }
       catch (pluginlib::PluginlibException& ex)
       {
-        ROS_ERROR_STREAM("Exception while creating constraint sampling plugin loader " << ex.what());
+        RCLCPP_ERROR(node_->get_logger(), "Exception while creating constraint sampling plugin loader %s", ex.what());
         return;
       }
       boost::char_separator<char> sep(" ");
@@ -70,27 +74,28 @@ public:
           constraint_samplers::ConstraintSamplerAllocatorPtr csa =
               constraint_sampler_plugin_loader_->createUniqueInstance(*beg);
           csm->registerSamplerAllocator(csa);
-          ROS_INFO("Loaded constraint sampling plugin %s", std::string(*beg).c_str());
+          RCLCPP_INFO(node_->get_logger(), "Loaded constraint sampling plugin %s", std::string(*beg).c_str());
         }
         catch (pluginlib::PluginlibException& ex)
         {
-          ROS_ERROR_STREAM("Exception while planning adapter plugin '" << *beg << "': " << ex.what());
+          RCLCPP_ERROR(node_->get_logger(), "Exception while planning adapter plugin '%s': %s",
+                       std::string(*beg).c_str(), ex.what());
         }
       }
     }
   }
 
 private:
-  ros::NodeHandle nh_;
+  rclcpp::Node::SharedPtr node_;
   std::unique_ptr<pluginlib::ClassLoader<constraint_samplers::ConstraintSamplerAllocator> >
       constraint_sampler_plugin_loader_;
 };
-
-ConstraintSamplerManagerLoader::ConstraintSamplerManagerLoader(
-    const constraint_samplers::ConstraintSamplerManagerPtr& csm)
+    ConstraintSamplerManagerLoader::ConstraintSamplerManagerLoader(
+        std::shared_ptr<rclcpp::Node>& node,
+        const constraint_samplers::ConstraintSamplerManagerPtr& csm)
   : constraint_sampler_manager_(csm ? csm : constraint_samplers::ConstraintSamplerManagerPtr(
                                                 new constraint_samplers::ConstraintSamplerManager()))
-  , impl_(new Helper(constraint_sampler_manager_))
+  , impl_(new Helper(constraint_sampler_manager_, node))
 {
 }
 }  // namespace constraint_sampler_manager_loader

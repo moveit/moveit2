@@ -41,23 +41,25 @@ move_group::ApplyPlanningSceneService::ApplyPlanningSceneService() : MoveGroupCa
 {
 }
 
-void move_group::ApplyPlanningSceneService::initialize()
+void move_group::ApplyPlanningSceneService::initialize(std::shared_ptr<rclcpp::Node>& node)
 {
-  service_ = root_node_handle_.advertiseService(APPLY_PLANNING_SCENE_SERVICE_NAME,
-                                                &ApplyPlanningSceneService::applyScene, this);
+  this->node_ = node;
+  service_ = this->node_->create_service<moveit_msgs::srv::ApplyPlanningScene>(
+      APPLY_PLANNING_SCENE_SERVICE_NAME, std::bind(&ApplyPlanningSceneService::applyScene, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3) );
 }
 
-bool move_group::ApplyPlanningSceneService::applyScene(moveit_msgs::srv::ApplyPlanningScene::Request& req,
-                                                       moveit_msgs::srv::ApplyPlanningScene::Response& res)
+void move_group::ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_t> request_header,
+   const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request> request,
+   const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response> response)
 {
   if (!context_->planning_scene_monitor_)
   {
-    ROS_ERROR("Cannot apply PlanningScene as no scene is monitored.");
-    return true;
+    RCLCPP_ERROR(rclcpp::get_logger("ApplyPlanningSceneService"), "Cannot apply PlanningScene as no scene is monitored.");
+    return;
   }
   context_->planning_scene_monitor_->updateFrameTransforms();
-  res.success = context_->planning_scene_monitor_->newPlanningSceneMessage(req.scene);
-  return true;
+  response->success = context_->planning_scene_monitor_->newPlanningSceneMessage(request->scene);
+  return;
 }
 
 #include <class_loader/class_loader.hpp>

@@ -35,22 +35,29 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/pick_place/pick_place_params.h>
-#include <dynamic_reconfigure/server.h>
-#include <moveit_ros_manipulation/PickPlaceDynamicReconfigureConfig.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace pick_place
 {
 namespace
 {
-using namespace moveit_ros_manipulation;
-
 class DynamicReconfigureImpl
 {
 public:
-  DynamicReconfigureImpl() : dynamic_reconfigure_server_(ros::NodeHandle("~/pick_place"))
+  DynamicReconfigureImpl()
   {
-    dynamic_reconfigure_server_.setCallback(
-        boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
+    node_ = rclcpp::Node::make_shared("~/pick_place");
+    node_->declare_parameter("max_attempted_states_per_pose");
+    node_->declare_parameter("max_consecutive_fail_attempts");
+    node_->declare_parameter("cartesian_motion_step_size");
+    node_->declare_parameter("jump_factor");
+
+    auto pick_place_parameters = std::make_shared<rclcpp::SyncParametersClient>(node_);
+
+    auto set_parameters_results = pick_place_parameters->set_parameters({
+        rclcpp::Parameter("max_attempted_states_per_pose", 5), rclcpp::Parameter("max_consecutive_fail_attempts", 3),
+        rclcpp::Parameter("cartesian_motion_step_size", 0.02), rclcpp::Parameter("jump_factor", 2.0),
+    });
   }
 
   const PickPlaceParams& getParams() const
@@ -60,16 +67,34 @@ public:
 
 private:
   PickPlaceParams params_;
+  rclcpp::Node::SharedPtr node_;
 
-  void dynamicReconfigureCallback(PickPlaceDynamicReconfigureConfig& config, uint32_t level)
+  void dynamicReconfigureCallback()
   {
-    params_.max_goal_count_ = config.max_attempted_states_per_pose;
-    params_.max_fail_ = config.max_consecutive_fail_attempts;
-    params_.max_step_ = config.cartesian_motion_step_size;
-    params_.jump_factor_ = config.jump_factor;
-  }
+    auto pick_place_parameters = std::make_shared<rclcpp::SyncParametersClient>(node_);
 
-  dynamic_reconfigure::Server<PickPlaceDynamicReconfigureConfig> dynamic_reconfigure_server_;
+    for (auto& parameter :
+         pick_place_parameters->get_parameters({ "max_attempted_states_per_pose", "max_consecutive_fail_attempts",
+                                                 "cartesian_motion_step_size", "jump_factor" }))
+    {
+      if (parameter.get_name().compare("max_attempted_states_per_pose") == 0)
+      {
+        params_.max_goal_count_ = parameter.as_int();
+      }
+      if (parameter.get_name().compare("max_consecutive_fail_attempts") == 0)
+      {
+        params_.max_fail_ = parameter.as_int();
+      }
+      if (parameter.get_name().compare("cartesian_motion_step_size") == 0)
+      {
+        params_.max_step_ = parameter.as_double();
+      }
+      if (parameter.get_name().compare("jump_factor") == 0)
+      {
+        params_.jump_factor_ = parameter.as_double();
+      }
+    }
+  }
 };
 }  // namespace
 }  // namespace pick_place

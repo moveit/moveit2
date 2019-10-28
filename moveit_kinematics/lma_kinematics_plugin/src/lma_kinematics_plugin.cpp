@@ -88,12 +88,12 @@ bool LMAKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
 
   if (!joint_model_group_->isChain())
   {
-    ROS_ERROR_NAMED("lma", "Group '%s' is not a chain", group_name.c_str());
+    RCLCPP_ERROR(node_->get_logger(), "Group '%s' is not a chain", group_name.c_str());
     return false;
   }
   if (!joint_model_group_->isSingleDOFJoints())
   {
-    ROS_ERROR_NAMED("lma", "Group '%s' includes joints that have more than 1 DOF", group_name.c_str());
+    RCLCPP_ERROR(node_->get_logger(), "Group '%s' includes joints that have more than 1 DOF", group_name.c_str());
     return false;
   }
 
@@ -101,12 +101,12 @@ bool LMAKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
 
   if (!kdl_parser::treeFromUrdfModel(*robot_model.getURDF(), kdl_tree))
   {
-    ROS_ERROR_NAMED("lma", "Could not initialize tree object");
+    RCLCPP_ERROR(node_->get_logger(), "Could not initialize tree object");
     return false;
   }
   if (!kdl_tree.getChain(base_frame_, getTipFrame(), kdl_chain_))
   {
-    ROS_ERROR_NAMED("lma", "Could not initialize chain object");
+    RCLCPP_ERROR(node_->get_logger(), "Could not initialize chain object");
     return false;
   }
 
@@ -121,16 +121,16 @@ bool LMAKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
   dimension_ = joints_.size();
 
   // Get Solver Parameters
-  lookupParam("max_solver_iterations", max_solver_iterations_, 500);
-  lookupParam("epsilon", epsilon_, 1e-5);
-  lookupParam("orientation_vs_position", orientation_vs_position_weight_, 0.01);
+  lookupParam(node_,"max_solver_iterations", max_solver_iterations_, 500);
+  lookupParam(node_,"epsilon", epsilon_, 1e-5);
+  lookupParam(node_,"orientation_vs_position", orientation_vs_position_weight_, 0.01);
 
   bool position_ik;
-  lookupParam("position_only_ik", position_ik, false);
+  lookupParam(node_,"position_only_ik", position_ik, false);
   if (position_ik)  // position_only_ik overrules orientation_vs_position
     orientation_vs_position_weight_ = 0.0;
   if (orientation_vs_position_weight_ == 0.0)
-    ROS_INFO_NAMED("lma", "Using position only ik");
+    RCLCPP_INFO(node_->get_logger(), "Using position only ik");
 
   // Setup the joint state groups that we need
   state_.reset(new robot_state::RobotState(robot_model_));
@@ -138,16 +138,16 @@ bool LMAKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
   fk_solver_.reset(new KDL::ChainFkSolverPos_recursive(kdl_chain_));
 
   initialized_ = true;
-  ROS_DEBUG_NAMED("lma", "LMA solver initialized");
+  RCLCPP_DEBUG(node_->get_logger(), "LMA solver initialized");
   return true;
 }
 
-bool LMAKinematicsPlugin::timedOut(const ros::WallTime& start_time, double duration) const
+bool LMAKinematicsPlugin::timedOut(const std::chrono::system_clock::time_point& start_time, double duration) const
 {
-  return ((ros::WallTime::now() - start_time).toSec() >= duration);
+  return (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start_time).count() /1000.0 >= duration);
 }
 
-bool LMAKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool LMAKinematicsPlugin::getPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                         std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                         const kinematics::KinematicsQueryOptions& options) const
 {
@@ -158,7 +158,7 @@ bool LMAKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, cons
                           options);
 }
 
-bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
@@ -169,7 +169,7 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
                           options);
 }
 
-bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
                                            std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
@@ -178,7 +178,7 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
                           options);
 }
 
-bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
@@ -189,7 +189,7 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
                           options);
 }
 
-bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
                                            std::vector<double>& solution, const IKCallbackFn& solution_callback,
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
@@ -215,33 +215,31 @@ bool LMAKinematicsPlugin::obeysLimits(const Eigen::VectorXd& values) const
   return true;
 }
 
-bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const std::vector<double>& consistency_limits,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
-  ros::WallTime start_time = ros::WallTime::now();
+  auto start_time = std::chrono::system_clock::now();
   if (!initialized_)
   {
-    ROS_ERROR_NAMED("lma", "kinematics solver not initialized");
+    RCLCPP_ERROR(node_->get_logger(), "kinematics solver not initialized");
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
 
   if (ik_seed_state.size() != dimension_)
   {
-    ROS_ERROR_STREAM_NAMED("lma", "Seed state must have size " << dimension_ << " instead of size "
-                                                               << ik_seed_state.size());
+    RCLCPP_ERROR(node_->get_logger(), "Seed state must have size %d instead of size %d",dimension_, ik_seed_state.size());
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
 
   if (!consistency_limits.empty() && consistency_limits.size() != dimension_)
   {
-    ROS_ERROR_STREAM_NAMED("lma", "Consistency limits be empty or must have size " << dimension_ << " instead of size "
-                                                                                   << consistency_limits.size());
+    RCLCPP_ERROR(node_->get_logger(), "Consistency limits be empty or must have size %d instead of size %d", dimension_, consistency_limits.size());
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
@@ -266,10 +264,9 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
   KDL::Frame pose_desired;
   tf2::fromMsg(ik_pose, pose_desired);
 
-  ROS_DEBUG_STREAM_NAMED("lma", "searchPositionIK2: Position request pose is "
-                                    << ik_pose.position.x << " " << ik_pose.position.y << " " << ik_pose.position.z
-                                    << " " << ik_pose.orientation.x << " " << ik_pose.orientation.y << " "
-                                    << ik_pose.orientation.z << " " << ik_pose.orientation.w);
+  RCLCPP_DEBUG(node_->get_logger(), "searchPositionIK2: Position request pose is %d %d %d %d %d %d %d",
+                                    ik_pose.position.x, ik_pose.position.y, ik_pose.position.z, ik_pose.orientation.x,
+                                    ik_pose.orientation.y, ik_pose.orientation.z, ik_pose.orientation.w);
   unsigned int attempt = 0;
   do
   {
@@ -280,7 +277,7 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
         getRandomConfiguration(jnt_seed_state.data, consistency_limits, jnt_pos_in.data);
       else
         getRandomConfiguration(jnt_pos_in.data);
-      ROS_DEBUG_STREAM_NAMED("lma", "New random configuration (" << attempt << "): " << jnt_pos_in);
+      RCLCPP_DEBUG(node_->get_logger(), "New random configuration (%d): %d",attempt, jnt_pos_in.data);
     }
 
     int ik_valid = ik_solver_pos.CartToJnt(jnt_pos_in, pose_desired, jnt_pos_out);
@@ -302,31 +299,29 @@ bool LMAKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
 
       // solution passed consistency check and solution callback
       error_code.val = error_code.SUCCESS;
-      ROS_DEBUG_STREAM_NAMED("lma", "Solved after " << (ros::WallTime::now() - start_time).toSec() << " < " << timeout
-                                                    << "s and " << attempt << " attempts");
+      RCLCPP_DEBUG(node_->get_logger(), "Solved after %ld < %fs and %d attempts",(std::chrono::system_clock::now() - start_time).count(),timeout,attempt);
       return true;
     }
   } while (!timedOut(start_time, timeout));
 
-  ROS_DEBUG_STREAM_NAMED("lma", "IK timed out after " << (ros::WallTime::now() - start_time).toSec() << " > " << timeout
-                                                      << "s and " << attempt << " attempts");
+  RCLCPP_DEBUG(node_->get_logger(), "IK timed out after %ld > %fs and %d attempts",(std::chrono::system_clock::now() - start_time).count(),timeout,attempt);
   error_code.val = error_code.TIMED_OUT;
   return false;
 }
 
 bool LMAKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_names,
                                         const std::vector<double>& joint_angles,
-                                        std::vector<geometry_msgs::Pose>& poses) const
+                                        std::vector<geometry_msgs::msg::Pose>& poses) const
 {
   if (!initialized_)
   {
-    ROS_ERROR_NAMED("lma", "kinematics solver not initialized");
+    RCLCPP_ERROR(node_->get_logger(), "kinematics solver not initialized");
     return false;
   }
   poses.resize(link_names.size());
   if (joint_angles.size() != dimension_)
   {
-    ROS_ERROR_NAMED("lma", "Joint angles vector must have size: %d", dimension_);
+    RCLCPP_ERROR(node_->get_logger(), "Joint angles vector must have size: %d", dimension_);
     return false;
   }
 
@@ -339,11 +334,16 @@ bool LMAKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_nam
   {
     if (fk_solver_->JntToCart(jnt_pos_in, p_out) >= 0)
     {
-      poses[i] = tf2::toMsg(p_out);
+      //TODO (anasarrak): Add a toMsg transformation for KDL::Frame
+      poses[i].position.x = p_out.p[0];
+      poses[i].position.y = p_out.p[1];
+      poses[i].position.z = p_out.p[2];
+      p_out.M.GetQuaternion(poses[i].orientation.x, poses[i].orientation.y,
+                            poses[i].orientation.z, poses[i].orientation.w);
     }
     else
     {
-      ROS_ERROR_NAMED("lma", "Could not compute FK for %s", link_names[i].c_str());
+      RCLCPP_ERROR(node_->get_logger(), "Could not compute FK for %s", link_names[i].c_str());
       valid = false;
     }
   }

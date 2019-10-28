@@ -35,14 +35,14 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/move_group_interface/move_group_interface.h>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 void demoPick(moveit::planning_interface::MoveGroupInterface& group)
 {
   std::vector<moveit_msgs::msg::Grasp> grasps;
   for (std::size_t i = 0; i < 20; ++i)
   {
-    geometry_msgs::PoseStamped p = group.getRandomPose();
+    geometry_msgs::msg::PoseStamped p = group.getRandomPose();
     p.pose.orientation.x = 0;
     p.pose.orientation.y = 0;
     p.pose.orientation.z = 0;
@@ -73,15 +73,15 @@ void demoPick(moveit::planning_interface::MoveGroupInterface& group)
 
 void demoPlace(moveit::planning_interface::MoveGroupInterface& group)
 {
-  std::vector<moveit_msgs::action::PlaceLocation> loc;
+  std::vector<moveit_msgs::msg::PlaceLocation> loc;
   for (std::size_t i = 0; i < 20; ++i)
   {
-    geometry_msgs::PoseStamped p = group.getRandomPose();
+    geometry_msgs::msg::PoseStamped p = group.getRandomPose();
     p.pose.orientation.x = 0;
     p.pose.orientation.y = 0;
     p.pose.orientation.z = 0;
     p.pose.orientation.w = 1;
-    moveit_msgs::action::PlaceLocation g;
+    moveit_msgs::msg::PlaceLocation g;
     g.place_pose = p;
     g.pre_place_approach.direction.vector.x = 1.0;
     g.post_place_retreat.direction.vector.z = 1.0;
@@ -107,12 +107,16 @@ void attachObject()
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "move_group_interface_demo", ros::init_options::AnonymousName);
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("move_group_interface_demo");
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  moveit::planning_interface::MoveGroupInterface::Options options("manipulator", "robot_description", node);
 
-  moveit::planning_interface::MoveGroupInterface group(argc > 1 ? argv[1] : "right_arm");
+  moveit::planning_interface::MoveGroupInterface group(options);
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(node);
+  std::thread executor_thread(std::bind(&rclcpp::executors::MultiThreadedExecutor::spin, &executor));
+
   demoPlace(group);
 
   sleep(2);

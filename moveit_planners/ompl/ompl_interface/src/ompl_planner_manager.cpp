@@ -41,8 +41,8 @@
 #include <moveit/profiler/profiler.h>
 #include <class_loader/class_loader.hpp>
 
-#include <dynamic_reconfigure/server.h>
-#include "moveit_planners_ompl/OMPLDynamicReconfigureConfig.h"
+// #include <dynamic_reconfigure/server.h>
+// #include "moveit_planners_ompl/OMPLDynamicReconfigureConfig.h"
 
 #include <moveit_msgs/msg/display_robot_state.hpp>
 #include <moveit_msgs/msg/display_trajectory.hpp>
@@ -54,47 +54,47 @@
 
 namespace ompl_interface
 {
-using namespace moveit_planners_ompl;
+// using namespace moveit_planners_ompl;
 
-#define OMPL_ROS_LOG(ros_log_level)                                                                                    \
-  {                                                                                                                    \
-    ROSCONSOLE_DEFINE_LOCATION(true, ros_log_level, ROSCONSOLE_NAME_PREFIX ".ompl");                                   \
-    if (ROS_UNLIKELY(__rosconsole_define_location__enabled))                                                           \
-      ::ros::console::print(0, __rosconsole_define_location__loc.logger_, __rosconsole_define_location__loc.level_,    \
-                            filename, line, __ROSCONSOLE_FUNCTION__, "%s", text.c_str());                              \
-  }
+// #define OMPL_ROS_LOG(ros_log_level)                                                                                    \
+//   {                                                                                                                    \
+//     ROSCONSOLE_DEFINE_LOCATION(true, ros_log_level, ROSCONSOLE_NAME_PREFIX ".ompl");                                   \
+//     if (ROS_UNLIKELY(__rosconsole_define_location__enabled))                                                           \
+//       ::ros::console::print(0, __rosconsole_define_location__loc.logger_, __rosconsole_define_location__loc.level_,    \
+//                             filename, line, __ROSCONSOLE_FUNCTION__, "%s", text.c_str());                              \
+//   }
 
 class OMPLPlannerManager : public planning_interface::PlannerManager
 {
 public:
-  OMPLPlannerManager() : planning_interface::PlannerManager(), nh_("~")
+  OMPLPlannerManager() : planning_interface::PlannerManager()
   {
     class OutputHandler : public ompl::msg::OutputHandler
     {
     public:
       void log(const std::string& text, ompl::msg::LogLevel level, const char* filename, int line) override
       {
-        switch (level)
-        {
-          case ompl::msg::LOG_DEV2:
-          case ompl::msg::LOG_DEV1:
-          case ompl::msg::LOG_DEBUG:
-            OMPL_ROS_LOG(::ros::console::levels::Debug);
-            break;
-          case ompl::msg::LOG_INFO:
-            OMPL_ROS_LOG(::ros::console::levels::Info);
-            break;
-          case ompl::msg::LOG_WARN:
-            OMPL_ROS_LOG(::ros::console::levels::Warn);
-            break;
-          case ompl::msg::LOG_ERROR:
-            OMPL_ROS_LOG(::ros::console::levels::Error);
-            break;
-          case ompl::msg::LOG_NONE:
-          default:
-            /* ignore */
-            break;
-        }
+        // switch (level)
+        // {
+        //   case ompl::msg::LOG_DEV2:
+        //   case ompl::msg::LOG_DEV1:
+        //   case ompl::msg::LOG_DEBUG:
+        //     OMPL_ROS_LOG(::ros::console::levels::Debug);
+        //     break;
+        //   case ompl::msg::LOG_INFO:
+        //     OMPL_ROS_LOG(::ros::console::levels::Info);
+        //     break;
+        //   case ompl::msg::LOG_WARN:
+        //     OMPL_ROS_LOG(::ros::console::levels::Warn);
+        //     break;
+        //   case ompl::msg::LOG_ERROR:
+        //     OMPL_ROS_LOG(::ros::console::levels::Error);
+        //     break;
+        //   case ompl::msg::LOG_NONE:
+        //   default:
+        //     /* ignore */
+        //     break;
+        // }
       }
     };
 
@@ -102,16 +102,15 @@ public:
     ompl::msg::useOutputHandler(output_handler_.get());
   }
 
-  bool initialize(const robot_model::RobotModelConstPtr& model, const std::string& ns) override
+  bool initialize(const robot_model::RobotModelConstPtr& model, std::shared_ptr<rclcpp::Node>& node) override
   {
-    if (!ns.empty())
-      nh_ = ros::NodeHandle(ns);
-    ompl_interface_.reset(new OMPLInterface(model, nh_));
-    std::string ompl_ns = ns.empty() ? "ompl" : ns + "/ompl";
-    dynamic_reconfigure_server_.reset(
-        new dynamic_reconfigure::Server<OMPLDynamicReconfigureConfig>(ros::NodeHandle(nh_, ompl_ns)));
-    dynamic_reconfigure_server_->setCallback(
-        std::bind(&OMPLPlannerManager::dynamicReconfigureCallback, this, std::placeholders::_1, std::placeholders::_2));
+    this->node_ = node;
+    ompl_interface_.reset(new OMPLInterface(model, node));
+    std::string ompl_ns = "ompl";
+    // dynamic_reconfigure_server_.reset(
+    //     new dynamic_reconfigure::Server<OMPLDynamicReconfigureConfig>(ros::NodeHandle(nh_, ompl_ns)));
+    // dynamic_reconfigure_server_->setCallback(
+    //     std::bind(&OMPLPlannerManager::dynamicReconfigureCallback, this, std::placeholders::_1, std::placeholders::_2));
     config_settings_ = ompl_interface_->getPlannerConfigurations();
     return true;
   }
@@ -259,53 +258,54 @@ private:
   }
   */
 
-  void dynamicReconfigureCallback(OMPLDynamicReconfigureConfig& config, uint32_t level)
-  {
-    if (config.link_for_exploration_tree.empty() && !planner_data_link_name_.empty())
-    {
-      pub_markers_.shutdown();
-      planner_data_link_name_.clear();
-      ROS_INFO("Not displaying OMPL exploration data structures.");
-    }
-    else if (!config.link_for_exploration_tree.empty() && planner_data_link_name_.empty())
-    {
-      pub_markers_ = nh_.advertise<visualization_msgs::MarkerArray>("ompl_planner_data_marker_array", 5);
-      planner_data_link_name_ = config.link_for_exploration_tree;
-      ROS_INFO("Displaying OMPL exploration data structures for %s", planner_data_link_name_.c_str());
-    }
-
-    ompl_interface_->simplifySolutions(config.simplify_solutions);
-    ompl_interface_->getPlanningContextManager().setMaximumSolutionSegmentLength(config.maximum_waypoint_distance);
-    ompl_interface_->getPlanningContextManager().setMinimumWaypointCount(config.minimum_waypoint_count);
-    if (display_random_valid_states_ && !config.display_random_valid_states)
-    {
-      display_random_valid_states_ = false;
-      if (pub_valid_states_thread_)
-      {
-        pub_valid_states_thread_->join();
-        pub_valid_states_thread_.reset();
-      }
-      pub_valid_states_.shutdown();
-      pub_valid_traj_.shutdown();
-    }
-    else if (!display_random_valid_states_ && config.display_random_valid_states)
-    {
-      pub_valid_states_ = nh_.advertise<moveit_msgs::msg::DisplayRobotState>("ompl_planner_valid_states", 5);
-      pub_valid_traj_ = nh_.advertise<moveit_msgs::msg::DisplayTrajectory>("ompl_planner_valid_trajectories", 5);
-      display_random_valid_states_ = true;
-      //    pub_valid_states_thread_.reset(new boost::thread(boost::bind(&OMPLPlannerManager::displayRandomValidStates,
-      //    this)));
-    }
-  }
-
-  ros::NodeHandle nh_;
-  std::unique_ptr<dynamic_reconfigure::Server<OMPLDynamicReconfigureConfig>> dynamic_reconfigure_server_;
+//   void dynamicReconfigureCallback(OMPLDynamicReconfigureConfig& config, uint32_t level)
+//   {
+//     if (config.link_for_exploration_tree.empty() && !planner_data_link_name_.empty())
+//     {
+//       pub_markers_.shutdown();
+//       planner_data_link_name_.clear();
+//       ROS_INFO("Not displaying OMPL exploration data structures.");
+//     }
+//     else if (!config.link_for_exploration_tree.empty() && planner_data_link_name_.empty())
+//     {
+//       pub_markers_ = nh_.advertise<visualization_msgs::MarkerArray>("ompl_planner_data_marker_array", 5);
+//       planner_data_link_name_ = config.link_for_exploration_tree;
+//       ROS_INFO("Displaying OMPL exploration data structures for %s", planner_data_link_name_.c_str());
+//     }
+//
+//     ompl_interface_->simplifySolutions(config.simplify_solutions);
+//     ompl_interface_->getPlanningContextManager().setMaximumSolutionSegmentLength(config.maximum_waypoint_distance);
+//     ompl_interface_->getPlanningContextManager().setMinimumWaypointCount(config.minimum_waypoint_count);
+//     if (display_random_valid_states_ && !config.display_random_valid_states)
+//     {
+//       display_random_valid_states_ = false;
+//       if (pub_valid_states_thread_)
+//       {
+//         pub_valid_states_thread_->join();
+//         pub_valid_states_thread_.reset();
+//       }
+//       pub_valid_states_.shutdown();
+//       pub_valid_traj_.shutdown();
+//     }
+//     else if (!display_random_valid_states_ && config.display_random_valid_states)
+//     {
+//       pub_valid_states_ = nh_.advertise<moveit_msgs::msg::DisplayRobotState>("ompl_planner_valid_states", 5);
+//       pub_valid_traj_ = nh_.advertise<moveit_msgs::msg::DisplayTrajectory>("ompl_planner_valid_trajectories", 5);
+//       display_random_valid_states_ = true;
+//       //    pub_valid_states_thread_.reset(new boost::thread(boost::bind(&OMPLPlannerManager::displayRandomValidStates,
+//       //    this)));
+//     }
+//   }
+//
+//   ros::NodeHandle nh_;
+//   std::unique_ptr<dynamic_reconfigure::Server<OMPLDynamicReconfigureConfig>> dynamic_reconfigure_server_;
   std::unique_ptr<OMPLInterface> ompl_interface_;
-  std::unique_ptr<std::thread> pub_valid_states_thread_;
+//   std::unique_ptr<std::thread> pub_valid_states_thread_;
   bool display_random_valid_states_{ false };
-  ros::Publisher pub_markers_;
-  ros::Publisher pub_valid_states_;
-  ros::Publisher pub_valid_traj_;
+//   ros::Publisher pub_markers_;
+//   ros::Publisher pub_valid_states_;
+//   ros::Publisher pub_valid_traj_;
+  std::shared_ptr<rclcpp::Node> node_;
   std::string planner_data_link_name_;
   std::shared_ptr<ompl::msg::OutputHandler> output_handler_;
 };

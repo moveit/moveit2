@@ -38,10 +38,11 @@
 #include <moveit/pick_place/approach_and_translate_stage.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <tf2_eigen/tf2_eigen.h>
-#include <ros/console.h>
 
 namespace pick_place
 {
+rclcpp::Logger LOGGER_APPROACH_AND_TRANSLATE_STAGE =
+    rclcpp::get_logger("moveit_ros_manipulation").get_child("approach_and_trandlate_stage");
 ApproachAndTranslateStage::ApproachAndTranslateStage(
     const planning_scene::PlanningSceneConstPtr& scene,
     const collision_detection::AllowedCollisionMatrixConstPtr& collision_matrix)
@@ -57,7 +58,7 @@ namespace
 {
 bool isStateCollisionFree(const planning_scene::PlanningScene* planning_scene,
                           const collision_detection::AllowedCollisionMatrix* collision_matrix, bool verbose,
-                          const trajectory_msgs::JointTrajectory* grasp_posture, robot_state::RobotState* state,
+                          const trajectory_msgs::msg::JointTrajectory* grasp_posture, robot_state::RobotState* state,
                           const robot_state::JointModelGroup* group, const double* joint_group_variable_values)
 {
   state->setJointGroupPositions(group, joint_group_variable_values);
@@ -121,7 +122,7 @@ bool samplePossibleGoalStates(const ManipulationPlanPtr& plan, const robot_state
 // This function is called during trajectory execution, after the gripper is closed, to attach the currently gripped
 // object
 bool executeAttachObject(const ManipulationPlanSharedDataConstPtr& shared_plan_data,
-                         const trajectory_msgs::JointTrajectory& detach_posture,
+                         const trajectory_msgs::msg::JointTrajectory& detach_posture,
                          const plan_execution::ExecutableMotionPlan* motion_plan)
 {
   if (shared_plan_data->diff_attached_object_.object.id.empty())
@@ -130,8 +131,9 @@ bool executeAttachObject(const ManipulationPlanSharedDataConstPtr& shared_plan_d
     return true;
   }
 
-  ROS_DEBUG_NAMED("manipulation", "Applying attached object diff to maintained planning scene (attaching/detaching "
-                                  "object to end effector)");
+  RCLCPP_DEBUG(LOGGER_APPROACH_AND_TRANSLATE_STAGE,
+               "Applying attached object diff to maintained planning scene (attaching/detaching "
+               "object to end effector)");
   bool ok = false;
   {
     planning_scene_monitor::LockedPlanningSceneRW ps(motion_plan->planning_scene_monitor_);
@@ -165,15 +167,16 @@ void addGripperTrajectory(const ManipulationPlanPtr& plan,
     // If user has defined a time for it's gripper movement time, don't add the
     // DEFAULT_GRASP_POSTURE_COMPLETION_DURATION
     if (!plan->retreat_posture_.points.empty() &&
-        plan->retreat_posture_.points.back().time_from_start > ros::Duration(0.0))
+        rclcpp::Duration(plan->retreat_posture_.points.back().time_from_start) > rclcpp::Duration(0.0))
     {
       ee_closed_traj->addPrefixWayPoint(ee_closed_state, 0.0);
     }
     else
     {  // Do what was done before
-      ROS_INFO_STREAM("Adding default duration of " << PickPlace::DEFAULT_GRASP_POSTURE_COMPLETION_DURATION
-                                                    << " seconds to the grasp closure time. Assign time_from_start to "
-                                                    << "your trajectory to avoid this.");
+      RCLCPP_INFO(LOGGER_APPROACH_AND_TRANSLATE_STAGE, "Adding default duration of %f"
+                                                       " seconds to the grasp closure time. Assign time_from_start to "
+                                                       "your trajectory to avoid this.",
+                  PickPlace::DEFAULT_GRASP_POSTURE_COMPLETION_DURATION);
       ee_closed_traj->addPrefixWayPoint(ee_closed_state, PickPlace::DEFAULT_GRASP_POSTURE_COMPLETION_DURATION);
     }
 
@@ -186,7 +189,8 @@ void addGripperTrajectory(const ManipulationPlanPtr& plan,
   }
   else
   {
-    ROS_WARN_NAMED("manipulation", "No joint states of grasp postures have been defined in the pick place action.");
+    RCLCPP_WARN(LOGGER_APPROACH_AND_TRANSLATE_STAGE,
+                "No joint states of grasp postures have been defined in the pick place action.");
   }
 }
 

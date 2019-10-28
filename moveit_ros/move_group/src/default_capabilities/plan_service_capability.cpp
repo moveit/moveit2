@@ -42,35 +42,38 @@ move_group::MoveGroupPlanService::MoveGroupPlanService() : MoveGroupCapability("
 {
 }
 
-void move_group::MoveGroupPlanService::initialize()
+void move_group::MoveGroupPlanService::initialize(std::shared_ptr<rclcpp::Node>& node)
 {
-  plan_service_ =
-      root_node_handle_.advertiseService(PLANNER_SERVICE_NAME, &MoveGroupPlanService::computePlanService, this);
+  this->node_ = node;
+  plan_service_ = node_->create_service<moveit_msgs::srv::GetMotionPlan>(
+        PLANNER_SERVICE_NAME, std::bind(&MoveGroupPlanService::computePlanService, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3) );
 }
 
-bool move_group::MoveGroupPlanService::computePlanService(moveit_msgs::srv::GetMotionPlan::Request& req,
-                                                          moveit_msgs::srv::GetMotionPlan::Response& res)
+void move_group::MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_id_t> request_header,
+     const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request> request,
+     const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response> response)
 {
-  ROS_INFO("Received new planning service request...");
+  RCLCPP_INFO(node_->get_logger(), "Received new planning service request..");
+
   // before we start planning, ensure that we have the latest robot state received...
-  if (static_cast<bool>(req.motion_plan_request.start_state.is_diff))
-    context_->planning_scene_monitor_->waitForCurrentRobotState(ros::Time::now());
+  if (static_cast<bool>(request->motion_plan_request.start_state.is_diff))
+    context_->planning_scene_monitor_->waitForCurrentRobotState(rclcpp::Clock().now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   planning_scene_monitor::LockedPlanningSceneRO ps(context_->planning_scene_monitor_);
   try
   {
     planning_interface::MotionPlanResponse mp_res;
-    context_->planning_pipeline_->generatePlan(ps, req.motion_plan_request, mp_res);
-    mp_res.getMessage(res.motion_plan_response);
+    context_->planning_pipeline_->generatePlan(ps, request->motion_plan_request, mp_res);
+    mp_res.getMessage(response->motion_plan_response);
   }
   catch (std::exception& ex)
   {
-    ROS_ERROR("Planning pipeline threw an exception: %s", ex.what());
-    res.motion_plan_response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    RCLCPP_ERROR(node_->get_logger(), "Planning pipeline threw an exception: %s", ex.what());
+    response->motion_plan_response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 
-  return true;
+  return;
 }
 
 #include <class_loader/class_loader.hpp>

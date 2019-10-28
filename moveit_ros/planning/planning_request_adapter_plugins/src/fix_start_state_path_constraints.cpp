@@ -39,17 +39,22 @@
 #include <moveit/robot_state/conversions.h>
 #include <class_loader/class_loader.hpp>
 #include <moveit/trajectory_processing/trajectory_tools.h>
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace default_planner_request_adapters
 {
 class FixStartStatePathConstraints : public planning_request_adapter::PlanningRequestAdapter
 {
+  rclcpp::Logger LOGGER_PLANNING_REQUEST_ADAPTER =
+      rclcpp::get_logger("moveit_planning_request_adapter_plugins").get_child("fix_start_state_path_constraints");
+
 public:
   FixStartStatePathConstraints() : planning_request_adapter::PlanningRequestAdapter()
   {
   }
-
+  void initialize()
+  {
+  }
   std::string getDescription() const override
   {
     return "Fix Start State Path Constraints";
@@ -59,7 +64,7 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& added_path_index) const override
   {
-    ROS_DEBUG("Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(LOGGER_PLANNING_REQUEST_ADAPTER, "Running '%s'", getDescription().c_str());
 
     // get the specified start state
     robot_state::RobotState start_state = planning_scene->getCurrentState();
@@ -69,9 +74,9 @@ public:
     if (planning_scene->isStateValid(start_state, req.group_name) &&
         !planning_scene->isStateValid(start_state, req.path_constraints, req.group_name))
     {
-      ROS_INFO("Path constraints not satisfied for start state...");
+      RCLCPP_INFO(LOGGER_PLANNING_REQUEST_ADAPTER, "Path constraints not satisfied for start state...");
       planning_scene->isStateValid(start_state, req.path_constraints, req.group_name, true);
-      ROS_INFO("Planning to path constraints...");
+      RCLCPP_INFO(LOGGER_PLANNING_REQUEST_ADAPTER, "Planning to path constraints...");
 
       planning_interface::MotionPlanRequest req2 = req;
       req2.goal_constraints.resize(1);
@@ -88,7 +93,8 @@ public:
       if (solved1)
       {
         planning_interface::MotionPlanRequest req3 = req;
-        ROS_INFO("Planned to path constraints. Resuming original planning request.");
+        RCLCPP_INFO(LOGGER_PLANNING_REQUEST_ADAPTER,
+                    "Planned to path constraints. Resuming original planning request.");
 
         // extract the last state of the computed motion plan and set it as the new start state
         robot_state::robotStateToRobotStateMsg(res2.trajectory_->getLastWayPoint(), req3.start_state);
@@ -115,7 +121,7 @@ public:
       }
       else
       {
-        ROS_WARN("Unable to plan to path constraints. Running usual motion plan.");
+        RCLCPP_WARN(LOGGER_PLANNING_REQUEST_ADAPTER, "Unable to plan to path constraints. Running usual motion plan.");
         bool result = planner(planning_scene, req, res);
         res.planning_time_ += res2.planning_time_;
         return result;
@@ -123,7 +129,7 @@ public:
     }
     else
     {
-      ROS_DEBUG("Path constraints are OK. Running usual motion plan.");
+      RCLCPP_DEBUG(LOGGER_PLANNING_REQUEST_ADAPTER, "Path constraints are OK. Running usual motion plan.");
       return planner(planning_scene, req, res);
     }
   }

@@ -55,7 +55,7 @@
 #include <ros/ros.h>
 
 #include <std_msgs/String.h>
-#include <moveit_msgs/msg/display_trajectory.hpp>
+#include <moveit_msgs/DisplayTrajectory.h>
 #endif
 
 #include <memory>

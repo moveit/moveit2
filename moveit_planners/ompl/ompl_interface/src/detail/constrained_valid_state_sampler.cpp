@@ -40,6 +40,8 @@
 
 #include <utility>
 
+rclcpp::Logger LOGGER_CONSTRAINED_VALID_STATE_SAMPLER = rclcpp::get_logger("moveit_planner_ompl").get_child("constrained_valid_state_sampler");
+
 ompl_interface::ValidConstrainedSampler::ValidConstrainedSampler(const ModelBasedPlanningContext* pc,
                                                                  kinematic_constraints::KinematicConstraintSetPtr ks,
                                                                  constraint_samplers::ConstraintSamplerPtr cs)
@@ -52,7 +54,7 @@ ompl_interface::ValidConstrainedSampler::ValidConstrainedSampler(const ModelBase
   if (!constraint_sampler_)
     default_sampler_ = si_->allocStateSampler();
   inv_dim_ = si_->getStateSpace()->getDimension() > 0 ? 1.0 / (double)si_->getStateSpace()->getDimension() : 1.0;
-  ROS_DEBUG_NAMED("constrained_valid_state_sampler", "Constructed a ValidConstrainedSampler instance at address %p",
+  RCLCPP_DEBUG(LOGGER_CONSTRAINED_VALID_STATE_SAMPLER, "Constructed a ValidConstrainedSampler instance at address %p",
                   this);
 }
 

@@ -39,7 +39,7 @@
 #include <moveit/py_bindings_tools/roscpp_initializer.h>
 #include <moveit/py_bindings_tools/py_conversions.h>
 #include <moveit/py_bindings_tools/serialize_msg.h>
-#include <moveit_msgs/msg/robot_state.hpp>
+#include <moveit_msgs/RobotState.h>
 #include <visualization_msgs/MarkerArray.h>
 
 #include <stdexcept>

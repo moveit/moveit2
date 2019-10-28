@@ -38,8 +38,8 @@
 #define _CHOMP_PLANNER_H_
 
 #include <chomp_motion_planner/chomp_parameters.h>
-#include <moveit_msgs/msg/motion_plan_detailed_response.hpp>
-#include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit_msgs/MotionPlanDetailedResponse.h>
+#include <moveit_msgs/MotionPlanRequest.h>
 #include <moveit/planning_scene/planning_scene.h>
 
 namespace chomp

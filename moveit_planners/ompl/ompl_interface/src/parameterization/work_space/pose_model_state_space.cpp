@@ -42,6 +42,9 @@
 
 const std::string ompl_interface::PoseModelStateSpace::PARAMETERIZATION_TYPE = "PoseModel";
 
+rclcpp::Logger LOGGER_POSE_MODEL_STATE_SPACE =
+    rclcpp::get_logger("moveit_planner_ompl").get_child("pose_model_state_space");
+
 ompl_interface::PoseModelStateSpace::PoseModelStateSpace(const ModelBasedStateSpaceSpecification& spec)
   : ModelBasedStateSpace(spec)
 {
@@ -56,8 +59,10 @@ ompl_interface::PoseModelStateSpace::PoseModelStateSpace(const ModelBasedStateSp
       poses_.emplace_back(it.first, it.second);
   }
   if (poses_.empty())
-    ROS_ERROR_NAMED("pose_model_state_space", "No kinematics solvers specified. Unable to construct a "
-                                              "PoseModelStateSpace");
+  {
+    RCLCPP_ERROR(LOGGER_POSE_MODEL_STATE_SPACE, "No kinematics solvers specified. Unable to construct a "
+                                                "PoseModelStateSpace");
+  }
   else
     std::sort(poses_.begin(), poses_.end());
   setName(getName() + "_" + PARAMETERIZATION_TYPE);
@@ -195,7 +200,7 @@ bool ompl_interface::PoseModelStateSpace::PoseComponent::computeStateFK(StateTyp
     values[i] = full_state->values[bijection_[i]];
 
   // compute forward kinematics for the link of interest
-  std::vector<geometry_msgs::Pose> poses;
+  std::vector<geometry_msgs::msg::Pose> poses;
   if (!kinematics_solver_->getPositionFK(fk_link_, values, poses))
     return false;
 
@@ -226,7 +231,7 @@ bool ompl_interface::PoseModelStateSpace::PoseComponent::computeStateIK(StateTyp
   */
 
   // construct the pose
-  geometry_msgs::Pose pose;
+  geometry_msgs::msg::Pose pose;
   const ompl::base::SE3StateSpace::StateType* se3_state = full_state->poses[idx];
   pose.position.x = se3_state->getX();
   pose.position.y = se3_state->getY();

@@ -40,7 +40,7 @@
 #include <tf2_ros/transform_listener.h>
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #include <moveit/profiler/profiler.h>
-#include <moveit_msgs/GetMotionPlan.h>
+#include <moveit_msgs/srv/get_motion_plan.hpp>
 #include <memory>
 
 static const std::string PLANNER_NODE_NAME = "ompl_planning";  // name of node
@@ -49,32 +49,43 @@ static const std::string PLANNER_SERVICE_NAME =
 static const std::string ROBOT_DESCRIPTION =
     "robot_description";  // name of the robot description (a param name, so it can be changed externally)
 
+bool shutdown_req = false;
+
 class OMPLPlannerService
 {
 public:
-  OMPLPlannerService(planning_scene_monitor::PlanningSceneMonitor& psm, bool debug = false)
-    : nh_("~"), psm_(psm), ompl_interface_(psm.getPlanningScene()->getRobotModel()), debug_(debug)
+  OMPLPlannerService(planning_scene_monitor::PlanningSceneMonitor& psm, bool debug = false,
+                        std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("ompl_planner"))
+    : node_(node), psm_(psm), ompl_interface_(psm.getPlanningScene()->getRobotModel(),node), debug_(debug)
   {
-    plan_service_ = nh_.advertiseService(PLANNER_SERVICE_NAME, &OMPLPlannerService::computePlan, this);
+    std::function<bool( std::shared_ptr<rmw_request_id_t>,
+                     std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request>,
+                     std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response>)> cb_get_plan_service = std::bind(
+       &OMPLPlannerService::computePlan, this, std::placeholders::_1,  std::placeholders::_2,  std::placeholders::_3);
+
+    plan_service_ = node_->create_service<moveit_msgs::srv::GetMotionPlan>(PLANNER_SERVICE_NAME,
+                                                                                        cb_get_plan_service);
     if (debug_)
     {
-      pub_plan_ = nh_.advertise<moveit_msgs::msg::DisplayTrajectory>("display_motion_plan", 100);
-      pub_request_ = nh_.advertise<moveit_msgs::msg::MotionPlanRequest>("motion_plan_request", 100);
+      pub_plan_ = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>("display_motion_plan", 100);
+      pub_request_ = node_->create_publisher<moveit_msgs::msg::MotionPlanRequest>("motion_plan_request", 100);
     }
   }
 
-  bool computePlan(moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res)
+  bool computePlan(std::shared_ptr<rmw_request_id_t> request_header,
+    std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request> req,
+    std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response> res)
   {
-    ROS_INFO("Received new planning request...");
+    RCLCPP_INFO(node_->get_logger(),"Received new planning request...");
     if (debug_)
-      pub_request_.publish(req.motion_plan_request);
+      pub_request_->publish(req->motion_plan_request);
     planning_interface::MotionPlanResponse response;
 
     ompl_interface::ModelBasedPlanningContextPtr context =
-        ompl_interface_.getPlanningContext(psm_.getPlanningScene(), req.motion_plan_request);
+        ompl_interface_.getPlanningContext(psm_.getPlanningScene(), req->motion_plan_request);
     if (!context)
     {
-      ROS_ERROR_STREAM_NAMED("computePlan", "No planning context found");
+      RCLCPP_ERROR(node_->get_logger(), "No planning context found");
       return false;
     }
     context->clear();
@@ -84,9 +95,9 @@ public:
     if (debug_)
     {
       if (result)
-        displaySolution(res.motion_plan_response);
+        displaySolution(res->motion_plan_response);
       std::stringstream ss;
-      ROS_INFO("%s", ss.str().c_str());
+      RCLCPP_INFO(node_->get_logger(),"%s", ss.str().c_str());
     }
     return result;
   }
@@ -97,44 +108,50 @@ public:
     d.model_id = psm_.getPlanningScene()->getRobotModel()->getName();
     d.trajectory_start = mplan_res.trajectory_start;
     d.trajectory.resize(1, mplan_res.trajectory);
-    pub_plan_.publish(d);
+    pub_plan_->publish(d);
   }
 
   void status()
   {
     ompl_interface_.printStatus();
-    ROS_INFO("Responding to planning and bechmark requests");
+    RCLCPP_INFO(node_->get_logger(),"Responding to planning and bechmark requests");
     if (debug_)
-      ROS_INFO("Publishing debug information");
+      RCLCPP_INFO(node_->get_logger(),"Publishing debug information");
   }
 
 private:
-  ros::NodeHandle nh_;
+  rclcpp::Node::SharedPtr node_;
   planning_scene_monitor::PlanningSceneMonitor& psm_;
   ompl_interface::OMPLInterface ompl_interface_;
-  ros::ServiceServer plan_service_;
-  ros::ServiceServer display_states_service_;
-  ros::Publisher pub_plan_;
-  ros::Publisher pub_request_;
+  rclcpp::Service<moveit_msgs::srv::GetMotionPlan>::SharedPtr plan_service_;
+  // rclcpp::Service<moveit_msgs::srv::GetMotionPlan>::SharedPtr display_states_service_;
+  rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>::SharedPtr pub_plan_;
+  rclcpp::Publisher<moveit_msgs::msg::MotionPlanRequest>::SharedPtr pub_request_;
   bool debug_;
 };
 
+void signalHandler(int signum)
+{
+  shutdown_req = true;
+}
+
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, PLANNER_NODE_NAME);
+  signal(SIGINT, signalHandler);
+
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared(PLANNER_NODE_NAME);
 
   bool debug = false;
   for (int i = 1; i < argc; ++i)
     if (strncmp(argv[i], "--debug", 7) == 0)
       debug = true;
+  rclcpp::executors::SingleThreadedExecutor executor;
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-  ros::NodeHandle nh;
-
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>();
+  rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(clock);
   std::shared_ptr<tf2_ros::TransformListener> tf_listener =
-      std::make_shared<tf2_ros::TransformListener>(*tf_buffer, nh);
+      std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
   planning_scene_monitor::PlanningSceneMonitor psm(ROBOT_DESCRIPTION, tf_buffer);
   if (psm.getPlanningScene())
   {
@@ -142,12 +159,16 @@ int main(int argc, char** argv)
     psm.startSceneMonitor();
     psm.startStateMonitor();
 
-    OMPLPlannerService pservice(psm, debug);
-    pservice.status();
-    ros::waitForShutdown();
+    OMPLPlannerService pservice(psm, debug, node);
+
+    while (!shutdown_req)
+    {
+      pservice.status();
+      executor.spin_node_some(node);
+    }
   }
   else
-    ROS_ERROR("Planning scene not configured");
+    RCLCPP_ERROR(node->get_logger(),"Planning scene not configured");
 
   return 0;
 }

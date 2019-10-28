@@ -41,6 +41,8 @@
 
 #include <utility>
 
+rclcpp::Logger LOGGER_CONSTRAINED_GOAL_SAMPLER = rclcpp::get_logger("moveit_planner_ompl").get_child("constrained_goal_sampler");
+
 ompl_interface::ConstrainedGoalSampler::ConstrainedGoalSampler(const ModelBasedPlanningContext* pc,
                                                                kinematic_constraints::KinematicConstraintSetPtr ks,
                                                                constraint_samplers::ConstraintSamplerPtr cs)
@@ -58,7 +60,7 @@ ompl_interface::ConstrainedGoalSampler::ConstrainedGoalSampler(const ModelBasedP
 {
   if (!constraint_sampler_)
     default_sampler_ = si_->allocStateSampler();
-  ROS_DEBUG_NAMED("constrained_goal_sampler", "Constructed a ConstrainedGoalSampler instance at address %p", this);
+  RCLCPP_DEBUG(LOGGER_CONSTRAINED_GOAL_SAMPLER, "Constructed a ConstrainedGoalSampler instance at address %p", this);
   startSampling();
 }
 
@@ -138,7 +140,7 @@ bool ompl_interface::ConstrainedGoalSampler::sampleUsingConstraintSampler(const 
           if (!warned_invalid_samples_ && invalid_sampled_constraints_ >= (attempts_so_far * 8) / 10)
           {
             warned_invalid_samples_ = true;
-            ROS_WARN_NAMED("constrained_goal_sampler", "More than 80%% of the sampled goal states "
+            RCLCPP_WARN(LOGGER_CONSTRAINED_GOAL_SAMPLER, "More than 80%% of the sampled goal states "
                                                        "fail to satisfy the constraints imposed on the goal sampler. "
                                                        "Is the constrained sampler working correctly?");
           }

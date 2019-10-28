@@ -37,7 +37,7 @@
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <moveit_msgs/RobotTrajectory.h>
 #include <class_loader/class_loader.hpp>
 #include <ros/ros.h>
 

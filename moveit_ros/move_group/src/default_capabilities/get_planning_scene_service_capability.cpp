@@ -42,20 +42,22 @@ move_group::MoveGroupGetPlanningSceneService::MoveGroupGetPlanningSceneService()
 {
 }
 
-void move_group::MoveGroupGetPlanningSceneService::initialize()
+void move_group::MoveGroupGetPlanningSceneService::initialize(std::shared_ptr<rclcpp::Node>& node)
 {
-  get_scene_service_ = root_node_handle_.advertiseService(
-      GET_PLANNING_SCENE_SERVICE_NAME, &MoveGroupGetPlanningSceneService::getPlanningSceneService, this);
+  this->node_ = node;
+  get_scene_service_ = node_->create_service<moveit_msgs::srv::GetPlanningScene>(
+      GET_PLANNING_SCENE_SERVICE_NAME, std::bind(&MoveGroupGetPlanningSceneService::getPlanningSceneService, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3) );
 }
 
-bool move_group::MoveGroupGetPlanningSceneService::getPlanningSceneService(moveit_msgs::srv::GetPlanningScene::Request& req,
-                                                                           moveit_msgs::srv::GetPlanningScene::Response& res)
+void move_group::MoveGroupGetPlanningSceneService::getPlanningSceneService(const std::shared_ptr<rmw_request_id_t> request_header,
+   const std::shared_ptr<moveit_msgs::srv::GetPlanningScene::Request> request,
+   const std::shared_ptr<moveit_msgs::srv::GetPlanningScene::Response> response)
 {
-  if (req.components.components & moveit_msgs::msg::PlanningSceneComponents::TRANSFORMS)
+  if (request->components.components & moveit_msgs::msg::PlanningSceneComponents::TRANSFORMS)
     context_->planning_scene_monitor_->updateFrameTransforms();
   planning_scene_monitor::LockedPlanningSceneRO ps(context_->planning_scene_monitor_);
-  ps->getPlanningSceneMsg(res.scene, req.components);
-  return true;
+  ps->getPlanningSceneMsg(response->scene, request->components);
+  return;
 }
 
 #include <class_loader/class_loader.hpp>

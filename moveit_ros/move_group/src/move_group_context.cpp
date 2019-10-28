@@ -41,20 +41,22 @@
 #include <moveit/plan_execution/plan_with_sensing.h>
 
 move_group::MoveGroupContext::MoveGroupContext(
-    const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor, bool allow_trajectory_execution,
+    const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+    std::shared_ptr<rclcpp::Node>& node,
+    bool allow_trajectory_execution,
     bool debug)
   : planning_scene_monitor_(planning_scene_monitor)
   , allow_trajectory_execution_(allow_trajectory_execution)
   , debug_(debug)
 {
-  planning_pipeline_.reset(new planning_pipeline::PlanningPipeline(planning_scene_monitor_->getRobotModel()));
+  planning_pipeline_.reset(new planning_pipeline::PlanningPipeline(planning_scene_monitor_->getRobotModel(), node));
 
   if (allow_trajectory_execution_)
   {
     trajectory_execution_manager_.reset(new trajectory_execution_manager::TrajectoryExecutionManager(
-        planning_scene_monitor_->getRobotModel(), planning_scene_monitor_->getStateMonitor()));
-    plan_execution_.reset(new plan_execution::PlanExecution(planning_scene_monitor_, trajectory_execution_manager_));
-    plan_with_sensing_.reset(new plan_execution::PlanWithSensing(trajectory_execution_manager_));
+        planning_scene_monitor_->getRobotModel(), planning_scene_monitor_->getStateMonitor(), node));
+    plan_execution_.reset(new plan_execution::PlanExecution(planning_scene_monitor_, trajectory_execution_manager_, node));
+    plan_with_sensing_.reset(new plan_execution::PlanWithSensing(trajectory_execution_manager_, node));
     if (debug)
       plan_with_sensing_->displayCostSources(true);
   }
@@ -81,13 +83,13 @@ bool move_group::MoveGroupContext::status() const
   const planning_interface::PlannerManagerPtr& planner_interface = planning_pipeline_->getPlannerManager();
   if (planner_interface)
   {
-    ROS_INFO_STREAM("MoveGroup context using planning plugin " << planning_pipeline_->getPlannerPluginName());
-    ROS_INFO_STREAM("MoveGroup context initialization complete");
+    RCLCPP_INFO(rclcpp::get_logger("MoveGroupContext"), "MoveGroup context using planning plugin %s", planning_pipeline_->getPlannerPluginName().c_str());
+    RCLCPP_INFO(rclcpp::get_logger("MoveGroupContext"), "MoveGroup context initialization complete");
     return true;
   }
   else
   {
-    ROS_WARN_STREAM("MoveGroup running was unable to load " << planning_pipeline_->getPlannerPluginName());
+    RCLCPP_WARN(rclcpp::get_logger("MoveGroupContext"), "MoveGroup running was unable to load %s", planning_pipeline_->getPlannerPluginName().c_str());
     return false;
   }
 }

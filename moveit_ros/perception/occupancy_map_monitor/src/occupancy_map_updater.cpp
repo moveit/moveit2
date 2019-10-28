@@ -37,6 +37,8 @@
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
 
+rclcpp::Logger logger_occupancy_map_updater = rclcpp::get_logger("occupancy_map_monitor");
+
 namespace occupancy_map_monitor
 {
 OccupancyMapUpdater::OccupancyMapUpdater(const std::string& type) : type_(type)
@@ -51,31 +53,42 @@ void OccupancyMapUpdater::setMonitor(OccupancyMapMonitor* monitor)
   tree_ = monitor->getOcTreePtr();
 }
 
-void OccupancyMapUpdater::readXmlParam(XmlRpc::XmlRpcValue& params, const std::string& param_name, double* value)
+void OccupancyMapUpdater::readXmlParam(const std::string& param_name, double* value)
 {
-  if (params.hasMember(param_name))
-  {
-    if (params[param_name].getType() == XmlRpc::XmlRpcValue::TypeInt)
-      *value = (int)params[param_name];
-    else
-      *value = (double)params[param_name];
+  std::string isInt ("integer");
+  //TODO: (anasarrak) update this with the shared node
+  auto node_occupancy_map = rclcpp::Node::make_shared("occupancy_map_server");
+  auto ocupancy_map_monitor_parameters = std::make_shared<rclcpp::SyncParametersClient>(node_occupancy_map);
+
+  for (auto & parameter : ocupancy_map_monitor_parameters->get_parameters({param_name})) {
+    if(isInt.compare(parameter.get_type_name()) == 0){
+      *value = std::stoi(parameter.value_to_string());
+    }else{
+      *value = std::stod(parameter.value_to_string());
+    }
+  }
+
+}
+
+void OccupancyMapUpdater::readXmlParam(const std::string& param_name, unsigned int* value)
+{
+  //TODO: (anasarrak) update this with the shared node
+  auto node_occupancy_map = rclcpp::Node::make_shared("occupancy_map_server");
+  auto ocupancy_map_monitor_parameters = std::make_shared<rclcpp::SyncParametersClient>(node_occupancy_map);
+
+  for (auto & parameter : ocupancy_map_monitor_parameters->get_parameters({param_name})) {
+    *value = std::stoi(parameter.value_to_string());
   }
 }
 
-void OccupancyMapUpdater::readXmlParam(XmlRpc::XmlRpcValue& params, const std::string& param_name, unsigned int* value)
-{
-  if (params.hasMember(param_name))
-    *value = (int)params[param_name];
-}
-
-bool OccupancyMapUpdater::updateTransformCache(const std::string& target_frame, const ros::Time& target_time)
+bool OccupancyMapUpdater::updateTransformCache(const std::string& target_frame, const rclcpp::Time& target_time)
 {
   transform_cache_.clear();
   if (transform_provider_callback_)
     return transform_provider_callback_(target_frame, target_time, transform_cache_);
   else
   {
-    ROS_WARN_THROTTLE(1, "No callback provided for updating the transform cache for octomap updaters");
+    RCUTILS_LOG_ERROR_THROTTLE(RCUTILS_STEADY_TIME,1, "No callback provided for updating the transform cache for octomap updaters");
     return false;
   }
 }

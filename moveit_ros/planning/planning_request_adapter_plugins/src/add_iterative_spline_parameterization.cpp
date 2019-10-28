@@ -38,17 +38,22 @@
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/trajectory_processing/iterative_spline_parameterization.h>
 #include <class_loader/class_loader.hpp>
-#include <ros/console.h>
 
 namespace default_planner_request_adapters
 {
 class AddIterativeSplineParameterization : public planning_request_adapter::PlanningRequestAdapter
 {
+  rclcpp::Logger LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION =
+      rclcpp::get_logger("moveit_planning_request_adapter_plugins").get_child("add_iterative_spline_parameterization");
+
 public:
   AddIterativeSplineParameterization() : planning_request_adapter::PlanningRequestAdapter()
   {
   }
-
+  void initialize()
+  {
+  }
+  
   std::string getDescription() const override
   {
     return "Add Time Parameterization";
@@ -61,10 +66,10 @@ public:
     bool result = planner(planning_scene, req, res);
     if (result && res.trajectory_)
     {
-      ROS_DEBUG("Running '%s'", getDescription().c_str());
+      RCLCPP_DEBUG(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION, "Running '%s'", getDescription().c_str());
       if (!time_param_.computeTimeStamps(*res.trajectory_, req.max_velocity_scaling_factor,
                                          req.max_acceleration_scaling_factor))
-        ROS_WARN("Time parametrization for the solution path failed.");
+        RCLCPP_WARN(LOGGER_ITERATIVE_SPLINE_PARAMETERIZATION, "Time parametrization for the solution path failed.");
     }
 
     return result;

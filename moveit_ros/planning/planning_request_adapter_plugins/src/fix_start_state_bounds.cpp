@@ -39,7 +39,7 @@
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/robot_state/conversions.h>
 #include <class_loader/class_loader.hpp>
-#include <ros/ros.h>
+#include "rclcpp/rclcpp.hpp"
 
 namespace default_planner_request_adapters
 {
@@ -49,23 +49,34 @@ public:
   static const std::string BOUNDS_PARAM_NAME;
   static const std::string DT_PARAM_NAME;
 
-  FixStartStateBounds() : planning_request_adapter::PlanningRequestAdapter(), nh_("~")
+  void initialize(std::shared_ptr<rclcpp::Node>& node)
   {
-    if (!nh_.getParam(BOUNDS_PARAM_NAME, bounds_dist_))
+    this->node_ = node;
+    auto bounds_param = std::make_shared<rclcpp::SyncParametersClient>(node_);
+
+    if (!bounds_param->has_parameter(BOUNDS_PARAM_NAME))
     {
       bounds_dist_ = 0.05;
-      ROS_INFO_STREAM("Param '" << BOUNDS_PARAM_NAME << "' was not set. Using default value: " << bounds_dist_);
+      RCLCPP_INFO(node_->get_logger(), "Param '%s' was not set. Using default value: %f", BOUNDS_PARAM_NAME.c_str(),
+                  bounds_dist_);
     }
     else
-      ROS_INFO_STREAM("Param '" << BOUNDS_PARAM_NAME << "' was set to " << bounds_dist_);
+    {
+      bounds_dist_ = node_->get_parameter(BOUNDS_PARAM_NAME).as_double();
+      RCLCPP_INFO(node_->get_logger(), "Param '%s' was set to %f", BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
+    }
 
-    if (!nh_.getParam(DT_PARAM_NAME, max_dt_offset_))
+    if (!bounds_param->has_parameter(DT_PARAM_NAME))
     {
       max_dt_offset_ = 0.5;
-      ROS_INFO_STREAM("Param '" << DT_PARAM_NAME << "' was not set. Using default value: " << max_dt_offset_);
+      RCLCPP_INFO(node_->get_logger(), "Param '%s' was not set. Using default value: %f", DT_PARAM_NAME.c_str(),
+                  max_dt_offset_);
     }
     else
-      ROS_INFO_STREAM("Param '" << DT_PARAM_NAME << "' was set to " << max_dt_offset_);
+    {
+      max_dt_offset_ = node_->get_parameter(DT_PARAM_NAME).as_double();
+      RCLCPP_INFO(node_->get_logger(), "Param '%s' was set to %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
+    }
   }
 
   std::string getDescription() const override
@@ -77,7 +88,7 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& added_path_index) const override
   {
-    ROS_DEBUG("Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(node_->get_logger(), "Running '%s'", getDescription().c_str());
 
     // get the specified start state
     robot_state::RobotState start_state = planning_scene->getCurrentState();
@@ -147,8 +158,9 @@ public:
             prefix_state.reset(new robot_state::RobotState(start_state));
           start_state.enforceBounds(jmodels[i]);
           change_req = true;
-          ROS_INFO("Starting state is just outside bounds (joint '%s'). Assuming within bounds.",
-                   jmodels[i]->getName().c_str());
+          RCLCPP_INFO(node_->get_logger(),
+                      "Starting state is just outside bounds (joint '%s'). Assuming within bounds.",
+                      jmodels[i]->getName().c_str());
         }
         else
         {
@@ -164,11 +176,11 @@ public:
             joint_bounds_low << b[k].min_position_ << " ";
             joint_bounds_hi << b[k].max_position_ << " ";
           }
-          ROS_WARN_STREAM("Joint '" << jmodels[i]->getName()
-                                    << "' from the starting state is outside bounds by a significant margin: [ "
-                                    << joint_values.str() << "] should be in the range [ " << joint_bounds_low.str()
-                                    << "], [ " << joint_bounds_hi.str() << "] but the error above the ~"
-                                    << BOUNDS_PARAM_NAME << " parameter (currently set to " << bounds_dist_ << ")");
+          RCLCPP_WARN(node_->get_logger(),
+                      "Joint '%s' from the starting state is outside bounds by a significant margin: [%s] should be in "
+                      "the range [%s], [%s] but the error above the ~%s parameter (currently set to %f)",
+                      jmodels[i]->getName().c_str(), joint_values.str().c_str(), joint_bounds_low.str().c_str(),
+                      joint_bounds_hi.str().c_str(), BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
         }
       }
     }
@@ -202,7 +214,7 @@ public:
   }
 
 private:
-  ros::NodeHandle nh_;
+  rclcpp::Node::SharedPtr node_;
   double bounds_dist_;
   double max_dt_offset_;
 };

@@ -35,7 +35,7 @@
 
 // SA
 #include "ros_controllers_widget.h"
-#include <moveit_msgs/msg/joint_limits.hpp>
+#include <moveit_msgs/JointLimits.h>
 // Qt
 #include <QFormLayout>
 #include <QMessageBox>

@@ -36,22 +36,23 @@
 /* Author: Ioan Sucan, Robert Haschke */
 
 #include "moveit_fake_controllers.h"
-#include <ros/param.h>
-#include <sensor_msgs/JointState.h>
+#include <sensor_msgs/msg/joint_state.hpp>
 #include <boost/thread.hpp>
 #include <limits>
 
 namespace moveit_fake_controller_manager
 {
+  static rclcpp::Logger LOGGER_FAKE_CONTROLLER = rclcpp::get_logger("moveit_fake_controller_manager").get_child("moveit_fake_controllers");
+
 BaseFakeController::BaseFakeController(const std::string& name, const std::vector<std::string>& joints,
-                                       const ros::Publisher& pub)
+                                       const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub)
   : moveit_controller_manager::MoveItControllerHandle(name), joints_(joints), pub_(pub)
 {
   std::stringstream ss;
   ss << "Fake controller '" << name << "' with joints [ ";
   std::copy(joints.begin(), joints.end(), std::ostream_iterator<std::string>(ss, " "));
   ss << "]";
-  ROS_INFO_STREAM(ss.str());
+  RCLCPP_INFO(LOGGER_FAKE_CONTROLLER, "%s", ss.str().c_str());
 }
 
 void BaseFakeController::getJoints(std::vector<std::string>& joints) const
@@ -65,7 +66,7 @@ moveit_controller_manager::ExecutionStatus BaseFakeController::getLastExecutionS
 }
 
 LastPointController::LastPointController(const std::string& name, const std::vector<std::string>& joints,
-                                         const ros::Publisher& pub)
+                                         const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub)
   : BaseFakeController(name, joints, pub)
 {
 }
@@ -74,19 +75,19 @@ LastPointController::~LastPointController() = default;
 
 bool LastPointController::sendTrajectory(const moveit_msgs::msg::RobotTrajectory& t)
 {
-  ROS_INFO("Fake execution of trajectory");
+  RCLCPP_INFO(LOGGER_FAKE_CONTROLLER, "Fake execution of trajectory");
   if (t.joint_trajectory.points.empty())
     return true;
 
-  sensor_msgs::JointState js;
-  const trajectory_msgs::JointTrajectoryPoint& last = t.joint_trajectory.points.back();
+  sensor_msgs::msg::JointState js;
+  const trajectory_msgs::msg::JointTrajectoryPoint& last = t.joint_trajectory.points.back();
   js.header = t.joint_trajectory.header;
-  js.header.stamp = ros::Time::now();
+  js.header.stamp = rclcpp::Clock().now();
   js.name = t.joint_trajectory.joint_names;
   js.position = last.positions;
   js.velocity = last.velocities;
   js.effort = last.effort;
-  pub_.publish(js);
+  pub_->publish(js);
 
   return true;
 }
@@ -96,14 +97,14 @@ bool LastPointController::cancelExecution()
   return true;
 }
 
-bool LastPointController::waitForExecution(const ros::Duration& /*timeout*/)
+bool LastPointController::waitForExecution(const rclcpp::Duration& /*timeout*/)
 {
-  ros::Duration(0.5).sleep();  // give some time to receive the published JointState
+  rclcpp::sleep_for(std::chrono::milliseconds(500)); // give some time to receive the published JointState
   return true;
 }
 
 ThreadedController::ThreadedController(const std::string& name, const std::vector<std::string>& joints,
-                                       const ros::Publisher& pub)
+                                       const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub)
   : BaseFakeController(name, joints, pub)
 {
 }
@@ -131,12 +132,12 @@ bool ThreadedController::sendTrajectory(const moveit_msgs::msg::RobotTrajectory&
 bool ThreadedController::cancelExecution()
 {
   cancelTrajectory();
-  ROS_INFO("Fake trajectory execution cancelled");
+  RCLCPP_INFO(LOGGER_FAKE_CONTROLLER, "Fake trajectory execution cancelled");
   status_ = moveit_controller_manager::ExecutionStatus::ABORTED;
   return true;
 }
 
-bool ThreadedController::waitForExecution(const ros::Duration& /*timeout*/)
+bool ThreadedController::waitForExecution(const rclcpp::Duration& /*timeout*/)
 {
   thread_.join();
   status_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
@@ -149,7 +150,7 @@ moveit_controller_manager::ExecutionStatus ThreadedController::getLastExecutionS
 }
 
 ViaPointController::ViaPointController(const std::string& name, const std::vector<std::string>& joints,
-                                       const ros::Publisher& pub)
+                                       const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub)
   : ThreadedController(name, joints, pub)
 {
 }
@@ -158,54 +159,58 @@ ViaPointController::~ViaPointController() = default;
 
 void ViaPointController::execTrajectory(const moveit_msgs::msg::RobotTrajectory& t)
 {
-  ROS_INFO("Fake execution of trajectory");
-  sensor_msgs::JointState js;
+  RCLCPP_INFO(LOGGER_FAKE_CONTROLLER, "Fake execution of trajectory");
+  sensor_msgs::msg::JointState js;
   js.header = t.joint_trajectory.header;
   js.name = t.joint_trajectory.joint_names;
 
   // publish joint states for all intermediate via points of the trajectory
   // no further interpolation
-  ros::Time start_time = ros::Time::now();
-  for (std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator via = t.joint_trajectory.points.begin(),
+  rclcpp::Time start_time = rclcpp::Clock().now();
+  for (std::vector<trajectory_msgs::msg::JointTrajectoryPoint>::const_iterator via = t.joint_trajectory.points.begin(),
                                                                           end = t.joint_trajectory.points.end();
        !cancelled() && via != end; ++via)
   {
     js.position = via->positions;
     js.velocity = via->velocities;
     js.effort = via->effort;
-
-    ros::Duration wait_time = via->time_from_start - (ros::Time::now() - start_time);
-    if (wait_time.toSec() > std::numeric_limits<float>::epsilon())
+    //TODO (anasarrak)
+    rclcpp::Duration wait_time(via->time_from_start.sec - (rclcpp::Clock().now() - start_time).seconds());
+    if (wait_time.seconds() > std::numeric_limits<float>::epsilon())
     {
-      ROS_DEBUG("Fake execution: waiting %0.1fs for next via point, %ld remaining", wait_time.toSec(), end - via);
-      wait_time.sleep();
+      RCLCPP_DEBUG(LOGGER_FAKE_CONTROLLER, "Fake execution: waiting %0.1fs for next via point, %ld remaining", wait_time.seconds(), end - via);
+      rclcpp::sleep_for(std::chrono::milliseconds((int)wait_time.seconds()));
     }
-    js.header.stamp = ros::Time::now();
-    pub_.publish(js);
+    js.header.stamp = rclcpp::Clock().now();
+    pub_->publish(js);
   }
-  ROS_DEBUG("Fake execution of trajectory: done");
+  RCLCPP_DEBUG(LOGGER_FAKE_CONTROLLER, "Fake execution of trajectory: done");
 }
 
 InterpolatingController::InterpolatingController(const std::string& name, const std::vector<std::string>& joints,
-                                                 const ros::Publisher& pub)
+                                                 const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub,
+                                                 const rclcpp::Node::SharedPtr& node_)
   : ThreadedController(name, joints, pub), rate_(10)
 {
+  auto fake_interpolating_controller_rate_param = std::make_shared<rclcpp::SyncParametersClient>(node_);
   double r;
-  if (ros::param::get("~fake_interpolating_controller_rate", r))
-    rate_ = ros::WallRate(r);
+  if(fake_interpolating_controller_rate_param->has_parameter("~fake_interpolating_controller_rate")){
+    r = fake_interpolating_controller_rate_param->get_parameter("~fake_interpolating_controller_rate", 10);
+  }
+  rclcpp::WallRate rate_(r);
 }
 
 InterpolatingController::~InterpolatingController() = default;
 
 namespace
 {
-void interpolate(sensor_msgs::JointState& js, const trajectory_msgs::JointTrajectoryPoint& prev,
-                 const trajectory_msgs::JointTrajectoryPoint& next, const ros::Duration& elapsed)
+void interpolate(sensor_msgs::msg::JointState& js, const trajectory_msgs::msg::JointTrajectoryPoint& prev,
+                 const trajectory_msgs::msg::JointTrajectoryPoint& next, const rclcpp::Duration& elapsed)
 {
-  double duration = (next.time_from_start - prev.time_from_start).toSec();
+  double duration = next.time_from_start.sec - prev.time_from_start.sec;
   double alpha = 1.0;
   if (duration > std::numeric_limits<double>::epsilon())
-    alpha = (elapsed - prev.time_from_start).toSec() / duration;
+    alpha = (elapsed.seconds() - prev.time_from_start.sec) / duration;
 
   js.position.resize(prev.positions.size());
   for (std::size_t i = 0, end = prev.positions.size(); i < end; ++i)
@@ -217,23 +222,23 @@ void interpolate(sensor_msgs::JointState& js, const trajectory_msgs::JointTrajec
 
 void InterpolatingController::execTrajectory(const moveit_msgs::msg::RobotTrajectory& t)
 {
-  ROS_INFO("Fake execution of trajectory");
+  RCLCPP_INFO(LOGGER_FAKE_CONTROLLER, "Fake execution of trajectory");
   if (t.joint_trajectory.points.empty())
     return;
 
-  sensor_msgs::JointState js;
+  sensor_msgs::msg::JointState js;
   js.header = t.joint_trajectory.header;
   js.name = t.joint_trajectory.joint_names;
 
-  const std::vector<trajectory_msgs::JointTrajectoryPoint>& points = t.joint_trajectory.points;
-  std::vector<trajectory_msgs::JointTrajectoryPoint>::const_iterator prev = points.begin(),  // previous via point
+  const std::vector<trajectory_msgs::msg::JointTrajectoryPoint>& points = t.joint_trajectory.points;
+  std::vector<trajectory_msgs::msg::JointTrajectoryPoint>::const_iterator prev = points.begin(),  // previous via point
       next = points.begin() + 1,  // currently targetted via point
       end = points.end();
 
-  ros::Time start_time = ros::Time::now();
+  rclcpp::Time start_time = rclcpp::Clock().now();
   while (!cancelled())
   {
-    ros::Duration elapsed = ros::Time::now() - start_time;
+    rclcpp::Duration elapsed = rclcpp::Clock().now() - start_time;
     // hop to next targetted via point
     while (next != end && elapsed > next->time_from_start)
     {
@@ -243,29 +248,29 @@ void InterpolatingController::execTrajectory(const moveit_msgs::msg::RobotTrajec
     if (next == end)
       break;
 
-    double duration = (next->time_from_start - prev->time_from_start).toSec();
-    ROS_DEBUG("elapsed: %.3f via points %td,%td / %td  alpha: %.3f", elapsed.toSec(), prev - points.begin(),
+    double duration = next->time_from_start.sec - prev->time_from_start.sec;
+    RCLCPP_INFO(LOGGER_FAKE_CONTROLLER, "elapsed: %.3f via points %td,%td / %td  alpha: %.3f", elapsed.seconds(), prev - points.begin(),
               next - points.begin(), end - points.begin(),
-              duration > std::numeric_limits<double>::epsilon() ? (elapsed - prev->time_from_start).toSec() / duration :
+              duration > std::numeric_limits<double>::epsilon() ? (elapsed.seconds() - prev->time_from_start.sec) / duration :
                                                                   1.0);
     interpolate(js, *prev, *next, elapsed);
-    js.header.stamp = ros::Time::now();
-    pub_.publish(js);
+    js.header.stamp = rclcpp::Clock().now();
+    pub_->publish(js);
     rate_.sleep();
   }
   if (cancelled())
     return;
 
-  ros::Duration elapsed = ros::Time::now() - start_time;
-  ROS_DEBUG("elapsed: %.3f via points %td,%td / %td  alpha: 1.0", elapsed.toSec(), prev - points.begin(),
+  rclcpp::Duration elapsed = rclcpp::Clock().now() - start_time;
+  RCLCPP_INFO(LOGGER_FAKE_CONTROLLER, "elapsed: %.3f via points %td,%td / %td  alpha: 1.0", elapsed.seconds(), prev - points.begin(),
             next - points.begin(), end - points.begin());
 
   // publish last point
   interpolate(js, *prev, *prev, prev->time_from_start);
-  js.header.stamp = ros::Time::now();
-  pub_.publish(js);
+  js.header.stamp = rclcpp::Clock().now();
+  pub_->publish(js);
 
-  ROS_DEBUG("Fake execution of trajectory: done");
+  RCLCPP_INFO(LOGGER_FAKE_CONTROLLER, "Fake execution of trajectory: done");
 }
 
 }  // end namespace moveit_fake_controller_manager

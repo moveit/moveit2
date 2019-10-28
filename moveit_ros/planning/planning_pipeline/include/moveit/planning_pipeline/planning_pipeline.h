@@ -194,8 +194,6 @@ private:
   /// Flag indicating whether the reported plans should be checked once again, by the planning pipeline itself
   bool check_solution_paths_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr contacts_publisher_;
-  
-  rmw_qos_profile_t custom_qos_profile_;
 };
 
 MOVEIT_CLASS_FORWARD(PlanningPipeline)

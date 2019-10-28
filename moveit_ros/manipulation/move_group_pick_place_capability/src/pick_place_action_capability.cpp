@@ -44,52 +44,102 @@ move_group::MoveGroupPickPlaceAction::MoveGroupPickPlaceAction()
 {
 }
 
-void move_group::MoveGroupPickPlaceAction::initialize()
+void move_group::MoveGroupPickPlaceAction::initialize(rclcpp::Node::SharedPtr& node)
 {
-  pick_place_.reset(new pick_place::PickPlace(context_->planning_pipeline_));
+  this->node_ = node;
+  pick_place_.reset(new pick_place::PickPlace(context_->planning_pipeline_, node_));
   pick_place_->displayComputedMotionPlans(true);
 
   if (context_->debug_)
     pick_place_->displayProcessedGrasps(true);
 
   // start the pickup action server
-  pickup_action_server_.reset(new actionlib::SimpleActionServer<moveit_msgs::action::PickupAction>(
-      root_node_handle_, PICKUP_ACTION, boost::bind(&MoveGroupPickPlaceAction::executePickupCallback, this, _1),
-      false));
-  pickup_action_server_->registerPreemptCallback(boost::bind(&MoveGroupPickPlaceAction::preemptPickupCallback, this));
-  pickup_action_server_->start();
+  pickup_action_server_.reset();
+  pickup_action_server_ = rclcpp_action::create_server<moveit_msgs::action::Pickup>(
+      node_, PICKUP_ACTION, std::bind(&move_group::MoveGroupPickPlaceAction::pickup_handle_goal, this,
+                                      std::placeholders::_1, std::placeholders::_2),
+      std::bind(&move_group::MoveGroupPickPlaceAction::pickup_handle_cancel, this, std::placeholders::_1),
+      std::bind(&move_group::MoveGroupPickPlaceAction::pickup_handle_accepted, this, std::placeholders::_1));
 
   // start the place action server
-  place_action_server_.reset(new actionlib::SimpleActionServer<moveit_msgs::action::PlaceAction>(
-      root_node_handle_, PLACE_ACTION, boost::bind(&MoveGroupPickPlaceAction::executePlaceCallback, this, _1), false));
-  place_action_server_->registerPreemptCallback(boost::bind(&MoveGroupPickPlaceAction::preemptPlaceCallback, this));
-  place_action_server_->start();
+  place_action_server_.reset();
+  place_action_server_ = rclcpp_action::create_server<moveit_msgs::action::Place>(
+      node_, PLACE_ACTION, std::bind(&move_group::MoveGroupPickPlaceAction::place_handle_goal, this,
+                                     std::placeholders::_1, std::placeholders::_2),
+      std::bind(&move_group::MoveGroupPickPlaceAction::place_handle_cancel, this, std::placeholders::_1),
+      std::bind(&move_group::MoveGroupPickPlaceAction::place_handle_accepted, this, std::placeholders::_1));
 }
 
-void move_group::MoveGroupPickPlaceAction::startPickupExecutionCallback()
+rclcpp_action::GoalResponse move_group::MoveGroupPickPlaceAction::place_handle_goal(
+    const rclcpp_action::GoalUUID& uuid, std::shared_ptr<const moveit_msgs::action::Place::Goal> goal)
 {
-  setPickupState(MONITOR);
+  (void)uuid;
+
+  return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-void move_group::MoveGroupPickPlaceAction::startPickupLookCallback()
+rclcpp_action::CancelResponse
+move_group::MoveGroupPickPlaceAction::place_handle_cancel(const std::shared_ptr<GoalHandlePlace> goal_handle)
 {
-  setPickupState(LOOK);
+  RCLCPP_INFO(rclcpp::get_logger("pick_place_action_capability"), "Got request to cancel Place goal");
+  (void)goal_handle;
+  return rclcpp_action::CancelResponse::ACCEPT;
 }
 
-void move_group::MoveGroupPickPlaceAction::startPlaceExecutionCallback()
+void move_group::MoveGroupPickPlaceAction::place_handle_accepted(const std::shared_ptr<GoalHandlePlace> goal_handle)
 {
-  setPlaceState(MONITOR);
+  std::thread(&move_group::MoveGroupPickPlaceAction::executePlaceCallback, this, goal_handle).detach();
 }
 
-void move_group::MoveGroupPickPlaceAction::startPlaceLookCallback()
+rclcpp_action::GoalResponse move_group::MoveGroupPickPlaceAction::pickup_handle_goal(
+    const rclcpp_action::GoalUUID& uuid, std::shared_ptr<const moveit_msgs::action::Pickup::Goal> goal)
 {
-  setPlaceState(LOOK);
+  (void)uuid;
+
+  return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-void move_group::MoveGroupPickPlaceAction::executePickupCallbackPlanOnly(const moveit_msgs::action::PickupGoalConstPtr& goal,
-                                                                         moveit_msgs::action::PickupResult& action_res)
+rclcpp_action::CancelResponse
+move_group::MoveGroupPickPlaceAction::pickup_handle_cancel(const std::shared_ptr<GoalHandlePickup> goal_handle)
+{
+  RCLCPP_INFO(rclcpp::get_logger("pick_place_action_capability"), "Got request to cancel Pickup goal");
+  (void)goal_handle;
+  return rclcpp_action::CancelResponse::ACCEPT;
+}
+
+void move_group::MoveGroupPickPlaceAction::pickup_handle_accepted(const std::shared_ptr<GoalHandlePickup> goal_handle)
+{
+  std::thread(&move_group::MoveGroupPickPlaceAction::executePickupCallback, this, goal_handle).detach();
+}
+
+void move_group::MoveGroupPickPlaceAction::startPickupExecutionCallback(
+    const std::shared_ptr<GoalHandlePickup> goal_handle)
+{
+  setPickupState(MONITOR, goal_handle);
+}
+
+void move_group::MoveGroupPickPlaceAction::startPickupLookCallback(const std::shared_ptr<GoalHandlePickup> goal_handle)
+{
+  setPickupState(LOOK, goal_handle);
+}
+
+void move_group::MoveGroupPickPlaceAction::startPlaceExecutionCallback(
+    const std::shared_ptr<GoalHandlePlace> goal_handle)
+{
+  setPlaceState(MONITOR, goal_handle);
+}
+
+void move_group::MoveGroupPickPlaceAction::startPlaceLookCallback(const std::shared_ptr<GoalHandlePlace> goal_handle)
+{
+  setPlaceState(LOOK, goal_handle);
+}
+
+void move_group::MoveGroupPickPlaceAction::executePickupCallbackPlanOnly(
+    const std::shared_ptr<GoalHandlePickup> goal_handle,
+    std::shared_ptr<moveit_msgs::action::Pickup::Result>& action_res)
 {
   pick_place::PickPlanPtr plan;
+  const auto goal = goal_handle->get_goal();
   try
   {
     planning_scene_monitor::LockedPlanningSceneRO ps(context_->planning_scene_monitor_);
@@ -97,7 +147,7 @@ void move_group::MoveGroupPickPlaceAction::executePickupCallbackPlanOnly(const m
   }
   catch (std::exception& ex)
   {
-    ROS_ERROR_NAMED("manipulation", "Pick&place threw an exception: %s", ex.what());
+    RCLCPP_ERROR(node_->get_logger(), "Pick&place threw an exception: %s", ex.what());
   }
 
   if (plan)
@@ -105,29 +155,30 @@ void move_group::MoveGroupPickPlaceAction::executePickupCallbackPlanOnly(const m
     const std::vector<pick_place::ManipulationPlanPtr>& success = plan->getSuccessfulManipulationPlans();
     if (success.empty())
     {
-      action_res.error_code = plan->getErrorCode();
+      action_res->error_code = plan->getErrorCode();
     }
     else
     {
       const pick_place::ManipulationPlanPtr& result = success.back();
-      convertToMsg(result->trajectories_, action_res.trajectory_start, action_res.trajectory_stages);
-      action_res.trajectory_descriptions.resize(result->trajectories_.size());
+      convertToMsg(result->trajectories_, action_res->trajectory_start, action_res->trajectory_stages);
+      action_res->trajectory_descriptions.resize(result->trajectories_.size());
       for (std::size_t i = 0; i < result->trajectories_.size(); ++i)
-        action_res.trajectory_descriptions[i] = result->trajectories_[i].description_;
+        action_res->trajectory_descriptions[i] = result->trajectories_[i].description_;
       if (result->id_ < goal->possible_grasps.size())
-        action_res.grasp = goal->possible_grasps[result->id_];
-      action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
-      action_res.planning_time = plan->getLastPlanTime();
+        action_res->grasp = goal->possible_grasps[result->id_];
+      action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+      action_res->planning_time = plan->getLastPlanTime();
     }
   }
   else
   {
-    action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 }
 
-void move_group::MoveGroupPickPlaceAction::executePlaceCallbackPlanOnly(const moveit_msgs::action::PlaceGoalConstPtr& goal,
-                                                                        moveit_msgs::action::PlaceResult& action_res)
+void move_group::MoveGroupPickPlaceAction::executePlaceCallbackPlanOnly(
+    const std::shared_ptr<const moveit_msgs::action::Place::Goal>& goal,
+    std::shared_ptr<moveit_msgs::action::Place::Result>& action_res)
 {
   pick_place::PlacePlanPtr plan;
   try
@@ -137,7 +188,7 @@ void move_group::MoveGroupPickPlaceAction::executePlaceCallbackPlanOnly(const mo
   }
   catch (std::exception& ex)
   {
-    ROS_ERROR_NAMED("manipulation", "Pick&place threw an exception: %s", ex.what());
+    RCLCPP_ERROR(node_->get_logger(), "Pick&place threw an exception: %s", ex.what());
   }
 
   if (plan)
@@ -145,43 +196,43 @@ void move_group::MoveGroupPickPlaceAction::executePlaceCallbackPlanOnly(const mo
     const std::vector<pick_place::ManipulationPlanPtr>& success = plan->getSuccessfulManipulationPlans();
     if (success.empty())
     {
-      action_res.error_code = plan->getErrorCode();
+      action_res->error_code = plan->getErrorCode();
     }
     else
     {
       const pick_place::ManipulationPlanPtr& result = success.back();
-      convertToMsg(result->trajectories_, action_res.trajectory_start, action_res.trajectory_stages);
-      action_res.trajectory_descriptions.resize(result->trajectories_.size());
+      convertToMsg(result->trajectories_, action_res->trajectory_start, action_res->trajectory_stages);
+      action_res->trajectory_descriptions.resize(result->trajectories_.size());
       for (std::size_t i = 0; i < result->trajectories_.size(); ++i)
-        action_res.trajectory_descriptions[i] = result->trajectories_[i].description_;
+        action_res->trajectory_descriptions[i] = result->trajectories_[i].description_;
       if (result->id_ < goal->place_locations.size())
-        action_res.place_location = goal->place_locations[result->id_];
-      action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
-      action_res.planning_time = plan->getLastPlanTime();
+        action_res->place_location = goal->place_locations[result->id_];
+      action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+      action_res->planning_time = plan->getLastPlanTime();
     }
   }
   else
   {
-    action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   }
 }
 
-bool move_group::MoveGroupPickPlaceAction::planUsingPickPlacePickup(const moveit_msgs::action::PickupGoal& goal,
-                                                                    moveit_msgs::action::PickupResult* action_res,
-                                                                    plan_execution::ExecutableMotionPlan& plan)
+bool move_group::MoveGroupPickPlaceAction::planUsingPickPlacePickup(
+    const std::shared_ptr<GoalHandlePickup> goal_handle,
+    std::shared_ptr<moveit_msgs::action::Pickup::Result>& action_res, plan_execution::ExecutableMotionPlan& plan)
 {
-  setPickupState(PLANNING);
-
+  setPickupState(PLANNING, goal_handle);
+  const auto goal = goal_handle->get_goal();
   planning_scene_monitor::LockedPlanningSceneRO ps(plan.planning_scene_monitor_);
 
   pick_place::PickPlanPtr pick_plan;
   try
   {
-    pick_plan = pick_place_->planPick(plan.planning_scene_, goal);
+    pick_plan = pick_place_->planPick(plan.planning_scene_, *goal.get());
   }
   catch (std::exception& ex)
   {
-    ROS_ERROR_NAMED("manipulation", "Pick&place threw an exception: %s", ex.what());
+    RCLCPP_ERROR(node_->get_logger(), "Pick&place threw an exception: %s", ex.what());
   }
 
   if (pick_plan)
@@ -195,8 +246,8 @@ bool move_group::MoveGroupPickPlaceAction::planUsingPickPlacePickup(const moveit
     {
       const pick_place::ManipulationPlanPtr& result = success.back();
       plan.plan_components_ = result->trajectories_;
-      if (result->id_ < goal.possible_grasps.size())
-        action_res->grasp = goal.possible_grasps[result->id_];
+      if (result->id_ < goal->possible_grasps.size())
+        action_res->grasp = goal->possible_grasps[result->id_];
       plan.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       action_res->planning_time = pick_plan->getLastPlanTime();
     }
@@ -209,22 +260,22 @@ bool move_group::MoveGroupPickPlaceAction::planUsingPickPlacePickup(const moveit
   return plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
 }
 
-bool move_group::MoveGroupPickPlaceAction::planUsingPickPlacePlace(const moveit_msgs::action::PlaceGoal& goal,
-                                                                   moveit_msgs::action::PlaceResult* action_res,
-                                                                   plan_execution::ExecutableMotionPlan& plan)
+bool move_group::MoveGroupPickPlaceAction::planUsingPickPlacePlace(
+    const std::shared_ptr<GoalHandlePlace> goal_handle, std::shared_ptr<moveit_msgs::action::Place::Result>& action_res,
+    plan_execution::ExecutableMotionPlan& plan)
 {
-  setPlaceState(PLANNING);
-
+  setPlaceState(PLANNING, goal_handle);
+  const auto goal = goal_handle->get_goal();
   planning_scene_monitor::LockedPlanningSceneRO ps(plan.planning_scene_monitor_);
 
   pick_place::PlacePlanPtr place_plan;
   try
   {
-    place_plan = pick_place_->planPlace(plan.planning_scene_, goal);
+    place_plan = pick_place_->planPlace(plan.planning_scene_, *goal.get());
   }
   catch (std::exception& ex)
   {
-    ROS_ERROR_NAMED("manipulation", "Pick&place threw an exception: %s", ex.what());
+    RCLCPP_ERROR(node_->get_logger(), "Pick&place threw an exception: %s", ex.what());
   }
 
   if (place_plan)
@@ -238,8 +289,8 @@ bool move_group::MoveGroupPickPlaceAction::planUsingPickPlacePlace(const moveit_
     {
       const pick_place::ManipulationPlanPtr& result = success.back();
       plan.plan_components_ = result->trajectories_;
-      if (result->id_ < goal.place_locations.size())
-        action_res->place_location = goal.place_locations[result->id_];
+      if (result->id_ < goal->place_locations.size())
+        action_res->place_location = goal->place_locations[result->id_];
       plan.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       action_res->planning_time = place_plan->getLastPlanTime();
     }
@@ -253,148 +304,153 @@ bool move_group::MoveGroupPickPlaceAction::planUsingPickPlacePlace(const moveit_
 }
 
 void move_group::MoveGroupPickPlaceAction::executePickupCallbackPlanAndExecute(
-    const moveit_msgs::action::PickupGoalConstPtr& goal, moveit_msgs::action::PickupResult& action_res)
+    const std::shared_ptr<GoalHandlePickup> goal_handle,
+    std::shared_ptr<moveit_msgs::action::Pickup::Result>& action_res)
 {
   plan_execution::PlanExecution::Options opt;
-
+  const auto goal = goal_handle->get_goal();
   opt.replan_ = goal->planning_options.replan;
   opt.replan_attempts_ = goal->planning_options.replan_attempts;
   opt.replan_delay_ = goal->planning_options.replan_delay;
-  opt.before_execution_callback_ = boost::bind(&MoveGroupPickPlaceAction::startPickupExecutionCallback, this);
-
-  opt.plan_callback_ =
-      boost::bind(&MoveGroupPickPlaceAction::planUsingPickPlacePickup, this, boost::cref(*goal), &action_res, _1);
+  opt.before_execution_callback_ =
+      std::bind(&MoveGroupPickPlaceAction::startPickupExecutionCallback, this, goal_handle);
+  opt.plan_callback_ = std::bind(&MoveGroupPickPlaceAction::planUsingPickPlacePickup, this, std::cref(goal_handle),
+                                 action_res, std::placeholders::_1);
   if (goal->planning_options.look_around && context_->plan_with_sensing_)
   {
-    opt.plan_callback_ = boost::bind(&plan_execution::PlanWithSensing::computePlan, context_->plan_with_sensing_.get(),
-                                     _1, opt.plan_callback_, goal->planning_options.look_around_attempts,
-                                     goal->planning_options.max_safe_execution_cost);
+    opt.plan_callback_ =
+        std::bind(&plan_execution::PlanWithSensing::computePlan, context_->plan_with_sensing_.get(),
+                  std::placeholders::_1, opt.plan_callback_, goal->planning_options.look_around_attempts,
+                  goal->planning_options.max_safe_execution_cost);
     context_->plan_with_sensing_->setBeforeLookCallback(
-        boost::bind(&MoveGroupPickPlaceAction::startPickupLookCallback, this));
+        std::bind(&MoveGroupPickPlaceAction::startPickupLookCallback, this, goal_handle));
   }
 
   plan_execution::ExecutableMotionPlan plan;
   context_->plan_execution_->planAndExecute(plan, goal->planning_options.planning_scene_diff, opt);
 
-  convertToMsg(plan.plan_components_, action_res.trajectory_start, action_res.trajectory_stages);
-  action_res.trajectory_descriptions.resize(plan.plan_components_.size());
+  convertToMsg(plan.plan_components_, action_res->trajectory_start, action_res->trajectory_stages);
+  action_res->trajectory_descriptions.resize(plan.plan_components_.size());
   for (std::size_t i = 0; i < plan.plan_components_.size(); ++i)
-    action_res.trajectory_descriptions[i] = plan.plan_components_[i].description_;
-  action_res.error_code = plan.error_code_;
+    action_res->trajectory_descriptions[i] = plan.plan_components_[i].description_;
+  action_res->error_code = plan.error_code_;
 }
 
 void move_group::MoveGroupPickPlaceAction::executePlaceCallbackPlanAndExecute(
-    const moveit_msgs::action::PlaceGoalConstPtr& goal, moveit_msgs::action::PlaceResult& action_res)
+    const std::shared_ptr<GoalHandlePlace> goal_handle, std::shared_ptr<moveit_msgs::action::Place::Result>& action_res)
 {
   plan_execution::PlanExecution::Options opt;
-
+  const auto goal = goal_handle->get_goal();
   opt.replan_ = goal->planning_options.replan;
   opt.replan_attempts_ = goal->planning_options.replan_attempts;
   opt.replan_delay_ = goal->planning_options.replan_delay;
-  opt.before_execution_callback_ = boost::bind(&MoveGroupPickPlaceAction::startPlaceExecutionCallback, this);
-  opt.plan_callback_ =
-      boost::bind(&MoveGroupPickPlaceAction::planUsingPickPlacePlace, this, boost::cref(*goal), &action_res, _1);
+  opt.before_execution_callback_ = std::bind(&MoveGroupPickPlaceAction::startPlaceExecutionCallback, this, goal_handle);
+  opt.plan_callback_ = std::bind(&MoveGroupPickPlaceAction::planUsingPickPlacePlace, this, std::cref(goal_handle),
+                                 action_res, std::placeholders::_1);
   if (goal->planning_options.look_around && context_->plan_with_sensing_)
   {
-    opt.plan_callback_ = boost::bind(&plan_execution::PlanWithSensing::computePlan, context_->plan_with_sensing_.get(),
-                                     _1, opt.plan_callback_, goal->planning_options.look_around_attempts,
-                                     goal->planning_options.max_safe_execution_cost);
+    opt.plan_callback_ =
+        std::bind(&plan_execution::PlanWithSensing::computePlan, context_->plan_with_sensing_.get(),
+                  std::placeholders::_1, opt.plan_callback_, goal->planning_options.look_around_attempts,
+                  goal->planning_options.max_safe_execution_cost);
     context_->plan_with_sensing_->setBeforeLookCallback(
-        boost::bind(&MoveGroupPickPlaceAction::startPlaceLookCallback, this));
+        std::bind(&MoveGroupPickPlaceAction::startPlaceLookCallback, this, goal_handle));
   }
 
   plan_execution::ExecutableMotionPlan plan;
   context_->plan_execution_->planAndExecute(plan, goal->planning_options.planning_scene_diff, opt);
 
-  convertToMsg(plan.plan_components_, action_res.trajectory_start, action_res.trajectory_stages);
-  action_res.trajectory_descriptions.resize(plan.plan_components_.size());
+  convertToMsg(plan.plan_components_, action_res->trajectory_start, action_res->trajectory_stages);
+  action_res->trajectory_descriptions.resize(plan.plan_components_.size());
   for (std::size_t i = 0; i < plan.plan_components_.size(); ++i)
-    action_res.trajectory_descriptions[i] = plan.plan_components_[i].description_;
-  action_res.error_code = plan.error_code_;
+    action_res->trajectory_descriptions[i] = plan.plan_components_[i].description_;
+  action_res->error_code = plan.error_code_;
 }
 
-void move_group::MoveGroupPickPlaceAction::executePickupCallback(const moveit_msgs::action::PickupGoalConstPtr& input_goal)
+void move_group::MoveGroupPickPlaceAction::executePickupCallback(const std::shared_ptr<GoalHandlePickup> goal_handle)
 {
-  setPickupState(PLANNING);
-
+  setPickupState(PLANNING, goal_handle);
+  auto input_goal = goal_handle->get_goal();
   // before we start planning, ensure that we have the latest robot state received...
-  context_->planning_scene_monitor_->waitForCurrentRobotState(ros::Time::now());
+  context_->planning_scene_monitor_->waitForCurrentRobotState(rclcpp::Clock().now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
-  moveit_msgs::action::PickupGoalConstPtr goal;
+  std::shared_ptr<const moveit_msgs::action::Pickup::Goal> goal;
   if (input_goal->possible_grasps.empty())
   {
-    moveit_msgs::action::PickupGoal* copy(new moveit_msgs::action::PickupGoal(*input_goal));
+    moveit_msgs::action::Pickup::Goal* copy(new moveit_msgs::action::Pickup::Goal(*input_goal));
     goal.reset(copy);
     fillGrasps(*copy);
   }
   else
     goal = input_goal;
 
-  moveit_msgs::action::PickupResult action_res;
+  auto action_res = std::make_shared<moveit_msgs::action::Pickup::Result>();
 
   if (goal->planning_options.plan_only || !context_->allow_trajectory_execution_)
   {
     if (!goal->planning_options.plan_only)
-      ROS_WARN_NAMED("manipulation", "This instance of MoveGroup is not allowed to execute trajectories but the pick "
-                                     "goal request has plan_only set to false. Only a motion plan will be computed "
-                                     "anyway.");
-    executePickupCallbackPlanOnly(goal, action_res);
+      RCLCPP_WARN(node_->get_logger(), "This instance of MoveGroup is not allowed to execute trajectories but the pick "
+                                       "goal request has plan_only set to false. Only a motion plan will be computed "
+                                       "anyway.");
+    executePickupCallbackPlanOnly(goal_handle, action_res);
   }
   else
-    executePickupCallbackPlanAndExecute(goal, action_res);
+    executePickupCallbackPlanAndExecute(goal_handle, action_res);
 
-  bool planned_trajectory_empty = action_res.trajectory_stages.empty();
-  std::string response =
-      getActionResultString(action_res.error_code, planned_trajectory_empty, goal->planning_options.plan_only);
-  if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
-    pickup_action_server_->setSucceeded(action_res, response);
+  bool planned_trajectory_empty = action_res->trajectory_stages.empty();
+  // std::string response =
+  //     getActionResultString(action_res->error_code, planned_trajectory_empty, goal->planning_options.plan_only);
+  if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+    goal_handle->succeed(action_res);
   else
-  {
-    if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
-      pickup_action_server_->setPreempted(action_res, response);
-    else
-      pickup_action_server_->setAborted(action_res, response);
+  {  // TODO(anasarrak): Preempt for ros2?
+     // if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
+     //   pickup_action_server_->setPreempted(action_res, response);
+     // else
+    goal_handle->abort(action_res);
   }
 
-  setPickupState(IDLE);
+  setPickupState(IDLE, goal_handle);
 }
 
-void move_group::MoveGroupPickPlaceAction::executePlaceCallback(const moveit_msgs::action::PlaceGoalConstPtr& goal)
+void move_group::MoveGroupPickPlaceAction::executePlaceCallback(const std::shared_ptr<GoalHandlePlace> goal_handle)
 {
-  setPlaceState(PLANNING);
+  setPlaceState(PLANNING, goal_handle);
+  auto goal = goal_handle->get_goal();
 
   // before we start planning, ensure that we have the latest robot state received...
-  context_->planning_scene_monitor_->waitForCurrentRobotState(ros::Time::now());
+  context_->planning_scene_monitor_->waitForCurrentRobotState(rclcpp::Clock().now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
-  moveit_msgs::action::PlaceResult action_res;
+  auto action_res = std::make_shared<moveit_msgs::action::Place::Result>();
 
   if (goal->planning_options.plan_only || !context_->allow_trajectory_execution_)
   {
     if (!goal->planning_options.plan_only)
-      ROS_WARN_NAMED("manipulation", "This instance of MoveGroup is not allowed to execute trajectories but the place "
-                                     "goal request has plan_only set to false. Only a motion plan will be computed "
-                                     "anyway.");
+      RCLCPP_WARN(node_->get_logger(),
+                  "This instance of MoveGroup is not allowed to execute trajectories but the place "
+                  "goal request has plan_only set to false. Only a motion plan will be computed "
+                  "anyway.");
     executePlaceCallbackPlanOnly(goal, action_res);
   }
   else
-    executePlaceCallbackPlanAndExecute(goal, action_res);
+    executePlaceCallbackPlanAndExecute(goal_handle, action_res);
 
-  bool planned_trajectory_empty = action_res.trajectory_stages.empty();
-  std::string response =
-      getActionResultString(action_res.error_code, planned_trajectory_empty, goal->planning_options.plan_only);
-  if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
-    place_action_server_->setSucceeded(action_res, response);
+  bool planned_trajectory_empty = action_res->trajectory_stages.empty();
+  // std::string response =
+  //     getActionResultString(action_res->error_code, planned_trajectory_empty, goal->planning_options.plan_only);
+  if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+    goal_handle->succeed(action_res);
   else
-  {
-    if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
-      place_action_server_->setPreempted(action_res, response);
-    else
-      place_action_server_->setAborted(action_res, response);
+  {  // TODO(anasarrak): Preempt for ros2?
+     // if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
+     //   goal_handle->setPreempted(action_res);
+     // else
+    goal_handle->abort(action_res);
   }
 
-  setPlaceState(IDLE);
+  setPlaceState(IDLE, goal_handle);
 }
 
 void move_group::MoveGroupPickPlaceAction::preemptPickupCallback()
@@ -405,25 +461,29 @@ void move_group::MoveGroupPickPlaceAction::preemptPlaceCallback()
 {
 }
 
-void move_group::MoveGroupPickPlaceAction::setPickupState(MoveGroupState state)
+void move_group::MoveGroupPickPlaceAction::setPickupState(MoveGroupState state,
+                                                          const std::shared_ptr<GoalHandlePickup> goal_handle)
 {
   pickup_state_ = state;
   pickup_feedback_.state = stateToStr(state);
-  pickup_action_server_->publishFeedback(pickup_feedback_);
+  auto pickup_feedback = std::make_shared<moveit_msgs::action::Pickup::Feedback>();
+  goal_handle->publish_feedback(pickup_feedback);
 }
 
-void move_group::MoveGroupPickPlaceAction::setPlaceState(MoveGroupState state)
+void move_group::MoveGroupPickPlaceAction::setPlaceState(MoveGroupState state,
+                                                         const std::shared_ptr<GoalHandlePlace> goal_handle)
 {
   place_state_ = state;
   place_feedback_.state = stateToStr(state);
-  place_action_server_->publishFeedback(place_feedback_);
+  auto place_feedback = std::make_shared<moveit_msgs::action::Place::Feedback>();
+  goal_handle->publish_feedback(place_feedback);
 }
 
-void move_group::MoveGroupPickPlaceAction::fillGrasps(moveit_msgs::action::PickupGoal& goal)
+void move_group::MoveGroupPickPlaceAction::fillGrasps(moveit_msgs::action::Pickup::Goal& goal)
 {
   planning_scene_monitor::LockedPlanningSceneRO lscene(context_->planning_scene_monitor_);
 
-  ROS_DEBUG_NAMED("manipulation", "Using default grasp poses");
+  RCLCPP_DEBUG(node_->get_logger(), "Using default grasp poses");
   goal.minimize_object_distance = true;
 
   // add a number of default grasp points

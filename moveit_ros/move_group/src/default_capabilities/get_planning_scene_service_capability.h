@@ -38,7 +38,7 @@
 #define MOVEIT_MOVE_GROUP_GET_PLANNING_SCENE_CAPABILITY_
 
 #include <moveit/move_group/move_group_capability.h>
-#include <moveit_msgs/GetPlanningScene.h>
+#include <moveit_msgs/srv/get_planning_scene.hpp>
 
 namespace move_group
 {
@@ -47,13 +47,15 @@ class MoveGroupGetPlanningSceneService : public MoveGroupCapability
 public:
   MoveGroupGetPlanningSceneService();
 
-  void initialize() override;
+  void initialize(std::shared_ptr<rclcpp::Node>& node) override;
 
 private:
-  bool getPlanningSceneService(moveit_msgs::srv::GetPlanningScene::Request& req,
-                               moveit_msgs::srv::GetPlanningScene::Response& res);
+  void getPlanningSceneService(const std::shared_ptr<rmw_request_id_t> request_header,
+     const std::shared_ptr<moveit_msgs::srv::GetPlanningScene::Request> request,
+     const std::shared_ptr<moveit_msgs::srv::GetPlanningScene::Response> response);
 
-  ros::ServiceServer get_scene_service_;
+  std::shared_ptr<rclcpp::Service<moveit_msgs::srv::GetPlanningScene>> get_scene_service_;
+
 };
 }
 

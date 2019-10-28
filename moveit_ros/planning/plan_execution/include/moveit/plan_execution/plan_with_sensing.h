@@ -54,7 +54,8 @@ MOVEIT_CLASS_FORWARD(PlanWithSensing)
 class PlanWithSensing
 {
 public:
-  PlanWithSensing(const trajectory_execution_manager::TrajectoryExecutionManagerPtr& trajectory_execution);
+  PlanWithSensing(const trajectory_execution_manager::TrajectoryExecutionManagerPtr& trajectory_execution,
+                  const std::shared_ptr<rclcpp::Node> node);
   ~PlanWithSensing();
 
   const trajectory_execution_manager::TrajectoryExecutionManagerPtr& getTrajectoryExecutionManager() const
@@ -115,7 +116,7 @@ public:
 private:
   bool lookAt(const std::set<collision_detection::CostSource>& cost_sources, const std::string& frame_id);
 
-  ros::NodeHandle node_handle_;
+  std::shared_ptr<rclcpp::Node> node_;
   trajectory_execution_manager::TrajectoryExecutionManagerPtr trajectory_execution_manager_;
 
   std::unique_ptr<pluginlib::ClassLoader<moveit_sensor_manager::MoveItSensorManager> > sensor_manager_loader_;
@@ -127,7 +128,7 @@ private:
   unsigned int max_cost_sources_;
 
   bool display_cost_sources_;
-  ros::Publisher cost_sources_publisher_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr cost_sources_publisher_;
 
   boost::function<void()> before_look_callback_;
 

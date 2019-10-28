@@ -36,12 +36,14 @@
 
 #include <pluginlib/class_loader.hpp>
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <memory>
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "list_planning_adapter_plugins");
+  rclcpp::init(argc, argv);
+
+  auto node = std::make_shared<rclcpp::Node>("list_planning_adapter_plugins");
 
   std::unique_ptr<pluginlib::ClassLoader<planning_request_adapter::PlanningRequestAdapter>> loader;
   try
@@ -72,6 +74,6 @@ int main(int argc, char** argv)
       std::cout << " \t\t  " << ad->getDescription() << std::endl;
     std::cout << std::endl << std::endl;
   }
-
+  rclcpp::shutdown();
   return 0;
 }

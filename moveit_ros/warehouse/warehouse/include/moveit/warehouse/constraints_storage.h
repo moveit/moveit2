@@ -39,7 +39,7 @@
 
 #include "moveit/warehouse/moveit_message_storage.h"
 #include <moveit/macros/class_forward.h>
-#include <moveit_msgs/msg/constraints.hpp>
+#include <moveit_msgs/Constraints.h>
 
 namespace moveit_warehouse
 {

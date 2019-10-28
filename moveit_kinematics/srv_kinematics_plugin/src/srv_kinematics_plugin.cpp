@@ -37,6 +37,7 @@
 #include <moveit/srv_kinematics_plugin/srv_kinematics_plugin.h>
 #include <class_loader/class_loader.hpp>
 #include <moveit/robot_state/conversions.h>
+#include <iterator>
 
 // Eigen
 #include <Eigen/Core>
@@ -57,7 +58,7 @@ bool SrvKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
 {
   bool debug = false;
 
-  ROS_INFO_STREAM_NAMED("srv", "SrvKinematicsPlugin initializing");
+  RCLCPP_INFO(node_->get_logger(), "SrvKinematicsPlugin initializing");
 
   storeValues(robot_model, group_name, base_frame, tip_frames, search_discretization);
   joint_model_group_ = robot_model_->getJointModelGroup(group_name);
@@ -74,10 +75,8 @@ bool SrvKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
 
   // Get the dimension of the planning group
   dimension_ = joint_model_group_->getVariableCount();
-  ROS_INFO_STREAM_NAMED("srv", "Dimension planning group '"
-                                   << group_name << "': " << dimension_
-                                   << ". Active Joints Models: " << joint_model_group_->getActiveJointModels().size()
-                                   << ". Mimic Joint Models: " << joint_model_group_->getMimicJointModels().size());
+  RCLCPP_INFO(node_->get_logger(), "Dimension planning group '%s': %d . Active Joints Models:  %d . Mimic Joint Models: %d",
+              group_name, dimension_, joint_model_group_->getActiveJointModels().size(), joint_model_group_->getMimicJointModels().size());
 
   // Copy joint names
   for (std::size_t i = 0; i < joint_model_group_->getJointModels().size(); ++i)
@@ -87,7 +86,7 @@ bool SrvKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
 
   if (debug)
   {
-    ROS_ERROR_STREAM_NAMED("srv", "tip links available:");
+    RCLCPP_ERROR(node_->get_logger(), "tip links available:");
     std::copy(tip_frames_.begin(), tip_frames_.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
   }
 
@@ -96,7 +95,7 @@ bool SrvKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
   {
     if (!joint_model_group_->hasLinkModel(tip_frames_[i]))
     {
-      ROS_ERROR_NAMED("srv", "Could not find tip name '%s' in joint group '%s'", tip_frames_[i].c_str(),
+      RCLCPP_ERROR(node_->get_logger(), "Could not find tip name '%s' in joint group '%s'", tip_frames_[i].c_str(),
                       group_name.c_str());
       return false;
     }
@@ -104,27 +103,27 @@ bool SrvKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model
   }
 
   // Choose what ROS service to send IK requests to
-  ROS_DEBUG_STREAM_NAMED("srv", "Looking for ROS service name on rosparam server with param: "
-                                    << "/kinematics_solver_service_name");
+  RCLCPP_DEBUG(node_->get_logger(), "Looking for ROS service name on rosparam server with param: "
+                                    "/kinematics_solver_service_name");
   std::string ik_service_name;
-  lookupParam("kinematics_solver_service_name", ik_service_name, std::string("solve_ik"));
+  lookupParam(node_,"kinematics_solver_service_name", ik_service_name, std::string("solve_ik"));
 
   // Setup the joint state groups that we need
   robot_state_.reset(new robot_state::RobotState(robot_model_));
   robot_state_->setToDefaultValues();
 
-  // Create the ROS service client
-  ros::NodeHandle nonprivate_handle("");
-  ik_service_client_ = std::make_shared<ros::ServiceClient>(
-      nonprivate_handle.serviceClient<moveit_msgs::srv::GetPositionIK>(ik_service_name));
-  if (!ik_service_client_->waitForExistence(ros::Duration(0.1)))  // wait 0.1 seconds, blocking
-    ROS_WARN_STREAM_NAMED("srv",
-                          "Unable to connect to ROS service client with name: " << ik_service_client_->getService());
+  // Create the ROS2 service client
+  ik_service_client_ =
+      node_->create_client<moveit_msgs::srv::GetPositionIK>(ik_service_name);
+
+  if (!ik_service_client_->wait_for_service(std::chrono::seconds(1)))  // wait 0.1 seconds, blocking
+    RCLCPP_WARN(node_->get_logger(),
+                          "Unable to connect to ROS service client with name: %s", ik_service_client_->get_service_name());
   else
-    ROS_INFO_STREAM_NAMED("srv", "Service client started with ROS service name: " << ik_service_client_->getService());
+    RCLCPP_INFO(node_->get_logger(), "Service client started with ROS service name: %s", ik_service_client_->get_service_name());
 
   active_ = true;
-  ROS_DEBUG_NAMED("srv", "ROS service-based kinematics solver initialized");
+  RCLCPP_DEBUG(node_->get_logger(), "ROS service-based kinematics solver initialized");
   return true;
 }
 
@@ -132,12 +131,12 @@ bool SrvKinematicsPlugin::setRedundantJoints(const std::vector<unsigned int>& re
 {
   if (num_possible_redundant_joints_ < 0)
   {
-    ROS_ERROR_NAMED("srv", "This group cannot have redundant joints");
+    RCLCPP_ERROR(node_->get_logger(), "This group cannot have redundant joints");
     return false;
   }
   if (int(redundant_joints.size()) > num_possible_redundant_joints_)
   {
-    ROS_ERROR_NAMED("srv", "This group can only have %d redundant joints", num_possible_redundant_joints_);
+    RCLCPP_ERROR(node_->get_logger(), "This group can only have %d redundant joints", num_possible_redundant_joints_);
     return false;
   }
 
@@ -162,12 +161,12 @@ int SrvKinematicsPlugin::getJointIndex(const std::string& name) const
   return -1;
 }
 
-bool SrvKinematicsPlugin::timedOut(const ros::WallTime& start_time, double duration) const
+bool SrvKinematicsPlugin::timedOut(const std::chrono::system_clock::time_point& start_time, double duration) const
 {
-  return ((ros::WallTime::now() - start_time).toSec() >= duration);
+  return (std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - start_time).count()*1e-9 >= duration);
 }
 
-bool SrvKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool SrvKinematicsPlugin::getPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                         std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                         const kinematics::KinematicsQueryOptions& options) const
 {
@@ -177,7 +176,7 @@ bool SrvKinematicsPlugin::getPositionIK(const geometry_msgs::Pose& ik_pose, cons
                           consistency_limits, options);
 }
 
-bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
@@ -188,7 +187,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
                           options);
 }
 
-bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
                                            std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
@@ -197,7 +196,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
                           options);
 }
 
-bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
@@ -208,7 +207,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
                           options);
 }
 
-bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, const std::vector<double>& consistency_limits,
                                            std::vector<double>& solution, const IKCallbackFn& solution_callback,
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
@@ -218,7 +217,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
                           options);
 }
 
-bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                                            double timeout, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
@@ -226,14 +225,14 @@ bool SrvKinematicsPlugin::searchPositionIK(const geometry_msgs::Pose& ik_pose, c
                                            const kinematics::KinematicsQueryOptions& options) const
 {
   // Convert single pose into a vector of one pose
-  std::vector<geometry_msgs::Pose> ik_poses;
+  std::vector<geometry_msgs::msg::Pose> ik_poses;
   ik_poses.push_back(ik_pose);
 
   return searchPositionIK(ik_poses, ik_seed_state, timeout, consistency_limits, solution, solution_callback, error_code,
                           options);
 }
 
-bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::Pose>& ik_poses,
+bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg::Pose>& ik_poses,
                                            const std::vector<double>& ik_seed_state, double timeout,
                                            const std::vector<double>& consistency_limits, std::vector<double>& solution,
                                            const IKCallbackFn& solution_callback,
@@ -243,7 +242,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::Pose
   // Check if active
   if (!active_)
   {
-    ROS_ERROR_NAMED("srv", "kinematics not active");
+    RCLCPP_ERROR(node_->get_logger(), "kinematics not active");
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
@@ -251,8 +250,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::Pose
   // Check if seed state correct
   if (ik_seed_state.size() != dimension_)
   {
-    ROS_ERROR_STREAM_NAMED("srv", "Seed state must have size " << dimension_ << " instead of size "
-                                                               << ik_seed_state.size());
+    RCLCPP_ERROR(node_->get_logger(), "Seed state must have size %d instead of size %d",dimension_, ik_seed_state.size());
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
@@ -260,24 +258,22 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::Pose
   // Check that we have the same number of poses as tips
   if (tip_frames_.size() != ik_poses.size())
   {
-    ROS_ERROR_STREAM_NAMED("srv", "Mismatched number of pose requests (" << ik_poses.size() << ") to tip frames ("
-                                                                         << tip_frames_.size()
-                                                                         << ") in searchPositionIK");
+    RCLCPP_ERROR(node_->get_logger(), "Mismatched number of pose requests (%d) to tip frames (%d) in searchPositionIK",ik_poses.size(),tip_frames_.size());
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
 
   // Create the service message
-  moveit_msgs::srv::GetPositionIK ik_srv;
-  ik_srv.request.ik_request.avoid_collisions = true;
-  ik_srv.request.ik_request.group_name = getGroupName();
+  auto ik_srv = std::make_shared<moveit_msgs::srv::GetPositionIK::Request>();
+  ik_srv->ik_request.avoid_collisions = true;
+  ik_srv->ik_request.group_name = getGroupName();
 
   // Copy seed state into virtual robot state and convert into moveit_msg
   robot_state_->setJointGroupPositions(joint_model_group_, ik_seed_state);
-  moveit::core::robotStateToRobotStateMsg(*robot_state_, ik_srv.request.ik_request.robot_state);
+  moveit::core::robotStateToRobotStateMsg(*robot_state_, ik_srv->ik_request.robot_state);
 
   // Load the poses into the request in difference places depending if there is more than one or not
-  geometry_msgs::PoseStamped ik_pose_st;
+  geometry_msgs::msg::PoseStamped ik_pose_st;
   ik_pose_st.header.frame_id = base_frame_;
   if (tip_frames_.size() > 1)
   {
@@ -285,8 +281,8 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::Pose
     for (std::size_t i = 0; i < tip_frames_.size(); ++i)
     {
       ik_pose_st.pose = ik_poses[i];
-      ik_srv.request.ik_request.pose_stamped_vector.push_back(ik_pose_st);
-      ik_srv.request.ik_request.ik_link_names.push_back(tip_frames_[i]);
+      ik_srv->ik_request.pose_stamped_vector.push_back(ik_pose_st);
+      ik_srv->ik_request.ik_link_names.push_back(tip_frames_[i]);
     }
   }
   else
@@ -294,46 +290,49 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::Pose
     ik_pose_st.pose = ik_poses[0];
 
     // Load into single pose value
-    ik_srv.request.ik_request.pose_stamped = ik_pose_st;
-    ik_srv.request.ik_request.ik_link_name = getTipFrames()[0];
+    ik_srv->ik_request.pose_stamped = ik_pose_st;
+    ik_srv->ik_request.ik_link_name = getTipFrames()[0];
   }
 
-  ROS_DEBUG_STREAM_NAMED("srv", "Calling service: " << ik_service_client_->getService());
-  if (ik_service_client_->call(ik_srv))
-  {
+  RCLCPP_DEBUG(node_->get_logger(), "Calling service: %s", ik_service_client_->get_service_name());
+  auto result_future = ik_service_client_->async_send_request(ik_srv);
+  auto response = result_future.get();
+  if (rclcpp::spin_until_future_complete(node_, result_future) ==
+     rclcpp::executor::FutureReturnCode::SUCCESS)
+   {
     // Check error code
-    error_code.val = ik_srv.response.error_code.val;
+    error_code.val = response->error_code.val;
     if (error_code.val != error_code.SUCCESS)
     {
-      ROS_DEBUG_STREAM_NAMED("srv", "An IK that satisifes the constraints and is collision free could not be found."
-                                        << "\nRequest was: \n"
-                                        << ik_srv.request.ik_request << "\nResponse was: \n"
-                                        << ik_srv.response.solution);
+      //TODO (anasarrak) Print the entire message for ROS2?
+      // RCLCPP_DEBUG("srv", "An IK that satisifes the constraints and is collision free could not be found."
+      //                                   << "\nRequest was: \n"
+      //                                   << ik_srv.request.ik_request << "\nResponse was: \n"
+      //                                   << ik_srv.response.solution);
       switch (error_code.val)
       {
         case moveit_msgs::msg::MoveItErrorCodes::FAILURE:
-          ROS_ERROR_STREAM_NAMED("srv", "Service failed with with error code: FAILURE");
+          RCLCPP_ERROR(node_->get_logger(), "Service failed with with error code: FAILURE");
           break;
         case moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION:
-          ROS_ERROR_STREAM_NAMED("srv", "Service failed with with error code: NO IK SOLUTION");
+          RCLCPP_DEBUG(node_->get_logger(), "Service failed with with error code: NO IK SOLUTION");
           break;
         default:
-          ROS_ERROR_STREAM_NAMED("srv", "Service failed with with error code: " << error_code.val);
+          RCLCPP_DEBUG(node_->get_logger(), "Service failed with with error code: %d", error_code.val);
       }
       return false;
     }
   }
   else
   {
-    ROS_ERROR_STREAM("Service call failed to connect to service: " << ik_service_client_->getService());
+    RCLCPP_DEBUG(node_->get_logger(),"Service call failed to connect to service: %s", ik_service_client_->get_service_name());
     error_code.val = error_code.FAILURE;
     return false;
   }
-
   // Convert the robot state message to our robot_state representation
-  if (!moveit::core::robotStateMsgToRobotState(ik_srv.response.solution, *robot_state_))
+  if (!moveit::core::robotStateMsgToRobotState(response->solution, *robot_state_))
   {
-    ROS_ERROR_STREAM_NAMED("srv",
+    RCLCPP_ERROR(node_->get_logger(),
                            "An error occured converting received robot state message into internal robot state.");
     error_code.val = error_code.FAILURE;
     return false;
@@ -345,7 +344,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::Pose
   // Run the solution callback (i.e. collision checker) if available
   if (!solution_callback.empty())
   {
-    ROS_DEBUG_STREAM_NAMED("srv", "Calling solution callback on IK solution");
+    RCLCPP_DEBUG(node_->get_logger(), "Calling solution callback on IK solution");
 
     // hack: should use all poses, not just the 0th
     solution_callback(ik_poses[0], solution, error_code);
@@ -355,40 +354,40 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::Pose
       switch (error_code.val)
       {
         case moveit_msgs::msg::MoveItErrorCodes::FAILURE:
-          ROS_ERROR_STREAM_NAMED("srv", "IK solution callback failed with with error code: FAILURE");
+          RCLCPP_ERROR(node_->get_logger(), "IK solution callback failed with with error code: FAILURE");
           break;
         case moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION:
-          ROS_ERROR_STREAM_NAMED("srv", "IK solution callback failed with with error code: "
+          RCLCPP_ERROR(node_->get_logger(), "IK solution callback failed with with error code: "
                                         "NO IK SOLUTION");
           break;
         default:
-          ROS_ERROR_STREAM_NAMED("srv", "IK solution callback failed with with error code: " << error_code.val);
+          RCLCPP_ERROR(node_->get_logger(), "IK solution callback failed with with error code: %d", error_code.val);
       }
       return false;
     }
   }
 
-  ROS_INFO_STREAM_NAMED("srv", "IK Solver Succeeded!");
+  RCLCPP_INFO(node_->get_logger(), "IK Solver Succeeded!");
   return true;
 }
 
 bool SrvKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_names,
                                         const std::vector<double>& joint_angles,
-                                        std::vector<geometry_msgs::Pose>& poses) const
+                                        std::vector<geometry_msgs::msg::Pose>& poses) const
 {
   if (!active_)
   {
-    ROS_ERROR_NAMED("srv", "kinematics not active");
+    RCLCPP_ERROR(node_->get_logger(), "kinematics not active");
     return false;
   }
   poses.resize(link_names.size());
   if (joint_angles.size() != dimension_)
   {
-    ROS_ERROR_NAMED("srv", "Joint angles vector must have size: %d", dimension_);
+    RCLCPP_ERROR(node_->get_logger(), "Joint angles vector must have size: %d", dimension_);
     return false;
   }
 
-  ROS_ERROR_STREAM_NAMED("srv", "Forward kinematics not implemented");
+  RCLCPP_ERROR(node_->get_logger(), "Forward kinematics not implemented");
 
   return false;
 }

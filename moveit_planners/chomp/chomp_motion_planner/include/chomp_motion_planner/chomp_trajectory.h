@@ -41,8 +41,8 @@
 #include <moveit/robot_model/robot_model.h>
 #include <chomp_motion_planner/chomp_utils.h>
 
-#include <moveit_msgs/msg/motion_plan_detailed_response.hpp>
-#include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit_msgs/MotionPlanDetailedResponse.h>
+#include <moveit_msgs/MotionPlanRequest.h>
 
 #include <vector>
 #include <eigen3/Eigen/Core>

@@ -38,7 +38,7 @@
 #define MOVEIT_MOVEIT_WAREHOUSE_PLANNING_SCENE_WORLD_STORAGE_
 
 #include <moveit/warehouse/moveit_message_storage.h>
-#include <moveit_msgs/msg/planning_scene_world.hpp>
+#include <moveit_msgs/PlanningSceneWorld.h>
 
 namespace moveit_warehouse
 {

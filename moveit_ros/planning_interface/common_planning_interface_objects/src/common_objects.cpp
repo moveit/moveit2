@@ -106,7 +106,8 @@ std::shared_ptr<tf2_ros::Buffer> getSharedTF()
   std::shared_ptr<tf2_ros::Buffer> buffer = s.tf_buffer_.lock();
   if (!buffer)
   {
-    tf2_ros::Buffer* raw = new tf2_ros::Buffer();
+    rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
+    tf2_ros::Buffer* raw = new tf2_ros::Buffer(clock);
     // assign custom deleter to also delete associated TransformListener
     buffer.reset(raw, Deleter(new tf2_ros::TransformListener(*raw)));
     s.tf_buffer_ = buffer;
@@ -114,7 +115,7 @@ std::shared_ptr<tf2_ros::Buffer> getSharedTF()
   return buffer;
 }
 
-robot_model::RobotModelConstPtr getSharedRobotModel(const std::string& robot_description)
+robot_model::RobotModelConstPtr getSharedRobotModel(const std::string& robot_description, std::shared_ptr<rclcpp::Node>& node)
 {
   SharedStorage& s = getSharedStorage();
   boost::mutex::scoped_lock slock(s.lock_);
@@ -124,7 +125,7 @@ robot_model::RobotModelConstPtr getSharedRobotModel(const std::string& robot_des
   {
     RobotModelLoader::Options opt(robot_description);
     opt.load_kinematics_solvers_ = true;
-    RobotModelLoaderPtr loader(new RobotModelLoader(opt));
+    RobotModelLoaderPtr loader(new RobotModelLoader(robot_description, node, opt.load_kinematics_solvers_ ));
     // create an aliasing shared_ptr
     model = robot_model::RobotModelPtr(loader, loader->getModel().get());
     it->second = model;
@@ -135,12 +136,12 @@ robot_model::RobotModelConstPtr getSharedRobotModel(const std::string& robot_des
 CurrentStateMonitorPtr getSharedStateMonitor(const robot_model::RobotModelConstPtr& robot_model,
                                              const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
 {
-  return getSharedStateMonitor(robot_model, tf_buffer, ros::NodeHandle());
+  return getSharedStateMonitor(robot_model, tf_buffer , rclcpp::Node::make_shared("default_common_object"));
 }
 
 CurrentStateMonitorPtr getSharedStateMonitor(const robot_model::RobotModelConstPtr& robot_model,
                                              const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-                                             const ros::NodeHandle& nh)
+                                             const std::shared_ptr<rclcpp::Node> node)
 {
   SharedStorage& s = getSharedStorage();
   boost::mutex::scoped_lock slock(s.lock_);
@@ -149,7 +150,7 @@ CurrentStateMonitorPtr getSharedStateMonitor(const robot_model::RobotModelConstP
   if (!monitor)
   {
     // if there was no valid entry, create one
-    monitor.reset(new CurrentStateMonitor(robot_model, tf_buffer, nh));
+    monitor.reset(new CurrentStateMonitor(robot_model, tf_buffer, node));
     it->second = monitor;
   }
   return monitor;

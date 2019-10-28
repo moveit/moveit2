@@ -32,17 +32,22 @@
 /* Author: Robert Haschke */
 
 #include <moveit/move_group_interface/move_group_interface.h>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "moveit_test_cleanup_cpp", ros::init_options::AnonymousName);
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("moveit_test_cleanup_cpp");
 
-  moveit::planning_interface::MoveGroupInterface group("manipulator");
+  moveit::planning_interface::MoveGroupInterface::Options options("manipulator", "robot_description", node);
 
-  ros::WallDuration(0.1).sleep();
+  moveit::planning_interface::MoveGroupInterface group(options);
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(node);
+  std::thread executor_thread(std::bind(&rclcpp::executors::MultiThreadedExecutor::spin, &executor));
+
+  sleep(2);
+
   return 0;
 }

@@ -42,9 +42,9 @@
 #include <moveit/utils/lexical_casts.h>
 #include <fstream>
 
-ompl_interface::OMPLInterface::OMPLInterface(const robot_model::RobotModelConstPtr& robot_model,
-                                             const ros::NodeHandle& nh)
-  : nh_(nh)
+ompl_interface::OMPLInterface::OMPLInterface(const std::shared_ptr<const robot_model::RobotModel>& robot_model,
+                                             const rclcpp::Node::SharedPtr& node)
+  : node_(node)
   , robot_model_(robot_model)
   , constraint_sampler_manager_(new constraint_samplers::ConstraintSamplerManager())
   , context_manager_(robot_model, constraint_sampler_manager_)
@@ -52,16 +52,16 @@ ompl_interface::OMPLInterface::OMPLInterface(const robot_model::RobotModelConstP
   , use_constraints_approximations_(true)
   , simplify_solutions_(true)
 {
-  ROS_INFO("Initializing OMPL interface using ROS parameters");
+  RCLCPP_INFO(node_->get_logger(), "Initializing OMPL interface using ROS parameters");
   loadPlannerConfigurations();
   loadConstraintApproximations();
   loadConstraintSamplers();
 }
 
-ompl_interface::OMPLInterface::OMPLInterface(const robot_model::RobotModelConstPtr& robot_model,
+ompl_interface::OMPLInterface::OMPLInterface(const std::shared_ptr<const robot_model::RobotModel>& robot_model,
                                              const planning_interface::PlannerConfigurationMap& pconfig,
-                                             const ros::NodeHandle& nh)
-  : nh_(nh)
+                                             const rclcpp::Node::SharedPtr& node)
+  : node_(node)
   , robot_model_(robot_model)
   , constraint_sampler_manager_(new constraint_samplers::ConstraintSamplerManager())
   , context_manager_(robot_model, constraint_sampler_manager_)
@@ -69,7 +69,7 @@ ompl_interface::OMPLInterface::OMPLInterface(const robot_model::RobotModelConstP
   , use_constraints_approximations_(true)
   , simplify_solutions_(true)
 {
-  ROS_INFO("Initializing OMPL interface using specified configuration");
+  RCLCPP_INFO(node_->get_logger(), "Initializing OMPL interface using specified configuration");
   setPlannerConfigurations(pconfig);
   loadConstraintApproximations();
   loadConstraintSamplers();
@@ -136,7 +136,7 @@ void ompl_interface::OMPLInterface::loadConstraintApproximations(const std::stri
   constraints_library_->loadConstraintApproximations(path);
   std::stringstream ss;
   constraints_library_->printConstraintApproximations(ss);
-  ROS_INFO_STREAM(ss.str());
+  RCLCPP_INFO(node_->get_logger(), ss.str());
 }
 
 void ompl_interface::OMPLInterface::saveConstraintApproximations(const std::string& path)
@@ -146,21 +146,26 @@ void ompl_interface::OMPLInterface::saveConstraintApproximations(const std::stri
 
 bool ompl_interface::OMPLInterface::saveConstraintApproximations()
 {
-  std::string cpath;
-  if (nh_.getParam("constraint_approximations_path", cpath))
+  auto constraint_approximations_path_parameter = std::make_shared<rclcpp::SyncParametersClient>(node_);
+
+  if (constraint_approximations_path_parameter->has_parameter("constraint_approximations_path"))
   {
+    std::string cpath = node_->get_parameter("constraint_approximations_path").get_value<std::string>();
     saveConstraintApproximations(cpath);
     return true;
   }
-  ROS_WARN("ROS param 'constraint_approximations' not found. Unable to save constraint approximations");
+  RCLCPP_WARN(node_->get_logger(),
+              "ROS param 'constraint_approximations' not found. Unable to save constraint approximations");
   return false;
 }
 
 bool ompl_interface::OMPLInterface::loadConstraintApproximations()
 {
-  std::string cpath;
-  if (nh_.getParam("constraint_approximations_path", cpath))
+  auto constraint_approximations_path_parameter = std::make_shared<rclcpp::SyncParametersClient>(node_);
+
+  if (constraint_approximations_path_parameter->has_parameter("constraint_approximations_path"))
   {
+    std::string cpath = node_->get_parameter("constraint_approximations_path").get_value<std::string>();
     loadConstraintApproximations(cpath);
     return true;
   }
@@ -170,7 +175,7 @@ bool ompl_interface::OMPLInterface::loadConstraintApproximations()
 void ompl_interface::OMPLInterface::loadConstraintSamplers()
 {
   constraint_sampler_manager_loader_.reset(
-      new constraint_sampler_manager_loader::ConstraintSamplerManagerLoader(constraint_sampler_manager_));
+      new constraint_sampler_manager_loader::ConstraintSamplerManagerLoader(node_, constraint_sampler_manager_));
 }
 
 bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
@@ -178,19 +183,23 @@ bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
     const std::map<std::string, std::string>& group_params,
     planning_interface::PlannerConfigurationSettings& planner_config)
 {
-  XmlRpc::XmlRpcValue xml_config;
-  if (!nh_.getParam("planner_configs/" + planner_id, xml_config))
-  {
-    ROS_ERROR("Could not find the planner configuration '%s' on the param server", planner_id.c_str());
-    return false;
-  }
+  auto planner_config_parameter = std::make_shared<rclcpp::SyncParametersClient>(node_);
+  auto planner_config_param_prefix = planner_config_parameter->list_parameters({"planner_configs"},10);
 
-  if (xml_config.getType() != XmlRpc::XmlRpcValue::TypeStruct)
+  if (!planner_config_parameter->has_parameter("planner_configs/" + planner_id))
   {
-    ROS_ERROR("A planning configuration should be of type XmlRpc Struct type (for configuration '%s')",
-              planner_id.c_str());
+    RCLCPP_ERROR(node_->get_logger(), "Could not find the planner configuration '%s' on the param server",
+                 planner_id.c_str());
     return false;
   }
+  // TODO (anasarrak): Adapt for ros2 parameters
+  // if (xml_config.getType() != XmlRpc::XmlRpcValue::TypeStruct)
+  // {
+  //   RCLCPP_ERROR(node_->get_logger(),"A planning configuration should be of type XmlRpc Struct type (for
+  //   configuration '%s')",
+  //             planner_id.c_str());
+  //   return false;
+  // }
 
   planner_config.name = group_name + "[" + planner_id + "]";
   planner_config.group = group_name;
@@ -199,16 +208,31 @@ bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
   planner_config.config = group_params;
 
   // read parameters specific for this configuration
-  for (std::pair<const std::string, XmlRpc::XmlRpcValue>& element : xml_config)
-  {
-    if (element.second.getType() == XmlRpc::XmlRpcValue::TypeString)
-      planner_config.config[element.first] = static_cast<std::string>(element.second);
-    else if (element.second.getType() == XmlRpc::XmlRpcValue::TypeDouble)
-      planner_config.config[element.first] = moveit::core::toString(static_cast<double>(element.second));
-    else if (element.second.getType() == XmlRpc::XmlRpcValue::TypeInt)
-      planner_config.config[element.first] = std::to_string(static_cast<int>(element.second));
-    else if (element.second.getType() == XmlRpc::XmlRpcValue::TypeBoolean)
-      planner_config.config[element.first] = std::to_string(static_cast<bool>(element.second));
+    for (auto & name : planner_config_param_prefix.names) {
+      std::string type = node_->get_parameter(name).get_type_name();
+      std::istringstream iss(name);
+      std::vector<std::string> indexes;
+      std::string index;
+      while (std::getline(iss, index, '.')) {
+      if (!index.empty())
+          indexes.push_back(index);
+      }
+      if(type.find("string") != std::string::npos){
+        auto s_index  = node_->get_parameter(name).as_string();
+        planner_config.config[indexes[2]] = static_cast<std::string>(s_index);
+      }
+      if(type.find("double") != std::string::npos){
+        auto d_index  = node_->get_parameter(name).as_double();
+        planner_config.config[indexes[2]] = moveit::core::toString(static_cast<double>(d_index));
+      }
+      if(type.find("int") != std::string::npos){
+        auto i_index  = node_->get_parameter(name).as_int();
+        planner_config.config[indexes[2]] = std::to_string(static_cast<int>(i_index));
+      }
+      if(type.find("boolean") != std::string::npos){
+        auto b_index  = node_->get_parameter(name).as_bool();
+        planner_config.config[indexes[2]] = std::to_string(static_cast<bool>(b_index));
+      }
   }
 
   return true;
@@ -219,7 +243,7 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
   // read the planning configuration for each group
   planning_interface::PlannerConfigurationMap pconfig;
   pconfig.clear();
-
+  auto known_group_parameters = std::make_shared<rclcpp::SyncParametersClient>(node_);
   for (const std::string& group_name : robot_model_->getJointModelGroupNames())
   {
     // the set of planning parameters that can be specific for the group (inherited by configurations of that group)
@@ -230,34 +254,34 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
     std::map<std::string, std::string> specific_group_params;
     for (const std::string& k : KNOWN_GROUP_PARAMS)
     {
-      if (nh_.hasParam(group_name + "/" + k))
+      if (known_group_parameters->has_parameter(group_name + "/" + k))
       {
-        std::string value;
-        if (nh_.getParam(group_name + "/" + k, value))
+        if (node_->get_parameter(group_name + "/" + k).get_type_name().compare("string") == 0)
         {
+          std::string value = node_->get_parameter(group_name + "/" + k).get_value<std::string>();
           if (!value.empty())
             specific_group_params[k] = value;
           continue;
         }
 
-        double value_d;
-        if (nh_.getParam(group_name + "/" + k, value_d))
+        if (node_->get_parameter(group_name + "/" + k).get_type_name().compare("double") == 0)
         {
+          double value_d = node_->get_parameter(group_name + "/" + k).get_value<double>();
           // convert to string using no locale
           specific_group_params[k] = moveit::core::toString(value_d);
           continue;
         }
 
-        int value_i;
-        if (nh_.getParam(group_name + "/" + k, value_i))
+        if (node_->get_parameter(group_name + "/" + k).get_type_name().compare("integer") == 0)
         {
+          int value_i = node_->get_parameter(group_name + "/" + k).get_value<int>();
           specific_group_params[k] = std::to_string(value_i);
           continue;
         }
 
-        bool value_b;
-        if (nh_.getParam(group_name + "/" + k, value_b))
+        if (node_->get_parameter(group_name + "/" + k).get_type_name().compare("bool") == 0)
         {
+          bool value_b = node_->get_parameter(group_name + "/" + k).get_value<bool>();
           specific_group_params[k] = std::to_string(value_b);
           continue;
         }
@@ -267,8 +291,9 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
     // add default planner configuration
     planning_interface::PlannerConfigurationSettings default_pc;
     std::string default_planner_id;
-    if (nh_.getParam(group_name + "/default_planner_config", default_planner_id))
+    if (known_group_parameters->has_parameter(group_name + "/default_planner_config"))
     {
+      default_planner_id = node_->get_parameter(group_name + "/default_planner_config").get_value<std::string>();
       if (!loadPlannerConfiguration(group_name, default_planner_id, specific_group_params, default_pc))
         default_planner_id = "";
     }
@@ -284,22 +309,27 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
     pconfig[default_pc.name] = default_pc;
 
     // get parameters specific to each planner type
-    XmlRpc::XmlRpcValue config_names;
-    if (nh_.getParam(group_name + "/planner_configs", config_names))
+    // XmlRpc::XmlRpcValue config_names;
+
+    if (known_group_parameters->has_parameter(group_name + "/planner_configs"))
     {
-      if (config_names.getType() != XmlRpc::XmlRpcValue::TypeArray)
+      std::vector<std::string> config_names = node_->get_parameter(group_name + "/planner_configs").as_string_array();
+      auto config_type = node_->get_parameter(group_name + "/planner_configs").get_type_name();
+      if (config_type.find("array") == std::string::npos)
       {
-        ROS_ERROR("The planner_configs argument of a group configuration "
-                  "should be an array of strings (for group '%s')",
-                  group_name.c_str());
+        RCLCPP_ERROR(node_->get_logger(), "The planner_configs argument of a group configuration "
+                                          "should be an array of strings (for group '%s')",
+                     group_name.c_str());
         continue;
       }
 
       for (int j = 0; j < config_names.size(); ++j)
       {
-        if (config_names[j].getType() != XmlRpc::XmlRpcValue::TypeString)
+        std::string type = typeid(config_names[j]).name();
+        if (type.find("string") == std::string::npos)
         {
-          ROS_ERROR("Planner configuration names must be of type string (for group '%s')", group_name.c_str());
+          RCLCPP_ERROR(node_->get_logger(), "Planner configuration names must be of type string (for group '%s')",
+                       group_name.c_str());
           continue;
         }
 
@@ -314,10 +344,12 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
 
   for (const std::pair<std::string, planning_interface::PlannerConfigurationSettings>& config : pconfig)
   {
-    ROS_DEBUG_STREAM_NAMED("parameters", "Parameters for configuration '" << config.first << "'");
+    RCLCPP_DEBUG(node_->get_logger(), "Parameters for configuration '%s'", config.first.c_str());
 
     for (const std::pair<std::string, std::string>& parameters : config.second.config)
-      ROS_DEBUG_STREAM_NAMED("parameters", " - " << parameters.first << " = " << parameters.second);
+    {
+      RCLCPP_DEBUG(node_->get_logger(), "parameters - %s = %s", parameters.first.c_str(), parameters.second.c_str());
+    }
   }
 
   setPlannerConfigurations(pconfig);
@@ -325,5 +357,5 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
 
 void ompl_interface::OMPLInterface::printStatus()
 {
-  ROS_INFO("OMPL ROS interface is running.");
+  RCLCPP_INFO(node_->get_logger(), "OMPL ROS interface is running.");
 }
