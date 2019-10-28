@@ -49,6 +49,8 @@
 using namespace angles;
 using namespace pr2_arm_kinematics;
 
+rclcpp::Logger LOGGER_PR2_ARM_IK = rclcpp::get_logger("pr2_arm_kinematics_plugin");
+
 PR2ArmIK::PR2ArmIK()
 {
 }
