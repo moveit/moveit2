@@ -1,6 +1,6 @@
-# moveit/moveit2:crystal-ci
+# moveit/moveit2:dashing-ci
 # Sets up a base image to use for running Continuous Integration on Travis
-FROM ros:crystal-ros-base-bionic
+FROM ros:dashing-ros-base-bionic
 
 LABEL maintainer="mike@picknik.ai"
 

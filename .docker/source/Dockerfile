@@ -1,7 +1,7 @@
-# moveit/moveit2:crystal-source
+# moveit/moveit2:dashing-source
 # Downloads the moveit source code and install remaining debian dependencies
 
-FROM moveit/moveit2:crystal-ci
+FROM moveit/moveit2:dashing-ci
 LABEL maintainer="mike@picknik.ai"
 
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
@@ -21,5 +21,5 @@ RUN apt-get -qq update && \
     rm -rf /var/lib/apt/lists/*
 
 # Build the workspace
-RUN . /opt/ros/crystal/setup.sh &&\
+RUN . /opt/ros/dashing/setup.sh &&\
     colcon build --symlink-install --event-handlers desktop_notification-
