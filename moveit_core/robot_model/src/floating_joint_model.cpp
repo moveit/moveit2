@@ -45,7 +45,7 @@ namespace moveit
 {
 namespace core
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("robot_model");
+rclcpp::Logger LOGGER_FLOATING_JOINT_MODEL = rclcpp::get_logger("floating_joint_model");
 
 FloatingJointModel::FloatingJointModel(const std::string& name) : JointModel(name), angular_distance_weight_(1.0)
 {
@@ -173,7 +173,7 @@ bool FloatingJointModel::normalizeRotation(double* values) const
     double norm = sqrt(norm_sqr);
     if (norm < std::numeric_limits<double>::epsilon() * 100.0)
     {
-      RCLCPP_WARN(LOGGER, "Quaternion is zero in RobotState representation. Setting to identity");
+      RCLCPP_WARN(LOGGER_FLOATING_JOINT_MODEL, "Quaternion is zero in RobotState representation. Setting to identity");
       values[3] = 0.0;
       values[4] = 0.0;
       values[5] = 0.0;
