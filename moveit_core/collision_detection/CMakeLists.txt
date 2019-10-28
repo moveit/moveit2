@@ -23,19 +23,8 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   visualization_msgs
   tf2_eigen
   geometric_shapes
-)
-
-ament_target_dependencies(${MOVEIT_LIB_NAME}
-  moveit_robot_state
-  rclcpp
-  rmw_implementation
-  urdf
-  urdfdom
-  urdfdom_headers
-  visualization_msgs
-  tf2_eigen
   Boost
-  geometric_shapes
+  OCTOMAP
 )
 
 # unit tests
