@@ -6,8 +6,13 @@ if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
 endif()
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+# Warnings
+add_compile_options(-Wall -Wextra
+  -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual
+  -Wno-unused-parameter -Wno-unused-function)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # This too often has false-positives
+  add_compile_options(-Wno-maybe-uninitialized)
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
