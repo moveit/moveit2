@@ -3,53 +3,47 @@
 
 - git:
     local-name: moveit_msgs
-    type: git
-    url: https://github.com/ros-planning/moveit_msgs
+    uri: https://github.com/ros-planning/moveit_msgs
     version: ros2
 - git:
+    local-name: moveit2
+    uri: https://github.com/ros-planning/moveit2
+    version: master
+- git:
     local-name: geometric_shapes
-    type: git
-    url: https://github.com/AcutronicRobotics/geometric_shapes
+    uri: https://github.com/AcutronicRobotics/geometric_shapes
     version: ros2
 - git:
     local-name: joint_state_publisher
-    type: git
-    url: https://github.com/ros/joint_state_publisher
+    uri: https://github.com/ros/joint_state_publisher
     version: ros2-devel
   # TODO(henningkayser): Change to 'ros-planning/ros2' once https://github.com/ros-planning/random_numbers/pull/18 is merged
 - git:
     local-name: random_numbers
-    type: git
-    url: https://github.com/PickNikRobotics/random_numbers
+    uri: https://github.com/PickNikRobotics/random_numbers
     version: ros2-devel
   # TODO(henningkayser): merge dependencies below into upstream pacages
 - git:
     local-name: object_recognition_msgs
-    type: git
-    url: https://github.com/PickNikRobotics/object_recognition_msgs
+    uri: https://github.com/PickNikRobotics/object_recognition_msgs
     version: master
 - git:
     local-name: octomap
-    type: git
-    url: https://github.com/PickNikRobotics/octomap
+    uri: https://github.com/PickNikRobotics/octomap
     version: ros2
 - git:
     local-name: octomap_msgs
-    type: git
-    url: https://github.com/PickNikRobotics/octomap_msgs
+    uri: https://github.com/PickNikRobotics/octomap_msgs
     version: ros2
 - git:
     local-name: moveit_resources
-    type: git
-    url: https://github.com/PickNikRobotics/moveit_resources
+    uri: https://github.com/PickNikRobotics/moveit_resources
     version: master
 - git:
     local-name: srdfdom
-    type: git
-    url: https://github.com/PickNikRobotics/srdfdom
+    uri: https://github.com/PickNikRobotics/srdfdom
     version: ros2
 - git:
     local-name: urdf_parser_py
-    type: git
-    url: https://github.com/PickNikRobotics/urdf_parser_py
+    uri: https://github.com/PickNikRobotics/urdf_parser_py
     version: ros2
