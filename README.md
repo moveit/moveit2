@@ -25,7 +25,7 @@ These instructions assume you are running on Ubuntu 18.04.
 
         git clone git@github.com:ros-planning/moveit2.git
         vcs import < moveit2/moveit2.repos
-        rosdep install -r --from-paths . --ignore-src --rosdistro Dashing -y
+        rosdep install -r --from-paths . --ignore-src --rosdistro dashing -y
 
 1. Configure and build the workspace:
 
