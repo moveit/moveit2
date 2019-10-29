@@ -65,21 +65,10 @@ rdf_loader::RDFLoader::RDFLoader(std::shared_ptr<rclcpp::Node>& node, const std:
 
   auto desc_parameters = std::make_shared<rclcpp::SyncParametersClient>(node);
 
-  rmw_qos_profile_t qos = rmw_qos_profile_default;
-  qos.depth = 1;
-  qos.durability = RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL;
-
-  auto subscription_robot_description_ = node->create_subscription<std_msgs::msg::String>(
-    robot_description,
-    [&](std_msgs::msg::String::ConstSharedPtr msg) {
-      content = std::string(msg->data.c_str());
-  }, qos);
-
-  while(content.length()<1){
+  // TODO(JafarAbdi): Revise parameter lookup
+  if (content.length()<1){
     RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model topic! Did you remap '%s'?\n", robot_description.c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    rclcpp::spin_some(node);
-  }
+    return;
 
   urdf::Model* umodel = new urdf::Model();
   if (!umodel->initString(content))
@@ -92,17 +81,9 @@ rdf_loader::RDFLoader::RDFLoader(std::shared_ptr<rclcpp::Node>& node, const std:
   const std::string srdf_description(robot_description_ + "_semantic");
   std::string scontent;
 
-  auto subscription_robot_description_semantic_ = node->create_subscription<std_msgs::msg::String>(
-    robot_description + "_semantic",
-    [&](std_msgs::msg::String::UniquePtr msg) {
-    scontent = std::string(msg->data.c_str());
-  }, qos);
-
-  while(scontent.length()<1){
+  // TODO(JafarAbdi): Revise parameter lookup
+  if(scontent.length()<1){
     RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model semantic topic! Did you remap '%s'?\n", std::string(robot_description + "_semantic").c_str());
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    rclcpp::spin_some(node);
-  }
 
   srdf_.reset(new srdf::Model());
   if (!srdf_->initString(*urdf_, scontent))
