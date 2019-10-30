@@ -16,15 +16,17 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>pkg-config</buildtool_depend>
+  <buildtool_depend>eigen3_cmake_module</buildtool_depend>
 
+  <depend>rclcpp</depend>
   <depend>assimp</depend>
   <depend>boost</depend>
   <depend>eigen</depend>
   <depend>eigen_stl_containers</depend>
   <depend>libfcl-dev</depend>
-  <depend version_gte="0.5.2">geometric_shapes</depend>
+  <depend version_gte="0.6.2">geometric_shapes</depend>
   <depend>geometry_msgs</depend>
   <depend>kdl_parser</depend>
   <depend>libconsole-bridge-dev</depend>
@@ -35,9 +37,6 @@
   <depend>octomap</depend>
   <depend>octomap_msgs</depend>
   <depend>random_numbers</depend>
-  <depend>roslib</depend>
-  <depend>rostime</depend>
-  <depend>rosconsole</depend>
   <depend>sensor_msgs</depend>
   <depend>shape_msgs</depend>
   <depend>srdfdom</depend>
