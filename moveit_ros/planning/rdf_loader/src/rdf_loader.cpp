@@ -66,10 +66,12 @@ rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, cons
   auto desc_parameters = std::make_shared<rclcpp::SyncParametersClient>(node);
 
   // TODO(JafarAbdi): Revise parameter lookup
-  if (content.length()<1){
-    RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model topic! Did you remap '%s'?\n", robot_description.c_str());
+  if (content.length() < 1)
+  {
+    RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model topic! Did you remap '%s'?\n",
+                     robot_description.c_str());
     return;
-
+  }
   urdf::Model* umodel = new urdf::Model();
   if (!umodel->initString(content))
   {
@@ -82,8 +84,12 @@ rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, cons
   std::string scontent;
 
   // TODO(JafarAbdi): Revise parameter lookup
-  if(scontent.length()<1){
-    RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model semantic topic! Did you remap '%s'?\n", std::string(robot_description + "_semantic").c_str());
+  if (scontent.length() < 1)
+  {
+    RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model semantic topic! Did you remap '%s'?\n",
+                     std::string(robot_description + "_semantic").c_str());
+    return;
+  }
 
   srdf_.reset(new srdf::Model());
   if (!srdf_->initString(*urdf_, scontent))
@@ -93,7 +99,8 @@ rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, cons
     return;
   }
 
-  RCLCPP_INFO(LOGGER_RDF_LOADER, "Loaded robot model in %ld seconds", std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count());
+  RCLCPP_INFO(LOGGER_RDF_LOADER, "Loaded robot model in %ld seconds",
+              std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count());
 }
 
 rdf_loader::RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_string)
