@@ -30,7 +30,7 @@ These instructions assume you are running on Ubuntu 18.04.
 1. Configure and build the workspace:
 
         cd $COLCON_WS
-        colcon build --merge-install --event-handlers desktop_notification- status-
+        colcon build --symlink-install --event-handlers desktop_notification- status-
 
 1. Source the workspace:
 

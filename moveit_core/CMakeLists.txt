@@ -180,6 +180,9 @@ include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
                     ${urdfdom_headers_INCLUDE_DIRS}
                     ${OCTOMAP_INCLUDE_DIRS}
                     ${moveit_msgs_INCLUDE_DIRS}
+                    ${random_numbers_INCLUDE_DIRS}
+                    ${srdfdom_INCLUDE_DIRS}
+                    ${geometric_shapes_INCLUDE_DIRS}
 )
 
 add_subdirectory(version)
