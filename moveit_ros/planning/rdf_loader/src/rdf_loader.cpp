@@ -172,7 +172,7 @@ bool rdf_loader::RDFLoader::loadXacroFileToString(std::string& buffer, const std
     RCLCPP_ERROR(LOGGER_RDF_LOADER, "File does not exist");
     return false;
   }
-  //TODO (anasarrak): Test ros2 xacro https://github.com/ros/xacro/tree/ros2 // https://github.com/bponsler/xacro
+
   std::string cmd = "ros2 run xacro xacro";
   for (std::vector<std::string>::const_iterator it = xacro_args.begin(); it != xacro_args.end(); ++it)
     cmd += *it + " ";
