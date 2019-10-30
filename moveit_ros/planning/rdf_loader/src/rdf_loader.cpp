@@ -54,7 +54,7 @@
 
 rclcpp::Logger LOGGER_RDF_LOADER = rclcpp::get_logger("moveit").get_child("rdf_loader");
 
-rdf_loader::RDFLoader::RDFLoader(std::shared_ptr<rclcpp::Node>& node, const std::string& robot_description)
+rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& robot_description)
 {
   moveit::tools::Profiler::ScopedStart prof_start;
   moveit::tools::Profiler::ScopedBlock prof_block("RDFLoader(robot_description)");
