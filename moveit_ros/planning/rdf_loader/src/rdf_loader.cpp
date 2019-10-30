@@ -41,6 +41,7 @@
 // ROS 2
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
+#include <ament_index_cpp/get_package_prefix.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
 // Boost
@@ -218,10 +219,14 @@ bool rdf_loader::RDFLoader::loadPkgFileToString(std::string& buffer, const std::
                                                 const std::string& relative_path,
                                                 const std::vector<std::string>& xacro_args)
 {
-  std::string package_path = ament_index_cpp::get_package_share_directory(package_name);
-  if (package_path.empty())
+  std::string package_path;
+  try
   {
-    RCLCPP_ERROR(LOGGER_RDF_LOADER, "ROS2 was unable to find the package name '%s'", package_name.c_str());
+    package_path = ament_index_cpp::get_package_share_directory(package_name);
+  }
+  catch (const ament_index_cpp::PackageNotFoundError& e)
+  {
+    RCLCPP_ERROR(LOGGER_RDF_LOADER, "ament_index_cpp: %s", e.what());
     return false;
   }
 
