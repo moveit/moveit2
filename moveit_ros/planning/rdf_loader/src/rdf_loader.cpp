@@ -106,7 +106,7 @@ rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, cons
       RCLCPP_WARN(LOGGER_RDF_LOADER, "When getting robot_description_semantic parameter: %s", e.what());
     }
   }
-  if (scontent.length() < 1)
+  if (scontent.empty())
   {
     RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model semantic topic! Did you remap '%s'?\n",
                      std::string(robot_description + "_semantic").c_str());
