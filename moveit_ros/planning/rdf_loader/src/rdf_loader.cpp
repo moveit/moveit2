@@ -63,28 +63,49 @@ rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, cons
   auto start = std::chrono::system_clock::now();
 
   std::string content;
-
-  auto desc_parameters = std::make_shared<rclcpp::SyncParametersClient>(node);
-
   // TODO(JafarAbdi): Revise parameter lookup
+  if (node->has_parameter(robot_description))
+  {
+    rclcpp::Parameter robot_description_param = node->get_parameter(robot_description);
+    try
+    {
+      content = robot_description_param.as_string();
+    }
+    catch (const rclcpp::ParameterTypeException& e)
+    {
+      RCLCPP_WARN(LOGGER_RDF_LOADER, "When getting robot_description parameter %s", e.what());
+    }
+  }
   if (content.length() < 1)
   {
     RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model topic! Did you remap '%s'?\n",
                      robot_description.c_str());
     return;
   }
+
   urdf::Model* umodel = new urdf::Model();
   if (!umodel->initString(content))
   {
-    RCLCPP_INFO(LOGGER_RDF_LOADER, "Unable to parse URDF from parameter '%s'", robot_description_.c_str());
+    RCLCPP_INFO(LOGGER_RDF_LOADER, "Unable to parse URDF from parameter: '%s'", robot_description_.c_str());
     return;
   }
   urdf_.reset(umodel);
 
   const std::string srdf_description(robot_description_ + "_semantic");
   std::string scontent;
-
   // TODO(JafarAbdi): Revise parameter lookup
+  if (node->has_parameter(srdf_description))
+  {
+    rclcpp::Parameter srdf_description_param = node->get_parameter(srdf_description);
+    try
+    {
+      content = srdf_description_param.as_string();
+    }
+    catch (const rclcpp::ParameterTypeException& e)
+    {
+      RCLCPP_WARN(LOGGER_RDF_LOADER, "When getting robot_description_semantic parameter: %s", e.what());
+    }
+  }
   if (scontent.length() < 1)
   {
     RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model semantic topic! Did you remap '%s'?\n",
