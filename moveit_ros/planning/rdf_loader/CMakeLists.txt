@@ -5,7 +5,10 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 ament_target_dependencies(${MOVEIT_LIB_NAME}
       rclcpp
       ament_index_cpp
-      urdf)
+      urdf
+      srdfdom
+      moveit_core
+      Boost)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
   ARCHIVE DESTINATION lib
@@ -13,3 +16,9 @@ install(TARGETS ${MOVEIT_LIB_NAME}
   RUNTIME DESTINATION bin)
 
 install(DIRECTORY include/ DESTINATION include)
+
+message(Jafar)
+foreach(dir ${moveit_core_LIBRARIES})
+        message(STATUS "dir='${dir}'")
+endforeach()
+message(Jafar)
