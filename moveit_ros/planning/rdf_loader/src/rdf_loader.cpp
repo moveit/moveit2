@@ -78,7 +78,7 @@ rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, cons
   }
   if (content.empty())
   {
-    RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model topic! Did you remap '%s'?\n",
+    RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Robot model parameter not found! Did you remap '%s'?\n",
                      robot_description.c_str());
     return;
   }
@@ -108,7 +108,7 @@ rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, cons
   }
   if (scontent.empty())
   {
-    RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model semantic topic! Did you remap '%s'?\n",
+    RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Robot semantic description not found. Did you forget to define or remap '%s'?\n",
                      std::string(robot_description + "_semantic").c_str());
     return;
   }
