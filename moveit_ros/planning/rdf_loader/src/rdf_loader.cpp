@@ -76,7 +76,7 @@ rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, cons
       RCLCPP_WARN(LOGGER_RDF_LOADER, "When getting robot_description parameter %s", e.what());
     }
   }
-  if (content.length() < 1)
+  if (content.empty())
   {
     RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Waiting for Robot model topic! Did you remap '%s'?\n",
                      robot_description.c_str());
