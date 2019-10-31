@@ -16,9 +16,3 @@ install(TARGETS ${MOVEIT_LIB_NAME}
   RUNTIME DESTINATION bin)
 
 install(DIRECTORY include/ DESTINATION include)
-
-message(Jafar)
-foreach(dir ${moveit_core_LIBRARIES})
-        message(STATUS "dir='${dir}'")
-endforeach()
-message(Jafar)
