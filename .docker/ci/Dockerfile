@@ -28,6 +28,7 @@ RUN apt-get -qq update && \
         python3-pip \
         python-rosdep \
         python3-wstool \
+        python3-vcstool \
         python3-rospkg-modules \
         python3-rosdistro-modules \
         && \
@@ -69,8 +70,8 @@ RUN apt-get -qq update && \
 # Download moveit source and fetch all necessary dependencies
 RUN mkdir src && \
     cd $ROS_WS/src && \
-    # TODO(mlautman): This should be changed to use vcs in the future
-    wstool init --shallow . https://raw.githubusercontent.com/ros-planning/moveit2/master/moveit.rosinstall && \
+    wget -q https://raw.githubusercontent.com/henningkayser/moveit2/pr-moveit_core/moveit2.repos && \
+    vcs import < moveit2.repos && \
     apt-get -qq update && \
     rosdep update -q && \
     rosdep install -q -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \

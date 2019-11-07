@@ -10,7 +10,8 @@ RUN mkdir src && \
     cd src && \
     #
     # Download moveit source so that we can get necessary dependencies
-    wstool init . https://raw.githubusercontent.com/ros-planning/moveit2/master/moveit.rosinstall
+    wget -q https://raw.githubusercontent.com/henningkayser/moveit2/pr-moveit_core/moveit2.repos && \
+    vcs import < moveit2.repos
 
 # Update apt package list as cache is cleared in previous container
 # Usually upgrading involves a few packages only (if container builds became out-of-sync)
