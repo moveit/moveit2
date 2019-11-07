@@ -36,13 +36,17 @@
 
 #include <moveit/constraint_samplers/constraint_sampler.h>
 
+namespace constraint_samplers
+{
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.constraint_sampler");
+
 constraint_samplers::ConstraintSampler::ConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene,
                                                           const std::string& group_name)
   : is_valid_(false), scene_(scene), jmg_(scene->getRobotModel()->getJointModelGroup(group_name)), verbose_(false)
 {
   if (!jmg_)
   {
-    RCLCPP_ERROR(LOGGER_CONSTRAINT_SAMPLERS, "A JointModelGroup should have been specified for the constraint sampler");
+    RCLCPP_ERROR(LOGGER, "A JointModelGroup should have been specified for the constraint sampler");
   }
 }
 
@@ -51,3 +55,4 @@ void constraint_samplers::ConstraintSampler::clear()
   is_valid_ = false;
   frame_depends_.clear();
 }
+}  // namespace constraint_samplers

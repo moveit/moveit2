@@ -182,7 +182,8 @@ public:
 
 private:
   /** \brief Adds different collision geometries to a link. */
-  void addLinkCollision(const std::string& link_name, const urdf::CollisionSharedPtr& coll, geometry_msgs::msg::Pose origin);
+  void addLinkCollision(const std::string& link_name, const urdf::CollisionSharedPtr& coll,
+                        geometry_msgs::msg::Pose origin);
 
   /** \brief Adds different visual geometries to a link. */
   void addLinkVisual(const std::string& link_name, const urdf::VisualSharedPtr& vis, geometry_msgs::msg::Pose origin);

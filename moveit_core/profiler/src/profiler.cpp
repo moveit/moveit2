@@ -40,11 +40,14 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
+#include <rclcpp/rclcpp.hpp>
 
 namespace moveit
 {
 namespace tools
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_profiler.profiler");
+
 Profiler& Profiler::instance()
 {
   static Profiler p(false, false);
@@ -174,7 +177,7 @@ void Profiler::console()
   std::stringstream ss;
   ss << std::endl;
   status(ss, true);
-  RCUTILS_LOG_INFO("profiler", ss.str().c_str());
+  RCLCPP_INFO(LOGGER, ss.str().c_str());
 }
 
 /// @cond IGNORE

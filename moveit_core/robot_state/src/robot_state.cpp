@@ -51,7 +51,7 @@ namespace moveit
 namespace core
 {
 // Logger
-rclcpp::Logger LOGGER = rclcpp::get_logger("robot_state");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_state.robot_state");
 
 /** \brief It is recommended that there are at least 10 steps per trajectory
  * for testing jump thresholds with computeCartesianPath. With less than 10 steps

@@ -51,7 +51,7 @@ namespace moveit
 {
 namespace core
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("robot_model");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.robot_model");
 
 RobotModel::RobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model)
 {
@@ -346,11 +346,10 @@ void RobotModel::buildGroupStates(const srdf::Model& srdf_model)
               state[vn[j]] = jt->second[j];
           else
           {
-            RCLCPP_ERROR(LOGGER,
-                         "The model for joint '%s' requires %d variable values, but only %d variable values were "
-                         "supplied in default state '%s' for group '%s'",
-                         jt->first.c_str(), (int)vn.size(), (int)jt->second.size(), ds[i].name_.c_str(),
-                         jmg->getName().c_str());
+            RCLCPP_ERROR(
+                LOGGER, "The model for joint '%s' requires %d variable values, but only %d variable values were "
+                        "supplied in default state '%s' for group '%s'",
+                jt->first.c_str(), (int)vn.size(), (int)jt->second.size(), ds[i].name_.c_str(), jmg->getName().c_str());
           }
         }
         else

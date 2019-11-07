@@ -45,7 +45,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 // Logger
-rclcpp::Logger logger_trajectory_processing_test = rclcpp::get_logger("trajectory_processing");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_trajectory_processing.test.test_time_parameterization");
 
 // Static variables used in all tests
 moveit::core::RobotModelConstPtr RMODEL = moveit::core::loadTestingRobotModel("pr2");
@@ -60,7 +60,7 @@ int initRepeatedPointTrajectory(robot_trajectory::RobotTrajectory& trajectory)
   const robot_model::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    RCLCPP_ERROR(logger_trajectory_processing_test, "Need to set the group");
+    RCLCPP_ERROR(LOGGER, "Need to set the group");
     return -1;
   }
   // leave initial velocity/acceleration unset
@@ -90,7 +90,7 @@ int initStraightTrajectory(robot_trajectory::RobotTrajectory& trajectory, double
   const robot_model::JointModelGroup* group = trajectory.getGroup();
   if (!group)
   {
-    RCLCPP_ERROR(logger_trajectory_processing_test, "Need to set the group");
+    RCLCPP_ERROR(LOGGER, "Need to set the group");
     return -1;
   }
   // leave initial velocity/acceleration unset

@@ -42,11 +42,11 @@ using namespace moveit::core;
 
 namespace kinematic_constraints
 {
-const std::string LOGNAME = "kinematic_constraint_utils";
+// Logger
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematic_constraints.utils");
 
-  rclcpp::Logger LOGGER_KINEMATIC_CONSTRAINTS_UTILS = rclcpp::get_logger(LOGNAME);
-
-moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constraints& first, const moveit_msgs::msg::Constraints& second)
+moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constraints& first,
+                                               const moveit_msgs::msg::Constraints& second)
 {
   moveit_msgs::msg::Constraints r;
 
@@ -65,10 +65,10 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
         const moveit_msgs::msg::JointConstraint& b = second.joint_constraints[j];
         double low = std::max(a.position - a.tolerance_below, b.position - b.tolerance_below);
         double high = std::min(a.position + a.tolerance_above, b.position + b.tolerance_above);
-        if (low > high){
-          RCLCPP_ERROR(LOGGER_KINEMATIC_CONSTRAINTS_UTILS,
-                          "Attempted to merge incompatible constraints for joint '%s'. Discarding constraint.",
-                          a.joint_name.c_str());
+        if (low > high)
+        {
+          RCLCPP_ERROR(LOGGER, "Attempted to merge incompatible constraints for joint '%s'. Discarding constraint.",
+                       a.joint_name.c_str());
         }
         else
         {
@@ -129,14 +129,14 @@ std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& cons
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const robot_state::RobotState& state,
-                                                  const robot_model::JointModelGroup* jmg, double tolerance)
+                                                       const robot_model::JointModelGroup* jmg, double tolerance)
 {
   return constructGoalConstraints(state, jmg, tolerance, tolerance);
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const robot_state::RobotState& state,
-                                                  const robot_model::JointModelGroup* jmg, double tolerance_below,
-                                                  double tolerance_above)
+                                                       const robot_model::JointModelGroup* jmg, double tolerance_below,
+                                                       double tolerance_above)
 {
   moveit_msgs::msg::Constraints goal;
   std::vector<double> vals;
@@ -154,8 +154,9 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const robot_state::RobotS
   return goal;
 }
 
-moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name, const geometry_msgs::msg::PoseStamped& pose,
-                                                  double tolerance_pos, double tolerance_angle)
+moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
+                                                       const geometry_msgs::msg::PoseStamped& pose,
+                                                       double tolerance_pos, double tolerance_angle)
 {
   moveit_msgs::msg::Constraints goal;
 
@@ -195,9 +196,10 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
   return goal;
 }
 
-moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name, const geometry_msgs::msg::PoseStamped& pose,
-                                                  const std::vector<double>& tolerance_pos,
-                                                  const std::vector<double>& tolerance_angle)
+moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
+                                                       const geometry_msgs::msg::PoseStamped& pose,
+                                                       const std::vector<double>& tolerance_pos,
+                                                       const std::vector<double>& tolerance_angle)
 {
   moveit_msgs::msg::Constraints goal = constructGoalConstraints(link_name, pose);
   if (tolerance_pos.size() == 3)
@@ -220,7 +222,8 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
-                                                  const geometry_msgs::msg::QuaternionStamped& quat, double tolerance)
+                                                       const geometry_msgs::msg::QuaternionStamped& quat,
+                                                       double tolerance)
 {
   moveit_msgs::msg::Constraints goal;
   goal.orientation_constraints.resize(1);
@@ -236,7 +239,8 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
-                                                  const geometry_msgs::msg::PointStamped& goal_point, double tolerance)
+                                                       const geometry_msgs::msg::PointStamped& goal_point,
+                                                       double tolerance)
 {
   geometry_msgs::msg::Point p;
   p.x = 0;
@@ -246,8 +250,9 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 }
 
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
-                                                  const geometry_msgs::msg::Point& reference_point,
-                                                  const geometry_msgs::msg::PointStamped& goal_point, double tolerance)
+                                                       const geometry_msgs::msg::Point& reference_point,
+                                                       const geometry_msgs::msg::PointStamped& goal_point,
+                                                       double tolerance)
 {
   moveit_msgs::msg::Constraints goal;
   goal.position_constraints.resize(1);
@@ -275,7 +280,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 
   return goal;
 }
-//TODO ROS 2: Rework these functions
+// TODO ROS 2: Rework these functions
 
 // TODO: Is not getting called from anywhere, check if is necessary
 // static bool constructPoseStamped(XmlRpc::XmlRpcValue::iterator& it, geometry_msgs::msg::PoseStamped& pose)
@@ -341,7 +346,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //     }
 //     else
 //     {
-//       RCLCPP_WARN(LOGGER_KINEMATIC_CONSTRAINTS_UTILS, "joint constraint contains unknown entity '" << it->first << "'");
+//       RCLCPP_WARN(LOGGER, "joint constraint contains unknown entity '" << it->first << "'");
 //     }
 //   }
 //   return true;
@@ -399,7 +404,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //     }
 //     else
 //     {
-//       RCLCPP_WARN(LOGGER_KINEMATIC_CONSTRAINTS_UTILS, "position constraint contains unknown entity '" << it->first << "'");
+//       RCLCPP_WARN(LOGGER, "position constraint contains unknown entity '" << it->first << "'");
 //     }
 //   }
 //   return true;
@@ -437,7 +442,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //     }
 //     else
 //     {
-//       RCLCPP_WARN(LOGGER_KINEMATIC_CONSTRAINTS_UTILS, "orientation constraint contains unknown entity '" << it->first << "'");
+//       RCLCPP_WARN(LOGGER, "orientation constraint contains unknown entity '" << it->first << "'");
 //     }
 //   }
 //   return true;
@@ -471,7 +476,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //       constraint.max_range_angle = parseDouble(it->second);
 //     else
 //     {
-//       RCLCPP_WARN(LOGGER_KINEMATIC_CONSTRAINTS_UTILS, "orientation constraint contains unknown entity '" << it->first << "'");
+//       RCLCPP_WARN(LOGGER, "orientation constraint contains unknown entity '" << it->first << "'");
 //     }
 //   }
 //
@@ -484,7 +489,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 // {
 //   if (params.getType() != XmlRpc::XmlRpcValue::TypeArray)
 //   {
-//     RCLCPP_ERROR(LOGGER_KINEMATIC_CONSTRAINTS_UTILS, "expected constraints as array");
+//     RCLCPP_ERROR(LOGGER, "expected constraints as array");
 //     return false;
 //   }
 //
@@ -492,7 +497,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //   {
 //     if (!params[i].hasMember("type"))
 //     {
-//       RCLCPP_ERROR(LOGGER_KINEMATIC_CONSTRAINTS_UTILS, "constraint parameter does not specify its type");
+//       RCLCPP_ERROR(LOGGER, "constraint parameter does not specify its type");
 //     }
 //     else if (params[i]["type"] == "joint")
 //     {

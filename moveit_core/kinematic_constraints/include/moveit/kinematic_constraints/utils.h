@@ -65,7 +65,7 @@ namespace kinematic_constraints
  * @return The merged set of constraints
  */
 moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constraints& first,
-                                          const moveit_msgs::msg::Constraints& second);
+                                               const moveit_msgs::msg::Constraints& second);
 
 /** \brief Check if any constraints were specified */
 bool isEmpty(const moveit_msgs::msg::Constraints& constr);
@@ -85,8 +85,8 @@ std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& cons
  * @return A full constraint message containing all the joint constraints
  */
 moveit_msgs::msg::Constraints constructGoalConstraints(const robot_state::RobotState& state,
-                                                  const robot_model::JointModelGroup* jmg, double tolerance_below,
-                                                  double tolerance_above);
+                                                       const robot_model::JointModelGroup* jmg, double tolerance_below,
+                                                       double tolerance_above);
 
 /**
  * \brief Generates a constraint message intended to be used as a goal
@@ -100,8 +100,8 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const robot_state::RobotS
  * @return A full constraint message containing all the joint constraints
  */
 moveit_msgs::msg::Constraints constructGoalConstraints(const robot_state::RobotState& state,
-                                                  const robot_model::JointModelGroup* jmg,
-                                                  double tolerance = std::numeric_limits<double>::epsilon());
+                                                       const robot_model::JointModelGroup* jmg,
+                                                       double tolerance = std::numeric_limits<double>::epsilon());
 
 /**
  * \brief Generates a constraint message intended to be used as a goal
@@ -118,8 +118,9 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const robot_state::RobotS
  *
  * @return A full constraint message containing both constraints
  */
-moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name, const geometry_msgs::msg::PoseStamped& pose,
-                                                  double tolerance_pos = 1e-3, double tolerance_angle = 1e-2);
+moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
+                                                       const geometry_msgs::msg::PoseStamped& pose,
+                                                       double tolerance_pos = 1e-3, double tolerance_angle = 1e-2);
 
 /**
  * \brief Generates a constraint message intended to be used as a goal
@@ -136,9 +137,10 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  *
  * @return A full constraint message containing both constraints
  */
-moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name, const geometry_msgs::msg::PoseStamped& pose,
-                                                  const std::vector<double>& tolerance_pos,
-                                                  const std::vector<double>& tolerance_angle);
+moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
+                                                       const geometry_msgs::msg::PoseStamped& pose,
+                                                       const std::vector<double>& tolerance_pos,
+                                                       const std::vector<double>& tolerance_angle);
 
 /**
  * \brief Generates a constraint message intended to be used as a goal
@@ -152,8 +154,8 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  * @return A full constraint message containing the orientation constraint
  */
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
-                                                  const geometry_msgs::msg::QuaternionStamped& quat,
-                                                  double tolerance = 1e-2);
+                                                       const geometry_msgs::msg::QuaternionStamped& quat,
+                                                       double tolerance = 1e-2);
 
 /**
  * \brief Generates a constraint message intended to be used as a goal
@@ -169,9 +171,9 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  * @return A full constraint message containing the position constraint
  */
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
-                                                  const geometry_msgs::msg::Point& reference_point,
-                                                  const geometry_msgs::msg::PointStamped& goal_point,
-                                                  double tolerance = 1e-3);
+                                                       const geometry_msgs::msg::Point& reference_point,
+                                                       const geometry_msgs::msg::PointStamped& goal_point,
+                                                       double tolerance = 1e-3);
 
 /**
  * \brief Generates a constraint message intended to be used as a goal
@@ -186,8 +188,8 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  * @return A full constraint message containing the position constraint
  */
 moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_name,
-                                                  const geometry_msgs::msg::PointStamped& goal_point,
-                                                  double tolerance = 1e-3);
+                                                       const geometry_msgs::msg::PointStamped& goal_point,
+                                                       double tolerance = 1e-3);
 
 /**
  * \brief extract constraint message from XmlRpc node.
@@ -200,7 +202,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  *
  * @return was the construction successful?
  */
- // TODO rework this function
+// TODO rework this function
 // bool constructConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Constraints& constraints);
 }
 

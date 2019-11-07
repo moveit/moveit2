@@ -42,7 +42,7 @@
 
 namespace kinematics_metrics
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("kinematics_metrics");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematics_metrics.kinematics_metrics");
 
 double KinematicsMetrics::getJointLimitsPenalty(const robot_state::RobotState& state,
                                                 const robot_model::JointModelGroup* joint_model_group) const

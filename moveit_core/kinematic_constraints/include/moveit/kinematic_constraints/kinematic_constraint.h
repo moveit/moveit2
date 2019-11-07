@@ -49,10 +49,6 @@
 #include <iostream>
 #include <vector>
 
-#include "rclcpp/clock.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp/duration.hpp"
-
 /** \brief Representation and evaluation of kinematic constraints */
 namespace kinematic_constraints
 {
@@ -1064,11 +1060,13 @@ protected:
 
   std::vector<moveit_msgs::msg::JointConstraint> joint_constraints_; /**<  \brief Messages corresponding to all internal
                                                                    joint constraints */
-  std::vector<moveit_msgs::msg::PositionConstraint> position_constraints_;       /**<  \brief Messages corresponding to all
-                                                                               internal position constraints */
-  std::vector<moveit_msgs::msg::OrientationConstraint> orientation_constraints_; /**<  \brief Messages corresponding to all
+  std::vector<moveit_msgs::msg::PositionConstraint> position_constraints_; /**<  \brief Messages corresponding to all
+                                                                         internal position constraints */
+  std::vector<moveit_msgs::msg::OrientationConstraint> orientation_constraints_; /**<  \brief Messages corresponding to
+                                                                               all
                                                                                internal orientation constraints */
-  std::vector<moveit_msgs::msg::VisibilityConstraint> visibility_constraints_;   /**<  \brief Messages corresponding to all
+  std::vector<moveit_msgs::msg::VisibilityConstraint> visibility_constraints_;   /**<  \brief Messages corresponding to
+                                                                               all
                                                                                internal visibility constraints */
   moveit_msgs::msg::Constraints all_constraints_; /**<  \brief Messages corresponding to all internal constraints */
 };

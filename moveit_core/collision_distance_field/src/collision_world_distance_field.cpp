@@ -45,6 +45,8 @@
 
 namespace collision_detection
 {
+const rclcpp::Logger CollisionWorldDistanceField::LOGGER =
+    rclcpp::get_logger("moveit_collision_distance_field.collision_world_distance_field");
 CollisionWorldDistanceField::~CollisionWorldDistanceField()
 {
   getWorld()->removeObserver(observer_handle_);
@@ -141,8 +143,7 @@ void CollisionWorldDistanceField::checkCollision(const CollisionRequest& req, Co
   }
   catch (const std::bad_cast& e)
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_WORLD_DISTANCE_FIELD,
-                 "Could not cast CollisionRobot to CollisionRobotDistanceField, %s", e.what());
+    RCLCPP_ERROR(LOGGER, "Could not cast CollisionRobot to CollisionRobotDistanceField, %s", e.what());
     return;
   }
 
@@ -185,8 +186,7 @@ void CollisionWorldDistanceField::checkCollision(const CollisionRequest& req, Co
   }
   catch (const std::bad_cast& e)
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_WORLD_DISTANCE_FIELD,
-                 "Could not cast CollisionRobot to CollisionRobotDistanceField, %s ", e.what());
+    RCLCPP_ERROR(LOGGER, "Could not cast CollisionRobot to CollisionRobotDistanceField, %s ", e.what());
     return;
   }
 
@@ -225,8 +225,7 @@ void CollisionWorldDistanceField::checkRobotCollision(const CollisionRequest& re
   }
   catch (const std::bad_cast& e)
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_WORLD_DISTANCE_FIELD,
-                 "Could not cast CollisionRobot to CollisionRobotDistanceField, %s", e.what());
+    RCLCPP_ERROR(LOGGER, "Could not cast CollisionRobot to CollisionRobotDistanceField, %s", e.what());
     return;
   }
 }
@@ -264,8 +263,7 @@ void CollisionWorldDistanceField::checkRobotCollision(const CollisionRequest& re
   }
   catch (const std::bad_cast& e)
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_WORLD_DISTANCE_FIELD,
-                 "Could not cast CollisionRobot to CollisionRobotDistanceField, %s", e.what());
+    RCLCPP_ERROR(LOGGER, "Could not cast CollisionRobot to CollisionRobotDistanceField, %s", e.what());
     return;
   }
 }
@@ -294,8 +292,7 @@ void CollisionWorldDistanceField::getCollisionGradients(const CollisionRequest& 
   }
   catch (const std::bad_cast& e)
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_WORLD_DISTANCE_FIELD,
-                 "Could not cast CollisionRobot to CollisionRobotDistanceField, %s ", e.what());
+    RCLCPP_ERROR(LOGGER, "Could not cast CollisionRobot to CollisionRobotDistanceField, %s ", e.what());
     return;
   }
 
@@ -325,8 +322,7 @@ void CollisionWorldDistanceField::getAllCollisions(const CollisionRequest& req, 
   }
   catch (const std::bad_cast& e)
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_WORLD_DISTANCE_FIELD,
-                 "Could not cast CollisionRobot to CollisionRobotDistanceField, %s", e.what());
+    RCLCPP_ERROR(LOGGER, "Could not cast CollisionRobot to CollisionRobotDistanceField, %s", e.what());
     return;
   }
 
@@ -499,8 +495,7 @@ void CollisionWorldDistanceField::notifyObjectChange(CollisionWorldDistanceField
     self->distance_field_cache_entry_->distance_field_->addPointsToField(add_points);
   }
 
-  RCLCPP_DEBUG(LOGGER_COLLISION_WORLD_DISTANCE_FIELD, "Modifying object %s took %lf s", obj->id_.c_str(),
-               rclcpp::Clock(RCL_SYSTEM_TIME).now() - n);
+  RCLCPP_DEBUG(LOGGER, "Modifying object %s took %lf s", obj->id_.c_str(), rclcpp::Clock(RCL_SYSTEM_TIME).now() - n);
 }
 
 void CollisionWorldDistanceField::updateDistanceObject(const std::string& id, DistanceFieldCacheEntryPtr& dfce,
@@ -521,9 +516,8 @@ void CollisionWorldDistanceField::updateDistanceObject(const std::string& id, Di
   World::ObjectConstPtr object = getWorld()->getObject(id);
   if (object)
   {
-    RCLCPP_DEBUG(LOGGER_COLLISION_WORLD_DISTANCE_FIELD,
-                 "Updating/Adding Object '%s' with %i  shapes  to CollisionWorldDistanceField", object->id_.c_str(),
-                 object->shapes_.size());
+    RCLCPP_DEBUG(LOGGER, "Updating/Adding Object '%s' with %i  shapes  to CollisionWorldDistanceField",
+                 object->id_.c_str(), object->shapes_.size());
     std::vector<PosedBodyPointDecompositionPtr> shape_points;
     for (unsigned int i = 0; i < object->shapes_.size(); i++)
     {
@@ -550,8 +544,7 @@ void CollisionWorldDistanceField::updateDistanceObject(const std::string& id, Di
   }
   else
   {
-    RCLCPP_DEBUG(LOGGER_COLLISION_WORLD_DISTANCE_FIELD,
-                 ("Removing Object '%s' from CollisionWorldDistanceField", id).c_str());
+    RCLCPP_DEBUG(LOGGER, "Removing Object '%s' from CollisionWorldDistanceField", id.c_str());
     dfce->posed_body_point_decompositions_.erase(id);
   }
 }

@@ -37,117 +37,111 @@
 #include <moveit/collision_detection/allvalid/collision_world_allvalid.h>
 #include "rclcpp/rclcpp.hpp"
 
+namespace collision_detection
+{
 // Logger
-rclcpp::Logger LOGGER_COLLISION_WORLD_ALLVALID = rclcpp::get_logger("moveit").get_child("collision_detection");;
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_world_allvalid");
 
-collision_detection::CollisionWorldAllValid::CollisionWorldAllValid() : CollisionWorld()
+CollisionWorldAllValid::CollisionWorldAllValid() : CollisionWorld()
 {
 }
 
-collision_detection::CollisionWorldAllValid::CollisionWorldAllValid(const WorldPtr& world) : CollisionWorld(world)
+CollisionWorldAllValid::CollisionWorldAllValid(const WorldPtr& world) : CollisionWorld(world)
 {
 }
 
-collision_detection::CollisionWorldAllValid::CollisionWorldAllValid(const CollisionWorld& other, const WorldPtr& world)
+CollisionWorldAllValid::CollisionWorldAllValid(const CollisionWorld& other, const WorldPtr& world)
   : CollisionWorld(other, world)
 {
 }
 
-void collision_detection::CollisionWorldAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                      const CollisionRobot& robot,
-                                                                      const robot_state::RobotState& state) const
+void CollisionWorldAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
+                                                 const CollisionRobot& robot,
+                                                 const robot_state::RobotState& state) const
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER_COLLISION_WORLD_ALLVALID, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionWorldAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                      const CollisionRobot& robot,
-                                                                      const robot_state::RobotState& state,
-                                                                      const AllowedCollisionMatrix& acm) const
+void CollisionWorldAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
+                                                 const CollisionRobot& robot, const robot_state::RobotState& state,
+                                                 const AllowedCollisionMatrix& acm) const
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER_COLLISION_WORLD_ALLVALID, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionWorldAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                      const CollisionRobot& robot,
-                                                                      const robot_state::RobotState& state1,
-                                                                      const robot_state::RobotState& state2) const
+void CollisionWorldAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
+                                                 const CollisionRobot& robot, const robot_state::RobotState& state1,
+                                                 const robot_state::RobotState& state2) const
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER_COLLISION_WORLD_ALLVALID, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionWorldAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                      const CollisionRobot& robot,
-                                                                      const robot_state::RobotState& state1,
-                                                                      const robot_state::RobotState& state2,
-                                                                      const AllowedCollisionMatrix& acm) const
+void CollisionWorldAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
+                                                 const CollisionRobot& robot, const robot_state::RobotState& state1,
+                                                 const robot_state::RobotState& state2,
+                                                 const AllowedCollisionMatrix& acm) const
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER_COLLISION_WORLD_ALLVALID, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionWorldAllValid::checkWorldCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                      const CollisionWorld& other_world) const
+void CollisionWorldAllValid::checkWorldCollision(const CollisionRequest& req, CollisionResult& res,
+                                                 const CollisionWorld& other_world) const
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER_COLLISION_WORLD_ALLVALID, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionWorldAllValid::checkWorldCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                      const CollisionWorld& other_world,
-                                                                      const AllowedCollisionMatrix& acm) const
+void CollisionWorldAllValid::checkWorldCollision(const CollisionRequest& req, CollisionResult& res,
+                                                 const CollisionWorld& other_world,
+                                                 const AllowedCollisionMatrix& acm) const
 {
   res.collision = false;
   if (req.verbose)
-    RCLCPP_INFO(LOGGER_COLLISION_WORLD_ALLVALID, "Using AllValid collision detection. No collision checking is performed.");
+    RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
 }
 
-double collision_detection::CollisionWorldAllValid::distanceRobot(const CollisionRobot& robot,
-                                                                  const robot_state::RobotState& state) const
+double CollisionWorldAllValid::distanceRobot(const CollisionRobot& robot, const robot_state::RobotState& state) const
 {
   return 0.0;
 }
 
-double collision_detection::CollisionWorldAllValid::distanceRobot(const CollisionRobot& robot,
-                                                                  const robot_state::RobotState& state,
-                                                                  const AllowedCollisionMatrix& acm) const
+double CollisionWorldAllValid::distanceRobot(const CollisionRobot& robot, const robot_state::RobotState& state,
+                                             const AllowedCollisionMatrix& acm) const
 {
   return 0.0;
 }
 
-void collision_detection::CollisionWorldAllValid::distanceRobot(const collision_detection::DistanceRequest& req,
-                                                                collision_detection::DistanceResult& res,
-                                                                const collision_detection::CollisionRobot& robot,
-                                                                const moveit::core::RobotState& state) const
+void CollisionWorldAllValid::distanceRobot(const DistanceRequest& req, DistanceResult& res, const CollisionRobot& robot,
+                                           const moveit::core::RobotState& state) const
 {
   res.collision = false;
 }
 
-double collision_detection::CollisionWorldAllValid::distanceWorld(const CollisionWorld& world) const
+double CollisionWorldAllValid::distanceWorld(const CollisionWorld& world) const
 {
   return 0.0;
 }
 
-double collision_detection::CollisionWorldAllValid::distanceWorld(const CollisionWorld& world,
-                                                                  const AllowedCollisionMatrix& acm) const
+double CollisionWorldAllValid::distanceWorld(const CollisionWorld& world, const AllowedCollisionMatrix& acm) const
 {
   return 0.0;
 }
 
-void collision_detection::CollisionWorldAllValid::distanceWorld(const collision_detection::DistanceRequest& req,
-                                                                collision_detection::DistanceResult& res,
-                                                                const collision_detection::CollisionWorld& world) const
+void CollisionWorldAllValid::distanceWorld(const DistanceRequest& req, DistanceResult& res,
+                                           const CollisionWorld& world) const
 {
   res.collision = false;
 }
+}  // namespace collision_detection
 
 #include <moveit/collision_detection/allvalid/collision_detector_allocator_allvalid.h>
 const std::string collision_detection::CollisionDetectorAllocatorAllValid::NAME("ALL_VALID");

@@ -60,7 +60,6 @@
 #include <boost/thread.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <rcutils/logging_macros.h>
 
 namespace moveit
 {

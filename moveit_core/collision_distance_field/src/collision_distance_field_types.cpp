@@ -42,10 +42,16 @@
 
 const static double EPSILON = 0.0001;
 
-std::vector<collision_detection::CollisionSphere>
-collision_detection::determineCollisionSpheres(const bodies::Body* body, Eigen::Isometry3d& relative_transform)
+namespace collision_detection
 {
-  std::vector<collision_detection::CollisionSphere> css;
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit_collision_distance_field.collision_distance_field_types");
+const rclcpp::Logger PosedBodyPointDecompositionVector::LOGGER = LOGGER;
+const rclcpp::Logger PosedBodySphereDecompositionVector::LOGGER = LOGGER;
+
+std::vector<CollisionSphere> determineCollisionSpheres(const bodies::Body* body, Eigen::Isometry3d& relative_transform)
+{
+  std::vector<CollisionSphere> css;
 
   bodies::BoundingCylinder cyl;
   body->computeBoundingCylinder(cyl);
@@ -55,18 +61,18 @@ collision_detection::determineCollisionSpheres(const bodies::Body* body, Eigen::
 
   for (unsigned int i = 1; i < num_points - 1; i++)
   {
-    collision_detection::CollisionSphere cs(
-        relative_transform * Eigen::Vector3d(0, 0, (-cyl.length / 2.0) + i * spacing), cyl.radius);
+    CollisionSphere cs(relative_transform * Eigen::Vector3d(0, 0, (-cyl.length / 2.0) + i * spacing), cyl.radius);
     css.push_back(cs);
   }
 
   return css;
 }
 
-bool collision_detection::PosedDistanceField::getCollisionSphereGradients(
-    const std::vector<CollisionSphere>& sphere_list, const EigenSTL::vector_Vector3d& sphere_centers,
-    GradientInfo& gradient, const collision_detection::CollisionType& type, double tolerance, bool subtract_radii,
-    double maximum_value, bool stop_at_first_collision)
+bool PosedDistanceField::getCollisionSphereGradients(const std::vector<CollisionSphere>& sphere_list,
+                                                     const EigenSTL::vector_Vector3d& sphere_centers,
+                                                     GradientInfo& gradient, const CollisionType& type,
+                                                     double tolerance, bool subtract_radii, double maximum_value,
+                                                     bool stop_at_first_collision)
 {
   // assumes gradient is properly initialized
 
@@ -125,13 +131,11 @@ bool collision_detection::PosedDistanceField::getCollisionSphereGradients(
   return in_collision;
 }
 
-bool collision_detection::getCollisionSphereGradients(const distance_field::DistanceField* distance_field,
-                                                      const std::vector<CollisionSphere>& sphere_list,
-                                                      const EigenSTL::vector_Vector3d& sphere_centers,
-                                                      GradientInfo& gradient,
-                                                      const collision_detection::CollisionType& type, double tolerance,
-                                                      bool subtract_radii, double maximum_value,
-                                                      bool stop_at_first_collision)
+bool getCollisionSphereGradients(const distance_field::DistanceField* distance_field,
+                                 const std::vector<CollisionSphere>& sphere_list,
+                                 const EigenSTL::vector_Vector3d& sphere_centers, GradientInfo& gradient,
+                                 const CollisionType& type, double tolerance, bool subtract_radii, double maximum_value,
+                                 bool stop_at_first_collision)
 {
   // assumes gradient is properly initialized
 
@@ -144,8 +148,7 @@ bool collision_detection::getCollisionSphereGradients(const distance_field::Dist
     double dist = distance_field->getDistanceGradient(p.x(), p.y(), p.z(), grad.x(), grad.y(), grad.z(), in_bounds);
     if (!in_bounds && grad.norm() > EPSILON)
     {
-      RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD, "Collision sphere point is out of bounds %lf, %lf, %lf", p.x(),
-                   p.y(), p.z());
+      RCLCPP_DEBUG(LOGGER, "Collision sphere point is out of bounds %lf, %lf, %lf", p.x(), p.y(), p.z());
       return true;
     }
 
@@ -189,10 +192,10 @@ bool collision_detection::getCollisionSphereGradients(const distance_field::Dist
   return in_collision;
 }
 
-bool collision_detection::getCollisionSphereCollision(const distance_field::DistanceField* distance_field,
-                                                      const std::vector<CollisionSphere>& sphere_list,
-                                                      const EigenSTL::vector_Vector3d& sphere_centers,
-                                                      double maximum_value, double tolerance)
+bool getCollisionSphereCollision(const distance_field::DistanceField* distance_field,
+                                 const std::vector<CollisionSphere>& sphere_list,
+                                 const EigenSTL::vector_Vector3d& sphere_centers, double maximum_value,
+                                 double tolerance)
 {
   for (unsigned int i = 0; i < sphere_list.size(); i++)
   {
@@ -203,7 +206,7 @@ bool collision_detection::getCollisionSphereCollision(const distance_field::Dist
 
     if (!in_bounds && grad.norm() > 0)
     {
-      RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD, "Collision sphere point is out of bounds");
+      RCLCPP_DEBUG(LOGGER, "Collision sphere point is out of bounds");
       return true;
     }
 
@@ -216,11 +219,10 @@ bool collision_detection::getCollisionSphereCollision(const distance_field::Dist
   return false;
 }
 
-bool collision_detection::getCollisionSphereCollision(const distance_field::DistanceField* distance_field,
-                                                      const std::vector<CollisionSphere>& sphere_list,
-                                                      const EigenSTL::vector_Vector3d& sphere_centers,
-                                                      double maximum_value, double tolerance, unsigned int num_coll,
-                                                      std::vector<unsigned int>& colls)
+bool getCollisionSphereCollision(const distance_field::DistanceField* distance_field,
+                                 const std::vector<CollisionSphere>& sphere_list,
+                                 const EigenSTL::vector_Vector3d& sphere_centers, double maximum_value,
+                                 double tolerance, unsigned int num_coll, std::vector<unsigned int>& colls)
 {
   colls.clear();
   for (unsigned int i = 0; i < sphere_list.size(); i++)
@@ -231,7 +233,7 @@ bool collision_detection::getCollisionSphereCollision(const distance_field::Dist
     double dist = distance_field->getDistanceGradient(p.x(), p.y(), p.z(), grad.x(), grad.y(), grad.z(), in_bounds);
     if (!in_bounds && (grad.norm() > 0))
     {
-      RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD, "Collision sphere point is out of bounds");
+      RCLCPP_DEBUG(LOGGER, "Collision sphere point is out of bounds");
       return true;
     }
     if (maximum_value > dist && (sphere_list[i].radius_ - dist > tolerance))
@@ -256,8 +258,7 @@ bool collision_detection::getCollisionSphereCollision(const distance_field::Dist
 /// BodyDecomposition
 ///
 
-collision_detection::BodyDecomposition::BodyDecomposition(const shapes::ShapeConstPtr& shape, double resolution,
-                                                          double padding)
+BodyDecomposition::BodyDecomposition(const shapes::ShapeConstPtr& shape, double resolution, double padding)
 {
   std::vector<shapes::ShapeConstPtr> shapes;
   EigenSTL::vector_Isometry3d poses(1, Eigen::Isometry3d::Identity());
@@ -266,16 +267,14 @@ collision_detection::BodyDecomposition::BodyDecomposition(const shapes::ShapeCon
   init(shapes, poses, resolution, padding);
 }
 
-collision_detection::BodyDecomposition::BodyDecomposition(const std::vector<shapes::ShapeConstPtr>& shapes,
-                                                          const EigenSTL::vector_Isometry3d& poses, double resolution,
-                                                          double padding)
+BodyDecomposition::BodyDecomposition(const std::vector<shapes::ShapeConstPtr>& shapes,
+                                     const EigenSTL::vector_Isometry3d& poses, double resolution, double padding)
 {
   init(shapes, poses, resolution, padding);
 }
 
-void collision_detection::BodyDecomposition::init(const std::vector<shapes::ShapeConstPtr>& shapes,
-                                                  const EigenSTL::vector_Isometry3d& poses, double resolution,
-                                                  double padding)
+void BodyDecomposition::init(const std::vector<shapes::ShapeConstPtr>& shapes, const EigenSTL::vector_Isometry3d& poses,
+                             double resolution, double padding)
 {
   bodies_.clear();
   for (unsigned int i = 0; i < shapes.size(); i++)
@@ -315,31 +314,29 @@ void collision_detection::BodyDecomposition::init(const std::vector<shapes::Shap
   }
   bodies::mergeBoundingSpheres(bounding_spheres, relative_bounding_sphere_);
 
-  RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD, "BodyDecomposition generated %i collision spheres out of %i shapes",
-               collision_spheres_.size(), shapes.size());
+  RCLCPP_DEBUG(LOGGER, "BodyDecomposition generated %i collision spheres out of %i shapes", collision_spheres_.size(),
+               shapes.size());
 }
 
-collision_detection::BodyDecomposition::~BodyDecomposition()
+BodyDecomposition::~BodyDecomposition()
 {
   bodies_.clear();
 }
 
-collision_detection::PosedBodyPointDecomposition::PosedBodyPointDecomposition(
-    const BodyDecompositionConstPtr& body_decomposition)
+PosedBodyPointDecomposition::PosedBodyPointDecomposition(const BodyDecompositionConstPtr& body_decomposition)
   : body_decomposition_(body_decomposition)
 {
   posed_collision_points_ = body_decomposition_->getCollisionPoints();
 }
 
-collision_detection::PosedBodyPointDecomposition::PosedBodyPointDecomposition(
-    const BodyDecompositionConstPtr& body_decomposition, const Eigen::Isometry3d& trans)
+PosedBodyPointDecomposition::PosedBodyPointDecomposition(const BodyDecompositionConstPtr& body_decomposition,
+                                                         const Eigen::Isometry3d& trans)
   : body_decomposition_(body_decomposition)
 {
   updatePose(trans);
 }
 
-collision_detection::PosedBodyPointDecomposition::PosedBodyPointDecomposition(
-    const std::shared_ptr<const octomap::OcTree>& octree)
+PosedBodyPointDecomposition::PosedBodyPointDecomposition(const std::shared_ptr<const octomap::OcTree>& octree)
   : body_decomposition_()
 {
   int num_nodes = octree->getNumLeafNodes();
@@ -351,7 +348,7 @@ collision_detection::PosedBodyPointDecomposition::PosedBodyPointDecomposition(
   }
 }
 
-void collision_detection::PosedBodyPointDecomposition::updatePose(const Eigen::Isometry3d& trans)
+void PosedBodyPointDecomposition::updatePose(const Eigen::Isometry3d& trans)
 {
   if (body_decomposition_)
   {
@@ -364,8 +361,7 @@ void collision_detection::PosedBodyPointDecomposition::updatePose(const Eigen::I
   }
 }
 
-collision_detection::PosedBodySphereDecomposition::PosedBodySphereDecomposition(
-    const BodyDecompositionConstPtr& body_decomposition)
+PosedBodySphereDecomposition::PosedBodySphereDecomposition(const BodyDecompositionConstPtr& body_decomposition)
   : body_decomposition_(body_decomposition)
 {
   posed_bounding_sphere_center_ = body_decomposition_->getRelativeBoundingSphere().center;
@@ -373,7 +369,7 @@ collision_detection::PosedBodySphereDecomposition::PosedBodySphereDecomposition(
   updatePose(Eigen::Isometry3d::Identity());
 }
 
-void collision_detection::PosedBodySphereDecomposition::updatePose(const Eigen::Isometry3d& trans)
+void PosedBodySphereDecomposition::updatePose(const Eigen::Isometry3d& trans)
 {
   // updating sphere centers
   posed_bounding_sphere_center_ = trans * body_decomposition_->getRelativeBoundingSphere().center;
@@ -393,8 +389,8 @@ void collision_detection::PosedBodySphereDecomposition::updatePose(const Eigen::
   }
 }
 
-bool collision_detection::doBoundingSpheresIntersect(const PosedBodySphereDecompositionConstPtr& p1,
-                                                     const PosedBodySphereDecompositionConstPtr& p2)
+bool doBoundingSpheresIntersect(const PosedBodySphereDecompositionConstPtr& p1,
+                                const PosedBodySphereDecompositionConstPtr& p2)
 {
   Eigen::Vector3d p1_sphere_center = p1->getBoundingSphereCenter();
   Eigen::Vector3d p2_sphere_center = p2->getBoundingSphereCenter();
@@ -405,10 +401,10 @@ bool collision_detection::doBoundingSpheresIntersect(const PosedBodySphereDecomp
   return dist < (p1_radius + p2_radius);
 }
 
-void collision_detection::getCollisionSphereMarkers(
-    const std_msgs::msg::ColorRGBA& color, const std::string& frame_id, const std::string& ns,
-    const rclcpp::Duration& dur, const std::vector<PosedBodySphereDecompositionPtr>& posed_decompositions,
-    visualization_msgs::msg::MarkerArray& arr)
+void getCollisionSphereMarkers(const std_msgs::msg::ColorRGBA& color, const std::string& frame_id,
+                               const std::string& ns, const rclcpp::Duration& dur,
+                               const std::vector<PosedBodySphereDecompositionPtr>& posed_decompositions,
+                               visualization_msgs::msg::MarkerArray& arr)
 {
   unsigned int count = 0;
   rclcpp::Clock ros_clock;
@@ -437,17 +433,15 @@ void collision_detection::getCollisionSphereMarkers(
   }
 }
 
-void collision_detection::getProximityGradientMarkers(
-    const std::string& frame_id, const std::string& ns, const rclcpp::Duration& dur,
-    const std::vector<PosedBodySphereDecompositionPtr>& posed_decompositions,
-    const std::vector<PosedBodySphereDecompositionVectorPtr>& posed_vector_decompositions,
-    const std::vector<GradientInfo>& gradients, visualization_msgs::msg::MarkerArray& arr)
+void getProximityGradientMarkers(const std::string& frame_id, const std::string& ns, const rclcpp::Duration& dur,
+                                 const std::vector<PosedBodySphereDecompositionPtr>& posed_decompositions,
+                                 const std::vector<PosedBodySphereDecompositionVectorPtr>& posed_vector_decompositions,
+                                 const std::vector<GradientInfo>& gradients, visualization_msgs::msg::MarkerArray& arr)
 {
   rclcpp::Clock ros_clock;
   if (gradients.size() != posed_decompositions.size() + posed_vector_decompositions.size())
   {
-    RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Size mismatch between gradients %u and decompositions %u",
-                (unsigned int)gradients.size(),
+    RCLCPP_WARN(LOGGER, "Size mismatch between gradients %u and decompositions %u", (unsigned int)gradients.size(),
                 (unsigned int)(posed_decompositions.size() + posed_vector_decompositions.size()));
     return;
   }
@@ -480,14 +474,12 @@ void collision_detection::getProximityGradientMarkers(
         }
         else
         {
-          RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD, "Negative length for %u %d %lf", i, arrow_mark.id,
-                       gradients[i].gradients[j].norm());
+          RCLCPP_DEBUG(LOGGER, "Negative length for %u %d %lf", i, arrow_mark.id, gradients[i].gradients[j].norm());
         }
       }
       else
       {
-        RCLCPP_DEBUG(LOGGER_COLLISION_DISTANCE_FIELD, "Negative dist %lf for %u %d", gradients[i].distances[j], i,
-                     arrow_mark.id);
+        RCLCPP_DEBUG(LOGGER, "Negative dist %lf for %u %d", gradients[i].distances[j], i, arrow_mark.id);
       }
       arrow_mark.points.resize(2);
       if (i < posed_decompositions.size())
@@ -512,25 +504,25 @@ void collision_detection::getProximityGradientMarkers(
       arrow_mark.scale.x = 0.01;
       arrow_mark.scale.y = 0.03;
       arrow_mark.color.a = 1.0;
-      if (gradients[i].types[j] == collision_detection::SELF)
+      if (gradients[i].types[j] == SELF)
       {
         arrow_mark.color.r = 1.0;
         arrow_mark.color.g = 0.2;
         arrow_mark.color.b = .5;
       }
-      else if (gradients[i].types[j] == collision_detection::INTRA)
+      else if (gradients[i].types[j] == INTRA)
       {
         arrow_mark.color.r = .2;
         arrow_mark.color.g = 1.0;
         arrow_mark.color.b = .5;
       }
-      else if (gradients[i].types[j] == collision_detection::ENVIRONMENT)
+      else if (gradients[i].types[j] == ENVIRONMENT)
       {
         arrow_mark.color.r = .2;
         arrow_mark.color.g = .5;
         arrow_mark.color.b = 1.0;
       }
-      else if (gradients[i].types[j] == collision_detection::NONE)
+      else if (gradients[i].types[j] == NONE)
       {
         arrow_mark.color.r = 1.0;
         arrow_mark.color.g = .2;
@@ -541,17 +533,16 @@ void collision_detection::getProximityGradientMarkers(
   }
 }
 
-void collision_detection::getCollisionMarkers(
-    const std::string& frame_id, const std::string& ns, const rclcpp::Duration& dur,
-    const std::vector<PosedBodySphereDecompositionPtr>& posed_decompositions,
-    const std::vector<PosedBodySphereDecompositionVectorPtr>& posed_vector_decompositions,
-    const std::vector<GradientInfo>& gradients, visualization_msgs::msg::MarkerArray& arr)
+void getCollisionMarkers(const std::string& frame_id, const std::string& ns, const rclcpp::Duration& dur,
+                         const std::vector<PosedBodySphereDecompositionPtr>& posed_decompositions,
+                         const std::vector<PosedBodySphereDecompositionVectorPtr>& posed_vector_decompositions,
+                         const std::vector<GradientInfo>& gradients, visualization_msgs::msg::MarkerArray& arr)
 {
   rclcpp::Clock ros_clock;
   if (gradients.size() != posed_decompositions.size() + posed_vector_decompositions.size())
   {
-    RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Size mismatch between gradients %zu and decompositions %zu",
-                gradients.size(), posed_decompositions.size() + posed_vector_decompositions.size());
+    RCLCPP_WARN(LOGGER, "Size mismatch between gradients %zu and decompositions %zu", gradients.size(),
+                posed_decompositions.size() + posed_vector_decompositions.size());
     return;
   }
   for (unsigned int i = 0; i < gradients.size(); i++)
@@ -592,19 +583,19 @@ void collision_detection::getCollisionMarkers(
       }
       sphere_mark.pose.orientation.w = 1.0;
       sphere_mark.color.a = 1.0;
-      if (gradients[i].types[j] == collision_detection::SELF)
+      if (gradients[i].types[j] == SELF)
       {
         sphere_mark.color.r = 1.0;
         sphere_mark.color.g = 0.2;
         sphere_mark.color.b = .5;
       }
-      else if (gradients[i].types[j] == collision_detection::INTRA)
+      else if (gradients[i].types[j] == INTRA)
       {
         sphere_mark.color.r = .2;
         sphere_mark.color.g = 1.0;
         sphere_mark.color.b = .5;
       }
-      else if (gradients[i].types[j] == collision_detection::ENVIRONMENT)
+      else if (gradients[i].types[j] == ENVIRONMENT)
       {
         sphere_mark.color.r = .2;
         sphere_mark.color.g = .5;
@@ -620,3 +611,4 @@ void collision_detection::getCollisionMarkers(
     }
   }
 }
+}  // namespace collision_detection
