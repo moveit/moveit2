@@ -70,7 +70,7 @@ RUN apt-get -qq update && \
 # Download moveit source and fetch all necessary dependencies
 RUN mkdir src && \
     cd $ROS_WS/src && \
-    wget -q https://raw.githubusercontent.com/henningkayser/moveit2/pr-moveit_core/moveit2.repos && \
+    wget -q https://raw.githubusercontent.com/ros-planning/moveit2/master/moveit2.repos && \
     vcs import < moveit2.repos && \
     apt-get -qq update && \
     rosdep update -q && \
