@@ -819,7 +819,7 @@ TEST(TestSignedPropagationDistanceField, TestPerformance)
 
   dt = std::chrono::system_clock::now();
   worstdfu.addPointsToField(bad_vec);
-  auto wd = std::chrono::system_clock::now() - dt;
+  std::chrono::duration<double> wd = std::chrono::system_clock::now() - dt;
   printf("Time for unsigned adding %u uniform points is %g average %g\n", (unsigned int)bad_vec.size(), wd.count(),
          wd.count() / (bad_vec.size() * 1.0));
   dt = std::chrono::system_clock::now();
