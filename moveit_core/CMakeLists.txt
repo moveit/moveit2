@@ -4,8 +4,10 @@ project(moveit_core VERSION 2.0.0 LANGUAGES CXX)
 add_compile_options(-std=c++14)
 
 # Warnings
+# Remove -Wcast-qual to avoid warnings in tf2/LinearMath/Vector3.h.
+# TODO: Add -Wcast-qual back when PR(https://github.com/ros2/geometry2/pull/193) is merged.
 add_compile_options(-Wall -Wextra
-  -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual
+  -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls
   -Wno-unused-parameter -Wno-unused-function)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # This too often has false-positives
