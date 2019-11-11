@@ -43,6 +43,8 @@
 
 namespace default_planner_request_adapters
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_bounds");
+
 class FixStartStateBounds : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
@@ -57,25 +59,23 @@ public:
     if (!bounds_param->has_parameter(BOUNDS_PARAM_NAME))
     {
       bounds_dist_ = 0.05;
-      RCLCPP_INFO(node_->get_logger(), "Param '%s' was not set. Using default value: %f", BOUNDS_PARAM_NAME.c_str(),
-                  bounds_dist_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
     }
     else
     {
       bounds_dist_ = node_->get_parameter(BOUNDS_PARAM_NAME).as_double();
-      RCLCPP_INFO(node_->get_logger(), "Param '%s' was set to %f", BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
     }
 
     if (!bounds_param->has_parameter(DT_PARAM_NAME))
     {
       max_dt_offset_ = 0.5;
-      RCLCPP_INFO(node_->get_logger(), "Param '%s' was not set. Using default value: %f", DT_PARAM_NAME.c_str(),
-                  max_dt_offset_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
     }
     else
     {
       max_dt_offset_ = node_->get_parameter(DT_PARAM_NAME).as_double();
-      RCLCPP_INFO(node_->get_logger(), "Param '%s' was set to %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
     }
   }
 
@@ -88,7 +88,7 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& added_path_index) const override
   {
-    RCLCPP_DEBUG(node_->get_logger(), "Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
 
     // get the specified start state
     robot_state::RobotState start_state = planning_scene->getCurrentState();
@@ -157,8 +157,7 @@ public:
             prefix_state.reset(new robot_state::RobotState(start_state));
           start_state.enforceBounds(jmodel);
           change_req = true;
-          RCLCPP_INFO(node_->get_logger(),
-                      "Starting state is just outside bounds (joint '%s'). Assuming within bounds.",
+          RCLCPP_INFO(LOGGER, "Starting state is just outside bounds (joint '%s'). Assuming within bounds.",
                       jmodel->getName().c_str());
         }
         else
@@ -175,7 +174,7 @@ public:
             joint_bounds_low << variable_bounds.min_position_ << " ";
             joint_bounds_hi << variable_bounds.max_position_ << " ";
           }
-          RCLCPP_WARN(node_->get_logger(),
+          RCLCPP_WARN(LOGGER,
                       "Joint '%s' from the starting state is outside bounds by a significant margin: [%s] should be in "
                       "the range [%s], [%s] but the error above the ~%s parameter (currently set to %f)",
                       jmodel->getName().c_str(), joint_values.str().c_str(), joint_bounds_low.str().c_str(),

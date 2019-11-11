@@ -42,6 +42,8 @@
 
 namespace default_planner_request_adapters
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_collision");
+
 class FixStartStateCollision : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
@@ -57,31 +59,30 @@ public:
     if (!collision_param->has_parameter(DT_PARAM_NAME))
     {
       max_dt_offset_ = 0.5;
-      RCLCPP_INFO(node_->get_logger(), "Param '%s' was not set. Using default value: %f", DT_PARAM_NAME.c_str(),
-                  max_dt_offset_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
     }
     else
     {
       max_dt_offset_ = node->get_parameter(DT_PARAM_NAME).as_double();
-      RCLCPP_INFO(node_->get_logger(), "Param '%s' was set to %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
     }
 
     if (!collision_param->has_parameter(JIGGLE_PARAM_NAME))
     {
       jiggle_fraction_ = 0.02;
-      RCLCPP_INFO(node_->get_logger(), "Param '%s' was not set. Using default value: %f", JIGGLE_PARAM_NAME.c_str(),
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", JIGGLE_PARAM_NAME.c_str(),
                   jiggle_fraction_);
     }
     else
     {
       jiggle_fraction_ = node->get_parameter(JIGGLE_PARAM_NAME).as_double();
-      RCLCPP_INFO(node_->get_logger(), "Param '%s' was set to %f", JIGGLE_PARAM_NAME.c_str(), jiggle_fraction_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", JIGGLE_PARAM_NAME.c_str(), jiggle_fraction_);
     }
 
     if (!collision_param->has_parameter(ATTEMPTS_PARAM_NAME))
     {
       sampling_attempts_ = 100;
-      RCLCPP_INFO(node_->get_logger(), "Param '%s' was not set. Using default value: %f,", ATTEMPTS_PARAM_NAME.c_str(),
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f,", ATTEMPTS_PARAM_NAME.c_str(),
                   sampling_attempts_);
     }
     else
@@ -89,10 +90,10 @@ public:
       if (sampling_attempts_ < 1)
       {
         sampling_attempts_ = 1;
-        RCLCPP_WARN(node_->get_logger(), "Param '%s' needs to be at least 1.", ATTEMPTS_PARAM_NAME.c_str());
+        RCLCPP_WARN(LOGGER, "Param '%s' needs to be at least 1.", ATTEMPTS_PARAM_NAME.c_str());
       }
       sampling_attempts_ = node->get_parameter(ATTEMPTS_PARAM_NAME).as_double();
-      RCLCPP_INFO(node_->get_logger(), "Param '%s' was set to %f", ATTEMPTS_PARAM_NAME.c_str(), sampling_attempts_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", ATTEMPTS_PARAM_NAME.c_str(), sampling_attempts_);
     }
   }
 
@@ -105,7 +106,7 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& added_path_index) const override
   {
-    RCLCPP_DEBUG(node_->get_logger(), "Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
 
     // get the specified start state
     robot_state::RobotState start_state = planning_scene->getCurrentState();
@@ -124,10 +125,9 @@ public:
       planning_scene->checkCollision(vcreq, vcres, start_state);
 
       if (creq.group_name.empty())
-        RCLCPP_INFO(node_->get_logger(), "Start state appears to be in collision");
+        RCLCPP_INFO(LOGGER, "Start state appears to be in collision");
       else
-        RCLCPP_INFO(node_->get_logger(), "Start state appears to be in collision with respect to group %s",
-                    creq.group_name.c_str());
+        RCLCPP_INFO(LOGGER, "Start state appears to be in collision with respect to group %s", creq.group_name.c_str());
 
       robot_state::RobotStatePtr prefix_state(new robot_state::RobotState(start_state));
       random_numbers::RandomNumberGenerator& rng = prefix_state->getRandomNumberGenerator();
@@ -152,8 +152,7 @@ public:
           if (!cres.collision)
           {
             found = true;
-            RCLCPP_INFO(node_->get_logger(),
-                        "Found a valid state near the start state at distance %lf after %d attempts",
+            RCLCPP_INFO(LOGGER, "Found a valid state near the start state at distance %lf after %d attempts",
                         prefix_state->distance(start_state), c);
           }
         }
@@ -180,7 +179,7 @@ public:
       }
       else
       {
-        RCLCPP_WARN(node_->get_logger(),
+        RCLCPP_WARN(LOGGER,
                     "Unable to find a valid state nearby the start state (using jiggle fraction of %lf and %u sampling "
                     "attempts). Passing the original planning request to the planner.",
                     jiggle_fraction_, sampling_attempts_);
@@ -190,9 +189,9 @@ public:
     else
     {
       if (creq.group_name.empty())
-        RCLCPP_DEBUG(node_->get_logger(), "Start state is valid");
+        RCLCPP_DEBUG(LOGGER, "Start state is valid");
       else
-        RCLCPP_DEBUG(node_->get_logger(), "Start state is valid with respect to group %s", creq.group_name.c_str());
+        RCLCPP_DEBUG(LOGGER, "Start state is valid with respect to group %s", creq.group_name.c_str());
       return planner(planning_scene, req, res);
     }
   }
