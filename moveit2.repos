@@ -1,0 +1,47 @@
+repositories:
+  moveit2:
+    type: git
+    url: https://github.com/ros-planning/moveit2
+    version: master
+  moveit_msgs:
+    type: git
+    url: https://github.com/ros-planning/moveit_msgs
+    version: ros2
+  joint_state_publisher:
+    type: git
+    url: https://github.com/ros/joint_state_publisher
+    version: ros2-devel
+  # TODO(henningkayser): Change to 'ros-planning/ros2' once https://github.com/ros-planning/random_numbers/pull/18 is merged
+  random_numbers:
+    type: git
+    url: https://github.com/PickNikRobotics/random_numbers
+    version: ros2-devel
+  # TODO(henningkayser): merge dependencies below into upstream packages
+  geometric_shapes:
+    type: git
+    url: https://github.com/PickNikRobotics/geometric_shapes
+    version: ros2
+  object_recognition_msgs:
+    type: git
+    url: https://github.com/PickNikRobotics/object_recognition_msgs
+    version: master
+  octomap:
+    type: git
+    url: https://github.com/PickNikRobotics/octomap
+    version: ros2
+  octomap_msgs:
+    type: git
+    url: https://github.com/PickNikRobotics/octomap_msgs
+    version: ros2
+  moveit_resources:
+    type: git
+    url: https://github.com/PickNikRobotics/moveit_resources
+    version: master
+  srdfdom:
+    type: git
+    url: https://github.com/PickNikRobotics/srdfdom
+    version: ros2
+  urdf_parser_py:
+    type: git
+    url: https://github.com/PickNikRobotics/urdf_parser_py
+    version: ros2
