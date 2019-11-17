@@ -35,6 +35,16 @@ RUN apt-get -qq update && \
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/*
 
+# Required for srdfdom compilation
+# TODO: Remove when srdfdom becomes a system dependency
+RUN apt-get -qq update && \
+    apt-get -qq install -y \
+        locales && \
+    # Clear apt-cache to reduce image size
+    rm -rf /var/lib/apt/lists/* && \
+    # Update system locale
+    locale-gen nl_NL.UTF-8
+
 # Upgrade Pip and install some packages needed for testing
 # NOTE(mlautman): These pip installs are from the ros2 source install instructions. Seeing as not all of them
 #        are installed in the base image I added them here. I have not been able to verify that they are needed
