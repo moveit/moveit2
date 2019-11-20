@@ -37,30 +37,31 @@
 #include <moveit/constraint_samplers/constraint_sampler_tools.h>
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 
-void constraint_samplers::visualizeDistribution(const moveit_msgs::msg::Constraints& constr,
-                                                const planning_scene::PlanningSceneConstPtr& scene,
-                                                const std::string& group, const std::string& link_name,
-                                                unsigned int sample_count,
-                                                visualization_msgs::msg::MarkerArray& markers)
+namespace constraint_samplers
+{
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.constraint_sampler_tools");
+
+void visualizeDistribution(const moveit_msgs::msg::Constraints& constr,
+                           const planning_scene::PlanningSceneConstPtr& scene, const std::string& group,
+                           const std::string& link_name, unsigned int sample_count,
+                           visualization_msgs::msg::MarkerArray& markers)
 {
   visualizeDistribution(ConstraintSamplerManager::selectDefaultSampler(scene, group, constr), scene->getCurrentState(),
                         link_name, sample_count, markers);
 }
 
-double constraint_samplers::countSamplesPerSecond(const moveit_msgs::msg::Constraints& constr,
-                                                  const planning_scene::PlanningSceneConstPtr& scene,
-                                                  const std::string& group)
+double countSamplesPerSecond(const moveit_msgs::msg::Constraints& constr,
+                             const planning_scene::PlanningSceneConstPtr& scene, const std::string& group)
 {
   return countSamplesPerSecond(ConstraintSamplerManager::selectDefaultSampler(scene, group, constr),
                                scene->getCurrentState());
 }
 
-double constraint_samplers::countSamplesPerSecond(const ConstraintSamplerPtr& sampler,
-                                                  const robot_state::RobotState& reference_state)
+double countSamplesPerSecond(const ConstraintSamplerPtr& sampler, const robot_state::RobotState& reference_state)
 {
   if (!sampler)
   {
-    RCLCPP_ERROR(LOGGER_CONTRAINT_SAMPLERS_TOOLS, "No sampler specified for counting samples per second");
+    RCLCPP_ERROR(LOGGER, "No sampler specified for counting samples per second");
     return 0.0;
   }
   robot_state::RobotState ks(reference_state);
@@ -80,14 +81,13 @@ double constraint_samplers::countSamplesPerSecond(const ConstraintSamplerPtr& sa
   return (double)valid / (double)total;
 }
 
-void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& sampler,
-                                                const robot_state::RobotState& reference_state,
-                                                const std::string& link_name, unsigned int sample_count,
-                                                visualization_msgs::msg::MarkerArray& markers)
+void visualizeDistribution(const ConstraintSamplerPtr& sampler, const robot_state::RobotState& reference_state,
+                           const std::string& link_name, unsigned int sample_count,
+                           visualization_msgs::msg::MarkerArray& markers)
 {
   if (!sampler)
   {
-    RCLCPP_ERROR(LOGGER_CONTRAINT_SAMPLERS_TOOLS, "No sampler specified for visualizing distribution of samples");
+    RCLCPP_ERROR(LOGGER, "No sampler specified for visualizing distribution of samples");
     return;
   }
   const robot_state::LinkModel* lm = reference_state.getLinkModel(link_name);
@@ -121,3 +121,4 @@ void constraint_samplers::visualizeDistribution(const ConstraintSamplerPtr& samp
     markers.markers.push_back(mk);
   }
 }
+}  // namespace constraint_samplers

@@ -40,7 +40,7 @@
 namespace collision_detection
 {
 // Logger
-rclcpp::Logger LOGGER_WORLD = rclcpp::get_logger("moveit").get_child("collision_detection");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.world");
 
 World::World()
 {
@@ -69,7 +69,7 @@ void World::addToObject(const std::string& id, const std::vector<shapes::ShapeCo
 {
   if (shapes.size() != poses.size())
   {
-    RCLCPP_ERROR(LOGGER_WORLD,
+    RCLCPP_ERROR(LOGGER,
                  "Number of shapes and number of poses do not match. Not adding this object to collision world.");
     return;
   }

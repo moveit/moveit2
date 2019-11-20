@@ -40,7 +40,7 @@
 
 namespace planning_interface
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("planning_interface");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_planning_interface.planning_interface");
 
 namespace
 {

@@ -44,7 +44,8 @@
 
 namespace distance_field
 {
-rclcpp::Logger LOGGER_DISTANCE_FIELD = rclcpp::get_logger("moveit").get_child("distance_field");
+// Logger
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_distance_field.distance_field");
 
 DistanceField::DistanceField(double size_x, double size_y, double size_z, double resolution, double origin_x,
                              double origin_y, double origin_z)
@@ -204,7 +205,7 @@ bool DistanceField::getShapePoints(const shapes::Shape* shape, const Eigen::Isom
     const shapes::OcTree* oc = dynamic_cast<const shapes::OcTree*>(shape);
     if (!oc)
     {
-      RCLCPP_ERROR(LOGGER_DISTANCE_FIELD, "Problem dynamic casting shape that claims to be OcTree");
+      RCLCPP_ERROR(LOGGER, "Problem dynamic casting shape that claims to be OcTree");
       return false;
     }
     getOcTreePoints(oc->octree.get(), points);
@@ -292,7 +293,7 @@ void DistanceField::moveShapeInField(const shapes::Shape* shape, const Eigen::Is
 {
   if (shape->type == shapes::OCTREE)
   {
-    RCLCPP_WARN(LOGGER_DISTANCE_FIELD, "Move shape not supported for Octree");
+    RCLCPP_WARN(LOGGER, "Move shape not supported for Octree");
     return;
   }
   bodies::Body* body = bodies::createBodyFromShape(shape);

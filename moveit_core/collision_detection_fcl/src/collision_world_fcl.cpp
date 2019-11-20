@@ -54,7 +54,8 @@
 
 namespace collision_detection
 {
-rclcpp::Logger LOGGER_COLLISION_WORLD = rclcpp::get_logger("collision_world.fcl");
+// Logger
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection_fcl.collision_world");
 const std::string CollisionDetectorAllocatorFCL::NAME("FCL");
 
 CollisionWorldFCL::CollisionWorldFCL() : CollisionWorld()
@@ -116,7 +117,7 @@ void CollisionWorldFCL::checkRobotCollision(const CollisionRequest& req, Collisi
                                             const CollisionRobot& robot, const robot_state::RobotState& state1,
                                             const robot_state::RobotState& state2) const
 {
-  RCLCPP_ERROR(LOGGER_COLLISION_WORLD, "FCL continuous collision checking not yet implemented");
+  RCLCPP_ERROR(LOGGER, "FCL continuous collision checking not yet implemented");
 }
 
 void CollisionWorldFCL::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
@@ -124,7 +125,7 @@ void CollisionWorldFCL::checkRobotCollision(const CollisionRequest& req, Collisi
                                             const robot_state::RobotState& state2,
                                             const AllowedCollisionMatrix& acm) const
 {
-  RCLCPP_ERROR(LOGGER_COLLISION_WORLD, "FCL continuous collision checking not yet implemented");
+  RCLCPP_ERROR(LOGGER, "FCL continuous collision checking not yet implemented");
 }
 
 void CollisionWorldFCL::checkRobotCollisionHelper(const CollisionRequest& req, CollisionResult& res,

@@ -58,9 +58,6 @@ MOVEIT_CLASS_FORWARD(RobotModel)
 /** @brief API for forward and inverse kinematics */
 namespace kinematics
 {
-// Logger
-static rclcpp::Logger LOGGER_KINEMATICS_BASE = rclcpp::get_logger("kinematics_base");
-
 /*
  * @enum DiscretizationMethods
  *
@@ -148,6 +145,7 @@ MOVEIT_CLASS_FORWARD(KinematicsBase)
 class KinematicsBase
 {
 public:
+  static const rclcpp::Logger LOGGER;
   static const double DEFAULT_SEARCH_DISCRETIZATION; /* = 0.1 */
   static const double DEFAULT_TIMEOUT;               /* = 1.0 */
 
@@ -314,7 +312,7 @@ public:
     }
 
     // Otherwise throw error because this function should have been implemented
-    RCLCPP_ERROR(LOGGER_KINEMATICS_BASE, "This kinematic solver does not support searchPositionIK with multiple poses");
+    RCLCPP_ERROR(LOGGER, "This kinematic solver does not support searchPositionIK with multiple poses");
     return false;
   }
 
@@ -329,21 +327,6 @@ public:
                              std::vector<geometry_msgs::msg::Pose>& poses) const = 0;
 
   /**
-   * @brief Set the parameters for the solver, for use with kinematic chain IK solvers
-   * @param robot_description This parameter can be used as an identifier for the robot kinematics it is computed for;
-   * For example, the name of the ROS parameter that contains the robot description;
-   * @param group_name The group for which this solver is being configured
-   * @param base_frame The base frame in which all input poses are expected.
-   * This may (or may not) be the root frame of the chain that the solver operates on
-   * @param tip_frame The tip of the chain
-   * @param search_discretization The discretization of the search when the solver steps through the redundancy
-   */
-  /* Replace by tip_frames-based method! */
-  MOVEIT_DEPRECATED virtual void setValues(const std::string& robot_description, const std::string& group_name,
-                                           const std::string& base_frame, const std::string& tip_frame,
-                                           double search_discretization);
-
-  /**
    * @brief Set the parameters for the solver, for use with non-chain IK solvers
    * @param robot_description This parameter can be used as an identifier for the robot kinematics it is computed for;
    * For example, the name of the ROS parameter that contains the robot description;
@@ -356,24 +339,6 @@ public:
   virtual void setValues(const std::string& robot_description, const std::string& group_name,
                          const std::string& base_frame, const std::vector<std::string>& tip_frames,
                          double search_discretization);
-
-  /**
-   * @brief  Initialization function for the kinematics, for use with kinematic chain IK solvers
-   * @param robot_description This parameter can be used as an identifier for the robot kinematics it is computed for;
-   * For example, the name of the ROS parameter that contains the robot description;
-   * @param group_name The group for which this solver is being configured
-   * @param base_frame The base frame in which all input poses are expected.
-   * This may (or may not) be the root frame of the chain that the solver operates on
-   * @param tip_frame The tip of the chain
-   * @param search_discretization The discretization of the search when the solver steps through the redundancy
-   * @return True if initialization was successful, false otherwise
-   *
-   * Instead of this method, use the method passing in a RobotModel!
-   * Default implementation returns false, indicating that this API is not supported.
-   */
-  MOVEIT_DEPRECATED virtual bool initialize(const std::string& robot_description, const std::string& group_name,
-                                            const std::string& base_frame, const std::string& tip_frame,
-                                            double search_discretization);
 
   /**
    * @brief  Initialization function for the kinematics, for use with non-chain IK solvers
@@ -438,8 +403,8 @@ public:
   virtual const std::string& getTipFrame() const
   {
     if (tip_frames_.size() > 1)
-      RCLCPP_ERROR(LOGGER_KINEMATICS_BASE, "This kinematic solver has more than one tip frame, "
-                                           "do not call getTipFrame()");
+      RCLCPP_ERROR(LOGGER, "This kinematic solver has more than one tip frame, "
+                           "do not call getTipFrame()");
 
     return tip_frames_[0];
   }
@@ -588,12 +553,6 @@ protected:
   std::string group_name_;
   std::string base_frame_;
   std::vector<std::string> tip_frames_;
-
-  // The next two variables still exists for backwards compatibility
-  // with previously generated custom ik solvers like IKFast
-  // Replace tip_frame_ -> tip_frames_[0], search_discretization_ -> redundant_joint_discretization_
-  MOVEIT_DEPRECATED std::string tip_frame_;
-  MOVEIT_DEPRECATED double search_discretization_;
 
   double default_timeout_;
   std::vector<unsigned int> redundant_joint_indices_;

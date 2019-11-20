@@ -35,18 +35,20 @@
 /* Author: Acorn Pooley, Ioan Sucan */
 
 #include <moveit/exceptions/exceptions.h>
-#include <rcutils/logging_macros.h>
 #include "rclcpp/rclcpp.hpp"
 
 // Logger
-rclcpp::Logger logger_exceptions = rclcpp::get_logger("exceptions");
-
-moveit::ConstructException::ConstructException(const std::string& what_arg) : std::runtime_error(what_arg)
+namespace moveit
 {
-  RCLCPP_ERROR(logger_exceptions, "Error during construction of object: %s\nException thrown.", what_arg.c_str());
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_exceptions.exceptions");
+
+ConstructException::ConstructException(const std::string& what_arg) : std::runtime_error(what_arg)
+{
+  RCLCPP_ERROR(LOGGER, "Error during construction of object: %s\nException thrown.", what_arg.c_str());
 }
 
-moveit::Exception::Exception(const std::string& what_arg) : std::runtime_error(what_arg)
+Exception::Exception(const std::string& what_arg) : std::runtime_error(what_arg)
 {
-  RCLCPP_ERROR(logger_exceptions, "%s\nException thrown.", what_arg.c_str());
+  RCLCPP_ERROR(LOGGER, "%s\nException thrown.", what_arg.c_str());
+}
 }

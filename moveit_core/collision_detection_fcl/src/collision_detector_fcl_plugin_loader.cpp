@@ -1,5 +1,5 @@
 #include <moveit/collision_detection_fcl/collision_detector_fcl_plugin_loader.h>
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 namespace collision_detection
 {

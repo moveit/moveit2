@@ -59,8 +59,6 @@
 
 namespace collision_detection
 {
-static rclcpp::Logger LOGGER_COLLISION_DISTANCE_FIELD =
-    rclcpp::get_logger("moveit").get_child("collision_distance_field");
 enum CollisionType
 {
   NONE = 0,
@@ -411,7 +409,7 @@ public:
   {
     if (i >= decomp_vector_.size())
     {
-      RCLCPP_INFO(LOGGER_COLLISION_DISTANCE_FIELD, "No body decomposition");
+      RCLCPP_INFO(LOGGER, "No body decomposition");
       return empty_ptr_;
     }
     return decomp_vector_[i];
@@ -421,7 +419,7 @@ public:
   {
     if (ind >= decomp_vector_.size())
     {
-      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Can't update pose");
+      RCLCPP_WARN(LOGGER, "Can't update pose");
       return;
     }
     decomp_vector_[ind]->updatePose(pose);
@@ -432,6 +430,7 @@ public:
   }
 
 private:
+  static const rclcpp::Logger LOGGER;
   PosedBodySphereDecompositionConstPtr empty_ptr_;
   std::vector<PosedBodySphereDecompositionPtr> decomp_vector_;
   std::vector<CollisionSphere> collision_spheres_;
@@ -474,7 +473,7 @@ public:
   {
     if (i >= decomp_vector_.size())
     {
-      RCLCPP_INFO(LOGGER_COLLISION_DISTANCE_FIELD, "No body decomposition");
+      RCLCPP_INFO(LOGGER, "No body decomposition");
       return empty_ptr_;
     }
     return decomp_vector_[i];
@@ -488,10 +487,13 @@ public:
     }
     else
     {
-      RCLCPP_WARN(LOGGER_COLLISION_DISTANCE_FIELD, "Can't update pose");
+      RCLCPP_WARN(LOGGER, "Can't update pose");
       return;
     }
   }
+
+protected:
+  static const rclcpp::Logger LOGGER;
 
 private:
   PosedBodyPointDecompositionPtr empty_ptr_;

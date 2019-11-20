@@ -45,8 +45,6 @@
 #include <moveit_msgs/msg/joint_limits.hpp>
 #include <random_numbers/random_numbers.h>
 #include <Eigen/Geometry>
-#include <rcutils/logging_macros.h>
-#include <moveit/robot_model/log.h>
 
 namespace moveit
 {

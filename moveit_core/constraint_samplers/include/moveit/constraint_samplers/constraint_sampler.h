@@ -52,7 +52,6 @@
 namespace constraint_samplers
 {
 MOVEIT_CLASS_FORWARD(ConstraintSampler)
-static rclcpp::Logger LOGGER_CONSTRAINT_SAMPLERS = rclcpp::get_logger("moveit").get_child("constraint_samplers");
 /**
  * \brief ConstraintSampler is an abstract base class that allows the
  * sampling of a kinematic state for a particular group of a robot.

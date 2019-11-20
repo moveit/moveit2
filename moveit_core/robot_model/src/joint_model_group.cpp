@@ -50,7 +50,7 @@ namespace core
 {
 namespace
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("robot_model.jmg");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.joint_model_group");
 
 // check if a parent or ancestor of joint is included in this group
 bool includesParent(const JointModel* joint, const JointModelGroup* group)
@@ -574,9 +574,8 @@ bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik
       // skip reported fixed joints
       if (hasJointModel(ik_jnames[i]) && getJointModel(ik_jnames[i])->getType() == JointModel::FIXED)
         continue;
-      RCLCPP_ERROR(LOGGER,
-                   "IK solver computes joint values for joint '%s' "
-                   "but group '%s' does not contain such a joint.",
+      RCLCPP_ERROR(LOGGER, "IK solver computes joint values for joint '%s' "
+                           "but group '%s' does not contain such a joint.",
                    ik_jnames[i].c_str(), getName().c_str());
       return false;
     }
@@ -752,7 +751,7 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
     {
       // TODO(davetcoleman) Support multiple variables
       RCLCPP_ERROR(LOGGER, "Attempting to check velocity bounds for waypoint move with joints that have multiple "
-                               "variables");
+                           "variables");
       return false;
     }
     const double max_velocity = (*var_bounds)[0].max_velocity_;

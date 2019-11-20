@@ -39,18 +39,18 @@
 #include "rclcpp/rclcpp.hpp"
 
 // Logger
-rclcpp::Logger LOGGER_COLLISION_ROBOT = rclcpp::get_logger("moveit").get_child("collision_detection");;
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_robot");
 
 static inline bool validateScale(double scale)
 {
   if (scale < std::numeric_limits<double>::epsilon())
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_ROBOT, "Scale must be positive");
+    RCLCPP_ERROR(LOGGER, "Scale must be positive");
     return false;
   }
   if (scale > std::numeric_limits<double>::max())
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_ROBOT, "Scale must be finite");
+    RCLCPP_ERROR(LOGGER, "Scale must be finite");
     return false;
   }
   return true;
@@ -60,12 +60,12 @@ static inline bool validatePadding(double padding)
 {
   if (padding < 0.0)
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_ROBOT, "Padding cannot be negative");
+    RCLCPP_ERROR(LOGGER, "Padding cannot be negative");
     return false;
   }
   if (padding > std::numeric_limits<double>::max())
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_ROBOT, "Padding must be finite");
+    RCLCPP_ERROR(LOGGER, "Padding must be finite");
     return false;
   }
   return true;
@@ -260,5 +260,4 @@ void CollisionRobot::getScale(std::vector<moveit_msgs::msg::LinkScale>& scale) c
 void CollisionRobot::updatedPaddingOrScaling(const std::vector<std::string>& links)
 {
 }
-
 }  // end of namespace collision_detection

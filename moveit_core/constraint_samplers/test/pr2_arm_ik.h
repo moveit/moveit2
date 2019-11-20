@@ -53,8 +53,6 @@ static const int NUM_JOINTS_ARM7DOF = 7;
 
 static const double IK_EPS = 1e-5;
 
-rclcpp::Logger LOGGER_PR2_ARM_IK = rclcpp::get_logger("pr2_arm_kinematics_plugin");
-
 inline double distance(const urdf::Pose& transform)
 {
   return sqrt(transform.position.x * transform.position.x + transform.position.y * transform.position.y +

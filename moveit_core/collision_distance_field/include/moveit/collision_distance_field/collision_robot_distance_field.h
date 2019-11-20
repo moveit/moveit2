@@ -55,9 +55,6 @@ static const double DEFAULT_RESOLUTION = .02;
 static const double DEFAULT_COLLISION_TOLERANCE = 0.0;
 static const double DEFAULT_MAX_PROPOGATION_DISTANCE = .25;
 
-static rclcpp::Logger LOGGER_COLLISION_ROBOT_DISTANCE_FIELD =
-    LOGGER_COLLISION_DISTANCE_FIELD.get_child("collision_robot_distance_field");
-
 MOVEIT_CLASS_FORWARD(CollisionRobotDistanceField)
 
 class CollisionRobotDistanceField : public CollisionRobot
@@ -106,21 +103,21 @@ public:
   void checkSelfCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
                           const moveit::core::RobotState& state1, const moveit::core::RobotState& state2) const override
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_ROBOT_DISTANCE_FIELD, "Not implemented");
+    RCLCPP_ERROR(LOGGER, "Not implemented");
   };
 
   void checkSelfCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
                           const moveit::core::RobotState& state1, const moveit::core::RobotState& state2,
                           const collision_detection::AllowedCollisionMatrix& acm) const override
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_ROBOT_DISTANCE_FIELD, "Not implemented");
+    RCLCPP_ERROR(LOGGER, "Not implemented");
   };
 
   void checkOtherCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
                            const moveit::core::RobotState& state, const CollisionRobot& other_robot,
                            const moveit::core::RobotState& other_state) const override
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_ROBOT_DISTANCE_FIELD, "Not implemented");
+    RCLCPP_ERROR(LOGGER, "Not implemented");
   };
 
   void checkOtherCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
@@ -128,7 +125,7 @@ public:
                            const moveit::core::RobotState& other_state,
                            const collision_detection::AllowedCollisionMatrix& acm) const override
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_ROBOT_DISTANCE_FIELD, "Not implemented");
+    RCLCPP_ERROR(LOGGER, "Not implemented");
   };
 
   void checkOtherCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
@@ -136,7 +133,7 @@ public:
                            const CollisionRobot& other_robot, const moveit::core::RobotState& other_state1,
                            const moveit::core::RobotState& other_state2) const override
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_ROBOT_DISTANCE_FIELD, "Not implemented");
+    RCLCPP_ERROR(LOGGER, "Not implemented");
   };
 
   void checkOtherCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
@@ -145,7 +142,7 @@ public:
                            const moveit::core::RobotState& other_state2,
                            const collision_detection::AllowedCollisionMatrix& acm) const override
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_ROBOT_DISTANCE_FIELD, "Not implemented");
+    RCLCPP_ERROR(LOGGER, "Not implemented");
   };
 
   void createCollisionModelMarker(const moveit::core::RobotState& state,
@@ -175,13 +172,13 @@ public:
   void distanceSelf(const DistanceRequest& req, DistanceResult& res,
                     const robot_state::RobotState& state) const override
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_ROBOT_DISTANCE_FIELD, "Not implemented");
+    RCLCPP_ERROR(LOGGER, "Not implemented");
   }
 
   void distanceOther(const DistanceRequest& req, DistanceResult& res, const robot_state::RobotState& state,
                      const CollisionRobot& other_robot, const robot_state::RobotState& other_state) const override
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_ROBOT_DISTANCE_FIELD, "Not implemented");
+    RCLCPP_ERROR(LOGGER, "Not implemented");
   }
 
   DistanceFieldCacheEntryConstPtr getLastDistanceFieldEntry() const
@@ -248,6 +245,9 @@ protected:
                                                  const collision_detection::AllowedCollisionMatrix& acm) const;
 
   void updatedPaddingOrScaling(const std::vector<std::string>& links) override{};
+
+  // Logger
+  static const rclcpp::Logger LOGGER;
 
   Eigen::Vector3d size_;
   Eigen::Vector3d origin_;

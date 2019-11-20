@@ -47,8 +47,6 @@
 namespace collision_detection
 {
 MOVEIT_CLASS_FORWARD(CollisionWorldDistanceField)
-static rclcpp::Logger LOGGER_COLLISION_WORLD_DISTANCE_FIELD =
-    LOGGER_COLLISION_DISTANCE_FIELD.get_child("collision_world_distance_field");
 class CollisionWorldDistanceField : public CollisionWorld
 {
 public:
@@ -146,12 +144,12 @@ public:
   void distanceRobot(const DistanceRequest& req, DistanceResult& res, const CollisionRobot& robot,
                      const robot_state::RobotState& state) const override
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_DISTANCE_FIELD, "Not implemented");
+    RCLCPP_ERROR(LOGGER, "Not implemented");
   }
 
   void distanceWorld(const DistanceRequest& req, DistanceResult& res, const CollisionWorld& world) const override
   {
-    RCLCPP_ERROR(LOGGER_COLLISION_DISTANCE_FIELD, "Not implemented");
+    RCLCPP_ERROR(LOGGER, "Not implemented");
   }
 
   void setWorld(const WorldPtr& world) override;
@@ -190,6 +188,9 @@ protected:
                                         GroupStateRepresentationPtr& gsr) const;
 
   static void notifyObjectChange(CollisionWorldDistanceField* self, const ObjectConstPtr& obj, World::Action action);
+
+  // Logger
+  static const rclcpp::Logger LOGGER;
 
   Eigen::Vector3d size_;
   Eigen::Vector3d origin_;

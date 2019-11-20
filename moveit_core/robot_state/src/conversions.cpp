@@ -52,7 +52,7 @@ namespace core
 namespace
 {
 // Logger
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit").get_child("robot_state");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_state.conversions");
 
 static bool _jointStateToRobotState(const sensor_msgs::msg::JointState& joint_state, RobotState& state)
 {
