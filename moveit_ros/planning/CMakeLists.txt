@@ -10,7 +10,7 @@ endif()
 find_package(Boost REQUIRED)
 find_package(ament_cmake REQUIRED)
 find_package(moveit_msgs REQUIRED)
-find_package(moveit_ros_perception REQUIRED)
+# find_package(moveit_ros_perception REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(message_filters REQUIRED)
@@ -53,7 +53,7 @@ set(libraries
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
-  moveit_ros_perception
+  # moveit_ros_perception
   moveit_msgs
   tf2_msgs
   tf2_geometry_msgs
