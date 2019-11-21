@@ -53,7 +53,7 @@
 #include <algorithm>
 #include <chrono>
 
-rclcpp::Logger LOGGER_RDF_LOADER = rclcpp::get_logger("moveit").get_child("rdf_loader");
+rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_rdf_loader.rdf_loader");
 
 rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& robot_description)
 {
@@ -73,20 +73,19 @@ rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, cons
     }
     catch (const rclcpp::ParameterTypeException& e)
     {
-      RCLCPP_WARN(LOGGER_RDF_LOADER, "When getting robot_description parameter %s", e.what());
+      RCLCPP_WARN(LOGGER, "When getting robot_description parameter %s", e.what());
     }
   }
   if (content.empty())
   {
-    RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Robot model parameter not found! Did you remap '%s'?\n",
-                     robot_description.c_str());
+    RCLCPP_INFO_ONCE(LOGGER, "Robot model parameter not found! Did you remap '%s'?\n", robot_description.c_str());
     return;
   }
 
   urdf::Model* umodel = new urdf::Model();
   if (!umodel->initString(content))
   {
-    RCLCPP_INFO(LOGGER_RDF_LOADER, "Unable to parse URDF from parameter: '%s'", robot_description_.c_str());
+    RCLCPP_INFO(LOGGER, "Unable to parse URDF from parameter: '%s'", robot_description_.c_str());
     return;
   }
   urdf_.reset(umodel);
@@ -103,12 +102,12 @@ rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, cons
     }
     catch (const rclcpp::ParameterTypeException& e)
     {
-      RCLCPP_WARN(LOGGER_RDF_LOADER, "When getting robot_description_semantic parameter: %s", e.what());
+      RCLCPP_WARN(LOGGER, "When getting robot_description_semantic parameter: %s", e.what());
     }
   }
   if (scontent.empty())
   {
-    RCLCPP_INFO_ONCE(LOGGER_RDF_LOADER, "Robot semantic description not found. Did you forget to define or remap '%s'?\n",
+    RCLCPP_INFO_ONCE(LOGGER, "Robot semantic description not found. Did you forget to define or remap '%s'?\n",
                      std::string(robot_description + "_semantic").c_str());
     return;
   }
@@ -116,12 +115,12 @@ rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, cons
   srdf_.reset(new srdf::Model());
   if (!srdf_->initString(*urdf_, scontent))
   {
-    RCLCPP_ERROR(LOGGER_RDF_LOADER, "Unable to parse SRDF from parameter '%s'", srdf_description.c_str());
+    RCLCPP_ERROR(LOGGER, "Unable to parse SRDF from parameter '%s'", srdf_description.c_str());
     srdf_.reset();
     return;
   }
 
-  RCLCPP_INFO(LOGGER_RDF_LOADER, "Loaded robot model in %ld seconds",
+  RCLCPP_INFO(LOGGER, "Loaded robot model in %ld seconds",
               std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count());
 }
 
@@ -137,13 +136,13 @@ rdf_loader::RDFLoader::RDFLoader(const std::string& urdf_string, const std::stri
     srdf_.reset(new srdf::Model());
     if (!srdf_->initString(*urdf_, srdf_string))
     {
-      RCLCPP_ERROR(LOGGER_RDF_LOADER, "Unable to parse SRDF");
+      RCLCPP_ERROR(LOGGER, "Unable to parse SRDF");
       srdf_.reset();
     }
   }
   else
   {
-    RCLCPP_ERROR(LOGGER_RDF_LOADER, "Unable to parse URDF");
+    RCLCPP_ERROR(LOGGER, "Unable to parse URDF");
     urdf_.reset();
   }
 }
@@ -160,20 +159,20 @@ bool rdf_loader::RDFLoader::loadFileToString(std::string& buffer, const std::str
 {
   if (path.empty())
   {
-    RCLCPP_ERROR(LOGGER_RDF_LOADER, "Path is empty");
+    RCLCPP_ERROR(LOGGER, "Path is empty");
     return false;
   }
 
   if (!boost::filesystem::exists(path))
   {
-    RCLCPP_ERROR(LOGGER_RDF_LOADER, "File does not exist");
+    RCLCPP_ERROR(LOGGER, "File does not exist");
     return false;
   }
 
   std::ifstream stream(path.c_str());
   if (!stream.good())
   {
-    RCLCPP_ERROR(LOGGER_RDF_LOADER, "Unable to load path");
+    RCLCPP_ERROR(LOGGER, "Unable to load path");
     return false;
   }
 
@@ -192,13 +191,13 @@ bool rdf_loader::RDFLoader::loadXacroFileToString(std::string& buffer, const std
 {
   if (path.empty())
   {
-    RCLCPP_ERROR(LOGGER_RDF_LOADER, "Path is empty");
+    RCLCPP_ERROR(LOGGER, "Path is empty");
     return false;
   }
 
   if (!boost::filesystem::exists(path))
   {
-    RCLCPP_ERROR(LOGGER_RDF_LOADER, "File does not exist");
+    RCLCPP_ERROR(LOGGER, "File does not exist");
     return false;
   }
 
@@ -210,7 +209,7 @@ bool rdf_loader::RDFLoader::loadXacroFileToString(std::string& buffer, const std
   FILE* pipe = popen(cmd.c_str(), "r");
   if (!pipe)
   {
-    RCLCPP_ERROR(LOGGER_RDF_LOADER, "Unable to load path");
+    RCLCPP_ERROR(LOGGER, "Unable to load path");
     return false;
   }
 
@@ -247,7 +246,7 @@ bool rdf_loader::RDFLoader::loadPkgFileToString(std::string& buffer, const std::
   }
   catch (const ament_index_cpp::PackageNotFoundError& e)
   {
-    RCLCPP_ERROR(LOGGER_RDF_LOADER, "ament_index_cpp: %s", e.what());
+    RCLCPP_ERROR(LOGGER, "ament_index_cpp: %s", e.what());
     return false;
   }
 
