@@ -53,9 +53,11 @@
 #include <algorithm>
 #include <chrono>
 
+namespace rdf_loader
+{
 rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_rdf_loader.rdf_loader");
 
-rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& robot_description)
+RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& robot_description)
 {
   moveit::tools::Profiler::ScopedStart prof_start;
   moveit::tools::Profiler::ScopedBlock prof_block("RDFLoader(robot_description)");
@@ -124,7 +126,7 @@ rdf_loader::RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, cons
               std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count());
 }
 
-rdf_loader::RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_string)
+RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_string)
 {
   moveit::tools::Profiler::ScopedStart prof_start;
   moveit::tools::Profiler::ScopedBlock prof_block("RDFLoader(string)");
@@ -147,7 +149,7 @@ rdf_loader::RDFLoader::RDFLoader(const std::string& urdf_string, const std::stri
   }
 }
 
-bool rdf_loader::RDFLoader::isXacroFile(const std::string& path)
+bool RDFLoader::isXacroFile(const std::string& path)
 {
   std::string lower_path = path;
   std::transform(lower_path.begin(), lower_path.end(), lower_path.begin(), ::tolower);
@@ -155,7 +157,7 @@ bool rdf_loader::RDFLoader::isXacroFile(const std::string& path)
   return lower_path.find(".xacro") != std::string::npos;
 }
 
-bool rdf_loader::RDFLoader::loadFileToString(std::string& buffer, const std::string& path)
+bool RDFLoader::loadFileToString(std::string& buffer, const std::string& path)
 {
   if (path.empty())
   {
@@ -186,8 +188,8 @@ bool rdf_loader::RDFLoader::loadFileToString(std::string& buffer, const std::str
   return true;
 }
 
-bool rdf_loader::RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& path,
-                                                  const std::vector<std::string>& xacro_args)
+bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& path,
+                                      const std::vector<std::string>& xacro_args)
 {
   if (path.empty())
   {
@@ -224,8 +226,8 @@ bool rdf_loader::RDFLoader::loadXacroFileToString(std::string& buffer, const std
   return true;
 }
 
-bool rdf_loader::RDFLoader::loadXmlFileToString(std::string& buffer, const std::string& path,
-                                                const std::vector<std::string>& xacro_args)
+bool RDFLoader::loadXmlFileToString(std::string& buffer, const std::string& path,
+                                    const std::vector<std::string>& xacro_args)
 {
   if (isXacroFile(path))
   {
@@ -235,9 +237,8 @@ bool rdf_loader::RDFLoader::loadXmlFileToString(std::string& buffer, const std::
   return loadFileToString(buffer, path);
 }
 
-bool rdf_loader::RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& package_name,
-                                                const std::string& relative_path,
-                                                const std::vector<std::string>& xacro_args)
+bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& package_name,
+                                    const std::string& relative_path, const std::vector<std::string>& xacro_args)
 {
   std::string package_path;
   try
@@ -256,3 +257,4 @@ bool rdf_loader::RDFLoader::loadPkgFileToString(std::string& buffer, const std::
 
   return loadXmlFileToString(buffer, path.string(), xacro_args);
 }
+}  // namespace rdf_loader
