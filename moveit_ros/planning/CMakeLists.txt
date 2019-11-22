@@ -10,7 +10,7 @@ endif()
 find_package(Boost REQUIRED)
 find_package(ament_cmake REQUIRED)
 find_package(moveit_msgs REQUIRED)
-find_package(moveit_ros_perception REQUIRED)
+# find_package(moveit_ros_perception REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(message_filters REQUIRED)
@@ -27,11 +27,11 @@ find_package(ament_index_cpp REQUIRED)
 
 
 set(THIS_PACKAGE_INCLUDE_DIRS
-    # rdf_loader/include
+    rdf_loader/include
     # kinematics_plugin_loader/include
     # robot_model_loader/include
     # constraint_sampler_manager_loader/include
-    planning_pipeline/include
+    # planning_pipeline/include
     # planning_scene_monitor/include
     # trajectory_execution_manager/include
     # plan_execution/include
@@ -39,11 +39,11 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 )
 
 set(libraries
-  # moveit_rdf_loader
+  moveit_rdf_loader
   # moveit_kinematics_plugin_loader
   # moveit_robot_model_loader
   # moveit_constraint_sampler_manager_loader
-  moveit_planning_pipeline
+  # moveit_planning_pipeline
   # moveit_trajectory_execution_manager
   # moveit_plan_execution
   # moveit_planning_scene_monitor
@@ -53,7 +53,7 @@ set(libraries
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
-  moveit_ros_perception
+  # moveit_ros_perception
   moveit_msgs
   tf2_msgs
   tf2_geometry_msgs
@@ -68,12 +68,12 @@ include_directories(SYSTEM
                     ${EIGEN3_INCLUDE_DIRS}
 )
 
-# add_subdirectory(rdf_loader)
+add_subdirectory(rdf_loader)
 # add_subdirectory(collision_plugin_loader)
 # add_subdirectory(kinematics_plugin_loader)
 # add_subdirectory(robot_model_loader)
 # add_subdirectory(constraint_sampler_manager_loader)
-add_subdirectory(planning_pipeline)
+# add_subdirectory(planning_pipeline)
 # add_subdirectory(planning_request_adapter_plugins)
 # add_subdirectory(planning_scene_monitor)
 # add_subdirectory(planning_components_tools)
