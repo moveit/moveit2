@@ -1,8 +1,18 @@
 set(MOVEIT_LIB_NAME moveit_rdf_loader)
 
-add_library(${MOVEIT_LIB_NAME} src/rdf_loader.cpp)
+add_library(${MOVEIT_LIB_NAME} SHARED src/rdf_loader.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME} ${catkin_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+      rclcpp
+      ament_index_cpp
+      urdf
+      srdfdom
+      moveit_core
+      Boost)
 
-install(TARGETS ${MOVEIT_LIB_NAME} LIBRARY DESTINATION ${CATKIN_GLOBAL_LIB_DESTINATION})
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+install(TARGETS ${MOVEIT_LIB_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+install(DIRECTORY include/ DESTINATION include)
