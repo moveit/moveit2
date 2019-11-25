@@ -11,12 +11,12 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 ament_target_dependencies(${MOVEIT_LIB_NAME}
-  moveit_planning_scene
-  moveit_distance_field
   urdf
   visualization_msgs
   tf2_eigen
   angles
+  geometric_shapes
+  OCTOMAP
 )
 
 target_link_libraries(${MOVEIT_LIB_NAME}  
@@ -24,7 +24,6 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_distance_field
   moveit_collision_detection
   moveit_robot_state
-  ${geometric_shapes_LIBRARIES}
 )
   
 install(TARGETS ${MOVEIT_LIB_NAME}
