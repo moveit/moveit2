@@ -37,4 +37,4 @@ install(TARGETS ${MOVEIT_LIB_NAME}
   RUNTIME DESTINATION bin)
 
 install(TARGETS moveit_list_request_adapter_plugins
-  RUNTIME DESTINATION bin)
+  DESTINATION lib/${PROJECT_NAME})
