@@ -101,4 +101,4 @@ const std::string FixWorkspaceBounds::WBOUNDS_PARAM_NAME = "default_workspace_bo
 }  // namespace default_planner_request_adapters
 
 CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::FixWorkspaceBounds,
-                            planning_request_adapter::PlanningRequestAdapter);
+                            planning_request_adapter::PlanningRequestAdapter)

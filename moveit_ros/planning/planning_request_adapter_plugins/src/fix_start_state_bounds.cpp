@@ -222,4 +222,4 @@ const std::string FixStartStateBounds::DT_PARAM_NAME = "start_state_max_dt";
 }  // namespace default_planner_request_adapters
 
 CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::FixStartStateBounds,
-                            planning_request_adapter::PlanningRequestAdapter);
+                            planning_request_adapter::PlanningRequestAdapter)

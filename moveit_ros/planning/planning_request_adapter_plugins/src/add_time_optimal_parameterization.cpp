@@ -85,4 +85,4 @@ public:
 }  // namespace default_planner_request_adapters
 
 CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::AddTimeOptimalParameterization,
-                            planning_request_adapter::PlanningRequestAdapter);
+                            planning_request_adapter::PlanningRequestAdapter)

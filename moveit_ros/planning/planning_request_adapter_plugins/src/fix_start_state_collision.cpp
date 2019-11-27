@@ -209,4 +209,4 @@ const std::string FixStartStateCollision::ATTEMPTS_PARAM_NAME = "max_sampling_at
 }  // namespace default_planner_request_adapters
 
 CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::FixStartStateCollision,
-                            planning_request_adapter::PlanningRequestAdapter);
+                            planning_request_adapter::PlanningRequestAdapter)
