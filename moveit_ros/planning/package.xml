@@ -44,7 +44,6 @@
 
   <export>
     <build_type>ament_cmake</build_type>
-    <moveit_core plugin="${prefix}/planning_request_adapters_plugin_description.xml"/>
   </export>
 
 </package>

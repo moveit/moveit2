@@ -82,14 +82,10 @@ add_subdirectory(planning_request_adapter_plugins)
 # add_subdirectory(trajectory_execution_manager)
 # add_subdirectory(plan_execution)
 
-install(
-  FILES
-    planning_request_adapters_plugin_description.xml
-  DESTINATION
-    share)
-
 ament_export_include_directories(include)
 ament_export_libraries(${libraries})
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+pluginlib_export_plugin_description_file(moveit_core "planning_request_adapters_plugin_description.xml")
 
 ament_package()
