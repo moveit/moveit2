@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_OMPL_INTERFACE_PARAMETERIZATION_WORK_SPACE_POSE_MODEL_STATE_SPACE_
-#define MOVEIT_OMPL_INTERFACE_PARAMETERIZATION_WORK_SPACE_POSE_MODEL_STATE_SPACE_
+#pragma once
 
 #include <moveit/ompl_interface/parameterization/model_based_state_space.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
@@ -111,6 +110,11 @@ public:
   void copyToOMPLState(ompl::base::State* state, const robot_state::RobotState& rstate) const override;
   void sanityChecks() const override;
 
+  const std::string& getParameterizationType() const override
+  {
+    return PARAMETERIZATION_TYPE;
+  }
+
 private:
   struct PoseComponent
   {
@@ -136,5 +140,3 @@ private:
   double jump_factor_;
 };
 }
-
-#endif

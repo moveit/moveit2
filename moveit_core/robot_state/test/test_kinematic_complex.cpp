@@ -43,14 +43,14 @@
 #include <boost/filesystem/path.hpp>
 #include <geometric_shapes/shapes.h>
 #include <moveit/profiler/profiler.h>
-#include <moveit_resources/config.h>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 class LoadPlanningModelsPr2 : public testing::Test
 {
 protected:
   void SetUp() override
   {
-    boost::filesystem::path res_path(MOVEIT_TEST_RESOURCES_DIR);
+    boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory("moveit_resources"));
 
     srdf_model_.reset(new srdf::Model());
     std::string xml_string;
@@ -179,19 +179,19 @@ TEST_F(LoadPlanningModelsPr2, GroupInit)
 
   bool found_shoulder_pan_link = false;
   bool found_wrist_roll_link = false;
-  for (unsigned int i = 0; i < left_arm_base_tip_group->getLinkModels().size(); i++)
+  for (const moveit::core::LinkModel* link_model : left_arm_base_tip_group->getLinkModels())
   {
-    if (left_arm_base_tip_group->getLinkModels()[i]->getName() == "l_shoulder_pan_link")
+    if (link_model->getName() == "l_shoulder_pan_link")
     {
       EXPECT_TRUE(!found_shoulder_pan_link);
       found_shoulder_pan_link = true;
     }
-    if (left_arm_base_tip_group->getLinkModels()[i]->getName() == "l_wrist_roll_link")
+    if (link_model->getName() == "l_wrist_roll_link")
     {
       EXPECT_TRUE(!found_wrist_roll_link);
       found_wrist_roll_link = true;
     }
-    EXPECT_TRUE(left_arm_base_tip_group->getLinkModels()[i]->getName() != "torso_lift_link");
+    EXPECT_TRUE(link_model->getName() != "torso_lift_link");
   }
   EXPECT_TRUE(found_shoulder_pan_link);
   EXPECT_TRUE(found_wrist_roll_link);

@@ -496,7 +496,7 @@ class MoveGroupCommander(object):
         elif joints is not None:
             try:
                 self.set_joint_value_target(self.get_remembered_joint_values()[joints])
-            except MoveItCommanderException:
+            except TypeError:
                 self.set_joint_value_target(joints)
         if wait:
             return self._g.move()
@@ -588,10 +588,15 @@ class MoveGroupCommander(object):
         """ Set the support surface name for a place operation """
         self._g.set_support_surface_name(value)
 
-    def retime_trajectory(self, ref_state_in, traj_in, velocity_scaling_factor):
+    def retime_trajectory(self, ref_state_in, traj_in, velocity_scaling_factor=1.0, acceleration_scaling_factor=1.0, algorithm="iterative_time_parameterization"):
         ser_ref_state_in = conversions.msg_to_string(ref_state_in)
         ser_traj_in = conversions.msg_to_string(traj_in)
-        ser_traj_out = self._g.retime_trajectory(ser_ref_state_in, ser_traj_in, velocity_scaling_factor)
+        ser_traj_out = self._g.retime_trajectory(ser_ref_state_in, ser_traj_in, velocity_scaling_factor, acceleration_scaling_factor, algorithm)
         traj_out = RobotTrajectory()
         traj_out.deserialize(ser_traj_out)
         return traj_out
+
+    def get_jacobian_matrix(self, joint_values, reference_point=None):
+        """ Get the jacobian matrix of the group as a list"""
+        return self._g.get_jacobian_matrix(joint_values, [0.0, 0.0, 0.0] if reference_point is None else reference_point)
+

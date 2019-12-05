@@ -36,15 +36,17 @@
 
 #include "kinematics_service_capability.h"
 #include <moveit/robot_state/conversions.h>
-#include <moveit/kinematic_constraints/utils.h>
+#include <moveit/utils/message_checks.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <moveit/move_group/capability_names.h>
 
-move_group::MoveGroupKinematicsService::MoveGroupKinematicsService() : MoveGroupCapability("KinematicsService")
+namespace move_group
+{
+MoveGroupKinematicsService::MoveGroupKinematicsService() : MoveGroupCapability("KinematicsService")
 {
 }
 
-void move_group::MoveGroupKinematicsService::initialize()
+void MoveGroupKinematicsService::initialize()
 {
   fk_service_ =
       root_node_handle_.advertiseService(FK_SERVICE_NAME, &MoveGroupKinematicsService::computeFKService, this);
@@ -66,9 +68,10 @@ bool isIKSolutionValid(const planning_scene::PlanningScene* planning_scene,
 }
 }  // namespace
 
-void move_group::MoveGroupKinematicsService::computeIK(
-    moveit_msgs::msg::PositionIKRequest& req, moveit_msgs::msg::RobotState& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
-    robot_state::RobotState& rs, const robot_state::GroupStateValidityCallbackFn& constraint) const
+void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& req,
+                                           moveit_msgs::msg::RobotState& solution,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code, robot_state::RobotState& rs,
+                                           const robot_state::GroupStateValidityCallbackFn& constraint) const
 {
   const robot_state::JointModelGroup* jmg = rs.getJointModelGroup(req.group_name);
   if (jmg)
@@ -140,13 +143,13 @@ void move_group::MoveGroupKinematicsService::computeIK(
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
 }
 
-bool move_group::MoveGroupKinematicsService::computeIKService(moveit_msgs::srv::GetPositionIK::Request& req,
-                                                              moveit_msgs::srv::GetPositionIK::Response& res)
+bool MoveGroupKinematicsService::computeIKService(moveit_msgs::srv::GetPositionIK::Request& req,
+                                                  moveit_msgs::srv::GetPositionIK::Response& res)
 {
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   // check if the planning scene needs to be kept locked; if so, call computeIK() in the scope of the lock
-  if (req.ik_request.avoid_collisions || !kinematic_constraints::isEmpty(req.ik_request.constraints))
+  if (req.ik_request.avoid_collisions || !moveit::core::isEmpty(req.ik_request.constraints))
   {
     planning_scene_monitor::LockedPlanningSceneRO ls(context_->planning_scene_monitor_);
     kinematic_constraints::KinematicConstraintSet kset(ls->getRobotModel());
@@ -169,12 +172,12 @@ bool move_group::MoveGroupKinematicsService::computeIKService(moveit_msgs::srv::
   return true;
 }
 
-bool move_group::MoveGroupKinematicsService::computeFKService(moveit_msgs::srv::GetPositionFK::Request& req,
-                                                              moveit_msgs::srv::GetPositionFK::Response& res)
+bool MoveGroupKinematicsService::computeFKService(moveit_msgs::srv::GetPositionFK::Request& req,
+                                                  moveit_msgs::srv::GetPositionFK::Response& res)
 {
   if (req.fk_link_names.empty())
   {
-    ROS_ERROR("No links specified for FK request");
+    ROS_ERROR_NAMED(getName(), "No links specified for FK request");
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_LINK_NAME;
     return true;
   }
@@ -210,6 +213,7 @@ bool move_group::MoveGroupKinematicsService::computeFKService(moveit_msgs::srv::
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_LINK_NAME;
   return true;
 }
+}  // namespace move_group
 
 #include <class_loader/class_loader.hpp>
 CLASS_LOADER_REGISTER_CLASS(move_group::MoveGroupKinematicsService, move_group::MoveGroupCapability)

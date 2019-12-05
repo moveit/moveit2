@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_MOVEIT_WAREHOUSE_PLANNING_SCENE_STORAGE_
-#define MOVEIT_MOVEIT_WAREHOUSE_PLANNING_SCENE_STORAGE_
+#pragma once
 
 #include "moveit/warehouse/moveit_message_storage.h"
 #include <moveit/macros/class_forward.h>
@@ -112,13 +111,11 @@ private:
 
   std::string getMotionPlanRequestName(const moveit_msgs::msg::MotionPlanRequest& planning_query,
                                        const std::string& scene_name) const;
-  std::string addNewPlanningRequest(const moveit_msgs::msg::MotionPlanRequest& planning_query, const std::string& scene_name,
-                                    const std::string& query_name);
+  std::string addNewPlanningRequest(const moveit_msgs::msg::MotionPlanRequest& planning_query,
+                                    const std::string& scene_name, const std::string& query_name);
 
   PlanningSceneCollection planning_scene_collection_;
   MotionPlanRequestCollection motion_plan_request_collection_;
   RobotTrajectoryCollection robot_trajectory_collection_;
 };
 }
-
-#endif

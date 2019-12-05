@@ -36,18 +36,19 @@
 
 #include <gtest/gtest.h>
 #include <moveit/planning_scene/planning_scene.h>
+#include <moveit/utils/message_checks.h>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <boost/filesystem/path.hpp>
-#include <moveit_resources/config.h>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 // This function needs to return void so the gtest FAIL() macro inside
 // it works right.
 void loadModelFile(std::string filename, std::string& file_content)
 {
-  boost::filesystem::path res_path(MOVEIT_TEST_RESOURCES_DIR);
+  boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory("moveit_resources"));
   std::string xml_string;
   std::fstream xml_file((res_path / filename).string().c_str(), std::fstream::in);
   EXPECT_TRUE(xml_file.is_open());
@@ -104,10 +105,10 @@ TEST(PlanningScene, LoadRestoreDiff)
 
   moveit_msgs::msg::PlanningScene ps_msg;
   ps_msg.robot_state.is_diff = true;
-  EXPECT_TRUE(planning_scene::PlanningScene::isEmpty(ps_msg));
+  EXPECT_TRUE(moveit::core::isEmpty(ps_msg));
   ps->getPlanningSceneMsg(ps_msg);
   ps->setPlanningSceneMsg(ps_msg);
-  EXPECT_FALSE(planning_scene::PlanningScene::isEmpty(ps_msg));
+  EXPECT_FALSE(moveit::core::isEmpty(ps_msg));
   EXPECT_TRUE(world.hasObject("sphere"));
 
   planning_scene::PlanningScenePtr next = ps->diff();

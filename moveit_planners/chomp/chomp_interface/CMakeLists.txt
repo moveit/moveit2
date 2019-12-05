@@ -1,7 +1,8 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.1.3)
 project(moveit_planners_chomp)
 
-add_definitions(-std=c++14)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # find catkin in isolation so that CATKIN_ENABLE_TESTING is defined
 find_package(catkin REQUIRED)
@@ -53,7 +54,7 @@ install(DIRECTORY include/chomp_interface/
 install(TARGETS ${PROJECT_NAME} chomp_planner_plugin
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
 )
 
 if(CATKIN_ENABLE_TESTING)

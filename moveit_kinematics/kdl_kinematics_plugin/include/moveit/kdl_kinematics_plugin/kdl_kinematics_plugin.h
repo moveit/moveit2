@@ -34,8 +34,7 @@
 
 /* Author: Sachin Chitta, David Lu!!, Ugo Cupcic */
 
-#ifndef MOVEIT_ROS_PLANNING_KDL_KINEMATICS_PLUGIN_
-#define MOVEIT_ROS_PLANNING_KDL_KINEMATICS_PLUGIN_
+#pragma once
 
 // ROS
 #include <ros/ros.h>
@@ -53,7 +52,7 @@
 #include <kdl/chainfksolver.hpp>
 #include <kdl/chainiksolver.hpp>
 
-// MoveIt!
+// MoveIt
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <moveit/kdl_kinematics_plugin/joint_mimic.hpp>
 #include <moveit/robot_model/robot_model.h>
@@ -96,7 +95,8 @@ public:
 
   bool searchPositionIK(
       const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-      std::vector<double>& solution, const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
+      std::vector<double>& solution, const IKCallbackFn& solution_callback,
+      moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   bool searchPositionIK(
@@ -123,23 +123,6 @@ public:
   const std::vector<std::string>& getLinkNames() const override;
 
 protected:
-  /**
-   * @brief Given a desired pose of the end-effector, search for the joint angles required to reach it.
-   * This particular method is intended for "searching" for a solutions by randomly re-seeding on failure.
-   * @param ik_pose the desired pose of the link
-   * @param ik_seed_state an initial guess solution for the inverse kinematics
-   * @param timeout The amount of time (in seconds) available to the solver
-   * @param solution the solution vector
-   * @param solution_callback A callback to validate an IK solution
-   * @param error_code an error code that encodes the reason for failure or success
-   * @param consistency_limits The returned solutuion will not deviate more than these from the seed
-   * @return True if a valid solution was found, false otherwise
-   */
-  bool searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-                        std::vector<double>& solution, const IKCallbackFn& solution_callback,
-                        moveit_msgs::msg::MoveItErrorCodes& error_code, const std::vector<double>& consistency_limits,
-                        const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const;
-
   typedef Eigen::Matrix<double, 6, 1> Twist;
 
   /// Solve position IK given initial joint values
@@ -175,7 +158,7 @@ private:
 
   bool initialized_;  ///< Internal variable that indicates whether solver is configured and ready
 
-  unsigned int dimension_;                        ///< Dimension of the group
+  unsigned int dimension_;                             ///< Dimension of the group
   moveit_msgs::msg::KinematicSolverInfo solver_info_;  ///< Stores information for the inverse kinematics solver
 
   const robot_model::JointModelGroup* joint_model_group_;
@@ -196,5 +179,3 @@ private:
   double orientation_vs_position_weight_;
 };
 }
-
-#endif

@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_VISUALIZATION_SCENE_DISPLAY_RVIZ_RENDER_SHAPES_
-#define MOVEIT_VISUALIZATION_SCENE_DISPLAY_RVIZ_RENDER_SHAPES_
+#pragma once
 
 #include <moveit/rviz_plugin_render_tools/octomap_render.h>
 #include <moveit/macros/class_forward.h>
@@ -70,6 +69,7 @@ public:
   void renderShape(Ogre::SceneNode* node, const shapes::Shape* s, const Eigen::Isometry3d& p,
                    OctreeVoxelRenderMode octree_voxel_rendering, OctreeVoxelColorMode octree_color_mode,
                    const rviz::Color& color, float alpha);
+  void updateShapeColors(float r, float g, float b, float a);
   void clear();
 
 private:
@@ -79,5 +79,3 @@ private:
   std::vector<OcTreeRenderPtr> octree_voxel_grids_;
 };
 }
-
-#endif

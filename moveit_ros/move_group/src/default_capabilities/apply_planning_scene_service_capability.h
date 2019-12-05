@@ -34,8 +34,7 @@
 
 /* Author: Michael 'v4hn' Goerner */
 
-#ifndef MOVEIT_MOVE_GROUP_APPLY_PLANNING_SCENE_SERVICE_CAPABILITY_
-#define MOVEIT_MOVE_GROUP_APPLY_PLANNING_SCENE_SERVICE_CAPABILITY_
+#pragma once
 
 #include <moveit/move_group/move_group_capability.h>
 #include <moveit_msgs/ApplyPlanningScene.h>
@@ -54,10 +53,9 @@ public:
   void initialize() override;
 
 private:
-  bool applyScene(moveit_msgs::srv::ApplyPlanningScene::Request& req, moveit_msgs::srv::ApplyPlanningScene::Response& res);
+  bool applyScene(moveit_msgs::srv::ApplyPlanningScene::Request& req,
+                  moveit_msgs::srv::ApplyPlanningScene::Response& res);
 
   ros::ServiceServer service_;
 };
 }
-
-#endif  // MOVEIT_MOVE_GROUP_APPLY_PLANNING_SCENE_SERVICE_CAPABILITY_

@@ -106,9 +106,9 @@ int main(int argc, char** argv)
   ROS_INFO("Added default state");
 
   const std::vector<std::string>& gnames = psm.getRobotModel()->getJointModelGroupNames();
-  for (std::size_t i = 0; i < gnames.size(); ++i)
+  for (const std::string& gname : gnames)
   {
-    const robot_model::JointModelGroup* jmg = psm.getRobotModel()->getJointModelGroup(gnames[i]);
+    const robot_model::JointModelGroup* jmg = psm.getRobotModel()->getJointModelGroup(gname);
     if (!jmg->isChain())
       continue;
     const std::vector<std::string>& lnames = jmg->getLinkModelNames();
@@ -132,7 +132,7 @@ int main(int argc, char** argv)
     cs.addConstraints(cmsg, psm.getRobotModel()->getName(), jmg->getName());
     ROS_INFO("Added default constraint: '%s'", cmsg.name.c_str());
   }
-  ROS_INFO("Default MoveIt! Warehouse was reset.");
+  ROS_INFO("Default MoveIt Warehouse was reset.");
 
   ros::shutdown();
 

@@ -34,6 +34,7 @@
 
 /* Author: Dave Coleman */
 
+#include <moveit/macros/diagnostics.h>
 // SA
 #include "setup_screen_widget.h"  // a base class for screens in the setup assistant
 #include "setup_assistant_widget.h"
@@ -47,18 +48,22 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QString>
+#include <QDir>
 #include <pluginlib/class_loader.hpp>  // for loading all avail kinematic planners
 // Rviz
+DIAGNOSTIC_PUSH
+SILENT_UNUSED_PARAM
 #include <rviz/render_panel.h>
 #include <rviz/visualization_manager.h>
 #include <rviz/view_manager.h>
 #include <rviz/default_plugin/view_controllers/orbit_view_controller.h>
 #include <moveit/robot_state_rviz_plugin/robot_state_display.h>
+DIAGNOSTIC_POP
 
 namespace moveit_setup_assistant
 {
 // ******************************************************************************************
-// Outer User Interface for MoveIt! Configuration Assistant
+// Outer User Interface for MoveIt Configuration Assistant
 // ******************************************************************************************
 SetupAssistantWidget::SetupAssistantWidget(QWidget* parent, const boost::program_options::variables_map& args)
   : QWidget(parent)
@@ -66,7 +71,7 @@ SetupAssistantWidget::SetupAssistantWidget(QWidget* parent, const boost::program
   rviz_manager_ = nullptr;
   rviz_render_panel_ = nullptr;
 
-  // Create object to hold all MoveIt! configuration data
+  // Create object to hold all MoveIt configuration data
   config_data_.reset(new MoveItConfigData());
 
   // Set debug mode flag if necessary
@@ -113,13 +118,7 @@ SetupAssistantWidget::SetupAssistantWidget(QWidget* parent, const boost::program
   }
   else
   {
-    // Open the directory where the MSA was started from.
-    // cf. http://stackoverflow.com/a/7413516/577001
-    QString pwdir("");
-    char* pwd;
-    pwd = getenv("PWD");
-    pwdir.append(pwd);
-    start_screen_widget_->stack_path_->setPath(pwdir);
+    start_screen_widget_->stack_path_->setPath(QDir::currentPath());
   }
 
   // Add Navigation Buttons (but do not load widgets yet except start screen)
@@ -164,7 +163,7 @@ SetupAssistantWidget::SetupAssistantWidget(QWidget* parent, const boost::program
   this->setLayout(layout);
 
   // Title
-  this->setWindowTitle("MoveIt! Setup Assistant");  // title of window
+  this->setWindowTitle("MoveIt Setup Assistant");  // title of window
 
   // Show screen before message
   QApplication::processEvents();
@@ -391,7 +390,7 @@ void SetupAssistantWidget::loadRviz()
   // Set the fixed and target frame
   rviz_manager_->setFixedFrame(QString::fromStdString(config_data_->getRobotModel()->getModelFrame()));
 
-  // Create the MoveIt! Rviz Plugin and attach to display
+  // Create the MoveIt Rviz Plugin and attach to display
   robot_state_display_ = new moveit_rviz_plugin::RobotStateDisplay();
   robot_state_display_->setName("Robot State");
 
@@ -402,6 +401,7 @@ void SetupAssistantWidget::loadRviz()
 
   // Set robot description
   robot_state_display_->subProp("Robot Description")->setValue(QString::fromStdString(ROBOT_DESCRIPTION));
+  robot_state_display_->setVisible(true);
 
   // Zoom into robot
   rviz::ViewController* view = rviz_manager_->getViewManager()->getCurrent();
@@ -484,7 +484,7 @@ void SetupAssistantWidget::closeEvent(QCloseEvent* event)
   if (!config_data_->debug_)
   {
     if (QMessageBox::question(this, "Exit Setup Assistant",
-                              QString("Are you sure you want to exit the MoveIt! Setup Assistant?"),
+                              QString("Are you sure you want to exit the MoveIt Setup Assistant?"),
                               QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Cancel)
     {
       event->ignore();
@@ -499,7 +499,7 @@ void SetupAssistantWidget::closeEvent(QCloseEvent* event)
 // ******************************************************************************************
 // Qt Error Handling - TODO
 // ******************************************************************************************
-bool SetupAssistantWidget::notify(QObject* reciever, QEvent* event)
+bool SetupAssistantWidget::notify(QObject* /*receiver*/, QEvent* /*event*/)
 {
   QMessageBox::critical(this, "Error", "An error occurred and was caught by Qt notify event handler.", QMessageBox::Ok);
 

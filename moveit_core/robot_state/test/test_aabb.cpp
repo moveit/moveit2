@@ -37,7 +37,6 @@
 #include <moveit/robot_model/aabb.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit_resources/config.h>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
 #include <boost/filesystem.hpp>
@@ -53,7 +52,7 @@
 
 #if VISUALIZE_PR2_RVIZ
 #include "rclcpp/rclcpp.hpp"
-#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/msg/marker.h>
 #include <geometric_shapes/shape_operations.h>
 #endif
 
@@ -153,18 +152,19 @@ TEST_F(TestAABB, TestPR2)
   int argc = 0;
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("visualize_pr2");
-  auto pub_aabb = node->create_publisher<visualization_msgs::Marker>("/visualization_aabb", rmw_qos_profile_default);
-  auto pub_obb = node->create_publisher<visualization_msgs::Marker>("/visualization_obb", rmw_qos_profile_default);
+  auto pub_aabb =
+      node->create_publisher<visualization_msgs::msg::Marker>("/visualization_aabb", rmw_qos_profile_default);
+  auto pub_obb = node->create_publisher<visualization_msgs::msg::Marker>("/visualization_obb", rmw_qos_profile_default);
   rclcpp::Rate loop_rate(10);
 
   // Wait for the publishers to establish connections
   sleep(5);
 
   // Prepare the ROS message we will reuse throughout the rest of the function.
-  auto msg = std::make_shared<visualization_msgs::Marker>();
+  auto msg = std::make_shared<visualization_msgs::msg::Marker>();
 
   msg->header.frame_id = pr2_state.getRobotModel()->getRootLinkName();
-  msg->type = visualization_msgs::Marker::CUBE;
+  msg->type = visualization_msgs::msg::Marker::CUBE;
   msg->color.a = 0.5;
   msg->lifetime.sec = 3000;
 

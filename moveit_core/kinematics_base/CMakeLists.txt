@@ -9,7 +9,8 @@ ament_target_dependencies(${MOVEIT_LIB_NAME} urdf urdfdom_headers)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin)
 
 install(DIRECTORY include/
         DESTINATION include)

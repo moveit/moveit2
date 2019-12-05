@@ -9,7 +9,10 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 target_link_libraries(${MOVEIT_LIB_NAME}
     ${Boost_FILESYSTEM_LIBRARY}
     ${catkin_LIBRARIES})
-install(TARGETS ${MOVEIT_LIB_NAME} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+install(TARGETS ${MOVEIT_LIB_NAME} 
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
 if(trac_ik_kinematics_plugin_FOUND)
     include_directories(${trac_ik_kinematics_plugin_INCLUDE_DIRS})
@@ -27,7 +30,10 @@ if(trac_ik_kinematics_plugin_FOUND)
     target_link_libraries(${MOVEIT_LIB_NAME} ${trac_ik_kinematics_plugin_LIBRARIES})
     set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES COMPILE_DEFINITIONS "CACHED_IK_KINEMATICS_TRAC_IK")
 endif()
-install(TARGETS ${MOVEIT_LIB_NAME} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+install(TARGETS ${MOVEIT_LIB_NAME} 
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
 
 # This is just for testing purposes; the arms from Universal Robots have
 # analytic solvers, so caching just adds extra overhead.
@@ -42,15 +48,12 @@ if(ur_kinematics_FOUND)
             moveit_cached_ik_kinematics_base
             ${ur${UR}_pluginlib}
             ${catkin_LIBRARIES})
-        install(TARGETS ${MOVEIT_LIB_NAME} LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+        install(TARGETS ${MOVEIT_LIB_NAME} 
+                LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+                ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+                RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
     endforeach()
 endif()
-
-add_executable(measure_ik_call_cost src/measure_ik_call_cost.cpp)
-target_link_libraries(measure_ik_call_cost
-    ${catkin_LIBRARIES}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY})
-install(TARGETS measure_ik_call_cost DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
 install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

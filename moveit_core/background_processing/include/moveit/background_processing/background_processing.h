@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_BACKGROUND_PROCESSING_
-#define MOVEIT_BACKGROUND_PROCESSING_
+#pragma once
 
 #include <deque>
 #include <string>
@@ -47,7 +46,7 @@
 namespace moveit
 {
 /** \brief This namespace includes classes and functions that are
-    helpful in the implementation of other MoveIt! components. This is
+    helpful in the implementation of other MoveIt components. This is
     not code specific to the functionality provided by MoveIt. */
 namespace tools
 {
@@ -113,5 +112,3 @@ private:
 };
 }  // namespace tools
 }  // namespace moveit
-
-#endif

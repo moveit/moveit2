@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_COLLISION_DETECTION_COLLISION_TOOLS_
-#define MOVEIT_COLLISION_DETECTION_COLLISION_TOOLS_
+#pragma once
 
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit_msgs/msg/cost_source.hpp>
@@ -76,6 +75,4 @@ bool getSensorPositioning(geometry_msgs::msg::Point& point, const std::set<CostS
 
 void costSourceToMsg(const CostSource& cost_source, moveit_msgs::msg::CostSource& msg);
 void contactToMsg(const Contact& contact, moveit_msgs::msg::ContactInformation& msg);
-}  // namespace collision_detection
-
-#endif
+}

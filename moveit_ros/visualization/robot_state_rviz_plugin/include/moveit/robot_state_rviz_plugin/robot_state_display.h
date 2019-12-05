@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_VISUALIZATION_ROBOT_STATE_DISPLAY_RVIZ_ROBOT_STATE_DISPLAY_
-#define MOVEIT_VISUALIZATION_ROBOT_STATE_DISPLAY_RVIZ_ROBOT_STATE_DISPLAY_
+#pragma once
 
 #include <rviz/display.h>
 
@@ -83,6 +82,9 @@ public:
 
   void setLinkColor(const std::string& link_name, const QColor& color);
   void unsetLinkColor(const std::string& link_name);
+
+public Q_SLOTS:
+  void setVisible(bool visible);
 
 private Q_SLOTS:
 
@@ -146,5 +148,3 @@ protected:
 };
 
 }  // namespace moveit_rviz_plugin
-
-#endif

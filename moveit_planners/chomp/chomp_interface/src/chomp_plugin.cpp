@@ -50,7 +50,7 @@ public:
   {
   }
 
-  bool initialize(const robot_model::RobotModelConstPtr& model, const std::string& ns) override
+  bool initialize(const robot_model::RobotModelConstPtr& model, const std::string& /*ns*/) override
   {
     for (const std::string& group : model->getJointModelGroupNames())
     {
@@ -60,9 +60,10 @@ public:
     return true;
   }
 
-  planning_interface::PlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                            const planning_interface::MotionPlanRequest& req,
-                                                            moveit_msgs::msg::MoveItErrorCodes& error_code) const override
+  planning_interface::PlanningContextPtr
+  getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                     const planning_interface::MotionPlanRequest& req,
+                     moveit_msgs::msg::MoveItErrorCodes& error_code) const override
   {
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
 
@@ -92,7 +93,7 @@ public:
     return context;
   }
 
-  bool canServiceRequest(const planning_interface::MotionPlanRequest& req) const override
+  bool canServiceRequest(const planning_interface::MotionPlanRequest& /*req*/) const override
   {
     // TODO: this is a dummy implementation
     //      capabilities.dummy = false;

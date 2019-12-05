@@ -36,6 +36,7 @@
 
 #include <moveit/common_planning_interface_objects/common_objects.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
 #include <moveit/move_group/capability_names.h>
 
@@ -66,6 +67,11 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz::
 {
   // set up the GUI
   ui_->setupUi(this);
+  // add more tabs
+  joints_tab_ = new MotionPlanningFrameJointsWidget(planning_display_, ui_->tabWidget);
+  ui_->tabWidget->addTab(joints_tab_, "Joints");
+  connect(planning_display_, SIGNAL(queryStartStateChanged()), joints_tab_, SLOT(queryStartStateChanged()));
+  connect(planning_display_, SIGNAL(queryGoalStateChanged()), joints_tab_, SLOT(queryGoalStateChanged()));
 
   // connect bottons to actions; each action usually registers the function pointer for the actual computation,
   // to keep the GUI more responsive (using the background job processing)
@@ -210,8 +216,8 @@ void MotionPlanningFrame::approximateIKChanged(int state)
 void MotionPlanningFrame::setItemSelectionInList(const std::string& item_name, bool selection, QListWidget* list)
 {
   QList<QListWidgetItem*> found_items = list->findItems(QString(item_name.c_str()), Qt::MatchExactly);
-  for (int i = 0; i < found_items.size(); ++i)
-    found_items[i]->setSelected(selection);
+  for (QListWidgetItem* found_item : found_items)
+    found_item->setSelected(selection);
 }
 
 void MotionPlanningFrame::allowExternalProgramCommunication(bool enable)
@@ -281,21 +287,23 @@ void MotionPlanningFrame::fillStateSelectionOptions()
     ui_->start_state_combo_box->addItem(QString("<random>"));
     ui_->start_state_combo_box->addItem(QString("<current>"));
     ui_->start_state_combo_box->addItem(QString("<same as goal>"));
+    ui_->start_state_combo_box->addItem(QString("<previous>"));
 
     ui_->goal_state_combo_box->addItem(QString("<random valid>"));
     ui_->goal_state_combo_box->addItem(QString("<random>"));
     ui_->goal_state_combo_box->addItem(QString("<current>"));
     ui_->goal_state_combo_box->addItem(QString("<same as start>"));
+    ui_->goal_state_combo_box->addItem(QString("<previous>"));
 
     const std::vector<std::string>& known_states = jmg->getDefaultStateNames();
     if (!known_states.empty())
     {
       ui_->start_state_combo_box->insertSeparator(ui_->start_state_combo_box->count());
       ui_->goal_state_combo_box->insertSeparator(ui_->goal_state_combo_box->count());
-      for (std::size_t i = 0; i < known_states.size(); ++i)
+      for (const std::string& known_state : known_states)
       {
-        ui_->start_state_combo_box->addItem(QString::fromStdString(known_states[i]));
-        ui_->goal_state_combo_box->addItem(QString::fromStdString(known_states[i]));
+        ui_->start_state_combo_box->addItem(QString::fromStdString(known_state));
+        ui_->goal_state_combo_box->addItem(QString::fromStdString(known_state));
       }
     }
 
@@ -383,6 +391,9 @@ void MotionPlanningFrame::changePlanningGroup()
 {
   planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::changePlanningGroupHelper, this),
                                       "Frame::changePlanningGroup");
+  joints_tab_->changePlanningGroup(planning_display_->getCurrentPlanningGroup(),
+                                   planning_display_->getQueryStartStateHandler(),
+                                   planning_display_->getQueryGoalStateHandler());
 }
 
 void MotionPlanningFrame::sceneUpdate(planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type)
@@ -511,7 +522,7 @@ void MotionPlanningFrame::tabChanged(int index)
     selectedCollisionObjectChanged();
 }
 
-void MotionPlanningFrame::updateSceneMarkers(float wall_dt, float ros_dt)
+void MotionPlanningFrame::updateSceneMarkers(float wall_dt, float /*ros_dt*/)
 {
   if (scene_marker_)
     scene_marker_->update(wall_dt);

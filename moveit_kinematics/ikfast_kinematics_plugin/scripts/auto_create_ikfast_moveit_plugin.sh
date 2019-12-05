@@ -75,7 +75,7 @@ function set_option_defaults {
       exit 1
    fi
    # Define default PKG_NAME if not yet defined
-   PKG_NAME=${PKG_NAME:-$ROBOT_NAME_$PLANNING_GROUP_ikfast_plugin}
+   PKG_NAME=${PKG_NAME:-${ROBOT_NAME}_${PLANNING_GROUP}_ikfast_plugin}
 }
 
 function cleanup {
@@ -88,9 +88,11 @@ function build_docker_image {
    echo "Building docker image"
    cat <<EOF > $TMP_DIR/Dockerfile
 FROM personalrobotics/ros-openrave
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends python-pip && \
-    apt-get install -y --no-install-recommends build-essential liblapack-dev ros-indigo-collada-urdf && \
+# Update ROS keys (https://discourse.ros.org/t/new-gpg-keys-deployed-for-packages-ros-org/9454)
+RUN apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654 && \
+    apt-key del 421C365BD9FF1F717815A3895523BAEEB01FA116 && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends python-pip build-essential liblapack-dev ros-indigo-collada-urdf && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 # enforce a specific version of sympy, which is known to work with OpenRave
 RUN pip install sympy==0.7.1
@@ -167,7 +169,7 @@ EOF
 
 function create_plugin {
    echo
-   echo "Running $(dirname $0)/create_ikfast_moveit_plugin.py"
+   echo "Running $(dirname $0)/create_ikfast_moveit_plugin.py \"$ROBOT_NAME\" \"$PLANNING_GROUP\" \"$PKG_NAME\" \"$BASE_LINK\" \"$EEF_LINK\" \"$INPUT\""
    $(dirname "$0")/create_ikfast_moveit_plugin.py "$ROBOT_NAME" "$PLANNING_GROUP" "$PKG_NAME" "$BASE_LINK" "$EEF_LINK" "$INPUT"
 }
 

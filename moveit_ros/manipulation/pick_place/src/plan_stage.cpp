@@ -72,7 +72,8 @@ bool PlanStage::evaluate(const ManipulationPlanPtr& plan) const
   {
     attempts++;
     if (!signal_stop_ && planning_pipeline_->generatePlan(planning_scene_, req, res) &&
-        res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && res.trajectory_ && !res.trajectory_->empty())
+        res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && res.trajectory_ &&
+        !res.trajectory_->empty())
     {
       // We have a valid motion plan, now apply pre-approach end effector posture (open gripper) if applicable
       if (!plan->approach_posture_.joint_names.empty())
@@ -116,7 +117,8 @@ bool PlanStage::evaluate(const ManipulationPlanPtr& plan) const
       plan->error_code_ = res.error_code_;
   }
   // if the planner reported an invalid plan, give it a second chance
-  while (!signal_stop_ && plan->error_code_.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN && attempts < 2);
+  while (!signal_stop_ && plan->error_code_.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN &&
+         attempts < 2);
 
   return false;
 }

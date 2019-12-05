@@ -37,6 +37,7 @@
 #include <moveit/kinematic_constraints/utils.h>
 #include <geometric_shapes/solid_primitive_dims.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <moveit/utils/message_checks.h>
 
 using namespace moveit::core;
 
@@ -52,17 +53,17 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
 
   // add all joint constraints that are in first but not in second
   // and merge joint constraints that are for the same joint
-  for (std::size_t i = 0; i < first.joint_constraints.size(); ++i)
+  for (const moveit_msgs::msg::JointConstraint& jc_first : first.joint_constraints)
   {
     bool add = true;
-    for (std::size_t j = 0; j < second.joint_constraints.size(); ++j)
-      if (second.joint_constraints[j].joint_name == first.joint_constraints[i].joint_name)
+    for (const moveit_msgs::msg::JointConstraint& jc_second : second.joint_constraints)
+      if (jc_second.joint_name == jc_first.joint_name)
       {
         add = false;
         // now we merge
         moveit_msgs::msg::JointConstraint m;
-        const moveit_msgs::msg::JointConstraint& a = first.joint_constraints[i];
-        const moveit_msgs::msg::JointConstraint& b = second.joint_constraints[j];
+        const moveit_msgs::msg::JointConstraint& a = jc_first;
+        const moveit_msgs::msg::JointConstraint& b = jc_second;
         double low = std::max(a.position - a.tolerance_below, b.position - b.tolerance_below);
         double high = std::min(a.position + a.tolerance_above, b.position + b.tolerance_above);
         if (low > high)
@@ -83,43 +84,42 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
         break;
       }
     if (add)
-      r.joint_constraints.push_back(first.joint_constraints[i]);
+      r.joint_constraints.push_back(jc_first);
   }
 
   // add all joint constraints that are in second but not in first
-  for (std::size_t i = 0; i < second.joint_constraints.size(); ++i)
+  for (const moveit_msgs::msg::JointConstraint& jc_second : second.joint_constraints)
   {
     bool add = true;
-    for (std::size_t j = 0; j < first.joint_constraints.size(); ++j)
-      if (second.joint_constraints[i].joint_name == first.joint_constraints[j].joint_name)
+    for (const moveit_msgs::msg::JointConstraint& jc_first : first.joint_constraints)
+      if (jc_second.joint_name == jc_first.joint_name)
       {
         add = false;
         break;
       }
     if (add)
-      r.joint_constraints.push_back(second.joint_constraints[i]);
+      r.joint_constraints.push_back(jc_second);
   }
 
   // merge rest of constraints
   r.position_constraints = first.position_constraints;
-  for (std::size_t i = 0; i < second.position_constraints.size(); ++i)
-    r.position_constraints.push_back(second.position_constraints[i]);
+  for (const moveit_msgs::msg::PositionConstraint& position_constraint : second.position_constraints)
+    r.position_constraints.push_back(position_constraint);
 
   r.orientation_constraints = first.orientation_constraints;
-  for (std::size_t i = 0; i < second.orientation_constraints.size(); ++i)
-    r.orientation_constraints.push_back(second.orientation_constraints[i]);
+  for (const moveit_msgs::msg::OrientationConstraint& orientation_constraint : second.orientation_constraints)
+    r.orientation_constraints.push_back(orientation_constraint);
 
   r.visibility_constraints = first.visibility_constraints;
-  for (std::size_t i = 0; i < second.visibility_constraints.size(); ++i)
-    r.visibility_constraints.push_back(second.visibility_constraints[i]);
+  for (const moveit_msgs::msg::VisibilityConstraint& visibility_constraint : second.visibility_constraints)
+    r.visibility_constraints.push_back(visibility_constraint);
 
   return r;
 }
 
 bool isEmpty(const moveit_msgs::msg::Constraints& constr)
 {
-  return constr.position_constraints.empty() && constr.orientation_constraints.empty() &&
-         constr.visibility_constraints.empty() && constr.joint_constraints.empty();
+  return moveit::core::isEmpty(constr);
 }
 
 std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& constr)
@@ -280,10 +280,11 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 
   return goal;
 }
+
 // TODO ROS 2: Rework these functions
 
 // TODO: Is not getting called from anywhere, check if is necessary
-// static bool constructPoseStamped(XmlRpc::XmlRpcValue::iterator& it, geometry_msgs::msg::PoseStamped& pose)
+// static bool constructPoseStamped(XmlRpc::XmlRpcValue::iterator& it, geometry_msgs::PoseStamped& pose)
 // {
 //   if (!isStruct(it->second, { "frame_id", "position", "orientation" }, it->first))
 //     return false;
@@ -305,7 +306,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //   return true;
 // }
 //
-// static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::JointConstraint& constraint)
+// static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::JointConstraint& constraint)
 // {
 //   for (XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it)
 //   {
@@ -346,13 +347,13 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //     }
 //     else
 //     {
-//       RCLCPP_WARN(LOGGER, "joint constraint contains unknown entity '" << it->first << "'");
+//       ROS_WARN_STREAM_NAMED(LOGNAME, "joint constraint contains unknown entity '" << it->first << "'");
 //     }
 //   }
 //   return true;
 // }
 //
-// static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::PositionConstraint& constraint)
+// static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::PositionConstraint& constraint)
 // {
 //   for (XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it)
 //   {
@@ -381,10 +382,10 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //       constraint.constraint_region.primitive_poses.emplace_back();
 //       constraint.constraint_region.primitives.emplace_back();
 //
-//       geometry_msgs::msg::Pose& region_pose = constraint.constraint_region.primitive_poses.back();
-//       shape_msgs::msg::SolidPrimitive& region_primitive = constraint.constraint_region.primitives.back();
+//       geometry_msgs::Pose& region_pose = constraint.constraint_region.primitive_poses.back();
+//       shape_msgs::SolidPrimitive& region_primitive = constraint.constraint_region.primitives.back();
 //
-//       region_primitive.type = shape_msgs::msg::SolidPrimitive::BOX;
+//       region_primitive.type = shape_msgs::SolidPrimitive::BOX;
 //       region_primitive.dimensions.resize(3);
 //
 //       std::function<void(XmlRpc::XmlRpcValue&, double&, double&)> parse_dimension =
@@ -394,23 +395,23 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //           };
 //
 //       parse_dimension(it->second["x"], region_pose.position.x,
-//                       region_primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_X]);
+//                       region_primitive.dimensions[shape_msgs::SolidPrimitive::BOX_X]);
 //       parse_dimension(it->second["y"], region_pose.position.y,
-//                       region_primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Y]);
+//                       region_primitive.dimensions[shape_msgs::SolidPrimitive::BOX_Y]);
 //       parse_dimension(it->second["z"], region_pose.position.z,
-//                       region_primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Z]);
+//                       region_primitive.dimensions[shape_msgs::SolidPrimitive::BOX_Z]);
 //
 //       region_pose.orientation.w = 1.0;
 //     }
 //     else
 //     {
-//       RCLCPP_WARN(LOGGER, "position constraint contains unknown entity '" << it->first << "'");
+//       ROS_WARN_STREAM_NAMED(LOGNAME, "position constraint contains unknown entity '" << it->first << "'");
 //     }
 //   }
 //   return true;
 // }
 //
-// static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::OrientationConstraint& constraint)
+// static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::OrientationConstraint& constraint)
 // {
 //   for (XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it)
 //   {
@@ -442,13 +443,13 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //     }
 //     else
 //     {
-//       RCLCPP_WARN(LOGGER, "orientation constraint contains unknown entity '" << it->first << "'");
+//       ROS_WARN_STREAM_NAMED(LOGNAME, "orientation constraint contains unknown entity '" << it->first << "'");
 //     }
 //   }
 //   return true;
 // }
 //
-// static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::VisibilityConstraint& constraint)
+// static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::VisibilityConstraint& constraint)
 // {
 //   for (XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it)
 //   {
@@ -476,28 +477,28 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //       constraint.max_range_angle = parseDouble(it->second);
 //     else
 //     {
-//       RCLCPP_WARN(LOGGER, "orientation constraint contains unknown entity '" << it->first << "'");
+//       ROS_WARN_STREAM_NAMED(LOGNAME, "orientation constraint contains unknown entity '" << it->first << "'");
 //     }
 //   }
 //
-//   constraint.sensor_view_direction = moveit_msgs::msg::VisibilityConstraint::SENSOR_X;
+//   constraint.sensor_view_direction = moveit_msgs::VisibilityConstraint::SENSOR_X;
 //
 //   return true;
 // }
 //
-// static bool collectConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Constraints& constraints)
+// static bool collectConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::Constraints& constraints)
 // {
 //   if (params.getType() != XmlRpc::XmlRpcValue::TypeArray)
 //   {
-//     RCLCPP_ERROR(LOGGER, "expected constraints as array");
+//     ROS_ERROR_NAMED(LOGNAME, "expected constraints as array");
 //     return false;
 //   }
 //
-//   for (int i = 0; i < params.size(); ++i)
+//   for (int i = 0; i < params.size(); ++i)  // NOLINT(modernize-loop-convert)
 //   {
 //     if (!params[i].hasMember("type"))
 //     {
-//       RCLCPP_ERROR(LOGGER, "constraint parameter does not specify its type");
+//       ROS_ERROR_NAMED(LOGNAME, "constraint parameter does not specify its type");
 //     }
 //     else if (params[i]["type"] == "joint")
 //     {
@@ -528,12 +529,66 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //   return true;
 // }
 //
-// bool constructConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Constraints& constraints)
+// bool constructConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::Constraints& constraints)
 // {
 //   if (!isStruct(params, { "name", "constraints" }, "Parameter"))
 //     return false;
 //
 //   constraints.name = static_cast<std::string>(params["name"]);
 //   return collectConstraints(params["constraints"], constraints);
+// }
+// }  // namespace kinematic_constraints
+//
+// bool kinematic_constraints::resolveConstraintFrames(const robot_state::RobotState& state,
+//                                                     moveit_msgs::Constraints& constraints)
+// {
+//   for (auto& c : constraints.position_constraints)
+//   {
+//     bool frame_found;
+//     const moveit::core::LinkModel* robot_link;
+//     const Eigen::Isometry3d& transform = state.getFrameInfo(c.link_name, robot_link, frame_found);
+//     if (!frame_found)
+//       return false;
+//
+//     // If the frame of the constraint is not part of the robot link model (but is an
+//     // attached body or subframe instead), the constraint needs to be expressed in
+//     // the frame of a robot link.
+//     if (c.link_name != robot_link->getName())
+//     {
+//       Eigen::Vector3d pos_in_link_frame,
+//           pos_in_original_frame(c.target_point_offset.x, c.target_point_offset.y, c.target_point_offset.z);
+//
+//       pos_in_link_frame = transform * pos_in_original_frame;
+//       c.link_name = robot_link->getName();
+//       c.target_point_offset.x = pos_in_link_frame[0];
+//       c.target_point_offset.y = pos_in_link_frame[1];
+//       c.target_point_offset.z = pos_in_link_frame[2];
+//     }
+//   }
+//   for (auto& c : constraints.orientation_constraints)
+//   {
+//     bool frame_found;
+//     const moveit::core::LinkModel* robot_link;
+//     const Eigen::Isometry3d& transform = state.getFrameInfo(c.link_name, robot_link, frame_found);
+//     if (!frame_found)
+//       return false;
+//
+//     // If the frame of the constraint is not part of the robot link model (but is an
+//     // attached body or subframe instead), the constraint needs to be expressed in
+//     // the frame of a robot link.
+//     if (c.link_name != robot_link->getName())
+//     {
+//       Eigen::Quaterniond q_body_to_link(transform.inverse().rotation());
+//       Eigen::Quaterniond q_target(c.orientation.w, c.orientation.x, c.orientation.y, c.orientation.z);
+//       Eigen::Quaterniond q_in_link = q_body_to_link * q_target;
+//
+//       c.link_name = robot_link->getName();
+//       c.orientation.x = q_in_link.x();
+//       c.orientation.y = q_in_link.y();
+//       c.orientation.z = q_in_link.z();
+//       c.orientation.w = q_in_link.w();
+//     }
+//   }
+//   return true;
 // }
 }

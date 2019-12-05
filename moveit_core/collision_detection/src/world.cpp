@@ -36,6 +36,7 @@
 
 #include <moveit/collision_detection/world.h>
 #include "rclcpp/rclcpp.hpp"
+#include <boost/algorithm/string/predicate.hpp>
 
 namespace collision_detection
 {
@@ -119,9 +120,9 @@ std::vector<std::string> World::getObjectIds() const
   return id;
 }
 
-World::ObjectConstPtr World::getObject(const std::string& id) const
+World::ObjectConstPtr World::getObject(const std::string& object_id) const
 {
-  auto it = objects_.find(id);
+  auto it = objects_.find(object_id);
   if (it == objects_.end())
     return ObjectConstPtr();
   else
@@ -134,14 +135,69 @@ void World::ensureUnique(ObjectPtr& obj)
     obj.reset(new Object(*obj));
 }
 
-bool World::hasObject(const std::string& id) const
+bool World::hasObject(const std::string& object_id) const
 {
-  return objects_.find(id) != objects_.end();
+  return objects_.find(object_id) != objects_.end();
 }
 
-bool World::moveShapeInObject(const std::string& id, const shapes::ShapeConstPtr& shape, const Eigen::Isometry3d& pose)
+bool World::knowsTransform(const std::string& name) const
 {
-  auto it = objects_.find(id);
+  // Check object names first
+  std::map<std::string, ObjectPtr>::const_iterator it = objects_.find(name);
+  if (it != objects_.end())
+    // only accept object name as frame if it is associated to a unique shape
+    return it->second->shape_poses_.size() == 1;
+  else  // Then objects' subframes
+  {
+    for (const std::pair<std::string, ObjectPtr>& object : objects_)
+    {
+      // if "object name/" matches start of object_id, we found the matching object
+      if (boost::starts_with(name, object.first) && name[object.first.length()] == '/')
+        return object.second->subframe_poses_.find(name.substr(object.first.length() + 1)) !=
+               object.second->subframe_poses_.end();
+    }
+  }
+  return false;
+}
+
+const Eigen::Isometry3d& World::getTransform(const std::string& name) const
+{
+  bool found;
+  const Eigen::Isometry3d& result = getTransform(name, found);
+  if (!found)
+    throw std::runtime_error("No transform found with name: " + name);
+  return result;
+}
+
+const Eigen::Isometry3d& World::getTransform(const std::string& name, bool& frame_found) const
+{
+  frame_found = true;
+  std::map<std::string, ObjectPtr>::const_iterator it = objects_.find(name);
+  if (it != objects_.end())
+    return it->second->shape_poses_[0];
+  else  // Search within subframes
+  {
+    for (const std::pair<std::string, ObjectPtr>& object : objects_)
+    {
+      // if "object name/" matches start of object_id, we found the matching object
+      if (boost::starts_with(name, object.first) && name[object.first.length()] == '/')
+      {
+        auto it = object.second->subframe_poses_.find(name.substr(object.first.length() + 1));
+        if (it != object.second->subframe_poses_.end())
+          return it->second;
+      }
+    }
+  }
+
+  static const Eigen::Isometry3d IDENTITY_TRANSFORM = Eigen::Isometry3d::Identity();
+  frame_found = false;
+  return IDENTITY_TRANSFORM;
+}
+
+bool World::moveShapeInObject(const std::string& object_id, const shapes::ShapeConstPtr& shape,
+                              const Eigen::Isometry3d& pose)
+{
+  auto it = objects_.find(object_id);
   if (it != objects_.end())
   {
     unsigned int n = it->second->shapes_.size();
@@ -158,9 +214,9 @@ bool World::moveShapeInObject(const std::string& id, const shapes::ShapeConstPtr
   return false;
 }
 
-bool World::moveObject(const std::string& id, const Eigen::Isometry3d& transform)
+bool World::moveObject(const std::string& object_id, const Eigen::Isometry3d& transform)
 {
-  auto it = objects_.find(id);
+  auto it = objects_.find(object_id);
   if (it == objects_.end())
     return false;
   if (transform.isApprox(Eigen::Isometry3d::Identity()))
@@ -174,9 +230,9 @@ bool World::moveObject(const std::string& id, const Eigen::Isometry3d& transform
   return true;
 }
 
-bool World::removeShapeFromObject(const std::string& id, const shapes::ShapeConstPtr& shape)
+bool World::removeShapeFromObject(const std::string& object_id, const shapes::ShapeConstPtr& shape)
 {
-  auto it = objects_.find(id);
+  auto it = objects_.find(object_id);
   if (it != objects_.end())
   {
     unsigned int n = it->second->shapes_.size();
@@ -202,9 +258,9 @@ bool World::removeShapeFromObject(const std::string& id, const shapes::ShapeCons
   return false;
 }
 
-bool World::removeObject(const std::string& id)
+bool World::removeObject(const std::string& object_id)
 {
-  auto it = objects_.find(id);
+  auto it = objects_.find(object_id);
   if (it != objects_.end())
   {
     notify(it->second, DESTROY);
@@ -218,6 +274,17 @@ void World::clearObjects()
 {
   notifyAll(DESTROY);
   objects_.clear();
+}
+
+bool World::setSubframesOfObject(const std::string& object_id, const moveit::core::FixedTransformsMap& subframe_poses)
+{
+  auto obj_pair = objects_.find(object_id);
+  if (obj_pair == objects_.end())
+  {
+    return false;
+  }
+  obj_pair->second->subframe_poses_ = subframe_poses;
+  return true;
 }
 
 World::ObserverHandle World::addObserver(const ObserverCallbackFn& callback)

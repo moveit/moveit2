@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_PLANNING_PIPELINE_PLANNING_PIPELINE_
-#define MOVEIT_PLANNING_PIPELINE_PLANNING_PIPELINE_
+#pragma once
 
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
@@ -194,11 +193,9 @@ private:
   /// Flag indicating whether the reported plans should be checked once again, by the planning pipeline itself
   bool check_solution_paths_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr contacts_publisher_;
-  
+
   rmw_qos_profile_t custom_qos_profile_;
 };
 
 MOVEIT_CLASS_FORWARD(PlanningPipeline)
 }
-
-#endif

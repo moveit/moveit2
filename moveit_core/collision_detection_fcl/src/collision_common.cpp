@@ -354,6 +354,9 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
   return cdata->done_;
 }
 
+/** \brief Cache for an arbitrary type of shape. It is assigned during the execution of \e createCollisionGeometry().
+ *
+ *  Only a single cache per thread and object type is created as it is a quasi-singleton instance. */
 struct FCLShapeCache
 {
   using ShapeKey = shapes::ShapeConstWeakPtr;
@@ -388,7 +391,10 @@ struct FCLShapeCache
 
   static const unsigned int MAX_CLEAN_COUNT = 100;  // every this many uses of the cache, a cleaning operation is
                                                     // executed (this is only removal of expired entries)
+  /** \brief Map of weak pointers to the FCLGeometry. */
   ShapeMap map_;
+
+  /** \brief Counts cache usage and triggers clearing of cache when \m MAX_CLEAN_COUNT is exceeded. */
   unsigned int clean_count_;
 };
 
@@ -618,7 +624,9 @@ bool distanceCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void
   return cdata->done;
 }
 
-/* We template the function so we get a different cache for each of the template arguments combinations */
+/* Templated function to get a different cache for each of the template arguments combinations.
+ *
+ * The returned cache is a quasi-singleton for each thread as it is created \e thread_local. */
 template <typename BV, typename T>
 FCLShapeCache& GetShapeCache()
 {
@@ -653,6 +661,11 @@ struct IfSameType<T, T>
   };
 };
 
+/** \brief Templated helper function creating new collision geometry out of general object using an arbitrary bounding
+ *  volume (BV).
+ *
+ *  It assigns a thread-local cache for each type of shape and minimizes memory usage and copying through utilizing the
+ *  cache. */
 template <typename BV, typename T>
 FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, const T* data, int shape_index)
 {
@@ -832,7 +845,6 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
   return FCLGeometryConstPtr();
 }
 
-/////////////////////////////////////////////////////
 FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, const robot_model::LinkModel* link,
                                             int shape_index)
 {
@@ -850,6 +862,8 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
   return createCollisionGeometry<fcl::OBBRSSd, World::Object>(shape, obj, 0);
 }
 
+/** \brief Templated helper function creating new collision geometry out of general object using an arbitrary bounding
+ *  volume (BV). This can include padding and scaling. */
 template <typename BV, typename T>
 FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, double scale, double padding,
                                             const T* data, int shape_index)

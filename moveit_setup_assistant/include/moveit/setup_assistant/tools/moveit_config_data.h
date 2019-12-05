@@ -34,8 +34,7 @@
 
 /* Author: Dave Coleman */
 
-#ifndef MOVEIT_MOVEIT_SETUP_ASSISTANT_TOOLS_MOVEIT_CONFIG_DATA_
-#define MOVEIT_MOVEIT_SETUP_ASSISTANT_TOOLS_MOVEIT_CONFIG_DATA_
+#pragma once
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_scene/planning_scene.h>                     // for getting kinematic model
@@ -175,7 +174,7 @@ private:
 MOVEIT_CLASS_FORWARD(MoveItConfigData)
 
 /** \brief This class is shared with all widgets and contains the common configuration data
-    needed for generating each robot's MoveIt! configuration package.
+    needed for generating each robot's MoveIt configuration package.
 
     All SRDF data is contained in a subclass of this class -
     srdf_writer.cpp. This class also contains the functions for writing
@@ -203,7 +202,7 @@ public:
   };
   unsigned long changes;  // bitfield of changes (composed of InformationFields)
 
-  // All of the data needed for creating a MoveIt! Configuration Files
+  // All of the data needed for creating a MoveIt Configuration Files
 
   // ******************************************************************************************
   // URDF Data
@@ -411,7 +410,7 @@ public:
   bool createFullSRDFPath(const std::string& package_path);
 
   /**
-   * Input .setup_assistant file - contains data used for the MoveIt! Setup Assistant
+   * Input .setup_assistant file - contains data used for the MoveIt Setup Assistant
    *
    * @param file_path path to .setup_assistant file
    * @return true if the file was read correctly
@@ -483,6 +482,16 @@ public:
   std::vector<std::map<std::string, GenericParameter> > getSensorPluginConfig();
 
   /**
+   * \brief Helper function to get the default start state group for moveit_sim_hw_interface
+   */
+  std::string getDefaultStartStateGroup();
+
+  /**
+   * \brief Helper function to get the default start pose for moveit_sim_hw_interface
+   */
+  std::string getDefaultStartPose();
+
+  /**
    * \brief Custom std::set comparator, used for sorting the joint_limits.yaml file into alphabetical order
    * \param jm1 - a pointer to the first joint model to compare
    * \param jm2 - a pointer to the second joint model to compare
@@ -515,5 +524,3 @@ private:
 };
 
 }  // namespace
-
-#endif

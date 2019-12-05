@@ -34,13 +34,11 @@
 
 /* Author: Sachin Chitta, Dave Coleman */
 
-#ifndef MOVEIT_KINEMATICS_BASE_KINEMATICS_BASE_
-#define MOVEIT_KINEMATICS_BASE_KINEMATICS_BASE_
+#pragma once
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit/macros/class_forward.h>
-#include <moveit/macros/deprecation.h>
 #include "rclcpp/rclcpp.hpp"
 #include <boost/function.hpp>
 #include <string>
@@ -175,12 +173,18 @@ public:
   /**
    * @brief Given the desired poses of all end-effectors, compute joint angles that are able to reach it.
    *
-   * This is a default implementation that returns only one solution and so its result is equivalent to calling
+   * The default implementation returns only one solution and so its result is equivalent to calling
    * 'getPositionIK(...)' with a zero initialized seed.
+   *
+   * Some planners (e.g. IKFast) support getting multiple joint solutions for a single pose.
+   * This can be enabled using the |DiscretizationMethods| enum and choosing an option that is not |NO_DISCRETIZATION|.
    *
    * @param ik_poses  The desired pose of each tip link
    * @param ik_seed_state an initial guess solution for the inverse kinematics
-   * @param solutions A vector of vectors where each entry is a valid joint solution
+   * @param solutions A vector of valid joint vectors. This return has two variant behaviors:
+   *                  1) Return a joint solution for every input |ik_poses|, e.g. multi-arm support
+   *                  2) Return multiple joint solutions for a single |ik_poses| input, e.g. underconstrained IK
+   *                  TODO(dave): This dual behavior is confusing and should be changed in a future refactor of this API
    * @param result A struct that reports the results of the query
    * @param options An option struct which contains the type of redundancy discretization used. This default
    *                implementation only supports the KinematicSearches::NO_DISCRETIZATION method; requesting any
@@ -294,8 +298,9 @@ public:
                    double timeout, const std::vector<double>& consistency_limits, std::vector<double>& solution,
                    const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
                    const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
-                   const moveit::core::RobotState* context_state = NULL) const
+                   const moveit::core::RobotState* context_state = nullptr) const
   {
+    (void)context_state;
     // For IK solvers that do not support multiple poses, fall back to single pose call
     if (ik_poses.size() == 1)
     {
@@ -620,5 +625,3 @@ private:
   std::string removeSlash(const std::string& str) const;
 };
 }  // namespace kinematics
-
-#endif

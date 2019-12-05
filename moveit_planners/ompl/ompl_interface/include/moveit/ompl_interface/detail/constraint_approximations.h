@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_OMPL_INTERFACE_DETAIL_CONSTRAINT_APPROXIMATION_
-#define MOVEIT_OMPL_INTERFACE_DETAIL_CONSTRAINT_APPROXIMATION_
+#pragma once
 
 #include <moveit/macros/declare_ptr.h>
 #include <planning_scene/planning_scene.h>
@@ -54,8 +53,8 @@ struct ConstraintApproximation
                           const std::string& factory, const std::string& serialization, const std::string& filename,
                           const ompl::base::StateStoragePtr& storage);
   ConstraintApproximation(const planning_models::RobotModelConstPtr& kinematic_model, const std::string& group,
-                          const std::string& factory, const moveit_msgs::msg::Constraints& msg, const std::string& filename,
-                          const ompl::base::StateStoragePtr& storage);
+                          const std::string& factory, const moveit_msgs::msg::Constraints& msg,
+                          const std::string& filename, const ompl::base::StateStoragePtr& storage);
 
   void visualizeDistribution(const std::string& link_name, unsigned int count,
                              visualization_msgs::MarkerArray& arr) const;
@@ -75,5 +74,3 @@ struct ConstraintApproximation
 
 MOVEIT_DECLARE_PTR(ConstraintApproximations, std::vector<ConstraintApproximation>)
 }
-
-#endif

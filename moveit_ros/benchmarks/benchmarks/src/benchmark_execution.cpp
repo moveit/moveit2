@@ -370,7 +370,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
               constr->position_constraints[0].constraint_region.primitive_poses.size() == 1 &&
               constr->position_constraints[0].constraint_region.mesh_poses.empty())
           {
-            geometry_msgs::Pose wMc_msg;
+            geometry_msgs::msg::Pose wMc_msg;
             wMc_msg.position = constr->position_constraints[0].constraint_region.primitive_poses[0].position;
             wMc_msg.orientation = constr->orientation_constraints[0].orientation;
             Eigen::Isometry3d wMc;
@@ -382,7 +382,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
             offset_tf.translation() = Eigen::Vector3d(options_.offsets[0], options_.offsets[1], options_.offsets[2]);
 
             Eigen::Isometry3d wMnc = wMc * offset_tf;
-            geometry_msgs::Pose wMnc_msg;
+            geometry_msgs::msg::Pose wMnc_msg;
             wMnc_msg = tf2::toMsg(wMnc);
 
             req.motion_plan_request.goal_constraints[0]
@@ -457,7 +457,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
                 constr->constraints[tc].position_constraints[0].constraint_region.primitive_poses.size() == 1 &&
                 constr->constraints[tc].position_constraints[0].constraint_region.mesh_poses.empty())
             {
-              geometry_msgs::Pose wMc_msg;
+              geometry_msgs::msg::Pose wMc_msg;
               wMc_msg.position = req.motion_plan_request.trajectory_constraints.constraints[tc]
                                      .position_constraints[0]
                                      .constraint_region.primitive_poses[0]
@@ -468,7 +468,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
               tf2::fromMsg(wMc_msg, wMc);
 
               Eigen::Isometry3d wMnc = wMc * offset_tf;
-              geometry_msgs::Pose wMnc_msg = tf2::toMsg(wMnc);
+              geometry_msgs::msg::Pose wMnc_msg = tf2::toMsg(wMnc);
 
               req.motion_plan_request.trajectory_constraints.constraints[tc]
                   .position_constraints[0]
@@ -1252,7 +1252,7 @@ void moveit_benchmarks::BenchmarkExecution::runGoalExistenceBenchmark(BenchmarkR
       req.motion_plan_request.goal_constraints[0].orientation_constraints.size() > 0)
   {
     // Compute IK on goal constraints
-    geometry_msgs::Pose ik_pose;
+    geometry_msgs::msg::Pose ik_pose;
     ik_pose.position.x = req.motion_plan_request.goal_constraints[0]
                              .position_constraints[0]
                              .constraint_region.primitive_poses[0]
@@ -1336,7 +1336,7 @@ void moveit_benchmarks::BenchmarkExecution::runGoalExistenceBenchmark(BenchmarkR
 
     for (std::size_t tc = 0; tc < req.motion_plan_request.trajectory_constraints.constraints.size(); ++tc)
     {
-      geometry_msgs::Pose ik_pose;
+      geometry_msgs::msg::Pose ik_pose;
       ik_pose.position.x = req.motion_plan_request.trajectory_constraints.constraints[tc]
                                .position_constraints[0]
                                .constraint_region.primitive_poses[0]

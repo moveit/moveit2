@@ -34,23 +34,18 @@
 
 /* Author: Acorn Pooley, Ioan Sucan */
 
-#ifndef MOVEIT_COLLISION_DETECTION_COLLISION_DETECTOR_HYBRID_H_
-#define MOVEIT_COLLISION_DETECTION_COLLISION_DETECTOR_HYBRID_H_
+#pragma once
 
 #include <moveit/collision_detection/collision_detector_allocator.h>
-#include <moveit/collision_distance_field/collision_robot_hybrid.h>
-#include <moveit/collision_distance_field/collision_world_hybrid.h>
+#include <moveit/collision_distance_field/collision_env_hybrid.h>
 
 namespace collision_detection
 {
 /** \brief An allocator for Hybrid collision detectors */
 class CollisionDetectorAllocatorHybrid
-    : public CollisionDetectorAllocatorTemplate<CollisionWorldHybrid, CollisionRobotHybrid,
-                                                CollisionDetectorAllocatorHybrid>
+    : public CollisionDetectorAllocatorTemplate<CollisionEnvHybrid, CollisionDetectorAllocatorHybrid>
 {
 public:
-  static const std::string NAME;  // defined in collision_world_hybrid.cpp
+  static const std::string NAME;  // defined in collision_env_hybrid.cpp
 };
 }
-
-#endif

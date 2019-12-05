@@ -34,12 +34,11 @@
 
 /* Author: Acorn Pooley, Ioan Sucan */
 
-#ifndef MOVEIT_EXCEPTIONS_
-#define MOVEIT_EXCEPTIONS_
+#pragma once
 
 #include <stdexcept>
 
-/** \brief Main namespace for MoveIt! */
+/** \brief Main namespace for MoveIt */
 namespace moveit
 {
 /** \brief This may be thrown during construction of objects if errors occur */
@@ -56,5 +55,3 @@ public:
   explicit Exception(const std::string& what_arg);
 };
 }
-
-#endif

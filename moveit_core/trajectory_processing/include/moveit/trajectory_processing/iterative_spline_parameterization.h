@@ -35,8 +35,7 @@
 
 /* Author: Ken Anderson */
 
-#ifndef MOVEIT_TRAJECTORY_PROCESSING_ITERATIVE_SPLINE_PARAMETERIZATION__
-#define MOVEIT_TRAJECTORY_PROCESSING_ITERATIVE_SPLINE_PARAMETERIZATION__
+#pragma once
 
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <moveit_msgs/msg/joint_limits.hpp>
@@ -86,5 +85,3 @@ private:
                      /// If false, move the 2nd and 2nd-last points.
 };
 }
-
-#endif

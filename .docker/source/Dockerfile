@@ -2,7 +2,10 @@
 # Downloads the moveit source code and install remaining debian dependencies
 
 FROM moveit/moveit2:dashing-ci
-LABEL maintainer="mike@picknik.ai"
+MAINTAINER Mike Lautman mike@picknik.ai
+
+ENV ROS_UNDERLAY /root/ws_moveit/install
+WORKDIR $ROS_UNDERLAY/../src
 
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
 # https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers

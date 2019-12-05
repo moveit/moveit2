@@ -70,7 +70,8 @@ public:
   }
 
   bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::msg::MotionPlanDetailedResponse& res) const
+             const moveit_msgs::srv::GetMotionPlan::Request& req,
+             moveit_msgs::msg::MotionPlanDetailedResponse& res) const
   {
     moveit_msgs::srv::GetMotionPlan::Response res2;
     if (sbpl_meta_interface_->solve(planning_scene, req, res2))

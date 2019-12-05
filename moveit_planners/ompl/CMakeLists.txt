@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.10.2)
 project(moveit_planners_ompl)
 
 # At least C++11 required for OMPL
-add_compile_options(-std=c++14)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)

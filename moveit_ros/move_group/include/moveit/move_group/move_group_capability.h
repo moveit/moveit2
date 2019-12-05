@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_MOVE_GROUP_CAPABILITY_
-#define MOVEIT_MOVE_GROUP_CAPABILITY_
+#pragma once
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
@@ -83,10 +82,12 @@ protected:
   void convertToMsg(const std::vector<plan_execution::ExecutableTrajectory>& trajectory,
                     moveit_msgs::msg::RobotState& first_state_msg,
                     std::vector<moveit_msgs::msg::RobotTrajectory>& trajectory_msg) const;
-  void convertToMsg(const robot_trajectory::RobotTrajectoryPtr& trajectory, moveit_msgs::msg::RobotState& first_state_msg,
+  void convertToMsg(const robot_trajectory::RobotTrajectoryPtr& trajectory,
+                    moveit_msgs::msg::RobotState& first_state_msg,
                     moveit_msgs::msg::RobotTrajectory& trajectory_msg) const;
   void convertToMsg(const std::vector<plan_execution::ExecutableTrajectory>& trajectory,
-                    moveit_msgs::msg::RobotState& first_state_msg, moveit_msgs::msg::RobotTrajectory& trajectory_msg) const;
+                    moveit_msgs::msg::RobotState& first_state_msg,
+                    moveit_msgs::msg::RobotTrajectory& trajectory_msg) const;
 
   planning_interface::MotionPlanRequest
   clearRequestStartState(const planning_interface::MotionPlanRequest& request) const;
@@ -99,5 +100,3 @@ protected:
   MoveGroupContextPtr context_;
 };
 }
-
-#endif

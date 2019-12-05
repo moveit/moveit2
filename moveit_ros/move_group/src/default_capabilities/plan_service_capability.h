@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_MOVE_GROUP_PLAN_SERVICE_CAPABILITY_
-#define MOVEIT_MOVE_GROUP_PLAN_SERVICE_CAPABILITY_
+#pragma once
 
 #include <moveit/move_group/move_group_capability.h>
 #include <moveit_msgs/GetMotionPlan.h>
@@ -50,10 +49,9 @@ public:
   void initialize() override;
 
 private:
-  bool computePlanService(moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res);
+  bool computePlanService(moveit_msgs::srv::GetMotionPlan::Request& req,
+                          moveit_msgs::srv::GetMotionPlan::Response& res);
 
   ros::ServiceServer plan_service_;
 };
 }
-
-#endif

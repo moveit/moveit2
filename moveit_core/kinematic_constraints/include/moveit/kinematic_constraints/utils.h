@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_KINEMATIC_CONSTRAINTS_UTILS_
-#define MOVEIT_KINEMATIC_CONSTRAINTS_UTILS_
+#pragma once
 
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
@@ -68,7 +67,7 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
                                                const moveit_msgs::msg::Constraints& second);
 
 /** \brief Check if any constraints were specified */
-bool isEmpty(const moveit_msgs::msg::Constraints& constr);
+[[deprecated("Use moveit/utils/message_checks.h instead")]] bool isEmpty(const moveit_msgs::msg::Constraints& constr);
 
 std::size_t countIndividualConstraints(const moveit_msgs::msg::Constraints& constr);
 
@@ -204,6 +203,18 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  */
 // TODO rework this function
 // bool constructConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Constraints& constraints);
-}
 
-#endif
+/**
+ * \brief Resolves frames used in constraints to links in the robot model.
+ *
+ * The link_name field of a constraint is changed from the name of an object's frame or subframe
+ * to the name of the robot link that the object is attached to.
+ *
+ * This is used in a planning request adapter which ensures that the planning problem is defined
+ * properly (the attached objects' frames are not known to the planner).
+ *
+ * @param [in] state The RobotState used to resolve frames.
+ * @param [in] constraints The constraint to resolve.
+ */
+bool resolveConstraintFrames(const robot_state::RobotState& state, moveit_msgs::msg::Constraints& constraints);
+}

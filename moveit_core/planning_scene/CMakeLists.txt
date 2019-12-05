@@ -19,6 +19,7 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_kinematic_constraints
   moveit_robot_trajectory
   moveit_trajectory_processing
+  moveit_utils
   ${LIBOCTOMAP_LIBRARIES}
   ${rclcpp_LIBRARIES}
   ${rmw_implementation_LIBRARIES}
@@ -31,7 +32,8 @@ target_link_libraries(${MOVEIT_LIB_NAME}
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+        ARCHIVE DESTINATION lib
+	RUNTIME DESTINATION bin)
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
@@ -51,5 +53,15 @@ if(BUILD_TESTING)
     ${urdf_LIBRARIES}
     ${geometric_shapes_LIBRARIES}
     ${OCTOMAP_LIBRARIES}
+    ${ament_index_cpp_LIBRARIES}
   )
+
+  ament_add_gtest(test_multi_threaded test/test_multi_threaded.cpp
+    APPEND_LIBRARY_DIRS "${append_library_dirs}")
+  target_link_libraries(test_multi_threaded
+    moveit_planning_scene
+    moveit_test_utils
+    ${MOVEIT_LIB_NAME}
+    ${urdfdom_LIBRARIES}
+    ${urdfdom_headers_LIBRARIES})
 endif()

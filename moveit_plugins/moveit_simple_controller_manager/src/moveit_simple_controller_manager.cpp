@@ -70,7 +70,7 @@ public:
     }
 
     /* actually create each controller */
-    for (int i = 0; i < controller_list.size(); ++i)
+    for (int i = 0; i < controller_list.size(); ++i)  // NOLINT(modernize-loop-convert)
     {
       if (!isStruct(controller_list[i], { "name", "joints", "action_ns", "type" }))
       {
@@ -145,7 +145,7 @@ public:
           continue;
         }
 
-        /* add list of joints, used by controller manager and MoveIt! */
+        /* add list of joints, used by controller manager and MoveIt */
         for (int j = 0; j < controller_list[i]["joints"].size(); ++j)
           new_handle->addJoint(std::string(controller_list[i]["joints"][j]));
 
@@ -224,7 +224,7 @@ public:
    * Controllers are all active and default -- that's what makes this thing simple.
    */
   moveit_controller_manager::MoveItControllerManager::ControllerState
-  getControllerState(const std::string& name) override
+  getControllerState(const std::string& /* name */) override
   {
     moveit_controller_manager::MoveItControllerManager::ControllerState state;
     state.active_ = true;
@@ -233,7 +233,8 @@ public:
   }
 
   /* Cannot switch our controllers */
-  bool switchControllers(const std::vector<std::string>& activate, const std::vector<std::string>& deactivate) override
+  bool switchControllers(const std::vector<std::string>& /* activate */,
+                         const std::vector<std::string>& /* deactivate */) override
   {
     return false;
   }

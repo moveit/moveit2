@@ -57,7 +57,7 @@ public:
   }
 
 private:
-  void dynamicReconfigureCallback(SenseForPlanDynamicReconfigureConfig& config, uint32_t level)
+  void dynamicReconfigureCallback(SenseForPlanDynamicReconfigureConfig& config, uint32_t /*level*/)
   {
     owner_->setMaxSafePathCost(config.max_safe_path_cost);
     owner_->setMaxCostSources(config.max_cost_sources);
@@ -248,7 +248,7 @@ bool plan_execution::PlanWithSensing::lookAt(const std::set<collision_detection:
 {
   if (!sensor_manager_)
   {
-    ROS_WARN("It seems looking around would be useful, but no MoveIt! Sensor Manager is loaded. Did you set "
+    ROS_WARN("It seems looking around would be useful, but no MoveIt Sensor Manager is loaded. Did you set "
              "~moveit_sensor_manager ?");
     return false;
   }
@@ -259,14 +259,14 @@ bool plan_execution::PlanWithSensing::lookAt(const std::set<collision_detection:
   std::vector<std::string> names;
   sensor_manager_->getSensorsList(names);
   geometry_msgs::PointStamped point;
-  for (std::size_t i = 0; i < names.size(); ++i)
+  for (const std::string& name : names)
     if (collision_detection::getSensorPositioning(point.point, cost_sources))
     {
       point.header.stamp = ros::Time::now();
       point.header.frame_id = frame_id;
-      ROS_DEBUG_STREAM("Pointing sensor " << names[i] << " to:\n" << point);
+      ROS_DEBUG_STREAM("Pointing sensor " << name << " to:\n" << point);
       moveit_msgs::msg::RobotTrajectory sensor_trajectory;
-      if (sensor_manager_->pointSensorTo(names[i], point, sensor_trajectory))
+      if (sensor_manager_->pointSensorTo(name, point, sensor_trajectory))
       {
         if (!trajectory_processing::isTrajectoryEmpty(sensor_trajectory))
           return trajectory_execution_manager_->push(sensor_trajectory) &&

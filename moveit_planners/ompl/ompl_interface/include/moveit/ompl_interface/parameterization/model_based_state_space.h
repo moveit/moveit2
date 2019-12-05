@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_OMPL_INTERFACE_PARAMETERIZATION_MODEL_BASED_STATE_SPACE_
-#define MOVEIT_OMPL_INTERFACE_PARAMETERIZATION_MODEL_BASED_STATE_SPACE_
+#pragma once
 
 #include <ompl/base/StateSpace.h>
 #include <moveit/robot_model/robot_model.h>
@@ -201,6 +200,8 @@ public:
 
   ompl::base::StateSamplerPtr allocDefaultStateSampler() const override;
 
+  virtual const std::string& getParameterizationType() const = 0;
+
   const robot_model::RobotModelConstPtr& getRobotModel() const
   {
     return spec_.robot_model_;
@@ -241,10 +242,10 @@ public:
   virtual void copyToOMPLState(ompl::base::State* state, const robot_state::RobotState& rstate) const;
 
   /**
-   * \brief Copy a single joint's values (which might have multiple variables) from a MoveIt! robot_state to an OMPL
+   * \brief Copy a single joint's values (which might have multiple variables) from a MoveIt robot_state to an OMPL
    * state.
    * \param state - output OMPL state with single joint modified
-   * \param robot_state - input MoveIt! state to get the joint value from
+   * \param robot_state - input MoveIt state to get the joint value from
    * \param joint_model - the joint to copy values of
    * \param ompl_state_joint_index - the index of the joint in the ompl state (passed in for efficiency, you should
    * cache this index)
@@ -270,5 +271,3 @@ protected:
   double tag_snap_to_segment_complement_;
 };
 }  // namespace ompl_interface
-
-#endif

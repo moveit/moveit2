@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_core VERSION 2.0.0 LANGUAGES CXX)
 
-add_compile_options(-std=c++14)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Warnings
 # Remove -Wcast-qual to avoid warnings in tf2/LinearMath/Vector3.h.
@@ -132,16 +133,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   OCTOMAP
 )
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
-
-# to run: catkin_make -DENABLE_COVERAGE_TESTING=ON package_name_coverage
-# TODO(henningkayser): enable once code_coverage is ported
-#if(BUILD_TESTING AND ENABLE_COVERAGE_TESTING)
-#  find_package(code_coverage REQUIRED)   # catkin package ros-*-code-coverage
-#  include(CodeCoverage)
-#  APPEND_COVERAGE_COMPILER_FLAGS()
-#  set(COVERAGE_EXCLUDES "*/test/*")
-#  add_code_coverage(NAME ${PROJECT_NAME}_coverage)
-#endif()
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
                            ${LIBFCL_INCLUDE_DIRS}

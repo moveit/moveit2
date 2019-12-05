@@ -2,7 +2,7 @@
 # Sets up a base image to use for running Continuous Integration on Travis
 FROM ros:dashing-ros-base-bionic
 
-LABEL maintainer="mike@picknik.ai"
+MAINTAINER Mike Lautman mike@picknik.ai
 
 ENV TERM xterm
 

@@ -36,6 +36,7 @@
 /* Author: Ioan Sucan, Sachin Chitta, Acorn Pooley, Mario Prats, Dave Coleman */
 
 #include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_state/cartesian_interpolator.h>
 #include <moveit/transforms/transforms.h>
 #include <geometric_shapes/shape_operations.h>
 #include <tf2_eigen/tf2_eigen.h>
@@ -52,12 +53,6 @@ namespace core
 {
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_state.robot_state");
-
-/** \brief It is recommended that there are at least 10 steps per trajectory
- * for testing jump thresholds with computeCartesianPath. With less than 10 steps
- * it is difficult to choose a jump_threshold parameter that effectively separates
- * valid paths from paths with large joint space jumps. */
-static const std::size_t MIN_STEPS_FOR_JUMP_THRESH = 10;
 
 RobotState::RobotState(const RobotModelConstPtr& robot_model)
   : robot_model_(robot_model)
@@ -174,10 +169,10 @@ void RobotState::copyFrom(const RobotState& other)
 
   // copy attached bodies
   clearAttachedBodies();
-  for (std::map<std::string, AttachedBody*>::const_iterator it = other.attached_body_map_.begin();
-       it != other.attached_body_map_.end(); ++it)
-    attachBody(it->second->getName(), it->second->getShapes(), it->second->getFixedTransforms(),
-               it->second->getTouchLinks(), it->second->getAttachedLinkName(), it->second->getDetachPosture());
+  for (const std::pair<const std::string, AttachedBody*>& it : other.attached_body_map_)
+    attachBody(it.second->getName(), it.second->getShapes(), it.second->getFixedTransforms(),
+               it.second->getTouchLinks(), it.second->getAttachedLinkName(), it.second->getDetachPosture(),
+               it.second->getSubframeTransforms());
 }
 
 bool RobotState::checkJointTransforms(const JointModel* joint) const
@@ -258,8 +253,8 @@ void RobotState::setToRandomPositions(const JointModelGroup* group)
 void RobotState::setToRandomPositions(const JointModelGroup* group, random_numbers::RandomNumberGenerator& rng)
 {
   const std::vector<const JointModel*>& joints = group->getActiveJointModels();
-  for (std::size_t i = 0; i < joints.size(); ++i)
-    joints[i]->getVariableRandomPositions(rng, position_ + joints[i]->getFirstVariableIndex());
+  for (const JointModel* joint : joints)
+    joint->getVariableRandomPositions(rng, position_ + joint->getFirstVariableIndex());
   updateMimicJoints(group);
 }
 
@@ -286,11 +281,11 @@ void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const 
   // could trigger updates outside the state of the group itself
   random_numbers::RandomNumberGenerator& rng = getRandomNumberGenerator();
   const std::vector<const JointModel*>& joints = group->getActiveJointModels();
-  for (std::size_t i = 0; i < joints.size(); ++i)
+  for (const JointModel* joint : joints)
   {
-    const int idx = joints[i]->getFirstVariableIndex();
-    joints[i]->getVariableRandomPositionsNearBy(rng, position_ + joints[i]->getFirstVariableIndex(),
-                                                near.position_ + idx, distance);
+    const int idx = joint->getFirstVariableIndex();
+    joint->getVariableRandomPositionsNearBy(rng, position_ + joint->getFirstVariableIndex(), near.position_ + idx,
+                                            distance);
   }
   updateMimicJoints(group);
 }
@@ -326,11 +321,10 @@ void RobotState::setVariablePositions(const double* position)
 
 void RobotState::setVariablePositions(const std::map<std::string, double>& variable_map)
 {
-  for (std::map<std::string, double>::const_iterator it = variable_map.begin(), end = variable_map.end(); it != end;
-       ++it)
+  for (const std::pair<const std::string, double>& it : variable_map)
   {
-    const int index = robot_model_->getVariableIndex(it->first);
-    position_[index] = it->second;
+    const int index = robot_model_->getVariableIndex(it.first);
+    position_[index] = it.second;
     const JointModel* jm = robot_model_->getJointOfVariable(index);
     markDirtyJointTransforms(jm);
     updateMimicJoint(jm);
@@ -342,10 +336,10 @@ void RobotState::getMissingKeys(const std::map<std::string, double>& variable_ma
 {
   missing_variables.clear();
   const std::vector<std::string>& nm = robot_model_->getVariableNames();
-  for (std::size_t i = 0; i < nm.size(); ++i)
-    if (variable_map.find(nm[i]) == variable_map.end())
-      if (robot_model_->getJointOfVariable(nm[i])->getMimic() == nullptr)
-        missing_variables.push_back(nm[i]);
+  for (const std::string& variable_name : nm)
+    if (variable_map.find(variable_name) == variable_map.end())
+      if (robot_model_->getJointOfVariable(variable_name)->getMimic() == nullptr)
+        missing_variables.push_back(variable_name);
 }
 
 void RobotState::setVariablePositions(const std::map<std::string, double>& variable_map,
@@ -371,9 +365,8 @@ void RobotState::setVariablePositions(const std::vector<std::string>& variable_n
 void RobotState::setVariableVelocities(const std::map<std::string, double>& variable_map)
 {
   markVelocity();
-  for (std::map<std::string, double>::const_iterator it = variable_map.begin(), end = variable_map.end(); it != end;
-       ++it)
-    velocity_[robot_model_->getVariableIndex(it->first)] = it->second;
+  for (const std::pair<const std::string, double>& it : variable_map)
+    velocity_[robot_model_->getVariableIndex(it.first)] = it.second;
 }
 
 void RobotState::setVariableVelocities(const std::map<std::string, double>& variable_map,
@@ -395,9 +388,8 @@ void RobotState::setVariableVelocities(const std::vector<std::string>& variable_
 void RobotState::setVariableAccelerations(const std::map<std::string, double>& variable_map)
 {
   markAcceleration();
-  for (std::map<std::string, double>::const_iterator it = variable_map.begin(), end = variable_map.end(); it != end;
-       ++it)
-    acceleration_[robot_model_->getVariableIndex(it->first)] = it->second;
+  for (const std::pair<const std::string, double>& it : variable_map)
+    acceleration_[robot_model_->getVariableIndex(it.first)] = it.second;
 }
 
 void RobotState::setVariableAccelerations(const std::map<std::string, double>& variable_map,
@@ -419,9 +411,8 @@ void RobotState::setVariableAccelerations(const std::vector<std::string>& variab
 void RobotState::setVariableEffort(const std::map<std::string, double>& variable_map)
 {
   markEffort();
-  for (std::map<std::string, double>::const_iterator it = variable_map.begin(), end = variable_map.end(); it != end;
-       ++it)
-    acceleration_[robot_model_->getVariableIndex(it->first)] = it->second;
+  for (const std::pair<const std::string, double>& it : variable_map)
+    acceleration_[robot_model_->getVariableIndex(it.first)] = it.second;
 }
 
 void RobotState::setVariableEffort(const std::map<std::string, double>& variable_map,
@@ -687,8 +678,8 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
 
   // update link transforms for descendant links only (leaving the transform for the current link untouched)
   const std::vector<const JointModel*>& cj = link->getChildJointModels();
-  for (std::size_t i = 0; i < cj.size(); ++i)
-    updateLinkTransformsInternal(cj[i]);
+  for (const JointModel* joint : cj)
+    updateLinkTransformsInternal(joint);
 
   // if we also need to go backward
   if (backward)
@@ -710,9 +701,9 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
       // update link transforms for descendant links only (leaving the transform for the current link untouched)
       // with the exception of the child link we are coming backwards from
       const std::vector<const JointModel*>& cj = parent_link->getChildJointModels();
-      for (std::size_t i = 0; i < cj.size(); ++i)
-        if (cj[i] != child_link->getParentJointModel())
-          updateLinkTransformsInternal(cj[i]);
+      for (const JointModel* joint : cj)
+        if (joint != child_link->getParentJointModel())
+          updateLinkTransformsInternal(joint);
     }
     // all collision body transforms are invalid now
     dirty_collision_body_transforms_ = parent_link->getParentJointModel();
@@ -727,8 +718,8 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
 bool RobotState::satisfiesBounds(double margin) const
 {
   const std::vector<const JointModel*>& jm = robot_model_->getActiveJointModels();
-  for (std::size_t i = 0; i < jm.size(); ++i)
-    if (!satisfiesBounds(jm[i], margin))
+  for (const JointModel* joint : jm)
+    if (!satisfiesBounds(joint, margin))
       return false;
   return true;
 }
@@ -736,8 +727,8 @@ bool RobotState::satisfiesBounds(double margin) const
 bool RobotState::satisfiesBounds(const JointModelGroup* group, double margin) const
 {
   const std::vector<const JointModel*>& jm = group->getActiveJointModels();
-  for (std::size_t i = 0; i < jm.size(); ++i)
-    if (!satisfiesBounds(jm[i], margin))
+  for (const JointModel* joint : jm)
+    if (!satisfiesBounds(joint, margin))
       return false;
   return true;
 }
@@ -745,15 +736,15 @@ bool RobotState::satisfiesBounds(const JointModelGroup* group, double margin) co
 void RobotState::enforceBounds()
 {
   const std::vector<const JointModel*>& jm = robot_model_->getActiveJointModels();
-  for (std::size_t i = 0; i < jm.size(); ++i)
-    enforceBounds(jm[i]);
+  for (const JointModel* joint : jm)
+    enforceBounds(joint);
 }
 
 void RobotState::enforceBounds(const JointModelGroup* joint_group)
 {
   const std::vector<const JointModel*>& jm = joint_group->getActiveJointModels();
-  for (std::size_t i = 0; i < jm.size(); ++i)
-    enforceBounds(jm[i]);
+  for (const JointModel* joint : jm)
+    enforceBounds(joint);
 }
 
 void RobotState::harmonizePositions()
@@ -783,32 +774,32 @@ RobotState::getMinDistanceToPositionBounds(const std::vector<const JointModel*>&
 {
   double distance = std::numeric_limits<double>::max();
   const JointModel* index = nullptr;
-  for (std::size_t i = 0; i < joints.size(); ++i)
+  for (const JointModel* joint : joints)
   {
-    if (joints[i]->getType() == JointModel::PLANAR || joints[i]->getType() == JointModel::FLOATING)
+    if (joint->getType() == JointModel::PLANAR || joint->getType() == JointModel::FLOATING)
       continue;
-    if (joints[i]->getType() == JointModel::REVOLUTE)
-      if (static_cast<const RevoluteJointModel*>(joints[i])->isContinuous())
+    if (joint->getType() == JointModel::REVOLUTE)
+      if (static_cast<const RevoluteJointModel*>(joint)->isContinuous())
         continue;
 
-    const double* joint_values = getJointPositions(joints[i]);
-    const JointModel::Bounds& bounds = joints[i]->getVariableBounds();
+    const double* joint_values = getJointPositions(joint);
+    const JointModel::Bounds& bounds = joint->getVariableBounds();
     std::vector<double> lower_bounds(bounds.size()), upper_bounds(bounds.size());
     for (std::size_t j = 0; j < bounds.size(); ++j)
     {
       lower_bounds[j] = bounds[j].min_position_;
       upper_bounds[j] = bounds[j].max_position_;
     }
-    double new_distance = joints[i]->distance(joint_values, &lower_bounds[0]);
+    double new_distance = joint->distance(joint_values, &lower_bounds[0]);
     if (new_distance < distance)
     {
-      index = joints[i];
+      index = joint;
       distance = new_distance;
     }
-    new_distance = joints[i]->distance(joint_values, &upper_bounds[0]);
+    new_distance = joint->distance(joint_values, &upper_bounds[0]);
     if (new_distance < distance)
     {
-      index = joints[i];
+      index = joint;
       distance = new_distance;
     }
   }
@@ -818,13 +809,13 @@ RobotState::getMinDistanceToPositionBounds(const std::vector<const JointModel*>&
 bool RobotState::isValidVelocityMove(const RobotState& other, const JointModelGroup* group, double dt) const
 {
   const std::vector<const JointModel*>& jm = group->getActiveJointModels();
-  for (std::size_t joint_id = 0; joint_id < jm.size(); ++joint_id)
+  for (const JointModel* joint_id : jm)
   {
-    const int idx = jm[joint_id]->getFirstVariableIndex();
-    const std::vector<VariableBounds>& bounds = jm[joint_id]->getVariableBounds();
+    const int idx = joint_id->getFirstVariableIndex();
+    const std::vector<VariableBounds>& bounds = joint_id->getVariableBounds();
 
     // Check velocity for each joint variable
-    for (std::size_t var_id = 0; var_id < jm[joint_id]->getVariableCount(); ++var_id)
+    for (std::size_t var_id = 0; var_id < joint_id->getVariableCount(); ++var_id)
     {
       const double dtheta = std::abs(*(position_ + idx + var_id) - *(other.getVariablePositions() + idx + var_id));
 
@@ -839,10 +830,10 @@ double RobotState::distance(const RobotState& other, const JointModelGroup* join
 {
   double d = 0.0;
   const std::vector<const JointModel*>& jm = joint_group->getActiveJointModels();
-  for (std::size_t i = 0; i < jm.size(); ++i)
+  for (const JointModel* joint : jm)
   {
-    const int idx = jm[i]->getFirstVariableIndex();
-    d += jm[i]->getDistanceFactor() * jm[i]->distance(position_ + idx, other.position_ + idx);
+    const int idx = joint->getFirstVariableIndex();
+    d += joint->getDistanceFactor() * joint->distance(position_ + idx, other.position_ + idx);
   }
   return d;
 }
@@ -859,10 +850,10 @@ void RobotState::interpolate(const RobotState& to, double t, RobotState& state,
                              const JointModelGroup* joint_group) const
 {
   const std::vector<const JointModel*>& jm = joint_group->getActiveJointModels();
-  for (std::size_t i = 0; i < jm.size(); ++i)
+  for (const JointModel* joint : jm)
   {
-    const int idx = jm[i]->getFirstVariableIndex();
-    jm[i]->interpolate(position_ + idx, to.position_ + idx, t, state.position_ + idx);
+    const int idx = joint->getFirstVariableIndex();
+    joint->interpolate(position_ + idx, to.position_ + idx, t, state.position_ + idx);
   }
   state.updateMimicJoints(joint_group);
 }
@@ -898,43 +889,37 @@ void RobotState::attachBody(AttachedBody* attached_body)
 }
 
 void RobotState::attachBody(const std::string& id, const std::vector<shapes::ShapeConstPtr>& shapes,
-                            const EigenSTL::vector_Isometry3d& attach_trans, const std::set<std::string>& touch_links,
-                            const std::string& link, const trajectory_msgs::msg::JointTrajectory& detach_posture)
+                            const EigenSTL::vector_Isometry3d& shape_poses, const std::set<std::string>& touch_links,
+                            const std::string& link, const trajectory_msgs::msg::JointTrajectory& detach_posture,
+                            const moveit::core::FixedTransformsMap& subframe_poses)
 {
   const LinkModel* l = robot_model_->getLinkModel(link);
-  AttachedBody* ab = new AttachedBody(l, id, shapes, attach_trans, touch_links, detach_posture);
-  attached_body_map_[id] = ab;
-  ab->computeTransform(getGlobalLinkTransform(l));
-  if (attached_body_update_callback_)
-    attached_body_update_callback_(ab, true);
+  attachBody(new AttachedBody(l, id, shapes, shape_poses, touch_links, detach_posture, subframe_poses));
 }
 
 void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies) const
 {
   attached_bodies.clear();
   attached_bodies.reserve(attached_body_map_.size());
-  for (std::map<std::string, AttachedBody*>::const_iterator it = attached_body_map_.begin();
-       it != attached_body_map_.end(); ++it)
-    attached_bodies.push_back(it->second);
+  for (const std::pair<const std::string, AttachedBody*>& it : attached_body_map_)
+    attached_bodies.push_back(it.second);
 }
 
 void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies,
                                    const JointModelGroup* group) const
 {
   attached_bodies.clear();
-  for (std::map<std::string, AttachedBody*>::const_iterator it = attached_body_map_.begin();
-       it != attached_body_map_.end(); ++it)
-    if (group->hasLinkModel(it->second->getAttachedLinkName()))
-      attached_bodies.push_back(it->second);
+  for (const std::pair<const std::string, AttachedBody*>& it : attached_body_map_)
+    if (group->hasLinkModel(it.second->getAttachedLinkName()))
+      attached_bodies.push_back(it.second);
 }
 
-void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies, const LinkModel* lm) const
+void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies, const LinkModel* link_model) const
 {
   attached_bodies.clear();
-  for (std::map<std::string, AttachedBody*>::const_iterator it = attached_body_map_.begin();
-       it != attached_body_map_.end(); ++it)
-    if (it->second->getAttachedLink() == lm)
-      attached_bodies.push_back(it->second);
+  for (const std::pair<const std::string, AttachedBody*>& it : attached_body_map_)
+    if (it.second->getAttachedLink() == link_model)
+      attached_bodies.push_back(it.second);
 }
 
 void RobotState::clearAttachedBodies()
@@ -1000,55 +985,107 @@ bool RobotState::clearAttachedBody(const std::string& id)
     return false;
 }
 
-const Eigen::Isometry3d& RobotState::getFrameTransform(const std::string& id)
+const Eigen::Isometry3d& RobotState::getFrameTransform(const std::string& frame_id, bool* frame_found)
 {
   updateLinkTransforms();
-  return static_cast<const RobotState*>(this)->getFrameTransform(id);
+  return static_cast<const RobotState*>(this)->getFrameTransform(frame_id, frame_found);
 }
 
-const Eigen::Isometry3d& RobotState::getFrameTransform(const std::string& id) const
+const Eigen::Isometry3d& RobotState::getFrameTransform(const std::string& frame_id, bool* frame_found) const
 {
-  if (!id.empty() && id[0] == '/')
-    return getFrameTransform(id.substr(1));
-  BOOST_VERIFY(checkLinkTransforms());
+  const LinkModel* ignored_link;
+  bool found;
+  const auto& result = getFrameInfo(frame_id, ignored_link, found);
+
+  if (frame_found)
+    *frame_found = found;
+  else if (!found)
+    RCLCPP_WARN(LOGGER, "getFrameTransform() did not find a frame with name %s.", frame_id.c_str());
+
+  return result;
+}
+
+const Eigen::Isometry3d& RobotState::getFrameInfo(const std::string& frame_id, const LinkModel*& robot_link,
+                                                  bool& frame_found) const
+{
+  if (!frame_id.empty() && frame_id[0] == '/')
+    return getFrameInfo(frame_id.substr(1), robot_link, frame_found);
 
   static const Eigen::Isometry3d IDENTITY_TRANSFORM = Eigen::Isometry3d::Identity();
-  if (id == robot_model_->getModelFrame())
-    return IDENTITY_TRANSFORM;
-  if (robot_model_->hasLinkModel(id))
+  if (frame_id == robot_model_->getModelFrame())
   {
-    const LinkModel* lm = robot_model_->getLinkModel(id);
-    return global_link_transforms_[lm->getLinkIndex()];
-  }
-  std::map<std::string, AttachedBody*>::const_iterator jt = attached_body_map_.find(id);
-  if (jt == attached_body_map_.end())
-  {
-    RCLCPP_ERROR(LOGGER, "Transform from frame '%s' to frame '%s' is not known "
-                         "('%s' should be a link name or an attached body id).",
-                 id.c_str(), robot_model_->getModelFrame().c_str(), id.c_str());
+    robot_link = robot_model_->getRootLink();
+    frame_found = true;
     return IDENTITY_TRANSFORM;
   }
-  const EigenSTL::vector_Isometry3d& tf = jt->second->getGlobalCollisionBodyTransforms();
-  if (tf.empty())
+  if (robot_model_->hasLinkModel(frame_id))
   {
-    RCLCPP_ERROR(LOGGER, "Attached body '%s' has no geometry associated to it. No transform to return.", id.c_str());
-    return IDENTITY_TRANSFORM;
+    robot_link = robot_model_->getLinkModel(frame_id);
+    BOOST_VERIFY(checkLinkTransforms());
+    frame_found = true;
+    return global_link_transforms_[robot_link->getLinkIndex()];
   }
-  if (tf.size() > 1)
-    RCLCPP_DEBUG(LOGGER, "There are multiple geometries associated to attached body '%s'. "
-                         "Returning the transform for the first one.",
-                 id.c_str());
-  return tf[0];
+  robot_link = nullptr;
+
+  // Check names of the attached bodies
+  std::map<std::string, AttachedBody*>::const_iterator jt = attached_body_map_.find(frame_id);
+  if (jt != attached_body_map_.end())
+  {
+    const EigenSTL::vector_Isometry3d& tf = jt->second->getGlobalCollisionBodyTransforms();
+    if (tf.empty())
+    {
+      RCLCPP_ERROR(LOGGER, "Attached body '%s' has no geometry associated to it. No transform to return.",
+                   frame_id.c_str());
+      robot_link = nullptr;
+      frame_found = false;
+      return IDENTITY_TRANSFORM;
+    }
+    if (tf.size() > 1)
+      RCLCPP_DEBUG(LOGGER, "There are multiple geometries associated to attached body '%s'. "
+                           "Returning the transform for the first one.",
+                   frame_id.c_str());
+    robot_link = jt->second->getAttachedLink();
+    frame_found = true;
+    BOOST_VERIFY(checkLinkTransforms());
+    return tf[0];
+  }
+
+  // Check if an AttachedBody has a subframe with name frame_id
+  for (const std::pair<std::string, AttachedBody*>& body : attached_body_map_)
+  {
+    const auto& transform = body.second->getSubframeTransform(frame_id, &frame_found);
+    if (frame_found)
+    {
+      robot_link = body.second->getAttachedLink();
+      BOOST_VERIFY(checkLinkTransforms());
+      return transform;
+    }
+  }
+
+  robot_link = nullptr;
+  frame_found = false;
+  return IDENTITY_TRANSFORM;
 }
 
-bool RobotState::knowsFrameTransform(const std::string& id) const
+bool RobotState::knowsFrameTransform(const std::string& frame_id) const
 {
-  if (!id.empty() && id[0] == '/')
-    return knowsFrameTransform(id.substr(1));
-  if (robot_model_->hasLinkModel(id))
+  if (!frame_id.empty() && frame_id[0] == '/')
+    return knowsFrameTransform(frame_id.substr(1));
+  if (robot_model_->hasLinkModel(frame_id))
     return true;
-  std::map<std::string, AttachedBody*>::const_iterator it = attached_body_map_.find(id);
-  return it != attached_body_map_.end() && !it->second->getGlobalCollisionBodyTransforms().empty();
+
+  // Check if an AttachedBody with name frame_id exists
+  std::map<std::string, AttachedBody*>::const_iterator it = attached_body_map_.find(frame_id);
+  if (it != attached_body_map_.end())
+    return !it->second->getGlobalCollisionBodyTransforms().empty();
+
+  // Check if an AttachedBody has a subframe with name frame_id
+  for (const std::pair<std::string, AttachedBody*>& body : attached_body_map_)
+  {
+    if (body.second->hasSubframeTransform(frame_id))
+      return true;
+  }
+  return false;
 }
 
 void RobotState::getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, const std::vector<std::string>& link_names,
@@ -1070,66 +1107,65 @@ void RobotState::getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, cons
 void RobotState::getRobotMarkers(visualization_msgs::msg::MarkerArray& arr, const std::vector<std::string>& link_names,
                                  bool include_attached) const
 {
-  builtin_interfaces::msg::Time tm = rclcpp::Clock().now();
-
-  for (std::size_t i = 0; i < link_names.size(); ++i)
+  rclcpp::Clock clock;
+  for (const std::string& link_name : link_names)
   {
-    RCLCPP_DEBUG(LOGGER, "Trying to get marker for link '%s'", link_names[i].c_str());
-    const LinkModel* lm = robot_model_->getLinkModel(link_names[i]);
-    if (!lm)
+    RCLCPP_DEBUG(LOGGER, "Trying to get marker for link '%s'", link_name.c_str());
+    const LinkModel* link_model = robot_model_->getLinkModel(link_name);
+    if (!link_model)
       continue;
     if (include_attached)
-      for (std::map<std::string, AttachedBody*>::const_iterator it = attached_body_map_.begin();
-           it != attached_body_map_.end(); ++it)
-        if (it->second->getAttachedLink() == lm)
+      for (const std::pair<const std::string, AttachedBody*>& it : attached_body_map_)
+        if (it.second->getAttachedLink() == link_model)
         {
-          for (std::size_t j = 0; j < it->second->getShapes().size(); ++j)
+          for (std::size_t j = 0; j < it.second->getShapes().size(); ++j)
           {
             visualization_msgs::msg::Marker att_mark;
             att_mark.header.frame_id = robot_model_->getModelFrame();
-            att_mark.header.stamp = tm;
-            if (shapes::constructMarkerFromShape(it->second->getShapes()[j].get(), att_mark))
+            att_mark.header.stamp = clock.now();
+            if (shapes::constructMarkerFromShape(it.second->getShapes()[j].get(), att_mark))
             {
               // if the object is invisible (0 volume) we skip it
               if (fabs(att_mark.scale.x * att_mark.scale.y * att_mark.scale.z) < std::numeric_limits<float>::epsilon())
                 continue;
-              att_mark.pose = tf2::toMsg(it->second->getGlobalCollisionBodyTransforms()[j]);
+              att_mark.pose = tf2::toMsg(it.second->getGlobalCollisionBodyTransforms()[j]);
               arr.markers.push_back(att_mark);
             }
           }
         }
 
-    if (lm->getShapes().empty())
+    if (link_model->getShapes().empty())
       continue;
 
-    for (std::size_t j = 0; j < lm->getShapes().size(); ++j)
+    for (std::size_t j = 0; j < link_model->getShapes().size(); ++j)
     {
       visualization_msgs::msg::Marker mark;
       mark.header.frame_id = robot_model_->getModelFrame();
-      mark.header.stamp = tm;
+      mark.header.stamp = clock.now();
 
       // we prefer using the visual mesh, if a mesh is available and we have one body to render
-      const std::string& mesh_resource = lm->getVisualMeshFilename();
-      if (mesh_resource.empty() || lm->getShapes().size() > 1)
+      const std::string& mesh_resource = link_model->getVisualMeshFilename();
+      if (mesh_resource.empty() || link_model->getShapes().size() > 1)
       {
-        if (!shapes::constructMarkerFromShape(lm->getShapes()[j].get(), mark))
+        if (!shapes::constructMarkerFromShape(link_model->getShapes()[j].get(), mark))
           continue;
         // if the object is invisible (0 volume) we skip it
         if (fabs(mark.scale.x * mark.scale.y * mark.scale.z) < std::numeric_limits<float>::epsilon())
           continue;
-        mark.pose = tf2::toMsg(global_collision_body_transforms_[lm->getFirstCollisionBodyTransformIndex() + j]);
+        mark.pose =
+            tf2::toMsg(global_collision_body_transforms_[link_model->getFirstCollisionBodyTransformIndex() + j]);
       }
       else
       {
         mark.type = mark.MESH_RESOURCE;
         mark.mesh_use_embedded_materials = false;
         mark.mesh_resource = mesh_resource;
-        const Eigen::Vector3d& mesh_scale = lm->getVisualMeshScale();
+        const Eigen::Vector3d& mesh_scale = link_model->getVisualMeshScale();
 
         mark.scale.x = mesh_scale[0];
         mark.scale.y = mesh_scale[1];
         mark.scale.z = mesh_scale[2];
-        mark.pose = tf2::toMsg(global_link_transforms_[lm->getLinkIndex()] * lm->getVisualMeshOrigin());
+        mark.pose = tf2::toMsg(global_link_transforms_[link_model->getLinkIndex()] * link_model->getVisualMeshOrigin());
       }
 
       arr.markers.push_back(mark);
@@ -1198,7 +1234,7 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
     const JointModel* pjm = link->getParentJointModel();
     if (pjm->getVariableCount() > 0)
     {
-      if (not group->hasJointModel(pjm->getName()))
+      if (!group->hasJointModel(pjm->getName()))
       {
         link = pjm->getParentLinkModel();
         continue;
@@ -1402,13 +1438,14 @@ bool RobotState::setToIKSolverFrame(Eigen::Isometry3d& pose, const std::string& 
   // Bring the pose to the frame of the IK solver
   if (!Transforms::sameFrame(ik_frame, robot_model_->getModelFrame()))
   {
-    const LinkModel* lm = getLinkModel((!ik_frame.empty() && ik_frame[0] == '/') ? ik_frame.substr(1) : ik_frame);
-    if (!lm)
+    const LinkModel* link_model =
+        getLinkModel((!ik_frame.empty() && ik_frame[0] == '/') ? ik_frame.substr(1) : ik_frame);
+    if (!link_model)
     {
       RCLCPP_ERROR(LOGGER, "The following IK frame does not exist:", ik_frame.c_str());
       return false;
     }
-    pose = getGlobalLinkTransform(lm).inverse() * pose;
+    pose = getGlobalLinkTransform(link_model).inverse() * pose;
   }
   return true;
 }
@@ -1546,31 +1583,31 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
       {
         if (hasAttachedBody(pose_frame))
         {
-          const AttachedBody* ab = getAttachedBody(pose_frame);
-          const EigenSTL::vector_Isometry3d& ab_trans = ab->getFixedTransforms();
+          const AttachedBody* body = getAttachedBody(pose_frame);
+          const EigenSTL::vector_Isometry3d& ab_trans = body->getFixedTransforms();
           if (ab_trans.size() != 1)
           {
             RCLCPP_ERROR(LOGGER, "Cannot use an attached body "
                                  "with multiple geometries as a reference frame.");
             return false;
           }
-          pose_frame = ab->getAttachedLinkName();
+          pose_frame = body->getAttachedLinkName();
           pose = pose * ab_trans[0].inverse();
         }
         if (pose_frame != solver_tip_frame)
         {
-          const robot_model::LinkModel* lm = getLinkModel(pose_frame);
-          if (!lm)
+          const robot_model::LinkModel* link_model = getLinkModel(pose_frame);
+          if (!link_model)
           {
             RCLCPP_ERROR(LOGGER, "The following Pose Frame does not exist ", pose_frame.c_str());
             return false;
           }
-          const robot_model::LinkTransformMap& fixed_links = lm->getAssociatedFixedTransforms();
-          for (robot_model::LinkTransformMap::const_iterator it = fixed_links.begin(); it != fixed_links.end(); ++it)
-            if (Transforms::sameFrame(it->first->getName(), solver_tip_frame))
+          const robot_model::LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
+          for (const std::pair<const LinkModel* const, Eigen::Isometry3d>& fixed_link : fixed_links)
+            if (Transforms::sameFrame(fixed_link.first->getName(), solver_tip_frame))
             {
               pose_frame = solver_tip_frame;
-              pose = pose * it->second;
+              pose = pose * fixed_link.second;
               break;
             }
         }
@@ -1758,27 +1795,27 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
     {
       if (hasAttachedBody(pose_frame))
       {
-        const AttachedBody* ab = getAttachedBody(pose_frame);
-        const EigenSTL::vector_Isometry3d& ab_trans = ab->getFixedTransforms();
+        const AttachedBody* body = getAttachedBody(pose_frame);
+        const EigenSTL::vector_Isometry3d& ab_trans = body->getFixedTransforms();
         if (ab_trans.size() != 1)
         {
           RCLCPP_ERROR(LOGGER, "Cannot use an attached body with multiple geometries as a reference frame.");
           return false;
         }
-        pose_frame = ab->getAttachedLinkName();
+        pose_frame = body->getAttachedLinkName();
         pose = pose * ab_trans[0].inverse();
       }
       if (pose_frame != solver_tip_frame)
       {
-        const robot_model::LinkModel* lm = getLinkModel(pose_frame);
-        if (!lm)
+        const robot_model::LinkModel* link_model = getLinkModel(pose_frame);
+        if (!link_model)
           return false;
-        const robot_model::LinkTransformMap& fixed_links = lm->getAssociatedFixedTransforms();
-        for (robot_model::LinkTransformMap::const_iterator it = fixed_links.begin(); it != fixed_links.end(); ++it)
-          if (it->first->getName() == solver_tip_frame)
+        const robot_model::LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
+        for (const std::pair<const LinkModel* const, Eigen::Isometry3d>& fixed_link : fixed_links)
+          if (fixed_link.first->getName() == solver_tip_frame)
           {
             pose_frame = solver_tip_frame;
-            pose = pose * it->second;
+            pose = pose * fixed_link.second;
             break;
           }
       }
@@ -1883,262 +1920,35 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
 
 double RobotState::computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj,
                                         const LinkModel* link, const Eigen::Vector3d& direction,
-                                        bool global_reference_frame, double distance, const MaxEEFStep& max_step,
-                                        const JumpThreshold& jump_threshold,
-                                        const GroupStateValidityCallbackFn& validCallback,
+                                        bool global_reference_frame, double distance, double max_step,
+                                        double jump_threshold_factor, const GroupStateValidityCallbackFn& validCallback,
                                         const kinematics::KinematicsQueryOptions& options)
 {
-  // this is the Cartesian pose we start from, and have to move in the direction indicated
-  const Eigen::Isometry3d& start_pose = getGlobalLinkTransform(link);
-
-  // the direction can be in the local reference frame (in which case we rotate it)
-  const Eigen::Vector3d rotated_direction = global_reference_frame ? direction : start_pose.rotation() * direction;
-
-  // The target pose is built by applying a translation to the start pose for the desired direction and distance
-  Eigen::Isometry3d target_pose = start_pose;
-  target_pose.translation() += rotated_direction * distance;
-
-  // call computeCartesianPath for the computed target pose in the global reference frame
-  return (distance *
-          computeCartesianPath(group, traj, link, target_pose, true, max_step, jump_threshold, validCallback, options));
+  return CartesianInterpolator::computeCartesianPath(this, group, traj, link, direction, global_reference_frame,
+                                                     distance, MaxEEFStep(max_step),
+                                                     JumpThreshold(jump_threshold_factor), validCallback, options);
 }
 
 double RobotState::computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj,
                                         const LinkModel* link, const Eigen::Isometry3d& target,
-                                        bool global_reference_frame, const MaxEEFStep& max_step,
-                                        const JumpThreshold& jump_threshold,
+                                        bool global_reference_frame, double max_step, double jump_threshold_factor,
                                         const GroupStateValidityCallbackFn& validCallback,
                                         const kinematics::KinematicsQueryOptions& options)
 {
-  const std::vector<const JointModel*>& cjnt = group->getContinuousJointModels();
-  // make sure that continuous joints wrap
-  for (std::size_t i = 0; i < cjnt.size(); ++i)
-    enforceBounds(cjnt[i]);
-
-  // this is the Cartesian pose we start from, and we move in the direction indicated
-  Eigen::Isometry3d start_pose = getGlobalLinkTransform(link);
-
-  // the target can be in the local reference frame (in which case we rotate it)
-  Eigen::Isometry3d rotated_target = global_reference_frame ? target : start_pose * target;
-
-  Eigen::Quaterniond start_quaternion(start_pose.rotation());
-  Eigen::Quaterniond target_quaternion(rotated_target.rotation());
-
-  if (max_step.translation <= 0.0 && max_step.rotation <= 0.0)
-  {
-    RCLCPP_ERROR(LOGGER, "Invalid MaxEEFStep passed into computeCartesianPath. Both the MaxEEFStep.rotation and "
-                         "MaxEEFStep.translation components must be non-negative and at least one component must be "
-                         "greater than zero");
-    return 0.0;
-  }
-
-  double rotation_distance = start_quaternion.angularDistance(target_quaternion);
-  double translation_distance = (rotated_target.translation() - start_pose.translation()).norm();
-
-  // decide how many steps we will need for this trajectory
-  std::size_t translation_steps = 0;
-  if (max_step.translation > 0.0)
-    translation_steps = floor(translation_distance / max_step.translation);
-
-  std::size_t rotation_steps = 0;
-  if (max_step.rotation > 0.0)
-    rotation_steps = floor(rotation_distance / max_step.rotation);
-
-  // If we are testing for relative jumps, we always want at least MIN_STEPS_FOR_JUMP_THRESH steps
-  std::size_t steps = std::max(translation_steps, rotation_steps) + 1;
-  if (jump_threshold.factor > 0 && steps < MIN_STEPS_FOR_JUMP_THRESH)
-    steps = MIN_STEPS_FOR_JUMP_THRESH;
-
-  // To limit absolute joint-space jumps, we pass consistency limits to the IK solver
-  std::vector<double> consistency_limits;
-  if (jump_threshold.prismatic > 0 || jump_threshold.revolute > 0)
-    for (const JointModel* jm : group->getActiveJointModels())
-    {
-      double limit;
-      switch (jm->getType())
-      {
-        case JointModel::REVOLUTE:
-          limit = jump_threshold.revolute;
-          break;
-        case JointModel::PRISMATIC:
-          limit = jump_threshold.prismatic;
-          break;
-        default:
-          limit = 0.0;
-      }
-      if (limit == 0.0)
-        limit = jm->getMaximumExtent();
-      consistency_limits.push_back(limit);
-    }
-
-  traj.clear();
-  traj.push_back(RobotStatePtr(new RobotState(*this)));
-
-  double last_valid_percentage = 0.0;
-  for (std::size_t i = 1; i <= steps; ++i)
-  {
-    double percentage = (double)i / (double)steps;
-
-    Eigen::Isometry3d pose(start_quaternion.slerp(percentage, target_quaternion));
-    pose.translation() = percentage * rotated_target.translation() + (1 - percentage) * start_pose.translation();
-
-    // Explicitly use a single IK attempt only: We want a smooth trajectory.
-    // Random seeding (of additional attempts) would probably create IK jumps.
-    if (setFromIK(group, pose, link->getName(), consistency_limits, 0.0, validCallback, options))
-      traj.push_back(RobotStatePtr(new RobotState(*this)));
-    else
-      break;
-
-    last_valid_percentage = percentage;
-  }
-
-  last_valid_percentage *= testJointSpaceJump(group, traj, jump_threshold);
-
-  return last_valid_percentage;
+  return CartesianInterpolator::computeCartesianPath(this, group, traj, link, target, global_reference_frame,
+                                                     MaxEEFStep(max_step), JumpThreshold(jump_threshold_factor),
+                                                     validCallback, options);
 }
 
 double RobotState::computeCartesianPath(const JointModelGroup* group, std::vector<RobotStatePtr>& traj,
                                         const LinkModel* link, const EigenSTL::vector_Isometry3d& waypoints,
-                                        bool global_reference_frame, const MaxEEFStep& max_step,
-                                        const JumpThreshold& jump_threshold,
+                                        bool global_reference_frame, double max_step, double jump_threshold_factor,
                                         const GroupStateValidityCallbackFn& validCallback,
                                         const kinematics::KinematicsQueryOptions& options)
 {
-  double percentage_solved = 0.0;
-  for (std::size_t i = 0; i < waypoints.size(); ++i)
-  {
-    // Don't test joint space jumps for every waypoint, test them later on the whole trajectory.
-    static const JumpThreshold NO_JOINT_SPACE_JUMP_TEST;
-    std::vector<RobotStatePtr> waypoint_traj;
-    double wp_percentage_solved = computeCartesianPath(group, waypoint_traj, link, waypoints[i], global_reference_frame,
-                                                       max_step, NO_JOINT_SPACE_JUMP_TEST, validCallback, options);
-    if (fabs(wp_percentage_solved - 1.0) < std::numeric_limits<double>::epsilon())
-    {
-      percentage_solved = (double)(i + 1) / (double)waypoints.size();
-      std::vector<RobotStatePtr>::iterator start = waypoint_traj.begin();
-      if (i > 0 && !waypoint_traj.empty())
-        std::advance(start, 1);
-      traj.insert(traj.end(), start, waypoint_traj.end());
-    }
-    else
-    {
-      percentage_solved += wp_percentage_solved / (double)waypoints.size();
-      std::vector<RobotStatePtr>::iterator start = waypoint_traj.begin();
-      if (i > 0 && !waypoint_traj.empty())
-        std::advance(start, 1);
-      traj.insert(traj.end(), start, waypoint_traj.end());
-      break;
-    }
-  }
-
-  percentage_solved *= testJointSpaceJump(group, traj, jump_threshold);
-
-  return percentage_solved;
-}
-
-double RobotState::testJointSpaceJump(const JointModelGroup* group, std::vector<RobotStatePtr>& traj,
-                                      const JumpThreshold& jump_threshold)
-{
-  double percentage_solved = 1.0;
-  if (traj.size() <= 1)
-    return percentage_solved;
-
-  if (jump_threshold.factor > 0.0)
-    percentage_solved *= testRelativeJointSpaceJump(group, traj, jump_threshold.factor);
-
-  if (jump_threshold.revolute > 0.0 || jump_threshold.prismatic > 0.0)
-    percentage_solved *= testAbsoluteJointSpaceJump(group, traj, jump_threshold.revolute, jump_threshold.prismatic);
-
-  return percentage_solved;
-}
-
-double RobotState::testRelativeJointSpaceJump(const JointModelGroup* group, std::vector<RobotStatePtr>& traj,
-                                              double jump_threshold_factor)
-{
-  if (traj.size() < MIN_STEPS_FOR_JUMP_THRESH)
-  {
-    RCLCPP_WARN(LOGGER, "The computed trajectory is too short to detect jumps in joint-space "
-                        "Need at least %zu steps, only got %zu. Try a lower max_step.",
-                MIN_STEPS_FOR_JUMP_THRESH, traj.size());
-  }
-
-  std::vector<double> dist_vector;
-  dist_vector.reserve(traj.size() - 1);
-  double total_dist = 0.0;
-  for (std::size_t i = 1; i < traj.size(); ++i)
-  {
-    double dist_prev_point = traj[i]->distance(*traj[i - 1], group);
-    dist_vector.push_back(dist_prev_point);
-    total_dist += dist_prev_point;
-  }
-
-  double percentage = 1.0;
-  // compute the average distance between the states we looked at
-  double thres = jump_threshold_factor * (total_dist / (double)dist_vector.size());
-  for (std::size_t i = 0; i < dist_vector.size(); ++i)
-    if (dist_vector[i] > thres)
-    {
-      RCLCPP_DEBUG(LOGGER, "Truncating Cartesian path due to detected jump in joint-space distance");
-      percentage = (double)(i + 1) / (double)(traj.size());
-      traj.resize(i + 1);
-      break;
-    }
-
-  return percentage;
-}
-
-double RobotState::testAbsoluteJointSpaceJump(const JointModelGroup* group, std::vector<RobotStatePtr>& traj,
-                                              double revolute_threshold, double prismatic_threshold)
-{
-  struct LimitData
-  {
-    double limit_;
-    bool check_;
-  };
-  LimitData data[2] = { { revolute_threshold, revolute_threshold > 0.0 },
-                        { prismatic_threshold, prismatic_threshold > 0.0 } };
-  bool still_valid = true;
-  const std::vector<const JointModel*>& joints = group->getActiveJointModels();
-  for (std::size_t traj_ix = 0, ix_end = traj.size() - 1; traj_ix != ix_end; ++traj_ix)
-  {
-    for (auto& joint : joints)
-    {
-      unsigned int type_index;
-      switch (joint->getType())
-      {
-        case JointModel::REVOLUTE:
-          type_index = 0;
-          break;
-        case JointModel::PRISMATIC:
-          type_index = 1;
-          break;
-        default:
-          RCLCPP_WARN(LOGGER, "Joint %s has not supported type %s. \n"
-                              "testAbsoluteJointSpaceJump only supports prismatic and revolute joints.",
-                      joint->getName().c_str(), joint->getTypeName().c_str());
-          continue;
-      }
-      if (!data[type_index].check_)
-        continue;
-
-      double distance = traj[traj_ix]->distance(*traj[traj_ix + 1], joint);
-      if (distance > data[type_index].limit_)
-      {
-        RCLCPP_DEBUG(LOGGER, "Truncating Cartesian path due to detected jump of %.4f > %.4f in joint %s", distance,
-                     data[type_index].limit_, joint->getName().c_str());
-        still_valid = false;
-        break;
-      }
-    }
-
-    if (!still_valid)
-    {
-      double percent_valid = (double)(traj_ix + 1) / (double)(traj.size());
-      traj.resize(traj_ix + 1);
-      return percent_valid;
-    }
-  }
-  return 1.0;
+  return CartesianInterpolator::computeCartesianPath(this, group, traj, link, waypoints, global_reference_frame,
+                                                     MaxEEFStep(max_step), JumpThreshold(jump_threshold_factor),
+                                                     validCallback, options);
 }
 
 void RobotState::computeAABB(std::vector<double>& aabb) const
@@ -2147,18 +1957,17 @@ void RobotState::computeAABB(std::vector<double>& aabb) const
 
   core::AABB bounding_box;
   std::vector<const LinkModel*> links = robot_model_->getLinkModelsWithCollisionGeometry();
-  for (std::size_t i = 0; i < links.size(); ++i)
+  for (const LinkModel* link : links)
   {
-    Eigen::Isometry3d transform = getGlobalLinkTransform(links[i]);  // intentional copy, we will translate
-    const Eigen::Vector3d& extents = links[i]->getShapeExtentsAtOrigin();
-    transform.translate(links[i]->getCenteredBoundingBoxOffset());
+    Eigen::Isometry3d transform = getGlobalLinkTransform(link);  // intentional copy, we will translate
+    const Eigen::Vector3d& extents = link->getShapeExtentsAtOrigin();
+    transform.translate(link->getCenteredBoundingBoxOffset());
     bounding_box.extendWithTransformedBox(transform, extents);
   }
-  for (std::map<std::string, AttachedBody*>::const_iterator it = attached_body_map_.begin();
-       it != attached_body_map_.end(); ++it)
+  for (const std::pair<const std::string, AttachedBody*>& it : attached_body_map_)
   {
-    const EigenSTL::vector_Isometry3d& transforms = it->second->getGlobalCollisionBodyTransforms();
-    const std::vector<shapes::ShapeConstPtr>& shapes = it->second->getShapes();
+    const EigenSTL::vector_Isometry3d& transforms = it.second->getGlobalCollisionBodyTransforms();
+    const std::vector<shapes::ShapeConstPtr>& shapes = it.second->getShapes();
     for (std::size_t i = 0; i < transforms.size(); ++i)
     {
       Eigen::Vector3d extents = shapes::computeShapeExtents(shapes[i].get());
@@ -2192,18 +2001,18 @@ void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointMod
   const std::vector<const moveit::core::JointModel*>& joints = jmg->getActiveJointModels();
 
   // Loop through joints
-  for (std::size_t i = 0; i < joints.size(); ++i)
+  for (const JointModel* joint : joints)
   {
     // Ignore joints with more than one variable
-    if (joints[i]->getVariableCount() > 1)
+    if (joint->getVariableCount() > 1)
       continue;
 
-    double current_value = getVariablePosition(joints[i]->getName());
+    double current_value = getVariablePosition(joint->getName());
 
     // check if joint is beyond limits
-    bool out_of_bounds = !satisfiesBounds(joints[i]);
+    bool out_of_bounds = !satisfiesBounds(joint);
 
-    const moveit::core::VariableBounds& bound = joints[i]->getVariableBounds()[0];
+    const moveit::core::VariableBounds& bound = joint->getVariableBounds()[0];
 
     if (out_of_bounds)
       out << MOVEIT_CONSOLE_COLOR_RED;
@@ -2228,7 +2037,7 @@ void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointMod
       out << "|";
 
     // show max position
-    out << " \t" << std::fixed << std::setprecision(5) << bound.max_position_ << "  \t" << joints[i]->getName()
+    out << " \t" << std::fixed << std::setprecision(5) << bound.max_position_ << "  \t" << joint->getName()
         << " current: " << std::fixed << std::setprecision(5) << current_value << std::endl;
 
     if (out_of_bounds)
@@ -2240,9 +2049,9 @@ void RobotState::printDirtyInfo(std::ostream& out) const
 {
   out << "  * Dirty Joint Transforms: " << std::endl;
   const std::vector<const JointModel*>& jm = robot_model_->getJointModels();
-  for (std::size_t i = 0; i < jm.size(); ++i)
-    if (jm[i]->getVariableCount() > 0 && dirtyJointTransform(jm[i]))
-      out << "    " << jm[i]->getName() << std::endl;
+  for (const JointModel* joint : jm)
+    if (joint->getVariableCount() > 0 && dirtyJointTransform(joint))
+      out << "    " << joint->getName() << std::endl;
   out << "  * Dirty Link Transforms: " << (dirty_link_transforms_ ? dirty_link_transforms_->getName() : "NULL")
       << std::endl;
   out << "  * Dirty Collision Body Transforms: "
@@ -2310,10 +2119,10 @@ void RobotState::printTransforms(std::ostream& out) const
 
   out << "Joint transforms:" << std::endl;
   const std::vector<const JointModel*>& jm = robot_model_->getJointModels();
-  for (std::size_t i = 0; i < jm.size(); ++i)
+  for (const JointModel* joint : jm)
   {
-    out << "  " << jm[i]->getName();
-    const int idx = jm[i]->getJointIndex();
+    out << "  " << joint->getName();
+    const int idx = joint->getJointIndex();
     if (dirty_joint_transforms_[idx])
       out << " [dirty]";
     out << ": ";
@@ -2321,11 +2130,11 @@ void RobotState::printTransforms(std::ostream& out) const
   }
 
   out << "Link poses:" << std::endl;
-  const std::vector<const LinkModel*>& lm = robot_model_->getLinkModels();
-  for (std::size_t i = 0; i < lm.size(); ++i)
+  const std::vector<const LinkModel*>& link_model = robot_model_->getLinkModels();
+  for (const LinkModel* link : link_model)
   {
-    out << "  " << lm[i]->getName() << ": ";
-    printTransform(global_link_transforms_[lm[i]->getLinkIndex()], out);
+    out << "  " << link->getName() << ": ";
+    printTransform(global_link_transforms_[link->getLinkIndex()], out);
   }
 }
 
@@ -2369,19 +2178,19 @@ void RobotState::getStateTreeJointString(std::ostream& ss, const JointModel* jm,
     ss << pfx << jm->getVariableNames()[i] << std::setw(12) << position_[jm->getFirstVariableIndex() + i] << std::endl;
   }
 
-  const LinkModel* lm = jm->getChildLinkModel();
+  const LinkModel* link_model = jm->getChildLinkModel();
 
-  ss << pfx << "Link: " << lm->getName() << std::endl;
-  getPoseString(ss, lm->getJointOriginTransform(), pfx + "joint_origin:");
+  ss << pfx << "Link: " << link_model->getName() << std::endl;
+  getPoseString(ss, link_model->getJointOriginTransform(), pfx + "joint_origin:");
   if (variable_joint_transforms_)
   {
     getPoseString(ss, variable_joint_transforms_[jm->getJointIndex()], pfx + "joint_variable:");
-    getPoseString(ss, global_link_transforms_[lm->getLinkIndex()], pfx + "link_global:");
+    getPoseString(ss, global_link_transforms_[link_model->getLinkIndex()], pfx + "link_global:");
   }
 
-  for (std::vector<const JointModel*>::const_iterator it = lm->getChildJointModels().begin();
-       it != lm->getChildJointModels().end(); ++it)
-    getStateTreeJointString(ss, *it, pfx, it + 1 == lm->getChildJointModels().end());
+  for (std::vector<const JointModel*>::const_iterator it = link_model->getChildJointModels().begin();
+       it != link_model->getChildJointModels().end(); ++it)
+    getStateTreeJointString(ss, *it, pfx, it + 1 == link_model->getChildJointModels().end());
 }
 
 std::ostream& operator<<(std::ostream& out, const RobotState& s)

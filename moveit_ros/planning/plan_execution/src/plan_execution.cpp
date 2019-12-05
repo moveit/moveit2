@@ -38,6 +38,7 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/collision_detection/collision_tools.h>
+#include <moveit/utils/message_checks.h>
 #include <boost/algorithm/string/join.hpp>
 
 #include <dynamic_reconfigure/server.h>
@@ -58,7 +59,7 @@ public:
   }
 
 private:
-  void dynamicReconfigureCallback(PlanExecutionDynamicReconfigureConfig& config, uint32_t level)
+  void dynamicReconfigureCallback(PlanExecutionDynamicReconfigureConfig& config, uint32_t /*level*/)
   {
     owner_->setMaxReplanAttempts(config.max_replan_attempts);
     owner_->setTrajectoryStateRecordingFrequency(config.record_trajectory_state_frequency);
@@ -139,9 +140,10 @@ void plan_execution::PlanExecution::planAndExecute(ExecutableMotionPlan& plan, c
 }
 
 void plan_execution::PlanExecution::planAndExecute(ExecutableMotionPlan& plan,
-                                                   const moveit_msgs::msg::PlanningScene& scene_diff, const Options& opt)
+                                                   const moveit_msgs::msg::PlanningScene& scene_diff,
+                                                   const Options& opt)
 {
-  if (planning_scene::PlanningScene::isEmpty(scene_diff))
+  if (moveit::core::isEmpty(scene_diff))
     planAndExecute(plan, opt);
   else
   {
@@ -261,13 +263,6 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
                     getErrorCodeString(plan.error_code_).c_str());
 }
 
-bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionPlan& plan)
-{
-  // check the validity of the currently executed path segment only, since there could be
-  // changes in the world in between path segments
-  return isRemainingPathValid(plan, trajectory_execution_manager_->getCurrentExpectedTrajectoryIndex());
-}
-
 bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionPlan& plan,
                                                          const std::pair<int, int>& path_segment)
 {
@@ -295,10 +290,6 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
 
       if (res.collision || !plan.planning_scene_->isStateFeasible(t.getWayPoint(i), false))
       {
-        // Dave's debacle
-        ROS_INFO_NAMED("plan_execution", "Trajectory component '%s' is invalid",
-                       plan.plan_components_[path_segment.first].description_.c_str());
-
         // call the same functions again, in verbose mode, to show what issues have been detected
         plan.planning_scene_->isStateFeasible(t.getWayPoint(i), true);
         req.verbose = true;
@@ -391,8 +382,13 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
   }
 
   if (!trajectory_monitor_ && planning_scene_monitor_->getStateMonitor())
-    trajectory_monitor_.reset(
-        new planning_scene_monitor::TrajectoryMonitor(planning_scene_monitor_->getStateMonitor()));
+  {
+    // Pass current value of reconfigurable parameter plan_execution/record_trajectory_state_frequency
+    double sampling_frequency = 0.0;
+    node_handle_.getParam("plan_execution/record_trajectory_state_frequency", sampling_frequency);
+    trajectory_monitor_ = std::make_shared<planning_scene_monitor::TrajectoryMonitor>(
+        planning_scene_monitor_->getStateMonitor(), sampling_frequency);
+  }
 
   // start recording trajectory states
   if (trajectory_monitor_)
@@ -412,8 +408,11 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
     if (new_scene_update_)
     {
       new_scene_update_ = false;
-      if (!isRemainingPathValid(plan))
+      std::pair<int, int> current_index = trajectory_execution_manager_->getCurrentExpectedTrajectoryIndex();
+      if (!isRemainingPathValid(plan, current_index))
       {
+        ROS_INFO_NAMED("plan_execution", "Trajectory component '%s' is invalid after scene update",
+                       plan.plan_components_[current_index.first].description_.c_str());
         path_became_invalid_ = true;
         break;
       }
@@ -441,7 +440,12 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
 
   // stop recording trajectory states
   if (trajectory_monitor_)
+  {
     trajectory_monitor_->stopTrajectoryMonitor();
+    plan.executed_trajectory_ =
+        std::make_shared<robot_trajectory::RobotTrajectory>(planning_scene_monitor_->getRobotModel(), "");
+    trajectory_monitor_->swapTrajectory(*plan.executed_trajectory_);
+  }
 
   // decide return value
   if (path_became_invalid_)
@@ -476,7 +480,7 @@ void plan_execution::PlanExecution::planningSceneUpdatedCallback(
 }
 
 void plan_execution::PlanExecution::doneWithTrajectoryExecution(
-    const moveit_controller_manager::ExecutionStatus& status)
+    const moveit_controller_manager::ExecutionStatus& /*status*/)
 {
   execution_complete_ = true;
 }
@@ -506,7 +510,12 @@ void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const E
   if (index < plan->plan_components_.size() && plan->plan_components_[index].trajectory_ &&
       !plan->plan_components_[index].trajectory_->empty())
   {
-    if (!isRemainingPathValid(*plan, std::make_pair<int>(index, 0)))
+    std::pair<int, int> next_index(static_cast<int>(index), 0);
+    if (!isRemainingPathValid(*plan, next_index))
+    {
+      ROS_INFO_NAMED("plan_execution", "Upcoming trajectory component '%s' is invalid",
+                     plan->plan_components_[next_index.first].description_.c_str());
       path_became_invalid_ = true;
+    }
   }
 }

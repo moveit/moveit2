@@ -250,7 +250,7 @@ void GroupEditWidget::setSelected(const std::string& group_name)
                          QString("Unable to find the kinematic solver '")
                              .append(kin_solver.c_str())
                              .append("'. Trying running rosmake for this package. Until fixed, this setting will be "
-                                     "lost the next time the MoveIt! configuration files are generated"));
+                                     "lost the next time the MoveIt configuration files are generated"));
     return;
   }
   else
@@ -318,22 +318,22 @@ void GroupEditWidget::loadKinematicPlannersComboBox()
   // Warn if no plugins are found
   if (classes.empty())
   {
-    QMessageBox::warning(this, "Missing Kinematic Solvers", "No MoveIt!-compatible kinematics solvers found. Try "
+    QMessageBox::warning(this, "Missing Kinematic Solvers", "No MoveIt-compatible kinematics solvers found. Try "
                                                             "installing moveit_kinematics (sudo apt-get install "
                                                             "ros-${ROS_DISTRO}-moveit-kinematics)");
     return;
   }
 
   // Loop through all planners and add to combo box
-  for (std::vector<std::string>::const_iterator plugin_it = classes.begin(); plugin_it != classes.end(); ++plugin_it)
+  for (const std::string& kinematics_plugin_name : classes)
   {
-    kinematics_solver_field_->addItem(plugin_it->c_str());
+    kinematics_solver_field_->addItem(kinematics_plugin_name.c_str());
   }
 
   std::vector<OMPLPlannerDescription> planners = config_data_->getOMPLPlanners();
-  for (std::size_t i = 0; i < planners.size(); ++i)
+  for (OMPLPlannerDescription& planner : planners)
   {
-    std::string planner_name = planners[i].name_;
+    std::string planner_name = planner.name_;
     default_planner_field_->addItem(planner_name.c_str());
   }
 }

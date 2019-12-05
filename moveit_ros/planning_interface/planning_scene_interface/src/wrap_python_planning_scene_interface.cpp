@@ -86,7 +86,8 @@ public:
     std::map<std::string, moveit_msgs::msg::CollisionObject> objs =
         getObjects(py_bindings_tools::stringFromList(object_ids));
     std::map<std::string, std::string> ser_objs;
-    for (std::map<std::string, moveit_msgs::msg::CollisionObject>::const_iterator it = objs.begin(); it != objs.end(); ++it)
+    for (std::map<std::string, moveit_msgs::msg::CollisionObject>::const_iterator it = objs.begin(); it != objs.end();
+         ++it)
       ser_objs[it->first] = py_bindings_tools::serializeMsg(it->second);
 
     return py_bindings_tools::dictFromType(ser_objs);

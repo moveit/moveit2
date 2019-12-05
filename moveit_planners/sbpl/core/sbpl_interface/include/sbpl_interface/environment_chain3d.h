@@ -34,8 +34,7 @@
 
 /** \Author: Benjamin Cohen /bcohen@willowgarage.com, E. Gil Jones **/
 
-#ifndef _ENVIRONMENT_CHAIN3D_H_
-#define _ENVIRONMENT_CHAIN3D_H_
+#pragma once
 
 #include <time.h>
 #include <stdio.h>
@@ -51,8 +50,7 @@
 #include <sbpl/headers.h>
 #include <sbpl_interface/bfs3d/BFS_3D.h>
 #include <planning_scene/planning_scene.h>
-#include <collision_distance_field/collision_robot_hybrid.h>
-#include <collision_distance_field/collision_world_hybrid.h>
+#include <collision_distance_field/collision_env_hybrid.h>
 #include <sbpl_interface/environment_chain3d_types.h>
 #include <moveit_msgs/GetMotionPlan.h>
 
@@ -211,8 +209,8 @@ public:
   virtual bool AreEquivalent(int StateID1, int StateID2);
 
   bool setupForMotionPlan(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                          const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res,
-                          const PlanningParameters& params);
+                          const moveit_msgs::srv::GetMotionPlan::Request& req,
+                          moveit_msgs::srv::GetMotionPlan::Response& res, const PlanningParameters& params);
 
   const EnvChain3DPlanningData& getPlanningData() const
   {
@@ -249,8 +247,7 @@ protected:
   std::vector<boost::shared_ptr<JointMotionWrapper> > joint_motion_wrappers_;
   std::vector<boost::shared_ptr<JointMotionPrimitive> > possible_actions_;
   planning_models::RobotState* state_;
-  const collision_detection::CollisionWorldHybrid* hy_world_;
-  const collision_detection::CollisionRobotHybrid* hy_robot_;
+  const collision_detection::CollisionEnvHybrid* hy_env_;
   planning_models::RobotState* ::JointStateGroup* joint_state_group_;
   boost::shared_ptr<collision_detection::GroupStateRepresentation> gsr_;
   // boost::shared_ptr<kinematics::KinematicsBase> kinematics_solver_;
@@ -334,5 +331,3 @@ inline void EnvironmentChain3D::convertJointAnglesToCoord(const std::vector<doub
 // }
 
 }  // namespace
-
-#endif

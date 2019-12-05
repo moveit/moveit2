@@ -33,13 +33,13 @@
 # Author: Ioan Sucan, Felix Messmer
 
 import rospy
-import conversions
+from . import conversions
 
 from moveit_msgs.msg import PlanningScene, CollisionObject, AttachedCollisionObject
 from moveit_ros_planning_interface import _moveit_planning_scene_interface
 from geometry_msgs.msg import Pose, Point
 from shape_msgs.msg import SolidPrimitive, Plane, Mesh, MeshTriangle
-from exception import MoveItCommanderException
+from .exception import MoveItCommanderException
 from moveit_msgs.srv import ApplyPlanningScene, ApplyPlanningSceneRequest
 
 try:
@@ -69,7 +69,7 @@ class PlanningSceneInterface(object):
 
     def __submit(self, collision_object, attach=False):
         if self.__synchronous:
-            diff_req = self.__make_planning_scene_diff_req(collision_object)
+            diff_req = self.__make_planning_scene_diff_req(collision_object, attach)
             self._apply_planning_scene_diff.call(diff_req)
         else:
             if attach:
@@ -88,7 +88,8 @@ class PlanningSceneInterface(object):
         """
         Add a cylinder to the planning scene
         """
-        self._pub_co.publish(self.__make_cylinder(name, pose, height, radius))
+        co = self.__make_cylinder(name, pose, height, radius)
+        self.__submit(co, attach=False)
 
     def add_mesh(self, name, pose, filename, size=(1, 1, 1)):
         """
@@ -150,7 +151,7 @@ class PlanningSceneInterface(object):
         co.operation = CollisionObject.REMOVE
         if name is not None:
             co.id = name
-        self.__submit(co, attach=True)
+        self.__submit(co, attach=False)
 
     def remove_attached_object(self, link, name=None):
         """
@@ -305,10 +306,14 @@ class PlanningSceneInterface(object):
         return co
 
     @staticmethod
-    def __make_planning_scene_diff_req(collision_object):
+    def __make_planning_scene_diff_req(collision_object, attach=False):
         scene = PlanningScene()
         scene.is_diff = True
-        scene.world.collision_objects = [collision_object]
+        scene.robot_state.is_diff = True
+        if attach:
+            scene.robot_state.attached_collision_objects = [collision_object]
+        else:
+            scene.world.collision_objects = [collision_object]
         planning_scene_diff_req = ApplyPlanningSceneRequest()
         planning_scene_diff_req.scene = scene
         return planning_scene_diff_req

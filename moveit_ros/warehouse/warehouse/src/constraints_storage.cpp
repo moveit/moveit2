@@ -65,8 +65,8 @@ void moveit_warehouse::ConstraintsStorage::reset()
   createCollections();
 }
 
-void moveit_warehouse::ConstraintsStorage::addConstraints(const moveit_msgs::msg::Constraints& msg, const std::string& robot,
-                                                          const std::string& group)
+void moveit_warehouse::ConstraintsStorage::addConstraints(const moveit_msgs::msg::Constraints& msg,
+                                                          const std::string& robot, const std::string& group)
 {
   bool replace = false;
   if (hasConstraints(msg.name, robot, group))
@@ -113,9 +113,9 @@ void moveit_warehouse::ConstraintsStorage::getKnownConstraints(std::vector<std::
   if (!group.empty())
     q->append(CONSTRAINTS_GROUP_NAME, group);
   std::vector<ConstraintsWithMetadata> constr = constraints_collection_->queryList(q, true, CONSTRAINTS_ID_NAME, true);
-  for (std::size_t i = 0; i < constr.size(); ++i)
-    if (constr[i]->lookupField(CONSTRAINTS_ID_NAME))
-      names.push_back(constr[i]->lookupString(CONSTRAINTS_ID_NAME));
+  for (const ConstraintsWithMetadata& it : constr)
+    if (it->lookupField(CONSTRAINTS_ID_NAME))
+      names.push_back(it->lookupString(CONSTRAINTS_ID_NAME));
 }
 
 bool moveit_warehouse::ConstraintsStorage::getConstraints(ConstraintsWithMetadata& msg_m, const std::string& name,
@@ -134,7 +134,8 @@ bool moveit_warehouse::ConstraintsStorage::getConstraints(ConstraintsWithMetadat
   {
     msg_m = constr.back();
     // in case the constraints were renamed, the name in the message may be out of date
-    const_cast<moveit_msgs::msg::Constraints*>(static_cast<const moveit_msgs::msg::Constraints*>(msg_m.get()))->name = name;
+    const_cast<moveit_msgs::msg::Constraints*>(static_cast<const moveit_msgs::msg::Constraints*>(msg_m.get()))->name =
+        name;
     return true;
   }
 }

@@ -53,12 +53,12 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotMo
   : node_(node), robot_model_(model)
 {
   auto planner_plugin_params = std::make_shared<rclcpp::SyncParametersClient>(node);
-  
-  if(planner_plugin_params->has_parameter({planner_plugin_param_name}))
-      planner_plugin_name_ = node_->get_parameter(planner_plugin_param_name).get_value<std::string>();
+
+  if (planner_plugin_params->has_parameter({ planner_plugin_param_name }))
+    planner_plugin_name_ = node_->get_parameter(planner_plugin_param_name).get_value<std::string>();
 
   std::string adapters;
-  if (planner_plugin_params->has_parameter({adapter_plugins_param_name}))
+  if (planner_plugin_params->has_parameter({ adapter_plugins_param_name }))
   {
     adapters = node_->get_parameter(adapter_plugins_param_name).get_value<std::string>();
     boost::char_separator<char> sep(" ");
@@ -71,9 +71,13 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotMo
 }
 
 planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotModelConstPtr& model,
-                                                      const std::shared_ptr<rclcpp::Node> node, const std::string& planner_plugin_name,
+                                                      const std::shared_ptr<rclcpp::Node> node,
+                                                      const std::string& planner_plugin_name,
                                                       const std::vector<std::string>& adapter_plugin_names)
-  : node_(node), planner_plugin_name_(planner_plugin_name), adapter_plugin_names_(adapter_plugin_names), robot_model_(model)
+  : node_(node)
+  , planner_plugin_name_(planner_plugin_name)
+  , adapter_plugin_names_(adapter_plugin_names)
+  , robot_model_(model)
 {
   configure();
 }
@@ -92,7 +96,7 @@ void planning_pipeline::PlanningPipeline::configure()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_FATAL(node_->get_logger(),"Exception while creating planning plugin loader %s" , ex.what());
+    RCLCPP_FATAL(node_->get_logger(), "Exception while creating planning plugin loader %s", ex.what());
   }
 
   std::vector<std::string> classes;
@@ -101,28 +105,33 @@ void planning_pipeline::PlanningPipeline::configure()
   if (planner_plugin_name_.empty() && classes.size() == 1)
   {
     planner_plugin_name_ = classes[0];
-    RCLCPP_INFO(node_->get_logger(),"No '~planning_plugin' parameter specified, but only '%s' planning plugin is available. Using that one.",
-             planner_plugin_name_.c_str());
+    RCLCPP_INFO(
+        node_->get_logger(),
+        "No '~planning_plugin' parameter specified, but only '%s' planning plugin is available. Using that one.",
+        planner_plugin_name_.c_str());
   }
   if (planner_plugin_name_.empty() && classes.size() > 1)
   {
     planner_plugin_name_ = classes[0];
-    RCLCPP_INFO(node_->get_logger(),"Multiple planning plugins available. You should specify the '~planning_plugin' parameter. Using '%s' for "
-             "now.",
-             planner_plugin_name_.c_str());
+    RCLCPP_INFO(
+        node_->get_logger(),
+        "Multiple planning plugins available. You should specify the '~planning_plugin' parameter. Using '%s' for "
+        "now.",
+        planner_plugin_name_.c_str());
   }
   try
   {
     planner_instance_ = planner_plugin_loader_->createUniqueInstance(planner_plugin_name_);
     if (!planner_instance_->initialize(robot_model_, node_->get_namespace()))
       throw std::runtime_error("Unable to initialize planning plugin");
-    RCLCPP_INFO(node_->get_logger(),"Using planning interface '%s'", planner_instance_->getDescription().c_str());
+    RCLCPP_INFO(node_->get_logger(), "Using planning interface '%s'", planner_instance_->getDescription().c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
     std::string classes_str = boost::algorithm::join(classes, ", ");
-    RCLCPP_ERROR(node_->get_logger(),"Exception while loading planner '%s': %s"
-        "Available plugins: %s" ,planner_plugin_name_, ex.what(), classes_str.c_str());
+    RCLCPP_ERROR(node_->get_logger(), "Exception while loading planner '%s': %s"
+                                      "Available plugins: %s",
+                 planner_plugin_name_, ex.what(), classes_str.c_str());
   }
 
   // load the planner request adapters
@@ -136,32 +145,35 @@ void planning_pipeline::PlanningPipeline::configure()
     }
     catch (pluginlib::PluginlibException& ex)
     {
-      RCLCPP_ERROR(node_->get_logger(),"Exception while creating planning plugin loader %s", ex.what());
+      RCLCPP_ERROR(node_->get_logger(), "Exception while creating planning plugin loader %s", ex.what());
     }
 
     if (adapter_plugin_loader_)
-      for (std::size_t i = 0; i < adapter_plugin_names_.size(); ++i)
+      for (const std::string& adapter_plugin_name : adapter_plugin_names_)
       {
-        planning_request_adapter::PlanningRequestAdapterConstPtr ad;
+        planning_request_adapter::PlanningRequestAdapterPtr ad;
         try
         {
-          ad = adapter_plugin_loader_->createUniqueInstance(adapter_plugin_names_[i]);
+          ad = adapter_plugin_loader_->createUniqueInstance(adapter_plugin_name);
         }
         catch (pluginlib::PluginlibException& ex)
         {
-          RCLCPP_ERROR(node_->get_logger(),"Exception while loading planning adapter plugin '%s': %s",
-                            adapter_plugin_names_[i].c_str(),  ex.what());
+          RCLCPP_ERROR(node_->get_logger(), "Exception while loading planning adapter plugin '%s': %s",
+                       adapter_plugin_names, ex.what());
         }
         if (ad)
-          ads.push_back(ad);
+        {
+          ad->initialize(nh_);
+          ads.push_back(std::move(ad));
+        }
       }
     if (!ads.empty())
     {
       adapter_chain_.reset(new planning_request_adapter::PlanningRequestAdapterChain());
-      for (std::size_t i = 0; i < ads.size(); ++i)
+      for (planning_request_adapter::PlanningRequestAdapterConstPtr& ad : ads)
       {
-        RCLCPP_ERROR(node_->get_logger(),"Using planning request adapter '%s'", ads[i]->getDescription());
-        adapter_chain_->addAdapter(ads[i]);
+        RCLCPP_ERROR(node_->get_logger(), "Using planning request adapter '%s'", ad->getDescription());
+        adapter_chain_->addAdapter(ad);
       }
     }
   }
@@ -173,10 +185,12 @@ void planning_pipeline::PlanningPipeline::displayComputedMotionPlans(bool flag)
 {
   if (display_computed_motion_plans_ && !flag)
     display_path_publisher_.reset();
-  else if (!display_computed_motion_plans_ && flag){
+  else if (!display_computed_motion_plans_ && flag)
+  {
     custom_qos_profile_ = rmw_qos_profile_default;
     custom_qos_profile_.depth = 10;
-    display_path_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC,custom_qos_profile_);
+    display_path_publisher_ =
+        node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(DISPLAY_PATH_TOPIC, custom_qos_profile_);
   }
   display_computed_motion_plans_ = flag;
 }
@@ -185,10 +199,12 @@ void planning_pipeline::PlanningPipeline::publishReceivedRequests(bool flag)
 {
   if (publish_received_requests_ && !flag)
     received_request_publisher_.reset();
-  else if (!publish_received_requests_ && flag){
+  else if (!publish_received_requests_ && flag)
+  {
     custom_qos_profile_ = rmw_qos_profile_default;
     custom_qos_profile_.depth = 10;
-    received_request_publisher_ = node_->create_publisher<moveit_msgs::msg::MotionPlanRequest>(MOTION_PLAN_REQUEST_TOPIC,custom_qos_profile_);
+    received_request_publisher_ =
+        node_->create_publisher<moveit_msgs::msg::MotionPlanRequest>(MOTION_PLAN_REQUEST_TOPIC, custom_qos_profile_);
   }
   publish_received_requests_ = flag;
 }
@@ -197,10 +213,12 @@ void planning_pipeline::PlanningPipeline::checkSolutionPaths(bool flag)
 {
   if (check_solution_paths_ && !flag)
     contacts_publisher_.reset();
-  else if (!check_solution_paths_ && flag){
+  else if (!check_solution_paths_ && flag)
+  {
     custom_qos_profile_ = rmw_qos_profile_default;
     custom_qos_profile_.depth = 100;
-    contacts_publisher_ = node_->create_publisher<visualization_msgs::msg::MarkerArray>(MOTION_CONTACTS_TOPIC,custom_qos_profile_);
+    contacts_publisher_ =
+        node_->create_publisher<visualization_msgs::msg::MarkerArray>(MOTION_CONTACTS_TOPIC, custom_qos_profile_);
   }
   check_solution_paths_ = flag;
 }
@@ -225,7 +243,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
 
   if (!planner_instance_)
   {
-    RCLCPP_ERROR(node_->get_logger(),"No planning plugin loaded. Cannot plan.");
+    RCLCPP_ERROR(node_->get_logger(), "No planning plugin loaded. Cannot plan.");
     return false;
   }
 
@@ -238,9 +256,10 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
       if (!adapter_added_state_index.empty())
       {
         std::stringstream ss;
-        for (std::size_t i = 0; i < adapter_added_state_index.size(); ++i)
-          ss << adapter_added_state_index[i] << " ";
-        RCLCPP_INFO(node_->get_logger(),"Planning adapters have added states at index positions: [ %s]", ss.str().c_str());
+        for (std::size_t added_index : adapter_added_state_index)
+          ss << added_index << " ";
+        RCLCPP_INFO(node_->get_logger(), "Planning adapters have added states at index positions: [ %s]",
+                    ss.str().c_str());
       }
     }
     else
@@ -252,7 +271,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   }
   catch (std::exception& ex)
   {
-    RCLCPP_ERROR(node_->get_logger(),"Exception caught: '%s'", ex.what());
+    RCLCPP_ERROR(node_->get_logger(), "Exception caught: '%s'", ex.what());
     return false;
   }
   bool valid = true;
@@ -260,7 +279,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
   if (solved && res.trajectory_)
   {
     std::size_t state_count = res.trajectory_->getWayPointCount();
-    RCLCPP_DEBUG(node_->get_logger(),"Motion planner reported a solution path with %ld states", state_count);
+    RCLCPP_DEBUG(node_->get_logger(), "Motion planner reported a solution path with %ld states", state_count);
     if (check_solution_paths_)
     {
       std::vector<std::size_t> index;
@@ -272,8 +291,8 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         for (std::size_t i = 0; i < index.size() && !problem; ++i)
         {
           bool found = false;
-          for (std::size_t j = 0; j < adapter_added_state_index.size(); ++j)
-            if (index[i] == adapter_added_state_index[j])
+          for (std::size_t added_index : adapter_added_state_index)
+            if (index[i] == added_index)
             {
               found = true;
               break;
@@ -283,8 +302,9 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
         }
         if (problem)
         {
-          if (index.size() == 1 && index[0] == 0){  // ignore cases when the robot starts at invalid location
-            RCLCPP_DEBUG(node_->get_logger(),"It appears the robot is starting at an invalid state, but that is ok.");
+          if (index.size() == 1 && index[0] == 0)
+          {  // ignore cases when the robot starts at invalid location
+            RCLCPP_DEBUG(node_->get_logger(), "It appears the robot is starting at an invalid state, but that is ok.");
           }
           else
           {
@@ -293,18 +313,19 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
 
             // display error messages
             std::stringstream ss;
-            for (std::size_t i = 0; i < index.size(); ++i)
-              ss << index[i] << " ";
-            RCLCPP_ERROR(node_->get_logger(),"Computed path is not valid. Invalid states at index locations: [%s] out of "
-                          "%ld. Explanations follow in command line. Contacts are published on %s",
-                             ss.str(), state_count, contacts_publisher_->get_topic_name());
+            for (std::size_t it : index)
+              ss << it << " ";
+            RCLCPP_ERROR(node_->get_logger(),
+                         "Computed path is not valid. Invalid states at index locations: [%s] out of "
+                         "%ld. Explanations follow in command line. Contacts are published on %s",
+                         ss.str(), state_count, contacts_publisher_->get_topic_name());
 
             // call validity checks in verbose mode for the problematic states
             visualization_msgs::msg::MarkerArray arr;
-            for (std::size_t i = 0; i < index.size(); ++i)
+            for (std::size_t it : index)
             {
               // check validity with verbose on
-              const robot_state::RobotState& robot_state = res.trajectory_->getWayPoint(index[i]);
+              const robot_state::RobotState& robot_state = res.trajectory_->getWayPoint(it);
               planning_scene->isStateValid(robot_state, req.path_constraints, req.group_name, true);
 
               // compute the contacts if any
@@ -323,19 +344,22 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                 arr.markers.insert(arr.markers.end(), arr_i.markers.begin(), arr_i.markers.end());
               }
             }
-            RCLCPP_ERROR(node_->get_logger(),"Completed listing of explanations for invalid states.");
-            if (!arr.markers.empty()){
+            RCLCPP_ERROR(node_->get_logger(), "Completed listing of explanations for invalid states.");
+            if (!arr.markers.empty())
+            {
               contacts_publisher_->publish(arr);
             }
           }
         }
-        else{
-          RCLCPP_DEBUG(node_->get_logger(),"Planned path was found to be valid, except for states that were added by planning request "
-                    "adapters, but that is ok.");
+        else
+        {
+          RCLCPP_DEBUG(node_->get_logger(),
+                       "Planned path was found to be valid, except for states that were added by planning request "
+                       "adapters, but that is ok.");
         }
       }
       else
-        RCLCPP_DEBUG(node_->get_logger(),"Planned path was found to be valid when rechecked");
+        RCLCPP_DEBUG(node_->get_logger(), "Planned path was found to be valid when rechecked");
     }
   }
 
@@ -348,6 +372,24 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     res.trajectory_->getRobotTrajectoryMsg(disp.trajectory[0]);
     robot_state::robotStateToRobotStateMsg(res.trajectory_->getFirstWayPoint(), disp.trajectory_start);
     display_path_publisher_->publish(disp);
+  }
+
+  if (!solved)
+  {
+    // This should alert the user if planning failed because of contradicting constraints.
+    // Could be checked more thoroughly, but it is probably not worth going to that length.
+    bool stacked_constraints = false;
+    if (req.path_constraints.position_constraints.size() > 1 || req.path_constraints.orientation_constraints.size() > 1)
+      stacked_constraints = true;
+    for (auto constraint : req.goal_constraints)
+    {
+      if (constraint.position_constraints.size() > 1 || constraint.orientation_constraints.size() > 1)
+        stacked_constraints = true;
+    }
+    if (stacked_constraints)
+      ROS_WARN("More than one constraint is set. If your move_group does not have multiple end effectors/arms, this is "
+               "unusual. Are you using a move_group_interface and forgetting to call clearPoseTargets() or "
+               "equivalent?");
   }
 
   return solved && valid;

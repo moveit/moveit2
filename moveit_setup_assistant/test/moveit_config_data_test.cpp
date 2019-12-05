@@ -42,8 +42,8 @@
 #include <string>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <moveit_resources/config.h>
 #include <moveit/setup_assistant/tools/moveit_config_data.h>
+#include <ros/package.h>
 
 // This tests writing/parsing of ros_controller.yaml
 class MoveItConfigData : public testing::Test
@@ -51,7 +51,7 @@ class MoveItConfigData : public testing::Test
 protected:
   void SetUp() override
   {
-    boost::filesystem::path res_path(MOVEIT_TEST_RESOURCES_DIR);
+    boost::filesystem::path res_path(ros::package::getPath("moveit_resources"));
 
     srdf_model.reset(new srdf::Model());
     std::string xml_string;
@@ -79,7 +79,7 @@ protected:
 
 TEST_F(MoveItConfigData, ReadingControllers)
 {
-  boost::filesystem::path res_path(MOVEIT_TEST_RESOURCES_DIR);
+  boost::filesystem::path res_path(ros::package::getPath("moveit_resources"));
 
   // Contains all the configuration data for the setup assistant
   moveit_setup_assistant::MoveItConfigDataPtr config_data;
@@ -106,7 +106,7 @@ TEST_F(MoveItConfigData, ReadingControllers)
   // ros_controller.yaml written correctly
   EXPECT_EQ(config_data->outputROSControllersYAML(test_file), true);
 
-  // Reset MoveIt! config MoveItConfigData
+  // Reset MoveIt config MoveItConfigData
   config_data.reset(new moveit_setup_assistant::MoveItConfigData());
 
   // Initially no controllers

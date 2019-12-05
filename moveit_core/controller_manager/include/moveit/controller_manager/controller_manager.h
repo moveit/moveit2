@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_MOVEIT_CONTROLLER_MANAGER_
-#define MOVEIT_MOVEIT_CONTROLLER_MANAGER_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -43,7 +42,7 @@
 #include <moveit/macros/class_forward.h>
 #include "rclcpp/rclcpp.hpp"
 
-/// Namespace for the base class of a MoveIt! controller manager
+/// Namespace for the base class of a MoveIt controller manager
 namespace moveit_controller_manager
 {
 /// The reported execution status
@@ -102,7 +101,7 @@ private:
 
 MOVEIT_CLASS_FORWARD(MoveItControllerHandle)
 
-/** \brief MoveIt! sends commands to a controller via a handle that satisfies this interface. */
+/** \brief MoveIt sends commands to a controller via a handle that satisfies this interface. */
 class MoveItControllerHandle
 {
 public:
@@ -150,7 +149,7 @@ protected:
 
 MOVEIT_CLASS_FORWARD(MoveItControllerManager)
 
-/** @brief MoveIt! does not enforce how controllers are implemented.
+/** @brief MoveIt does not enforce how controllers are implemented.
     To make your controllers usable by MoveIt, this interface needs to be implemented.
     The main purpose of this interface is to expose the set of known controllers and
     potentially to allow activating and deactivating them, if multiple controllers are available.
@@ -158,7 +157,7 @@ MOVEIT_CLASS_FORWARD(MoveItControllerManager)
 class MoveItControllerManager
 {
 public:
-  /** \brief Each controller known to MoveIt! has a state. This
+  /** \brief Each controller known to MoveIt has a state. This
       structure describes that controller's state. */
   struct ControllerState
   {
@@ -166,12 +165,12 @@ public:
     {
     }
 
-    /** \brief A controller can be active or inactive. This means that MoveIt! could activate the controller when
+    /** \brief A controller can be active or inactive. This means that MoveIt could activate the controller when
        needed, and de-activate controllers that overlap (control the same set of joints) */
     bool active_;
 
     /** \brief It is often the case that multiple controllers could be used to execute a motion. Marking a controller as
-       default makes MoveIt! prefer this controller when multiple options are available. */
+       default makes MoveIt prefer this controller when multiple options are available. */
     bool default_;
   };
 
@@ -212,5 +211,3 @@ public:
                                  const std::vector<std::string>& deactivate) = 0;
 };
 }
-
-#endif

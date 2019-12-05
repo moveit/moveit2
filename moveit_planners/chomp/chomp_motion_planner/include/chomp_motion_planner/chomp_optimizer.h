@@ -34,8 +34,7 @@
 
 /* Author: Mrinal Kalakrishnan */
 
-#ifndef CHOMP_OPTIMIZER_H_
-#define CHOMP_OPTIMIZER_H_
+#pragma once
 
 #include <chomp_motion_planner/chomp_parameters.h>
 #include <chomp_motion_planner/chomp_trajectory.h>
@@ -43,8 +42,7 @@
 #include <chomp_motion_planner/multivariate_gaussian.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/planning_scene/planning_scene.h>
-#include <moveit/collision_distance_field/collision_robot_hybrid.h>
-#include <moveit/collision_distance_field/collision_world_hybrid.h>
+#include <moveit/collision_distance_field/collision_env_hybrid.h>
 
 #include <Eigen/Core>
 #include <Eigen/StdVector>
@@ -86,25 +84,21 @@ private:
   inline double getPotential(double field_distance, double radius, double clearence)
   {
     double d = field_distance - radius;
-    double potential = 0.0;
 
-    // three cases below:
-    if (d >= clearence)
+    if (d >= clearence)  // everything is fine
     {
-      potential = 0.0;
+      return 0.0;
     }
-    else if (d >= 0.0)
+    else if (d >= 0.0)  // transition phase, no collision yet
     {
-      double diff = (d - clearence);
-      double gradient_magnitude = diff * clearence;  // (diff / clearance)
-      potential = 0.5 * gradient_magnitude * diff;
+      const double diff = (d - clearence);
+      const double gradient_magnitude = diff / clearence;
+      return 0.5 * gradient_magnitude * diff;  // 0.5 * (d - clearance)^2 / clearance
     }
-    else  // if d < 0.0
+    else  // d < 0.0: collision
     {
-      potential = -d + 0.5 * clearence;
+      return -d + 0.5 * clearence;  // linearly increase, starting from 0.5 * clearance
     }
-
-    return potential;
   }
   template <typename Derived>
   void getJacobian(int trajectoryPoint, Eigen::Vector3d& collision_point_pos, std::string& jointName,
@@ -136,8 +130,7 @@ private:
   moveit::core::RobotState state_;
   moveit::core::RobotState start_state_;
   const moveit::core::JointModelGroup* joint_model_group_;
-  const collision_detection::CollisionWorldHybrid* hy_world_;
-  const collision_detection::CollisionRobotHybrid* hy_robot_;
+  const collision_detection::CollisionEnvHybrid* hy_env_;
 
   std::vector<ChompCost> joint_costs_;
   collision_detection::GroupStateRepresentationPtr gsr_;
@@ -224,5 +217,3 @@ private:
   bool isCurrentTrajectoryMeshToMeshCollisionFree() const;
 };
 }
-
-#endif /* CHOMP_OPTIMIZER_H_ */

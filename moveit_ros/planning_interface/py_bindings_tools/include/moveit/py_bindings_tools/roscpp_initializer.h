@@ -34,15 +34,14 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_PY_BINDINGS_TOOLS_ROSCPP_INITIALIZER_
-#define MOVEIT_PY_BINDINGS_TOOLS_ROSCPP_INITIALIZER_
+#pragma once
 
 #include <boost/python.hpp>
 #include <string>
 
 namespace moveit
 {
-/** \brief Tools for creating python bindings for MoveIt! */
+/** \brief Tools for creating python bindings for MoveIt */
 namespace py_bindings_tools
 {
 /** \brief The constructor of this class ensures that ros::init() has
@@ -73,5 +72,3 @@ void roscpp_init();
 void roscpp_shutdown();
 }
 }
-
-#endif

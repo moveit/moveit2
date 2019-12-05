@@ -37,26 +37,32 @@
 #include "get_planning_scene_service_capability.h"
 #include <moveit/move_group/capability_names.h>
 
-move_group::MoveGroupGetPlanningSceneService::MoveGroupGetPlanningSceneService()
-  : MoveGroupCapability("GetPlanningSceneService")
+namespace move_group
+{
+MoveGroupGetPlanningSceneService::MoveGroupGetPlanningSceneService() : MoveGroupCapability("GetPlanningSceneService")
 {
 }
 
-void move_group::MoveGroupGetPlanningSceneService::initialize()
+void MoveGroupGetPlanningSceneService::initialize()
 {
   get_scene_service_ = root_node_handle_.advertiseService(
       GET_PLANNING_SCENE_SERVICE_NAME, &MoveGroupGetPlanningSceneService::getPlanningSceneService, this);
 }
 
-bool move_group::MoveGroupGetPlanningSceneService::getPlanningSceneService(moveit_msgs::srv::GetPlanningScene::Request& req,
-                                                                           moveit_msgs::srv::GetPlanningScene::Response& res)
+bool MoveGroupGetPlanningSceneService::getPlanningSceneService(moveit_msgs::srv::GetPlanningScene::Request& req,
+                                                               moveit_msgs::srv::GetPlanningScene::Response& res)
 {
   if (req.components.components & moveit_msgs::msg::PlanningSceneComponents::TRANSFORMS)
     context_->planning_scene_monitor_->updateFrameTransforms();
   planning_scene_monitor::LockedPlanningSceneRO ps(context_->planning_scene_monitor_);
-  ps->getPlanningSceneMsg(res.scene, req.components);
+
+  moveit_msgs::msg::PlanningSceneComponents all_components;
+  all_components.components = UINT_MAX;  // Return all scene components if nothing is specified.
+  ps->getPlanningSceneMsg(res.scene, req.components.components ? req.components : all_components);
+
   return true;
 }
+}  // namespace move_group
 
 #include <class_loader/class_loader.hpp>
 CLASS_LOADER_REGISTER_CLASS(move_group::MoveGroupGetPlanningSceneService, move_group::MoveGroupCapability)

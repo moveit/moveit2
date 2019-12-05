@@ -34,8 +34,7 @@
 
 /* Author: Sachin Chitta */
 
-#ifndef PR2_ARM_IK_H
-#define PR2_ARM_IK_H
+#pragma once
 
 #include <urdf_model/model.h>
 #include <urdf/model.h>
@@ -191,4 +190,3 @@ private:
   std::vector<bool> continuous_joint_;
 };
 }
-#endif  // PR2_ARM_IK_H

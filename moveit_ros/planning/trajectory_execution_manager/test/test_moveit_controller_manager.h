@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef TEST_MOVEIT_CONTROLLER_MANAGER_
-#define TEST_MOVEIT_CONTROLLER_MANAGER_
+#pragma once
 
 #include <moveit/controller_manager/controller_manager.h>
 
@@ -48,7 +47,7 @@ public:
   {
   }
 
-  bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory) override
+  bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& /*trajectory*/) override
   {
     return true;
   }
@@ -60,6 +59,7 @@ public:
 
   bool waitForExecution(const ros::Duration& timeout = ros::Duration(0)) override
   {
+    (void)timeout;
     return false;
   }
 
@@ -160,4 +160,3 @@ protected:
   std::map<std::string, std::vector<std::string> > controller_joints_;
 };
 }
-#endif

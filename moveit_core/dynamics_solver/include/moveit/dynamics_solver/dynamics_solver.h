@@ -34,8 +34,7 @@
 
 /* Author: Sachin Chitta */
 
-#ifndef MOVEIT_DYNAMICS_SOLVER_DYNAMICS_SOLVER_
-#define MOVEIT_DYNAMICS_SOLVER_DYNAMICS_SOLVER_
+#pragma once
 
 // KDL
 #include <kdl/chain.hpp>
@@ -150,4 +149,3 @@ private:
   double gravity_;  // Norm of the gravity vector passed in initialize()
 };
 }
-#endif

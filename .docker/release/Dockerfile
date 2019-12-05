@@ -1,6 +1,5 @@
 # moveit/moveit2:dashing-release
 # Full debian-based install of MoveIt using apt-get
-# TODO(mlautman): Add this Dockerfile to DockerHub once the moveit2 debians are released
 
 FROM ros:dashing-ros-base-bionic
 MAINTAINER Dave Coleman dave@picknik.ai

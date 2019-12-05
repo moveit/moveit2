@@ -48,6 +48,10 @@ public:
   {
   }
 
+  void initialize(const ros::NodeHandle& /*nh*/) override
+  {
+  }
+
   std::string getDescription() const override
   {
     return "Add Time Parameterization";
@@ -55,7 +59,7 @@ public:
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
-                    std::vector<std::size_t>& added_path_index) const override
+                    std::vector<std::size_t>& /*added_path_index*/) const override
   {
     bool result = planner(planning_scene, req, res);
     if (result && res.trajectory_)
@@ -63,7 +67,10 @@ public:
       ROS_DEBUG("Running '%s'", getDescription().c_str());
       if (!time_param_.computeTimeStamps(*res.trajectory_, req.max_velocity_scaling_factor,
                                          req.max_acceleration_scaling_factor))
-        ROS_WARN("Time parametrization for the solution path failed.");
+      {
+        ROS_ERROR("Time parametrization for the solution path failed.");
+        result = false;
+      }
     }
 
     return result;

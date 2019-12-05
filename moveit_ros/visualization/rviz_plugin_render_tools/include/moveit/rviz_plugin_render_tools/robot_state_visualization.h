@@ -34,13 +34,16 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_PLANNING_SCENE_RVIZ_PLUGIN_ROBOT_STATE_VISUALIZATION_
-#define MOVEIT_PLANNING_SCENE_RVIZ_PLUGIN_ROBOT_STATE_VISUALIZATION_
+#pragma once
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/rviz_plugin_render_tools/octomap_render.h>
+#include <moveit/macros/diagnostics.h>
+DIAGNOSTIC_PUSH
+SILENT_UNUSED_PARAM
 #include <rviz/robot/robot.h>
+DIAGNOSTIC_POP
 
 namespace moveit_rviz_plugin
 {
@@ -69,6 +72,13 @@ public:
               const std_msgs::ColorRGBA& default_attached_object_color,
               const std::map<std::string, std_msgs::ColorRGBA>& color_map);
   void setDefaultAttachedObjectColor(const std_msgs::ColorRGBA& default_attached_object_color);
+  /// update color of all attached object shapes
+  void updateAttachedObjectColors(const std_msgs::ColorRGBA& attached_object_color);
+
+  bool isVisible() const
+  {
+    return visible_;
+  }
 
   /**
    * \brief Set the robot as a whole to be visible or not
@@ -105,5 +115,3 @@ private:
   bool collision_visible_;
 };
 }
-
-#endif

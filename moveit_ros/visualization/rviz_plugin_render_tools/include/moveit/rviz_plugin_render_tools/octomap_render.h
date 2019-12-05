@@ -34,13 +34,15 @@
 
 /* Author: Julius Kammerl */
 
-#ifndef MOVEIT_VISUALIZATION_SCENE_DISPLAY_RVIZ_OCTOMAP_RENDER_
-#define MOVEIT_VISUALIZATION_SCENE_DISPLAY_RVIZ_OCTOMAP_RENDER_
+#pragma once
 
 #include <memory>
 #include <vector>
+#include <moveit/macros/diagnostics.h>
+DIAGNOSTIC_PUSH
+SILENT_UNUSED_PARAM
 #include <rviz/ogre_helpers/point_cloud.h>
-
+DIAGNOSTIC_POP
 #include <moveit/rviz_plugin_render_tools/octomap_render.h>
 
 namespace octomap
@@ -100,4 +102,3 @@ private:
   std::size_t octree_depth_;
 };
 }
-#endif

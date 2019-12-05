@@ -51,7 +51,7 @@ Transforms::Transforms(const std::string& target_frame) : target_frame_(target_f
   boost::trim(target_frame_);
   if (target_frame_.empty())
   {
-    RCLCPP_ERROR(LOGGER, "The target frame for MoveIt! Transforms cannot be empty.");
+    RCLCPP_ERROR(LOGGER, "The target frame for MoveIt Transforms cannot be empty.");
   }
   else
   {
@@ -143,8 +143,8 @@ void Transforms::setTransform(const geometry_msgs::msg::TransformStamped& transf
 
 void Transforms::setTransforms(const std::vector<geometry_msgs::msg::TransformStamped>& transforms)
 {
-  for (std::size_t i = 0; i < transforms.size(); ++i)
-    setTransform(transforms[i]);
+  for (const geometry_msgs::msg::TransformStamped& transform : transforms)
+    setTransform(transform);
 }
 
 void Transforms::copyTransforms(std::vector<geometry_msgs::msg::TransformStamped>& transforms) const

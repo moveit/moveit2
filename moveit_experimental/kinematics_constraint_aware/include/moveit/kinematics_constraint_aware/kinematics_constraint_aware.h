@@ -35,8 +35,7 @@
 * Author: Sachin Chitta
 *********************************************************************/
 
-#ifndef MOVEIT_KINEMATICS_CONSTRAINT_AWARE_
-#define MOVEIT_KINEMATICS_CONSTRAINT_AWARE_
+#pragma once
 
 // System
 #include <boost/function.hpp>
@@ -51,7 +50,7 @@
 // Plugin
 #include <moveit/kinematics_base/kinematics_base.h>
 
-// MoveIt!
+// MoveIt
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/planning_scene/planning_scene.h>
@@ -141,5 +140,3 @@ private:
   unsigned int ik_attempts_;
 };
 }
-
-#endif

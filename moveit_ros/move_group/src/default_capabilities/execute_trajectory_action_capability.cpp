@@ -58,7 +58,8 @@ void MoveGroupExecuteTrajectoryAction::initialize()
   execute_action_server_->start();
 }
 
-void MoveGroupExecuteTrajectoryAction::executePathCallback(const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal)
+void MoveGroupExecuteTrajectoryAction::executePathCallback(
+    const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal)
 {
   moveit_msgs::action::ExecuteTrajectoryResult action_res;
   if (!context_->trajectory_execution_manager_)
@@ -91,7 +92,7 @@ void MoveGroupExecuteTrajectoryAction::executePathCallback(const moveit_msgs::ac
 void MoveGroupExecuteTrajectoryAction::executePath(const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal,
                                                    moveit_msgs::action::ExecuteTrajectoryResult& action_res)
 {
-  ROS_INFO_NAMED(capability_name_, "Execution request received");
+  ROS_INFO_NAMED(getName(), "Execution request received");
 
   context_->trajectory_execution_manager_->clear();
   if (context_->trajectory_execution_manager_->push(goal->trajectory))
@@ -115,7 +116,7 @@ void MoveGroupExecuteTrajectoryAction::executePath(const moveit_msgs::action::Ex
     {
       action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
     }
-    ROS_INFO_STREAM_NAMED(capability_name_, "Execution completed: " << status.asString());
+    ROS_INFO_STREAM_NAMED(getName(), "Execution completed: " << status.asString());
   }
   else
   {

@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of MoveIt! nor the names of its
+ *   * Neither the name of MoveIt nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -35,8 +35,7 @@
 /* Author: Bryce Willey */
 /** \brief convenience functions and classes used for making simple robot models for testing. */
 
-#ifndef MOVEIT_CORE_UTILS_TEST_
-#define MOVEIT_CORE_UTILS_TEST_
+#pragma once
 
 #include <urdf_parser/urdf_parser.h>
 #include <urdf_model/model.h>
@@ -45,7 +44,6 @@
 #include <urdf/model.h>
 #include <fstream>
 #include <boost/filesystem/path.hpp>
-#include <moveit_resources/config.h>
 #include <moveit/robot_model/robot_model.h>
 #include <geometry_msgs/msg/pose.hpp>
 
@@ -198,5 +196,3 @@ private:
 };
 }
 }
-
-#endif

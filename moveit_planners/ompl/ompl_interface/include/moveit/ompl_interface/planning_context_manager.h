@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_OMPL_INTERFACE_PLANNING_CONTEXT_MANAGER_
-#define MOVEIT_OMPL_INTERFACE_PLANNING_CONTEXT_MANAGER_
+#pragma once
 
 #include <moveit/ompl_interface/model_based_planning_context.h>
 #include <moveit/ompl_interface/parameterization/model_based_state_space_factory.h>
@@ -141,12 +140,10 @@ public:
     return robot_model_;
   }
 
-  ModelBasedPlanningContextPtr getPlanningContext(const std::string& config,
-                                                  const std::string& factory_type = "") const;
-
   ModelBasedPlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                   const planning_interface::MotionPlanRequest& req,
-                                                  moveit_msgs::msg::MoveItErrorCodes& error_code) const;
+                                                  moveit_msgs::msg::MoveItErrorCodes& error_code,
+                                                  const ros::NodeHandle& nh, bool use_constraints_approximations) const;
 
   void registerPlannerAllocator(const std::string& planner_id, const ConfiguredPlannerAllocator& pa)
   {
@@ -229,5 +226,3 @@ private:
   CachedContextsPtr cached_contexts_;
 };
 }
-
-#endif

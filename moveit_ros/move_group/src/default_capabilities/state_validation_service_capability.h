@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_MOVE_GROUP_STATE_VALIDATION_SERVICE_CAPABILITY_
-#define MOVEIT_MOVE_GROUP_STATE_VALIDATION_SERVICE_CAPABILITY_
+#pragma once
 
 #include <moveit/move_group/move_group_capability.h>
 #include <moveit_msgs/GetStateValidity.h>
@@ -50,10 +49,9 @@ public:
   void initialize() override;
 
 private:
-  bool computeService(moveit_msgs::srv::GetStateValidity::Request& req, moveit_msgs::srv::GetStateValidity::Response& res);
+  bool computeService(moveit_msgs::srv::GetStateValidity::Request& req,
+                      moveit_msgs::srv::GetStateValidity::Response& res);
 
   ros::ServiceServer validity_service_;
 };
 }
-
-#endif

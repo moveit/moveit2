@@ -63,7 +63,7 @@ SimulationWidget::SimulationWidget(QWidget* parent, const MoveItConfigDataPtr& c
 
   HeaderWidget* header =
       new HeaderWidget("Simulate With Gazebo", "The following tool will auto-generate the URDF changes needed "
-                                               "for Gazebo compatibility with ROSControl and MoveIt!. The "
+                                               "for Gazebo compatibility with ROSControl and MoveIt. The "
                                                "needed changes are shown in green.",
                        this);
   layout->addWidget(header);
@@ -218,7 +218,7 @@ void SimulationWidget::generateURDFClick()
 // ******************************************************************************************
 // Called the copy to clipboard button is clicked
 // ******************************************************************************************
-void SimulationWidget::copyURDF(const QString& link)
+void SimulationWidget::copyURDF(const QString& /*link*/)
 {
   simulation_text_->selectAll();
   simulation_text_->copy();

@@ -35,8 +35,11 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/warehouse/moveit_message_storage.h>
+#include <moveit/macros/diagnostics.h>
+DIAGNOSTIC_PUSH
+SILENT_UNUSED_PARAM
 #include <warehouse_ros/database_loader.h>
-//#include <warehouse_ros_mongo/database_connection.h>
+DIAGNOSTIC_PUSH
 #include <boost/regex.hpp>
 #include <memory>
 #include <utility>
@@ -53,11 +56,11 @@ void moveit_warehouse::MoveItMessageStorage::filterNames(const std::string& rege
   {
     std::vector<std::string> fnames;
     boost::regex r(regex);
-    for (std::size_t i = 0; i < names.size(); ++i)
+    for (std::string& name : names)
     {
       boost::cmatch match;
-      if (boost::regex_match(names[i].c_str(), match, r))
-        fnames.push_back(names[i]);
+      if (boost::regex_match(name.c_str(), match, r))
+        fnames.push_back(name);
     }
     names.swap(fnames);
   }

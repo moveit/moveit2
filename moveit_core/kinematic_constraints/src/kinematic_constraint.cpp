@@ -38,8 +38,7 @@
 #include <geometric_shapes/body_operations.h>
 #include <geometric_shapes/shape_operations.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit/collision_detection_fcl/collision_robot_fcl.h>
-#include <moveit/collision_detection_fcl/collision_world_fcl.h>
+#include <moveit/collision_detection_fcl/collision_env_fcl.h>
 #include <boost/math/constants/constants.hpp>
 #include <tf2_eigen/tf2_eigen.h>
 #include <boost/bind.hpp>
@@ -646,7 +645,7 @@ void OrientationConstraint::print(std::ostream& out) const
 }
 
 VisibilityConstraint::VisibilityConstraint(const robot_model::RobotModelConstPtr& model)
-  : KinematicConstraint(model), collision_robot_(new collision_detection::CollisionRobotFCL(model))
+  : KinematicConstraint(model), collision_env_(new collision_detection::CollisionEnvFCL(model))
 {
   type_ = VISIBILITY_CONSTRAINT;
 }
@@ -705,8 +704,8 @@ bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstrain
     target_frame_id_ = tf.getTargetFrame();
     mobile_target_frame_ = false;
     // transform won't change, so apply it now
-    for (std::size_t i = 0; i < points_.size(); ++i)
-      points_[i] = target_pose_ * points_[i];
+    for (Eigen::Vector3d& point : points_)
+      point = target_pose_ * point;
   }
   else
   {
@@ -986,8 +985,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const robot_state::Robot
     return ConstraintEvaluationResult(false, 0.0);
 
   // add the visibility cone as an object
-  collision_detection::CollisionWorldFCL collision_world;
-  collision_world.getWorld()->addToObject("cone", shapes::ShapeConstPtr(m), Eigen::Isometry3d::Identity());
+  collision_env_->getWorld()->addToObject("cone", shapes::ShapeConstPtr(m), Eigen::Isometry3d::Identity());
 
   // check for collisions between the robot and the cone
   collision_detection::CollisionRequest req;
@@ -1000,7 +998,7 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const robot_state::Robot
   req.contacts = true;
   req.verbose = verbose;
   req.max_contacts = 1;
-  collision_world.checkRobotCollision(req, res, *collision_robot_, state, acm);
+  collision_env_->checkRobotCollision(req, res, state, acm);
 
   if (verbose)
   {
@@ -1009,6 +1007,8 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const robot_state::Robot
     RCLCPP_INFO(LOGGER, "Visibility constraint %ssatisfied. Visibility cone approximation:\n %s",
                 res.collision ? "not " : "", ss.str().c_str());
   }
+
+  collision_env_->getWorld()->removeObject("cone");
 
   return ConstraintEvaluationResult(!res.collision, res.collision ? res.contacts.begin()->second.front().depth : 0.0);
 }
@@ -1062,14 +1062,14 @@ void KinematicConstraintSet::clear()
 bool KinematicConstraintSet::add(const std::vector<moveit_msgs::msg::JointConstraint>& jc)
 {
   bool result = true;
-  for (unsigned int i = 0; i < jc.size(); ++i)
+  for (const moveit_msgs::msg::JointConstraint& joint_constraint : jc)
   {
     JointConstraint* ev = new JointConstraint(robot_model_);
-    bool u = ev->configure(jc[i]);
+    bool u = ev->configure(joint_constraint);
     result = result && u;
     kinematic_constraints_.push_back(KinematicConstraintPtr(ev));
-    joint_constraints_.push_back(jc[i]);
-    all_constraints_.joint_constraints.push_back(jc[i]);
+    joint_constraints_.push_back(joint_constraint);
+    all_constraints_.joint_constraints.push_back(joint_constraint);
   }
   return result;
 }
@@ -1078,14 +1078,14 @@ bool KinematicConstraintSet::add(const std::vector<moveit_msgs::msg::PositionCon
                                  const robot_state::Transforms& tf)
 {
   bool result = true;
-  for (unsigned int i = 0; i < pc.size(); ++i)
+  for (const moveit_msgs::msg::PositionConstraint& position_constraint : pc)
   {
     PositionConstraint* ev = new PositionConstraint(robot_model_);
-    bool u = ev->configure(pc[i], tf);
+    bool u = ev->configure(position_constraint, tf);
     result = result && u;
     kinematic_constraints_.push_back(KinematicConstraintPtr(ev));
-    position_constraints_.push_back(pc[i]);
-    all_constraints_.position_constraints.push_back(pc[i]);
+    position_constraints_.push_back(position_constraint);
+    all_constraints_.position_constraints.push_back(position_constraint);
   }
   return result;
 }
@@ -1094,14 +1094,14 @@ bool KinematicConstraintSet::add(const std::vector<moveit_msgs::msg::Orientation
                                  const robot_state::Transforms& tf)
 {
   bool result = true;
-  for (unsigned int i = 0; i < oc.size(); ++i)
+  for (const moveit_msgs::msg::OrientationConstraint& orientation_constraint : oc)
   {
     OrientationConstraint* ev = new OrientationConstraint(robot_model_);
-    bool u = ev->configure(oc[i], tf);
+    bool u = ev->configure(orientation_constraint, tf);
     result = result && u;
     kinematic_constraints_.push_back(KinematicConstraintPtr(ev));
-    orientation_constraints_.push_back(oc[i]);
-    all_constraints_.orientation_constraints.push_back(oc[i]);
+    orientation_constraints_.push_back(orientation_constraint);
+    all_constraints_.orientation_constraints.push_back(orientation_constraint);
   }
   return result;
 }
@@ -1110,14 +1110,14 @@ bool KinematicConstraintSet::add(const std::vector<moveit_msgs::msg::VisibilityC
                                  const robot_state::Transforms& tf)
 {
   bool result = true;
-  for (unsigned int i = 0; i < vc.size(); ++i)
+  for (const moveit_msgs::msg::VisibilityConstraint& visibility_constraint : vc)
   {
     VisibilityConstraint* ev = new VisibilityConstraint(robot_model_);
-    bool u = ev->configure(vc[i], tf);
+    bool u = ev->configure(visibility_constraint, tf);
     result = result && u;
     kinematic_constraints_.push_back(KinematicConstraintPtr(ev));
-    visibility_constraints_.push_back(vc[i]);
-    all_constraints_.visibility_constraints.push_back(vc[i]);
+    visibility_constraints_.push_back(visibility_constraint);
+    all_constraints_.visibility_constraints.push_back(visibility_constraint);
   }
   return result;
 }
@@ -1134,9 +1134,9 @@ bool KinematicConstraintSet::add(const moveit_msgs::msg::Constraints& c, const r
 ConstraintEvaluationResult KinematicConstraintSet::decide(const robot_state::RobotState& state, bool verbose) const
 {
   ConstraintEvaluationResult res(true, 0.0);
-  for (unsigned int i = 0; i < kinematic_constraints_.size(); ++i)
+  for (const KinematicConstraintPtr& kinematic_constraint : kinematic_constraints_)
   {
-    ConstraintEvaluationResult r = kinematic_constraints_[i]->decide(state, verbose);
+    ConstraintEvaluationResult r = kinematic_constraint->decide(state, verbose);
     if (!r.satisfied)
       res.satisfied = false;
     res.distance += r.distance;
@@ -1163,27 +1163,27 @@ ConstraintEvaluationResult KinematicConstraintSet::decide(const robot_state::Rob
 void KinematicConstraintSet::print(std::ostream& out) const
 {
   out << kinematic_constraints_.size() << " kinematic constraints" << std::endl;
-  for (unsigned int i = 0; i < kinematic_constraints_.size(); ++i)
-    kinematic_constraints_[i]->print(out);
+  for (const KinematicConstraintPtr& kinematic_constraint : kinematic_constraints_)
+    kinematic_constraint->print(out);
 }
 
 bool KinematicConstraintSet::equal(const KinematicConstraintSet& other, double margin) const
 {
   // each constraint in this matches some in the other
-  for (unsigned int i = 0; i < kinematic_constraints_.size(); ++i)
+  for (const KinematicConstraintPtr& kinematic_constraint : kinematic_constraints_)
   {
     bool found = false;
     for (unsigned int j = 0; !found && j < other.kinematic_constraints_.size(); ++j)
-      found = kinematic_constraints_[i]->equal(*other.kinematic_constraints_[j], margin);
+      found = kinematic_constraint->equal(*other.kinematic_constraints_[j], margin);
     if (!found)
       return false;
   }
   // each constraint in the other matches some constraint in this
-  for (unsigned int i = 0; i < other.kinematic_constraints_.size(); ++i)
+  for (const KinematicConstraintPtr& kinematic_constraint : other.kinematic_constraints_)
   {
     bool found = false;
     for (unsigned int j = 0; !found && j < kinematic_constraints_.size(); ++j)
-      found = other.kinematic_constraints_[i]->equal(*kinematic_constraints_[j], margin);
+      found = kinematic_constraint->equal(*kinematic_constraints_[j], margin);
     if (!found)
       return false;
   }

@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_TRANSFORMS_
-#define MOVEIT_TRANSFORMS_
+#pragma once
 
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/pose.hpp>
@@ -201,5 +200,3 @@ protected:
 };
 }
 }
-
-#endif

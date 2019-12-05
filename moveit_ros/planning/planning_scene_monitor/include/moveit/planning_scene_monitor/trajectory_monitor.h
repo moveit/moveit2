@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_PLANNING_SCENE_MONITOR_TRAJECTORY_MONITOR_
-#define MOVEIT_PLANNING_SCENE_MONITOR_TRAJECTORY_MONITOR_
+#pragma once
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
@@ -57,7 +56,7 @@ class TrajectoryMonitor
 public:
   /** @brief Constructor.
    */
-  TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, double sampling_frequency = 5.0);
+  TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, double sampling_frequency = 0.0);
 
   ~TrajectoryMonitor();
 
@@ -107,5 +106,3 @@ private:
   TrajectoryStateAddedCallback state_add_callback_;
 };
 }
-
-#endif

@@ -131,7 +131,7 @@ public:
     const planning_interface::PlannerConfigurationMap& pconfig = ompl_interface_->getPlannerConfigurations();
     algs.clear();
     algs.reserve(pconfig.size());
-    for (const std::pair<std::string, planning_interface::PlannerConfigurationSettings>& config : pconfig)
+    for (const std::pair<const std::string, planning_interface::PlannerConfigurationSettings>& config : pconfig)
       algs.push_back(config.first);
   }
 
@@ -143,9 +143,10 @@ public:
     PlannerManager::setPlannerConfigurations(ompl_interface_->getPlannerConfigurations());
   }
 
-  planning_interface::PlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                            const planning_interface::MotionPlanRequest& req,
-                                                            moveit_msgs::msg::MoveItErrorCodes& error_code) const override
+  planning_interface::PlanningContextPtr
+  getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                     const planning_interface::MotionPlanRequest& req,
+                     moveit_msgs::msg::MoveItErrorCodes& error_code) const override
   {
     return ompl_interface_->getPlanningContext(planning_scene, req, error_code);
   }
@@ -259,7 +260,7 @@ private:
   }
   */
 
-  void dynamicReconfigureCallback(OMPLDynamicReconfigureConfig& config, uint32_t level)
+  void dynamicReconfigureCallback(OMPLDynamicReconfigureConfig& config, uint32_t /*level*/)
   {
     if (config.link_for_exploration_tree.empty() && !planner_data_link_name_.empty())
     {

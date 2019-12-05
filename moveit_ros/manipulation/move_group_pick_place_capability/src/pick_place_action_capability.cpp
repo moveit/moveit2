@@ -86,8 +86,8 @@ void move_group::MoveGroupPickPlaceAction::startPlaceLookCallback()
   setPlaceState(LOOK);
 }
 
-void move_group::MoveGroupPickPlaceAction::executePickupCallbackPlanOnly(const moveit_msgs::action::PickupGoalConstPtr& goal,
-                                                                         moveit_msgs::action::PickupResult& action_res)
+void move_group::MoveGroupPickPlaceAction::executePickupCallbackPlanOnly(
+    const moveit_msgs::action::PickupGoalConstPtr& goal, moveit_msgs::action::PickupResult& action_res)
 {
   pick_place::PickPlanPtr plan;
   try
@@ -126,8 +126,8 @@ void move_group::MoveGroupPickPlaceAction::executePickupCallbackPlanOnly(const m
   }
 }
 
-void move_group::MoveGroupPickPlaceAction::executePlaceCallbackPlanOnly(const moveit_msgs::action::PlaceGoalConstPtr& goal,
-                                                                        moveit_msgs::action::PlaceResult& action_res)
+void move_group::MoveGroupPickPlaceAction::executePlaceCallbackPlanOnly(
+    const moveit_msgs::action::PlaceGoalConstPtr& goal, moveit_msgs::action::PlaceResult& action_res)
 {
   pick_place::PlacePlanPtr plan;
   try
@@ -313,7 +313,8 @@ void move_group::MoveGroupPickPlaceAction::executePlaceCallbackPlanAndExecute(
   action_res.error_code = plan.error_code_;
 }
 
-void move_group::MoveGroupPickPlaceAction::executePickupCallback(const moveit_msgs::action::PickupGoalConstPtr& input_goal)
+void move_group::MoveGroupPickPlaceAction::executePickupCallback(
+    const moveit_msgs::action::PickupGoalConstPtr& input_goal)
 {
   setPickupState(PLANNING);
 

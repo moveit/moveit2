@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan, Acorn Pooley, Sachin Chitta */
 
-#ifndef MOVEIT_COLLISION_DETECTION_WORLD_
-#define MOVEIT_COLLISION_DETECTION_WORLD_
+#pragma once
 
 #include <moveit/macros/class_forward.h>
 #include <string>
@@ -45,6 +44,7 @@
 #include <boost/function.hpp>
 #include <Eigen/Geometry>
 #include <eigen_stl_containers/eigen_stl_vector_container.h>
+#include <moveit/transforms/transforms.h>
 
 namespace shapes
 {
@@ -104,13 +104,19 @@ public:
      *
      * @copydetails shapes_ */
     EigenSTL::vector_Isometry3d shape_poses_;
+
+    /** \brief Transforms to subframes on the object.
+     *  Use them to define points of interest on an object to plan with
+     *  (e.g. screwdriver/tip, kettle/spout, mug/base).
+     */
+    moveit::core::FixedTransformsMap subframe_poses_;
   };
 
   /** \brief Get the list of Object ids */
   std::vector<std::string> getObjectIds() const;
 
   /** \brief Get a particular object */
-  ObjectConstPtr getObject(const std::string& id) const;
+  ObjectConstPtr getObject(const std::string& object_id) const;
 
   /** iterator over the objects in the world. */
   typedef std::map<std::string, ObjectPtr>::const_iterator const_iterator;
@@ -136,28 +142,43 @@ public:
   }
 
   /** \brief Check if a particular object exists in the collision world*/
-  bool hasObject(const std::string& id) const;
+  bool hasObject(const std::string& object_id) const;
+
+  /** \brief Check if an object or subframe with given name exists in the collision world.
+   * A subframe name needs to be prefixed with the object's name separated by a slash. */
+  bool knowsTransform(const std::string& name) const;
+
+  /** \brief Get the transform to an object or subframe with given name.
+   * If name does not exist, a std::runtime_error is thrown.
+   * A subframe name needs to be prefixed with the object's name separated by a slash. */
+  const Eigen::Isometry3d& getTransform(const std::string& name) const;
+
+  /** \brief Get the transform to an object or subframe with given name.
+   * If name does not exist, returns an identity transform and sets frame_found to false.
+   * A subframe name needs to be prefixed with the object's name separated by a slash. */
+  const Eigen::Isometry3d& getTransform(const std::string& name, bool& frame_found) const;
 
   /** \brief Add shapes to an object in the map.
    * This function makes repeated calls to addToObjectInternal() to add the
    * shapes one by one.
    *  \note This function does NOT call the addToObject() variant that takes
    * a single shape and a single pose as input. */
-  void addToObject(const std::string& id, const std::vector<shapes::ShapeConstPtr>& shapes,
+  void addToObject(const std::string& object_id, const std::vector<shapes::ShapeConstPtr>& shapes,
                    const EigenSTL::vector_Isometry3d& poses);
 
   /** \brief Add a shape to an object.
    * If the object already exists, this call will add the shape to the object
    * at the specified pose. Otherwise, the object is created and the
    * specified shape is added. This calls addToObjectInternal(). */
-  void addToObject(const std::string& id, const shapes::ShapeConstPtr& shape, const Eigen::Isometry3d& pose);
+  void addToObject(const std::string& object_id, const shapes::ShapeConstPtr& shape, const Eigen::Isometry3d& pose);
 
   /** \brief Update the pose of a shape in an object. Shape equality is
    * verified by comparing pointers. Returns true on success. */
-  bool moveShapeInObject(const std::string& id, const shapes::ShapeConstPtr& shape, const Eigen::Isometry3d& pose);
+  bool moveShapeInObject(const std::string& object_id, const shapes::ShapeConstPtr& shape,
+                         const Eigen::Isometry3d& pose);
 
   /** \brief Move all shapes in an object according to the given transform specified in world frame */
-  bool moveObject(const std::string& id, const Eigen::Isometry3d& transform);
+  bool moveObject(const std::string& object_id, const Eigen::Isometry3d& transform);
 
   /** \brief Remove shape from object.
    * Shape equality is verified by comparing pointers. Ownership of the
@@ -165,13 +186,16 @@ public:
    * exist) if this was the last shape in the object.
    * Returns true on success and false if the object did not exist or did not
    * contain the shape. */
-  bool removeShapeFromObject(const std::string& id, const shapes::ShapeConstPtr& shape);
+  bool removeShapeFromObject(const std::string& object_id, const shapes::ShapeConstPtr& shape);
 
   /** \brief Remove a particular object.
    * If there are no external pointers to the corresponding instance of
    * Object, the memory is freed.
    * Returns true on success and false if no such object was found. */
-  bool removeObject(const std::string& id);
+  bool removeObject(const std::string& object_id);
+
+  /** \brief Set subframes on an object. */
+  bool setSubframesOfObject(const std::string& object_id, const moveit::core::FixedTransformsMap& subframe_poses);
 
   /** \brief Clear all objects.
    * If there are no other pointers to corresponding instances of Objects,
@@ -262,7 +286,7 @@ private:
   /** The objects maintained in the world */
   std::map<std::string, ObjectPtr> objects_;
 
-  /* observers to call when something changes */
+  /** Wrapper for a callback function to call when something changes in the world */
   class Observer
   {
   public:
@@ -271,8 +295,8 @@ private:
     }
     ObserverCallbackFn callback_;
   };
+
+  /// All registered observers of this world representation
   std::vector<Observer*> observers_;
 };
-}  // namespace collision_detection
-
-#endif
+}

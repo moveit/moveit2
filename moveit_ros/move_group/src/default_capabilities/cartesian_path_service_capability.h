@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_MOVE_GROUP_CARTESIAN_PATH_SERVICE_CAPABILITY_
-#define MOVEIT_MOVE_GROUP_CARTESIAN_PATH_SERVICE_CAPABILITY_
+#pragma once
 
 #include <moveit/move_group/move_group_capability.h>
 #include <moveit_msgs/GetCartesianPath.h>
@@ -50,12 +49,11 @@ public:
   void initialize() override;
 
 private:
-  bool computeService(moveit_msgs::srv::GetCartesianPath::Request& req, moveit_msgs::srv::GetCartesianPath::Response& res);
+  bool computeService(moveit_msgs::srv::GetCartesianPath::Request& req,
+                      moveit_msgs::srv::GetCartesianPath::Response& res);
 
   ros::ServiceServer cartesian_path_service_;
   ros::Publisher display_path_;
   bool display_computed_paths_;
 };
 }
-
-#endif

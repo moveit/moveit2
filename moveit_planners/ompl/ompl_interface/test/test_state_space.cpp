@@ -36,7 +36,6 @@
 
 #include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
 #include <moveit/ompl_interface/parameterization/work_space/pose_model_state_space.h>
-#include <moveit_resources/config.h>
 
 #include <urdf_parser/urdf_parser.h>
 
@@ -45,13 +44,14 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include <boost/filesystem/path.hpp>
+#include <ros/package.h>
 
 class LoadPlanningModelsPr2 : public testing::Test
 {
 protected:
   void SetUp() override
   {
-    boost::filesystem::path res_path(MOVEIT_TEST_RESOURCES_DIR);
+    boost::filesystem::path res_path(ros::package::getPath("moveit_resources"));
 
     srdf_model_.reset(new srdf::Model());
     std::string xml_string;
@@ -107,19 +107,19 @@ TEST_F(LoadPlanningModelsPr2, StateSpace)
 TEST_F(LoadPlanningModelsPr2, StateSpaces)
 {
   ompl_interface::ModelBasedStateSpaceSpecification spec1(robot_model_, "right_arm");
-  ompl_interface::ModelBasedStateSpace ss1(spec1);
+  ompl_interface::JointModelStateSpace ss1(spec1);
   ss1.setup();
 
   ompl_interface::ModelBasedStateSpaceSpecification spec2(robot_model_, "left_arm");
-  ompl_interface::ModelBasedStateSpace ss2(spec2);
+  ompl_interface::JointModelStateSpace ss2(spec2);
   ss2.setup();
 
   ompl_interface::ModelBasedStateSpaceSpecification spec3(robot_model_, "whole_body");
-  ompl_interface::ModelBasedStateSpace ss3(spec3);
+  ompl_interface::JointModelStateSpace ss3(spec3);
   ss3.setup();
 
   ompl_interface::ModelBasedStateSpaceSpecification spec4(robot_model_, "arms");
-  ompl_interface::ModelBasedStateSpace ss4(spec4);
+  ompl_interface::JointModelStateSpace ss4(spec4);
   ss4.setup();
 
   std::ofstream fout("ompl_interface_test_state_space_diagram2.dot");

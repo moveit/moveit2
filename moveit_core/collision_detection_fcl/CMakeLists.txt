@@ -2,8 +2,7 @@ set(MOVEIT_LIB_NAME moveit_collision_detection_fcl)
 
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/collision_common.cpp
-  src/collision_robot_fcl.cpp
-  src/collision_world_fcl.cpp
+  src/collision_env_fcl.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
@@ -33,7 +32,9 @@ ament_target_dependencies(collision_detector_fcl_plugin
 
 install(TARGETS ${MOVEIT_LIB_NAME} collision_detector_fcl_plugin
           LIBRARY DESTINATION lib
-          ARCHIVE DESTINATION lib)
+          ARCHIVE DESTINATION lib
+          RUNTIME DESTINATION bin
+)
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
@@ -63,5 +64,13 @@ if(BUILD_TESTING)
     ${Boost_LIBRARIES}
     ${geometric_shapes_LIBRARIES}
     resource_retriever::resource_retriever
+  )
+
+  ament_add_gtest(test_fcl_collision_env test/test_fcl_env.cpp)
+  target_link_libraries(test_fcl_collision_env
+    moveit_test_utils
+    ${MOVEIT_LIB_NAME}
+    ${Boost_LIBRARIES}
+    moveit_robot_state
   )
 endif()

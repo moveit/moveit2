@@ -43,7 +43,7 @@
 #include <tf2_eigen/tf2_eigen.h>
 #include <xmlrpcpp/XmlRpcValue.h>
 
-// MoveIt!
+// MoveIt
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <moveit/rdf_loader/rdf_loader.h>
 #include <moveit/robot_model/robot_model.h>
@@ -203,7 +203,7 @@ protected:
   }
 
 public:
-  testing::AssertionResult isNear(const char* expr1, const char* expr2, const char* abs_error_expr,
+  testing::AssertionResult isNear(const char* expr1, const char* expr2, const char* /*abs_error_expr*/,
                                   const geometry_msgs::Point& val1, const geometry_msgs::Point& val2, double abs_error)
   {
     // clang-format off
@@ -218,7 +218,7 @@ public:
         << "Actual: " << expr2 << " [" << val2.x << ", " << val2.y << ", " << val2.z << "]";
     // clang-format on
   }
-  testing::AssertionResult isNear(const char* expr1, const char* expr2, const char* abs_error_expr,
+  testing::AssertionResult isNear(const char* expr1, const char* expr2, const char* /*abs_error_expr*/,
                                   const geometry_msgs::Quaternion& val1, const geometry_msgs::Quaternion& val2,
                                   double abs_error)
   {
@@ -261,7 +261,7 @@ public:
     return testing::AssertionSuccess();
   }
 
-  void searchIKCallback(const geometry_msgs::Pose& ik_pose, const std::vector<double>& joint_state,
+  void searchIKCallback(const geometry_msgs::Pose& /*ik_pose*/, const std::vector<double>& joint_state,
                         moveit_msgs::msg::MoveItErrorCodes& error_code)
   {
     std::vector<std::string> link_names = { tip_link_ };
@@ -419,7 +419,7 @@ static void parseVector(XmlRpc::XmlRpcValue& vec, std::vector<double>& values, s
   }
   values.reserve(vec.size());
   values.clear();
-  for (int i = 0; i < vec.size(); ++i)
+  for (int i = 0; i < vec.size(); ++i)  // NOLINT(modernize-loop-convert)
     values.push_back(parseDouble(vec[i]));
 }
 static bool parseGoal(const std::string& name, XmlRpc::XmlRpcValue& value, Eigen::Isometry3d& goal, std::string& desc)
@@ -512,14 +512,14 @@ TEST_F(KinematicsTest, unitIK)
      - pos.y: -0.1
        joints: [0, 0, 0, 0, 0, 0]
   */
-  for (int i = 0; i < tests.size(); ++i)
+  for (int i = 0; i < tests.size(); ++i)  // NOLINT(modernize-loop-convert)
   {
     goal = initial;  // reset goal to initial
     ground_truth.clear();
 
     ASSERT_EQ(tests[i].getType(), XmlRpc::XmlRpcValue::TypeStruct);
     std::string desc;
-    for (auto& member : tests[i])
+    for (std::pair<const std::string, XmlRpc::XmlRpcValue>& member : tests[i])
     {
       if (member.first == "joints")
         parseVector(member.second, ground_truth);

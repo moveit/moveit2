@@ -1,4 +1,4 @@
-<img src="http://moveit.ros.org/assets/images/moveit2_logo_black.png" alt="MoveIt! Logo" width="200"/>
+<img src="http://moveit.ros.org/assets/images/moveit2_logo_black.png" alt="MoveIt Logo" width="200"/>
 
 The MoveIt Motion Planning Framework for ROS 2
 

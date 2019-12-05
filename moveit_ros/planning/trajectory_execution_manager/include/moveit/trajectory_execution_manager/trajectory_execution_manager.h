@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_TRAJECTORY_EXECUTION_MANAGER_TRAJECTORY_EXECUTION_MANAGER_
-#define MOVEIT_TRAJECTORY_EXECUTION_MANAGER_TRAJECTORY_EXECUTION_MANAGER_
+#pragma once
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_model/robot_model.h>
@@ -273,7 +272,8 @@ private:
   void updateControllerState(const std::string& controller, const ros::Duration& age);
   void updateControllerState(ControllerInformation& ci, const ros::Duration& age);
 
-  bool distributeTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory, const std::vector<std::string>& controllers,
+  bool distributeTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory,
+                            const std::vector<std::string>& controllers,
                             std::vector<moveit_msgs::msg::RobotTrajectory>& parts);
 
   bool findControllers(const std::set<std::string>& actuated_joints, std::size_t controller_count,
@@ -321,6 +321,7 @@ private:
 
   boost::mutex execution_state_mutex_;
   boost::mutex continuous_execution_mutex_;
+  boost::mutex execution_thread_mutex_;
 
   boost::condition_variable continuous_execution_condition_;
 
@@ -362,5 +363,3 @@ private:
   bool wait_for_trajectory_completion_;
 };
 }
-
-#endif

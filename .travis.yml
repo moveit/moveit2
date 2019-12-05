@@ -17,7 +17,8 @@ env:
     - ROS_DISTRO=dashing
     - ROS_REPO=ros
     - UPSTREAM_WORKSPACE=moveit2.repos
-    - TEST_BLACKLIST=moveit_ros_perception  # mesh_filter_test fails due to broken Mesa OpenGL
+    # moveit_ros_perception: mesh_filter_test fails due to broken Mesa OpenGL
+    - TEST_BLACKLIST="moveit_ros_perception"
     - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-unused-function"
     - WARNINGS_OK=false
     - BEFORE_DOCKER_SCRIPT="sed -i 's/travis_run --retry rosdep install/#rosdep install/g' .moveit_ci/travis.sh"

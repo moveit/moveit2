@@ -34,11 +34,9 @@
 
 /* Author: Ioan Sucan, Dave Coleman, Adam Leeper, Sachin Chitta */
 
-#ifndef MOVEIT_MOTION_PLANNING_RVIZ_PLUGIN_MOTION_PLANNING_DISPLAY_
-#define MOVEIT_MOTION_PLANNING_RVIZ_PLUGIN_MOTION_PLANNING_DISPLAY_
+#pragma once
 
 #include <rviz/display.h>
-#include <rviz/selection/selection_manager.h>
 #include <rviz/panel_dock_widget.h>
 #include <moveit/planning_scene_rviz_plugin/planning_scene_display.h>
 #include <moveit/rviz_plugin_render_tools/trajectory_visualization.h>
@@ -108,6 +106,11 @@ public:
     return query_goal_state_->getState();
   }
 
+  const robot_state::RobotState& getPreviousState() const
+  {
+    return *previous_state_;
+  }
+
   const robot_interaction::RobotInteractionPtr& getRobotInteraction() const
   {
     return robot_interaction_;
@@ -133,6 +136,7 @@ public:
 
   void updateQueryStartState();
   void updateQueryGoalState();
+  void rememberPreviousStartState();
 
   void useApproximateIK(bool flag);
 
@@ -151,6 +155,11 @@ public:
   void resetStatusTextColor();
 
   void toggleSelectPlanningGroupSubscription(bool enable);
+
+Q_SIGNALS:
+  // signals issued when start/goal states of a query changed
+  void queryStartStateChanged();
+  void queryGoalStateChanged();
 
 private Q_SLOTS:
 
@@ -254,6 +263,8 @@ protected:
   std::shared_ptr<interactive_markers::MenuHandler> menu_handler_goal_;
   std::map<std::string, LinkDisplayStatus> status_links_start_;
   std::map<std::string, LinkDisplayStatus> status_links_goal_;
+  /// remember previous start state (updated before starting execution)
+  robot_state::RobotStatePtr previous_state_;
 
   /// Hold the names of the groups for which the query states have been updated (and should not be altered when new info
   /// is received from the planning scene)
@@ -301,5 +312,3 @@ protected:
 };
 
 }  // namespace moveit_rviz_plugin
-
-#endif

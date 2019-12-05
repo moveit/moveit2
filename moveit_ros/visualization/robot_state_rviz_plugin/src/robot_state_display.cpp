@@ -36,7 +36,11 @@
 
 #include <moveit/robot_state_rviz_plugin/robot_state_display.h>
 #include <moveit/robot_state/conversions.h>
+#include <moveit/utils/message_checks.h>
 
+#include <moveit/macros/diagnostics.h>
+DIAGNOSTIC_PUSH
+SILENT_UNUSED_PARAM
 #include <rviz/visualization_manager.h>
 #include <rviz/robot/robot.h>
 #include <rviz/robot/robot_link.h>
@@ -52,6 +56,7 @@
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
+DIAGNOSTIC_POP
 
 namespace moveit_rviz_plugin
 {
@@ -157,16 +162,16 @@ void RobotStateDisplay::changedEnableLinkHighlight()
 {
   if (enable_link_highlight_->getBool())
   {
-    for (std::map<std::string, std_msgs::ColorRGBA>::iterator it = highlights_.begin(); it != highlights_.end(); ++it)
+    for (std::pair<const std::string, std_msgs::ColorRGBA>& highlight : highlights_)
     {
-      setHighlight(it->first, it->second);
+      setHighlight(highlight.first, highlight.second);
     }
   }
   else
   {
-    for (std::map<std::string, std_msgs::ColorRGBA>::iterator it = highlights_.begin(); it != highlights_.end(); ++it)
+    for (std::pair<const std::string, std_msgs::ColorRGBA>& highlight : highlights_)
     {
-      unsetHighlight(it->first);
+      unsetHighlight(highlight.first);
     }
   }
 }
@@ -186,16 +191,16 @@ static bool operator!=(const std_msgs::ColorRGBA& a, const std_msgs::ColorRGBA& 
   return a.r != b.r || a.g != b.g || a.b != b.b || a.a != b.a;
 }
 
-void RobotStateDisplay::setRobotHighlights(const moveit_msgs::msg::DisplayRobotState::_highlight_links_type& highlight_links)
+void RobotStateDisplay::setRobotHighlights(
+    const moveit_msgs::msg::DisplayRobotState::_highlight_links_type& highlight_links)
 {
   if (highlight_links.empty() && highlights_.empty())
     return;
 
   std::map<std::string, std_msgs::ColorRGBA> highlights;
-  for (moveit_msgs::msg::DisplayRobotState::_highlight_links_type::const_iterator it = highlight_links.begin();
-       it != highlight_links.end(); ++it)
+  for (const moveit_msgs::msg::ObjectColor& highlight_link : highlight_links)
   {
-    highlights[it->id] = it->color;
+    highlights[highlight_link.id] = highlight_link.color;
   }
 
   if (enable_link_highlight_->getBool())
@@ -290,6 +295,8 @@ void RobotStateDisplay::changedRobotStateTopic()
   if (static_cast<bool>(robot_state_))
     robot_state_->setToDefaultValues();
   update_state_ = true;
+  robot_->setVisible(false);
+  setStatus(rviz::StatusProperty::Warn, "RobotState", "No msg received");
 
   robot_state_subscriber_ = root_nh_.subscribe(robot_state_topic_property_->getStdString(), 10,
                                                &RobotStateDisplay::newRobotStateCallback, this);
@@ -304,17 +311,28 @@ void RobotStateDisplay::newRobotStateCallback(const moveit_msgs::msg::DisplayRob
   // possibly use TF to construct a robot_state::Transforms object to pass in to the conversion function?
   try
   {
-    robot_state::robotStateMsgToRobotState(state_msg->state, *robot_state_);
+    if (!moveit::core::isEmpty(state_msg->state))
+      robot_state::robotStateMsgToRobotState(state_msg->state, *robot_state_);
     setRobotHighlights(state_msg->highlight_links);
-    setStatus(rviz::StatusProperty::Ok, "RobotState", "");
   }
   catch (const moveit::Exception& e)
   {
     robot_state_->setToDefaultValues();
     setRobotHighlights(moveit_msgs::msg::DisplayRobotState::_highlight_links_type());
     setStatus(rviz::StatusProperty::Error, "RobotState", e.what());
+    robot_->setVisible(false);
     return;
   }
+
+  if (robot_->isVisible() != !state_msg->hide)
+  {
+    robot_->setVisible(!state_msg->hide);
+    if (robot_->isVisible())
+      setStatus(rviz::StatusProperty::Ok, "RobotState", "");
+    else
+      setStatus(rviz::StatusProperty::Warn, "RobotState", "Hidden");
+  }
+
   update_state_ = true;
 }
 
@@ -326,6 +344,11 @@ void RobotStateDisplay::setLinkColor(const std::string& link_name, const QColor&
 void RobotStateDisplay::unsetLinkColor(const std::string& link_name)
 {
   unsetLinkColor(&robot_->getRobot(), link_name);
+}
+
+void RobotStateDisplay::setVisible(bool visible)
+{
+  robot_->setVisible(visible);
 }
 
 void RobotStateDisplay::setLinkColor(rviz::Robot* robot, const std::string& link_name, const QColor& color)
@@ -367,14 +390,13 @@ void RobotStateDisplay::loadRobotModel()
     root_link_name_property_->setStdString(getRobotModel()->getRootLinkName());
     root_link_name_property_->blockSignals(old_state);
     update_state_ = true;
-    setStatus(rviz::StatusProperty::Ok, "RobotState", "Planning Model Loaded Successfully");
+    setStatus(rviz::StatusProperty::Ok, "RobotModel", "Loaded successfully");
 
     changedEnableVisualVisible();
     changedEnableCollisionVisible();
-    robot_->setVisible(true);
   }
   else
-    setStatus(rviz::StatusProperty::Error, "RobotState", "No Planning Model Loaded");
+    setStatus(rviz::StatusProperty::Error, "RobotModel", "Loading failed");
 
   highlights_.clear();
 }
@@ -404,7 +426,10 @@ void RobotStateDisplay::update(float wall_dt, float ros_dt)
   if (load_robot_model_)
   {
     loadRobotModel();
+    // The following call to changedRobotStateTopic() should not change visibility
+    bool visible = robot_->isVisible();
     changedRobotStateTopic();
+    robot_->setVisible(visible);
   }
 
   calculateOffsetPosition();

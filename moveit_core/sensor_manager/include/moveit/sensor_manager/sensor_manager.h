@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_MOVEIT_SENSOR_MANAGER_
-#define MOVEIT_MOVEIT_SENSOR_MANAGER_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -43,7 +42,7 @@
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
 
-/// Namespace for the base class of a MoveIt! sensor manager
+/// Namespace for the base class of a MoveIt sensor manager
 namespace moveit_sensor_manager
 {
 /** \brief Define the frame of reference and the frustum of a sensor (usually this is a visual sensor) */
@@ -103,5 +102,3 @@ public:
                              moveit_msgs::msg::RobotTrajectory& sensor_trajectory) = 0;
 };
 }
-
-#endif

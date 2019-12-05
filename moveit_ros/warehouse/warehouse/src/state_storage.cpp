@@ -64,8 +64,8 @@ void moveit_warehouse::RobotStateStorage::reset()
   createCollections();
 }
 
-void moveit_warehouse::RobotStateStorage::addRobotState(const moveit_msgs::msg::RobotState& msg, const std::string& name,
-                                                        const std::string& robot)
+void moveit_warehouse::RobotStateStorage::addRobotState(const moveit_msgs::msg::RobotState& msg,
+                                                        const std::string& name, const std::string& robot)
 {
   bool replace = false;
   if (hasRobotState(name, robot))
@@ -105,9 +105,9 @@ void moveit_warehouse::RobotStateStorage::getKnownRobotStates(std::vector<std::s
   if (!robot.empty())
     q->append(ROBOT_NAME, robot);
   std::vector<RobotStateWithMetadata> constr = state_collection_->queryList(q, true, STATE_NAME, true);
-  for (std::size_t i = 0; i < constr.size(); ++i)
-    if (constr[i]->lookupField(STATE_NAME))
-      names.push_back(constr[i]->lookupString(STATE_NAME));
+  for (RobotStateWithMetadata& state : constr)
+    if (state->lookupField(STATE_NAME))
+      names.push_back(state->lookupString(STATE_NAME));
 }
 
 bool moveit_warehouse::RobotStateStorage::getRobotState(RobotStateWithMetadata& msg_m, const std::string& name,

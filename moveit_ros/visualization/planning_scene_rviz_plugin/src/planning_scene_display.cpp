@@ -420,8 +420,8 @@ void PlanningSceneDisplay::setGroupColor(rviz::Robot* robot, const std::string& 
     if (jmg)
     {
       const std::vector<std::string>& links = jmg->getLinkModelNamesWithCollisionGeometry();
-      for (std::size_t i = 0; i < links.size(); ++i)
-        setLinkColor(robot, links[i], color);
+      for (const std::string& link : links)
+        setLinkColor(robot, link, color);
     }
   }
 }
@@ -431,8 +431,8 @@ void PlanningSceneDisplay::unsetAllColors(rviz::Robot* robot)
   if (getRobotModel())
   {
     const std::vector<std::string>& links = getRobotModel()->getLinkModelNamesWithCollisionGeometry();
-    for (std::size_t i = 0; i < links.size(); ++i)
-      unsetLinkColor(robot, links[i]);
+    for (const std::string& link : links)
+      unsetLinkColor(robot, link);
   }
 }
 
@@ -444,8 +444,8 @@ void PlanningSceneDisplay::unsetGroupColor(rviz::Robot* robot, const std::string
     if (jmg)
     {
       const std::vector<std::string>& links = jmg->getLinkModelNamesWithCollisionGeometry();
-      for (std::size_t i = 0; i < links.size(); ++i)
-        unsetLinkColor(robot, links[i]);
+      for (const std::string& link : links)
+        unsetLinkColor(robot, link);
     }
   }
 }
@@ -561,7 +561,7 @@ void PlanningSceneDisplay::sceneMonitorReceivedUpdate(
 }
 
 void PlanningSceneDisplay::onSceneMonitorReceivedUpdate(
-    planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type)
+    planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType /*update_type*/)
 {
   bool old_state = scene_name_property_->blockSignals(true);
   getPlanningSceneRW()->getCurrentStateNonConst().update();
@@ -621,7 +621,7 @@ void PlanningSceneDisplay::update(float wall_dt, float ros_dt)
     updateInternal(wall_dt, ros_dt);
 }
 
-void PlanningSceneDisplay::updateInternal(float wall_dt, float ros_dt)
+void PlanningSceneDisplay::updateInternal(float wall_dt, float /*ros_dt*/)
 {
   current_scene_time_ += wall_dt;
   if (current_scene_time_ > scene_display_time_property_->getFloat() && planning_scene_render_ &&

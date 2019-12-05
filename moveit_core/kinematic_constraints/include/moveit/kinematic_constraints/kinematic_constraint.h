@@ -34,13 +34,12 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_KINEMATIC_CONSTRAINTS_KINEMATIC_CONSTRAINT_
-#define MOVEIT_KINEMATIC_CONSTRAINTS_KINEMATIC_CONSTRAINT_
+#pragma once
 
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/transforms/transforms.h>
-#include <moveit/collision_detection/collision_world.h>
+#include <moveit/collision_detection/collision_env.h>
 #include <moveit/macros/class_forward.h>
 
 #include <geometric_shapes/bodies.h>
@@ -340,7 +339,7 @@ MOVEIT_CLASS_FORWARD(OrientationConstraint)
  * This class expresses an orientation constraint on a particular
  * link.  The constraint is specified in terms of a quaternion, with
  * tolerances on X,Y, and Z axes.  The rotation difference is computed
- * based on the ZXZ Euler angle formulation.  The header on the
+ * based on the XYZ Euler angle formulation (intrinsic rotations).  The header on the
  * quaternion can be specified in terms of either a fixed frame or a
  * mobile frame.  The type value will return ORIENTATION_CONSTRAINT.
  *
@@ -832,7 +831,7 @@ protected:
    */
   bool decideContact(const collision_detection::Contact& contact) const;
 
-  collision_detection::CollisionRobotPtr collision_robot_; /**< \brief A copy of the collision robot maintained for
+  collision_detection::CollisionEnvPtr collision_env_; /**< \brief A copy of the collision robot maintained for
                                                               collision checking the cone against robot links */
   bool mobile_sensor_frame_;      /**< \brief True if the sensor is a non-fixed frame relative to the transform frame */
   bool mobile_target_frame_;      /**< \brief True if the target is a non-fixed frame relative to the transform frame */
@@ -1071,5 +1070,3 @@ protected:
   moveit_msgs::msg::Constraints all_constraints_; /**<  \brief Messages corresponding to all internal constraints */
 };
 }
-
-#endif

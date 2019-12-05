@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_PLANNING_INTERFACE_PLANNING_INTERFACE_
-#define MOVEIT_PLANNING_INTERFACE_PLANNING_INTERFACE_
+#pragma once
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_interface/planning_request.h>
@@ -49,7 +48,7 @@ namespace planning_scene
 MOVEIT_CLASS_FORWARD(PlanningScene)
 }
 
-/** \brief This namespace includes the base class for MoveIt! planners */
+/** \brief This namespace includes the base class for MoveIt planners */
 namespace planning_interface
 {
 /**
@@ -148,7 +147,7 @@ protected:
 
 MOVEIT_CLASS_FORWARD(PlannerManager)
 
-/** \brief Base class for a MoveIt! planner */
+/** \brief Base class for a MoveIt planner */
 class PlannerManager
 {
 public:
@@ -213,5 +212,3 @@ protected:
 };
 
 }  // planning_interface
-
-#endif

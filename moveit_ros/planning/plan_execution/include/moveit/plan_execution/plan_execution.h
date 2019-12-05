@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_PLAN_EXECUTION_PLAN_EXECUTION_
-#define MOVEIT_PLAN_EXECUTION_PLAN_EXECUTION_
+#pragma once
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/plan_execution/plan_representation.h>
@@ -128,7 +127,8 @@ public:
   }
 
   void planAndExecute(ExecutableMotionPlan& plan, const Options& opt);
-  void planAndExecute(ExecutableMotionPlan& plan, const moveit_msgs::msg::PlanningScene& scene_diff, const Options& opt);
+  void planAndExecute(ExecutableMotionPlan& plan, const moveit_msgs::msg::PlanningScene& scene_diff,
+                      const Options& opt);
 
   /** \brief Execute and monitor a previously created \e plan.
 
@@ -142,7 +142,6 @@ public:
 
 private:
   void planAndExecuteHelper(ExecutableMotionPlan& plan, const Options& opt);
-  bool isRemainingPathValid(const ExecutableMotionPlan& plan);
   bool isRemainingPathValid(const ExecutableMotionPlan& plan, const std::pair<int, int>& path_segment);
 
   void planningSceneUpdatedCallback(const planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type);
@@ -166,4 +165,3 @@ private:
   DynamicReconfigureImpl* reconfigure_impl_;
 };
 }
-#endif

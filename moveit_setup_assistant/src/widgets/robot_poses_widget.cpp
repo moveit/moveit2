@@ -49,7 +49,7 @@
 namespace moveit_setup_assistant
 {
 // ******************************************************************************************
-// Outer User Interface for MoveIt! Configuration Assistant
+// Outer User Interface for MoveIt Configuration Assistant
 // ******************************************************************************************
 RobotPosesWidget::RobotPosesWidget(QWidget* parent, const MoveItConfigDataPtr& config_data)
   : SetupScreenWidget(parent), config_data_(config_data)
@@ -93,7 +93,7 @@ RobotPosesWidget::RobotPosesWidget(QWidget* parent, const MoveItConfigDataPtr& c
   pub_robot_state_ = nh.advertise<moveit_msgs::msg::DisplayRobotState>(MOVEIT_ROBOT_STATE, 1);
 
   // Set the planning scene
-  config_data_->getPlanningScene()->setName("MoveIt! Planning Scene");
+  config_data_->getPlanningScene()->setName("MoveIt Planning Scene");
 
   // Collision Detection initializtion -------------------------------
 
@@ -144,7 +144,7 @@ QWidget* RobotPosesWidget::createContentsWidget()
   controls_layout->setAlignment(btn_default, Qt::AlignLeft);
 
   // Set play button
-  QPushButton* btn_play = new QPushButton("&MoveIt!", this);
+  QPushButton* btn_play = new QPushButton("&MoveIt", this);
   btn_play->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
   btn_play->setMaximumWidth(300);
   connect(btn_play, SIGNAL(clicked()), this, SLOT(playPoses()));
@@ -308,7 +308,7 @@ void RobotPosesWidget::showNewScreen()
 // ******************************************************************************************
 // Edit whatever element is selected
 // ******************************************************************************************
-void RobotPosesWidget::editDoubleClicked(int row, int column)
+void RobotPosesWidget::editDoubleClicked(int /*row*/, int /*column*/)
 {
   // We'll just base the edit on the selection highlight
   editSelected();
@@ -317,7 +317,7 @@ void RobotPosesWidget::editDoubleClicked(int row, int column)
 // ******************************************************************************************
 // Preview whatever element is selected
 // ******************************************************************************************
-void RobotPosesWidget::previewClicked(int row, int column)
+void RobotPosesWidget::previewClicked(int row, int /*column*/)
 {
   const std::string& name = data_table_->item(row, 0)->text().toStdString();
   const std::string& group = data_table_->item(row, 1)->text().toStdString();
@@ -465,10 +465,9 @@ void RobotPosesWidget::loadGroupsComboBox()
   group_name_field_->clear();
 
   // Add all group names to combo box
-  for (std::vector<srdf::Model::Group>::iterator group_it = config_data_->srdf_->groups_.begin();
-       group_it != config_data_->srdf_->groups_.end(); ++group_it)
+  for (srdf::Model::Group& group : config_data_->srdf_->groups_)
   {
-    group_name_field_->addItem(group_it->name_.c_str());
+    group_name_field_->addItem(group.name_.c_str());
   }
 }
 

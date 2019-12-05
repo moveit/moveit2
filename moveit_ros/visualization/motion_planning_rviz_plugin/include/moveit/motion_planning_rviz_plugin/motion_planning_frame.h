@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_MOTION_PLANNING_RVIZ_PLUGIN_MOTION_PLANNING_FRAME_
-#define MOVEIT_MOTION_PLANNING_RVIZ_PLUGIN_MOTION_PLANNING_FRAME_
+#pragma once
 
 #include <QWidget>
 #include <QTreeWidgetItem>
@@ -49,8 +48,12 @@
 #include <moveit/robot_interaction/robot_interaction.h>
 #include <moveit/robot_interaction/interaction_handler.h>
 #include <moveit/semantic_world/semantic_world.h>
+#include <moveit/macros/diagnostics.h>
 #include <interactive_markers/interactive_marker_server.h>
+DIAGNOSTIC_PUSH
+SILENT_UNUSED_PARAM
 #include <rviz/default_plugin/interactive_markers/interactive_marker.h>
+DIAGNOSTIC_POP
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <actionlib/client/simple_action_client.h>
 #include <object_recognition_msgs/ObjectRecognitionAction.h>
@@ -83,6 +86,7 @@ MOVEIT_CLASS_FORWARD(RobotStateStorage)
 namespace moveit_rviz_plugin
 {
 class MotionPlanningDisplay;
+class MotionPlanningFrameJointsWidget;
 
 const std::string OBJECT_RECOGNITION_ACTION = "/recognize_objects";
 
@@ -122,6 +126,7 @@ protected:
   MotionPlanningDisplay* planning_display_;
   rviz::DisplayContext* context_;
   Ui::MotionPlanningUI* ui_;
+  MotionPlanningFrameJointsWidget* joints_tab_;
 
   moveit::planning_interface::MoveGroupInterfacePtr move_group_;
   moveit::planning_interface::PlanningSceneInterfacePtr planning_scene_interface_;
@@ -315,7 +320,7 @@ private:
   ros::Publisher planning_scene_publisher_;
   ros::Publisher planning_scene_world_publisher_;
 
-  collision_detection::CollisionWorld::ObjectConstPtr scaled_object_;
+  collision_detection::CollisionEnv::ObjectConstPtr scaled_object_;
 
   std::vector<std::pair<std::string, bool> > known_collision_objects_;
   long unsigned int known_collision_objects_version_;
@@ -365,5 +370,3 @@ void MotionPlanningFrame::waitForAction(const T& action, const ros::NodeHandle& 
     ROS_DEBUG("Connected to '%s'", name.c_str());
 };
 }
-
-#endif

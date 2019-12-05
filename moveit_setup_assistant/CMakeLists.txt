@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_setup_assistant)
 
-add_compile_options(-std=c++14)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   # suppress warning in Ogre
   add_compile_options(-Wno-deprecated-register)
@@ -25,7 +27,8 @@ find_package(catkin REQUIRED COMPONENTS
   urdf
   srdfdom
 )
-include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+find_package(ompl REQUIRED)
+include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${OMPL_INCLUDE_DIRS})
 
 # Qt Stuff
 if(rviz_QT_VERSION VERSION_LESS "5")
@@ -139,9 +142,14 @@ set_target_properties(${PROJECT_NAME}_updater
                       PROPERTIES OUTPUT_NAME collisions_updater
                       PREFIX "")
 
-install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_widgets ${PROJECT_NAME}_tools ${PROJECT_NAME}_updater
-  LIBRARY DESTINATION ${CATKIN_GLOBAL_LIB_DESTINATION}
+install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_updater
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+install(TARGETS ${PROJECT_NAME}_widgets ${PROJECT_NAME}_tools
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+
 install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
 
 install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

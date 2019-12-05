@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_PLANNING_REQUEST_ADAPTER_PLANNING_REQUEST_ADAPTER_
-#define MOVEIT_PLANNING_REQUEST_ADAPTER_PLANNING_REQUEST_ADAPTER_
+#pragma once
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_interface/planning_interface.h>
@@ -62,6 +61,10 @@ public:
   virtual ~PlanningRequestAdapter()
   {
   }
+
+  /** \brief Initialize parameters using the passed Node
+      if no initialization is needed, simply implement as empty */
+  virtual void initialize(const rclcpp::Node& node) = 0;
 
   /// Get a short string that identifies the planning request adapter
   virtual std::string getDescription() const
@@ -117,5 +120,3 @@ private:
   std::vector<PlanningRequestAdapterConstPtr> adapters_;
 };
 }
-
-#endif

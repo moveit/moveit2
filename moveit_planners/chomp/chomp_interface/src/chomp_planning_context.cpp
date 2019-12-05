@@ -1,9 +1,38 @@
-/*
- * chomp_planning_context.cpp
+/*********************************************************************
+ * Software License Agreement (BSD License)
  *
- *  Created on: 27-Jul-2016
- *      Author: ace
- */
+ *  Copyright (c) 2012, Willow Garage, Inc.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of Willow Garage nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *********************************************************************/
+
+/* Author: Chittaranjan Srinivas Swaminathan */
 
 #include <chomp_interface/chomp_planning_context.h>
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
@@ -18,35 +47,9 @@ CHOMPPlanningContext::CHOMPPlanningContext(const std::string& name, const std::s
   chomp_interface_ = CHOMPInterfacePtr(new CHOMPInterface());
 }
 
-CHOMPPlanningContext::~CHOMPPlanningContext() = default;
-
 bool CHOMPPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
 {
-  moveit_msgs::msg::MotionPlanDetailedResponse res2;
-  if (chomp_interface_->solve(planning_scene_, request_, chomp_interface_->getParams(), res2))
-  {
-    res.trajectory_.resize(1);
-    res.trajectory_[0] =
-        robot_trajectory::RobotTrajectoryPtr(new robot_trajectory::RobotTrajectory(robot_model_, getGroupName()));
-
-    moveit::core::RobotState start_state(robot_model_);
-    robot_state::robotStateMsgToRobotState(res2.trajectory_start, start_state);
-    res.trajectory_[0]->setRobotTrajectoryMsg(start_state, res2.trajectory[0]);
-
-    trajectory_processing::IterativeParabolicTimeParameterization itp;
-    itp.computeTimeStamps(*res.trajectory_[0], request_.max_velocity_scaling_factor,
-                          request_.max_acceleration_scaling_factor);
-
-    res.description_.push_back("plan");
-    res.processing_time_ = res2.processing_time;
-    res.error_code_ = res2.error_code;
-    return true;
-  }
-  else
-  {
-    res.error_code_ = res2.error_code;
-    return false;
-  }
+  return chomp_interface_->solve(planning_scene_, request_, chomp_interface_->getParams(), res);
 }
 
 bool CHOMPPlanningContext::solve(planning_interface::MotionPlanResponse& res)

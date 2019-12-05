@@ -35,8 +35,7 @@
 
 /* Author: Michael Ferguson, Ioan Sucan, E. Gil Jones */
 
-#ifndef MOVEIT_PLUGINS_ACTION_BASED_CONTROLLER_HANDLE
-#define MOVEIT_PLUGINS_ACTION_BASED_CONTROLLER_HANDLE
+#pragma once
 
 #include <actionlib/client/simple_action_client.h>
 #include <moveit/controller_manager/controller_manager.h>
@@ -57,7 +56,7 @@ public:
 
   virtual void addJoint(const std::string& name) = 0;
   virtual void getJoints(std::vector<std::string>& joints) = 0;
-  virtual void configure(XmlRpc::XmlRpcValue& config)
+  virtual void configure(XmlRpc::XmlRpcValue& /* config */)
   {
   }
 };
@@ -127,6 +126,12 @@ public:
   {
     if (controller_action_client_ && !done_)
       return controller_action_client_->waitForResult(timeout);
+#if 1  // TODO: remove when https://github.com/ros/actionlib/issues/155 is fixed
+    // workaround for actionlib issue: waitForResult() might return before our doneCB finished
+    ros::Time deadline = ros::Time::now() + ros::Duration(0.1);  // limit waiting to 0.1s
+    while (!done_ && ros::ok() && ros::Time::now() < deadline)   // Check the done_ flag explicitly,
+      ros::Duration(0.0001).sleep();                             // which is eventually set in finishControllerExecution
+#endif
     return true;
   }
 
@@ -186,5 +191,3 @@ protected:
 };
 
 }  // end namespace moveit_simple_controller_manager
-
-#endif  // MOVEIT_PLUGINS_ACTION_BASED_CONTROLLER_HANDLE

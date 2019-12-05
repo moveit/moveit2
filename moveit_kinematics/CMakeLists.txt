@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_kinematics)
 
-add_compile_options(-std=c++14)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -12,7 +13,6 @@ find_package(Eigen3 REQUIRED)
 find_package(orocos_kdl REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   moveit_core
-  moveit_ros_planning
   pluginlib
   roscpp
   tf2
@@ -33,7 +33,6 @@ catkin_package(
   CATKIN_DEPENDS
     pluginlib
     moveit_core
-    moveit_ros_planning
   DEPENDS
     EIGEN3
 )

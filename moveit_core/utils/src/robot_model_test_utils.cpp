@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of MoveIt! nor the names of its
+ *   * Neither the name of MoveIt nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -38,7 +38,9 @@
 #include <boost/algorithm/string_regex.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <geometry_msgs/msg/pose.hpp>
+
 #include "moveit/utils/robot_model_test_utils.h"
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 namespace moveit
 {
@@ -56,7 +58,7 @@ moveit::core::RobotModelPtr loadTestingRobotModel(const std::string& robot_name)
 
 urdf::ModelInterfaceSharedPtr loadModelInterface(const std::string& robot_name)
 {
-  boost::filesystem::path res_path(MOVEIT_TEST_RESOURCES_DIR);
+  boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory("moveit_resources"));
   std::string urdf_path;
   if (robot_name == "pr2")
   {
@@ -77,7 +79,7 @@ urdf::ModelInterfaceSharedPtr loadModelInterface(const std::string& robot_name)
 
 srdf::ModelSharedPtr loadSRDFModel(const std::string& robot_name)
 {
-  boost::filesystem::path res_path(MOVEIT_TEST_RESOURCES_DIR);
+  boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory("moveit_resources"));
   urdf::ModelInterfaceSharedPtr urdf_model = loadModelInterface(robot_name);
   srdf::ModelSharedPtr srdf_model(new srdf::Model());
   std::string srdf_path;
@@ -118,14 +120,14 @@ void RobotModelBuilder::addChain(const std::string& section, const std::string& 
     return;
   }
   // First link should already be added.
-  if (not urdf_model_->getLink(link_names[0]))
+  if (!urdf_model_->getLink(link_names[0]))
   {
     RCLCPP_ERROR(LOGGER, "Link %s not present in builder yet!", link_names[0].c_str());
     is_valid_ = false;
     return;
   }
 
-  if (not joint_origins.empty() && link_names.size() - 1 != joint_origins.size())
+  if (!joint_origins.empty() && link_names.size() - 1 != joint_origins.size())
   {
     RCLCPP_ERROR(LOGGER, "There should be one more link (%zu) than there are joint origins (%zu)", link_names.size(),
                  joint_origins.size());
@@ -150,7 +152,7 @@ void RobotModelBuilder::addChain(const std::string& section, const std::string& 
     joint->name = link_names[i - 1] + "-" + link_names[i] + "-joint";
     // Default to Identity transform for origins.
     joint->parent_to_joint_origin_transform.clear();
-    if (not joint_origins.empty())
+    if (!joint_origins.empty())
     {
       geometry_msgs::msg::Pose o = joint_origins[i - 1];
       joint->parent_to_joint_origin_transform.position = urdf::Vector3(o.position.x, o.position.y, o.position.z);
@@ -195,7 +197,7 @@ void RobotModelBuilder::addChain(const std::string& section, const std::string& 
 void RobotModelBuilder::addInertial(const std::string& link_name, double mass, geometry_msgs::msg::Pose origin,
                                     double ixx, double ixy, double ixz, double iyy, double iyz, double izz)
 {
-  if (not urdf_model_->getLink(link_name))
+  if (!urdf_model_->getLink(link_name))
   {
     RCLCPP_ERROR(LOGGER, "Link %s not present in builder yet!", link_name.c_str());
     is_valid_ = false;
@@ -258,7 +260,7 @@ void RobotModelBuilder::addCollisionMesh(const std::string& link_name, const std
 void RobotModelBuilder::addLinkCollision(const std::string& link_name, const urdf::CollisionSharedPtr& collision,
                                          geometry_msgs::msg::Pose origin)
 {
-  if (not urdf_model_->getLink(link_name))
+  if (!urdf_model_->getLink(link_name))
   {
     RCLCPP_ERROR(LOGGER, "Link %s not present in builder yet!", link_name.c_str());
     is_valid_ = false;
@@ -276,7 +278,7 @@ void RobotModelBuilder::addLinkCollision(const std::string& link_name, const urd
 void RobotModelBuilder::addLinkVisual(const std::string& link_name, const urdf::VisualSharedPtr& vis,
                                       geometry_msgs::msg::Pose origin)
 {
-  if (not urdf_model_->getLink(link_name))
+  if (!urdf_model_->getLink(link_name))
   {
     RCLCPP_ERROR(LOGGER, "Link %s not present in builder yet!", link_name.c_str());
     is_valid_ = false;
@@ -288,7 +290,7 @@ void RobotModelBuilder::addLinkVisual(const std::string& link_name, const urdf::
 
   urdf::LinkSharedPtr link;
   urdf_model_->getLink(link_name, link);
-  if (not link->visual_array.empty())
+  if (!link->visual_array.empty())
   {
     link->visual_array.push_back(vis);
   }

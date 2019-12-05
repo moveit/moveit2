@@ -34,8 +34,7 @@
 
 /* Author: Ken Anderson */
 
-#ifndef MOVEIT_TRAJECTORY_PROCESSING_ITERATIVE_PARABOLIC_SMOOTHER_
-#define MOVEIT_TRAJECTORY_PROCESSING_ITERATIVE_PARABOLIC_SMOOTHER_
+#pragma once
 
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <moveit_msgs/msg/joint_limits.hpp>
@@ -70,5 +69,3 @@ private:
   double findT2(const double d1, const double d2, const double t1, double t2, const double a_max) const;
 };
 }
-
-#endif

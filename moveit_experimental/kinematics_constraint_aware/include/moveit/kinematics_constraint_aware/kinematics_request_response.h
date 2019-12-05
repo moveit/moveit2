@@ -35,8 +35,7 @@
 * Author: Sachin Chitta
 *********************************************************************/
 
-#ifndef MOVEIT_KINEMATICS_CONSTRAINT_AWARE_KINEMATICS_REQUEST_RESPONSE_
-#define MOVEIT_KINEMATICS_CONSTRAINT_AWARE_KINEMATICS_REQUEST_RESPONSE_
+#pragma once
 
 // System
 #include <boost/shared_ptr.hpp>
@@ -44,7 +43,7 @@
 // ROS msgs
 #include <geometry_msgs/PoseStamped.h>
 
-// MoveIt!
+// MoveIt
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
@@ -105,5 +104,3 @@ public:
   bool result_;
 };
 }
-
-#endif

@@ -34,8 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#ifndef MOVEIT_PLAN_EXECUTION_PLAN_REPRESENTATION_
-#define MOVEIT_PLAN_EXECUTION_PLAN_REPRESENTATION_
+#pragma once
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
@@ -73,7 +72,7 @@ struct ExecutableMotionPlan
 
   std::vector<ExecutableTrajectory> plan_components_;
 
-  // The trace of the trajectory recorded during execution
+  /// The trace of the trajectory recorded during execution
   robot_trajectory::RobotTrajectoryPtr executed_trajectory_;
 
   /// An error code reflecting what went wrong (if anything)
@@ -83,4 +82,3 @@ struct ExecutableMotionPlan
 /// The signature of a function that can compute a motion plan
 typedef boost::function<bool(ExecutableMotionPlan& plan)> ExecutableMotionPlanComputationFn;
 }
-#endif

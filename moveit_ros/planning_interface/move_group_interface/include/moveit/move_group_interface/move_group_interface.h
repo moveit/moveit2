@@ -35,11 +35,9 @@
 
 /* Author: Ioan Sucan, Sachin Chitta */
 
-#ifndef MOVEIT_MOVE_GROUP_INTERFACE_MOVE_GROUP_INTERFACE_
-#define MOVEIT_MOVE_GROUP_INTERFACE_MOVE_GROUP_INTERFACE_
+#pragma once
 
 #include <moveit/macros/class_forward.h>
-#include <moveit/macros/deprecation.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
@@ -47,16 +45,19 @@
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/grasp.hpp>
 #include <moveit_msgs/msg/place_location.hpp>
+#include <moveit_msgs/action/pickup_goal.h>
+#include <moveit_msgs/action/place_goal.h>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
-#include <moveit_msgs/MoveGroupAction.h>
-#include <geometry_msgs/PoseStamped.h>
+#include <moveit_msgs/action/move_group_action.h>
+#include <geometry_msgs/msg/pose_stamped.h>
 #include <actionlib/client/simple_action_client.h>
 #include <memory>
+#include <utility>
 #include <tf2_ros/buffer.h>
 
 namespace moveit
 {
-/** \brief Simple interface to MoveIt! components */
+/** \brief Simple interface to MoveIt components */
 namespace planning_interface
 {
 class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
@@ -104,9 +105,9 @@ public:
   /** \brief Specification of options to use when constructing the MoveGroupInterface class */
   struct Options
   {
-    Options(const std::string& group_name, const std::string& desc = ROBOT_DESCRIPTION,
+    Options(std::string group_name, std::string desc = ROBOT_DESCRIPTION,
             const ros::NodeHandle& node_handle = ros::NodeHandle())
-      : group_name_(group_name), robot_description_(desc), node_handle_(node_handle)
+      : group_name_(std::move(group_name)), robot_description_(std::move(desc)), node_handle_(node_handle)
     {
     }
 
@@ -150,8 +151,8 @@ public:
   MoveGroupInterface(const Options& opt,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
                      const ros::WallDuration& wait_for_servers = ros::WallDuration());
-  MOVEIT_DEPRECATED MoveGroupInterface(const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-                                       const ros::Duration& wait_for_servers);
+  [[deprecated]] MoveGroupInterface(const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
+                                    const ros::Duration& wait_for_servers);
 
   /**
       \brief Construct a client for the MoveGroup action for a particular \e group.
@@ -163,8 +164,8 @@ public:
   MoveGroupInterface(const std::string& group,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
                      const ros::WallDuration& wait_for_servers = ros::WallDuration());
-  MOVEIT_DEPRECATED MoveGroupInterface(const std::string& group, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-                                       const ros::Duration& wait_for_servers);
+  [[deprecated]] MoveGroupInterface(const std::string& group, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
+                                    const ros::Duration& wait_for_servers);
 
   ~MoveGroupInterface();
 
@@ -176,15 +177,14 @@ public:
   MoveGroupInterface(const MoveGroupInterface&) = delete;
   MoveGroupInterface& operator=(const MoveGroupInterface&) = delete;
 
-  MoveGroupInterface(MoveGroupInterface&& other);
-  MoveGroupInterface& operator=(MoveGroupInterface&& other);
-
+  MoveGroupInterface(MoveGroupInterface&& other) noexcept;
+  MoveGroupInterface& operator=(MoveGroupInterface&& other) noexcept;
   /** \brief Get the name of the group this instance operates on */
   const std::string& getName() const;
 
   /** \brief Get the names of the named robot states available as targets, both either remembered states or default
    * states from srdf */
-  const std::vector<std::string> getNamedTargets();
+  const std::vector<std::string>& getNamedTargets() const;
 
   /** \brief Get the RobotModel object. */
   robot_model::RobotModelConstPtr getRobotModel() const;
@@ -199,13 +199,13 @@ public:
   const std::vector<std::string>& getJointModelGroupNames() const;
 
   /** \brief Get vector of names of joints available in move group */
-  const std::vector<std::string>& getJointNames();
+  const std::vector<std::string>& getJointNames() const;
 
   /** \brief Get vector of names of links available in move group */
-  const std::vector<std::string>& getLinkNames();
+  const std::vector<std::string>& getLinkNames() const;
 
   /** \brief Get the joint angles for targets specified by name */
-  std::map<std::string, double> getNamedTargetValues(const std::string& name);
+  std::map<std::string, double> getNamedTargetValues(const std::string& name) const;
 
   /** \brief Get only the active (actuated) joints this instance operates on */
   const std::vector<std::string>& getActiveJoints() const;
@@ -218,10 +218,11 @@ public:
   unsigned int getVariableCount() const;
 
   /** \brief Get the description of the planning plugin loaded by the action server */
-  bool getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc);
+  bool getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc) const;
 
   /** \brief Get the planner parameters for given group and planner_id */
-  std::map<std::string, std::string> getPlannerParams(const std::string& planner_id, const std::string& group = "");
+  std::map<std::string, std::string> getPlannerParams(const std::string& planner_id,
+                                                      const std::string& group = "") const;
 
   /** \brief Set the planner parameters for given group and planner_id */
   void setPlannerParams(const std::string& planner_id, const std::string& group,
@@ -246,14 +247,14 @@ public:
   /** \brief Set a scaling factor for optionally reducing the maximum joint velocity.
       Allowed values are in (0,1]. The maximum joint velocity specified
       in the robot model is multiplied by the factor. If outside valid range
-      (imporantly, this includes it being set to 0.0), the factor is set to a
+      (importantly, this includes it being set to 0.0), the factor is set to a
       default value of 1.0 internally (i.e. maximum joint velocity) */
   void setMaxVelocityScalingFactor(double max_velocity_scaling_factor);
 
   /** \brief Set a scaling factor for optionally reducing the maximum joint acceleration.
       Allowed values are in (0,1]. The maximum joint acceleration specified
       in the robot model is multiplied by the factor. If outside valid range
-      (imporantly, this includes it being set to 0.0), the factor is set to a
+      (importantly, this includes it being set to 0.0), the factor is set to a
       default value of 1.0 internally (i.e. maximum joint acceleration) */
   void setMaxAccelerationScalingFactor(double max_acceleration_scaling_factor);
 
@@ -330,9 +331,8 @@ public:
 
   /** \brief Set the JointValueTarget and use it for future planning requests.
 
-      \e group_variable_values MUST contain exactly one value per joint
-      variable in the same order as returned by
-      getJointValueTarget().getJointModelGroup(getName())->getVariableNames().
+      \e group_variable_values MUST exactly match the variable order as returned by
+      getJointValueTarget(std::vector<double>&).
 
       This always sets all of the group's joint values.
 
@@ -359,6 +359,23 @@ public:
       If these values are out of bounds then false is returned BUT THE VALUES
       ARE STILL SET AS THE GOAL. */
   bool setJointValueTarget(const std::map<std::string, double>& variable_values);
+
+  /** \brief Set the JointValueTarget and use it for future planning requests.
+
+      \e variable_names are variable joint names and variable_values are
+      variable joint positions. Joints in the group are used to set the
+      JointValueTarget.  Joints in the model but not in the group are ignored.
+      An exception is thrown if a joint name is not found in the model.
+      Joint variables in the group that are missing from \e variable_names
+      remain unchanged (to reset all target variables to their current values
+      in the robot use setJointValueTarget(getCurrentJointValues())).
+
+      After this call, the JointValueTarget is used \b instead of any
+      previously set Position, Orientation, or Pose targets.
+
+      If these values are out of bounds then false is returned BUT THE VALUES
+      ARE STILL SET AS THE GOAL. */
+  bool setJointValueTarget(const std::vector<std::string>& variable_names, const std::vector<double>& variable_values);
 
   /** \brief Set the JointValueTarget and use it for future planning requests.
 
@@ -407,7 +424,7 @@ public:
 
       If these values are out of bounds then false is returned BUT THE VALUES
       ARE STILL SET AS THE GOAL. */
-  bool setJointValueTarget(const sensor_msgs::JointState& state);
+  bool setJointValueTarget(const sensor_msgs::msg::JointState& state);
 
   /** \brief Set the joint state goal for a particular joint by computing IK.
 
@@ -420,7 +437,7 @@ public:
 
       If IK fails to find a solution then false is returned BUT THE PARTIAL
       RESULT OF IK IS STILL SET AS THE GOAL. */
-  bool setJointValueTarget(const geometry_msgs::Pose& eef_pose, const std::string& end_effector_link = "");
+  bool setJointValueTarget(const geometry_msgs::msg::Pose& eef_pose, const std::string& end_effector_link = "");
 
   /** \brief Set the joint state goal for a particular joint by computing IK.
 
@@ -433,7 +450,7 @@ public:
 
       If IK fails to find a solution then false is returned BUT THE PARTIAL
       RESULT OF IK IS STILL SET AS THE GOAL. */
-  bool setJointValueTarget(const geometry_msgs::PoseStamped& eef_pose, const std::string& end_effector_link = "");
+  bool setJointValueTarget(const geometry_msgs::msg::PoseStamped& eef_pose, const std::string& end_effector_link = "");
 
   /** \brief Set the joint state goal for a particular joint by computing IK.
 
@@ -458,7 +475,8 @@ public:
       previously set Position, Orientation, or Pose targets.
 
       If IK fails to find a solution then an approximation is used. */
-  bool setApproximateJointValueTarget(const geometry_msgs::Pose& eef_pose, const std::string& end_effector_link = "");
+  bool setApproximateJointValueTarget(const geometry_msgs::msg::Pose& eef_pose,
+                                      const std::string& end_effector_link = "");
 
   /** \brief Set the joint state goal for a particular joint by computing IK.
 
@@ -470,7 +488,7 @@ public:
       previously set Position, Orientation, or Pose targets.
 
       If IK fails to find a solution then an approximation is used. */
-  bool setApproximateJointValueTarget(const geometry_msgs::PoseStamped& eef_pose,
+  bool setApproximateJointValueTarget(const geometry_msgs::msg::PoseStamped& eef_pose,
                                       const std::string& end_effector_link = "");
 
   /** \brief Set the joint state goal for a particular joint by computing IK.
@@ -495,8 +513,11 @@ public:
       that are specified in the SRDF under the name \e name as a group state*/
   bool setNamedTarget(const std::string& name);
 
-  /// Get the currently set joint state goal
-  const robot_state::RobotState& getJointValueTarget() const;
+  /** \brief Get the current joint state goal in a form compatible to setJointValueTarget() */
+  void getJointValueTarget(std::vector<double>& group_variable_values) const;
+
+  /// Get the currently set joint state goal, replaced by private getTargetRobotState()
+  [[deprecated]] const robot_state::RobotState& getJointValueTarget() const;
 
   /**@}*/
 
@@ -556,7 +577,7 @@ public:
       This new orientation target replaces any pre-existing JointValueTarget or
       pre-existing Position, Orientation, or Pose target for this \e
       end_effector_link. */
-  bool setPoseTarget(const geometry_msgs::Pose& target, const std::string& end_effector_link = "");
+  bool setPoseTarget(const geometry_msgs::msg::Pose& target, const std::string& end_effector_link = "");
 
   /** \brief Set the goal pose of the end-effector \e end_effector_link.
 
@@ -565,7 +586,7 @@ public:
       This new orientation target replaces any pre-existing JointValueTarget or
       pre-existing Position, Orientation, or Pose target for this \e
       end_effector_link. */
-  bool setPoseTarget(const geometry_msgs::PoseStamped& target, const std::string& end_effector_link = "");
+  bool setPoseTarget(const geometry_msgs::msg::PoseStamped& target, const std::string& end_effector_link = "");
 
   /** \brief Set goal poses for \e end_effector_link.
 
@@ -605,7 +626,7 @@ public:
       This new orientation target replaces any pre-existing JointValueTarget or
       pre-existing Position, Orientation, or Pose target(s) for this \e
       end_effector_link. */
-  bool setPoseTargets(const std::vector<geometry_msgs::Pose>& target, const std::string& end_effector_link = "");
+  bool setPoseTargets(const std::vector<geometry_msgs::msg::Pose>& target, const std::string& end_effector_link = "");
 
   /** \brief Set goal poses for \e end_effector_link.
 
@@ -625,7 +646,8 @@ public:
       This new orientation target replaces any pre-existing JointValueTarget or
       pre-existing Position, Orientation, or Pose target(s) for this \e
       end_effector_link. */
-  bool setPoseTargets(const std::vector<geometry_msgs::PoseStamped>& target, const std::string& end_effector_link = "");
+  bool setPoseTargets(const std::vector<geometry_msgs::msg::PoseStamped>& target,
+                      const std::string& end_effector_link = "");
 
   /// Specify which reference frame to assume for poses specified without a reference frame.
   void setPoseReferenceFrame(const std::string& pose_reference_frame);
@@ -651,14 +673,14 @@ public:
       If multiple targets are set for \e end_effector_link this will return the first one.
       If no pose target is set for this \e end_effector_link then an empty pose will be returned (check for
      orientation.xyzw == 0). */
-  const geometry_msgs::PoseStamped& getPoseTarget(const std::string& end_effector_link = "") const;
+  const geometry_msgs::msg::PoseStamped& getPoseTarget(const std::string& end_effector_link = "") const;
 
   /** Get the currently set pose goal for the end-effector \e end_effector_link. The pose goal can consist of multiple
      poses,
       if corresponding setPoseTarget() calls were made. Otherwise, only one pose is returned in the vector.
       If \e end_effector_link is empty (the default value) then the end-effector reported by getEndEffectorLink() is
      assumed  */
-  const std::vector<geometry_msgs::PoseStamped>& getPoseTargets(const std::string& end_effector_link = "") const;
+  const std::vector<geometry_msgs::msg::PoseStamped>& getPoseTargets(const std::string& end_effector_link = "") const;
 
   /** \brief Get the current end-effector link.
       This returns the value set by setEndEffectorLink() (or indirectly by setEndEffector()).
@@ -721,9 +743,9 @@ public:
       Return a value that is between 0.0 and 1.0 indicating the fraction of the path achieved as described by the
      waypoints.
       Return -1.0 in case of error. */
-  double computeCartesianPath(const std::vector<geometry_msgs::Pose>& waypoints, double eef_step, double jump_threshold,
-                              moveit_msgs::msg::RobotTrajectory& trajectory, bool avoid_collisions = true,
-                              moveit_msgs::msg::MoveItErrorCodes* error_code = NULL);
+  double computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
+                              double jump_threshold, moveit_msgs::msg::RobotTrajectory& trajectory,
+                              bool avoid_collisions = true, moveit_msgs::msg::MoveItErrorCodes* error_code = NULL);
 
   /** \brief Compute a Cartesian path that follows specified waypoints with a step size of at most \e eef_step meters
       between end effector configurations of consecutive points in the result \e trajectory. The reference frame for the
@@ -737,8 +759,8 @@ public:
       Return a value that is between 0.0 and 1.0 indicating the fraction of the path achieved as described by the
      waypoints.
       Return -1.0 in case of error. */
-  double computeCartesianPath(const std::vector<geometry_msgs::Pose>& waypoints, double eef_step, double jump_threshold,
-                              moveit_msgs::msg::RobotTrajectory& trajectory,
+  double computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
+                              double jump_threshold, moveit_msgs::msg::RobotTrajectory& trajectory,
                               const moveit_msgs::msg::Constraints& path_constraints, bool avoid_collisions = true,
                               moveit_msgs::msg::MoveItErrorCodes* error_code = NULL);
 
@@ -756,6 +778,20 @@ public:
       in \e request */
   void constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& request);
 
+  /** \brief Build a PickupGoal for an object named \e object and store it in \e goal_out */
+  moveit_msgs::action::PickupGoal constructPickupGoal(const std::string& object,
+                                                      std::vector<moveit_msgs::msg::Grasp> grasps,
+                                                      bool plan_only) const;
+
+  /** \brief Build a PlaceGoal for an object named \e object and store it in \e goal_out */
+  moveit_msgs::action::PlaceGoal constructPlaceGoal(const std::string& object,
+                                                    std::vector<moveit_msgs::msg::PlaceLocation> locations,
+                                                    bool plan_only) const;
+
+  /** \brief Convert a vector of PoseStamped to a vector of PlaceLocation */
+  std::vector<moveit_msgs::msg::PlaceLocation>
+  posesToPlaceLocations(const std::vector<geometry_msgs::msg::PoseStamped>& poses) const;
+
   /**@}*/
 
   /**
@@ -766,16 +802,28 @@ public:
   /** \brief Pick up an object
 
       This applies a number of hard-coded default grasps */
-  MoveItErrorCode pick(const std::string& object, bool plan_only = false);
+  MoveItErrorCode pick(const std::string& object, bool plan_only = false)
+  {
+    return pick(constructPickupGoal(object, std::vector<moveit_msgs::msg::Grasp>(), plan_only));
+  }
 
   /** \brief Pick up an object given a grasp pose */
-  MoveItErrorCode pick(const std::string& object, const moveit_msgs::msg::Grasp& grasp, bool plan_only = false);
+  MoveItErrorCode pick(const std::string& object, const moveit_msgs::msg::Grasp& grasp, bool plan_only = false)
+  {
+    return pick(constructPickupGoal(object, { grasp }, plan_only));
+  }
 
-  /** \brief Pick up an object given possible grasp poses
+  /** \brief Pick up an object given possible grasp poses */
+  MoveItErrorCode pick(const std::string& object, std::vector<moveit_msgs::msg::Grasp> grasps, bool plan_only = false)
+  {
+    return pick(constructPickupGoal(object, std::move(grasps), plan_only));
+  }
 
-      if the vector is left empty this behaves like pick(const std::string &object) */
-  MoveItErrorCode pick(const std::string& object, const std::vector<moveit_msgs::msg::Grasp>& grasps,
-                       bool plan_only = false);
+  /** \brief Pick up an object given a PickupGoal
+
+      Use as follows: first create the goal with constructPickupGoal(), then set \e possible_grasps and any other
+      desired variable in the goal, and finally pass it on to this function */
+  MoveItErrorCode pick(const moveit_msgs::action::PickupGoal& goal);
 
   /** \brief Pick up an object
 
@@ -787,18 +835,36 @@ public:
   MoveItErrorCode planGraspsAndPick(const moveit_msgs::msg::CollisionObject& object, bool plan_only = false);
 
   /** \brief Place an object somewhere safe in the world (a safe location will be detected) */
-  MoveItErrorCode place(const std::string& object, bool plan_only = false);
+  MoveItErrorCode place(const std::string& object, bool plan_only = false)
+  {
+    return place(constructPlaceGoal(object, std::vector<moveit_msgs::msg::PlaceLocation>(), plan_only));
+  }
 
   /** \brief Place an object at one of the specified possible locations */
-  MoveItErrorCode place(const std::string& object, const std::vector<moveit_msgs::action::PlaceLocation>& locations,
-                        bool plan_only = false);
+  MoveItErrorCode place(const std::string& object, std::vector<moveit_msgs::msg::PlaceLocation> locations,
+                        bool plan_only = false)
+  {
+    return place(constructPlaceGoal(object, std::move(locations), plan_only));
+  }
 
   /** \brief Place an object at one of the specified possible locations */
-  MoveItErrorCode place(const std::string& object, const std::vector<geometry_msgs::PoseStamped>& poses,
-                        bool plan_only = false);
+  MoveItErrorCode place(const std::string& object, const std::vector<geometry_msgs::msg::PoseStamped>& poses,
+                        bool plan_only = false)
+  {
+    return place(constructPlaceGoal(object, posesToPlaceLocations(poses), plan_only));
+  }
 
   /** \brief Place an object at one of the specified possible location */
-  MoveItErrorCode place(const std::string& object, const geometry_msgs::PoseStamped& pose, bool plan_only = false);
+  MoveItErrorCode place(const std::string& object, const geometry_msgs::msg::PoseStamped& pose, bool plan_only = false)
+  {
+    return place(constructPlaceGoal(object, posesToPlaceLocations({ pose }), plan_only));
+  }
+
+  /** \brief Place an object given a PlaceGoal
+
+      Use as follows: first create the goal with constructPlaceGoal(), then set \e place_locations and any other
+      desired variable in the goal, and finally pass it on to this function */
+  MoveItErrorCode place(const moveit_msgs::action::PlaceGoal& goal);
 
   /** \brief Given the name of an object in the planning scene, make
       the object attached to a link of the robot.  If no link name is
@@ -840,28 +906,28 @@ public:
   bool startStateMonitor(double wait = 1.0);
 
   /** \brief Get the current joint values for the joints planned for by this instance (see getJoints()) */
-  std::vector<double> getCurrentJointValues();
+  std::vector<double> getCurrentJointValues() const;
 
   /** \brief Get the current state of the robot within the duration specified by wait. */
-  robot_state::RobotStatePtr getCurrentState(double wait = 1);
+  robot_state::RobotStatePtr getCurrentState(double wait = 1) const;
 
   /** \brief Get the pose for the end-effector \e end_effector_link.
       If \e end_effector_link is empty (the default value) then the end-effector reported by getEndEffectorLink() is
      assumed */
-  geometry_msgs::PoseStamped getCurrentPose(const std::string& end_effector_link = "");
+  geometry_msgs::msg::PoseStamped getCurrentPose(const std::string& end_effector_link = "") const;
 
   /** \brief Get the roll-pitch-yaw (XYZ) for the end-effector \e end_effector_link.
       If \e end_effector_link is empty (the default value) then the end-effector reported by getEndEffectorLink() is
      assumed */
-  std::vector<double> getCurrentRPY(const std::string& end_effector_link = "");
+  std::vector<double> getCurrentRPY(const std::string& end_effector_link = "") const;
 
   /** \brief Get random joint values for the joints planned for by this instance (see getJoints()) */
-  std::vector<double> getRandomJointValues();
+  std::vector<double> getRandomJointValues() const;
 
   /** \brief Get a random reachable pose for the end-effector \e end_effector_link.
       If \e end_effector_link is empty (the default value) then the end-effector reported by getEndEffectorLink() is
      assumed */
-  geometry_msgs::PoseStamped getRandomPose(const std::string& end_effector_link = "");
+  geometry_msgs::msg::PoseStamped getRandomPose(const std::string& end_effector_link = "") const;
 
   /**@}*/
 
@@ -888,7 +954,7 @@ public:
     return remembered_joint_values_;
   }
 
-  /** \brief Forget the joint values remebered under \e name */
+  /** \brief Forget the joint values remembered under \e name */
   void forgetJointValues(const std::string& name);
 
   /**@}*/
@@ -929,12 +995,14 @@ public:
 
   /**@}*/
 
+protected:
+  /** return the full RobotState of the joint-space target, only for internal use */
+  const robot_state::RobotState& getTargetRobotState() const;
+
 private:
   std::map<std::string, std::vector<double> > remembered_joint_values_;
   class MoveGroupInterfaceImpl;
   MoveGroupInterfaceImpl* impl_;
 };
-}
-}
-
-#endif
+}  // namespace planning_interface
+}  // namespace moveit

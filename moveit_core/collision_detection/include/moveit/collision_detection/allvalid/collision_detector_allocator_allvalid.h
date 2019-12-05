@@ -34,23 +34,18 @@
 
 /* Author: Acorn Pooley, Ioan Sucan */
 
-#ifndef MOVEIT_COLLISION_DETECTION_COLLISION_DETECTOR_ALL_VALID_H_
-#define MOVEIT_COLLISION_DETECTION_COLLISION_DETECTOR_ALL_VALID_H_
+#pragma once
 
 #include <moveit/collision_detection/collision_detector_allocator.h>
-#include <moveit/collision_detection/allvalid/collision_robot_allvalid.h>
-#include <moveit/collision_detection/allvalid/collision_world_allvalid.h>
+#include <moveit/collision_detection/allvalid/collision_env_allvalid.h>
 
 namespace collision_detection
 {
 /** \brief An allocator for AllValid collision detectors */
 class CollisionDetectorAllocatorAllValid
-    : public CollisionDetectorAllocatorTemplate<CollisionWorldAllValid, CollisionRobotAllValid,
-                                                CollisionDetectorAllocatorAllValid>
+    : public CollisionDetectorAllocatorTemplate<CollisionEnvAllValid, CollisionDetectorAllocatorAllValid>
 {
 public:
-  static const std::string NAME;  // defined in collision_world_allvalid.cpp
+  static const std::string NAME;  // defined in collision_env_allvalid.cpp
 };
-}  // namespace collision_detection
-
-#endif
+}

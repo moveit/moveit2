@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 from __future__ import print_function
 '''
-IKFast Plugin Generator for MoveIt!
+IKFast Plugin Generator for MoveIt
 
 Creates a kinematics plugin using the output of IKFast from OpenRAVE.
 This plugin and the move_group node can be used as a general
@@ -71,13 +71,13 @@ search_modes = ['OPTIMIZE_MAX_JOINT', 'OPTIMIZE_FREE_JOINT']
 
 def create_parser():
   parser = argparse.ArgumentParser(
-      description="Generate an IKFast MoveIt! kinematic plugin")
+      description="Generate an IKFast MoveIt kinematic plugin")
   parser.add_argument("robot_name",
                       help="The name of your robot")
   parser.add_argument("planning_group_name",
                       help="The name of the planning group for which your IKFast solution was generated")
   parser.add_argument("ikfast_plugin_pkg",
-                      help="The name of the MoveIt! IKFast Kinematics Plugin to be created/updated")
+                      help="The name of the MoveIt IKFast Kinematics Plugin to be created/updated")
   parser.add_argument("base_link_name",
                       help="The name of the base link that was used when generating your IKFast solution")
   parser.add_argument("eef_link_name",
@@ -293,17 +293,27 @@ def update_ikfast_package(args):
   # Create a script for easily updating the plugin in the future in case the plugin needs to be updated
   easy_script_file_path = args.ikfast_plugin_pkg_path + "/update_ikfast_plugin.sh"
   with open(easy_script_file_path, 'w') as f:
-    f.write("rosrun moveit_kinematics create_ikfast_moveit_plugin.py" +
-            " --search_mode=" + args.search_mode +
-            " --srdf_filename=" + args.srdf_filename +
-            " --robot_name_in_srdf=" + args.robot_name_in_srdf +
-            " --moveit_config_pkg=" + args.moveit_config_pkg +
-            " " + args.robot_name +
-            " " + args.planning_group_name +
-            " " + args.ikfast_plugin_pkg +
-            " " + args.base_link_name +
-            " " + args.eef_link_name +
-            " " + args.ikfast_output_path)
+    f.write("search_mode=" + args.search_mode + "\n"
+            + "srdf_filename=" + args.srdf_filename + "\n"
+            + "robot_name_in_srdf=" + args.robot_name_in_srdf + "\n"
+            + "moveit_config_pkg=" + args.moveit_config_pkg + "\n"
+            + "robot_name=" + args.robot_name + "\n"
+            + "planning_group_name=" + args.planning_group_name + "\n"
+            + "ikfast_plugin_pkg=" + args.ikfast_plugin_pkg + "\n"
+            + "base_link_name=" + args.base_link_name + "\n"
+            + "eef_link_name=" + args.eef_link_name + "\n"
+            + "ikfast_output_path=" + args.ikfast_output_path + "\n\n"
+            + "rosrun moveit_kinematics create_ikfast_moveit_plugin.py\\\n"
+            + "  --search_mode=$search_mode\\\n"
+            + "  --srdf_filename=$srdf_filename\\\n"
+            + "  --robot_name_in_srdf=$robot_name_in_srdf\\\n"
+            + "  --moveit_config_pkg=$moveit_config_pkg\\\n"
+            + "  $robot_name\\\n"
+            + "  $planning_group_name\\\n"
+            + "  $ikfast_plugin_pkg\\\n"
+            + "  $base_link_name\\\n"
+            + "  $eef_link_name\\\n"
+            + "  $ikfast_output_path\n")
 
   print("Created update plugin script at '%s'" % easy_script_file_path)
 

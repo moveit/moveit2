@@ -34,12 +34,15 @@
 
 /* Author: Jon Binney, Ioan Sucan */
 
-#ifndef MOVEIT_PERCEPTION_POINTCLOUD_OCTOMAP_UPDATER_
-#define MOVEIT_PERCEPTION_POINTCLOUD_OCTOMAP_UPDATER_
+#pragma once
 
 #include <ros/ros.h>
+#include <moveit/macros/diagnostics.h>
 #include <tf2_ros/transform_listener.h>
+DIAGNOSTIC_PUSH
+SILENT_UNUSED_PARAM
 #include <tf2_ros/message_filter.h>
+DIAGNOSTIC_POP
 #include <message_filters/subscriber.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
@@ -101,5 +104,3 @@ private:
   std::vector<int> mask_;
 };
 }
-
-#endif

@@ -34,11 +34,9 @@
 
 /* Author: Ioan Sucan, Adam Leeper */
 
-#ifndef MOVEIT_ROBOT_TRAJECTORY_KINEMATIC_TRAJECTORY_
-#define MOVEIT_ROBOT_TRAJECTORY_KINEMATIC_TRAJECTORY_
+#pragma once
 
 #include <moveit/macros/class_forward.h>
-#include <moveit/macros/deprecation.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
@@ -124,7 +122,7 @@ public:
    */
   double getWayPointDurationFromStart(std::size_t index) const;
 
-  MOVEIT_DEPRECATED double getWaypointDurationFromStart(std::size_t index) const;
+  [[deprecated]] double getWaypointDurationFromStart(std::size_t index) const;
 
   double getWayPointDurationFromPrevious(std::size_t index) const
   {
@@ -209,6 +207,8 @@ public:
 
   void clear();
 
+  double getDuration() const;
+
   double getAverageSegmentDuration() const;
 
   void getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory);
@@ -271,5 +271,3 @@ private:
   rclcpp::Clock clock_ros_;
 };
 }  // namespace robot_trajectory
-
-#endif

@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_ros_planning)
 
-add_compile_options(-std=c++14)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED system filesystem date_time program_options thread chrono)
 find_package(ament_cmake REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_perception REQUIRED)

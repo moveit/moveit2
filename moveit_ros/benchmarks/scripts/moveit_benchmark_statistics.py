@@ -112,7 +112,7 @@ def readBenchmarkLog(dbname, filenames):
 
     # create all tables if they don't already exist
     c.executescript("""CREATE TABLE IF NOT EXISTS experiments
-        (id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR(512),
+        (id INTEGER PRIMARY KEY ON CONFLICT REPLACE AUTOINCREMENT, name VARCHAR(512),
         totaltime REAL, timelimit REAL, memorylimit REAL, runcount INTEGER,
         version VARCHAR(128), hostname VARCHAR(1024), cpuinfo TEXT,
         date DATETIME, seed INTEGER, setup TEXT);
@@ -130,7 +130,19 @@ def readBenchmarkLog(dbname, filenames):
         (runid INTEGER, time REAL, PRIMARY KEY (runid, time),
         FOREIGN KEY (runid) REFERENCES runs(id) ON DELETE CASCADE)""")
 
-    for filename in filenames:
+    # add placeholder entry for all_experiments
+    allExperimentsName = "all_experiments"
+    allExperimentsValues = {
+        "totaltime": 0.0, "timelimit": 0.0, "memorylimit": 0.0, "runcount": 0, "version": "0.0.0",
+        "hostname": "",   "cpuinfo": "",    "date": 0,          "seed": 0,     "setup": ""
+    }
+    addAllExperiments = len(filenames) > 0
+    if addAllExperiments:
+        c.execute('INSERT INTO experiments VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+                  (None, allExperimentsName) + tuple(allExperimentsValues.values()))
+        allExperimentsId = c.lastrowid
+
+    for i, filename in enumerate(filenames):
         print('Processing ' + filename)
         logfile = open(filename,'r')
         start_pos = logfile.tell()
@@ -155,7 +167,19 @@ def readBenchmarkLog(dbname, filenames):
         nrruns = -1
         if nrrunsOrNone != None:
             nrruns = int(nrrunsOrNone)
+            allExperimentsValues['runcount'] += nrruns
         totaltime = float(readRequiredLogValue("total time", logfile, 0, {-3 : "collect", -2 : "the", -1 : "data"}))
+        # fill in fields of all_experiments
+        allExperimentsValues['totaltime'] += totaltime
+        allExperimentsValues['memorylimit'] = max(allExperimentsValues['memorylimit'], totaltime)
+        allExperimentsValues['timelimit'] = max(allExperimentsValues['timelimit'], totaltime)
+        # copy the fields of the first file to all_experiments so that they are not empty
+        if (i==0):
+            allExperimentsValues['version'] = version
+            allExperimentsValues['date'] = date
+            allExperimentsValues['setup'] = expsetup
+            allExperimentsValues['hostname'] = hostname
+            allExperimentsValues['cpuinfo'] = cpuinfo
         numEnums = 0
         numEnumsOrNone = readOptionalLogValue(logfile, 0, {-2 : "enum"})
         if numEnumsOrNone != None:
@@ -213,13 +237,17 @@ def readBenchmarkLog(dbname, filenames):
             numRuns = int(logfile.readline().split()[0])
             runIds = []
             for j in range(numRuns):
-                values = tuple([experimentId, plannerId] + \
-                    [None if len(x) == 0 or x == 'nan' or x == 'inf' else x
-                    for x in logfile.readline().split('; ')[:-1]])
+                runValues = [None if len(x) == 0 or x == 'nan' or x == 'inf' else x
+                    for x in logfile.readline().split('; ')[:-1]]
+                values = tuple([experimentId, plannerId] + runValues)
                 c.execute(insertFmtStr, values)
                 # extract primary key of each run row so we can reference them
                 # in the planner progress data table if needed
                 runIds.append(c.lastrowid)
+                # add all run data to all_experiments
+                if addAllExperiments:
+                    values = tuple([allExperimentsId, plannerId] + runValues)
+                    c.execute(insertFmtStr, values)
 
             nextLine = logfile.readline().strip()
 
@@ -259,6 +287,15 @@ def readBenchmarkLog(dbname, filenames):
 
                 logfile.readline()
         logfile.close()
+
+    if addAllExperiments:
+        updateString = "UPDATE experiments SET"
+        for i, (key, val) in enumerate(allExperimentsValues.items()):
+            if i > 0:
+                updateString += ","
+            updateString += " " + str(key) + "='" + str(val) + "'"
+        updateString += "WHERE id='" + str(allExperimentsId) + "'"
+        c.execute(updateString)
     conn.commit()
     c.close()
 
@@ -306,7 +343,7 @@ def plotAttribute(cur, planners, attribute, typename):
                 color=matplotlib.cm.hot(int(floor(i*256/numValues))),
                 label=descriptions[i])
             heights = heights + measurements[i]
-        xtickNames = plt.xticks([x+width/2. for x in ind], labels, rotation=30)
+        xtickNames = plt.xticks([x + width / 2. for x in ind], labels, rotation=30, fontsize=8, ha='right')
         ax.set_ylabel(attribute.replace('_',' ') + ' (%)')
         box = ax.get_position()
         ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
@@ -318,7 +355,11 @@ def plotAttribute(cur, planners, attribute, typename):
         measurementsPercentage = [sum(m) * 100. / len(m) for m in measurements]
         ind = range(len(measurements))
         plt.bar(ind, measurementsPercentage, width)
-        xtickNames = plt.xticks([x + width / 2. for x in ind], labels, rotation=30, fontsize=8)
+        ### uncommenting this line will remove the term 'kConfigDefault' from the labels for OMPL Solvers. 
+        ### Fits situations where you need more control in the plot, such as in an academic publication for example
+        #labels = [l.replace('kConfigDefault', '') for l in labels]
+
+        xtickNames = plt.xticks([x + width / 2. for x in ind], labels, rotation=30, fontsize=8, ha='right')
         ax.set_ylabel(attribute.replace('_',' ') + ' (%)')
         plt.subplots_adjust(bottom=0.3) # Squish the plot into the upper 2/3 of the page.  Leave room for labels
     else:
@@ -330,19 +371,24 @@ def plotAttribute(cur, planners, attribute, typename):
 
         #xtickNames = plt.xticks(labels, rotation=30, fontsize=10)
         #plt.subplots_adjust(bottom=0.3) # Squish the plot into the upper 2/3 of the page.  Leave room for labels
-
+	
+        ### uncommenting this line will remove the term 'kConfigDefault' from the labels for OMPL Solvers. 
+        ### Fits situations where you need more control in the plot, such as in an academic publication for example
+        #labels = [l.replace('kConfigDefault', '') for l in labels]
+        
         xtickNames = plt.setp(ax,xticklabels=labels)
-        plt.setp(xtickNames, rotation=30)
+        plt.setp(xtickNames, rotation=30, fontsize=8, ha='right')
         for tick in ax.xaxis.get_major_ticks(): # shrink the font size of the x tick labels
             tick.label.set_fontsize(8)
         plt.subplots_adjust(bottom=0.3) # Squish the plot into the upper 2/3 of the page.  Leave room for labels
-    ax.set_xlabel('Motion planning algorithm')
+    ax.set_xlabel('Motion planning algorithm', fontsize=12)
     ax.yaxis.grid(True, linestyle='-', which='major', color='lightgrey', alpha=0.5)
     if max(nanCounts)>0:
         maxy = max([max(y) for y in measurements])
         for i in range(len(labels)):
             x = i+width/2 if typename=='BOOLEAN' else i+1
-            ax.text(x, .95*maxy, str(nanCounts[i]), horizontalalignment='center', size='small')
+        ### uncommenting the next line, the number of failed planning attempts will be added to each bar
+        # ax.text(x, .95*maxy, str(nanCounts[i]), horizontalalignment='center', size='small')
     plt.show()
 
 def plotProgressAttribute(cur, planners, attribute):
@@ -541,9 +587,9 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
 
     if len(args) == 0:
-	parser.error("No arguments were provided. Please provide full path of log file")
+        parser.error("No arguments were provided. Please provide full path of log file")
 
-    if len(args) == 1:
+    if len(args) > 0:
         readBenchmarkLog(options.dbname, args)
         # If we update the database, we recompute the views as well
         options.view = True
