@@ -24,8 +24,8 @@ env:
     - BEFORE_DOCKER_SCRIPT="sed -i 's/travis_run --retry rosdep install/#rosdep install/g' .moveit_ci/travis.sh"
     - BEFORE_SCRIPT="sudo apt-get -qq update; sudo apt-get -qq install -y libfcl-dev ros-dashing-angles"
   matrix:
-    # TODO(mlautman): Enable these in the future once they pass
-    # - TEST="clang-format ament_lint"
+    # TODO(henningkayser): Enable ament_lint once all packages are ported
+    - TEST="clang-format"
     - ROS_DISTRO=dashing
 
 # TODO(mlautman): Enable once franka_ikfast_plugin and panda_ikfast_plugin are available
