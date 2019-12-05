@@ -17,13 +17,13 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   OCTOMAP
 )
 
-target_link_libraries(${MOVEIT_LIB_NAME}  
+target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_planning_scene
   moveit_distance_field
   moveit_collision_detection
   moveit_robot_state
 )
-  
+
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib

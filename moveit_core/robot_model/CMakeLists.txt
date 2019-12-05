@@ -12,7 +12,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/prismatic_joint_model.cpp
   src/revolute_joint_model.cpp
   src/robot_model.cpp
-  )
+)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 target_link_libraries(${MOVEIT_LIB_NAME}
@@ -32,20 +32,20 @@ if(BUILD_TESTING)
   find_package(moveit_resources REQUIRED)
   ament_add_gtest(test_robot_model test/test.cpp)
   target_link_libraries(test_robot_model
-	  moveit_test_utils
-	  moveit_profiler
-	  ${Boost_LIBRARIES}
-	  ${rclcpp_LIBRARIES}
-	  ${rmw_implementation_LIBRARIES}
-	  ${urdfdom_LIBRARIES}
-	  ${urdfdom_headers_LIBRARIES}
-	  ${geometric_shapes_LIBRARIES}
-	  ${MOVEIT_LIB_NAME})
+    moveit_test_utils
+    moveit_profiler
+    ${Boost_LIBRARIES}
+    ${rclcpp_LIBRARIES}
+    ${rmw_implementation_LIBRARIES}
+    ${urdfdom_LIBRARIES}
+    ${urdfdom_headers_LIBRARIES}
+    ${geometric_shapes_LIBRARIES}
+    ${MOVEIT_LIB_NAME})
 endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
-	RUNTIME DESTINATION bin
+        RUNTIME DESTINATION bin
 )
 install(DIRECTORY include/ DESTINATION include)

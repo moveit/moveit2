@@ -31,7 +31,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
-	RUNTIME DESTINATION bin)
+        RUNTIME DESTINATION bin)
 install(DIRECTORY include/ DESTINATION include)
 
 # Unit tests
@@ -76,7 +76,7 @@ if(BUILD_TESTING)
 
   # As an executable, this benchmark is not run as a test by default
   ament_add_gtest(test_robot_state_benchmark test/robot_state_benchmark.cpp)
-    target_include_directories(test_robot_state_benchmark PUBLIC
+  target_include_directories(test_robot_state_benchmark PUBLIC
     ${tf2_geometry_msgs_INCLUDE_DIRS}
     ${urdf_INCLUDE_DIRS}
     ${visualization_msgs_INCLUDE_DIRS}

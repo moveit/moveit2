@@ -135,21 +135,21 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
-                           ${LIBFCL_INCLUDE_DIRS}
+  ${LIBFCL_INCLUDE_DIRS}
 )
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
-                    ${VERSION_FILE_PATH}
-                    ${rclcpp_INCLUDE_DIRS}
-                    ${rmw_implementation_INCLUDE_DIRS}
-                    ${Boost_INCLUDE_DIRS}
-                    ${urdfdom_INCLUDE_DIRS}
-                    ${urdfdom_headers_INCLUDE_DIRS}
-                    ${OCTOMAP_INCLUDE_DIRS}
-                    ${moveit_msgs_INCLUDE_DIRS}
-                    ${random_numbers_INCLUDE_DIRS}
-                    ${srdfdom_INCLUDE_DIRS}
-                    ${geometric_shapes_INCLUDE_DIRS}
+  ${VERSION_FILE_PATH}
+  ${rclcpp_INCLUDE_DIRS}
+  ${rmw_implementation_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+  ${urdfdom_INCLUDE_DIRS}
+  ${urdfdom_headers_INCLUDE_DIRS}
+  ${OCTOMAP_INCLUDE_DIRS}
+  ${moveit_msgs_INCLUDE_DIRS}
+  ${random_numbers_INCLUDE_DIRS}
+  ${srdfdom_INCLUDE_DIRS}
+  ${geometric_shapes_INCLUDE_DIRS}
 )
 
 # Generate and install version.h

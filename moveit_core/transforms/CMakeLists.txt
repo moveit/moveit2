@@ -4,18 +4,18 @@ add_library(${MOVEIT_LIB_NAME} SHARED src/transforms.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 ament_target_dependencies(${MOVEIT_LIB_NAME}
-            tf2_eigen
-	    rclcpp
-	    rmw_implementation
-	    urdfdom
-	    urdfdom_headers
-	    Boost
+  tf2_eigen
+  rclcpp
+  rmw_implementation
+  urdfdom
+  urdfdom_headers
+  Boost
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
-	RUNTIME DESTINATION bin
+        RUNTIME DESTINATION bin
 )
 install(DIRECTORY include/ DESTINATION include)
 
