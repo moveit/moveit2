@@ -54,20 +54,17 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
     node_ = node;
-    auto collision_param = std::make_shared<rclcpp::SyncParametersClient>(node_);
-
-    if (!collision_param->has_parameter(DT_PARAM_NAME))
+    if (!node_->get_parameter(DT_PARAM_NAME, max_dt_offset_))
     {
       max_dt_offset_ = 0.5;
       RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
     }
     else
     {
-      max_dt_offset_ = node->get_parameter(DT_PARAM_NAME).as_double();
       RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
     }
 
-    if (!collision_param->has_parameter(JIGGLE_PARAM_NAME))
+    if (!node_->get_parameter(JIGGLE_PARAM_NAME, jiggle_fraction_))
     {
       jiggle_fraction_ = 0.02;
       RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", JIGGLE_PARAM_NAME.c_str(),
@@ -75,11 +72,10 @@ public:
     }
     else
     {
-      jiggle_fraction_ = node->get_parameter(JIGGLE_PARAM_NAME).as_double();
       RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", JIGGLE_PARAM_NAME.c_str(), jiggle_fraction_);
     }
 
-    if (!collision_param->has_parameter(ATTEMPTS_PARAM_NAME))
+    if (!node_->get_parameter(ATTEMPTS_PARAM_NAME, sampling_attempts_))
     {
       sampling_attempts_ = 100;
       RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f,", ATTEMPTS_PARAM_NAME.c_str(),
@@ -92,7 +88,6 @@ public:
         sampling_attempts_ = 1;
         RCLCPP_WARN(LOGGER, "Param '%s' needs to be at least 1.", ATTEMPTS_PARAM_NAME.c_str());
       }
-      sampling_attempts_ = node->get_parameter(ATTEMPTS_PARAM_NAME).as_double();
       RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", ATTEMPTS_PARAM_NAME.c_str(), sampling_attempts_);
     }
   }

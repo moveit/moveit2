@@ -54,27 +54,23 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
     node_ = node;
-    auto bounds_param = std::make_shared<rclcpp::SyncParametersClient>(node_);
-
-    if (!bounds_param->has_parameter(BOUNDS_PARAM_NAME))
+    if (!node_->get_parameter(BOUNDS_PARAM_NAME, bounds_dist_))
     {
       bounds_dist_ = 0.05;
       RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
     }
     else
     {
-      bounds_dist_ = node_->get_parameter(BOUNDS_PARAM_NAME).as_double();
       RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
     }
 
-    if (!bounds_param->has_parameter(DT_PARAM_NAME))
+    if (!node_->get_parameter(DT_PARAM_NAME, max_dt_offset_))
     {
       max_dt_offset_ = 0.5;
       RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
     }
     else
     {
-      max_dt_offset_ = node_->get_parameter(DT_PARAM_NAME).as_double();
       RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
     }
   }
