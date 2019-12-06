@@ -16,7 +16,7 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>moveit_core</depend>
   <depend>moveit_ros_occupancy_map_monitor</depend>
@@ -38,6 +38,7 @@
   <build_depend>eigen</build_depend>
 
   <export>
+    <build_type>ament_cmake</build_type>
     <moveit_core plugin="${prefix}/planning_request_adapters_plugin_description.xml"/>
   </export>
 
