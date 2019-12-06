@@ -49,6 +49,7 @@ set(libraries
   # moveit_plan_execution
   # moveit_planning_scene_monitor
   # moveit_collision_plugin_loader
+  moveit_default_planning_request_adapter_plugins
 )
 
 
@@ -75,20 +76,16 @@ add_subdirectory(rdf_loader)
 # add_subdirectory(robot_model_loader)
 # add_subdirectory(constraint_sampler_manager_loader)
 # add_subdirectory(planning_pipeline)
-# add_subdirectory(planning_request_adapter_plugins)
+add_subdirectory(planning_request_adapter_plugins)
 # add_subdirectory(planning_scene_monitor)
 # add_subdirectory(planning_components_tools)
 # add_subdirectory(trajectory_execution_manager)
 # add_subdirectory(plan_execution)
 
-install(
-  FILES
-    planning_request_adapters_plugin_description.xml
-  DESTINATION
-    share)
-
 ament_export_include_directories(include)
 ament_export_libraries(${libraries})
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+pluginlib_export_plugin_description_file(moveit_core "planning_request_adapters_plugin_description.xml")
 
 ament_package()

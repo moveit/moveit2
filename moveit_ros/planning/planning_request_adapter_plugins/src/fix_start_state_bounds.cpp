@@ -39,37 +39,40 @@
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/robot_state/conversions.h>
 #include <class_loader/class_loader.hpp>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace default_planner_request_adapters
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_bounds");
+
 class FixStartStateBounds : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
   static const std::string BOUNDS_PARAM_NAME;
   static const std::string DT_PARAM_NAME;
 
-  FixStartStateBounds() : planning_request_adapter::PlanningRequestAdapter()
+  void initialize(const rclcpp::Node::SharedPtr& node) override
   {
-  }
-
-  void initialize(const ros::NodeHandle& nh) override
-  {
-    if (!nh.getParam(BOUNDS_PARAM_NAME, bounds_dist_))
+    node_ = node;
+    if (!node_->get_parameter(BOUNDS_PARAM_NAME, bounds_dist_))
     {
       bounds_dist_ = 0.05;
-      ROS_INFO_STREAM("Param '" << BOUNDS_PARAM_NAME << "' was not set. Using default value: " << bounds_dist_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
     }
     else
-      ROS_INFO_STREAM("Param '" << BOUNDS_PARAM_NAME << "' was set to " << bounds_dist_);
+    {
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
+    }
 
-    if (!nh.getParam(DT_PARAM_NAME, max_dt_offset_))
+    if (!node_->get_parameter(DT_PARAM_NAME, max_dt_offset_))
     {
       max_dt_offset_ = 0.5;
-      ROS_INFO_STREAM("Param '" << DT_PARAM_NAME << "' was not set. Using default value: " << max_dt_offset_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
     }
     else
-      ROS_INFO_STREAM("Param '" << DT_PARAM_NAME << "' was set to " << max_dt_offset_);
+    {
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
+    }
   }
 
   std::string getDescription() const override
@@ -81,7 +84,7 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& added_path_index) const override
   {
-    ROS_DEBUG("Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
 
     // get the specified start state
     robot_state::RobotState start_state = planning_scene->getCurrentState();
@@ -150,8 +153,8 @@ public:
             prefix_state.reset(new robot_state::RobotState(start_state));
           start_state.enforceBounds(jmodel);
           change_req = true;
-          ROS_INFO("Starting state is just outside bounds (joint '%s'). Assuming within bounds.",
-                   jmodel->getName().c_str());
+          RCLCPP_INFO(LOGGER, "Starting state is just outside bounds (joint '%s'). Assuming within bounds.",
+                      jmodel->getName().c_str());
         }
         else
         {
@@ -167,11 +170,11 @@ public:
             joint_bounds_low << variable_bounds.min_position_ << " ";
             joint_bounds_hi << variable_bounds.max_position_ << " ";
           }
-          ROS_WARN_STREAM("Joint '" << jmodel->getName()
-                                    << "' from the starting state is outside bounds by a significant margin: [ "
-                                    << joint_values.str() << "] should be in the range [ " << joint_bounds_low.str()
-                                    << "], [ " << joint_bounds_hi.str() << "] but the error above the ~"
-                                    << BOUNDS_PARAM_NAME << " parameter (currently set to " << bounds_dist_ << ")");
+          RCLCPP_WARN(LOGGER,
+                      "Joint '%s' from the starting state is outside bounds by a significant margin: [%s] should be in "
+                      "the range [%s], [%s] but the error above the ~%s parameter (currently set to %f)",
+                      jmodel->getName().c_str(), joint_values.str().c_str(), joint_bounds_low.str().c_str(),
+                      joint_bounds_hi.str().c_str(), BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
         }
       }
     }
@@ -205,6 +208,7 @@ public:
   }
 
 private:
+  rclcpp::Node::SharedPtr node_;
   double bounds_dist_;
   double max_dt_offset_;
 };
@@ -214,4 +218,4 @@ const std::string FixStartStateBounds::DT_PARAM_NAME = "start_state_max_dt";
 }  // namespace default_planner_request_adapters
 
 CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::FixStartStateBounds,
-                            planning_request_adapter::PlanningRequestAdapter);
+                            planning_request_adapter::PlanningRequestAdapter)

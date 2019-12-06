@@ -36,28 +36,30 @@
 
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <class_loader/class_loader.hpp>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace default_planner_request_adapters
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_workspace_bounds");
+
 class FixWorkspaceBounds : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
   static const std::string WBOUNDS_PARAM_NAME;
 
-  FixWorkspaceBounds() : planning_request_adapter::PlanningRequestAdapter()
+  void initialize(const rclcpp::Node::SharedPtr& node) override
   {
-  }
-
-  void initialize(const ros::NodeHandle& nh) override
-  {
-    if (!nh.getParam(WBOUNDS_PARAM_NAME, workspace_extent_))
+    node_ = node;
+    if (!node_->get_parameter(WBOUNDS_PARAM_NAME, workspace_extent_))
     {
       workspace_extent_ = 10.0;
-      ROS_INFO_STREAM("Param '" << WBOUNDS_PARAM_NAME << "' was not set. Using default value: " << workspace_extent_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", WBOUNDS_PARAM_NAME.c_str(),
+                  workspace_extent_);
     }
     else
-      ROS_INFO_STREAM("Param '" << WBOUNDS_PARAM_NAME << "' was set to " << workspace_extent_);
+    {
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", WBOUNDS_PARAM_NAME.c_str(), workspace_extent_);
+    }
     workspace_extent_ /= 2.0;
   }
 
@@ -70,13 +72,13 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& /*added_path_index*/) const override
   {
-    ROS_DEBUG("Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
     const moveit_msgs::msg::WorkspaceParameters& wparams = req.workspace_parameters;
     if (wparams.min_corner.x == wparams.max_corner.x && wparams.min_corner.x == 0.0 &&
         wparams.min_corner.y == wparams.max_corner.y && wparams.min_corner.y == 0.0 &&
         wparams.min_corner.z == wparams.max_corner.z && wparams.min_corner.z == 0.0)
     {
-      ROS_DEBUG("It looks like the planning volume was not specified. Using default values.");
+      RCLCPP_DEBUG(LOGGER, "It looks like the planning volume was not specified. Using default values.");
       planning_interface::MotionPlanRequest req2 = req;
       moveit_msgs::msg::WorkspaceParameters& default_wp = req2.workspace_parameters;
       default_wp.min_corner.x = default_wp.min_corner.y = default_wp.min_corner.z = -workspace_extent_;
@@ -88,6 +90,7 @@ public:
   }
 
 private:
+  rclcpp::Node::SharedPtr node_;
   double workspace_extent_;
 };
 
@@ -95,4 +98,4 @@ const std::string FixWorkspaceBounds::WBOUNDS_PARAM_NAME = "default_workspace_bo
 }  // namespace default_planner_request_adapters
 
 CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::FixWorkspaceBounds,
-                            planning_request_adapter::PlanningRequestAdapter);
+                            planning_request_adapter::PlanningRequestAdapter)

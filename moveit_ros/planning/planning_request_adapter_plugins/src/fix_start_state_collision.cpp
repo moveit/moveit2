@@ -38,10 +38,12 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <class_loader/class_loader.hpp>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace default_planner_request_adapters
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_collision");
+
 class FixStartStateCollision : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
@@ -49,41 +51,44 @@ public:
   static const std::string JIGGLE_PARAM_NAME;
   static const std::string ATTEMPTS_PARAM_NAME;
 
-  FixStartStateCollision() : planning_request_adapter::PlanningRequestAdapter()
+  void initialize(const rclcpp::Node::SharedPtr& node) override
   {
-  }
-
-  void initialize(const ros::NodeHandle& nh) override
-  {
-    if (!nh.getParam(DT_PARAM_NAME, max_dt_offset_))
+    node_ = node;
+    if (!node_->get_parameter(DT_PARAM_NAME, max_dt_offset_))
     {
       max_dt_offset_ = 0.5;
-      ROS_INFO_STREAM("Param '" << DT_PARAM_NAME << "' was not set. Using default value: " << max_dt_offset_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
     }
     else
-      ROS_INFO_STREAM("Param '" << DT_PARAM_NAME << "' was set to " << max_dt_offset_);
+    {
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
+    }
 
-    if (!nh.getParam(JIGGLE_PARAM_NAME, jiggle_fraction_))
+    if (!node_->get_parameter(JIGGLE_PARAM_NAME, jiggle_fraction_))
     {
       jiggle_fraction_ = 0.02;
-      ROS_INFO_STREAM("Param '" << JIGGLE_PARAM_NAME << "' was not set. Using default value: " << jiggle_fraction_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", JIGGLE_PARAM_NAME.c_str(),
+                  jiggle_fraction_);
     }
     else
-      ROS_INFO_STREAM("Param '" << JIGGLE_PARAM_NAME << "' was set to " << jiggle_fraction_);
+    {
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", JIGGLE_PARAM_NAME.c_str(), jiggle_fraction_);
+    }
 
-    if (!nh.getParam(ATTEMPTS_PARAM_NAME, sampling_attempts_))
+    if (!node_->get_parameter(ATTEMPTS_PARAM_NAME, sampling_attempts_))
     {
       sampling_attempts_ = 100;
-      ROS_INFO_STREAM("Param '" << ATTEMPTS_PARAM_NAME << "' was not set. Using default value: " << sampling_attempts_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f,", ATTEMPTS_PARAM_NAME.c_str(),
+                  sampling_attempts_);
     }
     else
     {
       if (sampling_attempts_ < 1)
       {
         sampling_attempts_ = 1;
-        ROS_WARN_STREAM("Param '" << ATTEMPTS_PARAM_NAME << "' needs to be at least 1.");
+        RCLCPP_WARN(LOGGER, "Param '%s' needs to be at least 1.", ATTEMPTS_PARAM_NAME.c_str());
       }
-      ROS_INFO_STREAM("Param '" << ATTEMPTS_PARAM_NAME << "' was set to " << sampling_attempts_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", ATTEMPTS_PARAM_NAME.c_str(), sampling_attempts_);
     }
   }
 
@@ -96,7 +101,7 @@ public:
                     const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                     std::vector<std::size_t>& added_path_index) const override
   {
-    ROS_DEBUG("Running '%s'", getDescription().c_str());
+    RCLCPP_DEBUG(LOGGER, "Running '%s'", getDescription().c_str());
 
     // get the specified start state
     robot_state::RobotState start_state = planning_scene->getCurrentState();
@@ -115,9 +120,9 @@ public:
       planning_scene->checkCollision(vcreq, vcres, start_state);
 
       if (creq.group_name.empty())
-        ROS_INFO("Start state appears to be in collision");
+        RCLCPP_INFO(LOGGER, "Start state appears to be in collision");
       else
-        ROS_INFO_STREAM("Start state appears to be in collision with respect to group " << creq.group_name);
+        RCLCPP_INFO(LOGGER, "Start state appears to be in collision with respect to group %s", creq.group_name.c_str());
 
       robot_state::RobotStatePtr prefix_state(new robot_state::RobotState(start_state));
       random_numbers::RandomNumberGenerator& rng = prefix_state->getRandomNumberGenerator();
@@ -142,8 +147,8 @@ public:
           if (!cres.collision)
           {
             found = true;
-            ROS_INFO("Found a valid state near the start state at distance %lf after %d attempts",
-                     prefix_state->distance(start_state), c);
+            RCLCPP_INFO(LOGGER, "Found a valid state near the start state at distance %lf after %d attempts",
+                        prefix_state->distance(start_state), c);
           }
         }
       }
@@ -169,23 +174,25 @@ public:
       }
       else
       {
-        ROS_WARN("Unable to find a valid state nearby the start state (using jiggle fraction of %lf and %u sampling "
-                 "attempts). Passing the original planning request to the planner.",
-                 jiggle_fraction_, sampling_attempts_);
+        RCLCPP_WARN(LOGGER,
+                    "Unable to find a valid state nearby the start state (using jiggle fraction of %lf and %u sampling "
+                    "attempts). Passing the original planning request to the planner.",
+                    jiggle_fraction_, sampling_attempts_);
         return planner(planning_scene, req, res);
       }
     }
     else
     {
       if (creq.group_name.empty())
-        ROS_DEBUG("Start state is valid");
+        RCLCPP_DEBUG(LOGGER, "Start state is valid");
       else
-        ROS_DEBUG_STREAM("Start state is valid with respect to group " << creq.group_name);
+        RCLCPP_DEBUG(LOGGER, "Start state is valid with respect to group %s", creq.group_name.c_str());
       return planner(planning_scene, req, res);
     }
   }
 
 private:
+  rclcpp::Node::SharedPtr node_;
   double max_dt_offset_;
   double jiggle_fraction_;
   int sampling_attempts_;
@@ -197,4 +204,4 @@ const std::string FixStartStateCollision::ATTEMPTS_PARAM_NAME = "max_sampling_at
 }  // namespace default_planner_request_adapters
 
 CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::FixStartStateCollision,
-                            planning_request_adapter::PlanningRequestAdapter);
+                            planning_request_adapter::PlanningRequestAdapter)

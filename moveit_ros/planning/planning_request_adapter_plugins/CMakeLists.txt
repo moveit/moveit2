@@ -10,19 +10,31 @@ set(SOURCE_FILES
   src/add_iterative_spline_parameterization.cpp
   src/add_time_optimal_parameterization.cpp
   src/resolve_constraint_frames.cpp
-  )
+)
 
-add_library(${MOVEIT_LIB_NAME} ${SOURCE_FILES})
+add_library(${MOVEIT_LIB_NAME} SHARED ${SOURCE_FILES})
+
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+    Boost
+    rclcpp
+    pluginlib
+    moveit_core
+    moveit_planning_scene
+)
 
 add_executable(moveit_list_request_adapter_plugins src/list.cpp)
-target_link_libraries(moveit_list_request_adapter_plugins ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(moveit_list_request_adapter_plugins
+  Boost
+  rclcpp
+  pluginlib
+  ament_index_cpp
+)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 
 install(TARGETS moveit_list_request_adapter_plugins
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+  DESTINATION lib/${PROJECT_NAME})
