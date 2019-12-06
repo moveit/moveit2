@@ -45,7 +45,7 @@ static const double ALIMIT = 1.0;  // default if not specified in model
 namespace trajectory_processing
 {
 static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_trajectory_processing.iterative_spline_parameterization");
+    rclcpp::get_logger("moveit.trajectory_processing.iterative_spline_parameterization");
 
 static void fit_cubic_spline(const int n, const double dt[], const double x[], double x1[], double x2[]);
 static void adjust_two_positions(const int n, const double dt[], double x[], double x1[], double x2[],

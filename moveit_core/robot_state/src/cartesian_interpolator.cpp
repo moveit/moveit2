@@ -48,7 +48,7 @@ namespace core
  * valid paths from paths with large joint space jumps. */
 static const std::size_t MIN_STEPS_FOR_JUMP_THRESH = 10;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_state.cartesian_interpolator");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.robot_state.cartesian_interpolator");
 
 double CartesianInterpolator::computeCartesianPath(RobotState* start_state, const JointModelGroup* group,
                                                    std::vector<RobotStatePtr>& traj, const LinkModel* link,

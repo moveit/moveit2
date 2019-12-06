@@ -45,7 +45,7 @@ namespace moveit
 {
 namespace core
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.floating_joint_model");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.robot_model.floating_joint_model");
 
 FloatingJointModel::FloatingJointModel(const std::string& name) : JointModel(name), angular_distance_weight_(1.0)
 {

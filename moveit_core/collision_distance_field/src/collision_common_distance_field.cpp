@@ -43,7 +43,7 @@
 namespace collision_detection
 {
 static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_collision_distance_field.collision_common_distance_field");
+    rclcpp::get_logger("moveit.collision_distance_field.collision_common_distance_field");
 struct BodyDecompositionCache
 {
   using Comperator = std::owner_less<shapes::ShapeConstWeakPtr>;

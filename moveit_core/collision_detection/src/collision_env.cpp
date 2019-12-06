@@ -39,7 +39,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 // Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_robot");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.collision_detection.collision_robot");
 
 static inline bool validateScale(double scale)
 {

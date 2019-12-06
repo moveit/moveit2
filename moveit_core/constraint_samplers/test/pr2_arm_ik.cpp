@@ -49,7 +49,7 @@
 using namespace angles;
 namespace pr2_arm_kinematics
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constaint_samplers.test.pr2_arm_ik");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.constaint_samplers.test.pr2_arm_ik");
 
 PR2ArmIK::PR2ArmIK()
 {
