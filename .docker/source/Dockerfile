@@ -21,7 +21,8 @@ RUN mkdir src && \
 RUN apt-get -qq update && \
     apt-get -qq dist-upgrade && \
     rosdep update && \
-    rosdep install -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
+    # TODO(henningkayser): Remove --skip-keys=catkin when octomap is released
+    rosdep install -y --from-paths . --ignore-src --skip-keys=catkin --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
     rm -rf /var/lib/apt/lists/*
 
 # Build the workspace

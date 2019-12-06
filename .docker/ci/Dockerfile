@@ -74,7 +74,8 @@ RUN mkdir src && \
     vcs import < moveit2.repos && \
     apt-get -qq update && \
     rosdep update -q && \
-    rosdep install -q -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
+    # TODO(henningkayser): Remove --skip-keys=catkin when octomap is released
+    rosdep install -q -y --from-paths . --ignore-src --skip-keys=catkin --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/* && \
     #
