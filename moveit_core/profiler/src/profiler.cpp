@@ -46,7 +46,7 @@ namespace moveit
 {
 namespace tools
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.profiler.profiler");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.profiler");
 
 Profiler& Profiler::instance()
 {

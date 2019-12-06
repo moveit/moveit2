@@ -40,7 +40,7 @@
 namespace kinematics
 {
 // Logger
-const rclcpp::Logger KinematicsBase::LOGGER = rclcpp::get_logger("moveit.kinematics_base.kinematics_base");
+const rclcpp::Logger KinematicsBase::LOGGER = rclcpp::get_logger("moveit.kinematics_base");
 const double KinematicsBase::DEFAULT_SEARCH_DISCRETIZATION = 0.1;
 const double KinematicsBase::DEFAULT_TIMEOUT = 1.0;
 
