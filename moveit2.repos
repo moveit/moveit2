@@ -3,11 +3,10 @@ repositories:
     type: git
     url: https://github.com/ros-planning/moveit2
     version: master
-# TODO: Switch to ros-planning/ros2 after sync PR is merged
   moveit_msgs:
     type: git
-    url: https://github.com/henningkayser/moveit_msgs
-    version: pr-sync_master
+    url: https://github.com/ros-planning/moveit_msgs
+    version: ros2
   joint_state_publisher:
     type: git
     url: https://github.com/ros/joint_state_publisher
