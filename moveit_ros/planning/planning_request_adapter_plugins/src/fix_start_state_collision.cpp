@@ -42,7 +42,7 @@
 
 namespace default_planner_request_adapters
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_collision");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.fix_start_state_collision");
 
 class FixStartStateCollision : public planning_request_adapter::PlanningRequestAdapter
 {

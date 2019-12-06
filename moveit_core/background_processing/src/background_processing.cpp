@@ -42,7 +42,7 @@ namespace moveit
 namespace tools
 {
 // Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_background_processing.background_processing");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.core.background_processing");
 
 BackgroundProcessing::BackgroundProcessing()
 {

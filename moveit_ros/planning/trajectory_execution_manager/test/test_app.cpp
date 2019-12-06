@@ -38,7 +38,7 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.trajectory_execution_manager.test_app");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.trajectory_execution_manager.test_app");
 
 int main(int argc, char** argv)
 {

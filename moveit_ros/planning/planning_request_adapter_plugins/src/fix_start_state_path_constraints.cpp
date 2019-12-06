@@ -43,7 +43,7 @@
 
 namespace default_planner_request_adapters
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_path_constraints");
+rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.fix_start_state_path_constraints");
 
 class FixStartStatePathConstraints : public planning_request_adapter::PlanningRequestAdapter
 {

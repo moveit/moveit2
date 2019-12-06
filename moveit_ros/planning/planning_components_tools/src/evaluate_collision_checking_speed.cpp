@@ -44,7 +44,7 @@ using namespace std::chrono_literals;
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("evaluate_collision_checking_speed");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.evaluate_collision_checking_speed");
 
 void runCollisionDetection(unsigned int id, unsigned int trials, const planning_scene::PlanningScene* scene,
                            const robot_state::RobotState* state)

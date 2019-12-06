@@ -39,7 +39,7 @@
 #include <moveit/profiler/profiler.h>
 #include <rclcpp/rclcpp.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.state_validity_checker");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.planners.ompl.state_validity_checker");
 
 ompl_interface::StateValidityChecker::StateValidityChecker(const ModelBasedPlanningContext* pc)
   : ompl::base::StateValidityChecker(pc->getOMPLSimpleSetup()->getSpaceInformation())

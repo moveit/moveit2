@@ -46,7 +46,7 @@ using namespace moveit::core;
 namespace kinematic_constraints
 {
 // Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematic_constraints.utils");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.core.kinematic_constraints.utils");
 
 moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constraints& first,
                                                const moveit_msgs::msg::Constraints& second)

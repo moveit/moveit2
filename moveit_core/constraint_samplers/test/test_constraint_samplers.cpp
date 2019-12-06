@@ -53,6 +53,8 @@
 
 #include "pr2_arm_kinematics_plugin.h"
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.core.constraint_samplers.test_constraint_samplers");
+
 class LoadPlanningModelsPr2 : public testing::Test
 {
 protected:
@@ -675,8 +677,7 @@ TEST_F(LoadPlanningModelsPr2, PoseConstraintSamplerManager)
     if (s->sample(ks, ks_const, 1))
       succ++;
   }
-  RCLCPP_INFO(rclcpp::get_logger("test_constraint_samplers"),
-              "Success rate for IK Constraint Sampler with position & orientation constraints for one arm: %lf",
+  RCLCPP_INFO(LOGGER, "Success rate for IK Constraint Sampler with position & orientation constraints for one arm: %lf",
               (double)succ / (double)NT);
 
   // add additional ocm with smaller volume
@@ -1108,7 +1109,7 @@ TEST_F(LoadPlanningModelsPr2, SubgroupPoseConstraintsSampler)
     if (s->sample(ks, ks_const, 1))
       succ++;
   }
-  RCLCPP_INFO(rclcpp::get_logger("pr2_arm_kinematics_plugin"),
+  RCLCPP_INFO(LOGGER,
               "Success rate for IK Constraint Sampler with position & orientation constraints for both arms: %lf",
               (double)succ / (double)NT);
 }

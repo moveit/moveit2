@@ -45,7 +45,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 // Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_trajectory_processing.test.test_time_parameterization");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.core.trajectory_processing.test_time_parameterization");
 
 // Static variables used in all tests
 moveit::core::RobotModelConstPtr RMODEL = moveit::core::loadTestingRobotModel("pr2");

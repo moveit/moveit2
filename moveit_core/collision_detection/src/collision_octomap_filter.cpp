@@ -44,7 +44,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 // Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_octomap_filter");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.core.collision_detection.octomap_filter");
 
 // forward declarations
 bool getMetaballSurfaceProperties(const octomap::point3d_list& cloud, const double& spacing, const double& iso_value,

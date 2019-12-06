@@ -49,7 +49,7 @@ namespace moveit
 {
 namespace planning_interface
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning_interface.planning_component");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning_interface.moveit_cpp.planning_component");
 
 PlanningComponent::PlanningComponent(const std::string& group_name, const MoveItCppPtr& moveit_cpp)
   : node_(moveit_cpp->getNode()), moveit_cpp_(moveit_cpp), group_name_(group_name)

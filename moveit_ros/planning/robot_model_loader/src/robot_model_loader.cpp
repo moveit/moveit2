@@ -41,7 +41,7 @@
 
 namespace robot_model_loader
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.robot_model_loader");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.robot_model_loader");
 
 RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
                                    bool load_kinematics_solvers)
@@ -193,7 +193,7 @@ void RobotModelLoader::configure(const Options& opt)
   if (model_ && opt.load_kinematics_solvers_)
     loadKinematicsSolvers();
 
-  RCLCPP_DEBUG(node_->get_logger(), "Loaded kinematic model in %d seconds", (clock.now() - start).seconds());
+  RCLCPP_DEBUG(LOGGER, "Loaded kinematic model in %d seconds", (clock.now() - start).seconds());
 }
 
 void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::KinematicsPluginLoaderPtr& kloader)

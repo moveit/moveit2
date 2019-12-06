@@ -77,7 +77,7 @@ using namespace std::placeholders;
 
 namespace ompl_interface
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.planning_context_manager");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.planners.ompl.planning_context_manager");
 struct PlanningContextManager::CachedContexts
 {
   std::map<std::pair<std::string, std::string>, std::vector<ModelBasedPlanningContextPtr> > contexts_;

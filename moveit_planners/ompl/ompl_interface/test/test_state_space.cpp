@@ -46,7 +46,7 @@
 #include <boost/filesystem/path.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.test.test_state_space");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.planners.ompl.test_state_space");
 
 class LoadPlanningModelsPr2 : public testing::Test
 {

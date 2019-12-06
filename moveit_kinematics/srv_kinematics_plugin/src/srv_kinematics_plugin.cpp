@@ -48,7 +48,7 @@ CLASS_LOADER_REGISTER_CLASS(srv_kinematics_plugin::SrvKinematicsPlugin, kinemati
 
 namespace srv_kinematics_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_srv_kinematics_plugin.srv_kinematics_plugin");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.kinematics.srv_kinematics_plugin");
 
 SrvKinematicsPlugin::SrvKinematicsPlugin() : active_(false)
 {

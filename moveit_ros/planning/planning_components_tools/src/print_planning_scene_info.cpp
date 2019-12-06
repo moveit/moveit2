@@ -42,7 +42,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("print_planning_scene_info");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.print_planning_scene_info");
 
 int main(int argc, char** argv)
 {

@@ -49,7 +49,7 @@ CLASS_LOADER_REGISTER_CLASS(lma_kinematics_plugin::LMAKinematicsPlugin, kinemati
 
 namespace lma_kinematics_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_lma_kinematics_plugin.lma_kinematics_plugin");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.kinematics.lma_kinematics_plugin");
 
 LMAKinematicsPlugin::LMAKinematicsPlugin() : initialized_(false)
 {

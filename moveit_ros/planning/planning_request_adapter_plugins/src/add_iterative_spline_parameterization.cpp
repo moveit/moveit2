@@ -41,7 +41,7 @@
 
 namespace default_planner_request_adapters
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_iterative_spline_parameterization");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.add_iterative_spline_parameterization");
 
 class AddIterativeSplineParameterization : public planning_request_adapter::PlanningRequestAdapter
 {

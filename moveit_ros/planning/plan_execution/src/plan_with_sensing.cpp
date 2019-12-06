@@ -46,7 +46,7 @@
 namespace plan_execution
 {
 // using namespace moveit_ros_planning;
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.plan_with_sensing");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.plan_execution.plan_with_sensing");
 
 class PlanWithSensing::DynamicReconfigureImpl
 {

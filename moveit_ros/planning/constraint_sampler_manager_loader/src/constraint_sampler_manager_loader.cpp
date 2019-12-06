@@ -42,7 +42,7 @@
 
 namespace constraint_sampler_manager_loader
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.constraint_sampler_manager_loader");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.constraint_sampler_manager_loader");
 
 class ConstraintSamplerManagerLoader::Helper
 {

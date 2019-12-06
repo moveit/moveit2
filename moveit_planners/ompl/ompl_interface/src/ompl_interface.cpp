@@ -42,7 +42,7 @@
 #include <moveit/utils/lexical_casts.h>
 #include <fstream>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.ompl_interface");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.planners.ompl.ompl_interface");
 
 ompl_interface::OMPLInterface::OMPLInterface(const robot_model::RobotModelConstPtr& robot_model,
                                              const rclcpp::Node::SharedPtr& node,

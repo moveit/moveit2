@@ -40,7 +40,7 @@
 
 #include <utility>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.pose_model_state_space");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.planners.ompl.pose_model_state_space");
 const std::string ompl_interface::PoseModelStateSpace::PARAMETERIZATION_TYPE = "PoseModel";
 
 ompl_interface::PoseModelStateSpace::PoseModelStateSpace(const ModelBasedStateSpaceSpecification& spec)

@@ -45,7 +45,7 @@
 
 namespace ompl_interface
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.constraints_library");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.planners.ompl.constraints_library");
 namespace
 {
 template <typename T>

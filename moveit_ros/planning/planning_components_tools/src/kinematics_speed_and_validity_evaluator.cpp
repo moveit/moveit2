@@ -39,7 +39,7 @@
 #include <moveit/profiler/profiler.h>
 #include <rclcpp/rclcpp.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("inverse_kinematics_test");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.kinematics_speed_and_validity_evaluator");
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 int main(int argc, char** argv)

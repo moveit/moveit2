@@ -47,7 +47,7 @@
 
 namespace kdl_kinematics_plugin
 {
-static rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kdl_kinematics_plugin.kdl_kinematics_plugin");
+static rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.kinematics.kdl_kinematics_plugin");
 
 KDLKinematicsPlugin::KDLKinematicsPlugin() : initialized_(false)
 {

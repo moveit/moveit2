@@ -44,7 +44,7 @@ namespace moveit
 {
 namespace planning_interface
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning_interface.moveit_cpp");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning_interface.moveit_cpp");
 constexpr char PLANNING_PLUGIN_PARAM[] = "planning_plugin";
 
 MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)

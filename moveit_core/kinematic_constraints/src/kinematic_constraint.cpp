@@ -53,7 +53,7 @@
 namespace kinematic_constraints
 {
 // Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematic_constraints.kinematic_constraints");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.core.kinematic_constraints");
 
 static double normalizeAngle(double angle)
 {

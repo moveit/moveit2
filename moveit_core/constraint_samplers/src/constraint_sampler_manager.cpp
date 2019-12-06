@@ -41,7 +41,7 @@
 
 namespace constraint_samplers
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.constraint_sampler_manager");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.core.constraint_samplers.constraint_sampler_manager");
 
 ConstraintSamplerPtr ConstraintSamplerManager::selectSampler(const planning_scene::PlanningSceneConstPtr& scene,
                                                              const std::string& group_name,

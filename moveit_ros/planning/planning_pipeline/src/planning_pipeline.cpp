@@ -42,7 +42,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <sstream>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_pipeline");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.planning_pipeline");
 
 const std::string planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC = "display_planned_path";
 const std::string planning_pipeline::PlanningPipeline::MOTION_PLAN_REQUEST_TOPIC = "motion_plan_request";

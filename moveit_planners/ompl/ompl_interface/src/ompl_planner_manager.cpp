@@ -43,8 +43,7 @@
 
 namespace ompl_interface
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.ompl_planner_manager");
-static const rclcpp::Logger OMPL_LOGGER = rclcpp::get_logger("ompl");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.planners.ompl.ompl_planner_manager");
 
 class OMPLPlannerManager : public planning_interface::PlannerManager
 {
@@ -61,16 +60,16 @@ public:
           case ompl::msg::LOG_DEV2:
           case ompl::msg::LOG_DEV1:
           case ompl::msg::LOG_DEBUG:
-            RCLCPP_DEBUG(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
+            RCLCPP_DEBUG(LOGGER, "%s:%i - %s", filename, line, text.c_str());
             break;
           case ompl::msg::LOG_INFO:
-            RCLCPP_INFO(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
+            RCLCPP_INFO(LOGGER, "%s:%i - %s", filename, line, text.c_str());
             break;
           case ompl::msg::LOG_WARN:
-            RCLCPP_WARN(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
+            RCLCPP_WARN(LOGGER, "%s:%i - %s", filename, line, text.c_str());
             break;
           case ompl::msg::LOG_ERROR:
-            RCLCPP_ERROR(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
+            RCLCPP_ERROR(LOGGER, "%s:%i - %s", filename, line, text.c_str());
             break;
           case ompl::msg::LOG_NONE:
           default:

@@ -40,7 +40,7 @@
 
 #include <utility>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.constrained_valid_state_sampler");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.planners.ompl.constrained_valid_state_sampler");
 
 ompl_interface::ValidConstrainedSampler::ValidConstrainedSampler(const ModelBasedPlanningContext* pc,
                                                                  kinematic_constraints::KinematicConstraintSetPtr ks,

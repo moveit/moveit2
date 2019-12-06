@@ -40,7 +40,8 @@
 #include <limits>
 #include <memory>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_scene_monitor.trajectory_monitor");
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit.ros.planning.planning_scene_monitor.trajectory_monitor");
 
 planning_scene_monitor::TrajectoryMonitor::TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor,
                                                              double sampling_frequency)

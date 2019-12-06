@@ -55,7 +55,7 @@
 
 namespace rdf_loader
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_rdf_loader.rdf_loader");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.rdf_loader");
 
 RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& robot_description)
 {

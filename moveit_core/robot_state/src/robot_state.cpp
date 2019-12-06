@@ -52,7 +52,7 @@ namespace moveit
 namespace core
 {
 // Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_state.robot_state");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.core.robot_state");
 
 RobotState::RobotState(const RobotModelConstPtr& robot_model)
   : robot_model_(robot_model)

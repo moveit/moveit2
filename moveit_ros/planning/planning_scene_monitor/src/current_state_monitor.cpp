@@ -41,7 +41,8 @@
 
 #include <limits>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.current_state_monitor");
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit.ros.planning.planning_scene_monitor.current_state_monitor");
 
 planning_scene_monitor::CurrentStateMonitor::CurrentStateMonitor(const rclcpp::Node::SharedPtr& node,
                                                                  const robot_model::RobotModelConstPtr& robot_model,

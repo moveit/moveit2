@@ -40,7 +40,7 @@
 
 namespace default_planner_request_adapters
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_time_parameterization");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.add_time_parameterization");
 
 class AddTimeParameterization : public planning_request_adapter::PlanningRequestAdapter
 {

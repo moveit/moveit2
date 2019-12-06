@@ -40,7 +40,7 @@
 
 namespace default_planner_request_adapters
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_workspace_bounds");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.fix_workspace_bounds");
 
 class FixWorkspaceBounds : public planning_request_adapter::PlanningRequestAdapter
 {

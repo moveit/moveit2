@@ -43,7 +43,7 @@
 
 namespace default_planner_request_adapters
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_bounds");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.fix_start_state_bounds");
 
 class FixStartStateBounds : public planning_request_adapter::PlanningRequestAdapter
 {

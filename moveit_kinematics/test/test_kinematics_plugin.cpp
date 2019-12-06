@@ -54,7 +54,7 @@
 
 #include <moveit/utils/robot_model_test_utils.h>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_kinematics_plugin");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.kinematics.test_kinematics_plugin");
 const std::string ROBOT_DESCRIPTION_PARAM = "robot_description";
 const double DEFAULT_SEARCH_DISCRETIZATION = 0.01f;
 const double EXPECTED_SUCCESS_RATE = 0.8;

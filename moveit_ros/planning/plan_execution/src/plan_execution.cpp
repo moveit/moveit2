@@ -47,7 +47,7 @@
 
 namespace plan_execution
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.plan_execution");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.plan_execution");
 
 class PlanExecution::DynamicReconfigureImpl
 {
@@ -240,7 +240,7 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
         RCLCPP_INFO(LOGGER, "Waiting for a %lf seconds before attempting a new plan ...", opt.replan_delay_);
         auto replan_delay_seconds = std::chrono::duration<double>(opt.replan_delay_);
         rclcpp::sleep_for(std::chrono::duration_cast<std::chrono::nanoseconds>(replan_delay_seconds));
-        RCLCPP_INFO(node_->get_logger(), "Done waiting");
+        RCLCPP_INFO(LOGGER, "Done waiting");
       }
     }
   } while (!preempt_requested_ && max_replan_attempts > replan_attempts);

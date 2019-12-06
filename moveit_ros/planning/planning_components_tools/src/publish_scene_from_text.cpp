@@ -39,7 +39,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 using namespace std::chrono_literals;
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("publish_scene_from_text");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.publish_scene_from_text");
 
 int main(int argc, char** argv)
 {

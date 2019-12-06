@@ -42,7 +42,7 @@ namespace default_planner_request_adapters
 {
 using namespace trajectory_processing;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_time_optimal_parameterization");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.add_time_optimal_parameterization");
 
 /** @brief This adapter uses the time-optimal trajectory generation method */
 class AddTimeOptimalParameterization : public planning_request_adapter::PlanningRequestAdapter

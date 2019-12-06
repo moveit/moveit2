@@ -39,7 +39,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_scene_monitor.demo_scene");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.planning_scene_monitor.demo_scene");
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 

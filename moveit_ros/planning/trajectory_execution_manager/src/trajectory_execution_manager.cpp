@@ -42,7 +42,7 @@
 
 namespace trajectory_execution_manager
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.trajectory_execution_manager");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.trajectory_execution_manager");
 
 const std::string TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC = "trajectory_execution_event";
 

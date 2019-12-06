@@ -71,7 +71,7 @@
 #include "ompl/base/objectives/StateCostIntegralObjective.h"
 #include "ompl/base/objectives/MaximizeMinClearanceObjective.h"
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.model_based_planning_context");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.planners.ompl.model_based_planning_context");
 
 ompl_interface::ModelBasedPlanningContext::ModelBasedPlanningContext(const std::string& name,
                                                                      const ModelBasedPlanningContextSpecification& spec)

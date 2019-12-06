@@ -48,7 +48,7 @@
 
 namespace dynamics_solver
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_dynamics_solver.dynamics_solver");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.core.dynamics_solver");
 
 namespace
 {

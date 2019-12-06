@@ -57,7 +57,7 @@
 #include <chrono>
 using namespace std::chrono_literals;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_scene_monitor.planning_scene_monitor");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.planning_scene_monitor");
 
 namespace planning_scene_monitor
 {

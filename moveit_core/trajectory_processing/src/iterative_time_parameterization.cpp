@@ -44,7 +44,8 @@ static const double DEFAULT_VEL_MAX = 1.0;
 static const double DEFAULT_ACCEL_MAX = 1.0;
 static const double ROUNDING_THRESHOLD = 0.01;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_trajectory_processing.iterative_time_parameterization");
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit.core.trajectory_processing.iterative_time_parameterization");
 
 IterativeParabolicTimeParameterization::IterativeParabolicTimeParameterization(unsigned int max_iterations,
                                                                                double max_time_change_per_it)

@@ -40,7 +40,7 @@
 
 namespace default_planner_request_adapters
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.resolve_constraint_frames");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.planning.resolve_constraint_frames");
 
 class ResolveConstraintFrames : public planning_request_adapter::PlanningRequestAdapter
 {

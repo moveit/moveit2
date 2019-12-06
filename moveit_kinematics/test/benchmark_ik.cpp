@@ -43,7 +43,7 @@
 
 namespace po = boost::program_options;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("cached_ik.measure_ik_call_cost");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.kinematics.benchmark_ik");
 
 /** Benchmark program measuring time to solve inverse kinematics of robot described in robot_description */
 int main(int argc, char* argv[])
