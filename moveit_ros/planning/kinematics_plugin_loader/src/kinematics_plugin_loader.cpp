@@ -341,9 +341,8 @@ robot_model::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const s
             }
             else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
             {  // just in case this is an int
-              int ksolver_timeout_i;
               ksolver_timeout = node_->get_parameter(ksolver_timeout_param_name).as_int();
-              ik_timeout_[known_group.name_] = ksolver_timeout_i;
+              ik_timeout_[known_group.name_] = ksolver_timeout;
             }
           }
 
@@ -383,7 +382,7 @@ robot_model::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const s
             if (ksolver_ik_links_param.get_type() == rclcpp::ParameterType::PARAMETER_STRING_ARRAY)
             {
               std::vector<std::string> ksolver_ik_links = ksolver_ik_links_param.as_string_array();
-              for (int32_t j = 0; j < ksolver_ik_links.size(); ++j)
+              for (size_t j = 0; j < ksolver_ik_links.size(); ++j)
               {
                 RCLCPP_DEBUG(LOGGER, "found tip %s for group %s", ksolver_ik_links[j].c_str(),
                              known_group.name_.c_str());
