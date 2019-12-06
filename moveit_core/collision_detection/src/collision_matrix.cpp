@@ -37,7 +37,7 @@
 #include <moveit/collision_detection/collision_matrix.h>
 #include <boost/bind.hpp>
 #include <iomanip>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace collision_detection
 {

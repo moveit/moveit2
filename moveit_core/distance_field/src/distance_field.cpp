@@ -40,7 +40,7 @@
 #include <tf2_eigen/tf2_eigen.h>
 #include <octomap/octomap.h>
 #include <octomap/OcTree.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace distance_field
 {

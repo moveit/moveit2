@@ -38,7 +38,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 #include <boost/math/constants/constants.hpp>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace kinematics_metrics
 {

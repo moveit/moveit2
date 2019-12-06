@@ -39,7 +39,7 @@
 #include <tf2_eigen/tf2_eigen.h>
 #include <boost/math/constants/constants.hpp>
 #include <numeric>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace robot_trajectory
 {
