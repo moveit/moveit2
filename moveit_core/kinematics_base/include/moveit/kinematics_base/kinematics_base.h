@@ -39,7 +39,8 @@
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit/macros/class_forward.h>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/parameter_client.hpp>
 #include <boost/function.hpp>
 #include <string>
 

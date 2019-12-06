@@ -40,7 +40,7 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace moveit
 {

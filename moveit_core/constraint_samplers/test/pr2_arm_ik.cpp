@@ -36,6 +36,7 @@
 
 #include <angles/angles.h>
 #include "pr2_arm_ik.h"
+#include <rclcpp/logging.hpp>
 
 /**** List of angles (for reference) *******
       th1 = shoulder/turret pan
