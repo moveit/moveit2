@@ -44,7 +44,6 @@
 #include <moveit_msgs/srv/get_position_fk.hpp>
 #include <moveit_msgs/srv/get_position_ik.hpp>
 #include <moveit_msgs/msg/kinematic_solver_info.hpp>
-#include <rclcpp/rclcpp.hpp>
 
 namespace pr2_arm_kinematics
 {

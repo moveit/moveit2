@@ -42,7 +42,7 @@
 #include <vector>
 #include <map>
 #include <memory>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 #include <moveit/profiler/profiler.h>
 
 namespace kinematics_plugin_loader

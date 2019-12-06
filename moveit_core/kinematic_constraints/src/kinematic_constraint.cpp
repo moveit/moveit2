@@ -44,9 +44,8 @@
 #include <boost/bind.hpp>
 #include <limits>
 #include <memory>
-#include <typeinfo>
 
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logging.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/duration.hpp>
 

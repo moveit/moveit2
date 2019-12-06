@@ -36,7 +36,7 @@
 
 #include <moveit/collision_detection/collision_env.h>
 #include <limits>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logging.hpp>
 
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.core.collision_detection.collision_env");

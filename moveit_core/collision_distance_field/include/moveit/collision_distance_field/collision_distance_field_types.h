@@ -55,10 +55,8 @@ DIAGNOSTIC_POP
 #include <moveit/distance_field/distance_field.h>
 #include <moveit/distance_field/propagation_distance_field.h>
 #include <visualization_msgs/msg/marker_array.hpp>
-#include <rclcpp/clock.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp/time.hpp>
-#include <rclcpp/utilities.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/duration.hpp>
 
 namespace collision_detection
 {

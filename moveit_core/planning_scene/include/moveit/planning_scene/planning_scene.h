@@ -55,7 +55,7 @@
 #include <boost/function.hpp>
 #include <boost/concept_check.hpp>
 #include <memory>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logging.hpp>
 
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene

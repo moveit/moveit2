@@ -42,7 +42,7 @@
 #include <moveit/collision_detection/collision_env.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <boost/thread/mutex.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace collision_detection
 {

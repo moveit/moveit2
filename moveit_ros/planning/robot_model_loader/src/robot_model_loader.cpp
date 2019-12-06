@@ -36,7 +36,7 @@
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/profiler/profiler.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 #include <typeinfo>
 
 namespace robot_model_loader
