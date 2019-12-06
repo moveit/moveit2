@@ -41,7 +41,7 @@
 #include <octomap/octomap.h>
 #include <geometric_shapes/shapes.h>
 #include <memory>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_octomap_filter");

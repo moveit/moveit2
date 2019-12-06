@@ -42,7 +42,7 @@
 #include <boost/lexical_cast.hpp>
 #include <algorithm>
 #include "order_robot_model_items.inc"
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace moveit
 {

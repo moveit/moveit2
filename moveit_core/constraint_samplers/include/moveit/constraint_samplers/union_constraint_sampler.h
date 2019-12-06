@@ -37,7 +37,7 @@
 #pragma once
 
 #include <moveit/constraint_samplers/constraint_sampler.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace constraint_samplers
 {

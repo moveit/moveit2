@@ -34,7 +34,7 @@
 
 /* Author: E. Gil Jones */
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 #include <moveit/collision_distance_field/collision_common_distance_field.h>
 #include <boost/thread/mutex.hpp>
 #include <tf2_eigen/tf2_eigen.h>

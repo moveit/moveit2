@@ -41,7 +41,7 @@
 #include <moveit/planning_interface/planning_response.h>
 #include <string>
 #include <map>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace planning_scene
 {

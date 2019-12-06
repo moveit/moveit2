@@ -43,7 +43,7 @@
 #include <Eigen/Core>
 #include <set>
 #include <octomap/octomap.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace EigenSTL
 {

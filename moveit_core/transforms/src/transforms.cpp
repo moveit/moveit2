@@ -37,7 +37,7 @@
 #include <moveit/transforms/transforms.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <boost/algorithm/string/trim.hpp>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace moveit
 {

@@ -39,7 +39,7 @@
 #include <boost/math/constants/constants.hpp>
 #include <limits>
 #include <cmath>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace moveit
 {
