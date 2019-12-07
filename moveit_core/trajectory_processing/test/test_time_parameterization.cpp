@@ -147,8 +147,7 @@ TEST(TestTimeParameterization, TestIterativeParabolic)
 
   auto diff_time = std::chrono::system_clock::now() - wt;
 
-  std::cout << "IterativeParabolicTimeParameterization  took " << (std::chrono::system_clock::now() - wt).count()
-            << std::endl;
+  std::cout << "IterativeParabolicTimeParameterization  took " << diff_time.count() << std::endl;
   printTrajectory(TRAJECTORY);
   ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 3.0);
 }
