@@ -40,9 +40,11 @@ RUN mkdir src && \
     cd $ROS_WS/src && \
     wget -q https://raw.githubusercontent.com/ros-planning/moveit2/master/moveit2.repos && \
     vcs import < moveit2.repos && \
+    # Remove folders declared as COLCON_IGNORE
+    find -L . -name COLCON_IGNORE -printf "%h\0" | xargs -0 rm -rf && \
     apt-get -qq update && \
     rosdep update -q && \
-    rosdep install -q -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
+    rosdep install -q -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false --skip-keys=octomap && \
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/* && \
     #
