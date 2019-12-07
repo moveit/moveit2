@@ -34,15 +34,15 @@
 
 #pragma once
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <moveit/macros/class_forward.h>
 #include <moveit/collision_detection/collision_plugin.h>
 
 namespace collision_detection
 {
 /**
- * @brief This is used to load the collision plugin
- */
+* @brief This is used to load the collision plugin
+*/
 class CollisionPluginLoader
 {
 public:
@@ -50,7 +50,7 @@ public:
   ~CollisionPluginLoader();
 
   /** @brief This can be called on a new planning scene to setup the collision detector. */
-  void setupScene(ros::NodeHandle& nh, const planning_scene::PlanningScenePtr& scene);
+  void setupScene(const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene);
 
   /**
    * @brief Load a collision detection robot/world into a planning scene instance.

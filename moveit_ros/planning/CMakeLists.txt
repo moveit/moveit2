@@ -36,7 +36,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     # planning_scene_monitor/include
     # trajectory_execution_manager/include
     # plan_execution/include
-    # collision_plugin_loader/include
+    collision_plugin_loader/include
 )
 
 set(libraries
@@ -48,7 +48,7 @@ set(libraries
   # moveit_trajectory_execution_manager
   # moveit_plan_execution
   # moveit_planning_scene_monitor
-  # moveit_collision_plugin_loader
+  moveit_collision_plugin_loader
   moveit_default_planning_request_adapter_plugins
 )
 
@@ -71,7 +71,7 @@ include_directories(SYSTEM
 )
 
 add_subdirectory(rdf_loader)
-# add_subdirectory(collision_plugin_loader)
+add_subdirectory(collision_plugin_loader)
 add_subdirectory(kinematics_plugin_loader)
 add_subdirectory(robot_model_loader)
 add_subdirectory(constraint_sampler_manager_loader)
