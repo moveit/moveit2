@@ -1,8 +1,11 @@
 # moveit/moveit2:dashing-ci
-# Sets up a base image to use for running Continuous Integration on Travis
-FROM ros:dashing-ros-base-bionic
+# ROS base image augmented with all MoveIt dependencies to use for CI on Travis
 
-MAINTAINER Mike Lautman mike@picknik.ai
+ARG ROS_DISTRO=dashing
+FROM ros:${ROS_DISTRO}-ros-base-bionic
+
+MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
+MAINTAINER Dave Coleman dave@picknik.ai
 
 ENV TERM xterm
 
@@ -32,39 +35,7 @@ RUN apt-get -qq update && \
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/*
 
-# Upgrade Pip and install some packages needed for testing
-# NOTE(mlautman): These pip installs are from the ros2 source install instructions. Seeing as not all of them
-#        are installed in the base image I added them here. I have not been able to verify that they are needed
-#        and if they aren't necessary they should be removed.
-RUN python3 -m pip install -q --upgrade pip && \
-    python3 -m pip install -q -U \
-        argcomplete \
-        flake8 \
-        flake8-blind-except \
-        flake8-builtins \
-        flake8-class-newline \
-        flake8-comprehensions \
-        flake8-deprecated \
-        flake8-docstrings \
-        flake8-import-order \
-        flake8-quotes \
-        pytest-repeat \
-        pytest-rerunfailures \
-        pytest \
-        pytest-cov \
-        pytest-runner \
-        setuptools
-
-# Install Fast-RTPS dependencies
-RUN apt-get -qq update && \
-    apt-get install -qq --no-install-recommends -y \
-        libasio-dev \
-        libtinyxml2-dev \
-        && \
-    # Clear apt-cache to reduce image size
-    rm -rf /var/lib/apt/lists/*
-
-# Download moveit source and fetch all necessary dependencies
+# Download moveit source and fetch all its dependencies
 RUN mkdir src && \
     cd $ROS_WS/src && \
     wget -q https://raw.githubusercontent.com/ros-planning/moveit2/master/moveit2.repos && \
