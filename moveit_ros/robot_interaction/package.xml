@@ -25,5 +25,5 @@
   <depend>tf2_ros</depend>
   <depend>interactive_markers</depend>
 
-  <test_depend>rosunit</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
 </package>

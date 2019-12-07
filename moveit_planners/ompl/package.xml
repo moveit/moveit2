@@ -26,7 +26,7 @@
   <depend version_gte="1.11.2">pluginlib</depend>
 
   <test_depend>moveit_resources</test_depend>
-  <test_depend>rosunit</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
 
   <export>
     <moveit_core plugin="${prefix}/ompl_interface_plugin_description.xml"/>

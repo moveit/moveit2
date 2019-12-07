@@ -36,5 +36,5 @@
   <exec_depend>xacro</exec_depend>
 
   <test_depend>moveit_resources</test_depend>
-  <test_depend>rosunit</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
 </package>
