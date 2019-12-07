@@ -17,12 +17,9 @@ RUN apt-get -qq update && \
     #
     # Install some base dependencies
     apt-get -qq install -y \
-        wget \
-        # Required for rosdep command
-        sudo \
+        # Required by moveit_ci
+        wget curl sudo xvfb mesa-utils ccache ssh curl gnupg2 lsb-release \
         clang clang-format-3.9 clang-tidy clang-tools \
-        ccache \
-        curl gnupg2 lsb-release \
         # Some python dependencies for working with ROS2
         python3-colcon-common-extensions \
         python3-pip \
