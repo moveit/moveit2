@@ -1,6 +1,6 @@
 # This config file for Travis CI utilizes https://github.com/ros-planning/moveit_ci/ package.
 sudo: required
-dist: xenial  # distro used by Travis (bionic not yet available), moveit_ci uses the docker image's distro
+dist: xenial  # distro used by Travis, moveit_ci uses the docker image's distro
 services:
   - docker
 language: cpp
@@ -10,19 +10,17 @@ compiler: gcc
 notifications:
   email:
     recipients:
-      - 130s@2000.jukuin.keio.ac.jp
+
 env:
   global:
     - MOVEIT_CI_TRAVIS_TIMEOUT=85  # Travis grants us 90 min, but we add a safety margin of 5 min
     - ROS_DISTRO=dashing
-    - ROS_REPO=ros
+    - ROS_REPO=ros-testing
     - UPSTREAM_WORKSPACE=moveit2.repos
     # moveit_ros_perception: mesh_filter_test fails due to broken Mesa OpenGL
     - TEST_BLACKLIST="moveit_ros_perception"
-    - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unused-parameter -Wno-unused-but-set-parameter -Wno-unused-function"
+    - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls"
     - WARNINGS_OK=false
-    - BEFORE_DOCKER_SCRIPT="sed -i 's/travis_run --retry rosdep install/#rosdep install/g' .moveit_ci/travis.sh"
-    - BEFORE_SCRIPT="sudo apt-get -qq update; sudo apt-get -qq install -y libfcl-dev ros-dashing-angles"
   matrix:
     # TODO(henningkayser): Enable ament_lint once all packages are ported
     - TEST="clang-format"
