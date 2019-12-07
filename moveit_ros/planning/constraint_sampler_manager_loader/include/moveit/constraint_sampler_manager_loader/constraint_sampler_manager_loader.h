@@ -47,6 +47,7 @@ class ConstraintSamplerManagerLoader
 {
 public:
   ConstraintSamplerManagerLoader(
+      const rclcpp::Node::SharedPtr& node,
       const constraint_samplers::ConstraintSamplerManagerPtr& csm = constraint_samplers::ConstraintSamplerManagerPtr());
 
   const constraint_samplers::ConstraintSamplerManagerPtr& getConstraintSamplerManager() const
