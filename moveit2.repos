@@ -19,11 +19,6 @@ repositories:
     type: git
     url: https://github.com/ros-planning/geometric_shapes
     version: dashing-devel
-# TODO(henningkayser): Remove once dashing release is available
-  octomap:
-    type: git
-    url: https://github.com/ros-gbp/octomap-release.git
-    version: debian/ros-melodic-octomap_1.9.0-1_bionic
 # TODO(henningkayser): merge dependencies below into upstream packages
   object_recognition_msgs:
     type: git
