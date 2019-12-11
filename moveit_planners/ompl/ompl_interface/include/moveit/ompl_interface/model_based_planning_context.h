@@ -317,13 +317,13 @@ public:
 
   /** @brief Look up param server 'constraint_approximations' and use its value as the path to load constraint
    * approximations to */
-  bool loadConstraintApproximations(const ros::NodeHandle& nh);
+  bool loadConstraintApproximations(const rclcpp::Node::SharedPtr& node);
 
   /** @brief Look up param server 'constraint_approximations' and use its value as the path to save constraint
    * approximations to */
-  bool saveConstraintApproximations(const ros::NodeHandle& nh);
+  bool saveConstraintApproximations(const rclcpp::Node::SharedPtr& node);
 
-  virtual void configure(const ros::NodeHandle& nh, bool use_constraints_approximations);
+  virtual void configure(const rclcpp::Node::SharedPtr& node, bool use_constraints_approximations);
 
 protected:
   void preSolve();

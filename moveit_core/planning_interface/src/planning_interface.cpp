@@ -92,7 +92,7 @@ void PlanningContext::setMotionPlanRequest(const MotionPlanRequest& request)
   request_.num_planning_attempts = std::max(1, request_.num_planning_attempts);
 }
 
-bool PlannerManager::initialize(const robot_model::RobotModelConstPtr& /*unused*/, std::shared_ptr<rclcpp::Node>& node)
+bool PlannerManager::initialize(const robot_model::RobotModelConstPtr& /*unused*/, const rclcpp::Node::SharedPtr& node)
 {
   return true;
 }
