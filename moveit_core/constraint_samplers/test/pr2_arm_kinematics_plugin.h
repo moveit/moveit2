@@ -218,9 +218,9 @@ public:
    * @brief  Initialization function for the kinematics
    * @return True if initialization was successful, false otherwise
    */
-  bool initialize(const moveit::core::RobotModel& robot_model, const std::string& group_name,
-                  const std::string& base_frame, const std::vector<std::string>& tip_frames,
-                  double search_discretization) override;
+  bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModel& robot_model,
+                  const std::string& group_name, const std::string& base_frame,
+                  const std::vector<std::string>& tip_frames, double search_discretization) override;
 
   /**
    * @brief  Return all the joint names in the order they are used internally

@@ -377,9 +377,9 @@ public:
    * Default implementation returns false and issues a warning to implement this new API.
    * TODO: Make this method purely virtual after some soaking time, replacing the fallback.
    */
-  virtual bool initialize(const moveit::core::RobotModel& robot_model, const std::string& group_name,
-                          const std::string& base_frame, const std::vector<std::string>& tip_frames,
-                          double search_discretization);
+  virtual bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModel& robot_model,
+                          const std::string& group_name, const std::string& base_frame,
+                          const std::vector<std::string>& tip_frames, double search_discretization);
 
   /**
    * @brief  Return the name of the group that the solver is operating on

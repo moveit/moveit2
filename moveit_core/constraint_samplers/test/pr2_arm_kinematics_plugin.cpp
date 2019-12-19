@@ -260,10 +260,12 @@ bool PR2ArmKinematicsPlugin::isActive()
   return active_;
 }
 
-bool PR2ArmKinematicsPlugin::initialize(const moveit::core::RobotModel& robot_model, const std::string& group_name,
+bool PR2ArmKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node,
+                                        const moveit::core::RobotModel& robot_model, const std::string& group_name,
                                         const std::string& base_frame, const std::vector<std::string>& tip_frames,
                                         double search_discretization)
 {
+  node_ = node;
   storeValues(robot_model, group_name, base_frame, tip_frames, search_discretization);
   const bool verbose = false;
   std::string xml_string;
