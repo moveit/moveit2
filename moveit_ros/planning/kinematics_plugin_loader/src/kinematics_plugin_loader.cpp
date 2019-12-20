@@ -59,11 +59,12 @@ public:
    * \param search_res
    * \param iksolver_to_tip_links - a map between each ik solver and a vector of custom-specified tip link(s)
    */
-  KinematicsLoaderImpl(const std::string& robot_description,
+  KinematicsLoaderImpl(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
                        const std::map<std::string, std::vector<std::string>>& possible_kinematics_solvers,
                        const std::map<std::string, std::vector<double>>& search_res,
                        const std::map<std::string, std::vector<std::string>>& iksolver_to_tip_links)
-    : robot_description_(robot_description)
+    : node_(node)
+    , robot_description_(robot_description)
     , possible_kinematics_solvers_(possible_kinematics_solvers)
     , search_res_(search_res)
     , iksolver_to_tip_links_(iksolver_to_tip_links)
@@ -174,7 +175,7 @@ public:
           // choose search resolution
           double search_res = search_res_.find(jmg->getName())->second[i];  // we know this exists, by construction
 
-          if (!result->initialize(jmg->getParentModel(), jmg->getName(),
+          if (!result->initialize(node_, jmg->getParentModel(), jmg->getName(),
                                   (base.empty() || base[0] != '/') ? base : base.substr(1), tips, search_res) &&
               // on failure: fallback to old method (TODO: remove in future)
               !result->initialize(robot_description_, jmg->getName(),
@@ -236,6 +237,7 @@ public:
   }
 
 private:
+  const rclcpp::Node::SharedPtr node_;
   std::string robot_description_;
   std::map<std::string, std::vector<std::string>> possible_kinematics_solvers_;
   std::map<std::string, std::vector<double>> search_res_;
@@ -415,8 +417,8 @@ robot_model::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const s
       }
     }
 
-    loader_.reset(
-        new KinematicsLoaderImpl(robot_description_, possible_kinematics_solvers, search_res, iksolver_to_tip_links));
+    loader_.reset(new KinematicsLoaderImpl(node_, robot_description_, possible_kinematics_solvers, search_res,
+                                           iksolver_to_tip_links));
   }
 
   return boost::bind(&KinematicsPluginLoader::KinematicsLoaderImpl::allocKinematicsSolverWithCache, loader_.get(), _1);
