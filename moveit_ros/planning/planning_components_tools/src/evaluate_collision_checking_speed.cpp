@@ -34,30 +34,38 @@
 
 /* Author: Ioan Sucan, Sachin Chitta */
 
+#include <chrono>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <boost/thread.hpp>
+
+using namespace std::chrono_literals;
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("evaluate_collision_checking_speed");
 
 void runCollisionDetection(unsigned int id, unsigned int trials, const planning_scene::PlanningScene* scene,
                            const robot_state::RobotState* state)
 {
-  ROS_INFO("Starting thread %u", id);
+  RCLCPP_INFO(LOGGER, "Starting thread %u", id);
+  rclcpp::Clock clock(RCL_ROS_TIME);
   collision_detection::CollisionRequest req;
-  ros::WallTime start = ros::WallTime::now();
+  rclcpp::Time start = clock.now();
   for (unsigned int i = 0; i < trials; ++i)
   {
     collision_detection::CollisionResult res;
     scene->checkCollision(req, res, *state);
   }
-  double duration = (ros::WallTime::now() - start).toSec();
-  ROS_INFO("Thread %u performed %lf collision checks per second", id, (double)trials / duration);
+  double duration = (clock.now() - start).seconds();
+  RCLCPP_INFO(LOGGER, "Thread %u performed %lf collision checks per second", id, (double)trials / duration);
 }
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "evaluate_collision_checking_speed");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("evaluate_collision_checking_speed");
 
   unsigned int nthreads = 2;
   unsigned int trials = 10000;
@@ -79,10 +87,10 @@ int main(int argc, char** argv)
     return 0;
   }
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(node);
 
-  planning_scene_monitor::PlanningSceneMonitor psm(ROBOT_DESCRIPTION);
+  planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (psm.getPlanningScene())
   {
     if (vm.count("wait"))
@@ -93,10 +101,10 @@ int main(int argc, char** argv)
       std::cin.get();
     }
     else
-      ros::Duration(0.5).sleep();
+      rclcpp::sleep_for(500ms);
 
     std::vector<robot_state::RobotStatePtr> states;
-    ROS_INFO("Sampling %u valid states...", nthreads);
+    RCLCPP_INFO(LOGGER, "Sampling %u valid states...", nthreads);
     for (unsigned int i = 0; i < nthreads; ++i)
     {
       // sample a valid state
@@ -115,7 +123,7 @@ int main(int argc, char** argv)
     }
 
     std::vector<boost::thread*> threads;
-
+    runCollisionDetection(10, trials, psm.getPlanningScene().get(), states[0].get());
     for (unsigned int i = 0; i < states.size(); ++i)
       threads.push_back(new boost::thread(
           boost::bind(&runCollisionDetection, i, trials, psm.getPlanningScene().get(), states[i].get())));
@@ -127,7 +135,7 @@ int main(int argc, char** argv)
     }
   }
   else
-    ROS_ERROR("Planning scene not configured");
+    RCLCPP_ERROR(LOGGER, "Planning scene not configured");
 
   return 0;
 }

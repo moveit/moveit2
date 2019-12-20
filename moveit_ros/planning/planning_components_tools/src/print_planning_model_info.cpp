@@ -35,21 +35,25 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
+using namespace std::chrono_literals;
+
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "print_model_info_to_console");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("print_model_info_to_console");
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(node);
 
-  robot_model_loader::RobotModelLoader rml(ROBOT_DESCRIPTION);
-  ros::Duration(0.5).sleep();
+  robot_model_loader::RobotModelLoader rml(node, ROBOT_DESCRIPTION);
+  rclcpp::sleep_for(500ms);
+
   rml.getModel()->printModelInfo(std::cout);
-
-  ros::shutdown();
+  executor.spin();
+  rclcpp::shutdown();
   return 0;
 }

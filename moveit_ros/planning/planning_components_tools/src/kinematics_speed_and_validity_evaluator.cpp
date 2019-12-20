@@ -37,24 +37,26 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/profiler/profiler.h>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("inverse_kinematics_test");
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "inverse_kinematics_test");
+  rclcpp::init(argc, argv);
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  auto node = rclcpp::Node::make_shared("inverse_kinematics_test");
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(node);
 
   if (argc <= 1)
-    ROS_ERROR("An argument specifying the group name is needed");
+    RCLCPP_ERROR(LOGGER, "An argument specifying the group name is needed");
   else
   {
-    robot_model_loader::RobotModelLoader rml(ROBOT_DESCRIPTION);
+    robot_model_loader::RobotModelLoader rml(node, ROBOT_DESCRIPTION);
     std::string group = argv[1];
-    ROS_INFO_STREAM("Evaluating IK for " << group);
+    RCLCPP_INFO(LOGGER, "Evaluating IK for %s", group.c_str());
 
     const robot_model::JointModelGroup* jmg = rml.getModel()->getJointModelGroup(group);
     if (jmg)
@@ -66,10 +68,10 @@ int main(int argc, char** argv)
         robot_state::RobotState state(rml.getModel());
         state.setToDefaultValues();
 
-        ROS_INFO_STREAM("Tip Frame:  " << solver->getTipFrame());
-        ROS_INFO_STREAM("Base Frame: " << solver->getBaseFrame());
-        ROS_INFO_STREAM("IK Timeout: " << solver->getDefaultTimeout());
-        ROS_INFO_STREAM("Search res: " << solver->getSearchDiscretization());
+        RCLCPP_INFO(LOGGER, "Tip Frame:  %s", solver->getTipFrame().c_str());
+        RCLCPP_INFO(LOGGER, "Base Frame: %s", solver->getBaseFrame().c_str());
+        RCLCPP_INFO(LOGGER, "IK Timeout: %f", solver->getDefaultTimeout());
+        RCLCPP_INFO(LOGGER, "Search res: %f", solver->getSearchDiscretization());
 
         unsigned int test_count = 1000;
         if (argc > 2)
@@ -81,7 +83,7 @@ int main(int argc, char** argv)
           {
           }
 
-        ROS_INFO("Running %u tests", test_count);
+        RCLCPP_INFO(LOGGER, "Running %u tests", test_count);
 
         moveit::tools::Profiler::Start();
         for (unsigned int i = 0; i < test_count; ++i)
@@ -113,10 +115,10 @@ int main(int argc, char** argv)
         moveit::tools::Profiler::Status();
       }
       else
-        ROS_ERROR_STREAM("No kinematics solver specified for group " << group);
+        RCLCPP_ERROR(LOGGER, "No kinematics solver specified for group %s", group.c_str());
     }
   }
-
-  ros::shutdown();
+  executor.spin();
+  rclcpp::shutdown();
   return 0;
 }
