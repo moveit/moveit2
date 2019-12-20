@@ -39,6 +39,8 @@
 
 namespace occupancy_map_monitor
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.occupancy_map_updater");
+
 OccupancyMapUpdater::OccupancyMapUpdater(const std::string& type) : type_(type)
 {
 }
@@ -51,31 +53,35 @@ void OccupancyMapUpdater::setMonitor(OccupancyMapMonitor* monitor)
   tree_ = monitor->getOcTreePtr();
 }
 
-void OccupancyMapUpdater::readXmlParam(XmlRpc::XmlRpcValue& params, const std::string& param_name, double* value)
-{
-  if (params.hasMember(param_name))
-  {
-    if (params[param_name].getType() == XmlRpc::XmlRpcValue::TypeInt)
-      *value = (int)params[param_name];
-    else
-      *value = (double)params[param_name];
-  }
-}
+// TODO rework this function
+// void OccupancyMapUpdater::readXmlParam(XmlRpc::XmlRpcValue& params, const std::string& param_name, double* value)
+// {
+//   if (params.hasMember(param_name))
+//   {
+//     if (params[param_name].getType() == XmlRpc::XmlRpcValue::TypeInt)
+//       *value = (int)params[param_name];
+//     else
+//       *value = (double)params[param_name];
+//   }
+// }
 
-void OccupancyMapUpdater::readXmlParam(XmlRpc::XmlRpcValue& params, const std::string& param_name, unsigned int* value)
-{
-  if (params.hasMember(param_name))
-    *value = (int)params[param_name];
-}
+// TODO rework this function
+// void OccupancyMapUpdater::readXmlParam(XmlRpc::XmlRpcValue& params, const std::string& param_name, unsigned int*
+// value)
+// {
+//   if (params.hasMember(param_name))
+//     *value = (int)params[param_name];
+// }
 
-bool OccupancyMapUpdater::updateTransformCache(const std::string& target_frame, const ros::Time& target_time)
+bool OccupancyMapUpdater::updateTransformCache(const std::string& target_frame, const rclcpp::Time& target_time)
 {
   transform_cache_.clear();
   if (transform_provider_callback_)
     return transform_provider_callback_(target_frame, target_time, transform_cache_);
   else
   {
-    ROS_WARN_THROTTLE(1, "No callback provided for updating the transform cache for octomap updaters");
+    RCUTILS_LOG_ERROR_THROTTLE(rcutils_steady_time_now, 1,
+                               "No callback provided for updating the transform cache for octomap updaters");
     return false;
   }
 }
