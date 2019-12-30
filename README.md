@@ -13,7 +13,7 @@ Implementation instructions for the ROS 2 migration process can be found in our 
 
 These instructions assume you are running on Ubuntu 18.04.
 
-1. [Install ROS2 Dashing](https://index.ros.org/doc/ros2/Installation/Linux-Install-Debians/) (Make sure to set `export CHOOSE_ROS_DISTRO=Dashing` and to source `/opt/ros/dashing/setup.bash`)
+1. [Install ROS2 Eloquent](https://index.ros.org/doc/ros2/Installation/Linux-Install-Debians/) (Make sure to set `export CHOOSE_ROS_DISTRO=Eloquent` and to source `/opt/ros/eloquent/setup.bash`)
 
 1. [Install ROS2 Build Tools](https://index.ros.org/doc/ros2/Installation/Linux-Development-Setup/#install-development-tools-and-ros-tools)
 
@@ -27,7 +27,7 @@ These instructions assume you are running on Ubuntu 18.04.
 
         git clone git@github.com:ros-planning/moveit2.git
         vcs import < moveit2/moveit2.repos
-        rosdep install -r --from-paths . --ignore-src --rosdistro dashing -y
+        rosdep install -r --from-path . --ignore-src --rosdistro eloquent -y
 
 1. Configure and build the workspace:
 

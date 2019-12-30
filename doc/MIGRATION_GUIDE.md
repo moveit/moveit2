@@ -27,8 +27,6 @@ This leads to the following basic migration steps:
 
        RCLCPP_INFO(LOGGER, "Very important info message");
        
-Currently, there is no direct replacement for the `ROS_*_STREAM` macros in dashing, however, a first implementation is available in eloquent (https://github.com/ros2/rclcpp/pull/926). Until we switch to eloquent, stream macros should be implemented using C formatting or commented with an adequate TODO and substitute log message.
-   
 ### Logger naming convention
 
 Migrating the loggers is a good opportunity to make logger names more consistent.
