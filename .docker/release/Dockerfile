@@ -1,7 +1,7 @@
-# moveit/moveit2:dashing-release
+# moveit/moveit2:eloquent-release
 # Full debian-based install of MoveIt using apt-get
 
-FROM ros:dashing-ros-base-bionic
+FROM ros:eloquent-ros-base-bionic
 MAINTAINER Dave Coleman dave@picknik.ai
 
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size

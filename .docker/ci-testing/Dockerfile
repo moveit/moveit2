@@ -1,7 +1,7 @@
-# moveit/moveit2:dashing-ci-testing
+# moveit/moveit2:eloquent-ci-testing
 # CI image using the ROS testing repository
 
-ARG ROS_DISTRO=dashing
+ARG ROS_DISTRO=eloquent
 FROM moveit/moveit2:${ROS_DISTRO}-ci
 
 MAINTAINER Dave Coleman dave@picknik.ai
