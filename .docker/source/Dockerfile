@@ -31,7 +31,7 @@ RUN apt-get -qq update && \
 
 # Build the workspace
 RUN . /opt/ros/${ROS_DISTRO}/setup.sh &&\
-    colcon build --symlink-install \
+    colcon build \
 	        --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 			  --ament-cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	        --event-handlers desktop_notification- status-
