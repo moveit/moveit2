@@ -30,7 +30,7 @@ RUN apt-get -qq update && \
     rm -rf /var/lib/apt/lists/*
 
 # Build the workspace
-RUN . /opt/ros/eloquent/setup.sh &&\
+RUN . /opt/ros/${ROS_DISTRO}/setup.sh &&\
     colcon build --symlink-install \
 	        --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 			  --ament-cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo \
