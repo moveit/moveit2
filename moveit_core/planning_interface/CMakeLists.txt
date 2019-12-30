@@ -8,14 +8,13 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
   visualization_msgs
-  moveit_robot_state
-  moveit_robot_trajectory
   urdfdom
-  urdfdom_headers)
-
+  urdfdom_headers
+)
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_robot_trajectory
-  moveit_robot_state)
+  moveit_robot_state
+)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
   ARCHIVE DESTINATION lib

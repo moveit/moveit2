@@ -12,9 +12,8 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
   visualization_msgs
   tf2_eigen
-  angles
   geometric_shapes
-  OCTOMAP
+  octomap
 )
 
 target_link_libraries(${MOVEIT_LIB_NAME}

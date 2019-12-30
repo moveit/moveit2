@@ -6,11 +6,13 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_core
-  moveit_rdf_loader
   rclcpp
   Boost
   pluginlib
   ament_index_cpp
+)
+target_link_libraries(${MOVEIT_LIB_NAME}
+  moveit_rdf_loader
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME}

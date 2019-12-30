@@ -12,22 +12,19 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/cartesian_interpolator.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  urdf
+  tf2_geometry_msgs
+  geometric_shapes
+  urdfdom_headers
+  Boost
+)
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_robot_model
   moveit_kinematics_base
   moveit_transforms
-  ${urdfdom_LIBRARIES}
-  ${geometric_shapes_LIBRARIES}
-  ${urdfdom_headers_LIBRARIES}
-  ${Boost_LIBRARIES}
 )
-ament_target_dependencies(${MOVEIT_LIB_NAME}
-  moveit_robot_model
-  moveit_kinematics_base
-  moveit_transforms
-  urdf
-  tf2_geometry_msgs
-)
+
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
