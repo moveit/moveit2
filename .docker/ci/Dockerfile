@@ -1,7 +1,7 @@
-# moveit/moveit2:dashing-ci
+# moveit/moveit2:eloquent-ci
 # ROS base image augmented with all MoveIt dependencies to use for CI on Travis
 
-ARG ROS_DISTRO=dashing
+ARG ROS_DISTRO=eloquent
 FROM ros:${ROS_DISTRO}-ros-base-bionic
 
 MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de

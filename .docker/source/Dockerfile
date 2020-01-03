@@ -1,7 +1,7 @@
-# moveit/moveit2:dashing-source
+# moveit/moveit2:eloquent-source
 # Downloads the moveit source code and install remaining debian dependencies
 
-ARG ROS_DISTRO=dashing
+ARG ROS_DISTRO=eloquent
 FROM moveit/moveit2:${ROS_DISTRO}-ci-testing
 
 MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
@@ -30,7 +30,7 @@ RUN apt-get -qq update && \
     rm -rf /var/lib/apt/lists/*
 
 # Build the workspace
-RUN . /opt/ros/dashing/setup.sh &&\
+RUN . /opt/ros/${ROS_DISTRO}/setup.sh &&\
     colcon build --symlink-install \
 	        --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo \
 			  --ament-cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo \
