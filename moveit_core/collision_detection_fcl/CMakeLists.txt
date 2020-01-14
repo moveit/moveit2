@@ -6,7 +6,6 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
-  moveit_collision_detection
   rclcpp
   rmw_implementation
   urdf
@@ -14,8 +13,8 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdfdom_headers
   LIBFCL
   Boost
-  visualization_msgs)
-
+  visualization_msgs
+)
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_collision_detection
 )
@@ -28,7 +27,10 @@ ament_target_dependencies(collision_detector_fcl_plugin
   visualization_msgs
   pluginlib
   rmw_implementation
-  ${MOVEIT_LIB_NAME})
+)
+target_link_libraries(collision_detector_fcl_plugin
+  ${MOVEIT_LIB_NAME}
+)
 
 install(TARGETS ${MOVEIT_LIB_NAME} collision_detector_fcl_plugin
           LIBRARY DESTINATION lib

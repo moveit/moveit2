@@ -20,7 +20,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
     rclcpp
     pluginlib
     moveit_core
-    moveit_planning_scene
 )
 
 add_executable(moveit_list_request_adapter_plugins src/list.cpp)

@@ -9,15 +9,18 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
-  moveit_robot_state
-  moveit_robot_trajectory
   rclcpp
   rmw_implementation
   urdf
   urdfdom
   urdfdom_headers
   visualization_msgs
-  Boost)
+  Boost
+)
+target_link_libraries(${MOVEIT_LIB_NAME}
+  moveit_robot_state
+  moveit_robot_trajectory
+)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
   ARCHIVE DESTINATION lib

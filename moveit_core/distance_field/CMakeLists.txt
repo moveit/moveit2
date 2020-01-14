@@ -15,7 +15,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   visualization_msgs
   geometric_shapes
   tf2_eigen
-  OCTOMAP
+  octomap
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME}

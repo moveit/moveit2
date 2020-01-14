@@ -668,7 +668,10 @@ TEST_F(LoadPlanningModelsPr2, VisibilityConstraintsSimple)
 
   vcm.sensor_pose.header.frame_id = "base_footprint";
   vcm.sensor_pose.pose.position.z = -1.0;
+  vcm.sensor_pose.pose.orientation.x = 0.0;
   vcm.sensor_pose.pose.orientation.y = 1.0;
+  vcm.sensor_pose.pose.orientation.z = 0.0;
+  vcm.sensor_pose.pose.orientation.w = 0.0;
 
   vcm.target_pose.header.frame_id = "base_footprint";
   vcm.target_pose.pose.position.z = -2.0;
