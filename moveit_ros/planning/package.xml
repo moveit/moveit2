@@ -26,9 +26,7 @@
   <depend>moveit_msgs</depend>
   <depend>message_filters</depend>
   <depend version_gte="1.11.2">pluginlib</depend>
-  <depend>actionlib</depend>
-  <depend>dynamic_reconfigure</depend>
-  <depend>rosconsole</depend>
+  <depend>rclcpp_action</depend>
   <depend>rclcpp</depend>
   <depend>srdfdom</depend>
   <depend>urdf</depend>
