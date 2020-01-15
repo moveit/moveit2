@@ -5,6 +5,7 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   urdf
+  pluginlib
   class_loader
   ament_index_cpp
   moveit_core
