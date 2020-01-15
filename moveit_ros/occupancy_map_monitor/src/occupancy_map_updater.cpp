@@ -80,8 +80,9 @@ bool OccupancyMapUpdater::updateTransformCache(const std::string& target_frame, 
     return transform_provider_callback_(target_frame, target_time, transform_cache_);
   else
   {
-    RCUTILS_LOG_ERROR_THROTTLE(rcutils_steady_time_now, 1,
-                               "No callback provided for updating the transform cache for octomap updaters");
+    rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+    RCLCPP_WARN_THROTTLE(LOGGER, steady_clock, 1000,
+                         "No callback provided for updating the transform cache for octomap updaters");
     return false;
   }
 }

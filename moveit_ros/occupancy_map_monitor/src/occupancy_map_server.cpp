@@ -52,14 +52,15 @@ static void publishOctomap(rclcpp::Publisher<octomap_msgs::msg::Octomap>::Shared
   map.header.stamp = rclcpp::Clock().now();
 
   server->getOcTreePtr()->lockRead();
+  rclcpp::Clock steady_clock(RCL_STEADY_TIME);
   try
   {
     if (!octomap_msgs::binaryMapToMsgData(*server->getOcTreePtr(), map.data))
-      RCUTILS_LOG_ERROR_THROTTLE(rcutils_steady_time_now, 1, "Could not generate OctoMap message");
+      RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Could not generate OctoMap message");
   }
   catch (...)
   {
-    RCUTILS_LOG_ERROR_THROTTLE(rcutils_steady_time_now, 1, "Exception thrown while generating OctoMap message");
+    RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Exception thrown while generating OctoMap message");
   }
   server->getOcTreePtr()->unlockRead();
 

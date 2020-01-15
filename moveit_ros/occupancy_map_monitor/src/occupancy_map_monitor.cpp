@@ -41,8 +41,6 @@
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 // #include <XmlRpcException.h>
 #include <boost/bind.hpp>
-#include <rcutils/logging_macros.h>
-#include <rcutils/time.h>
 
 namespace occupancy_map_monitor
 {
@@ -288,7 +286,8 @@ bool OccupancyMapMonitor::getShapeTransformCache(std::size_t index, const std::s
         std::map<ShapeHandle, ShapeHandle>::const_iterator jt = mesh_handles_[index].find(it.first);
         if (jt == mesh_handles_[index].end())
         {
-          RCUTILS_LOG_ERROR_THROTTLE(rcutils_steady_time_now, 1, "Incorrect mapping of mesh handles");
+          rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+          RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Incorrect mapping of mesh handles");
           return false;
         }
         else
