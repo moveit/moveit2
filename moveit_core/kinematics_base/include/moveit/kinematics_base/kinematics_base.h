@@ -606,6 +606,7 @@ protected:
       val = parameters_lookup.get_parameter("robot_description_kinematics/" + param, default_val);
       return true;
     }
+    val = default_val;
     return false;
   }
 
