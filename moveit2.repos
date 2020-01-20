@@ -15,6 +15,10 @@ repositories:
     type: git
     url: https://github.com/ros-planning/random_numbers
     version: ros2
+  eigen_stl_containers:
+    type: git
+    url: https://github.com/ros/eigen_stl_containers.git
+    version: ros2
   urdf_parser_py:
     type: git
     url: https://github.com/ros/urdf_parser_py
