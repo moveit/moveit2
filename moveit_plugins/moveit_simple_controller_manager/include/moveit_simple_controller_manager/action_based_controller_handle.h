@@ -37,7 +37,8 @@
 
 #pragma once
 
-#include <actionlib/client/simple_action_client.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
 #include <moveit/controller_manager/controller_manager.h>
 #include <moveit/macros/class_forward.h>
 #include <memory>
@@ -56,9 +57,13 @@ public:
 
   virtual void addJoint(const std::string& name) = 0;
   virtual void getJoints(std::vector<std::string>& joints) = 0;
-  virtual void configure(XmlRpc::XmlRpcValue& /* config */)
-  {
-  }
+  // TODO(JafarAbdi): Revise parameter lookup
+  //  virtual void configure(XmlRpc::XmlRpcValue& /* config */)
+  //  {
+  //  }
+
+protected:
+  const rclcpp::Logger LOGGER = rclcpp::get_logger("action_based_controller_handle");
 };
 
 MOVEIT_CLASS_FORWARD(ActionBasedControllerHandleBase)
@@ -70,33 +75,33 @@ template <typename T>
 class ActionBasedControllerHandle : public ActionBasedControllerHandleBase
 {
 public:
-  ActionBasedControllerHandle(const std::string& name, const std::string& ns)
-    : ActionBasedControllerHandleBase(name), nh_("~"), done_(true), namespace_(ns)
+  ActionBasedControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::string& ns)
+    : ActionBasedControllerHandleBase(name), node_(node), done_(true), namespace_(ns)
   {
-    controller_action_client_.reset(new actionlib::SimpleActionClient<T>(getActionName(), true));
+    controller_action_client_ = rclcpp_action::create_client<T>(node_, getActionName());
     unsigned int attempts = 0;
     double timeout;
-    nh_.param("trajectory_execution/controller_connection_timeout", timeout, 15.0);
+    node_->get_parameter_or("trajectory_execution.controller_connection_timeout", timeout, 15.0);
 
     if (timeout == 0.0)
     {
-      while (ros::ok() && !controller_action_client_->waitForServer(ros::Duration(5.0)))
+      while (rclcpp::ok() && !controller_action_client_->wait_for_action_server(std::chrono::seconds(5)))
       {
-        ROS_WARN_STREAM_NAMED("ActionBasedController", "Waiting for " << getActionName() << " to come up");
-        ros::Duration(1).sleep();
+        RCLCPP_WARN_STREAM(LOGGER, "Waiting for " << getActionName() << " to come up");
       }
     }
     else
     {
-      while (ros::ok() && !controller_action_client_->waitForServer(ros::Duration(timeout / 3)) && ++attempts < 3)
+      while (rclcpp::ok() &&
+             !controller_action_client_->wait_for_action_server(std::chrono::duration<double>(timeout / 3)) &&
+             ++attempts < 3)
       {
-        ROS_WARN_STREAM_NAMED("ActionBasedController", "Waiting for " << getActionName() << " to come up");
-        ros::Duration(1).sleep();
+        RCLCPP_WARN_STREAM(LOGGER, "Waiting for " << getActionName() << " to come up");
       }
     }
-    if (!controller_action_client_->isServerConnected())
+    if (!controller_action_client_->action_server_is_ready())
     {
-      ROS_ERROR_STREAM_NAMED("ActionBasedController", "Action client not connected: " << getActionName());
+      RCLCPP_ERROR_STREAM(LOGGER, "Action client not connected: " << getActionName());
       controller_action_client_.reset();
     }
 
@@ -114,24 +119,25 @@ public:
       return false;
     if (!done_)
     {
-      ROS_INFO_STREAM_NAMED("ActionBasedController", "Cancelling execution for " << name_);
-      controller_action_client_->cancelGoal();
+      RCLCPP_INFO_STREAM(LOGGER, "Cancelling execution for " << name_);
+      auto cancel_result_future = controller_action_client_->async_cancel_goal(current_goal_);
+      if (rclcpp::spin_until_future_complete(node_, cancel_result_future) !=
+          rclcpp::executor::FutureReturnCode::SUCCESS)
+      {
+        RCLCPP_ERROR(LOGGER, "Failed to cancel goal");
+      }
       last_exec_ = moveit_controller_manager::ExecutionStatus::PREEMPTED;
       done_ = true;
     }
     return true;
   }
 
-  bool waitForExecution(const ros::Duration& timeout = ros::Duration(0)) override
+  bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(0)) override
   {
+    auto result_future = controller_action_client_->async_get_result(current_goal_);
     if (controller_action_client_ && !done_)
-      return controller_action_client_->waitForResult(timeout);
-#if 1  // TODO: remove when https://github.com/ros/actionlib/issues/155 is fixed
-    // workaround for actionlib issue: waitForResult() might return before our doneCB finished
-    ros::Time deadline = ros::Time::now() + ros::Duration(0.1);  // limit waiting to 0.1s
-    while (!done_ && ros::ok() && ros::Time::now() < deadline)   // Check the done_ flag explicitly,
-      ros::Duration(0.0001).sleep();                             // which is eventually set in finishControllerExecution
-#endif
+      return (rclcpp::spin_until_future_complete(node_, result_future, timeout.to_chrono<std::chrono::seconds>()) ==
+              rclcpp::executor::FutureReturnCode::SUCCESS);
     return true;
   }
 
@@ -151,7 +157,7 @@ public:
   }
 
 protected:
-  ros::NodeHandle nh_;
+  const rclcpp::Node::SharedPtr node_;
   std::string getActionName(void) const
   {
     if (namespace_.empty())
@@ -160,16 +166,17 @@ protected:
       return name_ + "/" + namespace_;
   }
 
-  void finishControllerExecution(const actionlib::SimpleClientGoalState& state)
+  void finishControllerExecution(const rclcpp_action::ResultCode& state)
   {
-    ROS_DEBUG_STREAM_NAMED("ActionBasedController", "Controller " << name_ << " is done with state " << state.toString()
-                                                                  << ": " << state.getText());
-    if (state == actionlib::SimpleClientGoalState::SUCCEEDED)
+    RCLCPP_DEBUG_STREAM(LOGGER, "Controller " << name_ << " is done with state " << static_cast<int8_t>(state));
+    if (state == rclcpp_action::ResultCode::SUCCEEDED)
       last_exec_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
-    else if (state == actionlib::SimpleClientGoalState::ABORTED)
+    else if (state == rclcpp_action::ResultCode::ABORTED)
       last_exec_ = moveit_controller_manager::ExecutionStatus::ABORTED;
-    else if (state == actionlib::SimpleClientGoalState::PREEMPTED)
+    else if (state == rclcpp_action::ResultCode::CANCELED)
       last_exec_ = moveit_controller_manager::ExecutionStatus::PREEMPTED;
+    else if (state == rclcpp_action::ResultCode::UNKNOWN)
+      last_exec_ = moveit_controller_manager::ExecutionStatus::UNKNOWN;
     else
       last_exec_ = moveit_controller_manager::ExecutionStatus::FAILED;
     done_ = true;
@@ -187,7 +194,9 @@ protected:
   std::vector<std::string> joints_;
 
   /* action client */
-  std::shared_ptr<actionlib::SimpleActionClient<T> > controller_action_client_;
+  typename rclcpp_action::Client<T>::SharedPtr controller_action_client_;
+  /* Current goal that have been sent to the action server */
+  typename rclcpp_action::ClientGoalHandle<T>::SharedPtr current_goal_;
 };
 
 }  // end namespace moveit_simple_controller_manager

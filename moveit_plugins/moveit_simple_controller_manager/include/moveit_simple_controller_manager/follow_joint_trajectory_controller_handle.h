@@ -38,7 +38,9 @@
 #pragma once
 
 #include <moveit_simple_controller_manager/action_based_controller_handle.h>
-#include <control_msgs/FollowJointTrajectoryAction.h>
+#include <control_msgs/action/follow_joint_trajectory.hpp>
+#include <control_msgs/msg/joint_tolerance.hpp>
+#include <functional>
 
 namespace moveit_simple_controller_manager
 {
@@ -47,32 +49,29 @@ namespace moveit_simple_controller_manager
  * or anything using a control_mgs/FollowJointTrajectoryAction.
  */
 class FollowJointTrajectoryControllerHandle
-    : public ActionBasedControllerHandle<control_msgs::FollowJointTrajectoryAction>
+    : public ActionBasedControllerHandle<control_msgs::action::FollowJointTrajectory>
 {
 public:
-  FollowJointTrajectoryControllerHandle(const std::string& name, const std::string& action_ns)
-    : ActionBasedControllerHandle<control_msgs::FollowJointTrajectoryAction>(name, action_ns)
+  FollowJointTrajectoryControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name,
+                                        const std::string& action_ns)
+    : ActionBasedControllerHandle<control_msgs::action::FollowJointTrajectory>(node, name, action_ns)
   {
   }
 
   bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& trajectory) override;
 
-  void configure(XmlRpc::XmlRpcValue& config) override;
+  // TODO(JafarAbdi): Revise parameter lookup
+  // void configure(XmlRpc::XmlRpcValue& config) override;
 
 protected:
-  void configure(XmlRpc::XmlRpcValue& config, const std::string& config_name,
-                 std::vector<control_msgs::JointTolerance>& tolerances);
-  static control_msgs::JointTolerance& getTolerance(std::vector<control_msgs::JointTolerance>& tolerances,
-                                                    const std::string& name);
+  static control_msgs::msg::JointTolerance& getTolerance(std::vector<control_msgs::msg::JointTolerance>& tolerances,
+                                                         const std::string& name);
 
-  void controllerDoneCallback(const actionlib::SimpleClientGoalState& state,
-                              const control_msgs::FollowJointTrajectoryResultConstPtr& result);
+  void controllerDoneCallback(
+      const rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::WrappedResult&
+          wrapped_result);
 
-  void controllerActiveCallback();
-
-  void controllerFeedbackCallback(const control_msgs::FollowJointTrajectoryFeedbackConstPtr& feedback);
-
-  control_msgs::FollowJointTrajectoryGoal goal_template_;
+  control_msgs::action::FollowJointTrajectory::Goal goal_template_;
 };
 
 }  // end namespace moveit_simple_controller_manager
