@@ -50,8 +50,26 @@ CollisionCheckThread::CollisionCheckThread(
     const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : parameters_(parameters), planning_scene_monitor_(planning_scene_monitor)
 {
-  if (parameters_.collision_check_rate < MIN_RECOMMENDED_COLLISION_RATE)
-    ROS_WARN_STREAM_THROTTLE_NAMED(5, LOGNAME, "Collision check rate is low, increase it in yaml file if CPU allows");
+  // MoveIt Setup
+  while (ros::ok() && !model_loader_ptr)
+  {
+    ROS_WARN_THROTTLE_NAMED(5, LOGNAME, "Waiting for a non-null robot_model_loader pointer");
+    ros::Duration(WHILE_LOOP_WAIT).sleep();
+  }
+
+  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(model_loader_ptr));
+  if (!planning_scene_monitor_->getPlanningScene())
+  {
+    ROS_ERROR_STREAM_NAMED(LOGNAME, "Error in setting up the PlanningSceneMonitor.");
+    exit(EXIT_FAILURE);
+  }
+
+  planning_scene_monitor_->startSceneMonitor();
+  planning_scene_monitor_->startWorldGeometryMonitor(
+      planning_scene_monitor::PlanningSceneMonitor::DEFAULT_COLLISION_OBJECT_TOPIC,
+      planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_WORLD_TOPIC,
+      false /* skip octomap monitor */);
+  planning_scene_monitor_->startStateMonitor();
 }
 
 planning_scene_monitor::LockedPlanningSceneRO CollisionCheckThread::getLockedPlanningSceneRO() const
