@@ -67,7 +67,7 @@ public:
 #if KDL_VERSION_LESS(1, 4, 0)
   void updateInternalDataStructures();
 #else
-  void updateInternalDataStructures() override;
+  void updateInternalDataStructures();
 #endif
 #undef KDL_VERSION_LESS
 

@@ -36,12 +36,14 @@
 
 #include <cstring>
 #include <chrono>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <boost/program_options.hpp>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_scene/planning_scene.h>
 
 namespace po = boost::program_options;
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("cached_ik.measure_ik_call_cost");
 
 /** Benchmark program measuring time to solve inverse kinematics of robot described in robot_description */
 int main(int argc, char* argv[])
@@ -72,11 +74,12 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  ros::init(argc, argv, "benchmark_ik");
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  rclcpp::init(argc, argv);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("benchmark_ik");
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(node);
 
-  robot_model_loader::RobotModelLoader robot_model_loader;
+  robot_model_loader::RobotModelLoader robot_model_loader(node);
   const robot_model::RobotModelPtr& kinematic_model = robot_model_loader.getModel();
   planning_scene::PlanningScene planning_scene(kinematic_model);
   robot_state::RobotState& kinematic_state = planning_scene.getCurrentStateNonConst();
@@ -142,17 +145,16 @@ int main(int argc, char* argv[])
         num_failed_calls++;
       ++i;
       if (i % 100 == 0)
-        ROS_INFO_NAMED("cached_ik.measure_ik_call_cost",
-                       "Avg. time per IK solver call is %g after %d calls. %g%% of calls failed to return a solution. "
-                       "%g%% of random joint configurations were ignored due to self-collisions.",
-                       ik_time.count() / (double)i, i, 100. * num_failed_calls / i,
-                       100. * num_self_collisions / (num_self_collisions + i));
+        RCLCPP_INFO(LOGGER,
+                    "Avg. time per IK solver call is %g after %d calls. %g%% of calls failed to return a solution. "
+                    "%g%% of random joint configurations were ignored due to self-collisions.",
+                    ik_time.count() / (double)i, i, 100. * num_failed_calls / i,
+                    100. * num_self_collisions / (num_self_collisions + i));
     }
-    ROS_INFO_NAMED("cached_ik.measure_ik_call_cost", "Summary for group %s: %g %g %g", group->getName().c_str(),
-                   ik_time.count() / (double)i, 100. * num_failed_calls / i,
-                   100. * num_self_collisions / (num_self_collisions + i));
+    RCLCPP_INFO(LOGGER, "Summary for group %s: %g %g %g", group->getName().c_str(), ik_time.count() / (double)i,
+                100. * num_failed_calls / i, 100. * num_self_collisions / (num_self_collisions + i));
   }
 
-  ros::shutdown();
+  rclcpp::shutdown();
   return 0;
 }

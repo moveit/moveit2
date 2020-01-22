@@ -1,14 +1,31 @@
 set(MOVEIT_LIB_NAME moveit_kdl_kinematics_plugin)
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/kdl_kinematics_plugin.cpp
   src/chainiksolver_vel_mimic_svd.cpp)
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-target_link_libraries(${MOVEIT_LIB_NAME} ${catkin_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  rclcpp
+  random_numbers
+  pluginlib
+  moveit_core
+  moveit_msgs
+  orocos_kdl
+  kdl_parser
+  EIGEN3
+)
 
-install(TARGETS ${MOVEIT_LIB_NAME} 
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION} 
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}) 
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+# prevent pluginlib from using boost
+target_compile_definitions(${MOVEIT_LIB_NAME} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+# Causes the visibility macros to use dllexport rather than dllimport,
+# which is appropriate when building the dll but not consuming it.
+target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE "MOVEIT_KDL_KINEMATICS_PLUGIN_BUILDING_DLL")
+
+install(
+  TARGETS ${MOVEIT_LIB_NAME}
+  EXPORT ${MOVEIT_LIB_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+install(DIRECTORY include/ DESTINATION include)

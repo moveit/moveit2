@@ -41,16 +41,16 @@
 
 #pragma once
 
-// ROS
-#include <ros/ros.h>
+// ROS2
+#include <rclcpp/rclcpp.hpp>
 
 // System
 #include <memory>
 
 // ROS msgs
-#include <geometry_msgs/PoseStamped.h>
-#include <moveit_msgs/GetPositionFK.h>
-#include <moveit_msgs/GetPositionIK.h>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <moveit_msgs/srv/get_position_fk.hpp>
+#include <moveit_msgs/srv/get_position_ik.hpp>
 #include <moveit_msgs/msg/kinematic_solver_info.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 
@@ -73,45 +73,45 @@ public:
   SrvKinematicsPlugin();
 
   bool getPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, std::vector<double>& solution,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, std::vector<double>& solution,
       moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
       std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
       const std::vector<double>& consistency_limits, std::vector<double>& solution,
       moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
       std::vector<double>& solution, const IKCallbackFn& solution_callback,
       moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
   bool searchPositionIK(
-      const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+      const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
       const std::vector<double>& consistency_limits, std::vector<double>& solution,
       const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
       const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions()) const override;
 
-  bool searchPositionIK(const std::vector<geometry_msgs::Pose>& ik_poses, const std::vector<double>& ik_seed_state,
+  bool searchPositionIK(const std::vector<geometry_msgs::msg::Pose>& ik_poses, const std::vector<double>& ik_seed_state,
                         double timeout, const std::vector<double>& consistency_limits, std::vector<double>& solution,
-                        const IKCallbackFn& solution_callback, moveit_msgs::MoveItErrorCodes& error_code,
+                        const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
                         const kinematics::KinematicsQueryOptions& options = kinematics::KinematicsQueryOptions(),
                         const moveit::core::RobotState* context_state = nullptr) const override;
 
   bool getPositionFK(const std::vector<std::string>& link_names, const std::vector<double>& joint_angles,
-                     std::vector<geometry_msgs::Pose>& poses) const override;
+                     std::vector<geometry_msgs::msg::Pose>& poses) const override;
 
-  bool initialize(const moveit::core::RobotModel& robot_model, const std::string& group_name,
-                  const std::string& base_name, const std::vector<std::string>& tip_frames,
-                  double search_discretization) override;
+  bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModel& robot_model,
+                  const std::string& group_name, const std::string& base_name,
+                  const std::vector<std::string>& tip_frames, double search_discretization) override;
 
   /**
    * @brief  Return all the joint names in the order they are used internally
@@ -132,7 +132,7 @@ protected:
   bool setRedundantJoints(const std::vector<unsigned int>& redundant_joint_indices) override;
 
 private:
-  bool timedOut(const ros::WallTime& start_time, double duration) const;
+  bool timedOut(const rclcpp::Time& start_time, double duration) const;
 
   int getJointIndex(const std::string& name) const;
 
@@ -150,6 +150,8 @@ private:
 
   int num_possible_redundant_joints_;
 
-  std::shared_ptr<ros::ServiceClient> ik_service_client_;
+  rclcpp::Client<moveit_msgs::srv::GetPositionIK>::SharedPtr ik_service_client_;
+
+  rclcpp::Node::SharedPtr node_;
 };
 }
