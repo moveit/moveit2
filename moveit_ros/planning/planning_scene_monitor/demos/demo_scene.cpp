@@ -37,13 +37,15 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <geometric_shapes/solid_primitive_dims.h>
 
+#include <rclcpp/rclcpp.hpp>
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_scene_monitor.demo_scene");
+
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
-void sendKnife()
+void sendKnife(const rclcpp::Node::SharedPtr& node)
 {
-  ros::NodeHandle nh;
-  ros::Publisher pub_aco = nh.advertise<moveit_msgs::msg::AttachedCollisionObject>("attached_collision_object", 10);
-
+  auto pub_aco = node->create_publisher<moveit_msgs::msg::AttachedCollisionObject>("attached_collision_object", 10);
   moveit_msgs::msg::AttachedCollisionObject aco;
   aco.link_name = "r_wrist_roll_link";
   aco.touch_links.push_back("r_wrist_roll_link");
@@ -61,11 +63,11 @@ void sendKnife()
 
   moveit_msgs::msg::CollisionObject& co = aco.object;
   co.id = "knife";
-  co.header.stamp = ros::Time::now();
+  co.header.stamp = rclcpp::Clock().now();
   co.header.frame_id = aco.link_name;
   co.operation = moveit_msgs::msg::CollisionObject::ADD;
   co.primitives.resize(1);
-  co.primitives[0].type = shape_msgs::SolidPrimitive::BOX;
+  co.primitives[0].type = shape_msgs::msg::SolidPrimitive::BOX;
   co.primitives[0].dimensions.push_back(0.1);
   co.primitives[0].dimensions.push_back(0.1);
   co.primitives[0].dimensions.push_back(0.4);
@@ -73,25 +75,24 @@ void sendKnife()
   co.primitive_poses[0].position.x = 0.1;
   co.primitive_poses[0].position.y = 0;
   co.primitive_poses[0].position.z = -0.2;
-  co.primitive_poses[0].orientation.w = 1.0;
 
-  pub_aco.publish(aco);
-  ros::Duration(1).sleep();
-  pub_aco.publish(aco);
-  ROS_INFO("Object published.");
-  ros::Duration(1.5).sleep();
+  using namespace std::chrono_literals;
+  pub_aco->publish(aco);
+  rclcpp::sleep_for(1s);
+  pub_aco->publish(aco);
+  RCLCPP_INFO(LOGGER, "Object published.");
+  rclcpp::sleep_for(1500ms);
 }
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "demo", ros::init_options::AnonymousName);
+  rclcpp::init(argc, argv);
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  auto node = rclcpp::Node::make_shared("demo_scene");
 
-  sendKnife();
+  sendKnife(node);
 
-  ros::waitForShutdown();
+  rclcpp::spin(node);
 
   return 0;
 }
