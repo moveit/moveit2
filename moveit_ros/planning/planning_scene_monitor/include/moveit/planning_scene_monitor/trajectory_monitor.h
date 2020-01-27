@@ -44,7 +44,7 @@
 
 namespace planning_scene_monitor
 {
-typedef boost::function<void(const robot_state::RobotStateConstPtr& state, const ros::Time& stamp)>
+typedef boost::function<void(const robot_state::RobotStateConstPtr& state, const rclcpp::Time& stamp)>
     TrajectoryStateAddedCallback;
 
 MOVEIT_CLASS_FORWARD(TrajectoryMonitor)
@@ -99,8 +99,8 @@ private:
   double sampling_frequency_;
 
   robot_trajectory::RobotTrajectory trajectory_;
-  ros::Time trajectory_start_time_;
-  ros::Time last_recorded_state_time_;
+  rclcpp::Time trajectory_start_time_;
+  rclcpp::Time last_recorded_state_time_;
 
   std::unique_ptr<boost::thread> record_states_thread_;
   TrajectoryStateAddedCallback state_add_callback_;
