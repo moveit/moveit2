@@ -36,17 +36,18 @@
 
 #pragma once
 
-#include <ros/ros.h>
 #include <tf2_ros/buffer.h>
 #include <moveit/robot_state/robot_state.h>
-#include <sensor_msgs/JointState.h>
+#include <sensor_msgs/msg/joint_state.hpp>
 #include <boost/function.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition_variable.hpp>
+#include <boost/signals2.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 namespace planning_scene_monitor
 {
-typedef boost::function<void(const sensor_msgs::JointStateConstPtr& joint_state)> JointStateUpdateCallback;
+typedef std::function<void(const sensor_msgs::msg::JointState::ConstSharedPtr& joint_state)> JointStateUpdateCallback;
 
 /** @class CurrentStateMonitor
     @brief Monitors the joint_states topic and tf to maintain the current state of the robot. */
@@ -55,21 +56,13 @@ class CurrentStateMonitor
   typedef boost::signals2::connection TFConnection;
 
 public:
-  /**
-   * @brief Constructor.
-   * @param robot_model The current kinematic model to build on
-   * @param tf_buffer A pointer to the tf2_ros Buffer to use
-   */
-  CurrentStateMonitor(const robot_model::RobotModelConstPtr& robot_model,
-                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
-
   /** @brief Constructor.
+   *  @param node A shared_ptr to a node used for subscription to joint_states_topic
    *  @param robot_model The current kinematic model to build on
    *  @param tf_buffer A pointer to the tf2_ros Buffer to use
-   *  @param nh A ros::NodeHandle to pass node specific options
    */
-  CurrentStateMonitor(const robot_model::RobotModelConstPtr& robot_model,
-                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const ros::NodeHandle& nh);
+  CurrentStateMonitor(const rclcpp::Node::SharedPtr& node, const robot_model::RobotModelConstPtr& robot_model,
+                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
 
   ~CurrentStateMonitor();
 
@@ -103,7 +96,7 @@ public:
    *  @return False if we have no joint state information for one of the joints or if our state
    *  information is more than \e age old
    */
-  bool haveCompleteState(const ros::Duration& age) const;
+  bool haveCompleteState(const rclcpp::Duration& age) const;
 
   /** @brief Query whether we have joint state information for all DOFs in the kinematic model
    *  @param missing_joints Returns the list of joints that are missing
@@ -116,7 +109,7 @@ public:
    *  @param missing_states Returns the list of joints that are missing
    *  @return False if we have no joint state information for one of the joints or if our state
    *  information is more than \e age old*/
-  bool haveCompleteState(const ros::Duration& age, std::vector<std::string>& missing_states) const;
+  bool haveCompleteState(const rclcpp::Duration& age, std::vector<std::string>& missing_states) const;
 
   /** @brief Get the current state
    *  @return Returns the current state */
@@ -126,11 +119,11 @@ public:
   void setToCurrentState(robot_state::RobotState& upd) const;
 
   /** @brief Get the time stamp for the current state */
-  ros::Time getCurrentStateTime() const;
+  rclcpp::Time getCurrentStateTime() const;
 
   /** @brief Get the current state and its time stamp
    *  @return Returns a pair of the current state and its time stamp */
-  std::pair<robot_state::RobotStatePtr, ros::Time> getCurrentStateAndTime() const;
+  std::pair<robot_state::RobotStatePtr, rclcpp::Time> getCurrentStateAndTime() const;
 
   /** @brief Get the current state values as a map from joint names to joint state values
    *  @return Returns the map from joint names to joint state values*/
@@ -139,7 +132,7 @@ public:
   /** @brief Wait for at most \e wait_time seconds (default 1s) for a robot state more recent than t
    *  @return true on success, false if up-to-date robot state wasn't received within \e wait_time
   */
-  bool waitForCurrentState(const ros::Time t = ros::Time::now(), double wait_time = 1.0) const;
+  bool waitForCurrentState(const rclcpp::Time t = rclcpp::Clock().now(), double wait_time = 1.0) const;
 
   /** @brief Wait for at most \e wait_time seconds until the complete robot state is known.
       @return true if the full state is known */
@@ -150,7 +143,7 @@ public:
   bool waitForCompleteState(const std::string& group, double wait_time) const;
 
   /** @brief Get the time point when the monitor was started */
-  const ros::Time& getMonitorStartTime() const
+  const rclcpp::Time& getMonitorStartTime() const
   {
     return monitor_start_time_;
   }
@@ -188,23 +181,23 @@ public:
   }
 
 private:
-  void jointStateCallback(const sensor_msgs::JointStateConstPtr& joint_state);
+  void jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
   void tfCallback();
 
-  ros::NodeHandle nh_;
+  std::shared_ptr<rclcpp::Node> node_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   robot_model::RobotModelConstPtr robot_model_;
   robot_state::RobotState robot_state_;
-  std::map<const moveit::core::JointModel*, ros::Time> joint_time_;
+  std::map<const moveit::core::JointModel*, rclcpp::Time> joint_time_;
   bool state_monitor_started_;
   bool copy_dynamics_;  // Copy velocity and effort from joint_state
-  ros::Time monitor_start_time_;
+  rclcpp::Time monitor_start_time_;
   double error_;
-  ros::Subscriber joint_state_subscriber_;
-  ros::Time current_state_time_;
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
+  rclcpp::Time current_state_time_;
 
-  mutable boost::mutex state_update_lock_;
-  mutable boost::condition_variable state_update_condition_;
+  mutable std::mutex state_update_lock_;
+  mutable std::condition_variable state_update_condition_;
   std::vector<JointStateUpdateCallback> update_callbacks_;
 
   std::shared_ptr<TFConnection> tf_connection_;
