@@ -25,7 +25,7 @@ find_package(tf2_ros REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(ament_index_cpp REQUIRED)
-
+find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
     rdf_loader/include
@@ -33,7 +33,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     robot_model_loader/include
     constraint_sampler_manager_loader/include
     # planning_pipeline/include
-    # planning_scene_monitor/include
+    planning_scene_monitor/include
     # trajectory_execution_manager/include
     # plan_execution/include
     collision_plugin_loader/include
@@ -47,7 +47,7 @@ set(libraries
   # moveit_planning_pipeline
   # moveit_trajectory_execution_manager
   # moveit_plan_execution
-  # moveit_planning_scene_monitor
+  moveit_planning_scene_monitor
   moveit_collision_plugin_loader
   moveit_default_planning_request_adapter_plugins
 )
@@ -77,7 +77,7 @@ add_subdirectory(robot_model_loader)
 add_subdirectory(constraint_sampler_manager_loader)
 # add_subdirectory(planning_pipeline)
 add_subdirectory(planning_request_adapter_plugins)
-# add_subdirectory(planning_scene_monitor)
+add_subdirectory(planning_scene_monitor)
 # add_subdirectory(planning_components_tools)
 # add_subdirectory(trajectory_execution_manager)
 # add_subdirectory(plan_execution)

@@ -36,9 +36,10 @@
 
 #pragma once
 
-#include <ros/ros.h>
-#include <ros/callback_queue.h>
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_ros/message_filter.h>
 #include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
@@ -107,7 +108,7 @@ public:
    *  @param tf_buffer A pointer to a tf2_ros::Buffer
    *  @param name A name identifying this planning scene monitor
    */
-  PlanningSceneMonitor(const std::string& robot_description,
+  PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
                        const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
                        const std::string& name = "");
 
@@ -116,7 +117,7 @@ public:
    *  @param tf_buffer A pointer to a tf2_ros::Buffer
    *  @param name A name identifying this planning scene monitor
    */
-  PlanningSceneMonitor(const robot_model_loader::RobotModelLoaderPtr& rml,
+  PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const robot_model_loader::RobotModelLoaderPtr& rml,
                        const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
                        const std::string& name = "");
 
@@ -126,7 +127,8 @@ public:
    *  @param tf_buffer A pointer to a tf2_ros::Buffer
    *  @param name A name identifying this planning scene monitor
    */
-  PlanningSceneMonitor(const planning_scene::PlanningScenePtr& scene, const std::string& robot_description,
+  PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene,
+                       const std::string& robot_description,
                        const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
                        const std::string& name = "");
 
@@ -136,22 +138,8 @@ public:
    *  @param tf_buffer A pointer to a tf2_ros::Buffer
    *  @param name A name identifying this planning scene monitor
    */
-  PlanningSceneMonitor(const planning_scene::PlanningScenePtr& scene,
+  PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene,
                        const robot_model_loader::RobotModelLoaderPtr& rml,
-                       const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                       const std::string& name = "");
-
-  /** @brief Constructor
-   *  @param scene The scene instance to maintain up to date with monitored information
-   *  @param rml A pointer to a kinematic model loader
-   *  @param nh external parent NodeHandle
-   *         The monitors will use this NodeHandle's CallbackQueue for updates.
-   *         Usually, this should be a different queue than the global queue, otherwise you might run into timeouts.
-   *  @param tf_buffer A pointer to a tf2_ros::Buffer
-   *  @param name A name identifying this planning scene monitor
-   */
-  PlanningSceneMonitor(const planning_scene::PlanningScenePtr& scene,
-                       const robot_model_loader::RobotModelLoaderPtr& rml, const ros::NodeHandle& nh,
                        const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
                        const std::string& name = "");
 
@@ -318,8 +306,8 @@ public:
   /** @brief Get the maximum frequency (Hz) at which the current state of the planning scene is updated.*/
   double getStateUpdateFrequency() const
   {
-    if (!dt_state_update_.isZero())
-      return 1.0 / dt_state_update_.toSec();
+    if (dt_state_update_.count() > 0.0)
+      return 1.0 / dt_state_update_.count();
     else
       return 0.0;
   }
@@ -365,7 +353,7 @@ public:
   void getMonitoredTopics(std::vector<std::string>& topics) const;
 
   /** \brief Return the time when the last update was made to the planning scene (by \e any monitor) */
-  const ros::Time& getLastUpdateTime() const
+  const rclcpp::Time& getLastUpdateTime() const
   {
     return last_update_time_;
   }
@@ -380,7 +368,7 @@ public:
    * If there is no state monitor active, there will be no scene updates.
    * Hence, you can specify a timeout to wait for those updates. Default is 1s.
    */
-  bool waitForCurrentRobotState(const ros::Time& t, double wait_time = 1.);
+  bool waitForCurrentRobotState(const rclcpp::Time& t, double wait_time = 1.);
 
   /** \brief Lock the scene for reading (multiple threads can lock for reading at the same time) */
   void lockSceneRead();
@@ -414,16 +402,16 @@ protected:
   void configureDefaultPadding();
 
   /** @brief Callback for a new collision object msg*/
-  void collisionObjectCallback(const moveit_msgs::msg::CollisionObjectConstPtr& obj);
+  void collisionObjectCallback(const moveit_msgs::msg::CollisionObject::ConstSharedPtr obj);
 
   /** @brief Callback for a new planning scene world*/
-  void newPlanningSceneWorldCallback(const moveit_msgs::msg::PlanningSceneWorldConstPtr& world);
+  void newPlanningSceneWorldCallback(const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr world);
 
   /** @brief Callback for octomap updates */
   void octomapUpdateCallback();
 
   /** @brief Callback for a new attached object msg*/
-  void attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObjectConstPtr& obj);
+  void attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr obj);
 
   /** @brief Callback for a change for an attached object of the current state of the planning scene */
   void currentStateAttachedBodyUpdateCallback(robot_state::AttachedBody* attached_body, bool just_attached);
@@ -445,7 +433,7 @@ protected:
   void excludeAttachedBodyFromOctree(const robot_state::AttachedBody* attached_body);
   void includeAttachedBodyInOctree(const robot_state::AttachedBody* attached_body);
 
-  bool getShapeTransformCache(const std::string& target_frame, const ros::Time& target_time,
+  bool getShapeTransformCache(const std::string& target_frame, const rclcpp::Time& target_time,
                               occupancy_map_monitor::ShapeTransformCache& cache) const;
 
   /// The name of this scene monitor
@@ -455,13 +443,15 @@ protected:
   planning_scene::PlanningSceneConstPtr scene_const_;
   planning_scene::PlanningScenePtr parent_scene_;  /// if diffs are monitored, this is the pointer to the parent scene
   boost::shared_mutex scene_update_mutex_;         /// mutex for stored scene
-  ros::Time last_update_time_;                     /// Last time the state was updated
-  ros::Time last_robot_motion_time_;               /// Last time the robot has moved
+  rclcpp::Time last_update_time_;                  /// Last time the state was updated
+  rclcpp::Time last_robot_motion_time_;            /// Last time the robot has moved
 
-  ros::NodeHandle nh_;
-  ros::NodeHandle root_nh_;
-  ros::CallbackQueue queue_;
-  std::shared_ptr<ros::AsyncSpinner> spinner_;
+  std::shared_ptr<rclcpp::Node> node_;
+
+  // TODO: (anasarrak) callbacks on ROS2?
+  // https://answers.ros.org/question/300874/how-do-you-use-callbackgroups-as-a-replacement-for-callbackqueues-in-ros2/
+  // ros::CallbackQueue queue_;
+  std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> spinner_;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
 
@@ -481,7 +471,7 @@ protected:
   std::map<std::string, double> default_robot_link_scale_;
 
   // variables for planning scene publishing
-  ros::Publisher planning_scene_publisher_;
+  rclcpp::Publisher<moveit_msgs::msg::PlanningScene>::SharedPtr planning_scene_publisher_;
   std::unique_ptr<boost::thread> publish_planning_scene_;
   double publish_planning_scene_frequency_;
   SceneUpdateType publish_update_types_;
@@ -489,11 +479,11 @@ protected:
   boost::condition_variable_any new_scene_update_condition_;
 
   // subscribe to various sources of data
-  ros::Subscriber planning_scene_subscriber_;
-  ros::Subscriber planning_scene_world_subscriber_;
+  rclcpp::Subscription<moveit_msgs::msg::PlanningScene>::SharedPtr planning_scene_subscriber_;
+  rclcpp::Subscription<moveit_msgs::msg::PlanningSceneWorld>::SharedPtr planning_scene_world_subscriber_;
 
-  ros::Subscriber attached_collision_object_subscriber_;
-  ros::Subscriber collision_object_subscriber_;
+  rclcpp::Subscription<moveit_msgs::msg::AttachedCollisionObject>::SharedPtr attached_collision_object_subscriber_;
+  rclcpp::Subscription<moveit_msgs::msg::CollisionObject>::SharedPtr collision_object_subscriber_;
 
   // include a octomap monitor
   std::unique_ptr<occupancy_map_monitor::OccupancyMapMonitor> octomap_monitor_;
@@ -521,22 +511,22 @@ protected:
                                                                            /// are received
 
 private:
-  void getUpdatedFrameTransforms(std::vector<geometry_msgs::TransformStamped>& transforms);
+  void getUpdatedFrameTransforms(std::vector<geometry_msgs::msg::TransformStamped>& transforms);
 
   // publish planning scene update diffs (runs in its own thread)
   void scenePublishingThread();
 
   // called by current_state_monitor_ when robot state (as monitored on joint state topic) changes
-  void onStateUpdate(const sensor_msgs::JointStateConstPtr& joint_state);
+  void onStateUpdate(const sensor_msgs::msg::JointState::ConstSharedPtr& joint_state);
 
   // called by state_update_timer_ when a state update it pending
-  void stateUpdateTimerCallback(const ros::WallTimerEvent& event);
+  void stateUpdateTimerCallback();
 
   // Callback for a new planning scene msg
-  void newPlanningSceneCallback(const moveit_msgs::msg::PlanningSceneConstPtr& scene);
+  void newPlanningSceneCallback(const moveit_msgs::msg::PlanningScene::ConstSharedPtr scene);
 
   // Lock for state_update_pending_ and dt_state_update_
-  boost::mutex state_pending_mutex_;
+  std::mutex state_pending_mutex_;
 
   /// True when we need to update the RobotState from current_state_monitor_
   // This field is protected by state_pending_mutex_
@@ -544,21 +534,22 @@ private:
 
   /// the amount of time to wait in between updates to the robot state
   // This field is protected by state_pending_mutex_
-  ros::WallDuration dt_state_update_;
+  std::chrono::duration<double> dt_state_update_;  // 1hz
 
   /// the amount of time to wait when looking up transforms
   // Setting this to a non-zero value resolves issues when the sensor data is
   // arriving so fast that it is preceding the transform state.
-  ros::Duration shape_transform_cache_lookup_wait_time_;
+  rclcpp::Duration shape_transform_cache_lookup_wait_time_;
 
   /// timer for state updates.
   // Check if last_state_update_ is true and if so call updateSceneWithCurrentState()
   // Not safe to access from callback functions.
-  ros::WallTimer state_update_timer_;
+
+  rclcpp::TimerBase::SharedPtr state_update_timer_;
 
   /// Last time the state was updated from current_state_monitor_
   // Only access this from callback functions (and constructor)
-  ros::WallTime last_robot_state_update_wall_time_;
+  std::chrono::system_clock::time_point last_robot_state_update_wall_time_;
 
   robot_model_loader::RobotModelLoaderPtr rm_loader_;
   robot_model::RobotModelConstPtr robot_model_;
