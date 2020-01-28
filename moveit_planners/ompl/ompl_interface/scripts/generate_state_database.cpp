@@ -55,48 +55,66 @@ static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 static const std::string CONSTRAINT_PARAMETER = "constraints";
 
+static bool get_uint_parameter_or(const rclcpp::Node::SharedPtr& node, const std::string& param_name,
+                                  size_t&& result_value, const size_t default_value)
+{
+  int param_value;
+  if (node->get_parameter(param_name, param_value))
+  {
+    if (param_value >= 0)
+    {
+      result_value = static_cast<size_t>(param_value);
+      return true;
+    }
+
+    RCLCPP_WARN_STREAM(LOGGER, "Value for parameter '" << param_name << "' must be positive\n"
+                                                                        "Using back to default value:"
+                                                       << default_value);
+  }
+
+  result_value = default_value;
+}
+
 struct GenerateStateDatabaseParameters
 {
   bool setFromNode(const rclcpp::Node::SharedPtr& node)
   {
-    // TODO(henningkayser): Load parameters
-    // use_current_scene = nh.param("use_current_scene", false);
+    node->get_parameter_or("use_current_scene", use_current_scene, false);
 
-    // // number of states in joint space approximation
-    // construction_opts.samples = nh.param("state_cnt", 10000);
+    // number of states in joint space approximation
+    get_uint_parameter_or(node, "state_cnt", construction_opts.samples, 10000);
 
-    // // generate edges together with states?
-    // construction_opts.edges_per_sample = nh.param("edges_per_sample", 0);
-    // construction_opts.max_edge_length = nh.param("max_edge_length", 0.2);
+    // generate edges together with states?
+    get_uint_parameter_or(node, "edges_per_sample", construction_opts.edges_per_sample, 0);
 
-    // // verify constraint validity on edges
-    // construction_opts.explicit_motions = nh.param("explicit_motions", true);
-    // construction_opts.explicit_points_resolution = nh.param("explicit_points_resolution", 0.05);
-    // construction_opts.max_explicit_points = nh.param("max_explicit_points", 200);
+    node->get_parameter_or("max_edge_length", construction_opts.max_edge_length, 0.2);
 
-    // // local planning in JointModel state space
-    // construction_opts.state_space_parameterization =
-    //     nh.param<std::string>("state_space_parameterization", "JointModel");
+    // verify constraint validity on edges
+    node->get_parameter_or("explicit_motions", construction_opts.explicit_motions, true);
+    node->get_parameter_or("explicit_points_resolution", construction_opts.explicit_points_resolution, 0.05);
+    get_uint_parameter_or(node, "max_explicit_points", construction_opts.max_explicit_points, 200);
 
-    // output_folder = nh.param<std::string>("output_folder", "constraint_approximations_database");
+    // local planning in JointModel state space
+    node->get_parameter_or("state_space_parameterization", construction_opts.state_space_parameterization,
+                           std::string("JointModel"));
 
-    // if (!nh.getParam("planning_group", planning_group))
-    // {
-    //   RCLCPP_FATAL(LOGGER, "~planning_group parameter has to be specified.");
-    //   return false;
-    // }
+    node->get_parameter_or("output_folder", output_folder, std::string("constraint_approximation_database"));
 
-    // XmlRpc::XmlRpcValue constraint_description;
-    // if (!nh.getParam(CONSTRAINT_PARAMETER, constraint_description) ||
-    //     !kinematic_constraints::constructConstraints(constraint_description, constraints))
-    // {
-    //   RCLCPP_FATAL_STREAM(LOGGER,
-    //                          "Could not find valid constraint description in parameter '"
-    //                              << nh.resolveName(CONSTRAINT_PARAMETER)
-    //                              << "'. "
-    //                                 "Please upload correct correct constraint description or remap the parameter.");
-    //   return false;
-    // }
+    if (!node->get_parameter("planning_group", planning_group))
+    {
+      RCLCPP_FATAL(LOGGER, "~planning_group parameter has to be specified.");
+      return false;
+    }
+
+    if (!kinematic_constraints::constructConstraints(node, CONSTRAINT_PARAMETER, constraints))
+    {
+      RCLCPP_FATAL_STREAM(LOGGER,
+                          "Could not find valid constraint description in parameter '"
+                              << node->get_fully_qualified_name() << "." << CONSTRAINT_PARAMETER
+                              << "'. "
+                                 "Please upload correct correct constraint description or remap the parameter.");
+      return false;
+    }
 
     return true;
   };

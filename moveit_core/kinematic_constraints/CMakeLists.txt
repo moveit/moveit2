@@ -18,6 +18,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdfdom
   urdfdom_headers
   tf2_geometry_msgs
+  geometry_msgs
   visualization_msgs
   tf2_eigen
 )

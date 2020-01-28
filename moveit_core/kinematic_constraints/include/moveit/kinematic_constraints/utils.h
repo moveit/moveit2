@@ -196,13 +196,14 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
  * This can be used to construct a Constraints message from
  * specifications uploaded on the parameter server.
  *
- * @param [in] params XmlRpc node of the parameter specification
+ * @param [in] params Node node to load the parameters from
+ * @param [in] params string namespace from where to load the constraints parameters
  * @param [out] constraints The constructed constraints message
  *
  * @return was the construction successful?
  */
-// TODO rework this function
-// bool constructConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Constraints& constraints);
+bool constructConstraints(const rclcpp::Node::SharedPtr& node, const std::string& constraints_param,
+                          moveit_msgs::msg::Constraints& constraints);
 
 /**
  * \brief Resolves frames used in constraints to links in the robot model.
