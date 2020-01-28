@@ -57,13 +57,15 @@ namespace ompl_interface
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.ompl_planner_manager");
 // using namespace moveit_planners_ompl;
 
-//#define OMPL_ROS_LOG(ros_log_level)                                                                                    \
-//  {                                                                                                                    \
-//    ROSCONSOLE_DEFINE_LOCATION(true, ros_log_level, ROSCONSOLE_NAME_PREFIX ".ompl");                                   \
-//    if (ROS_UNLIKELY(__rosconsole_define_location__enabled))                                                           \
-//      ::ros::console::print(0, __rosconsole_define_location__loc.logger_, __rosconsole_define_location__loc.level_,    \
-//                            filename, line, __ROSCONSOLE_FUNCTION__, "%s", text.c_str());                              \
-//  }
+/*
+#define OMPL_ROS_LOG(ros_log_level)                                                                                    \
+  {                                                                                                                    \
+    ROSCONSOLE_DEFINE_LOCATION(true, ros_log_level, ROSCONSOLE_NAME_PREFIX ".ompl");                                   \
+    if (ROS_UNLIKELY(__rosconsole_define_location__enabled))                                                           \
+      ::ros::console::print(0, __rosconsole_define_location__loc.logger_, __rosconsole_define_location__loc.level_,    \
+                            filename, line, __ROSCONSOLE_FUNCTION__, "%s", text.c_str());                              \
+  }
+*/
 
 class OMPLPlannerManager : public planning_interface::PlannerManager
 {

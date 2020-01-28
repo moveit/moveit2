@@ -73,6 +73,7 @@ static bool get_uint_parameter_or(const rclcpp::Node::SharedPtr& node, const std
   }
 
   result_value = default_value;
+  return true;
 }
 
 struct GenerateStateDatabaseParameters
@@ -171,24 +172,33 @@ void computeDB(const rclcpp::Node::SharedPtr& node, const planning_scene::Planni
 /**
  * Generates a database of states that follow the given constraints.
  * An example of the constraint yaml that should be loaded to rosparam:
- * "name: tool0_upright
- *  constraints:
- *  - type: orientation
- *    frame_id: world
- *    link_name: tool0
- *    orientation: [0, 0, 0]
- *    tolerances: [0.01, 0.01, 3.15]
- *    weight: 1.0
- * "
+ * """
+ * name: constraint_name
+ * constraint_ids: [constraint_1, constraint_2]
+ * constraints:
+ *   constraint_1:
+ *     type: orientation
+ *     frame_id: world
+ *     link_name: tool0
+ *     orientation: [0, 0, 0]  # [r, p, y]
+ *     tolerances: [0.01, 0.01, 3.15]
+ *     weight: 1.0
+ *   constraint_2:
+ *     type: position
+ *     frame_id: base_link
+ *     link_name: tool0
+ *     target_offset: [0.1, 0.1, 0.1]  # [x, y, z]
+ *     region:
+ *       x: [0.1, 0.4]  # [min, max]
+ *       y: [0.2, 0.3]
+ *       z: [0.1, 0.6]
+ *     weight: 1.0
+ * """
  */
 int main(int argc, char** argv)
 {
-  rclcpp::init(argc, argv);  //, "construct_tool_constraint_database", ros::init_options::AnonymousName);
-
+  rclcpp::init(argc, argv);
   std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("generate_state_database");
-
-  // ros::AsyncSpinner spinner(1);
-  // spinner.start();
 
   GenerateStateDatabaseParameters params;
   if (!params.setFromNode(node))

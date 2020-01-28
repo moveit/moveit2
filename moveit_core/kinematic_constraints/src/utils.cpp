@@ -283,14 +283,15 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
   return goal;
 }
 
+/** Initialize a PoseStamped message from node parameters specified at pose_param. */
 static bool constructPoseStamped(const rclcpp::Node::SharedPtr& node, const std::string& pose_param,
                                  geometry_msgs::msg::PoseStamped& pose)
 {
-  if (!node->get_parameter(pose_param + "frame_id", pose.header.frame_id))
+  if (!node->get_parameter(pose_param + ".frame_id", pose.header.frame_id))
     return false;
 
   std::vector<double> orientation;
-  if (!node->get_parameter(pose_param + "orientation", orientation) || orientation.size() != 3)
+  if (!node->get_parameter(pose_param + ".orientation", orientation) || orientation.size() != 3)
     return false;
 
   tf2::Quaternion q;
@@ -298,7 +299,7 @@ static bool constructPoseStamped(const rclcpp::Node::SharedPtr& node, const std:
   pose.pose.orientation = toMsg(q);
 
   std::vector<double> position;
-  if (!node->get_parameter(pose_param + "position", position) || position.size() != 3)
+  if (!node->get_parameter(pose_param + ".position", position) || position.size() != 3)
     return false;
 
   pose.pose.position.x = position[0];
@@ -308,33 +309,34 @@ static bool constructPoseStamped(const rclcpp::Node::SharedPtr& node, const std:
   return true;
 }
 
+/** Initialize a JointConstraint message from node parameters specified at constraint_param. */
 static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
                                 moveit_msgs::msg::JointConstraint& constraint)
 {
-  node->get_parameter(constraint_param + "weight", constraint.weight);
-  node->get_parameter(constraint_param + "joint_name", constraint.joint_name);
-  node->get_parameter(constraint_param + "position", constraint.position);
+  node->get_parameter(constraint_param + ".weight", constraint.weight);
+  node->get_parameter(constraint_param + ".joint_name", constraint.joint_name);
+  node->get_parameter(constraint_param + ".position", constraint.position);
 
   double tolerance;
-  if (node->get_parameter(constraint_param + "tolerance", tolerance))
+  if (node->get_parameter(constraint_param + ".tolerance", tolerance))
   {
     constraint.tolerance_below = tolerance;
     constraint.tolerance_above = tolerance;
   }
-  else if (node->has_parameter(constraint_param + "tolerances"))
+  else if (node->has_parameter(constraint_param + ".tolerances"))
   {
     std::vector<double> tolerances;
-    node->get_parameter(constraint_param + "tolerances", tolerances);
+    node->get_parameter(constraint_param + ".tolerances", tolerances);
     if (tolerances.size() != 2)
       return false;
 
     constraint.tolerance_below = tolerances[0];
     constraint.tolerance_above = tolerances[1];
   }
-  else if (node->has_parameter(constraint_param + "bounds"))
+  else if (node->has_parameter(constraint_param + ".bounds"))
   {
     std::vector<double> bounds;
-    node->get_parameter(constraint_param + "bounds", bounds);
+    node->get_parameter(constraint_param + ".bounds", bounds);
     if (bounds.size() != 2)
       return false;
 
@@ -349,15 +351,16 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
   return true;
 }
 
+/** Initialize a PositionConstraint message from node parameters specified at constraint_param. */
 static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
                                 moveit_msgs::msg::PositionConstraint& constraint)
 {
-  node->get_parameter(constraint_param + "frame_id", constraint.header.frame_id);
-  node->get_parameter(constraint_param + "weight", constraint.weight);
-  node->get_parameter(constraint_param + "link_name", constraint.link_name);
+  node->get_parameter(constraint_param + ".frame_id", constraint.header.frame_id);
+  node->get_parameter(constraint_param + ".weight", constraint.weight);
+  node->get_parameter(constraint_param + ".link_name", constraint.link_name);
 
   std::vector<double> target_offset;
-  if (node->get_parameter(constraint_param + "target_offset", target_offset))
+  if (node->get_parameter(constraint_param + ".target_offset", target_offset))
   {
     if (target_offset.size() != 3)
       return false;
@@ -366,7 +369,7 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
     constraint.target_point_offset.y = target_offset[1];
     constraint.target_point_offset.z = target_offset[2];
   }
-  if (!node->list_parameters({ constraint_param + "region" }, 1).names.empty())  // TODO(henningkayser): specify depth
+  if (!node->list_parameters({ constraint_param + ".region" }, 1).names.empty())  // TODO(henningkayser): specify depth
   {
     geometry_msgs::msg::Pose region_pose;
     region_pose.orientation.w = 1.0;
@@ -377,7 +380,7 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
 
     const auto parse_dimension = [&](const std::string& dimension_param, double& center, double& dimension) -> bool {
       std::vector<double> dimension_limits;
-      if (!node->get_parameter(constraint_param + "region." + dimension_param, dimension_limits) ||
+      if (!node->get_parameter(constraint_param + ".region." + dimension_param, dimension_limits) ||
           dimension_limits.size() != 2)
         return false;
 
@@ -401,15 +404,16 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
   return true;
 }
 
+/** Initialize an OrientationConstraint message from node parameters specified at constraint_param. */
 static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
                                 moveit_msgs::msg::OrientationConstraint& constraint)
 {
-  node->get_parameter(constraint_param + "frame_id", constraint.header.frame_id);
-  node->get_parameter(constraint_param + "weight", constraint.weight);
-  node->get_parameter(constraint_param + "link_name", constraint.link_name);
+  node->get_parameter(constraint_param + ".frame_id", constraint.header.frame_id);
+  node->get_parameter(constraint_param + ".weight", constraint.weight);
+  node->get_parameter(constraint_param + ".link_name", constraint.link_name);
 
   std::vector<double> orientation;
-  if (node->get_parameter(constraint_param + "orientation", orientation))
+  if (node->get_parameter(constraint_param + ".orientation", orientation))
   {
     if (orientation.size() != 3)
       return false;
@@ -420,7 +424,7 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
   }
 
   std::vector<double> tolerances;
-  if (node->get_parameter(constraint_param + "tolerances", tolerances))
+  if (node->get_parameter(constraint_param + ".tolerances", tolerances))
   {
     if (tolerances.size() != 3)
       return false;
@@ -433,25 +437,26 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
   return true;
 }
 
+/** Initialize a VisibilityConstraint message from node parameters specified at constraint_param. */
 static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
                                 moveit_msgs::msg::VisibilityConstraint& constraint)
 {
-  node->get_parameter(constraint_param + "weight", constraint.weight);
-  node->get_parameter(constraint_param + "target_radius", constraint.target_radius);
-  node->get_parameter(constraint_param + "cone_sides", constraint.cone_sides);
-  node->get_parameter(constraint_param + "max_view_angle", constraint.max_view_angle);
-  node->get_parameter(constraint_param + "max_range_angle", constraint.max_range_angle);
+  node->get_parameter(constraint_param + ".weight", constraint.weight);
+  node->get_parameter(constraint_param + ".target_radius", constraint.target_radius);
+  node->get_parameter(constraint_param + ".cone_sides", constraint.cone_sides);
+  node->get_parameter(constraint_param + ".max_view_angle", constraint.max_view_angle);
+  node->get_parameter(constraint_param + ".max_range_angle", constraint.max_range_angle);
 
-  if (!node->list_parameters({ constraint_param + "target_pose" }, 1).names.empty())  // TODO(henningkayser): specify
-                                                                                      // depth
+  // TODO(henningkayser): specify depth
+  if (!node->list_parameters({ constraint_param + ".target_pose" }, 1).names.empty())
   {
-    if (!constructPoseStamped(node, constraint_param + "target_pose", constraint.target_pose))
+    if (!constructPoseStamped(node, constraint_param + ".target_pose", constraint.target_pose))
       return false;
   }
-  if (!node->list_parameters({ constraint_param + "sensor_pose" }, 1).names.empty())  // TODO(henningkayser): specify
-                                                                                      // depth
+  // TODO(henningkayser): specify depth
+  if (!node->list_parameters({ constraint_param + ".sensor_pose" }, 1).names.empty())
   {
-    if (!constructPoseStamped(node, constraint_param + "sensor_pose", constraint.sensor_pose))
+    if (!constructPoseStamped(node, constraint_param + ".sensor_pose", constraint.sensor_pose))
       return false;
   }
 
@@ -460,19 +465,20 @@ static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::
   return true;
 }
 
+/** Initialize a Constraints message containing constraints specified by node parameters under constraint_ids. */
 static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::vector<std::string>& constraint_ids,
                                moveit_msgs::msg::Constraints& constraints)
 {
   for (const auto& constraint_id : constraint_ids)
   {
-    const auto constraint_param = "constraints." + constraint_id + ".";
-    if (!node->has_parameter(constraint_param + "type"))
+    const auto constraint_param = ".constraints." + constraint_id;
+    if (!node->has_parameter(constraint_param + ".type"))
     {
       RCLCPP_ERROR(LOGGER, "constraint parameter does not specify its type");
       return false;
     }
     std::string constraint_type;
-    node->get_parameter(constraint_param + "type", constraint_type);
+    node->get_parameter(constraint_param + ".type", constraint_type);
     if (constraint_type == "joint")
     {
       constraints.joint_constraints.emplace_back();
@@ -510,11 +516,11 @@ static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::v
 bool constructConstraints(const rclcpp::Node::SharedPtr& node, const std::string& constraints_param,
                           moveit_msgs::msg::Constraints& constraints)
 {
-  if (!node->get_parameter(constraints_param + "name", constraints.name))
+  if (!node->get_parameter(constraints_param + ".name", constraints.name))
     return false;
 
   std::vector<std::string> constraint_ids;
-  if (!node->get_parameter(constraints_param + "constraint_ids", constraint_ids))
+  if (!node->get_parameter(constraints_param + ".constraint_ids", constraint_ids))
     return false;
 
   for (auto& constraint_id : constraint_ids)
