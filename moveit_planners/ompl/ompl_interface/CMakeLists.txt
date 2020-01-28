@@ -31,15 +31,13 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 	tf2_ros
 	OMPL
 	Boost)
-#target_link_libraries(${MOVEIT_LIB_NAME} ${OMPL_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 
-# TODO(henningkayser): Enable when PlanningSceneMonitor is available
-# add_executable(moveit_generate_state_database scripts/generate_state_database.cpp)
-# target_link_libraries(moveit_generate_state_database ${MOVEIT_LIB_NAME})
-# set_target_properties(moveit_generate_state_database PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
-# set_target_properties(moveit_generate_state_database PROPERTIES OUTPUT_NAME "generate_state_database")
+add_executable(moveit_generate_state_database scripts/generate_state_database.cpp)
+target_link_libraries(moveit_generate_state_database ${MOVEIT_LIB_NAME})
+set_target_properties(moveit_generate_state_database PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+set_target_properties(moveit_generate_state_database PROPERTIES OUTPUT_NAME "generate_state_database")
 
 add_library(moveit_ompl_planner_plugin src/ompl_planner_manager.cpp)
 set_target_properties(moveit_ompl_planner_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
@@ -57,19 +55,19 @@ install(TARGETS ${MOVEIT_LIB_NAME} moveit_ompl_planner_plugin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin)
-#install(TARGETS moveit_generate_state_database
-#	RUNTIME DESTINATION lib/${PROJECT_NAME})
+install(TARGETS moveit_generate_state_database
+	RUNTIME DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include)
 
-# TODO(henningkayser): Fix ompl linking issues
-# if(BUILD_TESTING)
-#   find_package(ament_cmake_gtest REQUIRED)
-#   find_package(ament_index_cpp REQUIRED)
-#   find_package(moveit_resources REQUIRED)
-#   find_package(Eigen3 REQUIRED)
-# 
-#   ament_add_gtest(test_state_space test/test_state_space.cpp)
-#   ament_target_dependencies(test_state_space ${MOVEIT_LIB_NAME} moveit_resources moveit_core ament_index_cpp OMPL Boost Eigen3)
-# 
-#   set_target_properties(test_state_space PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
-# endif()
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_index_cpp REQUIRED)
+  find_package(moveit_resources REQUIRED)
+  find_package(Eigen3 REQUIRED)
+
+  ament_add_gtest(test_state_space test/test_state_space.cpp)
+  ament_target_dependencies(test_state_space moveit_resources moveit_core ament_index_cpp OMPL Boost Eigen3)
+  target_link_libraries(test_state_space ${MOVEIT_LIB_NAME})
+
+  set_target_properties(test_state_space PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+endif()
