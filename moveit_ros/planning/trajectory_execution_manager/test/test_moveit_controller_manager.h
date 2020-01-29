@@ -36,7 +36,10 @@
 
 #pragma once
 
+#include <rclcpp/rclcpp.hpp>
 #include <moveit/controller_manager/controller_manager.h>
+#include <iostream>
+#include <map>
 
 namespace test_moveit_controller_manager
 {
@@ -57,7 +60,7 @@ public:
     return true;
   }
 
-  bool waitForExecution(const ros::Duration& timeout = ros::Duration(0)) override
+  bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(0.0)) override
   {
     (void)timeout;
     return false;
@@ -104,6 +107,10 @@ public:
                                                controller_joints_["left_arm"].end());
     controller_joints_["left_arm_head"].insert(controller_joints_["left_arm_head"].end(),
                                                controller_joints_["head"].begin(), controller_joints_["head"].end());
+  }
+
+  void initialize(rclcpp::Node::SharedPtr& /* node */) override
+  {
   }
 
   moveit_controller_manager::MoveItControllerHandlePtr getControllerHandle(const std::string& name) override
