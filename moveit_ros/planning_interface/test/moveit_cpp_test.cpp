@@ -37,7 +37,7 @@
 */
 
 // ROS
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 // Testing
 #include <gtest/gtest.h>
@@ -57,9 +57,15 @@ class MoveItCppTest : public ::testing::Test
 public:
   void SetUp() override
   {
-    nh_ = ros::NodeHandle("/moveit_cpp_test");
-    moveit_cpp_ptr = std::make_shared<MoveItCpp>(nh_);
-    planning_component_ptr = std::make_shared<PlanningComponent>(PLANNING_GROUP, moveit_cpp_ptr);
+    rclcpp::NodeOptions node_options;
+    // This enables loading arbitrary parameters
+    // However, best practice would be to declare parameters in the corresponding classes
+    // and provide descriptions about expected use
+    // TODO(henningkayser): remove once all parameters are declared inside the components
+    node_options.automatically_declare_parameters_from_overrides(true);
+    node_ = rclcpp::Node::make_shared("/moveit_cpp_test");
+    moveit_cpp_ptr = std::make_unique<MoveItCpp>(node_);
+    planning_component_ptr = std::make_unique<PlanningComponent>(PLANNING_GROUP, moveit_cpp_ptr);
     robot_model_ptr = moveit_cpp_ptr->getRobotModel();
     jmg_ptr = robot_model_ptr->getJointModelGroup(PLANNING_GROUP);
 
@@ -81,7 +87,7 @@ public:
   }
 
 protected:
-  ros::NodeHandle nh_;
+  rclcpp::Node node_;
   MoveItCppPtr moveit_cpp_ptr;
   PlanningComponentPtr planning_component_ptr;
   robot_model::RobotModelConstPtr robot_model_ptr;

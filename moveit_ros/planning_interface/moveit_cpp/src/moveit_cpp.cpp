@@ -36,40 +36,35 @@
 
 #include <stdexcept>
 #include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
-#include <moveit/common_planning_interface_objects/common_objects.h>
-
-#include <std_msgs/String.h>
 #include <tf2/utils.h>
 #include <tf2_ros/transform_listener.h>
-#include <ros/console.h>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace moveit
 {
 namespace planning_interface
 {
-constexpr char LOGNAME[] = "moveit_cpp";
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning_interface.moveit_cpp");
 constexpr char PLANNING_PLUGIN_PARAM[] = "planning_plugin";
 
-MoveItCpp::MoveItCpp(const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
-  : MoveItCpp(Options(nh), nh, tf_buffer)
+MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
+  : MoveItCpp(node, Options(node), tf_buffer)
 {
 }
 
-MoveItCpp::MoveItCpp(const Options& options, const ros::NodeHandle& /*unused*/,
+MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
-  : tf_buffer_(tf_buffer)
+  : node_(node), tf_buffer_(tf_buffer)
 {
   if (!tf_buffer_)
-    tf_buffer_.reset(new tf2_ros::Buffer());
-  tf_listener_.reset(new tf2_ros::TransformListener(*tf_buffer_));
+    tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
+  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
   // Configure planning scene monitor
   if (!loadPlanningSceneMonitor(options.planning_scene_monitor_options))
   {
     const std::string error = "Unable to configure planning scene monitor";
-    ROS_FATAL_STREAM_NAMED(LOGNAME, error);
+    RCLCPP_FATAL(LOGGER, error);
     throw std::runtime_error(error);
   }
 
@@ -78,7 +73,7 @@ MoveItCpp::MoveItCpp(const Options& options, const ros::NodeHandle& /*unused*/,
   {
     const std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
                               "parameter server.";
-    ROS_FATAL_STREAM_NAMED(LOGNAME, error);
+    RCLCPP_FATAL(LOGGER, error);
     throw std::runtime_error(error);
   }
 
@@ -86,15 +81,15 @@ MoveItCpp::MoveItCpp(const Options& options, const ros::NodeHandle& /*unused*/,
   if (load_planning_pipelines && !loadPlanningPipelines(options.planning_pipeline_options))
   {
     const std::string error = "Failed to load planning pipelines from parameter server";
-    ROS_FATAL_STREAM_NAMED(LOGNAME, error);
+    RCLCPP_FATAL(LOGGER, error);
     throw std::runtime_error(error);
   }
 
   // TODO(henningkayser): configure trajectory execution manager
   trajectory_execution_manager_.reset(new trajectory_execution_manager::TrajectoryExecutionManager(
-      robot_model_, planning_scene_monitor_->getStateMonitor()));
+      node_, robot_model_, planning_scene_monitor_->getStateMonitor()));
 
-  ROS_INFO_NAMED(LOGNAME, "MoveItCpp running");
+  RCLCPP_INFO(LOGGER, "MoveItCpp running");
 }
 
 MoveItCpp::MoveItCpp(MoveItCpp&& other)
@@ -104,7 +99,7 @@ MoveItCpp::MoveItCpp(MoveItCpp&& other)
 
 MoveItCpp::~MoveItCpp()
 {
-  ROS_INFO_NAMED(LOGNAME, "Deleting MoveItCpp");
+  RCLCPP_INFO(LOGGER, "Deleting MoveItCpp");
   clearContents();
 }
 
@@ -112,7 +107,7 @@ MoveItCpp& MoveItCpp::operator=(MoveItCpp&& other)
 {
   if (this != &other)
   {
-    this->node_handle_ = other.node_handle_;
+    this->node_ = other.node_;
     this->tf_buffer_ = other.tf_buffer_;
     this->robot_model_ = other.robot_model_;
     this->planning_scene_monitor_ = other.planning_scene_monitor_;
@@ -125,13 +120,13 @@ MoveItCpp& MoveItCpp::operator=(MoveItCpp&& other)
 bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& options)
 {
   planning_scene_monitor_.reset(
-      new planning_scene_monitor::PlanningSceneMonitor(options.robot_description, tf_buffer_, options.name));
+      new planning_scene_monitor::PlanningSceneMonitor(node_, options.robot_description, tf_buffer_, options.name));
   // Allows us to sycronize to Rviz and also publish collision objects to ourselves
-  ROS_DEBUG_STREAM_NAMED(LOGNAME, "Configuring Planning Scene Monitor");
+  RCLCPP_DEBUG(LOGGER, "Configuring Planning Scene Monitor");
   if (planning_scene_monitor_->getPlanningScene())
   {
     // Start state and scene monitors
-    ROS_INFO_NAMED(LOGNAME, "Listening to '%s' for joint states", options.joint_state_topic.c_str());
+    RCLCPP_INFO(LOGGER, "Listening to '%s' for joint states", options.joint_state_topic.c_str());
     planning_scene_monitor_->startStateMonitor(options.joint_state_topic, options.attached_collision_object_topic);
     planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
                                                           options.publish_planning_scene_topic);
@@ -139,14 +134,14 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opti
   }
   else
   {
-    ROS_ERROR_STREAM_NAMED(LOGNAME, "Planning scene not configured");
+    RCLCPP_ERROR(LOGGER, "Planning scene not configured");
     return false;
   }
 
   // Wait for complete state to be recieved
   if (options.wait_for_initial_state_timeout > 0.0)
   {
-    return planning_scene_monitor_->getStateMonitor()->waitForCurrentState(ros::Time::now(),
+    return planning_scene_monitor_->getStateMonitor()->waitForCurrentState(node_->now(),
                                                                            options.wait_for_initial_state_timeout);
   }
 
@@ -155,22 +150,23 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opti
 
 bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
 {
-  ros::NodeHandle node_handle(options.parent_namespace.empty() ? "~" : options.parent_namespace);
+  // TODO(henningkayser): Use parent namespace for planning pipeline config lookup
+  // ros::NodeHandle node_handle(options.parent_namespace.empty() ? "~" : options.parent_namespace);
   for (const auto& planning_pipeline_name : options.pipeline_names)
   {
     if (planning_pipelines_.count(planning_pipeline_name) > 0)
     {
-      ROS_WARN_NAMED(LOGNAME, "Skipping duplicate entry for planning pipeline '%s'.", planning_pipeline_name.c_str());
+      RCLCPP_WARN(LOGGER, "Skipping duplicate entry for planning pipeline '%s'.", planning_pipeline_name.c_str());
       continue;
     }
-    ROS_INFO_NAMED(LOGNAME, "Loading planning pipeline '%s'", planning_pipeline_name.c_str());
-    ros::NodeHandle child_nh(node_handle, planning_pipeline_name);
+    RCLCPP_INFO(LOGGER, "Loading planning pipeline '%s'", planning_pipeline_name.c_str());
     planning_pipeline::PlanningPipelinePtr pipeline;
-    pipeline.reset(new planning_pipeline::PlanningPipeline(robot_model_, child_nh, PLANNING_PLUGIN_PARAM));
+    pipeline.reset(
+        new planning_pipeline::PlanningPipeline(robot_model_, node_, planning_pipeline_name, PLANNING_PLUGIN_PARAM));
 
     if (!pipeline->getPlannerManager())
     {
-      ROS_ERROR_NAMED(LOGNAME, "Failed to initialize planning pipeline '%s'.", planning_pipeline_name.c_str());
+      RCLCPP_ERROR(LOGGER, "Failed to initialize planning pipeline '%s'.", planning_pipeline_name.c_str());
       continue;
     }
     planning_pipelines_[planning_pipeline_name] = pipeline;
@@ -179,7 +175,7 @@ bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
   if (planning_pipelines_.empty())
   {
     return false;
-    ROS_ERROR_NAMED(LOGNAME, "Failed to load any planning pipelines.");
+    RCLCPP_ERROR(LOGGER, "Failed to load any planning pipelines.");
   }
 
   // Retrieve group/pipeline mapping for faster lookup
@@ -208,17 +204,17 @@ robot_model::RobotModelConstPtr MoveItCpp::getRobotModel() const
   return robot_model_;
 }
 
-const ros::NodeHandle& MoveItCpp::getNodeHandle() const
+const rclcpp::Node::SharedPtr& MoveItCpp::getNode() const
 {
-  return node_handle_;
+  return node_;
 }
 
 bool MoveItCpp::getCurrentState(robot_state::RobotStatePtr& current_state, double wait_seconds)
 {
   if (wait_seconds > 0.0 &&
-      !planning_scene_monitor_->getStateMonitor()->waitForCurrentState(ros::Time::now(), wait_seconds))
+      !planning_scene_monitor_->getStateMonitor()->waitForCurrentState(node_->now(), wait_seconds))
   {
-    ROS_ERROR_NAMED(LOGNAME, "Did not receive robot state");
+    RCLCPP_ERROR(LOGGER, "Did not receive robot state");
     return false;
   }
   {  // Lock planning scene
@@ -245,7 +241,7 @@ std::set<std::string> MoveItCpp::getPlanningPipelineNames(const std::string& gro
   std::set<std::string> result_names;
   if (!group_name.empty() && groups_pipelines_map_.count(group_name) == 0)
   {
-    ROS_ERROR_NAMED(LOGNAME, "There are no planning pipelines loaded for group '%s'.", group_name.c_str());
+    RCLCPP_ERROR(LOGGER, "There are no planning pipelines loaded for group '%s'.", group_name.c_str());
     return result_names;  // empty
   }
   for (const auto& pipeline_entry : planning_pipelines_)
@@ -288,19 +284,19 @@ bool MoveItCpp::execute(const std::string& group_name, const robot_trajectory::R
 {
   if (!robot_trajectory)
   {
-    ROS_ERROR_NAMED(LOGNAME, "Robot trajectory is undefined");
+    RCLCPP_ERROR(LOGGER, "Robot trajectory is undefined");
     return false;
   }
 
   // Check if there are controllers that can handle the execution
   if (!trajectory_execution_manager_->ensureActiveControllersForGroup(group_name))
   {
-    ROS_ERROR_NAMED(LOGNAME, "Execution failed! No active controllers configured for group '%s'", group_name.c_str());
+    RCLCPP_ERROR(LOGGER, "Execution failed! No active controllers configured for group '%s'", group_name.c_str());
     return false;
   }
 
   // Execute trajectory
-  moveit_msgs::RobotTrajectory robot_trajectory_msg;
+  moveit_msgs::msg::RobotTrajectory robot_trajectory_msg;
   robot_trajectory->getRobotTrajectoryMsg(robot_trajectory_msg);
   if (blocking)
   {

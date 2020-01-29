@@ -38,25 +38,23 @@
 #pragma once
 
 #include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/robot_state/robot_state.h>
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/msg/pose_stamped.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/MoveItErrorCodes.h>
+#include <moveit_msgs/msg/move_it_error_codes.h>
 
 namespace moveit
 {
 namespace planning_interface
 {
-MOVEIT_CLASS_FORWARD(PlanningComponent);
+MOVEIT_CLASS_FORWARD(PlanningComponent)
 
 class PlanningComponent
 {
 public:
-  MOVEIT_STRUCT_FORWARD(PlanSolution);
+  MOVEIT_STRUCT_FORWARD(PlanSolution)
 
-  class MoveItErrorCode : public moveit_msgs::MoveItErrorCodes
+  class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
   {
   public:
     MoveItErrorCode()
@@ -67,13 +65,13 @@ public:
     {
       val = code;
     }
-    MoveItErrorCode(const moveit_msgs::MoveItErrorCodes& code)
+    MoveItErrorCode(const moveit_msgs::msg::MoveItErrorCodes& code)
     {
       val = code.val;
     }
     explicit operator bool() const
     {
-      return val == moveit_msgs::MoveItErrorCodes::SUCCESS;
+      return val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     }
     bool operator==(const int code) const
     {
@@ -89,7 +87,7 @@ public:
   struct PlanSolution
   {
     /// The full starting state used for planning
-    moveit_msgs::RobotState start_state;
+    moveit_msgs::msg::RobotState start_state;
 
     /// The trajectory of the robot (may not contain joints that are the same as for the start_state_)
     robot_trajectory::RobotTrajectoryPtr trajectory;
@@ -115,7 +113,7 @@ public:
   };
 
   /** \brief Constructor */
-  PlanningComponent(const std::string& group_name, const ros::NodeHandle& nh);
+  PlanningComponent(const std::string& group_name, const rclcpp::Node::SharedPtr& node);
   PlanningComponent(const std::string& group_name, const MoveItCppPtr& moveit_cpp);
 
   /**
@@ -162,11 +160,11 @@ public:
   void setStartStateToCurrentState();
 
   /** \brief Set the goal constraints used for planning */
-  bool setGoal(const std::vector<moveit_msgs::Constraints>& goal_constraints);
+  bool setGoal(const std::vector<moveit_msgs::msg::Constraints>& goal_constraints);
   /** \brief Set the goal constraints generated from a target state */
   bool setGoal(const robot_state::RobotState& goal_state);
   /** \brief Set the goal constraints generated from target pose and robot link */
-  bool setGoal(const geometry_msgs::PoseStamped& goal_pose, const std::string& link_name);
+  bool setGoal(const geometry_msgs::msg::PoseStamped& goal_pose, const std::string& link_name);
   /** \brief Set the goal constraints generated from a named target state */
   bool setGoal(const std::string& named_target);
 
@@ -186,7 +184,7 @@ public:
 
 private:
   // Core properties and instances
-  ros::NodeHandle nh_;
+  rclcpp::Node::SharedPtr node_;
   MoveItCppPtr moveit_cpp_;
   const std::string group_name_;
   // The robot_model_ member variable of MoveItCpp class will manually free the joint_model_group_ resources
@@ -196,9 +194,9 @@ private:
   std::set<std::string> planning_pipeline_names_;
   // The start state used in the planning motion request
   robot_state::RobotStatePtr considered_start_state_;
-  std::vector<moveit_msgs::Constraints> current_goal_constraints_;
+  std::vector<moveit_msgs::msg::Constraints> current_goal_constraints_;
   PlanRequestParameters plan_request_parameters_;
-  moveit_msgs::WorkspaceParameters workspace_parameters_;
+  moveit_msgs::msg::WorkspaceParameters workspace_parameters_;
   bool workspace_parameters_set_ = false;
   PlanSolutionPtr last_plan_solution_;
 
@@ -208,8 +206,8 @@ private:
   // double goal_position_tolerance_;
   // double goal_orientation_tolerance_;
   // TODO(henningkayser): implment path/trajectory constraints
-  // std::unique_ptr<moveit_msgs::Constraints> path_constraints_;
-  // std::unique_ptr<moveit_msgs::TrajectoryConstraints> trajectory_constraints_;
+  // std::unique_ptr<moveit_msgs::msg::Constraints> path_constraints_;
+  // std::unique_ptr<moveit_msgs::msg::TrajectoryConstraints> trajectory_constraints_;
 
   /** \brief Reset all member variables */
   void clearContents();
