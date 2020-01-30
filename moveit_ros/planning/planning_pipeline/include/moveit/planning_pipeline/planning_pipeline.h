@@ -39,7 +39,7 @@
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <pluginlib/class_loader.hpp>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 
@@ -193,8 +193,6 @@ private:
   /// Flag indicating whether the reported plans should be checked once again, by the planning pipeline itself
   bool check_solution_paths_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr contacts_publisher_;
-
-  rmw_qos_profile_t custom_qos_profile_;
 };
 
 MOVEIT_CLASS_FORWARD(PlanningPipeline)
