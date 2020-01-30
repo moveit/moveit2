@@ -2,18 +2,47 @@ set(MOVEIT_LIB_NAME moveit_trajectory_execution_manager)
 
 add_library(${MOVEIT_LIB_NAME} src/trajectory_execution_manager.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME} moveit_planning_scene_monitor moveit_robot_model_loader ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(${MOVEIT_LIB_NAME} ${moveit_ros_planning_EXPORTED_TARGETS}) # don't build until necessary msgs are finish
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  moveit_core
+  moveit_ros_occupancy_map_monitor
+  rclcpp
+  Boost
+  tinyxml_vendor
+  pluginlib
+  std_msgs
+  sensor_msgs
+  moveit_msgs
+  tf2_eigen
+)
+target_link_libraries(${MOVEIT_LIB_NAME}
+  moveit_planning_scene_monitor
+)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
-add_library(test_controller_manager_plugin test/test_moveit_controller_manager_plugin.cpp)
+install(DIRECTORY include/ DESTINATION include)
+
+add_library(test_controller_manager_plugin SHARED test/test_moveit_controller_manager_plugin.cpp)
 set_target_properties(test_controller_manager_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(test_controller_manager_plugin ${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(test_controller_manager_plugin
+  rclcpp
+  Boost
+  pluginlib
+)
+target_link_libraries(test_controller_manager_plugin ${MOVEIT_LIB_NAME})
 
 add_executable(test_controller_manager test/test_app.cpp)
-target_link_libraries(test_controller_manager ${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(test_controller_manager
+  rclcpp
+  Boost
+  pluginlib
+)
+target_link_libraries(test_controller_manager ${MOVEIT_LIB_NAME})
+
+install(TARGETS test_controller_manager
+  DESTINATION lib/${PROJECT_NAME}
+)
