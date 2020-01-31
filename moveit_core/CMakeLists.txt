@@ -25,6 +25,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(Boost REQUIRED system filesystem date_time thread iostreams)
 
+find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(PkgConfig REQUIRED)
 
@@ -129,6 +130,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   tf2_geometry_msgs
   trajectory_msgs
   visualization_msgs
+  Eigen3
+  eigen3_cmake_module
   Boost
   OCTOMAP
 )
