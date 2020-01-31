@@ -8,22 +8,20 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(catkin REQUIRED COMPONENTS
-  moveit_msgs
-  moveit_ros_planning
-  moveit_ros_warehouse
-  moveit_ros_manipulation
-  moveit_ros_move_group
-  geometry_msgs
-  tf2
-  tf2_eigen
-  tf2_geometry_msgs
-  tf2_ros
-  roscpp
-  actionlib
-  rospy
-  rosconsole
-)
+find_package(ament_cmake REQUIRED)
+find_package(moveit_msgs REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+# find_package(moveit_ros_warehouse REQUIRED)
+# find_package(moveit_ros_manipulation REQUIRED)
+# find_package(moveit_ros_move_group REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_eigen REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(rclpy REQUIRED)
 
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibs "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" REQUIRED)
@@ -44,52 +42,42 @@ find_package(Boost REQUIRED COMPONENTS
   thread
 )
 find_package(Eigen3 REQUIRED)
-find_package(eigenpy REQUIRED)
+# find_package(eigenpy REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
-  py_bindings_tools/include
+#  py_bindings_tools/include
   common_planning_interface_objects/include
-  planning_scene_interface/include
-  move_group_interface/include
-  moveit_cpp/include
+#  planning_scene_interface/include
+#  move_group_interface/include
+#  moveit_cpp/include
 )
 
-catkin_python_setup()
+# catkin_python_setup()
 
-catkin_package(
-  LIBRARIES
-    moveit_common_planning_interface_objects
-    moveit_planning_scene_interface
-    moveit_move_group_interface
-    moveit_cpp
-  INCLUDE_DIRS
-    ${THIS_PACKAGE_INCLUDE_DIRS}
-  CATKIN_DEPENDS
-    actionlib
-    moveit_ros_planning
-    moveit_ros_warehouse
-    moveit_ros_manipulation
-    moveit_ros_move_group
-    geometry_msgs
-    moveit_msgs
-    tf2_geometry_msgs
-  DEPENDS
-    EIGEN3
-)
 
-include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
-                    ${Boost_INCLUDE_DIRS}
-                    ${catkin_INCLUDE_DIRS})
+include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
-include_directories(SYSTEM
-                    ${EIGEN3_INCLUDE_DIRS}
-                    ${eigenpy_INCLUDE_DIRS}
-                    ${PYTHON_INCLUDE_DIRS})
-
-add_subdirectory(py_bindings_tools)
+# add_subdirectory(py_bindings_tools)
 add_subdirectory(common_planning_interface_objects)
-add_subdirectory(planning_scene_interface)
-add_subdirectory(move_group_interface)
-add_subdirectory(robot_interface)
-add_subdirectory(test)
-add_subdirectory(moveit_cpp)
+# add_subdirectory(planning_scene_interface)
+# add_subdirectory(move_group_interface)
+# add_subdirectory(robot_interface)
+# add_subdirectory(test)
+# add_subdirectory(moveit_cpp)
+
+ament_export_include_directories(include)
+ament_export_dependencies(moveit_msgs)
+ament_export_dependencies(moveit_ros_planning)
+ament_export_dependencies(geometry_msgs)
+ament_export_dependencies(tf2)
+ament_export_dependencies(tf2_eigen)
+ament_export_dependencies(tf2_geometry_msgs)
+ament_export_dependencies(tf2_ros)
+ament_export_dependencies(rclcpp)
+ament_export_dependencies(rclcpp_action)
+ament_export_dependencies(rclpy)
+ament_export_dependencies(PythonInterp)
+ament_export_dependencies(PythonLibs)
+ament_export_dependencies(Eigen3)
+ament_export_dependencies(Boost)
+ament_package()

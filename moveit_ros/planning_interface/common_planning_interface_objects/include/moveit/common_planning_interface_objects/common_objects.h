@@ -36,6 +36,8 @@
 
 #pragma once
 
+#include <memory>
+#include <tf2_ros/buffer.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 
 namespace moveit
@@ -44,31 +46,19 @@ namespace planning_interface
 {
 std::shared_ptr<tf2_ros::Buffer> getSharedTF();
 
-robot_model::RobotModelConstPtr getSharedRobotModel(const std::string& robot_description);
-
-/**
-  @brief getSharedStateMonitor is a simpler version of getSharedStateMonitor(const robot_model::RobotModelConstPtr
-  &robot_model, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-    ros::NodeHandle nh = ros::NodeHandle() ). It calls this function using the default constructed ros::NodeHandle
-
-  @param robot_model
-  @param tf_buffer
-  @return
- */
-planning_scene_monitor::CurrentStateMonitorPtr getSharedStateMonitor(const robot_model::RobotModelConstPtr& robot_model,
-                                                                     const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
+robot_model::RobotModelConstPtr getSharedRobotModel(const rclcpp::Node::SharedPtr& node,
+                                                    const std::string& robot_description);
 
 /**
   @brief getSharedStateMonitor
 
+  @param node A rclcpp::Node::SharePtr to pass node specific configurations, such as callbacks queues.
   @param robot_model
   @param tf_buffer
-  @param nh A ros::NodeHandle to pass node specific configurations, such as callbacks queues.
   @return
  */
-planning_scene_monitor::CurrentStateMonitorPtr getSharedStateMonitor(const robot_model::RobotModelConstPtr& robot_model,
-                                                                     const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-                                                                     const ros::NodeHandle& nh);
-
-}  // namespace planning interface
+planning_scene_monitor::CurrentStateMonitorPtr getSharedStateMonitor(const rclcpp::Node::SharedPtr& node,
+                                                                     const robot_model::RobotModelConstPtr& robot_model,
+                                                                     const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
+}  // namespace planning_interface
 }  // namespace moveit
