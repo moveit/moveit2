@@ -54,7 +54,8 @@ class FollowJointTrajectoryControllerHandle
 public:
   FollowJointTrajectoryControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name,
                                         const std::string& action_ns)
-    : ActionBasedControllerHandle<control_msgs::action::FollowJointTrajectory>(node, name, action_ns)
+    : ActionBasedControllerHandle<control_msgs::action::FollowJointTrajectory>(
+          node, name, action_ns, "moveit.simple_controller_manager.follow_joint_trajectory_controller_handle")
   {
   }
 

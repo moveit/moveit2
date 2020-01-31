@@ -51,7 +51,8 @@ namespace moveit_simple_controller_manager
 class ActionBasedControllerHandleBase : public moveit_controller_manager::MoveItControllerHandle
 {
 public:
-  ActionBasedControllerHandleBase(const std::string& name) : moveit_controller_manager::MoveItControllerHandle(name)
+  ActionBasedControllerHandleBase(const std::string& name, const std::string& logger_name)
+    : moveit_controller_manager::MoveItControllerHandle(name), LOGGER(rclcpp::get_logger(logger_name))
   {
   }
 
@@ -63,7 +64,7 @@ public:
   //  }
 
 protected:
-  const rclcpp::Logger LOGGER = rclcpp::get_logger("action_based_controller_handle");
+  const rclcpp::Logger LOGGER;
 };
 
 MOVEIT_CLASS_FORWARD(ActionBasedControllerHandleBase)
@@ -75,8 +76,9 @@ template <typename T>
 class ActionBasedControllerHandle : public ActionBasedControllerHandleBase
 {
 public:
-  ActionBasedControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::string& ns)
-    : ActionBasedControllerHandleBase(name), node_(node), done_(true), namespace_(ns)
+  ActionBasedControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::string& ns,
+                              const std::string& logger_name)
+    : ActionBasedControllerHandleBase(name, logger_name), node_(node), done_(true), namespace_(ns)
   {
     controller_action_client_ = rclcpp_action::create_client<T>(node_, getActionName());
     unsigned int attempts = 0;
