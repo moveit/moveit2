@@ -14,17 +14,18 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/robot_model.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  Eigen3
+  geometric_shapes
+  urdf
+  urdfdom_headers
+  srdfdom
+  visualization_msgs
+)
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_profiler
   moveit_exceptions
   moveit_kinematics_base
-  Eigen3::Eigen
-  ${urdf_LIBRARIES}
-  ${srdfdom_LIBRARIES}
-  ${urdfdom_headers_LIBRARIES}
-  ${visualization_msgs_LIBRARIES}
-  ${geometric_shapes_LIBRARIES}
 )
 
 if(BUILD_TESTING)
