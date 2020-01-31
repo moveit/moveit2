@@ -143,7 +143,8 @@ public:
   ModelBasedPlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                   const planning_interface::MotionPlanRequest& req,
                                                   moveit_msgs::msg::MoveItErrorCodes& error_code,
-                                                  const ros::NodeHandle& nh, bool use_constraints_approximations) const;
+                                                  const rclcpp::Node::SharedPtr& node,
+                                                  bool use_constraints_approximations) const;
 
   void registerPlannerAllocator(const std::string& planner_id, const ConfiguredPlannerAllocator& pa)
   {

@@ -44,7 +44,7 @@
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 #include <string>
 #include <map>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 /** \brief The MoveIt interface to OMPL */
 namespace ompl_interface
@@ -56,15 +56,14 @@ class OMPLInterface
 public:
   /** \brief Initialize OMPL-based planning for a particular robot model. ROS configuration is read from the specified
    * NodeHandle */
-  OMPLInterface(const robot_model::RobotModelConstPtr& robot_model, const ros::NodeHandle& nh = ros::NodeHandle("~"));
+  OMPLInterface(const robot_model::RobotModelConstPtr& robot_model, const rclcpp::Node::SharedPtr& node);
 
   /** \brief Initialize OMPL-based planning for a particular robot model. ROS configuration is read from the specified
      NodeHandle. However,
       planner configurations are used as specified in \e pconfig instead of reading them from the ROS parameter server
      */
   OMPLInterface(const robot_model::RobotModelConstPtr& robot_model,
-                const planning_interface::PlannerConfigurationMap& pconfig,
-                const ros::NodeHandle& nh = ros::NodeHandle("~"));
+                const planning_interface::PlannerConfigurationMap& pconfig, const rclcpp::Node::SharedPtr& node);
 
   virtual ~OMPLInterface();
 
@@ -147,7 +146,7 @@ protected:
                                                moveit_msgs::msg::MoveItErrorCodes* error_code, unsigned int* attempts,
                                                double* timeout) const;
 
-  ros::NodeHandle nh_;  /// The ROS node handle
+  rclcpp::Node::SharedPtr node_;  /// The ROS node
 
   /** \brief The kinematic model for which motion plans are computed */
   robot_model::RobotModelConstPtr robot_model_;

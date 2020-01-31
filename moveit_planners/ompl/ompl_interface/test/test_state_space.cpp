@@ -44,14 +44,16 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include <boost/filesystem/path.hpp>
-#include <ros/package.h>
+#include <ament_index_cpp/get_package_share_directory.hpp>
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.test.test_state_space");
 
 class LoadPlanningModelsPr2 : public testing::Test
 {
 protected:
   void SetUp() override
   {
-    boost::filesystem::path res_path(ros::package::getPath("moveit_resources"));
+    boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory("moveit_resources"));
 
     srdf_model_.reset(new srdf::Model());
     std::string xml_string;
@@ -99,7 +101,7 @@ TEST_F(LoadPlanningModelsPr2, StateSpace)
   }
   catch (ompl::Exception& ex)
   {
-    ROS_ERROR("Sanity checks did not pass: %s", ex.what());
+    RCLCPP_ERROR(LOGGER, "Sanity checks did not pass: %s", ex.what());
   }
   EXPECT_TRUE(passed);
 }
@@ -142,7 +144,7 @@ TEST_F(LoadPlanningModelsPr2, StateSpaceCopy)
   }
   catch (ompl::Exception& ex)
   {
-    ROS_ERROR("Sanity checks did not pass: %s", ex.what());
+    RCLCPP_ERROR(LOGGER, "Sanity checks did not pass: %s", ex.what());
   }
   EXPECT_TRUE(passed);
 

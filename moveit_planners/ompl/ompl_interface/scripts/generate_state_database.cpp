@@ -49,51 +49,71 @@
 #include <boost/math/constants/constants.hpp>
 #include <sstream>
 
-static const std::string LOGNAME = "generate_state_database";
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.planners_ompl.generate_state_database");
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 static const std::string CONSTRAINT_PARAMETER = "constraints";
 
+static bool get_uint_parameter_or(const rclcpp::Node::SharedPtr& node, const std::string& param_name,
+                                  size_t&& result_value, const size_t default_value)
+{
+  int param_value;
+  if (node->get_parameter(param_name, param_value))
+  {
+    if (param_value >= 0)
+    {
+      result_value = static_cast<size_t>(param_value);
+      return true;
+    }
+
+    RCLCPP_WARN_STREAM(LOGGER, "Value for parameter '" << param_name << "' must be positive\n"
+                                                                        "Using back to default value:"
+                                                       << default_value);
+  }
+
+  result_value = default_value;
+  return true;
+}
+
 struct GenerateStateDatabaseParameters
 {
-  bool setFromHandle(ros::NodeHandle& nh)
+  bool setFromNode(const rclcpp::Node::SharedPtr& node)
   {
-    use_current_scene = nh.param("use_current_scene", false);
+    node->get_parameter_or("use_current_scene", use_current_scene, false);
 
     // number of states in joint space approximation
-    construction_opts.samples = nh.param("state_cnt", 10000);
+    get_uint_parameter_or(node, "state_cnt", construction_opts.samples, 10000);
 
     // generate edges together with states?
-    construction_opts.edges_per_sample = nh.param("edges_per_sample", 0);
-    construction_opts.max_edge_length = nh.param("max_edge_length", 0.2);
+    get_uint_parameter_or(node, "edges_per_sample", construction_opts.edges_per_sample, 0);
+
+    node->get_parameter_or("max_edge_length", construction_opts.max_edge_length, 0.2);
 
     // verify constraint validity on edges
-    construction_opts.explicit_motions = nh.param("explicit_motions", true);
-    construction_opts.explicit_points_resolution = nh.param("explicit_points_resolution", 0.05);
-    construction_opts.max_explicit_points = nh.param("max_explicit_points", 200);
+    node->get_parameter_or("explicit_motions", construction_opts.explicit_motions, true);
+    node->get_parameter_or("explicit_points_resolution", construction_opts.explicit_points_resolution, 0.05);
+    get_uint_parameter_or(node, "max_explicit_points", construction_opts.max_explicit_points, 200);
 
     // local planning in JointModel state space
-    construction_opts.state_space_parameterization =
-        nh.param<std::string>("state_space_parameterization", "JointModel");
+    node->get_parameter_or("state_space_parameterization", construction_opts.state_space_parameterization,
+                           std::string("JointModel"));
 
-    output_folder = nh.param<std::string>("output_folder", "constraint_approximations_database");
+    node->get_parameter_or("output_folder", output_folder, std::string("constraint_approximation_database"));
 
-    if (!nh.getParam("planning_group", planning_group))
+    if (!node->get_parameter("planning_group", planning_group))
     {
-      ROS_FATAL_NAMED(LOGNAME, "~planning_group parameter has to be specified.");
+      RCLCPP_FATAL(LOGGER, "~planning_group parameter has to be specified.");
       return false;
     }
 
-    XmlRpc::XmlRpcValue constraint_description;
-    if (!nh.getParam(CONSTRAINT_PARAMETER, constraint_description) ||
-        !kinematic_constraints::constructConstraints(constraint_description, constraints))
+    if (!kinematic_constraints::constructConstraints(node, CONSTRAINT_PARAMETER, constraints))
     {
-      ROS_FATAL_STREAM_NAMED(LOGNAME,
-                             "Could not find valid constraint description in parameter '"
-                                 << nh.resolveName(CONSTRAINT_PARAMETER)
-                                 << "'. "
-                                    "Please upload correct correct constraint description or remap the parameter.");
+      RCLCPP_FATAL_STREAM(LOGGER,
+                          "Could not find valid constraint description in parameter '"
+                              << node->get_fully_qualified_name() << "." << CONSTRAINT_PARAMETER
+                              << "'. "
+                                 "Please upload correct correct constraint description or remap the parameter.");
       return false;
     }
 
@@ -115,12 +135,13 @@ struct GenerateStateDatabaseParameters
   ompl_interface::ConstraintApproximationConstructionOptions construction_opts;
 };
 
-void computeDB(const planning_scene::PlanningScenePtr& scene, struct GenerateStateDatabaseParameters& params)
+void computeDB(const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene,
+               struct GenerateStateDatabaseParameters& params)
 {
   // required by addConstraintApproximation
   scene->getCurrentStateNonConst().update();
 
-  ompl_interface::OMPLInterface ompl_interface(scene->getRobotModel());
+  ompl_interface::OMPLInterface ompl_interface(scene->getRobotModel(), node);
   planning_interface::MotionPlanRequest req;
   req.group_name = params.planning_group;
   req.path_constraints = params.constraints;
@@ -130,8 +151,8 @@ void computeDB(const planning_scene::PlanningScenePtr& scene, struct GenerateSta
 
   ompl_interface::ModelBasedPlanningContextPtr context = ompl_interface.getPlanningContext(scene, req);
 
-  ROS_INFO_STREAM_NAMED(LOGNAME, "Generating Joint Space Constraint Approximation Database for constraint:\n"
-                                     << params.constraints);
+  RCLCPP_INFO_STREAM(LOGGER, "Generating Joint Space Constraint Approximation Database for constraint:\n"
+                                 << params.constraints.name);
 
   ompl_interface::ConstraintApproximationConstructionResults result =
       context->getConstraintsLibraryNonConst()->addConstraintApproximation(params.constraints, params.planning_group,
@@ -139,63 +160,73 @@ void computeDB(const planning_scene::PlanningScenePtr& scene, struct GenerateSta
 
   if (!result.approx)
   {
-    ROS_FATAL_NAMED(LOGNAME, "Failed to generate approximation.");
+    RCLCPP_FATAL(LOGGER, "Failed to generate approximation.");
     return;
   }
   context->getConstraintsLibraryNonConst()->saveConstraintApproximations(params.output_folder);
-  ROS_INFO_STREAM_NAMED(LOGNAME,
-                        "Successfully generated Joint Space Constraint Approximation Database for constraint:\n"
-                            << params.constraints);
-  ROS_INFO_STREAM_NAMED(LOGNAME, "The database has been saved in your local folder '" << params.output_folder << "'");
+  RCLCPP_INFO_STREAM(LOGGER, "Successfully generated Joint Space Constraint Approximation Database for constraint:\n"
+                                 << params.constraints.name);
+  RCLCPP_INFO_STREAM(LOGGER, "The database has been saved in your local folder '" << params.output_folder << "'");
 }
 
 /**
  * Generates a database of states that follow the given constraints.
  * An example of the constraint yaml that should be loaded to rosparam:
- * "name: tool0_upright
- *  constraints:
- *  - type: orientation
- *    frame_id: world
- *    link_name: tool0
- *    orientation: [0, 0, 0]
- *    tolerances: [0.01, 0.01, 3.15]
- *    weight: 1.0
- * "
+ * """
+ * name: constraint_name
+ * constraint_ids: [constraint_1, constraint_2]
+ * constraints:
+ *   constraint_1:
+ *     type: orientation
+ *     frame_id: world
+ *     link_name: tool0
+ *     orientation: [0, 0, 0]  # [r, p, y]
+ *     tolerances: [0.01, 0.01, 3.15]
+ *     weight: 1.0
+ *   constraint_2:
+ *     type: position
+ *     frame_id: base_link
+ *     link_name: tool0
+ *     target_offset: [0.1, 0.1, 0.1]  # [x, y, z]
+ *     region:
+ *       x: [0.1, 0.4]  # [min, max]
+ *       y: [0.2, 0.3]
+ *       z: [0.1, 0.6]
+ *     weight: 1.0
+ * """
  */
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "construct_tool_constraint_database", ros::init_options::AnonymousName);
-
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-
-  ros::NodeHandle nh("~");
+  rclcpp::init(argc, argv);
+  std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("generate_state_database");
 
   GenerateStateDatabaseParameters params;
-  if (!params.setFromHandle(nh))
+  if (!params.setFromNode(node))
     return 1;
 
-  planning_scene_monitor::PlanningSceneMonitor psm(ROBOT_DESCRIPTION);
+  planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (!psm.getRobotModel())
     return 1;
 
   if (params.use_current_scene)
   {
-    ROS_INFO_NAMED(LOGNAME, "Requesting current planning scene to generate database");
+    RCLCPP_INFO(LOGGER, "Requesting current planning scene to generate database");
     if (!psm.requestPlanningSceneState())
     {
-      ROS_FATAL_NAMED(LOGNAME, "Abort. The current scene could not be retrieved.");
+      RCLCPP_FATAL(LOGGER, "Abort. The current scene could not be retrieved.");
       return 1;
     }
   }
 
   if (moveit::core::isEmpty(params.constraints))
   {
-    ROS_FATAL_NAMED(LOGNAME, "Abort. Constraint description is an empty set of constraints.");
+    RCLCPP_FATAL(LOGGER, "Abort. Constraint description is an empty set of constraints.");
     return 1;
   }
 
-  computeDB(psm.getPlanningScene(), params);
+  computeDB(node, psm.getPlanningScene(), params);
+
+  rclcpp::shutdown();
 
   return 0;
 }

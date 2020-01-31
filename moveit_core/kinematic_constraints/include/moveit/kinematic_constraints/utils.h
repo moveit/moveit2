@@ -191,18 +191,42 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
                                                        double tolerance = 1e-3);
 
 /**
- * \brief extract constraint message from XmlRpc node.
+ * \brief extract constraint message from node parameters.
  *
  * This can be used to construct a Constraints message from
- * specifications uploaded on the parameter server.
+ * specifications provided from a yaml file.
+ * An example for a constraint yaml structure (loaded at constraint_param):
+ * """
+ * name: constraint_name
+ * constraint_ids: [constraint_1, constraint_2]
+ * constraints:
+ *   constraint_1:
+ *     type: orientation
+ *     frame_id: world
+ *     link_name: tool0
+ *     orientation: [0, 0, 0]  # [r, p, y]
+ *     tolerances: [0.01, 0.01, 3.15]
+ *     weight: 1.0
+ *   constraint_2:
+ *     type: position
+ *     frame_id: base_link
+ *     link_name: tool0
+ *     target_offset: [0.1, 0.1, 0.1]  # [x, y, z]
+ *     region:
+ *       x: [0.1, 0.4]  # [min, max]
+ *       y: [0.2, 0.3]
+ *       z: [0.1, 0.6]
+ *     weight: 1.0
+ * """
  *
- * @param [in] params XmlRpc node of the parameter specification
+ * @param [in] params Node node to load the parameters from
+ * @param [in] params string namespace from where to load the constraints parameters
  * @param [out] constraints The constructed constraints message
  *
  * @return was the construction successful?
  */
-// TODO rework this function
-// bool constructConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::msg::Constraints& constraints);
+bool constructConstraints(const rclcpp::Node::SharedPtr& node, const std::string& constraints_param,
+                          moveit_msgs::msg::Constraints& constraints);
 
 /**
  * \brief Resolves frames used in constraints to links in the robot model.

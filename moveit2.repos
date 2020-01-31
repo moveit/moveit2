@@ -44,3 +44,10 @@ repositories:
     # version: ros2
     url: https://github.com/PickNikRobotics/object_recognition_msgs
     version: master
+
+# Temporarily install OMPL from melodic
+# TODO(henningkayser): remove once OMPL is released for ROS2
+  ompl:
+    type: git
+    url: https://github.com/ros-gbp/ompl-release.git
+    version: release/melodic/ompl/1.4.2-5

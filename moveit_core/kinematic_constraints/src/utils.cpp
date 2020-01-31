@@ -39,6 +39,8 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <moveit/utils/message_checks.h>
 
+#include <geometry_msgs/msg/pose_stamped.h>
+
 using namespace moveit::core;
 
 namespace kinematic_constraints
@@ -281,263 +283,254 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
   return goal;
 }
 
-// TODO ROS 2: Rework these functions
+/** Initialize a PoseStamped message from node parameters specified at pose_param. */
+static bool constructPoseStamped(const rclcpp::Node::SharedPtr& node, const std::string& pose_param,
+                                 geometry_msgs::msg::PoseStamped& pose)
+{
+  if (!node->get_parameter(pose_param + ".frame_id", pose.header.frame_id))
+    return false;
 
-// TODO: Is not getting called from anywhere, check if is necessary
-// static bool constructPoseStamped(XmlRpc::XmlRpcValue::iterator& it, geometry_msgs::PoseStamped& pose)
-// {
-//   if (!isStruct(it->second, { "frame_id", "position", "orientation" }, it->first))
-//     return false;
-//   pose.header.frame_id = static_cast<std::string>(it->second["frame_id"]);
-//
-//   if (!isArray(it->second["orientation"], 3, "orientation", "RPY values"))
-//     return false;
-//   auto& rpy = it->second["orientation"];
-//   tf2::Quaternion q;
-//   q.setRPY(parseDouble(rpy[0]), parseDouble(rpy[1]), parseDouble(rpy[2]));
-//   pose.pose.orientation = toMsg(q);
-//
-//   if (!isArray(it->second["position"], 3, "position", "xyz position"))
-//     return false;
-//   pose.pose.position.x = parseDouble(it->second["position"][0]);
-//   pose.pose.position.y = parseDouble(it->second["position"][1]);
-//   pose.pose.position.z = parseDouble(it->second["position"][2]);
-//
-//   return true;
-// }
-//
-// static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::JointConstraint& constraint)
-// {
-//   for (XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it)
-//   {
-//     if (it->first == "type")
-//       continue;
-//     else if (it->first == "joint_name")
-//       constraint.joint_name = static_cast<std::string>(it->second);
-//     else if (it->first == "weight")
-//       constraint.weight = parseDouble(it->second);
-//     else if (it->first == "position")
-//     {
-//       constraint.position = parseDouble(it->second);
-//     }
-//     else if (it->first == "tolerance")
-//     {
-//       constraint.tolerance_below = parseDouble(it->second);
-//       constraint.tolerance_above = parseDouble(it->second);
-//     }
-//     else if (it->first == "tolerances")
-//     {
-//       if (!isArray(it->second, 2, it->first, "lower/upper tolerances"))
-//         return false;
-//
-//       constraint.tolerance_below = parseDouble(it->second[0]);
-//       constraint.tolerance_above = parseDouble(it->second[1]);
-//     }
-//     else if (it->first == "bounds")
-//     {
-//       if (!isArray(it->second, 2, it->first, "lower/upper bound"))
-//         return false;
-//
-//       const double lower_bound = parseDouble(it->second[0]);
-//       const double upper_bound = parseDouble(it->second[1]);
-//
-//       constraint.position = (lower_bound + upper_bound) / 2;
-//       constraint.tolerance_below = constraint.position - lower_bound;
-//       constraint.tolerance_above = upper_bound - constraint.position;
-//     }
-//     else
-//     {
-//       ROS_WARN_STREAM_NAMED(LOGNAME, "joint constraint contains unknown entity '" << it->first << "'");
-//     }
-//   }
-//   return true;
-// }
-//
-// static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::PositionConstraint& constraint)
-// {
-//   for (XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it)
-//   {
-//     if (it->first == "type")
-//       continue;
-//     else if (it->first == "frame_id")
-//       constraint.header.frame_id = static_cast<std::string>(it->second);
-//     else if (it->first == "weight")
-//       constraint.weight = parseDouble(it->second);
-//     else if (it->first == "link_name")
-//       constraint.link_name = static_cast<std::string>(it->second);
-//     else if (it->first == "target_offset")
-//     {
-//       if (!isArray(it->second, 3, it->first, "x/y/z position"))
-//         return false;
-//
-//       constraint.target_point_offset.x = parseDouble(it->second[0]);
-//       constraint.target_point_offset.y = parseDouble(it->second[1]);
-//       constraint.target_point_offset.z = parseDouble(it->second[2]);
-//     }
-//     else if (it->first == "region")
-//     {
-//       if (!isStruct(it->second, { "x", "y", "z" }, "region"))
-//         return false;
-//
-//       constraint.constraint_region.primitive_poses.emplace_back();
-//       constraint.constraint_region.primitives.emplace_back();
-//
-//       geometry_msgs::Pose& region_pose = constraint.constraint_region.primitive_poses.back();
-//       shape_msgs::SolidPrimitive& region_primitive = constraint.constraint_region.primitives.back();
-//
-//       region_primitive.type = shape_msgs::SolidPrimitive::BOX;
-//       region_primitive.dimensions.resize(3);
-//
-//       std::function<void(XmlRpc::XmlRpcValue&, double&, double&)> parse_dimension =
-//           [](XmlRpc::XmlRpcValue& it, double& center, double& dimension) {
-//             center = (parseDouble(it[0]) + parseDouble(it[1])) / 2;
-//             dimension = parseDouble(it[1]) - parseDouble(it[0]);
-//           };
-//
-//       parse_dimension(it->second["x"], region_pose.position.x,
-//                       region_primitive.dimensions[shape_msgs::SolidPrimitive::BOX_X]);
-//       parse_dimension(it->second["y"], region_pose.position.y,
-//                       region_primitive.dimensions[shape_msgs::SolidPrimitive::BOX_Y]);
-//       parse_dimension(it->second["z"], region_pose.position.z,
-//                       region_primitive.dimensions[shape_msgs::SolidPrimitive::BOX_Z]);
-//
-//       region_pose.orientation.w = 1.0;
-//     }
-//     else
-//     {
-//       ROS_WARN_STREAM_NAMED(LOGNAME, "position constraint contains unknown entity '" << it->first << "'");
-//     }
-//   }
-//   return true;
-// }
-//
-// static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::OrientationConstraint& constraint)
-// {
-//   for (XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it)
-//   {
-//     if (it->first == "type")
-//       continue;
-//     else if (it->first == "frame_id")
-//       constraint.header.frame_id = static_cast<std::string>(it->second);
-//     else if (it->first == "weight")
-//       constraint.weight = parseDouble(it->second);
-//     else if (it->first == "link_name")
-//       constraint.link_name = static_cast<std::string>(it->second);
-//     else if (it->first == "orientation")
-//     {
-//       if (!isArray(it->second, 3, it->first, "RPY values"))
-//         return false;
-//
-//       tf2::Quaternion q;
-//       q.setRPY(parseDouble(it->second[0]), parseDouble(it->second[1]), parseDouble(it->second[2]));
-//       constraint.orientation = toMsg(q);
-//     }
-//     else if (it->first == "tolerances")
-//     {
-//       if (!isArray(it->second, 3, it->first, "xyz tolerances"))
-//         return false;
-//
-//       constraint.absolute_x_axis_tolerance = parseDouble(it->second[0]);
-//       constraint.absolute_y_axis_tolerance = parseDouble(it->second[1]);
-//       constraint.absolute_z_axis_tolerance = parseDouble(it->second[2]);
-//     }
-//     else
-//     {
-//       ROS_WARN_STREAM_NAMED(LOGNAME, "orientation constraint contains unknown entity '" << it->first << "'");
-//     }
-//   }
-//   return true;
-// }
-//
-// static bool constructConstraint(XmlRpc::XmlRpcValue& params, moveit_msgs::VisibilityConstraint& constraint)
-// {
-//   for (XmlRpc::XmlRpcValue::iterator it = params.begin(); it != params.end(); ++it)
-//   {
-//     if (it->first == "type")
-//       continue;
-//     else if (it->first == "weight")
-//       constraint.weight = parseDouble(it->second);
-//     else if (it->first == "target_radius")
-//       constraint.target_radius = parseDouble(it->second);
-//     else if (it->first == "target_pose")
-//     {
-//       if (!constructPoseStamped(it, constraint.target_pose))
-//         return false;
-//     }
-//     else if (it->first == "cone_sides")
-//       constraint.cone_sides = static_cast<int>(it->second);
-//     else if (it->first == "sensor_pose")
-//     {
-//       if (!constructPoseStamped(it, constraint.sensor_pose))
-//         return false;
-//     }
-//     else if (it->first == "max_view_angle")
-//       constraint.max_view_angle = parseDouble(it->second);
-//     else if (it->first == "max_range_angle")
-//       constraint.max_range_angle = parseDouble(it->second);
-//     else
-//     {
-//       ROS_WARN_STREAM_NAMED(LOGNAME, "orientation constraint contains unknown entity '" << it->first << "'");
-//     }
-//   }
-//
-//   constraint.sensor_view_direction = moveit_msgs::VisibilityConstraint::SENSOR_X;
-//
-//   return true;
-// }
-//
-// static bool collectConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::Constraints& constraints)
-// {
-//   if (params.getType() != XmlRpc::XmlRpcValue::TypeArray)
-//   {
-//     ROS_ERROR_NAMED(LOGNAME, "expected constraints as array");
-//     return false;
-//   }
-//
-//   for (int i = 0; i < params.size(); ++i)  // NOLINT(modernize-loop-convert)
-//   {
-//     if (!params[i].hasMember("type"))
-//     {
-//       ROS_ERROR_NAMED(LOGNAME, "constraint parameter does not specify its type");
-//     }
-//     else if (params[i]["type"] == "joint")
-//     {
-//       constraints.joint_constraints.emplace_back();
-//       if (!constructConstraint(params[i], constraints.joint_constraints.back()))
-//         return false;
-//     }
-//     else if (params[i]["type"] == "position")
-//     {
-//       constraints.position_constraints.emplace_back();
-//       if (!constructConstraint(params[i], constraints.position_constraints.back()))
-//         return false;
-//     }
-//     else if (params[i]["type"] == "orientation")
-//     {
-//       constraints.orientation_constraints.emplace_back();
-//       if (!constructConstraint(params[i], constraints.orientation_constraints.back()))
-//         return false;
-//     }
-//     else if (params[i]["type"] == "visibility")
-//     {
-//       constraints.visibility_constraints.emplace_back();
-//       if (!constructConstraint(params[i], constraints.visibility_constraints.back()))
-//         return false;
-//     }
-//   }
-//
-//   return true;
-// }
-//
-// bool constructConstraints(XmlRpc::XmlRpcValue& params, moveit_msgs::Constraints& constraints)
-// {
-//   if (!isStruct(params, { "name", "constraints" }, "Parameter"))
-//     return false;
-//
-//   constraints.name = static_cast<std::string>(params["name"]);
-//   return collectConstraints(params["constraints"], constraints);
-// }
-// }  // namespace kinematic_constraints
+  std::vector<double> orientation;
+  if (!node->get_parameter(pose_param + ".orientation", orientation) || orientation.size() != 3)
+    return false;
+
+  tf2::Quaternion q;
+  q.setRPY(orientation[0], orientation[1], orientation[2]);
+  pose.pose.orientation = toMsg(q);
+
+  std::vector<double> position;
+  if (!node->get_parameter(pose_param + ".position", position) || position.size() != 3)
+    return false;
+
+  pose.pose.position.x = position[0];
+  pose.pose.position.y = position[1];
+  pose.pose.position.z = position[2];
+
+  return true;
+}
+
+/** Initialize a JointConstraint message from node parameters specified at constraint_param. */
+static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
+                                moveit_msgs::msg::JointConstraint& constraint)
+{
+  node->get_parameter(constraint_param + ".weight", constraint.weight);
+  node->get_parameter(constraint_param + ".joint_name", constraint.joint_name);
+  node->get_parameter(constraint_param + ".position", constraint.position);
+
+  double tolerance;
+  if (node->get_parameter(constraint_param + ".tolerance", tolerance))
+  {
+    constraint.tolerance_below = tolerance;
+    constraint.tolerance_above = tolerance;
+  }
+  else if (node->has_parameter(constraint_param + ".tolerances"))
+  {
+    std::vector<double> tolerances;
+    node->get_parameter(constraint_param + ".tolerances", tolerances);
+    if (tolerances.size() != 2)
+      return false;
+
+    constraint.tolerance_below = tolerances[0];
+    constraint.tolerance_above = tolerances[1];
+  }
+  else if (node->has_parameter(constraint_param + ".bounds"))
+  {
+    std::vector<double> bounds;
+    node->get_parameter(constraint_param + ".bounds", bounds);
+    if (bounds.size() != 2)
+      return false;
+
+    const double lower_bound = bounds[0];
+    const double upper_bound = bounds[1];
+
+    constraint.position = (lower_bound + upper_bound) / 2;
+    constraint.tolerance_below = constraint.position - lower_bound;
+    constraint.tolerance_above = upper_bound - constraint.position;
+  }
+
+  return true;
+}
+
+/** Initialize a PositionConstraint message from node parameters specified at constraint_param. */
+static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
+                                moveit_msgs::msg::PositionConstraint& constraint)
+{
+  node->get_parameter(constraint_param + ".frame_id", constraint.header.frame_id);
+  node->get_parameter(constraint_param + ".weight", constraint.weight);
+  node->get_parameter(constraint_param + ".link_name", constraint.link_name);
+
+  std::vector<double> target_offset;
+  if (node->get_parameter(constraint_param + ".target_offset", target_offset))
+  {
+    if (target_offset.size() != 3)
+      return false;
+
+    constraint.target_point_offset.x = target_offset[0];
+    constraint.target_point_offset.y = target_offset[1];
+    constraint.target_point_offset.z = target_offset[2];
+  }
+  if (!node->list_parameters({ constraint_param + ".region" }, 1).names.empty())  // TODO(henningkayser): specify depth
+  {
+    geometry_msgs::msg::Pose region_pose;
+    region_pose.orientation.w = 1.0;
+
+    shape_msgs::msg::SolidPrimitive region_primitive;
+    region_primitive.type = shape_msgs::msg::SolidPrimitive::BOX;
+    region_primitive.dimensions.resize(3);
+
+    const auto parse_dimension = [&](const std::string& dimension_param, double& center, double& dimension) -> bool {
+      std::vector<double> dimension_limits;
+      if (!node->get_parameter(constraint_param + ".region." + dimension_param, dimension_limits) ||
+          dimension_limits.size() != 2)
+        return false;
+
+      center = (dimension_limits[0] + dimension_limits[1]) / 2;
+      dimension = dimension_limits[1] - dimension_limits[2];
+      return true;
+    };
+
+    if (!parse_dimension("x", region_pose.position.x,
+                         region_primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_X]) ||
+        !parse_dimension("y", region_pose.position.y,
+                         region_primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Y]) ||
+        !parse_dimension("z", region_pose.position.z,
+                         region_primitive.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Z]))
+      return false;
+
+    constraint.constraint_region.primitive_poses.push_back(region_pose);
+    constraint.constraint_region.primitives.emplace_back(region_primitive);
+  }
+
+  return true;
+}
+
+/** Initialize an OrientationConstraint message from node parameters specified at constraint_param. */
+static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
+                                moveit_msgs::msg::OrientationConstraint& constraint)
+{
+  node->get_parameter(constraint_param + ".frame_id", constraint.header.frame_id);
+  node->get_parameter(constraint_param + ".weight", constraint.weight);
+  node->get_parameter(constraint_param + ".link_name", constraint.link_name);
+
+  std::vector<double> orientation;
+  if (node->get_parameter(constraint_param + ".orientation", orientation))
+  {
+    if (orientation.size() != 3)
+      return false;
+
+    tf2::Quaternion q;
+    q.setRPY(orientation[0], orientation[1], orientation[2]);
+    constraint.orientation = toMsg(q);
+  }
+
+  std::vector<double> tolerances;
+  if (node->get_parameter(constraint_param + ".tolerances", tolerances))
+  {
+    if (tolerances.size() != 3)
+      return false;
+
+    constraint.absolute_x_axis_tolerance = tolerances[0];
+    constraint.absolute_y_axis_tolerance = tolerances[1];
+    constraint.absolute_z_axis_tolerance = tolerances[2];
+  }
+
+  return true;
+}
+
+/** Initialize a VisibilityConstraint message from node parameters specified at constraint_param. */
+static bool constructConstraint(const rclcpp::Node::SharedPtr& node, const std::string& constraint_param,
+                                moveit_msgs::msg::VisibilityConstraint& constraint)
+{
+  node->get_parameter(constraint_param + ".weight", constraint.weight);
+  node->get_parameter(constraint_param + ".target_radius", constraint.target_radius);
+  node->get_parameter(constraint_param + ".cone_sides", constraint.cone_sides);
+  node->get_parameter(constraint_param + ".max_view_angle", constraint.max_view_angle);
+  node->get_parameter(constraint_param + ".max_range_angle", constraint.max_range_angle);
+
+  // TODO(henningkayser): specify depth
+  if (!node->list_parameters({ constraint_param + ".target_pose" }, 1).names.empty())
+  {
+    if (!constructPoseStamped(node, constraint_param + ".target_pose", constraint.target_pose))
+      return false;
+  }
+  // TODO(henningkayser): specify depth
+  if (!node->list_parameters({ constraint_param + ".sensor_pose" }, 1).names.empty())
+  {
+    if (!constructPoseStamped(node, constraint_param + ".sensor_pose", constraint.sensor_pose))
+      return false;
+  }
+
+  constraint.sensor_view_direction = moveit_msgs::msg::VisibilityConstraint::SENSOR_X;
+
+  return true;
+}
+
+/** Initialize a Constraints message containing constraints specified by node parameters under constraint_ids. */
+static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::vector<std::string>& constraint_ids,
+                               moveit_msgs::msg::Constraints& constraints)
+{
+  for (const auto& constraint_id : constraint_ids)
+  {
+    const auto constraint_param = ".constraints." + constraint_id;
+    if (!node->has_parameter(constraint_param + ".type"))
+    {
+      RCLCPP_ERROR(LOGGER, "constraint parameter does not specify its type");
+      return false;
+    }
+    std::string constraint_type;
+    node->get_parameter(constraint_param + ".type", constraint_type);
+    if (constraint_type == "joint")
+    {
+      constraints.joint_constraints.emplace_back();
+      if (!constructConstraint(node, constraint_param, constraints.joint_constraints.back()))
+        return false;
+    }
+    else if (constraint_type == "position")
+    {
+      constraints.position_constraints.emplace_back();
+      if (!constructConstraint(node, constraint_param, constraints.position_constraints.back()))
+        return false;
+    }
+    else if (constraint_type == "orientation")
+    {
+      constraints.orientation_constraints.emplace_back();
+      if (!constructConstraint(node, constraint_param, constraints.orientation_constraints.back()))
+        return false;
+    }
+    else if (constraint_type == "visibility")
+    {
+      constraints.visibility_constraints.emplace_back();
+      if (!constructConstraint(node, constraint_param, constraints.visibility_constraints.back()))
+        return false;
+    }
+    else
+    {
+      RCLCPP_ERROR_STREAM(LOGGER, "Unable to process unknown constraint type: " << constraint_type);
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool constructConstraints(const rclcpp::Node::SharedPtr& node, const std::string& constraints_param,
+                          moveit_msgs::msg::Constraints& constraints)
+{
+  if (!node->get_parameter(constraints_param + ".name", constraints.name))
+    return false;
+
+  std::vector<std::string> constraint_ids;
+  if (!node->get_parameter(constraints_param + ".constraint_ids", constraint_ids))
+    return false;
+
+  for (auto& constraint_id : constraint_ids)
+    constraint_id = constraints_param + constraint_id;
+
+  return collectConstraints(node, constraint_ids, constraints);
+}
+}  // namespace kinematic_constraints
+
+// TODO(henningkayser): rework this function if necessary
 //
 // bool kinematic_constraints::resolveConstraintFrames(const robot_state::RobotState& state,
 //                                                     moveit_msgs::Constraints& constraints)
@@ -591,4 +584,3 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 //   }
 //   return true;
 // }
-}

@@ -40,7 +40,7 @@
 #include <planning_scene/planning_scene.h>
 #include <kinematic_constraints/kinematic_constraint.h>
 #include <ompl/base/StateStorage.h>
-#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/msg/marker_array.h>
 
 namespace ompl_interface
 {
@@ -57,7 +57,7 @@ struct ConstraintApproximation
                           const std::string& filename, const ompl::base::StateStoragePtr& storage);
 
   void visualizeDistribution(const std::string& link_name, unsigned int count,
-                             visualization_msgs::MarkerArray& arr) const;
+                             visualization_msgs::msg::MarkerArray& arr) const;
 
   std::string group_;
   std::string factory_;

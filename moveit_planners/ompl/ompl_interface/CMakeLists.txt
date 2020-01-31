@@ -1,6 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_ompl_interface)
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/ompl_interface.cpp
   src/planning_context_manager.cpp
   src/model_based_planning_context.cpp
@@ -23,7 +23,14 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 
 find_package(OpenMP REQUIRED)
 
-target_link_libraries(${MOVEIT_LIB_NAME} ${OMPL_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+	moveit_core
+	moveit_ros_planning
+	rclcpp
+	pluginlib
+	tf2_ros
+	OMPL
+	Boost)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 
@@ -34,21 +41,33 @@ set_target_properties(moveit_generate_state_database PROPERTIES OUTPUT_NAME "gen
 
 add_library(moveit_ompl_planner_plugin src/ompl_planner_manager.cpp)
 set_target_properties(moveit_ompl_planner_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_ompl_planner_plugin ${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(moveit_ompl_planner_plugin
+	moveit_core
+	moveit_ros_planning
+	rclcpp
+	pluginlib
+	tf2_ros
+	OMPL
+	Boost)
+target_link_libraries(moveit_ompl_planner_plugin ${MOVEIT_LIB_NAME})
 
 install(TARGETS ${MOVEIT_LIB_NAME} moveit_ompl_planner_plugin
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin)
 install(TARGETS moveit_generate_state_database
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+	RUNTIME DESTINATION lib/${PROJECT_NAME})
+install(DIRECTORY include/ DESTINATION include)
 
-if(CATKIN_ENABLE_TESTING)
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_index_cpp REQUIRED)
   find_package(moveit_resources REQUIRED)
-  include_directories(${moveit_resources_INCLUDE_DIRS})
+  find_package(Eigen3 REQUIRED)
 
-  catkin_add_gtest(test_state_space test/test_state_space.cpp)
-  target_link_libraries(test_state_space ${MOVEIT_LIB_NAME} ${OMPL_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+  ament_add_gtest(test_state_space test/test_state_space.cpp)
+  ament_target_dependencies(test_state_space moveit_resources moveit_core ament_index_cpp OMPL Boost Eigen3)
+  target_link_libraries(test_state_space ${MOVEIT_LIB_NAME})
+
   set_target_properties(test_state_space PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 endif()

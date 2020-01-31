@@ -14,21 +14,23 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>moveit_core</depend>
   <depend>ompl</depend>
   <depend>moveit_ros_planning</depend>
-  <depend>dynamic_reconfigure</depend>
-  <depend>rosconsole</depend>
-  <depend>roscpp</depend>
+  <depend>rclcpp</depend>
   <depend>tf2_ros</depend>
   <depend version_gte="1.11.2">pluginlib</depend>
 
   <test_depend>moveit_resources</test_depend>
+  <test_depend>eigen</test_depend>
+  <buildtool_depend>eigen3_cmake_module</buildtool_depend>
   <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_index_cpp</test_depend>
 
   <export>
+    <build_type>ament_cmake</build_type>
     <moveit_core plugin="${prefix}/ompl_interface_plugin_description.xml"/>
   </export>
 
