@@ -38,59 +38,48 @@
 #include <sstream>
 #include <memory>
 #include <moveit/kinematic_constraints/utils.h>
-#include <moveit/move_group/capability_names.h>
 #include <moveit/moveit_cpp/planning_component.h>
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
-#include <moveit/common_planning_interface_objects/common_objects.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/PickupAction.h>
-#include <moveit_msgs/ExecuteTrajectoryAction.h>
-#include <moveit_msgs/PlaceAction.h>
-#include <moveit_msgs/ExecuteKnownTrajectory.h>
-#include <moveit_msgs/QueryPlannerInterfaces.h>
-#include <moveit_msgs/GetCartesianPath.h>
-#include <moveit_msgs/GraspPlanning.h>
-#include <moveit_msgs/GetPlannerParams.h>
-#include <moveit_msgs/SetPlannerParams.h>
-
-#include <std_msgs/String.h>
-#include <geometry_msgs/TransformStamped.h>
+#include <geometry_msgs/msg/transform_stamped.h>
 #include <tf2/utils.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_ros/transform_listener.h>
-#include <ros/console.h>
-#include <ros/ros.h>
 
 namespace moveit
 {
 namespace planning_interface
 {
-constexpr char LOGNAME[] = "planning_component";
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning_interface.planning_component");
 
 PlanningComponent::PlanningComponent(const std::string& group_name, const MoveItCppPtr& moveit_cpp)
-  : nh_(moveit_cpp->getNodeHandle()), moveit_cpp_(moveit_cpp), group_name_(group_name)
+  : node_(moveit_cpp->getNode()), moveit_cpp_(moveit_cpp), group_name_(group_name)
 {
   joint_model_group_ = moveit_cpp_->getRobotModel()->getJointModelGroup(group_name);
   if (!joint_model_group_)
   {
     std::string error = "Could not find joint model group '" + group_name + "'.";
-    ROS_FATAL_STREAM_NAMED(LOGNAME, error);
+    RCLCPP_FATAL_STREAM(LOGGER, error);
     throw std::runtime_error(error);
   }
   planning_pipeline_names_ = moveit_cpp_->getPlanningPipelineNames(group_name);
 }
 
-PlanningComponent::PlanningComponent(const std::string& group_name, const ros::NodeHandle& nh)
-  : nh_(nh), moveit_cpp_(new MoveItCpp(nh)), group_name_(group_name)
+PlanningComponent::PlanningComponent(const std::string& group_name, const rclcpp::Node::SharedPtr& node)
+  : node_(node), moveit_cpp_(new MoveItCpp(node)), group_name_(group_name)
 {
+  joint_model_group_ = moveit_cpp_->getRobotModel()->getJointModelGroup(group_name);
+  if (!joint_model_group_)
+  {
+    std::string error = "Could not find joint model group '" + group_name + "'.";
+    RCLCPP_FATAL_STREAM(LOGGER, error);
+    throw std::runtime_error(error);
+  }
+  planning_pipeline_names_ = moveit_cpp_->getPlanningPipelineNames(group_name);
 }
 
 PlanningComponent::~PlanningComponent()
 {
-  ROS_INFO_NAMED(LOGNAME, "Deleting PlanningComponent '%s'", group_name_.c_str());
+  RCLCPP_INFO(LOGGER, "Deleting PlanningComponent '%s'", group_name_.c_str());
   clearContents();
 }
 
@@ -114,7 +103,7 @@ const std::vector<std::string> PlanningComponent::getNamedTargetStates()
   }
   else
   {
-    ROS_WARN_NAMED(LOGNAME, "Unable to find joint group with name '%s'.", group_name_.c_str());
+    RCLCPP_WARN(LOGGER, "Unable to find joint group with name '%s'.", group_name_.c_str());
   }
 
   std::vector<std::string> empty;
@@ -131,8 +120,8 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   last_plan_solution_.reset(new PlanSolution());
   if (!joint_model_group_)
   {
-    ROS_ERROR_NAMED(LOGNAME, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
-    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME);
+    RCLCPP_ERROR(LOGGER, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
+    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME);
     return *last_plan_solution_;
   }
 
@@ -167,8 +156,8 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   // Set goal constraints
   if (current_goal_constraints_.empty())
   {
-    ROS_ERROR_NAMED(LOGNAME, "No goal constraints set for planning request");
-    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+    RCLCPP_ERROR(LOGGER, "No goal constraints set for planning request");
+    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
     return *last_plan_solution_;
   }
   req.goal_constraints = current_goal_constraints_;
@@ -177,8 +166,8 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   ::planning_interface::MotionPlanResponse res;
   if (planning_pipeline_names_.find(parameters.planning_pipeline) == planning_pipeline_names_.end())
   {
-    ROS_ERROR_NAMED(LOGNAME, "No planning pipeline available for name '%s'", parameters.planning_pipeline.c_str());
-    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::MoveItErrorCodes::FAILURE);
+    RCLCPP_ERROR(LOGGER, "No planning pipeline available for name '%s'", parameters.planning_pipeline.c_str());
+    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     return *last_plan_solution_;
   }
   const planning_pipeline::PlanningPipelinePtr pipeline =
@@ -187,7 +176,7 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   last_plan_solution_->error_code = res.error_code_.val;
   if (res.error_code_.val != res.error_code_.SUCCESS)
   {
-    ROS_ERROR("Could not compute plan successfully");
+    RCLCPP_ERROR(LOGGER, "Could not compute plan successfully");
     return *last_plan_solution_;
   }
   last_plan_solution_->start_state = req.start_state;
@@ -198,7 +187,7 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   //{
   //  for (const auto& eef_link : eef_links)
   //  {
-  //    ROS_INFO_STREAM("Publishing trajectory for end effector " << eef_link->getName());
+  //    RCLCPP_INFO_STREAM("Publishing trajectory for end effector " << eef_link->getName());
   //    visual_tools_->publishTrajectoryLine(last_solution_trajectory_, eef_link);
   //    visual_tools_->publishTrajectoryPath(last_solution_trajectory_, false);
   //    visual_tools_->publishRobotState(last_solution_trajectory_->getLastWayPoint(), rviz_visual_tools::TRANSLUCENT);
@@ -242,7 +231,7 @@ bool PlanningComponent::setStartState(const std::string& start_state_name)
   const auto& named_targets = getNamedTargetStates();
   if (std::find(named_targets.begin(), named_targets.end(), start_state_name) == named_targets.end())
   {
-    ROS_ERROR_NAMED(LOGNAME, "No predefined joint state found for target name '%s'", start_state_name.c_str());
+    RCLCPP_ERROR(LOGGER, "No predefined joint state found for target name '%s'", start_state_name.c_str());
     return false;
   }
   robot_state::RobotState start_state(moveit_cpp_->getRobotModel());
@@ -266,7 +255,7 @@ std::map<std::string, double> PlanningComponent::getNamedTargetStateValues(const
 void PlanningComponent::setWorkspace(double minx, double miny, double minz, double maxx, double maxy, double maxz)
 {
   workspace_parameters_.header.frame_id = moveit_cpp_->getRobotModel()->getModelFrame();
-  workspace_parameters_.header.stamp = ros::Time::now();
+  workspace_parameters_.header.stamp = node_->now();
   workspace_parameters_.min_corner.x = minx;
   workspace_parameters_.min_corner.y = miny;
   workspace_parameters_.min_corner.z = minz;
@@ -281,7 +270,7 @@ void PlanningComponent::unsetWorkspace()
   workspace_parameters_set_ = false;
 }
 
-bool PlanningComponent::setGoal(const std::vector<moveit_msgs::Constraints>& goal_constraints)
+bool PlanningComponent::setGoal(const std::vector<moveit_msgs::msg::Constraints>& goal_constraints)
 {
   current_goal_constraints_ = goal_constraints;
   return true;
@@ -293,7 +282,7 @@ bool PlanningComponent::setGoal(const robot_state::RobotState& goal_state)
   return true;
 }
 
-bool PlanningComponent::setGoal(const geometry_msgs::PoseStamped& goal_pose, const std::string& link_name)
+bool PlanningComponent::setGoal(const geometry_msgs::msg::PoseStamped& goal_pose, const std::string& link_name)
 {
   current_goal_constraints_ = { kinematic_constraints::constructGoalConstraints(link_name, goal_pose) };
   return true;
@@ -304,7 +293,7 @@ bool PlanningComponent::setGoal(const std::string& goal_state_name)
   const auto& named_targets = getNamedTargetStates();
   if (std::find(named_targets.begin(), named_targets.end(), goal_state_name) == named_targets.end())
   {
-    ROS_ERROR_NAMED(LOGNAME, "No predefined joint state found for target name '%s'", goal_state_name.c_str());
+    RCLCPP_ERROR(LOGGER, "No predefined joint state found for target name '%s'", goal_state_name.c_str());
     return false;
   }
   robot_state::RobotState goal_state(moveit_cpp_->getRobotModel());
@@ -316,7 +305,7 @@ bool PlanningComponent::execute(bool blocking)
 {
   if (!last_plan_solution_)
   {
-    ROS_ERROR_NAMED(LOGNAME, "There is no successfull plan to execute");
+    RCLCPP_ERROR(LOGGER, "There is no successfull plan to execute");
     return false;
   }
 
@@ -325,7 +314,7 @@ bool PlanningComponent::execute(bool blocking)
   // if (!totg.computeTimeStamps(*last_solution_trajectory_, max_velocity_scaling_factor_,
   // max_acceleration_scaling_factor_))
   //{
-  //  ROS_ERROR("Failed to parameterize trajectory");
+  //  RCLCPP_ERROR("Failed to parameterize trajectory");
   //  return false;
   //}
   return moveit_cpp_->execute(group_name_, last_plan_solution_->trajectory, blocking);

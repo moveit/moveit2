@@ -50,7 +50,7 @@ namespace moveit
 {
 namespace planning_interface
 {
-MOVEIT_CLASS_FORWARD(MoveItCpp);
+MOVEIT_CLASS_FORWARD(MoveItCpp)
 
 class MoveItCpp
 {
@@ -58,20 +58,20 @@ public:
   /// Specification of options to use when constructing the MoveItCpp class
   struct PlanningSceneMonitorOptions
   {
-    void load(const ros::NodeHandle& nh)
+    void load(const rclcpp::Node::SharedPtr& node)
     {
-      std::string ns = "planning_scene_monitor_options/";
-      nh.param<std::string>(ns + "name", name, "planning_scene_monitor");
-      nh.param<std::string>(ns + "robot_description", robot_description, "robot_description");
-      nh.param(ns + "joint_state_topic", joint_state_topic,
-               planning_scene_monitor::PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC);
-      nh.param(ns + "attached_collision_object_topic", attached_collision_object_topic,
-               planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC);
-      nh.param(ns + "monitored_planning_scene_topic", monitored_planning_scene_topic,
-               planning_scene_monitor::PlanningSceneMonitor::MONITORED_PLANNING_SCENE_TOPIC);
-      nh.param(ns + "publish_planning_scene_topic", publish_planning_scene_topic,
-               planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC);
-      nh.param<double>(ns + "wait_for_initial_state_timeout", wait_for_initial_state_timeout, 0.0);
+      const std::string ns = "planning_scene_monitor_options.";
+      node->get_parameter_or(ns + "name", name, std::string("planning_scene_monitor"));
+      node->get_parameter_or(ns + "robot_description", robot_description, std::string("robot_description"));
+      node->get_parameter_or(ns + "joint_state_topic", joint_state_topic,
+                             planning_scene_monitor::PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC);
+      node->get_parameter_or(ns + "attached_collision_object_topic", attached_collision_object_topic,
+                             planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC);
+      node->get_parameter_or(ns + "monitored_planning_scene_topic", monitored_planning_scene_topic,
+                             planning_scene_monitor::PlanningSceneMonitor::MONITORED_PLANNING_SCENE_TOPIC);
+      node->get_parameter_or(ns + "publish_planning_scene_topic", publish_planning_scene_topic,
+                             planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC);
+      node->get_parameter_or(ns + "wait_for_initial_state_timeout", wait_for_initial_state_timeout, 0.0);
     }
     std::string name;
     std::string robot_description;
@@ -85,11 +85,11 @@ public:
   /// struct contains the the variables used for loading the planning pipeline
   struct PlanningPipelineOptions
   {
-    void load(const ros::NodeHandle& nh)
+    void load(const rclcpp::Node::SharedPtr& node)
     {
-      std::string ns = "planning_pipelines/";
-      nh.getParam(ns + "pipeline_names", pipeline_names);
-      nh.getParam(ns + "namespace", parent_namespace);
+      const std::string ns = "planning_pipelines.";
+      node->get_parameter(ns + "pipeline_names", pipeline_names);
+      node->get_parameter(ns + "namespace", parent_namespace);
     }
     std::vector<std::string> pipeline_names;
     std::string parent_namespace;
@@ -98,10 +98,10 @@ public:
   /// Parameter container for initializing MoveItCpp
   struct Options
   {
-    Options(const ros::NodeHandle& nh)
+    Options(const rclcpp::Node::SharedPtr& node)
     {
-      planning_scene_monitor_options.load(nh);
-      planning_pipeline_options.load(nh);
+      planning_scene_monitor_options.load(node);
+      planning_pipeline_options.load(node);
     }
 
     PlanningSceneMonitorOptions planning_scene_monitor_options;
@@ -109,8 +109,9 @@ public:
   };
 
   /** \brief Constructor */
-  MoveItCpp(const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = {});
-  MoveItCpp(const Options& options, const ros::NodeHandle& nh, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = {});
+  MoveItCpp(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = {});
+  MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options,
+            const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = {});
 
   /**
    * @brief This class owns unique resources (e.g. action clients, threads) and its not very
@@ -129,8 +130,8 @@ public:
   /** \brief Get the RobotModel object. */
   robot_model::RobotModelConstPtr getRobotModel() const;
 
-  /** \brief Get the ROS node handle of this instance operates on */
-  const ros::NodeHandle& getNodeHandle() const;
+  /** \brief Get the ROS node this instance operates on */
+  const rclcpp::Node::SharedPtr& getNode() const;
 
   /** \brief Get the current state queried from the current state monitor
       \param wait_seconds the time in seconds for the state monitor to wait for a robot state. */
@@ -162,15 +163,15 @@ public:
   bool execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
                bool blocking = true);
 
-protected:
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
-
 private:
   //  Core properties and instances
-  ros::NodeHandle node_handle_;
+  rclcpp::Node::SharedPtr node_;
   robot_model::RobotModelConstPtr robot_model_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+
+  // TF
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
   // Planning
   std::map<std::string, planning_pipeline::PlanningPipelinePtr> planning_pipelines_;

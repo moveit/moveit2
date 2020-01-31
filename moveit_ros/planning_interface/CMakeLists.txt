@@ -23,21 +23,21 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclpy REQUIRED)
 
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" REQUIRED)
+# find_package(PythonInterp REQUIRED)
+# find_package(PythonLibs "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" REQUIRED)
 
 find_package(Boost REQUIRED)
-if(Boost_VERSION LESS 106700)
-  set(BOOST_PYTHON_COMPONENT python)
-elseif()
-  set(BOOST_PYTHON_COMPONENT python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
-endif()
+#if(Boost_VERSION LESS 106700)
+#  set(BOOST_PYTHON_COMPONENT python)
+#elseif()
+#  set(BOOST_PYTHON_COMPONENT python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
+#endif()
 
 find_package(Boost REQUIRED COMPONENTS
   date_time
   filesystem
   program_options
-  ${BOOST_PYTHON_COMPONENT}
+  #${BOOST_PYTHON_COMPONENT}
   system
   thread
 )
@@ -49,11 +49,32 @@ set(THIS_PACKAGE_INCLUDE_DIRS
   common_planning_interface_objects/include
 #  planning_scene_interface/include
 #  move_group_interface/include
-#  moveit_cpp/include
+  moveit_cpp/include
 )
 
-# catkin_python_setup()
+set(THIS_PACKAGE_LIBRARIES
+#  moveit_common_planning_interface_objects
+#  moveit_planning_scene_interface
+#  moveit_move_group_interface
+  moveit_cpp
+)
 
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+  geometry_msgs
+  moveit_msgs
+  moveit_ros_planning
+#  moveit_ros_warehouse
+#  moveit_ros_manipulation
+#  moveit_ros_move_group
+  tf2
+  tf2_eigen
+  tf2_geometry_msgs
+  tf2_ros
+  rclcpp
+  rclcpp_action
+  Eigen3
+  Boost
+)
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
@@ -63,21 +84,10 @@ add_subdirectory(common_planning_interface_objects)
 # add_subdirectory(move_group_interface)
 # add_subdirectory(robot_interface)
 # add_subdirectory(test)
-# add_subdirectory(moveit_cpp)
+add_subdirectory(moveit_cpp)
 
 ament_export_include_directories(include)
-ament_export_dependencies(moveit_msgs)
-ament_export_dependencies(moveit_ros_planning)
-ament_export_dependencies(geometry_msgs)
-ament_export_dependencies(tf2)
-ament_export_dependencies(tf2_eigen)
-ament_export_dependencies(tf2_geometry_msgs)
-ament_export_dependencies(tf2_ros)
-ament_export_dependencies(rclcpp)
-ament_export_dependencies(rclcpp_action)
-ament_export_dependencies(rclpy)
-ament_export_dependencies(PythonInterp)
-ament_export_dependencies(PythonLibs)
-ament_export_dependencies(Eigen3)
-ament_export_dependencies(Boost)
+ament_export_libraries(${THIS_PACKAGE_LIBRARIES})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+
 ament_package()
