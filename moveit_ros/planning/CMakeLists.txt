@@ -54,6 +54,17 @@ set(libraries
 
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
+  Boost
+  pluginlib
+  rclcpp
+  message_filters
+  srdfdom
+  urdf
+  tf2
+  tf2_eigen
+  tf2_ros
+  Eigen3
+  moveit_ros_occupancy_map_monitor
   moveit_core
   # moveit_ros_perception
   moveit_msgs
