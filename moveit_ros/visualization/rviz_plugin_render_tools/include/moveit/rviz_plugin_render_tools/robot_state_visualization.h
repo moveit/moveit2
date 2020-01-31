@@ -42,7 +42,7 @@
 #include <moveit/macros/diagnostics.h>
 DIAGNOSTIC_PUSH
 SILENT_UNUSED_PARAM
-#include <rviz/robot/robot.h>
+#include <rviz_default_plugins/robot/robot.hpp>
 DIAGNOSTIC_POP
 
 namespace moveit_rviz_plugin
@@ -54,10 +54,10 @@ MOVEIT_CLASS_FORWARD(RobotStateVisualization)
 class RobotStateVisualization
 {
 public:
-  RobotStateVisualization(Ogre::SceneNode* root_node, rviz::DisplayContext* context, const std::string& name,
-                          rviz::Property* parent_property);
+  RobotStateVisualization(Ogre::SceneNode* root_node, rviz_common::DisplayContext* context, const std::string& name,
+                          rviz_common::properties::Property* parent_property);
 
-  rviz::Robot& getRobot()
+  rviz_default_plugins::robot::Robot& getRobot()
   {
     return robot_;
   }
@@ -67,13 +67,13 @@ public:
 
   void update(const robot_state::RobotStateConstPtr& kinematic_state);
   void update(const robot_state::RobotStateConstPtr& kinematic_state,
-              const std_msgs::ColorRGBA& default_attached_object_color);
+              const std_msgs::msg::ColorRGBA& default_attached_object_color);
   void update(const robot_state::RobotStateConstPtr& kinematic_state,
-              const std_msgs::ColorRGBA& default_attached_object_color,
-              const std::map<std::string, std_msgs::ColorRGBA>& color_map);
-  void setDefaultAttachedObjectColor(const std_msgs::ColorRGBA& default_attached_object_color);
+              const std_msgs::msg::ColorRGBA& default_attached_object_color,
+              const std::map<std::string, std_msgs::msg::ColorRGBA>& color_map);
+  void setDefaultAttachedObjectColor(const std_msgs::msg::ColorRGBA& default_attached_object_color);
   /// update color of all attached object shapes
-  void updateAttachedObjectColors(const std_msgs::ColorRGBA& attached_object_color);
+  void updateAttachedObjectColors(const std_msgs::msg::ColorRGBA& attached_object_color);
 
   bool isVisible() const
   {
@@ -102,11 +102,11 @@ public:
 
 private:
   void updateHelper(const robot_state::RobotStateConstPtr& kinematic_state,
-                    const std_msgs::ColorRGBA& default_attached_object_color,
-                    const std::map<std::string, std_msgs::ColorRGBA>* color_map);
-  rviz::Robot robot_;
+                    const std_msgs::msg::ColorRGBA& default_attached_object_color,
+                    const std::map<std::string, std_msgs::msg::ColorRGBA>* color_map);
+  rviz_default_plugins::robot::Robot robot_;
   RenderShapesPtr render_shapes_;
-  std_msgs::ColorRGBA default_attached_object_color_;
+  std_msgs::msg::ColorRGBA default_attached_object_color_;
   OctreeVoxelRenderMode octree_voxel_render_mode_;
   OctreeVoxelColorMode octree_voxel_color_mode_;
 

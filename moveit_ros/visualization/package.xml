@@ -17,7 +17,7 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>pkg-config</buildtool_depend>
 
   <build_depend>class_loader</build_depend>
@@ -28,21 +28,22 @@
 
   <depend>geometric_shapes</depend>
   <depend>interactive_markers</depend>
-  <depend>moveit_ros_robot_interaction</depend>
-  <depend>moveit_ros_perception</depend>
+  <!-- TODO(JafarAbdi): uncomment after porting moveit_ros_robot_interaction -->
+  <!--depend>moveit_ros_robot_interaction</depend-->
+  <!-- TODO(JafarAbdi): uncomment after porting moveit_ros_perception -->
+  <!--depend>moveit_ros_perception</depend-->
   <depend>moveit_ros_planning_interface</depend>
-  <depend>moveit_ros_warehouse</depend>
+  <!-- TODO(JafarAbdi): uncomment after porting moveit_ros_warehouse -->
+  <!--depend>moveit_ros_warehouse</depend-->
   <depend>object_recognition_msgs</depend>
   <depend version_gte="1.11.2">pluginlib</depend>
-  <depend>rosconsole</depend>
-  <depend>roscpp</depend>
-  <depend>rospy</depend>
-  <depend>rviz</depend>
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
+  <depend>rviz2</depend>
   <depend>tf2_eigen</depend>
 
-  <test_depend>rostest</test_depend>
-
   <export>
+    <build_type>ament_cmake</build_type>
     <rviz plugin="${prefix}/robot_state_rviz_plugin_description.xml"/>
     <rviz plugin="${prefix}/planning_scene_rviz_plugin_description.xml"/>
     <rviz plugin="${prefix}/motion_planning_rviz_plugin_description.xml"/>

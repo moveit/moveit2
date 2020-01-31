@@ -42,15 +42,13 @@
 #include <OgreSceneManager.h>
 #include <OgreManualObject.h>
 #include <OgreMaterialManager.h>
-
-#include <rviz/ogre_helpers/shape.h>
-#include <rviz/ogre_helpers/mesh_shape.h>
-
+#include <rviz_rendering/objects/shape.hpp>
+#include <ogre_helpers/mesh_shape.hpp>
 #include <moveit/macros/diagnostics.h>
 DIAGNOSTIC_PUSH
 SILENT_UNUSED_PARAM
-#include <rviz/display_context.h>
-#include <rviz/robot/robot.h>
+#include <rviz_common/display_context.hpp>
+#include <rviz_default_plugins/robot/robot.hpp>
 DIAGNOSTIC_POP
 
 #include <boost/lexical_cast.hpp>
@@ -60,7 +58,7 @@ DIAGNOSTIC_POP
 
 namespace moveit_rviz_plugin
 {
-RenderShapes::RenderShapes(rviz::DisplayContext* context) : context_(context)
+RenderShapes::RenderShapes(rviz_common::DisplayContext* context) : context_(context)
 {
 }
 
@@ -77,9 +75,9 @@ void RenderShapes::clear()
 
 void RenderShapes::renderShape(Ogre::SceneNode* node, const shapes::Shape* s, const Eigen::Isometry3d& p,
                                OctreeVoxelRenderMode octree_voxel_rendering, OctreeVoxelColorMode octree_color_mode,
-                               const rviz::Color& color, float alpha)
+                               const Ogre::ColourValue& color, float alpha)
 {
-  rviz::Shape* ogre_shape = nullptr;
+  rviz_rendering::Shape* ogre_shape = nullptr;
   Eigen::Vector3d translation = p.translation();
   Ogre::Vector3 position(translation.x(), translation.y(), translation.z());
   Eigen::Quaterniond q(p.rotation());
@@ -98,21 +96,21 @@ void RenderShapes::renderShape(Ogre::SceneNode* node, const shapes::Shape* s, co
   {
     case shapes::SPHERE:
     {
-      ogre_shape = new rviz::Shape(rviz::Shape::Sphere, context_->getSceneManager(), node);
+      ogre_shape = new rviz_rendering::Shape(rviz_rendering::Shape::Sphere, context_->getSceneManager(), node);
       double d = 2.0 * static_cast<const shapes::Sphere*>(s)->radius;
       ogre_shape->setScale(Ogre::Vector3(d, d, d));
     }
     break;
     case shapes::BOX:
     {
-      ogre_shape = new rviz::Shape(rviz::Shape::Cube, context_->getSceneManager(), node);
+      ogre_shape = new rviz_rendering::Shape(rviz_rendering::Shape::Cube, context_->getSceneManager(), node);
       const double* sz = static_cast<const shapes::Box*>(s)->size;
       ogre_shape->setScale(Ogre::Vector3(sz[0], sz[1], sz[2]));
     }
     break;
     case shapes::CYLINDER:
     {
-      ogre_shape = new rviz::Shape(rviz::Shape::Cylinder, context_->getSceneManager(), node);
+      ogre_shape = new rviz_rendering::Shape(rviz_rendering::Shape::Cylinder, context_->getSceneManager(), node);
       double d = 2.0 * static_cast<const shapes::Cylinder*>(s)->radius;
       double z = static_cast<const shapes::Cylinder*>(s)->length;
       ogre_shape->setScale(Ogre::Vector3(d, z, d));  // the shape has z as major axis, but the rendered cylinder has y
@@ -124,7 +122,7 @@ void RenderShapes::renderShape(Ogre::SceneNode* node, const shapes::Shape* s, co
       const shapes::Mesh* mesh = static_cast<const shapes::Mesh*>(s);
       if (mesh->triangle_count > 0)
       {
-        rviz::MeshShape* m = new rviz::MeshShape(context_->getSceneManager(), node);
+        rviz_rendering::MeshShape* m = new rviz_rendering::MeshShape(context_->getSceneManager(), node);
         ogre_shape = m;
 
         Ogre::Vector3 normal(0.0, 0.0, 0.0);
@@ -174,7 +172,7 @@ void RenderShapes::renderShape(Ogre::SceneNode* node, const shapes::Shape* s, co
 
   if (ogre_shape)
   {
-    ogre_shape->setColor(color.r_, color.g_, color.b_, alpha);
+    ogre_shape->setColor(color);
 
     if (s->type == shapes::CYLINDER)
     {
@@ -193,7 +191,7 @@ void RenderShapes::renderShape(Ogre::SceneNode* node, const shapes::Shape* s, co
 
 void RenderShapes::updateShapeColors(float r, float g, float b, float a)
 {
-  for (const std::unique_ptr<rviz::Shape>& shape : scene_shapes_)
+  for (const std::unique_ptr<rviz_rendering::Shape>& shape : scene_shapes_)
     shape->setColor(r, g, b, a);
 }
 

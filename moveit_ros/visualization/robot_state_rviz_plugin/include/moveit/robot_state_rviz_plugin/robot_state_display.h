@@ -36,35 +36,22 @@
 
 #pragma once
 
-#include <rviz/display.h>
+#include <rviz_common/display.hpp>
+#include <rviz_common/properties/string_property.hpp>
+#include <rviz_common/properties/ros_topic_property.hpp>
 
 #ifndef Q_MOC_RUN
 #include <moveit/rdf_loader/rdf_loader.h>
 #include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
 #include <moveit_msgs/msg/display_robot_state.hpp>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #endif
-
-namespace Ogre
-{
-class SceneNode;
-}
-
-namespace rviz
-{
-class Robot;
-class StringProperty;
-class BoolProperty;
-class FloatProperty;
-class RosTopicProperty;
-class ColorProperty;
-}
 
 namespace moveit_rviz_plugin
 {
 class RobotStateVisualization;
 
-class RobotStateDisplay : public rviz::Display
+class RobotStateDisplay : public rviz_common::Display
 {
   Q_OBJECT
 
@@ -109,13 +96,13 @@ protected:
    */
   void calculateOffsetPosition();
 
-  void setLinkColor(rviz::Robot* robot, const std::string& link_name, const QColor& color);
-  void unsetLinkColor(rviz::Robot* robot, const std::string& link_name);
+  void setLinkColor(rviz_default_plugins::robot::Robot* robot, const std::string& link_name, const QColor& color);
+  void unsetLinkColor(rviz_default_plugins::robot::Robot* robot, const std::string& link_name);
 
-  void newRobotStateCallback(const moveit_msgs::msg::DisplayRobotState::ConstPtr& state);
+  void newRobotStateCallback(const moveit_msgs::msg::DisplayRobotState::ConstSharedPtr state);
 
   void setRobotHighlights(const moveit_msgs::msg::DisplayRobotState::_highlight_links_type& highlight_links);
-  void setHighlight(const std::string& link_name, const std_msgs::ColorRGBA& color);
+  void setHighlight(const std::string& link_name, const std_msgs::msg::ColorRGBA& color);
   void unsetHighlight(const std::string& link_name);
 
   // overrides from Display
@@ -125,26 +112,26 @@ protected:
   void fixedFrameChanged() override;
 
   // render the robot
-  ros::NodeHandle root_nh_;
-  ros::Subscriber robot_state_subscriber_;
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Subscription<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_subscriber_;
 
   RobotStateVisualizationPtr robot_;
   rdf_loader::RDFLoaderPtr rdf_loader_;
   robot_model::RobotModelConstPtr robot_model_;
   robot_state::RobotStatePtr robot_state_;
-  std::map<std::string, std_msgs::ColorRGBA> highlights_;
+  std::map<std::string, std_msgs::msg::ColorRGBA> highlights_;
   bool update_state_;
   bool load_robot_model_;  // for delayed robot initialization
 
-  rviz::StringProperty* robot_description_property_;
-  rviz::StringProperty* root_link_name_property_;
-  rviz::RosTopicProperty* robot_state_topic_property_;
-  rviz::FloatProperty* robot_alpha_property_;
-  rviz::ColorProperty* attached_body_color_property_;
-  rviz::BoolProperty* enable_link_highlight_;
-  rviz::BoolProperty* enable_visual_visible_;
-  rviz::BoolProperty* enable_collision_visible_;
-  rviz::BoolProperty* show_all_links_;
+  rviz_common::properties::StringProperty* robot_description_property_;
+  rviz_common::properties::StringProperty* root_link_name_property_;
+  rviz_common::properties::RosTopicProperty* robot_state_topic_property_;
+  rviz_common::properties::FloatProperty* robot_alpha_property_;
+  rviz_common::properties::ColorProperty* attached_body_color_property_;
+  rviz_common::properties::BoolProperty* enable_link_highlight_;
+  rviz_common::properties::BoolProperty* enable_visual_visible_;
+  rviz_common::properties::BoolProperty* enable_collision_visible_;
+  rviz_common::properties::BoolProperty* show_all_links_;
 };
 
 }  // namespace moveit_rviz_plugin

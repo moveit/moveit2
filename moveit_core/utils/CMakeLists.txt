@@ -3,6 +3,7 @@ set(MOVEIT_LIB_NAME moveit_utils)
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/lexical_casts.cpp
   src/message_checks.cpp
+  src/rclcpp_utils.cpp
 )
 
 ament_target_dependencies(${MOVEIT_LIB_NAME} Boost moveit_msgs)

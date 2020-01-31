@@ -39,14 +39,14 @@
 #include <moveit/macros/diagnostics.h>
 DIAGNOSTIC_PUSH
 SILENT_UNUSED_PARAM
-#include <rviz/robot/link_updater.h>
+#include <rviz_default_plugins/robot/link_updater.hpp>
 DIAGNOSTIC_POP
 #include <moveit/robot_state/robot_state.h>
 
 namespace moveit_rviz_plugin
 {
 /** \brief Update the links of an rviz::Robot using a robot_state::RobotState */
-class PlanningLinkUpdater : public rviz::LinkUpdater
+class PlanningLinkUpdater : public rviz_default_plugins::robot::LinkUpdater
 {
 public:
   PlanningLinkUpdater(const robot_state::RobotStateConstPtr& state) : kinematic_state_(state)
