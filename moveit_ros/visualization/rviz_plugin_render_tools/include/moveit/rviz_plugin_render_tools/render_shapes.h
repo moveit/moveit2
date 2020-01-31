@@ -39,21 +39,13 @@
 #include <moveit/rviz_plugin_render_tools/octomap_render.h>
 #include <moveit/macros/class_forward.h>
 #include <geometric_shapes/shapes.h>
-#include <rviz/helpers/color.h>
+#include <rviz_common/properties/color_property.hpp>
+#include <rviz_common/display_context.hpp>
+#include <rviz_rendering/objects/shape.hpp>
+#include <OgreColourValue.h>
 #include <Eigen/Geometry>
 #include <string>
 #include <memory>
-
-namespace Ogre
-{
-class SceneNode;
-}
-
-namespace rviz
-{
-class DisplayContext;
-class Shape;
-}
 
 namespace moveit_rviz_plugin
 {
@@ -63,19 +55,19 @@ MOVEIT_CLASS_FORWARD(RenderShapes)
 class RenderShapes
 {
 public:
-  RenderShapes(rviz::DisplayContext* context);
+  RenderShapes(rviz_common::DisplayContext* context);
   ~RenderShapes();
 
   void renderShape(Ogre::SceneNode* node, const shapes::Shape* s, const Eigen::Isometry3d& p,
                    OctreeVoxelRenderMode octree_voxel_rendering, OctreeVoxelColorMode octree_color_mode,
-                   const rviz::Color& color, float alpha);
+                   const Ogre::ColourValue& color, float alpha);
   void updateShapeColors(float r, float g, float b, float a);
   void clear();
 
 private:
-  rviz::DisplayContext* context_;
+  rviz_common::DisplayContext* context_;
 
-  std::vector<std::unique_ptr<rviz::Shape> > scene_shapes_;
+  std::vector<std::unique_ptr<rviz_rendering::Shape> > scene_shapes_;
   std::vector<OcTreeRenderPtr> octree_voxel_grids_;
 };
 }

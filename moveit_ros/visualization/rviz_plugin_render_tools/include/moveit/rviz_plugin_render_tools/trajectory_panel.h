@@ -37,10 +37,10 @@
 #pragma once
 
 #ifndef Q_MOC_RUN
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #endif
 
-#include <rviz/panel.h>
+#include <rviz_common/panel.hpp>
 
 #include <QSlider>
 #include <QLabel>
@@ -48,7 +48,7 @@
 
 namespace moveit_rviz_plugin
 {
-class TrajectoryPanel : public rviz::Panel
+class TrajectoryPanel : public rviz_common::Panel
 {
   Q_OBJECT
 
