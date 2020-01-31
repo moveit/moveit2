@@ -31,6 +31,10 @@ repositories:
     type: git
     url: https://github.com/ros-planning/srdfdom
     version: ros2
+  octomap_msgs:
+    type: git
+    url: https://github.com/OctoMap/octomap_msgs
+    version: ros2
 
 # Dependencies with pending PRs
   object_recognition_msgs:
@@ -40,10 +44,3 @@ repositories:
     # version: ros2
     url: https://github.com/PickNikRobotics/object_recognition_msgs
     version: master
-  octomap_msgs:
-    type: git
-    # TODO(henningkayser): use upstream version once #13 is merged
-    # url: https://github.com/OctoMap/octomap_msgs
-    # version: ros2
-    url: https://github.com/PickNikRobotics/octomap_msgs
-    version: ros2
