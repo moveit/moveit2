@@ -35,7 +35,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     planning_pipeline/include
     planning_scene_monitor/include
     trajectory_execution_manager/include
-    # plan_execution/include
+    plan_execution/include
     collision_plugin_loader/include
 )
 
@@ -46,7 +46,7 @@ set(libraries
   moveit_constraint_sampler_manager_loader
   moveit_planning_pipeline
   moveit_trajectory_execution_manager
-  # moveit_plan_execution
+  moveit_plan_execution
   moveit_planning_scene_monitor
   moveit_collision_plugin_loader
   moveit_default_planning_request_adapter_plugins
@@ -91,7 +91,7 @@ add_subdirectory(planning_request_adapter_plugins)
 add_subdirectory(planning_scene_monitor)
 add_subdirectory(planning_components_tools)
 add_subdirectory(trajectory_execution_manager)
-# add_subdirectory(plan_execution)
+add_subdirectory(plan_execution)
 
 ament_export_include_directories(include)
 ament_export_libraries(${libraries})
