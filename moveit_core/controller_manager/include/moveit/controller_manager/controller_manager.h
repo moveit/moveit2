@@ -183,7 +183,7 @@ public:
   {
   }
 
-  virtual void initialize(std::shared_ptr<rclcpp::Node>& node) = 0;
+  virtual void initialize(const rclcpp::Node::SharedPtr& node) = 0;
 
   /** \brief Return a given named controller. */
   virtual MoveItControllerHandlePtr getControllerHandle(const std::string& name) = 0;

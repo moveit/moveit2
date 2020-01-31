@@ -109,7 +109,7 @@ public:
                                                controller_joints_["head"].begin(), controller_joints_["head"].end());
   }
 
-  void initialize(rclcpp::Node::SharedPtr& /* node */) override
+  void initialize(const rclcpp::Node::SharedPtr& /* node */) override
   {
   }
 
