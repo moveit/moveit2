@@ -34,11 +34,17 @@
 
 /* Author: Ioan Sucan */
 
+#include <chrono>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+
+using namespace std::chrono_literals;
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("display_random_state");
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "display_random_state");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("display_random_state");
 
   bool valid = false;
   bool invalid = false;
@@ -56,25 +62,24 @@ int main(int argc, char** argv)
     }
   }
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(node);
 
-  ros::NodeHandle nh;
   robot_model_loader::RobotModelLoader::Options opt;
   opt.robot_description_ = "robot_description";
-  robot_model_loader::RobotModelLoaderPtr rml(new robot_model_loader::RobotModelLoader(opt));
-  planning_scene_monitor::PlanningSceneMonitor psm(rml);
+  robot_model_loader::RobotModelLoaderPtr rml(new robot_model_loader::RobotModelLoader(node, opt));
+  planning_scene_monitor::PlanningSceneMonitor psm(node, rml);
   psm.startWorldGeometryMonitor();
   psm.startSceneMonitor();
-  ros::Publisher pub_scene = nh.advertise<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
+  auto pub_scene = node->create_publisher<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
 
-  ros::Duration(0.5).sleep();
+  rclcpp::sleep_for(500ms);
 
   do
   {
     if (!psm.getPlanningScene())
     {
-      ROS_ERROR("Planning scene did not load properly, exiting...");
+      RCLCPP_ERROR(LOGGER, "Planning scene did not load properly, exiting...");
       break;
     }
 
@@ -133,13 +138,13 @@ int main(int argc, char** argv)
 
       moveit_msgs::msg::PlanningScene psmsg;
       psm.getPlanningScene()->getPlanningSceneMsg(psmsg);
-      pub_scene.publish(psmsg);
+      pub_scene->publish(psmsg);
       std::cout << psm.getPlanningScene()->getCurrentState() << std::endl;
 
-      ros::Duration(1).sleep();
+      rclcpp::sleep_for(1s);
     }
-  } while (nh.ok());
+  } while (rclcpp::ok());
 
-  ros::shutdown();
+  rclcpp::shutdown();
   return 0;
 }

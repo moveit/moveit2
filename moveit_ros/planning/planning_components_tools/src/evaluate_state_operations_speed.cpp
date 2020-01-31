@@ -37,19 +37,23 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/profiler/profiler.h>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
+using namespace std::chrono_literals;
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("evaluate_state_operations_speed");
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "evaluate_state_operations_speed");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("evaluate_state_operations_speed");
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(node);
 
-  robot_model_loader::RobotModelLoader rml(ROBOT_DESCRIPTION);
-  ros::Duration(0.5).sleep();
+  robot_model_loader::RobotModelLoader rml(node, ROBOT_DESCRIPTION);
+  rclcpp::sleep_for(500ms);
 
   robot_model::RobotModelConstPtr robot_model = rml.getModel();
   if (robot_model)
@@ -118,8 +122,9 @@ int main(int argc, char** argv)
     moveit::tools::Profiler::Status();
   }
   else
-    ROS_ERROR("Unable to initialize robot model.");
+    RCLCPP_ERROR(LOGGER, "Unable to initialize robot model.");
 
-  ros::shutdown();
+  executor.spin();
+  rclcpp::shutdown();
   return 0;
 }

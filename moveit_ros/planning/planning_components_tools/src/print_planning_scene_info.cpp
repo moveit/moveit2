@@ -36,29 +36,30 @@
    Desc:   Simple utility to see all the collision objects in a planning scene, including attached
 */
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 // MoveIt
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
-static const std::string LOGNAME = "print_planning_scene_info";
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("print_planning_scene_info");
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "print_model_info_to_console");
+  rclcpp::init(argc, argv);
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  auto node = rclcpp::Node::make_shared("print_scene_info_to_console");
 
-  ros::NodeHandle nh;
-  ROS_INFO_STREAM_NAMED(LOGNAME, "Getting planning scene info to print");
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(node);
+
+  RCLCPP_INFO_STREAM(LOGGER, "Getting planning scene info to print");
 
   // Create planning scene monitor
-  planning_scene_monitor::PlanningSceneMonitor psm(ROBOT_DESCRIPTION);
+  planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (!psm.getPlanningScene())
   {
-    ROS_ERROR_STREAM_NAMED(LOGNAME, "Planning scene not configured");
+    RCLCPP_ERROR_STREAM(LOGGER, "Planning scene not configured");
     return 1;
   }
 

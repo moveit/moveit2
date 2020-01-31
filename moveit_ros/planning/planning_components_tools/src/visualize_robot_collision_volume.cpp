@@ -34,6 +34,7 @@
 
 /* Author: Ioan Sucan */
 
+#include <rclcpp/rclcpp.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <cstdlib>
 #include <tf2_ros/transform_listener.h>
@@ -43,25 +44,24 @@ static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "visualize_robot_collision_volume");
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("visualize_robot_collision_volume");
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(node);
   double radius = 0.02;
   double lifetime = 600.0;
-  ros::NodeHandle nh;
 
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>();
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(node->get_clock());
   std::shared_ptr<tf2_ros::TransformListener> tf_listener =
-      std::make_shared<tf2_ros::TransformListener>(*tf_buffer, nh);
-  planning_scene_monitor::PlanningSceneMonitor psm(ROBOT_DESCRIPTION, tf_buffer);
+      std::make_shared<tf2_ros::TransformListener>(*tf_buffer, node);
+  planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION, tf_buffer);
   if (psm.getPlanningScene())
   {
     psm.startWorldGeometryMonitor();
     psm.startSceneMonitor();
     psm.startStateMonitor();
-    ros::Publisher pub_markers = nh.advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 10);
+    auto pub_markers = node->create_publisher<visualization_msgs::msg::MarkerArray>("visualization_marker_array", 10);
     std::cout << "\nListening for planning scene...\nType the number of spheres to generate and press Enter: "
               << std::endl;
     int num_spheres;
@@ -72,13 +72,13 @@ int main(int argc, char** argv)
     scene->getCurrentState().computeAABB(aabb);
 
     // publish the bounding box
-    visualization_msgs::Marker mk;
-    mk.header.stamp = ros::Time::now();
+    visualization_msgs::msg::Marker mk;
+    mk.header.stamp = node->now();
     mk.header.frame_id = scene->getPlanningFrame();
     mk.ns = "bounding_box";
     mk.id = 0;
-    mk.type = visualization_msgs::Marker::CUBE;
-    mk.action = visualization_msgs::Marker::ADD;
+    mk.type = visualization_msgs::msg::Marker::CUBE;
+    mk.action = visualization_msgs::msg::Marker::ADD;
     mk.pose.position.x = (aabb[0] + aabb[1]) / 2.0;
     mk.pose.position.y = (aabb[2] + aabb[3]) / 2.0;
     mk.pose.position.z = (aabb[4] + aabb[5]) / 2.0;
@@ -90,10 +90,10 @@ int main(int argc, char** argv)
     mk.color.g = 0.5f;
     mk.color.b = 1.0f;
     mk.color.a = 0.3f;
-    mk.lifetime = ros::Duration(lifetime);
-    visualization_msgs::MarkerArray arr;
+    mk.lifetime = rclcpp::Duration(lifetime);
+    visualization_msgs::msg::MarkerArray arr;
     arr.markers.push_back(mk);
-    pub_markers.publish(arr);
+    pub_markers->publish(arr);
 
     Eigen::Isometry3d t;
     t.setIdentity();
@@ -102,7 +102,7 @@ int main(int argc, char** argv)
     random_numbers::RandomNumberGenerator rng;
     collision_detection::CollisionRequest req;
 
-    std_msgs::ColorRGBA color;
+    std_msgs::msg::ColorRGBA color;
     color.r = 1.0f;
     color.g = 0.0f;
     color.b = 0.0f;
@@ -124,29 +124,29 @@ int main(int argc, char** argv)
           arr.markers.clear();
           for (std::size_t k = published; k < points.size(); ++k)
           {
-            visualization_msgs::Marker mk;
-            mk.header.stamp = ros::Time::now();
+            visualization_msgs::msg::Marker mk;
+            mk.header.stamp = node->now();
             mk.header.frame_id = scene->getPlanningFrame();
             mk.ns = "colliding";
             mk.id = k;
-            mk.type = visualization_msgs::Marker::SPHERE;
-            mk.action = visualization_msgs::Marker::ADD;
+            mk.type = visualization_msgs::msg::Marker::SPHERE;
+            mk.action = visualization_msgs::msg::Marker::ADD;
             mk.pose.position.x = points[k].x();
             mk.pose.position.y = points[k].y();
             mk.pose.position.z = points[k].z();
             mk.pose.orientation.w = 1.0;
             mk.scale.x = mk.scale.y = mk.scale.z = radius;
             mk.color = color;
-            mk.lifetime = ros::Duration(lifetime);
+            mk.lifetime = rclcpp::Duration(lifetime);
             arr.markers.push_back(mk);
-            pub_markers.publish(arr);
+            pub_markers->publish(arr);
           }
-          pub_markers.publish(arr);
+          pub_markers->publish(arr);
           published = points.size();
         }
       }
     }
   }
-
+  executor.spin();
   return 0;
 }

@@ -34,11 +34,17 @@
 
 /* Author: Ioan Sucan */
 
+#include <chrono>
+#include <rclcpp/rclcpp.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+
+using namespace std::chrono_literals;
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("publish_scene_from_text");
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "publish_planning_scene", ros::init_options::AnonymousName);
+  rclcpp::init(argc, argv);
+  auto node = rclcpp::Node::make_shared("publish_planning_scene");
 
   // decide whether to publish the full scene
   bool full_scene = false;
@@ -54,49 +60,50 @@ int main(int argc, char** argv)
 
   if (argc > 1)
   {
-    ros::AsyncSpinner spinner(1);
-    spinner.start();
+    rclcpp::executors::MultiThreadedExecutor executor;
+    executor.add_node(node);
 
-    ros::NodeHandle nh;
-    ros::Publisher pub_scene;
+    rclcpp::Publisher<moveit_msgs::msg::PlanningScene>::SharedPtr pub_scene;
+    rclcpp::Publisher<moveit_msgs::msg::PlanningSceneWorld>::SharedPtr pub_world_scene;
+
     if (full_scene)
-      pub_scene = nh.advertise<moveit_msgs::msg::PlanningScene>(
+      pub_scene = node->create_publisher<moveit_msgs::msg::PlanningScene>(
           planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC, 1);
     else
-      pub_scene = nh.advertise<moveit_msgs::msg::PlanningSceneWorld>(
+      pub_world_scene = node->create_publisher<moveit_msgs::msg::PlanningSceneWorld>(
           planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_WORLD_TOPIC, 1);
 
     robot_model_loader::RobotModelLoader::Options opt;
     opt.robot_description_ = "robot_description";
     opt.load_kinematics_solvers_ = false;
-    robot_model_loader::RobotModelLoaderPtr rml(new robot_model_loader::RobotModelLoader(opt));
+    robot_model_loader::RobotModelLoaderPtr rml(new robot_model_loader::RobotModelLoader(node, opt));
     planning_scene::PlanningScene ps(rml->getModel());
 
     std::ifstream f(argv[filename_index]);
     if (ps.loadGeometryFromStream(f))
     {
-      ROS_INFO("Publishing geometry from '%s' ...", argv[filename_index]);
+      RCLCPP_INFO(LOGGER, "Publishing geometry from '%s' ...", argv[filename_index]);
       moveit_msgs::msg::PlanningScene ps_msg;
       ps.getPlanningSceneMsg(ps_msg);
       ps_msg.is_diff = true;
 
-      ros::WallDuration dt(0.5);
       unsigned int attempts = 0;
-      while (pub_scene.getNumSubscribers() < 1 && ++attempts < 100)
-        dt.sleep();
+      while (pub_scene->get_subscription_count() < 1 && ++attempts < 100)
+        rclcpp::sleep_for(500ms);
 
       if (full_scene)
-        pub_scene.publish(ps_msg);
+        pub_scene->publish(ps_msg);
       else
-        pub_scene.publish(ps_msg.world);
+        pub_world_scene->publish(ps_msg.world);
 
-      ros::Duration(1).sleep();
+      rclcpp::sleep_for(1s);
     }
   }
   else
-    ROS_WARN("A filename was expected as argument. That file should be a text representation of the geometry in a "
-             "planning scene.");
+    RCLCPP_WARN(LOGGER,
+                "A filename was expected as argument. That file should be a text representation of the geometry in a "
+                "planning scene.");
 
-  ros::shutdown();
+  rclcpp::shutdown();
   return 0;
 }
