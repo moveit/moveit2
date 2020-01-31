@@ -17,10 +17,6 @@ find_package(pluginlib REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(ompl REQUIRED)
 
-# TODO(henningkayser): replace dynamic_reconfigure
-#dynamic_reconfigure
-#generate_dynamic_reconfigure_options("ompl_interface/cfg/OMPLDynamicReconfigure.cfg")
-
 include_directories(ompl_interface/include
                     ${Boost_INCLUDE_DIRS}
                     ${catkin_INCLUDE_DIRS}
