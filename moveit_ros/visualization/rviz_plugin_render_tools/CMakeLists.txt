@@ -8,6 +8,7 @@ set(HEADERS
   include/moveit/rviz_plugin_render_tools/robot_state_visualization.h
   include/moveit/rviz_plugin_render_tools/trajectory_visualization.h
   include/moveit/rviz_plugin_render_tools/trajectory_panel.h
+  include/ogre_helpers/mesh_shape.hpp
 )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -20,7 +21,7 @@ add_library(${MOVEIT_LIB_NAME}
   src/octomap_render.cpp
   src/trajectory_visualization.cpp
   src/trajectory_panel.cpp
-  ${HEADERS}
+  src/mesh_shape.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
