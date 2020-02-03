@@ -50,19 +50,21 @@ const std::string planning_pipeline::PlanningPipeline::MOTION_CONTACTS_TOPIC = "
 
 planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotModelConstPtr& model,
                                                       const std::shared_ptr<rclcpp::Node> node,
+                                                      const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_param_name,
                                                       const std::string& adapter_plugins_param_name)
-  : node_(node), robot_model_(model)
+  : node_(node), parameter_namespace_(parameter_namespace), robot_model_(model)
 {
   auto planner_plugin_params = std::make_shared<rclcpp::SyncParametersClient>(node);
 
-  if (planner_plugin_params->has_parameter({ planner_plugin_param_name }))
-    planner_plugin_name_ = node_->get_parameter(planner_plugin_param_name).get_value<std::string>();
+  if (planner_plugin_params->has_parameter(parameter_namespace_ + "." + planner_plugin_param_name))
+    planner_plugin_name_ =
+        node_->get_parameter(parameter_namespace_ + "." + planner_plugin_param_name).get_value<std::string>();
 
   std::string adapters;
-  if (planner_plugin_params->has_parameter({ adapter_plugins_param_name }))
+  if (planner_plugin_params->has_parameter(parameter_namespace_ + "." + adapter_plugins_param_name))
   {
-    adapters = node_->get_parameter(adapter_plugins_param_name).get_value<std::string>();
+    adapters = node_->get_parameter(parameter_namespace_ + "." + adapter_plugins_param_name).get_value<std::string>();
     boost::char_separator<char> sep(" ");
     boost::tokenizer<boost::char_separator<char> > tok(adapters, sep);
     for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin(); beg != tok.end(); ++beg)
@@ -74,9 +76,11 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotMo
 
 planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotModelConstPtr& model,
                                                       const std::shared_ptr<rclcpp::Node> node,
+                                                      const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_name,
                                                       const std::vector<std::string>& adapter_plugin_names)
   : node_(node)
+  , parameter_namespace_(parameter_namespace)
   , planner_plugin_name_(planner_plugin_name)
   , adapter_plugin_names_(adapter_plugin_names)
   , robot_model_(model)
@@ -124,7 +128,7 @@ void planning_pipeline::PlanningPipeline::configure()
   try
   {
     planner_instance_ = planner_plugin_loader_->createUniqueInstance(planner_plugin_name_);
-    if (!planner_instance_->initialize(robot_model_, node_))
+    if (!planner_instance_->initialize(robot_model_, node_, parameter_namespace_))
       throw std::runtime_error("Unable to initialize planning plugin");
     RCLCPP_INFO(LOGGER, "Using planning interface '%s'", planner_instance_->getDescription().c_str());
   }
@@ -133,7 +137,7 @@ void planning_pipeline::PlanningPipeline::configure()
     std::string classes_str = boost::algorithm::join(classes, ", ");
     RCLCPP_ERROR(LOGGER, "Exception while loading planner '%s': %s"
                          "Available plugins: %s",
-                 planner_plugin_name_, ex.what(), classes_str.c_str());
+                 planner_plugin_name_.c_str(), ex.what(), classes_str.c_str());
   }
 
   // load the planner request adapters
@@ -160,12 +164,12 @@ void planning_pipeline::PlanningPipeline::configure()
         }
         catch (pluginlib::PluginlibException& ex)
         {
-          RCLCPP_ERROR(LOGGER, "Exception while loading planning adapter plugin '%s': %s", adapter_plugin_names_,
+          RCLCPP_ERROR(LOGGER, "Exception while loading planning adapter plugin '%s': %s", adapter_plugin_name.c_str(),
                        ex.what());
         }
         if (ad)
         {
-          ad->initialize(node_);
+          ad->initialize(node_, parameter_namespace_);
           ads.push_back(std::move(ad));
         }
       }
@@ -174,7 +178,7 @@ void planning_pipeline::PlanningPipeline::configure()
       adapter_chain_.reset(new planning_request_adapter::PlanningRequestAdapterChain());
       for (planning_request_adapter::PlanningRequestAdapterConstPtr& ad : ads)
       {
-        RCLCPP_ERROR(LOGGER, "Using planning request adapter '%s'", ad->getDescription());
+        RCLCPP_INFO(LOGGER, "Using planning request adapter '%s'", ad->getDescription().c_str());
         adapter_chain_->addAdapter(ad);
       }
     }

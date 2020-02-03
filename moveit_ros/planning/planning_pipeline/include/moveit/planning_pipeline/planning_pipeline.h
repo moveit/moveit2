@@ -71,24 +71,28 @@ public:
 
   /** \brief Given a robot model (\e model), a node handle (\e nh), initialize the planning pipeline.
       \param model The robot model for which this pipeline is initialized.
-      \param nh The ROS node handle that should be used for reading parameters needed for configuration
+      \param node The ROS node that should be used for reading parameters needed for configuration
+      \param the parameter namespace where the planner configurations are stored
       \param planning_plugin_param_name The name of the ROS parameter under which the name of the planning plugin is
      specified
       \param adapter_plugins_param_name The name of the ROS parameter under which the names of the request adapter
      plugins are specified (plugin names separated by space; order matters)
   */
   PlanningPipeline(const robot_model::RobotModelConstPtr& model, const std::shared_ptr<rclcpp::Node> node,
+                   const std::string& parameter_namespace,
                    const std::string& planning_plugin_param_name = "planning_plugin",
                    const std::string& adapter_plugins_param_name = "request_adapters");
 
   /** \brief Given a robot model (\e model), a node handle (\e nh), initialize the planning pipeline.
       \param model The robot model for which this pipeline is initialized.
-      \param nh The ROS node handle that should be used for reading parameters needed for configuration
+      \param node The ROS node that should be used for reading parameters needed for configuration
+      \param the parameter namespace where the planner configurations are stored
       \param planning_plugin_name The name of the planning plugin to load
       \param adapter_plugins_names The names of the planning request adapter plugins to load
   */
   PlanningPipeline(const robot_model::RobotModelConstPtr& model, const std::shared_ptr<rclcpp::Node> node,
-                   const std::string& planning_plugin_name, const std::vector<std::string>& adapter_plugin_names);
+                   const std::string& parameter_namespace, const std::string& planning_plugin_name,
+                   const std::vector<std::string>& adapter_plugin_names);
 
   /** \brief Pass a flag telling the pipeline whether or not to publish the computed motion plans on DISPLAY_PATH_TOPIC.
    * Default is true. */
@@ -171,6 +175,7 @@ private:
   void configure();
 
   std::shared_ptr<rclcpp::Node> node_;
+  std::string parameter_namespace_;
   /// Flag indicating whether motion plans should be published as a moveit_msgs::msg::DisplayTrajectory
   bool display_computed_motion_plans_;
   rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>::SharedPtr display_path_publisher_;
