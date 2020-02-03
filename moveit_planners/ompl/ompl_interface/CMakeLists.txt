@@ -39,7 +39,7 @@ target_link_libraries(moveit_generate_state_database ${MOVEIT_LIB_NAME})
 set_target_properties(moveit_generate_state_database PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 set_target_properties(moveit_generate_state_database PROPERTIES OUTPUT_NAME "generate_state_database")
 
-add_library(moveit_ompl_planner_plugin src/ompl_planner_manager.cpp)
+add_library(moveit_ompl_planner_plugin SHARED src/ompl_planner_manager.cpp)
 set_target_properties(moveit_ompl_planner_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_ompl_planner_plugin
 	moveit_core
