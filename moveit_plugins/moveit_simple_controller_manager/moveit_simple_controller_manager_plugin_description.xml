@@ -1,4 +1,4 @@
-<library path="libmoveit_simple_controller_manager">
+<library path="moveit_simple_controller_manager">
 
   <class name="moveit_simple_controller_manager/MoveItSimpleControllerManager"
          type="moveit_simple_controller_manager::MoveItSimpleControllerManager"
