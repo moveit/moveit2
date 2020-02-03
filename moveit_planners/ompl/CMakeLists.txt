@@ -24,10 +24,10 @@ include_directories(ompl_interface/include
 
 add_subdirectory(ompl_interface)
 
-pluginlib_export_plugin_description_file(moveit_ompl_interface ompl_interface_plugin_description.xml)
-
 ament_export_include_directories(include)
-ament_export_libraries(moveit_ompl_interface)
+ament_export_libraries(moveit_ompl_interface moveit_ompl_planner_plugin)
 ament_export_dependencies(moveit_core ompl)
+
+pluginlib_export_plugin_description_file(moveit_core ompl_interface_plugin_description.xml)
 
 ament_package()
