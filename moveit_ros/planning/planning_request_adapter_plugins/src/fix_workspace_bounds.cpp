@@ -47,10 +47,10 @@ class FixWorkspaceBounds : public planning_request_adapter::PlanningRequestAdapt
 public:
   static const std::string WBOUNDS_PARAM_NAME;
 
-  void initialize(const rclcpp::Node::SharedPtr& node) override
+  void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     node_ = node;
-    if (!node_->get_parameter(WBOUNDS_PARAM_NAME, workspace_extent_))
+    if (!node_->get_parameter(parameter_namespace + "." + WBOUNDS_PARAM_NAME, workspace_extent_))
     {
       workspace_extent_ = 10.0;
       RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", WBOUNDS_PARAM_NAME.c_str(),

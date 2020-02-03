@@ -62,9 +62,9 @@ public:
   {
   }
 
-  /** \brief Initialize parameters using the passed Node
-      if no initialization is needed, simply implement as empty */
-  virtual void initialize(const rclcpp::Node::SharedPtr& node) = 0;
+  /** \brief Initialize parameters using the passed Node and parameter namespace.
+      If no initialization is needed, simply implement as empty */
+  virtual void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) = 0;
 
   /// Get a short string that identifies the planning request adapter
   virtual std::string getDescription() const

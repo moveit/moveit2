@@ -52,7 +52,7 @@ public:
   {
   }
 
-  void initialize(const rclcpp::Node::SharedPtr& /* node */) override
+  void initialize(const rclcpp::Node::SharedPtr& /* node */, const std::string& /* parameter_namespace */) override
   {
   }
 

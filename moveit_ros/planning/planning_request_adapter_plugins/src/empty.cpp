@@ -54,7 +54,7 @@ public:
     return planner(planning_scene, req, res);
   }
 
-  void initialize(const rclcpp::Node::SharedPtr& /* node */) override
+  void initialize(const rclcpp::Node::SharedPtr& /* node */, const std::string& /* parameter_namespace */) override
   {
   }
 };
