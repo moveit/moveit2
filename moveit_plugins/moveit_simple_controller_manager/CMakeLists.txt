@@ -18,7 +18,7 @@ find_package(rclcpp_action REQUIRED)
 
 include_directories(include)
 
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
   src/moveit_simple_controller_manager.cpp
   src/follow_joint_trajectory_controller_handle.cpp
 )
