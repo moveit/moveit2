@@ -86,8 +86,9 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
   }
 
   // TODO(henningkayser): configure trajectory execution manager
-  trajectory_execution_manager_.reset(new trajectory_execution_manager::TrajectoryExecutionManager(
-      node_, robot_model_, planning_scene_monitor_->getStateMonitor()));
+  // NOTE: disabled for now since action clients fail to find non-existent servers
+  // trajectory_execution_manager_.reset(new trajectory_execution_manager::TrajectoryExecutionManager(
+  //     node_, robot_model_, planning_scene_monitor_->getStateMonitor()));
 
   RCLCPP_INFO(LOGGER, "MoveItCpp running");
 }
@@ -139,11 +140,12 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opti
   }
 
   // Wait for complete state to be recieved
-  if (options.wait_for_initial_state_timeout > 0.0)
-  {
-    return planning_scene_monitor_->getStateMonitor()->waitForCurrentState(node_->now(),
-                                                                           options.wait_for_initial_state_timeout);
-  }
+  // TODO(henningkayser): Fix segfault in waitForCurrentState()
+  // if (options.wait_for_initial_state_timeout > 0.0)
+  // {
+  //   return planning_scene_monitor_->getStateMonitor()->waitForCurrentState(node_->now(),
+  //                                                                          options.wait_for_initial_state_timeout);
+  // }
 
   return true;
 }
