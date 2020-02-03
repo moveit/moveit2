@@ -299,13 +299,13 @@ robot_model::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const s
         for (const srdf::Model::Group& known_group : known_groups)
         {
           std::string base_param_name = known_group.name_;
-          std::string ksolver_param_name = base_param_name + "/kinematics_solver";
+          std::string ksolver_param_name = base_param_name + ".kinematics_solver";
           RCLCPP_DEBUG(LOGGER, "Looking for param %s ", ksolver_param_name.c_str());
           bool found = node_->has_parameter(ksolver_param_name);
           if (!found)
           {
-            base_param_name = robot_description_ + "_kinematics/" + known_group.name_;
-            ksolver_param_name = base_param_name + "/kinematics_solver";
+            base_param_name = robot_description_ + "_kinematics." + known_group.name_;
+            ksolver_param_name = base_param_name + ".kinematics_solver";
             RCLCPP_DEBUG(LOGGER, "Looking for param %s ", ksolver_param_name.c_str());
             found = node_->has_parameter(ksolver_param_name);
           }
