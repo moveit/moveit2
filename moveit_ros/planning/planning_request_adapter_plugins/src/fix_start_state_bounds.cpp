@@ -51,10 +51,10 @@ public:
   static const std::string BOUNDS_PARAM_NAME;
   static const std::string DT_PARAM_NAME;
 
-  void initialize(const rclcpp::Node::SharedPtr& node) override
+  void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     node_ = node;
-    if (!node_->get_parameter(BOUNDS_PARAM_NAME, bounds_dist_))
+    if (!node_->get_parameter(parameter_namespace + "." + BOUNDS_PARAM_NAME, bounds_dist_))
     {
       bounds_dist_ = 0.05;
       RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
@@ -64,7 +64,7 @@ public:
       RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
     }
 
-    if (!node_->get_parameter(DT_PARAM_NAME, max_dt_offset_))
+    if (!node_->get_parameter(parameter_namespace + "." + DT_PARAM_NAME, max_dt_offset_))
     {
       max_dt_offset_ = 0.5;
       RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
