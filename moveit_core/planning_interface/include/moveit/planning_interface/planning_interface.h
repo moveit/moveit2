@@ -163,7 +163,8 @@ public:
   /// made.
   /// It is assumed that motion plans will be computed for the robot described by \e model
   /// and the node is passed as an argument to get some ROS parameters
-  virtual bool initialize(const robot_model::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node);
+  virtual bool initialize(const robot_model::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
+                          const std::string& parameter_namespace);
 
   /// Get \brief a short string that identifies the planning interface
   virtual std::string getDescription() const;

@@ -45,8 +45,10 @@
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.ompl_interface");
 
 ompl_interface::OMPLInterface::OMPLInterface(const robot_model::RobotModelConstPtr& robot_model,
-                                             const rclcpp::Node::SharedPtr& node)
+                                             const rclcpp::Node::SharedPtr& node,
+                                             const std::string& parameter_namespace)
   : node_(node)
+  , parameter_namespace_(parameter_namespace)
   , robot_model_(robot_model)
   , constraint_sampler_manager_(new constraint_samplers::ConstraintSamplerManager())
   , context_manager_(robot_model, constraint_sampler_manager_)
@@ -60,8 +62,10 @@ ompl_interface::OMPLInterface::OMPLInterface(const robot_model::RobotModelConstP
 
 ompl_interface::OMPLInterface::OMPLInterface(const robot_model::RobotModelConstPtr& robot_model,
                                              const planning_interface::PlannerConfigurationMap& pconfig,
-                                             const rclcpp::Node::SharedPtr& node)
+                                             const rclcpp::Node::SharedPtr& node,
+                                             const std::string& parameter_namespace)
   : node_(node)
+  , parameter_namespace_(parameter_namespace)
   , robot_model_(robot_model)
   , constraint_sampler_manager_(new constraint_samplers::ConstraintSamplerManager())
   , context_manager_(robot_model, constraint_sampler_manager_)
@@ -128,8 +132,8 @@ bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
     const std::map<std::string, std::string>& group_params,
     planning_interface::PlannerConfigurationSettings& planner_config)
 {
-  rcl_interfaces::msg::ListParametersResult planner_params_result =
-      node_->list_parameters({ "planner_configs." + planner_id }, 1);  // TODO(henningkayser): verify search depth
+  rcl_interfaces::msg::ListParametersResult planner_params_result = node_->list_parameters(
+      { parameter_namespace_ + ".planner_configs." + planner_id }, 1);  // TODO(henningkayser): verify search depth
 
   if (planner_params_result.names.empty())
   {
@@ -147,7 +151,7 @@ bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
   for (const auto& planner_param : planner_params_result.names)
   {
     // TODO(henningkayser): verify name is working for config map
-    const rclcpp::Parameter param = node_->get_parameter(planner_param);
+    const rclcpp::Parameter param = node_->get_parameter(parameter_namespace_ + "." + planner_param);
     planner_config.config[param.get_name()] = param.value_to_string();
   }
 
@@ -165,15 +169,16 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
     // the set of planning parameters that can be specific for the group (inherited by configurations of that group)
     static const std::string KNOWN_GROUP_PARAMS[] = { "projection_evaluator", "longest_valid_segment_fraction",
                                                       "enforce_joint_model_state_space" };
+    const std::string group_name_param = parameter_namespace_ + "." + group_name;
 
     // get parameters specific for the robot planning group
     std::map<std::string, std::string> specific_group_params;
     for (const std::string& k : KNOWN_GROUP_PARAMS)
     {
-      if (node_->has_parameter(group_name + "." + k))
+      if (node_->has_parameter(group_name_param + "." + k))
       {
         std::string value;
-        if (node_->get_parameter(group_name + "." + k, value))
+        if (node_->get_parameter(group_name_param + "." + k, value))
         {
           if (!value.empty())
             specific_group_params[k] = value;
@@ -181,7 +186,7 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
         }
 
         double value_d;
-        if (node_->get_parameter(group_name + "." + k, value_d))
+        if (node_->get_parameter(group_name_param + "." + k, value_d))
         {
           // convert to string using no locale
           specific_group_params[k] = moveit::core::toString(value_d);
@@ -189,14 +194,14 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
         }
 
         int value_i;
-        if (node_->get_parameter(group_name + "." + k, value_i))
+        if (node_->get_parameter(group_name_param + "." + k, value_i))
         {
           specific_group_params[k] = std::to_string(value_i);
           continue;
         }
 
         bool value_b;
-        if (node_->get_parameter(group_name + "." + k, value_b))
+        if (node_->get_parameter(group_name_param + "." + k, value_b))
         {
           specific_group_params[k] = std::to_string(value_b);
           continue;
@@ -207,7 +212,7 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
     // add default planner configuration
     planning_interface::PlannerConfigurationSettings default_pc;
     std::string default_planner_id;
-    if (node_->get_parameter(group_name + ".default_planner_config", default_planner_id))
+    if (node_->get_parameter(group_name_param + ".default_planner_config", default_planner_id))
     {
       if (!loadPlannerConfiguration(group_name, default_planner_id, specific_group_params, default_pc))
         default_planner_id = "";

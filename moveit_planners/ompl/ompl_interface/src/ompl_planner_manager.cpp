@@ -95,9 +95,10 @@ public:
     ompl::msg::useOutputHandler(output_handler_.get());
   }
 
-  bool initialize(const robot_model::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node) override
+  bool initialize(const robot_model::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
+                  const std::string& parameter_namespace) override
   {
-    ompl_interface_.reset(new OMPLInterface(model, node));
+    ompl_interface_.reset(new OMPLInterface(model, node, parameter_namespace));
     config_settings_ = ompl_interface_->getPlannerConfigurations();
     return true;
   }
@@ -145,4 +146,4 @@ private:
 
 }  // namespace ompl_interface
 
-CLASS_LOADER_REGISTER_CLASS(ompl_interface::OMPLPlannerManager, planning_interface::PlannerManager);
+CLASS_LOADER_REGISTER_CLASS(ompl_interface::OMPLPlannerManager, planning_interface::PlannerManager)

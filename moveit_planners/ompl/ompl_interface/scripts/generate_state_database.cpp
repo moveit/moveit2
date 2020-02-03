@@ -141,7 +141,7 @@ void computeDB(const rclcpp::Node::SharedPtr& node, const planning_scene::Planni
   // required by addConstraintApproximation
   scene->getCurrentStateNonConst().update();
 
-  ompl_interface::OMPLInterface ompl_interface(scene->getRobotModel(), node);
+  ompl_interface::OMPLInterface ompl_interface(scene->getRobotModel(), node, "ompl");
   planning_interface::MotionPlanRequest req;
   req.group_name = params.planning_group;
   req.path_constraints = params.constraints;
