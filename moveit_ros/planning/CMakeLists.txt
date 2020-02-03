@@ -71,6 +71,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_msgs
   tf2_msgs
   tf2_geometry_msgs
+  Boost
 )
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
