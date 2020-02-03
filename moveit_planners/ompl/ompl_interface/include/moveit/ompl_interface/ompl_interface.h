@@ -56,14 +56,16 @@ class OMPLInterface
 public:
   /** \brief Initialize OMPL-based planning for a particular robot model. ROS configuration is read from the specified
    * NodeHandle */
-  OMPLInterface(const robot_model::RobotModelConstPtr& robot_model, const rclcpp::Node::SharedPtr& node);
+  OMPLInterface(const robot_model::RobotModelConstPtr& robot_model, const rclcpp::Node::SharedPtr& node,
+                const std::string& parameter_namespace);
 
   /** \brief Initialize OMPL-based planning for a particular robot model. ROS configuration is read from the specified
      NodeHandle. However,
       planner configurations are used as specified in \e pconfig instead of reading them from the ROS parameter server
      */
   OMPLInterface(const robot_model::RobotModelConstPtr& robot_model,
-                const planning_interface::PlannerConfigurationMap& pconfig, const rclcpp::Node::SharedPtr& node);
+                const planning_interface::PlannerConfigurationMap& pconfig, const rclcpp::Node::SharedPtr& node,
+                const std::string& parameter_namespace);
 
   virtual ~OMPLInterface();
 
@@ -147,6 +149,7 @@ protected:
                                                double* timeout) const;
 
   rclcpp::Node::SharedPtr node_;  /// The ROS node
+  const std::string parameter_namespace_;
 
   /** \brief The kinematic model for which motion plans are computed */
   robot_model::RobotModelConstPtr robot_model_;
