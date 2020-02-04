@@ -1,6 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_cpp)
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/moveit_cpp.cpp
   src/planning_component.cpp
 )
