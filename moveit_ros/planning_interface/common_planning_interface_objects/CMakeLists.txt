@@ -14,5 +14,3 @@ install(TARGETS ${MOVEIT_LIB_NAME}
   RUNTIME DESTINATION bin)
 
 install(DIRECTORY include/ DESTINATION include)
-
-ament_export_libraries(${MOVEIT_LIB_NAME})

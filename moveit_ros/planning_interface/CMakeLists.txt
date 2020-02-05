@@ -53,7 +53,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 )
 
 set(THIS_PACKAGE_LIBRARIES
-#  moveit_common_planning_interface_objects
+  moveit_common_planning_interface_objects
 #  moveit_planning_scene_interface
 #  moveit_move_group_interface
   moveit_cpp
