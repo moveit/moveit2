@@ -122,7 +122,7 @@ protected Q_SLOTS:
 protected:
   /// This function reloads the robot model and reinitializes the PlanningSceneMonitor
   /// It can be called either from the Main Loop or from a Background thread
-  void loadRobotModel(const rclcpp::Node::SharedPtr& node);
+  void loadRobotModel();
 
   /// This function is used by loadRobotModel() and should only be called in the MainLoop
   /// You probably should not call this function directly
@@ -130,8 +130,7 @@ protected:
 
   /// This function constructs a new planning scene. Probably this should be called in a background thread
   /// as it may take some time to complete its execution
-  virtual planning_scene_monitor::PlanningSceneMonitorPtr
-  createPlanningSceneMonitor(const rclcpp::Node::SharedPtr& node);
+  virtual planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor();
 
   /// This is an event called by loadRobotModel() in the MainLoop; do not call directly
   virtual void onRobotModelLoaded();
@@ -195,6 +194,9 @@ protected:
   rviz_common::properties::FloatProperty* scene_display_time_property_;
   rviz_common::properties::EnumProperty* octree_render_property_;
   rviz_common::properties::EnumProperty* octree_coloring_property_;
+
+  // rclcpp node
+  rclcpp::Node::SharedPtr node_;
 };
 
 }  // namespace moveit_rviz_plugin

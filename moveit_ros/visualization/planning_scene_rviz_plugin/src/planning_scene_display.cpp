@@ -185,6 +185,14 @@ void PlanningSceneDisplay::clearJobs()
 void PlanningSceneDisplay::onInitialize()
 {
   Display::onInitialize();
+  auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
+  if (!ros_node_abstraction)
+  {
+    RVIZ_COMMON_LOG_WARNING("Unable to lock weak_ptr from DisplayContext in PlanningSceneDisplay constructor");
+    return;
+  }
+  node_ = ros_node_abstraction->get_raw_node();
+  planning_scene_topic_property_->initialize(ros_node_abstraction);
 
   // the scene node that contains everything
   planning_scene_node_ = scene_node_->createChildSceneNode();
@@ -207,9 +215,7 @@ void PlanningSceneDisplay::reset()
   if (planning_scene_robot_)
     planning_scene_robot_->clear();
 
-  addBackgroundJob(
-      boost::bind(&PlanningSceneDisplay::loadRobotModel, this, rclcpp::Node::make_shared("planning_scene_display")),
-      "loadRobotModel");
+  addBackgroundJob(boost::bind(&PlanningSceneDisplay::loadRobotModel, this), "loadRobotModel");
   Display::reset();
 
   if (planning_scene_robot_)
@@ -491,12 +497,11 @@ void PlanningSceneDisplay::unsetLinkColor(rviz_default_plugins::robot::Robot* ro
 // ******************************************************************************************
 // Load
 // ******************************************************************************************
-planning_scene_monitor::PlanningSceneMonitorPtr
-PlanningSceneDisplay::createPlanningSceneMonitor(const rclcpp::Node::SharedPtr& node)
+planning_scene_monitor::PlanningSceneMonitorPtr PlanningSceneDisplay::createPlanningSceneMonitor()
 {
   std::shared_ptr<tf2_ros::Buffer> tf_buffer = moveit::planning_interface::getSharedTF();
   return std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
-      node, robot_description_property_->getStdString(), tf_buffer, getNameStd() + "_planning_scene_monitor");
+      node_, robot_description_property_->getStdString(), tf_buffer, getNameStd() + "_planning_scene_monitor");
 }
 
 void PlanningSceneDisplay::clearRobotModel()
@@ -506,7 +511,7 @@ void PlanningSceneDisplay::clearRobotModel()
                                     // instance of a scene monitor is constructed
 }
 
-void PlanningSceneDisplay::loadRobotModel(const rclcpp::Node::SharedPtr& node)
+void PlanningSceneDisplay::loadRobotModel()
 {
   // wait for other robot loadRobotModel() calls to complete;
   boost::mutex::scoped_lock _(robot_model_loading_lock_);
@@ -519,7 +524,7 @@ void PlanningSceneDisplay::loadRobotModel(const rclcpp::Node::SharedPtr& node)
 
   waitForAllMainLoopJobs();
 
-  planning_scene_monitor::PlanningSceneMonitorPtr psm = createPlanningSceneMonitor(node);
+  planning_scene_monitor::PlanningSceneMonitorPtr psm = createPlanningSceneMonitor();
   if (psm->getPlanningScene())
   {
     planning_scene_monitor_.swap(psm);
@@ -580,9 +585,7 @@ void PlanningSceneDisplay::onEnable()
 {
   Display::onEnable();
 
-  addBackgroundJob(
-      boost::bind(&PlanningSceneDisplay::loadRobotModel, this, rclcpp::Node::make_shared("planning_scene_display")),
-      "loadRobotModel");
+  addBackgroundJob(boost::bind(&PlanningSceneDisplay::loadRobotModel, this), "loadRobotModel");
 
   if (planning_scene_robot_)
   {
@@ -662,7 +665,8 @@ void PlanningSceneDisplay::calculateOffsetPosition()
   Ogre::Vector3 position;
   Ogre::Quaternion orientation;
 
-  context_->getFrameManager()->getTransform(getRobotModel()->getModelFrame(), rclcpp::Time(0), position, orientation);
+  context_->getFrameManager()->getTransform(getRobotModel()->getModelFrame(), rclcpp::Time(0, 0, RCL_ROS_TIME),
+                                            position, orientation);
 
   planning_scene_node_->setPosition(position);
   planning_scene_node_->setOrientation(orientation);

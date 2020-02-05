@@ -37,6 +37,8 @@ find_package(rclpy REQUIRED)
 find_package(rviz2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(rviz_common REQUIRED)
+find_package(rviz_default_plugins REQUIRED)
 find_package(rviz_ogre_vendor REQUIRED)
 
 # Qt Stuff
@@ -62,7 +64,7 @@ add_subdirectory(planning_scene_rviz_plugin)
 # add_subdirectory(motion_planning_rviz_plugin)
 # add_subdirectory(trajectory_rviz_plugin)
 
-install(DIRECTORY icons DESTINATION share)
+install(DIRECTORY icons DESTINATION share/${PROJECT_NAME})
 
 #pluginlib_export_plugin_description_file(rviz_common motion_planning_rviz_plugin_description.xml)
 #pluginlib_export_plugin_description_file(rviz_common trajectory_rviz_plugin_description.xml)
@@ -74,11 +76,11 @@ pluginlib_export_plugin_description_file(rviz_common robot_state_rviz_plugin_des
 #  add_rostest(test/moveit_joy.test)
 #endif()
 
-ament_export_include_directories(include)
 ament_export_dependencies(class_loader)
 ament_export_dependencies(geometric_shapes)
 ament_export_dependencies(interactive_markers)
 ament_export_dependencies(moveit_ros_planning)
+ament_export_dependencies(moveit_ros_planning_interface)
 ament_export_dependencies(moveit_msgs)
 ament_export_dependencies(moveit_core)
 ament_export_dependencies(octomap_msgs)
