@@ -379,6 +379,11 @@ void RobotStateDisplay::unsetLinkColor(rviz_default_plugins::robot::Robot* robot
 void RobotStateDisplay::loadRobotModel()
 {
   load_robot_model_ = false;
+  if (robot_description_property_->getStdString().empty())
+  {
+    setStatus(rviz_common::properties::StatusProperty::Error, "RobotModel", "`Robot Description` field can't be empty");
+    return;
+  }
   if (!rdf_loader_)
     rdf_loader_.reset(new rdf_loader::RDFLoader(node_, robot_description_property_->getStdString()));
 
