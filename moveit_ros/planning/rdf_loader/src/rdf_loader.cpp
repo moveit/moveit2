@@ -62,68 +62,51 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
   moveit::tools::Profiler::ScopedStart prof_start;
   moveit::tools::Profiler::ScopedBlock prof_block("RDFLoader(robot_description)");
 
-  auto start = std::chrono::system_clock::now();
+  auto start = node->now();
 
-  std::string content;
-  // TODO(JafarAbdi): Revise parameter lookup
-  if (node->has_parameter(robot_description))
-  {
-    rclcpp::Parameter robot_description_param = node->get_parameter(robot_description);
-    try
-    {
-      content = robot_description_param.as_string();
-    }
-    catch (const rclcpp::ParameterTypeException& e)
-    {
-      RCLCPP_WARN(LOGGER, "When getting robot_description parameter %s", e.what());
-    }
-  }
-  if (content.empty())
+  // Check if the robot_description parameter is declared, declare it if it's not declared yet
+  if (!node->has_parameter(robot_description))
+    node->declare_parameter(robot_description);
+  std::string robot_description_content;
+  node->get_parameter_or(robot_description, robot_description_content, std::string());
+
+  if (robot_description_content.empty())
   {
     RCLCPP_INFO_ONCE(LOGGER, "Robot model parameter not found! Did you remap '%s'?\n", robot_description.c_str());
     return;
   }
 
   urdf::Model* umodel = new urdf::Model();
-  if (!umodel->initString(content))
+  if (!umodel->initString(robot_description_content))
   {
-    RCLCPP_INFO(LOGGER, "Unable to parse URDF from parameter: '%s'", robot_description_.c_str());
+    RCLCPP_INFO(LOGGER, "Unable to parse URDF from parameter: '%s'", robot_description.c_str());
     return;
   }
   urdf_.reset(umodel);
 
-  const std::string srdf_description(robot_description_ + "_semantic");
-  std::string scontent;
-  // TODO(JafarAbdi): Revise parameter lookup
-  if (node->has_parameter(srdf_description))
-  {
-    rclcpp::Parameter srdf_description_param = node->get_parameter(srdf_description);
-    try
-    {
-      content = srdf_description_param.as_string();
-    }
-    catch (const rclcpp::ParameterTypeException& e)
-    {
-      RCLCPP_WARN(LOGGER, "When getting robot_description_semantic parameter: %s", e.what());
-    }
-  }
-  if (scontent.empty())
+  const std::string srdf_description = robot_description + "_semantic";
+  // Check if the robot_description_semantic parameter is declared, declare it if it's not declared yet
+  if (!node->has_parameter(srdf_description))
+    node->declare_parameter(srdf_description);
+  std::string srdf_description_content;
+  node->get_parameter_or(srdf_description, srdf_description_content, std::string());
+
+  if (srdf_description_content.empty())
   {
     RCLCPP_INFO_ONCE(LOGGER, "Robot semantic description not found. Did you forget to define or remap '%s'?\n",
-                     std::string(robot_description + "_semantic").c_str());
+                     srdf_description.c_str());
     return;
   }
 
   srdf_.reset(new srdf::Model());
-  if (!srdf_->initString(*urdf_, scontent))
+  if (!srdf_->initString(*urdf_, srdf_description_content))
   {
     RCLCPP_ERROR(LOGGER, "Unable to parse SRDF from parameter '%s'", srdf_description.c_str());
     srdf_.reset();
     return;
   }
 
-  RCLCPP_INFO(LOGGER, "Loaded robot model in %ld seconds",
-              std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count());
+  RCLCPP_INFO_STREAM(LOGGER, "Loaded robot model in " << (node->now() - start).seconds() << " seconds");
 }
 
 RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_string)
