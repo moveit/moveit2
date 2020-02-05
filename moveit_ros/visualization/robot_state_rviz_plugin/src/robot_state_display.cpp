@@ -112,6 +112,14 @@ RobotStateDisplay::~RobotStateDisplay() = default;
 void RobotStateDisplay::onInitialize()
 {
   Display::onInitialize();
+  auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
+  if (!ros_node_abstraction)
+  {
+    RVIZ_COMMON_LOG_WARNING("Unable to lock weak_ptr from DisplayContext in RobotStateDisplay constructor");
+    return;
+  }
+  robot_state_topic_property_->initialize(ros_node_abstraction);
+  node_ = ros_node_abstraction->get_raw_node();
   robot_.reset(new RobotStateVisualization(scene_node_, context_, "Robot State", this));
   changedEnableVisualVisible();
   changedEnableCollisionVisible();
@@ -448,7 +456,8 @@ void RobotStateDisplay::calculateOffsetPosition()
   Ogre::Vector3 position;
   Ogre::Quaternion orientation;
 
-  context_->getFrameManager()->getTransform(getRobotModel()->getModelFrame(), rclcpp::Time(0), position, orientation);
+  context_->getFrameManager()->getTransform(getRobotModel()->getModelFrame(), rclcpp::Time(0, 0, RCL_ROS_TIME),
+                                            position, orientation);
 
   scene_node_->setPosition(position);
   scene_node_->setOrientation(orientation);
