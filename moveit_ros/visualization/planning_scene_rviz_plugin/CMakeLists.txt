@@ -2,7 +2,7 @@ set(MOVEIT_LIB_NAME moveit_planning_scene_rviz_plugin)
 
 add_library(${MOVEIT_LIB_NAME}_core SHARED
   src/planning_scene_display.cpp
-)
+  include/moveit/planning_scene_rviz_plugin/planning_scene_display.h)
 set_target_properties(${MOVEIT_LIB_NAME}_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(${MOVEIT_LIB_NAME}_core moveit_rviz_plugin_render_tools rviz_ogre_vendor::OgreMain)
 ament_target_dependencies(${MOVEIT_LIB_NAME}_core
