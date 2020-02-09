@@ -53,7 +53,7 @@ PlanningSceneRender::PlanningSceneRender(Ogre::SceneNode* node, rviz_common::Dis
 
 PlanningSceneRender::~PlanningSceneRender()
 {
-  context_->getSceneManager()->destroySceneNode(planning_scene_geometry_node_->getName());
+  context_->getSceneManager()->destroySceneNode(planning_scene_geometry_node_);
 }
 
 void PlanningSceneRender::clear()
