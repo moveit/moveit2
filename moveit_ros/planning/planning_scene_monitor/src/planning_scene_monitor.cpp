@@ -489,22 +489,31 @@ bool PlanningSceneMonitor::requestPlanningSceneState(const std::string& service_
                                srv->components.LINK_PADDING_AND_SCALING | srv->components.OBJECT_COLORS;
 
   // Make sure client is connected to server
-  RCLCPP_DEBUG(LOGGER, "Waiting for service `%s` to exist.", service_name.c_str());
-  client->wait_for_service(std::chrono::seconds(5));
-
-  auto result = client->async_send_request(srv);
-
-  if (rclcpp::spin_until_future_complete(node_, result) == rclcpp::executor::FutureReturnCode::SUCCESS)
+  RCLCPP_DEBUG(LOGGER, "Waiting for GetPlanningScene service `%s` to exist.", service_name.c_str());
+  if (client->wait_for_service(std::chrono::seconds(5)))
   {
-    newPlanningSceneMessage(result.get()->scene);
+    RCLCPP_DEBUG(LOGGER, "Sending service request to `%s`.", service_name.c_str());
+    auto service_result = client->async_send_request(srv);
+    const auto service_result_status = service_result.wait_for(std::chrono::seconds(5));
+    if (service_result_status == std::future_status::ready)  // Success
+    {
+      RCLCPP_DEBUG(LOGGER, "Service request succeeded, applying new planning scene");
+      newPlanningSceneMessage(service_result.get()->scene);
+      return true;
+    }
+    if (service_result_status == std::future_status::timeout)  // Timeout
+    {
+      RCLCPP_INFO(LOGGER, "GetPlanningScene service call to %s timed out. at %s:%d", service_name.c_str(), __FILE__,
+                  __LINE__);
+      return false;
+    }
   }
-  else
-  {
-    RCLCPP_INFO(LOGGER, "Failed to call service %s, have you launched move_group? at %s:%d", service_name.c_str(),
-                __FILE__, __LINE__);
-    return false;
-  }
-  return true;
+
+  // If we are here, service is not available or call failed
+  RCLCPP_INFO(LOGGER, "Failed to call service %s, have you launched move_group? at %s:%d", service_name.c_str(),
+              __FILE__, __LINE__);
+
+  return false;
 }
 
 void PlanningSceneMonitor::newPlanningSceneCallback(const moveit_msgs::msg::PlanningScene::ConstSharedPtr scene)
