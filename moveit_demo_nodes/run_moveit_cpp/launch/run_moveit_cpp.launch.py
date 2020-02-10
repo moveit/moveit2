@@ -29,7 +29,7 @@ def generate_launch_description():
     # moveit_cpp.yaml is passed by filename for now since it's node specific
     moveit_cpp_yaml_file_name = get_package_share_directory('run_moveit_cpp') + "/config/moveit_cpp.yaml"
 
-    # Component yaml files are stored inside dicts for now, allowing grouping the configs in separate namespaces
+    # Component yaml files are grouped in separate namespaces
     robot_description_config = load_file('moveit_resources', 'panda_description/urdf/panda.urdf')
     robot_description = {'robot_description' : robot_description_config}
 
@@ -39,24 +39,21 @@ def generate_launch_description():
     kinematics_yaml = load_yaml('moveit_resources', 'panda_moveit_config/config/kinematics.yaml')
     robot_description_kinematics = { 'robot_description_kinematics' : kinematics_yaml }
 
-    # This config file had to be migrated, so this is temporarily in the config folder of run_moveit_cpp
     controllers_yaml = load_yaml('run_moveit_cpp', 'config/controllers.yaml')
     moveit_controllers = { 'moveit_simple_controller_manager' : controllers_yaml }
 
-    ompl_planning_yaml = load_yaml('moveit_resources', 'panda_moveit_config/config/ompl_planning.yaml')
     ompl_planning_pipeline_config = { 'ompl' : {
         'planning_plugin' : 'ompl_interface/OMPLPlanner',
-        # TODO(henningkayser): enable planning request adapters
-        #'request_adapters' : """default_planner_request_adapters/AddTimeParameterization default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints""" ,
-        'request_adapters' : '',
+        'request_adapters' : """default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints""" ,
         'start_state_max_bounds_error' : 0.1 } }
+    ompl_planning_yaml = load_yaml('moveit_resources', 'panda_moveit_config/config/ompl_planning.yaml')
     ompl_planning_pipeline_config['ompl'].update(ompl_planning_yaml)
 
-    # Specify run_moveit_cpp node
+    # MoveItCpp demo executable
     run_moveit_cpp_node = Node(node_name='run_moveit_cpp',
                                package='run_moveit_cpp',
-                               # NOTE: not clear how to interact with the gdb instance
-                               #prefix='gdb -ex run --args',
+                               # TODO(henningkayser): add debug argument
+                               # prefix='xterm -e gdb --args',
                                node_executable='run_moveit_cpp',
                                output='screen',
                                parameters=[moveit_cpp_yaml_file_name,
@@ -65,4 +62,19 @@ def generate_launch_description():
                                            kinematics_yaml,
                                            ompl_planning_pipeline_config,
                                            moveit_controllers])
-    return LaunchDescription([ run_moveit_cpp_node ])
+
+    # RViz
+    rviz_node = Node(package='rviz2',
+                     node_executable='rviz2',
+                     node_name='rviz2',
+                     output='log',
+                     parameters=[robot_description])
+
+    # RobotStatePublisher
+    static_tf = Node(package='tf2_ros',
+                     node_executable='static_transform_publisher',
+                     node_name='static_transform_publisher',
+                     output='log',
+                     arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'world', 'panda_link0'])
+
+    return LaunchDescription([ static_tf, rviz_node, run_moveit_cpp_node ])
