@@ -36,17 +36,80 @@
    Desc: A simple demo node running MoveItCpp for planning and execution
 */
 
+#include <thread>
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/moveit_cpp/planning_component.h>
+#include <moveit/robot_state/conversions.h>
+#include <moveit_msgs/msg/display_robot_state.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("main");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_cpp_demo");
+
+class MoveItCppDemo
+{
+public:
+  MoveItCppDemo(const rclcpp::Node::SharedPtr& node)
+    : node_(node)
+    , robot_state_publisher_(node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state", 1))
+  {
+  }
+
+  void run()
+  {
+    RCLCPP_INFO(LOGGER, "Initialize MoveItCpp");
+    moveit_cpp_ = std::make_shared<moveit::planning_interface::MoveItCpp>(node_);
+
+    RCLCPP_INFO(LOGGER, "Initialize PlanningComponent");
+    moveit::planning_interface::PlanningComponent arm("panda_arm", moveit_cpp_);
+
+    // A little delay before running the plan
+    rclcpp::sleep_for(std::chrono::seconds(3));
+
+    RCLCPP_INFO(LOGGER, "Set goal");
+    arm.setGoal("home");
+
+    RCLCPP_INFO(LOGGER, "Plan to goal");
+    const auto plan_solution = arm.plan();
+    if (plan_solution)
+      visualizeTrajectory(*plan_solution.trajectory);
+
+    // TODO(henningkayser): Enable trajectory execution once controllers are available
+    // RCLCPP_INFO(LOGGER, "arm.execute()");
+    // arm.execute();
+  }
+
+private:
+  void visualizeTrajectory(const robot_trajectory::RobotTrajectory& trajectory)
+  {
+    moveit_msgs::msg::DisplayRobotState waypoint;
+    const auto start_time = node_->now();
+    for (size_t i = 0; i < trajectory.getWayPointCount(); ++i)
+    {
+      moveit::core::robotStateToRobotStateMsg(trajectory.getWayPoint(i), waypoint.state);
+      const auto waypoint_time =
+          start_time + rclcpp::Duration::from_seconds(trajectory.getWayPointDurationFromStart(i));
+      const auto now = node_->now();
+      if (waypoint_time > now)
+        rclcpp::sleep_for(std::chrono::nanoseconds((waypoint_time - now).nanoseconds()));
+
+      robot_state_publisher_->publish(waypoint);
+    }
+
+    //  Reset RobotState display to current state
+    rclcpp::sleep_for(std::chrono::seconds(1));
+    moveit::core::robotStateToRobotStateMsg(*moveit_cpp_->getCurrentState(), waypoint.state);
+    robot_state_publisher_->publish(waypoint);
+  }
+
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_publisher_;
+  moveit::planning_interface::MoveItCppPtr moveit_cpp_;
+};
 
 int main(int argc, char** argv)
 {
-  rclcpp::init(argc, argv);
-
   RCLCPP_INFO(LOGGER, "Initialize node");
+  rclcpp::init(argc, argv);
   rclcpp::NodeOptions node_options;
   // This enables loading undeclared parameters
   // best practice would be to declare parameters in the corresponding classes
@@ -54,21 +117,16 @@ int main(int argc, char** argv)
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("run_moveit_cpp", "", node_options);
 
-  RCLCPP_INFO(LOGGER, "Initialize MoveItCpp");
-  auto moveit_cpp = std::make_shared<moveit::planning_interface::MoveItCpp>(node);
-  RCLCPP_INFO(LOGGER, "Initialize PlanningComponent");
-  moveit::planning_interface::PlanningComponent arm("panda_arm", moveit_cpp);
-  // TODO(henningkayser): Fix segfault
-  // arm.setStartState();
-
-  RCLCPP_INFO(LOGGER, "Set goal");
-  arm.setGoal("home");
-
-  // TODO(henningkayser): Fix segfault
-  // RCLCPP_INFO(LOGGER, "arm.plan()");
-  // arm.plan();
+  MoveItCppDemo demo(node);
+  std::thread run_demo([&demo]() {
+    // Let RViz initialize before running demo
+    // TODO(henningkayser): use lifecycle events to launch node
+    rclcpp::sleep_for(std::chrono::seconds(5));
+    demo.run();
+  });
 
   rclcpp::spin(node);
+  run_demo.join();
 
   return 0;
 }
