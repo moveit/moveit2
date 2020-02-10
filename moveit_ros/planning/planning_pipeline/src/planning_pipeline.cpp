@@ -55,16 +55,13 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotMo
                                                       const std::string& adapter_plugins_param_name)
   : node_(node), parameter_namespace_(parameter_namespace), robot_model_(model)
 {
-  auto planner_plugin_params = std::make_shared<rclcpp::SyncParametersClient>(node);
-
-  if (planner_plugin_params->has_parameter(parameter_namespace_ + "." + planner_plugin_param_name))
-    planner_plugin_name_ =
-        node_->get_parameter(parameter_namespace_ + "." + planner_plugin_param_name).get_value<std::string>();
+  if (node_->has_parameter(parameter_namespace_ + "." + planner_plugin_param_name))
+    node_->get_parameter(parameter_namespace_ + "." + planner_plugin_param_name, planner_plugin_name_);
 
   std::string adapters;
-  if (planner_plugin_params->has_parameter(parameter_namespace_ + "." + adapter_plugins_param_name))
+  if (node_->has_parameter(parameter_namespace_ + "." + adapter_plugins_param_name))
   {
-    adapters = node_->get_parameter(parameter_namespace_ + "." + adapter_plugins_param_name).get_value<std::string>();
+    node_->get_parameter(parameter_namespace_ + "." + adapter_plugins_param_name, adapters);
     boost::char_separator<char> sep(" ");
     boost::tokenizer<boost::char_separator<char> > tok(adapters, sep);
     for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin(); beg != tok.end(); ++beg)
