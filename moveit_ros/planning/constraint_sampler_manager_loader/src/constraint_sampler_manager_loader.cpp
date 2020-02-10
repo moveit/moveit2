@@ -49,12 +49,10 @@ class ConstraintSamplerManagerLoader::Helper
 public:
   Helper(const rclcpp::Node::SharedPtr& node, const constraint_samplers::ConstraintSamplerManagerPtr& csm) : node_(node)
   {
-    auto parameters_constraint_sampler = std::make_shared<rclcpp::SyncParametersClient>(node_);
-
-    std::string constraint_samplers;
-    if (parameters_constraint_sampler->has_parameter("constraint_samplers"))
+    if (node_->has_parameter("constraint_samplers"))
     {
-      constraint_samplers = node_->get_parameter("constraint_samplers").get_value<std::string>();
+      std::string constraint_samplers;
+      node_->get_parameter("constraint_samplers", constraint_samplers);
       try
       {
         constraint_sampler_plugin_loader_.reset(

@@ -578,34 +578,33 @@ protected:
    * as the predominant configuration but also allows groupwise specifications.
    */
   template <typename T>
-  inline bool lookupParam(std::shared_ptr<rclcpp::Node>& node, const std::string& param, T& val,
+  inline bool lookupParam(const rclcpp::Node::SharedPtr& node, const std::string& param, T& val,
                           const T& default_val) const
   {
-    rclcpp::SyncParametersClient parameters_lookup(node);
-
-    if (parameters_lookup.has_parameter({ group_name_ + "/" + param }))
+    if (node->has_parameter({ group_name_ + "." + param }))
     {
-      val = parameters_lookup.get_parameter(group_name_ + "/" + param, default_val);
+      node->get_parameter(group_name_ + "." + param, val);
       return true;
     }
 
-    if (parameters_lookup.has_parameter({ param }))
+    if (node->has_parameter({ param }))
     {
-      val = parameters_lookup.get_parameter(param, default_val);
+      node->get_parameter(param, val);
       return true;
     }
 
-    if (parameters_lookup.has_parameter({ "robot_description_kinematics/" + group_name_ + "/" + param }))
+    if (node->has_parameter({ "robot_description_kinematics." + group_name_ + "." + param }))
     {
-      val = parameters_lookup.get_parameter("robot_description_kinematics/" + group_name_ + "/" + param, default_val);
+      node->get_parameter("robot_description_kinematics." + group_name_ + "." + param, val);
       return true;
     }
 
-    if (parameters_lookup.has_parameter({ "robot_description_kinematics/" + param }))
+    if (node->has_parameter("robot_description_kinematics." + param))
     {
-      val = parameters_lookup.get_parameter("robot_description_kinematics/" + param, default_val);
+      node->get_parameter("robot_description_kinematics." + param, val);
       return true;
     }
+
     val = default_val;
     return false;
   }
