@@ -64,10 +64,12 @@ def generate_launch_description():
                                            moveit_controllers])
 
     # RViz
+    rviz_config_file = get_package_share_directory('run_moveit_cpp') + "/launch/run_moveit_cpp.rviz"
     rviz_node = Node(package='rviz2',
                      node_executable='rviz2',
                      node_name='rviz2',
                      output='log',
+                     arguments=['-d', rviz_config_file],
                      parameters=[robot_description])
 
     # RobotStatePublisher
