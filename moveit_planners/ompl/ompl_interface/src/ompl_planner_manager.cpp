@@ -44,16 +44,7 @@
 namespace ompl_interface
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.ompl_planner_manager");
-
-/*
-#define OMPL_ROS_LOG(ros_log_level)                                                                                    \
-  {                                                                                                                    \
-    ROSCONSOLE_DEFINE_LOCATION(true, ros_log_level, ROSCONSOLE_NAME_PREFIX ".ompl");                                   \
-    if (ROS_UNLIKELY(__rosconsole_define_location__enabled))                                                           \
-      ::ros::console::print(0, __rosconsole_define_location__loc.logger_, __rosconsole_define_location__loc.level_,    \
-                            filename, line, __ROSCONSOLE_FUNCTION__, "%s", text.c_str());                              \
-  }
-*/
+static const rclcpp::Logger OMPL_LOGGER = rclcpp::get_logger("ompl");
 
 class OMPLPlannerManager : public planning_interface::PlannerManager
 {
@@ -62,8 +53,6 @@ public:
   {
     class OutputHandler : public ompl::msg::OutputHandler
     {
-      const rclcpp::Logger LOGGER = rclcpp::get_logger("ompl");
-
     public:
       void log(const std::string& text, ompl::msg::LogLevel level, const char* filename, int line) override
       {
@@ -72,16 +61,16 @@ public:
           case ompl::msg::LOG_DEV2:
           case ompl::msg::LOG_DEV1:
           case ompl::msg::LOG_DEBUG:
-            RCLCPP_DEBUG(LOGGER, "%s:$i - %s", filename, line, text);
+            RCLCPP_DEBUG(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
             break;
           case ompl::msg::LOG_INFO:
-            RCLCPP_INFO(LOGGER, "%s:$i - %s", filename, line, text);
+            RCLCPP_INFO(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
             break;
           case ompl::msg::LOG_WARN:
-            RCLCPP_WARN(LOGGER, "%s:$i - %s", filename, line, text);
+            RCLCPP_WARN(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
             break;
           case ompl::msg::LOG_ERROR:
-            RCLCPP_ERROR(LOGGER, "%s:$i - %s", filename, line, text);
+            RCLCPP_ERROR(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
             break;
           case ompl::msg::LOG_NONE:
           default:
