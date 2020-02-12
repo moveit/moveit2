@@ -85,6 +85,7 @@ def generate_launch_description():
                                   # TODO(JafarAbdi): Why this launch the two nodes (controller manager and the fake joint driver) with the same name!
                                   # node_name='fake_joint_driver_node',
                                   parameters=[os.path.join(get_package_share_directory("run_moveit_cpp"), "config", "panda_controllers.yaml"),
+                                              os.path.join(get_package_share_directory("run_moveit_cpp"), "config", "start_positions.yaml"),
                                               robot_description]
                                   )
 
