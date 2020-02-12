@@ -42,6 +42,7 @@
 #include <moveit/moveit_cpp/planning_component.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit_msgs/msg/display_robot_state.hpp>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_cpp_demo");
 
@@ -51,6 +52,9 @@ public:
   MoveItCppDemo(const rclcpp::Node::SharedPtr& node)
     : node_(node)
     , robot_state_publisher_(node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state", 1))
+    , trajectory_publisher_(node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(
+          "/fake_joint_trajectory_controller/joint_trajectory", 1))
+
   {
   }
 
@@ -76,6 +80,13 @@ public:
     // TODO(henningkayser): Enable trajectory execution once controllers are available
     // RCLCPP_INFO(LOGGER, "arm.execute()");
     // arm.execute();
+    // Right now the joint trajectory controller doesn't' support actions and the current way to send trajectory is by
+    // using a publisher
+    // See https://github.com/ros-controls/ros2_controllers/issues/12 for enabling action interface progress
+    RCLCPP_INFO(LOGGER, "Sending the trajectory for execution");
+    moveit_msgs::msg::RobotTrajectory robot_trajectory;
+    arm.getLastPlanSolution()->trajectory->getRobotTrajectoryMsg(robot_trajectory);
+    trajectory_publisher_->publish(robot_trajectory.joint_trajectory);
   }
 
 private:
@@ -103,6 +114,7 @@ private:
 
   rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_publisher_;
+  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_publisher_;
   moveit::planning_interface::MoveItCppPtr moveit_cpp_;
 };
 
