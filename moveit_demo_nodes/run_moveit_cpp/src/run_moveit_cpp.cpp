@@ -54,7 +54,6 @@ public:
     , robot_state_publisher_(node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state", 1))
     , trajectory_publisher_(node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(
           "/fake_joint_trajectory_controller/joint_trajectory", 1))
-
   {
   }
 
@@ -62,6 +61,7 @@ public:
   {
     RCLCPP_INFO(LOGGER, "Initialize MoveItCpp");
     moveit_cpp_ = std::make_shared<moveit::planning_interface::MoveItCpp>(node_);
+    moveit_cpp_->getPlanningSceneMonitor()->setPlanningScenePublishingFrequency(100);
 
     RCLCPP_INFO(LOGGER, "Initialize PlanningComponent");
     moveit::planning_interface::PlanningComponent arm("panda_arm", moveit_cpp_);
@@ -75,18 +75,20 @@ public:
     RCLCPP_INFO(LOGGER, "Plan to goal");
     const auto plan_solution = arm.plan();
     if (plan_solution)
+    {
       visualizeTrajectory(*plan_solution.trajectory);
 
-    // TODO(henningkayser): Enable trajectory execution once controllers are available
-    // RCLCPP_INFO(LOGGER, "arm.execute()");
-    // arm.execute();
-    // Right now the joint trajectory controller doesn't' support actions and the current way to send trajectory is by
-    // using a publisher
-    // See https://github.com/ros-controls/ros2_controllers/issues/12 for enabling action interface progress
-    RCLCPP_INFO(LOGGER, "Sending the trajectory for execution");
-    moveit_msgs::msg::RobotTrajectory robot_trajectory;
-    arm.getLastPlanSolution()->trajectory->getRobotTrajectoryMsg(robot_trajectory);
-    trajectory_publisher_->publish(robot_trajectory.joint_trajectory);
+      // TODO(henningkayser): Enable trajectory execution once controllers are available
+      // RCLCPP_INFO(LOGGER, "arm.execute()");
+      // arm.execute();
+      // Right now the joint trajectory controller doesn't support actions and the current way to send trajectory is by
+      // using a publisher
+      // See https://github.com/ros-controls/ros2_controllers/issues/12 for enabling action interface progress
+      RCLCPP_INFO(LOGGER, "Sending the trajectory for execution");
+      moveit_msgs::msg::RobotTrajectory robot_trajectory;
+      plan_solution.trajectory->getRobotTrajectoryMsg(robot_trajectory);
+      trajectory_publisher_->publish(robot_trajectory.joint_trajectory);
+    }
   }
 
 private:
@@ -105,11 +107,6 @@ private:
 
       robot_state_publisher_->publish(waypoint);
     }
-
-    //  Reset RobotState display to current state
-    rclcpp::sleep_for(std::chrono::seconds(1));
-    moveit::core::robotStateToRobotStateMsg(*moveit_cpp_->getCurrentState(), waypoint.state);
-    robot_state_publisher_->publish(waypoint);
   }
 
   rclcpp::Node::SharedPtr node_;
