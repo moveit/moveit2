@@ -1,0 +1,15 @@
+repositories:
+  ros2_control:
+    type: git
+    url: https://github.com/ros-controls/ros2_control
+    version: eloquent
+  ros2_controllers:
+    type: git
+    url: https://github.com/ros-controls/ros2_controllers
+    version: eloquent
+
+# TODO(JafarAbdi): Switch to upstream once PR https://github.com/tork-a/fake_joint/pull/7 is merged
+  fake_joint:
+    type: git
+    url: https://github.com/JafarAbdi/fake_joint
+    version: pr-port_to_ros2
