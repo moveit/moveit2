@@ -140,7 +140,7 @@ Visualization Manager:
           Show Trail: false
           Value: true
       Name: RobotState
-      Robot Alpha: 1
+      Robot Alpha: 0.5
       Robot Description: robot_description
       Robot State Topic: display_robot_state
       Show All Links: true
