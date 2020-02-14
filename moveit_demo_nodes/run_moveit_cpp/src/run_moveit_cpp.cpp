@@ -69,6 +69,28 @@ public:
     // A little delay before running the plan
     rclcpp::sleep_for(std::chrono::seconds(3));
 
+    moveit_msgs::msg::CollisionObject collision_object;
+    collision_object.header.frame_id = "panda_link0";
+    collision_object.id = "box";
+
+    shape_msgs::msg::SolidPrimitive box;
+    box.type = box.BOX;
+    box.dimensions.resize(3);
+    box.dimensions.at(0) = 0.1;
+    box.dimensions.at(1) = 0.4;
+    box.dimensions.at(2) = 0.1;
+
+    geometry_msgs::msg::Pose box_pose;
+    box_pose.position.x = 0.4;
+    box_pose.position.y = 0.0;
+    box_pose.position.z = 1.0;
+
+    collision_object.primitives.push_back(box);
+    collision_object.primitive_poses.push_back(box_pose);
+    collision_object.operation = collision_object.ADD;
+
+    getPlanningSceneRW()->processCollisionObjectMsg(collision_object);
+
     RCLCPP_INFO(LOGGER, "Set goal");
     arm.setGoal("home");
 
@@ -107,6 +129,11 @@ private:
 
       robot_state_publisher_->publish(waypoint);
     }
+  }
+
+  planning_scene_monitor::LockedPlanningSceneRW getPlanningSceneRW()
+  {
+    return planning_scene_monitor::LockedPlanningSceneRW(moveit_cpp_->getPlanningSceneMonitor());
   }
 
   rclcpp::Node::SharedPtr node_;
