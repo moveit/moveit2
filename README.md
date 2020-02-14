@@ -1,21 +1,31 @@
-<img src="http://moveit.ros.org/assets/images/moveit2_logo_black.png" alt="MoveIt Logo" width="200"/>
+<img src="https://github.com/ros-planning/moveit.ros.org/blob/master/assets/logo/moveit2/moveit_logo-black.png" alt="MoveIt 2 Logo" width="300"/>
 
-The MoveIt Motion Planning Framework for ROS 2
+The MoveIt Motion Planning Framework for **ROS 2**
 
-We are currently working on the upcoming Beta version of MoveIt 2.
-See the [MoveIt's website homepage](https://moveit.ros.org) for release dates and [this document](https://docs.google.com/spreadsheets/d/1aPb3hNP213iPHQIYgcnCYh9cGFUlZmi_06E_9iTSsOI/edit?usp=sharing) for our immediate migration progress.
+Currently we support ROS 2 Eloquent.
+
+- [Overview of MoveIt](http://moveit.ros.org)
+- [Installation Instructions](http://moveit.ros.org/install/)
+- [Documentation](http://moveit.ros.org/documentation/)
+- [Get Involved](http://moveit.ros.org/documentation/contributing/)
+
+## ROS 2 Migration Process and Roadmap
+
+See the [MoveIt website](https://moveit.ros.org) for release dates and [this document](https://docs.google.com/spreadsheets/d/1aPb3hNP213iPHQIYgcnCYh9cGFUlZmi_06E_9iTSsOI/edit?usp=sharing) for the current migration progress.
 
 Implementation instructions for the ROS 2 migration process can be found in our [Migration Guidelines](doc/MIGRATION_GUIDE.md).
 
-### Build from Source
+Plans for future milestones can be found in our [Development Roadmap](https://moveit.ros.org/documentation/contributing/roadmap/).
 
-> Note: Currently, only the moveit\_core packages are being compiled.
+## Build from Source
+
+> Note: See the [migration progress](https://docs.google.com/spreadsheets/d/1aPb3hNP213iPHQIYgcnCYh9cGFUlZmi_06E_9iTSsOI/edit?usp=sharing) for learning what packages are available.
 
 These instructions assume you are running on Ubuntu 18.04.
 
-1. [Install ROS2 Eloquent](https://index.ros.org/doc/ros2/Installation/Linux-Install-Debians/) (Make sure to set `export CHOOSE_ROS_DISTRO=Eloquent` and to source `/opt/ros/eloquent/setup.bash`)
+1. [Install ROS2 Eloquent](https://index.ros.org/doc/ros2/Installation/Eloquent/Linux-Install-Debians/) following the installation instructions. Use the desktop installation and don't forget to source the setup script.
 
-1. [Install ROS2 Build Tools](https://index.ros.org/doc/ros2/Installation/Linux-Development-Setup/#install-development-tools-and-ros-tools)
+1. [Install ROS2 Build Tools](https://index.ros.org/doc/ros2/Installation/Linux-Development-Setup/#install-development-tools-and-ros-tools) up until setting up rosdep (we're using slightly different steps for setting up our workspace)
 
 1. Create a colcon workspace:
 
@@ -27,7 +37,7 @@ These instructions assume you are running on Ubuntu 18.04.
 
         git clone git@github.com:ros-planning/moveit2.git
         vcs import < moveit2/moveit2.repos
-        rosdep install -r --from-path . --ignore-src --rosdistro eloquent -y
+        rosdep install -r --from-paths . --ignore-src --rosdistro eloquent -y
 
 1. Configure and build the workspace:
 
@@ -36,28 +46,14 @@ These instructions assume you are running on Ubuntu 18.04.
 
 1. Source the workspace:
 
-        source $COLCON_WS/install/local_setup.bash
+        source $COLCON_WS/install/setup.bash
+        
+## Getting Started
 
-
-## Roadmap
-The MoveIt Motion Planning Framework **for ROS 2.0**
-
-- [Milestones](#milestones)
-- [Overview of MoveIt!](http://moveit.ros.org)
-- [Installation Instructions](http://moveit.ros.org/install/)
-- [Documentation](http://moveit.ros.org/documentation/)
-- [Get Involved](http://moveit.ros.org/documentation/contributing/)
-- [Migration Guidelines](doc/MIGRATION_GUIDE.md)
+We've prepared a simple demo setup that you can use for quickly spinning up a simulated robot environment with MoveItCpp.
+See the [run_moveit_cpp](moveit_demo_nodes/run_moveit_cpp) demo package for further instructions and information.
 
 
 ## Continuous Integration Status
 
 [![Build Status](https://travis-ci.org/ros-planning/moveit2.svg?branch=master)](https://travis-ci.org/ros-planning/moveit2)
-
-## Docker Containers
-
-TODO [Create ROS2 Docker containers for MoveIt!](https://github.com/ros-planning/moveit2/issues/15)
-
-## ROS Buildfarm
-
-Debian releases of MoveIt2 will not be available during the alpha development stage. Check back May 2019.
