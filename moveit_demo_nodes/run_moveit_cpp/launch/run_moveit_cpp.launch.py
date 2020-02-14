@@ -72,7 +72,7 @@ def generate_launch_description():
                      arguments=['-d', rviz_config_file],
                      parameters=[robot_description])
 
-    # RobotStatePublisher
+    # Publish base link TF
     static_tf = Node(package='tf2_ros',
                      node_executable='static_transform_publisher',
                      node_name='static_transform_publisher',
