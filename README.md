@@ -1,25 +1,27 @@
 <img src="https://github.com/ros-planning/moveit.ros.org/blob/master/assets/logo/moveit2/moveit_logo-black.png" alt="MoveIt 2 Logo" width="300"/>
 
-The MoveIt Motion Planning Framework for **ROS 2**
+The MoveIt Motion Planning Framework for **ROS 2**. For ROS 1, see [MoveIt 1](https://github.com/ros-planning/moveit).
 
 Currently we support ROS 2 Eloquent.
 
-- [Overview of MoveIt](http://moveit.ros.org)
-- [Installation Instructions](http://moveit.ros.org/install/)
-- [Documentation](http://moveit.ros.org/documentation/)
-- [Get Involved](http://moveit.ros.org/documentation/contributing/)
+## Continuous Integration Status
 
-## ROS 2 Migration Process and Roadmap
+[![Build Status](https://travis-ci.org/ros-planning/moveit2.svg?branch=master)](https://travis-ci.org/ros-planning/moveit2)
 
-See the [MoveIt website](https://moveit.ros.org) for release dates and [this document](https://docs.google.com/spreadsheets/d/1aPb3hNP213iPHQIYgcnCYh9cGFUlZmi_06E_9iTSsOI/edit?usp=sharing) for the current migration progress.
+## General MoveIt Documentation
 
-Implementation instructions for the ROS 2 migration process can be found in our [Migration Guidelines](doc/MIGRATION_GUIDE.md).
+- [MoveIt Website](http://moveit.ros.org)
+- [Tutorials and Documentation](http://moveit.ros.org/documentation/)
+- [How to Get Involved](http://moveit.ros.org/documentation/contributing/)
+- [Future Release Dates](https://moveit.ros.org) (bottom of homepage)
 
-Plans for future milestones can be found in our [Development Roadmap](https://moveit.ros.org/documentation/contributing/roadmap/).
+## MoveIt 2 Specific Documentation
 
-## Build from Source
+- [MoveIt 2 Migration Progress](https://docs.google.com/spreadsheets/d/1aPb3hNP213iPHQIYgcnCYh9cGFUlZmi_06E_9iTSsOI/edit?usp=sharing)
+- [MoveIt 2 Migration Guidelines](doc/MIGRATION_GUIDE.md)
+- [MoveIt 2 Development Roadmap](https://moveit.ros.org/documentation/contributing/roadmap/)
 
-> Note: See the [migration progress](https://docs.google.com/spreadsheets/d/1aPb3hNP213iPHQIYgcnCYh9cGFUlZmi_06E_9iTSsOI/edit?usp=sharing) for learning what packages are available.
+# Build from Source
 
 These instructions assume you are running on Ubuntu 18.04.
 
@@ -47,13 +49,8 @@ These instructions assume you are running on Ubuntu 18.04.
 1. Source the workspace:
 
         source $COLCON_WS/install/setup.bash
-        
+
 ## Getting Started
 
 We've prepared a simple demo setup that you can use for quickly spinning up a simulated robot environment with MoveItCpp.
 See the [run_moveit_cpp](moveit_demo_nodes/run_moveit_cpp) demo package for further instructions and information.
-
-
-## Continuous Integration Status
-
-[![Build Status](https://travis-ci.org/ros-planning/moveit2.svg?branch=master)](https://travis-ci.org/ros-planning/moveit2)
