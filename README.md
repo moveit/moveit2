@@ -13,7 +13,7 @@ Currently we support ROS 2 Eloquent.
 - [MoveIt Website](http://moveit.ros.org)
 - [Tutorials and Documentation](http://moveit.ros.org/documentation/)
 - [How to Get Involved](http://moveit.ros.org/documentation/contributing/)
-- [Future Release Dates](https://moveit.ros.org) (bottom of homepage)
+- [Future Release Dates](https://moveit.ros.org/#release-versions)
 
 ## MoveIt 2 Specific Documentation
 
