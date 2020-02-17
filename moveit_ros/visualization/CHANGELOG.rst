@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2020-02-17)
+------------------
 * [fix] moveit_ros_visualization fixes (`#168 <https://github.com/ros-planning/moveit2/issues/168>`_)
   * robot_state_display: Fix empty robot description field
   * planning scene plugin: Fix destroySceneNode

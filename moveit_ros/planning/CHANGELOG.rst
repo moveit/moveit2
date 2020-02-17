@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2020-02-17)
+------------------
 * [fix] Fix double node executor exceptions
 * [fix] PlanningSceneMonitor: Fix double executor exception for service call
 * [sys] Fix export of moveit_ros_planning dependencies

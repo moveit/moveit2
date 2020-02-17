@@ -2,8 +2,8 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2020-02-17)
+------------------
 * [fix] Fix double node executor exceptions
   * Load parameters from node instead of SyncParameterClient
 * [fix] Load planning request adapter parameters from subnamespace

@@ -2,8 +2,8 @@
 Changelog for package run_moveit_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2020-02-17)
+------------------
 * [fix] Fix run_moveit_cpp version
 * [fix] ROS2 demo: Fix comment for static TF
 * [fix] ROS2 demo: Scope locked planning scene

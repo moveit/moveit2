@@ -2,8 +2,8 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2020-02-17)
+------------------
 * [fix] Fix OMPL logging macros
 * [fix] Fix OMPL planner plugin install
 * [improve] Load planner parameters from subnamespace
