@@ -37,7 +37,7 @@ These instructions assume you are running on Ubuntu 18.04.
 
 1. Download the repository and install any dependencies:
 
-        git clone git@github.com:ros-planning/moveit2.git
+        git clone https://github.com/ros-planning/moveit2.git -b master
         vcs import < moveit2/moveit2.repos
         rosdep install -r --from-paths . --ignore-src --rosdistro eloquent -y
 
