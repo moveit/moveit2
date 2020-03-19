@@ -133,7 +133,7 @@ bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
     planning_interface::PlannerConfigurationSettings& planner_config)
 {
   rcl_interfaces::msg::ListParametersResult planner_params_result = node_->list_parameters(
-      { parameter_namespace_ + ".planner_configs." + planner_id }, 1);  // TODO(henningkayser): verify search depth
+      { parameter_namespace_ + ".planner_configs." + planner_id }, 2);
 
   if (planner_params_result.names.empty())
   {
@@ -150,9 +150,9 @@ bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
   // read parameters specific for this configuration
   for (const auto& planner_param : planner_params_result.names)
   {
-    // TODO(henningkayser): verify name is working for config map
-    const rclcpp::Parameter param = node_->get_parameter(parameter_namespace_ + "." + planner_param);
-    planner_config.config[param.get_name()] = param.value_to_string();
+    const rclcpp::Parameter param = node_->get_parameter(planner_param);
+    auto param_name = planner_param.substr(planner_param.find(planner_id) + planner_id.size() + 1);
+    planner_config.config[param_name] = param.value_to_string();
   }
 
   return true;
