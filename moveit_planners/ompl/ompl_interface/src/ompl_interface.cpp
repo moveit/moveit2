@@ -132,8 +132,8 @@ bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
     const std::map<std::string, std::string>& group_params,
     planning_interface::PlannerConfigurationSettings& planner_config)
 {
-  rcl_interfaces::msg::ListParametersResult planner_params_result = node_->list_parameters(
-      { parameter_namespace_ + ".planner_configs." + planner_id }, 2);
+  rcl_interfaces::msg::ListParametersResult planner_params_result =
+      node_->list_parameters({ parameter_namespace_ + ".planner_configs." + planner_id }, 2);
 
   if (planner_params_result.names.empty())
   {
