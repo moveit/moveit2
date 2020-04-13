@@ -41,27 +41,35 @@
 #pragma once
 
 #include <moveit/move_group/move_group_capability.h>
-#include <actionlib/server/simple_action_server.h>
-#include <moveit_msgs/ExecuteTrajectoryAction.h>
+#include <rclcpp_action/rclcpp_action.hpp>
+#include <moveit_msgs/action/execute_trajectory.hpp>
+
 #include <memory>
 
 namespace move_group
 {
+using ExecTrajectory = moveit_msgs::action::ExecuteTrajectory;
+using ExecTrajectoryGoal = rclcpp_action::ServerGoalHandle<ExecTrajectory>;
+
 class MoveGroupExecuteTrajectoryAction : public MoveGroupCapability
 {
+  
 public:
   MoveGroupExecuteTrajectoryAction();
 
   void initialize() override;
 
 private:
-  void executePathCallback(const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal);
-  void executePath(const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal,
-                   moveit_msgs::action::ExecuteTrajectoryResult& action_res);
-  void preemptExecuteTrajectoryCallback();
-  void setExecuteTrajectoryState(MoveGroupState state);
+  void executePathCallback(std::shared_ptr<ExecTrajectoryGoal> goal);
+  void executePath(const std::shared_ptr<ExecTrajectoryGoal>& goal,
+                   std::shared_ptr<ExecTrajectory::Result>& action_res);
 
-  std::unique_ptr<actionlib::SimpleActionServer<moveit_msgs::action::ExecuteTrajectoryAction> > execute_action_server_;
+  void preemptExecuteTrajectoryCallback();
+  void setExecuteTrajectoryState(MoveGroupState state,
+    const std::shared_ptr<ExecTrajectoryGoal>& goal);
+
+  std::shared_ptr<rclcpp_action::Server<ExecTrajectory>> execute_action_server_;
+
 };
 
 }  // namespace move_group

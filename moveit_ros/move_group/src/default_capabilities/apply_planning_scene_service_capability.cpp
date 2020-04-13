@@ -39,26 +39,36 @@
 
 namespace move_group
 {
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.apply_planning_scene_service_capability");
+
 ApplyPlanningSceneService::ApplyPlanningSceneService() : MoveGroupCapability("ApplyPlanningSceneService")
 {
 }
 
 void ApplyPlanningSceneService::initialize()
 {
-  service_ = root_node_handle_.advertiseService(APPLY_PLANNING_SCENE_SERVICE_NAME,
-                                                &ApplyPlanningSceneService::applyScene, this);
+  using std::placeholders::_1;
+  using std::placeholders::_2;
+  using std::placeholders::_3;
+
+  service_ = root_node_->create_service<moveit_msgs::srv::ApplyPlanningScene>(
+    APPLY_PLANNING_SCENE_SERVICE_NAME,
+    std::bind(&ApplyPlanningSceneService::applyScene, this, _1, _2, _3));
 }
 
-bool ApplyPlanningSceneService::applyScene(moveit_msgs::srv::ApplyPlanningScene::Request& req,
-                                           moveit_msgs::srv::ApplyPlanningScene::Response& res)
+bool ApplyPlanningSceneService::applyScene(
+  const std::shared_ptr<rmw_request_id_t> request_header,
+  const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request> req,
+  std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response> res)
 {
   if (!context_->planning_scene_monitor_)
   {
-    ROS_ERROR_NAMED(getName(), "Cannot apply PlanningScene as no scene is monitored.");
+    RCLCPP_ERROR(LOGGER, "Cannot apply PlanningScene as no scene is monitored.");
     return true;
   }
   context_->planning_scene_monitor_->updateFrameTransforms();
-  res.success = context_->planning_scene_monitor_->newPlanningSceneMessage(req.scene);
+  res->success = context_->planning_scene_monitor_->newPlanningSceneMessage(req->scene);
   return true;
 }
 }  // namespace move_group
