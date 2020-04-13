@@ -102,5 +102,6 @@ ament_export_dependencies(tf2_ros)
 ament_export_dependencies(ament_cmake)
 ament_export_dependencies(moveit_core)
 ament_export_dependencies(moveit_ros_occupancy_map_monitor)
+ament_export_include_directories(include)
 
 ament_package()
