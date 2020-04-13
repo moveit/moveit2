@@ -39,7 +39,9 @@
 #include <stdexcept>
 #include <sstream>
 #include <memory>
+#if 0 //@todo
 #include <moveit/warehouse/constraints_storage.h>
+#endif
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/move_group/capability_names.h>
 #include <moveit/move_group_pick_place_capability/capability_names.h>
@@ -50,23 +52,20 @@
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <moveit/common_planning_interface_objects/common_objects.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/action/pickup_action.h>
-#include <moveit_msgs/action/execute_trajectory_action.h>
-#include <moveit_msgs/action/place_action.h>
-#include <moveit_msgs/srv/execute_known_trajectory.h>
-#include <moveit_msgs/srv/query_planner_interfaces.h>
-#include <moveit_msgs/srv/get_cartesian_path.h>
-#include <moveit_msgs/srv/grasp_planning.h>
+
+#include <moveit_msgs/srv/execute_known_trajectory.hpp>
+#include <moveit_msgs/srv/query_planner_interfaces.hpp>
+#include <moveit_msgs/srv/get_cartesian_path.hpp>
+#include <moveit_msgs/srv/grasp_planning.hpp>
 #include <moveit_msgs/srv/get_planner_params.hpp>
 #include <moveit_msgs/srv/set_planner_params.hpp>
+#include <moveit_msgs/msg/place_location.hpp>
 
-#include <std_msgs/msg/string.h>
+#include <std_msgs/msg/string.hpp>
 #include <geometry_msgs/msg/transform_stamped.h>
 #include <tf2/utils.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_ros/transform_listener.h>
-#include <ros/console.h>
-#include <ros/ros.h>
 
 namespace moveit
 {
@@ -92,22 +91,22 @@ class MoveGroupInterface::MoveGroupInterfaceImpl
 {
 public:
   MoveGroupInterfaceImpl(const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-                         const ros::WallDuration& wait_for_servers)
-    : opt_(opt), node_handle_(opt.node_handle_), tf_buffer_(tf_buffer)
+                         const rclcpp::Duration& wait_for_servers)
+    : opt_(opt), node_(opt.node_), tf_buffer_(tf_buffer)
   {
-    robot_model_ = opt.robot_model_ ? opt.robot_model_ : getSharedRobotModel(opt.robot_description_);
+    robot_model_ = opt.robot_model_ ? opt.robot_model_ : getSharedRobotModel(node_, opt.robot_description_);
     if (!getRobotModel())
     {
       std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
                           "parameter server.";
-      ROS_FATAL_STREAM_NAMED("move_group_interface", error);
+      RCLCPP_FATAL_STREAM(rclcpp::get_logger("move_group_interface"), error);
       throw std::runtime_error(error);
     }
 
     if (!getRobotModel()->hasJointModelGroup(opt.group_name_))
     {
       std::string error = "Group '" + opt.group_name_ + "' was not found.";
-      ROS_FATAL_STREAM_NAMED("move_group_interface", error);
+      RCLCPP_FATAL_STREAM(rclcpp::get_logger("move_group_interface"), error);
       throw std::runtime_error(error);
     }
 
@@ -132,104 +131,49 @@ public:
       end_effector_link_ = joint_model_group_->getLinkModelNames().back();
     pose_reference_frame_ = getRobotModel()->getModelFrame();
 
-    trajectory_event_publisher_ = node_handle_.advertise<std_msgs::msg::String>(
-        trajectory_execution_manager::TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC, 1, false);
-    attached_object_publisher_ = node_handle_.advertise<moveit_msgs::msg::AttachedCollisionObject>(
-        planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC, 1, false);
+    trajectory_event_publisher_ = node_->create_publisher<std_msgs::msg::String>(
+        trajectory_execution_manager::TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC, 1);
+    attached_object_publisher_ = node_->create_publisher<moveit_msgs::msg::AttachedCollisionObject>(
+        planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC, 1);
 
-    current_state_monitor_ = getSharedStateMonitor(robot_model_, tf_buffer_, node_handle_);
+#if 0 //@todo: see common_planning_interface/common_objects.h
+    current_state_monitor_ = getSharedStateMonitor(robot_model_, tf_buffer_, node_);
+#endif
+    rclcpp::Time timeout_for_servers = node_->get_clock()->now() + wait_for_servers;
+    if (wait_for_servers == rclcpp::Duration(std::chrono::duration_values<double>::max())) //@todo ; no rclcpp::Duration() representation for infinite time
+      timeout_for_servers = rclcpp::Time();  // wait for ever
+    double allotted_time = wait_for_servers.seconds();
 
-    ros::WallTime timeout_for_servers = ros::WallTime::now() + wait_for_servers;
-    if (wait_for_servers == ros::WallDuration())
-      timeout_for_servers = ros::WallTime();  // wait for ever
-    double allotted_time = wait_for_servers.toSec();
+    move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(
+        node_, move_group::MOVE_ACTION);
+    move_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
 
-    move_action_client_.reset(new actionlib::SimpleActionClient<moveit_msgs::action::MoveGroupAction>(
-        node_handle_, move_group::MOVE_ACTION, false));
-    waitForAction(move_action_client_, move_group::MOVE_ACTION, timeout_for_servers, allotted_time);
+    pick_action_client_ = rclcpp_action::create_client<moveit_msgs::action::Pickup>(
+        node_, move_group::PICKUP_ACTION);
+    pick_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
 
-    pick_action_client_.reset(new actionlib::SimpleActionClient<moveit_msgs::action::PickupAction>(
-        node_handle_, move_group::PICKUP_ACTION, false));
-    waitForAction(pick_action_client_, move_group::PICKUP_ACTION, timeout_for_servers, allotted_time);
+    place_action_client_ = rclcpp_action::create_client<moveit_msgs::action::Place>(
+        node_, move_group::PLACE_ACTION);
+    place_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
 
-    place_action_client_.reset(new actionlib::SimpleActionClient<moveit_msgs::action::PlaceAction>(
-        node_handle_, move_group::PLACE_ACTION, false));
-    waitForAction(place_action_client_, move_group::PLACE_ACTION, timeout_for_servers, allotted_time);
-
-    execute_action_client_.reset(new actionlib::SimpleActionClient<moveit_msgs::action::ExecuteTrajectoryAction>(
-        node_handle_, move_group::EXECUTE_ACTION_NAME, false));
-    waitForAction(execute_action_client_, move_group::EXECUTE_ACTION_NAME, timeout_for_servers, allotted_time);
-
+    execute_action_client_ = rclcpp_action::create_client<moveit_msgs::action::ExecuteTrajectory>(
+        node_, move_group::EXECUTE_ACTION_NAME);
+    execute_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
+    
     query_service_ =
-        node_handle_.serviceClient<moveit_msgs::srv::QueryPlannerInterfaces>(move_group::QUERY_PLANNERS_SERVICE_NAME);
+        node_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(move_group::QUERY_PLANNERS_SERVICE_NAME);
     get_params_service_ =
-        node_handle_.serviceClient<moveit_msgs::srv::GetPlannerParams>(move_group::GET_PLANNER_PARAMS_SERVICE_NAME);
+        node_->create_client<moveit_msgs::srv::GetPlannerParams>(move_group::GET_PLANNER_PARAMS_SERVICE_NAME);
     set_params_service_ =
-        node_handle_.serviceClient<moveit_msgs::srv::SetPlannerParams>(move_group::SET_PLANNER_PARAMS_SERVICE_NAME);
+        node_->create_client<moveit_msgs::srv::SetPlannerParams>(move_group::SET_PLANNER_PARAMS_SERVICE_NAME);
 
     cartesian_path_service_ =
-        node_handle_.serviceClient<moveit_msgs::srv::GetCartesianPath>(move_group::CARTESIAN_PATH_SERVICE_NAME);
+        node_->create_client<moveit_msgs::srv::GetCartesianPath>(move_group::CARTESIAN_PATH_SERVICE_NAME);
 
-    plan_grasps_service_ = node_handle_.serviceClient<moveit_msgs::srv::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
+    plan_grasps_service_ = node_->create_client<moveit_msgs::srv::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
 
-    ROS_INFO_STREAM_NAMED("move_group_interface", "Ready to take commands for planning group " << opt.group_name_
+    RCLCPP_INFO_STREAM(rclcpp::get_logger("move_group_interface"), "Ready to take commands for planning group " << opt.group_name_
                                                                                                << ".");
-  }
-
-  template <typename T>
-  void waitForAction(const T& action, const std::string& name, const ros::WallTime& timeout, double allotted_time) const
-  {
-    ROS_DEBUG_NAMED("move_group_interface", "Waiting for move_group action server (%s)...", name.c_str());
-
-    // wait for the server (and spin as needed)
-    if (timeout == ros::WallTime())  // wait forever
-    {
-      while (node_handle_.ok() && !action->isServerConnected())
-      {
-        ros::WallDuration(0.001).sleep();
-        // explicit ros::spinOnce on the callback queue used by NodeHandle that manages the action client
-        ros::CallbackQueue* queue = dynamic_cast<ros::CallbackQueue*>(node_handle_.getCallbackQueue());
-        if (queue)
-        {
-          queue->callAvailable();
-        }
-        else  // in case of nodelets and specific callback queue implementations
-        {
-          ROS_WARN_ONCE_NAMED("move_group_interface", "Non-default CallbackQueue: Waiting for external queue "
-                                                      "handling.");
-        }
-      }
-    }
-    else  // wait with timeout
-    {
-      while (node_handle_.ok() && !action->isServerConnected() && timeout > ros::WallTime::now())
-      {
-        ros::WallDuration(0.001).sleep();
-        // explicit ros::spinOnce on the callback queue used by NodeHandle that manages the action client
-        ros::CallbackQueue* queue = dynamic_cast<ros::CallbackQueue*>(node_handle_.getCallbackQueue());
-        if (queue)
-        {
-          queue->callAvailable();
-        }
-        else  // in case of nodelets and specific callback queue implementations
-        {
-          ROS_WARN_ONCE_NAMED("move_group_interface", "Non-default CallbackQueue: Waiting for external queue "
-                                                      "handling.");
-        }
-      }
-    }
-
-    if (!action->isServerConnected())
-    {
-      std::stringstream error;
-      error << "Unable to connect to move_group action server '" << name << "' within allotted time (" << allotted_time
-            << "s)";
-      throw std::runtime_error(error.str());
-    }
-    else
-    {
-      ROS_DEBUG_NAMED("move_group_interface", "Connected to '%s'", name.c_str());
-    }
   }
 
   ~MoveGroupInterfaceImpl()
@@ -258,35 +202,47 @@ public:
     return joint_model_group_;
   }
 
-  actionlib::SimpleActionClient<moveit_msgs::action::MoveGroupAction>& getMoveGroupClient() const
+  rclcpp_action::Client<moveit_msgs::action::MoveGroup>& getMoveGroupClient() const
   {
     return *move_action_client_;
   }
 
   bool getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc)
   {
-    moveit_msgs::srv::QueryPlannerInterfaces::Request req;
-    moveit_msgs::srv::QueryPlannerInterfaces::Response res;
-    if (query_service_.call(req, res))
-      if (!res.planner_interfaces.empty())
+    auto req = std::make_shared<moveit_msgs::srv::QueryPlannerInterfaces::Request>();
+    moveit_msgs::srv::QueryPlannerInterfaces::Response::SharedPtr response;
+    
+    auto res = query_service_->async_send_request(req);
+
+    //if (query_service_->call(req, res))
+    if (rclcpp::spin_until_future_complete(node_, res) == rclcpp::executor::FutureReturnCode::SUCCESS)
+    {
+      response = res.get();
+      if (!response->planner_interfaces.empty())
       {
-        desc = res.planner_interfaces.front();
+        desc = response->planner_interfaces.front();
         return true;
       }
+    }
     return false;
   }
 
   std::map<std::string, std::string> getPlannerParams(const std::string& planner_id, const std::string& group = "")
   {
-    moveit_msgs::srv::GetPlannerParams::Request req;
-    moveit_msgs::srv::GetPlannerParams::Response res;
-    req.planner_config = planner_id;
-    req.group = group;
+    auto req = std::make_shared<moveit_msgs::srv::GetPlannerParams::Request>();
+    moveit_msgs::srv::GetPlannerParams::Response::SharedPtr response;
+    req->planner_config = planner_id;
+    req->group = group;
     std::map<std::string, std::string> result;
-    if (get_params_service_.call(req, res))
+
+    auto res = get_params_service_->async_send_request(req);
+    //if (get_params_service_.call(req, res))
+    if (rclcpp::spin_until_future_complete(node_, res) ==
+      rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      for (unsigned int i = 0, end = res.params.keys.size(); i < end; ++i)
-        result[res.params.keys[i]] = res.params.values[i];
+      response = res.get();
+      for (unsigned int i = 0, end = response->params.keys.size(); i < end; ++i)
+        result[response->params.keys[i]] = response->params.values[i];
     }
     return result;
   }
@@ -294,17 +250,16 @@ public:
   void setPlannerParams(const std::string& planner_id, const std::string& group,
                         const std::map<std::string, std::string>& params, bool replace = false)
   {
-    moveit_msgs::srv::SetPlannerParams::Request req;
-    moveit_msgs::srv::SetPlannerParams::Response res;
-    req.planner_config = planner_id;
-    req.group = group;
-    req.replace = replace;
+    auto req = std::make_shared<moveit_msgs::srv::SetPlannerParams::Request>();
+    req->planner_config = planner_id;
+    req->group = group;
+    req->replace = replace;
     for (const std::pair<const std::string, std::string>& param : params)
     {
-      req.params.keys.push_back(param.first);
-      req.params.values.push_back(param.second);
+      req->params.keys.push_back(param.first);
+      req->params.values.push_back(param.second);
     }
-    set_params_service_.call(req, res);
+    set_params_service_->async_send_request(req);
   }
 
   std::string getDefaultPlannerId(const std::string& group) const
@@ -316,7 +271,7 @@ public:
     param_name << "/default_planner_config";
 
     std::string default_planner_config;
-    node_handle_.getParam(param_name.str(), default_planner_config);
+    node_->get_parameter(param_name.str(), default_planner_config);
     return default_planner_config;
   }
 
@@ -419,7 +374,7 @@ public:
         }
         else
         {
-          ROS_ERROR_NAMED("move_group_interface", "Unable to transform from frame '%s' to frame '%s'", frame.c_str(),
+          RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "Unable to transform from frame '%s' to frame '%s'", frame.c_str(),
                           getRobotModel()->getModelFrame().c_str());
           return false;
         }
@@ -468,7 +423,7 @@ public:
     const std::string& eef = end_effector_link.empty() ? end_effector_link_ : end_effector_link;
     if (eef.empty())
     {
-      ROS_ERROR_NAMED("move_group_interface", "No end-effector to set the pose for");
+      RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "No end-effector to set the pose for");
       return false;
     }
     else
@@ -477,7 +432,7 @@ public:
       // make sure we don't store an actual stamp, since that will become stale can potentially cause tf errors
       std::vector<geometry_msgs::msg::PoseStamped>& stored_poses = pose_targets_[eef];
       for (geometry_msgs::msg::PoseStamped& stored_pose : stored_poses)
-        stored_pose.header.stamp = ros::Time(0);
+        stored_pose.header.stamp = rclcpp::Time(0);
     }
     return true;
   }
@@ -500,7 +455,7 @@ public:
 
     // or return an error
     static const geometry_msgs::msg::PoseStamped UNKNOWN;
-    ROS_ERROR_NAMED("move_group_interface", "Pose for end-effector '%s' not known.", eef.c_str());
+    RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "Pose for end-effector '%s' not known.", eef.c_str());
     return UNKNOWN;
   }
 
@@ -515,7 +470,7 @@ public:
 
     // or return an error
     static const std::vector<geometry_msgs::msg::PoseStamped> EMPTY;
-    ROS_ERROR_NAMED("move_group_interface", "Poses for end-effector '%s' are not known.", eef.c_str());
+    RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "Poses for end-effector '%s' are not known.", eef.c_str());
     return EMPTY;
   }
 
@@ -548,7 +503,7 @@ public:
   {
     if (!current_state_monitor_)
     {
-      ROS_ERROR_NAMED("move_group_interface", "Unable to monitor current robot state");
+      RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "Unable to monitor current robot state");
       return false;
     }
 
@@ -564,7 +519,7 @@ public:
   {
     if (!current_state_monitor_)
     {
-      ROS_ERROR_NAMED("move_group_interface", "Unable to get current robot state");
+      RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "Unable to get current robot state");
       return false;
     }
 
@@ -572,9 +527,9 @@ public:
     if (!current_state_monitor_->isActive())
       current_state_monitor_->startStateMonitor();
 
-    if (!current_state_monitor_->waitForCurrentState(ros::Time::now(), wait_seconds))
+    if (!current_state_monitor_->waitForCurrentState(node_->get_clock()->now(), wait_seconds))
     {
-      ROS_ERROR_NAMED("move_group_interface", "Failed to fetch current robot state");
+      RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "Failed to fetch current robot state");
       return false;
     }
 
@@ -589,7 +544,7 @@ public:
     std::vector<moveit_msgs::msg::PlaceLocation> locations;
     for (const geometry_msgs::msg::PoseStamped& pose : poses)
     {
-      moveit_msgs::action::PlaceLocation location;
+      moveit_msgs::msg::PlaceLocation location;
       location.pre_place_approach.direction.vector.z = -1.0;
       location.post_place_retreat.direction.vector.x = -1.0;
       location.pre_place_approach.direction.header.frame_id = getRobotModel()->getModelFrame();
@@ -604,71 +559,49 @@ public:
       location.place_pose = pose;
       locations.push_back(location);
     }
-    ROS_DEBUG_NAMED("move_group_interface", "Move group interface has %u place locations",
+    RCLCPP_DEBUG(rclcpp::get_logger("move_group_interface"), "Move group interface has %u place locations",
                     (unsigned int)locations.size());
     return locations;
   }
 
-  MoveItErrorCode place(const moveit_msgs::action::PlaceGoal& goal)
+  MoveItErrorCode place(const moveit_msgs::action::Place::Goal& goal)
   {
-    if (!place_action_client_)
+    if (!place_action_client_ || !place_action_client_->action_server_is_ready())
     {
-      ROS_ERROR_STREAM_NAMED("move_group_interface", "Place action client not found");
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger("move_group_interface"), "Place action client not found/not ready");
       return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
-    if (!place_action_client_->isServerConnected())
+    
+    int64_t timeout = 3.0;
+    auto future = place_action_client_->async_send_goal(goal);
+    if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(timeout)) !=
+      rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      ROS_ERROR_STREAM_NAMED("move_group_interface", "Place action server not connected");
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger("move_group_interface"), "Place action timeout reached");
       return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
-
-    place_action_client_->sendGoal(goal);
-    ROS_DEBUG_NAMED("move_group_interface", "Sent place goal with %d locations", (int)goal.place_locations.size());
-    if (!place_action_client_->waitForResult())
-    {
-      ROS_INFO_STREAM_NAMED("move_group_interface", "Place action returned early");
-    }
-    if (place_action_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-    {
-      return MoveItErrorCode(place_action_client_->getResult()->error_code);
-    }
-    else
-    {
-      ROS_WARN_STREAM_NAMED("move_group_interface", "Fail: " << place_action_client_->getState().toString() << ": "
-                                                             << place_action_client_->getState().getText());
-      return MoveItErrorCode(place_action_client_->getResult()->error_code);
-    }
+    return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
   }
 
-  MoveItErrorCode pick(const moveit_msgs::action::PickupGoal& goal)
+  MoveItErrorCode pick(const moveit_msgs::action::Pickup::Goal& goal)
   {
-    if (!pick_action_client_)
+    if (!pick_action_client_ || !pick_action_client_->action_server_is_ready())
     {
-      ROS_ERROR_STREAM_NAMED("move_group_interface", "Pick action client not found");
-      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
-    }
-    if (!pick_action_client_->isServerConnected())
-    {
-      ROS_ERROR_STREAM_NAMED("move_group_interface", "Pick action server not connected");
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger("move_group_interface"), "Pick action client not found/not ready");
       return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
 
-    pick_action_client_->sendGoal(goal);
-    if (!pick_action_client_->waitForResult())
+    int64_t timeout = 3.0;
+    auto future = pick_action_client_->async_send_goal(goal);
+    if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(timeout)) !=
+      rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      ROS_INFO_STREAM_NAMED("move_group_interface", "Pickup action returned early");
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger("move_group_interface"), "Pick action timeout reached");
+      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
-    if (pick_action_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-    {
-      return MoveItErrorCode(pick_action_client_->getResult()->error_code);
-    }
-    else
-    {
-      ROS_WARN_STREAM_NAMED("move_group_interface", "Fail: " << pick_action_client_->getState().toString() << ": "
-                                                             << pick_action_client_->getState().getText());
-      return MoveItErrorCode(pick_action_client_->getResult()->error_code);
-    }
+    return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
   }
+
 
   MoveItErrorCode planGraspsAndPick(const std::string& object, bool plan_only = false)
   {
@@ -683,7 +616,7 @@ public:
 
     if (objects.empty())
     {
-      ROS_ERROR_STREAM_NAMED("move_group_interface", "Asked for grasps for the object '"
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger("move_group_interface"), "Asked for grasps for the object '"
                                                          << object << "', but the object could not be found");
       return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::INVALID_OBJECT_NAME);
     }
@@ -695,82 +628,90 @@ public:
   {
     if (!plan_grasps_service_)
     {
-      ROS_ERROR_STREAM_NAMED("move_group_interface", "Grasp planning service '"
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger("move_group_interface"), "Grasp planning service '"
                                                          << GRASP_PLANNING_SERVICE_NAME
                                                          << "' is not available."
                                                             " This has to be implemented and started separately.");
       return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
 
-    moveit_msgs::srv::GraspPlanning::Request request;
-    moveit_msgs::srv::GraspPlanning::Response response;
+    auto request = std::make_shared<moveit_msgs::srv::GraspPlanning::Request>();
+    moveit_msgs::srv::GraspPlanning::Response::SharedPtr response;
 
-    request.group_name = opt_.group_name_;
-    request.target = object;
-    request.support_surfaces.push_back(support_surface_);
+    request->group_name = opt_.group_name_;
+    request->target = object;
+    request->support_surfaces.push_back(support_surface_);
 
-    ROS_DEBUG_NAMED("move_group_interface", "Calling grasp planner...");
-    if (!plan_grasps_service_.call(request, response) ||
-        response.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+    RCLCPP_DEBUG(rclcpp::get_logger("move_group_interface"), "Calling grasp planner...");
+
+    auto res = plan_grasps_service_->async_send_request(request);
+    if (rclcpp::spin_until_future_complete(node_, res) !=
+          rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      ROS_ERROR_NAMED("move_group_interface", "Grasp planning failed. Unable to pick.");
+      RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "Grasp planning failed. Unable to pick.");
       return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
-
-    return pick(constructPickupGoal(object.id, std::move(response.grasps), plan_only));
+    response = res.get();
+    if (response->error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+    {
+      RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "Grasp planning failed. Unable to pick.");
+      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+    }
+    return pick(constructPickupGoal(object.id, std::move(response->grasps), plan_only));
   }
 
   MoveItErrorCode plan(Plan& plan)
   {
-    if (!move_action_client_)
+    if (!move_action_client_ || !move_action_client_->action_server_is_ready())
     {
+      RCLCPP_INFO_STREAM(rclcpp::get_logger("move_group_interface"), "MoveGroup action client/server not ready");
       return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
-    if (!move_action_client_->isServerConnected())
-    {
-      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
-    }
-
-    moveit_msgs::action::MoveGroupGoal goal;
+    
+    moveit_msgs::action::MoveGroup::Goal goal;
     constructGoal(goal);
     goal.planning_options.plan_only = true;
     goal.planning_options.look_around = false;
     goal.planning_options.replan = false;
     goal.planning_options.planning_scene_diff.is_diff = true;
     goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
+    
+    int64_t timeout = 3;
+    auto future = move_action_client_->async_send_goal(goal);
+    if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(timeout)) !=
+      rclcpp::executor::FutureReturnCode::SUCCESS)
+    {
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger("move_group_interface"), "MoveGroup action failed or timeout reached");
+      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+    }
 
-    move_action_client_->sendGoal(goal);
-    if (!move_action_client_->waitForResult())
+    auto goal_handle = future.get();
+    auto result_future = move_action_client_->async_get_result(goal_handle);
+    auto wait_result = rclcpp::spin_until_future_complete(node_, result_future,
+     std::chrono::seconds(timeout));
+    if (wait_result != rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      ROS_INFO_STREAM_NAMED("move_group_interface", "MoveGroup action returned early");
+      RCLCPP_WARN_STREAM(rclcpp::get_logger("move_group_interface"), 
+                      "ErrorCode: " << wait_result);
     }
-    if (move_action_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-    {
-      plan.trajectory_ = move_action_client_->getResult()->planned_trajectory;
-      plan.start_state_ = move_action_client_->getResult()->trajectory_start;
-      plan.planning_time_ = move_action_client_->getResult()->planning_time;
-      return MoveItErrorCode(move_action_client_->getResult()->error_code);
-    }
-    else
-    {
-      ROS_WARN_STREAM_NAMED("move_group_interface", "Fail: " << move_action_client_->getState().toString() << ": "
-                                                             << move_action_client_->getState().getText());
-      return MoveItErrorCode(move_action_client_->getResult()->error_code);
-    }
+
+    auto res = result_future.get();
+    plan.trajectory_ = res.result->planned_trajectory;
+    plan.start_state_ = res.result->trajectory_start;
+    plan.planning_time_ = res.result->planning_time;
+    
+    return res.result->error_code;
   }
 
   MoveItErrorCode move(bool wait)
   {
-    if (!move_action_client_)
+    if (!move_action_client_ || !move_action_client_->action_server_is_ready())
     {
-      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
-    }
-    if (!move_action_client_->isServerConnected())
-    {
+      RCLCPP_INFO_STREAM(rclcpp::get_logger("move_group_interface"), "MoveGroup action client/server not ready");
       return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
 
-    moveit_msgs::action::MoveGroupGoal goal;
+    moveit_msgs::action::MoveGroup::Goal goal;
     constructGoal(goal);
     goal.planning_options.plan_only = false;
     goal.planning_options.look_around = can_look_;
@@ -779,60 +720,67 @@ public:
     goal.planning_options.planning_scene_diff.is_diff = true;
     goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
 
-    move_action_client_->sendGoal(goal);
+    auto future = move_action_client_->async_send_goal(goal);
     if (!wait)
+      return MoveItErrorCode::SUCCESS;
+
+    int64_t timeout = 3;
+    if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(timeout)) !=
+      rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger("move_group_interface"), "MoveGroup action failed or timeout reached");
+      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
 
-    if (!move_action_client_->waitForResult())
+    auto goal_handle = future.get();
+    auto result_future = move_action_client_->async_get_result(goal_handle);
+    auto wait_result = rclcpp::spin_until_future_complete(node_, result_future,
+     std::chrono::seconds(timeout));
+    if (wait_result != rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      ROS_INFO_STREAM_NAMED("move_group_interface", "MoveGroup action returned early");
+      RCLCPP_WARN_STREAM(rclcpp::get_logger("move_group_interface"), 
+                      "ErrorCode: " << wait_result);
     }
 
-    if (move_action_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-    {
-      return MoveItErrorCode(move_action_client_->getResult()->error_code);
-    }
-    else
-    {
-      ROS_INFO_STREAM_NAMED("move_group_interface", move_action_client_->getState().toString()
-                                                        << ": " << move_action_client_->getState().getText());
-      return MoveItErrorCode(move_action_client_->getResult()->error_code);
-    }
+    auto res = result_future.get();
+    return res.result->error_code;
   }
 
   MoveItErrorCode execute(const Plan& plan, bool wait)
   {
-    if (!execute_action_client_->isServerConnected())
+    if (!execute_action_client_ || !execute_action_client_->action_server_is_ready())
     {
+      RCLCPP_INFO_STREAM(rclcpp::get_logger("move_group_interface"), "execute_action_client_ client/server not ready");
       return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
 
-    moveit_msgs::action::ExecuteTrajectoryGoal goal;
+    int64_t timeout = 3;
+    moveit_msgs::action::ExecuteTrajectory::Goal goal;
     goal.trajectory = plan.trajectory_;
 
-    execute_action_client_->sendGoal(goal);
+    auto future = execute_action_client_->async_send_goal(goal);
     if (!wait)
+      return MoveItErrorCode::SUCCESS;
+
+    if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(timeout)) !=
+          rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger("move_group_interface"), "execute_action_client_ action failed or timeout reached");
+      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
 
-    if (!execute_action_client_->waitForResult())
+    auto goal_handle = future.get();
+    auto result_future = execute_action_client_->async_get_result(goal_handle);
+    auto wait_result = rclcpp::spin_until_future_complete(node_, result_future,
+     std::chrono::seconds(timeout));
+    if (wait_result != rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      ROS_INFO_STREAM_NAMED("move_group_interface", "ExecuteTrajectory action returned early");
+      RCLCPP_WARN_STREAM(rclcpp::get_logger("move_group_interface"), 
+                      "ErrorCode: " << wait_result);
     }
 
-    if (execute_action_client_->getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-    {
-      return MoveItErrorCode(execute_action_client_->getResult()->error_code);
-    }
-    else
-    {
-      ROS_INFO_STREAM_NAMED("move_group_interface", execute_action_client_->getState().toString()
-                                                        << ": " << execute_action_client_->getState().getText());
-      return MoveItErrorCode(execute_action_client_->getResult()->error_code);
-    }
+    auto res = result_future.get();
+    return res.result->error_code;
   }
 
   double computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double step,
@@ -840,31 +788,33 @@ public:
                               const moveit_msgs::msg::Constraints& path_constraints, bool avoid_collisions,
                               moveit_msgs::msg::MoveItErrorCodes& error_code)
   {
-    moveit_msgs::srv::GetCartesianPath::Request req;
-    moveit_msgs::srv::GetCartesianPath::Response res;
+    auto req = std::make_shared<moveit_msgs::srv::GetCartesianPath::Request>();
+    moveit_msgs::srv::GetCartesianPath::Response::SharedPtr response;
 
     if (considered_start_state_)
-      robot_state::robotStateToRobotStateMsg(*considered_start_state_, req.start_state);
+      robot_state::robotStateToRobotStateMsg(*considered_start_state_, req->start_state);
     else
-      req.start_state.is_diff = true;
+      req->start_state.is_diff = true;
 
-    req.group_name = opt_.group_name_;
-    req.header.frame_id = getPoseReferenceFrame();
-    req.header.stamp = ros::Time::now();
-    req.waypoints = waypoints;
-    req.max_step = step;
-    req.jump_threshold = jump_threshold;
-    req.path_constraints = path_constraints;
-    req.avoid_collisions = avoid_collisions;
-    req.link_name = getEndEffectorLink();
+    req->group_name = opt_.group_name_;
+    req->header.frame_id = getPoseReferenceFrame();
+    req->header.stamp = getClock()->now();
+    req->waypoints = waypoints;
+    req->max_step = step;
+    req->jump_threshold = jump_threshold;
+    req->path_constraints = path_constraints;
+    req->avoid_collisions = avoid_collisions;
+    req->link_name = getEndEffectorLink();
 
-    if (cartesian_path_service_.call(req, res))
+    auto res = cartesian_path_service_->async_send_request(req);
+    if (rclcpp::spin_until_future_complete(node_, res) == rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      error_code = res.error_code;
-      if (res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+      response = res.get();
+      error_code = response->error_code;
+      if (response->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
       {
-        msg = res.solution;
-        return res.fraction;
+        msg = response->solution;
+        return response->fraction;
       }
       else
         return -1.0;
@@ -882,7 +832,7 @@ public:
     {
       std_msgs::msg::String event;
       event.data = "stop";
-      trajectory_event_publisher_.publish(event);
+      trajectory_event_publisher_->publish(event);
     }
   }
 
@@ -897,7 +847,7 @@ public:
     }
     if (l.empty())
     {
-      ROS_ERROR_NAMED("move_group_interface", "No known link to attach object '%s' to", object.c_str());
+      RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "No known link to attach object '%s' to", object.c_str());
       return false;
     }
     moveit_msgs::msg::AttachedCollisionObject aco;
@@ -908,7 +858,7 @@ public:
     else
       aco.touch_links = touch_links;
     aco.object.operation = moveit_msgs::msg::CollisionObject::ADD;
-    attached_object_publisher_.publish(aco);
+    attached_object_publisher_->publish(aco);
     return true;
   }
 
@@ -928,11 +878,11 @@ public:
       for (const std::string& lname : lnames)
       {
         aco.link_name = lname;
-        attached_object_publisher_.publish(aco);
+        attached_object_publisher_->publish(aco);
       }
     }
     else
-      attached_object_publisher_.publish(aco);
+      attached_object_publisher_->publish(aco);
     return true;
   }
 
@@ -980,13 +930,13 @@ public:
   void allowLooking(bool flag)
   {
     can_look_ = flag;
-    ROS_INFO_NAMED("move_group_interface", "Looking around: %s", can_look_ ? "yes" : "no");
+    RCLCPP_INFO(rclcpp::get_logger("move_group_interface"),"Looking around: %s", can_look_ ? "yes" : "no");
   }
 
   void allowReplanning(bool flag)
   {
     can_replan_ = flag;
-    ROS_INFO_NAMED("move_group_interface", "Replanning: %s", can_replan_ ? "yes" : "no");
+    RCLCPP_INFO(rclcpp::get_logger("move_group_interface"),"Replanning: %s", can_replan_ ? "yes" : "no");
   }
 
   void setReplanningDelay(double delay)
@@ -1049,24 +999,24 @@ public:
       }
     }
     else
-      ROS_ERROR_NAMED("move_group_interface", "Unable to construct MotionPlanRequest representation");
+      RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "Unable to construct MotionPlanRequest representation");
 
     if (path_constraints_)
       request.path_constraints = *path_constraints_;
     if (trajectory_constraints_)
       request.trajectory_constraints = *trajectory_constraints_;
   }
-
-  void constructGoal(moveit_msgs::action::MoveGroupGoal& goal) const
+  
+  void constructGoal(moveit_msgs::action::MoveGroup::Goal& goal) const
   {
     constructMotionPlanRequest(goal.request);
   }
 
-  moveit_msgs::action::PickupGoal constructPickupGoal(const std::string& object,
+  moveit_msgs::action::Pickup::Goal constructPickupGoal(const std::string& object,
                                                       std::vector<moveit_msgs::msg::Grasp>&& grasps,
                                                       bool plan_only = false) const
   {
-    moveit_msgs::action::PickupGoal goal;
+    moveit_msgs::action::Pickup::Goal goal;
     goal.target_name = object;
     goal.group_name = opt_.group_name_;
     goal.end_effector = getEndEffector();
@@ -1090,11 +1040,11 @@ public:
     return goal;
   }
 
-  moveit_msgs::action::PlaceGoal constructPlaceGoal(const std::string& object,
+  moveit_msgs::action::Place::Goal constructPlaceGoal(const std::string& object,
                                                     std::vector<moveit_msgs::msg::PlaceLocation>&& locations,
                                                     bool plan_only = false) const
   {
-    moveit_msgs::action::PlaceGoal goal;
+    moveit_msgs::action::Place::Goal goal;
     goal.group_name = opt_.group_name_;
     goal.attached_object_name = object;
     goal.support_surface_name = support_surface_;
@@ -1124,8 +1074,10 @@ public:
 
   bool setPathConstraints(const std::string& constraint)
   {
+#if 0 //@todo
     if (constraints_storage_)
     {
+
       moveit_warehouse::ConstraintsWithMetadata msg_m;
       if (constraints_storage_->getConstraints(msg_m, constraint, robot_model_->getName(), opt_.group_name_))
       {
@@ -1136,6 +1088,7 @@ public:
         return false;
     }
     else
+#endif
       return false;
   }
 
@@ -1158,13 +1111,15 @@ public:
   {
     while (initializing_constraints_)
     {
-      static ros::WallDuration d(0.01);
-      d.sleep();
+      std::chrono::duration<double> d(0.01);
+      rclcpp::sleep_for(std::chrono::duration_cast<std::chrono::nanoseconds>(d), rclcpp::Context::SharedPtr(nullptr));
     }
 
     std::vector<std::string> c;
+#if 0 //@todo
     if (constraints_storage_)
       constraints_storage_->getKnownConstraints(c, robot_model_->getName(), opt_.group_name_);
+#endif
 
     return c;
   }
@@ -1197,7 +1152,7 @@ public:
   void setWorkspace(double minx, double miny, double minz, double maxx, double maxy, double maxz)
   {
     workspace_parameters_.header.frame_id = getRobotModel()->getModelFrame();
-    workspace_parameters_.header.stamp = ros::Time::now();
+    workspace_parameters_.header.stamp = getClock()->now();
     workspace_parameters_.min_corner.x = minx;
     workspace_parameters_.min_corner.y = miny;
     workspace_parameters_.min_corner.z = minz;
@@ -1206,35 +1161,42 @@ public:
     workspace_parameters_.max_corner.z = maxz;
   }
 
+  rclcpp::Clock::SharedPtr getClock() 
+  {
+    return node_->get_clock();
+  }
 private:
   void initializeConstraintsStorageThread(const std::string& host, unsigned int port)
   {
     // Set up db
     try
     {
+#if 0 //@todo
       warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase();
       conn->setParams(host, port);
       if (conn->connect())
       {
         constraints_storage_.reset(new moveit_warehouse::ConstraintsStorage(conn));
       }
+#endif
     }
     catch (std::exception& ex)
     {
-      ROS_ERROR_NAMED("move_group_interface", "%s", ex.what());
+      RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "%s", ex.what());
     }
     initializing_constraints_ = false;
   }
 
   Options opt_;
-  ros::NodeHandle node_handle_;
+  rclcpp::Node::SharedPtr node_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   robot_model::RobotModelConstPtr robot_model_;
   planning_scene_monitor::CurrentStateMonitorPtr current_state_monitor_;
-  std::unique_ptr<actionlib::SimpleActionClient<moveit_msgs::action::MoveGroupAction> > move_action_client_;
-  std::unique_ptr<actionlib::SimpleActionClient<moveit_msgs::action::ExecuteTrajectoryAction> > execute_action_client_;
-  std::unique_ptr<actionlib::SimpleActionClient<moveit_msgs::action::PickupAction> > pick_action_client_;
-  std::unique_ptr<actionlib::SimpleActionClient<moveit_msgs::action::PlaceAction> > place_action_client_;
+
+  std::shared_ptr<rclcpp_action::Client<moveit_msgs::action::MoveGroup>> move_action_client_;
+  std::shared_ptr<rclcpp_action::Client<moveit_msgs::action::Pickup>> pick_action_client_;
+  std::shared_ptr<rclcpp_action::Client<moveit_msgs::action::Place>> place_action_client_;
+  std::shared_ptr<rclcpp_action::Client<moveit_msgs::action::ExecuteTrajectory> > execute_action_client_;
 
   // general planning params
   robot_state::RobotStatePtr considered_start_state_;
@@ -1268,44 +1230,48 @@ private:
   std::string support_surface_;
 
   // ROS communication
-  ros::Publisher trajectory_event_publisher_;
-  ros::Publisher attached_object_publisher_;
-  ros::ServiceClient query_service_;
-  ros::ServiceClient get_params_service_;
-  ros::ServiceClient set_params_service_;
-  ros::ServiceClient cartesian_path_service_;
-  ros::ServiceClient plan_grasps_service_;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr trajectory_event_publisher_;
+  rclcpp::Publisher<moveit_msgs::msg::AttachedCollisionObject>::SharedPtr attached_object_publisher_;
+  rclcpp::Client<moveit_msgs::srv::QueryPlannerInterfaces>::SharedPtr query_service_;
+  rclcpp::Client<moveit_msgs::srv::GetPlannerParams>::SharedPtr get_params_service_;
+  rclcpp::Client<moveit_msgs::srv::SetPlannerParams>::SharedPtr set_params_service_;
+  rclcpp::Client<moveit_msgs::srv::GetCartesianPath>::SharedPtr cartesian_path_service_;
+  rclcpp::Client<moveit_msgs::srv::GraspPlanning>::SharedPtr plan_grasps_service_;
+#if 0 //@todo
   std::unique_ptr<moveit_warehouse::ConstraintsStorage> constraints_storage_;
+#endif
   std::unique_ptr<boost::thread> constraints_init_thread_;
   bool initializing_constraints_;
 };
 
 MoveGroupInterface::MoveGroupInterface(const std::string& group_name, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-                                       const ros::WallDuration& wait_for_servers)
+                                       const rclcpp::Duration& wait_for_servers)
 {
-  if (!ros::ok())
+  if (!rclcpp::ok())
     throw std::runtime_error("ROS does not seem to be running");
   impl_ = new MoveGroupInterfaceImpl(Options(group_name), tf_buffer ? tf_buffer : getSharedTF(), wait_for_servers);
 }
-
+#if 0 //@todo
 MoveGroupInterface::MoveGroupInterface(const std::string& group, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-                                       const ros::Duration& wait_for_servers)
-  : MoveGroupInterface(group, tf_buffer, ros::WallDuration(wait_for_servers.toSec()))
+                                       const rclcpp::Duration& wait_for_servers)
+  : MoveGroupInterface(group, tf_buffer, rclcpp::Duration(wait_for_servers.toSec()))
 {
 }
-
+#endif
 MoveGroupInterface::MoveGroupInterface(const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-                                       const ros::WallDuration& wait_for_servers)
+                                       const rclcpp::Duration& wait_for_servers)
 {
   impl_ = new MoveGroupInterfaceImpl(opt, tf_buffer ? tf_buffer : getSharedTF(), wait_for_servers);
 }
 
+#if 0 //@todo
 MoveGroupInterface::MoveGroupInterface(const MoveGroupInterface::Options& opt,
                                        const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-                                       const ros::Duration& wait_for_servers)
-  : MoveGroupInterface(opt, tf_buffer, ros::WallDuration(wait_for_servers.toSec()))
+                                       const rclcpp::Duration& wait_for_servers)
+  : MoveGroupInterface(opt, tf_buffer, rclcpp::Duration(wait_for_servers.toSec()))
 {
 }
+#endif
 
 MoveGroupInterface::~MoveGroupInterface()
 {
@@ -1348,9 +1314,9 @@ robot_model::RobotModelConstPtr MoveGroupInterface::getRobotModel() const
   return impl_->getRobotModel();
 }
 
-const ros::NodeHandle& MoveGroupInterface::getNodeHandle() const
+rclcpp::Node::SharedPtr MoveGroupInterface::getNodeHandle() 
 {
-  return impl_->getOptions().node_handle_;
+  return impl_->getOptions().node_;
 }
 
 bool MoveGroupInterface::getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc) const
@@ -1405,7 +1371,7 @@ MoveItErrorCode MoveGroupInterface::asyncMove()
   return impl_->move(false);
 }
 
-actionlib::SimpleActionClient<moveit_msgs::action::MoveGroupAction>& MoveGroupInterface::getMoveGroupClient() const
+rclcpp_action::Client<moveit_msgs::action::MoveGroup>& MoveGroupInterface::getMoveGroupClient() const
 {
   return impl_->getMoveGroupClient();
 }
@@ -1430,14 +1396,14 @@ MoveItErrorCode MoveGroupInterface::plan(Plan& plan)
   return impl_->plan(plan);
 }
 
-moveit_msgs::action::PickupGoal MoveGroupInterface::constructPickupGoal(const std::string& object,
+moveit_msgs::action::Pickup::Goal MoveGroupInterface::constructPickupGoal(const std::string& object,
                                                                         std::vector<moveit_msgs::msg::Grasp> grasps,
                                                                         bool plan_only = false) const
 {
   return impl_->constructPickupGoal(object, std::move(grasps), plan_only);
 }
 
-moveit_msgs::action::PlaceGoal MoveGroupInterface::constructPlaceGoal(
+moveit_msgs::action::Place::Goal MoveGroupInterface::constructPlaceGoal(
     const std::string& object, std::vector<moveit_msgs::msg::PlaceLocation> locations, bool plan_only = false) const
 {
   return impl_->constructPlaceGoal(object, std::move(locations), plan_only);
@@ -1449,7 +1415,7 @@ MoveGroupInterface::posesToPlaceLocations(const std::vector<geometry_msgs::msg::
   return impl_->posesToPlaceLocations(poses);
 }
 
-MoveItErrorCode MoveGroupInterface::pick(const moveit_msgs::action::PickupGoal& goal)
+MoveItErrorCode MoveGroupInterface::pick(const moveit_msgs::action::Pickup::Goal& goal)
 {
   return impl_->pick(goal);
 }
@@ -1464,7 +1430,7 @@ MoveItErrorCode MoveGroupInterface::planGraspsAndPick(const moveit_msgs::msg::Co
   return impl_->planGraspsAndPick(object, plan_only);
 }
 
-MoveItErrorCode MoveGroupInterface::place(const moveit_msgs::action::PlaceGoal& goal)
+MoveItErrorCode MoveGroupInterface::place(const moveit_msgs::action::Place::Goal& goal)
 {
   return impl_->place(goal);
 }
@@ -1569,7 +1535,7 @@ bool MoveGroupInterface::setNamedTarget(const std::string& name)
       impl_->setTargetType(JOINT);
       return true;
     }
-    ROS_ERROR_NAMED("move_group_interface", "The requested named target '%s' does not exist", name.c_str());
+    RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "The requested named target '%s' does not exist", name.c_str());
     return false;
   }
 }
@@ -1595,7 +1561,7 @@ bool MoveGroupInterface::setJointValueTarget(const std::map<std::string, double>
   {
     if (std::find(allowed.begin(), allowed.end(), pair.first) == allowed.end())
     {
-      ROS_ERROR_STREAM("joint variable " << pair.first << " is not part of group "
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger("move_group_interface"), "joint variable " << pair.first << " is not part of group "
                                          << impl_->getJointModelGroup()->getName());
       return false;
     }
@@ -1614,7 +1580,7 @@ bool MoveGroupInterface::setJointValueTarget(const std::vector<std::string>& var
   {
     if (std::find(allowed.begin(), allowed.end(), variable_name) == allowed.end())
     {
-      ROS_ERROR_STREAM("joint variable " << variable_name << " is not part of group "
+      RCLCPP_ERROR_STREAM(rclcpp::get_logger("move_group_interface"), "joint variable " << variable_name << " is not part of group "
                                          << impl_->getJointModelGroup()->getName());
       return false;
     }
@@ -1648,7 +1614,7 @@ bool MoveGroupInterface::setJointValueTarget(const std::string& joint_name, cons
     return impl_->getTargetRobotState().satisfiesBounds(jm, impl_->getGoalJointTolerance());
   }
 
-  ROS_ERROR_STREAM("joint " << joint_name << " is not part of group " << impl_->getJointModelGroup()->getName());
+  RCLCPP_ERROR_STREAM(rclcpp::get_logger("move_group_interface"), "joint " << joint_name << " is not part of group " << impl_->getJointModelGroup()->getName());
   return false;
 }
 
@@ -1746,7 +1712,7 @@ bool MoveGroupInterface::setPoseTarget(const Eigen::Isometry3d& pose, const std:
   std::vector<geometry_msgs::msg::PoseStamped> pose_msg(1);
   pose_msg[0].pose = tf2::toMsg(pose);
   pose_msg[0].header.frame_id = getPoseReferenceFrame();
-  pose_msg[0].header.stamp = ros::Time::now();
+  pose_msg[0].header.stamp = impl_->getClock()->now();
   return setPoseTargets(pose_msg, end_effector_link);
 }
 
@@ -1755,7 +1721,7 @@ bool MoveGroupInterface::setPoseTarget(const geometry_msgs::msg::Pose& target, c
   std::vector<geometry_msgs::msg::PoseStamped> pose_msg(1);
   pose_msg[0].pose = target;
   pose_msg[0].header.frame_id = getPoseReferenceFrame();
-  pose_msg[0].header.stamp = ros::Time::now();
+  pose_msg[0].header.stamp = impl_->getClock()->now();
   return setPoseTargets(pose_msg, end_effector_link);
 }
 
@@ -1769,7 +1735,7 @@ bool MoveGroupInterface::setPoseTarget(const geometry_msgs::msg::PoseStamped& ta
 bool MoveGroupInterface::setPoseTargets(const EigenSTL::vector_Isometry3d& target, const std::string& end_effector_link)
 {
   std::vector<geometry_msgs::msg::PoseStamped> pose_out(target.size());
-  ros::Time tm = ros::Time::now();
+  rclcpp::Time tm = impl_->getClock()->now();
   const std::string& frame_id = getPoseReferenceFrame();
   for (std::size_t i = 0; i < target.size(); ++i)
   {
@@ -1784,7 +1750,7 @@ bool MoveGroupInterface::setPoseTargets(const std::vector<geometry_msgs::msg::Po
                                         const std::string& end_effector_link)
 {
   std::vector<geometry_msgs::msg::PoseStamped> target_stamped(target.size());
-  ros::Time tm = ros::Time::now();
+  rclcpp::Time tm = impl_->getClock()->now();
   const std::string& frame_id = getPoseReferenceFrame();
   for (std::size_t i = 0; i < target.size(); ++i)
   {
@@ -1800,7 +1766,7 @@ bool MoveGroupInterface::setPoseTargets(const std::vector<geometry_msgs::msg::Po
 {
   if (target.empty())
   {
-    ROS_ERROR_NAMED("move_group_interface", "No pose specified as goal target");
+    RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "No pose specified as goal target");
     return false;
   }
   else
@@ -1831,7 +1797,7 @@ inline void transformPose(const tf2_ros::Buffer& tf_buffer, const std::string& d
     geometry_msgs::msg::PoseStamped target_in(target);
     tf_buffer.transform(target_in, target, desired_frame);
     // we leave the stamp to ros::Time(0) on purpose
-    target.header.stamp = ros::Time(0);
+    target.header.stamp = rclcpp::Time(0);
   }
 }
 }  // namespace
@@ -1989,7 +1955,7 @@ geometry_msgs::msg::PoseStamped MoveGroupInterface::getRandomPose(const std::str
   Eigen::Isometry3d pose;
   pose.setIdentity();
   if (eef.empty())
-    ROS_ERROR_NAMED("move_group_interface", "No end-effector specified");
+    RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "No end-effector specified");
   else
   {
     robot_state::RobotStatePtr current_state;
@@ -2002,7 +1968,7 @@ geometry_msgs::msg::PoseStamped MoveGroupInterface::getRandomPose(const std::str
     }
   }
   geometry_msgs::msg::PoseStamped pose_msg;
-  pose_msg.header.stamp = ros::Time::now();
+  pose_msg.header.stamp = impl_->getClock()->now();
   pose_msg.header.frame_id = impl_->getRobotModel()->getModelFrame();
   pose_msg.pose = tf2::toMsg(pose);
   return pose_msg;
@@ -2014,7 +1980,7 @@ geometry_msgs::msg::PoseStamped MoveGroupInterface::getCurrentPose(const std::st
   Eigen::Isometry3d pose;
   pose.setIdentity();
   if (eef.empty())
-    ROS_ERROR_NAMED("move_group_interface", "No end-effector specified");
+    RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "No end-effector specified");
   else
   {
     robot_state::RobotStatePtr current_state;
@@ -2026,7 +1992,7 @@ geometry_msgs::msg::PoseStamped MoveGroupInterface::getCurrentPose(const std::st
     }
   }
   geometry_msgs::msg::PoseStamped pose_msg;
-  pose_msg.header.stamp = ros::Time::now();
+  pose_msg.header.stamp = impl_->getClock()->now();
   pose_msg.header.frame_id = impl_->getRobotModel()->getModelFrame();
   pose_msg.pose = tf2::toMsg(pose);
   return pose_msg;
@@ -2037,7 +2003,7 @@ std::vector<double> MoveGroupInterface::getCurrentRPY(const std::string& end_eff
   std::vector<double> result;
   const std::string& eef = end_effector_link.empty() ? getEndEffectorLink() : end_effector_link;
   if (eef.empty())
-    ROS_ERROR_NAMED("move_group_interface", "No end-effector specified");
+    RCLCPP_ERROR(rclcpp::get_logger("move_group_interface"), "No end-effector specified");
   else
   {
     robot_state::RobotStatePtr current_state;
@@ -2047,9 +2013,9 @@ std::vector<double> MoveGroupInterface::getCurrentRPY(const std::string& end_eff
       if (lm)
       {
         result.resize(3);
-        geometry_msgs::TransformStamped tfs = tf2::eigenToTransform(current_state->getGlobalLinkTransform(lm));
+        geometry_msgs::msg::TransformStamped tfs = tf2::eigenToTransform(current_state->getGlobalLinkTransform(lm));
         double pitch, roll, yaw;
-        tf2::getEulerYPR<geometry_msgs::Quaternion>(tfs.transform.rotation, yaw, pitch, roll);
+        tf2::getEulerYPR<geometry_msgs::msg::Quaternion>(tfs.transform.rotation, yaw, pitch, roll);
         result[0] = roll;
         result[1] = pitch;
         result[2] = yaw;

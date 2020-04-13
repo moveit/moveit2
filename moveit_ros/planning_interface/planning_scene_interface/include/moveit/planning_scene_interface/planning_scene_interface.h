@@ -40,7 +40,7 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit_msgs/msg/object_color.hpp>
 #include <moveit_msgs/msg/collision_object.hpp>
-#include <moveit_msgs/AttachedCollisionObject.h>
+#include <moveit_msgs/msg/attached_collision_object.hpp>
 #include <moveit_msgs/msg/planning_scene.hpp>
 
 namespace moveit
@@ -81,7 +81,7 @@ public:
   };
 
   /** \brief Get the poses from the objects identified by the given object ids list. */
-  std::map<std::string, geometry_msgs::Pose> getObjectPoses(const std::vector<std::string>& object_ids);
+  std::map<std::string, geometry_msgs::msg::Pose> getObjectPoses(const std::vector<std::string>& object_ids);
 
   /** \brief Get the objects identified by the given object ids list. If no ids are provided, return all the known
    * objects. */
@@ -100,7 +100,7 @@ public:
   /** \brief Apply collision object to the planning scene of the move_group node synchronously.
       Other PlanningSceneMonitors will NOT receive the update unless they subscribe to move_group's monitored scene */
   bool applyCollisionObject(const moveit_msgs::msg::CollisionObject& collision_object,
-                            const std_msgs::ColorRGBA& object_color);
+                            const std_msgs::msg::ColorRGBA& object_color);
 
   /** \brief Apply collision objects to the planning scene of the move_group node synchronously.
       Other PlanningSceneMonitors will NOT receive the update unless they subscribe to move_group's monitored scene.

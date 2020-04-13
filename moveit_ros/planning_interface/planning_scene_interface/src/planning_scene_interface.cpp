@@ -36,50 +36,58 @@
 
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit/move_group/capability_names.h>
-#include <moveit_msgs/msg/get_planning_scene.h>
-#include <moveit_msgs/msg/apply_planning_scene.h>
-#include <ros/ros.h>
+#include <moveit_msgs/srv/get_planning_scene.hpp>
+#include <moveit_msgs/srv/apply_planning_scene.hpp>
 #include <algorithm>
 
 namespace moveit
 {
 namespace planning_interface
 {
-static const std::string LOGNAME = "planning_scene_interface";
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_planning_scene_interface.planning_scene_interface");
 
 class PlanningSceneInterface::PlanningSceneInterfaceImpl
 {
 public:
   explicit PlanningSceneInterfaceImpl(const std::string& ns = "")
+    :node_(new rclcpp::Node(ns))
   {
-    node_handle_ = ros::NodeHandle(ns);
-    planning_scene_diff_publisher_ = node_handle_.advertise<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
+    planning_scene_diff_publisher_ = node_->create_publisher<moveit_msgs::msg::PlanningScene>(
+      "planning_scene", 1);
     planning_scene_service_ =
-        node_handle_.serviceClient<moveit_msgs::srv::GetPlanningScene>(move_group::GET_PLANNING_SCENE_SERVICE_NAME);
+        node_->create_client<moveit_msgs::srv::GetPlanningScene>(move_group::GET_PLANNING_SCENE_SERVICE_NAME);
     apply_planning_scene_service_ =
-        node_handle_.serviceClient<moveit_msgs::srv::ApplyPlanningScene>(move_group::APPLY_PLANNING_SCENE_SERVICE_NAME);
+        node_->create_client<moveit_msgs::srv::ApplyPlanningScene>(move_group::APPLY_PLANNING_SCENE_SERVICE_NAME);
 
-    waitForService(planning_scene_service_);
-    waitForService(apply_planning_scene_service_);
+    waitForService(std::static_pointer_cast<rclcpp::ClientBase>(planning_scene_service_));
+    waitForService(std::static_pointer_cast<rclcpp::ClientBase>(apply_planning_scene_service_));
   }
 
   std::vector<std::string> getKnownObjectNames(bool with_type)
   {
-    moveit_msgs::srv::GetPlanningScene::Request request;
-    moveit_msgs::srv::GetPlanningScene::Response response;
+    auto request = std::make_shared<moveit_msgs::srv::GetPlanningScene::Request>();
+    moveit_msgs::srv::GetPlanningScene::Response::SharedPtr response;
     std::vector<std::string> result;
-    request.components.components = request.components.WORLD_OBJECT_NAMES;
-    if (!planning_scene_service_.call(request, response))
+    request->components.components = request->components.WORLD_OBJECT_NAMES;
+
+    auto res = planning_scene_service_->async_send_request(request);
+    if (rclcpp::spin_until_future_complete(node_, res) !=
+      rclcpp::executor::FutureReturnCode::SUCCESS)
+    {
       return result;
+    }
+    response = res.get();
+    
     if (with_type)
     {
-      for (const moveit_msgs::msg::CollisionObject& collision_object : response.scene.world.collision_objects)
+      for (const moveit_msgs::msg::CollisionObject& collision_object : response->scene.world.collision_objects)
         if (!collision_object.type.key.empty())
           result.push_back(collision_object.id);
     }
     else
     {
-      for (const moveit_msgs::msg::CollisionObject& collision_object : response.scene.world.collision_objects)
+      for (const moveit_msgs::msg::CollisionObject& collision_object : response->scene.world.collision_objects)
         result.push_back(collision_object.id);
     }
     return result;
@@ -88,17 +96,21 @@ public:
   std::vector<std::string> getKnownObjectNamesInROI(double minx, double miny, double minz, double maxx, double maxy,
                                                     double maxz, bool with_type, std::vector<std::string>& types)
   {
-    moveit_msgs::srv::GetPlanningScene::Request request;
-    moveit_msgs::srv::GetPlanningScene::Response response;
+    auto request = std::make_shared<moveit_msgs::srv::GetPlanningScene::Request>();
+    moveit_msgs::srv::GetPlanningScene::Response::SharedPtr response;
     std::vector<std::string> result;
-    request.components.components = request.components.WORLD_OBJECT_GEOMETRY;
-    if (!planning_scene_service_.call(request, response))
+    request->components.components = request->components.WORLD_OBJECT_GEOMETRY;
+
+    auto res = planning_scene_service_->async_send_request(request);
+    if (rclcpp::spin_until_future_complete(node_, res) !=
+      rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      ROS_WARN_NAMED(LOGNAME, "Could not call planning scene service to get object names");
+      RCLCPP_WARN(LOGGER, "Could not call planning scene service to get object names");
       return result;
     }
-
-    for (const moveit_msgs::msg::CollisionObject& collision_object : response.scene.world.collision_objects)
+    response = res.get();
+    
+    for (const moveit_msgs::msg::CollisionObject& collision_object : response->scene.world.collision_objects)
     {
       if (with_type && collision_object.type.key.empty())
         continue;
@@ -132,44 +144,52 @@ public:
 
   std::map<std::string, geometry_msgs::msg::Pose> getObjectPoses(const std::vector<std::string>& object_ids)
   {
-    moveit_msgs::srv::GetPlanningScene::Request request;
-    moveit_msgs::srv::GetPlanningScene::Response response;
+    auto request = std::make_shared<moveit_msgs::srv::GetPlanningScene::Request>();
+    moveit_msgs::srv::GetPlanningScene::Response::SharedPtr response;
     std::map<std::string, geometry_msgs::msg::Pose> result;
-    request.components.components = request.components.WORLD_OBJECT_GEOMETRY;
-    if (!planning_scene_service_.call(request, response))
-    {
-      ROS_WARN_NAMED(LOGNAME, "Could not call planning scene service to get object names");
-      return result;
-    }
+    request->components.components = request->components.WORLD_OBJECT_GEOMETRY;
 
-    for (const moveit_msgs::msg::CollisionObject& collision_object : response.scene.world.collision_objects)
+    auto res = planning_scene_service_->async_send_request(request);
+    if (rclcpp::spin_until_future_complete(node_, res) ==
+      rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      if (std::find(object_ids.begin(), object_ids.end(), collision_object.id) != object_ids.end())
+      response = res.get();
+      for (const moveit_msgs::msg::CollisionObject& collision_object : response->scene.world.collision_objects)
       {
-        if (collision_object.mesh_poses.empty() && collision_object.primitive_poses.empty())
-          continue;
-        if (!collision_object.mesh_poses.empty())
-          result[collision_object.id] = collision_object.mesh_poses[0];
-        else
-          result[collision_object.id] = collision_object.primitive_poses[0];
+        if (std::find(object_ids.begin(), object_ids.end(), collision_object.id) != object_ids.end())
+        {
+          if (collision_object.mesh_poses.empty() && collision_object.primitive_poses.empty())
+            continue;
+          if (!collision_object.mesh_poses.empty())
+            result[collision_object.id] = collision_object.mesh_poses[0];
+          else
+            result[collision_object.id] = collision_object.primitive_poses[0];
+        }
       }
     }
+    else
+      RCLCPP_WARN(LOGGER, "Could not call planning scene service to get object names");
+    
     return result;
   }
 
   std::map<std::string, moveit_msgs::msg::CollisionObject> getObjects(const std::vector<std::string>& object_ids)
   {
-    moveit_msgs::srv::GetPlanningScene::Request request;
-    moveit_msgs::srv::GetPlanningScene::Response response;
+    auto request = std::make_shared<moveit_msgs::srv::GetPlanningScene::Request>();
+    moveit_msgs::srv::GetPlanningScene::Response::SharedPtr response;
     std::map<std::string, moveit_msgs::msg::CollisionObject> result;
-    request.components.components = request.components.WORLD_OBJECT_GEOMETRY;
-    if (!planning_scene_service_.call(request, response))
+    request->components.components = request->components.WORLD_OBJECT_GEOMETRY;
+    
+    auto res = planning_scene_service_->async_send_request(request);
+    if (rclcpp::spin_until_future_complete(node_, res) !=
+      rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      ROS_WARN_NAMED(LOGNAME, "Could not call planning scene service to get object geometries");
+      RCLCPP_WARN(LOGGER, "Could not call planning scene service to get object geometries");
       return result;
     }
+    response = res.get();
 
-    for (const moveit_msgs::msg::CollisionObject& collision_object : response.scene.world.collision_objects)
+    for (const moveit_msgs::msg::CollisionObject& collision_object : response->scene.world.collision_objects)
     {
       if (object_ids.empty() ||
           std::find(object_ids.begin(), object_ids.end(), collision_object.id) != object_ids.end())
@@ -183,18 +203,22 @@ public:
   std::map<std::string, moveit_msgs::msg::AttachedCollisionObject>
   getAttachedObjects(const std::vector<std::string>& object_ids)
   {
-    moveit_msgs::srv::GetPlanningScene::Request request;
-    moveit_msgs::srv::GetPlanningScene::Response response;
+    auto request = std::make_shared<moveit_msgs::srv::GetPlanningScene::Request>();
+    moveit_msgs::srv::GetPlanningScene::Response::SharedPtr response;
     std::map<std::string, moveit_msgs::msg::AttachedCollisionObject> result;
-    request.components.components = request.components.ROBOT_STATE_ATTACHED_OBJECTS;
-    if (!planning_scene_service_.call(request, response))
+    request->components.components = request->components.ROBOT_STATE_ATTACHED_OBJECTS;
+
+    auto res = planning_scene_service_->async_send_request(request);
+    if (rclcpp::spin_until_future_complete(node_, res) !=
+      rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      ROS_WARN_NAMED(LOGNAME, "Could not call planning scene service to get attached object geometries");
+      RCLCPP_WARN(LOGGER, "Could not call planning scene service to get attached object geometries");
       return result;
     }
+    response = res.get();
 
     for (const moveit_msgs::msg::AttachedCollisionObject& attached_collision_object :
-         response.scene.robot_state.attached_collision_objects)
+         response->scene.robot_state.attached_collision_objects)
     {
       if (object_ids.empty() ||
           std::find(object_ids.begin(), object_ids.end(), attached_collision_object.object.id) != object_ids.end())
@@ -207,15 +231,18 @@ public:
 
   bool applyPlanningScene(const moveit_msgs::msg::PlanningScene& planning_scene)
   {
-    moveit_msgs::srv::ApplyPlanningScene::Request request;
-    moveit_msgs::srv::ApplyPlanningScene::Response response;
-    request.scene = planning_scene;
-    if (!apply_planning_scene_service_.call(request, response))
+    auto request = std::make_shared<moveit_msgs::srv::ApplyPlanningScene::Request>();
+    moveit_msgs::srv::ApplyPlanningScene::Response::SharedPtr response;
+    request->scene = planning_scene;
+
+    auto res = apply_planning_scene_service_->async_send_request(request);
+    if (rclcpp::spin_until_future_complete(node_, res) !=
+      rclcpp::executor::FutureReturnCode::SUCCESS)
     {
-      ROS_WARN_NAMED(LOGNAME, "Failed to call ApplyPlanningScene service");
-      return false;
+      RCLCPP_WARN(LOGGER, "Failed to call ApplyPlanningScene service");
     }
-    return response.success;
+    response = res.get();
+    return response->success;
   }
 
   void addCollisionObjects(const std::vector<moveit_msgs::msg::CollisionObject>& collision_objects,
@@ -234,7 +261,7 @@ public:
     }
 
     planning_scene.is_diff = true;
-    planning_scene_diff_publisher_.publish(planning_scene);
+    planning_scene_diff_publisher_->publish(planning_scene);
   }
 
   void removeCollisionObjects(const std::vector<std::string>& object_ids) const
@@ -248,25 +275,27 @@ public:
       planning_scene.world.collision_objects.push_back(object);
     }
     planning_scene.is_diff = true;
-    planning_scene_diff_publisher_.publish(planning_scene);
+    planning_scene_diff_publisher_->publish(planning_scene);
   }
 
 private:
-  void waitForService(ros::ServiceClient& srv)
+  void waitForService(std::shared_ptr<rclcpp::ClientBase> srv)
   {
-    ros::Duration time_before_warning(5.0);
-    srv.waitForExistence(time_before_warning);
-    if (!srv.exists())
+    //rclcpp::Duration time_before_warning(5.0);
+    //srv.waitForExistence(time_before_warning);
+    std::chrono::duration<double> d(5.0);
+    srv->wait_for_service(std::chrono::duration_cast<std::chrono::nanoseconds>(d));
+    if (!srv->service_is_ready())
     {
-      ROS_WARN_STREAM_NAMED(LOGNAME, "service '" << srv.getService() << "' not advertised yet. Continue waiting...");
-      srv.waitForExistence();
+      RCLCPP_WARN_STREAM(LOGGER, "service '" << srv->get_service_name() << "' not advertised yet. Continue waiting...");
+      srv->wait_for_service();
     }
   }
 
-  ros::NodeHandle node_handle_;
-  ros::ServiceClient planning_scene_service_;
-  ros::ServiceClient apply_planning_scene_service_;
-  ros::Publisher planning_scene_diff_publisher_;
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Client<moveit_msgs::srv::GetPlanningScene>::SharedPtr planning_scene_service_;
+  rclcpp::Client<moveit_msgs::srv::ApplyPlanningScene>::SharedPtr apply_planning_scene_service_;
+  rclcpp::Publisher<moveit_msgs::msg::PlanningScene>::SharedPtr planning_scene_diff_publisher_;
   robot_model::RobotModelConstPtr robot_model_;
 };
 
