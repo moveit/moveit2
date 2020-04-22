@@ -252,7 +252,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   double temp_wait_time = 0.05;
 
   if (!robot_description_.empty())
-    node_->get_parameter_or(robot_description_ + "_planning/shape_transform_cache_lookup_wait_time", temp_wait_time,
+    node_->get_parameter_or(robot_description_ + "_planning.shape_transform_cache_lookup_wait_time", temp_wait_time,
                             temp_wait_time);
 
   shape_transform_cache_lookup_wait_time_ = rclcpp::Duration((int64_t)temp_wait_time * 1.0e+9);
@@ -1369,7 +1369,7 @@ void PlanningSceneMonitor::configureCollisionMatrix(const planning_scene::Planni
   // read overriding values from the param server
 
   // first we do default collision operations
-  if (!node_->has_parameter(robot_description_ + "_planning/default_collision_operations"))
+  if (!node_->has_parameter(robot_description_ + "_planning.default_collision_operations"))
     RCLCPP_DEBUG(LOGGER, "No additional default collision operations specified");
   else
   {
@@ -1418,12 +1418,11 @@ void PlanningSceneMonitor::configureDefaultPadding()
 
   // Ensure no leading slash creates a bad param server address
   static const std::string robot_description =
-      (robot_description_[0] == '/') ? robot_description_.substr(1) : robot_description_;
-
-  node_->get_parameter_or(robot_description + "_planning/default_robot_padding", default_robot_padd_, 0.0);
-  node_->get_parameter_or(robot_description + "_planning/default_robot_scale", default_robot_scale_, 1.0);
-  node_->get_parameter_or(robot_description + "_planning/default_object_padding", default_object_padd_, 0.0);
-  node_->get_parameter_or(robot_description + "_planning/default_attached_padding", default_attached_padd_, 0.0);
+      (robot_description_[0] == '.') ? robot_description_.substr(1) : robot_description_;
+  node_->get_parameter_or(robot_description + "_planning.default_robot_padding", default_robot_padd_, 0.0);
+  node_->get_parameter_or(robot_description + "_planning.default_robot_scale", default_robot_scale_, 1.0);
+  node_->get_parameter_or(robot_description + "_planning.default_object_padding", default_object_padd_, 0.0);
+  node_->get_parameter_or(robot_description + "_planning.default_attached_padding", default_attached_padd_, 0.0);
   default_robot_link_padd_ = std::map<std::string, double>();
   default_robot_link_scale_ = std::map<std::string, double>();
   // TODO: enable parameter type support to std::map

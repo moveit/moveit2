@@ -37,7 +37,6 @@
 #include <moveit/ompl_interface/ompl_interface.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
-#include <class_loader/class_loader.hpp>
 
 #include <ompl/util/Console.h>
 
@@ -135,4 +134,7 @@ private:
 
 }  // namespace ompl_interface
 
-CLASS_LOADER_REGISTER_CLASS(ompl_interface::OMPLPlannerManager, planning_interface::PlannerManager)
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(
+  ompl_interface::OMPLPlannerManager, planning_interface::PlannerManager)

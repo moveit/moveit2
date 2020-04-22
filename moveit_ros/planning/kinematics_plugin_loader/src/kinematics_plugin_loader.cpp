@@ -331,7 +331,7 @@ robot_model::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const s
             }
           }
 
-          std::string ksolver_timeout_param_name = base_param_name + "/kinematics_solver_timeout";
+          std::string ksolver_timeout_param_name = base_param_name + ".kinematics_solver_timeout";
           if (node_->has_parameter(ksolver_timeout_param_name))
           {
             double ksolver_timeout;
@@ -348,7 +348,7 @@ robot_model::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const s
             }
           }
 
-          std::string ksolver_res_param_name = base_param_name + "/kinematics_solver_search_resolution";
+          std::string ksolver_res_param_name = base_param_name + ".kinematics_solver_search_resolution";
           if (node_->has_parameter(ksolver_res_param_name))
           {
             rclcpp::Parameter ksolver_res_param = node_->get_parameter(ksolver_res_param_name);
@@ -377,7 +377,7 @@ robot_model::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const s
           }
 
           // Allow a kinematic solver's tip links to be specified on the rosparam server as an array
-          std::string ksolver_ik_links_param_name = base_param_name + "/kinematics_solver_ik_links";
+          std::string ksolver_ik_links_param_name = base_param_name + ".kinematics_solver_ik_links";
           if (node_->has_parameter(ksolver_ik_links_param_name))
           {
             rclcpp::Parameter ksolver_ik_links_param = node_->get_parameter(ksolver_ik_links_param_name);
