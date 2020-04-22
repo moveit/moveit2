@@ -94,6 +94,8 @@ public:
                          const rclcpp::Duration& wait_for_servers)
     : opt_(opt), node_(opt.node_), tf_buffer_(tf_buffer)
   {
+    if (!node_)
+      node_ = std::make_shared<rclcpp::Node>("MoveGroupInterfaceNode");
     robot_model_ = opt.robot_model_ ? opt.robot_model_ : getSharedRobotModel(node_, opt.robot_description_);
     if (!getRobotModel())
     {

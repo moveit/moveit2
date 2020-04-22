@@ -47,6 +47,7 @@ RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const st
                                    bool load_kinematics_solvers)
   : node_(node)
 {
+  RCLCPP_INFO(LOGGER, "xc: %s", robot_description.c_str());
   Options opt(robot_description);
   opt.load_kinematics_solvers_ = load_kinematics_solvers;
   configure(opt);
@@ -126,7 +127,7 @@ void RobotModelLoader::configure(const Options& opt)
       for (std::size_t joint_id = 0; joint_id < joint_limit.size(); ++joint_id)
       {
         std::string prefix =
-            rdf_loader_->getRobotDescription() + "_planning/joint_limits/" + joint_limit[joint_id].joint_name + "/";
+            rdf_loader_->getRobotDescription() + "_planning.joint_limits." + joint_limit[joint_id].joint_name + ".";
 
         std::string param_name;
         try
