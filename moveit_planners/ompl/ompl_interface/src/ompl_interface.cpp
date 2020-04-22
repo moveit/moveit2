@@ -146,7 +146,7 @@ bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
 
   // default to specified parameters of the group (overridden by configuration specific parameters)
   planner_config.config = group_params;
-
+  
   // read parameters specific for this configuration
   for (const auto& planner_param : planner_params_result.names)
   {
@@ -177,32 +177,30 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
     {
       if (node_->has_parameter(group_name_param + "." + k))
       {
-        std::string value;
-        if (node_->get_parameter(group_name_param + "." + k, value))
+        rclcpp::Parameter param = node_->get_parameter(group_name_param + "." + k);
+        if (param.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
         {
+          std::string value = param.get_value<std::string>();
           if (!value.empty())
             specific_group_params[k] = value;
           continue;
         }
-
-        double value_d;
-        if (node_->get_parameter(group_name_param + "." + k, value_d))
+        else if (param.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
         {
+          double value_d = param.get_value<double>();
           // convert to string using no locale
           specific_group_params[k] = moveit::core::toString(value_d);
           continue;
         }
-
-        int value_i;
-        if (node_->get_parameter(group_name_param + "." + k, value_i))
+        else if (param.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
         {
+          int value_i = param.get_value<int>();
           specific_group_params[k] = std::to_string(value_i);
           continue;
         }
-
-        bool value_b;
-        if (node_->get_parameter(group_name_param + "." + k, value_b))
+        else if (param.get_type() == rclcpp::ParameterType::PARAMETER_BOOL)
         {
+          bool value_b = param.get_value<bool>();
           specific_group_params[k] = std::to_string(value_b);
           continue;
         }

@@ -138,9 +138,8 @@ public:
     attached_object_publisher_ = node_->create_publisher<moveit_msgs::msg::AttachedCollisionObject>(
         planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC, 1);
 
-#if 0 //@todo: see common_planning_interface/common_objects.h
-    current_state_monitor_ = getSharedStateMonitor(robot_model_, tf_buffer_, node_);
-#endif
+    current_state_monitor_ = getSharedStateMonitor(node_, robot_model_, tf_buffer_);
+
     rclcpp::Time timeout_for_servers = node_->get_clock()->now() + wait_for_servers;
     if (wait_for_servers == rclcpp::Duration(std::chrono::duration_values<double>::max())) //@todo ; no rclcpp::Duration() representation for infinite time
       timeout_for_servers = rclcpp::Time();  // wait for ever
