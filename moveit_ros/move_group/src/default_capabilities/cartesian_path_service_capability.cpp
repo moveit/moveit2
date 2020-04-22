@@ -78,7 +78,7 @@ void MoveGroupCartesianPathService::initialize()
   display_path_ = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(
       planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC, 10);
 
-  cartesian_path_service_ = root_node_->create_service<moveit_msgs::srv::GetCartesianPath>(
+  cartesian_path_service_ = node_->create_service<moveit_msgs::srv::GetCartesianPath>(
     CARTESIAN_PATH_SERVICE_NAME,
     std::bind(&MoveGroupCartesianPathService::computeService, this, _1, _2, _3));
 }
@@ -198,5 +198,7 @@ bool MoveGroupCartesianPathService::computeService(
 
 }  // namespace move_group
 
-#include <class_loader/class_loader.hpp>
-CLASS_LOADER_REGISTER_CLASS(move_group::MoveGroupCartesianPathService, move_group::MoveGroupCapability)
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(
+  move_group::MoveGroupCartesianPathService, move_group::MoveGroupCapability)

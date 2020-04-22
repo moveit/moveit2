@@ -1,4 +1,4 @@
-<library path="libmoveit_move_group_default_capabilities">
+<library path="moveit_move_group_default_capabilities">
 
   <class name="move_group/MoveGroupCartesianPathService" type="move_group::MoveGroupCartesianPathService" base_class_type="move_group::MoveGroupCapability">
     <description>

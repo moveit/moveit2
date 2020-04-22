@@ -52,7 +52,7 @@ void MoveGroupStateValidationService::initialize()
   using std::placeholders::_2;
   using std::placeholders::_3;
 
-  validity_service_ = root_node_->create_service<moveit_msgs::srv::GetStateValidity>(
+  validity_service_ = node_->create_service<moveit_msgs::srv::GetStateValidity>(
     STATE_VALIDITY_SERVICE_NAME,
     std::bind(&MoveGroupStateValidationService::computeService, this, _1, _2, _3)
   );
@@ -130,5 +130,7 @@ bool MoveGroupStateValidationService::computeService(
 }
 }  // namespace move_group
 
-#include <class_loader/class_loader.hpp>
-CLASS_LOADER_REGISTER_CLASS(move_group::MoveGroupStateValidationService, move_group::MoveGroupCapability)
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(
+  move_group::MoveGroupStateValidationService, move_group::MoveGroupCapability)

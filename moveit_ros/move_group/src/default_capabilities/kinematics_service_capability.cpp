@@ -55,11 +55,11 @@ void MoveGroupKinematicsService::initialize()
   using std::placeholders::_2;
   using std::placeholders::_3;
 
-  fk_service_ = root_node_->create_service<moveit_msgs::srv::GetPositionFK>(
+  fk_service_ = node_->create_service<moveit_msgs::srv::GetPositionFK>(
     FK_SERVICE_NAME,
     std::bind(&MoveGroupKinematicsService::computeFKService, this, _1, _2, _3)
   );
-  ik_service_ = root_node_->create_service<moveit_msgs::srv::GetPositionIK>(
+  ik_service_ = node_->create_service<moveit_msgs::srv::GetPositionIK>(
     IK_SERVICE_NAME,
     std::bind(&MoveGroupKinematicsService::computeIKService, this, _1, _2, _3)
   );
@@ -231,5 +231,7 @@ bool MoveGroupKinematicsService::computeFKService(
 }
 }  // namespace move_group
 
-#include <class_loader/class_loader.hpp>
-CLASS_LOADER_REGISTER_CLASS(move_group::MoveGroupKinematicsService, move_group::MoveGroupCapability)
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(
+  move_group::MoveGroupKinematicsService, move_group::MoveGroupCapability)
