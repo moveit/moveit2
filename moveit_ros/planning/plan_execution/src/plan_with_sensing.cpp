@@ -90,8 +90,11 @@ plan_execution::PlanWithSensing::PlanWithSensing(
 
   // load the sensor manager plugin, if needed
   auto sensor_manager_params = std::make_shared<rclcpp::SyncParametersClient>(node_);
-  if (sensor_manager_params->has_parameter("moveit_sensor_manager"))
+  RCLCPP_INFO(LOGGER,"test");
+#if 0 //@todo: sensor_manager_params->has_parameter throws exception
+  if (sensor_manager_params && sensor_manager_params->has_parameter("moveit_sensor_manager"))
   {
+    RCLCPP_INFO(LOGGER,"test2");
     try
     {
       sensor_manager_loader_.reset(new pluginlib::ClassLoader<moveit_sensor_manager::MoveItSensorManager>(
@@ -126,7 +129,7 @@ plan_execution::PlanWithSensing::PlanWithSensing(
                   boost::algorithm::join(sensors, ", ").c_str());
     }
   }
-
+#endif
   // start the dynamic-reconfigure server
   // reconfigure_impl_ = new DynamicReconfigureImpl(this);
 }
