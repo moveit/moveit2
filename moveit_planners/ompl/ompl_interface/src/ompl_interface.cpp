@@ -132,8 +132,8 @@ bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
     const std::map<std::string, std::string>& group_params,
     planning_interface::PlannerConfigurationSettings& planner_config)
 {
-  rcl_interfaces::msg::ListParametersResult planner_params_result =
-      node_->list_parameters({ parameter_namespace_ + ".planner_configs." + planner_id }, 2);
+  rcl_interfaces::msg::ListParametersResult planner_params_result = node_->list_parameters(
+      { parameter_namespace_ + ".planner_configs." + planner_id }, 99);  // TODO(henningkayser): verify search depth
 
   if (planner_params_result.names.empty())
   {
@@ -147,11 +147,16 @@ bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
   // default to specified parameters of the group (overridden by configuration specific parameters)
   planner_config.config = group_params;
   
-  // read parameters specific for this configuration
+  // read parameters specific for this configuration, remove prefixes
+  std::string strip = parameter_namespace_ + ".planner_configs." + planner_id + ".";
   for (const auto& planner_param : planner_params_result.names)
   {
+    // TODO(henningkayser): verify name is working for config map
     const rclcpp::Parameter param = node_->get_parameter(planner_param);
-    auto param_name = planner_param.substr(planner_param.find(planner_id) + planner_id.size() + 1);
+    std::string param_name = param.get_name();
+    auto pos = param_name.find(strip);
+    if (pos != std::string::npos)
+      param_name.erase(pos, strip.length());
     planner_config.config[param_name] = param.value_to_string();
   }
 
