@@ -228,11 +228,11 @@ int main(int argc, char** argv)
     buffer << file.rdbuf();
     nh->set_parameter(rclcpp::Parameter("robot_description_semantic", buffer.str()));
 
-    auto allparams = nh->get_node_parameters_interface()->get_parameter_overrides();
-    for (auto param : allparams)
-    {
-      RCLCPP_INFO(LOGGER, "%s", param.first.c_str());
-    }
+    // auto allparams = nh->get_node_parameters_interface()->get_parameter_overrides();
+    // for (auto param : allparams)
+    // {
+    //   RCLCPP_INFO(LOGGER, "%s", param.first.c_str());
+    // }
   }
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(nh->get_clock(), 
@@ -257,10 +257,13 @@ int main(int argc, char** argv)
     else
       RCLCPP_INFO(LOGGER, "MoveGroup debug mode is OFF");
 
+    rclcpp::executors::MultiThreadedExecutor executor;
+    rclcpp::Node::SharedPtr monitor_node = rclcpp::Node::make_shared("monitor_node", opt);
+
     printf(MOVEIT_CONSOLE_COLOR_CYAN "Starting planning scene monitors...\n" MOVEIT_CONSOLE_COLOR_RESET);
     planning_scene_monitor->startSceneMonitor();
     planning_scene_monitor->startWorldGeometryMonitor();
-    planning_scene_monitor->startStateMonitor();
+    planning_scene_monitor->startStateMonitor(monitor_node);
     printf(MOVEIT_CONSOLE_COLOR_CYAN "Planning scene monitors started.\n" MOVEIT_CONSOLE_COLOR_RESET);
 
     move_group::MoveGroupExe mge(nh, planning_scene_monitor, debug);
@@ -269,7 +272,7 @@ int main(int argc, char** argv)
 
     mge.status();
 
-    rclcpp::executors::MultiThreadedExecutor executor;
+    executor.add_node(monitor_node);
     executor.add_node(nh);
     executor.spin();
 
