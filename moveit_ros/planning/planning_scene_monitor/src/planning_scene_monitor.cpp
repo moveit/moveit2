@@ -263,7 +263,25 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   state_update_timer_ =
       node_->create_wall_timer(dt_state_update_, std::bind(&PlanningSceneMonitor::stateUpdateTimerCallback, this));
 
+  //@todo: can remove DynamicReconfigureImpl now that we have ported parameters over
   reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  bool publish_planning_scene = node_->get_parameter("planning_scene_monitor.publish_planning_scene").as_bool();
+  bool publish_geom_updates = node_->get_parameter("planning_scene_monitor.publish_geometry_updates").as_bool();
+  bool publish_state_updates = node_->get_parameter("planning_scene_monitor.publish_state_updates").as_bool();
+  bool publish_transform_updates = node_->get_parameter("planning_scene_monitor.publish_transforms_updates").as_bool();
+
+  PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
+  if (publish_geom_updates)
+    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_GEOMETRY);
+  if (publish_state_updates)
+    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_STATE);
+  if (publish_transform_updates)
+    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
+  if (publish_planning_scene)
+  {
+    this->setPlanningScenePublishingFrequency(100);
+    this->startPublishingPlanningScene(event);
+  }
 }
 
 void PlanningSceneMonitor::monitorDiffs(bool flag)
@@ -1100,14 +1118,20 @@ void PlanningSceneMonitor::stopWorldGeometryMonitor()
     octomap_monitor_->stopMonitor();
 }
 
-void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_topic,
+
+
+void PlanningSceneMonitor::startStateMonitor(const rclcpp::Node::SharedPtr& listening_node,
+                                             const std::string& joint_states_topic,
                                              const std::string& attached_objects_topic)
 {
   stopStateMonitor();
   if (scene_)
   {
     if (!current_state_monitor_)
-      current_state_monitor_.reset(new CurrentStateMonitor(node_, getRobotModel(), tf_buffer_));
+    {
+      current_state_monitor_.reset(new CurrentStateMonitor(listening_node ? listening_node : node_,
+        getRobotModel(), tf_buffer_));
+    }
     current_state_monitor_->addUpdateCallback(boost::bind(&PlanningSceneMonitor::onStateUpdate, this, _1));
     current_state_monitor_->startStateMonitor(joint_states_topic);
 
