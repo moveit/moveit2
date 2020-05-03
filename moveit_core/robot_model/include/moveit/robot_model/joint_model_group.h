@@ -43,6 +43,7 @@
 #include <srdfdom/model.h>
 #include <boost/function.hpp>
 #include <set>
+#include <moveit/macros/visibility_control.hpp>
 
 namespace moveit
 {
@@ -65,7 +66,7 @@ using JointModelGroupMapConst = std::map<std::string, const JointModelGroup*>;
 
 using JointBoundsVector = std::vector<const JointModel::Bounds*>;
 
-class JointModelGroup
+class MOVEIT_CORE_PUBLIC JointModelGroup
 {
 public:
   struct KinematicsSolver
@@ -305,41 +306,24 @@ public:
   void getVariableDefaultPositions(std::map<std::string, double>& values) const;
 
   /** \brief Compute the default values for the joint group */
-  void getVariableDefaultPositions(std::vector<double>& values) const
-  {
-    values.resize(variable_count_);
-    getVariableDefaultPositions(&values[0]);
-  }
+  void getVariableDefaultPositions(std::vector<double>& values) const;
 
   /** \brief Compute the default values for the joint group */
   void getVariableDefaultPositions(double* values) const;
 
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values) const
-  {
-    getVariableRandomPositions(rng, values, active_joint_models_bounds_);
-  }
+  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values) const;
 
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values) const
-  {
-    values.resize(variable_count_);
-    getVariableRandomPositions(rng, &values[0], active_joint_models_bounds_);
-  }
+  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values) const;
 
   /** \brief Compute random values for the state of the joint group */
   void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values, const double* near,
-                                        const double distance) const
-  {
-    getVariableRandomPositionsNearBy(rng, values, active_joint_models_bounds_, near, distance);
-  }
+                                        const double distance) const;
+
   /** \brief Compute random values for the state of the joint group */
   void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,
-                                        const std::vector<double>& near, double distance) const
-  {
-    values.resize(variable_count_);
-    getVariableRandomPositionsNearBy(rng, &values[0], active_joint_models_bounds_, &near[0], distance);
-  }
+                                        const std::vector<double>& near, double distance) const;
 
   /** \brief Compute random values for the state of the joint group */
   void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,

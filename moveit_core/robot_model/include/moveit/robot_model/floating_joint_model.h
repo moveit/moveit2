@@ -37,13 +37,14 @@
 #pragma once
 
 #include <moveit/robot_model/joint_model.h>
+#include <moveit/macros/visibility_control.hpp>
 
 namespace moveit
 {
 namespace core
 {
 /** \brief A floating joint */
-class FloatingJointModel : public JointModel
+class MOVEIT_CORE_PUBLIC FloatingJointModel : public JointModel
 {
 public:
   FloatingJointModel(const std::string& name);

@@ -37,13 +37,14 @@
 #pragma once
 
 #include <moveit/robot_model/joint_model.h>
+#include <moveit/macros/visibility_control.hpp>
 
 namespace moveit
 {
 namespace core
 {
 /** \brief A prismatic joint */
-class PrismaticJointModel : public JointModel
+class MOVEIT_CORE_PUBLIC PrismaticJointModel : public JointModel
 {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW

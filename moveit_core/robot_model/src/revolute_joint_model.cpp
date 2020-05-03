@@ -34,6 +34,7 @@
  *********************************************************************/
 
 /* Author: Ioan Sucan */
+#define _USE_MATH_DEFINES 
 
 #include <moveit/robot_model/revolute_joint_model.h>
 #include <geometric_shapes/check_isometry.h>

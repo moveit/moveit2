@@ -59,6 +59,7 @@
 #include <boost/thread.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <moveit/macros/visibility_control.hpp>
 
 namespace moveit
 {
@@ -69,7 +70,7 @@ namespace tools
     external profiling tools in that it allows the user to count
     time spent in various bits of code (sub-function granularity)
     or count how many times certain pieces of code are executed.*/
-class Profiler : private boost::noncopyable
+class MOVEIT_CORE_PUBLIC Profiler : private boost::noncopyable
 {
 public:
   /** \brief This instance will call Profiler::begin() when constructed and Profiler::end() when it goes out of scope.
@@ -324,7 +325,7 @@ namespace moveit
 {
 namespace tools
 {
-class Profiler
+class MOVEIT_CORE_PUBLIC Profiler
 {
 public:
   class ScopedBlock

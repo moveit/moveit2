@@ -40,6 +40,7 @@
 #include <Eigen/Geometry>
 #include <boost/noncopyable.hpp>
 #include <moveit/macros/class_forward.h>
+#include <moveit/macros/visibility_control.hpp>
 #include <map>
 
 namespace moveit
@@ -56,7 +57,7 @@ using FixedTransformsMap = std::map<std::string, Eigen::Isometry3d, std::less<st
 /** @brief Provides an implementation of a snapshot of a transform tree that can be easily queried for
     transforming different quantities. Transforms are maintained as a list of transforms to a particular frame.
     All stored transforms are considered fixed. */
-class Transforms : private boost::noncopyable
+class MOVEIT_CORE_PUBLIC Transforms : private boost::noncopyable
 {
 public:
   /**

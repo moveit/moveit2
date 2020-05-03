@@ -10,7 +10,6 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 
 install(DIRECTORY include/ DESTINATION include)
 
-
 find_package(ament_index_cpp REQUIRED)
 set(MOVEIT_TEST_LIB_NAME moveit_test_utils)
 add_library(${MOVEIT_TEST_LIB_NAME} SHARED src/robot_model_test_utils.cpp)

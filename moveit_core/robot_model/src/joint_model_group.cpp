@@ -313,6 +313,30 @@ const JointModel* JointModelGroup::getJointModel(const std::string& name) const
   return it->second;
 }
 
+void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values) const
+{
+  getVariableRandomPositions(rng, values, active_joint_models_bounds_);
+}
+
+void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values) const
+{
+  values.resize(variable_count_);
+  getVariableRandomPositions(rng, &values[0], active_joint_models_bounds_);
+}
+
+void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values, const double* near,
+                                      const double distance) const
+{
+  getVariableRandomPositionsNearBy(rng, values, active_joint_models_bounds_, near, distance);
+}
+
+void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,
+                                      const std::vector<double>& near, double distance) const
+{
+  values.resize(variable_count_);
+  getVariableRandomPositionsNearBy(rng, &values[0], active_joint_models_bounds_, &near[0], distance);
+}
+
 void JointModelGroup::getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values,
                                                  const JointBoundsVector& active_joint_bounds) const
 {
@@ -460,6 +484,12 @@ void JointModelGroup::getVariableDefaultPositions(double* values) const
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
     active_joint_model_vector_[i]->getVariableDefaultPositions(values + active_joint_model_start_index_[i]);
   updateMimicJoints(values);
+}
+
+void JointModelGroup::getVariableDefaultPositions(std::vector<double>& values) const
+{
+  values.resize(variable_count_);
+  getVariableDefaultPositions(&values[0]);
 }
 
 void JointModelGroup::getVariableDefaultPositions(std::map<std::string, double>& values) const
