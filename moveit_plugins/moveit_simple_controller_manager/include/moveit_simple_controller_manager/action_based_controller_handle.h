@@ -80,7 +80,13 @@ public:
                               const std::string& logger_name)
     : ActionBasedControllerHandleBase(name, logger_name), node_(node), done_(true), namespace_(ns)
   {
-    controller_action_client_ = rclcpp_action::create_client<T>(node_, getActionName());
+    controller_action_client_ = rclcpp_action::create_client<T>(
+      node_->get_node_base_interface(),
+      node_->get_node_graph_interface(),
+      node_->get_node_logging_interface(),
+      node_->get_node_waitables_interface(),
+      getActionName());
+
     unsigned int attempts = 0;
     double timeout;
     node_->get_parameter_or("trajectory_execution.controller_connection_timeout", timeout, 15.0);
@@ -123,6 +129,7 @@ public:
     {
       RCLCPP_INFO_STREAM(LOGGER, "Cancelling execution for " << name_);
       auto cancel_result_future = controller_action_client_->async_cancel_goal(current_goal_);
+      //@todo: replace rclcpp::spin_until_future_complete
       if (rclcpp::spin_until_future_complete(node_, cancel_result_future) !=
           rclcpp::executor::FutureReturnCode::SUCCESS)
       {
@@ -137,9 +144,12 @@ public:
   bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(0)) override
   {
     auto result_future = controller_action_client_->async_get_result(current_goal_);
-    if (controller_action_client_ && !done_)
-      return (rclcpp::spin_until_future_complete(node_, result_future, timeout.to_chrono<std::chrono::seconds>()) ==
-              rclcpp::executor::FutureReturnCode::SUCCESS);
+
+    rclcpp::Time start_time = node_->now();
+    auto end_time = start_time + timeout;
+    while (!done_ && node_->now() < end_time) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
     return true;
   }
 

@@ -164,8 +164,27 @@ void TrajectoryExecutionManager::initialize()
     if (!controller.empty())
       try
       {
+        //@note: because of things being singlethreaded, we make a node named "moveit_simple_controller_manager"
+        //then copy parameters from the move_group node and then add it to the multithreadedexecutor
+        //alternatives:
+        //node_->create_sub_node doesnt work
+        //rename the node under ros_controllers.yaml to moveit_simple_controller_manager
+        rclcpp::NodeOptions opt;
+        opt.allow_undeclared_parameters(true);
+        opt.automatically_declare_parameters_from_overrides(true);
+        controller_mgr_node_.reset(new rclcpp::Node("moveit_simple_controller_manager", opt));
+
+        //the alternative is to create a node with name "moveit_simple_controller_manager"
+        // auto allparams = node_->get_node_parameters_interface()->get_parameter_overrides();
+        // for (auto param : allparams)
+        // {
+        //   RCLCPP_INFO(LOGGER, "%s", param.first.c_str());
+          
+        //   controller_mgr_node_->set_parameter(rclcpp::Parameter(param.first, param.second));
+        // }
+
         controller_manager_ = controller_manager_loader_->createUniqueInstance(controller);
-        controller_manager_->initialize(node_);
+        controller_manager_->initialize(controller_mgr_node_);
       }
       catch (pluginlib::PluginlibException& ex)
       {
@@ -1403,7 +1422,7 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
     }
 
     // compute the expected duration of the trajectory and find the part of the trajectory that takes longest to execute
-    rclcpp::Time current_time = rclcpp::Clock().now();
+    rclcpp::Time current_time = node_->now();
     rclcpp::Duration expected_trajectory_duration(0.0);
     int longest_part = -1;
     for (std::size_t i = 0; i < context.trajectory_parts_.size(); ++i)

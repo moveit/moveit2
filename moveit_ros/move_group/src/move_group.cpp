@@ -38,6 +38,8 @@
 #include <tf2_ros/transform_listener.h>
 #include <moveit/move_group/capability_names.h>
 #include <moveit/move_group/move_group_capability.h>
+#include <moveit/move_group/move_group_context.h>
+#include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <boost/tokenizer.hpp>
 #include <moveit/macros/console_colors.h>
 #include <moveit/move_group/node_name.h>
@@ -109,6 +111,8 @@ public:
     else
       RCLCPP_ERROR(LOGGER, "No MoveGroup context created. Nothing will work.");
   }
+
+  MoveGroupContextPtr getContext() { return context_; }
 
 private:
   void configureCapabilities()
@@ -271,7 +275,8 @@ int main(int argc, char** argv)
     planning_scene_monitor->publishDebugInformation(debug);
 
     mge.status();
-
+    auto controller_mgr_node_ = mge.getContext()->trajectory_execution_manager_->getControllerManagerNode();
+    executor.add_node(controller_mgr_node_);
     executor.add_node(monitor_node);
     executor.add_node(nh);
     executor.spin();

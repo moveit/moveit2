@@ -243,6 +243,7 @@ public:
   /// Enable or disable waiting for trajectory completion
   void setWaitForTrajectoryCompletion(bool flag);
 
+  rclcpp::Node::SharedPtr getControllerManagerNode() { return controller_mgr_node_; } 
 private:
   struct ControllerInformation
   {
@@ -306,6 +307,7 @@ private:
   const std::string name_ = "trajectory_execution_manager";
 
   rclcpp::Node::SharedPtr node_;
+  rclcpp::Node::SharedPtr controller_mgr_node_;
   robot_model::RobotModelConstPtr robot_model_;
   planning_scene_monitor::CurrentStateMonitorPtr csm_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr event_topic_subscriber_;

@@ -54,34 +54,42 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
   }
 
   if (done_)
-    RCLCPP_DEBUG_STREAM(LOGGER, "sending trajectory to " << name_);
+    RCLCPP_INFO_STREAM(LOGGER, "sending trajectory to " << name_);
   else
-    RCLCPP_DEBUG_STREAM(LOGGER, "sending continuation for the currently executed trajectory to " << name_);
+    RCLCPP_INFO_STREAM(LOGGER, "sending continuation for the currently executed trajectory to " << name_);
 
   control_msgs::action::FollowJointTrajectory::Goal goal = goal_template_;
   goal.trajectory = trajectory.joint_trajectory;
 
   rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SendGoalOptions send_goal_options;
   // Active callback
-  send_goal_options.goal_response_callback = [this](const auto& /* unused-arg */) {
-    RCLCPP_DEBUG_STREAM(LOGGER, name_ << " started execution");
+  send_goal_options.goal_response_callback = [this](const auto& future) {
+    RCLCPP_INFO_STREAM(LOGGER, name_ << " started execution");
+    auto goal_handle = future.get();
+    if (!goal_handle)
+      RCLCPP_INFO(LOGGER, "Goal request rejected");
+    else
+      RCLCPP_INFO(LOGGER, "Goal request accepted!");
   };
   // Result callback
   send_goal_options.result_callback =
       std::bind(&FollowJointTrajectoryControllerHandle::controllerDoneCallback, this, _1);
   // Send goal
   auto current_goal_future = controller_action_client_->async_send_goal(goal, send_goal_options);
-  if (rclcpp::spin_until_future_complete(node_, current_goal_future) != rclcpp::executor::FutureReturnCode::SUCCESS)
+  std::future_status status = current_goal_future.wait_for(std::chrono::seconds(60));
+  if (status != std::future_status::ready)
   {
     RCLCPP_ERROR(LOGGER, "Send goal call failed");
     return false;
   }
+
   current_goal_ = current_goal_future.get();
   if (!current_goal_)
   {
     RCLCPP_ERROR(LOGGER, "Goal was rejected by server");
     return false;
   }
+
   done_ = false;
   last_exec_ = moveit_controller_manager::ExecutionStatus::RUNNING;
   return true;
