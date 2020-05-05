@@ -728,7 +728,7 @@ public:
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "MoveGroup action failed or timeout reached");
+      RCLCPP_ERROR_STREAM(LOGGER, "MoveGroupInterface::plan() failed or timeout reached");
       return false;
     }
 
@@ -847,7 +847,7 @@ public:
 
     if (code != rclcpp_action::ResultCode::SUCCEEDED)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "MoveGroup action failed or timeout reached");
+      RCLCPP_ERROR_STREAM(LOGGER, "MoveGroupInterface::execute() failed or timeout reached");
       return false;
     }
     /*if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(timeout)) !=
