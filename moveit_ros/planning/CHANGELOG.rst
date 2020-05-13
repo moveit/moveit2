@@ -2,6 +2,53 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2020-02-17)
+------------------
+* [fix] Fix double node executor exceptions
+* [fix] PlanningSceneMonitor: Fix double executor exception for service call
+* [sys] Fix export of moveit_ros_planning dependencies
+* [improve] Support passing parameter subnamespace in PlanningPipeline
+* [improve] Load planning request adapter parameters from subnamespace
+* [fix] Fix parameter lookup: kinematics_plugin_loader
+* [fix] Fix moveit_ros_visualization (`#167 <https://github.com/ros-planning/moveit2/issues/167>`_)
+* [fix] rdf_loader: Fix parameter lookup
+* [port] Port moveit_cpp to ROS 2 (`#163 <https://github.com/ros-planning/moveit2/issues/163>`_)
+* [port] Port plan_execution to ROS 2 (`#111 <https://github.com/ros-planning/moveit2/issues/111>`_)
+* [fix] trajectory_execution_manager: Make library shared
+* [fix] planning_pipeline: Make library shared
+* [port] Port planning_components_tools to ROS 2 (`#149 <https://github.com/ros-planning/moveit2/issues/149>`_)
+* [port] Port moveit ros visualization to ROS 2 (`#160 <https://github.com/ros-planning/moveit2/issues/160>`_)
+* [sys] moveit_ros_planning: Fix export dependencies
+* [port] Port moveit_simple_controller_manager to ROS 2 (`#158 <https://github.com/ros-planning/moveit2/issues/158>`_)
+* [fix] Fix and compile planning_pipeline (`#162 <https://github.com/ros-planning/moveit2/issues/162>`_)
+* [port] Port trajectory_execution_manager to ROS2 (`#110 <https://github.com/ros-planning/moveit2/issues/110>`_)
+* [fix] Fix linking issue in planning_scene_monitor (`#161 <https://github.com/ros-planning/moveit2/issues/161>`_)
+* [port] Port planning_scene_monitor to ROS2 (`#112 <https://github.com/ros-planning/moveit2/issues/112>`_)
+* [sys] Re-enable moveit_ros_planning (`#144 <https://github.com/ros-planning/moveit2/issues/144>`_)
+* [sys] Comment moveit_ros_occupancy_map_monitor as depend
+* [sys] Upgrade to ROS 2 Eloquent (`#152 <https://github.com/ros-planning/moveit2/issues/152>`_)
+* [sys] Fix CMakeLists.txt files for Eloquent
+* [port] Port collision_plugin_loader to ROS 2 (`#137 <https://github.com/ros-planning/moveit2/issues/137>`_)
+* [improve] Pass node to KinematicsBase initialization (`#145 <https://github.com/ros-planning/moveit2/issues/145>`_)
+* [sys] Fix docker images (`#139 <https://github.com/ros-planning/moveit2/issues/139>`_)
+* [sys] COLCON_IGNORE moveit_ros_planning
+* [port] Port robot_model_loader to ROS2 (`#109 <https://github.com/ros-planning/moveit2/issues/109>`_)
+* [port] Port constraint_sampler_manager_loader to ROS2 (`#113 <https://github.com/ros-planning/moveit2/issues/113>`_)
+* [port] Port kinematics_plugin_loader to ROS2  (`#107 <https://github.com/ros-planning/moveit2/issues/107>`_)
+  * Update CMakeLists.txt
+  * Update parameter resolution
+  * Update logger
+* [port] Port planning_request_adapter_plugins to ROS2 (`#114 <https://github.com/ros-planning/moveit2/issues/114>`_)
+* [improve] Initialize parameters from node
+* [sys] Export plugin description file in new way
+* [fix] Fix warnings
+* [sys] Enable planning_request_adapter_plugins for colcon build
+* [port] Migrate to ROS 2 Logger
+* [sys] Update CMakeLists.txt
+* [port] Port planning_request_adapter_plugins to ROS 2
+* [port] Port rdf_loader to ROS2 (`#104 <https://github.com/ros-planning/moveit2/issues/104>`_)
+* Contributors: Henning Kayser, Jafar Abdi, Robert Haschke, Yu Yan, Víctor Mayoral Vilches,
+
 1.0.1 (2019-03-08)
 ------------------
 * [improve] Apply clang tidy fix to entire code base (Part 1) (`#1366 <https://github.com/ros-planning/moveit/issues/1366>`_)

@@ -2,6 +2,11 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2020-02-17)
+------------------
+* [port] Port moveit kinematics to ROS2 (`#128 <https://github.com/ros-planning/moveit2/issues/128>`_)
+* Contributors: Henning Kayser, Jafar Abdi
+
 1.0.1 (2019-03-08)
 ------------------
 * [improve] Apply clang tidy fix to entire code base (Part 1) (`#1366 <https://github.com/ros-planning/moveit/issues/1366>`_)

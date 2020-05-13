@@ -2,6 +2,34 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2020-02-17)
+------------------
+* [fix] Fix double node executor exceptions
+  * Load parameters from node instead of SyncParameterClient
+* [fix] Load planning request adapter parameters from subnamespace
+* [port] Port moveit_planners_ompl to ROS 2 (`#142 <https://github.com/ros-planning/moveit2/issues/142>`_)
+* [improve] Load OMPL planner config parameters
+* [port] Re-enable parameter util functions
+  * Construct constraints from node parameters
+* [port] Compile OMPL planning plugin
+* [fix] Fix Eigen3 linking issue in moveit_core (`#164 <https://github.com/ros-planning/moveit2/issues/164>`_)
+  * Closes `#151 <https://github.com/ros-planning/moveit2/issues/151>`_
+* [port] Port moveit ros visualization to ROS 2 (`#160 <https://github.com/ros-planning/moveit2/issues/160>`_)
+* [port] Port external rclcpp utils functions and add them to MoveIt 2 project temporary
+* [port] Port moveit_simple_controller_manager to ROS 2 (`#158 <https://github.com/ros-planning/moveit2/issues/158>`_)
+* [port] Port moveit_simple_controller_manager
+* [fix] KinematicsBase: fix default value in parameter lookup (`#154 <https://github.com/ros-planning/moveit2/issues/154>`_)
+* [sys] Upgrade to ROS 2 Eloquent (`#152 <https://github.com/ros-planning/moveit2/issues/152>`_)
+* [fix] Fix unit tests
+* [maintenance] Remove redundant build dependency to 'angles'
+* [sys] Fix CMakeLists.txt files for Eloquent
+* [improve] Pass node to KinematicsBase initialization (`#145 <https://github.com/ros-planning/moveit2/issues/145>`_)
+* [sys] replace rosunit -> ament_cmake_gtest
+* [port] Port planning_request_adapter_plugins to ROS2 (`#114 <https://github.com/ros-planning/moveit2/issues/114>`_)
+* [port] Port planning_request_adapter_plugins to ROS 2
+* [sys] Fix ament_lint
+* Contributors: Henning Kayser, Jafar Abdi
+
 1.0.1 (2019-03-08)
 ------------------
 * [capability] Graphically print current robot joint states with joint limits (`#1358 <https://github.com/ros-planning/moveit/issues/1358>`_)

@@ -2,6 +2,16 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2020-02-17)
+------------------
+* [fix] Fix OMPL logging macros
+* [fix] Fix OMPL planner plugin install
+* [improve] Load planner parameters from subnamespace
+* [port] Port moveit_planners_ompl to ROS 2 (`#142 <https://github.com/ros-planning/moveit2/issues/142>`_)
+* [improve] Load OMPL planner config parameters
+* [sys] replace rosunit -> ament_cmake_gtest
+* Contributors: Henning Kayser
+
 1.0.1 (2019-03-08)
 ------------------
 * [improve] Apply clang tidy fix to entire code base (Part 1) (`#1366 <https://github.com/ros-planning/moveit/issues/1366>`_)

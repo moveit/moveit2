@@ -2,6 +2,16 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2020-02-17)
+------------------
+* [fix] moveit_ros_visualization fixes (`#168 <https://github.com/ros-planning/moveit2/issues/168>`_)
+  * robot_state_display: Fix empty robot description field
+  * planning scene plugin: Fix destroySceneNode
+* [fix] Fix moveit_ros_visualization (`#167 <https://github.com/ros-planning/moveit2/issues/167>`_)
+* [port] Port moveit ros visualization to ROS 2 (`#160 <https://github.com/ros-planning/moveit2/issues/160>`_)
+* [port] Port rdf_loader to ROS2 (`#104 <https://github.com/ros-planning/moveit2/issues/104>`_)
+* Contributors: Henning Kayser, Jafar Abdi
+
 1.0.1 (2019-03-08)
 ------------------
 * [improve] Apply clang tidy fix to entire code base (Part 1) (`#1366 <https://github.com/ros-planning/moveit/issues/1366>`_)

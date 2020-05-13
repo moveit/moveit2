@@ -2,6 +2,17 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.0 (2020-02-17)
+------------------
+* [fix] Install moveit_cpp as SHARED library
+* [fix] Fix parameter lookup and runtime in MoveItCpp
+* [fix] Fix moveit_ros_visualization (`#167 <https://github.com/ros-planning/moveit2/issues/167>`_)
+* [fix] moveit_ros_planning_interface: Fix libraries export
+* [port] Port moveit_cpp to ROS 2 (`#163 <https://github.com/ros-planning/moveit2/issues/163>`_)
+* [port] Port common_planning_interface_objects to ROS 2 (`#159 <https://github.com/ros-planning/moveit2/issues/159>`_)
+* [port] Port rdf_loader to ROS2 (`#104 <https://github.com/ros-planning/moveit2/issues/104>`_)
+* Contributors: Henning Kayser, Jafar Abdi
+
 1.0.1 (2019-03-08)
 ------------------
 * [improve] Apply clang tidy fix to entire code base (Part 1) (`#1366 <https://github.com/ros-planning/moveit/issues/1366>`_)
