@@ -122,6 +122,7 @@ void TrajectoryExecutionManager::initialize()
   execution_duration_monitoring_ = true;
   execution_velocity_scaling_ = 1.0;
   allowed_start_tolerance_ = 0.01;
+  wait_for_trajectory_completion_ = true;
 
   allowed_execution_duration_scaling_ = DEFAULT_CONTROLLER_GOAL_DURATION_SCALING;
   allowed_goal_duration_margin_ = DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN;
@@ -177,13 +178,12 @@ void TrajectoryExecutionManager::initialize()
         controller_mgr_node_.reset(new rclcpp::Node("moveit_simple_controller_manager", opt));
 
         //the alternative is to create a node with name "moveit_simple_controller_manager"
-        // auto allparams = node_->get_node_parameters_interface()->get_parameter_overrides();
-        // for (auto param : allparams)
-        // {
-        //   RCLCPP_INFO(LOGGER, "%s", param.first.c_str());
-          
-        //   controller_mgr_node_->set_parameter(rclcpp::Parameter(param.first, param.second));
-        // }
+        auto allparams = node_->get_node_parameters_interface()->get_parameter_overrides();
+        for (auto param : allparams)
+        {
+          //RCLCPP_INFO(LOGGER, "%s", param.first.c_str());
+          controller_mgr_node_->set_parameter(rclcpp::Parameter(param.first, param.second));
+        }
 
         controller_manager_ = controller_manager_loader_->createUniqueInstance(controller);
         controller_manager_->initialize(controller_mgr_node_);
