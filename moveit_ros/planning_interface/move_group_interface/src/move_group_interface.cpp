@@ -529,7 +529,7 @@ public:
     if (!current_state_monitor_->isActive())
       current_state_monitor_->startStateMonitor();
 
-    if (!current_state_monitor_->waitForCurrentState(node_->get_clock()->now(), wait_seconds))
+    if (!current_state_monitor_->waitForCurrentState(rclcpp::Clock().now(), wait_seconds))
     {
       RCLCPP_ERROR(LOGGER, "Failed to fetch current robot state");
       return false;
