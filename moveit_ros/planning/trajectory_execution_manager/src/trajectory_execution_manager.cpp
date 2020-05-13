@@ -198,6 +198,9 @@ void TrajectoryExecutionManager::initialize()
       EXECUTION_EVENT_TOPIC, 100, std::bind(&TrajectoryExecutionManager::receiveEvent, this, std::placeholders::_1));
 
   reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  controller_mgr_node_->get_parameter("trajectory_execution.allowed_execution_duration_scaling", allowed_execution_duration_scaling_);
+  controller_mgr_node_->get_parameter("trajectory_execution.allowed_goal_duration_margin", allowed_goal_duration_margin_);
+  controller_mgr_node_->get_parameter("trajectory_execution.allowed_start_tolerance", allowed_start_tolerance_);
 
   if (manage_controllers_)
     RCLCPP_INFO(LOGGER, "Trajectory execution is managing controllers");
@@ -1323,7 +1326,7 @@ void TrajectoryExecutionManager::executeThread(const ExecutionCompleteCallback& 
 
   // only report that execution finished successfully when the robot actually stopped moving
   if (last_execution_status_ == moveit_controller_manager::ExecutionStatus::SUCCEEDED)
-    waitForRobotToStop(*trajectories_[i - 1]);
+    waitForRobotToStop(*trajectories_[i - 1], 10);
 
   RCLCPP_INFO(LOGGER, "Completed trajectory execution with status %s ...", last_execution_status_.asString().c_str());
 
