@@ -57,4 +57,4 @@ See the [run_moveit_cpp](moveit_demo_nodes/run_moveit_cpp) demo package for furt
 
 ## Supporters
 
-This open source project is maintained by supporters from around the world — see [MoveIt maintainers](https://moveit.ros.org/about/). [PickNik Robotics](https://picknik.ai/) is leading and organizing the development of MoveIt 2 in addition to financial and engineering resources from Intel. If you would like to support this project, please contact hello@picknik.ai
+This open source project is maintained by supporters from around the world — see [MoveIt maintainers](https://moveit.ros.org/about/). [PickNik Robotics](https://picknik.ai/) is leading and organizing the development of MoveIt 2, with additional engineering resources from Intel. If you would like to support this project, please contact hello@picknik.ai
