@@ -54,3 +54,7 @@ These instructions assume you are running on Ubuntu 18.04.
 
 We've prepared a simple demo setup that you can use for quickly spinning up a simulated robot environment with MoveItCpp.
 See the [run_moveit_cpp](moveit_demo_nodes/run_moveit_cpp) demo package for further instructions and information.
+
+## Supporters
+
+This open source project is maintained by supporters from around the world — see [MoveIt maintainers](https://moveit.ros.org/about/). [PickNik Robotics](https://picknik.ai/) is leading and organizing the development of MoveIt 2, with additional engineering resources from Intel. If you would like to support this project, please contact hello@picknik.ai
