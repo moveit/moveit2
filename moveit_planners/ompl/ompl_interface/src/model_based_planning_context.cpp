@@ -70,6 +70,7 @@
 #include "ompl/base/objectives/MinimaxObjective.h"
 #include "ompl/base/objectives/StateCostIntegralObjective.h"
 #include "ompl/base/objectives/MaximizeMinClearanceObjective.h"
+#include <ompl/geometric/planners/prm/LazyPRM.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.model_based_planning_context");
 
@@ -91,6 +92,7 @@ ompl_interface::ModelBasedPlanningContext::ModelBasedPlanningContext(const std::
   , max_solution_segment_length_(0.0)
   , minimum_waypoint_count_(0)
   , use_state_validity_cache_(true)
+  , multi_query_planning_enabled_(false)  // maintain "old" behavior by default
   , simplify_solutions_(true)
 {
   complete_initial_robot_state_.update();
@@ -291,43 +293,43 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   std::string optimizer;
   ompl::base::OptimizationObjectivePtr objective;
   it = cfg.find("optimization_objective");
-  if (it == cfg.end())
-  {
-    optimizer = "PathLengthOptimizationObjective";
-    RCLCPP_DEBUG(LOGGER, "No optimization objective specified, defaulting to %s", optimizer.c_str());
-  }
-  else
+  if (it != cfg.end())
   {
     optimizer = it->second;
     cfg.erase(it);
+
+    if (optimizer == "PathLengthOptimizationObjective")
+    {
+      objective.reset(new ompl::base::PathLengthOptimizationObjective(ompl_simple_setup_->getSpaceInformation()));
+    }
+    else if (optimizer == "MinimaxObjective")
+    {
+      objective.reset(new ompl::base::MinimaxObjective(ompl_simple_setup_->getSpaceInformation()));
+    }
+    else if (optimizer == "StateCostIntegralObjective")
+    {
+      objective.reset(new ompl::base::StateCostIntegralObjective(ompl_simple_setup_->getSpaceInformation()));
+    }
+    else if (optimizer == "MechanicalWorkOptimizationObjective")
+    {
+      objective.reset(new ompl::base::MechanicalWorkOptimizationObjective(ompl_simple_setup_->getSpaceInformation()));
+    }
+    else if (optimizer == "MaximizeMinClearanceObjective")
+    {
+      objective.reset(new ompl::base::MaximizeMinClearanceObjective(ompl_simple_setup_->getSpaceInformation()));
+    }
+    else
+    {
+      objective.reset(new ompl::base::PathLengthOptimizationObjective(ompl_simple_setup_->getSpaceInformation()));
+    }
+
+    ompl_simple_setup_->setOptimizationObjective(objective);
   }
 
-  if (optimizer == "PathLengthOptimizationObjective")
-  {
-    objective.reset(new ompl::base::PathLengthOptimizationObjective(ompl_simple_setup_->getSpaceInformation()));
-  }
-  else if (optimizer == "MinimaxObjective")
-  {
-    objective.reset(new ompl::base::MinimaxObjective(ompl_simple_setup_->getSpaceInformation()));
-  }
-  else if (optimizer == "StateCostIntegralObjective")
-  {
-    objective.reset(new ompl::base::StateCostIntegralObjective(ompl_simple_setup_->getSpaceInformation()));
-  }
-  else if (optimizer == "MechanicalWorkOptimizationObjective")
-  {
-    objective.reset(new ompl::base::MechanicalWorkOptimizationObjective(ompl_simple_setup_->getSpaceInformation()));
-  }
-  else if (optimizer == "MaximizeMinClearanceObjective")
-  {
-    objective.reset(new ompl::base::MaximizeMinClearanceObjective(ompl_simple_setup_->getSpaceInformation()));
-  }
-  else
-  {
-    objective.reset(new ompl::base::PathLengthOptimizationObjective(ompl_simple_setup_->getSpaceInformation()));
-  }
-
-  ompl_simple_setup_->setOptimizationObjective(objective);
+  // Don't clear planner data if multi-query planning is enabled
+  it = cfg.find("multi_query_planning_enabled");
+  if (it != cfg.end())
+    multi_query_planning_enabled_ = boost::lexical_cast<bool>(it->second);
 
   // remove the 'type' parameter; the rest are parameters for the planner itself
   it = cfg.find("type");
@@ -340,8 +342,9 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   {
     std::string type = it->second;
     cfg.erase(it);
-    ompl_simple_setup_->setPlannerAllocator(std::bind(spec_.planner_selector_(type), std::placeholders::_1,
-                                                      name_ != getGroupName() ? name_ : "", std::cref(spec_)));
+    const std::string planner_name = getGroupName() + "/" + name_;
+    ompl_simple_setup_->setPlannerAllocator(
+        std::bind(spec_.planner_selector_(type), std::placeholders::_1, planner_name, std::cref(spec_)));
     RCLCPP_INFO(LOGGER, "Planner configuration '%s' will use planner '%s'. "
                         "Additional configuration parameters will be set when the planner is constructed.",
                 name_.c_str(), type.c_str());
@@ -407,7 +410,7 @@ void ompl_interface::ModelBasedPlanningContext::interpolateSolution()
 void ompl_interface::ModelBasedPlanningContext::convertPath(const ompl::geometric::PathGeometric& pg,
                                                             robot_trajectory::RobotTrajectory& traj) const
 {
-  robot_state::RobotState ks = complete_initial_robot_state_;
+  moveit::core::RobotState ks = complete_initial_robot_state_;
   for (std::size_t i = 0; i < pg.getStateCount(); ++i)
   {
     spec_.state_space_->copyToRobotState(ks, pg.getState(i));
@@ -515,7 +518,7 @@ ompl::base::PlannerTerminationCondition ompl_interface::ModelBasedPlanningContex
 }
 
 void ompl_interface::ModelBasedPlanningContext::setCompleteInitialState(
-    const robot_state::RobotState& complete_initial_robot_state)
+    const moveit::core::RobotState& complete_initial_robot_state)
 {
   complete_initial_robot_state_ = complete_initial_robot_state;
   complete_initial_robot_state_.update();
@@ -523,7 +526,21 @@ void ompl_interface::ModelBasedPlanningContext::setCompleteInitialState(
 
 void ompl_interface::ModelBasedPlanningContext::clear()
 {
-  ompl_simple_setup_->clear();
+  if (!multi_query_planning_enabled_)
+    ompl_simple_setup_->clear();
+// TODO: remove when ROS Melodic and older are no longer supported
+#if OMPL_VERSION_VALUE >= 1005000
+  else
+  {
+    // For LazyPRM and LazyPRMstar we assume that the environment *could* have changed
+    // This means that we need to reset the validity flags for every node and edge in
+    // the roadmap. For PRM and PRMstar we assume that the environment is static. If
+    // this is not the case, then multi-query planning should not be enabled.
+    auto planner = dynamic_cast<ompl::geometric::LazyPRM*>(ompl_simple_setup_->getPlanner().get());
+    if (planner != nullptr)
+      planner->clearValidity();
+  }
+#endif
   ompl_simple_setup_->clearStartStates();
   ompl_simple_setup_->setGoal(ob::GoalPtr());
   ompl_simple_setup_->setStateValidityChecker(ob::StateValidityCheckerPtr());
@@ -615,7 +632,7 @@ void ompl_interface::ModelBasedPlanningContext::preSolve()
   // clear previously computed solutions
   ompl_simple_setup_->getProblemDefinition()->clearSolutionPaths();
   const ob::PlannerPtr planner = ompl_simple_setup_->getPlanner();
-  if (planner)
+  if (planner && !multi_query_planning_enabled_)
     planner->clear();
   startSampling();
   ompl_simple_setup_->getSpaceInformation()->getMotionValidator()->resetMotionCounter();
@@ -714,7 +731,7 @@ bool ompl_interface::ModelBasedPlanningContext::solve(double timeout, unsigned i
   preSolve();
 
   bool result = false;
-  if (count <= 1)
+  if (count <= 1 || multi_query_planning_enabled_)  // multi-query planners should always run in single instances
   {
     RCLCPP_DEBUG(LOGGER, "%s: Solving the planning problem once...", name_.c_str());
     ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);

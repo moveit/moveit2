@@ -84,7 +84,7 @@ public:
     ompl::msg::useOutputHandler(output_handler_.get());
   }
 
-  bool initialize(const robot_model::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
+  bool initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
                   const std::string& parameter_namespace) override
   {
     ompl_interface_.reset(new OMPLInterface(model, node, parameter_namespace));

@@ -48,6 +48,13 @@
 
 #include <boost/assert.hpp>
 
+/* Terminology
+   * Model Frame: RobotModel's root frame == PlanningScene's planning frame
+     If the SRDF defines a virtual, non-fixed (e.g. floating) joint, this is the parent of this virtual joint.
+     Otherwise, it is the root link of the URDF model.
+   * Dirty Link Transforms: a caching tool for reducing the frequency of calculating forward kinematics
+*/
+
 namespace moveit
 {
 namespace core
@@ -239,6 +246,9 @@ public:
     return velocity_;
   }
 
+  /** \brief Set all velocities to 0.0 */
+  void zeroVelocities();
+
   /** \brief Given an array with velocity values for all variables, set those values as the velocities in this state */
   void setVariableVelocities(const double* velocity)
   {
@@ -296,6 +306,9 @@ public:
     return velocity_[index];
   }
 
+  /** \brief Remove velocities from this state (this differs from setting them to zero) */
+  void dropVelocities();
+
   /** @} */
 
   /** \name Getting and setting variable acceleration
@@ -326,6 +339,9 @@ public:
   {
     return acceleration_;
   }
+
+  /** \brief Set all accelerations to 0.0 */
+  void zeroAccelerations();
 
   /** \brief Given an array with acceleration values for all variables, set those values as the accelerations in this
    * state */
@@ -389,6 +405,9 @@ public:
     return acceleration_[index];
   }
 
+  /** \brief Remove accelerations from this state (this differs from setting them to zero) */
+  void dropAccelerations();
+
   /** @} */
 
   /** \name Getting and setting variable effort
@@ -418,6 +437,9 @@ public:
   {
     return effort_;
   }
+
+  /** \brief Set all effort values to 0.0 */
+  void zeroEffort();
 
   /** \brief Given an array with effort values for all variables, set those values as the effort in this state */
   void setVariableEffort(const double* effort)
@@ -475,12 +497,20 @@ public:
     return effort_[index];
   }
 
+  /** \brief Remove effort values from this state (this differs from setting them to zero) */
+  void dropEffort();
+
+  /** \brief Reduce RobotState to kinematic information (remove velocity, acceleration and effort, if present) */
+  void dropDynamics();
+
   /** \brief Invert velocity if present. */
   void invertVelocity();
 
   /** @} */
 
-  /** \name Getting and setting joint positions, velocities, accelerations and effort
+  /** \name Getting and setting joint positions, velocities, accelerations and effort for a single joint
+   *  The joint might be multi-DOF, i.e. require more than one variable to set.
+   *  See setVariablePositions(), setVariableVelocities(), setVariableEffort() to handle multiple joints.
    *  @{
    */
   void setJointPositions(const std::string& joint_name, const double* position)
@@ -572,8 +602,7 @@ public:
    */
 
   /** \brief Given positions for the variables that make up a group, in the order found in the group (including values
-of mimic joints), set those
-as the new values that correspond to the group */
+   *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupPositions(const std::string& joint_group_name, const double* gstate)
   {
     const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
@@ -582,8 +611,7 @@ as the new values that correspond to the group */
   }
 
   /** \brief Given positions for the variables that make up a group, in the order found in the group (including values
-of mimic joints), set those
-as the new values that correspond to the group */
+   *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupPositions(const std::string& joint_group_name, const std::vector<double>& gstate)
   {
     const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
@@ -592,21 +620,18 @@ as the new values that correspond to the group */
   }
 
   /** \brief Given positions for the variables that make up a group, in the order found in the group (including values
-of mimic joints), set those
-as the new values that correspond to the group */
+   *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupPositions(const JointModelGroup* group, const std::vector<double>& gstate)
   {
     setJointGroupPositions(group, &gstate[0]);
   }
 
   /** \brief Given positions for the variables that make up a group, in the order found in the group (including values
-of mimic joints), set those
-as the new values that correspond to the group */
+   *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupPositions(const JointModelGroup* group, const double* gstate);
 
   /** \brief Given positions for the variables that make up a group, in the order found in the group (including values
-of mimic joints), set those
-as the new values that correspond to the group */
+   *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupPositions(const std::string& joint_group_name, const Eigen::VectorXd& values)
   {
     const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
@@ -615,8 +640,7 @@ as the new values that correspond to the group */
   }
 
   /** \brief Given positions for the variables that make up a group, in the order found in the group (including values
-of mimic joints), set those
-as the new values that correspond to the group */
+   *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupPositions(const JointModelGroup* group, const Eigen::VectorXd& values);
 
   /** \brief For a given group, copy the position values of the variables that make up the group into another location,
@@ -678,8 +702,7 @@ as the new values that correspond to the group */
    */
 
   /** \brief Given velocities for the variables that make up a group, in the order found in the group (including values
-of mimic joints), set those
-as the new values that correspond to the group */
+   *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupVelocities(const std::string& joint_group_name, const double* gstate)
   {
     const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
@@ -688,8 +711,7 @@ as the new values that correspond to the group */
   }
 
   /** \brief Given velocities for the variables that make up a group, in the order found in the group (including values
-of mimic joints), set those
-as the new values that correspond to the group */
+   *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupVelocities(const std::string& joint_group_name, const std::vector<double>& gstate)
   {
     const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
@@ -698,21 +720,18 @@ as the new values that correspond to the group */
   }
 
   /** \brief Given velocities for the variables that make up a group, in the order found in the group (including values
-of mimic joints), set those
-as the new values that correspond to the group */
+   *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupVelocities(const JointModelGroup* group, const std::vector<double>& gstate)
   {
     setJointGroupVelocities(group, &gstate[0]);
   }
 
   /** \brief Given velocities for the variables that make up a group, in the order found in the group (including values
-of mimic joints), set those
-as the new values that correspond to the group */
+   *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupVelocities(const JointModelGroup* group, const double* gstate);
 
   /** \brief Given velocities for the variables that make up a group, in the order found in the group (including values
-of mimic joints), set those
-as the new values that correspond to the group */
+   *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupVelocities(const std::string& joint_group_name, const Eigen::VectorXd& values)
   {
     const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
@@ -721,8 +740,7 @@ as the new values that correspond to the group */
   }
 
   /** \brief Given velocities for the variables that make up a group, in the order found in the group (including values
-of mimic joints), set those
-as the new values that correspond to the group */
+   *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupVelocities(const JointModelGroup* group, const Eigen::VectorXd& values);
 
   /** \brief For a given group, copy the velocity values of the variables that make up the group into another location,
@@ -784,8 +802,7 @@ as the new values that correspond to the group */
    */
 
   /** \brief Given accelerations for the variables that make up a group, in the order found in the group (including
-values of mimic joints), set those
-as the new values that correspond to the group */
+   *   values of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupAccelerations(const std::string& joint_group_name, const double* gstate)
   {
     const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
@@ -794,8 +811,7 @@ as the new values that correspond to the group */
   }
 
   /** \brief Given accelerations for the variables that make up a group, in the order found in the group (including
-values of mimic joints), set those
-as the new values that correspond to the group */
+   *   values of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupAccelerations(const std::string& joint_group_name, const std::vector<double>& gstate)
   {
     const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
@@ -804,21 +820,18 @@ as the new values that correspond to the group */
   }
 
   /** \brief Given accelerations for the variables that make up a group, in the order found in the group (including
-values of mimic joints), set those
-as the new values that correspond to the group */
+   *   values of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupAccelerations(const JointModelGroup* group, const std::vector<double>& gstate)
   {
     setJointGroupAccelerations(group, &gstate[0]);
   }
 
   /** \brief Given accelerations for the variables that make up a group, in the order found in the group (including
-values of mimic joints), set those
-as the new values that correspond to the group */
+   *   values of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupAccelerations(const JointModelGroup* group, const double* gstate);
 
   /** \brief Given accelerations for the variables that make up a group, in the order found in the group (including
-values of mimic joints), set those
-as the new values that correspond to the group */
+   *   values of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupAccelerations(const std::string& joint_group_name, const Eigen::VectorXd& values)
   {
     const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
@@ -827,8 +840,7 @@ as the new values that correspond to the group */
   }
 
   /** \brief Given accelerations for the variables that make up a group, in the order found in the group (including
-values of mimic joints), set those
-as the new values that correspond to the group */
+   *   values of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupAccelerations(const JointModelGroup* group, const Eigen::VectorXd& values);
 
   /** \brief For a given group, copy the acceleration values of the variables that make up the group into another
@@ -1247,6 +1259,12 @@ as the new values that correspond to the group */
   /** \brief Update the state after setting a particular link to the input global transform pose.*/
   void updateStateWithLinkAt(const LinkModel* link, const Eigen::Isometry3d& transform, bool backward = false);
 
+  /** \brief Get the link transform w.r.t. the root link (model frame) of the RobotModel.
+   *   This is typically the root link of the URDF unless a virtual joint is present.
+   *   Checks the cache and if there are any dirty (non-updated) transforms, first updates them as needed.
+   *   A related, more comprehensive function is |getFrameTransform|, which additionally to link frames
+   *   also searches for attached object frames and their subframes.
+   */
   const Eigen::Isometry3d& getGlobalLinkTransform(const std::string& link_name)
   {
     return getGlobalLinkTransform(robot_model_->getLinkModel(link_name));
@@ -1258,6 +1276,27 @@ as the new values that correspond to the group */
     return global_link_transforms_[link->getLinkIndex()];
   }
 
+  const Eigen::Isometry3d& getGlobalLinkTransform(const std::string& link_name) const
+  {
+    return getGlobalLinkTransform(robot_model_->getLinkModel(link_name));
+  }
+
+  const Eigen::Isometry3d& getGlobalLinkTransform(const LinkModel* link) const
+  {
+    BOOST_VERIFY(checkLinkTransforms());
+    return global_link_transforms_[link->getLinkIndex()];
+  }
+
+  /** \brief Get the link transform w.r.t. the root link (model frame) of the RobotModel.
+   *   This is typically the root link of the URDF unless a virtual joint is present.
+   *   Checks the cache and if there are any dirty (non-updated) transforms, first updates them as needed.
+   *
+   *   As opposed to the visual links in |getGlobalLinkTransform|, this function returns
+   *   the collision link transform used for collision checking.
+   *
+   *   @param link_name: name of link to lookup
+   *   @param index: specify which collision body to lookup, if more than one exists
+   */
   const Eigen::Isometry3d& getCollisionBodyTransform(const std::string& link_name, std::size_t index)
   {
     return getCollisionBodyTransform(robot_model_->getLinkModel(link_name), index);
@@ -1266,6 +1305,17 @@ as the new values that correspond to the group */
   const Eigen::Isometry3d& getCollisionBodyTransform(const LinkModel* link, std::size_t index)
   {
     updateCollisionBodyTransforms();
+    return global_collision_body_transforms_[link->getFirstCollisionBodyTransformIndex() + index];
+  }
+
+  const Eigen::Isometry3d& getCollisionBodyTransform(const std::string& link_name, std::size_t index) const
+  {
+    return getCollisionBodyTransform(robot_model_->getLinkModel(link_name), index);
+  }
+
+  const Eigen::Isometry3d& getCollisionBodyTransform(const LinkModel* link, std::size_t index) const
+  {
+    BOOST_VERIFY(checkCollisionTransforms());
     return global_collision_body_transforms_[link->getFirstCollisionBodyTransformIndex() + index];
   }
 
@@ -1284,28 +1334,6 @@ as the new values that correspond to the group */
       dirty = 0;
     }
     return variable_joint_transforms_[idx];
-  }
-
-  const Eigen::Isometry3d& getGlobalLinkTransform(const std::string& link_name) const
-  {
-    return getGlobalLinkTransform(robot_model_->getLinkModel(link_name));
-  }
-
-  const Eigen::Isometry3d& getGlobalLinkTransform(const LinkModel* link) const
-  {
-    BOOST_VERIFY(checkLinkTransforms());
-    return global_link_transforms_[link->getLinkIndex()];
-  }
-
-  const Eigen::Isometry3d& getCollisionBodyTransform(const std::string& link_name, std::size_t index) const
-  {
-    return getCollisionBodyTransform(robot_model_->getLinkModel(link_name), index);
-  }
-
-  const Eigen::Isometry3d& getCollisionBodyTransform(const LinkModel* link, std::size_t index) const
-  {
-    BOOST_VERIFY(checkCollisionTransforms());
-    return global_collision_body_transforms_[link->getFirstCollisionBodyTransformIndex() + index];
   }
 
   const Eigen::Isometry3d& getJointTransform(const std::string& joint_name) const
@@ -1574,24 +1602,24 @@ as the new values that correspond to the group */
     return *rng_;
   }
 
-  /** \brief Get the transformation matrix from the model frame to the frame identified by \e frame_id
+  /** \brief Get the transformation matrix from the model frame (root of model) to the frame identified by \e frame_id
    *
    * If frame_id was not found, \e frame_found is set to false and an identity transform is returned */
   const Eigen::Isometry3d& getFrameTransform(const std::string& frame_id, bool* frame_found = nullptr);
 
-  /** \brief Get the transformation matrix from the model frame to the frame identified by \e frame_id
+  /** \brief Get the transformation matrix from the model frame (root of model) to the frame identified by \e frame_id
    *
    * If frame_id was not found, \e frame_found is set to false and an identity transform is returned */
   const Eigen::Isometry3d& getFrameTransform(const std::string& frame_id, bool* frame_found = nullptr) const;
 
-  /** \brief Get the transformation matrix from the model frame to the frame identified by \e frame_id
+  /** \brief Get the transformation matrix from the model frame (root of model) to the frame identified by \e frame_id
    *
    * If this frame is attached to a robot link, the link pointer is returned in \e robot_link.
    * If frame_id was not found, \e frame_found is set to false and an identity transform is returned */
   const Eigen::Isometry3d& getFrameInfo(const std::string& frame_id, const LinkModel*& robot_link,
                                         bool& frame_found) const;
 
-  /** \brief Check if a transformation matrix from the model frame to frame \e frame_id is known */
+  /** \brief Check if a transformation matrix from the model frame (root of model) to frame \e frame_id is known */
   bool knowsFrameTransform(const std::string& frame_id) const;
 
   /** @brief Get a MarkerArray that fully describes the robot markers for a given robot.
@@ -1663,15 +1691,14 @@ private:
   {
     dirty_joint_transforms_[joint->getJointIndex()] = 1;
     dirty_link_transforms_ =
-        dirty_link_transforms_ == NULL ? joint : robot_model_->getCommonRoot(dirty_link_transforms_, joint);
+        dirty_link_transforms_ == nullptr ? joint : robot_model_->getCommonRoot(dirty_link_transforms_, joint);
   }
 
   void markDirtyJointTransforms(const JointModelGroup* group)
   {
-    const std::vector<const JointModel*>& jm = group->getActiveJointModels();
-    for (std::size_t i = 0; i < jm.size(); ++i)
-      dirty_joint_transforms_[jm[i]->getJointIndex()] = 1;
-    dirty_link_transforms_ = dirty_link_transforms_ == NULL ?
+    for (const JointModel* jm : group->getActiveJointModels())
+      dirty_joint_transforms_[jm->getJointIndex()] = 1;
+    dirty_link_transforms_ = dirty_link_transforms_ == nullptr ?
                                  group->getCommonRoot() :
                                  robot_model_->getCommonRoot(dirty_link_transforms_, group->getCommonRoot());
   }
@@ -1682,12 +1709,11 @@ private:
 
   void updateMimicJoint(const JointModel* joint)
   {
-    const std::vector<const JointModel*>& mim = joint->getMimicRequests();
     double v = position_[joint->getFirstVariableIndex()];
-    for (std::size_t i = 0; i < mim.size(); ++i)
+    for (const JointModel* jm : joint->getMimicRequests())
     {
-      position_[mim[i]->getFirstVariableIndex()] = mim[i]->getMimicFactor() * v + mim[i]->getMimicOffset();
-      markDirtyJointTransforms(mim[i]);
+      position_[jm->getFirstVariableIndex()] = jm->getMimicFactor() * v + jm->getMimicOffset();
+      markDirtyJointTransforms(jm);
     }
   }
 
@@ -1695,15 +1721,14 @@ private:
   /* use updateMimicJoints() instead, which also marks joints dirty */
   [[deprecated]] void updateMimicJoint(const std::vector<const JointModel*>& mim)
   {
-    for (std::size_t i = 0; i < mim.size(); ++i)
+    for (const JointModel* jm : mim)
     {
-      const int fvi = mim[i]->getFirstVariableIndex();
-      position_[fvi] =
-          mim[i]->getMimicFactor() * position_[mim[i]->getMimic()->getFirstVariableIndex()] + mim[i]->getMimicOffset();
+      const int fvi = jm->getFirstVariableIndex();
+      position_[fvi] = jm->getMimicFactor() * position_[jm->getMimic()->getFirstVariableIndex()] + jm->getMimicOffset();
       // Only mark joint transform dirty, but not the associated link transform
       // as this function is always used in combination of
       // updateMimicJoint(group->getMimicJointModels()) + markDirtyJointTransforms(group);
-      dirty_joint_transforms_[mim[i]->getJointIndex()] = 1;
+      dirty_joint_transforms_[jm->getJointIndex()] = 1;
     }
   }
 
@@ -1748,9 +1773,12 @@ private:
   const JointModel* dirty_link_transforms_;
   const JointModel* dirty_collision_body_transforms_;
 
-  Eigen::Isometry3d* variable_joint_transforms_;         // this points to an element in transforms_, so it is aligned
-  Eigen::Isometry3d* global_link_transforms_;            // this points to an element in transforms_, so it is aligned
-  Eigen::Isometry3d* global_collision_body_transforms_;  // this points to an element in transforms_, so it is aligned
+  // All the following transform variables point into aligned memory in memory_
+  // They are updated lazily, based on the flags in dirty_joint_transforms_
+  // resp. the pointers dirty_link_transforms_ and dirty_collision_body_transforms_
+  Eigen::Isometry3d* variable_joint_transforms_;         ///< Local transforms of all joints
+  Eigen::Isometry3d* global_link_transforms_;            ///< Transforms from model frame to link frame for each link
+  Eigen::Isometry3d* global_collision_body_transforms_;  ///< Transforms from model frame to collision bodies
   unsigned char* dirty_joint_transforms_;
 
   /** \brief All attached bodies that are part of this state, indexed by their name */
@@ -1770,5 +1798,5 @@ private:
 
 /** \brief Operator overload for printing variable bounds to a stream */
 std::ostream& operator<<(std::ostream& out, const RobotState& s);
-}
-}
+}  // namespace core
+}  // namespace moveit

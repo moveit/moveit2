@@ -58,14 +58,14 @@ int main(int argc, char** argv)
     std::string group = argv[1];
     RCLCPP_INFO(LOGGER, "Evaluating IK for %s", group.c_str());
 
-    const robot_model::JointModelGroup* jmg = rml.getModel()->getJointModelGroup(group);
+    const moveit::core::JointModelGroup* jmg = rml.getModel()->getJointModelGroup(group);
     if (jmg)
     {
       const kinematics::KinematicsBaseConstPtr& solver = jmg->getSolverInstance();
       if (solver)
       {
         const std::string& tip = solver->getTipFrame();
-        robot_state::RobotState state(rml.getModel());
+        moveit::core::RobotState state(rml.getModel());
         state.setToDefaultValues();
 
         RCLCPP_INFO(LOGGER, "Tip Frame:  %s", solver->getTipFrame().c_str());

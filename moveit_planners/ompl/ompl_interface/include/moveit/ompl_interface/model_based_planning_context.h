@@ -102,17 +102,17 @@ public:
     spec_.config_ = config;
   }
 
-  const robot_model::RobotModelConstPtr& getRobotModel() const
+  const moveit::core::RobotModelConstPtr& getRobotModel() const
   {
     return spec_.state_space_->getRobotModel();
   }
 
-  const robot_model::JointModelGroup* getJointModelGroup() const
+  const moveit::core::JointModelGroup* getJointModelGroup() const
   {
     return spec_.state_space_->getJointModelGroup();
   }
 
-  const robot_state::RobotState& getCompleteInitialRobotState() const
+  const moveit::core::RobotState& getCompleteInitialRobotState() const
   {
     return complete_initial_robot_state_;
   }
@@ -234,7 +234,7 @@ public:
 
   void setPlanningVolume(const moveit_msgs::msg::WorkspaceParameters& wparams);
 
-  void setCompleteInitialState(const robot_state::RobotState& complete_initial_robot_state);
+  void setCompleteInitialState(const moveit::core::RobotState& complete_initial_robot_state);
 
   bool setGoalConstraints(const std::vector<moveit_msgs::msg::Constraints>& goal_constraints,
                           const moveit_msgs::msg::Constraints& path_constraints,
@@ -370,7 +370,7 @@ protected:
 
   ModelBasedPlanningContextSpecification spec_;
 
-  robot_state::RobotState complete_initial_robot_state_;
+  moveit::core::RobotState complete_initial_robot_state_;
 
   /// the OMPL planning context; this contains the problem definition and the planner used
   og::SimpleSetupPtr ompl_simple_setup_;
@@ -419,6 +419,9 @@ protected:
   unsigned int minimum_waypoint_count_;
 
   bool use_state_validity_cache_;
+
+  /// when false, clears planners before running solve()
+  bool multi_query_planning_enabled_;
 
   ConstraintsLibraryPtr constraints_library_;
 

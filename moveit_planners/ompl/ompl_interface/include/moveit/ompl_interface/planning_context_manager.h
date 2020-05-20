@@ -41,16 +41,46 @@
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 #include <moveit/macros/class_forward.h>
 
+#include <ompl/base/PlannerDataStorage.h>
+
 #include <vector>
 #include <string>
 #include <map>
 
 namespace ompl_interface
 {
+class MultiQueryPlannerAllocator
+{
+public:
+  MultiQueryPlannerAllocator() = default;
+  ~MultiQueryPlannerAllocator();
+
+  template <typename T>
+  ob::PlannerPtr allocatePlanner(const ob::SpaceInformationPtr& si, const std::string& new_name,
+                                 const ModelBasedPlanningContextSpecification& spec);
+
+private:
+  template <typename T>
+  ob::PlannerPtr allocatePlannerImpl(const ob::SpaceInformationPtr& si, const std::string& new_name,
+                                     const ModelBasedPlanningContextSpecification& spec, bool load_planner_data = false,
+                                     bool store_planner_data = false, const std::string& file_path = "");
+
+  template <typename T>
+  inline ob::Planner* allocatePersistentPlanner(const ob::PlannerData& data);
+
+  // Storing multi-query planners
+  std::map<std::string, ob::PlannerPtr> planners_;
+
+  std::map<std::string, std::string> planner_data_storage_paths_;
+
+  // Store and load planner data
+  ob::PlannerDataStorage storage_;
+};
+
 class PlanningContextManager
 {
 public:
-  PlanningContextManager(robot_model::RobotModelConstPtr robot_model,
+  PlanningContextManager(moveit::core::RobotModelConstPtr robot_model,
                          constraint_samplers::ConstraintSamplerManagerPtr csm);
   ~PlanningContextManager();
 
@@ -135,7 +165,7 @@ public:
     minimum_waypoint_count_ = mwc;
   }
 
-  const robot_model::RobotModelConstPtr& getRobotModel() const
+  const moveit::core::RobotModelConstPtr& getRobotModel() const
   {
     return robot_model_;
   }
@@ -176,6 +206,9 @@ protected:
   void registerDefaultPlanners();
   void registerDefaultStateSpaces();
 
+  template <typename T>
+  void registerPlannerAllocatorHelper(const std::string& planner_id);
+
   /** \brief This is the function that constructs new planning contexts if no previous ones exist that are suitable */
   ModelBasedPlanningContextPtr getPlanningContext(const planning_interface::PlannerConfigurationSettings& config,
                                                   const StateSpaceFactoryTypeSelector& factory_selector,
@@ -187,7 +220,7 @@ protected:
                                                               const moveit_msgs::msg::MotionPlanRequest& req) const;
 
   /** \brief The kinematic model for which motion plans are computed */
-  robot_model::RobotModelConstPtr robot_model_;
+  moveit::core::RobotModelConstPtr robot_model_;
 
   constraint_samplers::ConstraintSamplerManagerPtr constraint_sampler_manager_;
 
@@ -222,8 +255,11 @@ protected:
   /// needed)
   unsigned int minimum_waypoint_count_;
 
+  /// Multi-query planner allocator
+  MultiQueryPlannerAllocator planner_allocator_;
+
 private:
   MOVEIT_STRUCT_FORWARD(CachedContexts)
   CachedContextsPtr cached_contexts_;
 };
-}
+}  // namespace ompl_interface

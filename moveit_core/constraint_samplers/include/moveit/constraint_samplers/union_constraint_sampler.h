@@ -149,10 +149,10 @@ public:
    *
    * @return True if all invidual samplers return true
    */
-  bool sample(robot_state::RobotState& state, const robot_state::RobotState& reference_state,
+  bool sample(moveit::core::RobotState& state, const moveit::core::RobotState& reference_state,
               unsigned int max_attempts) override;
 
-  bool project(robot_state::RobotState& state, unsigned int max_attempts) override;
+  bool project(moveit::core::RobotState& state, unsigned int max_attempts) override;
 
   /**
    * \brief Get the name of the constraint sampler, for debugging purposes
@@ -168,4 +168,4 @@ public:
 protected:
   std::vector<ConstraintSamplerPtr> samplers_; /**< \brief Holder for sorted internal list of samplers*/
 };
-}
+}  // namespace constraint_samplers

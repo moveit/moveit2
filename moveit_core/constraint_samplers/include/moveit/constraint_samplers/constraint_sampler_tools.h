@@ -42,7 +42,7 @@
 
 namespace constraint_samplers
 {
-void visualizeDistribution(const ConstraintSamplerPtr& sampler, const robot_state::RobotState& reference_state,
+void visualizeDistribution(const ConstraintSamplerPtr& sampler, const moveit::core::RobotState& reference_state,
                            const std::string& link_name, unsigned int sample_count,
                            visualization_msgs::msg::MarkerArray& markers);
 
@@ -51,8 +51,8 @@ void visualizeDistribution(const moveit_msgs::msg::Constraints& constr,
                            const std::string& link_name, unsigned int sample_count,
                            visualization_msgs::msg::MarkerArray& markers);
 
-double countSamplesPerSecond(const ConstraintSamplerPtr& sampler, const robot_state::RobotState& reference_state);
+double countSamplesPerSecond(const ConstraintSamplerPtr& sampler, const moveit::core::RobotState& reference_state);
 
 double countSamplesPerSecond(const moveit_msgs::msg::Constraints& constr,
                              const planning_scene::PlanningSceneConstPtr& scene, const std::string& group);
-}
+}  // namespace constraint_samplers

@@ -46,8 +46,8 @@ namespace planning_interface
 {
 std::shared_ptr<tf2_ros::Buffer> getSharedTF();
 
-robot_model::RobotModelConstPtr getSharedRobotModel(const rclcpp::Node::SharedPtr& node,
-                                                    const std::string& robot_description);
+moveit::core::RobotModelConstPtr getSharedRobotModel(const rclcpp::Node::SharedPtr& node,
+                                                     const std::string& robot_description);
 
 /**
   @brief getSharedStateMonitor
@@ -57,8 +57,8 @@ robot_model::RobotModelConstPtr getSharedRobotModel(const rclcpp::Node::SharedPt
   @param tf_buffer
   @return
  */
-planning_scene_monitor::CurrentStateMonitorPtr getSharedStateMonitor(const rclcpp::Node::SharedPtr& node,
-                                                                     const robot_model::RobotModelConstPtr& robot_model,
-                                                                     const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
+planning_scene_monitor::CurrentStateMonitorPtr
+getSharedStateMonitor(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
+                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
 }  // namespace planning_interface
 }  // namespace moveit

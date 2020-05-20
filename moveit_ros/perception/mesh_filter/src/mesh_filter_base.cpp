@@ -59,8 +59,8 @@ mesh_filter::MeshFilterBase::MeshFilterBase(const TransformCallback& transform_c
                                             const std::string& filter_vertex_shader,
                                             const std::string& filter_fragment_shader)
   : sensor_parameters_(sensor_parameters.clone())
-  , next_handle_(FirstLabel)  // 0 and 1 are reserved!
-  , min_handle_(FirstLabel)
+  , next_handle_(FIRST_LABEL)  // 0 and 1 are reserved!
+  , min_handle_(FIRST_LABEL)
   , stop_(false)
   , transform_callback_(transform_callback)
   , padding_scale_(1.0)
@@ -324,7 +324,7 @@ void mesh_filter::MeshFilterBase::doFilter(const void* sensor_data, const int en
   glUniform3f(padding_coefficients_id, padding_coefficients[0], padding_coefficients[1], padding_coefficients[2]);
 
   Eigen::Isometry3d transform;
-  for (const std::pair<MeshHandle, GLMeshPtr>& mesh : meshes_)
+  for (const std::pair<const MeshHandle, GLMeshPtr>& mesh : meshes_)
     if (transform_callback_(mesh.first, transform))
       mesh.second->render(transform);
 

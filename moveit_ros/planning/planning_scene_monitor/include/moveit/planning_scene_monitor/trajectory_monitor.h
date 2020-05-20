@@ -44,7 +44,7 @@
 
 namespace planning_scene_monitor
 {
-typedef boost::function<void(const robot_state::RobotStateConstPtr& state, const rclcpp::Time& stamp)>
+typedef boost::function<void(const moveit::core::RobotStateConstPtr& state, const rclcpp::Time& stamp)>
     TrajectoryStateAddedCallback;
 
 MOVEIT_CLASS_FORWARD(TrajectoryMonitor)
@@ -105,4 +105,4 @@ private:
   std::unique_ptr<boost::thread> record_states_thread_;
   TrajectoryStateAddedCallback state_add_callback_;
 };
-}
+}  // namespace planning_scene_monitor

@@ -160,7 +160,7 @@ public:
 
 protected:
   const rclcpp::Node::SharedPtr node_;
-  std::string getActionName(void) const
+  std::string getActionName() const
   {
     if (namespace_.empty())
       return name_;

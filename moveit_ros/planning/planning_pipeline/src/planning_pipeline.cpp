@@ -48,7 +48,7 @@ const std::string planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC = "dis
 const std::string planning_pipeline::PlanningPipeline::MOTION_PLAN_REQUEST_TOPIC = "motion_plan_request";
 const std::string planning_pipeline::PlanningPipeline::MOTION_CONTACTS_TOPIC = "display_contacts";
 
-planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotModelConstPtr& model,
+planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
                                                       const std::shared_ptr<rclcpp::Node> node,
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_param_name,
@@ -71,7 +71,7 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotMo
   configure();
 }
 
-planning_pipeline::PlanningPipeline::PlanningPipeline(const robot_model::RobotModelConstPtr& model,
+planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
                                                       const std::shared_ptr<rclcpp::Node> node,
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_name,
@@ -318,7 +318,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
             for (std::size_t it : index)
             {
               // check validity with verbose on
-              const robot_state::RobotState& robot_state = res.trajectory_->getWayPoint(it);
+              const moveit::core::RobotState& robot_state = res.trajectory_->getWayPoint(it);
               planning_scene->isStateValid(robot_state, req.path_constraints, req.group_name, true);
 
               // compute the contacts if any
@@ -363,7 +363,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     disp.model_id = robot_model_->getName();
     disp.trajectory.resize(1);
     res.trajectory_->getRobotTrajectoryMsg(disp.trajectory[0]);
-    robot_state::robotStateToRobotStateMsg(res.trajectory_->getFirstWayPoint(), disp.trajectory_start);
+    moveit::core::robotStateToRobotStateMsg(res.trajectory_->getFirstWayPoint(), disp.trajectory_start);
     display_path_publisher_->publish(disp);
   }
 
@@ -374,7 +374,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     bool stacked_constraints = false;
     if (req.path_constraints.position_constraints.size() > 1 || req.path_constraints.orientation_constraints.size() > 1)
       stacked_constraints = true;
-    for (auto constraint : req.goal_constraints)
+    for (const auto& constraint : req.goal_constraints)
     {
       if (constraint.position_constraints.size() > 1 || constraint.orientation_constraints.size() > 1)
         stacked_constraints = true;

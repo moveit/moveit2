@@ -310,12 +310,12 @@ void RobotStateDisplay::newRobotStateCallback(const moveit_msgs::msg::DisplayRob
   if (!robot_model_)
     return;
   if (!robot_state_)
-    robot_state_.reset(new robot_state::RobotState(robot_model_));
-  // possibly use TF to construct a robot_state::Transforms object to pass in to the conversion function?
+    robot_state_.reset(new moveit::core::RobotState(robot_model_));
+  // possibly use TF to construct a moveit::core::Transforms object to pass in to the conversion function?
   try
   {
     if (!moveit::core::isEmpty(state_msg->state))
-      robot_state::robotStateMsgToRobotState(state_msg->state, *robot_state_);
+      moveit::core::robotStateMsgToRobotState(state_msg->state, *robot_state_);
     setRobotHighlights(state_msg->highlight_links);
   }
   catch (const moveit::Exception& e)
@@ -391,9 +391,9 @@ void RobotStateDisplay::loadRobotModel()
   {
     const srdf::ModelSharedPtr& srdf =
         rdf_loader_->getSRDF() ? rdf_loader_->getSRDF() : srdf::ModelSharedPtr(new srdf::Model());
-    robot_model_.reset(new robot_model::RobotModel(rdf_loader_->getURDF(), srdf));
+    robot_model_.reset(new moveit::core::RobotModel(rdf_loader_->getURDF(), srdf));
     robot_->load(*robot_model_->getURDF());
-    robot_state_.reset(new robot_state::RobotState(robot_model_));
+    robot_state_.reset(new moveit::core::RobotState(robot_model_));
     robot_state_->setToDefaultValues();
     bool old_state = root_link_name_property_->blockSignals(true);
     root_link_name_property_->setStdString(getRobotModel()->getRootLinkName());

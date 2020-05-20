@@ -52,7 +52,12 @@ MOVEIT_CLASS_FORWARD(PlanningSceneInterface)
 class PlanningSceneInterface
 {
 public:
-  explicit PlanningSceneInterface(const std::string& ns = "");
+  /**
+    \param ns. Namespace in which all MoveIt related topics and services are discovered
+    \param wait. Wait for services if they are not announced in ROS.
+    If this is false, the constructor throws std::runtime_error instead.
+  */
+  explicit PlanningSceneInterface(const std::string& ns = "", bool wait = true);
   ~PlanningSceneInterface();
 
   /**
@@ -143,5 +148,5 @@ private:
   class PlanningSceneInterfaceImpl;
   PlanningSceneInterfaceImpl* impl_;
 };
-}
-}
+}  // namespace planning_interface
+}  // namespace moveit

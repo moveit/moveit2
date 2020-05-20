@@ -83,6 +83,7 @@ public:
    *
    * where W_q and W_x are joint- and Cartesian weights respectively.
    * A smaller joint weight (< 1.0) will reduce the contribution of this joint to the solution. */
+  // NOLINTNEXTLINE(readability-identifier-naming)
   int CartToJnt(const JntArray& q_in, const Twist& v_in, JntArray& qdot_out, const Eigen::VectorXd& joint_weights,
                 const Eigen::Matrix<double, 6, 1>& cartesian_weights);
 
@@ -114,4 +115,4 @@ private:
   Jacobian jac_;          // full Jacobian
   Jacobian jac_reduced_;  // reduced Jacobian with contributions of mimic joints mapped onto active DoFs
 };
-}
+}  // namespace KDL

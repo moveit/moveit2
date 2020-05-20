@@ -48,4 +48,4 @@ class CollisionDetectorAllocatorHybrid
 public:
   static const std::string NAME;  // defined in collision_env_hybrid.cpp
 };
-}
+}  // namespace collision_detection

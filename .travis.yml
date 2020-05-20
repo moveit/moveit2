@@ -1,5 +1,5 @@
 # This config file for Travis CI utilizes https://github.com/ros-planning/moveit_ci/ package.
-sudo: required
+os: linux
 dist: xenial  # distro used by Travis, moveit_ci uses the docker image's distro
 services:
   - docker
@@ -8,8 +8,7 @@ cache: ccache
 compiler: gcc
 
 notifications:
-  email:
-    recipients:
+  email: true
 
 env:
   global:
@@ -17,23 +16,22 @@ env:
     - ROS_DISTRO=eloquent
     - ROS_REPO=ros
     - UPSTREAM_WORKSPACE=moveit2.repos
-    # moveit_ros_perception: mesh_filter_test fails due to broken Mesa OpenGL
-    - TEST_BLACKLIST="moveit_ros_perception"
     - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls"
     - WARNINGS_OK=false
-  matrix:
-    # TODO(henningkayser): Enable ament_lint once all packages are ported
-    - TEST="clang-format"
-    - ROS_DISTRO=eloquent
 
-# TODO(mlautman): Enable once franka_ikfast_plugin and panda_ikfast_plugin are available
-# matrix: # Add a separate config to the matrix, using clang as compiler
-  # include:
-    # # add a config to the matrix using clang as compiler and also test ikfast plugin creation
-    # - compiler: clang
-      # env: ROS_REPO=ros
+jobs:
+  fast_finish: true
+  include:
+    - env: TEST="clang-format"  # TODO(henningkayser): Enable ament_lint
+    - env: TEST=code-coverage
+    - env: ROS_DISTRO=eloquent
+    - compiler: clang  # test_ikfast_plugins takes ~10 minutes: include here to keep the main jobs shorter
+      env: TEST=clang-tidy-fix
+           CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-overloaded-virtual"
+           # TODO(mlautman): Enable once franka_ikfast_plugin and panda_ikfast_plugin are available
            # BEFORE_DOCKER_SCRIPT="source moveit_kinematics/test/test_ikfast_plugins.sh"
-           # CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unused-parameter -Wno-unused-function -Wno-overloaded-virtual"
+  allow_failures:
+    - env: TEST=code-coverage
 
 before_script:
   - git clone -q -b ros2 --depth=1 https://github.com/ros-planning/moveit_ci.git .moveit_ci

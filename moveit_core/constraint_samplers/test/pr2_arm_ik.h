@@ -189,4 +189,4 @@ private:
 
   std::vector<bool> continuous_joint_;
 };
-}
+}  // namespace pr2_arm_kinematics

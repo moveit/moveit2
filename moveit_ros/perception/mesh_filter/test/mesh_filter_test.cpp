@@ -231,7 +231,7 @@ void MeshFilterTest<Type>::test()
     float sensor_depth = sensor_data_[idx] * FilterTraits<Type>::ToMetricScale;
     if (fabs(sensor_depth - distance_ - shadow_) > epsilon_ && fabs(sensor_depth - distance_) > epsilon_)
     {
-      ASSERT_FLOAT_EQ(filtered_depth[idx], gt_depth[idx]);
+      ASSERT_NEAR(filtered_depth[idx], gt_depth[idx], 1e-6);
       ASSERT_EQ(filtered_labels[idx], gt_labels[idx]);
     }
   }
@@ -251,11 +251,11 @@ void MeshFilterTest<Type>::getGroundTruth(unsigned int* labels, float* depth) co
       {
         depth[idx] = double(sensor_data_[idx]) * scale;
         if (depth[idx] < near_)
-          labels[idx] = MeshFilterBase::NearClip;
+          labels[idx] = MeshFilterBase::NEAR_CLIP;
         else if (depth[idx] >= far_)
-          labels[idx] = MeshFilterBase::FarClip;
+          labels[idx] = MeshFilterBase::FAR_CLIP;
         else
-          labels[idx] = MeshFilterBase::Background;
+          labels[idx] = MeshFilterBase::BACKGROUND;
 
         if (depth[idx] <= near_ || depth[idx] >= far_)
           depth[idx] = 0;
@@ -272,21 +272,21 @@ void MeshFilterTest<Type>::getGroundTruth(unsigned int* labels, float* depth) co
 
         if (depth[idx] < near_)
         {
-          labels[idx] = MeshFilterBase::NearClip;
+          labels[idx] = MeshFilterBase::NEAR_CLIP;
           depth[idx] = 0;
         }
         else
         {
           double diff = depth[idx] - distance_;
           if (diff < 0 && depth[idx] < far_)
-            labels[idx] = MeshFilterBase::Background;
+            labels[idx] = MeshFilterBase::BACKGROUND;
           else if (diff > shadow_)
-            labels[idx] = MeshFilterBase::Shadow;
+            labels[idx] = MeshFilterBase::SHADOW;
           else if (depth[idx] >= far_)
-            labels[idx] = MeshFilterBase::FarClip;
+            labels[idx] = MeshFilterBase::FAR_CLIP;
           else
           {
-            labels[idx] = MeshFilterBase::FirstLabel;
+            labels[idx] = MeshFilterBase::FIRST_LABEL;
             depth[idx] = 0;
           }
 

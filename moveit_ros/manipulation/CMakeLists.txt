@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10.2)
 project(moveit_ros_manipulation)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
@@ -32,9 +33,12 @@ catkin_package(
   LIBRARIES
     moveit_pick_place_planner
   CATKIN_DEPENDS
+    actionlib
+    dynamic_reconfigure
     moveit_core
     moveit_msgs
     moveit_ros_planning
+    roscpp
   DEPENDS
     EIGEN3
 )

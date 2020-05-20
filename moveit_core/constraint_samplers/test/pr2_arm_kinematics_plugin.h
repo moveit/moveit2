@@ -42,8 +42,6 @@
 #include <kdl/tree.hpp>
 #include <kdl_parser/kdl_parser.hpp>
 
-#include <angles/angles.h>
-
 #include <moveit/macros/class_forward.h>
 #include <moveit_msgs/srv/get_position_fk.hpp>
 #include <moveit_msgs/srv/get_position_ik.hpp>
@@ -251,4 +249,4 @@ protected:
   void jointSolutionCallback(const KDL::JntArray& jnt_array, const KDL::Frame& ik_pose,
                              moveit_msgs::msg::MoveItErrorCodes& error_code) const;
 };
-}
+}  // namespace pr2_arm_kinematics

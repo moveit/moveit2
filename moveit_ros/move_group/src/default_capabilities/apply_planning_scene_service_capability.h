@@ -58,4 +58,4 @@ private:
 
   ros::ServiceServer service_;
 };
-}
+}  // namespace move_group

@@ -44,7 +44,7 @@
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.ompl_interface");
 
-ompl_interface::OMPLInterface::OMPLInterface(const robot_model::RobotModelConstPtr& robot_model,
+ompl_interface::OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model,
                                              const rclcpp::Node::SharedPtr& node,
                                              const std::string& parameter_namespace)
   : node_(node)
@@ -55,12 +55,12 @@ ompl_interface::OMPLInterface::OMPLInterface(const robot_model::RobotModelConstP
   , use_constraints_approximations_(true)
   , simplify_solutions_(true)
 {
-  RCLCPP_INFO(LOGGER, "Initializing OMPL interface using ROS parameters");
+  RCLCPP_DEBUG(LOGGER, "Initializing OMPL interface using ROS parameters");
   loadPlannerConfigurations();
   loadConstraintSamplers();
 }
 
-ompl_interface::OMPLInterface::OMPLInterface(const robot_model::RobotModelConstPtr& robot_model,
+ompl_interface::OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model,
                                              const planning_interface::PlannerConfigurationMap& pconfig,
                                              const rclcpp::Node::SharedPtr& node,
                                              const std::string& parameter_namespace)
@@ -72,7 +72,7 @@ ompl_interface::OMPLInterface::OMPLInterface(const robot_model::RobotModelConstP
   , use_constraints_approximations_(true)
   , simplify_solutions_(true)
 {
-  RCLCPP_INFO(LOGGER, "Initializing OMPL interface using specified configuration");
+  RCLCPP_DEBUG(LOGGER, "Initializing OMPL interface using specified configuration");
   setPlannerConfigurations(pconfig);
   loadConstraintSamplers();
 }
@@ -84,7 +84,7 @@ void ompl_interface::OMPLInterface::setPlannerConfigurations(const planning_inte
   planning_interface::PlannerConfigurationMap pconfig2 = pconfig;
 
   // construct default configurations for planning groups that don't have configs already passed in
-  for (const robot_model::JointModelGroup* group : robot_model_->getJointModelGroups())
+  for (const moveit::core::JointModelGroup* group : robot_model_->getJointModelGroups())
   {
     if (pconfig.find(group->getName()) == pconfig.end())
     {

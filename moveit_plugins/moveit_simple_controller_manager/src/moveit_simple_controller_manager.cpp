@@ -157,6 +157,12 @@ public:
           continue;
         }
 
+        moveit_controller_manager::MoveItControllerManager::ControllerState state;
+        node_->get_parameter_or(PARAM_BASE_NAME + "." + controller_name + ".default", state.default_, false);
+        state.active_ = true;
+
+        controller_states_[controller_name] = state;
+
         /* add list of joints, used by controller manager and MoveIt */
         for (const std::string& controller_joint : controller_joints)
           new_handle->addJoint(controller_joint);
@@ -227,16 +233,10 @@ public:
     }
   }
 
-  /*
-   * Controllers are all active and default -- that's what makes this thing simple.
-   */
   moveit_controller_manager::MoveItControllerManager::ControllerState
-  getControllerState(const std::string& /* name */) override
+  getControllerState(const std::string& name) override
   {
-    moveit_controller_manager::MoveItControllerManager::ControllerState state;
-    state.active_ = true;
-    state.default_ = true;
-    return state;
+    return controller_states_[name];
   }
 
   /* Cannot switch our controllers */
@@ -249,6 +249,7 @@ public:
 protected:
   rclcpp::Node::SharedPtr node_;
   std::map<std::string, ActionBasedControllerHandleBasePtr> controllers_;
+  std::map<std::string, moveit_controller_manager::MoveItControllerManager::ControllerState> controller_states_;
 };
 
 }  // end namespace moveit_simple_controller_manager

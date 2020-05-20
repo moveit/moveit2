@@ -64,8 +64,8 @@ private:
   kinematic_constraints::KinematicConstraintSetPtr kinematic_constraint_set_;
   constraint_samplers::ConstraintSamplerPtr constraint_sampler_;
   ompl::base::StateSamplerPtr default_sampler_;
-  robot_state::RobotState work_state_;
+  moveit::core::RobotState work_state_;
   double inv_dim_;
   ompl::RNG rng_;
 };
-}
+}  // namespace ompl_interface

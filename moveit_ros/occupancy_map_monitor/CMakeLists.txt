@@ -3,7 +3,7 @@ project(moveit_ros_occupancy_map_monitor)
 set(MOVEIT_LIB_NAME ${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 14)
-
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Disable -Wpedantic warnings due to the warnings in ros-dashing-octomap
@@ -28,6 +28,7 @@ find_package(pluginlib REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(octomap REQUIRED)
 find_package(geometric_shapes REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 include_directories(include)
 include_directories(SYSTEM

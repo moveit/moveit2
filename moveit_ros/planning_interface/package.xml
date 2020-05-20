@@ -48,4 +48,9 @@
   <export>
     <build_type>ament_cmake</build_type>
   </export>
+
+  <test_depend>moveit_resources</test_depend>
+  <test_depend>eigen_conversions</test_depend>
+  <!-- TODO(henningkayser): switch to launch_test -->
+  <!-- <test_depend>rostest</test_depend> -->
 </package>

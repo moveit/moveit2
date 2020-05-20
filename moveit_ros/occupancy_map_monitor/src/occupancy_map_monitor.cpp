@@ -44,7 +44,7 @@
 
 namespace occupancy_map_monitor
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.occupancy_map_monitor");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.occupancy_map_monitor");
 
 OccupancyMapMonitor::OccupancyMapMonitor(const rclcpp::Node::SharedPtr& node, double map_resolution)
   : map_resolution_(map_resolution), debug_info_(false), mesh_handle_count_(0), node_(node), active_(false)
@@ -82,91 +82,95 @@ void OccupancyMapMonitor::initialize()
         RCLCPP_WARN(LOGGER, "No target frame specified for Octomap. No transforms will be applied to received data.");
 
   if (!tf_buffer_ && !map_frame_.empty())
-    RCLCPP_WARN(LOGGER,
-                "Target frame specified but no TF instance specified. No transforms will be applied to received data.");
+    RCLCPP_WARN(LOGGER, "Target frame specified but no TF instance (buffer) specified."
+                        "No transforms will be applied to received data.");
 
   tree_.reset(new OccMapTree(map_resolution_));
   tree_const_ = tree_;
 
-  // TODO rework this in ROS2
-  // XmlRpc::XmlRpcValue sensor_list;
-  // if (nh_.getParam("sensors", sensor_list))
-  // {
-  //   try
+  // TODO(henningkayser): rework this in ROS2
+  //   XmlRpc::XmlRpcValue sensor_list;
+  //   if (nh_.getParam("sensors", sensor_list))
   //   {
-  //     if (sensor_list.getType() == XmlRpc::XmlRpcValue::TypeArray)
-  //       for (int32_t i = 0; i < sensor_list.size(); ++i)
-  //       {
-  //         if (sensor_list[i].getType() != XmlRpc::XmlRpcValue::TypeStruct)
+  //     try
+  //     {
+  //       if (sensor_list.getType() == XmlRpc::XmlRpcValue::TypeArray)
+  //         for (int32_t i = 0; i < sensor_list.size(); ++i)
   //         {
-  //           ROS_ERROR("Params for octomap updater %d not a struct; ignoring.", i);
-  //           continue;
-  //         }
-
-  //         if (!sensor_list[i].hasMember("sensor_plugin"))
-  //         {
-  //           ROS_ERROR("No sensor plugin specified for octomap updater %d; ignoring.", i);
-  //           continue;
-  //         }
-
-  //         std::string sensor_plugin = std::string(sensor_list[i]["sensor_plugin"]);
-  //         if (sensor_plugin.empty() || sensor_plugin[0] == '~')
-  //         {
-  //           ROS_INFO("Skipping octomap updater plugin '%s'", sensor_plugin.c_str());
-  //           continue;
-  //         }
-
-  //         if (!updater_plugin_loader_)
-  //         {
+  //           if (sensor_list[i].getType() != XmlRpc::XmlRpcValue::TypeStruct)
+  //           {
+  //             ROS_ERROR_NAMED(LOGNAME, "Params for octomap updater %d not a struct; ignoring.", i);
+  //             continue;
+  //           }
+  //
+  //           if (!sensor_list[i].hasMember("sensor_plugin"))
+  //           {
+  //             ROS_ERROR_NAMED(LOGNAME, "No sensor plugin specified for octomap updater %d; ignoring.", i);
+  //             continue;
+  //           }
+  //
+  //           std::string sensor_plugin = std::string(sensor_list[i]["sensor_plugin"]);
+  //           if (sensor_plugin.empty() || sensor_plugin[0] == '~')
+  //           {
+  //             ROS_INFO_STREAM_NAMED(LOGNAME, "Skipping octomap updater plugin '" << sensor_plugin << "'");
+  //             continue;
+  //           }
+  //
+  //           if (!updater_plugin_loader_)
+  //           {
+  //             try
+  //             {
+  //               updater_plugin_loader_.reset(new pluginlib::ClassLoader<OccupancyMapUpdater>(
+  //                   "moveit_ros_perception", "occupancy_map_monitor::OccupancyMapUpdater"));
+  //             }
+  //             catch (pluginlib::PluginlibException& ex)
+  //             {
+  //               ROS_FATAL_STREAM_NAMED(LOGNAME, "Exception while creating octomap updater plugin loader " <<
+  //               ex.what());
+  //             }
+  //           }
+  //
+  //           OccupancyMapUpdaterPtr up;
   //           try
   //           {
-  //             updater_plugin_loader_.reset(new pluginlib::ClassLoader<OccupancyMapUpdater>(
-  //                 "moveit_ros_perception", "occupancy_map_monitor::OccupancyMapUpdater"));
+  //             up = updater_plugin_loader_->createUniqueInstance(sensor_plugin);
+  //             up->setMonitor(this);
   //           }
   //           catch (pluginlib::PluginlibException& ex)
   //           {
-  //             ROS_FATAL_STREAM("Exception while creating octomap updater plugin loader " << ex.what());
+  //             ROS_ERROR_STREAM_NAMED(LOGNAME, "Exception while loading octomap updater '"
+  //                                                 << sensor_plugin << "': " << ex.what() << std::endl);
   //           }
-  //         }
-
-  //         OccupancyMapUpdaterPtr up;
-  //         try
-  //         {
-  //           up = updater_plugin_loader_->createUniqueInstance(sensor_plugin);
-  //           up->setMonitor(this);
-  //         }
-  //         catch (pluginlib::PluginlibException& ex)
-  //         {
-  //           ROS_ERROR_STREAM("Exception while loading octomap updater '" << sensor_plugin << "': " << ex.what()
-  //                                                                        << std::endl);
-  //         }
-  //         if (up)
-  //         {
-  //           /* pass the params struct directly in to the updater */
-  //           if (!up->setParams(sensor_list[i]))
+  //           if (up)
   //           {
-  //             ROS_ERROR("Failed to configure updater of type %s", up->getType().c_str());
-  //             continue;
+  //             /* pass the params struct directly in to the updater */
+  //             if (!up->setParams(sensor_list[i]))
+  //             {
+  //               ROS_ERROR_STREAM_NAMED(LOGNAME, "Failed to configure updater of type " << up->getType());
+  //               continue;
+  //             }
+  //
+  //             if (!up->initialize())
+  //             {
+  //               ROS_ERROR_NAMED(LOGNAME, "Unable to initialize map updater of type %s (plugin %s)",
+  //               up->getType().c_str(),
+  //                               sensor_plugin.c_str());
+  //               continue;
+  //             }
+  //
+  //             addUpdater(up);
   //           }
-
-  //           if (!up->initialize())
-  //           {
-  //             ROS_ERROR("Unable to initialize map updater of type %s (plugin %s)", up->getType().c_str(),
-  //                       sensor_plugin.c_str());
-  //             continue;
-  //           }
-
-  //           addUpdater(up);
   //         }
-  //       }
-  //     else
-  //       ROS_ERROR("List of sensors must be an array!");
+  //       else
+  //         ROS_ERROR_NAMED(LOGNAME, "List of sensors must be an array!");
+  //     }
+  //     catch (XmlRpc::XmlRpcException& ex)
+  //     {
+  //       ROS_ERROR_STREAM_NAMED(LOGNAME, "XmlRpc Exception: " << ex.getMessage());
+  //     }
   //   }
-  //   catch (XmlRpc::XmlRpcException& ex)
-  //   {
-  //     ROS_ERROR("XmlRpc Exception: %s", ex.getMessage().c_str());
-  //   }
-  // }
+  //   else
+  //     ROS_ERROR_NAMED(LOGNAME, "Failed to find 3D sensor plugin parameters for octomap generation");
 
   /* advertise a service for loading octomaps from disk */
   auto save_map_service_callback = [this](const std::shared_ptr<rmw_request_id_t> request_header,
@@ -194,8 +198,8 @@ void OccupancyMapMonitor::addUpdater(const OccupancyMapUpdaterPtr& updater)
     if (map_updaters_.size() > 1)
     {
       mesh_handles_.resize(map_updaters_.size());
-      if (map_updaters_.size() ==
-          2)  // when we had one updater only, we passed direcly the transform cache callback to that updater
+      // when we had one updater only, we passed direcly the transform cache callback to that updater
+      if (map_updaters_.size() == 2)
       {
         map_updaters_[0]->setTransformCacheCallback(
             boost::bind(&OccupancyMapMonitor::getShapeTransformCache, this, 0, _1, _2, _3));

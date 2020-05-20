@@ -39,7 +39,7 @@
 
 namespace occupancy_map_monitor
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.occupancy_map_updater");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.occupancy_map_updater");
 
 OccupancyMapUpdater::OccupancyMapUpdater(const std::string& type) : type_(type)
 {

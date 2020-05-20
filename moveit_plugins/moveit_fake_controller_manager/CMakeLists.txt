@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.1.3)
 project(moveit_fake_controller_manager)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
@@ -24,6 +25,7 @@ catkin_package(
   CATKIN_DEPENDS
     moveit_core
     moveit_ros_planning
+    roscpp
 )
 
 add_library(${PROJECT_NAME}

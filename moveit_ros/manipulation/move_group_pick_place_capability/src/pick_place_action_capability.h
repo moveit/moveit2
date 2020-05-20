@@ -101,4 +101,4 @@ private:
 
   ros::ServiceClient grasp_planning_service_;
 };
-}
+}  // namespace move_group

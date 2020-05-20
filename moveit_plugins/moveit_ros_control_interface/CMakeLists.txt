@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.1.3)
 project(moveit_ros_control_interface)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -21,8 +22,9 @@ catkin_package(
     ${PROJECT_NAME}_plugin
     ${PROJECT_NAME}_trajectory_plugin
   CATKIN_DEPENDS
-    moveit_core
+    actionlib
     controller_manager_msgs
+    moveit_core
     trajectory_msgs
   DEPENDS Boost
 )

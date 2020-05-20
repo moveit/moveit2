@@ -55,7 +55,7 @@ public:
       POSE_COMPUTED = 512
     };
 
-    StateType() : ModelBasedStateSpace::StateType(), poses(NULL)
+    StateType() : ModelBasedStateSpace::StateType(), poses(nullptr)
     {
       flags |= JOINTS_COMPUTED;
     }
@@ -107,7 +107,7 @@ public:
   bool computeStateK(ompl::base::State* state) const;
 
   void setPlanningVolume(double minX, double maxX, double minY, double maxY, double minZ, double maxZ) override;
-  void copyToOMPLState(ompl::base::State* state, const robot_state::RobotState& rstate) const override;
+  void copyToOMPLState(ompl::base::State* state, const moveit::core::RobotState& rstate) const override;
   void sanityChecks() const override;
 
   const std::string& getParameterizationType() const override
@@ -118,8 +118,8 @@ public:
 private:
   struct PoseComponent
   {
-    PoseComponent(const robot_model::JointModelGroup* subgroup,
-                  const robot_model::JointModelGroup::KinematicsSolver& k);
+    PoseComponent(const moveit::core::JointModelGroup* subgroup,
+                  const moveit::core::JointModelGroup::KinematicsSolver& k);
 
     bool computeStateFK(StateType* full_state, unsigned int idx) const;
     bool computeStateIK(StateType* full_state, unsigned int idx) const;
@@ -129,7 +129,7 @@ private:
       return subgroup_->getName() < o.subgroup_->getName();
     }
 
-    const robot_model::JointModelGroup* subgroup_;
+    const moveit::core::JointModelGroup* subgroup_;
     kinematics::KinematicsBasePtr kinematics_solver_;
     std::vector<unsigned int> bijection_;
     ompl::base::StateSpacePtr state_space_;
@@ -139,4 +139,4 @@ private:
   std::vector<PoseComponent> poses_;
   double jump_factor_;
 };
-}
+}  // namespace ompl_interface

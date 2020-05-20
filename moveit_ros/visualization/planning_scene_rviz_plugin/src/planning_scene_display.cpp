@@ -281,13 +281,13 @@ const std::string PlanningSceneDisplay::getMoveGroupNS() const
   return move_group_ns_property_->getStdString();
 }
 
-const robot_model::RobotModelConstPtr& PlanningSceneDisplay::getRobotModel() const
+const moveit::core::RobotModelConstPtr& PlanningSceneDisplay::getRobotModel() const
 {
   if (planning_scene_monitor_)
     return planning_scene_monitor_->getRobotModel();
   else
   {
-    static robot_model::RobotModelConstPtr empty;
+    static moveit::core::RobotModelConstPtr empty;
     return empty;
   }
 }
@@ -383,7 +383,13 @@ void PlanningSceneDisplay::changedPlanningSceneTopic()
     std::string service_name = planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_SERVICE;
     if (!getMoveGroupNS().empty())
       service_name = rclcpp::names::append(getMoveGroupNS(), service_name);
-    planning_scene_monitor_->requestPlanningSceneState(service_name);
+    auto bg_func = [=]() {
+      if (planning_scene_monitor_->requestPlanningSceneState(service_name))
+        addMainLoopJob(boost::bind(&PlanningSceneDisplay::onNewPlanningSceneState, this));
+      else
+        setStatus(rviz_common::properties::StatusProperty::Warn, "PlanningScene", "Requesting initial scene failed");
+    };
+    addBackgroundJob(bg_func, "requestPlanningSceneState");
   }
 }
 
@@ -430,7 +436,7 @@ void PlanningSceneDisplay::setGroupColor(rviz_default_plugins::robot::Robot* rob
 {
   if (getRobotModel())
   {
-    const robot_model::JointModelGroup* jmg = getRobotModel()->getJointModelGroup(group_name);
+    const moveit::core::JointModelGroup* jmg = getRobotModel()->getJointModelGroup(group_name);
     if (jmg)
     {
       const std::vector<std::string>& links = jmg->getLinkModelNamesWithCollisionGeometry();
@@ -454,7 +460,7 @@ void PlanningSceneDisplay::unsetGroupColor(rviz_default_plugins::robot::Robot* r
 {
   if (getRobotModel())
   {
-    const robot_model::JointModelGroup* jmg = getRobotModel()->getJointModelGroup(group_name);
+    const moveit::core::JointModelGroup* jmg = getRobotModel()->getJointModelGroup(group_name);
     if (jmg)
     {
       const std::vector<std::string>& links = jmg->getLinkModelNamesWithCollisionGeometry();
@@ -528,6 +534,8 @@ void PlanningSceneDisplay::loadRobotModel()
   if (psm->getPlanningScene())
   {
     planning_scene_monitor_.swap(psm);
+    planning_scene_monitor_->addUpdateCallback(
+        boost::bind(&PlanningSceneDisplay::sceneMonitorReceivedUpdate, this, _1));
     addMainLoopJob(boost::bind(&PlanningSceneDisplay::onRobotModelLoaded, this));
     setStatus(rviz_common::properties::StatusProperty::Ok, "PlanningScene", "Planning Scene Loaded Successfully");
     waitForAllMainLoopJobs();
@@ -537,13 +545,10 @@ void PlanningSceneDisplay::loadRobotModel()
     setStatus(rviz_common::properties::StatusProperty::Error, "PlanningScene", "No Planning Scene Loaded");
   }
 
-  if (planning_scene_monitor_)
-    planning_scene_monitor_->addUpdateCallback(
-        boost::bind(&PlanningSceneDisplay::sceneMonitorReceivedUpdate, this, _1));
-
   model_is_loading_ = false;
 }
 
+// This should always run in the main GUI thread!
 void PlanningSceneDisplay::onRobotModelLoaded()
 {
   changedPlanningSceneTopic();
@@ -554,14 +559,18 @@ void PlanningSceneDisplay::onRobotModelLoaded()
   if (planning_scene_robot_)
   {
     planning_scene_robot_->load(*getRobotModel()->getURDF());
-    robot_state::RobotState* rs = new robot_state::RobotState(ps->getCurrentState());
+    moveit::core::RobotState* rs = new moveit::core::RobotState(ps->getCurrentState());
     rs->update();
-    planning_scene_robot_->update(robot_state::RobotStateConstPtr(rs));
+    planning_scene_robot_->update(moveit::core::RobotStateConstPtr(rs));
   }
 
   bool old_state = scene_name_property_->blockSignals(true);
   scene_name_property_->setStdString(ps->getName());
   scene_name_property_->blockSignals(old_state);
+}
+
+void PlanningSceneDisplay::onNewPlanningSceneState()
+{
 }
 
 void PlanningSceneDisplay::sceneMonitorReceivedUpdate(

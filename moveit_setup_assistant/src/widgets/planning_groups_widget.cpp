@@ -318,7 +318,7 @@ void PlanningGroupsWidget::loadGroupsTreeRecursive(srdf::Model::Group& group_it,
   group->addChild(joints);
 
   // Retrieve pointer to the shared kinematic model
-  const robot_model::RobotModelConstPtr& model = config_data_->getRobotModel();
+  const moveit::core::RobotModelConstPtr& model = config_data_->getRobotModel();
 
   // Loop through all aval. joints
   for (std::vector<std::string>::const_iterator joint_it = group_it.joints_.begin(); joint_it != group_it.joints_.end();
@@ -329,7 +329,7 @@ void PlanningGroupsWidget::loadGroupsTreeRecursive(srdf::Model::Group& group_it,
     std::string joint_name;
 
     // Get the type of joint this is
-    const robot_model::JointModel* jm = model->getJointModel(*joint_it);
+    const moveit::core::JointModel* jm = model->getJointModel(*joint_it);
     if (jm)  // check if joint model was found
     {
       joint_name = *joint_it + " - " + jm->getTypeName();
@@ -520,7 +520,7 @@ void PlanningGroupsWidget::editSelected()
 void PlanningGroupsWidget::loadJointsScreen(srdf::Model::Group* this_group)
 {
   // Retrieve pointer to the shared kinematic model
-  const robot_model::RobotModelConstPtr& model = config_data_->getRobotModel();
+  const moveit::core::RobotModelConstPtr& model = config_data_->getRobotModel();
 
   // Get the names of the all joints
   const std::vector<std::string>& joints = model->getJointModelNames();
@@ -552,7 +552,7 @@ void PlanningGroupsWidget::loadJointsScreen(srdf::Model::Group* this_group)
 void PlanningGroupsWidget::loadLinksScreen(srdf::Model::Group* this_group)
 {
   // Retrieve pointer to the shared kinematic model
-  const robot_model::RobotModelConstPtr& model = config_data_->getRobotModel();
+  const moveit::core::RobotModelConstPtr& model = config_data_->getRobotModel();
 
   // Get the names of the all links
   const std::vector<std::string>& links = model->getLinkModelNames();
@@ -1084,6 +1084,8 @@ bool PlanningGroupsWidget::saveGroupScreen()
   const std::string& default_planner = group_edit_widget_->default_planner_field_->currentText().toStdString();
   const std::string& kinematics_resolution = group_edit_widget_->kinematics_resolution_field_->text().toStdString();
   const std::string& kinematics_timeout = group_edit_widget_->kinematics_timeout_field_->text().toStdString();
+  const std::string& kinematics_parameters_file =
+      group_edit_widget_->kinematics_parameters_file_field_->text().toStdString();
 
   // Used for editing existing groups
   srdf::Model::Group* searched_group = nullptr;
@@ -1103,13 +1105,12 @@ bool PlanningGroupsWidget::saveGroupScreen()
   }
 
   // Check that the group name is unique
-  for (std::vector<srdf::Model::Group>::const_iterator group_it = config_data_->srdf_->groups_.begin();
-       group_it != config_data_->srdf_->groups_.end(); ++group_it)
+  for (const auto& group : config_data_->srdf_->groups_)
   {
-    if (group_it->name_.compare(group_name) == 0)  // the names are the same
+    if (group.name_.compare(group_name) == 0)  // the names are the same
     {
       // is this our existing group? check if group pointers are same
-      if (&(*group_it) != searched_group)
+      if (&group != searched_group)
       {
         QMessageBox::warning(this, "Error Saving", "A group already exists with that name!");
         return false;
@@ -1235,6 +1236,7 @@ bool PlanningGroupsWidget::saveGroupScreen()
   config_data_->group_meta_data_[group_name].kinematics_solver_ = kinematics_solver;
   config_data_->group_meta_data_[group_name].kinematics_solver_search_resolution_ = kinematics_resolution_double;
   config_data_->group_meta_data_[group_name].kinematics_solver_timeout_ = kinematics_timeout_double;
+  config_data_->group_meta_data_[group_name].kinematics_parameters_file_ = kinematics_parameters_file;
   config_data_->group_meta_data_[group_name].default_planner_ = default_planner;
   config_data_->changes |= MoveItConfigData::GROUP_KINEMATICS;
 
@@ -1401,12 +1403,12 @@ void PlanningGroupsWidget::changeScreen(int index)
 // ******************************************************************************************
 // Called from Double List widget to highlight a link
 // ******************************************************************************************
-void PlanningGroupsWidget::previewSelectedLink(std::vector<std::string> links)
+void PlanningGroupsWidget::previewSelectedLink(const std::vector<std::string>& links)
 {
   // Unhighlight all links
   Q_EMIT unhighlightAll();
 
-  for (std::string& link : links)
+  for (const std::string& link : links)
   {
     if (link.empty())
     {
@@ -1421,14 +1423,14 @@ void PlanningGroupsWidget::previewSelectedLink(std::vector<std::string> links)
 // ******************************************************************************************
 // Called from Double List widget to highlight joints
 // ******************************************************************************************
-void PlanningGroupsWidget::previewSelectedJoints(std::vector<std::string> joints)
+void PlanningGroupsWidget::previewSelectedJoints(const std::vector<std::string>& joints)
 {
   // Unhighlight all links
   Q_EMIT unhighlightAll();
 
   for (const std::string& joint : joints)
   {
-    const robot_model::JointModel* joint_model = config_data_->getRobotModel()->getJointModel(joint);
+    const moveit::core::JointModel* joint_model = config_data_->getRobotModel()->getJointModel(joint);
 
     // Check that a joint model was found
     if (!joint_model)
@@ -1452,7 +1454,7 @@ void PlanningGroupsWidget::previewSelectedJoints(std::vector<std::string> joints
 // ******************************************************************************************
 // Called from Double List widget to highlight a subgroup
 // ******************************************************************************************
-void PlanningGroupsWidget::previewSelectedSubgroup(std::vector<std::string> groups)
+void PlanningGroupsWidget::previewSelectedSubgroup(const std::vector<std::string>& groups)
 {
   // Unhighlight all links
   Q_EMIT unhighlightAll();

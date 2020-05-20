@@ -124,7 +124,7 @@ UnionConstraintSampler::UnionConstraintSampler(const planning_scene::PlanningSce
   }
 }
 
-bool UnionConstraintSampler::sample(robot_state::RobotState& state, const robot_state::RobotState& reference_state,
+bool UnionConstraintSampler::sample(moveit::core::RobotState& state, const moveit::core::RobotState& reference_state,
                                     unsigned int max_attempts)
 {
   state = reference_state;
@@ -148,7 +148,7 @@ bool UnionConstraintSampler::sample(robot_state::RobotState& state, const robot_
   return true;
 }
 
-bool UnionConstraintSampler::project(robot_state::RobotState& state, unsigned int max_attempts)
+bool UnionConstraintSampler::project(moveit::core::RobotState& state, unsigned int max_attempts)
 {
   for (ConstraintSamplerPtr& sampler : samplers_)
   {

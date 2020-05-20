@@ -121,25 +121,25 @@ public:
   MoveItCpp(const MoveItCpp&) = delete;
   MoveItCpp& operator=(const MoveItCpp&) = delete;
 
-  MoveItCpp(MoveItCpp&& other);
-  MoveItCpp& operator=(MoveItCpp&& other);
+  MoveItCpp(MoveItCpp&& other) = default;
+  MoveItCpp& operator=(MoveItCpp&& other) = default;
 
   /** \brief Destructor */
   ~MoveItCpp();
 
   /** \brief Get the RobotModel object. */
-  robot_model::RobotModelConstPtr getRobotModel() const;
+  moveit::core::RobotModelConstPtr getRobotModel() const;
 
   /** \brief Get the ROS node this instance operates on */
   const rclcpp::Node::SharedPtr& getNode() const;
 
   /** \brief Get the current state queried from the current state monitor
       \param wait_seconds the time in seconds for the state monitor to wait for a robot state. */
-  bool getCurrentState(robot_state::RobotStatePtr& current_state, double wait_seconds);
+  bool getCurrentState(moveit::core::RobotStatePtr& current_state, double wait_seconds);
 
   /** \brief Get the current state queried from the current state monitor
       \param wait_seconds the time in seconds for the state monitor to wait for a robot state. */
-  robot_state::RobotStatePtr getCurrentState(double wait_seconds = 0.0);
+  moveit::core::RobotStatePtr getCurrentState(double wait_seconds = 0.0);
 
   /** \brief Get all loaded planning pipeline instances mapped to their reference names */
   const std::map<std::string, planning_pipeline::PlanningPipelinePtr>& getPlanningPipelines() const;
@@ -166,7 +166,7 @@ public:
 private:
   //  Core properties and instances
   rclcpp::Node::SharedPtr node_;
-  robot_model::RobotModelConstPtr robot_model_;
+  moveit::core::RobotModelConstPtr robot_model_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   // TF

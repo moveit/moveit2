@@ -61,4 +61,4 @@ public:
   virtual bool canService(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name,
                           const moveit_msgs::msg::Constraints& constr) const = 0;
 };
-}
+}  // namespace constraint_samplers

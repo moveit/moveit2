@@ -101,4 +101,4 @@ private:
   srdf::ModelSharedPtr srdf_;
   urdf::ModelInterfaceSharedPtr urdf_;
 };
-}
+}  // namespace rdf_loader

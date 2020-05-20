@@ -146,10 +146,10 @@ bool World::knowsTransform(const std::string& name) const
   std::map<std::string, ObjectPtr>::const_iterator it = objects_.find(name);
   if (it != objects_.end())
     // only accept object name as frame if it is associated to a unique shape
-    return it->second->shape_poses_.size() == 1;
+    return !it->second->shape_poses_.empty();
   else  // Then objects' subframes
   {
-    for (const std::pair<std::string, ObjectPtr>& object : objects_)
+    for (const std::pair<const std::string, ObjectPtr>& object : objects_)
     {
       // if "object name/" matches start of object_id, we found the matching object
       if (boost::starts_with(name, object.first) && name[object.first.length()] == '/')
@@ -171,13 +171,18 @@ const Eigen::Isometry3d& World::getTransform(const std::string& name) const
 
 const Eigen::Isometry3d& World::getTransform(const std::string& name, bool& frame_found) const
 {
+  // assume found
   frame_found = true;
+
   std::map<std::string, ObjectPtr>::const_iterator it = objects_.find(name);
   if (it != objects_.end())
-    return it->second->shape_poses_[0];
+  {
+    if (!it->second->shape_poses_.empty())
+      return it->second->shape_poses_[0];
+  }
   else  // Search within subframes
   {
-    for (const std::pair<std::string, ObjectPtr>& object : objects_)
+    for (const std::pair<const std::string, ObjectPtr>& object : objects_)
     {
       // if "object name/" matches start of object_id, we found the matching object
       if (boost::starts_with(name, object.first) && name[object.first.length()] == '/')
@@ -189,6 +194,7 @@ const Eigen::Isometry3d& World::getTransform(const std::string& name, bool& fram
     }
   }
 
+  // we need a persisting isometry for the API
   static const Eigen::Isometry3d IDENTITY_TRANSFORM = Eigen::Isometry3d::Identity();
   frame_found = false;
   return IDENTITY_TRANSFORM;
@@ -315,8 +321,8 @@ void World::notifyAll(Action action)
 
 void World::notify(const ObjectConstPtr& obj, Action action)
 {
-  for (std::vector<Observer*>::const_iterator obs = observers_.begin(); obs != observers_.end(); ++obs)
-    (*obs)->callback_(obj, action);
+  for (Observer* observer : observers_)
+    observer->callback_(obj, action);
 }
 
 void World::notifyObserverAllObjects(const ObserverHandle observer_handle, Action action) const

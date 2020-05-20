@@ -53,6 +53,21 @@
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #endif
 
+namespace rviz
+{
+class Robot;
+class Shape;
+class Property;
+class IntProperty;
+class StringProperty;
+class BoolProperty;
+class FloatProperty;
+class RosTopicProperty;
+class EditableEnumProperty;
+class ColorProperty;
+class MovableText;
+}  // namespace rviz
+
 namespace moveit_rviz_plugin
 {
 MOVEIT_CLASS_FORWARD(TrajectoryVisualization)
@@ -77,7 +92,7 @@ public:
 
   void onInitialize(const rclcpp::Node::SharedPtr& node, Ogre::SceneNode* scene_node,
                     rviz_common::DisplayContext* context);
-  void onRobotModelLoaded(const robot_model::RobotModelConstPtr& robot_model);
+  void onRobotModelLoaded(const moveit::core::RobotModelConstPtr& robot_model);
   void onEnable();
   void onDisable();
   void setName(const QString& name);
@@ -131,8 +146,8 @@ protected:
   float current_state_time_;
   boost::mutex update_trajectory_message_;
 
-  robot_model::RobotModelConstPtr robot_model_;
-  robot_state::RobotStatePtr robot_state_;
+  moveit::core::RobotModelConstPtr robot_model_;
+  moveit::core::RobotStatePtr robot_state_;
 
   // Pointers from parent display taht we save
   rviz_common::Display* display_;  // the parent display that this class populates

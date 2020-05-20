@@ -67,10 +67,10 @@ public:
       request \e req for group \e group. The group \e group must always be specified and takes precedence over \e
      req.group_name, which may be different */
   virtual int canRepresentProblem(const std::string& group, const moveit_msgs::msg::MotionPlanRequest& req,
-                                  const robot_model::RobotModelConstPtr& robot_model) const = 0;
+                                  const moveit::core::RobotModelConstPtr& robot_model) const = 0;
 
 protected:
   virtual ModelBasedStateSpacePtr allocStateSpace(const ModelBasedStateSpaceSpecification& space_spec) const = 0;
   std::string type_;
 };
-}
+}  // namespace ompl_interface

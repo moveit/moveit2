@@ -198,4 +198,4 @@ private:
   ModelBasedPlanningContext* context_;
   std::map<std::string, ConstraintApproximationPtr> constraint_approximations_;
 };
-}
+}  // namespace ompl_interface

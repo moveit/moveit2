@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10.2)
 project(moveit_setup_assistant)
 
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -55,6 +56,7 @@ catkin_package(
   CATKIN_DEPENDS
     moveit_ros_planning
     moveit_ros_visualization
+    roscpp
 )
 
 # Header files that need Qt Moc pre-processing for use with Qt signals, etc:

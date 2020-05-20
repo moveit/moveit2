@@ -77,4 +77,4 @@ private:
   RenderShapesPtr render_shapes_;
   RobotStateVisualizationPtr scene_robot_;
 };
-}
+}  // namespace moveit_rviz_plugin

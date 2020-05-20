@@ -78,7 +78,7 @@ public:
       \param adapter_plugins_param_name The name of the ROS parameter under which the names of the request adapter
      plugins are specified (plugin names separated by space; order matters)
   */
-  PlanningPipeline(const robot_model::RobotModelConstPtr& model, const std::shared_ptr<rclcpp::Node> node,
+  PlanningPipeline(const moveit::core::RobotModelConstPtr& model, const std::shared_ptr<rclcpp::Node> node,
                    const std::string& parameter_namespace,
                    const std::string& planning_plugin_param_name = "planning_plugin",
                    const std::string& adapter_plugins_param_name = "request_adapters");
@@ -90,7 +90,7 @@ public:
       \param planning_plugin_name The name of the planning plugin to load
       \param adapter_plugins_names The names of the planning request adapter plugins to load
   */
-  PlanningPipeline(const robot_model::RobotModelConstPtr& model, const std::shared_ptr<rclcpp::Node> node,
+  PlanningPipeline(const moveit::core::RobotModelConstPtr& model, const std::shared_ptr<rclcpp::Node> node,
                    const std::string& parameter_namespace, const std::string& planning_plugin_name,
                    const std::vector<std::string>& adapter_plugin_names);
 
@@ -166,7 +166,7 @@ public:
   }
 
   /** \brief Get the robot model that this pipeline is using */
-  const robot_model::RobotModelConstPtr& getRobotModel() const
+  const moveit::core::RobotModelConstPtr& getRobotModel() const
   {
     return robot_model_;
   }
@@ -193,7 +193,7 @@ private:
   std::unique_ptr<planning_request_adapter::PlanningRequestAdapterChain> adapter_chain_;
   std::vector<std::string> adapter_plugin_names_;
 
-  robot_model::RobotModelConstPtr robot_model_;
+  moveit::core::RobotModelConstPtr robot_model_;
 
   /// Flag indicating whether the reported plans should be checked once again, by the planning pipeline itself
   bool check_solution_paths_;
@@ -201,4 +201,4 @@ private:
 };
 
 MOVEIT_CLASS_FORWARD(PlanningPipeline)
-}
+}  // namespace planning_pipeline

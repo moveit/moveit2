@@ -94,10 +94,7 @@ PR2ArmIKSolver::PR2ArmIKSolver(const urdf::ModelInterface& robot_model, const st
   search_discretization_angle_ = search_discretization_angle;
   free_angle_ = free_angle;
   root_frame_name_ = root_frame_name;
-  if (!pr2_arm_ik_.init(robot_model, root_frame_name, tip_frame_name))
-    active_ = false;
-  else
-    active_ = true;
+  active_ = pr2_arm_ik_.init(robot_model, root_frame_name, tip_frame_name);
 }
 
 int PR2ArmIKSolver::CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_in, KDL::JntArray& q_out)

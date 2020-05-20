@@ -25,7 +25,9 @@
   <depend>assimp</depend>
   <depend>boost</depend>
   <depend>eigen</depend>
+  <depend>bullet</depend>
   <depend>eigen_stl_containers</depend>
+  <depend>eigen_conversions</depend>
   <depend>libfcl-dev</depend>
   <depend>geometric_shapes</depend>
   <depend>geometry_msgs</depend>
@@ -57,5 +59,6 @@
   <export>
     <build_type>ament_cmake</build_type>
     <moveit_core plugin="${prefix}/collision_detector_fcl_description.xml"/>
+    <moveit_core plugin="${prefix}/collision_detector_bullet_description.xml"/>
   </export>
 </package>

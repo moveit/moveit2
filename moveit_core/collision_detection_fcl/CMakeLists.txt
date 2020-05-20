@@ -50,23 +50,23 @@ if(BUILD_TESTING)
     set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../collision_detection;${CMAKE_CURRENT_BINARY_DIR}/../robot_state;${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../utils")
   endif()
 
-  ament_add_gtest(test_fcl_collision_detection test/test_fcl_collision_detection.cpp
-    APPEND_LIBRARY_DIRS "${append_library_dirs}")
+  # ament_add_gtest(test_fcl_collision_detection test/test_fcl_collision_detection.cpp
+  #   APPEND_LIBRARY_DIRS "${append_library_dirs}")
 
-  target_link_libraries(test_fcl_collision_detection
-    ${urdf_LIBRARIES}
-    ${visualization_msgs_LIBRARIES}
-    ${srdfdom_LIBRARIES}
-    moveit_test_utils
-    moveit_robot_model
-    moveit_robot_state
-    moveit_collision_detection
-    moveit_collision_detection_fcl
-    ${MOVEIT_LIB_NAME}
-    ${Boost_LIBRARIES}
-    ${geometric_shapes_LIBRARIES}
-    resource_retriever::resource_retriever
-  )
+  # target_link_libraries(test_fcl_collision_detection
+  #   ${urdf_LIBRARIES}
+  #   ${visualization_msgs_LIBRARIES}
+  #   ${srdfdom_LIBRARIES}
+  #   moveit_test_utils
+  #   moveit_robot_model
+  #   moveit_robot_state
+  #   moveit_collision_detection
+  #   moveit_collision_detection_fcl
+  #   ${MOVEIT_LIB_NAME}
+  #   ${Boost_LIBRARIES}
+  #   ${geometric_shapes_LIBRARIES}
+  #   resource_retriever::resource_retriever
+  # )
 
   ament_add_gtest(test_fcl_collision_env test/test_fcl_env.cpp)
   target_link_libraries(test_fcl_collision_env
@@ -75,4 +75,10 @@ if(BUILD_TESTING)
     ${Boost_LIBRARIES}
     moveit_robot_state
   )
+
+  ament_add_gtest(test_fcl_collision_detection test/test_fcl_collision_detection_pr2.cpp)
+  target_link_libraries(test_fcl_collision_detection moveit_test_utils ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
+
+  ament_add_gtest(test_fcl_collision_detection_panda test/test_fcl_collision_detection_panda.cpp)
+  target_link_libraries(test_fcl_collision_detection_panda moveit_test_utils ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
 endif()

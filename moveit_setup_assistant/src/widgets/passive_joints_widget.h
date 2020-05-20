@@ -86,7 +86,7 @@ private Q_SLOTS:
   void selectionUpdated();
 
   /// Called from Double List widget to highlight joints
-  void previewSelectedJoints(std::vector<std::string> joints);
+  void previewSelectedJoints(const std::vector<std::string>& joints);
 
 private:
   // ******************************************************************************************
@@ -100,4 +100,4 @@ private:
   std::string current_edit_vjoint_;
 };
 
-}  // namespace
+}  // namespace moveit_setup_assistant

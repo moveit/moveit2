@@ -81,11 +81,11 @@ public:
   };
 
   /// Load the controller manager plugin, start listening for events on a topic.
-  TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node, const robot_model::RobotModelConstPtr& robot_model,
+  TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                              const planning_scene_monitor::CurrentStateMonitorPtr& csm);
 
   /// Load the controller manager plugin, start listening for events on a topic.
-  TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node, const robot_model::RobotModelConstPtr& robot_model,
+  TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                              const planning_scene_monitor::CurrentStateMonitorPtr& csm, bool manage_controllers);
 
   /// Destructor. Cancels all running trajectories (if any)
@@ -306,7 +306,7 @@ private:
   const std::string name_ = "trajectory_execution_manager";
 
   rclcpp::Node::SharedPtr node_;
-  robot_model::RobotModelConstPtr robot_model_;
+  moveit::core::RobotModelConstPtr robot_model_;
   planning_scene_monitor::CurrentStateMonitorPtr csm_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr event_topic_subscriber_;
   std::map<std::string, ControllerInformation> known_controllers_;
@@ -361,4 +361,4 @@ private:
   double execution_velocity_scaling_;
   bool wait_for_trajectory_completion_;
 };
-}
+}  // namespace trajectory_execution_manager

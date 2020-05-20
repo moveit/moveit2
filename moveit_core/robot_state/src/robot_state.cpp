@@ -146,9 +146,9 @@ void RobotState::copyFrom(const RobotState& other)
   if (dirty_link_transforms_ == robot_model_->getRootJoint())
   {
     // everything is dirty; no point in copying transforms; copy positions, potentially velocity & acceleration
-    memcpy(position_, other.position_, robot_model_->getVariableCount() * sizeof(double) *
-                                           (1 + ((has_velocity_ || has_acceleration_ || has_effort_) ? 1 : 0) +
-                                            ((has_acceleration_ || has_effort_) ? 1 : 0)));
+    memcpy(position_, other.position_,
+           robot_model_->getVariableCount() * sizeof(double) *
+               (1 + (has_velocity_ ? 1 : 0) + ((has_acceleration_ || has_effort_) ? 1 : 0)));
     // and just initialize transforms
     initTransforms();
   }
@@ -232,6 +232,46 @@ void RobotState::markEffort()
     has_effort_ = true;
     memset(effort_, 0, sizeof(double) * robot_model_->getVariableCount());
   }
+}
+
+void RobotState::zeroVelocities()
+{
+  has_velocity_ = false;
+  markVelocity();
+}
+
+void RobotState::zeroAccelerations()
+{
+  has_acceleration_ = false;
+  markAcceleration();
+}
+
+void RobotState::zeroEffort()
+{
+  has_effort_ = false;
+  markEffort();
+}
+
+void RobotState::dropVelocities()
+{
+  has_velocity_ = false;
+}
+
+void RobotState::dropAccelerations()
+{
+  has_velocity_ = false;
+}
+
+void RobotState::dropEffort()
+{
+  has_velocity_ = false;
+}
+
+void RobotState::dropDynamics()
+{
+  dropVelocities();
+  dropAccelerations();
+  dropEffort();
 }
 
 void RobotState::setToRandomPositions()
@@ -633,21 +673,21 @@ void RobotState::updateLinkTransformsInternal(const JointModel* start)
     if (parent)  // root JointModel will not have a parent
     {
       int idx_parent = parent->getLinkIndex();
-      if (link->parentJointIsFixed())
+      if (link->parentJointIsFixed())  // fixed joint
         global_link_transforms_[idx_link].affine().noalias() =
             global_link_transforms_[idx_parent].affine() * link->getJointOriginTransform().matrix();
-      else
+      else  // non-fixed joint
       {
-        if (link->jointOriginTransformIsIdentity())
+        if (link->jointOriginTransformIsIdentity())  // Link has identity transform
           global_link_transforms_[idx_link].affine().noalias() =
               global_link_transforms_[idx_parent].affine() * getJointTransform(link->getParentJointModel()).matrix();
-        else
+        else  // Link has non-identity transform
           global_link_transforms_[idx_link].affine().noalias() =
               global_link_transforms_[idx_parent].affine() * link->getJointOriginTransform().matrix() *
               getJointTransform(link->getParentJointModel()).matrix();
       }
     }
-    else
+    else  // is the origin / root / 'model frame'
     {
       if (link->jointOriginTransformIsIdentity())
         global_link_transforms_[idx_link] = getJointTransform(link->getParentJointModel());
@@ -882,6 +922,9 @@ const AttachedBody* RobotState::getAttachedBody(const std::string& id) const
 
 void RobotState::attachBody(AttachedBody* attached_body)
 {
+  // If an attached body with the same id exists, remove it
+  clearAttachedBody(attached_body->getName());
+
   attached_body_map_[attached_body->getName()] = attached_body;
   attached_body->computeTransform(getGlobalLinkTransform(attached_body->getAttachedLink()));
   if (attached_body_update_callback_)
@@ -1018,11 +1061,9 @@ const Eigen::Isometry3d& RobotState::getFrameInfo(const std::string& frame_id, c
     frame_found = true;
     return IDENTITY_TRANSFORM;
   }
-  if (robot_model_->hasLinkModel(frame_id))
+  if ((robot_link = robot_model_->getLinkModel(frame_id, &frame_found)))
   {
-    robot_link = robot_model_->getLinkModel(frame_id);
     BOOST_VERIFY(checkLinkTransforms());
-    frame_found = true;
     return global_link_transforms_[robot_link->getLinkIndex()];
   }
   robot_link = nullptr;
@@ -1051,9 +1092,9 @@ const Eigen::Isometry3d& RobotState::getFrameInfo(const std::string& frame_id, c
   }
 
   // Check if an AttachedBody has a subframe with name frame_id
-  for (const std::pair<std::string, AttachedBody*>& body : attached_body_map_)
+  for (const std::pair<const std::string, AttachedBody*>& body : attached_body_map_)
   {
-    const auto& transform = body.second->getSubframeTransform(frame_id, &frame_found);
+    const auto& transform = body.second->getGlobalSubframeTransform(frame_id, &frame_found);
     if (frame_found)
     {
       robot_link = body.second->getAttachedLink();
@@ -1080,7 +1121,7 @@ bool RobotState::knowsFrameTransform(const std::string& frame_id) const
     return !it->second->getGlobalCollisionBodyTransforms().empty();
 
   // Check if an AttachedBody has a subframe with name frame_id
-  for (const std::pair<std::string, AttachedBody*>& body : attached_body_map_)
+  for (const std::pair<const std::string, AttachedBody*>& body : attached_body_map_)
   {
     if (body.second->hasSubframeTransform(frame_id))
       return true;
@@ -1201,8 +1242,8 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
     return false;
   }
 
-  const robot_model::JointModel* root_joint_model = group->getJointModels()[0];  // group->getJointRoots()[0];
-  const robot_model::LinkModel* root_link_model = root_joint_model->getParentLinkModel();
+  const moveit::core::JointModel* root_joint_model = group->getJointModels()[0];  // group->getJointRoots()[0];
+  const moveit::core::LinkModel* root_link_model = root_joint_model->getParentLinkModel();
   Eigen::Isometry3d reference_transform =
       root_link_model ? getGlobalLinkTransform(root_link_model).inverse() : Eigen::Isometry3d::Identity();
   int rows = use_quaternion_representation ? 7 : 6;
@@ -1240,21 +1281,21 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
         continue;
       }
       unsigned int joint_index = group->getVariableGroupIndex(pjm->getName());
-      if (pjm->getType() == robot_model::JointModel::REVOLUTE)
+      if (pjm->getType() == moveit::core::JointModel::REVOLUTE)
       {
         joint_transform = reference_transform * getGlobalLinkTransform(link);
-        joint_axis = joint_transform.rotation() * static_cast<const robot_model::RevoluteJointModel*>(pjm)->getAxis();
+        joint_axis = joint_transform.rotation() * static_cast<const moveit::core::RevoluteJointModel*>(pjm)->getAxis();
         jacobian.block<3, 1>(0, joint_index) =
             jacobian.block<3, 1>(0, joint_index) + joint_axis.cross(point_transform - joint_transform.translation());
         jacobian.block<3, 1>(3, joint_index) = jacobian.block<3, 1>(3, joint_index) + joint_axis;
       }
-      else if (pjm->getType() == robot_model::JointModel::PRISMATIC)
+      else if (pjm->getType() == moveit::core::JointModel::PRISMATIC)
       {
         joint_transform = reference_transform * getGlobalLinkTransform(link);
-        joint_axis = joint_transform.rotation() * static_cast<const robot_model::PrismaticJointModel*>(pjm)->getAxis();
+        joint_axis = joint_transform.rotation() * static_cast<const moveit::core::PrismaticJointModel*>(pjm)->getAxis();
         jacobian.block<3, 1>(0, joint_index) = jacobian.block<3, 1>(0, joint_index) + joint_axis;
       }
-      else if (pjm->getType() == robot_model::JointModel::PLANAR)
+      else if (pjm->getType() == moveit::core::JointModel::PLANAR)
       {
         joint_transform = reference_transform * getGlobalLinkTransform(link);
         joint_axis = joint_transform * Eigen::Vector3d(1.0, 0.0, 0.0);
@@ -1596,13 +1637,13 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
         }
         if (pose_frame != solver_tip_frame)
         {
-          const robot_model::LinkModel* link_model = getLinkModel(pose_frame);
+          const moveit::core::LinkModel* link_model = getLinkModel(pose_frame);
           if (!link_model)
           {
             RCLCPP_ERROR(LOGGER, "The following Pose Frame does not exist ", pose_frame.c_str());
             return false;
           }
-          const robot_model::LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
+          const moveit::core::LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
           for (const std::pair<const LinkModel* const, Eigen::Isometry3d>& fixed_link : fixed_links)
             if (Transforms::sameFrame(fixed_link.first->getName(), solver_tip_frame))
             {
@@ -1807,10 +1848,10 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
       }
       if (pose_frame != solver_tip_frame)
       {
-        const robot_model::LinkModel* link_model = getLinkModel(pose_frame);
+        const moveit::core::LinkModel* link_model = getLinkModel(pose_frame);
         if (!link_model)
           return false;
-        const robot_model::LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
+        const moveit::core::LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
         for (const std::pair<const LinkModel* const, Eigen::Isometry3d>& fixed_link : fixed_links)
           if (fixed_link.first->getName() == solver_tip_frame)
           {

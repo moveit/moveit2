@@ -47,7 +47,7 @@ static const std::string ROBOT_DESCRIPTION = "robot_description";
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("evaluate_collision_checking_speed");
 
 void runCollisionDetection(unsigned int id, unsigned int trials, const planning_scene::PlanningScene* scene,
-                           const robot_state::RobotState* state)
+                           const moveit::core::RobotState* state)
 {
   RCLCPP_INFO(LOGGER, "Starting thread %u", id);
   rclcpp::Clock clock(RCL_ROS_TIME);
@@ -103,12 +103,12 @@ int main(int argc, char** argv)
     else
       rclcpp::sleep_for(500ms);
 
-    std::vector<robot_state::RobotStatePtr> states;
+    std::vector<moveit::core::RobotStatePtr> states;
     RCLCPP_INFO(LOGGER, "Sampling %u valid states...", nthreads);
     for (unsigned int i = 0; i < nthreads; ++i)
     {
       // sample a valid state
-      robot_state::RobotState* state = new robot_state::RobotState(psm.getPlanningScene()->getRobotModel());
+      moveit::core::RobotState* state = new moveit::core::RobotState(psm.getPlanningScene()->getRobotModel());
       collision_detection::CollisionRequest req;
       do
       {
@@ -119,7 +119,7 @@ int main(int argc, char** argv)
         if (!res.collision)
           break;
       } while (true);
-      states.push_back(robot_state::RobotStatePtr(state));
+      states.push_back(moveit::core::RobotStatePtr(state));
     }
 
     std::vector<boost::thread*> threads;

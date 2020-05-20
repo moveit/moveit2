@@ -27,7 +27,6 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 target_link_libraries(${MOVEIT_LIB_NAME}
-    rviz_ogre_vendor::OgreMain
     Qt5::Widgets
     rviz_common::rviz_common
     rviz_default_plugins::rviz_default_plugins

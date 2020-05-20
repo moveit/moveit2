@@ -55,17 +55,17 @@ MOVEIT_STRUCT_FORWARD(ManipulationPlanSharedData)
 struct ManipulationPlanSharedData
 {
   ManipulationPlanSharedData()
-    : planning_group_(NULL)
-    , end_effector_group_(NULL)
-    , ik_link_(NULL)
+    : planning_group_(nullptr)
+    , end_effector_group_(nullptr)
+    , ik_link_(nullptr)
     , max_goal_sampling_attempts_(0)
     , minimize_object_distance_(false)
   {
   }
 
-  const robot_model::JointModelGroup* planning_group_;
-  const robot_model::JointModelGroup* end_effector_group_;
-  const robot_model::LinkModel* ik_link_;
+  const moveit::core::JointModelGroup* planning_group_;
+  const moveit::core::JointModelGroup* end_effector_group_;
+  const moveit::core::LinkModel* ik_link_;
 
   unsigned int max_goal_sampling_attempts_;
 
@@ -125,9 +125,9 @@ struct ManipulationPlan
   // Allows for the sampling of a kineamtic state for a particular group of a robot
   constraint_samplers::ConstraintSamplerPtr goal_sampler_;
 
-  std::vector<robot_state::RobotStatePtr> possible_goal_states_;
+  std::vector<moveit::core::RobotStatePtr> possible_goal_states_;
 
-  robot_state::RobotStatePtr approach_state_;
+  moveit::core::RobotStatePtr approach_state_;
 
   // The sequence of trajectories produced for execution
   std::vector<plan_execution::ExecutableTrajectory> trajectories_;
@@ -141,4 +141,4 @@ struct ManipulationPlan
   // An id for this plan; this is usually the index of the Grasp / PlaceLocation in the input request
   std::size_t id_;
 };
-}
+}  // namespace pick_place
