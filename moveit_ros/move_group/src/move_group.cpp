@@ -178,7 +178,7 @@ private:
     for (const MoveGroupCapabilityPtr& cap : capabilities_)
       ss << "*     - " << cap->getName() << std::endl;
     ss << "********************************************************" << std::endl;
-    RCLCPP_INFO_STREAM(LOGGER, ss.str());
+    RCLCPP_INFO(LOGGER, "%s", ss.str().c_str());
   }
 
   rclcpp::Node::SharedPtr node_;
