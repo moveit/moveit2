@@ -105,7 +105,7 @@ public:
       RCLCPP_FATAL_STREAM(LOGGER, error);
       throw std::runtime_error(error);
     }
-
+    
     if (!getRobotModel()->hasJointModelGroup(opt.group_name_))
     {
       std::string error = "Group '" + opt.group_name_ + "' was not found.";
@@ -149,7 +149,7 @@ public:
     move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(
         node_, move_group::MOVE_ACTION);
     move_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
-
+#if 0 // TODO (anyone): Enable when moveit_ros_manipulation is ported
     pick_action_client_ = rclcpp_action::create_client<moveit_msgs::action::Pickup>(
         node_, move_group::PICKUP_ACTION);
     pick_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
@@ -157,7 +157,7 @@ public:
     place_action_client_ = rclcpp_action::create_client<moveit_msgs::action::Place>(
         node_, move_group::PLACE_ACTION);
     place_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
-
+#endif
     execute_action_client_ = rclcpp_action::create_client<moveit_msgs::action::ExecuteTrajectory>(
         node_, move_group::EXECUTE_ACTION_NAME);
     execute_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
@@ -216,15 +216,12 @@ public:
     
     auto res = query_service_->async_send_request(req);
 
-    //if (query_service_->call(req, res))
-    if (rclcpp::spin_until_future_complete(node_, res) == rclcpp::executor::FutureReturnCode::SUCCESS)
+    // wait until future is done
+    response = res.get();
+    if (!response->planner_interfaces.empty())
     {
-      response = res.get();
-      if (!response->planner_interfaces.empty())
-      {
-        desc = response->planner_interfaces.front();
-        return true;
-      }
+      desc = response->planner_interfaces.front();
+      return true;
     }
     return false;
   }
