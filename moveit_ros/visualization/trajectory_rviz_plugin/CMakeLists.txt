@@ -8,7 +8,7 @@ set(HEADERS
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # Trajectory Display
-add_library(${MOVEIT_LIB_NAME}_core
+add_library(${MOVEIT_LIB_NAME}_core SHARED
   src/trajectory_display.cpp
   ${HEADERS}
 )
@@ -16,17 +16,35 @@ set_target_properties(${MOVEIT_LIB_NAME}_core PROPERTIES VERSION "${${PROJECT_NA
 target_link_libraries(${MOVEIT_LIB_NAME}_core
   moveit_rviz_plugin_render_tools
   moveit_planning_scene_rviz_plugin_core
-  ${catkin_LIBRARIES} ${QT_LIBRARIES} ${Boost_LIBRARIES}
+)
+
+ament_target_dependencies(${MOVEIT_LIB_NAME}_core
+  rclcpp
+  rviz2
+  moveit_msgs
+  pluginlib
+  Boost
 )
 
 # Plugin Initializer
-add_library(${MOVEIT_LIB_NAME} src/plugin_init.cpp)
+add_library(${MOVEIT_LIB_NAME} SHARED src/plugin_init.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core)
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  rclcpp
+  pluginlib
+  Boost
+)
 
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+install(DIRECTORY include/ DESTINATION include)
 
 install(TARGETS ${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+ament_export_libraries(
+  ${MOVEIT_LIB_NAME}_core
+  ${MOVEIT_LIB_NAME}
+)
