@@ -38,22 +38,24 @@
 
 #pragma once
 
-#include <rviz/display.h>
+#include <rviz_common/display.hpp>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
 
 #include <moveit/rviz_plugin_render_tools/trajectory_visualization.h>
 #ifndef Q_MOC_RUN
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <moveit/rdf_loader/rdf_loader.h>
 #endif
 
-namespace rviz
+namespace rviz_common
 {
-class StringProperty;
+class DisplayContext;
 }
 
 namespace moveit_rviz_plugin
 {
-class TrajectoryDisplay : public rviz::Display
+class TrajectoryDisplay : public rviz_common::Display
 {
   Q_OBJECT
   // friend class TrajectoryVisualization; // allow the visualization class to access the display
@@ -72,7 +74,6 @@ public:
   void onInitialize() override;
   void onEnable() override;
   void onDisable() override;
-  void setName(const QString& name) override;
 
 private Q_SLOTS:
   /**
@@ -91,7 +92,9 @@ protected:
   bool load_robot_model_;  // for delayed robot initialization
 
   // Properties
-  rviz::StringProperty* robot_description_property_;
+  rviz_common::properties::StringProperty* robot_description_property_;
+
+  rclcpp::Node::SharedPtr node_;
 };
 
 }  // namespace moveit_rviz_plugin
