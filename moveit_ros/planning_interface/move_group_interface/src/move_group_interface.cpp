@@ -142,7 +142,7 @@ public:
     current_state_monitor_ = getSharedStateMonitor(node_, robot_model_, tf_buffer_);
 
     rclcpp::Time timeout_for_servers = node_->get_clock()->now() + wait_for_servers;
-    if (wait_for_servers == rclcpp::Duration(std::chrono::duration_values<double>::max())) //@todo ; no rclcpp::Duration() representation for infinite time
+    if (wait_for_servers == rclcpp::Duration(0.0))
       timeout_for_servers = rclcpp::Time();  // wait for ever
     double allotted_time = wait_for_servers.seconds();
 

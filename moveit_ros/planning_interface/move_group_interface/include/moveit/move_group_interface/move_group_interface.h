@@ -155,7 +155,7 @@ public:
     */
   MoveGroupInterface(const Options& opt,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration(std::chrono::duration_values<double>::max()));
+                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration(0.0));
 #if 0 //@todo
   [[deprecated]] MoveGroupInterface(const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
                                     const rclcpp::Duration& wait_for_servers);
@@ -170,7 +170,7 @@ public:
     */
   MoveGroupInterface(const std::string& group,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration(std::chrono::duration_values<double>::max()));
+                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration(0.0));
 #if 0 //@todo
   [[deprecated]] MoveGroupInterface(const std::string& group, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
                                     const rclcpp::Duration& wait_for_servers);
