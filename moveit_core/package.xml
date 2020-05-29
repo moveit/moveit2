@@ -27,7 +27,6 @@
   <depend>eigen</depend>
   <depend>bullet</depend>
   <depend>eigen_stl_containers</depend>
-  <depend>eigen_conversions</depend>
   <depend>libfcl-dev</depend>
   <depend>geometric_shapes</depend>
   <depend>geometry_msgs</depend>
