@@ -145,8 +145,6 @@ TEST(TestTimeParameterization, TestIterativeParabolic)
   auto wt = std::chrono::system_clock::now();
   EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
 
-  auto diff_time = std::chrono::system_clock::now() - wt;
-
   std::cout << "IterativeParabolicTimeParameterization  took " << (std::chrono::system_clock::now() - wt).count()
             << std::endl;
   printTrajectory(TRAJECTORY);

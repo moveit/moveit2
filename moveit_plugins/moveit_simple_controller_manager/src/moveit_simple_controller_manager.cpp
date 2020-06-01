@@ -94,7 +94,7 @@ public:
         }
 
         std::vector<std::string> controller_joints;
-        if (!node_->get_parameter(PARAM_BASE_NAME + "." + controller_name + ".joints", controller_joints),
+        if (!node_->get_parameter(PARAM_BASE_NAME + "." + controller_name + ".joints", controller_joints) ||
             controller_joints.empty())
         {
           RCLCPP_ERROR_STREAM(LOGGER, "No joints specified for controller " << controller_name);

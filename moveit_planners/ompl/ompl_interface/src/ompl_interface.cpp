@@ -243,10 +243,10 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
 
   for (const std::pair<const std::string, planning_interface::PlannerConfigurationSettings>& config : pconfig)
   {
-    RCLCPP_DEBUG(LOGGER, "Parameters for configuration '%s'", config.first);
+    RCLCPP_DEBUG(LOGGER, "Parameters for configuration '%s'", config.first.c_str());
 
     for (const std::pair<const std::string, std::string>& parameters : config.second.config)
-      RCLCPP_DEBUG(LOGGER, " - %s = %s", parameters.first, parameters.second);
+      RCLCPP_DEBUG(LOGGER, " - %s = %s", parameters.first.c_str(), parameters.second.c_str());
   }
 
   setPlannerConfigurations(pconfig);
