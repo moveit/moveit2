@@ -51,11 +51,10 @@ static const std::string ROBOT_DESCRIPTION = "robot_description";
 class MoveItFakeControllerManager : public moveit_controller_manager::MoveItControllerManager
 {
 public:
-  MoveItFakeControllerManager()
-    :MoveItControllerManager()
+  MoveItFakeControllerManager() : MoveItControllerManager()
   {
-  } 
-  
+  }
+
   void initialize(const rclcpp::Node::SharedPtr& node)
   {
     // TODO(henningkayser): use flexible base
@@ -74,12 +73,12 @@ public:
       RCLCPP_ERROR(LOGGER, "Parameter controller_names should be specified as a string array");
       return;
     }
-    
+
     /* by setting latch to true we preserve the initial joint state while other nodes launch */
     pub_ = node_->create_publisher<sensor_msgs::msg::JointState>("fake_controller_joint_states", 100);
 
     /* publish initial pose */
-    // TODO (ddengster) : not sure if we still need loadInitialJointValues since joint_states is being published?
+    // TODO: codebase wide refactoring for XmlRpc
     // XmlRpc::XmlRpcValue initial;
     // if (node_handle_.getParam("initial", initial))
     // {
@@ -104,19 +103,20 @@ public:
         std::string type = DEFAULT_TYPE;
         if (node_->has_parameter(PARAM_BASE_NAME + "." + controller_name + ".type"))
           node_->get_parameter(PARAM_BASE_NAME + "." + controller_name + ".type", type);
-        
+
         if (type == "last point")
           controllers_[controller_name].reset(new LastPointController(controller_name, controller_joints, pub_));
         else if (type == "via points")
           controllers_[controller_name].reset(new ViaPointController(controller_name, controller_joints, pub_));
         else if (type == "interpolate")
         {
-          //@note: would put this in InterpolatingController's constructor 
-          //but they disabled WallRate::operator= for some reason and that complicates things
+          //@note: would put this in InterpolatingController's constructor
+          // but they disabled WallRate::operator= for some reason and that complicates things
           double rate = 10.0;
           if (node_->has_parameter("fake_interpolating_controller_rate"))
             node_->get_parameter("fake_interpolating_controller_rate", rate);
-          controllers_[controller_name].reset(new InterpolatingController(controller_name, controller_joints, pub_, rate));
+          controllers_[controller_name].reset(
+              new InterpolatingController(controller_name, controller_joints, pub_, rate));
         }
         else
           RCLCPP_ERROR_STREAM(LOGGER, "Unknown fake controller type: " << type);
@@ -133,7 +133,7 @@ public:
     }
   }
 
-  // TODO (ddengster) : not sure if we still need loadInitialJointValues since joint_states is being published?
+  // TODO: codebase wide refactoring for XmlRpc
   // sensor_msgs::msg::JointState loadInitialJointValues(XmlRpc::XmlRpcValue& param) const
   // {
   //   sensor_msgs::msg::JointState js;
@@ -262,9 +262,10 @@ public:
     }
     else
     {
-      RCLCPP_WARN(LOGGER, "The joints for controller '%s' are not known. Perhaps the controller configuration is not loaded on "
-                          "the param server?",
-                          name.c_str());
+      RCLCPP_WARN(LOGGER,
+                  "The joints for controller '%s' are not known. Perhaps the controller configuration is not loaded on "
+                  "the param server?",
+                  name.c_str());
       joints.clear();
     }
   }

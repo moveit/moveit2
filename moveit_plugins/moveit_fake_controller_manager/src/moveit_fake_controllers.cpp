@@ -168,7 +168,7 @@ void ViaPointController::execTrajectory(const moveit_msgs::msg::RobotTrajectory&
   // no further interpolation
   rclcpp::Time start_time = rclcpp::Clock().now();
   for (std::vector<trajectory_msgs::msg::JointTrajectoryPoint>::const_iterator via = t.joint_trajectory.points.begin(),
-                                                                          end = t.joint_trajectory.points.end();
+                                                                               end = t.joint_trajectory.points.end();
        !cancelled() && via != end; ++via)
   {
     js.position = via->positions;
@@ -178,7 +178,8 @@ void ViaPointController::execTrajectory(const moveit_msgs::msg::RobotTrajectory&
     rclcpp::Duration wait_time = rclcpp::Duration(via->time_from_start) - (rclcpp::Clock().now() - start_time);
     if (wait_time.seconds() > std::numeric_limits<float>::epsilon())
     {
-      RCLCPP_DEBUG(LOGGER, "Fake execution: waiting %0.1fs for next via point, %ld remaining", wait_time.seconds(), end - via);
+      RCLCPP_DEBUG(LOGGER, "Fake execution: waiting %0.1fs for next via point, %ld remaining", wait_time.seconds(),
+                   end - via);
       rclcpp::sleep_for(std::chrono::nanoseconds(wait_time.nanoseconds()));
     }
     js.header.stamp = rclcpp::Clock().now();
@@ -249,10 +250,11 @@ void InterpolatingController::execTrajectory(const moveit_msgs::msg::RobotTrajec
     rclcpp::Duration next_time = next->time_from_start;
     rclcpp::Duration prev_time = prev->time_from_start;
     double duration = (next_time - prev_time).seconds();
-    RCLCPP_DEBUG(LOGGER, "elapsed: %.3f via points %td,%td / %td  alpha: %.3f", elapsed.seconds(), prev - points.begin(),
-              next - points.begin(), end - points.begin(),
-              duration > std::numeric_limits<double>::epsilon() ? (elapsed - prev->time_from_start).seconds() / duration :
-                                                                  1.0);
+    RCLCPP_DEBUG(LOGGER, "elapsed: %.3f via points %td,%td / %td  alpha: %.3f", elapsed.seconds(),
+                 prev - points.begin(), next - points.begin(), end - points.begin(),
+                 duration > std::numeric_limits<double>::epsilon() ?
+                     (elapsed - prev->time_from_start).seconds() / duration :
+                     1.0);
     interpolate(js, *prev, *next, elapsed);
     js.header.stamp = rclcpp::Clock().now();
     pub_->publish(js);
@@ -264,7 +266,7 @@ void InterpolatingController::execTrajectory(const moveit_msgs::msg::RobotTrajec
 
   rclcpp::Duration elapsed = rclcpp::Clock().now() - start_time;
   RCLCPP_DEBUG(LOGGER, "elapsed: %.3f via points %td,%td / %td  alpha: 1.0", elapsed.seconds(), prev - points.begin(),
-            next - points.begin(), end - points.begin());
+               next - points.begin(), end - points.begin());
 
   // publish last point
   interpolate(js, *prev, *prev, prev->time_from_start);

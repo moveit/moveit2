@@ -51,8 +51,8 @@ MOVEIT_CLASS_FORWARD(BaseFakeController)
 class BaseFakeController : public moveit_controller_manager::MoveItControllerHandle
 {
 public:
-  BaseFakeController(const std::string& name, const std::vector<std::string>& joints, 
-    const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub);
+  BaseFakeController(const std::string& name, const std::vector<std::string>& joints,
+                     const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub);
 
   moveit_controller_manager::ExecutionStatus getLastExecutionStatus() override;
   void getJoints(std::vector<std::string>& joints) const;
@@ -66,7 +66,7 @@ class LastPointController : public BaseFakeController
 {
 public:
   LastPointController(const std::string& name, const std::vector<std::string>& joints,
-    const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub);
+                      const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub);
   ~LastPointController() override;
 
   bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& t) override;
@@ -78,7 +78,7 @@ class ThreadedController : public BaseFakeController
 {
 public:
   ThreadedController(const std::string& name, const std::vector<std::string>& joints,
-    const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub);
+                     const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub);
   ~ThreadedController() override;
 
   bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& t) override;
@@ -106,7 +106,7 @@ class ViaPointController : public ThreadedController
 {
 public:
   ViaPointController(const std::string& name, const std::vector<std::string>& joints,
-    const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub);
+                     const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub);
   ~ViaPointController() override;
 
 protected:
@@ -117,7 +117,7 @@ class InterpolatingController : public ThreadedController
 {
 public:
   InterpolatingController(const std::string& name, const std::vector<std::string>& joints,
-    const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub, double rate = 10.0);
+                          const rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr& pub, double rate = 10.0);
   ~InterpolatingController() override;
 
 protected:
