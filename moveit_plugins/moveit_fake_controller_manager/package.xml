@@ -22,6 +22,7 @@
   <depend>rclcpp</depend>
 
   <export>
+    <build_type>ament_cmake</build_type>
     <moveit_core plugin="${prefix}/moveit_fake_controller_manager_plugin_description.xml"/>
   </export>
 
