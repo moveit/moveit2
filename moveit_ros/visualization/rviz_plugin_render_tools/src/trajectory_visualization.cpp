@@ -147,6 +147,9 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
   context_ = context;
   node_ = node;
 
+  auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
+  trajectory_topic_property_->initialize(ros_node_abstraction);
+
   // Load trajectory robot
   display_path_robot_.reset(new RobotStateVisualization(scene_node_, context_, "Planned Path", widget_));
   display_path_robot_->setVisualVisible(display_path_visual_enabled_property_->getBool());
