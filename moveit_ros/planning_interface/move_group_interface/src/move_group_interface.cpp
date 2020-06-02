@@ -683,11 +683,10 @@ public:
     send_goal_opts.goal_response_callback = [&](
       std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr> future) {
       auto goal_handle = future.get();
-      if (!goal_handle) {
-        RCLCPP_INFO(LOGGER, "Goal request rejected");
-      }
+      if (!goal_handle)
+        RCLCPP_INFO(LOGGER, "Planning request rejected");
       else
-        RCLCPP_INFO(LOGGER, "Goal request accepted");
+        RCLCPP_INFO(LOGGER, "Planning request accepted");
     };
     send_goal_opts.result_callback = [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::WrappedResult & result) {
       res = result.result;
@@ -696,26 +695,25 @@ public:
       
       switch (result.code) {
         case rclcpp_action::ResultCode::SUCCEEDED:
-          RCLCPP_INFO(LOGGER, "Goal success!");
+          RCLCPP_INFO(LOGGER, "Planning request complete!");
           break;
         case rclcpp_action::ResultCode::ABORTED:
-          RCLCPP_INFO(LOGGER, "Goal was aborted");
+          RCLCPP_INFO(LOGGER, "Planning request aborted");
           return;
         case rclcpp_action::ResultCode::CANCELED:
-          RCLCPP_INFO(LOGGER, "Goal was canceled");
+          RCLCPP_INFO(LOGGER, "Planning request canceled");
           return;
         default:
-          RCLCPP_INFO(LOGGER, "Unknown result code");
+          RCLCPP_INFO(LOGGER, "Planning request unknown result code");
           return;
       }
     };
-      
-    int64_t timeout = 99999;
-    auto goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
-    std::future_status status = goal_handle_future.wait_for(std::chrono::seconds((int64_t)timeout));
-    if (status != std::future_status::ready)
-      return false;
 
+    auto goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
+    goal_handle_future.wait();
+
+    // wait until send_goal_opts.result_callback is called
+    double timeout = 9999.0;
     rclcpp::Time start_time = node_->now();
     rclcpp::Duration wait = rclcpp::Duration::from_seconds(timeout);
     auto end_time = start_time + wait;
@@ -754,30 +752,59 @@ public:
     goal.planning_options.planning_scene_diff.is_diff = true;
     goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
 
-    auto future = move_action_client_->async_send_goal(goal);
+    bool done = false;
+    rclcpp_action::ResultCode code = rclcpp_action::ResultCode::UNKNOWN;
+    std::shared_ptr<moveit_msgs::action::MoveGroup_Result> res;
+    auto send_goal_opts = rclcpp_action::Client<moveit_msgs::action::MoveGroup>::SendGoalOptions();
+
+    send_goal_opts.goal_response_callback = [&](
+      std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr> future) {
+      auto goal_handle = future.get();
+      if (!goal_handle)
+        RCLCPP_INFO(LOGGER, "Plan and Execute request rejected");
+      else
+        RCLCPP_INFO(LOGGER, "Plan and Execute request accepted");
+    };
+    send_goal_opts.result_callback = [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::WrappedResult & result) {
+      res = result.result;
+      code = result.code;
+      done = true;
+      
+      switch (result.code) {
+        case rclcpp_action::ResultCode::SUCCEEDED:
+          RCLCPP_INFO(LOGGER, "Plan and Execute request complete!");
+          break;
+        case rclcpp_action::ResultCode::ABORTED:
+          RCLCPP_INFO(LOGGER, "Plan and Execute request aborted");
+          return;
+        case rclcpp_action::ResultCode::CANCELED:
+          RCLCPP_INFO(LOGGER, "Plan and Execute request canceled");
+          return;
+        default:
+          RCLCPP_INFO(LOGGER, "Plan and Execute request unknown result code");
+          return;
+      }
+    };
+    auto goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
     if (!wait)
       return MoveItErrorCode::SUCCESS;
-    //@todo: switch out for callbacks
-    int64_t timeout = 3;
-    if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(timeout)) !=
-      rclcpp::executor::FutureReturnCode::SUCCESS)
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "MoveGroup action failed or timeout reached");
-      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+    goal_handle_future.wait();
+
+    // wait until send_goal_opts.result_callback is called
+    double timeout = 9999.0;
+    rclcpp::Time start_time = node_->now();
+    rclcpp::Duration waitdur = rclcpp::Duration::from_seconds(timeout);
+    auto end_time = start_time + waitdur;
+    while (!done && node_->now() < end_time) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    auto goal_handle = future.get();
-    auto result_future = move_action_client_->async_get_result(goal_handle);
-    auto wait_result = rclcpp::spin_until_future_complete(node_, result_future,
-     std::chrono::seconds(timeout));
-    if (wait_result != rclcpp::executor::FutureReturnCode::SUCCESS)
+    if (code != rclcpp_action::ResultCode::SUCCEEDED)
     {
-      RCLCPP_WARN_STREAM(LOGGER, 
-                      "ErrorCode: " << wait_result);
+      RCLCPP_ERROR_STREAM(LOGGER, "MoveGroupInterface::move() failed or timeout reached");
+      return false;
     }
-
-    auto res = result_future.get();
-    return res.result->error_code;
+    return res->error_code;
   }
 
   MoveItErrorCode execute(const Plan& plan, bool wait)
@@ -797,10 +824,10 @@ public:
       std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr> future) {
       auto goal_handle = future.get();
       if (!goal_handle) {
-        RCLCPP_INFO(LOGGER, "Goal request rejected");
+        RCLCPP_INFO(LOGGER, "Execute request rejected");
       }
       else
-        RCLCPP_INFO(LOGGER, "Goal request accepted");
+        RCLCPP_INFO(LOGGER, "Execute request accepted");
     };
     send_goal_opts.result_callback = [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::WrappedResult & result) {
       res = result.result;
@@ -809,16 +836,16 @@ public:
       
       switch (result.code) {
         case rclcpp_action::ResultCode::SUCCEEDED:
-          RCLCPP_INFO(LOGGER, "Goal success!");
+          RCLCPP_INFO(LOGGER, "Execute request success!");
           break;
         case rclcpp_action::ResultCode::ABORTED:
-          RCLCPP_INFO(LOGGER, "Goal was aborted");
+          RCLCPP_INFO(LOGGER, "Execute request aborted");
           return;
         case rclcpp_action::ResultCode::CANCELED:
-          RCLCPP_INFO(LOGGER, "Goal was canceled");
+          RCLCPP_INFO(LOGGER, "Execute request canceled");
           return;
         default:
-          RCLCPP_INFO(LOGGER, "Unknown result code");
+          RCLCPP_INFO(LOGGER, "Execute request unknown result code");
           return;
       }
     };
@@ -829,12 +856,10 @@ public:
     auto goal_handle_future = execute_action_client_->async_send_goal(goal, send_goal_opts);
     if (!wait)
       return MoveItErrorCode::SUCCESS;
+    goal_handle_future.wait();
 
-    int64_t timeout = 99999;
-    std::future_status status = goal_handle_future.wait_for(std::chrono::seconds(timeout));
-    if (status != std::future_status::ready)
-      return false;
-
+    // wait until send_goal_opts.result_callback is called
+    double timeout = 9999.0;
     rclcpp::Time start_time = node_->now();
     rclcpp::Duration waitdur = rclcpp::Duration::from_seconds(timeout);
     auto end_time = start_time + waitdur;
@@ -847,23 +872,6 @@ public:
       RCLCPP_ERROR_STREAM(LOGGER, "MoveGroupInterface::execute() failed or timeout reached");
       return false;
     }
-    /*if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(timeout)) !=
-          rclcpp::executor::FutureReturnCode::SUCCESS)
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "execute_action_client_ action failed or timeout reached");
-      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
-    }
-
-    auto goal_handle = future.get();
-    auto result_future = execute_action_client_->async_get_result(goal_handle);
-    auto wait_result = rclcpp::spin_until_future_complete(node_, result_future,
-     std::chrono::seconds(timeout));
-    if (wait_result != rclcpp::executor::FutureReturnCode::SUCCESS)
-    {
-      RCLCPP_WARN_STREAM(LOGGER, 
-                      "ErrorCode: " << wait_result);
-    }*/
-
     return res->error_code;
   }
 
