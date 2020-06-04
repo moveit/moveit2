@@ -78,14 +78,12 @@ public:
     pub_ = node_->create_publisher<sensor_msgs::msg::JointState>("fake_controller_joint_states", 100);
 
     /* publish initial pose */
-    // TODO: codebase wide refactoring for XmlRpc
-    // XmlRpc::XmlRpcValue initial;
-    // if (node_handle_.getParam("initial", initial))
-    // {
-    //   sensor_msgs::msg::JointState js = loadInitialJointValues(initial);
-    //   js.header.stamp = ros::Time::now();
-    //   pub_.publish(js);
-    // }
+    if (node_->has_parameter(PARAM_BASE_NAME + ".initial"))
+    {
+      sensor_msgs::msg::JointState js = loadInitialJointValues(PARAM_BASE_NAME + ".initial");
+      js.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
+      pub_->publish(js);
+    }
 
     std::vector<std::string> controller_names = controller_names_param.as_string_array();
     /* actually create each controller */
@@ -134,79 +132,75 @@ public:
   }
 
   // TODO: codebase wide refactoring for XmlRpc
-  // sensor_msgs::msg::JointState loadInitialJointValues(XmlRpc::XmlRpcValue& param) const
-  // {
-  //   sensor_msgs::msg::JointState js;
+  sensor_msgs::msg::JointState loadInitialJointValues(const std::string& param_base_name) const
+  {
+    sensor_msgs::msg::JointState js;
 
-  //   if (param.getType() != XmlRpc::XmlRpcValue::TypeArray || param.size() == 0)
-  //   {
-  //     RCLCPP_ERROR_ONCE(LOGGER, "Parameter 'initial' should be an array of (group, pose) "
-  //                                 "structs.");
-  //     return js;
-  //   }
+    robot_model_loader::RobotModelLoader robot_model_loader(node_, ROBOT_DESCRIPTION);
+    const robot_model::RobotModelPtr& robot_model = robot_model_loader.getModel();
+    moveit::core::RobotState robot_state(robot_model);
+    typedef std::map<std::string, double> JointPoseMap;
+    JointPoseMap joints;
 
-  //   robot_model_loader::RobotModelLoader robot_model_loader(ROBOT_DESCRIPTION);
-  //   const robot_model::RobotModelPtr& robot_model = robot_model_loader.getModel();
-  //   moveit::core::RobotState robot_state(robot_model);
-  //   typedef std::map<std::string, double> JointPoseMap;
-  //   JointPoseMap joints;
+    robot_state.setToDefaultValues();  // initialize all joint values (just in case...)
 
-  //   robot_state.setToDefaultValues();  // initialize all joint values (just in case...)
-  //   for (int i = 0, end = param.size(); i != end; ++i)
-  //   {
-  //     try
-  //     {
-  //       std::string group_name = std::string(param[i]["group"]);
-  //       std::string pose_name = std::string(param[i]["pose"]);
-  //       if (!robot_model->hasJointModelGroup(group_name))
-  //       {
-  //         RCLCPP_ERROR_STREAM(LOGGER, "Unknown joint model group: " << group_name);
-  //         continue;
-  //       }
-  //       moveit::core::JointModelGroup* jmg = robot_model->getJointModelGroup(group_name);
-  //       const std::vector<std::string>& joint_names = jmg->getActiveJointModelNames();
+    rcl_interfaces::msg::ListParametersResult params_result = node_->list_parameters({ param_base_name }, 2);
 
-  //       if (!robot_state.setToDefaultValues(jmg, pose_name))
-  //       {
-  //         RCLCPP_WARN(LOGGER, "Unknown pose '%s' for group '%s'.", pose_name.c_str(),
-  //                        group_name.c_str());
-  //         continue;
-  //       }
-  //       RCLCPP_WARN(LOGGER, "Set joints of group '%s' to pose '%s'.", group_name.c_str(),
-  //                      pose_name.c_str());
+    for (const auto& param_name : params_result.names)
+    {
+      try
+      {
+        rclcpp::Parameter param = node_->get_parameter(param_name);
+        auto group_name = param_name.substr(param_name.find(param_base_name) + param_base_name.size() + 1);
+        auto pose_name = param.value_to_string();
 
-  //       for (const std::string& joint_name : joint_names)
-  //       {
-  //         const moveit::core::JointModel* jm = robot_state.getJointModel(joint_name);
-  //         if (!jm)
-  //         {
-  //           RCLCPP_WARN_STREAM(LOGGER, "Unknown joint: " << joint_name);
-  //           continue;
-  //         }
-  //         if (jm->getVariableCount() != 1)
-  //         {
-  //           RCLCPP_WARN_STREAM(LOGGER, "Cannot handle multi-variable joint: " << joint_name);
-  //           continue;
-  //         }
+        if (!robot_model->hasJointModelGroup(group_name))
+        {
+          RCLCPP_ERROR_STREAM(LOGGER, "Unknown joint model group: " << group_name);
+          continue;
+        }
 
-  //         joints[joint_name] = robot_state.getJointPositions(jm)[0];
-  //       }
-  //     }
-  //     catch (...)
-  //     {
-  //       RCLCPP_ERROR_ONCE(LOGGER, "Caught unknown exception while reading initial pose "
-  //                                 "information.");
-  //     }
-  //   }
+        moveit::core::JointModelGroup* jmg = robot_model->getJointModelGroup(group_name);
+        const std::vector<std::string>& joint_names = jmg->getActiveJointModelNames();
+        if (!robot_state.setToDefaultValues(jmg, pose_name))
+        {
+          RCLCPP_WARN(LOGGER, "Unknown pose '%s' for group '%s'.", pose_name.c_str(), group_name.c_str());
+          continue;
+        }
+        RCLCPP_WARN(LOGGER, "Set joints of group '%s' to pose '%s'.", group_name.c_str(), pose_name.c_str());
 
-  //   // fill the joint state
-  //   for (JointPoseMap::const_iterator it = joints.begin(), end = joints.end(); it != end; ++it)
-  //   {
-  //     js.name.push_back(it->first);
-  //     js.position.push_back(it->second);
-  //   }
-  //   return js;
-  // }
+        for (const std::string& joint_name : joint_names)
+        {
+          const moveit::core::JointModel* jm = robot_state.getJointModel(joint_name);
+          if (!jm)
+          {
+            RCLCPP_WARN_STREAM(LOGGER, "Unknown joint: " << joint_name);
+            continue;
+          }
+          if (jm->getVariableCount() != 1)
+          {
+            RCLCPP_WARN_STREAM(LOGGER, "Cannot handle multi-variable joint: " << joint_name);
+            continue;
+          }
+
+          joints[joint_name] = robot_state.getJointPositions(jm)[0];
+        }
+      }
+      catch (...)
+      {
+        RCLCPP_ERROR_ONCE(LOGGER, "Caught unknown exception while reading initial pose "
+                                  "information.");
+      }
+    }
+
+    // fill the joint state
+    for (JointPoseMap::const_iterator it = joints.begin(), end = joints.end(); it != end; ++it)
+    {
+      js.name.push_back(it->first);
+      js.position.push_back(it->second);
+    }
+    return js;
+  }
 
   ~MoveItFakeControllerManager() override = default;
 
