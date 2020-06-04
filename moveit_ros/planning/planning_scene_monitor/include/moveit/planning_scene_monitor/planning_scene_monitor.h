@@ -37,7 +37,6 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <tf2_ros/message_filter.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 #include <moveit/macros/class_forward.h>
@@ -575,8 +574,8 @@ private:
 
   collision_detection::CollisionPluginLoader collision_loader_;
 
-  class DynamicReconfigureImpl;
-  DynamicReconfigureImpl* reconfigure_impl_;
+  // class DynamicReconfigureImpl;
+  // DynamicReconfigureImpl* reconfigure_impl_;
 };
 
 /** \brief This is a convenience class for obtaining access to an

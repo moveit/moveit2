@@ -64,57 +64,57 @@ namespace planning_scene_monitor
 // This namespace is used for the dynamic_reconfigure
 // using namespace moveit_ros_planning;
 
-class PlanningSceneMonitor::DynamicReconfigureImpl
-{
-public:
-  DynamicReconfigureImpl(PlanningSceneMonitor* owner)
-    : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle(decideNamespace(owner->getName())))*/
-  {
-    // TODO (anasarrak): re-add when starting with the parameters for ros2
-    // dynamic_reconfigure_server_.setCallback(
-    //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
-  }
-
-private:
-  // make sure we do not advertise the same service multiple times, in case we use multiple PlanningSceneMonitor
-  // instances in a process
-  // TODO (anasarrak): Update advertise for ros2
-  // static std::string decideNamespace(const std::string& name)
-  // {
-  //   std::string ns = "~/" + name;
-  //   std::replace(ns.begin(), ns.end(), ' ', '_');
-  //   std::transform(ns.begin(), ns.end(), ns.begin(), ::tolower);
-  //   if (ros::service::exists(ns + "/set_parameters", false))
-  //   {
-  //     unsigned int c = 1;
-  //     while (ros::service::exists(ns + boost::lexical_cast<std::string>(c) + "/set_parameters", false))
-  //       c++;
-  //     ns += boost::lexical_cast<std::string>(c);
-  //   }
-  //   return ns;
-  // }
-  // TODO(anasarrak): uncomment this once the config for ROS2 is generated
-  // void dynamicReconfigureCallback(PlanningSceneMonitorDynamicReconfigureConfig& config, uint32_t level)
-  // {
-  //   PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
-  //   if (config.publish_geometry_updates)
-  //     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_GEOMETRY);
-  //   if (config.publish_state_updates)
-  //     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_STATE);
-  //   if (config.publish_transforms_updates)
-  //     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
-  //   if (config.publish_planning_scene)
-  //   {
-  //     owner_->setPlanningScenePublishingFrequency(config.publish_planning_scene_hz);
-  //     owner_->startPublishingPlanningScene(event);
-  //   }
-  //   else
-  //     owner_->stopPublishingPlanningScene();
-  // }
-
-  PlanningSceneMonitor* owner_;
-  // dynamic_reconfigure::Server<PlanningSceneMonitorDynamicReconfigureConfig> dynamic_reconfigure_server_;
-};
+// class PlanningSceneMonitor::DynamicReconfigureImpl
+// {
+// public:
+//   DynamicReconfigureImpl(PlanningSceneMonitor* owner)
+//     : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle(decideNamespace(owner->getName())))*/
+//   {
+//     // TODO (anasarrak): re-add when starting with the parameters for ros2
+//     // dynamic_reconfigure_server_.setCallback(
+//     //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
+//   }
+//
+// private:
+//   // make sure we do not advertise the same service multiple times, in case we use multiple PlanningSceneMonitor
+//   // instances in a process
+//   // TODO (anasarrak): Update advertise for ros2
+//   // static std::string decideNamespace(const std::string& name)
+//   // {
+//   //   std::string ns = "~/" + name;
+//   //   std::replace(ns.begin(), ns.end(), ' ', '_');
+//   //   std::transform(ns.begin(), ns.end(), ns.begin(), ::tolower);
+//   //   if (ros::service::exists(ns + "/set_parameters", false))
+//   //   {
+//   //     unsigned int c = 1;
+//   //     while (ros::service::exists(ns + boost::lexical_cast<std::string>(c) + "/set_parameters", false))
+//   //       c++;
+//   //     ns += boost::lexical_cast<std::string>(c);
+//   //   }
+//   //   return ns;
+//   // }
+//   // TODO(anasarrak): uncomment this once the config for ROS2 is generated
+//   // void dynamicReconfigureCallback(PlanningSceneMonitorDynamicReconfigureConfig& config, uint32_t level)
+//   // {
+//   //   PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
+//   //   if (config.publish_geometry_updates)
+//   //     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_GEOMETRY);
+//   //   if (config.publish_state_updates)
+//   //     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_STATE);
+//   //   if (config.publish_transforms_updates)
+//   //     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
+//   //   if (config.publish_planning_scene)
+//   //   {
+//   //     owner_->setPlanningScenePublishingFrequency(config.publish_planning_scene_hz);
+//   //     owner_->startPublishingPlanningScene(event);
+//   //   }
+//   //   else
+//   //     owner_->stopPublishingPlanningScene();
+//   // }
+//
+//   // PlanningSceneMonitor* owner_;
+//   // dynamic_reconfigure::Server<PlanningSceneMonitorDynamicReconfigureConfig> dynamic_reconfigure_server_;
+// };
 
 const std::string PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC = "joint_states";
 const std::string PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC = "attached_collision_object";
@@ -178,7 +178,7 @@ PlanningSceneMonitor::~PlanningSceneMonitor()
   stopSceneMonitor();
 
   spinner_.reset();
-  delete reconfigure_impl_;
+  // delete reconfigure_impl_;
   current_state_monitor_.reset();
   scene_const_.reset();
   scene_.reset();
@@ -263,7 +263,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   state_update_timer_ =
       node_->create_wall_timer(dt_state_update_, std::bind(&PlanningSceneMonitor::stateUpdateTimerCallback, this));
 
-  reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  // reconfigure_impl_ = new DynamicReconfigureImpl(this);
 }
 
 void PlanningSceneMonitor::monitorDiffs(bool flag)
