@@ -36,19 +36,22 @@
 
 #pragma once
 
-#include <moveit/kinematics_base/kinematics_base.h>
-#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
-#include <moveit/robot_model/robot_model.h>
-#include <tf2/LinearMath/Vector3.h>
-#include <tf2/LinearMath/Quaternion.h>
 #include <moveit/cached_ik_kinematics_plugin/detail/NearestNeighborsGNAT.h>
+#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
+#include <moveit/kinematics_base/kinematics_base.h>
+#include <moveit/robot_model/robot_model.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Vector3.h>
 #include <boost/filesystem.hpp>
-#include <unordered_map>
 #include <mutex>
+#include <unordered_map>
 #include <utility>
 
 namespace cached_ik_kinematics_plugin
 {
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit_cached_ik_kinematics_plugin.cached_ik_kinematics_plugin");
+
 /** \brief A cache of inverse kinematic solutions */
 class IKCache
 {
@@ -68,13 +71,13 @@ public:
     \brief class to represent end effector pose
 
      tf2::Transform stores orientation as a matrix, so we define our
-     own pose class that maps more directly to geometry_msgs::Pose and
+     own pose class that maps more directly to geometry_msgs::msg::Pose and
      for which we can more easily define a distance metric.
   */
   struct Pose
   {
     Pose() = default;
-    Pose(const geometry_msgs::Pose& pose);
+    Pose(const geometry_msgs::msg::Pose& pose);
     tf2::Vector3 position;
     tf2::Quaternion orientation;
     /** compute the distance between this pose and another pose */
@@ -185,7 +188,8 @@ struct HasRobotModelApi : std::false_type
 };
 
 template <typename KinematicsPlugin>
-struct HasRobotModelApi<KinematicsPlugin, decltype(std::declval<KinematicsPlugin&>().initialize(
+struct hasRobotModelAPI<KinematicsPlugin, decltype(std::declval<KinematicsPlugin&>().initialize(
+                                              std::declval<const rclcpp::Node::SharedPtr&>(),
                                               std::declval<const moveit::core::RobotModel&>(), std::string(),
                                               std::string(), std::vector<std::string>(), 0.0))> : std::true_type
 {
@@ -220,43 +224,40 @@ public:
 
   // virtual methods that need to be wrapped:
 
-  bool initialize(const moveit::core::RobotModel& robot_model, const std::string& group_name,
-                  const std::string& base_frame, const std::vector<std::string>& tip_frames,
-                  double search_discretization) override
+  bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModel& robot_model,
+                  const std::string& group_name, const std::string& base_frame,
+                  const std::vector<std::string>& tip_frames, double search_discretization) override
   {
-    return initializeImpl(robot_model, group_name, base_frame, tip_frames, search_discretization);
+    node_ = node;
+    return initializeImpl(node, robot_model, group_name, base_frame, tip_frames, search_discretization);
   }
 
-  bool initialize(const std::string& robot_description, const std::string& group_name, const std::string& base_frame,
-                  const std::string& tip_frame, double search_discretization) override
-  {
-    return initializeImpl(robot_description, group_name, base_frame, tip_frame, search_discretization);
-  }
-
-  bool getPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+  bool getPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
                      std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                      const KinematicsQueryOptions& options = KinematicsQueryOptions()) const override;
 
-  bool searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-                        std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
+  bool searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+                        double timeout, std::vector<double>& solution, moveit_msgs::msg::MoveItErrorCodes& error_code,
                         const KinematicsQueryOptions& options = KinematicsQueryOptions()) const override;
 
-  bool searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-                        const std::vector<double>& consistency_limits, std::vector<double>& solution,
+  bool searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+                        double timeout, const std::vector<double>& consistency_limits, std::vector<double>& solution,
                         moveit_msgs::msg::MoveItErrorCodes& error_code,
                         const KinematicsQueryOptions& options = KinematicsQueryOptions()) const override;
 
-  bool searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-                        std::vector<double>& solution, const IKCallbackFn& solution_callback,
+  bool searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+                        double timeout, std::vector<double>& solution, const IKCallbackFn& solution_callback,
                         moveit_msgs::msg::MoveItErrorCodes& error_code,
                         const KinematicsQueryOptions& options = KinematicsQueryOptions()) const override;
 
-  bool searchPositionIK(const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
-                        const std::vector<double>& consistency_limits, std::vector<double>& solution,
+  bool searchPositionIK(const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state,
+                        double timeout, const std::vector<double>& consistency_limits, std::vector<double>& solution,
                         const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
                         const KinematicsQueryOptions& options = KinematicsQueryOptions()) const override;
 
 private:
+  rclcpp::Node::SharedPtr node_;
+
   IKCache cache_;
 
   void initCache(const std::string& robot_id, const std::string& group_name, const std::string& cache_name);
@@ -265,48 +266,28 @@ private:
      availability of API in wrapped KinematicsPlugin class.
      However, as templates and virtual functions cannot be combined, we need helpers initializeImpl(). */
   template <class T = KinematicsPlugin>
-  typename std::enable_if<HasRobotModelApi<T>::value, bool>::type
-  initializeImpl(const moveit::core::RobotModel& robot_model, const std::string& group_name,
-                 const std::string& base_frame, const std::vector<std::string>& tip_frames,
-                 double search_discretization)
+  typename std::enable_if<hasRobotModelAPI<T>::value, bool>::type
+  initializeImpl(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModel& robot_model,
+                 const std::string& group_name, const std::string& base_frame,
+                 const std::vector<std::string>& tip_frames, double search_discretization)
   {
     if (tip_frames.size() != 1)
     {
-      ROS_ERROR_NAMED("cached_ik", "This solver does not support multiple tip frames");
+      RCLCPP_ERROR(LOGGER, "This solver does not support multiple tip frames");
       return false;
     }
 
     // call initialize method of wrapped class
-    if (!KinematicsPlugin::initialize(robot_model, group_name, base_frame, tip_frames, search_discretization))
+    if (!KinematicsPlugin::initialize(node, robot_model, group_name, base_frame, tip_frames, search_discretization))
       return false;
     initCache(robot_model.getName(), group_name, base_frame + tip_frames[0]);
     return true;
   }
 
   template <class T = KinematicsPlugin>
-  typename std::enable_if<!HasRobotModelApi<T>::value, bool>::type
-  initializeImpl(const moveit::core::RobotModel& /*unused*/, const std::string& /*unused*/,
-                 const std::string& /*unused*/, const std::vector<std::string>& /*unused*/, double /*unused*/)
-  {
-    return false;  // API not supported
-  }
-
-  template <class T = KinematicsPlugin>
-  typename std::enable_if<HasRobotDescApi<T>::value, bool>::type
-  initializeImpl(const std::string& robot_description, const std::string& group_name, const std::string& base_frame,
-                 const std::string& tip_frame, double search_discretization)
-  {
-    // call initialize method of wrapped class
-    if (!KinematicsPlugin::initialize(robot_description, group_name, base_frame, tip_frame, search_discretization))
-      return false;
-    initCache(robot_description, group_name, base_frame + tip_frame);
-    return true;
-  }
-
-  template <class T = KinematicsPlugin>
-  typename std::enable_if<!HasRobotDescApi<T>::value, bool>::type
-  initializeImpl(const std::string& /*unused*/, const std::string& /*unused*/, const std::string& /*unused*/,
-                 const std::string& /*unused*/, double /*unused*/)
+  typename std::enable_if<!hasRobotModelAPI<T>::value, bool>::type
+  initializeImpl(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModel&, const std::string&,
+                 const std::string&, const std::vector<std::string>&, double)
   {
     return false;  // API not supported
   }
@@ -332,14 +313,11 @@ public:
   using IKCallbackFn = kinematics::KinematicsBase::IKCallbackFn;
   using KinematicsQueryOptions = kinematics::KinematicsQueryOptions;
 
-  bool initialize(const moveit::core::RobotModel& robot_model, const std::string& group_name,
-                  const std::string& base_frame, const std::vector<std::string>& tip_frames,
-                  double search_discretization) override;
-
-  bool initialize(const std::string& robot_description, const std::string& group_name, const std::string& base_frame,
+  bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModel& robot_model,
+                  const std::string& group_name, const std::string& base_frame,
                   const std::vector<std::string>& tip_frames, double search_discretization) override;
 
-  bool searchPositionIK(const std::vector<geometry_msgs::Pose>& ik_poses, const std::vector<double>& ik_seed_state,
+  bool searchPositionIK(const std::vector<geometry_msgs::msg::Pose>& ik_poses, const std::vector<double>& ik_seed_state,
                         double timeout, const std::vector<double>& consistency_limits, std::vector<double>& solution,
                         const IKCallbackFn& solution_callback, moveit_msgs::msg::MoveItErrorCodes& error_code,
                         const KinematicsQueryOptions& options = KinematicsQueryOptions(),
