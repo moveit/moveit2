@@ -55,32 +55,33 @@ static const double DEFAULT_CONTROLLER_GOAL_DURATION_SCALING =
 
 // using namespace moveit_ros_planning; // Used for dynamic_reconfigure
 
-class TrajectoryExecutionManager::DynamicReconfigureImpl
-{
-public:
-  DynamicReconfigureImpl(TrajectoryExecutionManager* owner)
-    : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle("~/trajectory_execution"))*/
-  {
-    // TODO: generate a similar thing for ros2 using the parameters
-    // dynamic_reconfigure_server_.setCallback(
-    //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
-  }
-
-private:
-  // TODO: generate a similar thing for ros2 using the parameters
-  // void dynamicReconfigureCallback(TrajectoryExecutionDynamicReconfigureConfig& config, uint32_t level)
-  // {
-  //   owner_->enableExecutionDurationMonitoring(config.execution_duration_monitoring);
-  //   owner_->setAllowedExecutionDurationScaling(config.allowed_execution_duration_scaling);
-  //   owner_->setAllowedGoalDurationMargin(config.allowed_goal_duration_margin);
-  //   owner_->setExecutionVelocityScaling(config.execution_velocity_scaling);
-  //   owner_->setAllowedStartTolerance(config.allowed_start_tolerance);
-  //   owner_->setWaitForTrajectoryCompletion(config.wait_for_trajectory_completion);
-  // }
-
-  TrajectoryExecutionManager* owner_;
-  // dynamic_reconfigure::Server<TrajectoryExecutionDynamicReconfigureConfig> dynamic_reconfigure_server_;
-};
+// TODO(henningkayser): re-enable dynamic reconfigure behavior
+// class TrajectoryExecutionManager::DynamicReconfigureImpl
+// {
+// public:
+//   DynamicReconfigureImpl(TrajectoryExecutionManager* owner)
+//     : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle("~/trajectory_execution"))*/
+//   {
+//     // TODO: generate a similar thing for ros2 using the parameters
+//     // dynamic_reconfigure_server_.setCallback(
+//     //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
+//   }
+//
+// private:
+//   // TODO: generate a similar thing for ros2 using the parameters
+//   // void dynamicReconfigureCallback(TrajectoryExecutionDynamicReconfigureConfig& config, uint32_t level)
+//   // {
+//   //   owner_->enableExecutionDurationMonitoring(config.execution_duration_monitoring);
+//   //   owner_->setAllowedExecutionDurationScaling(config.allowed_execution_duration_scaling);
+//   //   owner_->setAllowedGoalDurationMargin(config.allowed_goal_duration_margin);
+//   //   owner_->setExecutionVelocityScaling(config.execution_velocity_scaling);
+//   //   owner_->setAllowedStartTolerance(config.allowed_start_tolerance);
+//   //   owner_->setWaitForTrajectoryCompletion(config.wait_for_trajectory_completion);
+//   // }
+//
+//   TrajectoryExecutionManager* owner_;
+//   // dynamic_reconfigure::Server<TrajectoryExecutionDynamicReconfigureConfig> dynamic_reconfigure_server_;
+// };
 
 TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node,
                                                        const moveit::core::RobotModelConstPtr& robot_model,
@@ -105,12 +106,12 @@ TrajectoryExecutionManager::~TrajectoryExecutionManager()
 {
   run_continuous_execution_thread_ = false;
   stopExecution(true);
-  delete reconfigure_impl_;
+  // delete reconfigure_impl_;
 }
 
 void TrajectoryExecutionManager::initialize()
 {
-  reconfigure_impl_ = nullptr;
+  // reconfigure_impl_ = nullptr;
   verbose_ = false;
   execution_complete_ = true;
   stop_continuous_execution_ = false;
@@ -178,7 +179,7 @@ void TrajectoryExecutionManager::initialize()
   event_topic_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
       EXECUTION_EVENT_TOPIC, 100, std::bind(&TrajectoryExecutionManager::receiveEvent, this, std::placeholders::_1));
 
-  reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  // reconfigure_impl_ = new DynamicReconfigureImpl(this);
 
   if (manage_controllers_)
     RCLCPP_INFO(LOGGER, "Trajectory execution is managing controllers");
