@@ -33,4 +33,5 @@ install(TARGETS ${PROJECT_NAME}
 pluginlib_export_plugin_description_file(moveit_core moveit_fake_controller_manager_plugin_description.xml)
 
 ament_export_libraries(${PROJECT_NAME})
+ament_export_dependencies(${PROJECT_NAME})
 ament_package()

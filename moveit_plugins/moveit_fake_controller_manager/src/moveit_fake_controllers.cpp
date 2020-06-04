@@ -81,7 +81,7 @@ bool LastPointController::sendTrajectory(const moveit_msgs::msg::RobotTrajectory
   sensor_msgs::msg::JointState js;
   const trajectory_msgs::msg::JointTrajectoryPoint& last = t.joint_trajectory.points.back();
   js.header = t.joint_trajectory.header;
-  js.header.stamp = rclcpp::Clock().now();
+  js.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
   js.name = t.joint_trajectory.joint_names;
   js.position = last.positions;
   js.velocity = last.velocities;
@@ -166,7 +166,7 @@ void ViaPointController::execTrajectory(const moveit_msgs::msg::RobotTrajectory&
 
   // publish joint states for all intermediate via points of the trajectory
   // no further interpolation
-  rclcpp::Time start_time = rclcpp::Clock().now();
+  rclcpp::Time start_time = rclcpp::Clock(RCL_ROS_TIME).now();
   for (std::vector<trajectory_msgs::msg::JointTrajectoryPoint>::const_iterator via = t.joint_trajectory.points.begin(),
                                                                                end = t.joint_trajectory.points.end();
        !cancelled() && via != end; ++via)

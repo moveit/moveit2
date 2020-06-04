@@ -34,8 +34,7 @@
  *********************************************************************/
 
 /* Author: Ioan Sucan, Robert Haschke */
-#ifndef MOVEIT_FAKE_CONTROLLERS
-#define MOVEIT_FAKE_CONTROLLERS
+#pragma once
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/controller_manager/controller_manager.h>
@@ -128,4 +127,3 @@ private:
 };
 }
 
-#endif
