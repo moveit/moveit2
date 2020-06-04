@@ -131,7 +131,7 @@ private:
 
   boost::function<void()> before_look_callback_;
 
-  class DynamicReconfigureImpl;
-  DynamicReconfigureImpl* reconfigure_impl_;
+  // class DynamicReconfigureImpl;
+  // DynamicReconfigureImpl* reconfigure_impl_;
 };
 }  // namespace plan_execution

@@ -48,30 +48,30 @@ namespace plan_execution
 // using namespace moveit_ros_planning;
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.plan_with_sensing");
 
-class PlanWithSensing::DynamicReconfigureImpl
-{
-public:
-  // TODO(anasarrak): Adapt the dynamic parameters for ros2
-  DynamicReconfigureImpl(PlanWithSensing* owner)
-    : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle("~/sense_for_plan"))*/
-  {
-    // dynamic_reconfigure_server_.setCallback(
-    //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
-  }
-
-private:
-  // TODO(anasarrak): Adapt the dynamic parameters for ros2
-  // void dynamicReconfigureCallback(SenseForPlanDynamicReconfigureConfig& config, uint32_t level)
-  // {
-  //   owner_->setMaxSafePathCost(config.max_safe_path_cost);
-  //   owner_->setMaxCostSources(config.max_cost_sources);
-  //   owner_->setMaxLookAttempts(config.max_look_attempts);
-  //   owner_->setDiscardOverlappingCostSources(config.discard_overlapping_cost_sources);
-  // }
-
-  PlanWithSensing* owner_;
-  // dynamic_reconfigure::Server<SenseForPlanDynamicReconfigureConfig> dynamic_reconfigure_server_;
-};
+// class PlanWithSensing::DynamicReconfigureImpl
+// {
+// public:
+//   // TODO(anasarrak): Adapt the dynamic parameters for ros2
+//   DynamicReconfigureImpl(PlanWithSensing* owner)
+//     : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle("~/sense_for_plan"))*/
+//   {
+//     // dynamic_reconfigure_server_.setCallback(
+//     //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
+//   }
+//
+// private:
+//   // TODO(anasarrak): Adapt the dynamic parameters for ros2
+//   // void dynamicReconfigureCallback(SenseForPlanDynamicReconfigureConfig& config, uint32_t level)
+//   // {
+//   //   owner_->setMaxSafePathCost(config.max_safe_path_cost);
+//   //   owner_->setMaxCostSources(config.max_cost_sources);
+//   //   owner_->setMaxLookAttempts(config.max_look_attempts);
+//   //   owner_->setDiscardOverlappingCostSources(config.discard_overlapping_cost_sources);
+//   // }
+//
+//   PlanWithSensing* owner_;
+//   // dynamic_reconfigure::Server<SenseForPlanDynamicReconfigureConfig> dynamic_reconfigure_server_;
+// };
 }  // namespace plan_execution
 
 plan_execution::PlanWithSensing::PlanWithSensing(
@@ -128,12 +128,12 @@ plan_execution::PlanWithSensing::PlanWithSensing(
   }
 
   // start the dynamic-reconfigure server
-  reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  // reconfigure_impl_ = new DynamicReconfigureImpl(this);
 }
 
 plan_execution::PlanWithSensing::~PlanWithSensing()
 {
-  delete reconfigure_impl_;
+  // delete reconfigure_impl_;
 }
 
 void plan_execution::PlanWithSensing::displayCostSources(bool flag)
