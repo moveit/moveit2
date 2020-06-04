@@ -21,34 +21,9 @@ Currently we support ROS 2 Eloquent.
 - [MoveIt 2 Migration Guidelines](doc/MIGRATION_GUIDE.md)
 - [MoveIt 2 Development Roadmap](https://moveit.ros.org/documentation/contributing/roadmap/)
 
-# Build from Source
+## Source Build
 
-These instructions assume you are running on Ubuntu 18.04.
-
-1. [Install ROS2 Eloquent](https://index.ros.org/doc/ros2/Installation/Eloquent/Linux-Install-Debians/) following the installation instructions. Use the desktop installation and don't forget to source the setup script.
-
-1. [Install ROS2 Build Tools](https://index.ros.org/doc/ros2/Installation/Linux-Development-Setup/#install-development-tools-and-ros-tools) up until setting up rosdep (we're using slightly different steps for setting up our workspace)
-
-1. Create a colcon workspace:
-
-        export COLCON_WS=~/ws_ros2/
-        mkdir -p $COLCON_WS/src
-        cd $COLCON_WS/src
-
-1. Download the repository and install any dependencies:
-
-        git clone https://github.com/ros-planning/moveit2.git -b master
-        vcs import < moveit2/moveit2.repos
-        rosdep install -r --from-paths . --ignore-src --rosdistro eloquent -y
-
-1. Configure and build the workspace:
-
-        cd $COLCON_WS
-        colcon build --event-handlers desktop_notification- status- --cmake-args -DCMAKE_BUILD_TYPE=Release
-
-1. Source the workspace:
-
-        source $COLCON_WS/install/setup.bash
+See [MoveIt 2 Source Build - Linux](https://moveit.ros.org/install-moveit2/source/)
 
 ## Getting Started
 
@@ -57,4 +32,25 @@ See the [run_moveit_cpp](moveit_demo_nodes/run_moveit_cpp) demo package for furt
 
 ## Supporters
 
-This open source project is maintained by supporters from around the world — see [MoveIt maintainers](https://moveit.ros.org/about/). [PickNik Robotics](https://picknik.ai/) is leading and organizing the development of MoveIt 2, with additional engineering resources from Intel. If you would like to support this project, please contact hello@picknik.ai
+This open source project is maintained by supporters from around the world — see [MoveIt maintainers](https://moveit.ros.org/about/). Special thanks to contributor from Intel and Open Robotics.
+
+<a href="https://picknik.ai/">
+  <img src="https://picknik.ai/assets/images/logo.jpg" width="168">
+</a>
+
+[PickNik Robotics](https://picknik.ai/) is leading and organizing the development of MoveIt 2.
+If you would like to support this project, please contact hello@picknik.ai
+
+<a href="http://rosin-project.eu">
+  <img src="http://rosin-project.eu/wp-content/uploads/rosin_ack_logo_wide.png"
+       alt="rosin_logo" height="60" >
+</a>
+
+The port to ROS 2 is supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
+More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
+
+<img src="http://rosin-project.eu/wp-content/uploads/rosin_eu_flag.jpg"
+     alt="eu_flag" height="45" align="left" >
+
+This project has received funding from the European Union’s Horizon 2020
+research and innovation programme under grant agreement no. 732287.
