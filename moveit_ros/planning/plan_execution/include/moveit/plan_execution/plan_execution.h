@@ -162,7 +162,7 @@ private:
   bool execution_complete_;
   bool path_became_invalid_;
 
-  class DynamicReconfigureImpl;
-  DynamicReconfigureImpl* reconfigure_impl_;
+  // class DynamicReconfigureImpl;
+  // DynamicReconfigureImpl* reconfigure_impl_;
 };
 }  // namespace plan_execution

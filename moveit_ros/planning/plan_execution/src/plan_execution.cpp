@@ -49,26 +49,26 @@ namespace plan_execution
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.plan_execution");
 
-class PlanExecution::DynamicReconfigureImpl
-{
-public:
-  DynamicReconfigureImpl(PlanExecution* owner)
-    : owner_(owner)  //, dynamic_reconfigure_server_(ros::NodeHandle("~/plan_execution"))
-  {
-    // dynamic_reconfigure_server_.setCallback(
-    //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
-  }
-
-private:
-  // void dynamicReconfigureCallback(PlanExecutionDynamicReconfigureConfig& config, uint32_t level)
-  // {
-  //   owner_->setMaxReplanAttempts(config.max_replan_attempts);
-  //   owner_->setTrajectoryStateRecordingFrequency(config.record_trajectory_state_frequency);
-  // }
-
-  PlanExecution* owner_;
-  // dynamic_reconfigure::Server<PlanExecutionDynamicReconfigureConfig> dynamic_reconfigure_server_;
-};
+// class PlanExecution::DynamicReconfigureImpl
+// {
+// public:
+//   DynamicReconfigureImpl(PlanExecution* owner)
+//     : owner_(owner)  //, dynamic_reconfigure_server_(ros::NodeHandle("~/plan_execution"))
+//   {
+//     // dynamic_reconfigure_server_.setCallback(
+//     //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
+//   }
+//
+// private:
+//   // void dynamicReconfigureCallback(PlanExecutionDynamicReconfigureConfig& config, uint32_t level)
+//   // {
+//   //   owner_->setMaxReplanAttempts(config.max_replan_attempts);
+//   //   owner_->setTrajectoryStateRecordingFrequency(config.record_trajectory_state_frequency);
+//   // }
+//
+//   PlanExecution* owner_;
+//   // dynamic_reconfigure::Server<PlanExecutionDynamicReconfigureConfig> dynamic_reconfigure_server_;
+// };
 }  // namespace plan_execution
 
 plan_execution::PlanExecution::PlanExecution(
@@ -89,12 +89,12 @@ plan_execution::PlanExecution::PlanExecution(
   planning_scene_monitor_->addUpdateCallback(boost::bind(&PlanExecution::planningSceneUpdatedCallback, this, _1));
 
   // start the dynamic-reconfigure server
-  reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  // reconfigure_impl_ = new DynamicReconfigureImpl(this);
 }
 
 plan_execution::PlanExecution::~PlanExecution()
 {
-  delete reconfigure_impl_;
+  // delete reconfigure_impl_;
 }
 
 void plan_execution::PlanExecution::stop()
