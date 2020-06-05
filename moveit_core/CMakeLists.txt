@@ -36,7 +36,7 @@ find_package(Eigen3 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 
-# TODO(henningkayser): enable bullet
+# TODO(henningkayser): enable bullet once the library is migrated to ROS2
 # TODO: Move collision detection into separate packages
 # find_package(Bullet 2.87)
 #
@@ -219,7 +219,7 @@ add_subdirectory(distance_field)
 add_subdirectory(collision_distance_field)
 add_subdirectory(kinematics_metrics)
 add_subdirectory(dynamics_solver)
-# TODO(henningkayser): enable bullet
+# TODO(henningkayser): enable bullet once the library is migrated to ROS2
 # if(BULLET_ENABLE)
 #   add_subdirectory(collision_detection_bullet)
 # else()
