@@ -125,7 +125,7 @@ class SharedData
     node_->declare_parameter("publish_trajectory", false);
 
     // load robot model
-    robot_model_ = moveit::core::loadTestingRobotModel("panda");
+    robot_model_ = moveit::core::loadTestingRobotModel("fanuc");
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
 
     // init ClassLoader
