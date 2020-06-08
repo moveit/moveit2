@@ -256,7 +256,7 @@ void InterpolatingController::execTrajectory(const moveit_msgs::msg::RobotTrajec
                      (elapsed - prev->time_from_start).seconds() / duration :
                      1.0);
     interpolate(js, *prev, *next, elapsed);
-    js.header.stamp = rclcpp::Clock().now();
+    js.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     pub_->publish(js);
 
     rate_.sleep();
