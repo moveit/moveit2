@@ -233,7 +233,7 @@ void InterpolatingController::execTrajectory(const moveit_msgs::msg::RobotTrajec
       next = points.begin() + 1,  // currently targetted via point
       end = points.end();
 
-  rclcpp::Time start_time = rclcpp::Clock().now();
+  rclcpp::Time start_time = rclcpp::Clock(RCL_ROS_TIME).now();
   while (!cancelled())
   {
     rclcpp::Duration elapsed = rclcpp::Clock().now() - start_time;
