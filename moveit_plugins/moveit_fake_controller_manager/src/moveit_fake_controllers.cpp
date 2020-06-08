@@ -182,7 +182,7 @@ void ViaPointController::execTrajectory(const moveit_msgs::msg::RobotTrajectory&
                    end - via);
       rclcpp::sleep_for(std::chrono::nanoseconds(wait_time.nanoseconds()));
     }
-    js.header.stamp = rclcpp::Clock().now();
+    js.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
     pub_->publish(js);
   }
   RCLCPP_DEBUG(LOGGER, "Fake execution of trajectory: done");
