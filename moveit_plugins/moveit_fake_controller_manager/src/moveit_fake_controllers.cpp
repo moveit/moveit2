@@ -270,7 +270,7 @@ void InterpolatingController::execTrajectory(const moveit_msgs::msg::RobotTrajec
 
   // publish last point
   interpolate(js, *prev, *prev, prev->time_from_start);
-  js.header.stamp = rclcpp::Clock().now();
+  js.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
   pub_->publish(js);
 
   RCLCPP_DEBUG(LOGGER, "Fake execution of trajectory: done");
