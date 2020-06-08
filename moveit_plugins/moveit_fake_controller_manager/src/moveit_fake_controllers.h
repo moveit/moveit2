@@ -126,4 +126,3 @@ private:
   rclcpp::WallRate rate_;
 };
 }
-
