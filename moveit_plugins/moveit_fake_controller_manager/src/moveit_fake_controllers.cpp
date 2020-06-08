@@ -175,7 +175,7 @@ void ViaPointController::execTrajectory(const moveit_msgs::msg::RobotTrajectory&
     js.velocity = via->velocities;
     js.effort = via->effort;
 
-    rclcpp::Duration wait_time = rclcpp::Duration(via->time_from_start) - (rclcpp::Clock().now() - start_time);
+    rclcpp::Duration wait_time = rclcpp::Duration(via->time_from_start) - (rclcpp::Clock(RCL_ROS_TIME).now() - start_time);
     if (wait_time.seconds() > std::numeric_limits<float>::epsilon())
     {
       RCLCPP_DEBUG(LOGGER, "Fake execution: waiting %0.1fs for next via point, %ld remaining", wait_time.seconds(),
