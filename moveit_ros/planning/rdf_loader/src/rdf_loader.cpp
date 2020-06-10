@@ -99,10 +99,9 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
   }
 
   srdf::ModelSharedPtr srdf(new srdf::Model());
-  if (!srdf_->initString(*urdf_, srdf_description_content))
+  if (!srdf->initString(*urdf_, srdf_description_content))
   {
     RCLCPP_ERROR(LOGGER, "Unable to parse SRDF from parameter '%s'", srdf_description.c_str());
-    srdf_.reset();
     return;
   }
   srdf_ = std::move(srdf);

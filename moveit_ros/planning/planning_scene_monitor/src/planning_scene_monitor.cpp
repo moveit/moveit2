@@ -479,7 +479,7 @@ void PlanningSceneMonitor::triggerSceneUpdateEvent(SceneUpdateType update_type)
 
 bool PlanningSceneMonitor::requestPlanningSceneState(const std::string& service_name)
 {
-  if (get_scene_service_->get_service_name() == service_name)
+  if (get_scene_service_ && get_scene_service_->get_service_name() == service_name)
   {
     RCLCPP_FATAL_STREAM(LOGGER, "requestPlanningSceneState() to self-provided service '" << service_name << "'");
     throw std::runtime_error("requestPlanningSceneState() to self-provided service: " + service_name);
