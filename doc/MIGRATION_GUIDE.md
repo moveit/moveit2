@@ -42,4 +42,4 @@ If the source file name is the same or very similar to the library name it is su
 
 Some classes declared in header files may contain log messages, for instance to warn about not-implemented virtual functions in abstract classes.
 A logger defined in the header file would not tell us what derived class is missing the implementation, since the source name would be resolved from the header file.
-For this case, the base class should declare a private member variable `static const rclcpp::Logger LOGGER` which is to be defined in the implementing class using the corresponding source file name.
+For this case, the base class should declare a private member variable `static const rclcpp::Logger logger_` which is to be defined in the implementing class using the corresponding source file name.
