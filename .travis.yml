@@ -22,11 +22,12 @@ env:
 jobs:
   fast_finish: true
   include:
-    - env: TEST="clang-format"  # TODO(henningkayser): Enable ament_lint, clang-tidy
+    - env: TEST="clang-format"  # TODO(henningkayser): Enable ament_lint
     - env: TEST=code-coverage
     - env: ROS_DISTRO=eloquent
     - compiler: clang  # test_ikfast_plugins takes ~10 minutes: include here to keep the main jobs shorter
-      env: CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-overloaded-virtual"
+      env: TEST=clang-tidy-fix
+           CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-overloaded-virtual"
            # TODO(mlautman): Enable once franka_ikfast_plugin and panda_ikfast_plugin are available
            # BEFORE_DOCKER_SCRIPT="source moveit_kinematics/test/test_ikfast_plugins.sh"
   allow_failures:
