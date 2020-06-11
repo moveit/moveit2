@@ -20,11 +20,11 @@ if(WITH_OPENGL)
   set(gl_LIBS ${gl_LIBS} ${OPENGL_LIBRARIES})
   set(perception_GL_INCLUDE_DIRS "mesh_filter/include" "depth_image_octomap_updater/include")
   set(SYSTEM_GL_INCLUDE_DIRS ${GLEW_INCLUDE_DIR} ${GLUT_INCLUDE_DIR})
-endif(WITH_OPENGL)
+endif()
 
 if(APPLE)
   find_package(X11 REQUIRED)
-endif(APPLE)
+endif()
 
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
@@ -75,27 +75,27 @@ catkin_package(
 )
 
 include_directories(lazy_free_space_updater/include
-                    point_containment_filter/include
-                    pointcloud_octomap_updater/include
-                    semantic_world/include
-                    ${perception_GL_INCLUDE_DIRS}
-                    ${Boost_INCLUDE_DIRS}
-                    ${catkin_INCLUDE_DIRS}
-                    )
+  point_containment_filter/include
+  pointcloud_octomap_updater/include
+  semantic_world/include
+  ${perception_GL_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+)
 include_directories(SYSTEM
-                    ${OpenCV_INCLUDE_DIRS}
-                    ${EIGEN3_INCLUDE_DIRS}
-                    ${SYSTEM_GL_INCLUDE_DIR}
-                    ${X11_INCLUDE_DIR}
-                    )
+  ${OpenCV_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+  ${SYSTEM_GL_INCLUDE_DIR}
+  ${X11_INCLUDE_DIR}
+)
 
 add_subdirectory(lazy_free_space_updater)
 add_subdirectory(point_containment_filter)
 add_subdirectory(pointcloud_octomap_updater)
-if (WITH_OPENGL)
+if(WITH_OPENGL)
   add_subdirectory(mesh_filter)
   add_subdirectory(depth_image_octomap_updater)
-endif(WITH_OPENGL)
+endif()
 
 add_subdirectory(semantic_world)
 
@@ -104,4 +104,5 @@ install(
     pointcloud_octomap_updater_plugin_description.xml
     depth_image_octomap_updater_plugin_description.xml
   DESTINATION
-    ${CATKIN_PACKAGE_SHARE_DESTINATION})
+    ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)

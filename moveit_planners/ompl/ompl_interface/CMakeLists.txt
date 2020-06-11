@@ -24,13 +24,14 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 find_package(OpenMP REQUIRED)
 
 ament_target_dependencies(${MOVEIT_LIB_NAME}
-	moveit_core
-	moveit_ros_planning
-	rclcpp
-	pluginlib
-	tf2_ros
-	OMPL
-	Boost)
+  moveit_core
+  moveit_ros_planning
+  rclcpp
+  pluginlib
+  tf2_ros
+  OMPL
+  Boost
+)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 
@@ -42,21 +43,24 @@ set_target_properties(moveit_generate_state_database PROPERTIES OUTPUT_NAME "gen
 add_library(moveit_ompl_planner_plugin SHARED src/ompl_planner_manager.cpp)
 set_target_properties(moveit_ompl_planner_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_ompl_planner_plugin
-	moveit_core
-	moveit_ros_planning
-	rclcpp
-	pluginlib
-	tf2_ros
-	OMPL
-	Boost)
+  moveit_core
+  moveit_ros_planning
+  rclcpp
+  pluginlib
+  tf2_ros
+  OMPL
+  Boost
+)
 target_link_libraries(moveit_ompl_planner_plugin ${MOVEIT_LIB_NAME})
 
 install(TARGETS ${MOVEIT_LIB_NAME} moveit_ompl_planner_plugin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin)
+  RUNTIME DESTINATION bin
+)
 install(TARGETS moveit_generate_state_database
-	RUNTIME DESTINATION lib/${PROJECT_NAME})
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)

@@ -1,4 +1,4 @@
-if (CATKIN_ENABLE_TESTING)
+if(CATKIN_ENABLE_TESTING)
   find_package(moveit_resources REQUIRED)
   find_package(rostest REQUIRED)
 

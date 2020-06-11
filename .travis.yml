@@ -22,7 +22,7 @@ env:
 jobs:
   fast_finish: true
   include:
-    - env: TEST="clang-format"  # TODO(henningkayser): Enable ament_lint
+    - env: TEST="clang-format ament_lint"
     - env: TEST=code-coverage
     - env: ROS_DISTRO=eloquent
     - compiler: clang  # test_ikfast_plugins takes ~10 minutes: include here to keep the main jobs shorter

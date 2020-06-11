@@ -135,9 +135,10 @@ target_link_libraries(${PROJECT_NAME}_widgets
 add_executable(${PROJECT_NAME} src/setup_assistant_main.cpp)
 target_link_libraries(${PROJECT_NAME}
   ${PROJECT_NAME}_widgets ${PROJECT_NAME}_tools
-  ${QT_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES} log4cxx)
+  ${QT_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES} log4cxx
+)
 
-add_executable(${PROJECT_NAME}_updater src/collisions_updater.cpp )
+add_executable(${PROJECT_NAME}_updater src/collisions_updater.cpp)
 target_link_libraries(${PROJECT_NAME}_updater
   ${PROJECT_NAME}_tools ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 set_target_properties(${PROJECT_NAME}_updater
