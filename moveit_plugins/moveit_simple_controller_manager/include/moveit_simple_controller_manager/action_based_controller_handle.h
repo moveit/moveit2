@@ -126,12 +126,11 @@ public:
     {
       RCLCPP_INFO_STREAM(LOGGER, "Cancelling execution for " << name_);
       auto cancel_result_future = controller_action_client_->async_cancel_goal(current_goal_);
-      //@todo: replace rclcpp::spin_until_future_complete
-      if (rclcpp::spin_until_future_complete(node_, cancel_result_future) !=
-          rclcpp::executor::FutureReturnCode::SUCCESS)
-      {
+      
+      auto result = cancel_result_future.get();
+      if (!result)
         RCLCPP_ERROR(LOGGER, "Failed to cancel goal");
-      }
+      
       last_exec_ = moveit_controller_manager::ExecutionStatus::PREEMPTED;
       done_ = true;
     }

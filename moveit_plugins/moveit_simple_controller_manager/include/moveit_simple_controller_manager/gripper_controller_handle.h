@@ -144,11 +144,6 @@ public:
         std::bind(&GripperControllerHandle::controllerDoneCallback, this, std::placeholders::_1);
     // Send goal
     auto current_goal_future = controller_action_client_->async_send_goal(goal, send_goal_options);
-    if (rclcpp::spin_until_future_complete(node_, current_goal_future) != rclcpp::executor::FutureReturnCode::SUCCESS)
-    {
-      RCLCPP_ERROR(LOGGER, "Send goal call failed");
-      return false;
-    }
     current_goal_ = current_goal_future.get();
     if (!current_goal_)
     {
