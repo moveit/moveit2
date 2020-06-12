@@ -36,9 +36,9 @@
 
 #pragma once
 
-#include <visualization_msgs/InteractiveMarkerFeedback.h>
-#include <visualization_msgs/InteractiveMarker.h>
-#include <interactive_markers/menu_handler.h>
+#include <visualization_msgs/msg/interactive_marker_feedback.hpp>
+#include <visualization_msgs/msg/interactive_marker.hpp>
+#include <interactive_markers/menu_handler.hpp>
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_interaction/interaction.h>
@@ -75,7 +75,7 @@ public:
   /// The topic name on which the internal Interactive Marker Server operates
   static const std::string INTERACTIVE_MARKER_TOPIC;
 
-  RobotInteraction(const moveit::core::RobotModelConstPtr& robot_model, const std::string& ns = "");
+  RobotInteraction(const moveit::core::RobotModelConstPtr& robot_model, const rclcpp::Node::SharedPtr& node, const std::string& ns = "");
   virtual ~RobotInteraction();
 
   const std::string& getServerTopic() const
@@ -171,7 +171,6 @@ private:
   // called by decideActiveComponents(); add markers for planar and floating joints
   void decideActiveJoints(const std::string& group);
 
-  void moveInteractiveMarker(const std::string& name, const geometry_msgs::PoseStampedConstPtr& msg);
   // register the name of the topic and marker name to move interactive marker from other ROS nodes
   void registerMoveInteractiveMarkerTopic(const std::string& marker_name, const std::string& name);
   // return the diameter of the sphere that certainly can enclose the AABB of the link
@@ -179,15 +178,15 @@ private:
   // return the diameter of the sphere that certainly can enclose the AABB of the links in this group
   double computeGroupMarkerSize(const std::string& group);
   void computeMarkerPose(const InteractionHandlerPtr& handler, const EndEffectorInteraction& eef,
-                         const moveit::core::RobotState& robot_state, geometry_msgs::Pose& pose,
-                         geometry_msgs::Pose& control_to_eef_tf) const;
+                         const moveit::core::RobotState& robot_state, geometry_msgs::msg::Pose& pose,
+                         geometry_msgs::msg::Pose& control_to_eef_tf) const;
 
   void addEndEffectorMarkers(const InteractionHandlerPtr& handler, const EndEffectorInteraction& eef,
-                             visualization_msgs::InteractiveMarker& im, bool position = true, bool orientation = true);
+                             visualization_msgs::msg::InteractiveMarker& im, bool position = true, bool orientation = true);
   void addEndEffectorMarkers(const InteractionHandlerPtr& handler, const EndEffectorInteraction& eef,
-                             const geometry_msgs::Pose& offset, visualization_msgs::InteractiveMarker& im,
+                             const geometry_msgs::msg::Pose& offset, visualization_msgs::msg::InteractiveMarker& im,
                              bool position = true, bool orientation = true);
-  void processInteractiveMarkerFeedback(const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback);
+  void processInteractiveMarkerFeedback(visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr feedback);
   void subscribeMoveInteractiveMarker(const std::string marker_name, const std::string& name);
   void processingThread();
   void clearInteractiveMarkersUnsafe();
@@ -196,7 +195,7 @@ private:
   bool run_processing_thread_;
 
   boost::condition_variable new_feedback_condition_;
-  std::map<std::string, visualization_msgs::InteractiveMarkerFeedbackConstPtr> feedback_map_;
+  std::map<std::string, visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr> feedback_map_;
 
   moveit::core::RobotModelConstPtr robot_model_;
 
@@ -219,7 +218,7 @@ private:
 
   interactive_markers::InteractiveMarkerServer* int_marker_server_;
   // ros subscribers to move the interactive markers by other ros nodes
-  std::vector<ros::Subscriber> int_marker_move_subscribers_;
+  std::vector<rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr> int_marker_move_subscribers_;
   // the array of the names of the topics which need to be subscribed
   // to move the interactive markers by other ROS nodes
   std::vector<std::string> int_marker_move_topics_;
@@ -227,6 +226,7 @@ private:
   std::vector<std::string> int_marker_names_;
 
   std::string topic_;
+  rclcpp::Node::SharedPtr node_;
 
   // options for doing IK
   KinematicOptionsMapPtr kinematic_options_map_;

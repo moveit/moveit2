@@ -42,11 +42,11 @@
 
 namespace robot_interaction
 {
-visualization_msgs::InteractiveMarker makeEmptyInteractiveMarker(const std::string& name,
-                                                                 const geometry_msgs::PoseStamped& stamped,
+visualization_msgs::msg::InteractiveMarker makeEmptyInteractiveMarker(const std::string& name,
+                                                                 const geometry_msgs::msg::PoseStamped& stamped,
                                                                  double scale)
 {
-  visualization_msgs::InteractiveMarker int_marker;
+  visualization_msgs::msg::InteractiveMarker int_marker;
   int_marker.header = stamped.header;
   int_marker.name = name;
   int_marker.scale = scale;
@@ -54,17 +54,17 @@ visualization_msgs::InteractiveMarker makeEmptyInteractiveMarker(const std::stri
   return int_marker;
 }
 
-void addTArrowMarker(visualization_msgs::InteractiveMarker& im)
+void addTArrowMarker(visualization_msgs::msg::InteractiveMarker& im)
 {
   // create an arrow marker
-  visualization_msgs::Marker m;
-  m.type = visualization_msgs::Marker::ARROW;
+  visualization_msgs::msg::Marker m;
+  m.type = visualization_msgs::msg::Marker::ARROW;
   m.scale.x = 0.6 * im.scale;
   m.scale.y = 0.12 * im.scale;
   m.scale.z = 0.12 * im.scale;
   m.ns = "goal_pose_arrow_marker";
   m.id = 1;
-  m.action = visualization_msgs::Marker::ADD;
+  m.action = visualization_msgs::msg::Marker::ADD;
   m.header = im.header;
   m.pose = im.pose;
   // Arrow points along Z
@@ -78,14 +78,14 @@ void addTArrowMarker(visualization_msgs::InteractiveMarker& im)
   m.color.b = 0.0f;
   m.color.a = 1.0f;
 
-  visualization_msgs::Marker mc;
-  mc.type = visualization_msgs::Marker::CYLINDER;
+  visualization_msgs::msg::Marker mc;
+  mc.type = visualization_msgs::msg::Marker::CYLINDER;
   mc.scale.x = 0.05 * im.scale;
   mc.scale.y = 0.05 * im.scale;
   mc.scale.z = 0.15 * im.scale;
   mc.ns = "goal_pose_arrow_marker";
   mc.id = 2;
-  mc.action = visualization_msgs::Marker::ADD;
+  mc.action = visualization_msgs::msg::Marker::ADD;
   mc.header = im.header;
   mc.pose = im.pose;
   // Cylinder points along Y
@@ -100,7 +100,7 @@ void addTArrowMarker(visualization_msgs::InteractiveMarker& im)
   mc.color.b = 0.0f;
   mc.color.a = 1.0f;
 
-  visualization_msgs::InteractiveMarkerControl m_control;
+  visualization_msgs::msg::InteractiveMarkerControl m_control;
   m_control.always_visible = true;
   m_control.interaction_mode = m_control.BUTTON;
   m_control.markers.push_back(m);
@@ -110,18 +110,18 @@ void addTArrowMarker(visualization_msgs::InteractiveMarker& im)
   im.controls.push_back(m_control);
 }
 
-void addErrorMarker(visualization_msgs::InteractiveMarker& im)
+void addErrorMarker(visualization_msgs::msg::InteractiveMarker& im)
 {
   // create a grey box marker
-  visualization_msgs::Marker err;
-  err.type = visualization_msgs::Marker::MESH_RESOURCE;
+  visualization_msgs::msg::Marker err;
+  err.type = visualization_msgs::msg::Marker::MESH_RESOURCE;
   err.scale.x = 0.002 * im.scale;
   err.scale.y = 0.002 * im.scale;
   err.scale.z = 0.002 * im.scale;
   err.mesh_resource = "package://moveit_ros_planning_interface/resources/access-denied.dae";
   err.ns = "robot_interaction_error";
   err.id = 1;
-  err.action = visualization_msgs::Marker::ADD;
+  err.action = visualization_msgs::msg::Marker::ADD;
   err.header = im.header;
   err.pose = im.pose;
   err.pose.orientation.x = err.pose.orientation.y = 0.7071067811865476;
@@ -131,7 +131,7 @@ void addErrorMarker(visualization_msgs::InteractiveMarker& im)
   err.color.b = 0.0f;
   err.color.a = 1.0f;
 
-  visualization_msgs::InteractiveMarkerControl err_control;
+  visualization_msgs::msg::InteractiveMarkerControl err_control;
   err_control.always_visible = false;
   err_control.markers.push_back(err);
 
@@ -142,113 +142,113 @@ void addErrorMarker(visualization_msgs::InteractiveMarker& im)
 // value for normalized quaternion: 1.0 / std::sqrt(2.0)
 static const double SQRT2INV = 0.707106781;
 
-void addPlanarXYControl(visualization_msgs::InteractiveMarker& int_marker, bool orientation_fixed)
+void addPlanarXYControl(visualization_msgs::msg::InteractiveMarker& int_marker, bool orientation_fixed)
 {
-  visualization_msgs::InteractiveMarkerControl control;
+  visualization_msgs::msg::InteractiveMarkerControl control;
 
   if (orientation_fixed)
-    control.orientation_mode = visualization_msgs::InteractiveMarkerControl::FIXED;
+    control.orientation_mode = visualization_msgs::msg::InteractiveMarkerControl::FIXED;
   control.orientation.w = SQRT2INV;
   control.orientation.x = SQRT2INV;
   control.orientation.y = 0;
   control.orientation.z = 0;
-  control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_AXIS;
+  control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::MOVE_AXIS;
   int_marker.controls.push_back(control);
 
   control.orientation.w = SQRT2INV;
   control.orientation.x = 0;
   control.orientation.y = SQRT2INV;
   control.orientation.z = 0;
-  control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_AXIS;
+  control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::ROTATE_AXIS;
   int_marker.controls.push_back(control);
 
   control.orientation.w = SQRT2INV;
   control.orientation.x = 0;
   control.orientation.y = 0;
   control.orientation.z = SQRT2INV;
-  control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_AXIS;
+  control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::MOVE_AXIS;
   int_marker.controls.push_back(control);
 }
 
-void add6DOFControl(visualization_msgs::InteractiveMarker& int_marker, bool orientation_fixed)
+void add6DOFControl(visualization_msgs::msg::InteractiveMarker& int_marker, bool orientation_fixed)
 {
   addOrientationControl(int_marker, orientation_fixed);
   addPositionControl(int_marker, orientation_fixed);
 }
 
-void addOrientationControl(visualization_msgs::InteractiveMarker& int_marker, bool orientation_fixed)
+void addOrientationControl(visualization_msgs::msg::InteractiveMarker& int_marker, bool orientation_fixed)
 {
-  visualization_msgs::InteractiveMarkerControl control;
+  visualization_msgs::msg::InteractiveMarkerControl control;
 
   if (orientation_fixed)
-    control.orientation_mode = visualization_msgs::InteractiveMarkerControl::FIXED;
+    control.orientation_mode = visualization_msgs::msg::InteractiveMarkerControl::FIXED;
   control.orientation.w = SQRT2INV;
   control.orientation.x = SQRT2INV;
   control.orientation.y = 0;
   control.orientation.z = 0;
-  control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_AXIS;
+  control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::ROTATE_AXIS;
   int_marker.controls.push_back(control);
 
   control.orientation.w = SQRT2INV;
   control.orientation.x = 0;
   control.orientation.y = SQRT2INV;
   control.orientation.z = 0;
-  control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_AXIS;
+  control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::ROTATE_AXIS;
   int_marker.controls.push_back(control);
 
   control.orientation.w = SQRT2INV;
   control.orientation.x = 0;
   control.orientation.y = 0;
   control.orientation.z = SQRT2INV;
-  control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_AXIS;
+  control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::ROTATE_AXIS;
   int_marker.controls.push_back(control);
 }
 
-void addPositionControl(visualization_msgs::InteractiveMarker& int_marker, bool orientation_fixed)
+void addPositionControl(visualization_msgs::msg::InteractiveMarker& int_marker, bool orientation_fixed)
 {
-  visualization_msgs::InteractiveMarkerControl control;
+  visualization_msgs::msg::InteractiveMarkerControl control;
 
   if (orientation_fixed)
-    control.orientation_mode = visualization_msgs::InteractiveMarkerControl::FIXED;
+    control.orientation_mode = visualization_msgs::msg::InteractiveMarkerControl::FIXED;
   control.orientation.w = SQRT2INV;
   control.orientation.x = SQRT2INV;
   control.orientation.y = 0;
   control.orientation.z = 0;
-  control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_AXIS;
+  control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::MOVE_AXIS;
   int_marker.controls.push_back(control);
 
   control.orientation.w = SQRT2INV;
   control.orientation.x = 0;
   control.orientation.y = SQRT2INV;
   control.orientation.z = 0;
-  control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_AXIS;
+  control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::MOVE_AXIS;
   int_marker.controls.push_back(control);
 
   control.orientation.w = SQRT2INV;
   control.orientation.x = 0;
   control.orientation.y = 0;
   control.orientation.z = SQRT2INV;
-  control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_AXIS;
+  control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::MOVE_AXIS;
   int_marker.controls.push_back(control);
 }
 
-void addViewPlaneControl(visualization_msgs::InteractiveMarker& int_marker, double radius,
-                         const std_msgs::ColorRGBA& color, bool position, bool orientation)
+void addViewPlaneControl(visualization_msgs::msg::InteractiveMarker& int_marker, double radius,
+                         const std_msgs::msg::ColorRGBA& color, bool position, bool orientation)
 {
-  visualization_msgs::InteractiveMarkerControl control;
-  control.orientation_mode = visualization_msgs::InteractiveMarkerControl::VIEW_FACING;
+  visualization_msgs::msg::InteractiveMarkerControl control;
+  control.orientation_mode = visualization_msgs::msg::InteractiveMarkerControl::VIEW_FACING;
   if (position && orientation)
-    control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_ROTATE_3D;
+    control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::MOVE_ROTATE_3D;
   else if (orientation)
-    control.interaction_mode = visualization_msgs::InteractiveMarkerControl::ROTATE_3D;
+    control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::ROTATE_3D;
   else
-    control.interaction_mode = visualization_msgs::InteractiveMarkerControl::MOVE_3D;
+    control.interaction_mode = visualization_msgs::msg::InteractiveMarkerControl::MOVE_3D;
   control.independent_marker_orientation = true;
   control.name = "move";
 
-  visualization_msgs::Marker marker;
+  visualization_msgs::msg::Marker marker;
 
-  marker.type = visualization_msgs::Marker::SPHERE;
+  marker.type = visualization_msgs::msg::Marker::SPHERE;
   marker.scale.x = radius * 2.0;
   marker.scale.y = radius * 2.0;
   marker.scale.z = radius * 2.0;
@@ -260,19 +260,19 @@ void addViewPlaneControl(visualization_msgs::InteractiveMarker& int_marker, doub
   int_marker.controls.push_back(control);
 }
 
-visualization_msgs::InteractiveMarker makePlanarXYMarker(const std::string& name,
-                                                         const geometry_msgs::PoseStamped& stamped, double scale,
+visualization_msgs::msg::InteractiveMarker makePlanarXYMarker(const std::string& name,
+                                                         const geometry_msgs::msg::PoseStamped& stamped, double scale,
                                                          bool orientation_fixed)
 {
-  visualization_msgs::InteractiveMarker int_marker = makeEmptyInteractiveMarker(name, stamped, scale);
+  visualization_msgs::msg::InteractiveMarker int_marker = makeEmptyInteractiveMarker(name, stamped, scale);
   addPlanarXYControl(int_marker, orientation_fixed);
   return int_marker;
 }
 
-visualization_msgs::InteractiveMarker make6DOFMarker(const std::string& name, const geometry_msgs::PoseStamped& stamped,
+visualization_msgs::msg::InteractiveMarker make6DOFMarker(const std::string& name, const geometry_msgs::msg::PoseStamped& stamped,
                                                      double scale, bool orientation_fixed)
 {
-  visualization_msgs::InteractiveMarker int_marker = makeEmptyInteractiveMarker(name, stamped, scale);
+  visualization_msgs::msg::InteractiveMarker int_marker = makeEmptyInteractiveMarker(name, stamped, scale);
   add6DOFControl(int_marker, orientation_fixed);
   return int_marker;
 }

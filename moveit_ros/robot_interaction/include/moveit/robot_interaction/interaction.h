@@ -36,9 +36,9 @@
 
 #pragma once
 
-#include <visualization_msgs/InteractiveMarkerFeedback.h>
-#include <visualization_msgs/InteractiveMarker.h>
-#include <interactive_markers/menu_handler.h>
+#include <visualization_msgs/msg/interactive_marker_feedback.hpp>
+#include <visualization_msgs/msg/interactive_marker.hpp>
+#include <interactive_markers/menu_handler.hpp>
 #include <moveit/robot_state/robot_state.h>
 #include <boost/function.hpp>
 #include <boost/thread.hpp>
@@ -84,7 +84,7 @@ enum InteractionStyle
 ///          that will be used to control the interaction.
 ///  @returns true if the function succeeds, false if the function was not able
 ///          to fill in \e marker.
-typedef boost::function<bool(const moveit::core::RobotState& state, visualization_msgs::InteractiveMarker& marker)>
+typedef boost::function<bool(const moveit::core::RobotState& state, visualization_msgs::msg::InteractiveMarker& marker)>
     InteractiveMarkerConstructorFn;
 
 /// Type of function for processing marker feedback.
@@ -99,7 +99,7 @@ typedef boost::function<bool(const moveit::core::RobotState& state, visualizatio
 ///           is somehow invalid or erronious (e.g. in collision).  true if
 ///           everything worked well.
 typedef boost::function<bool(moveit::core::RobotState& state,
-                             const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback)>
+                             visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr feedback)>
     ProcessFeedbackFn;
 
 /// Type of function for updating marker pose for new state.
@@ -111,7 +111,7 @@ typedef boost::function<bool(moveit::core::RobotState& state,
 ///              marker, given the new state of the robot.
 /// @returns true if the pose was modified, false if no update is needed (i.e.
 ///              if the pose did not change).
-typedef boost::function<bool(const moveit::core::RobotState&, geometry_msgs::Pose&)> InteractiveMarkerUpdateFn;
+typedef boost::function<bool(const moveit::core::RobotState&, geometry_msgs::msg::Pose&)> InteractiveMarkerUpdateFn;
 
 /// Representation of a generic interaction.
 /// Displays one interactive marker.

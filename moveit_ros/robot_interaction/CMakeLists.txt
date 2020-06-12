@@ -12,36 +12,19 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 endif()
 
 find_package(Boost REQUIRED thread)
-find_package(catkin REQUIRED COMPONENTS
-  moveit_ros_planning
-  interactive_markers
-  tf2
-  tf2_eigen
-  tf2_geometry_msgs
-  tf2_ros
-  roscpp
-)
+find_package(moveit_ros_planning REQUIRED)
+find_package(interactive_markers REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_eigen REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(rclcpp REQUIRED)
 
 set(MOVEIT_LIB_NAME moveit_robot_interaction)
 
-catkin_package(
-  LIBRARIES
-    ${MOVEIT_LIB_NAME}
-  INCLUDE_DIRS
-    include
-  CATKIN_DEPENDS
-    interactive_markers
-    moveit_ros_planning
-    roscpp
-    tf2_geometry_msgs
-)
-
 include_directories(include)
-include_directories(SYSTEM
-                    ${catkin_INCLUDE_DIRS}
-                    ${Boost_INCLUDE_DIRS})
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/interactive_marker_helpers.cpp
   src/kinematic_options.cpp
   src/kinematic_options_map.cpp
@@ -50,21 +33,30 @@ add_library(${MOVEIT_LIB_NAME}
   src/robot_interaction.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  Boost
+  moveit_ros_planning
+  interactive_markers
+  tf2_geometry_msgs
+)
 
-if(CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(locked_robot_state_test test/locked_robot_state_test.cpp)
-  target_link_libraries(locked_robot_state_test
-    ${MOVEIT_LIB_NAME}
-    ${catkin_LIBRARIES}
-    ${Boost_LIBRARIES})
-endif()
+# TODO (anyone): update tests
+# if (BUILD_TESTING)
+#   find_package(ament_cmake_gtest REQUIRED)
+#   ament_add_gtest(locked_robot_state_test test/locked_robot_state_test.cpp)
+#   ament_target_dependencies(locked_robot_state_test
+#     ${MOVEIT_LIB_NAME}
+#     Boost)
+# endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
-)
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin)
+install(DIRECTORY include/ DESTINATION include)
 
-install(DIRECTORY resources DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
+install(DIRECTORY resources DESTINATION share/${PROJECT_NAME})
+
+ament_export_include_directories(include)
+ament_export_libraries(${MOVEIT_LIB_NAME})
+ament_package()

@@ -36,35 +36,35 @@
 
 #pragma once
 
-#include <visualization_msgs/InteractiveMarker.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <std_msgs/ColorRGBA.h>
+#include <visualization_msgs/msg/interactive_marker.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <std_msgs/msg/color_rgba.hpp>
 
 namespace robot_interaction
 {
-visualization_msgs::InteractiveMarker makeEmptyInteractiveMarker(const std::string& name,
-                                                                 const geometry_msgs::PoseStamped& stamped,
+visualization_msgs::msg::InteractiveMarker makeEmptyInteractiveMarker(const std::string& name,
+                                                                 const geometry_msgs::msg::PoseStamped& stamped,
                                                                  double scale);
 
-visualization_msgs::InteractiveMarker make6DOFMarker(const std::string& name, const geometry_msgs::PoseStamped& stamped,
+visualization_msgs::msg::InteractiveMarker make6DOFMarker(const std::string& name, const geometry_msgs::msg::PoseStamped& stamped,
                                                      double scale, bool orientation_fixed = false);
 
-visualization_msgs::InteractiveMarker makePlanarXYMarker(const std::string& name,
-                                                         const geometry_msgs::PoseStamped& stamped, double scale,
+visualization_msgs::msg::InteractiveMarker makePlanarXYMarker(const std::string& name,
+                                                         const geometry_msgs::msg::PoseStamped& stamped, double scale,
                                                          bool orientation_fixed = false);
 
-void addTArrowMarker(visualization_msgs::InteractiveMarker& im);
+void addTArrowMarker(visualization_msgs::msg::InteractiveMarker& im);
 
-void addErrorMarker(visualization_msgs::InteractiveMarker& im);
+void addErrorMarker(visualization_msgs::msg::InteractiveMarker& im);
 
-void add6DOFControl(visualization_msgs::InteractiveMarker& int_marker, bool orientation_fixed = false);
+void add6DOFControl(visualization_msgs::msg::InteractiveMarker& int_marker, bool orientation_fixed = false);
 
-void addPlanarXYControl(visualization_msgs::InteractiveMarker& int_marker, bool orientation_fixed = false);
+void addPlanarXYControl(visualization_msgs::msg::InteractiveMarker& int_marker, bool orientation_fixed = false);
 
-void addOrientationControl(visualization_msgs::InteractiveMarker& int_marker, bool orientation_fixed = false);
+void addOrientationControl(visualization_msgs::msg::InteractiveMarker& int_marker, bool orientation_fixed = false);
 
-void addPositionControl(visualization_msgs::InteractiveMarker& int_marker, bool orientation_fixed = false);
+void addPositionControl(visualization_msgs::msg::InteractiveMarker& int_marker, bool orientation_fixed = false);
 
-void addViewPlaneControl(visualization_msgs::InteractiveMarker& int_marker, double radius,
-                         const std_msgs::ColorRGBA& color, bool position = true, bool orientation = true);
-}  // namespace robot_interaction
+void addViewPlaneControl(visualization_msgs::msg::InteractiveMarker& int_marker, double radius,
+                         const std_msgs::msg::ColorRGBA& color, bool position = true, bool orientation = true);
+}

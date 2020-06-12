@@ -36,12 +36,12 @@
 
 #pragma once
 
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_interaction/locked_robot_state.h>
 //#include <moveit/robot_interaction/robot_interaction.h>
-#include <visualization_msgs/InteractiveMarkerFeedback.h>
-#include <interactive_markers/menu_handler.h>
+#include <visualization_msgs/msg/interactive_marker_feedback.hpp>
+#include <interactive_markers/menu_handler.hpp>
 #include <tf2_ros/buffer.h>
 
 namespace robot_interaction
@@ -117,24 +117,24 @@ public:
   /** \brief Set the offset from EEF to its marker.
    * @param eef The target end-effector.
    * @param m The pose of the marker in the frame of the end-effector parent. */
-  void setPoseOffset(const EndEffectorInteraction& eef, const geometry_msgs::Pose& m);
+  void setPoseOffset(const EndEffectorInteraction& eef, const geometry_msgs::msg::Pose& m);
 
   /** \brief Set the offset from a joint to its marker.
    * @param j The target joint.
    * @param m The pose of the marker in the frame of the joint parent. */
-  void setPoseOffset(const JointInteraction& j, const geometry_msgs::Pose& m);
+  void setPoseOffset(const JointInteraction& j, const geometry_msgs::msg::Pose& m);
 
   /** \brief Get the offset from EEF to its marker.
    * @param  The target end-effector.
    * @param  The pose offset (only valid if return value is true).
    * @return True if an offset was found for the given end-effector. */
-  bool getPoseOffset(const EndEffectorInteraction& eef, geometry_msgs::Pose& m);
+  bool getPoseOffset(const EndEffectorInteraction& eef, geometry_msgs::msg::Pose& m);
 
   /** \brief Get the offset from a joint to its marker.
    * @param vj The joint.
    * @param m The pose offset (only valid if return value is true).
    * @return True if an offset was found for the given joint. */
-  bool getPoseOffset(const JointInteraction& vj, geometry_msgs::Pose& m);
+  bool getPoseOffset(const JointInteraction& vj, geometry_msgs::msg::Pose& m);
 
   /** \brief Clear the interactive marker pose offset for the given
    * end-effector.
@@ -166,14 +166,14 @@ public:
    * @param A PoseStamped message containing the last (offset-removed) pose
    *           commanded for the end-effector.
    * @return True if a pose for that end-effector was found, false otherwise. */
-  bool getLastEndEffectorMarkerPose(const EndEffectorInteraction& eef, geometry_msgs::PoseStamped& pose);
+  bool getLastEndEffectorMarkerPose(const EndEffectorInteraction& eef, geometry_msgs::msg::PoseStamped& pose);
 
   /** \brief Get the last interactive_marker command pose for a joint.
    * @param The joint in question.
    * @param A PoseStamped message containing the last (offset-removed) pose
    *           commanded for the joint.
    * @return True if a pose for that joint was found, false otherwise. */
-  bool getLastJointMarkerPose(const JointInteraction& vj, geometry_msgs::PoseStamped& pose);
+  bool getLastJointMarkerPose(const JointInteraction& vj, geometry_msgs::msg::PoseStamped& pose);
 
   /** \brief Clear the last interactive_marker command pose for the given
    * end-effector.
@@ -191,17 +191,17 @@ public:
   /** \brief Update the internal state maintained by the handler using
    * information from the received feedback message. */
   virtual void handleEndEffector(const EndEffectorInteraction& eef,
-                                 const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback);
+                                 visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr feedback);
 
   /** \brief Update the internal state maintained by the handler using
    * information from the received feedback message. */
   virtual void handleJoint(const JointInteraction& vj,
-                           const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback);
+                           visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr feedback);
 
   /** \brief Update the internal state maintained by the handler using
    * information from the received feedback message. */
   virtual void handleGeneric(const GenericInteraction& g,
-                             const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback);
+                             visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr feedback);
 
   /** \brief Check if the marker corresponding to this end-effector leads to an
    * invalid state */
@@ -219,8 +219,8 @@ public:
   void clearError();
 
 protected:
-  bool transformFeedbackPose(const visualization_msgs::InteractiveMarkerFeedbackConstPtr& feedback,
-                             const geometry_msgs::Pose& offset, geometry_msgs::PoseStamped& tpose);
+  bool transformFeedbackPose(visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr feedback,
+                             const geometry_msgs::msg::Pose& offset, geometry_msgs::msg::PoseStamped& tpose);
 
   const std::string name_;
   const std::string planning_frame_;
@@ -232,17 +232,17 @@ private:
   // Update RobotState using a generic interaction feedback message.
   // YOU MUST LOCK state_lock_ BEFORE CALLING THIS.
   void updateStateGeneric(moveit::core::RobotState* state, const GenericInteraction* g,
-                          const visualization_msgs::InteractiveMarkerFeedbackConstPtr* feedback,
+                          visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr* feedback,
                           StateChangeCallbackFn* callback);
 
   // Update RobotState for a new pose of an eef.
   // YOU MUST LOCK state_lock_ BEFORE CALLING THIS.
   void updateStateEndEffector(moveit::core::RobotState* state, const EndEffectorInteraction* eef,
-                              const geometry_msgs::Pose* pose, StateChangeCallbackFn* callback);
+                              const geometry_msgs::msg::Pose* pose, StateChangeCallbackFn* callback);
 
   // Update RobotState for a new joint position.
   // YOU MUST LOCK state_lock_ BEFORE CALLING THIS.
-  void updateStateJoint(moveit::core::RobotState* state, const JointInteraction* vj, const geometry_msgs::Pose* pose,
+  void updateStateJoint(moveit::core::RobotState* state, const JointInteraction* vj, const geometry_msgs::msg::Pose* pose,
                         StateChangeCallbackFn* callback);
 
   // Set the error state for \e name.
@@ -261,7 +261,7 @@ private:
   // the x-axis will move the center of the 6-DOF interactive marker from
   // the wrist to the finger tips.
   // PROTECTED BY offset_map_lock_
-  std::map<std::string, geometry_msgs::Pose> offset_map_;
+  std::map<std::string, geometry_msgs::msg::Pose> offset_map_;
 
   // Contains the most recent poses received from interactive marker feedback,
   // with the offset removed (e.g. in theory, coinciding with the end-effector
@@ -270,7 +270,7 @@ private:
   // gradient-based methods) even when the IK solver failed to find a valid
   // robot state that satisfies the feedback pose.
   // PROTECTED BY pose_map_lock_
-  std::map<std::string, geometry_msgs::PoseStamped> pose_map_;
+  std::map<std::string, geometry_msgs::msg::PoseStamped> pose_map_;
 
   boost::mutex pose_map_lock_;
   boost::mutex offset_map_lock_;
