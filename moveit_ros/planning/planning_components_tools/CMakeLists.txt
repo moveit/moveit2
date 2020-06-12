@@ -1,4 +1,6 @@
-
+# NOTE: For some reason ament_lint_cmake [linelength] only complains about this file
+# TODO(henningkayser): Disable linelength filter once number of digits is configurable - set to 120
+# lint_cmake: -linelength
 add_executable(moveit_print_planning_model_info src/print_planning_model_info.cpp)
 target_link_libraries(moveit_print_planning_model_info moveit_robot_model_loader)
 ament_target_dependencies(moveit_print_planning_model_info
@@ -33,7 +35,11 @@ ament_target_dependencies(moveit_evaluate_collision_checking_speed
 
 if("${catkin_LIBRARIES}" MATCHES "moveit_collision_detection_bullet")
   add_executable(moveit_compare_collision_checking_speed_fcl_bullet src/compare_collision_speed_checking_fcl_bullet.cpp)
-  target_link_libraries(moveit_compare_collision_checking_speed_fcl_bullet moveit_planning_scene_monitor ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+  target_link_libraries(moveit_compare_collision_checking_speed_fcl_bullet
+    moveit_planning_scene_monitor
+    ${catkin_LIBRARIES}
+    ${Boost_LIBRARIES}
+  )
 endif()
 
 add_executable(moveit_kinematics_speed_and_validity_evaluator src/kinematics_speed_and_validity_evaluator.cpp)
@@ -65,4 +71,6 @@ install(TARGETS
   moveit_evaluate_state_operations_speed
   moveit_kinematics_speed_and_validity_evaluator
   moveit_publish_scene_from_text
-  RUNTIME DESTINATION lib/${PROJECT_NAME})
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
+# lint_cmake:

@@ -20,7 +20,7 @@ find_package(Boost REQUIRED thread)
 
 if(APPLE)
   find_package(X11 REQUIRED)
-endif(APPLE)
+endif()
 
 find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
@@ -32,14 +32,14 @@ find_package(tf2_ros REQUIRED)
 
 include_directories(include)
 include_directories(SYSTEM
-                    ${EIGEN3_INCLUDE_DIRS}
-                    ${X11_INCLUDE_DIR}
-                    )
+  ${EIGEN3_INCLUDE_DIRS}
+  ${X11_INCLUDE_DIR}
+)
 
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/occupancy_map_monitor.cpp
   src/occupancy_map_updater.cpp
-  )
+)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp

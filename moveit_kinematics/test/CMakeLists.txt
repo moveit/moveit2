@@ -3,9 +3,7 @@ if(BUILD_TESTING)
   find_package(moveit_resources REQUIRED)
   find_package(moveit_ros_planning REQUIRED)
 
-  ament_add_gtest(test_kinematics_plugin  test_kinematics_plugin.cpp
-                               APPEND_LIBRARY_DIRS "${append_library_dirs}"
-       )
+  ament_add_gtest(test_kinematics_plugin test_kinematics_plugin.cpp APPEND_LIBRARY_DIRS "${append_library_dirs}")
 
   ament_target_dependencies(
     test_kinematics_plugin
@@ -37,12 +35,12 @@ if(BUILD_TESTING)
 
   # Run ikfast tests only if the corresponding packages were built
   find_package(fanuc_ikfast_plugin QUIET)
-  if (fanuc_ikfast_plugin_FOUND)
+  if(fanuc_ikfast_plugin_FOUND)
     add_rostest(fanuc-ikfast.test ${DEPS})
   endif()
 
   find_package(panda_ikfast_plugin QUIET)
-  if (panda_ikfast_plugin_FOUND)
+  if(panda_ikfast_plugin_FOUND)
     add_rostest(panda-ikfast.test ${DEPS})
   endif()
 
@@ -56,6 +54,5 @@ if(BUILD_TESTING)
     Boost
   )
 
-  install(TARGETS benchmark_ik
-    RUNTIME DESTINATION bin)
+  install(TARGETS benchmark_ik RUNTIME DESTINATION bin)
 endif()

@@ -24,9 +24,9 @@ set(LIBRARY_NAME sbpl_planner_plugin)
 include(CMakeDetermineSystem)
 if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
   rosbuild_add_library_module(${LIBRARY_NAME} ${SOURCE_FILES})
-else(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+else()
   rosbuild_add_library(${LIBRARY_NAME} ${SOURCE_FILES})
-endif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+endif()
 
 
 #uncomment if you have defined messages
