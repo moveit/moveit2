@@ -81,11 +81,8 @@ public:
     : ActionBasedControllerHandleBase(name, logger_name), node_(node), done_(true), namespace_(ns)
   {
     controller_action_client_ = rclcpp_action::create_client<T>(
-      node_->get_node_base_interface(),
-      node_->get_node_graph_interface(),
-      node_->get_node_logging_interface(),
-      node_->get_node_waitables_interface(),
-      getActionName());
+        node_->get_node_base_interface(), node_->get_node_graph_interface(), node_->get_node_logging_interface(),
+        node_->get_node_waitables_interface(), getActionName());
 
     unsigned int attempts = 0;
     double timeout;
@@ -147,7 +144,8 @@ public:
 
     rclcpp::Time start_time = node_->now();
     auto end_time = start_time + timeout;
-    while (!done_ && node_->now() < end_time) {
+    while (!done_ && node_->now() < end_time)
+    {
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     return true;
