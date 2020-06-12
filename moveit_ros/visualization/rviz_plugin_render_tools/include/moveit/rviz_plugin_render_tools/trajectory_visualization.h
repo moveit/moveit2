@@ -124,6 +124,7 @@ protected:
   /**
    * \brief ROS callback for an incoming path message
    */
+  // NOLINTNEXTLINE(performance-unnecessary-value-param)
   void incomingDisplayTrajectory(const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg);
   float getStateDisplayTime();
   void clearTrajectoryTrail();

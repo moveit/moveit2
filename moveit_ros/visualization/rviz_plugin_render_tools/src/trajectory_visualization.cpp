@@ -485,6 +485,7 @@ void TrajectoryVisualization::update(float wall_dt, float /*ros_dt*/)
                                    (trajectory_slider_panel_ && trajectory_slider_panel_->isVisible())));
 }
 
+// NOLINTNEXTLINE(performance-unnecessary-value-param)
 void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg)
 {
   // Error check
