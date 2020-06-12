@@ -108,21 +108,26 @@ public:
           controllers_[controller_name].reset(new ViaPointController(controller_name, controller_joints, pub_));
         else if (type == "interpolate")
         {
-          //@note: would put this in InterpolatingController's constructor
+          // @note: would put this in InterpolatingController's constructor
           // but they disabled WallRate::operator= for some reason and that complicates things
           double rate = 10.0;
-          if (node_->has_parameter("fake_interpolating_controller_rate"))
-            node_->get_parameter("fake_interpolating_controller_rate", rate);
+          std::string fake_interp_rate_param = PARAM_BASE_NAME + "." + controller_name +
+           ".fake_interpolating_controller_rate";
+          if (node_->has_parameter(fake_interp_rate_param))
+            node_->get_parameter(fake_interp_rate_param, rate);
           controllers_[controller_name].reset(
               new InterpolatingController(controller_name, controller_joints, pub_, rate));
         }
         else
           RCLCPP_ERROR_STREAM(LOGGER, "Unknown fake controller type: " << type);
+
         moveit_controller_manager::MoveItControllerManager::ControllerState state;
-        state.default_ = controller_list[i].hasMember("default") ? (bool)controller_list[i]["default"] : false;
         state.active_ = true;
 
-        controller_states_[name] = state;
+        std::string default_state_param = PARAM_BASE_NAME + "." + controller_name + "default";
+        if (node_->has_parameter(default_state_param))
+          node_->get_parameter(default_state_param, state.default_);
+        controller_states_[controller_name] = state;
       }
       catch (...)
       {
