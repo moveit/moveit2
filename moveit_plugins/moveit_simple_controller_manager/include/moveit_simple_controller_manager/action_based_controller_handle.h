@@ -141,11 +141,16 @@ public:
   {
     auto result_future = controller_action_client_->async_get_result(current_goal_);
 
-    rclcpp::Time start_time = node_->now();
-    auto end_time = start_time + timeout;
-    while (!done_ && node_->now() < end_time)
+    if (timeout.seconds() == 0.0)
+      result_future.get();
+    else
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      rclcpp::Time start_time = node_->now();
+      auto end_time = start_time + timeout;
+      while (!done_ && node_->now() < end_time)
+      {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      }
     }
     return true;
   }
