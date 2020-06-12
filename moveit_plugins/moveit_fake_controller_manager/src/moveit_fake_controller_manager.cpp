@@ -111,8 +111,8 @@ public:
           // @note: would put this in InterpolatingController's constructor
           // but they disabled WallRate::operator= for some reason and that complicates things
           double rate = 10.0;
-          std::string fake_interp_rate_param = PARAM_BASE_NAME + "." + controller_name +
-           ".fake_interpolating_controller_rate";
+          std::string fake_interp_rate_param =
+              PARAM_BASE_NAME + "." + controller_name + ".fake_interpolating_controller_rate";
           if (node_->has_parameter(fake_interp_rate_param))
             node_->get_parameter(fake_interp_rate_param, rate);
           controllers_[controller_name].reset(
