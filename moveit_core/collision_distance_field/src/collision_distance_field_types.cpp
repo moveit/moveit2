@@ -46,8 +46,6 @@ namespace collision_detection
 {
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit_collision_distance_field.collision_distance_field_types");
-const rclcpp::Logger PosedBodyPointDecompositionVector::logger_ = LOGGER;
-const rclcpp::Logger PosedBodySphereDecompositionVector::logger_ = LOGGER;
 
 std::vector<CollisionSphere> determineCollisionSpheres(const bodies::Body* body, Eigen::Isometry3d& relative_transform)
 {
@@ -612,3 +610,5 @@ void getCollisionMarkers(const std::string& frame_id, const std::string& ns, con
   }
 }
 }  // namespace collision_detection
+const rclcpp::Logger collision_detection::PosedBodyPointDecompositionVector::LOGGER = collision_detection::LOGGER;
+const rclcpp::Logger collision_detection::PosedBodySphereDecompositionVector::LOGGER = collision_detection::LOGGER;
