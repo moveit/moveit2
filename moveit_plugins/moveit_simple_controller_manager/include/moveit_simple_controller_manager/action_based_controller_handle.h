@@ -140,18 +140,9 @@ public:
   bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(0)) override
   {
     auto result_future = controller_action_client_->async_get_result(current_goal_);
-
-    if (timeout.seconds() == 0.0)
-      result_future.get();
-    else
-    {
-      rclcpp::Time start_time = node_->now();
-      auto end_time = start_time + timeout;
-      while (!done_ && node_->now() < end_time)
-      {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-      }
-    }
+    std::future_status status = result_future.wait_for(timeout.to_chrono<std::chrono::seconds>());
+    if (status == std::future_status::timeout)
+      RCLCPP_WARN(LOGGER, "waitForExecution timed out");
     return true;
   }
 
