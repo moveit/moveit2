@@ -149,6 +149,7 @@ public:
 
     robot_state.setToDefaultValues();  // initialize all joint values (just in case...)
 
+    // TODO: Declare and only support declared parameters for this
     rcl_interfaces::msg::ListParametersResult params_result = node_->list_parameters({ param_base_name }, 2);
 
     for (const auto& param_name : params_result.names)
