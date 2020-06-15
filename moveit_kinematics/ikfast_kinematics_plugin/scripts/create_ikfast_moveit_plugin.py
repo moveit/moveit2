@@ -54,14 +54,14 @@ import shutil
 import argparse
 
 try:
-  from roslib.packages import get_pkg_dir, InvalidROSPkgException
+  from ament_index_python.packages import get_package_share_directory, PackageNotFoundError
 except ImportError:
-  print("Failed to import roslib. No ROS environment available? Trying without.")
+  print("Failed to import ament_index_python. No ROS2 environment available? Trying without.")
   # define stubs
-  class InvalidROSPkgException(Exception):
+  class PackageNotFoundError(Exception):
     pass
-  def get_pkg_dir(pkg_name):
-    raise InvalidROSPkgException
+  def get_package_share_directory(pkg_name):
+    raise PackageNotFoundError
 
 # Package containing this file
 plugin_gen_pkg = 'moveit_kinematics'
@@ -155,8 +155,8 @@ def xmlElement(name, text=None, **attributes):
 
 def create_ikfast_package(args):
   try:
-    setattr(args, 'ikfast_plugin_pkg_path', get_pkg_dir(args.ikfast_plugin_pkg))
-  except InvalidROSPkgException:
+    setattr(args, 'ikfast_plugin_pkg_path', get_package_share_directory(args.ikfast_plugin_pkg))
+  except PackageNotFoundError:
     args.ikfast_plugin_pkg_path = os.path.abspath(args.ikfast_plugin_pkg)
     print("Failed to find package: %s. Will create it in %s." %
           (args.ikfast_plugin_pkg, args.ikfast_plugin_pkg_path))
@@ -181,7 +181,7 @@ def create_ikfast_package(args):
     root.append(xmlElement("license", text="BSD"))
     user_name = getuser()
     root.append(xmlElement("maintainer", email="%s@todo.todo" % user_name, text=user_name))
-    root.append(xmlElement("buildtool_depend", text="catkin"))
+    root.append(xmlElement("buildtool_depend", text="ament_cmake"))
     with open(pkg_xml_path, 'w') as f:
       etree.ElementTree(root).write(f, xml_declaration=True, pretty_print=True, encoding="UTF-8")
     print("Created package.xml at: '%s'" % pkg_xml_path)
@@ -192,8 +192,8 @@ def find_template_dir():
     if os.path.exists(candidate) and os.path.exists(candidate + '/ikfast.h'):
       return os.path.realpath(candidate)
   try:
-    return os.path.join(get_pkg_dir(plugin_gen_pkg), 'ikfast_kinematics_plugin/templates')
-  except InvalidROSPkgException:
+    return os.path.join(get_package_share_directory(plugin_gen_pkg), 'ikfast_kinematics_plugin/templates')
+  except PackageNotFoundError:
     raise Exception("Can't find package %s" % plugin_gen_pkg)
 
 
@@ -262,8 +262,8 @@ def update_ikfast_package(args):
   package_xml = etree.parse(package_file_name, parser).getroot()
 
   # Make sure at least all required dependencies are in the depends lists
-  build_deps = ["liblapack-dev", "moveit_core", "pluginlib", "roscpp", "tf2_kdl", "tf2_eigen", "eigen_conversions"]
-  run_deps = ["liblapack-dev", "moveit_core", "pluginlib", "roscpp", "eigen_conversions"]
+  build_deps = ["liblapack-dev", "moveit_core", "pluginlib", "rclcpp", "tf2_kdl", "tf2_eigen"]
+  run_deps = ["liblapack-dev", "moveit_core", "pluginlib", "rclcpp"]
 
   update_deps(build_deps, "build_depend", package_xml)
   update_deps(run_deps, "exec_depend", package_xml)
@@ -320,8 +320,8 @@ def update_ikfast_package(args):
 
 def update_moveit_package(args):
   try:
-    moveit_config_pkg_path = get_pkg_dir(args.moveit_config_pkg)
-  except InvalidROSPkgException:
+    moveit_config_pkg_path = get_package_share_directory(args.moveit_config_pkg)
+  except PackageNotFoundError:
     raise Exception("Failed to find package: " + args.moveit_config_pkg)
 
   try:
