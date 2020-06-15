@@ -16,19 +16,19 @@ find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
-   src/moveit_fake_controller_manager.cpp
-   src/moveit_fake_controllers.cpp)
+  src/moveit_fake_controller_manager.cpp
+  src/moveit_fake_controllers.cpp)
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${PROJECT_NAME} 
+ament_target_dependencies(${PROJECT_NAME}
   Boost
   moveit_core
   moveit_ros_planning
 )
 
-install(TARGETS ${PROJECT_NAME} 
+install(TARGETS ${PROJECT_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin) 
+        RUNTIME DESTINATION bin)
 
 pluginlib_export_plugin_description_file(moveit_core moveit_fake_controller_manager_plugin_description.xml)
 
