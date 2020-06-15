@@ -439,7 +439,7 @@ public:
    * @param [out] marker The marker that will contain the indicated cells.
    */
   void getIsoSurfaceMarkers(double min_distance, double max_distance, const std::string& frame_id,
-                            const rclcpp::Time stamp, visualization_msgs::msg::Marker& marker) const;
+                            const rclcpp::Time& stamp, visualization_msgs::msg::Marker& marker) const;
 
   /**
    * \brief Populates the supplied marker array with a series of
@@ -483,7 +483,7 @@ public:
    * @param [out] marker The marker that will contain the indicated cells.
    */
   void getPlaneMarkers(PlaneVisualizationType type, double length, double width, double height,
-                       const Eigen::Vector3d& origin, const std::string& frame_id, const rclcpp::Time stamp,
+                       const Eigen::Vector3d& origin, const std::string& frame_id, const rclcpp::Time& stamp,
                        visualization_msgs::msg::Marker& marker) const;
   /**
    * \brief A function that populates the marker with three planes -

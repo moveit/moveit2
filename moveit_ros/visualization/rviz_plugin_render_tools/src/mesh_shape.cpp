@@ -59,7 +59,7 @@ MeshShape::~MeshShape()
 
 void MeshShape::estimateVertexCount(size_t vcount)
 {
-  if (entity_ == NULL && started_ == false)
+  if (entity_ == nullptr && !started_)
     manual_object_->estimateVertexCount(vcount);
 }
 
@@ -143,7 +143,7 @@ void MeshShape::clear()
     entity_->detachFromParent();
     Ogre::MeshManager::getSingleton().remove(entity_->getMesh()->getName());
     scene_manager_->destroyEntity(entity_);
-    entity_ = NULL;
+    entity_ = nullptr;
   }
   manual_object_->clear();
   started_ = false;

@@ -51,4 +51,4 @@ Exception::Exception(const std::string& what_arg) : std::runtime_error(what_arg)
 {
   RCLCPP_ERROR(LOGGER, "%s\nException thrown.", what_arg.c_str());
 }
-}
+}  // namespace moveit

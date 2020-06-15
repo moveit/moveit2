@@ -406,11 +406,11 @@ void getCollisionSphereMarkers(const std_msgs::msg::ColorRGBA& color, const std:
 {
   unsigned int count = 0;
   rclcpp::Clock ros_clock;
-  for (unsigned int i = 0; i < posed_decompositions.size(); i++)
+  for (const auto& posed_decomposition : posed_decompositions)
   {
-    if (posed_decompositions[i])
+    if (posed_decomposition)
     {
-      for (unsigned int j = 0; j < posed_decompositions[i]->getCollisionSpheres().size(); j++)
+      for (unsigned int j = 0; j < posed_decomposition->getCollisionSpheres().size(); j++)
       {
         visualization_msgs::msg::Marker sphere;
         sphere.type = visualization_msgs::msg::Marker::SPHERE;
@@ -420,11 +420,10 @@ void getCollisionSphereMarkers(const std_msgs::msg::ColorRGBA& color, const std:
         sphere.id = count++;
         sphere.lifetime = dur;
         sphere.color = color;
-        sphere.scale.x = sphere.scale.y = sphere.scale.z =
-            posed_decompositions[i]->getCollisionSpheres()[j].radius_ * 2.0;
-        sphere.pose.position.x = posed_decompositions[i]->getSphereCenters()[j].x();
-        sphere.pose.position.y = posed_decompositions[i]->getSphereCenters()[j].y();
-        sphere.pose.position.z = posed_decompositions[i]->getSphereCenters()[j].z();
+        sphere.scale.x = sphere.scale.y = sphere.scale.z = posed_decomposition->getCollisionSpheres()[j].radius_ * 2.0;
+        sphere.pose.position.x = posed_decomposition->getSphereCenters()[j].x();
+        sphere.pose.position.y = posed_decomposition->getSphereCenters()[j].y();
+        sphere.pose.position.z = posed_decomposition->getSphereCenters()[j].z();
         arr.markers.push_back(sphere);
       }
     }
