@@ -107,8 +107,6 @@ public:
           controllers_[controller_name].reset(new ViaPointController(controller_name, controller_joints, pub_));
         else if (type == "interpolate")
         {
-          // @note: would put this in InterpolatingController's constructor
-          // but they disabled WallRate::operator= for some reason and that complicates things
           double rate = 10.0;
           std::string fake_interp_rate_param =
               PARAM_BASE_NAME + "." + controller_name + ".fake_interpolating_controller_rate";
