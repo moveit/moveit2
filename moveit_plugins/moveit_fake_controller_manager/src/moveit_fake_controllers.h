@@ -125,4 +125,4 @@ protected:
 private:
   rclcpp::WallRate rate_;
 };
-} // end namespace moveit_fake_controller_manager
+}  // end namespace moveit_fake_controller_manager
