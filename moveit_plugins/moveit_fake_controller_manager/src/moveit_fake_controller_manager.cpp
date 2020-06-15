@@ -57,16 +57,16 @@ public:
 
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
-    const std::string PARAM_BASE_NAME = "moveit_fake_controller_manager";
+    const std::string param_base_name = "moveit_fake_controller_manager";
     node_ = node;
-    if (!node_->has_parameter(PARAM_BASE_NAME + ".controller_names"))
+    if (!node_->has_parameter(param_base_name + ".controller_names"))
     {
       RCLCPP_ERROR(LOGGER, "No controller_names specified.");
       return;
     }
 
     rclcpp::Parameter controller_names_param;
-    node_->get_parameter(PARAM_BASE_NAME + ".controller_names", controller_names_param);
+    node_->get_parameter(param_base_name + ".controller_names", controller_names_param);
     if (controller_names_param.get_type() != rclcpp::ParameterType::PARAMETER_STRING_ARRAY)
     {
       RCLCPP_ERROR(LOGGER, "Parameter controller_names should be specified as a string array");
@@ -77,9 +77,9 @@ public:
     pub_ = node_->create_publisher<sensor_msgs::msg::JointState>("fake_controller_joint_states", 100);
 
     /* publish initial pose */
-    if (node_->has_parameter(PARAM_BASE_NAME + ".initial"))
+    if (node_->has_parameter(param_base_name + ".initial"))
     {
-      sensor_msgs::msg::JointState js = loadInitialJointValues(PARAM_BASE_NAME + ".initial");
+      sensor_msgs::msg::JointState js = loadInitialJointValues(param_base_name + ".initial");
       js.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
       pub_->publish(js);
     }
@@ -91,15 +91,15 @@ public:
       try
       {
         std::vector<std::string> controller_joints;
-        if (!node_->get_parameter(PARAM_BASE_NAME + "." + controller_name + ".joints", controller_joints))
+        if (!node_->get_parameter(param_base_name + "." + controller_name + ".joints", controller_joints))
         {
           RCLCPP_ERROR_STREAM(LOGGER, "No joints specified for controller " << controller_name);
           continue;
         }
 
         std::string type = DEFAULT_TYPE;
-        if (node_->has_parameter(PARAM_BASE_NAME + "." + controller_name + ".type"))
-          node_->get_parameter(PARAM_BASE_NAME + "." + controller_name + ".type", type);
+        if (node_->has_parameter(param_base_name + "." + controller_name + ".type"))
+          node_->get_parameter(param_base_name + "." + controller_name + ".type", type);
 
         if (type == "last point")
           controllers_[controller_name].reset(new LastPointController(controller_name, controller_joints, pub_));
@@ -109,7 +109,7 @@ public:
         {
           double rate = 10.0;
           std::string fake_interp_rate_param =
-              PARAM_BASE_NAME + "." + controller_name + ".fake_interpolating_controller_rate";
+              param_base_name + "." + controller_name + ".fake_interpolating_controller_rate";
           if (node_->has_parameter(fake_interp_rate_param))
             node_->get_parameter(fake_interp_rate_param, rate);
           controllers_[controller_name].reset(
@@ -121,7 +121,7 @@ public:
         moveit_controller_manager::MoveItControllerManager::ControllerState state;
         state.active_ = true;
 
-        std::string default_state_param = PARAM_BASE_NAME + "." + controller_name + "default";
+        std::string default_state_param = param_base_name + "." + controller_name + "default";
         if (node_->has_parameter(default_state_param))
           node_->get_parameter(default_state_param, state.default_);
         controller_states_[controller_name] = state;

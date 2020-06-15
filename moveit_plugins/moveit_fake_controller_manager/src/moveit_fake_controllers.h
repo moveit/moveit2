@@ -70,7 +70,7 @@ public:
 
   bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& t) override;
   bool cancelExecution() override;
-  bool waitForExecution(const rclcpp::Duration&) override;
+  bool waitForExecution(const rclcpp::Duration& timeout) override;
 };
 
 class ThreadedController : public BaseFakeController
@@ -82,7 +82,7 @@ public:
 
   bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& t) override;
   bool cancelExecution() override;
-  bool waitForExecution(const rclcpp::Duration&) override;
+  bool waitForExecution(const rclcpp::Duration& timeout) override;
   moveit_controller_manager::ExecutionStatus getLastExecutionStatus() override;
 
 protected:
@@ -125,4 +125,4 @@ protected:
 private:
   rclcpp::WallRate rate_;
 };
-}
+} // end namespace moveit_fake_controller_manager
