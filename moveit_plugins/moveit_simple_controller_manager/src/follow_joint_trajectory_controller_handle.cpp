@@ -67,19 +67,23 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
     RCLCPP_INFO_STREAM(LOGGER, name_ << " started execution");
     auto goal_handle = future.get();
     if (!goal_handle)
-      RCLCPP_INFO(LOGGER, "Goal request rejected");
+      RCLCPP_WARN(LOGGER, "Goal request rejected");
     else
       RCLCPP_INFO(LOGGER, "Goal request accepted!");
   };
   // Result callback
   send_goal_options.result_callback =
       std::bind(&FollowJointTrajectoryControllerHandle::controllerDoneCallback, this, _1);
+
+  done_ = false;
+  last_exec_ = moveit_controller_manager::ExecutionStatus::RUNNING;
+
   // Send goal
   auto current_goal_future = controller_action_client_->async_send_goal(goal, send_goal_options);
   std::future_status status = current_goal_future.wait_for(std::chrono::seconds(60));
-  if (status != std::future_status::ready)
+  if (status == std::future_status::timeout)
   {
-    RCLCPP_ERROR(LOGGER, "Send goal call failed");
+    RCLCPP_ERROR(LOGGER, "Send goal call timed out");
     return false;
   }
 
@@ -89,9 +93,6 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
     RCLCPP_ERROR(LOGGER, "Goal was rejected by server");
     return false;
   }
-
-  done_ = false;
-  last_exec_ = moveit_controller_manager::ExecutionStatus::RUNNING;
   return true;
 }
 
