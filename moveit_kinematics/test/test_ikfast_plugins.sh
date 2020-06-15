@@ -8,7 +8,7 @@
 # using the script auto_create_ikfast_moveit_plugin.sh
 
 # Clone moveit_resources for URDFs. They are not available before running docker.
-travis_run git clone -q --depth=1 https://github.com/ros-planning/moveit_resources /tmp/resources
+travis_run git clone -q --depth=1 -b ros2 https://github.com/ros-planning/moveit_resources /tmp/resources
 fanuc=/tmp/resources/fanuc_description/urdf/fanuc.urdf
 panda=/tmp/resources/panda_description/urdf/panda.urdf
 
