@@ -57,7 +57,6 @@ public:
 
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
-    // TODO(henningkayser): use flexible base
     const std::string PARAM_BASE_NAME = "moveit_fake_controller_manager";
     node_ = node;
     if (!node_->has_parameter(PARAM_BASE_NAME + ".controller_names"))
