@@ -80,13 +80,6 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
 
   // Send goal
   auto current_goal_future = controller_action_client_->async_send_goal(goal, send_goal_options);
-  std::future_status status = current_goal_future.wait_for(std::chrono::seconds(60));
-  if (status == std::future_status::timeout)
-  {
-    RCLCPP_ERROR(LOGGER, "Send goal call timed out");
-    return false;
-  }
-
   current_goal_ = current_goal_future.get();
   if (!current_goal_)
   {
