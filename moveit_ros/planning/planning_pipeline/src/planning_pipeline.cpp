@@ -55,13 +55,21 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
                                                       const std::string& adapter_plugins_param_name)
   : node_(node), parameter_namespace_(parameter_namespace), robot_model_(model)
 {
-  if (node_->has_parameter(parameter_namespace_ + "." + planner_plugin_param_name))
-    node_->get_parameter(parameter_namespace_ + "." + planner_plugin_param_name, planner_plugin_name_);
+  std::string planner_plugin_fullname = parameter_namespace_ + "." + planner_plugin_param_name;
+  if (parameter_namespace_.empty())
+    planner_plugin_fullname = planner_plugin_param_name;
+  if (node_->has_parameter(planner_plugin_fullname)) {
+    node_->get_parameter(planner_plugin_fullname, planner_plugin_name_);
+  }
+
+  std::string adapter_plugins_fullname = parameter_namespace_ + "." + adapter_plugins_param_name;
+  if (parameter_namespace_.empty())
+    adapter_plugins_fullname = adapter_plugins_param_name;
 
   std::string adapters;
-  if (node_->has_parameter(parameter_namespace_ + "." + adapter_plugins_param_name))
+  if (node_->has_parameter(adapter_plugins_fullname))
   {
-    node_->get_parameter(parameter_namespace_ + "." + adapter_plugins_param_name, adapters);
+    node_->get_parameter(adapter_plugins_fullname, adapters);
     boost::char_separator<char> sep(" ");
     boost::tokenizer<boost::char_separator<char> > tok(adapters, sep);
     for (boost::tokenizer<boost::char_separator<char> >::iterator beg = tok.begin(); beg != tok.end(); ++beg)

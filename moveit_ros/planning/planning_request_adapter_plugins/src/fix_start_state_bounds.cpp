@@ -54,24 +54,28 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     node_ = node;
-    if (!node_->get_parameter(parameter_namespace + "." + BOUNDS_PARAM_NAME, bounds_dist_))
+    std::string bounds_param = parameter_namespace.empty() ? 
+       BOUNDS_PARAM_NAME : parameter_namespace + "." + BOUNDS_PARAM_NAME;
+    if (!node_->get_parameter(bounds_param, bounds_dist_))
     {
       bounds_dist_ = 0.05;
-      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", bounds_param.c_str(), bounds_dist_);
     }
     else
     {
-      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", BOUNDS_PARAM_NAME.c_str(), bounds_dist_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", bounds_param.c_str(), bounds_dist_);
     }
 
-    if (!node_->get_parameter(parameter_namespace + "." + DT_PARAM_NAME, max_dt_offset_))
+    std::string dt_param = parameter_namespace.empty() ? 
+       DT_PARAM_NAME : parameter_namespace + "." + DT_PARAM_NAME;
+    if (!node_->get_parameter(dt_param, max_dt_offset_))
     {
       max_dt_offset_ = 0.5;
-      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", dt_param.c_str(), max_dt_offset_);
     }
     else
     {
-      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", dt_param.c_str(), max_dt_offset_);
     }
   }
 

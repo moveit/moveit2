@@ -1491,12 +1491,12 @@ void PlanningSceneMonitor::configureDefaultPadding()
 
   // Ensure no leading slash creates a bad param server address
   static const std::string ROBOT_DESCRIPTION =
-      (robot_description_[0] == '/') ? robot_description_.substr(1) : robot_description_;
+      (robot_description_[0] == '.') ? robot_description_.substr(1) : robot_description_;
 
-  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning/default_robot_padding", default_robot_padd_, 0.0);
-  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning/default_robot_scale", default_robot_scale_, 1.0);
-  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning/default_object_padding", default_object_padd_, 0.0);
-  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning/default_attached_padding", default_attached_padd_, 0.0);
+  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning.default_robot_padding", default_robot_padd_, 0.0);
+  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning.default_robot_scale", default_robot_scale_, 1.0);
+  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning.default_object_padding", default_object_padd_, 0.0);
+  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning.default_attached_padding", default_attached_padd_, 0.0);
   default_robot_link_padd_ = std::map<std::string, double>();
   default_robot_link_scale_ = std::map<std::string, double>();
   // TODO: enable parameter type support to std::map
