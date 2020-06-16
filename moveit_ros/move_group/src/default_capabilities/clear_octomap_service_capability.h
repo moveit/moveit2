@@ -37,7 +37,7 @@
 #pragma once
 
 #include <moveit/move_group/move_group_capability.h>
-#include <std_srvs/Empty.h>
+#include <std_srvs/srv/empty.hpp>
 
 namespace move_group
 {
@@ -49,8 +49,11 @@ public:
   void initialize() override;
 
 private:
-  bool clearOctomap(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
+  bool clearOctomap(
+    const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<std_srvs::srv::Empty::Request> req, 
+    std::shared_ptr<std_srvs::srv::Empty::Response> res);
 
-  ros::ServiceServer service_;
+  rclcpp::Service<std_srvs::srv::Empty>::SharedPtr service_;
 };
 }  // namespace move_group

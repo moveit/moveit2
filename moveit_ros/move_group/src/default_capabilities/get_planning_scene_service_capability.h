@@ -37,6 +37,7 @@
 #pragma once
 
 #include <moveit/move_group/move_group_capability.h>
+#include <moveit_msgs/srv/get_planning_scene.hpp>
 
 namespace move_group
 {
@@ -46,5 +47,13 @@ public:
   MoveGroupGetPlanningSceneService();
 
   void initialize() override;
+
+private:
+  bool getPlanningSceneService(
+    const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<moveit_msgs::srv::GetPlanningScene::Request> req,
+    std::shared_ptr<moveit_msgs::srv::GetPlanningScene::Response> res);
+
+  rclcpp::Service<moveit_msgs::srv::GetPlanningScene>::SharedPtr get_scene_service_;
 };
 }

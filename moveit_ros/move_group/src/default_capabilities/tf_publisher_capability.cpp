@@ -44,6 +44,9 @@
 
 namespace move_group
 {
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.tf_publisher_capability");
+
 TfPublisher::TfPublisher() : MoveGroupCapability("TfPublisher")
 {
 }
@@ -57,9 +60,9 @@ TfPublisher::~TfPublisher()
 namespace
 {
 void publishSubframes(tf2_ros::TransformBroadcaster& broadcaster, const moveit::core::FixedTransformsMap& subframes,
-                      const std::string& parent_object, const std::string& parent_frame, const ros::Time& stamp)
+                      const std::string& parent_object, const std::string& parent_frame, const rclcpp::Time& stamp)
 {
-  geometry_msgs::TransformStamped transform;
+  geometry_msgs::msg::TransformStamped transform;
   for (auto& subframe : subframes)
   {
     transform = tf2::eigenToTransform(subframe.second);
@@ -73,14 +76,14 @@ void publishSubframes(tf2_ros::TransformBroadcaster& broadcaster, const moveit::
 
 void TfPublisher::publishPlanningSceneFrames()
 {
-  tf2_ros::TransformBroadcaster broadcaster;
-  geometry_msgs::TransformStamped transform;
-  ros::Rate rate(rate_);
+  tf2_ros::TransformBroadcaster broadcaster(node_);
+  geometry_msgs::msg::TransformStamped transform;
+  rclcpp::Rate rate(rate_);
 
   while (keep_running_)
   {
     {
-      ros::Time stamp = ros::Time::now();
+      rclcpp::Time stamp = node_->get_clock()->now();
       planning_scene_monitor::LockedPlanningSceneRO locked_planning_scene(context_->planning_scene_monitor_);
       collision_detection::WorldConstPtr world = locked_planning_scene->getWorld();
       std::string planning_frame = locked_planning_scene->getPlanningFrame();
@@ -121,14 +124,15 @@ void TfPublisher::publishPlanningSceneFrames()
 
 void TfPublisher::initialize()
 {
-  ros::NodeHandle nh = ros::NodeHandle("~");
+  rclcpp::Node::SharedPtr n(new rclcpp::Node("TFPublisher"));
 
-  std::string prefix = nh.getNamespace() + "/";
-  nh.param("planning_scene_frame_publishing_rate", rate_, 10);
-  nh.param("planning_scene_tf_prefix", prefix_, prefix);
+  std::string prefix = n->get_namespace();
+  prefix += "/";
+  n->get_parameter_or("planning_scene_frame_publishing_rate", rate_, 10);
+  n->get_parameter_or("planning_scene_tf_prefix", prefix_, prefix);
   keep_running_ = true;
 
-  ROS_INFO("Initializing MoveGroupTfPublisher with a frame publishing rate of %d", rate_);
+  RCLCPP_INFO(LOGGER, "Initializing MoveGroupTfPublisher with a frame publishing rate of %d", rate_);
   thread_ = std::thread(&TfPublisher::publishPlanningSceneFrames, this);
 }
 }  // namespace move_group

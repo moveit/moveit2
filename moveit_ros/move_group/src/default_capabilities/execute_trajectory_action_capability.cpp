@@ -43,84 +43,107 @@
 
 namespace move_group
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.execute_trajectory_action_capability");
+
 MoveGroupExecuteTrajectoryAction::MoveGroupExecuteTrajectoryAction() : MoveGroupCapability("ExecuteTrajectoryAction")
 {
 }
 
 void MoveGroupExecuteTrajectoryAction::initialize()
 {
+  using std::placeholders::_1;
+  using std::placeholders::_2;
+
   // start the move action server
-  execute_action_server_.reset(new actionlib::SimpleActionServer<moveit_msgs::action::ExecuteTrajectoryAction>(
-      root_node_handle_, EXECUTE_ACTION_NAME,
-      boost::bind(&MoveGroupExecuteTrajectoryAction::executePathCallback, this, _1), false));
-  execute_action_server_->registerPreemptCallback(
-      boost::bind(&MoveGroupExecuteTrajectoryAction::preemptExecuteTrajectoryCallback, this));
-  execute_action_server_->start();
+  execute_action_server_= rclcpp_action::create_server<ExecTrajectory>(
+    root_node_->get_node_base_interface(),
+    root_node_->get_node_clock_interface(),
+    root_node_->get_node_logging_interface(),
+    root_node_->get_node_waitables_interface(),
+    EXECUTE_ACTION_NAME,
+    [](const rclcpp_action::GoalUUID&, std::shared_ptr<const ExecTrajectory::Goal>) {
+      RCLCPP_INFO(LOGGER, "Received goal request");
+      return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+    },
+    [](const std::shared_ptr<ExecTrajectoryGoal>& g) {
+      RCLCPP_INFO(LOGGER, "Received request to cancel goal");
+      return rclcpp_action::CancelResponse::ACCEPT;
+    },
+    std::bind(&MoveGroupExecuteTrajectoryAction::executePathCallback, this, _1)
+  );
 }
 
 void MoveGroupExecuteTrajectoryAction::executePathCallback(
-    const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal)
+    std::shared_ptr<ExecTrajectoryGoal> goal)
 {
-  moveit_msgs::action::ExecuteTrajectoryResult action_res;
+  auto action_res = std::make_shared<ExecTrajectory::Result>();
   if (!context_->trajectory_execution_manager_)
   {
     const std::string response = "Cannot execute trajectory since ~allow_trajectory_execution was set to false";
-    action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
-    execute_action_server_->setAborted(action_res, response);
+    action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
+    goal->abort(action_res);
     return;
   }
 
   executePath(goal, action_res);
 
-  const std::string response = getActionResultString(action_res.error_code, false, false);
-  if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+  const std::string response = getActionResultString(action_res->error_code, false, false);
+  auto fb = std::make_shared<ExecTrajectory::Feedback>();
+  fb->state = response;
+  if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
-    execute_action_server_->setSucceeded(action_res, response);
+    goal->publish_feedback(fb);
+    goal->succeed(action_res);
   }
-  else if (action_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
+  else if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
   {
-    execute_action_server_->setPreempted(action_res, response);
+    //@todo: wait for preempt?
+    //execute_action_server_->setPreempted(action_res, response);
+    goal->publish_feedback(fb);
   }
   else
   {
-    execute_action_server_->setAborted(action_res, response);
+    goal->publish_feedback(fb);
+    goal->abort(action_res);
   }
 
-  setExecuteTrajectoryState(IDLE);
+  setExecuteTrajectoryState(IDLE, goal);
+
 }
 
-void MoveGroupExecuteTrajectoryAction::executePath(const moveit_msgs::action::ExecuteTrajectoryGoalConstPtr& goal,
-                                                   moveit_msgs::action::ExecuteTrajectoryResult& action_res)
+void MoveGroupExecuteTrajectoryAction::executePath(const std::shared_ptr<ExecTrajectoryGoal>& goal,
+                                                   std::shared_ptr<ExecTrajectory::Result>& action_res)
 {
-  ROS_INFO_NAMED(getName(), "Execution request received");
+
+  RCLCPP_INFO(LOGGER, "Execution request received");
 
   context_->trajectory_execution_manager_->clear();
-  if (context_->trajectory_execution_manager_->push(goal->trajectory))
+  if (context_->trajectory_execution_manager_->push(goal->get_goal()->trajectory))
   {
-    setExecuteTrajectoryState(MONITOR);
+    setExecuteTrajectoryState(MONITOR, goal);
     context_->trajectory_execution_manager_->execute();
     moveit_controller_manager::ExecutionStatus status = context_->trajectory_execution_manager_->waitForExecution();
     if (status == moveit_controller_manager::ExecutionStatus::SUCCEEDED)
     {
-      action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+      action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     }
     else if (status == moveit_controller_manager::ExecutionStatus::PREEMPTED)
     {
-      action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+      action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
     }
     else if (status == moveit_controller_manager::ExecutionStatus::TIMED_OUT)
     {
-      action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT;
+      action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT;
     }
     else
     {
-      action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
+      action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
     }
-    ROS_INFO_STREAM_NAMED(getName(), "Execution completed: " << status.asString());
+    RCLCPP_INFO_STREAM(LOGGER, "Execution completed: " << status.asString());
   }
   else
   {
-    action_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
+    action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
   }
 }
 
@@ -129,11 +152,12 @@ void MoveGroupExecuteTrajectoryAction::preemptExecuteTrajectoryCallback()
   context_->trajectory_execution_manager_->stopExecution(true);
 }
 
-void MoveGroupExecuteTrajectoryAction::setExecuteTrajectoryState(MoveGroupState state)
+void MoveGroupExecuteTrajectoryAction::setExecuteTrajectoryState(MoveGroupState state,
+  const std::shared_ptr<ExecTrajectoryGoal>& goal)
 {
-  moveit_msgs::action::ExecuteTrajectoryFeedback execute_feedback;
-  execute_feedback.state = stateToStr(state);
-  execute_action_server_->publishFeedback(execute_feedback);
+  auto execute_feedback = std::make_shared<ExecTrajectory::Feedback>();
+  execute_feedback->state = stateToStr(state);
+  goal->publish_feedback(execute_feedback);
 }
 
 }  // namespace move_group

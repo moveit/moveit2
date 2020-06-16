@@ -37,7 +37,8 @@
 #pragma once
 
 #include <moveit/move_group/move_group_capability.h>
-#include <moveit_msgs/GetCartesianPath.h>
+#include <moveit_msgs/srv/get_cartesian_path.hpp>
+#include <moveit_msgs/msg/display_trajectory.hpp>
 
 namespace move_group
 {
@@ -49,11 +50,14 @@ public:
   void initialize() override;
 
 private:
-  bool computeService(moveit_msgs::srv::GetCartesianPath::Request& req,
-                      moveit_msgs::srv::GetCartesianPath::Response& res);
+  bool computeService(
+    const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
+    std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res);
 
-  ros::ServiceServer cartesian_path_service_;
-  ros::Publisher display_path_;
+  rclcpp::Service<moveit_msgs::srv::GetCartesianPath>::SharedPtr cartesian_path_service_;
+  rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>::SharedPtr display_path_;
+
   bool display_computed_paths_;
 };
 }  // namespace move_group

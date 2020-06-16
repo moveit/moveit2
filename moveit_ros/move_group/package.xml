@@ -15,7 +15,7 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>actionlib</depend>
   <depend>moveit_core</depend>
@@ -33,7 +33,8 @@
   <test_depend>moveit_resources</test_depend>
 
   <export>
-    <moveit_ros_move_group plugin="${prefix}/default_capabilities_plugin_description.xml"/>
+    <moveit_ros_move_group plugin="${prefix}/default_capabilities_plugin_description.xml" />
+    <build_type>ament_cmake</build_type>
   </export>
 
 </package>

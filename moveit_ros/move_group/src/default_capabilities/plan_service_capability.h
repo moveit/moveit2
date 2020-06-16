@@ -37,7 +37,7 @@
 #pragma once
 
 #include <moveit/move_group/move_group_capability.h>
-#include <moveit_msgs/GetMotionPlan.h>
+#include <moveit_msgs/srv/get_motion_plan.hpp>
 
 namespace move_group
 {
@@ -49,9 +49,11 @@ public:
   void initialize() override;
 
 private:
-  bool computePlanService(moveit_msgs::srv::GetMotionPlan::Request& req,
-                          moveit_msgs::srv::GetMotionPlan::Response& res);
+  bool computePlanService(
+    const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request> req,
+    std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response> res);
 
-  ros::ServiceServer plan_service_;
+  rclcpp::Service<moveit_msgs::srv::GetMotionPlan>::SharedPtr plan_service_;
 };
 }  // namespace move_group

@@ -37,7 +37,7 @@
 #pragma once
 
 #include <moveit/move_group/move_group_capability.h>
-#include <moveit_msgs/GetStateValidity.h>
+#include <moveit_msgs/srv/get_state_validity.hpp>
 
 namespace move_group
 {
@@ -49,9 +49,11 @@ public:
   void initialize() override;
 
 private:
-  bool computeService(moveit_msgs::srv::GetStateValidity::Request& req,
-                      moveit_msgs::srv::GetStateValidity::Response& res);
+  bool computeService(
+    const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request> req,
+    std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response> res);
 
-  ros::ServiceServer validity_service_;
+  rclcpp::Service<moveit_msgs::srv::GetStateValidity>::SharedPtr validity_service_;
 };
 }  // namespace move_group
