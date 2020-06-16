@@ -67,10 +67,11 @@ void MoveGroupMoveAction::initialize()
     node_->get_node_waitables_interface(),
     MOVE_ACTION,
     [](const rclcpp_action::GoalUUID&, std::shared_ptr<const MGAction::Goal>) {
+      RCLCPP_INFO(LOGGER, "Received request");
       return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     },
     [](const std::shared_ptr<MGActionGoal>&) {
-      //RCLCPP_INFO(LOGGER, "Received request to cancel goal");
+      RCLCPP_INFO(LOGGER, "Received request to cancel goal");
       return rclcpp_action::CancelResponse::ACCEPT;
     },
     std::bind(&MoveGroupMoveAction::executeMoveCallback, this, _1)
@@ -79,11 +80,12 @@ void MoveGroupMoveAction::initialize()
 
 void MoveGroupMoveAction::executeMoveCallback(std::shared_ptr<MGActionGoal> goal)
 {
+  RCLCPP_INFO(LOGGER, "executing..");
   setMoveState(PLANNING, goal);
   // before we start planning, ensure that we have the latest robot state received...
-  context_->planning_scene_monitor_->waitForCurrentRobotState(node_->now());
+  context_->planning_scene_monitor_->waitForCurrentRobotState(rclcpp::Clock().now());
   context_->planning_scene_monitor_->updateFrameTransforms();
-
+  
   auto action_res = std::make_shared<MGAction::Result>();
   if (goal->get_goal()->planning_options.plan_only || !context_->allow_trajectory_execution_)
   {

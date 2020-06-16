@@ -184,60 +184,6 @@ private:
 };
 }  // namespace move_group
 
-#if 0 //@todo: disabled in favor of customized function for coffeebot
-int main(int argc, char** argv)
-{
-  rclcpp::init(argc, argv);
-  
-  rclcpp::executors::MultiThreadedExecutor executor;
-  rclcpp::Node::SharedPtr nh = rclcpp::Node::make_shared("move_group");
-  executor.add_node(nh);
-
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(nh->get_clock(), 
-    tf2::durationFromSec(10.0));
-  std::shared_ptr<tf2_ros::TransformListener> tfl = std::make_shared<tf2_ros::TransformListener>(*tf_buffer, nh);
-
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor(
-      new planning_scene_monitor::PlanningSceneMonitor(nh, ROBOT_DESCRIPTION, tf_buffer));
-
-  auto future_handle = std::async(
-    std::launch::async, [&executor]() -> void {
-      executor.spin();
-    });
-  if (planning_scene_monitor->getPlanningScene())
-  {
-    bool debug = false;
-    for (int i = 1; i < argc; ++i)
-      if (strncmp(argv[i], "--debug", 7) == 0)
-      {
-        debug = true;
-        break;
-      }
-    if (debug)
-      RCLCPP_INFO(LOGGER, "MoveGroup debug mode is ON");
-    else
-      RCLCPP_INFO(LOGGER, "MoveGroup debug mode is OFF");
-
-    printf(MOVEIT_CONSOLE_COLOR_CYAN "Starting planning scene monitors...\n" MOVEIT_CONSOLE_COLOR_RESET);
-    planning_scene_monitor->startSceneMonitor();
-    planning_scene_monitor->startWorldGeometryMonitor();
-    planning_scene_monitor->startStateMonitor();
-    printf(MOVEIT_CONSOLE_COLOR_CYAN "Planning scene monitors started.\n" MOVEIT_CONSOLE_COLOR_RESET);
-
-    move_group::MoveGroupExe mge(planning_scene_monitor, debug);
-
-    planning_scene_monitor->publishDebugInformation(debug);
-
-    mge.status();
-    executor.cancel();
-    rclcpp::shutdown();
-  }
-  else
-    RCLCPP_ERROR(LOGGER, "Planning scene not configured");
-
-  return 0;
-}
-#endif
 template <typename T>
 T getParameterFromRemoteNode(const rclcpp::Node::SharedPtr& node,
  const std::string& node_name, const std::string& param_name)
@@ -263,45 +209,39 @@ int main(int argc, char** argv)
   
   rcutils_logging_set_logger_level("", RCUTILS_LOG_SEVERITY_INFO);
 
-  //rclcpp::executors::MultiThreadedExecutor executor;
   rclcpp::NodeOptions opt;
   opt.allow_undeclared_parameters(true);
   opt.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr nh = rclcpp::Node::make_shared("move_group", opt);
-  //executor.add_node(nh);
 
-  std::string robot_desc_param = "robot_description";
-  std::string str = getParameterFromRemoteNode<std::string>(nh, "robot_state_publisher", robot_desc_param);
-  nh->declare_parameter(robot_desc_param);
-  nh->set_parameter(rclcpp::Parameter(robot_desc_param, str));
-
+  //fetch a bunch of parameters
   {
+    std::string robot_desc_param = "robot_description";
+    std::string str = getParameterFromRemoteNode<std::string>(nh, "robot_state_publisher", robot_desc_param);
+    nh->declare_parameter(robot_desc_param);
+    nh->set_parameter(rclcpp::Parameter(robot_desc_param, str));
+
     std::string semantic_file = nh->get_parameter("robot_description_semantic").as_string();
     std::ifstream file(semantic_file);
     RCLCPP_INFO(LOGGER, "%s", semantic_file.c_str());
     std::stringstream buffer;
     buffer << file.rdbuf();
     nh->set_parameter(rclcpp::Parameter("robot_description_semantic", buffer.str()));
-  }
-  //nh->get_node_parameters_interface()->
-  auto allparams = nh->get_node_parameters_interface()->get_parameter_overrides();
-  for (auto param : allparams)
-  {
-    RCLCPP_INFO(LOGGER, "%s", param.first.c_str());
+
+    // auto allparams = nh->get_node_parameters_interface()->get_parameter_overrides();
+    // for (auto param : allparams)
+    // {
+    //   RCLCPP_INFO(LOGGER, "%s", param.first.c_str());
+    // }
   }
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(nh->get_clock(), 
     tf2::durationFromSec(10.0));
-  std::shared_ptr<tf2_ros::TransformListener> tfl = std::make_shared<tf2_ros::TransformListener>(*tf_buffer, nh);
+  std::shared_ptr<tf2_ros::TransformListener> tfl = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
 
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor(
       new planning_scene_monitor::PlanningSceneMonitor(nh, ROBOT_DESCRIPTION, tf_buffer));
 
-  // auto future_handle = std::async(
-  //   std::launch::async, [&executor]() -> void {
-  //     executor.spin();
-  //   });
-#if  1
   if (planning_scene_monitor->getPlanningScene())
   {
     bool debug = false;
@@ -317,10 +257,13 @@ int main(int argc, char** argv)
     else
       RCLCPP_INFO(LOGGER, "MoveGroup debug mode is OFF");
 
+    rclcpp::executors::MultiThreadedExecutor executor;
+    rclcpp::Node::SharedPtr monitor_node = rclcpp::Node::make_shared("monitor_node", opt);
+
     printf(MOVEIT_CONSOLE_COLOR_CYAN "Starting planning scene monitors...\n" MOVEIT_CONSOLE_COLOR_RESET);
     planning_scene_monitor->startSceneMonitor();
     planning_scene_monitor->startWorldGeometryMonitor();
-    planning_scene_monitor->startStateMonitor();
+    planning_scene_monitor->startStateMonitor(monitor_node);
     printf(MOVEIT_CONSOLE_COLOR_CYAN "Planning scene monitors started.\n" MOVEIT_CONSOLE_COLOR_RESET);
 
     move_group::MoveGroupExe mge(nh, planning_scene_monitor, debug);
@@ -328,12 +271,15 @@ int main(int argc, char** argv)
     planning_scene_monitor->publishDebugInformation(debug);
 
     mge.status();
-    RCLCPP_INFO(rclcpp::get_logger("asdasd"), "asdsa2");
-    //executor.cancel();
+
+    executor.add_node(monitor_node);
+    executor.add_node(nh);
+    executor.spin();
+
     rclcpp::shutdown();
   }
   else
     RCLCPP_ERROR(LOGGER, "Planning scene not configured");
-#endif
+
   return 0;
 }

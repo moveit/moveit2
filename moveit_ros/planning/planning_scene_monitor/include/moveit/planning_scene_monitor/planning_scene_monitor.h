@@ -286,7 +286,8 @@ public:
   /** @brief Start the current state monitor
       @param joint_states_topic the topic to listen to for joint states
       @param attached_objects_topic the topic to listen to for attached collision objects */
-  void startStateMonitor(const std::string& joint_states_topic = DEFAULT_JOINT_STATES_TOPIC,
+  void startStateMonitor(const rclcpp::Node::SharedPtr& listening_node = rclcpp::Node::SharedPtr(),
+                         const std::string& joint_states_topic = DEFAULT_JOINT_STATES_TOPIC,
                          const std::string& attached_objects_topic = DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC);
 
   /** @brief Stop the state monitor*/
