@@ -200,6 +200,9 @@ void TrajectoryExecutionManager::initialize()
       EXECUTION_EVENT_TOPIC, 100, std::bind(&TrajectoryExecutionManager::receiveEvent, this, std::placeholders::_1));
 
   // reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  controller_mgr_node_->get_parameter("trajectory_execution.allowed_execution_duration_scaling", allowed_execution_duration_scaling_);
+  controller_mgr_node_->get_parameter("trajectory_execution.allowed_goal_duration_margin", allowed_goal_duration_margin_);
+  controller_mgr_node_->get_parameter("trajectory_execution.allowed_start_tolerance", allowed_start_tolerance_);
 
   if (manage_controllers_)
     RCLCPP_INFO(LOGGER, "Trajectory execution is managing controllers");
@@ -1026,7 +1029,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
 
       for (std::size_t i = 0, end = joint_names.size(); i < end; ++i)
       {
-        const moveit::core::JointModel* jm = current_state->getJointModel(joint_names[i]);
+        const robot_model::JointModel* jm = current_state->getJointModel(joint_names[i]);
         if (!jm)
         {
           RCLCPP_ERROR_STREAM(LOGGER, "Unknown joint in trajectory: " << joint_names[i]);
