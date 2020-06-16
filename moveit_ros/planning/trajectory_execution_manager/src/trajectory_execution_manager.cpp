@@ -166,8 +166,27 @@ void TrajectoryExecutionManager::initialize()
     if (!controller.empty())
       try
       {
+        //@note: because of things being singlethreaded, we make a node named "moveit_simple_controller_manager"
+        //then copy parameters from the move_group node and then add it to the multithreadedexecutor
+        //alternatives:
+        //node_->create_sub_node doesnt work
+        //rename the node under ros_controllers.yaml to moveit_simple_controller_manager
+        rclcpp::NodeOptions opt;
+        opt.allow_undeclared_parameters(true);
+        opt.automatically_declare_parameters_from_overrides(true);
+        controller_mgr_node_.reset(new rclcpp::Node("moveit_simple_controller_manager", opt));
+
+        //the alternative is to create a node with name "moveit_simple_controller_manager"
+        // auto allparams = node_->get_node_parameters_interface()->get_parameter_overrides();
+        // for (auto param : allparams)
+        // {
+        //   RCLCPP_INFO(LOGGER, "%s", param.first.c_str());
+          
+        //   controller_mgr_node_->set_parameter(rclcpp::Parameter(param.first, param.second));
+        // }
+
         controller_manager_ = controller_manager_loader_->createUniqueInstance(controller);
-        controller_manager_->initialize(node_);
+        controller_manager_->initialize(controller_mgr_node_);
       }
       catch (pluginlib::PluginlibException& ex)
       {
