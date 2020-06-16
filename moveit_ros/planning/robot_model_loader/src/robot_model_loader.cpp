@@ -47,7 +47,6 @@ RobotModelLoader::RobotModelLoader(const rclcpp::Node::SharedPtr& node, const st
                                    bool load_kinematics_solvers)
   : node_(node)
 {
-  RCLCPP_INFO(LOGGER, "xc: %s", robot_description.c_str());
   Options opt(robot_description);
   opt.load_kinematics_solvers_ = load_kinematics_solvers;
   configure(opt);

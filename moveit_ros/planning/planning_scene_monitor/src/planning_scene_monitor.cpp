@@ -188,7 +188,8 @@ PlanningSceneMonitor::~PlanningSceneMonitor()
   if (private_executor_thread_.joinable())
     private_executor_thread_.join();
   private_executor_.reset();
-  // delete reconfigure_impl_;
+  delete reconfigure_impl_;
+
   current_state_monitor_.reset();
   scene_const_.reset();
   scene_.reset();
@@ -262,7 +263,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   double temp_wait_time = 0.05;
 
   if (!robot_description_.empty())
-    node_->get_parameter_or(robot_description_ + "_planning/shape_transform_cache_lookup_wait_time", temp_wait_time,
+    node_->get_parameter_or(robot_description_ + "_planning.shape_transform_cache_lookup_wait_time", temp_wait_time,
                             temp_wait_time);
 
   shape_transform_cache_lookup_wait_time_ = rclcpp::Duration((int64_t)temp_wait_time * 1.0e+9);
@@ -277,6 +278,25 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   // start executor on a different thread now
   private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
   // reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  //@todo: can remove DynamicReconfigureImpl now that we have ported parameters over
+  reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  bool publish_planning_scene = node_->get_parameter("planning_scene_monitor.publish_planning_scene").as_bool();
+  bool publish_geom_updates = node_->get_parameter("planning_scene_monitor.publish_geometry_updates").as_bool();
+  bool publish_state_updates = node_->get_parameter("planning_scene_monitor.publish_state_updates").as_bool();
+  bool publish_transform_updates = node_->get_parameter("planning_scene_monitor.publish_transforms_updates").as_bool();
+
+  PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
+  if (publish_geom_updates)
+    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_GEOMETRY);
+  if (publish_state_updates)
+    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_STATE);
+  if (publish_transform_updates)
+    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
+  if (publish_planning_scene)
+  {
+    this->setPlanningScenePublishingFrequency(100);
+    this->startPublishingPlanningScene(event);
+  }
 }
 
 void PlanningSceneMonitor::monitorDiffs(bool flag)
