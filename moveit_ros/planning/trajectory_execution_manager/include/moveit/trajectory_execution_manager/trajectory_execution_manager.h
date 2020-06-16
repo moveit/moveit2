@@ -243,6 +243,11 @@ public:
   /// Enable or disable waiting for trajectory completion
   void setWaitForTrajectoryCompletion(bool flag);
 
+  rclcpp::Node::SharedPtr getControllerManagerNode()
+  {
+    return controller_mgr_node_;
+  }
+
 private:
   struct ControllerInformation
   {
@@ -349,8 +354,8 @@ private:
 
   bool verbose_;
 
-  // class DynamicReconfigureImpl;
-  // DynamicReconfigureImpl* reconfigure_impl_;
+  class DynamicReconfigureImpl;
+  DynamicReconfigureImpl* reconfigure_impl_;
 
   bool execution_duration_monitoring_;
   // 'global' values
@@ -365,4 +370,4 @@ private:
   double execution_velocity_scaling_;
   bool wait_for_trajectory_completion_;
 };
-}  // namespace trajectory_execution_manager
+}

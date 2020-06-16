@@ -42,8 +42,8 @@
 
 namespace move_group
 {
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.kinematics_service_capability");
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit_move_group_default_capabilities.kinematics_service_capability");
 
 MoveGroupKinematicsService::MoveGroupKinematicsService() : MoveGroupCapability("KinematicsService")
 {
@@ -56,13 +56,9 @@ void MoveGroupKinematicsService::initialize()
   using std::placeholders::_3;
 
   fk_service_ = node_->create_service<moveit_msgs::srv::GetPositionFK>(
-    FK_SERVICE_NAME,
-    std::bind(&MoveGroupKinematicsService::computeFKService, this, _1, _2, _3)
-  );
+      FK_SERVICE_NAME, std::bind(&MoveGroupKinematicsService::computeFKService, this, _1, _2, _3));
   ik_service_ = node_->create_service<moveit_msgs::srv::GetPositionIK>(
-    IK_SERVICE_NAME,
-    std::bind(&MoveGroupKinematicsService::computeIKService, this, _1, _2, _3)
-  );
+      IK_SERVICE_NAME, std::bind(&MoveGroupKinematicsService::computeIKService, this, _1, _2, _3));
 }
 
 namespace
@@ -79,11 +75,10 @@ bool isIKSolutionValid(const planning_scene::PlanningScene* planning_scene,
 }
 }  // namespace
 
-void MoveGroupKinematicsService::computeIK(
-  moveit_msgs::msg::PositionIKRequest& req,
-  moveit_msgs::msg::RobotState& solution,
-  moveit_msgs::msg::MoveItErrorCodes& error_code, robot_state::RobotState& rs,
-  const robot_state::GroupStateValidityCallbackFn& constraint) const
+void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& req,
+                                           moveit_msgs::msg::RobotState& solution,
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code, robot_state::RobotState& rs,
+                                           const robot_state::GroupStateValidityCallbackFn& constraint) const
 {
   const moveit::core::JointModelGroup* jmg = rs.getJointModelGroup(req.group_name);
   if (jmg)
@@ -155,10 +150,9 @@ void MoveGroupKinematicsService::computeIK(
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
 }
 
-bool MoveGroupKinematicsService::computeIKService(
-  const std::shared_ptr<rmw_request_id_t> request_header,
-  const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request> req,
-  std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response> res)
+bool MoveGroupKinematicsService::computeIKService(const std::shared_ptr<rmw_request_id_t> request_header,
+                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request> req,
+                                                  std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response> res)
 {
   context_->planning_scene_monitor_->updateFrameTransforms();
 
@@ -186,10 +180,9 @@ bool MoveGroupKinematicsService::computeIKService(
   return true;
 }
 
-bool MoveGroupKinematicsService::computeFKService(
-  const std::shared_ptr<rmw_request_id_t> request_header,
-  const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request> req,
-  std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response> res)
+bool MoveGroupKinematicsService::computeFKService(const std::shared_ptr<rmw_request_id_t> request_header,
+                                                  const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request> req,
+                                                  std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response> res)
 {
   if (req->fk_link_names.empty())
   {
@@ -233,5 +226,4 @@ bool MoveGroupKinematicsService::computeFKService(
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(
-  move_group::MoveGroupKinematicsService, move_group::MoveGroupCapability)
+PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupKinematicsService, move_group::MoveGroupCapability)

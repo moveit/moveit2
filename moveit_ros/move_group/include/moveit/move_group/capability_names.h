@@ -49,7 +49,7 @@ static const std::string GET_PLANNER_PARAMS_SERVICE_NAME =
     "get_planner_params";  // service name to retrieve planner parameters
 static const std::string SET_PLANNER_PARAMS_SERVICE_NAME =
     "set_planner_params";                                 // service name to set planner parameters
-static const std::string MOVE_ACTION = "move_action";      // name of 'move' action
+static const std::string MOVE_ACTION = "move_action";     // name of 'move' action
 static const std::string IK_SERVICE_NAME = "compute_ik";  // name of ik service
 static const std::string FK_SERVICE_NAME = "compute_fk";  // name of fk service
 static const std::string STATE_VALIDITY_SERVICE_NAME =

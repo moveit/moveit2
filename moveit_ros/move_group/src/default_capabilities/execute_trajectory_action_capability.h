@@ -53,7 +53,6 @@ using ExecTrajectoryGoal = rclcpp_action::ServerGoalHandle<ExecTrajectory>;
 
 class MoveGroupExecuteTrajectoryAction : public MoveGroupCapability
 {
-  
 public:
   MoveGroupExecuteTrajectoryAction();
 
@@ -65,11 +64,9 @@ private:
                    std::shared_ptr<ExecTrajectory::Result>& action_res);
 
   void preemptExecuteTrajectoryCallback();
-  void setExecuteTrajectoryState(MoveGroupState state,
-    const std::shared_ptr<ExecTrajectoryGoal>& goal);
+  void setExecuteTrajectoryState(MoveGroupState state, const std::shared_ptr<ExecTrajectoryGoal>& goal);
 
   std::shared_ptr<rclcpp_action::Server<ExecTrajectory>> execute_action_server_;
-
 };
 
 }  // namespace move_group

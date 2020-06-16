@@ -44,8 +44,8 @@
 
 namespace move_group
 {
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.tf_publisher_capability");
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit_move_group_default_capabilities.tf_publisher_capability");
 
 TfPublisher::TfPublisher() : MoveGroupCapability("TfPublisher")
 {
@@ -139,5 +139,4 @@ void TfPublisher::initialize()
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(
-  move_group::TfPublisher, move_group::MoveGroupCapability)
+PLUGINLIB_EXPORT_CLASS(move_group::TfPublisher, move_group::MoveGroupCapability)

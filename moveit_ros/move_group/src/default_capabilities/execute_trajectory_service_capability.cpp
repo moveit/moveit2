@@ -114,5 +114,4 @@ bool MoveGroupExecuteService::executeTrajectoryService(moveit_msgs::srv::Execute
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(
-  move_group::MoveGroupExecuteService, move_group::MoveGroupCapability)
+PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupExecuteService, move_group::MoveGroupCapability)

@@ -74,14 +74,14 @@ static const char* DEFAULT_CAPABILITIES[] = {
 class MoveGroupExe
 {
 public:
-  MoveGroupExe(const rclcpp::Node::SharedPtr& n, planning_scene_monitor::PlanningSceneMonitorPtr& psm, bool debug) 
+  MoveGroupExe(const rclcpp::Node::SharedPtr& n, planning_scene_monitor::PlanningSceneMonitorPtr& psm, bool debug)
     : node_(n)
   {
     // if the user wants to be able to disable execution of paths, they can just set this ROS param to false
     bool allow_trajectory_execution;
     node_->get_parameter_or("allow_trajectory_execution", allow_trajectory_execution, true);
 
-    context_.reset(new MoveGroupContext(n, psm, allow_trajectory_execution, debug));
+    context_.reset(new MoveGroupContext(node_, psm, allow_trajectory_execution, debug));
 
     // start the capabilities
     configureCapabilities();
@@ -112,7 +112,10 @@ public:
       RCLCPP_ERROR(LOGGER, "No MoveGroup context created. Nothing will work.");
   }
 
-  MoveGroupContextPtr getContext() { return context_; }
+  MoveGroupContextPtr getContext()
+  {
+    return context_;
+  }
 
 private:
   void configureCapabilities()
@@ -127,7 +130,7 @@ private:
       RCLCPP_FATAL_STREAM(LOGGER, "Exception while creating plugin loader for move_group capabilities: " << ex.what());
       return;
     }
-    
+
     std::set<std::string> capabilities;
 
     // add default capabilities
@@ -166,7 +169,8 @@ private:
       }
       catch (pluginlib::PluginlibException& ex)
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "Exception while loading move_group capability '" << capability << "': " << ex.what());
+        RCLCPP_ERROR_STREAM(LOGGER, "Exception while loading move_group capability '" << capability
+                                                                                      << "': " << ex.what());
       }
     }
 
@@ -189,14 +193,15 @@ private:
 }  // namespace move_group
 
 template <typename T>
-T getParameterFromRemoteNode(const rclcpp::Node::SharedPtr& node,
- const std::string& node_name, const std::string& param_name)
+T getParameterFromRemoteNode(const rclcpp::Node::SharedPtr& node, const std::string& node_name,
+                             const std::string& param_name)
 {
   using namespace std::chrono_literals;
   auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(node, node_name);
-  while (!parameters_client->wait_for_service(0.5s)) {
-    RCLCPP_INFO(LOGGER, "wtf");
-    if (!rclcpp::ok()) {
+  while (!parameters_client->wait_for_service(0.5s))
+  {
+    if (!rclcpp::ok())
+    {
       RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
       return 0;
     }
@@ -210,15 +215,13 @@ T getParameterFromRemoteNode(const rclcpp::Node::SharedPtr& node,
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  
-  rcutils_logging_set_logger_level("", RCUTILS_LOG_SEVERITY_INFO);
 
   rclcpp::NodeOptions opt;
   opt.allow_undeclared_parameters(true);
   opt.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr nh = rclcpp::Node::make_shared("move_group", opt);
 
-  //fetch a bunch of parameters
+  // fetch a bunch of parameters
   {
     std::string robot_desc_param = "robot_description";
     std::string str = getParameterFromRemoteNode<std::string>(nh, "robot_state_publisher", robot_desc_param);
@@ -227,20 +230,13 @@ int main(int argc, char** argv)
 
     std::string semantic_file = nh->get_parameter("robot_description_semantic").as_string();
     std::ifstream file(semantic_file);
-    RCLCPP_INFO(LOGGER, "%s", semantic_file.c_str());
     std::stringstream buffer;
     buffer << file.rdbuf();
     nh->set_parameter(rclcpp::Parameter("robot_description_semantic", buffer.str()));
-
-    // auto allparams = nh->get_node_parameters_interface()->get_parameter_overrides();
-    // for (auto param : allparams)
-    // {
-    //   RCLCPP_INFO(LOGGER, "%s", param.first.c_str());
-    // }
   }
 
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(nh->get_clock(), 
-    tf2::durationFromSec(10.0));
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer =
+      std::make_shared<tf2_ros::Buffer>(nh->get_clock(), tf2::durationFromSec(10.0));
   std::shared_ptr<tf2_ros::TransformListener> tfl = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
 
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor(
@@ -255,7 +251,7 @@ int main(int argc, char** argv)
         debug = true;
         break;
       }
-      debug = true;
+    debug = true;
     if (debug)
       RCLCPP_INFO(LOGGER, "MoveGroup debug mode is ON");
     else

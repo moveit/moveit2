@@ -100,8 +100,9 @@ move_group::MoveGroupCapability::clearRequestStartState(const planning_interface
   planning_interface::MotionPlanRequest r = request;
   r.start_state = moveit_msgs::msg::RobotState();
   r.start_state.is_diff = true;
-  RCLCPP_WARN(LOGGER, "Execution of motions should always start at the robot's current state. Ignoring the state supplied as "
-           "start state in the motion planning request");
+  RCLCPP_WARN(LOGGER,
+              "Execution of motions should always start at the robot's current state. Ignoring the state supplied as "
+              "start state in the motion planning request");
   return r;
 }
 
@@ -111,8 +112,9 @@ move_group::MoveGroupCapability::clearSceneRobotState(const moveit_msgs::msg::Pl
   moveit_msgs::msg::PlanningScene r = scene;
   r.robot_state = moveit_msgs::msg::RobotState();
   r.robot_state.is_diff = true;
-  RCLCPP_WARN(LOGGER, "Execution of motions should always start at the robot's current state. Ignoring the state supplied as "
-           "difference in the planning scene diff");
+  RCLCPP_WARN(LOGGER,
+              "Execution of motions should always start at the robot's current state. Ignoring the state supplied as "
+              "difference in the planning scene diff");
   return r;
 }
 

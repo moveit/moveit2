@@ -43,23 +43,22 @@
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_capabilities_base.move_group_context");
 
 move_group::MoveGroupContext::MoveGroupContext(
-    const rclcpp::Node::SharedPtr node,
-    const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor, bool allow_trajectory_execution,
-    bool debug)
+    const rclcpp::Node::SharedPtr node, const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+    bool allow_trajectory_execution, bool debug)
   : planning_scene_monitor_(planning_scene_monitor)
   , allow_trajectory_execution_(allow_trajectory_execution)
   , debug_(debug)
 {
-  planning_pipeline_.reset(new planning_pipeline::PlanningPipeline(
-    planning_scene_monitor_->getRobotModel(), node, "move_group"));
+  planning_pipeline_.reset(
+      new planning_pipeline::PlanningPipeline(planning_scene_monitor_->getRobotModel(), node, "move_group"));
 
   if (allow_trajectory_execution_)
   {
-
     trajectory_execution_manager_.reset(new trajectory_execution_manager::TrajectoryExecutionManager(
         node, planning_scene_monitor_->getRobotModel(), planning_scene_monitor_->getStateMonitor()));
 
-    plan_execution_.reset(new plan_execution::PlanExecution(node, planning_scene_monitor_, trajectory_execution_manager_));
+    plan_execution_.reset(
+        new plan_execution::PlanExecution(node, planning_scene_monitor_, trajectory_execution_manager_));
     plan_with_sensing_.reset(new plan_execution::PlanWithSensing(node, trajectory_execution_manager_));
 
     if (debug)
@@ -88,7 +87,8 @@ bool move_group::MoveGroupContext::status() const
   const planning_interface::PlannerManagerPtr& planner_interface = planning_pipeline_->getPlannerManager();
   if (planner_interface)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "MoveGroup context using planning plugin " << planning_pipeline_->getPlannerPluginName());
+    RCLCPP_INFO_STREAM(LOGGER, "MoveGroup context using planning plugin "
+                                   << planning_pipeline_->getPlannerPluginName());
     RCLCPP_INFO_STREAM(LOGGER, "MoveGroup context initialization complete");
     return true;
   }

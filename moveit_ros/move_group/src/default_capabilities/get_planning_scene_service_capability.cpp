@@ -45,34 +45,11 @@ MoveGroupGetPlanningSceneService::MoveGroupGetPlanningSceneService() : MoveGroup
 
 void MoveGroupGetPlanningSceneService::initialize()
 {
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-  using std::placeholders::_3;
-
-  get_scene_service_ = node_->create_service<moveit_msgs::srv::GetPlanningScene>(
-    GET_PLANNING_SCENE_SERVICE_NAME, 
-    std::bind(&MoveGroupGetPlanningSceneService::getPlanningSceneService, this, _1, _2, _3)
-  );
+  context_->planning_scene_monitor_->providePlanningSceneService(GET_PLANNING_SCENE_SERVICE_NAME);
 }
 
-bool MoveGroupGetPlanningSceneService::getPlanningSceneService(
-  const std::shared_ptr<rmw_request_id_t> request_header,
-  const std::shared_ptr<moveit_msgs::srv::GetPlanningScene::Request> req,
-  std::shared_ptr<moveit_msgs::srv::GetPlanningScene::Response> res)
-{
-  if (req->components.components & moveit_msgs::msg::PlanningSceneComponents::TRANSFORMS)
-    context_->planning_scene_monitor_->updateFrameTransforms();
-  planning_scene_monitor::LockedPlanningSceneRO ps(context_->planning_scene_monitor_);
-
-  moveit_msgs::msg::PlanningSceneComponents all_components;
-  all_components.components = UINT_MAX;  // Return all scene components if nothing is specified.
-  ps->getPlanningSceneMsg(res->scene, req->components.components ? req->components : all_components);
-
-  return true;
-}
 }  // namespace move_group
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(
-  move_group::MoveGroupGetPlanningSceneService, move_group::MoveGroupCapability)
+PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupGetPlanningSceneService, move_group::MoveGroupCapability)

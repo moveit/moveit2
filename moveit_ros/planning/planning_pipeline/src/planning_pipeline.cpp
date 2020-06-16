@@ -58,7 +58,8 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
   std::string planner_plugin_fullname = parameter_namespace_ + "." + planner_plugin_param_name;
   if (parameter_namespace_.empty())
     planner_plugin_fullname = planner_plugin_param_name;
-  if (node_->has_parameter(planner_plugin_fullname)) {
+  if (node_->has_parameter(planner_plugin_fullname))
+  {
     node_->get_parameter(planner_plugin_fullname, planner_plugin_name_);
   }
 

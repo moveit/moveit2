@@ -60,7 +60,7 @@ public:
   MoveGroupCapability(const std::string& capability_name) : capability_name_(capability_name)
   {
   }
-  
+
   virtual ~MoveGroupCapability()
   {
   }

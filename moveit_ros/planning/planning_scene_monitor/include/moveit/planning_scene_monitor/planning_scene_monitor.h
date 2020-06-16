@@ -578,8 +578,8 @@ private:
 
   collision_detection::CollisionPluginLoader collision_loader_;
 
-  // class DynamicReconfigureImpl;
-  // DynamicReconfigureImpl* reconfigure_impl_;
+  class DynamicReconfigureImpl;
+  DynamicReconfigureImpl* reconfigure_impl_;
 };
 
 /** \brief This is a convenience class for obtaining access to an

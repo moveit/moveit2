@@ -43,7 +43,6 @@
 
 namespace move_group
 {
-
 using MGAction = moveit_msgs::action::MoveGroup;
 using MGActionGoal = rclcpp_action::ServerGoalHandle<MGAction>;
 
@@ -55,7 +54,6 @@ public:
   void initialize() override;
 
 private:
-
   void executeMoveCallback(std::shared_ptr<MGActionGoal> goal);
   void executeMoveCallbackPlanAndExecute(const std::shared_ptr<MGActionGoal>& goal,
                                          std::shared_ptr<MGAction::Result>& action_res);

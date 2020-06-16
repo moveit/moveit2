@@ -37,7 +37,8 @@
 #include "clear_octomap_service_capability.h"
 #include <moveit/move_group/capability_names.h>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.clear_octomap_service_capability");
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit_move_group_default_capabilities.clear_octomap_service_capability");
 
 move_group::ClearOctomapService::ClearOctomapService() : MoveGroupCapability("ClearOctomapService")
 {
@@ -50,14 +51,12 @@ void move_group::ClearOctomapService::initialize()
   using std::placeholders::_3;
 
   service_ = node_->create_service<std_srvs::srv::Empty>(
-    CLEAR_OCTOMAP_SERVICE_NAME,
-    std::bind(&ClearOctomapService::clearOctomap, this, _1, _2, _3));
+      CLEAR_OCTOMAP_SERVICE_NAME, std::bind(&ClearOctomapService::clearOctomap, this, _1, _2, _3));
 }
 
-bool move_group::ClearOctomapService::clearOctomap(
-  const std::shared_ptr<rmw_request_id_t> /*request_header*/,
-    const std::shared_ptr<std_srvs::srv::Empty::Request> /*req*/, 
-    std::shared_ptr<std_srvs::srv::Empty::Response> /*res*/)
+bool move_group::ClearOctomapService::clearOctomap(const std::shared_ptr<rmw_request_id_t> /*request_header*/,
+                                                   const std::shared_ptr<std_srvs::srv::Empty::Request> /*req*/,
+                                                   std::shared_ptr<std_srvs::srv::Empty::Response> /*res*/)
 {
   if (!context_->planning_scene_monitor_)
   {
@@ -73,5 +72,4 @@ bool move_group::ClearOctomapService::clearOctomap(
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(
-  move_group::ClearOctomapService, move_group::MoveGroupCapability)
+PLUGINLIB_EXPORT_CLASS(move_group::ClearOctomapService, move_group::MoveGroupCapability)

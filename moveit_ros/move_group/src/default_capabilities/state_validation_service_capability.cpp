@@ -53,15 +53,13 @@ void MoveGroupStateValidationService::initialize()
   using std::placeholders::_3;
 
   validity_service_ = node_->create_service<moveit_msgs::srv::GetStateValidity>(
-    STATE_VALIDITY_SERVICE_NAME,
-    std::bind(&MoveGroupStateValidationService::computeService, this, _1, _2, _3)
-  );
+      STATE_VALIDITY_SERVICE_NAME, std::bind(&MoveGroupStateValidationService::computeService, this, _1, _2, _3));
 }
 
 bool MoveGroupStateValidationService::computeService(
-  const std::shared_ptr<rmw_request_id_t> request_header,
-  const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request> req,
-  std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response> res)
+    const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request> req,
+    std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response> res)
 {
   planning_scene_monitor::LockedPlanningSceneRO ls(context_->planning_scene_monitor_);
   moveit::core::RobotState rs = ls->getCurrentState();
@@ -132,5 +130,4 @@ bool MoveGroupStateValidationService::computeService(
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(
-  move_group::MoveGroupStateValidationService, move_group::MoveGroupCapability)
+PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupStateValidationService, move_group::MoveGroupCapability)

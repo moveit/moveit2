@@ -39,8 +39,8 @@
 
 namespace move_group
 {
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.apply_planning_scene_service_capability");
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit_move_group_default_capabilities.apply_planning_scene_service_capability");
 
 ApplyPlanningSceneService::ApplyPlanningSceneService() : MoveGroupCapability("ApplyPlanningSceneService")
 {
@@ -51,16 +51,14 @@ void ApplyPlanningSceneService::initialize()
   using std::placeholders::_1;
   using std::placeholders::_2;
   using std::placeholders::_3;
-  
+
   service_ = node_->create_service<moveit_msgs::srv::ApplyPlanningScene>(
-    APPLY_PLANNING_SCENE_SERVICE_NAME,
-    std::bind(&ApplyPlanningSceneService::applyScene, this, _1, _2, _3));
+      APPLY_PLANNING_SCENE_SERVICE_NAME, std::bind(&ApplyPlanningSceneService::applyScene, this, _1, _2, _3));
 }
 
-bool ApplyPlanningSceneService::applyScene(
-  const std::shared_ptr<rmw_request_id_t> request_header,
-  const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request> req,
-  std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response> res)
+bool ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_t> request_header,
+                                           const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request> req,
+                                           std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response> res)
 {
   if (!context_->planning_scene_monitor_)
   {
@@ -75,5 +73,4 @@ bool ApplyPlanningSceneService::applyScene(
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(
-  move_group::ApplyPlanningSceneService, move_group::MoveGroupCapability)
+PLUGINLIB_EXPORT_CLASS(move_group::ApplyPlanningSceneService, move_group::MoveGroupCapability)

@@ -522,7 +522,7 @@ bool PlanningSceneMonitor::requestPlanningSceneState(const std::string& service_
     throw std::runtime_error("requestPlanningSceneState() to self-provided service: " + service_name);
   }
   // use global namespace for service
-  auto client = pnode_->create_client<moveit_msgs::srv::GetPlanningScene>(service_name);
+  auto client = node_->create_client<moveit_msgs::srv::GetPlanningScene>(service_name);
   auto srv = std::make_shared<moveit_msgs::srv::GetPlanningScene::Request>();
   srv->components.components = srv->components.SCENE_SETTINGS | srv->components.ROBOT_STATE |
                                srv->components.ROBOT_STATE_ATTACHED_OBJECTS | srv->components.WORLD_OBJECT_NAMES |
@@ -562,7 +562,7 @@ bool PlanningSceneMonitor::requestPlanningSceneState(const std::string& service_
 void PlanningSceneMonitor::providePlanningSceneService(const std::string& service_name)
 {
   // Load the service
-  get_scene_service_ = pnode_->create_service<moveit_msgs::srv::GetPlanningScene>(
+  get_scene_service_ = node_->create_service<moveit_msgs::srv::GetPlanningScene>(
       service_name, std::bind(&PlanningSceneMonitor::getPlanningSceneServiceCallback, this, std::placeholders::_1,
                               std::placeholders::_2));
 }
@@ -1040,7 +1040,7 @@ void PlanningSceneMonitor::startSceneMonitor(const std::string& scene_topic)
   // listen for planning scene updates; these messages include transforms, so no need for filters
   if (!scene_topic.empty())
   {
-    planning_scene_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::PlanningScene>(
+    planning_scene_subscriber_ = node_->create_subscription<moveit_msgs::msg::PlanningScene>(
         scene_topic, 100, std::bind(&PlanningSceneMonitor::newPlanningSceneCallback, this, std::placeholders::_1));
     RCLCPP_INFO(LOGGER, "Listening to '%s'", planning_scene_subscriber_->get_topic_name());
   }
@@ -1171,14 +1171,18 @@ void PlanningSceneMonitor::stopWorldGeometryMonitor()
     octomap_monitor_->stopMonitor();
 }
 
-void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_topic,
-                                             const std::string& attached_objects_topic)
+void PlanningSceneMonitor::startStateMonitor(const rclcpp::Node::SharedPtr& listening_node,
+                                            const std::string& joint_states_topic,
+                                            const std::string& attached_objects_topic)
 {
   stopStateMonitor();
   if (scene_)
   {
     if (!current_state_monitor_)
-      current_state_monitor_.reset(new CurrentStateMonitor(pnode_, getRobotModel(), tf_buffer_));
+    {
+      current_state_monitor_.reset(
+          new CurrentStateMonitor(listening_node ? listening_node : pnode_, getRobotModel(), tf_buffer_));
+    }
     current_state_monitor_->addUpdateCallback(boost::bind(&PlanningSceneMonitor::onStateUpdate, this, _1));
     current_state_monitor_->startStateMonitor(joint_states_topic);
 

@@ -61,8 +61,8 @@ bool isStateValid(const planning_scene::PlanningScene* planning_scene,
 
 namespace move_group
 {
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.cartersian_path_service_capability");
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit_move_group_default_capabilities.cartersian_path_service_capability");
 
 MoveGroupCartesianPathService::MoveGroupCartesianPathService()
   : MoveGroupCapability("CartesianPathService"), display_computed_paths_(true)
@@ -79,12 +79,11 @@ void MoveGroupCartesianPathService::initialize()
       planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC, 10);
 
   cartesian_path_service_ = node_->create_service<moveit_msgs::srv::GetCartesianPath>(
-    CARTESIAN_PATH_SERVICE_NAME,
-    std::bind(&MoveGroupCartesianPathService::computeService, this, _1, _2, _3));
+      CARTESIAN_PATH_SERVICE_NAME, std::bind(&MoveGroupCartesianPathService::computeService, this, _1, _2, _3));
 }
 
 bool MoveGroupCartesianPathService::computeService(
-  const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<rmw_request_id_t> request_header,
     const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
     std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res)
 {
@@ -132,7 +131,7 @@ bool MoveGroupCartesianPathService::computeService(
       if (req->max_step < std::numeric_limits<double>::epsilon())
       {
         RCLCPP_ERROR(LOGGER, "Maximum step to take between consecutive configrations along Cartesian path"
-                                   "was not specified (this value needs to be > 0)");
+                             "was not specified (this value needs to be > 0)");
         res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       }
       else
@@ -154,9 +153,9 @@ bool MoveGroupCartesianPathService::computeService(
           }
           bool global_frame = !moveit::core::Transforms::sameFrame(link_name, req->header.frame_id);
           RCLCPP_INFO(LOGGER, "Attempting to follow %u waypoints for link '%s' using a step of %lf m "
-                                    "and jump threshold %lf (in %s reference frame)",
-                         (unsigned int)waypoints.size(), link_name.c_str(), req->max_step, req->jump_threshold,
-                         global_frame ? "global" : "link");
+                              "and jump threshold %lf (in %s reference frame)",
+                      (unsigned int)waypoints.size(), link_name.c_str(), req->max_step, req->jump_threshold,
+                      global_frame ? "global" : "link");
           std::vector<moveit::core::RobotStatePtr> traj;
           res->fraction = moveit::core::CartesianInterpolator::computeCartesianPath(
               &start_state, jmg, traj, start_state.getLinkModel(link_name), waypoints, global_frame,
@@ -174,7 +173,7 @@ bool MoveGroupCartesianPathService::computeService(
 
           rt.getRobotTrajectoryMsg(res->solution);
           RCLCPP_INFO(LOGGER, "Computed Cartesian path with %u points (followed %lf%% of requested trajectory)",
-                         (unsigned int)traj.size(), res->fraction * 100.0);
+                      (unsigned int)traj.size(), res->fraction * 100.0);
           if (display_computed_paths_ && rt.getWayPointCount() > 0)
           {
             moveit_msgs::msg::DisplayTrajectory disp;
@@ -200,5 +199,4 @@ bool MoveGroupCartesianPathService::computeService(
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(
-  move_group::MoveGroupCartesianPathService, move_group::MoveGroupCapability)
+PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupCartesianPathService, move_group::MoveGroupCapability)

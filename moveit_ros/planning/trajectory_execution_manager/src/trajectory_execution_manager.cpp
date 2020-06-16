@@ -56,33 +56,32 @@ static const double DEFAULT_CONTROLLER_GOAL_DURATION_SCALING =
 
 // using namespace moveit_ros_planning; // Used for dynamic_reconfigure
 
-// TODO(henningkayser): re-enable dynamic reconfigure behavior
-// class TrajectoryExecutionManager::DynamicReconfigureImpl
-// {
-// public:
-//   DynamicReconfigureImpl(TrajectoryExecutionManager* owner)
-//     : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle("~/trajectory_execution"))*/
-//   {
-//     // TODO: generate a similar thing for ros2 using the parameters
-//     // dynamic_reconfigure_server_.setCallback(
-//     //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
-//   }
-//
-// private:
-//   // TODO: generate a similar thing for ros2 using the parameters
-//   // void dynamicReconfigureCallback(TrajectoryExecutionDynamicReconfigureConfig& config, uint32_t level)
-//   // {
-//   //   owner_->enableExecutionDurationMonitoring(config.execution_duration_monitoring);
-//   //   owner_->setAllowedExecutionDurationScaling(config.allowed_execution_duration_scaling);
-//   //   owner_->setAllowedGoalDurationMargin(config.allowed_goal_duration_margin);
-//   //   owner_->setExecutionVelocityScaling(config.execution_velocity_scaling);
-//   //   owner_->setAllowedStartTolerance(config.allowed_start_tolerance);
-//   //   owner_->setWaitForTrajectoryCompletion(config.wait_for_trajectory_completion);
-//   // }
-//
-//   TrajectoryExecutionManager* owner_;
-//   // dynamic_reconfigure::Server<TrajectoryExecutionDynamicReconfigureConfig> dynamic_reconfigure_server_;
-// };
+class TrajectoryExecutionManager::DynamicReconfigureImpl
+{
+public:
+  DynamicReconfigureImpl(TrajectoryExecutionManager* owner)
+    : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle("~/trajectory_execution"))*/
+  {
+    // TODO: generate a similar thing for ros2 using the parameters
+    // dynamic_reconfigure_server_.setCallback(
+    //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
+  }
+
+private:
+  // TODO: generate a similar thing for ros2 using the parameters
+  // void dynamicReconfigureCallback(TrajectoryExecutionDynamicReconfigureConfig& config, uint32_t level)
+  // {
+  //   owner_->enableExecutionDurationMonitoring(config.execution_duration_monitoring);
+  //   owner_->setAllowedExecutionDurationScaling(config.allowed_execution_duration_scaling);
+  //   owner_->setAllowedGoalDurationMargin(config.allowed_goal_duration_margin);
+  //   owner_->setExecutionVelocityScaling(config.execution_velocity_scaling);
+  //   owner_->setAllowedStartTolerance(config.allowed_start_tolerance);
+  //   owner_->setWaitForTrajectoryCompletion(config.wait_for_trajectory_completion);
+  // }
+
+  TrajectoryExecutionManager* owner_;
+  // dynamic_reconfigure::Server<TrajectoryExecutionDynamicReconfigureConfig> dynamic_reconfigure_server_;
+};
 
 TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node,
                                                        const moveit::core::RobotModelConstPtr& robot_model,
@@ -107,12 +106,12 @@ TrajectoryExecutionManager::~TrajectoryExecutionManager()
 {
   run_continuous_execution_thread_ = false;
   stopExecution(true);
-  // delete reconfigure_impl_;
+  delete reconfigure_impl_;
 }
 
 void TrajectoryExecutionManager::initialize()
 {
-  // reconfigure_impl_ = nullptr;
+  reconfigure_impl_ = nullptr;
   verbose_ = false;
   execution_complete_ = true;
   stop_continuous_execution_ = false;
@@ -168,22 +167,23 @@ void TrajectoryExecutionManager::initialize()
       try
       {
         //@note: because of things being singlethreaded, we make a node named "moveit_simple_controller_manager"
-        //then copy parameters from the move_group node and then add it to the multithreadedexecutor
-        //alternatives:
-        //node_->create_sub_node doesnt work
-        //rename the node under ros_controllers.yaml to moveit_simple_controller_manager
+        // then copy parameters from the move_group node and then add it to the multithreadedexecutor
+        // alternatives:
+        // node_->create_sub_node doesnt work
+        // rename the node under ros_controllers.yaml to moveit_simple_controller_manager
         rclcpp::NodeOptions opt;
         opt.allow_undeclared_parameters(true);
         opt.automatically_declare_parameters_from_overrides(true);
         controller_mgr_node_.reset(new rclcpp::Node("moveit_simple_controller_manager", opt));
 
-        //the alternative is to create a node with name "moveit_simple_controller_manager"
-        auto allparams = node_->get_node_parameters_interface()->get_parameter_overrides();
-        for (auto param : allparams)
-        {
-          //RCLCPP_INFO(LOGGER, "%s", param.first.c_str());
-          controller_mgr_node_->set_parameter(rclcpp::Parameter(param.first, param.second));
-        }
+        // the alternative is to create a node with name "moveit_simple_controller_manager"
+        // auto allparams = node_->get_node_parameters_interface()->get_parameter_overrides();
+        // for (auto param : allparams)
+        // {
+        //   RCLCPP_INFO(LOGGER, "%s", param.first.c_str());
+
+        //   controller_mgr_node_->set_parameter(rclcpp::Parameter(param.first, param.second));
+        // }
 
         controller_manager_ = controller_manager_loader_->createUniqueInstance(controller);
         controller_manager_->initialize(controller_mgr_node_);
@@ -199,9 +199,11 @@ void TrajectoryExecutionManager::initialize()
   event_topic_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
       EXECUTION_EVENT_TOPIC, 100, std::bind(&TrajectoryExecutionManager::receiveEvent, this, std::placeholders::_1));
 
-  // reconfigure_impl_ = new DynamicReconfigureImpl(this);
-  controller_mgr_node_->get_parameter("trajectory_execution.allowed_execution_duration_scaling", allowed_execution_duration_scaling_);
-  controller_mgr_node_->get_parameter("trajectory_execution.allowed_goal_duration_margin", allowed_goal_duration_margin_);
+  reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  controller_mgr_node_->get_parameter("trajectory_execution.allowed_execution_duration_scaling",
+                                      allowed_execution_duration_scaling_);
+  controller_mgr_node_->get_parameter("trajectory_execution.allowed_goal_duration_margin",
+                                      allowed_goal_duration_margin_);
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_start_tolerance", allowed_start_tolerance_);
 
   if (manage_controllers_)

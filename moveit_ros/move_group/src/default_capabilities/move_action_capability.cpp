@@ -46,8 +46,8 @@
 
 namespace move_group
 {
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.move_action_capability");
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit_move_group_default_capabilities.move_action_capability");
 
 MoveGroupMoveAction::MoveGroupMoveAction()
   : MoveGroupCapability("MoveAction"), move_state_(IDLE), preempt_requested_{ false }
@@ -61,21 +61,17 @@ void MoveGroupMoveAction::initialize()
   using std::placeholders::_2;
 
   execute_action_server_ = rclcpp_action::create_server<MGAction>(
-    node_->get_node_base_interface(),
-    node_->get_node_clock_interface(),
-    node_->get_node_logging_interface(),
-    node_->get_node_waitables_interface(),
-    MOVE_ACTION,
-    [](const rclcpp_action::GoalUUID&, std::shared_ptr<const MGAction::Goal>) {
-      RCLCPP_INFO(LOGGER, "Received request");
-      return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
-    },
-    [](const std::shared_ptr<MGActionGoal>&) {
-      RCLCPP_INFO(LOGGER, "Received request to cancel goal");
-      return rclcpp_action::CancelResponse::ACCEPT;
-    },
-    std::bind(&MoveGroupMoveAction::executeMoveCallback, this, _1)
-  );
+      node_->get_node_base_interface(), node_->get_node_clock_interface(), node_->get_node_logging_interface(),
+      node_->get_node_waitables_interface(), MOVE_ACTION,
+      [](const rclcpp_action::GoalUUID&, std::shared_ptr<const MGAction::Goal>) {
+        RCLCPP_INFO(LOGGER, "Received request");
+        return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+      },
+      [](const std::shared_ptr<MGActionGoal>&) {
+        RCLCPP_INFO(LOGGER, "Received request to cancel goal");
+        return rclcpp_action::CancelResponse::ACCEPT;
+      },
+      std::bind(&MoveGroupMoveAction::executeMoveCallback, this, _1));
 }
 
 void MoveGroupMoveAction::executeMoveCallback(std::shared_ptr<MGActionGoal> goal)
@@ -85,14 +81,14 @@ void MoveGroupMoveAction::executeMoveCallback(std::shared_ptr<MGActionGoal> goal
   // before we start planning, ensure that we have the latest robot state received...
   context_->planning_scene_monitor_->waitForCurrentRobotState(rclcpp::Clock().now());
   context_->planning_scene_monitor_->updateFrameTransforms();
-  
+
   auto action_res = std::make_shared<MGAction::Result>();
   if (goal->get_goal()->planning_options.plan_only || !context_->allow_trajectory_execution_)
   {
     if (!goal->get_goal()->planning_options.plan_only)
       RCLCPP_WARN(LOGGER, "This instance of MoveGroup is not allowed to execute trajectories "
-                                "but the goal request has plan_only set to false. "
-                                "Only a motion plan will be computed anyway.");
+                          "but the goal request has plan_only set to false. "
+                          "Only a motion plan will be computed anyway.");
     executeMoveCallbackPlanOnly(goal, action_res);
   }
   else
@@ -100,8 +96,8 @@ void MoveGroupMoveAction::executeMoveCallback(std::shared_ptr<MGActionGoal> goal
 
   bool planned_trajectory_empty = trajectory_processing::isTrajectoryEmpty(action_res->planned_trajectory);
   // @todo: Response messages
-  std::string response =
-      getActionResultString(action_res->error_code, planned_trajectory_empty, goal->get_goal()->planning_options.plan_only);
+  std::string response = getActionResultString(action_res->error_code, planned_trajectory_empty,
+                                               goal->get_goal()->planning_options.plan_only);
   auto fb = std::make_shared<MGAction::Feedback>();
   fb->state = response;
   if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
@@ -114,7 +110,7 @@ void MoveGroupMoveAction::executeMoveCallback(std::shared_ptr<MGActionGoal> goal
     if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
     {
       //@todo: wait for preempt?
-      //move_action_server_->setPreempted(action_res, response);
+      // move_action_server_->setPreempted(action_res, response);
       goal->publish_feedback(fb);
     }
     else
@@ -128,12 +124,11 @@ void MoveGroupMoveAction::executeMoveCallback(std::shared_ptr<MGActionGoal> goal
   preempt_requested_ = false;
 }
 
-void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(
-  const std::shared_ptr<MGActionGoal>& goal,
-  std::shared_ptr<MGAction::Result>& action_res)
+void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_ptr<MGActionGoal>& goal,
+                                                            std::shared_ptr<MGAction::Result>& action_res)
 {
   RCLCPP_INFO(LOGGER, "Combined planning and execution request received for MoveGroup action. "
-                            "Forwarding to planning and execution pipeline.");
+                      "Forwarding to planning and execution pipeline.");
 
   if (moveit::core::isEmpty(goal->get_goal()->planning_options.planning_scene_diff))
   {
@@ -142,9 +137,9 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(
 
     // check to see if the desired constraints are already met
     for (std::size_t i = 0; i < goal->get_goal()->request.goal_constraints.size(); ++i)
-      if (lscene->isStateConstrained(current_state,
-                                     kinematic_constraints::mergeConstraints(goal->get_goal()->request.goal_constraints[i],
-                                                                             goal->get_goal()->request.path_constraints)))
+      if (lscene->isStateConstrained(
+              current_state, kinematic_constraints::mergeConstraints(goal->get_goal()->request.goal_constraints[i],
+                                                                     goal->get_goal()->request.path_constraints)))
       {
         RCLCPP_INFO(LOGGER, "Goal constraints are already satisfied. No need to plan or execute any motions");
         action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
@@ -155,7 +150,8 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(
   plan_execution::PlanExecution::Options opt;
 
   const moveit_msgs::msg::MotionPlanRequest& motion_plan_request =
-      moveit::core::isEmpty(goal->get_goal()->request.start_state) ? goal->get_goal()->request : clearRequestStartState(goal->get_goal()->request);
+      moveit::core::isEmpty(goal->get_goal()->request.start_state) ? goal->get_goal()->request :
+                                                                     clearRequestStartState(goal->get_goal()->request);
   const moveit_msgs::msg::PlanningScene& planning_scene_diff =
       moveit::core::isEmpty(goal->get_goal()->planning_options.planning_scene_diff.robot_state) ?
           goal->get_goal()->planning_options.planning_scene_diff :
@@ -192,9 +188,8 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(
   action_res->error_code = plan.error_code_;
 }
 
-void MoveGroupMoveAction::executeMoveCallbackPlanOnly(
-  const std::shared_ptr<MGActionGoal>& goal,
-  std::shared_ptr<MGAction::Result>& action_res)
+void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGActionGoal>& goal,
+                                                      std::shared_ptr<MGAction::Result>& action_res)
 {
   RCLCPP_INFO(LOGGER, "Planning request received for MoveGroup action. Forwarding to planning pipeline.");
 
@@ -226,7 +221,6 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(
   convertToMsg(res.trajectory_, action_res->trajectory_start, action_res->planned_trajectory);
   action_res->error_code = res.error_code_;
   action_res->planning_time = res.planning_time_;
-
 }
 
 bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::MotionPlanRequest& req,
@@ -273,8 +267,7 @@ void MoveGroupMoveAction::preemptMoveCallback()
   context_->plan_execution_->stop();
 }
 
-void MoveGroupMoveAction::setMoveState(MoveGroupState state,
-  const std::shared_ptr<MGActionGoal>& goal)
+void MoveGroupMoveAction::setMoveState(MoveGroupState state, const std::shared_ptr<MGActionGoal>& goal)
 {
   move_state_ = state;
 
@@ -289,5 +282,4 @@ void MoveGroupMoveAction::setMoveState(MoveGroupState state,
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(
-  move_group::MoveGroupMoveAction, move_group::MoveGroupCapability)
+PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupMoveAction, move_group::MoveGroupCapability)

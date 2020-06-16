@@ -43,7 +43,8 @@
 
 namespace move_group
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_default_capabilities.execute_trajectory_action_capability");
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit_move_group_default_capabilities.execute_trajectory_action_capability");
 
 MoveGroupExecuteTrajectoryAction::MoveGroupExecuteTrajectoryAction() : MoveGroupCapability("ExecuteTrajectoryAction")
 {
@@ -55,26 +56,21 @@ void MoveGroupExecuteTrajectoryAction::initialize()
   using std::placeholders::_2;
 
   // start the move action server
-  execute_action_server_= rclcpp_action::create_server<ExecTrajectory>(
-    node_->get_node_base_interface(),
-    node_->get_node_clock_interface(),
-    node_->get_node_logging_interface(),
-    node_->get_node_waitables_interface(),
-    EXECUTE_ACTION_NAME,
-    [](const rclcpp_action::GoalUUID&, std::shared_ptr<const ExecTrajectory::Goal>) {
-      RCLCPP_INFO(LOGGER, "Received goal request");
-      return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
-    },
-    [](const std::shared_ptr<ExecTrajectoryGoal>& g) {
-      RCLCPP_INFO(LOGGER, "Received request to cancel goal");
-      return rclcpp_action::CancelResponse::ACCEPT;
-    },
-    std::bind(&MoveGroupExecuteTrajectoryAction::executePathCallback, this, _1)
-  );
+  execute_action_server_ = rclcpp_action::create_server<ExecTrajectory>(
+      node_->get_node_base_interface(), node_->get_node_clock_interface(), node_->get_node_logging_interface(),
+      node_->get_node_waitables_interface(), EXECUTE_ACTION_NAME,
+      [](const rclcpp_action::GoalUUID&, std::shared_ptr<const ExecTrajectory::Goal>) {
+        RCLCPP_INFO(LOGGER, "Received goal request");
+        return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+      },
+      [](const std::shared_ptr<ExecTrajectoryGoal>& g) {
+        RCLCPP_INFO(LOGGER, "Received request to cancel goal");
+        return rclcpp_action::CancelResponse::ACCEPT;
+      },
+      std::bind(&MoveGroupExecuteTrajectoryAction::executePathCallback, this, _1));
 }
 
-void MoveGroupExecuteTrajectoryAction::executePathCallback(
-    std::shared_ptr<ExecTrajectoryGoal> goal)
+void MoveGroupExecuteTrajectoryAction::executePathCallback(std::shared_ptr<ExecTrajectoryGoal> goal)
 {
   auto action_res = std::make_shared<ExecTrajectory::Result>();
   if (!context_->trajectory_execution_manager_)
@@ -95,12 +91,6 @@ void MoveGroupExecuteTrajectoryAction::executePathCallback(
     goal->publish_feedback(fb);
     goal->succeed(action_res);
   }
-  else if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
-  {
-    //@todo: wait for preempt?
-    //execute_action_server_->setPreempted(action_res, response);
-    goal->publish_feedback(fb);
-  }
   else
   {
     goal->publish_feedback(fb);
@@ -108,13 +98,11 @@ void MoveGroupExecuteTrajectoryAction::executePathCallback(
   }
 
   setExecuteTrajectoryState(IDLE, goal);
-
 }
 
 void MoveGroupExecuteTrajectoryAction::executePath(const std::shared_ptr<ExecTrajectoryGoal>& goal,
                                                    std::shared_ptr<ExecTrajectory::Result>& action_res)
 {
-
   RCLCPP_INFO(LOGGER, "Execution request received");
 
   context_->trajectory_execution_manager_->clear();
@@ -153,7 +141,7 @@ void MoveGroupExecuteTrajectoryAction::preemptExecuteTrajectoryCallback()
 }
 
 void MoveGroupExecuteTrajectoryAction::setExecuteTrajectoryState(MoveGroupState state,
-  const std::shared_ptr<ExecTrajectoryGoal>& goal)
+                                                                 const std::shared_ptr<ExecTrajectoryGoal>& goal)
 {
   auto execute_feedback = std::make_shared<ExecTrajectory::Feedback>();
   execute_feedback->state = stateToStr(state);
@@ -164,5 +152,4 @@ void MoveGroupExecuteTrajectoryAction::setExecuteTrajectoryState(MoveGroupState 
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(
-  move_group::MoveGroupExecuteTrajectoryAction, move_group::MoveGroupCapability)
+PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupExecuteTrajectoryAction, move_group::MoveGroupCapability)
