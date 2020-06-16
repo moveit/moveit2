@@ -93,8 +93,8 @@ bool MoveGroupCartesianPathService::computeService(
 
   moveit::core::RobotState start_state =
       planning_scene_monitor::LockedPlanningSceneRO(context_->planning_scene_monitor_)->getCurrentState();
-  moveit::core::robotStateMsgToRobotState(req.start_state, start_state);
-  if (const moveit::core::JointModelGroup* jmg = start_state.getJointModelGroup(req.group_name))
+  moveit::core::robotStateMsgToRobotState(req->start_state, start_state);
+  if (const moveit::core::JointModelGroup* jmg = start_state.getJointModelGroup(req->group_name))
   {
     std::string link_name = req->link_name;
     if (link_name.empty() && !jmg->getLinkModelNames().empty())
@@ -104,8 +104,8 @@ bool MoveGroupCartesianPathService::computeService(
     EigenSTL::vector_Isometry3d waypoints(req->waypoints.size());
     const std::string& default_frame = context_->planning_scene_monitor_->getRobotModel()->getModelFrame();
     bool no_transform = req->header.frame_id.empty() ||
-                        moveit::core::Transforms::sameFrame(req.header.frame_id, default_frame) ||
-                        moveit::core::Transforms::sameFrame(req.header.frame_id, link_name);
+                        moveit::core::Transforms::sameFrame(req->header.frame_id, default_frame) ||
+                        moveit::core::Transforms::sameFrame(req->header.frame_id, link_name);
 
     for (std::size_t i = 0; i < req->waypoints.size(); ++i)
     {
@@ -158,7 +158,7 @@ bool MoveGroupCartesianPathService::computeService(
                          (unsigned int)waypoints.size(), link_name.c_str(), req->max_step, req->jump_threshold,
                          global_frame ? "global" : "link");
           std::vector<moveit::core::RobotStatePtr> traj;
-          res.fraction = moveit::core::CartesianInterpolator::computeCartesianPath(
+          res->fraction = moveit::core::CartesianInterpolator::computeCartesianPath(
               &start_state, jmg, traj, start_state.getLinkModel(link_name), waypoints, global_frame,
               moveit::core::MaxEEFStep(req->max_step), moveit::core::JumpThreshold(req->jump_threshold), constraint_fn);
           moveit::core::robotStateToRobotStateMsg(start_state, res->start_state);
