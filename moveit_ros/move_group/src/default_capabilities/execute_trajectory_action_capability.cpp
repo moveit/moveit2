@@ -56,10 +56,10 @@ void MoveGroupExecuteTrajectoryAction::initialize()
 
   // start the move action server
   execute_action_server_= rclcpp_action::create_server<ExecTrajectory>(
-    root_node_->get_node_base_interface(),
-    root_node_->get_node_clock_interface(),
-    root_node_->get_node_logging_interface(),
-    root_node_->get_node_waitables_interface(),
+    node_->get_node_base_interface(),
+    node_->get_node_clock_interface(),
+    node_->get_node_logging_interface(),
+    node_->get_node_waitables_interface(),
     EXECUTE_ACTION_NAME,
     [](const rclcpp_action::GoalUUID&, std::shared_ptr<const ExecTrajectory::Goal>) {
       RCLCPP_INFO(LOGGER, "Received goal request");
@@ -162,5 +162,7 @@ void MoveGroupExecuteTrajectoryAction::setExecuteTrajectoryState(MoveGroupState 
 
 }  // namespace move_group
 
-#include <class_loader/class_loader.hpp>
-CLASS_LOADER_REGISTER_CLASS(move_group::MoveGroupExecuteTrajectoryAction, move_group::MoveGroupCapability)
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(
+  move_group::MoveGroupExecuteTrajectoryAction, move_group::MoveGroupCapability)

@@ -49,15 +49,15 @@ void MoveGroupQueryPlannersService::initialize()
   using std::placeholders::_1;
   using std::placeholders::_2;
   using std::placeholders::_3;
-  query_service_ = root_node_->create_service<moveit_msgs::srv::QueryPlannerInterfaces>(
+  query_service_ = node_->create_service<moveit_msgs::srv::QueryPlannerInterfaces>(
     APPLY_PLANNING_SCENE_SERVICE_NAME,
     std::bind(&MoveGroupQueryPlannersService::queryInterface, this, _1, _2, _3));
 
-  get_service_ = root_node_->create_service<moveit_msgs::srv::GetPlannerParams>(
+  get_service_ = node_->create_service<moveit_msgs::srv::GetPlannerParams>(
     GET_PLANNER_PARAMS_SERVICE_NAME,
     std::bind(&MoveGroupQueryPlannersService::getParams, this, _1, _2, _3));
 
-  set_service_ = root_node_->create_service<moveit_msgs::srv::SetPlannerParams>(
+  set_service_ = node_->create_service<moveit_msgs::srv::SetPlannerParams>(
     SET_PLANNER_PARAMS_SERVICE_NAME,
     std::bind(&MoveGroupQueryPlannersService::setParams, this, _1, _2, _3));
 }
@@ -141,5 +141,7 @@ bool MoveGroupQueryPlannersService::setParams(
 }
 }  // namespace move_group
 
-#include <class_loader/class_loader.hpp>
-CLASS_LOADER_REGISTER_CLASS(move_group::MoveGroupQueryPlannersService, move_group::MoveGroupCapability)
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(
+  move_group::MoveGroupQueryPlannersService, move_group::MoveGroupCapability)

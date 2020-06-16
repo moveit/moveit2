@@ -49,7 +49,7 @@ void MoveGroupGetPlanningSceneService::initialize()
   using std::placeholders::_2;
   using std::placeholders::_3;
 
-  get_scene_service_ = root_node_->create_service<moveit_msgs::srv::GetPlanningScene>(
+  get_scene_service_ = node_->create_service<moveit_msgs::srv::GetPlanningScene>(
     GET_PLANNING_SCENE_SERVICE_NAME, 
     std::bind(&MoveGroupGetPlanningSceneService::getPlanningSceneService, this, _1, _2, _3)
   );
@@ -72,5 +72,7 @@ bool MoveGroupGetPlanningSceneService::getPlanningSceneService(
 }
 }  // namespace move_group
 
-#include <class_loader/class_loader.hpp>
-CLASS_LOADER_REGISTER_CLASS(move_group::MoveGroupGetPlanningSceneService, move_group::MoveGroupCapability)
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(
+  move_group::MoveGroupGetPlanningSceneService, move_group::MoveGroupCapability)

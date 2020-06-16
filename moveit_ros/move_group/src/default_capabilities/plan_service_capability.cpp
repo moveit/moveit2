@@ -54,7 +54,7 @@ void MoveGroupPlanService::initialize()
   using std::placeholders::_3;
 
   plan_service_ =
-    root_node_->create_service<moveit_msgs::srv::GetMotionPlan>(
+    node_->create_service<moveit_msgs::srv::GetMotionPlan>(
       PLANNER_SERVICE_NAME,
       std::bind(&MoveGroupPlanService::computePlanService, this, _1, _2, _3));
 }
@@ -87,5 +87,7 @@ bool MoveGroupPlanService::computePlanService(
 }
 }  // namespace move_group
 
-#include <class_loader/class_loader.hpp>
-CLASS_LOADER_REGISTER_CLASS(move_group::MoveGroupPlanService, move_group::MoveGroupCapability)
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(
+  move_group::MoveGroupPlanService, move_group::MoveGroupCapability)

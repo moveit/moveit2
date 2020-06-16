@@ -61,10 +61,10 @@ void MoveGroupMoveAction::initialize()
   using std::placeholders::_2;
 
   execute_action_server_ = rclcpp_action::create_server<MGAction>(
-    root_node_->get_node_base_interface(),
-    root_node_->get_node_clock_interface(),
-    root_node_->get_node_logging_interface(),
-    root_node_->get_node_waitables_interface(),
+    node_->get_node_base_interface(),
+    node_->get_node_clock_interface(),
+    node_->get_node_logging_interface(),
+    node_->get_node_waitables_interface(),
     MOVE_ACTION,
     [](const rclcpp_action::GoalUUID&, std::shared_ptr<const MGAction::Goal>) {
       return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
@@ -81,7 +81,7 @@ void MoveGroupMoveAction::executeMoveCallback(std::shared_ptr<MGActionGoal> goal
 {
   setMoveState(PLANNING, goal);
   // before we start planning, ensure that we have the latest robot state received...
-  context_->planning_scene_monitor_->waitForCurrentRobotState(root_node_->now());
+  context_->planning_scene_monitor_->waitForCurrentRobotState(node_->now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   auto action_res = std::make_shared<MGAction::Result>();
@@ -285,5 +285,7 @@ void MoveGroupMoveAction::setMoveState(MoveGroupState state,
 }
 }  // namespace move_group
 
-#include <class_loader/class_loader.hpp>
-CLASS_LOADER_REGISTER_CLASS(move_group::MoveGroupMoveAction, move_group::MoveGroupCapability)
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(
+  move_group::MoveGroupMoveAction, move_group::MoveGroupCapability)

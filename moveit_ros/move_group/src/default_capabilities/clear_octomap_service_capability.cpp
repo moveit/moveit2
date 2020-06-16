@@ -49,7 +49,7 @@ void move_group::ClearOctomapService::initialize()
   using std::placeholders::_2;
   using std::placeholders::_3;
 
-  service_ = root_node_->create_service<std_srvs::srv::Empty>(
+  service_ = node_->create_service<std_srvs::srv::Empty>(
     CLEAR_OCTOMAP_SERVICE_NAME,
     std::bind(&ClearOctomapService::clearOctomap, this, _1, _2, _3));
 }
@@ -71,5 +71,7 @@ bool move_group::ClearOctomapService::clearOctomap(
   return true;
 }
 
-#include <class_loader/class_loader.hpp>
-CLASS_LOADER_REGISTER_CLASS(move_group::ClearOctomapService, move_group::MoveGroupCapability)
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(
+  move_group::ClearOctomapService, move_group::MoveGroupCapability)

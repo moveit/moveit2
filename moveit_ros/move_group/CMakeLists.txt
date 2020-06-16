@@ -26,7 +26,7 @@ endif()
 
 find_package(Boost REQUIRED system filesystem date_time program_options thread)
 
-add_library(moveit_move_group_capabilities_base src/move_group_context.cpp
+add_library(moveit_move_group_capabilities_base SHARED src/move_group_context.cpp
   src/move_group_capability.cpp)
 set_target_properties(moveit_move_group_capabilities_base
   PROPERTIES
@@ -39,13 +39,14 @@ add_executable(move_group src/move_group.cpp)
 target_include_directories(move_group PRIVATE include)
 ament_target_dependencies(move_group 
   rclcpp rclcpp_action moveit_core moveit_ros_planning tf2_ros Boost)
+target_link_libraries(move_group moveit_move_group_capabilities_base)
 
 add_executable(list_move_group_capabilities src/list_capabilities.cpp)
 target_include_directories(list_move_group_capabilities PRIVATE include)
 ament_target_dependencies(list_move_group_capabilities 
   rclcpp moveit_core moveit_ros_planning Boost pluginlib)
 
-add_library(moveit_move_group_default_capabilities
+add_library(moveit_move_group_default_capabilities SHARED
   src/default_capabilities/move_action_capability.cpp
   src/default_capabilities/plan_service_capability.cpp
   src/default_capabilities/execute_trajectory_action_capability.cpp
@@ -62,7 +63,7 @@ set_target_properties(moveit_move_group_default_capabilities
   VERSION "${${PROJECT_NAME}_VERSION}")
 target_include_directories(moveit_move_group_default_capabilities PRIVATE include)
 ament_target_dependencies(moveit_move_group_default_capabilities 
-  rclcpp rclcpp_action moveit_core moveit_ros_planning)
+  rclcpp rclcpp_action moveit_core moveit_ros_planning std_srvs)
 
 install(TARGETS move_group list_move_group_capabilities
   RUNTIME
@@ -82,11 +83,10 @@ install(DIRECTORY include/ DESTINATION include)
 install(PROGRAMS scripts/load_map scripts/save_map
   DESTINATION lib/${PROJECT_NAME})
 
-install(FILES default_capabilities_plugin_description.xml
-  DESTINATION share/${PROJECT_NAME})
+pluginlib_export_plugin_description_file(${PROJECT_NAME} default_capabilities_plugin_description.xml)
 
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
+if(BUILD_TESTING)
+#  find_package(rostest REQUIRED) # rostest under development in ROS2 https://github.com/ros-planning/moveit2/issues/23
   # this test is flaky
   # add_rostest(test/test_cancel_before_plan_execution.test)
 endif()
@@ -102,5 +102,6 @@ ament_export_dependencies(tf2_ros)
 ament_export_dependencies(ament_cmake)
 ament_export_dependencies(moveit_core)
 ament_export_dependencies(moveit_ros_occupancy_map_monitor)
+ament_export_include_directories(include)
 
 ament_package()
