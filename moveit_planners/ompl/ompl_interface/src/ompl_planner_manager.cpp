@@ -136,5 +136,4 @@ private:
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(
-  ompl_interface::OMPLPlannerManager, planning_interface::PlannerManager)
+PLUGINLIB_EXPORT_CLASS(ompl_interface::OMPLPlannerManager, planning_interface::PlannerManager)
