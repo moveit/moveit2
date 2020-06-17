@@ -148,6 +148,11 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
   node_ = node;
 
   auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
+  if (!ros_node_abstraction)
+  {
+    RVIZ_COMMON_LOG_WARNING("Unable to lock weak_ptr from DisplayContext in TrajectoryVisualization constructor");
+    return;
+  }
   trajectory_topic_property_->initialize(ros_node_abstraction);
 
   // Load trajectory robot
