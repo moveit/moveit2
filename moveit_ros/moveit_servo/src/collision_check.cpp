@@ -29,7 +29,7 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+ *******************************************************************************/
 
 /*      Title     : collision_check.cpp
  *      Project   : moveit_servo
@@ -37,48 +37,54 @@
  *      Author    : Brian O'Neil, Andy Zelenak, Blake Anderson
  */
 
-#include <std_msgs/Float64.h>
+#include <std_msgs/msg/float64.hpp>
 
 #include <moveit_servo/collision_check.h>
-#include <moveit_servo/make_shared_from_pool.h>
+// #include <moveit_servo/make_shared_from_pool.h>
 
-static const char LOGNAME[] = "collision_check";
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.collision_check");
 static const double MIN_RECOMMENDED_COLLISION_RATE = 10;
-constexpr double EPSILON = 1e-6;                // For very small numeric comparisons
-constexpr size_t ROS_LOG_THROTTLE_PERIOD = 30;  // Seconds to throttle logs inside loops
+constexpr double EPSILON = 1e-6;                       // For very small numeric comparisons
+constexpr size_t ROS_LOG_THROTTLE_PERIOD = 30 * 1000;  // Milliseconds to throttle logs inside loops
 
 namespace moveit_servo
 {
 // Constructor for the class that handles collision checking
-CollisionCheck::CollisionCheck(ros::NodeHandle& nh, const moveit_servo::ServoParameters& parameters,
-                               const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-                               const std::shared_ptr<JointStateSubscriber>& joint_state_subscriber)
-  : nh_(nh)
+CollisionCheck::CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParametersPtr& parameters,
+                               const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+  : node_(node)
   , parameters_(parameters)
   , planning_scene_monitor_(planning_scene_monitor)
-  , joint_state_subscriber_(joint_state_subscriber)
-  , self_velocity_scale_coefficient_(-log(0.001) / parameters.self_collision_proximity_threshold)
-  , scene_velocity_scale_coefficient_(-log(0.001) / parameters.scene_collision_proximity_threshold)
-  , period_(1. / parameters_.collision_check_rate)
+  , self_velocity_scale_coefficient_(-log(0.001) / parameters->self_collision_proximity_threshold)
+  , scene_velocity_scale_coefficient_(-log(0.001) / parameters->scene_collision_proximity_threshold)
+  , period_(1. / parameters->collision_check_rate)
 {
   // Init collision request
-  collision_request_.group_name = parameters_.move_group_name;
+  collision_request_.group_name = parameters_->move_group_name;
   collision_request_.distance = true;  // enable distance-based collision checking
   collision_request_.contacts = true;  // Record the names of collision pairs
 
-  if (parameters_.collision_check_rate < MIN_RECOMMENDED_COLLISION_RATE)
-    ROS_WARN_STREAM_THROTTLE_NAMED(ROS_LOG_THROTTLE_PERIOD, LOGNAME,
-                                   "Collision check rate is low, increase it in yaml file if CPU allows");
+  if (parameters_->collision_check_rate < MIN_RECOMMENDED_COLLISION_RATE)
+  {
+    auto& clk = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clk, ROS_LOG_THROTTLE_PERIOD,
+                                "Collision check rate is low, increase it in yaml file if CPU allows");
+  }
 
   collision_check_type_ =
-      (parameters_.collision_check_type == "threshold_distance" ? K_THRESHOLD_DISTANCE : K_STOP_DISTANCE);
-  safety_factor_ = parameters_.collision_distance_safety_factor;
+      (parameters_->collision_check_type == "threshold_distance" ? K_THRESHOLD_DISTANCE : K_STOP_DISTANCE);
+  safety_factor_ = parameters_->collision_distance_safety_factor;
 
-  // Internal namespace
-  ros::NodeHandle internal_nh("~internal");
-  collision_velocity_scale_pub_ = internal_nh.advertise<std_msgs::Float64>("collision_velocity_scale", ROS_QUEUE_SIZE);
-  worst_case_stop_time_sub_ =
-      internal_nh.subscribe("worst_case_stop_time", ROS_QUEUE_SIZE, &CollisionCheck::worstCaseStopTimeCB, this);
+  // ROS pubs/subs
+  collision_velocity_scale_pub_ =
+      node_->create_publisher<std_msgs::msg::Float64>("collision_velocity_scale", ROS_QUEUE_SIZE);
+
+  joint_state_sub_ = node_->create_subscription<sensor_msgs::msg::JointState>(
+      parameters_->joint_topic, ROS_QUEUE_SIZE, std::bind(&CollisionCheck::jointStateCB, this, std::placeholders::_1));
+
+  worst_case_stop_time_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
+      "worst_case_stop_time", ROS_QUEUE_SIZE,
+      std::bind(&CollisionCheck::worstCaseStopTimeCB, this, std::placeholders::_1));
 
   current_state_ = std::make_unique<moveit::core::RobotState>(getLockedPlanningSceneRO()->getCurrentState());
   acm_ = getLockedPlanningSceneRO()->getAllowedCollisionMatrix();
@@ -91,33 +97,27 @@ planning_scene_monitor::LockedPlanningSceneRO CollisionCheck::getLockedPlanningS
 
 void CollisionCheck::start()
 {
-  timer_ = nh_.createTimer(period_, &CollisionCheck::run, this);
+  timer_ = node_->create_wall_timer(std::chrono::duration<double>(period_), std::bind(&CollisionCheck::run, this));
 }
 
 void CollisionCheck::stop()
 {
-  timer_.stop();
+  timer_->cancel();
 }
 
-void CollisionCheck::run(const ros::TimerEvent& timer_event)
+void CollisionCheck::run()
 {
-  // Log warning when the last loop duration was longer than the period
-  if (timer_event.profile.last_duration.toSec() > period_.toSec())
-  {
-    ROS_WARN_STREAM_THROTTLE_NAMED(ROS_LOG_THROTTLE_PERIOD, LOGNAME,
-                                   "last_duration: " << timer_event.profile.last_duration.toSec() << " ("
-                                                     << period_.toSec() << ")");
-  }
-
   if (paused_)
   {
     return;
   }
 
   // Copy the latest joint state
-  auto latest_joint_state = joint_state_subscriber_->getLatest();
-  for (std::size_t i = 0; i < latest_joint_state->position.size(); ++i)
-    current_state_->setJointPositions(latest_joint_state->name[i], &latest_joint_state->position[i]);
+  {
+    const std::lock_guard<std::mutex> lock(joint_state_mutex_);
+    for (std::size_t i = 0; i < latest_joint_state_.position.size(); ++i)
+      current_state_->setJointPositions(latest_joint_state_.name[i], &latest_joint_state_.position[i]);
+  }
 
   current_state_->updateCollisionBodyTransforms();
   collision_detected_ = false;
@@ -150,22 +150,22 @@ void CollisionCheck::run(const ros::TimerEvent& timer_event)
     // If we are far from a collision, velocity_scale should be 1.
     // If we are very close to a collision, velocity_scale should be ~zero.
     // When scene_collision_proximity_threshold is breached, start decelerating exponentially.
-    if (scene_collision_distance_ < parameters_.scene_collision_proximity_threshold)
+    if (scene_collision_distance_ < parameters_->scene_collision_proximity_threshold)
     {
       // velocity_scale = e ^ k * (collision_distance - threshold)
       // k = - ln(0.001) / collision_proximity_threshold
       // velocity_scale should equal one when collision_distance is at collision_proximity_threshold.
       // velocity_scale should equal 0.001 when collision_distance is at zero.
-      velocity_scale_ =
-          std::min(velocity_scale_, exp(scene_velocity_scale_coefficient_ *
-                                        (scene_collision_distance_ - parameters_.scene_collision_proximity_threshold)));
+      velocity_scale_ = std::min(velocity_scale_,
+                                 exp(scene_velocity_scale_coefficient_ *
+                                     (scene_collision_distance_ - parameters_->scene_collision_proximity_threshold)));
     }
 
-    if (self_collision_distance_ < parameters_.self_collision_proximity_threshold)
+    if (self_collision_distance_ < parameters_->self_collision_proximity_threshold)
     {
       velocity_scale_ =
           std::min(velocity_scale_, exp(self_velocity_scale_coefficient_ *
-                                        (self_collision_distance_ - parameters_.self_collision_proximity_threshold)));
+                                        (self_collision_distance_ - parameters_->self_collision_proximity_threshold)));
     }
   }
   // Else, we stop based on worst-case stopping distance
@@ -175,9 +175,9 @@ void CollisionCheck::run(const ros::TimerEvent& timer_event)
 
     // Calculate rate of change of distance to nearest collision
     current_collision_distance_ = std::min(scene_collision_distance_, self_collision_distance_);
-    derivative_of_collision_distance_ = (current_collision_distance_ - prev_collision_distance_) / period_.toSec();
+    derivative_of_collision_distance_ = (current_collision_distance_ - prev_collision_distance_) / period_;
 
-    if (current_collision_distance_ < parameters_.min_allowable_collision_distance &&
+    if (current_collision_distance_ < parameters_->min_allowable_collision_distance &&
         derivative_of_collision_distance_ <= 0)
     {
       velocity_scale_ = 0;
@@ -201,9 +201,9 @@ void CollisionCheck::run(const ros::TimerEvent& timer_event)
 
   // publish message
   {
-    auto msg = moveit::util::make_shared_from_pool<std_msgs::Float64>();
-    msg->data = velocity_scale_;
-    collision_velocity_scale_pub_.publish(msg);
+    auto msg = std::make_unique<std_msgs::msg::Float64>();
+    msg.get()->data = velocity_scale_;
+    collision_velocity_scale_pub_->publish(std::move(msg));
   }
 }
 
@@ -211,23 +211,30 @@ void CollisionCheck::printCollisionPairs(collision_detection::CollisionResult::C
 {
   if (!contact_map.empty())
   {
+    rclcpp::Clock& clock = *node_->get_clock();
     // Throttled error message about the first contact in the list
-    ROS_WARN_STREAM_THROTTLE_NAMED(ROS_LOG_THROTTLE_PERIOD, LOGNAME, "Objects in collision (among others, possibly): "
-                                                                         << contact_map.begin()->first.first << ", "
-                                                                         << contact_map.begin()->first.second);
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                "Objects in collision (among others, possibly): "
+                                    << contact_map.begin()->first.first << ", " << contact_map.begin()->first.second);
     // Log all other contacts if in debug mode
-    ROS_DEBUG_STREAM_THROTTLE_NAMED(ROS_LOG_THROTTLE_PERIOD, LOGNAME, "Objects in collision:");
+    RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Objects in collision:");
     for (auto contact : contact_map)
     {
-      ROS_DEBUG_STREAM_THROTTLE_NAMED(ROS_LOG_THROTTLE_PERIOD, LOGNAME, "\t" << contact.first.first << ", "
-                                                                             << contact.first.second);
+      RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "\t" << contact.first.first << ", "
+                                                                                << contact.first.second);
     }
   }
 }
 
-void CollisionCheck::worstCaseStopTimeCB(const std_msgs::Float64ConstPtr& msg)
+void CollisionCheck::jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg)
 {
-  worst_case_stop_time_ = msg->data;
+  const std::lock_guard<std::mutex> lock(joint_state_mutex_);
+  latest_joint_state_ = *msg.get();
+}
+
+void CollisionCheck::worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg)
+{
+  worst_case_stop_time_ = msg.get()->data;
 }
 
 void CollisionCheck::setPaused(bool paused)

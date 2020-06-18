@@ -34,7 +34,7 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+ *******************************************************************************/
 
 #pragma once
 
@@ -43,7 +43,7 @@
 #include <moveit_servo/collision_check.h>
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo_calcs.h>
-#include <moveit_servo/joint_state_subscriber.h>
+#include "std_srvs/srv/trigger.hpp"
 
 namespace moveit_servo
 {
@@ -53,18 +53,22 @@ namespace moveit_servo
 class Servo
 {
 public:
-  Servo(ros::NodeHandle& nh, const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+  Servo(const rclcpp::Node::SharedPtr& node, ServoParametersPtr parameters,
+        planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor);
 
   ~Servo();
 
   /** \brief start servo node */
-  void start();
+  bool start();
 
   /** \brief stop servo node */
   void stop();
 
   /** \brief Pause or unpause processing servo commands while keeping the timers alive */
   void setPaused(bool paused);
+
+  /** \brief Returns when a joint state message has been recieved, and start() may be called */
+  bool waitForInitialized(std::chrono::duration<double> wait_for = std::chrono::duration<double>(0.25));
 
   /**
    * Get the MoveIt planning link transform.
@@ -76,23 +80,18 @@ public:
   bool getCommandFrameTransform(Eigen::Isometry3d& transform);
 
   /** \brief Get the parameters used by servo node. */
-  const ServoParameters& getParameters() const;
+  const std::shared_ptr<moveit_servo::ServoParameters>& getParameters() const;
 
   /** \brief Get the latest joint state. */
-  sensor_msgs::JointStateConstPtr getLatestJointState() const;
+  sensor_msgs::msg::JointState::ConstSharedPtr getLatestJointState() const;
 
 private:
-  bool readParameters();
-
-  ros::NodeHandle nh_;
-
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
-  // Store the parameters that were read from ROS server
-  ServoParameters parameters_;
+  // The stored servo parameters
+  ServoParametersPtr parameters_;
 
-  std::shared_ptr<JointStateSubscriber> joint_state_subscriber_;
   std::unique_ptr<ServoCalcs> servo_calcs_;
   std::unique_ptr<CollisionCheck> collision_checker_;
 };

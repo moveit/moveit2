@@ -46,38 +46,46 @@ constexpr size_t ROS_QUEUE_SIZE = 2;
 // ROS params to be read. See the yaml file in /config for a description of each.
 struct ServoParameters
 {
-  std::string move_group_name;
-  std::string joint_topic;
-  std::string cartesian_command_in_topic;
-  std::string robot_link_command_frame;
-  std::string command_out_topic;
-  std::string planning_frame;
+  bool use_gazebo;
   std::string status_topic;
+  // Properties of incoming commands
+  std::string cartesian_command_in_topic;
   std::string joint_command_in_topic;
+  std::string robot_link_command_frame;
   std::string command_in_type;
-  std::string command_out_type;
   double linear_scale;
   double rotational_scale;
   double joint_scale;
-  double lower_singularity_threshold;
-  double hard_stop_singularity_threshold;
-  double low_pass_filter_coeff;
+  // Properties of outgoing commands
+  std::string command_out_topic;
   double publish_period;
-  double incoming_command_timeout;
-  double joint_limit_margin;
-  int num_outgoing_halt_msgs_to_publish;
-  bool use_gazebo;
+  std::string command_out_type;
   bool publish_joint_positions;
   bool publish_joint_velocities;
   bool publish_joint_accelerations;
+  // Incoming Joint State properties
+  std::string joint_topic;
+  double low_pass_filter_coeff;
+  // MoveIt properties
+  std::string move_group_name;
+  std::string planning_frame;
+  // Stopping behaviour
+  double incoming_command_timeout;
+  int num_outgoing_halt_msgs_to_publish;
+  // Configure handling of singularities and joint limits
+  double lower_singularity_threshold;
+  double hard_stop_singularity_threshold;
+  double joint_limit_margin;
   // Collision checking
   bool check_collisions;
-  std::string collision_check_type;
   double collision_check_rate;
-  double scene_collision_proximity_threshold;
+  std::string collision_check_type;
   double self_collision_proximity_threshold;
+  double scene_collision_proximity_threshold;
   double collision_distance_safety_factor;
   double min_allowable_collision_distance;
 };
+
+using ServoParametersPtr = std::shared_ptr<ServoParameters>;
 
 }  // namespace moveit_servo
