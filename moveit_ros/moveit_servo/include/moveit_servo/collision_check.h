@@ -34,19 +34,21 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+ *******************************************************************************/
 
 #pragma once
 
-#include <moveit/collision_detection/collision_common.h>
+#include <mutex>
+
+#include <rclcpp/rclcpp.hpp>
+
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <sensor_msgs/JointState.h>
-#include <std_msgs/Float64.h>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <std_msgs/msg/float64.hpp>
 
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/low_pass_filter.h>
-#include <moveit_servo/joint_state_subscriber.h>
 
 namespace moveit_servo
 {
@@ -56,7 +58,7 @@ enum CollisionCheckType
   K_STOP_DISTANCE = 2
 };
 
-class CollisionCheck
+class CollisionCheck : public rclcpp::Node
 {
 public:
   /** \brief Constructor
@@ -64,9 +66,8 @@ public:
    *  \param planning_scene_monitor: PSM should have scene monitor and state monitor
    *                                 already started when passed into this class
    */
-  CollisionCheck(ros::NodeHandle& nh, const moveit_servo::ServoParameters& parameters,
-                 const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-                 const std::shared_ptr<JointStateSubscriber>& joint_state_subscriber);
+  CollisionCheck(const rclcpp::NodeOptions& options, const moveit_servo::ServoParameters& parameters,
+                 const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   /** \brief start and stop the Timer */
   void start();
@@ -76,28 +77,16 @@ public:
   void setPaused(bool paused);
 
 private:
-  /** \brief Run one iteration of collision checking */
-  void run(const ros::TimerEvent& timer_event);
-
-  /** \brief Print objects in collision. Useful for debugging.  */
-  void printCollisionPairs(collision_detection::CollisionResult::ContactMap& contact_map);
-
-  /** \brief Get a read-only copy of the planning scene */
+  void run();  // TODO(adamp): come back and pass a timer event here?
   planning_scene_monitor::LockedPlanningSceneRO getLockedPlanningSceneRO() const;
-
-  /** \brief Callback for stopping time, from the thread that is aware of velocity and acceleration */
-  void worstCaseStopTimeCB(const std_msgs::Float64ConstPtr& msg);
-
-  ros::NodeHandle nh_;
+  void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
+  void worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg);
 
   // Parameters from yaml
   const ServoParameters& parameters_;
 
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-
-  // Subscriber to joint states
-  const std::shared_ptr<JointStateSubscriber> joint_state_subscriber_;
 
   // Robot state and collision matrix from planning scene
   std::unique_ptr<moveit::core::RobotState> current_state_;
@@ -129,10 +118,13 @@ private:
   collision_detection::CollisionResult collision_result_;
 
   // ROS
-  ros::Timer timer_;
-  ros::Duration period_;
-  ros::Subscriber joint_state_sub_;
-  ros::Publisher collision_velocity_scale_pub_;
-  ros::Subscriber worst_case_stop_time_sub_;
+  rclcpp::TimerBase::SharedPtr timer_;
+  double period_;  // The loop period, in seconds
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_sub_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr collision_velocity_scale_pub_;
+  rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr worst_case_stop_time_sub_;
+
+  mutable std::mutex joint_state_mutex_;
+  sensor_msgs::msg::JointState latest_joint_state_;
 };
 }  // namespace moveit_servo
