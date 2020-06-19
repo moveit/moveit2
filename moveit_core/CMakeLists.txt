@@ -81,6 +81,7 @@ find_package(trajectory_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(common_interfaces REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(orocos_kdl REQUIRED)
 
 # Set target file path for version.h
 set(VERSION_FILE_PATH ${CMAKE_BINARY_DIR}/include)
@@ -160,6 +161,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   eigen3_cmake_module
   Boost
   OCTOMAP
+  orocos_kdl
   # ${BULLET_ENABLE}
 )
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)

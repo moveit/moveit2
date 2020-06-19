@@ -4,9 +4,17 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/lexical_casts.cpp
   src/message_checks.cpp
   src/rclcpp_utils.cpp
+  src/eigen_kdl.cpp
 )
 
-ament_target_dependencies(${MOVEIT_LIB_NAME} Boost moveit_msgs)
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+    Boost
+    moveit_msgs
+    eigen3_cmake_module
+    Eigen3
+    orocos_kdl
+)
+
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 install(TARGETS ${MOVEIT_LIB_NAME}
