@@ -76,29 +76,34 @@ include_directories(
 )
 
 # Add composable node libraries
-add_library(collision_check_component SHARED
-   src/collision_check.cpp)
-ament_target_dependencies(collision_check_component
-  "rclcpp"
-  "rclcpp_components"
-  "std_msgs"
-  "sensor_msgs"
-  "moveit_ros_planning")
-rclcpp_components_register_nodes(collision_check_component "moveit_servo::CollisionCheck")
-
-# add_library(servo_calcs_component SHARED
-#    src/servo_calcs.cpp)
-# ament_target_dependencies(servo_calcs_component
+# add_library(collision_check_component SHARED
+#    src/collision_check.cpp)
+# ament_target_dependencies(collision_check_component
 #   "rclcpp"
 #   "rclcpp_components"
 #   "std_msgs"
 #   "sensor_msgs"
 #   "moveit_ros_planning")
-# rclcpp_components_register_nodes(servo_calcs_component "moveit_servo::CollisionCheck")
+# rclcpp_components_register_nodes(collision_check_component "moveit_servo::CollisionCheck")
+
+add_library(servo_calcs_component SHARED
+   src/servo_calcs.cpp)
+ament_target_dependencies(servo_calcs_component
+  "rclcpp"
+  "rclcpp_components"
+  "std_msgs"
+  "sensor_msgs"
+  "control_msgs"
+  "moveit_msgs"
+  "geometry_msgs"
+  "trajectory_msgs"
+  "moveit_ros_planning")
+rclcpp_components_register_nodes(servo_calcs_component "moveit_servo::JogCalcs")
 
 # Install Libraries
 install(TARGETS
-  collision_check_component
+  # collision_check_component
+  servo_calcs_component
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
