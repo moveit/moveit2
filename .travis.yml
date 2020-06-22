@@ -28,8 +28,7 @@ jobs:
     - compiler: clang  # test_ikfast_plugins takes ~10 minutes: include here to keep the main jobs shorter
       env: TEST=clang-tidy-fix
            CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-overloaded-virtual"
-           # TODO(mlautman): Enable once franka_ikfast_plugin and panda_ikfast_plugin are available
-           # BEFORE_DOCKER_SCRIPT="source moveit_kinematics/test/test_ikfast_plugins.sh"
+           BEFORE_DOCKER_SCRIPT="source moveit_kinematics/test/test_ikfast_plugins.sh"
   allow_failures:
     - env: TEST=code-coverage
 

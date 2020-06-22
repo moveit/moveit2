@@ -10,12 +10,12 @@ install(
     scripts/create_ikfast_moveit_plugin.py
     scripts/round_collada_numbers.py
   DESTINATION
-    ${CATKIN_PACKAGE_BIN_DESTINATION}
+    lib/${PROJECT_NAME}
 )
 
 install(
   DIRECTORY
     templates
   DESTINATION
-    ${CATKIN_PACKAGE_SHARE_DESTINATION}/ikfast_kinematics_plugin
+    share/${PROJECT_NAME}/ikfast_kinematics_plugin
 )
