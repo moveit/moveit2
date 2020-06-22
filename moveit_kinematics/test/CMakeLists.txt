@@ -54,6 +54,5 @@ if(BUILD_TESTING)
     Boost
   )
 
-  install(TARGETS benchmark_ik
-    DESTINATION lib/${PROJECT_NAME})
+  install(TARGETS benchmark_ik DESTINATION lib/${PROJECT_NAME})
 endif()

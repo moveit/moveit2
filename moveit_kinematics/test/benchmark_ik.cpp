@@ -40,6 +40,7 @@
 #include <boost/program_options.hpp>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_scene/planning_scene.h>
+#include <moveit/utils/robot_model_test_utils.h>
 
 namespace po = boost::program_options;
 
@@ -79,8 +80,10 @@ int main(int argc, char* argv[])
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node);
 
-  robot_model_loader::RobotModelLoader robot_model_loader(node);
-  const moveit::core::RobotModelPtr& kinematic_model = robot_model_loader.getModel();
+  // TODO(henningkayser): Load robot model from robot_description, fix kinematic param config
+  // robot_model_loader::RobotModelLoader robot_model_loader(node);
+  // const moveit::core::RobotModelPtr& kinematic_model = robot_model_loader.getModel();
+  const moveit::core::RobotModelPtr& kinematic_model = moveit::core::loadTestingRobotModel("panda");
   planning_scene::PlanningScene planning_scene(kinematic_model);
   moveit::core::RobotState& kinematic_state = planning_scene.getCurrentStateNonConst();
   collision_detection::CollisionRequest collision_request;
@@ -99,7 +102,10 @@ int main(int argc, char* argv[])
   {
     // skip group if there's no IK solver
     if (group->getSolverInstance() == nullptr)
+    {
+      RCLCPP_WARN_STREAM(LOGGER, "No kinematic solver configured for group '" << group->getName() << "' - skipping");
       continue;
+    }
 
     if (tip == "default")
       group->getEndEffectorTips(end_effectors);
