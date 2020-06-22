@@ -37,15 +37,17 @@
 */
 
 #include <moveit/trajectory_rviz_plugin/trajectory_display.h>
-#include <rviz/properties/string_property.h>
+#include <rviz_common/properties/string_property.hpp>
 
 namespace moveit_rviz_plugin
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.visualization.trajectory_display");
+
 TrajectoryDisplay::TrajectoryDisplay() : Display(), load_robot_model_(false)
 {
   // The robot description property is only needed when using the trajectory playback standalone (not within motion
   // planning plugin)
-  robot_description_property_ = new rviz::StringProperty(
+  robot_description_property_ = new rviz_common::properties::StringProperty(
       "Robot Description", "robot_description", "The name of the ROS parameter where the URDF for the robot is loaded",
       this, SLOT(changedRobotDescription()), this);
 
@@ -58,21 +60,28 @@ void TrajectoryDisplay::onInitialize()
 {
   Display::onInitialize();
 
-  trajectory_visual_->onInitialize(scene_node_, context_, update_nh_);
+  auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
+  if (!ros_node_abstraction)
+  {
+    RCLCPP_INFO(LOGGER, "Unable to lock weak_ptr from DisplayContext in TrajectoryDisplay constructor");
+    return;
+  }
+  node_ = ros_node_abstraction->get_raw_node();
+  trajectory_visual_->onInitialize(node_, scene_node_, context_);
 }
 
 void TrajectoryDisplay::loadRobotModel()
 {
   load_robot_model_ = false;
-  rdf_loader_.reset(new rdf_loader::RDFLoader(robot_description_property_->getStdString()));
+  rdf_loader_.reset(new rdf_loader::RDFLoader(node_, robot_description_property_->getStdString()));
 
   if (!rdf_loader_->getURDF())
   {
-    this->setStatus(rviz::StatusProperty::Error, "Robot Model",
+    this->setStatus(rviz_common::properties::StatusProperty::Error, "Robot Model",
                     "Failed to load from parameter " + robot_description_property_->getString());
     return;
   }
-  this->setStatus(rviz::StatusProperty::Ok, "Robot Model", "Successfully loaded");
+  this->setStatus(rviz_common::properties::StatusProperty::Ok, "Robot Model", "Successfully loaded");
 
   const srdf::ModelSharedPtr& srdf =
       rdf_loader_->getSRDF() ? rdf_loader_->getSRDF() : srdf::ModelSharedPtr(new srdf::Model());
@@ -110,12 +119,6 @@ void TrajectoryDisplay::update(float wall_dt, float ros_dt)
     loadRobotModel();
 
   trajectory_visual_->update(wall_dt, ros_dt);
-}
-
-void TrajectoryDisplay::setName(const QString& name)
-{
-  BoolProperty::setName(name);
-  trajectory_visual_->setName(name);
 }
 
 void TrajectoryDisplay::changedRobotDescription()

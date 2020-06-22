@@ -57,6 +57,8 @@
 #include <rviz_default_plugins/robot/robot_link.hpp>
 #include <rviz_common/window_manager_interface.hpp>
 
+using namespace std::placeholders;
+
 namespace moveit_rviz_plugin
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_rviz_plugin_render_tools.trajectory_visualization");
@@ -145,6 +147,14 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
   context_ = context;
   node_ = node;
 
+  auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
+  if (!ros_node_abstraction)
+  {
+    RVIZ_COMMON_LOG_WARNING("Unable to lock weak_ptr from DisplayContext in TrajectoryVisualization constructor");
+    return;
+  }
+  trajectory_topic_property_->initialize(ros_node_abstraction);
+
   // Load trajectory robot
   display_path_robot_.reset(new RobotStateVisualization(scene_node_, context_, "Planned Path", widget_));
   display_path_robot_->setVisualVisible(display_path_visual_enabled_property_->getBool());
@@ -162,6 +172,10 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
             SLOT(trajectorySliderPanelVisibilityChange(bool)));
     trajectory_slider_panel_->onInitialize();
   }
+
+  trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
+      trajectory_topic_property_->getStdString(), 2,
+      std::bind(&TrajectoryVisualization::incomingDisplayTrajectory, this, _1));
 }
 
 void TrajectoryVisualization::setName(const QString& name)
@@ -265,7 +279,6 @@ void TrajectoryVisualization::changedRobotPathAlpha()
 
 void TrajectoryVisualization::changedTrajectoryTopic()
 {
-  using namespace std::placeholders;
   // post-pone subscription if robot_state_ is not yet defined, i.e. onRobotModelLoaded() not yet called
   if (!trajectory_topic_property_->getStdString().empty() && robot_state_)
   {

@@ -102,8 +102,6 @@ public:
     const auto plan_solution = arm.plan();
     if (plan_solution)
     {
-      visualizeTrajectory(*plan_solution.trajectory);
-
       // TODO(henningkayser): Enable trajectory execution once controllers are available
       // RCLCPP_INFO(LOGGER, "arm.execute()");
       // arm.execute();
@@ -118,23 +116,6 @@ public:
   }
 
 private:
-  void visualizeTrajectory(const robot_trajectory::RobotTrajectory& trajectory)
-  {
-    moveit_msgs::msg::DisplayRobotState waypoint;
-    const auto start_time = node_->now();
-    for (size_t i = 0; i < trajectory.getWayPointCount(); ++i)
-    {
-      moveit::core::robotStateToRobotStateMsg(trajectory.getWayPoint(i), waypoint.state);
-      const auto waypoint_time =
-          start_time + rclcpp::Duration::from_seconds(trajectory.getWayPointDurationFromStart(i));
-      const auto now = node_->now();
-      if (waypoint_time > now)
-        rclcpp::sleep_for(std::chrono::nanoseconds((waypoint_time - now).nanoseconds()));
-
-      robot_state_publisher_->publish(waypoint);
-    }
-  }
-
   rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_publisher_;
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_publisher_;
