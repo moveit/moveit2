@@ -127,47 +127,26 @@ bool JogArm::readParameters()
   if (nh_.hasParam(parameter_ns + "/collision_proximity_threshold") &&
       rosparam_shortcuts::get("", nh_, parameter_ns + "/collision_proximity_threshold", collision_proximity_threshold))
   {
-    if (rosparam_shortcuts::get("", n, parameter_ns + "/collision_proximity_threshold",
-                                ros_parameters_.self_collision_proximity_threshold))
+    ROS_WARN_NAMED(LOGNAME, "'collision_proximity_threshold' parameter is deprecated, and has been replaced by separate"
+                            "'self_collision_proximity_threshold' and 'scene_collision_proximity_threshold' "
+                            "parameters. Please update the jogging yaml file.");
+    if (!have_self_collision_proximity_threshold)
     {
       parameters_.self_collision_proximity_threshold = collision_proximity_threshold;
       have_self_collision_proximity_threshold = true;
     }
-    else
+    if (!have_scene_collision_proximity_threshold)
     {
       parameters_.scene_collision_proximity_threshold = collision_proximity_threshold;
       have_scene_collision_proximity_threshold = true;
     }
   }
-<<<<<<< HEAD
-  error += !rosparam_shortcuts::get("", n, parameter_ns + "/move_group_name", ros_parameters_.move_group_name);
-  error += !rosparam_shortcuts::get("", n, parameter_ns + "/planning_frame", ros_parameters_.planning_frame);
-  error += !rosparam_shortcuts::get("", n, parameter_ns + "/use_gazebo", ros_parameters_.use_gazebo);
-  error += !rosparam_shortcuts::get("", n, parameter_ns + "/check_collisions", ros_parameters_.check_collisions);
-  error += !rosparam_shortcuts::get("", n, parameter_ns + "/joint_limit_margin", ros_parameters_.joint_limit_margin);
-  error += !rosparam_shortcuts::get("", n, parameter_ns + "/command_out_topic", ros_parameters_.command_out_topic);
-  error += !rosparam_shortcuts::get("", n, parameter_ns + "/command_out_type", ros_parameters_.command_out_type);
-  error += !rosparam_shortcuts::get("", n, parameter_ns + "/publish_joint_positions",
-                                    ros_parameters_.publish_joint_positions);
-  error += !rosparam_shortcuts::get("", n, parameter_ns + "/publish_joint_velocities",
-                                    ros_parameters_.publish_joint_velocities);
-  error += !rosparam_shortcuts::get("", n, parameter_ns + "/publish_joint_accelerations",
-                                    ros_parameters_.publish_joint_accelerations);
-=======
   error += !have_self_collision_proximity_threshold;
   error += !have_scene_collision_proximity_threshold;
-<<<<<<< HEAD
-  error += !rosparam_shortcuts::get("", nh, parameter_ns + "/collision_distance_safety_factor",
-                                    ros_parameters_.collision_distance_safety_factor);
-  error += !rosparam_shortcuts::get("", nh, parameter_ns + "/min_allowable_collision_distance",
-                                    ros_parameters_.min_allowable_collision_distance);
->>>>>>> 44bcada99... [jog_arm] time-based collision avoidance (#2100)
-=======
   error += !rosparam_shortcuts::get("", nh_, parameter_ns + "/collision_distance_safety_factor",
                                     parameters_.collision_distance_safety_factor);
   error += !rosparam_shortcuts::get("", nh_, parameter_ns + "/min_allowable_collision_distance",
                                     parameters_.min_allowable_collision_distance);
->>>>>>> 8c651f07c... use ros timers instead of threads in jog_arm
 
   // This parameter name was changed recently.
   // Try retrieving from the correct name. If it fails, then try the deprecated name.
