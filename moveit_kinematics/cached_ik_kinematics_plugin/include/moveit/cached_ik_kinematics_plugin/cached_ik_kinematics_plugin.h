@@ -188,7 +188,7 @@ struct HasRobotModelApi : std::false_type
 };
 
 template <typename KinematicsPlugin>
-struct hasRobotModelAPI<KinematicsPlugin, decltype(std::declval<KinematicsPlugin&>().initialize(
+struct HasRobotModelApi<KinematicsPlugin, decltype(std::declval<KinematicsPlugin&>().initialize(
                                               std::declval<const rclcpp::Node::SharedPtr&>(),
                                               std::declval<const moveit::core::RobotModel&>(), std::string(),
                                               std::string(), std::vector<std::string>(), 0.0))> : std::true_type
@@ -266,7 +266,7 @@ private:
      availability of API in wrapped KinematicsPlugin class.
      However, as templates and virtual functions cannot be combined, we need helpers initializeImpl(). */
   template <class T = KinematicsPlugin>
-  typename std::enable_if<hasRobotModelAPI<T>::value, bool>::type
+  typename std::enable_if<HasRobotModelApi<T>::value, bool>::type
   initializeImpl(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModel& robot_model,
                  const std::string& group_name, const std::string& base_frame,
                  const std::vector<std::string>& tip_frames, double search_discretization)
@@ -285,9 +285,30 @@ private:
   }
 
   template <class T = KinematicsPlugin>
-  typename std::enable_if<!hasRobotModelAPI<T>::value, bool>::type
-  initializeImpl(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModel&, const std::string&,
-                 const std::string&, const std::vector<std::string>&, double)
+  typename std::enable_if<!HasRobotModelApi<T>::value, bool>::type
+  initializeImpl(const rclcpp::Node::SharedPtr& node /*unused*/, const moveit::core::RobotModel& /*unused*/,
+                 const std::string& /*unused*/, const std::string& /*unused*/,
+                 const std::vector<std::string>& /*unused*/, double /*unused*/)
+  {
+    return false;  // API not supported
+  }
+
+  template <class T = KinematicsPlugin>
+  typename std::enable_if<HasRobotDescApi<T>::value, bool>::type
+  initializeImpl(const std::string& robot_description, const std::string& group_name, const std::string& base_frame,
+                 const std::string& tip_frame, double search_discretization)
+  {
+    // call initialize method of wrapped class
+    if (!KinematicsPlugin::initialize(robot_description, group_name, base_frame, tip_frame, search_discretization))
+      return false;
+    initCache(robot_description, group_name, base_frame + tip_frame);
+    return true;
+  }
+
+  template <class T = KinematicsPlugin>
+  typename std::enable_if<!HasRobotDescApi<T>::value, bool>::type
+  initializeImpl(const std::string& /*unused*/, const std::string& /*unused*/, const std::string& /*unused*/,
+                 const std::string& /*unused*/, double /*unused*/)
   {
     return false;  // API not supported
   }

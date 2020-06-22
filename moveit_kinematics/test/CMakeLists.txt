@@ -54,5 +54,6 @@ if(BUILD_TESTING)
     Boost
   )
 
-  install(TARGETS benchmark_ik RUNTIME DESTINATION bin)
+  install(TARGETS benchmark_ik
+    DESTINATION lib/${PROJECT_NAME})
 endif()
