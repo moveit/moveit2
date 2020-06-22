@@ -286,7 +286,7 @@ private:
 
   template <class T = KinematicsPlugin>
   typename std::enable_if<!HasRobotModelApi<T>::value, bool>::type
-  initializeImpl(const rclcpp::Node::SharedPtr& node /*unused*/, const moveit::core::RobotModel& /*unused*/,
+  initializeImpl(const rclcpp::Node::SharedPtr& /*unused*/, const moveit::core::RobotModel& /*unused*/,
                  const std::string& /*unused*/, const std::string& /*unused*/,
                  const std::vector<std::string>& /*unused*/, double /*unused*/)
   {
