@@ -55,11 +55,12 @@ void CachedIKKinematicsPlugin<KinematicsPlugin>::initCache(const std::string& ro
 {
   IKCache::Options opts;
   int max_cache_size;  // rosparam can't handle unsigned int
-  kinematics::KinematicsBase::lookupParam("max_cache_size", max_cache_size, static_cast<int>(opts.max_cache_size));
+  kinematics::KinematicsBase::lookupParam(node_, "max_cache_size", max_cache_size,
+                                          static_cast<int>(opts.max_cache_size));
   opts.max_cache_size = max_cache_size;
-  kinematics::KinematicsBase::lookupParam("min_pose_distance", opts.min_pose_distance, 1.0);
-  kinematics::KinematicsBase::lookupParam("min_joint_config_distance", opts.min_joint_config_distance, 1.0);
-  kinematics::KinematicsBase::lookupParam<std::string>("cached_ik_path", opts.cached_ik_path, "");
+  kinematics::KinematicsBase::lookupParam(node_, "min_pose_distance", opts.min_pose_distance, 1.0);
+  kinematics::KinematicsBase::lookupParam(node_, "min_joint_config_distance", opts.min_joint_config_distance, 1.0);
+  kinematics::KinematicsBase::lookupParam<std::string>(node_, "cached_ik_path", opts.cached_ik_path, "");
 
   cache_.initializeCache(robot_id, group_name, cache_name, KinematicsPlugin::getJointNames().size(), opts);
 
@@ -70,14 +71,12 @@ void CachedIKKinematicsPlugin<KinematicsPlugin>::initCache(const std::string& ro
 }
 
 template <class KinematicsPlugin>
-bool CachedMultiTipIKKinematicsPlugin<KinematicsPlugin>::initialize(const moveit::core::RobotModel& robot_model,
-                                                                    const std::string& group_name,
-                                                                    const std::string& base_frame,
-                                                                    const std::vector<std::string>& tip_frames,
-                                                                    double search_discretization)
+bool CachedMultiTipIKKinematicsPlugin<KinematicsPlugin>::initialize(
+    const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModel& robot_model, const std::string& group_name,
+    const std::string& base_frame, const std::vector<std::string>& tip_frames, double search_discretization)
 {
   // call initialize method of wrapped class
-  if (!KinematicsPlugin::initialize(robot_model, group_name, base_frame, tip_frames, search_discretization))
+  if (!KinematicsPlugin::initialize(node, robot_model, group_name, base_frame, tip_frames, search_discretization))
     return false;
 
   std::string cache_name = base_frame;
@@ -88,25 +87,7 @@ bool CachedMultiTipIKKinematicsPlugin<KinematicsPlugin>::initialize(const moveit
 }
 
 template <class KinematicsPlugin>
-bool CachedMultiTipIKKinematicsPlugin<KinematicsPlugin>::initialize(const std::string& robot_description,
-                                                                    const std::string& group_name,
-                                                                    const std::string& base_frame,
-                                                                    const std::vector<std::string>& tip_frames,
-                                                                    double search_discretization)
-{
-  // call initialize method of wrapped class
-  if (!KinematicsPlugin::initialize(robot_description, group_name, base_frame, tip_frames, search_discretization))
-    return false;
-
-  std::string cache_name = base_frame;
-  std::accumulate(tip_frames.begin(), tip_frames.end(), cache_name);
-  CachedIKKinematicsPlugin<KinematicsPlugin>::cache_.initializeCache(robot_description, group_name, cache_name,
-                                                                     KinematicsPlugin::getJointNames().size());
-  return true;
-}
-
-template <class KinematicsPlugin>
-bool CachedIKKinematicsPlugin<KinematicsPlugin>::getPositionIK(const geometry_msgs::Pose& ik_pose,
+bool CachedIKKinematicsPlugin<KinematicsPlugin>::getPositionIK(const geometry_msgs::msg::Pose& ik_pose,
                                                                const std::vector<double>& ik_seed_state,
                                                                std::vector<double>& solution,
                                                                moveit_msgs::msg::MoveItErrorCodes& error_code,
@@ -122,7 +103,7 @@ bool CachedIKKinematicsPlugin<KinematicsPlugin>::getPositionIK(const geometry_ms
 }
 
 template <class KinematicsPlugin>
-bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(const geometry_msgs::Pose& ik_pose,
+bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose,
                                                                   const std::vector<double>& ik_seed_state,
                                                                   double timeout, std::vector<double>& solution,
                                                                   moveit_msgs::msg::MoveItErrorCodes& error_code,
@@ -146,7 +127,7 @@ bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(const geometry
 
 template <class KinematicsPlugin>
 bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(
-    const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+    const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
     const std::vector<double>& consistency_limits, std::vector<double>& solution,
     moveit_msgs::msg::MoveItErrorCodes& error_code, const KinematicsQueryOptions& options) const
 {
@@ -167,7 +148,7 @@ bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(
 }
 
 template <class KinematicsPlugin>
-bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(const geometry_msgs::Pose& ik_pose,
+bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(const geometry_msgs::msg::Pose& ik_pose,
                                                                   const std::vector<double>& ik_seed_state,
                                                                   double timeout, std::vector<double>& solution,
                                                                   const IKCallbackFn& solution_callback,
@@ -192,7 +173,7 @@ bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(const geometry
 
 template <class KinematicsPlugin>
 bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(
-    const geometry_msgs::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
+    const geometry_msgs::msg::Pose& ik_pose, const std::vector<double>& ik_seed_state, double timeout,
     const std::vector<double>& consistency_limits, std::vector<double>& solution, const IKCallbackFn& solution_callback,
     moveit_msgs::msg::MoveItErrorCodes& error_code, const KinematicsQueryOptions& options) const
 {
@@ -214,7 +195,7 @@ bool CachedIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(
 
 template <class KinematicsPlugin>
 bool CachedMultiTipIKKinematicsPlugin<KinematicsPlugin>::searchPositionIK(
-    const std::vector<geometry_msgs::Pose>& ik_poses, const std::vector<double>& ik_seed_state, double timeout,
+    const std::vector<geometry_msgs::msg::Pose>& ik_poses, const std::vector<double>& ik_seed_state, double timeout,
     const std::vector<double>& consistency_limits, std::vector<double>& solution, const IKCallbackFn& solution_callback,
     moveit_msgs::msg::MoveItErrorCodes& error_code, const KinematicsQueryOptions& options,
     const moveit::core::RobotState* context_state) const
