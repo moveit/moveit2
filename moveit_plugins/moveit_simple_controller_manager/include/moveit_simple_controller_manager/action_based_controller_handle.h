@@ -80,7 +80,10 @@ public:
                               const std::string& logger_name)
     : ActionBasedControllerHandleBase(name, logger_name), node_(node), done_(true), namespace_(ns)
   {
-    controller_action_client_ = rclcpp_action::create_client<T>(node_, getActionName());
+    controller_action_client_ = rclcpp_action::create_client<T>(
+        node_->get_node_base_interface(), node_->get_node_graph_interface(), node_->get_node_logging_interface(),
+        node_->get_node_waitables_interface(), getActionName());
+
     unsigned int attempts = 0;
     double timeout;
     node_->get_parameter_or("trajectory_execution.controller_connection_timeout", timeout, 15.0);
@@ -123,11 +126,11 @@ public:
     {
       RCLCPP_INFO_STREAM(LOGGER, "Cancelling execution for " << name_);
       auto cancel_result_future = controller_action_client_->async_cancel_goal(current_goal_);
-      if (rclcpp::spin_until_future_complete(node_, cancel_result_future) !=
-          rclcpp::executor::FutureReturnCode::SUCCESS)
-      {
+
+      const auto& result = cancel_result_future.get();
+      if (!result)
         RCLCPP_ERROR(LOGGER, "Failed to cancel goal");
-      }
+
       last_exec_ = moveit_controller_manager::ExecutionStatus::PREEMPTED;
       done_ = true;
     }
@@ -137,9 +140,9 @@ public:
   bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(0)) override
   {
     auto result_future = controller_action_client_->async_get_result(current_goal_);
-    if (controller_action_client_ && !done_)
-      return (rclcpp::spin_until_future_complete(node_, result_future, timeout.to_chrono<std::chrono::seconds>()) ==
-              rclcpp::executor::FutureReturnCode::SUCCESS);
+    std::future_status status = result_future.wait_for(timeout.to_chrono<std::chrono::seconds>());
+    if (status == std::future_status::timeout)
+      RCLCPP_WARN(LOGGER, "waitForExecution timed out");
     return true;
   }
 
