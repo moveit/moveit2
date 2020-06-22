@@ -49,7 +49,7 @@ const std::string planning_pipeline::PlanningPipeline::MOTION_PLAN_REQUEST_TOPIC
 const std::string planning_pipeline::PlanningPipeline::MOTION_CONTACTS_TOPIC = "display_contacts";
 
 planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
-                                                      const std::shared_ptr<rclcpp::Node> node,
+                                                      const std::shared_ptr<rclcpp::Node>& node,
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_param_name,
                                                       const std::string& adapter_plugins_param_name)
@@ -72,7 +72,7 @@ planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotM
 }
 
 planning_pipeline::PlanningPipeline::PlanningPipeline(const moveit::core::RobotModelConstPtr& model,
-                                                      const std::shared_ptr<rclcpp::Node> node,
+                                                      const std::shared_ptr<rclcpp::Node>& node,
                                                       const std::string& parameter_namespace,
                                                       const std::string& planner_plugin_name,
                                                       const std::vector<std::string>& adapter_plugin_names)

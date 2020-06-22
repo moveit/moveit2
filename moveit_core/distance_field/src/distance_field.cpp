@@ -89,7 +89,7 @@ double DistanceField::getDistanceGradient(double x, double y, double z, double& 
 }
 
 void DistanceField::getIsoSurfaceMarkers(double min_distance, double max_distance, const std::string& frame_id,
-                                         const rclcpp::Time stamp, visualization_msgs::msg::Marker& inf_marker) const
+                                         const rclcpp::Time& stamp, visualization_msgs::msg::Marker& inf_marker) const
 {
   inf_marker.points.clear();
   inf_marker.header.frame_id = frame_id;
@@ -337,7 +337,7 @@ void DistanceField::removeShapeFromField(const shapes::Shape* shape, const geome
 
 void DistanceField::getPlaneMarkers(PlaneVisualizationType type, double length, double width, double height,
                                     const Eigen::Vector3d& origin, const std::string& frame_id,
-                                    const rclcpp::Time stamp, visualization_msgs::msg::Marker& plane_marker) const
+                                    const rclcpp::Time& stamp, visualization_msgs::msg::Marker& plane_marker) const
 {
   plane_marker.header.frame_id = frame_id;
   plane_marker.header.stamp = stamp;

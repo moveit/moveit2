@@ -44,10 +44,10 @@
 #include <algorithm>
 #include <map>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.plugins.moveit_simple_controller_manager");
-
 namespace moveit_simple_controller_manager
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.plugins.moveit_simple_controller_manager");
+static const std::string PARAM_BASE_NAME = "moveit_simple_controller_manager";
 class MoveItSimpleControllerManager : public moveit_controller_manager::MoveItControllerManager
 {
 public:
@@ -57,8 +57,6 @@ public:
 
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
-    // TODO(henningkayser): use flexible base
-    const std::string PARAM_BASE_NAME = "moveit_simple_controller_manager";
     node_ = node;
     if (!node_->has_parameter(PARAM_BASE_NAME + ".controller_names"))
     {

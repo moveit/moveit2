@@ -132,7 +132,7 @@ public:
   /** @brief Wait for at most \e wait_time seconds (default 1s) for a robot state more recent than t
    *  @return true on success, false if up-to-date robot state wasn't received within \e wait_time
   */
-  bool waitForCurrentState(const rclcpp::Time t = rclcpp::Clock().now(), double wait_time = 1.0) const;
+  bool waitForCurrentState(const rclcpp::Time& t = rclcpp::Clock().now(), double wait_time = 1.0) const;
 
   /** @brief Wait for at most \e wait_time seconds until the complete robot state is known.
       @return true if the full state is known */

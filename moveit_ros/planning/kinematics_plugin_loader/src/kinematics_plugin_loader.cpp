@@ -118,8 +118,8 @@ public:
     // Debug tip choices
     std::stringstream tip_debug;
     tip_debug << "Planning group '" << jmg->getName() << "' has tip(s): ";
-    for (std::size_t i = 0; i < tips.size(); ++i)
-      tip_debug << tips[i] << ", ";
+    for (const auto& tip : tips)
+      tip_debug << tip << ", ";
     RCLCPP_DEBUG(LOGGER, tip_debug.str());
 
     return tips;
@@ -354,7 +354,7 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
             rclcpp::Parameter ksolver_res_param = node_->get_parameter(ksolver_res_param_name);
             if (ksolver_res_param.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
             {
-              std::string ksolver_res = ksolver_res_param.as_string();
+              const std::string& ksolver_res = ksolver_res_param.as_string();
               std::stringstream ss(ksolver_res);
               while (ss.good() && !ss.eof())
               {
@@ -384,11 +384,10 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
             if (ksolver_ik_links_param.get_type() == rclcpp::ParameterType::PARAMETER_STRING_ARRAY)
             {
               std::vector<std::string> ksolver_ik_links = ksolver_ik_links_param.as_string_array();
-              for (size_t j = 0; j < ksolver_ik_links.size(); ++j)
+              for (auto& ksolver_ik_link : ksolver_ik_links)
               {
-                RCLCPP_DEBUG(LOGGER, "found tip %s for group %s", ksolver_ik_links[j].c_str(),
-                             known_group.name_.c_str());
-                iksolver_to_tip_links[known_group.name_].push_back(ksolver_ik_links[j]);
+                RCLCPP_DEBUG(LOGGER, "found tip %s for group %s", ksolver_ik_link.c_str(), known_group.name_.c_str());
+                iksolver_to_tip_links[known_group.name_].push_back(ksolver_ik_link);
               }
             }
             else
