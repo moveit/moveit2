@@ -247,7 +247,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
 
   last_update_time_ = last_robot_motion_time_ = rclcpp::Clock().now();
   last_robot_state_update_wall_time_ = std::chrono::system_clock::now();
-  dt_state_update_ = std::chrono::duration<double>(0.1);
+  dt_state_update_ = std::chrono::duration<double>(0.03);
 
   double temp_wait_time = 0.05;
 
@@ -379,6 +379,11 @@ void PlanningSceneMonitor::scenePublishingThread()
             if (octomap_monitor_)
               lock = octomap_monitor_->getOcTreePtr()->reading();
             scene_->getPlanningSceneDiffMsg(msg);
+            if (new_scene_update_ == UPDATE_STATE)
+            {
+              msg.robot_state.attached_collision_objects.clear();
+              msg.robot_state.is_diff = true;
+            }
           }
           boost::recursive_mutex::scoped_lock prevent_shape_cache_updates(shape_handles_lock_);  // we don't want the
                                                                                                  // transform cache to
@@ -414,7 +419,6 @@ void PlanningSceneMonitor::scenePublishingThread()
     }
     if (publish_msg)
     {
-      rate.reset();
       planning_scene_publisher_->publish(msg);
       if (is_full)
         RCLCPP_DEBUG(LOGGER, "Published full planning scene: '%s'", msg.name.c_str());

@@ -1,18 +1,18 @@
-<img src="https://github.com/ros-planning/moveit.ros.org/blob/master/assets/logo/moveit2/moveit_logo-black.png" alt="MoveIt 2 Logo" width="300"/>
+<img src="https://moveit.ros.org/assets/logo/moveit2/moveit_logo-black.png" alt="MoveIt 2 Logo" width="200"/>
 
 The MoveIt Motion Planning Framework for **ROS 2**. For ROS 1, see [MoveIt 1](https://github.com/ros-planning/moveit).
 
-Currently we support ROS 2 Eloquent.
+*Easy-to-use open source robotics manipulation platform for developing commercial applications, prototyping designs, and benchmarking algorithms.*
 
 ## Continuous Integration Status
 
-[![Build Status](https://travis-ci.org/ros-planning/moveit2.svg?branch=master)](https://travis-ci.org/ros-planning/moveit2)
+[![Build Status](https://travis-ci.com/ros-planning/moveit2.svg?branch=master)](https://travis-ci.org/ros-planning/moveit2)
 
 ## General MoveIt Documentation
 
 - [MoveIt Website](http://moveit.ros.org)
 - [Tutorials and Documentation](http://moveit.ros.org/documentation/)
-- [How to Get Involved](http://moveit.ros.org/documentation/contributing/)
+- [How to Get Involved](http://moveit.ros.org/about/get_involved/)
 - [Future Release Dates](https://moveit.ros.org/#release-versions)
 
 ## MoveIt 2 Specific Documentation
