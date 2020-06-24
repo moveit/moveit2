@@ -31,6 +31,8 @@
  * Author: Adam Leeper, Stuart Glaser
  */
 
+// TODO(JafarAbdi): This file is coming from https://github.com/ros/geometry which has not been ported to ROS2
+
 #pragma once
 
 #include <Eigen/Core>
