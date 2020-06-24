@@ -1,8 +1,8 @@
 /*******************************************************************************
- *      Title     : jog_ros_interface.h
+ *      Title     : jog_arm.cpp
  *      Project   : moveit_jog_arm
  *      Created   : 3/9/2017
- *      Author    : Brian O'Neil, Blake Anderson, Andy Zelenak
+ *      Author    : Brian O'Neil, Andy Zelenak, Blake Anderson
  *
  * BSD 3-Clause License
  *
@@ -36,25 +36,68 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-// Server node for arm jogging with MoveIt.
-
 #pragma once
 
-#include "jog_interface_base.h"
+#include <memory>
+
+#include <moveit_jog_arm/collision_check.h>
+#include <moveit_jog_arm/jog_arm_parameters.h>
+#include <moveit_jog_arm/jog_calcs.h>
+#include <moveit_jog_arm/joint_state_subscriber.h>
 
 namespace moveit_jog_arm
 {
 /**
- * Class JogROSInterface - Instantiated in main(). Handles ROS subs & pubs and creates the worker threads.
+ * Class JogArm - Jacobian based robot control with collision avoidance.
  */
-class JogROSInterface : protected JogInterfaceBase
+class JogArm
 {
 public:
-  JogROSInterface();
+  JogArm(ros::NodeHandle& nh, const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+
+  ~JogArm();
+
+  /** \brief start jog arm */
+  void start();
+
+  /** \brief stop jog arm */
+  void stop();
+
+  /** \brief Pause or unpause processing jog commands while keeping the timers alive */
+  void setPaused(bool paused);
+
+  /**
+   * Get the MoveIt planning link transform.
+   * The transform from the MoveIt planning frame to robot_link_command_frame
+   *
+   * @param transform the transform that will be calculated
+   * @return true if a valid transform was available
+   */
+  bool getCommandFrameTransform(Eigen::Isometry3d& transform);
+
+  /** \brief Get the parameters used by jog arm. */
+  const JogArmParameters& getParameters() const;
+
+  /** \brief Get the latest joint state. */
+  sensor_msgs::JointStateConstPtr getLatestJointState() const;
 
 private:
-  // ROS subscriber callbacks
-  void deltaCartesianCmdCB(const geometry_msgs::TwistStampedConstPtr& msg);
-  void deltaJointCmdCB(const control_msgs::JointJogConstPtr& msg);
+  bool readParameters();
+
+  ros::NodeHandle nh_;
+
+  // Pointer to the collision environment
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+
+  // Store the parameters that were read from ROS server
+  JogArmParameters parameters_;
+
+  std::shared_ptr<JointStateSubscriber> joint_state_subscriber_;
+  std::unique_ptr<JogCalcs> jog_calcs_;
+  std::unique_ptr<CollisionCheck> collision_checker_;
 };
+
+// JogArmPtr using alias
+using JogArmPtr = std::shared_ptr<JogArm>;
+
 }  // namespace moveit_jog_arm

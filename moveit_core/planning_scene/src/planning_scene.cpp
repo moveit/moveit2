@@ -965,9 +965,10 @@ void PlanningScene::saveGeometryToStream(std::ostream& out) const
         for (std::size_t j = 0; j < obj->shapes_.size(); ++j)
         {
           shapes::saveAsText(obj->shapes_[j].get(), out);
+          // shape_poses_ is valid isometry by contract
           out << obj->shape_poses_[j].translation().x() << " " << obj->shape_poses_[j].translation().y() << " "
               << obj->shape_poses_[j].translation().z() << std::endl;
-          Eigen::Quaterniond r(obj->shape_poses_[j].rotation());
+          Eigen::Quaterniond r(obj->shape_poses_[j].linear());
           out << r.x() << " " << r.y() << " " << r.z() << " " << r.w() << std::endl;
           if (hasObjectColor(id))
           {
@@ -1018,8 +1019,8 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
       in >> shape_count;
       for (std::size_t i = 0; i < shape_count && in.good() && !in.eof(); ++i)
       {
-        shapes::Shape* s = shapes::constructShapeFromText(in);
-        if (!s)
+        const auto shape = shapes::ShapeConstPtr(shapes::constructShapeFromText(in));
+        if (!shape)
         {
           RCLCPP_ERROR(LOGGER, "Failed to load shape from scene file");
           return false;
@@ -1041,12 +1042,12 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
           RCLCPP_ERROR(LOGGER, "Improperly formatted color in scene geometry file");
           return false;
         }
-        if (s)
+        if (shape)
         {
           Eigen::Isometry3d pose = Eigen::Translation3d(x, y, z) * Eigen::Quaterniond(rw, rx, ry, rz);
           // Transform pose by input pose offset
           pose = offset * pose;
-          world_->addToObject(ns, shapes::ShapePtr(s), pose);
+          world_->addToObject(ns, shape, pose);
           if (r > 0.0f || g > 0.0f || b > 0.0f || a > 0.0f)
           {
             std_msgs::msg::ColorRGBA color;
@@ -1286,7 +1287,7 @@ void PlanningScene::processOctomapMsg(const octomap_msgs::msg::Octomap& map)
   std::shared_ptr<octomap::OcTree> om(static_cast<octomap::OcTree*>(octomap_msgs::msgToMap(map)));
   if (!map.header.frame_id.empty())
   {
-    const Eigen::Isometry3d& t = getTransforms().getTransform(map.header.frame_id);
+    const Eigen::Isometry3d& t = getFrameTransform(map.header.frame_id);
     world_->addToObject(OCTOMAP_NS, shapes::ShapeConstPtr(new shapes::OcTree(om)), t);
   }
   else
@@ -1322,7 +1323,7 @@ void PlanningScene::processOctomapMsg(const octomap_msgs::msg::OctomapWithPose& 
   }
 
   std::shared_ptr<octomap::OcTree> om(static_cast<octomap::OcTree*>(octomap_msgs::msgToMap(map.octomap)));
-  const Eigen::Isometry3d& t = getTransforms().getTransform(map.header.frame_id);
+  const Eigen::Isometry3d& t = getFrameTransform(map.header.frame_id);
   Eigen::Isometry3d p;
   tf2::fromMsg(map.origin, p);
   p = t * p;
@@ -1496,7 +1497,7 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
         if (object.object.header.frame_id != object.link_name)
         {
           const Eigen::Isometry3d& transform = robot_state_->getGlobalLinkTransform(link_model).inverse() *
-                                               getTransforms().getTransform(object.object.header.frame_id);
+                                               getFrameTransform(object.object.header.frame_id);
           for (Eigen::Isometry3d& pose : poses)
             pose = transform * pose;
         }
@@ -1536,7 +1537,7 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
         if (object.object.header.frame_id != object.link_name)
         {
           const Eigen::Isometry3d& transform = robot_state_->getGlobalLinkTransform(link_model).inverse() *
-                                               getTransforms().getTransform(object.object.header.frame_id);
+                                               getFrameTransform(object.object.header.frame_id);
           for (auto& subframe : subframe_poses)
             subframe.second = transform * subframe.second;
         }
@@ -1733,7 +1734,7 @@ bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionO
     return false;
   }
 
-  if (!getTransforms().canTransform(object.header.frame_id))
+  if (!knowsFrameTransform(object.header.frame_id))
   {
     RCLCPP_ERROR(LOGGER, "Unknown frame: %s", object.header.frame_id.c_str());
     return false;
@@ -1743,7 +1744,7 @@ bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionO
   if (object.operation == moveit_msgs::msg::CollisionObject::ADD && world_->hasObject(object.id))
     world_->removeObject(object.id);
 
-  const Eigen::Isometry3d& object_frame_transform = getTransforms().getTransform(object.header.frame_id);
+  const Eigen::Isometry3d& object_frame_transform = getFrameTransform(object.header.frame_id);
 
   for (std::size_t i = 0; i < object.primitives.size(); ++i)
   {
@@ -1814,7 +1815,7 @@ bool PlanningScene::processCollisionObjectMove(const moveit_msgs::msg::Collision
       RCLCPP_WARN(LOGGER, "Move operation for object '%s' ignores the geometry specified in the message.",
                   object.id.c_str());
 
-    const Eigen::Isometry3d& t = getTransforms().getTransform(object.header.frame_id);
+    const Eigen::Isometry3d& t = getFrameTransform(object.header.frame_id);
     EigenSTL::vector_Isometry3d new_poses;
     for (const geometry_msgs::msg::Pose& primitive_pose : object.primitive_poses)
     {

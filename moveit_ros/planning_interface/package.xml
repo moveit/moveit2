@@ -1,4 +1,5 @@
-<package format="2">
+<?xml version="1.0"?>
+<package format="3">
   <name>moveit_ros_planning_interface</name>
   <version>2.0.0</version>
   <description>Components of MoveIt that offer simpler interfaces to planning and execution</description>
@@ -16,7 +17,6 @@
   <url type="repository">https://github.com/ros-planning/moveit</url>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-
   <buildtool_depend>eigen3_cmake_module</buildtool_depend>
 
   <depend>moveit_core</depend>

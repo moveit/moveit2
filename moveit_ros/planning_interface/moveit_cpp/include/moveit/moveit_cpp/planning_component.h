@@ -106,10 +106,21 @@ public:
   {
     std::string planner_id;
     std::string planning_pipeline;
-    size_t planning_attempts;
+    int planning_attempts;
     double planning_time;
     double max_velocity_scaling_factor;
     double max_acceleration_scaling_factor;
+
+    void load(const rclcpp::Node::SharedPtr& node)
+    {
+      std::string ns = "plan_request_params.";
+      node->get_parameter_or(ns + "planner_id", planner_id, std::string(""));
+      node->get_parameter_or(ns + "planning_pipeline", planning_pipeline, std::string(""));
+      node->get_parameter_or(ns + "planning_attempts", planning_attempts, 1);
+      node->get_parameter_or(ns + "planning_time", planning_time, 5.0);
+      node->get_parameter_or(ns + "max_velocity_scaling_factor", max_velocity_scaling_factor, 1.0);
+      node->get_parameter_or(ns + "max_acceleration_scaling_factor", max_acceleration_scaling_factor, 1.0);
+    }
   };
 
   /** \brief Constructor */

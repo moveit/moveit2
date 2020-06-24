@@ -1,9 +1,4 @@
 /*******************************************************************************
- * Title     : collision_check_thread.h
- * Project   : moveit_jog_arm
- * Created   : 1/11/2019
- * Author    : Brian O'Neil, Andy Zelenak, Blake Anderson
- *
  * BSD 3-Clause License
  *
  * Copyright (c) 2019, Los Alamos National Security, LLC
@@ -36,36 +31,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-#pragma once
+/*      Title     : joint_state_subscriber.cpp
+ *      Project   : moveit_jog_arm
+ *      Created   : 06/11/2020
+ *      Author    : Tyler Weaver
+ */
 
-#include <atomic>
-#include "jog_arm_data.h"
-#include "low_pass_filter.h"
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit_jog_arm/joint_state_subscriber.h>
 
 namespace moveit_jog_arm
 {
-class CollisionCheckThread
+constexpr char LOGNAME[] = "joint_state_subscriber";
+
+// Constructor for the class that handles collision checking
+JointStateSubscriber::JointStateSubscriber(ros::NodeHandle& nh, const std::string& joint_state_topic_name)
 {
-public:
-  /** \brief Constructor
-   *  \param parameters: common settings of jog_arm
-   *  \param planning_scene_monitor: PSM should have scene monitor and state monitor
-   *                                 already started when passed into this class
-   */
-  CollisionCheckThread(const moveit_jog_arm::JogArmParameters& parameters,
-                       const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+  // subscribe to joints
+  joint_state_sub_ = nh.subscribe(joint_state_topic_name, ROS_QUEUE_SIZE, &JointStateSubscriber::jointStateCB, this);
 
-  // Get thread-safe read-only lock of planning scene
-  planning_scene_monitor::LockedPlanningSceneRO getLockedPlanningSceneRO() const;
+  // Wait for initial messages
+  ROS_INFO_NAMED(LOGNAME, "Waiting for first joint msg.");
+  ros::topic::waitForMessage<sensor_msgs::JointState>(joint_state_topic_name);
+  ROS_INFO_NAMED(LOGNAME, "Received first joint msg.");
+}
 
-  void startMainLoop(moveit_jog_arm::JogArmShared& shared_variables);
+sensor_msgs::JointStateConstPtr JointStateSubscriber::getLatest() const
+{
+  const std::lock_guard<std::mutex> lock(joint_state_mutex_);
+  return latest_joint_state_;
+}
 
-private:
-  const moveit_jog_arm::JogArmParameters parameters_;
+void JointStateSubscriber::jointStateCB(const sensor_msgs::JointStateConstPtr& msg)
+{
+  const std::lock_guard<std::mutex> lock(joint_state_mutex_);
+  latest_joint_state_ = msg;
+}
 
-  // Pointer to the collision environment
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-};
 }  // namespace moveit_jog_arm
