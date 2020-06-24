@@ -13,7 +13,7 @@ notifications:
 env:
   global:
     - MOVEIT_CI_TRAVIS_TIMEOUT=85  # Travis grants us 90 min, but we add a safety margin of 5 min
-    - ROS_DISTRO=eloquent
+    - ROS_DISTRO=foxy
     - ROS_REPO=ros
     - UPSTREAM_WORKSPACE=moveit2.repos
     - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls"
@@ -24,7 +24,7 @@ jobs:
   include:
     - env: TEST="clang-format ament_lint"
     - env: TEST=code-coverage
-    - env: ROS_DISTRO=eloquent
+    - env: ROS_DISTRO=foxy
     - compiler: clang  # test_ikfast_plugins takes ~10 minutes: include here to keep the main jobs shorter
       env: TEST=clang-tidy-fix
            CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-overloaded-virtual"
