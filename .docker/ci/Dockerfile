@@ -1,8 +1,8 @@
-# moveit/moveit2:eloquent-ci
+# moveit/moveit2:foxy-ci
 # ROS base image augmented with all MoveIt dependencies to use for CI on Travis
 
-ARG ROS_DISTRO=eloquent
-FROM ros:${ROS_DISTRO}-ros-base-bionic
+ARG ROS_DISTRO=foxy
+FROM ros:${ROS_DISTRO}-ros-base-focal
 
 MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
 MAINTAINER Dave Coleman dave@picknik.ai
@@ -22,11 +22,11 @@ RUN apt-get -qq update && \
     apt-get -qq install -y \
         # Required by moveit_ci
         wget curl sudo xvfb mesa-utils ccache ssh curl gnupg2 lsb-release \
-        clang clang-format-3.9 clang-tidy clang-tools \
+        clang clang-format-10 clang-tidy clang-tools \
         # Some python dependencies for working with ROS2
         python3-colcon-common-extensions \
         python3-pip \
-        python-rosdep \
+        python3-rosdep \
         python3-wstool \
         python3-vcstool \
         python3-rospkg-modules \
@@ -44,7 +44,7 @@ RUN mkdir src && \
     find -L . -name COLCON_IGNORE -printf "%h\0" | xargs -0 rm -rf && \
     apt-get -qq update && \
     rosdep update -q && \
-    rosdep install -q -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false --skip-keys=octomap && \
+    rosdep install -q -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/* && \
     #
