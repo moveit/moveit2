@@ -38,36 +38,35 @@
 
 using namespace moveit_ros_benchmarks;
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.benchmarks.BenchmarkOptions");
+
 BenchmarkOptions::BenchmarkOptions()
 {
 }
 
-BenchmarkOptions::BenchmarkOptions(const std::string& ros_namespace)
+BenchmarkOptions::BenchmarkOptions(const rclcpp::Node::SharedPtr& node)
 {
-  readBenchmarkOptions(ros_namespace);
+  readBenchmarkOptions(node);
 }
 
 BenchmarkOptions::~BenchmarkOptions() = default;
 
-void BenchmarkOptions::setNamespace(const std::string& ros_namespace)
-{
-  readBenchmarkOptions(ros_namespace);
-}
+// void BenchmarkOptions::setNamespace(const std::string& ros_namespace)
+// {
+//   readBenchmarkOptions(ros_namespace);
+// }
 
-void BenchmarkOptions::readBenchmarkOptions(const std::string& ros_namespace)
+void BenchmarkOptions::readBenchmarkOptions(const rclcpp::Node::SharedPtr& node)
 {
-  ros::NodeHandle nh(ros_namespace);
-
-  XmlRpc::XmlRpcValue benchmark_config;
-  if (nh.getParam("benchmark_config", benchmark_config))
+  if (node->has_parameter("benchmark_config.parameters.name"))
   {
-    readWarehouseOptions(nh);
-    readBenchmarkParameters(nh);
-    readPlannerConfigs(nh);
+    readWarehouseOptions(node);
+    readBenchmarkParameters(node);
+    readPlannerConfigs(node);
   }
   else
   {
-    ROS_WARN("No benchmark_config found on param server");
+    RCLCPP_WARN(LOGGER, "No benchmark_config found on param server");
   }
 }
 
@@ -174,123 +173,126 @@ const moveit_msgs::msg::WorkspaceParameters& BenchmarkOptions::getWorkspaceParam
   return workspace_;
 }
 
-void BenchmarkOptions::readWarehouseOptions(ros::NodeHandle& nh)
+void BenchmarkOptions::readWarehouseOptions(const rclcpp::Node::SharedPtr& node)
 {
-  nh.param(std::string("benchmark_config/warehouse/host"), hostname_, std::string("127.0.0.1"));
-  nh.param(std::string("benchmark_config/warehouse/port"), port_, 33829);
+  node->get_parameter_or(std::string("benchmark_config.warehouse.host"), hostname_, std::string("127.0.0.1"));
+  node->get_parameter_or(std::string("benchmark_config.warehouse.port"), port_, 33829);
 
-  if (!nh.getParam("benchmark_config/warehouse/scene_name", scene_name_))
-    ROS_WARN("Benchmark scene_name NOT specified");
+  if (!node->get_parameter("benchmark_config.warehouse.scene_name", scene_name_))
+    RCLCPP_WARN(LOGGER, "Benchmark scene_name NOT specified");
 
-  ROS_INFO("Benchmark host: %s", hostname_.c_str());
-  ROS_INFO("Benchmark port: %d", port_);
-  ROS_INFO("Benchmark scene: %s", scene_name_.c_str());
+  RCLCPP_INFO(LOGGER, "Benchmark host: %s", hostname_.c_str());
+  RCLCPP_INFO(LOGGER, "Benchmark port: %d", port_);
+  RCLCPP_INFO(LOGGER, "Benchmark scene: %s", scene_name_.c_str());
 }
 
-void BenchmarkOptions::readBenchmarkParameters(ros::NodeHandle& nh)
+void BenchmarkOptions::readBenchmarkParameters(const rclcpp::Node::SharedPtr& node)
 {
-  nh.param(std::string("benchmark_config/parameters/name"), benchmark_name_, std::string(""));
-  nh.param(std::string("benchmark_config/parameters/runs"), runs_, 10);
-  nh.param(std::string("benchmark_config/parameters/timeout"), timeout_, 10.0);
-  nh.param(std::string("benchmark_config/parameters/output_directory"), output_directory_, std::string(""));
-  nh.param(std::string("benchmark_config/parameters/queries"), query_regex_, std::string(".*"));
-  nh.param(std::string("benchmark_config/parameters/start_states"), start_state_regex_, std::string(""));
-  nh.param(std::string("benchmark_config/parameters/goal_constraints"), goal_constraint_regex_, std::string(""));
-  nh.param(std::string("benchmark_config/parameters/path_constraints"), path_constraint_regex_, std::string(""));
-  nh.param(std::string("benchmark_config/parameters/trajectory_constraints"), trajectory_constraint_regex_,
-           std::string(""));
-  nh.param(std::string("benchmark_config/parameters/predefined_poses"), predefined_poses_, {});
-  nh.param(std::string("benchmark_config/parameters/predefined_poses_group"), predefined_poses_group_, std::string(""));
+  node->get_parameter_or(std::string("benchmark_config.parameters.name"), benchmark_name_, std::string(""));
+  node->get_parameter_or(std::string("benchmark_config.parameters.runs"), runs_, 10);
+  node->get_parameter_or(std::string("benchmark_config.parameters.timeout"), timeout_, 10.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.output_directory"), output_directory_,
+                         std::string(""));
+  node->get_parameter_or(std::string("benchmark_config.parameters.queries"), query_regex_, std::string(".*"));
+  node->get_parameter_or(std::string("benchmark_config.parameters.start_states"), start_state_regex_, std::string(""));
+  node->get_parameter_or(std::string("benchmark_config.parameters.goal_constraints"), goal_constraint_regex_,
+                         std::string(""));
+  node->get_parameter_or(std::string("benchmark_config.parameters.path_constraints"), path_constraint_regex_,
+                         std::string(""));
+  node->get_parameter_or(std::string("benchmark_config.parameters.trajectory_constraints"),
+                         trajectory_constraint_regex_, std::string(""));
+  node->get_parameter_or(std::string("benchmark_config.parameters.predefined_poses"), predefined_poses_, {});
+  node->get_parameter_or(std::string("benchmark_config.parameters.predefined_poses_group"), predefined_poses_group_,
+                         std::string(""));
 
-  if (!nh.getParam(std::string("benchmark_config/parameters/group"), group_name_))
-    ROS_WARN("Benchmark group NOT specified");
+  if (!node->get_parameter(std::string("benchmark_config.parameters.group"), group_name_))
+    RCLCPP_INFO(LOGGER, "Benchmark group NOT specified");
 
-  if (nh.hasParam("benchmark_config/parameters/workspace"))
-    readWorkspaceParameters(nh);
+  if (node->has_parameter("benchmark_config.parameters.workspace"))
+    readWorkspaceParameters(node);
 
   // Reading in goal_offset (or defaulting to zero)
-  nh.param(std::string("benchmark_config/parameters/goal_offset/x"), goal_offsets[0], 0.0);
-  nh.param(std::string("benchmark_config/parameters/goal_offset/y"), goal_offsets[1], 0.0);
-  nh.param(std::string("benchmark_config/parameters/goal_offset/z"), goal_offsets[2], 0.0);
-  nh.param(std::string("benchmark_config/parameters/goal_offset/roll"), goal_offsets[3], 0.0);
-  nh.param(std::string("benchmark_config/parameters/goal_offset/pitch"), goal_offsets[4], 0.0);
-  nh.param(std::string("benchmark_config/parameters/goal_offset/yaw"), goal_offsets[5], 0.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.x"), goal_offsets[0], 0.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.y"), goal_offsets[1], 0.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.z"), goal_offsets[2], 0.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.roll"), goal_offsets[3], 0.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.pitch"), goal_offsets[4], 0.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.goal_offset.yaw"), goal_offsets[5], 0.0);
 
-  ROS_INFO("Benchmark name: '%s'", benchmark_name_.c_str());
-  ROS_INFO("Benchmark #runs: %d", runs_);
-  ROS_INFO("Benchmark timeout: %f secs", timeout_);
-  ROS_INFO("Benchmark group: %s", group_name_.c_str());
-  ROS_INFO("Benchmark query regex: '%s'", query_regex_.c_str());
-  ROS_INFO("Benchmark start state regex: '%s':", start_state_regex_.c_str());
-  ROS_INFO("Benchmark goal constraint regex: '%s':", goal_constraint_regex_.c_str());
-  ROS_INFO("Benchmark path constraint regex: '%s':", path_constraint_regex_.c_str());
-  ROS_INFO("Benchmark goal offsets (%f %f %f, %f %f %f)", goal_offsets[0], goal_offsets[1], goal_offsets[2],
-           goal_offsets[3], goal_offsets[4], goal_offsets[5]);
-  ROS_INFO("Benchmark output directory: %s", output_directory_.c_str());
-  ROS_INFO_STREAM("Benchmark workspace: " << workspace_);
+  RCLCPP_INFO(LOGGER, "Benchmark name: '%s'", benchmark_name_.c_str());
+  RCLCPP_INFO(LOGGER, "Benchmark #runs: %d", runs_);
+  RCLCPP_INFO(LOGGER, "Benchmark timeout: %f secs", timeout_);
+  RCLCPP_INFO(LOGGER, "Benchmark group: %s", group_name_.c_str());
+  RCLCPP_INFO(LOGGER, "Benchmark query regex: '%s'", query_regex_.c_str());
+  RCLCPP_INFO(LOGGER, "Benchmark start state regex: '%s':", start_state_regex_.c_str());
+  RCLCPP_INFO(LOGGER, "Benchmark goal constraint regex: '%s':", goal_constraint_regex_.c_str());
+  RCLCPP_INFO(LOGGER, "Benchmark path constraint regex: '%s':", path_constraint_regex_.c_str());
+  RCLCPP_INFO(LOGGER, "Benchmark goal offsets (%f %f %f, %f %f %f)", goal_offsets[0], goal_offsets[1], goal_offsets[2],
+              goal_offsets[3], goal_offsets[4], goal_offsets[5]);
+  RCLCPP_INFO(LOGGER, "Benchmark output directory: %s", output_directory_.c_str());
+  RCLCPP_INFO_STREAM(LOGGER, "Benchmark workspace: min_corner: ["
+                                 << workspace_.min_corner.x << ", " << workspace_.min_corner.y << ", "
+                                 << workspace_.min_corner.z << "], "
+                                 << "max_corner: [" << workspace_.max_corner.x << ", " << workspace_.max_corner.y
+                                 << ", " << workspace_.max_corner.z << "]");
 }
 
-void BenchmarkOptions::readWorkspaceParameters(ros::NodeHandle& nh)
+void BenchmarkOptions::readWorkspaceParameters(const rclcpp::Node::SharedPtr& node)
 {
   // Make sure all params exist
-  if (!nh.getParam("benchmark_config/parameters/workspace/frame_id", workspace_.header.frame_id))
-    ROS_WARN("Workspace frame_id not specified in benchmark config");
+  if (!node->get_parameter("benchmark_config.parameters.workspace.frame_id", workspace_.header.frame_id))
+    RCLCPP_WARN(LOGGER, "Workspace frame_id not specified in benchmark config");
 
-  nh.param(std::string("benchmark_config/parameters/workspace/min_corner/x"), workspace_.min_corner.x, 0.0);
-  nh.param(std::string("benchmark_config/parameters/workspace/min_corner/y"), workspace_.min_corner.y, 0.0);
-  nh.param(std::string("benchmark_config/parameters/workspace/min_corner/z"), workspace_.min_corner.z, 0.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.x"), workspace_.min_corner.x,
+                         0.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.y"), workspace_.min_corner.y,
+                         0.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.workspace.min_corner.z"), workspace_.min_corner.z,
+                         0.0);
 
-  nh.param(std::string("benchmark_config/parameters/workspace/max_corner/x"), workspace_.max_corner.x, 0.0);
-  nh.param(std::string("benchmark_config/parameters/workspace/max_corner/y"), workspace_.max_corner.y, 0.0);
-  nh.param(std::string("benchmark_config/parameters/workspace/max_corner/z"), workspace_.max_corner.z, 0.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.x"), workspace_.max_corner.x,
+                         0.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.y"), workspace_.max_corner.y,
+                         0.0);
+  node->get_parameter_or(std::string("benchmark_config.parameters.workspace.max_corner.z"), workspace_.max_corner.z,
+                         0.0);
 
-  workspace_.header.stamp = ros::Time::now();
+  workspace_.header.stamp = rclcpp::Clock().now();
 }
 
-void BenchmarkOptions::readPlannerConfigs(ros::NodeHandle& nh)
+void BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
 {
   planning_pipelines_.clear();
 
-  XmlRpc::XmlRpcValue pipeline_configs;
-  if (nh.getParam("benchmark_config/planning_pipelines", pipeline_configs))
+  const std::string np = "benchmark_config.planning_pipelines";
+  std::vector<std::string> pipelines;
+  if (!node->get_parameter(np + ".pipelines", pipelines))
   {
-    if (pipeline_configs.getType() != XmlRpc::XmlRpcValue::TypeArray)
+    RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", (np + ".pipelines").c_str());
+    return;
+  }
+
+  for (const std::string& pipeline : pipelines)
+  {
+    std::string pipeline_name;
+    if (!node->get_parameter(np + "." + pipeline + ".name", pipeline_name))
     {
-      ROS_ERROR("Expected a list of planning pipeline configurations to benchmark");
+      RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", (np + "." + pipeline + ".name").c_str());
       return;
     }
 
-    for (int i = 0; i < pipeline_configs.size(); ++i)  // NOLINT(modernize-loop-convert)
+    RCLCPP_INFO(LOGGER, "Reading in planner names for planning pipeline '%s'", pipeline_name.c_str());
+
+    std::vector<std::string> planners;
+    if (!node->get_parameter(np + "." + pipeline + ".planners", planners))
     {
-      if (pipeline_configs[i].getType() != XmlRpc::XmlRpcValue::TypeStruct)
-      {
-        ROS_WARN("Improper YAML type for planning pipeline configurations");
-        continue;
-      }
-      if (!pipeline_configs[i].hasMember("name") || !pipeline_configs[i].hasMember("planners"))
-      {
-        ROS_WARN("Malformed YAML for planner configurations");
-        continue;
-      }
-
-      if (pipeline_configs[i]["planners"].getType() != XmlRpc::XmlRpcValue::TypeArray)
-      {
-        ROS_WARN("Expected a list of planners to benchmark");
-        continue;
-      }
-
-      const std::string pipeline_name = pipeline_configs[i]["name"];
-      ROS_INFO("Reading in planner names for planning pipeline '%s'", pipeline_name.c_str());
-
-      std::vector<std::string> planners;
-      planners.reserve(pipeline_configs[i]["planners"].size());
-      for (int j = 0; j < pipeline_configs[i]["planners"].size(); ++j)
-        planners.emplace_back(pipeline_configs[i]["planners"][j]);
-
-      for (std::size_t j = 0; j < planners.size(); ++j)
-        ROS_INFO("  [%lu]: %s", j, planners[j].c_str());
-
-      planning_pipelines_[pipeline_name] = planners;
+      RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", (np + "." + pipeline + ".planners").c_str());
+      return;
     }
+
+    for (const std::string& planner : planners)
+      RCLCPP_INFO(LOGGER, "  %s", planner.c_str());
+
+    planning_pipelines_[pipeline_name] = planners;
   }
 }
