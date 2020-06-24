@@ -64,7 +64,6 @@ ament_target_dependencies(moveit_ros_occupancy_map_server
 target_link_libraries(moveit_ros_occupancy_map_server ${MOVEIT_LIB_NAME})
 
 ament_export_include_directories(include)
-ament_export_interfaces(${MOVEIT_LIB_NAME} HAS_LIBRARY_TARGET)
 ament_export_libraries(${MOVEIT_LIB_NAME})
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(eigen3_cmake_module)
