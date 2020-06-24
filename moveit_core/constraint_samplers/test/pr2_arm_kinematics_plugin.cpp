@@ -97,6 +97,12 @@ PR2ArmIKSolver::PR2ArmIKSolver(const urdf::ModelInterface& robot_model, const st
   active_ = pr2_arm_ik_.init(robot_model, root_frame_name, tip_frame_name);
 }
 
+void PR2ArmIKSolver::updateInternalDataStructures()
+{
+  // TODO: move (re)allocation of any internal data structures here
+  // to react to changes in chain
+}
+
 int PR2ArmIKSolver::CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_in, KDL::JntArray& q_out)
 {
   const bool verbose = false;
