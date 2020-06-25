@@ -58,7 +58,7 @@ find_library(LIBFCL_LIBRARIES_FULL ${LIBFCL_LIBRARIES} ${LIBFCL_LIBRARY_DIRS})
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
 
 
-find_package(octomap REQUIRED)
+find_package(OCTOMAP REQUIRED)
 find_package(urdfdom REQUIRED)
 find_package(urdf REQUIRED)
 find_package(urdfdom_headers REQUIRED)

@@ -21,7 +21,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   tf2_eigen
   geometric_shapes
   Boost
-  octomap
+  OCTOMAP
 )
 
 target_link_libraries(${MOVEIT_LIB_NAME}
@@ -30,7 +30,6 @@ target_link_libraries(${MOVEIT_LIB_NAME}
 
 # unit tests
 if(BUILD_TESTING)
-  find_package(resource_retriever REQUIRED)
   if(WIN32)
     # TODO add window paths
   else()
@@ -39,35 +38,15 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_world test/test_world.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_world
-    ${MOVEIT_LIB_NAME}
-    ${urdfdom}
-    ${urdfdom_headers}
-    ${Boost_LIBRARIES}
-    ${geometric_shapes_LIBRARIES}
-  )
+  target_link_libraries(test_world ${MOVEIT_LIB_NAME})
 
   ament_add_gtest(test_world_diff test/test_world_diff.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_world_diff
-    ${MOVEIT_LIB_NAME}
-    ${urdfdom}
-    ${urdfdom_headers}
-    ${Boost_LIBRARIES}
-    ${geometric_shapes_LIBRARIES}
-  )
+  target_link_libraries(test_world_diff ${MOVEIT_LIB_NAME})
 
   ament_add_gtest(test_all_valid test/test_all_valid.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_all_valid
-    ${MOVEIT_LIB_NAME}
-    moveit_robot_model
-    ${urdfdom}
-    ${urdfdom_headers}
-    ${Boost_LIBRARIES}
-    ${geometric_shapes_LIBRARIES}
-    resource_retriever::resource_retriever
-  )
+  target_link_libraries(test_all_valid ${MOVEIT_LIB_NAME} moveit_robot_model)
 endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}

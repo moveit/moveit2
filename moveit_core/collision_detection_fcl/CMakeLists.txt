@@ -33,17 +33,13 @@ target_link_libraries(collision_detector_fcl_plugin
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME} collision_detector_fcl_plugin
-          LIBRARY DESTINATION lib
-          ARCHIVE DESTINATION lib
-          RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
-  find_package(moveit_resources REQUIRED)
-  include_directories(${moveit_resources_INCLUDE_DIRS})
-  find_package(resource_retriever REQUIRED)
-
   if(WIN32)
     # set(append_library_dirs "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
   else()
@@ -51,16 +47,11 @@ if(BUILD_TESTING)
   endif()
 
   ament_add_gtest(test_fcl_collision_env test/test_fcl_env.cpp)
-  target_link_libraries(test_fcl_collision_env
-    moveit_test_utils
-    ${MOVEIT_LIB_NAME}
-    ${Boost_LIBRARIES}
-    moveit_robot_state
-  )
+  target_link_libraries(test_fcl_collision_env moveit_test_utils ${MOVEIT_LIB_NAME})
 
   ament_add_gtest(test_fcl_collision_detection test/test_fcl_collision_detection_pr2.cpp)
-  target_link_libraries(test_fcl_collision_detection moveit_test_utils ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
+  target_link_libraries(test_fcl_collision_detection moveit_test_utils ${MOVEIT_LIB_NAME})
 
   ament_add_gtest(test_fcl_collision_detection_panda test/test_fcl_collision_detection_panda.cpp)
-  target_link_libraries(test_fcl_collision_detection_panda moveit_test_utils ${MOVEIT_LIB_NAME} ${Boost_LIBRARIES})
+  target_link_libraries(test_fcl_collision_detection_panda moveit_test_utils ${MOVEIT_LIB_NAME})
 endif()

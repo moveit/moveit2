@@ -32,21 +32,19 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(moveit_resources REQUIRED)
   ament_add_gtest(test_robot_model test/test.cpp)
+  ament_target_dependencies(test_robot_model
+    rclcpp
+    Boost
+  )
   target_link_libraries(test_robot_model
     moveit_test_utils
-    moveit_profiler
-    ${Boost_LIBRARIES}
-    ${rclcpp_LIBRARIES}
-    ${rmw_implementation_LIBRARIES}
-    ${urdfdom_LIBRARIES}
-    ${urdfdom_headers_LIBRARIES}
-    ${geometric_shapes_LIBRARIES}
-    ${MOVEIT_LIB_NAME})
+    ${MOVEIT_LIB_NAME}
+  )
 endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 install(DIRECTORY include/ DESTINATION include)
