@@ -44,8 +44,5 @@ if(BUILD_TESTING)
   ament_add_gtest(test_time_parameterization test/test_time_parameterization.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
 
-  target_link_libraries(test_time_parameterization
-    moveit_test_utils
-    ${MOVEIT_LIB_NAME}
-  )
+  target_link_libraries(test_time_parameterization moveit_test_utils ${MOVEIT_LIB_NAME})
 endif()

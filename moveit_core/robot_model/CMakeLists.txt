@@ -15,6 +15,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
+  moveit_msgs
   Eigen3
   geometric_shapes
   urdf
@@ -25,7 +26,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_profiler
   moveit_exceptions
-  moveit_kinematics_base
 )
 
 if(BUILD_TESTING)
@@ -36,10 +36,7 @@ if(BUILD_TESTING)
     rclcpp
     Boost
   )
-  target_link_libraries(test_robot_model
-    moveit_test_utils
-    ${MOVEIT_LIB_NAME}
-  )
+  target_link_libraries(test_robot_model moveit_test_utils ${MOVEIT_LIB_NAME})
 endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}
