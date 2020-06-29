@@ -236,12 +236,12 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     result.successful = true;
     bool publish_planning_scene = false, publish_geometry_updates = false, publish_state_updates = false,
          publish_transform_updates = false;
-    for (auto parameter : parameters)
+    for (const auto& parameter : parameters)
     {
       rclcpp::ParameterType parameter_type = parameter.get_type();
       if (parameter_type == rclcpp::ParameterType::PARAMETER_BOOL)
       {
-        std::string name = parameter.get_name();
+        const std::string& name = parameter.get_name();
         if (name == "planning_scene_monitor.publish_planning_scene")
           publish_planning_scene = parameter.as_bool();
         else if (name == "planning_scene_monitor.publish_geometry_updates")

@@ -36,9 +36,7 @@
 
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <moveit/robot_state/robot_state.h>
-// #include <moveit_ros_planning/TrajectoryExecutionDynamicReconfigureConfig.h>
 #include <geometric_shapes/check_isometry.h>
-// #include <dynamic_reconfigure/server.h>
 #include <tf2_eigen/tf2_eigen.h>
 
 namespace trajectory_execution_manager
@@ -53,35 +51,6 @@ static const double DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN = 0.5;  // allow 0.5
                                                                     // after scaling)
 static const double DEFAULT_CONTROLLER_GOAL_DURATION_SCALING =
     1.1;  // allow the execution of a trajectory to take more time than expected (scaled by a value > 1)
-
-// using namespace moveit_ros_planning; // Used for dynamic_reconfigure
-
-// class TrajectoryExecutionManager::DynamicReconfigureImpl
-// {
-// public:
-//   DynamicReconfigureImpl(TrajectoryExecutionManager* owner)
-//     : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle("~/trajectory_execution"))*/
-//   {
-//     // TODO: generate a similar thing for ros2 using the parameters
-//     // dynamic_reconfigure_server_.setCallback(
-//     //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
-//   }
-
-// private:
-//   // TODO: generate a similar thing for ros2 using the parameters
-//   // void dynamicReconfigureCallback(TrajectoryExecutionDynamicReconfigureConfig& config, uint32_t level)
-//   // {
-//   //   owner_->enableExecutionDurationMonitoring(config.execution_duration_monitoring);
-//   //   owner_->setAllowedExecutionDurationScaling(config.allowed_execution_duration_scaling);
-//   //   owner_->setAllowedGoalDurationMargin(config.allowed_goal_duration_margin);
-//   //   owner_->setExecutionVelocityScaling(config.execution_velocity_scaling);
-//   //   owner_->setAllowedStartTolerance(config.allowed_start_tolerance);
-//   //   owner_->setWaitForTrajectoryCompletion(config.wait_for_trajectory_completion);
-//   // }
-
-//   TrajectoryExecutionManager* owner_;
-//   // dynamic_reconfigure::Server<TrajectoryExecutionDynamicReconfigureConfig> dynamic_reconfigure_server_;
-// };
 
 TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node,
                                                        const moveit::core::RobotModelConstPtr& robot_model,
@@ -200,6 +169,31 @@ void TrajectoryExecutionManager::initialize()
     RCLCPP_INFO(LOGGER, "Trajectory execution is managing controllers");
   else
     RCLCPP_INFO(LOGGER, "Trajectory execution is not managing controllers");
+
+  auto controller_mgr_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters) {
+    auto result = rcl_interfaces::msg::SetParametersResult();
+    result.successful = true;
+    for (const auto& parameter : parameters)
+    {
+      const std::string& name = parameter.get_name();
+      if (name == "trajectory_execution.execution_duration_monitoring")
+        enableExecutionDurationMonitoring(parameter.as_bool());
+      else if (name == "trajectory_execution.allowed_execution_duration_scaling")
+        setAllowedExecutionDurationScaling(parameter.as_double());
+      else if (name == "trajectory_execution.allowed_goal_duration_margin")
+        setAllowedGoalDurationMargin(parameter.as_double());
+      else if (name == "trajectory_execution.execution_velocity_scaling")
+        setExecutionVelocityScaling(parameter.as_double());
+      else if (name == "trajectory_execution.allowed_start_tolerance")
+        setAllowedStartTolerance(parameter.as_double());
+      else if (name == "trajectory_execution.wait_for_trajectory_completion")
+        setWaitForTrajectoryCompletion(parameter.as_bool());
+      else
+        result.successful = false;
+    }
+    return result;
+  };
+  callback_handler_ = controller_mgr_node_->add_on_set_parameters_callback(controller_mgr_parameter_set_callback);
 }
 
 void TrajectoryExecutionManager::enableExecutionDurationMonitoring(bool flag)
@@ -1021,7 +1015,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
 
       for (std::size_t i = 0, end = joint_names.size(); i < end; ++i)
       {
-        const robot_model::JointModel* jm = current_state->getJointModel(joint_names[i]);
+        const moveit::core::JointModel* jm = current_state->getJointModel(joint_names[i]);
         if (!jm)
         {
           RCLCPP_ERROR_STREAM(LOGGER, "Unknown joint in trajectory: " << joint_names[i]);

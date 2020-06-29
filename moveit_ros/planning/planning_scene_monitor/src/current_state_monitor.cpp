@@ -352,8 +352,7 @@ void planning_scene_monitor::CurrentStateMonitor::jointStateCallback(
     std::unique_lock<std::mutex> _(state_update_lock_);
     // read the received values, and update their time stamps
     std::size_t n = joint_state->name.size();
-
-    current_state_time_ = rclcpp::Clock().now();
+    current_state_time_ = joint_state->header.stamp;
     for (std::size_t i = 0; i < n; ++i)
     {
       const moveit::core::JointModel* jm = robot_model_->getJointModel(joint_state->name[i]);
