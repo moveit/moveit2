@@ -58,60 +58,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_sce
 
 namespace planning_scene_monitor
 {
-// This namespace is used for the dynamic_reconfigure
-// using namespace moveit_ros_planning;
-
-// class PlanningSceneMonitor::DynamicReconfigureImpl
-// {
-// public:
-//   DynamicReconfigureImpl(PlanningSceneMonitor* owner)
-//     : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle(decideNamespace(owner->getName())))*/
-//   {
-//     // TODO (anasarrak): re-add when starting with the parameters for ros2
-//     // dynamic_reconfigure_server_.setCallback(
-//     //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
-//   }
-//
-// private:
-//   // make sure we do not advertise the same service multiple times, in case we use multiple PlanningSceneMonitor
-//   // instances in a process
-//   // TODO (anasarrak): Update advertise for ros2
-//   // static std::string decideNamespace(const std::string& name)
-//   // {
-//   //   std::string ns = "~/" + name;
-//   //   std::replace(ns.begin(), ns.end(), ' ', '_');
-//   //   std::transform(ns.begin(), ns.end(), ns.begin(), ::tolower);
-//   //   if (ros::service::exists(ns + "/set_parameters", false))
-//   //   {
-//   //     unsigned int c = 1;
-//   //     while (ros::service::exists(ns + boost::lexical_cast<std::string>(c) + "/set_parameters", false))
-//   //       c++;
-//   //     ns += boost::lexical_cast<std::string>(c);
-//   //   }
-//   //   return ns;
-//   // }
-//   // TODO(anasarrak): uncomment this once the config for ROS2 is generated
-//   // void dynamicReconfigureCallback(PlanningSceneMonitorDynamicReconfigureConfig& config, uint32_t level)
-//   // {
-//   //   PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
-//   //   if (config.publish_geometry_updates)
-//   //     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_GEOMETRY);
-//   //   if (config.publish_state_updates)
-//   //     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_STATE);
-//   //   if (config.publish_transforms_updates)
-//   //     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
-//   //   if (config.publish_planning_scene)
-//   //   {
-//   //     owner_->setPlanningScenePublishingFrequency(config.publish_planning_scene_hz);
-//   //     owner_->startPublishingPlanningScene(event);
-//   //   }
-//   //   else
-//   //     owner_->stopPublishingPlanningScene();
-//   // }
-//
-//   // PlanningSceneMonitor* owner_;
-//   // dynamic_reconfigure::Server<PlanningSceneMonitorDynamicReconfigureConfig> dynamic_reconfigure_server_;
-// };
 
 const std::string PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC = "joint_states";
 const std::string PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC = "attached_collision_object";
@@ -283,15 +229,13 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   bool publish_state_updates = node_->get_parameter("planning_scene_monitor.publish_state_updates").as_bool();
   bool publish_transform_updates = node_->get_parameter("planning_scene_monitor.publish_transforms_updates").as_bool();
 
-  updatePublishSettings(publish_geom_updates, publish_state_updates,
-                        publish_transform_updates, publish_planning_scene);
+  updatePublishSettings(publish_geom_updates, publish_state_updates, publish_transform_updates, publish_planning_scene);
 
-  auto psm_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters)
-  {
+  auto psm_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters) {
     auto result = rcl_interfaces::msg::SetParametersResult();
     result.successful = true;
-    bool publish_planning_scene = false, publish_geometry_updates = false,
-      publish_state_updates = false, publish_transform_updates = false;
+    bool publish_planning_scene = false, publish_geometry_updates = false, publish_state_updates = false,
+         publish_transform_updates = false;
     for (auto parameter : parameters)
     {
       rclcpp::ParameterType parameter_type = parameter.get_type();
@@ -313,8 +257,8 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
         result.successful = false;
     }
     if (result.successful)
-      updatePublishSettings(publish_geometry_updates, publish_state_updates,
-                            publish_transform_updates, publish_planning_scene);
+      updatePublishSettings(publish_geometry_updates, publish_state_updates, publish_transform_updates,
+                            publish_planning_scene);
     return result;
   };
   callback_handler_ = node_->add_on_set_parameters_callback(psm_parameter_set_callback);

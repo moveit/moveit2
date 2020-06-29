@@ -547,8 +547,8 @@ private:
   void getPlanningSceneServiceCallback(moveit_msgs::srv::GetPlanningScene::Request::SharedPtr req,
                                        moveit_msgs::srv::GetPlanningScene::Response::SharedPtr res);
 
-  void updatePublishSettings(bool publish_geom_updates, bool publish_state_updates,
-                             bool publish_transform_updates, bool publish_planning_scene);
+  void updatePublishSettings(bool publish_geom_updates, bool publish_state_updates, bool publish_transform_updates,
+                             bool publish_planning_scene);
 
   // Lock for state_update_pending_ and dt_state_update_
   std::mutex state_pending_mutex_;

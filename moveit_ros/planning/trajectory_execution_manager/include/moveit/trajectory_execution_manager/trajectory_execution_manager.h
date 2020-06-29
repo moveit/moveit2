@@ -354,9 +354,6 @@ private:
 
   bool verbose_;
 
-  class DynamicReconfigureImpl;
-  DynamicReconfigureImpl* reconfigure_impl_;
-
   bool execution_duration_monitoring_;
   // 'global' values
   double allowed_execution_duration_scaling_;

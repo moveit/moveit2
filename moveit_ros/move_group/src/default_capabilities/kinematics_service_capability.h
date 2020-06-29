@@ -46,9 +46,6 @@ class MoveGroupKinematicsService : public MoveGroupCapability
 {
 public:
   MoveGroupKinematicsService();
-  ~MoveGroupKinematicsService()
-  {
-  }
 
   void initialize() override;
 

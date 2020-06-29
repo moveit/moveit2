@@ -203,7 +203,7 @@ T getParameterFromRemoteNode(const rclcpp::Node::SharedPtr& node, const std::str
     if (!rclcpp::ok())
     {
       RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
-      return 0;
+      return T();
     }
     RCLCPP_INFO(LOGGER, "service not available, waiting again...");
   }
@@ -271,8 +271,8 @@ int main(int argc, char** argv)
     planning_scene_monitor->publishDebugInformation(debug);
 
     mge.status();
-    auto controller_mgr_node_ = mge.getContext()->trajectory_execution_manager_->getControllerManagerNode();
-    executor.add_node(controller_mgr_node_);
+    auto controller_mgr_node = mge.getContext()->trajectory_execution_manager_->getControllerManagerNode();
+    executor.add_node(controller_mgr_node);
     executor.add_node(monitor_node);
     executor.add_node(nh);
     executor.spin();

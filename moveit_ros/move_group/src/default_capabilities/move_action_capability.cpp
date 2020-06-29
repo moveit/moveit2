@@ -271,11 +271,11 @@ void MoveGroupMoveAction::setMoveState(MoveGroupState state, const std::shared_p
 {
   move_state_ = state;
 
-  if (goal.get())
+  if (goal)
   {
-    auto move_feedback_ = std::make_shared<MGAction::Feedback>();
-    move_feedback_->state = stateToStr(state);
-    goal->publish_feedback(move_feedback_);
+    auto move_feedback = std::make_shared<MGAction::Feedback>();
+    move_feedback->state = stateToStr(state);
+    goal->publish_feedback(move_feedback);
   }
 }
 }  // namespace move_group
