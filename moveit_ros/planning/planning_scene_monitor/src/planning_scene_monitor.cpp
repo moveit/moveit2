@@ -280,23 +280,47 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   // reconfigure_impl_ = new DynamicReconfigureImpl(this);
   //@todo: can remove DynamicReconfigureImpl now that we have ported parameters over
   reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  // Set up publishing parameters
   bool publish_planning_scene = node_->get_parameter("planning_scene_monitor.publish_planning_scene").as_bool();
   bool publish_geom_updates = node_->get_parameter("planning_scene_monitor.publish_geometry_updates").as_bool();
   bool publish_state_updates = node_->get_parameter("planning_scene_monitor.publish_state_updates").as_bool();
   bool publish_transform_updates = node_->get_parameter("planning_scene_monitor.publish_transforms_updates").as_bool();
 
-  PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
-  if (publish_geom_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_GEOMETRY);
-  if (publish_state_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_STATE);
-  if (publish_transform_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
-  if (publish_planning_scene)
+  updatePublishSettings(publish_geom_updates, publish_state_updates,
+                        publish_transform_updates, publish_planning_scene);
+
+  auto psm_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters)
   {
-    this->setPlanningScenePublishingFrequency(100);
-    this->startPublishingPlanningScene(event);
-  }
+    auto result = rcl_interfaces::msg::SetParametersResult();
+    result.successful = true;
+    bool publish_planning_scene = false, publish_geometry_updates = false,
+      publish_state_updates = false, publish_transform_updates = false;
+    for (auto parameter : parameters)
+    {
+      rclcpp::ParameterType parameter_type = parameter.get_type();
+      if (parameter_type == rclcpp::ParameterType::PARAMETER_BOOL)
+      {
+        std::string name = parameter.get_name();
+        if (name == "planning_scene_monitor.publish_planning_scene")
+          publish_planning_scene = parameter.as_bool();
+        else if (name == "planning_scene_monitor.publish_geometry_updates")
+          publish_geometry_updates = parameter.as_bool();
+        else if (name == "planning_scene_monitor.publish_state_updates")
+          publish_state_updates = parameter.as_bool();
+        else if (name == "planning_scene_monitor.publish_transforms_updates")
+          publish_transform_updates = parameter.as_bool();
+        else
+          result.successful = false;
+      }
+      else
+        result.successful = false;
+    }
+    if (result.successful)
+      updatePublishSettings(publish_geometry_updates, publish_state_updates,
+                            publish_transform_updates, publish_planning_scene);
+    return result;
+  };
+  callback_handler_ = node_->add_on_set_parameters_callback(psm_parameter_set_callback);
 }
 
 void PlanningSceneMonitor::monitorDiffs(bool flag)
@@ -578,6 +602,25 @@ void PlanningSceneMonitor::getPlanningSceneServiceCallback(moveit_msgs::srv::Get
 
   boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
   scene_->getPlanningSceneMsg(res->scene, req->components.components ? req->components : all_components);
+}
+
+void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool publish_state_updates,
+                                                 bool publish_transform_updates, bool publish_planning_scene)
+{
+  PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
+  if (publish_geom_updates)
+    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_GEOMETRY);
+  if (publish_state_updates)
+    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_STATE);
+  if (publish_transform_updates)
+    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
+  if (publish_planning_scene)
+  {
+    this->setPlanningScenePublishingFrequency(100);
+    this->startPublishingPlanningScene(event);
+  }
+  else
+    stopPublishingPlanningScene();
 }
 
 void PlanningSceneMonitor::newPlanningSceneCallback(moveit_msgs::msg::PlanningScene::SharedPtr scene)
