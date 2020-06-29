@@ -40,9 +40,6 @@
 #include <moveit/exceptions/exceptions.h>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
 
-// TODO: Re-enable dynamic_reconfigure.
-// #include <dynamic_reconfigure/server.h>
-// #include <moveit_ros_planning/PlanningSceneMonitorDynamicReconfigureConfig.h>
 #include <tf2/exceptions.h>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_eigen/tf2_eigen.h>
