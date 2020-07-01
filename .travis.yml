@@ -22,7 +22,11 @@ env:
 jobs:
   fast_finish: true
   include:
-    - env: TEST="clang-format ament_lint"
+    - env: TEST="ament_lint"
+    - env: TEST="clang-format"
+           ROS_DISTRO="eloquent"
+           UPSTREAM_WORKSPACE=""
+           BEFORE_SCRIPT="for p in geometric_shapes moveit_msgs moveit_resources object_recognition_msgs octomap_msgs ompl random_numbers srdfdom; do ros2 pkg create \$p; done"
     - env: TEST=code-coverage
     - env: ROS_DISTRO=foxy
     - compiler: clang  # test_ikfast_plugins takes ~10 minutes: include here to keep the main jobs shorter
