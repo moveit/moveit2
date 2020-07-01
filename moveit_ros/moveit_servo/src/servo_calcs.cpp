@@ -98,6 +98,9 @@ ServoCalcs::ServoCalcs(const rclcpp::NodeOptions& options, const ServoParameters
   // Subscribe to command topics
   using std::placeholders::_1;
   using std::placeholders::_2;
+  joint_state_sub_ = this->create_subscription<sensor_msgs::msg::JointState>(
+      parameters_.joint_topic, ROS_QUEUE_SIZE, std::bind(&ServoCalcs::jointStateCB, this, _1));
+
   twist_stamped_sub_ = this->create_subscription<geometry_msgs::msg::TwistStamped>(
       parameters_.cartesian_command_in_topic, ROS_QUEUE_SIZE, std::bind(&ServoCalcs::twistStampedCB, this, _1));
 
@@ -142,6 +145,23 @@ ServoCalcs::ServoCalcs(const rclcpp::NodeOptions& options, const ServoParameters
   internal_joint_state_.position.resize(num_joints_);
   internal_joint_state_.velocity.resize(num_joints_);
 
+  // Wait for the first joint state update
+  // TODO(adamp): this probably needs to be better:
+  // 1) directly calling the callback here?? Doesn't seem good
+  // 2) the take() call might not work with intra-process comms, unsure
+  // 3) this waiting blocks the constructor
+  rclcpp::WaitSet wait_set(std::vector<rclcpp::WaitSet::SubscriptionEntry>{ { joint_state_sub_ } });
+  {
+    auto wait_result = wait_set.wait();
+
+    sensor_msgs::msg::JointState recieved_joint_state_msg;
+    rclcpp::MessageInfo msg_info;
+    joint_state_sub_->take(recieved_joint_state_msg, msg_info);  // TODO(adamp): this returns a bool, need to decide
+                                                                 // what happens if this returns false
+
+    jointStateCB(std::make_shared<sensor_msgs::msg::JointState>(recieved_joint_state_msg));
+  }
+
   // Set up the "last" published message, in case we need to send it first
   auto initial_joint_trajectory =
       std::make_unique<trajectory_msgs::msg::JointTrajectory>();  // TODO(adamp): consider going back to pool allocate
@@ -151,12 +171,7 @@ ServoCalcs::ServoCalcs(const rclcpp::NodeOptions& options, const ServoParameters
   trajectory_msgs::msg::JointTrajectoryPoint point;
   point.time_from_start = rclcpp::Duration(parameters_.publish_period);
   if (parameters_.publish_joint_positions)
-  {
-    std::vector<double> position(num_joints_);  // TODO(adamp): BAD! Initializes the trajectory to 0 positions, can be
-                                                // really bad. Need to figure out how to wait for a message (joint
-                                                // states) and set from that
-    point.positions = position;
-  }
+    point.positions = incoming_joint_state_->position;
   if (parameters_.publish_joint_velocities)
   {
     std::vector<double> velocity(num_joints_);
