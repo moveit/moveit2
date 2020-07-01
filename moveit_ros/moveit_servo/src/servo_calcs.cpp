@@ -42,7 +42,7 @@
 #include <moveit_servo/servo_calcs.h>
 // #include <moveit_servo/make_shared_from_pool.h> // TODO(adamp): consider going back to pool allocate
 
-static const std::string LOGNAME = "servo_calcs";
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
 constexpr size_t ROS_LOG_THROTTLE_PERIOD = 30 * 1000;  // Milliseconds to throttle logs inside loops
 
 namespace moveit_servo
@@ -81,7 +81,7 @@ ServoCalcs::ServoCalcs(const rclcpp::NodeOptions& options, const ServoParameters
   while (rclcpp::ok() && !model_loader_ptr)
   {
     auto& clock = *this->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                 "Waiting for a non-null robot_model_loader pointer");  // TODO(adamp):
                                                                                        // getting the
                                                                                        // clock is
@@ -306,7 +306,7 @@ void ServoCalcs::run()  // TODO(adamp): come back and pass a timer event here?
   if (!twist_command_is_stale_ || !joint_command_is_stale_)
   {
     auto& clock = *this->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                 "Stale command. Try a larger 'incoming_command_timeout' parameter?");  // TODO(adamp):
                                                                                                        // getting the
                                                                                                        // clock is
@@ -328,7 +328,7 @@ void ServoCalcs::run()  // TODO(adamp): come back and pass a timer event here?
   {
     ok_to_publish_ = false;
     auto& clock = *this->get_clock();
-    RCLCPP_DEBUG_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+    RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                  "All-zero command. Doing nothing.");  // TODO(adamp):
                                                                        // getting the
                                                                        // clock is
@@ -388,7 +388,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
       std::isnan(cmd.twist.angular.x) || std::isnan(cmd.twist.angular.y) || std::isnan(cmd.twist.angular.z))
   {
     auto& clock = *this->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                 "nan in incoming command. Skipping this datapoint.");  // TODO(adamp):
                                                                                        // getting the
                                                                                        // clock is
@@ -403,7 +403,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
         (fabs(cmd.twist.angular.x) > 1) || (fabs(cmd.twist.angular.y) > 1) || (fabs(cmd.twist.angular.z) > 1))
     {
       auto& clock = *this->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                   "Component of incoming command is >1. Skipping this datapoint.");  // TODO(adamp):
                                                                                                      // getting the
                                                                                                      // clock is
@@ -491,7 +491,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   if (status_ == StatusCode::HALT_FOR_COLLISION)
   {
     auto& clock = *this->get_clock();
-    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                  "Halting for collision!");  // TODO(adamp):
                                                              // getting the
                                                              // clock is
@@ -513,7 +513,7 @@ bool ServoCalcs::jointServoCalcs(const control_msgs::msg::JointJog& cmd,
     if (std::isnan(velocity))
     {
       auto& clock = *this->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                   "nan in incoming command. Skipping this datapoint.");  // TODO(adamp):
                                                                                          // getting the
                                                                                          // clock is
@@ -640,7 +640,7 @@ void ServoCalcs::applyVelocityScaling(Eigen::ArrayXd& delta_theta, double singul
   {
     status_ = StatusCode::DECELERATE_FOR_COLLISION;
     auto& clock = *this->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                 SERVO_STATUS_CODE_MAP.at(status_));  // TODO(adamp):
                                                                      // getting the
                                                                      // clock is
@@ -713,7 +713,7 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
                                 (parameters_.hard_stop_singularity_threshold - parameters_.lower_singularity_threshold);
       status_ = StatusCode::DECELERATE_FOR_SINGULARITY;
       auto& clock = *this->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                   SERVO_STATUS_CODE_MAP.at(status_));  // TODO(adamp):
                                                                        // getting the
                                                                        // clock is
@@ -726,7 +726,7 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
       velocity_scale = 0;
       status_ = StatusCode::HALT_FOR_SINGULARITY;
       auto& clock = *this->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                   SERVO_STATUS_CODE_MAP.at(status_));  // TODO(adamp):
                                                                        // getting the
                                                                        // clock is
@@ -840,7 +840,7 @@ bool ServoCalcs::enforceSRDFPositionLimits()
              (joint_angle > (limits[0].max_position - parameters_.joint_limit_margin))))
         {
           auto& clock = *this->get_clock();
-          RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+          RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                       this->get_name() << " " << joint->getName()
                                                        << " close to a position limit. Halting.");  // TODO(adamp):
                                                                                                     // getting the
@@ -898,7 +898,7 @@ bool ServoCalcs::updateJoints()
     catch (const std::out_of_range& e)
     {
       auto& clock = *this->get_clock();
-      RCLCPP_DEBUG_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+      RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                    "Ignoring joint " << incoming_joint_state_->name[m]);  // TODO(adamp):
                                                                                           // getting the
                                                                                           // clock is
@@ -938,7 +938,7 @@ bool ServoCalcs::updateJoints()
         else
         {
           auto& clock = *this->get_clock();
-          RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+          RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                       "An acceleration limit is not defined for this joint; minimum stop distance "
                                       "should not be used for collision checking");  // TODO(adamp):
                                                                                      // getting the
@@ -994,7 +994,7 @@ Eigen::VectorXd ServoCalcs::scaleCartesianCommand(const geometry_msgs::msg::Twis
   else
   {
     auto& clock = *this->get_clock();
-    RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                  "Unexpected command_in_type");  // TODO(adamp):
                                                                  // getting the
                                                                  // clock is
@@ -1019,7 +1019,7 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
     catch (const std::out_of_range& e)
     {
       auto& clock = *this->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                   "Ignoring joint " << internal_joint_state_.name[m]);  // TODO(adamp):
                                                                                         // getting the
                                                                                         // clock is
@@ -1035,7 +1035,7 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
     else
     {
       auto& clock = *this->get_clock();
-      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+      RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                    "Unexpected command_in_type, check yaml file.");  // TODO(adamp):
                                                                                      // getting the
                                                                                      // clock is
@@ -1058,7 +1058,7 @@ bool ServoCalcs::addJointIncrements(sensor_msgs::msg::JointState& output, const 
     catch (const std::out_of_range& e)
     {
       auto& clock = *this->get_clock();
-      RCLCPP_ERROR_STREAM_THROTTLE(this->get_logger(), clock, ROS_LOG_THROTTLE_PERIOD,
+      RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                    this->get_name() << " Lengths of output and "
                                                        "increments do not match.");  // TODO(adamp):
                                                                                      // getting the

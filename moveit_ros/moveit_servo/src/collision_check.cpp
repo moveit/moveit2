@@ -42,10 +42,10 @@
 #include <moveit_servo/collision_check.h>
 // #include <moveit_servo/make_shared_from_pool.h>
 
-static const char LOGNAME[] = "collision_check";
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.collision_check");
 static const double MIN_RECOMMENDED_COLLISION_RATE = 10;
 constexpr double EPSILON = 1e-6;                // For very small numeric comparisons
-constexpr size_t ROS_LOG_THROTTLE_PERIOD = 30;  // Seconds to throttle logs inside loops
+constexpr size_t ROS_LOG_THROTTLE_PERIOD = 30 * 1000;  // Milliseconds to throttle logs inside loops
 
 namespace moveit_servo
 {
@@ -67,7 +67,7 @@ CollisionCheck::CollisionCheck(const rclcpp::NodeOptions& options, const moveit_
   if (parameters_.collision_check_rate < MIN_RECOMMENDED_COLLISION_RATE)
   {
     auto& clk = *this->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), clk, ROS_LOG_THROTTLE_PERIOD,
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clk, ROS_LOG_THROTTLE_PERIOD,
                                 "Collision check rate is low, increase it in yaml file if CPU allows");  // TODO(adamp):
                                                                                                          // getting the
                                                                                                          // clock is
