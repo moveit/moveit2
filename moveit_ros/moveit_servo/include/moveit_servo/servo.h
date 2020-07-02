@@ -34,7 +34,7 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+ *******************************************************************************/
 
 #pragma once
 
@@ -43,7 +43,6 @@
 #include <moveit_servo/collision_check.h>
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo_calcs.h>
-#include <moveit_servo/joint_state_subscriber.h>
 
 namespace moveit_servo
 {
@@ -53,7 +52,8 @@ namespace moveit_servo
 class Servo
 {
 public:
-  Servo(ros::NodeHandle& nh, const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+  Servo(const rclcpp::NodeOptions& options, const moveit_servo::ServoParameters& parameters,
+        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   ~Servo();
 
@@ -79,20 +79,18 @@ public:
   const ServoParameters& getParameters() const;
 
   /** \brief Get the latest joint state. */
-  sensor_msgs::JointStateConstPtr getLatestJointState() const;
+  sensor_msgs::msg::JointState::ConstSharedPtr getLatestJointState() const;
 
 private:
-  bool readParameters();
-
-  ros::NodeHandle nh_;
+  // bool readParameters(); // adamp: will move reading the params out of this class and instead ask for them in
+  // constructor
 
   // Pointer to the collision environment
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;  // TODO(adamp:) do we need to store this?
 
-  // Store the parameters that were read from ROS server
-  ServoParameters parameters_;
+  // The stored servo parameters
+  ServoParameters parameters_;  // TODO(adamp): do we need to store here? Probably not...
 
-  std::shared_ptr<JointStateSubscriber> joint_state_subscriber_;
   std::unique_ptr<ServoCalcs> servo_calcs_;
   std::unique_ptr<CollisionCheck> collision_checker_;
 };

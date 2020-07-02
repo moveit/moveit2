@@ -29,7 +29,7 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*******************************************************************************/
+ *******************************************************************************/
 
 /*      Title     : servo.cpp
  *      Project   : moveit_servo
@@ -37,30 +37,25 @@
  *      Author    : Brian O'Neil, Andy Zelenak, Blake Anderson
  */
 
-#include <rosparam_shortcuts/rosparam_shortcuts.h>
-
 #include <moveit_servo/servo.h>
-
-static const std::string LOGNAME = "servo_node";
 
 namespace moveit_servo
 {
-Servo::Servo(ros::NodeHandle& nh, const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
-  : nh_(nh), planning_scene_monitor_(planning_scene_monitor)
+Servo::Servo(const rclcpp::NodeOptions& options, const moveit_servo::ServoParameters& parameters,
+             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+  : parameters_(parameters), planning_scene_monitor_(planning_scene_monitor)
 {
   // Read ROS parameters, typically from YAML file
-  if (!readParameters())
-    exit(EXIT_FAILURE);
+  // if (!readParameters())
+  //   exit(EXIT_FAILURE);
 
-  joint_state_subscriber_ = std::make_shared<JointStateSubscriber>(nh_, parameters_.joint_topic);
+  servo_calcs_ = std::make_unique<ServoCalcs>(options, parameters, planning_scene_monitor);
 
-  servo_calcs_ = std::make_unique<ServoCalcs>(nh_, parameters_, planning_scene_monitor_, joint_state_subscriber_);
-
-  collision_checker_ =
-      std::make_unique<CollisionCheck>(nh_, parameters_, planning_scene_monitor_, joint_state_subscriber_);
+  collision_checker_ = std::make_unique<CollisionCheck>(options, parameters, planning_scene_monitor);
 }
 
 // Read ROS parameters, typically from YAML file
+/*
 bool Servo::readParameters()
 {
   std::size_t error = 0;
@@ -273,6 +268,7 @@ bool Servo::readParameters()
 
   return true;
 }
+*/
 
 void Servo::start()
 {
@@ -313,9 +309,9 @@ const ServoParameters& Servo::getParameters() const
   return parameters_;
 }
 
-sensor_msgs::JointStateConstPtr Servo::getLatestJointState() const
+sensor_msgs::msg::JointState::ConstSharedPtr Servo::getLatestJointState() const
 {
-  return joint_state_subscriber_->getLatest();
+  return servo_calcs_->getLatestJointState();
 }
 
 }  // namespace moveit_servo

@@ -100,6 +100,21 @@ ament_target_dependencies(servo_calcs_component
   "moveit_ros_planning")
 rclcpp_components_register_nodes(servo_calcs_component "moveit_servo::JogCalcs")
 
+add_library(servo_library SHARED
+   src/servo.cpp
+   src/servo_calcs.cpp
+   src/collision_check.cpp)
+ament_target_dependencies(servo_library
+  "rclcpp"
+  "rclcpp_components"
+  "std_msgs"
+  "sensor_msgs"
+  "control_msgs"
+  "moveit_msgs"
+  "geometry_msgs"
+  "trajectory_msgs"
+  "moveit_ros_planning")
+
 # Install Libraries
 install(TARGETS
   # collision_check_component

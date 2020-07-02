@@ -81,6 +81,9 @@ public:
   /** \brief Pause or unpause processing servo commands while keeping the timers alive */
   void setPaused(bool paused);
 
+  /** \brief Get the latest joint state */
+  sensor_msgs::msg::JointState::ConstSharedPtr getLatestJointState() const;
+
 private:
   /** \brief Timer method */
   void run();  // TODO(adamp): come back and pass a timer event here?

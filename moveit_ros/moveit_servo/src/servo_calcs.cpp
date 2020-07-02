@@ -1118,6 +1118,11 @@ bool ServoCalcs::getCommandFrameTransform(Eigen::Isometry3d& transform)
   return false;
 }
 
+sensor_msgs::msg::JointState::ConstSharedPtr ServoCalcs::getLatestJointState() const
+{
+  return incoming_joint_state_;
+}
+
 void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr msg)
 {
   const std::lock_guard<std::mutex> lock(latest_state_mutex_);
