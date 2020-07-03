@@ -103,7 +103,8 @@ rclcpp_components_register_nodes(servo_calcs_component "moveit_servo::JogCalcs")
 add_library(servo_library SHARED
    src/servo.cpp
    src/servo_calcs.cpp
-   src/collision_check.cpp)
+   src/collision_check.cpp
+   src/servo_parameters.cpp)
 ament_target_dependencies(servo_library
   "rclcpp"
   "rclcpp_components"

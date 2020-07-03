@@ -82,9 +82,6 @@ public:
   sensor_msgs::msg::JointState::ConstSharedPtr getLatestJointState() const;
 
 private:
-  // bool readParameters(); // adamp: will move reading the params out of this class and instead ask for them in
-  // constructor
-
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;  // TODO(adamp:) do we need to store this?
 

@@ -2,8 +2,11 @@
 # Modify all parameters related to servoing here
 ###############################################
 use_gazebo: true # Whether the robot is started in a Gazebo simulation environment
+status_topic: servo_server/status # Publish status to this topic
 
 ## Properties of incoming commands
+cartesian_command_in_topic: servo_server/delta_twist_cmds  # Topic for incoming Cartesian twist commands
+joint_command_in_topic: servo_server/delta_joint_cmds # Topic for incoming joint angle commands
 robot_link_command_frame:  world  # commands must be given in the frame of a robot link. Usually either the base or end effector
 command_in_type: "speed_units" # "unitless"> in the range [-1:1], as if from joystick. "speed_units"> cmds are in m/s and rad/s
 scale:
@@ -12,9 +15,9 @@ scale:
   rotational:  0.3 # Max angular velocity. Rads per publish_period. Unit is [rad/s]. Only used for Cartesian commands.
   # Max joint angular/linear velocity. Rads or Meters per publish period. Only used for joint commands on joint_command_in_topic.
   joint: 0.01
-low_pass_filter_coeff: 2.  # Larger --> trust the filtered data more, trust the measurements less.
 
 ## Properties of outgoing commands
+command_out_topic: joint_group_position_controller/command # Publish outgoing commands here
 publish_period: 0.008  # 1/Nominal publish rate [seconds]
 
 # What type of topic does your robot driver expect?
@@ -26,6 +29,10 @@ command_out_type: std_msgs/Float64MultiArray
 publish_joint_positions: true
 publish_joint_velocities: false
 publish_joint_accelerations: false
+
+## Incoming Joint State properties
+joint_topic:  joint_states
+low_pass_filter_coeff: 2.  # Larger --> trust the filtered data more, trust the measurements less.
 
 ## MoveIt properties
 move_group_name:  manipulator  # Often 'manipulator' or 'arm'
@@ -41,13 +48,6 @@ num_outgoing_halt_msgs_to_publish: 4
 lower_singularity_threshold:  17  # Start decelerating when the condition number hits this (close to singularity)
 hard_stop_singularity_threshold: 30 # Stop when the condition number hits this
 joint_limit_margin: 0.1 # added as a buffer to joint limits [radians]. If moving quickly, make this larger.
-
-## Topic names
-cartesian_command_in_topic: servo_server/delta_twist_cmds  # Topic for incoming Cartesian twist commands
-joint_command_in_topic: servo_server/delta_joint_cmds # Topic for incoming joint angle commands
-joint_topic:  joint_states
-status_topic: servo_server/status # Publish status to this topic
-command_out_topic: joint_group_position_controller/command # Publish outgoing commands here
 
 ## Collision checking for the entire robot body
 check_collisions: true # Check collisions?
