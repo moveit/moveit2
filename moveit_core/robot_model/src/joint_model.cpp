@@ -59,8 +59,6 @@ JointModel::JointModel(const std::string& name)
 {
 }
 
-JointModel::~JointModel() = default;
-
 std::string JointModel::getTypeName() const
 {
   switch (type_)

@@ -313,28 +313,49 @@ const JointModel* JointModelGroup::getJointModel(const std::string& name) const
   return it->second;
 }
 
-void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values) const
+void JointModelGroup::getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values) const
 {
   getVariableRandomPositions(rng, values, active_joint_models_bounds_);
 }
 
-void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values) const
+void JointModelGroup::getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values) const
 {
   values.resize(variable_count_);
   getVariableRandomPositions(rng, &values[0], active_joint_models_bounds_);
 }
 
-void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values, const double* near,
+void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values, const double* near,
                                       const double distance) const
 {
   getVariableRandomPositionsNearBy(rng, values, active_joint_models_bounds_, near, distance);
 }
 
-void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,
+void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,
                                       const std::vector<double>& near, double distance) const
 {
   values.resize(variable_count_);
   getVariableRandomPositionsNearBy(rng, &values[0], active_joint_models_bounds_, &near[0], distance);
+}
+
+void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,
+                                      const std::vector<double>& near,
+                                      const std::map<JointModel::JointType, double>& distance_map) const
+{
+  values.resize(variable_count_);
+  getVariableRandomPositionsNearBy(rng, &values[0], active_joint_models_bounds_, &near[0], distance_map);
+}
+
+void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values, const double* near,
+                                      const std::vector<double>& distances) const
+{
+  getVariableRandomPositionsNearBy(rng, values, active_joint_models_bounds_, near, distances);
+}
+
+void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,
+                                      const std::vector<double>& near, const std::vector<double>& distances) const
+{
+  values.resize(variable_count_);
+  getVariableRandomPositionsNearBy(rng, &values[0], active_joint_models_bounds_, &near[0], distances);
 }
 
 void JointModelGroup::getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values,
@@ -402,6 +423,11 @@ void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNum
   updateMimicJoints(values);
 }
 
+bool JointModelGroup::satisfiesPositionBounds(const double* state, double margin) const
+{
+  return satisfiesPositionBounds(state, active_joint_models_bounds_, margin);
+}
+
 bool JointModelGroup::satisfiesPositionBounds(const double* state, const JointBoundsVector& active_joint_bounds,
                                               double margin) const
 {
@@ -411,6 +437,11 @@ bool JointModelGroup::satisfiesPositionBounds(const double* state, const JointBo
                                                                 *active_joint_bounds[i], margin))
       return false;
   return true;
+}
+
+bool JointModelGroup::enforcePositionBounds(double* state) const
+{
+  return enforcePositionBounds(state, active_joint_models_bounds_);
 }
 
 bool JointModelGroup::enforcePositionBounds(double* state, const JointBoundsVector& active_joint_bounds) const
@@ -424,6 +455,11 @@ bool JointModelGroup::enforcePositionBounds(double* state, const JointBoundsVect
   if (change)
     updateMimicJoints(state);
   return change;
+}
+
+double JointModelGroup::getMaximumExtent() const
+{
+  return getMaximumExtent(active_joint_models_bounds_);
 }
 
 double JointModelGroup::getMaximumExtent(const JointBoundsVector& active_joint_bounds) const
@@ -617,6 +653,12 @@ bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik
       joint_bijection.push_back(it->second + k);
   }
   return true;
+}
+
+void JointModelGroup::setSolverAllocators(const SolverAllocatorFn& solver,
+                          const SolverAllocatorMapFn& solver_map)
+{
+  setSolverAllocators(std::make_pair(solver, solver_map));
 }
 
 void JointModelGroup::setSolverAllocators(const std::pair<SolverAllocatorFn, SolverAllocatorMapFn>& solvers)
