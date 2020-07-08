@@ -152,6 +152,7 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                            const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name)
   : monitor_name_(name)
   , node_(node)
+  , private_executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   , tf_buffer_(tf_buffer)
   , dt_state_update_(0.0)
   , shape_transform_cache_lookup_wait_time_(0, 0)
@@ -177,7 +178,8 @@ PlanningSceneMonitor::~PlanningSceneMonitor()
   stopWorldGeometryMonitor();
   stopSceneMonitor();
 
-  spinner_.reset();
+  private_executor_->cancel();
+  private_executor_.reset();
   // delete reconfigure_impl_;
   current_state_monitor_.reset();
   scene_const_.reset();
@@ -260,9 +262,14 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   state_update_pending_ = false;
   // Period for 0.1 sec
   using std::chrono::nanoseconds;
+  std::shared_ptr<rclcpp::Node> pnode =
+      std::make_shared<rclcpp::Node>(std::string(node_->get_fully_qualified_name()) + "_private");
   state_update_timer_ =
-      node_->create_wall_timer(dt_state_update_, std::bind(&PlanningSceneMonitor::stateUpdateTimerCallback, this));
+      pnode->create_wall_timer(dt_state_update_, std::bind(&PlanningSceneMonitor::stateUpdateTimerCallback, this));
+  private_executor_->add_node(pnode);
 
+  // start executor on a different thread now
+  std::thread([this]() { private_executor_->spin(); }).detach();
   // reconfigure_impl_ = new DynamicReconfigureImpl(this);
 }
 
