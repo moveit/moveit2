@@ -246,6 +246,9 @@ public:
 private:
   struct ControllerInformation
   {
+    ControllerInformation() : last_update_(0, 0, RCL_ROS_TIME)
+    {
+    }
     std::string name_;
     std::set<std::string> joints_;
     std::set<std::string> overlapping_controllers_;
