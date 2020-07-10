@@ -1,0 +1,17 @@
+repositories:
+  fake_joint:
+    type: git
+    url: https://github.com/AdamPettinger/fake_joint
+    version: foxy
+  ros2_control:
+    type: git
+    url: https://github.com/ros-controls/ros2_control
+    version: master
+  ros2_controllers:
+    type: git
+    url: https://github.com/ros-controls/ros2_controllers
+    version: master
+  control_msgs:
+    type: git
+    url: https://github.com/AdamPettinger/control_msgs
+    version: foxy-add_joint_jog_msg
