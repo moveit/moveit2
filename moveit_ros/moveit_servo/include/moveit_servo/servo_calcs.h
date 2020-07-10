@@ -278,8 +278,8 @@ private:
   Eigen::Isometry3d tf_moveit_to_robot_cmd_frame_;
   geometry_msgs::msg::TwistStamped::ConstSharedPtr latest_twist_stamped_;
   control_msgs::msg::JointJog::ConstSharedPtr latest_joint_cmd_;
-  rclcpp::Time latest_twist_command_stamp_ = rclcpp::Time(0.);
-  rclcpp::Time latest_joint_command_stamp_ = rclcpp::Time(0.);
+  rclcpp::Time latest_twist_command_stamp_ = rclcpp::Time(0., RCL_ROS_TIME);
+  rclcpp::Time latest_joint_command_stamp_ = rclcpp::Time(0., RCL_ROS_TIME);
   bool latest_nonzero_twist_stamped_ = false;
   bool latest_nonzero_joint_cmd_ = false;
 };

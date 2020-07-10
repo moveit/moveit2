@@ -42,12 +42,15 @@
 namespace moveit_servo
 {
 Servo::Servo(const rclcpp::NodeOptions& options, const moveit_servo::ServoParameters& parameters,
-             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
-  : parameters_(parameters), planning_scene_monitor_(planning_scene_monitor)
+             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor, std::shared_ptr<rclcpp::executors::MultiThreadedExecutor>& executor)
+  : parameters_(parameters), planning_scene_monitor_(planning_scene_monitor), executor_(executor)
 {
-  servo_calcs_ = std::make_unique<ServoCalcs>(options, parameters, planning_scene_monitor);
+  servo_calcs_ = std::make_shared<ServoCalcs>(options, parameters, planning_scene_monitor);
 
-  collision_checker_ = std::make_unique<CollisionCheck>(options, parameters, planning_scene_monitor);
+  collision_checker_ = std::make_shared<CollisionCheck>(options, parameters, planning_scene_monitor);
+
+  executor_->add_node(servo_calcs_);
+  executor_->add_node(collision_checker_);
 }
 
 void Servo::start()

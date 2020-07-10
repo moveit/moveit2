@@ -52,7 +52,7 @@ namespace moveit_servo
 // Constructor for the class that handles collision checking
 CollisionCheck::CollisionCheck(const rclcpp::NodeOptions& options, const moveit_servo::ServoParameters& parameters,
                                const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
-  : Node("collision_checking", rclcpp::NodeOptions().use_intra_process_comms(true))
+  : Node("collision_checking", options)
   , parameters_(parameters)
   , planning_scene_monitor_(planning_scene_monitor)
   , self_velocity_scale_coefficient_(-log(0.001) / parameters.self_collision_proximity_threshold)
@@ -68,10 +68,7 @@ CollisionCheck::CollisionCheck(const rclcpp::NodeOptions& options, const moveit_
   {
     auto& clk = *this->get_clock();
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clk, ROS_LOG_THROTTLE_PERIOD,
-                                "Collision check rate is low, increase it in yaml file if CPU allows");  // TODO(adamp):
-                                                                                                         // getting the
-                                                                                                         // clock is
-                                                                                                         // ugly
+                                "Collision check rate is low, increase it in yaml file if CPU allows");
   }
 
   collision_check_type_ =

@@ -53,7 +53,7 @@ class Servo
 {
 public:
   Servo(const rclcpp::NodeOptions& options, const moveit_servo::ServoParameters& parameters,
-        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor, std::shared_ptr<rclcpp::executors::MultiThreadedExecutor>& executor);
 
   ~Servo();
 
@@ -88,8 +88,9 @@ private:
   // The stored servo parameters
   ServoParameters parameters_;  // TODO(adamp): do we need to store here? Probably not...
 
-  std::unique_ptr<ServoCalcs> servo_calcs_;
-  std::unique_ptr<CollisionCheck> collision_checker_;
+  std::shared_ptr<ServoCalcs> servo_calcs_;
+  std::shared_ptr<CollisionCheck> collision_checker_;
+  std::shared_ptr<rclcpp::executors::MultiThreadedExecutor> executor_;
 };
 
 // ServoPtr using alias

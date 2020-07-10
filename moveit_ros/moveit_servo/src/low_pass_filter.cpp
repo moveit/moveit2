@@ -40,7 +40,6 @@
 #include <moveit_servo/low_pass_filter.h>
 #include <cmath>
 #include <string>
-#include <ros/ros.h>
 
 namespace moveit_servo
 {
@@ -59,20 +58,22 @@ LowPassFilter::LowPassFilter(double low_pass_filter_coeff)
   // guarantee this doesn't change because the logic below depends on this length implicity
   static_assert(LowPassFilter::FILTER_LENGTH == 2, "moveit_servo::LowPassFilter::FILTER_LENGTH should be 2");
 
-  ROS_ASSERT_MSG(!std::isinf(feedback_term_), "%s: outputs from filter will be inf because feedback term is inf",
-                 LOGNAME);
-  ROS_ASSERT_MSG(!std::isinf(scale_term_), "%s: outputs from filter will be inf because denominator of scale is 0",
-                 LOGNAME);
-  ROS_ASSERT_MSG(low_pass_filter_coeff >= 1., "%s: Filter coefficient < 1. makes the lowpass filter unstable", LOGNAME);
+  // TODO(adamp): clean these messages up
+  // ROS_ASSERT_MSG(!std::isinf(feedback_term_), "%s: outputs from filter will be inf because feedback term is inf",
+  //                LOGNAME);
+  // ROS_ASSERT_MSG(!std::isinf(scale_term_), "%s: outputs from filter will be inf because denominator of scale is 0",
+  //                LOGNAME);
+  // ROS_ASSERT_MSG(low_pass_filter_coeff >= 1., "%s: Filter coefficient < 1. makes the lowpass filter unstable", LOGNAME);
 
   if (std::abs(feedback_term_) < EPSILON)
   {
-    ROS_WARN_STREAM_NAMED(
-        LOGNAME, "Filter coefficient value of "
-                     << low_pass_filter_coeff
-                     << " resulted in feedback term of 0. "
-                        " This results in a window averaging Finite Impulse Response (FIR) filter with a gain of "
-                     << scale_term_ * LowPassFilter::FILTER_LENGTH);
+    // TODO(adamp): clean these messages up
+    // ROS_WARN_STREAM_NAMED(
+    //     LOGNAME, "Filter coefficient value of "
+    //                  << low_pass_filter_coeff
+    //                  << " resulted in feedback term of 0. "
+    //                     " This results in a window averaging Finite Impulse Response (FIR) filter with a gain of "
+    //                  << scale_term_ * LowPassFilter::FILTER_LENGTH);
   }
 }
 
