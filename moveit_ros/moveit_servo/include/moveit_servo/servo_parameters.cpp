@@ -38,6 +38,8 @@
 
 #include <rclcpp/rclcpp.hpp>
 
+#include <type_traits>
+
 #include <moveit_servo/servo_parameters.h>
 
 namespace moveit_servo
@@ -46,9 +48,33 @@ template <typename T>
 bool declareAndGetParam(const std::string& param_name, T& output_value, rclcpp::Node& node,
                         const rclcpp::Logger& logger)
 {
-  node.declare_parameter<T>(param_name, T{});
-  if (node.get_parameter(param_name, output_value))
+  bool got_param = false;
+  try
+  {
+    node.declare_parameter<T>(param_name, T{});
+    got_param = node.get_parameter(param_name, output_value);
+  }
+  catch(const rclcpp::exceptions::InvalidParameterTypeException& e)
+  {
+    // Catch a <double> parameter written in the yaml as "1" being considered an <int>
+    if(std::is_same<T, double>::value)
+    {
+      int value;
+      node.undeclare_parameter(param_name);
+      node.declare_parameter<int>(param_name, 0);
+      got_param = node.get_parameter(param_name, value);
+      output_value = value;
+    }
+    else
+    {
+      throw e;
+    }
+  }
+
+  if (got_param)
+  {
     return true;
+  }
   else
   {
     RCLCPP_WARN_STREAM(logger, "Unable to get parameter: \'" << param_name << "\'. Please check YAML file");
@@ -60,78 +86,66 @@ bool readParameters(rclcpp::Node& node, const rclcpp::Logger& logger, ServoParam
 {
   bool error = false;
 
-  // Specified in the launch file. All other parameters will be read from this namespace.
-  std::string parameter_ns;
-  node.declare_parameter<std::string>("parameter_ns", "");
-  node.get_parameter("parameter_ns", parameter_ns);
-  if (parameter_ns.empty())
-  {
-    RCLCPP_ERROR_STREAM(logger, "A namespace must be specified in the launch file, like:\n<param name=\"parameter_ns\" "
-                                "type=\"string\" "
-                                "value=\"left_servo_server\" />");
-    return false;
-  }
+  // TODO(adamp): eventually will need to not hardcode in the "moveit_servo" prefix. But need to figure out how that namespace will be set when loading the params and how to get the info here
 
   // Get the parameters (organized same order as YAML file)
-  error |= declareAndGetParam<bool>("use_gazebo", parameters.use_gazebo, node, logger);
-  error |= declareAndGetParam<std::string>("status_topic", parameters.status_topic, node, logger);
-  // TODO(adamp): handle deprecated "warning_topic" here?
+  error |= !declareAndGetParam<bool>("moveit_servo.use_gazebo", parameters.use_gazebo, node, logger);
+  error |= !declareAndGetParam<std::string>("moveit_servo.status_topic", parameters.status_topic, node, logger);
 
   // Properties of incoming commands
-  error |= declareAndGetParam<std::string>("cartesian_command_in_topic", parameters.cartesian_command_in_topic, node,
+  error |= !declareAndGetParam<std::string>("moveit_servo.cartesian_command_in_topic", parameters.cartesian_command_in_topic, node,
                                            logger);
-  error |= declareAndGetParam<std::string>("joint_command_in_topic", parameters.joint_command_in_topic, node, logger);
+  error |= !declareAndGetParam<std::string>("moveit_servo.joint_command_in_topic", parameters.joint_command_in_topic, node, logger);
   error |=
-      declareAndGetParam<std::string>("robot_link_command_frame", parameters.robot_link_command_frame, node, logger);
-  error |= declareAndGetParam<std::string>("command_in_type", parameters.command_in_type, node, logger);
-  error |= declareAndGetParam<double>("scale/linear", parameters.linear_scale, node, logger);
-  error |= declareAndGetParam<double>("scale/rotational", parameters.rotational_scale, node, logger);
-  error |= declareAndGetParam<double>("scale/joint", parameters.joint_scale, node, logger);
+      !declareAndGetParam<std::string>("moveit_servo.robot_link_command_frame", parameters.robot_link_command_frame, node, logger);
+  error |= !declareAndGetParam<std::string>("moveit_servo.command_in_type", parameters.command_in_type, node, logger);
+  error |= !declareAndGetParam<double>("moveit_servo.scale/linear", parameters.linear_scale, node, logger);
+  error |= !declareAndGetParam<double>("moveit_servo.scale/rotational", parameters.rotational_scale, node, logger);
+  error |= !declareAndGetParam<double>("moveit_servo.scale/joint", parameters.joint_scale, node, logger);
 
   // Properties of outgoing commands
-  error |= declareAndGetParam<std::string>("command_out_topic", parameters.command_out_topic, node, logger);
-  error |= declareAndGetParam<double>("publish_period", parameters.publish_period, node, logger);
-  error |= declareAndGetParam<std::string>("command_out_type", parameters.command_out_type, node, logger);
-  error |= declareAndGetParam<bool>("publish_joint_positions", parameters.publish_joint_positions, node, logger);
-  error |= declareAndGetParam<bool>("publish_joint_velocities", parameters.publish_joint_velocities, node, logger);
+  error |= !declareAndGetParam<std::string>("moveit_servo.command_out_topic", parameters.command_out_topic, node, logger);
+  error |= !declareAndGetParam<double>("moveit_servo.publish_period", parameters.publish_period, node, logger);
+  error |= !declareAndGetParam<std::string>("moveit_servo.command_out_type", parameters.command_out_type, node, logger);
+  error |= !declareAndGetParam<bool>("moveit_servo.publish_joint_positions", parameters.publish_joint_positions, node, logger);
+  error |= !declareAndGetParam<bool>("moveit_servo.publish_joint_velocities", parameters.publish_joint_velocities, node, logger);
   error |=
-      declareAndGetParam<bool>("publish_joint_accelerations", parameters.publish_joint_accelerations, node, logger);
+      !declareAndGetParam<bool>("moveit_servo.publish_joint_accelerations", parameters.publish_joint_accelerations, node, logger);
 
   // Incoming Joint State properties
-  error |= declareAndGetParam<std::string>("joint_topic", parameters.joint_topic, node, logger);
-  error |= declareAndGetParam<double>("low_pass_filter_coeff", parameters.low_pass_filter_coeff, node, logger);
+  error |= !declareAndGetParam<std::string>("moveit_servo.joint_topic", parameters.joint_topic, node, logger);
+  error |= !declareAndGetParam<double>("moveit_servo.low_pass_filter_coeff", parameters.low_pass_filter_coeff, node, logger);
 
   // MoveIt properties
-  error |= declareAndGetParam<std::string>("move_group_name", parameters.move_group_name, node, logger);
-  error |= declareAndGetParam<std::string>("planning_frame", parameters.planning_frame, node, logger);
+  error |= !declareAndGetParam<std::string>("moveit_servo.move_group_name", parameters.move_group_name, node, logger);
+  error |= !declareAndGetParam<std::string>("moveit_servo.planning_frame", parameters.planning_frame, node, logger);
 
   // Stopping behaviour
-  error |= declareAndGetParam<double>("incoming_command_timeout", parameters.incoming_command_timeout, node, logger);
-  error |= declareAndGetParam<int>("num_outgoing_halt_msgs_to_publish", parameters.num_outgoing_halt_msgs_to_publish,
+  error |= !declareAndGetParam<double>("moveit_servo.incoming_command_timeout", parameters.incoming_command_timeout, node, logger);
+  error |= !declareAndGetParam<int>("moveit_servo.num_outgoing_halt_msgs_to_publish", parameters.num_outgoing_halt_msgs_to_publish,
                                    node, logger);
 
   // Configure handling of singularities and joint limits
   error |=
-      declareAndGetParam<double>("lower_singularity_threshold", parameters.lower_singularity_threshold, node, logger);
-  error |= declareAndGetParam<double>("hard_stop_singularity_threshold", parameters.hard_stop_singularity_threshold,
+      !declareAndGetParam<double>("moveit_servo.lower_singularity_threshold", parameters.lower_singularity_threshold, node, logger);
+  error |= !declareAndGetParam<double>("moveit_servo.hard_stop_singularity_threshold", parameters.hard_stop_singularity_threshold,
                                       node, logger);
-  error |= declareAndGetParam<double>("joint_limit_margin", parameters.joint_limit_margin, node, logger);
+  error |= !declareAndGetParam<double>("moveit_servo.joint_limit_margin", parameters.joint_limit_margin, node, logger);
 
   // Collision checking
-  error |= declareAndGetParam<bool>("check_collisions", parameters.check_collisions, node, logger);
-  error |= declareAndGetParam<double>("collision_check_rate", parameters.collision_check_rate, node, logger);
-  error |= declareAndGetParam<std::string>("collision_check_type", parameters.collision_check_type, node, logger);
-  error |= declareAndGetParam<double>("self_collision_proximity_threshold",
+  error |= !declareAndGetParam<bool>("moveit_servo.check_collisions", parameters.check_collisions, node, logger);
+  error |= !declareAndGetParam<double>("moveit_servo.collision_check_rate", parameters.collision_check_rate, node, logger);
+  error |= !declareAndGetParam<std::string>("moveit_servo.collision_check_type", parameters.collision_check_type, node, logger);
+  error |= !declareAndGetParam<double>("moveit_servo.self_collision_proximity_threshold",
                                       parameters.self_collision_proximity_threshold, node, logger);
-  error |= declareAndGetParam<double>("scene_collision_proximity_threshold",
+  error |= !declareAndGetParam<double>("moveit_servo.scene_collision_proximity_threshold",
                                       parameters.scene_collision_proximity_threshold, node, logger);
-  // TODO(adamp): handle the deprecated "collision_proximity_threshold" here??
-  error |= declareAndGetParam<double>("collision_distance_safety_factor", parameters.collision_distance_safety_factor,
+  error |= !declareAndGetParam<double>("moveit_servo.collision_distance_safety_factor", parameters.collision_distance_safety_factor,
                                       node, logger);
-  error |= declareAndGetParam<double>("min_allowable_collision_distance", parameters.min_allowable_collision_distance,
+  error |= !declareAndGetParam<double>("moveit_servo.min_allowable_collision_distance", parameters.min_allowable_collision_distance,
                                       node, logger);
 
-  // Only continue if all paramters were found
+  // Only continue if all parameters were found
   if (error)
   {
     RCLCPP_ERROR_STREAM(logger, "One or more Servo parameters missing, check YAML file before proceeding");

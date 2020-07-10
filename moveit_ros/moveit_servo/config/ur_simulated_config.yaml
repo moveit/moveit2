@@ -7,7 +7,7 @@ status_topic: servo_server/status # Publish status to this topic
 ## Properties of incoming commands
 cartesian_command_in_topic: servo_server/delta_twist_cmds  # Topic for incoming Cartesian twist commands
 joint_command_in_topic: servo_server/delta_joint_cmds # Topic for incoming joint angle commands
-robot_link_command_frame:  world  # commands must be given in the frame of a robot link. Usually either the base or end effector
+robot_link_command_frame:  panda_link0  # commands must be given in the frame of a robot link. Usually either the base or end effector
 command_in_type: "speed_units" # "unitless"> in the range [-1:1], as if from joystick. "speed_units"> cmds are in m/s and rad/s
 scale:
   # Scale parameters are only used if command_in_type=="unitless"
@@ -17,13 +17,13 @@ scale:
   joint: 0.01
 
 ## Properties of outgoing commands
-command_out_topic: joint_group_position_controller/command # Publish outgoing commands here
+command_out_topic: /fake_joint_trajectory_controller/joint_trajectory # Publish outgoing commands here
 publish_period: 0.008  # 1/Nominal publish rate [seconds]
 
 # What type of topic does your robot driver expect?
 # Currently supported are std_msgs/Float64MultiArray (for ros_control JointGroupVelocityController or JointGroupPositionController)
 # or trajectory_msgs/JointTrajectory (for Universal Robots and other non-ros_control robots)
-command_out_type: std_msgs/Float64MultiArray
+command_out_type: trajectory_msgs/JointTrajectory
 
 # What to publish? Can save some bandwidth as most robots only require positions or velocities
 publish_joint_positions: true
@@ -32,11 +32,11 @@ publish_joint_accelerations: false
 
 ## Incoming Joint State properties
 joint_topic:  joint_states
-low_pass_filter_coeff: 2.  # Larger --> trust the filtered data more, trust the measurements less.
+low_pass_filter_coeff: 2  # Larger --> trust the filtered data more, trust the measurements less.
 
 ## MoveIt properties
-move_group_name:  manipulator  # Often 'manipulator' or 'arm'
-planning_frame: world  # The MoveIt planning frame. Often 'base_link' or 'world'
+move_group_name:  panda_arm  # Often 'manipulator' or 'arm'
+planning_frame: panda_link0  # The MoveIt planning frame. Often 'base_link' or 'world'
 
 ## Stopping behaviour
 incoming_command_timeout:  0.1  # Stop servoing if X seconds elapse without a new command
