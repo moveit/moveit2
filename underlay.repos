@@ -1,4 +1,8 @@
 repositories:
+  eigen_stl_containers: 
+    type: git
+    url: https://github.com/ros/eigen_stl_containers.git
+    version: ros2
   geometric_shapes: 
     type: git
     url: https://github.com/ros-planning/geometric_shapes
@@ -15,6 +19,10 @@ repositories:
     type: git
     url: https://github.com/ros-planning/moveit_resources
     version: ros2
+  octomap: 
+    type: git
+    url: https://github.com/OctoMap/octomap.git
+    version: devel
   octomap_msgs: 
     type: git
     url: https://github.com/OctoMap/octomap_msgs
