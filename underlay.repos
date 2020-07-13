@@ -1,4 +1,8 @@
-repositories:
+repositories: 
+  angles:
+    type: git
+    url: https://github.com/ros/angles.git
+    version: ros2
   eigen_stl_containers: 
     type: git
     url: https://github.com/ros/eigen_stl_containers.git
@@ -31,7 +35,7 @@ repositories:
     type: git
     url: https://github.com/ros-planning/random_numbers
     version: ros2
-  srdfdom:
+  srdfdom: 
     type: git
     url: https://github.com/ros-planning/srdfdom
     version: ros2
@@ -39,6 +43,10 @@ repositories:
     type: git
     url: https://github.com/ros/urdf_parser_py
     version: ros2
+  control_msgs: 
+    type: git
+    url: https://github.com/ros-controls/control_msgs.git
+    version: foxy-devel
 
 # TODO(#242): Remove below once console_bridge conflict is resolved
   urdfdom:
