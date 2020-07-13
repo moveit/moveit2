@@ -18,6 +18,7 @@ ARG UNDERLAY_WS
 WORKDIR $UNDERLAY_WS/src
 COPY ./underlay.repos ../
 RUN vcs import ./ < ../underlay.repos && \
+    rm OctoMap/octomap/CMakeLists.txt && \
     find ./ -name ".git" | xargs rm -rf
 
 # copy overlay source
@@ -61,7 +62,6 @@ RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
     colcon build \
       --symlink-install \
       --mixin $UNDERLAY_MIXINS \
-      --event-handlers console_direct+ \
     || ([ -z "$FAIL_ON_BUILD_FAILURE" ] || exit 1)
 
 # install overlay dependencies
