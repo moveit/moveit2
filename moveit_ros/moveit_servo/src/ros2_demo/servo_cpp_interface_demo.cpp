@@ -49,7 +49,7 @@ using namespace std::chrono_literals;
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.test.servo_parameters_test.cpp");
+  static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_demo_node.cpp");
 
   // ROS objects
   rclcpp::NodeOptions node_options;
@@ -57,8 +57,8 @@ int main(int argc, char** argv)
   auto executor = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
 
   // Get Servo Parameters
-  moveit_servo::ServoParameters servo_parameters;
-  if(!moveit_servo::readParameters(*node, LOGGER, servo_parameters))
+  auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
+  if(!moveit_servo::readParameters(*node, LOGGER, *servo_parameters))
   {
     RCLCPP_ERROR(LOGGER, "Could not get parameters");
     return -1;
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
   loop_rate.sleep();
 
   // Create Servo and start it
-  moveit_servo::Servo servo(node_options, servo_parameters, planning_scene_monitor, executor);
+  moveit_servo::Servo servo(node, servo_parameters, planning_scene_monitor);
   servo.start();
 
   // Create a publisher for publishing the jog commands

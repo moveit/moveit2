@@ -59,10 +59,10 @@
 
 namespace moveit_servo
 {
-class ServoCalcs : public rclcpp::Node
+class ServoCalcs
 {
 public:
-  ServoCalcs(const rclcpp::NodeOptions& options, const ServoParameters& parameters,
+  ServoCalcs(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<moveit_servo::ServoParameters>& parameters,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   /** \brief Start and stop the timer where we do work and publish outputs */
@@ -195,10 +195,10 @@ private:
                                std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response> res);
 
   // Parameters from yaml
-  const ServoParameters& parameters_;
+  std::shared_ptr<moveit_servo::ServoParameters> parameters_;
 
-  // Pointer to the collision environment
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  // Pointer to the ROS node
+  std::shared_ptr<rclcpp::Node> node_;
 
   // Track the number of cycles during which motion has not occurred.
   // Will avoid re-publishing zero velocities endlessly.

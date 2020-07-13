@@ -43,6 +43,7 @@
 #include <moveit_servo/collision_check.h>
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo_calcs.h>
+#include "std_srvs/srv/trigger.hpp"
 
 namespace moveit_servo
 {
@@ -52,8 +53,8 @@ namespace moveit_servo
 class Servo
 {
 public:
-  Servo(const rclcpp::NodeOptions& options, const moveit_servo::ServoParameters& parameters,
-        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor, std::shared_ptr<rclcpp::executors::MultiThreadedExecutor>& executor);
+  Servo(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<moveit_servo::ServoParameters>& parameters,
+        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   ~Servo();
 
@@ -76,7 +77,7 @@ public:
   bool getCommandFrameTransform(Eigen::Isometry3d& transform);
 
   /** \brief Get the parameters used by servo node. */
-  const ServoParameters& getParameters() const;
+  const std::shared_ptr<moveit_servo::ServoParameters>& getParameters() const;
 
   /** \brief Get the latest joint state. */
   sensor_msgs::msg::JointState::ConstSharedPtr getLatestJointState() const;
@@ -86,10 +87,10 @@ private:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;  // TODO(adamp:) do we need to store this?
 
   // The stored servo parameters
-  ServoParameters parameters_;  // TODO(adamp): do we need to store here? Probably not...
+  std::shared_ptr<moveit_servo::ServoParameters> parameters_; // TODO(adamp): do we need to store here? Probably not...
 
-  std::shared_ptr<ServoCalcs> servo_calcs_;
-  std::shared_ptr<CollisionCheck> collision_checker_;
+  std::unique_ptr<ServoCalcs> servo_calcs_;
+  std::unique_ptr<CollisionCheck> collision_checker_;
   std::shared_ptr<rclcpp::executors::MultiThreadedExecutor> executor_;
 };
 

@@ -41,16 +41,13 @@
 
 namespace moveit_servo
 {
-Servo::Servo(const rclcpp::NodeOptions& options, const moveit_servo::ServoParameters& parameters,
-             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor, std::shared_ptr<rclcpp::executors::MultiThreadedExecutor>& executor)
-  : parameters_(parameters), planning_scene_monitor_(planning_scene_monitor), executor_(executor)
+Servo::Servo(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<moveit_servo::ServoParameters>& parameters,
+        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+  : parameters_(parameters), planning_scene_monitor_(planning_scene_monitor)
 {
-  servo_calcs_ = std::make_shared<ServoCalcs>(options, parameters, planning_scene_monitor);
+  servo_calcs_ = std::make_unique<ServoCalcs>(node, parameters, planning_scene_monitor_);
 
-  collision_checker_ = std::make_shared<CollisionCheck>(options, parameters, planning_scene_monitor);
-
-  executor_->add_node(servo_calcs_);
-  executor_->add_node(collision_checker_);
+  collision_checker_ = std::make_unique<CollisionCheck>(node, parameters, planning_scene_monitor_);
 }
 
 void Servo::start()
@@ -61,7 +58,7 @@ void Servo::start()
   servo_calcs_->start();
 
   // Check collisions in this timer
-  if (parameters_.check_collisions)
+  if (parameters_->check_collisions)
     collision_checker_->start();
 }
 
@@ -87,7 +84,7 @@ bool Servo::getCommandFrameTransform(Eigen::Isometry3d& transform)
   return servo_calcs_->getCommandFrameTransform(transform);
 }
 
-const ServoParameters& Servo::getParameters() const
+const std::shared_ptr<moveit_servo::ServoParameters>& Servo::getParameters() const
 {
   return parameters_;
 }

@@ -58,7 +58,7 @@ enum CollisionCheckType
   K_STOP_DISTANCE = 2
 };
 
-class CollisionCheck : public rclcpp::Node
+class CollisionCheck
 {
 public:
   /** \brief Constructor
@@ -66,7 +66,7 @@ public:
    *  \param planning_scene_monitor: PSM should have scene monitor and state monitor
    *                                 already started when passed into this class
    */
-  CollisionCheck(const rclcpp::NodeOptions& options, const moveit_servo::ServoParameters& parameters,
+  CollisionCheck(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<moveit_servo::ServoParameters>& parameters,
                  const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   /** \brief start and stop the Timer */
@@ -96,10 +96,13 @@ private:
   std::shared_ptr<rclcpp::Node> node_;
 
   // Parameters from yaml
-  const ServoParameters& parameters_;
+  std::shared_ptr<moveit_servo::ServoParameters> parameters_;
 
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+
+  // Pointer to the ROS node
+  std::shared_ptr<rclcpp::Node> node_;
 
   // Robot state and collision matrix from planning scene
   std::unique_ptr<moveit::core::RobotState> current_state_;
