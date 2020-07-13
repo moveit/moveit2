@@ -166,7 +166,7 @@ ServoCalcs::ServoCalcs(const rclcpp::NodeOptions& options, const ServoParameters
                                                                  // what happens if this returns false
 
     jointStateCB(std::make_shared<sensor_msgs::msg::JointState>(recieved_joint_state_msg));
-    updateJoints(); // TODO(adamp): because we use this here outside the control loop, split the updateJoints() function into 2 parts: 1) update joints, 2) do the worst case collision stuff?
+    updateJoints();
   }
 
   // Set up the "last" published message, in case we need to send it first
@@ -233,6 +233,9 @@ void ServoCalcs::run()  // TODO(adamp): come back and pass a timer event here?
       return;
     default_sleep_rate_.sleep();
   }
+
+  // Calculate and publish worst stop time for collision checker
+  calculateWorstCaseStopTime();
 
   // Update from latest state
   {
@@ -889,7 +892,12 @@ bool ServoCalcs::updateJoints()
   // Cache the original joints in case they need to be reset
   original_joint_state_ = internal_joint_state_;
 
-  // Calculate worst case joint stop time, for collision checking
+  return true;
+}
+
+// Calculate worst case joint stop time, for collision checking
+bool ServoCalcs::calculateWorstCaseStopTime()
+{
   std::string joint_name = "";
   moveit::core::JointModel::Bounds kinematic_bounds;
   double accel_limit = 0;

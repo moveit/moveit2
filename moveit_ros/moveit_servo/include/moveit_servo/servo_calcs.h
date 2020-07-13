@@ -98,6 +98,9 @@ private:
   /** \brief Parse the incoming joint msg for the joints of our MoveGroup */
   bool updateJoints();
 
+  /** \brief Finds the worst case stopping time based on accel limits, for collision checking */
+  bool calculateWorstCaseStopTime();
+
   /** \brief If incoming velocity commands are from a unitless joystick, scale them to physical units.
    * Also, multiply by timestep to calculate a position change.
    */
