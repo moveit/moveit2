@@ -211,8 +211,6 @@ protected:
 
     // initializing plugin
     ASSERT_TRUE(kinematics_solver_->initialize(node_, *robot_model_, group_name_, root_link_, { tip_link_ },
-                                               DEFAULT_SEARCH_DISCRETIZATION) ||
-                kinematics_solver_->initialize(ROBOT_DESCRIPTION_PARAM, group_name_, root_link_, { tip_link_ },
                                                DEFAULT_SEARCH_DISCRETIZATION))
         << "Solver failed to initialize";
 
