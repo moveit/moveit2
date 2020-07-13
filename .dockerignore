@@ -1,0 +1,11 @@
+################################################################################
+# Repo
+
+.circleci/*
+.git/*
+.dockerignore
+.gitignore
+.travis.yml
+**Dockerfile
+**.Dockerfile
+codecov.yml
