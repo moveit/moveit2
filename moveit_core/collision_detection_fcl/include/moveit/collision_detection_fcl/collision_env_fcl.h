@@ -50,7 +50,7 @@
 namespace collision_detection
 {
 /** \brief FCL implementation of the CollisionEnv */
-class COLLISION_DETECTION_FCL_PUBLIC CollisionEnvFCL : public CollisionEnv
+class CollisionEnvFCL : public CollisionEnv
 {
 public:
   CollisionEnvFCL() = delete;

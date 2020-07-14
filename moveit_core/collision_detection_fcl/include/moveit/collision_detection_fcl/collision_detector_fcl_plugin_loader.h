@@ -42,7 +42,7 @@
 
 namespace collision_detection
 {
-class COLLISION_DETECTION_FCL_PUBLIC CollisionDetectorFCLPluginLoader : public CollisionPlugin
+class COLLISION_DETECTION_FCL_PLUGIN_PUBLIC CollisionDetectorFCLPluginLoader : public CollisionPlugin
 {
 public:
   bool initialize(const planning_scene::PlanningScenePtr& scene) const override;

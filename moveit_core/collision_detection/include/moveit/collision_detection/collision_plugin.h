@@ -75,7 +75,7 @@ MOVEIT_CLASS_FORWARD(CollisionPlugin)  // Defines CollisionPluginPtr, ConstPtr, 
  *   };
  * </PRE>
  */
-class COLLISION_DETECTION_PUBLIC CollisionPlugin
+class CollisionPlugin
 {
 public:
   CollisionPlugin()
