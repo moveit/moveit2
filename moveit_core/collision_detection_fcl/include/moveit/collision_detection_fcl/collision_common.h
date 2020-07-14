@@ -41,6 +41,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/collision_detection_fcl/fcl_compat.h>
 #include <geometric_shapes/check_isometry.h>
+#include <moveit/collision_detection_fcl/visibility_control.hpp>
 
 #if (MOVEIT_FCL_VERSION >= FCL_VERSION_CHECK(0, 6, 0))
 #include <fcl/broadphase/broadphase_collision_manager.h>
@@ -287,31 +288,38 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
 bool distanceCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void* data, double& min_dist);
 
 /** \brief Create new FCLGeometry object out of robot link model. */
+COLLISION_DETECTION_FCL_PUBLIC
 FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, const moveit::core::LinkModel* link,
                                             int shape_index);
 
 /** \brief Create new FCLGeometry object out of attached body. */
+COLLISION_DETECTION_FCL_PUBLIC
 FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, const moveit::core::AttachedBody* ab,
                                             int shape_index);
 
 /** \brief Create new FCLGeometry object out of a world object.
  *
  *  A world object always consists only of a single shape, therefore we don't need the \e shape_index. */
+COLLISION_DETECTION_FCL_PUBLIC
 FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, const World::Object* obj);
 
 /** \brief Create new scaled and / or padded FCLGeometry object out of robot link model. */
+COLLISION_DETECTION_FCL_PUBLIC
 FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, double scale, double padding,
                                             const moveit::core::LinkModel* link, int shape_index);
 
 /** \brief Create new scaled and / or padded FCLGeometry object out of an attached body. */
+COLLISION_DETECTION_FCL_PUBLIC
 FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, double scale, double padding,
                                             const moveit::core::AttachedBody* ab, int shape_index);
 
 /** \brief Create new scaled and / or padded FCLGeometry object out of an world object. */
+COLLISION_DETECTION_FCL_PUBLIC
 FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, double scale, double padding,
                                             const World::Object* obj);
 
 /** \brief Increases the counter of the caches which can trigger the cleaning of expired entries from them. */
+COLLISION_DETECTION_FCL_PUBLIC
 void cleanCollisionGeometryCache();
 
 /** \brief Transforms an Eigen Isometry3d to FCL coordinate transformation */

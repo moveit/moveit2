@@ -38,11 +38,12 @@
 
 #include <moveit/collision_detection/collision_detector_allocator.h>
 #include <moveit/collision_detection_fcl/collision_env_fcl.h>
+#include <moveit/collision_detection_fcl/visibility_control.hpp>
 
 namespace collision_detection
 {
 /** \brief An allocator for FCL collision detectors */
-class CollisionDetectorAllocatorFCL
+class COLLISION_DETECTION_FCL_PUBLIC CollisionDetectorAllocatorFCL
   : public CollisionDetectorAllocatorTemplate<CollisionEnvFCL, CollisionDetectorAllocatorFCL>
 {
 public:

@@ -2,6 +2,11 @@ set(MOVEIT_LIB_NAME moveit_robot_trajectory)
 
 add_library(${MOVEIT_LIB_NAME} SHARED src/robot_trajectory.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
+# Causes the visibility macros to use dllexport rather than dllimport,
+# which is appropriate when building the dll but not consuming it.
+target_compile_definitions(${MOVEIT_LIB_NAME}
+  PRIVATE "ROBOT_TRAJECTORY_BUILDING_LIBRARY")
+
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   urdfdom

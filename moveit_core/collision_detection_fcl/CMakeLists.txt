@@ -12,6 +12,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdfdom
   urdfdom_headers
   LIBFCL
+  LIBCCD
   Boost
   visualization_msgs
 )
@@ -21,7 +22,14 @@ target_link_libraries(${MOVEIT_LIB_NAME}
 
 add_library(collision_detector_fcl_plugin SHARED src/collision_detector_fcl_plugin_loader.cpp)
 set_target_properties(collision_detector_fcl_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(collision_detector_fcl_plugin
+set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+# Causes the visibility macros to use dllexport rather than dllimport,
+# which is appropriate when building the dll but not consuming it.
+target_compile_definitions(${MOVEIT_LIB_NAME}
+  PRIVATE "COLLISION_DETECTION_FCL_BUILDING_LIBRARY")
+
+
+  ament_target_dependencies(collision_detector_fcl_plugin
   rclcpp
   urdf
   visualization_msgs
