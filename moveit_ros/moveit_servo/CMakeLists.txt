@@ -27,35 +27,11 @@ find_package(sensor_msgs REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
+find_package(std_srvs REQUIRED)
 
 include_directories(
   include
 )
-
-# Add composable node libraries
-# add_library(collision_check_component SHARED
-#    src/collision_check.cpp)
-# ament_target_dependencies(collision_check_component
-#   "rclcpp"
-#   "rclcpp_components"
-#   "std_msgs"
-#   "sensor_msgs"
-#   "moveit_ros_planning")
-# rclcpp_components_register_nodes(collision_check_component "moveit_servo::CollisionCheck")
-
-# add_library(servo_calcs_component SHARED
-#    src/servo_calcs.cpp)
-# ament_target_dependencies(servo_calcs_component
-#   "rclcpp"
-#   "rclcpp_components"
-#   "std_msgs"
-#   "sensor_msgs"
-#   "control_msgs"
-#   "moveit_msgs"
-#   "geometry_msgs"
-#   "trajectory_msgs"
-#   "moveit_ros_planning")
-# rclcpp_components_register_nodes(servo_calcs_component "moveit_servo::JogCalcs")
 
 add_library(servo_library SHARED
    src/servo.cpp
@@ -82,11 +58,43 @@ install(
 
 # Install Libraries
 install(TARGETS
-  # collision_check_component
   servo_library
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
+
+# Add composable node libraries
+add_library(servo_server SHARED
+   src/servo_server.cpp src/servo.cpp src/servo_calcs.cpp src/collision_check.cpp src/low_pass_filter.cpp)
+ament_target_dependencies(servo_server
+  "rclcpp"
+  "rclcpp_components"
+  "std_msgs"
+  "sensor_msgs"
+  "moveit_ros_planning"
+  "control_msgs"
+  "std_srvs")
+rclcpp_components_register_nodes(servo_server "moveit_servo::ServoServer")
+install(TARGETS
+  servo_server
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+add_executable(fake_command_publisher test/publish_fake_jog_commands.cpp)
+ament_target_dependencies(fake_command_publisher 
+  "rclcpp"
+  "std_msgs"
+  "sensor_msgs"
+  "control_msgs"
+  "moveit_msgs"
+  "geometry_msgs"
+  "trajectory_msgs"
+  "std_srvs"
+  "moveit_ros_planning")
+install(TARGETS
+  fake_command_publisher
+  DESTINATION lib/${PROJECT_NAME})
 
 add_executable(servo_demo src/ros2_demo/servo_cpp_interface_demo.cpp src/servo.cpp src/servo_calcs.cpp src/collision_check.cpp src/low_pass_filter.cpp)
 ament_target_dependencies(servo_demo 

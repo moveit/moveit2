@@ -37,50 +37,119 @@
  *      Author    : Andy Zelenak
  */
 
-#include <moveit_servo/servo.h>
+#include <moveit_servo/servo_server.h>
+#include <moveit_servo/servo_parameters.cpp>
 
-namespace
+// namespace
+// {
+// constexpr char LOGNAME[] = "servo_server";
+// constexpr char ROS_THREADS = 8;
+
+// }  // namespace
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_server");
+
+namespace moveit_servo
 {
-constexpr char LOGNAME[] = "servo_server";
-constexpr char ROS_THREADS = 8;
 
-}  // namespace
-
-int main(int argc, char** argv)
+ServoServer::ServoServer(const rclcpp::NodeOptions& options)
+  : Node("servo_service", options)
 {
-  ros::init(argc, argv, LOGNAME);
-  ros::AsyncSpinner spinner(ROS_THREADS);
-  spinner.start();
-
-  ros::NodeHandle nh;
-
-  // Load the planning scene monitor
-  auto planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
-  if (!planning_scene_monitor->getPlanningScene())
+  if(!options.use_intra_process_comms())
   {
-    ROS_ERROR_STREAM_NAMED(LOGNAME, "Error in setting up the PlanningSceneMonitor.");
-    exit(EXIT_FAILURE);
+    RCLCPP_WARN_STREAM(LOGGER, "Intra-process communication is disabled, consider enabling it with: \n something here"); //TODO(adamp): figure out the instructions for enabling and update here
+  }
+  // Create tf buffer and planning scene monitor
+
+  // Set up services for interacting with Servo
+  using std::placeholders::_1;
+  using std::placeholders::_2;
+  start_servo_service_ = this->create_service<std_srvs::srv::Trigger>("start_servo", std::bind(&ServoServer::startCB, this, _1, _2));
+  stop_servo_service_ = this->create_service<std_srvs::srv::Trigger>("stop_servo", std::bind(&ServoServer::stopCB, this, _1, _2));
+  pause_servo_service_ = this->create_service<std_srvs::srv::Trigger>("pause_servo", std::bind(&ServoServer::pauseCB, this, _1, _2));
+  unpause_servo_service_ = this->create_service<std_srvs::srv::Trigger>("unpause_servo", std::bind(&ServoServer::unpauseCB, this, _1, _2));
+
+  // Set up the planning scene, get the parameters, and start servoing
+  initialization_timer_ = this->create_wall_timer(std::chrono::duration<double>(2.0), std::bind(&ServoServer::initializeServo, this));
+}
+
+void ServoServer::initializeServo()
+{
+  tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
+  auto node_ptr = shared_from_this();
+  planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_ptr, "robot_description", tf_buffer_, "planning_scene_monitor"); //TODO(adamp) parameterize this
+
+  // Get the parameters
+  bool initialized_properly = false;
+  auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
+  if(moveit_servo::readParameters(*this, LOGGER, *servo_parameters))
+  {
+    initialized_properly = true;
+  }
+  else
+  {
+    RCLCPP_ERROR(LOGGER, "Could not get parameters");
   }
 
   // Start the planning scene monitor
-  planning_scene_monitor->startSceneMonitor();
-  planning_scene_monitor->startWorldGeometryMonitor(
-      planning_scene_monitor::PlanningSceneMonitor::DEFAULT_COLLISION_OBJECT_TOPIC,
-      planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_WORLD_TOPIC,
-      false /* skip octomap monitor */);
-  planning_scene_monitor->startStateMonitor();
+  if (planning_scene_monitor_->getPlanningScene())
+  {
+    // TODO(adamp): parameterize this
+    planning_scene_monitor_->startStateMonitor("/joint_states");
+    planning_scene_monitor_->setPlanningScenePublishingFrequency(25);
+    planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE, "/moveit_servo/publish_planning_scene");
+  }
+  else
+  {
+    RCLCPP_ERROR(LOGGER, "Planning scene not configured");
+    initialized_properly = false;
+  }
 
-  // Create the servo server
-  moveit_servo::Servo servo(nh, planning_scene_monitor);
-
-  // Start the servo server (runs in the ros spinner)
-  servo.start();
-
-  // Wait for ros to shutdown
-  ros::waitForShutdown();
-
-  // Stop the servo server
-  servo.stop();
-
-  return 0;
+  // Create Servo
+  servo_ = std::make_unique<moveit_servo::Servo>(node_ptr, servo_parameters, planning_scene_monitor_);
+  
+  // If we initialized properly, go ahead and start everything up
+  if(initialized_properly)
+  {
+    servo_->start();
+    initialization_timer_->cancel();
+  }
+  else
+  {
+    RCLCPP_WARN(LOGGER, "Servo Service failed to initialize properly, not starting servoing");
+  }
 }
+
+void ServoServer::startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+          std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+  servo_->start();
+  response->success = true;
+}
+
+void ServoServer::stopCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+          std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+  servo_->stop();
+  response->success = true;
+}
+
+void ServoServer::pauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+          std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+  servo_->setPaused(true);
+  response->success = true;
+}
+
+void ServoServer::unpauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+          std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+  servo_->setPaused(false);
+  response->success = true;
+}
+
+} // namespace moveit_servo
+
+// Register the component with class_loader
+#include <rclcpp_components/register_node_macro.hpp>
+RCLCPP_COMPONENTS_REGISTER_NODE(moveit_servo::ServoServer)
