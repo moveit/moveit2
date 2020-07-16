@@ -26,7 +26,7 @@ def load_yaml(package_name, file_path):
 
 def generate_launch_description():
     # Get parameters for the Servo node
-    servo_yaml = load_yaml('moveit_servo', 'config/ur_simulated_config.yaml')
+    servo_yaml = load_yaml('moveit_servo', 'config/panda_simulated_config.yaml')
     servo_params = { 'moveit_servo' : servo_yaml }
 
     # Get URDF and SRDF
@@ -44,12 +44,12 @@ def generate_launch_description():
                      arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'world', 'panda_link0'])
 
     # The servo cpp interface demo
+    # Creates the Servo node and publishes commands to it
     servo_node = Node(
         package='moveit_servo',
         executable='servo_demo',
         output='screen',
-        # prefix=['xterm -e gdb --args'],
-        parameters=[servo_params, robot_description, robot_description_semantic]
+        parameters=[servo_params, robot_description, robot_description_semantic ]
     )
 
     # Publishes tf's for the robot

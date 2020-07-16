@@ -28,7 +28,7 @@ def load_yaml(package_name, file_path):
 
 def generate_launch_description():
     # Get parameters for the Servo node
-    servo_yaml = load_yaml('moveit_servo', 'config/ur_simulated_config.yaml')
+    servo_yaml = load_yaml('moveit_servo', 'config/panda_simulated_config.yaml')
     servo_params = { 'moveit_servo' : servo_yaml }
 
     # Get URDF and SRDF
@@ -37,42 +37,6 @@ def generate_launch_description():
 
     robot_description_semantic_config = load_file('moveit_resources', 'panda_moveit_config/config/panda.srdf')
     robot_description_semantic = {'robot_description_semantic' : robot_description_semantic_config}
-
-    static_tf_pub_params = {'child_frame_id' : 'panda_link0', 'frame_id' : 'world',
-                            'rotation/w' : '1.0', 'rotation/x' : '0.0', 'rotation/y' : '0.0', 'rotation/z' : '0.0',
-                            'translation/x' : '0.0', 'translation/y' : '0.0', 'translation/z' : '0.0'}
-
-    # A node to publish world -> panda_link0 transform
-    static_tf = Node(package='tf2_ros',
-                     executable='static_transform_publisher',
-                     name='static_transform_publisher',
-                     output='log',
-                     arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'world', 'panda_link0'])
-
-    # The servo cpp interface demo
-    # servo_node = Node(
-    #     package='moveit_servo',
-    #     executable='servo_demo',
-    #     output='screen',
-    #     # prefix=['xterm -e gdb --args'],
-    #     parameters=[servo_params, robot_description, robot_description_semantic]
-    # )
-
-    # servo_node = Node(
-    #     package='moveit_servo',
-    #     executable='servo_server',
-    #     output='screen',
-    #     # prefix=['xterm -e gdb --args'],
-    #     parameters=[servo_params, robot_description, robot_description_semantic]
-    # )
-
-    # Publishes tf's for the robot
-    # robot_state_publisher = Node(
-    #     package='robot_state_publisher',
-    #     executable='robot_state_publisher',
-    #     output='screen',
-    #     parameters=[robot_description]
-    # )
 
     # RViz
     rviz_config_file = get_package_share_directory('moveit_servo') + "/config/demo_rviz_config.rviz"
@@ -102,11 +66,11 @@ def generate_launch_description():
                     plugin='robot_state_publisher::RobotStatePublisher',
                     name='robot_state_publisher',
                     parameters=[robot_description]),
-                # ComposableNode(
-                #     package='tf2_ros',
-                #     plugin='tf2_ros::StaticTransformBroadcasterNode',
-                #     name='static_tf2_broadcaster',
-                #     parameters=[{'static_tf2_broadcaster' : {'child_frame_id' : 'panda_link0', 'frame_id' : 'world'}}]),
+                ComposableNode(
+                    package='tf2_ros',
+                    plugin='tf2_ros::StaticTransformBroadcasterNode',
+                    name='static_tf2_broadcaster',
+                    parameters=[ {'/child_frame_id' : 'panda_link0', '/frame_id' : 'world'} ]),
                 ComposableNode(
                     package='moveit_servo',
                     plugin='moveit_servo::ServoServer',
@@ -116,5 +80,4 @@ def generate_launch_description():
             output='screen',
     )
     
-    # return LaunchDescription([ rviz_node, static_tf, servo_node, fake_joint_driver_node, robot_state_publisher ])
-    return LaunchDescription([ rviz_node, fake_joint_driver_node, static_tf, container ])
+    return LaunchDescription([ rviz_node, fake_joint_driver_node, container ])
