@@ -71,8 +71,8 @@ bool isNonZero(const control_msgs::msg::JointJog& msg)
 // Constructor for the class that handles servoing calculations
 ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node, const ServoParametersPtr& parameters,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
-  : parameters_(parameters)
-  , node_(node)
+  : node_(node)
+  , parameters_(parameters)
   , period_(parameters->publish_period)
 {
   // MoveIt Setup

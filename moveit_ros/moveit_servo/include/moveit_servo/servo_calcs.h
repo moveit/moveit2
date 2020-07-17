@@ -194,11 +194,11 @@ private:
   void changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request> req,
                                std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response> res);
 
-  // Parameters from yaml
-  ServoParametersPtr parameters_;
-
   // Pointer to the ROS node
   std::shared_ptr<rclcpp::Node> node_;
+
+  // Parameters from yaml
+  ServoParametersPtr parameters_;
 
   // Track the number of cycles during which motion has not occurred.
   // Will avoid re-publishing zero velocities endlessly.

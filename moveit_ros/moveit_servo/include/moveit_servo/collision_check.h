@@ -101,9 +101,6 @@ private:
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
-  // Pointer to the ROS node
-  std::shared_ptr<rclcpp::Node> node_;
-
   // Robot state and collision matrix from planning scene
   std::unique_ptr<moveit::core::RobotState> current_state_;
   collision_detection::AllowedCollisionMatrix acm_;
