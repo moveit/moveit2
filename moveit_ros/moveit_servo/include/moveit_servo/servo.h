@@ -53,7 +53,7 @@ namespace moveit_servo
 class Servo
 {
 public:
-  Servo(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<moveit_servo::ServoParameters>& parameters,
+  Servo(const rclcpp::Node::SharedPtr& node, const ServoParametersPtr& parameters,
         const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   ~Servo();
@@ -87,7 +87,7 @@ private:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;  // TODO(adamp:) do we need to store this?
 
   // The stored servo parameters
-  std::shared_ptr<moveit_servo::ServoParameters> parameters_; // TODO(adamp): do we need to store here? Probably not...
+  ServoParametersPtr parameters_; // TODO(adamp): do we need to store here? Probably not...
 
   std::unique_ptr<ServoCalcs> servo_calcs_;
   std::unique_ptr<CollisionCheck> collision_checker_;

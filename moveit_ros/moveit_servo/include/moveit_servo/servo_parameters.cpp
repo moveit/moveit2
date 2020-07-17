@@ -86,10 +86,8 @@ bool readParameters(rclcpp::Node& node, const rclcpp::Logger& logger, ServoParam
 {
   bool error = false;
 
-  // TODO(adamp): eventually will need to not hardcode in the "moveit_servo" prefix. But need to figure out how that namespace will be set when loading the params and how to get the info here
-  RCLCPP_INFO_STREAM(logger, "Node name: " << node.get_name());
-  RCLCPP_INFO_STREAM(logger, "Node namespace: " << node.get_namespace());
-  RCLCPP_INFO_STREAM(logger, "Node fully qualified name: " << node.get_fully_qualified_name());
+  // TODO(adamp): add a note for users when launching this to namespace the servo yaml file with 'moveit_servo' prefix
+  // TODO(adamp): but then leave that namespace hardcoded here
 
   // Get the parameters (organized same order as YAML file)
   error |= !declareAndGetParam<bool>("moveit_servo.use_gazebo", parameters.use_gazebo, node, logger);

@@ -62,7 +62,7 @@ namespace moveit_servo
 class ServoCalcs
 {
 public:
-  ServoCalcs(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<moveit_servo::ServoParameters>& parameters,
+  ServoCalcs(const rclcpp::Node::SharedPtr& node, const ServoParametersPtr& parameters,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   /** \brief Start and stop the timer where we do work and publish outputs */
@@ -195,7 +195,7 @@ private:
                                std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response> res);
 
   // Parameters from yaml
-  std::shared_ptr<moveit_servo::ServoParameters> parameters_;
+  ServoParametersPtr parameters_;
 
   // Pointer to the ROS node
   std::shared_ptr<rclcpp::Node> node_;

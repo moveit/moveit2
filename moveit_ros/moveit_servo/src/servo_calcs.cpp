@@ -69,7 +69,7 @@ bool isNonZero(const control_msgs::msg::JointJog& msg)
 }  // namespace
 
 // Constructor for the class that handles servoing calculations
-ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<moveit_servo::ServoParameters>& parameters,
+ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node, const ServoParametersPtr& parameters,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : parameters_(parameters)
   , node_(node)

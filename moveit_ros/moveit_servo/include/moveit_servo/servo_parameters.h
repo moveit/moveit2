@@ -86,4 +86,6 @@ struct ServoParameters
   double min_allowable_collision_distance;
 };
 
+using ServoParametersPtr = std::shared_ptr<ServoParameters>;
+
 }  // namespace moveit_servo

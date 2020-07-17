@@ -41,7 +41,7 @@
 
 namespace moveit_servo
 {
-Servo::Servo(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<moveit_servo::ServoParameters>& parameters,
+Servo::Servo(const rclcpp::Node::SharedPtr& node, const ServoParametersPtr& parameters,
         const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : parameters_(parameters), planning_scene_monitor_(planning_scene_monitor)
 {
