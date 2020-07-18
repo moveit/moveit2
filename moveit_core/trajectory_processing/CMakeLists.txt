@@ -25,14 +25,14 @@ target_link_libraries(${MOVEIT_LIB_NAME}
 install(TARGETS ${MOVEIT_LIB_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
+  RUNTIME DESTINATION bin
+)
 
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
   find_package(moveit_resources REQUIRED)
   include_directories(${moveit_resources_INCLUDE_DIRS})
-  find_package(resource_retriever REQUIRED)
 
   if(WIN32)
     # TODO add windows paths
@@ -44,19 +44,5 @@ if(BUILD_TESTING)
   ament_add_gtest(test_time_parameterization test/test_time_parameterization.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
 
-  target_include_directories(test_time_parameterization PUBLIC
-    ${geometric_shapes_INCLUDE_DIRS}
-  )
-
-  target_link_libraries(test_time_parameterization
-    moveit_test_utils
-    moveit_robot_trajectory
-    moveit_trajectory_processing
-    ${urdfdom_LIBRARIES}
-    ${srdfdom_LIBRARIES}
-    ${urdfdom_headers_LIBRARIES}
-    ${MOVEIT_LIB_NAME}
-    ${geometric_shapes_LIBRARIES}
-    resource_retriever::resource_retriever
-  )
+  target_link_libraries(test_time_parameterization moveit_test_utils ${MOVEIT_LIB_NAME})
 endif()

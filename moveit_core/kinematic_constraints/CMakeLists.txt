@@ -41,24 +41,9 @@ install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
-  find_package(moveit_resources REQUIRED)
-  find_package(resource_retriever REQUIRED)
-
-  include_directories(${moveit_resources_INCLUDE_DIRS})
 
   ament_add_gtest(test_constraints test/test_constraints.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}"
   )
-
-  target_link_libraries(test_constraints
-    moveit_kinematic_constraints
-    moveit_collision_detection_fcl
-    moveit_robot_model
-    moveit_robot_state
-    moveit_utils
-    moveit_test_utils
-    ${geometric_shapes_LIBRARIES}
-    resource_retriever::resource_retriever
-    ${MOVEIT_LIB_NAME}
-  )
+  target_link_libraries(test_constraints moveit_test_utils ${MOVEIT_LIB_NAME})
 endif()

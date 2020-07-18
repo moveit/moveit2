@@ -58,7 +58,7 @@ find_library(LIBFCL_LIBRARIES_FULL ${LIBFCL_LIBRARIES} ${LIBFCL_LIBRARY_DIRS})
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
 
 
-find_package(octomap REQUIRED)
+find_package(OCTOMAP REQUIRED)
 find_package(urdfdom REQUIRED)
 find_package(urdf REQUIRED)
 find_package(urdfdom_headers REQUIRED)
@@ -169,19 +169,7 @@ include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
   # ${BULLET_INCLUDE_DIRS}
 )
 
-include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
-  ${VERSION_FILE_PATH}
-  ${rclcpp_INCLUDE_DIRS}
-  ${rmw_implementation_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  ${urdfdom_INCLUDE_DIRS}
-  ${urdfdom_headers_INCLUDE_DIRS}
-  ${OCTOMAP_INCLUDE_DIRS}
-  ${moveit_msgs_INCLUDE_DIRS}
-  ${random_numbers_INCLUDE_DIRS}
-  ${srdfdom_INCLUDE_DIRS}
-  ${geometric_shapes_INCLUDE_DIRS}
-)
+include_directories(${THIS_PACKAGE_INCLUDE_DIRS} ${VERSION_FILE_PATH})
 
 # Generate and install version.h
 string(REGEX REPLACE "^([0-9]+)\\..*" "\\1" MOVEIT_VERSION_MAJOR "${${PROJECT_NAME}_VERSION}")

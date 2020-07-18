@@ -16,15 +16,16 @@ add_library(${MOVEIT_LIB_NAME} SHARED ${SOURCE_FILES})
 
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
-    Boost
-    rclcpp
-    pluginlib
-    moveit_core
+  Boost
+  moveit_core
+  rclcpp
+  pluginlib
 )
 
 add_executable(moveit_list_request_adapter_plugins src/list.cpp)
 ament_target_dependencies(moveit_list_request_adapter_plugins
   Boost
+  moveit_core
   rclcpp
   pluginlib
   ament_index_cpp
@@ -33,7 +34,9 @@ ament_target_dependencies(moveit_list_request_adapter_plugins
 install(TARGETS ${MOVEIT_LIB_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
+  RUNTIME DESTINATION bin
+)
 
 install(TARGETS moveit_list_request_adapter_plugins
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+)
