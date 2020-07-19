@@ -32,7 +32,6 @@
   <depend>geometric_shapes</depend>
   <depend>geometry_msgs</depend>
   <depend>kdl_parser</depend>
-  <depend>libconsole-bridge-dev</depend>
   <depend>urdf</depend>
   <depend>liburdfdom-dev</depend>
   <depend>liburdfdom-headers-dev</depend>
