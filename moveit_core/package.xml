@@ -33,8 +33,8 @@
   <depend>geometry_msgs</depend>
   <depend>kdl_parser</depend>
   <depend>urdf</depend>
-  <depend>liburdfdom-dev</depend>
-  <depend>liburdfdom-headers-dev</depend>
+  <depend>urdfdom</depend>
+  <depend>urdfdom_headers</depend>
   <depend>moveit_msgs</depend>
   <depend>octomap</depend>
   <depend>octomap_msgs</depend>
