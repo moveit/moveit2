@@ -35,7 +35,6 @@
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>fake_joint_driver</exec_depend>
 
-  <test_depend>rostest</test_depend>
   <test_depend>moveit_resources</test_depend>
 
   <export>

@@ -1,58 +1,43 @@
-## Moveit Servo
+# Moveit Servo
 
-#### Quick Start Guide for UR5 example
+## Quick Start Guide for Panda example
 
-Clone the `universal_robot` repo into your catkin workspace:
-
-    git clone https://github.com/ros-industrial/universal_robot.git
-
-Run `rosdep install` from the `src` folder to install dependencies.
-
-    rosdep install --from-paths . --ignore-src -y
-
-Build and subsequently source the catkin workspace. Startup the robot and MoveIt:
-
-    roslaunch ur_gazebo ur5.launch
-
-    roslaunch ur5_moveit_config ur5_moveit_planning_execution.launch sim:=true
-
-    roslaunch ur5_moveit_config moveit_rviz.launch config:=true
-
-In RViz, "plan and execute" a motion to a non-singular position (not all zero joint angles) that is not close to a joint limit.
-
-Switch to a compatible type of `ros-control` controller. It should be a `JointGroupVelocityController` or a `JointGroupPositionController`, not a trajectory controller like MoveIt usually requires.
-
-```sh
-rosservice call /controller_manager/switch_controller "start_controllers:
-- 'joint_group_position_controller'
-stop_controllers:
-- 'arm_controller'
-strictness: 2"
+### Install
+Install and build, roughly following [these instructions](https://moveit.ros.org/install-moveit2/source/).
+```bash
+source /opt/ros/foxy/setup.bash
+export COLCON_WS=~/ws_ros2/
+mkdir -p $COLCON_WS/src
+cd $COLCON_WS/src
+git clone https://github.com/AdamPettinger/moveit2.git -b foxy-compile_servo
+vcs import < moveit2/moveit2.repos
+vcs import < moveit2/moveit_ros/moveit_servo/moveit_servo.repos
+rosdep install -r --from-paths . --ignore-src --rosdistro foxy -y
+cd $COLCON_WS
+colcon build --event-handlers desktop_notification- status- --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
 
-Launch the servo node. This example uses commands from a SpaceNavigator joystick-like device:
+### Run C++ Interface Example
+In a new terminal, run
+```bash
+source /opt/ros/foxy/setup.bash
+. ~/ws_ros2/install/local_setup.bash
+ros2 launch moveit_servo servo_cpp_interface_demo.launch.py
+```
+RViz should pop up with the panda robot, and start servoing while twisting the end effector. It will approach singularity and stop moving.
 
-    roslaunch moveit_servo spacenav_cpp.launch
-
-If you dont have a SpaceNavigator, send commands like this:
-
-```sh
-rostopic pub -r 100 /servo_server/delta_twist_cmds geometry_msgs/TwistStamped "header: auto
-twist:
-  linear:
-    x: 0.0
-    y: 0.01
-    z: -0.01
-  angular:
-    x: 0.0
-    y: 0.0
-    z: 0.0"
+### Run Composable Node Example
+End the C++ interface demo if running. In two seperate terminals, run:
+```bash
+source /opt/ros/foxy/setup.bash
+. ~/ws_ros2/install/local_setup.bash
+ros2 launch moveit_servo servo_server_demo.launch.py
 ```
 
-If you see a warning about "close to singularity", try changing the direction of motion.
-
-#### Running Tests
-
-Run tests from the moveit\_servo folder:
-
-    catkin run_tests --no-deps --this
+and
+```bash
+source /opt/ros/foxy/setup.bash
+. ~/ws_ros2/install/local_setup.bash
+ros2 run moveit_servo fake_command_publisher
+```
+The first will open RViz like the last demo, and start the Servo object as a composable node. The second terminal publishes commands to it. The combined effect should closely resemble the C++ interface demo.

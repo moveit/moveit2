@@ -6,12 +6,16 @@ repositories:
   ros2_control:
     type: git
     url: https://github.com/ros-controls/ros2_control
-    version: master
+    version: f4d33a7177db5ad178cc146f6104101fbf980b3c
   ros2_controllers:
     type: git
     url: https://github.com/ros-controls/ros2_controllers
-    version: master
+    version: a049b7a4295c2378cc0a46a153394034e0b60c3d
   control_msgs:
     type: git
     url: https://github.com/AdamPettinger/control_msgs
     version: foxy-add_joint_jog_msg
+  realtime_tools:
+    type: git
+    url: https://github.com/ros-controls/realtime_tools.git
+    version: 9f308f3563acd07061610785924f70d022c8bbcf
