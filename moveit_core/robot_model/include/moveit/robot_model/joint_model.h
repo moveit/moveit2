@@ -44,7 +44,6 @@
 #include <moveit_msgs/msg/joint_limits.hpp>
 #include <random_numbers/random_numbers.h>
 #include <Eigen/Geometry>
-#include <moveit/macros/visibility_control.hpp>
 
 namespace moveit
 {
@@ -105,7 +104,7 @@ using JointModelMapConst = std::map<std::string, const JointModel*>;
     and 'y' will store its full variable names as 'base/x' and
     'base/y'). Local names are never used to reference
     variables directly. */
-class MOVEIT_CORE_PUBLIC JointModel
+class JointModel
 {
 public:
   /** \brief The different types of joints we support */
@@ -125,7 +124,7 @@ public:
   /** \brief Construct a joint named \e name */
   JointModel(const std::string& name);
 
-  virtual ~JointModel() {}
+  virtual ~JointModel();
 
   /** \brief Get the name of the joint */
   const std::string& getName() const
@@ -299,11 +298,7 @@ public:
 
   /** Harmonize position of revolute joints, adding/subtracting multiples of 2*Pi to bring them back into bounds.
    *  Return true if changes were made. */
-  virtual bool harmonizePosition(double* values, const Bounds& other_bounds) const
-  {
-    return false;
-  }
-
+  virtual bool harmonizePosition(double* values, const Bounds& other_bounds) const;
   bool harmonizePosition(double* values) const
   {
     return harmonizePosition(values, variable_bounds_);
@@ -316,15 +311,7 @@ public:
   }
 
   /** \brief Check if the set of velocities for the variables of this joint are within bounds, up to some margin. */
-  virtual bool satisfiesVelocityBounds(const double* values, const Bounds& other_bounds, double margin) const
-  {
-    for (std::size_t i = 0; i < other_bounds.size(); ++i)
-      if (other_bounds[i].max_velocity_ + margin < values[i])
-        return false;
-      else if (other_bounds[i].min_velocity_ - margin > values[i])
-        return false;
-    return true;
-  }
+  virtual bool satisfiesVelocityBounds(const double* values, const Bounds& other_bounds, double margin) const;
 
   /** \brief Force the specified velocities to be within bounds. Return true if changes were made. */
   bool enforceVelocityBounds(double* values) const
@@ -333,22 +320,7 @@ public:
   }
 
   /** \brief Force the specified velocities to be inside bounds. Return true if changes were made. */
-  virtual bool enforceVelocityBounds(double* values, const Bounds& other_bounds) const
-  {
-    bool change = false;
-    for (std::size_t i = 0; i < other_bounds.size(); ++i)
-      if (other_bounds[i].max_velocity_ < values[i])
-      {
-        values[i] = other_bounds[i].max_velocity_;
-        change = true;
-      }
-      else if (other_bounds[i].min_velocity_ > values[i])
-      {
-        values[i] = other_bounds[i].min_velocity_;
-        change = true;
-      }
-    return change;
-  }
+  virtual bool enforceVelocityBounds(double* values, const Bounds& other_bounds) const;
 
   /** \brief Get the bounds for a variable. Throw an exception if the variable was not found */
   const VariableBounds& getVariableBounds(const std::string& variable) const;
@@ -547,7 +519,6 @@ protected:
 };
 
 /** \brief Operator overload for printing variable bounds to a stream */
-MOVEIT_CORE_PUBLIC
 std::ostream& operator<<(std::ostream& out, const VariableBounds& b);
 }  // namespace core
 }  // namespace moveit

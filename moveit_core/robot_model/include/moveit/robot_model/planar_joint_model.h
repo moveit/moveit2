@@ -37,14 +37,13 @@
 #pragma once
 
 #include <moveit/robot_model/joint_model.h>
-#include <moveit/macros/visibility_control.hpp>
 
 namespace moveit
 {
 namespace core
 {
 /** \brief A planar joint */
-class MOVEIT_CORE_PUBLIC PlanarJointModel : public JointModel
+class PlanarJointModel : public JointModel
 {
 public:
   /** \brief different types of planar joints we support */

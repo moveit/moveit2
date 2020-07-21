@@ -48,7 +48,6 @@
 #include <moveit/robot_model/planar_joint_model.h>
 #include <moveit/robot_model/revolute_joint_model.h>
 #include <moveit/robot_model/prismatic_joint_model.h>
-#include <moveit/macros/visibility_control.hpp>
 #include <Eigen/Geometry>
 #include <iostream>
 
@@ -62,7 +61,7 @@ MOVEIT_CLASS_FORWARD(RobotModel)  // Defines RobotModelPtr, ConstPtr, WeakPtr...
 
 /** \brief Definition of a kinematic model. This class is not thread
     safe, however multiple instances can be created */
-class MOVEIT_CORE_PUBLIC RobotModel
+class RobotModel
 {
 public:
   /** \brief Construct a kinematic model from a parsed description and a list of planning groups */

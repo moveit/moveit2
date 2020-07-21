@@ -83,36 +83,6 @@ RobotState::~RobotState()
     delete rng_;
 }
 
-const RobotModelConstPtr& RobotState::getRobotModel() const
-{
-  return robot_model_;
-}
-
-std::size_t RobotState::getVariableCount() const
-{
-  return robot_model_->getVariableCount();
-}
-
-const std::vector<std::string>& RobotState::getVariableNames() const
-{
-  return robot_model_->getVariableNames();
-}
-
-const LinkModel* RobotState::getLinkModel(const std::string& link) const
-{
-  return robot_model_->getLinkModel(link);
-}
-
-const JointModel* RobotState::getJointModel(const std::string& joint) const
-{
-  return robot_model_->getJointModel(joint);
-}
-
-const JointModelGroup* RobotState::getJointModelGroup(const std::string& group) const
-{
-  return robot_model_->getJointModelGroup(group);
-}
-
 void RobotState::allocMemory()
 {
   static_assert((sizeof(Eigen::Isometry3d) / EIGEN_MAX_ALIGN_BYTES) * EIGEN_MAX_ALIGN_BYTES == sizeof(Eigen::Isometry3d),
@@ -389,12 +359,6 @@ void RobotState::setVariablePositions(const double* position)
   dirty_link_transforms_ = robot_model_->getRootJoint();
 }
 
-void RobotState::setVariablePositions(const std::vector<double>& position)
-{
-  assert(robot_model_->getVariableCount() <= position.size());  // checked only in debug mode
-  setVariablePositions(&position[0]);
-}
-
 void RobotState::setVariablePositions(const std::map<std::string, double>& variable_map)
 {
   for (const std::pair<const std::string, double>& it : variable_map)
@@ -438,61 +402,6 @@ void RobotState::setVariablePositions(const std::vector<std::string>& variable_n
   }
 }
 
-void RobotState::setVariablePosition(const std::string& variable, double value)
-{
-  setVariablePosition(robot_model_->getVariableIndex(variable), value);
-}
-
-void RobotState::setVariablePosition(int index, double value)
-{
-  position_[index] = value;
-  const JointModel* jm = robot_model_->getJointOfVariable(index);
-  if (jm)
-  {
-    markDirtyJointTransforms(jm);
-    updateMimicJoint(jm);
-  }
-}
-
-double RobotState::getVariablePosition(const std::string& variable) const
-{
-  return position_[robot_model_->getVariableIndex(variable)];
-}
-
-double RobotState::getVariablePosition(int index) const
-{
-  return position_[index];
-}
-
-bool RobotState::hasVelocities() const
-{
-  return has_velocity_;
-}
-
-double* RobotState::getVariableVelocities()
-{
-  markVelocity();
-  return velocity_;
-}
-
-const double* RobotState::getVariableVelocities() const
-{
-  return velocity_;
-}
-
-void RobotState::setVariableVelocities(const double* velocity)
-{
-  has_velocity_ = true;
-  // assume everything is in order in terms of array lengths (for efficiency reasons)
-  memcpy(velocity_, velocity, robot_model_->getVariableCount() * sizeof(double));
-}
-
-void RobotState::setVariableVelocities(const std::vector<double>& velocity)
-{
-  assert(robot_model_->getVariableCount() <= velocity.size());  // checked only in debug mode
-  setVariableVelocities(&velocity[0]);
-}
-
 void RobotState::setVariableVelocities(const std::map<std::string, double>& variable_map)
 {
   markVelocity();
@@ -514,32 +423,6 @@ void RobotState::setVariableVelocities(const std::vector<std::string>& variable_
   assert(variable_names.size() == variable_velocity.size());
   for (std::size_t i = 0; i < variable_names.size(); ++i)
     velocity_[robot_model_->getVariableIndex(variable_names[i])] = variable_velocity[i];
-}
-
-void RobotState::setVariableVelocity(const std::string& variable, double value)
-{
-  setVariableVelocity(robot_model_->getVariableIndex(variable), value);
-}
-
-void RobotState::setVariableVelocity(int index, double value)
-{
-  markVelocity();
-  velocity_[index] = value;
-}
-
-void RobotState::setVariableAccelerations(const double* acceleration)
-{
-  has_acceleration_ = true;
-  has_effort_ = false;
-
-  // assume everything is in order in terms of array lengths (for efficiency reasons)
-  memcpy(acceleration_, acceleration, robot_model_->getVariableCount() * sizeof(double));
-}
-
-void RobotState::setVariableAccelerations(const std::vector<double>& acceleration)
-{
-  assert(robot_model_->getVariableCount() <= acceleration.size());  // checked only in debug mode
-  setVariableAccelerations(&acceleration[0]);
 }
 
 void RobotState::setVariableAccelerations(const std::map<std::string, double>& variable_map)
@@ -565,36 +448,6 @@ void RobotState::setVariableAccelerations(const std::vector<std::string>& variab
     acceleration_[robot_model_->getVariableIndex(variable_names[i])] = variable_acceleration[i];
 }
 
-bool RobotState::hasEffort() const
-{
-  return has_effort_;
-}
-
-double* RobotState::getVariableEffort()
-{
-  markEffort();
-  return effort_;
-}
-
-const double* RobotState::getVariableEffort() const
-{
-  return effort_;
-}
-
-void RobotState::setVariableEffort(const double* effort)
-{
-  has_effort_ = true;
-  has_acceleration_ = false;
-  // assume everything is in order in terms of array lengths (for efficiency reasons)
-  memcpy(effort_, effort, robot_model_->getVariableCount() * sizeof(double));
-}
-
-void RobotState::setVariableEffort(const std::vector<double>& effort)
-{
-  assert(robot_model_->getVariableCount() <= effort.size());  // checked only in debug mode
-  setVariableEffort(&effort[0]);
-}
-
 void RobotState::setVariableEffort(const std::map<std::string, double>& variable_map)
 {
   markEffort();
@@ -618,27 +471,6 @@ void RobotState::setVariableEffort(const std::vector<std::string>& variable_name
     effort_[robot_model_->getVariableIndex(variable_names[i])] = variable_effort[i];
 }
 
-void RobotState::setVariableEffort(const std::string& variable, double value)
-{
-  setVariableEffort(robot_model_->getVariableIndex(variable), value);
-}
-
-void RobotState::setVariableEffort(int index, double value)
-{
-  markEffort();
-  effort_[index] = value;
-}
-
-double RobotState::getVariableEffort(const std::string& variable) const
-{
-  return effort_[robot_model_->getVariableIndex(variable)];
-}
-
-double RobotState::getVariableEffort(int index) const
-{
-  return effort_[index];
-}
-
 void RobotState::invertVelocity()
 {
   if (has_velocity_)
@@ -646,46 +478,6 @@ void RobotState::invertVelocity()
     for (size_t i = 0; i < robot_model_->getVariableCount(); ++i)
       velocity_[i] *= -1;
   }
-}
-
-void RobotState::setJointPositions(const std::string& joint_name, const double* position)
-{
-  setJointPositions(robot_model_->getJointModel(joint_name), position);
-}
-
-void RobotState::setJointPositions(const std::string& joint_name, const std::vector<double>& position)
-{
-  setJointPositions(robot_model_->getJointModel(joint_name), &position[0]);
-}
-
-void RobotState::setJointPositions(const JointModel* joint, const std::vector<double>& position)
-{
-  setJointPositions(joint, &position[0]);
-}
-
-void RobotState::setJointPositions(const JointModel* joint, const double* position)
-{
-  memcpy(position_ + joint->getFirstVariableIndex(), position, joint->getVariableCount() * sizeof(double));
-  markDirtyJointTransforms(joint);
-  updateMimicJoint(joint);
-}
-
-void RobotState::setJointPositions(const std::string& joint_name, const Eigen::Isometry3d& transform)
-{
-  setJointPositions(robot_model_->getJointModel(joint_name), transform);
-}
-
-void RobotState::setJointPositions(const JointModel* joint, const Eigen::Isometry3d& transform)
-{
-  joint->computeVariablePositions(transform, position_ + joint->getFirstVariableIndex());
-  markDirtyJointTransforms(joint);
-  updateMimicJoint(joint);
-}
-
-void RobotState::setJointVelocities(const JointModel* joint, const double* velocity)
-{
-  has_velocity_ = true;
-  memcpy(velocity_ + joint->getFirstVariableIndex(), velocity, joint->getVariableCount() * sizeof(double));
 }
 
 void RobotState::setJointEfforts(const JointModel* joint, const double* effort)
@@ -700,65 +492,6 @@ void RobotState::setJointEfforts(const JointModel* joint, const double* effort)
   memcpy(effort_ + joint->getFirstVariableIndex(), effort, joint->getVariableCount() * sizeof(double));
 }
 
-const double* RobotState::getJointPositions(const std::string& joint_name) const
-{
-  return getJointPositions(robot_model_->getJointModel(joint_name));
-}
-
-const double* RobotState::getJointPositions(const JointModel* joint) const
-{
-  return position_ + joint->getFirstVariableIndex();
-}
-
-const double* RobotState::getJointVelocities(const std::string& joint_name) const
-{
-  return getJointVelocities(robot_model_->getJointModel(joint_name));
-}
-
-const double* RobotState::getJointVelocities(const JointModel* joint) const
-{
-  return velocity_ + joint->getFirstVariableIndex();
-}
-
-const double* RobotState::getJointAccelerations(const std::string& joint_name) const
-{
-  return getJointAccelerations(robot_model_->getJointModel(joint_name));
-}
-
-const double* RobotState::getJointAccelerations(const JointModel* joint) const
-{
-  return acceleration_ + joint->getFirstVariableIndex();
-}
-
-const double* RobotState::getJointEffort(const std::string& joint_name) const
-{
-  return getJointEffort(robot_model_->getJointModel(joint_name));
-}
-
-const double* RobotState::getJointEffort(const JointModel* joint) const
-{
-  return effort_ + joint->getFirstVariableIndex();
-}
-
-void RobotState::setJointGroupPositions(const std::string& joint_group_name, const double* gstate)
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    setJointGroupPositions(jmg, gstate);
-}
-
-void RobotState::setJointGroupPositions(const std::string& joint_group_name, const std::vector<double>& gstate)
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    setJointGroupPositions(jmg, &gstate[0]);
-}
-
-void RobotState::setJointGroupPositions(const JointModelGroup* group, const std::vector<double>& gstate)
-{
-  setJointGroupPositions(group, &gstate[0]);
-}
-
 void RobotState::setJointGroupPositions(const JointModelGroup* group, const double* gstate)
 {
   const std::vector<int>& il = group->getVariableIndexList();
@@ -770,13 +503,6 @@ void RobotState::setJointGroupPositions(const JointModelGroup* group, const doub
       position_[il[i]] = gstate[i];
   }
   updateMimicJoints(group);
-}
-
-void RobotState::setJointGroupPositions(const std::string& joint_group_name, const Eigen::VectorXd& values)
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    setJointGroupPositions(jmg, values);
 }
 
 void RobotState::setJointGroupPositions(const JointModelGroup* group, const Eigen::VectorXd& values)
@@ -821,38 +547,12 @@ void RobotState::copyJointGroupPositions(const JointModelGroup* group, double* g
       gstate[i] = position_[il[i]];
 }
 
-void RobotState::copyJointGroupPositions(const std::string& joint_group_name, Eigen::VectorXd& values) const
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    copyJointGroupPositions(jmg, values);
-}
-
 void RobotState::copyJointGroupPositions(const JointModelGroup* group, Eigen::VectorXd& values) const
 {
   const std::vector<int>& il = group->getVariableIndexList();
   values.resize(il.size());
   for (std::size_t i = 0; i < il.size(); ++i)
     values(i) = position_[il[i]];
-}
-
-void RobotState::setJointGroupVelocities(const std::string& joint_group_name, const double* gstate)
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    setJointGroupVelocities(jmg, gstate);
-}
-
-void RobotState::setJointGroupVelocities(const std::string& joint_group_name, const std::vector<double>& gstate)
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    setJointGroupVelocities(jmg, &gstate[0]);
-}
-
-void RobotState::setJointGroupVelocities(const JointModelGroup* group, const std::vector<double>& gstate)
-{
-  setJointGroupVelocities(group, &gstate[0]);
 }
 
 void RobotState::setJointGroupVelocities(const JointModelGroup* group, const double* gstate)
@@ -868,42 +568,12 @@ void RobotState::setJointGroupVelocities(const JointModelGroup* group, const dou
   }
 }
 
-void RobotState::setJointGroupVelocities(const std::string& joint_group_name, const Eigen::VectorXd& values)
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    setJointGroupVelocities(jmg, values);
-}
- 
 void RobotState::setJointGroupVelocities(const JointModelGroup* group, const Eigen::VectorXd& values)
 {
   markVelocity();
   const std::vector<int>& il = group->getVariableIndexList();
   for (std::size_t i = 0; i < il.size(); ++i)
     velocity_[il[i]] = values(i);
-}
-
-void RobotState::copyJointGroupVelocities(const std::string& joint_group_name, std::vector<double>& gstate) const
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-  {
-    gstate.resize(jmg->getVariableCount());
-    copyJointGroupVelocities(jmg, &gstate[0]);
-  }
-}
-
-void RobotState::copyJointGroupVelocities(const std::string& joint_group_name, double* gstate) const
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    copyJointGroupVelocities(jmg, gstate);
-}
-
-void RobotState::copyJointGroupVelocities(const JointModelGroup* group, std::vector<double>& gstate) const
-{
-  gstate.resize(group->getVariableCount());
-  copyJointGroupVelocities(group, &gstate[0]);
 }
 
 void RobotState::copyJointGroupVelocities(const JointModelGroup* group, double* gstate) const
@@ -916,38 +586,12 @@ void RobotState::copyJointGroupVelocities(const JointModelGroup* group, double* 
       gstate[i] = velocity_[il[i]];
 }
 
-void RobotState::copyJointGroupVelocities(const std::string& joint_group_name, Eigen::VectorXd& values) const
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    copyJointGroupVelocities(jmg, values);
-}
-
 void RobotState::copyJointGroupVelocities(const JointModelGroup* group, Eigen::VectorXd& values) const
 {
   const std::vector<int>& il = group->getVariableIndexList();
   values.resize(il.size());
   for (std::size_t i = 0; i < il.size(); ++i)
     values(i) = velocity_[il[i]];
-}
-
-void RobotState::setJointGroupAccelerations(const std::string& joint_group_name, const double* gstate)
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    setJointGroupAccelerations(jmg, gstate);
-}
-
-void RobotState::setJointGroupAccelerations(const std::string& joint_group_name, const std::vector<double>& gstate)
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    setJointGroupAccelerations(jmg, &gstate[0]);
-}
-
-void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const std::vector<double>& gstate)
-{
-  setJointGroupAccelerations(group, &gstate[0]);
 }
 
 void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const double* gstate)
@@ -963,42 +607,12 @@ void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const 
   }
 }
 
-void RobotState::setJointGroupAccelerations(const std::string& joint_group_name, const Eigen::VectorXd& values)
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    setJointGroupAccelerations(jmg, values);
-}
-
 void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const Eigen::VectorXd& values)
 {
   markAcceleration();
   const std::vector<int>& il = group->getVariableIndexList();
   for (std::size_t i = 0; i < il.size(); ++i)
     acceleration_[il[i]] = values(i);
-}
-
-void RobotState::copyJointGroupAccelerations(const std::string& joint_group_name, std::vector<double>& gstate) const
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-  {
-    gstate.resize(jmg->getVariableCount());
-    copyJointGroupAccelerations(jmg, &gstate[0]);
-  }
-}
-
-void RobotState::copyJointGroupAccelerations(const std::string& joint_group_name, double* gstate) const
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    copyJointGroupAccelerations(jmg, gstate);
-}
-
-void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, std::vector<double>& gstate) const
-{
-  gstate.resize(group->getVariableCount());
-  copyJointGroupAccelerations(group, &gstate[0]);
 }
 
 void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, double* gstate) const
@@ -1009,13 +623,6 @@ void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, doubl
   else
     for (std::size_t i = 0; i < il.size(); ++i)
       gstate[i] = acceleration_[il[i]];
-}
-
-void RobotState::copyJointGroupAccelerations(const std::string& joint_group_name, Eigen::VectorXd& values) const
-{
-  const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
-  if (jmg)
-    copyJointGroupAccelerations(jmg, values);
 }
 
 void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, Eigen::VectorXd& values) const
@@ -1065,56 +672,6 @@ void RobotState::updateCollisionBodyTransforms()
       }
     }
   }
-}
-
-void RobotState::markDirtyJointTransforms(const JointModel* joint)
-{
-  dirty_joint_transforms_[joint->getJointIndex()] = 1;
-  dirty_link_transforms_ =
-      dirty_link_transforms_ == nullptr ? joint : robot_model_->getCommonRoot(dirty_link_transforms_, joint);
-}
-
-void RobotState::markDirtyJointTransforms(const JointModelGroup* group)
-{
-  for (const JointModel* jm : group->getActiveJointModels())
-    dirty_joint_transforms_[jm->getJointIndex()] = 1;
-  dirty_link_transforms_ = dirty_link_transforms_ == nullptr ?
-                                group->getCommonRoot() :
-                                robot_model_->getCommonRoot(dirty_link_transforms_, group->getCommonRoot());
-}
-
-void RobotState::updateMimicJoint(const JointModel* joint)
-{
-  double v = position_[joint->getFirstVariableIndex()];
-  for (const JointModel* jm : joint->getMimicRequests())
-  {
-    position_[jm->getFirstVariableIndex()] = jm->getMimicFactor() * v + jm->getMimicOffset();
-    markDirtyJointTransforms(jm);
-  }
-}
-
-[[deprecated]] void RobotState::updateMimicJoint(const std::vector<const JointModel*>& mim)
-{
-  for (const JointModel* jm : mim)
-  {
-    const int fvi = jm->getFirstVariableIndex();
-    position_[fvi] = jm->getMimicFactor() * position_[jm->getMimic()->getFirstVariableIndex()] + jm->getMimicOffset();
-    // Only mark joint transform dirty, but not the associated link transform
-    // as this function is always used in combination of
-    // updateMimicJoint(group->getMimicJointModels()) + markDirtyJointTransforms(group);
-    dirty_joint_transforms_[jm->getJointIndex()] = 1;
-  }
-}
-
-void RobotState::updateMimicJoints(const JointModelGroup* group)
-{
-  for (const JointModel* jm : group->getMimicJointModels())
-  {
-    const int fvi = jm->getFirstVariableIndex();
-    position_[fvi] = jm->getMimicFactor() * position_[jm->getMimic()->getFirstVariableIndex()] + jm->getMimicOffset();
-    markDirtyJointTransforms(jm);
-  }
-  markDirtyJointTransforms(group);
 }
 
 void RobotState::updateLinkTransforms()
@@ -1222,78 +779,6 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
     it->second->computeTransform(global_link_transforms_[it->second->getAttachedLink()->getLinkIndex()]);
 }
 
-const Eigen::Isometry3d& RobotState::getGlobalLinkTransform(const std::string& link_name)
-{
-  return getGlobalLinkTransform(robot_model_->getLinkModel(link_name));
-}
-
-const Eigen::Isometry3d& RobotState::getGlobalLinkTransform(const LinkModel* link)
-{
-  updateLinkTransforms();
-  return global_link_transforms_[link->getLinkIndex()];
-}
-
-const Eigen::Isometry3d& RobotState::getGlobalLinkTransform(const std::string& link_name) const
-{
-  return getGlobalLinkTransform(robot_model_->getLinkModel(link_name));
-}
-
-const Eigen::Isometry3d& RobotState::getGlobalLinkTransform(const LinkModel* link) const
-{
-  BOOST_VERIFY(checkLinkTransforms());
-  return global_link_transforms_[link->getLinkIndex()];
-}
-
-const Eigen::Isometry3d& RobotState::getCollisionBodyTransform(const std::string& link_name, std::size_t index)
-{
-  return getCollisionBodyTransform(robot_model_->getLinkModel(link_name), index);
-}
-
-const Eigen::Isometry3d& RobotState::getCollisionBodyTransform(const LinkModel* link, std::size_t index)
-{
-  updateCollisionBodyTransforms();
-  return global_collision_body_transforms_[link->getFirstCollisionBodyTransformIndex() + index];
-}
-
-const Eigen::Isometry3d& RobotState::getCollisionBodyTransform(const std::string& link_name, std::size_t index) const
-{
-  return getCollisionBodyTransform(robot_model_->getLinkModel(link_name), index);
-}
-
-const Eigen::Isometry3d& RobotState::getCollisionBodyTransform(const LinkModel* link, std::size_t index) const
-{
-  BOOST_VERIFY(checkCollisionTransforms());
-  return global_collision_body_transforms_[link->getFirstCollisionBodyTransformIndex() + index];
-}
-
-const Eigen::Isometry3d& RobotState::getJointTransform(const std::string& joint_name)
-{
-  return getJointTransform(robot_model_->getJointModel(joint_name));
-}
-
-const Eigen::Isometry3d& RobotState::getJointTransform(const JointModel* joint)
-{
-  const int idx = joint->getJointIndex();
-  unsigned char& dirty = dirty_joint_transforms_[idx];
-  if (dirty)
-  {
-    joint->computeTransform(position_ + joint->getFirstVariableIndex(), variable_joint_transforms_[idx]);
-    dirty = 0;
-  }
-  return variable_joint_transforms_[idx];
-}
-
-const Eigen::Isometry3d& RobotState::getJointTransform(const std::string& joint_name) const
-{
-  return getJointTransform(robot_model_->getJointModel(joint_name));
-}
-
-const Eigen::Isometry3d& RobotState::getJointTransform(const JointModel* joint) const
-{
-  BOOST_VERIFY(checkJointTransforms(joint));
-  return variable_joint_transforms_[joint->getJointIndex()];
-}
-
 bool RobotState::satisfiesBounds(double margin) const
 {
   const std::vector<const JointModel*>& jm = robot_model_->getActiveJointModels();
@@ -1312,21 +797,6 @@ bool RobotState::satisfiesBounds(const JointModelGroup* group, double margin) co
   return true;
 }
 
-bool RobotState::satisfiesBounds(const JointModel* joint, double margin) const
-{
-  return satisfiesPositionBounds(joint, margin) && (!has_velocity_ || satisfiesVelocityBounds(joint, margin));
-}
-
-bool RobotState::satisfiesPositionBounds(const JointModel* joint, double margin) const
-{
-  return joint->satisfiesPositionBounds(getJointPositions(joint), margin);
-}
-
-bool RobotState::satisfiesVelocityBounds(const JointModel* joint, double margin) const
-{
-  return joint->satisfiesVelocityBounds(getJointVelocities(joint), margin);
-}
-
 void RobotState::enforceBounds()
 {
   const std::vector<const JointModel*>& jm = robot_model_->getActiveJointModels();
@@ -1341,22 +811,6 @@ void RobotState::enforceBounds(const JointModelGroup* joint_group)
     enforceBounds(joint);
 }
 
-void RobotState::enforceBounds(const JointModel* joint)
-{
-  enforcePositionBounds(joint);
-  if (has_velocity_)
-    enforceVelocityBounds(joint);
-}
-
-void RobotState::enforcePositionBounds(const JointModel* joint)
-{
-  if (joint->enforcePositionBounds(position_ + joint->getFirstVariableIndex()))
-  {
-    markDirtyJointTransforms(joint);
-    updateMimicJoint(joint);
-  }
-}
-
 void RobotState::harmonizePositions()
 {
   for (const JointModel* jm : robot_model_->getActiveJointModels())
@@ -1367,18 +821,6 @@ void RobotState::harmonizePositions(const JointModelGroup* joint_group)
 {
   for (const JointModel* jm : joint_group->getActiveJointModels())
     harmonizePosition(jm);
-}
-
-void RobotState::harmonizePosition(const JointModel* joint)
-{
-  if (joint->harmonizePosition(position_ + joint->getFirstVariableIndex()))
-    // no need to mark transforms dirty, as the transform hasn't changed
-    updateMimicJoint(joint);
-}
-
-void RobotState::enforceVelocityBounds(const JointModel* joint)
-{
-  joint->enforceVelocityBounds(velocity_ + joint->getFirstVariableIndex());
 }
 
 std::pair<double, const JointModel*> RobotState::getMinDistanceToPositionBounds() const
@@ -1448,11 +890,6 @@ bool RobotState::isValidVelocityMove(const RobotState& other, const JointModelGr
   return true;
 }
 
-double RobotState::distance(const RobotState& other) const
-{
-  return robot_model_->distance(position_, other.getVariablePositions());
-}
-
 double RobotState::distance(const RobotState& other, const JointModelGroup* joint_group) const
 {
   double d = 0.0;
@@ -1463,12 +900,6 @@ double RobotState::distance(const RobotState& other, const JointModelGroup* join
     d += joint->getDistanceFactor() * joint->distance(position_ + idx, other.position_ + idx);
   }
   return d;
-}
-
-double RobotState::distance(const RobotState& other, const JointModel* joint) const
-{
-  const int idx = joint->getFirstVariableIndex();
-  return joint->distance(position_ + idx, other.position_ + idx);
 }
 
 void RobotState::interpolate(const RobotState& to, double t, RobotState& state) const
@@ -1530,16 +961,6 @@ void RobotState::attachBody(const std::string& id, const std::vector<shapes::Sha
 {
   const LinkModel* l = robot_model_->getLinkModel(link);
   attachBody(new AttachedBody(l, id, shapes, shape_poses, touch_links, detach_posture, subframe_poses));
-}
-
-void RobotState::attachBody(const std::string& id, const std::vector<shapes::ShapeConstPtr>& shapes,
-                const EigenSTL::vector_Isometry3d& shape_poses, const std::vector<std::string>& touch_links,
-                const std::string& link_name,
-                const trajectory_msgs::msg::JointTrajectory& detach_posture,
-                const moveit::core::FixedTransformsMap& subframe_poses)
-{
-  std::set<std::string> touch_links_set(touch_links.begin(), touch_links.end());
-  attachBody(id, shapes, shape_poses, touch_links_set, link_name, detach_posture, subframe_poses);
 }
 
 void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies) const
@@ -1627,13 +1048,6 @@ bool RobotState::clearAttachedBody(const std::string& id)
   }
   else
     return false;
-}
-
-random_numbers::RandomNumberGenerator& RobotState::getRandomNumberGenerator()
-{
-  if (!rng_)
-    rng_ = new random_numbers::RandomNumberGenerator();
-  return *rng_;
 }
 
 const Eigen::Isometry3d& RobotState::getFrameTransform(const std::string& frame_id, bool* frame_found)
@@ -1956,13 +1370,6 @@ bool RobotState::setFromDiffIK(const JointModelGroup* jmg, const geometry_msgs::
   return setFromDiffIK(jmg, t, tip, dt, constraint);
 }
 
-void RobotState::computeVariableVelocity(const JointModelGroup* jmg, Eigen::VectorXd& qdot, const Eigen::VectorXd& twist,
-                              const LinkModel* tip)
-{
-  updateLinkTransforms();
-  static_cast<const RobotState*>(this)->computeVariableVelocity(jmg, qdot, twist, tip);
-}
-
 void RobotState::computeVariableVelocity(const JointModelGroup* jmg, Eigen::VectorXd& qdot,
                                          const Eigen::VectorXd& twist, const LinkModel* tip) const
 {
@@ -2022,15 +1429,6 @@ bool RobotState::integrateVariableVelocity(const JointModelGroup* jmg, const Eig
   else
     return true;
 }
-
-void RobotState::setVariableValues(const sensor_msgs::msg::JointState& msg)
-{
-  if (!msg.position.empty())
-    setVariablePositions(msg.name, msg.position);
-  if (!msg.velocity.empty())
-    setVariableVelocities(msg.name, msg.velocity);
-}
-
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg::Pose& pose, double timeout,
                            const GroupStateValidityCallbackFn& constraint,

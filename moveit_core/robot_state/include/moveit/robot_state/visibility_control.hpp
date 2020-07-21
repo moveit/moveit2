@@ -33,38 +33,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MOVEIT_CORE__VISIBILITY_CONTROL_HPP_
-#define MOVEIT_CORE__VISIBILITY_CONTROL_HPP_
+#ifndef ROBOT_STATE__VISIBILITY_CONTROL_HPP_
+#define ROBOT_STATE__VISIBILITY_CONTROL_HPP_
 
 // This logic was borrowed (then namespaced) from the examples on the gcc wiki:
 //     https://gcc.gnu.org/wiki/Visibility
 
 #if defined _WIN32 || defined __CYGWIN__
   #ifdef __GNUC__
-    #define MOVEIT_CORE_EXPORT __attribute__ ((dllexport))
-    #define MOVEIT_CORE_IMPORT __attribute__ ((dllimport))
+    #define ROBOT_STATE_EXPORT __attribute__ ((dllexport))
+    #define ROBOT_STATE_IMPORT __attribute__ ((dllimport))
   #else
-    #define MOVEIT_CORE_EXPORT __declspec(dllexport)
-    #define MOVEIT_CORE_IMPORT __declspec(dllimport)
+    #define ROBOT_STATE_EXPORT __declspec(dllexport)
+    #define ROBOT_STATE_IMPORT __declspec(dllimport)
   #endif
-  #ifdef MOVEIT_CORE_BUILDING_LIBRARY
-    #define MOVEIT_CORE_PUBLIC MOVEIT_CORE_EXPORT
+  #ifdef ROBOT_STATE_BUILDING_LIBRARY
+    #define ROBOT_STATE_PUBLIC ROBOT_STATE_EXPORT
   #else
-    #define MOVEIT_CORE_PUBLIC MOVEIT_CORE_IMPORT
+    #define ROBOT_STATE_PUBLIC ROBOT_STATE_IMPORT
   #endif
-  #define MOVEIT_CORE_PUBLIC_TYPE MOVEIT_CORE_PUBLIC
-  #define MOVEIT_CORE_LOCAL
+  #define ROBOT_STATE_PUBLIC_TYPE ROBOT_STATE_PUBLIC
+  #define ROBOT_STATE_LOCAL
 #else
-  #define MOVEIT_CORE_EXPORT __attribute__ ((visibility("default")))
-  #define MOVEIT_CORE_IMPORT
+  #define ROBOT_STATE_EXPORT __attribute__ ((visibility("default")))
+  #define ROBOT_STATE_IMPORT
   #if __GNUC__ >= 4
-    #define MOVEIT_CORE_PUBLIC __attribute__ ((visibility("default")))
-    #define MOVEIT_CORE_LOCAL  __attribute__ ((visibility("hidden")))
+    #define ROBOT_STATE_PUBLIC __attribute__ ((visibility("default")))
+    #define ROBOT_STATE_LOCAL  __attribute__ ((visibility("hidden")))
   #else
-    #define MOVEIT_CORE_PUBLIC
-    #define MOVEIT_CORE_LOCAL
+    #define ROBOT_STATE_PUBLIC
+    #define ROBOT_STATE_LOCAL
   #endif
-  #define MOVEIT_CORE_PUBLIC_TYPE
+  #define ROBOT_STATE_PUBLIC_TYPE
 #endif
 
-#endif  // MOVEIT_CORE__VISIBILITY_CONTROL_HPP_
+#endif  // ROBOT_STATE__VISIBILITY_CONTROL_HPP_

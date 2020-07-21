@@ -59,6 +59,8 @@ JointModel::JointModel(const std::string& name)
 {
 }
 
+JointModel::~JointModel() = default;
+
 std::string JointModel::getTypeName() const
 {
   switch (type_)
@@ -86,6 +88,38 @@ int JointModel::getLocalVariableIndex(const std::string& variable) const
   if (it == variable_index_map_.end())
     throw Exception("Could not find variable '" + variable + "' to get bounds for within joint '" + name_ + "'");
   return it->second;
+}
+
+bool JointModel::harmonizePosition(double* values, const Bounds& other_bounds) const
+{
+  return false;
+}
+
+bool JointModel::enforceVelocityBounds(double* values, const Bounds& other_bounds) const
+{
+  bool change = false;
+  for (std::size_t i = 0; i < other_bounds.size(); ++i)
+    if (other_bounds[i].max_velocity_ < values[i])
+    {
+      values[i] = other_bounds[i].max_velocity_;
+      change = true;
+    }
+    else if (other_bounds[i].min_velocity_ > values[i])
+    {
+      values[i] = other_bounds[i].min_velocity_;
+      change = true;
+    }
+  return change;
+}
+
+bool JointModel::satisfiesVelocityBounds(const double* values, const Bounds& other_bounds, double margin) const
+{
+  for (std::size_t i = 0; i < other_bounds.size(); ++i)
+    if (other_bounds[i].max_velocity_ + margin < values[i])
+      return false;
+    else if (other_bounds[i].min_velocity_ - margin > values[i])
+      return false;
+  return true;
 }
 
 const VariableBounds& JointModel::getVariableBounds(const std::string& variable) const

@@ -4,6 +4,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/plan_with_sensing.cpp
   src/plan_execution.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 target_link_libraries(${MOVEIT_LIB_NAME}
     moveit_planning_pipeline
     moveit_planning_scene_monitor

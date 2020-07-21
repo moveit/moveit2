@@ -36,6 +36,7 @@
 
 #pragma once
 
+#include <deque>
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>

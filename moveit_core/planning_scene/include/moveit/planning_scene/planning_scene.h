@@ -46,6 +46,7 @@
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/macros/class_forward.h>
+#include <moveit/planning_scene/visibility_control.hpp>
 #include <moveit_msgs/msg/planning_scene.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
@@ -99,8 +100,8 @@ public:
       const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model,
       const collision_detection::WorldPtr& world = collision_detection::WorldPtr(new collision_detection::World()));
 
-  static const std::string OCTOMAP_NS;
-  static const std::string DEFAULT_SCENE_NAME;
+  PLANNING_SCENE_PUBLIC static const std::string OCTOMAP_NS;
+  PLANNING_SCENE_PUBLIC static const std::string DEFAULT_SCENE_NAME;
 
   ~PlanningScene();
 

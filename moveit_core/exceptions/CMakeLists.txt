@@ -8,7 +8,8 @@ target_compile_definitions(${MOVEIT_LIB_NAME}
   PRIVATE "MOVEIT_CORE_BUILDING_LIBRARY")
 
   set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${MOVEIT_LIB_NAME}
+  set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+  ament_target_dependencies(${MOVEIT_LIB_NAME}
   Boost
   rclcpp
   urdfdom

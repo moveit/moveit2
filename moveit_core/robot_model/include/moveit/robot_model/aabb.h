@@ -37,14 +37,13 @@
 #pragma once
 
 #include <Eigen/Geometry>
-#include <moveit/macros/visibility_control.hpp>
 
 namespace moveit
 {
 namespace core
 {
 /** \brief Represents an axis-aligned bounding box. */
-class MOVEIT_CORE_PUBLIC AABB : public Eigen::AlignedBox3d
+class AABB : public Eigen::AlignedBox3d
 {
 public:
   /** \brief Extend with a box transformed by the given transform. */

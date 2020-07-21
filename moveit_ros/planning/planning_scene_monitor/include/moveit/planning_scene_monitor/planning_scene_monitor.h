@@ -45,7 +45,9 @@
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/collision_plugin_loader/collision_plugin_loader.h>
+#include <moveit/planning_scene_monitor/visibility_control.hpp>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
+#include <boost/thread.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
@@ -82,23 +84,23 @@ public:
   };
 
   /// The name of the topic used by default for receiving joint states
-  static const std::string DEFAULT_JOINT_STATES_TOPIC;  // "/joint_states"
+  PLANNING_SCENE_MONITOR_PUBLIC static const std::string DEFAULT_JOINT_STATES_TOPIC;  // "/joint_states"
 
   /// The name of the topic used by default for attached collision objects
-  static const std::string DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC;  // "/attached_collision_object"
+  PLANNING_SCENE_MONITOR_PUBLIC static const std::string DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC;  // "/attached_collision_object"
 
   /// The name of the topic used by default for receiving collision objects in the world
-  static const std::string DEFAULT_COLLISION_OBJECT_TOPIC;  // "/collision_object"
+  PLANNING_SCENE_MONITOR_PUBLIC static const std::string DEFAULT_COLLISION_OBJECT_TOPIC;  // "/collision_object"
 
   /// The name of the topic used by default for receiving geometry information about a planning scene (complete
   /// overwrite of world geometry)
-  static const std::string DEFAULT_PLANNING_SCENE_WORLD_TOPIC;  // "/planning_scene_world"
+  PLANNING_SCENE_MONITOR_PUBLIC static const std::string DEFAULT_PLANNING_SCENE_WORLD_TOPIC;  // "/planning_scene_world"
 
   /// The name of the topic used by default for receiving full planning scenes or planning scene diffs
-  static const std::string DEFAULT_PLANNING_SCENE_TOPIC;  // "/planning_scene"
+  PLANNING_SCENE_MONITOR_PUBLIC static const std::string DEFAULT_PLANNING_SCENE_TOPIC;  // "/planning_scene"
 
   /// The name of the service used by default for requesting full planning scene state
-  static const std::string DEFAULT_PLANNING_SCENE_SERVICE;  // "/get_planning_scene"
+  PLANNING_SCENE_MONITOR_PUBLIC static const std::string DEFAULT_PLANNING_SCENE_SERVICE;  // "/get_planning_scene"
 
   /// The name of the topic used by default for publishing the monitored planning scene (this is without "/" in the
   /// name, so the topic is prefixed by the node name)

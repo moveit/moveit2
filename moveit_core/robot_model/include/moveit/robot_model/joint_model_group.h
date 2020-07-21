@@ -43,7 +43,6 @@
 #include <srdfdom/model.h>
 #include <boost/function.hpp>
 #include <set>
-#include <moveit/macros/visibility_control.hpp>
 
 namespace moveit
 {
@@ -66,7 +65,7 @@ using JointModelGroupMapConst = std::map<std::string, const JointModelGroup*>;
 
 using JointBoundsVector = std::vector<const JointModel::Bounds*>;
 
-class MOVEIT_CORE_PUBLIC JointModelGroup
+class JointModelGroup
 {
 public:
   struct KinematicsSolver
@@ -306,37 +305,64 @@ public:
   void getVariableDefaultPositions(std::map<std::string, double>& values) const;
 
   /** \brief Compute the default values for the joint group */
-  void getVariableDefaultPositions(std::vector<double>& values) const;
+  void getVariableDefaultPositions(std::vector<double>& values) const
+  {
+    values.resize(variable_count_);
+    getVariableDefaultPositions(&values[0]);
+  }
 
   /** \brief Compute the default values for the joint group */
   void getVariableDefaultPositions(double* values) const;
 
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values) const;
+  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values) const
+  {
+    getVariableRandomPositions(rng, values, active_joint_models_bounds_);
+  }
 
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values) const;
+  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values) const
+  {
+    values.resize(variable_count_);
+    getVariableRandomPositions(rng, &values[0], active_joint_models_bounds_);
+  }
 
   /** \brief Compute random values for the state of the joint group */
   void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values, const double* near,
-                                        const double distance) const;
-
+                                        const double distance) const
+  {
+    getVariableRandomPositionsNearBy(rng, values, active_joint_models_bounds_, near, distance);
+  }
   /** \brief Compute random values for the state of the joint group */
   void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,
-                                        const std::vector<double>& near, double distance) const;
+                                        const std::vector<double>& near, double distance) const
+  {
+    values.resize(variable_count_);
+    getVariableRandomPositionsNearBy(rng, &values[0], active_joint_models_bounds_, &near[0], distance);
+  }
 
   /** \brief Compute random values for the state of the joint group */
   void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,
                                         const std::vector<double>& near,
-                                        const std::map<JointModel::JointType, double>& distance_map) const;
+                                        const std::map<JointModel::JointType, double>& distance_map) const
+  {
+    values.resize(variable_count_);
+    getVariableRandomPositionsNearBy(rng, &values[0], active_joint_models_bounds_, &near[0], distance_map);
+  }
 
   /** \brief Compute random values for the state of the joint group */
   void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values, const double* near,
-                                        const std::vector<double>& distances) const;
-
+                                        const std::vector<double>& distances) const
+  {
+    getVariableRandomPositionsNearBy(rng, values, active_joint_models_bounds_, near, distances);
+  }
   /** \brief Compute random values for the state of the joint group */
   void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,
-                                        const std::vector<double>& near, const std::vector<double>& distances) const;
+                                        const std::vector<double>& near, const std::vector<double>& distances) const
+  {
+    values.resize(variable_count_);
+    getVariableRandomPositionsNearBy(rng, &values[0], active_joint_models_bounds_, &near[0], distances);
+  }
 
   void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values,
                                   const JointBoundsVector& active_joint_bounds) const;
@@ -356,17 +382,23 @@ public:
                                         const JointBoundsVector& active_joint_bounds, const double* near,
                                         const std::vector<double>& distances) const;
 
-  bool enforcePositionBounds(double* state) const;
+  bool enforcePositionBounds(double* state) const
+  {
+    return enforcePositionBounds(state, active_joint_models_bounds_);
+  }
 
   bool enforcePositionBounds(double* state, const JointBoundsVector& active_joint_bounds) const;
-
-  bool satisfiesPositionBounds(const double* state, double margin = 0.0) const;
-
+  bool satisfiesPositionBounds(const double* state, double margin = 0.0) const
+  {
+    return satisfiesPositionBounds(state, active_joint_models_bounds_, margin);
+  }
   bool satisfiesPositionBounds(const double* state, const JointBoundsVector& active_joint_bounds,
                                double margin = 0.0) const;
 
-  double getMaximumExtent() const;
-
+  double getMaximumExtent() const
+  {
+    return getMaximumExtent(active_joint_models_bounds_);
+  }
   double getMaximumExtent(const JointBoundsVector& active_joint_bounds) const;
 
   double distance(const double* state1, const double* state2) const;
@@ -494,7 +526,10 @@ public:
   }
 
   void setSolverAllocators(const SolverAllocatorFn& solver,
-                           const SolverAllocatorMapFn& solver_map = SolverAllocatorMapFn());
+                           const SolverAllocatorMapFn& solver_map = SolverAllocatorMapFn())
+  {
+    setSolverAllocators(std::make_pair(solver, solver_map));
+  }
 
   void setSolverAllocators(const std::pair<SolverAllocatorFn, SolverAllocatorMapFn>& solvers);
 
