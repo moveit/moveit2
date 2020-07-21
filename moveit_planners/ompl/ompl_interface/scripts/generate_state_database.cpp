@@ -84,17 +84,17 @@ struct GenerateStateDatabaseParameters
     node->get_parameter_or("use_current_scene", use_current_scene, false);
 
     // number of states in joint space approximation
-    get_uint_parameter_or(node, "state_cnt", construction_opts.samples, 10000);
+    get_uint_parameter_or(node, "state_cnt", static_cast<size_t>(construction_opts.samples), 10000);
 
     // generate edges together with states?
-    get_uint_parameter_or(node, "edges_per_sample", construction_opts.edges_per_sample, 0);
+    get_uint_parameter_or(node, "edges_per_sample", static_cast<size_t>(construction_opts.edges_per_sample), 0);
 
     node->get_parameter_or("max_edge_length", construction_opts.max_edge_length, 0.2);
 
     // verify constraint validity on edges
     node->get_parameter_or("explicit_motions", construction_opts.explicit_motions, true);
     node->get_parameter_or("explicit_points_resolution", construction_opts.explicit_points_resolution, 0.05);
-    get_uint_parameter_or(node, "max_explicit_points", construction_opts.max_explicit_points, 200);
+    get_uint_parameter_or(node, "max_explicit_points", static_cast<size_t>(construction_opts.max_explicit_points), 200);
 
     // local planning in JointModel state space
     node->get_parameter_or("state_space_parameterization", construction_opts.state_space_parameterization,
