@@ -9,6 +9,11 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wpedantic)
 endif()
 
+if (WIN32)
+  add_compile_options(/wd4251 /wd4068 /wd4275)
+endif()
+
+
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(moveit_common REQUIRED)
