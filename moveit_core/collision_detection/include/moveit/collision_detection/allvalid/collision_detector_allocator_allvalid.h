@@ -38,6 +38,7 @@
 
 #include <moveit/collision_detection/collision_detector_allocator.h>
 #include <moveit/collision_detection/allvalid/collision_env_allvalid.h>
+#include <moveit/collision_detection/visibility_control.hpp>
 
 namespace collision_detection
 {
@@ -46,6 +47,6 @@ class CollisionDetectorAllocatorAllValid
   : public CollisionDetectorAllocatorTemplate<CollisionEnvAllValid, CollisionDetectorAllocatorAllValid>
 {
 public:
-  static const std::string NAME;  // defined in collision_env_allvalid.cpp
+  COLLISION_DETECTION_PUBLIC static const std::string NAME;  // defined in collision_env_allvalid.cpp
 };
 }  // namespace collision_detection
