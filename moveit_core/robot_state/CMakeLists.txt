@@ -39,7 +39,7 @@ if(BUILD_TESTING)
   find_package(resource_retriever REQUIRED)
 
   if(WIN32)
-    # TODO add windows paths
+    add_compile_definitions(_USE_MATH_DEFINES /wd4251 /wd4068 /wd4275)
   else()
     set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../utils")
   endif()
