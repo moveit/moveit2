@@ -36,6 +36,7 @@
   <exec_depend>fake_joint_driver</exec_depend>
 
   <test_depend>moveit_resources</test_depend>
+  <test_depend>ros_testing</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

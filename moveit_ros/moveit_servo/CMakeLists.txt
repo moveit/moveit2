@@ -98,13 +98,23 @@ install(TARGETS
   ${FAKE_SERVO_CMDS_NAME}
   DESTINATION lib/${PROJECT_NAME})
 
-# if(BUILD_TESTING)
-#   find_package(ament_cmake_gtest REQUIRED)
-#   ament_add_gtest(read_parameters_test test/servo_parameters_test.cpp)
-#   target_link_libraries( read_parameters_test
-#     servo_library
-#   )
-# endif()
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(ros_testing REQUIRED)
+
+  # Lowpass filter unit test
+  ament_add_gtest(test_low_pass_filter test/test_low_pass_filter.cpp)
+  target_link_libraries( test_low_pass_filter ${LIBRARY_NAME})
+
+  # Servo parameters launch test
+  add_executable(test_servo_parameters_node test/test_servo_parameters_node.cpp)
+  ament_target_dependencies(test_servo_parameters_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  ament_add_gtest_executable(test_servo_parameters test/test_servo_parameters.cpp)
+  ament_target_dependencies(test_servo_parameters ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  target_link_libraries(test_servo_parameters ${LIBRARY_NAME})
+  add_ros_test(test/launch/test_servo_parameters.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+
+endif()
 
 # Install include, launch, config directories
 install(DIRECTORY include/ DESTINATION include)
