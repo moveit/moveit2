@@ -66,7 +66,6 @@ ament_target_dependencies(moveit_combine_predefined_poses_benchmark
 target_link_libraries(moveit_combine_predefined_poses_benchmark ${MOVEIT_LIB_NAME})
 
 ament_export_include_directories(include)
-ament_export_interfaces(${MOVEIT_LIB_NAME} HAS_LIBRARY_TARGET)
 ament_export_libraries(${MOVEIT_LIB_NAME})
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(Boost)
