@@ -4,6 +4,8 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/kdl_kinematics_plugin.cpp
   src/chainiksolver_vel_mimic_svd.cpp)
 
+set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   random_numbers

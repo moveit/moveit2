@@ -6,6 +6,7 @@ find_package(Boost COMPONENTS filesystem program_options REQUIRED)
 set(MOVEIT_LIB_NAME moveit_cached_ik_kinematics_base)
 add_library(${MOVEIT_LIB_NAME} SHARED src/ik_cache.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   moveit_core
@@ -20,6 +21,7 @@ endif()
 set(MOVEIT_LIB_NAME moveit_cached_ik_kinematics_plugin)
 add_library(${MOVEIT_LIB_NAME} SHARED src/cached_ik_kinematics_plugin.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   moveit_core
@@ -42,6 +44,7 @@ if(ur_kinematics_FOUND)
         set(MOVEIT_LIB_NAME moveit_cached_ur${UR}_kinematics_plugin)
         add_library(${MOVEIT_LIB_NAME} SHARED src/cached_ur_kinematics_plugin.cpp)
         set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+        set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
         find_library(ur${UR}_pluginlib ur${UR}_moveit_plugin PATHS ${ur_kinematics_LIBRARY_DIRS})
         target_link_libraries(${MOVEIT_LIB_NAME}
             moveit_cached_ik_kinematics_base
