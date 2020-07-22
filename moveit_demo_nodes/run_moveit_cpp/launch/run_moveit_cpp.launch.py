@@ -51,11 +51,11 @@ def generate_launch_description():
     ompl_planning_pipeline_config['ompl'].update(ompl_planning_yaml)
 
     # MoveItCpp demo executable
-    run_moveit_cpp_node = Node(node_name='run_moveit_cpp',
+    run_moveit_cpp_node = Node(name='run_moveit_cpp',
                                package='run_moveit_cpp',
                                # TODO(henningkayser): add debug argument
                                # prefix='xterm -e gdb --args',
-                               node_executable='run_moveit_cpp',
+                               executable='run_moveit_cpp',
                                output='screen',
                                parameters=[moveit_cpp_yaml_file_name,
                                            robot_description,
@@ -67,24 +67,24 @@ def generate_launch_description():
     # RViz
     rviz_config_file = get_package_share_directory('run_moveit_cpp') + "/launch/run_moveit_cpp.rviz"
     rviz_node = Node(package='rviz2',
-                     node_executable='rviz2',
-                     node_name='rviz2',
+                     executable='rviz2',
+                     name='rviz2',
                      output='log',
                      arguments=['-d', rviz_config_file],
                      parameters=[robot_description])
 
     # Publish TF
     robot_state_publisher = Node(package='robot_state_publisher',
-                                 node_executable='robot_state_publisher',
-                                 node_name='robot_state_publisher',
+                                 executable='robot_state_publisher',
+                                 name='robot_state_publisher',
                                  output='both',
                                  parameters=[robot_description])
 
     # Fake joint driver
     fake_joint_driver_node = Node(package='fake_joint_driver',
-                                  node_executable='fake_joint_driver_node',
+                                  executable='fake_joint_driver_node',
                                   # TODO(JafarAbdi): Why this launch the two nodes (controller manager and the fake joint driver) with the same name!
-                                  # node_name='fake_joint_driver_node',
+                                  # name='fake_joint_driver_node',
                                   parameters=[{'controller_name': 'panda_arm_controller'},
                                               os.path.join(get_package_share_directory("run_moveit_cpp"), "config", "panda_controllers.yaml"),
                                               os.path.join(get_package_share_directory("run_moveit_cpp"), "config", "start_positions.yaml"),

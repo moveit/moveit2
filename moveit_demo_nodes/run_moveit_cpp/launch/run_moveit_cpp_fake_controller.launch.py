@@ -56,11 +56,11 @@ def generate_launch_description():
                        'moveit_controller_manager': 'moveit_fake_controller_manager/MoveItFakeControllerManager'}
 
     # MoveItCpp demo executable
-    run_moveit_cpp_node = Node(node_name='run_moveit_cpp',
+    run_moveit_cpp_node = Node(name='run_moveit_cpp',
                                package='run_moveit_cpp',
                                # TODO(henningkayser): add debug argument
                                # prefix='xterm -e gdb --args',
-                               node_executable='run_moveit_cpp',
+                               executable='run_moveit_cpp',
                                output='screen',
                                parameters=[moveit_cpp_yaml_file_name,
                                            robot_description,
@@ -73,24 +73,24 @@ def generate_launch_description():
     # RViz
     rviz_config_file = get_package_share_directory('run_moveit_cpp') + "/launch/run_moveit_cpp.rviz"
     rviz_node = Node(package='rviz2',
-                     node_executable='rviz2',
-                     node_name='rviz2',
+                     executable='rviz2',
+                     name='rviz2',
                      output='log',
                      arguments=['-d', rviz_config_file],
                      parameters=[robot_description])
 
     # Publish TF
     robot_state_publisher = Node(package='robot_state_publisher',
-                                 node_executable='robot_state_publisher',
-                                 node_name='robot_state_publisher',
+                                 executable='robot_state_publisher',
+                                 name='robot_state_publisher',
                                  output='both',
                                  parameters=[robot_description])
 
 
     # Joint state publisher
     joint_state_publisher = Node(package='joint_state_publisher',
-                                 node_executable='joint_state_publisher',
-                                 node_name='joint_state_publisher',
+                                 executable='joint_state_publisher',
+                                 name='joint_state_publisher',
                                  arguments=[os.path.join(get_package_share_directory('moveit_resources'), 'panda_description/urdf/panda.urdf')],
                                  output='log',
                                  parameters=[{'source_list': ["/fake_controller_joint_states"]}])
