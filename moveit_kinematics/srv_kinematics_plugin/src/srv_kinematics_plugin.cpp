@@ -298,7 +298,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
   RCLCPP_DEBUG(LOGGER, "Calling service: %s", ik_service_client_->get_service_name());
   auto result_future = ik_service_client_->async_send_request(ik_srv);
   auto response = result_future.get();
-  if (rclcpp::spin_until_future_complete(node_, result_future) == rclcpp::executor::FutureReturnCode::SUCCESS)
+  if (rclcpp::spin_until_future_complete(node_, result_future) == rclcpp::FutureReturnCode::SUCCESS)
   {
     // Check error code
     error_code.val = response->error_code.val;
