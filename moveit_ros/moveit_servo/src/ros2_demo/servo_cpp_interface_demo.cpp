@@ -32,9 +32,11 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Adam Pettinger
-   Desc:   TODO(adamp)
-*/
+/*      Title     : servo_cpp_interface_demo.cpp
+ *      Project   : moveit_servo
+ *      Created   : 07/13/2020
+ *      Author    : Adam Pettinger
+ */
 
 // ROS
 #include <rclcpp/rclcpp.hpp>

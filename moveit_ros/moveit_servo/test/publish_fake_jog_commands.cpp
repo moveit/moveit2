@@ -32,8 +32,11 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Adam Pettinger
-   Desc:   TODO(adamp)
+/* Author    : Adam Pettinger
+   Desc      : Simple node to publish commands to the Servo demo
+   Title     : test_servo_parameters.cpp
+   Project   : moveit_servo
+   Created   : 07/16/2020
 */
 
 // ROS

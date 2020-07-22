@@ -38,8 +38,6 @@
  *      Author    : Adam Pettinger
  */
 
-// TODO(adamp): license correct?
-
 #pragma once
 
 #include <moveit_servo/servo.h>
