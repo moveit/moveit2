@@ -112,10 +112,9 @@ if(BUILD_TESTING)
   target_link_libraries( test_low_pass_filter ${LIBRARY_NAME})
 
   # Basic unit test Servo standup
-  ament_add_gtest(test_servo test/test_standup_servo.cpp test/test_parameter_struct.hpp
-    APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  ament_target_dependencies(test_servo ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
-  target_link_libraries( test_servo ${LIBRARY_NAME})
+  # ament_add_gtest(test_servo test/test_standup_servo.cpp test/test_parameter_struct.hpp )
+  # target_link_libraries( test_servo ${LIBRARY_NAME})
+  # ament_target_dependencies(test_servo ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost ament_cmake_gtest ros_testing)
 
 
   # Servo parameters launch test
@@ -123,10 +122,19 @@ if(BUILD_TESTING)
     test/test_servo_parameters_node.cpp
     test/test_parameter_struct.hpp)
   ament_target_dependencies(test_servo_parameters_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  
   ament_add_gtest_executable(test_servo_parameters test/test_servo_parameters.cpp)
   ament_target_dependencies(test_servo_parameters ${THIS_PACKAGE_INCLUDE_DEPENDS})
   target_link_libraries(test_servo_parameters ${LIBRARY_NAME})
   add_ros_test(test/launch/test_servo_parameters.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  # End servo parameters launch test
+
+  # Servo integration launch test
+  ament_add_gtest_executable(test_servo_integration test/servo_cpp_interface_test.cpp test/test_parameter_struct.hpp)
+  ament_target_dependencies(test_servo_integration ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  add_ros_test(test/launch/test_servo_integration.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  # end servo integration launch test
+
 
 endif()
 
