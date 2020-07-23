@@ -274,7 +274,7 @@ bool planning_scene_monitor::CurrentStateMonitor::haveCompleteState(const rclcpp
 
 bool planning_scene_monitor::CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait_time) const
 {
-  rclcpp::Time start = rclcpp::Clock(RCL_ROS_TIME).now();
+  rclcpp::Time start = node_->now();
   rclcpp::Duration elapsed(0, 0);
   rclcpp::Duration timeout(wait_time, 0);
 
@@ -282,7 +282,7 @@ bool planning_scene_monitor::CurrentStateMonitor::waitForCurrentState(const rclc
   while (current_state_time_ < t)
   {
     state_update_condition_.wait_for(lock, (timeout - elapsed).to_chrono<std::chrono::seconds>());
-    elapsed = rclcpp::Clock(RCL_ROS_TIME).now() - start;
+    elapsed = node_->now() - start;
     if (elapsed > timeout)
     {
       RCLCPP_INFO(LOGGER, "Didn't received robot state (joint angles) with recent timestamp within "
