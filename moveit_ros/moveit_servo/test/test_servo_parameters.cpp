@@ -48,68 +48,39 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.test_servo
 
 using namespace std::chrono_literals;
 
-
-// class ServoParametersTest : public ::testing::Test
-// {
-// protected:
-//   void SetUp() override
-//   {
-//     // Use simulated time
-//     node_->set_parameter({"use_sim_time", true});
-//     executor_->add_node(node_);
-//   }
-
-//   // void TearDown() override {executor_->cancel();}
-
-//   ServoParametersTest()
-//   : node_(std::make_shared<rclcpp::Node>("servo_parameters_test"))
-//   , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
-//   , parameters_(std::make_shared<moveit_servo::ServoParameters>())
-//   {
-//   }
-
-//   bool testReadParameters()
-//   {
-//     return moveit_servo::readParameters(*node_, LOGGER, *parameters_);
-//   }
-
-// private:
-//   rclcpp::Node::SharedPtr node_;
-//   rclcpp::Executor::SharedPtr executor_;
-//   moveit_servo::ServoParametersPtr parameters_;
-
-// };
-
-// TEST_F(ServoParametersTest, test_read_example_parameters)
-// {
-//   EXPECT_TRUE(testReadParameters());
-// }
-
-TEST(TestServoParameters, LoadParams)
+TEST(TestServoParameters, LoadParamsSuccess)
 {
-  rclcpp::NodeOptions node_options;
-  auto node = std::make_shared<rclcpp::Node>("test_servo_parameters", node_options);
+  auto node = std::make_shared<rclcpp::Node>("test_servo_parameters");
 
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client =
-    node->create_client<std_srvs::srv::Trigger>("get_result");
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr load_param_client =
+    node->create_client<std_srvs::srv::Trigger>("get_loading_result");
 
-  while (!client->wait_for_service(1s)) {
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr equal_param_client =
+    node->create_client<std_srvs::srv::Trigger>("get_equal_expected_result");
+
+  while (!load_param_client->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
     }
-    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "service not available, waiting again...");
-  }
-  auto result = client->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-
-  if (rclcpp::spin_until_future_complete(node, result) ==
-    rclcpp::FutureReturnCode::SUCCESS)
-  {
-    // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Sum: %ld", result.get()->success);
-  } else {
-    // RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service add_two_ints");
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "get_loading_result service not available, waiting again...");
   }
 
-  EXPECT_TRUE(result.get()->success);
+  while (!equal_param_client->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
+    }
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "get_equal_expected_result service not available, waiting again...");
+  }
+
+  // Test the loading of the parameters
+  auto loading_result = load_param_client->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+  ASSERT_TRUE(rclcpp::spin_until_future_complete(node, loading_result) == rclcpp::FutureReturnCode::SUCCESS);
+  EXPECT_TRUE(loading_result.get()->success);
+
+  // Test if the loaded parameters equal the expected parameters
+  auto equal_result = equal_param_client->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+  ASSERT_TRUE(rclcpp::spin_until_future_complete(node, equal_result) == rclcpp::FutureReturnCode::SUCCESS);
+  EXPECT_TRUE(equal_result.get()->success);
 }
 
 

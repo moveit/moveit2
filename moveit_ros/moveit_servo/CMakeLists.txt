@@ -107,7 +107,9 @@ if(BUILD_TESTING)
   target_link_libraries( test_low_pass_filter ${LIBRARY_NAME})
 
   # Servo parameters launch test
-  add_executable(test_servo_parameters_node test/test_servo_parameters_node.cpp)
+  add_executable(test_servo_parameters_node 
+    test/test_servo_parameters_node.cpp
+    test/test_parameter_struct.hpp)
   ament_target_dependencies(test_servo_parameters_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
   ament_add_gtest_executable(test_servo_parameters test/test_servo_parameters.cpp)
   ament_target_dependencies(test_servo_parameters ${THIS_PACKAGE_INCLUDE_DEPENDS})

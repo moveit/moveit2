@@ -42,35 +42,54 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit_servo/servo_parameters.cpp>
 #include <std_srvs/srv/trigger.hpp>
+#include "test_parameter_struct.hpp"
 
 bool load_params_success_ = false;
+bool expected_load_params_success_, got_expected_, equals_expected_;
 
-void resultCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+void loadResultCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
           std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  response->success = load_params_success_;
+  // To pass (return true here), we need:
+  // 1) To have gotten the parameter telling us if we should have success loading parameters
+  // 2) Our success/fail loading parameters should match the expected
+  response->success = (got_expected_ && load_params_success_ == expected_load_params_success_);
+}
+
+void expectedResultCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+          std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+{
+  response->success = equals_expected_;
 }
 
 int main(int argc, char** argv)
 {
+  // Init ROS objects
   rclcpp::init(argc, argv);
   static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.test_servo_parameters_node.cpp");
+  auto node = std::make_shared<rclcpp::Node>("test_servo_parameters_node");
 
-  rclcpp::NodeOptions node_options;
-  auto node = std::make_shared<rclcpp::Node>("servo_demo_node", node_options);
-  auto executor = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+  // We need to know whether or not to expect valid parameter loading
+  // This param passed alongside 'servo_params' in launch file
+  node->declare_parameter<bool>("expect_valid_params", true);
+  got_expected_ = node->get_parameter("expect_valid_params", expected_load_params_success_);
+  RCLCPP_INFO_STREAM(LOGGER, "Got expect_valid_params? : " << got_expected_ << ", value = " << expected_load_params_success_);
 
-  node->declare_parameter<std::string>("some_test_param", "Oscar Kilo");
-  std::string the_param;
-  bool got_param = node->get_parameter("some_test_param", the_param);
-  RCLCPP_WARN_STREAM(LOGGER, "Got param? : " << got_param << ". What was it? " << the_param);
-
+  // Create and try to load the parameters
   auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
-
   load_params_success_ = moveit_servo::readParameters(*node, LOGGER, *servo_parameters);
 
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr service =
-    node->create_service<std_srvs::srv::Trigger>("get_result", &resultCB);
+  // Offer a service to report the success/fail of the loading
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr loading_service =
+    node->create_service<std_srvs::srv::Trigger>("get_loading_result", &loadResultCB);
+
+  // Check to see if the parameters we grabbed equal the expected ones for testing
+  moveit_servo::ServoParametersPtr test_params = getTestParameters();
+  equals_expected_ = (*test_params == *servo_parameters);
+
+  // Offer a service to report if the loading matches the test parameters
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr equal_expected_service =
+    node->create_service<std_srvs::srv::Trigger>("get_equal_expected_result", &expectedResultCB);
 
   rclcpp::spin(node);
   rclcpp::shutdown();
