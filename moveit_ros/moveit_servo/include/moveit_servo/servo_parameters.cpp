@@ -104,9 +104,9 @@ bool readParameters(rclcpp::Node& node, const rclcpp::Logger& logger, ServoParam
   error |=
       !declareAndGetParam<std::string>("moveit_servo.robot_link_command_frame", parameters.robot_link_command_frame, node, logger);
   error |= !declareAndGetParam<std::string>("moveit_servo.command_in_type", parameters.command_in_type, node, logger);
-  error |= !declareAndGetParam<double>("moveit_servo.scale/linear", parameters.linear_scale, node, logger);
-  error |= !declareAndGetParam<double>("moveit_servo.scale/rotational", parameters.rotational_scale, node, logger);
-  error |= !declareAndGetParam<double>("moveit_servo.scale/joint", parameters.joint_scale, node, logger);
+  error |= !declareAndGetParam<double>("moveit_servo.scale.linear", parameters.linear_scale, node, logger);
+  error |= !declareAndGetParam<double>("moveit_servo.scale.rotational", parameters.rotational_scale, node, logger);
+  error |= !declareAndGetParam<double>("moveit_servo.scale.joint", parameters.joint_scale, node, logger);
 
   // Properties of outgoing commands
   error |= !declareAndGetParam<std::string>("moveit_servo.command_out_topic", parameters.command_out_topic, node, logger);

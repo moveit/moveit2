@@ -105,12 +105,12 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node, const ServoParameter
 
   // ROS Server for allowing drift in some dimensions
   drift_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeDriftDimensions>(
-      std::string(node_->get_fully_qualified_name()) + "change_drift_dimensions",
+      std::string(node_->get_fully_qualified_name()) + "/change_drift_dimensions",
       std::bind(&ServoCalcs::changeDriftDimensions, this, _1, _2));
 
   // ROS Server for changing the control dimensions
   control_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeControlDimensions>(
-      std::string(node_->get_fully_qualified_name()) + "change_control_dimensions",
+      std::string(node_->get_fully_qualified_name()) + "/change_control_dimensions",
       std::bind(&ServoCalcs::changeControlDimensions, this, _1, _2));
 
   // Subscribe to the collision_check topic
