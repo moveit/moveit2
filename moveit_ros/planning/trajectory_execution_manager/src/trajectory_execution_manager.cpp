@@ -1565,8 +1565,7 @@ bool TrajectoryExecutionManager::waitForRobotToStop(const TrajectoryExecutionCon
   unsigned int no_motion_count = 0;  // count iterations with no motion
   while (time_remaining > 0. && no_motion_count < 3)
   {
-    if (!csm_->waitForCurrentState(node_->now(), time_remaining) ||
-        !(cur_state = csm_->getCurrentState()))
+    if (!csm_->waitForCurrentState(node_->now(), time_remaining) || !(cur_state = csm_->getCurrentState()))
     {
       RCLCPP_WARN(LOGGER, "Failed to receive current joint state");
       return false;
