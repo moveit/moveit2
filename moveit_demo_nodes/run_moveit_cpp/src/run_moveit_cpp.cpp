@@ -61,16 +61,6 @@ public:
     moveit_cpp_ = std::make_shared<moveit::planning_interface::MoveItCpp>(node_);
     moveit_cpp_->getPlanningSceneMonitor()->setPlanningScenePublishingFrequency(100);
 
-    // Wait until there are active controllers available
-    while (rclcpp::ok())
-    {
-      if (moveit_cpp_->getTrajectoryExecutionManager()->ensureActiveControllersForGroup("panda_arm"))
-        break;
-
-      RCLCPP_INFO(LOGGER, "Waiting for active controllers");
-      rclcpp::sleep_for(std::chrono::seconds(1));
-    }
-
     RCLCPP_INFO(LOGGER, "Initialize PlanningComponent");
     moveit::planning_interface::PlanningComponent arm("panda_arm", moveit_cpp_);
 
