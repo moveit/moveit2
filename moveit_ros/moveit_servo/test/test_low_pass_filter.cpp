@@ -52,6 +52,7 @@ TEST(MOVEIT_SERVO, FilterConverge)
     value = lpf.filter(5.0);
   }
   EXPECT_DOUBLE_EQ(5.0, value);
+  EXPECT_NE(5.0, lpf.filter(100.0));
 }
 
 TEST(MOVEIT_SERVO, FilterReset)
@@ -61,4 +62,5 @@ TEST(MOVEIT_SERVO, FilterReset)
   lpf.reset(5.0);
   double value = lpf.filter(5.0);
   EXPECT_DOUBLE_EQ(5.0, value);
+  EXPECT_NE(5.0, lpf.filter(100.0));
 }
