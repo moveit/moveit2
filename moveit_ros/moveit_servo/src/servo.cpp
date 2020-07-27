@@ -50,16 +50,19 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, const ServoParametersPtr& para
   collision_checker_ = std::make_unique<CollisionCheck>(node, parameters, planning_scene_monitor_);
 }
 
-void Servo::start()
+bool Servo::start()
 {
-  setPaused(false);
-
   // Crunch the numbers in this timer
-  servo_calcs_->start();
+  if (servo_calcs_->start())
+    setPaused(false);
+  else
+    return false;
 
   // Check collisions in this timer
   if (parameters_->check_collisions)
     collision_checker_->start();
+
+  return true;
 }
 
 void Servo::stop()
@@ -77,6 +80,11 @@ void Servo::setPaused(bool paused)
 {
   servo_calcs_->setPaused(paused);
   collision_checker_->setPaused(paused);
+}
+
+bool Servo::waitForInitialized(std::chrono::duration<double> wait_for)
+{
+  return servo_calcs_->waitForInitialized(wait_for);
 }
 
 bool Servo::getCommandFrameTransform(Eigen::Isometry3d& transform)

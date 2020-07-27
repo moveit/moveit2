@@ -89,6 +89,12 @@ int main(int argc, char** argv)
 
   // Create Servo and start it
   moveit_servo::Servo servo(node, servo_parameters, planning_scene_monitor);
+  while (!servo.waitForInitialized())
+  {
+    auto& clock = *node->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, 5000,
+                                "Waiting for ServoCalcs to recieve joint states");
+  }
   servo.start();
 
   // Create a publisher for publishing the jog commands

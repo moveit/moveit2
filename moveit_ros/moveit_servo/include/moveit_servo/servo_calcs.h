@@ -65,9 +65,14 @@ public:
   ServoCalcs(const rclcpp::Node::SharedPtr& node, const ServoParametersPtr& parameters,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
-  /** \brief Start and stop the timer where we do work and publish outputs */
-  void start();
+  /** \brief Start and stop the timer where we do work and publish outputs
+   * start will return false if not initialized
+   */
+  bool start();
   void stop();
+
+  /** \brief Returns when a joint state message has been recieved, and start() may be called */
+  bool waitForInitialized(std::chrono::duration<double> wait_for=std::chrono::duration<double>(0.25));
 
   /**
    * Get the MoveIt planning link transform.

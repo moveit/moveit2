@@ -40,13 +40,6 @@
 #include <moveit_servo/servo_server.h>
 #include <moveit_servo/servo_parameters.cpp>
 
-// namespace
-// {
-// constexpr char LOGNAME[] = "servo_server";
-// constexpr char ROS_THREADS = 8;
-
-// }  // namespace
-
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_server");
 
 namespace moveit_servo
@@ -109,7 +102,7 @@ void ServoServer::initializeServo()
   servo_ = std::make_unique<moveit_servo::Servo>(node_ptr, servo_parameters, planning_scene_monitor_);
   
   // If we initialized properly, go ahead and start everything up
-  if(initialized_properly)
+  if(initialized_properly && servo_->waitForInitialized())
   {
     servo_->start();
     initialization_timer_->cancel();

@@ -149,24 +149,22 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node, const ServoParameter
     // Low-pass filters for the joint positions
     position_filters_.emplace_back(parameters_->low_pass_filter_coeff);
   }
+}
 
-  // Wait for the first joint state update
-  // TODO(adamp): this probably needs to be better:
-  // 1) directly calling the callback here?? Doesn't seem good
-  // 2) the take() call might not work with intra-process comms, unsure
-  // 3) this waiting blocks the constructor
-  rclcpp::WaitSet wait_set(std::vector<rclcpp::WaitSet::SubscriptionEntry>{ { joint_state_sub_ } });
+bool ServoCalcs::start()
+{
+  // If the joint_state pointer is null, don't start ServoCalcs
+  if (!incoming_joint_state_)
   {
-    auto wait_result = wait_set.wait();
-
-    sensor_msgs::msg::JointState recieved_joint_state_msg;
-    rclcpp::MessageInfo msg_info;
-    joint_state_sub_->take(recieved_joint_state_msg, msg_info);  // TODO(adamp): this returns a bool, need to decide
-                                                                 // what happens if this returns false
-
-    jointStateCB(std::make_shared<sensor_msgs::msg::JointState>(recieved_joint_state_msg));
-    updateJoints();
+    auto& clock = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                "Trying to start ServoCalcs, but it is not initialized. Are you publishing joint_states?");
+    return false;
   }
+
+  // Otherwise, we should always set up the "last published" command
+  // TODO(adamp): note that if you call start() while the arm is moving... its gonna sudden halt
+  updateJoints();
 
   // Set up the "last" published message, in case we need to send it first
   auto initial_joint_trajectory =
@@ -193,18 +191,41 @@ ServoCalcs::ServoCalcs(const rclcpp::Node::SharedPtr& node, const ServoParameter
   }
   initial_joint_trajectory->points.push_back(point);
   last_sent_command_ = std::move(initial_joint_trajectory);
-}
 
-void ServoCalcs::start()
-{
+  // Set up timer for calculation callback
   stop_requested_ = false;
   timer_ = node_->create_wall_timer(std::chrono::duration<double>(period_), std::bind(&ServoCalcs::run, this));
+  return true;
 }
 
 void ServoCalcs::stop()
 {
   stop_requested_ = true;
   timer_->cancel();
+}
+
+bool ServoCalcs::waitForInitialized(std::chrono::duration<double> wait_for)
+{
+  // Already there if incoming_joint_state_ isn't null
+  if (incoming_joint_state_)
+    return true;
+
+  // Do the waiting
+  rclcpp::WaitSet wait_set(std::vector<rclcpp::WaitSet::SubscriptionEntry>{ { joint_state_sub_ } });
+  {
+    auto wait_result = wait_set.wait(wait_for);
+    if (wait_result.kind() != rclcpp::WaitResultKind::Ready)
+      return false;
+
+    sensor_msgs::msg::JointState recieved_joint_state_msg;
+    rclcpp::MessageInfo msg_info;
+    joint_state_sub_->take(recieved_joint_state_msg, msg_info);  // TODO(adamp): this returns a bool, need to decide
+                                                                 // what happens if this returns false
+
+    jointStateCB(std::make_shared<sensor_msgs::msg::JointState>(recieved_joint_state_msg));
+    updateJoints();
+  }
+  return true;
 }
 
 void ServoCalcs::run()  // TODO(adamp): come back and pass a timer event here?
