@@ -95,6 +95,7 @@ public:
   bool active_;
 
   int CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_in, KDL::JntArray& q_out) override;
+  void updateInternalDataStructures() override {}
 
   int cartToJntSearch(const KDL::JntArray& q_in, const KDL::Frame& p_in, KDL::JntArray& q_out, const double& timeout);
 
