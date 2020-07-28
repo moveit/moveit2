@@ -80,7 +80,6 @@ COPY --from=cacher $OVERLAY_WS ./
 ARG OVERLAY_MIXINS="release ccache"
 RUN . $UNDERLAY_WS/install/setup.sh && \
     colcon build \
-      --symlink-install \
       --mixin $OVERLAY_MIXINS \
     || ([ -z "$FAIL_ON_BUILD_FAILURE" ] || exit 1)
 
