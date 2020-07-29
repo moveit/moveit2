@@ -116,8 +116,8 @@ void ServoServer::initializeServo()
 void ServoServer::startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
           std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  servo_->start();
-  response->success = true;
+  bool success = servo_->start();
+  response->success = success;
 }
 
 void ServoServer::stopCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
