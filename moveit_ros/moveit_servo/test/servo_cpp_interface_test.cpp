@@ -117,6 +117,7 @@ public:
   bool waitForFirstStatus()
   {
     rclcpp::WaitSet wait_set(std::vector<rclcpp::WaitSet::SubscriptionEntry>{ { sub_servo_status_ } });
+    // auto wait_result = wait_set.wait();
     auto wait_result = wait_set.wait(std::chrono::seconds(15));
 
     std_msgs::msg::Int8 recieved_msg;
@@ -125,6 +126,7 @@ public:
                                                                 // what happens if this returns false
 
     statusCB(std::make_shared<std_msgs::msg::Int8>(recieved_msg));
+    RCLCPP_WARN_STREAM(LOGGER, "Wait kind is: " << wait_result.kind() << ". Status code is: " << latest_status_);
     return wait_result.kind() == rclcpp::WaitResultKind::Ready;
   }
 
@@ -209,7 +211,7 @@ public:
 
   bool setupStatusSub()
   {
-    sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
+    sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>("/" +
       parameters_->status_topic, 10, std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
     return true;
   }
@@ -437,30 +439,49 @@ TEST_F(ServoFixture, StartStopTest)
 
   ASSERT_TRUE(setupJointStateSub());
 
-
-  {
-    rclcpp::WaitSet wait_set(std::vector<rclcpp::WaitSet::SubscriptionEntry>{ { sub_joint_state_ } });
-    // auto wait_result = wait_set.wait();
-    auto wait_result = wait_set.wait(std::chrono::seconds(10));
-
-    EXPECT_TRUE(wait_result.kind() == rclcpp::WaitResultKind::Ready);
-  }
-
-
-
-
-
-  // bool got_msg = false;
-  // while (!got_msg)
+  // Wait for a joint state message to ensure fake_joint_driver is up
   // {
-  //   {
-  //     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
-  //     if (num_joint_state_ > 0)
-  //       got_msg = true;
-  //   }
-  //   rclcpp::sleep_for(std::chrono::duration<long int, std::ratio<1, 1000000000>>(100000));
+  //   rclcpp::WaitSet wait_set(std::vector<rclcpp::WaitSet::SubscriptionEntry>{ { sub_joint_state_ } });
+  //   // auto wait_result = wait_set.wait();
+  //   auto wait_result = wait_set.wait(std::chrono::seconds(15));
+
+  //   EXPECT_TRUE(wait_result.kind() == rclcpp::WaitResultKind::Ready);
   // }
-  // ASSERT_TRUE(got_msg);
+
+  // Feels redundant with the above
+  bool got_msg = false;
+  while (!got_msg)
+  {
+    {
+      const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+      if (num_joint_state_ > 0)
+        got_msg = true;
+    }
+    rclcpp::sleep_for(std::chrono::milliseconds(20));
+  }
+  ASSERT_TRUE(got_msg);
+
+  // Try to start Servo
+  auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+  EXPECT_TRUE(start_result.get()->success);
+
+  // With servo running we should get a status that should be NO_WARNING
+  rclcpp::sleep_for(std::chrono::milliseconds(20));
+  EXPECT_TRUE(num_status_ > 0);
+  EXPECT_TRUE(latest_status_ == moveit_servo::StatusCode::NO_WARNING);
+
+  // Now stop servo and wait
+  auto stop_result = client_servo_stop_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+  EXPECT_TRUE(stop_result.get()->success);
+  rclcpp::sleep_for(std::chrono::seconds(1));
+  num_status_ = 0;
+
+  // Restart and recheck Servo
+  start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+  EXPECT_TRUE(start_result.get()->success);
+  rclcpp::sleep_for(std::chrono::milliseconds(20));
+  EXPECT_TRUE(num_status_ > 0);
+  EXPECT_TRUE(latest_status_ == moveit_servo::StatusCode::NO_WARNING);
 }
 
 }  // namespace moveit_servo
