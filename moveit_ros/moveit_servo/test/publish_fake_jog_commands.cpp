@@ -42,9 +42,7 @@
 // ROS
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
-
-// Servo
-// #include <moveit_servo/servo_parameters.cpp>
+#include <std_srvs/srv/trigger.hpp>
 
 using namespace std::chrono_literals;
 
@@ -58,13 +56,10 @@ int main(int argc, char** argv)
   auto node = std::make_shared<rclcpp::Node>("publish_fake_jog_commands", node_options);
   auto executor = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
 
-  // // Get Servo Parameters
-  // moveit_servo::ServoParameters servo_parameters;
-  // if(!moveit_servo::readParameters(*node, LOGGER, servo_parameters))
-  // {
-  //   RCLCPP_ERROR(LOGGER, "Could not get parameters");
-  //   return -1;
-  // }
+  // Call the start service to init and start the servo component
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr servo_start_client = node->create_client<std_srvs::srv::Trigger>("/start_servo");
+  servo_start_client->wait_for_service(1s);
+  servo_start_client->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
 
   // Create a publisher for publishing the jog commands
   auto pub = node->create_publisher<geometry_msgs::msg::TwistStamped>("servo_server/delta_twist_cmds", 10);

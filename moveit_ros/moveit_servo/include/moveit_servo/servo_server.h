@@ -50,7 +50,7 @@ public:
   ServoServer(const rclcpp::NodeOptions& options);
 
 private:
-  void initializeServo();
+  bool init();
 
   rclcpp::TimerBase::SharedPtr initialization_timer_;
 
@@ -81,5 +81,7 @@ private:
   // TODO(adamp): Do we actually want to expose these? Might need to define a service then... Could also just leave it for C++ API
   void getCommandFrameTransform();
   void getLatestJointState();
+
+  bool is_initialized_;
 };
 } //namespace moveit_servo

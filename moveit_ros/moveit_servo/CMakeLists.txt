@@ -75,6 +75,7 @@ add_executable(${FAKE_SERVO_CMDS_NAME} test/publish_fake_jog_commands.cpp)
 ament_target_dependencies(${FAKE_SERVO_CMDS_NAME} 
   rclcpp
   geometry_msgs
+  std_srvs
 )
 
 # Install Libraries
