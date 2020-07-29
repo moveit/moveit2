@@ -74,7 +74,7 @@ references:
               dependencies=$(
                 rosdep install -q -y \
                   --from-paths src \
-                    << parameters.underlay >> \
+                    << parameters.underlay >>/src \
                   --ignore-src \
                   --skip-keys " \
                     slam_toolbox \
@@ -187,6 +187,7 @@ references:
       command: |
         mkdir -p $ROS_WS && cd $ROS_WS
         ln -s /opt/ros/$ROS_DISTRO install
+        ln -s /opt/ros/$ROS_DISTRO src
         echo $CACHE_NONCE | \
           (echo cache_nonce && cat) >> checksum.txt
         sha256sum $PWD/checksum.txt >> checksum.txt
