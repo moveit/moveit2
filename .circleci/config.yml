@@ -74,7 +74,7 @@ references:
               dependencies=$(
                 rosdep install -q -y \
                   --from-paths src \
-                    << parameters.underlay >>/src \
+                    << parameters.underlay >>/install \
                   --ignore-src \
                   --skip-keys " \
                     slam_toolbox \
