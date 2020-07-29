@@ -119,7 +119,6 @@ references:
                       . << parameters.underlay >>/install/setup.sh
                       rm -rf build install log
                       colcon build \
-                        --symlink-install \
                         --mixin << parameters.mixins >>
                     else
                       echo "Skipping Build"
