@@ -196,18 +196,18 @@ references:
         rm -rf $OVERLAY_WS/*
   on_checkout: &on_checkout
     checkout:
-      path: src/navigation2
+      path: src/moveit2
   post_checkout: &post_checkout
     run:
       name: Post Checkout
       command: |
         if ! cmp \
-          $OVERLAY_WS/src/navigation2/tools/underlay.repos \
+          $OVERLAY_WS/src/moveit2/underlay.repos \
           $UNDERLAY_WS/underlay.repos >/dev/null 2>&1
         then
           echo "Cleaning Underlay"
           rm -rf $UNDERLAY_WS/*
-          cp $OVERLAY_WS/src/navigation2/tools/underlay.repos \
+          cp $OVERLAY_WS/src/moveit2/underlay.repos \
             $UNDERLAY_WS/underlay.repos
           mkdir -p $UNDERLAY_WS/src
           vcs import $UNDERLAY_WS/src \
@@ -269,7 +269,7 @@ references:
     run:
       name: Collect Code Coverage
       working_directory: /opt/overlay_ws
-      command: src/navigation2/tools/code_coverage_report.bash ci
+      command: src/moveit2/tools/code_coverage_report.bash ci
       when: always
   upload_overlay_coverage: &upload_overlay_coverage
     codecov/upload:
@@ -322,7 +322,7 @@ commands:
 executors:
   debug_exec:
     docker:
-      - image: rosplanning/navigation2:master.debug
+      - image: rosplanning/moveit2:master.debug
     working_directory: /opt/overlay_ws
     environment:
       <<: *common_environment
@@ -331,7 +331,7 @@ executors:
       UNDERLAY_MIXINS: "release ccache"
   release_exec:
     docker:
-      - image: rosplanning/navigation2:master.release
+      - image: rosplanning/moveit2:master.release
     working_directory: /opt/overlay_ws
     environment:
       <<: *common_environment
