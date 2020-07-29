@@ -92,15 +92,6 @@ def generate_launch_description():
                                  node_name='joint_state_publisher',
                                  arguments=[os.path.join(get_package_share_directory('moveit_resources'), 'panda_description/urdf/panda.urdf')],
                                  output='log',
-                                 parameters=[{'source_list': ['/fake_controller_joint_states'],
-                                              'zeros': {'panda_joint1': 0.0,
-                                                        'panda_joint2': -0.785,
-                                                        'panda_joint3': 0.0,
-                                                        'panda_joint4': -2.356,
-                                                        'panda_joint5': 0.0,
-                                                        'panda_joint6':  1.571,
-                                                        'panda_joint7': 0.785,
-                                                        'panda_finger_joint1': 0.035,
-                                                        'panda_finger_joint2': 0.035}}])
+                                 parameters=[{'publish_default_positions': False}])
 
     return LaunchDescription([ static_tf, rviz_node, joint_state_publisher, run_moveit_cpp_node ])
