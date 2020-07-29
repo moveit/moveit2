@@ -322,7 +322,7 @@ commands:
 executors:
   debug_exec:
     docker:
-      - image: rosplanning/moveit2:master.debug
+      - image: ruffsl/moveit2:master.debug
     working_directory: /opt/overlay_ws
     environment:
       <<: *common_environment
@@ -331,7 +331,7 @@ executors:
       UNDERLAY_MIXINS: "release ccache"
   release_exec:
     docker:
-      - image: rosplanning/moveit2:master.release
+      - image: ruffsl/moveit2:master.release
     working_directory: /opt/overlay_ws
     environment:
       <<: *common_environment
