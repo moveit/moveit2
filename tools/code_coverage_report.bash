@@ -72,21 +72,13 @@ lcov \
 lcov \
   --remove ${LCOVDIR}/workspace_coverage.info \
     "${PWD}/build/*" \
-  --remove ${LCOVDIR}/workspace_coverage.info \
-    "${PWD}/*/dwb_msgs/*" \
-  --remove ${LCOVDIR}/workspace_coverage.info \
-    "${PWD}/*/nav2_msgs/*" \
-  --remove ${LCOVDIR}/workspace_coverage.info \
-    "${PWD}/*/nav_2d_msgs/*" \
-  --remove ${LCOVDIR}/workspace_coverage.info \
-    "${PWD}/*/nav2_system_tests/*" \
   --output-file ${LCOVDIR}/project_coverage.info \
   --rc lcov_branch_coverage=0
 
 if [ $COVERAGE_REPORT_VIEW = codecovio ]; then
   bash <(curl -s https://codecov.io/bash) \
     -f ${LCOVDIR}/project_coverage.info \
-    -R src/navigation2
+    -R src/moveit2
 elif [ $COVERAGE_REPORT_VIEW = genhtml ]; then
   genhtml ${LCOVDIR}/project_coverage.info \
     --output-directory ${LCOVDIR}/html
