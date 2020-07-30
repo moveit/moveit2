@@ -112,7 +112,16 @@ public:
     pub_joint_cmd_ = node_->create_publisher<control_msgs::msg::JointJog>(parameters_->joint_command_in_topic, 10);
   }
 
-  void TearDown() override {executor_->cancel();}
+  void TearDown() override
+  {
+    // If the stop client isn't null, we set it up and likely started the Servo. Stop it.
+    // Otherwise the Servo is still running when another test starts...
+    if (!client_servo_stop_)
+    {
+      client_servo_stop_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+    }
+    executor_->cancel();
+  }
 
   bool waitForFirstStatus()
   {
@@ -133,6 +142,7 @@ public:
   // Set up for callbacks (so they aren't run for EVERY test)
   bool setupStartClient()
   {
+    // Start client
     client_servo_start_ = node_->create_client<std_srvs::srv::Trigger>("/start_servo");
     while (!client_servo_start_->wait_for_service(1s))
     {
@@ -141,11 +151,8 @@ public:
       }
       RCLCPP_INFO(LOGGER, "client_servo_start_ service not available, waiting again...");
     }
-    return true;
-  }
 
-  bool setupStopClient()
-  {
+    // If we setup the start client, also setup the stop client...
     client_servo_stop_ = node_->create_client<std_srvs::srv::Trigger>("/stop_servo");
     while (!client_servo_stop_->wait_for_service(1s))
     {
@@ -286,6 +293,84 @@ public:
     latest_array_cmd_ = msg;
   }
 
+  StatusCode getLatestStatus()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    return latest_status_;
+  }
+
+  size_t getNumStatus()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    return num_status_;
+  }
+
+  void resetNumStatus()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    num_status_ = 0;
+  }
+
+  double getLatestCollisionScale()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    return latest_collision_scale_;
+  }
+
+  size_t getNumCollisionScale()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    return num_collision_scale_;
+  }
+
+  void resetNumCollisionScale()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    num_collision_scale_ = 0;
+  }
+
+  sensor_msgs::msg::JointState getLatestJointState()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    return *latest_joint_state_;
+  }
+
+  size_t getNumJointState()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    return num_joint_state_;
+  }
+
+  void resetNumJointState()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    num_joint_state_ = 0;
+  }
+
+  trajectory_msgs::msg::JointTrajectory getLatestTrajCommand()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    return *latest_traj_cmd_;
+  }
+
+  std_msgs::msg::Float64MultiArray getLatestArrayCommand()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    return *latest_array_cmd_;
+  }
+
+  size_t getNumCommands()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    return num_commands_;
+  }
+
+  void resetNumCommands()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    num_commands_ = 0;
+  }
+
 protected:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Executor::SharedPtr executor_;
@@ -312,13 +397,7 @@ protected:
   rclcpp::Subscription<trajectory_msgs::msg::JointTrajectory>::SharedPtr sub_trajectory_cmd_output_;
   rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr sub_array_cmd_output_;
 
-  // Callbacks
-  // void statusCB(const std_msgs::msg::Int8::SharedPtr msg);
-  // void collisionScaleCB(const std_msgs::msg::Float64::SharedPtr msg);
-  // void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
-  // void trajectoryCommandCB(const trajectory_msgs::msg::JointTrajectory::SharedPtr msg);
-  // void arrayCommandCB(const std_msgs::msg::Float64MultiArray::SharedPtr msg);
-
+  // Subscription counting and data
   size_t num_status_;
   StatusCode latest_status_ = StatusCode::NO_WARNING;
 
@@ -433,30 +512,16 @@ TEST_F(ServoFixture, StartStopTest)
 {
   // Setup the start/stop clients, and the command callback
   ASSERT_TRUE(setupStartClient());
-  ASSERT_TRUE(setupStopClient());
   ASSERT_TRUE(setupStatusSub());
-  ASSERT_TRUE(setupCommandSub(parameters_->command_out_type));
-
   ASSERT_TRUE(setupJointStateSub());
 
   // Wait for a joint state message to ensure fake_joint_driver is up
-  // {
-  //   rclcpp::WaitSet wait_set(std::vector<rclcpp::WaitSet::SubscriptionEntry>{ { sub_joint_state_ } });
-  //   // auto wait_result = wait_set.wait();
-  //   auto wait_result = wait_set.wait(std::chrono::seconds(15));
-
-  //   EXPECT_TRUE(wait_result.kind() == rclcpp::WaitResultKind::Ready);
-  // }
-
-  // Feels redundant with the above
   bool got_msg = false;
   while (!got_msg)
   {
-    {
-      const std::lock_guard<std::mutex> lock(latest_state_mutex_);
-      if (num_joint_state_ > 0)
-        got_msg = true;
-    }
+    if (getNumJointState() > 0)
+      got_msg = true;
+
     rclcpp::sleep_for(std::chrono::milliseconds(20));
   }
   ASSERT_TRUE(got_msg);
@@ -467,21 +532,95 @@ TEST_F(ServoFixture, StartStopTest)
 
   // With servo running we should get a status that should be NO_WARNING
   rclcpp::sleep_for(std::chrono::milliseconds(20));
-  EXPECT_TRUE(num_status_ > 0);
+  EXPECT_TRUE(getNumStatus() > 0);
   EXPECT_TRUE(latest_status_ == moveit_servo::StatusCode::NO_WARNING);
 
   // Now stop servo and wait
   auto stop_result = client_servo_stop_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
   EXPECT_TRUE(stop_result.get()->success);
   rclcpp::sleep_for(std::chrono::seconds(1));
-  num_status_ = 0;
+  resetNumStatus();
 
   // Restart and recheck Servo
   start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
   EXPECT_TRUE(start_result.get()->success);
   rclcpp::sleep_for(std::chrono::milliseconds(20));
-  EXPECT_TRUE(num_status_ > 0);
+  EXPECT_TRUE(getNumStatus() > 0);
   EXPECT_TRUE(latest_status_ == moveit_servo::StatusCode::NO_WARNING);
+}
+
+TEST_F(ServoFixture, SendTwistStampedTest)
+{
+  ASSERT_TRUE(setupStartClient());
+  ASSERT_TRUE(setupCommandSub(parameters_->command_out_type));
+
+  // Start Servo
+  auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+  ASSERT_TRUE(start_result.get()->success);
+
+  // We want to count the number of commands Servo publishes, we need timing
+  auto time_start = node_->now();
+
+  // Publish N messages with some time between, ensure it's less than the timeout for Servo
+  size_t num_commands = 30;
+  rclcpp::Rate loop_rate(2/parameters_->incoming_command_timeout);
+  resetNumCommands();
+  for (size_t i = 0; i < num_commands && rclcpp::ok(); ++i)
+  {
+    auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
+    msg->header.stamp = node_->now();
+    msg->twist.linear.x = 0.1;
+    msg->twist.angular.z = 0.5;
+    pub_twist_cmd_->publish(std::move(msg));
+    loop_rate.sleep();
+  }
+
+  // Capture the time and number of recieved messages
+  auto time_end = node_->now();
+  auto num_recieved = getNumCommands();
+
+  // Compare actual number recieved to expected number
+  auto num_expected = (time_end - time_start).seconds() / parameters_->publish_period;
+  
+  EXPECT_GT(num_recieved, 0.7*num_expected);
+  EXPECT_LT(num_recieved, 1.1*num_expected);
+}
+
+TEST_F(ServoFixture, SendJointServoTest)
+{
+  ASSERT_TRUE(setupStartClient());
+  ASSERT_TRUE(setupCommandSub(parameters_->command_out_type));
+
+  // Start Servo
+  auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+  ASSERT_TRUE(start_result.get()->success);
+
+  // We want to count the number of commands Servo publishes, we need timing
+  auto time_start = node_->now();
+
+  // Publish N messages with some time between, ensure it's less than the timeout for Servo
+  size_t num_commands = 30;
+  rclcpp::Rate loop_rate(2/parameters_->incoming_command_timeout);
+  resetNumCommands();
+  for (size_t i = 0; i < num_commands && rclcpp::ok(); ++i)
+  {
+    auto msg = std::make_unique<control_msgs::msg::JointJog>();
+    msg->header.stamp = node_->now();
+    msg->header.frame_id = "panda_link3";
+    msg->velocities.push_back(0.1);
+    pub_joint_cmd_->publish(std::move(msg));
+    loop_rate.sleep();
+  }
+
+  // Capture the time and number of recieved messages
+  auto time_end = node_->now();
+  auto num_recieved = getNumCommands();
+
+  // Compare actual number recieved to expected number
+  auto num_expected = (time_end - time_start).seconds() / parameters_->publish_period;
+  
+  EXPECT_GT(num_recieved, 0.8*num_expected);
+  EXPECT_LT(num_recieved, 1.1*num_expected);
 }
 
 }  // namespace moveit_servo
