@@ -39,6 +39,7 @@ FROM $FROM_IMAGE AS builder
 
 # install CI dependencies
 RUN apt-get update && apt-get install -q -y \
+      apt-utils \
       ccache \
       lcov \
     && rosdep update \
