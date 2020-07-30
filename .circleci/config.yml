@@ -12,6 +12,7 @@ references:
     MAKEFLAGS: "-j 1 -l 2"
     RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED: "1"
     RETEST_UNTIL_PASS: "2"
+    DEBIAN_FRONTEND: "noninteractive"
   common_commands: &common_commands
     restore_from_cache:
       description: "Restore From Cache"

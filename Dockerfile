@@ -36,6 +36,7 @@ RUN mkdir -p /tmp/opt && \
 
 # multi-stage for building
 FROM $FROM_IMAGE AS builder
+ARG DEBIAN_FRONTEND=noninteractive
 
 # install CI dependencies
 RUN apt-get update && apt-get install -q -y \
