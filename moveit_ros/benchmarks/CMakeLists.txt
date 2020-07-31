@@ -17,7 +17,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(Boost REQUIRED filesystem)
+find_package(Boost REQUIRED date_time filesystem)
 find_package(tf2_eigen REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 # TODO(YuYan): uncomment after porting moveit_ros_warehouse
