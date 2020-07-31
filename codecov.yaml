@@ -1,13 +1,8 @@
-coverage:
-  status:
-    project:
-      default:
-        target: auto
-        # allow coverage to drop by this amount and still post success
-        threshold: 0.5%
-        base: auto
-        branches:
-          - master
-        if_not_found: success
-        if_ci_failed: error
-        only_pulls: false
+fixes:
+  - "src/moveit2/::"
+
+ignore:
+  - "*/**/test/*" # ignore package test directories, e.g. moveit_core/robot_trajectory/test
+  - "*/test/**/*" # ignore package test directories, e.g. moveit_kinematics/test
+  - "**/test_*.*" # ignore files starting with test_ e.g. moveit_core/collision_detection/test/test_all_valid.cpp
+  - "**/*_test.*" # ignore files ending   with _test e.g. moveit_planners/trajopt/test/trajectory_test.cpp
