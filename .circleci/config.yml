@@ -9,7 +9,7 @@ references:
     OVERLAY_WS: "/opt/overlay_ws"
     CCACHE_LOGFILE: "/tmp/ccache.log"
     CCACHE_MAXSIZE: "200M"
-    MAKEFLAGS: "-j 1 -l 2"
+    MAKEFLAGS: "-j 2 -l 2"
     RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED: "1"
     RETEST_UNTIL_PASS: "2"
     DEBIAN_FRONTEND: "noninteractive"
