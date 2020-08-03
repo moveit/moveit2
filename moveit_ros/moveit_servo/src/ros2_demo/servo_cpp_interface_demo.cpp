@@ -76,6 +76,7 @@ int main(int argc, char** argv)
     planning_scene_monitor->startStateMonitor("/joint_states");
     planning_scene_monitor->setPlanningScenePublishingFrequency(25);
     planning_scene_monitor->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE, "/moveit_servo/publish_planning_scene");
+    planning_scene_monitor->startSceneMonitor();
   }
   else
   {
@@ -84,8 +85,35 @@ int main(int argc, char** argv)
   }
 
   // Pause for RViz to come up..
-  rclcpp::Rate loop_rate(0.25);
-  loop_rate.sleep();
+  rclcpp::sleep_for(std::chrono::seconds(4));
+
+  // Create collision object, in the way of servoing
+  moveit_msgs::msg::CollisionObject collision_object;
+  collision_object.header.frame_id = "panda_link0";
+  collision_object.id = "box";
+
+  shape_msgs::msg::SolidPrimitive box;
+  box.type = box.BOX;
+  box.dimensions = { 0.1, 0.4, 0.1 };
+
+  geometry_msgs::msg::Pose box_pose;
+  box_pose.position.x = 0.6;
+  box_pose.position.y = 0.0;
+  box_pose.position.z = 0.6;
+
+  collision_object.primitives.push_back(box);
+  collision_object.primitive_poses.push_back(box_pose);
+  collision_object.operation = collision_object.ADD;
+
+  moveit_msgs::msg::PlanningSceneWorld psw;
+  psw.collision_objects.push_back(collision_object);
+
+  moveit_msgs::msg::PlanningScene ps;
+  ps.world = psw;
+
+  // Publish the collision object to the planning scene
+  auto scene_pub = node->create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", 10);
+  scene_pub->publish(ps);
 
   // Create Servo and start it
   moveit_servo::Servo servo(node, servo_parameters, planning_scene_monitor);

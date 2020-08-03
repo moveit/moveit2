@@ -87,6 +87,7 @@ bool ServoServer::init()
     planning_scene_monitor_->startStateMonitor("/joint_states");
     planning_scene_monitor_->setPlanningScenePublishingFrequency(25);
     planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE, "/moveit_servo/publish_planning_scene");
+    planning_scene_monitor_->startSceneMonitor();
   }
   else
     RCLCPP_ERROR(LOGGER, "Planning scene not configured");
