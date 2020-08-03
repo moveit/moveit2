@@ -542,6 +542,9 @@ bool ServoCalcs::jointServoCalcs(const control_msgs::msg::JointJog& cmd,
 
   enforceSRDFAccelVelLimits(delta_theta_);
 
+  // If close to a collision, decelerate
+  applyVelocityScaling(delta_theta_, 1.0 /* scaling for singularities -- ignore for joint motions */);
+
   prev_joint_velocity_ = delta_theta_ / parameters_->publish_period;
 
   return convertDeltasToOutgoingCmd(joint_trajectory);
