@@ -97,16 +97,40 @@ int main(int argc, char** argv)
   }
   servo.start();
 
-  // Create a publisher for publishing the jog commands
-  auto pub = node->create_publisher<geometry_msgs::msg::TwistStamped>("servo_server/delta_twist_cmds", 10);
-  std::weak_ptr<std::remove_pointer<decltype(pub.get())>::type> captured_pub = pub;
+  // Create publisher for publishing a few joint commands
+  size_t count{0};
+  auto joint_pub = node->create_publisher<control_msgs::msg::JointJog>("servo_server/delta_joint_cmds", 10);
+  std::weak_ptr<std::remove_pointer<decltype(joint_pub.get())>::type> captured_twist_pub = joint_pub;
   std::weak_ptr<std::remove_pointer<decltype(node.get())>::type> captured_node = node;
-  auto callback = [captured_pub, captured_node]() -> void {
-      auto pub_ptr = captured_pub.lock();
+  auto joint_callback = [captured_twist_pub, captured_node, &count]() -> void {
+      auto pub_ptr = captured_twist_pub.lock();
       auto node_ptr = captured_node.lock();
       if (!pub_ptr || !node_ptr) {
         return;
       }
+      if(count > 100)
+        return;
+      auto msg = std::make_unique<control_msgs::msg::JointJog>();
+      msg->header.stamp = node_ptr->now();
+      msg->header.frame_id = "panda_link3";
+      msg->joint_names.push_back("panda_joint1");
+      msg->velocities.push_back(0.1);
+      pub_ptr->publish(std::move(msg));
+      ++count;
+    };
+  auto joint_timer = node->create_wall_timer(50ms, joint_callback);
+
+  // Create a publisher for publishing the twist commands
+  auto twist_pub = node->create_publisher<geometry_msgs::msg::TwistStamped>("servo_server/delta_twist_cmds", 10);
+  std::weak_ptr<std::remove_pointer<decltype(twist_pub.get())>::type> captured_joint_pub = twist_pub;
+  auto twist_callback = [captured_joint_pub, captured_node, &count]() -> void {
+      auto pub_ptr = captured_joint_pub.lock();
+      auto node_ptr = captured_node.lock();
+      if (!pub_ptr || !node_ptr) {
+        return;
+      }
+      if (count < 100)
+        return;
       auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
       msg->header.stamp = node_ptr->now();
       msg->header.frame_id = "panda_link0";
@@ -114,7 +138,7 @@ int main(int argc, char** argv)
       msg->twist.angular.z = 0.5;
       pub_ptr->publish(std::move(msg));
     };
-  auto timer = node->create_wall_timer(50ms, callback);
+  auto twist_timer = node->create_wall_timer(50ms, twist_callback);
 
   executor->add_node(node);
   

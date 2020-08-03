@@ -71,30 +71,7 @@ class ServoFixture : public ::testing::Test
 public:
   void SetUp() override
   {
-
-    /*
-    ROS Interfaces in the ServoFixture:
-
-    Subs:
-    collision check
-    joint states
-    tf?
-    servo status
-    command output topic
-
-    Pubs:
-    twist commands
-    joint commands
-
-    Service clients:
-    start
-    stop
-    pause
-    unpause
-    control dims
-    drift dims
-
-    */
+    // node_->set_parameter({"use_sim_time", true});
     executor_->add_node(node_);
     executor_task_fut_ = std::async(std::launch::async, [this]() {this->executor_->spin();});
   }
@@ -414,100 +391,6 @@ protected:
   mutable std::mutex latest_state_mutex_;
 };  // class ServoFixture
 
-// TEST_F(ServoFixture, StartStopTest)
-// {
-//   servo_->start();
-//   EXPECT_TRUE(waitForFirstStatus()) << "Timeout waiting for Status message";
-//   servo_->stop();
-
-//   ros::Duration(1.0).sleep();
-
-//   // Start and stop again
-//   servo_->start();
-//   EXPECT_TRUE(waitForFirstStatus()) << "Timeout waiting for Status message";
-//   servo_->stop();
-// }
-
-// TEST_F(ServoFixture, SendTwistStampedTest)
-// {
-//   servo_->start();
-//   EXPECT_TRUE(waitForFirstStatus()) << "Timeout waiting for Status message";
-
-//   auto parameters = servo_->getParameters();
-
-//   // count trajectory messages sent by servo
-//   size_t received_count = 0;
-//   boost::function<void(const trajectory_msgs::JointTrajectoryConstPtr&)> traj_callback =
-//       [&received_count](const trajectory_msgs::JointTrajectoryConstPtr& msg) { received_count++; };
-//   auto traj_sub = nh_.subscribe(parameters.command_out_topic, 1, traj_callback);
-
-//   // Create publisher to send servo commands
-//   auto twist_stamped_pub = nh_.advertise<geometry_msgs::TwistStamped>(parameters.cartesian_command_in_topic, 1);
-
-//   constexpr double test_duration = 1.0;
-//   const double publish_period = parameters.publish_period;
-//   const size_t num_commands = static_cast<size_t>(test_duration / publish_period);
-
-//   ros::Rate publish_rate(1. / publish_period);
-
-//   // Send a few Cartesian velocity commands
-//   for (size_t i = 0; i < num_commands && ros::ok(); ++i)
-//   {
-//     auto msg = moveit::util::make_shared_from_pool<geometry_msgs::TwistStamped>();
-//     msg->header.stamp = ros::Time::now();
-//     msg->header.frame_id = "panda_link0";
-//     msg->twist.angular.y = 1.0;
-
-//     // Send the message
-//     twist_stamped_pub.publish(msg);
-//     publish_rate.sleep();
-//   }
-
-//   EXPECT_GT(received_count, num_commands - 20);
-//   EXPECT_LT(received_count, num_commands + 20);
-//   servo_->stop();
-// }
-
-// TEST_F(ServoFixture, SendJointServoTest)
-// {
-//   servo_->start();
-//   EXPECT_TRUE(waitForFirstStatus()) << "Timeout waiting for Status message";
-
-//   auto parameters = servo_->getParameters();
-
-//   // count trajectory messages sent by servo
-//   size_t received_count = 0;
-//   boost::function<void(const trajectory_msgs::JointTrajectoryConstPtr&)> traj_callback =
-//       [&received_count](const trajectory_msgs::JointTrajectoryConstPtr& msg) { received_count++; };
-//   auto traj_sub = nh_.subscribe(parameters.command_out_topic, 1, traj_callback);
-
-//   // Create publisher to send servo commands
-//   auto joint_servo_pub = nh_.advertise<control_msgs::JointJog>(parameters.joint_command_in_topic, 1);
-
-//   constexpr double test_duration = 1.0;
-//   const double publish_period = parameters.publish_period;
-//   const size_t num_commands = static_cast<size_t>(test_duration / publish_period);
-
-//   ros::Rate publish_rate(1. / publish_period);
-
-//   // Send a few joint velocity commands
-//   for (size_t i = 0; i < num_commands && ros::ok(); ++i)
-//   {
-//     auto msg = moveit::util::make_shared_from_pool<control_msgs::JointJog>();
-//     msg->header.stamp = ros::Time::now();
-//     msg->header.frame_id = "panda_link3";
-//     msg->velocities.push_back(0.1);
-
-//     // Send the message
-//     joint_servo_pub.publish(msg);
-//     publish_rate.sleep();
-//   }
-
-//   EXPECT_GT(received_count, num_commands - 20);
-//   EXPECT_LT(received_count, num_commands + 20);
-//   servo_->stop();
-// }
-
 TEST_F(ServoFixture, StartStopTest)
 {
   // Setup the start/stop clients, and the command callback
@@ -607,6 +490,7 @@ TEST_F(ServoFixture, SendJointServoTest)
     auto msg = std::make_unique<control_msgs::msg::JointJog>();
     msg->header.stamp = node_->now();
     msg->header.frame_id = "panda_link3";
+    msg->joint_names.push_back("panda_joint1");
     msg->velocities.push_back(0.1);
     pub_joint_cmd_->publish(std::move(msg));
     loop_rate.sleep();
@@ -621,6 +505,44 @@ TEST_F(ServoFixture, SendJointServoTest)
   
   EXPECT_GT(num_recieved, 0.8*num_expected);
   EXPECT_LT(num_recieved, 1.1*num_expected);
+}
+
+TEST_F(ServoFixture, StaleCommandStop)
+{
+  ASSERT_TRUE(setupStartClient());
+  ASSERT_TRUE(setupCommandSub(parameters_->command_out_type));
+
+  // Start Servo
+  auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+  ASSERT_TRUE(start_result.get()->success);
+
+  // Setup the message to publish (only once)
+  auto msg = std::make_unique<control_msgs::msg::JointJog>();
+  msg->header.stamp = node_->now();
+  msg->joint_names.push_back("panda_joint1");
+  msg->header.frame_id = "panda_link3";
+  msg->velocities.push_back(0.1);
+
+  // Get current position
+  double start_position = getLatestTrajCommand().points[0].positions[0];
+  
+  // Publish once
+  pub_joint_cmd_->publish(std::move(msg));
+
+  // Wait the stale limit
+  const int sleep_time = 1000* parameters_->incoming_command_timeout;
+  rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
+  
+  // Get the new current position (should be different than first)
+  double middle_position = getLatestTrajCommand().points[0].positions[0];
+  EXPECT_NE(start_position, middle_position);
+
+  // Wait the stale limit
+  rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
+
+  // Get the current position (should be no change)
+  double end_position = getLatestTrajCommand().points[0].positions[0];
+  EXPECT_EQ(middle_position, end_position);
 }
 
 }  // namespace moveit_servo
