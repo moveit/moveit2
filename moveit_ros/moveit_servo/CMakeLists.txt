@@ -130,11 +130,24 @@ if(BUILD_TESTING)
   # End servo parameters launch test
 
   # Servo integration launch test
-  ament_add_gtest_executable(test_servo_integration test/servo_cpp_interface_test.cpp test/test_parameter_struct.hpp test/servo_launch_test_common.hpp)
+  ament_add_gtest_executable(test_servo_integration
+      test/servo_cpp_interface_test.cpp
+      test/test_parameter_struct.hpp
+      test/servo_launch_test_common.hpp
+  )
   ament_target_dependencies(test_servo_integration ${THIS_PACKAGE_INCLUDE_DEPENDS})
   add_ros_test(test/launch/test_servo_integration.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
   # end servo integration launch test
 
+  # Servo collision checking integration test
+  ament_add_gtest_executable(test_servo_collision
+        test/test_servo_collision.cpp
+        test/test_parameter_struct.hpp
+        test/servo_launch_test_common.hpp
+  )
+  ament_target_dependencies(test_servo_collision ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  add_ros_test(test/launch/test_servo_collision.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+# end servo collision checking integration test
 
 endif()
 
