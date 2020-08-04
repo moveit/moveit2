@@ -411,41 +411,11 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
                                      trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // Check for nan's in the incoming command
-  if (std::isnan(cmd.twist.linear.x) || std::isnan(cmd.twist.linear.y) || std::isnan(cmd.twist.linear.z) ||
-      std::isnan(cmd.twist.angular.x) || std::isnan(cmd.twist.angular.y) || std::isnan(cmd.twist.angular.z))
-  {
-    auto& clock = *node_->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                "nan in incoming command. Skipping this datapoint.");
+  if (!checkValidCommand(cmd))
     return false;
-  }
-
-  // If incoming commands should be in the range [-1:1], check for |delta|>1
-  if (parameters_->command_in_type == "unitless")
-  {
-    if ((fabs(cmd.twist.linear.x) > 1) || (fabs(cmd.twist.linear.y) > 1) || (fabs(cmd.twist.linear.z) > 1) ||
-        (fabs(cmd.twist.angular.x) > 1) || (fabs(cmd.twist.angular.y) > 1) || (fabs(cmd.twist.angular.z) > 1))
-    {
-      auto& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                  "Component of incoming command is >1. Skipping this datapoint.");
-      return false;
-    }
-  }
 
   // Set uncontrolled dimensions to 0 in command frame
-  if (!control_dimensions_[0])
-    cmd.twist.linear.x = 0;
-  if (!control_dimensions_[1])
-    cmd.twist.linear.y = 0;
-  if (!control_dimensions_[2])
-    cmd.twist.linear.z = 0;
-  if (!control_dimensions_[3])
-    cmd.twist.angular.x = 0;
-  if (!control_dimensions_[4])
-    cmd.twist.angular.y = 0;
-  if (!control_dimensions_[5])
-    cmd.twist.angular.z = 0;
+  enforceControlDimensions(cmd);
 
   // Transform the command to the MoveGroup planning frame
   if (cmd.header.frame_id != parameters_->planning_frame)
@@ -486,17 +456,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   // Convert from cartesian commands to joint commands
   Eigen::MatrixXd jacobian = kinematic_state_->getJacobian(joint_model_group_);
 
-  // May allow some dimensions to drift, based on drift_dimensions
-  // i.e. take advantage of task redundancy.
-  // Remove the Jacobian rows corresponding to True in the vector drift_dimensions
-  // Work backwards through the 6-vector so indices don't get out of order
-  for (auto dimension = jacobian.rows() - 1; dimension >= 0; --dimension)
-  {
-    if (drift_dimensions_[dimension] && jacobian.rows() > 1)
-    {
-      removeDimension(jacobian, delta_x, dimension);
-    }
-  }
+  removeDriftDimensions(jacobian, delta_x);
 
   Eigen::JacobiSVD<Eigen::MatrixXd> svd =
       Eigen::JacobiSVD<Eigen::MatrixXd>(jacobian, Eigen::ComputeThinU | Eigen::ComputeThinV);
@@ -504,77 +464,105 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   Eigen::MatrixXd pseudo_inverse = svd.matrixV() * matrix_s.inverse() * svd.matrixU().transpose();
 
   delta_theta_ = pseudo_inverse * delta_x;
+  delta_theta_ *= velocityScalingFactorForSingularity(delta_x, svd, pseudo_inverse);
 
-  enforceSRDFAccelVelLimits(delta_theta_);
-
-  // If close to a collision or a singularity, decelerate
-  applyVelocityScaling(delta_theta_, velocityScalingFactorForSingularity(delta_x, svd, pseudo_inverse));
-  if (status_ == StatusCode::HALT_FOR_COLLISION)
-  {
-    auto& clock = *node_->get_clock();
-    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                 "Halting for collision!");
-    delta_theta_.setZero();
-  }
-
-  prev_joint_velocity_ = delta_theta_ / parameters_->publish_period;
-
-  return convertDeltasToOutgoingCmd(joint_trajectory);
+  return internalServoUpdate(delta_theta_, joint_trajectory);
 }
 
 bool ServoCalcs::jointServoCalcs(const control_msgs::msg::JointJog& cmd,
                                  trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // Check for nan's
-  for (double velocity : cmd.velocities)
-  {
-    if (std::isnan(velocity))
-    {
-      auto& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                  "nan in incoming command. Skipping this datapoint.");
-      return false;
-    }
-  }
+  if (!checkValidCommand(cmd))
+    return false;
 
   // Apply user-defined scaling
   delta_theta_ = scaleJointCommand(cmd);
 
-  enforceSRDFAccelVelLimits(delta_theta_);
-
-  // If close to a collision, decelerate
-  applyVelocityScaling(delta_theta_, 1.0 /* scaling for singularities -- ignore for joint motions */);
-
-  prev_joint_velocity_ = delta_theta_ / parameters_->publish_period;
-
-  return convertDeltasToOutgoingCmd(joint_trajectory);
+  // Perform interal servo with the command
+  return internalServoUpdate(delta_theta_, joint_trajectory);
 }
 
-bool ServoCalcs::convertDeltasToOutgoingCmd(trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
+  // Set internal joint state from original
   internal_joint_state_ = original_joint_state_;
-  if (!addJointIncrements(internal_joint_state_, delta_theta_))
+
+  // Enforce SRDF Velocity, Acceleration limits
+  enforceSRDFAccelVelLimits(delta_theta);
+
+  // Apply collision scaling
+  double collision_scale = collision_velocity_scale_;
+  if (collision_scale > 0 && collision_scale < 1)
+  {
+    status_ = StatusCode::DECELERATE_FOR_COLLISION;
+    auto& clock = *node_->get_clock();
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                  SERVO_STATUS_CODE_MAP.at(status_));
+  }
+  else if (collision_scale == 0)
+  {
+    status_ = StatusCode::HALT_FOR_COLLISION;
+    auto& clock = *node_->get_clock();
+      RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                  "Halting for collision!");
+  }
+  delta_theta *= collision_scale;
+
+  // Loop thru joints and update them, calculate velocities, and filter
+  if (!applyJointUpdate(delta_theta, internal_joint_state_, prev_joint_velocity_))
     return false;
 
-  lowPassFilterPositions(internal_joint_state_);
+  // Mark the lowpass filters as updated for this cycle
+  updated_filters_ = true;
 
-  // Calculate joint velocities here so that positions are filtered and SRDF bounds still get checked
-  calculateJointVelocities(internal_joint_state_, delta_theta_);
-
+  // compose outgoing message
   composeJointTrajMessage(internal_joint_state_, joint_trajectory);
 
+  // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
   if (!enforceSRDFPositionLimits())
   {
     suddenHalt(joint_trajectory);
     status_ = StatusCode::JOINT_BOUND;
+    prev_joint_velocity_.setZero();
   }
 
-  // done with calculations
+    // Modify the output message if we are using gazebo
   if (parameters_->use_gazebo)
   {
     insertRedundantPointsIntoTrajectory(joint_trajectory, gazebo_redundant_message_count_);
   }
 
+  return true;
+}
+
+bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state, Eigen::ArrayXd& previous_vel)
+{
+  // All the sizes must match
+  if (joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
+      joint_state.velocity.size() != joint_state.position.size() ||
+      static_cast<std::size_t>(previous_vel.size()) != joint_state.position.size())
+  {
+    auto& clock = *node_->get_clock();
+      RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                  "Lengths of output and increments do not match.");
+    return false;
+  }
+
+  for (std::size_t i = 0; i < joint_state.position.size(); ++i)
+  {
+    // Increment joint
+    joint_state.position[i] += delta_theta[i];
+
+    // Lowpass filter position
+    joint_state.position[i] = position_filters_[i].filter(joint_state.position[i]);
+
+    // Calculate joint velocity
+    joint_state.velocity[i] = delta_theta[i] / parameters_->publish_period;
+
+    // Save this velocity for future accel calculations
+    previous_vel[i] = joint_state.velocity[i];
+  }
   return true;
 }
 
@@ -584,6 +572,8 @@ bool ServoCalcs::convertDeltasToOutgoingCmd(trajectory_msgs::msg::JointTrajector
 void ServoCalcs::insertRedundantPointsIntoTrajectory(trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                                                      int count) const
 {
+  if (count < 2)
+    return;
   joint_trajectory.points.resize(count);
   auto point = joint_trajectory.points[0];
   // Start from 2 because we already have the first point. End at count+1 so (total #) == count
@@ -594,16 +584,6 @@ void ServoCalcs::insertRedundantPointsIntoTrajectory(trajectory_msgs::msg::Joint
   }
 }
 
-void ServoCalcs::lowPassFilterPositions(sensor_msgs::msg::JointState& joint_state)
-{
-  for (size_t i = 0; i < position_filters_.size(); ++i)
-  {
-    joint_state.position[i] = position_filters_[i].filter(joint_state.position[i]);
-  }
-
-  updated_filters_ = true;
-}
-
 void ServoCalcs::resetLowPassFilters(const sensor_msgs::msg::JointState& joint_state)
 {
   for (std::size_t i = 0; i < position_filters_.size(); ++i)
@@ -612,14 +592,6 @@ void ServoCalcs::resetLowPassFilters(const sensor_msgs::msg::JointState& joint_s
   }
 
   updated_filters_ = true;
-}
-
-void ServoCalcs::calculateJointVelocities(sensor_msgs::msg::JointState& joint_state, const Eigen::ArrayXd& delta_theta)
-{
-  for (int i = 0; i < delta_theta.size(); ++i)
-  {
-    joint_state.velocity[i] = delta_theta[i] / parameters_->publish_period;
-  }
 }
 
 void ServoCalcs::composeJointTrajMessage(const sensor_msgs::msg::JointState& joint_state,
@@ -644,32 +616,6 @@ void ServoCalcs::composeJointTrajMessage(const sensor_msgs::msg::JointState& joi
     point.accelerations = acceleration;
   }
   joint_trajectory.points.push_back(point);
-}
-
-// Apply velocity scaling for proximity of collisions and singularities.
-void ServoCalcs::applyVelocityScaling(Eigen::ArrayXd& delta_theta, double singularity_scale)
-{
-  double collision_scale = collision_velocity_scale_;
-
-  if (collision_scale > 0 && collision_scale < 1)
-  {
-    status_ = StatusCode::DECELERATE_FOR_COLLISION;
-    auto& clock = *node_->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                SERVO_STATUS_CODE_MAP.at(status_));
-  }
-  else if (collision_scale == 0)
-  {
-    status_ = StatusCode::HALT_FOR_COLLISION;
-  }
-
-  delta_theta = collision_scale * singularity_scale * delta_theta;
-
-  if (status_ == StatusCode::HALT_FOR_COLLISION)
-  {
-    ROS_WARN_STREAM_THROTTLE_NAMED(3, LOGNAME, "Halting for collision!");
-    delta_theta_.setZero();
-  }
 }
 
 // Possibly calculate a velocity scaling factor, due to proximity of singularity and direction of motion
@@ -748,72 +694,77 @@ void ServoCalcs::enforceSRDFAccelVelLimits(Eigen::ArrayXd& delta_theta)
   Eigen::ArrayXd velocity = delta_theta / parameters_->publish_period;
   const Eigen::ArrayXd acceleration = (velocity - prev_joint_velocity_) / parameters_->publish_period;
 
-  std::size_t joint_delta_index = 0;
+  std::size_t i = 0;
   for (auto joint : joint_model_group_->getActiveJointModels())
   {
     // Some joints do not have bounds defined
     const auto bounds = joint->getVariableBounds(joint->getName());
-    if (bounds.acceleration_bounded_)
-    {
-      bool clip_acceleration = false;
-      double acceleration_limit = 0.0;
-      if (acceleration(joint_delta_index) < bounds.min_acceleration_)
-      {
-        clip_acceleration = true;
-        acceleration_limit = bounds.min_acceleration_;
-      }
-      else if (acceleration(joint_delta_index) > bounds.max_acceleration_)
-      {
-        clip_acceleration = true;
-        acceleration_limit = bounds.max_acceleration_;
-      }
+    enforceSingleVelAccelLimit(bounds, velocity[i], prev_joint_velocity_[i], acceleration[i], delta_theta[i]);
+    ++i;
+  }
+}
 
-      // Apply acceleration bounds
-      if (clip_acceleration)
-      {
-        // accel = (vel - vel_prev) / delta_t = ((delta_theta / delta_t) - vel_prev) / delta_t
-        // --> delta_theta = (accel * delta_t _ + vel_prev) * delta_t
-        const double relative_change =
-            ((acceleration_limit * parameters_->publish_period + prev_joint_velocity_(joint_delta_index)) *
-             parameters_->publish_period) /
-            delta_theta(joint_delta_index);
-        // Avoid nan
-        if (fabs(relative_change) < 1)
-          delta_theta(joint_delta_index) = relative_change * delta_theta(joint_delta_index);
-      }
+void ServoCalcs::enforceSingleVelAccelLimit(const moveit::core::VariableBounds& bound, double& vel, const double& prev_vel, const double& accel, double& delta)
+{
+  if (bound.acceleration_bounded_)
+  {
+    bool clip_acceleration = false;
+    double acceleration_limit = 0.0;
+    if (accel < bound.min_acceleration_)
+    {
+      clip_acceleration = true;
+      acceleration_limit = bound.min_acceleration_;
+    }
+    else if (accel > bound.max_acceleration_)
+    {
+      clip_acceleration = true;
+      acceleration_limit = bound.max_acceleration_;
     }
 
-    if (bounds.velocity_bounded_)
+    // Apply acceleration bounds
+    if (clip_acceleration)
     {
-      velocity(joint_delta_index) = delta_theta(joint_delta_index) / parameters_->publish_period;
+      // accel = (vel - vel_prev) / delta_t = ((delta_theta / delta_t) - vel_prev) / delta_t
+      // --> delta_theta = (accel * delta_t _ + vel_prev) * delta_t
+      const double relative_change =
+          ((acceleration_limit * parameters_->publish_period + prev_vel) *
+            parameters_->publish_period) /
+          delta;
+      // Avoid nan
+      if (fabs(relative_change) < 1)
+        delta = relative_change * delta;
+    }
+  }
 
-      bool clip_velocity = false;
-      double velocity_limit = 0.0;
-      if (velocity(joint_delta_index) < bounds.min_velocity_)
-      {
-        clip_velocity = true;
-        velocity_limit = bounds.min_velocity_;
-      }
-      else if (velocity(joint_delta_index) > bounds.max_velocity_)
-      {
-        clip_velocity = true;
-        velocity_limit = bounds.max_velocity_;
-      }
+  if (bound.velocity_bounded_)
+  {
+    vel = delta / parameters_->publish_period;
 
-      // Apply velocity bounds
-      if (clip_velocity)
+    bool clip_velocity = false;
+    double velocity_limit = 0.0;
+    if (vel < bound.min_velocity_)
+    {
+      clip_velocity = true;
+      velocity_limit = bound.min_velocity_;
+    }
+    else if (vel > bound.max_velocity_)
+    {
+      clip_velocity = true;
+      velocity_limit = bound.max_velocity_;
+    }
+
+    // Apply velocity bounds
+    if (clip_velocity)
+    {
+      // delta_theta = joint_velocity * delta_t
+      const double relative_change = (velocity_limit * parameters_->publish_period) / delta;
+      // Avoid nan
+      if (fabs(relative_change) < 1)
       {
-        // delta_theta = joint_velocity * delta_t
-        const double relative_change = (velocity_limit * parameters_->publish_period) / delta_theta(joint_delta_index);
-        // Avoid nan
-        if (fabs(relative_change) < 1)
-        {
-          delta_theta(joint_delta_index) = relative_change * delta_theta(joint_delta_index);
-          velocity(joint_delta_index) = relative_change * velocity(joint_delta_index);
-        }
+        delta = relative_change * delta;
+        vel = relative_change * vel;
       }
     }
-    ++joint_delta_index;
   }
 }
 
@@ -968,10 +919,53 @@ bool ServoCalcs::calculateWorstCaseStopTime()
   return true;
 }
 
+bool ServoCalcs::checkValidCommand(const control_msgs::msg::JointJog& cmd)
+{
+  for (double velocity : cmd.velocities)
+  {
+    if (std::isnan(velocity))
+    {
+      auto& clock = *node_->get_clock();
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                  "nan in incoming command. Skipping this datapoint.");
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ServoCalcs::checkValidCommand(const geometry_msgs::msg::TwistStamped& cmd)
+{
+  if (std::isnan(cmd.twist.linear.x) || std::isnan(cmd.twist.linear.y) || std::isnan(cmd.twist.linear.z) ||
+      std::isnan(cmd.twist.angular.x) || std::isnan(cmd.twist.angular.y) || std::isnan(cmd.twist.angular.z))
+  {
+    auto& clock = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                "nan in incoming command. Skipping this datapoint.");
+    return false;
+  }
+
+  // If incoming commands should be in the range [-1:1], check for |delta|>1
+  if (parameters_->command_in_type == "unitless")
+  {
+    if ((fabs(cmd.twist.linear.x) > 1) || (fabs(cmd.twist.linear.y) > 1) || (fabs(cmd.twist.linear.z) > 1) ||
+        (fabs(cmd.twist.angular.x) > 1) || (fabs(cmd.twist.angular.y) > 1) || (fabs(cmd.twist.angular.z) > 1))
+    {
+      auto& clock = *node_->get_clock();
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                  "Component of incoming command is >1. Skipping this datapoint.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // Scale the incoming jog command
 Eigen::VectorXd ServoCalcs::scaleCartesianCommand(const geometry_msgs::msg::TwistStamped& command)
 {
   Eigen::VectorXd result(6);
+  result.setZero(); // Or the else case below leads to misery
 
   // Apply user-defined scaling if inputs are unitless [-1:1]
   if (parameters_->command_in_type == "unitless")
@@ -1039,28 +1033,6 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
   return result;
 }
 
-// Add the deltas to each joint
-bool ServoCalcs::addJointIncrements(sensor_msgs::msg::JointState& output, const Eigen::VectorXd& increments)
-{
-  for (std::size_t i = 0, size = static_cast<std::size_t>(increments.size()); i < size; ++i)
-  {
-    try
-    {
-      output.position[i] += increments[i];
-    }
-    catch (const std::out_of_range& e)
-    {
-      auto& clock = *node_->get_clock();
-      RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                   node_->get_name() << " Lengths of output and "
-                                                       "increments do not match.");
-      return false;
-    }
-  }
-
-  return true;
-}
-
 void ServoCalcs::removeDimension(Eigen::MatrixXd& jacobian, Eigen::VectorXd& delta_x, unsigned int row_to_remove) const
 {
   unsigned int num_rows = jacobian.rows() - 1;
@@ -1075,6 +1047,38 @@ void ServoCalcs::removeDimension(Eigen::MatrixXd& jacobian, Eigen::VectorXd& del
   }
   jacobian.conservativeResize(num_rows, num_cols);
   delta_x.conservativeResize(num_rows);
+}
+
+void ServoCalcs::removeDriftDimensions(Eigen::MatrixXd& matrix, Eigen::VectorXd& delta_x)
+{
+  // May allow some dimensions to drift, based on drift_dimensions
+  // i.e. take advantage of task redundancy.
+  // Remove the Jacobian rows corresponding to True in the vector drift_dimensions
+  // Work backwards through the 6-vector so indices don't get out of order
+  for (auto dimension = matrix.rows() - 1; dimension >= 0; --dimension)
+  {
+    if (drift_dimensions_[dimension] && matrix.rows() > 1)
+    {
+      removeDimension(matrix, delta_x, dimension);
+    }
+  }
+}
+
+void ServoCalcs::enforceControlDimensions(geometry_msgs::msg::TwistStamped& command)
+{
+  // Can't loop through the message, so check them all
+  if (!control_dimensions_[0])
+    command.twist.linear.x = 0;
+  if (!control_dimensions_[1])
+    command.twist.linear.y = 0;
+  if (!control_dimensions_[2])
+    command.twist.linear.z = 0;
+  if (!control_dimensions_[3])
+    command.twist.angular.x = 0;
+  if (!control_dimensions_[4])
+    command.twist.angular.y = 0;
+  if (!control_dimensions_[5])
+    command.twist.angular.z = 0;
 }
 
 void ServoCalcs::jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg)

@@ -89,7 +89,7 @@ public:
   /** \brief Get the latest joint state */
   sensor_msgs::msg::JointState::ConstSharedPtr getLatestJointState() const;
 
-private:
+protected:
   /** \brief Timer method */
   void run();  // TODO(adamp): come back and pass a timer event here?
 
@@ -106,6 +106,20 @@ private:
   /** \brief Finds the worst case stopping time based on accel limits, for collision checking */
   bool calculateWorstCaseStopTime();
 
+  /**
+   * Checks a JointJog msg for valid (non-NaN) velocities
+   * @param cmd the desired joint servo command
+   * @return true if this represents a valid joint servo command, false otherwise
+   */
+  bool checkValidCommand(const control_msgs::msg::JointJog& cmd);
+
+  /**
+   * Checks a TwistStamped msg for valid (non-NaN) velocities
+   * @param cmd the desired twist servo command
+   * @return true if this represents a valid servo twist command, false otherwise
+   */
+  bool checkValidCommand(const geometry_msgs::msg::TwistStamped& cmd);
+
   /** \brief If incoming velocity commands are from a unitless joystick, scale them to physical units.
    * Also, multiply by timestep to calculate a position change.
    */
@@ -116,8 +130,6 @@ private:
    */
   Eigen::VectorXd scaleJointCommand(const control_msgs::msg::JointJog& command);
 
-  bool addJointIncrements(sensor_msgs::msg::JointState& output, const Eigen::VectorXd& increments);
-
   /** \brief Suddenly halt for a joint limit or other critical issue.
    * Is handled differently for position vs. velocity control.
    */
@@ -125,6 +137,15 @@ private:
 
   /** \brief  Scale the delta theta to match joint velocity/acceleration limits */
   void enforceSRDFAccelVelLimits(Eigen::ArrayXd& delta_theta);
+
+  /** \brief Enforces the velocity and acceleration limit for one joint delta_theta
+   * @param bound moveit::core::VariableBounds defining the velocity and acceleration limits for a joint
+   * @param vel The current (calculated) velocity of the joint
+   * @param prev_vel The previous (calculated) velocity of the joint
+   * @param accel The current (calculated) acceleration of the joint
+   * @param delta The desired change in joint angle, that will be changed to be within limits
+   */
+  void enforceSingleVelAccelLimit(const moveit::core::VariableBounds& bound, double& vel, const double& prev_vel, const double& accel, double& delta);
 
   /** \brief Avoid overshooting joint limits */
   bool enforceSRDFPositionLimits();
@@ -136,30 +157,29 @@ private:
                                              const Eigen::JacobiSVD<Eigen::MatrixXd>& svd,
                                              const Eigen::MatrixXd& pseudo_inverse);
 
-  /**
-   * Slow motion down if close to singularity or collision.
-   * @param delta_theta motion command, used in calculating new_joint_tray
-   * @param singularity_scale tells how close we are to a singularity
-   */
-  void applyVelocityScaling(Eigen::ArrayXd& delta_theta, double singularity_scale);
-
   /** \brief Compose the outgoing JointTrajectory message */
   void composeJointTrajMessage(const sensor_msgs::msg::JointState& joint_state,
                                trajectory_msgs::msg::JointTrajectory& joint_trajectory);
 
-  /** \brief Smooth position commands with a lowpass filter */
-  void lowPassFilterPositions(sensor_msgs::msg::JointState& joint_state);
-
   /** \brief Set the filters to the specified values */
   void resetLowPassFilters(const sensor_msgs::msg::JointState& joint_state);
 
-  /** \brief Convert an incremental position command to joint velocity message */
-  void calculateJointVelocities(sensor_msgs::msg::JointState& joint_state, const Eigen::ArrayXd& delta_theta);
-
-  /** \brief Convert joint deltas to an outgoing JointTrajectory command.
-   * This happens for joint commands and Cartesian commands.
+  /** \brief Handles all aspects of the servoing after the desired joint commands are established
+   * Joint and Cartesian calcs feed into here
+   * Handles limit enforcement, internal state updated, collision scaling, and publishing the commands
+   * @param delta_theta Eigen vector of joint delta's, from joint or Cartesian servo calcs
+   * @param joint_trajectory Output trajectory message
    */
-  bool convertDeltasToOutgoingCmd(trajectory_msgs::msg::JointTrajectory& joint_trajectory);
+  bool internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory);
+
+/** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
+   * Also calculates the previous velocity
+   * @param delta_theta Eigen vector of joint delta's
+   * @param joint_state The joint state msg being updated
+   * @param previous_vel Eigen vector of previous velocities being updated
+   * @return Returns false if there is a problem, true otherwise
+   */
+  bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state, Eigen::ArrayXd& previous_vel);
 
   /** \brief Gazebo simulations have very strict message timestamp requirements.
    * Satisfy Gazebo by stuffing multiple messages into one.
@@ -174,6 +194,21 @@ private:
    * @param row_to_remove Dimension that will be allowed to drift, e.g. row_to_remove = 2 allows z-translation drift.
    */
   void removeDimension(Eigen::MatrixXd& matrix, Eigen::VectorXd& delta_x, unsigned int row_to_remove) const;
+
+  /**
+   * Removes all of the drift dimensions from the jacobian and delta-x element
+   *
+   * @param matrix The Jacobian matrix.
+   * @param delta_x Vector of Cartesian delta commands, should be the same size as matrix.rows()
+   */
+  void removeDriftDimensions(Eigen::MatrixXd& matrix, Eigen::VectorXd& delta_x);
+
+  /**
+   * Uses control_dimensions_ to set the incoming twist command values to 0 in uncontrolled directions
+   *
+   * @param command TwistStamped msg being used in the Cartesian calcs process
+   */
+  void enforceControlDimensions(geometry_msgs::msg::TwistStamped& command);
 
   /* \brief Callback for joint subsription */
   void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
