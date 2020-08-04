@@ -48,6 +48,9 @@
 #include <boost/filesystem/path.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include "test_parameter_struct.hpp"
+#include "unit_test_servo_calcs.hpp"
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.unit_test_servo_calcs.cpp");
 
 void loadModelFile(std::string filename, std::string& file_content)
 {
@@ -66,49 +69,212 @@ void loadModelFile(std::string filename, std::string& file_content)
   file_content = xml_string;
 }
 
-std::vector<std::string> joint_names_{"panda_finger_joint1", "panda_finger_joint2", "panda_joint1", "panda_joint2"
-    "panda_joint3", "panda_joint4", "panda_joint5", "panda_joint6", "panda_joint7"};
+FriendServoCalcs::FriendServoCalcs(const rclcpp::Node::SharedPtr& node, const moveit_servo::ServoParametersPtr& parameters,
+             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+: ServoCalcs(node, parameters, planning_scene_monitor) {}
 
-TEST(MOVEIT_SERVO, InitialTest)
+ServoCalcsTestFixture::ServoCalcsTestFixture()
+: node_(std::make_shared<rclcpp::Node>("servo_calcs_test"))
 {
-  auto node = std::make_shared<rclcpp::Node>("test_servo");
+  // "Load" parameters from yaml as node parameters
   std::string robot_description_string, srdf_string;
   loadModelFile("panda_description/urdf/panda.urdf", robot_description_string);
   loadModelFile("panda_moveit_config/config/panda.srdf", srdf_string);
+  node_->declare_parameter<std::string>("robot_description", robot_description_string);
+  node_->declare_parameter<std::string>("robot_description_semantic", srdf_string);
 
-  node->declare_parameter<std::string>("robot_description", robot_description_string);
-  node->declare_parameter<std::string>("robot_description_semantic", srdf_string);
+  // Startup planning_scene_monitor
+  tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
+  psm_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, "robot_description", tf_buffer_, "planning_scene_monitor");
 
-  auto tf_buffer = std::make_shared<tf2_ros::Buffer>(node->get_clock());
-
-  auto planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node, "robot_description", tf_buffer, "planning_scene_monitor");
-
-  RCLCPP_WARN_STREAM(node->get_logger(), "Test Point 1");
-
-  // EXPECT_TRUE(planning_scene_monitor->getPlanningScene());
-  EXPECT_TRUE(5==5);
-  planning_scene_monitor->startStateMonitor("/joint_states");
-  RCLCPP_WARN_STREAM(node->get_logger(), "Test Point 2");
-
+  // Get moveit parameters
   moveit_servo::ServoParametersPtr test_params = getTestParameters();
-  RCLCPP_WARN_STREAM(node->get_logger(), "Test Point 3");
 
-  // moveit_servo::Servo servo(node, test_params, planning_scene_monitor);
-  auto servo_calcs = std::make_unique<moveit_servo::ServoCalcs>(node, test_params, planning_scene_monitor);
-  // auto joint_state_pub = node->create_publisher<sensor_msgs::msg::JointState>("/joint_states", 10);
-  // auto init_joint_state_msg = std::make_unique<sensor_msgs::msg::JointState>();
-  // init_joint_state_msg.get()->header.stamp = node->now();
-  // RCLCPP_WARN_STREAM(node->get_logger(), "Test Point 4");
+  // Set up the servo_calcs object
+  servo_calcs_ = std::make_unique<FriendServoCalcs>(node_, test_params, psm_);
+}
 
-  // auto returned_params = servo.getParameters();
-  // RCLCPP_WARN_STREAM(node->get_logger(), "Test Point 5");
+void ServoCalcsTestFixture::SetUp()
+{
+  // do stuff
+}
 
-  // // EXPECT_TRUE(*returned_params == *test_params);
-  // EXPECT_TRUE(true);
-  // RCLCPP_WARN_STREAM(node->get_logger(), "Test Point 6");
+void ServoCalcsTestFixture::TearDown()
+{
+  // Do other stuff
+}
 
-  EXPECT_TRUE(5 == 5);
+TEST_F(ServoCalcsTestFixture, TestRemoveSingleDimension)
+{
+  int rows = 6;
+  int cols = 7;
 
+  // Create a matrix and vector, set one value so we can track the removal was correct
+  Eigen::MatrixXd matrix(rows, cols);
+  matrix.setZero();
+  matrix(2,0) = 4.0;
+  Eigen::VectorXd vector(rows);
+  vector.setZero();
+  vector(2) = 4.0;
+
+  // Remove the second row
+  servo_calcs_->removeDimension(matrix, vector, 1);
+
+  // Size should be reduced, and the set values should have moved up
+  EXPECT_EQ(matrix.rows(), rows-1);
+  EXPECT_EQ(vector.size(), rows-1);
+  EXPECT_EQ(matrix(1,0), 4.0);
+  EXPECT_EQ(vector(1), 4.0);
+
+  // Remove the last row
+  servo_calcs_->removeDimension(matrix, vector, 4);
+
+  // Size should be reduced, but the set values should not move
+  EXPECT_EQ(matrix.rows(), rows-2);
+  EXPECT_EQ(vector.size(), rows-2);
+  EXPECT_EQ(matrix(1,0), 4.0);
+  EXPECT_EQ(vector(1), 4.0);
+
+  // Sanity check that the columns stayed the same
+  EXPECT_EQ(matrix.cols(), cols);
+}
+
+TEST_F(ServoCalcsTestFixture, TestRemoveDriftDimensions)
+{
+  int rows = 6;
+  int cols = 7;
+
+  // Create a matrix and vector, set one value so we can track the removal was correct
+  Eigen::MatrixXd matrix(rows, cols);
+  matrix.setZero();
+  matrix(2,0) = 4.0;
+  Eigen::VectorXd vector(rows);
+  vector.setZero();
+  vector(2) = 4.0;
+
+  // Remove with default drift_dimensions_ values should not change
+  servo_calcs_->removeDriftDimensions(matrix, vector);
+  EXPECT_EQ(matrix.rows(), rows);
+  EXPECT_EQ(matrix.cols(), cols);
+  EXPECT_EQ(vector.size(), rows);
+  EXPECT_EQ(matrix(2,0), 4.0);
+  EXPECT_EQ(vector(2), 4.0);
+
+  // Set drift_dimensions_ to be something with True's in it
+  servo_calcs_->drift_dimensions_[0] = true;
+  servo_calcs_->drift_dimensions_[1] = true;
+  servo_calcs_->drift_dimensions_[5] = true;
+
+  // Now a remove should have changes
+  servo_calcs_->removeDriftDimensions(matrix, vector);
+  EXPECT_EQ(matrix.rows(), rows-3);
+  EXPECT_EQ(matrix.cols(), cols);
+  EXPECT_EQ(vector.size(), rows-3);
+  EXPECT_EQ(matrix(0,0), 4.0);
+  EXPECT_EQ(vector(0), 4.0);
+}
+
+TEST_F(ServoCalcsTestFixture, TestEnforceControlDimensions)
+{
+  // Create a TwistStamped message to test with
+  geometry_msgs::msg::TwistStamped msg;
+  msg.twist.linear.x = 1.0;
+  msg.twist.linear.y = 2.0;
+  msg.twist.linear.z = 3.0;
+  msg.twist.angular.x = 4.0;
+  msg.twist.angular.y = 5.0;
+  msg.twist.angular.z = 6.0;
+  geometry_msgs::msg::TwistStamped init_copy = msg;
+
+  // Enforcing with the default values should not change anything
+  servo_calcs_->enforceControlDimensions(msg);
+  EXPECT_EQ(msg, init_copy);
+
+  // Lets set the whole array to false and make sure each value is changed to 0
+  for (size_t i=0; i<6; ++i)
+  {
+    servo_calcs_->control_dimensions_[i] = false;
+  }
+  geometry_msgs::msg::TwistStamped empty_msg;
+  servo_calcs_->enforceControlDimensions(msg);
+  EXPECT_EQ(msg, empty_msg);
+}
+
+TEST_F(ServoCalcsTestFixture, TestCheckValidCommand)
+{
+  // Create a valid JointJog message and test it
+  control_msgs::msg::JointJog joint_msg;
+  joint_msg.velocities.push_back(1.0);
+  EXPECT_TRUE(servo_calcs_->checkValidCommand(joint_msg));
+
+  // Now give it a NaN and check again
+  joint_msg.velocities.push_back(NAN);
+  EXPECT_FALSE(servo_calcs_->checkValidCommand(joint_msg));
+
+  // Create a valid TwistStamped message and test it
+  geometry_msgs::msg::TwistStamped twist_msg;
+  twist_msg.twist.linear.x = 1.0;
+  EXPECT_TRUE(servo_calcs_->checkValidCommand(twist_msg));
+
+  // Now give it a NaN and check again
+  twist_msg.twist.linear.y = NAN;
+  EXPECT_FALSE(servo_calcs_->checkValidCommand(twist_msg));
+}
+
+TEST_F(ServoCalcsTestFixture, TestApplyJointUpdate)
+{
+  // Create Eigen arrays for testing
+  Eigen::ArrayXd deltas(3);
+  deltas[0] = 1.0;
+  deltas[1] = 2.0;
+  deltas[2] = 3.0;
+  Eigen::ArrayXd prev_vel(3);
+  prev_vel.setZero();
+
+  // Test catching size mismatches
+  sensor_msgs::msg::JointState joint_state;
+  EXPECT_FALSE(servo_calcs_->applyJointUpdate(deltas, joint_state, prev_vel));
+
+  // Now test it with properly sized arrays
+  joint_state.position.assign(3, 10.0);
+  joint_state.velocity.assign(3, 0);
+  EXPECT_TRUE(servo_calcs_->applyJointUpdate(deltas, joint_state, prev_vel));
+
+  // Can't test equality on the position because of filtering
+  EXPECT_NE(joint_state.position[0], 10);
+  EXPECT_NE(joint_state.position[2], 10);
+
+  // Velocities should match though
+  EXPECT_EQ(joint_state.velocity[0], deltas[0]/servo_calcs_->parameters_->publish_period);
+  EXPECT_EQ(joint_state.velocity[2], deltas[2]/servo_calcs_->parameters_->publish_period);
+  EXPECT_EQ(joint_state.velocity[0], prev_vel[0]);
+}
+
+TEST_F(ServoCalcsTestFixture, TestInsertRedundantPoints)
+{
+  // Create a joint trajectory message for testing
+  trajectory_msgs::msg::JointTrajectory joint_traj;
+  trajectory_msgs::msg::JointTrajectoryPoint point;
+  point.positions.push_back(1.0);
+  point.positions.push_back(2.0);
+  point.velocities.push_back(3.0);
+  point.velocities.push_back(4.0);
+  joint_traj.points.push_back(point);
+
+  auto init_copy = joint_traj;
+
+  // Test for count 0 and 1, this should leave the message unchanged
+  servo_calcs_->insertRedundantPointsIntoTrajectory(joint_traj, 0);
+  EXPECT_EQ(joint_traj, init_copy);
+  servo_calcs_->insertRedundantPointsIntoTrajectory(joint_traj, 1);
+  EXPECT_EQ(joint_traj, init_copy);
+
+  // Test for a more reasonable count
+  size_t count = 10;
+  servo_calcs_->insertRedundantPointsIntoTrajectory(joint_traj, count);
+  EXPECT_NE(joint_traj, init_copy);
+  EXPECT_EQ(joint_traj.points.size(), count);
+  EXPECT_EQ(joint_traj.points[0].positions, joint_traj.points.back().positions);
 }
 
 int main(int argc, char ** argv)
@@ -120,13 +286,3 @@ int main(int argc, char ** argv)
   rclcpp::shutdown();
   return ret;
 }
-
-// TEST(MOVEIT_SERVO, FilterReset)
-// {
-//   moveit_servo::LowPassFilter lpf(2.0);
-//   EXPECT_DOUBLE_EQ(0.0, lpf.filter(0.0));
-//   lpf.reset(5.0);
-//   double value = lpf.filter(5.0);
-//   EXPECT_DOUBLE_EQ(5.0, value);
-//   EXPECT_NE(5.0, lpf.filter(100.0));
-// }
