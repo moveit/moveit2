@@ -104,6 +104,21 @@ void ServoCalcsTestFixture::TearDown()
   // Do other stuff
 }
 
+sensor_msgs::msg::JointState ServoCalcsTestFixture::getJointState(std::vector<double> pos, std::vector<double> vel)
+{
+  sensor_msgs::msg::JointState msg;
+  std::vector<double> effort;
+  effort.assign(9,0);
+
+  msg.name = panda_joint_names_;
+  msg.position = pos;
+  msg.velocity = vel;
+  msg.effort = effort;
+  msg.header.stamp = node_->now();
+
+  return msg;
+}
+
 TEST_F(ServoCalcsTestFixture, TestRemoveSingleDimension)
 {
   int rows = 6;
@@ -275,6 +290,106 @@ TEST_F(ServoCalcsTestFixture, TestInsertRedundantPoints)
   EXPECT_NE(joint_traj, init_copy);
   EXPECT_EQ(joint_traj.points.size(), count);
   EXPECT_EQ(joint_traj.points[0].positions, joint_traj.points.back().positions);
+}
+
+TEST_F(ServoCalcsTestFixture, TestSuddenHalt)
+{
+  // We need to set up some ServoCalcs members
+  servo_calcs_->num_joints_ = 3;
+  servo_calcs_->original_joint_state_.position.push_back(1.0);
+  servo_calcs_->original_joint_state_.position.push_back(2.0);
+  servo_calcs_->original_joint_state_.position.push_back(3.0);
+
+  // Let's make sure to test publishing position and velocity
+  servo_calcs_->parameters_->publish_joint_positions = true;
+  servo_calcs_->parameters_->publish_joint_velocities = true;
+
+  // Let's start with an empty trajectory
+  trajectory_msgs::msg::JointTrajectory msg;
+  servo_calcs_->suddenHalt(msg);
+  EXPECT_TRUE(msg.points.size() == 1);
+  EXPECT_TRUE(msg.points[0].positions.size() == 3);
+  EXPECT_TRUE(msg.points[0].velocities.size() == 3);
+  EXPECT_EQ(msg.points[0].positions[2], 3.0);
+  EXPECT_EQ(msg.points[0].velocities[2], 0.0);
+
+  // Now if we change those values and call it again, they should go back
+  msg.points[0].positions[2] = 100.0;
+  msg.points[0].velocities[2] = 100.0;
+  servo_calcs_->suddenHalt(msg);
+  EXPECT_EQ(msg.points[0].positions[2], 3.0);
+  EXPECT_EQ(msg.points[0].velocities[2], 0.0);
+}
+
+TEST_F(ServoCalcsTestFixture, TestEnforcePosLimits)
+{
+  // Set the position to the upper limits
+  std::vector<double> position{0,0,2.8973,1.7628,2.8973,0.0175,2.8973,3.7525,2.8973};
+  std::vector<double> velocity;
+  velocity.assign(9,1.0);
+
+  // Set the position in the ServoCalcs object
+  sensor_msgs::msg::JointState joint_state = getJointState(position, velocity);
+  servo_calcs_->original_joint_state_ = joint_state;
+  servo_calcs_->kinematic_state_->setVariableValues(joint_state);
+
+  // Test here, expecting to be violating joint position limits
+  EXPECT_FALSE(servo_calcs_->enforceSRDFPositionLimits());
+
+  // At the upper limits with negative velocity, we should not be 'violating'
+  velocity.assign(9,-1.0);
+  joint_state = getJointState(position, velocity);
+  servo_calcs_->original_joint_state_ = joint_state;
+  servo_calcs_->kinematic_state_->setVariableValues(joint_state);
+  EXPECT_TRUE(servo_calcs_->enforceSRDFPositionLimits());
+
+  // However, if we change 1 of the joints to the bottom limit and stay negative velocity
+  // We expect to violate joint position limits again
+  position[2] = -2.8973;
+  joint_state = getJointState(position, velocity);
+  servo_calcs_->original_joint_state_ = joint_state;
+  servo_calcs_->kinematic_state_->setVariableValues(joint_state);
+  EXPECT_FALSE(servo_calcs_->enforceSRDFPositionLimits());
+
+  // For completeness, we'll set the position to lower limits with positive vel and expect a pass
+  std::vector<double> lower_position{0,0,-2.8973,-1.7628,-2.8973,-3.0718,-2.8973,-0.0175,-2.8973};
+  velocity.assign(9,1.0);
+  joint_state = getJointState(lower_position, velocity);
+  servo_calcs_->original_joint_state_ = joint_state;
+  servo_calcs_->kinematic_state_->setVariableValues(joint_state);
+  EXPECT_TRUE(servo_calcs_->enforceSRDFPositionLimits());
+}
+
+TEST_F(ServoCalcsTestFixture, TestEnforceAccelVelLimits)
+{
+  // First, define the velocity limits (from panda URDF)
+  std::vector<double> vel_limits{2.3925,2.3925,2.3925,2.3925,2.8710,2.8710,2.8710};
+
+  // Lets test the Velocity limits first
+  // Set prev_joint_velocity_ == desired_velocity, both above the limits
+  // to avoid acceleration limits (accel is 0)
+  Eigen::ArrayXd desired_velocity(7);
+  desired_velocity << 3, 3, 3, 3, 3, 3, 3; // rad/s
+  desired_velocity *= servo_calcs_->parameters_->publish_period; // rad/loop
+  servo_calcs_->prev_joint_velocity_ = desired_velocity;
+
+  // Do the enforcing and check it
+  servo_calcs_->enforceSRDFAccelVelLimits(desired_velocity);
+  for (size_t i=0; i<7; ++i)
+  {
+    // We need to check vs radians-per-loop allowable rate (not rad/s)
+    EXPECT_LE(desired_velocity[i], vel_limits[i]*servo_calcs_->parameters_->publish_period);
+  }
+
+  // Let's check the negative velocities too
+  desired_velocity *= -1;
+  servo_calcs_->prev_joint_velocity_ = desired_velocity;
+  servo_calcs_->enforceSRDFAccelVelLimits(desired_velocity);
+  for (size_t i=0; i<7; ++i)
+  {
+    // We need to check vs radians-per-loop allowable rate (not rad/s)
+    EXPECT_GE(desired_velocity[i], -1*vel_limits[i]*servo_calcs_->parameters_->publish_period);
+  }
 }
 
 int main(int argc, char ** argv)

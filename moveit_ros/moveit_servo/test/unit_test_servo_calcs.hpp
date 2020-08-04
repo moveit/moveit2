@@ -44,7 +44,7 @@
 #include <gtest/gtest.h>
 #include <moveit_servo/servo_calcs.h>
 
-const std::vector<std::string> panda_joint_names_{"panda_finger_joint1", "panda_finger_joint2", "panda_joint1", "panda_joint2"
+const std::vector<std::string> panda_joint_names_{"panda_finger_joint1", "panda_finger_joint2", "panda_joint1", "panda_joint2",
     "panda_joint3", "panda_joint4", "panda_joint5", "panda_joint6", "panda_joint7"};
 
 // subclassing and friending so we can access member varibles
@@ -56,6 +56,9 @@ class FriendServoCalcs : public moveit_servo::ServoCalcs
   FRIEND_TEST(ServoCalcsTestFixture, TestCheckValidCommand);
   FRIEND_TEST(ServoCalcsTestFixture, TestApplyJointUpdate);
   FRIEND_TEST(ServoCalcsTestFixture, TestInsertRedundantPoints);
+  FRIEND_TEST(ServoCalcsTestFixture, TestSuddenHalt);
+  FRIEND_TEST(ServoCalcsTestFixture, TestEnforcePosLimits);
+  FRIEND_TEST(ServoCalcsTestFixture, TestEnforceAccelVelLimits);
 public:
   FriendServoCalcs(const rclcpp::Node::SharedPtr& node, const moveit_servo::ServoParametersPtr& parameters,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
@@ -77,4 +80,6 @@ protected:
   moveit_servo::ServoParametersPtr parameters_;
   planning_scene_monitor::PlanningSceneMonitorPtr psm_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+
+  sensor_msgs::msg::JointState getJointState(std::vector<double> pos, std::vector<double> vel);
 };
