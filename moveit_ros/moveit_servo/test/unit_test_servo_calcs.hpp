@@ -58,7 +58,11 @@ class FriendServoCalcs : public moveit_servo::ServoCalcs
   FRIEND_TEST(ServoCalcsTestFixture, TestInsertRedundantPoints);
   FRIEND_TEST(ServoCalcsTestFixture, TestSuddenHalt);
   FRIEND_TEST(ServoCalcsTestFixture, TestEnforcePosLimits);
-  FRIEND_TEST(ServoCalcsTestFixture, TestEnforceAccelVelLimits);
+  FRIEND_TEST(ServoCalcsTestFixture, TestEnforceVelLimits);
+  FRIEND_TEST(ServoCalcsTestFixture, TestEnforceAccelLimits);
+  FRIEND_TEST(ServoCalcsTestFixture, TestScaleCartesianCommand);
+  FRIEND_TEST(ServoCalcsTestFixture, TestScaleJointCommand);
+  FRIEND_TEST(ServoCalcsTestFixture, TestComposeOutputMsg);
 public:
   FriendServoCalcs(const rclcpp::Node::SharedPtr& node, const moveit_servo::ServoParametersPtr& parameters,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);

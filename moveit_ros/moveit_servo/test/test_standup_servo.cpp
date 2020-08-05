@@ -234,6 +234,12 @@ TEST_F(ServoCalcsTestFixture, TestCheckValidCommand)
   // Now give it a NaN and check again
   twist_msg.twist.linear.y = NAN;
   EXPECT_FALSE(servo_calcs_->checkValidCommand(twist_msg));
+
+  // Now set the scaling to unitless and give it a number with abs() > 1, expecting a fail
+  twist_msg.twist.linear.y = -10.0;
+  EXPECT_TRUE(servo_calcs_->checkValidCommand(twist_msg));
+  servo_calcs_->parameters_->command_in_type = "unitless";
+  EXPECT_FALSE(servo_calcs_->checkValidCommand(twist_msg));
 }
 
 TEST_F(ServoCalcsTestFixture, TestApplyJointUpdate)
@@ -360,7 +366,7 @@ TEST_F(ServoCalcsTestFixture, TestEnforcePosLimits)
   EXPECT_TRUE(servo_calcs_->enforceSRDFPositionLimits());
 }
 
-TEST_F(ServoCalcsTestFixture, TestEnforceAccelVelLimits)
+TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
 {
   // First, define the velocity limits (from panda URDF)
   std::vector<double> vel_limits{2.3925,2.3925,2.3925,2.3925,2.8710,2.8710,2.8710};
@@ -390,6 +396,126 @@ TEST_F(ServoCalcsTestFixture, TestEnforceAccelVelLimits)
     // We need to check vs radians-per-loop allowable rate (not rad/s)
     EXPECT_GE(desired_velocity[i], -1*vel_limits[i]*servo_calcs_->parameters_->publish_period);
   }
+}
+
+TEST_F(ServoCalcsTestFixture, TestEnforceAccelLimits)
+{
+  // The panda URDF defines no accel limits
+  // So we get the bound from joint_model_group_ and modify it
+  auto joint_model = servo_calcs_->joint_model_group_->getActiveJointModels()[3];
+  auto bounds = joint_model->getVariableBounds(joint_model->getName());
+  bounds.acceleration_bounded_ = true;
+  bounds.min_acceleration_ = -3;
+  bounds.max_acceleration_ = 3;
+
+  // Pick previous_velocity and desired_velocity to violate limits
+  double previous_velocity = -2; // rad/s & within velocity limits
+  double desired_velocity = 2; // rad/s & within velocity limits
+
+  // From those, calculate desired delta_theta and current acceleration
+  double delta_theta = desired_velocity * servo_calcs_->parameters_->publish_period; // rad
+  double acceleration = (desired_velocity - previous_velocity) / servo_calcs_->parameters_->publish_period; // rad/s^2
+
+  // Enforce the bounds
+  double init_delta_theta = delta_theta;
+  servo_calcs_->enforceSingleVelAccelLimit(bounds, desired_velocity, previous_velocity, acceleration, delta_theta);
+
+  // The delta_theta should have dropped to be within the limit
+  EXPECT_LT(delta_theta, init_delta_theta);
+
+  // In fact we can calculate the maximum delta_theta at the limit as:
+  // delta_limit = delta_t * (accel_lim * delta_t _ + vel_prev)
+  double delta_at_limit = servo_calcs_->parameters_->publish_period * (previous_velocity + bounds.max_acceleration_*servo_calcs_->parameters_->publish_period);
+  EXPECT_EQ(delta_theta, delta_at_limit);
+
+  // Let's test again, but with only a small change in velocity
+  desired_velocity = -1.9;
+  delta_theta = desired_velocity * servo_calcs_->parameters_->publish_period; // rad
+  acceleration = (desired_velocity - previous_velocity) / servo_calcs_->parameters_->publish_period; // rad/s^2
+  init_delta_theta = delta_theta;
+  servo_calcs_->enforceSingleVelAccelLimit(bounds, desired_velocity, previous_velocity, acceleration, delta_theta);
+
+  // Now, the delta_theta should not have changed
+  EXPECT_EQ(delta_theta, init_delta_theta);
+}
+
+TEST_F(ServoCalcsTestFixture, TestScaleCartesianCommand)
+{
+  // Create a twist msg to test
+  geometry_msgs::msg::TwistStamped msg;
+  msg.twist.linear.x = 2.0;
+  msg.twist.angular.z = 6.0;
+
+  // Lets test an invalid scaling type first
+  servo_calcs_->parameters_->command_in_type = "invalid_string";
+  Eigen::VectorXd result = servo_calcs_->scaleCartesianCommand(msg);
+  EXPECT_TRUE(result.isZero());
+
+  // Now let's try with unitless
+  servo_calcs_->parameters_->command_in_type = "unitless";
+  result = servo_calcs_->scaleCartesianCommand(msg);
+  EXPECT_EQ(result[0], msg.twist.linear.x*servo_calcs_->parameters_->linear_scale*servo_calcs_->parameters_->publish_period);
+  EXPECT_EQ(result[5], msg.twist.angular.z*servo_calcs_->parameters_->rotational_scale*servo_calcs_->parameters_->publish_period);
+
+  // And finally with speed_units
+  servo_calcs_->parameters_->command_in_type = "speed_units";
+  result = servo_calcs_->scaleCartesianCommand(msg);
+  EXPECT_EQ(result[0], msg.twist.linear.x*servo_calcs_->parameters_->publish_period);
+  EXPECT_EQ(result[5], msg.twist.angular.z*servo_calcs_->parameters_->publish_period);
+}
+
+TEST_F(ServoCalcsTestFixture, TestScaleJointCommand)
+{
+  // Get a JointJog msg to test
+  control_msgs::msg::JointJog msg;
+  msg.joint_names = panda_joint_names_;
+  std::vector<double> vel{0,0,1,1,1,1,1,1,1};
+  msg.velocities = vel;
+
+  // Test with unitless
+  servo_calcs_->parameters_->command_in_type = "unitless";
+  Eigen::VectorXd result = servo_calcs_->scaleJointCommand(msg);
+  EXPECT_EQ(result[0], servo_calcs_->parameters_->joint_scale*servo_calcs_->parameters_->publish_period);
+
+  // And with speed_units
+  servo_calcs_->parameters_->command_in_type = "speed_units";
+  result = servo_calcs_->scaleJointCommand(msg);
+  EXPECT_EQ(result[0], servo_calcs_->parameters_->publish_period);
+
+  // And for completeness, with invalid scaling type
+  servo_calcs_->parameters_->command_in_type = "invalid_string";
+  result = servo_calcs_->scaleJointCommand(msg);
+  EXPECT_TRUE(result.isZero());
+}
+
+TEST_F(ServoCalcsTestFixture, TestComposeOutputMsg)
+{
+  // Create the input and output message
+  trajectory_msgs::msg::JointTrajectory traj;
+  sensor_msgs::msg::JointState joint_state;
+  joint_state.name.push_back("some_joint");
+  joint_state.position.push_back(1.0);
+  joint_state.velocity.push_back(2.0);
+
+  // Perform the compisition with all 3 modes published
+  servo_calcs_->parameters_->publish_joint_positions = true;
+  servo_calcs_->parameters_->publish_joint_velocities = true;
+  servo_calcs_->parameters_->publish_joint_accelerations = true;
+  servo_calcs_->composeJointTrajMessage(joint_state, traj);
+
+  // Check the header info
+  EXPECT_FALSE(traj.header.stamp == rclcpp::Time(0.)); // Time should be set
+  EXPECT_EQ(traj.header.frame_id, servo_calcs_->parameters_->planning_frame);
+  EXPECT_EQ(traj.joint_names[0], "some_joint");
+
+  // Check the trajectory info
+  EXPECT_TRUE(traj.points.size() == 1);
+  EXPECT_TRUE(traj.points[0].positions.size() == 1); // Set to input length
+  EXPECT_TRUE(traj.points[0].velocities.size() == 1);
+  EXPECT_TRUE(traj.points[0].accelerations.size() == 7); // Set to num joints
+  EXPECT_EQ(traj.points[0].positions[0], 1.0);
+  EXPECT_EQ(traj.points[0].velocities[0], 2.0);
+  EXPECT_EQ(traj.points[0].accelerations[0], 0.0);
 }
 
 int main(int argc, char ** argv)
