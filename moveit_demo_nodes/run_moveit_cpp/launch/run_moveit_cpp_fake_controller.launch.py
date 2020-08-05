@@ -51,7 +51,7 @@ def generate_launch_description():
                             'trajectory_execution.allowed_goal_duration_margin': 0.5,
                             'trajectory_execution.allowed_start_tolerance': 0.01}
 
-    controllers_yaml = load_yaml('moveit_resources', 'panda_moveit_config/config/fake_controllers.yaml')
+    controllers_yaml = load_yaml('run_moveit_cpp', 'config/fake_controllers.yaml')
     fake_controller = {'moveit_fake_controller_manager': controllers_yaml,
                        'moveit_controller_manager': 'moveit_fake_controller_manager/MoveItFakeControllerManager'}
 
