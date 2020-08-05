@@ -128,10 +128,10 @@ int main(int argc, char** argv)
   // Create publisher for publishing a few joint commands
   size_t count{0};
   auto joint_pub = node->create_publisher<control_msgs::msg::JointJog>("servo_server/delta_joint_cmds", 10);
-  std::weak_ptr<std::remove_pointer<decltype(joint_pub.get())>::type> captured_twist_pub = joint_pub;
+  std::weak_ptr<std::remove_pointer<decltype(joint_pub.get())>::type> captured_joint_pub = joint_pub;
   std::weak_ptr<std::remove_pointer<decltype(node.get())>::type> captured_node = node;
-  auto joint_callback = [captured_twist_pub, captured_node, &count]() -> void {
-      auto pub_ptr = captured_twist_pub.lock();
+  auto joint_callback = [captured_joint_pub, captured_node, &count]() -> void {
+      auto pub_ptr = captured_joint_pub.lock();
       auto node_ptr = captured_node.lock();
       if (!pub_ptr || !node_ptr) {
         return;
@@ -150,9 +150,9 @@ int main(int argc, char** argv)
 
   // Create a publisher for publishing the twist commands
   auto twist_pub = node->create_publisher<geometry_msgs::msg::TwistStamped>("servo_server/delta_twist_cmds", 10);
-  std::weak_ptr<std::remove_pointer<decltype(twist_pub.get())>::type> captured_joint_pub = twist_pub;
-  auto twist_callback = [captured_joint_pub, captured_node, &count]() -> void {
-      auto pub_ptr = captured_joint_pub.lock();
+  std::weak_ptr<std::remove_pointer<decltype(twist_pub.get())>::type> captured_twist_pub = twist_pub;
+  auto twist_callback = [captured_twist_pub, captured_node, &count]() -> void {
+      auto pub_ptr = captured_twist_pub.lock();
       auto node_ptr = captured_node.lock();
       if (!pub_ptr || !node_ptr) {
         return;
