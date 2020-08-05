@@ -39,7 +39,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <moveit_msgs/msg/workspace_parameters.hpp>
 
 namespace moveit_ros_benchmarks
@@ -50,12 +50,12 @@ public:
   /** \brief Constructor */
   BenchmarkOptions();
   /** \brief Constructor accepting a custom namespace for parameter lookup */
-  BenchmarkOptions(const std::string& ros_namespace);
+  BenchmarkOptions(const rclcpp::Node::SharedPtr& node);
   /** \brief Destructor */
   virtual ~BenchmarkOptions();
 
   /** \brief Set the ROS namespace the node handle should use for parameter lookup */
-  void setNamespace(const std::string& ros_namespace);
+  // void setNamespace(const std::string& ros_namespace);
 
   /** \brief Get the name of the warehouse database host server */
   const std::string& getHostName() const;
@@ -101,14 +101,14 @@ public:
   const moveit_msgs::msg::WorkspaceParameters& getWorkspaceParameters() const;
 
 protected:
-  void readBenchmarkOptions(const std::string& ros_namespace);
+  void readBenchmarkOptions(const rclcpp::Node::SharedPtr& node);
 
-  void readWarehouseOptions(ros::NodeHandle& nh);
-  void readBenchmarkParameters(ros::NodeHandle& nh);
-  void readPlannerConfigs(ros::NodeHandle& nh);
+  void readWarehouseOptions(const rclcpp::Node::SharedPtr& node);
+  void readBenchmarkParameters(const rclcpp::Node::SharedPtr& node);
+  void readPlannerConfigs(const rclcpp::Node::SharedPtr& node);
 
-  void readWorkspaceParameters(ros::NodeHandle& nh);
-  void readGoalOffset(ros::NodeHandle& nh);
+  void readWorkspaceParameters(const rclcpp::Node::SharedPtr& node);
+  void readGoalOffset(const rclcpp::Node::SharedPtr& node);
 
   /// warehouse parameters
   std::string hostname_;

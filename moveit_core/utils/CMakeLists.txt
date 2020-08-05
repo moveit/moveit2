@@ -20,10 +20,11 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(moveit_resources REQUIRED)
   set(MOVEIT_TEST_LIB_NAME moveit_test_utils)
-  add_library(${MOVEIT_TEST_LIB_NAME} SHARED
-    src/robot_model_test_utils.cpp)
+  add_library(${MOVEIT_TEST_LIB_NAME} SHARED src/robot_model_test_utils.cpp)
+  target_link_libraries(${MOVEIT_TEST_LIB_NAME} moveit_robot_model)
   ament_target_dependencies(${MOVEIT_TEST_LIB_NAME}
     Boost
+    geometry_msgs
     urdf
     srdfdom
     urdfdom

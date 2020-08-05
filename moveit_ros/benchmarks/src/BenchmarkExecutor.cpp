@@ -52,6 +52,24 @@
 
 using namespace moveit_ros_benchmarks;
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.benchmarks.BenchmarkExecutor");
+
+template <class Clock, class Duration>
+boost::posix_time::ptime toBoost(const std::chrono::time_point<Clock, Duration>& from)
+{
+  typedef std::chrono::nanoseconds duration_t;
+  typedef long rep_t;
+  rep_t d = std::chrono::duration_cast<duration_t>(from.time_since_epoch()).count();
+  rep_t sec = d / 1000000000;
+  rep_t nsec = d % 1000000000;
+  namespace pt = boost::posix_time;
+#ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
+  return pt::from_time_t(sec) + pt::nanoseconds(nsec)
+#else
+  return pt::from_time_t(sec) + pt::microseconds(nsec / 1000);
+#endif
+}
+
 static std::string getHostname()
 {
   static const int BUF_SIZE = 1024;
@@ -66,24 +84,27 @@ static std::string getHostname()
   }
 }
 
-BenchmarkExecutor::BenchmarkExecutor(const std::string& robot_description_param)
+BenchmarkExecutor::BenchmarkExecutor(const rclcpp::Node::SharedPtr& node, const std::string& robot_description_param)
+  : node_(node)
 {
-  pss_ = nullptr;
-  psws_ = nullptr;
-  rs_ = nullptr;
-  cs_ = nullptr;
-  tcs_ = nullptr;
-  psm_ = new planning_scene_monitor::PlanningSceneMonitor(robot_description_param);
+  // TODO(YuYan): uncomment after porting moveit_ros_warehouse
+  // pss_ = nullptr;
+  // psws_ = nullptr;
+  // rs_ = nullptr;
+  // cs_ = nullptr;
+  // tcs_ = nullptr;
+  psm_ = new planning_scene_monitor::PlanningSceneMonitor(node, robot_description_param);
   planning_scene_ = psm_->getPlanningScene();
 }
 
 BenchmarkExecutor::~BenchmarkExecutor()
 {
-  delete pss_;
-  delete psws_;
-  delete rs_;
-  delete cs_;
-  delete tcs_;
+  // TODO(YuYan): uncomment after porting moveit_ros_warehouse
+  // delete pss_;
+  // delete psws_;
+  // delete rs_;
+  // delete cs_;
+  // delete tcs_;
   delete psm_;
 }
 
@@ -91,18 +112,19 @@ void BenchmarkExecutor::initialize(const std::vector<std::string>& planning_pipe
 {
   planning_pipelines_.clear();
 
-  ros::NodeHandle pnh("~");
+  // ros::NodeHandle pnh("~");
+  std::string parent_node_name = node_->get_name();
   for (const std::string& planning_pipeline_name : planning_pipeline_names)
   {
     // Initialize planning pipelines from configured child namespaces
-    ros::NodeHandle child_nh(pnh, planning_pipeline_name);
+    static rclcpp::Node::SharedPtr child_node = rclcpp::Node::make_shared(planning_pipeline_name, parent_node_name);
     planning_pipeline::PlanningPipelinePtr pipeline(new planning_pipeline::PlanningPipeline(
-        planning_scene_->getRobotModel(), child_nh, "planning_plugin", "request_adapters"));
+        planning_scene_->getRobotModel(), child_node, "planning_plugin", "request_adapters"));
 
     // Verify the pipeline has successfully initialized a planner
     if (!pipeline->getPlannerManager())
     {
-      ROS_ERROR("Failed to initialize planning pipeline '%s'", planning_pipeline_name.c_str());
+      RCLCPP_ERROR(LOGGER, "Failed to initialize planning pipeline '%s'", planning_pipeline_name.c_str());
       continue;
     }
 
@@ -114,42 +136,43 @@ void BenchmarkExecutor::initialize(const std::vector<std::string>& planning_pipe
 
   // Error check
   if (planning_pipelines_.empty())
-    ROS_ERROR("No planning pipelines have been loaded. Nothing to do for the benchmarking service.");
+    RCLCPP_ERROR(LOGGER, "No planning pipelines have been loaded. Nothing to do for the benchmarking service.");
   else
   {
-    ROS_INFO("Available planning pipelines:");
+    RCLCPP_INFO(LOGGER, "Available planning pipelines:");
     for (const std::pair<const std::string, planning_pipeline::PlanningPipelinePtr>& entry : planning_pipelines_)
-      ROS_INFO_STREAM("Pipeline: " << entry.first << ", Planner: " << entry.second->getPlannerPluginName());
+      RCLCPP_INFO_STREAM(LOGGER, "Pipeline: " << entry.first << ", Planner: " << entry.second->getPlannerPluginName());
   }
 }
 
 void BenchmarkExecutor::clear()
 {
-  if (pss_)
-  {
-    delete pss_;
-    pss_ = nullptr;
-  }
-  if (psws_)
-  {
-    delete psws_;
-    psws_ = nullptr;
-  }
-  if (rs_)
-  {
-    delete rs_;
-    rs_ = nullptr;
-  }
-  if (cs_)
-  {
-    delete cs_;
-    cs_ = nullptr;
-  }
-  if (tcs_)
-  {
-    delete tcs_;
-    tcs_ = nullptr;
-  }
+  // TODO(YuYan): uncomment after porting moveit_ros_warehouse
+  // if (pss_)
+  // {
+  //   delete pss_;
+  //   pss_ = nullptr;
+  // }
+  // if (psws_)
+  // {
+  //   delete psws_;
+  //   psws_ = nullptr;
+  // }
+  // if (rs_)
+  // {
+  //   delete rs_;
+  //   rs_ = nullptr;
+  // }
+  // if (cs_)
+  // {
+  //   delete cs_;
+  //   cs_ = nullptr;
+  // }
+  // if (tcs_)
+  // {
+  //   delete tcs_;
+  //   tcs_ = nullptr;
+  // }
 
   benchmark_data_.clear();
   pre_event_fns_.clear();
@@ -194,7 +217,7 @@ bool BenchmarkExecutor::runBenchmarks(const BenchmarkOptions& opts)
 {
   if (planning_pipelines_.empty())
   {
-    ROS_ERROR("No planning pipelines configured.  Did you call BenchmarkExecutor::initialize?");
+    RCLCPP_ERROR(LOGGER, "No planning pipelines configured.  Did you call BenchmarkExecutor::initialize?");
     return false;
   }
 
@@ -225,15 +248,16 @@ bool BenchmarkExecutor::runBenchmarks(const BenchmarkOptions& opts)
       for (QueryStartEventFunction& query_start_fn : query_start_fns_)
         query_start_fn(queries[i].request, planning_scene_);
 
-      ROS_INFO("Benchmarking query '%s' (%lu of %lu)", queries[i].name.c_str(), i + 1, queries.size());
-      ros::WallTime start_time = ros::WallTime::now();
+      RCLCPP_INFO(LOGGER, "Benchmarking query '%s' (%lu of %lu)", queries[i].name.c_str(), i + 1, queries.size());
+      std::chrono::system_clock::time_point start_time = std::chrono::system_clock::now();
       runBenchmark(queries[i].request, options_.getPlanningPipelineConfigurations(), options_.getNumRuns());
-      double duration = (ros::WallTime::now() - start_time).toSec();
+      std::chrono::duration<double> dt = std::chrono::system_clock::now() - start_time;
+      double duration = dt.count();
 
       for (QueryCompletionEventFunction& query_end_fn : query_end_fns_)
         query_end_fn(queries[i].request, planning_scene_);
 
-      writeOutput(queries[i], boost::posix_time::to_iso_extended_string(start_time.toBoost()), duration);
+      writeOutput(queries[i], boost::posix_time::to_iso_extended_string(toBoost(start_time)), duration);
     }
 
     return true;
@@ -251,9 +275,9 @@ bool BenchmarkExecutor::queriesAndPlannersCompatible(
     {
       if (!pipeline_entry.second->getPlannerManager()->canServiceRequest(request.request))
       {
-        ROS_ERROR("Interface '%s' in pipeline '%s' cannot service the benchmark request '%s'",
-                  pipeline_entry.second->getPlannerPluginName().c_str(), pipeline_entry.first.c_str(),
-                  request.name.c_str());
+        RCLCPP_ERROR(LOGGER, "Interface '%s' in pipeline '%s' cannot service the benchmark request '%s'",
+                     pipeline_entry.second->getPlannerPluginName().c_str(), pipeline_entry.first.c_str(),
+                     request.name.c_str());
         return false;
       }
     }
@@ -277,13 +301,14 @@ bool BenchmarkExecutor::initializeBenchmarks(const BenchmarkOptions& opts, movei
   if (!loadBenchmarkQueryData(opts, scene_msg, start_states, path_constraints, goal_constraints, traj_constraints,
                               queries))
   {
-    ROS_ERROR("Failed to load benchmark query data");
+    RCLCPP_ERROR(LOGGER, "Failed to load benchmark query data");
     return false;
   }
 
-  ROS_INFO("Benchmark loaded %lu starts, %lu goals, %lu path constraints, %lu trajectory constraints, and %lu queries",
-           start_states.size(), goal_constraints.size(), path_constraints.size(), traj_constraints.size(),
-           queries.size());
+  RCLCPP_INFO(
+      LOGGER,
+      "Benchmark loaded %lu starts, %lu goals, %lu path constraints, %lu trajectory constraints, and %lu queries",
+      start_states.size(), goal_constraints.size(), path_constraints.size(), traj_constraints.size(), queries.size());
 
   moveit_msgs::msg::WorkspaceParameters workspace_parameters = opts.getWorkspaceParameters();
   // Make sure that workspace_parameters are set
@@ -394,35 +419,37 @@ bool BenchmarkExecutor::loadBenchmarkQueryData(const BenchmarkOptions& opts, mov
                                                std::vector<TrajectoryConstraints>& traj_constraints,
                                                std::vector<BenchmarkRequest>& queries)
 {
-  try
-  {
-    warehouse_ros::DatabaseConnection::Ptr warehouse_connection = dbloader.loadDatabase();
-    warehouse_connection->setParams(opts.getHostName(), opts.getPort(), 20);
-    if (warehouse_connection->connect())
-    {
-      pss_ = new moveit_warehouse::PlanningSceneStorage(warehouse_connection);
-      psws_ = new moveit_warehouse::PlanningSceneWorldStorage(warehouse_connection);
-      rs_ = new moveit_warehouse::RobotStateStorage(warehouse_connection);
-      cs_ = new moveit_warehouse::ConstraintsStorage(warehouse_connection);
-      tcs_ = new moveit_warehouse::TrajectoryConstraintsStorage(warehouse_connection);
-    }
-    else
-    {
-      ROS_ERROR("Failed to connect to DB");
-      return false;
-    }
-  }
-  catch (std::exception& e)
-  {
-    ROS_ERROR("Failed to initialize benchmark server: '%s'", e.what());
-    return false;
-  }
+  // TODO(YuYan): uncomment after porting moveit_ros_warehouse
+  // try
+  // {
+  //   warehouse_ros::DatabaseConnection::Ptr warehouse_connection = dbloader.loadDatabase();
+  //   warehouse_connection->setParams(opts.getHostName(), opts.getPort(), 20);
+  //   if (warehouse_connection->connect())
+  //   {
+  //     pss_ = new moveit_warehouse::PlanningSceneStorage(warehouse_connection);
+  //     psws_ = new moveit_warehouse::PlanningSceneWorldStorage(warehouse_connection);
+  //     rs_ = new moveit_warehouse::RobotStateStorage(warehouse_connection);
+  //     cs_ = new moveit_warehouse::ConstraintsStorage(warehouse_connection);
+  //     tcs_ = new moveit_warehouse::TrajectoryConstraintsStorage(warehouse_connection);
+  //   }
+  //   else
+  //   {
+  //     RCLCPP_ERROR(LOGGER, "Failed to connect to DB");
+  //     return false;
+  //   }
+  // }
+  // catch (std::exception& e)
+  // {
+  //   RCLCPP_ERROR(LOGGER, "Failed to initialize benchmark server: '%s'", e.what());
+  //   return false;
+  // }
 
-  return loadPlanningScene(opts.getSceneName(), scene_msg) && loadStates(opts.getStartStateRegex(), start_states) &&
-         loadPathConstraints(opts.getGoalConstraintRegex(), goal_constraints) &&
-         loadPathConstraints(opts.getPathConstraintRegex(), path_constraints) &&
-         loadTrajectoryConstraints(opts.getTrajectoryConstraintRegex(), traj_constraints) &&
-         loadQueries(opts.getQueryRegex(), opts.getSceneName(), queries);
+  // return loadPlanningScene(opts.getSceneName(), scene_msg) && loadStates(opts.getStartStateRegex(), start_states) &&
+  //        loadPathConstraints(opts.getGoalConstraintRegex(), goal_constraints) &&
+  //        loadPathConstraints(opts.getPathConstraintRegex(), path_constraints) &&
+  //        loadTrajectoryConstraints(opts.getTrajectoryConstraintRegex(), traj_constraints) &&
+  //        loadQueries(opts.getQueryRegex(), opts.getSceneName(), queries);
+  return true;
 }
 
 void BenchmarkExecutor::shiftConstraintsByOffset(moveit_msgs::msg::Constraints& constraints,
@@ -512,7 +539,7 @@ bool BenchmarkExecutor::plannerConfigurationsExist(
 
     if (!pipeline_exists)
     {
-      ROS_ERROR("Planning pipeline '%s' does NOT exist", pipeline_config_entry.first.c_str());
+      RCLCPP_ERROR(LOGGER, "Planning pipeline '%s' does NOT exist", pipeline_config_entry.first.c_str());
       return false;
     }
   }
@@ -541,8 +568,8 @@ bool BenchmarkExecutor::plannerConfigurationsExist(
 
       if (!planner_exists)
       {
-        ROS_ERROR("Planner '%s' does NOT exist for group '%s' in pipeline '%s'", entry.second[i].c_str(),
-                  group_name.c_str(), entry.first.c_str());
+        RCLCPP_ERROR(LOGGER, "Planner '%s' does NOT exist for group '%s' in pipeline '%s'", entry.second[i].c_str(),
+                     group_name.c_str(), entry.first.c_str());
         std::cout << "There are " << config_map.size() << " planner entries: " << std::endl;
         for (const auto& config_map_entry : config_map)
           std::cout << config_map_entry.second.name << std::endl;
@@ -557,190 +584,195 @@ bool BenchmarkExecutor::plannerConfigurationsExist(
 bool BenchmarkExecutor::loadPlanningScene(const std::string& scene_name, moveit_msgs::msg::PlanningScene& scene_msg)
 {
   bool ok = false;
-  try
-  {
-    if (pss_->hasPlanningScene(scene_name))  // whole planning scene
-    {
-      moveit_warehouse::PlanningSceneWithMetadata pswm;
-      ok = pss_->getPlanningScene(pswm, scene_name);
-      scene_msg = static_cast<moveit_msgs::msg::PlanningScene>(*pswm);
+  // TODO(YuYan): uncomment after porting moveit_ros_warehouse
+  // try
+  // {
+  //   if (pss_->hasPlanningScene(scene_name))  // whole planning scene
+  //   {
+  //     moveit_warehouse::PlanningSceneWithMetadata pswm;
+  //     ok = pss_->getPlanningScene(pswm, scene_name);
+  //     scene_msg = static_cast<moveit_msgs::msg::PlanningScene>(*pswm);
 
-      if (!ok)
-        ROS_ERROR("Failed to load planning scene '%s'", scene_name.c_str());
-    }
-    else if (psws_->hasPlanningSceneWorld(scene_name))  // Just the world (no robot)
-    {
-      moveit_warehouse::PlanningSceneWorldWithMetadata pswwm;
-      ok = psws_->getPlanningSceneWorld(pswwm, scene_name);
-      scene_msg.world = static_cast<moveit_msgs::msg::PlanningSceneWorld>(*pswwm);
-      scene_msg.robot_model_name =
-          "NO ROBOT INFORMATION. ONLY WORLD GEOMETRY";  // this will be fixed when running benchmark
+  //     if (!ok)
+  //       RCLCPP_ERROR(LOGGER, "Failed to load planning scene '%s'", scene_name.c_str());
+  //   }
+  //   else if (psws_->hasPlanningSceneWorld(scene_name))  // Just the world (no robot)
+  //   {
+  //     moveit_warehouse::PlanningSceneWorldWithMetadata pswwm;
+  //     ok = psws_->getPlanningSceneWorld(pswwm, scene_name);
+  //     scene_msg.world = static_cast<moveit_msgs::msg::PlanningSceneWorld>(*pswwm);
+  //     scene_msg.robot_model_name =
+  //         "NO ROBOT INFORMATION. ONLY WORLD GEOMETRY";  // this will be fixed when running benchmark
 
-      if (!ok)
-        ROS_ERROR("Failed to load planning scene '%s'", scene_name.c_str());
-    }
-    else
-      ROS_ERROR("Failed to find planning scene '%s'", scene_name.c_str());
-  }
-  catch (std::exception& ex)
-  {
-    ROS_ERROR("Error loading planning scene: %s", ex.what());
-  }
-  ROS_INFO("Loaded planning scene successfully");
+  //     if (!ok)
+  //       RCLCPP_ERROR(LOGGER, "Failed to load planning scene '%s'", scene_name.c_str());
+  //   }
+  //   else
+  //     RCLCPP_ERROR(LOGGER, "Failed to find planning scene '%s'", scene_name.c_str());
+  // }
+  // catch (std::exception& ex)
+  // {
+  //   RCLCPP_ERROR(LOGGER, "Error loading planning scene: %s", ex.what());
+  // }
+  // RCLCPP_INFO(LOGGER, "Loaded planning scene successfully");
   return ok;
 }
 
 bool BenchmarkExecutor::loadQueries(const std::string& regex, const std::string& scene_name,
                                     std::vector<BenchmarkRequest>& queries)
 {
-  if (regex.empty())
-    return true;
+  // TODO(YuYan): uncomment after porting moveit_ros_warehouses
+  // if (regex.empty())
+  //   return true;
 
-  std::vector<std::string> query_names;
-  try
-  {
-    pss_->getPlanningQueriesNames(regex, query_names, scene_name);
-  }
-  catch (std::exception& ex)
-  {
-    ROS_ERROR("Error loading motion planning queries: %s", ex.what());
-    return false;
-  }
+  // std::vector<std::string> query_names;
+  // try
+  // {
+  //   pss_->getPlanningQueriesNames(regex, query_names, scene_name);
+  // }
+  // catch (std::exception& ex)
+  // {
+  //   RCLCPP_ERROR(LOGGER, "Error loading motion planning queries: %s", ex.what());
+  //   return false;
+  // }
 
-  if (query_names.empty())
-  {
-    ROS_ERROR("Scene '%s' has no associated queries", scene_name.c_str());
-    return false;
-  }
+  // if (query_names.empty())
+  // {
+  //   RCLCPP_ERROR(LOGGER, "Scene '%s' has no associated queries", scene_name.c_str());
+  //   return false;
+  // }
 
-  for (const std::string& query_name : query_names)
-  {
-    moveit_warehouse::MotionPlanRequestWithMetadata planning_query;
-    try
-    {
-      pss_->getPlanningQuery(planning_query, scene_name, query_name);
-    }
-    catch (std::exception& ex)
-    {
-      ROS_ERROR("Error loading motion planning query '%s': %s", query_name.c_str(), ex.what());
-      continue;
-    }
+  // for (const std::string& query_name : query_names)
+  // {
+  //   moveit_warehouse::MotionPlanRequestWithMetadata planning_query;
+  //   try
+  //   {
+  //     pss_->getPlanningQuery(planning_query, scene_name, query_name);
+  //   }
+  //   catch (std::exception& ex)
+  //   {
+  //     RCLCPP_ERROR(LOGGER, "Error loading motion planning query '%s': %s", query_name.c_str(), ex.what());
+  //     continue;
+  //   }
 
-    BenchmarkRequest query;
-    query.name = query_name;
-    query.request = static_cast<moveit_msgs::msg::MotionPlanRequest>(*planning_query);
-    queries.push_back(query);
-  }
-  ROS_INFO("Loaded queries successfully");
+  //   BenchmarkRequest query;
+  //   query.name = query_name;
+  //   query.request = static_cast<moveit_msgs::msg::MotionPlanRequest>(*planning_query);
+  //   queries.push_back(query);
+  // }
+  // RCLCPP_INFO(LOGGER, "Loaded queries successfully");
   return true;
 }
 
 bool BenchmarkExecutor::loadStates(const std::string& regex, std::vector<StartState>& start_states)
 {
-  if (!regex.empty())
-  {
-    boost::regex start_regex(regex);
-    std::vector<std::string> state_names;
-    rs_->getKnownRobotStates(state_names);
-    for (const std::string& state_name : state_names)
-    {
-      boost::cmatch match;
-      if (boost::regex_match(state_name.c_str(), match, start_regex))
-      {
-        moveit_warehouse::RobotStateWithMetadata robot_state;
-        try
-        {
-          if (rs_->getRobotState(robot_state, state_name))
-          {
-            StartState start_state;
-            start_state.state = moveit_msgs::msg::RobotState(*robot_state);
-            start_state.name = state_name;
-            start_states.push_back(start_state);
-          }
-        }
-        catch (std::exception& ex)
-        {
-          ROS_ERROR("Runtime error when loading state '%s': %s", state_name.c_str(), ex.what());
-          continue;
-        }
-      }
-    }
+  // TODO(YuYan): uncomment after porting moveit_ros_warehouse
+  // if (!regex.empty())
+  // {
+  //   boost::regex start_regex(regex);
+  //   std::vector<std::string> state_names;
+  //   rs_->getKnownRobotStates(state_names);
+  //   for (const std::string& state_name : state_names)
+  //   {
+  //     boost::cmatch match;
+  //     if (boost::regex_match(state_name.c_str(), match, start_regex))
+  //     {
+  //       moveit_warehouse::RobotStateWithMetadata robot_state;
+  //       try
+  //       {
+  //         if (rs_->getRobotState(robot_state, state_name))
+  //         {
+  //           StartState start_state;
+  //           start_state.state = moveit_msgs::msg::RobotState(*robot_state);
+  //           start_state.name = state_name;
+  //           start_states.push_back(start_state);
+  //         }
+  //       }
+  //       catch (std::exception& ex)
+  //       {
+  //         RCLCPP_ERROR(LOGGER, "Runtime error when loading state '%s': %s", state_name.c_str(), ex.what());
+  //         continue;
+  //       }
+  //     }
+  //   }
 
-    if (start_states.empty())
-      ROS_WARN("No stored states matched the provided start state regex: '%s'", regex.c_str());
-  }
-  ROS_INFO("Loaded states successfully");
+  //   if (start_states.empty())
+  //     ROS_WARN("No stored states matched the provided start state regex: '%s'", regex.c_str());
+  // }
+  // RCLCPP_INFO(LOGGER, "Loaded states successfully");
   return true;
 }
 
 bool BenchmarkExecutor::loadPathConstraints(const std::string& regex, std::vector<PathConstraints>& constraints)
 {
-  if (!regex.empty())
-  {
-    std::vector<std::string> cnames;
-    cs_->getKnownConstraints(regex, cnames);
+  // TODO(YuYan): uncomment after porting moveit_ros_warehouse
+  // if (!regex.empty())
+  // {
+  //   std::vector<std::string> cnames;
+  //   cs_->getKnownConstraints(regex, cnames);
 
-    for (const std::string& cname : cnames)
-    {
-      moveit_warehouse::ConstraintsWithMetadata constr;
-      try
-      {
-        if (cs_->getConstraints(constr, cname))
-        {
-          PathConstraints constraint;
-          constraint.constraints.push_back(*constr);
-          constraint.name = cname;
-          constraints.push_back(constraint);
-        }
-      }
-      catch (std::exception& ex)
-      {
-        ROS_ERROR("Runtime error when loading path constraint '%s': %s", cname.c_str(), ex.what());
-        continue;
-      }
-    }
+  //   for (const std::string& cname : cnames)
+  //   {
+  //     moveit_warehouse::ConstraintsWithMetadata constr;
+  //     try
+  //     {
+  //       if (cs_->getConstraints(constr, cname))
+  //       {
+  //         PathConstraints constraint;
+  //         constraint.constraints.push_back(*constr);
+  //         constraint.name = cname;
+  //         constraints.push_back(constraint);
+  //       }
+  //     }
+  //     catch (std::exception& ex)
+  //     {
+  //       RCLCPP_ERROR(LOGGER, "Runtime error when loading path constraint '%s': %s", cname.c_str(), ex.what());
+  //       continue;
+  //     }
+  //   }
 
-    if (constraints.empty())
-      ROS_WARN("No path constraints found that match regex: '%s'", regex.c_str());
-    else
-      ROS_INFO("Loaded path constraints successfully");
-  }
+  //   if (constraints.empty())
+  //     ROS_WARN("No path constraints found that match regex: '%s'", regex.c_str());
+  //   else
+  //     RCLCPP_INFO(LOGGER, "Loaded path constraints successfully");
+  // }
   return true;
 }
 
 bool BenchmarkExecutor::loadTrajectoryConstraints(const std::string& regex,
                                                   std::vector<TrajectoryConstraints>& constraints)
 {
-  if (!regex.empty())
-  {
-    std::vector<std::string> cnames;
-    tcs_->getKnownTrajectoryConstraints(regex, cnames);
+  // TODO(YuYan): uncomment after porting moveit_ros_warehouse
+  // if (!regex.empty())
+  // {
+  //   std::vector<std::string> cnames;
+  //   tcs_->getKnownTrajectoryConstraints(regex, cnames);
 
-    for (const std::string& cname : cnames)
-    {
-      moveit_warehouse::TrajectoryConstraintsWithMetadata constr;
-      try
-      {
-        if (tcs_->getTrajectoryConstraints(constr, cname))
-        {
-          TrajectoryConstraints constraint;
-          constraint.constraints = *constr;
-          constraint.name = cname;
-          constraints.push_back(constraint);
-        }
-      }
-      catch (std::exception& ex)
-      {
-        ROS_ERROR("Runtime error when loading trajectory constraint '%s': %s", cname.c_str(), ex.what());
-        continue;
-      }
-    }
+  //   for (const std::string& cname : cnames)
+  //   {
+  //     moveit_warehouse::TrajectoryConstraintsWithMetadata constr;
+  //     try
+  //     {
+  //       if (tcs_->getTrajectoryConstraints(constr, cname))
+  //       {
+  //         TrajectoryConstraints constraint;
+  //         constraint.constraints = *constr;
+  //         constraint.name = cname;
+  //         constraints.push_back(constraint);
+  //       }
+  //     }
+  //     catch (std::exception& ex)
+  //     {
+  //       RCLCPP_ERROR(LOGGER, "Runtime error when loading trajectory constraint '%s': %s", cname.c_str(), ex.what());
+  //       continue;
+  //     }
+  //   }
 
-    if (constraints.empty())
-      ROS_WARN("No trajectory constraints found that match regex: '%s'", regex.c_str());
-    else
-      ROS_INFO("Loaded trajectory constraints successfully");
-  }
+  //   if (constraints.empty())
+  //     ROS_WARN("No trajectory constraints found that match regex: '%s'", regex.c_str());
+  //   else
+  //     RCLCPP_INFO(LOGGER, "Loaded trajectory constraints successfully");
+  // }
   return true;
 }
 
@@ -788,7 +820,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
           pre_event_fn(request);
 
         // Solve problem
-        ros::WallTime start = ros::WallTime::now();
+        std::chrono::system_clock::time_point start = std::chrono::system_clock::now();
         if (use_planning_context)
         {
           solved[j] = planning_context->solve(responses[j]);
@@ -806,17 +838,19 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
             responses[j].processing_time_.push_back(response.planning_time_);
           }
         }
-        double total_time = (ros::WallTime::now() - start).toSec();
+        std::chrono::duration<double> dt = std::chrono::system_clock::now() - start;
+        double total_time = dt.count();
 
         // Collect data
-        start = ros::WallTime::now();
+        start = std::chrono::system_clock::now();
 
         // Post-run events
         for (PostRunEventFunction& post_event_fn : post_event_fns_)
           post_event_fn(request, responses[j], planner_data[j]);
         collectMetrics(planner_data[j], responses[j], solved[j], total_time);
-        double metrics_time = (ros::WallTime::now() - start).toSec();
-        ROS_DEBUG("Spent %lf seconds collecting metrics", metrics_time);
+        dt = std::chrono::system_clock::now() - start;
+        double metrics_time = dt.count();
+        RCLCPP_DEBUG(LOGGER, "Spent %lf seconds collecting metrics", metrics_time);
 
         ++progress;
       }
@@ -934,7 +968,7 @@ void BenchmarkExecutor::computeAveragePathSimilarities(
     PlannerBenchmarkData& planner_data, const std::vector<planning_interface::MotionPlanDetailedResponse>& responses,
     const std::vector<bool>& solved)
 {
-  ROS_INFO("Computing result path similarity");
+  RCLCPP_INFO(LOGGER, "Computing result path similarity");
   const size_t result_count = planner_data.size();
   size_t unsolved = std::count_if(solved.begin(), solved.end(), [](bool s) { return !s; });
   std::vector<double> average_distances(responses.size());
@@ -1070,7 +1104,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
   std::ofstream out(filename.c_str());
   if (!out)
   {
-    ROS_ERROR("Failed to open '%s' for benchmark output", filename.c_str());
+    RCLCPP_ERROR(LOGGER, "Failed to open '%s' for benchmark output", filename.c_str());
     return;
   }
 
@@ -1083,8 +1117,18 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
   moveit_msgs::msg::PlanningScene scene_msg;
   planning_scene_->getPlanningSceneMsg(scene_msg);
   out << "<<<|" << std::endl;
-  out << "Motion plan request:" << std::endl << brequest.request << std::endl;
-  out << "Planning scene: " << std::endl << scene_msg << std::endl << "|>>>" << std::endl;
+  // TODO(YuYan): implement stream print for the message formats
+  // out << "Motion plan request:" << std::endl << brequest.request << std::endl;
+  // out << "Planning scene: " << std::endl << scene_msg << std::endl << "|>>>" << std::endl;
+  out << "Motion plan request:" << std::endl
+      << "  planner_id: " << brequest.request.planner_id << std::endl
+      << "  group_name: " << brequest.request.group_name << std::endl
+      << "  num_planning_attempts: " << brequest.request.num_planning_attempts << std::endl
+      << "  allowed_planning_time: " << brequest.request.allowed_planning_time << std::endl;
+  out << "Planning scene:" << std::endl
+      << "  scene_name: " << scene_msg.name << std::endl
+      << "  robot_model_name: " << scene_msg.robot_model_name << std::endl
+      << "|>>>" << std::endl;
 
   // Not writing optional cpu information
 
@@ -1147,5 +1191,5 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
   }
 
   out.close();
-  ROS_INFO("Benchmark results saved to '%s'", filename.c_str());
+  RCLCPP_INFO(LOGGER, "Benchmark results saved to '%s'", filename.c_str());
 }

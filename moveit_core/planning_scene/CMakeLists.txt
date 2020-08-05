@@ -3,10 +3,13 @@ set(MOVEIT_LIB_NAME moveit_planning_scene)
 add_library(${MOVEIT_LIB_NAME} SHARED src/planning_scene.cpp)
 #TODO: Fix the versioning
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-
-target_include_directories(${MOVEIT_LIB_NAME} PUBLIC
-  ${octomap_msgs_INCLUDE_DIRS}
-  ${octomap_INCLUDE_DIRS}
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  Boost
+  rclcpp
+  urdfdom
+  urdfdom_headers
+  octomap_msgs
+  OCTOMAP
 )
 
 target_link_libraries(${MOVEIT_LIB_NAME}
@@ -20,14 +23,6 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_robot_trajectory
   moveit_trajectory_processing
   moveit_utils
-  ${LIBOCTOMAP_LIBRARIES}
-  ${rclcpp_LIBRARIES}
-  ${rmw_implementation_LIBRARIES}
-  ${urdfdom_LIBRARIES}
-  ${urdfdom_headers_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${octomap_msgs_LIBRARIES}
-  ${OCTOMAP_LIBRARIES}
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME}
@@ -47,21 +42,14 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_planning_scene test/test_planning_scene.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_planning_scene
-    ${MOVEIT_LIB_NAME}
-    ${srdfdom_LIBRARIES}
-    ${urdf_LIBRARIES}
-    ${geometric_shapes_LIBRARIES}
-    ${OCTOMAP_LIBRARIES}
-    ${ament_index_cpp_LIBRARIES}
+  ament_target_dependencies(test_planning_scene
+    ament_index_cpp
+    geometric_shapes
+    srdfdom
   )
+  target_link_libraries(test_planning_scene ${MOVEIT_LIB_NAME})
 
   ament_add_gtest(test_multi_threaded test/test_multi_threaded.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
-  target_link_libraries(test_multi_threaded
-    moveit_planning_scene
-    moveit_test_utils
-    ${MOVEIT_LIB_NAME}
-    ${urdfdom_LIBRARIES}
-    ${urdfdom_headers_LIBRARIES})
+  target_link_libraries(test_multi_threaded moveit_test_utils ${MOVEIT_LIB_NAME})
 endif()

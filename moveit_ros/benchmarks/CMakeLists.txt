@@ -11,58 +11,97 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Boost REQUIRED filesystem)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
-find_package(catkin REQUIRED COMPONENTS
-  tf2_eigen
-  moveit_ros_planning
-  moveit_ros_warehouse
-  roscpp
-  pluginlib
-)
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(Boost REQUIRED date_time filesystem)
+find_package(tf2_eigen REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+# TODO(YuYan): uncomment after porting moveit_ros_warehouse
+# find_package(moveit_ros_warehouse REQUIRED)
+find_package(pluginlib REQUIRED)
 
-catkin_package(
-  LIBRARIES ${MOVEIT_LIB_NAME}
-  CATKIN_DEPENDS
-    tf2_eigen
-    moveit_ros_planning
-    moveit_ros_warehouse
-    roscpp
-  DEPENDS
-  INCLUDE_DIRS include
-)
+include_directories(include)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/BenchmarkOptions.cpp
   src/BenchmarkExecutor.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-
-add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
-target_link_libraries(moveit_run_benchmark ${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-add_executable(moveit_combine_predefined_poses_benchmark src/simple_benchmarks/CombinePredefinedPosesBenchmark.cpp)
-target_link_libraries(moveit_combine_predefined_poses_benchmark ${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-
-install(
-  TARGETS
-    ${MOVEIT_LIB_NAME}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-
-install(
-  TARGETS
-    moveit_run_benchmark
-    moveit_combine_predefined_poses_benchmark
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
-
-install(PROGRAMS scripts/moveit_benchmark_statistics.py
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  rclcpp
+  Boost
+  tf2_eigen
+  moveit_ros_planning
+  # TODO(YuYan): uncomment after porting moveit_ros_warehouse
+  # moveit_ros_warehouse
+  pluginlib
 )
 
-install(DIRECTORY examples/ DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/examples)
+# TODO(YuYan): uncomment after porting moveit_ros_warehouse
+# add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
+# ament_target_dependencies(moveit_run_benchmark
+#   rclcpp
+#   Boost
+#   tf2_eigen
+#   moveit_ros_planning
+#   # moveit_ros_warehouse
+#   pluginlib
+# )
+# target_link_libraries(moveit_run_benchmark ${MOVEIT_LIB_NAME})
+
+add_executable(moveit_combine_predefined_poses_benchmark src/simple_benchmarks/CombinePredefinedPosesBenchmark.cpp)
+ament_target_dependencies(moveit_combine_predefined_poses_benchmark
+  rclcpp
+  Boost
+  tf2_eigen
+  moveit_ros_planning
+  # TODO(YuYan): uncomment after porting moveit_ros_warehouse
+  # moveit_ros_warehouse
+  pluginlib
+)
+target_link_libraries(moveit_combine_predefined_poses_benchmark ${MOVEIT_LIB_NAME})
+
+ament_export_include_directories(include)
+ament_export_interfaces(${MOVEIT_LIB_NAME} HAS_LIBRARY_TARGET)
+ament_export_libraries(${MOVEIT_LIB_NAME})
+ament_export_dependencies(rclcpp)
+ament_export_dependencies(Boost)
+ament_export_dependencies(tf2_eigen)
+ament_export_dependencies(moveit_ros_planning)
+# TODO(YuYan): uncomment after porting moveit_ros_warehouse
+# ament_export_dependencies(moveit_ros_warehouse)
+ament_export_dependencies(pluginlib)
+
+install(
+  TARGETS ${MOVEIT_LIB_NAME}
+  EXPORT  ${MOVEIT_LIB_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+install(
+  TARGETS
+    # TODO(YuYan): uncomment after porting moveit_ros_warehouse
+    # moveit_run_benchmark
+    moveit_combine_predefined_poses_benchmark
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY include/
+  DESTINATION include
+)
+
+install(PROGRAMS scripts/moveit_benchmark_statistics.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY examples/
+  DESTINATION share/${PROJECT_NAME}
+)
+
+ament_package()

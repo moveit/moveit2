@@ -15,6 +15,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
+  moveit_msgs
   Eigen3
   geometric_shapes
   urdf
@@ -25,28 +26,22 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_profiler
   moveit_exceptions
-  moveit_kinematics_base
 )
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(moveit_resources REQUIRED)
   ament_add_gtest(test_robot_model test/test.cpp)
-  target_link_libraries(test_robot_model
-    moveit_test_utils
-    moveit_profiler
-    ${Boost_LIBRARIES}
-    ${rclcpp_LIBRARIES}
-    ${rmw_implementation_LIBRARIES}
-    ${urdfdom_LIBRARIES}
-    ${urdfdom_headers_LIBRARIES}
-    ${geometric_shapes_LIBRARIES}
-    ${MOVEIT_LIB_NAME})
+  ament_target_dependencies(test_robot_model
+    rclcpp
+    Boost
+  )
+  target_link_libraries(test_robot_model moveit_test_utils ${MOVEIT_LIB_NAME})
 endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 install(DIRECTORY include/ DESTINATION include)
