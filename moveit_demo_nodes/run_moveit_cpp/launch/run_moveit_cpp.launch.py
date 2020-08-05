@@ -40,7 +40,8 @@ def generate_launch_description():
     robot_description_kinematics = { 'robot_description_kinematics' : kinematics_yaml }
 
     controllers_yaml = load_yaml('run_moveit_cpp', 'config/controllers.yaml')
-    moveit_controllers = { 'moveit_simple_controller_manager' : controllers_yaml }
+    moveit_controllers = { 'moveit_simple_controller_manager' : controllers_yaml,
+                           'moveit_controller_manager': 'moveit_simple_controller_manager/MoveItSimpleControllerManager'}
 
     ompl_planning_pipeline_config = { 'ompl' : {
         'planning_plugin' : 'ompl_interface/OMPLPlanner',
