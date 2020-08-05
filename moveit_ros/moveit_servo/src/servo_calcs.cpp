@@ -244,6 +244,9 @@ void ServoCalcs::run()  // TODO(adamp): come back and pass a timer event here?
   status_msg.get()->data = static_cast<int8_t>(status_);
   status_pub_->publish(std::move(status_msg));
 
+  // After we publish, status, reset it back to no warnings
+  status_ = StatusCode::NO_WARNING;
+
   // Always update the joints and end-effector transform for 2 reasons:
   // 1) in case the getCommandFrameTransform() method is being used
   // 2) so the low-pass filters are up to date and don't cause a jump
