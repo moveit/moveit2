@@ -244,6 +244,8 @@ public:
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     ++num_status_;
     latest_status_ = static_cast<StatusCode>(msg.get()->data);
+    if (latest_status_ == status_tracking_code_)
+      status_seen_ = true;
   }
 
   void collisionScaleCB(const std_msgs::msg::Float64::SharedPtr msg)
@@ -352,6 +354,19 @@ public:
     num_commands_ = 0;
   }
 
+  void watchForStatus(StatusCode code_to_watch_for)
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    status_seen_ = false;
+    status_tracking_code_ = code_to_watch_for;
+  }
+
+  bool sawTrackedStatus()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    return status_seen_;
+  }
+
 protected:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Executor::SharedPtr executor_;
@@ -391,6 +406,9 @@ protected:
   size_t num_commands_;
   trajectory_msgs::msg::JointTrajectory::SharedPtr latest_traj_cmd_;
   std_msgs::msg::Float64MultiArray::ConstSharedPtr latest_array_cmd_;
+
+  bool status_seen_;
+  StatusCode status_tracking_code_ = StatusCode::NO_WARNING;
 
   mutable std::mutex latest_state_mutex_;
 };  // class ServoFixture

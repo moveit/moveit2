@@ -52,6 +52,9 @@ TEST_F(ServoFixture, SelfCollision)
   auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
   ASSERT_TRUE(start_result.get()->success);
 
+  // Look for HALT_FOR_COLLISION status
+  watchForStatus(moveit_servo::StatusCode::HALT_FOR_COLLISION);
+
   // Publish some joint jog commands that will bring us to collision
   rclcpp::Rate loop_rate(20);
   for (size_t i = 0; i < 10; ++i)
@@ -65,7 +68,7 @@ TEST_F(ServoFixture, SelfCollision)
     loop_rate.sleep();
   }
 
-  EXPECT_TRUE(getLatestStatus() == moveit_servo::StatusCode::HALT_FOR_COLLISION);
+  EXPECT_TRUE(sawTrackedStatus());
 }
 
 TEST_F(ServoFixture, ExternalCollision)
@@ -108,6 +111,9 @@ TEST_F(ServoFixture, ExternalCollision)
   auto scene_pub = node_->create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", 10);
   scene_pub->publish(ps);
 
+  // Look for HALT_FOR_COLLISION status
+  watchForStatus(moveit_servo::StatusCode::HALT_FOR_COLLISION);
+
   // Now publish twist commands that collide with the box
   rclcpp::Rate loop_rate(20);
   for (size_t i = 0; i < 10; ++i)
@@ -118,7 +124,7 @@ TEST_F(ServoFixture, ExternalCollision)
     pub_twist_cmd_->publish(std::move(msg));
     loop_rate.sleep();
   }
-  EXPECT_TRUE(getLatestStatus() == moveit_servo::StatusCode::HALT_FOR_COLLISION);
+  EXPECT_TRUE(sawTrackedStatus());
 }
 
 }  // namespace moveit_servo

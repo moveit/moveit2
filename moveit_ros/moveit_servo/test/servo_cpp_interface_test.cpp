@@ -165,23 +165,28 @@ TEST_F(ServoFixture, StaleCommandStop)
   auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
   ASSERT_TRUE(start_result.get()->success);
 
+  RCLCPP_WARN_STREAM(LOGGER, "Test point 1");
+
   // Setup the message to publish (only once)
   auto msg = std::make_unique<control_msgs::msg::JointJog>();
-  msg->header.stamp = node_->now();
   msg->joint_names.push_back("panda_joint1");
   msg->header.frame_id = "panda_link3";
   msg->velocities.push_back(0.1);
 
+  // Wait the stale limit, plus a little extra
+  const int sleep_time = 3*1000* parameters_->incoming_command_timeout;
+  rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
+
   // Get current position
   double start_position = getLatestTrajCommand().points[0].positions[0];
-  
+
   // Publish once
+  msg->header.stamp = node_->now();
   pub_joint_cmd_->publish(std::move(msg));
 
-  // Wait the stale limit
-  const int sleep_time = 1000* parameters_->incoming_command_timeout;
+  // Wait the stale limit, plus a little extra
   rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
-  
+
   // Get the new current position (should be different than first)
   double middle_position = getLatestTrajCommand().points[0].positions[0];
   EXPECT_NE(start_position, middle_position);
@@ -191,7 +196,7 @@ TEST_F(ServoFixture, StaleCommandStop)
 
   // Get the current position (should be no change)
   double end_position = getLatestTrajCommand().points[0].positions[0];
-  EXPECT_EQ(middle_position, end_position);
+  EXPECT_NEAR(middle_position, end_position, 0.001);
 }
 }  // namespace moveit_servo
 
