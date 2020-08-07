@@ -258,7 +258,8 @@ void ServoCalcs::run()  // TODO(adamp): come back and pass a timer event here?
   }
 
   // Calculate and publish worst stop time for collision checker
-  calculateWorstCaseStopTime();
+  if (parameters_->collision_check_type == "stop_distance")
+    calculateWorstCaseStopTime();
 
   // Update from latest state
   {
