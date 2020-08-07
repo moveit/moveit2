@@ -52,8 +52,8 @@ TEST_F(ServoFixture, SelfCollision)
   auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
   ASSERT_TRUE(start_result.get()->success);
 
-  // Look for HALT_FOR_COLLISION status
-  watchForStatus(moveit_servo::StatusCode::HALT_FOR_COLLISION);
+  // Look for DECELERATE_FOR_COLLISION status
+  watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_COLLISION);
 
   // Publish some joint jog commands that will bring us to collision
   rclcpp::Rate loop_rate(20);
@@ -63,7 +63,7 @@ TEST_F(ServoFixture, SelfCollision)
     msg->header.stamp = node_->now();
     msg->header.frame_id = "panda_link3";
     msg->joint_names.push_back("panda_joint4");
-    msg->velocities.push_back(-0.2);
+    msg->velocities.push_back(-0.8);
     pub_joint_cmd_->publish(std::move(msg));
     loop_rate.sleep();
   }
@@ -111,8 +111,8 @@ TEST_F(ServoFixture, ExternalCollision)
   auto scene_pub = node_->create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", 10);
   scene_pub->publish(ps);
 
-  // Look for HALT_FOR_COLLISION status
-  watchForStatus(moveit_servo::StatusCode::HALT_FOR_COLLISION);
+  // Look for DECELERATE_FOR_COLLISION status
+  watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_COLLISION);
 
   // Now publish twist commands that collide with the box
   rclcpp::Rate loop_rate(20);

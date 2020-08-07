@@ -56,10 +56,10 @@ moveit_servo::ServoParametersPtr getTestParameters()
   output->cartesian_command_in_topic = "servo_server/delta_twist_cmds";
   output->joint_command_in_topic = "servo_server/delta_joint_cmds";
   output->robot_link_command_frame = "panda_link0";
-  output->command_in_type = "speed_units";
-  output->linear_scale = 0.6;
-  output->rotational_scale = 0.3;
-  output->joint_scale = 0.01;
+  output->command_in_type = "unitless";
+  output->linear_scale = 0.4;
+  output->rotational_scale = 0.8;
+  output->joint_scale = 0.5;
   output->command_out_topic = "/fake_joint_trajectory_controller/joint_trajectory";
   output->publish_period = 0.008;
   output->command_out_type = "trajectory_msgs/JointTrajectory";
@@ -77,9 +77,9 @@ moveit_servo::ServoParametersPtr getTestParameters()
   output->joint_limit_margin = 0.1;
   output->check_collisions = true;
   output->collision_check_rate = 50;
-  output->collision_check_type = "stop_distance";
+  output->collision_check_type = "threshold_distance";
   output->self_collision_proximity_threshold = 0.01;
-  output->scene_collision_proximity_threshold = 0.05;
+  output->scene_collision_proximity_threshold = 0.02;
   output->collision_distance_safety_factor = 1000;
   output->min_allowable_collision_distance = 0.01;
 

@@ -142,7 +142,7 @@ int main(int argc, char** argv)
       msg->header.stamp = node_ptr->now();
       msg->header.frame_id = "panda_link3";
       msg->joint_names.push_back("panda_joint1");
-      msg->velocities.push_back(0.1);
+      msg->velocities.push_back(0.3);
       pub_ptr->publish(std::move(msg));
       ++count;
     };
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
       auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
       msg->header.stamp = node_ptr->now();
       msg->header.frame_id = "panda_link0";
-      msg->twist.linear.x = 0.1;
+      msg->twist.linear.x = 0.3;
       msg->twist.angular.z = 0.5;
       pub_ptr->publish(std::move(msg));
     };

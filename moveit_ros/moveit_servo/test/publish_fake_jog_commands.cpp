@@ -74,7 +74,7 @@ int main(int argc, char** argv)
       auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
       msg->header.stamp = node_ptr->now();
       // msg->header.frame_id = "panda_link0";
-      msg->twist.linear.x = 0.1;
+      msg->twist.linear.x = 0.3;
       msg->twist.angular.z = 0.5;
       pub_ptr->publish(std::move(msg));
     };

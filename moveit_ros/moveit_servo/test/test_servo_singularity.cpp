@@ -59,7 +59,7 @@ TEST_F(ServoFixture, ReachSingular)
   {
     auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
     msg->header.stamp = node_->now();
-    msg->twist.linear.x = 0.2;
+    msg->twist.linear.x = 0.8;
     pub_twist_cmd_->publish(std::move(msg));
     loop_rate.sleep();
   }

@@ -236,6 +236,7 @@ TEST_F(ServoCalcsTestFixture, TestCheckValidCommand)
   EXPECT_FALSE(servo_calcs_->checkValidCommand(twist_msg));
 
   // Now set the scaling to unitless and give it a number with abs() > 1, expecting a fail
+  servo_calcs_->parameters_->command_in_type = "speed_units";
   twist_msg.twist.linear.y = -10.0;
   EXPECT_TRUE(servo_calcs_->checkValidCommand(twist_msg));
   servo_calcs_->parameters_->command_in_type = "unitless";
