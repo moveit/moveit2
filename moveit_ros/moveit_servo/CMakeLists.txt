@@ -146,7 +146,7 @@ if(BUILD_TESTING)
 
   # Servo integration launch test
   ament_add_gtest_executable(test_servo_integration
-      test/servo_cpp_interface_test.cpp
+      test/test_servo_interface.cpp
       test/test_parameter_struct.hpp
       test/servo_launch_test_common.hpp
   )

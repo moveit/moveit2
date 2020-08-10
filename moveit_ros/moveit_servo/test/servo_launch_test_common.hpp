@@ -66,7 +66,7 @@
 
 using namespace std::chrono_literals;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_cpp_interface_test.cpp");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_launch_test_common.hpp");
 
 namespace moveit_servo
 {
@@ -102,22 +102,6 @@ public:
       client_servo_stop_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
     }
     executor_->cancel();
-  }
-
-  bool waitForFirstStatus()
-  {
-    rclcpp::WaitSet wait_set(std::vector<rclcpp::WaitSet::SubscriptionEntry>{ { sub_servo_status_ } });
-    // auto wait_result = wait_set.wait();
-    auto wait_result = wait_set.wait(std::chrono::seconds(15));
-
-    std_msgs::msg::Int8 recieved_msg;
-    rclcpp::MessageInfo msg_info;
-    sub_servo_status_->take(recieved_msg, msg_info);  // TODO(adamp): this returns a bool, need to decide
-                                                                // what happens if this returns false
-
-    statusCB(std::make_shared<std_msgs::msg::Int8>(recieved_msg));
-    RCLCPP_WARN_STREAM(LOGGER, "Wait kind is: " << wait_result.kind() << ". Status code is: " << latest_status_);
-    return wait_result.kind() == rclcpp::WaitResultKind::Ready;
   }
 
   // Set up for callbacks (so they aren't run for EVERY test)
