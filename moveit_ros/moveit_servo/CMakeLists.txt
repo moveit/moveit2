@@ -69,6 +69,12 @@ add_executable(${CPP_DEMO_NAME} src/ros2_demo/servo_cpp_interface_demo.cpp)
 ament_target_dependencies(${CPP_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(${CPP_DEMO_NAME} ${LIBRARY_NAME})
 
+# Add executable for using a controller
+set(SERVO_CONTROLLER_INPUT servo_controller_input)
+add_library(${SERVO_CONTROLLER_INPUT} SHARED src/joystick_servo_example.cpp)
+ament_target_dependencies(${SERVO_CONTROLLER_INPUT} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+rclcpp_components_register_nodes(${SERVO_CONTROLLER_INPUT} "moveit_servo::JoyToServoPub")
+
 # Add executable to publish fake servo commands for testing/demo purposes
 set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
 add_executable(${FAKE_SERVO_CMDS_NAME} test/publish_fake_jog_commands.cpp)
@@ -86,6 +92,12 @@ install(TARGETS ${LIBRARY_NAME}
 
 install(TARGETS
   ${COMPOSABLE_NODE_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+install(TARGETS
+  ${SERVO_CONTROLLER_INPUT}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)

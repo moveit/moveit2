@@ -54,7 +54,6 @@ int main(int argc, char** argv)
   // ROS objects
   rclcpp::NodeOptions node_options;
   auto node = std::make_shared<rclcpp::Node>("publish_fake_jog_commands", node_options);
-  auto executor = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
 
   // Call the start service to init and start the servo component
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr servo_start_client = node->create_client<std_srvs::srv::Trigger>("/start_servo");
@@ -80,9 +79,6 @@ int main(int argc, char** argv)
     };
   auto timer = node->create_wall_timer(50ms, callback);
 
-  // executor->add_node(node);
-  
-  // executor->spin();
   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;
