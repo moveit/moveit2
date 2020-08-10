@@ -123,10 +123,10 @@ if(BUILD_TESTING)
   ament_add_gtest(test_low_pass_filter test/test_low_pass_filter.cpp)
   target_link_libraries( test_low_pass_filter ${LIBRARY_NAME})
 
-  # Basic unit test Servo standup
+  # Basic unit test ServoCalcs
   ament_add_gtest(
     test_servo
-    test/test_standup_servo.cpp
+    test/unit_test_servo_calcs.cpp
     test/test_parameter_struct.hpp
   )
   target_link_libraries( test_servo ${LIBRARY_NAME})

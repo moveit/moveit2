@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/*      Title     : TODO(adamp)
+/*      Title     : unit_test_servo_calcs.cpp
  *      Project   : moveit_servo
  *      Created   : 07/24/2020
  *      Author    : Adam Pettinger
