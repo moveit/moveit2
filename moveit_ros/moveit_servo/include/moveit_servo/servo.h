@@ -87,10 +87,10 @@ public:
 
 private:
   // Pointer to the collision environment
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;  // TODO(adamp:) do we need to store this?
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   // The stored servo parameters
-  ServoParametersPtr parameters_; // TODO(adamp): do we need to store here? Probably not...
+  ServoParametersPtr parameters_;
 
   std::unique_ptr<ServoCalcs> servo_calcs_;
   std::unique_ptr<CollisionCheck> collision_checker_;

@@ -68,10 +68,14 @@ bool ServoServer::init()
 {
   bool performed_initialization = true;
 
+  // Can set robot_description name from parameters
+  std::string robot_description_name = "robot_description";
+  this->get_parameter_or("robot_description_name", robot_description_name, robot_description_name);
+
   // Set up planning_scene_monitor
   auto node_ptr = shared_from_this();
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
-  planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_ptr, "robot_description", tf_buffer_, "planning_scene_monitor"); //TODO(adamp) parameterize this
+  planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_ptr, robot_description_name, tf_buffer_, "planning_scene_monitor");
   
   // Get the servo parameters
   auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
@@ -83,8 +87,7 @@ bool ServoServer::init()
   performed_initialization &= (planning_scene_monitor_->getPlanningScene() != nullptr);
   if (performed_initialization)
   {
-    // TODO(adamp): parameterize this
-    planning_scene_monitor_->startStateMonitor("/joint_states");
+    planning_scene_monitor_->startStateMonitor(servo_parameters->joint_topic);
     planning_scene_monitor_->setPlanningScenePublishingFrequency(25);
     planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE, "/moveit_servo/publish_planning_scene");
     planning_scene_monitor_->startSceneMonitor();

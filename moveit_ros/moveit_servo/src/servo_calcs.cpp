@@ -219,8 +219,11 @@ bool ServoCalcs::waitForInitialized(std::chrono::duration<double> wait_for)
 
     sensor_msgs::msg::JointState recieved_joint_state_msg;
     rclcpp::MessageInfo msg_info;
-    joint_state_sub_->take(recieved_joint_state_msg, msg_info);  // TODO(adamp): this returns a bool, need to decide
-                                                                 // what happens if this returns false
+    if (!joint_state_sub_->take(recieved_joint_state_msg, msg_info))
+    {
+      RCLCPP_WARN(LOGGER, "Problem receiving first joint_state message");
+      return false;
+    }
 
     jointStateCB(std::make_shared<sensor_msgs::msg::JointState>(recieved_joint_state_msg));
     updateJoints();
@@ -228,17 +231,8 @@ bool ServoCalcs::waitForInitialized(std::chrono::duration<double> wait_for)
   return true;
 }
 
-void ServoCalcs::run()  // TODO(adamp): come back and pass a timer event here?
+void ServoCalcs::run()
 {
-  // Log warning when the last loop duration was longer than the period
-  // TODO(adamp): timer running long handle here
-  // if (timer_event.profile.last_duration.toSec() > period_.toSec())
-  // {
-  //   ROS_WARN_STREAM_THROTTLE_NAMED(ROS_LOG_THROTTLE_PERIOD, LOGNAME,
-  //                                  "last_duration: " << timer_event.profile.last_duration.toSec() << " ("
-  //                                                    << period_.toSec() << ")");
-  // }
-
   // Publish status each loop iteration
   auto status_msg = std::make_unique<std_msgs::msg::Int8>();  // TODO(adamp): use pool allocator here
   status_msg.get()->data = static_cast<int8_t>(status_);

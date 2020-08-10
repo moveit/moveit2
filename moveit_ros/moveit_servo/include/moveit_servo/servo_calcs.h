@@ -91,7 +91,7 @@ public:
 
 protected:
   /** \brief Timer method */
-  void run();  // TODO(adamp): come back and pass a timer event here?
+  void run();
 
   /** \brief Do servoing calculations for Cartesian twist commands. */
   bool cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
