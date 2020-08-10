@@ -45,4 +45,8 @@ if(BUILD_TESTING)
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
 
   target_link_libraries(test_time_parameterization moveit_test_utils ${MOVEIT_LIB_NAME})
+
+  ament_add_gtest(test_time_optimal_trajectory_generation test/test_time_optimal_trajectory_generation.cpp)
+
+  target_link_libraries(test_time_optimal_trajectory_generation ${MOVEIT_LIB_NAME})
 endif()
