@@ -77,7 +77,7 @@ int main(int argc, char** argv)
 
   // Create and try to load the parameters
   auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
-  load_params_success_ = moveit_servo::readParameters(*node, LOGGER, *servo_parameters);
+  load_params_success_ = moveit_servo::readParameters(node, LOGGER, servo_parameters);
 
   // Offer a service to report the success/fail of the loading
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr loading_service =
