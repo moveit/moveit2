@@ -1,4 +1,4 @@
-fake_joint_trajectory_controller:
+panda_arm_controller:
   ros__parameters:
     joints:
       - panda_joint1
