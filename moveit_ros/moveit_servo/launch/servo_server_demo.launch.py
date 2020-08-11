@@ -75,7 +75,8 @@ def generate_launch_description():
                     package='moveit_servo',
                     plugin='moveit_servo::ServoServer',
                     name='servo_server',
-                    parameters=[servo_params, robot_description, robot_description_semantic])
+                    parameters=[servo_params, robot_description, robot_description_semantic],
+                    extra_arguments=[{'use_intra_process_comms' : True}])
             ],
             output='screen',
     )

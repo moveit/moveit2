@@ -55,6 +55,7 @@ int main(int argc, char** argv)
 
   // ROS objects
   rclcpp::NodeOptions node_options;
+  node_options.use_intra_process_comms(true);
   auto node = std::make_shared<rclcpp::Node>("servo_demo_node", node_options);
   auto executor = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
 

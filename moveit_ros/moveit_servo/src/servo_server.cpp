@@ -51,9 +51,8 @@ ServoServer::ServoServer(const rclcpp::NodeOptions& options)
 {
   if(!options.use_intra_process_comms())
   {
-    RCLCPP_WARN_STREAM(LOGGER, "Intra-process communication is disabled, consider enabling it with: \n something here"); //TODO(adamp): figure out the instructions for enabling and update here
+    RCLCPP_WARN_STREAM(LOGGER, "Intra-process communication is disabled, consider enabling it by adding: \nextra_arguments=[{'use_intra_process_comms' : True}]\nto the Servo composable node in the launch file");
   }
-  // Create tf buffer and planning scene monitor
 
   // Set up services for interacting with Servo
   using std::placeholders::_1;
