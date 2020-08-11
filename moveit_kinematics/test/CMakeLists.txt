@@ -3,20 +3,20 @@ if(BUILD_TESTING)
   find_package(moveit_resources REQUIRED)
   find_package(moveit_ros_planning REQUIRED)
 
-  ament_add_gtest(test_kinematics_plugin test_kinematics_plugin.cpp APPEND_LIBRARY_DIRS "${append_library_dirs}")
-
-  ament_target_dependencies(
-    test_kinematics_plugin
-    class_loader
-    pluginlib
-    rclcpp
-    moveit_core
-    moveit_ros_planning
-    Boost
-  )
-  target_compile_definitions(test_kinematics_plugin PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
-
 # TODO(henningkayser): enable new tests
+#  ament_add_gtest(test_kinematics_plugin test_kinematics_plugin.cpp APPEND_LIBRARY_DIRS "${append_library_dirs}")
+#
+#  ament_target_dependencies(
+#    test_kinematics_plugin
+#    class_loader
+#    pluginlib
+#    rclcpp
+#    moveit_core
+#    moveit_ros_planning
+#    Boost
+#  )
+#  target_compile_definitions(test_kinematics_plugin PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+#
 # catkin_add_executable_with_gtest(test_kinematics_plugin test_kinematics_plugin.cpp)
 #  target_link_libraries(test_kinematics_plugin ${catkin_LIBRARIES} ${moveit_ros_planning_LIBRARIES} ${xmlrpcpp_LIBRARIES})
 #  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

@@ -31,7 +31,7 @@
   <depend>moveit_msgs</depend>
 
   <exec_depend>python-lxml</exec_depend>
-  <exec_depend>liburdfdom-tools</exec_depend> <!-- provides check_urdf required by ikfast scripts -->
+  <exec_depend>urdfdom</exec_depend> <!-- provides check_urdf required by ikfast scripts -->
 
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>moveit_ros_planning</test_depend>

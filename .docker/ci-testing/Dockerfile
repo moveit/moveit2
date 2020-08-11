@@ -1,7 +1,7 @@
-# moveit/moveit2:eloquent-ci-testing
+# moveit/moveit2:foxy-ci-testing
 # CI image using the ROS testing repository
 
-ARG ROS_DISTRO=eloquent
+ARG ROS_DISTRO=foxy
 FROM moveit/moveit2:${ROS_DISTRO}-ci
 
 MAINTAINER Dave Coleman dave@picknik.ai

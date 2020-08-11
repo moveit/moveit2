@@ -13,7 +13,7 @@ notifications:
 env:
   global:
     - MOVEIT_CI_TRAVIS_TIMEOUT=85  # Travis grants us 90 min, but we add a safety margin of 5 min
-    - ROS_DISTRO=eloquent
+    - ROS_DISTRO=foxy
     - ROS_REPO=ros
     - UPSTREAM_WORKSPACE=moveit2.repos
     - CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls"
@@ -22,10 +22,19 @@ env:
 jobs:
   fast_finish: true
   include:
-    - env: TEST="clang-format ament_lint"
-    - env: TEST=code-coverage
-    - env: ROS_DISTRO=eloquent
-    - compiler: clang  # test_ikfast_plugins takes ~10 minutes: include here to keep the main jobs shorter
+    - name: "[Foxy] - ament_lint"
+      env: TEST="ament_lint"
+    - name: "[Eloquent] - clang-format"
+      env: TEST="clang-format"
+           ROS_DISTRO="eloquent"
+           UPSTREAM_WORKSPACE=""
+           BEFORE_SCRIPT="for p in geometric_shapes moveit_msgs moveit_resources object_recognition_msgs octomap_msgs ompl random_numbers srdfdom; do ros2 pkg create \$p; done"
+    - name: "[Foxy] - code-coverage"
+      env: TEST=code-coverage
+    - name: "[Foxy] - gcc (build,test)"
+      env: ROS_DISTRO=foxy
+    - name: "[Foxy] - clang (build,test,clang-tidy-fix,test_ikfast_plugins)"
+      compiler: clang  # test_ikfast_plugins takes ~10 minutes: include here to keep the main jobs shorter
       env: TEST=clang-tidy-fix
            CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-overloaded-virtual"
            BEFORE_DOCKER_SCRIPT="source moveit_kinematics/test/test_ikfast_plugins.sh"

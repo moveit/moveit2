@@ -1,23 +1,11 @@
 repositories:
   moveit2:
     type: git
-    url: https://github.com/ros-planning/moveit2
-    version: master
+    url: https://github.com/henningkayser/moveit2
+    version: foxy
   moveit_msgs:
     type: git
     url: https://github.com/ros-planning/moveit_msgs
-    version: ros2
-  joint_state_publisher:
-    type: git
-    url: https://github.com/ros/joint_state_publisher
-    version: ros2
-  random_numbers:
-    type: git
-    url: https://github.com/ros-planning/random_numbers
-    version: ros2
-  urdf_parser_py:
-    type: git
-    url: https://github.com/ros/urdf_parser_py
     version: ros2
   moveit_resources:
     type: git
@@ -26,28 +14,18 @@ repositories:
   geometric_shapes:
     type: git
     url: https://github.com/ros-planning/geometric_shapes
-    version: dashing-devel
+    version: ros2
   srdfdom:
     type: git
-    url: https://github.com/ros-planning/srdfdom
-    version: ros2
-  octomap_msgs:
-    type: git
-    url: https://github.com/OctoMap/octomap_msgs
+    url: https://github.com/PickNikRobotics/srdfdom
     version: ros2
 
-# Dependencies with pending PRs
-  object_recognition_msgs:
+# TODO(#242): Remove below once console_bridge conflict is resolved
+  urdfdom:
     type: git
-    # TODO(henningkayser): use upstream version once #8 is merged
-    # url: https://github.com/wg-perception/object_recognition_msgs
-    # version: ros2
-    url: https://github.com/PickNikRobotics/object_recognition_msgs
-    version: master
-
-# Temporarily install OMPL from melodic
-# TODO(henningkayser): remove once OMPL is released for ROS2
-  ompl:
+    url: https://github.com/ros2/urdfdom
+    version: foxy
+  urdfdom_headers:
     type: git
-    url: https://github.com/ros-gbp/ompl-release.git
-    version: release/melodic/ompl/1.4.2-5
+    url: https://github.com/ros/urdfdom_headers
+    version: foxy
