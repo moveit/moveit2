@@ -1,6 +1,6 @@
 # This config file for Travis CI utilizes https://github.com/ros-planning/moveit_ci/ package.
 os: linux
-dist: xenial  # distro used by Travis, moveit_ci uses the docker image's distro
+dist: bionic  # distro used by Travis, moveit_ci uses the docker image's distro
 services:
   - docker
 language: cpp
@@ -34,7 +34,8 @@ jobs:
     - name: "[Foxy] - gcc (build,test)"
       env: ROS_DISTRO=foxy
     - name: "[Foxy] - clang (build,test,clang-tidy-fix,test_ikfast_plugins)"
-      compiler: clang  # test_ikfast_plugins takes ~10 minutes: include here to keep the main jobs shorter
+      compiler: clang
+      # test_ikfast_plugins takes ~10 minutes: include here to keep the main jobs shorter
       env: TEST=clang-tidy-fix
            CXXFLAGS="-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-overloaded-virtual"
            BEFORE_DOCKER_SCRIPT="source moveit_kinematics/test/test_ikfast_plugins.sh"

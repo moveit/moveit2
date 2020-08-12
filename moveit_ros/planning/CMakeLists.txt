@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_ros_planning)
 
-set(CMAKE_CXX_STANDARD 14)
+if(NOT "${CMAKE_CXX_STANDARD}")
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -53,7 +55,6 @@ set(libraries
   moveit_default_planning_request_adapter_plugins
 )
 
-
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   Boost
   pluginlib
@@ -74,7 +75,9 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   Boost
 )
 
-include_directories(${THIS_PACKAGE_INCLUDE_DIRS} SYSTEM ${EIGEN3_INCLUDE_DIRS})
+include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
+include_directories(SYSTEM
+                    ${EIGEN3_INCLUDE_DIRS})
 
 add_subdirectory(rdf_loader)
 add_subdirectory(collision_plugin_loader)

@@ -23,6 +23,7 @@
   <buildtool_export_depend>eigen3_cmake_module</buildtool_export_depend>
 
   <depend>rclcpp</depend>
+  <depend>common_interfaces</depend>
   <depend>assimp</depend>
   <depend>boost</depend>
   <depend>eigen</depend>

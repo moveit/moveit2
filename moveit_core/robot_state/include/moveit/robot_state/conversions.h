@@ -39,7 +39,6 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/transforms/transforms.h>
 #include <moveit_msgs/msg/robot_state.hpp>
-#include <moveit_msgs/msg/robot_trajectory.hpp>
 
 namespace moveit
 {

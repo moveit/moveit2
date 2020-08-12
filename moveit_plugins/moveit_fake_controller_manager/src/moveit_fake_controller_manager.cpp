@@ -40,7 +40,6 @@
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <pluginlib/class_list_macros.hpp>
 #include <map>
-#include <iterator>
 
 namespace moveit_fake_controller_manager
 {
@@ -196,10 +195,10 @@ public:
     }
 
     // fill the joint state
-    for (JointPoseMap::const_iterator it = joints.begin(), end = joints.end(); it != end; ++it)
+    for (const auto& joint : joints)
     {
-      js.name.push_back(it->first);
-      js.position.push_back(it->second);
+      js.name.push_back(joint.first);
+      js.position.push_back(joint.second);
     }
     return js;
   }

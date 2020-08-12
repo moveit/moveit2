@@ -37,7 +37,6 @@
 #pragma once
 
 #include <geometry_msgs/msg/transform_stamped.hpp>
-#include <geometry_msgs/msg/pose.hpp>
 #include <Eigen/Geometry>
 #include <boost/noncopyable.hpp>
 #include <moveit/macros/class_forward.h>

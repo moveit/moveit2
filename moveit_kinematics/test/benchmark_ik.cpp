@@ -34,7 +34,6 @@
 
 /* Author: Mark Moll */
 
-#include <cstring>
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
 #include <boost/program_options.hpp>

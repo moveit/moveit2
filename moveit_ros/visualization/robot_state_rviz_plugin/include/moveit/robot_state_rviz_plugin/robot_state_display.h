@@ -37,8 +37,6 @@
 #pragma once
 
 #include <rviz_common/display.hpp>
-#include <rviz_common/properties/string_property.hpp>
-#include <rviz_common/properties/ros_topic_property.hpp>
 
 #ifndef Q_MOC_RUN
 #include <moveit/rdf_loader/rdf_loader.h>
@@ -46,6 +44,19 @@
 #include <moveit_msgs/msg/display_robot_state.hpp>
 #include <rclcpp/rclcpp.hpp>
 #endif
+
+namespace rviz_common
+{
+namespace properties
+{
+class Robot;
+class StringProperty;
+class BoolProperty;
+class FloatProperty;
+class RosTopicProperty;
+class ColorProperty;
+}  // namespace properties
+}  // namespace rviz_common
 
 namespace moveit_rviz_plugin
 {

@@ -36,7 +36,6 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <cstdlib>
 #include <tf2_ros/transform_listener.h>
 #include <memory>
 

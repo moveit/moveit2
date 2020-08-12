@@ -48,9 +48,7 @@
 #include <memory>
 
 // ROS msgs
-#include <geometry_msgs/msg/pose_stamped.hpp>
-#include <moveit_msgs/srv/get_position_fk.hpp>
-#include <moveit_msgs/srv/get_position_ik.hpp>
+#include <geometry_msgs/msg/pose.hpp>
 #include <moveit_msgs/msg/kinematic_solver_info.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 

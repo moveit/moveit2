@@ -36,6 +36,9 @@
 
 #include <stdexcept>
 #include <moveit/moveit_cpp/moveit_cpp.h>
+#include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <moveit/common_planning_interface_objects/common_objects.h>
+
 #include <tf2/utils.h>
 #include <tf2_ros/transform_listener.h>
 #include <rclcpp/rclcpp.hpp>

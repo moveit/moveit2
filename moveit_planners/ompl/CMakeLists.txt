@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.10.2)
 project(moveit_planners_ompl)
 
 # At least C++11 required for OMPL
-set(CMAKE_CXX_STANDARD 14)
+if(NOT "${CMAKE_CXX_STANDARD}")
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -18,9 +20,9 @@ find_package(pluginlib REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(ompl REQUIRED)
 
-include_directories(ompl_interface/include
+include_directories(ompl_interface/include)
+include_directories(SYSTEM
                     ${Boost_INCLUDE_DIRS}
-                    ${catkin_INCLUDE_DIRS}
                     ${OMPL_INCLUDE_DIRS})
 
 add_subdirectory(ompl_interface)
