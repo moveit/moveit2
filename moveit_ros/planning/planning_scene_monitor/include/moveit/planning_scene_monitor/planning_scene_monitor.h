@@ -461,6 +461,7 @@ protected:
   // TODO: (anasarrak) callbacks on ROS2?
   // https://answers.ros.org/question/300874/how-do-you-use-callbackgroups-as-a-replacement-for-callbackqueues-in-ros2/
   // ros::CallbackQueue queue_;
+  std::shared_ptr<rclcpp::Node> pnode_;
   std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> private_executor_;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
