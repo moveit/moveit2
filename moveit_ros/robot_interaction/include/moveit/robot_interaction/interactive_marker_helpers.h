@@ -43,15 +43,16 @@
 namespace robot_interaction
 {
 visualization_msgs::msg::InteractiveMarker makeEmptyInteractiveMarker(const std::string& name,
-                                                                 const geometry_msgs::msg::PoseStamped& stamped,
-                                                                 double scale);
+                                                                      const geometry_msgs::msg::PoseStamped& stamped,
+                                                                      double scale);
 
-visualization_msgs::msg::InteractiveMarker make6DOFMarker(const std::string& name, const geometry_msgs::msg::PoseStamped& stamped,
-                                                     double scale, bool orientation_fixed = false);
+visualization_msgs::msg::InteractiveMarker make6DOFMarker(const std::string& name,
+                                                          const geometry_msgs::msg::PoseStamped& stamped, double scale,
+                                                          bool orientation_fixed = false);
 
 visualization_msgs::msg::InteractiveMarker makePlanarXYMarker(const std::string& name,
-                                                         const geometry_msgs::msg::PoseStamped& stamped, double scale,
-                                                         bool orientation_fixed = false);
+                                                              const geometry_msgs::msg::PoseStamped& stamped,
+                                                              double scale, bool orientation_fixed = false);
 
 void addTArrowMarker(visualization_msgs::msg::InteractiveMarker& im);
 
@@ -67,4 +68,4 @@ void addPositionControl(visualization_msgs::msg::InteractiveMarker& int_marker, 
 
 void addViewPlaneControl(visualization_msgs::msg::InteractiveMarker& int_marker, double radius,
                          const std_msgs::msg::ColorRGBA& color, bool position = true, bool orientation = true);
-}
+}  // namespace robot_interaction

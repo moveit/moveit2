@@ -17,13 +17,13 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>moveit_ros_planning</build_depend>
-  <build_depend>rclcpp</build_depend>
-  <build_depend>tf2</build_depend>
-  <build_depend>tf2_eigen</build_depend>
-  <build_depend>tf2_geometry_msgs</build_depend>
-  <build_depend>tf2_ros</build_depend>
-  <build_depend>interactive_markers</build_depend>
+  <depend>moveit_ros_planning</depend>
+  <depend>rclcpp</depend>
+  <depend>tf2</depend>
+  <depend>tf2_eigen</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>interactive_markers</depend>
 
   <test_depend>ament_cmake_gtest</test_depend>
   <export>

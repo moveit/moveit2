@@ -43,8 +43,8 @@
 namespace robot_interaction
 {
 visualization_msgs::msg::InteractiveMarker makeEmptyInteractiveMarker(const std::string& name,
-                                                                 const geometry_msgs::msg::PoseStamped& stamped,
-                                                                 double scale)
+                                                                      const geometry_msgs::msg::PoseStamped& stamped,
+                                                                      double scale)
 {
   visualization_msgs::msg::InteractiveMarker int_marker;
   int_marker.header = stamped.header;
@@ -261,16 +261,17 @@ void addViewPlaneControl(visualization_msgs::msg::InteractiveMarker& int_marker,
 }
 
 visualization_msgs::msg::InteractiveMarker makePlanarXYMarker(const std::string& name,
-                                                         const geometry_msgs::msg::PoseStamped& stamped, double scale,
-                                                         bool orientation_fixed)
+                                                              const geometry_msgs::msg::PoseStamped& stamped,
+                                                              double scale, bool orientation_fixed)
 {
   visualization_msgs::msg::InteractiveMarker int_marker = makeEmptyInteractiveMarker(name, stamped, scale);
   addPlanarXYControl(int_marker, orientation_fixed);
   return int_marker;
 }
 
-visualization_msgs::msg::InteractiveMarker make6DOFMarker(const std::string& name, const geometry_msgs::msg::PoseStamped& stamped,
-                                                     double scale, bool orientation_fixed)
+visualization_msgs::msg::InteractiveMarker make6DOFMarker(const std::string& name,
+                                                          const geometry_msgs::msg::PoseStamped& stamped, double scale,
+                                                          bool orientation_fixed)
 {
   visualization_msgs::msg::InteractiveMarker int_marker = makeEmptyInteractiveMarker(name, stamped, scale);
   add6DOFControl(int_marker, orientation_fixed);

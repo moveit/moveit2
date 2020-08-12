@@ -141,7 +141,8 @@ bool InteractionHandler::getPoseOffset(const JointInteraction& vj, geometry_msgs
   return false;
 }
 
-bool InteractionHandler::getLastEndEffectorMarkerPose(const EndEffectorInteraction& eef, geometry_msgs::msg::PoseStamped& ps)
+bool InteractionHandler::getLastEndEffectorMarkerPose(const EndEffectorInteraction& eef,
+                                                      geometry_msgs::msg::PoseStamped& ps)
 {
   boost::mutex::scoped_lock slock(pose_map_lock_);
   std::map<std::string, geometry_msgs::msg::PoseStamped>::iterator it = pose_map_.find(eef.eef_group);
@@ -201,8 +202,8 @@ void InteractionHandler::clearMenuHandler()
   menu_handler_.reset();
 }
 
-void InteractionHandler::handleGeneric(const GenericInteraction& g,
-                                       visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr feedback)
+void InteractionHandler::handleGeneric(
+    const GenericInteraction& g, const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
   if (g.process_feedback)
   {
@@ -217,8 +218,9 @@ void InteractionHandler::handleGeneric(const GenericInteraction& g,
   }
 }
 
-void InteractionHandler::handleEndEffector(const EndEffectorInteraction& eef,
-                                           visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr feedback)
+void InteractionHandler::handleEndEffector(
+    const EndEffectorInteraction& eef,
+    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
   if (feedback->event_type != visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE)
     return;
@@ -249,7 +251,7 @@ void InteractionHandler::handleEndEffector(const EndEffectorInteraction& eef,
 }
 
 void InteractionHandler::handleJoint(const JointInteraction& vj,
-                                     visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr feedback)
+                                     const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
   if (feedback->event_type != visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE)
     return;
@@ -280,9 +282,9 @@ void InteractionHandler::handleJoint(const JointInteraction& vj,
 }
 
 // MUST hold state_lock_ when calling this!
-void InteractionHandler::updateStateGeneric(moveit::core::RobotState* state, const GenericInteraction* g,
-                                            visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr* feedback,
-                                            StateChangeCallbackFn* callback)
+void InteractionHandler::updateStateGeneric(
+    moveit::core::RobotState* state, const GenericInteraction* g,
+    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr* feedback, StateChangeCallbackFn* callback)
 {
   bool ok = g->process_feedback(*state, *feedback);
   bool error_state_changed = setErrorState(g->marker_name_suffix, !ok);
@@ -306,7 +308,8 @@ void InteractionHandler::updateStateEndEffector(moveit::core::RobotState* state,
 
 // MUST hold state_lock_ when calling this!
 void InteractionHandler::updateStateJoint(moveit::core::RobotState* state, const JointInteraction* vj,
-                                          const geometry_msgs::msg::Pose* feedback_pose, StateChangeCallbackFn* callback)
+                                          const geometry_msgs::msg::Pose* feedback_pose,
+                                          StateChangeCallbackFn* callback)
 {
   Eigen::Isometry3d pose;
   tf2::fromMsg(*feedback_pose, pose);
@@ -365,8 +368,9 @@ bool InteractionHandler::getErrorState(const std::string& name) const
   return error_state_.find(name) != error_state_.end();
 }
 
-bool InteractionHandler::transformFeedbackPose(visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr feedback,
-                                               const geometry_msgs::msg::Pose& offset, geometry_msgs::msg::PoseStamped& tpose)
+bool InteractionHandler::transformFeedbackPose(
+    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback,
+    const geometry_msgs::msg::Pose& offset, geometry_msgs::msg::PoseStamped& tpose)
 {
   tpose.header = feedback->header;
   tpose.pose = feedback->pose;
@@ -387,13 +391,13 @@ bool InteractionHandler::transformFeedbackPose(visualization_msgs::msg::Interact
       catch (tf2::TransformException& e)
       {
         RCLCPP_ERROR(LOGGER, "Error transforming from frame '%s' to frame '%s'", tpose.header.frame_id.c_str(),
-                  planning_frame_.c_str());
+                     planning_frame_.c_str());
         return false;
       }
     else
     {
       RCLCPP_ERROR(LOGGER, "Cannot transform from frame '%s' to frame '%s' (no TF instance provided)",
-                tpose.header.frame_id.c_str(), planning_frame_.c_str());
+                   tpose.header.frame_id.c_str(), planning_frame_.c_str());
       return false;
     }
   }

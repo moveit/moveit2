@@ -64,7 +64,7 @@ static const float END_EFFECTOR_REACHABLE_COLOR[4] = { 0.2, 1.0, 0.2, 1.0 };
 const std::string RobotInteraction::INTERACTIVE_MARKER_TOPIC = "robot_interaction_interactive_marker_topic";
 
 RobotInteraction::RobotInteraction(const moveit::core::RobotModelConstPtr& robot_model,
-  const rclcpp::Node::SharedPtr& node, const std::string& ns)
+                                   const rclcpp::Node::SharedPtr& node, const std::string& ns)
   : robot_model_(robot_model), kinematic_options_map_(new KinematicOptionsMap)
 {
   topic_ = ns.empty() ? INTERACTIVE_MARKER_TOPIC : ns + "/" + INTERACTIVE_MARKER_TOPIC;
@@ -98,7 +98,7 @@ void RobotInteraction::decideActiveComponents(const std::string& group, Interact
   if (!group.empty() && active_eef_.empty() && active_vj_.empty() && active_generic_.empty())
     RCLCPP_INFO(LOGGER, "No active joints or end effectors found for group '%s'. "
                         "Make sure that kinematics.yaml is loaded in this node's namespace.",
-                   group.c_str());
+                group.c_str());
 }
 
 void RobotInteraction::addActiveComponent(const InteractiveMarkerConstructorFn& construct,
@@ -338,8 +338,7 @@ void RobotInteraction::decideActiveEndEffectors(const std::string& group, Intera
     // otherwise, we use the size of the parent_link
     eef.size = (eef.eef_group == eef.parent_group) ? computeLinkMarkerSize(eef.parent_link) :
                                                      computeGroupMarkerSize(eef.eef_group);
-    RCLCPP_DEBUG(LOGGER, "Found active end-effector '%s', of scale %lf", eef.eef_group.c_str(),
-                    eef.size);
+    RCLCPP_DEBUG(LOGGER, "Found active end-effector '%s', of scale %lf", eef.eef_group.c_str(), eef.size);
   }
   // if there is only a single end effector marker, we can safely use a larger marker
   if (active_eef_.size() == 1)
@@ -373,7 +372,8 @@ void RobotInteraction::clearInteractiveMarkersUnsafe()
 }
 
 void RobotInteraction::addEndEffectorMarkers(const InteractionHandlerPtr& handler, const EndEffectorInteraction& eef,
-                                             visualization_msgs::msg::InteractiveMarker& im, bool position, bool orientation)
+                                             visualization_msgs::msg::InteractiveMarker& im, bool position,
+                                             bool orientation)
 {
   geometry_msgs::msg::Pose pose;
   pose.orientation.w = 1;
@@ -382,7 +382,8 @@ void RobotInteraction::addEndEffectorMarkers(const InteractionHandlerPtr& handle
 
 void RobotInteraction::addEndEffectorMarkers(const InteractionHandlerPtr& handler, const EndEffectorInteraction& eef,
                                              const geometry_msgs::msg::Pose& im_to_eef,
-                                             visualization_msgs::msg::InteractiveMarker& im, bool position, bool orientation)
+                                             visualization_msgs::msg::InteractiveMarker& im, bool position,
+                                             bool orientation)
 {
   if (eef.parent_group == eef.eef_group || !robot_model_->hasLinkModel(eef.parent_link))
     return;
@@ -463,8 +464,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
         im.name = getMarkerName(handler, active_generic_[i]);
         shown_markers_[im.name] = i;
         ims.push_back(im);
-        RCLCPP_DEBUG(LOGGER, "Publishing interactive marker %s (size = %lf)", im.name.c_str(),
-                              im.scale);
+        RCLCPP_DEBUG(LOGGER, "Publishing interactive marker %s (size = %lf)", im.name.c_str(), im.scale);
       }
     }
 
@@ -473,7 +473,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
       geometry_msgs::msg::PoseStamped pose;
       geometry_msgs::msg::Pose control_to_eef_tf;
       pose.header.frame_id = robot_model_->getModelFrame();
-      pose.header.stamp = rclcpp::Clock().now();
+      pose.header.stamp = node_->now();
       computeMarkerPose(handler, active_eef_[i], *s, pose.pose, control_to_eef_tf);
 
       std::string marker_name = getMarkerName(handler, active_eef_[i]);
@@ -507,14 +507,13 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
                               active_eef_[i].interaction & InteractionStyle::ORIENTATION_EEF);
       ims.push_back(im);
       registerMoveInteractiveMarkerTopic(marker_name, handler->getName() + "_" + active_eef_[i].parent_link);
-      RCLCPP_DEBUG(LOGGER, "Publishing interactive marker %s (size = %lf)", marker_name.c_str(),
-                      mscale);
+      RCLCPP_DEBUG(LOGGER, "Publishing interactive marker %s (size = %lf)", marker_name.c_str(), mscale);
     }
     for (std::size_t i = 0; i < active_vj_.size(); ++i)
     {
       geometry_msgs::msg::PoseStamped pose;
       pose.header.frame_id = robot_model_->getModelFrame();
-      pose.header.stamp = rclcpp::Clock().now();
+      pose.header.stamp = node_->now();
       pose.pose = tf2::toMsg(s->getGlobalLinkTransform(active_vj_[i].connecting_link));
       std::string marker_name = getMarkerName(handler, active_vj_[i]);
       shown_markers_[marker_name] = i;
@@ -532,8 +531,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
       }
       ims.push_back(im);
       registerMoveInteractiveMarkerTopic(marker_name, handler->getName() + "_" + active_vj_[i].connecting_link);
-      RCLCPP_DEBUG(LOGGER, "Publishing interactive marker %s (size = %lf)", marker_name.c_str(),
-                      mscale);
+      RCLCPP_DEBUG(LOGGER, "Publishing interactive marker %s (size = %lf)", marker_name.c_str(), mscale);
     }
     handlers_[handler->getName()] = handler;
   }
@@ -573,26 +571,10 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
       {
         std::string topic_name = int_marker_move_topics_[i];
         std::string marker_name = int_marker_names_[i];
-        
-        auto subscription_callback = [this, marker_name](geometry_msgs::msg::PoseStamped::ConstSharedPtr msg) {
-          std::map<std::string, std::size_t>::const_iterator it = shown_markers_.find(marker_name);
-          if (it != shown_markers_.end())
-          {
-            auto feedback = std::make_shared<visualization_msgs::msg::InteractiveMarkerFeedback>();
-            feedback->header = msg->header;
-            feedback->marker_name = marker_name;
-            feedback->pose = msg->pose;
-            feedback->event_type = visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE;
-            processInteractiveMarkerFeedback(feedback);
-            {
-              boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
-              int_marker_server_->setPose(marker_name, msg->pose, msg->header);  // move the interactive marker
-              int_marker_server_->applyChanges();
-            }
-          }
-        };
-        auto sub = node_->create_subscription<geometry_msgs::msg::PoseStamped>(topic_name, 1, subscription_callback);
-        int_marker_move_subscribers_.push_back(sub);
+        int_marker_move_subscribers_.push_back(node_->create_subscription<geometry_msgs::msg::PointStamped>(
+            topic_name, 1, [this, marker_name](const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg) {
+              moveInteractiveMarker(marker_name, msg);
+            }));
       }
     }
   }
@@ -666,8 +648,8 @@ void RobotInteraction::updateInteractiveMarkers(const InteractionHandlerPtr& han
 
   std_msgs::msg::Header header;
   header.frame_id = root_link;  // marker poses are give w.r.t. root frame
-  for (std::map<std::string, geometry_msgs::msg::Pose>::const_iterator it = pose_updates.begin(); it != pose_updates.end();
-       ++it)
+  for (std::map<std::string, geometry_msgs::msg::Pose>::const_iterator it = pose_updates.begin();
+       it != pose_updates.end(); ++it)
     int_marker_server_->setPose(it->first, it->second, header);
   int_marker_server_->applyChanges();
 }
@@ -694,15 +676,36 @@ bool RobotInteraction::showingMarkers(const InteractionHandlerPtr& handler)
   return true;
 }
 
+void RobotInteraction::moveInteractiveMarker(const std::string& name,
+                                             const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg)
+{
+  std::map<std::string, std::size_t>::const_iterator it = shown_markers_.find(name);
+  if (it != shown_markers_.end())
+  {
+    auto feedback = std::make_shared<visualization_msgs::msg::InteractiveMarkerFeedback>();
+    feedback->header = msg->header;
+    feedback->marker_name = name;
+    feedback->pose = msg->pose;
+    feedback->event_type = visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE;
+    processInteractiveMarkerFeedback(feedback);
+    {
+      boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
+      int_marker_server_->setPose(name, msg->pose, msg->header);  // move the interactive marker
+      int_marker_server_->applyChanges();
+    }
+  }
+}
+
 void RobotInteraction::processInteractiveMarkerFeedback(
-    visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr feedback)
+    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
   // perform some validity checks
   boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
   std::map<std::string, std::size_t>::const_iterator it = shown_markers_.find(feedback->marker_name);
   if (it == shown_markers_.end())
   {
-    RCLCPP_ERROR(LOGGER, "Unknown marker name: '%s' (not published by RobotInteraction class)", feedback->marker_name.c_str());
+    RCLCPP_ERROR(LOGGER, "Unknown marker name: '%s' (not published by RobotInteraction class)",
+                 feedback->marker_name.c_str());
     return;
   }
 
@@ -730,22 +733,21 @@ void RobotInteraction::processingThread()
     {
       auto feedback = feedback_map_.begin()->second;
       feedback_map_.erase(feedback_map_.begin());
-      RCLCPP_DEBUG(LOGGER, "Processing feedback from map for marker [%s]",
-                      feedback->marker_name.c_str());
+      RCLCPP_DEBUG(LOGGER, "Processing feedback from map for marker [%s]", feedback->marker_name.c_str());
 
       std::map<std::string, std::size_t>::const_iterator it = shown_markers_.find(feedback->marker_name);
       if (it == shown_markers_.end())
       {
         RCLCPP_ERROR(LOGGER, "Unknown marker name: '%s' (not published by RobotInteraction class) "
-                  "(should never have ended up in the feedback_map!)",
-                  feedback->marker_name.c_str());
+                             "(should never have ended up in the feedback_map!)",
+                     feedback->marker_name.c_str());
         continue;
       }
       std::size_t u = feedback->marker_name.find_first_of('_');
       if (u == std::string::npos || u < 4)
       {
         RCLCPP_ERROR(LOGGER, "Invalid marker name: '%s' (should never have ended up in the feedback_map!)",
-                  feedback->marker_name.c_str());
+                     feedback->marker_name.c_str());
         continue;
       }
       std::string marker_class = feedback->marker_name.substr(0, 2);
@@ -808,7 +810,8 @@ void RobotInteraction::processingThread()
           marker_access_lock_.lock();
         }
         else
-          RCLCPP_ERROR(LOGGER, "Unknown marker class ('%s') for marker '%s'", marker_class.c_str(), feedback->marker_name.c_str());
+          RCLCPP_ERROR(LOGGER, "Unknown marker class ('%s') for marker '%s'", marker_class.c_str(),
+                       feedback->marker_name.c_str());
       }
       catch (std::exception& ex)
       {

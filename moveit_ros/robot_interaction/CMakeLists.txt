@@ -40,19 +40,19 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   tf2_geometry_msgs
 )
 
-# TODO (anyone): update tests
-# if (BUILD_TESTING)
-#   find_package(ament_cmake_gtest REQUIRED)
-#   ament_add_gtest(locked_robot_state_test test/locked_robot_state_test.cpp)
-#   ament_target_dependencies(locked_robot_state_test
-#     ${MOVEIT_LIB_NAME}
-#     Boost)
-# endif()
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(locked_robot_state_test test/locked_robot_state_test.cpp)
+  target_link_libraries(locked_robot_state_test ${MOVEIT_LIB_NAME})
+  ament_target_dependencies(locked_robot_state_test
+    Boost)
+endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin)
+
 install(DIRECTORY include/ DESTINATION include)
 
 install(DIRECTORY resources DESTINATION share/${PROJECT_NAME})

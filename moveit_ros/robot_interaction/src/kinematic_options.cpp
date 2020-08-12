@@ -47,7 +47,8 @@ robot_interaction::KinematicOptions::KinematicOptions() : timeout_seconds_(0.0) 
 // This is intended to be called as a ModifyStateFunction to modify the state
 // maintained by a LockedRobotState in place.
 bool robot_interaction::KinematicOptions::setStateFromIK(moveit::core::RobotState& state, const std::string& group,
-                                                         const std::string& tip, const geometry_msgs::msg::Pose& pose) const
+                                                         const std::string& tip,
+                                                         const geometry_msgs::msg::Pose& pose) const
 {
   const moveit::core::JointModelGroup* jmg = state.getJointModelGroup(group);
   if (!jmg)
