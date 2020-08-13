@@ -77,10 +77,23 @@ public:
   void setPaused(bool paused);
 
 private:
-  void run();  // TODO(adamp): come back and pass a timer event here?
+  /** \brief Run one iteration of collision checking */
+  void run();
+
+  /** \brief Print objects in collision. Useful for debugging.  */
+  void printCollisionPairs(collision_detection::CollisionResult::ContactMap& contact_map);
+
+  /** \brief Get a read-only copy of the planning scene */
   planning_scene_monitor::LockedPlanningSceneRO getLockedPlanningSceneRO() const;
-  void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
+
+  /** \brief Callback for stopping time, from the thread that is aware of velocity and acceleration */
   void worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg);
+
+  /** \brief Callback for joint state msgs */
+  void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
+
+  // Pointer to the ROS node
+  std::shared_ptr<rclcpp::Node> node_;
 
   // Parameters from yaml
   const ServoParameters& parameters_;

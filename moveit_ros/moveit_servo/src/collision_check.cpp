@@ -222,21 +222,21 @@ void CollisionCheck::printCollisionPairs(collision_detection::CollisionResult::C
 {
   if (!contact_map.empty())
   {
+    auto& clock = *node_->get_clock();
     // Throttled error message about the first contact in the list
-    ROS_WARN_STREAM_THROTTLE_NAMED(ROS_LOG_THROTTLE_PERIOD, LOGNAME, "Objects in collision (among others, possibly): "
-                                                                         << contact_map.begin()->first.first << ", "
-                                                                         << contact_map.begin()->first.second);
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                "Objects in collision (among others, possibly): "
+                                    << contact_map.begin()->first.first << ", " << contact_map.begin()->first.second);
     // Log all other contacts if in debug mode
-    ROS_DEBUG_STREAM_THROTTLE_NAMED(ROS_LOG_THROTTLE_PERIOD, LOGNAME, "Objects in collision:");
+    RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Objects in collision:");
     for (auto contact : contact_map)
     {
-      ROS_DEBUG_STREAM_THROTTLE_NAMED(ROS_LOG_THROTTLE_PERIOD, LOGNAME, "\t" << contact.first.first << ", "
-                                                                             << contact.first.second);
+      RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                   "\t" << contact.first.first << ", " << contact.first.second);
     }
   }
 }
 
-void CollisionCheck::worstCaseStopTimeCB(const std_msgs::Float64ConstPtr& msg)
 void CollisionCheck::jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg)
 {
   const std::lock_guard<std::mutex> lock(joint_state_mutex_);
