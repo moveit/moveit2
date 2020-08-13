@@ -57,7 +57,7 @@ TEST_F(ServoFixture, SelfCollision)
 
   // Publish some joint jog commands that will bring us to collision
   rclcpp::Rate loop_rate(20);
-  for (size_t i = 0; i < 10; ++i)
+  for (size_t i = 0; i < 20; ++i)
   {
     auto msg = std::make_unique<control_msgs::msg::JointJog>();
     msg->header.stamp = node_->now();

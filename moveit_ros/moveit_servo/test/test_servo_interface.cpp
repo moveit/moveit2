@@ -165,8 +165,6 @@ TEST_F(ServoFixture, StaleCommandStop)
   auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
   ASSERT_TRUE(start_result.get()->success);
 
-  RCLCPP_WARN_STREAM(LOGGER, "Test point 1");
-
   // Setup the message to publish (only once)
   auto msg = std::make_unique<control_msgs::msg::JointJog>();
   msg->joint_names.push_back("panda_joint1");

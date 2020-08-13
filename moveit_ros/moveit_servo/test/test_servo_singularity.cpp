@@ -54,6 +54,9 @@ TEST_F(ServoFixture, ReachSingular)
 
   rclcpp::Rate loop_rate(20);
 
+  // Look for DECELERATE_FOR_SINGULARITY status
+  watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_SINGULARITY);
+
   // Publish some twist commands that will bring us to singularity
   for (size_t i = 0; i < 10; ++i)
   {
@@ -65,7 +68,7 @@ TEST_F(ServoFixture, ReachSingular)
   }
 
   // Status should be decelerating from singularity
-  EXPECT_TRUE(getLatestStatus() == moveit_servo::StatusCode::DECELERATE_FOR_SINGULARITY);
+  EXPECT_TRUE(sawTrackedStatus());
 
   // If we move the other way (away from singular), we should get no warnings
   resetNumStatus();
