@@ -1,17 +1,15 @@
 repositories:
-  fake_joint:
-    type: git
-    url: https://github.com/AdamPettinger/fake_joint
-    version: foxy
   ros2_control:
     type: git
     url: https://github.com/ros-controls/ros2_control
-    version: f4d33a7177db5ad178cc146f6104101fbf980b3c
+    version: master
   ros2_controllers:
     type: git
     url: https://github.com/ros-controls/ros2_controllers
-    version: a049b7a4295c2378cc0a46a153394034e0b60c3d
-  realtime_tools:
+    version: master
+
+# TODO(JafarAbdi): Switch to upstream once PR https://github.com/tork-a/fake_joint/pull/7 is merged
+  fake_joint:
     type: git
-    url: https://github.com/ros-controls/realtime_tools.git
-    version: 9f308f3563acd07061610785924f70d022c8bbcf
+    url: https://github.com/JafarAbdi/fake_joint
+    version: foxy

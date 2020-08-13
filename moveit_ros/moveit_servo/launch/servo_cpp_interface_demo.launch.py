@@ -72,7 +72,8 @@ def generate_launch_description():
     # Is a perfect controller without dynamics
     fake_joint_driver_node = Node(package='fake_joint_driver',
                                   executable='fake_joint_driver_node',
-                                  parameters=[os.path.join(get_package_share_directory("moveit_servo"), "config", "panda_controllers.yaml"),
+                                  parameters=[{'controller_name': 'fake_joint_trajectory_controller'},
+                                              os.path.join(get_package_share_directory("moveit_servo"), "config", "panda_controllers.yaml"),
                                               os.path.join(get_package_share_directory("moveit_servo"), "config", "start_positions.yaml"),
                                               robot_description])
 
