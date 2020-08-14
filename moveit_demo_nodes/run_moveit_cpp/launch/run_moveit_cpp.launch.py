@@ -20,7 +20,7 @@ def load_yaml(package_name, file_path):
 
     try:
         with open(absolute_file_path, 'r') as file:
-            return yaml.load(file)
+            return yaml.safe_load(file)
     except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available
         return None
 
