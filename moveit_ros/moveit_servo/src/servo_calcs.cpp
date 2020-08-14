@@ -163,7 +163,6 @@ bool ServoCalcs::start()
   }
 
   // Otherwise, we should always set up the "last published" command
-  // TODO(adamp): note that if you call start() while the arm is moving... its gonna sudden halt
   updateJoints();
 
   // Set up the "last" published message, in case we need to send it first
