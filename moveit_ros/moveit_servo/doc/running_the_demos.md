@@ -1,6 +1,6 @@
 # Running the Demos
 1) [Installation](#Installation)
-2) [C++ Interface Demo](#C++-Interface-Demo)
+2) [C++ Interface Demo](#Cpp-Interface-Demo)
 3) [Component Demo](#Component-Demo)
 4) [Teleoperation Demo](#Teleoperation-Demo)
 
@@ -35,7 +35,7 @@ cd $COLCON_WS
 colcon build --event-handlers desktop_notification- status- --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
 
-## C++ Interface Demo
+## Cpp Interface Demo
 The simplest demo is the C++ interface demo. In it, a simulated Panda arm is spawned and shown in Rviz, along with a collision object. 
 
 First, a simple joint command is sent to the arm for a few seconds.
