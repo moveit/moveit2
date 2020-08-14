@@ -78,10 +78,6 @@ private:
           std::shared_ptr<std_srvs::srv::Trigger::Response> response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr unpause_servo_service_;
 
-  // TODO(adamp): Do we actually want to expose these? Might need to define a service then... Could also just leave it for C++ API
-  void getCommandFrameTransform();
-  void getLatestJointState();
-
   bool is_initialized_;
 };
 } //namespace moveit_servo

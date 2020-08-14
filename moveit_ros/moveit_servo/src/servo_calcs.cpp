@@ -252,7 +252,7 @@ void ServoCalcs::run()
   }
 
   // Calculate and publish worst stop time for collision checker
-  if (parameters_->collision_check_type == "stop_distance")
+  if (parameters_->check_collisions && parameters_->collision_check_type == "stop_distance")
     calculateWorstCaseStopTime();
 
   // Update from latest state
@@ -327,7 +327,7 @@ void ServoCalcs::run()
   {
     // Joint trajectory is not populated with anything, so set it to the last positions and 0 velocity
     *joint_trajectory = *last_sent_command_;
-    for (auto point : joint_trajectory.get()->points)
+    for (auto& point : joint_trajectory.get()->points)
     {
       point.velocities.assign(point.velocities.size(), 0);
     }
@@ -892,9 +892,13 @@ bool ServoCalcs::calculateWorstCaseStopTime()
         else
         {
           auto& clock = *node_->get_clock();
-          RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+          RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                       "An acceleration limit is not defined for this joint; minimum stop distance "
                                       "should not be used for collision checking");
+        
+          // TODO(adamp): figure out what to do here. We definitely don't want to allow 'stop_distance' collision checking with
+          // no acceleration limits defined. Could also throw instead of just stopping.
+          stop();
         }
         break;
       }
