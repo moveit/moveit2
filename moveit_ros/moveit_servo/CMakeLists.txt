@@ -65,13 +65,13 @@ rclcpp_components_register_nodes(${COMPOSABLE_NODE_NAME} "moveit_servo::ServoSer
 
 # Add cpp interface example executable
 set(CPP_DEMO_NAME servo_demo)
-add_executable(${CPP_DEMO_NAME} src/ros2_demo/servo_cpp_interface_demo.cpp)
+add_executable(${CPP_DEMO_NAME} src/cpp_interface_demo/servo_cpp_interface_demo.cpp)
 ament_target_dependencies(${CPP_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(${CPP_DEMO_NAME} ${LIBRARY_NAME})
 
 # Add executable for using a controller
 set(SERVO_CONTROLLER_INPUT servo_controller_input)
-add_library(${SERVO_CONTROLLER_INPUT} SHARED src/joystick_servo_example.cpp)
+add_library(${SERVO_CONTROLLER_INPUT} SHARED src/teleop_demo/joystick_servo_example.cpp)
 ament_target_dependencies(${SERVO_CONTROLLER_INPUT} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 rclcpp_components_register_nodes(${SERVO_CONTROLLER_INPUT} "moveit_servo::JoyToServoPub")
 
