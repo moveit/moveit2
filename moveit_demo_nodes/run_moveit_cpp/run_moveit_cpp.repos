@@ -13,8 +13,7 @@ repositories:
     type: git
     url: https://github.com/JafarAbdi/fake_joint
     version: foxy
-# TODO(JafarAbdi): Switch to upstream once PR https://github.com/ros-planning/moveit_resources/pull/38 is merged
   moveit_resources:
     type: git
-    url: https://github.com/JafarAbdi/moveit_resources
-    version: pr-fake_controller_fixes
+    url: https://github.com/henningkayser/moveit_resources.git
+    version: prepare_foxy
