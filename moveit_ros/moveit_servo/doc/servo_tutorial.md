@@ -45,16 +45,16 @@ The C++ API is offered as the `Servo` class, defined in `include/moveit_servo/se
 3) Creating a `planning_scene_monitor` (if you don't already have one) and `ServoParameters` and passing both to a new `Servo` object.
 4) Calling `start()` on the `Servo` instance and publishing commands.
 
-See the [C++ interface demo](https://github.com/AdamPettinger/moveit2/blob/pr-rebase_on_foxy/moveit_ros/moveit_servo/src/ros2_demo/servo_cpp_interface_demo.cpp) as an example, and the [Setting Up a New Robot](#Setting-Up-a-New-Robot) section later for details on getting your specific robot up and running.
+See the [C++ interface demo](../src/cpp_interface_demo/servo_cpp_interface_demo.cpp) as an example, and the [Setting Up a New Robot](#Setting-Up-a-New-Robot) section later for details on getting your specific robot up and running.
 
 The C++ API can be visualized with:
-![Alt Text](https://github.com/AdamPettinger/moveit2/blob/pr-rebase_on_foxy/moveit_ros/moveit_servo/doc/Images/Servo_Interface.png)
+![Alt Text](Images/Servo_Interface.png)
 
 #### Composable Node Interface
-A standalone component is also offered as a `ServoServer`. This allows you include starting a `ServoServer` in your launch file, and interact with `Servo` only through ROS topics and services. See the [servo server demo](https://github.com/AdamPettinger/moveit2/blob/pr-rebase_on_foxy/moveit_ros/moveit_servo/launch/servo_server_demo.launch.py) as an example.
+A standalone component is also offered as a `ServoServer`. This allows you include starting a `ServoServer` in your launch file, and interact with `Servo` only through ROS topics and services. See the [servo server demo](../launch/servo_server_demo.launch.py) as an example.
 
 The composable node interface can be visualized with:
-![Alt Text](https://github.com/AdamPettinger/moveit2/blob/pr-rebase_on_foxy/moveit_ros/moveit_servo/doc/Images/Servo_Servo_Interface.png)
+![Alt Text](Images/Servo_Servo_Interface.png)
 
 # Setting Up a New Robot
 
@@ -70,10 +70,10 @@ Because the kinematics are handled by the core parts of `moveit`, it is reccomen
 #### A note on controllers
 As of now, there is no [ros2_controls controller](https://github.com/ros-controls/ros2_controllers) that can work with `moveit_servo`. ROS1 controllers that worked include `position_controllers/JointGroupPositionControllers` and `velocity_controllers/JointGroupVelocityControllers`. 
 
-A simulated controller, [fake_joint_driver](https://github.com/JafarAbdi/fake_joint/tree/foxy) is used in the `moveit_servo` examples, and should at least be able to get `moveit_servo` working with a simulated version of your robot. Please see [the example config file](https://github.com/AdamPettinger/moveit2/blob/pr-rebase_on_foxy/moveit_ros/moveit_servo/config/panda_controllers.yaml) and [launch file](https://github.com/AdamPettinger/moveit2/blob/0387902b9a81cfd8d09888f90a02a1540c9e02da/moveit_ros/moveit_servo/launch/servo_cpp_interface_demo.launch.py#L73-L78) for an example of how to set that up for your robot.
+A simulated controller, [fake_joint_driver](https://github.com/JafarAbdi/fake_joint/tree/foxy) is used in the `moveit_servo` examples, and should at least be able to get `moveit_servo` working with a simulated version of your robot. Please see [the example config file](../config/panda_controllers.yaml) and [launch file](../launch/servo_cpp_interface_demo.launch.py#L73-L78) for an example of how to set that up for your robot.
 
 ### Installation
-Please see the [Running the Demos](https://github.com/AdamPettinger/moveit2/blob/pr-rebase_on_foxy/moveit_ros/moveit_servo/doc/running_the_demos.md) guide for installation instructions. Running at least the C++ Interface Demo will make sure `moveit_servo` is properly installed.
+Please see the [Running the Demos](running_the_demos.md) guide for installation instructions. Running at least the C++ Interface Demo will make sure `moveit_servo` is properly installed.
 
 ### Input devices
 The two primary inputs to `moveit_servo` are Cartesian commands and joint commands. These come into `moveit_servo` as [TwistStamped](http://docs.ros.org/melodic/api/geometry_msgs/html/msg/TwistStamped.html) and [JointJog](http://docs.ros.org/api/control_msgs/html/msg/JointJog.html) messages respectively. The source of the commands can be almost anything including: gamepads, voice commands, a SpaceNav mouse, or PID nodes (e.g. for visual servoing). 

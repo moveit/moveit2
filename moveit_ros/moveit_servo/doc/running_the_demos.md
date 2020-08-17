@@ -49,7 +49,7 @@ ros2 launch moveit_servo servo_cpp_interface_demo.launch.py
 ```
 
 #### Expected Output
-![Alt Text](https://github.com/AdamPettinger/moveit2/blob/pr-rebase_on_foxy/moveit_ros/moveit_servo/doc/Images/C%2B%2B_Interface_Demo.gif)
+![Alt Text](Images/C%2B%2B_Interface_Demo.gif)
 
 ## Component Demo
 `moveit_servo` is also offered as a composable node that may be run in a container with other components. 
@@ -69,7 +69,7 @@ ros2 run moveit_servo fake_command_publisher
 ```
 
 #### Expected ouput
-![Alt Text](https://github.com/AdamPettinger/moveit2/blob/pr-rebase_on_foxy/moveit_ros/moveit_servo/doc/Images/Servo_Component_Demo.gif)
+![Alt Text](Images/Servo_Component_Demo.gif)
 
 ## Teleoperation Demo
 `moveit_servo` is a versatile tool for teleoperating a manipulator. Inputs can include generic `TwistStamped` or `JointJog` commands, collisions can be detected and avoided, and singular positions can be avoided. 
@@ -89,6 +89,6 @@ ros2 launch moveit_servo servo_teleop.launch.py
 You should now be able to input commands via the controller. Default supported actions include Cartesian and joint commands, and switching the frame of the Cartiesian commands.
 
 #### Expected output
-![Alt Text](https://github.com/AdamPettinger/moveit2/blob/pr-rebase_on_foxy/moveit_ros/moveit_servo/doc/Images/Servo_Teleop_Demo.gif)
+![Alt Text](Images/Servo_Teleop_Demo.gif)
 
 Please note the controller overlay is for demonstration purposes and is not part of the actual demonstration.
