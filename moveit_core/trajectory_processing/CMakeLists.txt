@@ -31,9 +31,6 @@ install(TARGETS ${MOVEIT_LIB_NAME}
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
-  find_package(moveit_resources REQUIRED)
-  include_directories(${moveit_resources_INCLUDE_DIRS})
-
   if(WIN32)
     # TODO add windows paths
     # set(append_library_dirs "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")

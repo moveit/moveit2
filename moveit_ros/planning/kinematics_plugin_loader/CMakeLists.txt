@@ -7,7 +7,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
   pluginlib
   class_loader
-  ament_index_cpp
   moveit_core
   Boost
 )

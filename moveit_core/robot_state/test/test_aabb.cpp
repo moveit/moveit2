@@ -88,7 +88,7 @@ TEST_F(TestAABB, TestPR2)
   moveit::core::RobotState pr2_state = this->loadModel("pr2");
 
   const Eigen::Vector3d& extents_base_footprint = pr2_state.getLinkModel("base_footprint")->getShapeExtentsAtOrigin();
-  // values taken from moveit_resources/pr2_description/urdf/robot.xml
+  // values taken from moveit_resources_pr2_description/urdf/robot.xml
   EXPECT_NEAR(extents_base_footprint[0], 0.001, 1e-4);
   EXPECT_NEAR(extents_base_footprint[1], 0.001, 1e-4);
   EXPECT_NEAR(extents_base_footprint[2], 0.001, 1e-4);
@@ -100,7 +100,7 @@ TEST_F(TestAABB, TestPR2)
   EXPECT_NEAR(offset_base_footprint[2], 0.071, 1e-4);
 
   const Eigen::Vector3d& extents_base_link = pr2_state.getLinkModel("base_link")->getShapeExtentsAtOrigin();
-  // values computed from moveit_resources/pr2_description/urdf/meshes/base_v0/base_L.stl in e.g. Meshlab
+  // values computed from moveit_resources_pr2_description/urdf/meshes/base_v0/base_L.stl in e.g. Meshlab
   EXPECT_NEAR(extents_base_link[0], 0.668242, 1e-4);
   EXPECT_NEAR(extents_base_link[1], 0.668242, 1e-4);
   EXPECT_NEAR(extents_base_link[2], 0.656175, 1e-4);
@@ -285,7 +285,7 @@ TEST_F(TestAABB, TestSimple)
   origin.position.x = 0;
   origin.position.y = 0;
   origin.position.z = 0;
-  builder.addCollisionMesh("base_link", "package://moveit_resources/pr2_description/urdf/meshes/base_v0/base_L.stl",
+  builder.addCollisionMesh("base_link", "package://moveit_resources_pr2_description/urdf/meshes/base_v0/base_L.stl",
                            origin);
 
   origin.position.x = 0;
