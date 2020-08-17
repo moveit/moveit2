@@ -71,7 +71,8 @@ def generate_launch_description():
                      name='rviz2',
                      output='log',
                      arguments=['-d', rviz_config_file],
-                     parameters=[robot_description])
+                     parameters=[robot_description,
+                                 robot_description_semantic])
 
     # Static TF
     static_tf = Node(package='tf2_ros',
