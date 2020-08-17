@@ -94,7 +94,7 @@ public:
 
     // Set joint state goal
     RCLCPP_INFO(LOGGER, "Set goal");
-    arm.setGoal("home");
+    arm.setGoal("extended");
 
     // Run actual plan
     RCLCPP_INFO(LOGGER, "Plan to goal");
