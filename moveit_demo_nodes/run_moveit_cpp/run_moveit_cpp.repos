@@ -13,7 +13,3 @@ repositories:
     type: git
     url: https://github.com/JafarAbdi/fake_joint
     version: foxy
-  moveit_resources:
-    type: git
-    url: https://github.com/henningkayser/moveit_resources.git
-    version: prepare_foxy
