@@ -1,18 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 project(moveit_servo)
 
-# Default to C99
-if(NOT CMAKE_C_STANDARD)
-  set(CMAKE_C_STANDARD 99)
-endif()
-
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 set(LIBRARY_NAME moveit_servo)
@@ -85,28 +76,14 @@ ament_target_dependencies(${FAKE_SERVO_CMDS_NAME}
 )
 
 # Install Libraries
-install(TARGETS ${LIBRARY_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
-
-install(TARGETS
-  ${COMPOSABLE_NODE_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
-
-install(TARGETS
-  ${SERVO_CONTROLLER_INPUT}
+install(TARGETS 
+  ${LIBRARY_NAME} ${COMPOSABLE_NODE_NAME} ${SERVO_CONTROLLER_INPUT}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
 
 install(TARGETS
   ${CPP_DEMO_NAME}
-  DESTINATION lib/${PROJECT_NAME})
-
-install(TARGETS
   ${FAKE_SERVO_CMDS_NAME}
   DESTINATION lib/${PROJECT_NAME})
 
