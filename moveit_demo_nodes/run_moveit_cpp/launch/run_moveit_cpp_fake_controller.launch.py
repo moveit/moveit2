@@ -79,6 +79,13 @@ def generate_launch_description():
                      arguments=['-d', rviz_config_file],
                      parameters=[robot_description])
 
+    # Static TF
+    static_tf = Node(package='tf2_ros',
+                     executable='static_transform_publisher',
+                     name='static_transform_publisher',
+                     output='log',
+                     arguments=['0.0', '0.0', '0.0', '0.0', '0.0', '0.0', 'world', 'panda_link0'])
+
     # Publish TF
     robot_state_publisher = Node(package='robot_state_publisher',
                                  executable='robot_state_publisher',
@@ -95,4 +102,4 @@ def generate_launch_description():
                                  output='log',
                                  parameters=[{'source_list': ["/fake_controller_joint_states"]}])
 
-    return LaunchDescription([ robot_state_publisher, rviz_node, joint_state_publisher, run_moveit_cpp_node ])
+    return LaunchDescription([ static_tf, robot_state_publisher, rviz_node, joint_state_publisher, run_moveit_cpp_node ])
