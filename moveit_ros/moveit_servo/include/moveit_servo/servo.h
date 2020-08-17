@@ -94,7 +94,6 @@ private:
 
   std::unique_ptr<ServoCalcs> servo_calcs_;
   std::unique_ptr<CollisionCheck> collision_checker_;
-  std::shared_ptr<rclcpp::executors::MultiThreadedExecutor> executor_;
 };
 
 // ServoPtr using alias

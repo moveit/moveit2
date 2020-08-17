@@ -93,10 +93,10 @@ private:
   void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
 
   // Pointer to the ROS node
-  std::shared_ptr<rclcpp::Node> node_;
+  const std::shared_ptr<rclcpp::Node> node_;
 
   // Parameters from yaml
-  ServoParametersPtr parameters_;
+  const ServoParametersPtr parameters_;
 
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
