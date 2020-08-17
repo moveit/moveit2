@@ -28,7 +28,6 @@ ament_target_dependencies(moveit_list_request_adapter_plugins
   moveit_core
   rclcpp
   pluginlib
-  ament_index_cpp
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME}

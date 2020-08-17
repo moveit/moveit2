@@ -22,8 +22,6 @@ install(TARGETS ${MOVEIT_LIB_NAME}
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
-  find_package(moveit_resources REQUIRED)
-
   ament_add_gtest(test_robot_trajectory test/test_robot_trajectory.cpp)
   target_link_libraries(test_robot_trajectory moveit_test_utils ${MOVEIT_LIB_NAME})
 endif()

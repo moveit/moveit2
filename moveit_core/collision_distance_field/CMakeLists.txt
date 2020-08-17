@@ -33,8 +33,6 @@ install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
-  find_package(moveit_resources REQUIRED)
-  include_directories(${moveit_resources_INCLUDE_DIRS})
   find_package(resource_retriever REQUIRED)
 
   if(WIN32)
@@ -49,6 +47,7 @@ if(BUILD_TESTING)
     moveit_collision_detection
     moveit_collision_distance_field
     moveit_robot_state
+    moveit_test_utils
     ${geometric_shapes_LIBRARIES}
     ${OCTOMAP_LIBRARIES}
     ${srdfdom_LIBRARIES}

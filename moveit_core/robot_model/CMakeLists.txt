@@ -30,7 +30,6 @@ target_link_libraries(${MOVEIT_LIB_NAME}
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
-  find_package(moveit_resources REQUIRED)
   ament_add_gtest(test_robot_model test/test.cpp)
   ament_target_dependencies(test_robot_model
     rclcpp

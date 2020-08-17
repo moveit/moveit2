@@ -32,9 +32,7 @@ install(TARGETS ${MOVEIT_LIB_NAME}
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
-  find_package(moveit_resources REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
-  include_directories(${moveit_resources_INCLUDE_DIRS})
 
   if(UNIX OR APPLE)
     set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR}:${CMAKE_CURRENT_BINARY_DIR}/../utils:${CMAKE_CURRENT_BINARY_DIR}/../collision_detection_fcl:${CMAKE_CURRENT_BINARY_DIR}/../collision_detection")
@@ -43,11 +41,10 @@ if(BUILD_TESTING)
   ament_add_gtest(test_planning_scene test/test_planning_scene.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
   ament_target_dependencies(test_planning_scene
-    ament_index_cpp
     geometric_shapes
     srdfdom
   )
-  target_link_libraries(test_planning_scene ${MOVEIT_LIB_NAME})
+  target_link_libraries(test_planning_scene moveit_test_utils ${MOVEIT_LIB_NAME})
 
   ament_add_gtest(test_multi_threaded test/test_multi_threaded.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
