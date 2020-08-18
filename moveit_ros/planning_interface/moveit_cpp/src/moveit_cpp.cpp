@@ -36,6 +36,9 @@
 
 #include <stdexcept>
 #include <moveit/moveit_cpp/moveit_cpp.h>
+#include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <moveit/common_planning_interface_objects/common_objects.h>
+
 #include <tf2/utils.h>
 #include <tf2_ros/transform_listener.h>
 #include <rclcpp/rclcpp.hpp>
@@ -85,10 +88,8 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
     throw std::runtime_error(error);
   }
 
-  // TODO(henningkayser): configure trajectory execution manager
-  // NOTE: disabled for now since action clients fail to find non-existent servers
-  // trajectory_execution_manager_.reset(new trajectory_execution_manager::TrajectoryExecutionManager(
-  //     node_, robot_model_, planning_scene_monitor_->getStateMonitor()));
+  trajectory_execution_manager_.reset(new trajectory_execution_manager::TrajectoryExecutionManager(
+      node_, robot_model_, planning_scene_monitor_->getStateMonitor()));
 
   RCLCPP_DEBUG(LOGGER, "MoveItCpp running");
 }

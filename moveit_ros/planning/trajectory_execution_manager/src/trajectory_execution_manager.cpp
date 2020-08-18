@@ -568,14 +568,14 @@ void TrajectoryExecutionManager::updateControllerState(const std::string& contro
 
 void TrajectoryExecutionManager::updateControllerState(ControllerInformation& ci, const rclcpp::Duration& age)
 {
-  if (rclcpp::Clock().now() - ci.last_update_ >= age)
+  if (node_->now() - ci.last_update_ >= age)
   {
     if (controller_manager_)
     {
       if (verbose_)
         RCLCPP_INFO(LOGGER, "Updating information for controller '%s'.", ci.name_.c_str());
       ci.state_ = controller_manager_->getControllerState(ci.name_);
-      ci.last_update_ = rclcpp::Clock().now();
+      ci.last_update_ = node_->now();
     }
   }
   else if (verbose_)
@@ -950,7 +950,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
   RCLCPP_INFO(LOGGER, "Validating trajectory with allowed_start_tolerance %g", allowed_start_tolerance_);
 
   moveit::core::RobotStatePtr current_state;
-  if (!csm_->waitForCurrentState(rclcpp::Clock().now()) || !(current_state = csm_->getCurrentState()))
+  if (!csm_->waitForCurrentState(node_->now()) || !(current_state = csm_->getCurrentState()))
   {
     RCLCPP_WARN(LOGGER, "Failed to validate trajectory: couldn't receive full current joint state within 1s");
     return false;
@@ -983,7 +983,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
         // normalize positions and compare
         jm->enforcePositionBounds(&cur_position);
         jm->enforcePositionBounds(&traj_position);
-        if (fabs(cur_position - traj_position) > allowed_start_tolerance_)
+        if (jm->distance(&cur_position, &traj_position) > allowed_start_tolerance_)
         {
           RCLCPP_ERROR(LOGGER, "\nInvalid Trajectory: start point deviates from current robot state more than %g"
                                "\njoint '%s': expected: %g, current: %g",
@@ -1407,7 +1407,7 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
     }
 
     // compute the expected duration of the trajectory and find the part of the trajectory that takes longest to execute
-    rclcpp::Time current_time = rclcpp::Clock().now();
+    rclcpp::Time current_time = node_->now();
     rclcpp::Duration expected_trajectory_duration(0.0);
     int longest_part = -1;
     for (std::size_t i = 0; i < context.trajectory_parts_.size(); ++i)
@@ -1492,7 +1492,7 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
       if (execution_duration_monitoring_)
       {
         if (!handle->waitForExecution(expected_trajectory_duration))
-          if (!execution_complete_ && rclcpp::Clock().now() - current_time > expected_trajectory_duration)
+          if (!execution_complete_ && node_->now() - current_time > expected_trajectory_duration)
           {
             RCLCPP_ERROR(LOGGER, "Controller is taking too long to execute trajectory (the expected upper "
                                  "bound for the trajectory execution was %lf seconds). Stopping trajectory.",
@@ -1565,7 +1565,7 @@ bool TrajectoryExecutionManager::waitForRobotToStop(const TrajectoryExecutionCon
   unsigned int no_motion_count = 0;  // count iterations with no motion
   while (time_remaining > 0. && no_motion_count < 3)
   {
-    if (!csm_->waitForCurrentState(rclcpp::Clock().now(), time_remaining) || !(cur_state = csm_->getCurrentState()))
+    if (!csm_->waitForCurrentState(node_->now(), time_remaining) || !(cur_state = csm_->getCurrentState()))
     {
       RCLCPP_WARN(LOGGER, "Failed to receive current joint state");
       return false;
@@ -1613,7 +1613,7 @@ std::pair<int, int> TrajectoryExecutionManager::getCurrentExpectedTrajectoryInde
   if (time_index_.empty())
     return std::make_pair((int)current_context_, -1);
   std::vector<rclcpp::Time>::const_iterator time_index_it =
-      std::lower_bound(time_index_.begin(), time_index_.end(), rclcpp::Clock().now());
+      std::lower_bound(time_index_.begin(), time_index_.end(), node_->now());
   int pos = time_index_it - time_index_.begin();
   return std::make_pair((int)current_context_, pos);
 }

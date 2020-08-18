@@ -36,9 +36,6 @@
 
 #pragma once
 
-#include <trajectory_msgs/msg/joint_trajectory.hpp>
-#include <moveit_msgs/msg/joint_limits.hpp>
-#include <moveit_msgs/msg/robot_state.hpp>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include "rclcpp/rclcpp.hpp"
 

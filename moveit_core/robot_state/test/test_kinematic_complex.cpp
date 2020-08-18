@@ -43,30 +43,16 @@
 #include <boost/filesystem/path.hpp>
 #include <geometric_shapes/shapes.h>
 #include <moveit/profiler/profiler.h>
-#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <moveit/utils/robot_model_test_utils.h>
 
 class LoadPlanningModelsPr2 : public testing::Test
 {
 protected:
   void SetUp() override
   {
-    boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory("moveit_resources"));
-
-    srdf_model_.reset(new srdf::Model());
-    std::string xml_string;
-    std::fstream xml_file((res_path / "pr2_description/urdf/robot.xml").string().c_str(), std::fstream::in);
-    if (xml_file.is_open())
-    {
-      while (xml_file.good())
-      {
-        std::string line;
-        std::getline(xml_file, line);
-        xml_string += (line + "\n");
-      }
-      xml_file.close();
-      urdf_model_ = urdf::parseURDF(xml_string);
-    }
-    srdf_model_->initFile(*urdf_model_, (res_path / "pr2_description/srdf/robot.xml").string());
+    const std::string robot_name = "pr2";
+    urdf_model_ = moveit::core::loadModelInterface(robot_name);
+    srdf_model_ = moveit::core::loadSRDFModel(robot_name);
     robot_model_.reset(new moveit::core::RobotModel(urdf_model_, srdf_model_));
   };
 

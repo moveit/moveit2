@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_setup_assistant)
 
-set(CMAKE_CXX_STANDARD 14)
+if(NOT "${CMAKE_CXX_STANDARD}")
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -29,7 +31,8 @@ find_package(catkin REQUIRED COMPONENTS
   srdfdom
 )
 find_package(ompl REQUIRED)
-include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${OMPL_INCLUDE_DIRS})
+include_directories(SYSTEM ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${OMPL_INCLUDE_DIRS})
+include_directories(include)
 
 # Qt Stuff
 if(rviz_QT_VERSION VERSION_LESS "5")
@@ -46,7 +49,7 @@ add_definitions(-DQT_NO_KEYWORDS)
 # Support new yaml-cpp API.
 find_package(PkgConfig)
 pkg_check_modules(YAMLCPP REQUIRED yaml-cpp>=0.5)
-include_directories(${YAMLCPP_INCLUDE_DIRS})
+include_directories(SYSTEM ${YAMLCPP_INCLUDE_DIRS})
 
 catkin_package(
   INCLUDE_DIRS

@@ -84,6 +84,8 @@ public:
 
   ~PR2ArmIKSolver() override{};
 
+  void updateInternalDataStructures() override;
+
   /**
    * @brief The PR2 inverse kinematics solver
    */

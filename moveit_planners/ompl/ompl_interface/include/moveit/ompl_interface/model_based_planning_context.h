@@ -68,7 +68,6 @@ struct ModelBasedPlanningContextSpecification
   constraint_samplers::ConstraintSamplerManagerPtr constraint_sampler_manager_;
 
   ModelBasedStateSpacePtr state_space_;
-  std::vector<ModelBasedStateSpacePtr> subspaces_;
   og::SimpleSetupPtr ompl_simple_setup_;  // pass in the correct simple setup type
 };
 
@@ -257,16 +256,6 @@ public:
     return constraints_library_;
   }
 
-  bool useStateValidityCache() const
-  {
-    return use_state_validity_cache_;
-  }
-
-  void useStateValidityCache(bool flag)
-  {
-    use_state_validity_cache_ = flag;
-  }
-
   bool simplifySolutions() const
   {
     return simplify_solutions_;
@@ -275,6 +264,16 @@ public:
   void simplifySolutions(bool flag)
   {
     simplify_solutions_ = flag;
+  }
+
+  void setInterpolation(bool flag)
+  {
+    interpolate_ = flag;
+  }
+
+  void setHybridize(bool flag)
+  {
+    hybridize_ = flag;
   }
 
   /* @brief Solve the planning problem. Return true if the problem is solved
@@ -323,6 +322,13 @@ public:
    * approximations to */
   bool saveConstraintApproximations(const rclcpp::Node::SharedPtr& node);
 
+  /** \brief Configure ompl_simple_setup_ and optionally the constraints_library_.
+   *
+   * ompl_simple_setup_ gets a start state, state sampler, and state validity checker.
+   *
+   * \param node ROS node used to load the constraint approximations.
+   * \param use_constraints_approximations Set to true if we want to load the constraint approximation.
+   * */
   virtual void configure(const rclcpp::Node::SharedPtr& node, bool use_constraints_approximations);
 
 protected:
@@ -347,8 +353,8 @@ protected:
 
      * `Iteration[num]`: Terminate after `num` iterations. Here, `num` should be replaced
        with a positive integer.
-     * `CostConvergence[solutionsWindow,epsilon]`: Terminate after the cost (as specified
-       by an optimization objective) has converged. The parameter `solutionsWindow`
+     * `CostConvergence[solutions_window,epsilon]`: Terminate after the cost (as specified
+       by an optimization objective) has converged. The parameter `solutions_window`
        specifies the minimum number of solutions to use in deciding whether a planner has
        converged. The parameter `epsilon`	is the threshold to consider for convergence.
        This should be a positive number close to 0. If the cumulative moving average does
@@ -418,13 +424,17 @@ protected:
   /// needed)
   unsigned int minimum_waypoint_count_;
 
-  bool use_state_validity_cache_;
-
   /// when false, clears planners before running solve()
   bool multi_query_planning_enabled_;
 
   ConstraintsLibraryPtr constraints_library_;
 
   bool simplify_solutions_;
+
+  // if false the final solution is not interpolated
+  bool interpolate_;
+
+  // if false parallel plan returns the first solution found
+  bool hybridize_;
 };
 }  // namespace ompl_interface

@@ -40,7 +40,6 @@
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <pluginlib/class_list_macros.hpp>
 #include <map>
-#include <iterator>
 
 namespace moveit_fake_controller_manager
 {
@@ -77,9 +76,11 @@ public:
     pub_ = node_->create_publisher<sensor_msgs::msg::JointState>("fake_controller_joint_states", 100);
 
     /* publish initial pose */
-    if (node_->has_parameter(param_base_name + ".initial"))
+    rcl_interfaces::msg::ListParametersResult params_result = node->list_parameters(
+        { param_base_name + ".initial" }, rcl_interfaces::srv::ListParameters::Request::DEPTH_RECURSIVE);
+    if (!params_result.prefixes.empty())
     {
-      sensor_msgs::msg::JointState js = loadInitialJointValues(param_base_name + ".initial");
+      sensor_msgs::msg::JointState js = loadInitialJointValues(params_result.names);
       js.header.stamp = rclcpp::Clock(RCL_ROS_TIME).now();
       pub_->publish(js);
     }
@@ -134,7 +135,7 @@ public:
   }
 
   // TODO: codebase wide refactoring for XmlRpc
-  sensor_msgs::msg::JointState loadInitialJointValues(const std::string& param_base_name) const
+  sensor_msgs::msg::JointState loadInitialJointValues(const std::vector<std::string>& param_names) const
   {
     sensor_msgs::msg::JointState js;
 
@@ -146,15 +147,12 @@ public:
 
     robot_state.setToDefaultValues();  // initialize all joint values (just in case...)
 
-    // TODO: Declare and only support declared parameters for this
-    rcl_interfaces::msg::ListParametersResult params_result = node_->list_parameters({ param_base_name }, 2);
-
-    for (const auto& param_name : params_result.names)
+    for (const auto& param_name : param_names)
     {
       try
       {
         rclcpp::Parameter param = node_->get_parameter(param_name);
-        auto group_name = param_name.substr(param_name.find(param_base_name) + param_base_name.size() + 1);
+        auto group_name = param_name.substr(param_name.find_last_of('.') + 1);
         auto pose_name = param.value_to_string();
 
         if (!robot_model->hasJointModelGroup(group_name))
@@ -197,10 +195,10 @@ public:
     }
 
     // fill the joint state
-    for (JointPoseMap::const_iterator it = joints.begin(), end = joints.end(); it != end; ++it)
+    for (const auto& joint : joints)
     {
-      js.name.push_back(it->first);
-      js.position.push_back(it->second);
+      js.name.push_back(joint.first);
+      js.position.push_back(joint.second);
     }
     return js;
   }

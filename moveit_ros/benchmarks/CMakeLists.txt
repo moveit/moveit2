@@ -3,7 +3,9 @@ project(moveit_ros_benchmarks)
 
 set(MOVEIT_LIB_NAME moveit_ros_benchmarks)
 
-set(CMAKE_CXX_STANDARD 14)
+if(NOT "${CMAKE_CXX_STANDARD}")
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -66,7 +68,6 @@ ament_target_dependencies(moveit_combine_predefined_poses_benchmark
 target_link_libraries(moveit_combine_predefined_poses_benchmark ${MOVEIT_LIB_NAME})
 
 ament_export_include_directories(include)
-ament_export_interfaces(${MOVEIT_LIB_NAME} HAS_LIBRARY_TARGET)
 ament_export_libraries(${MOVEIT_LIB_NAME})
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(Boost)

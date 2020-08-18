@@ -39,8 +39,13 @@
 #include <moveit/version.h>
 #include <tf2_eigen/tf2_eigen.h>
 
+// TODO(henningkayser): Switch to boost/timer/progress_display.hpp with Boost 1.72
+// boost/progress.hpp is deprecated and will be replaced by boost/timer/progress_display.hpp in Boost 1.72.
+// Until then we need to suppress the deprecation warning.
+#define BOOST_ALLOW_DEPRECATED_HEADERS
 #include <boost/regex.hpp>
 #include <boost/progress.hpp>
+#undef BOOST_ALLOW_DEPRECATED_HEADERS
 #include <boost/math/constants/constants.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>

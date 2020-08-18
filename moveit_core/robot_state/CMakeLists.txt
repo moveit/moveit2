@@ -34,11 +34,8 @@ install(DIRECTORY include/ DESTINATION include)
 # Unit tests
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
-  find_package(moveit_resources REQUIRED)
   find_package(tf2_geometry_msgs REQUIRED)
   find_package(resource_retriever REQUIRED)
-
-  include_directories(${moveit_resources_INCLUDE_DIRS})
 
   if(WIN32)
     # TODO add windows paths
@@ -66,7 +63,6 @@ if(BUILD_TESTING)
   )
 
   ament_add_gtest(test_robot_state_complex test/test_kinematic_complex.cpp)
-  ament_target_dependencies(test_robot_state_complex ament_index_cpp)
   target_link_libraries(test_robot_state_complex
     moveit_test_utils
     moveit_utils

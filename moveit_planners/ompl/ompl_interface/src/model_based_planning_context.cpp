@@ -72,7 +72,10 @@
 #include "ompl/base/objectives/MaximizeMinClearanceObjective.h"
 #include <ompl/geometric/planners/prm/LazyPRM.h>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.model_based_planning_context");
+namespace ompl_interface
+{
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.model_based_planning_context");
+}  // namespace ompl_interface
 
 ompl_interface::ModelBasedPlanningContext::ModelBasedPlanningContext(const std::string& name,
                                                                      const ModelBasedPlanningContextSpecification& spec)
@@ -91,9 +94,10 @@ ompl_interface::ModelBasedPlanningContext::ModelBasedPlanningContext(const std::
   , max_planning_threads_(0)
   , max_solution_segment_length_(0.0)
   , minimum_waypoint_count_(0)
-  , use_state_validity_cache_(true)
   , multi_query_planning_enabled_(false)  // maintain "old" behavior by default
   , simplify_solutions_(true)
+  , interpolate_(true)
+  , hybridize_(true)
 {
   complete_initial_robot_state_.update();
 
@@ -331,6 +335,22 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
   if (it != cfg.end())
     multi_query_planning_enabled_ = boost::lexical_cast<bool>(it->second);
 
+  // check whether the path returned by the planner should be interpolated
+  it = cfg.find("interpolate");
+  if (it != cfg.end())
+  {
+    interpolate_ = boost::lexical_cast<bool>(it->second);
+    cfg.erase(it);
+  }
+
+  // check whether solution paths from parallel planning should be hybridized
+  it = cfg.find("hybridize");
+  if (it != cfg.end())
+  {
+    hybridize_ = boost::lexical_cast<bool>(it->second);
+    cfg.erase(it);
+  }
+
   // remove the 'type' parameter; the rest are parameters for the planner itself
   it = cfg.find("type");
   if (it == cfg.end())
@@ -488,17 +508,17 @@ ompl::base::PlannerTerminationCondition ompl_interface::ModelBasedPlanningContex
   // Only useful for anytime/optimizing planners.
   else if (termination_and_params[0] == "CostConvergence")
   {
-    std::size_t solutionsWindow = 10u;
+    std::size_t solutions_window = 10u;
     double epsilon = 0.1;
     if (termination_and_params.size() > 1)
     {
-      solutionsWindow = std::stoul(termination_and_params[1]);
+      solutions_window = std::stoul(termination_and_params[1]);
       if (termination_and_params.size() > 2)
         epsilon = moveit::core::toDouble(termination_and_params[2]);
     }
     return ob::plannerOrTerminationCondition(
         ob::timedPlannerTerminationCondition(timeout - ompl::time::seconds(ompl::time::now() - start)),
-        ob::CostConvergenceTerminationCondition(ompl_simple_setup_->getProblemDefinition(), solutionsWindow, epsilon));
+        ob::CostConvergenceTerminationCondition(ompl_simple_setup_->getProblemDefinition(), solutions_window, epsilon));
   }
 #endif
   // Terminate as soon as an exact solution is found or a timeout occurs.
@@ -659,7 +679,9 @@ bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::Motion
       simplifySolution(request_.allowed_planning_time - ptime);
       ptime += getLastSimplifyTime();
     }
-    interpolateSolution();
+
+    if (interpolate_)
+      interpolateSolution();
 
     // fill the response
     RCLCPP_DEBUG(LOGGER, "%s: Returning successful solution with %lu states", getName().c_str(),
@@ -703,13 +725,16 @@ bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::Motion
       getSolutionPath(*res.trajectory_.back());
     }
 
-    ompl::time::point start_interpolate = ompl::time::now();
-    interpolateSolution();
-    res.processing_time_.push_back(ompl::time::seconds(ompl::time::now() - start_interpolate));
-    res.description_.emplace_back("interpolate");
-    res.trajectory_.resize(res.trajectory_.size() + 1);
-    res.trajectory_.back().reset(new robot_trajectory::RobotTrajectory(getRobotModel(), getGroupName()));
-    getSolutionPath(*res.trajectory_.back());
+    if (interpolate_)
+    {
+      ompl::time::point start_interpolate = ompl::time::now();
+      interpolateSolution();
+      res.processing_time_.push_back(ompl::time::seconds(ompl::time::now() - start_interpolate));
+      res.description_.emplace_back("interpolate");
+      res.trajectory_.resize(res.trajectory_.size() + 1);
+      res.trajectory_.back().reset(new robot_trajectory::RobotTrajectory(getRobotModel(), getGroupName()));
+      getSolutionPath(*res.trajectory_.back());
+    }
 
     // fill the response
     RCLCPP_DEBUG(LOGGER, "%s: Returning successful solution with %lu states", getName().c_str(),
@@ -756,7 +781,7 @@ bool ompl_interface::ModelBasedPlanningContext::solve(double timeout, unsigned i
 
       ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
       registerTerminationCondition(ptc);
-      result = ompl_parallel_plan_.solve(ptc, 1, count, true) == ompl::base::PlannerStatus::EXACT_SOLUTION;
+      result = ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION;
       last_plan_time_ = ompl::time::seconds(ompl::time::now() - start);
       unregisterTerminationCondition();
     }
@@ -775,7 +800,7 @@ bool ompl_interface::ModelBasedPlanningContext::solve(double timeout, unsigned i
         else
           for (unsigned int i = 0; i < max_planning_threads_; ++i)
             ompl_parallel_plan_.addPlanner(ompl::tools::SelfConfig::getDefaultPlanner(ompl_simple_setup_->getGoal()));
-        bool r = ompl_parallel_plan_.solve(ptc, 1, count, true) == ompl::base::PlannerStatus::EXACT_SOLUTION;
+        bool r = ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION;
         result = result && r;
       }
       n = count % max_planning_threads_;
@@ -788,7 +813,7 @@ bool ompl_interface::ModelBasedPlanningContext::solve(double timeout, unsigned i
         else
           for (int i = 0; i < n; ++i)
             ompl_parallel_plan_.addPlanner(ompl::tools::SelfConfig::getDefaultPlanner(ompl_simple_setup_->getGoal()));
-        bool r = ompl_parallel_plan_.solve(ptc, 1, count, true) == ompl::base::PlannerStatus::EXACT_SOLUTION;
+        bool r = ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION;
         result = result && r;
       }
       last_plan_time_ = ompl::time::seconds(ompl::time::now() - start);

@@ -41,7 +41,10 @@
 
 #include <utility>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.constrained_goal_sampler");
+namespace ompl_interface
+{
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.constrained_goal_sampler");
+}  // namespace ompl_interface
 
 ompl_interface::ConstrainedGoalSampler::ConstrainedGoalSampler(const ModelBasedPlanningContext* pc,
                                                                kinematic_constraints::KinematicConstraintSetPtr ks,

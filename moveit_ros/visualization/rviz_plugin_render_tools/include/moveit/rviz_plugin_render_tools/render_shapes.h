@@ -44,7 +44,6 @@
 #include <rviz_rendering/objects/shape.hpp>
 #include <OgreColourValue.h>
 #include <Eigen/Geometry>
-#include <string>
 #include <memory>
 
 namespace moveit_rviz_plugin

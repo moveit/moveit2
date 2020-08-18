@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit_msgs/msg/constraints.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <geometry_msgs/msg/quaternion_stamped.hpp>

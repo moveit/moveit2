@@ -43,7 +43,6 @@
 
 #include <ompl/base/PlannerDataStorage.h>
 
-#include <vector>
 #include <string>
 #include <map>
 
@@ -170,6 +169,15 @@ public:
     return robot_model_;
   }
 
+  /** \brief Returns a planning context to OMPLInterface, which in turn passes it to OMPLPlannerManager.
+   *
+   * This function checks the input and reads planner specific configurations.
+   * Then it creates the planning context with PlanningContextManager::createPlanningContext.
+   * Finally, it puts the context into a state appropriate for planning.
+   * This last step involves setting the start, goal, and state validity checker using the method
+   * ModelBasedPlanningContext::configure.
+   *
+   * */
   ModelBasedPlanningContextPtr getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                                   const planning_interface::MotionPlanRequest& req,
                                                   moveit_msgs::msg::MoveItErrorCodes& error_code,

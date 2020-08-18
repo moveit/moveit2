@@ -38,7 +38,6 @@
 #include <kdl_parser/kdl_parser.hpp>
 #include <tf2_kdl/tf2_kdl.h>
 #include <algorithm>
-#include <numeric>
 
 #include <moveit/robot_model/robot_model.h>
 #include "pr2_arm_kinematics_plugin.h"
@@ -95,6 +94,12 @@ PR2ArmIKSolver::PR2ArmIKSolver(const urdf::ModelInterface& robot_model, const st
   free_angle_ = free_angle;
   root_frame_name_ = root_frame_name;
   active_ = pr2_arm_ik_.init(robot_model, root_frame_name, tip_frame_name);
+}
+
+void PR2ArmIKSolver::updateInternalDataStructures()
+{
+  // TODO: move (re)allocation of any internal data structures here
+  // to react to changes in chain
 }
 
 int PR2ArmIKSolver::CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_in, KDL::JntArray& q_out)

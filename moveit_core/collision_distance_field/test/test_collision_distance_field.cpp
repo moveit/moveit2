@@ -39,6 +39,7 @@
 #include <moveit/transforms/transforms.h>
 #include <moveit/collision_distance_field/collision_distance_field_types.h>
 #include <moveit/collision_distance_field/collision_env_distance_field.h>
+#include <moveit/utils/robot_model_test_utils.h>
 
 #include <geometric_shapes/shape_operations.h>
 #include <urdf_parser/urdf_parser.h>
@@ -50,8 +51,6 @@
 #include <ctype.h>
 #include <boost/filesystem.hpp>
 
-#include <ament_index_cpp/get_package_share_directory.hpp>
-
 typedef collision_detection::CollisionEnvDistanceField DefaultCEnvType;
 
 class DistanceFieldCollisionDetectionTester : public testing::Test
@@ -59,29 +58,7 @@ class DistanceFieldCollisionDetectionTester : public testing::Test
 protected:
   void SetUp() override
   {
-    srdf_model_.reset(new srdf::Model());
-    std::string xml_string;
-    std::fstream xml_file(ament_index_cpp::get_package_share_directory("moveit_resources") +
-                              "/pr2_description/urdf/robot.xml",
-                          std::fstream::in);
-    if (xml_file.is_open())
-    {
-      while (xml_file.good())
-      {
-        std::string line;
-        std::getline(xml_file, line);
-        xml_string += (line + "\n");
-      }
-      xml_file.close();
-      urdf_model_ = urdf::parseURDF(xml_string);
-      urdf_ok_ = static_cast<bool>(urdf_model_);
-    }
-    else
-      urdf_ok_ = false;
-    srdf_ok_ = srdf_model_->initFile(*urdf_model_, ament_index_cpp::get_package_share_directory("moveit_resources") +
-                                                       "/pr2_description/srdf/robot.xml");
-
-    robot_model_.reset(new moveit::core::RobotModel(urdf_model_, srdf_model_));
+    robot_model_ = moveit::core::loadTestingRobotModel("pr2");
 
     acm_.reset(new collision_detection::AllowedCollisionMatrix(robot_model_->getLinkModelNames(), true));
 

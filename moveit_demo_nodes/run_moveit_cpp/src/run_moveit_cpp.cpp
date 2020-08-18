@@ -52,8 +52,6 @@ public:
   MoveItCppDemo(const rclcpp::Node::SharedPtr& node)
     : node_(node)
     , robot_state_publisher_(node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state", 1))
-    , trajectory_publisher_(node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(
-          "/fake_joint_trajectory_controller/joint_trajectory", 1))
   {
   }
 
@@ -61,6 +59,7 @@ public:
   {
     RCLCPP_INFO(LOGGER, "Initialize MoveItCpp");
     moveit_cpp_ = std::make_shared<moveit::planning_interface::MoveItCpp>(node_);
+    moveit_cpp_->getPlanningSceneMonitor()->providePlanningSceneService();  // let RViz display query PlanningScene
     moveit_cpp_->getPlanningSceneMonitor()->setPlanningScenePublishingFrequency(100);
 
     RCLCPP_INFO(LOGGER, "Initialize PlanningComponent");
@@ -95,30 +94,21 @@ public:
 
     // Set joint state goal
     RCLCPP_INFO(LOGGER, "Set goal");
-    arm.setGoal("home");
+    arm.setGoal("extended");
 
     // Run actual plan
     RCLCPP_INFO(LOGGER, "Plan to goal");
     const auto plan_solution = arm.plan();
     if (plan_solution)
     {
-      // TODO(henningkayser): Enable trajectory execution once controllers are available
-      // RCLCPP_INFO(LOGGER, "arm.execute()");
-      // arm.execute();
-      // Right now the joint trajectory controller doesn't support actions and the current way to send trajectory is by
-      // using a publisher
-      // See https://github.com/ros-controls/ros2_controllers/issues/12 for enabling action interface progress
-      RCLCPP_INFO(LOGGER, "Sending the trajectory for execution");
-      moveit_msgs::msg::RobotTrajectory robot_trajectory;
-      plan_solution.trajectory->getRobotTrajectoryMsg(robot_trajectory);
-      trajectory_publisher_->publish(robot_trajectory.joint_trajectory);
+      RCLCPP_INFO(LOGGER, "arm.execute()");
+      arm.execute();
     }
   }
 
 private:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_publisher_;
-  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_publisher_;
   moveit::planning_interface::MoveItCppPtr moveit_cpp_;
 };
 

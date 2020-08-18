@@ -26,23 +26,16 @@ install(TARGETS ${MOVEIT_LIB_NAME}
 
 install(DIRECTORY include/ DESTINATION include)
 
-add_library(test_controller_manager_plugin SHARED test/test_moveit_controller_manager_plugin.cpp)
-set_target_properties(test_controller_manager_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(test_controller_manager_plugin
-  rclcpp
-  Boost
-  pluginlib
-)
-target_link_libraries(test_controller_manager_plugin ${MOVEIT_LIB_NAME})
+if(CATKIN_ENABLE_TESTING)
 
-add_executable(test_controller_manager test/test_app.cpp)
-ament_target_dependencies(test_controller_manager
-  rclcpp
-  Boost
-  pluginlib
-)
-target_link_libraries(test_controller_manager ${MOVEIT_LIB_NAME})
-
-install(TARGETS test_controller_manager
-  DESTINATION lib/${PROJECT_NAME}
-)
+## This needs further cleanup before it can run
+# add_library(test_controller_manager_plugin test/test_moveit_controller_manager_plugin.cpp)
+# set_target_properties(test_controller_manager_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+# target_link_libraries(test_controller_manager_plugin ${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+#
+# find_package(rostest REQUIRED)
+# add_rostest_gtest(test_execution_manager
+#                   test/test_execution_manager.test
+#                   test/test_execution_manager.cpp)
+# target_link_libraries(test_execution_manager ${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+endif()

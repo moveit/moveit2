@@ -43,7 +43,7 @@
 
 namespace ompl_interface
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ompl_planning.ompl_planner_manager");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.ompl_planner_manager");
 static const rclcpp::Logger OMPL_LOGGER = rclcpp::get_logger("ompl");
 
 class OMPLPlannerManager : public planning_interface::PlannerManager

@@ -38,8 +38,6 @@
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/distance_field/voxel_grid.h>
-#include <vector>
-#include <list>
 #include <visualization_msgs/msg/marker.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <Eigen/Core>

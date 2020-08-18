@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_core VERSION 2.0.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 14)
+if(NOT "${CMAKE_CXX_STANDARD}")
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -169,7 +171,8 @@ include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
   # ${BULLET_INCLUDE_DIRS}
 )
 
-include_directories(${THIS_PACKAGE_INCLUDE_DIRS} ${VERSION_FILE_PATH})
+include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
+                    ${VERSION_FILE_PATH})
 
 # Generate and install version.h
 string(REGEX REPLACE "^([0-9]+)\\..*" "\\1" MOVEIT_VERSION_MAJOR "${${PROJECT_NAME}_VERSION}")

@@ -35,7 +35,6 @@
 /* Author: Ken Anderson */
 
 #include <moveit/trajectory_processing/iterative_spline_parameterization.h>
-#include <moveit_msgs/msg/joint_limits.hpp>
 #include <moveit/robot_state/conversions.h>
 #include <vector>
 
@@ -80,8 +79,6 @@ void globalAdjustment(std::vector<SingleJointTrajectory>& t2, int num_joints, co
 IterativeSplineParameterization::IterativeSplineParameterization(bool add_points) : add_points_(add_points)
 {
 }
-
-IterativeSplineParameterization::~IterativeSplineParameterization() = default;
 
 bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
                                                         const double max_velocity_scaling_factor,

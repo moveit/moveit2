@@ -65,12 +65,10 @@ install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
-  find_package(ament_index_cpp REQUIRED)
-  find_package(moveit_resources REQUIRED)
   find_package(Eigen3 REQUIRED)
 
   ament_add_gtest(test_state_space test/test_state_space.cpp)
-  ament_target_dependencies(test_state_space moveit_resources moveit_core ament_index_cpp OMPL Boost Eigen3)
+  ament_target_dependencies(test_state_space moveit_core OMPL Boost Eigen3)
   target_link_libraries(test_state_space ${MOVEIT_LIB_NAME})
 
   set_target_properties(test_state_space PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
