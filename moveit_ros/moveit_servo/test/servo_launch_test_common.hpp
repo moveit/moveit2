@@ -75,13 +75,12 @@ class ServoFixture : public ::testing::Test
 public:
   void SetUp() override
   {
-    // node_->set_parameter({"use_sim_time", true});
     executor_->add_node(node_);
     executor_task_fut_ = std::async(std::launch::async, [this]() {this->executor_->spin();});
   }
 
   ServoFixture()
-  : node_(std::make_shared<rclcpp::Node>("diffbot_controller_test"))
+  : node_(std::make_shared<rclcpp::Node>("servo_testing"))
   , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   {
     // Read the parameters used for testing
