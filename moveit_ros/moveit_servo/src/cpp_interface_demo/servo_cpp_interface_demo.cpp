@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 
   // Get Servo Parameters
   auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
-  if(!moveit_servo::readParameters(node, LOGGER, servo_parameters))
+  if(!moveit_servo::readParameters(servo_parameters, node, LOGGER))
   {
     RCLCPP_ERROR(LOGGER, "Could not get parameters");
     return -1;

@@ -78,7 +78,7 @@ bool ServoServer::init()
   
   // Get the servo parameters
   auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
-  performed_initialization &= moveit_servo::readParameters(node_ptr, LOGGER, servo_parameters);
+  performed_initialization &= moveit_servo::readParameters(servo_parameters, node_ptr, LOGGER);
   if (!performed_initialization)
     RCLCPP_ERROR(LOGGER, "Could not get parameters");
 

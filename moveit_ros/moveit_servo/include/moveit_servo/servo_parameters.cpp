@@ -49,7 +49,7 @@
 namespace moveit_servo
 {
 template <typename T>
-bool declareAndGetParam(const std::string& param_name, T& output_value, rclcpp::Node::SharedPtr& node,
+bool declareAndGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
                         const rclcpp::Logger& logger)
 {
   bool got_param = false;
@@ -94,65 +94,65 @@ bool declareAndGetParam(const std::string& param_name, T& output_value, rclcpp::
  * @param ns Parameter namespace (as loaded in launch files). Defaults to "moveit_servo" but can be changed to allow multiple arms/instances
  * @return true if all parameters were loaded and verified successfully, false otherwise
  */
-bool readParameters(rclcpp::Node::SharedPtr& node, const rclcpp::Logger& logger, ServoParametersPtr& parameters, std::string ns = "moveit_servo")
+bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPtr& node, const rclcpp::Logger& logger, std::string ns = "moveit_servo")
 {
   bool error = false;
 
   // Get the parameters (organized same order as YAML file)
-  error |= !declareAndGetParam<bool>(ns + ".use_gazebo", parameters->use_gazebo, node, logger);
-  error |= !declareAndGetParam<std::string>(ns + ".status_topic", parameters->status_topic, node, logger);
+  error |= !declareAndGetParam<bool>(parameters->use_gazebo, ns + ".use_gazebo", node, logger);
+  error |= !declareAndGetParam<std::string>(parameters->status_topic, ns + ".status_topic", node, logger);
 
   // Properties of incoming commands
-  error |= !declareAndGetParam<std::string>(ns + ".cartesian_command_in_topic", parameters->cartesian_command_in_topic, node,
+  error |= !declareAndGetParam<std::string>(parameters->cartesian_command_in_topic, ns + ".cartesian_command_in_topic", node,
                                            logger);
-  error |= !declareAndGetParam<std::string>(ns + ".joint_command_in_topic", parameters->joint_command_in_topic, node, logger);
+  error |= !declareAndGetParam<std::string>(parameters->joint_command_in_topic, ns + ".joint_command_in_topic", node, logger);
   error |=
-      !declareAndGetParam<std::string>(ns + ".robot_link_command_frame", parameters->robot_link_command_frame, node, logger);
-  error |= !declareAndGetParam<std::string>(ns + ".command_in_type", parameters->command_in_type, node, logger);
-  error |= !declareAndGetParam<double>(ns + ".scale.linear", parameters->linear_scale, node, logger);
-  error |= !declareAndGetParam<double>(ns + ".scale.rotational", parameters->rotational_scale, node, logger);
-  error |= !declareAndGetParam<double>(ns + ".scale.joint", parameters->joint_scale, node, logger);
+      !declareAndGetParam<std::string>(parameters->robot_link_command_frame, ns + ".robot_link_command_frame", node, logger);
+  error |= !declareAndGetParam<std::string>(parameters->command_in_type, ns + ".command_in_type", node, logger);
+  error |= !declareAndGetParam<double>(parameters->linear_scale, ns + ".scale.linear", node, logger);
+  error |= !declareAndGetParam<double>(parameters->rotational_scale, ns + ".scale.rotational", node, logger);
+  error |= !declareAndGetParam<double>(parameters->joint_scale, ns + ".scale.joint", node, logger);
 
   // Properties of outgoing commands
-  error |= !declareAndGetParam<std::string>(ns + ".command_out_topic", parameters->command_out_topic, node, logger);
-  error |= !declareAndGetParam<double>(ns + ".publish_period", parameters->publish_period, node, logger);
-  error |= !declareAndGetParam<std::string>(ns + ".command_out_type", parameters->command_out_type, node, logger);
-  error |= !declareAndGetParam<bool>(ns + ".publish_joint_positions", parameters->publish_joint_positions, node, logger);
-  error |= !declareAndGetParam<bool>(ns + ".publish_joint_velocities", parameters->publish_joint_velocities, node, logger);
+  error |= !declareAndGetParam<std::string>(parameters->command_out_topic, ns + ".command_out_topic", node, logger);
+  error |= !declareAndGetParam<double>(parameters->publish_period, ns + ".publish_period", node, logger);
+  error |= !declareAndGetParam<std::string>(parameters->command_out_type, ns + ".command_out_type", node, logger);
+  error |= !declareAndGetParam<bool>(parameters->publish_joint_positions, ns + ".publish_joint_positions", node, logger);
+  error |= !declareAndGetParam<bool>(parameters->publish_joint_velocities, ns + ".publish_joint_velocities", node, logger);
   error |=
-      !declareAndGetParam<bool>(ns + ".publish_joint_accelerations", parameters->publish_joint_accelerations, node, logger);
+      !declareAndGetParam<bool>(parameters->publish_joint_accelerations, ns + ".publish_joint_accelerations", node, logger);
 
   // Incoming Joint State properties
-  error |= !declareAndGetParam<std::string>(ns + ".joint_topic", parameters->joint_topic, node, logger);
-  error |= !declareAndGetParam<double>(ns + ".low_pass_filter_coeff", parameters->low_pass_filter_coeff, node, logger);
+  error |= !declareAndGetParam<std::string>(parameters->joint_topic, ns + ".joint_topic", node, logger);
+  error |= !declareAndGetParam<double>(parameters->low_pass_filter_coeff, ns + ".low_pass_filter_coeff", node, logger);
 
   // MoveIt properties
-  error |= !declareAndGetParam<std::string>(ns + ".move_group_name", parameters->move_group_name, node, logger);
-  error |= !declareAndGetParam<std::string>(ns + ".planning_frame", parameters->planning_frame, node, logger);
+  error |= !declareAndGetParam<std::string>(parameters->move_group_name, ns + ".move_group_name", node, logger);
+  error |= !declareAndGetParam<std::string>(parameters->planning_frame, ns + ".planning_frame", node, logger);
 
   // Stopping behaviour
-  error |= !declareAndGetParam<double>(ns + ".incoming_command_timeout", parameters->incoming_command_timeout, node, logger);
-  error |= !declareAndGetParam<int>(ns + ".num_outgoing_halt_msgs_to_publish", parameters->num_outgoing_halt_msgs_to_publish,
+  error |= !declareAndGetParam<double>(parameters->incoming_command_timeout, ns + ".incoming_command_timeout", node, logger);
+  error |= !declareAndGetParam<int>(parameters->num_outgoing_halt_msgs_to_publish, ns + ".num_outgoing_halt_msgs_to_publish",
                                    node, logger);
 
   // Configure handling of singularities and joint limits
   error |=
-      !declareAndGetParam<double>(ns + ".lower_singularity_threshold", parameters->lower_singularity_threshold, node, logger);
-  error |= !declareAndGetParam<double>(ns + ".hard_stop_singularity_threshold", parameters->hard_stop_singularity_threshold,
+      !declareAndGetParam<double>(parameters->lower_singularity_threshold, ns + ".lower_singularity_threshold", node, logger);
+  error |= !declareAndGetParam<double>(parameters->hard_stop_singularity_threshold, ns + ".hard_stop_singularity_threshold",
                                       node, logger);
-  error |= !declareAndGetParam<double>(ns + ".joint_limit_margin", parameters->joint_limit_margin, node, logger);
+  error |= !declareAndGetParam<double>(parameters->joint_limit_margin, ns + ".joint_limit_margin", node, logger);
 
   // Collision checking
-  error |= !declareAndGetParam<bool>(ns + ".check_collisions", parameters->check_collisions, node, logger);
-  error |= !declareAndGetParam<double>(ns + ".collision_check_rate", parameters->collision_check_rate, node, logger);
-  error |= !declareAndGetParam<std::string>(ns + ".collision_check_type", parameters->collision_check_type, node, logger);
-  error |= !declareAndGetParam<double>(ns + ".self_collision_proximity_threshold",
-                                      parameters->self_collision_proximity_threshold, node, logger);
-  error |= !declareAndGetParam<double>(ns + ".scene_collision_proximity_threshold",
-                                      parameters->scene_collision_proximity_threshold, node, logger);
-  error |= !declareAndGetParam<double>(ns + ".collision_distance_safety_factor", parameters->collision_distance_safety_factor,
+  error |= !declareAndGetParam<bool>(parameters->check_collisions, ns + ".check_collisions", node, logger);
+  error |= !declareAndGetParam<double>(parameters->collision_check_rate, ns + ".collision_check_rate", node, logger);
+  error |= !declareAndGetParam<std::string>(parameters->collision_check_type, ns + ".collision_check_type", node, logger);
+  error |= !declareAndGetParam<double>(parameters->self_collision_proximity_threshold, ns + ".self_collision_proximity_threshold",
                                       node, logger);
-  error |= !declareAndGetParam<double>(ns + ".min_allowable_collision_distance", parameters->min_allowable_collision_distance,
+  error |= !declareAndGetParam<double>(parameters->scene_collision_proximity_threshold, ns + ".scene_collision_proximity_threshold",
+                                      node, logger);
+  error |= !declareAndGetParam<double>(parameters->collision_distance_safety_factor, ns + ".collision_distance_safety_factor",
+                                      node, logger);
+  error |= !declareAndGetParam<double>(parameters->min_allowable_collision_distance, ns + ".min_allowable_collision_distance",
                                       node, logger);
 
   // Only continue if all parameters were found
