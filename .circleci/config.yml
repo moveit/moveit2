@@ -1,18 +1,8 @@
 version: 2.1
 orbs:
-  codecov: codecov/codecov@1.0.5
+  codecov: codecov/codecov@1.1.1
 
-references:
-  common_environment: &common_environment
-    ROS_WS: "/opt/ros_ws"
-    UNDERLAY_WS: "/opt/underlay_ws"
-    OVERLAY_WS: "/opt/overlay_ws"
-    CCACHE_LOGFILE: "/tmp/ccache.log"
-    CCACHE_MAXSIZE: "200M"
-    MAKEFLAGS: "-j 2 -l 2"
-    RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED: "1"
-    RETEST_UNTIL_PASS: "2"
-    DEBIAN_FRONTEND: "noninteractive"
+_commands:
   common_commands: &common_commands
     restore_from_cache:
       description: "Restore From Cache"
@@ -153,10 +143,7 @@ references:
                   xargs)
               set -o xtrace
               colcon test \
-                --packages-select ${TEST_PACKAGES}
-              colcon test \
                 --packages-select ${TEST_PACKAGES} \
-                --packages-select-test-failures \
                 --retest-until-pass ${RETEST_UNTIL_PASS} \
                 --ctest-args --test-regex "test_.*"
               colcon test-result \
@@ -179,6 +166,19 @@ references:
             path: << parameters.workspace >>/test_results
         - store_artifacts:
             path: << parameters.workspace >>/test_results
+    trigger_dockerhub_url:
+      description: "Trigger Dockerhub URL"
+      parameters:
+        data:
+          type: string
+      steps:
+        - run:
+            command: |
+              curl -H "Content-Type: application/json" \
+                --data '<< parameters.data >>' \
+                -X POST ${DOCKERHUB_TRIGGER_URL}
+
+_steps:
   pre_checkout: &pre_checkout
     run:
       name: Pre Checkout
@@ -192,9 +192,10 @@ references:
           (echo ros_entrypoint && cat) >> checksum.txt
         sha256sum $PWD/checksum.txt >> checksum.txt
         rm -rf $OVERLAY_WS/*
+        mv ~/.ccache /mnt/ramdisk/.ccache
   on_checkout: &on_checkout
     checkout:
-      path: src/moveit2
+      path: src/navigation2
   post_checkout: &post_checkout
     run:
       name: Post Checkout
@@ -258,7 +259,7 @@ references:
     save_to_cache:
       key: ccache
       workspace: /opt/underlay_ws
-      path: ~/.ccache
+      path: /mnt/ramdisk/.ccache
       when: always
   test_overlay_workspace: &test_overlay_workspace
     test_workspace:
@@ -274,6 +275,13 @@ references:
       file: lcov/project_coverage.info
       flags: project
       when: always
+  trigger_dockerhub_build: &trigger_dockerhub_build
+    trigger_dockerhub_url:
+        data: |
+          {
+            "source_type": "Branch",
+            "source_name": "main"
+          }
 
 commands:
   <<: *common_commands
@@ -316,6 +324,23 @@ commands:
     steps:
       - *collect_overlay_coverage
       - *upload_overlay_coverage
+  trigger_dockerhub:
+    description: "Trigger DockerHub"
+    steps:
+      - *trigger_dockerhub_build
+
+_environments:
+  common_environment: &common_environment
+    ROS_WS: "/opt/ros_ws"
+    UNDERLAY_WS: "/opt/underlay_ws"
+    OVERLAY_WS: "/opt/overlay_ws"
+    CCACHE_DIR: "/mnt/ramdisk/.ccache"
+    CCACHE_LOGFILE: "/tmp/ccache.log"
+    CCACHE_MAXSIZE: "200M"
+    MAKEFLAGS: "-j 1 -l 2"
+    RCUTILS_CONSOLE_STDOUT_LINE_BUFFERED: "0"
+    RETEST_UNTIL_PASS: "2"
+    DEBIAN_FRONTEND: "noninteractive"
 
 executors:
   debug_exec:
@@ -336,6 +361,19 @@ executors:
       CACHE_NONCE: "Release"
       OVERLAY_MIXINS: "release ccache"
       UNDERLAY_MIXINS: "release ccache"
+  python_exec:
+    docker:
+      - image: circleci/python
+
+_jobs:
+  job_test: &job_test
+    parameters:
+      rmw:
+        default: "rmw_fastrtps_cpp"
+        type: string
+    parallelism: 1
+    environment:
+      RMW_IMPLEMENTATION: << parameters.rmw >>
 
 jobs:
   debug_build: &debug_build
@@ -348,30 +386,22 @@ jobs:
     executor: release_exec
     <<: *debug_build
   debug_test:
+    <<: *job_test
     executor: debug_exec
-    parallelism: 1
     steps:
       - restore_build
       - test_build
       - report_coverage
-  release_test: &release_test
+  release_test:
+    <<: *job_test
     executor: release_exec
-    parallelism: 1
     steps:
       - restore_build
       - test_build
-  test_rmw_connext_cpp:
-    <<: *release_test
-    environment:
-      RMW_IMPLEMENTATION: "rmw_connext_cpp"
-  test_rmw_cyclonedds_cpp:
-    <<: *release_test
-    environment:
-      RMW_IMPLEMENTATION: "rmw_cyclonedds_cpp"
-  test_rmw_fastrtps_cpp:
-    <<: *release_test
-    environment:
-      RMW_IMPLEMENTATION: "rmw_fastrtps_cpp"
+  rebuild_dockerhub:
+    executor: python_exec
+    steps:
+      - trigger_dockerhub
 
 workflows:
   version: 2
@@ -392,18 +422,28 @@ workflows:
           requires:
             - debug_build
       - release_build
-      # - test_rmw_connext_cpp:
-      #     requires:
-      #       - release_build
-      - test_rmw_cyclonedds_cpp:
+      - release_test:
           requires:
             - release_build
-      - test_rmw_fastrtps_cpp:
-          requires:
-            - release_build
+          matrix:
+            parameters:
+              rmw:
+                # - rmw_connext_cpp
+                - rmw_cyclonedds_cpp
+                - rmw_fastrtps_cpp
     triggers:
       - schedule:
-          cron: "0 0 * * *"
+          cron: "0 13 * * *"
+          filters:
+            branches:
+              only:
+                - master
+  dockerhub:
+    jobs:
+      - rebuild_dockerhub
+    triggers:
+      - schedule:
+          cron: "0 7 * * *"
           filters:
             branches:
               only:
