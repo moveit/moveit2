@@ -152,7 +152,7 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                            const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name)
   : monitor_name_(name)
   , node_(node)
-  , pnode_(std::make_shared<rclcpp::Node>(std::string(node_->get_fully_qualified_name()) + "_private"))
+  , pnode_(std::make_shared<rclcpp::Node>(std::string(node_->get_name()) + "_private", node_->get_namespace()))
   , private_executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   , tf_buffer_(tf_buffer)
   , dt_state_update_(0.0)
