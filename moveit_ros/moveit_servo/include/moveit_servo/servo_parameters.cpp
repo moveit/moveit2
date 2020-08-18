@@ -197,7 +197,7 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
   if (parameters->joint_limit_margin < 0.)
   {
     RCLCPP_WARN(logger, "Parameter 'joint_limit_margin' should be "
-                        "greater than zero. Check yaml file.");
+                        "greater than or equal to zero. Check yaml file.");
     return false;
   }
   if (parameters->command_in_type != "unitless" && parameters->command_in_type != "speed_units")
