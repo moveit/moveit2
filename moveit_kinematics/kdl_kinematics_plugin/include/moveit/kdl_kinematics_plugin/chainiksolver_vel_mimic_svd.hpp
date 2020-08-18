@@ -62,14 +62,7 @@ public:
                                     const std::vector<kdl_kinematics_plugin::JointMimic>& mimic_joints,
                                     bool position_ik = false, double threshold = 0.001);
 
-// TODO: simplify after kinetic support is dropped
-#define KDL_VERSION_LESS(a, b, c) ((KDL_VERSION) < ((a << 16) | (b << 8) | c))
-#if KDL_VERSION_LESS(1, 4, 0)
-  void updateInternalDataStructures();
-#else
   void updateInternalDataStructures() override;
-#endif
-#undef KDL_VERSION_LESS
 
   ~ChainIkSolverVelMimicSVD() override;
 
