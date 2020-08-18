@@ -195,7 +195,7 @@ _steps:
         mv ~/.ccache /mnt/ramdisk/.ccache
   on_checkout: &on_checkout
     checkout:
-      path: src/navigation2
+      path: src/moveit2
   post_checkout: &post_checkout
     run:
       name: Post Checkout
