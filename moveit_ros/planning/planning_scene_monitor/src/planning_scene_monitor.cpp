@@ -224,10 +224,24 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   //@todo: can remove DynamicReconfigureImpl now that we have ported parameters over
   reconfigure_impl_ = new DynamicReconfigureImpl(this);
   // Set up publishing parameters
-  bool publish_planning_scene = node_->get_parameter("planning_scene_monitor.publish_planning_scene").as_bool();
-  bool publish_geom_updates = node_->get_parameter("planning_scene_monitor.publish_geometry_updates").as_bool();
-  bool publish_state_updates = node_->get_parameter("planning_scene_monitor.publish_state_updates").as_bool();
-  bool publish_transform_updates = node_->get_parameter("planning_scene_monitor.publish_transforms_updates").as_bool();
+  rcl_interfaces::msg::ParameterDescriptor desc;
+  desc.set__type(rclcpp::ParameterType::PARAMETER_BOOL);
+
+  desc.set__name("publish_planning_scene");
+  desc.set__description("Set to True to publish Planning Scenes");
+  bool publish_planning_scene = node_->declare_parameter("planning_scene_monitor.publish_planning_scene", false, desc);
+  
+  desc.set__name("publish_geometry_updates");
+  desc.set__description("Set to True to publish geometry updates of the planning scene");
+  bool publish_geom_updates = node_->declare_parameter("planning_scene_monitor.publish_geometry_updates", true, desc);
+
+  desc.set__name("publish_state_updates");
+  desc.set__description("Set to True to publish state updates of the planning scene");
+  bool publish_state_updates = node_->declare_parameter("planning_scene_monitor.publish_state_updates", false, desc);
+
+  desc.set__name("publish_transforms_updates");
+  desc.set__description("Set to True to publish transform updates of the planning scene");
+  bool publish_transform_updates = node_->declare_parameter("planning_scene_monitor.publish_transforms_updates", false, desc);
 
   updatePublishSettings(publish_geom_updates, publish_state_updates, publish_transform_updates, publish_planning_scene);
 
