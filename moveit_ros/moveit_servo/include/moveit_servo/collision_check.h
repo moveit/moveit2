@@ -86,7 +86,7 @@ private:
   /** \brief Get a read-only copy of the planning scene */
   planning_scene_monitor::LockedPlanningSceneRO getLockedPlanningSceneRO() const;
 
-  /** \brief Callback for stopping time, from the thread that is aware of velocity and acceleration */
+  /** \brief Callback for collision stopping time, from the thread that is aware of velocity and acceleration */
   void worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg);
 
   /** \brief Callback for joint state msgs */

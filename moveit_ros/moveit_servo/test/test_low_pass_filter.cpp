@@ -51,7 +51,10 @@ TEST(MOVEIT_SERVO, FilterConverge)
   {
     value = lpf.filter(5.0);
   }
+  // Check that the filter converges to expected value after many identical messages
   EXPECT_DOUBLE_EQ(5.0, value);
+
+  // Then check that a different measurement changes the value
   EXPECT_NE(5.0, lpf.filter(100.0));
 }
 
@@ -61,6 +64,10 @@ TEST(MOVEIT_SERVO, FilterReset)
   EXPECT_DOUBLE_EQ(0.0, lpf.filter(0.0));
   lpf.reset(5.0);
   double value = lpf.filter(5.0);
+
+  // Check that the filter was properly set to the desired value
   EXPECT_DOUBLE_EQ(5.0, value);
+
+  // Then check that a different measurement changes the value
   EXPECT_NE(5.0, lpf.filter(100.0));
 }

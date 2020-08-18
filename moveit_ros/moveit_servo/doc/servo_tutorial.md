@@ -64,8 +64,9 @@ The bare minimum requirements for running `moveit_servo` on your robot include:
 1) A URDF for your robot
 2) A SRDF for your robot
 3) A controller that can accept joint positions or velocities from a ROS topic
+4) Joint encoders that provide rapid and accurate joint position feedback.
 
-Because the kinematics are handled by the core parts of `moveit`, it is reccomended that you have a valid `moveit_config` package for your robot and you can run the demo launch file included with it.
+Because the kinematics are handled by the core parts of `moveit`, it is recommended that you have a valid `moveit_config` package for your robot and you can run the demo launch file included with it.
 
 #### A note on controllers
 As of now, there is no [ros2_controls controller](https://github.com/ros-controls/ros2_controllers) that can work with `moveit_servo`. ROS1 controllers that worked include `position_controllers/JointGroupPositionControllers` and `velocity_controllers/JointGroupVelocityControllers`. 
@@ -82,10 +83,10 @@ The incoming messages do need a few things to be able to work with `moveit_servo
 
 1) **TwistStamped** and **JointJog** *need* a timestamp in the header that is updated when the message is published. This timestamp is used to track when `Servo` should stop listening to "stale" commands
 2) **TwistStamped** messages *can* proivde a `frame_id` in the header. If this frame name is valid and can be transformed to, Servo will perform Cartesian servoing in the given frame. Empty frames default to the frame given in the configuration file
-3) **JointJog** messages *need* to have valid joint names in the `joint_names` field that coorespond with the commands you are trying to give in the `displacements` or `velocities` fields. Note that each of the 3 fields should be equal in length and in the same order.
+3) **JointJog** messages *need* to have valid joint names in the `joint_names` field that correspond with the commands you are trying to give in the `displacements` or `velocities` fields. Note that each of the 3 fields should be equal in length and in the same order.
 
 ### Servo config
-In `config/panda_simulated_config.yaml` you can see a list of all the parameters that control `moveit_servo`'s behaivor. When setting up your robot, it is reccomended to copy this file into your package (so it is tracked with your version control) and modifying it from the defaults. The example file shows the configuration for all of the demonstrations. These values are generally good, but a few will need to be changed based on the specific robot. The ones that you certainly need to update are discussed below:
+In `config/panda_simulated_config.yaml` you can see a list of all the parameters that control `moveit_servo`'s behavior. When setting up your robot, it is recommended to copy this file into your package (so it is tracked with your version control) and modifying it from the defaults. The example file shows the configuration for all of the demonstrations. These values are generally good, but a few will need to be changed based on the specific robot. The ones that you certainly need to update are discussed below:
 
 1) `robot_link_command_frame`: Update this to be a valid frame in your robot. Recommend the planning frame or EEF frame
 2) `command_in_type`: Set to "unitless" if your input comes from a joystick, "speed_units" if the input will be in meters/second or radians/second.
@@ -169,7 +170,7 @@ When creating and starting the Servo instance, you need to pass the read paramet
 moveit_servo::Servo servo(node, servo_parameters, planning_scene_monitor);
 while (!servo.waitForInitialized())
 {
-  auto& clock = *node->get_clock();
+  rclcpp::Clock& clock = *node->get_clock();
   RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, 5000,
                               "Waiting for ServoCalcs to recieve joint states");
 }

@@ -54,7 +54,7 @@ ros2 launch moveit_servo servo_cpp_interface_demo.launch.py
 ## Component Demo
 `moveit_servo` is also offered as a composable node that may be run in a container with other components. 
 
-This demo starts a `moveit_servo` instance in a container with the `tf` publisher. Commands may be sent to the arm by publishing to the `moveit_servo` input topics, and the `moveit_servo` behaivor may be controlled by its offered services.
+This demo starts a `moveit_servo` instance in a container with the `tf` publisher. Commands may be sent to the arm by publishing to the `moveit_servo` input topics, and the `moveit_servo` behavior may be controlled by its offered services.
 
 #### To run
 ```bash
@@ -86,7 +86,7 @@ Open a terminal and run
 source $COLCON_WS/install/setup.bash
 ros2 launch moveit_servo servo_teleop.launch.py
 ```
-You should now be able to input commands via the controller. Default supported actions include Cartesian and joint commands, and switching the frame of the Cartiesian commands.
+You should now be able to input commands via the controller. Default supported actions include Cartesian and joint commands, and switching the frame of the Cartesian commands.
 
 #### Expected output
 ![Alt Text](Images/Servo_Teleop_Demo.gif)

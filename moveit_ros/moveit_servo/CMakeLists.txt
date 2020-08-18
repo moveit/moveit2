@@ -92,10 +92,6 @@ if(BUILD_TESTING)
   find_package(ros_testing REQUIRED)
   find_package(Boost REQUIRED COMPONENTS filesystem)
 
-  if(UNIX OR APPLE)
-    set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR}:${CMAKE_CURRENT_BINARY_DIR}/../utils:${CMAKE_CURRENT_BINARY_DIR}/../collision_detection_fcl:${CMAKE_CURRENT_BINARY_DIR}/../collision_detection")
-  endif()
-
   # Lowpass filter unit test
   ament_add_gtest(test_low_pass_filter test/test_low_pass_filter.cpp)
   target_link_libraries( test_low_pass_filter ${LIBRARY_NAME})

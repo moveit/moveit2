@@ -21,8 +21,7 @@ command_out_topic: /fake_joint_trajectory_controller/joint_trajectory # Publish 
 publish_period: 0.008  # 1/Nominal publish rate [seconds]
 
 # What type of topic does your robot driver expect?
-# Currently supported are std_msgs/Float64MultiArray (for ros_control JointGroupVelocityController or JointGroupPositionController)
-# or trajectory_msgs/JointTrajectory (for Universal Robots and other non-ros_control robots)
+# Currently supported are std_msgs/Float64MultiArray or trajectory_msgs/JointTrajectory
 command_out_type: trajectory_msgs/JointTrajectory
 
 # What to publish? Can save some bandwidth as most robots only require positions or velocities

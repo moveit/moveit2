@@ -107,14 +107,6 @@ void CollisionCheck::stop()
 
 void CollisionCheck::run()
 {
-  // // Log warning when the last loop duration was longer than the period
-  // if (timer_event.profile.last_duration.toSec() > period_.toSec())
-  // {
-  //   ROS_WARN_STREAM_THROTTLE_NAMED(ROS_LOG_THROTTLE_PERIOD, LOGNAME,
-  //                                  "last_duration: " << timer_event.profile.last_duration.toSec() << " ("
-  //                                                    << period_.toSec() << ")");
-  // }
-
   if (paused_)
   {
     return;
@@ -209,7 +201,7 @@ void CollisionCheck::run()
 
   // publish message
   {
-    auto msg = std::make_unique<std_msgs::msg::Float64>();  // TODO(adamp): consider going back to pool allocate
+    auto msg = std::make_unique<std_msgs::msg::Float64>();
     msg.get()->data = velocity_scale_;
     collision_velocity_scale_pub_->publish(std::move(msg));
   }
@@ -219,7 +211,7 @@ void CollisionCheck::printCollisionPairs(collision_detection::CollisionResult::C
 {
   if (!contact_map.empty())
   {
-    auto& clock = *node_->get_clock();
+    rclcpp::Clock& clock = *node_->get_clock();
     // Throttled error message about the first contact in the list
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                 "Objects in collision (among others, possibly): "
