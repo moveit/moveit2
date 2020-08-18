@@ -7,6 +7,10 @@ repositories:
     type: git
     url: https://github.com/OctoMap/octomap_msgs
     version: ros2
+  ompl/ompl: 
+    type: git
+    url: https://github.com/ompl/ompl
+    version: master
   ros-controls/control_msgs: 
     type: git
     url: https://github.com/ros-controls/control_msgs.git
@@ -46,6 +50,14 @@ repositories:
   ros/urdf_parser_py: 
     type: git
     url: https://github.com/ros/urdf_parser_py
+    version: ros2
+  ros/xacro: 
+    type: git
+    url: https://github.com/ros/xacro
+    version: dashing-devel
+  wg-perception/object_recognition_msgs: 
+    type: git
+    url: https://github.com/wg-perception/object_recognition_msgs
     version: ros2
 
 
