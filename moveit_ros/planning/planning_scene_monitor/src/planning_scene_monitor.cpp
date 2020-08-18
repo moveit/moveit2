@@ -243,13 +243,20 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   desc.set__description("Set to True to publish transform updates of the planning scene");
   bool publish_transform_updates = node_->declare_parameter("planning_scene_monitor.publish_transforms_updates", false, desc);
 
-  updatePublishSettings(publish_geom_updates, publish_state_updates, publish_transform_updates, publish_planning_scene);
+  desc.set__type(rclcpp::ParameterType::PARAMETER_DOUBLE);
+  desc.set__name("publish_planning_scene_hz");
+  desc.set__description("Set the maximum frequency at which planning scene updates are published");
+  double publish_planning_scene_hz = node_->declare_parameter("planning_scene_monitor.publish_planning_scene_hz", 4.0, desc);
+
+  updatePublishSettings(publish_geom_updates, publish_state_updates, publish_transform_updates, publish_planning_scene,
+    publish_planning_scene_hz);
 
   auto psm_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters) {
     auto result = rcl_interfaces::msg::SetParametersResult();
     result.successful = true;
     bool publish_planning_scene = false, publish_geometry_updates = false, publish_state_updates = false,
          publish_transform_updates = false;
+    double publish_planning_scene_hz = 4.0;
     for (const auto& parameter : parameters)
     {
       rclcpp::ParameterType parameter_type = parameter.get_type();
@@ -267,12 +274,20 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
         else
           result.successful = false;
       }
+      else if (parameter_type == rclcpp::ParameterType::PARAMETER_DOUBLE)
+      {
+        const std::string& name = parameter.get_name();
+        if (name == "planning_scene_monitor.publish_planning_scene_hz")
+          publish_planning_scene_hz = parameter.as_double();
+        else
+          result.successful = false;
+      }
       else
         result.successful = false;
     }
     if (result.successful)
       updatePublishSettings(publish_geometry_updates, publish_state_updates, publish_transform_updates,
-                            publish_planning_scene);
+                            publish_planning_scene, publish_planning_scene_hz);
     return result;
   };
   callback_handler_ = node_->add_on_set_parameters_callback(psm_parameter_set_callback);
@@ -560,7 +575,8 @@ void PlanningSceneMonitor::getPlanningSceneServiceCallback(moveit_msgs::srv::Get
 }
 
 void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool publish_state_updates,
-                                                 bool publish_transform_updates, bool publish_planning_scene)
+                                                 bool publish_transform_updates, bool publish_planning_scene,
+                                                 double publish_planning_scene_hz)
 {
   PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
   if (publish_geom_updates)
@@ -571,7 +587,7 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
   if (publish_planning_scene)
   {
-    this->setPlanningScenePublishingFrequency(100);
+    this->setPlanningScenePublishingFrequency(publish_planning_scene_hz);
     this->startPublishingPlanningScene(event);
   }
   else
