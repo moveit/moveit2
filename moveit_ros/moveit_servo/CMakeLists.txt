@@ -39,11 +39,11 @@ include_directories(
 )
 
 add_library(${LIBRARY_NAME} SHARED
-   src/servo.cpp
-   src/servo_calcs.cpp
-   src/collision_check.cpp
-   src/low_pass_filter.cpp
-   include/moveit_servo/servo_parameters.cpp
+  src/servo.cpp
+  src/servo_calcs.cpp
+  src/collision_check.cpp
+  src/low_pass_filter.cpp
+  include/moveit_servo/servo_parameters.cpp
 )
 set_target_properties(${LIBRARY_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${LIBRARY_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
@@ -69,14 +69,14 @@ rclcpp_components_register_nodes(${SERVO_CONTROLLER_INPUT} "moveit_servo::JoyToS
 # Add executable to publish fake servo commands for testing/demo purposes
 set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
 add_executable(${FAKE_SERVO_CMDS_NAME} test/publish_fake_jog_commands.cpp)
-ament_target_dependencies(${FAKE_SERVO_CMDS_NAME} 
+ament_target_dependencies(${FAKE_SERVO_CMDS_NAME}
   rclcpp
   geometry_msgs
   std_srvs
 )
 
 # Install Libraries
-install(TARGETS 
+install(TARGETS
   ${LIBRARY_NAME} ${COMPOSABLE_NODE_NAME} ${SERVO_CONTROLLER_INPUT}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
@@ -94,7 +94,7 @@ if(BUILD_TESTING)
 
   # Lowpass filter unit test
   ament_add_gtest(test_low_pass_filter test/test_low_pass_filter.cpp)
-  target_link_libraries( test_low_pass_filter ${LIBRARY_NAME})
+  target_link_libraries(test_low_pass_filter ${LIBRARY_NAME})
 
   # Basic unit test ServoCalcs
   ament_add_gtest(
@@ -102,15 +102,15 @@ if(BUILD_TESTING)
     test/unit_test_servo_calcs.cpp
     test/test_parameter_struct.hpp
   )
-  target_link_libraries( test_servo ${LIBRARY_NAME})
+  target_link_libraries(test_servo ${LIBRARY_NAME})
   ament_target_dependencies(test_servo ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost ament_cmake_gtest ros_testing)
 
   # Servo parameters launch test
-  add_executable(test_servo_parameters_node 
+  add_executable(test_servo_parameters_node
     test/test_servo_parameters_node.cpp
     test/test_parameter_struct.hpp)
   ament_target_dependencies(test_servo_parameters_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  
+
   ament_add_gtest_executable(test_servo_parameters test/test_servo_parameters.cpp)
   ament_target_dependencies(test_servo_parameters ${THIS_PACKAGE_INCLUDE_DEPENDS})
   target_link_libraries(test_servo_parameters ${LIBRARY_NAME})
