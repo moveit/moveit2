@@ -52,7 +52,7 @@ void ApplyPlanningSceneService::initialize()
   using std::placeholders::_2;
   using std::placeholders::_3;
 
-  service_ = node_->create_service<moveit_msgs::srv::ApplyPlanningScene>(
+  service_ = context_->node_->create_service<moveit_msgs::srv::ApplyPlanningScene>(
       APPLY_PLANNING_SCENE_SERVICE_NAME, std::bind(&ApplyPlanningSceneService::applyScene, this, _1, _2, _3));
 }
 

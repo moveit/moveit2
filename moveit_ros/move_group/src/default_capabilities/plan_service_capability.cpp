@@ -53,7 +53,7 @@ void MoveGroupPlanService::initialize()
   using std::placeholders::_2;
   using std::placeholders::_3;
 
-  plan_service_ = node_->create_service<moveit_msgs::srv::GetMotionPlan>(
+  plan_service_ = context_->node_->create_service<moveit_msgs::srv::GetMotionPlan>(
       PLANNER_SERVICE_NAME, std::bind(&MoveGroupPlanService::computePlanService, this, _1, _2, _3));
 }
 
@@ -64,7 +64,7 @@ bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_
   RCLCPP_INFO(LOGGER, "Received new planning service request...");
   // before we start planning, ensure that we have the latest robot state received...
   if (static_cast<bool>(req->motion_plan_request.start_state.is_diff))
-    context_->planning_scene_monitor_->waitForCurrentRobotState(node_->get_clock()->now());
+    context_->planning_scene_monitor_->waitForCurrentRobotState(context_->node_->get_clock()->now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   planning_scene_monitor::LockedPlanningSceneRO ps(context_->planning_scene_monitor_);

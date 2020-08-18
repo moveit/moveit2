@@ -75,10 +75,10 @@ void MoveGroupCartesianPathService::initialize()
   using std::placeholders::_2;
   using std::placeholders::_3;
 
-  display_path_ = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(
+  display_path_ = context_->node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>(
       planning_pipeline::PlanningPipeline::DISPLAY_PATH_TOPIC, 10);
 
-  cartesian_path_service_ = node_->create_service<moveit_msgs::srv::GetCartesianPath>(
+  cartesian_path_service_ = context_->node_->create_service<moveit_msgs::srv::GetCartesianPath>(
       CARTESIAN_PATH_SERVICE_NAME, std::bind(&MoveGroupCartesianPathService::computeService, this, _1, _2, _3));
 }
 

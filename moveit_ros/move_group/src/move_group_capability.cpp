@@ -40,11 +40,6 @@
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_capabilities_base.move_group_capability");
 
-void move_group::MoveGroupCapability::setNode(const rclcpp::Node::SharedPtr& node)
-{
-  node_ = node;
-}
-
 void move_group::MoveGroupCapability::setContext(const MoveGroupContextPtr& context)
 {
   context_ = context;

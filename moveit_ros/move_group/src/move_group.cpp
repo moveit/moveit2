@@ -163,7 +163,6 @@ private:
         printf(MOVEIT_CONSOLE_COLOR_CYAN "Loading '%s'...\n" MOVEIT_CONSOLE_COLOR_RESET, capability.c_str());
         MoveGroupCapabilityPtr cap = capability_plugin_loader_->createUniqueInstance(capability);
         cap->setContext(context_);
-        cap->setNode(node_);
         cap->initialize();
         capabilities_.push_back(cap);
       }

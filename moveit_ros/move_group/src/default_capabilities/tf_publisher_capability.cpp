@@ -76,14 +76,14 @@ void publishSubframes(tf2_ros::TransformBroadcaster& broadcaster, const moveit::
 
 void TfPublisher::publishPlanningSceneFrames()
 {
-  tf2_ros::TransformBroadcaster broadcaster(node_);
+  tf2_ros::TransformBroadcaster broadcaster(context_->node_);
   geometry_msgs::msg::TransformStamped transform;
   rclcpp::Rate rate(rate_);
 
   while (keep_running_)
   {
     {
-      rclcpp::Time stamp = node_->get_clock()->now();
+      rclcpp::Time stamp = context_->node_->get_clock()->now();
       planning_scene_monitor::LockedPlanningSceneRO locked_planning_scene(context_->planning_scene_monitor_);
       collision_detection::WorldConstPtr world = locked_planning_scene->getWorld();
       std::string planning_frame = locked_planning_scene->getPlanningFrame();

@@ -65,8 +65,6 @@ public:
   {
   }
 
-  void setNode(const rclcpp::Node::SharedPtr& node);
-
   void setContext(const MoveGroupContextPtr& context);
 
   virtual void initialize() = 0;
@@ -96,7 +94,6 @@ protected:
   moveit_msgs::msg::PlanningScene clearSceneRobotState(const moveit_msgs::msg::PlanningScene& scene) const;
   bool performTransform(geometry_msgs::msg::PoseStamped& pose_msg, const std::string& target_frame) const;
 
-  rclcpp::Node::SharedPtr node_;
   std::string capability_name_;
   MoveGroupContextPtr context_;
 };

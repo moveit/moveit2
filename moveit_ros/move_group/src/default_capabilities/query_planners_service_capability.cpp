@@ -49,13 +49,13 @@ void MoveGroupQueryPlannersService::initialize()
   using std::placeholders::_1;
   using std::placeholders::_2;
   using std::placeholders::_3;
-  query_service_ = node_->create_service<moveit_msgs::srv::QueryPlannerInterfaces>(
+  query_service_ = context_->node_->create_service<moveit_msgs::srv::QueryPlannerInterfaces>(
       QUERY_PLANNERS_SERVICE_NAME, std::bind(&MoveGroupQueryPlannersService::queryInterface, this, _1, _2, _3));
 
-  get_service_ = node_->create_service<moveit_msgs::srv::GetPlannerParams>(
+  get_service_ = context_->node_->create_service<moveit_msgs::srv::GetPlannerParams>(
       GET_PLANNER_PARAMS_SERVICE_NAME, std::bind(&MoveGroupQueryPlannersService::getParams, this, _1, _2, _3));
 
-  set_service_ = node_->create_service<moveit_msgs::srv::SetPlannerParams>(
+  set_service_ = context_->node_->create_service<moveit_msgs::srv::SetPlannerParams>(
       SET_PLANNER_PARAMS_SERVICE_NAME, std::bind(&MoveGroupQueryPlannersService::setParams, this, _1, _2, _3));
 }
 

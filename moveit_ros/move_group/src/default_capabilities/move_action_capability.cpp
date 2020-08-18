@@ -60,9 +60,10 @@ void MoveGroupMoveAction::initialize()
   using std::placeholders::_1;
   using std::placeholders::_2;
 
+  auto node = context_->node_;
   execute_action_server_ = rclcpp_action::create_server<MGAction>(
-      node_->get_node_base_interface(), node_->get_node_clock_interface(), node_->get_node_logging_interface(),
-      node_->get_node_waitables_interface(), MOVE_ACTION,
+      node->get_node_base_interface(), node->get_node_clock_interface(), node->get_node_logging_interface(),
+      node->get_node_waitables_interface(), MOVE_ACTION,
       [](const rclcpp_action::GoalUUID&, std::shared_ptr<const MGAction::Goal>) {
         RCLCPP_INFO(LOGGER, "Received request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
