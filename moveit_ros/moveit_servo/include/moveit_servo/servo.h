@@ -53,8 +53,8 @@ namespace moveit_servo
 class Servo
 {
 public:
-  Servo(const rclcpp::Node::SharedPtr& node, const ServoParametersPtr& parameters,
-        const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+  Servo(const rclcpp::Node::SharedPtr& node, ServoParametersPtr parameters,
+        planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor);
 
   ~Servo();
 

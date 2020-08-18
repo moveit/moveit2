@@ -62,7 +62,7 @@ namespace moveit_servo
 class ServoCalcs
 {
 public:
-  ServoCalcs(const rclcpp::Node::SharedPtr& node, const ServoParametersPtr& parameters,
+  ServoCalcs(rclcpp::Node::SharedPtr node, const ServoParametersPtr& parameters,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   /** \brief Start and stop the timer where we do work and publish outputs
