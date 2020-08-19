@@ -38,10 +38,10 @@ def generate_servo_test_description(*args,
     servo_params = { 'moveit_servo' : servo_yaml }
 
     # Get URDF and SRDF
-    robot_description_config = load_file('moveit_resources', 'panda_description/urdf/panda.urdf')
+    robot_description_config = load_file('moveit_resources_panda_description', 'urdf/panda.urdf')
     robot_description = {'robot_description' : robot_description_config}
 
-    robot_description_semantic_config = load_file('moveit_resources', 'panda_moveit_config/config/panda.srdf')
+    robot_description_semantic_config = load_file('moveit_resources_panda_moveit_config', 'config/panda.srdf')
     robot_description_semantic = {'robot_description_semantic' : robot_description_semantic_config}
 
     # Is a perfect controller without dynamics

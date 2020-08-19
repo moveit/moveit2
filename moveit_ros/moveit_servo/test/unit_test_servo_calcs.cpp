@@ -52,13 +52,11 @@
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.unit_test_servo_calcs.cpp");
 
-void loadModelFile(std::string filename, std::string& file_content)
+void loadModelFile(std::string package_name, std::string filename, std::string& file_content)
 {
-  boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory("moveit_resources"));
+  boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
   std::string xml_string;
   std::fstream xml_file((res_path / filename).string().c_str(), std::fstream::in);
-  // EXPECT_TRUE(xml_file.is_open());
-  EXPECT_TRUE(5==5);
   while (xml_file.good())
   {
     std::string line;
@@ -78,8 +76,8 @@ ServoCalcsTestFixture::ServoCalcsTestFixture()
 {
   // "Load" parameters from yaml as node parameters
   std::string robot_description_string, srdf_string;
-  loadModelFile("panda_description/urdf/panda.urdf", robot_description_string);
-  loadModelFile("panda_moveit_config/config/panda.srdf", srdf_string);
+  loadModelFile("moveit_resources_panda_description", "urdf/panda.urdf", robot_description_string);
+  loadModelFile("moveit_resources_panda_moveit_config", "config/panda.srdf", srdf_string);
   node_->declare_parameter<std::string>("robot_description", robot_description_string);
   node_->declare_parameter<std::string>("robot_description_semantic", srdf_string);
 
@@ -92,16 +90,6 @@ ServoCalcsTestFixture::ServoCalcsTestFixture()
 
   // Set up the servo_calcs object
   servo_calcs_ = std::make_unique<FriendServoCalcs>(node_, test_params, psm_);
-}
-
-void ServoCalcsTestFixture::SetUp()
-{
-  // do stuff
-}
-
-void ServoCalcsTestFixture::TearDown()
-{
-  // Do other stuff
 }
 
 sensor_msgs::msg::JointState ServoCalcsTestFixture::getJointState(std::vector<double> pos, std::vector<double> vel)

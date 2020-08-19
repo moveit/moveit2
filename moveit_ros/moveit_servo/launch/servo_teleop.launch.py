@@ -32,10 +32,10 @@ def generate_launch_description():
     servo_params = { 'moveit_servo' : servo_yaml }
 
     # Get URDF and SRDF
-    robot_description_config = load_file('moveit_resources', 'panda_description/urdf/panda.urdf')
+    robot_description_config = load_file('moveit_resources_panda_description', 'urdf/panda.urdf')
     robot_description = {'robot_description' : robot_description_config}
 
-    robot_description_semantic_config = load_file('moveit_resources', 'panda_moveit_config/config/panda.srdf')
+    robot_description_semantic_config = load_file('moveit_resources_panda_moveit_config', 'config/panda.srdf')
     robot_description_semantic = {'robot_description_semantic' : robot_description_semantic_config}
 
     # RViz
@@ -45,7 +45,7 @@ def generate_launch_description():
                      name='rviz2',
                      output='log',
                      arguments=['-d', rviz_config_file],
-                     parameters=[robot_description])
+                     parameters=[robot_description, robot_description_semantic])
 
     # Is a perfect controller without dynamics
     fake_joint_driver_node = Node(package='fake_joint_driver',

@@ -105,6 +105,7 @@ TEST_F(ServoFixture, ExternalCollision)
   psw.collision_objects.push_back(collision_object);
 
   moveit_msgs::msg::PlanningScene ps;
+  ps.is_diff = true;
   ps.world = psw;
 
   // Publish the collision object to the planning scene

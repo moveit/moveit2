@@ -73,8 +73,6 @@ class ServoCalcsTestFixture : public ::testing::Test
 public:
   ServoCalcsTestFixture();
   ~ServoCalcsTestFixture(){};
-  void SetUp();
-  void TearDown();
 
   void SetUpStateController();
 

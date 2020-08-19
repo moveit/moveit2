@@ -204,6 +204,7 @@ public:
 
       auto ps = std::make_unique<moveit_msgs::msg::PlanningScene>();
       ps->world = psw;
+      ps->is_diff = true;
       collision_pub_->publish(std::move(ps));
       });
   }
