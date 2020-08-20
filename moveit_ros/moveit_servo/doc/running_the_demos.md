@@ -21,11 +21,6 @@ cd $COLCON_WS/src
 ```bash
 git clone https://github.com/ros-planning/moveit2.git -b master
 vcs import < moveit2/moveit2.repos
-```
-
-#### Download `moveit_servo` dependencies
-```bash
-vcs import < moveit2/moveit_ros/moveit_servo/moveit_servo.repos
 rosdep install -r --from-paths . --ignore-src --rosdistro foxy -y
 ```
 
