@@ -160,15 +160,13 @@ public:
     joint_pub_ = this->create_publisher<control_msgs::msg::JointJog>(JOINT_TOPIC, ROS_QUEUE_SIZE);
     collision_pub_ = this->create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", 10);
 
-    // Create a temp service client to start the ServoServer
-    rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr servo_start_client = this->create_client<std_srvs::srv::Trigger>("/start_servo");
-    servo_start_client->wait_for_service(std::chrono::seconds(1));
-    rclcpp::sleep_for(std::chrono::seconds(1));
-    servo_start_client->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+    // Create a service client to start the ServoServer
+    servo_start_client_ = this->create_client<std_srvs::srv::Trigger>("/start_servo");
+    servo_start_client_->wait_for_service(std::chrono::seconds(1));
+    servo_start_client_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
 
     // Load the collision scene asynchronously
-    std::weak_ptr<std::remove_pointer<decltype(collision_pub_.get())>::type> captured_collision_pub = collision_pub_;
-    collision_task_fut_ = std::async(std::launch::async, [this, captured_collision_pub]() {
+    collision_task_fut_ = std::async(std::launch::async, [this]() {
       rclcpp::sleep_for(std::chrono::seconds(3));
       // Create collision object, in the way of servoing
       moveit_msgs::msg::CollisionObject collision_object;
@@ -240,6 +238,7 @@ private:
   rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr twist_pub_;
   rclcpp::Publisher<control_msgs::msg::JointJog>::SharedPtr joint_pub_;
   rclcpp::Publisher<moveit_msgs::msg::PlanningScene>::SharedPtr collision_pub_;
+  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr servo_start_client_;
 
   std::future<void> collision_task_fut_;
 
