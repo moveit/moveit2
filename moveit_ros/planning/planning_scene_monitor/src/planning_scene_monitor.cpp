@@ -180,6 +180,8 @@ PlanningSceneMonitor::~PlanningSceneMonitor()
   stopSceneMonitor();
 
   private_executor_->cancel();
+  if (private_executor_thread_.joinable())
+    private_executor_thread_.join();
   private_executor_.reset();
   // delete reconfigure_impl_;
   current_state_monitor_.reset();
@@ -268,7 +270,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   private_executor_->add_node(pnode_);
 
   // start executor on a different thread now
-  std::thread([this]() { private_executor_->spin(); }).detach();
+  private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
   // reconfigure_impl_ = new DynamicReconfigureImpl(this);
 }
 
