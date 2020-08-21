@@ -57,13 +57,13 @@ TEST_F(ServoFixture, SelfCollision)
 
   // Publish some joint jog commands that will bring us to collision
   rclcpp::Rate loop_rate(20);
-  for (size_t i = 0; i < 20; ++i)
+  for (size_t i = 0; i < 40; ++i)
   {
     auto msg = std::make_unique<control_msgs::msg::JointJog>();
     msg->header.stamp = node_->now();
     msg->header.frame_id = "panda_link3";
     msg->joint_names.push_back("panda_joint4");
-    msg->velocities.push_back(-0.8);
+    msg->velocities.push_back(-0.2);
     pub_joint_cmd_->publish(std::move(msg));
     loop_rate.sleep();
   }
@@ -117,7 +117,7 @@ TEST_F(ServoFixture, ExternalCollision)
 
   // Now publish twist commands that collide with the box
   rclcpp::Rate loop_rate(20);
-  for (size_t i = 0; i < 10; ++i)
+  for (size_t i = 0; i < 40; ++i)
   {
     auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
     msg->header.stamp = node_->now();

@@ -61,7 +61,7 @@ moveit_servo::ServoParametersPtr getTestParameters()
   output->rotational_scale = 0.8;
   output->joint_scale = 0.5;
   output->command_out_topic = "/fake_joint_trajectory_controller/joint_trajectory";
-  output->publish_period = 0.008;
+  output->publish_period = 0.034;
   output->command_out_type = "trajectory_msgs/JointTrajectory";
   output->publish_joint_positions = true;
   output->publish_joint_velocities = false;
@@ -76,7 +76,7 @@ moveit_servo::ServoParametersPtr getTestParameters()
   output->hard_stop_singularity_threshold = 30;
   output->joint_limit_margin = 0.1;
   output->check_collisions = true;
-  output->collision_check_rate = 50;
+  output->collision_check_rate = 10;
   output->collision_check_type = "threshold_distance";
   output->self_collision_proximity_threshold = 0.01;
   output->scene_collision_proximity_threshold = 0.02;

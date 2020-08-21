@@ -443,14 +443,14 @@ TEST_F(ServoCalcsTestFixture, TestScaleCartesianCommand)
   // Now let's try with unitless
   servo_calcs_->parameters_->command_in_type = "unitless";
   result = servo_calcs_->scaleCartesianCommand(msg);
-  EXPECT_EQ(result[0], msg.twist.linear.x*servo_calcs_->parameters_->linear_scale*servo_calcs_->parameters_->publish_period);
-  EXPECT_EQ(result[5], msg.twist.angular.z*servo_calcs_->parameters_->rotational_scale*servo_calcs_->parameters_->publish_period);
+  EXPECT_NEAR(result[0], msg.twist.linear.x*servo_calcs_->parameters_->linear_scale*servo_calcs_->parameters_->publish_period, 0.001);
+  EXPECT_NEAR(result[5], msg.twist.angular.z*servo_calcs_->parameters_->rotational_scale*servo_calcs_->parameters_->publish_period, 0.001);
 
   // And finally with speed_units
   servo_calcs_->parameters_->command_in_type = "speed_units";
   result = servo_calcs_->scaleCartesianCommand(msg);
-  EXPECT_EQ(result[0], msg.twist.linear.x*servo_calcs_->parameters_->publish_period);
-  EXPECT_EQ(result[5], msg.twist.angular.z*servo_calcs_->parameters_->publish_period);
+  EXPECT_NEAR(result[0], msg.twist.linear.x*servo_calcs_->parameters_->publish_period, 0.001);
+  EXPECT_NEAR(result[5], msg.twist.angular.z*servo_calcs_->parameters_->publish_period, 0.001);
 }
 
 TEST_F(ServoCalcsTestFixture, TestScaleJointCommand)

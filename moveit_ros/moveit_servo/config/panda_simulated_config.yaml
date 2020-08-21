@@ -18,7 +18,7 @@ scale:
 
 ## Properties of outgoing commands
 command_out_topic: /fake_joint_trajectory_controller/joint_trajectory # Publish outgoing commands here
-publish_period: 0.008  # 1/Nominal publish rate [seconds]
+publish_period: 0.034  # 1/Nominal publish rate [seconds]
 
 # What type of topic does your robot driver expect?
 # Currently supported are std_msgs/Float64MultiArray or trajectory_msgs/JointTrajectory
@@ -50,7 +50,7 @@ joint_limit_margin: 0.1 # added as a buffer to joint limits [radians]. If moving
 
 ## Collision checking for the entire robot body
 check_collisions: true # Check collisions?
-collision_check_rate: 50 # [Hz] Collision-checking can easily bog down a CPU if done too often.
+collision_check_rate: 10 # [Hz] Collision-checking can easily bog down a CPU if done too often.
 # Two collision check algorithms are available:
 # "threshold_distance" begins slowing down when nearer than a specified distance. Good if you want to tune collision thresholds manually.
 # "stop_distance" stops if a collision is nearer than the worst-case stopping distance and the distance is decreasing. Requires joint acceleration limits
