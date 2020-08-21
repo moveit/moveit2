@@ -48,45 +48,110 @@
 
 using namespace std::chrono_literals;
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_demo_node.cpp");
+
+class ServoCppDemo
+{
+public:
+  ServoCppDemo(rclcpp::Node::SharedPtr node)
+  : node_(node)
+  , count_(0)
+  {
+    // Create the planning_scene_monitor
+    tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
+    planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, "robot_description", tf_buffer_, "planning_scene_monitor");
+
+    // Get the planning_scene_monitor to publish scene diff's for RViz visualization
+    if (planning_scene_monitor_->getPlanningScene())
+    {
+      planning_scene_monitor_->startStateMonitor("/joint_states");
+      planning_scene_monitor_->setPlanningScenePublishingFrequency(25);
+      planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE, "/moveit_servo/publish_planning_scene");
+      planning_scene_monitor_->startSceneMonitor();
+    }
+    else
+    {
+      RCLCPP_ERROR(LOGGER, "Planning scene not configured");
+    }
+
+    // We need 2 different publishers for the different command types
+    joint_cmd_pub_ = node_->create_publisher<control_msgs::msg::JointJog>("servo_server/delta_joint_cmds", 10);
+    twist_cmd_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>("servo_server/delta_twist_cmds", 10);
+  }
+
+  void start()
+  {
+    // Get Servo Parameters
+    auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
+    if(!moveit_servo::readParameters(servo_parameters, node_, LOGGER))
+    {
+      RCLCPP_ERROR(LOGGER, "Could not get parameters");
+    }
+
+    // Create Servo and start it
+    servo_ = std::make_unique<moveit_servo::Servo>(node_, servo_parameters, planning_scene_monitor_);
+    while (!servo_->waitForInitialized() && rclcpp::ok())
+    {
+      rclcpp::Clock& clock = *node_->get_clock();
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, 5000,
+                                  "Waiting for ServoCalcs to recieve joint states");
+    }
+    servo_->start();
+
+    timer_ = node_->create_wall_timer(50ms, std::bind(&ServoCppDemo::publishCommands, this));
+  }
+
+private:
+  rclcpp::Node::SharedPtr node_;
+
+  rclcpp::Publisher<control_msgs::msg::JointJog>::SharedPtr joint_cmd_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr twist_cmd_pub_;
+
+  size_t count_;
+
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> planning_scene_monitor_;
+  std::unique_ptr<moveit_servo::Servo> servo_;
+
+  rclcpp::TimerBase::SharedPtr timer_;
+
+  void publishCommands()
+  {
+    // Publish joint commands for a little bit
+    if (count_ < 100)
+    {
+      auto msg = std::make_unique<control_msgs::msg::JointJog>();
+      msg->header.stamp = node_->now();
+      msg->joint_names.push_back("panda_joint1");
+      msg->velocities.push_back(0.3);
+      joint_cmd_pub_->publish(std::move(msg));
+      ++count_;
+    }
+    // Then switch to twist commands
+    else
+    {
+      auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
+      msg->header.stamp = node_->now();
+      msg->header.frame_id = "panda_link0";
+      msg->twist.linear.x = 0.3;
+      msg->twist.angular.z = 0.5;
+      twist_cmd_pub_->publish(std::move(msg));
+    }
+  }
+};
+
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
-  static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_demo_node.cpp");
-
-  // ROS objects
   rclcpp::NodeOptions node_options;
   node_options.use_intra_process_comms(true);
   auto node = std::make_shared<rclcpp::Node>("servo_demo_node", node_options);
-  auto executor = std::make_shared<rclcpp::executors::MultiThreadedExecutor>();
-
-  // Get Servo Parameters
-  auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
-  if(!moveit_servo::readParameters(servo_parameters, node, LOGGER))
-  {
-    RCLCPP_ERROR(LOGGER, "Could not get parameters");
-    return -1;
-  }
-
-  // Create the planning_scene_monitor
-  auto tf_buffer = std::make_shared<tf2_ros::Buffer>(node->get_clock());
-  auto planning_scene_monitor = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node, "robot_description", tf_buffer, "planning_scene_monitor");
-
-  // Get the planning_scene_monitor to publish scene diff's for RViz visualization
-  if (planning_scene_monitor->getPlanningScene())
-  {
-    planning_scene_monitor->startStateMonitor("/joint_states");
-    planning_scene_monitor->setPlanningScenePublishingFrequency(25);
-    planning_scene_monitor->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE, "/moveit_servo/publish_planning_scene");
-    planning_scene_monitor->startSceneMonitor();
-  }
-  else
-  {
-    RCLCPP_ERROR(LOGGER, "Planning scene not configured");
-    return -1;
-  }
 
   // Pause for RViz to come up..
   rclcpp::sleep_for(std::chrono::seconds(4));
+
+  // We need to initialize the planning_scene_monitor here before publishing the collision object
+  ServoCppDemo demo(node);
 
   // Create collision object, in the way of servoing
   moveit_msgs::msg::CollisionObject collision_object;
@@ -117,62 +182,14 @@ int main(int argc, char** argv)
   auto scene_pub = node->create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", 10);
   scene_pub->publish(ps);
 
-  // Create Servo and start it
-  moveit_servo::Servo servo(node, servo_parameters, planning_scene_monitor);
-  while (!servo.waitForInitialized() && rclcpp::ok())
-  {
-    rclcpp::Clock& clock = *node->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, 5000,
-                                "Waiting for ServoCalcs to recieve joint states");
-  }
-  servo.start();
+  // Start the Servo object, and start publishing commands to it
+  demo.start();
 
-  // Create publisher for publishing a few joint commands
-  size_t count{0};
-  auto joint_pub = node->create_publisher<control_msgs::msg::JointJog>("servo_server/delta_joint_cmds", 10);
-  std::weak_ptr<std::remove_pointer<decltype(joint_pub.get())>::type> captured_joint_pub = joint_pub;
-  std::weak_ptr<std::remove_pointer<decltype(node.get())>::type> captured_node = node;
-  auto joint_callback = [captured_joint_pub, captured_node, &count]() -> void {
-      auto pub_ptr = captured_joint_pub.lock();
-      auto node_ptr = captured_node.lock();
-      if (!pub_ptr || !node_ptr) {
-        return;
-      }
-      if(count > 100)
-        return;
-      auto msg = std::make_unique<control_msgs::msg::JointJog>();
-      msg->header.stamp = node_ptr->now();
-      msg->header.frame_id = "panda_link3";
-      msg->joint_names.push_back("panda_joint1");
-      msg->velocities.push_back(0.3);
-      pub_ptr->publish(std::move(msg));
-      ++count;
-    };
-  auto joint_timer = node->create_wall_timer(50ms, joint_callback);
-
-  // Create a publisher for publishing the twist commands
-  auto twist_pub = node->create_publisher<geometry_msgs::msg::TwistStamped>("servo_server/delta_twist_cmds", 10);
-  std::weak_ptr<std::remove_pointer<decltype(twist_pub.get())>::type> captured_twist_pub = twist_pub;
-  auto twist_callback = [captured_twist_pub, captured_node, &count]() -> void {
-      auto pub_ptr = captured_twist_pub.lock();
-      auto node_ptr = captured_node.lock();
-      if (!pub_ptr || !node_ptr) {
-        return;
-      }
-      if (count < 100)
-        return;
-      auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
-      msg->header.stamp = node_ptr->now();
-      msg->header.frame_id = "panda_link0";
-      msg->twist.linear.x = 0.3;
-      msg->twist.angular.z = 0.5;
-      pub_ptr->publish(std::move(msg));
-    };
-  auto twist_timer = node->create_wall_timer(50ms, twist_callback);
-
+  // Spin
+  auto executor = std::make_unique<rclcpp::executors::MultiThreadedExecutor>();
   executor->add_node(node);
-  
   executor->spin();
+
   rclcpp::shutdown();
   return 0;
 }
