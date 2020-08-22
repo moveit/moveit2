@@ -131,10 +131,10 @@ bool convertJoyToCmd(const std::vector<float>& axes, const std::vector<int>& but
 }
 
 /** \brief // This should update the frame_to_publish_ as needed for changing command frame via controller
-   * @param axes The vector of continuous controller joystick axes
+   * @param frame_name Set the command frame to this
    * @param buttons The vector of discrete controller button values
    */
-void updateCmdFrame(const std::vector<float>& axes, const std::vector<int>& buttons, std::string& frame_name)
+void updateCmdFrame(std::string& frame_name, const std::vector<int>& buttons)
 {
   if (buttons[CHANGE_VIEW] && frame_name == EEF_FRAME_ID)
     frame_name = BASE_FRAME_ID;
@@ -214,7 +214,7 @@ public:
     auto joint_msg = std::make_unique<control_msgs::msg::JointJog>();
 
     // This call updates the frame for twist commands
-    updateCmdFrame(msg->axes, msg->buttons, frame_to_publish_);
+    updateCmdFrame(frame_to_publish_, msg->buttons);
 
     // Convert the joystick message to Twist or JointJog and publish
     if (convertJoyToCmd(msg->axes, msg->buttons, twist_msg, joint_msg))

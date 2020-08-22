@@ -168,7 +168,7 @@ if(!moveit_servo::readParameters(servo_parameters, node, LOGGER))
 When creating and starting the Servo instance, you need to pass the read parameters as
 ```cpp
 moveit_servo::Servo servo(node, servo_parameters, planning_scene_monitor);
-while (!servo.waitForInitialized())
+while (!servo.waitForInitialized() && rclcpp::ok())
 {
   rclcpp::Clock& clock = *node->get_clock();
   RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, 5000,

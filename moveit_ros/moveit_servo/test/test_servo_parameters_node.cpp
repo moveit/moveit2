@@ -47,7 +47,7 @@
 bool load_params_success_ = false;
 bool expected_load_params_success_, got_expected_, equals_expected_;
 
-void loadResultCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+void loadResultCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>,
           std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
   // To pass (return true here), we need:
@@ -56,7 +56,7 @@ void loadResultCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request
   response->success = (got_expected_ && load_params_success_ == expected_load_params_success_);
 }
 
-void expectedResultCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+void expectedResultCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>,
           std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
   response->success = equals_expected_;
