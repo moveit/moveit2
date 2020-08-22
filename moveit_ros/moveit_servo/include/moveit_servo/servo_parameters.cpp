@@ -49,40 +49,26 @@
 namespace moveit_servo
 {
 template <typename T>
-bool declareAndGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
+void declareAndGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
                         const rclcpp::Logger& logger)
 {
-  bool got_param = false;
   try
   {
-    node->declare_parameter<T>(param_name, T{});
-    got_param = node->get_parameter(param_name, output_value);
+    output_value = node->declare_parameter<T>(param_name, T{});
   }
   catch(const rclcpp::exceptions::InvalidParameterTypeException& e)
   {
     // Catch a <double> parameter written in the yaml as "1" being considered an <int>
     if(std::is_same<T, double>::value)
     {
-      int value;
       node->undeclare_parameter(param_name);
-      node->declare_parameter<int>(param_name, 0);
-      got_param = node->get_parameter(param_name, value);
-      output_value = value;
+      output_value = node->declare_parameter<int>(param_name, 0);
     }
     else
     {
+      RCLCPP_ERROR_STREAM(logger, "Error getting parameter \'" << param_name << "\', check parameter type in YAML file");
       throw e;
     }
-  }
-
-  if (got_param)
-  {
-    return true;
-  }
-  else
-  {
-    RCLCPP_WARN_STREAM(logger, "Unable to get parameter: \'" << param_name << "\'. Please check YAML file");
-    return false;
   }
 }
 
@@ -96,71 +82,59 @@ bool declareAndGetParam(T& output_value, const std::string& param_name, const rc
  */
 bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPtr& node, const rclcpp::Logger& logger, std::string ns = "moveit_servo")
 {
-  bool error = false;
-
   // Get the parameters (organized same order as YAML file)
-  error |= !declareAndGetParam<bool>(parameters->use_gazebo, ns + ".use_gazebo", node, logger);
-  error |= !declareAndGetParam<std::string>(parameters->status_topic, ns + ".status_topic", node, logger);
+  declareAndGetParam<bool>(parameters->use_gazebo, ns + ".use_gazebo", node, logger);
+  declareAndGetParam<std::string>(parameters->status_topic, ns + ".status_topic", node, logger);
 
   // Properties of incoming commands
-  error |= !declareAndGetParam<std::string>(parameters->cartesian_command_in_topic, ns + ".cartesian_command_in_topic", node,
+  declareAndGetParam<std::string>(parameters->cartesian_command_in_topic, ns + ".cartesian_command_in_topic", node,
                                            logger);
-  error |= !declareAndGetParam<std::string>(parameters->joint_command_in_topic, ns + ".joint_command_in_topic", node, logger);
-  error |=
-      !declareAndGetParam<std::string>(parameters->robot_link_command_frame, ns + ".robot_link_command_frame", node, logger);
-  error |= !declareAndGetParam<std::string>(parameters->command_in_type, ns + ".command_in_type", node, logger);
-  error |= !declareAndGetParam<double>(parameters->linear_scale, ns + ".scale.linear", node, logger);
-  error |= !declareAndGetParam<double>(parameters->rotational_scale, ns + ".scale.rotational", node, logger);
-  error |= !declareAndGetParam<double>(parameters->joint_scale, ns + ".scale.joint", node, logger);
+  declareAndGetParam<std::string>(parameters->joint_command_in_topic, ns + ".joint_command_in_topic", node, logger);
+  declareAndGetParam<std::string>(parameters->robot_link_command_frame, ns + ".robot_link_command_frame", node, logger);
+  declareAndGetParam<std::string>(parameters->command_in_type, ns + ".command_in_type", node, logger);
+  declareAndGetParam<double>(parameters->linear_scale, ns + ".scale.linear", node, logger);
+  declareAndGetParam<double>(parameters->rotational_scale, ns + ".scale.rotational", node, logger);
+  declareAndGetParam<double>(parameters->joint_scale, ns + ".scale.joint", node, logger);
 
   // Properties of outgoing commands
-  error |= !declareAndGetParam<std::string>(parameters->command_out_topic, ns + ".command_out_topic", node, logger);
-  error |= !declareAndGetParam<double>(parameters->publish_period, ns + ".publish_period", node, logger);
-  error |= !declareAndGetParam<std::string>(parameters->command_out_type, ns + ".command_out_type", node, logger);
-  error |= !declareAndGetParam<bool>(parameters->publish_joint_positions, ns + ".publish_joint_positions", node, logger);
-  error |= !declareAndGetParam<bool>(parameters->publish_joint_velocities, ns + ".publish_joint_velocities", node, logger);
-  error |=
-      !declareAndGetParam<bool>(parameters->publish_joint_accelerations, ns + ".publish_joint_accelerations", node, logger);
+  declareAndGetParam<std::string>(parameters->command_out_topic, ns + ".command_out_topic", node, logger);
+  declareAndGetParam<double>(parameters->publish_period, ns + ".publish_period", node, logger);
+  declareAndGetParam<std::string>(parameters->command_out_type, ns + ".command_out_type", node, logger);
+  declareAndGetParam<bool>(parameters->publish_joint_positions, ns + ".publish_joint_positions", node, logger);
+  declareAndGetParam<bool>(parameters->publish_joint_velocities, ns + ".publish_joint_velocities", node, logger);
+  declareAndGetParam<bool>(parameters->publish_joint_accelerations, ns + ".publish_joint_accelerations", node, logger);
 
   // Incoming Joint State properties
-  error |= !declareAndGetParam<std::string>(parameters->joint_topic, ns + ".joint_topic", node, logger);
-  error |= !declareAndGetParam<double>(parameters->low_pass_filter_coeff, ns + ".low_pass_filter_coeff", node, logger);
+  declareAndGetParam<std::string>(parameters->joint_topic, ns + ".joint_topic", node, logger);
+  declareAndGetParam<double>(parameters->low_pass_filter_coeff, ns + ".low_pass_filter_coeff", node, logger);
 
   // MoveIt properties
-  error |= !declareAndGetParam<std::string>(parameters->move_group_name, ns + ".move_group_name", node, logger);
-  error |= !declareAndGetParam<std::string>(parameters->planning_frame, ns + ".planning_frame", node, logger);
+  declareAndGetParam<std::string>(parameters->move_group_name, ns + ".move_group_name", node, logger);
+  declareAndGetParam<std::string>(parameters->planning_frame, ns + ".planning_frame", node, logger);
 
   // Stopping behaviour
-  error |= !declareAndGetParam<double>(parameters->incoming_command_timeout, ns + ".incoming_command_timeout", node, logger);
-  error |= !declareAndGetParam<int>(parameters->num_outgoing_halt_msgs_to_publish, ns + ".num_outgoing_halt_msgs_to_publish",
+  declareAndGetParam<double>(parameters->incoming_command_timeout, ns + ".incoming_command_timeout", node, logger);
+  declareAndGetParam<int>(parameters->num_outgoing_halt_msgs_to_publish, ns + ".num_outgoing_halt_msgs_to_publish",
                                    node, logger);
 
   // Configure handling of singularities and joint limits
-  error |=
-      !declareAndGetParam<double>(parameters->lower_singularity_threshold, ns + ".lower_singularity_threshold", node, logger);
-  error |= !declareAndGetParam<double>(parameters->hard_stop_singularity_threshold, ns + ".hard_stop_singularity_threshold",
+  declareAndGetParam<double>(parameters->lower_singularity_threshold, ns + ".lower_singularity_threshold", node, logger);
+  declareAndGetParam<double>(parameters->hard_stop_singularity_threshold, ns + ".hard_stop_singularity_threshold",
                                       node, logger);
-  error |= !declareAndGetParam<double>(parameters->joint_limit_margin, ns + ".joint_limit_margin", node, logger);
+  declareAndGetParam<double>(parameters->joint_limit_margin, ns + ".joint_limit_margin", node, logger);
 
   // Collision checking
-  error |= !declareAndGetParam<bool>(parameters->check_collisions, ns + ".check_collisions", node, logger);
-  error |= !declareAndGetParam<double>(parameters->collision_check_rate, ns + ".collision_check_rate", node, logger);
-  error |= !declareAndGetParam<std::string>(parameters->collision_check_type, ns + ".collision_check_type", node, logger);
-  error |= !declareAndGetParam<double>(parameters->self_collision_proximity_threshold, ns + ".self_collision_proximity_threshold",
+  declareAndGetParam<bool>(parameters->check_collisions, ns + ".check_collisions", node, logger);
+  declareAndGetParam<double>(parameters->collision_check_rate, ns + ".collision_check_rate", node, logger);
+  declareAndGetParam<std::string>(parameters->collision_check_type, ns + ".collision_check_type", node, logger);
+  declareAndGetParam<double>(parameters->self_collision_proximity_threshold, ns + ".self_collision_proximity_threshold",
                                       node, logger);
-  error |= !declareAndGetParam<double>(parameters->scene_collision_proximity_threshold, ns + ".scene_collision_proximity_threshold",
+  declareAndGetParam<double>(parameters->scene_collision_proximity_threshold, ns + ".scene_collision_proximity_threshold",
                                       node, logger);
-  error |= !declareAndGetParam<double>(parameters->collision_distance_safety_factor, ns + ".collision_distance_safety_factor",
+  declareAndGetParam<double>(parameters->collision_distance_safety_factor, ns + ".collision_distance_safety_factor",
                                       node, logger);
-  error |= !declareAndGetParam<double>(parameters->min_allowable_collision_distance, ns + ".min_allowable_collision_distance",
+  declareAndGetParam<double>(parameters->min_allowable_collision_distance, ns + ".min_allowable_collision_distance",
                                       node, logger);
-
-  // Only continue if all parameters were found
-  if (error)
-  {
-    RCLCPP_ERROR_STREAM(logger, "One or more Servo parameters missing, check YAML file before proceeding");
-    return false;
-  }
 
   // Begin input checking
   if (parameters->publish_period <= 0.)
@@ -174,21 +148,21 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
     RCLCPP_WARN(logger, "Parameter 'num_outgoing_halt_msgs_to_publish' should be greater than zero. Check yaml file.");
     return false;
   }
-  if (parameters->hard_stop_singularity_threshold < parameters->lower_singularity_threshold)
+  if (parameters->hard_stop_singularity_threshold <= parameters->lower_singularity_threshold)
   {
     RCLCPP_WARN(logger, "Parameter 'hard_stop_singularity_threshold' "
                         "should be greater than 'lower_singularity_threshold.' "
                         "Check yaml file.");
     return false;
   }
-  if ((parameters->hard_stop_singularity_threshold < 0.) || (parameters->lower_singularity_threshold < 0.))
+  if ((parameters->hard_stop_singularity_threshold <= 0.) || (parameters->lower_singularity_threshold <= 0.))
   {
     RCLCPP_WARN(logger, "Parameters 'hard_stop_singularity_threshold' "
                         "and 'lower_singularity_threshold' should be "
                         "greater than zero. Check yaml file.");
     return false;
   }
-  if (parameters->low_pass_filter_coeff < 0.)
+  if (parameters->low_pass_filter_coeff <= 0.)
   {
     RCLCPP_WARN(logger, "Parameter 'low_pass_filter_coeff' should be "
                         "greater than zero. Check yaml file.");
@@ -236,13 +210,13 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
     RCLCPP_WARN(logger, "collision_check_type must be 'threshold_distance' or 'stop_distance'");
     return false;
   }
-  if (parameters->self_collision_proximity_threshold < 0.)
+  if (parameters->self_collision_proximity_threshold <= 0.)
   {
     RCLCPP_WARN(logger, "Parameter 'self_collision_proximity_threshold' should be "
                         "greater than zero. Check yaml file.");
     return false;
   }
-  if (parameters->scene_collision_proximity_threshold < 0.)
+  if (parameters->scene_collision_proximity_threshold <= 0.)
   {
     RCLCPP_WARN(logger, "Parameter 'scene_collision_proximity_threshold' should be "
                         "greater than zero. Check yaml file.");
@@ -253,7 +227,7 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
     RCLCPP_WARN(logger, "Parameter 'self_collision_proximity_threshold' should probably be less "
                         "than or equal to 'scene_collision_proximity_threshold'. Check yaml file.");
   }
-  if (parameters->collision_check_rate < 0)
+  if (parameters->collision_check_rate <= 0)
   {
     RCLCPP_WARN(logger, "Parameter 'collision_check_rate' should be "
                         "greater than zero. Check yaml file.");
@@ -265,7 +239,7 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
                         "greater than or equal to 1. Check yaml file.");
     return false;
   }
-  if (parameters->min_allowable_collision_distance < 0)
+  if (parameters->min_allowable_collision_distance <= 0)
   {
     RCLCPP_WARN(logger, "Parameter 'min_allowable_collision_distance' should be "
                         "greater than zero. Check yaml file.");
