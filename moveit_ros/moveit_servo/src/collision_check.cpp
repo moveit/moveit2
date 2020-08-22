@@ -44,14 +44,14 @@
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.collision_check");
 static const double MIN_RECOMMENDED_COLLISION_RATE = 10;
-constexpr double EPSILON = 1e-6;                // For very small numeric comparisons
+constexpr double EPSILON = 1e-6;                       // For very small numeric comparisons
 constexpr size_t ROS_LOG_THROTTLE_PERIOD = 30 * 1000;  // Milliseconds to throttle logs inside loops
 
 namespace moveit_servo
 {
 // Constructor for the class that handles collision checking
 CollisionCheck::CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParametersPtr& parameters,
-                 const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+                               const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
   , parameters_(parameters)
   , planning_scene_monitor_(planning_scene_monitor)
@@ -156,9 +156,9 @@ void CollisionCheck::run()
       // k = - ln(0.001) / collision_proximity_threshold
       // velocity_scale should equal one when collision_distance is at collision_proximity_threshold.
       // velocity_scale should equal 0.001 when collision_distance is at zero.
-      velocity_scale_ =
-          std::min(velocity_scale_, exp(scene_velocity_scale_coefficient_ *
-                                        (scene_collision_distance_ - parameters_->scene_collision_proximity_threshold)));
+      velocity_scale_ = std::min(velocity_scale_,
+                                 exp(scene_velocity_scale_coefficient_ *
+                                     (scene_collision_distance_ - parameters_->scene_collision_proximity_threshold)));
     }
 
     if (self_collision_distance_ < parameters_->self_collision_proximity_threshold)
@@ -220,8 +220,8 @@ void CollisionCheck::printCollisionPairs(collision_detection::CollisionResult::C
     RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Objects in collision:");
     for (auto contact : contact_map)
     {
-      RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                   "\t" << contact.first.first << ", " << contact.first.second);
+      RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "\t" << contact.first.first << ", "
+                                                                                << contact.first.second);
     }
   }
 }

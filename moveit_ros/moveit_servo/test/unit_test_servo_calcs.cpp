@@ -67,12 +67,14 @@ void loadModelFile(std::string package_name, std::string filename, std::string& 
   file_content = xml_string;
 }
 
-FriendServoCalcs::FriendServoCalcs(const rclcpp::Node::SharedPtr& node, const moveit_servo::ServoParametersPtr& parameters,
-             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
-: ServoCalcs(node, parameters, planning_scene_monitor) {}
+FriendServoCalcs::FriendServoCalcs(const rclcpp::Node::SharedPtr& node,
+                                   const moveit_servo::ServoParametersPtr& parameters,
+                                   const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+  : ServoCalcs(node, parameters, planning_scene_monitor)
+{
+}
 
-ServoCalcsTestFixture::ServoCalcsTestFixture()
-: node_(std::make_shared<rclcpp::Node>("servo_calcs_test"))
+ServoCalcsTestFixture::ServoCalcsTestFixture() : node_(std::make_shared<rclcpp::Node>("servo_calcs_test"))
 {
   // "Load" parameters from yaml as node parameters
   std::string robot_description_string, srdf_string;
@@ -83,7 +85,8 @@ ServoCalcsTestFixture::ServoCalcsTestFixture()
 
   // Startup planning_scene_monitor
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
-  psm_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, "robot_description", tf_buffer_, "planning_scene_monitor");
+  psm_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, "robot_description", tf_buffer_,
+                                                                        "planning_scene_monitor");
 
   // Get moveit parameters
   moveit_servo::ServoParametersPtr test_params = getTestParameters();
@@ -96,7 +99,7 @@ sensor_msgs::msg::JointState ServoCalcsTestFixture::getJointState(std::vector<do
 {
   sensor_msgs::msg::JointState msg;
   std::vector<double> effort;
-  effort.assign(9,0);
+  effort.assign(9, 0);
 
   msg.name = panda_joint_names_;
   msg.position = pos;
@@ -115,7 +118,7 @@ TEST_F(ServoCalcsTestFixture, TestRemoveSingleDimension)
   // Create a matrix and vector, set one value so we can track the removal was correct
   Eigen::MatrixXd matrix(rows, cols);
   matrix.setZero();
-  matrix(2,0) = 4.0;
+  matrix(2, 0) = 4.0;
   Eigen::VectorXd vector(rows);
   vector.setZero();
   vector(2) = 4.0;
@@ -124,18 +127,18 @@ TEST_F(ServoCalcsTestFixture, TestRemoveSingleDimension)
   servo_calcs_->removeDimension(matrix, vector, 1);
 
   // Size should be reduced, and the set values should have moved up
-  EXPECT_EQ(matrix.rows(), rows-1);
-  EXPECT_EQ(vector.size(), rows-1);
-  EXPECT_EQ(matrix(1,0), 4.0);
+  EXPECT_EQ(matrix.rows(), rows - 1);
+  EXPECT_EQ(vector.size(), rows - 1);
+  EXPECT_EQ(matrix(1, 0), 4.0);
   EXPECT_EQ(vector(1), 4.0);
 
   // Remove the last row
   servo_calcs_->removeDimension(matrix, vector, 4);
 
   // Size should be reduced, but the set values should not move
-  EXPECT_EQ(matrix.rows(), rows-2);
-  EXPECT_EQ(vector.size(), rows-2);
-  EXPECT_EQ(matrix(1,0), 4.0);
+  EXPECT_EQ(matrix.rows(), rows - 2);
+  EXPECT_EQ(vector.size(), rows - 2);
+  EXPECT_EQ(matrix(1, 0), 4.0);
   EXPECT_EQ(vector(1), 4.0);
 
   // Sanity check that the columns stayed the same
@@ -150,7 +153,7 @@ TEST_F(ServoCalcsTestFixture, TestRemoveDriftDimensions)
   // Create a matrix and vector, set one value so we can track the removal was correct
   Eigen::MatrixXd matrix(rows, cols);
   matrix.setZero();
-  matrix(2,0) = 4.0;
+  matrix(2, 0) = 4.0;
   Eigen::VectorXd vector(rows);
   vector.setZero();
   vector(2) = 4.0;
@@ -160,7 +163,7 @@ TEST_F(ServoCalcsTestFixture, TestRemoveDriftDimensions)
   EXPECT_EQ(matrix.rows(), rows);
   EXPECT_EQ(matrix.cols(), cols);
   EXPECT_EQ(vector.size(), rows);
-  EXPECT_EQ(matrix(2,0), 4.0);
+  EXPECT_EQ(matrix(2, 0), 4.0);
   EXPECT_EQ(vector(2), 4.0);
 
   // Set drift_dimensions_ to be something with True's in it
@@ -170,10 +173,10 @@ TEST_F(ServoCalcsTestFixture, TestRemoveDriftDimensions)
 
   // Now a remove should have changes
   servo_calcs_->removeDriftDimensions(matrix, vector);
-  EXPECT_EQ(matrix.rows(), rows-3);
+  EXPECT_EQ(matrix.rows(), rows - 3);
   EXPECT_EQ(matrix.cols(), cols);
-  EXPECT_EQ(vector.size(), rows-3);
-  EXPECT_EQ(matrix(0,0), 4.0);
+  EXPECT_EQ(vector.size(), rows - 3);
+  EXPECT_EQ(matrix(0, 0), 4.0);
   EXPECT_EQ(vector(0), 4.0);
 }
 
@@ -194,7 +197,7 @@ TEST_F(ServoCalcsTestFixture, TestEnforceControlDimensions)
   EXPECT_EQ(msg, init_copy);
 
   // Lets set the whole array to false and make sure each value is changed to 0
-  for (size_t i=0; i<6; ++i)
+  for (size_t i = 0; i < 6; ++i)
   {
     servo_calcs_->control_dimensions_[i] = false;
   }
@@ -255,8 +258,8 @@ TEST_F(ServoCalcsTestFixture, TestApplyJointUpdate)
   EXPECT_NE(joint_state.position[2], 10);
 
   // Velocities should match though
-  EXPECT_EQ(joint_state.velocity[0], deltas[0]/servo_calcs_->parameters_->publish_period);
-  EXPECT_EQ(joint_state.velocity[2], deltas[2]/servo_calcs_->parameters_->publish_period);
+  EXPECT_EQ(joint_state.velocity[0], deltas[0] / servo_calcs_->parameters_->publish_period);
+  EXPECT_EQ(joint_state.velocity[2], deltas[2] / servo_calcs_->parameters_->publish_period);
   EXPECT_EQ(joint_state.velocity[0], prev_vel[0]);
 }
 
@@ -319,9 +322,9 @@ TEST_F(ServoCalcsTestFixture, TestSuddenHalt)
 TEST_F(ServoCalcsTestFixture, TestEnforcePosLimits)
 {
   // Set the position to the upper limits
-  std::vector<double> position{0,0,2.8973,1.7628,2.8973,0.0175,2.8973,3.7525,2.8973};
+  std::vector<double> position{ 0, 0, 2.8973, 1.7628, 2.8973, 0.0175, 2.8973, 3.7525, 2.8973 };
   std::vector<double> velocity;
-  velocity.assign(9,1.0);
+  velocity.assign(9, 1.0);
 
   // Set the position in the ServoCalcs object
   sensor_msgs::msg::JointState joint_state = getJointState(position, velocity);
@@ -332,7 +335,7 @@ TEST_F(ServoCalcsTestFixture, TestEnforcePosLimits)
   EXPECT_FALSE(servo_calcs_->enforceSRDFPositionLimits());
 
   // At the upper limits with negative velocity, we should not be 'violating'
-  velocity.assign(9,-1.0);
+  velocity.assign(9, -1.0);
   joint_state = getJointState(position, velocity);
   servo_calcs_->original_joint_state_ = joint_state;
   servo_calcs_->kinematic_state_->setVariableValues(joint_state);
@@ -347,8 +350,8 @@ TEST_F(ServoCalcsTestFixture, TestEnforcePosLimits)
   EXPECT_FALSE(servo_calcs_->enforceSRDFPositionLimits());
 
   // For completeness, we'll set the position to lower limits with positive vel and expect a pass
-  std::vector<double> lower_position{0,0,-2.8973,-1.7628,-2.8973,-3.0718,-2.8973,-0.0175,-2.8973};
-  velocity.assign(9,1.0);
+  std::vector<double> lower_position{ 0, 0, -2.8973, -1.7628, -2.8973, -3.0718, -2.8973, -0.0175, -2.8973 };
+  velocity.assign(9, 1.0);
   joint_state = getJointState(lower_position, velocity);
   servo_calcs_->original_joint_state_ = joint_state;
   servo_calcs_->kinematic_state_->setVariableValues(joint_state);
@@ -358,32 +361,32 @@ TEST_F(ServoCalcsTestFixture, TestEnforcePosLimits)
 TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
 {
   // First, define the velocity limits (from panda URDF)
-  std::vector<double> vel_limits{2.3925,2.3925,2.3925,2.3925,2.8710,2.8710,2.8710};
+  std::vector<double> vel_limits{ 2.3925, 2.3925, 2.3925, 2.3925, 2.8710, 2.8710, 2.8710 };
 
   // Lets test the Velocity limits first
   // Set prev_joint_velocity_ == desired_velocity, both above the limits
   // to avoid acceleration limits (accel is 0)
   Eigen::ArrayXd desired_velocity(7);
-  desired_velocity << 3, 3, 3, 3, 3, 3, 3; // rad/s
-  desired_velocity *= servo_calcs_->parameters_->publish_period; // rad/loop
+  desired_velocity << 3, 3, 3, 3, 3, 3, 3;                        // rad/s
+  desired_velocity *= servo_calcs_->parameters_->publish_period;  // rad/loop
   servo_calcs_->prev_joint_velocity_ = desired_velocity;
 
   // Do the enforcing and check it
   servo_calcs_->enforceSRDFAccelVelLimits(desired_velocity);
-  for (size_t i=0; i<7; ++i)
+  for (size_t i = 0; i < 7; ++i)
   {
     // We need to check vs radians-per-loop allowable rate (not rad/s)
-    EXPECT_LE(desired_velocity[i], vel_limits[i]*servo_calcs_->parameters_->publish_period);
+    EXPECT_LE(desired_velocity[i], vel_limits[i] * servo_calcs_->parameters_->publish_period);
   }
 
   // Let's check the negative velocities too
   desired_velocity *= -1;
   servo_calcs_->prev_joint_velocity_ = desired_velocity;
   servo_calcs_->enforceSRDFAccelVelLimits(desired_velocity);
-  for (size_t i=0; i<7; ++i)
+  for (size_t i = 0; i < 7; ++i)
   {
     // We need to check vs radians-per-loop allowable rate (not rad/s)
-    EXPECT_GE(desired_velocity[i], -1*vel_limits[i]*servo_calcs_->parameters_->publish_period);
+    EXPECT_GE(desired_velocity[i], -1 * vel_limits[i] * servo_calcs_->parameters_->publish_period);
   }
 }
 
@@ -398,12 +401,12 @@ TEST_F(ServoCalcsTestFixture, TestEnforceAccelLimits)
   bounds.max_acceleration_ = 3;
 
   // Pick previous_velocity and desired_velocity to violate limits
-  double previous_velocity = -2; // rad/s & within velocity limits
-  double desired_velocity = 2; // rad/s & within velocity limits
+  double previous_velocity = -2;  // rad/s & within velocity limits
+  double desired_velocity = 2;    // rad/s & within velocity limits
 
   // From those, calculate desired delta_theta and current acceleration
-  double delta_theta = desired_velocity * servo_calcs_->parameters_->publish_period; // rad
-  double acceleration = (desired_velocity - previous_velocity) / servo_calcs_->parameters_->publish_period; // rad/s^2
+  double delta_theta = desired_velocity * servo_calcs_->parameters_->publish_period;                         // rad
+  double acceleration = (desired_velocity - previous_velocity) / servo_calcs_->parameters_->publish_period;  // rad/s^2
 
   // Enforce the bounds
   double init_delta_theta = delta_theta;
@@ -414,13 +417,14 @@ TEST_F(ServoCalcsTestFixture, TestEnforceAccelLimits)
 
   // In fact we can calculate the maximum delta_theta at the limit as:
   // delta_limit = delta_t * (accel_lim * delta_t _ + vel_prev)
-  double delta_at_limit = servo_calcs_->parameters_->publish_period * (previous_velocity + bounds.max_acceleration_*servo_calcs_->parameters_->publish_period);
+  double delta_at_limit = servo_calcs_->parameters_->publish_period *
+                          (previous_velocity + bounds.max_acceleration_ * servo_calcs_->parameters_->publish_period);
   EXPECT_EQ(delta_theta, delta_at_limit);
 
   // Let's test again, but with only a small change in velocity
   desired_velocity = -1.9;
-  delta_theta = desired_velocity * servo_calcs_->parameters_->publish_period; // rad
-  acceleration = (desired_velocity - previous_velocity) / servo_calcs_->parameters_->publish_period; // rad/s^2
+  delta_theta = desired_velocity * servo_calcs_->parameters_->publish_period;                         // rad
+  acceleration = (desired_velocity - previous_velocity) / servo_calcs_->parameters_->publish_period;  // rad/s^2
   init_delta_theta = delta_theta;
   servo_calcs_->enforceSingleVelAccelLimit(bounds, desired_velocity, previous_velocity, acceleration, delta_theta);
 
@@ -443,14 +447,18 @@ TEST_F(ServoCalcsTestFixture, TestScaleCartesianCommand)
   // Now let's try with unitless
   servo_calcs_->parameters_->command_in_type = "unitless";
   result = servo_calcs_->scaleCartesianCommand(msg);
-  EXPECT_NEAR(result[0], msg.twist.linear.x*servo_calcs_->parameters_->linear_scale*servo_calcs_->parameters_->publish_period, 0.001);
-  EXPECT_NEAR(result[5], msg.twist.angular.z*servo_calcs_->parameters_->rotational_scale*servo_calcs_->parameters_->publish_period, 0.001);
+  EXPECT_NEAR(result[0],
+              msg.twist.linear.x * servo_calcs_->parameters_->linear_scale * servo_calcs_->parameters_->publish_period,
+              0.001);
+  EXPECT_NEAR(result[5], msg.twist.angular.z * servo_calcs_->parameters_->rotational_scale *
+                             servo_calcs_->parameters_->publish_period,
+              0.001);
 
   // And finally with speed_units
   servo_calcs_->parameters_->command_in_type = "speed_units";
   result = servo_calcs_->scaleCartesianCommand(msg);
-  EXPECT_NEAR(result[0], msg.twist.linear.x*servo_calcs_->parameters_->publish_period, 0.001);
-  EXPECT_NEAR(result[5], msg.twist.angular.z*servo_calcs_->parameters_->publish_period, 0.001);
+  EXPECT_NEAR(result[0], msg.twist.linear.x * servo_calcs_->parameters_->publish_period, 0.001);
+  EXPECT_NEAR(result[5], msg.twist.angular.z * servo_calcs_->parameters_->publish_period, 0.001);
 }
 
 TEST_F(ServoCalcsTestFixture, TestScaleJointCommand)
@@ -458,13 +466,13 @@ TEST_F(ServoCalcsTestFixture, TestScaleJointCommand)
   // Get a JointJog msg to test
   control_msgs::msg::JointJog msg;
   msg.joint_names = panda_joint_names_;
-  std::vector<double> vel{0,0,1,1,1,1,1,1,1};
+  std::vector<double> vel{ 0, 0, 1, 1, 1, 1, 1, 1, 1 };
   msg.velocities = vel;
 
   // Test with unitless
   servo_calcs_->parameters_->command_in_type = "unitless";
   Eigen::VectorXd result = servo_calcs_->scaleJointCommand(msg);
-  EXPECT_EQ(result[0], servo_calcs_->parameters_->joint_scale*servo_calcs_->parameters_->publish_period);
+  EXPECT_EQ(result[0], servo_calcs_->parameters_->joint_scale * servo_calcs_->parameters_->publish_period);
 
   // And with speed_units
   servo_calcs_->parameters_->command_in_type = "speed_units";
@@ -493,21 +501,21 @@ TEST_F(ServoCalcsTestFixture, TestComposeOutputMsg)
   servo_calcs_->composeJointTrajMessage(joint_state, traj);
 
   // Check the header info
-  EXPECT_FALSE(traj.header.stamp == rclcpp::Time(0.)); // Time should be set
+  EXPECT_FALSE(traj.header.stamp == rclcpp::Time(0.));  // Time should be set
   EXPECT_EQ(traj.header.frame_id, servo_calcs_->parameters_->planning_frame);
   EXPECT_EQ(traj.joint_names[0], "some_joint");
 
   // Check the trajectory info
   EXPECT_TRUE(traj.points.size() == 1);
-  EXPECT_TRUE(traj.points[0].positions.size() == 1); // Set to input length
+  EXPECT_TRUE(traj.points[0].positions.size() == 1);  // Set to input length
   EXPECT_TRUE(traj.points[0].velocities.size() == 1);
-  EXPECT_TRUE(traj.points[0].accelerations.size() == 7); // Set to num joints
+  EXPECT_TRUE(traj.points[0].accelerations.size() == 7);  // Set to num joints
   EXPECT_EQ(traj.points[0].positions[0], 1.0);
   EXPECT_EQ(traj.points[0].velocities[0], 2.0);
   EXPECT_EQ(traj.points[0].accelerations[0], 0.0);
 }
 
-int main(int argc, char ** argv)
+int main(int argc, char** argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
   rclcpp::init(argc, argv);

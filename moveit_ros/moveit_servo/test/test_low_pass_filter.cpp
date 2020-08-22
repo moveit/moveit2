@@ -47,7 +47,7 @@ TEST(MOVEIT_SERVO, FilterConverge)
   moveit_servo::LowPassFilter lpf(2.0);
   EXPECT_DOUBLE_EQ(0.0, lpf.filter(0.0));
   double value;
-  for(size_t i=0; i < 100; ++i)
+  for (size_t i = 0; i < 100; ++i)
   {
     value = lpf.filter(5.0);
   }

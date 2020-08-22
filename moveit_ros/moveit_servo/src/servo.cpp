@@ -42,7 +42,7 @@
 namespace moveit_servo
 {
 Servo::Servo(const rclcpp::Node::SharedPtr& node, ServoParametersPtr parameters,
-        planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
+             planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
   : planning_scene_monitor_(planning_scene_monitor), parameters_(parameters)
 {
   servo_calcs_ = std::make_unique<ServoCalcs>(node, parameters, planning_scene_monitor_);

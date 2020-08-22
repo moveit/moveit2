@@ -48,7 +48,7 @@ bool load_params_success_ = false;
 bool expected_load_params_success_, got_expected_, equals_expected_;
 
 void loadResultCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>,
-          std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+                  std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
   // To pass (return true here), we need:
   // 1) To have gotten the parameter telling us if we should have success loading parameters
@@ -57,7 +57,7 @@ void loadResultCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>,
 }
 
 void expectedResultCB(const std::shared_ptr<std_srvs::srv::Trigger::Request>,
-          std::shared_ptr<std_srvs::srv::Trigger::Response> response)
+                      std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
   response->success = equals_expected_;
 }
@@ -73,7 +73,8 @@ int main(int argc, char** argv)
   // This param passed alongside 'servo_params' in launch file
   node->declare_parameter<bool>("expect_valid_params", true);
   got_expected_ = node->get_parameter("expect_valid_params", expected_load_params_success_);
-  RCLCPP_INFO_STREAM(LOGGER, "Got expect_valid_params? : " << got_expected_ << ", value = " << expected_load_params_success_);
+  RCLCPP_INFO_STREAM(LOGGER, "Got expect_valid_params? : " << got_expected_
+                                                           << ", value = " << expected_load_params_success_);
 
   // Create and try to load the parameters
   auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
@@ -81,7 +82,7 @@ int main(int argc, char** argv)
 
   // Offer a service to report the success/fail of the loading
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr loading_service =
-    node->create_service<std_srvs::srv::Trigger>("get_loading_result", &loadResultCB);
+      node->create_service<std_srvs::srv::Trigger>("get_loading_result", &loadResultCB);
 
   // Check to see if the parameters we grabbed equal the expected ones for testing
   moveit_servo::ServoParametersPtr test_params = getTestParameters();
@@ -89,7 +90,7 @@ int main(int argc, char** argv)
 
   // Offer a service to report if the loading matches the test parameters
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr equal_expected_service =
-    node->create_service<std_srvs::srv::Trigger>("get_equal_expected_result", &expectedResultCB);
+      node->create_service<std_srvs::srv::Trigger>("get_equal_expected_result", &expectedResultCB);
 
   rclcpp::spin(node);
   rclcpp::shutdown();

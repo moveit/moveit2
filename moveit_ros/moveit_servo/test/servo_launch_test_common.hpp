@@ -76,19 +76,20 @@ public:
   void SetUp() override
   {
     executor_->add_node(node_);
-    executor_task_fut_ = std::async(std::launch::async, [this]() {this->executor_->spin();});
+    executor_task_fut_ = std::async(std::launch::async, [this]() { this->executor_->spin(); });
   }
 
   ServoFixture()
-  : node_(std::make_shared<rclcpp::Node>("servo_testing"))
-  , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
+    : node_(std::make_shared<rclcpp::Node>("servo_testing"))
+    , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   {
     // Read the parameters used for testing
     parameters_ = getTestParameters();
 
     // Init ROS interfaces
     // Publishers
-    pub_twist_cmd_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(parameters_->cartesian_command_in_topic, 10);
+    pub_twist_cmd_ =
+        node_->create_publisher<geometry_msgs::msg::TwistStamped>(parameters_->cartesian_command_in_topic, 10);
     pub_joint_cmd_ = node_->create_publisher<control_msgs::msg::JointJog>(parameters_->joint_command_in_topic, 10);
   }
 
@@ -110,7 +111,8 @@ public:
     client_servo_start_ = node_->create_client<std_srvs::srv::Trigger>("/start_servo");
     while (!client_servo_start_->wait_for_service(1s))
     {
-      if (!rclcpp::ok()) {
+      if (!rclcpp::ok())
+      {
         RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
       }
       RCLCPP_INFO(LOGGER, "client_servo_start_ service not available, waiting again...");
@@ -120,7 +122,8 @@ public:
     client_servo_stop_ = node_->create_client<std_srvs::srv::Trigger>("/stop_servo");
     while (!client_servo_stop_->wait_for_service(1s))
     {
-      if (!rclcpp::ok()) {
+      if (!rclcpp::ok())
+      {
         RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
       }
       RCLCPP_INFO(LOGGER, "client_servo_stop_ service not available, waiting again...");
@@ -133,7 +136,8 @@ public:
     client_servo_pause_ = node_->create_client<std_srvs::srv::Trigger>("/pause_servo");
     while (!client_servo_pause_->wait_for_service(1s))
     {
-      if (!rclcpp::ok()) {
+      if (!rclcpp::ok())
+      {
         RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
       }
       RCLCPP_INFO(LOGGER, "client_servo_pause_ service not available, waiting again...");
@@ -146,7 +150,8 @@ public:
     client_servo_unpause_ = node_->create_client<std_srvs::srv::Trigger>("/unpause_servo");
     while (!client_servo_unpause_->wait_for_service(1s))
     {
-      if (!rclcpp::ok()) {
+      if (!rclcpp::ok())
+      {
         RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
       }
       RCLCPP_INFO(LOGGER, "client_servo_unpause_ service not available, waiting again...");
@@ -156,10 +161,12 @@ public:
 
   bool setupControlDimsClient()
   {
-    client_change_control_dims_ = node_->create_client<moveit_msgs::srv::ChangeControlDimensions>("/servo_server/change_control_dimensions");
+    client_change_control_dims_ =
+        node_->create_client<moveit_msgs::srv::ChangeControlDimensions>("/servo_server/change_control_dimensions");
     while (!client_change_control_dims_->wait_for_service(1s))
     {
-      if (!rclcpp::ok()) {
+      if (!rclcpp::ok())
+      {
         RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
       }
       RCLCPP_INFO(LOGGER, "client_change_control_dims_ service not available, waiting again...");
@@ -169,10 +176,12 @@ public:
 
   bool setupDriftDimsClient()
   {
-    client_change_drift_dims_ = node_->create_client<moveit_msgs::srv::ChangeDriftDimensions>("/servo_server/change_drift_dimensions");
+    client_change_drift_dims_ =
+        node_->create_client<moveit_msgs::srv::ChangeDriftDimensions>("/servo_server/change_drift_dimensions");
     while (!client_change_drift_dims_->wait_for_service(1s))
     {
-      if (!rclcpp::ok()) {
+      if (!rclcpp::ok())
+      {
         RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
       }
       RCLCPP_INFO(LOGGER, "client_change_drift_dims_ service not available, waiting again...");
@@ -182,15 +191,16 @@ public:
 
   bool setupStatusSub()
   {
-    sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>("/" +
-      parameters_->status_topic, 10, std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
+    sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
+        "/" + parameters_->status_topic, 10, std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
     return true;
   }
 
   bool setupCollisionScaleSub()
   {
     sub_collision_scale_ = node_->create_subscription<std_msgs::msg::Float64>(
-      "collision_velocity_scale", ROS_QUEUE_SIZE, std::bind(&ServoFixture::collisionScaleCB, this, std::placeholders::_1));
+        "collision_velocity_scale", ROS_QUEUE_SIZE,
+        std::bind(&ServoFixture::collisionScaleCB, this, std::placeholders::_1));
     return true;
   }
 
@@ -199,13 +209,14 @@ public:
     if (command_type == "trajectory_msgs/JointTrajectory")
     {
       sub_trajectory_cmd_output_ = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-        parameters_->command_out_topic, 10, std::bind(&ServoFixture::trajectoryCommandCB, this, std::placeholders::_1));
+          parameters_->command_out_topic, 10,
+          std::bind(&ServoFixture::trajectoryCommandCB, this, std::placeholders::_1));
       return true;
     }
     else if (command_type == "std_msgs/Float64MultiArray")
     {
       sub_array_cmd_output_ = node_->create_subscription<std_msgs::msg::Float64MultiArray>(
-        parameters_->command_out_topic, 10, std::bind(&ServoFixture::arrayCommandCB, this, std::placeholders::_1));
+          parameters_->command_out_topic, 10, std::bind(&ServoFixture::arrayCommandCB, this, std::placeholders::_1));
       return true;
     }
     else
@@ -218,7 +229,7 @@ public:
   bool setupJointStateSub()
   {
     sub_joint_state_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-      parameters_->joint_topic, 10, std::bind(&ServoFixture::jointStateCB, this, std::placeholders::_1));
+        parameters_->joint_topic, 10, std::bind(&ServoFixture::jointStateCB, this, std::placeholders::_1));
     return true;
   }
 
@@ -242,7 +253,7 @@ public:
   {
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     ++num_joint_state_;
-    latest_joint_state_ = msg; 
+    latest_joint_state_ = msg;
   }
 
   void trajectoryCommandCB(const trajectory_msgs::msg::JointTrajectory::SharedPtr msg)

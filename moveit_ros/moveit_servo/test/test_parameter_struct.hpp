@@ -90,31 +90,22 @@ moveit_servo::ServoParametersPtr getTestParameters()
    */
 bool operator==(moveit_servo::ServoParameters& lhs, moveit_servo::ServoParameters& rhs)
 {
-  return (lhs.use_gazebo == rhs.use_gazebo &&
-          lhs.status_topic == rhs.status_topic &&
+  return (lhs.use_gazebo == rhs.use_gazebo && lhs.status_topic == rhs.status_topic &&
           lhs.cartesian_command_in_topic == rhs.cartesian_command_in_topic &&
           lhs.joint_command_in_topic == rhs.joint_command_in_topic &&
-          lhs.robot_link_command_frame == rhs.robot_link_command_frame &&
-          lhs.command_in_type == rhs.command_in_type &&
-          lhs.linear_scale == rhs.linear_scale &&
-          lhs.rotational_scale == rhs.rotational_scale &&
-          lhs.joint_scale == rhs.joint_scale &&
-          lhs.command_out_topic == rhs.command_out_topic &&
-          lhs.publish_period == rhs.publish_period &&
-          lhs.command_out_type == rhs.command_out_type &&
+          lhs.robot_link_command_frame == rhs.robot_link_command_frame && lhs.command_in_type == rhs.command_in_type &&
+          lhs.linear_scale == rhs.linear_scale && lhs.rotational_scale == rhs.rotational_scale &&
+          lhs.joint_scale == rhs.joint_scale && lhs.command_out_topic == rhs.command_out_topic &&
+          lhs.publish_period == rhs.publish_period && lhs.command_out_type == rhs.command_out_type &&
           lhs.publish_joint_positions == rhs.publish_joint_positions &&
           lhs.publish_joint_velocities == rhs.publish_joint_velocities &&
-          lhs.publish_joint_accelerations == rhs.publish_joint_accelerations &&
-          lhs.joint_topic == rhs.joint_topic &&
-          lhs.low_pass_filter_coeff == rhs.low_pass_filter_coeff &&
-          lhs.move_group_name == rhs.move_group_name &&
-          lhs.planning_frame == rhs.planning_frame &&
-          lhs.incoming_command_timeout == rhs.incoming_command_timeout &&
+          lhs.publish_joint_accelerations == rhs.publish_joint_accelerations && lhs.joint_topic == rhs.joint_topic &&
+          lhs.low_pass_filter_coeff == rhs.low_pass_filter_coeff && lhs.move_group_name == rhs.move_group_name &&
+          lhs.planning_frame == rhs.planning_frame && lhs.incoming_command_timeout == rhs.incoming_command_timeout &&
           lhs.num_outgoing_halt_msgs_to_publish == rhs.num_outgoing_halt_msgs_to_publish &&
           lhs.lower_singularity_threshold == rhs.lower_singularity_threshold &&
           lhs.hard_stop_singularity_threshold == rhs.hard_stop_singularity_threshold &&
-          lhs.joint_limit_margin == rhs.joint_limit_margin &&
-          lhs.check_collisions == rhs.check_collisions &&
+          lhs.joint_limit_margin == rhs.joint_limit_margin && lhs.check_collisions == rhs.check_collisions &&
           lhs.collision_check_rate == rhs.collision_check_rate &&
           lhs.collision_check_type == rhs.collision_check_type &&
           lhs.self_collision_proximity_threshold == rhs.self_collision_proximity_threshold &&
@@ -127,4 +118,3 @@ bool operator!=(moveit_servo::ServoParameters& lhs, moveit_servo::ServoParameter
 {
   return !(lhs == rhs);
 }
-

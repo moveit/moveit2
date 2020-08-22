@@ -39,7 +39,6 @@
    Created   : 07/02/2020
 */
 
-
 #include <rclcpp/rclcpp.hpp>
 
 #include <type_traits>
@@ -56,17 +55,18 @@ void declareAndGetParam(T& output_value, const std::string& param_name, const rc
   {
     output_value = node->declare_parameter<T>(param_name, T{});
   }
-  catch(const rclcpp::exceptions::InvalidParameterTypeException& e)
+  catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
   {
     // Catch a <double> parameter written in the yaml as "1" being considered an <int>
-    if(std::is_same<T, double>::value)
+    if (std::is_same<T, double>::value)
     {
       node->undeclare_parameter(param_name);
       output_value = node->declare_parameter<int>(param_name, 0);
     }
     else
     {
-      RCLCPP_ERROR_STREAM(logger, "Error getting parameter \'" << param_name << "\', check parameter type in YAML file");
+      RCLCPP_ERROR_STREAM(logger, "Error getting parameter \'" << param_name
+                                                               << "\', check parameter type in YAML file");
       throw e;
     }
   }
@@ -74,13 +74,17 @@ void declareAndGetParam(T& output_value, const std::string& param_name, const rc
 
 /**
  * Declares, reads, and validates parameters used for moveit_servo
- * @param node Shared ptr to node that will the parameters will be declared in. Params should be defined in launch/config files
+ * @param node Shared ptr to node that will the parameters will be declared in. Params should be defined in
+ * launch/config files
  * @param logger Logger for outputting warnings about the parameters
- * @param parameters The set up parameters that will be updated. After this call, they can be used to start a Servo instance
- * @param ns Parameter namespace (as loaded in launch files). Defaults to "moveit_servo" but can be changed to allow multiple arms/instances
+ * @param parameters The set up parameters that will be updated. After this call, they can be used to start a Servo
+ * instance
+ * @param ns Parameter namespace (as loaded in launch files). Defaults to "moveit_servo" but can be changed to allow
+ * multiple arms/instances
  * @return true if all parameters were loaded and verified successfully, false otherwise
  */
-bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPtr& node, const rclcpp::Logger& logger, std::string ns = "moveit_servo")
+bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPtr& node, const rclcpp::Logger& logger,
+                    std::string ns = "moveit_servo")
 {
   // Get the parameters (organized same order as YAML file)
   declareAndGetParam<bool>(parameters->use_gazebo, ns + ".use_gazebo", node, logger);
@@ -88,7 +92,7 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
 
   // Properties of incoming commands
   declareAndGetParam<std::string>(parameters->cartesian_command_in_topic, ns + ".cartesian_command_in_topic", node,
-                                           logger);
+                                  logger);
   declareAndGetParam<std::string>(parameters->joint_command_in_topic, ns + ".joint_command_in_topic", node, logger);
   declareAndGetParam<std::string>(parameters->robot_link_command_frame, ns + ".robot_link_command_frame", node, logger);
   declareAndGetParam<std::string>(parameters->command_in_type, ns + ".command_in_type", node, logger);
@@ -115,12 +119,13 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
   // Stopping behaviour
   declareAndGetParam<double>(parameters->incoming_command_timeout, ns + ".incoming_command_timeout", node, logger);
   declareAndGetParam<int>(parameters->num_outgoing_halt_msgs_to_publish, ns + ".num_outgoing_halt_msgs_to_publish",
-                                   node, logger);
+                          node, logger);
 
   // Configure handling of singularities and joint limits
-  declareAndGetParam<double>(parameters->lower_singularity_threshold, ns + ".lower_singularity_threshold", node, logger);
-  declareAndGetParam<double>(parameters->hard_stop_singularity_threshold, ns + ".hard_stop_singularity_threshold",
-                                      node, logger);
+  declareAndGetParam<double>(parameters->lower_singularity_threshold, ns + ".lower_singularity_threshold", node,
+                             logger);
+  declareAndGetParam<double>(parameters->hard_stop_singularity_threshold, ns + ".hard_stop_singularity_threshold", node,
+                             logger);
   declareAndGetParam<double>(parameters->joint_limit_margin, ns + ".joint_limit_margin", node, logger);
 
   // Collision checking
@@ -128,13 +133,13 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
   declareAndGetParam<double>(parameters->collision_check_rate, ns + ".collision_check_rate", node, logger);
   declareAndGetParam<std::string>(parameters->collision_check_type, ns + ".collision_check_type", node, logger);
   declareAndGetParam<double>(parameters->self_collision_proximity_threshold, ns + ".self_collision_proximity_threshold",
-                                      node, logger);
-  declareAndGetParam<double>(parameters->scene_collision_proximity_threshold, ns + ".scene_collision_proximity_threshold",
-                                      node, logger);
+                             node, logger);
+  declareAndGetParam<double>(parameters->scene_collision_proximity_threshold,
+                             ns + ".scene_collision_proximity_threshold", node, logger);
   declareAndGetParam<double>(parameters->collision_distance_safety_factor, ns + ".collision_distance_safety_factor",
-                                      node, logger);
+                             node, logger);
   declareAndGetParam<double>(parameters->min_allowable_collision_distance, ns + ".min_allowable_collision_distance",
-                                      node, logger);
+                             node, logger);
 
   // Begin input checking
   if (parameters->publish_period <= 0.)

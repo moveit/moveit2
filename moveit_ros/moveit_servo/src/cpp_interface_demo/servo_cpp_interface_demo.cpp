@@ -53,20 +53,20 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_demo
 class ServoCppDemo
 {
 public:
-  ServoCppDemo(rclcpp::Node::SharedPtr node)
-  : node_(node)
-  , count_(0)
+  ServoCppDemo(rclcpp::Node::SharedPtr node) : node_(node), count_(0)
   {
     // Create the planning_scene_monitor
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
-    planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, "robot_description", tf_buffer_, "planning_scene_monitor");
+    planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
+        node_, "robot_description", tf_buffer_, "planning_scene_monitor");
 
     // Get the planning_scene_monitor to publish scene diff's for RViz visualization
     if (planning_scene_monitor_->getPlanningScene())
     {
       planning_scene_monitor_->startStateMonitor("/joint_states");
       planning_scene_monitor_->setPlanningScenePublishingFrequency(25);
-      planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE, "/moveit_servo/publish_planning_scene");
+      planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
+                                                            "/moveit_servo/publish_planning_scene");
       planning_scene_monitor_->startSceneMonitor();
     }
     else
@@ -83,7 +83,7 @@ public:
   {
     // Get Servo Parameters
     auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
-    if(!moveit_servo::readParameters(servo_parameters, node_, LOGGER))
+    if (!moveit_servo::readParameters(servo_parameters, node_, LOGGER))
     {
       RCLCPP_ERROR(LOGGER, "Could not get parameters");
     }
@@ -93,8 +93,7 @@ public:
     while (!servo_->waitForInitialized() && rclcpp::ok())
     {
       rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, 5000,
-                                  "Waiting for ServoCalcs to recieve joint states");
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, 5000, "Waiting for ServoCalcs to recieve joint states");
     }
     servo_->start();
 

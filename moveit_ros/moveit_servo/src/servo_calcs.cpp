@@ -70,10 +70,8 @@ bool isNonZero(const control_msgs::msg::JointJog& msg)
 
 // Constructor for the class that handles servoing calculations
 ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node, const ServoParametersPtr& parameters,
-             const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
-  : node_(node)
-  , parameters_(parameters)
-  , period_(parameters->publish_period)
+                       const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
+  : node_(node), parameters_(parameters), period_(parameters->publish_period)
 {
   // MoveIt Setup
   const robot_model_loader::RobotModelLoaderPtr& model_loader_ptr = planning_scene_monitor->getRobotModelLoader();
@@ -141,7 +139,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node, const ServoParametersPtr& p
   internal_joint_state_.position.resize(num_joints_);
   internal_joint_state_.velocity.resize(num_joints_);
 
-  for (std::size_t i = 0; i < num_joints_; ++i) 
+  for (std::size_t i = 0; i < num_joints_; ++i)
   {
     // A map for the indices of incoming joint commands
     joint_state_name_map_[internal_joint_state_.name[i]] = i;
@@ -157,8 +155,9 @@ bool ServoCalcs::start()
   if (!incoming_joint_state_)
   {
     rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                "Trying to start ServoCalcs, but it is not initialized. Are you publishing joint_states?");
+    RCLCPP_WARN_STREAM_THROTTLE(
+        LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+        "Trying to start ServoCalcs, but it is not initialized. Are you publishing joint_states?");
     return false;
   }
 
@@ -166,8 +165,7 @@ bool ServoCalcs::start()
   updateJoints();
 
   // Set up the "last" published message, in case we need to send it first
-  auto initial_joint_trajectory =
-      std::make_unique<trajectory_msgs::msg::JointTrajectory>();
+  auto initial_joint_trajectory = std::make_unique<trajectory_msgs::msg::JointTrajectory>();
   initial_joint_trajectory->header.frame_id = parameters_->planning_frame;
   initial_joint_trajectory->header.stamp = node_->now();
   initial_joint_trajectory->joint_names = internal_joint_state_.name;
@@ -264,10 +262,10 @@ void ServoCalcs::run()
       joint_servo_cmd_ = *latest_joint_cmd_;
 
     // Check for stale cmds
-    twist_command_is_stale_ =
-        ((node_->now() - latest_twist_command_stamp_) >= rclcpp::Duration::from_seconds(parameters_->incoming_command_timeout));
-    joint_command_is_stale_ =
-        ((node_->now() - latest_joint_command_stamp_) >= rclcpp::Duration::from_seconds(parameters_->incoming_command_timeout));
+    twist_command_is_stale_ = ((node_->now() - latest_twist_command_stamp_) >=
+                               rclcpp::Duration::from_seconds(parameters_->incoming_command_timeout));
+    joint_command_is_stale_ = ((node_->now() - latest_joint_command_stamp_) >=
+                               rclcpp::Duration::from_seconds(parameters_->incoming_command_timeout));
 
     have_nonzero_twist_stamped_ = latest_nonzero_twist_stamped_;
     have_nonzero_joint_command_ = latest_nonzero_joint_cmd_;
@@ -355,8 +353,7 @@ void ServoCalcs::run()
   {
     ok_to_publish_ = false;
     rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                 "All-zero command. Doing nothing.");
+    RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "All-zero command. Doing nothing.");
   }
   else
   {
@@ -480,7 +477,8 @@ bool ServoCalcs::jointServoCalcs(const control_msgs::msg::JointJog& cmd,
   return internalServoUpdate(delta_theta_, joint_trajectory);
 }
 
-bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
+                                     trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // Set internal joint state from original
   internal_joint_state_ = original_joint_state_;
@@ -494,15 +492,13 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msg
   {
     status_ = StatusCode::DECELERATE_FOR_COLLISION;
     rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                  SERVO_STATUS_CODE_MAP.at(status_));
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
   }
   else if (collision_scale == 0)
   {
     status_ = StatusCode::HALT_FOR_COLLISION;
     rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                  "Halting for collision!");
+    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Halting for collision!");
   }
   delta_theta *= collision_scale;
 
@@ -524,7 +520,7 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msg
     prev_joint_velocity_.setZero();
   }
 
-    // Modify the output message if we are using gazebo
+  // Modify the output message if we are using gazebo
   if (parameters_->use_gazebo)
   {
     insertRedundantPointsIntoTrajectory(joint_trajectory, gazebo_redundant_message_count_);
@@ -533,7 +529,8 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msg
   return true;
 }
 
-bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state, Eigen::ArrayXd& previous_vel)
+bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state,
+                                  Eigen::ArrayXd& previous_vel)
 {
   // All the sizes must match
   if (joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
@@ -541,8 +538,8 @@ bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs
       static_cast<std::size_t>(previous_vel.size()) != joint_state.position.size())
   {
     rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                  "Lengths of output and increments do not match.");
+    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                 "Lengths of output and increments do not match.");
     return false;
   }
 
@@ -664,12 +661,12 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
     if ((ini_condition > parameters_->lower_singularity_threshold) &&
         (ini_condition < parameters_->hard_stop_singularity_threshold))
     {
-      velocity_scale = 1. - (ini_condition - parameters_->lower_singularity_threshold) /
-                                (parameters_->hard_stop_singularity_threshold - parameters_->lower_singularity_threshold);
+      velocity_scale = 1. -
+                       (ini_condition - parameters_->lower_singularity_threshold) /
+                           (parameters_->hard_stop_singularity_threshold - parameters_->lower_singularity_threshold);
       status_ = StatusCode::DECELERATE_FOR_SINGULARITY;
       rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                  SERVO_STATUS_CODE_MAP.at(status_));
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
     }
 
     // Very close to singularity, so halt.
@@ -678,8 +675,7 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
       velocity_scale = 0;
       status_ = StatusCode::HALT_FOR_SINGULARITY;
       rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                  SERVO_STATUS_CODE_MAP.at(status_));
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
     }
   }
 
@@ -701,7 +697,8 @@ void ServoCalcs::enforceSRDFAccelVelLimits(Eigen::ArrayXd& delta_theta)
   }
 }
 
-void ServoCalcs::enforceSingleVelAccelLimit(const moveit::core::VariableBounds& bound, double& vel, const double& prev_vel, const double& accel, double& delta)
+void ServoCalcs::enforceSingleVelAccelLimit(const moveit::core::VariableBounds& bound, double& vel,
+                                            const double& prev_vel, const double& accel, double& delta)
 {
   if (bound.acceleration_bounded_)
   {
@@ -724,9 +721,7 @@ void ServoCalcs::enforceSingleVelAccelLimit(const moveit::core::VariableBounds& 
       // accel = (vel - vel_prev) / delta_t = ((delta_theta / delta_t) - vel_prev) / delta_t
       // --> delta_theta = (accel * delta_t _ + vel_prev) * delta_t
       const double relative_change =
-          ((acceleration_limit * parameters_->publish_period + prev_vel) *
-            parameters_->publish_period) /
-          delta;
+          ((acceleration_limit * parameters_->publish_period + prev_vel) * parameters_->publish_period) / delta;
       // Avoid nan
       if (fabs(relative_change) < 1)
         delta = relative_change * delta;
@@ -796,7 +791,7 @@ bool ServoCalcs::enforceSRDFPositionLimits()
           rclcpp::Clock& clock = *node_->get_clock();
           RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
                                       node_->get_name() << " " << joint->getName()
-                                                       << " close to a position limit. Halting.");
+                                                        << " close to a position limit. Halting.");
           halting = true;
         }
       }
@@ -849,8 +844,8 @@ bool ServoCalcs::updateJoints()
     catch (const std::out_of_range& e)
     {
       rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                   "Ignoring joint " << incoming_joint_state_->name[m]);
+      RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Ignoring joint "
+                                                                               << incoming_joint_state_->name[m]);
       continue;
     }
 
@@ -892,10 +887,11 @@ bool ServoCalcs::calculateWorstCaseStopTime()
         {
           rclcpp::Clock& clock = *node_->get_clock();
           RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                      "An acceleration limit is not defined for this joint; minimum stop distance "
-                                      "should not be used for collision checking");
-        
-          // TODO(adamp): figure out what to do here. We definitely don't want to allow 'stop_distance' collision checking with
+                                       "An acceleration limit is not defined for this joint; minimum stop distance "
+                                       "should not be used for collision checking");
+
+          // TODO(adamp): figure out what to do here. We definitely don't want to allow 'stop_distance' collision
+          // checking with
           // no acceleration limits defined. Could also throw instead of just stopping.
           stop();
         }
@@ -966,7 +962,7 @@ bool ServoCalcs::checkValidCommand(const geometry_msgs::msg::TwistStamped& cmd)
 Eigen::VectorXd ServoCalcs::scaleCartesianCommand(const geometry_msgs::msg::TwistStamped& command)
 {
   Eigen::VectorXd result(6);
-  result.setZero(); // Or the else case below leads to misery
+  result.setZero();  // Or the else case below leads to misery
 
   // Apply user-defined scaling if inputs are unitless [-1:1]
   if (parameters_->command_in_type == "unitless")
@@ -991,8 +987,7 @@ Eigen::VectorXd ServoCalcs::scaleCartesianCommand(const geometry_msgs::msg::Twis
   else
   {
     rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                 "Unexpected command_in_type");
+    RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Unexpected command_in_type");
   }
 
   return result;
@@ -1013,8 +1008,8 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
     catch (const std::out_of_range& e)
     {
       rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                  "Ignoring joint " << internal_joint_state_.name[m]);
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Ignoring joint "
+                                                                              << internal_joint_state_.name[m]);
       continue;
     }
     // Apply user-defined scaling if inputs are unitless [-1:1]

@@ -60,24 +60,24 @@ private:
 
   /** \brief Start the servo */
   void startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-          std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+               std::shared_ptr<std_srvs::srv::Trigger::Response> response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_servo_service_;
 
   /** \brief Stop the servo */
   void stopCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-          std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+              std::shared_ptr<std_srvs::srv::Trigger::Response> response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_servo_service_;
 
   /** \brief Pause servo */
   void pauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-          std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+               std::shared_ptr<std_srvs::srv::Trigger::Response> response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr pause_servo_service_;
 
   /** \brief Unpause servo */
   void unpauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-          std::shared_ptr<std_srvs::srv::Trigger::Response> response);
+                 std::shared_ptr<std_srvs::srv::Trigger::Response> response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr unpause_servo_service_;
 
   bool is_initialized_;
 };
-} //namespace moveit_servo
+}  // namespace moveit_servo

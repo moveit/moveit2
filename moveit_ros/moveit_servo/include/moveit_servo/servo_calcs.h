@@ -72,7 +72,7 @@ public:
   void stop();
 
   /** \brief Returns when a joint state message has been recieved, and start() may be called */
-  bool waitForInitialized(std::chrono::duration<double> wait_for=std::chrono::duration<double>(0.25));
+  bool waitForInitialized(std::chrono::duration<double> wait_for = std::chrono::duration<double>(0.25));
 
   /**
    * Get the MoveIt planning link transform.
@@ -145,7 +145,8 @@ protected:
    * @param accel The current (calculated) acceleration of the joint
    * @param delta The desired change in joint angle, that will be changed to be within limits
    */
-  void enforceSingleVelAccelLimit(const moveit::core::VariableBounds& bound, double& vel, const double& prev_vel, const double& accel, double& delta);
+  void enforceSingleVelAccelLimit(const moveit::core::VariableBounds& bound, double& vel, const double& prev_vel,
+                                  const double& accel, double& delta);
 
   /** \brief Avoid overshooting joint limits */
   bool enforceSRDFPositionLimits();
@@ -172,14 +173,15 @@ protected:
    */
   bool internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory);
 
-/** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
-   * Also calculates the previous velocity
-   * @param delta_theta Eigen vector of joint delta's
-   * @param joint_state The joint state msg being updated
-   * @param previous_vel Eigen vector of previous velocities being updated
-   * @return Returns false if there is a problem, true otherwise
-   */
-  bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state, Eigen::ArrayXd& previous_vel);
+  /** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
+     * Also calculates the previous velocity
+     * @param delta_theta Eigen vector of joint delta's
+     * @param joint_state The joint state msg being updated
+     * @param previous_vel Eigen vector of previous velocities being updated
+     * @return Returns false if there is a problem, true otherwise
+     */
+  bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state,
+                        Eigen::ArrayXd& previous_vel);
 
   /** \brief Gazebo simulations have very strict message timestamp requirements.
    * Satisfy Gazebo by stuffing multiple messages into one.

@@ -68,7 +68,7 @@ public:
   void setPaused(bool paused);
 
   /** \brief Returns when a joint state message has been recieved, and start() may be called */
-  bool waitForInitialized(std::chrono::duration<double> wait_for=std::chrono::duration<double>(0.25));
+  bool waitForInitialized(std::chrono::duration<double> wait_for = std::chrono::duration<double>(0.25));
 
   /**
    * Get the MoveIt planning link transform.

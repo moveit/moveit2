@@ -95,7 +95,7 @@ TEST_F(ServoFixture, SendTwistStampedTest)
 
   // Publish N messages with some time between, ensure it's less than the timeout for Servo
   size_t num_commands = 30;
-  rclcpp::Rate loop_rate(2/parameters_->incoming_command_timeout);
+  rclcpp::Rate loop_rate(2 / parameters_->incoming_command_timeout);
   resetNumCommands();
   for (size_t i = 0; i < num_commands && rclcpp::ok(); ++i)
   {
@@ -113,9 +113,9 @@ TEST_F(ServoFixture, SendTwistStampedTest)
 
   // Compare actual number recieved to expected number
   auto num_expected = (time_end - time_start).seconds() / parameters_->publish_period;
-  
-  EXPECT_GT(num_recieved, 0.5*num_expected);
-  EXPECT_LT(num_recieved, 1.5*num_expected);
+
+  EXPECT_GT(num_recieved, 0.5 * num_expected);
+  EXPECT_LT(num_recieved, 1.5 * num_expected);
 }
 
 TEST_F(ServoFixture, SendJointServoTest)
@@ -132,7 +132,7 @@ TEST_F(ServoFixture, SendJointServoTest)
 
   // Publish N messages with some time between, ensure it's less than the timeout for Servo
   size_t num_commands = 30;
-  rclcpp::Rate loop_rate(2/parameters_->incoming_command_timeout);
+  rclcpp::Rate loop_rate(2 / parameters_->incoming_command_timeout);
   resetNumCommands();
   for (size_t i = 0; i < num_commands && rclcpp::ok(); ++i)
   {
@@ -151,9 +151,9 @@ TEST_F(ServoFixture, SendJointServoTest)
 
   // Compare actual number recieved to expected number
   auto num_expected = (time_end - time_start).seconds() / parameters_->publish_period;
-  
-  EXPECT_GT(num_recieved, 0.5*num_expected);
-  EXPECT_LT(num_recieved, 1.5*num_expected);
+
+  EXPECT_GT(num_recieved, 0.5 * num_expected);
+  EXPECT_LT(num_recieved, 1.5 * num_expected);
 }
 
 TEST_F(ServoFixture, StaleCommandStop)
@@ -172,7 +172,7 @@ TEST_F(ServoFixture, StaleCommandStop)
   msg->velocities.push_back(0.1);
 
   // Wait the stale limit, plus a little extra
-  const int sleep_time = 5*1000* parameters_->incoming_command_timeout;
+  const int sleep_time = 5 * 1000 * parameters_->incoming_command_timeout;
   rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
 
   // Get current position

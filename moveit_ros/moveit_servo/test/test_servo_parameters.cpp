@@ -53,20 +53,24 @@ TEST(TestServoParameters, LoadParamsSuccess)
   auto node = std::make_shared<rclcpp::Node>("test_servo_parameters");
 
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr load_param_client =
-    node->create_client<std_srvs::srv::Trigger>("get_loading_result");
+      node->create_client<std_srvs::srv::Trigger>("get_loading_result");
 
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr equal_param_client =
-    node->create_client<std_srvs::srv::Trigger>("get_equal_expected_result");
+      node->create_client<std_srvs::srv::Trigger>("get_equal_expected_result");
 
-  while (!load_param_client->wait_for_service(1s)) {
-    if (!rclcpp::ok()) {
+  while (!load_param_client->wait_for_service(1s))
+  {
+    if (!rclcpp::ok())
+    {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
     }
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "get_loading_result service not available, waiting again...");
   }
 
-  while (!equal_param_client->wait_for_service(1s)) {
-    if (!rclcpp::ok()) {
+  while (!equal_param_client->wait_for_service(1s))
+  {
+    if (!rclcpp::ok())
+    {
       RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Interrupted while waiting for the service. Exiting.");
     }
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "get_equal_expected_result service not available, waiting again...");
@@ -83,8 +87,7 @@ TEST(TestServoParameters, LoadParamsSuccess)
   EXPECT_TRUE(equal_result.get()->success);
 }
 
-
-int main(int argc, char ** argv)
+int main(int argc, char** argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
   rclcpp::init(argc, argv);
