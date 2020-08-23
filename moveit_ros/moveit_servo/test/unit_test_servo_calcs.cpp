@@ -305,9 +305,9 @@ TEST_F(ServoCalcsTestFixture, TestSuddenHalt)
   // Let's start with an empty trajectory
   trajectory_msgs::msg::JointTrajectory msg;
   servo_calcs_->suddenHalt(msg);
-  EXPECT_TRUE(msg.points.size() == 1);
-  EXPECT_TRUE(msg.points[0].positions.size() == 3);
-  EXPECT_TRUE(msg.points[0].velocities.size() == 3);
+  EXPECT_EQ(msg.points.size(), 1);
+  EXPECT_EQ(msg.points[0].positions.size(), 3);
+  EXPECT_EQ(msg.points[0].velocities.size(), 3);
   EXPECT_EQ(msg.points[0].positions[2], 3.0);
   EXPECT_EQ(msg.points[0].velocities[2], 0.0);
 
@@ -506,10 +506,10 @@ TEST_F(ServoCalcsTestFixture, TestComposeOutputMsg)
   EXPECT_EQ(traj.joint_names[0], "some_joint");
 
   // Check the trajectory info
-  EXPECT_TRUE(traj.points.size() == 1);
-  EXPECT_TRUE(traj.points[0].positions.size() == 1);  // Set to input length
-  EXPECT_TRUE(traj.points[0].velocities.size() == 1);
-  EXPECT_TRUE(traj.points[0].accelerations.size() == 7);  // Set to num joints
+  EXPECT_EQ(traj.points.size(), 1);
+  EXPECT_EQ(traj.points[0].positions.size(), 1);  // Set to input length
+  EXPECT_EQ(traj.points[0].velocities.size(), 1);
+  EXPECT_EQ(traj.points[0].accelerations.size(), 7);  // Set to num joints
   EXPECT_EQ(traj.points[0].positions[0], 1.0);
   EXPECT_EQ(traj.points[0].velocities[0], 2.0);
   EXPECT_EQ(traj.points[0].accelerations[0], 0.0);
