@@ -232,7 +232,7 @@ void ServoCalcs::run()
 {
   // Publish status each loop iteration
   auto status_msg = std::make_unique<std_msgs::msg::Int8>();
-  status_msg.get()->data = static_cast<int8_t>(status_);
+  status_msg->data = static_cast<int8_t>(status_);
   status_pub_->publish(std::move(status_msg));
 
   // After we publish, status, reset it back to no warnings
@@ -324,7 +324,7 @@ void ServoCalcs::run()
   {
     // Joint trajectory is not populated with anything, so set it to the last positions and 0 velocity
     *joint_trajectory = *last_sent_command_;
-    for (auto& point : joint_trajectory.get()->points)
+    for (auto& point : joint_trajectory->points)
     {
       point.velocities.assign(point.velocities.size(), 0);
     }
@@ -379,7 +379,7 @@ void ServoCalcs::run()
     // (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
     if (parameters_->command_out_type == "trajectory_msgs/JointTrajectory")
     {
-      joint_trajectory.get()->header.stamp = node_->now();
+      joint_trajectory->header.stamp = node_->now();
       *last_sent_command_ = *joint_trajectory;
       trajectory_outgoing_cmd_pub_->publish(std::move(joint_trajectory));
     }
@@ -387,9 +387,9 @@ void ServoCalcs::run()
     {
       auto joints = std::make_unique<std_msgs::msg::Float64MultiArray>();
       if (parameters_->publish_joint_positions && !joint_trajectory->points.empty())
-        joints.get()->data = joint_trajectory.get()->points[0].positions;
-      else if (parameters_->publish_joint_velocities && !joint_trajectory.get()->points.empty())
-        joints.get()->data = joint_trajectory.get()->points[0].velocities;
+        joints->data = joint_trajectory->points[0].positions;
+      else if (parameters_->publish_joint_velocities && !joint_trajectory->points.empty())
+        joints->data = joint_trajectory->points[0].velocities;
       *last_sent_command_ = *joint_trajectory;
       multiarray_outgoing_cmd_pub_->publish(std::move(joints));
     }
@@ -909,7 +909,7 @@ bool ServoCalcs::calculateWorstCaseStopTime()
   // publish message
   {
     auto msg = std::make_unique<std_msgs::msg::Float64>();
-    msg.get()->data = worst_case_stop_time;
+    msg->data = worst_case_stop_time;
     worst_case_stop_time_pub_->publish(std::move(msg));
   }
 
@@ -1126,27 +1126,27 @@ void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::SharedPt
 void ServoCalcs::changeDriftDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request> req,
                                        std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response> res)
 {
-  drift_dimensions_[0] = req.get()->drift_x_translation;
-  drift_dimensions_[1] = req.get()->drift_y_translation;
-  drift_dimensions_[2] = req.get()->drift_z_translation;
-  drift_dimensions_[3] = req.get()->drift_x_rotation;
-  drift_dimensions_[4] = req.get()->drift_y_rotation;
-  drift_dimensions_[5] = req.get()->drift_z_rotation;
+  drift_dimensions_[0] = req->drift_x_translation;
+  drift_dimensions_[1] = req->drift_y_translation;
+  drift_dimensions_[2] = req->drift_z_translation;
+  drift_dimensions_[3] = req->drift_x_rotation;
+  drift_dimensions_[4] = req->drift_y_rotation;
+  drift_dimensions_[5] = req->drift_z_rotation;
 
-  res.get()->success = true;
+  res->success = true;
 }
 
 void ServoCalcs::changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request> req,
                                          std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response> res)
 {
-  control_dimensions_[0] = req.get()->control_x_translation;
-  control_dimensions_[1] = req.get()->control_y_translation;
-  control_dimensions_[2] = req.get()->control_z_translation;
-  control_dimensions_[3] = req.get()->control_x_rotation;
-  control_dimensions_[4] = req.get()->control_y_rotation;
-  control_dimensions_[5] = req.get()->control_z_rotation;
+  control_dimensions_[0] = req->control_x_translation;
+  control_dimensions_[1] = req->control_y_translation;
+  control_dimensions_[2] = req->control_z_translation;
+  control_dimensions_[3] = req->control_x_rotation;
+  control_dimensions_[4] = req->control_y_rotation;
+  control_dimensions_[5] = req->control_z_rotation;
 
-  res.get()->success = true;
+  res->success = true;
 }
 
 void ServoCalcs::setPaused(bool paused)

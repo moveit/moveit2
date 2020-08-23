@@ -44,9 +44,9 @@
 #include <gtest/gtest.h>
 #include <moveit_servo/servo_calcs.h>
 
-const std::vector<std::string> panda_joint_names_{ "panda_finger_joint1", "panda_finger_joint2", "panda_joint1",
-                                                   "panda_joint2",        "panda_joint3",        "panda_joint4",
-                                                   "panda_joint5",        "panda_joint6",        "panda_joint7" };
+const std::vector<std::string> PANDA_JOINT_NAMES{ "panda_finger_joint1", "panda_finger_joint2", "panda_joint1",
+                                                  "panda_joint2",        "panda_joint3",        "panda_joint4",
+                                                  "panda_joint5",        "panda_joint6",        "panda_joint7" };
 
 // subclassing and friending so we can access member varibles
 class FriendServoCalcs : public moveit_servo::ServoCalcs
@@ -74,9 +74,9 @@ class ServoCalcsTestFixture : public ::testing::Test
 {
 public:
   ServoCalcsTestFixture();
-  ~ServoCalcsTestFixture(){};
+  ~ServoCalcsTestFixture() override = default;
 
-  void SetUpStateController();
+  void setUpStateController();
 
 protected:
   rclcpp::Node::SharedPtr node_;

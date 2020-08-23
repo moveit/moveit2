@@ -101,7 +101,7 @@ sensor_msgs::msg::JointState ServoCalcsTestFixture::getJointState(std::vector<do
   std::vector<double> effort;
   effort.assign(9, 0);
 
-  msg.name = panda_joint_names_;
+  msg.name = PANDA_JOINT_NAMES;
   msg.position = pos;
   msg.velocity = vel;
   msg.effort = effort;
@@ -465,7 +465,7 @@ TEST_F(ServoCalcsTestFixture, TestScaleJointCommand)
 {
   // Get a JointJog msg to test
   control_msgs::msg::JointJog msg;
-  msg.joint_names = panda_joint_names_;
+  msg.joint_names = PANDA_JOINT_NAMES;
   std::vector<double> vel{ 0, 0, 1, 1, 1, 1, 1, 1, 1 };
   msg.velocities = vel;
 

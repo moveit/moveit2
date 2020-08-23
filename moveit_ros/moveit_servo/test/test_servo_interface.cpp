@@ -188,8 +188,8 @@ TEST_F(ServoFixture, StaleCommandStop)
 
   // Wait the stale limit, plus a little extra
   log_time_start = node_->now();
-  const int SLEEP_TIME = 1.5 * 1000 * parameters_->incoming_command_timeout;
-  rclcpp::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+  const int sleep_time = 1.5 * 1000 * parameters_->incoming_command_timeout;
+  rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
   log_time_end = node_->now();
   RCLCPP_INFO_STREAM(LOGGER, "Wait for stopping: " << (log_time_end - log_time_start).seconds());
 
@@ -198,7 +198,7 @@ TEST_F(ServoFixture, StaleCommandStop)
   EXPECT_NE(start_position, middle_position);
 
   // Wait for a bit
-  rclcpp::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+  rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
 
   // Get the current position (should be no change)
   double end_position = getLatestTrajCommand().points[0].positions[0];
