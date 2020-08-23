@@ -45,30 +45,35 @@ namespace moveit_servo
 {
 TEST_F(ServoFixture, SelfCollision)
 {
+  auto log_time_start = node_->now();
   ASSERT_TRUE(setupStartClient());
-  ASSERT_TRUE(setupStatusSub());
+  auto log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
 
   // Start Servo
-  auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-  ASSERT_TRUE(start_result.get()->success);
+  ASSERT_TRUE(start());
+  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
 
   // Look for DECELERATE_FOR_COLLISION status
   watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_COLLISION);
 
   // Publish some joint jog commands that will bring us to collision
-  rclcpp::Rate loop_rate(20);
-  for (size_t i = 0; i < 40; ++i)
+  log_time_start = node_->now();
+  size_t iterations = 0;
+  while (!sawTrackedStatus() && iterations++ < TIMEOUT_ITERATIONS)
   {
     auto msg = std::make_unique<control_msgs::msg::JointJog>();
     msg->header.stamp = node_->now();
     msg->header.frame_id = "panda_link3";
     msg->joint_names.push_back("panda_joint4");
-    msg->velocities.push_back(-0.2);
+    msg->velocities.push_back(-1.0);
     pub_joint_cmd_->publish(std::move(msg));
-    loop_rate.sleep();
+    publish_loop_rate_.sleep();
   }
 
-  EXPECT_TRUE(sawTrackedStatus());
+  EXPECT_LT(iterations, TIMEOUT_ITERATIONS);
+  log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Wait for collision: " << (log_time_end - log_time_start).seconds());
 }
 
 TEST_F(ServoFixture, ExternalCollision)
@@ -76,12 +81,13 @@ TEST_F(ServoFixture, ExternalCollision)
   // NOTE: This test is meant to be run after the SelfCollision test
   // It assumes the position is where the robot ends in SelfCollision test
 
+  auto log_time_start = node_->now();
   ASSERT_TRUE(setupStartClient());
-  ASSERT_TRUE(setupStatusSub());
+  auto log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
 
   // Start Servo
-  auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-  ASSERT_TRUE(start_result.get()->success);
+  ASSERT_TRUE(start());
 
   // Create collision object, in the way of servoing
   moveit_msgs::msg::CollisionObject collision_object;
@@ -116,16 +122,20 @@ TEST_F(ServoFixture, ExternalCollision)
   watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_COLLISION);
 
   // Now publish twist commands that collide with the box
-  rclcpp::Rate loop_rate(20);
-  for (size_t i = 0; i < 40; ++i)
+  log_time_start = node_->now();
+  size_t iterations = 0;
+  while (!sawTrackedStatus() && iterations++ < TIMEOUT_ITERATIONS)
   {
     auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
     msg->header.stamp = node_->now();
     msg->twist.linear.x = 0.2;
     pub_twist_cmd_->publish(std::move(msg));
-    loop_rate.sleep();
+    publish_loop_rate_.sleep();
   }
-  EXPECT_TRUE(sawTrackedStatus());
+
+  EXPECT_LT(iterations, TIMEOUT_ITERATIONS);
+  log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Wait for collision: " << (log_time_end - log_time_start).seconds());
 }
 
 }  // namespace moveit_servo

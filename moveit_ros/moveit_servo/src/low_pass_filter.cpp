@@ -46,7 +46,6 @@ namespace moveit_servo
 {
 namespace
 {
-constexpr char LOGNAME[] = "low_pass_filter";
 constexpr double EPSILON = 1e-9;
 }
 

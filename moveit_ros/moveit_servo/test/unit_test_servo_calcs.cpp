@@ -101,7 +101,7 @@ sensor_msgs::msg::JointState ServoCalcsTestFixture::getJointState(std::vector<do
   std::vector<double> effort;
   effort.assign(9, 0);
 
-  msg.name = panda_joint_names_;
+  msg.name = PANDA_JOINT_NAMES;
   msg.position = pos;
   msg.velocity = vel;
   msg.effort = effort;
@@ -305,9 +305,9 @@ TEST_F(ServoCalcsTestFixture, TestSuddenHalt)
   // Let's start with an empty trajectory
   trajectory_msgs::msg::JointTrajectory msg;
   servo_calcs_->suddenHalt(msg);
-  EXPECT_TRUE(msg.points.size() == 1);
-  EXPECT_TRUE(msg.points[0].positions.size() == 3);
-  EXPECT_TRUE(msg.points[0].velocities.size() == 3);
+  EXPECT_EQ(msg.points.size(), 1UL);
+  EXPECT_EQ(msg.points[0].positions.size(), 3UL);
+  EXPECT_EQ(msg.points[0].velocities.size(), 3UL);
   EXPECT_EQ(msg.points[0].positions[2], 3.0);
   EXPECT_EQ(msg.points[0].velocities[2], 0.0);
 
@@ -465,7 +465,7 @@ TEST_F(ServoCalcsTestFixture, TestScaleJointCommand)
 {
   // Get a JointJog msg to test
   control_msgs::msg::JointJog msg;
-  msg.joint_names = panda_joint_names_;
+  msg.joint_names = PANDA_JOINT_NAMES;
   std::vector<double> vel{ 0, 0, 1, 1, 1, 1, 1, 1, 1 };
   msg.velocities = vel;
 
@@ -506,10 +506,10 @@ TEST_F(ServoCalcsTestFixture, TestComposeOutputMsg)
   EXPECT_EQ(traj.joint_names[0], "some_joint");
 
   // Check the trajectory info
-  EXPECT_TRUE(traj.points.size() == 1);
-  EXPECT_TRUE(traj.points[0].positions.size() == 1);  // Set to input length
-  EXPECT_TRUE(traj.points[0].velocities.size() == 1);
-  EXPECT_TRUE(traj.points[0].accelerations.size() == 7);  // Set to num joints
+  EXPECT_EQ(traj.points.size(), 1UL);
+  EXPECT_EQ(traj.points[0].positions.size(), 1UL);  // Set to input length
+  EXPECT_EQ(traj.points[0].velocities.size(), 1UL);
+  EXPECT_EQ(traj.points[0].accelerations.size(), 7UL);  // Set to num joints
   EXPECT_EQ(traj.points[0].positions[0], 1.0);
   EXPECT_EQ(traj.points[0].velocities[0], 2.0);
   EXPECT_EQ(traj.points[0].accelerations[0], 0.0);

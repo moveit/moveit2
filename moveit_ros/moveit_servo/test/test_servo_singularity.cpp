@@ -46,42 +46,53 @@ namespace moveit_servo
 TEST_F(ServoFixture, ReachSingular)
 {
   ASSERT_TRUE(setupStartClient());
-  ASSERT_TRUE(setupStatusSub());
 
   // Start Servo
-  auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-  ASSERT_TRUE(start_result.get()->success);
-
-  rclcpp::Rate loop_rate(20);
+  ASSERT_TRUE(start());
+  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
 
   // Look for DECELERATE_FOR_SINGULARITY status
   watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_SINGULARITY);
 
   // Publish some twist commands that will bring us to singularity
-  for (size_t i = 0; i < 10; ++i)
+  auto log_time_start = node_->now();
+  size_t iterations = 0;
+  while (!sawTrackedStatus() && iterations++ < TIMEOUT_ITERATIONS)
   {
     auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
     msg->header.stamp = node_->now();
     msg->twist.linear.x = 0.8;
     pub_twist_cmd_->publish(std::move(msg));
-    loop_rate.sleep();
+    publish_loop_rate_.sleep();
   }
 
-  // Status should be decelerating from singularity
-  EXPECT_TRUE(sawTrackedStatus());
+  // Test that we didn't timeout
+  EXPECT_LT(iterations, TIMEOUT_ITERATIONS);
+  auto log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Wait for singularity: " << (log_time_end - log_time_start).seconds());
+
+  // Look for NO_WARNING status
+  watchForStatus(moveit_servo::StatusCode::NO_WARNING);
+  resetNumStatus();
 
   // If we move the other way (away from singular), we should get no warnings
-  resetNumStatus();
-  for (size_t i = 0; i < 10; ++i)
+  log_time_start = node_->now();
+  iterations = 0;
+  while (!sawTrackedStatus() && iterations++ < TIMEOUT_ITERATIONS)
   {
     auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
     msg->header.stamp = node_->now();
     msg->twist.linear.x = -0.1;
     msg->twist.angular.z = -0.5;
     pub_twist_cmd_->publish(std::move(msg));
-    loop_rate.sleep();
+    publish_loop_rate_.sleep();
   }
-  EXPECT_TRUE(getLatestStatus() == moveit_servo::StatusCode::NO_WARNING);
+  EXPECT_EQ(getLatestStatus(), moveit_servo::StatusCode::NO_WARNING);
+
+  // Test that we didn't timeout
+  EXPECT_LT(iterations, TIMEOUT_ITERATIONS);
+  log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Wait for no warning: " << (log_time_end - log_time_start).seconds());
 }
 
 }  // namespace moveit_servo

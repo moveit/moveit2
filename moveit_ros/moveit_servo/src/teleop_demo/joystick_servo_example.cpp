@@ -84,8 +84,8 @@ enum Button
 
 // Some axes have offsets (e.g. the default trigger position is 1.0 not 0)
 // This will map the default values for the axes
-std::map<Axis, double> axis_defaults_ = { { LEFT_TRIGGER, 1.0 }, { RIGHT_TRIGGER, 1.0 } };
-std::map<Button, double> button_defaults_;
+std::map<Axis, double> AXIS_DEFAULTS = { { LEFT_TRIGGER, 1.0 }, { RIGHT_TRIGGER, 1.0 } };
+std::map<Button, double> BUTTON_DEFAULTS;
 
 // To change controls or setup a new controller, all you should to do is change the above enums and the follow 2
 // functions
@@ -122,8 +122,8 @@ bool convertJoyToCmd(const std::vector<float>& axes, const std::vector<int>& but
   twist->twist.linear.z = axes[RIGHT_STICK_Y];
   twist->twist.linear.y = axes[RIGHT_STICK_X];
 
-  double lin_x_right = -0.5 * (axes[RIGHT_TRIGGER] - axis_defaults_.at(RIGHT_TRIGGER));
-  double lin_x_left = 0.5 * (axes[LEFT_TRIGGER] - axis_defaults_.at(LEFT_TRIGGER));
+  double lin_x_right = -0.5 * (axes[RIGHT_TRIGGER] - AXIS_DEFAULTS.at(RIGHT_TRIGGER));
+  double lin_x_left = 0.5 * (axes[LEFT_TRIGGER] - AXIS_DEFAULTS.at(LEFT_TRIGGER));
   twist->twist.linear.x = lin_x_right + lin_x_left;
 
   twist->twist.angular.y = axes[LEFT_STICK_Y];

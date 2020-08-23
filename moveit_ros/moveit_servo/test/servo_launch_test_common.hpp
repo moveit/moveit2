@@ -82,10 +82,12 @@ public:
   ServoFixture()
     : node_(std::make_shared<rclcpp::Node>("servo_testing"))
     , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
+    , parameters_(getTestParameters())
+    , PUBLISH_HZ(2.0 / parameters_->incoming_command_timeout)
+    , PUBLISH_PERIOD(1.0 / PUBLISH_HZ)
+    , TIMEOUT_ITERATIONS(10 * PUBLISH_HZ)
+    , publish_loop_rate_(PUBLISH_HZ)
   {
-    // Read the parameters used for testing
-    parameters_ = getTestParameters();
-
     // Init ROS interfaces
     // Publishers
     pub_twist_cmd_ =
@@ -130,6 +132,10 @@ public:
       }
       RCLCPP_INFO(LOGGER, "client_servo_stop_ service not available, waiting again...");
     }
+
+    // Status sub (we need this to check that we've started / stopped)
+    sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
+        "/" + parameters_->status_topic, 10, std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
     return true;
   }
 
@@ -192,13 +198,6 @@ public:
       }
       RCLCPP_INFO(LOGGER, "client_change_drift_dims_ service not available, waiting again...");
     }
-    return true;
-  }
-
-  bool setupStatusSub()
-  {
-    sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
-        "/" + parameters_->status_topic, 10, std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
     return true;
   }
 
@@ -367,6 +366,70 @@ public:
     return status_seen_;
   }
 
+  bool start()
+  {
+    auto time_start = node_->now();
+    auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+    if (!start_result.get()->success)
+    {
+      RCLCPP_ERROR(LOGGER, "Error returned form service call to start servo");
+      return false;
+    }
+    RCLCPP_INFO_STREAM(LOGGER, "Wait for start servo: " << (node_->now() - time_start).seconds());
+
+    // Test that status messages start
+    time_start = node_->now();
+    auto num_statuses_start = getNumStatus();
+    size_t iterations = 0;
+    while (getNumStatus() == num_statuses_start && iterations++ < TIMEOUT_ITERATIONS)
+    {
+      publish_loop_rate_.sleep();
+    }
+
+    RCLCPP_INFO_STREAM(LOGGER, "Wait for status num increasing: " << (node_->now() - time_start).seconds());
+
+    if (iterations >= TIMEOUT_ITERATIONS)
+    {
+      RCLCPP_ERROR(LOGGER, "Timeout waiting for status num increasing");
+      return false;
+    }
+
+    return getNumStatus() > num_statuses_start;
+  }
+
+  bool stop()
+  {
+    auto time_start = node_->now();
+    auto stop_result = client_servo_stop_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+    if (!stop_result.get()->success)
+    {
+      RCLCPP_ERROR(LOGGER, "Error returned form service call to stop servo");
+      return false;
+    }
+    RCLCPP_INFO_STREAM(LOGGER, "Wait for stop servo service: " << (node_->now() - time_start).seconds());
+
+    // Test that status messages stop
+    time_start = node_->now();
+    size_t num_statuses_start = 0;
+    size_t iterations = 0;
+    do
+    {
+      num_statuses_start = getNumStatus();
+      // Wait 4x the loop rate
+      for (size_t i = 0; i < 4; ++i)
+        publish_loop_rate_.sleep();
+    } while (getNumStatus() != num_statuses_start && ++iterations < TIMEOUT_ITERATIONS);
+    RCLCPP_INFO_STREAM(LOGGER, "Wait for status to stop: " << (node_->now() - time_start).seconds());
+
+    if (iterations >= TIMEOUT_ITERATIONS)
+    {
+      RCLCPP_ERROR(LOGGER, "Timeout waiting for status num increasing");
+      return false;
+    }
+
+    return true;
+  }
+
 protected:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Executor::SharedPtr executor_;
@@ -409,6 +472,11 @@ protected:
 
   bool status_seen_;
   StatusCode status_tracking_code_ = StatusCode::NO_WARNING;
+
+  const double PUBLISH_HZ;
+  const double PUBLISH_PERIOD;
+  const double TIMEOUT_ITERATIONS;
+  rclcpp::Rate publish_loop_rate_;
 
   mutable std::mutex latest_state_mutex_;
 };  // class ServoFixture

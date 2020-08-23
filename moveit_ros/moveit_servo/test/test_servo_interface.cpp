@@ -43,59 +43,55 @@ namespace moveit_servo
 TEST_F(ServoFixture, StartStopTest)
 {
   // Setup the start/stop clients, and the command callback
+  auto log_time_start = node_->now();
   ASSERT_TRUE(setupStartClient());
-  ASSERT_TRUE(setupStatusSub());
   ASSERT_TRUE(setupJointStateSub());
+  auto log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
 
   // Wait for a joint state message to ensure fake_joint_driver is up
+  log_time_start = node_->now();
   bool got_msg = false;
   while (!got_msg)
   {
     if (getNumJointState() > 0)
       got_msg = true;
 
-    rclcpp::sleep_for(std::chrono::milliseconds(20));
+    publish_loop_rate_.sleep();
   }
   ASSERT_TRUE(got_msg);
+  log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Wait for joint state message time: " << (log_time_end - log_time_start).seconds());
 
   // Try to start Servo
-  auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-  EXPECT_TRUE(start_result.get()->success);
+  ASSERT_TRUE(start());
+  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
 
-  // With servo running we should get a status that should be NO_WARNING
-  rclcpp::sleep_for(std::chrono::milliseconds(200));
-  EXPECT_TRUE(getNumStatus() > 0);
-  EXPECT_TRUE(latest_status_ == moveit_servo::StatusCode::NO_WARNING);
-
-  // Now stop servo and wait
-  auto stop_result = client_servo_stop_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-  EXPECT_TRUE(stop_result.get()->success);
-  rclcpp::sleep_for(std::chrono::seconds(1));
-  resetNumStatus();
+  // Now stop servo
+  ASSERT_TRUE(stop());
 
   // Restart and recheck Servo
-  start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-  EXPECT_TRUE(start_result.get()->success);
-  rclcpp::sleep_for(std::chrono::milliseconds(200));
-  EXPECT_TRUE(getNumStatus() > 0);
-  EXPECT_TRUE(latest_status_ == moveit_servo::StatusCode::NO_WARNING);
+  ASSERT_TRUE(start());
+  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
 }
 
 TEST_F(ServoFixture, SendTwistStampedTest)
 {
+  auto log_time_start = node_->now();
   ASSERT_TRUE(setupStartClient());
   ASSERT_TRUE(setupCommandSub(parameters_->command_out_type));
+  auto log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
 
   // Start Servo
-  auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-  ASSERT_TRUE(start_result.get()->success);
+  ASSERT_TRUE(start());
+  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
 
   // We want to count the number of commands Servo publishes, we need timing
   auto time_start = node_->now();
 
   // Publish N messages with some time between, ensure it's less than the timeout for Servo
   size_t num_commands = 30;
-  rclcpp::Rate loop_rate(2 / parameters_->incoming_command_timeout);
   resetNumCommands();
   for (size_t i = 0; i < num_commands && rclcpp::ok(); ++i)
   {
@@ -104,7 +100,7 @@ TEST_F(ServoFixture, SendTwistStampedTest)
     msg->twist.linear.x = 0.1;
     msg->twist.angular.z = 0.5;
     pub_twist_cmd_->publish(std::move(msg));
-    loop_rate.sleep();
+    publish_loop_rate_.sleep();
   }
 
   // Capture the time and number of recieved messages
@@ -113,6 +109,7 @@ TEST_F(ServoFixture, SendTwistStampedTest)
 
   // Compare actual number recieved to expected number
   auto num_expected = (time_end - time_start).seconds() / parameters_->publish_period;
+  RCLCPP_INFO_STREAM(LOGGER, "Wait publish messages: " << (time_end - time_start).seconds());
 
   EXPECT_GT(num_recieved, 0.5 * num_expected);
   EXPECT_LT(num_recieved, 1.5 * num_expected);
@@ -120,19 +117,21 @@ TEST_F(ServoFixture, SendTwistStampedTest)
 
 TEST_F(ServoFixture, SendJointServoTest)
 {
+  auto log_time_start = node_->now();
   ASSERT_TRUE(setupStartClient());
   ASSERT_TRUE(setupCommandSub(parameters_->command_out_type));
+  auto log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
 
   // Start Servo
-  auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-  ASSERT_TRUE(start_result.get()->success);
+  ASSERT_TRUE(start());
+  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
 
   // We want to count the number of commands Servo publishes, we need timing
   auto time_start = node_->now();
 
   // Publish N messages with some time between, ensure it's less than the timeout for Servo
   size_t num_commands = 30;
-  rclcpp::Rate loop_rate(2 / parameters_->incoming_command_timeout);
   resetNumCommands();
   for (size_t i = 0; i < num_commands && rclcpp::ok(); ++i)
   {
@@ -142,7 +141,7 @@ TEST_F(ServoFixture, SendJointServoTest)
     msg->joint_names.push_back("panda_joint1");
     msg->velocities.push_back(0.1);
     pub_joint_cmd_->publish(std::move(msg));
-    loop_rate.sleep();
+    publish_loop_rate_.sleep();
   }
 
   // Capture the time and number of recieved messages
@@ -151,6 +150,8 @@ TEST_F(ServoFixture, SendJointServoTest)
 
   // Compare actual number recieved to expected number
   auto num_expected = (time_end - time_start).seconds() / parameters_->publish_period;
+  log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Wait publish messages: " << (time_end - time_start).seconds());
 
   EXPECT_GT(num_recieved, 0.5 * num_expected);
   EXPECT_LT(num_recieved, 1.5 * num_expected);
@@ -158,22 +159,23 @@ TEST_F(ServoFixture, SendJointServoTest)
 
 TEST_F(ServoFixture, StaleCommandStop)
 {
+  auto log_time_start = node_->now();
   ASSERT_TRUE(setupStartClient());
   ASSERT_TRUE(setupCommandSub(parameters_->command_out_type));
+  auto log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
 
   // Start Servo
-  auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-  ASSERT_TRUE(start_result.get()->success);
+  log_time_start = node_->now();
+  ASSERT_TRUE(start());
+  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
 
   // Setup the message to publish (only once)
+  log_time_start = node_->now();
   auto msg = std::make_unique<control_msgs::msg::JointJog>();
   msg->joint_names.push_back("panda_joint1");
   msg->header.frame_id = "panda_link3";
-  msg->velocities.push_back(0.1);
-
-  // Wait the stale limit, plus a little extra
-  const int sleep_time = 5 * 1000 * parameters_->incoming_command_timeout;
-  rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
+  msg->velocities.push_back(0.5);
 
   // Get current position
   double start_position = getLatestTrajCommand().points[0].positions[0];
@@ -181,15 +183,21 @@ TEST_F(ServoFixture, StaleCommandStop)
   // Publish once
   msg->header.stamp = node_->now();
   pub_joint_cmd_->publish(std::move(msg));
+  log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Wait for send one joint cmd: " << (log_time_end - log_time_start).seconds());
 
   // Wait the stale limit, plus a little extra
+  log_time_start = node_->now();
+  const int sleep_time = 1.5 * 1000 * parameters_->incoming_command_timeout;
   rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
+  log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Wait for stopping: " << (log_time_end - log_time_start).seconds());
 
   // Get the new current position (should be different than first)
   double middle_position = getLatestTrajCommand().points[0].positions[0];
   EXPECT_NE(start_position, middle_position);
 
-  // Wait the stale limit
+  // Wait for a bit
   rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
 
   // Get the current position (should be no change)

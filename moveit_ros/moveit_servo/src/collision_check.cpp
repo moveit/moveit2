@@ -202,7 +202,7 @@ void CollisionCheck::run()
   // publish message
   {
     auto msg = std::make_unique<std_msgs::msg::Float64>();
-    msg.get()->data = velocity_scale_;
+    msg->data = velocity_scale_;
     collision_velocity_scale_pub_->publish(std::move(msg));
   }
 }
@@ -218,7 +218,7 @@ void CollisionCheck::printCollisionPairs(collision_detection::CollisionResult::C
                                     << contact_map.begin()->first.first << ", " << contact_map.begin()->first.second);
     // Log all other contacts if in debug mode
     RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Objects in collision:");
-    for (auto contact : contact_map)
+    for (const auto& contact : contact_map)
     {
       RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "\t" << contact.first.first << ", "
                                                                                 << contact.first.second);
