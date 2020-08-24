@@ -65,7 +65,7 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
   // Active callback
   send_goal_options.goal_response_callback = [this](const auto& future) {
     RCLCPP_INFO_STREAM(LOGGER, name_ << " started execution");
-    auto goal_handle = future.get();
+    const auto& goal_handle = future.get();
     if (!goal_handle)
       RCLCPP_WARN(LOGGER, "Goal request rejected");
     else
