@@ -2,7 +2,7 @@ repositories:
   moveit2:
     type: git
     url: https://github.com/ros-planning/moveit2
-    version: master
+    version: eloquent
   moveit_msgs:
     type: git
     url: https://github.com/ros-planning/moveit_msgs
