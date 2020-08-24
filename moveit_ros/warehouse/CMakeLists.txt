@@ -11,29 +11,32 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(moveit_core REQUIRED)
+find_package(warehouse_ros REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+find_package(tf2_eigen REQUIRED)
+find_package(tf2_ros REQUIRED)
 find_package(Boost REQUIRED thread system filesystem regex date_time program_options)
+find_package(OpenSSL)
 
-find_package(catkin REQUIRED COMPONENTS
-  moveit_ros_planning
-  roscpp
-  rosconsole
-  warehouse_ros
-  tf2_eigen
-  tf2_ros
-)
-
-catkin_package(
-  LIBRARIES
-    moveit_warehouse
-  INCLUDE_DIRS
-    warehouse/include
-  CATKIN_DEPENDS
-    moveit_ros_planning
-    warehouse_ros
-    roscpp
-)
-
-include_directories(warehouse/include)
-include_directories(SYSTEM ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+include_directories(warehouse/include ${OPENSSL_INCLUDE_DIR})
 
 add_subdirectory(warehouse)
+
+ament_export_include_directories(include)
+ament_export_libraries(moveit_warehouse)
+ament_export_dependencies(rclcpp)
+ament_export_dependencies(moveit_core)
+ament_export_dependencies(warehouse_ros)
+ament_export_dependencies(moveit_ros_planning)
+ament_export_dependencies(tf2_eigen)
+ament_export_dependencies(tf2_ros)
+ament_export_dependencies(Boost)
+
+ament_package()
