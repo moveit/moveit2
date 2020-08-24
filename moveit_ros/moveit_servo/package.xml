@@ -17,8 +17,7 @@
   <author>Blake Anderson</author>
   <author email="alex@machinekoder.com">Alexander Rössler</author>
   <author email="tyler@picknik.ai">Tyler Weaver</author>
-
-  <buildtool_depend>catkin</buildtool_depend>
+  <author email="adam.pettinger@utexas.edu">Adam Pettinger</author>
 
   <depend>control_msgs</depend>
   <depend>geometry_msgs</depend>
@@ -27,15 +26,16 @@
   <depend>trajectory_msgs</depend>
   <depend>moveit_msgs</depend>
   <depend>moveit_ros_planning_interface</depend>
-  <depend>rosparam_shortcuts</depend>
 
-  <exec_depend>joy_teleop</exec_depend>
-  <exec_depend>spacenav_node</exec_depend>
+  <exec_depend>joy</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
 
-  <test_depend>rostest</test_depend>
   <test_depend>moveit_resources</test_depend>
+  <test_depend>ros_testing</test_depend>
 
   <export>
+    <build_type>ament_cmake</build_type>
   </export>
 
 </package>

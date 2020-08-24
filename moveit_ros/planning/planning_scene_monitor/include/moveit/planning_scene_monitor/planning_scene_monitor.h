@@ -50,6 +50,7 @@
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 #include <memory>
+#include <thread>
 
 namespace planning_scene_monitor
 {
@@ -463,6 +464,7 @@ protected:
   // ros::CallbackQueue queue_;
   std::shared_ptr<rclcpp::Node> pnode_;
   std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> private_executor_;
+  std::thread private_executor_thread_;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
 
