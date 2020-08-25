@@ -71,7 +71,7 @@ public:
   bool start();
   void stop();
 
-  /** \brief Returns when a joint state message has been recieved, and start() may be called */
+  /** \brief Returns when a joint state message has been received, and start() may be called */
   bool waitForInitialized(std::chrono::duration<double> wait_for = std::chrono::duration<double>(0.25));
 
   /**

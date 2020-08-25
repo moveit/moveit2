@@ -214,15 +214,15 @@ bool ServoCalcs::waitForInitialized(std::chrono::duration<double> wait_for)
     if (wait_result.kind() != rclcpp::WaitResultKind::Ready)
       return false;
 
-    sensor_msgs::msg::JointState recieved_joint_state_msg;
+    sensor_msgs::msg::JointState received_joint_state_msg;
     rclcpp::MessageInfo msg_info;
-    if (!joint_state_sub_->take(recieved_joint_state_msg, msg_info))
+    if (!joint_state_sub_->take(received_joint_state_msg, msg_info))
     {
       RCLCPP_WARN(LOGGER, "Problem receiving first joint_state message");
       return false;
     }
 
-    jointStateCB(std::make_shared<sensor_msgs::msg::JointState>(recieved_joint_state_msg));
+    jointStateCB(std::make_shared<sensor_msgs::msg::JointState>(received_joint_state_msg));
     updateJoints();
   }
   return true;
