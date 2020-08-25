@@ -76,14 +76,15 @@ public:
   ServoCalcsTestFixture();
   ~ServoCalcsTestFixture() override = default;
 
-  void setUpStateController();
-
 protected:
   rclcpp::Node::SharedPtr node_;
   std::unique_ptr<FriendServoCalcs> servo_calcs_;
-  moveit_servo::ServoParametersPtr parameters_;
-  planning_scene_monitor::PlanningSceneMonitorPtr psm_;
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
 
   sensor_msgs::msg::JointState getJointState(std::vector<double> pos, std::vector<double> vel);
 };
+
+// These are shared between each individual unit test
+std::shared_ptr<rclcpp::Node> TEST_NODE;
+std::shared_ptr<tf2_ros::Buffer> TEST_TF_BUFFER;
+std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> TEST_PSM;
+moveit_servo::ServoParametersPtr TEST_PARAMS;
