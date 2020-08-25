@@ -1188,7 +1188,8 @@ void PlanningSceneMonitor::stopStateMonitor()
     attached_collision_object_subscriber_.reset();
 
   // stop must be called with state_pending_mutex_ unlocked to avoid deadlock
-  state_update_timer_.reset();
+  if (state_update_timer_)
+    state_update_timer_->cancel();
   {
     std::unique_lock<std::mutex> lock(state_pending_mutex_);
     state_update_pending_ = false;
@@ -1292,7 +1293,8 @@ void PlanningSceneMonitor::setStateUpdateFrequency(double hz)
     // stop must be called with state_pending_mutex_ unlocked to avoid deadlock
     // ROS original: state_update_timer_.stop();
     // TODO: re-enable WallTimer stop()
-    state_update_timer_.reset();
+    if (state_update_timer_)
+      state_update_timer_->cancel();
     std::unique_lock<std::mutex> lock(state_pending_mutex_);
     dt_state_update_ = std::chrono::duration<double>(0.0);
     if (state_update_pending_)

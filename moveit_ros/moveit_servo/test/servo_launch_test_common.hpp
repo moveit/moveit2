@@ -76,7 +76,7 @@ public:
   void SetUp() override
   {
     executor_->add_node(node_);
-    executor_task_fut_ = std::async(std::launch::async, [this]() { this->executor_->spin(); });
+    executor_thread_ = std::thread([this]() { this->executor_->spin(); });
   }
 
   ServoFixture()
@@ -104,6 +104,8 @@ public:
       client_servo_stop_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
     }
     executor_->cancel();
+    if (executor_thread_.joinable())
+      executor_thread_.join();
   }
 
   // Set up for callbacks (so they aren't run for EVERY test)
@@ -434,7 +436,7 @@ protected:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Executor::SharedPtr executor_;
   moveit_servo::ServoParametersPtr parameters_;
-  std::future<void> executor_task_fut_;
+  std::thread executor_thread_;
 
   // ROS interfaces
   // Service Clients
