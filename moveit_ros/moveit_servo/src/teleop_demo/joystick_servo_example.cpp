@@ -45,6 +45,7 @@
 #include <control_msgs/msg/joint_jog.hpp>
 #include <std_srvs/srv/trigger.hpp>
 #include <moveit_msgs/msg/planning_scene.hpp>
+#include <thread>
 
 // We'll just set up parameters here
 const std::string JOY_TOPIC = "/joy";
@@ -170,7 +171,7 @@ public:
     servo_start_client_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
 
     // Load the collision scene asynchronously
-    collision_task_fut_ = std::async(std::launch::async, [this]() {
+    collision_pub_thread_ = std::thread([this]() {
       rclcpp::sleep_for(std::chrono::seconds(3));
       // Create collision object, in the way of servoing
       moveit_msgs::msg::CollisionObject collision_object;
@@ -211,6 +212,12 @@ public:
     });
   }
 
+  ~JoyToServoPub() override
+  {
+    if (collision_pub_thread_.joinable())
+      collision_pub_thread_.join();
+  }
+
   void joyCB(const sensor_msgs::msg::Joy::SharedPtr msg)
   {
     // Create the messages we might publish
@@ -244,9 +251,9 @@ private:
   rclcpp::Publisher<moveit_msgs::msg::PlanningScene>::SharedPtr collision_pub_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr servo_start_client_;
 
-  std::future<void> collision_task_fut_;
-
   std::string frame_to_publish_;
+
+  std::thread collision_pub_thread_;
 };  // class JoyToServoPub
 
 }  // namespace moveit_servo
