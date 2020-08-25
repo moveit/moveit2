@@ -93,7 +93,7 @@ if(BUILD_TESTING)
   target_link_libraries(test_low_pass_filter ${LIBRARY_NAME})
 
   # Basic unit test ServoCalcs
-  ament_add_gtest(
+  ament_add_gtest_executable(
     test_servo
     test/unit_test_servo_calcs.cpp
     test/test_parameter_struct.hpp
