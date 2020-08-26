@@ -262,7 +262,7 @@ int main(int argc, char** argv)
     printf(MOVEIT_CONSOLE_COLOR_CYAN "Starting planning scene monitors...\n" MOVEIT_CONSOLE_COLOR_RESET);
     planning_scene_monitor->startSceneMonitor();
     planning_scene_monitor->startWorldGeometryMonitor();
-    planning_scene_monitor->startStateMonitor(monitor_node);
+    planning_scene_monitor->startStateMonitor();
     printf(MOVEIT_CONSOLE_COLOR_CYAN "Planning scene monitors started.\n" MOVEIT_CONSOLE_COLOR_RESET);
 
     move_group::MoveGroupExe mge(nh, planning_scene_monitor, debug);

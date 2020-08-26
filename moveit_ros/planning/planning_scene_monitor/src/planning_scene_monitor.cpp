@@ -131,7 +131,6 @@ PlanningSceneMonitor::~PlanningSceneMonitor()
   if (private_executor_thread_.joinable())
     private_executor_thread_.join();
   private_executor_.reset();
-  delete reconfigure_impl_;
 
   current_state_monitor_.reset();
   scene_const_.reset();
@@ -220,9 +219,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
 
   // start executor on a different thread now
   private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
-  // reconfigure_impl_ = new DynamicReconfigureImpl(this);
-  //@todo: can remove DynamicReconfigureImpl now that we have ported parameters over
-  reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  
   // Set up publishing parameters
   rcl_interfaces::msg::ParameterDescriptor desc;
   desc.set__type(rclcpp::ParameterType::PARAMETER_BOOL);
@@ -1184,8 +1181,7 @@ void PlanningSceneMonitor::stopWorldGeometryMonitor()
     octomap_monitor_->stopMonitor();
 }
 
-void PlanningSceneMonitor::startStateMonitor(const rclcpp::Node::SharedPtr& listening_node,
-                                            const std::string& joint_states_topic,
+void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_topic,
                                             const std::string& attached_objects_topic)
 {
   stopStateMonitor();
@@ -1194,7 +1190,7 @@ void PlanningSceneMonitor::startStateMonitor(const rclcpp::Node::SharedPtr& list
     if (!current_state_monitor_)
     {
       current_state_monitor_.reset(
-          new CurrentStateMonitor(listening_node ? listening_node : pnode_, getRobotModel(), tf_buffer_));
+          new CurrentStateMonitor(pnode_, getRobotModel(), tf_buffer_));
     }
     current_state_monitor_->addUpdateCallback(boost::bind(&PlanningSceneMonitor::onStateUpdate, this, _1));
     current_state_monitor_->startStateMonitor(joint_states_topic);
