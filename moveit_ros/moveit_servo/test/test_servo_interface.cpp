@@ -103,16 +103,16 @@ TEST_F(ServoFixture, SendTwistStampedTest)
     publish_loop_rate_.sleep();
   }
 
-  // Capture the time and number of recieved messages
+  // Capture the time and number of received messages
   auto time_end = node_->now();
-  auto num_recieved = getNumCommands();
+  auto num_received = getNumCommands();
 
-  // Compare actual number recieved to expected number
+  // Compare actual number received to expected number
   auto num_expected = (time_end - time_start).seconds() / parameters_->publish_period;
   RCLCPP_INFO_STREAM(LOGGER, "Wait publish messages: " << (time_end - time_start).seconds());
 
-  EXPECT_GT(num_recieved, 0.5 * num_expected);
-  EXPECT_LT(num_recieved, 1.5 * num_expected);
+  EXPECT_GT(num_received, 0.5 * num_expected);
+  EXPECT_LT(num_received, 1.5 * num_expected);
 }
 
 TEST_F(ServoFixture, SendJointServoTest)
@@ -144,65 +144,35 @@ TEST_F(ServoFixture, SendJointServoTest)
     publish_loop_rate_.sleep();
   }
 
-  // Capture the time and number of recieved messages
+  // Capture the time and number of received messages
   auto time_end = node_->now();
-  auto num_recieved = getNumCommands();
+  auto num_received = getNumCommands();
 
-  // Compare actual number recieved to expected number
+  // Compare actual number received to expected number
   auto num_expected = (time_end - time_start).seconds() / parameters_->publish_period;
   log_time_end = node_->now();
   RCLCPP_INFO_STREAM(LOGGER, "Wait publish messages: " << (time_end - time_start).seconds());
 
-  EXPECT_GT(num_recieved, 0.5 * num_expected);
-  EXPECT_LT(num_recieved, 1.5 * num_expected);
-}
+  EXPECT_GT(num_received, 0.5 * num_expected);
+  EXPECT_LT(num_received, 1.5 * num_expected);
 
-TEST_F(ServoFixture, StaleCommandStop)
-{
-  auto log_time_start = node_->now();
-  ASSERT_TRUE(setupStartClient());
-  ASSERT_TRUE(setupCommandSub(parameters_->command_out_type));
-  auto log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
-
-  // Start Servo
+  // Now let's test the Servo input going stale
+  // We expect the command we were publishing above to continue for a while, then
+  // to continually receive Servo output, but with 0 velocity/delta_position
   log_time_start = node_->now();
-  ASSERT_TRUE(start());
-  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
 
-  // Setup the message to publish (only once)
-  log_time_start = node_->now();
-  auto msg = std::make_unique<control_msgs::msg::JointJog>();
-  msg->joint_names.push_back("panda_joint1");
-  msg->header.frame_id = "panda_link3";
-  msg->velocities.push_back(0.5);
-
-  // Get current position
-  double start_position = getLatestTrajCommand().points[0].positions[0];
-
-  // Publish once
-  msg->header.stamp = node_->now();
-  pub_joint_cmd_->publish(std::move(msg));
-  log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Wait for send one joint cmd: " << (log_time_end - log_time_start).seconds());
-
-  // Wait the stale limit, plus a little extra
-  log_time_start = node_->now();
+  // Allow the last command to go stale and measure the output position
   const int sleep_time = 1.5 * 1000 * parameters_->incoming_command_timeout;
   rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
-  log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Wait for stopping: " << (log_time_end - log_time_start).seconds());
+  double joint_position_first = getLatestTrajCommand().points[0].positions[0];
 
-  // Get the new current position (should be different than first)
-  double middle_position = getLatestTrajCommand().points[0].positions[0];
-  EXPECT_NE(start_position, middle_position);
-
-  // Wait for a bit
+  // Now if we sleep a bit longer and check again, it should be the same
   rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
+  double joint_position_later = getLatestTrajCommand().points[0].positions[0];
+  EXPECT_NEAR(joint_position_first, joint_position_later, 0.001);
 
-  // Get the current position (should be no change)
-  double end_position = getLatestTrajCommand().points[0].positions[0];
-  EXPECT_NEAR(middle_position, end_position, 0.001);
+  log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Wait stale command: " << (log_time_end - log_time_start).seconds());
 }
 }  // namespace moveit_servo
 

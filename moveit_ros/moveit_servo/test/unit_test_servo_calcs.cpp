@@ -74,25 +74,9 @@ FriendServoCalcs::FriendServoCalcs(const rclcpp::Node::SharedPtr& node,
 {
 }
 
-ServoCalcsTestFixture::ServoCalcsTestFixture() : node_(std::make_shared<rclcpp::Node>("servo_calcs_test"))
+ServoCalcsTestFixture::ServoCalcsTestFixture() : node_(TEST_NODE)
 {
-  // "Load" parameters from yaml as node parameters
-  std::string robot_description_string, srdf_string;
-  loadModelFile("moveit_resources_panda_description", "urdf/panda.urdf", robot_description_string);
-  loadModelFile("moveit_resources_panda_moveit_config", "config/panda.srdf", srdf_string);
-  node_->declare_parameter<std::string>("robot_description", robot_description_string);
-  node_->declare_parameter<std::string>("robot_description_semantic", srdf_string);
-
-  // Startup planning_scene_monitor
-  tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
-  psm_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, "robot_description", tf_buffer_,
-                                                                        "planning_scene_monitor");
-
-  // Get moveit parameters
-  moveit_servo::ServoParametersPtr test_params = getTestParameters();
-
-  // Set up the servo_calcs object
-  servo_calcs_ = std::make_unique<FriendServoCalcs>(node_, test_params, psm_);
+  servo_calcs_ = std::make_unique<FriendServoCalcs>(node_, TEST_PARAMS, TEST_PSM);
 }
 
 sensor_msgs::msg::JointState ServoCalcsTestFixture::getJointState(std::vector<double> pos, std::vector<double> vel)
@@ -520,7 +504,33 @@ int main(int argc, char** argv)
   ::testing::InitGoogleTest(&argc, argv);
   rclcpp::init(argc, argv);
 
+  // Set up the shared node
+  TEST_NODE = std::make_shared<rclcpp::Node>("servo_calcs_test");
+
+  // "Load" parameters from yaml as node parameters
+  std::string robot_description_string, srdf_string;
+  loadModelFile("moveit_resources_panda_description", "urdf/panda.urdf", robot_description_string);
+  loadModelFile("moveit_resources_panda_moveit_config", "config/panda.srdf", srdf_string);
+  TEST_NODE->declare_parameter<std::string>("robot_description", robot_description_string);
+  TEST_NODE->declare_parameter<std::string>("robot_description_semantic", srdf_string);
+
+  // Startup planning_scene_monitor
+  TEST_TF_BUFFER = std::make_shared<tf2_ros::Buffer>(TEST_NODE->get_clock());
+  TEST_PSM = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(TEST_NODE, "robot_description",
+                                                                            TEST_TF_BUFFER, "planning_scene_monitor");
+
+  // Get moveit parameters
+  TEST_PARAMS = getTestParameters();
+
+  // Actually run the tests
   int ret = RUN_ALL_TESTS();
+
+  // Shut down the shared stuff
+  TEST_PARAMS.reset();
+  TEST_PSM.reset();
+  TEST_TF_BUFFER.reset();
+  TEST_NODE.reset();
+
   rclcpp::shutdown();
   return ret;
 }
