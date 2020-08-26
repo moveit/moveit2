@@ -64,11 +64,11 @@ void MoveGroupMoveAction::initialize()
   execute_action_server_ = rclcpp_action::create_server<MGAction>(
       node->get_node_base_interface(), node->get_node_clock_interface(), node->get_node_logging_interface(),
       node->get_node_waitables_interface(), MOVE_ACTION,
-      [](const rclcpp_action::GoalUUID&, std::shared_ptr<const MGAction::Goal>) {
+      [](const rclcpp_action::GoalUUID& /*unused*/, std::shared_ptr<const MGAction::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [](const std::shared_ptr<MGActionGoal>&) {
+      [](const std::shared_ptr<MGActionGoal>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
