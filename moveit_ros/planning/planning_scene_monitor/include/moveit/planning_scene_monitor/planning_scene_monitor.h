@@ -488,7 +488,7 @@ protected:
   std::unique_ptr<boost::thread> publish_planning_scene_;
   double publish_planning_scene_frequency_;
   SceneUpdateType publish_update_types_;
-  SceneUpdateType new_scene_update_;
+  std::atomic<SceneUpdateType> new_scene_update_;
   boost::condition_variable_any new_scene_update_condition_;
 
   // subscribe to various sources of data
