@@ -163,7 +163,7 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
   new_args.push_back("-r");
   new_args.push_back(std::string("__node:=") + node_->get_name() + "_private");
   new_args.push_back("--");
-  pnode_ = std::make_shared<rclcpp::Node>("_", "", rclcpp::NodeOptions().arguments(new_args));
+  pnode_ = std::make_shared<rclcpp::Node>("_", node_->get_namespace(), rclcpp::NodeOptions().arguments(new_args));
   // use same callback queue as root_nh_
   // root_nh_.setCallbackQueue(&queue_);
   // nh_.setCallbackQueue(&queue_);
