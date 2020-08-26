@@ -71,12 +71,6 @@ protected:
   }
 
 protected:
-  bool urdf_ok_;
-  bool srdf_ok_;
-
-  urdf::ModelInterfaceSharedPtr urdf_model_;
-  srdf::ModelSharedPtr srdf_model_;
-
   moveit::core::RobotModelPtr robot_model_;
 
   moveit::core::TransformsPtr ftf_;
@@ -92,8 +86,6 @@ TEST_F(DistanceFieldCollisionDetectionTester, DefaultNotInCollision)
   moveit::core::RobotState robot_state(robot_model_);
   robot_state.setToDefaultValues();
   robot_state.update();
-
-  ASSERT_TRUE(urdf_ok_ && srdf_ok_);
 
   collision_detection::CollisionRequest req;
   collision_detection::CollisionResult res;
