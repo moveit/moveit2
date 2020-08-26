@@ -58,7 +58,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_sce
 
 namespace planning_scene_monitor
 {
-
 const std::string PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC = "joint_states";
 const std::string PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC = "attached_collision_object";
 const std::string PlanningSceneMonitor::DEFAULT_COLLISION_OBJECT_TOPIC = "collision_object";
@@ -219,34 +218,55 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
 
   // start executor on a different thread now
   private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
-  
+
   // Set up publishing parameters
   rcl_interfaces::msg::ParameterDescriptor desc;
   desc.set__type(rclcpp::ParameterType::PARAMETER_BOOL);
+  auto grab_or_declare_parameter_bool = [](rclcpp::Node::SharedPtr& node, const std::string& param_name,
+                                           bool default_val,
+                                           const rcl_interfaces::msg::ParameterDescriptor& desc) -> bool {
+    bool ret = default_val;
+    if (node->has_parameter(param_name))
+      ret = node->get_parameter(param_name).as_bool();
+    else
+      ret = node->declare_parameter("planning_scene_monitor.publish_planning_scene", false, desc);
+    return ret;
+  };
 
   desc.set__name("publish_planning_scene");
   desc.set__description("Set to True to publish Planning Scenes");
-  bool publish_planning_scene = node_->declare_parameter("planning_scene_monitor.publish_planning_scene", false, desc);
-  
+  bool publish_planning_scene =
+      grab_or_declare_parameter_bool(node_, "planning_scene_monitor.publish_planning_scene", false, desc);
+
   desc.set__name("publish_geometry_updates");
   desc.set__description("Set to True to publish geometry updates of the planning scene");
-  bool publish_geom_updates = node_->declare_parameter("planning_scene_monitor.publish_geometry_updates", true, desc);
+  bool publish_geom_updates =
+      grab_or_declare_parameter_bool(node_, "planning_scene_monitor.publish_geometry_updates", false, desc);
 
   desc.set__name("publish_state_updates");
   desc.set__description("Set to True to publish state updates of the planning scene");
-  bool publish_state_updates = node_->declare_parameter("planning_scene_monitor.publish_state_updates", false, desc);
+  bool publish_state_updates =
+      grab_or_declare_parameter_bool(node_, "planning_scene_monitor.publish_state_updates", false, desc);
 
   desc.set__name("publish_transforms_updates");
   desc.set__description("Set to True to publish transform updates of the planning scene");
-  bool publish_transform_updates = node_->declare_parameter("planning_scene_monitor.publish_transforms_updates", false, desc);
+  bool publish_transform_updates =
+      grab_or_declare_parameter_bool(node_, "planning_scene_monitor.publish_transforms_updates", false, desc);
 
-  desc.set__type(rclcpp::ParameterType::PARAMETER_DOUBLE);
-  desc.set__name("publish_planning_scene_hz");
-  desc.set__description("Set the maximum frequency at which planning scene updates are published");
-  double publish_planning_scene_hz = node_->declare_parameter("planning_scene_monitor.publish_planning_scene_hz", 4.0, desc);
+  double publish_planning_scene_hz = 4.0;
+  std::string publish_param_hz_param = "planning_scene_monitor.publish_planning_scene_hz";
+  if (node_->has_parameter(publish_param_hz_param))
+    publish_planning_scene_hz = node_->get_parameter(publish_param_hz_param).as_double();
+  else
+  {
+    desc.set__type(rclcpp::ParameterType::PARAMETER_DOUBLE);
+    desc.set__name("publish_planning_scene_hz");
+    desc.set__description("Set the maximum frequency at which planning scene updates are published");
+    publish_planning_scene_hz = node_->declare_parameter(publish_param_hz_param, 4.0, desc);
+  }
 
   updatePublishSettings(publish_geom_updates, publish_state_updates, publish_transform_updates, publish_planning_scene,
-    publish_planning_scene_hz);
+                        publish_planning_scene_hz);
 
   auto psm_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters) {
     auto result = rcl_interfaces::msg::SetParametersResult();
@@ -1182,15 +1202,14 @@ void PlanningSceneMonitor::stopWorldGeometryMonitor()
 }
 
 void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_topic,
-                                            const std::string& attached_objects_topic)
+                                             const std::string& attached_objects_topic)
 {
   stopStateMonitor();
   if (scene_)
   {
     if (!current_state_monitor_)
     {
-      current_state_monitor_.reset(
-          new CurrentStateMonitor(pnode_, getRobotModel(), tf_buffer_));
+      current_state_monitor_.reset(new CurrentStateMonitor(pnode_, getRobotModel(), tf_buffer_));
     }
     current_state_monitor_->addUpdateCallback(boost::bind(&PlanningSceneMonitor::onStateUpdate, this, _1));
     current_state_monitor_->startStateMonitor(joint_states_topic);

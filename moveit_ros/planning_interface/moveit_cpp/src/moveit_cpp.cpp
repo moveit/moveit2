@@ -110,8 +110,7 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opti
   {
     // Start state and scene monitors
     RCLCPP_INFO(LOGGER, "Listening to '%s' for joint states", options.joint_state_topic.c_str());
-    planning_scene_monitor_->startStateMonitor(options.joint_state_topic,
-                                               options.attached_collision_object_topic);
+    planning_scene_monitor_->startStateMonitor(options.joint_state_topic, options.attached_collision_object_topic);
     planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
                                                           options.publish_planning_scene_topic);
     planning_scene_monitor_->startSceneMonitor(options.monitored_planning_scene_topic);
