@@ -71,7 +71,7 @@ struct KinematicOptions
   /// @param pose desired pose of tip link
   /// @param result true if IK succeeded.
   bool setStateFromIK(moveit::core::RobotState& state, const std::string& group, const std::string& tip,
-                      const geometry_msgs::Pose& pose) const;
+                      const geometry_msgs::msg::Pose& pose) const;
 
   /// Copy a subset of source to this.
   /// For each bit set in fields the corresponding member is copied from
