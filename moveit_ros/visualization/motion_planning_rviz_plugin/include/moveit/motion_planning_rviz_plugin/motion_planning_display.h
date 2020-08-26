@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <rviz/display.h>
-#include <rviz/panel_dock_widget.h>
+#include <rviz_common/display.hpp>
+#include <rviz_common/panel_dock_widget.hpp>
 #include <moveit/planning_scene_rviz_plugin/planning_scene_display.h>
 #include <moveit/rviz_plugin_render_tools/trajectory_visualization.h>
 
@@ -50,9 +50,9 @@
 #include <moveit/kinematics_metrics/kinematics_metrics.h>
 #include <moveit/dynamics_solver/dynamics_solver.h>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
-#include <std_msgs/String.h>
+#include <std_msgs/msg/string.hpp>
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #endif
 
@@ -63,10 +63,16 @@ namespace Ogre
 class SceneNode;
 }
 
-namespace rviz
+namespace rviz_rendering
 {
-class Robot;
 class Shape;
+class MovableText;
+}
+
+namespace rviz_common
+{
+namespace properties
+{
 class Property;
 class StringProperty;
 class BoolProperty;
@@ -75,7 +81,16 @@ class RosTopicProperty;
 class EditableEnumProperty;
 class ColorProperty;
 class MovableText;
-}  // namespace rviz
+}  // namespace properties
+}  // namespace rviz_common
+
+namespace rviz_default_plugins
+{
+namespace robot
+{
+class Robot;
+}
+}
 
 namespace moveit_rviz_plugin
 {
@@ -88,13 +103,11 @@ public:
 
   ~MotionPlanningDisplay() override;
 
-  void load(const rviz::Config& config) override;
-  void save(rviz::Config config) const override;
+  void load(const rviz_common::Config& config) override;
+  void save(rviz_common::Config config) const override;
 
   void update(float wall_dt, float ros_dt) override;
   void reset() override;
-
-  void setName(const QString& name) override;
 
   moveit::core::RobotStateConstPtr getQueryStartState() const
   {
@@ -143,8 +156,8 @@ public:
 
   // Pick Place
   void clearPlaceLocationsDisplay();
-  void visualizePlaceLocations(const std::vector<geometry_msgs::PoseStamped>& place_poses);
-  std::vector<std::shared_ptr<rviz::Shape> > place_locations_display_;
+  void visualizePlaceLocations(const std::vector<geometry_msgs::msg::PoseStamped>& place_poses);
+  std::vector<std::shared_ptr<rviz_rendering::Shape> > place_locations_display_;
 
   std::string getCurrentPlanningGroup() const;
 
@@ -232,7 +245,7 @@ protected:
   void setQueryStateHelper(bool use_start_state, const std::string& v);
   void populateMenuHandler(std::shared_ptr<interactive_markers::MenuHandler>& mh);
 
-  void selectPlanningGroupCallback(const std_msgs::StringConstPtr& msg);
+  void selectPlanningGroupCallback(const std_msgs::msg::String::ConstSharedPtr msg);
 
   // overrides from Display
   void onInitialize() override;
@@ -245,17 +258,16 @@ protected:
 
   Ogre::SceneNode* text_display_scene_node_;  ///< displays texts
   bool text_display_for_start_;               ///< indicates whether the text display is for the start state or not
-  rviz::MovableText* text_to_display_;
+  rviz_rendering::MovableText* text_to_display_;
 
-  ros::Subscriber planning_group_sub_;
-  ros::NodeHandle private_handle_, node_handle_;
+  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr planning_group_sub_;
 
   // render the workspace box
-  std::unique_ptr<rviz::Shape> workspace_box_;
+  std::unique_ptr<rviz_rendering::Shape> workspace_box_;
 
   // the planning frame
   MotionPlanningFrame* frame_;
-  rviz::PanelDockWidget* frame_dock_;
+  rviz_common::PanelDockWidget* frame_dock_;
 
   // robot interaction
   robot_interaction::RobotInteractionPtr robot_interaction_;
@@ -287,30 +299,30 @@ protected:
   TrajectoryVisualizationPtr trajectory_visual_;
 
   // properties to show on side panel
-  rviz::Property* path_category_;
-  rviz::Property* plan_category_;
-  rviz::Property* metrics_category_;
+  rviz_common::properties::Property* path_category_;
+  rviz_common::properties::Property* plan_category_;
+  rviz_common::properties::Property* metrics_category_;
 
-  rviz::EditableEnumProperty* planning_group_property_;
-  rviz::BoolProperty* query_start_state_property_;
-  rviz::BoolProperty* query_goal_state_property_;
-  rviz::FloatProperty* query_marker_scale_property_;
-  rviz::ColorProperty* query_start_color_property_;
-  rviz::ColorProperty* query_goal_color_property_;
-  rviz::FloatProperty* query_start_alpha_property_;
-  rviz::FloatProperty* query_goal_alpha_property_;
-  rviz::ColorProperty* query_colliding_link_color_property_;
-  rviz::ColorProperty* query_outside_joint_limits_link_color_property_;
+  rviz_common::properties::EditableEnumProperty* planning_group_property_;
+  rviz_common::properties::BoolProperty* query_start_state_property_;
+  rviz_common::properties::BoolProperty* query_goal_state_property_;
+  rviz_common::properties::FloatProperty* query_marker_scale_property_;
+  rviz_common::properties::ColorProperty* query_start_color_property_;
+  rviz_common::properties::ColorProperty* query_goal_color_property_;
+  rviz_common::properties::FloatProperty* query_start_alpha_property_;
+  rviz_common::properties::FloatProperty* query_goal_alpha_property_;
+  rviz_common::properties::ColorProperty* query_colliding_link_color_property_;
+  rviz_common::properties::ColorProperty* query_outside_joint_limits_link_color_property_;
 
-  rviz::BoolProperty* compute_weight_limit_property_;
-  rviz::BoolProperty* show_manipulability_index_property_;
-  rviz::BoolProperty* show_manipulability_property_;
-  rviz::BoolProperty* show_joint_torques_property_;
-  rviz::FloatProperty* metrics_set_payload_property_;
-  rviz::FloatProperty* metrics_text_height_property_;
-  rviz::BoolProperty* show_workspace_property_;
+  rviz_common::properties::BoolProperty* compute_weight_limit_property_;
+  rviz_common::properties::BoolProperty* show_manipulability_index_property_;
+  rviz_common::properties::BoolProperty* show_manipulability_property_;
+  rviz_common::properties::BoolProperty* show_joint_torques_property_;
+  rviz_common::properties::FloatProperty* metrics_set_payload_property_;
+  rviz_common::properties::FloatProperty* metrics_text_height_property_;
+  rviz_common::properties::BoolProperty* show_workspace_property_;
 
-  rviz::Display* int_marker_display_;
+  rviz_common::Display* int_marker_display_;
 };
 
 }  // namespace moveit_rviz_plugin
