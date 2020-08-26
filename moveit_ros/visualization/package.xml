@@ -28,8 +28,7 @@
 
   <depend>geometric_shapes</depend>
   <depend>interactive_markers</depend>
-  <!-- TODO(JafarAbdi): uncomment after porting moveit_ros_robot_interaction -->
-  <!--depend>moveit_ros_robot_interaction</depend-->
+  <depend>moveit_ros_robot_interaction</depend>
   <!-- TODO(JafarAbdi): uncomment after porting moveit_ros_perception -->
   <!--depend>moveit_ros_perception</depend-->
   <depend>moveit_ros_planning_interface</depend>

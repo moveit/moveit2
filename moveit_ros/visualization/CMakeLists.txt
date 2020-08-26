@@ -31,11 +31,12 @@ find_package(octomap_msgs REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 # TODO(JafarAbdi): Uncomment when porting each package
 # find_package(moveit_ros_perception REQUIRED)
-# find_package(moveit_ros_robot_interaction REQUIRED)
+find_package(moveit_ros_robot_interaction REQUIRED)
 # find_package(moveit_ros_warehouse REQUIRED)
 find_package(object_recognition_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(rviz2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
@@ -62,19 +63,19 @@ add_definitions(-DQT_NO_KEYWORDS)
 include_directories(rviz_plugin_render_tools/include
                     robot_state_rviz_plugin/include
                     planning_scene_rviz_plugin/include
-                    #motion_planning_rviz_plugin/include
+                    motion_planning_rviz_plugin/include
                     trajectory_rviz_plugin/include
 )
 
 add_subdirectory(rviz_plugin_render_tools)
 add_subdirectory(robot_state_rviz_plugin)
 add_subdirectory(planning_scene_rviz_plugin)
-# add_subdirectory(motion_planning_rviz_plugin)
+add_subdirectory(motion_planning_rviz_plugin)
 add_subdirectory(trajectory_rviz_plugin)
 
 install(DIRECTORY icons DESTINATION share/${PROJECT_NAME})
 
-#pluginlib_export_plugin_description_file(rviz_common motion_planning_rviz_plugin_description.xml)
+pluginlib_export_plugin_description_file(rviz_common motion_planning_rviz_plugin_description.xml)
 pluginlib_export_plugin_description_file(rviz_common trajectory_rviz_plugin_description.xml)
 pluginlib_export_plugin_description_file(rviz_common planning_scene_rviz_plugin_description.xml)
 pluginlib_export_plugin_description_file(rviz_common robot_state_rviz_plugin_description.xml)
@@ -92,9 +93,11 @@ ament_export_dependencies(moveit_ros_planning_interface)
 ament_export_dependencies(moveit_msgs)
 ament_export_dependencies(moveit_core)
 ament_export_dependencies(octomap_msgs)
+ament_export_dependencies(moveit_ros_robot_interaction)
 ament_export_dependencies(object_recognition_msgs)
 ament_export_dependencies(pluginlib)
 ament_export_dependencies(rclcpp)
+ament_export_dependencies(rclcpp_action)
 ament_export_dependencies(rclpy)
 ament_export_dependencies(rviz2)
 ament_export_dependencies(tf2_eigen)
