@@ -110,9 +110,7 @@ void MoveGroupMoveAction::executeMoveCallback(std::shared_ptr<MGActionGoal> goal
   {
     if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
     {
-      //@todo: wait for preempt?
-      // move_action_server_->setPreempted(action_res, response);
-      goal->publish_feedback(fb);
+      goal->canceled(action_res);
     }
     else
     {

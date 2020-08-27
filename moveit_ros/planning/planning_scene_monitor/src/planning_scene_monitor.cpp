@@ -229,7 +229,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     if (node->has_parameter(param_name))
       ret = node->get_parameter(param_name).as_bool();
     else
-      ret = node->declare_parameter("planning_scene_monitor.publish_planning_scene", false, desc);
+      ret = node->declare_parameter(param_name, false, desc);
     return ret;
   };
 
@@ -533,7 +533,7 @@ bool PlanningSceneMonitor::requestPlanningSceneState(const std::string& service_
     throw std::runtime_error("requestPlanningSceneState() to self-provided service: " + service_name);
   }
   // use global namespace for service
-  auto client = node_->create_client<moveit_msgs::srv::GetPlanningScene>(service_name);
+  auto client = pnode_->create_client<moveit_msgs::srv::GetPlanningScene>(service_name);
   auto srv = std::make_shared<moveit_msgs::srv::GetPlanningScene::Request>();
   srv->components.components = srv->components.SCENE_SETTINGS | srv->components.ROBOT_STATE |
                                srv->components.ROBOT_STATE_ATTACHED_OBJECTS | srv->components.WORLD_OBJECT_NAMES |

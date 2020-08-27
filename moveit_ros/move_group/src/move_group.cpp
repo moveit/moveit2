@@ -36,9 +36,7 @@
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <tf2_ros/transform_listener.h>
-#include <moveit/move_group/capability_names.h>
 #include <moveit/move_group/move_group_capability.h>
-#include <moveit/move_group/move_group_context.h>
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <boost/tokenizer.hpp>
 #include <moveit/macros/console_colors.h>
