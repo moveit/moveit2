@@ -152,13 +152,18 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                            const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name)
   : monitor_name_(name)
   , node_(node)
-  , pnode_(std::make_shared<rclcpp::Node>(std::string(node_->get_name()) + "_private", node_->get_namespace()))
   , private_executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   , tf_buffer_(tf_buffer)
   , dt_state_update_(0.0)
   , shape_transform_cache_lookup_wait_time_(0, 0)
   , rm_loader_(rm_loader)
 {
+  std::vector<std::string> new_args = rclcpp::NodeOptions().arguments();
+  new_args.push_back("--ros-args");
+  new_args.push_back("-r");
+  new_args.push_back(std::string("__node:=") + node_->get_name() + "_private");
+  new_args.push_back("--");
+  pnode_ = std::make_shared<rclcpp::Node>("_", node_->get_namespace(), rclcpp::NodeOptions().arguments(new_args));
   // use same callback queue as root_nh_
   // root_nh_.setCallbackQueue(&queue_);
   // nh_.setCallbackQueue(&queue_);
