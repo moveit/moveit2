@@ -224,7 +224,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   {
     rcl_interfaces::msg::ParameterDescriptor desc;
     desc.set__description(description);
-    return node_->declare_parameter(param_name, default_val, desc);
+    return pnode_->declare_parameter(param_name, default_val, desc);
   };
 
   try
@@ -258,16 +258,16 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     bool publish_planning_scene = false, publish_geometry_updates = false, publish_state_updates = false,
          publish_transform_updates = false;
     double publish_planning_scene_hz = 4.0;
-    bool declared_params_valid = node_->get_parameter("publish_planning_scene", publish_planning_scene) &&
-                                 node_->get_parameter("publish_geometry_updates", publish_geometry_updates) &&
-                                 node_->get_parameter("publish_state_updates", publish_state_updates) &&
-                                 node_->get_parameter("publish_transforms_updates", publish_transform_updates) &&
-                                 node_->get_parameter("publish_planning_scene_hz", publish_planning_scene_hz);
+    bool declared_params_valid = pnode_->get_parameter("publish_planning_scene", publish_planning_scene) &&
+                                 pnode_->get_parameter("publish_geometry_updates", publish_geometry_updates) &&
+                                 pnode_->get_parameter("publish_state_updates", publish_state_updates) &&
+                                 pnode_->get_parameter("publish_transforms_updates", publish_transform_updates) &&
+                                 pnode_->get_parameter("publish_planning_scene_hz", publish_planning_scene_hz);
 
     if (!declared_params_valid)
     {
-      result.successful = false;
       RCLCPP_ERROR(LOGGER, "Initially declared parameters are invalid - failed to process update callback");
+      result.successful = false;
       return result;
     }
 
@@ -277,7 +277,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
       const auto& type = parameter.get_type();
 
       // Only allow already declared parameters with same value type
-      if (!node_->has_parameter(name) || node_->get_parameter(name).get_type() != type)
+      if (!pnode_->has_parameter(name) || pnode_->get_parameter(name).get_type() != type)
       {
         RCLCPP_ERROR(LOGGER, "Invalid parameter in PlanningSceneMonitor parameter callback");
         result.successful = false;
@@ -303,7 +303,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     return result;
   };
 
-  callback_handler_ = node_->add_on_set_parameters_callback(psm_parameter_set_callback);
+  callback_handler_ = pnode_->add_on_set_parameters_callback(psm_parameter_set_callback);
 }
 
 void PlanningSceneMonitor::monitorDiffs(bool flag)
