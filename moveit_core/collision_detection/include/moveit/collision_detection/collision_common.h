@@ -310,6 +310,8 @@ struct DistanceResultsData
   /// The distance between two objects. If two objects are in collision, distance <= 0.
   double distance;
 
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   /// The nearest points
   Eigen::Vector3d nearest_points[2];
 
