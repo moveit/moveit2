@@ -219,94 +219,90 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   // start executor on a different thread now
   private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
 
-  // Set up publishing parameters
-  rcl_interfaces::msg::ParameterDescriptor desc;
-  desc.set__type(rclcpp::ParameterType::PARAMETER_BOOL);
-  auto grab_or_declare_parameter_bool = [](rclcpp::Node::SharedPtr& node, const std::string& param_name,
-                                           bool default_val,
-                                           const rcl_interfaces::msg::ParameterDescriptor& desc) -> bool {
-    bool ret = default_val;
-    if (node->has_parameter(param_name))
-      ret = node->get_parameter(param_name).as_bool();
-    else
-      ret = node->declare_parameter(param_name, false, desc);
-    return ret;
+  auto declare_parameter = [this](const std::string& param_name, auto default_val,
+                                  const std::string& description) -> auto
+  {
+    rcl_interfaces::msg::ParameterDescriptor desc;
+    desc.set__description(description);
+    return node_->declare_parameter(param_name, default_val, desc);
   };
 
-  desc.set__name("publish_planning_scene");
-  desc.set__description("Set to True to publish Planning Scenes");
-  bool publish_planning_scene =
-      grab_or_declare_parameter_bool(node_, "planning_scene_monitor.publish_planning_scene", false, desc);
-
-  desc.set__name("publish_geometry_updates");
-  desc.set__description("Set to True to publish geometry updates of the planning scene");
-  bool publish_geom_updates =
-      grab_or_declare_parameter_bool(node_, "planning_scene_monitor.publish_geometry_updates", false, desc);
-
-  desc.set__name("publish_state_updates");
-  desc.set__description("Set to True to publish state updates of the planning scene");
-  bool publish_state_updates =
-      grab_or_declare_parameter_bool(node_, "planning_scene_monitor.publish_state_updates", false, desc);
-
-  desc.set__name("publish_transforms_updates");
-  desc.set__description("Set to True to publish transform updates of the planning scene");
-  bool publish_transform_updates =
-      grab_or_declare_parameter_bool(node_, "planning_scene_monitor.publish_transforms_updates", false, desc);
-
-  double publish_planning_scene_hz = 4.0;
-  std::string publish_param_hz_param = "planning_scene_monitor.publish_planning_scene_hz";
-  if (node_->has_parameter(publish_param_hz_param))
-    publish_planning_scene_hz = node_->get_parameter(publish_param_hz_param).as_double();
-  else
+  try
   {
-    desc.set__type(rclcpp::ParameterType::PARAMETER_DOUBLE);
-    desc.set__name("publish_planning_scene_hz");
-    desc.set__description("Set the maximum frequency at which planning scene updates are published");
-    publish_planning_scene_hz = node_->declare_parameter(publish_param_hz_param, 4.0, desc);
+    // Set up publishing parameters
+    bool publish_planning_scene =
+        declare_parameter("publish_planning_scene", false, "Set to True to publish Planning Scenes");
+    bool publish_geometry_updates = declare_parameter("publish_geometry_updates", false,
+                                                      "Set to True to publish geometry updates of the planning scene");
+    bool publish_state_updates =
+        declare_parameter("publish_state_updates", false, "Set to True to publish state updates of the planning scene");
+    bool publish_transform_updates = declare_parameter(
+        "publish_transforms_updates", false, "Set to True to publish transform updates of the planning scene");
+    double publish_planning_scene_hz = declare_parameter(
+        "publish_planning_scene_hz", 4.0, "Set the maximum frequency at which planning scene updates are published");
+    updatePublishSettings(publish_geometry_updates, publish_state_updates, publish_transform_updates,
+                          publish_planning_scene, publish_planning_scene_hz);
+  }
+  catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Invalid parameter type in PlanningSceneMonitor: " << e.what());
+    RCLCPP_ERROR(LOGGER, "Dynamic publishing parameters won't be available");
+    return;
   }
 
-  updatePublishSettings(publish_geom_updates, publish_state_updates, publish_transform_updates, publish_planning_scene,
-                        publish_planning_scene_hz);
-
-  auto psm_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters) {
+  auto psm_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters) -> auto
+  {
     auto result = rcl_interfaces::msg::SetParametersResult();
     result.successful = true;
+
     bool publish_planning_scene = false, publish_geometry_updates = false, publish_state_updates = false,
          publish_transform_updates = false;
     double publish_planning_scene_hz = 4.0;
+    bool declared_params_valid = node_->get_parameter("publish_planning_scene", publish_planning_scene) &&
+                                 node_->get_parameter("publish_geometry_updates", publish_geometry_updates) &&
+                                 node_->get_parameter("publish_state_updates", publish_state_updates) &&
+                                 node_->get_parameter("publish_transforms_updates", publish_transform_updates) &&
+                                 node_->get_parameter("publish_planning_scene_hz", publish_planning_scene_hz);
+
+    if (!declared_params_valid)
+    {
+      result.successful = false;
+      RCLCPP_ERROR(LOGGER, "Initially declared parameters are invalid - failed to process update callback");
+      return result;
+    }
+
     for (const auto& parameter : parameters)
     {
-      rclcpp::ParameterType parameter_type = parameter.get_type();
-      if (parameter_type == rclcpp::ParameterType::PARAMETER_BOOL)
+      const auto& name = parameter.get_name();
+      const auto& type = parameter.get_type();
+
+      // Only allow already declared parameters with same value type
+      if (!node_->has_parameter(name) || node_->get_parameter(name).get_type() != type)
       {
-        const std::string& name = parameter.get_name();
-        if (name == "planning_scene_monitor.publish_planning_scene")
-          publish_planning_scene = parameter.as_bool();
-        else if (name == "planning_scene_monitor.publish_geometry_updates")
-          publish_geometry_updates = parameter.as_bool();
-        else if (name == "planning_scene_monitor.publish_state_updates")
-          publish_state_updates = parameter.as_bool();
-        else if (name == "planning_scene_monitor.publish_transforms_updates")
-          publish_transform_updates = parameter.as_bool();
-        else
-          result.successful = false;
-      }
-      else if (parameter_type == rclcpp::ParameterType::PARAMETER_DOUBLE)
-      {
-        const std::string& name = parameter.get_name();
-        if (name == "planning_scene_monitor.publish_planning_scene_hz")
-          publish_planning_scene_hz = parameter.as_double();
-        else
-          result.successful = false;
-      }
-      else
+        RCLCPP_ERROR(LOGGER, "Invalid parameter in PlanningSceneMonitor parameter callback");
         result.successful = false;
+        return result;
+      }
+
+      // Update parameter values
+      if (name == "planning_scene_monitor.publish_planning_scene")
+        publish_planning_scene = parameter.as_bool();
+      else if (name == "planning_scene_monitor.publish_geometry_updates")
+        publish_geometry_updates = parameter.as_bool();
+      else if (name == "planning_scene_monitor.publish_state_updates")
+        publish_state_updates = parameter.as_bool();
+      else if (name == "planning_scene_monitor.publish_transforms_updates")
+        publish_transform_updates = parameter.as_bool();
+      else if (name == "planning_scene_monitor.publish_planning_scene_hz")
+        publish_planning_scene_hz = parameter.as_double();
     }
+
     if (result.successful)
       updatePublishSettings(publish_geometry_updates, publish_state_updates, publish_transform_updates,
                             publish_planning_scene, publish_planning_scene_hz);
     return result;
   };
+
   callback_handler_ = node_->add_on_set_parameters_callback(psm_parameter_set_callback);
 }
 
@@ -604,8 +600,8 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
   if (publish_planning_scene)
   {
-    this->setPlanningScenePublishingFrequency(publish_planning_scene_hz);
-    this->startPublishingPlanningScene(event);
+    setPlanningScenePublishingFrequency(publish_planning_scene_hz);
+    startPublishingPlanningScene(event);
   }
   else
     stopPublishingPlanningScene();
