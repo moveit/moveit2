@@ -113,7 +113,7 @@ public:
   {
     // Start client
     client_servo_start_ = node_->create_client<std_srvs::srv::Trigger>("/start_servo");
-    while (!client_servo_start_->wait_for_service(1s))
+    while (!client_servo_start_->service_is_ready())
     {
       if (!rclcpp::ok())
       {
@@ -121,11 +121,12 @@ public:
         return false;
       }
       RCLCPP_INFO(LOGGER, "client_servo_start_ service not available, waiting again...");
+      rclcpp::sleep_for(500ms);
     }
 
     // If we setup the start client, also setup the stop client...
     client_servo_stop_ = node_->create_client<std_srvs::srv::Trigger>("/stop_servo");
-    while (!client_servo_stop_->wait_for_service(1s))
+    while (!client_servo_stop_->service_is_ready())
     {
       if (!rclcpp::ok())
       {
@@ -133,6 +134,7 @@ public:
         return false;
       }
       RCLCPP_INFO(LOGGER, "client_servo_stop_ service not available, waiting again...");
+      rclcpp::sleep_for(500ms);
     }
 
     // Status sub (we need this to check that we've started / stopped)
@@ -144,7 +146,7 @@ public:
   bool setupPauseClient()
   {
     client_servo_pause_ = node_->create_client<std_srvs::srv::Trigger>("/pause_servo");
-    while (!client_servo_pause_->wait_for_service(1s))
+    while (!client_servo_pause_->service_is_ready())
     {
       if (!rclcpp::ok())
       {
@@ -152,6 +154,7 @@ public:
         return false;
       }
       RCLCPP_INFO(LOGGER, "client_servo_pause_ service not available, waiting again...");
+      rclcpp::sleep_for(500ms);
     }
     return true;
   }
@@ -159,7 +162,7 @@ public:
   bool setupUnpauseClient()
   {
     client_servo_unpause_ = node_->create_client<std_srvs::srv::Trigger>("/unpause_servo");
-    while (!client_servo_unpause_->wait_for_service(1s))
+    while (!client_servo_unpause_->service_is_ready())
     {
       if (!rclcpp::ok())
       {
@@ -167,6 +170,7 @@ public:
         return false;
       }
       RCLCPP_INFO(LOGGER, "client_servo_unpause_ service not available, waiting again...");
+      rclcpp::sleep_for(500ms);
     }
     return true;
   }
@@ -175,7 +179,7 @@ public:
   {
     client_change_control_dims_ =
         node_->create_client<moveit_msgs::srv::ChangeControlDimensions>("/servo_server/change_control_dimensions");
-    while (!client_change_control_dims_->wait_for_service(1s))
+    while (!client_change_control_dims_->service_is_ready())
     {
       if (!rclcpp::ok())
       {
@@ -183,6 +187,7 @@ public:
         return false;
       }
       RCLCPP_INFO(LOGGER, "client_change_control_dims_ service not available, waiting again...");
+      rclcpp::sleep_for(500ms);
     }
     return true;
   }
@@ -191,7 +196,7 @@ public:
   {
     client_change_drift_dims_ =
         node_->create_client<moveit_msgs::srv::ChangeDriftDimensions>("/servo_server/change_drift_dimensions");
-    while (!client_change_drift_dims_->wait_for_service(1s))
+    while (!client_change_drift_dims_->service_is_ready())
     {
       if (!rclcpp::ok())
       {
@@ -199,6 +204,7 @@ public:
         return false;
       }
       RCLCPP_INFO(LOGGER, "client_change_drift_dims_ service not available, waiting again...");
+      rclcpp::sleep_for(500ms);
     }
     return true;
   }
