@@ -243,6 +243,11 @@ public:
   /// Enable or disable waiting for trajectory completion
   void setWaitForTrajectoryCompletion(bool flag);
 
+  rclcpp::Node::SharedPtr getControllerManagerNode()
+  {
+    return controller_mgr_node_;
+  }
+
 private:
   struct ControllerInformation
   {
@@ -309,6 +314,7 @@ private:
   const std::string name_ = "trajectory_execution_manager";
 
   rclcpp::Node::SharedPtr node_;
+  rclcpp::Node::SharedPtr controller_mgr_node_;
   moveit::core::RobotModelConstPtr robot_model_;
   planning_scene_monitor::CurrentStateMonitorPtr csm_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr event_topic_subscriber_;
@@ -348,9 +354,6 @@ private:
 
   bool verbose_;
 
-  // class DynamicReconfigureImpl;
-  // DynamicReconfigureImpl* reconfigure_impl_;
-
   bool execution_duration_monitoring_;
   // 'global' values
   double allowed_execution_duration_scaling_;
@@ -363,5 +366,7 @@ private:
   double allowed_start_tolerance_;  // joint tolerance for validate(): radians for revolute joints
   double execution_velocity_scaling_;
   bool wait_for_trajectory_completion_;
+
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr callback_handler_;
 };
 }  // namespace trajectory_execution_manager

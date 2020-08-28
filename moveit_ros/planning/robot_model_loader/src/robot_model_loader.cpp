@@ -126,7 +126,7 @@ void RobotModelLoader::configure(const Options& opt)
       for (std::size_t joint_id = 0; joint_id < joint_limit.size(); ++joint_id)
       {
         std::string prefix =
-            rdf_loader_->getRobotDescription() + "_planning/joint_limits/" + joint_limit[joint_id].joint_name + "/";
+            rdf_loader_->getRobotDescription() + "_planning.joint_limits." + joint_limit[joint_id].joint_name + ".";
 
         std::string param_name;
         try

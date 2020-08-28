@@ -90,7 +90,7 @@ plan_execution::PlanWithSensing::PlanWithSensing(
 
   // load the sensor manager plugin, if needed
   auto sensor_manager_params = std::make_shared<rclcpp::SyncParametersClient>(node_);
-  if (sensor_manager_params->has_parameter("moveit_sensor_manager"))
+  if (sensor_manager_params && sensor_manager_params->has_parameter("moveit_sensor_manager"))
   {
     try
     {

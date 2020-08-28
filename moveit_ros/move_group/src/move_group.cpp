@@ -36,8 +36,8 @@
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <tf2_ros/transform_listener.h>
-#include <moveit/move_group/capability_names.h>
 #include <moveit/move_group/move_group_capability.h>
+#include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <boost/tokenizer.hpp>
 #include <moveit/macros/console_colors.h>
 #include <moveit/move_group/node_name.h>
@@ -46,6 +46,8 @@
 
 static const std::string ROBOT_DESCRIPTION =
     "robot_description";  // name of the robot description (a param name, so it can be changed externally)
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("move_group.move_group");
 
 namespace move_group
 {
@@ -56,7 +58,8 @@ static const char* DEFAULT_CAPABILITIES[] = {
    "move_group/MoveGroupKinematicsService",
    "move_group/MoveGroupExecuteTrajectoryAction",
    "move_group/MoveGroupMoveAction",
-   "move_group/MoveGroupPickPlaceAction",
+    // TODO (ddengster) : wait for port for moveit_ros_manipulation package
+   //"move_group/MoveGroupPickPlaceAction",
    "move_group/MoveGroupPlanService",
    "move_group/MoveGroupQueryPlannersService",
    "move_group/MoveGroupStateValidationService",
@@ -69,13 +72,14 @@ static const char* DEFAULT_CAPABILITIES[] = {
 class MoveGroupExe
 {
 public:
-  MoveGroupExe(const planning_scene_monitor::PlanningSceneMonitorPtr& psm, bool debug) : node_handle_("~")
+  MoveGroupExe(const rclcpp::Node::SharedPtr& n, planning_scene_monitor::PlanningSceneMonitorPtr& psm, bool debug)
+    : node_(n)
   {
     // if the user wants to be able to disable execution of paths, they can just set this ROS param to false
     bool allow_trajectory_execution;
-    node_handle_.param("allow_trajectory_execution", allow_trajectory_execution, true);
+    node_->get_parameter_or("allow_trajectory_execution", allow_trajectory_execution, true);
 
-    context_.reset(new MoveGroupContext(psm, allow_trajectory_execution, debug));
+    context_.reset(new MoveGroupContext(node_, psm, allow_trajectory_execution, debug));
 
     // start the capabilities
     configureCapabilities();
@@ -103,7 +107,12 @@ public:
       }
     }
     else
-      ROS_ERROR("No MoveGroup context created. Nothing will work.");
+      RCLCPP_ERROR(LOGGER, "No MoveGroup context created. Nothing will work.");
+  }
+
+  MoveGroupContextPtr getContext()
+  {
+    return context_;
   }
 
 private:
@@ -116,7 +125,7 @@ private:
     }
     catch (pluginlib::PluginlibException& ex)
     {
-      ROS_FATAL_STREAM("Exception while creating plugin loader for move_group capabilities: " << ex.what());
+      RCLCPP_FATAL_STREAM(LOGGER, "Exception while creating plugin loader for move_group capabilities: " << ex.what());
       return;
     }
 
@@ -128,7 +137,7 @@ private:
 
     // add capabilities listed in ROS parameter
     std::string capability_plugins;
-    if (node_handle_.getParam("capabilities", capability_plugins))
+    if (node_->get_parameter("capabilities", capability_plugins))
     {
       boost::char_separator<char> sep(" ");
       boost::tokenizer<boost::char_separator<char> > tok(capability_plugins, sep);
@@ -136,7 +145,7 @@ private:
     }
 
     // drop capabilities that have been explicitly disabled
-    if (node_handle_.getParam("disable_capabilities", capability_plugins))
+    if (node_->get_parameter("disable_capabilities", capability_plugins))
     {
       boost::char_separator<char> sep(" ");
       boost::tokenizer<boost::char_separator<char> > tok(capability_plugins, sep);
@@ -157,7 +166,8 @@ private:
       }
       catch (pluginlib::PluginlibException& ex)
       {
-        ROS_ERROR_STREAM("Exception while loading move_group capability '" << capability << "': " << ex.what());
+        RCLCPP_ERROR_STREAM(LOGGER, "Exception while loading move_group capability '" << capability
+                                                                                      << "': " << ex.what());
       }
     }
 
@@ -169,29 +179,65 @@ private:
     for (const MoveGroupCapabilityPtr& cap : capabilities_)
       ss << "*     - " << cap->getName() << std::endl;
     ss << "********************************************************" << std::endl;
-    ROS_INFO_STREAM(ss.str());
+    RCLCPP_INFO(LOGGER, "%s", ss.str().c_str());
   }
 
-  ros::NodeHandle node_handle_;
+  rclcpp::Node::SharedPtr node_;
   MoveGroupContextPtr context_;
   std::shared_ptr<pluginlib::ClassLoader<MoveGroupCapability> > capability_plugin_loader_;
   std::vector<MoveGroupCapabilityPtr> capabilities_;
 };
 }  // namespace move_group
 
+template <typename T>
+T getParameterFromRemoteNode(const rclcpp::Node::SharedPtr& node, const std::string& node_name,
+                             const std::string& param_name)
+{
+  using namespace std::chrono_literals;
+  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(node, node_name);
+  while (!parameters_client->wait_for_service(0.5s))
+  {
+    if (!rclcpp::ok())
+    {
+      RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
+      return T();
+    }
+    RCLCPP_INFO(LOGGER, "service not available, waiting again...");
+  }
+
+  T param_value = parameters_client->get_parameter<T>(param_name, T());
+  return param_value;
+}
+
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, move_group::NODE_NAME);
+  rclcpp::init(argc, argv);
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-  ros::NodeHandle nh;
+  rclcpp::NodeOptions opt;
+  opt.allow_undeclared_parameters(true);
+  opt.automatically_declare_parameters_from_overrides(true);
+  rclcpp::Node::SharedPtr nh = rclcpp::Node::make_shared("move_group", opt);
 
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(ros::Duration(10.0));
-  std::shared_ptr<tf2_ros::TransformListener> tfl = std::make_shared<tf2_ros::TransformListener>(*tf_buffer, nh);
+  // fetch a bunch of parameters
+  {
+    std::string robot_desc_param = "robot_description";
+    std::string str = getParameterFromRemoteNode<std::string>(nh, "robot_state_publisher", robot_desc_param);
+    nh->declare_parameter(robot_desc_param);
+    nh->set_parameter(rclcpp::Parameter(robot_desc_param, str));
+
+    std::string semantic_file = nh->get_parameter("robot_description_semantic").as_string();
+    std::ifstream file(semantic_file);
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    nh->set_parameter(rclcpp::Parameter("robot_description_semantic", buffer.str()));
+  }
+
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer =
+      std::make_shared<tf2_ros::Buffer>(nh->get_clock(), tf2::durationFromSec(10.0));
+  std::shared_ptr<tf2_ros::TransformListener> tfl = std::make_shared<tf2_ros::TransformListener>(*tf_buffer);
 
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor(
-      new planning_scene_monitor::PlanningSceneMonitor(ROBOT_DESCRIPTION, tf_buffer));
+      new planning_scene_monitor::PlanningSceneMonitor(nh, ROBOT_DESCRIPTION, tf_buffer));
 
   if (planning_scene_monitor->getPlanningScene())
   {
@@ -202,10 +248,14 @@ int main(int argc, char** argv)
         debug = true;
         break;
       }
+    debug = true;
     if (debug)
-      ROS_INFO("MoveGroup debug mode is ON");
+      RCLCPP_INFO(LOGGER, "MoveGroup debug mode is ON");
     else
-      ROS_INFO("MoveGroup debug mode is OFF");
+      RCLCPP_INFO(LOGGER, "MoveGroup debug mode is OFF");
+
+    rclcpp::executors::MultiThreadedExecutor executor;
+    rclcpp::Node::SharedPtr monitor_node = rclcpp::Node::make_shared("monitor_node", opt);
 
     printf(MOVEIT_CONSOLE_COLOR_CYAN "Starting planning scene monitors...\n" MOVEIT_CONSOLE_COLOR_RESET);
     planning_scene_monitor->startSceneMonitor();
@@ -213,16 +263,21 @@ int main(int argc, char** argv)
     planning_scene_monitor->startStateMonitor();
     printf(MOVEIT_CONSOLE_COLOR_CYAN "Planning scene monitors started.\n" MOVEIT_CONSOLE_COLOR_RESET);
 
-    move_group::MoveGroupExe mge(planning_scene_monitor, debug);
+    move_group::MoveGroupExe mge(nh, planning_scene_monitor, debug);
 
     planning_scene_monitor->publishDebugInformation(debug);
 
     mge.status();
+    auto controller_mgr_node = mge.getContext()->trajectory_execution_manager_->getControllerManagerNode();
+    executor.add_node(controller_mgr_node);
+    executor.add_node(monitor_node);
+    executor.add_node(nh);
+    executor.spin();
 
-    ros::waitForShutdown();
+    rclcpp::shutdown();
   }
   else
-    ROS_ERROR("Planning scene not configured");
+    RCLCPP_ERROR(LOGGER, "Planning scene not configured");
 
   return 0;
 }

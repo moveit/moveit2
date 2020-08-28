@@ -50,5 +50,6 @@ void MoveGroupGetPlanningSceneService::initialize()
 
 }  // namespace move_group
 
-#include <class_loader/class_loader.hpp>
-CLASS_LOADER_REGISTER_CLASS(move_group::MoveGroupGetPlanningSceneService, move_group::MoveGroupCapability)
+#include <pluginlib/class_list_macros.hpp>
+
+PLUGINLIB_EXPORT_CLASS(move_group::MoveGroupGetPlanningSceneService, move_group::MoveGroupCapability)

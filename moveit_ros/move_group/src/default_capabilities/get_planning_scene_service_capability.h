@@ -37,6 +37,7 @@
 #pragma once
 
 #include <moveit/move_group/move_group_capability.h>
+#include <moveit_msgs/srv/get_planning_scene.hpp>
 
 namespace move_group
 {

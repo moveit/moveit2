@@ -36,6 +36,7 @@
 
 #pragma once
 
+#include <rclcpp/rclcpp.hpp>
 #include <moveit/macros/class_forward.h>
 
 namespace planning_scene_monitor
@@ -65,12 +66,14 @@ MOVEIT_STRUCT_FORWARD(MoveGroupContext)
 
 struct MoveGroupContext
 {
-  MoveGroupContext(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+  MoveGroupContext(const rclcpp::Node::SharedPtr& node,
+                   const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                    bool allow_trajectory_execution = false, bool debug = false);
   ~MoveGroupContext();
 
   bool status() const;
 
+  rclcpp::Node::SharedPtr node_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   trajectory_execution_manager::TrajectoryExecutionManagerPtr trajectory_execution_manager_;
   planning_pipeline::PlanningPipelinePtr planning_pipeline_;

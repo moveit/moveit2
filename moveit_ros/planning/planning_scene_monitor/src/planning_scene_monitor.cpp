@@ -40,9 +40,6 @@
 #include <moveit/exceptions/exceptions.h>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
 
-// TODO: Re-enable dynamic_reconfigure.
-// #include <dynamic_reconfigure/server.h>
-// #include <moveit_ros_planning/PlanningSceneMonitorDynamicReconfigureConfig.h>
 #include <tf2/exceptions.h>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_eigen/tf2_eigen.h>
@@ -61,61 +58,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_sce
 
 namespace planning_scene_monitor
 {
-// This namespace is used for the dynamic_reconfigure
-// using namespace moveit_ros_planning;
-
-// class PlanningSceneMonitor::DynamicReconfigureImpl
-// {
-// public:
-//   DynamicReconfigureImpl(PlanningSceneMonitor* owner)
-//     : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle(decideNamespace(owner->getName())))*/
-//   {
-//     // TODO (anasarrak): re-add when starting with the parameters for ros2
-//     // dynamic_reconfigure_server_.setCallback(
-//     //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
-//   }
-//
-// private:
-//   // make sure we do not advertise the same service multiple times, in case we use multiple PlanningSceneMonitor
-//   // instances in a process
-//   // TODO (anasarrak): Update advertise for ros2
-//   // static std::string decideNamespace(const std::string& name)
-//   // {
-//   //   std::string ns = "~/" + name;
-//   //   std::replace(ns.begin(), ns.end(), ' ', '_');
-//   //   std::transform(ns.begin(), ns.end(), ns.begin(), ::tolower);
-//   //   if (ros::service::exists(ns + "/set_parameters", false))
-//   //   {
-//   //     unsigned int c = 1;
-//   //     while (ros::service::exists(ns + boost::lexical_cast<std::string>(c) + "/set_parameters", false))
-//   //       c++;
-//   //     ns += boost::lexical_cast<std::string>(c);
-//   //   }
-//   //   return ns;
-//   // }
-//   // TODO(anasarrak): uncomment this once the config for ROS2 is generated
-//   // void dynamicReconfigureCallback(PlanningSceneMonitorDynamicReconfigureConfig& config, uint32_t level)
-//   // {
-//   //   PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
-//   //   if (config.publish_geometry_updates)
-//   //     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_GEOMETRY);
-//   //   if (config.publish_state_updates)
-//   //     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_STATE);
-//   //   if (config.publish_transforms_updates)
-//   //     event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
-//   //   if (config.publish_planning_scene)
-//   //   {
-//   //     owner_->setPlanningScenePublishingFrequency(config.publish_planning_scene_hz);
-//   //     owner_->startPublishingPlanningScene(event);
-//   //   }
-//   //   else
-//   //     owner_->stopPublishingPlanningScene();
-//   // }
-//
-//   // PlanningSceneMonitor* owner_;
-//   // dynamic_reconfigure::Server<PlanningSceneMonitorDynamicReconfigureConfig> dynamic_reconfigure_server_;
-// };
-
 const std::string PlanningSceneMonitor::DEFAULT_JOINT_STATES_TOPIC = "joint_states";
 const std::string PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC = "attached_collision_object";
 const std::string PlanningSceneMonitor::DEFAULT_COLLISION_OBJECT_TOPIC = "collision_object";
@@ -188,7 +130,7 @@ PlanningSceneMonitor::~PlanningSceneMonitor()
   if (private_executor_thread_.joinable())
     private_executor_thread_.join();
   private_executor_.reset();
-  // delete reconfigure_impl_;
+
   current_state_monitor_.reset();
   scene_const_.reset();
   scene_.reset();
@@ -262,7 +204,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   double temp_wait_time = 0.05;
 
   if (!robot_description_.empty())
-    node_->get_parameter_or(robot_description_ + "_planning/shape_transform_cache_lookup_wait_time", temp_wait_time,
+    node_->get_parameter_or(robot_description_ + "_planning.shape_transform_cache_lookup_wait_time", temp_wait_time,
                             temp_wait_time);
 
   shape_transform_cache_lookup_wait_time_ = rclcpp::Duration((int64_t)temp_wait_time * 1.0e+9);
@@ -276,7 +218,92 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
 
   // start executor on a different thread now
   private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
-  // reconfigure_impl_ = new DynamicReconfigureImpl(this);
+
+  auto declare_parameter = [this](const std::string& param_name, auto default_val,
+                                  const std::string& description) -> auto
+  {
+    rcl_interfaces::msg::ParameterDescriptor desc;
+    desc.set__description(description);
+    return node_->declare_parameter(param_name, default_val, desc);
+  };
+
+  try
+  {
+    // Set up publishing parameters
+    bool publish_planning_scene =
+        declare_parameter("publish_planning_scene", false, "Set to True to publish Planning Scenes");
+    bool publish_geometry_updates = declare_parameter("publish_geometry_updates", false,
+                                                      "Set to True to publish geometry updates of the planning scene");
+    bool publish_state_updates =
+        declare_parameter("publish_state_updates", false, "Set to True to publish state updates of the planning scene");
+    bool publish_transform_updates = declare_parameter(
+        "publish_transforms_updates", false, "Set to True to publish transform updates of the planning scene");
+    double publish_planning_scene_hz = declare_parameter(
+        "publish_planning_scene_hz", 4.0, "Set the maximum frequency at which planning scene updates are published");
+    updatePublishSettings(publish_geometry_updates, publish_state_updates, publish_transform_updates,
+                          publish_planning_scene, publish_planning_scene_hz);
+  }
+  catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Invalid parameter type in PlanningSceneMonitor: " << e.what());
+    RCLCPP_ERROR(LOGGER, "Dynamic publishing parameters won't be available");
+    return;
+  }
+
+  auto psm_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters) -> auto
+  {
+    auto result = rcl_interfaces::msg::SetParametersResult();
+    result.successful = true;
+
+    bool publish_planning_scene = false, publish_geometry_updates = false, publish_state_updates = false,
+         publish_transform_updates = false;
+    double publish_planning_scene_hz = 4.0;
+    bool declared_params_valid = node_->get_parameter("publish_planning_scene", publish_planning_scene) &&
+                                 node_->get_parameter("publish_geometry_updates", publish_geometry_updates) &&
+                                 node_->get_parameter("publish_state_updates", publish_state_updates) &&
+                                 node_->get_parameter("publish_transforms_updates", publish_transform_updates) &&
+                                 node_->get_parameter("publish_planning_scene_hz", publish_planning_scene_hz);
+
+    if (!declared_params_valid)
+    {
+      result.successful = false;
+      RCLCPP_ERROR(LOGGER, "Initially declared parameters are invalid - failed to process update callback");
+      return result;
+    }
+
+    for (const auto& parameter : parameters)
+    {
+      const auto& name = parameter.get_name();
+      const auto& type = parameter.get_type();
+
+      // Only allow already declared parameters with same value type
+      if (!node_->has_parameter(name) || node_->get_parameter(name).get_type() != type)
+      {
+        RCLCPP_ERROR(LOGGER, "Invalid parameter in PlanningSceneMonitor parameter callback");
+        result.successful = false;
+        return result;
+      }
+
+      // Update parameter values
+      if (name == "planning_scene_monitor.publish_planning_scene")
+        publish_planning_scene = parameter.as_bool();
+      else if (name == "planning_scene_monitor.publish_geometry_updates")
+        publish_geometry_updates = parameter.as_bool();
+      else if (name == "planning_scene_monitor.publish_state_updates")
+        publish_state_updates = parameter.as_bool();
+      else if (name == "planning_scene_monitor.publish_transforms_updates")
+        publish_transform_updates = parameter.as_bool();
+      else if (name == "planning_scene_monitor.publish_planning_scene_hz")
+        publish_planning_scene_hz = parameter.as_double();
+    }
+
+    if (result.successful)
+      updatePublishSettings(publish_geometry_updates, publish_state_updates, publish_transform_updates,
+                            publish_planning_scene, publish_planning_scene_hz);
+    return result;
+  };
+
+  callback_handler_ = node_->add_on_set_parameters_callback(psm_parameter_set_callback);
 }
 
 void PlanningSceneMonitor::monitorDiffs(bool flag)
@@ -542,7 +569,7 @@ bool PlanningSceneMonitor::requestPlanningSceneState(const std::string& service_
 void PlanningSceneMonitor::providePlanningSceneService(const std::string& service_name)
 {
   // Load the service
-  get_scene_service_ = pnode_->create_service<moveit_msgs::srv::GetPlanningScene>(
+  get_scene_service_ = node_->create_service<moveit_msgs::srv::GetPlanningScene>(
       service_name, std::bind(&PlanningSceneMonitor::getPlanningSceneServiceCallback, this, std::placeholders::_1,
                               std::placeholders::_2));
 }
@@ -560,7 +587,27 @@ void PlanningSceneMonitor::getPlanningSceneServiceCallback(moveit_msgs::srv::Get
   scene_->getPlanningSceneMsg(res->scene, req->components.components ? req->components : all_components);
 }
 
-void PlanningSceneMonitor::newPlanningSceneCallback(const moveit_msgs::msg::PlanningScene::SharedPtr scene)
+void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool publish_state_updates,
+                                                 bool publish_transform_updates, bool publish_planning_scene,
+                                                 double publish_planning_scene_hz)
+{
+  PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
+  if (publish_geom_updates)
+    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_GEOMETRY);
+  if (publish_state_updates)
+    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_STATE);
+  if (publish_transform_updates)
+    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
+  if (publish_planning_scene)
+  {
+    setPlanningScenePublishingFrequency(publish_planning_scene_hz);
+    startPublishingPlanningScene(event);
+  }
+  else
+    stopPublishingPlanningScene();
+}
+
+void PlanningSceneMonitor::newPlanningSceneCallback(moveit_msgs::msg::PlanningScene::SharedPtr scene)
 {
   newPlanningSceneMessage(*scene);
 }
@@ -658,8 +705,7 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
   return result;
 }
 
-void PlanningSceneMonitor::newPlanningSceneWorldCallback(
-    const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr world)
+void PlanningSceneMonitor::newPlanningSceneWorldCallback(moveit_msgs::msg::PlanningSceneWorld::SharedPtr world)
 {
   if (scene_)
   {
@@ -683,7 +729,7 @@ void PlanningSceneMonitor::newPlanningSceneWorldCallback(
   }
 }
 
-void PlanningSceneMonitor::collisionObjectCallback(const moveit_msgs::msg::CollisionObject::ConstSharedPtr obj)
+void PlanningSceneMonitor::collisionObjectCallback(moveit_msgs::msg::CollisionObject::SharedPtr obj)
 {
   if (!scene_)
     return;
@@ -698,7 +744,7 @@ void PlanningSceneMonitor::collisionObjectCallback(const moveit_msgs::msg::Colli
   triggerSceneUpdateEvent(UPDATE_GEOMETRY);
 }
 
-void PlanningSceneMonitor::attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr obj)
+void PlanningSceneMonitor::attachObjectCallback(moveit_msgs::msg::AttachedCollisionObject::SharedPtr obj)
 {
   if (scene_)
   {
@@ -1020,7 +1066,7 @@ void PlanningSceneMonitor::startSceneMonitor(const std::string& scene_topic)
   // listen for planning scene updates; these messages include transforms, so no need for filters
   if (!scene_topic.empty())
   {
-    planning_scene_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::PlanningScene>(
+    planning_scene_subscriber_ = node_->create_subscription<moveit_msgs::msg::PlanningScene>(
         scene_topic, 100, std::bind(&PlanningSceneMonitor::newPlanningSceneCallback, this, std::placeholders::_1));
     RCLCPP_INFO(LOGGER, "Listening to '%s'", planning_scene_subscriber_->get_topic_name());
   }
@@ -1158,7 +1204,9 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
   if (scene_)
   {
     if (!current_state_monitor_)
+    {
       current_state_monitor_.reset(new CurrentStateMonitor(pnode_, getRobotModel(), tf_buffer_));
+    }
     current_state_monitor_->addUpdateCallback(boost::bind(&PlanningSceneMonitor::onStateUpdate, this, _1));
     current_state_monitor_->startStateMonitor(joint_states_topic);
 
@@ -1422,7 +1470,7 @@ void PlanningSceneMonitor::configureCollisionMatrix(const planning_scene::Planni
   // read overriding values from the param server
 
   // first we do default collision operations
-  if (!node_->has_parameter(robot_description_ + "_planning/default_collision_operations"))
+  if (!node_->has_parameter(robot_description_ + "_planning.default_collision_operations"))
     RCLCPP_DEBUG(LOGGER, "No additional default collision operations specified");
   else
   {
@@ -1471,12 +1519,12 @@ void PlanningSceneMonitor::configureDefaultPadding()
 
   // Ensure no leading slash creates a bad param server address
   static const std::string ROBOT_DESCRIPTION =
-      (robot_description_[0] == '/') ? robot_description_.substr(1) : robot_description_;
+      (robot_description_[0] == '.') ? robot_description_.substr(1) : robot_description_;
 
-  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning/default_robot_padding", default_robot_padd_, 0.0);
-  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning/default_robot_scale", default_robot_scale_, 1.0);
-  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning/default_object_padding", default_object_padd_, 0.0);
-  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning/default_attached_padding", default_attached_padd_, 0.0);
+  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning.default_robot_padding", default_robot_padd_, 0.0);
+  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning.default_robot_scale", default_robot_scale_, 1.0);
+  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning.default_object_padding", default_object_padd_, 0.0);
+  node_->get_parameter_or(ROBOT_DESCRIPTION + "_planning.default_attached_padding", default_attached_padd_, 0.0);
   default_robot_link_padd_ = std::map<std::string, double>();
   default_robot_link_scale_ = std::map<std::string, double>();
   // TODO: enable parameter type support to std::map

@@ -36,9 +36,7 @@
 
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <moveit/robot_state/robot_state.h>
-// #include <moveit_ros_planning/TrajectoryExecutionDynamicReconfigureConfig.h>
 #include <geometric_shapes/check_isometry.h>
-// #include <dynamic_reconfigure/server.h>
 #include <tf2_eigen/tf2_eigen.h>
 
 namespace trajectory_execution_manager
@@ -53,36 +51,6 @@ static const double DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN = 0.5;  // allow 0.5
                                                                     // after scaling)
 static const double DEFAULT_CONTROLLER_GOAL_DURATION_SCALING =
     1.1;  // allow the execution of a trajectory to take more time than expected (scaled by a value > 1)
-
-// using namespace moveit_ros_planning; // Used for dynamic_reconfigure
-
-// TODO(henningkayser): re-enable dynamic reconfigure behavior
-// class TrajectoryExecutionManager::DynamicReconfigureImpl
-// {
-// public:
-//   DynamicReconfigureImpl(TrajectoryExecutionManager* owner)
-//     : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle("~/trajectory_execution"))*/
-//   {
-//     // TODO: generate a similar thing for ros2 using the parameters
-//     // dynamic_reconfigure_server_.setCallback(
-//     //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
-//   }
-//
-// private:
-//   // TODO: generate a similar thing for ros2 using the parameters
-//   // void dynamicReconfigureCallback(TrajectoryExecutionDynamicReconfigureConfig& config, uint32_t level)
-//   // {
-//   //   owner_->enableExecutionDurationMonitoring(config.execution_duration_monitoring);
-//   //   owner_->setAllowedExecutionDurationScaling(config.allowed_execution_duration_scaling);
-//   //   owner_->setAllowedGoalDurationMargin(config.allowed_goal_duration_margin);
-//   //   owner_->setExecutionVelocityScaling(config.execution_velocity_scaling);
-//   //   owner_->setAllowedStartTolerance(config.allowed_start_tolerance);
-//   //   owner_->setWaitForTrajectoryCompletion(config.wait_for_trajectory_completion);
-//   // }
-//
-//   TrajectoryExecutionManager* owner_;
-//   // dynamic_reconfigure::Server<TrajectoryExecutionDynamicReconfigureConfig> dynamic_reconfigure_server_;
-// };
 
 TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node,
                                                        const moveit::core::RobotModelConstPtr& robot_model,
@@ -107,12 +75,10 @@ TrajectoryExecutionManager::~TrajectoryExecutionManager()
 {
   run_continuous_execution_thread_ = false;
   stopExecution(true);
-  // delete reconfigure_impl_;
 }
 
 void TrajectoryExecutionManager::initialize()
 {
-  // reconfigure_impl_ = nullptr;
   verbose_ = false;
   execution_complete_ = true;
   stop_continuous_execution_ = false;
@@ -122,6 +88,7 @@ void TrajectoryExecutionManager::initialize()
   execution_duration_monitoring_ = true;
   execution_velocity_scaling_ = 1.0;
   allowed_start_tolerance_ = 0.01;
+  wait_for_trajectory_completion_ = true;
 
   allowed_execution_duration_scaling_ = DEFAULT_CONTROLLER_GOAL_DURATION_SCALING;
   allowed_goal_duration_margin_ = DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN;
@@ -166,8 +133,20 @@ void TrajectoryExecutionManager::initialize()
     if (!controller.empty())
       try
       {
+        // We make a node called moveit_simple_controller_manager so it's able to
+        // receive callbacks on another thread. We then copy parameters from the move_group node
+        // and then add it to the multithreadedexecutor
+        rclcpp::NodeOptions opt;
+        opt.allow_undeclared_parameters(true);
+        opt.automatically_declare_parameters_from_overrides(true);
+        controller_mgr_node_.reset(new rclcpp::Node("moveit_simple_controller_manager", opt));
+
+        auto all_params = node_->get_node_parameters_interface()->get_parameter_overrides();
+        for (auto param : all_params)
+          controller_mgr_node_->set_parameter(rclcpp::Parameter(param.first, param.second));
+
         controller_manager_ = controller_manager_loader_->createUniqueInstance(controller);
-        controller_manager_->initialize(node_);
+        controller_manager_->initialize(controller_mgr_node_);
       }
       catch (pluginlib::PluginlibException& ex)
       {
@@ -180,12 +159,41 @@ void TrajectoryExecutionManager::initialize()
   event_topic_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
       EXECUTION_EVENT_TOPIC, 100, std::bind(&TrajectoryExecutionManager::receiveEvent, this, std::placeholders::_1));
 
-  // reconfigure_impl_ = new DynamicReconfigureImpl(this);
+  controller_mgr_node_->get_parameter("trajectory_execution.allowed_execution_duration_scaling",
+                                      allowed_execution_duration_scaling_);
+  controller_mgr_node_->get_parameter("trajectory_execution.allowed_goal_duration_margin",
+                                      allowed_goal_duration_margin_);
+  controller_mgr_node_->get_parameter("trajectory_execution.allowed_start_tolerance", allowed_start_tolerance_);
 
   if (manage_controllers_)
     RCLCPP_INFO(LOGGER, "Trajectory execution is managing controllers");
   else
     RCLCPP_INFO(LOGGER, "Trajectory execution is not managing controllers");
+
+  auto controller_mgr_parameter_set_callback = [this](std::vector<rclcpp::Parameter> parameters) {
+    auto result = rcl_interfaces::msg::SetParametersResult();
+    result.successful = true;
+    for (const auto& parameter : parameters)
+    {
+      const std::string& name = parameter.get_name();
+      if (name == "trajectory_execution.execution_duration_monitoring")
+        enableExecutionDurationMonitoring(parameter.as_bool());
+      else if (name == "trajectory_execution.allowed_execution_duration_scaling")
+        setAllowedExecutionDurationScaling(parameter.as_double());
+      else if (name == "trajectory_execution.allowed_goal_duration_margin")
+        setAllowedGoalDurationMargin(parameter.as_double());
+      else if (name == "trajectory_execution.execution_velocity_scaling")
+        setExecutionVelocityScaling(parameter.as_double());
+      else if (name == "trajectory_execution.allowed_start_tolerance")
+        setAllowedStartTolerance(parameter.as_double());
+      else if (name == "trajectory_execution.wait_for_trajectory_completion")
+        setWaitForTrajectoryCompletion(parameter.as_bool());
+      else
+        result.successful = false;
+    }
+    return result;
+  };
+  callback_handler_ = controller_mgr_node_->add_on_set_parameters_callback(controller_mgr_parameter_set_callback);
 }
 
 void TrajectoryExecutionManager::enableExecutionDurationMonitoring(bool flag)

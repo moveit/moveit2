@@ -413,16 +413,16 @@ protected:
   void configureDefaultPadding();
 
   /** @brief Callback for a new collision object msg*/
-  void collisionObjectCallback(const moveit_msgs::msg::CollisionObject::ConstSharedPtr obj);
+  void collisionObjectCallback(moveit_msgs::msg::CollisionObject::SharedPtr obj);
 
   /** @brief Callback for a new planning scene world*/
-  void newPlanningSceneWorldCallback(const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr world);
+  void newPlanningSceneWorldCallback(moveit_msgs::msg::PlanningSceneWorld::SharedPtr world);
 
   /** @brief Callback for octomap updates */
   void octomapUpdateCallback();
 
   /** @brief Callback for a new attached object msg*/
-  void attachObjectCallback(const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr obj);
+  void attachObjectCallback(moveit_msgs::msg::AttachedCollisionObject::SharedPtr obj);
 
   /** @brief Callback for a change for an attached object of the current state of the planning scene */
   void currentStateAttachedBodyUpdateCallback(moveit::core::AttachedBody* attached_body, bool just_attached);
@@ -546,6 +546,9 @@ private:
   void getPlanningSceneServiceCallback(moveit_msgs::srv::GetPlanningScene::Request::SharedPtr req,
                                        moveit_msgs::srv::GetPlanningScene::Response::SharedPtr res);
 
+  void updatePublishSettings(bool publish_geom_updates, bool publish_state_updates, bool publish_transform_updates,
+                             bool publish_planning_scene, double publish_planning_scene_hz);
+
   // Lock for state_update_pending_ and dt_state_update_
   std::mutex state_pending_mutex_;
 
@@ -577,8 +580,7 @@ private:
 
   collision_detection::CollisionPluginLoader collision_loader_;
 
-  // class DynamicReconfigureImpl;
-  // DynamicReconfigureImpl* reconfigure_impl_;
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr callback_handler_;
 };
 
 /** \brief This is a convenience class for obtaining access to an
