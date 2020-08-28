@@ -73,7 +73,8 @@ def generate_servo_test_description(*args,
                     package='moveit_servo',
                     plugin='moveit_servo::ServoServer',
                     name='servo_server',
-                    parameters=[servo_params, robot_description, robot_description_semantic])
+                    parameters=[servo_params, robot_description, robot_description_semantic],
+                    extra_arguments=[{'use_intra_process_comm': True}])
             ],
             output='screen',
     )
