@@ -300,7 +300,8 @@ struct DistanceRequest
 };
 
 /** \brief Generic representation of the distance information for a pair of objects */
-struct DistanceResultsData
+// TODO(#267): Enable check - for some reason clang-tidy wants to rename this struct to "i0"
+struct DistanceResultsData  // NOLINT(readability-identifier-naming)
 {
   DistanceResultsData()
   {
