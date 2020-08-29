@@ -60,7 +60,7 @@ void MoveGroupExecuteTrajectoryAction::initialize()
   execute_action_server_ = rclcpp_action::create_server<ExecTrajectory>(
       node->get_node_base_interface(), node->get_node_clock_interface(), node->get_node_logging_interface(),
       node->get_node_waitables_interface(), EXECUTE_ACTION_NAME,
-      [](const rclcpp_action::GoalUUID&, std::shared_ptr<const ExecTrajectory::Goal>) {
+      [](const rclcpp_action::GoalUUID& /*unused*/, std::shared_ptr<const ExecTrajectory::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },

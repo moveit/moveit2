@@ -653,7 +653,7 @@ struct IfSameType
 {
   enum
   {
-    value = 0
+    VALUE = 0
   };
 };
 
@@ -662,7 +662,7 @@ struct IfSameType<T, T>
 {
   enum
   {
-    value = 1
+    VALUE = 1
   };
 };
 
@@ -706,7 +706,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
   // attached objects could have previously been World::Object; we try to move them
   // from their old cache to the new one, if possible. the code is not pretty, but should help
   // when we attach/detach objects that are in the world
-  if (IfSameType<T, moveit::core::AttachedBody>::value == 1)
+  if (IfSameType<T, moveit::core::AttachedBody>::VALUE == 1)
   {
     // get the cache that corresponds to objects; maybe this attached object used to be a world object
     FCLShapeCache& othercache = GetShapeCache<BV, World::Object>();
@@ -739,7 +739,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
       // world objects could have previously been attached objects; we try to move them
       // from their old cache to the new one, if possible. the code is not pretty, but should help
       // when we attach/detach objects that are in the world
-      if (IfSameType<T, World::Object>::value == 1)
+      if (IfSameType<T, World::Object>::VALUE == 1)
   {
     // get the cache that corresponds to objects; maybe this attached object used to be a world object
     FCLShapeCache& othercache = GetShapeCache<BV, moveit::core::AttachedBody>();

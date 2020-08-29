@@ -52,8 +52,6 @@ IterativeParabolicTimeParameterization::IterativeParabolicTimeParameterization(u
 {
 }
 
-IterativeParabolicTimeParameterization::~IterativeParabolicTimeParameterization() = default;
-
 namespace
 {
 void printPoint(const trajectory_msgs::msg::JointTrajectoryPoint& point, std::size_t i)

@@ -142,7 +142,7 @@ void TrajectoryExecutionManager::initialize()
         controller_mgr_node_.reset(new rclcpp::Node("moveit_simple_controller_manager", opt));
 
         auto all_params = node_->get_node_parameters_interface()->get_parameter_overrides();
-        for (auto param : all_params)
+        for (const auto& param : all_params)
           controller_mgr_node_->set_parameter(rclcpp::Parameter(param.first, param.second));
 
         controller_manager_ = controller_manager_loader_->createUniqueInstance(controller);
