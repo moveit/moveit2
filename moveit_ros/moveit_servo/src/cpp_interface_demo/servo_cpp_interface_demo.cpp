@@ -186,8 +186,12 @@ int main(int argc, char** argv)
 
   // Spin
   auto executor = std::make_unique<rclcpp::executors::MultiThreadedExecutor>();
-  executor->add_node(node);
-  executor->spin();
+  rclcpp::Rate loop_rate(1000);
+  while (rclcpp::ok())
+  {
+    executor->spin_node_once(node);
+    loop_rate.sleep();
+  }
 
   rclcpp::shutdown();
   return 0;
