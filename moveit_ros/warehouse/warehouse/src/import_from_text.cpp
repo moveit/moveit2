@@ -49,6 +49,8 @@
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.planning_scene_storage");
+
 void parseStart(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* psm,
                 moveit_warehouse::RobotStateStorage* rs)
 {
@@ -87,7 +89,7 @@ void parseStart(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* 
         st.setVariablePositions(v);
         moveit_msgs::msg::RobotState msg;
         moveit::core::robotStateToRobotStateMsg(st, msg);
-        ROS_INFO("Parsed start state '%s'", name.c_str());
+        RCLCPP_INFO(LOGGER, "Parsed start state '%s'", name.c_str());
         rs->addRobotState(msg, name);
       }
     }
@@ -132,7 +134,7 @@ void parseLinkConstraint(std::istream& in, planning_scene_monitor::PlanningScene
                                Eigen::AngleAxisd(y, Eigen::Vector3d::UnitZ()));
     }
     else
-      ROS_ERROR("Unknown link constraint element: '%s'", type.c_str());
+      RCLCPP_ERROR(LOGGER, "Unknown link constraint element: '%s'", type.c_str());
     in >> type;
   }
 
@@ -142,12 +144,12 @@ void parseLinkConstraint(std::istream& in, planning_scene_monitor::PlanningScene
 
   if (have_position && have_orientation)
   {
-    geometry_msgs::PoseStamped pose;
+    geometry_msgs::msg::PoseStamped pose;
     pose.pose = tf2::toMsg(pos * rot);
     pose.header.frame_id = psm->getRobotModel()->getModelFrame();
     moveit_msgs::msg::Constraints constr = kinematic_constraints::constructGoalConstraints(link_name, pose);
     constr.name = name;
-    ROS_INFO("Parsed link constraint '%s'", name.c_str());
+    RCLCPP_INFO(LOGGER, "Parsed link constraint '%s'", name.c_str());
     cs->addConstraints(constr);
   }
 }
@@ -174,7 +176,7 @@ void parseGoal(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* p
         if (type == "link_constraint")
           parseLinkConstraint(in, psm, cs);
         else
-          ROS_ERROR("Unknown goal type: '%s'", type.c_str());
+          RCLCPP_INFO(LOGGER, "Unknown goal type: '%s'", type.c_str());
       }
     }
   }
@@ -197,14 +199,18 @@ void parseQueries(std::istream& in, planning_scene_monitor::PlanningSceneMonitor
       else if (type == "goal")
         parseGoal(in, psm, cs);
       else
-        ROS_ERROR("Unknown query type: '%s'", type.c_str());
+        RCLCPP_ERROR(LOGGER, "Unknown query type: '%s'", type.c_str());
     }
   }
 }
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "import_from_text_to_warehouse", ros::init_options::AnonymousName);
+  rclcpp::init(argc, argv);
+  rclcpp::NodeOptions node_options;
+  node_options.allow_undeclared_parameters(true);
+  node_options.automatically_declare_parameters_from_overrides(true);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("import_from_text_to_warehouse", node_options);
 
   boost::program_options::options_description desc;
   desc.add_options()("help", "Show help message")("queries", boost::program_options::value<std::string>(),
@@ -223,20 +229,16 @@ int main(int argc, char** argv)
     return 1;
   }
   // Set up db
-  warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase();
+  warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase(node);
   if (vm.count("host") && vm.count("port"))
     conn->setParams(vm["host"].as<std::string>(), vm["port"].as<std::size_t>());
   if (!conn->connect())
     return 1;
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-
-  ros::NodeHandle nh;
-  planning_scene_monitor::PlanningSceneMonitor psm(ROBOT_DESCRIPTION);
+  planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (!psm.getPlanningScene())
   {
-    ROS_ERROR("Unable to initialize PlanningSceneMonitor");
+    RCLCPP_ERROR(LOGGER, "Unable to initialize PlanningSceneMonitor");
     return 1;
   }
 
@@ -262,5 +264,6 @@ int main(int argc, char** argv)
     fin.close();
   }
 
+  rclcpp::spin(node);
   return 0;
 }
