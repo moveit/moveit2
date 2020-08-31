@@ -569,7 +569,7 @@ bool PlanningSceneMonitor::requestPlanningSceneState(const std::string& service_
 void PlanningSceneMonitor::providePlanningSceneService(const std::string& service_name)
 {
   // Load the service
-  get_scene_service_ = node_->create_service<moveit_msgs::srv::GetPlanningScene>(
+  get_scene_service_ = pnode_->create_service<moveit_msgs::srv::GetPlanningScene>(
       service_name, std::bind(&PlanningSceneMonitor::getPlanningSceneServiceCallback, this, std::placeholders::_1,
                               std::placeholders::_2));
 }
@@ -979,7 +979,7 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
   if (t.nanoseconds() == 0)
     return false;
   auto start = std::chrono::system_clock::now();
-  auto timeout = std::chrono::duration<double, std::nano>(wait_time * 1e09);
+  auto timeout = std::chrono::duration<double>(wait_time);
   RCLCPP_DEBUG(LOGGER, "sync robot state to: %.3fs", fmod(t.seconds(), 10.));
 
   if (current_state_monitor_)
@@ -1066,7 +1066,7 @@ void PlanningSceneMonitor::startSceneMonitor(const std::string& scene_topic)
   // listen for planning scene updates; these messages include transforms, so no need for filters
   if (!scene_topic.empty())
   {
-    planning_scene_subscriber_ = node_->create_subscription<moveit_msgs::msg::PlanningScene>(
+    planning_scene_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::PlanningScene>(
         scene_topic, 100, std::bind(&PlanningSceneMonitor::newPlanningSceneCallback, this, std::placeholders::_1));
     RCLCPP_INFO(LOGGER, "Listening to '%s'", planning_scene_subscriber_->get_topic_name());
   }

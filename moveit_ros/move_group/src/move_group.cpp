@@ -189,26 +189,6 @@ private:
 };
 }  // namespace move_group
 
-template <typename T>
-T getParameterFromRemoteNode(const rclcpp::Node::SharedPtr& node, const std::string& node_name,
-                             const std::string& param_name)
-{
-  using namespace std::chrono_literals;
-  auto parameters_client = std::make_shared<rclcpp::SyncParametersClient>(node, node_name);
-  while (!parameters_client->wait_for_service(0.5s))
-  {
-    if (!rclcpp::ok())
-    {
-      RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
-      return T();
-    }
-    RCLCPP_INFO(LOGGER, "service not available, waiting again...");
-  }
-
-  T param_value = parameters_client->get_parameter<T>(param_name, T());
-  return param_value;
-}
-
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
@@ -217,20 +197,6 @@ int main(int argc, char** argv)
   opt.allow_undeclared_parameters(true);
   opt.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr nh = rclcpp::Node::make_shared("move_group", opt);
-
-  // fetch a bunch of parameters
-  {
-    std::string robot_desc_param = "robot_description";
-    std::string str = getParameterFromRemoteNode<std::string>(nh, "robot_state_publisher", robot_desc_param);
-    nh->declare_parameter(robot_desc_param);
-    nh->set_parameter(rclcpp::Parameter(robot_desc_param, str));
-
-    std::string semantic_file = nh->get_parameter("robot_description_semantic").as_string();
-    std::ifstream file(semantic_file);
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    nh->set_parameter(rclcpp::Parameter("robot_description_semantic", buffer.str()));
-  }
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer =
       std::make_shared<tf2_ros::Buffer>(nh->get_clock(), tf2::durationFromSec(10.0));
@@ -255,7 +221,6 @@ int main(int argc, char** argv)
       RCLCPP_INFO(LOGGER, "MoveGroup debug mode is OFF");
 
     rclcpp::executors::MultiThreadedExecutor executor;
-    rclcpp::Node::SharedPtr monitor_node = rclcpp::Node::make_shared("monitor_node", opt);
 
     printf(MOVEIT_CONSOLE_COLOR_CYAN "Starting planning scene monitors...\n" MOVEIT_CONSOLE_COLOR_RESET);
     planning_scene_monitor->startSceneMonitor();
@@ -268,9 +233,6 @@ int main(int argc, char** argv)
     planning_scene_monitor->publishDebugInformation(debug);
 
     mge.status();
-    auto controller_mgr_node = mge.getContext()->trajectory_execution_manager_->getControllerManagerNode();
-    executor.add_node(controller_mgr_node);
-    executor.add_node(monitor_node);
     executor.add_node(nh);
     executor.spin();
 

@@ -384,7 +384,6 @@ void MotionPlanningFrame::changePlanningGroupHelper()
     moveit::planning_interface::MoveGroupInterface::Options opt(group);
     opt.robot_model_ = robot_model;
     opt.robot_description_.clear();
-    opt.node_ = node_;
     try
     {
 #ifdef RVIZ_TF1
@@ -394,7 +393,7 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       // /std::shared_ptr<tf2_ros::Buffer> tf_buffer = context_->getFrameManager()->getTF2BufferPtr();
       std::shared_ptr<tf2_ros::Buffer> tf_buffer = moveit::planning_interface::getSharedTF();
 #endif
-      move_group_.reset(new moveit::planning_interface::MoveGroupInterface(opt, tf_buffer, rclcpp::Duration(30)));
+      move_group_.reset(new moveit::planning_interface::MoveGroupInterface(node_, opt, tf_buffer, rclcpp::Duration(30)));
       // TODO (ddengster): Enable when moveit_ros_warehouse is ported
       //      if (planning_scene_storage_)
       //        move_group_->setConstraintsDatabase(ui_->database_host->text().toStdString(),

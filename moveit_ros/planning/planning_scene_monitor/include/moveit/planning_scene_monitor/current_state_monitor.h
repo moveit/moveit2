@@ -131,8 +131,8 @@ public:
 
   /** @brief Wait for at most \e wait_time seconds (default 1s) for a robot state more recent than t
    *  @return true on success, false if up-to-date robot state wasn't received within \e wait_time
-  */
-  bool waitForCurrentState(const rclcpp::Time& t = rclcpp::Clock().now(), double wait_time = 1.0) const;
+   */
+  bool waitForCurrentState(const rclcpp::Time& t = rclcpp::Clock(RCL_ROS_TIME).now(), double wait_time = 1.0) const;
 
   /** @brief Wait for at most \e wait_time seconds until the complete robot state is known.
       @return true if the full state is known */
@@ -191,10 +191,10 @@ private:
   std::map<const moveit::core::JointModel*, rclcpp::Time> joint_time_;
   bool state_monitor_started_;
   bool copy_dynamics_;  // Copy velocity and effort from joint_state
-  rclcpp::Time monitor_start_time_;
+  rclcpp::Time monitor_start_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
   double error_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
-  rclcpp::Time current_state_time_;
+  rclcpp::Time current_state_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
   mutable std::mutex state_update_lock_;
   mutable std::condition_variable state_update_condition_;

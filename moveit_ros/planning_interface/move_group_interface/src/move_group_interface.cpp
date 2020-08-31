@@ -92,12 +92,11 @@ enum ActiveTargetType
 class MoveGroupInterface::MoveGroupInterfaceImpl
 {
 public:
-  MoveGroupInterfaceImpl(const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
+  MoveGroupInterfaceImpl(const rclcpp::Node::SharedPtr& node, const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
                          const rclcpp::Duration& wait_for_servers)
-    : opt_(opt), node_(opt.node_), tf_buffer_(tf_buffer)
+    : opt_(opt), node_(node), tf_buffer_(tf_buffer)
   {
-    if (!node_)
-      node_ = std::make_shared<rclcpp::Node>("MoveGroupInterfaceNode");
+    pnode_ = std::make_shared<rclcpp::Node>("move_group_interface_node");
     robot_model_ = opt.robot_model_ ? opt.robot_model_ : getSharedRobotModel(node_, opt.robot_description_);
     if (!getRobotModel())
     {
@@ -137,19 +136,19 @@ public:
       end_effector_link_ = joint_model_group_->getLinkModelNames().back();
     pose_reference_frame_ = getRobotModel()->getModelFrame();
 
-    trajectory_event_publisher_ = node_->create_publisher<std_msgs::msg::String>(
+    trajectory_event_publisher_ = pnode_->create_publisher<std_msgs::msg::String>(
         trajectory_execution_manager::TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC, 1);
-    attached_object_publisher_ = node_->create_publisher<moveit_msgs::msg::AttachedCollisionObject>(
+    attached_object_publisher_ = pnode_->create_publisher<moveit_msgs::msg::AttachedCollisionObject>(
         planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC, 1);
 
     current_state_monitor_ = getSharedStateMonitor(node_, robot_model_, tf_buffer_);
 
-    rclcpp::Time timeout_for_servers = node_->get_clock()->now() + wait_for_servers;
+    rclcpp::Time timeout_for_servers = pnode_->now() + wait_for_servers;
     if (wait_for_servers == rclcpp::Duration(0.0))
       timeout_for_servers = rclcpp::Time();  // wait for ever
     double allotted_time = wait_for_servers.seconds();
 
-    move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(node_, move_group::MOVE_ACTION);
+    move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(pnode_, move_group::MOVE_ACTION);
     move_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
     // TODO(JafarAbdi): Enable once moveit_ros_manipulation is ported
     // pick_action_client_ = rclcpp_action::create_client<moveit_msgs::action::Pickup>(
@@ -160,20 +159,20 @@ public:
     //        node_, move_group::PLACE_ACTION);
     //    place_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
     execute_action_client_ =
-        rclcpp_action::create_client<moveit_msgs::action::ExecuteTrajectory>(node_, move_group::EXECUTE_ACTION_NAME);
+        rclcpp_action::create_client<moveit_msgs::action::ExecuteTrajectory>(pnode_, move_group::EXECUTE_ACTION_NAME);
     execute_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
 
     query_service_ =
-        node_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(move_group::QUERY_PLANNERS_SERVICE_NAME);
+        pnode_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(move_group::QUERY_PLANNERS_SERVICE_NAME);
     get_params_service_ =
-        node_->create_client<moveit_msgs::srv::GetPlannerParams>(move_group::GET_PLANNER_PARAMS_SERVICE_NAME);
+        pnode_->create_client<moveit_msgs::srv::GetPlannerParams>(move_group::GET_PLANNER_PARAMS_SERVICE_NAME);
     set_params_service_ =
-        node_->create_client<moveit_msgs::srv::SetPlannerParams>(move_group::SET_PLANNER_PARAMS_SERVICE_NAME);
+        pnode_->create_client<moveit_msgs::srv::SetPlannerParams>(move_group::SET_PLANNER_PARAMS_SERVICE_NAME);
 
     cartesian_path_service_ =
-        node_->create_client<moveit_msgs::srv::GetCartesianPath>(move_group::CARTESIAN_PATH_SERVICE_NAME);
+        pnode_->create_client<moveit_msgs::srv::GetCartesianPath>(move_group::CARTESIAN_PATH_SERVICE_NAME);
 
-    plan_grasps_service_ = node_->create_client<moveit_msgs::srv::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
+    // plan_grasps_service_ = pnode_->create_client<moveit_msgs::srv::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
 
     RCLCPP_INFO_STREAM(LOGGER, "Ready to take commands for planning group " << opt.group_name_ << ".");
   }
@@ -212,16 +211,16 @@ public:
   bool getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc)
   {
     auto req = std::make_shared<moveit_msgs::srv::QueryPlannerInterfaces::Request>();
-    moveit_msgs::srv::QueryPlannerInterfaces::Response::SharedPtr response;
-
-    auto res = query_service_->async_send_request(req);
+    auto response = query_service_->async_send_request(req);
 
     // wait until future is done
-    response = res.get();
-    if (!response->planner_interfaces.empty())
+    if (rclcpp::spin_until_future_complete(pnode_, response) == rclcpp::FutureReturnCode::SUCCESS)
     {
-      desc = response->planner_interfaces.front();
-      return true;
+      if (!response.get()->planner_interfaces.empty())
+      {
+        desc = response.get()->planner_interfaces.front();
+        return true;
+      }
     }
     return false;
   }
@@ -235,8 +234,7 @@ public:
     std::map<std::string, std::string> result;
 
     auto res = get_params_service_->async_send_request(req);
-    // if (get_params_service_.call(req, res))
-    if (rclcpp::spin_until_future_complete(node_, res) == rclcpp::executor::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(pnode_, res) == rclcpp::executor::FutureReturnCode::SUCCESS)
     {
       response = res.get();
       for (unsigned int i = 0, end = response->params.keys.size(); i < end; ++i)
@@ -549,7 +547,7 @@ public:
     if (!current_state_monitor_->isActive())
       current_state_monitor_->startStateMonitor();
 
-    if (!current_state_monitor_->waitForCurrentState(rclcpp::Clock().now(), wait_seconds))
+    if (!current_state_monitor_->waitForCurrentState(node_->now(), wait_seconds))
     {
       RCLCPP_ERROR(LOGGER, "Failed to fetch current robot state");
       return false;
@@ -699,14 +697,17 @@ public:
 
     bool done = false;
     rclcpp_action::ResultCode code = rclcpp_action::ResultCode::UNKNOWN;
-    std::shared_ptr<moveit_msgs::action::MoveGroup_Result> res;
+    std::shared_ptr<moveit_msgs::action::MoveGroup::Result> res;
     auto send_goal_opts = rclcpp_action::Client<moveit_msgs::action::MoveGroup>::SendGoalOptions();
 
     send_goal_opts.goal_response_callback =
         [&](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr> future) {
           auto goal_handle = future.get();
           if (!goal_handle)
+          {
+            done = true;
             RCLCPP_INFO(LOGGER, "Planning request rejected");
+          }
           else
             RCLCPP_INFO(LOGGER, "Planning request accepted");
         };
@@ -734,14 +735,9 @@ public:
         };
 
     auto goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
-    goal_handle_future.wait();
 
     // wait until send_goal_opts.result_callback is called
-    double timeout = 9999.0;
-    rclcpp::Time start_time = node_->now();
-    rclcpp::Duration wait = rclcpp::Duration::from_seconds(timeout);
-    auto end_time = start_time + wait;
-    while (!done && node_->now() < end_time)
+    while (!done)
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -786,7 +782,10 @@ public:
         [&](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr> future) {
           auto goal_handle = future.get();
           if (!goal_handle)
+          {
+            done = true;
             RCLCPP_INFO(LOGGER, "Plan and Execute request rejected");
+          }
           else
             RCLCPP_INFO(LOGGER, "Plan and Execute request accepted");
         };
@@ -815,15 +814,11 @@ public:
     auto goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
     if (!wait)
       return MoveItErrorCode::SUCCESS;
-    goal_handle_future.wait();
 
     // wait until send_goal_opts.result_callback is called
-    double timeout = 9999.0;
-    rclcpp::Time start_time = node_->now();
-    rclcpp::Duration waitdur = rclcpp::Duration::from_seconds(timeout);
-    auto end_time = start_time + waitdur;
-    while (!done && node_->now() < end_time)
+    while (!done)
     {
+      rclcpp::spin_some(pnode_);
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
@@ -853,6 +848,7 @@ public:
       auto goal_handle = future.get();
       if (!goal_handle)
       {
+        done = true;
         RCLCPP_INFO(LOGGER, "Execute request rejected");
       }
       else
@@ -887,15 +883,11 @@ public:
     auto goal_handle_future = execute_action_client_->async_send_goal(goal, send_goal_opts);
     if (!wait)
       return MoveItErrorCode::SUCCESS;
-    goal_handle_future.wait();
 
     // wait until send_goal_opts.result_callback is called
-    double timeout = 9999.0;
-    rclcpp::Time start_time = node_->now();
-    rclcpp::Duration waitdur = rclcpp::Duration::from_seconds(timeout);
-    auto end_time = start_time + waitdur;
-    while (!done && node_->now() < end_time)
+    while (!done)
     {
+      rclcpp::spin_some(pnode_);
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
@@ -931,7 +923,7 @@ public:
     req->link_name = getEndEffectorLink();
 
     auto res = cartesian_path_service_->async_send_request(req);
-    if (rclcpp::spin_until_future_complete(node_, res) == rclcpp::executor::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(pnode_, res) == rclcpp::FutureReturnCode::SUCCESS)
     {
       response = res.get();
       error_code = response->error_code;
@@ -957,6 +949,7 @@ public:
       std_msgs::msg::String event;
       event.data = "stop";
       trajectory_event_publisher_->publish(event);
+      rclcpp::spin_some(pnode_);
     }
   }
 
@@ -983,6 +976,7 @@ public:
       aco.touch_links = touch_links;
     aco.object.operation = moveit_msgs::msg::CollisionObject::ADD;
     attached_object_publisher_->publish(aco);
+    rclcpp::spin_some(pnode_);
     return true;
   }
 
@@ -1003,10 +997,14 @@ public:
       {
         aco.link_name = lname;
         attached_object_publisher_->publish(aco);
+        rclcpp::spin_some(pnode_);
       }
     }
     else
+    {
       attached_object_publisher_->publish(aco);
+      rclcpp::spin_some(pnode_);
+    }
     return true;
   }
 
@@ -1312,6 +1310,7 @@ private:
 
   Options opt_;
   rclcpp::Node::SharedPtr node_;
+  rclcpp::Node::SharedPtr pnode_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   moveit::core::RobotModelConstPtr robot_model_;
   planning_scene_monitor::CurrentStateMonitorPtr current_state_monitor_;
@@ -1359,25 +1358,25 @@ private:
   rclcpp::Client<moveit_msgs::srv::GetPlannerParams>::SharedPtr get_params_service_;
   rclcpp::Client<moveit_msgs::srv::SetPlannerParams>::SharedPtr set_params_service_;
   rclcpp::Client<moveit_msgs::srv::GetCartesianPath>::SharedPtr cartesian_path_service_;
-  rclcpp::Client<moveit_msgs::srv::GraspPlanning>::SharedPtr plan_grasps_service_;
+  // rclcpp::Client<moveit_msgs::srv::GraspPlanning>::SharedPtr plan_grasps_service_;
   // TODO(JafarAbdi): Enable once moveit_ros_warehouse is ported
   // std::unique_ptr<moveit_warehouse::ConstraintsStorage> constraints_storage_;
   std::unique_ptr<boost::thread> constraints_init_thread_;
   bool initializing_constraints_;
 };
 
-MoveGroupInterface::MoveGroupInterface(const std::string& group_name, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
+MoveGroupInterface::MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const std::string& group_name, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
                                        const rclcpp::Duration& wait_for_servers)
 {
   if (!rclcpp::ok())
     throw std::runtime_error("ROS does not seem to be running");
-  impl_ = new MoveGroupInterfaceImpl(Options(group_name), tf_buffer ? tf_buffer : getSharedTF(), wait_for_servers);
+  impl_ = new MoveGroupInterfaceImpl(node, Options(group_name), tf_buffer ? tf_buffer : getSharedTF(), wait_for_servers);
 }
 
-MoveGroupInterface::MoveGroupInterface(const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
+MoveGroupInterface::MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
                                        const rclcpp::Duration& wait_for_servers)
 {
-  impl_ = new MoveGroupInterfaceImpl(opt, tf_buffer ? tf_buffer : getSharedTF(), wait_for_servers);
+  impl_ = new MoveGroupInterfaceImpl(node, opt, tf_buffer ? tf_buffer : getSharedTF(), wait_for_servers);
 }
 
 MoveGroupInterface::~MoveGroupInterface()
@@ -1419,11 +1418,6 @@ const std::vector<std::string>& MoveGroupInterface::getNamedTargets() const
 moveit::core::RobotModelConstPtr MoveGroupInterface::getRobotModel() const
 {
   return impl_->getRobotModel();
-}
-
-rclcpp::Node::SharedPtr MoveGroupInterface::getNodeHandle()
-{
-  return impl_->getOptions().node_;
 }
 
 bool MoveGroupInterface::getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc) const

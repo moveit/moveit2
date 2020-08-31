@@ -110,8 +110,8 @@ public:
   /** \brief Specification of options to use when constructing the MoveGroupInterface class */
   struct Options
   {
-    Options(std::string group_name, std::string desc = ROBOT_DESCRIPTION, const rclcpp::Node::SharedPtr& node = nullptr)
-      : group_name_(std::move(group_name)), robot_description_(std::move(desc)), node_(node)
+    Options(std::string group_name, std::string desc = ROBOT_DESCRIPTION)
+      : group_name_(std::move(group_name)), robot_description_(std::move(desc))
     {
     }
 
@@ -123,8 +123,6 @@ public:
 
     /// Optionally, an instance of the RobotModel to use can be also specified
     moveit::core::RobotModelConstPtr robot_model_;
-
-    rclcpp::Node::SharedPtr node_;
   };
 
   MOVEIT_STRUCT_FORWARD(Plan)
@@ -152,7 +150,7 @@ public:
                         one will be constructed internally along with an internal TF2_ROS TransformListener
       \param wait_for_servers. Timeout for connecting to action servers. Zero time means unlimited waiting.
     */
-  MoveGroupInterface(const Options& opt,
+  MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const Options& opt,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
                      const rclcpp::Duration& wait_for_servers = rclcpp::Duration(0.0));
 
@@ -163,7 +161,7 @@ public:
                         one will be constructed internally along with an internal TF2_ROS TransformListener
       \param wait_for_servers. Timeout for connecting to action servers. Zero time means unlimited waiting.
     */
-  MoveGroupInterface(const std::string& group,
+  MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const std::string& group,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
                      const rclcpp::Duration& wait_for_servers = rclcpp::Duration(0.0));
 
