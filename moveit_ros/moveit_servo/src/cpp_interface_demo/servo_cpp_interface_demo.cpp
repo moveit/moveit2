@@ -49,6 +49,7 @@
 using namespace std::chrono_literals;
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_demo_node.cpp");
+static constexpr double DEFAULT_SPIN_RATE = 1000;
 
 class ServoCppDemo
 {
@@ -186,7 +187,7 @@ int main(int argc, char** argv)
 
   // Spin
   auto executor = std::make_unique<rclcpp::executors::MultiThreadedExecutor>();
-  rclcpp::Rate loop_rate(1000);
+  rclcpp::Rate loop_rate(DEFAULT_SPIN_RATE);
   while (rclcpp::ok())
   {
     executor->spin_node_once(node);
