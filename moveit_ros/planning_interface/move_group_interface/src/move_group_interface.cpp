@@ -739,6 +739,7 @@ public:
     // wait until send_goal_opts.result_callback is called
     while (!done)
     {
+      rclcpp::spin_some(pnode_);
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 

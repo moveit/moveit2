@@ -1361,7 +1361,7 @@ void PlanningSceneMonitor::setStateUpdateFrequency(double hz)
 
 void PlanningSceneMonitor::updateSceneWithCurrentState()
 {
-  rclcpp::Time time = rclcpp::Clock().now();
+  rclcpp::Time time = node_->now();
   rclcpp::Clock steady_clock = rclcpp::Clock(RCL_STEADY_TIME);
   if (current_state_monitor_)
   {

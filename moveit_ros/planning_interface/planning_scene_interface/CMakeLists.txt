@@ -23,4 +23,4 @@ install(TARGETS ${MOVEIT_LIB_NAME}
 #install(TARGETS ${MOVEIT_LIB_NAME}_python
 #  DESTINATION bin)
 
-install(DIRECTORY include/ DESTINATION planning_scene_interface/include)
+install(DIRECTORY include/ DESTINATION include)
