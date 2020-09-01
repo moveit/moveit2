@@ -543,7 +543,7 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
   {
     int_marker_server_->insert(im);
     int_marker_server_->setCallback(im.name,
-                                    boost::bind(&RobotInteraction::processInteractiveMarkerFeedback, this, _1));
+                                    boost::bind(&RobotInteraction::processInteractiveMarkerFeedback, this, boost::placeholders::_1));
 
     // Add menu handler to all markers that this interaction handler creates.
     if (std::shared_ptr<interactive_markers::MenuHandler> mh = handler->getMenuHandler())

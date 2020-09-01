@@ -12,6 +12,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_msgs
   orocos_kdl
   kdl_parser
+  tf2_kdl
   EIGEN3
 )
 

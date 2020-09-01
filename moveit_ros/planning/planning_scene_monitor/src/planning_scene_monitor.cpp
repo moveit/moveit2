@@ -184,9 +184,9 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     if (scene_)
     {
       scene_->setAttachedBodyUpdateCallback(
-          boost::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback, this, _1, _2));
+          boost::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback, this, boost::placeholders::_1, boost::placeholders::_2));
       scene_->setCollisionObjectUpdateCallback(
-          boost::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback, this, _1, _2));
+          boost::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback, this, boost::placeholders::_1, boost::placeholders::_2));
     }
   }
   else
@@ -322,9 +322,9 @@ void PlanningSceneMonitor::monitorDiffs(bool flag)
         scene_ = parent_scene_->diff();
         scene_const_ = scene_;
         scene_->setAttachedBodyUpdateCallback(
-            boost::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback, this, _1, _2));
+            boost::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback, this, boost::placeholders::_1, boost::placeholders::_2));
         scene_->setCollisionObjectUpdateCallback(
-            boost::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback, this, _1, _2));
+            boost::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback, this, boost::placeholders::_1, boost::placeholders::_2));
       }
     }
     else
@@ -435,9 +435,9 @@ void PlanningSceneMonitor::scenePublishingThread()
           scene_->pushDiffs(parent_scene_);
           scene_->clearDiffs();
           scene_->setAttachedBodyUpdateCallback(
-              boost::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback, this, _1, _2));
+              boost::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback, this, boost::placeholders::_1, boost::placeholders::_2));
           scene_->setCollisionObjectUpdateCallback(
-              boost::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback, this, _1, _2));
+              boost::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback, this, boost::placeholders::_1, boost::placeholders::_2));
           if (octomap_monitor_)
           {
             excludeAttachedBodiesFromOctree();  // in case updates have happened to the attached bodies, put them in
@@ -667,9 +667,9 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
       scene_ = parent_scene_->diff();
       scene_const_ = scene_;
       scene_->setAttachedBodyUpdateCallback(
-          boost::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback, this, _1, _2));
+          boost::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback, this, boost::placeholders::_1, boost::placeholders::_2));
       scene_->setCollisionObjectUpdateCallback(
-          boost::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback, this, _1, _2));
+          boost::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback, this, boost::placeholders::_1, boost::placeholders::_2));
     }
     if (octomap_monitor_)
     {
@@ -1174,7 +1174,7 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
       excludeWorldObjectsFromOctree();
 
       octomap_monitor_->setTransformCacheCallback(
-          boost::bind(&PlanningSceneMonitor::getShapeTransformCache, this, _1, _2, _3));
+          boost::bind(&PlanningSceneMonitor::getShapeTransformCache, this, boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3));
       octomap_monitor_->setUpdateCallback(boost::bind(&PlanningSceneMonitor::octomapUpdateCallback, this));
     }
     octomap_monitor_->startMonitor();
@@ -1207,7 +1207,7 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
     {
       current_state_monitor_.reset(new CurrentStateMonitor(pnode_, getRobotModel(), tf_buffer_));
     }
-    current_state_monitor_->addUpdateCallback(boost::bind(&PlanningSceneMonitor::onStateUpdate, this, _1));
+    current_state_monitor_->addUpdateCallback(boost::bind(&PlanningSceneMonitor::onStateUpdate, this, boost::placeholders::_1));
     current_state_monitor_->startStateMonitor(joint_states_topic);
 
     {

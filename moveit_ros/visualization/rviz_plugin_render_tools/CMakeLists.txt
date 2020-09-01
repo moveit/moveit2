@@ -37,7 +37,9 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
     moveit_core
     Boost
     octomap_msgs
+    rviz_ogre_vendor
 )
+target_include_directories(${MOVEIT_LIB_NAME} PRIVATE "${OGRE_PREFIX_DIR}/include")
 
 install(DIRECTORY include/ DESTINATION include)
 

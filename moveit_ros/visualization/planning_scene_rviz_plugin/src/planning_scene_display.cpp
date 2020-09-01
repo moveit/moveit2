@@ -542,7 +542,7 @@ void PlanningSceneDisplay::loadRobotModel()
   {
     planning_scene_monitor_.swap(psm);
     planning_scene_monitor_->addUpdateCallback(
-        boost::bind(&PlanningSceneDisplay::sceneMonitorReceivedUpdate, this, _1));
+        boost::bind(&PlanningSceneDisplay::sceneMonitorReceivedUpdate, this, boost::placeholders::_1));
     addMainLoopJob(boost::bind(&PlanningSceneDisplay::onRobotModelLoaded, this));
     setStatus(rviz_common::properties::StatusProperty::Ok, "PlanningScene", "Planning Scene Loaded Successfully");
     waitForAllMainLoopJobs();
