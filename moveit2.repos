@@ -35,3 +35,9 @@ repositories:
     type: git
     url: https://github.com/JafarAbdi/fake_joint
     version: foxy
+
+# TODO(YuYan): Switch to upstream once PR https://github.com/ros-planning/warehouse_ros/pull/48 is merged
+  warehouse_ros:
+    type: git
+    url: https://github.com/RoboticsYY/warehouse_ros
+    version: pr-ros2
