@@ -234,14 +234,14 @@ void MotionPlanningFrame::selectedSupportSurfaceChanged()
 
 void MotionPlanningFrame::updateSupportSurfacesList()
 {
-  double min_x = ui_->roi_center_x->value() - ui_->roi_size_x->value() / 2.0;
-  double min_y = ui_->roi_center_y->value() - ui_->roi_size_y->value() / 2.0;
-  double min_z = ui_->roi_center_z->value() - ui_->roi_size_z->value() / 2.0;
-
-  double max_x = ui_->roi_center_x->value() + ui_->roi_size_x->value() / 2.0;
-  double max_y = ui_->roi_center_y->value() + ui_->roi_size_y->value() / 2.0;
-  double max_z = ui_->roi_center_z->value() + ui_->roi_size_z->value() / 2.0;
   // TODO (ddengster): Enable when moveit_ros_perception is ported
+  // double min_x = ui_->roi_center_x->value() - ui_->roi_size_x->value() / 2.0;
+  // double min_y = ui_->roi_center_y->value() - ui_->roi_size_y->value() / 2.0;
+  // double min_z = ui_->roi_center_z->value() - ui_->roi_size_z->value() / 2.0;
+
+  // double max_x = ui_->roi_center_x->value() + ui_->roi_size_x->value() / 2.0;
+  // double max_y = ui_->roi_center_y->value() + ui_->roi_size_y->value() / 2.0;
+  // double max_z = ui_->roi_center_z->value() + ui_->roi_size_z->value() / 2.0;
   // std::vector<std::string> support_ids = semantic_world_->getTableNamesInROI(min_x, min_y, min_z, max_x, max_y,
   // max_z);
   std::vector<std::string> support_ids;

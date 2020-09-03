@@ -92,8 +92,8 @@ enum ActiveTargetType
 class MoveGroupInterface::MoveGroupInterfaceImpl
 {
 public:
-  MoveGroupInterfaceImpl(const rclcpp::Node::SharedPtr& node, const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
-                         const rclcpp::Duration& wait_for_servers)
+  MoveGroupInterfaceImpl(const rclcpp::Node::SharedPtr& node, const Options& opt,
+                         const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const rclcpp::Duration& wait_for_servers)
     : opt_(opt), node_(node), tf_buffer_(tf_buffer)
   {
     pnode_ = std::make_shared<rclcpp::Node>("move_group_interface_node");
@@ -146,7 +146,6 @@ public:
     rclcpp::Time timeout_for_servers = pnode_->now() + wait_for_servers;
     if (wait_for_servers == rclcpp::Duration(0.0))
       timeout_for_servers = rclcpp::Time();  // wait for ever
-    double allotted_time = wait_for_servers.seconds();
 
     move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(pnode_, move_group::MOVE_ACTION);
     move_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
@@ -702,7 +701,7 @@ public:
 
     send_goal_opts.goal_response_callback =
         [&](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr> future) {
-          auto goal_handle = future.get();
+          const auto& goal_handle = future.get();
           if (!goal_handle)
           {
             done = true;
@@ -781,7 +780,7 @@ public:
 
     send_goal_opts.goal_response_callback =
         [&](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr> future) {
-          auto goal_handle = future.get();
+          const auto& goal_handle = future.get();
           if (!goal_handle)
           {
             done = true;
@@ -846,7 +845,7 @@ public:
 
     send_goal_opts.goal_response_callback = [&](
         std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr> future) {
-      auto goal_handle = future.get();
+      const auto& goal_handle = future.get();
       if (!goal_handle)
       {
         done = true;
@@ -1366,15 +1365,18 @@ private:
   bool initializing_constraints_;
 };
 
-MoveGroupInterface::MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const std::string& group_name, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
+MoveGroupInterface::MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const std::string& group_name,
+                                       const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
                                        const rclcpp::Duration& wait_for_servers)
 {
   if (!rclcpp::ok())
     throw std::runtime_error("ROS does not seem to be running");
-  impl_ = new MoveGroupInterfaceImpl(node, Options(group_name), tf_buffer ? tf_buffer : getSharedTF(), wait_for_servers);
+  impl_ =
+      new MoveGroupInterfaceImpl(node, Options(group_name), tf_buffer ? tf_buffer : getSharedTF(), wait_for_servers);
 }
 
-MoveGroupInterface::MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const Options& opt, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
+MoveGroupInterface::MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const Options& opt,
+                                       const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
                                        const rclcpp::Duration& wait_for_servers)
 {
   impl_ = new MoveGroupInterfaceImpl(node, opt, tf_buffer ? tf_buffer : getSharedTF(), wait_for_servers);

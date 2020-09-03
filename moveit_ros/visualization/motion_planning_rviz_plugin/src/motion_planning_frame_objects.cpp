@@ -61,7 +61,7 @@ namespace
 QString subframe_poses_to_qstring(const moveit::core::FixedTransformsMap& subframes)
 {
   QString status_text = "\nIt has the subframes '";
-  for (auto subframe : subframes)
+  for (const auto& subframe : subframes)
   {
     status_text += QString::fromStdString(subframe.first) + "', '";
   }
@@ -477,7 +477,7 @@ void MotionPlanningFrame::copySelectedCollisionObject()
       continue;
 
     // find a name for the copy
-    name = "Copy of " + name;
+    name = std::string("Copy of ").append(name);
     if (ps->getWorld()->hasObject(name))
     {
       name += " ";

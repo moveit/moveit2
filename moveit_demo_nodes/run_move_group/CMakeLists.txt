@@ -23,13 +23,13 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 add_executable(run_move_group src/run_move_group.cpp)
 ament_target_dependencies(run_move_group
- moveit_ros_planning_interface
- Boost
+  moveit_ros_planning_interface
+  Boost
 )
 
 install(TARGETS run_move_group
- EXPORT export_${PROJECT_NAME}
- DESTINATION lib/${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+  DESTINATION lib/${PROJECT_NAME}
 )
 
 install(DIRECTORY launch

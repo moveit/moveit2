@@ -20,7 +20,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 #set_target_properties(${MOVEIT_LIB_NAME}_python PROPERTIES LIBRARY_OUTPUT_DIRECTORY "bin")
 if(WIN32)
 #  set_target_properties(${MOVEIT_LIB_NAME}_python PROPERTIES SUFFIX .pyd)
-endif(WIN32)
+endif()
 
 install(TARGETS ${MOVEIT_LIB_NAME}
   EXPORT ${MOVEIT_LIB_NAME}
