@@ -62,8 +62,7 @@ void MoveGroupMoveAction::initialize()
 
   auto node = context_->node_;
   execute_action_server_ = rclcpp_action::create_server<MGAction>(
-      node->get_node_base_interface(), node->get_node_clock_interface(), node->get_node_logging_interface(),
-      node->get_node_waitables_interface(), MOVE_ACTION,
+      node, MOVE_ACTION,
       [](const rclcpp_action::GoalUUID& /*unused*/, std::shared_ptr<const MGAction::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
@@ -80,7 +79,7 @@ void MoveGroupMoveAction::executeMoveCallback(std::shared_ptr<MGActionGoal> goal
   RCLCPP_INFO(LOGGER, "executing..");
   setMoveState(PLANNING, goal);
   // before we start planning, ensure that we have the latest robot state received...
-  context_->planning_scene_monitor_->waitForCurrentRobotState(rclcpp::Clock().now());
+  context_->planning_scene_monitor_->waitForCurrentRobotState(rclcpp::Clock(RCL_ROS_TIME).now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   auto action_res = std::make_shared<MGAction::Result>();
@@ -97,27 +96,14 @@ void MoveGroupMoveAction::executeMoveCallback(std::shared_ptr<MGActionGoal> goal
 
   bool planned_trajectory_empty = trajectory_processing::isTrajectoryEmpty(action_res->planned_trajectory);
   // @todo: Response messages
-  std::string response = getActionResultString(action_res->error_code, planned_trajectory_empty,
-                                               goal->get_goal()->planning_options.plan_only);
-  auto fb = std::make_shared<MGAction::Feedback>();
-  fb->state = response;
+  RCLCPP_INFO_STREAM(LOGGER, getActionResultString(action_res->error_code, planned_trajectory_empty,
+                                                   goal->get_goal()->planning_options.plan_only));
   if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
-  {
     goal->succeed(action_res);
-    goal->publish_feedback(fb);
-  }
+  else if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
+    goal->canceled(action_res);
   else
-  {
-    if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
-    {
-      goal->canceled(action_res);
-    }
-    else
-    {
-      goal->abort(action_res);
-      goal->publish_feedback(fb);
-    }
-  }
+    goal->abort(action_res);
 
   setMoveState(IDLE, goal);
   preempt_requested_ = false;

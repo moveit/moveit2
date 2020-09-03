@@ -15,23 +15,6 @@ There are two options and launch files for simulating the robot controllers (the
 
 1. ros2_control using a fake_joint driver: `run_moveit_cpp.launch.py`
 1. MoveIt's fake controller: `run_moveit_cpp_fake_controller.launch.py`
-
-## Prerequisites
-
-Before running the demo, there are additional dependencies that need to be installed:
-
-* [ros2_control](https://github.com/ros-controls/ros2_control)
-* [ros2_controllers](https://github.com/ros-controls/ros2_controllers)
-* [fake_joint](https://github.com/tork-a/fake_joint)
-
-For that, simply import `run_moveit_cpp.repos` into your workspace and recompile with colcon (assuming the workspace has been compiled and sourced following the [installation instructions](/README.md)):
-
-    cd $COLCON_WS/src
-    vcs import < moveit2/moveit_demo_nodes/run_moveit_cpp/run_moveit_cpp.repos
-    rosdep install --from-paths . --ignore-src --rosdistro foxy
-    cd ..
-    colcon build --event-handlers desktop_notification- status- --cmake-args -DCMAKE_BUILD_TYPE=Release
-    source install/setup.bash
     
 ## Running the Demo
  

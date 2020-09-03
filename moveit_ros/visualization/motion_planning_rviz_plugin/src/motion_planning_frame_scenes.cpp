@@ -33,10 +33,10 @@
  *********************************************************************/
 
 /* Author: Ioan Sucan */
-
-#include <moveit/warehouse/planning_scene_storage.h>
-#include <moveit/warehouse/constraints_storage.h>
-#include <moveit/warehouse/state_storage.h>
+// TODO (ddengster): Enable when moveit_ros_warehouse is ported
+//#include <moveit/warehouse/planning_scene_storage.h>
+//#include <moveit/warehouse/constraints_storage.h>
+//#include <moveit/warehouse/state_storage.h>
 
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
@@ -44,10 +44,10 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/robot_interaction/interactive_marker_helpers.h>
 
-#include <interactive_markers/tools.h>
+#include <interactive_markers/tools.hpp>
 
-#include <rviz/display_context.h>
-#include <rviz/window_manager_interface.h>
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/window_manager_interface.hpp>
 
 #include <QMessageBox>
 #include <QInputDialog>
@@ -60,55 +60,61 @@
 
 namespace moveit_rviz_plugin
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_frame_scenes");
+
 void MotionPlanningFrame::saveSceneButtonClicked()
 {
-  if (planning_scene_storage_)
-  {
-    const std::string& name = planning_display_->getPlanningSceneRO()->getName();
-    if (name.empty() || planning_scene_storage_->hasPlanningScene(name))
-    {
-      std::unique_ptr<QMessageBox> q;
-      if (name.empty())
-        q.reset(new QMessageBox(QMessageBox::Question, "Change Planning Scene Name",
-                                QString("The name for the planning scene should not be empty. Would you like to rename "
-                                        "the planning scene?'"),
-                                QMessageBox::Cancel, this));
-      else
-        q.reset(new QMessageBox(QMessageBox::Question, "Confirm Planning Scene Overwrite",
-                                QString("A planning scene named '")
-                                    .append(name.c_str())
-                                    .append("' already exists. Do you wish to "
-                                            "overwrite that scene?"),
-                                QMessageBox::Yes | QMessageBox::No, this));
-      std::unique_ptr<QPushButton> rename(q->addButton("&Rename", QMessageBox::AcceptRole));
-      if (q->exec() != QMessageBox::Yes)
-      {
-        if (q->clickedButton() == rename.get())
-        {
-          bool ok = false;
-          QString new_name = QInputDialog::getText(this, "Rename Planning Scene", "New name for the planning scene:",
-                                                   QLineEdit::Normal, QString::fromStdString(name), &ok);
-          if (ok)
-          {
-            planning_display_->getPlanningSceneRW()->setName(new_name.toStdString());
-            rviz::Property* prop = planning_display_->subProp("Scene Geometry")->subProp("Scene Name");
-            if (prop)
-            {
-              bool old = prop->blockSignals(true);
-              prop->setValue(new_name);
-              prop->blockSignals(old);
-            }
-            saveSceneButtonClicked();
-          }
-          return;
-        }
-        return;
-      }
-    }
-
-    planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::computeSaveSceneButtonClicked, this),
-                                        "save scene");
-  }
+  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
+  //  if (planning_scene_storage_)
+  //  {
+  //    const std::string& name = planning_display_->getPlanningSceneRO()->getName();
+  //    if (name.empty() || planning_scene_storage_->hasPlanningScene(name))
+  //    {
+  //      std::unique_ptr<QMessageBox> q;
+  //      if (name.empty())
+  //        q.reset(new QMessageBox(QMessageBox::Question, "Change Planning Scene Name",
+  //                                QString("The name for the planning scene should not be empty. Would you like to
+  //                                rename "
+  //                                        "the planning scene?'"),
+  //                                QMessageBox::Cancel, this));
+  //      else
+  //        q.reset(new QMessageBox(QMessageBox::Question, "Confirm Planning Scene Overwrite",
+  //                                QString("A planning scene named '")
+  //                                    .append(name.c_str())
+  //                                    .append("' already exists. Do you wish to "
+  //                                            "overwrite that scene?"),
+  //                                QMessageBox::Yes | QMessageBox::No, this));
+  //      std::unique_ptr<QPushButton> rename(q->addButton("&Rename", QMessageBox::AcceptRole));
+  //      if (q->exec() != QMessageBox::Yes)
+  //      {
+  //        if (q->clickedButton() == rename.get())
+  //        {
+  //          bool ok = false;
+  //          QString new_name = QInputDialog::getText(this, "Rename Planning Scene", "New name for the planning
+  //          scene:",
+  //                                                   QLineEdit::Normal, QString::fromStdString(name), &ok);
+  //          if (ok)
+  //          {
+  //            planning_display_->getPlanningSceneRW()->setName(new_name.toStdString());
+  //            rviz_common::properties::Property* prop = planning_display_->subProp("Scene Geometry")->subProp("Scene
+  //            Name");
+  //            if (prop)
+  //            {
+  //              bool old = prop->blockSignals(true);
+  //              prop->setValue(new_name);
+  //              prop->blockSignals(old);
+  //            }
+  //            saveSceneButtonClicked();
+  //          }
+  //          return;
+  //        }
+  //        return;
+  //      }
+  //    }
+  //
+  //    planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::computeSaveSceneButtonClicked, this),
+  //                                        "save scene");
+  //  }
 }
 
 void MotionPlanningFrame::planningSceneItemClicked()
@@ -118,66 +124,69 @@ void MotionPlanningFrame::planningSceneItemClicked()
 
 void MotionPlanningFrame::saveQueryButtonClicked()
 {
-  if (planning_scene_storage_)
-  {
-    QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
-    if (!sel.empty())
-    {
-      QTreeWidgetItem* s = sel.front();
-
-      // if we have selected a PlanningScene, add the query as a new one, under that planning scene
-      if (s->type() == ITEM_TYPE_SCENE)
-      {
-        std::string scene = s->text(0).toStdString();
-        planning_display_->addBackgroundJob(
-            boost::bind(&MotionPlanningFrame::computeSaveQueryButtonClicked, this, scene, ""), "save query");
-      }
-      else
-      {
-        // if we selected a query name, then we overwrite that query
-        std::string scene = s->parent()->text(0).toStdString();
-        std::string query_name = s->text(0).toStdString();
-
-        while (query_name.empty() || planning_scene_storage_->hasPlanningQuery(scene, query_name))
-        {
-          std::unique_ptr<QMessageBox> q;
-          if (query_name.empty())
-            q.reset(new QMessageBox(QMessageBox::Question, "Change Planning Query Name",
-                                    QString("The name for the planning query should not be empty. Would you like to "
-                                            "rename the planning query?'"),
-                                    QMessageBox::Cancel, this));
-          else
-            q.reset(new QMessageBox(QMessageBox::Question, "Confirm Planning Query Overwrite",
-                                    QString("A planning query named '")
-                                        .append(query_name.c_str())
-                                        .append("' already exists. Do you wish "
-                                                "to overwrite that query?"),
-                                    QMessageBox::Yes | QMessageBox::No, this));
-          std::unique_ptr<QPushButton> rename(q->addButton("&Rename", QMessageBox::AcceptRole));
-          if (q->exec() == QMessageBox::Yes)
-            break;
-          else
-          {
-            if (q->clickedButton() == rename.get())
-            {
-              bool ok = false;
-              QString new_name =
-                  QInputDialog::getText(this, "Rename Planning Query", "New name for the planning query:",
-                                        QLineEdit::Normal, QString::fromStdString(query_name), &ok);
-              if (ok)
-                query_name = new_name.toStdString();
-              else
-                return;
-            }
-            else
-              return;
-          }
-        }
-        planning_display_->addBackgroundJob(
-            boost::bind(&MotionPlanningFrame::computeSaveQueryButtonClicked, this, scene, query_name), "save query");
-      }
-    }
-  }
+  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
+  //  if (planning_scene_storage_)
+  //  {
+  //    QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
+  //    if (!sel.empty())
+  //    {
+  //      QTreeWidgetItem* s = sel.front();
+  //
+  //      // if we have selected a PlanningScene, add the query as a new one, under that planning scene
+  //      if (s->type() == ITEM_TYPE_SCENE)
+  //      {
+  //        std::string scene = s->text(0).toStdString();
+  //        planning_display_->addBackgroundJob(
+  //            boost::bind(&MotionPlanningFrame::computeSaveQueryButtonClicked, this, scene, ""), "save query");
+  //      }
+  //      else
+  //      {
+  //        // if we selected a query name, then we overwrite that query
+  //        std::string scene = s->parent()->text(0).toStdString();
+  //        std::string query_name = s->text(0).toStdString();
+  //
+  //        while (query_name.empty() || planning_scene_storage_->hasPlanningQuery(scene, query_name))
+  //        {
+  //          std::unique_ptr<QMessageBox> q;
+  //          if (query_name.empty())
+  //            q.reset(new QMessageBox(QMessageBox::Question, "Change Planning Query Name",
+  //                                    QString("The name for the planning query should not be empty. Would you like to
+  //                                    "
+  //                                            "rename the planning query?'"),
+  //                                    QMessageBox::Cancel, this));
+  //          else
+  //            q.reset(new QMessageBox(QMessageBox::Question, "Confirm Planning Query Overwrite",
+  //                                    QString("A planning query named '")
+  //                                        .append(query_name.c_str())
+  //                                        .append("' already exists. Do you wish "
+  //                                                "to overwrite that query?"),
+  //                                    QMessageBox::Yes | QMessageBox::No, this));
+  //          std::unique_ptr<QPushButton> rename(q->addButton("&Rename", QMessageBox::AcceptRole));
+  //          if (q->exec() == QMessageBox::Yes)
+  //            break;
+  //          else
+  //          {
+  //            if (q->clickedButton() == rename.get())
+  //            {
+  //              bool ok = false;
+  //              QString new_name =
+  //                  QInputDialog::getText(this, "Rename Planning Query", "New name for the planning query:",
+  //                                        QLineEdit::Normal, QString::fromStdString(query_name), &ok);
+  //              if (ok)
+  //                query_name = new_name.toStdString();
+  //              else
+  //                return;
+  //            }
+  //            else
+  //              return;
+  //          }
+  //        }
+  //        planning_display_->addBackgroundJob(
+  //            boost::bind(&MotionPlanningFrame::computeSaveQueryButtonClicked, this, scene, query_name), "save
+  //            query");
+  //      }
+  //    }
+  //  }
 }
 
 void MotionPlanningFrame::deleteSceneButtonClicked()
@@ -208,94 +217,96 @@ void MotionPlanningFrame::warehouseItemNameChanged(QTreeWidgetItem* item, int co
 {
   if (item->text(column) == item->toolTip(column) || item->toolTip(column).length() == 0)
     return;
-  moveit_warehouse::PlanningSceneStoragePtr planning_scene_storage = planning_scene_storage_;
-  if (!planning_scene_storage)
-    return;
-
-  if (item->type() == ITEM_TYPE_SCENE)
-  {
-    std::string new_name = item->text(column).toStdString();
-
-    if (planning_scene_storage->hasPlanningScene(new_name))
-    {
-      planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlanningSceneTreeView, this));
-      QMessageBox::warning(this, "Scene not renamed",
-                           QString("The scene name '").append(item->text(column)).append("' already exists"));
-      return;
-    }
-    else
-    {
-      std::string old_name = item->toolTip(column).toStdString();
-      planning_scene_storage->renamePlanningScene(old_name, new_name);
-      item->setToolTip(column, item->text(column));
-    }
-  }
-  else
-  {
-    std::string scene = item->parent()->text(0).toStdString();
-    std::string new_name = item->text(column).toStdString();
-    if (planning_scene_storage->hasPlanningQuery(scene, new_name))
-    {
-      planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlanningSceneTreeView, this));
-      QMessageBox::warning(this, "Query not renamed", QString("The query name '")
-                                                          .append(item->text(column))
-                                                          .append("' already exists for scene ")
-                                                          .append(item->parent()->text(0)));
-      return;
-    }
-    else
-    {
-      std::string old_name = item->toolTip(column).toStdString();
-      planning_scene_storage->renamePlanningQuery(scene, old_name, new_name);
-      item->setToolTip(column, item->text(column));
-    }
-  }
+  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
+  //  moveit_warehouse::PlanningSceneStoragePtr planning_scene_storage = planning_scene_storage_;
+  //  if (!planning_scene_storage)
+  //    return;
+  //
+  //  if (item->type() == ITEM_TYPE_SCENE)
+  //  {
+  //    std::string new_name = item->text(column).toStdString();
+  //
+  //    if (planning_scene_storage->hasPlanningScene(new_name))
+  //    {
+  //      planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlanningSceneTreeView, this));
+  //      QMessageBox::warning(this, "Scene not renamed",
+  //                           QString("The scene name '").append(item->text(column)).append("' already exists"));
+  //      return;
+  //    }
+  //    else
+  //    {
+  //      std::string old_name = item->toolTip(column).toStdString();
+  //      planning_scene_storage->renamePlanningScene(old_name, new_name);
+  //      item->setToolTip(column, item->text(column));
+  //    }
+  //  }
+  //  else
+  //  {
+  //    std::string scene = item->parent()->text(0).toStdString();
+  //    std::string new_name = item->text(column).toStdString();
+  //    if (planning_scene_storage->hasPlanningQuery(scene, new_name))
+  //    {
+  //      planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlanningSceneTreeView, this));
+  //      QMessageBox::warning(this, "Query not renamed", QString("The query name '")
+  //                                                          .append(item->text(column))
+  //                                                          .append("' already exists for scene ")
+  //                                                          .append(item->parent()->text(0)));
+  //      return;
+  //    }
+  //    else
+  //    {
+  //      std::string old_name = item->toolTip(column).toStdString();
+  //      planning_scene_storage->renamePlanningQuery(scene, old_name, new_name);
+  //      item->setToolTip(column, item->text(column));
+  //    }
+  //  }
 }
 
 void MotionPlanningFrame::populatePlanningSceneTreeView()
 {
-  moveit_warehouse::PlanningSceneStoragePtr planning_scene_storage = planning_scene_storage_;
-  if (!planning_scene_storage)
-    return;
-
-  ui_->planning_scene_tree->setUpdatesEnabled(false);
-
-  // remember which items were expanded
-  std::set<std::string> expanded;
-  for (int i = 0; i < ui_->planning_scene_tree->topLevelItemCount(); ++i)
-  {
-    QTreeWidgetItem* it = ui_->planning_scene_tree->topLevelItem(i);
-    if (it->isExpanded())
-      expanded.insert(it->text(0).toStdString());
-  }
-
-  ui_->planning_scene_tree->clear();
-  std::vector<std::string> names;
-  planning_scene_storage->getPlanningSceneNames(names);
-
-  for (const std::string& name : names)
-  {
-    std::vector<std::string> query_names;
-    planning_scene_storage->getPlanningQueriesNames(query_names, name);
-    QTreeWidgetItem* item =
-        new QTreeWidgetItem(ui_->planning_scene_tree, QStringList(QString::fromStdString(name)), ITEM_TYPE_SCENE);
-    item->setFlags(item->flags() | Qt::ItemIsEditable);
-    item->setToolTip(0, item->text(0));  // we use the tool tip as a backup of the old name when renaming
-    for (const std::string& query_name : query_names)
-    {
-      QTreeWidgetItem* subitem =
-          new QTreeWidgetItem(item, QStringList(QString::fromStdString(query_name)), ITEM_TYPE_QUERY);
-      subitem->setFlags(subitem->flags() | Qt::ItemIsEditable);
-      subitem->setToolTip(0, subitem->text(0));
-      item->addChild(subitem);
-    }
-
-    ui_->planning_scene_tree->insertTopLevelItem(ui_->planning_scene_tree->topLevelItemCount(), item);
-    if (expanded.find(name) != expanded.end())
-      ui_->planning_scene_tree->expandItem(item);
-  }
-  ui_->planning_scene_tree->sortItems(0, Qt::AscendingOrder);
-  ui_->planning_scene_tree->setUpdatesEnabled(true);
-  checkPlanningSceneTreeEnabledButtons();
+  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
+  //  moveit_warehouse::PlanningSceneStoragePtr planning_scene_storage = planning_scene_storage_;
+  //  if (!planning_scene_storage)
+  //    return;
+  //
+  //  ui_->planning_scene_tree->setUpdatesEnabled(false);
+  //
+  //  // remember which items were expanded
+  //  std::set<std::string> expanded;
+  //  for (int i = 0; i < ui_->planning_scene_tree->topLevelItemCount(); ++i)
+  //  {
+  //    QTreeWidgetItem* it = ui_->planning_scene_tree->topLevelItem(i);
+  //    if (it->isExpanded())
+  //      expanded.insert(it->text(0).toStdString());
+  //  }
+  //
+  //  ui_->planning_scene_tree->clear();
+  //  std::vector<std::string> names;
+  //  planning_scene_storage->getPlanningSceneNames(names);
+  //
+  //  for (const std::string& name : names)
+  //  {
+  //    std::vector<std::string> query_names;
+  //    planning_scene_storage->getPlanningQueriesNames(query_names, name);
+  //    QTreeWidgetItem* item =
+  //        new QTreeWidgetItem(ui_->planning_scene_tree, QStringList(QString::fromStdString(name)), ITEM_TYPE_SCENE);
+  //    item->setFlags(item->flags() | Qt::ItemIsEditable);
+  //    item->setToolTip(0, item->text(0));  // we use the tool tip as a backup of the old name when renaming
+  //    for (const std::string& query_name : query_names)
+  //    {
+  //      QTreeWidgetItem* subitem =
+  //          new QTreeWidgetItem(item, QStringList(QString::fromStdString(query_name)), ITEM_TYPE_QUERY);
+  //      subitem->setFlags(subitem->flags() | Qt::ItemIsEditable);
+  //      subitem->setToolTip(0, subitem->text(0));
+  //      item->addChild(subitem);
+  //    }
+  //
+  //    ui_->planning_scene_tree->insertTopLevelItem(ui_->planning_scene_tree->topLevelItemCount(), item);
+  //    if (expanded.find(name) != expanded.end())
+  //      ui_->planning_scene_tree->expandItem(item);
+  //  }
+  //  ui_->planning_scene_tree->sortItems(0, Qt::AscendingOrder);
+  //  ui_->planning_scene_tree->setUpdatesEnabled(true);
+  //  checkPlanningSceneTreeEnabledButtons();
 }
 }  // namespace moveit_rviz_plugin

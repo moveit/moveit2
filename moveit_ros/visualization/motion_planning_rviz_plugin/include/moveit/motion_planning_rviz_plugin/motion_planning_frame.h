@@ -46,26 +46,29 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_interaction/robot_interaction.h>
 #include <moveit/robot_interaction/interaction_handler.h>
-#include <moveit/semantic_world/semantic_world.h>
+// TODO (ddengster): Enable when moveit_ros_perception is ported
+// #include <moveit/semantic_world/semantic_world.h>
+
 #include <moveit/macros/diagnostics.h>
-#include <interactive_markers/interactive_marker_server.h>
+#include <interactive_markers/interactive_marker_server.hpp>
 DIAGNOSTIC_PUSH
 SILENT_UNUSED_PARAM
-#include <rviz/default_plugin/interactive_markers/interactive_marker.h>
+#include <rviz_default_plugins/displays/interactive_markers/interactive_marker.hpp>
 DIAGNOSTIC_POP
 #include <moveit_msgs/msg/motion_plan_request.hpp>
-#include <actionlib/client/simple_action_client.h>
-#include <object_recognition_msgs/ObjectRecognitionAction.h>
+#include <rclcpp_action/rclcpp_action.hpp>
+#include <object_recognition_msgs/action/object_recognition.hpp>
 
-#include <std_msgs/Bool.h>
-#include <std_msgs/Empty.h>
+#include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/empty.hpp>
+#include <std_srvs/srv/empty.hpp>
 #endif
 
 #include <map>
 #include <string>
 #include <memory>
 
-namespace rviz
+namespace rviz_common
 {
 class DisplayContext;
 }
@@ -106,7 +109,7 @@ class MotionPlanningFrame : public QWidget
 
 public:
   MotionPlanningFrame(const MotionPlanningFrame&) = delete;
-  MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz::DisplayContext* context, QWidget* parent = nullptr);
+  MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_common::DisplayContext* context, QWidget* parent = nullptr);
   ~MotionPlanningFrame() override;
 
   void changePlanningGroup();
@@ -125,19 +128,21 @@ protected:
   void updateExternalCommunication();
 
   MotionPlanningDisplay* planning_display_;
-  rviz::DisplayContext* context_;
+  rviz_common::DisplayContext* context_;
   Ui::MotionPlanningUI* ui_;
   MotionPlanningFrameJointsWidget* joints_tab_;
 
   moveit::planning_interface::MoveGroupInterfacePtr move_group_;
-  moveit::semantic_world::SemanticWorldPtr semantic_world_;
+  // TODO (ddengster): Enable when moveit_ros_perception is ported
+  //  moveit::semantic_world::SemanticWorldPtr semantic_world_;
 
   moveit::planning_interface::MoveGroupInterface::PlanPtr current_plan_;
-  moveit_warehouse::PlanningSceneStoragePtr planning_scene_storage_;
-  moveit_warehouse::ConstraintsStoragePtr constraints_storage_;
-  moveit_warehouse::RobotStateStoragePtr robot_state_storage_;
+  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
+  // moveit_warehouse::PlanningSceneStoragePtr planning_scene_storage_;
+  // moveit_warehouse::ConstraintsStoragePtr constraints_storage_;
+  // moveit_warehouse::RobotStateStoragePtr robot_state_storage_;
 
-  std::shared_ptr<rviz::InteractiveMarker> scene_marker_;
+  std::shared_ptr<rviz_default_plugins::displays::InteractiveMarker> scene_marker_;
 
   typedef std::map<std::string, moveit_msgs::msg::RobotState> RobotStateMap;
   typedef std::pair<std::string, moveit_msgs::msg::RobotState> RobotStatePair;
@@ -187,7 +192,7 @@ private Q_SLOTS:
   void selectedCollisionObjectChanged();
   void objectPoseValueChanged(double value);
   void collisionObjectChanged(QListWidgetItem* item);
-  void imProcessFeedback(visualization_msgs::InteractiveMarkerFeedback& feedback);
+  void imProcessFeedback(visualization_msgs::msg::InteractiveMarkerFeedback& feedback);
   void copySelectedCollisionObject();
   void exportGeometryAsTextButtonClicked();
   void importGeometryFromTextButtonClicked();
@@ -254,7 +259,7 @@ private:
   void populateCollisionObjectsList();
   void computeImportGeometryFromText(const std::string& path);
   void computeExportGeometryAsText(const std::string& path);
-  visualization_msgs::InteractiveMarker
+  visualization_msgs::msg::InteractiveMarker
   createObjectMarkerMsg(const collision_detection::CollisionEnv::ObjectConstPtr& obj);
 
   // Stored scenes tab
@@ -277,12 +282,12 @@ private:
   void updateDetectedObjectsList(const std::vector<std::string>& object_ids);
   void publishTables();
   void updateSupportSurfacesList();
-  ros::Publisher object_recognition_trigger_publisher_;
+
   std::map<std::string, std::string> pick_object_name_;
   std::string place_object_name_;
-  std::vector<geometry_msgs::PoseStamped> place_poses_;
-  void pickObject();
-  void placeObject();
+  std::vector<geometry_msgs::msg::PoseStamped> place_poses_;
+  // void pickObject();
+  // void placeObject();
   void triggerObjectDetection();
   void updateTables();
   std::string support_surface_name_;
@@ -290,88 +295,43 @@ private:
   std::string selected_object_name_;
   std::string selected_support_surface_name_;
 
-  std::unique_ptr<actionlib::SimpleActionClient<object_recognition_msgs::ObjectRecognitionAction> >
-      object_recognition_client_;
-  template <typename T>
-  void waitForAction(const T& action, const ros::NodeHandle& node_handle, const ros::Duration& wait_for_server,
-                     const std::string& name);
-  void listenDetectedObjects(const object_recognition_msgs::RecognizedObjectArrayPtr& msg);
-  ros::Subscriber object_recognition_subscriber_;
+  rclcpp_action::Client<object_recognition_msgs::action::ObjectRecognition>::SharedPtr object_recognition_client_;
+  void listenDetectedObjects(const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr msg);
+  rclcpp::Subscription<object_recognition_msgs::msg::RecognizedObjectArray>::SharedPtr object_recognition_subscriber_;
 
-  ros::Subscriber plan_subscriber_;
-  ros::Subscriber execute_subscriber_;
-  ros::Subscriber stop_subscriber_;
-  ros::Subscriber update_start_state_subscriber_;
-  ros::Subscriber update_goal_state_subscriber_;
-  ros::Subscriber update_custom_start_state_subscriber_;
-  ros::Subscriber update_custom_goal_state_subscriber_;
+  rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr plan_subscriber_;
+  rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr execute_subscriber_;
+  rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr stop_subscriber_;
+  rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr update_start_state_subscriber_;
+  rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr update_goal_state_subscriber_;
+  rclcpp::Subscription<moveit_msgs::msg::RobotState>::SharedPtr update_custom_start_state_subscriber_;
+  rclcpp::Subscription<moveit_msgs::msg::RobotState>::SharedPtr update_custom_goal_state_subscriber_;
+
   // General
   void changePlanningGroupHelper();
   shapes::ShapePtr loadMeshResource(const std::string& url);
   void loadStoredStates(const std::string& pattern);
 
-  void remotePlanCallback(const std_msgs::EmptyConstPtr& msg);
-  void remoteExecuteCallback(const std_msgs::EmptyConstPtr& msg);
-  void remoteStopCallback(const std_msgs::EmptyConstPtr& msg);
-  void remoteUpdateStartStateCallback(const std_msgs::EmptyConstPtr& msg);
-  void remoteUpdateGoalStateCallback(const std_msgs::EmptyConstPtr& msg);
-  void remoteUpdateCustomStartStateCallback(const moveit_msgs::msg::RobotStateConstPtr& msg);
-  void remoteUpdateCustomGoalStateCallback(const moveit_msgs::msg::RobotStateConstPtr& msg);
+  void remotePlanCallback(const std_msgs::msg::Empty::ConstSharedPtr msg);
+  void remoteExecuteCallback(const std_msgs::msg::Empty::ConstSharedPtr msg);
+  void remoteStopCallback(const std_msgs::msg::Empty::ConstSharedPtr msg);
+  void remoteUpdateStartStateCallback(const std_msgs::msg::Empty::ConstSharedPtr msg);
+  void remoteUpdateGoalStateCallback(const std_msgs::msg::Empty::ConstSharedPtr msg);
+  void remoteUpdateCustomStartStateCallback(const moveit_msgs::msg::RobotState::ConstSharedPtr msg);
+  void remoteUpdateCustomGoalStateCallback(const moveit_msgs::msg::RobotState::ConstSharedPtr msg);
 
   /* Selects or unselects a item in a list by the item name */
   void setItemSelectionInList(const std::string& item_name, bool selection, QListWidget* list);
 
-  ros::NodeHandle nh_;
-  ros::Publisher planning_scene_publisher_;
-  ros::Publisher planning_scene_world_publisher_;
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Publisher<moveit_msgs::msg::PlanningScene>::SharedPtr planning_scene_publisher_;
+  rclcpp::Publisher<moveit_msgs::msg::PlanningSceneWorld>::SharedPtr planning_scene_world_publisher_;
 
   collision_detection::CollisionEnv::ObjectConstPtr scaled_object_;
 
   std::vector<std::pair<std::string, bool> > known_collision_objects_;
   long unsigned int known_collision_objects_version_;
   bool first_time_;
-  ros::ServiceClient clear_octomap_service_client_;
-};
-
-// \todo THIS IS REALLY BAD. NEED TO MOVE THIS AND RELATED FUNCTIONALITY OUT OF HERE
-template <typename T>
-void MotionPlanningFrame::waitForAction(const T& action, const ros::NodeHandle& node_handle,
-                                        const ros::Duration& wait_for_server, const std::string& name)
-{
-  ROS_DEBUG("Waiting for MoveGroup action server (%s)...", name.c_str());
-
-  // in case ROS time is published, wait for the time data to arrive
-  ros::Time start_time = ros::Time::now();
-  while (start_time == ros::Time::now())
-  {
-    ros::WallDuration(0.01).sleep();
-    ros::spinOnce();
-  }
-
-  // wait for the server (and spin as needed)
-  if (wait_for_server == ros::Duration(0, 0))
-  {
-    // wait forever until action server connects
-    while (node_handle.ok() && !action->isServerConnected())
-    {
-      ros::WallDuration(0.02).sleep();
-      ros::spinOnce();
-    }
-  }
-  else
-  {
-    // wait for a limited amount of non-simulated time
-    ros::WallTime final_time = ros::WallTime::now() + ros::WallDuration(wait_for_server.toSec());
-    while (node_handle.ok() && !action->isServerConnected() && final_time > ros::WallTime::now())
-    {
-      ros::WallDuration(0.02).sleep();
-      ros::spinOnce();
-    }
-  }
-
-  if (!action->isServerConnected())
-    throw std::runtime_error("Unable to connect to move_group action server within allotted time");
-  else
-    ROS_DEBUG("Connected to '%s'", name.c_str());
+  rclcpp::Client<std_srvs::srv::Empty>::SharedPtr clear_octomap_service_client_;
 };
 }  // namespace moveit_rviz_plugin
