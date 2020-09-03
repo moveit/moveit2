@@ -226,6 +226,7 @@ int main(int argc, char** argv)
     planning_scene_monitor->startSceneMonitor();
     planning_scene_monitor->startWorldGeometryMonitor();
     planning_scene_monitor->startStateMonitor();
+    planning_scene_monitor->setPlanningScenePublishingFrequency(100);
     printf(MOVEIT_CONSOLE_COLOR_CYAN "Planning scene monitors started.\n" MOVEIT_CONSOLE_COLOR_RESET);
 
     move_group::MoveGroupExe mge(nh, planning_scene_monitor, debug);
