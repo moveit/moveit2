@@ -243,8 +243,8 @@ void InteractionHandler::handleEndEffector(
 
   // modify the RobotState in-place with state_lock_ held.
   // This locks state_lock_ before calling updateState()
-  LockedRobotState::modifyState(
-      boost::bind(&InteractionHandler::updateStateEndEffector, this, boost::placeholders::_1, &eef, &tpose.pose, &callback));
+  LockedRobotState::modifyState(boost::bind(&InteractionHandler::updateStateEndEffector, this, boost::placeholders::_1,
+                                            &eef, &tpose.pose, &callback));
 
   // This calls update_callback_ to notify client that state changed.
   if (callback)

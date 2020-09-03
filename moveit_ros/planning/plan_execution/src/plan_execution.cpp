@@ -86,7 +86,8 @@ plan_execution::PlanExecution::PlanExecution(
   new_scene_update_ = false;
 
   // we want to be notified when new information is available
-  planning_scene_monitor_->addUpdateCallback(boost::bind(&PlanExecution::planningSceneUpdatedCallback, this, boost::placeholders::_1));
+  planning_scene_monitor_->addUpdateCallback(
+      boost::bind(&PlanExecution::planningSceneUpdatedCallback, this, boost::placeholders::_1));
 
   // start the dynamic-reconfigure server
   // reconfigure_impl_ = new DynamicReconfigureImpl(this);
