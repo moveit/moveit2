@@ -113,7 +113,7 @@ void MotionPlanningFrame::onClearOctomapClicked()
   auto req = std::make_shared<std_srvs::srv::Empty::Request>();
   auto result = clear_octomap_service_client_->async_send_request(req);
 
-  if (rclcpp::spin_until_future_complete(node_, result) != rclcpp::executor::FutureReturnCode::SUCCESS)
+  if (rclcpp::spin_until_future_complete(node_, result) != rclcpp::FutureReturnCode::SUCCESS)
   {
     RCLCPP_ERROR(LOGGER, "Failed to call clear_octomap_service");
   }

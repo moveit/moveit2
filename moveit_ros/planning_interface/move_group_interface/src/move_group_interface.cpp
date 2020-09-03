@@ -233,7 +233,7 @@ public:
     std::map<std::string, std::string> result;
 
     auto res = get_params_service_->async_send_request(req);
-    if (rclcpp::spin_until_future_complete(pnode_, res) == rclcpp::executor::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(pnode_, res) == rclcpp::FutureReturnCode::SUCCESS)
     {
       response = res.get();
       for (unsigned int i = 0, end = response->params.keys.size(); i < end; ++i)
@@ -594,7 +594,7 @@ public:
   //    int64_t timeout = 3.0;
   //    auto future = place_action_client_->async_send_goal(goal);
   //    if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(timeout)) !=
-  //      rclcpp::executor::FutureReturnCode::SUCCESS)
+  //      rclcpp::FutureReturnCode::SUCCESS)
   //    {
   //      RCLCPP_ERROR_STREAM(LOGGER, "Place action timeout reached");
   //      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
@@ -613,7 +613,7 @@ public:
   //    int64_t timeout = 3.0;
   //    auto future = pick_action_client_->async_send_goal(goal);
   //    if (rclcpp::spin_until_future_complete(node_, future, std::chrono::seconds(timeout)) !=
-  //      rclcpp::executor::FutureReturnCode::SUCCESS)
+  //      rclcpp::FutureReturnCode::SUCCESS)
   //    {
   //      RCLCPP_ERROR_STREAM(LOGGER, "Pick action timeout reached");
   //      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
@@ -664,7 +664,7 @@ public:
   //
   //    auto res = plan_grasps_service_->async_send_request(request);
   //    if (rclcpp::spin_until_future_complete(node_, res) !=
-  //          rclcpp::executor::FutureReturnCode::SUCCESS)
+  //          rclcpp::FutureReturnCode::SUCCESS)
   //    {
   //      RCLCPP_ERROR(LOGGER, "Grasp planning failed. Unable to pick.");
   //      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);

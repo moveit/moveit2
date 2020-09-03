@@ -72,7 +72,7 @@ public:
     request->components.components = request->components.WORLD_OBJECT_NAMES;
 
     auto res = planning_scene_service_->async_send_request(request);
-    if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::executor::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::FutureReturnCode::SUCCESS)
     {
       return result;
     }
@@ -101,7 +101,7 @@ public:
     request->components.components = request->components.WORLD_OBJECT_GEOMETRY;
 
     auto res = planning_scene_service_->async_send_request(request);
-    if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::executor::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::FutureReturnCode::SUCCESS)
     {
       RCLCPP_WARN(LOGGER, "Could not call planning scene service to get object names");
       return result;
@@ -148,7 +148,7 @@ public:
     request->components.components = request->components.WORLD_OBJECT_GEOMETRY;
 
     auto res = planning_scene_service_->async_send_request(request);
-    if (rclcpp::spin_until_future_complete(node_, res) == rclcpp::executor::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(node_, res) == rclcpp::FutureReturnCode::SUCCESS)
     {
       response = res.get();
       for (const moveit_msgs::msg::CollisionObject& collision_object : response->scene.world.collision_objects)
@@ -178,7 +178,7 @@ public:
     request->components.components = request->components.WORLD_OBJECT_GEOMETRY;
 
     auto res = planning_scene_service_->async_send_request(request);
-    if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::executor::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::FutureReturnCode::SUCCESS)
     {
       RCLCPP_WARN(LOGGER, "Could not call planning scene service to get object geometries");
       return result;
@@ -205,7 +205,7 @@ public:
     request->components.components = request->components.ROBOT_STATE_ATTACHED_OBJECTS;
 
     auto res = planning_scene_service_->async_send_request(request);
-    if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::executor::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::FutureReturnCode::SUCCESS)
     {
       RCLCPP_WARN(LOGGER, "Could not call planning scene service to get attached object geometries");
       return result;
@@ -231,7 +231,7 @@ public:
     request->scene = planning_scene;
 
     auto res = apply_planning_scene_service_->async_send_request(request);
-    if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::executor::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(node_, res) != rclcpp::FutureReturnCode::SUCCESS)
     {
       RCLCPP_WARN(LOGGER, "Failed to call ApplyPlanningScene service");
     }
