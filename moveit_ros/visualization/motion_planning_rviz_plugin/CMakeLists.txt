@@ -4,7 +4,7 @@ set(HEADERS
   include/moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h
   include/moveit/motion_planning_rviz_plugin/motion_planning_param_widget.h
 )
-qt_wrap_ui(UIC_FILES
+qt5_wrap_ui(UIC_FILES
   src/ui/motion_planning_rviz_plugin_frame.ui
   src/ui/motion_planning_rviz_plugin_frame_joints.ui
 )
@@ -27,20 +27,36 @@ set(SOURCE_FILES
 )
 
 set(MOVEIT_LIB_NAME moveit_motion_planning_rviz_plugin)
-add_library(${MOVEIT_LIB_NAME}_core ${SOURCE_FILES} ${HEADERS} ${UIC_FILES})
+add_library(${MOVEIT_LIB_NAME}_core SHARED ${SOURCE_FILES} ${HEADERS} ${UIC_FILES})
 set_target_properties(${MOVEIT_LIB_NAME}_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME}_core
-  moveit_rviz_plugin_render_tools
-  moveit_planning_scene_rviz_plugin_core
-  ${catkin_LIBRARIES} ${rviz_DEFAULT_PLUGIN_LIBRARIES} ${QT_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(${MOVEIT_LIB_NAME}_core moveit_rviz_plugin_render_tools moveit_planning_scene_rviz_plugin)
+ament_target_dependencies(${MOVEIT_LIB_NAME}_core
+  Boost
+  moveit_ros_robot_interaction
+  moveit_ros_planning_interface
+  rviz2
+  rviz_ogre_vendor
+  Qt5
+  pluginlib
+)
 
-add_library(${MOVEIT_LIB_NAME} src/plugin_init.cpp)
+add_library(${MOVEIT_LIB_NAME} SHARED src/plugin_init.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core)
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  Boost
+  moveit_ros_robot_interaction
+  pluginlib
+)
 
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+install(DIRECTORY include/ DESTINATION include)
 
 install(TARGETS ${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+ament_export_libraries(
+  ${MOVEIT_LIB_NAME}_core
+  ${MOVEIT_LIB_NAME}
+)

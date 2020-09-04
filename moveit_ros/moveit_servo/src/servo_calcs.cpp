@@ -1090,7 +1090,6 @@ bool ServoCalcs::getCommandFrameTransform(Eigen::Isometry3d& transform)
 
   // All zeros means the transform wasn't initialized, so return false
   return !transform.matrix().isZero(0);
-  return false;
 }
 
 sensor_msgs::msg::JointState::ConstSharedPtr ServoCalcs::getLatestJointState() const

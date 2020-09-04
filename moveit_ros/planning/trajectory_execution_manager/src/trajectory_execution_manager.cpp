@@ -75,6 +75,10 @@ TrajectoryExecutionManager::~TrajectoryExecutionManager()
 {
   run_continuous_execution_thread_ = false;
   stopExecution(true);
+  private_executor_->cancel();
+  if (private_executor_thread_.joinable())
+    private_executor_thread_.join();
+  private_executor_.reset();
 }
 
 void TrajectoryExecutionManager::initialize()
@@ -147,6 +151,11 @@ void TrajectoryExecutionManager::initialize()
 
         controller_manager_ = controller_manager_loader_->createUniqueInstance(controller);
         controller_manager_->initialize(controller_mgr_node_);
+        private_executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+        private_executor_->add_node(controller_mgr_node_);
+
+        // start executor on a different thread now
+        private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
       }
       catch (pluginlib::PluginlibException& ex)
       {

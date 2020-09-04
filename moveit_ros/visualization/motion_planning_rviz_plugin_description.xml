@@ -1,5 +1,5 @@
-<library path="libmoveit_motion_planning_rviz_plugin">
-  <class name="moveit_rviz_plugin/MotionPlanning" type="moveit_rviz_plugin::MotionPlanningDisplay" base_class_type="rviz::Display">
+<library path="moveit_motion_planning_rviz_plugin">
+  <class name="moveit_rviz_plugin/MotionPlanning" type="moveit_rviz_plugin::MotionPlanningDisplay" base_class_type="rviz_common::Display">
     <description>
       Displays information about a planning scene and can animate solution paths within that planning scene.
     </description>

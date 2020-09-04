@@ -148,7 +148,7 @@ void planning_scene_monitor::CurrentStateMonitor::startStateMonitor(const std::s
       //     tf_buffer_->_addTransformsChangedListener(std::bind(&CurrentStateMonitor::tfCallback, this))));
     }
     state_monitor_started_ = true;
-    monitor_start_time_ = rclcpp::Clock().now();
+    monitor_start_time_ = node_->now();
     RCLCPP_INFO(LOGGER, "Listening to joint states on topic '%s'", joint_states_topic.c_str());
   }
 }
