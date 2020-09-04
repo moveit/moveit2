@@ -16,7 +16,7 @@ RUN mkdir src && \
     cd src && \
     #
     # Download moveit source so that we can get necessary dependencies
-    wget -q https://raw.githubusercontent.com/ros-planning/moveit2/master/moveit2.repos && \
+    wget -q https://raw.githubusercontent.com/ros-planning/moveit2/main/moveit2.repos && \
     vcs import < moveit2.repos && \
     # Remove folders declared as COLCON_IGNORE
     find -L . -name COLCON_IGNORE -printf "%h\0" | xargs -0 rm -rf
