@@ -51,7 +51,7 @@ For this to work the controller names should not contain slashes. This is a stri
 
 ## moveit_ros_control_interface::MoveItMultiControllerManager
 
-This plugin does not need further configuration. It polls the ROS master for services and identifies ros_control nodes automatically.
+This plugin does not need further configuration. It polls the ROS main for services and identifies ros_control nodes automatically.
 It spawns `moveit_ros_control_interface::MoveItControllerManager` instances with their namespace and takes cares of proper delegation.
 
 

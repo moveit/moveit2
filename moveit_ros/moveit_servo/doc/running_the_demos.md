@@ -19,7 +19,7 @@ cd $COLCON_WS/src
 
 #### Download source code
 ```bash
-git clone https://github.com/ros-planning/moveit2.git -b master
+git clone https://github.com/ros-planning/moveit2.git -b main
 vcs import < moveit2/moveit2.repos
 rosdep install -r --from-paths . --ignore-src --rosdistro foxy -y
 ```

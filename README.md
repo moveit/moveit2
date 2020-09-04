@@ -6,7 +6,7 @@ The MoveIt Motion Planning Framework for **ROS 2**. For ROS 1, see [MoveIt 1](ht
 
 ## Continuous Integration Status
 
-[![Build Status](https://travis-ci.com/ros-planning/moveit2.svg?branch=master)](https://travis-ci.com/ros-planning/moveit2)
+[![Build Status](https://travis-ci.com/ros-planning/moveit2.svg?branch=main)](https://travis-ci.com/ros-planning/moveit2)
 
 ## General MoveIt Documentation
 
