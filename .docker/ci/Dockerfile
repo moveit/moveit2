@@ -38,7 +38,7 @@ RUN apt-get -qq update && \
 # Download moveit source and fetch all its dependencies
 RUN mkdir src && \
     cd $ROS_WS/src && \
-    wget -q https://raw.githubusercontent.com/ros-planning/moveit2/master/moveit2.repos && \
+    wget -q https://raw.githubusercontent.com/ros-planning/moveit2/main/moveit2.repos && \
     vcs import < moveit2.repos && \
     # Remove folders declared as COLCON_IGNORE
     find -L . -name COLCON_IGNORE -printf "%h\0" | xargs -0 rm -rf && \

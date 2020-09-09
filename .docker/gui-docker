@@ -7,9 +7,9 @@
 # See documentation for detailed examples: https://moveit.ros.org/install/docker/
 
 # Example commands:
-# ./gui-docker --rm -it moveit/moveit:master-source /bin/bash     # Run a (randomly named) container that is removed on exit
-# ./gui-docker -v ~/ros_ws:/root/ros_ws --rm -it moveit/moveit:master-source /bin/bash   # Same, but also link host volume ~/ros_ws to /root/ros_ws in the container
-# ./gui-docker -c container_name                                  # Start (or continue) an interactive bash in a moveit/moveit:master-source container
+# ./gui-docker --rm -it moveit/moveit:foxy-source /bin/bash     # Run a (randomly named) container that is removed on exit
+# ./gui-docker -v ~/ros_ws:/root/ros_ws --rm -it moveit/moveit:foxy-source /bin/bash   # Same, but also link host volume ~/ros_ws to /root/ros_ws in the container
+# ./gui-docker -c container_name                                  # Start (or continue) an interactive bash in a moveit/moveit:foxy-source container
 # ./gui-docker                                                    # Same, but use the default container name "default_moveit_container"
 
 function check_nvidia2() {
@@ -115,7 +115,7 @@ if [ -n "${CONTAINER_NAME:-}" ] ; then
       NAME_OPTION="--name=$CONTAINER_NAME"
       if [ "$(count_positional_args $@)" == "0" ] ; then
          # If no further (positional) arguments were provided, start a bash in the default image (for dummy users)
-         DUMMY_DEFAULTS="-it moveit/moveit:master-source bash"
+         DUMMY_DEFAULTS="-it moveit/moveit:foxy-source bash"
       fi
    else
       if [ -z "$($DOCKER_EXECUTABLE ps -q --filter name=^$CONTAINER_NAME\$)" ] ; then
