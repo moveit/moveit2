@@ -59,6 +59,7 @@ set_target_properties(moveit_move_group_default_capabilities
 target_include_directories(moveit_move_group_default_capabilities PUBLIC include)
 ament_target_dependencies(moveit_move_group_default_capabilities
   rclcpp rclcpp_action moveit_core moveit_ros_planning std_srvs)
+target_link_libraries(moveit_move_group_default_capabilities moveit_move_group_capabilities_base)
 
 install(TARGETS move_group list_move_group_capabilities
   RUNTIME

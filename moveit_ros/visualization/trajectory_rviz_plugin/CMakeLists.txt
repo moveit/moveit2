@@ -25,7 +25,9 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}_core
     moveit_msgs
     pluginlib
     Boost
+    rviz_ogre_vendor
 )
+target_include_directories(${MOVEIT_LIB_NAME}_core PRIVATE "${OGRE_PREFIX_DIR}/include")
 
 # Plugin Initializer
 add_library(${MOVEIT_LIB_NAME} SHARED src/plugin_init.cpp)
@@ -35,7 +37,9 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
     rclcpp
     pluginlib
     Boost
+    rviz_ogre_vendor
 )
+target_include_directories(${MOVEIT_LIB_NAME} PRIVATE "${OGRE_PREFIX_DIR}/include")
 
 install(DIRECTORY include/ DESTINATION include)
 

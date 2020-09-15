@@ -8,6 +8,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_msgs
   rclcpp
   Boost
+  pluginlib
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME}

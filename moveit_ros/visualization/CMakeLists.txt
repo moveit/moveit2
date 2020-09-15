@@ -104,3 +104,5 @@ ament_export_dependencies(tf2_eigen)
 ament_export_dependencies(Eigen3)
 ament_export_dependencies(rviz_ogre_vendor)
 ament_package()
+
+include_directories("${OGRE_PREFIX_DIR}/include")
