@@ -82,10 +82,9 @@ void MoveGroupCartesianPathService::initialize()
       CARTESIAN_PATH_SERVICE_NAME, std::bind(&MoveGroupCartesianPathService::computeService, this, _1, _2, _3));
 }
 
-bool MoveGroupCartesianPathService::computeService(
-    const std::shared_ptr<rmw_request_id_t> request_header,
-    const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
-    std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res)
+bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_request_id_t> request_header,
+                                                   const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
+                                                   std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res)
 {
   RCLCPP_INFO(LOGGER, "Received request to compute Cartesian path");
   context_->planning_scene_monitor_->updateFrameTransforms();
@@ -153,8 +152,9 @@ bool MoveGroupCartesianPathService::computeService(
                 boost::placeholders::_3);
           }
           bool global_frame = !moveit::core::Transforms::sameFrame(link_name, req->header.frame_id);
-          RCLCPP_INFO(LOGGER, "Attempting to follow %u waypoints for link '%s' using a step of %lf m "
-                              "and jump threshold %lf (in %s reference frame)",
+          RCLCPP_INFO(LOGGER,
+                      "Attempting to follow %u waypoints for link '%s' using a step of %lf m "
+                      "and jump threshold %lf (in %s reference frame)",
                       (unsigned int)waypoints.size(), link_name.c_str(), req->max_step, req->jump_threshold,
                       global_frame ? "global" : "link");
           std::vector<moveit::core::RobotStatePtr> traj;

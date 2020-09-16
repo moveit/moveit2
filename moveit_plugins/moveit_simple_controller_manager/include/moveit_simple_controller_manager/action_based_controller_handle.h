@@ -80,9 +80,10 @@ public:
                               const std::string& logger_name)
     : ActionBasedControllerHandleBase(name, logger_name), node_(node), done_(true), namespace_(ns)
   {
-    controller_action_client_ = rclcpp_action::create_client<T>(
-        node_->get_node_base_interface(), node_->get_node_graph_interface(), node_->get_node_logging_interface(),
-        node_->get_node_waitables_interface(), getActionName());
+    controller_action_client_ =
+        rclcpp_action::create_client<T>(node_->get_node_base_interface(), node_->get_node_graph_interface(),
+                                        node_->get_node_logging_interface(), node_->get_node_waitables_interface(),
+                                        getActionName());
 
     unsigned int attempts = 0;
     double timeout;

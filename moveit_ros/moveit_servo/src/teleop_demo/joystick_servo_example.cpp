@@ -91,12 +91,12 @@ std::map<Button, double> BUTTON_DEFAULTS;
 // To change controls or setup a new controller, all you should to do is change the above enums and the follow 2
 // functions
 /** \brief // This converts a joystick axes and buttons array to a TwistStamped or JointJog message
-   * @param axes The vector of continuous controller joystick axes
-   * @param buttons The vector of discrete controller button values
-   * @param twist A TwistStamped message to update in prep for publishing
-   * @param joint A JointJog message to update in prep for publishing
-   * @return return true if you want to publish a Twist, false if you want to publish a JointJog
-   */
+ * @param axes The vector of continuous controller joystick axes
+ * @param buttons The vector of discrete controller button values
+ * @param twist A TwistStamped message to update in prep for publishing
+ * @param joint A JointJog message to update in prep for publishing
+ * @return return true if you want to publish a Twist, false if you want to publish a JointJog
+ */
 bool convertJoyToCmd(const std::vector<float>& axes, const std::vector<int>& buttons,
                      std::unique_ptr<geometry_msgs::msg::TwistStamped>& twist,
                      std::unique_ptr<control_msgs::msg::JointJog>& joint)
@@ -138,9 +138,9 @@ bool convertJoyToCmd(const std::vector<float>& axes, const std::vector<int>& but
 }
 
 /** \brief // This should update the frame_to_publish_ as needed for changing command frame via controller
-   * @param frame_name Set the command frame to this
-   * @param buttons The vector of discrete controller button values
-   */
+ * @param frame_name Set the command frame to this
+ * @param buttons The vector of discrete controller button values
+ */
 void updateCmdFrame(std::string& frame_name, const std::vector<int>& buttons)
 {
   if (buttons[CHANGE_VIEW] && frame_name == EEF_FRAME_ID)

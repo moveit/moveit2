@@ -65,8 +65,7 @@ void declareAndGetParam(T& output_value, const std::string& param_name, const rc
     }
     else
     {
-      RCLCPP_ERROR_STREAM(logger, "Error getting parameter \'" << param_name
-                                                               << "\', check parameter type in YAML file");
+      RCLCPP_ERROR_STREAM(logger, "Error getting parameter \'" << param_name << "\', check parameter type in YAML file");
       throw e;
     }
   }
@@ -122,8 +121,7 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
                           node, logger);
 
   // Configure handling of singularities and joint limits
-  declareAndGetParam<double>(parameters->lower_singularity_threshold, ns + ".lower_singularity_threshold", node,
-                             logger);
+  declareAndGetParam<double>(parameters->lower_singularity_threshold, ns + ".lower_singularity_threshold", node, logger);
   declareAndGetParam<double>(parameters->hard_stop_singularity_threshold, ns + ".hard_stop_singularity_threshold", node,
                              logger);
   declareAndGetParam<double>(parameters->joint_limit_margin, ns + ".joint_limit_margin", node, logger);

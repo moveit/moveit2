@@ -348,14 +348,16 @@ void RobotModel::buildGroupStates(const srdf::Model& srdf_model)
             for (std::size_t j = 0; j < vn.size(); ++j)
               state[vn[j]] = jt->second[j];
           else
-            RCLCPP_ERROR(LOGGER, "The model for joint '%s' requires %d variable values, "
-                                 "but only %d variable values were supplied in default state '%s' for group '%s'",
+            RCLCPP_ERROR(LOGGER,
+                         "The model for joint '%s' requires %d variable values, "
+                         "but only %d variable values were supplied in default state '%s' for group '%s'",
                          jt->first.c_str(), (int)vn.size(), (int)jt->second.size(), group_state.name_.c_str(),
                          jmg->getName().c_str());
         }
         else
-          RCLCPP_ERROR(LOGGER, "Group state '%s' specifies value for joint '%s', "
-                               "but that joint is not part of group '%s'",
+          RCLCPP_ERROR(LOGGER,
+                       "Group state '%s' specifies value for joint '%s', "
+                       "but that joint is not part of group '%s'",
                        group_state.name_.c_str(), jt->first.c_str(), jmg->getName().c_str());
       }
       if (!remaining_joints.empty())
@@ -629,8 +631,9 @@ void RobotModel::buildGroupsInfoEndEffectors(const srdf::Model& srdf_model)
                              eef.parent_group_.c_str(), eef.name_.c_str());
             }
             else
-              RCLCPP_ERROR(LOGGER, "Group '%s' was specified as parent group for end-effector '%s' "
-                                   "but it does not include the parent link '%s'",
+              RCLCPP_ERROR(LOGGER,
+                           "Group '%s' was specified as parent group for end-effector '%s' "
+                           "but it does not include the parent link '%s'",
                            eef.parent_group_.c_str(), eef.name_.c_str(), eef.parent_link_.c_str());
           }
           else
@@ -924,8 +927,9 @@ JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const
     {
       if (virtual_joint.child_link_ != child_link->name)
       {
-        RCLCPP_WARN(LOGGER, "Skipping virtual joint '%s' because its child frame '%s' "
-                            "does not match the URDF frame '%s'",
+        RCLCPP_WARN(LOGGER,
+                    "Skipping virtual joint '%s' because its child frame '%s' "
+                    "does not match the URDF frame '%s'",
                     virtual_joint.name_.c_str(), virtual_joint.child_link_.c_str(), child_link->name.c_str());
       }
       else if (virtual_joint.parent_frame_.empty())
@@ -1025,9 +1029,10 @@ LinkModel* RobotModel::constructLinkModel(const urdf::Link* urdf_link)
   if (warn_about_missing_collision)
   {
     RCLCPP_WARN_STREAM(LOGGER,  // TODO(henningkayser): use child namespace "empty_collision_geometry"
-                       "Link " << urdf_link->name << " has visual geometry but no collision geometry. "
-                                                     "Collision geometry will be left empty. "
-                                                     "Fix your URDF file by explicitly specifying collision geometry.");
+                       "Link " << urdf_link->name
+                               << " has visual geometry but no collision geometry. "
+                                  "Collision geometry will be left empty. "
+                                  "Fix your URDF file by explicitly specifying collision geometry.");
   }
 
   new_link_model->setGeometry(shapes, poses);

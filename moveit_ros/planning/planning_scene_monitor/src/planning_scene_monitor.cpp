@@ -847,8 +847,7 @@ void PlanningSceneMonitor::includeWorldObjectsInOctree()
   boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
 
   // clear information about any attached object
-  for (std::pair<const std::string,
-                 std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>>>&
+  for (std::pair<const std::string, std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>>>&
            collision_body_shape_handle : collision_body_shape_handles_)
     for (std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>& it :
          collision_body_shape_handle.second)
@@ -1023,8 +1022,7 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
   bool success = last_robot_motion_time_ >= t;
   // suppress warning if we received an update at all
   if (!success && prev_robot_motion_time != last_robot_motion_time_)
-    RCLCPP_WARN(LOGGER, "Maybe failed to update robot state, time diff: %.3fs",
-                (t - last_robot_motion_time_).seconds());
+    RCLCPP_WARN(LOGGER, "Maybe failed to update robot state, time diff: %.3fs", (t - last_robot_motion_time_).seconds());
 
   RCLCPP_DEBUG(LOGGER, "sync done: robot motion: %i scene update: %i", (t - last_robot_motion_time_).seconds(),
                (t - last_update_time_).seconds());

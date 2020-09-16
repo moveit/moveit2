@@ -49,7 +49,7 @@ namespace moveit_simple_controller_manager
  * or anything using a control_mgs/FollowJointTrajectoryAction.
  */
 class FollowJointTrajectoryControllerHandle
-    : public ActionBasedControllerHandle<control_msgs::action::FollowJointTrajectory>
+  : public ActionBasedControllerHandle<control_msgs::action::FollowJointTrajectory>
 {
 public:
   FollowJointTrajectoryControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name,
@@ -69,8 +69,7 @@ protected:
                                                          const std::string& name);
 
   void controllerDoneCallback(
-      const rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::WrappedResult&
-          wrapped_result);
+      const rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::WrappedResult& wrapped_result);
 
   control_msgs::action::FollowJointTrajectory::Goal goal_template_;
 };

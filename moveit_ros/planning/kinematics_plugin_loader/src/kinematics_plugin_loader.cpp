@@ -94,16 +94,18 @@ public:
     if (ik_it != iksolver_to_tip_links_.end())
     {
       // the tip is being chosen based on a corresponding rosparam ik link
-      RCLCPP_DEBUG(LOGGER, "Choosing tip frame of kinematic solver for group %s"
-                           "based on values in rosparam server.",
+      RCLCPP_DEBUG(LOGGER,
+                   "Choosing tip frame of kinematic solver for group %s"
+                   "based on values in rosparam server.",
                    jmg->getName().c_str());
       tips = ik_it->second;
     }
     else
     {
       // get the last link in the chain
-      RCLCPP_DEBUG(LOGGER, "Choosing tip frame of kinematic solver for group %s"
-                           "based on last link in chain",
+      RCLCPP_DEBUG(LOGGER,
+                   "Choosing tip frame of kinematic solver for group %s"
+                   "based on last link in chain",
                    jmg->getName().c_str());
 
       tips.push_back(jmg->getLinkModels().back()->getName());
@@ -185,8 +187,9 @@ public:
           }
 
           result->setDefaultTimeout(jmg->getDefaultIKTimeout());
-          RCLCPP_DEBUG(LOGGER, "Successfully allocated and initialized a kinematics solver of type '%s' with search "
-                               "resolution %lf for group '%s' at address %p",
+          RCLCPP_DEBUG(LOGGER,
+                       "Successfully allocated and initialized a kinematics solver of type '%s' with search "
+                       "resolution %lf for group '%s' at address %p",
                        it->second[i].c_str(), search_res, jmg->getName().c_str(), result.get());
           break;
         }

@@ -195,8 +195,7 @@ const rclcpp::Node::SharedPtr& MoveItCpp::getNode() const
 
 bool MoveItCpp::getCurrentState(moveit::core::RobotStatePtr& current_state, double wait_seconds)
 {
-  if (wait_seconds > 0.0 &&
-      !planning_scene_monitor_->getStateMonitor()->waitForCurrentState(node_->now(), wait_seconds))
+  if (wait_seconds > 0.0 && !planning_scene_monitor_->getStateMonitor()->waitForCurrentState(node_->now(), wait_seconds))
   {
     RCLCPP_ERROR(LOGGER, "Did not receive robot state");
     return false;

@@ -328,15 +328,16 @@ void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNum
 {
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
-    active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(
-        rng, values + active_joint_model_start_index_[i], *active_joint_bounds[i],
-        near + active_joint_model_start_index_[i], distance);
+    active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(rng, values + active_joint_model_start_index_[i],
+                                                                    *active_joint_bounds[i],
+                                                                    near + active_joint_model_start_index_[i],
+                                                                    distance);
   updateMimicJoints(values);
 }
 
-void JointModelGroup::getVariableRandomPositionsNearBy(
-    random_numbers::RandomNumberGenerator& rng, double* values, const JointBoundsVector& active_joint_bounds,
-    const double* near, const std::map<JointModel::JointType, double>& distance_map) const
+void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values,
+                                                       const JointBoundsVector& active_joint_bounds, const double* near,
+                                                       const std::map<JointModel::JointType, double>& distance_map) const
 {
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
@@ -350,9 +351,10 @@ void JointModelGroup::getVariableRandomPositionsNearBy(
     {
       RCLCPP_WARN(LOGGER, "Did not pass in distance for '%s'", active_joint_model_vector_[i]->getName().c_str());
     }
-    active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(
-        rng, values + active_joint_model_start_index_[i], *active_joint_bounds[i],
-        near + active_joint_model_start_index_[i], distance);
+    active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(rng, values + active_joint_model_start_index_[i],
+                                                                    *active_joint_bounds[i],
+                                                                    near + active_joint_model_start_index_[i],
+                                                                    distance);
   }
   updateMimicJoints(values);
 }
@@ -363,14 +365,14 @@ void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNum
 {
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   if (distances.size() != active_joint_model_vector_.size())
-    throw Exception("When sampling random values nearby for group '" + name_ +
-                    "', distances vector should be of size " +
+    throw Exception("When sampling random values nearby for group '" + name_ + "', distances vector should be of size " +
                     boost::lexical_cast<std::string>(active_joint_model_vector_.size()) + ", but it is of size " +
                     boost::lexical_cast<std::string>(distances.size()));
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
-    active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(
-        rng, values + active_joint_model_start_index_[i], *active_joint_bounds[i],
-        near + active_joint_model_start_index_[i], distances[i]);
+    active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(rng, values + active_joint_model_start_index_[i],
+                                                                    *active_joint_bounds[i],
+                                                                    near + active_joint_model_start_index_[i],
+                                                                    distances[i]);
   updateMimicJoints(values);
 }
 
@@ -572,8 +574,9 @@ bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik
       // skip reported fixed joints
       if (hasJointModel(ik_jname) && getJointModel(ik_jname)->getType() == JointModel::FIXED)
         continue;
-      RCLCPP_ERROR(LOGGER, "IK solver computes joint values for joint '%s' "
-                           "but group '%s' does not contain such a joint.",
+      RCLCPP_ERROR(LOGGER,
+                   "IK solver computes joint values for joint '%s' "
+                   "but group '%s' does not contain such a joint.",
                    ik_jname.c_str(), getName().c_str());
       return false;
     }

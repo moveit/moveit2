@@ -195,8 +195,7 @@ void AllowedCollisionMatrix::removeEntry(const std::string& name1, const std::st
   }
 }
 
-void AllowedCollisionMatrix::setEntry(const std::string& name, const std::vector<std::string>& other_names,
-                                      bool allowed)
+void AllowedCollisionMatrix::setEntry(const std::string& name, const std::vector<std::string>& other_names, bool allowed)
 {
   for (const auto& other_name : other_names)
     if (other_name != name)

@@ -67,8 +67,9 @@ static bool get_uint_parameter_or(const rclcpp::Node::SharedPtr& node, const std
       return true;
     }
 
-    RCLCPP_WARN_STREAM(LOGGER, "Value for parameter '" << param_name << "' must be positive\n"
-                                                                        "Using back to default value:"
+    RCLCPP_WARN_STREAM(LOGGER, "Value for parameter '" << param_name
+                                                       << "' must be positive\n"
+                                                          "Using back to default value:"
                                                        << default_value);
   }
 

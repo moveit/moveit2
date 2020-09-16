@@ -324,8 +324,9 @@ bool PlanningScene::setActiveCollisionDetector(const std::string& collision_dete
   }
   else
   {
-    RCLCPP_ERROR(LOGGER, "Cannot setActiveCollisionDetector to '%s' -- it has been added to PlanningScene. "
-                         "Keeping existing active collision detector '%s'",
+    RCLCPP_ERROR(LOGGER,
+                 "Cannot setActiveCollisionDetector to '%s' -- it has been added to PlanningScene. "
+                 "Keeping existing active collision detector '%s'",
                  collision_detector_name.c_str(), active_collision_->alloc_->getName().c_str());
     return false;
   }
@@ -359,8 +360,9 @@ PlanningScene::getCollisionEnvUnpadded(const std::string& collision_detector_nam
   CollisionDetectorConstIterator it = collision_.find(collision_detector_name);
   if (it == collision_.end())
   {
-    RCLCPP_ERROR(LOGGER, "Could not get CollisionRobotUnpadded named '%s'. "
-                         "Returning active CollisionRobotUnpadded '%s' instead",
+    RCLCPP_ERROR(LOGGER,
+                 "Could not get CollisionRobotUnpadded named '%s'. "
+                 "Returning active CollisionRobotUnpadded '%s' instead",
                  collision_detector_name.c_str(), active_collision_->alloc_->getName().c_str());
     return active_collision_->getCollisionEnvUnpadded();
   }
@@ -1094,11 +1096,11 @@ void PlanningScene::setCurrentState(const moveit_msgs::msg::RobotState& state)
 
   for (std::size_t i = 0; i < state.attached_collision_objects.size(); ++i)
   {
-    if (!state.is_diff &&
-        state.attached_collision_objects[i].object.operation != moveit_msgs::msg::CollisionObject::ADD)
+    if (!state.is_diff && state.attached_collision_objects[i].object.operation != moveit_msgs::msg::CollisionObject::ADD)
     {
-      RCLCPP_ERROR(LOGGER, "The specified RobotState is not marked as is_diff. "
-                           "The request to modify the object '%s' is not supported. Object is ignored.",
+      RCLCPP_ERROR(LOGGER,
+                   "The specified RobotState is not marked as is_diff. "
+                   "The request to modify the object '%s' is not supported. Object is ignored.",
                    state.attached_collision_objects[i].object.id.c_str());
       continue;
     }
@@ -1454,8 +1456,9 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
         }
         else
         {
-          RCLCPP_ERROR(LOGGER, "Attempting to attach object '%s' to link '%s' but no geometry specified "
-                               "and such an object does not exist in the collision world",
+          RCLCPP_ERROR(LOGGER,
+                       "Attempting to attach object '%s' to link '%s' but no geometry specified "
+                       "and such an object does not exist in the collision world",
                        object.object.id.c_str(), object.link_name.c_str());
           return false;
         }
@@ -1550,8 +1553,9 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
           RCLCPP_DEBUG(LOGGER, "Removing world object with the same name as newly attached object: '%s'",
                        object.object.id.c_str());
         else
-          RCLCPP_WARN(LOGGER, "You tried to append geometry to an attached object "
-                              "that is actually a world object ('%s'). World geometry is ignored.",
+          RCLCPP_WARN(LOGGER,
+                      "You tried to append geometry to an attached object "
+                      "that is actually a world object ('%s'). World geometry is ignored.",
                       object.object.id.c_str());
       }
 
@@ -1560,8 +1564,9 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
           !robot_state_->hasAttachedBody(object.object.id))
       {
         if (robot_state_->clearAttachedBody(object.object.id))
-          RCLCPP_DEBUG(LOGGER, "The robot state already had an object named '%s' attached to link '%s'. "
-                               "The object was replaced.",
+          RCLCPP_DEBUG(LOGGER,
+                       "The robot state already had an object named '%s' attached to link '%s'. "
+                       "The object was replaced.",
                        object.object.id.c_str(), object.link_name.c_str());
         robot_state_->attachBody(object.object.id, shapes, poses, object.touch_links, object.link_name,
                                  object.detach_posture, subframe_poses);
@@ -1841,8 +1846,9 @@ bool PlanningScene::processCollisionObjectMove(const moveit_msgs::msg::Collision
     }
     else
     {
-      RCLCPP_ERROR(LOGGER, "Number of supplied poses (%zu) for object '%s' does not match number of shapes (%zu). "
-                           "Not moving.",
+      RCLCPP_ERROR(LOGGER,
+                   "Number of supplied poses (%zu) for object '%s' does not match number of shapes (%zu). "
+                   "Not moving.",
                    new_poses.size(), object.id.c_str(), obj->shapes_.size());
       return false;
     }
@@ -2016,8 +2022,7 @@ bool PlanningScene::isStateColliding(const std::string& group, bool verbose)
     return isStateColliding(getCurrentState(), group, verbose);
 }
 
-bool PlanningScene::isStateColliding(const moveit::core::RobotState& state, const std::string& group,
-                                     bool verbose) const
+bool PlanningScene::isStateColliding(const moveit::core::RobotState& state, const std::string& group, bool verbose) const
 {
   collision_detection::CollisionRequest req;
   req.verbose = verbose;
@@ -2085,8 +2090,7 @@ bool PlanningScene::isStateValid(const moveit::core::RobotState& state, const st
   return isStateValid(state, EMP_CONSTRAINTS, group, verbose);
 }
 
-bool PlanningScene::isStateValid(const moveit_msgs::msg::RobotState& state, const std::string& group,
-                                 bool verbose) const
+bool PlanningScene::isStateValid(const moveit_msgs::msg::RobotState& state, const std::string& group, bool verbose) const
 {
   static const moveit_msgs::msg::Constraints EMP_CONSTRAINTS;
   return isStateValid(state, EMP_CONSTRAINTS, group, verbose);

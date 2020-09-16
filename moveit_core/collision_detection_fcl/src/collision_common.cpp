@@ -99,8 +99,9 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
       {
         always_allow_collision = true;
         if (cdata->req_->verbose)
-          RCLCPP_DEBUG(LOGGER, "Collision between '%s' (type '%s') and '%s' (type '%s') is always allowed. "
-                               "No contacts are computed.",
+          RCLCPP_DEBUG(LOGGER,
+                       "Collision between '%s' (type '%s') and '%s' (type '%s') is always allowed. "
+                       "No contacts are computed.",
                        cd1->getID().c_str(), cd1->getTypeString().c_str(), cd2->getID().c_str(),
                        cd2->getTypeString().c_str());
       }
@@ -179,14 +180,16 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
     std::size_t num_max_cost_sources = cdata->req_->max_cost_sources;
     bool enable_contact = true;
     fcl::CollisionResultd col_result;
-    int num_contacts = fcl::collide(o1, o2, fcl::CollisionRequestd(std::numeric_limits<size_t>::max(), enable_contact,
-                                                                   num_max_cost_sources, enable_cost),
+    int num_contacts = fcl::collide(o1, o2,
+                                    fcl::CollisionRequestd(std::numeric_limits<size_t>::max(), enable_contact,
+                                                           num_max_cost_sources, enable_cost),
                                     col_result);
     if (num_contacts > 0)
     {
       if (cdata->req_->verbose)
-        RCLCPP_INFO(LOGGER, "Found %d contacts between '%s' and '%s'. "
-                            "These contacts will be evaluated to check if they are accepted or not",
+        RCLCPP_INFO(LOGGER,
+                    "Found %d contacts between '%s' and '%s'. "
+                    "These contacts will be evaluated to check if they are accepted or not",
                     num_contacts, cd1->getID().c_str(), cd2->getID().c_str());
       Contact c;
       const std::pair<std::string, std::string>& pc = cd1->getID() < cd2->getID() ?
@@ -209,8 +212,9 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
                           cd1->getID().c_str(), cd2->getID().c_str());
           }
           else if (cdata->req_->verbose)
-            RCLCPP_INFO(LOGGER, "Found unacceptable contact between '%s' (type '%s') and '%s' "
-                                "(type '%s'). Contact was stored.",
+            RCLCPP_INFO(LOGGER,
+                        "Found unacceptable contact between '%s' (type '%s') and '%s' "
+                        "(type '%s'). Contact was stored.",
                         cd1->getID().c_str(), cd1->getTypeString().c_str(), cd2->getID().c_str(),
                         cd2->getTypeString().c_str());
           cdata->res_->collision = true;
@@ -245,9 +249,10 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
       bool enable_contact = true;
 
       fcl::CollisionResultd col_result;
-      int num_contacts = fcl::collide(
-          o1, o2, fcl::CollisionRequestd(want_contact_count, enable_contact, num_max_cost_sources, enable_cost),
-          col_result);
+      int num_contacts =
+          fcl::collide(o1, o2,
+                       fcl::CollisionRequestd(want_contact_count, enable_contact, num_max_cost_sources, enable_cost),
+                       col_result);
       if (num_contacts > 0)
       {
         int num_contacts_initial = num_contacts;
@@ -262,8 +267,9 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
         }
 
         if (cdata->req_->verbose)
-          RCLCPP_INFO(LOGGER, "Found %d contacts between '%s' (type '%s') and '%s' (type '%s'), "
-                              "which constitute a collision. %d contacts will be stored",
+          RCLCPP_INFO(LOGGER,
+                      "Found %d contacts between '%s' (type '%s') and '%s' (type '%s'), "
+                      "which constitute a collision. %d contacts will be stored",
                       num_contacts_initial, cd1->getID().c_str(), cd1->getTypeString().c_str(), cd2->getID().c_str(),
                       cd2->getTypeString().c_str(), num_contacts);
 
@@ -307,9 +313,10 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
       {
         cdata->res_->collision = true;
         if (cdata->req_->verbose)
-          RCLCPP_INFO(LOGGER, "Found a contact between '%s' (type '%s') and '%s' (type '%s'), "
-                              "which constitutes a collision. "
-                              "Contact information is not stored.",
+          RCLCPP_INFO(LOGGER,
+                      "Found a contact between '%s' (type '%s') and '%s' (type '%s'), "
+                      "which constitutes a collision. "
+                      "Contact information is not stored.",
                       cd1->getID().c_str(), cd1->getTypeString().c_str(), cd2->getID().c_str(),
                       cd2->getTypeString().c_str());
       }
@@ -346,8 +353,9 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
   {
     cdata->done_ = cdata->req_->is_done(*cdata->res_);
     if (cdata->done_ && cdata->req_->verbose)
-      RCLCPP_INFO(LOGGER, "Collision checking is considered complete due to external callback. "
-                          "%s was found. %u contacts are stored.",
+      RCLCPP_INFO(LOGGER,
+                  "Collision checking is considered complete due to external callback. "
+                  "%s was found. %u contacts are stored.",
                   cdata->res_->collision ? "Collision" : "No collision", (unsigned int)cdata->res_->contact_count);
   }
 
