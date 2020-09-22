@@ -1,17 +1,10 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_kinematics)
 
-if(NOT "${CMAKE_CXX_STANDARD}")
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
-
 find_package(ament_cmake REQUIRED)
+find_package(moveit_common REQUIRED)
+
+moveit_package()
 
 find_package(Boost REQUIRED program_options system)
 find_package(Eigen3 REQUIRED)

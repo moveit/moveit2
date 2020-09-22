@@ -15,6 +15,7 @@
   <url type="repository">https://github.com/ros-planning/moveit</url>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>moveit_common</build_depend>
 
   <depend>moveit_core</depend>
   <depend>ompl</depend>

@@ -1,15 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 project(moveit_servo)
 
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-
 set(LIBRARY_NAME moveit_servo)
 set(COMPOSABLE_NODE_NAME servo_server)
 
 find_package(ament_cmake REQUIRED)
+find_package(moveit_common REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -20,6 +16,8 @@ find_package(moveit_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
+
+moveit_package()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp
