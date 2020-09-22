@@ -3,21 +3,12 @@ project(moveit_ros_benchmarks)
 
 set(MOVEIT_LIB_NAME moveit_ros_benchmarks)
 
-if(NOT "${CMAKE_CXX_STANDARD}")
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
-
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wpedantic)
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(moveit_common REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(Boost REQUIRED date_time filesystem)
 find_package(tf2_eigen REQUIRED)
@@ -25,6 +16,8 @@ find_package(moveit_ros_planning REQUIRED)
 # TODO(YuYan): uncomment after porting moveit_ros_warehouse
 # find_package(moveit_ros_warehouse REQUIRED)
 find_package(pluginlib REQUIRED)
+
+moveit_package()
 
 include_directories(include)
 

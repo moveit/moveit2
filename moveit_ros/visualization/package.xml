@@ -19,6 +19,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>pkg-config</buildtool_depend>
+  <build_depend>moveit_common</build_depend>
 
   <build_depend>class_loader</build_depend>
   <build_depend>eigen</build_depend>
