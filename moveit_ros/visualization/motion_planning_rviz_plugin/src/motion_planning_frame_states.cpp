@@ -33,7 +33,6 @@
  *********************************************************************/
 
 /* Author: Mario Prats, Ioan Sucan */
-// TODO (ddengster): Enable when moveit_ros_warehouse is ported
 #include <moveit/warehouse/state_storage.h>
 
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
@@ -61,7 +60,6 @@ void MotionPlanningFrame::populateRobotStatesList()
 
 void MotionPlanningFrame::loadStateButtonClicked()
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   if (robot_state_storage_)
   {
     bool ok;
@@ -81,7 +79,6 @@ void MotionPlanningFrame::loadStateButtonClicked()
 
 void MotionPlanningFrame::loadStoredStates(const std::string& pattern)
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   std::vector<std::string> names;
   try
   {
@@ -151,7 +148,6 @@ void MotionPlanningFrame::saveRobotStateButtonClicked(const moveit::core::RobotS
         robot_states_.insert(RobotStatePair(name, msg));
 
         // Save to the database if connected
-        // TODO (ddengster): Enable when moveit_ros_warehouse is ported
         if (robot_state_storage_)
         {
           try
@@ -211,7 +207,6 @@ void MotionPlanningFrame::setAsGoalStateButtonClicked()
 
 void MotionPlanningFrame::removeStateButtonClicked()
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   if (robot_state_storage_)
   {
     // Warn the user

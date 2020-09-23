@@ -33,7 +33,6 @@
  *********************************************************************/
 
 /* Author: Ioan Sucan, Mario Prats */
-// TODO (ddengster): Enable when moveit_ros_warehouse is ported
 #include <moveit/warehouse/planning_scene_storage.h>
 
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
@@ -496,7 +495,6 @@ void MotionPlanningFrame::copySelectedCollisionObject()
 
 void MotionPlanningFrame::computeSaveSceneButtonClicked()
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   if (planning_scene_storage_)
   {
     moveit_msgs::msg::PlanningScene msg;
@@ -519,7 +517,6 @@ void MotionPlanningFrame::computeSaveQueryButtonClicked(const std::string& scene
 {
   moveit_msgs::msg::MotionPlanRequest mreq;
   constructPlanningRequest(mreq);
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   if (planning_scene_storage_)
   {
     try
@@ -539,7 +536,6 @@ void MotionPlanningFrame::computeSaveQueryButtonClicked(const std::string& scene
 
 void MotionPlanningFrame::computeDeleteSceneButtonClicked()
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   if (planning_scene_storage_)
   {
     QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
@@ -578,7 +574,6 @@ void MotionPlanningFrame::computeDeleteSceneButtonClicked()
 
 void MotionPlanningFrame::computeDeleteQueryButtonClicked()
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   if (planning_scene_storage_)
   {
     QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
@@ -649,7 +644,6 @@ void MotionPlanningFrame::checkPlanningSceneTreeEnabledButtons()
 
 void MotionPlanningFrame::computeLoadSceneButtonClicked()
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   if (planning_scene_storage_)
   {
     QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
@@ -706,7 +700,6 @@ void MotionPlanningFrame::computeLoadSceneButtonClicked()
 
 void MotionPlanningFrame::computeLoadQueryButtonClicked()
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   if (planning_scene_storage_)
   {
     QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();

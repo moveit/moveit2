@@ -33,7 +33,6 @@
  *********************************************************************/
 
 /* Author: Ioan Sucan */
-// TODO (ddengster): Enable when moveit_ros_warehouse is ported
 #include <moveit/warehouse/planning_scene_storage.h>
 #include <moveit/warehouse/constraints_storage.h>
 #include <moveit/warehouse/state_storage.h>
@@ -102,7 +101,6 @@ void MotionPlanningFrame::computeDatabaseConnectButtonClicked()
 {
   RCLCPP_INFO(LOGGER, "Connect to database: {host: %s, port: %d}", ui_->database_host->text().toStdString().c_str(),
               ui_->database_port->value());
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   if (planning_scene_storage_)
   {
     planning_scene_storage_.reset();
@@ -202,7 +200,6 @@ void MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper(int mode)
 
 void MotionPlanningFrame::computeResetDbButtonClicked(const std::string& db)
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   if (db == "Constraints" && constraints_storage_)
     constraints_storage_->reset();
   else if (db == "Robot States" && robot_state_storage_)

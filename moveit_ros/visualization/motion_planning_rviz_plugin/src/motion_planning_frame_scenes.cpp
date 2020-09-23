@@ -33,7 +33,6 @@
  *********************************************************************/
 
 /* Author: Ioan Sucan */
-// TODO (ddengster): Enable when moveit_ros_warehouse is ported
 #include <moveit/warehouse/planning_scene_storage.h>
 #include <moveit/warehouse/constraints_storage.h>
 #include <moveit/warehouse/state_storage.h>
@@ -64,7 +63,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualizatio
 
 void MotionPlanningFrame::saveSceneButtonClicked()
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   if (planning_scene_storage_)
   {
     const std::string& name = planning_display_->getPlanningSceneRO()->getName();
@@ -123,7 +121,6 @@ void MotionPlanningFrame::planningSceneItemClicked()
 
 void MotionPlanningFrame::saveQueryButtonClicked()
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   if (planning_scene_storage_)
   {
     QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
@@ -214,7 +211,6 @@ void MotionPlanningFrame::warehouseItemNameChanged(QTreeWidgetItem* item, int co
 {
   if (item->text(column) == item->toolTip(column) || item->toolTip(column).length() == 0)
     return;
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   moveit_warehouse::PlanningSceneStoragePtr planning_scene_storage = planning_scene_storage_;
   if (!planning_scene_storage)
     return;
@@ -262,7 +258,6 @@ void MotionPlanningFrame::warehouseItemNameChanged(QTreeWidgetItem* item, int co
 
 void MotionPlanningFrame::populatePlanningSceneTreeView()
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
   moveit_warehouse::PlanningSceneStoragePtr planning_scene_storage = planning_scene_storage_;
   if (!planning_scene_storage)
     return;
