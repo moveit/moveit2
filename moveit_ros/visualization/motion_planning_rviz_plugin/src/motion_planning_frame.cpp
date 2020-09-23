@@ -210,8 +210,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
       node_, OBJECT_RECOGNITION_ACTION);
 
   object_recognition_subscriber_ = node_->create_subscription<object_recognition_msgs::msg::RecognizedObjectArray>(
-      "recognized_object_array", 1,
-      std::bind(&MotionPlanningFrame::listenDetectedObjects, this, std::placeholders::_1));
+      "recognized_object_array", 1, std::bind(&MotionPlanningFrame::listenDetectedObjects, this, std::placeholders::_1));
 
   if (object_recognition_client_)
   {
@@ -279,8 +278,7 @@ void MotionPlanningFrame::allowExternalProgramCommunication(bool enable)
     stop_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
         "/rviz/moveit/stop", 1, std::bind(&MotionPlanningFrame::remoteStopCallback, this, _1));
     update_start_state_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/update_start_state", 1,
-        std::bind(&MotionPlanningFrame::remoteUpdateStartStateCallback, this, _1));
+        "/rviz/moveit/update_start_state", 1, std::bind(&MotionPlanningFrame::remoteUpdateStartStateCallback, this, _1));
     update_goal_state_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
         "/rviz/moveit/update_goal_state", 1, std::bind(&MotionPlanningFrame::remoteUpdateGoalStateCallback, this, _1));
     update_custom_start_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::RobotState>(
@@ -393,8 +391,7 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       // /std::shared_ptr<tf2_ros::Buffer> tf_buffer = context_->getFrameManager()->getTF2BufferPtr();
       std::shared_ptr<tf2_ros::Buffer> tf_buffer = moveit::planning_interface::getSharedTF();
 #endif
-      move_group_.reset(
-          new moveit::planning_interface::MoveGroupInterface(node_, opt, tf_buffer, rclcpp::Duration(30)));
+      move_group_.reset(new moveit::planning_interface::MoveGroupInterface(node_, opt, tf_buffer, rclcpp::Duration(30)));
       // TODO (ddengster): Enable when moveit_ros_warehouse is ported
       //      if (planning_scene_storage_)
       //        move_group_->setConstraintsDatabase(ui_->database_host->text().toStdString(),

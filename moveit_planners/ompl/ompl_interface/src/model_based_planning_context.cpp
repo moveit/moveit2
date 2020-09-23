@@ -160,8 +160,9 @@ ompl_interface::ModelBasedPlanningContext::getProjectionEvaluator(const std::str
     if (getRobotModel()->hasLinkModel(link_name))
       return ob::ProjectionEvaluatorPtr(new ProjectionEvaluatorLinkPose(this, link_name));
     else
-      RCLCPP_ERROR(LOGGER, "Attempted to set projection evaluator with respect to position of link '%s', "
-                           "but that link is not known to the kinematic model.",
+      RCLCPP_ERROR(LOGGER,
+                   "Attempted to set projection evaluator with respect to position of link '%s', "
+                   "but that link is not known to the kinematic model.",
                    link_name.c_str());
   }
   else if (peval.find_first_of("joints(") == 0 && peval[peval.length() - 1] == ')')
@@ -187,8 +188,9 @@ ompl_interface::ModelBasedPlanningContext::getProjectionEvaluator(const std::str
           RCLCPP_WARN(LOGGER, "%s: Ignoring joint '%s' in projection since it has 0 DOF", name_.c_str(), joint.c_str());
       }
       else
-        RCLCPP_ERROR(LOGGER, "%s: Attempted to set projection evaluator with respect to value of joint "
-                             "'%s', but that joint is not known to the group '%s'.",
+        RCLCPP_ERROR(LOGGER,
+                     "%s: Attempted to set projection evaluator with respect to value of joint "
+                     "'%s', but that joint is not known to the group '%s'.",
                      name_.c_str(), joint.c_str(), getGroupName().c_str());
     }
     if (j.empty())
@@ -365,8 +367,9 @@ void ompl_interface::ModelBasedPlanningContext::useConfig()
     const std::string planner_name = getGroupName() + "/" + name_;
     ompl_simple_setup_->setPlannerAllocator(
         std::bind(spec_.planner_selector_(type), std::placeholders::_1, planner_name, std::cref(spec_)));
-    RCLCPP_INFO(LOGGER, "Planner configuration '%s' will use planner '%s'. "
-                        "Additional configuration parameters will be set when the planner is constructed.",
+    RCLCPP_INFO(LOGGER,
+                "Planner configuration '%s' will use planner '%s'. "
+                "Additional configuration parameters will be set when the planner is constructed.",
                 name_.c_str(), type.c_str());
   }
 
@@ -384,8 +387,9 @@ void ompl_interface::ModelBasedPlanningContext::setPlanningVolume(const moveit_m
       wparams.min_corner.z == wparams.max_corner.z && wparams.min_corner.z == 0.0)
     RCLCPP_WARN(LOGGER, "It looks like the planning volume was not specified.");
 
-  RCLCPP_DEBUG(LOGGER, "%s: Setting planning volume (affects SE2 & SE3 joints only) to x = [%f, %f], y = "
-                       "[%f, %f], z = [%f, %f]",
+  RCLCPP_DEBUG(LOGGER,
+               "%s: Setting planning volume (affects SE2 & SE3 joints only) to x = [%f, %f], y = "
+               "[%f, %f], z = [%f, %f]",
                name_.c_str(), wparams.min_corner.x, wparams.max_corner.x, wparams.min_corner.y, wparams.max_corner.y,
                wparams.min_corner.z, wparams.max_corner.z);
 
@@ -478,8 +482,9 @@ ompl::base::GoalPtr ompl_interface::ModelBasedPlanningContext::constructGoal()
   return ob::GoalPtr();
 }
 
-ompl::base::PlannerTerminationCondition ompl_interface::ModelBasedPlanningContext::constructPlannerTerminationCondition(
-    double timeout, const ompl::time::point& start)
+ompl::base::PlannerTerminationCondition
+ompl_interface::ModelBasedPlanningContext::constructPlannerTerminationCondition(double timeout,
+                                                                                const ompl::time::point& start)
 {
   auto it = spec_.config_.find("termination_condition");
   if (it == spec_.config_.end())
@@ -569,8 +574,8 @@ void ompl_interface::ModelBasedPlanningContext::clear()
   getOMPLStateSpace()->setInterpolationFunction(InterpolationFunction());
 }
 
-bool ompl_interface::ModelBasedPlanningContext::setPathConstraints(
-    const moveit_msgs::msg::Constraints& path_constraints, moveit_msgs::msg::MoveItErrorCodes* /*error*/)
+bool ompl_interface::ModelBasedPlanningContext::setPathConstraints(const moveit_msgs::msg::Constraints& path_constraints,
+                                                                   moveit_msgs::msg::MoveItErrorCodes* /*error*/)
 {
   // ******************* set the path constraints to use
   path_constraints_.reset(new kinematic_constraints::KinematicConstraintSet(getRobotModel()));

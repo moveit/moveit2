@@ -42,4 +42,4 @@ namespace trajectory_processing
 {
 bool isTrajectoryEmpty(const moveit_msgs::msg::RobotTrajectory& trajectory);
 std::size_t trajectoryWaypointCount(const moveit_msgs::msg::RobotTrajectory& trajectory);
-}
+}  // namespace trajectory_processing

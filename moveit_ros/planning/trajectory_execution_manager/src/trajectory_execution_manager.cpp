@@ -122,8 +122,9 @@ void TrajectoryExecutionManager::initialize()
       if (classes.size() == 1)
       {
         controller = classes[0];
-        RCLCPP_WARN(LOGGER, "Parameter '~moveit_controller_manager' is not specified but only one "
-                            "matching plugin was found: '%s'. Using that one.",
+        RCLCPP_WARN(LOGGER,
+                    "Parameter '~moveit_controller_manager' is not specified but only one "
+                    "matching plugin was found: '%s'. Using that one.",
                     controller.c_str());
       }
       else
@@ -259,8 +260,7 @@ void TrajectoryExecutionManager::receiveEvent(const std_msgs::msg::String::Share
   processEvent(event->data);
 }
 
-bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& trajectory,
-                                      const std::string& controller)
+bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& trajectory, const std::string& controller)
 {
   if (controller.empty())
     return push(trajectory, std::vector<std::string>());
@@ -339,8 +339,7 @@ bool TrajectoryExecutionManager::pushAndExecute(const trajectory_msgs::msg::Join
     return pushAndExecute(trajectory, std::vector<std::string>(1, controller));
 }
 
-bool TrajectoryExecutionManager::pushAndExecute(const sensor_msgs::msg::JointState& state,
-                                                const std::string& controller)
+bool TrajectoryExecutionManager::pushAndExecute(const sensor_msgs::msg::JointState& state, const std::string& controller)
 {
   if (controller.empty())
     return pushAndExecute(state, std::vector<std::string>());
@@ -1002,8 +1001,9 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
         jm->enforcePositionBounds(&traj_position);
         if (jm->distance(&cur_position, &traj_position) > allowed_start_tolerance_)
         {
-          RCLCPP_ERROR(LOGGER, "\nInvalid Trajectory: start point deviates from current robot state more than %g"
-                               "\njoint '%s': expected: %g, current: %g",
+          RCLCPP_ERROR(LOGGER,
+                       "\nInvalid Trajectory: start point deviates from current robot state more than %g"
+                       "\njoint '%s': expected: %g, current: %g",
                        allowed_start_tolerance_, joint_names[i].c_str(), traj_position, cur_position);
           return false;
         }
@@ -1381,8 +1381,7 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
             active_handles_.clear();
             current_context_ = -1;
             last_execution_status_ = moveit_controller_manager::ExecutionStatus::ABORTED;
-            RCLCPP_ERROR(LOGGER, "No controller handle for controller '%s'. Aborting.",
-                         context.controllers_[i].c_str());
+            RCLCPP_ERROR(LOGGER, "No controller handle for controller '%s'. Aborting.", context.controllers_[i].c_str());
             return false;
           }
           active_handles_[i] = h;
@@ -1493,8 +1492,7 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
       else
       {
         rclcpp::Duration d(0.0);
-        if (rclcpp::Time(context.trajectory_parts_[longest_part].multi_dof_joint_trajectory.header.stamp) >
-            current_time)
+        if (rclcpp::Time(context.trajectory_parts_[longest_part].multi_dof_joint_trajectory.header.stamp) > current_time)
           d = rclcpp::Time(context.trajectory_parts_[longest_part].multi_dof_joint_trajectory.header.stamp) -
               current_time;
         for (trajectory_msgs::msg::MultiDOFJointTrajectoryPoint& point :
@@ -1511,8 +1509,9 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
         if (!handle->waitForExecution(expected_trajectory_duration))
           if (!execution_complete_ && node_->now() - current_time > expected_trajectory_duration)
           {
-            RCLCPP_ERROR(LOGGER, "Controller is taking too long to execute trajectory (the expected upper "
-                                 "bound for the trajectory execution was %lf seconds). Stopping trajectory.",
+            RCLCPP_ERROR(LOGGER,
+                         "Controller is taking too long to execute trajectory (the expected upper "
+                         "bound for the trajectory execution was %lf seconds). Stopping trajectory.",
                          expected_trajectory_duration.seconds());
             {
               boost::mutex::scoped_lock slock(execution_state_mutex_);

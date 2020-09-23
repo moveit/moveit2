@@ -115,8 +115,9 @@ bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
       }
       else if (joint_model_->getVariableCount() > 1)
       {
-        RCLCPP_ERROR(LOGGER, "Joint '%s' has more than one parameter to constrain. "
-                             "This type of constraint is not supported.",
+        RCLCPP_ERROR(LOGGER,
+                     "Joint '%s' has more than one parameter to constrain. "
+                     "This type of constraint is not supported.",
                      jc.joint_name.c_str());
         joint_model_ = nullptr;
       }
@@ -175,16 +176,18 @@ bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
       {
         joint_position_ = bounds.min_position_;
         joint_tolerance_above_ = std::numeric_limits<double>::epsilon();
-        RCLCPP_WARN(LOGGER, "Joint %s is constrained to be below the minimum bounds. "
-                            "Assuming minimum bounds instead.",
+        RCLCPP_WARN(LOGGER,
+                    "Joint %s is constrained to be below the minimum bounds. "
+                    "Assuming minimum bounds instead.",
                     jc.joint_name.c_str());
       }
       else if (bounds.max_position_ < joint_position_ - joint_tolerance_below_)
       {
         joint_position_ = bounds.max_position_;
         joint_tolerance_below_ = std::numeric_limits<double>::epsilon();
-        RCLCPP_WARN(LOGGER, "Joint %s is constrained to be above the maximum bounds. "
-                            "Assuming maximum bounds instead.",
+        RCLCPP_WARN(LOGGER,
+                    "Joint %s is constrained to be above the maximum bounds. "
+                    "Assuming maximum bounds instead.",
                     jc.joint_name.c_str());
       }
     }
@@ -238,8 +241,9 @@ ConstraintEvaluationResult JointConstraint::decide(const moveit::core::RobotStat
   bool result = dif <= (joint_tolerance_above_ + 2.0 * std::numeric_limits<double>::epsilon()) &&
                 dif >= (-joint_tolerance_below_ - 2.0 * std::numeric_limits<double>::epsilon());
   if (verbose)
-    RCLCPP_INFO(LOGGER, "Constraint %s:: Joint name: '%s', actual value: %f, desired value: %f, "
-                        "tolerance_above: %f, tolerance_below: %f",
+    RCLCPP_INFO(LOGGER,
+                "Constraint %s:: Joint name: '%s', actual value: %f, desired value: %f, "
+                "tolerance_above: %f, tolerance_below: %f",
                 result ? "satisfied" : "violated", joint_variable_name_.c_str(), current_joint_position,
                 joint_position_, joint_tolerance_above_, joint_tolerance_below_);
   return ConstraintEvaluationResult(result, constraint_weight_ * fabs(dif));
@@ -513,8 +517,9 @@ bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstra
   tf2::fromMsg(oc.orientation, q);
   if (fabs(q.norm() - 1.0) > 1e-3)
   {
-    RCLCPP_WARN(LOGGER, "Orientation constraint for link '%s' is probably incorrect: %f, %f, %f, "
-                        "%f. Assuming identity instead.",
+    RCLCPP_WARN(LOGGER,
+                "Orientation constraint for link '%s' is probably incorrect: %f, %f, %f, "
+                "%f. Assuming identity instead.",
                 oc.link_name.c_str(), oc.orientation.x, oc.orientation.y, oc.orientation.z, oc.orientation.w);
     q = Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0);
   }
@@ -628,8 +633,9 @@ ConstraintEvaluationResult OrientationConstraint::decide(const moveit::core::Rob
   {
     Eigen::Quaterniond q_act(state.getGlobalLinkTransform(link_model_).linear());
     Eigen::Quaterniond q_des(desired_rotation_matrix_);
-    RCLCPP_INFO(LOGGER, "Orientation constraint %s for link '%s'. Quaternion desired: %f %f %f %f, quaternion "
-                        "actual: %f %f %f %f, error: x=%f, y=%f, z=%f, tolerance: x=%f, y=%f, z=%f",
+    RCLCPP_INFO(LOGGER,
+                "Orientation constraint %s for link '%s'. Quaternion desired: %f %f %f %f, quaternion "
+                "actual: %f %f %f %f, error: x=%f, y=%f, z=%f, tolerance: x=%f, y=%f, z=%f",
                 result ? "satisfied" : "violated", link_model_->getName().c_str(), q_des.x(), q_des.y(), q_des.z(),
                 q_des.w(), q_act.x(), q_act.y(), q_act.z(), q_act.w(), xyz(0), xyz(1), xyz(2),
                 absolute_x_axis_tolerance_, absolute_y_axis_tolerance_, absolute_z_axis_tolerance_);
@@ -683,8 +689,9 @@ bool VisibilityConstraint::configure(const moveit_msgs::msg::VisibilityConstrain
 
   if (vc.cone_sides < 3)
   {
-    RCLCPP_WARN(LOGGER, "The number of sides for the visibility region must be 3 or more. "
-                        "Assuming 3 sides instead of the specified %d",
+    RCLCPP_WARN(LOGGER,
+                "The number of sides for the visibility region must be 3 or more. "
+                "Assuming 3 sides instead of the specified %d",
                 vc.cone_sides);
     cone_sides_ = 3;
   }
@@ -966,8 +973,9 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
       if (max_view_angle_ < ang)
       {
         if (verbose)
-          RCLCPP_INFO(LOGGER, "Visibility constraint is violated because the view angle is %lf "
-                              "(above the maximum allowed of %lf)",
+          RCLCPP_INFO(LOGGER,
+                      "Visibility constraint is violated because the view angle is %lf "
+                      "(above the maximum allowed of %lf)",
                       ang, max_view_angle_);
         return ConstraintEvaluationResult(false, 0.0);
       }
@@ -988,8 +996,9 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
       if (max_range_angle_ < ang)
       {
         if (verbose)
-          RCLCPP_INFO(LOGGER, "Visibility constraint is violated because the range angle is %lf "
-                              "(above the maximum allowed of %lf)",
+          RCLCPP_INFO(LOGGER,
+                      "Visibility constraint is violated because the range angle is %lf "
+                      "(above the maximum allowed of %lf)",
                       ang, max_range_angle_);
         return ConstraintEvaluationResult(false, 0.0);
       }

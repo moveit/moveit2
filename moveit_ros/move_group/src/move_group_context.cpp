@@ -88,8 +88,7 @@ bool move_group::MoveGroupContext::status() const
   const planning_interface::PlannerManagerPtr& planner_interface = planning_pipeline_->getPlannerManager();
   if (planner_interface)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "MoveGroup context using planning plugin "
-                                   << planning_pipeline_->getPlannerPluginName());
+    RCLCPP_INFO_STREAM(LOGGER, "MoveGroup context using planning plugin " << planning_pipeline_->getPlannerPluginName());
     RCLCPP_INFO_STREAM(LOGGER, "MoveGroup context initialization complete");
     return true;
   }

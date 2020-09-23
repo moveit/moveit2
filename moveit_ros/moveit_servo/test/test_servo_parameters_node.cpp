@@ -73,8 +73,8 @@ int main(int argc, char** argv)
   // This param passed alongside 'servo_params' in launch file
   node->declare_parameter<bool>("expect_valid_params", true);
   GOT_EXPECTED = node->get_parameter("expect_valid_params", EXPECTED_LOAD_PARAMS_SUCCESS);
-  RCLCPP_INFO_STREAM(LOGGER, "Got expect_valid_params? : " << GOT_EXPECTED
-                                                           << ", value = " << EXPECTED_LOAD_PARAMS_SUCCESS);
+  RCLCPP_INFO_STREAM(LOGGER,
+                     "Got expect_valid_params? : " << GOT_EXPECTED << ", value = " << EXPECTED_LOAD_PARAMS_SUCCESS);
 
   // Create and try to load the parameters
   auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();

@@ -661,9 +661,9 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
     if ((ini_condition > parameters_->lower_singularity_threshold) &&
         (ini_condition < parameters_->hard_stop_singularity_threshold))
     {
-      velocity_scale = 1. -
-                       (ini_condition - parameters_->lower_singularity_threshold) /
-                           (parameters_->hard_stop_singularity_threshold - parameters_->lower_singularity_threshold);
+      velocity_scale =
+          1. - (ini_condition - parameters_->lower_singularity_threshold) /
+                   (parameters_->hard_stop_singularity_threshold - parameters_->lower_singularity_threshold);
       status_ = StatusCode::DECELERATE_FOR_SINGULARITY;
       rclcpp::Clock& clock = *node_->get_clock();
       RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
@@ -790,8 +790,8 @@ bool ServoCalcs::enforceSRDFPositionLimits()
         {
           rclcpp::Clock& clock = *node_->get_clock();
           RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                      node_->get_name() << " " << joint->getName()
-                                                        << " close to a position limit. Halting.");
+                                      node_->get_name()
+                                          << " " << joint->getName() << " close to a position limit. Halting.");
           halting = true;
         }
       }
@@ -844,8 +844,8 @@ bool ServoCalcs::updateJoints()
     catch (const std::out_of_range& e)
     {
       rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Ignoring joint "
-                                                                               << incoming_joint_state_->name[m]);
+      RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                   "Ignoring joint " << incoming_joint_state_->name[m]);
       continue;
     }
 
@@ -1008,8 +1008,8 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
     catch (const std::out_of_range& e)
     {
       rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Ignoring joint "
-                                                                              << internal_joint_state_.name[m]);
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                  "Ignoring joint " << internal_joint_state_.name[m]);
       continue;
     }
     // Apply user-defined scaling if inputs are unitless [-1:1]

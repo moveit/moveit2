@@ -187,8 +187,7 @@ public:
 
     for (const moveit_msgs::msg::CollisionObject& collision_object : response->scene.world.collision_objects)
     {
-      if (object_ids.empty() ||
-          std::find(object_ids.begin(), object_ids.end(), collision_object.id) != object_ids.end())
+      if (object_ids.empty() || std::find(object_ids.begin(), object_ids.end(), collision_object.id) != object_ids.end())
       {
         result[collision_object.id] = collision_object;
       }
@@ -406,9 +405,8 @@ bool PlanningSceneInterface::applyPlanningScene(const moveit_msgs::msg::Planning
   return impl_->applyPlanningScene(ps);
 }
 
-void PlanningSceneInterface::addCollisionObjects(
-    const std::vector<moveit_msgs::msg::CollisionObject>& collision_objects,
-    const std::vector<moveit_msgs::msg::ObjectColor>& object_colors) const
+void PlanningSceneInterface::addCollisionObjects(const std::vector<moveit_msgs::msg::CollisionObject>& collision_objects,
+                                                 const std::vector<moveit_msgs::msg::ObjectColor>& object_colors) const
 {
   impl_->addCollisionObjects(collision_objects, object_colors);
 }

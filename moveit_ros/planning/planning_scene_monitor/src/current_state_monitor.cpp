@@ -285,9 +285,10 @@ bool planning_scene_monitor::CurrentStateMonitor::waitForCurrentState(const rclc
     elapsed = node_->now() - start;
     if (elapsed > timeout)
     {
-      RCLCPP_INFO(LOGGER, "Didn't received robot state (joint angles) with recent timestamp within "
-                          "%f seconds.\n"
-                          "Check clock synchronization if your are running ROS across multiple machines!",
+      RCLCPP_INFO(LOGGER,
+                  "Didn't received robot state (joint angles) with recent timestamp within "
+                  "%f seconds.\n"
+                  "Check clock synchronization if your are running ROS across multiple machines!",
                   wait_time);
       return false;
     }
@@ -440,9 +441,10 @@ void planning_scene_monitor::CurrentStateMonitor::tfCallback()
       }
       catch (tf2::TransformException& ex)
       {
-        RCLCPP_WARN_ONCE(LOGGER, "Unable to update multi-DOF joint '%s':"
-                                 "Failure to lookup transform between '%s'"
-                                 "and '%s' with TF exception: %s",
+        RCLCPP_WARN_ONCE(LOGGER,
+                         "Unable to update multi-DOF joint '%s':"
+                         "Failure to lookup transform between '%s'"
+                         "and '%s' with TF exception: %s",
                          joint->getName().c_str(), parent_frame.c_str(), child_frame.c_str(), ex.what());
         continue;
       }

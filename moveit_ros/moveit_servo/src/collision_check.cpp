@@ -220,8 +220,8 @@ void CollisionCheck::printCollisionPairs(collision_detection::CollisionResult::C
     RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Objects in collision:");
     for (const auto& contact : contact_map)
     {
-      RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "\t" << contact.first.first << ", "
-                                                                                << contact.first.second);
+      RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                   "\t" << contact.first.first << ", " << contact.first.second);
     }
   }
 }

@@ -22,13 +22,8 @@ env:
 jobs:
   fast_finish: true
   include:
-    - name: "[Foxy] - ament_lint"
-      env: TEST="ament_lint"
-    - name: "[Eloquent] - clang-format"
-      env: TEST="clang-format"
-           ROS_DISTRO="eloquent"
-           UPSTREAM_WORKSPACE=""
-           BEFORE_SCRIPT="for p in geometric_shapes moveit_msgs moveit_resources_pr2_description moveit_resources_panda_moveit_config moveit_resources object_recognition_msgs octomap_msgs ompl random_numbers srdfdom; do ros2 pkg create \$p; done"
+    - name: "[Foxy] - clang-format, ament_lint"
+      env: TEST="clang-format ament_lint"
     - name: "[Foxy] - code-coverage"
       env: TEST=code-coverage
     - name: "[Foxy] - gcc (build,test)"
@@ -43,7 +38,7 @@ jobs:
     - env: TEST=code-coverage
 
 before_script:
-  - git clone -q -b ros2 --depth=1 https://github.com/ros-planning/moveit_ci.git .moveit_ci
+  - git clone -q -b sync-master --depth=1 https://github.com/henningkayser/moveit_ci.git .moveit_ci
 
 script:
   - .moveit_ci/travis.sh

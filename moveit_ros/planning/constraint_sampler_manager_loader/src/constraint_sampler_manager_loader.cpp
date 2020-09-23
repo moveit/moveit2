@@ -77,8 +77,7 @@ public:
         }
         catch (pluginlib::PluginlibException& ex)
         {
-          RCLCPP_ERROR(LOGGER, "Exception while planning adapter plugin '%s': %s", std::string(*beg).c_str(),
-                       ex.what());
+          RCLCPP_ERROR(LOGGER, "Exception while planning adapter plugin '%s': %s", std::string(*beg).c_str(), ex.what());
         }
       }
     }
@@ -91,8 +90,9 @@ private:
 };
 ConstraintSamplerManagerLoader::ConstraintSamplerManagerLoader(
     const rclcpp::Node::SharedPtr& node, const constraint_samplers::ConstraintSamplerManagerPtr& csm)
-  : constraint_sampler_manager_(csm ? csm : constraint_samplers::ConstraintSamplerManagerPtr(
-                                                new constraint_samplers::ConstraintSamplerManager()))
+  : constraint_sampler_manager_(
+        csm ? csm :
+              constraint_samplers::ConstraintSamplerManagerPtr(new constraint_samplers::ConstraintSamplerManager()))
   , impl_(new Helper(node, constraint_sampler_manager_))
 {
 }

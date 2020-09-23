@@ -41,8 +41,7 @@
 
 namespace moveit_warehouse
 {
-typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::PlanningSceneWorld>::ConstPtr
-    PlanningSceneWorldWithMetadata;
+typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::PlanningSceneWorld>::ConstPtr PlanningSceneWorldWithMetadata;
 typedef warehouse_ros::MessageCollection<moveit_msgs::msg::PlanningSceneWorld>::Ptr PlanningSceneWorldCollection;
 
 class PlanningSceneWorldStorage : public MoveItMessageStorage

@@ -196,8 +196,9 @@ void getBodySphereVisualizationMarkers(const GroupStateRepresentationConstPtr& g
     const moveit::core::AttachedBody* att = state.getAttachedBody(gsr->dfce_->attached_body_names_[i]);
     if (!att)
     {
-      RCLCPP_WARN(LOGGER, "Attached body '%s' was not found, skipping sphere "
-                          "decomposition visualization",
+      RCLCPP_WARN(LOGGER,
+                  "Attached body '%s' was not found, skipping sphere "
+                  "decomposition visualization",
                   gsr->dfce_->attached_body_names_[i].c_str());
       continue;
     }

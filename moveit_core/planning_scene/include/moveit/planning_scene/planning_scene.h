@@ -73,8 +73,7 @@ typedef boost::function<bool(const moveit::core::RobotState&, bool)> StateFeasib
     The order of the arguments matters: the notion of feasibility is to be checked for motion segments that start at the
    first state and end at the second state. The third argument indicates
     whether the check should be verbose or not. */
-typedef boost::function<bool(const moveit::core::RobotState&, const moveit::core::RobotState&, bool)>
-    MotionFeasibilityFn;
+typedef boost::function<bool(const moveit::core::RobotState&, const moveit::core::RobotState&, bool)> MotionFeasibilityFn;
 
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their colors */
 typedef std::map<std::string, std_msgs::msg::ColorRGBA> ObjectColorMap;
@@ -483,8 +482,7 @@ public:
                           moveit::core::RobotState& robot_state) const
   {
     robot_state.updateCollisionBodyTransforms();
-    checkSelfCollision(req, res, static_cast<const moveit::core::RobotState&>(robot_state),
-                       getAllowedCollisionMatrix());
+    checkSelfCollision(req, res, static_cast<const moveit::core::RobotState&>(robot_state), getAllowedCollisionMatrix());
   }
 
   /** \brief Check whether a specified state (\e robot_state) is in self collision */

@@ -78,8 +78,7 @@ void RobotStateVisualization::clear()
   robot_.clear();
 }
 
-void RobotStateVisualization::setDefaultAttachedObjectColor(
-    const std_msgs::msg::ColorRGBA& default_attached_object_color)
+void RobotStateVisualization::setDefaultAttachedObjectColor(const std_msgs::msg::ColorRGBA& default_attached_object_color)
 {
   default_attached_object_color_ = default_attached_object_color;
 }

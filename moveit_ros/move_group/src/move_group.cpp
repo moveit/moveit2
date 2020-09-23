@@ -166,8 +166,8 @@ private:
       }
       catch (pluginlib::PluginlibException& ex)
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "Exception while loading move_group capability '" << capability
-                                                                                      << "': " << ex.what());
+        RCLCPP_ERROR_STREAM(LOGGER,
+                            "Exception while loading move_group capability '" << capability << "': " << ex.what());
       }
     }
 

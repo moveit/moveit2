@@ -46,15 +46,7 @@ namespace moveit
 namespace core
 {
 RevoluteJointModel::RevoluteJointModel(const std::string& name)
-  : JointModel(name)
-  , axis_(0.0, 0.0, 0.0)
-  , continuous_(false)
-  , x2_(0.0)
-  , y2_(0.0)
-  , z2_(0.0)
-  , xy_(0.0)
-  , xz_(0.0)
-  , yz_(0.0)
+  : JointModel(name), axis_(0.0, 0.0, 0.0), continuous_(false), x2_(0.0), y2_(0.0), z2_(0.0), xy_(0.0), xz_(0.0), yz_(0.0)
 {
   type_ = REVOLUTE;
   variable_names_.push_back(name_);

@@ -44,8 +44,8 @@
 #include <moveit_servo/servo_parameters.h>
 
 /** \brief Returns a shared ptr to a ServoParams object with valid (and 'default') fields
-   * A ServoParameters of this type should match what is loaded from config/panda_simulated_config.yaml
-   */
+ * A ServoParameters of this type should match what is loaded from config/panda_simulated_config.yaml
+ */
 moveit_servo::ServoParametersPtr getTestParameters()
 {
   auto output = std::make_shared<moveit_servo::ServoParameters>();
@@ -87,7 +87,7 @@ moveit_servo::ServoParametersPtr getTestParameters()
 }
 
 /** \brief Checks 2 ServoParameter objects for equality
-   */
+ */
 bool operator==(moveit_servo::ServoParameters& lhs, moveit_servo::ServoParameters& rhs)
 {
   return (lhs.use_gazebo == rhs.use_gazebo && lhs.status_topic == rhs.status_topic &&
