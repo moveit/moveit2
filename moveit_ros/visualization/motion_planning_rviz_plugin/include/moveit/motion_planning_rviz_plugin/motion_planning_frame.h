@@ -137,10 +137,9 @@ protected:
   //  moveit::semantic_world::SemanticWorldPtr semantic_world_;
 
   moveit::planning_interface::MoveGroupInterface::PlanPtr current_plan_;
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
-  // moveit_warehouse::PlanningSceneStoragePtr planning_scene_storage_;
-  // moveit_warehouse::ConstraintsStoragePtr constraints_storage_;
-  // moveit_warehouse::RobotStateStoragePtr robot_state_storage_;
+  moveit_warehouse::PlanningSceneStoragePtr planning_scene_storage_;
+  moveit_warehouse::ConstraintsStoragePtr constraints_storage_;
+  moveit_warehouse::RobotStateStoragePtr robot_state_storage_;
 
   std::shared_ptr<rviz_default_plugins::displays::InteractiveMarker> scene_marker_;
 
