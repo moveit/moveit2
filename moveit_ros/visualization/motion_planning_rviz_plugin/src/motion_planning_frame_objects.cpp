@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan, Mario Prats */
 // TODO (ddengster): Enable when moveit_ros_warehouse is ported
-// #include <moveit/warehouse/planning_scene_storage.h>
+#include <moveit/warehouse/planning_scene_storage.h>
 
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
@@ -497,22 +497,22 @@ void MotionPlanningFrame::copySelectedCollisionObject()
 void MotionPlanningFrame::computeSaveSceneButtonClicked()
 {
   // TODO (ddengster): Enable when moveit_ros_warehouse is ported
-  //  if (planning_scene_storage_)
-  //  {
-  //    moveit_msgs::msg::PlanningScene msg;
-  //    planning_display_->getPlanningSceneRO()->getPlanningSceneMsg(msg);
-  //    try
-  //    {
-  //      planning_scene_storage_->removePlanningScene(msg.name);
-  //      planning_scene_storage_->addPlanningScene(msg);
-  //    }
-  //    catch (std::exception& ex)
-  //    {
-  //      RCLCPP_ERROR(LOGGER, "%s", ex.what());
-  //    }
-  //
-  //    planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlanningSceneTreeView, this));
-  //  }
+  if (planning_scene_storage_)
+  {
+    moveit_msgs::msg::PlanningScene msg;
+    planning_display_->getPlanningSceneRO()->getPlanningSceneMsg(msg);
+    try
+    {
+      planning_scene_storage_->removePlanningScene(msg.name);
+      planning_scene_storage_->addPlanningScene(msg);
+    }
+    catch (std::exception& ex)
+    {
+      RCLCPP_ERROR(LOGGER, "%s", ex.what());
+    }
+
+    planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlanningSceneTreeView, this));
+  }
 }
 
 void MotionPlanningFrame::computeSaveQueryButtonClicked(const std::string& scene, const std::string& query_name)
@@ -520,88 +520,88 @@ void MotionPlanningFrame::computeSaveQueryButtonClicked(const std::string& scene
   moveit_msgs::msg::MotionPlanRequest mreq;
   constructPlanningRequest(mreq);
   // TODO (ddengster): Enable when moveit_ros_warehouse is ported
-  //  if (planning_scene_storage_)
-  //  {
-  //    try
-  //    {
-  //      if (!query_name.empty())
-  //        planning_scene_storage_->removePlanningQuery(scene, query_name);
-  //      planning_scene_storage_->addPlanningQuery(mreq, scene, query_name);
-  //    }
-  //    catch (std::exception& ex)
-  //    {
-  //      RCLCPP_ERROR(LOGGER, "%s", ex.what());
-  //    }
-  //
-  //    planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlanningSceneTreeView, this));
-  //  }
+  if (planning_scene_storage_)
+  {
+    try
+    {
+      if (!query_name.empty())
+        planning_scene_storage_->removePlanningQuery(scene, query_name);
+      planning_scene_storage_->addPlanningQuery(mreq, scene, query_name);
+    }
+    catch (std::exception& ex)
+    {
+      RCLCPP_ERROR(LOGGER, "%s", ex.what());
+    }
+
+    planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlanningSceneTreeView, this));
+  }
 }
 
 void MotionPlanningFrame::computeDeleteSceneButtonClicked()
 {
   // TODO (ddengster): Enable when moveit_ros_warehouse is ported
-  //  if (planning_scene_storage_)
-  //  {
-  //    QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
-  //    if (!sel.empty())
-  //    {
-  //      QTreeWidgetItem* s = sel.front();
-  //      if (s->type() == ITEM_TYPE_SCENE)
-  //      {
-  //        std::string scene = s->text(0).toStdString();
-  //        try
-  //        {
-  //          planning_scene_storage_->removePlanningScene(scene);
-  //        }
-  //        catch (std::exception& ex)
-  //        {
-  //          RCLCPP_ERROR(LOGGER, "%s", ex.what());
-  //        }
-  //      }
-  //      else
-  //      {
-  //        // if we selected a query name, then we overwrite that query
-  //        std::string scene = s->parent()->text(0).toStdString();
-  //        try
-  //        {
-  //          planning_scene_storage_->removePlanningScene(scene);
-  //        }
-  //        catch (std::exception& ex)
-  //        {
-  //          RCLCPP_ERROR(LOGGER, "%s", ex.what());
-  //        }
-  //      }
-  //      planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlanningSceneTreeView, this));
-  //    }
-  //  }
+  if (planning_scene_storage_)
+  {
+    QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
+    if (!sel.empty())
+    {
+      QTreeWidgetItem* s = sel.front();
+      if (s->type() == ITEM_TYPE_SCENE)
+      {
+        std::string scene = s->text(0).toStdString();
+        try
+        {
+          planning_scene_storage_->removePlanningScene(scene);
+        }
+        catch (std::exception& ex)
+        {
+          RCLCPP_ERROR(LOGGER, "%s", ex.what());
+        }
+      }
+      else
+      {
+        // if we selected a query name, then we overwrite that query
+        std::string scene = s->parent()->text(0).toStdString();
+        try
+        {
+          planning_scene_storage_->removePlanningScene(scene);
+        }
+        catch (std::exception& ex)
+        {
+          RCLCPP_ERROR(LOGGER, "%s", ex.what());
+        }
+      }
+      planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlanningSceneTreeView, this));
+    }
+  }
 }
 
 void MotionPlanningFrame::computeDeleteQueryButtonClicked()
 {
   // TODO (ddengster): Enable when moveit_ros_warehouse is ported
-  //  if (planning_scene_storage_)
-  //  {
-  //    QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
-  //    if (!sel.empty())
-  //    {
-  //      QTreeWidgetItem* s = sel.front();
-  //      if (s->type() == ITEM_TYPE_QUERY)
-  //      {
-  //        std::string scene = s->parent()->text(0).toStdString();
-  //        std::string query_name = s->text(0).toStdString();
-  //        try
-  //        {
-  //          planning_scene_storage_->removePlanningQuery(scene, query_name);
-  //        }
-  //        catch (std::exception& ex)
-  //        {
-  //          RCLCPP_ERROR(LOGGER, "%s", ex.what());
-  //        }
-  //        planning_display_->addMainLoopJob(
-  //            boost::bind(&MotionPlanningFrame::computeDeleteQueryButtonClickedHelper, this, s));
-  //      }
-  //    }
-  //  }
+  if (planning_scene_storage_)
+  {
+    QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
+    if (!sel.empty())
+    {
+      QTreeWidgetItem* s = sel.front();
+      if (s->type() == ITEM_TYPE_QUERY)
+      {
+        std::string scene = s->parent()->text(0).toStdString();
+        std::string query_name = s->text(0).toStdString();
+        try
+        {
+          planning_scene_storage_->removePlanningQuery(scene, query_name);
+        }
+        catch (std::exception& ex)
+        {
+          RCLCPP_ERROR(LOGGER, "%s", ex.what());
+        }
+        planning_display_->addMainLoopJob(
+            boost::bind(&MotionPlanningFrame::computeDeleteQueryButtonClickedHelper, this, s));
+      }
+    }
+  }
 }
 
 void MotionPlanningFrame::computeDeleteQueryButtonClickedHelper(QTreeWidgetItem* s)
@@ -650,114 +650,112 @@ void MotionPlanningFrame::checkPlanningSceneTreeEnabledButtons()
 void MotionPlanningFrame::computeLoadSceneButtonClicked()
 {
   // TODO (ddengster): Enable when moveit_ros_warehouse is ported
-  //  if (planning_scene_storage_)
-  //  {
-  //    QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
-  //    if (!sel.empty())
-  //    {
-  //      QTreeWidgetItem* s = sel.front();
-  //      if (s->type() == ITEM_TYPE_SCENE)
-  //      {
-  //        std::string scene = s->text(0).toStdString();
-  //        RCLCPP_DEBUG(LOGGER, "Attempting to load scene '%s'", scene.c_str());
-  //
-  //        moveit_warehouse::PlanningSceneWithMetadata scene_m;
-  //        bool got_ps = false;
-  //        try
-  //        {
-  //          got_ps = planning_scene_storage_->getPlanningScene(scene_m, scene);
-  //        }
-  //        catch (std::exception& ex)
-  //        {
-  //          RCLCPP_ERROR(LOGGER, "%s", ex.what());
-  //        }
-  //
-  //        if (got_ps)
-  //        {
-  //          RCLCPP_INFO(LOGGER, "Loaded scene '%s'", scene.c_str());
-  //          if (planning_display_->getPlanningSceneMonitor())
-  //          {
-  //            if (scene_m->robot_model_name != planning_display_->getRobotModel()->getName())
-  //            {
-  //              RCLCPP_INFO(LOGGER, "Scene '%s' was saved for robot '%s' but we are using robot '%s'. Using scene
-  //              geometry only",
-  //                       scene.c_str(), scene_m->robot_model_name.c_str(),
-  //                       planning_display_->getRobotModel()->getName().c_str());
-  //              planning_scene_world_publisher_.publish(scene_m->world);
-  //              // publish the parts that are not in the world
-  //              moveit_msgs::msg::PlanningScene diff;
-  //              diff.is_diff = true;
-  //              diff.name = scene_m->name;
-  //              planning_scene_publisher_.publish(diff);
-  //            }
-  //            else
-  //              planning_scene_publisher_.publish(static_cast<const moveit_msgs::msg::PlanningScene&>(*scene_m));
-  //          }
-  //          else
-  //            planning_scene_publisher_.publish(static_cast<const moveit_msgs::msg::PlanningScene&>(*scene_m));
-  //        }
-  //        else
-  //          RCLCPP_WARN(LOGGER, "Failed to load scene '%s'. Has the message format changed since the scene was
-  //          saved?",
-  //                   scene.c_str());
-  //      }
-  //    }
-  //  }
+  if (planning_scene_storage_)
+  {
+    QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
+    if (!sel.empty())
+    {
+      QTreeWidgetItem* s = sel.front();
+      if (s->type() == ITEM_TYPE_SCENE)
+      {
+        std::string scene = s->text(0).toStdString();
+        RCLCPP_DEBUG(LOGGER, "Attempting to load scene '%s'", scene.c_str());
+
+        moveit_warehouse::PlanningSceneWithMetadata scene_m;
+        bool got_ps = false;
+        try
+        {
+          got_ps = planning_scene_storage_->getPlanningScene(scene_m, scene);
+        }
+        catch (std::exception& ex)
+        {
+          RCLCPP_ERROR(LOGGER, "%s", ex.what());
+        }
+
+        if (got_ps)
+        {
+          RCLCPP_INFO(LOGGER, "Loaded scene '%s'", scene.c_str());
+          if (planning_display_->getPlanningSceneMonitor())
+          {
+            if (scene_m->robot_model_name != planning_display_->getRobotModel()->getName())
+            {
+              RCLCPP_INFO(LOGGER,
+                          "Scene '%s' was saved for robot '%s' but we are using robot '%s'. Using scene geometry only",
+                          scene.c_str(), scene_m->robot_model_name.c_str(),
+                          planning_display_->getRobotModel()->getName().c_str());
+              planning_scene_world_publisher_->publish(scene_m->world);
+              // publish the parts that are not in the world
+              moveit_msgs::msg::PlanningScene diff;
+              diff.is_diff = true;
+              diff.name = scene_m->name;
+              planning_scene_publisher_->publish(diff);
+            }
+            else
+              planning_scene_publisher_->publish(static_cast<const moveit_msgs::msg::PlanningScene&>(*scene_m));
+          }
+          else
+            planning_scene_publisher_->publish(static_cast<const moveit_msgs::msg::PlanningScene&>(*scene_m));
+        }
+        else
+          RCLCPP_WARN(LOGGER, "Failed to load scene '%s'. Has the message format changed since the scene was saved?",
+                      scene.c_str());
+      }
+    }
+  }
 }
 
 void MotionPlanningFrame::computeLoadQueryButtonClicked()
 {
   // TODO (ddengster): Enable when moveit_ros_warehouse is ported
-  //  if (planning_scene_storage_)
-  //  {
-  //    QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
-  //    if (!sel.empty())
-  //    {
-  //      QTreeWidgetItem* s = sel.front();
-  //      if (s->type() == ITEM_TYPE_QUERY)
-  //      {
-  //        std::string scene = s->parent()->text(0).toStdString();
-  //        std::string query_name = s->text(0).toStdString();
-  //
-  //        moveit_warehouse::MotionPlanRequestWithMetadata mp;
-  //        bool got_q = false;
-  //        try
-  //        {
-  //          got_q = planning_scene_storage_->getPlanningQuery(mp, scene, query_name);
-  //        }
-  //        catch (std::exception& ex)
-  //        {
-  //          RCLCPP_ERROR(LOGGER, "%s", ex.what());
-  //        }
-  //
-  //        if (got_q)
-  //        {
-  //          moveit::core::RobotStatePtr start_state(
-  //              new moveit::core::RobotState(*planning_display_->getQueryStartState()));
-  //          moveit::core::robotStateMsgToRobotState(planning_display_->getPlanningSceneRO()->getTransforms(),
-  //                                                  mp->start_state, *start_state);
-  //          planning_display_->setQueryStartState(*start_state);
-  //
-  //          moveit::core::RobotStatePtr goal_state(new
-  //          moveit::core::RobotState(*planning_display_->getQueryGoalState()));
-  //          for (const moveit_msgs::msg::Constraints& goal_constraint : mp->goal_constraints)
-  //            if (!goal_constraint.joint_constraints.empty())
-  //            {
-  //              std::map<std::string, double> vals;
-  //              for (const moveit_msgs::msg::JointConstraint& joint_constraint : goal_constraint.joint_constraints)
-  //                vals[joint_constraint.joint_name] = joint_constraint.position;
-  //              goal_state->setVariablePositions(vals);
-  //              break;
-  //            }
-  //          planning_display_->setQueryGoalState(*goal_state);
-  //        }
-  //        else
-  //          RCLCPP_ERROR(LOGGER, "Failed to load planning query '%s'. Has the message format changed since the query
-  //          was saved?",
-  //                    query_name.c_str());
-  //      }
-  //    }
-  //  }
+  if (planning_scene_storage_)
+  {
+    QList<QTreeWidgetItem*> sel = ui_->planning_scene_tree->selectedItems();
+    if (!sel.empty())
+    {
+      QTreeWidgetItem* s = sel.front();
+      if (s->type() == ITEM_TYPE_QUERY)
+      {
+        std::string scene = s->parent()->text(0).toStdString();
+        std::string query_name = s->text(0).toStdString();
+
+        moveit_warehouse::MotionPlanRequestWithMetadata mp;
+        bool got_q = false;
+        try
+        {
+          got_q = planning_scene_storage_->getPlanningQuery(mp, scene, query_name);
+        }
+        catch (std::exception& ex)
+        {
+          RCLCPP_ERROR(LOGGER, "%s", ex.what());
+        }
+
+        if (got_q)
+        {
+          moveit::core::RobotStatePtr start_state(
+              new moveit::core::RobotState(*planning_display_->getQueryStartState()));
+          moveit::core::robotStateMsgToRobotState(planning_display_->getPlanningSceneRO()->getTransforms(),
+                                                  mp->start_state, *start_state);
+          planning_display_->setQueryStartState(*start_state);
+
+          moveit::core::RobotStatePtr goal_state(new moveit::core::RobotState(*planning_display_->getQueryGoalState()));
+          for (const moveit_msgs::msg::Constraints& goal_constraint : mp->goal_constraints)
+            if (!goal_constraint.joint_constraints.empty())
+            {
+              std::map<std::string, double> vals;
+              for (const moveit_msgs::msg::JointConstraint& joint_constraint : goal_constraint.joint_constraints)
+                vals[joint_constraint.joint_name] = joint_constraint.position;
+              goal_state->setVariablePositions(vals);
+              break;
+            }
+          planning_display_->setQueryGoalState(*goal_state);
+        }
+        else
+          RCLCPP_ERROR(LOGGER,
+                       "Failed to load planning query '%s'. Has the message format changed since the query was saved?",
+                       query_name.c_str());
+      }
+    }
+  }
 }
 
 visualization_msgs::msg::InteractiveMarker
