@@ -30,6 +30,10 @@ target_include_directories(moveit_move_group_capabilities_base PUBLIC include)
 ament_target_dependencies(moveit_move_group_capabilities_base
   rclcpp moveit_core moveit_ros_planning tf2_geometry_msgs)
 
+# Causes the visibility macros to use dllexport rather than dllimport,
+# which is appropriate when building the dll but not consuming it.
+target_compile_definitions(moveit_move_group_capabilities_base PRIVATE "MOVE_GROUP_BUILDING_LIBRARY")
+
 add_executable(move_group src/move_group.cpp)
 target_include_directories(move_group PUBLIC include)
 ament_target_dependencies(move_group
