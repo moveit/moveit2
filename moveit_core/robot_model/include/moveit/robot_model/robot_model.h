@@ -39,6 +39,7 @@
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/exceptions/exceptions.h>
+#include <moveit/robot_model/visibility_control.hpp>
 #include <srdfdom/model.h>
 
 // joint types
@@ -61,7 +62,7 @@ MOVEIT_CLASS_FORWARD(RobotModel)
 
 /** \brief Definition of a kinematic model. This class is not thread
     safe, however multiple instances can be created */
-class RobotModel
+class ROBOT_MODEL_PUBLIC RobotModel
 {
 public:
   /** \brief Construct a kinematic model from a parsed description and a list of planning groups */

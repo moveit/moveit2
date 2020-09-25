@@ -22,6 +22,10 @@ if(WIN32)
 #  set_target_properties(${MOVEIT_LIB_NAME}_python PROPERTIES SUFFIX .pyd)
 endif()
 
+# Causes the visibility macros to use dllexport rather than dllimport,
+# which is appropriate when building the dll but not consuming it.
+target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE "MOVE_GROUP_INTERFACE_BUILDING_LIBRARY")
+
 install(TARGETS ${MOVEIT_LIB_NAME}
   EXPORT ${MOVEIT_LIB_NAME}
   ARCHIVE DESTINATION lib

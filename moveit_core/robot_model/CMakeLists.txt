@@ -28,6 +28,10 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_exceptions
 )
 
+# Causes the visibility macros to use dllexport rather than dllimport,
+# which is appropriate when building the dll but not consuming it.
+target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE "ROBOT_MODEL_BUILDING_LIBRARY")
+
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(test_robot_model test/test.cpp)

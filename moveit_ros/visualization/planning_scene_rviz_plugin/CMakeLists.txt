@@ -26,6 +26,10 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 )
 target_include_directories(${MOVEIT_LIB_NAME} PRIVATE "${OGRE_PREFIX_DIR}/include")
 
+# Causes the visibility macros to use dllexport rather than dllimport,
+# which is appropriate when building the dll but not consuming it.
+target_compile_definitions(${MOVEIT_LIB_NAME}_core PRIVATE "PLANNING_SCENE_RVIZ_PLUGIN_BUILDING_LIBRARY")
+
 install(DIRECTORY include/ DESTINATION include)
 
 install(TARGETS ${MOVEIT_LIB_NAME}_core ${MOVEIT_LIB_NAME}
