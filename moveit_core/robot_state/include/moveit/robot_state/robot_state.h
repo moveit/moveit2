@@ -40,6 +40,7 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/attached_body.h>
 #include <moveit/transforms/transforms.h>
+#include <moveit/robot_state/visibility_control.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <std_msgs/msg/color_rgba.hpp>
@@ -86,7 +87,7 @@ typedef boost::function<bool(RobotState* robot_state, const JointModelGroup* joi
     For efficiency reasons a state computes forward kinematics in a
     lazy fashion. This can sometimes lead to problems if the update()
     function was not called on the state. */
-class RobotState
+class ROBOT_STATE_PUBLIC RobotState
 {
 public:
   /** \brief A state can be constructed from a specified robot model. No values are initialized.

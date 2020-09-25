@@ -39,6 +39,7 @@
 #include <geometry_msgs/msg/pose.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit/macros/class_forward.h>
+#include <moveit/kinematics_base/visibility_control.hpp>
 #include "rclcpp/rclcpp.hpp"
 #include <boost/function.hpp>
 #include <string>
@@ -140,7 +141,7 @@ MOVEIT_CLASS_FORWARD(KinematicsBase)
  * @class KinematicsBase
  * @brief Provides an interface for kinematics solvers.
  */
-class KinematicsBase
+class KINEMATICS_BASE_PUBLIC KinematicsBase
 {
 public:
   static const rclcpp::Logger LOGGER;

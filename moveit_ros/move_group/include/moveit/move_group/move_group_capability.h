@@ -41,6 +41,7 @@
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/plan_execution/plan_representation.h>
 #include <moveit/move_group/move_group_context.h>
+#include <moveit/move_group/visibility_control.hpp>
 
 namespace move_group
 {
@@ -54,7 +55,7 @@ enum MoveGroupState
 
 MOVEIT_CLASS_FORWARD(MoveGroupCapability)
 
-class MoveGroupCapability
+class MOVE_GROUP_PUBLIC MoveGroupCapability
 {
 public:
   MoveGroupCapability(const std::string& capability_name) : capability_name_(capability_name)

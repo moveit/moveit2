@@ -39,6 +39,7 @@
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
+#include <moveit/move_group_interface/visibility_control.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
 #include <moveit_msgs/msg/planner_interface_description.hpp>
@@ -105,7 +106,7 @@ class MoveGroupInterface
 {
 public:
   /** \brief Default ROS parameter name from where to read the robot's URDF. Set to 'robot_description' */
-  static const std::string ROBOT_DESCRIPTION;
+  MOVE_GROUP_INTERFACE_PUBLIC static const std::string ROBOT_DESCRIPTION;
 
   /** \brief Specification of options to use when constructing the MoveGroupInterface class */
   struct Options

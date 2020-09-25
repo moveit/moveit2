@@ -37,6 +37,7 @@
 #pragma once
 
 #include <moveit/macros/class_forward.h>
+#include <moveit/robot_trajectory/visibility_control.hpp>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
@@ -55,7 +56,7 @@ MOVEIT_CLASS_FORWARD(RobotTrajectory)
 
 /** \brief Maintain a sequence of waypoints and the time durations
     between these waypoints */
-class RobotTrajectory
+class ROBOT_TRAJECTORY_PUBLIC RobotTrajectory
 {
 public:
   RobotTrajectory(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group);

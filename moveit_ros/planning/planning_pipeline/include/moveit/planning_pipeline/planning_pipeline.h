@@ -42,6 +42,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
+#include <moveit/planning_pipeline/visibility_control.hpp>
 
 #include <memory>
 
@@ -59,15 +60,15 @@ class PlanningPipeline
 public:
   /** \brief When motion plans are computed and they are supposed to be automatically displayed, they are sent to this
    * topic (moveit_msgs::msg::DisplauTrajectory) */
-  static const std::string DISPLAY_PATH_TOPIC;
+  PLANNING_PIPELINE_PUBLIC static const std::string DISPLAY_PATH_TOPIC;
 
   /** \brief When motion planning requests are received and they are supposed to be automatically published, they are
    * sent to this topic (moveit_msgs::msg::MotionPlanRequest) */
-  static const std::string MOTION_PLAN_REQUEST_TOPIC;
+  PLANNING_PIPELINE_PUBLIC static const std::string MOTION_PLAN_REQUEST_TOPIC;
 
   /** \brief When contacts are found in the solution path reported by a planner, they can be published as markers on
    * this topic (visualization_msgs::MarkerArray) */
-  static const std::string MOTION_CONTACTS_TOPIC;
+  PLANNING_PIPELINE_PUBLIC static const std::string MOTION_CONTACTS_TOPIC;
 
   /** \brief Given a robot model (\e model), a node handle (\e nh), initialize the planning pipeline.
       \param model The robot model for which this pipeline is initialized.
