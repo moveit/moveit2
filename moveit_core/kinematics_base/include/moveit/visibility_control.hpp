@@ -67,32 +67,4 @@
   #define KINEMATICS_BASE_PUBLIC_TYPE
 #endif
 
-#if defined _WIN32 || defined __CYGWIN__
-  #ifdef __GNUC__
-    #define KINEMATICS_BASE_PLUGIN_EXPORT __attribute__ ((dllexport))
-    #define KINEMATICS_BASE_PLUGIN_IMPORT __attribute__ ((dllimport))
-  #else
-    #define KINEMATICS_BASE_PLUGIN_EXPORT __declspec(dllexport)
-    #define KINEMATICS_BASE_PLUGIN_IMPORT __declspec(dllimport)
-  #endif
-  #ifdef KINEMATICS_BASE_PLUGIN_BUILDING_LIBRARY
-    #define KINEMATICS_BASE_PLUGIN_PUBLIC KINEMATICS_BASE_PLUGIN_EXPORT
-  #else
-    #define KINEMATICS_BASE_PLUGIN_PUBLIC KINEMATICS_BASE_PLUGIN_IMPORT
-  #endif
-  #define KINEMATICS_BASE_PLUGIN_PUBLIC_TYPE KINEMATICS_BASE_PLUGIN_PUBLIC
-  #define KINEMATICS_BASE_PLUGIN_LOCAL
-#else
-  #define KINEMATICS_BASE_PLUGIN_EXPORT __attribute__ ((visibility("default")))
-  #define KINEMATICS_BASE_PLUGIN_IMPORT
-  #if __GNUC__ >= 4
-    #define KINEMATICS_BASE_PLUGIN_PUBLIC __attribute__ ((visibility("default")))
-    #define KINEMATICS_BASE_PLUGIN_LOCAL  __attribute__ ((visibility("hidden")))
-  #else
-    #define KINEMATICS_BASE_PLUGIN_PUBLIC
-    #define KINEMATICS_BASE_PLUGIN_LOCAL
-  #endif
-  #define KINEMATICS_BASE_PLUGIN_PUBLIC_TYPE
-#endif
-
 #endif  // KINEMATICS_BASE__VISIBILITY_CONTROL_HPP_
