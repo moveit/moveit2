@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_planners_ompl)
 
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wno-overloaded-virtual)
+endif()
+
 find_package(Boost REQUIRED system filesystem date_time thread serialization)
 find_package(moveit_common REQUIRED)
 find_package(moveit_core REQUIRED)
