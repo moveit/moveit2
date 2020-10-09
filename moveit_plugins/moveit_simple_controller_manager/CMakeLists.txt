@@ -1,16 +1,17 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_simple_controller_manager)
 
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
+
 find_package(Boost REQUIRED thread)
 find_package(ament_cmake REQUIRED)
-find_package(moveit_common REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
-
-moveit_package()
 
 include_directories(include)
 

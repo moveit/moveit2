@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_core VERSION 2.0.0 LANGUAGES CXX)
 
-find_package(ament_cmake REQUIRED)
+# Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()
 
+find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 # boost::iostreams on Windows depends on boost::zlib
 if(WIN32)
@@ -16,9 +17,6 @@ find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
-
-#find_package(MOVEIT_COMMON REQUIRED)
-#moveit_package()
 
 # TODO(henningkayser): enable bullet once the library is migrated to ROS2
 # TODO: Move collision detection into separate packages

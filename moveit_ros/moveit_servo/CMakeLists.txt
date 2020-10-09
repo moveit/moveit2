@@ -4,8 +4,11 @@ project(moveit_servo)
 set(LIBRARY_NAME moveit_servo)
 set(COMPOSABLE_NODE_NAME servo_server)
 
-find_package(ament_cmake REQUIRED)
+# Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
+moveit_package()
+
+find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -16,8 +19,6 @@ find_package(moveit_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
-
-moveit_package()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp

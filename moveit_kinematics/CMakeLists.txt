@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_kinematics)
 
-find_package(ament_cmake REQUIRED)
+# Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
-
 moveit_package()
 
+find_package(ament_cmake REQUIRED)
 find_package(Boost REQUIRED program_options system)
 find_package(Eigen3 REQUIRED)
 find_package(orocos_kdl REQUIRED)

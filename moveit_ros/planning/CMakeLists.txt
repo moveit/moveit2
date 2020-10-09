@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_ros_planning)
 
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
+
 find_package(Boost REQUIRED system filesystem date_time program_options thread chrono)
 find_package(ament_cmake REQUIRED)
-find_package(moveit_common REQUIRED)
 find_package(moveit_msgs REQUIRED)
 # find_package(moveit_ros_perception REQUIRED)
 find_package(pluginlib REQUIRED)
@@ -20,8 +23,6 @@ find_package(Eigen3 REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(moveit_ros_occupancy_map_monitor REQUIRED)
-
-moveit_package()
 
 set(THIS_PACKAGE_INCLUDE_DIRS
     rdf_loader/include

@@ -13,7 +13,6 @@ macro(moveit_package)
   else()
     # Defaults for Microsoft C++ compiler
     add_compile_options(/W3 /wd4251 /wd4068 /wd4275)
-    add_compile_options(/D_USE_MATH_DEFINES)
 
     # https://blog.kitware.com/create-dlls-on-windows-without-declspec-using-new-cmake-export-all-feature/
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)

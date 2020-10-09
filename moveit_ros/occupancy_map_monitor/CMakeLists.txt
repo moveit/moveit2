@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.10.2)
 project(moveit_ros_occupancy_map_monitor)
 set(MOVEIT_LIB_NAME ${PROJECT_NAME})
 
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
+
 # Disable -Wpedantic warnings due to the warnings in ros-dashing-octomap
 # TODO: add -Wpedantic warnings back when PR(https://github.com/OctoMap/octomap/pull/275) is merged
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -9,9 +13,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(Boost REQUIRED thread)
-find_package(moveit_common REQUIRED)
-
-moveit_package()
 
 if(APPLE)
   find_package(X11 REQUIRED)

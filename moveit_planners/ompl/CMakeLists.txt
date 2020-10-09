@@ -1,16 +1,17 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_planners_ompl)
 
-find_package(Boost REQUIRED system filesystem date_time thread serialization)
+# Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
+moveit_package()
+
+find_package(Boost REQUIRED system filesystem date_time thread serialization)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(ompl REQUIRED)
-
-moveit_package()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wno-overloaded-virtual)

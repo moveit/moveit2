@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 project(run_moveit_cpp)
 
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
+
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wpedantic)
 endif()
@@ -15,8 +19,6 @@ find_package(Boost REQUIRED COMPONENTS system)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
-
-moveit_package()
 
 add_executable(run_moveit_cpp src/run_moveit_cpp.cpp)
 ament_target_dependencies(run_moveit_cpp

@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_ros_robot_interaction)
 
-find_package(Boost REQUIRED thread)
+# Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
+moveit_package()
+
+find_package(Boost REQUIRED thread)
 find_package(moveit_ros_planning REQUIRED)
 find_package(interactive_markers REQUIRED)
 find_package(tf2 REQUIRED)
@@ -10,8 +13,6 @@ find_package(tf2_eigen REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(rclcpp REQUIRED)
-
-moveit_package()
 
 set(MOVEIT_LIB_NAME moveit_robot_interaction)
 
