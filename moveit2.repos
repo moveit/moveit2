@@ -17,7 +17,7 @@ repositories:
     version: ros2
   srdfdom:
     type: git
-    url: https://github.com/PickNikRobotics/srdfdom
+    url: https://github.com/ros-planning/srdfdom
     version: ros2
 
 # TODO(#283): Switch to master after fixing breaking changes in ros2_control
