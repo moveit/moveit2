@@ -22,7 +22,7 @@ repositories:
   moveit_resources:
     type: git
     url: https://github.com/ros-planning/moveit_resources
-    version: ros2
+    version: 0400e1f541c143b7638041dd41a98bdd96c6e6bb
   geometric_shapes:
     type: git
     url: https://github.com/ros-planning/geometric_shapes
