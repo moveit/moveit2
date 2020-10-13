@@ -37,6 +37,8 @@ if(BUILD_TESTING)
   ament_export_libraries(${MOVEIT_TEST_LIB_NAME} ${MOVEIT_LIB_NAME})
   ament_export_include_directories(include)
 
+  ament_python_install_package(${MOVEIT_LIB_NAME})
+
   install(TARGETS
     ${MOVEIT_TEST_LIB_NAME}
     LIBRARY DESTINATION lib
