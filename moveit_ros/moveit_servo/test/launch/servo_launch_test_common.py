@@ -55,7 +55,7 @@ def generate_servo_test_description(*args,
     # Component nodes for tf and Servo
     test_container = ComposableNodeContainer(
             name='test_servo_integration_container',
-            namespace='',
+            namespace='/',
             package='rclcpp_components',
             executable='component_container',
             composable_node_descriptions=[
