@@ -120,7 +120,7 @@ If using the composable node, you will need to load the parameters into the "mov
 servo_params = { 'moveit_servo' : servo_yaml }
 container = ComposableNodeContainer(
             name='moveit_servo_demo_container',
-            namespace='',
+            namespace='/',
             package='rclcpp_components',
             executable='component_container',
             composable_node_descriptions=[
