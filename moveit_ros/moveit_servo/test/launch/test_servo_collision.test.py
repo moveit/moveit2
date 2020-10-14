@@ -1,10 +1,11 @@
+from servo_launch_test_common import generate_servo_test_description
 import os
 import sys
 import unittest
 
 import launch_testing.asserts
 sys.path.append(os.path.dirname(__file__))
-from servo_launch_test_common import generate_servo_test_description 
+
 
 def generate_test_description():
     return generate_servo_test_description(gtest_name='test_servo_collision',
