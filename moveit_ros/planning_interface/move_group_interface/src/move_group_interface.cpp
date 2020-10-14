@@ -843,17 +843,18 @@ public:
     std::shared_ptr<moveit_msgs::action::ExecuteTrajectory_Result> res;
     auto send_goal_opts = rclcpp_action::Client<moveit_msgs::action::ExecuteTrajectory>::SendGoalOptions();
 
-    send_goal_opts.goal_response_callback = [&](
-        std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr> future) {
-      const auto& goal_handle = future.get();
-      if (!goal_handle)
-      {
-        done = true;
-        RCLCPP_INFO(LOGGER, "Execute request rejected");
-      }
-      else
-        RCLCPP_INFO(LOGGER, "Execute request accepted");
-    };
+    send_goal_opts.goal_response_callback =
+        [&](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr>
+                future) {
+          const auto& goal_handle = future.get();
+          if (!goal_handle)
+          {
+            done = true;
+            RCLCPP_INFO(LOGGER, "Execute request rejected");
+          }
+          else
+            RCLCPP_INFO(LOGGER, "Execute request accepted");
+        };
     send_goal_opts.result_callback =
         [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::WrappedResult& result) {
           res = result.result;
@@ -1729,8 +1730,8 @@ bool MoveGroupInterface::setJointValueTarget(const std::string& joint_name, cons
     return impl_->getTargetRobotState().satisfiesBounds(jm, impl_->getGoalJointTolerance());
   }
 
-  RCLCPP_ERROR_STREAM(LOGGER, "joint " << joint_name << " is not part of group "
-                                       << impl_->getJointModelGroup()->getName());
+  RCLCPP_ERROR_STREAM(LOGGER,
+                      "joint " << joint_name << " is not part of group " << impl_->getJointModelGroup()->getName());
   return false;
 }
 

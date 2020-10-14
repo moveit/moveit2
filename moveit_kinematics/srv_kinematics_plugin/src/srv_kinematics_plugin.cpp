@@ -249,8 +249,8 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
   // Check if seed state correct
   if (ik_seed_state.size() != dimension_)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Seed state must have size " << dimension_ << " instead of size "
-                                                             << ik_seed_state.size());
+    RCLCPP_ERROR_STREAM(LOGGER,
+                        "Seed state must have size " << dimension_ << " instead of size " << ik_seed_state.size());
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
@@ -326,8 +326,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
   }
   else
   {
-    RCLCPP_DEBUG_STREAM(LOGGER,
-                        "Service call failed to connect to service: " << ik_service_client_->get_service_name());
+    RCLCPP_DEBUG_STREAM(LOGGER, "Service call failed to connect to service: " << ik_service_client_->get_service_name());
     error_code.val = error_code.FAILURE;
     return false;
   }

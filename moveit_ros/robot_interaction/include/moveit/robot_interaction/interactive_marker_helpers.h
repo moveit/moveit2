@@ -42,9 +42,8 @@
 
 namespace robot_interaction
 {
-visualization_msgs::msg::InteractiveMarker makeEmptyInteractiveMarker(const std::string& name,
-                                                                      const geometry_msgs::msg::PoseStamped& stamped,
-                                                                      double scale);
+visualization_msgs::msg::InteractiveMarker
+makeEmptyInteractiveMarker(const std::string& name, const geometry_msgs::msg::PoseStamped& stamped, double scale);
 
 visualization_msgs::msg::InteractiveMarker make6DOFMarker(const std::string& name,
                                                           const geometry_msgs::msg::PoseStamped& stamped, double scale,

@@ -23,6 +23,7 @@ if(BUILD_TESTING)
   add_library(${MOVEIT_TEST_LIB_NAME} SHARED src/robot_model_test_utils.cpp)
   target_link_libraries(${MOVEIT_TEST_LIB_NAME} moveit_robot_model)
   ament_target_dependencies(${MOVEIT_TEST_LIB_NAME}
+    ament_index_cpp
     Boost
     geometry_msgs
     urdf

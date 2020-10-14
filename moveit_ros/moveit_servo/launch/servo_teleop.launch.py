@@ -58,7 +58,7 @@ def generate_launch_description():
     # Launch as much as possible in components
     container = ComposableNodeContainer(
             name='moveit_servo_demo_container',
-            namespace='',
+            namespace='/',
             package='rclcpp_components',
             executable='component_container',
             composable_node_descriptions=[

@@ -82,8 +82,9 @@ struct OrderSamplers
         }
     if (b_depends_on_a && a_depends_on_b)
     {
-      RCLCPP_WARN(LOGGER, "Circular frame dependency! "
-                          "Sampling will likely produce invalid results (sampling for groups '%s' and '%s')",
+      RCLCPP_WARN(LOGGER,
+                  "Circular frame dependency! "
+                  "Sampling will likely produce invalid results (sampling for groups '%s' and '%s')",
                   a->getJointModelGroup()->getName().c_str(), b->getJointModelGroup()->getName().c_str());
       return true;
     }

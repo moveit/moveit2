@@ -2,7 +2,7 @@ set(MOVEIT_LIB_NAME moveit_move_group_interface)
 
 add_library(${MOVEIT_LIB_NAME} SHARED src/move_group_interface.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME} moveit_common_planning_interface_objects moveit_planning_scene_interface)
+target_link_libraries(${MOVEIT_LIB_NAME} moveit_common_planning_interface_objects moveit_planning_scene_interface ${Boost_THREAD_LIBRARY})
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_ros_occupancy_map_monitor
   moveit_ros_move_group

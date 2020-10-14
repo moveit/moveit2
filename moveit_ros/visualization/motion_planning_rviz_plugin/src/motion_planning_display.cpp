@@ -99,21 +99,25 @@ MotionPlanningDisplay::MotionPlanningDisplay()
   path_category_ = new rviz_common::properties::Property("Planned Path", QVariant(), "", this);
 
   // Metrics category -----------------------------------------------------------------------------------------
-  compute_weight_limit_property_ = new rviz_common::properties::BoolProperty(
-      "Show Weight Limit", false, "Shows the weight limit at a particular pose for an end-effector", metrics_category_,
-      SLOT(changedShowWeightLimit()), this);
+  compute_weight_limit_property_ =
+      new rviz_common::properties::BoolProperty("Show Weight Limit", false,
+                                                "Shows the weight limit at a particular pose for an end-effector",
+                                                metrics_category_, SLOT(changedShowWeightLimit()), this);
 
-  show_manipulability_index_property_ = new rviz_common::properties::BoolProperty(
-      "Show Manipulability Index", false, "Shows the manipulability index for an end-effector", metrics_category_,
-      SLOT(changedShowManipulabilityIndex()), this);
+  show_manipulability_index_property_ =
+      new rviz_common::properties::BoolProperty("Show Manipulability Index", false,
+                                                "Shows the manipulability index for an end-effector", metrics_category_,
+                                                SLOT(changedShowManipulabilityIndex()), this);
 
-  show_manipulability_property_ = new rviz_common::properties::BoolProperty(
-      "Show Manipulability", false, "Shows the manipulability for an end-effector", metrics_category_,
-      SLOT(changedShowManipulability()), this);
+  show_manipulability_property_ =
+      new rviz_common::properties::BoolProperty("Show Manipulability", false,
+                                                "Shows the manipulability for an end-effector", metrics_category_,
+                                                SLOT(changedShowManipulability()), this);
 
-  show_joint_torques_property_ = new rviz_common::properties::BoolProperty(
-      "Show Joint Torques", false, "Shows the joint torques for a given configuration and payload", metrics_category_,
-      SLOT(changedShowJointTorques()), this);
+  show_joint_torques_property_ =
+      new rviz_common::properties::BoolProperty("Show Joint Torques", false,
+                                                "Shows the joint torques for a given configuration and payload",
+                                                metrics_category_, SLOT(changedShowJointTorques()), this);
 
   metrics_set_payload_property_ =
       new rviz_common::properties::FloatProperty("Payload", 1.0f, "Specify the payload at the end effector (kg)",
@@ -129,34 +133,38 @@ MotionPlanningDisplay::MotionPlanningDisplay()
   planning_group_property_ = new rviz_common::properties::EditableEnumProperty(
       "Planning Group", "", "The name of the group of links to plan for (from the ones defined in the SRDF)",
       plan_category_, SLOT(changedPlanningGroup()), this);
-  show_workspace_property_ =
-      new rviz_common::properties::BoolProperty("Show Workspace", false, "Shows the axis-aligned bounding box for "
-                                                                         "the workspace allowed for planning",
-                                                plan_category_, SLOT(changedWorkspace()), this);
-  query_start_state_property_ = new rviz_common::properties::BoolProperty(
-      "Query Start State", false, "Set a custom start state for the motion planning query", plan_category_,
-      SLOT(changedQueryStartState()), this);
-  query_goal_state_property_ = new rviz_common::properties::BoolProperty(
-      "Query Goal State", true, "Shows the goal state for the motion planning query", plan_category_,
-      SLOT(changedQueryGoalState()), this);
+  show_workspace_property_ = new rviz_common::properties::BoolProperty("Show Workspace", false,
+                                                                       "Shows the axis-aligned bounding box for "
+                                                                       "the workspace allowed for planning",
+                                                                       plan_category_, SLOT(changedWorkspace()), this);
+  query_start_state_property_ =
+      new rviz_common::properties::BoolProperty("Query Start State", false,
+                                                "Set a custom start state for the motion planning query",
+                                                plan_category_, SLOT(changedQueryStartState()), this);
+  query_goal_state_property_ =
+      new rviz_common::properties::BoolProperty("Query Goal State", true,
+                                                "Shows the goal state for the motion planning query", plan_category_,
+                                                SLOT(changedQueryGoalState()), this);
   query_marker_scale_property_ = new rviz_common::properties::FloatProperty(
       "Interactive Marker Size", 0.0f,
       "Specifies scale of the interactive marker overlayed on the robot. 0 is auto scale.", plan_category_,
       SLOT(changedQueryMarkerScale()), this);
   query_marker_scale_property_->setMin(0.0f);
 
-  query_start_color_property_ = new rviz_common::properties::ColorProperty(
-      "Start State Color", QColor(0, 255, 0), "The highlight color for the start state", plan_category_,
-      SLOT(changedQueryStartColor()), this);
+  query_start_color_property_ =
+      new rviz_common::properties::ColorProperty("Start State Color", QColor(0, 255, 0),
+                                                 "The highlight color for the start state", plan_category_,
+                                                 SLOT(changedQueryStartColor()), this);
   query_start_alpha_property_ =
       new rviz_common::properties::FloatProperty("Start State Alpha", 1.0f, "Specifies the alpha for the robot links",
                                                  plan_category_, SLOT(changedQueryStartAlpha()), this);
   query_start_alpha_property_->setMin(0.0);
   query_start_alpha_property_->setMax(1.0);
 
-  query_goal_color_property_ = new rviz_common::properties::ColorProperty(
-      "Goal State Color", QColor(250, 128, 0), "The highlight color for the goal state", plan_category_,
-      SLOT(changedQueryGoalColor()), this);
+  query_goal_color_property_ =
+      new rviz_common::properties::ColorProperty("Goal State Color", QColor(250, 128, 0),
+                                                 "The highlight color for the goal state", plan_category_,
+                                                 SLOT(changedQueryGoalColor()), this);
 
   query_goal_alpha_property_ =
       new rviz_common::properties::FloatProperty("Goal State Alpha", 1.0f, "Specifies the alpha for the robot links",
@@ -164,9 +172,10 @@ MotionPlanningDisplay::MotionPlanningDisplay()
   query_goal_alpha_property_->setMin(0.0);
   query_goal_alpha_property_->setMax(1.0);
 
-  query_colliding_link_color_property_ = new rviz_common::properties::ColorProperty(
-      "Colliding Link Color", QColor(255, 0, 0), "The highlight color for colliding links", plan_category_,
-      SLOT(changedQueryCollidingLinkColor()), this);
+  query_colliding_link_color_property_ =
+      new rviz_common::properties::ColorProperty("Colliding Link Color", QColor(255, 0, 0),
+                                                 "The highlight color for colliding links", plan_category_,
+                                                 SLOT(changedQueryCollidingLinkColor()), this);
 
   query_outside_joint_limits_link_color_property_ = new rviz_common::properties::ColorProperty(
       "Joint Violation Color", QColor(255, 0, 255),
@@ -177,7 +186,8 @@ MotionPlanningDisplay::MotionPlanningDisplay()
   trajectory_visual_.reset(new TrajectoryVisualization(path_category_, this));
 
   // Start background jobs
-  background_process_.setJobUpdateEvent(boost::bind(&MotionPlanningDisplay::backgroundJobUpdate, this, _1, _2));
+  background_process_.setJobUpdateEvent(
+      boost::bind(&MotionPlanningDisplay::backgroundJobUpdate, this, boost::placeholders::_1, boost::placeholders::_2));
 }
 
 // ******************************************************************************************
@@ -219,8 +229,7 @@ void MotionPlanningDisplay::onInitialize()
   color.a = 1.0f;
   query_robot_start_->setDefaultAttachedObjectColor(color);
 
-  query_robot_goal_.reset(
-      new RobotStateVisualization(planning_scene_node_, context_, "Planning Request Goal", nullptr));
+  query_robot_goal_.reset(new RobotStateVisualization(planning_scene_node_, context_, "Planning Request Goal", nullptr));
   query_robot_goal_->setCollisionVisible(false);
   query_robot_goal_->setVisualVisible(true);
   query_robot_goal_->setVisible(query_goal_state_property_->getBool());
@@ -546,7 +555,7 @@ inline void copyItemIfExists(const std::map<std::string, double>& source, std::m
   if (it != source.end())
     dest[key] = it->second;
 }
-}
+}  // namespace
 
 void MotionPlanningDisplay::displayMetrics(bool start)
 {
@@ -1128,7 +1137,8 @@ void MotionPlanningDisplay::onRobotModelLoaded()
   robot_interaction_.reset(
       new robot_interaction::RobotInteraction(getRobotModel(), node_, "rviz_moveit_motion_planning_display"));
   robot_interaction::KinematicOptions o;
-  o.state_validity_callback_ = boost::bind(&MotionPlanningDisplay::isIKSolutionCollisionFree, this, _1, _2, _3);
+  o.state_validity_callback_ = boost::bind(&MotionPlanningDisplay::isIKSolutionCollisionFree, this,
+                                           boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3);
   robot_interaction_->getKinematicOptionsMap()->setOptions(
       robot_interaction::KinematicOptionsMap::ALL, o, robot_interaction::KinematicOptions::STATE_VALIDITY_CALLBACK);
 
@@ -1143,8 +1153,10 @@ void MotionPlanningDisplay::onRobotModelLoaded()
                                                                      planning_scene_monitor_->getTFClient()));
   query_goal_state_.reset(new robot_interaction::InteractionHandler(robot_interaction_, "goal", *previous_state_,
                                                                     planning_scene_monitor_->getTFClient()));
-  query_start_state_->setUpdateCallback(boost::bind(&MotionPlanningDisplay::scheduleDrawQueryStartState, this, _1, _2));
-  query_goal_state_->setUpdateCallback(boost::bind(&MotionPlanningDisplay::scheduleDrawQueryGoalState, this, _1, _2));
+  query_start_state_->setUpdateCallback(boost::bind(&MotionPlanningDisplay::scheduleDrawQueryStartState, this,
+                                                    boost::placeholders::_1, boost::placeholders::_2));
+  query_goal_state_->setUpdateCallback(boost::bind(&MotionPlanningDisplay::scheduleDrawQueryGoalState, this,
+                                                   boost::placeholders::_1, boost::placeholders::_2));
 
   // Interactive marker menus
   populateMenuHandler(menu_handler_start_);
@@ -1436,8 +1448,7 @@ void MotionPlanningDisplay::visualizePlaceLocations(const std::vector<geometry_m
     place_locations_display_[i].reset(
         new rviz_rendering::Shape(rviz_rendering::Shape::Sphere, context_->getSceneManager()));
     place_locations_display_[i]->setColor(1.0f, 0.0f, 0.0f, 0.3f);
-    Ogre::Vector3 center(place_poses[i].pose.position.x, place_poses[i].pose.position.y,
-                         place_poses[i].pose.position.z);
+    Ogre::Vector3 center(place_poses[i].pose.position.x, place_poses[i].pose.position.y, place_poses[i].pose.position.z);
     Ogre::Vector3 extents(0.02, 0.02, 0.02);
     place_locations_display_[i]->setScale(extents);
     place_locations_display_[i]->setPosition(center);

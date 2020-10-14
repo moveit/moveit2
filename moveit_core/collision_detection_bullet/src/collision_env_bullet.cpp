@@ -313,9 +313,8 @@ void CollisionEnvBullet::notifyObjectChange(const ObjectConstPtr& obj, World::Ac
   }
 }
 
-void CollisionEnvBullet::addAttachedOjects(
-    const moveit::core::RobotState& state,
-    std::vector<collision_detection_bullet::CollisionObjectWrapperPtr>& cows) const
+void CollisionEnvBullet::addAttachedOjects(const moveit::core::RobotState& state,
+                                           std::vector<collision_detection_bullet::CollisionObjectWrapperPtr>& cows) const
 {
   std::vector<const moveit::core::AttachedBody*> attached_bodies;
   state.getAttachedBodies(attached_bodies);

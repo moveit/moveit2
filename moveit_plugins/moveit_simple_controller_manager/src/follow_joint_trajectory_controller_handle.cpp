@@ -199,12 +199,14 @@ const char* errorCodeToMessage(int error_code)
 //    ROS_WARN_STREAM_NAMED(LOGNAME, "Invalid " << config_name);
 //}
 
-control_msgs::msg::JointTolerance& FollowJointTrajectoryControllerHandle::getTolerance(
-    std::vector<control_msgs::msg::JointTolerance>& tolerances, const std::string& name)
+control_msgs::msg::JointTolerance&
+FollowJointTrajectoryControllerHandle::getTolerance(std::vector<control_msgs::msg::JointTolerance>& tolerances,
+                                                    const std::string& name)
 {
-  auto it = std::lower_bound(
-      tolerances.begin(), tolerances.end(), name,
-      [](const control_msgs::msg::JointTolerance& lhs, const std::string& rhs) { return lhs.name < rhs; });
+  auto it = std::lower_bound(tolerances.begin(), tolerances.end(), name,
+                             [](const control_msgs::msg::JointTolerance& lhs, const std::string& rhs) {
+                               return lhs.name < rhs;
+                             });
   if (it == tolerances.cend() || it->name != name)
   {  // insert new entry if not yet available
     it = tolerances.insert(it, control_msgs::msg::JointTolerance());

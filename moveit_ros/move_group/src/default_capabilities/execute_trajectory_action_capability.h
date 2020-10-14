@@ -60,8 +60,7 @@ public:
 
 private:
   void executePathCallback(std::shared_ptr<ExecTrajectoryGoal> goal);
-  void executePath(const std::shared_ptr<ExecTrajectoryGoal>& goal,
-                   std::shared_ptr<ExecTrajectory::Result>& action_res);
+  void executePath(const std::shared_ptr<ExecTrajectoryGoal>& goal, std::shared_ptr<ExecTrajectory::Result>& action_res);
 
   void preemptExecuteTrajectoryCallback();
   void setExecuteTrajectoryState(MoveGroupState state, const std::shared_ptr<ExecTrajectoryGoal>& goal);

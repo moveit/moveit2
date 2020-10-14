@@ -164,10 +164,12 @@ bool MoveGroupKinematicsService::computeIKService(const std::shared_ptr<rmw_requ
     moveit::core::RobotState rs = ls->getCurrentState();
     kset.add(req->ik_request.constraints, ls->getTransforms());
     computeIK(req->ik_request, res->solution, res->error_code, rs,
-              boost::bind(&isIKSolutionValid, req->ik_request.avoid_collisions ?
-                                                  static_cast<const planning_scene::PlanningSceneConstPtr&>(ls).get() :
-                                                  nullptr,
-                          kset.empty() ? nullptr : &kset, _1, _2, _3));
+              boost::bind(&isIKSolutionValid,
+                          req->ik_request.avoid_collisions ?
+                              static_cast<const planning_scene::PlanningSceneConstPtr&>(ls).get() :
+                              nullptr,
+                          kset.empty() ? nullptr : &kset, boost::placeholders::_1, boost::placeholders::_2,
+                          boost::placeholders::_3));
   }
   else
   {

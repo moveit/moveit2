@@ -174,12 +174,12 @@ protected:
   bool internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory);
 
   /** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
-     * Also calculates the previous velocity
-     * @param delta_theta Eigen vector of joint delta's
-     * @param joint_state The joint state msg being updated
-     * @param previous_vel Eigen vector of previous velocities being updated
-     * @return Returns false if there is a problem, true otherwise
-     */
+   * Also calculates the previous velocity
+   * @param delta_theta Eigen vector of joint delta's
+   * @param joint_state The joint state msg being updated
+   * @param previous_vel Eigen vector of previous velocities being updated
+   * @return Returns false if there is a problem, true otherwise
+   */
   bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state,
                         Eigen::ArrayXd& previous_vel);
 

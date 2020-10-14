@@ -298,8 +298,9 @@ void ompl_interface::ConstraintsLibrary::loadConstraintApproximations(const std:
   std::ifstream fin((path + "/manifest").c_str());
   if (!fin.good())
   {
-    RCLCPP_WARN(LOGGER, "Manifest not found in folder '%s'. Not loading "
-                        "constraint approximations.",
+    RCLCPP_WARN(LOGGER,
+                "Manifest not found in folder '%s'. Not loading "
+                "constraint approximations.",
                 path.c_str());
     return;
   }
@@ -351,8 +352,9 @@ void ompl_interface::ConstraintsLibrary::loadConstraintApproximations(const std:
     std::size_t sum = 0;
     for (std::size_t i = 0; i < cass->size(); ++i)
       sum += cass->getMetadata(i).first.size();
-    RCLCPP_INFO(LOGGER, "Loaded %lu states (%lu milestones) and %lu connections (%0.1lf per state) "
-                        "for constraint named '%s'%s",
+    RCLCPP_INFO(LOGGER,
+                "Loaded %lu states (%lu milestones) and %lu connections (%0.1lf per state) "
+                "for constraint named '%s'%s",
                 cass->size(), cap->getMilestoneCount(), sum, (double)sum / (double)cap->getMilestoneCount(),
                 msg.name.c_str(), explicit_motions ? ". Explicit motions included." : "");
   }
@@ -424,18 +426,20 @@ ompl_interface::ConstraintsLibrary::getConstraintApproximation(const moveit_msgs
 }
 
 ompl_interface::ConstraintApproximationConstructionResults
-ompl_interface::ConstraintsLibrary::addConstraintApproximation(
-    const moveit_msgs::msg::Constraints& constr, const std::string& group,
-    const planning_scene::PlanningSceneConstPtr& scene, const ConstraintApproximationConstructionOptions& options)
+ompl_interface::ConstraintsLibrary::addConstraintApproximation(const moveit_msgs::msg::Constraints& constr,
+                                                               const std::string& group,
+                                                               const planning_scene::PlanningSceneConstPtr& scene,
+                                                               const ConstraintApproximationConstructionOptions& options)
 {
   return addConstraintApproximation(constr, constr, group, scene, options);
 }
 
 ompl_interface::ConstraintApproximationConstructionResults
-ompl_interface::ConstraintsLibrary::addConstraintApproximation(
-    const moveit_msgs::msg::Constraints& constr_sampling, const moveit_msgs::msg::Constraints& constr_hard,
-    const std::string& group, const planning_scene::PlanningSceneConstPtr& scene,
-    const ConstraintApproximationConstructionOptions& options)
+ompl_interface::ConstraintsLibrary::addConstraintApproximation(const moveit_msgs::msg::Constraints& constr_sampling,
+                                                               const moveit_msgs::msg::Constraints& constr_hard,
+                                                               const std::string& group,
+                                                               const planning_scene::PlanningSceneConstPtr& scene,
+                                                               const ConstraintApproximationConstructionOptions& options)
 {
   ConstraintApproximationConstructionResults res;
   if (context_->getGroupName() != group &&

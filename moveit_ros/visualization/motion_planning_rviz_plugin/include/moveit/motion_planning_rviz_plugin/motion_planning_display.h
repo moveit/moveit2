@@ -67,7 +67,7 @@ namespace rviz_rendering
 {
 class Shape;
 class MovableText;
-}
+}  // namespace rviz_rendering
 
 namespace rviz_common
 {
@@ -90,7 +90,7 @@ namespace robot
 {
 class Robot;
 }
-}
+}  // namespace rviz_default_plugins
 
 namespace moveit_rviz_plugin
 {

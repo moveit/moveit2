@@ -41,8 +41,8 @@
 namespace collision_detection
 {
 /**
-* @brief This is used to load the collision plugin
-*/
+ * @brief This is used to load the collision plugin
+ */
 class CollisionPluginLoader
 {
 public:

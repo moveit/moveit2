@@ -224,8 +224,9 @@ public:
     }
     else
     {
-      RCLCPP_WARN(LOGGER, "The joints for controller '%s' are not known. Perhaps the controller configuration is "
-                          "not loaded on the param server?",
+      RCLCPP_WARN(LOGGER,
+                  "The joints for controller '%s' are not known. Perhaps the controller configuration is "
+                  "not loaded on the param server?",
                   name.c_str());
       joints.clear();
     }

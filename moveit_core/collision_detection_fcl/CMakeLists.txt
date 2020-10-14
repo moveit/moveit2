@@ -30,6 +30,7 @@ ament_target_dependencies(collision_detector_fcl_plugin
 )
 target_link_libraries(collision_detector_fcl_plugin
   ${MOVEIT_LIB_NAME}
+  moveit_planning_scene
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME} collision_detector_fcl_plugin

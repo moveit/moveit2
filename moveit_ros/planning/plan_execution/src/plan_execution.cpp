@@ -86,7 +86,8 @@ plan_execution::PlanExecution::PlanExecution(
   new_scene_update_ = false;
 
   // we want to be notified when new information is available
-  planning_scene_monitor_->addUpdateCallback(boost::bind(&PlanExecution::planningSceneUpdatedCallback, this, _1));
+  planning_scene_monitor_->addUpdateCallback(
+      boost::bind(&PlanExecution::planningSceneUpdatedCallback, this, boost::placeholders::_1));
 
   // start the dynamic-reconfigure server
   // reconfigure_impl_ = new DynamicReconfigureImpl(this);
@@ -402,8 +403,8 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
 
   // start a trajectory execution thread
   trajectory_execution_manager_->execute(
-      boost::bind(&PlanExecution::doneWithTrajectoryExecution, this, _1),
-      boost::bind(&PlanExecution::successfulTrajectorySegmentExecution, this, &plan, _1));
+      boost::bind(&PlanExecution::doneWithTrajectoryExecution, this, boost::placeholders::_1),
+      boost::bind(&PlanExecution::successfulTrajectorySegmentExecution, this, &plan, boost::placeholders::_1));
   // wait for path to be done, while checking that the path does not become invalid
   rclcpp::WallRate r(100);
   path_became_invalid_ = false;
