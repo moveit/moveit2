@@ -38,7 +38,7 @@ repositories:
   ros2_controllers:
     type: git
     url: https://github.com/ros-controls/ros2_controllers
-    version: d52902538a970e792ecc604416e22ef90a57f29e
+    version: 8587e079490acdd0fabeb2742a3bec3bf551bbc5
 
 # TODO(JafarAbdi): Switch to upstream once PR https://github.com/tork-a/fake_joint/pull/7 is merged
   fake_joint:
