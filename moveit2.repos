@@ -17,18 +17,8 @@ repositories:
     version: ros2
   srdfdom:
     type: git
-    url: https://github.com/PickNikRobotics/srdfdom
+    url: https://github.com/ros-planning/srdfdom
     version: ros2
-
-# TODO(#242): Remove below once console_bridge conflict is resolved
-  urdfdom:
-    type: git
-    url: https://github.com/ros2/urdfdom
-    version: foxy
-  urdfdom_headers:
-    type: git
-    url: https://github.com/ros/urdfdom_headers
-    version: foxy
 
 # TODO(#283): Switch to master after fixing breaking changes in ros2_control
   ros2_control:

@@ -38,7 +38,7 @@ jobs:
     - env: TEST=code-coverage
 
 before_script:
-  - git clone -q -b sync-master --depth=1 https://github.com/henningkayser/moveit_ci.git .moveit_ci
+  - git clone -q -b ros2 --depth=1 https://github.com/ros-planning/moveit_ci.git .moveit_ci
 
 script:
   - .moveit_ci/travis.sh
