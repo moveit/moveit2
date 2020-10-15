@@ -140,7 +140,7 @@ public:
     sensor_msgs::msg::JointState js;
 
     robot_model_loader::RobotModelLoader robot_model_loader(node_, ROBOT_DESCRIPTION);
-    const robot_model::RobotModelPtr& robot_model = robot_model_loader.getModel();
+    const moveit::core::RobotModelPtr& robot_model = robot_model_loader.getModel();
     moveit::core::RobotState robot_state(robot_model);
     typedef std::map<std::string, double> JointPoseMap;
     JointPoseMap joints;
