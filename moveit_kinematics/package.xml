@@ -20,6 +20,7 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit/issues</url>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>moveit_common</build_depend>
 
   <depend>moveit_core</depend>
   <depend>class_loader</depend>
