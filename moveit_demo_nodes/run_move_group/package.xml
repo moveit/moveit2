@@ -8,6 +8,7 @@
   <license>BSD</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>moveit_common</build_depend>
 
   <depend>moveit_ros_planning_interface</depend>
 

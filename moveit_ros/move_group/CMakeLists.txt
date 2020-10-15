@@ -1,13 +1,9 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_ros_move_group)
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
 
 find_package(Boost REQUIRED system filesystem date_time program_options thread)
 find_package(ament_cmake REQUIRED)

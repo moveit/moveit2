@@ -1,16 +1,9 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_planners_ompl)
 
-# At least C++11 required for OMPL
-if(NOT "${CMAKE_CXX_STANDARD}")
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
 
 find_package(Boost REQUIRED system filesystem date_time thread serialization)
 find_package(moveit_core REQUIRED)
@@ -19,6 +12,10 @@ find_package(rclcpp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(ompl REQUIRED)
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wno-overloaded-virtual)
+endif()
 
 include_directories(ompl_interface/include)
 include_directories(SYSTEM
