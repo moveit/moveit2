@@ -33,10 +33,9 @@
  *********************************************************************/
 
 /* Author: Ioan Sucan */
-// TODO (ddengster): Enable when moveit_ros_warehouse is ported
-// #include <moveit/warehouse/planning_scene_storage.h>
-// #include <moveit/warehouse/constraints_storage.h>
-// #include <moveit/warehouse/state_storage.h>
+#include <moveit/warehouse/planning_scene_storage.h>
+#include <moveit/warehouse/constraints_storage.h>
+#include <moveit/warehouse/state_storage.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
 
@@ -100,47 +99,47 @@ void MotionPlanningFrame::resetDbButtonClicked()
 
 void MotionPlanningFrame::computeDatabaseConnectButtonClicked()
 {
-  RCLCPP_WARN(LOGGER, "compute database functionality isn't supported yet");
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
-  //  if (planning_scene_storage_)
-  //  {
-  //    planning_scene_storage_.reset();
-  //    robot_state_storage_.reset();
-  //    constraints_storage_.reset();
-  //    planning_display_->addMainLoopJob(
-  //        boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 1));
-  //  }
-  //  else
-  //  {
-  //    planning_display_->addMainLoopJob(
-  //        boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 2));
-  //    try
-  //    {
-  //      warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase();
-  //      conn->setParams(ui_->database_host->text().toStdString(), ui_->database_port->value(), 5.0);
-  //      if (conn->connect())
-  //      {
-  //        planning_scene_storage_.reset(new moveit_warehouse::PlanningSceneStorage(conn));
-  //        robot_state_storage_.reset(new moveit_warehouse::RobotStateStorage(conn));
-  //        constraints_storage_.reset(new moveit_warehouse::ConstraintsStorage(conn));
-  //      }
-  //      else
-  //      {
-  //        planning_display_->addMainLoopJob(
-  //            boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 3));
-  //        return;
-  //      }
-  //    }
-  //    catch (std::exception& ex)
-  //    {
-  //      planning_display_->addMainLoopJob(
-  //          boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 3));
-  //      ROS_ERROR("%s", ex.what());
-  //      return;
-  //    }
-  //    planning_display_->addMainLoopJob(
-  //        boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 4));
-  //  }
+  RCLCPP_INFO(LOGGER, "Connect to database: {host: %s, port: %d}", ui_->database_host->text().toStdString().c_str(),
+              ui_->database_port->value());
+  if (planning_scene_storage_)
+  {
+    planning_scene_storage_.reset();
+    robot_state_storage_.reset();
+    constraints_storage_.reset();
+    planning_display_->addMainLoopJob(
+        boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 1));
+  }
+  else
+  {
+    planning_display_->addMainLoopJob(
+        boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 2));
+    try
+    {
+      warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase(node_);
+      conn->setParams(ui_->database_host->text().toStdString(), ui_->database_port->value(), 5.0);
+      if (conn->connect())
+      {
+        planning_scene_storage_.reset(new moveit_warehouse::PlanningSceneStorage(conn));
+        robot_state_storage_.reset(new moveit_warehouse::RobotStateStorage(conn));
+        constraints_storage_.reset(new moveit_warehouse::ConstraintsStorage(conn));
+      }
+      else
+      {
+        planning_display_->addMainLoopJob(
+            boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 3));
+        return;
+      }
+    }
+    catch (std::exception& ex)
+    {
+      planning_display_->addMainLoopJob(
+          boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 3));
+      RCLCPP_ERROR(LOGGER, "%s", ex.what());
+      return;
+    }
+    planning_display_->addMainLoopJob(
+        boost::bind(&MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper, this, 4));
+  }
 }
 
 void MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper(int mode)
@@ -201,12 +200,11 @@ void MotionPlanningFrame::computeDatabaseConnectButtonClickedHelper(int mode)
 
 void MotionPlanningFrame::computeResetDbButtonClicked(const std::string& db)
 {
-  // TODO (ddengster): Enable when moveit_ros_warehouse is ported
-  //  if (db == "Constraints" && constraints_storage_)
-  //    constraints_storage_->reset();
-  //  else if (db == "Robot States" && robot_state_storage_)
-  //    robot_state_storage_->reset();
-  //  else if (db == "Planning Scenes")
-  //    planning_scene_storage_->reset();
+  if (db == "Constraints" && constraints_storage_)
+    constraints_storage_->reset();
+  else if (db == "Robot States" && robot_state_storage_)
+    robot_state_storage_->reset();
+  else if (db == "Planning Scenes")
+    planning_scene_storage_->reset();
 }
 }  // namespace moveit_rviz_plugin

@@ -46,13 +46,19 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/math/constants/constants.hpp>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.initialize_demo_db");
+
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "initialize_demo_db", ros::init_options::AnonymousName);
+  rclcpp::init(argc, argv);
+  rclcpp::NodeOptions node_options;
+  node_options.allow_undeclared_parameters(true);
+  node_options.automatically_declare_parameters_from_overrides(true);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("initialize_demo_db", node_options);
 
   boost::program_options::options_description desc;
   desc.add_options()("help", "Show help message")("host", boost::program_options::value<std::string>(),
@@ -70,20 +76,16 @@ int main(int argc, char** argv)
     return 1;
   }
   // Set up db
-  warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase();
+  warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase(node);
   if (vm.count("host") && vm.count("port"))
     conn->setParams(vm["host"].as<std::string>(), vm["port"].as<std::size_t>());
   if (!conn->connect())
     return 1;
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-
-  ros::NodeHandle nh;
-  planning_scene_monitor::PlanningSceneMonitor psm(ROBOT_DESCRIPTION);
+  planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (!psm.getPlanningScene())
   {
-    ROS_ERROR("Unable to initialize PlanningSceneMonitor");
+    RCLCPP_ERROR(LOGGER, "Unable to initialize PlanningSceneMonitor");
     return 1;
   }
 
@@ -99,12 +101,12 @@ int main(int argc, char** argv)
   psm.getPlanningScene()->getPlanningSceneMsg(psmsg);
   psmsg.name = "default";
   pss.addPlanningScene(psmsg);
-  ROS_INFO("Added default scene: '%s'", psmsg.name.c_str());
+  RCLCPP_INFO(LOGGER, "Added default scene: '%s'", psmsg.name.c_str());
 
   moveit_msgs::msg::RobotState rsmsg;
   moveit::core::robotStateToRobotStateMsg(psm.getPlanningScene()->getCurrentState(), rsmsg);
   rs.addRobotState(rsmsg, "default");
-  ROS_INFO("Added default state");
+  RCLCPP_INFO(LOGGER, "Added default state");
 
   const std::vector<std::string>& gnames = psm.getRobotModel()->getJointModelGroupNames();
   for (const std::string& gname : gnames)
@@ -131,11 +133,11 @@ int main(int argc, char** argv)
     cmsg.orientation_constraints.resize(1, ocm);
     cmsg.name = ocm.link_name + ":upright";
     cs.addConstraints(cmsg, psm.getRobotModel()->getName(), jmg->getName());
-    ROS_INFO("Added default constraint: '%s'", cmsg.name.c_str());
+    RCLCPP_INFO(LOGGER, "Added default constraint: '%s'", cmsg.name.c_str());
   }
-  ROS_INFO("Default MoveIt Warehouse was reset.");
+  RCLCPP_INFO(LOGGER, "Default MoveIt Warehouse was reset.");
 
-  ros::shutdown();
+  rclcpp::spin(node);
 
   return 0;
 }

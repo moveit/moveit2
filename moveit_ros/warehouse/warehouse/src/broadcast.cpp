@@ -43,7 +43,7 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 static const std::string PLANNING_SCENE_TOPIC = "planning_scene";
 static const std::string PLANNING_REQUEST_TOPIC = "motion_plan_request";
@@ -53,9 +53,17 @@ static const std::string CONSTRAINTS_TOPIC = "constraints";
 
 static const std::string STATES_TOPIC = "robot_states";
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.broadcast");
+
+using namespace std::chrono_literals;
+
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "publish_warehouse_data", ros::init_options::AnonymousName);
+  rclcpp::init(argc, argv);
+  rclcpp::NodeOptions node_options;
+  node_options.allow_undeclared_parameters(true);
+  node_options.automatically_declare_parameters_from_overrides(true);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("publish_warehouse_data", node_options);
 
   // time to wait in between publishing messages
   double delay = 0.001;
@@ -92,32 +100,26 @@ int main(int argc, char** argv)
     return 2;
   }
   // Set up db
-  warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase();
+  warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase(node);
   if (vm.count("host") && vm.count("port"))
     conn->setParams(vm["host"].as<std::string>(), vm["port"].as<std::size_t>());
   if (!conn->connect())
     return 1;
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  rclcpp::executors::StaticSingleThreadedExecutor executor;
+  executor.add_node(node);
 
-  ros::NodeHandle nh;
-  ros::Publisher pub_scene, pub_req, pub_res, pub_constr, pub_state;
-  ros::Duration wait_time(delay);
+  rclcpp::Rate rate((int64_t)delay * 1000ms);
 
   // publish the scene
   if (vm.count("scene"))
   {
-    pub_scene = nh.advertise<moveit_msgs::msg::PlanningScene>(PLANNING_SCENE_TOPIC, 10);
+    auto pub_scene = node->create_publisher<moveit_msgs::msg::PlanningScene>(PLANNING_SCENE_TOPIC, 10);
     bool req = vm.count("planning_requests");
     bool res = vm.count("planning_results");
-    if (req)
-      pub_req = nh.advertise<moveit_msgs::msg::MotionPlanRequest>(PLANNING_REQUEST_TOPIC, 100);
-    if (res)
-      pub_res = nh.advertise<moveit_msgs::msg::RobotTrajectory>(PLANNING_RESULTS_TOPIC, 100);
 
     moveit_warehouse::PlanningSceneStorage pss(conn);
-    ros::spinOnce();
+    executor.spin_once(0ns);
 
     std::vector<std::string> scene_names;
     pss.getPlanningSceneNames(vm["scene"].as<std::string>(), scene_names);
@@ -127,26 +129,28 @@ int main(int argc, char** argv)
       moveit_warehouse::PlanningSceneWithMetadata pswm;
       if (pss.getPlanningScene(pswm, scene_name))
       {
-        ROS_INFO("Publishing scene '%s'",
-                 pswm->lookupString(moveit_warehouse::PlanningSceneStorage::PLANNING_SCENE_ID_NAME).c_str());
-        pub_scene.publish(static_cast<const moveit_msgs::msg::PlanningScene&>(*pswm));
-        ros::spinOnce();
+        RCLCPP_INFO(LOGGER, "Publishing scene '%s'",
+                    pswm->lookupString(moveit_warehouse::PlanningSceneStorage::PLANNING_SCENE_ID_NAME).c_str());
+        pub_scene->publish(static_cast<const moveit_msgs::msg::PlanningScene&>(*pswm));
+        executor.spin_once(0ns);
 
         // publish optional data associated to the scene
         if (req || res)
         {
+          auto pub_req = node->create_publisher<moveit_msgs::msg::MotionPlanRequest>(PLANNING_REQUEST_TOPIC, 100);
+          auto pub_res = node->create_publisher<moveit_msgs::msg::RobotTrajectory>(PLANNING_RESULTS_TOPIC, 100);
           std::vector<moveit_warehouse::MotionPlanRequestWithMetadata> planning_queries;
           std::vector<std::string> query_names;
           pss.getPlanningQueries(planning_queries, query_names, pswm->name);
-          ROS_INFO("There are %d planning queries associated to the scene", (int)planning_queries.size());
-          ros::WallDuration(0.5).sleep();
+          RCLCPP_INFO(LOGGER, "There are %d planning queries associated to the scene", (int)planning_queries.size());
+          rclcpp::sleep_for(500ms);
           for (std::size_t i = 0; i < planning_queries.size(); ++i)
           {
             if (req)
             {
-              ROS_INFO("Publishing query '%s'", query_names[i].c_str());
-              pub_req.publish(static_cast<const moveit_msgs::msg::MotionPlanRequest&>(*planning_queries[i]));
-              ros::spinOnce();
+              RCLCPP_INFO(LOGGER, "Publishing query '%s'", query_names[i].c_str());
+              pub_req->publish(static_cast<const moveit_msgs::msg::MotionPlanRequest&>(*planning_queries[i]));
+              executor.spin_once(0ns);
             }
             if (res)
             {
@@ -154,13 +158,13 @@ int main(int argc, char** argv)
               pss.getPlanningResults(planning_results, query_names[i], pswm->name);
               for (moveit_warehouse::RobotTrajectoryWithMetadata& planning_result : planning_results)
               {
-                pub_res.publish(static_cast<const moveit_msgs::msg::RobotTrajectory&>(*planning_result));
-                ros::spinOnce();
+                pub_res->publish(static_cast<const moveit_msgs::msg::RobotTrajectory&>(*planning_result));
+                executor.spin_once(0ns);
               }
             }
           }
         }
-        wait_time.sleep();
+        rate.sleep();
       }
     }
   }
@@ -169,7 +173,7 @@ int main(int argc, char** argv)
   if (vm.count("constraint"))
   {
     moveit_warehouse::ConstraintsStorage cs(conn);
-    pub_constr = nh.advertise<moveit_msgs::msg::Constraints>(CONSTRAINTS_TOPIC, 100);
+    auto pub_constr = node->create_publisher<moveit_msgs::msg::Constraints>(CONSTRAINTS_TOPIC, 100);
     std::vector<std::string> cnames;
     cs.getKnownConstraints(vm["constraint"].as<std::string>(), cnames);
 
@@ -178,11 +182,11 @@ int main(int argc, char** argv)
       moveit_warehouse::ConstraintsWithMetadata cwm;
       if (cs.getConstraints(cwm, cname))
       {
-        ROS_INFO("Publishing constraints '%s'",
-                 cwm->lookupString(moveit_warehouse::ConstraintsStorage::CONSTRAINTS_ID_NAME).c_str());
-        pub_constr.publish(static_cast<const moveit_msgs::msg::Constraints&>(*cwm));
-        ros::spinOnce();
-        wait_time.sleep();
+        RCLCPP_INFO(LOGGER, "Publishing constraints '%s'",
+                    cwm->lookupString(moveit_warehouse::ConstraintsStorage::CONSTRAINTS_ID_NAME).c_str());
+        pub_constr->publish(static_cast<const moveit_msgs::msg::Constraints&>(*cwm));
+        executor.spin_once(0ns);
+        rate.sleep();
       }
     }
   }
@@ -191,7 +195,7 @@ int main(int argc, char** argv)
   if (vm.count("state"))
   {
     moveit_warehouse::RobotStateStorage rs(conn);
-    pub_state = nh.advertise<moveit_msgs::msg::RobotState>(STATES_TOPIC, 100);
+    auto pub_state = node->create_publisher<moveit_msgs::msg::RobotState>(STATES_TOPIC, 100);
     std::vector<std::string> rnames;
     rs.getKnownRobotStates(vm["state"].as<std::string>(), rnames);
 
@@ -200,16 +204,17 @@ int main(int argc, char** argv)
       moveit_warehouse::RobotStateWithMetadata rswm;
       if (rs.getRobotState(rswm, rname))
       {
-        ROS_INFO("Publishing state '%s'", rswm->lookupString(moveit_warehouse::RobotStateStorage::STATE_NAME).c_str());
-        pub_state.publish(static_cast<const moveit_msgs::msg::RobotState&>(*rswm));
-        ros::spinOnce();
-        wait_time.sleep();
+        RCLCPP_INFO(LOGGER, "Publishing state '%s'",
+                    rswm->lookupString(moveit_warehouse::RobotStateStorage::STATE_NAME).c_str());
+        pub_state->publish(static_cast<const moveit_msgs::msg::RobotState&>(*rswm));
+        executor.spin_once(0ns);
+        rate.sleep();
       }
     }
   }
 
-  ros::WallDuration(1.0).sleep();
-  ROS_INFO("Done.");
+  rclcpp::sleep_for(1s);
+  RCLCPP_INFO(LOGGER, "Done.");
 
   return 0;
 }

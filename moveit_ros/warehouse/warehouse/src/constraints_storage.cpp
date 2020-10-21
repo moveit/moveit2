@@ -44,6 +44,8 @@ const std::string moveit_warehouse::ConstraintsStorage::CONSTRAINTS_ID_NAME = "c
 const std::string moveit_warehouse::ConstraintsStorage::CONSTRAINTS_GROUP_NAME = "group_id";
 const std::string moveit_warehouse::ConstraintsStorage::ROBOT_NAME = "robot_id";
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.constraints_storage");
+
 using warehouse_ros::Metadata;
 using warehouse_ros::Query;
 
@@ -79,7 +81,7 @@ void moveit_warehouse::ConstraintsStorage::addConstraints(const moveit_msgs::msg
   metadata->append(ROBOT_NAME, robot);
   metadata->append(CONSTRAINTS_GROUP_NAME, group);
   constraints_collection_->insert(msg, metadata);
-  ROS_DEBUG("%s constraints '%s'", replace ? "Replaced" : "Added", msg.name.c_str());
+  RCLCPP_DEBUG(LOGGER, "%s constraints '%s'", replace ? "Replaced" : "Added", msg.name.c_str());
 }
 
 bool moveit_warehouse::ConstraintsStorage::hasConstraints(const std::string& name, const std::string& robot,
@@ -152,7 +154,7 @@ void moveit_warehouse::ConstraintsStorage::renameConstraints(const std::string& 
   Metadata::Ptr m = constraints_collection_->createMetadata();
   m->append(CONSTRAINTS_ID_NAME, new_name);
   constraints_collection_->modifyMetadata(q, m);
-  ROS_DEBUG("Renamed constraints from '%s' to '%s'", old_name.c_str(), new_name.c_str());
+  RCLCPP_DEBUG(LOGGER, "Renamed constraints from '%s' to '%s'", old_name.c_str(), new_name.c_str());
 }
 
 void moveit_warehouse::ConstraintsStorage::removeConstraints(const std::string& name, const std::string& robot,
@@ -165,5 +167,5 @@ void moveit_warehouse::ConstraintsStorage::removeConstraints(const std::string& 
   if (!group.empty())
     q->append(CONSTRAINTS_GROUP_NAME, group);
   unsigned int rem = constraints_collection_->removeMessages(q);
-  ROS_DEBUG("Removed %u Constraints messages (named '%s')", rem, name.c_str());
+  RCLCPP_DEBUG(LOGGER, "Removed %u Constraints messages (named '%s')", rem, name.c_str());
 }

@@ -43,6 +43,8 @@ const std::string moveit_warehouse::RobotStateStorage::DATABASE_NAME = "moveit_r
 const std::string moveit_warehouse::RobotStateStorage::STATE_NAME = "state_id";
 const std::string moveit_warehouse::RobotStateStorage::ROBOT_NAME = "robot_id";
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.state_storage");
+
 using warehouse_ros::Metadata;
 using warehouse_ros::Query;
 
@@ -77,7 +79,7 @@ void moveit_warehouse::RobotStateStorage::addRobotState(const moveit_msgs::msg::
   metadata->append(STATE_NAME, name);
   metadata->append(ROBOT_NAME, robot);
   state_collection_->insert(msg, metadata);
-  ROS_DEBUG("%s robot state '%s'", replace ? "Replaced" : "Added", name.c_str());
+  RCLCPP_DEBUG(LOGGER, "%s robot state '%s'", replace ? "Replaced" : "Added", name.c_str());
 }
 
 bool moveit_warehouse::RobotStateStorage::hasRobotState(const std::string& name, const std::string& robot) const
@@ -137,7 +139,7 @@ void moveit_warehouse::RobotStateStorage::renameRobotState(const std::string& ol
   Metadata::Ptr m = state_collection_->createMetadata();
   m->append(STATE_NAME, new_name);
   state_collection_->modifyMetadata(q, m);
-  ROS_DEBUG("Renamed robot state from '%s' to '%s'", old_name.c_str(), new_name.c_str());
+  RCLCPP_DEBUG(LOGGER, "Renamed robot state from '%s' to '%s'", old_name.c_str(), new_name.c_str());
 }
 
 void moveit_warehouse::RobotStateStorage::removeRobotState(const std::string& name, const std::string& robot)
@@ -147,5 +149,5 @@ void moveit_warehouse::RobotStateStorage::removeRobotState(const std::string& na
   if (!robot.empty())
     q->append(ROBOT_NAME, robot);
   unsigned int rem = state_collection_->removeMessages(q);
-  ROS_DEBUG("Removed %u RobotState messages (named '%s')", rem, name.c_str());
+  RCLCPP_DEBUG(LOGGER, "Removed %u RobotState messages (named '%s')", rem, name.c_str());
 }

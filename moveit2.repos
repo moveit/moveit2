@@ -35,3 +35,13 @@ repositories:
     type: git
     url: https://github.com/JafarAbdi/fake_joint
     version: foxy
+
+  warehouse_ros:
+    type: git
+    url: https://github.com/ros-planning/warehouse_ros
+    version: ros2
+
+  warehouse_ros_mongo:
+    type: git
+    url: https://github.com/ros-planning/warehouse_ros_mongo
+    version: ros2
