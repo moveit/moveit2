@@ -41,8 +41,7 @@ repositories:
     url: https://github.com/ros-planning/warehouse_ros
     version: ros2
 
-# TODO(YuYan): Switch to upstream once PR https://github.com/ros-planning/warehouse_ros_mongo/pull/38 is merged
   warehouse_ros_mongo:
     type: git
-    url: https://github.com/RoboticsYY/warehouse_ros_mongo
-    version: pr-porting_to_ros2
+    url: https://github.com/ros-planning/warehouse_ros_mongo
+    version: ros2
