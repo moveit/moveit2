@@ -49,6 +49,16 @@ namespace kinematics_plugin_loader
 {
 rclcpp::Logger LOGGER = rclcpp::get_logger("kinematics_plugin_loader");
 
+rclcpp::Parameter declare_parameter(const rclcpp::Node::SharedPtr& node, const std::string& parameter_name)
+{
+  if (!node->has_parameter(parameter_name))
+    node->declare_parameter(parameter_name);
+  rclcpp::Parameter parameter;
+  if (!node->get_parameter(parameter_name, parameter))
+    RCLCPP_DEBUG_STREAM(LOGGER, "Parameter `" << parameter_name << "` doesn't exists");
+  return parameter;
+}
+
 class KinematicsPluginLoader::KinematicsLoaderImpl
 {
 public:
@@ -293,27 +303,26 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
       if (default_solver_plugin_.empty())
       {
         RCLCPP_DEBUG(LOGGER, "Loading settings for kinematics solvers from the ROS param server ...");
-
-        // TODO(JafarAbdi): revise parameter lookup
         // read the list of plugin names for possible kinematics solvers
         for (const srdf::Model::Group& known_group : known_groups)
         {
           std::string base_param_name = known_group.name_;
           std::string ksolver_param_name = base_param_name + ".kinematics_solver";
           RCLCPP_DEBUG(LOGGER, "Looking for param %s ", ksolver_param_name.c_str());
-          bool found = node_->has_parameter(ksolver_param_name);
-          if (!found)
+          rclcpp::Parameter ksolver_param = declare_parameter(node_, ksolver_param_name);
+          if (ksolver_param.get_type() == rclcpp::ParameterType::PARAMETER_NOT_SET)
           {
             base_param_name = robot_description_ + "_kinematics." + known_group.name_;
             ksolver_param_name = base_param_name + ".kinematics_solver";
             RCLCPP_DEBUG(LOGGER, "Looking for param %s ", ksolver_param_name.c_str());
-            found = node_->has_parameter(ksolver_param_name);
+            declare_parameter(node_, ksolver_param_name);
+            ksolver_param = declare_parameter(node_, ksolver_param_name);
           }
-          if (found)
+          if (ksolver_param.get_type() != rclcpp::ParameterType::PARAMETER_NOT_SET)
           {
             RCLCPP_DEBUG(LOGGER, "Found param %s", ksolver_param_name.c_str());
 
-            std::string ksolver = node_->get_parameter(ksolver_param_name).as_string();
+            std::string ksolver = ksolver_param.as_string();
             std::stringstream ss(ksolver);
             bool first = true;
             while (ss.good() && !ss.eof())
@@ -332,26 +341,23 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
           }
 
           std::string ksolver_timeout_param_name = base_param_name + ".kinematics_solver_timeout";
+          rclcpp::Parameter ksolver_timeout_param = declare_parameter(node_, ksolver_timeout_param_name);
           if (node_->has_parameter(ksolver_timeout_param_name))
           {
-            double ksolver_timeout;
-            rclcpp::Parameter parameter = node_->get_parameter(ksolver_timeout_param_name);
-            if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
+            if (ksolver_timeout_param.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
             {
-              ksolver_timeout = node_->get_parameter(ksolver_timeout_param_name).as_double();
-              ik_timeout_[known_group.name_] = ksolver_timeout;
+              ik_timeout_[known_group.name_] = ksolver_timeout_param.as_double();
             }
-            else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
+            else if (ksolver_timeout_param.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
             {  // just in case this is an int
-              ksolver_timeout = node_->get_parameter(ksolver_timeout_param_name).as_int();
-              ik_timeout_[known_group.name_] = ksolver_timeout;
+              ik_timeout_[known_group.name_] = ksolver_timeout_param.as_int();
             }
           }
 
           std::string ksolver_res_param_name = base_param_name + ".kinematics_solver_search_resolution";
-          if (node_->has_parameter(ksolver_res_param_name))
+          rclcpp::Parameter ksolver_res_param = declare_parameter(node_, ksolver_res_param_name);
+          if (ksolver_res_param.get_type() != rclcpp::ParameterType::PARAMETER_NOT_SET)
           {
-            rclcpp::Parameter ksolver_res_param = node_->get_parameter(ksolver_res_param_name);
             if (ksolver_res_param.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
             {
               const std::string& ksolver_res = ksolver_res_param.as_string();
@@ -366,21 +372,19 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
             // handle the case this param is just one value and parsed as a double
             else if (ksolver_res_param.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
             {
-              double res = node_->get_parameter(ksolver_res_param_name).as_double();
-              search_res[known_group.name_].push_back(res);
+              search_res[known_group.name_].push_back(ksolver_res_param.as_double());
             }
             else if (ksolver_res_param.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
             {
-              int res = node_->get_parameter(ksolver_res_param_name).as_int();
-              search_res[known_group.name_].push_back(res);
+              search_res[known_group.name_].push_back(ksolver_res_param.as_int());
             }
           }
 
           // Allow a kinematic solver's tip links to be specified on the rosparam server as an array
           std::string ksolver_ik_links_param_name = base_param_name + ".kinematics_solver_ik_links";
-          if (node_->has_parameter(ksolver_ik_links_param_name))
+          rclcpp::Parameter ksolver_ik_links_param = declare_parameter(node_, ksolver_ik_links_param_name);
+          if (ksolver_ik_links_param.get_type() != rclcpp::ParameterType::PARAMETER_NOT_SET)
           {
-            rclcpp::Parameter ksolver_ik_links_param = node_->get_parameter(ksolver_ik_links_param_name);
             if (ksolver_ik_links_param.get_type() == rclcpp::ParameterType::PARAMETER_STRING_ARRAY)
             {
               std::vector<std::string> ksolver_ik_links = ksolver_ik_links_param.as_string_array();
