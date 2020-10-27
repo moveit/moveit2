@@ -12,7 +12,7 @@ if(BUILD_TESTING)
 
   set(DEPS DEPENDENCIES test_kinematics_plugin)
   set(ARGS ARGS ik_plugin:=kdl_kinematics_plugin/KDLKinematicsPlugin)
-  add_launch_test(fanuc-kdl-test.py)# ${DEPS} ${ARGS})
+  add_launch_test(fanuc-kdl.test.py)# ${DEPS} ${ARGS})
   # add_launch_test(panda-kdl.test ${DEPS} ${ARGS})
 
   # LMA solver seems to have less precision
@@ -40,6 +40,8 @@ if(BUILD_TESTING)
     moveit_ros_planning
     Boost
   )
+
+  install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 
   install(TARGETS benchmark_ik RUNTIME DESTINATION bin)
   install(TARGETS test_kinematics_plugin DESTINATION lib/${PROJECT_NAME})
