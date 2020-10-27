@@ -315,7 +315,6 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
             base_param_name = robot_description_ + "_kinematics." + known_group.name_;
             ksolver_param_name = base_param_name + ".kinematics_solver";
             RCLCPP_DEBUG(LOGGER, "Looking for param %s ", ksolver_param_name.c_str());
-            declare_parameter(node_, ksolver_param_name);
             ksolver_param = declare_parameter(node_, ksolver_param_name);
           }
           if (ksolver_param.get_type() != rclcpp::ParameterType::PARAMETER_NOT_SET)
@@ -342,7 +341,7 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
 
           std::string ksolver_timeout_param_name = base_param_name + ".kinematics_solver_timeout";
           rclcpp::Parameter ksolver_timeout_param = declare_parameter(node_, ksolver_timeout_param_name);
-          if (node_->has_parameter(ksolver_timeout_param_name))
+          if (ksolver_timeout_param.get_type() != rclcpp::ParameterType::PARAMETER_NOT_SET)
           {
             if (ksolver_timeout_param.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
             {
