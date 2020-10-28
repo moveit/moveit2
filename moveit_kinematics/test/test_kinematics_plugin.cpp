@@ -93,7 +93,9 @@ class SharedData
 
   void initialize()
   {
-    node_ = std::make_shared<rclcpp::Node>("moveit_kinematics_test");
+    rclcpp::NodeOptions node_options;
+    node_options.automatically_declare_parameters_from_overrides(true);
+    node_ = rclcpp::Node::make_shared("moveit_kinematics_test", node_options);
 
     RCLCPP_INFO_STREAM(LOGGER, "Loading robot model from " << node_->get_name() << "." << ROBOT_DESCRIPTION_PARAM);
     // load robot model
@@ -106,26 +108,26 @@ class SharedData
     ASSERT_TRUE(bool(kinematics_loader_)) << "Failed to instantiate ClassLoader";
 
     // load parameters
-    group_name_ = node_->declare_parameter("group", UNDEFINED);
-    tip_link_ = node_->declare_parameter("tip_link", UNDEFINED);
-    root_link_ = node_->declare_parameter("root_link", UNDEFINED);
-    joints_ = node_->declare_parameter("joint_names", joints_);
-    seed_ = node_->declare_parameter("seed", seed_);
+    node_->get_parameter_or("group", group_name_, UNDEFINED);
+    node_->get_parameter_or("tip_link", tip_link_, UNDEFINED);
+    node_->get_parameter_or("root_link", root_link_, UNDEFINED);
+    node_->get_parameter_or("joint_names", joints_, joints_);
+    node_->get_parameter_or("seed", seed_, seed_);
     ASSERT_TRUE(seed_.empty() || seed_.size() == joints_.size()) << "If set, 'seed' size must match 'joint_names' size";
-    consistency_limits_ = node_->declare_parameter("consistency_limits", consistency_limits_);
+    node_->get_parameter_or("consistency_limits", consistency_limits_, consistency_limits_);
     ASSERT_TRUE(consistency_limits_.empty() || consistency_limits_.size() == joints_.size())
-      << "If set, 'consistency_limits' size must match 'joint_names' size";
-    timeout_ = node_->declare_parameter("ik_timeout", 1.0);
+        << "If set, 'consistency_limits' size must match 'joint_names' size";
+    node_->get_parameter_or("ik_timeout", timeout_, 1.0);
     ASSERT_TRUE(timeout_ > 0.0) << "'ik_timeout' must be more than 0.0 seconds";
-    tolerance_ = node_->declare_parameter("tolerance", DEFAULT_TOLERANCE);
+    node_->get_parameter_or("tolerance", tolerance_, tolerance_);
     ASSERT_TRUE(tolerance_ > 0.0) << "'tolerance' must be greater than 0.0";
-    num_fk_tests_ = node_->declare_parameter("num_fk_tests", 0);
-    num_ik_cb_tests_ = node_->declare_parameter("num_ik_cb_tests", 0);
-    num_ik_tests_ = node_->declare_parameter("num_ik_tests", 0);
-    num_ik_multiple_tests_ = node_->declare_parameter("num_ik_multiple_tests", 0);
-    num_nearest_ik_tests_ = node_->declare_parameter("num_nearest_ik_tests", 0);
-    ik_plugin_name_ = node_->declare_parameter("ik_plugin_name", UNDEFINED);
-    publish_trajectory_ = node_->declare_parameter("publish_trajectory", false);
+    node_->get_parameter_or("num_fk_tests", num_fk_tests_, 0);
+    node_->get_parameter_or("num_ik_cb_tests", num_ik_cb_tests_, 0);
+    node_->get_parameter_or("num_ik_tests", num_ik_tests_, 0);
+    node_->get_parameter_or("num_ik_multiple_tests", num_ik_multiple_tests_, 0);
+    node_->get_parameter_or("num_nearest_ik_tests", num_nearest_ik_tests_, 0);
+    node_->get_parameter_or("ik_plugin_name", ik_plugin_name_, UNDEFINED);
+    node_->get_parameter_or("publish_trajectory", publish_trajectory_, false);
 
     ASSERT_TRUE(robot_model_->hasJointModelGroup(group_name_));
     ASSERT_TRUE(robot_model_->hasLinkModel(root_link_));
@@ -163,7 +165,7 @@ protected:
     root_link_ = data.root_link_;
     tip_link_ = data.tip_link_;
     group_name_ = data.group_name_;
-    group_name_ = data.ik_plugin_name_;
+    ik_plugin_name_ = data.ik_plugin_name_;
     joints_ = data.joints_;
     seed_ = data.seed_;
     consistency_limits_ = data.consistency_limits_;
@@ -189,14 +191,13 @@ protected:
     ASSERT_TRUE(kinematics_solver_->initialize(node_, *robot_model_, group_name_, root_link_, { tip_link_ },
                                                DEFAULT_SEARCH_DISCRETIZATION))
         << "Solver failed to initialize";
-
     jmg_ = robot_model_->getJointModelGroup(kinematics_solver_->getGroupName());
     ASSERT_TRUE(jmg_);
-
     // Validate chain information
     ASSERT_EQ(root_link_, kinematics_solver_->getBaseFrame());
     ASSERT_FALSE(kinematics_solver_->getTipFrames().empty());
     ASSERT_EQ(tip_link_, kinematics_solver_->getTipFrame());
+
     ASSERT_EQ(joints_, kinematics_solver_->getJointNames());
   }
 
