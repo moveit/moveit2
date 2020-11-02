@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>moveit_resources_prbt_pg70_support</name>
+  <version>0.7.1</version>
+  <description>PRBT support for Schunk pg70 gripper.</description>
+
+  <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
+  <maintainer email="h.slusarek@pilz.de">Hagen Slusarek</maintainer>
+  <maintainer email="i.martini@pilz.de">Immanuel Martini</maintainer>
+
+  <license>Apache 2.0</license>
+
+  <url type="website">http://moveit.ros.org</url>
+  <url type="bugtracker">https://github.com/ros-planning/moveit-resources/issues</url>
+  <url type="repository">https://github.com/ros-planning/moveit-resources</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>moveit_resources_prbt_support</exec_depend>
+  <exec_depend>moveit_resources_prbt_ikfast_manipulator_plugin</exec_depend>
+  <exec_depend>moveit_resources_prbt_moveit_config</exec_depend>
+
+  <exec_depend>xacro</exec_depend>
+
+
+
+</package>

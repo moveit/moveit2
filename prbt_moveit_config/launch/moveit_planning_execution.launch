@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+
+<!--
+Copyright © 2018 Pilz GmbH & Co. KG
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<launch>
+  <!-- The planning and execution components of MoveIt! configured to run -->
+  <!-- using the ROS-Industrial interface. -->
+
+  <!-- Non-standard joint names:
+       - Create a file [robot_moveit_config]/config/joint_names.yaml
+           controller_joint_names: [joint_1, joint_2, ... joint_N]
+       - Update with joint names for your robot (in order expected by rbt controller)
+       - and uncomment the following line: -->
+  <rosparam command="load" file="$(find moveit_resources_prbt_moveit_config)/config/joint_names.yaml"/>
+
+  <!-- the "sim" argument controls whether we connect to a Simulated or Real robot -->
+  <arg name="sim" default="true" />
+
+  <!-- Set gripper -->
+  <arg name="gripper" default="" />
+
+  <!-- Load robot description to parameter server. Can be set to false to let someone else load the model -->
+  <arg name="load_robot_description" default="true" />
+
+  <!-- Start RViz with default configuration settings. Once you have changed the configuration and have saved
+       it inside your package folder, set the path and file name here. -->
+  <arg name="rviz_config" default="$(find moveit_resources_prbt_moveit_config)/launch/moveit.rviz" />
+
+  <!-- configuration for moveit -->
+  <arg name="pipeline" default="ompl" /><!-- Choose planning pipeline -->
+  <arg name="capabilities" default=""/> <!-- define capabilites that are loaded on start (space seperated) -->
+  <arg name="disable_capabilities" default=""/> <!-- inhibit capabilites (space seperated) -->
+
+  <!-- load the robot_description parameter before launching ROS-I nodes -->
+  <include file="$(find moveit_resources_prbt_moveit_config)/launch/planning_context.launch" >
+    <arg name="load_robot_description" value="$(arg load_robot_description)" />
+    <arg name="gripper" value="$(arg gripper)" />
+  </include>
+
+  <!-- run the robot simulator and action interface nodes -->
+  <group if="$(arg sim)">
+    <!-- publish the robot state (tf transforms) -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+    <!-- We do not have a robot connected, so publish fake joint states -->
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+      <param name="/use_gui" value="false"/>
+      <rosparam param="/source_list">[/move_group/fake_controller_joint_states]</rosparam>
+    </node>
+
+    <!-- We assume that no safety controller is connected, so we need to fake the corresponding interface -->
+    <!--  - this includes: speed override -->
+    <include file="$(find prbt_hardware_support)/launch/fake_safety_interface.launch" />
+  </group>
+
+  <!-- run the "real robot" interface nodes -->
+  <!--   - this includes: robot_state, canopen, and run_permitted nodes -->
+  <group unless="$(arg sim)">
+    <include file="$(find moveit_resources_prbt_support)/launch/robot.launch" >
+      <arg name="gripper" value="$(arg gripper)" />
+      <arg name="load_robot_description" value="false" />
+    </include>
+  </group>
+
+  <include file="$(find moveit_resources_prbt_moveit_config)/launch/move_group.launch">
+    <arg name="publish_monitored_planning_scene" value="true" />
+    <arg name="fake_execution" value="$(arg sim)"/>
+    <arg name="pipeline" value="$(arg pipeline)" />
+    <arg name="gripper" value="$(arg gripper)" />
+    <arg name="load_robot_description" value="$(arg load_robot_description)" />
+    <arg name="capabilities" value="$(arg capabilities)" />
+    <arg name="disable_capabilities" value="$(arg disable_capabilities)" />
+  </include>
+
+  <include file="$(find moveit_resources_prbt_moveit_config)/launch/moveit_rviz.launch">
+    <arg name="rviz_config" value="$(arg rviz_config)"/>
+  </include>
+
+</launch>
