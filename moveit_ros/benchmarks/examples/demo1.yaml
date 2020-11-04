@@ -4,23 +4,23 @@
 
 # Three different planners from OMPL are run a total of 50 times each, with a
 # maximum of 10 seconds per run.  Output is stored in the /tmp/moveit_benchmarks directory.
-
-benchmark_config:
-    warehouse:
-        host: 127.0.0.1
-        port: 33829
-        scene_name: Kitchen1     # Required
-    parameters:
-        name: KitchenPick1
-        runs: 50
-        group: panda_arm       # Required
-        timeout: 10.0
-        output_directory: /tmp/moveit_benchmarks/
-        queries: Pick1
-        start_states: Start1
-    planning_pipelines:
-        - name: ompl
-          planners:
+warehouse:
+    host: 127.0.0.1
+    port: 33829
+    scene_name: Kitchen1     # Required
+parameters:
+    name: KitchenPick1
+    runs: 50
+    group: panda_arm       # Required
+    timeout: 10.0
+    output_directory: /tmp/moveit_benchmarks/
+    queries: Pick1
+    start_states: Start1
+planning_pipelines:
+    pipelines: [pipeline1]
+    pipeline1:
+        name: ompl
+        planners:
             - RRTConnectkConfigDefault
             - BKPIECEkConfigDefault
             - KPIECEkConfigDefault
