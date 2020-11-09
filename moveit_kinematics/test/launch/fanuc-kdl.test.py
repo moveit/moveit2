@@ -41,12 +41,9 @@ def generate_test_description():
     kinematics_yaml = load_yaml('moveit_resources_fanuc_moveit_config', 'config/kinematics.yaml')
     robot_description_kinematics = { 'robot_description_kinematics' : kinematics_yaml }
     test_param = load_yaml('moveit_kinematics', 'config/fanuc-kdl-test.yaml')
-    #test_param = {'test_param' : test_param_yaml}
     test_node = Node(package='moveit_kinematics',
                      executable='test_kinematics_plugin',
                      name='test_kinmatics_plugin',
-                     #prefix=['gdb -ex run --args'],
-                     # prefix='xterm -e gdb --args',
                      parameters=[robot_description,
                                  robot_description_semantic,
                                  robot_description_kinematics,
@@ -54,11 +51,12 @@ def generate_test_description():
                                  ]
     )
     return LaunchDescription([
-        # other fixture actions
         test_node,
         launch_testing.actions.ReadyToTest(),
     ]), {'test_node': test_node}
 
+# Workaround for https://github.com/ros2/launch/issues/380
+#TODO Remove workaround once its fixed
 class TestLoggingOutputFormat(unittest.TestCase):
 
     def test_logging_output(self, proc_info, proc_output, test_node):
