@@ -25,7 +25,7 @@ def load_yaml(package_name, file_path):
 
     try:
         with open(absolute_file_path, 'r') as file:
-            return yaml.load(file)
+            return yaml.full_load(file)
     except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available
         return None
 
@@ -40,11 +40,12 @@ def generate_test_description():
     robot_description_semantic = {'robot_description_semantic' : robot_description_semantic_config}
     kinematics_yaml = load_yaml('moveit_resources_fanuc_moveit_config', 'config/kinematics.yaml')
     robot_description_kinematics = { 'robot_description_kinematics' : kinematics_yaml }
-    test_param_yaml = load_yaml('moveit_kinematics', 'config/fanuc-kdl-test.yaml')
-    test_param = {'test_param' : test_param_yaml}
+    test_param = load_yaml('moveit_kinematics', 'config/fanuc-kdl-test.yaml')
+    #test_param = {'test_param' : test_param_yaml}
     test_node = Node(package='moveit_kinematics',
                      executable='test_kinematics_plugin',
                      name='test_kinmatics_plugin',
+                     #prefix=['gdb -ex run --args'],
                      # prefix='xterm -e gdb --args',
                      parameters=[robot_description,
                                  robot_description_semantic,
@@ -56,7 +57,13 @@ def generate_test_description():
         # other fixture actions
         test_node,
         launch_testing.actions.ReadyToTest(),
-    ])
+    ]), {'test_node': test_node}
+
+class TestLoggingOutputFormat(unittest.TestCase):
+
+    def test_logging_output(self, proc_info, proc_output, test_node):
+        proc_info.assertWaitForShutdown(process=test_node, timeout=10.0)
+
 
 @launch_testing.post_shutdown_test()
 class TestOutcome(unittest.TestCase):
