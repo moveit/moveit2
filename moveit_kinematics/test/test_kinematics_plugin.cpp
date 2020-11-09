@@ -406,9 +406,9 @@ static bool parsePose(const std::vector<double>& pose_values, Eigen::Isometry3d&
   Eigen::Quaterniond q;
   if (pose_values.size() == 6)
   {
-    q = Eigen::AngleAxisd(pose_values[4], Eigen::Vector3d::UnitX())
-      * Eigen::AngleAxisd(pose_values[5], Eigen::Vector3d::UnitY())
-      * Eigen::AngleAxisd(pose_values[6], Eigen::Vector3d::UnitZ());
+    q = Eigen::AngleAxisd(pose_values[4], Eigen::Vector3d::UnitX()) *
+        Eigen::AngleAxisd(pose_values[5], Eigen::Vector3d::UnitY()) *
+        Eigen::AngleAxisd(pose_values[6], Eigen::Vector3d::UnitZ());
   }
   else if (pose_values.size() == 7)
   {
@@ -432,7 +432,6 @@ TEST_F(KinematicsTest, unitIK)
   // if (expected_test_poses == 0)
   //   return;
 
-
   std::vector<double> seed, sol;
   const std::vector<std::string>& tip_frames = kinematics_solver_->getTipFrames();
   moveit::core::RobotState robot_state(robot_model_);
@@ -449,13 +448,11 @@ TEST_F(KinematicsTest, unitIK)
   Eigen::Isometry3d initial, goal;
   tf2::fromMsg(poses[0], initial);
 
-
   auto validate_ik = [&](const geometry_msgs::msg::Pose& goal, std::vector<double>& truth) {
     // compute IK
     moveit_msgs::msg::MoveItErrorCodes error_code;
     kinematics_solver_->searchPositionIK(goal, seed, timeout_,
-                                         const_cast<const std::vector<double>&>(consistency_limits_), sol,
-                                         error_code);
+                                         const_cast<const std::vector<double>&>(consistency_limits_), sol, error_code);
     ASSERT_EQ(error_code.val, error_code.SUCCESS);
 
     // validate reached poses
@@ -496,12 +493,12 @@ TEST_F(KinematicsTest, unitIK)
     ground_truth.clear();
     ground_truth = node_->declare_parameter(pose_param + ".joints", ground_truth);
     ASSERT_EQ(ground_truth.size(), joints_.size())
-      << "Test pose '" << pose_name << "' has invalid 'joints' vector size";
+        << "Test pose '" << pose_name << "' has invalid 'joints' vector size";
 
     pose_values.clear();
     pose_values = node_->declare_parameter(pose_param + ".pose", pose_values);
     ASSERT_TRUE(pose_values.size() == 6 || pose_values.size() == 7)
-      << "Test pose '" << pose_name << "' has invalid 'pose' vector size";
+        << "Test pose '" << pose_name << "' has invalid 'pose' vector size";
 
     Eigen::Isometry3d pose;
     ASSERT_TRUE(parsePose(pose_values, pose)) << "Failed to parse 'pose' vector in: " << pose_name;
@@ -512,8 +509,8 @@ TEST_F(KinematicsTest, unitIK)
     else if (pose_type == POSE_TYPE_ABSOLUTE)
       goal = pose;
     else
-      FAIL() << "Found invalid 'type' in " << pose_name << ": should be one of '" << POSE_TYPE_RELATIVE
-        << "' or '" << POSE_TYPE_ABSOLUTE << "'";
+      FAIL() << "Found invalid 'type' in " << pose_name << ": should be one of '" << POSE_TYPE_RELATIVE << "' or '"
+             << POSE_TYPE_ABSOLUTE << "'";
 
     std::string desc;
     {
@@ -585,8 +582,7 @@ TEST_F(KinematicsTest, searchIKWithCallback)
     }
 
     kinematics_solver_->searchPositionIK(poses[0], fk_values, timeout_, solution,
-                                         boost::bind(&KinematicsTest::searchIKCallback, this, _1, _2, _3),
-                                         error_code);
+                                         boost::bind(&KinematicsTest::searchIKCallback, this, _1, _2, _3), error_code);
     if (error_code.val == error_code.SUCCESS)
       success++;
     else
