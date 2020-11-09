@@ -389,17 +389,15 @@ TEST_F(KinematicsTest, randomWalkIK)
     traj.addSuffixWayPoint(robot_state, 0.1);
   }
   EXPECT_LE(failures, (1.0 - EXPECTED_SUCCESS_RATE) * num_ik_tests_);
-  // TODO(JafarAbdi): Enable after porting the launch files
-  // if (publish_trajectory_)
-  // {
-  //   ros::NodeHandle nh;
-  //   ros::AsyncSpinner spinner(1);
-  //   spinner.start();
-  //   ros::Publisher pub = nh.advertise<moveit_msgs::DisplayTrajectory>("display_random_walk", 1, true);
-  //   traj.getRobotTrajectoryMsg(msg.trajectory[0]);
-  //   pub.publish(msg);
-  //   ros::WallDuration(0.1).sleep();
-  // }
+  if (publish_trajectory_)
+  {
+    auto pub = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>("display_random_walk", 1);
+
+    sleep(10);
+    traj.getRobotTrajectoryMsg(msg.trajectory[0]);
+    pub->publish(msg);
+    rclcpp::spin_some(node_);
+  }
 }
 
 static bool parsePose(const std::vector<double>& pose_values, Eigen::Isometry3d& goal)
