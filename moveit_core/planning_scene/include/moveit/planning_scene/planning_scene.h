@@ -60,7 +60,7 @@
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene
 {
-MOVEIT_CLASS_FORWARD(PlanningScene)
+MOVEIT_CLASS_FORWARD(PlanningScene)  // Defines PlanningScenePtr, ConstPtr, WeakPtr... etc
 
 /** \brief This is the function signature for additional feasibility checks to be imposed on states (in addition to
    respecting constraints and collision avoidance).
@@ -73,13 +73,14 @@ typedef boost::function<bool(const moveit::core::RobotState&, bool)> StateFeasib
     The order of the arguments matters: the notion of feasibility is to be checked for motion segments that start at the
    first state and end at the second state. The third argument indicates
     whether the check should be verbose or not. */
-typedef boost::function<bool(const moveit::core::RobotState&, const moveit::core::RobotState&, bool)> MotionFeasibilityFn;
+using MotionFeasibilityFn =
+    boost::function<bool(const moveit::core::RobotState&, const moveit::core::RobotState&, bool)>;
 
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their colors */
-typedef std::map<std::string, std_msgs::msg::ColorRGBA> ObjectColorMap;
+using ObjectColorMap = std::map<std::string, std_msgs::msg::ColorRGBA>;
 
 /** \brief A map from object names (e.g., attached bodies, collision objects) to their types */
-typedef std::map<std::string, object_recognition_msgs::msg::ObjectType> ObjectTypeMap;
+using ObjectTypeMap = std::map<std::string, object_recognition_msgs::msg::ObjectType>;
 
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
@@ -1007,8 +1008,8 @@ private:
   };
   friend struct CollisionDetector;
 
-  typedef std::map<std::string, CollisionDetectorPtr>::iterator CollisionDetectorIterator;
-  typedef std::map<std::string, CollisionDetectorPtr>::const_iterator CollisionDetectorConstIterator;
+  using CollisionDetectorIterator = std::map<std::string, CollisionDetectorPtr>::iterator;
+  using CollisionDetectorConstIterator = std::map<std::string, CollisionDetectorPtr>::const_iterator;
 
   void allocateCollisionDetectors();
   void allocateCollisionDetectors(CollisionDetector& detector);

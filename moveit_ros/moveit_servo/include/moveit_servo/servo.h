@@ -43,7 +43,6 @@
 #include <moveit_servo/collision_check.h>
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo_calcs.h>
-#include "std_srvs/srv/trigger.hpp"
 
 namespace moveit_servo
 {
@@ -59,10 +58,7 @@ public:
   ~Servo();
 
   /** \brief start servo node */
-  bool start();
-
-  /** \brief stop servo node */
-  void stop();
+  void start();
 
   /** \brief Pause or unpause processing servo commands while keeping the timers alive */
   void setPaused(bool paused);
@@ -78,12 +74,28 @@ public:
    * @return true if a valid transform was available
    */
   bool getCommandFrameTransform(Eigen::Isometry3d& transform);
+  bool getCommandFrameTransform(geometry_msgs::msg::TransformStamped& transform);
+
+  /**
+   * Get the End Effector link transform.
+   * The transform from the MoveIt planning frame to EE link
+   *
+   * @param transform the transform that will be calculated
+   * @return true if a valid transform was available
+   */
+  bool getEEFrameTransform(Eigen::Isometry3d& transform);
+  bool getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform);
 
   /** \brief Get the parameters used by servo node. */
   const std::shared_ptr<moveit_servo::ServoParameters>& getParameters() const;
 
-  /** \brief Get the latest joint state. */
-  sensor_msgs::msg::JointState::ConstSharedPtr getLatestJointState() const;
+  /** \brief Change the controlled link. Often, this is the end effector
+   * This must be a link on the robot since MoveIt tracks the transform (not tf)
+   */
+  void changeRobotLinkCommandFrame(const std::string& new_command_frame)
+  {
+    servo_calcs_->changeRobotLinkCommandFrame(new_command_frame);
+  }
 
 private:
   // Pointer to the collision environment

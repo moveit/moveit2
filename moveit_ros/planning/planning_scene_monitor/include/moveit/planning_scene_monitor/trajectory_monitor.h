@@ -44,10 +44,10 @@
 
 namespace planning_scene_monitor
 {
-typedef boost::function<void(const moveit::core::RobotStateConstPtr& state, const rclcpp::Time& stamp)>
-    TrajectoryStateAddedCallback;
+using TrajectoryStateAddedCallback =
+    boost::function<void(const moveit::core::RobotStateConstPtr&, const rclcpp::Time&)>;
 
-MOVEIT_CLASS_FORWARD(TrajectoryMonitor)
+MOVEIT_CLASS_FORWARD(TrajectoryMonitor)  // Defines TrajectoryMonitorPtr, ConstPtr, WeakPtr... etc
 
 /** @class TrajectoryMonitor
     @brief Monitors the joint_states topic and tf to record the trajectory of the robot. */

@@ -10,47 +10,38 @@ MAINTAINER Dave Coleman dave@picknik.ai
 ENV TERM xterm
 
 # Setup catkin workspace
-ENV ROS_WS=/opt/ws_moveit
-
+ENV ROS_WS=/root/ws_moveit
 WORKDIR $ROS_WS
 
-# Update apt package list as previous containers clear the cache
-RUN apt-get -qq update && \
-    apt-get -qq dist-upgrade -y && \
+# Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
+# https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers
+RUN \
+    # Update apt package list as previous containers clear the cache
+    apt-get -qq update && \
+    apt-get -qq dist-upgrade && \
     #
     # Install some base dependencies
-    apt-get -qq install -y \
-        # Required by moveit_ci
-        wget curl sudo xvfb mesa-utils ccache ssh curl gnupg2 lsb-release \
+    apt-get -qq install --no-install-recommends -y \
+        # Some basic requirements
+        wget git sudo curl \
+        # Preferred build tools
         clang clang-format-10 clang-tidy clang-tools \
-        # Some python dependencies for working with ROS2
-        python3-colcon-common-extensions \
-        python3-pip \
-        python3-rosdep \
-        python3-wstool \
-        python3-vcstool \
-        python3-rospkg-modules \
-        python3-rosdistro-modules \
-        && \
+        ccache && \
+    #
+    # Download MoveIt source, so that we can fetch all necessary dependencies
+    mkdir src && \
+    wget -q https://raw.githubusercontent.com/ros-planning/moveit2/main/moveit2.repos -P src && \
+    vcs import src < src/moveit2.repos && \
+    #
+    # Download all dependencies of MoveIt
+    rosdep update && \
+    DEBIAN_FRONTEND=noninteractive \
+    rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
+    # Remove the source code from this container
+    rm -rf src && \
+    #
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/*
-
-# Download moveit source and fetch all its dependencies
-RUN mkdir src && \
-    cd $ROS_WS/src && \
-    wget -q https://raw.githubusercontent.com/ros-planning/moveit2/main/moveit2.repos && \
-    vcs import < moveit2.repos && \
-    # Remove folders declared as COLCON_IGNORE
-    find -L . -name COLCON_IGNORE -printf "%h\0" | xargs -0 rm -rf && \
-    apt-get -qq update && \
-    rosdep update -q && \
-    rosdep install -q -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
-    # Clear apt-cache to reduce image size
-    rm -rf /var/lib/apt/lists/* && \
-    #
-    # Remove the source code from this container
-    cd $ROS_WS && \
-    rm -rf src/
 
 # Continous Integration Setting
 ENV IN_DOCKER 1

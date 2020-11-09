@@ -39,16 +39,12 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/rviz_plugin_render_tools/octomap_render.h>
-#include <moveit/macros/diagnostics.h>
-DIAGNOSTIC_PUSH
-SILENT_UNUSED_PARAM
 #include <rviz_default_plugins/robot/robot.hpp>
-DIAGNOSTIC_POP
 
 namespace moveit_rviz_plugin
 {
-MOVEIT_CLASS_FORWARD(RenderShapes)
-MOVEIT_CLASS_FORWARD(RobotStateVisualization)
+MOVEIT_CLASS_FORWARD(RenderShapes)             // Defines RenderShapesPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(RobotStateVisualization)  // Defines RobotStateVisualizationPtr, ConstPtr, WeakPtr... etc
 
 /** \brief Update the links of an rviz::Robot using a moveit::core::RobotState */
 class RobotStateVisualization

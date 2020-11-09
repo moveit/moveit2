@@ -1,6 +1,5 @@
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
-  find_package(moveit_resources REQUIRED)
   find_package(moveit_ros_planning REQUIRED)
 
 # TODO(henningkayser): enable new tests

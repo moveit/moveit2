@@ -83,7 +83,7 @@ class MoveGroupCommander(object):
     def set_end_effector_link(self, link_name):
         """ Set the name of the link to be considered as an end effector """
         if not self._g.set_end_effector_link(link_name):
-            raise MoveItCommanderException("Unable to set end efector link")
+            raise MoveItCommanderException("Unable to set end effector link")
 
     def get_interface_description(self):
         """ Get the description of the planner interface (list of planner ids) """
@@ -156,6 +156,20 @@ class MoveGroupCommander(object):
         """
         self._g.set_start_state(conversions.msg_to_string(msg))
 
+    def get_current_state_bounded(self):
+        """ Get the current state of the robot bounded."""
+        s = RobotState()
+        c_str = self._g.get_current_state_bounded()
+        conversions.msg_from_string(s, c_str)
+        return s
+
+    def get_current_state(self):
+        """ Get the current state of the robot."""
+        s = RobotState()
+        c_str = self._g.get_current_state()
+        conversions.msg_from_string(s, c_str)
+        return s
+
     def get_joint_value_target(self):
         return self._g.get_joint_value_target()
 
@@ -219,7 +233,7 @@ class MoveGroupCommander(object):
                 if approx:
                     raise MoveItCommanderException("Error setting joint target. Does your IK solver support approximate IK?")
                 else:
-                    raise MoveItCommanderException("Error setting joint target. Is IK running?")
+                    raise MoveItCommanderException("Error setting joint target. Is the IK solver functional?")
 
         elif (hasattr(arg1, '__iter__')):
             if (arg2 is not None or arg3 is not None):
@@ -229,7 +243,6 @@ class MoveGroupCommander(object):
 
         else:
             raise MoveItCommanderException("Unsupported argument of type %s" % type(arg1))
-
 
     def set_rpy_target(self, rpy, end_effector_link=""):
         """ Specify a target orientation for the end-effector. Any position of the end-effector is acceptable."""
@@ -571,7 +584,7 @@ class MoveGroupCommander(object):
     def place(self, object_name, location=None, plan_only=False):
         """Place the named object at a particular location in the environment or somewhere safe in the world if location is not provided"""
         result = False
-        if location is None:
+        if not location:
             result = self._g.place(object_name, plan_only)
         elif type(location) is PoseStamped:
             old = self.get_pose_reference_frame()
@@ -582,8 +595,16 @@ class MoveGroupCommander(object):
             result = self._g.place(object_name, conversions.pose_to_list(location), plan_only)
         elif type(location) is PlaceLocation:
             result = self._g.place(object_name, conversions.msg_to_string(location), plan_only)
+        elif type(location) is list:
+            if location:
+                if type(location[0]) is PlaceLocation:
+                    result = self._g.place_locations_list(object_name, [conversions.msg_to_string(x) for x in location], plan_only)
+                elif type(location[0]) is PoseStamped:
+                    result = self._g.place_poses_list(object_name, [conversions.msg_to_string(x) for x in location], plan_only)
+                else:
+                    raise MoveItCommanderException("Parameter location must be a Pose, PoseStamped, PlaceLocation, list of PoseStamped or list of PlaceLocation object")
         else:
-            raise MoveItCommanderException("Parameter location must be a Pose, PoseStamped or PlaceLocation object")
+            raise MoveItCommanderException("Parameter location must be a Pose, PoseStamped, PlaceLocation, list of PoseStamped or list of PlaceLocation object")
         return result
 
     def set_support_surface_name(self, value):
@@ -602,3 +623,9 @@ class MoveGroupCommander(object):
         """ Get the jacobian matrix of the group as a list"""
         return self._g.get_jacobian_matrix(joint_values, [0.0, 0.0, 0.0] if reference_point is None else reference_point)
 
+    def enforce_bounds(self, robot_state_msg):
+        """ Takes a moveit_msgs RobotState and enforces the state bounds, based on the C++ RobotState enforceBounds() """
+        s = RobotState()
+        c_str = self._g.enforce_bounds(conversions.msg_to_string(robot_state_msg))
+        conversions.msg_from_string(s, c_str)
+        return s

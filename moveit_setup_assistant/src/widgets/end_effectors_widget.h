@@ -37,24 +37,17 @@
 #pragma once
 
 // Qt
-#include <QWidget>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QScrollArea>
-#include <QGroupBox>
-#include <QLabel>
-#include <QPushButton>
-#include <QTableWidget>
-#include <QStackedLayout>
-#include <QString>
-#include <QComboBox>
+class QComboBox;
+class QLineEdit;
+class QPushButton;
+class QStackedWidget;
+class QTableWidget;
 
 // SA
 #ifndef Q_MOC_RUN
 #include <moveit/setup_assistant/tools/moveit_config_data.h>
 #endif
 
-#include "header_widget.h"
 #include "setup_screen_widget.h"  // a base class for screens in the setup assistant
 
 namespace moveit_setup_assistant
@@ -81,7 +74,7 @@ public:
   QPushButton* btn_delete_;
   QPushButton* btn_save_;
   QPushButton* btn_cancel_;
-  QStackedLayout* stacked_layout_;
+  QStackedWidget* stacked_widget_;
   QLineEdit* effector_name_field_;
   QComboBox* parent_name_field_;
   QComboBox* parent_group_name_field_;

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(moveit_servo)
 
-set(LIBRARY_NAME moveit_servo)
+set(SERVO_LIB_NAME moveit_servo)
 set(COMPOSABLE_NODE_NAME servo_server)
 
 # Common cmake code applied to all moveit packages
@@ -15,10 +15,14 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(control_msgs REQUIRED)
+find_package(control_toolbox REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(tf2_eigen REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp
@@ -27,8 +31,10 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   std_srvs
   sensor_msgs
   control_msgs
+  control_toolbox
   moveit_msgs
   geometry_msgs
+  tf2_eigen
   trajectory_msgs
   moveit_ros_planning
 )
@@ -37,27 +43,49 @@ include_directories(
   include
 )
 
-add_library(${LIBRARY_NAME} SHARED
+#########################################################
+## Library to process realtime twist or joint commands ##
+#########################################################
+
+# This library provides an interface for sending realtime twist or joint commands to a robot
+add_library(${SERVO_LIB_NAME} SHARED
+  # These files are used to produce differential motion
   src/servo.cpp
   src/servo_calcs.cpp
   src/collision_check.cpp
   src/low_pass_filter.cpp
   include/moveit_servo/servo_parameters.cpp
 )
-set_target_properties(${LIBRARY_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${LIBRARY_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(${SERVO_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Add and export library for composable node server
 add_library(${COMPOSABLE_NODE_NAME} SHARED src/servo_server.cpp)
 ament_target_dependencies(${COMPOSABLE_NODE_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(${COMPOSABLE_NODE_NAME} ${LIBRARY_NAME})
+target_link_libraries(${COMPOSABLE_NODE_NAME} ${SERVO_LIB_NAME})
 rclcpp_components_register_nodes(${COMPOSABLE_NODE_NAME} "moveit_servo::ServoServer")
 
 # Add cpp interface example executable
-set(CPP_DEMO_NAME servo_demo)
+set(CPP_DEMO_NAME servo_cpp_demo)
 add_executable(${CPP_DEMO_NAME} src/cpp_interface_demo/servo_cpp_interface_demo.cpp)
 ament_target_dependencies(${CPP_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(${CPP_DEMO_NAME} ${LIBRARY_NAME})
+target_link_libraries(${CPP_DEMO_NAME} ${SERVO_LIB_NAME})
+
+
+########################################
+## Library for servoing toward a pose ##
+########################################
+
+# TODO(henningkayser): Port pose tracking to ROS2
+# add_library(${POSE_TRACKING} SHARED src/pose_tracking.cpp)
+# ament_target_dependencies(${POSE_TRACKING} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+# add_dependencies(${POSE_TRACKING} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(${POSE_TRACKING} ${SERVO_LIB_NAME})
+#
+# An example of pose tracking
+# set(POSE_TRACKING_DEMO_NAME servo_pose_tracking_demo)
+# add_executable(${POSE_TRACKING_DEMO_NAME} src/cpp_interface_demo/pose_tracking_demo.cpp)
+# ament_target_dependencies(${POSE_TRACKING_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Add executable for using a controller
 set(SERVO_CONTROLLER_INPUT servo_controller_input)
@@ -75,12 +103,21 @@ ament_target_dependencies(${FAKE_SERVO_CMDS_NAME}
 )
 
 # Install Libraries
-install(TARGETS
-  ${LIBRARY_NAME} ${COMPOSABLE_NODE_NAME} ${SERVO_CONTROLLER_INPUT} ${CPP_DEMO_NAME} ${FAKE_SERVO_CMDS_NAME}
+install(
+  TARGETS
+    ${SERVO_LIB_NAME}
+    ${COMPOSABLE_NODE_NAME}
+    ${SERVO_CONTROLLER_INPUT}
+    ${CPP_DEMO_NAME}
+    ${FAKE_SERVO_CMDS_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
   DESTINATION lib/${PROJECT_NAME})
+
+#############
+## TESTING ##
+#############
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -89,7 +126,7 @@ if(BUILD_TESTING)
 
   # Lowpass filter unit test
   ament_add_gtest(test_low_pass_filter test/test_low_pass_filter.cpp)
-  target_link_libraries(test_low_pass_filter ${LIBRARY_NAME})
+  target_link_libraries(test_low_pass_filter ${SERVO_LIB_NAME})
 
   # Basic unit test ServoCalcs
   ament_add_gtest(
@@ -97,7 +134,7 @@ if(BUILD_TESTING)
     test/unit_test_servo_calcs.cpp
     test/test_parameter_struct.hpp
   )
-  target_link_libraries(test_servo ${LIBRARY_NAME})
+  target_link_libraries(test_servo ${SERVO_LIB_NAME})
   ament_target_dependencies(test_servo ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost ament_cmake_gtest ros_testing)
 
   # Servo parameters launch test
@@ -108,7 +145,7 @@ if(BUILD_TESTING)
 
   ament_add_gtest_executable(test_servo_parameters test/test_servo_parameters.cpp)
   ament_target_dependencies(test_servo_parameters ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  target_link_libraries(test_servo_parameters ${LIBRARY_NAME})
+  target_link_libraries(test_servo_parameters ${SERVO_LIB_NAME})
   add_ros_test(test/launch/test_servo_parameters.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
   # End servo parameters launch test
 
@@ -142,6 +179,27 @@ if(BUILD_TESTING)
   add_ros_test(test/launch/test_servo_singularity.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
   # end servo singularity checking integration test
 
+  # TODO(henningkayser): Port tests to ROS2
+  # servo_cpp_interface
+  # add_rostest_gtest(servo_cpp_interface_test
+  #   test/servo_cpp_interface_test.test
+  #   test/servo_cpp_interface_test.cpp
+  # )
+  # target_link_libraries(servo_cpp_interface_test
+  #   ${SERVO_LIB_NAME}
+  #   ${catkin_LIBRARIES}
+  # )
+
+  # # pose_tracking
+  # add_rostest_gtest(pose_tracking_test
+  #   test/pose_tracking_test.test
+  #   test/pose_tracking_test.cpp
+  # )
+  # target_link_libraries(pose_tracking_test
+  #   pose_tracking
+  #   ${catkin_LIBRARIES}
+  # )
+
 endif()
 
 # Install include, launch, config directories
@@ -149,8 +207,8 @@ install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 
-ament_export_include_directories(include)
-ament_export_libraries(${LIBRARY_NAME})
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
+ament_export_include_directories(include)
+ament_export_libraries(${SERVO_LIB_NAME})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ament_package()

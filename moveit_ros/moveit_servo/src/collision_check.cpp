@@ -86,7 +86,7 @@ CollisionCheck::CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParamete
       "worst_case_stop_time", ROS_QUEUE_SIZE,
       std::bind(&CollisionCheck::worstCaseStopTimeCB, this, std::placeholders::_1));
 
-  current_state_ = std::make_unique<moveit::core::RobotState>(getLockedPlanningSceneRO()->getCurrentState());
+  current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   acm_ = getLockedPlanningSceneRO()->getAllowedCollisionMatrix();
 }
 
@@ -100,11 +100,6 @@ void CollisionCheck::start()
   timer_ = node_->create_wall_timer(std::chrono::duration<double>(period_), std::bind(&CollisionCheck::run, this));
 }
 
-void CollisionCheck::stop()
-{
-  timer_->cancel();
-}
-
 void CollisionCheck::run()
 {
   if (paused_)
@@ -112,13 +107,8 @@ void CollisionCheck::run()
     return;
   }
 
-  // Copy the latest joint state
-  {
-    const std::lock_guard<std::mutex> lock(joint_state_mutex_);
-    for (std::size_t i = 0; i < latest_joint_state_.position.size(); ++i)
-      current_state_->setJointPositions(latest_joint_state_.name[i], &latest_joint_state_.position[i]);
-  }
-
+  // Update to the latest current state
+  current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   current_state_->updateCollisionBodyTransforms();
   collision_detected_ = false;
 
@@ -128,7 +118,7 @@ void CollisionCheck::run()
                                                                      *current_state_);
   scene_collision_distance_ = collision_result_.distance;
   collision_detected_ |= collision_result_.collision;
-  printCollisionPairs(collision_result_.contacts);
+  collision_result_.print();
 
   collision_result_.clear();
   // Self-collisions and scene collisions are checked separately so different thresholds can be used
@@ -136,7 +126,7 @@ void CollisionCheck::run()
                                                                             *current_state_, acm_);
   self_collision_distance_ = collision_result_.distance;
   collision_detected_ |= collision_result_.collision;
-  printCollisionPairs(collision_result_.contacts);
+  collision_result_.print();
 
   velocity_scale_ = 1;
   // If we're definitely in collision, stop immediately
@@ -205,31 +195,6 @@ void CollisionCheck::run()
     msg->data = velocity_scale_;
     collision_velocity_scale_pub_->publish(std::move(msg));
   }
-}
-
-void CollisionCheck::printCollisionPairs(collision_detection::CollisionResult::ContactMap& contact_map)
-{
-  if (!contact_map.empty())
-  {
-    rclcpp::Clock& clock = *node_->get_clock();
-    // Throttled error message about the first contact in the list
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                "Objects in collision (among others, possibly): "
-                                    << contact_map.begin()->first.first << ", " << contact_map.begin()->first.second);
-    // Log all other contacts if in debug mode
-    RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Objects in collision:");
-    for (const auto& contact : contact_map)
-    {
-      RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                   "\t" << contact.first.first << ", " << contact.first.second);
-    }
-  }
-}
-
-void CollisionCheck::jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg)
-{
-  const std::lock_guard<std::mutex> lock(joint_state_mutex_);
-  latest_joint_state_ = *msg.get();
 }
 
 void CollisionCheck::worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg)

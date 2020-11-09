@@ -45,7 +45,7 @@
 
 namespace collision_detection
 {
-MOVEIT_CLASS_FORWARD(CollisionEnv)
+MOVEIT_CLASS_FORWARD(CollisionEnv)  // Defines CollisionEnvPtr, ConstPtr, WeakPtr... etc
 
 /** \brief Provides the interface to the individual collision checking libraries. */
 class CollisionEnv
@@ -248,8 +248,8 @@ public:
     return world_const_;
   }
 
-  typedef World::ObjectPtr ObjectPtr;
-  typedef World::ObjectConstPtr ObjectConstPtr;
+  using ObjectPtr = World::ObjectPtr;
+  using ObjectConstPtr = World::ObjectConstPtr;
 
   /** @brief The kinematic model corresponding to this collision model*/
   const moveit::core::RobotModelConstPtr& getRobotModel() const

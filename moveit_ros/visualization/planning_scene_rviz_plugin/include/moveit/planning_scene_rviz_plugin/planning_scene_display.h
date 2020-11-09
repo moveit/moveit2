@@ -132,6 +132,7 @@ private Q_SLOTS:
   void changedSceneDisplayTime();
   void changedOctreeRenderMode();
   void changedOctreeColorMode();
+  void setSceneName(const QString& name);
 
 protected Q_SLOTS:
   virtual void changedAttachedBodyColor();

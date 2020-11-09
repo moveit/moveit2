@@ -70,6 +70,18 @@ if(BUILD_TESTING)
   ament_add_gtest(test_state_space test/test_state_space.cpp)
   ament_target_dependencies(test_state_space moveit_core OMPL Boost Eigen3)
   target_link_libraries(test_state_space ${MOVEIT_LIB_NAME})
-
   set_target_properties(test_state_space PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+
+  # TODO(henningkayser): port tests to ROS2
+  # find_package(rostest REQUIRED)
+  # find_package(tf2_eigen REQUIRED)
+  #
+  # add_rostest_gtest(test_planning_context_manager
+  #   test/test_planning_context_manager.test
+  #   test/test_planning_context_manager.cpp)
+  # target_link_libraries(test_planning_context_manager ${MOVEIT_LIB_NAME} ${OMPL_LIBRARIES} ${catkin_LIBRARIES} ${tf2_eigen_LIBRARIES})
+  #
+  # catkin_add_gtest(test_state_validity_checker test/test_state_validity_checker.cpp)
+  # target_link_libraries(test_state_validity_checker ${MOVEIT_LIB_NAME} ${OMPL_LIBRARIES} ${catkin_LIBRARIES})
+  # set_target_properties(test_state_validity_checker PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 endif()

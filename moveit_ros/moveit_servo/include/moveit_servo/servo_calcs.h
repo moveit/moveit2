@@ -38,18 +38,23 @@
 
 #pragma once
 
+// C++
+#include <mutex>
+
 // ROS
 #include <rclcpp/rclcpp.hpp>
+#include <control_msgs/msg/joint_jog.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit_msgs/srv/change_drift_dimensions.hpp>
 #include <moveit_msgs/srv/change_control_dimensions.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/int8.hpp>
+#include <std_srvs/srv/empty.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
-#include <control_msgs/msg/joint_jog.hpp>
-#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <std_msgs/msg/tf2_eigen.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 // moveit_servo
@@ -65,11 +70,13 @@ public:
   ServoCalcs(rclcpp::Node::SharedPtr node, const ServoParametersPtr& parameters,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
-  /** \brief Start and stop the timer where we do work and publish outputs
-   * start will return false if not initialized
-   */
-  bool start();
-  void stop();
+  ~ServoCalcs()
+  {
+    timer_.stop();
+  }
+
+  /** \brief Start the timer where we do work and publish outputs */
+  void start();
 
   /** \brief Returns when a joint state message has been received, and start() may be called */
   bool waitForInitialized(std::chrono::duration<double> wait_for = std::chrono::duration<double>(0.25));
@@ -82,12 +89,25 @@ public:
    * @return true if a valid transform was available
    */
   bool getCommandFrameTransform(Eigen::Isometry3d& transform);
+  bool getCommandFrameTransform(geometry_msgs::msg::TransformStamped& transform);
+
+  /**
+   * Get the End Effector link transform.
+   * The transform from the MoveIt planning frame to EE link
+   *
+   * @param transform the transform that will be calculated
+   * @return true if a valid transform was available
+   */
+  bool getEEFrameTransform(Eigen::Isometry3d& transform);
+  bool getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform);
 
   /** \brief Pause or unpause processing servo commands while keeping the timers alive */
   void setPaused(bool paused);
 
-  /** \brief Get the latest joint state */
-  sensor_msgs::msg::JointState::ConstSharedPtr getLatestJointState() const;
+  /** \brief Change the controlled link. Often, this is the end effector
+   * This must be a link on the robot since MoveIt tracks the transform (not tf)
+   */
+  void changeRobotLinkCommandFrame(const std::string& new_command_frame);
 
 protected:
   /** \brief Timer method */
@@ -101,7 +121,7 @@ protected:
   bool jointServoCalcs(const control_msgs::msg::JointJog& cmd, trajectory_msgs::msg::JointTrajectory& joint_trajectory);
 
   /** \brief Parse the incoming joint msg for the joints of our MoveGroup */
-  bool updateJoints();
+  void updateJoints();
 
   /** \brief Finds the worst case stopping time based on accel limits, for collision checking */
   bool calculateWorstCaseStopTime();
@@ -136,7 +156,7 @@ protected:
   void suddenHalt(trajectory_msgs::msg::JointTrajectory& joint_trajectory) const;
 
   /** \brief  Scale the delta theta to match joint velocity/acceleration limits */
-  void enforceSRDFAccelVelLimits(Eigen::ArrayXd& delta_theta);
+  void enforceVelLimits(Eigen::ArrayXd& delta_theta);
 
   /** \brief Enforces the velocity and acceleration limit for one joint delta_theta
    * @param bound moveit::core::VariableBounds defining the velocity and acceleration limits for a joint
@@ -149,7 +169,7 @@ protected:
                                   const double& accel, double& delta);
 
   /** \brief Avoid overshooting joint limits */
-  bool enforceSRDFPositionLimits();
+  bool enforcePositionLimits();
 
   /** \brief Possibly calculate a velocity scaling factor, due to proximity of
    * singularity and direction of motion
@@ -236,11 +256,18 @@ protected:
   void changeControlDimensions(const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request> req,
                                std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response> res);
 
+  /** \brief Service callback to reset Servo status, e.g. so the arm can move again after a collision */
+  bool resetServoStatus(const std::shared_ptr<std_srvs::srv::Empty::Request> req,
+                        std::shared_ptr<std_srvs::srv::Empty::Response> res);
+
   // Pointer to the ROS node
   std::shared_ptr<rclcpp::Node> node_;
 
   // Parameters from yaml
   ServoParametersPtr parameters_;
+
+  // Pointer to the collision environment
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   // Track the number of cycles during which motion has not occurred.
   // Will avoid re-publishing zero velocities endlessly.
@@ -263,7 +290,7 @@ protected:
 
   const moveit::core::JointModelGroup* joint_model_group_;
 
-  moveit::core::RobotStatePtr kinematic_state_;
+  moveit::core::RobotStatePtr current_state_;
 
   // incoming_joint_state_ is the incoming message. It may contain passive joints or other joints we don't care about.
   // (mutex protected below)
@@ -290,10 +317,10 @@ protected:
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr multiarray_outgoing_cmd_pub_;
   rclcpp::Service<moveit_msgs::srv::ChangeControlDimensions>::SharedPtr control_dimensions_server_;
   rclcpp::Service<moveit_msgs::srv::ChangeDriftDimensions>::SharedPtr drift_dimensions_server_;
+  rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_servo_status_;
 
   // Status
   StatusCode status_ = StatusCode::NO_WARNING;
-  bool stop_requested_ = false;
   bool paused_ = false;
   bool twist_command_is_stale_ = false;
   bool joint_command_is_stale_ = false;
@@ -314,13 +341,11 @@ protected:
   // The dimesions to control. In the command frame. [x, y, z, roll, pitch, yaw]
   std::array<bool, 6> control_dimensions_ = { { true, true, true, true, true, true } };
 
-  // Amount we sleep when waiting
-  rclcpp::Rate default_sleep_rate_{ 100 };
-
   // latest_state_mutex_ is used to protect the state below it
   mutable std::mutex latest_state_mutex_;
   sensor_msgs::msg::JointState::ConstSharedPtr incoming_joint_state_;
   Eigen::Isometry3d tf_moveit_to_robot_cmd_frame_;
+  Eigen::Isometry3d tf_moveit_to_ee_frame_;
   geometry_msgs::msg::TwistStamped::ConstSharedPtr latest_twist_stamped_;
   control_msgs::msg::JointJog::ConstSharedPtr latest_joint_cmd_;
   rclcpp::Time latest_twist_command_stamp_ = rclcpp::Time(0., RCL_ROS_TIME);

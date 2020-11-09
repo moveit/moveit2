@@ -68,9 +68,9 @@ enum Type
 
 /** \brief Signature of predicate that decides whether a contact is allowed or not (when AllowedCollision::Type is
  * CONDITIONAL) */
-typedef std::function<bool(collision_detection::Contact&)> DecideContactFn;
+using DecideContactFn = boost::function<bool(collision_detection::Contact&)>;
 
-MOVEIT_CLASS_FORWARD(AllowedCollisionMatrix)
+MOVEIT_CLASS_FORWARD(AllowedCollisionMatrix)  // Defines AllowedCollisionMatrixPtr, ConstPtr, WeakPtr... etc
 
 /** @class AllowedCollisionMatrix
  *  @brief Definition of a structure for the allowed collision matrix. All elements in the collision world are referred

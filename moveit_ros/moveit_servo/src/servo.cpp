@@ -37,43 +37,54 @@
  *      Author    : Brian O'Neil, Andy Zelenak, Blake Anderson
  */
 
+#include <moveit_servo/make_shared_from_pool.h>
 #include <moveit_servo/servo.h>
 
 namespace moveit_servo
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
+namespace
+{
+constexpr double ROBOT_STATE_WAIT_TIME = 10.0;  // seconds
+}  // namespace
 Servo::Servo(const rclcpp::Node::SharedPtr& node, ServoParametersPtr parameters,
              planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
   : planning_scene_monitor_(planning_scene_monitor), parameters_(parameters)
 {
+  // Confirm the planning scene monitor is ready to be used
+  if (!planning_scene_monitor_->getStateMonitor())
+  {
+    planning_scene_monitor_->startStateMonitor(parameters_.joint_topic);
+  }
+  planning_scene_monitor->getStateMonitor()->enableCopyDynamics(true);
+
+  if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState(parameters_.move_group_name,
+                                                                        ROBOT_STATE_WAIT_TIME))
+  {
+    RCLCPP_FATAL(LOGGER, "Timeout waiting for current state");
+    exit(EXIT_FAILURE);
+  }
+
   servo_calcs_ = std::make_unique<ServoCalcs>(node, parameters, planning_scene_monitor_);
 
   collision_checker_ = std::make_unique<CollisionCheck>(node, parameters, planning_scene_monitor_);
 }
 
-bool Servo::start()
+void Servo::start()
 {
+  setPaused(false);
+
   // Crunch the numbers in this timer
-  if (servo_calcs_->start())
-    setPaused(false);
-  else
-    return false;
+  servo_calcs_->start();
 
   // Check collisions in this timer
   if (parameters_->check_collisions)
     collision_checker_->start();
-
-  return true;
-}
-
-void Servo::stop()
-{
-  servo_calcs_->stop();
-  collision_checker_->stop();
 }
 
 Servo::~Servo()
 {
-  stop();
+  setPaused(true);
 }
 
 void Servo::setPaused(bool paused)
@@ -92,14 +103,24 @@ bool Servo::getCommandFrameTransform(Eigen::Isometry3d& transform)
   return servo_calcs_->getCommandFrameTransform(transform);
 }
 
+bool Servo::getCommandFrameTransform(geometry_msgs::msg::TransformStamped& transform)
+{
+  return servo_calcs_->getEEFrameTransform(transform);
+}
+
+bool Servo::getEEFrameTransform(Eigen::Isometry3d& transform)
+{
+  return servo_calcs_->getEEFrameTransform(transform);
+}
+
+bool Servo::getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform)
+{
+  return servo_calcs_->getEEFrameTransform(transform);
+}
+
 const std::shared_ptr<moveit_servo::ServoParameters>& Servo::getParameters() const
 {
   return parameters_;
-}
-
-sensor_msgs::msg::JointState::ConstSharedPtr Servo::getLatestJointState() const
-{
-  return servo_calcs_->getLatestJointState();
 }
 
 }  // namespace moveit_servo

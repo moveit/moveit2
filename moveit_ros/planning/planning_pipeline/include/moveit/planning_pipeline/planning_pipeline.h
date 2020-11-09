@@ -200,5 +200,5 @@ private:
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr contacts_publisher_;
 };
 
-MOVEIT_CLASS_FORWARD(PlanningPipeline)
+MOVEIT_CLASS_FORWARD(PlanningPipeline)  // Defines PlanningPipelinePtr, ConstPtr, WeakPtr... etc
 }  // namespace planning_pipeline

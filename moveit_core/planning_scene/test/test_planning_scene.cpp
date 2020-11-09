@@ -62,8 +62,7 @@ TEST(PlanningScene, LoadRestoreDiff)
 {
   urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
   srdf::ModelSharedPtr srdf_model(new srdf::Model());
-
-  planning_scene::PlanningScenePtr ps(new planning_scene::PlanningScene(urdf_model, srdf_model));
+  auto ps = std::make_shared<planning_scene::PlanningScene>(urdf_model, srdf_model);
 
   collision_detection::World& world = *ps->getWorldNonConst();
 
@@ -123,7 +122,7 @@ TEST(PlanningScene, MakeAttachedDiff)
 {
   urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
   srdf::ModelSharedPtr srdf_model(new srdf::Model());
-  planning_scene::PlanningScenePtr ps(new planning_scene::PlanningScene(urdf_model, srdf_model));
+  auto ps = std::make_shared<planning_scene::PlanningScene>(urdf_model, srdf_model);
 
   /* add a single object to ps's world */
   collision_detection::World& world = *ps->getWorldNonConst();

@@ -69,9 +69,13 @@ public:
   CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParametersPtr& parameters,
                  const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
-  /** \brief start and stop the Timer */
+  ~CollisionCheck()
+  {
+    timer_.stop();
+  }
+
+  /** \brief start the Timer that regulates collision check rate */
   void start();
-  void stop();
 
   /** \brief Pause or unpause processing servo commands while keeping the timers alive */
   void setPaused(bool paused);
@@ -79,9 +83,6 @@ public:
 private:
   /** \brief Run one iteration of collision checking */
   void run();
-
-  /** \brief Print objects in collision. Useful for debugging.  */
-  void printCollisionPairs(collision_detection::CollisionResult::ContactMap& contact_map);
 
   /** \brief Get a read-only copy of the planning scene */
   planning_scene_monitor::LockedPlanningSceneRO getLockedPlanningSceneRO() const;
@@ -102,7 +103,7 @@ private:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   // Robot state and collision matrix from planning scene
-  std::unique_ptr<moveit::core::RobotState> current_state_;
+  std::shared_ptr<moveit::core::RobotState> current_state_;
   collision_detection::AllowedCollisionMatrix acm_;
 
   // Scale robot velocity according to collision proximity and user-defined thresholds.

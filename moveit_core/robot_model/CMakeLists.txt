@@ -26,6 +26,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_profiler
   moveit_exceptions
+  moveit_kinematics_base
 )
 
 if(BUILD_TESTING)

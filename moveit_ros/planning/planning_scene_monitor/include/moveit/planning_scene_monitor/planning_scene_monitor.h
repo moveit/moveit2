@@ -54,7 +54,7 @@
 
 namespace planning_scene_monitor
 {
-MOVEIT_CLASS_FORWARD(PlanningSceneMonitor)
+MOVEIT_CLASS_FORWARD(PlanningSceneMonitor)  // Defines PlanningSceneMonitorPtr, ConstPtr, WeakPtr... etc
 
 /**
  * @brief PlanningSceneMonitor
@@ -511,11 +511,10 @@ protected:
   typedef std::map<const moveit::core::LinkModel*,
                    std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t> > >
       LinkShapeHandles;
-  typedef std::map<const moveit::core::AttachedBody*,
-                   std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t> > >
-      AttachedBodyShapeHandles;
-  typedef std::map<std::string, std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*> > >
-      CollisionBodyShapeHandles;
+  using AttachedBodyShapeHandles = std::map<const moveit::core::AttachedBody*,
+                                            std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t> > >;
+  using CollisionBodyShapeHandles =
+      std::map<std::string, std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*> > >;
 
   LinkShapeHandles link_shape_handles_;
   AttachedBodyShapeHandles attached_body_shape_handles_;

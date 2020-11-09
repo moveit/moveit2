@@ -36,11 +36,7 @@
 
 #pragma once
 
-#include <moveit/macros/diagnostics.h>
-DIAGNOSTIC_PUSH
-SILENT_UNUSED_PARAM
 #include <rviz_default_plugins/robot/link_updater.hpp>
-DIAGNOSTIC_POP
 #include <moveit/robot_state/robot_state.h>
 
 namespace moveit_rviz_plugin

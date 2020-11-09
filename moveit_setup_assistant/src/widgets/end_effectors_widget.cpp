@@ -36,10 +36,24 @@
 
 // SA
 #include "end_effectors_widget.h"
+#include "header_widget.h"
+
 // Qt
-#include <QFormLayout>
-#include <QMessageBox>
 #include <QApplication>
+#include <QComboBox>
+#include <QFormLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QScrollArea>
+#include <QStackedWidget>
+#include <QString>
+#include <QTableWidget>
+#include <QVBoxLayout>
+#include <QWidget>
 
 namespace moveit_setup_assistant
 {
@@ -68,15 +82,10 @@ EndEffectorsWidget::EndEffectorsWidget(QWidget* parent, const MoveItConfigDataPt
   effector_edit_widget_ = createEditWidget();
 
   // Create stacked layout -----------------------------------------
-  stacked_layout_ = new QStackedLayout(this);
-  stacked_layout_->addWidget(effector_list_widget_);  // screen index 0
-  stacked_layout_->addWidget(effector_edit_widget_);  // screen index 1
-
-  // Create Widget wrapper for layout
-  QWidget* stacked_layout_widget = new QWidget(this);
-  stacked_layout_widget->setLayout(stacked_layout_);
-
-  layout->addWidget(stacked_layout_widget);
+  stacked_widget_ = new QStackedWidget(this);
+  stacked_widget_->addWidget(effector_list_widget_);  // screen index 0
+  stacked_widget_->addWidget(effector_edit_widget_);  // screen index 1
+  layout->addWidget(stacked_widget_);
 
   // Finish Layout --------------------------------------------------
   this->setLayout(layout);
@@ -116,9 +125,7 @@ QWidget* EndEffectorsWidget::createContentsWidget()
   QHBoxLayout* controls_layout = new QHBoxLayout();
 
   // Spacer
-  QWidget* spacer = new QWidget(this);
-  spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-  controls_layout->addWidget(spacer);
+  controls_layout->addItem(new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
   // Edit Selected Button
   btn_edit_ = new QPushButton("&Edit Selected", this);
@@ -196,9 +203,7 @@ QWidget* EndEffectorsWidget::createEditWidget()
   controls_layout->setContentsMargins(0, 25, 0, 15);
 
   // Spacer
-  QWidget* spacer = new QWidget(this);
-  spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-  controls_layout->addWidget(spacer);
+  controls_layout->addItem(new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
   // Save
   btn_save_ = new QPushButton("&Save", this);
@@ -238,7 +243,7 @@ void EndEffectorsWidget::showNewScreen()
   parent_group_name_field_->clearEditText();  // actually this just chooses first option
 
   // Switch to screen
-  stacked_layout_->setCurrentIndex(1);
+  stacked_widget_->setCurrentIndex(1);
 
   // Announce that this widget is in modal mode
   Q_EMIT isModal(true);
@@ -280,7 +285,7 @@ void EndEffectorsWidget::previewClicked(int /*row*/, int /*column*/)
 void EndEffectorsWidget::previewClickedString(const QString& name)
 {
   // Don't highlight if we are on the overview end effectors screen. we are just populating drop down box
-  if (stacked_layout_->currentIndex() == 0)
+  if (stacked_widget_->currentIndex() == 0)
     return;
 
   // Unhighlight all links
@@ -348,7 +353,7 @@ void EndEffectorsWidget::edit(const std::string& name)
   parent_group_name_field_->setCurrentIndex(index);
 
   // Switch to screen
-  stacked_layout_->setCurrentIndex(1);
+  stacked_widget_->setCurrentIndex(1);
 
   // Announce that this widget is in modal mode
   Q_EMIT isModal(true);
@@ -572,7 +577,7 @@ void EndEffectorsWidget::doneEditing()
   loadDataTable();
 
   // Switch to screen
-  stacked_layout_->setCurrentIndex(0);
+  stacked_widget_->setCurrentIndex(0);
 
   // Announce that this widget is not in modal mode
   Q_EMIT isModal(false);
@@ -584,7 +589,7 @@ void EndEffectorsWidget::doneEditing()
 void EndEffectorsWidget::cancelEditing()
 {
   // Switch to screen
-  stacked_layout_->setCurrentIndex(0);
+  stacked_widget_->setCurrentIndex(0);
 
   // Re-highlight the currently selected end effector group
   previewClicked(0, 0);  // the number parameters are actually meaningless
@@ -651,7 +656,7 @@ void EndEffectorsWidget::loadDataTable()
 void EndEffectorsWidget::focusGiven()
 {
   // Show the current effectors screen
-  stacked_layout_->setCurrentIndex(0);
+  stacked_widget_->setCurrentIndex(0);
 
   // Load the data to the tree
   loadDataTable();
