@@ -553,7 +553,10 @@ TEST_F(KinematicsTest, searchIK)
     EXPECT_NEAR_POSES(poses, reached_poses, tolerance_);
   }
 
-  RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << (double)success / num_ik_tests_);
+  if (num_ik_cb_tests_ > 0)
+  {
+    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << (double)success / num_ik_tests_);
+  }
   EXPECT_GE(success, EXPECTED_SUCCESS_RATE * num_ik_tests_);
 }
 
@@ -594,7 +597,10 @@ TEST_F(KinematicsTest, searchIKWithCallback)
     EXPECT_NEAR_POSES(poses, reached_poses, tolerance_);
   }
 
-  RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << (double)success / num_ik_cb_tests_);
+  if (num_ik_cb_tests_ > 0)
+  {
+    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << (double)success / num_ik_cb_tests_);
+  }
   EXPECT_GE(success, EXPECTED_SUCCESS_RATE * num_ik_cb_tests_);
 }
 
@@ -662,7 +668,10 @@ TEST_F(KinematicsTest, getIKMultipleSolutions)
     }
   }
 
-  RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << (double)success / num_ik_multiple_tests_);
+  if (num_ik_cb_tests_ > 0)
+  {
+    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << (double)success / num_ik_multiple_tests_);
+  }
   EXPECT_GE(success, EXPECTED_SUCCESS_RATE * num_ik_multiple_tests_);
 }
 
