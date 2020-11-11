@@ -2,16 +2,37 @@ set(MOVEIT_LIB_NAME moveit_depth_image_octomap_updater)
 
 add_library(${MOVEIT_LIB_NAME}_core src/depth_image_octomap_updater.cpp)
 set_target_properties(${MOVEIT_LIB_NAME}_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME}_core moveit_lazy_free_space_updater moveit_mesh_filter ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-
-add_dependencies(${MOVEIT_LIB_NAME}_core ${sensor_msgs_EXPORTED_TARGETS})
+ament_target_dependencies(${MOVEIT_LIB_NAME}_core
+  rclcpp
+  moveit_core
+  image_transport
+  sensor_msgs
+  tf2
+  tf2_geometry_msgs
+  geometric_shapes
+  moveit_ros_occupancy_map_monitor
+  Boost
+)
+target_link_libraries(${MOVEIT_LIB_NAME}_core moveit_lazy_free_space_updater moveit_mesh_filter)
 
 add_library(${MOVEIT_LIB_NAME} src/updater_plugin.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  rclcpp
+  moveit_core
+  image_transport
+  sensor_msgs
+  tf2
+  tf2_geometry_msgs
+  geometric_shapes
+  moveit_ros_occupancy_map_monitor
+  Boost
+  pluginlib
+)
+target_link_libraries(${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core)
 
 install(TARGETS ${MOVEIT_LIB_NAME}_core ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin)
+install(DIRECTORY include/ DESTINATION include)

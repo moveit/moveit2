@@ -2,12 +2,23 @@ set(MOVEIT_LIB_NAME moveit_semantic_world)
 
 add_library(${MOVEIT_LIB_NAME} src/semantic_world.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-add_dependencies(${MOVEIT_LIB_NAME} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${MOVEIT_LIB_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  rclcpp
+  moveit_core
+  object_recognition_msgs
+  visualization_msgs
+  geometry_msgs
+  geometric_shapes
+  moveit_msgs
+  tf2_eigen
+  Eigen3
+  Boost
+)
+target_link_libraries(${MOVEIT_LIB_NAME} ${OpenCV_LIBRARIES})
 
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+install(DIRECTORY include/ DESTINATION include)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
