@@ -43,14 +43,16 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/transform_listener.h>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.save_to_warehouse");
+
 void onSceneUpdate(planning_scene_monitor::PlanningSceneMonitor* psm, moveit_warehouse::PlanningSceneStorage* pss)
 {
-  ROS_INFO("Received an update to the planning scene...");
+  RCLCPP_INFO(LOGGER, "Received an update to the planning scene...");
 
   if (!psm->getPlanningScene()->getName().empty())
   {
@@ -61,45 +63,46 @@ void onSceneUpdate(planning_scene_monitor::PlanningSceneMonitor* psm, moveit_war
       pss->addPlanningScene(psmsg);
     }
     else
-      ROS_INFO("Scene '%s' was previously added. Not adding again.", psm->getPlanningScene()->getName().c_str());
+      RCLCPP_INFO(LOGGER, "Scene '%s' was previously added. Not adding again.",
+                  psm->getPlanningScene()->getName().c_str());
   }
   else
-    ROS_INFO("Scene name is empty. Not saving.");
+    RCLCPP_INFO(LOGGER, "Scene name is empty. Not saving.");
 }
 
-void onMotionPlanRequest(const moveit_msgs::msg::MotionPlanRequestConstPtr& req,
+void onMotionPlanRequest(const moveit_msgs::msg::MotionPlanRequest::ConstSharedPtr req,
                          planning_scene_monitor::PlanningSceneMonitor* psm, moveit_warehouse::PlanningSceneStorage* pss)
 {
   if (psm->getPlanningScene()->getName().empty())
   {
-    ROS_INFO("Scene name is empty. Not saving planning request.");
+    RCLCPP_INFO(LOGGER, "Scene name is empty. Not saving planning request.");
     return;
   }
   pss->addPlanningQuery(*req, psm->getPlanningScene()->getName());
 }
 
-void onConstraints(const moveit_msgs::msg::ConstraintsConstPtr& msg, moveit_warehouse::ConstraintsStorage* cs)
+void onConstraints(const moveit_msgs::msg::Constraints::ConstSharedPtr msg, moveit_warehouse::ConstraintsStorage* cs)
 {
   if (msg->name.empty())
   {
-    ROS_INFO("No name specified for constraints. Not saving.");
+    RCLCPP_INFO(LOGGER, "No name specified for constraints. Not saving.");
     return;
   }
 
   if (cs->hasConstraints(msg->name))
   {
-    ROS_INFO("Replacing constraints '%s'", msg->name.c_str());
+    RCLCPP_INFO(LOGGER, "Replacing constraints '%s'", msg->name.c_str());
     cs->removeConstraints(msg->name);
     cs->addConstraints(*msg);
   }
   else
   {
-    ROS_INFO("Adding constraints '%s'", msg->name.c_str());
+    RCLCPP_INFO(LOGGER, "Adding constraints '%s'", msg->name.c_str());
     cs->addConstraints(*msg);
   }
 }
 
-void onRobotState(const moveit_msgs::msg::RobotStateConstPtr& msg, moveit_warehouse::RobotStateStorage* rs)
+void onRobotState(const moveit_msgs::msg::RobotState::ConstSharedPtr msg, moveit_warehouse::RobotStateStorage* rs)
 {
   std::vector<std::string> names;
   rs->getKnownRobotStates(names);
@@ -108,13 +111,17 @@ void onRobotState(const moveit_msgs::msg::RobotStateConstPtr& msg, moveit_wareho
   while (names_set.find("S" + boost::lexical_cast<std::string>(n)) != names_set.end())
     n++;
   std::string name = "S" + boost::lexical_cast<std::string>(n);
-  ROS_INFO("Adding robot state '%s'", name.c_str());
+  RCLCPP_INFO(LOGGER, "Adding robot state '%s'", name.c_str());
   rs->addRobotState(*msg, name);
 }
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "save_to_warehouse", ros::init_options::AnonymousName);
+  rclcpp::init(argc, argv);
+  rclcpp::NodeOptions node_options;
+  node_options.allow_undeclared_parameters(true);
+  node_options.automatically_declare_parameters_from_overrides(true);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("save_to_warehouse", node_options);
 
   boost::program_options::options_description desc;
   desc.add_options()("help", "Show help message")("host", boost::program_options::value<std::string>(),
@@ -132,23 +139,20 @@ int main(int argc, char** argv)
     return 1;
   }
   // Set up db
-  warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase();
+  warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase(node);
   if (vm.count("host") && vm.count("port"))
     conn->setParams(vm["host"].as<std::string>(), vm["port"].as<std::size_t>());
   if (!conn->connect())
     return 1;
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-
-  ros::NodeHandle nh;
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>();
+  rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(clock);
   std::shared_ptr<tf2_ros::TransformListener> tf_listener =
-      std::make_shared<tf2_ros::TransformListener>(*tf_buffer, nh);
-  planning_scene_monitor::PlanningSceneMonitor psm(ROBOT_DESCRIPTION, tf_buffer);
+      std::make_shared<tf2_ros::TransformListener>(*tf_buffer, node);
+  planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION, tf_buffer);
   if (!psm.getPlanningScene())
   {
-    ROS_ERROR("Unable to initialize PlanningSceneMonitor");
+    RCLCPP_ERROR(LOGGER, "Unable to initialize PlanningSceneMonitor");
     return 1;
   }
 
@@ -160,49 +164,51 @@ int main(int argc, char** argv)
   std::vector<std::string> names;
   pss.getPlanningSceneNames(names);
   if (names.empty())
-    ROS_INFO("There are no previously stored scenes");
+    RCLCPP_INFO(LOGGER, "There are no previously stored scenes");
   else
   {
-    ROS_INFO("Previously stored scenes:");
+    RCLCPP_INFO(LOGGER, "Previously stored scenes:");
     for (const std::string& name : names)
-      ROS_INFO(" * %s", name.c_str());
+      RCLCPP_INFO(LOGGER, " * %s", name.c_str());
   }
   cs.getKnownConstraints(names);
   if (names.empty())
-    ROS_INFO("There are no previously stored constraints");
+    RCLCPP_INFO(LOGGER, "There are no previously stored constraints");
   else
   {
-    ROS_INFO("Previously stored constraints:");
+    RCLCPP_INFO(LOGGER, "Previously stored constraints:");
     for (const std::string& name : names)
-      ROS_INFO(" * %s", name.c_str());
+      RCLCPP_INFO(LOGGER, " * %s", name.c_str());
   }
   rs.getKnownRobotStates(names);
   if (names.empty())
-    ROS_INFO("There are no previously stored robot states");
+    RCLCPP_INFO(LOGGER, "There are no previously stored robot states");
   else
   {
-    ROS_INFO("Previously stored robot states:");
+    RCLCPP_INFO(LOGGER, "Previously stored robot states:");
     for (const std::string& name : names)
-      ROS_INFO(" * %s", name.c_str());
+      RCLCPP_INFO(LOGGER, " * %s", name.c_str());
   }
 
   psm.addUpdateCallback(boost::bind(&onSceneUpdate, &psm, &pss));
 
-  boost::function<void(const moveit_msgs::msg::MotionPlanRequestConstPtr&)> callback1 =
-      boost::bind(&onMotionPlanRequest, _1, &psm, &pss);
-  ros::Subscriber mplan_req_sub = nh.subscribe("motion_plan_request", 100, callback1);
-  boost::function<void(const moveit_msgs::msg::ConstraintsConstPtr&)> callback2 = boost::bind(&onConstraints, _1, &cs);
-  ros::Subscriber constr_sub = nh.subscribe("constraints", 100, callback2);
-  boost::function<void(const moveit_msgs::msg::RobotStateConstPtr&)> callback3 = boost::bind(&onRobotState, _1, &rs);
-  ros::Subscriber state_sub = nh.subscribe("robot_state", 100, callback3);
+  auto callback1 = [&](moveit_msgs::msg::MotionPlanRequest::ConstSharedPtr msg) -> void {
+    return onMotionPlanRequest(msg, &psm, &pss);
+  };
+  auto mplan_req_sub =
+      node->create_subscription<moveit_msgs::msg::MotionPlanRequest>("motion_plan_request", 100, callback1);
+  auto callback2 = [&](moveit_msgs::msg::Constraints::ConstSharedPtr msg) -> void { return onConstraints(msg, &cs); };
+  auto constr_sub = node->create_subscription<moveit_msgs::msg::Constraints>("constraints", 100, callback2);
+  auto callback3 = [&](moveit_msgs::msg::RobotState::ConstSharedPtr msg) -> void { return onRobotState(msg, &rs); };
+  auto state_sub = node->create_subscription<moveit_msgs::msg::RobotState>("robot_state", 100, callback3);
 
   std::vector<std::string> topics;
   psm.getMonitoredTopics(topics);
-  ROS_INFO_STREAM("Listening for scene updates on topics " << boost::algorithm::join(topics, ", "));
-  ROS_INFO_STREAM("Listening for planning requests on topic " << mplan_req_sub.getTopic());
-  ROS_INFO_STREAM("Listening for named constraints on topic " << constr_sub.getTopic());
-  ROS_INFO_STREAM("Listening for states on topic " << state_sub.getTopic());
+  RCLCPP_INFO_STREAM(LOGGER, "Listening for scene updates on topics " << boost::algorithm::join(topics, ", "));
+  RCLCPP_INFO_STREAM(LOGGER, "Listening for planning requests on topic " << mplan_req_sub->get_topic_name());
+  RCLCPP_INFO_STREAM(LOGGER, "Listening for named constraints on topic " << constr_sub->get_topic_name());
+  RCLCPP_INFO_STREAM(LOGGER, "Listening for states on topic " << state_sub->get_topic_name());
 
-  ros::waitForShutdown();
+  rclcpp::spin(node);
   return 0;
 }

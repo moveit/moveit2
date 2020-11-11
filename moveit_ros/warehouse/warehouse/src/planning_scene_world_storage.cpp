@@ -41,6 +41,8 @@
 const std::string moveit_warehouse::PlanningSceneWorldStorage::DATABASE_NAME = "moveit_planning_scene_worlds";
 const std::string moveit_warehouse::PlanningSceneWorldStorage::PLANNING_SCENE_WORLD_ID_NAME = "world_id";
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.planning_scene_world_storage");
+
 using warehouse_ros::Metadata;
 using warehouse_ros::Query;
 
@@ -75,7 +77,7 @@ void moveit_warehouse::PlanningSceneWorldStorage::addPlanningSceneWorld(const mo
   Metadata::Ptr metadata = planning_scene_world_collection_->createMetadata();
   metadata->append(PLANNING_SCENE_WORLD_ID_NAME, name);
   planning_scene_world_collection_->insert(msg, metadata);
-  ROS_DEBUG("%s planning scene world '%s'", replace ? "Replaced" : "Added", name.c_str());
+  RCLCPP_DEBUG(LOGGER, "%s planning scene world '%s'", replace ? "Replaced" : "Added", name.c_str());
 }
 
 bool moveit_warehouse::PlanningSceneWorldStorage::hasPlanningSceneWorld(const std::string& name) const
@@ -127,7 +129,7 @@ void moveit_warehouse::PlanningSceneWorldStorage::renamePlanningSceneWorld(const
   Metadata::Ptr m = planning_scene_world_collection_->createMetadata();
   m->append(PLANNING_SCENE_WORLD_ID_NAME, new_name);
   planning_scene_world_collection_->modifyMetadata(q, m);
-  ROS_DEBUG("Renamed planning scene world from '%s' to '%s'", old_name.c_str(), new_name.c_str());
+  RCLCPP_DEBUG(LOGGER, "Renamed planning scene world from '%s' to '%s'", old_name.c_str(), new_name.c_str());
 }
 
 void moveit_warehouse::PlanningSceneWorldStorage::removePlanningSceneWorld(const std::string& name)
@@ -135,5 +137,5 @@ void moveit_warehouse::PlanningSceneWorldStorage::removePlanningSceneWorld(const
   Query::Ptr q = planning_scene_world_collection_->createQuery();
   q->append(PLANNING_SCENE_WORLD_ID_NAME, name);
   unsigned int rem = planning_scene_world_collection_->removeMessages(q);
-  ROS_DEBUG("Removed %u PlanningSceneWorld messages (named '%s')", rem, name.c_str());
+  RCLCPP_DEBUG(LOGGER, "Removed %u PlanningSceneWorld messages (named '%s')", rem, name.c_str());
 }

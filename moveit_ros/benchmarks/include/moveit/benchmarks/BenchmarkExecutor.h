@@ -40,17 +40,16 @@
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
-// TODO(YuYan): uncomment after porting moveit_ros_warehouse
-// #include <moveit/warehouse/planning_scene_storage.h>
-// #include <moveit/warehouse/planning_scene_world_storage.h>
-// #include <moveit/warehouse/state_storage.h>
-// #include <moveit/warehouse/constraints_storage.h>
-// #include <moveit/warehouse/trajectory_constraints_storage.h>
+#include <moveit/warehouse/planning_scene_storage.h>
+#include <moveit/warehouse/planning_scene_world_storage.h>
+#include <moveit/warehouse/state_storage.h>
+#include <moveit/warehouse/constraints_storage.h>
+#include <moveit/warehouse/trajectory_constraints_storage.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/macros/diagnostics.h>
 DIAGNOSTIC_PUSH
 SILENT_UNUSED_PARAM
-// #include <warehouse_ros/database_loader.h>
+#include <warehouse_ros/database_loader.h>
 DIAGNOSTIC_PUSH
 #include <pluginlib/class_loader.hpp>
 
@@ -205,14 +204,14 @@ protected:
                     const std::map<std::string, std::vector<std::string>>& planners, int runs);
 
   planning_scene_monitor::PlanningSceneMonitor* psm_;
-  // TODO(YuYan): uncomment after porting moveit_ros_warehouse
-  // moveit_warehouse::PlanningSceneStorage* pss_;
-  // moveit_warehouse::PlanningSceneWorldStorage* psws_;
-  // moveit_warehouse::RobotStateStorage* rs_;
-  // moveit_warehouse::ConstraintsStorage* cs_;
-  // moveit_warehouse::TrajectoryConstraintsStorage* tcs_;
+  moveit_warehouse::PlanningSceneStorage* pss_;
+  moveit_warehouse::PlanningSceneWorldStorage* psws_;
+  moveit_warehouse::RobotStateStorage* rs_;
+  moveit_warehouse::ConstraintsStorage* cs_;
+  moveit_warehouse::TrajectoryConstraintsStorage* tcs_;
 
-  // warehouse_ros::DatabaseLoader dbloader;
+  rclcpp::Node::SharedPtr node_;
+  warehouse_ros::DatabaseLoader dbloader;
   planning_scene::PlanningScenePtr planning_scene_;
 
   BenchmarkOptions options_;
@@ -227,7 +226,5 @@ protected:
   std::vector<PlannerCompletionEventFunction> planner_completion_fns_;
   std::vector<QueryStartEventFunction> query_start_fns_;
   std::vector<QueryCompletionEventFunction> query_end_fns_;
-
-  rclcpp::Node::SharedPtr node_;
 };
 }  // namespace moveit_ros_benchmarks

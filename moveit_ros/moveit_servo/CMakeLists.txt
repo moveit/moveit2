@@ -1,13 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
 project(moveit_servo)
 
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-
 set(LIBRARY_NAME moveit_servo)
 set(COMPOSABLE_NODE_NAME servo_server)
+
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)

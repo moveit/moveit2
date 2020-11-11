@@ -34,6 +34,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}_core
   Boost
   moveit_ros_robot_interaction
   moveit_ros_planning_interface
+  moveit_ros_warehouse
   rviz2
   rviz_ogre_vendor
   Qt5
@@ -48,6 +49,7 @@ target_link_libraries(${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core)
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   Boost
   moveit_ros_robot_interaction
+  moveit_ros_warehouse
   pluginlib
   rviz_ogre_vendor
 )

@@ -17,18 +17,8 @@ repositories:
     version: ros2
   srdfdom:
     type: git
-    url: https://github.com/PickNikRobotics/srdfdom
+    url: https://github.com/ros-planning/srdfdom
     version: ros2
-
-# TODO(#242): Remove below once console_bridge conflict is resolved
-  urdfdom:
-    type: git
-    url: https://github.com/ros2/urdfdom
-    version: foxy
-  urdfdom_headers:
-    type: git
-    url: https://github.com/ros/urdfdom_headers
-    version: foxy
 
 # TODO(#283): Switch to master after fixing breaking changes in ros2_control
   ros2_control:
@@ -38,10 +28,20 @@ repositories:
   ros2_controllers:
     type: git
     url: https://github.com/ros-controls/ros2_controllers
-    version: d52902538a970e792ecc604416e22ef90a57f29e
+    version: 8587e079490acdd0fabeb2742a3bec3bf551bbc5
 
 # TODO(JafarAbdi): Switch to upstream once PR https://github.com/tork-a/fake_joint/pull/7 is merged
   fake_joint:
     type: git
     url: https://github.com/JafarAbdi/fake_joint
     version: foxy
+
+  warehouse_ros:
+    type: git
+    url: https://github.com/ros-planning/warehouse_ros
+    version: ros2
+
+  warehouse_ros_mongo:
+    type: git
+    url: https://github.com/ros-planning/warehouse_ros_mongo
+    version: ros2

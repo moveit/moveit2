@@ -1,29 +1,9 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_core VERSION 2.0.0 LANGUAGES CXX)
 
-if(NOT "${CMAKE_CXX_STANDARD}")
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  # Enable warnings
-  add_compile_options(-Wall -Wextra
-    -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual
-    -Wno-unused-parameter -Wno-unused-function)
-endif()
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  # This too often has false-positives
-  add_compile_options(-Wno-maybe-uninitialized)
-endif()
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  message("${PROJECT_NAME}: You did not request a specific build type: Choosing 'Release' for maximum performance")
-  set(CMAKE_BUILD_TYPE Release)
-endif()
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)

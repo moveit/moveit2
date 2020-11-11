@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>moveit_common</name>
+  <version>2.0.0</version>
+  <description>Common support functionality used throughout MoveIt</description>
+  <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
+
+  <license>BSD</license>
+  <url type="website">http://moveit.ros.org</url>
+  <url type="bugtracker">https://github.com/ros-planning/moveit/issues</url>
+  <url type="repository">https://github.com/ros-planning/moveit</url>
+
+  <buildtool_export_depend>ament_cmake</buildtool_export_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

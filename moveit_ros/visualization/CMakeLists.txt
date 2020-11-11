@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_ros_visualization)
 
-if(NOT "${CMAKE_CXX_STANDARD}")
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   # suppress warning in Ogre
@@ -14,10 +12,6 @@ endif()
 
 # definition needed for boost/math/constants/constants.hpp included by Ogre to compile
 add_definitions(-DBOOST_MATH_DISABLE_FLOAT128)
-
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
 
 find_package(Boost REQUIRED thread date_time system filesystem)
 find_package(ament_cmake REQUIRED)
@@ -32,7 +26,7 @@ find_package(moveit_ros_planning_interface REQUIRED)
 # TODO(JafarAbdi): Uncomment when porting each package
 # find_package(moveit_ros_perception REQUIRED)
 find_package(moveit_ros_robot_interaction REQUIRED)
-# find_package(moveit_ros_warehouse REQUIRED)
+find_package(moveit_ros_warehouse REQUIRED)
 find_package(object_recognition_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)

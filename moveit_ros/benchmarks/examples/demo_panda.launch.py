@@ -20,21 +20,21 @@ def load_yaml(package_name, file_path):
 
     try:
         with open(absolute_file_path, 'r') as file:
-            return yaml.load(file)
+            return yaml.safe_load(file)
     except EnvironmentError: # parent of IOError, OSError *and* WindowsError where available
         return None
 
 def generate_launch_description():
 
-    moveit_ros_benchmarks_yaml = load_yaml('moveit_ros_benchmarks', 'demo_panda_predefined_poses.yaml')
-    moveit_ros_benchmarks_config = { 'benchmark_config' : moveit_ros_benchmarks_yaml }    
+    moveit_ros_benchmarks_yaml = load_yaml('moveit_ros_benchmarks', 'demo1.yaml')
+    moveit_ros_benchmarks_config = { 'benchmark_config' : moveit_ros_benchmarks_yaml }
 
     # Component yaml files are grouped in separate namespaces
     robot_description_config = load_file('moveit_resources_panda_description', 'urdf/panda.urdf')
     robot_description = {'robot_description' : robot_description_config}
 
     robot_description_semantic_config = load_file('moveit_resources_panda_moveit_config', 'config/panda.srdf')
-    robot_description_semantic = {'robot_description_semantic' : robot_description_semantic_config}
+    robot_description_semantic = {'robot_description_semantic' : robot_description_semantic_config }
 
     kinematics_yaml = load_yaml('moveit_resources_panda_moveit_config', 'config/kinematics.yaml')
     robot_description_kinematics = { 'robot_description_kinematics' : kinematics_yaml }
@@ -47,10 +47,10 @@ def generate_launch_description():
     ompl_planning_pipeline_config['ompl'].update(ompl_planning_yaml)
 
     # moveit_ros_benchmark demo executable
-    moveit_ros_benchmarks_node = Node(node_name='moveit_run_benchmark',
+    moveit_ros_benchmarks_node = Node(name='moveit_run_benchmark',
                                       package='moveit_ros_benchmarks',
-                                    #   prefix='xterm -e gdb --ex=run --args',
-                                      node_executable='moveit_combine_predefined_poses_benchmark',
+                                      # prefix='xterm -e gdb --ex=run --args',
+                                      executable='moveit_run_benchmark',
                                       output='screen',
                                       parameters=[moveit_ros_benchmarks_config,
                                                   robot_description,
@@ -58,5 +58,12 @@ def generate_launch_description():
                                                   robot_description_kinematics,
                                                   ompl_planning_pipeline_config])
 
-    return LaunchDescription([moveit_ros_benchmarks_node])
+    # Warehouse mongodb server
+    mongodb_server_node = Node(package='warehouse_ros_mongo',
+                               executable='mongo_wrapper_ros.py',
+                               parameters=[{'warehouse_port': 33829},
+                                           {'warehouse_host': 'localhost'},
+                                           {'warehouse_plugin': 'warehouse_ros_mongo::MongoDatabaseConnection'}],
+                               output='screen')
 
+    return LaunchDescription([moveit_ros_benchmarks_node, mongodb_server_node])

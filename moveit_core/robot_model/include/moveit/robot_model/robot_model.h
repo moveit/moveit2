@@ -615,6 +615,3 @@ protected:
 };
 }  // namespace core
 }  // namespace moveit
-
-namespace robot_model = moveit::core;
-namespace robot_state = moveit::core;

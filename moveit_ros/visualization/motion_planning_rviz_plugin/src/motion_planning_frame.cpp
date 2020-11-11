@@ -392,10 +392,8 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       std::shared_ptr<tf2_ros::Buffer> tf_buffer = moveit::planning_interface::getSharedTF();
 #endif
       move_group_.reset(new moveit::planning_interface::MoveGroupInterface(node_, opt, tf_buffer, rclcpp::Duration(30)));
-      // TODO (ddengster): Enable when moveit_ros_warehouse is ported
-      //      if (planning_scene_storage_)
-      //        move_group_->setConstraintsDatabase(ui_->database_host->text().toStdString(),
-      //        ui_->database_port->value());
+      if (planning_scene_storage_)
+        move_group_->setConstraintsDatabase(ui_->database_host->text().toStdString(), ui_->database_port->value());
     }
     catch (std::exception& ex)
     {

@@ -77,8 +77,8 @@ bool isIKSolutionValid(const planning_scene::PlanningScene* planning_scene,
 
 void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& req,
                                            moveit_msgs::msg::RobotState& solution,
-                                           moveit_msgs::msg::MoveItErrorCodes& error_code, robot_state::RobotState& rs,
-                                           const robot_state::GroupStateValidityCallbackFn& constraint) const
+                                           moveit_msgs::msg::MoveItErrorCodes& error_code, moveit::core::RobotState& rs,
+                                           const moveit::core::GroupStateValidityCallbackFn& constraint) const
 {
   const moveit::core::JointModelGroup* jmg = rs.getJointModelGroup(req.group_name);
   if (jmg)

@@ -34,22 +34,26 @@
 
 /* Author: Ryan Luna */
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <string>
 
 #include <moveit/benchmarks/BenchmarkOptions.h>
 #include <moveit/benchmarks/BenchmarkExecutor.h>
 
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.benchmarks.RunBenchmark");
+
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "moveit_run_benchmark");
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  rclcpp::init(argc, argv);
+  rclcpp::NodeOptions node_options;
+  node_options.allow_undeclared_parameters(true);
+  node_options.automatically_declare_parameters_from_overrides(true);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("moveit_run_benchmark", node_options);
 
   // Read benchmark options from param server
-  moveit_ros_benchmarks::BenchmarkOptions opts(ros::this_node::getName());
+  moveit_ros_benchmarks::BenchmarkOptions opts(node);
   // Setup benchmark server
-  moveit_ros_benchmarks::BenchmarkExecutor server;
+  moveit_ros_benchmarks::BenchmarkExecutor server(node);
 
   std::vector<std::string> planning_pipelines;
   opts.getPlanningPipelineNames(planning_pipelines);
@@ -57,5 +61,7 @@ int main(int argc, char** argv)
 
   // Running benchmarks
   if (!server.runBenchmarks(opts))
-    ROS_ERROR("Failed to run all benchmarks");
+    RCLCPP_ERROR(LOGGER, "Failed to run all benchmarks");
+
+  rclcpp::spin(node);
 }

@@ -3,18 +3,12 @@ project(moveit_ros_benchmarks)
 
 set(MOVEIT_LIB_NAME moveit_ros_benchmarks)
 
-if(NOT "${CMAKE_CXX_STANDARD}")
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wpedantic)
 endif()
 
 find_package(ament_cmake REQUIRED)
@@ -22,8 +16,7 @@ find_package(rclcpp REQUIRED)
 find_package(Boost REQUIRED date_time filesystem)
 find_package(tf2_eigen REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
-# TODO(YuYan): uncomment after porting moveit_ros_warehouse
-# find_package(moveit_ros_warehouse REQUIRED)
+find_package(moveit_ros_warehouse REQUIRED)
 find_package(pluginlib REQUIRED)
 
 include_directories(include)
@@ -38,22 +31,20 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   Boost
   tf2_eigen
   moveit_ros_planning
-  # TODO(YuYan): uncomment after porting moveit_ros_warehouse
-  # moveit_ros_warehouse
+  moveit_ros_warehouse
   pluginlib
 )
 
-# TODO(YuYan): uncomment after porting moveit_ros_warehouse
-# add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
-# ament_target_dependencies(moveit_run_benchmark
-#   rclcpp
-#   Boost
-#   tf2_eigen
-#   moveit_ros_planning
-#   # moveit_ros_warehouse
-#   pluginlib
-# )
-# target_link_libraries(moveit_run_benchmark ${MOVEIT_LIB_NAME})
+add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
+ament_target_dependencies(moveit_run_benchmark
+  rclcpp
+  Boost
+  tf2_eigen
+  moveit_ros_planning
+  moveit_ros_warehouse
+  pluginlib
+)
+target_link_libraries(moveit_run_benchmark ${MOVEIT_LIB_NAME})
 
 add_executable(moveit_combine_predefined_poses_benchmark src/simple_benchmarks/CombinePredefinedPosesBenchmark.cpp)
 ament_target_dependencies(moveit_combine_predefined_poses_benchmark
@@ -61,8 +52,7 @@ ament_target_dependencies(moveit_combine_predefined_poses_benchmark
   Boost
   tf2_eigen
   moveit_ros_planning
-  # TODO(YuYan): uncomment after porting moveit_ros_warehouse
-  # moveit_ros_warehouse
+  moveit_ros_warehouse
   pluginlib
 )
 target_link_libraries(moveit_combine_predefined_poses_benchmark ${MOVEIT_LIB_NAME})
@@ -73,8 +63,7 @@ ament_export_dependencies(rclcpp)
 ament_export_dependencies(Boost)
 ament_export_dependencies(tf2_eigen)
 ament_export_dependencies(moveit_ros_planning)
-# TODO(YuYan): uncomment after porting moveit_ros_warehouse
-# ament_export_dependencies(moveit_ros_warehouse)
+ament_export_dependencies(moveit_ros_warehouse)
 ament_export_dependencies(pluginlib)
 
 install(
@@ -87,8 +76,7 @@ install(
 
 install(
   TARGETS
-    # TODO(YuYan): uncomment after porting moveit_ros_warehouse
-    # moveit_run_benchmark
+    moveit_run_benchmark
     moveit_combine_predefined_poses_benchmark
   DESTINATION lib/${PROJECT_NAME}
 )
