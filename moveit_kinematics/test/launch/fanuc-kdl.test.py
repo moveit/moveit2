@@ -41,19 +41,53 @@ def generate_test_description():
     kinematics_yaml = load_yaml('moveit_resources_fanuc_moveit_config', 'config/kinematics.yaml')
     robot_description_kinematics = { 'robot_description_kinematics' : kinematics_yaml }
     test_param = load_yaml('moveit_kinematics', 'config/fanuc-kdl-test.yaml')
-    test_node = Node(package='moveit_kinematics',
+
+    private_params = {
+        'seed': [0, -0.32, -0.5, 0, -0.5, 0],
+        'consistency_limits': [0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
+    }
+
+    unit_tests_poses = {
+        'unit_test_poses':
+        {
+            'size' : 6,
+            'pose_0': { 'pose':   [0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        'joints': [0, -0.152627, -0.367847, 0, -0.46478, 0],
+                        'type':  'relative'
+                      },
+            'pose_1': { 'pose':   [0.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        'joints': [0.1582256, -0.3066389, -0.490349, 0.250946, -0.5159858, -0.319381],
+                        'type':   'relative'
+                      },
+            'pose_2': { 'pose':   [0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0],
+                        'joints': [0, -0.287588, -0.324304, 0, -0.643285, 0],
+                        'type':   'relative'
+                      },
+            'pose_3': { 'pose':   [0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        'joints': [-0.0159181, -0.319276, -0.499953, -0.231014, -0.511806, 0.212341],
+                        'type':   'relative'
+                      },
+            'pose_4': { 'pose':   [0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        'joints': [0, -0.331586, -0.520375, 0, -0.391211, 0],
+                        'type':   'relative'
+                      },
+            'pose_5': { 'pose':   [0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        'joints': [0, -0.32, -0.5, 0, -0.5, -0.1],
+                        'type':   'relative'
+                      },
+        }
+    }
+    fanuc_kdl = Node(package='moveit_kinematics',
                      executable='test_kinematics_plugin',
-                     name='test_kinmatics_plugin',
+                     name='fanuc_kdl',
                      parameters=[robot_description,
                                  robot_description_semantic,
                                  robot_description_kinematics,
-                                 test_param
+                                 test_param,
+                                 private_params,
+                                 unit_tests_poses
                                  ]
     )
-    return LaunchDescription([
-        test_node,
-        launch_testing.actions.ReadyToTest(),
-    ]), {'test_node': test_node}
 
 # Workaround for https://github.com/ros2/launch/issues/380
 #TODO Remove workaround once its fixed
@@ -62,6 +96,10 @@ class TestLoggingOutputFormat(unittest.TestCase):
     def test_logging_output(self, proc_info, proc_output, test_node):
         proc_info.assertWaitForShutdown(process=test_node, timeout=10.0)
 
+    return LaunchDescription([
+        fanuc_kdl,
+        launch_testing.actions.ReadyToTest(),
+    ]), {'fanuc_kdl': fanuc_kdl}
 
 @launch_testing.post_shutdown_test()
 class TestOutcome(unittest.TestCase):

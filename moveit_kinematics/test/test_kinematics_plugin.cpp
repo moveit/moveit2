@@ -428,7 +428,9 @@ static bool parsePose(const std::vector<double>& pose_values, Eigen::Isometry3d&
 TEST_F(KinematicsTest, unitIK)
 {
   static const std::string TEST_POSES_PARAM = "unit_test_poses";
-  const size_t expected_test_poses = node_->declare_parameter(TEST_POSES_PARAM + ".size", 0);
+  size_t expected_test_poses = 0;
+  node_->get_parameter_or(TEST_POSES_PARAM + ".size", expected_test_poses, expected_test_poses);
+
   // if (expected_test_poses == 0)
   //   return;
 
@@ -487,23 +489,24 @@ TEST_F(KinematicsTest, unitIK)
   */
   for (size_t i = 0; i < expected_test_poses; ++i)  // NOLINT(modernize-loop-convert)
   {
-    const std::string pose_name = "pose_" + i;
+    const std::string pose_name = "pose_" + std::to_string(i);
     const std::string pose_param = TEST_POSES_PARAM + "." + pose_name;
     goal = initial;  // reset goal to initial
     ground_truth.clear();
-    ground_truth = node_->declare_parameter(pose_param + ".joints", ground_truth);
+    node_->get_parameter_or(pose_param + ".joints", ground_truth, ground_truth);
     ASSERT_EQ(ground_truth.size(), joints_.size())
         << "Test pose '" << pose_name << "' has invalid 'joints' vector size";
 
     pose_values.clear();
-    pose_values = node_->declare_parameter(pose_param + ".pose", pose_values);
+    node_->get_parameter_or(pose_param + ".pose", pose_values, pose_values);
     ASSERT_TRUE(pose_values.size() == 6 || pose_values.size() == 7)
         << "Test pose '" << pose_name << "' has invalid 'pose' vector size";
 
     Eigen::Isometry3d pose;
     ASSERT_TRUE(parsePose(pose_values, pose)) << "Failed to parse 'pose' vector in: " << pose_name;
 
-    const std::string pose_type = node_->declare_parameter(pose_param + ".type", POSE_TYPE_RELATIVE);
+    std::string pose_type = "POSE_TYPE_RELATIVE";
+    node_->get_parameter_or(pose_param + ".type", pose_type, pose_type);
     if (pose_type == POSE_TYPE_RELATIVE)
       goal = goal * pose;
     else if (pose_type == POSE_TYPE_ABSOLUTE)
