@@ -39,6 +39,7 @@
 // This logic was borrowed (then namespaced) from the examples on the gcc wiki:
 //     https://gcc.gnu.org/wiki/Visibility
 
+// clang-format off
 #if defined _WIN32 || defined __CYGWIN__
   #ifdef __GNUC__
     #define PLANNING_SCENE_EXPORT __attribute__ ((dllexport))
@@ -67,4 +68,5 @@
   #define PLANNING_SCENE_PUBLIC_TYPE
 #endif
 
+// clang-format on
 #endif  // PLANNING_SCENE__VISIBILITY_CONTROL_HPP_
