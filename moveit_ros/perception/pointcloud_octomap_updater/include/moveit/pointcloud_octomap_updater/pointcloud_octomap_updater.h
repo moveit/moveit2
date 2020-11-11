@@ -36,11 +36,11 @@
 
 #pragma once
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/message_filter.h>
 #include <message_filters/subscriber.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
 #include <moveit/point_containment_filter/shape_mask.h>
 
@@ -54,30 +54,32 @@ public:
   PointCloudOctomapUpdater();
   ~PointCloudOctomapUpdater() override;
 
-  bool setParams(XmlRpc::XmlRpcValue& params) override;
+  bool setParams(const std::string& name_space) override;
 
-  bool initialize() override;
+  bool initialize(const rclcpp::Node::SharedPtr& node) override;
   void start() override;
   void stop() override;
   ShapeHandle excludeShape(const shapes::ShapeConstPtr& shape) override;
   void forgetShape(ShapeHandle handle) override;
 
 protected:
-  virtual void updateMask(const sensor_msgs::PointCloud2& cloud, const Eigen::Vector3d& sensor_origin,
+  virtual void updateMask(const sensor_msgs::msg::PointCloud2& cloud, const Eigen::Vector3d& sensor_origin,
                           std::vector<int>& mask);
 
 private:
   bool getShapeTransform(ShapeHandle h, Eigen::Isometry3d& transform) const;
-  void cloudMsgCallback(const sensor_msgs::PointCloud2::ConstPtr& cloud_msg);
+  void cloudMsgCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud_msg);
   void stopHelper();
 
-  ros::NodeHandle root_nh_;
-  ros::NodeHandle private_nh_;
+  // TODO: Enable private node for publishing filtered point cloud
+  // ros::NodeHandle root_nh_;
+  // ros::NodeHandle private_nh_;
+  rclcpp::Node::SharedPtr node_;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
-  ros::Time last_update_time_;
+  rclcpp::Time last_update_time_;
 
   /* params */
   std::string point_cloud_topic_;
@@ -87,10 +89,10 @@ private:
   unsigned int point_subsample_;
   double max_update_rate_;
   std::string filtered_cloud_topic_;
-  ros::Publisher filtered_cloud_publisher_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr filtered_cloud_publisher_;
 
-  message_filters::Subscriber<sensor_msgs::PointCloud2>* point_cloud_subscriber_;
-  tf2_ros::MessageFilter<sensor_msgs::PointCloud2>* point_cloud_filter_;
+  message_filters::Subscriber<sensor_msgs::msg::PointCloud2>* point_cloud_subscriber_;
+  tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>* point_cloud_filter_;
 
   /* used to store all cells in the map which a given ray passes through during raycasting.
      we cache this here because it dynamically pre-allocates a lot of memory in its contsructor */
