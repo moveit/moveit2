@@ -12,7 +12,7 @@ if(BUILD_TESTING)
 
   set(DEPS DEPENDENCIES test_kinematics_plugin)
   set(ARGS ARGS ik_plugin:=kdl_kinematics_plugin/KDLKinematicsPlugin)
-  add_launch_test(fanuc-kdl.test.py)# ${DEPS} ${ARGS})
+  add_launch_test(launch/fanuc-kdl.test.py)# ${DEPS} ${ARGS})
   # add_launch_test(panda-kdl.test ${DEPS} ${ARGS})
 
   # LMA solver seems to have less precision

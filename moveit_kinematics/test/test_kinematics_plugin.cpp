@@ -392,8 +392,6 @@ TEST_F(KinematicsTest, randomWalkIK)
   if (publish_trajectory_)
   {
     auto pub = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>("display_random_walk", 1);
-
-    sleep(10);
     traj.getRobotTrajectoryMsg(msg.trajectory[0]);
     pub->publish(msg);
     rclcpp::spin_some(node_);

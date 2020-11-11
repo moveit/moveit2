@@ -89,13 +89,6 @@ def generate_test_description():
                                  ]
     )
 
-# Workaround for https://github.com/ros2/launch/issues/380
-#TODO Remove workaround once its fixed
-class TestLoggingOutputFormat(unittest.TestCase):
-
-    def test_logging_output(self, proc_info, proc_output, test_node):
-        proc_info.assertWaitForShutdown(process=test_node, timeout=10.0)
-
     return LaunchDescription([
         fanuc_kdl,
         launch_testing.actions.ReadyToTest(),
@@ -104,6 +97,6 @@ class TestLoggingOutputFormat(unittest.TestCase):
 @launch_testing.post_shutdown_test()
 class TestOutcome(unittest.TestCase):
 
-    def test_exit_codes(self, proc_info):
-        launch_testing.asserts.assertExitCodes(proc_info)
+    def test_exit_codes(self, proc_info, fanuc_kdl):#
+      launch_testing.asserts.assertExitCodes(proc_info, process=fanuc_kdl)
 
