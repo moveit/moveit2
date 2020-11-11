@@ -16,11 +16,12 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>moveit_common</build_depend>
 
   <depend>moveit_core</depend>
-  <depend>roscpp</depend>
-  <depend>rosconsole</depend>
+  <depend>rclcpp</depend>
+  <!-- <depend>rosconsole</depend> -->
   <depend>urdf</depend>
   <depend>message_filters</depend>
   <depend version_gte="1.11.2">pluginlib</depend>
@@ -41,9 +42,10 @@
 
   <build_depend>eigen</build_depend>
 
-  <test_depend>ament_cmake_gtest</test_depend>
+  <!-- <test_depend>ament_cmake_gtest</test_depend> -->
 
   <export>
+    <build_type>ament_cmake</build_type>
     <moveit_ros_perception plugin="${prefix}/pointcloud_octomap_updater_plugin_description.xml"/>
     <moveit_ros_perception plugin="${prefix}/depth_image_octomap_updater_plugin_description.xml"/>
   </export>
