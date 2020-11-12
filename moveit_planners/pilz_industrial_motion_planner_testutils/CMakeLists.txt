@@ -24,7 +24,7 @@ if(CATKIN_ENABLE_CLANG_TIDY)
     CLANG_TIDY_EXE
     NAMES "clang-tidy"
     DOC "Path to clang-tidy executable"
-    )
+  )
   if(NOT CLANG_TIDY_EXE)
     message(FATAL_ERROR "clang-tidy not found.")
   else()
@@ -84,5 +84,5 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 ## Mark executables and/or libraries for installation
 install(TARGETS ${PROJECT_NAME}
-   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )

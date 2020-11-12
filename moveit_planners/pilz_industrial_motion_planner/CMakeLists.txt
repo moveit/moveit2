@@ -25,11 +25,11 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(orocos_kdl)
-find_package(Boost REQUIRED COMPONENTS )
+find_package(Boost REQUIRED COMPONENTS)
 
 if(CATKIN_ENABLE_TESTING AND ENABLE_COVERAGE_TESTING)
   find_package(code_coverage REQUIRED)
-  APPEND_COVERAGE_COMPILER_FLAGS()
+  append_coverage_compiler_flags()
 endif()
 
 ################
@@ -40,7 +40,7 @@ if(CATKIN_ENABLE_CLANG_TIDY)
     CLANG_TIDY_EXE
     NAMES "clang-tidy"
     DOC "Path to clang-tidy executable"
-    )
+  )
   if(NOT CLANG_TIDY_EXE)
     message(FATAL_ERROR "clang-tidy not found.")
   else()
@@ -87,102 +87,94 @@ add_library(${PROJECT_NAME}_lib
   src/plan_components_builder.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}_lib
-  ${catkin_LIBRARIES}
-)
+target_link_libraries(${PROJECT_NAME}_lib ${catkin_LIBRARIES})
 
 #############
 ## Plugins ##
 #############
 add_library(${PROJECT_NAME}
-            src/${PROJECT_NAME}.cpp
-            src/planning_context_loader.cpp
-            src/joint_limits_aggregator.cpp
-            src/joint_limits_container.cpp
-            src/limits_container.cpp
-            src/cartesian_limit.cpp
-            src/cartesian_limits_aggregator.cpp
-            )
-target_link_libraries(${PROJECT_NAME}
-                      ${catkin_LIBRARIES})
+  src/${PROJECT_NAME}.cpp
+  src/planning_context_loader.cpp
+  src/joint_limits_aggregator.cpp
+  src/joint_limits_container.cpp
+  src/limits_container.cpp
+  src/cartesian_limit.cpp
+  src/cartesian_limits_aggregator.cpp
+)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 add_library(planning_context_loader_ptp
-            src/planning_context_loader_ptp.cpp
-            src/planning_context_loader.cpp
-            src/trajectory_functions.cpp
-            src/trajectory_generator.cpp
-            src/trajectory_generator_ptp.cpp
-            src/velocity_profile_atrap.cpp
-            src/joint_limits_container.cpp
-            )
-target_link_libraries(planning_context_loader_ptp
-                      ${catkin_LIBRARIES})
+  src/planning_context_loader_ptp.cpp
+  src/planning_context_loader.cpp
+  src/trajectory_functions.cpp
+  src/trajectory_generator.cpp
+  src/trajectory_generator_ptp.cpp
+  src/velocity_profile_atrap.cpp
+  src/joint_limits_container.cpp
+)
+target_link_libraries(planning_context_loader_ptp ${catkin_LIBRARIES})
 
 add_library(planning_context_loader_lin
-            src/planning_context_loader_lin.cpp
-            src/planning_context_loader.cpp
-            src/trajectory_functions.cpp
-            src/trajectory_generator.cpp
-            src/trajectory_generator_lin.cpp
-            src/velocity_profile_atrap.cpp
-            )
-target_link_libraries(planning_context_loader_lin
-                      ${catkin_LIBRARIES})
+  src/planning_context_loader_lin.cpp
+  src/planning_context_loader.cpp
+  src/trajectory_functions.cpp
+  src/trajectory_generator.cpp
+  src/trajectory_generator_lin.cpp
+  src/velocity_profile_atrap.cpp
+)
+target_link_libraries(planning_context_loader_lin ${catkin_LIBRARIES})
 
 add_library(planning_context_loader_circ
-            src/planning_context_loader_circ.cpp
-            src/planning_context_loader.cpp
-            src/trajectory_functions.cpp
-            src/trajectory_generator.cpp
-            src/trajectory_generator_circ.cpp
-            src/path_circle_generator.cpp
-            )
-target_link_libraries(planning_context_loader_circ
-                      ${catkin_LIBRARIES})
+  src/planning_context_loader_circ.cpp
+  src/planning_context_loader.cpp
+  src/trajectory_functions.cpp
+  src/trajectory_generator.cpp
+  src/trajectory_generator_circ.cpp
+  src/path_circle_generator.cpp
+)
+target_link_libraries(planning_context_loader_circ ${catkin_LIBRARIES})
 
 add_library(command_list_manager
-            src/command_list_manager.cpp
-            src/plan_components_builder.cpp)
-target_link_libraries(command_list_manager
-            ${catkin_LIBRARIES})
-add_dependencies(command_list_manager
-            ${catkin_EXPORTED_TARGETS})
+  src/command_list_manager.cpp
+  src/plan_components_builder.cpp
+)
+target_link_libraries(command_list_manager ${catkin_LIBRARIES})
+add_dependencies(command_list_manager ${catkin_EXPORTED_TARGETS})
 
 add_library(sequence_capability
-            src/move_group_sequence_action.cpp
-            src/move_group_sequence_service.cpp
-            src/plan_components_builder.cpp
-            src/command_list_manager.cpp
-            src/trajectory_blender_transition_window.cpp
-            src/joint_limits_aggregator.cpp  # do we need joint limits and cartesian_limit here?
-            src/joint_limits_container.cpp
-            src/limits_container.cpp
-            src/cartesian_limit.cpp
-            src/cartesian_limits_aggregator.cpp
-            )
-target_link_libraries(sequence_capability
-                      ${catkin_LIBRARIES})
-add_dependencies(sequence_capability
-           ${catkin_EXPORTED_TARGETS})
+  src/move_group_sequence_action.cpp
+  src/move_group_sequence_service.cpp
+  src/plan_components_builder.cpp
+  src/command_list_manager.cpp
+  src/trajectory_blender_transition_window.cpp
+  src/joint_limits_aggregator.cpp  # do we need joint limits and cartesian_limit here?
+  src/joint_limits_container.cpp
+  src/limits_container.cpp
+  src/cartesian_limit.cpp
+  src/cartesian_limits_aggregator.cpp
+)
+target_link_libraries(sequence_capability ${catkin_LIBRARIES})
+add_dependencies(sequence_capability ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##
 #############
 install(FILES
-       plugins/sequence_capability_plugin_description.xml
-       plugins/${PROJECT_NAME}_plugin_description.xml
-       plugins/planning_context_plugin_description.xml
-       DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/plugins
-       )
+  plugins/sequence_capability_plugin_description.xml
+  plugins/${PROJECT_NAME}_plugin_description.xml
+  plugins/planning_context_plugin_description.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/plugins
+)
 
 ## Mark libraries for installation
-install(TARGETS
-   ${PROJECT_NAME}
-   planning_context_loader_ptp
-   planning_context_loader_lin
-   planning_context_loader_circ
-   command_list_manager
-   sequence_capability
+install(
+  TARGETS
+    ${PROJECT_NAME}
+    planning_context_loader_ptp
+    planning_context_loader_lin
+    planning_context_loader_circ
+    command_list_manager
+    sequence_capability
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
@@ -200,7 +192,7 @@ if(CATKIN_ENABLE_TESTING)
 
   if(ENABLE_COVERAGE_TESTING)
     include(CodeCoverage)
-    APPEND_COVERAGE_COMPILER_FLAGS()
+    append_coverage_compiler_flags()
   endif()
 
   #########################
@@ -254,7 +246,8 @@ if(CATKIN_ENABLE_TESTING)
   )
 
   add_rostest(test/integrationtest_sequence_service_capability_frankaemika_panda.test
-    DEPENDENCIES integrationtest_sequence_service_capability )
+    DEPENDENCIES integrationtest_sequence_service_capability
+  )
 
   add_rostest(test/integrationtest_sequence_service_capability_with_gripper.test
     DEPENDENCIES integrationtest_sequence_service_capability
@@ -277,7 +270,8 @@ if(CATKIN_ENABLE_TESTING)
   )
 
   add_rostest(test/integrationtest_command_planning_frankaemika_panda.test
-    DEPENDENCIES integrationtest_command_planning )
+    DEPENDENCIES integrationtest_command_planning
+  )
 
   # Blending Integration tests
   add_rostest_gtest(integrationtest_command_list_manager
@@ -339,7 +333,7 @@ if(CATKIN_ENABLE_TESTING)
     test/unittest_velocity_profile_atrap.cpp
     src/velocity_profile_atrap.cpp
   )
-  target_link_libraries(unittest_velocity_profile_atrap 
+  target_link_libraries(unittest_velocity_profile_atrap
     ${catkin_LIBRARIES}
   )
 
@@ -502,7 +496,7 @@ if(CATKIN_ENABLE_TESTING)
   catkin_add_gmock(unittest_get_solver_tip_frame
     test/unittest_get_solver_tip_frame.cpp
   )
-  target_link_libraries(unittest_get_solver_tip_frame 
+  target_link_libraries(unittest_get_solver_tip_frame
     ${catkin_LIBRARIES}
   )
 
