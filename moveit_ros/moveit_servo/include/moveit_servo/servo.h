@@ -63,9 +63,6 @@ public:
   /** \brief Pause or unpause processing servo commands while keeping the timers alive */
   void setPaused(bool paused);
 
-  /** \brief Returns when a joint state message has been received, and start() may be called */
-  bool waitForInitialized(std::chrono::duration<double> wait_for = std::chrono::duration<double>(0.25));
-
   /**
    * Get the MoveIt planning link transform.
    * The transform from the MoveIt planning frame to robot_link_command_frame

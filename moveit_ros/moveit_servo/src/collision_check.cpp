@@ -77,13 +77,10 @@ CollisionCheck::CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParamete
 
   // ROS pubs/subs
   collision_velocity_scale_pub_ =
-      node_->create_publisher<std_msgs::msg::Float64>("collision_velocity_scale", ROS_QUEUE_SIZE);
-
-  joint_state_sub_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-      parameters_->joint_topic, ROS_QUEUE_SIZE, std::bind(&CollisionCheck::jointStateCB, this, std::placeholders::_1));
+      node_->create_publisher<std_msgs::msg::Float64>("~/collision_velocity_scale", ROS_QUEUE_SIZE);
 
   worst_case_stop_time_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
-      "worst_case_stop_time", ROS_QUEUE_SIZE,
+      "~/worst_case_stop_time", ROS_QUEUE_SIZE,
       std::bind(&CollisionCheck::worstCaseStopTimeCB, this, std::placeholders::_1));
 
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();

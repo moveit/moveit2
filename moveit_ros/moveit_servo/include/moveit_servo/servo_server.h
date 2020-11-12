@@ -41,6 +41,7 @@
 #pragma once
 
 #include <moveit_servo/servo.h>
+#include <std_srvs/srv/trigger.hpp>
 
 namespace moveit_servo
 {
@@ -51,6 +52,8 @@ public:
 
 private:
   bool init();
+
+  void reset();
 
   rclcpp::TimerBase::SharedPtr initialization_timer_;
 

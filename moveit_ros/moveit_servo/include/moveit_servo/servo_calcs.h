@@ -50,11 +50,11 @@
 #include <moveit_msgs/srv/change_drift_dimensions.hpp>
 #include <moveit_msgs/srv/change_control_dimensions.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <std_msgs/msg/int8.hpp>
-#include <std_srvs/srv/empty.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
-#include <std_msgs/msg/tf2_eigen.hpp>
+#include <std_msgs/msg/int8.hpp>
+#include <std_srvs/srv/empty.hpp>
+#include <tf2_eigen/tf2_eigen.h>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 // moveit_servo
@@ -72,14 +72,11 @@ public:
 
   ~ServoCalcs()
   {
-    timer_.stop();
+    timer_->cancel();
   }
 
   /** \brief Start the timer where we do work and publish outputs */
   void start();
-
-  /** \brief Returns when a joint state message has been received, and start() may be called */
-  bool waitForInitialized(std::chrono::duration<double> wait_for = std::chrono::duration<double>(0.25));
 
   /**
    * Get the MoveIt planning link transform.
@@ -124,7 +121,7 @@ protected:
   void updateJoints();
 
   /** \brief Finds the worst case stopping time based on accel limits, for collision checking */
-  bool calculateWorstCaseStopTime();
+  void calculateWorstCaseStopTime();
 
   /**
    * Checks a JointJog msg for valid (non-NaN) velocities
@@ -157,16 +154,6 @@ protected:
 
   /** \brief  Scale the delta theta to match joint velocity/acceleration limits */
   void enforceVelLimits(Eigen::ArrayXd& delta_theta);
-
-  /** \brief Enforces the velocity and acceleration limit for one joint delta_theta
-   * @param bound moveit::core::VariableBounds defining the velocity and acceleration limits for a joint
-   * @param vel The current (calculated) velocity of the joint
-   * @param prev_vel The previous (calculated) velocity of the joint
-   * @param accel The current (calculated) acceleration of the joint
-   * @param delta The desired change in joint angle, that will be changed to be within limits
-   */
-  void enforceSingleVelAccelLimit(const moveit::core::VariableBounds& bound, double& vel, const double& prev_vel,
-                                  const double& accel, double& delta);
 
   /** \brief Avoid overshooting joint limits */
   bool enforcePositionLimits();
@@ -292,7 +279,6 @@ protected:
 
   moveit::core::RobotStatePtr current_state_;
 
-  // incoming_joint_state_ is the incoming message. It may contain passive joints or other joints we don't care about.
   // (mutex protected below)
   // internal_joint_state_ is used in servo calculations. It shouldn't be relied on to be accurate.
   // original_joint_state_ is the same as incoming_joint_state_ except it only contains the joints the servo node acts
@@ -343,7 +329,6 @@ protected:
 
   // latest_state_mutex_ is used to protect the state below it
   mutable std::mutex latest_state_mutex_;
-  sensor_msgs::msg::JointState::ConstSharedPtr incoming_joint_state_;
   Eigen::Isometry3d tf_moveit_to_robot_cmd_frame_;
   Eigen::Isometry3d tf_moveit_to_ee_frame_;
   geometry_msgs::msg::TwistStamped::ConstSharedPtr latest_twist_stamped_;

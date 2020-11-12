@@ -71,7 +71,7 @@ public:
 
   ~CollisionCheck()
   {
-    timer_.stop();
+    timer_->cancel();
   }
 
   /** \brief start the Timer that regulates collision check rate */
@@ -89,9 +89,6 @@ private:
 
   /** \brief Callback for collision stopping time, from the thread that is aware of velocity and acceleration */
   void worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg);
-
-  /** \brief Callback for joint state msgs */
-  void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
 
   // Pointer to the ROS node
   const std::shared_ptr<rclcpp::Node> node_;
@@ -134,7 +131,6 @@ private:
   // ROS
   rclcpp::TimerBase::SharedPtr timer_;
   double period_;  // The loop period, in seconds
-  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_sub_;
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr collision_velocity_scale_pub_;
   rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr worst_case_stop_time_sub_;
 

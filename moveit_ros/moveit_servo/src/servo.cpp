@@ -54,11 +54,11 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, ServoParametersPtr parameters,
   // Confirm the planning scene monitor is ready to be used
   if (!planning_scene_monitor_->getStateMonitor())
   {
-    planning_scene_monitor_->startStateMonitor(parameters_.joint_topic);
+    planning_scene_monitor_->startStateMonitor(parameters_->joint_topic);
   }
   planning_scene_monitor->getStateMonitor()->enableCopyDynamics(true);
 
-  if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState(parameters_.move_group_name,
+  if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState(parameters_->move_group_name,
                                                                         ROBOT_STATE_WAIT_TIME))
   {
     RCLCPP_FATAL(LOGGER, "Timeout waiting for current state");
@@ -91,11 +91,6 @@ void Servo::setPaused(bool paused)
 {
   servo_calcs_->setPaused(paused);
   collision_checker_->setPaused(paused);
-}
-
-bool Servo::waitForInitialized(std::chrono::duration<double> wait_for)
-{
-  return servo_calcs_->waitForInitialized(wait_for);
 }
 
 bool Servo::getCommandFrameTransform(Eigen::Isometry3d& transform)

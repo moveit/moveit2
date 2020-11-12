@@ -77,6 +77,7 @@ FriendServoCalcs::FriendServoCalcs(const rclcpp::Node::SharedPtr& node,
 ServoCalcsTestFixture::ServoCalcsTestFixture() : node_(TEST_NODE)
 {
   servo_calcs_ = std::make_unique<FriendServoCalcs>(node_, TEST_PARAMS, TEST_PSM);
+  servo_calcs_->start();
 }
 
 sensor_msgs::msg::JointState ServoCalcsTestFixture::getJointState(std::vector<double> pos, std::vector<double> vel)
@@ -313,33 +314,33 @@ TEST_F(ServoCalcsTestFixture, TestEnforcePosLimits)
   // Set the position in the ServoCalcs object
   sensor_msgs::msg::JointState joint_state = getJointState(position, velocity);
   servo_calcs_->original_joint_state_ = joint_state;
-  servo_calcs_->kinematic_state_->setVariableValues(joint_state);
+  servo_calcs_->current_state_->setVariableValues(joint_state);
 
   // Test here, expecting to be violating joint position limits
-  EXPECT_FALSE(servo_calcs_->enforceSRDFPositionLimits());
+  EXPECT_FALSE(servo_calcs_->enforcePositionLimits());
 
   // At the upper limits with negative velocity, we should not be 'violating'
   velocity.assign(9, -1.0);
   joint_state = getJointState(position, velocity);
   servo_calcs_->original_joint_state_ = joint_state;
-  servo_calcs_->kinematic_state_->setVariableValues(joint_state);
-  EXPECT_TRUE(servo_calcs_->enforceSRDFPositionLimits());
+  servo_calcs_->current_state_->setVariableValues(joint_state);
+  EXPECT_TRUE(servo_calcs_->enforcePositionLimits());
 
   // However, if we change 1 of the joints to the bottom limit and stay negative velocity
   // We expect to violate joint position limits again
   position[2] = -2.8973;
   joint_state = getJointState(position, velocity);
   servo_calcs_->original_joint_state_ = joint_state;
-  servo_calcs_->kinematic_state_->setVariableValues(joint_state);
-  EXPECT_FALSE(servo_calcs_->enforceSRDFPositionLimits());
+  servo_calcs_->current_state_->setVariableValues(joint_state);
+  EXPECT_FALSE(servo_calcs_->enforcePositionLimits());
 
   // For completeness, we'll set the position to lower limits with positive vel and expect a pass
   std::vector<double> lower_position{ 0, 0, -2.8973, -1.7628, -2.8973, -3.0718, -2.8973, -0.0175, -2.8973 };
   velocity.assign(9, 1.0);
   joint_state = getJointState(lower_position, velocity);
   servo_calcs_->original_joint_state_ = joint_state;
-  servo_calcs_->kinematic_state_->setVariableValues(joint_state);
-  EXPECT_TRUE(servo_calcs_->enforceSRDFPositionLimits());
+  servo_calcs_->current_state_->setVariableValues(joint_state);
+  EXPECT_TRUE(servo_calcs_->enforcePositionLimits());
 }
 
 TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
@@ -356,7 +357,7 @@ TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
   servo_calcs_->prev_joint_velocity_ = desired_velocity;
 
   // Do the enforcing and check it
-  servo_calcs_->enforceSRDFAccelVelLimits(desired_velocity);
+  servo_calcs_->enforceVelLimits(desired_velocity);
   for (size_t i = 0; i < 7; ++i)
   {
     // We need to check vs radians-per-loop allowable rate (not rad/s)
@@ -366,7 +367,7 @@ TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
   // Let's check the negative velocities too
   desired_velocity *= -1;
   servo_calcs_->prev_joint_velocity_ = desired_velocity;
-  servo_calcs_->enforceSRDFAccelVelLimits(desired_velocity);
+  servo_calcs_->enforceVelLimits(desired_velocity);
   for (size_t i = 0; i < 7; ++i)
   {
     // We need to check vs radians-per-loop allowable rate (not rad/s)
@@ -374,47 +375,50 @@ TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
   }
 }
 
-TEST_F(ServoCalcsTestFixture, TestEnforceAccelLimits)
-{
-  // The panda URDF defines no accel limits
-  // So we get the bound from joint_model_group_ and modify it
-  auto joint_model = servo_calcs_->joint_model_group_->getActiveJointModels()[3];
-  auto bounds = joint_model->getVariableBounds(joint_model->getName());
-  bounds.acceleration_bounded_ = true;
-  bounds.min_acceleration_ = -3;
-  bounds.max_acceleration_ = 3;
-
-  // Pick previous_velocity and desired_velocity to violate limits
-  double previous_velocity = -2;  // rad/s & within velocity limits
-  double desired_velocity = 2;    // rad/s & within velocity limits
-
-  // From those, calculate desired delta_theta and current acceleration
-  double delta_theta = desired_velocity * servo_calcs_->parameters_->publish_period;                         // rad
-  double acceleration = (desired_velocity - previous_velocity) / servo_calcs_->parameters_->publish_period;  // rad/s^2
-
-  // Enforce the bounds
-  double init_delta_theta = delta_theta;
-  servo_calcs_->enforceSingleVelAccelLimit(bounds, desired_velocity, previous_velocity, acceleration, delta_theta);
-
-  // The delta_theta should have dropped to be within the limit
-  EXPECT_LT(delta_theta, init_delta_theta);
-
-  // In fact we can calculate the maximum delta_theta at the limit as:
-  // delta_limit = delta_t * (accel_lim * delta_t _ + vel_prev)
-  double delta_at_limit = servo_calcs_->parameters_->publish_period *
-                          (previous_velocity + bounds.max_acceleration_ * servo_calcs_->parameters_->publish_period);
-  EXPECT_EQ(delta_theta, delta_at_limit);
-
-  // Let's test again, but with only a small change in velocity
-  desired_velocity = -1.9;
-  delta_theta = desired_velocity * servo_calcs_->parameters_->publish_period;                         // rad
-  acceleration = (desired_velocity - previous_velocity) / servo_calcs_->parameters_->publish_period;  // rad/s^2
-  init_delta_theta = delta_theta;
-  servo_calcs_->enforceSingleVelAccelLimit(bounds, desired_velocity, previous_velocity, acceleration, delta_theta);
-
-  // Now, the delta_theta should not have changed
-  EXPECT_EQ(delta_theta, init_delta_theta);
-}
+// TODO(henningkayser): re-enable acceleration limit enforcement
+// The accel/vel limit enforcement has been refactored, enforceSingleVelAccelLimit() was removed
+// since all values need to be scaled by the lowest bound
+// TEST_F(ServoCalcsTestFixture, TestEnforceAccelLimits)
+// {
+//   // The panda URDF defines no accel limits
+//   // So we get the bound from joint_model_group_ and modify it
+//   auto joint_model = servo_calcs_->joint_model_group_->getActiveJointModels()[3];
+//   auto bounds = joint_model->getVariableBounds(joint_model->getName());
+//   bounds.acceleration_bounded_ = true;
+//   bounds.min_acceleration_ = -3;
+//   bounds.max_acceleration_ = 3;
+//
+//   // Pick previous_velocity and desired_velocity to violate limits
+//   double previous_velocity = -2;  // rad/s & within velocity limits
+//   double desired_velocity = 2;    // rad/s & within velocity limits
+//
+//   // From those, calculate desired delta_theta and current acceleration
+//   double delta_theta = desired_velocity * servo_calcs_->parameters_->publish_period;                         // rad
+//   double acceleration = (desired_velocity - previous_velocity) / servo_calcs_->parameters_->publish_period;  // rad/s^2
+//
+//   // Enforce the bounds
+//   double init_delta_theta = delta_theta;
+//   servo_calcs_->enforceSingleVelAccelLimit(bounds, desired_velocity, previous_velocity, acceleration, delta_theta);
+//
+//   // The delta_theta should have dropped to be within the limit
+//   EXPECT_LT(delta_theta, init_delta_theta);
+//
+//   // In fact we can calculate the maximum delta_theta at the limit as:
+//   // delta_limit = delta_t * (accel_lim * delta_t _ + vel_prev)
+//   double delta_at_limit = servo_calcs_->parameters_->publish_period *
+//                           (previous_velocity + bounds.max_acceleration_ * servo_calcs_->parameters_->publish_period);
+//   EXPECT_EQ(delta_theta, delta_at_limit);
+//
+//   // Let's test again, but with only a small change in velocity
+//   desired_velocity = -1.9;
+//   delta_theta = desired_velocity * servo_calcs_->parameters_->publish_period;                         // rad
+//   acceleration = (desired_velocity - previous_velocity) / servo_calcs_->parameters_->publish_period;  // rad/s^2
+//   init_delta_theta = delta_theta;
+//   servo_calcs_->enforceSingleVelAccelLimit(bounds, desired_velocity, previous_velocity, acceleration, delta_theta);
+//
+//   // Now, the delta_theta should not have changed
+//   EXPECT_EQ(delta_theta, init_delta_theta);
+// }
 
 TEST_F(ServoCalcsTestFixture, TestScaleCartesianCommand)
 {
@@ -486,7 +490,7 @@ TEST_F(ServoCalcsTestFixture, TestComposeOutputMsg)
   servo_calcs_->composeJointTrajMessage(joint_state, traj);
 
   // Check the header info
-  EXPECT_FALSE(traj.header.stamp == rclcpp::Time(0.));  // Time should be set
+  EXPECT_TRUE(traj.header.stamp == rclcpp::Time(0));  // Time should be set
   EXPECT_EQ(traj.header.frame_id, servo_calcs_->parameters_->planning_frame);
   EXPECT_EQ(traj.joint_names[0], "some_joint");
 
@@ -519,6 +523,8 @@ int main(int argc, char** argv)
   TEST_TF_BUFFER = std::make_shared<tf2_ros::Buffer>(TEST_NODE->get_clock());
   TEST_PSM = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(TEST_NODE, "robot_description",
                                                                             TEST_TF_BUFFER, "planning_scene_monitor");
+  // Initialize CurrentStateMonitor
+  TEST_PSM->startStateMonitor();
 
   // Get moveit parameters
   TEST_PARAMS = getTestParameters();

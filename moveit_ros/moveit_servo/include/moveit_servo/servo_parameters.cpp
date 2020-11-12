@@ -48,12 +48,15 @@
 namespace moveit_servo
 {
 template <typename T>
-void declareAndGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
-                        const rclcpp::Logger& logger)
+void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
+                       const rclcpp::Logger& logger)
 {
   try
   {
-    output_value = node->declare_parameter<T>(param_name, T{});
+    if (node->has_parameter(param_name))
+      node->get_parameter<T>(param_name, output_value);
+    else
+      output_value = node->declare_parameter<T>(param_name, T{});
   }
   catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
   {
@@ -69,6 +72,7 @@ void declareAndGetParam(T& output_value, const std::string& param_name, const rc
       throw e;
     }
   }
+  RCLCPP_INFO_STREAM(logger, "Found parameter - " << param_name << ": " << output_value);
 }
 
 /**
@@ -86,58 +90,59 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
                     std::string ns = "moveit_servo")
 {
   // Get the parameters (organized same order as YAML file)
-  declareAndGetParam<bool>(parameters->use_gazebo, ns + ".use_gazebo", node, logger);
-  declareAndGetParam<std::string>(parameters->status_topic, ns + ".status_topic", node, logger);
+  declareOrGetParam<bool>(parameters->use_gazebo, ns + ".use_gazebo", node, logger);
+  declareOrGetParam<std::string>(parameters->status_topic, ns + ".status_topic", node, logger);
 
   // Properties of incoming commands
-  declareAndGetParam<std::string>(parameters->cartesian_command_in_topic, ns + ".cartesian_command_in_topic", node,
-                                  logger);
-  declareAndGetParam<std::string>(parameters->joint_command_in_topic, ns + ".joint_command_in_topic", node, logger);
-  declareAndGetParam<std::string>(parameters->robot_link_command_frame, ns + ".robot_link_command_frame", node, logger);
-  declareAndGetParam<std::string>(parameters->command_in_type, ns + ".command_in_type", node, logger);
-  declareAndGetParam<double>(parameters->linear_scale, ns + ".scale.linear", node, logger);
-  declareAndGetParam<double>(parameters->rotational_scale, ns + ".scale.rotational", node, logger);
-  declareAndGetParam<double>(parameters->joint_scale, ns + ".scale.joint", node, logger);
+  declareOrGetParam<std::string>(parameters->cartesian_command_in_topic, ns + ".cartesian_command_in_topic", node,
+                                 logger);
+  declareOrGetParam<std::string>(parameters->joint_command_in_topic, ns + ".joint_command_in_topic", node, logger);
+  declareOrGetParam<std::string>(parameters->robot_link_command_frame, ns + ".robot_link_command_frame", node, logger);
+  declareOrGetParam<std::string>(parameters->command_in_type, ns + ".command_in_type", node, logger);
+  declareOrGetParam<double>(parameters->linear_scale, ns + ".scale.linear", node, logger);
+  declareOrGetParam<double>(parameters->rotational_scale, ns + ".scale.rotational", node, logger);
+  declareOrGetParam<double>(parameters->joint_scale, ns + ".scale.joint", node, logger);
 
   // Properties of outgoing commands
-  declareAndGetParam<std::string>(parameters->command_out_topic, ns + ".command_out_topic", node, logger);
-  declareAndGetParam<double>(parameters->publish_period, ns + ".publish_period", node, logger);
-  declareAndGetParam<std::string>(parameters->command_out_type, ns + ".command_out_type", node, logger);
-  declareAndGetParam<bool>(parameters->publish_joint_positions, ns + ".publish_joint_positions", node, logger);
-  declareAndGetParam<bool>(parameters->publish_joint_velocities, ns + ".publish_joint_velocities", node, logger);
-  declareAndGetParam<bool>(parameters->publish_joint_accelerations, ns + ".publish_joint_accelerations", node, logger);
+  declareOrGetParam<std::string>(parameters->command_out_topic, ns + ".command_out_topic", node, logger);
+  declareOrGetParam<double>(parameters->publish_period, ns + ".publish_period", node, logger);
+  declareOrGetParam<std::string>(parameters->command_out_type, ns + ".command_out_type", node, logger);
+  declareOrGetParam<bool>(parameters->publish_joint_positions, ns + ".publish_joint_positions", node, logger);
+  declareOrGetParam<bool>(parameters->publish_joint_velocities, ns + ".publish_joint_velocities", node, logger);
+  declareOrGetParam<bool>(parameters->publish_joint_accelerations, ns + ".publish_joint_accelerations", node, logger);
 
   // Incoming Joint State properties
-  declareAndGetParam<std::string>(parameters->joint_topic, ns + ".joint_topic", node, logger);
-  declareAndGetParam<double>(parameters->low_pass_filter_coeff, ns + ".low_pass_filter_coeff", node, logger);
+  declareOrGetParam<std::string>(parameters->joint_topic, ns + ".joint_topic", node, logger);
+  declareOrGetParam<double>(parameters->low_pass_filter_coeff, ns + ".low_pass_filter_coeff", node, logger);
 
   // MoveIt properties
-  declareAndGetParam<std::string>(parameters->move_group_name, ns + ".move_group_name", node, logger);
-  declareAndGetParam<std::string>(parameters->planning_frame, ns + ".planning_frame", node, logger);
+  declareOrGetParam<std::string>(parameters->move_group_name, ns + ".move_group_name", node, logger);
+  declareOrGetParam<std::string>(parameters->planning_frame, ns + ".planning_frame", node, logger);
+  declareOrGetParam<std::string>(parameters->ee_frame_name, ns + ".ee_frame_name", node, logger);
 
   // Stopping behaviour
-  declareAndGetParam<double>(parameters->incoming_command_timeout, ns + ".incoming_command_timeout", node, logger);
-  declareAndGetParam<int>(parameters->num_outgoing_halt_msgs_to_publish, ns + ".num_outgoing_halt_msgs_to_publish",
-                          node, logger);
+  declareOrGetParam<double>(parameters->incoming_command_timeout, ns + ".incoming_command_timeout", node, logger);
+  declareOrGetParam<int>(parameters->num_outgoing_halt_msgs_to_publish, ns + ".num_outgoing_halt_msgs_to_publish", node,
+                         logger);
 
   // Configure handling of singularities and joint limits
-  declareAndGetParam<double>(parameters->lower_singularity_threshold, ns + ".lower_singularity_threshold", node, logger);
-  declareAndGetParam<double>(parameters->hard_stop_singularity_threshold, ns + ".hard_stop_singularity_threshold", node,
-                             logger);
-  declareAndGetParam<double>(parameters->joint_limit_margin, ns + ".joint_limit_margin", node, logger);
+  declareOrGetParam<double>(parameters->lower_singularity_threshold, ns + ".lower_singularity_threshold", node, logger);
+  declareOrGetParam<double>(parameters->hard_stop_singularity_threshold, ns + ".hard_stop_singularity_threshold", node,
+                            logger);
+  declareOrGetParam<double>(parameters->joint_limit_margin, ns + ".joint_limit_margin", node, logger);
 
   // Collision checking
-  declareAndGetParam<bool>(parameters->check_collisions, ns + ".check_collisions", node, logger);
-  declareAndGetParam<double>(parameters->collision_check_rate, ns + ".collision_check_rate", node, logger);
-  declareAndGetParam<std::string>(parameters->collision_check_type, ns + ".collision_check_type", node, logger);
-  declareAndGetParam<double>(parameters->self_collision_proximity_threshold, ns + ".self_collision_proximity_threshold",
-                             node, logger);
-  declareAndGetParam<double>(parameters->scene_collision_proximity_threshold,
-                             ns + ".scene_collision_proximity_threshold", node, logger);
-  declareAndGetParam<double>(parameters->collision_distance_safety_factor, ns + ".collision_distance_safety_factor",
-                             node, logger);
-  declareAndGetParam<double>(parameters->min_allowable_collision_distance, ns + ".min_allowable_collision_distance",
-                             node, logger);
+  declareOrGetParam<bool>(parameters->check_collisions, ns + ".check_collisions", node, logger);
+  declareOrGetParam<double>(parameters->collision_check_rate, ns + ".collision_check_rate", node, logger);
+  declareOrGetParam<std::string>(parameters->collision_check_type, ns + ".collision_check_type", node, logger);
+  declareOrGetParam<double>(parameters->self_collision_proximity_threshold, ns + ".self_collision_proximity_threshold",
+                            node, logger);
+  declareOrGetParam<double>(parameters->scene_collision_proximity_threshold,
+                            ns + ".scene_collision_proximity_threshold", node, logger);
+  declareOrGetParam<double>(parameters->collision_distance_safety_factor, ns + ".collision_distance_safety_factor",
+                            node, logger);
+  declareOrGetParam<double>(parameters->min_allowable_collision_distance, ns + ".min_allowable_collision_distance",
+                            node, logger);
 
   // Begin input checking
   if (parameters->publish_period <= 0.)

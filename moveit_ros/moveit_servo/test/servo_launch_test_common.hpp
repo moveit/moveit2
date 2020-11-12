@@ -87,12 +87,14 @@ public:
     , PUBLISH_PERIOD(1.0 / PUBLISH_HZ)
     , TIMEOUT_ITERATIONS(10 * PUBLISH_HZ)
     , publish_loop_rate_(PUBLISH_HZ)
+    , servo_server_node_name_("/servo_server")
   {
     // Init ROS interfaces
     // Publishers
-    pub_twist_cmd_ =
-        node_->create_publisher<geometry_msgs::msg::TwistStamped>(parameters_->cartesian_command_in_topic, 10);
-    pub_joint_cmd_ = node_->create_publisher<control_msgs::msg::JointJog>(parameters_->joint_command_in_topic, 10);
+    pub_twist_cmd_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
+        resolveServoTopicName(parameters_->cartesian_command_in_topic), 10);
+    pub_joint_cmd_ = node_->create_publisher<control_msgs::msg::JointJog>(
+        resolveServoTopicName(parameters_->joint_command_in_topic), 10);
   }
 
   void TearDown() override
@@ -108,11 +110,19 @@ public:
       executor_thread_.join();
   }
 
+  std::string resolveServoTopicName(std::string topic_name) const
+  {
+    if (topic_name.at(0) == '~')
+      return topic_name.replace(0, 1, servo_server_node_name_);
+    else
+      return topic_name;
+  }
+
   // Set up for callbacks (so they aren't run for EVERY test)
   bool setupStartClient()
   {
     // Start client
-    client_servo_start_ = node_->create_client<std_srvs::srv::Trigger>("/start_servo");
+    client_servo_start_ = node_->create_client<std_srvs::srv::Trigger>(resolveServoTopicName("~/start_servo"));
     while (!client_servo_start_->service_is_ready())
     {
       if (!rclcpp::ok())
@@ -125,7 +135,7 @@ public:
     }
 
     // If we setup the start client, also setup the stop client...
-    client_servo_stop_ = node_->create_client<std_srvs::srv::Trigger>("/stop_servo");
+    client_servo_stop_ = node_->create_client<std_srvs::srv::Trigger>(resolveServoTopicName("~/stop_servo"));
     while (!client_servo_stop_->service_is_ready())
     {
       if (!rclcpp::ok())
@@ -139,13 +149,14 @@ public:
 
     // Status sub (we need this to check that we've started / stopped)
     sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
-        "/" + parameters_->status_topic, 10, std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
+        resolveServoTopicName(parameters_->status_topic), 10,
+        std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
     return true;
   }
 
   bool setupPauseClient()
   {
-    client_servo_pause_ = node_->create_client<std_srvs::srv::Trigger>("/pause_servo");
+    client_servo_pause_ = node_->create_client<std_srvs::srv::Trigger>(resolveServoTopicName("~/pause_servo"));
     while (!client_servo_pause_->service_is_ready())
     {
       if (!rclcpp::ok())
@@ -161,7 +172,7 @@ public:
 
   bool setupUnpauseClient()
   {
-    client_servo_unpause_ = node_->create_client<std_srvs::srv::Trigger>("/unpause_servo");
+    client_servo_unpause_ = node_->create_client<std_srvs::srv::Trigger>(resolveServoTopicName("~/unpause_servo"));
     while (!client_servo_unpause_->service_is_ready())
     {
       if (!rclcpp::ok())
@@ -177,8 +188,8 @@ public:
 
   bool setupControlDimsClient()
   {
-    client_change_control_dims_ =
-        node_->create_client<moveit_msgs::srv::ChangeControlDimensions>("/servo_server/change_control_dimensions");
+    client_change_control_dims_ = node_->create_client<moveit_msgs::srv::ChangeControlDimensions>(
+        resolveServoTopicName("~/change_control_dimensions"));
     while (!client_change_control_dims_->service_is_ready())
     {
       if (!rclcpp::ok())
@@ -194,8 +205,8 @@ public:
 
   bool setupDriftDimsClient()
   {
-    client_change_drift_dims_ =
-        node_->create_client<moveit_msgs::srv::ChangeDriftDimensions>("/servo_server/change_drift_dimensions");
+    client_change_drift_dims_ = node_->create_client<moveit_msgs::srv::ChangeDriftDimensions>(
+        resolveServoTopicName("~/change_drift_dimensions"));
     while (!client_change_drift_dims_->service_is_ready())
     {
       if (!rclcpp::ok())
@@ -212,7 +223,7 @@ public:
   bool setupCollisionScaleSub()
   {
     sub_collision_scale_ = node_->create_subscription<std_msgs::msg::Float64>(
-        "collision_velocity_scale", ROS_QUEUE_SIZE,
+        resolveServoTopicName("~/collision_velocity_scale"), ROS_QUEUE_SIZE,
         std::bind(&ServoFixture::collisionScaleCB, this, std::placeholders::_1));
     return true;
   }
@@ -222,14 +233,15 @@ public:
     if (command_type == "trajectory_msgs/JointTrajectory")
     {
       sub_trajectory_cmd_output_ = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-          parameters_->command_out_topic, 10,
+          resolveServoTopicName(parameters_->command_out_topic), 10,
           std::bind(&ServoFixture::trajectoryCommandCB, this, std::placeholders::_1));
       return true;
     }
     else if (command_type == "std_msgs/Float64MultiArray")
     {
       sub_array_cmd_output_ = node_->create_subscription<std_msgs::msg::Float64MultiArray>(
-          parameters_->command_out_topic, 10, std::bind(&ServoFixture::arrayCommandCB, this, std::placeholders::_1));
+          resolveServoTopicName(parameters_->command_out_topic), 10,
+          std::bind(&ServoFixture::arrayCommandCB, this, std::placeholders::_1));
       return true;
     }
     else
@@ -242,7 +254,8 @@ public:
   bool setupJointStateSub()
   {
     sub_joint_state_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-        parameters_->joint_topic, 10, std::bind(&ServoFixture::jointStateCB, this, std::placeholders::_1));
+        resolveServoTopicName(parameters_->joint_topic), 10,
+        std::bind(&ServoFixture::jointStateCB, this, std::placeholders::_1));
     return true;
   }
 
@@ -485,6 +498,7 @@ protected:
   const double PUBLISH_PERIOD;
   const double TIMEOUT_ITERATIONS;
   rclcpp::Rate publish_loop_rate_;
+  const std::string servo_server_node_name_;
 
   mutable std::mutex latest_state_mutex_;
 };  // class ServoFixture
