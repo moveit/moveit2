@@ -42,31 +42,30 @@ def generate_test_description():
     kinematics_yaml = load_yaml('moveit_resources_panda_moveit_config', 'config/kinematics.yaml')
     robot_description_kinematics = { 'robot_description_kinematics' : kinematics_yaml }
     test_param = load_yaml('moveit_kinematics', 'config/panda-kdl-test.yaml')
-    test_node = Node(package='moveit_kinematics',
+
+    private_params = {
+        'seed': [-0.5, -0.5, 0.3, -2, 0.8, 1.8, 1.9],
+        'consistency_limits': [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
+    }
+    panda_kdl = Node(package='moveit_kinematics',
                      executable='test_kinematics_plugin',
-                     name='test_kinmatics_plugin',
+                     name='panda_kdl',
                      parameters=[robot_description,
                                  robot_description_semantic,
                                  robot_description_kinematics,
-                                 test_param
-                                 ]
+                                 test_param,
+                                 private_params,
+                                 ],
+                     output='screen'
     )
+
     return LaunchDescription([
-        test_node,
+        panda_kdl,
         launch_testing.actions.ReadyToTest(),
-    ]), {'test_node': test_node}
-
-# Workaround for https://github.com/ros2/launch/issues/380
-#TODO Remove workaround once its fixed
-class TestLoggingOutputFormat(unittest.TestCase):
-
-    def test_logging_output(self, proc_info, proc_output, test_node):
-        proc_info.assertWaitForShutdown(process=test_node, timeout=10.0)
-
+    ])
 
 @launch_testing.post_shutdown_test()
 class TestOutcome(unittest.TestCase):
 
     def test_exit_codes(self, proc_info):
         launch_testing.asserts.assertExitCodes(proc_info)
-
