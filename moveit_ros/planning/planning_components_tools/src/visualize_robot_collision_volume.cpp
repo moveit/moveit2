@@ -36,7 +36,6 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <tf2_ros/transform_listener.h>
 #include <memory>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
@@ -52,8 +51,6 @@ int main(int argc, char** argv)
   double lifetime = 600.0;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(node->get_clock());
-  std::shared_ptr<tf2_ros::TransformListener> tf_listener =
-      std::make_shared<tf2_ros::TransformListener>(*tf_buffer, node);
   planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION, tf_buffer);
   if (psm.getPlanningScene())
   {

@@ -44,7 +44,6 @@
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <tf2_ros/transform_listener.h>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
@@ -147,8 +146,6 @@ int main(int argc, char** argv)
 
   rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
   std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(clock);
-  std::shared_ptr<tf2_ros::TransformListener> tf_listener =
-      std::make_shared<tf2_ros::TransformListener>(*tf_buffer, node);
   planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION, tf_buffer);
   if (!psm.getPlanningScene())
   {
