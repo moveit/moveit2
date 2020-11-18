@@ -46,6 +46,8 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
+#include <tf2_msgs/msg/tf_message.hpp>
+
 #include <tf2_ros/buffer.h>
 
 #include <moveit/robot_state/robot_state.h>
@@ -58,8 +60,6 @@ using JointStateUpdateCallback = std::function<void(sensor_msgs::msg::JointState
     @brief Monitors the joint_states topic and tf to maintain the current state of the robot. */
 class CurrentStateMonitor
 {
-  using TFConnection = boost::signals2::connection;
-
 public:
   /**
    * @brief      Dependency injection class for testing the CurrentStateMonitor
@@ -86,6 +86,22 @@ public:
      * @param[in]  callback  The callback
      */
     virtual void createJointStateSubscription(const std::string& topic, JointStateUpdateCallback callback) = 0;
+
+    /**
+     * @brief      Creates a static transform message subscription
+     *
+     * @param[in]  callback  The callback
+     */
+    virtual void
+    createStaticTfSubscription(std::function<void(const tf2_msgs::msg::TFMessage::ConstSharedPtr)> callback) = 0;
+
+    /**
+     * @brief      Creates a dynamic transform message subscription
+     *
+     * @param[in]  callback  The callback
+     */
+    virtual void
+    createDynamicTfSubscription(std::function<void(const tf2_msgs::msg::TFMessage::ConstSharedPtr)> callback) = 0;
 
     /**
      * @brief      Reset the joint state subscription
@@ -277,9 +293,9 @@ public:
 private:
   bool haveCompleteStateHelper(const rclcpp::Time& oldest_allowed_update_time,
                                std::vector<std::string>* missing_joints) const;
-
   void jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
-  void tfCallback();
+  void updateMultiDofJoints();
+  void transfromCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, bool is_static);
 
   std::unique_ptr<MiddlewareHandle> middleware_handle_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -290,13 +306,16 @@ private:
   bool copy_dynamics_;  // Copy velocity and effort from joint_state
   rclcpp::Time monitor_start_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
   double error_;
+
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
+  rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr transform_subscriber_;
+  rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr static_transfrom_subscriber_;
+
   rclcpp::Time current_state_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
   mutable std::mutex state_update_lock_;
   mutable std::condition_variable state_update_condition_;
   std::vector<JointStateUpdateCallback> update_callbacks_;
-
-  std::shared_ptr<TFConnection> tf_connection_;
 };
 
 MOVEIT_CLASS_FORWARD(CurrentStateMonitor);  // Defines CurrentStateMonitorPtr, ConstPtr, WeakPtr... etc

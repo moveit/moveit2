@@ -159,10 +159,10 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
     }
     if (tf_buffer_ && !robot_model_->getMultiDOFJointModels().empty())
     {
-      // TODO (anasarrak): replace this for the appropiate function, there is no similar
-      // function in ros2/geometry2.
-      // tf_connection_.reset(new TFConnection(
-      //     tf_buffer_->_addTransformsChangedListener(std::bind(&CurrentStateMonitor::tfCallback, this))));
+      middleware_handle_->createDynamicTfSubscription(
+          std::bind(&CurrentStateMonitor::transfromCallback, this, std::placeholders::_1, false));
+      middleware_handle_->createStaticTfSubscription(
+          std::bind(&CurrentStateMonitor::transfromCallback, this, std::placeholders::_1, true));
     }
     state_monitor_started_ = true;
     monitor_start_time_ = middleware_handle_->now();
@@ -180,12 +180,10 @@ void CurrentStateMonitor::stopStateMonitor()
   if (state_monitor_started_)
   {
     middleware_handle_->resetJointStateSubscription();
-    if (tf_buffer_ && tf_connection_)
+    if (tf_buffer_)
     {
-      // TODO (anasarrak): replace this for the appropiate function, there is no similar
-      // function in ros2/geometry2.
-      // tf_buffer_->_removeTransformsChangedListener(*tf_connection_);
-      tf_connection_.reset();
+      transform_subscriber_.reset();
+      static_transfrom_subscriber_.reset();
     }
     RCLCPP_DEBUG(LOGGER, "No longer listening for joint states");
     state_monitor_started_ = false;
@@ -315,7 +313,15 @@ void CurrentStateMonitor::jointStateCallback(sensor_msgs::msg::JointState::Const
       if (jm->getVariableCount() != 1)
         continue;
 
-      joint_time_[jm] = joint_state->header.stamp;
+      // TODO(JafarAbdi): Replace with insert_or_assign once we have C++17 support
+      auto joint_time_it = joint_time_.find(jm);
+      if (joint_time_it != joint_time_.end())
+      {
+        // key already exists, perform assignment.
+        joint_time_it->second = joint_state->header.stamp;
+      }
+      else
+        joint_time_.emplace(jm, rclcpp::Time(0, 0, RCL_ROS_TIME));
 
       if (robot_state_.getJointPositions(jm)[0] != joint_state->position[i])
       {
@@ -369,7 +375,7 @@ void CurrentStateMonitor::jointStateCallback(sensor_msgs::msg::JointState::Const
   state_update_condition_.notify_all();
 }
 
-void CurrentStateMonitor::tfCallback()
+void CurrentStateMonitor::updateMultiDofJoints()
 {
   // read multi-dof joint states from TF, if needed
   const std::vector<const moveit::core::JointModel*>& multi_dof_joints = robot_model_->getMultiDOFJointModels();
@@ -384,7 +390,7 @@ void CurrentStateMonitor::tfCallback()
       const std::string& parent_frame =
           joint->getParentLinkModel() ? joint->getParentLinkModel()->getName() : robot_model_->getModelFrame();
 
-      rclcpp::Time latest_common_time;
+      rclcpp::Time latest_common_time = rclcpp::Time(0, 0, RCL_ROS_TIME);
       geometry_msgs::msg::TransformStamped transf;
       try
       {
@@ -401,8 +407,13 @@ void CurrentStateMonitor::tfCallback()
         continue;
       }
 
+      // TODO(JafarAbdi): Replace with insert_or_assign once we have C++17 support
+      auto joint_time_it = joint_time_.find(joint);
+      if (joint_time_it == joint_time_.end())
+        joint_time_.emplace(joint, rclcpp::Time(0, 0, RCL_ROS_TIME));
+
       // allow update if time is more recent or if it is a static transform (time = 0)
-      if (latest_common_time <= joint_time_[joint] && latest_common_time > rclcpp::Time(0))
+      if (latest_common_time <= joint_time_[joint] && latest_common_time > rclcpp::Time(0, 0, RCL_ROS_TIME))
         continue;
       joint_time_[joint] = latest_common_time;
 
@@ -441,4 +452,25 @@ void CurrentStateMonitor::tfCallback()
   }
 }
 
+// Copied from https://github.com/ros2/geometry2/blob/ros2/tf2_ros/src/transform_listener.cpp
+void CurrentStateMonitor::transfromCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static)
+{
+  for (auto i = 0u; i < msg->transforms.size(); i++)
+  {
+    try
+    {
+      tf_buffer_->setTransform(msg->transforms[i],
+                               is_static ? static_transfrom_subscriber_->get_topic_name() :
+                                           transform_subscriber_->get_topic_name(),
+                               is_static);
+    }
+    catch (tf2::TransformException& ex)
+    {
+      std::string temp = ex.what();
+      RCLCPP_ERROR(LOGGER, "Failure to set recieved transform from %s to %s with error: %s\n",
+                   msg->transforms[i].child_frame_id.c_str(), msg->transforms[i].header.frame_id.c_str(), temp.c_str());
+    }
+  }
+  updateMultiDofJoints();
+}
 }  // namespace planning_scene_monitor
