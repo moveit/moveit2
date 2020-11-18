@@ -43,7 +43,7 @@ def generate_test_description():
     test_param = load_yaml('moveit_kinematics', 'config/fanuc-kdl-test.yaml')
 
     private_params = {
-        'seed': [0, -0.32, -0.5, 0, -0.5, 0],
+        'seed': [0.0, -0.32, -0.5, 0.0, -0.5, 0.0],
         'consistency_limits': [0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
     }
 
@@ -51,28 +51,28 @@ def generate_test_description():
         'unit_test_poses':
         {
             'size' : 6,
-            'pose_0': { 'pose':   [0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                        'joints': [0, -0.152627, -0.367847, 0, -0.46478, 0],
+            'pose_0': { 'pose':   [0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        'joints': [0.0, -0.152627, -0.367847, 0.0, -0.46478, 0.0],
                         'type':  'relative'
                       },
-            'pose_1': { 'pose':   [0.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
+            'pose_1': { 'pose':   [0.0, 0.1, 0.0, 0.0, 0.0, 0.0],
                         'joints': [0.1582256, -0.3066389, -0.490349, 0.250946, -0.5159858, -0.319381],
                         'type':   'relative'
                       },
-            'pose_2': { 'pose':   [0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0],
-                        'joints': [0, -0.287588, -0.324304, 0, -0.643285, 0],
+            'pose_2': { 'pose':   [0.0, 0.0, 0.1, 0.0, 0.0, 0.0],
+                        'joints': [0.0, -0.287588, -0.324304, 0.0, -0.643285, 0.0],
                         'type':   'relative'
                       },
-            'pose_3': { 'pose':   [0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            'pose_3': { 'pose':   [0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
                         'joints': [-0.0159181, -0.319276, -0.499953, -0.231014, -0.511806, 0.212341],
                         'type':   'relative'
                       },
-            'pose_4': { 'pose':   [0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                        'joints': [0, -0.331586, -0.520375, 0, -0.391211, 0],
+            'pose_4': { 'pose':   [0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        'joints': [0.0, -0.331586, -0.520375, 0.0, -0.391211, 0.0],
                         'type':   'relative'
                       },
-            'pose_5': { 'pose':   [0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                        'joints': [0, -0.32, -0.5, 0, -0.5, -0.1],
+            'pose_5': { 'pose':   [0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
+                        'joints': [0.0, -0.32, -0.5, 0.0, -0.5, -0.1],
                         'type':   'relative'
                       },
         }
@@ -86,17 +86,17 @@ def generate_test_description():
                                  test_param,
                                  private_params,
                                  unit_tests_poses
-                                 ]
+                                 ],
+                     output='screen'
     )
 
     return LaunchDescription([
         fanuc_kdl,
         launch_testing.actions.ReadyToTest(),
-    ]), {'fanuc_kdl': fanuc_kdl}
+    ])
 
 @launch_testing.post_shutdown_test()
 class TestOutcome(unittest.TestCase):
 
-    def test_exit_codes(self, proc_info, fanuc_kdl):#
-      launch_testing.asserts.assertExitCodes(proc_info, process=fanuc_kdl)
-
+    def test_exit_codes(self, proc_info):
+        launch_testing.asserts.assertExitCodes(proc_info)

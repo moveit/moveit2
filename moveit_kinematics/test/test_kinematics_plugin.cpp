@@ -112,7 +112,7 @@ class SharedData
     node_->get_parameter_or("tip_link", tip_link_, UNDEFINED);
     node_->get_parameter_or("root_link", root_link_, UNDEFINED);
     node_->get_parameter_or("joint_names", joints_, joints_);
-    node_->get_parameter_or("seed", seed_, seed_);
+    node_->get_parameter_or("seed", seed_, {0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
     ASSERT_TRUE(seed_.empty() || seed_.size() == joints_.size()) << "If set, 'seed' size must match 'joint_names' size";
     node_->get_parameter_or("consistency_limits", consistency_limits_, consistency_limits_);
     ASSERT_TRUE(consistency_limits_.empty() || consistency_limits_.size() == joints_.size())
@@ -429,29 +429,22 @@ TEST_F(KinematicsTest, unitIK)
   size_t expected_test_poses = 0;
   node_->get_parameter_or(TEST_POSES_PARAM + ".size", expected_test_poses, expected_test_poses);
 
-  // if (expected_test_poses == 0)
-  //   return;
-
-  std::vector<double> seed, sol;
+  std::vector<double> sol;
   const std::vector<std::string>& tip_frames = kinematics_solver_->getTipFrames();
   moveit::core::RobotState robot_state(robot_model_);
   robot_state.setToDefaultValues();
-
-  // initial joint pose from seed_ or defaults
-  if (!seed_.empty())
-    robot_state.setJointGroupPositions(jmg_, seed_);
-  robot_state.copyJointGroupPositions(jmg_, seed);
+  robot_state.setJointGroupPositions(jmg_, seed_);
 
   // compute initial end-effector pose
   std::vector<geometry_msgs::msg::Pose> poses;
-  ASSERT_TRUE(kinematics_solver_->getPositionFK(tip_frames, seed, poses));
+  ASSERT_TRUE(kinematics_solver_->getPositionFK(tip_frames, seed_, poses));
   Eigen::Isometry3d initial, goal;
   tf2::fromMsg(poses[0], initial);
 
   auto validate_ik = [&](const geometry_msgs::msg::Pose& goal, std::vector<double>& truth) {
     // compute IK
     moveit_msgs::msg::MoveItErrorCodes error_code;
-    kinematics_solver_->searchPositionIK(goal, seed, timeout_,
+    kinematics_solver_->searchPositionIK(goal, seed_, timeout_,
                                          const_cast<const std::vector<double>&>(consistency_limits_), sol, error_code);
     ASSERT_EQ(error_code.val, error_code.SUCCESS);
 
