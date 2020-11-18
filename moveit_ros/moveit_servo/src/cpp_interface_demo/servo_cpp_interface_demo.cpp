@@ -75,8 +75,8 @@ public:
     }
 
     // We need 2 different publishers for the different command types
-    joint_cmd_pub_ = node_->create_publisher<control_msgs::msg::JointJog>("servo_server/delta_joint_cmds", 10);
-    twist_cmd_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>("servo_server/delta_twist_cmds", 10);
+    joint_cmd_pub_ = node_->create_publisher<control_msgs::msg::JointJog>("servo_demo_node/delta_joint_cmds", 10);
+    twist_cmd_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>("servo_demo_node/delta_twist_cmds", 10);
   }
 
   void start()
@@ -90,11 +90,6 @@ public:
 
     // Create Servo and start it
     servo_ = std::make_unique<moveit_servo::Servo>(node_, servo_parameters, planning_scene_monitor_);
-    while (!servo_->waitForInitialized() && rclcpp::ok())
-    {
-      rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, 5000, "Waiting for ServoCalcs to recieve joint states");
-    }
     servo_->start();
 
     timer_ = node_->create_wall_timer(50ms, std::bind(&ServoCppDemo::publishCommands, this));

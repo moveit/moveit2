@@ -44,15 +44,14 @@
 /** \brief Generic interface to adapting motion planning requests */
 namespace planning_request_adapter
 {
-MOVEIT_CLASS_FORWARD(PlanningRequestAdapter)
+MOVEIT_CLASS_FORWARD(PlanningRequestAdapter)  // Defines PlanningRequestAdapterPtr, ConstPtr, WeakPtr... etc
 
 class PlanningRequestAdapter
 {
 public:
-  typedef boost::function<bool(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                               const planning_interface::MotionPlanRequest& req,
-                               planning_interface::MotionPlanResponse& res)>
-      PlannerFn;
+  using PlannerFn =
+      boost::function<bool(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
+                           planning_interface::MotionPlanResponse&)>;
 
   PlanningRequestAdapter()
   {

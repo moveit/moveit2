@@ -568,7 +568,7 @@ ompl::base::StateStoragePtr ompl_interface::ConstraintsLibrary::constructConstra
   {
     RCLCPP_INFO(LOGGER, "Computing graph connections (max %u edges per sample) ...", options.edges_per_sample);
 
-    // construct connexions
+    // construct connections
     const ob::StateSpacePtr& space = pcontext->getOMPLSimpleSetup()->getStateSpace();
     unsigned int milestones = state_storage->size();
     std::vector<ob::State*> int_states(options.max_explicit_points, nullptr);

@@ -57,13 +57,13 @@ ServoServer::ServoServer(const rclcpp::NodeOptions& options) : Node("servo_servi
   using std::placeholders::_1;
   using std::placeholders::_2;
   start_servo_service_ =
-      this->create_service<std_srvs::srv::Trigger>("start_servo", std::bind(&ServoServer::startCB, this, _1, _2));
+      this->create_service<std_srvs::srv::Trigger>("~/start_servo", std::bind(&ServoServer::startCB, this, _1, _2));
   stop_servo_service_ =
-      this->create_service<std_srvs::srv::Trigger>("stop_servo", std::bind(&ServoServer::stopCB, this, _1, _2));
+      this->create_service<std_srvs::srv::Trigger>("~/stop_servo", std::bind(&ServoServer::stopCB, this, _1, _2));
   pause_servo_service_ =
-      this->create_service<std_srvs::srv::Trigger>("pause_servo", std::bind(&ServoServer::pauseCB, this, _1, _2));
+      this->create_service<std_srvs::srv::Trigger>("~/pause_servo", std::bind(&ServoServer::pauseCB, this, _1, _2));
   unpause_servo_service_ =
-      this->create_service<std_srvs::srv::Trigger>("unpause_servo", std::bind(&ServoServer::unpauseCB, this, _1, _2));
+      this->create_service<std_srvs::srv::Trigger>("~/unpause_servo", std::bind(&ServoServer::unpauseCB, this, _1, _2));
 }
 
 bool ServoServer::init()
@@ -103,10 +103,11 @@ bool ServoServer::init()
   servo_ = std::make_unique<moveit_servo::Servo>(node_ptr, servo_parameters, planning_scene_monitor_);
 
   // If we initialized properly, go ahead and start everything up
-  if (performed_initialization && servo_->waitForInitialized())
+  if (performed_initialization)
   {
     is_initialized_ = true;
-    return servo_->start();
+    servo_->start();
+    return true;
   }
   else
   {
@@ -115,34 +116,46 @@ bool ServoServer::init()
   }
 }
 
+void ServoServer::reset()
+{
+  servo_.reset();
+  tf_buffer_.reset();
+  planning_scene_monitor_.reset();
+  is_initialized_ = false;
+}
+
 void ServoServer::startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                           std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  // If we already initialized, just start the servo. Else: initialize
+  // If we already initialized, reset servo before initializing again
   if (is_initialized_)
-    response->success = servo_->start();
-  else
-    response->success = init();
+    reset();
+
+  response->success = init();
 }
 
 void ServoServer::stopCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                          std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  servo_->stop();
+  reset();
   response->success = true;
 }
 
 void ServoServer::pauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                           std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  servo_->setPaused(true);
+  if (servo_)
+    servo_->setPaused(true);
+
   response->success = true;
 }
 
 void ServoServer::unpauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                             std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  servo_->setPaused(false);
+  if (servo_)
+    servo_->setPaused(false);
+
   response->success = true;
 }
 

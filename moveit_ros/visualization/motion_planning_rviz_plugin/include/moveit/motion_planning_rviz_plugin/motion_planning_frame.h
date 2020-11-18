@@ -49,12 +49,8 @@
 // TODO (ddengster): Enable when moveit_ros_perception is ported
 // #include <moveit/semantic_world/semantic_world.h>
 
-#include <moveit/macros/diagnostics.h>
 #include <interactive_markers/interactive_marker_server.hpp>
-DIAGNOSTIC_PUSH
-SILENT_UNUSED_PARAM
 #include <rviz_default_plugins/displays/interactive_markers/interactive_marker.hpp>
-DIAGNOSTIC_POP
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <object_recognition_msgs/action/object_recognition.hpp>
@@ -80,9 +76,9 @@ class MotionPlanningUI;
 
 namespace moveit_warehouse
 {
-MOVEIT_CLASS_FORWARD(PlanningSceneStorage)
-MOVEIT_CLASS_FORWARD(ConstraintsStorage)
-MOVEIT_CLASS_FORWARD(RobotStateStorage)
+MOVEIT_CLASS_FORWARD(PlanningSceneStorage)  // Defines PlanningSceneStoragePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(ConstraintsStorage)    // Defines ConstraintsStoragePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(RobotStateStorage)     // Defines RobotStateStoragePtr, ConstPtr, WeakPtr... etc
 }  // namespace moveit_warehouse
 
 namespace moveit_rviz_plugin

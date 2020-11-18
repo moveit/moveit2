@@ -47,7 +47,7 @@ namespace moveit
 {
 namespace planning_interface
 {
-MOVEIT_CLASS_FORWARD(PlanningComponent)
+MOVEIT_CLASS_FORWARD(PlanningComponent)  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
 
 class PlanningComponent
 {

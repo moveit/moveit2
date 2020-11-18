@@ -47,7 +47,7 @@
 
 namespace collision_detection
 {
-MOVEIT_CLASS_FORWARD(AllowedCollisionMatrix)
+MOVEIT_CLASS_FORWARD(AllowedCollisionMatrix)  // Defines AllowedCollisionMatrixPtr, ConstPtr, WeakPtr... etc
 
 /** \brief The types of bodies that are considered for collision */
 namespace BodyTypes
@@ -67,7 +67,7 @@ enum Type
 }  // namespace BodyTypes
 
 /** \brief The types of bodies that are considered for collision */
-typedef BodyTypes::Type BodyType;
+using BodyType = BodyTypes::Type;
 
 /** \brief Definition of a contact point */
 struct Contact
@@ -147,7 +147,7 @@ struct CollisionResult
   CollisionResult() : collision(false), distance(std::numeric_limits<double>::max()), contact_count(0)
   {
   }
-  typedef std::map<std::pair<std::string, std::string>, std::vector<Contact> > ContactMap;
+  using ContactMap = std::map<std::pair<std::string, std::string>, std::vector<Contact> >;
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -160,6 +160,9 @@ struct CollisionResult
     contacts.clear();
     cost_sources.clear();
   }
+
+  /** \brief Throttled warning printing the first collision pair, if any. All collisions are logged at DEBUG level */
+  void print() const;
 
   /** \brief True if collision was found, false otherwise */
   bool collision;
@@ -237,7 +240,7 @@ enum DistanceRequestType
   ALL       ///< Find all the contacts for a given pair
 };
 }
-typedef DistanceRequestTypes::DistanceRequestType DistanceRequestType;
+using DistanceRequestType = DistanceRequestTypes::DistanceRequestType;
 
 /** \brief Representation of a distance-reporting request */
 struct DistanceRequest
@@ -301,7 +304,7 @@ struct DistanceRequest
 
 /** \brief Generic representation of the distance information for a pair of objects */
 // TODO(#267): Enable check - for some reason clang-tidy wants to rename this struct to "i0"
-struct DistanceResultsData  // NOLINT(readability-identifier-naming)
+struct DistanceResultsData  // NOLINT(readability-identifier-naming) - suppress spurious clang-tidy warning
 {
   DistanceResultsData()
   {
@@ -356,7 +359,7 @@ struct DistanceResultsData  // NOLINT(readability-identifier-naming)
 };
 
 /** \brief Mapping between the names of the collision objects and the DistanceResultData. */
-typedef std::map<const std::pair<std::string, std::string>, std::vector<DistanceResultsData> > DistanceMap;
+using DistanceMap = std::map<const std::pair<std::string, std::string>, std::vector<DistanceResultsData> >;
 
 /** \brief Result of a distance request. */
 struct DistanceResult

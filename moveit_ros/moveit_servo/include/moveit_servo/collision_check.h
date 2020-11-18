@@ -69,9 +69,13 @@ public:
   CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParametersPtr& parameters,
                  const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
-  /** \brief start and stop the Timer */
+  ~CollisionCheck()
+  {
+    timer_->cancel();
+  }
+
+  /** \brief start the Timer that regulates collision check rate */
   void start();
-  void stop();
 
   /** \brief Pause or unpause processing servo commands while keeping the timers alive */
   void setPaused(bool paused);
@@ -80,17 +84,11 @@ private:
   /** \brief Run one iteration of collision checking */
   void run();
 
-  /** \brief Print objects in collision. Useful for debugging.  */
-  void printCollisionPairs(collision_detection::CollisionResult::ContactMap& contact_map);
-
   /** \brief Get a read-only copy of the planning scene */
   planning_scene_monitor::LockedPlanningSceneRO getLockedPlanningSceneRO() const;
 
   /** \brief Callback for collision stopping time, from the thread that is aware of velocity and acceleration */
   void worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg);
-
-  /** \brief Callback for joint state msgs */
-  void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
 
   // Pointer to the ROS node
   const std::shared_ptr<rclcpp::Node> node_;
@@ -102,7 +100,7 @@ private:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   // Robot state and collision matrix from planning scene
-  std::unique_ptr<moveit::core::RobotState> current_state_;
+  std::shared_ptr<moveit::core::RobotState> current_state_;
   collision_detection::AllowedCollisionMatrix acm_;
 
   // Scale robot velocity according to collision proximity and user-defined thresholds.
@@ -133,7 +131,6 @@ private:
   // ROS
   rclcpp::TimerBase::SharedPtr timer_;
   double period_;  // The loop period, in seconds
-  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_sub_;
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr collision_velocity_scale_pub_;
   rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr worst_case_stop_time_sub_;
 

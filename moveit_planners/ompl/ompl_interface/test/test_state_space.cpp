@@ -66,10 +66,6 @@ protected:
 
 protected:
   moveit::core::RobotModelPtr robot_model_;
-  urdf::ModelInterfaceSharedPtr urdf_model_;
-  srdf::ModelSharedPtr srdf_model_;
-  bool urdf_ok_;
-  bool srdf_ok_;
 };
 
 TEST_F(LoadPlanningModelsPr2, StateSpace)

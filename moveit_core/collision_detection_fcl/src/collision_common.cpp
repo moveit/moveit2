@@ -488,8 +488,6 @@ bool distanceCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void
   if (cdata->req->verbose)
     RCLCPP_DEBUG(LOGGER, "Actually checking collisions between %s and %s", cd1->getID().c_str(), cd2->getID().c_str());
 
-  fcl::DistanceResultd fcl_result;
-  DistanceResultsData dist_result;
   double dist_threshold = cdata->req->distance_threshold;
 
   const std::pair<std::string, std::string>& pc = cd1->getID() < cd2->getID() ?
@@ -518,6 +516,7 @@ bool distanceCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void
     }
   }
 
+  fcl::DistanceResultd fcl_result;
   fcl_result.min_distance = dist_threshold;
   // fcl::distance segfaults when given an octree with a null root pointer (using FCL 0.6.1)
   if ((o1->getObjectType() == fcl::OT_OCTREE &&
@@ -534,6 +533,7 @@ bool distanceCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, void
   // one and add the new distance information.
   if (d < dist_threshold)
   {
+    DistanceResultsData dist_result;
     dist_result.distance = fcl_result.min_distance;
 #if (MOVEIT_FCL_VERSION >= FCL_VERSION_CHECK(0, 6, 0))
     dist_result.nearest_points[0] = fcl_result.nearest_points[0];

@@ -52,9 +52,9 @@ moveit_servo::ServoParametersPtr getTestParameters()
 
   // Populate the fields
   output->use_gazebo = true;
-  output->status_topic = "servo_server/status";
-  output->cartesian_command_in_topic = "servo_server/delta_twist_cmds";
-  output->joint_command_in_topic = "servo_server/delta_joint_cmds";
+  output->status_topic = "~/status";
+  output->cartesian_command_in_topic = "~/delta_twist_cmds";
+  output->joint_command_in_topic = "~/delta_joint_cmds";
   output->robot_link_command_frame = "panda_link0";
   output->command_in_type = "unitless";
   output->linear_scale = 0.4;
@@ -66,9 +66,10 @@ moveit_servo::ServoParametersPtr getTestParameters()
   output->publish_joint_positions = true;
   output->publish_joint_velocities = false;
   output->publish_joint_accelerations = false;
-  output->joint_topic = "joint_states";
+  output->joint_topic = "/joint_states";
   output->low_pass_filter_coeff = 2;
   output->move_group_name = "panda_arm";
+  output->ee_frame_name = "panda_link8";
   output->planning_frame = "panda_link0";
   output->incoming_command_timeout = 0.1;
   output->num_outgoing_halt_msgs_to_publish = 4;
@@ -101,7 +102,8 @@ bool operator==(moveit_servo::ServoParameters& lhs, moveit_servo::ServoParameter
           lhs.publish_joint_velocities == rhs.publish_joint_velocities &&
           lhs.publish_joint_accelerations == rhs.publish_joint_accelerations && lhs.joint_topic == rhs.joint_topic &&
           lhs.low_pass_filter_coeff == rhs.low_pass_filter_coeff && lhs.move_group_name == rhs.move_group_name &&
-          lhs.planning_frame == rhs.planning_frame && lhs.incoming_command_timeout == rhs.incoming_command_timeout &&
+          lhs.ee_frame_name == rhs.ee_frame_name && lhs.planning_frame == rhs.planning_frame &&
+          lhs.incoming_command_timeout == rhs.incoming_command_timeout &&
           lhs.num_outgoing_halt_msgs_to_publish == rhs.num_outgoing_halt_msgs_to_publish &&
           lhs.lower_singularity_threshold == rhs.lower_singularity_threshold &&
           lhs.hard_stop_singularity_threshold == rhs.hard_stop_singularity_threshold &&

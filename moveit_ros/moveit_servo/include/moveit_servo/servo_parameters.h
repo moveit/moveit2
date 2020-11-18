@@ -69,6 +69,7 @@ struct ServoParameters
   // MoveIt properties
   std::string move_group_name;
   std::string planning_frame;
+  std::string ee_frame_name;
   // Stopping behaviour
   double incoming_command_timeout;
   int num_outgoing_halt_msgs_to_publish;

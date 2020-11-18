@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>moveit_servo</name>
-  <version>1.1.0</version>
+  <version>1.1.1</version>
 
   <description>Provides real-time manipulator Cartesian and joint servoing.</description>
 
@@ -23,19 +23,21 @@
   <build_depend>moveit_common</build_depend>
 
   <depend>control_msgs</depend>
+  <depend>control_toolbox</depend>
   <depend>geometry_msgs</depend>
-  <depend>sensor_msgs</depend>
-  <depend>std_msgs</depend>
-  <depend>trajectory_msgs</depend>
   <depend>moveit_msgs</depend>
   <depend>moveit_ros_planning_interface</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>tf2_eigen</depend>
+  <depend>trajectory_msgs</depend>
 
   <exec_depend>joy</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
 
-  <test_depend>moveit_resources</test_depend>
-  <test_depend>ros_testing</test_depend>
+  <test_depend>moveit_resources_panda_moveit_config</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

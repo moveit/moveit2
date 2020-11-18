@@ -47,7 +47,7 @@ def generate_launch_description():
     # Creates the Servo node and publishes commands to it
     servo_node = Node(
         package='moveit_servo',
-        executable='servo_demo',
+        executable='servo_cpp_demo',
         output='screen',
         parameters=[servo_params, robot_description, robot_description_semantic ]
     )

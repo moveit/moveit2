@@ -53,7 +53,7 @@ protected:
     const std::string robot_name = "pr2";
     urdf_model_ = moveit::core::loadModelInterface(robot_name);
     srdf_model_ = moveit::core::loadSRDFModel(robot_name);
-    robot_model_.reset(new moveit::core::RobotModel(urdf_model_, srdf_model_));
+    robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_model_);
   };
 
   void TearDown() override
@@ -63,7 +63,7 @@ protected:
 protected:
   urdf::ModelInterfaceSharedPtr urdf_model_;
   srdf::ModelSharedPtr srdf_model_;
-  moveit::core::RobotModelConstPtr robot_model_;
+  moveit::core::RobotModelPtr robot_model_;
 };
 
 TEST_F(LoadPlanningModelsPr2, InitOK)

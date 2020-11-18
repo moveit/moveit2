@@ -54,7 +54,7 @@ JMGItemModel::JMGItemModel(const moveit::core::RobotState& robot_state, const st
     jmg_ = robot_state_.getRobotModel()->getJointModelGroup(group_name);
 }
 
-int JMGItemModel::rowCount(const QModelIndex& parent) const
+int JMGItemModel::rowCount(const QModelIndex& /*parent*/) const
 {
   if (!jmg_)
     return robot_state_.getVariableCount();
@@ -62,7 +62,7 @@ int JMGItemModel::rowCount(const QModelIndex& parent) const
     return jmg_->getVariableCount();
 }
 
-int JMGItemModel::columnCount(const QModelIndex& parent) const
+int JMGItemModel::columnCount(const QModelIndex& /*parent*/) const
 {
   return 2;
 }
@@ -387,8 +387,20 @@ void ProgressBarDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
   {
     QVariant joint_type = index.data(JointTypeRole);
     double value = index.data().toDouble();
-    bool is_revolute = joint_type.isValid() && joint_type.toInt() == moveit::core::JointModel::REVOLUTE;
-    style_option.text = option.locale.toString(is_revolute ? value * 180 / M_PI : value, 'f', is_revolute ? 0 : 3);
+    if (joint_type.isValid())
+    {
+      switch (joint_type.toInt())
+      {
+        case moveit::core::JointModel::REVOLUTE:
+          style_option.text = option.locale.toString(value * 180 / M_PI, 'f', 0).append("°");
+          break;
+        case moveit::core::JointModel::PRISMATIC:
+          style_option.text = option.locale.toString(value, 'f', 3).append("m");
+          break;
+        default:
+          break;
+      }
+    }
 
     QVariant vbounds = index.data(VariableBoundsRole);
     if (vbounds.isValid())
@@ -453,7 +465,7 @@ JointsWidgetEventFilter::JointsWidgetEventFilter(QAbstractItemView* view) : QObj
 {
 }
 
-bool JointsWidgetEventFilter::eventFilter(QObject* target, QEvent* event)
+bool JointsWidgetEventFilter::eventFilter(QObject* /*target*/, QEvent* event)
 {
   if (event->type() == QEvent::MouseButtonPress)
   {

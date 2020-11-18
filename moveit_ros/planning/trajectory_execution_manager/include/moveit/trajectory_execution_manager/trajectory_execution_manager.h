@@ -52,7 +52,7 @@
 
 namespace trajectory_execution_manager
 {
-MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager)
+MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager)  // Defines TrajectoryExecutionManagerPtr, ConstPtr, WeakPtr... etc
 
 // Two modes:
 // Managed controllers
@@ -68,7 +68,7 @@ public:
 
   /// Definition of the function signature that is called when the execution of a pushed trajectory completes
   /// successfully.
-  typedef boost::function<void(std::size_t)> PathSegmentCompleteCallback;
+  using PathSegmentCompleteCallback = boost::function<void(std::size_t)>;
 
   /// Data structure that represents information necessary to execute a trajectory
   struct TrajectoryExecutionContext

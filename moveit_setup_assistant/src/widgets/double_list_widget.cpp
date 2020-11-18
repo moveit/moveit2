@@ -34,15 +34,17 @@
 
 /* Author: Dave Coleman */
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QGroupBox>
-#include <QPushButton>
 #include <QFormLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QHeaderView>
+#include <QLabel>
 #include <QLineEdit>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QString>
-#include <QHeaderView>
+#include <QTableWidget>
+#include <QVBoxLayout>
 #include "double_list_widget.h"
 
 namespace moveit_setup_assistant
@@ -140,9 +142,7 @@ DoubleListWidget::DoubleListWidget(QWidget* parent, const MoveItConfigDataPtr& c
     controls_layout->setContentsMargins(0, 25, 0, 15);
 
     // Spacer
-    QWidget* spacer = new QWidget(this);
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    controls_layout->addWidget(spacer);
+    controls_layout->addItem(new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
     // Save
     QPushButton* btn_save = new QPushButton("&Save", this);

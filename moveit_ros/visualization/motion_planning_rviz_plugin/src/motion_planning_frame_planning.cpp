@@ -117,6 +117,7 @@ void MotionPlanningFrame::onClearOctomapClicked()
   {
     RCLCPP_ERROR(LOGGER, "Failed to call clear_octomap_service");
   }
+  ui_->clear_octomap_button->setEnabled(false);
 }
 
 bool MotionPlanningFrame::computeCartesianPlan()

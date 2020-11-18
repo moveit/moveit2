@@ -31,12 +31,16 @@
   <depend>orocos_kdl</depend>
   <depend>moveit_msgs</depend>
 
+  <!-- some requirements of ikfast scripts -->
+  <exec_depend>urdfdom</exec_depend> <!-- provides check_urdf -->
   <exec_depend>python-lxml</exec_depend>
-  <exec_depend>urdfdom</exec_depend> <!-- provides check_urdf required by ikfast scripts -->
 
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>moveit_ros_planning</test_depend>
-  <test_depend>moveit_resources</test_depend>
+  <test_depend>moveit_resources_fanuc_description</test_depend>
+  <test_depend>moveit_resources_fanuc_moveit_config</test_depend>
+  <test_depend>moveit_resources_panda_description</test_depend>
+  <test_depend>moveit_resources_panda_moveit_config</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

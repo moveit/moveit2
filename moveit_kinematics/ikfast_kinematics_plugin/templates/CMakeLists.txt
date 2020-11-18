@@ -28,7 +28,7 @@ ament_target_dependencies(${IKFAST_LIBRARY_NAME}
   tf2_eigen
 )
 # suppress warnings about unused variables in OpenRave's solver code
-target_compile_options(${IKFAST_LIBRARY_NAME} PRIVATE -Wno-unused-variable)
+target_compile_options(${IKFAST_LIBRARY_NAME} PRIVATE -Wno-unused-variable -Wno-unused-parameter)
 
 install(TARGETS
   ${IKFAST_LIBRARY_NAME}

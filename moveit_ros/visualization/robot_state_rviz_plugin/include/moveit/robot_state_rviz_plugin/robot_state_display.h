@@ -70,6 +70,7 @@ public:
   RobotStateDisplay();
   ~RobotStateDisplay() override;
 
+  void load(const rviz_common::Config& config) override;
   void update(float wall_dt, float ros_dt) override;
   void reset() override;
 
@@ -132,7 +133,6 @@ protected:
   moveit::core::RobotStatePtr robot_state_;
   std::map<std::string, std_msgs::msg::ColorRGBA> highlights_;
   bool update_state_;
-  bool load_robot_model_;  // for delayed robot initialization
 
   rviz_common::properties::StringProperty* robot_description_property_;
   rviz_common::properties::StringProperty* root_link_name_property_;

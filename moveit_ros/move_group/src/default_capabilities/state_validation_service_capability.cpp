@@ -72,8 +72,8 @@ bool MoveGroupStateValidationService::computeService(
   creq.group_name = req->group_name;
   creq.cost = true;
   creq.contacts = true;
-  creq.max_contacts = ls->getWorld()->size();
-  creq.max_cost_sources = creq.max_contacts + ls->getRobotModel()->getLinkModelsWithCollisionGeometry().size();
+  creq.max_contacts = ls->getWorld()->size() + ls->getRobotModel()->getLinkModelsWithCollisionGeometry().size();
+  creq.max_cost_sources = creq.max_contacts;
   creq.max_contacts *= creq.max_contacts;
   collision_detection::CollisionResult cres;
 

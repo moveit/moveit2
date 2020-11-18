@@ -52,8 +52,8 @@ namespace ob = ompl::base;
 namespace og = ompl::geometric;
 namespace ot = ompl::tools;
 
-MOVEIT_CLASS_FORWARD(ModelBasedPlanningContext)
-MOVEIT_CLASS_FORWARD(ConstraintsLibrary)
+MOVEIT_CLASS_FORWARD(ModelBasedPlanningContext)  // Defines ModelBasedPlanningContextPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(ConstraintsLibrary)         // Defines ConstraintsLibraryPtr, ConstPtr, WeakPtr... etc
 
 struct ModelBasedPlanningContextSpecification;
 typedef std::function<ob::PlannerPtr(const ompl::base::SpaceInformationPtr& si, const std::string& name,
@@ -282,7 +282,7 @@ public:
   */
   bool solve(double timeout, unsigned int count);
 
-  /* @brief Benchmark the planning problem. Return true on succesful saving of benchmark results
+  /* @brief Benchmark the planning problem. Return true on successful saving of benchmark results
      @param timeout The time to spend on solving
      @param count The number of runs to average in the computation of the benchmark
      @param filename The name of the file to which the benchmark results are to be saved (automatic names can be
