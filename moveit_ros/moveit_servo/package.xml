@@ -38,6 +38,7 @@
   <exec_depend>robot_state_publisher</exec_depend>
 
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
+  <test_depend>ros_testing</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
