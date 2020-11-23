@@ -2,6 +2,16 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2020-11-23)
+------------------
+* [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)
+  * New moveit_package() macro for compile flags, Windows support etc
+  * Add package 'moveit_common' as build dependency for moveit_package()
+  * Added -Wno-overloaded-virtual compiler flag for moveit_ros_planners_ompl
+* [maint] Compilation fixes for macOS (`#271 <https://github.com/ros-planning/moveit2/issues/271>`_)
+* [ros2-migration] Port MoveGroupInterface and MotionPlanning display (`#272 <https://github.com/ros-planning/moveit2/issues/272>`_)
+* Contributors: Henning Kayser, Jafar Abdi, Lior Lustgarten, Mark Moll, Yu Yan
+
 2.0.0 (2020-02-17)
 ------------------
 * [fix] Install moveit_cpp as SHARED library

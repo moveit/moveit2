@@ -2,6 +2,14 @@
 Changelog for package moveit_ros_occupancy_map_monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2020-11-23)
+------------------
+* [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)
+  * New moveit_package() macro for compile flags, Windows support etc
+  * Add package 'moveit_common' as build dependency for moveit_package()
+  * Added -Wno-overloaded-virtual compiler flag for moveit_ros_planners_ompl
+* Contributors: Lior Lustgarten
+
 2.0.0 (2020-02-17)
 ------------------
 * [port] Port occupancy_map_monitor to ROS2 (`#148 <https://github.com/ros-planning/moveit2/issues/148>`_)

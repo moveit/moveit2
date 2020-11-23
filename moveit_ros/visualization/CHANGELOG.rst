@@ -2,6 +2,18 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2020-11-23)
+------------------
+* [fix] Interactive markers not visible in motion planning plugin (`#299 <https://github.com/ros-planning/moveit2/issues/299>`_)
+* [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)
+  * New moveit_package() macro for compile flags, Windows support etc
+  * Add package 'moveit_common' as build dependency for moveit_package()
+  * Added -Wno-overloaded-virtual compiler flag for moveit_ros_planners_ompl
+* [maint] Compilation fixes for macOS (`#271 <https://github.com/ros-planning/moveit2/issues/271>`_)
+* [ros2-migration] Port moveit_ros_warehouse to ROS 2 (`#273 <https://github.com/ros-planning/moveit2/issues/273>`_)
+* [ros2-migration] Port trajectory_rviz_plugin to ROS 2 (`#201 <https://github.com/ros-planning/moveit2/issues/201>`_)
+* Contributors: Henning Kayser, Jafar Abdi, Lior Lustgarten, Mark Moll, Yu Yan, Edwin Fan
+
 2.0.0 (2020-02-17)
 ------------------
 * [fix] moveit_ros_visualization fixes (`#168 <https://github.com/ros-planning/moveit2/issues/168>`_)

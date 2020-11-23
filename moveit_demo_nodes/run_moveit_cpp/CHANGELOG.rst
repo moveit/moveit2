@@ -2,6 +2,9 @@
 Changelog for package run_moveit_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2020-11-23)
+------------------
+
 2.0.0 (2020-02-17)
 ------------------
 * [fix] Fix run_moveit_cpp version
