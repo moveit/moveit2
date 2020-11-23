@@ -2,6 +2,19 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.1 (2020-11-23)
+------------------
+* [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)
+  * New moveit_package() macro for compile flags, Windows support etc
+  * Add package 'moveit_common' as build dependency for moveit_package()
+  * Added -Wno-overloaded-virtual compiler flag for moveit_ros_planners_ompl
+* [fix] Servo runtime issues (`#257 <https://github.com/ros-planning/moveit2/issues/257>`_, `#265 <https://github.com/ros-planning/moveit2/issues/265>`_, `#294 <https://github.com/ros-planning/moveit2/issues/294>`_)
+* [ros2-migration] Port moveit_servo to ROS 2 (`#248 <https://github.com/ros-planning/moveit2/issues/248>`_)
+  * Ports the source from MoveIt
+  * Adds examples (C++ interface, composable node interface, teleoperation demo for gamepad)
+  * Adds integration and unit tests
+* Contributors: Adam Pettinger, Henning Kayser, Lior Lustgarten, Tyler Weaver
+
 1.1.1 (2020-10-13)
 ------------------
 * [feature] A library for servoing toward a moving pose (`#2203 <https://github.com/ros-planning/moveit/issues/2203>`_)

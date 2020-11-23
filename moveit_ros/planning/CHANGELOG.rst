@@ -2,6 +2,32 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.1 (2020-11-23)
+------------------
+* [improvement] Planning Scene Monitor Node Executor (`#230 <https://github.com/ros-planning/moveit2/issues/230>`_, `#257 <https://github.com/ros-planning/moveit2/issues/257>`_, `#262 <https://github.com/ros-planning/moveit2/issues/262>`_, `#266 <https://github.com/ros-planning/moveit2/issues/266>`_)
+  * Fix PSM private node name
+  * Initializes all ros interfaces with the private node
+  * Runs timer callback using async single threaded executor
+  * Fix duplicate PSM ndes (from `ros-planning/navigation2#1940 <https://github.com/ros-planning/navigation2/issues/1940>`_)
+* [improvement] Enable MoveIt fake controller in demo (`#231 <https://github.com/ros-planning/moveit2/issues/231>`_)
+* [fix] Interactive markers not visible in motion planning plugin (`#299 <https://github.com/ros-planning/moveit2/issues/299>`_)
+* [maint] Remove deprecated namespaces robot_model, robot_state  (`#276 <https://github.com/ros-planning/moveit2/issues/276>`_)
+* [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)
+  * New moveit_package() macro for compile flags, Windows support etc
+  * Add package 'moveit_common' as build dependency for moveit_package()
+  * Added -Wno-overloaded-virtual compiler flag for moveit_ros_planners_ompl
+* [maint] Compilation fixes for macOS (`#271 <https://github.com/ros-planning/moveit2/issues/271>`_)
+* [maint] kinematics_base: remove deprecated initialize function (`#232 <https://github.com/ros-planning/moveit2/issues/232>`_)
+* [maint] Update to new moveit_resources layout (`#247 <https://github.com/ros-planning/moveit2/issues/247>`_)
+* [maint] Cleanup and fix CMakeLists target dependencies (`#226 <https://github.com/ros-planning/moveit2/issues/226>`_, `#228 <https://github.com/ros-planning/moveit2/issues/228>`_)
+* [maint] Enable clang-tidy-fix and ament_lint_cmake (`#210 <https://github.com/ros-planning/moveit2/issues/210>`_, `#215 <https://github.com/ros-planning/moveit2/issues/215>`_, `#264 <https://github.com/ros-planning/moveit2/issues/264>`_)
+* [ros2-migration] Port MoveGroupInterface and MotionPlanning display to ROS 2 (`#272 <https://github.com/ros-planning/moveit2/issues/272>`_)
+  * Add private executor for the internal trajectory_execution_manager node
+  * Use private MGI node, cleanup & fixes
+* [ros2-migration] Port move_group to ROS 2 (`#217 <https://github.com/ros-planning/moveit2/issues/217>`_)
+* [ros2-migration] Port planning_pipeline to ROS 2 (`#75 <https://github.com/ros-planning/moveit2/issues/75>`_)
+* Contributors: Adam Pettinger, Edwin Fan, Henning Kayser, Jafar Abdi, Jorge Nicho, Lior Lustgarten, Mark Moll, Tyler Weaver, Yu Yan, anasarrak
+
 2.0.0 (2020-02-17)
 ------------------
 * [fix] Fix double node executor exceptions
@@ -269,15 +295,15 @@ Changelog for package moveit_ros_planning
 
 0.6.6 (2016-06-08)
 ------------------
-* Add library moveit_collision_plugin_loader as an exported catkin library (`#678 <https://github.com/ros-planning/moveit_ros/issues/678>`_)
+* Add library moveit_collision_plugin_loader as an exported catkin library (`ros-planning:moveit_ros#678 <https://github.com/ros-planning/moveit_ros/issues/678>`_)
 * replaced cmake_modules dependency with eigen
 * [jade] eigen3 adjustment
 * Fix compilation with C++11.
 * Enable optional build against Qt5, use -DUseQt5=On to enable it
-* merge indigo-devel changes (PR `#633 <https://github.com/ros-planning/moveit_ros/issues/633>`_ trailing whitespace) into jade-devel
+* merge indigo-devel changes (PR `ros-planning:moveit_ros#633 <https://github.com/ros-planning/moveit_ros/issues/633>`_ trailing whitespace) into jade-devel
 * Removed trailing whitespace from entire repository
 * Optional ability to copy velocity and effort to RobotState
-* cherry-picked PR `#614 <https://github.com/ros-planning/moveit_ros/issues/614>`_
+* cherry-picked PR `ros-planning:moveit_ros#614 <https://github.com/ros-planning/moveit_ros/issues/614>`_
   fixed segfault on shutdown
 * fixed segfault on shutdown
   use of pluginlib's createUnmanagedInstance() is strongly discouraged:
@@ -285,7 +311,7 @@ Changelog for package moveit_ros_planning
   here, the kinematics plugin libs were unloaded before destruction of corresponding pointers
 * Deprecate shape_tools
 * CurrentStateMonitor no longer requires hearing mimic joint state values.
-* Fix crash due to robot state not getting updated (moveit_ros `#559 <https://github.com/ros-planning/moveit_ros/issues/559>`_)
+* Fix crash due to robot state not getting updated (moveit_ros `ros-planning:moveit_ros#559 <https://github.com/ros-planning/moveit_ros/issues/559>`_)
 * Contributors: Dave Coleman, Dave Hershberger, Isaac I.Y. Saito, Levi Armstrong, Maarten de Vries, Robert Haschke, Simon Schmeisser (isys vision), kohlbrecher
 
 0.6.5 (2015-01-24)
@@ -300,7 +326,7 @@ Changelog for package moveit_ros_planning
 ------------------
 * Namespaced "traj_execution" for all trajectory_execution_manager logging
 * planning_scene_monitor: add ros parameter for adding a wait-for-transform lookup time
-  fixes `#465 <https://github.com/ros-planning/moveit_ros/issues/465>`_
+  fixes `ros-planning:moveit_ros#465 <https://github.com/ros-planning/moveit_ros/issues/465>`_
 * Contributors: Dave Coleman, Jonathan Bohren
 
 0.6.3 (2014-12-03)
@@ -414,7 +440,7 @@ Changelog for package moveit_ros_planning
 * Fixed dependency issue
 * fixing joint limits setup for mimic joints
 * implement feature requests
-* clear monitored octomap when needed (see `#315 <https://github.com/ros-planning/moveit_ros/issues/315>`_)
+* clear monitored octomap when needed (see `ros-planning:moveit_ros#315 <https://github.com/ros-planning/moveit_ros/issues/315>`_)
 * fix the adapter for fixing path constraints for initial states
 * fixed computation of dimension\_.
 * bugfixes in indexing added states for path adapters
@@ -439,15 +465,15 @@ Changelog for package moveit_ros_planning
 * fix loading of default params
 * port to new RobotState API, new messages
 * make sure we do not overwrite attached bodies, when updating the current state
-* fix `#308 <https://github.com/ros-planning/moveit_ros/issues/308>`_
-* fix `#304 <https://github.com/ros-planning/moveit_ros/issues/304>`_
+* fix `ros-planning:moveit_ros#308 <https://github.com/ros-planning/moveit_ros/issues/308>`_
+* fix `ros-planning:moveit_ros#304 <https://github.com/ros-planning/moveit_ros/issues/304>`_
 * fix issue with sending trajectories for passive/mimic/fixed joints
 * pass effort along
 
 0.5.4 (2013-08-14)
 ------------------
 
-* remove CollisionMap, expose topic names in PlanningSceneMonitor, implement detach / attach operations as requested by `#280 <https://github.com/ros-planning/moveit_ros/issues/280>`_
+* remove CollisionMap, expose topic names in PlanningSceneMonitor, implement detach / attach operations as requested by `ros-planning:moveit_ros#280 <https://github.com/ros-planning/moveit_ros/issues/280>`_
 * make headers and author definitions aligned the same way; white space fixes
 * move background_processing lib to core
 * add option to disable trajectory monitoring
@@ -478,8 +504,8 @@ Changelog for package moveit_ros_planning
 
 0.4.4 (2013-06-26)
 ------------------
-* fix `#210 <https://github.com/ros-planning/moveit_ros/issues/210>`_
-* added dynamic reconfigure parameters to allow enabling/disabling of trajectory duration monitoring. fixes `#256 <https://github.com/ros-planning/moveit_ros/issues/256>`_
+* fix `ros-planning:moveit_ros#210 <https://github.com/ros-planning/moveit_ros/issues/210>`_
+* added dynamic reconfigure parameters to allow enabling/disabling of trajectory duration monitoring. fixes `ros-planning:moveit_ros#256 <https://github.com/ros-planning/moveit_ros/issues/256>`_
 * add state operations evaluation tool
 * warn when time parametrization fails
 * moved exceptions headers

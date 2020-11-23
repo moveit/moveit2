@@ -2,6 +2,21 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.1 (2020-11-23)
+------------------
+* [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)
+  * New moveit_package() macro for compile flags, Windows support etc
+  * Add package 'moveit_common' as build dependency for moveit_package()
+  * Added -Wno-overloaded-virtual compiler flag for moveit_ros_planners_ompl
+* [maint] small compilation fixes for macOS (`#271 <https://github.com/ros-planning/moveit2/issues/271>`_)
+* [maint] kinematics_base: remove deprecated initialize function (`#232 <https://github.com/ros-planning/moveit2/issues/232>`_)
+* [maint] Enable clang-tidy-fix and ament_lint_cmake (`#210 <https://github.com/ros-planning/moveit2/issues/210>`_)
+* [maint] Simplify kdl now that kinetic support is dropped (`#237 <https://github.com/ros-planning/moveit2/issues/237>`_)
+* [ros2-migration] Migrate to ROS 2 Foxy (`#227 <https://github.com/ros-planning/moveit2/issues/227>`_)
+* [ros2-migration] Port Ikfast kinematics solver (`#205 <https://github.com/ros-planning/moveit2/issues/205>`_)
+* [ros2-migration] Port CachedIKKinematicsPlugin to ROS2 (`#207 <https://github.com/ros-planning/moveit2/issues/207>`_)
+* Contributors: Henning Kayser, Jafar Abdi, Lior Lustgarten, Mark Moll, Mohmmad Ayman, Nathan Brooks, Ruffin
+
 2.0.0 (2020-02-17)
 ------------------
 * [port] Port moveit kinematics to ROS2 (`#128 <https://github.com/ros-planning/moveit2/issues/128>`_)

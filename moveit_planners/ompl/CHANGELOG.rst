@@ -2,6 +2,20 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.1 (2020-11-23)
+------------------
+* [fix] Rosdep dependencies for ros_testing, OpenMP (`#309 <https://github.com/ros-planning/moveit2/issues/309>`_)
+* [fix] OMPL parameter loading (`#178 <https://github.com/ros-planning/moveit2/issues/178>`_)
+* [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)
+  * New moveit_package() macro for compile flags, Windows support etc
+  * Add package 'moveit_common' as build dependency for moveit_package()
+  * Added -Wno-overloaded-virtual compiler flag for moveit_ros_planners_ompl
+* [maint] Update to new moveit_resources layout (`#247 <https://github.com/ros-planning/moveit2/issues/247>`_)
+* [maint] Enable clang-tidy-fix and ament_lint_cmake (`#210 <https://github.com/ros-planning/moveit2/issues/210>`_)
+* [ros2-migration] Port move_group to ROS2 (`#217 <https://github.com/ros-planning/moveit2/issues/217>`_)
+  * switch OMPL to use pluginlib
+* Contributors: Edwin Fan, Henning Kayser, Jonathan Chapple, Lior Lustgarten
+
 2.0.0 (2020-02-17)
 ------------------
 * [fix] Fix OMPL logging macros
