@@ -41,7 +41,7 @@
 #include <thread>
 
 // ROS
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 // Testing
 #include <gtest/gtest.h>
@@ -49,11 +49,13 @@
 // Servo
 #include <moveit_servo/pose_tracking.h>
 #include <moveit_servo/make_shared_from_pool.h>
+#include <moveit_servo/servo_parameters.cpp>
 
-static const std::string LOGNAME = "servo_cpp_interface_test";
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.pose_tracking_test");
+
 static constexpr double TRANSLATION_TOLERANCE = 0.01;  // meters
 static constexpr double ROTATION_TOLERANCE = 0.1;      // quaternion
-static constexpr double ROS_PUB_SUB_DELAY = 4;         // allow for subscribers to initialize
+static constexpr u_int64_t ROS_PUB_SUB_DELAY = 4;      // seconds (to allow for subscribers to initialize)
 
 namespace moveit_servo
 {
@@ -62,39 +64,77 @@ class PoseTrackingFixture : public ::testing::Test
 public:
   void SetUp() override
   {
-    // Wait for several key topics / parameters
-    ros::topic::waitForMessage<sensor_msgs::JointState>("/joint_states");
-    while (!nh_.hasParam("/robot_description") && ros::ok())
+    executor_->add_node(node_);
+    executor_thread_ = std::thread([this]() { this->executor_->spin(); });
+
+    if (!moveit_servo::readParameters(servo_parameters_, node_, LOGGER))
     {
-      ros::Duration(0.1).sleep();
+      RCLCPP_ERROR_STREAM(LOGGER, "Could not get server parameters!");
+      exit(EXIT_FAILURE);
     }
 
     // Load the planning scene monitor
-    planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
+    if (!planning_scene_monitor_->getPlanningScene())
+    {
+      RCLCPP_ERROR_STREAM(LOGGER, "Error in setting up the PlanningSceneMonitor.");
+      exit(EXIT_FAILURE);
+    }
+
+    planning_scene_monitor_->providePlanningSceneService();
     planning_scene_monitor_->startSceneMonitor();
-    planning_scene_monitor_->startStateMonitor();
     planning_scene_monitor_->startWorldGeometryMonitor(
         planning_scene_monitor::PlanningSceneMonitor::DEFAULT_COLLISION_OBJECT_TOPIC,
         planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_WORLD_TOPIC,
         false /* skip octomap monitor */);
+    planning_scene_monitor_->startStateMonitor(servo_parameters_->joint_topic);
+    planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
 
-    tracker_ = std::make_shared<moveit_servo::PoseTracking>(nh_, planning_scene_monitor_);
-
-    target_pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("target_pose", 1 /* queue */, true /* latch */);
+    tracker_ = std::make_shared<moveit_servo::PoseTracking>(node_, servo_parameters_, planning_scene_monitor_);
 
     // Tolerance for pose seeking
     translation_tolerance_ << TRANSLATION_TOLERANCE, TRANSLATION_TOLERANCE, TRANSLATION_TOLERANCE;
   }
+
+  PoseTrackingFixture()
+    : node_(std::make_shared<rclcpp::Node>("pose_tracking_testing"))
+    , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
+    , servo_parameters_(std::make_shared<moveit_servo::ServoParameters>())
+    , planning_scene_monitor_(
+          std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, "robot_description"))
+    , PUBLISH_HZ(2.0 / servo_parameters_->incoming_command_timeout)
+    , PUBLISH_PERIOD(1.0 / PUBLISH_HZ)
+    , TIMEOUT_ITERATIONS(10 * PUBLISH_HZ)
+    , publish_loop_rate_(PUBLISH_HZ)
+  {
+    // Init ROS interfaces
+    // Publishers
+    target_pose_pub_ = node_->create_publisher<geometry_msgs::msg::PoseStamped>("target_pose", 1);
+  }
+
   void TearDown() override
   {
+    executor_->cancel();
+    if (executor_thread_.joinable())
+      executor_thread_.join();
   }
 
 protected:
-  ros::NodeHandle nh_{ "~" };
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Executor::SharedPtr executor_;
+  std::thread executor_thread_;
+
+  moveit_servo::ServoParametersPtr servo_parameters_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-  Eigen::Vector3d translation_tolerance_;
+
   moveit_servo::PoseTrackingPtr tracker_;
-  ros::Publisher target_pose_pub_;
+
+  Eigen::Vector3d translation_tolerance_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr target_pose_pub_;
+
+  const double PUBLISH_HZ;
+  const double PUBLISH_PERIOD;
+  const double TIMEOUT_ITERATIONS;
+  rclcpp::Rate publish_loop_rate_;
 };  // class PoseTrackingFixture
 
 // Check for commands going out to ros_control
@@ -102,9 +142,9 @@ TEST_F(PoseTrackingFixture, OutgoingMsgTest)
 {
   // halt Servoing when first msg to ros_control is received
   // and test some conditions
-  trajectory_msgs::JointTrajectory last_received_msg;
-  boost::function<void(const trajectory_msgs::JointTrajectoryConstPtr&)> traj_callback =
-      [&/* this */](const trajectory_msgs::JointTrajectoryConstPtr& msg) {
+  trajectory_msgs::msg::JointTrajectory last_received_msg;
+  std::function<void(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
+      [&/* this */](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) {
         EXPECT_EQ(msg->header.frame_id, "panda_link0");
         // Check for an expected joint position command
         // As of now, the robot doesn't actually move because there are no controllers enabled.
@@ -120,11 +160,12 @@ TEST_F(PoseTrackingFixture, OutgoingMsgTest)
         this->tracker_->stopMotion();
         return;
       };
-  auto traj_sub = nh_.subscribe("servo_server/command", 1, traj_callback);
+  auto traj_sub = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
+      "/fake_joint_trajectory_controller/joint_trajectory", 1, traj_callback);
 
-  geometry_msgs::PoseStamped target_pose;
+  geometry_msgs::msg::PoseStamped target_pose;
   target_pose.header.frame_id = "panda_link4";
-  target_pose.header.stamp = ros::Time::now();
+  target_pose.header.stamp = node_->now();
   target_pose.pose.position.x = 0.2;
   target_pose.pose.position.y = 0.2;
   target_pose.pose.position.z = 0.2;
@@ -135,15 +176,15 @@ TEST_F(PoseTrackingFixture, OutgoingMsgTest)
     size_t msg_count = 0;
     while (++msg_count < 100)
     {
-      target_pose_pub_.publish(target_pose);
-      ros::Duration(0.01).sleep();
+      target_pose_pub_->publish(target_pose);
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
+      ;
     }
   });
 
-  ros::Duration(ROS_PUB_SUB_DELAY).sleep();
+  std::this_thread::sleep_for(std::chrono::seconds(ROS_PUB_SUB_DELAY));
 
-  // resetTargetPose() can be used to clear the target pose and wait for a new one, e.g. when moving between multiple
-  // waypoints
+  // resetTargetPose() can be used to clear the target pose and wait for a new one, e.g. when moving between multiple waypoints
   tracker_->resetTargetPose();
 
   tracker_->moveToPose(translation_tolerance_, ROTATION_TOLERANCE, 1 /* target pose timeout */);
@@ -155,12 +196,10 @@ TEST_F(PoseTrackingFixture, OutgoingMsgTest)
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, LOGNAME);
-  testing::InitGoogleTest(&argc, argv);
-
-  ros::AsyncSpinner spinner(8);
-  spinner.start();
+  ::testing::InitGoogleTest(&argc, argv);
+  rclcpp::init(argc, argv);
 
   int result = RUN_ALL_TESTS();
+  rclcpp::shutdown();
   return result;
 }

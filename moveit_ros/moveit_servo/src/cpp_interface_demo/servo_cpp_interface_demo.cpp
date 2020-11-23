@@ -173,7 +173,7 @@ int main(int argc, char** argv)
   ps.world = psw;
 
   // Publish the collision object to the planning scene
-  auto scene_pub = node->create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", 10);
+  auto scene_pub = node->create_publisher<moveit_msgs::msg::PlanningScene>("planning_scene", 10);
   scene_pub->publish(ps);
 
   // Start the Servo object, and start publishing commands to it

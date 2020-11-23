@@ -36,7 +36,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include <std_msgs/Int8.h>
+#include <std_msgs/msg/int8.hpp>
 #include <geometry_msgs/TransformStamped.h>
 
 #include <moveit_servo/servo.h>
