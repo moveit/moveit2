@@ -76,16 +76,16 @@ target_link_libraries(${CPP_DEMO_NAME} ${SERVO_LIB_NAME})
 ## Library for servoing toward a pose ##
 ########################################
 
-# TODO(henningkayser): Port pose tracking and demos in cpp_interface_example to ROS 2
-# add_library(${POSE_TRACKING} SHARED src/pose_tracking_demo.cpp)
-# ament_target_dependencies(${POSE_TRACKING} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-# add_dependencies(${POSE_TRACKING} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(${POSE_TRACKING} ${SERVO_LIB_NAME})
-#
+set(POSE_TRACKING pose_tracking)
+add_library(${POSE_TRACKING} SHARED src/pose_tracking.cpp)
+ament_target_dependencies(${POSE_TRACKING} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(${POSE_TRACKING} ${SERVO_LIB_NAME})
+
 # An example of pose tracking
-# set(POSE_TRACKING_DEMO_NAME servo_pose_tracking_demo)
-# add_executable(${POSE_TRACKING_DEMO_NAME} src/cpp_interface_example/pose_tracking_demo.cpp)
-# ament_target_dependencies(${POSE_TRACKING_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+set(POSE_TRACKING_DEMO_NAME servo_pose_tracking_demo)
+add_executable(${POSE_TRACKING_DEMO_NAME} src/cpp_interface_demo/pose_tracking_demo.cpp)
+target_link_libraries(${POSE_TRACKING_DEMO_NAME} ${POSE_TRACKING})
+ament_target_dependencies(${POSE_TRACKING_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Add executable for using a controller
 set(SERVO_CONTROLLER_INPUT servo_controller_input)
@@ -110,6 +110,8 @@ install(
     ${SERVO_CONTROLLER_INPUT}
     ${CPP_DEMO_NAME}
     ${FAKE_SERVO_CMDS_NAME}
+    ${POSE_TRACKING}
+    ${POSE_TRACKING_DEMO_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -190,15 +192,13 @@ if(BUILD_TESTING)
   #   ${catkin_LIBRARIES}
   # )
 
-  # # pose_tracking
-  # add_rostest_gtest(pose_tracking_test
-  #   test/pose_tracking_test.test
-  #   test/pose_tracking_test.cpp
-  # )
-  # target_link_libraries(pose_tracking_test
-  #   pose_tracking
-  #   ${catkin_LIBRARIES}
-  # )
+  # pose_tracking
+  ament_add_gtest_executable(test_servo_pose_tracking
+        test/pose_tracking_test.cpp
+  )
+  ament_target_dependencies(test_servo_pose_tracking ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  target_link_libraries(test_servo_pose_tracking ${POSE_TRACKING})
+  add_ros_test(test/launch/test_servo_pose_tracking.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
 endif()
 

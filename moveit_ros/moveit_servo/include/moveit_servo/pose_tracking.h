@@ -39,12 +39,13 @@
 #pragma once
 
 #include <atomic>
-#include <control_toolbox/pid.h>
+#include <control_toolbox/pid.hpp>
 #include <moveit_servo/make_shared_from_pool.h>
 #include <moveit_servo/servo.h>
-#include <rosparam_shortcuts/rosparam_shortcuts.h>
+#include <moveit_servo/servo_parameters.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/transform_listener.h>
+#include <rclcpp/rclcpp.hpp>
 
 // Conventions:
 // Calculations are done in the planning_frame_ unless otherwise noted.
@@ -85,7 +86,8 @@ class PoseTracking
 {
 public:
   /** \brief Constructor. Loads ROS parameters under the given namespace. */
-  PoseTracking(const ros::NodeHandle& nh, const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
+  PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParametersPtr& servo_parameters,
+               const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   PoseTrackingStatusCode moveToPose(const Eigen::Vector3d& positional_tolerance, const double angular_tolerance,
                                     const double target_pose_timeout);
@@ -112,7 +114,7 @@ public:
    * @param transform the transform that will be calculated
    * @return true if a valid transform was available
    */
-  bool getCommandFrameTransform(geometry_msgs::TransformStamped& transform);
+  bool getCommandFrameTransform(geometry_msgs::msg::TransformStamped& transform);
 
   /** \brief Re-initialize the target pose to an empty message. Can be used to reset motion between waypoints. */
   void resetTargetPose();
@@ -137,7 +139,7 @@ private:
   bool satisfiesPoseTolerance(const Eigen::Vector3d& positional_tolerance, const double angular_tolerance);
 
   /** \brief Subscribe to the target pose on this topic */
-  void targetPoseCallback(const geometry_msgs::PoseStampedConstPtr& msg);
+  void targetPoseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg);
 
   /** \brief Update PID controller target positions & orientations */
   void updateControllerSetpoints();
@@ -146,23 +148,24 @@ private:
   void updateControllerStateMeasurements();
 
   /** \brief Use PID controllers to calculate a full spatial velocity toward a pose */
-  geometry_msgs::TwistStampedConstPtr calculateTwistCommand();
+  geometry_msgs::msg::TwistStamped::ConstSharedPtr calculateTwistCommand();
 
   /** \brief Reset flags and PID controllers after a motion completes */
   void doPostMotionReset();
 
-  ros::NodeHandle nh_;
+  rclcpp::Node::SharedPtr node_;
+  moveit_servo::ServoParametersPtr servo_parameters_;
 
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-  robot_model::RobotModelConstPtr robot_model_;
+  moveit::core::RobotModelConstPtr robot_model_;
   const moveit::core::JointModelGroup* joint_model_group_;
   // Joint group used for controlling the motions
   std::string move_group_name_;
 
-  ros::Rate loop_rate_;
+  rclcpp::Rate loop_rate_;
 
   // ROS interface to Servo
-  ros::Publisher twist_stamped_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr twist_stamped_pub_;
 
   std::vector<control_toolbox::Pid> cartesian_position_pids_;
   std::vector<control_toolbox::Pid> cartesian_orientation_pids_;
@@ -171,12 +174,12 @@ private:
 
   // Transforms w.r.t. planning_frame_
   Eigen::Isometry3d command_frame_transform_;
-  ros::Time command_frame_transform_stamp_;
-  geometry_msgs::PoseStamped target_pose_;
+  rclcpp::Time command_frame_transform_stamp_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
+  geometry_msgs::msg::PoseStamped target_pose_;
   mutable std::mutex target_pose_mtx_;
 
   // Subscribe to target pose
-  ros::Subscriber target_pose_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr target_pose_sub_;
 
   tf2_ros::Buffer transform_buffer_;
   tf2_ros::TransformListener transform_listener_;
