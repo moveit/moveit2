@@ -50,6 +50,19 @@ namespace hybrid_planning_action = moveit_msgs::action;
 
 namespace hybrid_planning
 {
+// The possible hybrid planner states
+enum class HybridPlanningState : int8_t
+{
+  ABORT = -1,
+  UNKNOWN = 0,
+  READY = 1,
+  REQUEST_RECEIVED = 2,
+  GLOBAL_PLANNING_ACTIVE = 3,
+  GLOBAL_PLAN_READY = 4,
+  LOCAL_PLANNING_ACTIVE = 5,
+  FINISHED = 6
+};
+
 // Hybrid planning manager component node
 class HybridPlanningManager : public rclcpp::Node
 {
@@ -57,6 +70,7 @@ public:
   HybridPlanningManager(const rclcpp::NodeOptions& options);
 
 private:
+  HybridPlanningState state_;  // TODO: Add state publisher topic
   rclcpp::TimerBase::SharedPtr timer_;
 
   std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::RunHybridPlanning>>
@@ -82,6 +96,7 @@ private:
   void runHybridPlanning(
       std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::RunHybridPlanning>> goal_handle);
 
+  // Run the hybrid planning manager's internal state machine
   void hybridPlanningLoop();
 
   // Request global planning

@@ -72,9 +72,10 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
   hybrid_planning_request_server_ = rclcpp_action::create_server<hybrid_planning_action::RunHybridPlanning>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
       this->get_node_waitables_interface(), "hybrid_planning_request",
-      [](const rclcpp_action::GoalUUID& /*unused*/,
-         std::shared_ptr<const hybrid_planning_action::RunHybridPlanning::Goal> /*unused*/) {
+      [this](const rclcpp_action::GoalUUID& /*unused*/,
+             std::shared_ptr<const hybrid_planning_action::RunHybridPlanning::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received goal request");
+        state_ = hybrid_planning::HybridPlanningState::REQUEST_RECEIVED;
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
       [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::RunHybridPlanning>>& /*unused*/) {
@@ -82,6 +83,7 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
         return rclcpp_action::CancelResponse::ACCEPT;
       },
       std::bind(&HybridPlanningManager::runHybridPlanning, this, _1));
+  state_ = hybrid_planning::HybridPlanningState::READY;
 }
 
 int HybridPlanningManager::planGlobalTrajectory()
@@ -112,7 +114,6 @@ int HybridPlanningManager::planGlobalTrajectory()
   send_goal_options.result_callback =
       [this](
           const rclcpp_action::ClientGoalHandle<hybrid_planning_action::PlanGlobalTrajectory>::WrappedResult& result) {
-        global_planning_executed_ = true;
         auto planning_progress = std::make_shared<hybrid_planning_action::RunHybridPlanning::Feedback>();
         auto& feedback = planning_progress->feedback;
         switch (result.code)
@@ -131,6 +132,7 @@ int HybridPlanningManager::planGlobalTrajectory()
             break;
         }
         hybrid_planning_goal_handle_->publish_feedback(planning_progress);
+        state_ = hybrid_planning::HybridPlanningState::GLOBAL_PLAN_READY;
       };
   // Send global planning goal and wait until it's accepted
   auto goal_handle_future = global_planner_action_client_->async_send_goal(goal_msg, send_goal_options);
@@ -165,7 +167,6 @@ int HybridPlanningManager::runLocalPlanner()
   // Add result callback to print the result
   send_goal_options.result_callback =
       [this](const rclcpp_action::ClientGoalHandle<hybrid_planning_action::OperateLocalPlanner>::WrappedResult& result) {
-        local_planning_executed_ = true;
         auto planning_progress = std::make_shared<hybrid_planning_action::RunHybridPlanning::Feedback>();
         auto& feedback = planning_progress->feedback;
         switch (result.code)
@@ -182,8 +183,9 @@ int HybridPlanningManager::runLocalPlanner()
           default:
             feedback = "Unknown local result code";
             break;
-            hybrid_planning_goal_handle_->publish_feedback(planning_progress);
         }
+        hybrid_planning_goal_handle_->publish_feedback(planning_progress);
+        state_ = hybrid_planning::HybridPlanningState::FINISHED;
       };
   // Send global planning goal
   auto goal_handle_future = local_planner_action_client_->async_send_goal(goal_msg, send_goal_options);
@@ -193,12 +195,6 @@ int HybridPlanningManager::runLocalPlanner()
 void HybridPlanningManager::runHybridPlanning(
     std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::RunHybridPlanning>> goal_handle)
 {
-  global_planning_started_ = false;
-  local_planning_started_ = false;
-  global_planning_executed_ = false;
-  local_planning_executed_ = false;
-  abort_ = false;
-
   hybrid_planning_goal_handle_ = std::move(goal_handle);
   timer_ = this->create_wall_timer(std::chrono::milliseconds(1),
                                    std::bind(&HybridPlanningManager::hybridPlanningLoop, this));
@@ -207,44 +203,49 @@ void HybridPlanningManager::runHybridPlanning(
 void HybridPlanningManager::hybridPlanningLoop()
 {
   auto result = std::make_shared<hybrid_planning_action::RunHybridPlanning::Result>();
-  // Check for abort
-  if (abort_)
+  switch (state_)
   {
-    hybrid_planning_goal_handle_->abort(result);
-    abort_ = true;
-    timer_->cancel();
-    return;
-  }
-  // Start global planning if not already done
-  else if (!global_planning_started_)
-  {
-    global_planning_started_ = true;
-    if (!planGlobalTrajectory())
-    {
+    case hybrid_planning::HybridPlanningState::REQUEST_RECEIVED:
+      if (!this->planGlobalTrajectory())
+      {
+        state_ = hybrid_planning::HybridPlanningState::ABORT;
+        break;
+      }
+      else
+        state_ = hybrid_planning::HybridPlanningState::GLOBAL_PLANNING_ACTIVE;
+      break;
+    case hybrid_planning::HybridPlanningState::GLOBAL_PLANNING_ACTIVE:
+      break;  // wait till global planner found a solution
+    case hybrid_planning::HybridPlanningState::GLOBAL_PLAN_READY:
+      if (!this->runLocalPlanner())
+      {
+        state_ = hybrid_planning::HybridPlanningState::ABORT;
+        break;
+      }
+      else
+        state_ = hybrid_planning::HybridPlanningState::LOCAL_PLANNING_ACTIVE;
+      break;
+    case hybrid_planning::HybridPlanningState::LOCAL_PLANNING_ACTIVE:
+      break;  // wait till local planner executed the trajectory
+    case hybrid_planning::HybridPlanningState::FINISHED:
+      result->error_code.val = 1;
+      hybrid_planning_goal_handle_->succeed(result);
+      timer_->cancel();
+      state_ = hybrid_planning::HybridPlanningState::READY;
+      break;
+    case hybrid_planning::HybridPlanningState::ABORT:
       hybrid_planning_goal_handle_->abort(result);
-      abort_ = true;
-      return;
-    }
+      timer_->cancel();
+      state_ = hybrid_planning::HybridPlanningState::READY;
+      break;
+    default:
+      auto planning_progress = std::make_shared<hybrid_planning_action::RunHybridPlanning::Feedback>();
+      auto& feedback = planning_progress->feedback;
+      feedback = "Unknown hybrid planning manager state";
+      hybrid_planning_goal_handle_->publish_feedback(planning_progress);
+      state_ = hybrid_planning::HybridPlanningState::ABORT;
+      break;
   }
-  // Start local planning after global planning is done
-  else if (global_planning_executed_ && !local_planning_started_)
-  {
-    local_planning_started_ = true;
-    if (!runLocalPlanner())
-    {
-      hybrid_planning_goal_handle_->abort(result);
-      return;
-    }
-  }
-  // Send hybrid planning success
-  else if (global_planning_executed_ && !local_planning_executed_)
-  {
-    result->error_code.val = 1;
-    hybrid_planning_goal_handle_->succeed(result);
-  }
-  else
-  {
-  }  // do nothing as local or global planner is busy
 }
 
 }  // namespace hybrid_planning
