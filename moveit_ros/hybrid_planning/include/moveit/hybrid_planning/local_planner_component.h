@@ -41,11 +41,24 @@
 #include <rclcpp_action/rclcpp_action.hpp>
 
 #include <moveit_msgs/action/operate_local_planner.hpp>
+#include <moveit_msgs/msg/motion_plan_response.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 
 namespace hybrid_planning_action = moveit_msgs::action;
 
 namespace hybrid_planning
 {
+// The possible hybrid planner states
+// TODO Use lifecycle node?
+enum class LocalPlannerState : int8_t
+{
+  ABORT = -1,
+  UNKNOWN = 0,
+  READY = 1,
+  AWAIT_GLOBAL_TRAJECTORY = 2,
+  LOCAL_PLANNING_ACTIVE = 3
+};
+
 // Component node containing the local planner
 class LocalPlannerComponent : public rclcpp::Node
 {
@@ -53,11 +66,21 @@ public:
   LocalPlannerComponent(const rclcpp::NodeOptions& options);
 
 private:
+  LocalPlannerState state_;
+  rclcpp::TimerBase::SharedPtr timer_;
+  std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::OperateLocalPlanner>>
+      local_planning_goal_handle_;
+  moveit_msgs::msg::RobotTrajectory global_trajectory_;
+
+  bool global_trajectory_received_{ false };
+
+  // Global trajectory listener
+  rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_trajectory_sub_;
+
   // Local planning request action server
   rclcpp_action::Server<hybrid_planning_action::OperateLocalPlanner>::SharedPtr local_planning_request_server_;
 
   // Goal callback for local planning request action server
-  void localPlanningGoalCallback(
-      std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::OperateLocalPlanner>> goal_handle);
+  void localPlanningLoop();
 };
 }  // namespace hybrid_planning

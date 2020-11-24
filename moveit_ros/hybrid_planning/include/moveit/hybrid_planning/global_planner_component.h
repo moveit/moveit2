@@ -41,6 +41,7 @@
 #include <rclcpp_action/rclcpp_action.hpp>
 
 #include <moveit_msgs/action/plan_global_trajectory.hpp>
+#include <moveit_msgs/msg/motion_plan_response.hpp>
 
 namespace hybrid_planning_action = moveit_msgs::action;
 
@@ -55,6 +56,9 @@ public:
 private:
   // Global planning request action server
   rclcpp_action::Server<hybrid_planning_action::PlanGlobalTrajectory>::SharedPtr global_planning_request_server_;
+
+  // Global trajectory publisher
+  rclcpp::Publisher<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_trajectory_pub_;
 
   // Goal callback for global planning request action server
   void globalPlanningGoalCallback(

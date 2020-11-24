@@ -58,18 +58,54 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
         RCLCPP_INFO(LOGGER, "Received request to cancel local planning goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      std::bind(&LocalPlannerComponent::localPlanningGoalCallback, this, _1));
+      [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::OperateLocalPlanner>> goal_handle) {
+        local_planning_goal_handle_ = std::move(goal_handle);
+        timer_ = this->create_wall_timer(std::chrono::milliseconds(1),
+                                         std::bind(&LocalPlannerComponent::localPlanningLoop, this));
+      });
+
+  // Initialize global trajectory listener
+  global_trajectory_sub_ = create_subscription<moveit_msgs::msg::MotionPlanResponse>(
+      "global_trajectory", 1, [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr msg) {
+        RCLCPP_INFO(LOGGER, "Received global trajectory");
+        global_trajectory_ = msg->trajectory;
+        global_trajectory_received_ = true;
+      });
+  state_ = hybrid_planning::LocalPlannerState::READY;
 }
 
-void LocalPlannerComponent::localPlanningGoalCallback(
-    std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::OperateLocalPlanner>> goal_handle)
+void LocalPlannerComponent::localPlanningLoop()
 {
-  // Fake computation for dummy implementation
   auto result = std::make_shared<hybrid_planning_action::OperateLocalPlanner::Result>();
-  RCLCPP_INFO(LOGGER, "Local planning dummy computation started");
-  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-  RCLCPP_INFO(LOGGER, "Local planning dummy computation finished");
-  goal_handle->succeed(result);
+  switch (state_)
+  {
+    case hybrid_planning::LocalPlannerState::READY:
+      state_ = hybrid_planning::LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY;
+      break;
+    case hybrid_planning::LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY:
+      if (!global_trajectory_received_)
+      {
+        break;
+      }
+      else
+        state_ = hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE;
+      break;
+    case hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE:
+      // Fake computation for dummy implementation
+      RCLCPP_INFO(LOGGER, "Local planning dummy computation started");
+      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+      RCLCPP_INFO(LOGGER, "Local planning dummy computation finished");
+      local_planning_goal_handle_->succeed(result);
+      state_ = hybrid_planning::LocalPlannerState::READY;
+      timer_->cancel();
+      break;
+    default:
+      local_planning_goal_handle_->abort(result);
+      timer_->cancel();
+      RCLCPP_ERROR(LOGGER, "Local planner somehow failed :(");
+      state_ = hybrid_planning::LocalPlannerState::READY;
+      break;
+  }
 };
 }  // namespace hybrid_planning
 

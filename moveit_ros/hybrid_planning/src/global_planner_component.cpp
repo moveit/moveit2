@@ -62,6 +62,8 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
         return rclcpp_action::CancelResponse::ACCEPT;
       },
       std::bind(&GlobalPlannerComponent::globalPlanningGoalCallback, this, _1));
+
+  global_trajectory_pub_ = this->create_publisher<moveit_msgs::msg::MotionPlanResponse>("global_trajectory", 1);
 }
 
 void GlobalPlannerComponent::globalPlanningGoalCallback(
@@ -71,6 +73,11 @@ void GlobalPlannerComponent::globalPlanningGoalCallback(
   auto result = std::make_shared<hybrid_planning_action::PlanGlobalTrajectory::Result>();
   RCLCPP_INFO(LOGGER, "Global planning dummy computation started");
   std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+
+  // publish empty dummy msg
+  auto msg = moveit_msgs::msg::MotionPlanResponse();
+  this->global_trajectory_pub_->publish(msg);
+
   RCLCPP_INFO(LOGGER, "Global planning dummy computation finished");
   goal_handle->succeed(result);
 };
