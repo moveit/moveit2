@@ -10,25 +10,30 @@ if(BUILD_TESTING)
     target_compile_options(test_kinematics_plugin PRIVATE -Wno-deprecated-declarations)
   endif()
 
-  set(DEPS DEPENDENCIES test_kinematics_plugin)
-  set(ARGS ARGS ik_plugin:=kdl_kinematics_plugin/KDLKinematicsPlugin)
-  add_launch_test(launch/fanuc-kdl.test.py)# ${DEPS} ${ARGS})
+  #set(DEPS DEPENDENCIES test_kinematics_plugin)
+  #set(ARGS ARGS ik_plugin:=kdl_kinematics_plugin/KDLKinematicsPlugin)
+  add_launch_test(launch/fanuc-kdl.test.py)
+  add_launch_test(launch/fanuc-kdl-singular.test.py)
+  add_launch_test(launch/panda-kdl.test.py)
+  add_launch_test(launch/panda-kdl-singular.test.py)
   # add_launch_test(panda-kdl.test ${DEPS} ${ARGS})
 
   # LMA solver seems to have less precision
-  set(ARGS ARGS ik_plugin:=lma_kinematics_plugin/LMAKinematicsPlugin tolerance:=0.0005)
+  #set(ARGS ARGS ik_plugin:=lma_kinematics_plugin/LMAKinematicsPlugin tolerance:=0.0005)
   # add_launch_test(fanuc-kdl-test.py)# ${DEPS} ${ARGS})
   # add_launch_test(panda-kdl.test ${DEPS} ${ARGS})
 
   # Run ikfast tests only if the corresponding packages were built
   find_package(fanuc_ikfast_plugin QUIET)
   if(fanuc_ikfast_plugin_FOUND)
-    add_rostest(fanuc-ikfast.test ${DEPS})
+    add_launch_test(launch/fanuc-ikfast.test.py)
+    add_launch_test(launch/fanuc-ikfast-singular.test.py)
   endif()
 
   find_package(panda_ikfast_plugin QUIET)
   if(panda_ikfast_plugin_FOUND)
-    add_rostest(panda-ikfast.test ${DEPS})
+    add_launch_test(launch/panda-ikfast.test.py)
+    add_launch_test(launch/panda-ikfast-singular.test.py)
   endif()
 
   # Benchmarking program for cached_ik_kinematics

@@ -32,7 +32,6 @@ def load_yaml(package_name, file_path):
 @pytest.mark.rostest
 def generate_test_description():
 
-    # Component yaml files are grouped in separate namespaces
     robot_description_config = load_file('moveit_resources_fanuc_description', 'urdf/fanuc.urdf')
     robot_description = {'robot_description' : robot_description_config}
 
@@ -40,10 +39,10 @@ def generate_test_description():
     robot_description_semantic = {'robot_description_semantic' : robot_description_semantic_config}
     kinematics_yaml = load_yaml('moveit_resources_fanuc_moveit_config', 'config/kinematics.yaml')
     robot_description_kinematics = { 'robot_description_kinematics' : kinematics_yaml }
-    test_param = load_yaml('moveit_kinematics', 'config/fanuc-kdl-test.yaml')
+    test_param = load_yaml('moveit_kinematics', 'config/fanuc-ikfast-test.yaml')
 
     private_params = {
-        'seed': [0.0, -0.32, -0.5, 0.0, -0.5, 0.0],
+        'seed': [0, -0.32, -0.5, 0, -0.5, 0],
         'consistency_limits': [0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
         'num_fk_tests': 100,
         'num_ik_tests': 100,
@@ -79,21 +78,22 @@ def generate_test_description():
                       },
         }
     }
-    fanuc_kdl = Node(package='moveit_kinematics',
+
+    fanuc_ikfast = Node(package='moveit_kinematics',
                      executable='test_kinematics_plugin',
-                     name='fanuc_kdl',
+                     name='fanuc_ikfast',
                      parameters=[robot_description,
                                  robot_description_semantic,
                                  robot_description_kinematics,
                                  test_param,
-                                 private_params,
-                                 unit_tests_poses
+                                 singular_private_params,
+                                 singular_unit_tests_poses
                                  ],
                      output='screen'
     )
 
     return LaunchDescription([
-        fanuc_kdl,
+        fanuc_ikfast,
         launch_testing.actions.ReadyToTest(),
     ])
 
@@ -101,4 +101,4 @@ def generate_test_description():
 class TestOutcome(unittest.TestCase):
 
     def test_exit_codes(self, proc_info):
-        launch_testing.asserts.assertExitCodes(proc_info)
+      launch_testing.asserts.assertExitCodes(proc_info)
