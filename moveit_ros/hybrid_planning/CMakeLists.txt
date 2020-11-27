@@ -33,19 +33,19 @@ add_library(moveit_global_planner_component SHARED src/global_planner_component.
 set_target_properties(moveit_global_planner_component PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_global_planner_component ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-rclcpp_components_register_nodes(moveit_global_planner_component "hybrid_planning::GlobalPlannerComponent")
+rclcpp_components_register_nodes(moveit_global_planner_component "moveit::hybrid_planning::GlobalPlannerComponent")
 
 add_library(moveit_hybrid_planning_manager SHARED src/hybrid_planning_manager.cpp)
 set_target_properties(moveit_hybrid_planning_manager PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_hybrid_planning_manager ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-rclcpp_components_register_nodes(moveit_hybrid_planning_manager "hybrid_planning::HybridPlanningManager")
+rclcpp_components_register_nodes(moveit_hybrid_planning_manager "moveit::hybrid_planning::HybridPlanningManager")
 
 add_library(moveit_local_planner_component SHARED src/local_planner_component.cpp)
 set_target_properties(moveit_local_planner_component PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_local_planner_component ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-rclcpp_components_register_nodes(moveit_local_planner_component "hybrid_planning::LocalPlannerComponent")
+rclcpp_components_register_nodes(moveit_local_planner_component "moveit::hybrid_planning::LocalPlannerComponent")
 
 add_executable(dummy_action_client test/dummy_action_client.cpp)
 ament_target_dependencies(dummy_action_client ${THIS_PACKAGE_INCLUDE_DEPENDS})

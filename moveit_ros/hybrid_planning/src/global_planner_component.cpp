@@ -40,6 +40,8 @@
 #include <chrono>
 #include <thread>
 
+namespace moveit
+{
 namespace hybrid_planning
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
@@ -49,15 +51,15 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
 {
   // Initialize global planning request action server
   using namespace std::placeholders;
-  global_planning_request_server_ = rclcpp_action::create_server<hybrid_planning_action::PlanGlobalTrajectory>(
+  global_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::PlanGlobalTrajectory>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
       this->get_node_waitables_interface(), "global_planning_request",
       [](const rclcpp_action::GoalUUID& /*unused*/,
-         std::shared_ptr<const hybrid_planning_action::PlanGlobalTrajectory::Goal> /*unused*/) {
+         std::shared_ptr<const moveit_msgs::action::PlanGlobalTrajectory::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received global planning goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::PlanGlobalTrajectory>>& /*unused*/) {
+      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::PlanGlobalTrajectory>>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel global planning goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
@@ -67,10 +69,10 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
 }
 
 void GlobalPlannerComponent::globalPlanningGoalCallback(
-    std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::PlanGlobalTrajectory>> goal_handle)
+    std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::PlanGlobalTrajectory>> goal_handle)
 {
   // Fake computation for dummy implementation
-  auto result = std::make_shared<hybrid_planning_action::PlanGlobalTrajectory::Result>();
+  auto result = std::make_shared<moveit_msgs::action::PlanGlobalTrajectory::Result>();
   RCLCPP_INFO(LOGGER, "Global planning dummy computation started");
   std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
@@ -82,7 +84,9 @@ void GlobalPlannerComponent::globalPlanningGoalCallback(
   goal_handle->succeed(result);
 };
 }  // namespace hybrid_planning
+}  // namespace moveit
+
 
 // Register the component with class_loader
 #include <rclcpp_components/register_node_macro.hpp>
-RCLCPP_COMPONENTS_REGISTER_NODE(hybrid_planning::GlobalPlannerComponent)
+RCLCPP_COMPONENTS_REGISTER_NODE(moveit::hybrid_planning::GlobalPlannerComponent)

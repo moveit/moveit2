@@ -43,8 +43,8 @@
 #include <moveit_msgs/action/plan_global_trajectory.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 
-namespace hybrid_planning_action = moveit_msgs::action;
-
+namespace moveit
+{
 namespace hybrid_planning
 {
 // Component node containing the global planner
@@ -55,13 +55,14 @@ public:
 
 private:
   // Global planning request action server
-  rclcpp_action::Server<hybrid_planning_action::PlanGlobalTrajectory>::SharedPtr global_planning_request_server_;
+  rclcpp_action::Server<moveit_msgs::action::PlanGlobalTrajectory>::SharedPtr global_planning_request_server_;
 
   // Global trajectory publisher
   rclcpp::Publisher<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_trajectory_pub_;
 
   // Goal callback for global planning request action server
   void globalPlanningGoalCallback(
-      std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::PlanGlobalTrajectory>> goal_handle);
+      std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::PlanGlobalTrajectory>> goal_handle);
 };
 }  // namespace hybrid_planning
+}  // namespace moveit

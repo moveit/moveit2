@@ -37,6 +37,8 @@
 
 #include <moveit/hybrid_planning/local_planner_component.h>
 
+namespace moveit
+{
 namespace hybrid_planning
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
@@ -46,19 +48,19 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
 {
   // Initialize local planning request action server
   using namespace std::placeholders;
-  local_planning_request_server_ = rclcpp_action::create_server<hybrid_planning_action::OperateLocalPlanner>(
+  local_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::OperateLocalPlanner>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
       this->get_node_waitables_interface(), "operate_local_planner",
       [](const rclcpp_action::GoalUUID& /*unused*/,
-         std::shared_ptr<const hybrid_planning_action::OperateLocalPlanner::Goal> /*unused*/) {
+         std::shared_ptr<const moveit_msgs::action::OperateLocalPlanner::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received local planning goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::OperateLocalPlanner>>& /*unused*/) {
+      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::OperateLocalPlanner>>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel local planning goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::OperateLocalPlanner>> goal_handle) {
+      [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::OperateLocalPlanner>> goal_handle) {
         local_planning_goal_handle_ = std::move(goal_handle);
         timer_ = this->create_wall_timer(std::chrono::milliseconds(1),
                                          std::bind(&LocalPlannerComponent::localPlanningLoop, this));
@@ -76,7 +78,7 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
 
 void LocalPlannerComponent::localPlanningLoop()
 {
-  auto result = std::make_shared<hybrid_planning_action::OperateLocalPlanner::Result>();
+  auto result = std::make_shared<moveit_msgs::action::OperateLocalPlanner::Result>();
   switch (state_)
   {
     case hybrid_planning::LocalPlannerState::READY:
@@ -108,7 +110,8 @@ void LocalPlannerComponent::localPlanningLoop()
   }
 };
 }  // namespace hybrid_planning
+}  // namespace moveit
 
 // Register the component with class_loader
 #include <rclcpp_components/register_node_macro.hpp>
-RCLCPP_COMPONENTS_REGISTER_NODE(hybrid_planning::LocalPlannerComponent)
+RCLCPP_COMPONENTS_REGISTER_NODE(moveit::hybrid_planning::LocalPlannerComponent)

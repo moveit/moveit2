@@ -44,8 +44,8 @@
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 
-namespace hybrid_planning_action = moveit_msgs::action;
-
+namespace moveit
+{
 namespace hybrid_planning
 {
 // The possible hybrid planner states
@@ -68,8 +68,7 @@ public:
 private:
   LocalPlannerState state_;
   rclcpp::TimerBase::SharedPtr timer_;
-  std::shared_ptr<rclcpp_action::ServerGoalHandle<hybrid_planning_action::OperateLocalPlanner>>
-      local_planning_goal_handle_;
+  std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::OperateLocalPlanner>> local_planning_goal_handle_;
   moveit_msgs::msg::RobotTrajectory global_trajectory_;
 
   bool global_trajectory_received_{ false };
@@ -78,9 +77,10 @@ private:
   rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_trajectory_sub_;
 
   // Local planning request action server
-  rclcpp_action::Server<hybrid_planning_action::OperateLocalPlanner>::SharedPtr local_planning_request_server_;
+  rclcpp_action::Server<moveit_msgs::action::OperateLocalPlanner>::SharedPtr local_planning_request_server_;
 
   // Goal callback for local planning request action server
   void localPlanningLoop();
 };
 }  // namespace hybrid_planning
+}  // namespace moveit
