@@ -2,6 +2,22 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2020-11-23)
+------------------
+* [fix] Interactive markers not visible in motion planning plugin (`#299 <https://github.com/ros-planning/moveit2/issues/299>`_)
+* [fix] Rosdep dependencies ros_testing, OpenMP (`#309 <https://github.com/ros-planning/moveit2/issues/309>`_)
+* [maint] Remove deprecated namespaces robot_model, robot_state  (`#276 <https://github.com/ros-planning/moveit2/issues/276>`_)
+* [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)
+  * New moveit_package() macro for compile flags, Windows support etc
+  * Add package 'moveit_common' as build dependency for moveit_package()
+  * Added -Wno-overloaded-virtual compiler flag for moveit_ros_planners_ompl
+* [maint] Compilation fixes for macOS (`#271 <https://github.com/ros-planning/moveit2/issues/271>`_)
+* [ros2-migration] Enable warehouse in moveit_ros_benchmarks (`#301 <https://github.com/ros-planning/moveit2/issues/301>`_)
+* [ros2-migration] Port moveit_ros_warehouse to ROS 2 (`#273 <https://github.com/ros-planning/moveit2/issues/273>`_)
+* [ros2-migration] Port moveit_ros_benchmarks to ROS 2 (`#225 <https://github.com/ros-planning/moveit2/issues/225>`_)
+* [ros2-migration] Port moveit_group to ROS 2 (`#217 <https://github.com/ros-planning/moveit2/issues/217>`_)
+* Contributors: Abdullah Alzaidy, Edwin Fan, Henning Kayser, Jafar Abdi, Lior Lustgarten, Yu Yan
+
 1.1.1 (2020-10-13)
 ------------------
 * [fix] Let the max number of contacts be the amount of world objects + link models with geometry (`#2355 <https://github.com/ros-planning/moveit/issues/2355>`_)

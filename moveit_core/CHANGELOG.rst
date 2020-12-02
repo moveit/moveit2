@@ -2,33 +2,69 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2020-11-23)
+------------------
+* [fix] Clang-tidy fixes (`#264 <https://github.com/ros-planning/moveit2/issues/264>`_, `#210 <https://github.com/ros-planning/moveit2/issues/210>`_)
+  * Suppress false-positive clang-tidy fix in DistanceResultsData
+  * Fix Eigen alignment in DistanceResultsData
+  * Fix readability-identifier-naming, performance-for-range-copy, readability-named-parameter
+* [fix] Fixup moveit_resources usage in moveit_core test (`#259 <https://github.com/ros-planning/moveit2/issues/259>`_)
+* [maint] Remove deprecated namespaces robot_model, robot_state  (`#276 <https://github.com/ros-planning/moveit2/issues/276>`_)
+* [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)
+  * New moveit_package() macro for compile flags, Windows support etc
+  * Add package 'moveit_common' as build dependency for moveit_package()
+  * Added -Wno-overloaded-virtual compiler flag for moveit_ros_planners_ompl
+* [maint] Compilation fixes for macOS (`#271 <https://github.com/ros-planning/moveit2/issues/271>`_)
+* [maint] kinematics_base: remove deprecated initialize function (`#232 <https://github.com/ros-planning/moveit2/issues/232>`_)
+* [maint] Update to new moveit_resources layout (`#247 <https://github.com/ros-planning/moveit2/issues/247>`_)
+* [maint] Enable "test_time_optimal_trajectory_generation" unit test (`#241 <https://github.com/ros-planning/moveit2/issues/241>`_)
+* [maint] CMakeLists dependency cleanup and fixes (`#226 <https://github.com/ros-planning/moveit2/issues/226>`_, `#228 <https://github.com/ros-planning/moveit2/issues/228>`_)
+* [ros2-migration] Migrate to ROS 2 Foxy (`#227 <https://github.com/ros-planning/moveit2/issues/227>`_)
+* Contributors: Abdullah Alzaidy, Dave Coleman, Henning Kayser, Jafar Abdi, Lior Lustgarten, Mark Moll, Mohmmad Ayman, Robert Haschke, Yu Yan, Tyler Weaver, Sebastian Jahr
+
 2.0.0 (2020-02-17)
 ------------------
+* [improve] Load OMPL planner config parameters
 * [fix] Fix double node executor exceptions
   * Load parameters from node instead of SyncParameterClient
 * [fix] Load planning request adapter parameters from subnamespace
-* [port] Port moveit_planners_ompl to ROS 2 (`#142 <https://github.com/ros-planning/moveit2/issues/142>`_)
-* [improve] Load OMPL planner config parameters
-* [port] Re-enable parameter util functions
-  * Construct constraints from node parameters
-* [port] Compile OMPL planning plugin
-* [fix] Fix Eigen3 linking issue in moveit_core (`#164 <https://github.com/ros-planning/moveit2/issues/164>`_)
-  * Closes `#151 <https://github.com/ros-planning/moveit2/issues/151>`_
-* [port] Port moveit ros visualization to ROS 2 (`#160 <https://github.com/ros-planning/moveit2/issues/160>`_)
-* [port] Port external rclcpp utils functions and add them to MoveIt 2 project temporary
-* [port] Port moveit_simple_controller_manager to ROS 2 (`#158 <https://github.com/ros-planning/moveit2/issues/158>`_)
-* [port] Port moveit_simple_controller_manager
 * [fix] KinematicsBase: fix default value in parameter lookup (`#154 <https://github.com/ros-planning/moveit2/issues/154>`_)
 * [sys] Upgrade to ROS 2 Eloquent (`#152 <https://github.com/ros-planning/moveit2/issues/152>`_)
-* [fix] Fix unit tests
-* [maintenance] Remove redundant build dependency to 'angles'
 * [sys] Fix CMakeLists.txt files for Eloquent
-* [improve] Pass node to KinematicsBase initialization (`#145 <https://github.com/ros-planning/moveit2/issues/145>`_)
 * [sys] replace rosunit -> ament_cmake_gtest
-* [port] Port planning_request_adapter_plugins to ROS2 (`#114 <https://github.com/ros-planning/moveit2/issues/114>`_)
-* [port] Port planning_request_adapter_plugins to ROS 2
-* [sys] Fix ament_lint
-* Contributors: Henning Kayser, Jafar Abdi
+* [maintenance] Remove redundant build dependency to 'angles'
+* [ros2-migration] Build moveit_core with colcon (`#117 <https://github.com/ros-planning/moveit2/issues/117>`_, `#125 <https://github.com/ros-planning/moveit2/issues/125>`_, `#164 <https://github.com/ros-planning/moveit2/issues/164>`_)
+* [ros2-migration] Increase CMake version to 3.10.2 per REP 2000 (`#27 <https://github.com/ros-planning/moveit2/issues/27>`_)
+* [ros2-migration] Port moveit ros visualization to ROS 2 (`#160 <https://github.com/ros-planning/moveit2/issues/160>`_)
+* [ros2-migration] Port moveit_simple_controller_manager to ROS 2 (`#158 <https://github.com/ros-planning/moveit2/issues/158>`_)
+* [ros2-migration] Port planning_request_adapter_plugins to ROS 2 (`#62 <https://github.com/ros-planning/moveit2/issues/62>`_, `#87 <https://github.com/ros-planning/moveit2/issues/87>`_, `#114 <https://github.com/ros-planning/moveit2/issues/114>`_)
+* [ros2-migration] Port kinematic_constraints to ROS2 (`#42 <https://github.com/ros-planning/moveit2/issues/42>`_)
+* [ros2-migration] Port collision_distance_field to ROS 2 (`#65 <https://github.com/ros-planning/moveit2/issues/65>`_)
+* [ros2-migration] Port constraint_samplers to ROS 2 (`#60 <https://github.com/ros-planning/moveit2/issues/60>`_)
+* [ros2-migration] Port kinematics_base to ROS 2 (`#8 <https://github.com/ros-planning/moveit2/issues/8>`_, `#83 <https://github.com/ros-planning/moveit2/issues/83>`_, `#145 <https://github.com/ros-planning/moveit2/issues/145>`_)
+* [ros2-migration] Port collision_detection_fcl to ROS 2 (`#41 <https://github.com/ros-planning/moveit2/issues/41>`_)
+* [ros2-migration] Port planning_scene to ROS2 (`#43 <https://github.com/ros-planning/moveit2/issues/43>`_)
+* [ros2-migration] Port trajectory_processing to ROS 2 (`#63 <https://github.com/ros-planning/moveit2/issues/63>`_)
+* [ros2-migration] Port collision_detection to ROS 2 (`#40 <https://github.com/ros-planning/moveit2/issues/40>`_)
+* [ros2-migration] Port distance_field to ROS 2 (`#64 <https://github.com/ros-planning/moveit2/issues/64>`_)
+* [ros2-migration] Port background_processing to ROS 2  (`#55 <https://github.com/ros-planning/moveit2/issues/55>`_, `#82 <https://github.com/ros-planning/moveit2/issues/82>`_)
+* [ros2-migration] Port controller_manager to ROS 2 (`#84 <https://github.com/ros-planning/moveit2/issues/84>`_)
+* [ros2-migration] Port moveit_core_utils to ROS 2 (`#68 <https://github.com/ros-planning/moveit2/issues/68>`_)
+* [ros2-migration] Port robot_state to ROS 2 (`#80 <https://github.com/ros-planning/moveit2/issues/80>`_)
+* [ros2-migration] Port robot_trajectory to ROS 2 (`#39 <https://github.com/ros-planning/moveit2/issues/39>`_)
+* [ros2-migration] Port kinematics_metrics to ROS 2 (`#66 <https://github.com/ros-planning/moveit2/issues/66>`_, `#88 <https://github.com/ros-planning/moveit2/issues/88>`_)
+* [ros2-migration] Port planning_interface to ROS 2 (`#61 <https://github.com/ros-planning/moveit2/issues/61>`_, `#86 <https://github.com/ros-planning/moveit2/issues/86>`_)
+* [ros2-migration] Port dynamics_solver to ROS 2 (`#67 <https://github.com/ros-planning/moveit2/issues/67>`_, `#89 <https://github.com/ros-planning/moveit2/issues/89>`_)
+* [ros2-migration] Port robot_model to ROS 2 (`#10 <https://github.com/ros-planning/moveit2/issues/10>`_)
+* [ros2-migration] Port profiler to ROS 2 (`#9 <https://github.com/ros-planning/moveit2/issues/9>`_)
+* [ros2-migration] Port transforms to ROS 2 (`#12 <https://github.com/ros-planning/moveit2/issues/12>`_)
+* [ros2-migration] Port exceptions to ROS 2 (`#7 <https://github.com/ros-planning/moveit2/issues/7>`_, `#81 <https://github.com/ros-planning/moveit2/issues/81>`_)
+* [ros2-migration] Port controller_manager submodule of moveit_core to ROS 2 (`#6 <https://github.com/ros-planning/moveit2/issues/6>`_)
+* [ros2-migration] Port version submodule of moveit_core (`#4 <https://github.com/ros-planning/moveit2/issues/4>`_)
+* [ros2-migration] Port backtrace to ROS 2 (`#5 <https://github.com/ros-planning/moveit2/issues/5>`_)
+* [ros2-migration] Port sensor_manager ROS 2 (`#11 <https://github.com/ros-planning/moveit2/issues/11>`_)
+* [ros2-migration] Port macros to ROS 2 (`#3 <https://github.com/ros-planning/moveit2/issues/3>`_)
+* Contributors: Abdullah Alzaidy, Alejandro Hernández Cordero, Anas Mchichou El Harrak, Dave Coleman, Henning Kayser, Jafar Abdi, Mark Moll, Michael Görner, Mike Lautman, Mohmmad Ayman, Robert Haschke, Tyler Weaver, Víctor Mayoral Vilches, Yu Yan
 
 1.1.1 (2020-10-13)
 ------------------
@@ -338,39 +374,39 @@ Changelog for package moveit_core
 
 0.8.2 (2016-06-17)
 ------------------
-* [feat] planning_scene updates: expose success state to caller. This is required to get the information back for the ApplyPlanningSceneService. `#296 <https://github.com/ros-planning/moveit_core/issues/297>`_
+* [feat] planning_scene updates: expose success state to caller. This is required to get the information back for the ApplyPlanningSceneService. `ros-planning:moveit_core#296 <https://github.com/ros-planning/moveit_core/issues/297>`_
 * [sys] replaced cmake_modules dependency with eigen
 * Contributors: Michael Ferguson, Robert Haschke, Michael Goerner, Isaac I. Y. Saito
 
 0.8.1 (2016-05-19)
 ------------------
-* Corrected check in getStateAtDurationFromStart (cherry-picking `#291 <https://github.com/ros-planning/moveit_core/issues/291>`_ from indigo-devel)
+* Corrected check in getStateAtDurationFromStart (cherry-picking `ros-planning:moveit_core#291 <https://github.com/ros-planning/moveit_core/issues/291>`_ from indigo-devel)
 * Contributors: Hamal Marino
 
 0.8.0 (2016-05-18)
 ------------------
-* [feat] Added file and trajectory_msg to RobotState conversion functions `#267 <https://github.com/ros-planning/moveit_core/issues/267>`_
-* [feat] Added setJointVelocity and setJointEffort functions `#261 <https://github.com/ros-planning/moveit_core/issues/261>`_
-* [feat] KinematicsBase changes `#248 <https://github.com/ros-planning/moveit_core/issues/248>`_
+* [feat] Added file and trajectory_msg to RobotState conversion functions `ros-planning:moveit_core#267 <https://github.com/ros-planning/moveit_core/issues/267>`_
+* [feat] Added setJointVelocity and setJointEffort functions `ros-planning:moveit_core#261 <https://github.com/ros-planning/moveit_core/issues/261>`_
+* [feat] KinematicsBase changes `ros-planning:moveit_core#248 <https://github.com/ros-planning/moveit_core/issues/248>`_
 * [feat] added an ik_seed_state argument to the new getPositionIK(...) method
 * [feat] added new interface method for computing multiple ik solutions for a single pose
-* [fix] RevoluteJointModel::computeVariablePositions `#282 <https://github.com/ros-planning/moveit_core/issues/282>`_
-* [fix] getStateAtDurationFromStart would never execute as the check for number of waypoints was inverted `#289 <https://github.com/ros-planning/moveit_core/issues/289>`_
-* [fix] Revert "Use libfcl-dev rosdep key in kinetic" `#287 <https://github.com/ros-planning/moveit_core/issues/287>`_
-* [fix] memory leak in RobotState::attachBody `#276 <https://github.com/ros-planning/moveit_core/issues/276>`_. Fixing `#275 <https://github.com/ros-planning/moveit_core/issues/275>`_
-* [fix] New getOnlyOneEndEffectorTip() function `#262 <https://github.com/ros-planning/moveit_core/issues/262>`_
-* [fix] issue `#258 <https://github.com/ros-planning/moveit_core/issues/258>`_ in jade-devel `#266 <https://github.com/ros-planning/moveit_core/issues/266>`_
-* [fix] Segfault in parenthesis operator `#254 <https://github.com/ros-planning/moveit_core/issues/254>`_
-* [fix] API Change of shape_tools `#242 <https://github.com/ros-planning/moveit_core/issues/242>`_
-* [fix] Fixed bug in KinematicConstraintSet::decide that makes it evaluate only joint_constraints. `#250 <https://github.com/ros-planning/moveit_core/issues/250>`_
-* [fix] Prevent divide by zero `#246 <https://github.com/ros-planning/moveit_core/issues/246>`_
+* [fix] RevoluteJointModel::computeVariablePositions `ros-planning:moveit_core#282 <https://github.com/ros-planning/moveit_core/issues/282>`_
+* [fix] getStateAtDurationFromStart would never execute as the check for number of waypoints was inverted `ros-planning:moveit_core#289 <https://github.com/ros-planning/moveit_core/issues/289>`_
+* [fix] Revert "Use libfcl-dev rosdep key in kinetic" `ros-planning:moveit_core#287 <https://github.com/ros-planning/moveit_core/issues/287>`_
+* [fix] memory leak in RobotState::attachBody `ros-planning:moveit_core#276 <https://github.com/ros-planning/moveit_core/issues/276>`_. Fixing `ros-planning:moveit_core#275 <https://github.com/ros-planning/moveit_core/issues/275>`_
+* [fix] New getOnlyOneEndEffectorTip() function `ros-planning:moveit_core#262 <https://github.com/ros-planning/moveit_core/issues/262>`_
+* [fix] issue `ros-planning:moveit_core#258 <https://github.com/ros-planning/moveit_core/issues/258>`_ in jade-devel `ros-planning:moveit_core#266 <https://github.com/ros-planning/moveit_core/issues/266>`_
+* [fix] Segfault in parenthesis operator `ros-planning:moveit_core#254 <https://github.com/ros-planning/moveit_core/issues/254>`_
+* [fix] API Change of shape_tools `ros-planning:moveit_core#242 <https://github.com/ros-planning/moveit_core/issues/242>`_
+* [fix] Fixed bug in KinematicConstraintSet::decide that makes it evaluate only joint_constraints. `ros-planning:moveit_core#250 <https://github.com/ros-planning/moveit_core/issues/250>`_
+* [fix] Prevent divide by zero `ros-planning:moveit_core#246 <https://github.com/ros-planning/moveit_core/issues/246>`_
 * [fix] removed the 'f' float specifiers and corrected misspelled method name
 * [fix] typo MULTIPLE_TIPS_NO_SUPPORTED -> MULTIPLE_TIPS_NOT_SUPPORTED
-* [sys] Upgrade to Eigen3 as required in Jade `#293 <https://github.com/ros-planning/moveit_core/issues/293>`_
-* [sys] [cmake] Tell the compiler about FCL include dirs `#263 <https://github.com/ros-planning/moveit_core/issues/263>`_
-* [sys] Install static libs `#251 <https://github.com/ros-planning/moveit_core/issues/251>`_
-* [enhance] Allow a RobotTrajectory to be initialized with a pointer joint model group `#245 <https://github.com/ros-planning/moveit_core/issues/245>`_
-* [doc] Better documentation and formatting `#244 <https://github.com/ros-planning/moveit_core/issues/244>`_
+* [sys] Upgrade to Eigen3 as required in Jade `ros-planning:moveit_core#293 <https://github.com/ros-planning/moveit_core/issues/293>`_
+* [sys] [cmake] Tell the compiler about FCL include dirs `ros-planning:moveit_core#263 <https://github.com/ros-planning/moveit_core/issues/263>`_
+* [sys] Install static libs `ros-planning:moveit_core#251 <https://github.com/ros-planning/moveit_core/issues/251>`_
+* [enhance] Allow a RobotTrajectory to be initialized with a pointer joint model group `ros-planning:moveit_core#245 <https://github.com/ros-planning/moveit_core/issues/245>`_
+* [doc] Better documentation and formatting `ros-planning:moveit_core#244 <https://github.com/ros-planning/moveit_core/issues/244>`_
 * Contributors: Alexis Ballier, Bastian Gaspers, Christian Dornhege, Dave Coleman, Gary Servin, Ioan A Sucan, Isaac I.Y. Saito, Jim Mainprice, Levi Armstrong, Michael Ferguson, Mihai Pomarlan, Robert Haschke, Sachin Chitta, Sam Pfeiffer, Steven Peters, Severin Lemaignan, jrgnicho, ros-devel, simonschmeisser
 
 0.6.15 (2015-01-20)
@@ -395,20 +431,19 @@ Changelog for package moveit_core
 
 0.6.12 (2014-12-03)
 -------------------
-* Merge pull request `#214 <https://github.com/ros-planning/moveit_core/issues/214>`_ from mikeferguson/collision_plugin
+* Merge pull request `ros-planning:moveit_core#214 <https://github.com/ros-planning/moveit_core/issues/214>`_ from mikeferguson/collision_plugin
   moveit_core components of collision plugins
-* Merge pull request `#210 <https://github.com/ros-planning/moveit_core/issues/210>`_ from davetcoleman/debug_model
+* Merge pull request `ros-planning:moveit_core#210 <https://github.com/ros-planning/moveit_core/issues/210>`_ from davetcoleman/debug_model
   Fix truncated debug message
 * Fixed a number of tests, all are now passing on buildfarm
-* Merge pull request `#208 <https://github.com/ros-planning/moveit_core/issues/208>`_ from mikeferguson/update_fcl_api
+* Merge pull request `ros-planning:moveit_core#208 <https://github.com/ros-planning/moveit_core/issues/208>`_ from mikeferguson/update_fcl_api
   update to use non-deprecated call
 * Contributors: Dave Coleman, Ioan A Sucan, Michael Ferguson
 
 0.6.11 (2014-11-03)
 -------------------
-* Merge pull request `#204 <https://github.com/ros-planning/moveit_core/issues/204>`_ from mikeferguson/indigo-devel
-  forward port `#198 <https://github.com/ros-planning/moveit_core/issues/198>`_ to indigo
-* forward port `#198 <https://github.com/ros-planning/moveit_core/issues/198>`_ to indigo
+* Merge pull request `ros-planning:moveit_core#204 <https://github.com/ros-planning/moveit_core/issues/204>`_ from mikeferguson/indigo-devel
+* forward port `ros-planning:moveit_core#198 <https://github.com/ros-planning/moveit_core/issues/198>`_ to indigo
 * Contributors: Ioan A Sucan, Michael Ferguson
 
 0.6.10 (2014-10-27)
@@ -511,7 +546,7 @@ Changelog for package moveit_core
 0.5.7 (2014-02-27)
 ------------------
 * Constraint samplers bug fix and improvements
-* fix for reverting PR #148
+* fix for reverting PR ros-planning:moveit_core#148
 * Fix joint variable location segfault
 * Better enforce is_valid as a flag that indicated proper configuration has been completed, added comments and warning
 * Fix fcl dependency in CMakeLists.txt
@@ -566,7 +601,7 @@ Changelog for package moveit_core
 * Compute associated transforms bug fixed.
 * Fixing broken tests for changes in robot_state.
 * Fixed doxygen function-grouping.
-* Fix `#95 <https://github.com/ros-planning/moveit_core/issues/95>`_.
+* Fix `ros-planning:moveit_core#95 <https://github.com/ros-planning/moveit_core/issues/95>`_.
 * More docs for RobotState.
 
 0.5.4 (2013-10-11)
@@ -583,7 +618,7 @@ Changelog for package moveit_core
 ------------------
 * Rewrite RobotState and significantly update RobotModel; lots of optimizations
 * add support for diffs in RobotState
-* fix `#87 <https://github.com/ros-planning/moveit_core/issues/87>`_
+* fix `ros-planning:moveit_core#87 <https://github.com/ros-planning/moveit_core/issues/87>`_
 * add non-const variants for getRobotMarkers
 * use trajectory_msgs::JointTrajectory for object attach information instead of sensor_msgs::JointState
 * add effort to robot state
@@ -629,7 +664,7 @@ Changelog for package moveit_core
 * slight improvements to profiler
 * Fixes compile failures on OS X with clang
 * minor speedup in construction of RobotState
-* fix time parametrization crash due to joints that have #variables!=1
+* fix time parametrization crash due to joints that have ros-planning:moveit_core#variables!=1
 * remove re-parenting of URDF models feature (we can do it cleaner in a different way)
 
 0.4.4 (2013-06-03)
@@ -647,17 +682,17 @@ Changelog for package moveit_core
 
 0.4.1 (2013-05-27)
 ------------------
-* fix `#66 <https://github.com/ros-planning/moveit_core/issues/66>`_
+* fix `ros-planning:moveit_core#66 <https://github.com/ros-planning/moveit_core/issues/66>`_
 * rename getTransforms() to copyTransforms()
 * refactor how we deal with frames; add a separate library
 * remove direction from CollisionResult
 
 0.4.0 (2013-05-23)
 ------------------
-* attempt to fix `#241 <https://github.com/ros-planning/moveit_core/issues/241>`_ from moveit_ros
+* attempt to fix `ros-planning:moveit_core#241 <https://github.com/ros-planning/moveit_core/issues/241>`_ from moveit_ros
 * update paths so that files are found in the globally installed moveit_resources package
 * remove magical 0.2 and use of velocity_map
-* Work on issue `#35 <https://github.com/ros-planning/moveit_core/issues/35>`_.
+* Work on issue `ros-planning:moveit_core#35 <https://github.com/ros-planning/moveit_core/issues/35>`_.
 
 0.3.19 (2013-05-02)
 -------------------
@@ -704,8 +739,8 @@ Changelog for package moveit_core
 0.3.14 (2013-02-05)
 -------------------
 * initialize controller state by default
-* fix `#157 <https://github.com/ros-planning/moveit_core/issues/157>`_ in moveit_ros
-* fix moveit_ros/`#152 <https://github.com/ros-planning/moveit_core/issues/152>`_
+* fix `ros-planning:moveit_core#157 <https://github.com/ros-planning/moveit_core/issues/157>`_ in moveit_ros
+* fix moveit_ros/`ros-planning:moveit_core#152 <https://github.com/ros-planning/moveit_core/issues/152>`_
 
 0.3.13 (2013-02-04 23:25)
 -------------------------
@@ -728,7 +763,7 @@ Changelog for package moveit_core
 
 0.3.10 (2013-01-28)
 -------------------
-* fix `#28 <https://github.com/ros-planning/moveit_core/issues/28>`_
+* fix `ros-planning:moveit_core#28 <https://github.com/ros-planning/moveit_core/issues/28>`_
 * improves implementation of metaball normal refinement for octomap
 * add heuristic to detect jumps in joint-space distance
 * make it such that when an end effector is looked up by group name OR end effector name, things work as expected
@@ -742,7 +777,7 @@ Changelog for package moveit_core
 * add computeCartesianPath()
 * add ability to load & save scene geometry as text
 * compute jacobian with kdl
-* fix `#15 <https://github.com/ros-planning/moveit_core/issues/15>`_
+* fix `ros-planning:moveit_core#15 <https://github.com/ros-planning/moveit_core/issues/15>`_
 
 0.3.9 (2013-01-05)
 ------------------
@@ -814,7 +849,7 @@ Changelog for package moveit_core
 0.2.10 (2012-11-25)
 -------------------
 * minor reorganization of code
-* fix `#10 <https://github.com/ros-planning/moveit_core/issues/10>`_
+* fix `ros-planning:moveit_core#10 <https://github.com/ros-planning/moveit_core/issues/10>`_
 
 0.2.9 (2012-11-23)
 ------------------
@@ -845,8 +880,8 @@ Changelog for package moveit_core
 
 0.2.3 (2012-11-08)
 ------------------
-* using srdf info for `#6 <https://github.com/ros-planning/moveit_core/issues/6>`_
-* fix `#6 <https://github.com/ros-planning/moveit_core/issues/6>`_
+* using srdf info for `ros-planning:moveit_core#6 <https://github.com/ros-planning/moveit_core/issues/6>`_
+* fix `ros-planning:moveit_core#6 <https://github.com/ros-planning/moveit_core/issues/6>`_
 
 0.2.2 (2012-11-07)
 ------------------

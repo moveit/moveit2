@@ -1138,8 +1138,8 @@ void MotionPlanningDisplay::onRobotModelLoaded()
   robot_interaction_->getKinematicOptionsMap()->setOptions(
       robot_interaction::KinematicOptionsMap::ALL, o, robot_interaction::KinematicOptions::STATE_VALIDITY_CALLBACK);
 
-  int_marker_display_->subProp("Update Topic")
-      ->setValue(QString::fromStdString(robot_interaction_->getServerTopic() + "/update"));
+  int_marker_display_->subProp("Interactive Markers Namespace")
+      ->setValue(QString::fromStdString(robot_interaction_->getServerTopic()));
   query_robot_start_->load(*getRobotModel()->getURDF());
   query_robot_goal_->load(*getRobotModel()->getURDF());
 
