@@ -66,7 +66,8 @@ install(TARGETS ${LIBRARIES} dummy_action_client
 install(DIRECTORY include/ DESTINATION include)
 
 install(DIRECTORY include DESTINATION include)
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY test/launch DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY test/config DESTINATION share/${PROJECT_NAME})
 
 ament_export_include_directories(include)
 ament_export_LIBRARIES(${LIBRARIES})

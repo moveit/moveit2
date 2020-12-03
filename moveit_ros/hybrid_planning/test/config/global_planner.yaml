@@ -1,0 +1,10 @@
+planning_scene_monitor_options:
+  name: "bla"
+  robot_description: "robot_description"
+  joint_state_topic: "/joint_states"
+  attached_collision_object_topic: "/hybrid_planning/planning_scene_monitor"
+  publish_planning_scene_topic: "/hybrid_planning/publish_planning_scene"
+  monitored_planning_scene_topic: "/hybrid_planning/monitored_planning_scene"
+
+planning_pipelines:
+  pipeline_names: ["ompl"]
