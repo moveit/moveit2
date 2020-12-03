@@ -70,7 +70,6 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
   }
 
   // Initialize hybrid planning action server
-  using namespace std::placeholders;
   hybrid_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::RunHybridPlanning>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
       this->get_node_waitables_interface(), "hybrid_planning_request",
@@ -84,14 +83,12 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      std::bind(&HybridPlanningManager::runHybridPlanning, this, _1));
+      std::bind(&HybridPlanningManager::runHybridPlanning, this, std::placeholders::_1));
   state_ = hybrid_planning::HybridPlanningState::READY;
 }
 
 int HybridPlanningManager::planGlobalTrajectory()
 {
-  // Setup empty dummy goal
-  auto goal_msg = moveit_msgs::action::PlanGlobalTrajectory::Goal();
   auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::PlanGlobalTrajectory>::SendGoalOptions();
 
   // Add goal response callback to print whether the goal is accepted or not
@@ -135,6 +132,10 @@ int HybridPlanningManager::planGlobalTrajectory()
         hybrid_planning_goal_handle_->publish_feedback(planning_progress);
         state_ = hybrid_planning::HybridPlanningState::GLOBAL_PLAN_READY;
       };
+  // Forward global trajectory goal
+  auto goal_msg = moveit_msgs::action::PlanGlobalTrajectory::Goal();
+  goal_msg.request = (hybrid_planning_goal_handle_->get_goal())->request;
+
   // Send global planning goal and wait until it's accepted
   auto goal_handle_future = global_planner_action_client_->async_send_goal(goal_msg, send_goal_options);
   return 1;  // return always success
@@ -197,6 +198,8 @@ void HybridPlanningManager::runHybridPlanning(
     std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::RunHybridPlanning>> goal_handle)
 {
   hybrid_planning_goal_handle_ = std::move(goal_handle);
+
+  // Start hybrid planning loop
   timer_ = this->create_wall_timer(std::chrono::milliseconds(1),
                                    std::bind(&HybridPlanningManager::hybridPlanningLoop, this));
 }
