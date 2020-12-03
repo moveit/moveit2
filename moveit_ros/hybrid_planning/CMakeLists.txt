@@ -11,7 +11,10 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(moveit_msgs REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+find_package(moveit_core REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 set(LIBRARIES
   moveit_hybrid_planning_manager
@@ -23,8 +26,11 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp
   rclcpp_components
   rclcpp_action 
+  moveit_core
+  moveit_ros_planning
   moveit_msgs
   std_srvs
+  tf2_ros
 )
 
 include_directories(include)

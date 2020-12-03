@@ -40,7 +40,16 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/robot_state/robot_state.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/planning_pipeline/planning_pipeline.h>
+
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+
 #include <moveit_msgs/action/plan_global_trajectory.hpp>
+#include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 
 namespace moveit
@@ -53,7 +62,39 @@ class GlobalPlannerComponent : public rclcpp::Node
 public:
   GlobalPlannerComponent(const rclcpp::NodeOptions& options);
 
+  // TODO implement get_last_solution service
+
 private:
+  rclcpp::TimerBase::SharedPtr timer_;
+  bool initialized_{ false };
+  struct GlobalPlannerConfig
+  {
+    // Planning scene monitor
+    std::string name;
+    std::string robot_description;
+    std::string joint_state_topic;
+    std::string attached_collision_object_topic;
+    std::string publish_planning_scene_topic;
+    std::string monitored_planning_scene_topic;
+
+    // Planning pipelines
+    std::vector<std::string> pipeline_names;
+  };
+
+  GlobalPlannerConfig config_;
+  // Planning pipelines and scene monitor
+  moveit::core::RobotModelConstPtr robot_model_;
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+
+  std::map<std::string, planning_pipeline::PlanningPipelinePtr> planning_pipelines_;
+  std::map<std::string, std::set<std::string>> groups_pipelines_map_;
+
+  moveit_msgs::msg::MotionPlanResponse last_global_solution_;
+
+  // TF
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+
   // Global planning request action server
   rclcpp_action::Server<moveit_msgs::action::PlanGlobalTrajectory>::SharedPtr global_planning_request_server_;
 
@@ -61,8 +102,15 @@ private:
   rclcpp::Publisher<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_trajectory_pub_;
 
   // Goal callback for global planning request action server
-  void globalPlanningGoalCallback(
+  void runGlobalPlanning(
       std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::PlanGlobalTrajectory>> goal_handle);
+
+  // Initialize planning scene monitor and load pipelines
+  bool init();
+
+  // Plan global trajectory
+  moveit_msgs::msg::MotionPlanResponse plan(moveit_msgs::msg::MotionPlanRequest planning_problem);
 };
+
 }  // namespace hybrid_planning
 }  // namespace moveit
