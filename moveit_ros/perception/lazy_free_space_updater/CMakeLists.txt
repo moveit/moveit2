@@ -8,9 +8,8 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   moveit_ros_occupancy_map_monitor
   Boost
+  sensor_msgs
 )
-
-# add_dependencies(${MOVEIT_LIB_NAME} ${sensor_msgs_EXPORTED_TARGETS})
 
 install(TARGETS ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib

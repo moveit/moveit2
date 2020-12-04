@@ -51,7 +51,7 @@ find_package(OpenMP REQUIRED)
 find_package(OpenCV)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
-  # lazy_free_space_updater/include
+  lazy_free_space_updater/include
   point_containment_filter/include
   pointcloud_octomap_updater/include
   semantic_world/include
@@ -59,7 +59,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 )
 
 set(THIS_PACKAGE_LIBRARIES
-  # moveit_lazy_free_space_updater
+  moveit_lazy_free_space_updater
   moveit_point_containment_filter
   moveit_pointcloud_octomap_updater_core
   moveit_semantic_world
@@ -77,13 +77,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   Eigen3
 )
 
-include_directories(
-  # lazy_free_space_updater/include
-  point_containment_filter/include
-  pointcloud_octomap_updater/include
-  semantic_world/include
-  # ${perception_GL_INCLUDE_DIRS}
-)
+include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 include_directories(SYSTEM
   ${Boost_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
@@ -92,7 +86,7 @@ include_directories(SYSTEM
   ${X11_INCLUDE_DIR}
 )
 
-# add_subdirectory(lazy_free_space_updater)
+add_subdirectory(lazy_free_space_updater)
 add_subdirectory(point_containment_filter)
 add_subdirectory(pointcloud_octomap_updater)
 # if(WITH_OPENGL)
