@@ -82,7 +82,7 @@ def generate_launch_description():
     )
 
     # RViz
-    rviz_config_file = get_package_share_directory('run_moveit_cpp') + "/launch/run_moveit_cpp.rviz"
+    rviz_config_file = get_package_share_directory('moveit_hybrid_planning') + "/config/hybrid_planning_demo.rviz"
     rviz_node = Node(package='rviz2',
                      executable='rviz2',
                      name='rviz2',
