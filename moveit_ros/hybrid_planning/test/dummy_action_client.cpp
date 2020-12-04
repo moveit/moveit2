@@ -40,6 +40,12 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/kinematic_constraints/utils.h>
+#include <moveit/robot_state/conversions.h>
+
 #include <moveit/hybrid_planning/global_planner_component.h>
 #include <moveit/hybrid_planning/hybrid_planning_manager.h>
 #include <moveit/hybrid_planning/local_planner_component.h>
@@ -61,12 +67,46 @@ public:
 
   void run()
   {
+    RCLCPP_INFO(LOGGER, "Wait 5s to ensure everything has started");
+    rclcpp::sleep_for(std::chrono::seconds(5));
+
     if (!hp_action_client_->wait_for_action_server(std::chrono::seconds(20)))
     {
       RCLCPP_ERROR(LOGGER, "Hybrid planning action server not available after waiting");
       return;
     }
 
+    // Setup motion planning goal taken from motion_planning_api tutorial
+    const std::string PLANNING_GROUP = "panda_arm";
+    robot_model_loader::RobotModelLoader robot_model_loader(node_, "robot_description");
+    const moveit::core::RobotModelPtr& robot_model = robot_model_loader.getModel();
+
+    // Create a RobotState and JointModelGroup
+    moveit::core::RobotStatePtr robot_state(new moveit::core::RobotState(robot_model));
+    const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(PLANNING_GROUP);
+
+    planning_scene::PlanningScenePtr planning_scene(new planning_scene::PlanningScene(robot_model));
+    // Configure a valid robot state
+    planning_scene->getCurrentStateNonConst().setToDefaultValues(joint_model_group, "ready");
+
+    auto goal_msg = moveit_msgs::action::RunHybridPlanning::Goal();
+
+    moveit::core::robotStateToRobotStateMsg(planning_scene->getCurrentStateNonConst(), goal_msg.request.start_state);
+    goal_msg.request.group_name = PLANNING_GROUP;
+    goal_msg.request.num_planning_attempts = 10;
+    goal_msg.request.max_velocity_scaling_factor = 1.0;
+    goal_msg.request.max_acceleration_scaling_factor = 1.0;
+    goal_msg.request.allowed_planning_time = 1.0;
+    goal_msg.request.planner_id = "ompl";
+    // goal->request.workspace_parameters = workspace_parameters_;
+
+    moveit::core::RobotState goal_state(robot_model);
+    std::vector<double> joint_values = { -1.0, 0.7, 0.7, -1.5, -0.7, 2.0, 0.0 };
+    goal_state.setJointGroupPositions(joint_model_group, joint_values);
+
+    goal_msg.request.goal_constraints.resize(1);
+    goal_msg.request.goal_constraints[0] =
+        kinematic_constraints::constructGoalConstraints(goal_state, joint_model_group);
 
     auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::RunHybridPlanning>::SendGoalOptions();
     send_goal_options.result_callback =
@@ -94,7 +134,6 @@ public:
           RCLCPP_INFO(LOGGER, feedback->feedback);
         };
 
-    auto goal_msg = moveit_msgs::action::RunHybridPlanning::Goal();
     RCLCPP_INFO(LOGGER, "Sending hybrid planning goal");
     // Ask server to achieve some goal and wait until it's accepted
     auto goal_handle_future = hp_action_client_->async_send_goal(goal_msg, send_goal_options);

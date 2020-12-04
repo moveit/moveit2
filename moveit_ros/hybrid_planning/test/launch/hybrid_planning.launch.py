@@ -89,7 +89,8 @@ def generate_launch_description():
                      output='log',
                      arguments=['-d', rviz_config_file],
                      parameters=[robot_description,
-                                 robot_description_semantic])
+                                 robot_description_semantic],
+                    )
 
     # Static TF
     static_tf = Node(package='tf2_ros',
@@ -116,4 +117,11 @@ def generate_launch_description():
                                               robot_description]
                                   )
 
-    return launch.LaunchDescription([container, static_tf, rviz_node, robot_state_publisher])
+    # Test node
+    test_request_node = Node(package='moveit_hybrid_planning',
+                                 executable='dummy_action_client',
+                                 name='dummy_action_client',
+                                 output='screen',
+                                 parameters=[robot_description, robot_description_semantic])
+
+    return launch.LaunchDescription([container, static_tf, rviz_node, robot_state_publisher, test_request_node])

@@ -78,6 +78,7 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
   ns = "planning_pipelines";
   config_.pipeline_names =
       this->declare_parameter<std::vector<std::string>>(ns + ".pipeline_names", std::vector<std::string>({ "ompl" }));
+
   // Initialize global planning request action server
   global_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::PlanGlobalTrajectory>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
@@ -104,7 +105,7 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
         break;
       case false:
         initialized_ = this->init();
-        if (initialized_)
+        if (!initialized_)
         {
           const std::string error = "Failed to initialize global planner";
           RCLCPP_FATAL(LOGGER, error);
@@ -125,15 +126,16 @@ bool GlobalPlannerComponent::init()
   if (planning_scene_monitor_->getPlanningScene())
   {
     // Start state and scene monitors
-    RCLCPP_INFO(LOGGER, "Listening to '%s' for joint states", config_.joint_state_topic);
+    RCLCPP_INFO(LOGGER, "Listening to '%s' for joint states", config_.joint_state_topic.c_str());
     planning_scene_monitor_->startStateMonitor(config_.joint_state_topic, config_.attached_collision_object_topic);
-    planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
-                                                          config_.publish_planning_scene_topic);
-    planning_scene_monitor_->startSceneMonitor(config_.monitored_planning_scene_topic);
+    planning_scene_monitor_->setPlanningScenePublishingFrequency(100);
+    planning_scene_monitor_->startPublishingPlanningScene(
+        planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,  // TODO Just listen to planning_scene changes
+        config_.publish_planning_scene_topic);
+    planning_scene_monitor_->startSceneMonitor();
 
     // let RViz display query PlanningScene
     planning_scene_monitor_->providePlanningSceneService();  // let RViz display query PlanningScene
-    planning_scene_monitor_->setPlanningScenePublishingFrequency(100);
   }
   else
   {
@@ -184,6 +186,7 @@ void GlobalPlannerComponent::runGlobalPlanning(
   const auto goal = goal_handle->get_goal();
 
   // Plan global trajectory
+  RCLCPP_INFO(LOGGER, "Start global planning");
   moveit_msgs::msg::MotionPlanResponse planning_solution = plan(goal->request);
 
   // Publish global planning solution to the local planner
@@ -198,8 +201,7 @@ void GlobalPlannerComponent::runGlobalPlanning(
   last_global_solution_ = planning_solution;  // TODO Add Service to expose this
 };
 
-moveit_msgs::msg::MotionPlanResponse
-GlobalPlannerComponent::plan(moveit_msgs::msg::MotionPlanRequest planning_problem)
+moveit_msgs::msg::MotionPlanResponse GlobalPlannerComponent::plan(moveit_msgs::msg::MotionPlanRequest planning_problem)
 {
   // Clone current planning scene
   planning_scene_monitor_->updateFrameTransforms();
@@ -207,18 +209,16 @@ GlobalPlannerComponent::plan(moveit_msgs::msg::MotionPlanRequest planning_proble
   ::planning_scene::PlanningScenePtr planning_scene =
       ::planning_scene::PlanningScene::clone(planning_scene_monitor_->getPlanningScene());
   planning_scene_monitor_->unlockSceneRead();  // UNLOCK planning scene
-  planning_scene_monitor_.reset();             // release this pointer
 
   // TODO implement start/current robot state considerations
   // TODO refactor get current state function --> see planning_context for example
 
   // Set start state
-  moveit::core::RobotStatePtr start_state;
-  moveit::core::robotStateToRobotStateMsg(*start_state,
-                                          planning_problem.start_state);  // Take start state from planning problem
-  planning_scene->setCurrentState(*start_state);
-
   moveit_msgs::msg::MotionPlanResponse planning_solution;
+  moveit::core::RobotState start_state(robot_model_);
+  moveit::core::robotStateMsgToRobotState(planning_problem.start_state,
+                                          start_state);  // Use start state from planning problem
+  planning_scene->setCurrentState(start_state);
 
   // Set goal constraints
   ::planning_interface::MotionPlanResponse response;

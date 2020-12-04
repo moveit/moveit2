@@ -1,5 +1,5 @@
 planning_scene_monitor_options:
-  name: "bla"
+  name: "planning_scene_monitor"
   robot_description: "robot_description"
   joint_state_topic: "/joint_states"
   attached_collision_object_topic: "/hybrid_planning/planning_scene_monitor"
