@@ -2,6 +2,12 @@
 Changelog for package moveit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.0 (2020-11-23)
+------------------
+
+2.0.0 (2020-02-17)
+------------------
+
 1.1.1 (2020-10-13)
 ------------------
 * [feature][visualization] Clean up Rviz Motion Planning plugin, add tooltips (`#2310 <https://github.com/ros-planning/moveit/issues/2310>`_)
