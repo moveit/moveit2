@@ -73,6 +73,9 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
         global_trajectory_ = msg->trajectory;
         global_trajectory_received_ = true;
       });
+
+  trajectory_pub_ = this->create_publisher<trajectory_msgs::msg::JointTrajectory>("panda_arm_controller/joint_trajectory", 1);
+
   state_ = hybrid_planning::LocalPlannerState::READY;
 }
 
@@ -94,9 +97,11 @@ void LocalPlannerComponent::localPlanningLoop()
       break;
     case hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE:
       // Fake computation for dummy implementation
-      RCLCPP_INFO(LOGGER, "Local planning dummy computation started");
-      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-      RCLCPP_INFO(LOGGER, "Local planning dummy computation finished");
+      RCLCPP_INFO(LOGGER, "Forward trajectory");
+      //auto trajectory_msg = trajectory_msgs::msg::JointTrajectory()
+      //trajectory_msg = global_trajectory_.joint_trajectory
+      trajectory_pub_->publish(global_trajectory_.joint_trajectory);
+
       local_planning_goal_handle_->succeed(result);
       state_ = hybrid_planning::LocalPlannerState::READY;
       timer_->cancel();

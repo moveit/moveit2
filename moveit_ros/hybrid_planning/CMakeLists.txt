@@ -31,6 +31,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_msgs
   std_srvs
   tf2_ros
+  trajectory_msgs
 )
 
 include_directories(include)

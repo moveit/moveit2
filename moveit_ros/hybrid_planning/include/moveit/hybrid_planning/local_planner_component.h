@@ -44,6 +44,8 @@
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 
+#include "trajectory_msgs/msg/joint_trajectory.hpp"
+
 namespace moveit
 {
 namespace hybrid_planning
@@ -78,6 +80,9 @@ private:
 
   // Local planning request action server
   rclcpp_action::Server<moveit_msgs::action::OperateLocalPlanner>::SharedPtr local_planning_request_server_;
+
+  // Forward trajectory publisher
+  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_pub_;
 
   // Goal callback for local planning request action server
   void localPlanningLoop();
