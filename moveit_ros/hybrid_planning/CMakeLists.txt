@@ -53,11 +53,11 @@ ament_target_dependencies(moveit_local_planner_component ${THIS_PACKAGE_INCLUDE_
 
 rclcpp_components_register_nodes(moveit_local_planner_component "moveit::hybrid_planning::LocalPlannerComponent")
 
-add_executable(dummy_action_client test/dummy_action_client.cpp)
-ament_target_dependencies(dummy_action_client ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(dummy_action_client ${LIBRARIES})
+add_executable(hybrid_planning_test_node test/hybrid_planning_test_node.cpp)
+ament_target_dependencies(hybrid_planning_test_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(hybrid_planning_test_node ${LIBRARIES})
 
-install(TARGETS ${LIBRARIES} dummy_action_client
+install(TARGETS ${LIBRARIES} hybrid_planning_test_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin

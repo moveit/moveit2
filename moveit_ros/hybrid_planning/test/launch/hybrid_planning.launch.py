@@ -119,8 +119,8 @@ def generate_launch_description():
 
     # Test node
     test_request_node = Node(package='moveit_hybrid_planning',
-                                 executable='dummy_action_client',
-                                 name='dummy_action_client',
+                                 executable='hybrid_planning_test_node',
+                                 name='hybrid_planning_test_node',
                                  output='screen',
                                  parameters=[robot_description, robot_description_semantic])
 

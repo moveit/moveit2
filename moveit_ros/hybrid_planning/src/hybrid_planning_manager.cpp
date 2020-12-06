@@ -61,7 +61,7 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
 
   // Initialize global planning action client
   global_planner_action_client_ =
-      rclcpp_action::create_client<moveit_msgs::action::PlanGlobalTrajectory>(this, "global_planning_request");
+      rclcpp_action::create_client<moveit_msgs::action::PlanGlobalTrajectory>(this, "run_global_planning");
   if (!global_planner_action_client_->wait_for_action_server(std::chrono::seconds(2)))
   {
     const std::string error = "Global planner action server not available after waiting";
@@ -72,7 +72,7 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
   // Initialize hybrid planning action server
   hybrid_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::RunHybridPlanning>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
-      this->get_node_waitables_interface(), "hybrid_planning_request",
+      this->get_node_waitables_interface(), "run_hybrid_planning",
       [this](const rclcpp_action::GoalUUID& /*unused*/,
              std::shared_ptr<const moveit_msgs::action::RunHybridPlanning::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received goal request");

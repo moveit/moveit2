@@ -53,7 +53,7 @@
 #include <moveit_msgs/action/run_hybrid_planning.hpp>
 #include <moveit_msgs/action/plan_global_trajectory.hpp>
 
-const rclcpp::Logger LOGGER = rclcpp::get_logger("dummy_hybrid_planning_client");
+const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
 
 class HybridPlanningDemo
 {
@@ -62,13 +62,13 @@ public:
   {
     node_ = node;
     hp_action_client_ =
-        rclcpp_action::create_client<moveit_msgs::action::RunHybridPlanning>(node_, "hybrid_planning_request");
+        rclcpp_action::create_client<moveit_msgs::action::RunHybridPlanning>(node_, "run_hybrid_planning");
   }
 
   void run()
   {
-    RCLCPP_INFO(LOGGER, "Wait 5s to ensure everything has started");
-    rclcpp::sleep_for(std::chrono::seconds(5));
+    RCLCPP_INFO(LOGGER, "Wait 2s to ensure everything has started");
+    rclcpp::sleep_for(std::chrono::seconds(2));
 
     if (!hp_action_client_->wait_for_action_server(std::chrono::seconds(20)))
     {
@@ -150,7 +150,7 @@ int main(int argc, char** argv)
   rclcpp::NodeOptions node_options;
   node_options.automatically_declare_parameters_from_overrides(true);
 
-  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("hybrid_planner_demo", "", node_options);
+  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("hybrid_planning_test_node", "", node_options);
 
   HybridPlanningDemo demo(node);
   std::thread run_demo([&demo]() {

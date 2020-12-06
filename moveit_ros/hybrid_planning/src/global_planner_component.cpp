@@ -82,7 +82,7 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
   // Initialize global planning request action server
   global_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::PlanGlobalTrajectory>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
-      this->get_node_waitables_interface(), "global_planning_request",
+      this->get_node_waitables_interface(), "run_global_planning",
       [](const rclcpp_action::GoalUUID& /*unused*/,
          std::shared_ptr<const moveit_msgs::action::PlanGlobalTrajectory::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received global planning goal request");
