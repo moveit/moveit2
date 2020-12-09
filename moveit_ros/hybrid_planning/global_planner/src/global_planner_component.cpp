@@ -35,7 +35,7 @@
 /* Author: Sebastian Jahr
  */
 
-#include <moveit/hybrid_planning/global_planner_component.h>
+#include <moveit/global_planner/global_planner_component.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit_msgs/msg/move_it_error_codes.h>
@@ -59,23 +59,10 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
   this->declare_parameter<std::string>("robot_description", std::string());
   this->declare_parameter<std::string>("robot_description_semantic", std::string());
 
-  std::string ns = "panda_arm";
-  this->declare_parameter<std::string>(ns + ".kinematics_solver", std::string());
-  this->declare_parameter<double>(ns + ".kinematics_solver_search_resolution", 0.0);
-  this->declare_parameter<double>(ns + ".kinematics_solver_timeout", 0.0);
+  config_.publish_planning_scene_topic =
+      this->declare_parameter<std::string>("publish_planning_scene_topic", "/publish_planning_scene");
 
-  ns = "planning_scene_monitor_options";
-  config_.name = this->declare_parameter<std::string>(ns + ".name", "planning_scene_monitor");
-  config_.robot_description = this->declare_parameter<std::string>(ns + ".robot_description", "robot_description");
-  config_.joint_state_topic = this->declare_parameter<std::string>(ns + ".joint_state_topic", "/joint_states");
-  config_.attached_collision_object_topic = this->declare_parameter<std::string>(
-      ns + ".attached_collision_object_topic", "/hybrid_planning/planning_scene_monitor");
-  config_.publish_planning_scene_topic = this->declare_parameter<std::string>(
-      ns + ".publish_planning_scene_topic", "/hybrid_planning/publish_planning_scene");
-  config_.monitored_planning_scene_topic = this->declare_parameter<std::string>(
-      ns + ".monitored_planning_scene_topic", "/hybrid_planning/monitored_planning_scene");
-
-  ns = "planning_pipelines";
+  std::string ns = "planning_pipelines";
   config_.pipeline_names =
       this->declare_parameter<std::vector<std::string>>(ns + ".pipeline_names", std::vector<std::string>({ "ompl" }));
 
@@ -119,23 +106,15 @@ bool GlobalPlannerComponent::init()
 {
   auto node_ptr = shared_from_this();
   // Configure planning scene monitor
-  planning_scene_monitor_.reset(
-      new planning_scene_monitor::PlanningSceneMonitor(node_ptr, config_.robot_description, tf_buffer_, config_.name));
+  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
+      node_ptr, "robot_description", tf_buffer_, "global_planner/planning_scene_monitor"));
   // Allows us to sycronize to Rviz and also publish collision objects to ourselves
   RCLCPP_DEBUG(LOGGER, "Configuring Planning Scene Monitor");
   if (planning_scene_monitor_->getPlanningScene())
   {
     // Start state and scene monitors
-    RCLCPP_INFO(LOGGER, "Listening to '%s' for joint states", config_.joint_state_topic.c_str());
-    planning_scene_monitor_->startStateMonitor(config_.joint_state_topic, config_.attached_collision_object_topic);
-    planning_scene_monitor_->setPlanningScenePublishingFrequency(100);
-    planning_scene_monitor_->startPublishingPlanningScene(
-        planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,  // TODO Just listen to planning_scene changes
-        config_.publish_planning_scene_topic);
+    RCLCPP_INFO(LOGGER, "Listening to '/publish_planning_scene' for planning scene updates");
     planning_scene_monitor_->startSceneMonitor();
-
-    // let RViz display query PlanningScene
-    planning_scene_monitor_->providePlanningSceneService();  // let RViz display query PlanningScene
   }
   else
   {

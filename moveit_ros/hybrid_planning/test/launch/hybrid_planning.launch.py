@@ -124,4 +124,4 @@ def generate_launch_description():
                                  output='screen',
                                  parameters=[robot_description, robot_description_semantic])
 
-    return launch.LaunchDescription([container, static_tf, rviz_node, robot_state_publisher, test_request_node])
+    return launch.LaunchDescription([container, static_tf, rviz_node, robot_state_publisher, test_request_node, fake_joint_driver_node])

@@ -35,7 +35,7 @@
 /* Author: Sebastian Jahr
  */
 
-#include <moveit/hybrid_planning/hybrid_planning_manager.h>
+#include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
 
 #include <chrono>
 #include <thread>

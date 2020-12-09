@@ -67,15 +67,10 @@ public:
 private:
   rclcpp::TimerBase::SharedPtr timer_;
   bool initialized_{ false };
-  struct GlobalPlannerConfig
+  struct GlobalPlannerConfig  // TODO Implement this properly
   {
     // Planning scene monitor
-    std::string name;
-    std::string robot_description;
-    std::string joint_state_topic;
-    std::string attached_collision_object_topic;
     std::string publish_planning_scene_topic;
-    std::string monitored_planning_scene_topic;
 
     // Planning pipelines
     std::vector<std::string> pipeline_names;

@@ -40,15 +40,16 @@
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_action/rclcpp_action.hpp"
 
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/robot_state/conversions.h>
 
-#include <moveit/hybrid_planning/global_planner_component.h>
-#include <moveit/hybrid_planning/hybrid_planning_manager.h>
-#include <moveit/hybrid_planning/local_planner_component.h>
+#include <moveit/global_planner/global_planner_component.h>
+#include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
+#include <moveit/local_planner/local_planner_component.h>
 
 #include <moveit_msgs/action/run_hybrid_planning.hpp>
 #include <moveit_msgs/action/plan_global_trajectory.hpp>
@@ -67,6 +68,21 @@ public:
 
   void run()
   {
+    RCLCPP_INFO(LOGGER, "Initialize MoveItCpp");
+    tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
+    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+
+    planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
+        node_, "robot_description", tf_buffer_, "planning_scene_monitor");
+    if (planning_scene_monitor_->getPlanningScene() != nullptr)
+    {
+      planning_scene_monitor_->startStateMonitor("/joint_states");
+      planning_scene_monitor_->providePlanningSceneService();  // let RViz display query PlanningScene
+      planning_scene_monitor_->setPlanningScenePublishingFrequency(100);
+      planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
+                                                            "/publish_planning_scene");
+      planning_scene_monitor_->startSceneMonitor();
+    }
     RCLCPP_INFO(LOGGER, "Wait 2s to ensure everything has started");
     rclcpp::sleep_for(std::chrono::seconds(2));
 
@@ -142,6 +158,11 @@ public:
 private:
   rclcpp::Node::SharedPtr node_;
   rclcpp_action::Client<moveit_msgs::action::RunHybridPlanning>::SharedPtr hp_action_client_;
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+
+  // TF
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 };
 
 int main(int argc, char** argv)

@@ -15,6 +15,7 @@ find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(trajectory_msgs REQUIRED)
 
 set(LIBRARIES
   moveit_hybrid_planning_manager
@@ -25,7 +26,7 @@ set(LIBRARIES
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp
   rclcpp_components
-  rclcpp_action 
+  rclcpp_action
   moveit_core
   moveit_ros_planning
   moveit_msgs
@@ -34,29 +35,21 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   trajectory_msgs
 )
 
-include_directories(include)
+set(THIS_PACKAGE_INCLUDE_DIRS
+  global_planner/include
+  local_planner/include
+  hybrid_planning_manager/include
+)
+include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
-add_library(moveit_global_planner_component SHARED src/global_planner_component.cpp)
-set_target_properties(moveit_global_planner_component PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_global_planner_component ${THIS_PACKAGE_INCLUDE_DEPENDS})
-
-rclcpp_components_register_nodes(moveit_global_planner_component "moveit::hybrid_planning::GlobalPlannerComponent")
-
-add_library(moveit_hybrid_planning_manager SHARED src/hybrid_planning_manager.cpp)
-set_target_properties(moveit_hybrid_planning_manager PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_hybrid_planning_manager ${THIS_PACKAGE_INCLUDE_DEPENDS})
+add_subdirectory(hybrid_planning_manager)
+add_subdirectory(global_planner)
+add_subdirectory(local_planner)
+add_subdirectory(test)
 
 rclcpp_components_register_nodes(moveit_hybrid_planning_manager "moveit::hybrid_planning::HybridPlanningManager")
-
-add_library(moveit_local_planner_component SHARED src/local_planner_component.cpp)
-set_target_properties(moveit_local_planner_component PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_local_planner_component ${THIS_PACKAGE_INCLUDE_DEPENDS})
-
+rclcpp_components_register_nodes(moveit_global_planner_component "moveit::hybrid_planning::GlobalPlannerComponent")
 rclcpp_components_register_nodes(moveit_local_planner_component "moveit::hybrid_planning::LocalPlannerComponent")
-
-add_executable(hybrid_planning_test_node test/hybrid_planning_test_node.cpp)
-ament_target_dependencies(hybrid_planning_test_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(hybrid_planning_test_node ${LIBRARIES})
 
 install(TARGETS ${LIBRARIES} hybrid_planning_test_node
   ARCHIVE DESTINATION lib
@@ -64,14 +57,13 @@ install(TARGETS ${LIBRARIES} hybrid_planning_test_node
   RUNTIME DESTINATION bin
   DESTINATION lib/${PROJECT_NAME})
 
-install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS} DESTINATION include)
 
-install(DIRECTORY include DESTINATION include)
 install(DIRECTORY test/launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY test/config DESTINATION share/${PROJECT_NAME})
 
 ament_export_include_directories(include)
-ament_export_LIBRARIES(${LIBRARIES})
+ament_export_libraries(${LIBRARIES})
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 ament_package()
