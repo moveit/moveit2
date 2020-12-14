@@ -1169,7 +1169,7 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
     if (!octomap_monitor_)
     {
       octomap_monitor_.reset(
-          new occupancy_map_monitor::OccupancyMapMonitor(pnode_, tf_buffer_, scene_->getPlanningFrame()));
+          new occupancy_map_monitor::OccupancyMapMonitor(node_, tf_buffer_, scene_->getPlanningFrame()));
       excludeRobotLinksFromOctree();
       excludeAttachedBodiesFromOctree();
       excludeWorldObjectsFromOctree();

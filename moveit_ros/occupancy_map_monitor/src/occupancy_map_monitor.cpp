@@ -39,7 +39,6 @@
 #include <moveit_msgs/srv/load_map.hpp>
 #include <moveit/occupancy_map_monitor/occupancy_map.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-// #include <XmlRpcException.h>
 #include <boost/bind.hpp>
 
 namespace occupancy_map_monitor
@@ -88,89 +87,76 @@ void OccupancyMapMonitor::initialize()
   tree_.reset(new OccMapTree(map_resolution_));
   tree_const_ = tree_;
 
-  // TODO(henningkayser): rework this in ROS2
-  //   XmlRpc::XmlRpcValue sensor_list;
-  //   if (nh_.getParam("sensors", sensor_list))
-  //   {
-  //     try
-  //     {
-  //       if (sensor_list.getType() == XmlRpc::XmlRpcValue::TypeArray)
-  //         for (int32_t i = 0; i < sensor_list.size(); ++i)
-  //         {
-  //           if (sensor_list[i].getType() != XmlRpc::XmlRpcValue::TypeStruct)
-  //           {
-  //             ROS_ERROR_NAMED(LOGNAME, "Params for octomap updater %d not a struct; ignoring.", i);
-  //             continue;
-  //           }
-  //
-  //           if (!sensor_list[i].hasMember("sensor_plugin"))
-  //           {
-  //             ROS_ERROR_NAMED(LOGNAME, "No sensor plugin specified for octomap updater %d; ignoring.", i);
-  //             continue;
-  //           }
-  //
-  //           std::string sensor_plugin = std::string(sensor_list[i]["sensor_plugin"]);
-  //           if (sensor_plugin.empty() || sensor_plugin[0] == '~')
-  //           {
-  //             ROS_INFO_STREAM_NAMED(LOGNAME, "Skipping octomap updater plugin '" << sensor_plugin << "'");
-  //             continue;
-  //           }
-  //
-  //           if (!updater_plugin_loader_)
-  //           {
-  //             try
-  //             {
-  //               updater_plugin_loader_.reset(new pluginlib::ClassLoader<OccupancyMapUpdater>(
-  //                   "moveit_ros_perception", "occupancy_map_monitor::OccupancyMapUpdater"));
-  //             }
-  //             catch (pluginlib::PluginlibException& ex)
-  //             {
-  //               ROS_FATAL_STREAM_NAMED(LOGNAME, "Exception while creating octomap updater plugin loader " <<
-  //               ex.what());
-  //             }
-  //           }
-  //
-  //           OccupancyMapUpdaterPtr up;
-  //           try
-  //           {
-  //             up = updater_plugin_loader_->createUniqueInstance(sensor_plugin);
-  //             up->setMonitor(this);
-  //           }
-  //           catch (pluginlib::PluginlibException& ex)
-  //           {
-  //             ROS_ERROR_STREAM_NAMED(LOGNAME, "Exception while loading octomap updater '"
-  //                                                 << sensor_plugin << "': " << ex.what() << std::endl);
-  //           }
-  //           if (up)
-  //           {
-  //             /* pass the params struct directly in to the updater */
-  //             if (!up->setParams(sensor_list[i]))
-  //             {
-  //               ROS_ERROR_STREAM_NAMED(LOGNAME, "Failed to configure updater of type " << up->getType());
-  //               continue;
-  //             }
-  //
-  //             if (!up->initialize())
-  //             {
-  //               ROS_ERROR_NAMED(LOGNAME, "Unable to initialize map updater of type %s (plugin %s)",
-  //               up->getType().c_str(),
-  //                               sensor_plugin.c_str());
-  //               continue;
-  //             }
-  //
-  //             addUpdater(up);
-  //           }
-  //         }
-  //       else
-  //         ROS_ERROR_NAMED(LOGNAME, "List of sensors must be an array!");
-  //     }
-  //     catch (XmlRpc::XmlRpcException& ex)
-  //     {
-  //       ROS_ERROR_STREAM_NAMED(LOGNAME, "XmlRpc Exception: " << ex.getMessage());
-  //     }
-  //   }
-  //   else
-  //     ROS_ERROR_NAMED(LOGNAME, "Failed to find 3D sensor plugin parameters for octomap generation");
+  std::vector<std::string> sensor_list;
+  if (node_->get_parameter("sensors", sensor_list))
+  {
+    if (!sensor_list.empty())
+    {
+      for (const auto& sensor : sensor_list)
+      {
+        if (!node_->has_parameter(sensor + ".sensor_plugin"))
+        {
+          RCLCPP_ERROR(LOGGER, "No sensor plugin specified for octomap updater %s; ignoring.", sensor.c_str());
+          continue;
+        }
+
+        std::string sensor_plugin;
+        node_->get_parameter(sensor + ".sensor_plugin", sensor_plugin);
+        if (sensor_plugin.empty() || sensor_plugin[0] == '~')
+        {
+          RCLCPP_INFO_STREAM(LOGGER, "Skipping octomap updater plugin '" << sensor_plugin << "'");
+          continue;
+        }
+
+        if (!updater_plugin_loader_)
+        {
+          try
+          {
+            updater_plugin_loader_.reset(new pluginlib::ClassLoader<OccupancyMapUpdater>(
+                "moveit_ros_occupancy_map_monitor", "occupancy_map_monitor::OccupancyMapUpdater"));
+          }
+          catch (pluginlib::PluginlibException& ex)
+          {
+            RCLCPP_FATAL_STREAM(LOGGER, "Exception while creating octomap updater plugin loader " << ex.what());
+          }
+        }
+
+        OccupancyMapUpdaterPtr up;
+        try
+        {
+          up = updater_plugin_loader_->createUniqueInstance(sensor_plugin);
+          up->setMonitor(this);
+        }
+        catch (pluginlib::PluginlibException& ex)
+        {
+          RCLCPP_ERROR_STREAM(LOGGER, "Exception while loading octomap updater '" << sensor_plugin << "': " << ex.what()
+                                                                                  << std::endl);
+        }
+        if (up)
+        {
+          if (!up->initialize(node_))
+          {
+            RCLCPP_ERROR(LOGGER, "Unable to initialize map updater of type %s (plugin %s)", up->getType().c_str(),
+                         sensor_plugin.c_str());
+            continue;
+          }
+
+          /* pass the params struct directly in to the updater */
+          if (!up->setParams(sensor))
+          {
+            RCLCPP_ERROR_STREAM(LOGGER, "Failed to configure updater of type " << up->getType());
+            continue;
+          }
+
+          addUpdater(up);
+        }
+      }
+    }
+    else
+      RCLCPP_ERROR(LOGGER, "List of sensors is empty!");
+  }
+  else
+    RCLCPP_ERROR(LOGGER, "Failed to find 3D sensor plugin parameters for octomap generation");
 
   /* advertise a service for loading octomaps from disk */
   auto save_map_service_callback = [this](const std::shared_ptr<rmw_request_id_t> request_header,

@@ -61,7 +61,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 set(THIS_PACKAGE_LIBRARIES
   moveit_lazy_free_space_updater
   moveit_point_containment_filter
-  moveit_pointcloud_octomap_updater_core
+  moveit_pointcloud_octomap_updater
   moveit_semantic_world
 )
 
@@ -100,7 +100,7 @@ ament_export_include_directories(include)
 ament_export_libraries(${THIS_PACKAGE_LIBRARIES})
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor pointcloud_octomap_updater_plugin_description.xml)
-pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor depth_image_octomap_updater_plugin_description.xml)
+pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor "pointcloud_octomap_updater_plugin_description.xml")
+# pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor "depth_image_octomap_updater_plugin_description.xml")
 
 ament_package()

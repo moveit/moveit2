@@ -66,7 +66,6 @@ public:
 
   /** @brief Set updater params using struct that comes from parsing a yaml string. This must be called after
    * setMonitor() */
-  // Rework XmlRpc param look up to ROS2 style
   virtual bool setParams(const std::string& name_space) = 0;
 
   /** @brief Do any necessary setup (subscribe to ros topics, etc.). This call assumes setMonitor() and setParams() have

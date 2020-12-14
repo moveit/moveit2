@@ -91,6 +91,9 @@ bool PointCloudOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
 
 void PointCloudOctomapUpdater::start()
 {
+  if (!filtered_cloud_topic_.empty())
+    filtered_cloud_publisher_ = node_->create_publisher<sensor_msgs::msg::PointCloud2>(filtered_cloud_topic_, 10);
+
   if (point_cloud_subscriber_)
     return;
   /* subscribe to point cloud topic using tf filter*/
