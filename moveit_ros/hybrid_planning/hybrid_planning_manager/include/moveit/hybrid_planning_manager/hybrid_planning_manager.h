@@ -91,6 +91,8 @@ private:
   // Hybrid planning request action server
   rclcpp_action::Server<moveit_msgs::action::HybridPlanning>::SharedPtr hybrid_planning_request_server_;
 
+  bool initialize();
+
   // Hybrid planning goal callback for hybrid planning request server
   void hybridPlanningRequestCallback(
       std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanning>> goal_handle);

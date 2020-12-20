@@ -61,8 +61,7 @@ public:
   HybridPlanningDemo(const rclcpp::Node::SharedPtr& node)
   {
     node_ = node;
-    hp_action_client_ =
-        rclcpp_action::create_client<moveit_msgs::action::HybridPlanning>(node_, "run_hybrid_planning");
+    hp_action_client_ = rclcpp_action::create_client<moveit_msgs::action::HybridPlanning>(node_, "run_hybrid_planning");
   }
 
   void run()
