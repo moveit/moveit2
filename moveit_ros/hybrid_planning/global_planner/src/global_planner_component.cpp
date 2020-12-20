@@ -56,9 +56,6 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
-  this->declare_parameter<std::string>("robot_description", std::string());
-  this->declare_parameter<std::string>("robot_description_semantic", std::string());
-
   config_.publish_planning_scene_topic =
       this->declare_parameter<std::string>("publish_planning_scene_topic", "/publish_planning_scene");
 
