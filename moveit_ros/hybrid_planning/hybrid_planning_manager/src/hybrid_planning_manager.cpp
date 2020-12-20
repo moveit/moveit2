@@ -51,7 +51,7 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
 {
   // Initialize local planning action client
   local_planner_action_client_ =
-      rclcpp_action::create_client<moveit_msgs::action::OperateLocalPlanner>(this, "operate_local_planner");
+      rclcpp_action::create_client<moveit_msgs::action::LocalPlanner>(this, "local_planning_action");
   if (!local_planner_action_client_->wait_for_action_server(std::chrono::seconds(2)))
   {
     const std::string error = "Local planner action server not available after waiting";
@@ -61,7 +61,7 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
 
   // Initialize global planning action client
   global_planner_action_client_ =
-      rclcpp_action::create_client<moveit_msgs::action::PlanGlobalTrajectory>(this, "run_global_planning");
+      rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(this, "global_planning_action");
   if (!global_planner_action_client_->wait_for_action_server(std::chrono::seconds(2)))
   {
     const std::string error = "Global planner action server not available after waiting";
@@ -70,16 +70,16 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
   }
 
   // Initialize hybrid planning action server
-  hybrid_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::RunHybridPlanning>(
+  hybrid_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::HybridPlanning>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
       this->get_node_waitables_interface(), "run_hybrid_planning",
       [this](const rclcpp_action::GoalUUID& /*unused*/,
-             std::shared_ptr<const moveit_msgs::action::RunHybridPlanning::Goal> /*unused*/) {
+             std::shared_ptr<const moveit_msgs::action::HybridPlanning::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received goal request");
         state_ = hybrid_planning::HybridPlanningState::REQUEST_RECEIVED;
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::RunHybridPlanning>>& /*unused*/) {
+      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanning>>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
@@ -89,14 +89,14 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
 
 int HybridPlanningManager::planGlobalTrajectory()
 {
-  auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::PlanGlobalTrajectory>::SendGoalOptions();
+  auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::GlobalPlanner>::SendGoalOptions();
 
   // Add goal response callback to print whether the goal is accepted or not
   send_goal_options.goal_response_callback =
-      [this](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::PlanGlobalTrajectory>::SharedPtr>
+      [this](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::GlobalPlanner>::SharedPtr>
                  future) {
         auto goal_handle = future.get();
-        auto planning_progress = std::make_shared<moveit_msgs::action::RunHybridPlanning::Feedback>();
+        auto planning_progress = std::make_shared<moveit_msgs::action::HybridPlanning::Feedback>();
         auto& feedback = planning_progress->feedback;
         if (!goal_handle)
         {
@@ -111,8 +111,8 @@ int HybridPlanningManager::planGlobalTrajectory()
 
   // Add result callback to print the result
   send_goal_options.result_callback =
-      [this](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::PlanGlobalTrajectory>::WrappedResult& result) {
-        auto planning_progress = std::make_shared<moveit_msgs::action::RunHybridPlanning::Feedback>();
+      [this](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::GlobalPlanner>::WrappedResult& result) {
+        auto planning_progress = std::make_shared<moveit_msgs::action::HybridPlanning::Feedback>();
         auto& feedback = planning_progress->feedback;
         switch (result.code)
         {
@@ -133,7 +133,7 @@ int HybridPlanningManager::planGlobalTrajectory()
         state_ = hybrid_planning::HybridPlanningState::GLOBAL_PLAN_READY;
       };
   // Forward global trajectory goal
-  auto goal_msg = moveit_msgs::action::PlanGlobalTrajectory::Goal();
+  auto goal_msg = moveit_msgs::action::GlobalPlanner::Goal();
   goal_msg.request = (hybrid_planning_goal_handle_->get_goal())->request;
 
   // Send global planning goal and wait until it's accepted
@@ -144,16 +144,16 @@ int HybridPlanningManager::planGlobalTrajectory()
 int HybridPlanningManager::runLocalPlanner()
 {
   // Setup empty dummy goal
-  auto goal_msg = moveit_msgs::action::OperateLocalPlanner::Goal();
-  auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::OperateLocalPlanner>::SendGoalOptions();
-  rclcpp_action::ClientGoalHandle<moveit_msgs::action::OperateLocalPlanner>::SharedPtr goal_handle;
+  auto goal_msg = moveit_msgs::action::LocalPlanner::Goal();
+  auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::LocalPlanner>::SendGoalOptions();
+  rclcpp_action::ClientGoalHandle<moveit_msgs::action::LocalPlanner>::SharedPtr goal_handle;
 
   // Add goal response callback to print whether the goal is accepted or not
   send_goal_options.goal_response_callback =
-      [this](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::OperateLocalPlanner>::SharedPtr>
+      [this](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::LocalPlanner>::SharedPtr>
                  future) {
         auto goal_handle = future.get();
-        auto planning_progress = std::make_shared<moveit_msgs::action::RunHybridPlanning::Feedback>();
+        auto planning_progress = std::make_shared<moveit_msgs::action::HybridPlanning::Feedback>();
         auto& feedback = planning_progress->feedback;
         if (!goal_handle)
         {
@@ -168,8 +168,8 @@ int HybridPlanningManager::runLocalPlanner()
 
   // Add result callback to print the result
   send_goal_options.result_callback =
-      [this](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::OperateLocalPlanner>::WrappedResult& result) {
-        auto planning_progress = std::make_shared<moveit_msgs::action::RunHybridPlanning::Feedback>();
+      [this](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::LocalPlanner>::WrappedResult& result) {
+        auto planning_progress = std::make_shared<moveit_msgs::action::HybridPlanning::Feedback>();
         auto& feedback = planning_progress->feedback;
         switch (result.code)
         {
@@ -195,7 +195,7 @@ int HybridPlanningManager::runLocalPlanner()
 }
 
 void HybridPlanningManager::runHybridPlanning(
-    std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::RunHybridPlanning>> goal_handle)
+    std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanning>> goal_handle)
 {
   hybrid_planning_goal_handle_ = std::move(goal_handle);
 
@@ -206,7 +206,7 @@ void HybridPlanningManager::runHybridPlanning(
 
 void HybridPlanningManager::hybridPlanningLoop()
 {
-  auto result = std::make_shared<moveit_msgs::action::RunHybridPlanning::Result>();
+  auto result = std::make_shared<moveit_msgs::action::HybridPlanning::Result>();
   switch (state_)
   {
     case hybrid_planning::HybridPlanningState::REQUEST_RECEIVED:
@@ -243,7 +243,7 @@ void HybridPlanningManager::hybridPlanningLoop()
       state_ = hybrid_planning::HybridPlanningState::READY;
       break;
     default:
-      auto planning_progress = std::make_shared<moveit_msgs::action::RunHybridPlanning::Feedback>();
+      auto planning_progress = std::make_shared<moveit_msgs::action::HybridPlanning::Feedback>();
       auto& feedback = planning_progress->feedback;
       feedback = "Unknown hybrid planning manager state";
       hybrid_planning_goal_handle_->publish_feedback(planning_progress);

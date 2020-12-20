@@ -48,19 +48,19 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
 {
   // Initialize local planning request action server
   using namespace std::placeholders;
-  local_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::OperateLocalPlanner>(
+  local_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::LocalPlanner>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
-      this->get_node_waitables_interface(), "operate_local_planner",
+      this->get_node_waitables_interface(), "local_planning_action",
       [](const rclcpp_action::GoalUUID& /*unused*/,
-         std::shared_ptr<const moveit_msgs::action::OperateLocalPlanner::Goal> /*unused*/) {
+         std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received local planning goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::OperateLocalPlanner>>& /*unused*/) {
+      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel local planning goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::OperateLocalPlanner>> goal_handle) {
+      [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>> goal_handle) {
         local_planning_goal_handle_ = std::move(goal_handle);
         timer_ = this->create_wall_timer(std::chrono::milliseconds(1),
                                          std::bind(&LocalPlannerComponent::localPlanningLoop, this));
@@ -82,7 +82,7 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
 
 void LocalPlannerComponent::localPlanningLoop()
 {
-  auto result = std::make_shared<moveit_msgs::action::OperateLocalPlanner::Result>();
+  auto result = std::make_shared<moveit_msgs::action::LocalPlanner::Result>();
   switch (state_)
   {
     case hybrid_planning::LocalPlannerState::READY:

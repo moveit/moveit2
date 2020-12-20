@@ -51,8 +51,7 @@
 #include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
 #include <moveit/local_planner/local_planner_component.h>
 
-#include <moveit_msgs/action/run_hybrid_planning.hpp>
-#include <moveit_msgs/action/plan_global_trajectory.hpp>
+#include <moveit_msgs/action/hybrid_planning.hpp>
 
 const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
 
@@ -63,7 +62,7 @@ public:
   {
     node_ = node;
     hp_action_client_ =
-        rclcpp_action::create_client<moveit_msgs::action::RunHybridPlanning>(node_, "run_hybrid_planning");
+        rclcpp_action::create_client<moveit_msgs::action::HybridPlanning>(node_, "run_hybrid_planning");
   }
 
   void run()
@@ -105,7 +104,7 @@ public:
     // Configure a valid robot state
     planning_scene->getCurrentStateNonConst().setToDefaultValues(joint_model_group, "ready");
 
-    auto goal_msg = moveit_msgs::action::RunHybridPlanning::Goal();
+    auto goal_msg = moveit_msgs::action::HybridPlanning::Goal();
 
     moveit::core::robotStateToRobotStateMsg(planning_scene->getCurrentStateNonConst(), goal_msg.request.start_state);
     goal_msg.request.group_name = PLANNING_GROUP;
@@ -124,9 +123,9 @@ public:
     goal_msg.request.goal_constraints[0] =
         kinematic_constraints::constructGoalConstraints(goal_state, joint_model_group);
 
-    auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::RunHybridPlanning>::SendGoalOptions();
+    auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::HybridPlanning>::SendGoalOptions();
     send_goal_options.result_callback =
-        [](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::RunHybridPlanning>::WrappedResult& result) {
+        [](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanning>::WrappedResult& result) {
           switch (result.code)
           {
             case rclcpp_action::ResultCode::SUCCEEDED:
@@ -145,8 +144,8 @@ public:
           }
         };
     send_goal_options.feedback_callback =
-        [](rclcpp_action::ClientGoalHandle<moveit_msgs::action::RunHybridPlanning>::SharedPtr,
-           const std::shared_ptr<const moveit_msgs::action::RunHybridPlanning::Feedback> feedback) {
+        [](rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanning>::SharedPtr,
+           const std::shared_ptr<const moveit_msgs::action::HybridPlanning::Feedback> feedback) {
           RCLCPP_INFO(LOGGER, feedback->feedback);
         };
 
@@ -157,7 +156,7 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
-  rclcpp_action::Client<moveit_msgs::action::RunHybridPlanning>::SharedPtr hp_action_client_;
+  rclcpp_action::Client<moveit_msgs::action::HybridPlanning>::SharedPtr hp_action_client_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   // TF

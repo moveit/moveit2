@@ -40,9 +40,9 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 
-#include <moveit_msgs/action/operate_local_planner.hpp>
-#include <moveit_msgs/action/plan_global_trajectory.hpp>
-#include <moveit_msgs/action/run_hybrid_planning.hpp>
+#include <moveit_msgs/action/local_planner.hpp>
+#include <moveit_msgs/action/global_planner.hpp>
+#include <moveit_msgs/action/hybrid_planning.hpp>
 
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 
@@ -73,8 +73,8 @@ private:
   HybridPlanningState state_;  // TODO: Add state publisher topic
   rclcpp::TimerBase::SharedPtr timer_;
 
-  std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::RunHybridPlanning>> hybrid_planning_goal_handle_;
-  std::shared_ptr<moveit_msgs::action::RunHybridPlanning_Feedback> hybrid_planning_progess_;
+  std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanning>> hybrid_planning_goal_handle_;
+  std::shared_ptr<moveit_msgs::action::HybridPlanning_Feedback> hybrid_planning_progess_;
 
   bool global_planning_started_;
   bool local_planning_started_;
@@ -85,15 +85,15 @@ private:
   bool abort_;
 
   // Planning request action clients
-  rclcpp_action::Client<moveit_msgs::action::OperateLocalPlanner>::SharedPtr local_planner_action_client_;
-  rclcpp_action::Client<moveit_msgs::action::PlanGlobalTrajectory>::SharedPtr global_planner_action_client_;
+  rclcpp_action::Client<moveit_msgs::action::LocalPlanner>::SharedPtr local_planner_action_client_;
+  rclcpp_action::Client<moveit_msgs::action::GlobalPlanner>::SharedPtr global_planner_action_client_;
 
   // Hybrid planning request action server
-  rclcpp_action::Server<moveit_msgs::action::RunHybridPlanning>::SharedPtr hybrid_planning_request_server_;
+  rclcpp_action::Server<moveit_msgs::action::HybridPlanning>::SharedPtr hybrid_planning_request_server_;
 
   // Hybrid planning goal callback for hybrid planning request server
   void runHybridPlanning(
-      std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::RunHybridPlanning>> goal_handle);
+      std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanning>> goal_handle);
 
   // Run the hybrid planning manager's internal state machine
   void hybridPlanningLoop();

@@ -48,7 +48,7 @@
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 
-#include <moveit_msgs/action/plan_global_trajectory.hpp>
+#include <moveit_msgs/action/global_planner.hpp>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 
@@ -91,14 +91,14 @@ private:
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
   // Global planning request action server
-  rclcpp_action::Server<moveit_msgs::action::PlanGlobalTrajectory>::SharedPtr global_planning_request_server_;
+  rclcpp_action::Server<moveit_msgs::action::GlobalPlanner>::SharedPtr global_planning_request_server_;
 
   // Global trajectory publisher
   rclcpp::Publisher<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_trajectory_pub_;
 
   // Goal callback for global planning request action server
   void runGlobalPlanning(
-      std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::PlanGlobalTrajectory>> goal_handle);
+      std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle);
 
   // Initialize planning scene monitor and load pipelines
   bool init();

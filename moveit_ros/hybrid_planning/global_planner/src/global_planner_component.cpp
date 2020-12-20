@@ -67,15 +67,15 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
       this->declare_parameter<std::vector<std::string>>(ns + ".pipeline_names", std::vector<std::string>({ "ompl" }));
 
   // Initialize global planning request action server
-  global_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::PlanGlobalTrajectory>(
+  global_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::GlobalPlanner>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
-      this->get_node_waitables_interface(), "run_global_planning",
+      this->get_node_waitables_interface(), "global_planning_action",
       [](const rclcpp_action::GoalUUID& /*unused*/,
-         std::shared_ptr<const moveit_msgs::action::PlanGlobalTrajectory::Goal> /*unused*/) {
+         std::shared_ptr<const moveit_msgs::action::GlobalPlanner::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received global planning goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::PlanGlobalTrajectory>>& /*unused*/) {
+      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel global planning goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
@@ -159,7 +159,7 @@ bool GlobalPlannerComponent::init()
 }
 
 void GlobalPlannerComponent::runGlobalPlanning(
-    std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::PlanGlobalTrajectory>> goal_handle)
+    std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle)
 {
   // TODO: Add feedback
   const auto goal = goal_handle->get_goal();
@@ -172,7 +172,7 @@ void GlobalPlannerComponent::runGlobalPlanning(
   this->global_trajectory_pub_->publish(planning_solution);
 
   // Send action response
-  auto result = std::make_shared<moveit_msgs::action::PlanGlobalTrajectory::Result>();
+  auto result = std::make_shared<moveit_msgs::action::GlobalPlanner::Result>();
   result->response = planning_solution;
   goal_handle->succeed(result);
 

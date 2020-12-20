@@ -40,7 +40,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 
-#include <moveit_msgs/action/operate_local_planner.hpp>
+#include <moveit_msgs/action/local_planner.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 
@@ -70,7 +70,7 @@ public:
 private:
   LocalPlannerState state_;
   rclcpp::TimerBase::SharedPtr timer_;
-  std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::OperateLocalPlanner>> local_planning_goal_handle_;
+  std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>> local_planning_goal_handle_;
   moveit_msgs::msg::RobotTrajectory global_trajectory_;
 
   bool global_trajectory_received_{ false };
@@ -79,7 +79,7 @@ private:
   rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_trajectory_sub_;
 
   // Local planning request action server
-  rclcpp_action::Server<moveit_msgs::action::OperateLocalPlanner>::SharedPtr local_planning_request_server_;
+  rclcpp_action::Server<moveit_msgs::action::LocalPlanner>::SharedPtr local_planning_request_server_;
 
   // Forward trajectory publisher
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_pub_;
