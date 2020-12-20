@@ -79,7 +79,7 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
         RCLCPP_INFO(LOGGER, "Received request to cancel global planning goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      std::bind(&GlobalPlannerComponent::runGlobalPlanning, this, std::placeholders::_1));
+      std::bind(&GlobalPlannerComponent::globalPlanningRequestCallback, this, std::placeholders::_1));
 
   global_trajectory_pub_ = this->create_publisher<moveit_msgs::msg::MotionPlanResponse>("global_trajectory", 1);
 
@@ -158,7 +158,7 @@ bool GlobalPlannerComponent::init()
   return true;
 }
 
-void GlobalPlannerComponent::runGlobalPlanning(
+void GlobalPlannerComponent::globalPlanningRequestCallback(
     std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle)
 {
   // TODO: Add feedback

@@ -97,7 +97,7 @@ private:
   rclcpp::Publisher<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_trajectory_pub_;
 
   // Goal callback for global planning request action server
-  void runGlobalPlanning(
+  void globalPlanningRequestCallback(
       std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle);
 
   // Initialize planning scene monitor and load pipelines

@@ -83,7 +83,7 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      std::bind(&HybridPlanningManager::runHybridPlanning, this, std::placeholders::_1));
+      std::bind(&HybridPlanningManager::hybridPlanningRequestCallback, this, std::placeholders::_1));
   state_ = hybrid_planning::HybridPlanningState::READY;
 }
 
@@ -194,7 +194,7 @@ int HybridPlanningManager::runLocalPlanner()
   return 1;  // return always success
 }
 
-void HybridPlanningManager::runHybridPlanning(
+void HybridPlanningManager::hybridPlanningRequestCallback(
     std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanning>> goal_handle)
 {
   hybrid_planning_goal_handle_ = std::move(goal_handle);
