@@ -47,10 +47,6 @@
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/robot_state/conversions.h>
 
-#include <moveit/global_planner/global_planner_component.h>
-#include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
-#include <moveit/local_planner/local_planner_component.h>
-
 #include <moveit_msgs/action/hybrid_planning.hpp>
 
 const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
@@ -112,7 +108,6 @@ public:
     goal_msg.request.max_acceleration_scaling_factor = 1.0;
     goal_msg.request.allowed_planning_time = 1.0;
     goal_msg.request.planner_id = "ompl";
-    // goal->request.workspace_parameters = workspace_parameters_;
 
     moveit::core::RobotState goal_state(robot_model);
     std::vector<double> joint_values = { -1.0, 0.7, 0.7, -1.5, -0.7, 2.0, 0.0 };

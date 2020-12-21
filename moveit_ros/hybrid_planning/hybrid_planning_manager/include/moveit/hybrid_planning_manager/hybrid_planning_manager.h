@@ -33,6 +33,7 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
+   Description: The hybrid planning manager component node that serves as the control unit of the whole architecture.
  */
 
 #pragma once
@@ -44,7 +45,6 @@
 #include <moveit_msgs/action/global_planner.hpp>
 #include <moveit_msgs/action/hybrid_planning.hpp>
 
-#include <moveit_msgs/msg/move_it_error_codes.hpp>
 
 namespace moveit
 {

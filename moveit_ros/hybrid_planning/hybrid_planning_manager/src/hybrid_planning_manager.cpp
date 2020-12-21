@@ -37,9 +37,6 @@
 
 #include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
 
-#include <chrono>
-#include <thread>
-
 namespace moveit
 {
 namespace hybrid_planning
