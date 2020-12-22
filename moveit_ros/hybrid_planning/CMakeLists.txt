@@ -21,6 +21,7 @@ set(LIBRARIES
   moveit_hybrid_planning_manager
   moveit_local_planner_component
   moveit_global_planner_component
+  planner_logic_interface
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
