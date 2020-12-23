@@ -32,6 +32,7 @@
 
   <export>
     <build_type>ament_cmake</build_type>
+    <moveit_hybrid_planning plugin="${prefix}/single_plan_execution_plugin.xml"/>
   </export>
 
 </package>
