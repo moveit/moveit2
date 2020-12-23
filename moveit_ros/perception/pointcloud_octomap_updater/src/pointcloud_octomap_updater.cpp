@@ -41,6 +41,8 @@
 #include <tf2/LinearMath/Vector3.h>
 #include <tf2/LinearMath/Transform.h>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
+#include <tf2_ros/create_timer_interface.h>
+#include <tf2_ros/create_timer_ros.h>
 
 #include <memory>
 
@@ -97,10 +99,7 @@ void PointCloudOctomapUpdater::start()
   if (point_cloud_subscriber_)
     return;
   /* subscribe to point cloud topic using tf filter*/
-  rmw_qos_profile_t qos;
-  qos.depth = 5;
-  point_cloud_subscriber_ =
-      new message_filters::Subscriber<sensor_msgs::msg::PointCloud2>(node_, point_cloud_topic_, qos);
+  point_cloud_subscriber_ = new message_filters::Subscriber<sensor_msgs::msg::PointCloud2>(node_, point_cloud_topic_);
   if (tf_listener_ && tf_buffer_ && !monitor_->getMapFrame().empty())
   {
     point_cloud_filter_ = new tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>(
@@ -168,7 +167,7 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
   if (max_update_rate_ > 0)
   {
     // ensure we are not updating the octomap representation too often
-    if (rclcpp::Clock(RCL_ROS_TIME).now() - last_update_time_ <=
+    if ((rclcpp::Clock(RCL_ROS_TIME).now() - last_update_time_) <=
         rclcpp::Duration(std::chrono::duration<double>(1.0 / max_update_rate_)))
       return;
     last_update_time_ = rclcpp::Clock(RCL_ROS_TIME).now();
