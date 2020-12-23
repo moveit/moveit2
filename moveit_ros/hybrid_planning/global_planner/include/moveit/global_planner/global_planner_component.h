@@ -52,9 +52,7 @@
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 
-namespace moveit
-{
-namespace hybrid_planning
+namespace moveit_hybrid_planning
 {
 // Component node containing the global planner
 class GlobalPlannerComponent : public rclcpp::Node
@@ -107,5 +105,4 @@ private:
   moveit_msgs::msg::MotionPlanResponse plan(moveit_msgs::msg::MotionPlanRequest planning_problem);
 };
 
-}  // namespace hybrid_planning
-}  // namespace moveit
+}  // namespace moveit_hybrid_planning

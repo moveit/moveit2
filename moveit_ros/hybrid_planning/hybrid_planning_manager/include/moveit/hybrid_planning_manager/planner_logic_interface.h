@@ -42,9 +42,7 @@
 
 #include <moveit/hybrid_planning_manager/hybrid_planning_events.h>
 
-namespace moveit
-{
-namespace hybrid_planning
+namespace moveit_hybrid_planning
 {
 class HybridPlanningManager;  // Forward declaration
 
@@ -61,7 +59,7 @@ public:
    * @param hybrid_planner_handle Handle to access the hybrid planning manager's member functions and communication interfaces.
    * @return true if initialization was successful
    */
-  virtual bool initialize(std::shared_ptr<moveit::hybrid_planning::HybridPlanningManager> hybrid_planner_handle) = 0;
+  virtual bool initialize(std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planner_handle) = 0;
 
   /**
    * React to event defined in BasicHybridPlanningEvent enum
@@ -76,13 +74,13 @@ public:
    * @return true if reaction was successful
    */
   virtual bool react(std::string event) = 0;
+  ~PlannerLogicInterface(){};
 
 protected:
   /** \brief Constructor */
-  PlannerLogicInterface();
+  PlannerLogicInterface(){};
 
   // Handle to access communication interfaces and member functions of hybrid planning manager instance that uses the planner plugin
-  std::shared_ptr<moveit::hybrid_planning::HybridPlanningManager> hybrid_planner_handle_ = nullptr;
+  std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planner_handle_ = nullptr;
 };
-}  // namespace hybrid_planning
-}  // namespace moveit
+}  // namespace moveit_hybrid_planning

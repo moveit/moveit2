@@ -37,9 +37,7 @@
 
 #include <moveit/local_planner/local_planner_component.h>
 
-namespace moveit
-{
-namespace hybrid_planning
+namespace moveit_hybrid_planning
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 
@@ -77,7 +75,7 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   trajectory_pub_ =
       this->create_publisher<trajectory_msgs::msg::JointTrajectory>("panda_arm_controller/joint_trajectory", 1);
 
-  state_ = hybrid_planning::LocalPlannerState::READY;
+  state_ = moveit_hybrid_planning::LocalPlannerState::READY;
 }
 
 void LocalPlannerComponent::localPlanningLoop()
@@ -85,37 +83,36 @@ void LocalPlannerComponent::localPlanningLoop()
   auto result = std::make_shared<moveit_msgs::action::LocalPlanner::Result>();
   switch (state_)
   {
-    case hybrid_planning::LocalPlannerState::READY:
-      state_ = hybrid_planning::LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY;
+    case moveit_hybrid_planning::LocalPlannerState::READY:
+      state_ = moveit_hybrid_planning::LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY;
       break;
-    case hybrid_planning::LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY:
+    case moveit_hybrid_planning::LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY:
       if (!global_trajectory_received_)
       {
         break;
       }
       else
-        state_ = hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE;
+        state_ = moveit_hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE;
       break;
-    case hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE:
+    case moveit_hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE:
       RCLCPP_INFO(LOGGER, "Forward trajectory");
 
       trajectory_pub_->publish(global_trajectory_.joint_trajectory);
 
       local_planning_goal_handle_->succeed(result);
-      state_ = hybrid_planning::LocalPlannerState::READY;
+      state_ = moveit_hybrid_planning::LocalPlannerState::READY;
       timer_->cancel();
       break;
     default:
       local_planning_goal_handle_->abort(result);
       timer_->cancel();
       RCLCPP_ERROR(LOGGER, "Local planner somehow failed :(");
-      state_ = hybrid_planning::LocalPlannerState::READY;
+      state_ = moveit_hybrid_planning::LocalPlannerState::READY;
       break;
   }
 };
-}  // namespace hybrid_planning
-}  // namespace moveit
+}  // namespace moveit_hybrid_planning
 
 // Register the component with class_loader
 #include <rclcpp_components/register_node_macro.hpp>
-RCLCPP_COMPONENTS_REGISTER_NODE(moveit::hybrid_planning::LocalPlannerComponent)
+RCLCPP_COMPONENTS_REGISTER_NODE(moveit_hybrid_planning::LocalPlannerComponent)

@@ -46,9 +46,7 @@
 
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 
-namespace moveit
-{
-namespace hybrid_planning
+namespace moveit_hybrid_planning
 {
 // The possible hybrid planner states
 // TODO Use lifecycle node?
@@ -87,5 +85,4 @@ private:
   // Goal callback for local planning request action server
   void localPlanningLoop();
 };
-}  // namespace hybrid_planning
-}  // namespace moveit
+}  // namespace moveit_hybrid_planning

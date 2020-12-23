@@ -48,9 +48,7 @@
 #include <pluginlib/class_loader.hpp>
 #include <moveit/hybrid_planning_manager/planner_logic_interface.h>
 
-namespace moveit
-{
-namespace hybrid_planning
+namespace moveit_hybrid_planning
 {
 /**
  * Class HybridPlanningManager - ROS 2 component node that implements the hybrid planning manager.
@@ -103,10 +101,10 @@ public:
 
 private:
   // Planner logic plugin loader
-  std::unique_ptr<pluginlib::ClassLoader<moveit::hybrid_planning::PlannerLogicInterface>> planner_logic_plugin_loader_;
+  std::unique_ptr<pluginlib::ClassLoader<moveit_hybrid_planning::PlannerLogicInterface>> planner_logic_plugin_loader_;
 
   // Planner logic instance to implement reactive behavior
-  std::shared_ptr<moveit::hybrid_planning::PlannerLogicInterface> planner_logic_instance_;
+  std::shared_ptr<moveit_hybrid_planning::PlannerLogicInterface> planner_logic_instance_;
 
   // Timer to trigger events periodically
   rclcpp::TimerBase::SharedPtr timer_;
@@ -116,6 +114,7 @@ private:
 
   // Shared hybrid planning goal handle
   std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanning>> hybrid_planning_goal_handle_;
+  moveit_msgs::msg::MotionPlanRequest latest_hybrid_planning_goal_;
 
   // Frequently updated feedback for the hybrid planning action requester
   std::shared_ptr<moveit_msgs::action::HybridPlanning_Feedback> hybrid_planning_progess_;
@@ -130,5 +129,4 @@ private:
   // Global solution subscriber
   rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_solution_sub_;
 };
-}  // namespace hybrid_planning
-}  // namespace moveit
+}  // namespace moveit_hybrid_planning

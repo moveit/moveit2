@@ -38,9 +38,7 @@
 #include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
 #include <moveit/hybrid_planning_manager/hybrid_planning_events.h>
 
-namespace moveit
-{
-namespace hybrid_planning
+namespace moveit_hybrid_planning
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
 
@@ -74,8 +72,8 @@ bool HybridPlanningManager::initialize()
   // Load planning logic plugin
   try
   {
-    planner_logic_plugin_loader_.reset(new pluginlib::ClassLoader<hybrid_planning::PlannerLogicInterface>(
-        "moveit_hybrid_planning", "hybrid_planning::PlannerLogicInterface"));
+    planner_logic_plugin_loader_.reset(new pluginlib::ClassLoader<moveit_hybrid_planning::PlannerLogicInterface>(
+        "moveit_hybrid_planning", "moveit_hybrid_planning::PlannerLogicInterface"));
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -89,7 +87,8 @@ bool HybridPlanningManager::initialize()
   }
   else
   {
-    logic_plugin_name = this->declare_parameter<std::string>("planner_logic_plugin_name", "single_loop_logic");
+    logic_plugin_name =
+        this->declare_parameter<std::string>("planner_logic_plugin_name", "moveit_hybrid_planning/SingleLoopLogic");
   }
   try
   {
@@ -132,7 +131,8 @@ bool HybridPlanningManager::initialize()
       [this](const rclcpp_action::GoalUUID& /*unused*/,
              std::shared_ptr<const moveit_msgs::action::HybridPlanning::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received goal request");
-        planner_logic_instance_->react(hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED);
+        planner_logic_instance_->react(
+            moveit_hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED);
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
       [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanning>>& /*unused*/) {
@@ -144,13 +144,14 @@ bool HybridPlanningManager::initialize()
   // Initialize global solution subscriber
   global_solution_sub_ = create_subscription<moveit_msgs::msg::MotionPlanResponse>(
       "global_trajectory", 1, [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr msg) {
-        planner_logic_instance_->react(hybrid_planning::BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE);
+        planner_logic_instance_->react(moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE);
       });
   return true;
 }
 
 bool HybridPlanningManager::planGlobalTrajectory()
 {
+  RCLCPP_INFO(LOGGER, "START PLANNING");
   auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::GlobalPlanner>::SendGoalOptions();
 
   // Add goal response callback
@@ -169,17 +170,15 @@ bool HybridPlanningManager::planGlobalTrajectory()
         }
         hybrid_planning_goal_handle_->publish_feedback(planning_progress);
       };
-
   // Add result callback
   send_goal_options.result_callback =
       [this](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::GlobalPlanner>::WrappedResult& result) {
-        planner_logic_instance_->react(hybrid_planning::BasicHybridPlanningEvent::GLOBAL_PLANNING_ACTION_FINISHED);
+        planner_logic_instance_->react(
+            moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_PLANNING_ACTION_FINISHED);
       };
-
   // Forward global trajectory goal from hybrid planning request TODO pass goal as function argument
   auto goal_msg = moveit_msgs::action::GlobalPlanner::Goal();
-  goal_msg.request = (hybrid_planning_goal_handle_->get_goal())->request;
-
+  goal_msg.request = latest_hybrid_planning_goal_;
   // Send global planning goal and wait until it's accepted
   auto goal_handle_future = global_planner_action_client_->async_send_goal(goal_msg, send_goal_options);
   return true;  // return always success TODO add more error checking
@@ -212,7 +211,7 @@ bool HybridPlanningManager::runLocalPlanner()
   // Add result callback to print the result
   send_goal_options.result_callback =
       [this](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::LocalPlanner>::WrappedResult& result) {
-        planner_logic_instance_->react(hybrid_planning::BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED);
+        planner_logic_instance_->react(moveit_hybrid_planning::BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED);
       };
 
   // Send global planning goal
@@ -225,9 +224,10 @@ void HybridPlanningManager::hybridPlanningRequestCallback(
 {
   // Pass goal handle to class member
   hybrid_planning_goal_handle_ = std::move(goal_handle);
+  latest_hybrid_planning_goal_ = (hybrid_planning_goal_handle_->get_goal())->request;
 
   // React on incoming planning request
-  planner_logic_instance_->react(hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED);
+  planner_logic_instance_->react(moveit_hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED);
 }
 
 void HybridPlanningManager::sendHybridPlanningResponse(bool success)
@@ -244,9 +244,8 @@ void HybridPlanningManager::sendHybridPlanningResponse(bool success)
     hybrid_planning_goal_handle_->abort(result);
   }
 }
-}  // namespace hybrid_planning
-}  // namespace moveit
+}  // namespace moveit_hybrid_planning
 
 // Register the component with class_loader
 #include <rclcpp_components/register_node_macro.hpp>
-RCLCPP_COMPONENTS_REGISTER_NODE(moveit::hybrid_planning::HybridPlanningManager)
+RCLCPP_COMPONENTS_REGISTER_NODE(moveit_hybrid_planning::HybridPlanningManager)

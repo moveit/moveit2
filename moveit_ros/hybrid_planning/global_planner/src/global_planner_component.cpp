@@ -43,9 +43,7 @@
 #include <chrono>
 #include <thread>
 
-namespace moveit
-{
-namespace hybrid_planning
+namespace moveit_hybrid_planning
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
 constexpr char PLANNING_PLUGIN_PARAM[] = "planning_plugin";
@@ -216,9 +214,8 @@ moveit_msgs::msg::MotionPlanResponse GlobalPlannerComponent::plan(moveit_msgs::m
   response.getMessage(planning_solution);
   return planning_solution;
 }
-}  // namespace hybrid_planning
-}  // namespace moveit
+}  // namespace moveit_hybrid_planning
 
 // Register the component with class_loader
 #include <rclcpp_components/register_node_macro.hpp>
-RCLCPP_COMPONENTS_REGISTER_NODE(moveit::hybrid_planning::GlobalPlannerComponent)
+RCLCPP_COMPONENTS_REGISTER_NODE(moveit_hybrid_planning::GlobalPlannerComponent)

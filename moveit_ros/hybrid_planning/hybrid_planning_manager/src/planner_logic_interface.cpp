@@ -37,10 +37,7 @@
 
 #include <moveit/hybrid_planning_manager/planner_logic_interface.h>
 
-namespace moveit
-{
-namespace hybrid_planning
+namespace moveit_hybrid_planning
 {
 // Empty because this library only defines an interface
-}  // namespace hybrid_planning
-}  // namespace moveit
+}  // namespace moveit_hybrid_planning

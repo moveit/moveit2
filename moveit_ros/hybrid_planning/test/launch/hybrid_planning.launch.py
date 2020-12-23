@@ -62,7 +62,7 @@ def generate_launch_description():
             composable_node_descriptions=[
                 ComposableNode(
                     package='moveit_hybrid_planning',
-                    plugin='moveit::hybrid_planning::GlobalPlannerComponent',
+                    plugin='moveit_hybrid_planning::GlobalPlannerComponent',
                     name='global_planner',
                     parameters=[global_planner_param,
                                 robot_description,
@@ -71,11 +71,11 @@ def generate_launch_description():
                                 ompl_planning_pipeline_config]),
                 ComposableNode(
                     package='moveit_hybrid_planning',
-                    plugin='moveit::hybrid_planning::LocalPlannerComponent',
+                    plugin='moveit_hybrid_planning::LocalPlannerComponent',
                     name='local_planner'),
                 ComposableNode(
                     package='moveit_hybrid_planning',
-                    plugin='moveit::hybrid_planning::HybridPlanningManager',
+                    plugin='moveit_hybrid_planning::HybridPlanningManager',
                     name='hybrid_planning_manager')
             ],
             output='screen',
