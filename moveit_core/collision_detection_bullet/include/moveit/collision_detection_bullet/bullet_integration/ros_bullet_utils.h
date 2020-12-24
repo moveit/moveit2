@@ -24,7 +24,7 @@
 #include <geometric_shapes/shape_messages.h>
 #include <geometric_shapes/shapes.h>
 #include <geometric_shapes/shape_operations.h>
-#include <ros/console.h>
+#include <rclcpp/logging.hpp>
 
 #include <moveit/collision_detection_bullet/bullet_integration/basic_types.h>
 
@@ -89,7 +89,7 @@ inline shapes::ShapePtr constructShape(const urdf::Geometry* geom)
     }
     break;
     default:
-      ROS_ERROR("Unknown geometry type: %d", static_cast<int>(geom->type));
+    	RCLCPP_ERROR(BULLET_LOGGER,"Unknown geometry type: %d", static_cast<int>(geom->type));
       break;
   }
 

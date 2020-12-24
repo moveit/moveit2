@@ -40,10 +40,10 @@
 #include <geometric_shapes/shapes.h>
 #include <memory>
 #include <octomap/octomap.h>
-#include <ros/console.h>
 
 namespace collision_detection_bullet
 {
+
 btCollisionShape* createShapePrimitive(const shapes::Box* geom, const CollisionObjectType& collision_object_type)
 {
   assert(collision_object_type == CollisionObjectType::USE_SHAPE_TYPE);
@@ -144,13 +144,13 @@ btCollisionShape* createShapePrimitive(const shapes::Mesh* geom, const Collision
       }
       default:
       {
-        ROS_ERROR("This bullet shape type (%d) is not supported for geometry meshs",
+        RCLCPP_ERROR(BULLET_LOGGER,"This bullet shape type (%d) is not supported for geometry meshs",
                   static_cast<int>(collision_object_type));
         return nullptr;
       }
     }
   }
-  ROS_ERROR("The mesh is empty!");
+  RCLCPP_ERROR(BULLET_LOGGER,"The mesh is empty!");
   return nullptr;
 }
 
@@ -217,7 +217,7 @@ btCollisionShape* createShapePrimitive(const shapes::OcTree* geom, const Collisi
     }
     default:
     {
-      ROS_ERROR("This bullet shape type (%d) is not supported for geometry octree",
+      RCLCPP_ERROR(BULLET_LOGGER,"This bullet shape type (%d) is not supported for geometry octree",
                 static_cast<int>(collision_object_type));
       return nullptr;
     }
@@ -255,7 +255,7 @@ btCollisionShape* createShapePrimitive(const shapes::ShapeConstPtr& geom,
     }
     default:
     {
-      ROS_ERROR("This geometric shape type (%d) is not supported using BULLET yet", static_cast<int>(geom->type));
+      RCLCPP_ERROR(BULLET_LOGGER,"This geometric shape type (%d) is not supported using BULLET yet", static_cast<int>(geom->type));
       return nullptr;
     }
   }

@@ -28,7 +28,7 @@
   <depend>assimp</depend>
   <depend>boost</depend>
   <depend>eigen</depend>
-  <depend>bullet</depend>
+  <depend>libbullet-dev</depend>
   <depend>eigen_stl_containers</depend>
   <depend>libfcl-dev</depend>
   <depend>geometric_shapes</depend>

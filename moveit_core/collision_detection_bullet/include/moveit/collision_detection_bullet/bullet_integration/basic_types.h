@@ -33,6 +33,9 @@
 
 namespace collision_detection_bullet
 {
+
+static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
+
 template <typename T>
 using AlignedVector = std::vector<T, Eigen::aligned_allocator<T>>;
 

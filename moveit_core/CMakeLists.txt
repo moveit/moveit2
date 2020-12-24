@@ -17,17 +17,17 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 
 # TODO(henningkayser): enable bullet once the library is migrated to ROS2
 # TODO: Move collision detection into separate packages
-# find_package(Bullet 2.87)
-#
-# # TODO(j-petit): Version check can be dropped when Xenial reaches end-of-life
-# if(BULLET_FOUND)
-#   set(BULLET_ENABLE "BULLET")
-#   set(BULLET_LIB "moveit_collision_detection_bullet")
-#   set(BULLET_INC "collision_detection_bullet/include")
-#   message(STATUS "Compiling with Bullet")
-# else()
-#   message(STATUS "Version of Bullet too old or not available: disabling Bullet collision detection plugin. Try using Ubuntu 18.04 or later.")
-# endif()
+ find_package(Bullet 2.87)
+			
+ # TODO(j-petit): Version check can be dropped when Xenial reaches end-of-life
+ if(BULLET_FOUND)
+   set(BULLET_ENABLE "BULLET")
+   set(BULLET_LIB "moveit_collision_detection_bullet")
+   set(BULLET_INC "collision_detection_bullet/include")
+   message(STATUS "Compiling with Bullet")
+ else()
+   message(STATUS "Version of Bullet too old or not available: disabling Bullet collision detection plugin. Try using Ubuntu 18.04 or later.")
+ endif()
 
 find_package(PkgConfig REQUIRED)
 
@@ -70,7 +70,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     backtrace/include
     collision_detection/include
     collision_detection_fcl/include
-    # ${BULLET_INC}
+    ${BULLET_INC}
     constraint_samplers/include
     controller_manager/include
     distance_field/include
@@ -104,9 +104,7 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_planning_interface
     moveit_collision_detection
     moveit_collision_detection_fcl
-    collision_detector_fcl_plugin
-    # ${BULLET_LIB}
-    # collision_detector_bullet_plugin
+    ${BULLET_LIB}
     moveit_kinematic_constraints
     moveit_planning_scene
     moveit_constraint_samplers
@@ -140,13 +138,13 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   Eigen3
   eigen3_cmake_module
   OCTOMAP
-  # ${BULLET_ENABLE}
+  ${BULLET_ENABLE}
 )
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
   ${LIBFCL_INCLUDE_DIRS}
-  # ${BULLET_INCLUDE_DIRS}
+  ${BULLET_INCLUDE_DIRS}
 )
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
@@ -189,11 +187,11 @@ add_subdirectory(collision_distance_field)
 add_subdirectory(kinematics_metrics)
 add_subdirectory(dynamics_solver)
 # TODO(henningkayser): enable bullet once the library is migrated to ROS2
-# if(BULLET_ENABLE)
-#   add_subdirectory(collision_detection_bullet)
-# else()
-#   install(FILES collision_detection_bullet/empty_description.xml DESTINATION share/${PROJECT_NAME} RENAME collision_detector_bullet_description.xml)
-# endif()
+ if(BULLET_ENABLE)
+   add_subdirectory(collision_detection_bullet)
+ else()
+   install(FILES collision_detection_bullet/empty_description.xml DESTINATION share/${PROJECT_NAME} RENAME collision_detector_bullet_description.xml)
+ endif()
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}

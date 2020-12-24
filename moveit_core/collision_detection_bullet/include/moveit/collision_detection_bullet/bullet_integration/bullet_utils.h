@@ -36,7 +36,7 @@
 
 #include <btBulletCollisionCommon.h>
 #include <geometric_shapes/mesh_operations.h>
-#include <ros/console.h>
+#include <rclcpp/logging.hpp>
 
 #include <moveit/collision_detection_bullet/bullet_integration/basic_types.h>
 #include <moveit/collision_detection_bullet/bullet_integration/contact_checker_common.h>
@@ -69,27 +69,27 @@ inline bool acmCheck(const std::string& body_1, const std::string& body_2,
     {
       if (allowed_type == collision_detection::AllowedCollision::Type::NEVER)
       {
-        ROS_DEBUG_STREAM_NAMED("collision_detection.bullet", "Not allowed entry in ACM found, collision check between "
+        RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Not allowed entry in ACM found, collision check between "
                                                                  << body_1 << " and " << body_2);
         return false;
       }
       else
       {
-        ROS_DEBUG_STREAM_NAMED("collision_detection.bullet", "Entry in ACM found, skipping collision check as allowed "
+        RCLCPP_DEBUG_STREAM(BULLET_LOGGER,"Entry in ACM found, skipping collision check as allowed "
                                                                  << body_1 << " and " << body_2);
         return true;
       }
     }
     else
     {
-      ROS_DEBUG_STREAM_NAMED("collision_detection.bullet",
+     RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
                              "No entry in ACM found, collision check between " << body_1 << " and " << body_2);
       return false;
     }
   }
   else
   {
-    ROS_DEBUG_STREAM_NAMED("collision_detection.bullet",
+   RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
                            "No ACM, collision check between " << body_1 << " and " << body_2);
     return false;
   }
@@ -604,7 +604,7 @@ struct BroadphaseContactResultCallback
   {
     if (cp.m_distance1 > static_cast<btScalar>(contact_distance_))
     {
-      ROS_DEBUG_STREAM_NAMED("collision_detection.bullet", "Not close enough for collision with " << cp.m_distance1);
+      RCLCPP_DEBUG_STREAM(BULLET_LOGGER,"Not close enough for collision with " << cp.m_distance1);
       return 0;
     }
 
@@ -717,7 +717,7 @@ public:
     std::pair<std::string, std::string> pair_names{ cow0->getName(), cow1->getName() };
     if (results_callback_.needsCollision(cow0, cow1))
     {
-      ROS_DEBUG_STREAM_NAMED("collision_detection.bullet",
+     RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
                              "Processing " << cow0->getName() << " vs " << cow1->getName());
       btCollisionObjectWrapper obj0_wrap(nullptr, cow0->getCollisionShape(), cow0, cow0->getWorldTransform(), -1, -1);
       btCollisionObjectWrapper obj1_wrap(nullptr, cow1->getCollisionShape(), cow1, cow1->getWorldTransform(), -1, -1);
@@ -740,7 +740,7 @@ public:
     }
     else
     {
-      ROS_DEBUG_STREAM_NAMED("collision_detection.bullet",
+     RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
                              "Not processing " << cow0->getName() << " vs " << cow1->getName());
     }
     return false;
@@ -778,7 +778,7 @@ inline void updateCollisionObjectFilters(const std::vector<std::string>& active,
     cow.getBroadphaseHandle()->m_collisionFilterGroup = cow.m_collisionFilterGroup;
     cow.getBroadphaseHandle()->m_collisionFilterMask = cow.m_collisionFilterMask;
   }
-  ROS_DEBUG_STREAM_NAMED("collision_detection.bullet", "COW " << cow.getName() << " group "
+  RCLCPP_DEBUG_STREAM(BULLET_LOGGER,"COW " << cow.getName() << " group "
                                                               << cow.m_collisionFilterGroup << " mask "
                                                               << cow.m_collisionFilterMask);
 }
@@ -855,7 +855,7 @@ inline CollisionObjectWrapperPtr makeCastCollisionObject(const CollisionObjectWr
       }
       else
       {
-        ROS_ERROR_NAMED("collision_detection.bullet",
+        RCLCPP_ERROR_STREAM(BULLET_LOGGER,
                         "I can only collision check convex shapes and compound shapes made of convex shapes");
         throw std::runtime_error("I can only collision check convex shapes and compound shapes made of convex shapes");
       }
@@ -869,7 +869,7 @@ inline CollisionObjectWrapperPtr makeCastCollisionObject(const CollisionObjectWr
   }
   else
   {
-    ROS_ERROR_NAMED("collision_detection.bullet",
+    RCLCPP_ERROR_STREAM(BULLET_LOGGER,
                     "I can only collision check convex shapes and compound shapes made of convex shapes");
     throw std::runtime_error("I can only collision check convex shapes and compound shapes made of convex shapes");
   }
@@ -918,7 +918,7 @@ inline void addCollisionObjectToBroadphase(const CollisionObjectWrapperPtr& cow,
                                            const std::unique_ptr<btBroadphaseInterface>& broadphase,
                                            const std::unique_ptr<btCollisionDispatcher>& dispatcher)
 {
-  ROS_DEBUG_STREAM_NAMED("collision_detection.bullet", "Added " << cow->getName() << " to broadphase");
+  RCLCPP_DEBUG_STREAM(BULLET_LOGGER,"Added " << cow->getName() << " to broadphase");
   btVector3 aabb_min, aabb_max;
   cow->getAABB(aabb_min, aabb_max);
 
@@ -961,8 +961,7 @@ struct BroadphaseFilterCallback : public btOverlapFilterCallback
       if (cow0->m_touch_links == cow1->m_touch_links)
         return false;
 
-    ROS_DEBUG_STREAM_NAMED("collision_detection.bullet",
-                           "Broadphase pass " << cow0->getName() << " vs " << cow1->getName());
+    RCLCPP_DEBUG_STREAM(BULLET_LOGGER,"Broadphase pass " << cow0->getName() << " vs " << cow1->getName());
     return true;
   }
 };

@@ -31,6 +31,7 @@
 
 namespace collision_detection_bullet
 {
+
 /**
  * @brief Get a key for two object to search the collision matrix
  * @param obj1 First collision object name
@@ -67,7 +68,7 @@ inline collision_detection::Contact* processResult(ContactTestData& cdata, colli
     }
   }
 
-  ROS_DEBUG_STREAM_NAMED("collision_detection.bullet",
+  RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
                          "Contact btw " << key.first << " and " << key.second << " dist: " << contact.depth);
   // case if pair hasn't a contact yet
   if (!found)
@@ -165,7 +166,7 @@ inline int createConvexHull(AlignedVector<Eigen::Vector3d>& vertices, std::vecto
                               static_cast<btScalar>(shrinkClamp));
   if (val < 0)
   {
-    ROS_ERROR("Failed to create convex hull");
+    RCLCPP_ERROR(BULLET_LOGGER,"Failed to create convex hull");
     return -1;
   }
 
