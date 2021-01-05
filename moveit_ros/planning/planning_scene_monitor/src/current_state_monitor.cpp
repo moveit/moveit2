@@ -276,12 +276,12 @@ bool planning_scene_monitor::CurrentStateMonitor::waitForCurrentState(const rclc
 {
   rclcpp::Time start = node_->now();
   rclcpp::Duration elapsed(0, 0);
-  rclcpp::Duration timeout(wait_time, 0);
+  rclcpp::Duration timeout = rclcpp::Duration::from_seconds(wait_time);
 
   std::unique_lock<std::mutex> lock(state_update_lock_);
   while (current_state_time_ < t)
   {
-    state_update_condition_.wait_for(lock, (timeout - elapsed).to_chrono<std::chrono::seconds>());
+    state_update_condition_.wait_for(lock, (timeout - elapsed).to_chrono<std::chrono::duration<double>>());
     elapsed = node_->now() - start;
     if (elapsed > timeout)
     {
