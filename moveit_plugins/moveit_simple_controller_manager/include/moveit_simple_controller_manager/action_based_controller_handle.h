@@ -81,10 +81,7 @@ public:
                               const std::string& logger_name)
     : ActionBasedControllerHandleBase(name, logger_name), node_(node), done_(true), namespace_(ns)
   {
-    controller_action_client_ =
-        rclcpp_action::create_client<T>(node_->get_node_base_interface(), node_->get_node_graph_interface(),
-                                        node_->get_node_logging_interface(), node_->get_node_waitables_interface(),
-                                        getActionName());
+    controller_action_client_ = rclcpp_action::create_client<T>(node_, getActionName());
 
     unsigned int attempts = 0;
     double timeout;
@@ -148,10 +145,17 @@ public:
     }
     else
     {
-      std::future_status status = result_future.wait_for(timeout.to_chrono<std::chrono::seconds>());
+      std::future_status status = result_future.wait_for(timeout.to_chrono<std::chrono::duration<double>>());
       if (status == std::future_status::timeout)
+      {
         RCLCPP_WARN(LOGGER, "waitForExecution timed out");
+        return false;
+      }
     }
+    // workaround for controllerDoneCallback being called a little bit late
+    rclcpp::Time deadline = node_->now() + rclcpp::Duration::from_seconds(0.1);  // limit waiting to 0.1s
+    while (!done_ && rclcpp::ok() && node_->now() < deadline)                    // Check the done_ flag explicitly,
+      rclcpp::sleep_for(std::chrono::nanoseconds(100));  // which is eventually set in finishControllerExecution
     return true;
   }
 
@@ -182,7 +186,7 @@ protected:
 
   void finishControllerExecution(const rclcpp_action::ResultCode& state)
   {
-    RCLCPP_DEBUG_STREAM(LOGGER, "Controller " << name_ << " is done with state " << static_cast<int8_t>(state));
+    RCLCPP_DEBUG_STREAM(LOGGER, "Controller " << name_ << " is done with state " << static_cast<int>(state));
     if (state == rclcpp_action::ResultCode::SUCCEEDED)
       last_exec_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
     else if (state == rclcpp_action::ResultCode::ABORTED)
