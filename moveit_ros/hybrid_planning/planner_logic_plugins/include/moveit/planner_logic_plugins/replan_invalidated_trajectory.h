@@ -33,56 +33,21 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
+   Description: Simple hybrid planning logic that runs the global planner once and starts executing the global solution
+   with the local planner. In case the local planner detects a collision the global planner is rerun to update the
+   invalidated global trajectory.
  */
 
 #include <moveit/planner_logic_plugins/single_plan_execution.h>
 
 namespace moveit_hybrid_planning
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
-std::once_flag LOCAL_PLANNER_STARTED;
-
-bool SinglePlanExecution::initialize(std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planner_handle)
+class ReplanInvalidatedTrajectory : public SinglePlanExecution  // Inherit from SinglePlanExecution because we just want
+                                                                // alter the reaction to local planner events.
 {
-  hybrid_planner_handle_ = hybrid_planner_handle;
-  return true;
-}
-
-bool SinglePlanExecution::react(BasicHybridPlanningEvent event)
-{
-  switch (event)
-  {
-    case moveit_hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
-      if (!hybrid_planner_handle_->planGlobalTrajectory())  // Start global planning
-      {
-        hybrid_planner_handle_->sendHybridPlanningResponse(false);
-      }
-      break;
-    case moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
-      std::call_once(LOCAL_PLANNER_STARTED, [this]() {   // ensure the local planner is not started twice
-        if (!hybrid_planner_handle_->runLocalPlanner())  // Start local planning
-        {
-          hybrid_planner_handle_->sendHybridPlanningResponse(false);
-        }
-      });
-      break;
-    case moveit_hybrid_planning::BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
-      hybrid_planner_handle_->sendHybridPlanningResponse(true);
-      break;
-    default:
-      // Do nothing
-      break;
-  }
-  return true;
-}
-bool SinglePlanExecution::react(std::string event)
-{
-  auto& clock = *hybrid_planner_handle_->get_clock();
-  RCLCPP_INFO_THROTTLE(LOGGER, clock, 1000, event);
-  return true;
+public:
+  ReplanInvalidatedTrajectory(){};
+  ~ReplanInvalidatedTrajectory() override{};
+  bool react(std::string event) override;
 };
 }  // namespace moveit_hybrid_planning
-
-#include <pluginlib/class_list_macros.hpp>
-
-PLUGINLIB_EXPORT_CLASS(moveit_hybrid_planning::SinglePlanExecution, moveit_hybrid_planning::PlannerLogicInterface)

@@ -1,0 +1,3 @@
+
+# planner_logic_plugin_name: "moveit_hybrid_planning/SinglePlanExecution"
+planner_logic_plugin_name: "moveit_hybrid_planning/ReplanInvalidatedTrajectory"

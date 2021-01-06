@@ -60,12 +60,12 @@ class GlobalPlannerComponent : public rclcpp::Node
 public:
   GlobalPlannerComponent(const rclcpp::NodeOptions& options);
 
-  // TODO implement get_last_solution service
+  // TODO(sjahr) implement get_last_solution service
 
 private:
   rclcpp::TimerBase::SharedPtr timer_;
   bool initialized_{ false };
-  struct GlobalPlannerConfig  // TODO Implement this properly
+  struct GlobalPlannerConfig  // TODO(sjahr) Implement this properly
   {
     // Planning scene monitor
     std::string publish_planning_scene_topic;
