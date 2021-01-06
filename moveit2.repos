@@ -3,10 +3,11 @@ repositories:
     type: git
     url: https://github.com/ros-planning/moveit2
     version: main
+# TODO(sjahr): Switch to upstream after hybrid planning action definitions are finalized and merged
   moveit_msgs:
     type: git
-    url: https://github.com/ros-planning/moveit_msgs
-    version: ros2
+    url: https://github.com/sjahr/moveit_msgs
+    version: hybrid_planning
   moveit_resources:
     type: git
     url: https://github.com/ros-planning/moveit_resources
