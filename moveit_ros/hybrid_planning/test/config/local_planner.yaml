@@ -1,0 +1,7 @@
+
+robot_description: "robot_description"
+trajectory_operator_plugin_name: "moveit_hybrid_planning/NextWaypointSampler"
+local_constraint_solver_plugin_name: "moveit_hybrid_planning/DecelerateBeforeCollision"
+local_planning_frequency: 100.0
+global_solution_topic: "global_trajectory"
+local_solution_topic: "panda_arm_controller/joint_trajectory"

@@ -33,56 +33,46 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
+   Description: Simple local solver plugin that stops in front of a collision object.
  */
 
-#include <moveit/planner_logic_plugins/single_plan_execution.h>
+#pragma once
+
+#include <rclcpp/rclcpp.hpp>
+#include <moveit/local_planner/local_constraint_solver_interface.h>
+#include <control_toolbox/pid.hpp>
 
 namespace moveit_hybrid_planning
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
-std::once_flag LOCAL_PLANNER_STARTED;
+struct PIDConfig
+{
+  // Default values
+  double k_p = 1;
+  double k_i = 0;
+  double k_d = 0;
+  double windup_limit = 0.1;
+  double d_t = 0.01;  // s
+};
 
-bool SinglePlanExecution::initialize(std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planner_handle)
+class DecelerateBeforeCollision : public LocalConstraintSolverInterface
 {
-  hybrid_planner_handle_ = hybrid_planner_handle;
-  return true;
-}
+public:
+  DecelerateBeforeCollision();
+  ~DecelerateBeforeCollision() override{};
+  bool initialize(const rclcpp::Node::SharedPtr& node,
+                  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor) override;
 
-bool SinglePlanExecution::react(BasicHybridPlanningEvent event)
-{
-  switch (event)
-  {
-    case moveit_hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
-      if (!hybrid_planner_handle_->planGlobalTrajectory())  // Start global planning
-      {
-        hybrid_planner_handle_->sendHybridPlanningResponse(false);
-      }
-      break;
-    case moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
-      std::call_once(LOCAL_PLANNER_STARTED, [this]() {   // ensure the local planner is not started twice
-        if (!hybrid_planner_handle_->runLocalPlanner())  // Start local planning
-        {
-          hybrid_planner_handle_->sendHybridPlanningResponse(false);
-        }
-      });
-      break;
-    case moveit_hybrid_planning::BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
-      hybrid_planner_handle_->sendHybridPlanningResponse(true);
-      break;
-    default:
-      // Do nothing
-      break;
-  }
-  return true;
-}
-bool SinglePlanExecution::react(std::string event)
-{
-  auto& clock = *hybrid_planner_handle_->get_clock();
-  RCLCPP_INFO_THROTTLE(LOGGER, clock, 1000, event);
-  return true;
+  trajectory_msgs::msg::JointTrajectory
+  solve(robot_trajectory::RobotTrajectory local_trajectory,
+        std::vector<moveit_msgs::msg::Constraints> local_constraints,
+        std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback) override;
+
+private:
+  rclcpp::Node::SharedPtr node_handle_;
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  bool path_invalidation_event_send_;  // Send path invalidation event only once
+  std::vector<control_toolbox::Pid> joint_position_pids_;
+  PIDConfig pid_config_;
+  rclcpp::Rate loop_rate_;
 };
 }  // namespace moveit_hybrid_planning
-
-#include <pluginlib/class_list_macros.hpp>
-
-PLUGINLIB_EXPORT_CLASS(moveit_hybrid_planning::SinglePlanExecution, moveit_hybrid_planning::PlannerLogicInterface)
