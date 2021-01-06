@@ -128,7 +128,7 @@ bool GlobalPlannerComponent::init()
   }
 
   // Load planning pipelines
-  // TODO Use refactored MoveItCpp instance (load only planning pipeline and planning scene monitor) to reduce redundancy
+  // TODO(sjahr) Use refactored MoveItCpp instance (load only planning pipeline and planning scene monitor) to reduce redundancy
   for (const auto& planning_pipeline_name : config_.pipeline_names)
   {
     if (planning_pipelines_.count(planning_pipeline_name) > 0)
@@ -157,7 +157,7 @@ bool GlobalPlannerComponent::init()
 void GlobalPlannerComponent::globalPlanningRequestCallback(
     std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle)
 {
-  // TODO: Add feedback
+  // TODO(sjahr): Add feedback
   const auto goal = goal_handle->get_goal();
 
   // Plan global trajectory
@@ -173,7 +173,7 @@ void GlobalPlannerComponent::globalPlanningRequestCallback(
   goal_handle->succeed(result);
 
   // Save newest planning solution
-  last_global_solution_ = planning_solution;  // TODO Add Service to expose this
+  last_global_solution_ = planning_solution;  // TODO(sjahr) Add Service to expose this
 };
 
 moveit_msgs::msg::MotionPlanResponse GlobalPlannerComponent::plan(moveit_msgs::msg::MotionPlanRequest planning_problem)
@@ -185,15 +185,10 @@ moveit_msgs::msg::MotionPlanResponse GlobalPlannerComponent::plan(moveit_msgs::m
       ::planning_scene::PlanningScene::clone(planning_scene_monitor_->getPlanningScene());
   planning_scene_monitor_->unlockSceneRead();  // UNLOCK planning scene
 
-  // TODO implement start/current robot state considerations
-  // TODO refactor get current state function --> see planning_context for example
+  // TODO(sjahr) Review start/current robot state considerations
+  moveit::core::robotStateToRobotStateMsg(planning_scene->getCurrentState(), planning_problem.start_state);
 
-  // Set start state
   moveit_msgs::msg::MotionPlanResponse planning_solution;
-  moveit::core::RobotState start_state(robot_model_);
-  moveit::core::robotStateMsgToRobotState(planning_problem.start_state,
-                                          start_state);  // Use start state from planning problem
-  planning_scene->setCurrentState(start_state);
 
   // Set goal constraints
   ::planning_interface::MotionPlanResponse response;
@@ -206,7 +201,7 @@ moveit_msgs::msg::MotionPlanResponse GlobalPlannerComponent::plan(moveit_msgs::m
 
   // Run planning attempt
   const planning_pipeline::PlanningPipelinePtr pipeline = planning_pipelines_.at(
-      config_.pipeline_names[0]);  // Assume, there is only one planning pipeline TODO expand Request
+      config_.pipeline_names[0]);  // Assume, there is only one planning pipeline TODO(sjahr) expand Request
   pipeline->generatePlan(planning_scene, planning_problem, response);
   if (response.error_code_.val != response.error_code_.SUCCESS)
   {
