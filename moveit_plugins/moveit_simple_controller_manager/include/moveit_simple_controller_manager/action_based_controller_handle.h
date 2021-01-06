@@ -136,9 +136,17 @@ public:
     return true;
   }
 
+  virtual void
+  controllerDoneCallback(const typename rclcpp_action::ClientGoalHandle<T>::WrappedResult& wrapped_result) = 0;
+
   bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(0)) override
   {
-    auto result_future = controller_action_client_->async_get_result(current_goal_);
+    std::promise<bool> result_callback_done;
+    auto result_future = controller_action_client_->async_get_result(
+        current_goal_, [this, &result_callback_done](const auto& wrapped_result) {
+          controllerDoneCallback(wrapped_result);
+          result_callback_done.set_value(true);
+        });
     if (timeout.seconds() == 0.0)
     {
       result_future.wait();
@@ -152,10 +160,8 @@ public:
         return false;
       }
     }
-    // workaround for controllerDoneCallback being called a little bit late
-    rclcpp::Time deadline = node_->now() + rclcpp::Duration::from_seconds(0.1);  // limit waiting to 0.1s
-    while (!done_ && rclcpp::ok() && node_->now() < deadline)                    // Check the done_ flag explicitly,
-      rclcpp::sleep_for(std::chrono::nanoseconds(100));  // which is eventually set in finishControllerExecution
+    // To accommodate for the delay after the future for the result is ready and the time controllerDoneCallback takes to finish
+    result_callback_done.get_future().wait();
     return true;
   }
 

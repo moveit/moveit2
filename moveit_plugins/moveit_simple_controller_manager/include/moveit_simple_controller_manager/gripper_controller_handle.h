@@ -139,9 +139,6 @@ public:
     send_goal_options.goal_response_callback = [this](const auto& /* unused-arg */) {
       RCLCPP_DEBUG_STREAM(LOGGER, name_ << " started execution");
     };
-    // Result callback
-    send_goal_options.result_callback =
-        std::bind(&GripperControllerHandle::controllerDoneCallback, this, std::placeholders::_1);
     // Send goal
     auto current_goal_future = controller_action_client_->async_send_goal(goal, send_goal_options);
     current_goal_ = current_goal_future.get();
@@ -181,7 +178,7 @@ public:
 
 private:
   void controllerDoneCallback(
-      const rclcpp_action::ClientGoalHandle<control_msgs::action::GripperCommand>::WrappedResult& wrapped_result)
+      const rclcpp_action::ClientGoalHandle<control_msgs::action::GripperCommand>::WrappedResult& wrapped_result) override
   {
     if (wrapped_result.code == rclcpp_action::ResultCode::ABORTED && allow_failure_)
       finishControllerExecution(rclcpp_action::ResultCode::SUCCEEDED);
