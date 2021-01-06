@@ -87,13 +87,13 @@ public:
     }
 
     // Setup motion planning goal taken from motion_planning_api tutorial
-    const std::string PLANNING_GROUP = "panda_arm";
+    const std::string planning_group = "panda_arm";
     robot_model_loader::RobotModelLoader robot_model_loader(node_, "robot_description");
     const moveit::core::RobotModelPtr& robot_model = robot_model_loader.getModel();
 
     // Create a RobotState and JointModelGroup
     moveit::core::RobotStatePtr robot_state(new moveit::core::RobotState(robot_model));
-    const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(PLANNING_GROUP);
+    const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(planning_group);
 
     planning_scene::PlanningScenePtr planning_scene(new planning_scene::PlanningScene(robot_model));
     // Configure a valid robot state
@@ -102,7 +102,7 @@ public:
     auto goal_msg = moveit_msgs::action::HybridPlanning::Goal();
 
     moveit::core::robotStateToRobotStateMsg(planning_scene->getCurrentStateNonConst(), goal_msg.request.start_state);
-    goal_msg.request.group_name = PLANNING_GROUP;
+    goal_msg.request.group_name = planning_group;
     goal_msg.request.num_planning_attempts = 10;
     goal_msg.request.max_velocity_scaling_factor = 1.0;
     goal_msg.request.max_acceleration_scaling_factor = 1.0;
@@ -138,7 +138,7 @@ public:
           }
         };
     send_goal_options.feedback_callback =
-        [](rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanning>::SharedPtr,
+        [](rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanning>::SharedPtr /*unused*/,
            const std::shared_ptr<const moveit_msgs::action::HybridPlanning::Feedback> feedback) {
           RCLCPP_INFO(LOGGER, feedback->feedback);
         };

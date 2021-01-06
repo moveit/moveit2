@@ -80,19 +80,19 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
 
   // Initialize global planner after construction
   timer_ = this->create_wall_timer(std::chrono::milliseconds(1), [this]() {
-    switch (initialized_)
+    if (initialized_)
     {
-      case true:
+      timer_->cancel();
+    }
+    else
+    {
+      initialized_ = this->init();
+      if (!initialized_)
+      {
+        const std::string error = "Failed to initialize global planner";
         timer_->cancel();
-        break;
-      case false:
-        initialized_ = this->init();
-        if (!initialized_)
-        {
-          const std::string error = "Failed to initialize global planner";
-          RCLCPP_FATAL(LOGGER, error);
-        }
-        break;
+        throw std::runtime_error(error);
+      }
     }
   });
 }
@@ -128,6 +128,7 @@ bool GlobalPlannerComponent::init()
   }
 
   // Load planning pipelines
+  // TODO Use refactored MoveItCpp instance (load only planning pipeline and planning scene monitor) to reduce redundancy
   for (const auto& planning_pipeline_name : config_.pipeline_names)
   {
     if (planning_pipelines_.count(planning_pipeline_name) > 0)

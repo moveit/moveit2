@@ -48,21 +48,19 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
   initialized_ = false;
   // Initialize hybrid planning component after after construction
   timer_ = this->create_wall_timer(std::chrono::milliseconds(1), [this]() {
-    switch (initialized_)
+    if (initialized_)
     {
-      case true:
+      timer_->cancel();
+    }
+    else
+    {
+      if (!this->initialize())
+      {
+        const std::string error = "Failed to initialize global planner";
         timer_->cancel();
-        break;
-      case false:
-        if (!this->initialize())
-        {
-          const std::string error = "Failed to initialize global planner";
-          RCLCPP_FATAL(LOGGER, error);
-          throw std::runtime_error(error);
-          timer_->cancel();
-        }
-        initialized_ = true;
-        break;
+        throw std::runtime_error(error);
+      }
+      initialized_ = true;
     }
   });
 }
@@ -128,11 +126,9 @@ bool HybridPlanningManager::initialize()
   hybrid_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::HybridPlanning>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
       this->get_node_waitables_interface(), "run_hybrid_planning",
-      [this](const rclcpp_action::GoalUUID& /*unused*/,
-             std::shared_ptr<const moveit_msgs::action::HybridPlanning::Goal> /*unused*/) {
+      [](const rclcpp_action::GoalUUID& /*unused*/,
+         std::shared_ptr<const moveit_msgs::action::HybridPlanning::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received goal request");
-        planner_logic_instance_->react(
-            moveit_hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED);
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
       [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanning>>& /*unused*/) {
@@ -157,7 +153,7 @@ bool HybridPlanningManager::planGlobalTrajectory()
   // Add goal response callback
   send_goal_options.goal_response_callback =
       [this](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::GlobalPlanner>::SharedPtr> future) {
-        auto goal_handle = future.get();
+        auto const& goal_handle = future.get();
         auto planning_progress = std::make_shared<moveit_msgs::action::HybridPlanning::Feedback>();
         auto& feedback = planning_progress->feedback;
         if (!goal_handle)
@@ -194,7 +190,7 @@ bool HybridPlanningManager::runLocalPlanner()
   // Add goal response callback
   send_goal_options.goal_response_callback =
       [this](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::LocalPlanner>::SharedPtr> future) {
-        auto goal_handle = future.get();
+        auto const& goal_handle = future.get();
         auto planning_progress = std::make_shared<moveit_msgs::action::HybridPlanning::Feedback>();
         auto& feedback = planning_progress->feedback;
         if (!goal_handle)

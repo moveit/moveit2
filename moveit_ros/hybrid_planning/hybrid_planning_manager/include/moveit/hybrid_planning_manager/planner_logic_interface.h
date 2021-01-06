@@ -74,7 +74,7 @@ public:
    * @return true if reaction was successful
    */
   virtual bool react(std::string event) = 0;
-  ~PlannerLogicInterface(){};
+  virtual ~PlannerLogicInterface(){};
 
 protected:
   /** \brief Constructor */
