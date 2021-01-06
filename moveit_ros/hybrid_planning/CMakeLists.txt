@@ -23,6 +23,8 @@ set(LIBRARIES
   moveit_global_planner_component
   planner_logic_interface
   single_plan_execution_plugin
+  trajectory_operator_interface
+  constraint_solver_interface
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
