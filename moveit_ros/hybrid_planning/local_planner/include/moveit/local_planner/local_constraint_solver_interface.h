@@ -33,56 +33,55 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
+   Description: Defines an interface for a local constraint solver plugin implementation for the local planner component node.
  */
 
-#include <moveit/planner_logic_plugins/single_plan_execution.h>
+#pragma once
+
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
+
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/robot_state/robot_state.h>
+
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <moveit_msgs/msg/constraints.hpp>
+
+#include <moveit_msgs/action/local_planner.hpp>
+
+#include <trajectory_msgs/msg/joint_trajectory.h>
 
 namespace moveit_hybrid_planning
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
-std::once_flag LOCAL_PLANNER_STARTED;
+/**
+ * Class LocalConstraintSolverInterface - Base class for a local constrain solver.
+ */
+class LocalConstraintSolverInterface
+{
+public:
+  /**
+   * Initialize local constraint solver
+   * @return True if initialization was successful
+   */
+  virtual bool initialize(const rclcpp::Node::SharedPtr& node,
+                          planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor) = 0;
 
-bool SinglePlanExecution::initialize(std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planner_handle)
-{
-  hybrid_planner_handle_ = hybrid_planner_handle;
-  return true;
-}
+  /**
+   * Solve local planning problem for the current loop run
+   * @param local_trajectory The local trajectory to pursue
+   * @param local_constraints Local goal constraints
+   * @param planning_scene The planning scene to use for local planning
+   * @param feedback Feedback event string from the current solver i.e. "Collision detected"
+   * @return Local planning solution in joint space
+   */
+  virtual trajectory_msgs::msg::JointTrajectory
+  solve(robot_trajectory::RobotTrajectory local_trajectory,
+        std::vector<moveit_msgs::msg::Constraints> local_constraints,
+        std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback) = 0;
+  virtual ~LocalConstraintSolverInterface(){};
 
-bool SinglePlanExecution::react(BasicHybridPlanningEvent event)
-{
-  switch (event)
-  {
-    case moveit_hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
-      if (!hybrid_planner_handle_->planGlobalTrajectory())  // Start global planning
-      {
-        hybrid_planner_handle_->sendHybridPlanningResponse(false);
-      }
-      break;
-    case moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
-      std::call_once(LOCAL_PLANNER_STARTED, [this]() {   // ensure the local planner is not started twice
-        if (!hybrid_planner_handle_->runLocalPlanner())  // Start local planning
-        {
-          hybrid_planner_handle_->sendHybridPlanningResponse(false);
-        }
-      });
-      break;
-    case moveit_hybrid_planning::BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
-      hybrid_planner_handle_->sendHybridPlanningResponse(true);
-      break;
-    default:
-      // Do nothing
-      break;
-  }
-  return true;
-}
-bool SinglePlanExecution::react(std::string event)
-{
-  auto& clock = *hybrid_planner_handle_->get_clock();
-  RCLCPP_INFO_THROTTLE(LOGGER, clock, 1000, event);
-  return true;
+protected:
+  /** \brief Constructor */
+  LocalConstraintSolverInterface(){};
 };
 }  // namespace moveit_hybrid_planning
-
-#include <pluginlib/class_list_macros.hpp>
-
-PLUGINLIB_EXPORT_CLASS(moveit_hybrid_planning::SinglePlanExecution, moveit_hybrid_planning::PlannerLogicInterface)

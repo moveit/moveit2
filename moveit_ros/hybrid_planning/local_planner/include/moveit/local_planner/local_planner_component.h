@@ -33,6 +33,8 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
+   Description: A local planner component node that is customizable through plugins that implement the local planning
+   problem solver algorithm and the trajectory matching and blending.
  */
 
 #pragma once
@@ -46,43 +48,136 @@
 
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/local_planner/local_constraint_solver_interface.h>
+#include <moveit/local_planner/trajectory_operator_interface.h>
+
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+
 namespace moveit_hybrid_planning
 {
-// The possible hybrid planner states
-// TODO Use lifecycle node?
+// TODO(sjahr) Refactor and use repository wide solution
+template <typename T>
+void declareOrGetParam(const std::string& param_name, T& output_value, const T& default_value,
+                       const rclcpp::Node::SharedPtr& node)
+{
+  try
+  {
+    if (node->has_parameter(param_name))
+      node->get_parameter<T>(param_name, output_value);
+    else
+      output_value = node->declare_parameter<T>(param_name, default_value);
+  }
+  catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
+  {
+    RCLCPP_ERROR_STREAM(node->get_logger(),
+                        "Error getting parameter \'" << param_name << "\', check parameter type in YAML file");
+    throw e;
+  }
+}
+
+/// Internal local planner states
+/// TODO(sjahr) Use lifecycle node?
 enum class LocalPlannerState : int8_t
 {
   ABORT = -1,
-  UNKNOWN = 0,
+  ERROR = 0,
   READY = 1,
-  AWAIT_GLOBAL_TRAJECTORY = 2,
-  LOCAL_PLANNING_ACTIVE = 3
+  UNCONFIGURED = 2,
+  AWAIT_GLOBAL_TRAJECTORY = 3,
+  LOCAL_PLANNING_ACTIVE = 4
 };
 
-// Component node containing the local planner
+/**
+ * Class LocalPlannerComponent - ROS 2 component node that implements a local planner.
+ */
 class LocalPlannerComponent : public rclcpp::Node
 {
 public:
+  /// Struct that contains configuration of the local planner component node
+  struct LocalPlannerConfig
+  {
+    void load(const rclcpp::Node::SharedPtr& node)
+    {
+      std::string undefined = "<undefined>";
+      declareOrGetParam<std::string>("trajectory_operator_plugin_name", trajectory_operator_plugin_name, undefined,
+                                     node);
+      declareOrGetParam<std::string>("local_constraint_solver_plugin_name", local_constraint_solver_plugin_name,
+                                     undefined, node);
+      declareOrGetParam<double>("local_planning_frequency", local_planning_frequency, 1.0, node);
+      declareOrGetParam<std::string>("global_solution_topic", global_solution_topic, undefined, node);
+      declareOrGetParam<std::string>("local_solution_topic", local_solution_topic, undefined, node);
+    }
+
+    std::string robot_description;
+    std::string robot_description_semantic;
+    std::string publish_planning_scene_topic;
+    std::string trajectory_operator_plugin_name;
+    std::string local_constraint_solver_plugin_name;
+    std::string global_solution_topic;
+    std::string local_solution_topic;
+    double local_planning_frequency;
+  };
+
+  /** \brief Constructor */
   LocalPlannerComponent(const rclcpp::NodeOptions& options);
 
+  /**
+   * Initialize and start planning scene monitor to listen to the planning scene topic.
+   * Load trajectory_operator and constraint solver plugin.
+   * Initialize ROS 2 interfaces
+   * @return true if scene monitor and plugins are successfully initialized
+   */
+  bool initialize();
+
+  /**
+   * Handle the planners current job based on the internal state each loop run when the planner is started.
+   */
+  void executePlanningLoopRun();
+
 private:
+  // Planner configuration
+  LocalPlannerConfig config_;
+
+  // Current planner state
   LocalPlannerState state_;
+
+  // Timer to periodically call executePlanningLoopRun()
   rclcpp::TimerBase::SharedPtr timer_;
+
+  // Current action goal handle
   std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>> local_planning_goal_handle_;
-  moveit_msgs::msg::RobotTrajectory global_trajectory_;
 
-  bool global_trajectory_received_{ false };
+  // Planning scene monitor to get the current planning scene
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
-  // Global trajectory listener
-  rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_trajectory_sub_;
+  // TF
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
+
+  // Global solution listener
+  rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_solution_subscriber_;
 
   // Local planning request action server
   rclcpp_action::Server<moveit_msgs::action::LocalPlanner>::SharedPtr local_planning_request_server_;
 
-  // Forward trajectory publisher
-  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_pub_;
+  // Local solution publisher
+  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr local_solution_publisher_;
 
-  // Goal callback for local planning request action server
-  void localPlanningLoop();
+  // Local constraint solver plugin loader
+  std::unique_ptr<pluginlib::ClassLoader<moveit_hybrid_planning::LocalConstraintSolverInterface>>
+      local_constraint_solver_plugin_loader_;
+
+  // Local constrain solver instance to compute a local solution each loop run
+  std::shared_ptr<moveit_hybrid_planning::LocalConstraintSolverInterface> local_constraint_solver_instance_;
+
+  // Trajectory operator plugin
+  std::unique_ptr<pluginlib::ClassLoader<moveit_hybrid_planning::TrajectoryOperatorInterface>>
+      trajectory_operator_loader_;
+
+  // Trajectory_operator instance handle trajectory matching and blending
+  std::shared_ptr<moveit_hybrid_planning::TrajectoryOperatorInterface> trajectory_operator_instance_;
 };
 }  // namespace moveit_hybrid_planning
