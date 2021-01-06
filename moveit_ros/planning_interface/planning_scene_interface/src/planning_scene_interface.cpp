@@ -50,7 +50,7 @@ class PlanningSceneInterface::PlanningSceneInterfaceImpl
 {
 public:
   explicit PlanningSceneInterfaceImpl(const std::string& ns = "", bool wait = true)
-    : node_(new rclcpp::Node("planning_scene_interface", ns))
+    : node_(new rclcpp::Node("planning_scene_interface_" + std::to_string(reinterpret_cast<std::size_t>(this)), ns))
   {
     planning_scene_diff_publisher_ = node_->create_publisher<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
     planning_scene_service_ =
