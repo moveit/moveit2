@@ -32,57 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Sebastian Jahr
- */
-
-#include <moveit/planner_logic_plugins/single_plan_execution.h>
+#include <moveit/local_planner/local_constraint_solver_interface.h>
 
 namespace moveit_hybrid_planning
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
-std::once_flag LOCAL_PLANNER_STARTED;
-
-bool SinglePlanExecution::initialize(std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planner_handle)
-{
-  hybrid_planner_handle_ = hybrid_planner_handle;
-  return true;
+// Empty because this library only defines an interface
 }
-
-bool SinglePlanExecution::react(BasicHybridPlanningEvent event)
-{
-  switch (event)
-  {
-    case moveit_hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
-      if (!hybrid_planner_handle_->planGlobalTrajectory())  // Start global planning
-      {
-        hybrid_planner_handle_->sendHybridPlanningResponse(false);
-      }
-      break;
-    case moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
-      std::call_once(LOCAL_PLANNER_STARTED, [this]() {   // ensure the local planner is not started twice
-        if (!hybrid_planner_handle_->runLocalPlanner())  // Start local planning
-        {
-          hybrid_planner_handle_->sendHybridPlanningResponse(false);
-        }
-      });
-      break;
-    case moveit_hybrid_planning::BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
-      hybrid_planner_handle_->sendHybridPlanningResponse(true);
-      break;
-    default:
-      // Do nothing
-      break;
-  }
-  return true;
-}
-bool SinglePlanExecution::react(std::string event)
-{
-  auto& clock = *hybrid_planner_handle_->get_clock();
-  RCLCPP_INFO_THROTTLE(LOGGER, clock, 1000, event);
-  return true;
-};
-}  // namespace moveit_hybrid_planning
-
-#include <pluginlib/class_list_macros.hpp>
-
-PLUGINLIB_EXPORT_CLASS(moveit_hybrid_planning::SinglePlanExecution, moveit_hybrid_planning::PlannerLogicInterface)
