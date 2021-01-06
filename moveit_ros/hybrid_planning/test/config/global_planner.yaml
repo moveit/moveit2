@@ -1,4 +1,4 @@
-publish_planning_scene_topic: "/publish_planning_scene"
+publish_planning_scene_topic: "/planning_scene"
 
 planning_pipelines:
   pipeline_names: ["ompl"]

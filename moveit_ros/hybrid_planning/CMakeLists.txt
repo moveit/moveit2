@@ -16,6 +16,7 @@ find_package(moveit_core REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(trajectory_msgs REQUIRED)
+find_package(control_toolbox REQUIRED)
 
 set(LIBRARIES
   moveit_hybrid_planning_manager
@@ -23,6 +24,12 @@ set(LIBRARIES
   moveit_global_planner_component
   planner_logic_interface
   single_plan_execution_plugin
+  trajectory_operator_interface
+  local_constraint_solver_interface
+  next_waypoint_sampler_plugin
+  single_plan_execution_plugin
+  decelerate_before_collision_plugin
+  replan_invalidated_trajectory_plugin
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -35,6 +42,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   std_srvs
   tf2_ros
   trajectory_msgs
+  control_toolbox
 )
 
 set(THIS_PACKAGE_INCLUDE_DIRS
@@ -42,6 +50,8 @@ set(THIS_PACKAGE_INCLUDE_DIRS
   local_planner/include
   hybrid_planning_manager/include
   planner_logic_plugins/include
+  trajectory_operator_plugins/include
+  local_constraint_solver_plugins/include
 )
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
@@ -49,6 +59,8 @@ add_subdirectory(hybrid_planning_manager)
 add_subdirectory(global_planner)
 add_subdirectory(local_planner)
 add_subdirectory(planner_logic_plugins)
+add_subdirectory(trajectory_operator_plugins)
+add_subdirectory(local_constraint_solver_plugins)
 add_subdirectory(test)
 
 rclcpp_components_register_nodes(moveit_hybrid_planning_manager "moveit_hybrid_planning::HybridPlanningManager")
@@ -67,6 +79,9 @@ install(DIRECTORY test/launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY test/config DESTINATION share/${PROJECT_NAME})
 
 pluginlib_export_plugin_description_file(moveit_hybrid_planning single_plan_execution_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_hybrid_planning next_waypoint_sampler_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_hybrid_planning decelerate_before_collision_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_hybrid_planning replan_invalidated_trajectory_plugin.xml)
 
 ament_export_include_directories(include)
 ament_export_libraries(${LIBRARIES})

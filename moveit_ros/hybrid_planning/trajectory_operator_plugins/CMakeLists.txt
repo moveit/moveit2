@@ -1,0 +1,6 @@
+add_library(next_waypoint_sampler_plugin SHARED
+  src/next_waypoint_sampler.cpp
+)
+set_target_properties(next_waypoint_sampler_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(next_waypoint_sampler_plugin ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(next_waypoint_sampler_plugin trajectory_operator_interface)
