@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 
   moveit::planning_interface::MoveGroupInterface move_group(move_group_node, PLANNING_GROUP);
 
-  moveit::planning_interface::PlanningSceneInterface planning_scene_interface(move_group_node->get_name());
+  moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 
   prompt("Press 'Enter' to start the demo");
 
