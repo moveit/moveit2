@@ -61,8 +61,3 @@ install(TARGETS ${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin)
-
-ament_export_libraries(
-  ${MOVEIT_LIB_NAME}_core
-  ${MOVEIT_LIB_NAME}
-)

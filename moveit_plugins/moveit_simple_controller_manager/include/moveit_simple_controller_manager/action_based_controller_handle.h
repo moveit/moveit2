@@ -81,10 +81,7 @@ public:
                               const std::string& logger_name)
     : ActionBasedControllerHandleBase(name, logger_name), node_(node), done_(true), namespace_(ns)
   {
-    controller_action_client_ =
-        rclcpp_action::create_client<T>(node_->get_node_base_interface(), node_->get_node_graph_interface(),
-                                        node_->get_node_logging_interface(), node_->get_node_waitables_interface(),
-                                        getActionName());
+    controller_action_client_ = rclcpp_action::create_client<T>(node_, getActionName());
 
     unsigned int attempts = 0;
     double timeout;
@@ -139,19 +136,32 @@ public:
     return true;
   }
 
+  virtual void
+  controllerDoneCallback(const typename rclcpp_action::ClientGoalHandle<T>::WrappedResult& wrapped_result) = 0;
+
   bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(0)) override
   {
-    auto result_future = controller_action_client_->async_get_result(current_goal_);
+    std::promise<bool> result_callback_done;
+    auto result_future = controller_action_client_->async_get_result(
+        current_goal_, [this, &result_callback_done](const auto& wrapped_result) {
+          controllerDoneCallback(wrapped_result);
+          result_callback_done.set_value(true);
+        });
     if (timeout.seconds() == 0.0)
     {
       result_future.wait();
     }
     else
     {
-      std::future_status status = result_future.wait_for(timeout.to_chrono<std::chrono::seconds>());
+      std::future_status status = result_future.wait_for(timeout.to_chrono<std::chrono::duration<double>>());
       if (status == std::future_status::timeout)
+      {
         RCLCPP_WARN(LOGGER, "waitForExecution timed out");
+        return false;
+      }
     }
+    // To accommodate for the delay after the future for the result is ready and the time controllerDoneCallback takes to finish
+    result_callback_done.get_future().wait();
     return true;
   }
 
@@ -182,7 +192,7 @@ protected:
 
   void finishControllerExecution(const rclcpp_action::ResultCode& state)
   {
-    RCLCPP_DEBUG_STREAM(LOGGER, "Controller " << name_ << " is done with state " << static_cast<int8_t>(state));
+    RCLCPP_DEBUG_STREAM(LOGGER, "Controller " << name_ << " is done with state " << static_cast<int>(state));
     if (state == rclcpp_action::ResultCode::SUCCEEDED)
       last_exec_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
     else if (state == rclcpp_action::ResultCode::ABORTED)

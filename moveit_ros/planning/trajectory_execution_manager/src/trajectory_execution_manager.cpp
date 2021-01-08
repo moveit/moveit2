@@ -1471,7 +1471,7 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
 
       // expected duration is the duration of the longest part
       expected_trajectory_duration =
-          std::max(d * current_scaling + rclcpp::Duration(current_margin), expected_trajectory_duration);
+          std::max(d * current_scaling + rclcpp::Duration::from_seconds(current_margin), expected_trajectory_duration);
     }
 
     // construct a map from expected time to state index, for easy access to expected state location

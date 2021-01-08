@@ -71,9 +71,6 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
     else
       RCLCPP_INFO(LOGGER, "Goal request accepted!");
   };
-  // Result callback
-  send_goal_options.result_callback =
-      std::bind(&FollowJointTrajectoryControllerHandle::controllerDoneCallback, this, _1);
 
   done_ = false;
   last_exec_ = moveit_controller_manager::ExecutionStatus::RUNNING;

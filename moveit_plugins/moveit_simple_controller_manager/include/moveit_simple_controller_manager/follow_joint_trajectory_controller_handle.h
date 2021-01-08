@@ -69,7 +69,8 @@ protected:
                                                          const std::string& name);
 
   void controllerDoneCallback(
-      const rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::WrappedResult& wrapped_result);
+      const rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::WrappedResult& wrapped_result)
+      override;
 
   control_msgs::action::FollowJointTrajectory::Goal goal_template_;
 };

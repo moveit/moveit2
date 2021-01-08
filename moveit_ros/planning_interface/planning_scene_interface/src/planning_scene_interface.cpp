@@ -49,8 +49,13 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_sce
 class PlanningSceneInterface::PlanningSceneInterfaceImpl
 {
 public:
-  explicit PlanningSceneInterfaceImpl(const std::string& ns = "", bool wait = true) : node_(new rclcpp::Node(ns))
+  explicit PlanningSceneInterfaceImpl(const std::string& ns = "", bool wait = true)
   {
+    rclcpp::NodeOptions options;
+    options.arguments({ "--ros-args", "-r",
+                        "__node:=" + std::string("planning_scene_interface_") +
+                            std::to_string(reinterpret_cast<std::size_t>(this)) });
+    node_ = rclcpp::Node::make_shared("_", ns, options);
     planning_scene_diff_publisher_ = node_->create_publisher<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
     planning_scene_service_ =
         node_->create_client<moveit_msgs::srv::GetPlanningScene>(move_group::GET_PLANNING_SCENE_SERVICE_NAME);
