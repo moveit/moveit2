@@ -86,6 +86,30 @@ public:
       return;
     }
 
+    // Create collision object, planning shouldn't be too easy
+    moveit_msgs::msg::CollisionObject collision_object;
+    collision_object.header.frame_id = "panda_link0";
+    collision_object.id = "box";
+
+    shape_msgs::msg::SolidPrimitive box;
+    box.type = box.BOX;
+    box.dimensions = { 0.1, 0.4, 0.1 };
+
+    geometry_msgs::msg::Pose box_pose;
+    box_pose.position.x = 0.4;
+    box_pose.position.y = 0.0;
+    box_pose.position.z = 1.0;
+
+    collision_object.primitives.push_back(box);
+    collision_object.primitive_poses.push_back(box_pose);
+    collision_object.operation = collision_object.ADD;
+
+    // Add object to planning scene
+    {  // Lock PlanningScene
+      planning_scene_monitor::LockedPlanningSceneRW scene(planning_scene_monitor_);
+      scene->processCollisionObjectMsg(collision_object);
+    }  // Unlock PlanningScene
+
     // Setup motion planning goal taken from motion_planning_api tutorial
     const std::string planning_group = "panda_arm";
     robot_model_loader::RobotModelLoader robot_model_loader(node_, "robot_description");
@@ -110,7 +134,7 @@ public:
     goal_msg.request.planner_id = "ompl";
 
     moveit::core::RobotState goal_state(robot_model);
-    std::vector<double> joint_values = { -1.0, 0.7, 0.7, -1.5, -0.7, 2.0, 0.0 };
+    std::vector<double> joint_values = { 0.0, 0.0, 0.0, 0.0, 0.0, 1.571, 0.785 };
     goal_state.setJointGroupPositions(joint_model_group, joint_values);
 
     goal_msg.request.goal_constraints.resize(1);
