@@ -77,6 +77,6 @@ public:
 
 protected:
   /** \brief Constructor */
-  ConstraintSolverInterface();
+  ConstraintSolverInterface(){};
 };
 }  // namespace moveit_hybrid_planning

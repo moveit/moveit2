@@ -104,7 +104,7 @@ bool LocalPlannerComponent::initialize()
   try
   {
     trajectory_operator_loader_.reset(new pluginlib::ClassLoader<moveit_hybrid_planning::TrajectoryOperatorInterface>(
-        "moveit_hybrid_planning", "hybrid_planning::TrajectoryOperatorInterface"));
+        "moveit_hybrid_planning", "moveit_hybrid_planning::TrajectoryOperatorInterface"));
   }
   catch (pluginlib::PluginlibException& ex)
   {
