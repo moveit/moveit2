@@ -1,0 +1,7 @@
+<library path="handle_imminent_collision_plugin">
+  <class name="moveit_hybrid_planning/HandleImminentCollision" type="moveit_hybrid_planning::HandleImminentCollision" base_class_type="moveit_hybrid_planning::ConstraintSolverInterface">
+    <description>
+        Simple local solver plugin that stops in front of a collision object.
+    </description>
+  </class>
+</library>

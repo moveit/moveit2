@@ -1,0 +1,6 @@
+add_library(handle_imminent_collision_plugin SHARED
+  src/handle_imminent_collision.cpp
+)
+set_target_properties(handle_imminent_collision_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(handle_imminent_collision_plugin ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(handle_imminent_collision_plugin constraint_solver_interface)
