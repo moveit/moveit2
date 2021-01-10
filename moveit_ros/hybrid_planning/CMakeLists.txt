@@ -26,6 +26,7 @@ set(LIBRARIES
   trajectory_operator_interface
   constraint_solver_interface
   next_waypoint_sampler_plugin
+  single_plan_execution_plugin
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
