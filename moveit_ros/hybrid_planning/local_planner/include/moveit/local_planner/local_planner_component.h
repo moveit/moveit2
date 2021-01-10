@@ -102,8 +102,6 @@ public:
     void load(const rclcpp::Node::SharedPtr& node)
     {
       std::string undefined = "<undefined>";
-      declareOrGetParam<std::string>("robot_description", robot_description, undefined, node);
-      declareOrGetParam<std::string>("robot_description_semantic", robot_description_semantic, undefined, node);
       declareOrGetParam<std::string>("trajectory_operator_plugin_name", trajectory_operator_plugin_name, undefined,
                                      node);
       declareOrGetParam<std::string>("solver_plugin_name", solver_plugin_name, undefined, node);

@@ -52,6 +52,7 @@ def generate_launch_description():
     ompl_planning_pipeline_config['ompl'].update(ompl_planning_yaml)
 
     global_planner_param = load_yaml('moveit_hybrid_planning', 'config/global_planner.yaml')
+    local_planner_param = load_yaml('moveit_hybrid_planning', 'config/local_planner.yaml')
 
     # Generate launch description with multiple components
     container = ComposableNodeContainer(
@@ -72,7 +73,11 @@ def generate_launch_description():
                 ComposableNode(
                     package='moveit_hybrid_planning',
                     plugin='moveit_hybrid_planning::LocalPlannerComponent',
-                    name='local_planner'),
+                    name='local_planner',
+                    parameters=[local_planner_param,
+                                robot_description,
+                                robot_description_semantic,
+                                kinematics_yaml]),
                 ComposableNode(
                     package='moveit_hybrid_planning',
                     plugin='moveit_hybrid_planning::HybridPlanningManager',
