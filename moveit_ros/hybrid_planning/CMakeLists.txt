@@ -27,6 +27,7 @@ set(LIBRARIES
   constraint_solver_interface
   next_waypoint_sampler_plugin
   single_plan_execution_plugin
+  handle_imminent_collision_plugin
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -47,6 +48,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
   hybrid_planning_manager/include
   planner_logic_plugins/include
   trajectory_operator_plugins/include
+  constraint_solver_plugins/include
 )
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
@@ -55,6 +57,7 @@ add_subdirectory(global_planner)
 add_subdirectory(local_planner)
 add_subdirectory(planner_logic_plugins)
 add_subdirectory(trajectory_operator_plugins)
+add_subdirectory(constraint_solver_plugins)
 add_subdirectory(test)
 
 rclcpp_components_register_nodes(moveit_hybrid_planning_manager "moveit_hybrid_planning::HybridPlanningManager")
@@ -74,6 +77,7 @@ install(DIRECTORY test/config DESTINATION share/${PROJECT_NAME})
 
 pluginlib_export_plugin_description_file(moveit_hybrid_planning single_plan_execution_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning next_waypoint_sampler_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_hybrid_planning handle_imminent_collision_plugin.xml)
 
 ament_export_include_directories(include)
 ament_export_libraries(${LIBRARIES})
