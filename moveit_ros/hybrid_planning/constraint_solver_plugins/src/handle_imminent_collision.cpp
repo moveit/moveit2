@@ -51,10 +51,10 @@ HandleImminentCollision::solve(moveit_msgs::msg::Constraints goal,
 {
   trajectory_msgs::msg::JointTrajectory local_solution;
   trajectory_msgs::msg::JointTrajectoryPoint waypoint;
-  for (unsigned int i = 0; i < goal.joint_constraints.size(); i++)
+  for (auto& joint_constraint : goal.joint_constraints)
   {
-    local_solution.joint_names[i] = goal.joint_constraints[i].joint_name;
-    waypoint.positions[i] = goal.joint_constraints[i].position;
+    local_solution.joint_names.push_back(joint_constraint.joint_name);
+    waypoint.positions.push_back(joint_constraint.position);
   }
   local_solution.points.push_back(waypoint);
   return local_solution;
