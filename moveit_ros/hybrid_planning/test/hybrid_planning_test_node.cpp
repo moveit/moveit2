@@ -49,6 +49,7 @@
 
 #include <moveit_msgs/action/hybrid_planning.hpp>
 #include <moveit_msgs/msg/display_robot_state.hpp>
+#include <moveit_msgs/msg/motion_plan_response.hpp>
 
 const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
 
@@ -60,6 +61,34 @@ public:
     node_ = node;
     hp_action_client_ = rclcpp_action::create_client<moveit_msgs::action::HybridPlanning>(node_, "run_hybrid_planning"),
     robot_state_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state", 1);
+
+    // Add new collision object as soon as global trajectory is available.
+    global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
+        "global_trajectory", 1, [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr msg) {
+          // Create collision object, planning shouldn't be too easy
+          moveit_msgs::msg::CollisionObject collision_object;
+          collision_object.header.frame_id = "panda_link0";
+          collision_object.id = "big_box";
+
+          shape_msgs::msg::SolidPrimitive box;
+          box.type = box.BOX;
+          box.dimensions = { 0.3, 0.8, 0.1 };
+
+          geometry_msgs::msg::Pose box_pose;
+          box_pose.position.x = 0.4;
+          box_pose.position.y = 0.0;
+          box_pose.position.z = 1.0;
+
+          collision_object.primitives.push_back(box);
+          collision_object.primitive_poses.push_back(box_pose);
+          collision_object.operation = collision_object.ADD;
+
+          // Add object to planning scene
+          {  // Lock PlanningScene
+            planning_scene_monitor::LockedPlanningSceneRW scene(planning_scene_monitor_);
+            scene->processCollisionObjectMsg(collision_object);
+          }  // Unlock PlanningScene
+        });
   }
 
   void run()
@@ -111,6 +140,9 @@ public:
       planning_scene_monitor::LockedPlanningSceneRW scene(planning_scene_monitor_);
       scene->processCollisionObjectMsg(collision_object);
     }  // Unlock PlanningScene
+
+    RCLCPP_INFO(LOGGER, "Wait 2s see collision object");
+    rclcpp::sleep_for(std::chrono::seconds(2));
 
     // Setup motion planning goal taken from motion_planning_api tutorial
     const std::string planning_group = "panda_arm";
@@ -179,6 +211,7 @@ private:
   rclcpp::Node::SharedPtr node_;
   rclcpp_action::Client<moveit_msgs::action::HybridPlanning>::SharedPtr hp_action_client_;
   rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_publisher_;
+  rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_solution_subscriber_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   // TF
