@@ -57,12 +57,13 @@ public:
   HybridPlanningDemo(const rclcpp::Node::SharedPtr& node)
   {
     node_ = node;
-    hp_action_client_ = rclcpp_action::create_client<moveit_msgs::action::HybridPlanning>(node_, "run_hybrid_planning");
+    hp_action_client_ = rclcpp_action::create_client<moveit_msgs::action::HybridPlanning>(node_, "run_hybrid_planning"),
+    robot_state_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state", 1);
   }
 
   void run()
   {
-    RCLCPP_INFO(LOGGER, "Initialize MoveItCpp");
+    RCLCPP_INFO(LOGGER, "Initialize Planning Scene Monitor");
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
@@ -74,7 +75,7 @@ public:
       planning_scene_monitor_->providePlanningSceneService();  // let RViz display query PlanningScene
       planning_scene_monitor_->setPlanningScenePublishingFrequency(100);
       planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
-                                                            "/publish_planning_scene");
+                                                            "/planning_scene");
       planning_scene_monitor_->startSceneMonitor();
     }
     RCLCPP_INFO(LOGGER, "Wait 2s to ensure everything has started");
@@ -120,6 +121,7 @@ public:
     const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(planning_group);
 
     planning_scene::PlanningScenePtr planning_scene(new planning_scene::PlanningScene(robot_model));
+
     // Configure a valid robot state
     planning_scene->getCurrentStateNonConst().setToDefaultValues(joint_model_group, "ready");
 
@@ -175,6 +177,7 @@ public:
 private:
   rclcpp::Node::SharedPtr node_;
   rclcpp_action::Client<moveit_msgs::action::HybridPlanning>::SharedPtr hp_action_client_;
+  rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_publisher_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   // TF
