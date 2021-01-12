@@ -61,14 +61,15 @@ public:
    * Initialize trajectory operator
    * @return True if initialization was successful
    */
-  virtual bool initialize(const rclcpp::Node::SharedPtr& node) = 0;
+  virtual bool initialize(const rclcpp::Node::SharedPtr& node, moveit::core::RobotModelConstPtr robot_model,
+                          std::string group_name) = 0;
 
   /**
    * Add a new reference trajectory segment to the vector of global trajectory segments to process
    * @param new_trajectory New reference trajectory segment to add
    * @return True if segment was successfully added
    */
-  virtual bool addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory, std::string group) = 0;
+  virtual bool addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory) = 0;
 
   /**
    * Return the current local constraints based on the newest robot state

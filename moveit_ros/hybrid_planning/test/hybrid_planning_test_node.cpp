@@ -48,6 +48,7 @@
 #include <moveit/robot_state/conversions.h>
 
 #include <moveit_msgs/action/hybrid_planning.hpp>
+#include <moveit_msgs/msg/display_robot_state.hpp>
 
 const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
 

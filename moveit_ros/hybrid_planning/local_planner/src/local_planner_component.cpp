@@ -90,7 +90,6 @@ bool LocalPlannerComponent::initialize()
   if (planning_scene_monitor_->getPlanningScene())
   {
     // Start state and scene monitors
-    RCLCPP_INFO(LOGGER, "Listening to '/publish_planning_scene' for planning scene updates");
     planning_scene_monitor_->startSceneMonitor();
   }
   else
@@ -114,7 +113,8 @@ bool LocalPlannerComponent::initialize()
   {
     trajectory_operator_instance_ =
         trajectory_operator_loader_->createUniqueInstance(config_.trajectory_operator_plugin_name);
-    if (!trajectory_operator_instance_->initialize(node_ptr))
+    if (!trajectory_operator_instance_->initialize(node_ptr, planning_scene_monitor_->getRobotModel(),
+                                                   "panda_arm"))  // TODO add default group param
       throw std::runtime_error("Unable to initialize trajectory operator plugin");
     RCLCPP_INFO(LOGGER, "Using trajectory operator interface '%s'", config_.trajectory_operator_plugin_name.c_str());
   }
@@ -171,14 +171,12 @@ bool LocalPlannerComponent::initialize()
   // Initialize global trajectory listener
   global_solution_subscriber_ = create_subscription<moveit_msgs::msg::MotionPlanResponse>(
       config_.global_solution_topic, 1, [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr msg) {
-        RCLCPP_INFO(LOGGER, "Received global trajectory update");
-
         // Add received trajectory to internal reference trajectory
         robot_trajectory::RobotTrajectory new_trajectory(planning_scene_monitor_->getRobotModel(), msg->group_name);
         moveit::core::RobotState start_state(planning_scene_monitor_->getRobotModel());
         moveit::core::robotStateMsgToRobotState(msg->trajectory_start, start_state);
         new_trajectory.setRobotTrajectoryMsg(start_state, msg->trajectory);
-        trajectory_operator_instance_->addTrajectorySegment(new_trajectory, msg->group_name);
+        trajectory_operator_instance_->addTrajectorySegment(new_trajectory);
 
         // Update local planner state
         state_ = moveit_hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE;
@@ -234,7 +232,7 @@ void LocalPlannerComponent::executePlanningLoopRun()
       auto current_robot_state = planning_scene->getCurrentStateNonConst();
 
       // Check if the global goal is reached
-      if (trajectory_operator_instance_->getTrajectoryProgress(current_robot_state))
+      if (trajectory_operator_instance_->getTrajectoryProgress(current_robot_state) == 1.0)
       {
         local_planning_goal_handle_->succeed(result);
         state_ = moveit_hybrid_planning::LocalPlannerState::READY;
