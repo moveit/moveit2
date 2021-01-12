@@ -41,15 +41,27 @@
 
 namespace moveit_hybrid_planning
 {
-bool NextWaypointSampler::initialize(const rclcpp::Node::SharedPtr& node)
+const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
+
+bool NextWaypointSampler::initialize(const rclcpp::Node::SharedPtr& node, moveit::core::RobotModelConstPtr robot_model,
+                                     std::string group_name)
 {
+  reference_trajectory_.reset(new robot_trajectory::RobotTrajectory(robot_model, group_name));
   index_ = 0;
   return true;
 }
 
-bool NextWaypointSampler::addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory,
-                                               std::string group)
+bool NextWaypointSampler::addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory)
 {
+  if (new_trajectory.getGroupName() != reference_trajectory_->getGroupName())
+  {
+    RCLCPP_ERROR_STREAM(
+        LOGGER,
+        "NextWaypointSampler: Group names don't match, reset reference_trajectory!");  // TODO Review reference
+                                                                                       // trajectory initialization
+    reference_trajectory_.reset(
+        new robot_trajectory::RobotTrajectory(new_trajectory.getRobotModel(), new_trajectory.getGroupName()));
+  }
   reference_trajectory_->append(
       new_trajectory,
       0.01);  // TODO Remove magic number by interpolation between both end and start point of the trajectories
@@ -59,19 +71,27 @@ bool NextWaypointSampler::addTrajectorySegment(const robot_trajectory::RobotTraj
 moveit_msgs::msg::Constraints NextWaypointSampler::getCurrentGoal(moveit::core::RobotState current_state)
 {
   moveit::core::RobotState desired_goal_state = reference_trajectory_->getWayPoint(index_);
-  if (desired_goal_state.distance(current_state) <= 0.1)
+  if (desired_goal_state.distance(current_state) <= 0.01)
   {
     index_ += 1;
-    desired_goal_state = reference_trajectory_->getWayPoint(index_);
+    if (index_ < reference_trajectory_->getWayPointCount())
+    {
+      desired_goal_state = reference_trajectory_->getWayPoint(index_);
+    }
   }
   moveit_msgs::msg::Constraints local_goal_constraint = kinematic_constraints::constructGoalConstraints(
-      desired_goal_state, desired_goal_state.getJointModelGroup(group_), 0.1);  // TODO Remove magic number!
+      desired_goal_state, desired_goal_state.getJointModelGroup(reference_trajectory_->getGroupName()),
+      0.1);  // TODO Remove magic number!
   return local_goal_constraint;
 }
 
 double NextWaypointSampler::getTrajectoryProgress(moveit::core::RobotState current_state)
 {
-  return 0.0;  // TODO Implement this!
+  if (index_ >= reference_trajectory_->getWayPointCount())
+  {
+    return 1.0;
+  }
+  return 0.0;
 }
 }  // namespace moveit_hybrid_planning
 
