@@ -47,10 +47,13 @@ class HandleImminentCollision : public ConstraintSolverInterface
 public:
   HandleImminentCollision(){};
   ~HandleImminentCollision() override{};
-  bool initialize(const rclcpp::Node::SharedPtr& node) override;
+  bool initialize(const rclcpp::Node::SharedPtr& node);
 
-  trajectory_msgs::msg::JointTrajectory solve(moveit_msgs::msg::Constraints goal,
+  trajectory_msgs::msg::JointTrajectory solve(std::vector<moveit_msgs::msg::Constraints> local_problem,
                                               std::vector<moveit_msgs::msg::Constraints> additional_constraints,
                                               planning_scene::PlanningScenePtr planning_scene) override;
+
+private:
+  rclcpp::Node::SharedPtr node_handle_;
 };
 }  // namespace moveit_hybrid_planning
