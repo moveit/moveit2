@@ -241,8 +241,8 @@ void LocalPlannerComponent::executePlanningLoopRun()
       }
 
       // Get and solve local planning problem
-      moveit_msgs::msg::Constraints current_goal_constraint =
-          trajectory_operator_instance_->getCurrentGoal(current_robot_state);
+      std::vector<moveit_msgs::msg::Constraints> current_goal_constraint =
+          trajectory_operator_instance_->getLocalProblem(current_robot_state);
       const auto goal = local_planning_goal_handle_->get_goal();
       trajectory_msgs::msg::JointTrajectory local_solution =
           constraint_solver_instance_->solve(current_goal_constraint, goal->local_constraints, planning_scene);

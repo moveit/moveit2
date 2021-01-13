@@ -68,26 +68,35 @@ bool NextWaypointSampler::addTrajectorySegment(const robot_trajectory::RobotTraj
   return true;
 }
 
-moveit_msgs::msg::Constraints NextWaypointSampler::getCurrentGoal(moveit::core::RobotState current_state)
+std::vector<moveit_msgs::msg::Constraints> NextWaypointSampler::getLocalProblem(moveit::core::RobotState current_state)
 {
-  moveit::core::RobotState desired_goal_state = reference_trajectory_->getWayPoint(index_);
-  if (desired_goal_state.distance(current_state) <= 0.01)
+  moveit::core::RobotState next_desired_goal_state = reference_trajectory_->getWayPoint(index_);
+  if (next_desired_goal_state.distance(current_state) <= 0.01)
   {
     index_ += 1;
     if (index_ < reference_trajectory_->getWayPointCount())
     {
-      desired_goal_state = reference_trajectory_->getWayPoint(index_);
+      next_desired_goal_state = reference_trajectory_->getWayPoint(index_);
     }
   }
-  moveit_msgs::msg::Constraints local_goal_constraint = kinematic_constraints::constructGoalConstraints(
-      desired_goal_state, desired_goal_state.getJointModelGroup(reference_trajectory_->getGroupName()),
-      0.1);  // TODO Remove magic number!
-  return local_goal_constraint;
+  std::vector<moveit_msgs::msg::Constraints> local_goal_constraints;
+  // Construct local trajectory
+  for (auto i = 0; i < 3; i++)
+  {  // TODO Use param to config window width
+    if ((index_ + i) < reference_trajectory_->getWayPointCount())
+    {
+      moveit::core::RobotState local_robot_state = reference_trajectory_->getWayPoint(index_ + i);
+      local_goal_constraints.push_back(kinematic_constraints::constructGoalConstraints(
+          local_robot_state, local_robot_state.getJointModelGroup(reference_trajectory_->getGroupName()),
+          0.1));  // TODO Remove magic number!
+    }
+  }
+  return local_goal_constraints;
 }
 
 double NextWaypointSampler::getTrajectoryProgress(moveit::core::RobotState current_state)
 {
-  if (index_ >= reference_trajectory_->getWayPointCount())
+  if (index_ >= reference_trajectory_->getWayPointCount() - 1)
   {
     return 1.0;
   }

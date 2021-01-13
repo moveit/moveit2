@@ -72,7 +72,7 @@ public:
 
           shape_msgs::msg::SolidPrimitive box;
           box.type = box.BOX;
-          box.dimensions = { 0.3, 0.8, 0.1 };
+          box.dimensions = { 0.5, 0.8, 0.1 };
 
           geometry_msgs::msg::Pose box_pose;
           box_pose.position.x = 0.4;
@@ -88,6 +88,19 @@ public:
             planning_scene_monitor::LockedPlanningSceneRW scene(planning_scene_monitor_);
             scene->processCollisionObjectMsg(collision_object);
           }  // Unlock PlanningScene
+          timer_ = node_->create_wall_timer(std::chrono::milliseconds(5000), [this]() {
+            RCLCPP_INFO(LOGGER, "Remove object after 5s!");
+            moveit_msgs::msg::CollisionObject collision_object;
+            collision_object.header.frame_id = "panda_link0";
+            collision_object.id = "big_box";
+            collision_object.operation = collision_object.REMOVE;
+            // Add object to planning scene
+            {  // Lock PlanningScene
+              planning_scene_monitor::LockedPlanningSceneRW scene(planning_scene_monitor_);
+              scene->processCollisionObjectMsg(collision_object);
+            }  // Unlock PlanningScene
+            timer_->cancel();
+          });
         });
   }
 
@@ -213,6 +226,7 @@ private:
   rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_publisher_;
   rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_solution_subscriber_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  rclcpp::TimerBase::SharedPtr timer_;
 
   // TF
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;

@@ -76,7 +76,7 @@ public:
    * @param current_state Current RobotState
    * @return Current local constraints that define the local planning goal
    */
-  virtual moveit_msgs::msg::Constraints getCurrentGoal(moveit::core::RobotState current_state) = 0;
+  virtual std::vector<moveit_msgs::msg::Constraints> getLocalProblem(moveit::core::RobotState current_state) = 0;
 
   /**
    * Return the processing status of the reference trajectory's execution based on a user defined
