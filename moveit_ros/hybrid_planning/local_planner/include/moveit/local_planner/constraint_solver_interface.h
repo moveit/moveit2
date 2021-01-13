@@ -70,7 +70,7 @@ public:
      @param additional_constraints Additional local goal constraints
      @return Local planning solution in joint space
   */
-  virtual trajectory_msgs::msg::JointTrajectory solve(moveit_msgs::msg::Constraints goal,
+  virtual trajectory_msgs::msg::JointTrajectory solve(std::vector<moveit_msgs::msg::Constraints> local_problem,
                                                       std::vector<moveit_msgs::msg::Constraints> additional_constraints,
                                                       planning_scene::PlanningScenePtr planning_scene) = 0;
   virtual ~ConstraintSolverInterface(){};

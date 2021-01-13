@@ -51,7 +51,7 @@ public:
   bool initialize(const rclcpp::Node::SharedPtr& node, moveit::core::RobotModelConstPtr robot_model,
                   std::string group_name) override;
   bool addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory) override;
-  moveit_msgs::msg::Constraints getCurrentGoal(moveit::core::RobotState current_state) override;
+  std::vector<moveit_msgs::msg::Constraints> getLocalProblem(moveit::core::RobotState current_state) override;
   double getTrajectoryProgress(moveit::core::RobotState current_state) override;
 
 private:
