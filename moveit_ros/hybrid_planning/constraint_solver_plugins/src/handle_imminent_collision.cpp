@@ -52,7 +52,8 @@ bool HandleImminentCollision::initialize(const rclcpp::Node::SharedPtr& node)
 trajectory_msgs::msg::JointTrajectory
 HandleImminentCollision::solve(std::vector<moveit_msgs::msg::Constraints> local_problem,
                                std::vector<moveit_msgs::msg::Constraints> additional_constraints,
-                               planning_scene::PlanningScenePtr planning_scene)
+                               planning_scene::PlanningScenePtr planning_scene,
+                               std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback)
 {
   trajectory_msgs::msg::JointTrajectory local_joint_trajectory;
   for (auto& joint_constraint : local_problem[0].joint_constraints)
@@ -79,9 +80,10 @@ HandleImminentCollision::solve(std::vector<moveit_msgs::msg::Constraints> local_
 
   trajectory_msgs::msg::JointTrajectory local_solution;
   trajectory_msgs::msg::JointTrajectoryPoint waypoint;
+
+  // Check if path is valid
   if (planning_scene->isPathValid(current_state_msg, local_trajectory_msg))
   {
-    // Check if path is valid
     for (auto& joint_constraint : local_problem[0].joint_constraints)
     {
       local_solution.joint_names.push_back(joint_constraint.joint_name);
@@ -91,8 +93,8 @@ HandleImminentCollision::solve(std::vector<moveit_msgs::msg::Constraints> local_
   }
   else
   {
-    auto& clock = *node_handle_->get_clock();
-    RCLCPP_INFO_THROTTLE(LOGGER, clock, 1000, "Path invalidated! Keeping current position");
+    feedback->feedback = "collision_ahead";
+
     // Keep current position
     moveit::core::RobotState current_state = planning_scene->getCurrentState();
     std::vector<double> joint_states;
