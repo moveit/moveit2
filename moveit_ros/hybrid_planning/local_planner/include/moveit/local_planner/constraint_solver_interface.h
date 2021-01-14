@@ -42,10 +42,12 @@
 #include <rclcpp_action/rclcpp_action.hpp>
 
 #include <moveit/planning_scene/planning_scene.h>
+#include <moveit/robot_state/robot_state.h>
 
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
-#include <moveit/robot_state/robot_state.h>
+
+#include <moveit_msgs/action/local_planner.hpp>
 
 #include <trajectory_msgs/msg/joint_trajectory.h>
 
@@ -70,9 +72,11 @@ public:
      @param additional_constraints Additional local goal constraints
      @return Local planning solution in joint space
   */
-  virtual trajectory_msgs::msg::JointTrajectory solve(std::vector<moveit_msgs::msg::Constraints> local_problem,
-                                                      std::vector<moveit_msgs::msg::Constraints> additional_constraints,
-                                                      planning_scene::PlanningScenePtr planning_scene) = 0;
+  virtual trajectory_msgs::msg::JointTrajectory
+  solve(std::vector<moveit_msgs::msg::Constraints> local_problem,
+        std::vector<moveit_msgs::msg::Constraints> additional_constraints,
+        planning_scene::PlanningScenePtr planning_scene,
+        std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback) = 0;
   virtual ~ConstraintSolverInterface(){};
 
 protected:

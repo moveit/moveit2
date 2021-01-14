@@ -39,6 +39,8 @@
 
 namespace moveit_hybrid_planning
 {
+const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
+
 bool SinglePlanExecution::initialize(std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planner_handle)
 {
   hybrid_planner_handle_ = hybrid_planner_handle;
@@ -71,7 +73,9 @@ bool SinglePlanExecution::react(BasicHybridPlanningEvent event)
 }
 bool SinglePlanExecution::react(std::string event)
 {
-  return false;
+  auto& clock = *hybrid_planner_handle_->get_clock();
+  RCLCPP_INFO_THROTTLE(LOGGER, clock, 1000, event);
+  return true;
 };
 }  // namespace moveit_hybrid_planning
 
