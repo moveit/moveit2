@@ -28,6 +28,7 @@ set(LIBRARIES
   next_waypoint_sampler_plugin
   single_plan_execution_plugin
   handle_imminent_collision_plugin
+  replan_invalidated_trajectory_plugin
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -78,6 +79,7 @@ install(DIRECTORY test/config DESTINATION share/${PROJECT_NAME})
 pluginlib_export_plugin_description_file(moveit_hybrid_planning single_plan_execution_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning next_waypoint_sampler_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning handle_imminent_collision_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_hybrid_planning replan_invalidated_trajectory_plugin.xml)
 
 ament_export_include_directories(include)
 ament_export_libraries(${LIBRARIES})
