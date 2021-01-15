@@ -57,5 +57,6 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_handle_;
+  bool feedback_send_;
 };
 }  // namespace moveit_hybrid_planning
