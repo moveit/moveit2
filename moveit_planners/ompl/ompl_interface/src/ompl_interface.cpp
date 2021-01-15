@@ -45,11 +45,9 @@
 namespace ompl_interface
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.ompl_interface");
-}  // namespace ompl_interface
 
-ompl_interface::OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model,
-                                             const rclcpp::Node::SharedPtr& node,
-                                             const std::string& parameter_namespace)
+OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model, const rclcpp::Node::SharedPtr& node,
+                             const std::string& parameter_namespace)
   : node_(node)
   , parameter_namespace_(parameter_namespace)
   , robot_model_(robot_model)
@@ -63,10 +61,9 @@ ompl_interface::OMPLInterface::OMPLInterface(const moveit::core::RobotModelConst
   loadConstraintSamplers();
 }
 
-ompl_interface::OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model,
-                                             const planning_interface::PlannerConfigurationMap& pconfig,
-                                             const rclcpp::Node::SharedPtr& node,
-                                             const std::string& parameter_namespace)
+OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model,
+                             const planning_interface::PlannerConfigurationMap& pconfig,
+                             const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace)
   : node_(node)
   , parameter_namespace_(parameter_namespace)
   , robot_model_(robot_model)
@@ -80,9 +77,9 @@ ompl_interface::OMPLInterface::OMPLInterface(const moveit::core::RobotModelConst
   loadConstraintSamplers();
 }
 
-ompl_interface::OMPLInterface::~OMPLInterface() = default;
+OMPLInterface::~OMPLInterface() = default;
 
-void ompl_interface::OMPLInterface::setPlannerConfigurations(const planning_interface::PlannerConfigurationMap& pconfig)
+void OMPLInterface::setPlannerConfigurations(const planning_interface::PlannerConfigurationMap& pconfig)
 {
   planning_interface::PlannerConfigurationMap pconfig2 = pconfig;
 
@@ -100,41 +97,42 @@ void ompl_interface::OMPLInterface::setPlannerConfigurations(const planning_inte
   context_manager_.setPlannerConfigurations(pconfig2);
 }
 
-ompl_interface::ModelBasedPlanningContextPtr
-ompl_interface::OMPLInterface::getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                  const planning_interface::MotionPlanRequest& req) const
+ModelBasedPlanningContextPtr
+OMPLInterface::getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                  const planning_interface::MotionPlanRequest& req) const
 {
   moveit_msgs::msg::MoveItErrorCodes dummy;
   return getPlanningContext(planning_scene, req, dummy);
 }
 
-ompl_interface::ModelBasedPlanningContextPtr
-ompl_interface::OMPLInterface::getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                                  const planning_interface::MotionPlanRequest& req,
-                                                  moveit_msgs::msg::MoveItErrorCodes& error_code) const
+ModelBasedPlanningContextPtr
+OMPLInterface::getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                  const planning_interface::MotionPlanRequest& req,
+                                  moveit_msgs::msg::MoveItErrorCodes& error_code) const
 {
   ModelBasedPlanningContextPtr ctx =
       context_manager_.getPlanningContext(planning_scene, req, error_code, node_, use_constraints_approximations_);
   if (ctx)
+  {
     configureContext(ctx);
+  }
   return ctx;
 }
 
-void ompl_interface::OMPLInterface::configureContext(const ModelBasedPlanningContextPtr& context) const
+void OMPLInterface::configureContext(const ModelBasedPlanningContextPtr& context) const
 {
   context->simplifySolutions(simplify_solutions_);
 }
 
-void ompl_interface::OMPLInterface::loadConstraintSamplers()
+void OMPLInterface::loadConstraintSamplers()
 {
   constraint_sampler_manager_loader_.reset(
       new constraint_sampler_manager_loader::ConstraintSamplerManagerLoader(node_, constraint_sampler_manager_));
 }
 
-bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
-    const std::string& group_name, const std::string& planner_id,
-    const std::map<std::string, std::string>& group_params,
-    planning_interface::PlannerConfigurationSettings& planner_config)
+bool OMPLInterface::loadPlannerConfiguration(const std::string& group_name, const std::string& planner_id,
+                                             const std::map<std::string, std::string>& group_params,
+                                             planning_interface::PlannerConfigurationSettings& planner_config)
 {
   rcl_interfaces::msg::ListParametersResult planner_params_result =
       node_->list_parameters({ parameter_namespace_ + ".planner_configs." + planner_id }, 2);
@@ -162,7 +160,7 @@ bool ompl_interface::OMPLInterface::loadPlannerConfiguration(
   return true;
 }
 
-void ompl_interface::OMPLInterface::loadPlannerConfigurations()
+void OMPLInterface::loadPlannerConfigurations()
 {
   // read the planning configuration for each group
   planning_interface::PlannerConfigurationMap pconfig;
@@ -172,7 +170,9 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
   {
     // the set of planning parameters that can be specific for the group (inherited by configurations of that group)
     static const std::string KNOWN_GROUP_PARAMS[] = { "projection_evaluator", "longest_valid_segment_fraction",
-                                                      "enforce_joint_model_state_space" };
+                                                      "enforce_joint_model_state_space",
+                                                      "enforce_constrained_state_space" };
+
     const std::string group_name_param = parameter_namespace_ + "." + group_name;
 
     // get parameters specific for the robot planning group
@@ -222,7 +222,9 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
     if (node_->get_parameter(group_name_param + ".default_planner_config", default_planner_id))
     {
       if (!loadPlannerConfiguration(group_name, default_planner_id, specific_group_params, default_pc))
+      {
         default_planner_id = "";
+      }
     }
 
     if (default_planner_id.empty())
@@ -243,7 +245,9 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
       {
         planning_interface::PlannerConfigurationSettings pc;
         if (loadPlannerConfiguration(group_name, planner_id, specific_group_params, pc))
+        {
           pconfig[pc.name] = pc;
+        }
       }
     }
   }
@@ -253,13 +257,16 @@ void ompl_interface::OMPLInterface::loadPlannerConfigurations()
     RCLCPP_DEBUG(LOGGER, "Parameters for configuration '%s'", config.first.c_str());
 
     for (const std::pair<const std::string, std::string>& parameters : config.second.config)
+    {
       RCLCPP_DEBUG(LOGGER, " - %s = %s", parameters.first.c_str(), parameters.second.c_str());
+    }
   }
 
   setPlannerConfigurations(pconfig);
 }
 
-void ompl_interface::OMPLInterface::printStatus()
+void OMPLInterface::printStatus()
 {
   RCLCPP_INFO(LOGGER, "OMPL ROS interface is running.");
 }
+}  // namespace ompl_interface

@@ -7,9 +7,11 @@ moveit_package()
 
 find_package(Boost REQUIRED system filesystem date_time thread serialization)
 find_package(moveit_core REQUIRED)
+find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(tf2_eigen REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(ompl REQUIRED)
 
