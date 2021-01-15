@@ -185,15 +185,10 @@ moveit_msgs::msg::MotionPlanResponse GlobalPlannerComponent::plan(moveit_msgs::m
       ::planning_scene::PlanningScene::clone(planning_scene_monitor_->getPlanningScene());
   planning_scene_monitor_->unlockSceneRead();  // UNLOCK planning scene
 
-  // TODO implement start/current robot state considerations
-  // TODO refactor get current state function --> see planning_context for example
+  // TODO Review start/current robot state considerations
+  moveit::core::robotStateToRobotStateMsg(planning_scene->getCurrentState(), planning_problem.start_state);
 
-  // Set start state
   moveit_msgs::msg::MotionPlanResponse planning_solution;
-  moveit::core::RobotState start_state(robot_model_);
-  moveit::core::robotStateMsgToRobotState(planning_problem.start_state,
-                                          start_state);  // Use start state from planning problem
-  planning_scene->setCurrentState(start_state);
 
   // Set goal constraints
   ::planning_interface::MotionPlanResponse response;
