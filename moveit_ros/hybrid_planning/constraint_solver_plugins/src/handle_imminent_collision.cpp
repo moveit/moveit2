@@ -46,6 +46,7 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 bool HandleImminentCollision::initialize(const rclcpp::Node::SharedPtr& node)
 {
   node_handle_ = node;
+  feedback_send_ = false;
   return true;
 }
 
@@ -84,6 +85,12 @@ HandleImminentCollision::solve(std::vector<moveit_msgs::msg::Constraints> local_
   // Check if path is valid
   if (planning_scene->isPathValid(current_state_msg, local_trajectory_msg))
   {
+    if (feedback_send_)
+    {
+      feedback_send_ = false;  // Reset feedback flag
+    }
+
+    // Forward closest waypoint to the robot controller
     for (auto& joint_constraint : local_problem[0].joint_constraints)
     {
       local_solution.joint_names.push_back(joint_constraint.joint_name);
@@ -93,8 +100,11 @@ HandleImminentCollision::solve(std::vector<moveit_msgs::msg::Constraints> local_
   }
   else
   {
-    feedback->feedback = "collision_ahead";
-
+    if (!feedback_send_)
+    {  // Send feedback only once
+      feedback->feedback = "collision_ahead";
+      feedback_send_ = true;
+    }
     // Keep current position
     moveit::core::RobotState current_state = planning_scene->getCurrentState();
     std::vector<double> joint_states;

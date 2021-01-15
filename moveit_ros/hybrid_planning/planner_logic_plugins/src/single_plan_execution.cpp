@@ -40,27 +40,31 @@
 namespace moveit_hybrid_planning
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
+std::once_flag LOCAL_PLANNER_STARTED;
 
 bool SinglePlanExecution::initialize(std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planner_handle)
 {
   hybrid_planner_handle_ = hybrid_planner_handle;
   return true;
 }
+
 bool SinglePlanExecution::react(BasicHybridPlanningEvent event)
 {
   switch (event)
   {
     case moveit_hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
-      if (!hybrid_planner_handle_->planGlobalTrajectory())
+      if (!hybrid_planner_handle_->planGlobalTrajectory())  // Start global planning
       {
         hybrid_planner_handle_->sendHybridPlanningResponse(false);
       }
       break;
     case moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
-      if (!hybrid_planner_handle_->runLocalPlanner())
-      {
-        hybrid_planner_handle_->sendHybridPlanningResponse(false);
-      }
+      std::call_once(LOCAL_PLANNER_STARTED, [this]() {   // ensure the local planner is not started twice
+        if (!hybrid_planner_handle_->runLocalPlanner())  // Start local planning
+        {
+          hybrid_planner_handle_->sendHybridPlanningResponse(false);
+        }
+      });
       break;
     case moveit_hybrid_planning::BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
       hybrid_planner_handle_->sendHybridPlanningResponse(true);
