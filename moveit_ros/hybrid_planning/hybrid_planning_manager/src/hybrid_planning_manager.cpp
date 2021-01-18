@@ -85,8 +85,8 @@ bool HybridPlanningManager::initialize()
   }
   else
   {
-    logic_plugin_name =
-        this->declare_parameter<std::string>("planner_logic_plugin_name", "moveit_hybrid_planning/SinglePlanExecution");
+    logic_plugin_name = this->declare_parameter<std::string>("planner_logic_plugin_name",
+                                                             "moveit_hybrid_planning/ReplanInvalidatedTrajectory");
   }
   try
   {

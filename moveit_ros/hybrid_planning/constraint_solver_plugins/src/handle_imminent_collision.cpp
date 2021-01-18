@@ -51,36 +51,20 @@ bool HandleImminentCollision::initialize(const rclcpp::Node::SharedPtr& node)
 }
 
 trajectory_msgs::msg::JointTrajectory
-HandleImminentCollision::solve(std::vector<moveit_msgs::msg::Constraints> local_problem,
-                               std::vector<moveit_msgs::msg::Constraints> additional_constraints,
+HandleImminentCollision::solve(robot_trajectory::RobotTrajectory local_trajectory,
+                               std::vector<moveit_msgs::msg::Constraints> local_constraints,
                                planning_scene::PlanningScenePtr planning_scene,
                                std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback)
 {
-  trajectory_msgs::msg::JointTrajectory local_joint_trajectory;
-  for (auto& joint_constraint : local_problem[0].joint_constraints)
-  {
-    local_joint_trajectory.joint_names.push_back(joint_constraint.joint_name);
-  }
-  for (auto& waypoint_constraints : local_problem)
-  {
-    trajectory_msgs::msg::JointTrajectoryPoint waypoint;
-    for (auto& joint_constraint : waypoint_constraints.joint_constraints)
-    {
-      waypoint.positions.push_back(joint_constraint.position);
-    }
-    local_joint_trajectory.points.push_back(waypoint);
-  }
-  robot_trajectory::RobotTrajectory local_trajectory(planning_scene->getRobotModel(), "panda_arm");
-  local_trajectory.setRobotTrajectoryMsg(planning_scene->getCurrentState(), local_joint_trajectory);
+  // Transform local_trajectory into msg data structure to use isPathValid()
   moveit_msgs::msg::RobotTrajectory local_trajectory_msg;
-  local_trajectory.getRobotTrajectoryMsg(local_trajectory_msg, local_joint_trajectory.joint_names);
+  local_trajectory.getRobotTrajectoryMsg(local_trajectory_msg);
 
-  // Check if path is valid
+  // Get Current State
   moveit_msgs::msg::RobotState current_state_msg;
   robotStateToRobotStateMsg(planning_scene->getCurrentState(), current_state_msg);
 
-  trajectory_msgs::msg::JointTrajectory local_solution;
-  trajectory_msgs::msg::JointTrajectoryPoint waypoint;
+  robot_trajectory::RobotTrajectory robot_command(local_trajectory.getRobotModel(), local_trajectory.getGroupName());
 
   // Check if path is valid
   if (planning_scene->isPathValid(current_state_msg, local_trajectory_msg))
@@ -90,33 +74,28 @@ HandleImminentCollision::solve(std::vector<moveit_msgs::msg::Constraints> local_
       feedback_send_ = false;  // Reset feedback flag
     }
 
-    // Forward closest waypoint to the robot controller
-    for (auto& joint_constraint : local_problem[0].joint_constraints)
-    {
-      local_solution.joint_names.push_back(joint_constraint.joint_name);
-      waypoint.positions.push_back(joint_constraint.position);
-    }
-    local_solution.points.push_back(waypoint);
+    // Forward next waypoint to the robot controller
+    robot_command.addSuffixWayPoint(local_trajectory.getWayPoint(0), 0.0);
   }
   else
   {
     if (!feedback_send_)
     {  // Send feedback only once
       feedback->feedback = "collision_ahead";
-      feedback_send_ = true;
+      feedback_send_ = true;  // Set feedback flag
     }
+
     // Keep current position
     moveit::core::RobotState current_state = planning_scene->getCurrentState();
-    std::vector<double> joint_states;
-    current_state.copyJointGroupPositions("panda_arm", joint_states);
-    for (size_t i = 0; i < local_joint_trajectory.joint_names.size(); i++)
-    {
-      local_solution.joint_names.push_back(local_problem[0].joint_constraints[i].joint_name);
-      waypoint.positions.push_back(joint_states[i]);
-    }
-    local_solution.points.push_back(waypoint);
+    robot_command.addSuffixWayPoint(current_state, 0.0);
   }
-  return local_solution;
+
+  // Transform RobotTrajectory into RobotTrajectoryMsg
+  moveit_msgs::msg::RobotTrajectory robot_command_msg;
+  robot_command.getRobotTrajectoryMsg(robot_command_msg);
+
+  // Return only joint trajectory
+  return robot_command_msg.joint_trajectory;
 }
 }  // namespace moveit_hybrid_planning
 
