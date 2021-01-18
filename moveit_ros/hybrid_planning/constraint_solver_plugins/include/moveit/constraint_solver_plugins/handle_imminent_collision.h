@@ -39,6 +39,7 @@
 #pragma once
 
 #include <moveit/local_planner/constraint_solver_interface.h>
+//#include <moveit_servo/servo.h>
 
 namespace moveit_hybrid_planning
 {
@@ -47,15 +48,17 @@ class HandleImminentCollision : public ConstraintSolverInterface
 public:
   HandleImminentCollision(){};
   ~HandleImminentCollision() override{};
-  bool initialize(const rclcpp::Node::SharedPtr& node) override;
+  bool initialize(const rclcpp::Node::SharedPtr& node,
+                  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor) override;
 
   trajectory_msgs::msg::JointTrajectory
   solve(robot_trajectory::RobotTrajectory local_trajectory,
-        std::vector<moveit_msgs::msg::Constraints> local_constraints, planning_scene::PlanningScenePtr planning_scene,
+        std::vector<moveit_msgs::msg::Constraints> local_constraints,
         std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback) override;
 
 private:
   rclcpp::Node::SharedPtr node_handle_;
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   bool feedback_send_;
 };
 }  // namespace moveit_hybrid_planning
