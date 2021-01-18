@@ -137,7 +137,7 @@ bool LocalPlannerComponent::initialize()
   try
   {
     constraint_solver_instance_ = solver_plugin_loader_->createUniqueInstance(config_.solver_plugin_name);
-    if (!constraint_solver_instance_->initialize(node_ptr))
+    if (!constraint_solver_instance_->initialize(node_ptr, planning_scene_monitor_))
       throw std::runtime_error("Unable to initialize constraint solver plugin");
     RCLCPP_INFO(LOGGER, "Using constraint solver interface '%s'", config_.solver_plugin_name.c_str());
   }
@@ -246,7 +246,7 @@ void LocalPlannerComponent::executePlanningLoopRun()
       const auto goal = local_planning_goal_handle_->get_goal();
       auto local_feedback = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
       trajectory_msgs::msg::JointTrajectory local_solution =
-          constraint_solver_instance_->solve(local_trajectory, goal->local_constraints, planning_scene, local_feedback);
+          constraint_solver_instance_->solve(local_trajectory, goal->local_constraints, local_feedback);
 
       if (!local_feedback->feedback.empty())
       {
