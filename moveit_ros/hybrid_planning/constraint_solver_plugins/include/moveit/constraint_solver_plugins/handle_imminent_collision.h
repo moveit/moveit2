@@ -50,9 +50,8 @@ public:
   bool initialize(const rclcpp::Node::SharedPtr& node) override;
 
   trajectory_msgs::msg::JointTrajectory
-  solve(std::vector<moveit_msgs::msg::Constraints> local_problem,
-        std::vector<moveit_msgs::msg::Constraints> additional_constraints,
-        planning_scene::PlanningScenePtr planning_scene,
+  solve(robot_trajectory::RobotTrajectory local_trajectory,
+        std::vector<moveit_msgs::msg::Constraints> local_constraints, planning_scene::PlanningScenePtr planning_scene,
         std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback) override;
 
 private:

@@ -39,6 +39,7 @@
  */
 
 #include <moveit/local_planner/trajectory_operator_interface.h>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 
 namespace moveit_hybrid_planning
 {
@@ -51,10 +52,11 @@ public:
   bool initialize(const rclcpp::Node::SharedPtr& node, moveit::core::RobotModelConstPtr robot_model,
                   std::string group_name) override;
   bool addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory) override;
-  std::vector<moveit_msgs::msg::Constraints> getLocalProblem(moveit::core::RobotState current_state) override;
+  robot_trajectory::RobotTrajectory getLocalTrajectory(moveit::core::RobotState current_state) override;
   double getTrajectoryProgress(moveit::core::RobotState current_state) override;
 
 private:
   std::size_t index_;
+  trajectory_processing::TimeOptimalTrajectoryGeneration time_parametrization_;
 };
 }  // namespace moveit_hybrid_planning

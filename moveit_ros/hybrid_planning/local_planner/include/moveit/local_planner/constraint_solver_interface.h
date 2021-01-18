@@ -67,15 +67,15 @@ public:
 
   /**
    * Solve local planning problem for the current loop run
-     @param planning_scene The planning scene to use for local planning
-     @param goal The local planning goal constraint
-     @param additional_constraints Additional local goal constraints
-     @return Local planning solution in joint space
-  */
+   * @param local_trajectory The local trajectory to pursue
+   * @param local_constraints Local goal constraints
+   * @param planning_scene The planning scene to use for local planning
+   * @param feedback Feedback event string from the current solver i.e. "Collision detected"
+   * @return Local planning solution in joint space
+   */
   virtual trajectory_msgs::msg::JointTrajectory
-  solve(std::vector<moveit_msgs::msg::Constraints> local_problem,
-        std::vector<moveit_msgs::msg::Constraints> additional_constraints,
-        planning_scene::PlanningScenePtr planning_scene,
+  solve(robot_trajectory::RobotTrajectory local_trajectory,
+        std::vector<moveit_msgs::msg::Constraints> local_constraints, planning_scene::PlanningScenePtr planning_scene,
         std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback) = 0;
   virtual ~ConstraintSolverInterface(){};
 
