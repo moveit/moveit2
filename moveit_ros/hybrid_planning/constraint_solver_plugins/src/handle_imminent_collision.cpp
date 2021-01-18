@@ -43,8 +43,10 @@ namespace moveit_hybrid_planning
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 
-bool HandleImminentCollision::initialize(const rclcpp::Node::SharedPtr& node)
+bool HandleImminentCollision::initialize(const rclcpp::Node::SharedPtr& node,
+                                         planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
 {
+  planning_scene_monitor_ = planning_scene_monitor;
   node_handle_ = node;
   feedback_send_ = false;
   return true;
@@ -53,12 +55,18 @@ bool HandleImminentCollision::initialize(const rclcpp::Node::SharedPtr& node)
 trajectory_msgs::msg::JointTrajectory
 HandleImminentCollision::solve(robot_trajectory::RobotTrajectory local_trajectory,
                                std::vector<moveit_msgs::msg::Constraints> local_constraints,
-                               planning_scene::PlanningScenePtr planning_scene,
                                std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback)
 {
   // Transform local_trajectory into msg data structure to use isPathValid()
   moveit_msgs::msg::RobotTrajectory local_trajectory_msg;
   local_trajectory.getRobotTrajectoryMsg(local_trajectory_msg);
+
+  // Clone current planning scene
+  planning_scene_monitor_->updateFrameTransforms();
+  planning_scene_monitor_->lockSceneRead();  // LOCK planning scene
+  planning_scene::PlanningScenePtr planning_scene = planning_scene::PlanningScene::clone(
+      planning_scene_monitor_->getPlanningScene());  // TODO remove expensive planning scene cloning
+  planning_scene_monitor_->unlockSceneRead();        // UNLOCK planning scene
 
   // Get Current State
   moveit_msgs::msg::RobotState current_state_msg;

@@ -41,7 +41,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_state/robot_state.h>
 
 #include <moveit_msgs/msg/robot_trajectory.hpp>
@@ -63,7 +63,8 @@ public:
    * Initialize constraint solver
    * @return True if initialization was successful
    */
-  virtual bool initialize(const rclcpp::Node::SharedPtr& node) = 0;
+  virtual bool initialize(const rclcpp::Node::SharedPtr& node,
+                          planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor) = 0;
 
   /**
    * Solve local planning problem for the current loop run
@@ -75,7 +76,7 @@ public:
    */
   virtual trajectory_msgs::msg::JointTrajectory
   solve(robot_trajectory::RobotTrajectory local_trajectory,
-        std::vector<moveit_msgs::msg::Constraints> local_constraints, planning_scene::PlanningScenePtr planning_scene,
+        std::vector<moveit_msgs::msg::Constraints> local_constraints,
         std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback) = 0;
   virtual ~ConstraintSolverInterface(){};
 
