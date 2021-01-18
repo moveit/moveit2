@@ -11,7 +11,7 @@ The MoveIt Motion Planning Framework for **ROS 2**. For ROS 1, see [MoveIt 1](ht
 ## General MoveIt Documentation
 
 - [MoveIt Website](http://moveit.ros.org)
-- [Tutorials and Documentation](http://moveit.ros.org/documentation/)
+- [Tutorials and Documentation](https://ros-planning.github.io/moveit_tutorials/)
 - [How to Get Involved](http://moveit.ros.org/about/get_involved/)
 - [Future Release Dates](https://moveit.ros.org/#release-versions)
 
