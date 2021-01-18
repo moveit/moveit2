@@ -59,6 +59,9 @@ class TrajectoryOperatorInterface
 public:
   /**
    * Initialize trajectory operator
+   * @param node Node handle to access parameters
+   * @param robot_model Robot model
+   * @param group_name Name of the joint group the trajectory uses
    * @return True if initialization was successful
    */
   virtual bool initialize(const rclcpp::Node::SharedPtr& node, moveit::core::RobotModelConstPtr robot_model,
@@ -76,7 +79,7 @@ public:
    * @param current_state Current RobotState
    * @return Current local constraints that define the local planning goal
    */
-  virtual std::vector<moveit_msgs::msg::Constraints> getLocalProblem(moveit::core::RobotState current_state) = 0;
+  virtual robot_trajectory::RobotTrajectory getLocalTrajectory(moveit::core::RobotState current_state) = 0;
 
   /**
    * Return the processing status of the reference trajectory's execution based on a user defined

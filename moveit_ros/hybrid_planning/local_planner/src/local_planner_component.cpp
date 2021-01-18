@@ -241,12 +241,12 @@ void LocalPlannerComponent::executePlanningLoopRun()
       }
 
       // Get and solve local planning problem
-      std::vector<moveit_msgs::msg::Constraints> current_goal_constraint =
-          trajectory_operator_instance_->getLocalProblem(current_robot_state);
+      robot_trajectory::RobotTrajectory local_trajectory =
+          trajectory_operator_instance_->getLocalTrajectory(current_robot_state);
       const auto goal = local_planning_goal_handle_->get_goal();
       auto local_feedback = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
-      trajectory_msgs::msg::JointTrajectory local_solution = constraint_solver_instance_->solve(
-          current_goal_constraint, goal->local_constraints, planning_scene, local_feedback);
+      trajectory_msgs::msg::JointTrajectory local_solution =
+          constraint_solver_instance_->solve(local_trajectory, goal->local_constraints, planning_scene, local_feedback);
 
       if (!local_feedback->feedback.empty())
       {

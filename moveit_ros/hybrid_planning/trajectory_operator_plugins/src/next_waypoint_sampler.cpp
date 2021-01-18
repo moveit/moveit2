@@ -53,49 +53,45 @@ bool NextWaypointSampler::initialize(const rclcpp::Node::SharedPtr& node, moveit
 
 bool NextWaypointSampler::addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory)
 {
-  if (new_trajectory.getGroupName() != reference_trajectory_->getGroupName())
-  {
-    RCLCPP_ERROR_STREAM(
-        LOGGER,
-        "NextWaypointSampler: Group names don't match, reset reference_trajectory!");  // TODO Review reference
-                                                                                       // trajectory initialization
-    reference_trajectory_.reset(
-        new robot_trajectory::RobotTrajectory(new_trajectory.getRobotModel(), new_trajectory.getGroupName()));
-  }
-  reference_trajectory_->append(
-      new_trajectory,
-      0.01);  // TODO Remove magic number by interpolation between both end and start point of the trajectories
+  // Throw away old reference trajectory and use trajectory update
+  reference_trajectory_.reset(new robot_trajectory::RobotTrajectory(new_trajectory));
+
+  // Parametrize trajectory and calculate velocity and accelerations
+  time_parametrization_.computeTimeStamps(*reference_trajectory_);
   return true;
 }
 
-std::vector<moveit_msgs::msg::Constraints> NextWaypointSampler::getLocalProblem(moveit::core::RobotState current_state)
+robot_trajectory::RobotTrajectory NextWaypointSampler::getLocalTrajectory(moveit::core::RobotState current_state)
 {
+  // Get next desired robot state
   moveit::core::RobotState next_desired_goal_state = reference_trajectory_->getWayPoint(index_);
+
+  // Check if state reached
   if (next_desired_goal_state.distance(current_state) <= 0.01)
   {
+    // Update index (and thus desired robot state)
     index_ += 1;
-    if (index_ < reference_trajectory_->getWayPointCount())
-    {
-      next_desired_goal_state = reference_trajectory_->getWayPoint(index_);
-    }
   }
-  std::vector<moveit_msgs::msg::Constraints> local_goal_constraints;
-  // Construct local trajectory
+
+  // Construct local trajectory containing the next three global trajectory waypoints
+  robot_trajectory::RobotTrajectory local_trajectory(reference_trajectory_->getRobotModel(),
+                                                     reference_trajectory_->getGroupName());
   for (auto i = 0; i < 3; i++)
   {  // TODO Use param to config window width
     if ((index_ + i) < reference_trajectory_->getWayPointCount())
     {
       moveit::core::RobotState local_robot_state = reference_trajectory_->getWayPoint(index_ + i);
-      local_goal_constraints.push_back(kinematic_constraints::constructGoalConstraints(
-          local_robot_state, local_robot_state.getJointModelGroup(reference_trajectory_->getGroupName()),
-          0.1));  // TODO Remove magic number!
+      local_trajectory.addSuffixWayPoint(
+          reference_trajectory_->getWayPoint(index_ + i),
+          reference_trajectory_->getWayPointDurationFromPrevious(index_ + i));  // TODO Remove magic number!
     }
   }
-  return local_goal_constraints;
+  return local_trajectory;
 }
 
 double NextWaypointSampler::getTrajectoryProgress(moveit::core::RobotState current_state)
 {
+  // Check if trajectory is unwinded
   if (index_ >= reference_trajectory_->getWayPointCount() - 1)
   {
     return 1.0;
