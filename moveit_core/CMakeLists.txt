@@ -19,9 +19,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 # TODO: Move collision detection into separate packages
  find_package(Bullet 2.87)
 			
- # TODO(j-petit): Version check can be dropped when Xenial reaches end-of-life
  if(BULLET_FOUND)
-   set(BULLET_ENABLE "BULLET")
+   set(BULLET_ENABLE "Bullet")
    set(BULLET_LIB "moveit_collision_detection_bullet")
    set(BULLET_INC "collision_detection_bullet/include")
    message(STATUS "Compiling with Bullet")
