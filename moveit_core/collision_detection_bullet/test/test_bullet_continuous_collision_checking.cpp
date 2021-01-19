@@ -263,7 +263,7 @@ TEST_F(BulletCollisionDetectionTester, DISABLED_ContinuousCollisionSelf)
   ASSERT_FALSE(res.collision);
   res.clear();
 
-  RCLCPP_INFO(TEST_LOGGER,"Continous to continous collisions are not supported yet, therefore fail here.");
+  RCLCPP_INFO(TEST_LOGGER, "Continous to continous collisions are not supported yet, therefore fail here.");
   ASSERT_TRUE(res.collision);
   res.clear();
 }
