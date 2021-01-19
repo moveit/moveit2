@@ -38,15 +38,27 @@
 
 #pragma once
 
+#include <rclcpp/rclcpp.hpp>
 #include <moveit/local_planner/constraint_solver_interface.h>
+#include <control_toolbox/pid.hpp>
 //#include <moveit_servo/servo.h>
 
 namespace moveit_hybrid_planning
 {
+struct PIDConfig
+{
+  // Default values
+  double k_p = 1;
+  double k_i = 0;
+  double k_d = 0;
+  double windup_limit = 0.1;
+  double d_t = 0.01;  // s
+};
+
 class HandleImminentCollision : public ConstraintSolverInterface
 {
 public:
-  HandleImminentCollision(){};
+  HandleImminentCollision();
   ~HandleImminentCollision() override{};
   bool initialize(const rclcpp::Node::SharedPtr& node,
                   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor) override;
@@ -60,5 +72,8 @@ private:
   rclcpp::Node::SharedPtr node_handle_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   bool feedback_send_;
+  std::vector<control_toolbox::Pid> joint_position_pids_;
+  PIDConfig pid_config_;
+  rclcpp::Rate loop_rate_;
 };
 }  // namespace moveit_hybrid_planning
