@@ -59,7 +59,7 @@ MOVEIT_CLASS_FORWARD(CollisionObjectWrapper)
 
 /** \brief Allowed = true */
 bool acmCheck(const std::string& body_1, const std::string& body_2,
-                     const collision_detection::AllowedCollisionMatrix* acm);
+              const collision_detection::AllowedCollisionMatrix* acm);
 
 /** \brief Converts eigen vector to bullet vector */
 inline btVector3 convertEigenToBt(const Eigen::Vector3d& v)
@@ -709,8 +709,8 @@ inline void removeCollisionObjectFromBroadphase(const CollisionObjectWrapperPtr&
  *  @param broadphase The bullet broadphase interface
  *  @param dispatcher The bullet collision dispatcher */
 void addCollisionObjectToBroadphase(const CollisionObjectWrapperPtr& cow,
-                                           const std::unique_ptr<btBroadphaseInterface>& broadphase,
-                                           const std::unique_ptr<btCollisionDispatcher>& dispatcher);
+                                    const std::unique_ptr<btBroadphaseInterface>& broadphase,
+                                    const std::unique_ptr<btCollisionDispatcher>& dispatcher);
 
 struct BroadphaseFilterCallback : public btOverlapFilterCallback
 {

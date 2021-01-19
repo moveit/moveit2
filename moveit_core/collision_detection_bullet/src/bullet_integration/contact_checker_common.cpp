@@ -37,9 +37,8 @@ static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detect
 
 namespace collision_detection_bullet
 {
-
 collision_detection::Contact* processResult(ContactTestData& cdata, collision_detection::Contact& contact,
-                                                   const std::pair<std::string, std::string>& key, bool found)
+                                            const std::pair<std::string, std::string>& key, bool found)
 {
   // add deepest penetration / smallest distance to result
   if (cdata.req.distance)
@@ -50,8 +49,7 @@ collision_detection::Contact* processResult(ContactTestData& cdata, collision_de
     }
   }
 
-  RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
-                         "Contact btw " << key.first << " and " << key.second << " dist: " << contact.depth);
+  RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Contact btw " << key.first << " and " << key.second << " dist: " << contact.depth);
   // case if pair hasn't a contact yet
   if (!found)
   {
@@ -119,7 +117,7 @@ collision_detection::Contact* processResult(ContactTestData& cdata, collision_de
 }
 
 int createConvexHull(AlignedVector<Eigen::Vector3d>& vertices, std::vector<int>& faces,
-                            const AlignedVector<Eigen::Vector3d>& input, double shrink, double shrinkClamp)
+                     const AlignedVector<Eigen::Vector3d>& input, double shrink, double shrinkClamp)
 {
   vertices.clear();
   faces.clear();
@@ -136,7 +134,7 @@ int createConvexHull(AlignedVector<Eigen::Vector3d>& vertices, std::vector<int>&
                               static_cast<btScalar>(shrinkClamp));
   if (val < 0)
   {
-    RCLCPP_ERROR(BULLET_LOGGER,"Failed to create convex hull");
+    RCLCPP_ERROR(BULLET_LOGGER, "Failed to create convex hull");
     return -1;
   }
 
@@ -182,5 +180,4 @@ int createConvexHull(AlignedVector<Eigen::Vector3d>& vertices, std::vector<int>&
   return num_faces;
 }
 
-}
-
+}  // namespace collision_detection_bullet

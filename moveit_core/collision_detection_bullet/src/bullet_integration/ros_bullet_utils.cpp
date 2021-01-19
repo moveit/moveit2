@@ -37,9 +37,8 @@ const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bul
 
 namespace collision_detection_bullet
 {
-
 static void getActiveLinkNamesRecursive(std::vector<std::string>& active_links,
-                                               const urdf::LinkConstSharedPtr& urdf_link, bool active)
+                                        const urdf::LinkConstSharedPtr& urdf_link, bool active)
 {
   if (active)
   {
@@ -92,7 +91,7 @@ shapes::ShapePtr constructShape(const urdf::Geometry* geom)
     }
     break;
     default:
-    	RCLCPP_ERROR(BULLET_LOGGER,"Unknown geometry type: %d", static_cast<int>(geom->type));
+      RCLCPP_ERROR(BULLET_LOGGER, "Unknown geometry type: %d", static_cast<int>(geom->type));
       break;
   }
 
@@ -108,5 +107,4 @@ Eigen::Isometry3d urdfPose2Eigen(const urdf::Pose& pose)
   return result;
 }
 
-}
-
+}  // namespace collision_detection_bullet

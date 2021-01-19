@@ -31,7 +31,6 @@
 
 namespace collision_detection_bullet
 {
-
 /**
  * @brief Get a key for two object to search the collision matrix
  * @param obj1 First collision object name
@@ -57,7 +56,7 @@ inline bool isLinkActive(const std::vector<std::string>& active, const std::stri
  *   \param found Indicates if a contact for this pair of objects has already been found
  *   \return Pointer to the newly inserted contact */
 collision_detection::Contact* processResult(ContactTestData& cdata, collision_detection::Contact& contact,
-                                                   const std::pair<std::string, std::string>& key, bool found);
+                                            const std::pair<std::string, std::string>& key, bool found);
 
 /**
  * @brief Create a convex hull from vertices using Bullet Convex Hull Computer
@@ -72,6 +71,6 @@ collision_detection::Contact* processResult(ContactTestData& cdata, collision_de
  * @return The number of faces. If less than zero an error occured when trying to create the convex hull
  */
 int createConvexHull(AlignedVector<Eigen::Vector3d>& vertices, std::vector<int>& faces,
-                            const AlignedVector<Eigen::Vector3d>& input, double shrink = -1, double shrinkClamp = -1);
+                     const AlignedVector<Eigen::Vector3d>& input, double shrink = -1, double shrinkClamp = -1);
 
 }  // namespace collision_detection_bullet

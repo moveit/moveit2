@@ -43,12 +43,10 @@
 
 static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
 
-
 namespace collision_detection_bullet
 {
-
 bool acmCheck(const std::string& body_1, const std::string& body_2,
-                     const collision_detection::AllowedCollisionMatrix* acm)
+              const collision_detection::AllowedCollisionMatrix* acm)
 {
   collision_detection::AllowedCollision::Type allowed_type;
 
@@ -58,28 +56,27 @@ bool acmCheck(const std::string& body_1, const std::string& body_2,
     {
       if (allowed_type == collision_detection::AllowedCollision::Type::NEVER)
       {
-        RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Not allowed entry in ACM found, collision check between "
-                                                                 << body_1 << " and " << body_2);
+        RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
+                            "Not allowed entry in ACM found, collision check between " << body_1 << " and " << body_2);
         return false;
       }
       else
       {
-        RCLCPP_DEBUG_STREAM(BULLET_LOGGER,"Entry in ACM found, skipping collision check as allowed "
-                                                                 << body_1 << " and " << body_2);
+        RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
+                            "Entry in ACM found, skipping collision check as allowed " << body_1 << " and " << body_2);
         return true;
       }
     }
     else
     {
-     RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
-                             "No entry in ACM found, collision check between " << body_1 << " and " << body_2);
+      RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
+                          "No entry in ACM found, collision check between " << body_1 << " and " << body_2);
       return false;
     }
   }
   else
   {
-   RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
-                           "No ACM, collision check between " << body_1 << " and " << body_2);
+    RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "No ACM, collision check between " << body_1 << " and " << body_2);
     return false;
   }
 }
@@ -184,13 +181,13 @@ btCollisionShape* createShapePrimitive(const shapes::Mesh* geom, const Collision
       }
       default:
       {
-        RCLCPP_ERROR(BULLET_LOGGER,"This bullet shape type (%d) is not supported for geometry meshs",
-                  static_cast<int>(collision_object_type));
+        RCLCPP_ERROR(BULLET_LOGGER, "This bullet shape type (%d) is not supported for geometry meshs",
+                     static_cast<int>(collision_object_type));
         return nullptr;
       }
     }
   }
-  RCLCPP_ERROR(BULLET_LOGGER,"The mesh is empty!");
+  RCLCPP_ERROR(BULLET_LOGGER, "The mesh is empty!");
   return nullptr;
 }
 
@@ -257,8 +254,8 @@ btCollisionShape* createShapePrimitive(const shapes::OcTree* geom, const Collisi
     }
     default:
     {
-      RCLCPP_ERROR(BULLET_LOGGER,"This bullet shape type (%d) is not supported for geometry octree",
-                static_cast<int>(collision_object_type));
+      RCLCPP_ERROR(BULLET_LOGGER, "This bullet shape type (%d) is not supported for geometry octree",
+                   static_cast<int>(collision_object_type));
       return nullptr;
     }
   }
@@ -283,9 +280,8 @@ void updateCollisionObjectFilters(const std::vector<std::string>& active, Collis
     cow.getBroadphaseHandle()->m_collisionFilterGroup = cow.m_collisionFilterGroup;
     cow.getBroadphaseHandle()->m_collisionFilterMask = cow.m_collisionFilterMask;
   }
-  RCLCPP_DEBUG_STREAM(BULLET_LOGGER,"COW " << cow.getName() << " group "
-                                                              << cow.m_collisionFilterGroup << " mask "
-                                                              << cow.m_collisionFilterMask);
+  RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "COW " << cow.getName() << " group " << cow.m_collisionFilterGroup << " mask "
+                                            << cow.m_collisionFilterMask);
 }
 
 CollisionObjectWrapperPtr makeCastCollisionObject(const CollisionObjectWrapperPtr& cow)
@@ -361,7 +357,7 @@ CollisionObjectWrapperPtr makeCastCollisionObject(const CollisionObjectWrapperPt
       else
       {
         RCLCPP_ERROR_STREAM(BULLET_LOGGER,
-                        "I can only collision check convex shapes and compound shapes made of convex shapes");
+                            "I can only collision check convex shapes and compound shapes made of convex shapes");
         throw std::runtime_error("I can only collision check convex shapes and compound shapes made of convex shapes");
       }
     }
@@ -375,7 +371,7 @@ CollisionObjectWrapperPtr makeCastCollisionObject(const CollisionObjectWrapperPt
   else
   {
     RCLCPP_ERROR_STREAM(BULLET_LOGGER,
-                    "I can only collision check convex shapes and compound shapes made of convex shapes");
+                        "I can only collision check convex shapes and compound shapes made of convex shapes");
     throw std::runtime_error("I can only collision check convex shapes and compound shapes made of convex shapes");
   }
 
@@ -383,10 +379,10 @@ CollisionObjectWrapperPtr makeCastCollisionObject(const CollisionObjectWrapperPt
 }
 
 void addCollisionObjectToBroadphase(const CollisionObjectWrapperPtr& cow,
-                                           const std::unique_ptr<btBroadphaseInterface>& broadphase,
-                                           const std::unique_ptr<btCollisionDispatcher>& dispatcher)
+                                    const std::unique_ptr<btBroadphaseInterface>& broadphase,
+                                    const std::unique_ptr<btCollisionDispatcher>& dispatcher)
 {
-  RCLCPP_DEBUG_STREAM(BULLET_LOGGER,"Added " << cow->getName() << " to broadphase");
+  RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Added " << cow->getName() << " to broadphase");
   btVector3 aabb_min, aabb_max;
   cow->getAABB(aabb_min, aabb_max);
 
@@ -426,7 +422,8 @@ btCollisionShape* createShapePrimitive(const shapes::ShapeConstPtr& geom,
     }
     default:
     {
-      RCLCPP_ERROR(BULLET_LOGGER,"This geometric shape type (%d) is not supported using BULLET yet", static_cast<int>(geom->type));
+      RCLCPP_ERROR(BULLET_LOGGER, "This geometric shape type (%d) is not supported using BULLET yet",
+                   static_cast<int>(geom->type));
       return nullptr;
     }
   }
@@ -464,16 +461,18 @@ bool BroadphaseFilterCallback::needBroadphaseCollision(btBroadphaseProxy* proxy0
     if (cow0->m_touch_links == cow1->m_touch_links)
       return false;
 
-  RCLCPP_DEBUG_STREAM(BULLET_LOGGER,"Broadphase pass " << cow0->getName() << " vs " << cow1->getName());
+  RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Broadphase pass " << cow0->getName() << " vs " << cow1->getName());
   return true;
 }
 
-btScalar BroadphaseContactResultCallback::addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0,
-                         const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1)
+btScalar BroadphaseContactResultCallback::addSingleResult(btManifoldPoint& cp,
+                                                          const btCollisionObjectWrapper* colObj0Wrap, int partId0,
+                                                          int index0, const btCollisionObjectWrapper* colObj1Wrap,
+                                                          int partId1, int index1)
 {
   if (cp.m_distance1 > static_cast<btScalar>(contact_distance_))
   {
-    RCLCPP_DEBUG_STREAM(BULLET_LOGGER,"Not close enough for collision with " << cp.m_distance1);
+    RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Not close enough for collision with " << cp.m_distance1);
     return 0;
   }
 
@@ -502,8 +501,7 @@ bool TesseractCollisionPairCallback::processOverlap(btBroadphasePair& pair)
   std::pair<std::string, std::string> pair_names{ cow0->getName(), cow1->getName() };
   if (results_callback_.needsCollision(cow0, cow1))
   {
-   RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
-                           "Processing " << cow0->getName() << " vs " << cow1->getName());
+    RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Processing " << cow0->getName() << " vs " << cow1->getName());
     btCollisionObjectWrapper obj0_wrap(nullptr, cow0->getCollisionShape(), cow0, cow0->getWorldTransform(), -1, -1);
     btCollisionObjectWrapper obj1_wrap(nullptr, cow1->getCollisionShape(), cow1, cow1->getWorldTransform(), -1, -1);
 
@@ -516,8 +514,7 @@ bool TesseractCollisionPairCallback::processOverlap(btBroadphasePair& pair)
     if (pair.m_algorithm)
     {
       TesseractBroadphaseBridgedManifoldResult contact_point_result(&obj0_wrap, &obj1_wrap, results_callback_);
-      contact_point_result.m_closestPointDistanceThreshold =
-          static_cast<btScalar>(results_callback_.contact_distance_);
+      contact_point_result.m_closestPointDistanceThreshold = static_cast<btScalar>(results_callback_.contact_distance_);
 
       // discrete collision detection query
       pair.m_algorithm->processCollision(&obj0_wrap, &obj1_wrap, dispatch_info_, &contact_point_result);
@@ -525,8 +522,7 @@ bool TesseractCollisionPairCallback::processOverlap(btBroadphasePair& pair)
   }
   else
   {
-   RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
-                           "Not processing " << cow0->getName() << " vs " << cow1->getName());
+    RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Not processing " << cow0->getName() << " vs " << cow1->getName());
   }
   return false;
 }

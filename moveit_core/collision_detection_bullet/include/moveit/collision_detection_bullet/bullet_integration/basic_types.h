@@ -33,7 +33,6 @@
 
 namespace collision_detection_bullet
 {
-
 template <typename T>
 using AlignedVector = std::vector<T, Eigen::aligned_allocator<T>>;
 
