@@ -33,6 +33,9 @@
 
 #include "moveit/collision_detection_bullet/bullet_integration/bullet_discrete_bvh_manager.h"
 
+static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
+
+
 namespace collision_detection_bullet
 {
 BulletDiscreteBVHManagerPtr BulletDiscreteBVHManager::clone() const

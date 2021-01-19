@@ -6,6 +6,8 @@ add_library(${MOVEIT_LIB_NAME}
   src/bullet_integration/bullet_cast_bvh_manager.cpp
   src/collision_env_bullet.cpp
   src/bullet_integration/bullet_bvh_manager.cpp
+  src/bullet_integration/contact_checker_common.cpp
+  src/bullet_integration/ros_bullet_utils.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
