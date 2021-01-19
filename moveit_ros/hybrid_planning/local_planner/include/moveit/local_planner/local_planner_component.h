@@ -105,12 +105,9 @@ public:
       declareOrGetParam<std::string>("trajectory_operator_plugin_name", trajectory_operator_plugin_name, undefined,
                                      node);
       declareOrGetParam<std::string>("solver_plugin_name", solver_plugin_name, undefined, node);
-      declareOrGetParam<int>("cycle_time", cycle_time, 1, node);
+      declareOrGetParam<double>("local_planning_frequency", local_planning_frequency, 1.0, node);
       declareOrGetParam<std::string>("global_solution_topic", global_solution_topic, undefined, node);
       declareOrGetParam<std::string>("local_solution_topic", local_solution_topic, undefined, node);
-      const std::string ns = "planning_scene_monitor_options";
-      declareOrGetParam<std::string>(ns + ".publish_planning_scene_topic", publish_planning_scene_topic, undefined,
-                                     node);
     }
 
     std::string robot_description;
@@ -120,7 +117,7 @@ public:
     std::string solver_plugin_name;
     std::string global_solution_topic;
     std::string local_solution_topic;
-    int cycle_time;
+    double local_planning_frequency;
   };
 
   /** \brief Constructor */
