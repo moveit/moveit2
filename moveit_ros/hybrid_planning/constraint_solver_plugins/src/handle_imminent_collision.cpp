@@ -42,6 +42,10 @@
 namespace moveit_hybrid_planning
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
+const std::string PLANNING_FRAME = "panda_link0";
+const double CYLCE_TIME = 0.01;  // TODO Add param and proper time handling
+
+HandleImminentCollision::HandleImminentCollision() : loop_rate_(1 / CYLCE_TIME){};
 
 bool HandleImminentCollision::initialize(const rclcpp::Node::SharedPtr& node,
                                          planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
@@ -49,6 +53,15 @@ bool HandleImminentCollision::initialize(const rclcpp::Node::SharedPtr& node,
   planning_scene_monitor_ = planning_scene_monitor;
   node_handle_ = node;
   feedback_send_ = false;
+
+  // Initialize PID
+  auto joint_names = (planning_scene_monitor_->getRobotModel())->getJointModelNames();
+  for (std::size_t i = 0; i < joint_names.size(); i++)
+  {
+    joint_position_pids_.push_back(control_toolbox::Pid(pid_config_.k_p, pid_config_.k_i, pid_config_.k_d,
+                                                        pid_config_.windup_limit, -pid_config_.windup_limit,
+                                                        true));  // TODO Add ROS2 param
+  }
   return true;
 }
 
@@ -98,12 +111,35 @@ HandleImminentCollision::solve(robot_trajectory::RobotTrajectory local_trajector
     robot_command.addSuffixWayPoint(current_state, 0.0);
   }
 
-  // Transform RobotTrajectory into RobotTrajectoryMsg
+  // Transform into joint_trajectory
   moveit_msgs::msg::RobotTrajectory robot_command_msg;
   robot_command.getRobotTrajectoryMsg(robot_command_msg);
 
+  trajectory_msgs::msg::JointTrajectory joint_trajectory = robot_command_msg.joint_trajectory;
+
+  // Calculate PID command
+  std::vector<double> delta_theta;
+  for (std::size_t i = 0; i < joint_trajectory.points[0].positions.size(); i++)
+  {
+    double error = joint_trajectory.points[0].positions[i] - current_state_msg.joint_state.position[i];
+    delta_theta.push_back(joint_position_pids_[i].computeCommand(error, loop_rate_.period().count()));
+  }
+
+  // Apply PID command
+  trajectory_msgs::msg::JointTrajectoryPoint command_goal_point;
+  command_goal_point.time_from_start = rclcpp::Duration(loop_rate_.period().count());
+  for (std::size_t i = 0; i < joint_trajectory.points[0].positions.size(); i++)
+  {
+    // Increment joint
+    command_goal_point.positions.push_back(current_state_msg.joint_state.position[i] += delta_theta[i]);
+  }
+
+  // Add new command point to local solution joint trajectory
+  joint_trajectory.points.clear();
+  joint_trajectory.points.push_back(command_goal_point);
+
   // Return only joint trajectory
-  return robot_command_msg.joint_trajectory;
+  return joint_trajectory;
 }
 }  // namespace moveit_hybrid_planning
 

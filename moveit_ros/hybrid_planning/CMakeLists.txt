@@ -16,6 +16,7 @@ find_package(moveit_core REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(trajectory_msgs REQUIRED)
+find_package(control_toolbox REQUIRED)
 
 set(LIBRARIES
   moveit_hybrid_planning_manager
@@ -41,6 +42,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   std_srvs
   tf2_ros
   trajectory_msgs
+  control_toolbox
 )
 
 set(THIS_PACKAGE_INCLUDE_DIRS
