@@ -66,12 +66,11 @@ public:
 
   /** @brief Set updater params using struct that comes from parsing a yaml string. This must be called after
    * setMonitor() */
-  // TODO rework this function
-  // virtual bool setParams(XmlRpc::XmlRpcValue& params) = 0;
+  virtual bool setParams(const std::string& name_space) = 0;
 
   /** @brief Do any necessary setup (subscribe to ros topics, etc.). This call assumes setMonitor() and setParams() have
    * been previously called. */
-  virtual bool initialize() = 0;
+  virtual bool initialize(const rclcpp::Node::SharedPtr& node) = 0;
 
   virtual void start() = 0;
 

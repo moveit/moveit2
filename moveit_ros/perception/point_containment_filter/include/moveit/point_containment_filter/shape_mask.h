@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <geometric_shapes/bodies.h>
 #include <boost/function.hpp>
 #include <vector>
@@ -78,7 +78,7 @@ public:
      point
       is inside the robot. The point is outside if the mask element is OUTSIDE.
   */
-  void maskContainment(const sensor_msgs::PointCloud2& data_in, const Eigen::Vector3d& sensor_pos,
+  void maskContainment(const sensor_msgs::msg::PointCloud2& data_in, const Eigen::Vector3d& sensor_pos,
                        const double min_sensor_dist, const double max_sensor_dist, std::vector<int>& mask);
 
   /** \brief Get the containment mask (INSIDE or OUTSIDE) value for an individual point.

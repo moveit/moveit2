@@ -1,18 +1,41 @@
 set(MOVEIT_LIB_NAME moveit_pointcloud_octomap_updater)
 
-add_library(${MOVEIT_LIB_NAME}_core src/pointcloud_octomap_updater.cpp)
+add_library(${MOVEIT_LIB_NAME}_core SHARED src/pointcloud_octomap_updater.cpp)
 set_target_properties(${MOVEIT_LIB_NAME}_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME}_core moveit_point_containment_filter ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}_core
+  rclcpp
+  moveit_core
+  tf2_ros
+  message_filters
+  sensor_msgs
+  moveit_ros_occupancy_map_monitor
+  tf2_geometry_msgs
+  tf2
+  Boost
+)
+target_link_libraries(${MOVEIT_LIB_NAME}_core moveit_point_containment_filter)
 set_target_properties(${MOVEIT_LIB_NAME}_core PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set_target_properties(${MOVEIT_LIB_NAME}_core PROPERTIES LINK_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
-add_library(${MOVEIT_LIB_NAME} src/plugin_init.cpp)
+add_library(${MOVEIT_LIB_NAME} SHARED src/plugin_init.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(${MOVEIT_LIB_NAME}
+  rclcpp
+  moveit_core
+  tf2_ros
+  message_filters
+  sensor_msgs
+  moveit_ros_occupancy_map_monitor
+  tf2_geometry_msgs
+  tf2
+  Boost
+  pluginlib
+)
+target_link_libraries(${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core)
 
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+install(DIRECTORY include/ DESTINATION include)
 
 install(TARGETS ${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)

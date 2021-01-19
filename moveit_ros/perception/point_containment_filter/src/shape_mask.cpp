@@ -36,10 +36,10 @@
 
 #include <moveit/point_containment_filter/shape_mask.h>
 #include <geometric_shapes/body_operations.h>
-#include <ros/console.h>
-#include <sensor_msgs/point_cloud2_iterator.h>
+#include <sensor_msgs/point_cloud2_iterator.hpp>
+#include <rclcpp/rclcpp.hpp>
 
-static const std::string LOGNAME = "shape_mask";
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.shape_mask");
 
 point_containment_filter::ShapeMask::ShapeMask(const TransformCallback& transform_callback)
   : transform_callback_(transform_callback), next_handle_(1), min_handle_(1)
@@ -80,7 +80,7 @@ point_containment_filter::ShapeHandle point_containment_filter::ShapeMask::addSh
     ss.handle = next_handle_;
     std::pair<std::set<SeeShape, SortBodies>::iterator, bool> insert_op = bodies_.insert(ss);
     if (!insert_op.second)
-      ROS_ERROR_NAMED(LOGNAME, "Internal error in management of bodies in ShapeMask. This is a serious error.");
+      RCLCPP_ERROR(LOGGER, "Internal error in management of bodies in ShapeMask. This is a serious error.");
     used_handles_[next_handle_] = insert_op.first;
   }
   else
@@ -111,10 +111,10 @@ void point_containment_filter::ShapeMask::removeShape(ShapeHandle handle)
     min_handle_ = handle;
   }
   else
-    ROS_ERROR_NAMED(LOGNAME, "Unable to remove shape handle %u", handle);
+    RCLCPP_ERROR(LOGGER, "Unable to remove shape handle %u", handle);
 }
 
-void point_containment_filter::ShapeMask::maskContainment(const sensor_msgs::PointCloud2& data_in,
+void point_containment_filter::ShapeMask::maskContainment(const sensor_msgs::msg::PointCloud2& data_in,
                                                           const Eigen::Vector3d& /*sensor_origin*/,
                                                           const double min_sensor_dist, const double max_sensor_dist,
                                                           std::vector<int>& mask)
@@ -135,10 +135,10 @@ void point_containment_filter::ShapeMask::maskContainment(const sensor_msgs::Poi
       if (!transform_callback_(it->handle, tmp))
       {
         if (!it->body)
-          ROS_ERROR_STREAM_NAMED(LOGNAME, "Missing transform for shape with handle " << it->handle << " without a body");
+          RCLCPP_ERROR_STREAM(LOGGER, "Missing transform for shape with handle " << it->handle << " without a body");
         else
-          ROS_ERROR_STREAM_NAMED(LOGNAME, "Missing transform for shape " << it->body->getType() << " with handle "
-                                                                         << it->handle);
+          RCLCPP_ERROR_STREAM(LOGGER,
+                              "Missing transform for shape " << it->body->getType() << " with handle " << it->handle);
       }
       else
       {
