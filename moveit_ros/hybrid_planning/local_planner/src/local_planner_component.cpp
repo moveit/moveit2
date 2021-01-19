@@ -164,7 +164,7 @@ bool LocalPlannerComponent::initialize()
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>> goal_handle) {
         local_planning_goal_handle_ = std::move(goal_handle);
         // Start local planning loop when an action request is received
-        timer_ = this->create_wall_timer(std::chrono::milliseconds(config_.cycle_time),
+        timer_ = this->create_wall_timer(std::chrono::duration<double>(1 / config_.local_planning_frequency),
                                          std::bind(&LocalPlannerComponent::executePlanningLoopRun, this));
       });
 
