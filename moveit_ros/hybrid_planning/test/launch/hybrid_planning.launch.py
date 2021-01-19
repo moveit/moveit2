@@ -53,6 +53,7 @@ def generate_launch_description():
 
     global_planner_param = load_yaml('moveit_hybrid_planning', 'config/global_planner.yaml')
     local_planner_param = load_yaml('moveit_hybrid_planning', 'config/local_planner.yaml')
+    hybrid_planning_manager_param = load_yaml('moveit_hybrid_planning', 'config/hybrid_planning_manager.yaml')
 
     # Generate launch description with multiple components
     container = ComposableNodeContainer(
@@ -81,7 +82,8 @@ def generate_launch_description():
                 ComposableNode(
                     package='moveit_hybrid_planning',
                     plugin='moveit_hybrid_planning::HybridPlanningManager',
-                    name='hybrid_planning_manager')
+                    name='hybrid_planning_manager',
+                    parameters=[hybrid_planning_manager_param]),
             ],
             output='screen',
     )
