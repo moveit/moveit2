@@ -20,6 +20,7 @@ set_target_properties(collision_detector_bullet_plugin PROPERTIES VERSION "${${P
 target_link_libraries(collision_detector_bullet_plugin ${catkin_LIBRARIES} ${MOVEIT_LIB_NAME})
 
 install(TARGETS ${MOVEIT_LIB_NAME} collision_detector_bullet_plugin
+        EXPORT ${MOVEIT_LIB_NAME} collision_detector_bullet_plugin
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 

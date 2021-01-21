@@ -31,6 +31,7 @@ ament_target_dependencies(moveit_list_request_adapter_plugins
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME}
+  EXPORT  ${MOVEIT_LIB_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
