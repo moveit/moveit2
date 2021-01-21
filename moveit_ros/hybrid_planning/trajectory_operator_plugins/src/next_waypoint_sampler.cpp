@@ -58,6 +58,9 @@ bool NextWaypointSampler::addTrajectorySegment(const robot_trajectory::RobotTraj
 
   // Parametrize trajectory and calculate velocity and accelerations
   time_parametrization_.computeTimeStamps(*reference_trajectory_);
+
+  // Reset index
+  index_ = 0;
   return true;
 }
 
