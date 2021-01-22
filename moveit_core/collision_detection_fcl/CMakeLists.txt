@@ -34,6 +34,7 @@ target_link_libraries(collision_detector_fcl_plugin
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME} collision_detector_fcl_plugin
+  EXPORT ${MOVEIT_LIB_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin

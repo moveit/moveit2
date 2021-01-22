@@ -10,6 +10,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME} Boost moveit_msgs)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 install(TARGETS ${MOVEIT_LIB_NAME}
+        EXPORT ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin)
@@ -37,8 +38,8 @@ if(BUILD_TESTING)
   ament_export_libraries(${MOVEIT_TEST_LIB_NAME} ${MOVEIT_LIB_NAME})
   ament_export_include_directories(include)
 
-  install(TARGETS
-    ${MOVEIT_TEST_LIB_NAME}
+  install(TARGETS ${MOVEIT_TEST_LIB_NAME}
+    EXPORT ${MOVEIT_TEST_LIB_NAME}
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin)

@@ -13,6 +13,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   Boost
 )
 install(TARGETS ${MOVEIT_LIB_NAME}
+        EXPORT ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin)
@@ -38,6 +39,7 @@ if(trac_ik_kinematics_plugin_FOUND)
     set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES COMPILE_DEFINITIONS "CACHED_IK_KINEMATICS_TRAC_IK")
 endif()
 install(TARGETS ${MOVEIT_LIB_NAME}
+        EXPORT ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin)
@@ -55,6 +57,7 @@ if(ur_kinematics_FOUND)
             moveit_cached_ik_kinematics_base
             ${ur${UR}_pluginlib})
         install(TARGETS ${MOVEIT_LIB_NAME}
+                EXPORT ${MOVEIT_LIB_NAME}
                 LIBRARY DESTINATION lib
                 ARCHIVE DESTINATION lib
                 RUNTIME DESTINATION bin)

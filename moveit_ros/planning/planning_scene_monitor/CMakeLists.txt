@@ -32,6 +32,7 @@ ament_target_dependencies(demo_scene
 target_link_libraries(demo_scene ${MOVEIT_LIB_NAME})
 
 install(TARGETS ${MOVEIT_LIB_NAME}
+  EXPORT  ${MOVEIT_LIB_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin

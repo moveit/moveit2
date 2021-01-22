@@ -21,6 +21,7 @@ install(TARGETS ${MOVEIT_LIB_NAME}
   RUNTIME DESTINATION bin)
 
 #install(TARGETS ${MOVEIT_LIB_NAME}_python
+#  EXPORT ${MOVEIT_LIB_NAME}_python
 #  DESTINATION bin)
 
 install(DIRECTORY include/ DESTINATION include)
