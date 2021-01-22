@@ -41,7 +41,7 @@
 
 #include <rviz_default_plugins/robot/robot.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
-#include <rviz_default_plugins/displays/interactive_markers/interactive_marker_display.hpp>
+#include <moveit/motion_planning_rviz_plugin/interactive_marker_display.h>
 
 #include <rviz_common/properties/property.hpp>
 #include <rviz_common/properties/string_property.hpp>
