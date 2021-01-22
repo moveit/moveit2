@@ -38,14 +38,34 @@
 
 #pragma once
 
+#include <thread>
+#include <mutex>
+#include <vector>
+#include <rclcpp/rclcpp.hpp>
+
 namespace moveit_servo
 {
 // Size of queues used in ros pub/sub/service
 constexpr size_t ROS_QUEUE_SIZE = 2;
 
+using SetParameterCallbackType = std::function<rcl_interfaces::msg::SetParametersResult(const rclcpp::Parameter&)>;
+
+// Helper template for declaring and getting ros param
+template <typename T>
+void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
+                       const rclcpp::Logger& logger);
+
 // ROS params to be read. See the yaml file in /config for a description of each.
 struct ServoParameters
 {
+  using SharedConstPtr = std::shared_ptr<const ServoParameters>;
+
+  // Parameter namespace
+  const std::string ns;
+
+  // ROS Parameters
+  // Note that all of these are effectively const because the only way to create one of these
+  //  is as a shared_ptr to a constant struct.
   bool use_gazebo;
   std::string status_topic;
   // Properties of incoming commands
@@ -86,8 +106,51 @@ struct ServoParameters
   double scene_collision_proximity_threshold;
   double collision_distance_safety_factor;
   double min_allowable_collision_distance;
-};
 
-using ServoParametersPtr = std::shared_ptr<ServoParameters>;
+  /**
+   * Declares, reads, and validates parameters used for moveit_servo
+   * @param node Shared ptr to node that will the parameters will be declared in. Params should be defined in
+   * launch/config files
+   * @param logger Logger for outputting warnings about the parameters
+   * @param parameters The set up parameters that will be updated. After this call, they can be used to start a Servo
+   * instance
+   * @param ns Parameter namespace (as loaded in launch files). Defaults to "moveit_servo" but can be changed to allow
+   * multiple arms/instances
+   * @param dynamic_parameters Enable dynamic parameter handling. (default: true)
+   * @return std::shared_ptr<ServoParameters> if all parameters were loaded and verified successfully, nullptr otherwise
+   */
+  static SharedConstPtr makeServoParameters(const rclcpp::Node::SharedPtr& node, const rclcpp::Logger& logger,
+                                            std::string ns = "moveit_servo", bool dynamic_parameters = true);
+
+  /**
+   * Register a callback for a parameter set event.
+   * Note that these callbacks do not change any of the parameters struct.
+   * Use a local variable for tracking the state of the dynamic parameter after initial bringup.
+   * @param name Name of parameter (key used for callback in map)
+   * @param callback function to call when parameter is changed
+   */
+  void registerSetParameterCallback(const std::string name, SetParameterCallbackType callback) const
+  {
+    const std::lock_guard<std::mutex> guard(callback_mutex_);
+    set_parameter_callbacks_[name].push_back(callback);
+  }
+
+private:
+  // Private constructor because we only want this object to be created through the builder method makeServoParameters
+  ServoParameters(const rclcpp::Logger& logger, std::string ns) : ns(ns), logger_(logger)
+  {
+  }
+  const rclcpp::Logger& logger_;
+
+  // callback handler for the on set parameters callback
+  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr on_set_parameters_callback_handler_;
+
+  // mutable so the callback can be registered objects that have const versions of this struct
+  mutable std::mutex callback_mutex_;
+  mutable std::map<std::string, std::vector<SetParameterCallbackType>> set_parameter_callbacks_;
+
+  // For registering with add_on_set_parameters_callback after initializing data
+  rcl_interfaces::msg::SetParametersResult setParametersCallback(std::vector<rclcpp::Parameter> parameters);
+};
 
 }  // namespace moveit_servo

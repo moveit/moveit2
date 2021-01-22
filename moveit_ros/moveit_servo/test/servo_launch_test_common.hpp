@@ -58,9 +58,8 @@
 #include <gtest/gtest.h>
 
 // Servo
-#include <moveit_servo/servo_parameters.cpp>
+#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
-#include "test_parameter_struct.hpp"
 
 #pragma once
 
@@ -75,6 +74,7 @@ class ServoFixture : public ::testing::Test
 public:
   void SetUp() override
   {
+    ASSERT_TRUE(servo_parameters_.get() != nullptr);
     executor_->add_node(node_);
     executor_thread_ = std::thread([this]() { this->executor_->spin(); });
   }
@@ -82,19 +82,31 @@ public:
   ServoFixture()
     : node_(std::make_shared<rclcpp::Node>("servo_testing"))
     , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
-    , parameters_(getTestParameters())
-    , PUBLISH_HZ(2.0 / parameters_->incoming_command_timeout)
-    , PUBLISH_PERIOD(1.0 / PUBLISH_HZ)
-    , TIMEOUT_ITERATIONS(10 * PUBLISH_HZ)
-    , publish_loop_rate_(PUBLISH_HZ)
-    , servo_server_node_name_("/servo_server")
   {
+    // read parameters and store them in shared pointer to constant
+    servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_, LOGGER, "moveit_servo", false);
+    if (servo_parameters_ == nullptr)
+    {
+      RCLCPP_FATAL(LOGGER, "Failed to load the servo parameters");
+      return;
+    }
+
+    // store test constants as shared pointer to constant struct
+    {
+      auto test_parameters = std::make_shared<struct TestParameters>();
+      test_parameters->publish_hz = 2.0 / servo_parameters_->incoming_command_timeout;
+      test_parameters->publish_period = 1.0 / test_parameters->publish_hz;
+      test_parameters->timeout_iterations = 10 * test_parameters->publish_hz;
+      test_parameters->servo_node_name = "/servo_server";
+      test_parameters_ = test_parameters;
+    }
+
     // Init ROS interfaces
     // Publishers
     pub_twist_cmd_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
-        resolveServoTopicName(parameters_->cartesian_command_in_topic), 10);
+        resolveServoTopicName(servo_parameters_->cartesian_command_in_topic), 10);
     pub_joint_cmd_ = node_->create_publisher<control_msgs::msg::JointJog>(
-        resolveServoTopicName(parameters_->joint_command_in_topic), 10);
+        resolveServoTopicName(servo_parameters_->joint_command_in_topic), 10);
   }
 
   void TearDown() override
@@ -110,10 +122,10 @@ public:
       executor_thread_.join();
   }
 
-  std::string resolveServoTopicName(std::string topic_name) const
+  std::string resolveServoTopicName(std::string topic_name)
   {
     if (topic_name.at(0) == '~')
-      return topic_name.replace(0, 1, servo_server_node_name_);
+      return topic_name.replace(0, 1, test_parameters_->servo_node_name);
     else
       return topic_name;
   }
@@ -149,7 +161,7 @@ public:
 
     // Status sub (we need this to check that we've started / stopped)
     sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
-        resolveServoTopicName(parameters_->status_topic), 10,
+        resolveServoTopicName(servo_parameters_->status_topic), 10,
         std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
     return true;
   }
@@ -233,14 +245,14 @@ public:
     if (command_type == "trajectory_msgs/JointTrajectory")
     {
       sub_trajectory_cmd_output_ = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-          resolveServoTopicName(parameters_->command_out_topic), 10,
+          resolveServoTopicName(servo_parameters_->command_out_topic), 10,
           std::bind(&ServoFixture::trajectoryCommandCB, this, std::placeholders::_1));
       return true;
     }
     else if (command_type == "std_msgs/Float64MultiArray")
     {
       sub_array_cmd_output_ = node_->create_subscription<std_msgs::msg::Float64MultiArray>(
-          resolveServoTopicName(parameters_->command_out_topic), 10,
+          resolveServoTopicName(servo_parameters_->command_out_topic), 10,
           std::bind(&ServoFixture::arrayCommandCB, this, std::placeholders::_1));
       return true;
     }
@@ -254,7 +266,7 @@ public:
   bool setupJointStateSub()
   {
     sub_joint_state_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-        resolveServoTopicName(parameters_->joint_topic), 10,
+        resolveServoTopicName(servo_parameters_->joint_topic), 10,
         std::bind(&ServoFixture::jointStateCB, this, std::placeholders::_1));
     return true;
   }
@@ -399,17 +411,18 @@ public:
     RCLCPP_INFO_STREAM(LOGGER, "Wait for start servo: " << (node_->now() - time_start).seconds());
 
     // Test that status messages start
+    rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
     time_start = node_->now();
     auto num_statuses_start = getNumStatus();
     size_t iterations = 0;
-    while (getNumStatus() == num_statuses_start && iterations++ < TIMEOUT_ITERATIONS)
+    while (getNumStatus() == num_statuses_start && iterations++ < test_parameters_->timeout_iterations)
     {
-      publish_loop_rate_.sleep();
+      publish_loop_rate.sleep();
     }
 
     RCLCPP_INFO_STREAM(LOGGER, "Wait for status num increasing: " << (node_->now() - time_start).seconds());
 
-    if (iterations >= TIMEOUT_ITERATIONS)
+    if (iterations >= test_parameters_->timeout_iterations)
     {
       RCLCPP_ERROR(LOGGER, "Timeout waiting for status num increasing");
       return false;
@@ -430,6 +443,7 @@ public:
     RCLCPP_INFO_STREAM(LOGGER, "Wait for stop servo service: " << (node_->now() - time_start).seconds());
 
     // Test that status messages stop
+    rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
     time_start = node_->now();
     size_t num_statuses_start = 0;
     size_t iterations = 0;
@@ -438,11 +452,11 @@ public:
       num_statuses_start = getNumStatus();
       // Wait 4x the loop rate
       for (size_t i = 0; i < 4; ++i)
-        publish_loop_rate_.sleep();
-    } while (getNumStatus() != num_statuses_start && ++iterations < TIMEOUT_ITERATIONS);
+        publish_loop_rate.sleep();
+    } while (getNumStatus() != num_statuses_start && ++iterations < test_parameters_->timeout_iterations);
     RCLCPP_INFO_STREAM(LOGGER, "Wait for status to stop: " << (node_->now() - time_start).seconds());
 
-    if (iterations >= TIMEOUT_ITERATIONS)
+    if (iterations >= test_parameters_->timeout_iterations)
     {
       RCLCPP_ERROR(LOGGER, "Timeout waiting for status num increasing");
       return false;
@@ -454,10 +468,20 @@ public:
 protected:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Executor::SharedPtr executor_;
-  moveit_servo::ServoParametersPtr parameters_;
   std::thread executor_thread_;
+  std::shared_ptr<const moveit_servo::ServoParameters> servo_parameters_;
+
+  struct TestParameters
+  {
+    double publish_hz;
+    double publish_period;
+    double timeout_iterations;
+    std::string servo_node_name;
+  };
+  std::shared_ptr<const struct TestParameters> test_parameters_;
 
   // ROS interfaces
+
   // Service Clients
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_start_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_stop_;
@@ -494,12 +518,7 @@ protected:
   bool status_seen_;
   StatusCode status_tracking_code_ = StatusCode::NO_WARNING;
 
-  const double PUBLISH_HZ;
-  const double PUBLISH_PERIOD;
-  const double TIMEOUT_ITERATIONS;
-  rclcpp::Rate publish_loop_rate_;
-  const std::string servo_server_node_name_;
-
   mutable std::mutex latest_state_mutex_;
 };  // class ServoFixture
+
 }  // namespace moveit_servo

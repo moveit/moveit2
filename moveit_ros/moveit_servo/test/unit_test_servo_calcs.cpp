@@ -47,7 +47,6 @@
 #include <string>
 #include <boost/filesystem/path.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
-#include "test_parameter_struct.hpp"
 #include "unit_test_servo_calcs.hpp"
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.unit_test_servo_calcs.cpp");
@@ -68,7 +67,7 @@ void loadModelFile(std::string package_name, std::string filename, std::string& 
 }
 
 FriendServoCalcs::FriendServoCalcs(const rclcpp::Node::SharedPtr& node,
-                                   const moveit_servo::ServoParametersPtr& parameters,
+                                   const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
                                    const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : ServoCalcs(node, parameters, planning_scene_monitor)
 {
@@ -212,10 +211,10 @@ TEST_F(ServoCalcsTestFixture, TestCheckValidCommand)
   EXPECT_FALSE(servo_calcs_->checkValidCommand(twist_msg));
 
   // Now set the scaling to unitless and give it a number with abs() > 1, expecting a fail
-  servo_calcs_->parameters_->command_in_type = "speed_units";
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->command_in_type = "speed_units";
   twist_msg.twist.linear.y = -10.0;
   EXPECT_TRUE(servo_calcs_->checkValidCommand(twist_msg));
-  servo_calcs_->parameters_->command_in_type = "unitless";
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->command_in_type = "unitless";
   EXPECT_FALSE(servo_calcs_->checkValidCommand(twist_msg));
 }
 
@@ -284,8 +283,8 @@ TEST_F(ServoCalcsTestFixture, TestSuddenHalt)
   servo_calcs_->original_joint_state_.position.push_back(3.0);
 
   // Let's make sure to test publishing position and velocity
-  servo_calcs_->parameters_->publish_joint_positions = true;
-  servo_calcs_->parameters_->publish_joint_velocities = true;
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->publish_joint_positions = true;
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->publish_joint_velocities = true;
 
   // Let's start with an empty trajectory
   trajectory_msgs::msg::JointTrajectory msg;
@@ -307,7 +306,7 @@ TEST_F(ServoCalcsTestFixture, TestSuddenHalt)
 TEST_F(ServoCalcsTestFixture, TestEnforcePosLimits)
 {
   // Set the position to the upper limits
-  std::vector<double> position{ 0, 0, 2.8973, 1.7628, 2.8973, 0.0175, 2.8973, 3.7525, 2.8973 };
+  std::vector<double> position{ 0, 0, 2.8973, 1.9628, 2.8973, 0.0175, 2.8973, 3.7525, 2.8973 };
   std::vector<double> velocity;
   velocity.assign(9, 1.0);
 
@@ -428,12 +427,12 @@ TEST_F(ServoCalcsTestFixture, TestScaleCartesianCommand)
   msg.twist.angular.z = 6.0;
 
   // Lets test an invalid scaling type first
-  servo_calcs_->parameters_->command_in_type = "invalid_string";
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->command_in_type = "invalid_string";
   Eigen::VectorXd result = servo_calcs_->scaleCartesianCommand(msg);
   EXPECT_TRUE(result.isZero());
 
   // Now let's try with unitless
-  servo_calcs_->parameters_->command_in_type = "unitless";
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->command_in_type = "unitless";
   result = servo_calcs_->scaleCartesianCommand(msg);
   EXPECT_NEAR(result[0],
               msg.twist.linear.x * servo_calcs_->parameters_->linear_scale * servo_calcs_->parameters_->publish_period,
@@ -444,7 +443,7 @@ TEST_F(ServoCalcsTestFixture, TestScaleCartesianCommand)
               0.001);
 
   // And finally with speed_units
-  servo_calcs_->parameters_->command_in_type = "speed_units";
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->command_in_type = "speed_units";
   result = servo_calcs_->scaleCartesianCommand(msg);
   EXPECT_NEAR(result[0], msg.twist.linear.x * servo_calcs_->parameters_->publish_period, 0.001);
   EXPECT_NEAR(result[5], msg.twist.angular.z * servo_calcs_->parameters_->publish_period, 0.001);
@@ -459,17 +458,17 @@ TEST_F(ServoCalcsTestFixture, TestScaleJointCommand)
   msg.velocities = vel;
 
   // Test with unitless
-  servo_calcs_->parameters_->command_in_type = "unitless";
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->command_in_type = "unitless";
   Eigen::VectorXd result = servo_calcs_->scaleJointCommand(msg);
   EXPECT_EQ(result[0], servo_calcs_->parameters_->joint_scale * servo_calcs_->parameters_->publish_period);
 
   // And with speed_units
-  servo_calcs_->parameters_->command_in_type = "speed_units";
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->command_in_type = "speed_units";
   result = servo_calcs_->scaleJointCommand(msg);
   EXPECT_EQ(result[0], servo_calcs_->parameters_->publish_period);
 
   // And for completeness, with invalid scaling type
-  servo_calcs_->parameters_->command_in_type = "invalid_string";
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->command_in_type = "invalid_string";
   result = servo_calcs_->scaleJointCommand(msg);
   EXPECT_TRUE(result.isZero());
 }
@@ -484,9 +483,9 @@ TEST_F(ServoCalcsTestFixture, TestComposeOutputMsg)
   joint_state.velocity.push_back(2.0);
 
   // Perform the compisition with all 3 modes published
-  servo_calcs_->parameters_->publish_joint_positions = true;
-  servo_calcs_->parameters_->publish_joint_velocities = true;
-  servo_calcs_->parameters_->publish_joint_accelerations = true;
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->publish_joint_positions = true;
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->publish_joint_velocities = true;
+  const_cast<moveit_servo::ServoParameters*>(servo_calcs_->parameters_.get())->publish_joint_accelerations = true;
   servo_calcs_->composeJointTrajMessage(joint_state, traj);
 
   // Check the header info
@@ -526,8 +525,16 @@ int main(int argc, char** argv)
   // Initialize CurrentStateMonitor
   TEST_PSM->startStateMonitor();
 
-  // Get moveit parameters
-  TEST_PARAMS = getTestParameters();
+  // read parameters and store them in shared pointer to constant
+  TEST_PARAMS = moveit_servo::ServoParameters::makeServoParameters(TEST_NODE, LOGGER);
+  if (TEST_PARAMS == nullptr)
+  {
+    RCLCPP_FATAL(LOGGER, "Failed to load the servo parameters");
+    rclcpp::shutdown();
+    return 1;
+  }
+
+  RCLCPP_INFO(LOGGER, "Init finished, beginning test");
 
   // Actually run the tests
   int ret = RUN_ALL_TESTS();

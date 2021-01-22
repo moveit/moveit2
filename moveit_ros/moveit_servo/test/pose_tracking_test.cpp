@@ -49,7 +49,7 @@
 // Servo
 #include <moveit_servo/pose_tracking.h>
 #include <moveit_servo/make_shared_from_pool.h>
-#include <moveit_servo/servo_parameters.cpp>
+#include <moveit_servo/servo_parameters.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.pose_tracking_test");
 
@@ -66,10 +66,21 @@ public:
     executor_->add_node(node_);
     executor_thread_ = std::thread([this]() { this->executor_->spin(); });
 
-    if (!moveit_servo::readParameters(servo_parameters_, node_, LOGGER))
+    servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_, LOGGER);
+    ;
+    if (servo_parameters_ == nullptr)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Could not get server parameters!");
+      RCLCPP_FATAL(LOGGER, "Could not get servo parameters!");
       exit(EXIT_FAILURE);
+    }
+
+    // store test constants as shared pointer to constant struct
+    {
+      auto test_parameters = std::make_shared<struct TestParameters>();
+      test_parameters->publish_hz = 2.0 / servo_parameters_->incoming_command_timeout;
+      test_parameters->publish_period = 1.0 / test_parameters->publish_hz;
+      test_parameters->timeout_iterations = 10 * test_parameters->publish_hz;
+      test_parameters_ = test_parameters;
     }
 
     // Load the planning scene monitor
@@ -104,13 +115,8 @@ public:
   PoseTrackingFixture()
     : node_(std::make_shared<rclcpp::Node>("pose_tracking_testing"))
     , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
-    , servo_parameters_(std::make_shared<moveit_servo::ServoParameters>())
     , planning_scene_monitor_(
           std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, "robot_description"))
-    , PUBLISH_HZ(2.0 / servo_parameters_->incoming_command_timeout)
-    , PUBLISH_PERIOD(1.0 / PUBLISH_HZ)
-    , TIMEOUT_ITERATIONS(10 * PUBLISH_HZ)
-    , publish_loop_rate_(PUBLISH_HZ)
   {
     // Init ROS interfaces
     // Publishers
@@ -129,18 +135,21 @@ protected:
   rclcpp::Executor::SharedPtr executor_;
   std::thread executor_thread_;
 
-  moveit_servo::ServoParametersPtr servo_parameters_;
+  moveit_servo::ServoParameters::SharedConstPtr servo_parameters_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+
+  struct TestParameters
+  {
+    double publish_hz;
+    double publish_period;
+    double timeout_iterations;
+  };
+  std::shared_ptr<const struct TestParameters> test_parameters_;
 
   moveit_servo::PoseTrackingPtr tracker_;
 
   Eigen::Vector3d translation_tolerance_;
   rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr target_pose_pub_;
-
-  const double PUBLISH_HZ;
-  const double PUBLISH_PERIOD;
-  const double TIMEOUT_ITERATIONS;
-  rclcpp::Rate publish_loop_rate_;
 };  // class PoseTrackingFixture
 
 // Check for commands going out to ros_control

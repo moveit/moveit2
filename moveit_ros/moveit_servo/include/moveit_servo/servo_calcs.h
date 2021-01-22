@@ -69,7 +69,7 @@ namespace moveit_servo
 class ServoCalcs
 {
 public:
-  ServoCalcs(rclcpp::Node::SharedPtr node, const ServoParametersPtr& parameters,
+  ServoCalcs(rclcpp::Node::SharedPtr node, const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   ~ServoCalcs();
@@ -99,11 +99,6 @@ public:
 
   /** \brief Pause or unpause processing servo commands while keeping the timers alive */
   void setPaused(bool paused);
-
-  /** \brief Change the controlled link. Often, this is the end effector
-   * This must be a link on the robot since MoveIt tracks the transform (not tf)
-   */
-  void changeRobotLinkCommandFrame(const std::string& new_command_frame);
 
 protected:
   /** \brief Run the main calculation loop */
@@ -256,7 +251,7 @@ protected:
   std::shared_ptr<rclcpp::Node> node_;
 
   // Parameters from yaml
-  ServoParametersPtr parameters_;
+  const std::shared_ptr<const moveit_servo::ServoParameters> parameters_;
 
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
@@ -334,8 +329,8 @@ protected:
   // The dimesions to control. In the command frame. [x, y, z, roll, pitch, yaw]
   std::array<bool, 6> control_dimensions_ = { { true, true, true, true, true, true } };
 
-  // input_mutex_ is used to protect the state below it
-  mutable std::mutex input_mutex_;
+  // main_loop_mutex_ is used to protect the input state and dynamic parameters
+  mutable std::mutex main_loop_mutex_;
   Eigen::Isometry3d tf_moveit_to_robot_cmd_frame_;
   Eigen::Isometry3d tf_moveit_to_ee_frame_;
   geometry_msgs::msg::TwistStamped::ConstSharedPtr latest_twist_stamped_;
@@ -348,5 +343,9 @@ protected:
   // input condition variable used for low latency mode
   std::condition_variable input_cv_;
   bool new_input_cmd_ = false;
+
+  // dynamic parameters
+  std::string robot_link_command_frame_;
+  rcl_interfaces::msg::SetParametersResult robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter);
 };
 }  // namespace moveit_servo
