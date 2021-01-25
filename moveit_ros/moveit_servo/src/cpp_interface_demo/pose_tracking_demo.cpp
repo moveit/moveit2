@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
-  std::thread([&executor]() { executor.spin(); }).detach();
+  std::thread executor_thread([&executor]() { executor.spin(); });
 
   moveit_servo::ServoParametersPtr servo_parameters;
   servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
@@ -179,6 +179,10 @@ int main(int argc, char** argv)
   // Make sure the tracker is stopped and clean up
   tracker.stopMotion();
   move_to_pose_thread.join();
+
+  // Kill executor thread before shutdown
+  executor.cancel();
+  executor_thread.join();
 
   rclcpp::shutdown();
   return EXIT_SUCCESS;
