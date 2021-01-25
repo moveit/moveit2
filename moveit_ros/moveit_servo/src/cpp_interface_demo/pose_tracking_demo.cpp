@@ -116,7 +116,11 @@ int main(int argc, char** argv)
   planning_scene_monitor->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
 
   // Wait for Planning Scene Monitor to setup
-  rclcpp::sleep_for(std::chrono::seconds(5));
+  if (!planning_scene_monitor->waitForCurrentRobotState(node->now(), 5.0 /* seconds */))
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Error waiting for current robot state in PlanningSceneMonitor.");
+    exit(EXIT_FAILURE);
+  }
 
   // Create the pose tracker
   moveit_servo::PoseTracking tracker(node, servo_parameters, planning_scene_monitor);
@@ -172,9 +176,6 @@ int main(int argc, char** argv)
 
     loop_rate.sleep();
   }
-
-  rclcpp::sleep_for(std::chrono::seconds(5));
-  RCLCPP_DEBUG_STREAM(LOGGER, "Timer expired and unfinished motion will be terminated");
 
   // Make sure the tracker is stopped and clean up
   tracker.stopMotion();
