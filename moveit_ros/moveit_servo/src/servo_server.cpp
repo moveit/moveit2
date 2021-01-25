@@ -38,7 +38,7 @@
  */
 
 #include <moveit_servo/servo_server.h>
-#include <moveit_servo/servo_parameters.cpp>
+#include <moveit_servo/servo_parameters.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_server");
 

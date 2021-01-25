@@ -58,7 +58,7 @@
 #include <gtest/gtest.h>
 
 // Servo
-#include <moveit_servo/servo_parameters.cpp>
+#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
 #include "test_parameter_struct.hpp"
 

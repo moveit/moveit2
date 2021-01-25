@@ -40,7 +40,7 @@
  */
 
 #include <rclcpp/rclcpp.hpp>
-#include <moveit_servo/servo_parameters.cpp>
+#include <moveit_servo/servo_parameters.h>
 #include <std_srvs/srv/trigger.hpp>
 #include "test_parameter_struct.hpp"
 

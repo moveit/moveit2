@@ -41,7 +41,7 @@
 
 #include <gtest/gtest.h>
 #include <rclcpp/rclcpp.hpp>
-#include <moveit_servo/servo_parameters.cpp>
+#include <moveit_servo/servo_parameters.h>
 #include <std_srvs/srv/trigger.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.test_servo_parameters.cpp");
