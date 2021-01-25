@@ -47,47 +47,8 @@
 
 namespace moveit_servo
 {
-template <typename T>
-void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
-                       const rclcpp::Logger& logger)
-{
-  try
-  {
-    if (node->has_parameter(param_name))
-      node->get_parameter<T>(param_name, output_value);
-    else
-      output_value = node->declare_parameter<T>(param_name, T{});
-  }
-  catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
-  {
-    // Catch a <double> parameter written in the yaml as "1" being considered an <int>
-    if (std::is_same<T, double>::value)
-    {
-      node->undeclare_parameter(param_name);
-      output_value = node->declare_parameter<int>(param_name, 0);
-    }
-    else
-    {
-      RCLCPP_ERROR_STREAM(logger, "Error getting parameter \'" << param_name << "\', check parameter type in YAML file");
-      throw e;
-    }
-  }
-  RCLCPP_INFO_STREAM(logger, "Found parameter - " << param_name << ": " << output_value);
-}
-
-/**
- * Declares, reads, and validates parameters used for moveit_servo
- * @param node Shared ptr to node that will the parameters will be declared in. Params should be defined in
- * launch/config files
- * @param logger Logger for outputting warnings about the parameters
- * @param parameters The set up parameters that will be updated. After this call, they can be used to start a Servo
- * instance
- * @param ns Parameter namespace (as loaded in launch files). Defaults to "moveit_servo" but can be changed to allow
- * multiple arms/instances
- * @return true if all parameters were loaded and verified successfully, false otherwise
- */
 bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPtr& node, const rclcpp::Logger& logger,
-                    std::string ns = "moveit_servo")
+                    std::string ns)
 {
   // Get the parameters (organized same order as YAML file)
   declareOrGetParam<bool>(parameters->use_gazebo, ns + ".use_gazebo", node, logger);

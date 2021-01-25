@@ -54,7 +54,7 @@ add_library(${SERVO_LIB_NAME} SHARED
   src/servo_calcs.cpp
   src/collision_check.cpp
   src/low_pass_filter.cpp
-  include/moveit_servo/servo_parameters.cpp
+  src/servo_parameters.cpp
 )
 set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${SERVO_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
@@ -140,7 +140,8 @@ if(BUILD_TESTING)
   # Servo parameters launch test
   add_executable(test_servo_parameters_node
     test/test_servo_parameters_node.cpp
-    test/test_parameter_struct.hpp)
+    test/test_parameter_struct.hpp
+    src/servo_parameters.cpp)
   ament_target_dependencies(test_servo_parameters_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
   ament_add_gtest_executable(test_servo_parameters test/test_servo_parameters.cpp)
