@@ -50,7 +50,7 @@
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/local_planner/constraint_solver_interface.h>
+#include <moveit/local_planner/local_constraint_solver_interface.h>
 #include <moveit/local_planner/trajectory_operator_interface.h>
 
 #include <tf2_ros/buffer.h>
@@ -104,7 +104,8 @@ public:
       std::string undefined = "<undefined>";
       declareOrGetParam<std::string>("trajectory_operator_plugin_name", trajectory_operator_plugin_name, undefined,
                                      node);
-      declareOrGetParam<std::string>("solver_plugin_name", solver_plugin_name, undefined, node);
+      declareOrGetParam<std::string>("local_constraint_solver_plugin_name", local_constraint_solver_plugin_name,
+                                     undefined, node);
       declareOrGetParam<double>("local_planning_frequency", local_planning_frequency, 1.0, node);
       declareOrGetParam<std::string>("global_solution_topic", global_solution_topic, undefined, node);
       declareOrGetParam<std::string>("local_solution_topic", local_solution_topic, undefined, node);
@@ -114,7 +115,7 @@ public:
     std::string robot_description_semantic;
     std::string publish_planning_scene_topic;
     std::string trajectory_operator_plugin_name;
-    std::string solver_plugin_name;
+    std::string local_constraint_solver_plugin_name;
     std::string global_solution_topic;
     std::string local_solution_topic;
     double local_planning_frequency;
@@ -166,10 +167,11 @@ private:
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr local_solution_publisher_;
 
   // Local constraint solver plugin loader
-  std::unique_ptr<pluginlib::ClassLoader<moveit_hybrid_planning::ConstraintSolverInterface>> solver_plugin_loader_;
+  std::unique_ptr<pluginlib::ClassLoader<moveit_hybrid_planning::LocalConstraintSolverInterface>>
+      local_constraint_solver_plugin_loader_;
 
   // Local constrain solver instance to compute a local solution each loop run
-  std::shared_ptr<moveit_hybrid_planning::ConstraintSolverInterface> constraint_solver_instance_;
+  std::shared_ptr<moveit_hybrid_planning::LocalConstraintSolverInterface> local_constraint_solver_instance_;
 
   // Trajectory operator plugin
   std::unique_ptr<pluginlib::ClassLoader<moveit_hybrid_planning::TrajectoryOperatorInterface>>

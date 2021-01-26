@@ -35,7 +35,7 @@
 /* Author: Sebastian Jahr
  */
 
-#include <moveit/constraint_solver_plugins/decelerate_before_collision.h>
+#include <moveit/local_constraint_solver_plugins/decelerate_before_collision.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
 
@@ -142,4 +142,4 @@ DecelerateBeforeCollision::solve(robot_trajectory::RobotTrajectory local_traject
 #include <pluginlib/class_list_macros.hpp>
 
 PLUGINLIB_EXPORT_CLASS(moveit_hybrid_planning::DecelerateBeforeCollision,
-                       moveit_hybrid_planning::ConstraintSolverInterface);
+                       moveit_hybrid_planning::LocalConstraintSolverInterface);

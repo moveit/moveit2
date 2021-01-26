@@ -1,5 +1,5 @@
 <library path="decelerate_before_collision_plugin">
-  <class name="moveit_hybrid_planning/DecelerateBeforeCollision" type="moveit_hybrid_planning::DecelerateBeforeCollision" base_class_type="moveit_hybrid_planning::ConstraintSolverInterface">
+  <class name="moveit_hybrid_planning/DecelerateBeforeCollision" type="moveit_hybrid_planning::DecelerateBeforeCollision" base_class_type="moveit_hybrid_planning::LocalConstraintSolverInterface">
     <description>
         Simple local solver plugin that stops in front of a collision object.
     </description>
