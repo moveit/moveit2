@@ -69,20 +69,19 @@ DecelerateBeforeCollision::solve(robot_trajectory::RobotTrajectory local_traject
                                  std::vector<moveit_msgs::msg::Constraints> local_constraints,
                                  std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback)
 {
-  // Read current planning scene
+  // Get current planning scene
   planning_scene_monitor_->updateFrameTransforms();
-  planning_scene_monitor_->lockSceneRead();  // LOCK planning scene
-  planning_scene::PlanningScenePtr planning_scene = planning_scene_monitor_->getPlanningScene();
-  planning_scene_monitor_->unlockSceneRead();  // UNLOCK planning scene
+
+  planning_scene_monitor::LockedPlanningSceneRO locked_planning_scene(planning_scene_monitor_);
 
   robot_trajectory::RobotTrajectory robot_command(local_trajectory.getRobotModel(), local_trajectory.getGroupName());
   std::vector<std::size_t>* invalid_index;
 
   // Get Current State
-  moveit::core::RobotState current_state = planning_scene->getCurrentState();
+  moveit::core::RobotState current_state = locked_planning_scene->getCurrentState();
 
   // Check if path is valid
-  if (planning_scene->isPathValid(local_trajectory, local_trajectory.getGroupName(), false, invalid_index))
+  if (locked_planning_scene->isPathValid(local_trajectory, local_trajectory.getGroupName(), false, invalid_index))
   {
     if (path_invalidation_event_send_)
     {
