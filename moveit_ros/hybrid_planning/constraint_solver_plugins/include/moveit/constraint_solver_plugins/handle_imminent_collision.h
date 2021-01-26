@@ -41,7 +41,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/local_planner/constraint_solver_interface.h>
 #include <control_toolbox/pid.hpp>
-//#include <moveit_servo/servo.h>
 
 namespace moveit_hybrid_planning
 {
@@ -71,7 +70,7 @@ public:
 private:
   rclcpp::Node::SharedPtr node_handle_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-  bool feedback_send_;
+  bool path_invalidation_event_send_;  // Send path invalidation event only once
   std::vector<control_toolbox::Pid> joint_position_pids_;
   PIDConfig pid_config_;
   rclcpp::Rate loop_rate_;
