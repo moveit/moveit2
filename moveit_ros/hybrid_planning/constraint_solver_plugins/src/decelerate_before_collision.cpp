@@ -35,7 +35,7 @@
 /* Author: Sebastian Jahr
  */
 
-#include <moveit/constraint_solver_plugins/handle_imminent_collision.h>
+#include <moveit/constraint_solver_plugins/decelerate_before_collision.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
 
@@ -44,10 +44,10 @@ namespace moveit_hybrid_planning
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 const double CYLCE_TIME = 0.01;  // TODO(sjahr) Add param and proper time handling
 
-HandleImminentCollision::HandleImminentCollision() : loop_rate_(1 / CYLCE_TIME){};
+DecelerateBeforeCollision::DecelerateBeforeCollision() : loop_rate_(1 / CYLCE_TIME){};
 
-bool HandleImminentCollision::initialize(const rclcpp::Node::SharedPtr& node,
-                                         planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
+bool DecelerateBeforeCollision::initialize(const rclcpp::Node::SharedPtr& node,
+                                           planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
 {
   planning_scene_monitor_ = planning_scene_monitor;
   node_handle_ = node;
@@ -65,9 +65,9 @@ bool HandleImminentCollision::initialize(const rclcpp::Node::SharedPtr& node,
 }
 
 trajectory_msgs::msg::JointTrajectory
-HandleImminentCollision::solve(robot_trajectory::RobotTrajectory local_trajectory,
-                               std::vector<moveit_msgs::msg::Constraints> local_constraints,
-                               std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback)
+DecelerateBeforeCollision::solve(robot_trajectory::RobotTrajectory local_trajectory,
+                                 std::vector<moveit_msgs::msg::Constraints> local_constraints,
+                                 std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback)
 {
   // Read current planning scene
   planning_scene_monitor_->updateFrameTransforms();
@@ -142,5 +142,5 @@ HandleImminentCollision::solve(robot_trajectory::RobotTrajectory local_trajector
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(moveit_hybrid_planning::HandleImminentCollision,
+PLUGINLIB_EXPORT_CLASS(moveit_hybrid_planning::DecelerateBeforeCollision,
                        moveit_hybrid_planning::ConstraintSolverInterface);
