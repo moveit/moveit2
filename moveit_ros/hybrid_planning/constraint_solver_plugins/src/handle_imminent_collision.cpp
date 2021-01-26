@@ -42,8 +42,7 @@
 namespace moveit_hybrid_planning
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
-const std::string PLANNING_FRAME = "panda_link0";
-const double CYLCE_TIME = 0.01;  // TODO Add param and proper time handling
+const double CYLCE_TIME = 0.01;  // TODO(sjahr) Add param and proper time handling
 
 HandleImminentCollision::HandleImminentCollision() : loop_rate_(1 / CYLCE_TIME){};
 
@@ -60,7 +59,7 @@ bool HandleImminentCollision::initialize(const rclcpp::Node::SharedPtr& node,
   {
     joint_position_pids_.push_back(control_toolbox::Pid(pid_config_.k_p, pid_config_.k_i, pid_config_.k_d,
                                                         pid_config_.windup_limit, -pid_config_.windup_limit,
-                                                        true));  // TODO Add ROS2 param
+                                                        true));  // TODO(sjahr) Add ROS2 param
   }
   return true;
 }

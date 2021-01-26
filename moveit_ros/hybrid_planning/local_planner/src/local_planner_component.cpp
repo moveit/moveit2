@@ -114,7 +114,7 @@ bool LocalPlannerComponent::initialize()
     trajectory_operator_instance_ =
         trajectory_operator_loader_->createUniqueInstance(config_.trajectory_operator_plugin_name);
     if (!trajectory_operator_instance_->initialize(node_ptr, planning_scene_monitor_->getRobotModel(),
-                                                   "panda_arm"))  // TODO add default group param
+                                                   "panda_arm"))  // TODO(sjahr) add default group param
       throw std::runtime_error("Unable to initialize trajectory operator plugin");
     RCLCPP_INFO(LOGGER, "Using trajectory operator interface '%s'", config_.trajectory_operator_plugin_name.c_str());
   }
@@ -214,7 +214,7 @@ void LocalPlannerComponent::executePlanningLoopRun()
       timer_->cancel();
       RCLCPP_ERROR(LOGGER, "Local planner somehow failed :(");
 
-      // TODO add proper reset function
+      // TODO(sjahr) add proper reset function
       state_ = moveit_hybrid_planning::LocalPlannerState::READY;
       break;
     }
