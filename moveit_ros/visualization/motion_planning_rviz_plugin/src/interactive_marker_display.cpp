@@ -101,7 +101,7 @@ void InteractiveMarkerDisplay::onInitialize()
   rclcpp::NodeOptions options;
   options.arguments({ "--ros-args", "-r",
                       "__node:=" + std::string("interactive_marker_display_") +
-                      std::to_string(reinterpret_cast<std::size_t>(this)) });
+                          std::to_string(reinterpret_cast<std::size_t>(this)) });
   pnode_ = rclcpp::Node::make_shared("_", "", options);
   private_executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
   private_executor_->add_node(pnode_);
