@@ -77,7 +77,7 @@ bool HybridPlanningManager::initialize()
   {
     RCLCPP_FATAL(LOGGER, "Exception while creating planner logic plugin loader %s", ex.what());
   }
-  // TODO Refactor parameter declaration and use repository wide solution
+  // TODO(sjahr) Refactor parameter declaration and use repository wide solution
   std::string logic_plugin_name = "";
   if (this->has_parameter("planner_logic_plugin_name"))
   {
@@ -172,17 +172,17 @@ bool HybridPlanningManager::planGlobalTrajectory()
         planner_logic_instance_->react(
             moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_PLANNING_ACTION_FINISHED);
       };
-  // Forward global trajectory goal from hybrid planning request TODO pass goal as function argument
+  // Forward global trajectory goal from hybrid planning request TODO(sjahr) pass goal as function argument
   auto global_goal_msg = moveit_msgs::action::GlobalPlanner::Goal();
   global_goal_msg.request = latest_hybrid_planning_goal_;
   // Send global planning goal and wait until it's accepted
   auto goal_handle_future = global_planner_action_client_->async_send_goal(global_goal_msg, global_goal_options);
-  return true;  // return always success TODO add more error checking
+  return true;  // return always success TODO(sjahr) add more error checking
 }
 
 bool HybridPlanningManager::runLocalPlanner()
 {
-  // Setup empty dummy goal (Global trajectory is subscribed by the local planner) TODO pass goal as function argument
+  // Setup empty dummy goal (Global trajectory is subscribed by the local planner) TODO(sjahr) pass goal as function argument
   auto local_goal_msg = moveit_msgs::action::LocalPlanner::Goal();
   auto local_goal_options = rclcpp_action::Client<moveit_msgs::action::LocalPlanner>::SendGoalOptions();
   rclcpp_action::ClientGoalHandle<moveit_msgs::action::LocalPlanner>::SharedPtr goal_handle;
@@ -219,7 +219,7 @@ bool HybridPlanningManager::runLocalPlanner()
 
   // Send global planning goal
   auto goal_handle_future = local_planner_action_client_->async_send_goal(local_goal_msg, local_goal_options);
-  return true;  // return always success TODO add more error checking
+  return true;  // return always success TODO(sjahr) add more error checking
 }
 
 void HybridPlanningManager::hybridPlanningRequestCallback(
