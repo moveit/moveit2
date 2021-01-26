@@ -115,7 +115,7 @@ private:
   void unsubscribe();
 
   /// Called by InteractiveMarkerClient when successfully initialized.
-  void initializeCallback(visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr);
+  void initializeCallback(visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr /*msg*/);
 
   /// Called by InteractiveMarkerClient when an update from a server is received.
   void updateCallback(visualization_msgs::msg::InteractiveMarkerUpdate::ConstSharedPtr msg);
@@ -124,7 +124,7 @@ private:
   void resetCallback();
 
   /// Called by InteractiveMarkerClient when there is a status message.
-  void statusCallback(interactive_markers::InteractiveMarkerClient::Status, const std::string& message);
+  void statusCallback(interactive_markers::InteractiveMarkerClient::Status /*status*/, const std::string& message);
 
   void updateMarkers(const std::vector<visualization_msgs::msg::InteractiveMarker>& markers);
 
