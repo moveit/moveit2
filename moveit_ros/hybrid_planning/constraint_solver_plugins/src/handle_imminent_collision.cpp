@@ -52,7 +52,7 @@ bool HandleImminentCollision::initialize(const rclcpp::Node::SharedPtr& node,
 {
   planning_scene_monitor_ = planning_scene_monitor;
   node_handle_ = node;
-  feedback_send_ = false;
+  path_invalidation_event_send_ = false;
 
   // Initialize PID
   auto joint_names = (planning_scene_monitor_->getRobotModel())->getJointModelNames();
@@ -83,9 +83,9 @@ HandleImminentCollision::solve(robot_trajectory::RobotTrajectory local_trajector
   // Check if path is valid
   if (planning_scene->isPathValid(local_trajectory, local_trajectory.getGroupName(), false, invalid_index))
   {
-    if (feedback_send_)
+    if (path_invalidation_event_send_)
     {
-      feedback_send_ = false;  // Reset feedback flag
+      path_invalidation_event_send_ = false;  // Reset flag
     }
 
     // Forward next waypoint to the robot controller
@@ -93,10 +93,10 @@ HandleImminentCollision::solve(robot_trajectory::RobotTrajectory local_trajector
   }
   else
   {
-    if (!feedback_send_)
+    if (!path_invalidation_event_send_)
     {  // Send feedback only once
       feedback->feedback = "collision_ahead";
-      feedback_send_ = true;  // Set feedback flag
+      path_invalidation_event_send_ = true;  // Set feedback flag
     }
 
     // Keep current position
