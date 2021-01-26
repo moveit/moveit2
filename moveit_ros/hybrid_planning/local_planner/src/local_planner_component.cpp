@@ -124,11 +124,12 @@ bool LocalPlannerComponent::initialize()
                  config_.trajectory_operator_plugin_name.c_str(), ex.what());
   }
 
-  // Load constraint solver
+  // Load local constraint solver
   try
   {
-    solver_plugin_loader_.reset(new pluginlib::ClassLoader<moveit_hybrid_planning::ConstraintSolverInterface>(
-        "moveit_hybrid_planning", "moveit_hybrid_planning::ConstraintSolverInterface"));
+    local_constraint_solver_plugin_loader_.reset(
+        new pluginlib::ClassLoader<moveit_hybrid_planning::LocalConstraintSolverInterface>(
+            "moveit_hybrid_planning", "moveit_hybrid_planning::LocalConstraintSolverInterface"));
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -136,15 +137,16 @@ bool LocalPlannerComponent::initialize()
   }
   try
   {
-    constraint_solver_instance_ = solver_plugin_loader_->createUniqueInstance(config_.solver_plugin_name);
-    if (!constraint_solver_instance_->initialize(node_ptr, planning_scene_monitor_))
+    local_constraint_solver_instance_ =
+        local_constraint_solver_plugin_loader_->createUniqueInstance(config_.local_constraint_solver_plugin_name);
+    if (!local_constraint_solver_instance_->initialize(node_ptr, planning_scene_monitor_))
       throw std::runtime_error("Unable to initialize constraint solver plugin");
-    RCLCPP_INFO(LOGGER, "Using constraint solver interface '%s'", config_.solver_plugin_name.c_str());
+    RCLCPP_INFO(LOGGER, "Using constraint solver interface '%s'", config_.local_constraint_solver_plugin_name.c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading constraint solver '%s': %s", config_.solver_plugin_name.c_str(),
-                 ex.what());
+    RCLCPP_ERROR(LOGGER, "Exception while loading constraint solver '%s': %s",
+                 config_.local_constraint_solver_plugin_name.c_str(), ex.what());
   }
 
   // Initialize local planning request action server
@@ -245,7 +247,7 @@ void LocalPlannerComponent::executePlanningLoopRun()
       const auto goal = local_planning_goal_handle_->get_goal();
       auto local_feedback = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
       trajectory_msgs::msg::JointTrajectory local_solution =
-          constraint_solver_instance_->solve(local_trajectory, goal->local_constraints, local_feedback);
+          local_constraint_solver_instance_->solve(local_trajectory, goal->local_constraints, local_feedback);
 
       if (!local_feedback->feedback.empty())
       {

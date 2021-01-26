@@ -33,46 +33,55 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: Simple local solver plugin that stops in front of a collision object.
+   Description: Defines an interface for a local constraint solver plugin implementation for the local planner component node.
  */
 
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/local_planner/constraint_solver_interface.h>
-#include <control_toolbox/pid.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
+
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/robot_state/robot_state.h>
+
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <moveit_msgs/msg/constraints.hpp>
+
+#include <moveit_msgs/action/local_planner.hpp>
+
+#include <trajectory_msgs/msg/joint_trajectory.h>
 
 namespace moveit_hybrid_planning
 {
-struct PIDConfig
-{
-  // Default values
-  double k_p = 1;
-  double k_i = 0;
-  double k_d = 0;
-  double windup_limit = 0.1;
-  double d_t = 0.01;  // s
-};
-
-class DecelerateBeforeCollision : public ConstraintSolverInterface
+/**
+ * Class LocalConstraintSolverInterface - Base class for a local constrain solver.
+ */
+class LocalConstraintSolverInterface
 {
 public:
-  DecelerateBeforeCollision();
-  ~DecelerateBeforeCollision() override{};
-  bool initialize(const rclcpp::Node::SharedPtr& node,
-                  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor) override;
+  /**
+   * Initialize local constraint solver
+   * @return True if initialization was successful
+   */
+  virtual bool initialize(const rclcpp::Node::SharedPtr& node,
+                          planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor) = 0;
 
-  trajectory_msgs::msg::JointTrajectory
+  /**
+   * Solve local planning problem for the current loop run
+   * @param local_trajectory The local trajectory to pursue
+   * @param local_constraints Local goal constraints
+   * @param planning_scene The planning scene to use for local planning
+   * @param feedback Feedback event string from the current solver i.e. "Collision detected"
+   * @return Local planning solution in joint space
+   */
+  virtual trajectory_msgs::msg::JointTrajectory
   solve(robot_trajectory::RobotTrajectory local_trajectory,
         std::vector<moveit_msgs::msg::Constraints> local_constraints,
-        std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback) override;
+        std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback) = 0;
+  virtual ~LocalConstraintSolverInterface(){};
 
-private:
-  rclcpp::Node::SharedPtr node_handle_;
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-  bool path_invalidation_event_send_;  // Send path invalidation event only once
-  std::vector<control_toolbox::Pid> joint_position_pids_;
-  PIDConfig pid_config_;
-  rclcpp::Rate loop_rate_;
+protected:
+  /** \brief Constructor */
+  LocalConstraintSolverInterface(){};
 };
 }  // namespace moveit_hybrid_planning
