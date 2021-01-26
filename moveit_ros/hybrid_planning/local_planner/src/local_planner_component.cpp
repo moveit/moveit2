@@ -221,12 +221,11 @@ void LocalPlannerComponent::executePlanningLoopRun()
     // If the planner received an action request and a global solution it starts to plan locally
     case moveit_hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE:
     {
-      // Clone current planning scene
+      // Read current planning scene
       planning_scene_monitor_->updateFrameTransforms();
       planning_scene_monitor_->lockSceneRead();  // LOCK planning scene
-      planning_scene::PlanningScenePtr planning_scene = planning_scene::PlanningScene::clone(
-          planning_scene_monitor_->getPlanningScene());  // TODO remove expensive planning scene cloning
-      planning_scene_monitor_->unlockSceneRead();        // UNLOCK planning scene
+      planning_scene::PlanningScenePtr planning_scene = planning_scene_monitor_->getPlanningScene();
+      planning_scene_monitor_->unlockSceneRead();  // UNLOCK planning scene
 
       // Get current state
       auto current_robot_state = planning_scene->getCurrentStateNonConst();
