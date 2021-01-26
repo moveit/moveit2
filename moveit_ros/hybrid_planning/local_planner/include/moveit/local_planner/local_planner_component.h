@@ -58,7 +58,7 @@
 
 namespace moveit_hybrid_planning
 {
-// TODO Refactor and use repository wide solution
+// TODO(sjahr) Refactor and use repository wide solution
 template <typename T>
 void declareOrGetParam(const std::string& param_name, T& output_value, const T& default_value,
                        const rclcpp::Node::SharedPtr& node)
@@ -79,7 +79,7 @@ void declareOrGetParam(const std::string& param_name, T& output_value, const T& 
 }
 
 /// Internal local planner states
-/// TODO Use lifecycle node?
+/// TODO(sjahr) Use lifecycle node?
 enum class LocalPlannerState : int8_t
 {
   ABORT = -1,

@@ -80,13 +80,13 @@ robot_trajectory::RobotTrajectory NextWaypointSampler::getLocalTrajectory(moveit
   robot_trajectory::RobotTrajectory local_trajectory(reference_trajectory_->getRobotModel(),
                                                      reference_trajectory_->getGroupName());
   for (auto i = 0; i < 3; i++)
-  {  // TODO Use param to config window width
+  {  // TODO(sjahr) Use param to config window width
     if ((index_ + i) < reference_trajectory_->getWayPointCount())
     {
       moveit::core::RobotState local_robot_state = reference_trajectory_->getWayPoint(index_ + i);
       local_trajectory.addSuffixWayPoint(
           reference_trajectory_->getWayPoint(index_ + i),
-          reference_trajectory_->getWayPointDurationFromPrevious(index_ + i));  // TODO Remove magic number!
+          reference_trajectory_->getWayPointDurationFromPrevious(index_ + i));  // TODO(sjahr) Remove magic number!
     }
   }
   return local_trajectory;
