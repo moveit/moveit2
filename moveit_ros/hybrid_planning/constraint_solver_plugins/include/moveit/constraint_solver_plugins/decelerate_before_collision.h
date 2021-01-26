@@ -54,11 +54,11 @@ struct PIDConfig
   double d_t = 0.01;  // s
 };
 
-class HandleImminentCollision : public ConstraintSolverInterface
+class DecelerateBeforeCollision : public ConstraintSolverInterface
 {
 public:
-  HandleImminentCollision();
-  ~HandleImminentCollision() override{};
+  DecelerateBeforeCollision();
+  ~DecelerateBeforeCollision() override{};
   bool initialize(const rclcpp::Node::SharedPtr& node,
                   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor) override;
 
