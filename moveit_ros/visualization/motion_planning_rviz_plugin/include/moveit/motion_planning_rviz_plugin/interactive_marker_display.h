@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// TODO(JafarAbdi): Remove this file once the lag issue is fixed upstream
+// TODO(JafarAbdi): Remove this file once the lag issue is fixed upstream https://github.com/ros2/rviz/issues/548
 // This file is copied from https://github.com/ros2/rviz, the only difference is the addition of the private members
 // pnode_, private_executor_, and private_executor_thread_ to fix the lag in the motion planning display interactive
 // marker cause by Rviz having only a single thread executor
