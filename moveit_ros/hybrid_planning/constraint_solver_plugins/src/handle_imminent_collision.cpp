@@ -70,15 +70,17 @@ HandleImminentCollision::solve(robot_trajectory::RobotTrajectory local_trajector
                                std::vector<moveit_msgs::msg::Constraints> local_constraints,
                                std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback)
 {
-  // Clone current planning scene
+  // Read current planning scene
   planning_scene_monitor_->updateFrameTransforms();
   planning_scene_monitor_->lockSceneRead();  // LOCK planning scene
-  planning_scene::PlanningScenePtr planning_scene = planning_scene::PlanningScene::clone(
-      planning_scene_monitor_->getPlanningScene());  // TODO remove expensive planning scene cloning
-  planning_scene_monitor_->unlockSceneRead();        // UNLOCK planning scene
+  planning_scene::PlanningScenePtr planning_scene = planning_scene_monitor_->getPlanningScene();
+  planning_scene_monitor_->unlockSceneRead();  // UNLOCK planning scene
 
   robot_trajectory::RobotTrajectory robot_command(local_trajectory.getRobotModel(), local_trajectory.getGroupName());
   std::vector<std::size_t>* invalid_index;
+
+  // Get Current State
+  moveit::core::RobotState current_state = planning_scene->getCurrentState();
 
   // Check if path is valid
   if (planning_scene->isPathValid(local_trajectory, local_trajectory.getGroupName(), false, invalid_index))
@@ -100,7 +102,6 @@ HandleImminentCollision::solve(robot_trajectory::RobotTrajectory local_trajector
     }
 
     // Keep current position
-    moveit::core::RobotState current_state = planning_scene->getCurrentState();
     robot_command.addSuffixWayPoint(current_state, 0.0);
   }
 
@@ -110,9 +111,9 @@ HandleImminentCollision::solve(robot_trajectory::RobotTrajectory local_trajector
 
   trajectory_msgs::msg::JointTrajectory joint_trajectory = robot_command_msg.joint_trajectory;
 
-  // Get Current State
+  // Transform current state into msg
   moveit_msgs::msg::RobotState current_state_msg;
-  robotStateToRobotStateMsg(planning_scene->getCurrentState(), current_state_msg);
+  robotStateToRobotStateMsg(current_state, current_state_msg);
 
   // Calculate PID command
   std::vector<double> delta_theta;
