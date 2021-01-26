@@ -13,8 +13,8 @@ set_target_properties(trajectory_operator_interface PROPERTIES VERSION "${${PROJ
 ament_target_dependencies(trajectory_operator_interface ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Constraint solver interface
-add_library(constraint_solver_interface SHARED
-  src/constraint_solver_interface.cpp
+add_library(local_constraint_solver_interface SHARED
+  src/local_constraint_solver_interface.cpp
 )
-set_target_properties(constraint_solver_interface PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(constraint_solver_interface ${THIS_PACKAGE_INCLUDE_DEPENDS})
+set_target_properties(local_constraint_solver_interface PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(local_constraint_solver_interface ${THIS_PACKAGE_INCLUDE_DEPENDS})

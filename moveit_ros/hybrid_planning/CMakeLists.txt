@@ -25,7 +25,7 @@ set(LIBRARIES
   planner_logic_interface
   single_plan_execution_plugin
   trajectory_operator_interface
-  constraint_solver_interface
+  local_constraint_solver_interface
   next_waypoint_sampler_plugin
   single_plan_execution_plugin
   decelerate_before_collision_plugin
@@ -51,7 +51,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
   hybrid_planning_manager/include
   planner_logic_plugins/include
   trajectory_operator_plugins/include
-  constraint_solver_plugins/include
+  local_constraint_solver_plugins/include
 )
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
@@ -60,7 +60,7 @@ add_subdirectory(global_planner)
 add_subdirectory(local_planner)
 add_subdirectory(planner_logic_plugins)
 add_subdirectory(trajectory_operator_plugins)
-add_subdirectory(constraint_solver_plugins)
+add_subdirectory(local_constraint_solver_plugins)
 add_subdirectory(test)
 
 rclcpp_components_register_nodes(moveit_hybrid_planning_manager "moveit_hybrid_planning::HybridPlanningManager")

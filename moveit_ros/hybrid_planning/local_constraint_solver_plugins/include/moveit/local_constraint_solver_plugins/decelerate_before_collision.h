@@ -32,9 +32,47 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/local_planner/constraint_solver_interface.h>
+/* Author: Sebastian Jahr
+   Description: Simple local solver plugin that stops in front of a collision object.
+ */
+
+#pragma once
+
+#include <rclcpp/rclcpp.hpp>
+#include <moveit/local_planner/local_constraint_solver_interface.h>
+#include <control_toolbox/pid.hpp>
 
 namespace moveit_hybrid_planning
 {
-// Empty because this library only defines an interface
-}
+struct PIDConfig
+{
+  // Default values
+  double k_p = 1;
+  double k_i = 0;
+  double k_d = 0;
+  double windup_limit = 0.1;
+  double d_t = 0.01;  // s
+};
+
+class DecelerateBeforeCollision : public LocalConstraintSolverInterface
+{
+public:
+  DecelerateBeforeCollision();
+  ~DecelerateBeforeCollision() override{};
+  bool initialize(const rclcpp::Node::SharedPtr& node,
+                  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor) override;
+
+  trajectory_msgs::msg::JointTrajectory
+  solve(robot_trajectory::RobotTrajectory local_trajectory,
+        std::vector<moveit_msgs::msg::Constraints> local_constraints,
+        std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback) override;
+
+private:
+  rclcpp::Node::SharedPtr node_handle_;
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  bool path_invalidation_event_send_;  // Send path invalidation event only once
+  std::vector<control_toolbox::Pid> joint_position_pids_;
+  PIDConfig pid_config_;
+  rclcpp::Rate loop_rate_;
+};
+}  // namespace moveit_hybrid_planning

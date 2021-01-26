@@ -3,4 +3,4 @@ add_library(decelerate_before_collision_plugin SHARED
 )
 set_target_properties(decelerate_before_collision_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(decelerate_before_collision_plugin ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(decelerate_before_collision_plugin constraint_solver_interface)
+target_link_libraries(decelerate_before_collision_plugin local_constraint_solver_interface)
