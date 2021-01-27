@@ -48,6 +48,8 @@
 #include <moveit/robot_state/conversions.h>
 
 #include <moveit_msgs/action/hybrid_planning.hpp>
+#include <moveit_msgs/msg/display_robot_state.hpp>
+#include <moveit_msgs/msg/motion_plan_response.hpp>
 
 const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
 
@@ -57,12 +59,64 @@ public:
   HybridPlanningDemo(const rclcpp::Node::SharedPtr& node)
   {
     node_ = node;
-    hp_action_client_ = rclcpp_action::create_client<moveit_msgs::action::HybridPlanning>(node_, "run_hybrid_planning");
+    hp_action_client_ = rclcpp_action::create_client<moveit_msgs::action::HybridPlanning>(node_, "run_hybrid_planning"),
+    robot_state_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state", 1);
+
+    collision_object_1_.header.frame_id = "panda_link0";
+    collision_object_1_.id = "box1";
+
+    collision_object_2_.header.frame_id = "panda_link0";
+    collision_object_2_.id = "box2";
+
+    collision_object_3_.header.frame_id = "panda_link0";
+    collision_object_3_.id = "box3";
+
+    box_1_.type = box_1_.BOX;
+    box_1_.dimensions = { 0.5, 0.8, 0.01 };
+
+    box_2_.type = box_2_.BOX;
+    box_2_.dimensions = { 1.0, 0.4, 0.01 };
+
+    // Add new collision object as soon as global trajectory is available.
+    global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
+        "global_trajectory", 1, [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr msg) {
+          RCLCPP_INFO(LOGGER, "0");
+          // Remove old collision objects
+          collision_object_1_.operation = collision_object_1_.REMOVE;
+
+          // Add new collision objects
+          geometry_msgs::msg::Pose box_pose_2;
+          box_pose_2.position.x = 0.2;
+          box_pose_2.position.y = 0.4;
+          box_pose_2.position.z = 0.95;
+
+          collision_object_2_.primitives.push_back(box_2_);
+          collision_object_2_.primitive_poses.push_back(box_pose_2);
+          collision_object_2_.operation = collision_object_2_.ADD;
+
+          geometry_msgs::msg::Pose box_pose_3;
+          box_pose_3.position.x = 0.2;
+          box_pose_3.position.y = -0.4;
+          box_pose_3.position.z = 0.95;
+
+          collision_object_3_.primitives.push_back(box_2_);
+          collision_object_3_.primitive_poses.push_back(box_pose_3);
+          collision_object_3_.operation = collision_object_3_.ADD;
+
+          // Add object to planning scene
+          {  // Lock PlanningScene
+            planning_scene_monitor::LockedPlanningSceneRW scene(planning_scene_monitor_);
+            scene->processCollisionObjectMsg(collision_object_2_);
+            scene->processCollisionObjectMsg(collision_object_3_);
+            scene->processCollisionObjectMsg(collision_object_1_);
+          }  // Unlock PlanningScene
+        });
   }
 
   void run()
   {
-    RCLCPP_INFO(LOGGER, "Initialize MoveItCpp");
+    // T
+    RCLCPP_INFO(LOGGER, "Initialize Planning Scene Monitor");
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
@@ -74,17 +128,35 @@ public:
       planning_scene_monitor_->providePlanningSceneService();  // let RViz display query PlanningScene
       planning_scene_monitor_->setPlanningScenePublishingFrequency(100);
       planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
-                                                            "/publish_planning_scene");
+                                                            "/planning_scene");
       planning_scene_monitor_->startSceneMonitor();
     }
     RCLCPP_INFO(LOGGER, "Wait 2s to ensure everything has started");
-    rclcpp::sleep_for(std::chrono::seconds(2));
+    rclcpp::sleep_for(std::chrono::seconds(5));
 
     if (!hp_action_client_->wait_for_action_server(std::chrono::seconds(20)))
     {
       RCLCPP_ERROR(LOGGER, "Hybrid planning action server not available after waiting");
       return;
     }
+
+    geometry_msgs::msg::Pose box_pose;
+    box_pose.position.x = 0.4;
+    box_pose.position.y = 0.0;
+    box_pose.position.z = 0.85;
+
+    collision_object_1_.primitives.push_back(box_1_);
+    collision_object_1_.primitive_poses.push_back(box_pose);
+    collision_object_1_.operation = collision_object_1_.ADD;
+
+    // Add object to planning scene
+    {  // Lock PlanningScene
+      planning_scene_monitor::LockedPlanningSceneRW scene(planning_scene_monitor_);
+      scene->processCollisionObjectMsg(collision_object_1_);
+    }  // Unlock PlanningScene
+
+    RCLCPP_INFO(LOGGER, "Wait 2s see collision object");
+    rclcpp::sleep_for(std::chrono::seconds(2));
 
     // Setup motion planning goal taken from motion_planning_api tutorial
     const std::string planning_group = "panda_arm";
@@ -96,6 +168,7 @@ public:
     const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(planning_group);
 
     planning_scene::PlanningScenePtr planning_scene(new planning_scene::PlanningScene(robot_model));
+
     // Configure a valid robot state
     planning_scene->getCurrentStateNonConst().setToDefaultValues(joint_model_group, "ready");
 
@@ -104,13 +177,13 @@ public:
     moveit::core::robotStateToRobotStateMsg(planning_scene->getCurrentStateNonConst(), goal_msg.request.start_state);
     goal_msg.request.group_name = planning_group;
     goal_msg.request.num_planning_attempts = 10;
-    goal_msg.request.max_velocity_scaling_factor = 1.0;
-    goal_msg.request.max_acceleration_scaling_factor = 1.0;
-    goal_msg.request.allowed_planning_time = 1.0;
+    goal_msg.request.max_velocity_scaling_factor = 0.1;
+    goal_msg.request.max_acceleration_scaling_factor = 0.1;
+    goal_msg.request.allowed_planning_time = 2.0;
     goal_msg.request.planner_id = "ompl";
 
     moveit::core::RobotState goal_state(robot_model);
-    std::vector<double> joint_values = { -1.0, 0.7, 0.7, -1.5, -0.7, 2.0, 0.0 };
+    std::vector<double> joint_values = { 0.0, 0.0, 0.0, 0.0, 0.0, 1.571, 0.785 };
     goal_state.setJointGroupPositions(joint_model_group, joint_values);
 
     goal_msg.request.goal_constraints.resize(1);
@@ -151,7 +224,16 @@ public:
 private:
   rclcpp::Node::SharedPtr node_;
   rclcpp_action::Client<moveit_msgs::action::HybridPlanning>::SharedPtr hp_action_client_;
+  rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_publisher_;
+  rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_solution_subscriber_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  rclcpp::TimerBase::SharedPtr timer_;
+
+  moveit_msgs::msg::CollisionObject collision_object_1_;
+  moveit_msgs::msg::CollisionObject collision_object_2_;
+  moveit_msgs::msg::CollisionObject collision_object_3_;
+  shape_msgs::msg::SolidPrimitive box_1_;
+  shape_msgs::msg::SolidPrimitive box_2_;
 
   // TF
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
