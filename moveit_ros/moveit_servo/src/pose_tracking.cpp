@@ -237,7 +237,7 @@ void PoseTracking::targetPoseCallback(const geometry_msgs::msg::PoseStamped::Con
     try
     {
       geometry_msgs::msg::TransformStamped target_to_planning_frame = transform_buffer_.lookupTransform(
-          planning_frame_, target_pose_.header.frame_id, rclcpp::Time(0), rclcpp::Duration(0));
+          planning_frame_, target_pose_.header.frame_id, rclcpp::Time(0), rclcpp::Duration(100ms));
       tf2::doTransform(target_pose_, target_pose_, target_to_planning_frame);
 
       // Prevent doTransform from copying a stamp of 0, which will cause the haveRecentTargetPose check to fail servo motions

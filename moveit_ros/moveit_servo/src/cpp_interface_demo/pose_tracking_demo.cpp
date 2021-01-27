@@ -178,7 +178,6 @@ int main(int argc, char** argv)
   }
 
   // Make sure the tracker is stopped and clean up
-  tracker.stopMotion();
   move_to_pose_thread.join();
 
   // Kill executor thread before shutdown
