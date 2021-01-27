@@ -75,7 +75,7 @@ DecelerateBeforeCollision::solve(robot_trajectory::RobotTrajectory local_traject
   planning_scene_monitor::LockedPlanningSceneRO locked_planning_scene(planning_scene_monitor_);
 
   robot_trajectory::RobotTrajectory robot_command(local_trajectory.getRobotModel(), local_trajectory.getGroupName());
-  std::vector<std::size_t>* invalid_index;
+  std::vector<std::size_t>* invalid_index = nullptr;
 
   // Get Current State
   moveit::core::RobotState current_state = locked_planning_scene->getCurrentState();
