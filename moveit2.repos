@@ -45,3 +45,8 @@ repositories:
     type: git
     url: https://github.com/ros-planning/warehouse_ros_mongo
     version: ros2
+    
+  geometry2:
+    type: git
+    url: https://github.com/gleichdick/geometry2-1
+    version: ros2_new_toMsg_approach
