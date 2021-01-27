@@ -89,6 +89,14 @@ public:
     planning_scene_monitor_->startStateMonitor(servo_parameters_->joint_topic);
     planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
 
+    // Wait for Planning Scene Monitor to setup
+    if (!planning_scene_monitor_->waitForCurrentRobotState(node_->now(), 5.0 /* seconds */))
+    {
+      RCLCPP_ERROR_STREAM(LOGGER, "Error waiting for current robot state in PlanningSceneMonitor.");
+      exit(EXIT_FAILURE);
+    }
+
+
     tracker_ = std::make_shared<moveit_servo::PoseTracking>(node_, servo_parameters_, planning_scene_monitor_);
 
     // Tolerance for pose seeking
@@ -174,15 +182,13 @@ TEST_F(PoseTrackingFixture, OutgoingMsgTest)
   // Republish the target pose in a new thread, as if the target is moving
   std::thread target_pub_thread([&] {
     size_t msg_count = 0;
+    rclcpp::Rate loop_rate(50);
     while (++msg_count < 100)
     {
       target_pose_pub_->publish(target_pose);
-      std::this_thread::sleep_for(std::chrono::milliseconds(10));
-      ;
+      loop_rate.sleep();
     }
   });
-
-  std::this_thread::sleep_for(std::chrono::seconds(ROS_PUB_SUB_DELAY));
 
   // resetTargetPose() can be used to clear the target pose and wait for a new one, e.g. when moving between multiple waypoints
   tracker_->resetTargetPose();
