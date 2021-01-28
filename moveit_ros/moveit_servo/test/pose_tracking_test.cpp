@@ -55,7 +55,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.pose_track
 
 static constexpr double TRANSLATION_TOLERANCE = 0.01;  // meters
 static constexpr double ROTATION_TOLERANCE = 0.1;      // quaternion
-static constexpr u_int64_t ROS_PUB_SUB_DELAY = 4;      // seconds (to allow for subscribers to initialize)
 
 namespace moveit_servo
 {
