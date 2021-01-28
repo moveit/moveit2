@@ -63,6 +63,7 @@ install(TARGETS move_group list_move_group_capabilities
 
 install(TARGETS moveit_move_group_capabilities_base
   moveit_move_group_default_capabilities
+  EXPORT moveit_move_group_default_capabilities
   ARCHIVE
   DESTINATION lib
   LIBRARY
