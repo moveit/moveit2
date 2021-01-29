@@ -79,7 +79,7 @@ public:
    * @param current_state Current RobotState
    * @return Current local constraints that define the local planning goal
    */
-  virtual robot_trajectory::RobotTrajectory getLocalTrajectory(moveit::core::RobotState current_state) = 0;
+  virtual robot_trajectory::RobotTrajectory getLocalTrajectory(const moveit::core::RobotState& current_state) = 0;
 
   /**
    * Return the processing status of the reference trajectory's execution based on a user defined
@@ -87,7 +87,7 @@ public:
    * @param current_state Current RobotState
    * @return A value between 0.0 (start) to 1.0 (completion).
    */
-  virtual double getTrajectoryProgress(moveit::core::RobotState current_state) = 0;
+  virtual double getTrajectoryProgress(const moveit::core::RobotState& current_state) = 0;
   virtual ~TrajectoryOperatorInterface(){};
 
 protected:

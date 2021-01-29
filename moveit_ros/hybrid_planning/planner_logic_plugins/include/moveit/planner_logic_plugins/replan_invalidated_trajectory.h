@@ -48,6 +48,6 @@ class ReplanInvalidatedTrajectory : public SinglePlanExecution  // Inherit from 
 public:
   ReplanInvalidatedTrajectory(){};
   ~ReplanInvalidatedTrajectory() override{};
-  bool react(std::string event) override;
+  bool react(const std::string& event) override;
 };
 }  // namespace moveit_hybrid_planning

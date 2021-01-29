@@ -43,8 +43,8 @@ namespace moveit_hybrid_planning
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 
-bool NextWaypointSampler::initialize(const rclcpp::Node::SharedPtr& node, moveit::core::RobotModelConstPtr robot_model,
-                                     std::string group_name)
+bool NextWaypointSampler::initialize(const rclcpp::Node::SharedPtr& node,
+                                     const moveit::core::RobotModelConstPtr& robot_model, const std::string& group_name)
 {
   reference_trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, group_name);
   index_ = 0;
@@ -64,7 +64,7 @@ bool NextWaypointSampler::addTrajectorySegment(const robot_trajectory::RobotTraj
   return true;
 }
 
-robot_trajectory::RobotTrajectory NextWaypointSampler::getLocalTrajectory(moveit::core::RobotState current_state)
+robot_trajectory::RobotTrajectory NextWaypointSampler::getLocalTrajectory(const moveit::core::RobotState& current_state)
 {
   // Get next desired robot state
   moveit::core::RobotState next_desired_goal_state = reference_trajectory_->getWayPoint(index_);
@@ -92,7 +92,7 @@ robot_trajectory::RobotTrajectory NextWaypointSampler::getLocalTrajectory(moveit
   return local_trajectory;
 }
 
-double NextWaypointSampler::getTrajectoryProgress(moveit::core::RobotState current_state)
+double NextWaypointSampler::getTrajectoryProgress(const moveit::core::RobotState& current_state)
 {
   // Check if trajectory is unwinded
   if (index_ >= reference_trajectory_->getWayPointCount() - 1)

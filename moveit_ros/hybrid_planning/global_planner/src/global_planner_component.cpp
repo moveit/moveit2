@@ -176,7 +176,8 @@ void GlobalPlannerComponent::globalPlanningRequestCallback(
   last_global_solution_ = planning_solution;  // TODO(sjahr) Add Service to expose this
 };
 
-moveit_msgs::msg::MotionPlanResponse GlobalPlannerComponent::plan(moveit_msgs::msg::MotionPlanRequest planning_problem)
+moveit_msgs::msg::MotionPlanResponse
+GlobalPlannerComponent::plan(const moveit_msgs::msg::MotionPlanRequest& planning_problem)
 {
   // Clone current planning scene
   planning_scene_monitor_->updateFrameTransforms();

@@ -47,7 +47,7 @@ const double CYLCE_TIME = 0.01;  // TODO(sjahr) Add param and proper time handli
 DecelerateBeforeCollision::DecelerateBeforeCollision() : loop_rate_(1 / CYLCE_TIME){};
 
 bool DecelerateBeforeCollision::initialize(const rclcpp::Node::SharedPtr& node,
-                                           planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
+                                           const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
 {
   planning_scene_monitor_ = planning_scene_monitor;
   node_handle_ = node;
@@ -64,10 +64,10 @@ bool DecelerateBeforeCollision::initialize(const rclcpp::Node::SharedPtr& node,
   return true;
 }
 
-trajectory_msgs::msg::JointTrajectory
-DecelerateBeforeCollision::solve(robot_trajectory::RobotTrajectory local_trajectory,
-                                 std::vector<moveit_msgs::msg::Constraints> local_constraints,
-                                 std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback)
+moveit_msgs::action::LocalPlanner::Feedback
+DecelerateBeforeCollision::solve(const robot_trajectory::RobotTrajectory& local_trajectory,
+                                 const std::vector<moveit_msgs::msg::Constraints>& local_constraints,
+                                 trajectory_msgs::msg::JointTrajectory& local_solution)
 {
   // Get current planning scene
   planning_scene_monitor_->updateFrameTransforms();

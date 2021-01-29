@@ -56,10 +56,11 @@ class PlannerLogicInterface
 public:
   /**
    * Initialize the planner logic
-   * @param hybrid_planner_handle Handle to access the hybrid planning manager's member functions and communication interfaces.
+   * @param hybrid_planning_manager The hybrid planning manager instance to initialize this logic with.
    * @return true if initialization was successful
    */
-  virtual bool initialize(std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planner_handle) = 0;
+  virtual bool
+  initialize(const std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager>& hybrid_planning_manager) = 0;
 
   /**
    * React to event defined in BasicHybridPlanningEvent enum
@@ -73,14 +74,14 @@ public:
    * @param event Encoded as string
    * @return true if reaction was successful
    */
-  virtual bool react(std::string event) = 0;
+  virtual bool react(const std::string& event) = 0;
   virtual ~PlannerLogicInterface(){};
 
 protected:
   /** \brief Constructor */
   PlannerLogicInterface(){};
 
-  // Handle to access communication interfaces and member functions of hybrid planning manager instance that uses the planner plugin
-  std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planner_handle_ = nullptr;
+  // The hybrid planning manager instance that runs this logic plugin
+  std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planning_manager_ = nullptr;
 };
 }  // namespace moveit_hybrid_planning
