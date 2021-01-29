@@ -40,6 +40,7 @@
 
 namespace moveit_hybrid_planning
 {
+using namespace std::chrono_literals;
 const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
 
 HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
@@ -47,7 +48,7 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
 {
   initialized_ = false;
   // Initialize hybrid planning component after after construction
-  timer_ = this->create_wall_timer(std::chrono::milliseconds(1), [this]() {
+  timer_ = this->create_wall_timer(1ms, [this]() {
     if (initialized_)
     {
       timer_->cancel();
@@ -105,7 +106,7 @@ bool HybridPlanningManager::initialize()
   // Initialize local planning action client
   local_planner_action_client_ =
       rclcpp_action::create_client<moveit_msgs::action::LocalPlanner>(this, "local_planning_action");
-  if (!local_planner_action_client_->wait_for_action_server(std::chrono::seconds(2)))
+  if (!local_planner_action_client_->wait_for_action_server(2s))
   {
     const std::string error = "Local planner action server not available after waiting";
     RCLCPP_FATAL(LOGGER, error);
@@ -115,7 +116,7 @@ bool HybridPlanningManager::initialize()
   // Initialize global planning action client
   global_planner_action_client_ =
       rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(this, "global_planning_action");
-  if (!global_planner_action_client_->wait_for_action_server(std::chrono::seconds(2)))
+  if (!global_planner_action_client_->wait_for_action_server(2s))
   {
     const std::string error = "Global planner action server not available after waiting";
     RCLCPP_FATAL(LOGGER, error);

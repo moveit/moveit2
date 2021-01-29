@@ -45,6 +45,7 @@
 #include <moveit_msgs/msg/constraints.hpp>
 namespace moveit_hybrid_planning
 {
+using namespace std::chrono_literals;
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 
 LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
@@ -53,7 +54,7 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   state_ = moveit_hybrid_planning::LocalPlannerState::UNCONFIGURED;
 
   // Initialize local planner after construction
-  timer_ = this->create_wall_timer(std::chrono::milliseconds(1), [this]() {
+  timer_ = this->create_wall_timer(1ms, [this]() {
     switch (state_)
     {
       case moveit_hybrid_planning::LocalPlannerState::READY:
@@ -166,7 +167,7 @@ bool LocalPlannerComponent::initialize()
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>> goal_handle) {
         local_planning_goal_handle_ = std::move(goal_handle);
         // Start local planning loop when an action request is received
-        timer_ = this->create_wall_timer(std::chrono::duration<double>(1 / config_.local_planning_frequency),
+        timer_ = this->create_wall_timer(1s / config_.local_planning_frequency,
                                          std::bind(&LocalPlannerComponent::executePlanningLoopRun, this));
       });
 

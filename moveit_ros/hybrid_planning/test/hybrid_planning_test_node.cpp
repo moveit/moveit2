@@ -51,6 +51,7 @@
 #include <moveit_msgs/msg/display_robot_state.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 
+using namespace std::chrono_literals;
 const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
 
 class HybridPlanningDemo
@@ -132,9 +133,9 @@ public:
       planning_scene_monitor_->startSceneMonitor();
     }
     RCLCPP_INFO(LOGGER, "Wait 2s to ensure everything has started");
-    rclcpp::sleep_for(std::chrono::seconds(5));
+    rclcpp::sleep_for(5s);
 
-    if (!hp_action_client_->wait_for_action_server(std::chrono::seconds(20)))
+    if (!hp_action_client_->wait_for_action_server(20s))
     {
       RCLCPP_ERROR(LOGGER, "Hybrid planning action server not available after waiting");
       return;
@@ -156,7 +157,7 @@ public:
     }  // Unlock PlanningScene
 
     RCLCPP_INFO(LOGGER, "Wait 2s see collision object");
-    rclcpp::sleep_for(std::chrono::seconds(2));
+    rclcpp::sleep_for(2s);
 
     // Setup motion planning goal taken from motion_planning_api tutorial
     const std::string planning_group = "panda_arm";
@@ -250,7 +251,7 @@ int main(int argc, char** argv)
 
   HybridPlanningDemo demo(node);
   std::thread run_demo([&demo]() {
-    rclcpp::sleep_for(std::chrono::seconds(5));
+    rclcpp::sleep_for(5s);
     demo.run();
   });
 

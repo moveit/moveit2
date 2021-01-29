@@ -45,6 +45,7 @@
 
 namespace moveit_hybrid_planning
 {
+using namespace std::chrono_literals;
 const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
 constexpr char PLANNING_PLUGIN_PARAM[] = "planning_plugin";
 
@@ -79,7 +80,7 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
   global_trajectory_pub_ = this->create_publisher<moveit_msgs::msg::MotionPlanResponse>("global_trajectory", 1);
 
   // Initialize global planner after construction
-  timer_ = this->create_wall_timer(std::chrono::milliseconds(1), [this]() {
+  timer_ = this->create_wall_timer(1ms, [this]() {
     if (initialized_)
     {
       timer_->cancel();
