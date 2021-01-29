@@ -102,8 +102,8 @@ bool GlobalPlannerComponent::init()
 {
   auto node_ptr = shared_from_this();
   // Configure planning scene monitor
-  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
-      node_ptr, "robot_description", tf_buffer_, "global_planner/planning_scene_monitor"));
+  planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
+      node_ptr, "robot_description", tf_buffer_, "global_planner/planning_scene_monitor");
   // Allows us to sycronize to Rviz and also publish collision objects to ourselves
   RCLCPP_DEBUG(LOGGER, "Configuring Planning Scene Monitor");
   if (planning_scene_monitor_->getPlanningScene())
@@ -138,9 +138,8 @@ bool GlobalPlannerComponent::init()
       continue;
     }
     RCLCPP_INFO(LOGGER, "Loading planning pipeline '%s'", planning_pipeline_name.c_str());
-    planning_pipeline::PlanningPipelinePtr pipeline;
-    pipeline.reset(
-        new planning_pipeline::PlanningPipeline(robot_model_, node_ptr, planning_pipeline_name, PLANNING_PLUGIN_PARAM));
+    auto pipeline = std::make_shared<planning_pipeline::PlanningPipeline>(
+        robot_model_, node_ptr, planning_pipeline_name, PLANNING_PLUGIN_PARAM);
     if (!pipeline->getPlannerManager())
     {
       RCLCPP_ERROR(LOGGER, "Failed to initialize planning pipeline '%s'.", planning_pipeline_name.c_str());

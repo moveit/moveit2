@@ -86,8 +86,8 @@ bool LocalPlannerComponent::initialize()
   config_.load(node_ptr);
 
   // Configure planning scene monitor
-  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
-      node_ptr, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor"));
+  planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
+      node_ptr, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor");
   if (planning_scene_monitor_->getPlanningScene())
   {
     // Start state and scene monitors
@@ -103,8 +103,9 @@ bool LocalPlannerComponent::initialize()
   // Load trajectory operator plugin
   try
   {
-    trajectory_operator_loader_.reset(new pluginlib::ClassLoader<moveit_hybrid_planning::TrajectoryOperatorInterface>(
-        "moveit_hybrid_planning", "moveit_hybrid_planning::TrajectoryOperatorInterface"));
+    trajectory_operator_loader_ =
+        std::make_unique<pluginlib::ClassLoader<moveit_hybrid_planning::TrajectoryOperatorInterface>>(
+            "moveit_hybrid_planning", "moveit_hybrid_planning::TrajectoryOperatorInterface");
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -128,9 +129,9 @@ bool LocalPlannerComponent::initialize()
   // Load local constraint solver
   try
   {
-    local_constraint_solver_plugin_loader_.reset(
-        new pluginlib::ClassLoader<moveit_hybrid_planning::LocalConstraintSolverInterface>(
-            "moveit_hybrid_planning", "moveit_hybrid_planning::LocalConstraintSolverInterface"));
+    local_constraint_solver_plugin_loader_ =
+        std::make_unique<pluginlib::ClassLoader<moveit_hybrid_planning::LocalConstraintSolverInterface>>(
+            "moveit_hybrid_planning", "moveit_hybrid_planning::LocalConstraintSolverInterface");
   }
   catch (pluginlib::PluginlibException& ex)
   {

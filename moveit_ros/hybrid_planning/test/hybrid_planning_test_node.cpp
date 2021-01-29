@@ -165,10 +165,10 @@ public:
     const moveit::core::RobotModelPtr& robot_model = robot_model_loader.getModel();
 
     // Create a RobotState and JointModelGroup
-    moveit::core::RobotStatePtr robot_state(new moveit::core::RobotState(robot_model));
+    const auto robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
     const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(planning_group);
 
-    planning_scene::PlanningScenePtr planning_scene(new planning_scene::PlanningScene(robot_model));
+    const auto planning_scene = std::make_shared<planning_scene::PlanningScene>(robot_model);
 
     // Configure a valid robot state
     planning_scene->getCurrentStateNonConst().setToDefaultValues(joint_model_group, "ready");

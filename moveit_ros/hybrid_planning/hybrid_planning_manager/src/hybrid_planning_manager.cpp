@@ -71,8 +71,9 @@ bool HybridPlanningManager::initialize()
   // Load planning logic plugin
   try
   {
-    planner_logic_plugin_loader_.reset(new pluginlib::ClassLoader<moveit_hybrid_planning::PlannerLogicInterface>(
-        "moveit_hybrid_planning", "moveit_hybrid_planning::PlannerLogicInterface"));
+    planner_logic_plugin_loader_ =
+        std::make_unique<pluginlib::ClassLoader<moveit_hybrid_planning::PlannerLogicInterface>>(
+            "moveit_hybrid_planning", "moveit_hybrid_planning::PlannerLogicInterface");
   }
   catch (pluginlib::PluginlibException& ex)
   {
