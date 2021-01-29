@@ -60,7 +60,8 @@ public:
   DecelerateBeforeCollision();
   ~DecelerateBeforeCollision() override{};
   bool initialize(const rclcpp::Node::SharedPtr& node,
-                  const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor) override;
+                  const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+                  const std::string& group_name) override;
 
   moveit_msgs::action::LocalPlanner::Feedback solve(const robot_trajectory::RobotTrajectory& local_trajectory,
                                                     const std::vector<moveit_msgs::msg::Constraints>& local_constraints,
@@ -70,7 +71,8 @@ private:
   rclcpp::Node::SharedPtr node_handle_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   bool path_invalidation_event_send_;  // Send path invalidation event only once
-  std::vector<control_toolbox::Pid> joint_position_pids_;
+  // Map from joint name to controller
+  std::map<std::string, control_toolbox::Pid> joint_position_pids_;
   PIDConfig pid_config_;
   rclcpp::Rate loop_rate_;
 };

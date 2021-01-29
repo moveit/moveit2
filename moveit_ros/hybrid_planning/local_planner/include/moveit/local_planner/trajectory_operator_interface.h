@@ -64,8 +64,8 @@ public:
    * @param group_name Name of the joint group the trajectory uses
    * @return True if initialization was successful
    */
-  virtual bool initialize(const rclcpp::Node::SharedPtr& node, moveit::core::RobotModelConstPtr robot_model,
-                          std::string group_name) = 0;
+  virtual bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
+                          const std::string& group_name) = 0;
 
   /**
    * Add a new reference trajectory segment to the vector of global trajectory segments to process

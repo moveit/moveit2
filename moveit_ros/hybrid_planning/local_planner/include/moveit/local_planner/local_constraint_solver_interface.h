@@ -64,7 +64,8 @@ public:
    * @return True if initialization was successful
    */
   virtual bool initialize(const rclcpp::Node::SharedPtr& node,
-                          const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor) = 0;
+                          const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+                          const std::string& group_name) = 0;
 
   /**
    * Solve local planning problem for the current loop run

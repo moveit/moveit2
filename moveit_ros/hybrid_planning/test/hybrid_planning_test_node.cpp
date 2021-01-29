@@ -116,7 +116,6 @@ public:
 
   void run()
   {
-    // T
     RCLCPP_INFO(LOGGER, "Initialize Planning Scene Monitor");
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -125,15 +124,19 @@ public:
         node_, "robot_description", tf_buffer_, "planning_scene_monitor");
     if (planning_scene_monitor_->getPlanningScene() != nullptr)
     {
-      planning_scene_monitor_->startStateMonitor("/joint_states");
+      planning_scene_monitor_->startStateMonitor();
       planning_scene_monitor_->providePlanningSceneService();  // let RViz display query PlanningScene
       planning_scene_monitor_->setPlanningScenePublishingFrequency(100);
       planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
                                                             "/planning_scene");
       planning_scene_monitor_->startSceneMonitor();
     }
-    RCLCPP_INFO(LOGGER, "Wait 2s to ensure everything has started");
-    rclcpp::sleep_for(5s);
+
+    if (!planning_scene_monitor_->waitForCurrentRobotState(node_->now(), 5))
+    {
+      RCLCPP_ERROR(LOGGER, "Timeout when waiting for /joint_states updates. Is the robot running?");
+      return;
+    }
 
     if (!hp_action_client_->wait_for_action_server(20s))
     {
@@ -168,14 +171,12 @@ public:
     const auto robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
     const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(planning_group);
 
-    const auto planning_scene = std::make_shared<planning_scene::PlanningScene>(robot_model);
-
     // Configure a valid robot state
-    planning_scene->getCurrentStateNonConst().setToDefaultValues(joint_model_group, "ready");
+    robot_state->setToDefaultValues(joint_model_group, "ready");
 
     auto goal_msg = moveit_msgs::action::HybridPlanning::Goal();
 
-    moveit::core::robotStateToRobotStateMsg(planning_scene->getCurrentStateNonConst(), goal_msg.request.start_state);
+    moveit::core::robotStateToRobotStateMsg(*robot_state, goal_msg.request.start_state);
     goal_msg.request.group_name = planning_group;
     goal_msg.request.num_planning_attempts = 10;
     goal_msg.request.max_velocity_scaling_factor = 0.1;

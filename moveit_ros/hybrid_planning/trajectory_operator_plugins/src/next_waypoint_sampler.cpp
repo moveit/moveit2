@@ -83,7 +83,6 @@ robot_trajectory::RobotTrajectory NextWaypointSampler::getLocalTrajectory(const 
   {  // TODO(sjahr) Use param to config window width
     if ((index_ + i) < reference_trajectory_->getWayPointCount())
     {
-      moveit::core::RobotState local_robot_state = reference_trajectory_->getWayPoint(index_ + i);
       local_trajectory.addSuffixWayPoint(
           reference_trajectory_->getWayPoint(index_ + i),
           reference_trajectory_->getWayPointDurationFromPrevious(index_ + i));  // TODO(sjahr) Remove magic number!

@@ -88,17 +88,18 @@ bool LocalPlannerComponent::initialize()
   // Configure planning scene monitor
   planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
       node_ptr, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor");
-  if (planning_scene_monitor_->getPlanningScene())
-  {
-    // Start state and scene monitors
-    planning_scene_monitor_->startSceneMonitor();
-  }
-  else
+  if (!planning_scene_monitor_->getPlanningScene())
   {
     const std::string error = "Unable to configure planning scene monitor";
     RCLCPP_FATAL(LOGGER, error);
     throw std::runtime_error(error);
   }
+
+  // Start state and scene monitors
+  RCLCPP_INFO(LOGGER, "Starting planning scene monitors");
+  planning_scene_monitor_->startSceneMonitor();
+  planning_scene_monitor_->startWorldGeometryMonitor();
+  planning_scene_monitor_->startStateMonitor();
 
   // Load trajectory operator plugin
   try
@@ -141,7 +142,7 @@ bool LocalPlannerComponent::initialize()
   {
     local_constraint_solver_instance_ =
         local_constraint_solver_plugin_loader_->createUniqueInstance(config_.local_constraint_solver_plugin_name);
-    if (!local_constraint_solver_instance_->initialize(node_ptr, planning_scene_monitor_))
+    if (!local_constraint_solver_instance_->initialize(node_ptr, planning_scene_monitor_, "panda_arm"))
       throw std::runtime_error("Unable to initialize constraint solver plugin");
     RCLCPP_INFO(LOGGER, "Using constraint solver interface '%s'", config_.local_constraint_solver_plugin_name.c_str());
   }
@@ -251,7 +252,8 @@ void LocalPlannerComponent::executePlanningLoopRun()
       // Solve local planning problem
       trajectory_msgs::msg::JointTrajectory local_solution;
       auto local_feedback = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
-      *local_feedback = local_constraint_solver_instance_->solve(local_trajectory, goal->local_constraints, local_solution);
+      *local_feedback =
+          local_constraint_solver_instance_->solve(local_trajectory, goal->local_constraints, local_solution);
 
       if (!local_feedback->feedback.empty())
       {
