@@ -49,11 +49,11 @@ public:
   NextWaypointSampler(){};
   ~NextWaypointSampler() override{};
 
-  bool initialize(const rclcpp::Node::SharedPtr& node, moveit::core::RobotModelConstPtr robot_model,
-                  std::string group_name) override;
+  bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
+                  const std::string& group_name) override;
   bool addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory) override;
-  robot_trajectory::RobotTrajectory getLocalTrajectory(moveit::core::RobotState current_state) override;
-  double getTrajectoryProgress(moveit::core::RobotState current_state) override;
+  robot_trajectory::RobotTrajectory getLocalTrajectory(const moveit::core::RobotState& current_state) override;
+  double getTrajectoryProgress(const moveit::core::RobotState& current_state) override;
 
 private:
   std::size_t index_;
