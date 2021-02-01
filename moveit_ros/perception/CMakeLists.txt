@@ -13,18 +13,18 @@ endif()
 
 find_package(Boost REQUIRED thread)
 
-# if(WITH_OPENGL)
-#   # Prefer newer vendor-specific OpenGL library
-#   if(POLICY CMP0072)
-#     cmake_policy(SET CMP0072 NEW)
-#   endif()
-#   find_package(OpenGL REQUIRED)
-#   find_package(GLEW REQUIRED)
-#   find_package(GLUT REQUIRED)
-#   set(gl_LIBS ${gl_LIBS} ${OPENGL_LIBRARIES})
-#   set(perception_GL_INCLUDE_DIRS "mesh_filter/include" "depth_image_octomap_updater/include")
-#   set(SYSTEM_GL_INCLUDE_DIRS ${GLEW_INCLUDE_DIR} ${GLUT_INCLUDE_DIR})
-# endif()
+if(WITH_OPENGL)
+  # Prefer newer vendor-specific OpenGL library
+  if(POLICY CMP0072)
+    cmake_policy(SET CMP0072 NEW)
+  endif()
+  find_package(OpenGL REQUIRED)
+  find_package(GLEW REQUIRED)
+  find_package(GLUT REQUIRED)
+  set(gl_LIBS ${gl_LIBS} ${OPENGL_LIBRARIES})
+  set(perception_GL_INCLUDE_DIRS "mesh_filter/include" "depth_image_octomap_updater/include")
+  set(SYSTEM_GL_INCLUDE_DIRS ${GLEW_INCLUDE_DIR} ${GLUT_INCLUDE_DIR})
+endif()
 
 if(APPLE)
   find_package(X11 REQUIRED)
@@ -55,7 +55,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
   point_containment_filter/include
   pointcloud_octomap_updater/include
   semantic_world/include
-  # ${perception_GL_INCLUDE_DIRS}
+  ${perception_GL_INCLUDE_DIRS}
 )
 
 set(THIS_PACKAGE_LIBRARIES
@@ -89,10 +89,10 @@ include_directories(SYSTEM
 add_subdirectory(lazy_free_space_updater)
 add_subdirectory(point_containment_filter)
 add_subdirectory(pointcloud_octomap_updater)
-# if(WITH_OPENGL)
-#   add_subdirectory(mesh_filter)
-#   add_subdirectory(depth_image_octomap_updater)
-# endif()
+if(WITH_OPENGL)
+  add_subdirectory(mesh_filter)
+  add_subdirectory(depth_image_octomap_updater)
+endif()
 
 add_subdirectory(semantic_world)
 
@@ -101,6 +101,6 @@ ament_export_libraries(${THIS_PACKAGE_LIBRARIES})
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor "pointcloud_octomap_updater_plugin_description.xml")
-# pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor "depth_image_octomap_updater_plugin_description.xml")
+pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor "depth_image_octomap_updater_plugin_description.xml")
 
 ament_package()
