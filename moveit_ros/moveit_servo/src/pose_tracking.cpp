@@ -289,7 +289,8 @@ geometry_msgs::msg::TwistStamped::ConstSharedPtr PoseTracking::calculateTwistCom
   // Cache the angular error, for rotation tolerance checking
   angular_error_ = axis_angle.angle();
 
-  double ang_vel_magnitude = cartesian_orientation_pids_[0].computeCommand(angular_error_, loop_rate_.period().count());
+  double ang_vel_magnitude =
+      cartesian_orientation_pids_[0].computeCommand(*angular_error_, loop_rate_.period().count());
   twist.angular.x = ang_vel_magnitude * axis_angle.axis()[0];
   twist.angular.y = ang_vel_magnitude * axis_angle.axis()[1];
   twist.angular.z = ang_vel_magnitude * axis_angle.axis()[2];
