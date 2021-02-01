@@ -51,6 +51,7 @@
 #include <moveit_msgs/msg/display_robot_state.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 
+using namespace std::chrono_literals;
 const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
 
 class HybridPlanningDemo
@@ -115,7 +116,6 @@ public:
 
   void run()
   {
-    // T
     RCLCPP_INFO(LOGGER, "Initialize Planning Scene Monitor");
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
     tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -124,17 +124,21 @@ public:
         node_, "robot_description", tf_buffer_, "planning_scene_monitor");
     if (planning_scene_monitor_->getPlanningScene() != nullptr)
     {
-      planning_scene_monitor_->startStateMonitor("/joint_states");
+      planning_scene_monitor_->startStateMonitor();
       planning_scene_monitor_->providePlanningSceneService();  // let RViz display query PlanningScene
       planning_scene_monitor_->setPlanningScenePublishingFrequency(100);
       planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
                                                             "/planning_scene");
       planning_scene_monitor_->startSceneMonitor();
     }
-    RCLCPP_INFO(LOGGER, "Wait 2s to ensure everything has started");
-    rclcpp::sleep_for(std::chrono::seconds(5));
 
-    if (!hp_action_client_->wait_for_action_server(std::chrono::seconds(20)))
+    if (!planning_scene_monitor_->waitForCurrentRobotState(node_->now(), 5))
+    {
+      RCLCPP_ERROR(LOGGER, "Timeout when waiting for /joint_states updates. Is the robot running?");
+      return;
+    }
+
+    if (!hp_action_client_->wait_for_action_server(20s))
     {
       RCLCPP_ERROR(LOGGER, "Hybrid planning action server not available after waiting");
       return;
@@ -156,7 +160,7 @@ public:
     }  // Unlock PlanningScene
 
     RCLCPP_INFO(LOGGER, "Wait 2s see collision object");
-    rclcpp::sleep_for(std::chrono::seconds(2));
+    rclcpp::sleep_for(2s);
 
     // Setup motion planning goal taken from motion_planning_api tutorial
     const std::string planning_group = "panda_arm";
@@ -164,17 +168,15 @@ public:
     const moveit::core::RobotModelPtr& robot_model = robot_model_loader.getModel();
 
     // Create a RobotState and JointModelGroup
-    moveit::core::RobotStatePtr robot_state(new moveit::core::RobotState(robot_model));
+    const auto robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
     const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(planning_group);
 
-    planning_scene::PlanningScenePtr planning_scene(new planning_scene::PlanningScene(robot_model));
-
     // Configure a valid robot state
-    planning_scene->getCurrentStateNonConst().setToDefaultValues(joint_model_group, "ready");
+    robot_state->setToDefaultValues(joint_model_group, "ready");
 
     auto goal_msg = moveit_msgs::action::HybridPlanning::Goal();
 
-    moveit::core::robotStateToRobotStateMsg(planning_scene->getCurrentStateNonConst(), goal_msg.request.start_state);
+    moveit::core::robotStateToRobotStateMsg(*robot_state, goal_msg.request.start_state);
     goal_msg.request.group_name = planning_group;
     goal_msg.request.num_planning_attempts = 10;
     goal_msg.request.max_velocity_scaling_factor = 0.1;
@@ -250,7 +252,7 @@ int main(int argc, char** argv)
 
   HybridPlanningDemo demo(node);
   std::thread run_demo([&demo]() {
-    rclcpp::sleep_for(std::chrono::seconds(5));
+    rclcpp::sleep_for(5s);
     demo.run();
   });
 

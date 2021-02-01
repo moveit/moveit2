@@ -42,9 +42,10 @@ namespace moveit_hybrid_planning
 const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
 std::once_flag LOCAL_PLANNER_STARTED;
 
-bool SinglePlanExecution::initialize(std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planner_handle)
+bool SinglePlanExecution::initialize(
+    const std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager>& hybrid_planning_manager)
 {
-  hybrid_planner_handle_ = hybrid_planner_handle;
+  hybrid_planning_manager_ = hybrid_planning_manager;
   return true;
 }
 
@@ -53,21 +54,21 @@ bool SinglePlanExecution::react(BasicHybridPlanningEvent event)
   switch (event)
   {
     case moveit_hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
-      if (!hybrid_planner_handle_->planGlobalTrajectory())  // Start global planning
+      if (!hybrid_planning_manager_->planGlobalTrajectory())  // Start global planning
       {
-        hybrid_planner_handle_->sendHybridPlanningResponse(false);
+        hybrid_planning_manager_->sendHybridPlanningResponse(false);
       }
       break;
     case moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
-      std::call_once(LOCAL_PLANNER_STARTED, [this]() {   // ensure the local planner is not started twice
-        if (!hybrid_planner_handle_->runLocalPlanner())  // Start local planning
+      std::call_once(LOCAL_PLANNER_STARTED, [this]() {     // ensure the local planner is not started twice
+        if (!hybrid_planning_manager_->runLocalPlanner())  // Start local planning
         {
-          hybrid_planner_handle_->sendHybridPlanningResponse(false);
+          hybrid_planning_manager_->sendHybridPlanningResponse(false);
         }
       });
       break;
     case moveit_hybrid_planning::BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
-      hybrid_planner_handle_->sendHybridPlanningResponse(true);
+      hybrid_planning_manager_->sendHybridPlanningResponse(true);
       break;
     default:
       // Do nothing
@@ -75,10 +76,10 @@ bool SinglePlanExecution::react(BasicHybridPlanningEvent event)
   }
   return true;
 }
-bool SinglePlanExecution::react(std::string event)
+bool SinglePlanExecution::react(const std::string& event)
 {
-  auto& clock = *hybrid_planner_handle_->get_clock();
-  RCLCPP_INFO_THROTTLE(LOGGER, clock, 1000, event);
+  auto& clock = *hybrid_planning_manager_->get_clock();
+  RCLCPP_INFO_THROTTLE(LOGGER, clock, 1000, event.c_str());
   return true;
 };
 }  // namespace moveit_hybrid_planning

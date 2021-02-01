@@ -41,13 +41,13 @@ namespace moveit_hybrid_planning
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
 
-bool ReplanInvalidatedTrajectory::react(std::string event)
+bool ReplanInvalidatedTrajectory::react(const std::string& event)
 {
   if (event == "collision_ahead")
   {
-    if (!hybrid_planner_handle_->planGlobalTrajectory())  // Start global planning
+    if (!hybrid_planning_manager_->planGlobalTrajectory())  // Start global planning
     {
-      hybrid_planner_handle_->sendHybridPlanningResponse(false);
+      hybrid_planning_manager_->sendHybridPlanningResponse(false);
     }
   }
   else if (!event.empty())
