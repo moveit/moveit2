@@ -1,5 +1,10 @@
 set(MOVEIT_LIB_NAME moveit_ompl_interface)
 
+if (APPLE)
+  # needed to bring ode on the linker path exported by homebrew's OMPL
+  link_directories(${OMPL_LIBRARY_DIRS})
+endif()
+
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/ompl_interface.cpp
   src/planning_context_manager.cpp

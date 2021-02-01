@@ -46,6 +46,9 @@
 
 #include <memory>
 
+using boost::placeholders::_1;
+using boost::placeholders::_2;
+
 namespace occupancy_map_monitor
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.pointcloud_octomap_updater");

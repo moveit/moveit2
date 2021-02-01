@@ -17,9 +17,6 @@ find_package(moveit_ros_planning REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(Boost REQUIRED thread system filesystem regex date_time program_options)
-find_package(OpenSSL)
-
-include_directories(warehouse/include ${OPENSSL_INCLUDE_DIR})
 
 add_subdirectory(warehouse)
 
