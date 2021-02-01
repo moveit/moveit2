@@ -64,8 +64,8 @@ public:
    * @param group_name Name of the joint group the trajectory uses
    * @return True if initialization was successful
    */
-  virtual bool initialize(const rclcpp::Node::SharedPtr& node, moveit::core::RobotModelConstPtr robot_model,
-                          std::string group_name) = 0;
+  virtual bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
+                          const std::string& group_name) = 0;
 
   /**
    * Add a new reference trajectory segment to the vector of global trajectory segments to process
@@ -79,7 +79,7 @@ public:
    * @param current_state Current RobotState
    * @return Current local constraints that define the local planning goal
    */
-  virtual robot_trajectory::RobotTrajectory getLocalTrajectory(moveit::core::RobotState current_state) = 0;
+  virtual robot_trajectory::RobotTrajectory getLocalTrajectory(const moveit::core::RobotState& current_state) = 0;
 
   /**
    * Return the processing status of the reference trajectory's execution based on a user defined
@@ -87,7 +87,7 @@ public:
    * @param current_state Current RobotState
    * @return A value between 0.0 (start) to 1.0 (completion).
    */
-  virtual double getTrajectoryProgress(moveit::core::RobotState current_state) = 0;
+  virtual double getTrajectoryProgress(const moveit::core::RobotState& current_state) = 0;
   virtual ~TrajectoryOperatorInterface(){};
 
 protected:
