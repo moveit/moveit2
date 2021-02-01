@@ -45,6 +45,7 @@
 #include <moveit_msgs/msg/constraints.hpp>
 namespace moveit_hybrid_planning
 {
+using namespace std::chrono_literals;
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 
 LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
@@ -53,7 +54,7 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   state_ = moveit_hybrid_planning::LocalPlannerState::UNCONFIGURED;
 
   // Initialize local planner after construction
-  timer_ = this->create_wall_timer(std::chrono::milliseconds(1), [this]() {
+  timer_ = this->create_wall_timer(1ms, [this]() {
     switch (state_)
     {
       case moveit_hybrid_planning::LocalPlannerState::READY:
@@ -85,25 +86,27 @@ bool LocalPlannerComponent::initialize()
   config_.load(node_ptr);
 
   // Configure planning scene monitor
-  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
-      node_ptr, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor"));
-  if (planning_scene_monitor_->getPlanningScene())
-  {
-    // Start state and scene monitors
-    planning_scene_monitor_->startSceneMonitor();
-  }
-  else
+  planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
+      node_ptr, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor");
+  if (!planning_scene_monitor_->getPlanningScene())
   {
     const std::string error = "Unable to configure planning scene monitor";
     RCLCPP_FATAL(LOGGER, error);
     throw std::runtime_error(error);
   }
 
+  // Start state and scene monitors
+  RCLCPP_INFO(LOGGER, "Starting planning scene monitors");
+  planning_scene_monitor_->startSceneMonitor();
+  planning_scene_monitor_->startWorldGeometryMonitor();
+  planning_scene_monitor_->startStateMonitor();
+
   // Load trajectory operator plugin
   try
   {
-    trajectory_operator_loader_.reset(new pluginlib::ClassLoader<moveit_hybrid_planning::TrajectoryOperatorInterface>(
-        "moveit_hybrid_planning", "moveit_hybrid_planning::TrajectoryOperatorInterface"));
+    trajectory_operator_loader_ =
+        std::make_unique<pluginlib::ClassLoader<moveit_hybrid_planning::TrajectoryOperatorInterface>>(
+            "moveit_hybrid_planning", "moveit_hybrid_planning::TrajectoryOperatorInterface");
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -127,9 +130,9 @@ bool LocalPlannerComponent::initialize()
   // Load local constraint solver
   try
   {
-    local_constraint_solver_plugin_loader_.reset(
-        new pluginlib::ClassLoader<moveit_hybrid_planning::LocalConstraintSolverInterface>(
-            "moveit_hybrid_planning", "moveit_hybrid_planning::LocalConstraintSolverInterface"));
+    local_constraint_solver_plugin_loader_ =
+        std::make_unique<pluginlib::ClassLoader<moveit_hybrid_planning::LocalConstraintSolverInterface>>(
+            "moveit_hybrid_planning", "moveit_hybrid_planning::LocalConstraintSolverInterface");
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -139,7 +142,7 @@ bool LocalPlannerComponent::initialize()
   {
     local_constraint_solver_instance_ =
         local_constraint_solver_plugin_loader_->createUniqueInstance(config_.local_constraint_solver_plugin_name);
-    if (!local_constraint_solver_instance_->initialize(node_ptr, planning_scene_monitor_))
+    if (!local_constraint_solver_instance_->initialize(node_ptr, planning_scene_monitor_, "panda_arm"))
       throw std::runtime_error("Unable to initialize constraint solver plugin");
     RCLCPP_INFO(LOGGER, "Using constraint solver interface '%s'", config_.local_constraint_solver_plugin_name.c_str());
   }
@@ -166,7 +169,7 @@ bool LocalPlannerComponent::initialize()
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>> goal_handle) {
         local_planning_goal_handle_ = std::move(goal_handle);
         // Start local planning loop when an action request is received
-        timer_ = this->create_wall_timer(std::chrono::duration<double>(1 / config_.local_planning_frequency),
+        timer_ = this->create_wall_timer(1s / config_.local_planning_frequency,
                                          std::bind(&LocalPlannerComponent::executePlanningLoopRun, this));
       });
 
@@ -241,13 +244,16 @@ void LocalPlannerComponent::executePlanningLoopRun()
         break;
       }
 
-      // Get and solve local planning problem
+      // Get local goal trajectory to follow
       robot_trajectory::RobotTrajectory local_trajectory =
           trajectory_operator_instance_->getLocalTrajectory(current_robot_state);
       const auto goal = local_planning_goal_handle_->get_goal();
+
+      // Solve local planning problem
+      trajectory_msgs::msg::JointTrajectory local_solution;
       auto local_feedback = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
-      trajectory_msgs::msg::JointTrajectory local_solution =
-          local_constraint_solver_instance_->solve(local_trajectory, goal->local_constraints, local_feedback);
+      *local_feedback =
+          local_constraint_solver_instance_->solve(local_trajectory, goal->local_constraints, local_solution);
 
       if (!local_feedback->feedback.empty())
       {
