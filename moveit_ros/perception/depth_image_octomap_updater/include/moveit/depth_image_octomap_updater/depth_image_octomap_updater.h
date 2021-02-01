@@ -36,13 +36,13 @@
 
 #pragma once
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/buffer.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
 #include <moveit/mesh_filter/mesh_filter.h>
 #include <moveit/mesh_filter/stereo_camera_model.h>
 #include <moveit/lazy_free_space_updater/lazy_free_space_updater.h>
-#include <image_transport/image_transport.h>
+#include <image_transport/image_transport.hpp>
 #include <memory>
 
 namespace occupancy_map_monitor
@@ -53,31 +53,32 @@ public:
   DepthImageOctomapUpdater();
   ~DepthImageOctomapUpdater() override;
 
-  bool setParams(XmlRpc::XmlRpcValue& params) override;
-  bool initialize() override;
+  bool setParams(const std::string& name_space) override;
+  bool initialize(const rclcpp::Node::SharedPtr& node) override;
   void start() override;
   void stop() override;
   ShapeHandle excludeShape(const shapes::ShapeConstPtr& shape) override;
   void forgetShape(ShapeHandle handle) override;
 
 private:
-  void depthImageCallback(const sensor_msgs::ImageConstPtr& depth_msg, const sensor_msgs::CameraInfoConstPtr& info_msg);
+  void depthImageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
+                          const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg);
   bool getShapeTransform(mesh_filter::MeshHandle h, Eigen::Isometry3d& transform) const;
   void stopHelper();
 
-  ros::NodeHandle nh_;
+  rclcpp::Node::SharedPtr node_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-  image_transport::ImageTransport input_depth_transport_;
-  image_transport::ImageTransport model_depth_transport_;
-  image_transport::ImageTransport filtered_depth_transport_;
-  image_transport::ImageTransport filtered_label_transport_;
+  std::unique_ptr<image_transport::ImageTransport> input_depth_transport_;
+  std::unique_ptr<image_transport::ImageTransport> model_depth_transport_;
+  std::unique_ptr<image_transport::ImageTransport> filtered_depth_transport_;
+  std::unique_ptr<image_transport::ImageTransport> filtered_label_transport_;
 
   image_transport::CameraSubscriber sub_depth_image_;
   image_transport::CameraPublisher pub_model_depth_image_;
   image_transport::CameraPublisher pub_filtered_depth_image_;
   image_transport::CameraPublisher pub_filtered_label_image_;
 
-  ros::Time last_update_time_;
+  rclcpp::Time last_update_time_;
 
   std::string filtered_cloud_topic_;
   std::string sensor_type_;
@@ -103,6 +104,6 @@ private:
   std::vector<float> x_cache_, y_cache_;
   double inv_fx_, inv_fy_, K0_, K2_, K4_, K5_;
   std::vector<unsigned int> filtered_labels_;
-  ros::WallTime last_depth_callback_start_;
+  rclcpp::Time last_depth_callback_start_;
 };
 }  // namespace occupancy_map_monitor
