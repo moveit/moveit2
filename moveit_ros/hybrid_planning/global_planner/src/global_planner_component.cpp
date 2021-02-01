@@ -45,6 +45,7 @@
 
 namespace moveit_hybrid_planning
 {
+using namespace std::chrono_literals;
 const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
 constexpr char PLANNING_PLUGIN_PARAM[] = "planning_plugin";
 
@@ -79,7 +80,7 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
   global_trajectory_pub_ = this->create_publisher<moveit_msgs::msg::MotionPlanResponse>("global_trajectory", 1);
 
   // Initialize global planner after construction
-  timer_ = this->create_wall_timer(std::chrono::milliseconds(1), [this]() {
+  timer_ = this->create_wall_timer(1ms, [this]() {
     if (initialized_)
     {
       timer_->cancel();
@@ -100,18 +101,14 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
 bool GlobalPlannerComponent::init()
 {
   auto node_ptr = shared_from_this();
+
   // Configure planning scene monitor
-  planning_scene_monitor_.reset(new planning_scene_monitor::PlanningSceneMonitor(
-      node_ptr, "robot_description", tf_buffer_, "global_planner/planning_scene_monitor"));
+  planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
+      node_ptr, "robot_description", tf_buffer_, "global_planner/planning_scene_monitor");
+
   // Allows us to sycronize to Rviz and also publish collision objects to ourselves
   RCLCPP_DEBUG(LOGGER, "Configuring Planning Scene Monitor");
-  if (planning_scene_monitor_->getPlanningScene())
-  {
-    // Start state and scene monitors
-    RCLCPP_INFO(LOGGER, "Listening to '/publish_planning_scene' for planning scene updates");
-    planning_scene_monitor_->startSceneMonitor();
-  }
-  else
+  if (!planning_scene_monitor_->getPlanningScene())
   {
     const std::string error = "Unable to configure planning scene monitor";
     RCLCPP_FATAL(LOGGER, error);
@@ -127,6 +124,12 @@ bool GlobalPlannerComponent::init()
     throw std::runtime_error(error);
   }
 
+  // Start state and scene monitors
+  RCLCPP_INFO(LOGGER, "Starting planning scene monitors");
+  planning_scene_monitor_->startSceneMonitor();
+  planning_scene_monitor_->startWorldGeometryMonitor();
+  planning_scene_monitor_->startStateMonitor();
+
   // Load planning pipelines
   // TODO(sjahr) Use refactored MoveItCpp instance (load only planning pipeline and planning scene monitor) to reduce redundancy
   for (const auto& planning_pipeline_name : config_.pipeline_names)
@@ -137,9 +140,8 @@ bool GlobalPlannerComponent::init()
       continue;
     }
     RCLCPP_INFO(LOGGER, "Loading planning pipeline '%s'", planning_pipeline_name.c_str());
-    planning_pipeline::PlanningPipelinePtr pipeline;
-    pipeline.reset(
-        new planning_pipeline::PlanningPipeline(robot_model_, node_ptr, planning_pipeline_name, PLANNING_PLUGIN_PARAM));
+    auto pipeline = std::make_shared<planning_pipeline::PlanningPipeline>(
+        robot_model_, node_ptr, planning_pipeline_name, PLANNING_PLUGIN_PARAM);
     if (!pipeline->getPlannerManager())
     {
       RCLCPP_ERROR(LOGGER, "Failed to initialize planning pipeline '%s'.", planning_pipeline_name.c_str());
@@ -176,37 +178,41 @@ void GlobalPlannerComponent::globalPlanningRequestCallback(
   last_global_solution_ = planning_solution;  // TODO(sjahr) Add Service to expose this
 };
 
-moveit_msgs::msg::MotionPlanResponse GlobalPlannerComponent::plan(moveit_msgs::msg::MotionPlanRequest planning_problem)
+moveit_msgs::msg::MotionPlanResponse
+GlobalPlannerComponent::plan(const moveit_msgs::msg::MotionPlanRequest& planning_problem)
 {
-  // Clone current planning scene
-  planning_scene_monitor_->updateFrameTransforms();
-  planning_scene_monitor_->lockSceneRead();  // LOCK planning scene
-  ::planning_scene::PlanningScenePtr planning_scene =
-      ::planning_scene::PlanningScene::clone(planning_scene_monitor_->getPlanningScene());
-  planning_scene_monitor_->unlockSceneRead();  // UNLOCK planning scene
-
-  // TODO(sjahr) Review start/current robot state considerations
-  moveit::core::robotStateToRobotStateMsg(planning_scene->getCurrentState(), planning_problem.start_state);
-
+  // Result
   moveit_msgs::msg::MotionPlanResponse planning_solution;
 
-  // Set goal constraints
-  ::planning_interface::MotionPlanResponse response;
-  if (planning_problem.goal_constraints.empty())
+  // Update planning scene and lock for planning
+  planning_scene_monitor_->getStateMonitor()->waitForCurrentState();
+  planning_scene_monitor_->updateFrameTransforms();
+  planning_scene_monitor_->lockSceneRead();  // LOCK planning scene
+
+  // Validate MotionPlanRequest
+  // Assume, there is only one planning pipeline TODO(sjahr) expand Request
+  const auto& pipeline = planning_pipelines_.at(config_.pipeline_names[0]);
+  if (!pipeline->getPlannerManager()->canServiceRequest(planning_problem))
   {
-    RCLCPP_ERROR(LOGGER, "No goal constraints set for planning request");
+    RCLCPP_ERROR(LOGGER, "Planner can't service MotionPlanRequest");
     planning_solution.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
     return planning_solution;
   }
 
-  // Run planning attempt
-  const planning_pipeline::PlanningPipelinePtr pipeline = planning_pipelines_.at(
-      config_.pipeline_names[0]);  // Assume, there is only one planning pipeline TODO(sjahr) expand Request
-  pipeline->generatePlan(planning_scene, planning_problem, response);
+  // Run planning attempt with current state as start state, unlock scene right after
+  const planning_scene::PlanningSceneConstPtr scene = planning_scene_monitor_->getPlanningScene();
+  // TODO(sjahr): do we need to initialize start_state? by default the current state of the scene should be used
+  auto motion_plan_request = planning_problem;
+  moveit::core::robotStateToRobotStateMsg(scene->getCurrentState(), motion_plan_request.start_state);
+  ::planning_interface::MotionPlanResponse response;
+  pipeline->generatePlan(scene, motion_plan_request, response);
+  planning_scene_monitor_->unlockSceneRead();  // UNLOCK planning scene
+
   if (response.error_code_.val != response.error_code_.SUCCESS)
   {
-    RCLCPP_ERROR(LOGGER, "Could not compute plan successfully");
+    RCLCPP_ERROR(LOGGER, "Failed to compute global trajectory");
   }
+
   response.getMessage(planning_solution);
   return planning_solution;
 }
