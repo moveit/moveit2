@@ -95,7 +95,6 @@ public:
       exit(EXIT_FAILURE);
     }
 
-
     tracker_ = std::make_shared<moveit_servo::PoseTracking>(node_, servo_parameters_, planning_scene_monitor_);
 
     // Tolerance for pose seeking
