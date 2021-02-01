@@ -102,7 +102,7 @@ private:
   bool init();
 
   // Plan global trajectory
-  moveit_msgs::msg::MotionPlanResponse plan(moveit_msgs::msg::MotionPlanRequest planning_problem);
+  moveit_msgs::msg::MotionPlanResponse plan(const moveit_msgs::msg::MotionPlanRequest& planning_problem);
 };
 
 }  // namespace moveit_hybrid_planning

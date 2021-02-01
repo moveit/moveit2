@@ -64,20 +64,20 @@ public:
    * @return True if initialization was successful
    */
   virtual bool initialize(const rclcpp::Node::SharedPtr& node,
-                          planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor) = 0;
+                          const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+                          const std::string& group_name) = 0;
 
   /**
    * Solve local planning problem for the current loop run
    * @param local_trajectory The local trajectory to pursue
    * @param local_constraints Local goal constraints
-   * @param planning_scene The planning scene to use for local planning
-   * @param feedback Feedback event string from the current solver i.e. "Collision detected"
-   * @return Local planning solution in joint space
+   * @param local_solution solution plan in joint space
+   * @return Feedback event from the current solver call i.e. "Collision detected"
    */
-  virtual trajectory_msgs::msg::JointTrajectory
-  solve(robot_trajectory::RobotTrajectory local_trajectory,
-        std::vector<moveit_msgs::msg::Constraints> local_constraints,
-        std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> feedback) = 0;
+  virtual moveit_msgs::action::LocalPlanner::Feedback
+  solve(const robot_trajectory::RobotTrajectory& local_trajectory,
+        const std::vector<moveit_msgs::msg::Constraints>& local_constraints,
+        trajectory_msgs::msg::JointTrajectory& local_solution) = 0;
   virtual ~LocalConstraintSolverInterface(){};
 
 protected:
