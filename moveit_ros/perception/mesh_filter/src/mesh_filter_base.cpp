@@ -44,8 +44,6 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <ros/console.h>
-
 // include SSE headers
 #ifdef HAVE_SSE_EXTENSIONS
 #include <xmmintrin.h>

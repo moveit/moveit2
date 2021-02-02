@@ -11,13 +11,7 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   moveit_core
-  image_transport
-  cv_bridge
-  tf2_ros
-  tf2_eigen
   geometric_shapes
-  moveit_ros_planning
-  moveit_ros_occupancy_map_monitor
   Eigen3
   Boost
 )
