@@ -39,8 +39,8 @@ target_link_libraries(collision_detector_bullet_plugin
   moveit_planning_scene
 )
 
-install(TARGETS ${MOVEIT_LIB_NAME} collision_detector_bullet_plugin
-  EXPORT ${MOVEIT_LIB_NAME} collision_detector_bullet_plugin
+install(TARGETS ${MOVEIT_LIB_NAME} EXPORT ${MOVEIT_LIB_NAME}
+  TARGETS collision_detector_bullet_plugin EXPORT collision_detector_bullet_plugin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
