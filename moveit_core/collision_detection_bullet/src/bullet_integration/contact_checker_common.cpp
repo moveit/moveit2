@@ -29,7 +29,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Jorge Nicho*/
+/* Author: Jorge Nicho
+ * Author: Levi Armstrong
+ */
 
 #include "moveit/collision_detection_bullet/bullet_integration/contact_checker_common.h"
 
