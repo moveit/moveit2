@@ -50,7 +50,7 @@ PoseTracking::PoseTracking(const ros::NodeHandle& nh,
   , loop_rate_(DEFAULT_LOOP_RATE)
   , transform_listener_(transform_buffer_)
   , stop_requested_(false)
-  , angular_error_(0)
+  , angular_error_(boost::none)
 {
   readROSParams();
 
@@ -128,6 +128,11 @@ PoseTrackingStatusCode PoseTracking::moveToPose(const Eigen::Vector3d& positiona
 
     // Compute servo command from PID controller output and send it to the Servo object, for execution
     twist_stamped_pub_.publish(calculateTwistCommand());
+
+    if (!loop_rate_.sleep())
+    {
+      ROS_WARN_STREAM_THROTTLE_NAMED(1, LOGNAME, "Target control rate was missed");
+    }
   }
 
   doPostMotionReset();
@@ -221,8 +226,12 @@ bool PoseTracking::satisfiesPoseTolerance(const Eigen::Vector3d& positional_tole
   double y_error = target_pose_.pose.position.y - command_frame_transform_.translation()(1);
   double z_error = target_pose_.pose.position.z - command_frame_transform_.translation()(2);
 
+  // If uninitialized, likely haven't received the target pose yet.
+  if (!angular_error_)
+    return false;
+
   return ((std::abs(x_error) < positional_tolerance(0)) && (std::abs(y_error) < positional_tolerance(1)) &&
-          (std::abs(z_error) < positional_tolerance(2)) && (std::abs(angular_error_) < angular_tolerance));
+          (std::abs(z_error) < positional_tolerance(2)) && (std::abs(*angular_error_) < angular_tolerance));
 }
 
 void PoseTracking::targetPoseCallback(const geometry_msgs::PoseStampedConstPtr& msg)
@@ -238,6 +247,9 @@ void PoseTracking::targetPoseCallback(const geometry_msgs::PoseStampedConstPtr& 
       geometry_msgs::TransformStamped target_to_planning_frame = transform_buffer_.lookupTransform(
           planning_frame_, target_pose_.header.frame_id, ros::Time(0), ros::Duration(0.1));
       tf2::doTransform(target_pose_, target_pose_, target_to_planning_frame);
+
+      // Prevent doTransform from copying a stamp of 0, which will cause the haveRecentTargetPose check to fail servo motions
+      target_pose_.header.stamp = ros::Time::now();
     }
     catch (const tf2::TransformException& ex)
     {
@@ -285,7 +297,7 @@ geometry_msgs::TwistStampedConstPtr PoseTracking::calculateTwistCommand()
   // Cache the angular error, for rotation tolerance checking
   angular_error_ = axis_angle.angle();
   double ang_vel_magnitude =
-      cartesian_orientation_pids_[0].computeCommand(angular_error_, loop_rate_.expectedCycleTime());
+      cartesian_orientation_pids_[0].computeCommand(*angular_error_, loop_rate_.expectedCycleTime());
   twist.angular.x = ang_vel_magnitude * axis_angle.axis()[0];
   twist.angular.y = ang_vel_magnitude * axis_angle.axis()[1];
   twist.angular.z = ang_vel_magnitude * axis_angle.axis()[2];
@@ -298,7 +310,7 @@ geometry_msgs::TwistStampedConstPtr PoseTracking::calculateTwistCommand()
 void PoseTracking::doPostMotionReset()
 {
   stop_requested_ = false;
-  angular_error_ = 0;
+  angular_error_ = boost::none;
 
   // Reset error integrals and previous errors of PID controllers
   cartesian_position_pids_[0].reset();

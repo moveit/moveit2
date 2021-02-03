@@ -259,12 +259,12 @@ void RobotState::dropVelocities()
 
 void RobotState::dropAccelerations()
 {
-  has_velocity_ = false;
+  has_acceleration_ = false;
 }
 
 void RobotState::dropEffort()
 {
-  has_velocity_ = false;
+  has_effort_ = false;
 }
 
 void RobotState::dropDynamics()
@@ -510,6 +510,30 @@ void RobotState::setJointGroupPositions(const JointModelGroup* group, const Eige
   const std::vector<int>& il = group->getVariableIndexList();
   for (std::size_t i = 0; i < il.size(); ++i)
     position_[il[i]] = values(i);
+  updateMimicJoints(group);
+}
+
+void RobotState::setJointGroupActivePositions(const JointModelGroup* group, const std::vector<double>& gstate)
+{
+  assert(gstate.size() == group->getActiveVariableCount());
+  std::size_t i = 0;
+  for (const JointModel* jm : group->getActiveJointModels())
+  {
+    setJointPositions(jm, &gstate[i]);
+    i += jm->getVariableCount();
+  }
+  updateMimicJoints(group);
+}
+
+void RobotState::setJointGroupActivePositions(const JointModelGroup* group, const Eigen::VectorXd& values)
+{
+  assert(values.size() == group->getActiveVariableCount());
+  std::size_t i = 0;
+  for (const JointModel* jm : group->getActiveJointModels())
+  {
+    setJointPositions(jm, &values(i));
+    i += jm->getVariableCount();
+  }
   updateMimicJoints(group);
 }
 
