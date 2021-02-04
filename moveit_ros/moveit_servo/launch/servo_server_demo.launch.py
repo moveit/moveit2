@@ -55,6 +55,18 @@ def generate_launch_description():
                                               os.path.join(get_package_share_directory("moveit_servo"), "config", "start_positions.yaml"),
                                               robot_description])
 
+
+
+
+    # The servo cpp interface demo
+    # Creates the Servo node and publishes commands to it
+    servo_node = Node(
+        package='moveit_servo',
+        executable='servo_cpp_demo',
+        output='screen',
+        parameters=[servo_params, robot_description, robot_description_semantic ]
+    )
+
     # Launch as much as possible in components
     container = ComposableNodeContainer(
             name='moveit_servo_demo_container',
@@ -71,15 +83,9 @@ def generate_launch_description():
                     package='tf2_ros',
                     plugin='tf2_ros::StaticTransformBroadcasterNode',
                     name='static_tf2_broadcaster',
-                    parameters=[ {'/child_frame_id' : 'panda_link0', '/frame_id' : 'world'} ]),
-                ComposableNode(
-                    package='moveit_servo',
-                    plugin='moveit_servo::ServoServer',
-                    name='servo_server',
-                    parameters=[servo_params, robot_description, robot_description_semantic],
-                    extra_arguments=[{'use_intra_process_comms' : True}])
+                    parameters=[ {'/child_frame_id' : 'panda_link0', '/frame_id' : 'world'} ])
             ],
             output='screen',
     )
     
-    return LaunchDescription([ rviz_node, fake_joint_driver_node, container ])
+    return LaunchDescription([ rviz_node, fake_joint_driver_node, servo_node, container ])
