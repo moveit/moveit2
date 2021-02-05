@@ -228,13 +228,13 @@ void CollisionEnvBullet::checkRobotCollisionHelperCCD(const CollisionRequest& re
 void CollisionEnvBullet::distanceSelf(const DistanceRequest& req, DistanceResult& res,
                                       const moveit::core::RobotState& state) const
 {
-  RCLCPP_INFO(LOGGER, "Distance to self not implemented yet.");
+  RCLCPP_INFO(LOGGER, "distanceSelf is not implemented for Bullet.");
 }
 
 void CollisionEnvBullet::distanceRobot(const DistanceRequest& req, DistanceResult& res,
                                        const moveit::core::RobotState& state) const
 {
-  RCLCPP_INFO(LOGGER, "Distance to self not implemented yet.");
+  RCLCPP_INFO(LOGGER, "distanceRobot is not implemented for Bullet.");
 }
 
 void CollisionEnvBullet::addToManager(const World::Object* obj)

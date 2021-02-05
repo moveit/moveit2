@@ -110,6 +110,7 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
   declareOrGetParam<bool>(parameters->publish_joint_positions, ns + ".publish_joint_positions", node, logger);
   declareOrGetParam<bool>(parameters->publish_joint_velocities, ns + ".publish_joint_velocities", node, logger);
   declareOrGetParam<bool>(parameters->publish_joint_accelerations, ns + ".publish_joint_accelerations", node, logger);
+  declareOrGetParam<bool>(parameters->low_latency_mode, ns + ".low_latency_mode", node, logger);
 
   // Incoming Joint State properties
   declareOrGetParam<std::string>(parameters->joint_topic, ns + ".joint_topic", node, logger);
