@@ -4,3 +4,10 @@ add_library(next_waypoint_sampler_plugin SHARED
 set_target_properties(next_waypoint_sampler_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(next_waypoint_sampler_plugin ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(next_waypoint_sampler_plugin trajectory_operator_interface)
+
+add_library(dynamic_window_operator_plugin SHARED
+  src/dynamic_window_operator.cpp
+)
+set_target_properties(dynamic_window_operator_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(dynamic_window_operator_plugin ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(dynamic_window_operator_plugin trajectory_operator_interface)

@@ -27,6 +27,7 @@ set(LIBRARIES
   trajectory_operator_interface
   local_constraint_solver_interface
   next_waypoint_sampler_plugin
+  dynamic_window_operator_plugin
   single_plan_execution_plugin
   decelerate_before_collision_plugin
   replan_invalidated_trajectory_plugin
@@ -82,6 +83,7 @@ pluginlib_export_plugin_description_file(moveit_hybrid_planning single_plan_exec
 pluginlib_export_plugin_description_file(moveit_hybrid_planning next_waypoint_sampler_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning decelerate_before_collision_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning replan_invalidated_trajectory_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_hybrid_planning dynamic_window_operator_plugin.xml)
 
 ament_export_include_directories(include)
 ament_export_libraries(${LIBRARIES})
