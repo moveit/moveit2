@@ -30,6 +30,7 @@ set(LIBRARIES
   single_plan_execution_plugin
   decelerate_before_collision_plugin
   replan_invalidated_trajectory_plugin
+  forward_trajectory_plugin
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -82,6 +83,7 @@ pluginlib_export_plugin_description_file(moveit_hybrid_planning single_plan_exec
 pluginlib_export_plugin_description_file(moveit_hybrid_planning next_waypoint_sampler_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning decelerate_before_collision_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning replan_invalidated_trajectory_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_hybrid_planning forward_trajectory_plugin.xml)
 
 ament_export_include_directories(include)
 ament_export_libraries(${LIBRARIES})
