@@ -139,7 +139,7 @@ public:
   virtual void
   controllerDoneCallback(const typename rclcpp_action::ClientGoalHandle<T>::WrappedResult& wrapped_result) = 0;
 
-  bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(0)) override
+  bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(-1)) override
   {
     std::promise<bool> result_callback_done;
     auto result_future = controller_action_client_->async_get_result(
@@ -147,7 +147,7 @@ public:
           controllerDoneCallback(wrapped_result);
           result_callback_done.set_value(true);
         });
-    if (timeout.seconds() == 0.0)
+    if (timeout < std::chrono::nanoseconds(0))
     {
       result_future.wait();
     }
