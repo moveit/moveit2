@@ -233,9 +233,10 @@ public:
    */
   /**@{*/
 
-  const std::string& getCollisionDetectorName() const
+  const std::string getCollisionDetectorName() const
   {
-    return collision_detector_->alloc_->getName();
+    // If no collision detector is allocated, return an empty string
+    return collision_detector_ ? (collision_detector_->alloc_->getName()) : "";
   }
 
   /** \brief Get the representation of the world */
@@ -993,7 +994,7 @@ private:
   collision_detection::World::ObserverCallbackFn current_world_object_update_callback_;
   collision_detection::World::ObserverHandle current_world_object_update_observer_handle_;
 
-  CollisionDetectorPtr collision_detector_;                  // copy of one of the entries in collision_.  Never NULL.
+  CollisionDetectorPtr collision_detector_;  // copy of one of the entries in collision_.  Never NULL.
 
   collision_detection::AllowedCollisionMatrixPtr acm_;  // if NULL use parent's
 

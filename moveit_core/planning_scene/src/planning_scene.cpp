@@ -200,10 +200,11 @@ PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(pare
   collision_detector_->alloc_ = parent_detector->alloc_;
   collision_detector_->cenv_ = collision_detector_->alloc_->allocateEnv(parent_detector->cenv_, world_);
   collision_detector_->cenv_const_ = collision_detector_->cenv_;
-  collision_detector_->cenv_unpadded_ = collision_detector_->alloc_->allocateEnv(parent_detector->cenv_unpadded_, world_);
+  collision_detector_->cenv_unpadded_ =
+      collision_detector_->alloc_->allocateEnv(parent_detector->cenv_unpadded_, world_);
   collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
   // TODO(andyz): copy padding from parent. Maybe like this?
-  //collision_detector_->copyPadding(parent_detector->collision_detector_);
+  // collision_detector_->copyPadding(parent_detector->collision_detector_);
 }
 
 PlanningScenePtr PlanningScene::clone(const PlanningSceneConstPtr& scene)
@@ -235,8 +236,14 @@ void PlanningScene::CollisionDetector::copyPadding(const PlanningScene::Collisio
 void PlanningScene::setCollisionDetectorType(const collision_detection::CollisionDetectorAllocatorPtr& allocator)
 {
   const std::string& name = allocator->getName();
-  // Temporary copy of the previous
-  CollisionDetector prev_coll_detector = *collision_detector_;
+  // Temporary copy of the previous (if any), to copy padding
+  CollisionDetector prev_coll_detector;
+  bool have_previous_coll_detector = false;
+  if (collision_detector_)
+  {
+    have_previous_coll_detector = true;
+    prev_coll_detector = *collision_detector_;
+  }
 
   if (name == getCollisionDetectorName())  // already using this collision detector
     return;
@@ -249,9 +256,12 @@ void PlanningScene::setCollisionDetectorType(const collision_detection::Collisio
   collision_detector_->cenv_const_ = collision_detector_->cenv_;
 
   // Copy padding from the previous collision detector
-  collision_detector_->cenv_unpadded_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
-  collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
-  collision_detector_->copyPadding(prev_coll_detector);
+  if (have_previous_coll_detector)
+  {
+    collision_detector_->cenv_unpadded_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
+    collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
+    collision_detector_->copyPadding(prev_coll_detector);
+  }
 
   // Allocate unpadded
   collision_detector_->cenv_unpadded_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
@@ -301,33 +311,30 @@ void PlanningScene::clearDiffs()
   collision_detector_->copyPadding(*parent_->collision_detector_);
   collision_detector_->cenv_const_ = collision_detector_->cenv_;
 
-
-
-
-/*
-  // use parent crobot_ if it exists.  Otherwise copy padding from parent.
-  for (std::pair<const std::string, CollisionDetectorPtr>& it : collision_)
-  {
-    if (!it.second->parent_)
-      it.second->findParent(*this);
-
-    if (it.second->parent_)
+  /*
+    // use parent crobot_ if it exists.  Otherwise copy padding from parent.
+    for (std::pair<const std::string, CollisionDetectorPtr>& it : collision_)
     {
-      it.second->cenv_ = it.second->alloc_->allocateEnv(it.second->parent_->cenv_, world_);
-      it.second->cenv_const_ = it.second->cenv_;
+      if (!it.second->parent_)
+        it.second->findParent(*this);
 
-      it.second->cenv_unpadded_ = it.second->alloc_->allocateEnv(it.second->parent_->cenv_unpadded_, world_);
-      it.second->cenv_unpadded_const_ = it.second->cenv_unpadded_;
-    }
-    else
-    {
-      it.second->copyPadding(*parent_->collision_detector_);
+      if (it.second->parent_)
+      {
+        it.second->cenv_ = it.second->alloc_->allocateEnv(it.second->parent_->cenv_, world_);
+        it.second->cenv_const_ = it.second->cenv_;
 
-      it.second->cenv_ = it.second->alloc_->allocateEnv(it.second->parent_->cenv_, world_);
-      it.second->cenv_const_ = it.second->cenv_;
+        it.second->cenv_unpadded_ = it.second->alloc_->allocateEnv(it.second->parent_->cenv_unpadded_, world_);
+        it.second->cenv_unpadded_const_ = it.second->cenv_unpadded_;
+      }
+      else
+      {
+        it.second->copyPadding(*parent_->collision_detector_);
+
+        it.second->cenv_ = it.second->alloc_->allocateEnv(it.second->parent_->cenv_, world_);
+        it.second->cenv_const_ = it.second->cenv_;
+      }
     }
-  }
-*/
+  */
   scene_transforms_.reset();
   robot_state_.reset();
   acm_.reset();
