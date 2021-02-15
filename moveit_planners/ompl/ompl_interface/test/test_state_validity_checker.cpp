@@ -63,9 +63,9 @@
 #include <ompl/geometric/SimpleSetup.h>
 
 /** \brief This flag sets the verbosity level for the state validity checker. **/
-constexpr bool VERBOSE{ false };
+constexpr bool VERBOSE = false;
 
-constexpr char LOGNAME[] = "test_state_validity_checker";
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_state_validity_checker");
 
 /** \brief Pretty print std:vectors **/
 std::ostream& operator<<(std::ostream& os, const std::vector<double>& v)
@@ -86,19 +86,17 @@ public:
   {
   }
 
-  /***************************************************************************
-   * START Test implementations
-   * ************************************************************************/
-
   void testConstructor()
   {
-    ompl::base::StateValidityCheckerPtr checker =
-        std::make_shared<ompl_interface::StateValidityChecker>(planning_context_.get());
+    SCOPED_TRACE("testConstructor");
+    EXPECT_TRUE(planning_context_.get());
   }
 
   /** This test takes a state that is inside the joint limits and collision free as input. **/
   void testJointLimits(const std::vector<double>& position_in_limits)
   {
+    SCOPED_TRACE("testJointLimits");
+
     // create a validity checker for this test
     auto checker = std::make_shared<ompl_interface::StateValidityChecker>(planning_context_.get());
     checker->setVerbose(VERBOSE);
@@ -110,7 +108,7 @@ public:
     ompl::base::ScopedState<> ompl_state(state_space_);
     state_space_->copyToOMPLState(ompl_state.get(), *robot_state_);
 
-    ROS_DEBUG_STREAM_NAMED(LOGNAME, ompl_state.reals());
+    RCLCPP_DEBUG_STREAM(LOGGER, ompl_state.reals());
 
     // assume the given position is not in self-collision
     // and there are no collision objects or path constraints so this state should be valid
@@ -120,7 +118,7 @@ public:
     ompl_state->as<ompl_interface::JointModelStateSpace::StateType>()->values[0] = std::numeric_limits<double>::max();
     ompl_state->as<ompl_interface::JointModelStateSpace::StateType>()->clearKnownInformation();
 
-    ROS_DEBUG_STREAM_NAMED(LOGNAME, ompl_state.reals());
+    RCLCPP_DEBUG_STREAM(LOGGER, ompl_state.reals());
 
     EXPECT_FALSE(checker->isValid(ompl_state.get()));
   }
@@ -128,6 +126,8 @@ public:
   /** This test takes a state that is known to be in self-collision and inside the joint limits as input. **/
   void testSelfCollision(const std::vector<double>& position_in_self_collision)
   {
+    SCOPED_TRACE("testSelfCollision");
+
     // create a validity checker for this test
     auto checker = std::make_shared<ompl_interface::StateValidityChecker>(planning_context_.get());
     checker->setVerbose(VERBOSE);
@@ -139,7 +139,7 @@ public:
     ompl::base::ScopedState<> ompl_state(state_space_);
     state_space_->copyToOMPLState(ompl_state.get(), *robot_state_);
 
-    ROS_DEBUG_STREAM_NAMED(LOGNAME, ompl_state.reals());
+    RCLCPP_DEBUG_STREAM(LOGGER, ompl_state.reals());
 
     // the given state is known to be in self-collision, we check it here
     EXPECT_FALSE(checker->isValid(ompl_state.get()));
@@ -150,19 +150,21 @@ public:
 
   void testPathConstraints(const std::vector<double>& position_in_joint_limits)
   {
+    SCOPED_TRACE("testPathConstraints");
+
     ASSERT_NE(planning_context_, nullptr) << "Initialize planning context before adding path constraints.";
 
     // set the robot to a known position that is withing the joint limits and collision free
     robot_state_->setJointGroupPositions(joint_model_group_, position_in_joint_limits);
 
     // create position constraints around the given robot state
-    moveit_msgs::Constraints path_constraints;
+    moveit_msgs::msg::Constraints path_constraints;
     Eigen::Isometry3d ee_pose = robot_state_->getGlobalLinkTransform(ee_link_name_);
     path_constraints.name = "test_position_constraints";
     path_constraints.position_constraints.push_back(createPositionConstraint(
         { ee_pose.translation().x(), ee_pose.translation().y(), ee_pose.translation().z() }, { 0.1, 0.1, 0.1 }));
 
-    moveit_msgs::MoveItErrorCodes error_code_not_used;
+    moveit_msgs::msg::MoveItErrorCodes error_code_not_used;
     ASSERT_TRUE(planning_context_->setPathConstraints(path_constraints, &error_code_not_used));
 
     auto checker = std::make_shared<ompl_interface::StateValidityChecker>(planning_context_.get());
@@ -173,12 +175,12 @@ public:
     ompl::base::ScopedState<> ompl_state(state_space_);
     state_space_->copyToOMPLState(ompl_state.get(), *robot_state_);
 
-    ROS_DEBUG_STREAM_NAMED(LOGNAME, ompl_state.reals());
+    RCLCPP_DEBUG_STREAM(LOGGER, ompl_state.reals());
 
     EXPECT_TRUE(checker->isValid(ompl_state.get()));
 
     // move the position constraints away from the curren end-effector position to make it fail
-    moveit_msgs::Constraints path_constraints_2(path_constraints);
+    moveit_msgs::msg::Constraints path_constraints_2(path_constraints);
     path_constraints_2.position_constraints.at(0).constraint_region.primitive_poses.at(0).position.z += 0.2;
 
     ASSERT_TRUE(planning_context_->setPathConstraints(path_constraints_2, &error_code_not_used));
@@ -189,10 +191,6 @@ public:
 
     EXPECT_FALSE(checker->isValid(ompl_state.get()));
   }
-
-  /***************************************************************************
-   * END Test implementation
-   * ************************************************************************/
 
 protected:
   void SetUp() override
@@ -226,32 +224,29 @@ protected:
   }
 
   /** \brief Helper function to create a position constraint. **/
-  moveit_msgs::PositionConstraint createPositionConstraint(std::array<double, 3> position,
-                                                           std::array<double, 3> dimensions)
+  moveit_msgs::msg::PositionConstraint createPositionConstraint(std::array<double, 3> position,
+                                                                std::array<double, 3> dimensions)
   {
-    shape_msgs::SolidPrimitive box;
-    box.type = shape_msgs::SolidPrimitive::BOX;
+    shape_msgs::msg::SolidPrimitive box;
+    box.type = shape_msgs::msg::SolidPrimitive::BOX;
     box.dimensions.resize(3);
-    box.dimensions[shape_msgs::SolidPrimitive::BOX_X] = dimensions[0];
-    box.dimensions[shape_msgs::SolidPrimitive::BOX_Y] = dimensions[1];
-    box.dimensions[shape_msgs::SolidPrimitive::BOX_Z] = dimensions[2];
+    box.dimensions[shape_msgs::msg::SolidPrimitive::BOX_X] = dimensions[0];
+    box.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Y] = dimensions[1];
+    box.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Z] = dimensions[2];
 
-    geometry_msgs::Pose box_pose;
+    geometry_msgs::msg::Pose box_pose;
     box_pose.position.x = position[0];
     box_pose.position.y = position[1];
     box_pose.position.z = position[2];
     box_pose.orientation.w = 1.0;
 
-    moveit_msgs::PositionConstraint position_constraint;
-    position_constraint.header.frame_id = base_link_name_;
-    position_constraint.link_name = ee_link_name_;
-    position_constraint.constraint_region.primitives.push_back(box);
-    position_constraint.constraint_region.primitive_poses.push_back(box_pose);
+    moveit_msgs::msg::PositionConstraint pc;
+    pc.header.frame_id = base_link_name_;
+    pc.link_name = ee_link_name_;
+    pc.constraint_region.primitives.push_back(box);
+    pc.constraint_region.primitive_poses.push_back(box_pose);
 
-    // set the default weight to avoid warning in test output
-    position_constraint.weight = 1.0;
-
-    return position_constraint;
+    return pc;
   }
 
   ompl_interface::ModelBasedStateSpacePtr state_space_;
@@ -280,7 +275,7 @@ TEST_F(PandaValidity, testJointLimits)
 {
   // use the panda "ready" state from the srdf config
   // we know this state should be within limits and self-collision free
-  testJointLimits({ 0, -0.785, 0, -2.356, 0, 1.571, 0.785 });
+  testJointLimits({ 0., -0.785, 0., -2.356, 0., 1.571, 0.785 });
 }
 
 TEST_F(PandaValidity, testSelfCollision)
@@ -294,7 +289,7 @@ TEST_F(PandaValidity, testPathConstraints)
 {
   // use the panda "ready" state from the srdf config
   // we know this state should be within limits and self-collision free
-  testPathConstraints({ 0, -0.785, 0, -2.356, 0, 1.571, 0.785 });
+  testPathConstraints({ 0., -0.785, 0., -2.356, 0., 1.571, 0.785 });
 }
 
 /***************************************************************************
