@@ -6,10 +6,13 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/model_based_planning_context.cpp
   src/parameterization/model_based_state_space.cpp
   src/parameterization/model_based_state_space_factory.cpp
+  src/parameterization/joint_space/constrained_planning_state_space.cpp
+  src/parameterization/joint_space/constrained_planning_state_space_factory.cpp
   src/parameterization/joint_space/joint_model_state_space.cpp
   src/parameterization/joint_space/joint_model_state_space_factory.cpp
   src/parameterization/work_space/pose_model_state_space.cpp
   src/parameterization/work_space/pose_model_state_space_factory.cpp
+  src/detail/ompl_constraints.cpp
   src/detail/threadsafe_state_storage.cpp
   src/detail/state_validity_checker.cpp
   src/detail/projection_evaluators.cpp
@@ -25,9 +28,11 @@ find_package(OpenMP REQUIRED)
 
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_core
+  moveit_msgs
   moveit_ros_planning
   rclcpp
   pluginlib
+  tf2_eigen
   tf2_ros
   OMPL
   Boost
@@ -66,6 +71,7 @@ install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(ros_testing REQUIRED)
   find_package(Eigen3 REQUIRED)
 
   ament_add_gtest(test_state_space test/test_state_space.cpp)
@@ -73,16 +79,27 @@ if(BUILD_TESTING)
   target_link_libraries(test_state_space ${MOVEIT_LIB_NAME})
   set_target_properties(test_state_space PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 
-  # TODO(henningkayser): port tests to ROS2
-  # find_package(rostest REQUIRED)
-  # find_package(tf2_eigen REQUIRED)
-  #
-  # add_rostest_gtest(test_planning_context_manager
-  #   test/test_planning_context_manager.test
-  #   test/test_planning_context_manager.cpp)
-  # target_link_libraries(test_planning_context_manager ${MOVEIT_LIB_NAME} ${OMPL_LIBRARIES} ${catkin_LIBRARIES} ${tf2_eigen_LIBRARIES})
-  #
-  # catkin_add_gtest(test_state_validity_checker test/test_state_validity_checker.cpp)
-  # target_link_libraries(test_state_validity_checker ${MOVEIT_LIB_NAME} ${OMPL_LIBRARIES} ${catkin_LIBRARIES})
-  # set_target_properties(test_state_validity_checker PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+  ament_add_gtest(test_state_validity_checker test/test_state_validity_checker.cpp)
+  ament_target_dependencies(test_state_validity_checker moveit_core OMPL Boost Eigen3)
+  target_link_libraries(test_state_validity_checker ${MOVEIT_LIB_NAME})
+  set_target_properties(test_state_validity_checker PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+
+  ament_add_gtest(test_planning_context_manager test/test_planning_context_manager.cpp)
+  ament_target_dependencies(test_planning_context_manager moveit_core tf2_eigen OMPL Boost Eigen3)
+  target_link_libraries(test_planning_context_manager ${MOVEIT_LIB_NAME})
+
+  ament_add_gtest(test_ompl_constraints test/test_ompl_constraints.cpp)
+  ament_target_dependencies(test_ompl_constraints moveit_core OMPL Boost Eigen3)
+  target_link_libraries(test_ompl_constraints ${MOVEIT_LIB_NAME})
+
+  ament_add_gtest(test_constrained_planning_state_space test/test_constrained_planning_state_space.cpp)
+  ament_target_dependencies(test_constrained_planning_state_space moveit_core OMPL Boost Eigen3)
+  target_link_libraries(test_constrained_planning_state_space ${MOVEIT_LIB_NAME})
+  set_target_properties(test_constrained_planning_state_space PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+
+  ament_add_gtest(test_constrained_state_validity_checker test/test_constrained_state_validity_checker.cpp)
+  ament_target_dependencies(test_constrained_state_validity_checker moveit_core OMPL Boost Eigen3)
+  target_link_libraries(test_constrained_state_validity_checker ${MOVEIT_LIB_NAME})
+  set_target_properties(test_constrained_state_validity_checker PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+
 endif()

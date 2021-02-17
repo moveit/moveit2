@@ -38,7 +38,7 @@
 
 #pragma once
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <boost/pool/pool_alloc.hpp>
 
 namespace moveit
@@ -47,10 +47,10 @@ namespace util
 {
 // Useful template for creating messages from a message pool
 template <typename T>
-boost::shared_ptr<T> make_shared_from_pool()
+std::shared_ptr<T> make_shared_from_pool()
 {
-  using allocator_t = boost::fast_pool_allocator<boost::shared_ptr<T>>;
-  return boost::allocate_shared<T, allocator_t>(allocator_t());
+  using allocator_t = boost::fast_pool_allocator<std::shared_ptr<T>>;
+  return std::allocate_shared<T, allocator_t>(allocator_t());
 }
 
 }  // namespace util
