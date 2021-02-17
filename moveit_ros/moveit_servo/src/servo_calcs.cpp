@@ -88,7 +88,8 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node, const ServoParametersPtr& p
   : node_(node)
   , parameters_(parameters)
   , planning_scene_monitor_(planning_scene_monitor)
-  , period_(parameters->publish_period)
+  , stop_requested_(true)
+  , paused_(false)
 {
   // MoveIt Setup
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
@@ -160,8 +161,16 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node, const ServoParametersPtr& p
   tf_moveit_to_robot_cmd_frame_ = empty_matrix;
 }
 
+ServoCalcs::~ServoCalcs()
+{
+  stop();
+}
+
 void ServoCalcs::start()
 {
+  // Stop the thread if we are currently running
+  stop();
+
   // Set up the "last" published message, in case we need to send it first
   auto initial_joint_trajectory = std::make_unique<trajectory_msgs::msg::JointTrajectory>();
   initial_joint_trajectory->header.stamp = node_->now();
@@ -188,17 +197,80 @@ void ServoCalcs::start()
   initial_joint_trajectory->points.push_back(point);
   last_sent_command_ = std::move(initial_joint_trajectory);
 
-  // Set up timer for calculation callback
-  timer_ = node_->create_wall_timer(std::chrono::duration<double>(period_), std::bind(&ServoCalcs::run, this));
-
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   tf_moveit_to_ee_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
                            current_state_->getGlobalLinkTransform(parameters_->ee_frame_name);
   tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
                                   current_state_->getGlobalLinkTransform(parameters_->robot_link_command_frame);
+
+  stop_requested_ = false;
+  thread_ = std::thread([this] { mainCalcLoop(); });
+  new_input_cmd_ = false;
 }
 
-void ServoCalcs::run()
+void ServoCalcs::stop()
+{
+  // Request stop
+  stop_requested_ = true;
+
+  // Notify condition variable in case the thread is blocked on it
+  {
+    // scope so the mutex is unlocked after so the thread can continue
+    // and therefore be joinable
+    const std::lock_guard<std::mutex> lock(input_mutex_);
+    new_input_cmd_ = false;
+    input_cv_.notify_all();
+  }
+
+  // Join the thread
+  if (thread_.joinable())
+  {
+    thread_.join();
+  }
+}
+
+void ServoCalcs::mainCalcLoop()
+{
+  rclcpp::Rate rate(1.0 / parameters_->publish_period);
+
+  while (rclcpp::ok() && !stop_requested_)
+  {
+    // lock the input state mutex
+    std::unique_lock<std::mutex> input_lock(input_mutex_);
+
+    // low latency mode -- begin calculations as soon as a new command is received.
+    if (parameters_->low_latency_mode)
+    {
+      input_cv_.wait(input_lock, [this] { return (new_input_cmd_ || stop_requested_); });
+    }
+
+    // reset new_input_cmd_ flag
+    new_input_cmd_ = false;
+
+    // run servo calcs
+    const auto start_time = node_->now();
+    calculateSingleIteration();
+    const auto run_duration = node_->now() - start_time;
+
+    // Log warning when the run duration was longer than the period
+    if (run_duration.seconds() > parameters_->publish_period)
+    {
+      rclcpp::Clock& clock = *node_->get_clock();
+      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                  "run_duration: " << run_duration.seconds() << " (" << parameters_->publish_period
+                                                   << ")");
+    }
+
+    // normal mode, unlock input mutex and wait for the period of the loop
+    if (!parameters_->low_latency_mode)
+    {
+      input_lock.unlock();
+      rate.sleep();
+    }
+  }
+}
+
+void ServoCalcs::calculateSingleIteration()
 {
   // Publish status each loop iteration
   auto status_msg = std::make_unique<std_msgs::msg::Int8>();
@@ -219,22 +291,20 @@ void ServoCalcs::run()
 
   // Update from latest state
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  {
-    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
-    if (latest_twist_stamped_)
-      twist_stamped_cmd_ = *latest_twist_stamped_;
-    if (latest_joint_cmd_)
-      joint_servo_cmd_ = *latest_joint_cmd_;
 
-    // Check for stale cmds
-    twist_command_is_stale_ = ((node_->now() - latest_twist_command_stamp_) >=
-                               rclcpp::Duration::from_seconds(parameters_->incoming_command_timeout));
-    joint_command_is_stale_ = ((node_->now() - latest_joint_command_stamp_) >=
-                               rclcpp::Duration::from_seconds(parameters_->incoming_command_timeout));
+  if (latest_twist_stamped_)
+    twist_stamped_cmd_ = *latest_twist_stamped_;
+  if (latest_joint_cmd_)
+    joint_servo_cmd_ = *latest_joint_cmd_;
 
-    have_nonzero_twist_stamped_ = latest_nonzero_twist_stamped_;
-    have_nonzero_joint_command_ = latest_nonzero_joint_cmd_;
-  }
+  // Check for stale cmds
+  twist_command_is_stale_ = ((node_->now() - latest_twist_command_stamp_) >=
+                             rclcpp::Duration::from_seconds(parameters_->incoming_command_timeout));
+  joint_command_is_stale_ = ((node_->now() - latest_joint_command_stamp_) >=
+                             rclcpp::Duration::from_seconds(parameters_->incoming_command_timeout));
+
+  have_nonzero_twist_stamped_ = latest_nonzero_twist_stamped_;
+  have_nonzero_joint_command_ = latest_nonzero_joint_cmd_;
 
   // Get the transform from MoveIt planning frame to servoing command frame
   // Calculate this transform to ensure it is available via C++ API
@@ -1020,7 +1090,7 @@ void ServoCalcs::enforceControlDimensions(geometry_msgs::msg::TwistStamped& comm
 
 bool ServoCalcs::getCommandFrameTransform(Eigen::Isometry3d& transform)
 {
-  const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+  const std::lock_guard<std::mutex> lock(input_mutex_);
   transform = tf_moveit_to_robot_cmd_frame_;
 
   // All zeros means the transform wasn't initialized, so return false
@@ -1029,7 +1099,7 @@ bool ServoCalcs::getCommandFrameTransform(Eigen::Isometry3d& transform)
 
 bool ServoCalcs::getCommandFrameTransform(geometry_msgs::msg::TransformStamped& transform)
 {
-  const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+  const std::lock_guard<std::mutex> lock(input_mutex_);
   // All zeros means the transform wasn't initialized, so return false
   if (tf_moveit_to_robot_cmd_frame_.matrix().isZero(0))
   {
@@ -1043,7 +1113,7 @@ bool ServoCalcs::getCommandFrameTransform(geometry_msgs::msg::TransformStamped& 
 
 bool ServoCalcs::getEEFrameTransform(Eigen::Isometry3d& transform)
 {
-  const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+  const std::lock_guard<std::mutex> lock(input_mutex_);
   transform = tf_moveit_to_ee_frame_;
 
   // All zeros means the transform wasn't initialized, so return false
@@ -1052,7 +1122,7 @@ bool ServoCalcs::getEEFrameTransform(Eigen::Isometry3d& transform)
 
 bool ServoCalcs::getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform)
 {
-  const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+  const std::lock_guard<std::mutex> lock(input_mutex_);
   // All zeros means the transform wasn't initialized, so return false
   if (tf_moveit_to_ee_frame_.matrix().isZero(0))
   {
@@ -1066,22 +1136,30 @@ bool ServoCalcs::getEEFrameTransform(geometry_msgs::msg::TransformStamped& trans
 
 void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr msg)
 {
-  const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+  const std::lock_guard<std::mutex> lock(input_mutex_);
   latest_twist_stamped_ = msg;
   latest_nonzero_twist_stamped_ = isNonZero(*latest_twist_stamped_.get());
 
   if (msg.get()->header.stamp != rclcpp::Time(0.))
     latest_twist_command_stamp_ = msg.get()->header.stamp;
+
+  // notify that we have a new input
+  new_input_cmd_ = true;
+  input_cv_.notify_all();
 }
 
 void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::SharedPtr msg)
 {
-  const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+  const std::lock_guard<std::mutex> lock(input_mutex_);
   latest_joint_cmd_ = msg;
   latest_nonzero_joint_cmd_ = isNonZero(*latest_joint_cmd_.get());
 
   if (msg.get()->header.stamp != rclcpp::Time(0.))
     latest_joint_command_stamp_ = msg.get()->header.stamp;
+
+  // notify that we have a new input
+  new_input_cmd_ = true;
+  input_cv_.notify_all();
 }
 
 void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::SharedPtr msg)

@@ -8,6 +8,7 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 ament_target_dependencies(${MOVEIT_LIB_NAME} rclcpp urdf urdfdom_headers srdfdom moveit_msgs geometric_shapes geometry_msgs Boost)
 
 install(TARGETS ${MOVEIT_LIB_NAME}
+        EXPORT ${MOVEIT_LIB_NAME}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin)

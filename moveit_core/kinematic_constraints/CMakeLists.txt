@@ -32,6 +32,7 @@ target_link_libraries(${MOVEIT_LIB_NAME}
 )
 
 install(TARGETS ${MOVEIT_LIB_NAME}
+  EXPORT ${MOVEIT_LIB_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
@@ -46,4 +47,7 @@ if(BUILD_TESTING)
     APPEND_LIBRARY_DIRS "${append_library_dirs}"
   )
   target_link_libraries(test_constraints moveit_test_utils ${MOVEIT_LIB_NAME})
+
+  ament_add_gtest(test_orientation_constraints test/test_orientation_constraints.cpp)
+  target_link_libraries(test_orientation_constraints moveit_test_utils ${MOVEIT_LIB_NAME})
 endif()

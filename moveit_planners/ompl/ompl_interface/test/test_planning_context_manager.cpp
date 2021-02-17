@@ -65,21 +65,21 @@
 
 #include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
 
+// static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_planning_context_manager");
+
 /** \brief Generic implementation of the tests that can be executed on different robots. **/
 class TestPlanningContext : public ompl_interface_testing::LoadTestRobot, public testing::Test
 {
 public:
   TestPlanningContext(const std::string& robot_name, const std::string& group_name)
-    : LoadTestRobot(robot_name, group_name)
+    : LoadTestRobot(robot_name, group_name), node_(std::make_shared<rclcpp::Node>("planning_context_manager_test"))
   {
   }
 
-  // /***************************************************************************
-  //  * START Test implementations
-  //  * ************************************************************************/
-
   void testSimpleRequest(const std::vector<double>& start, const std::vector<double>& goal)
   {
+    SCOPED_TRACE("testSimpleRequest");
+
     // create all the test specific input necessary to make the getPlanningContext call possible
     planning_interface::PlannerConfigurationSettings pconfig_settings;
     pconfig_settings.group = group_name_;
@@ -87,7 +87,7 @@ public:
     pconfig_settings.config = { { "enforce_joint_model_state_space", "0" } };
 
     planning_interface::PlannerConfigurationMap pconfig_map{ { pconfig_settings.name, pconfig_settings } };
-    moveit_msgs::MoveItErrorCodes error_code;
+    moveit_msgs::msg::MoveItErrorCodes error_code;
     planning_interface::MotionPlanRequest request = createRequest(start, goal);
 
     // setup the planning context manager
@@ -95,7 +95,7 @@ public:
     pcm.setPlannerConfigurations(pconfig_map);
 
     // see if it returns the expected planning context
-    auto pc = pcm.getPlanningContext(planning_scene_, request, error_code, node_handle_, false);
+    auto pc = pcm.getPlanningContext(planning_scene_, request, error_code, node_, false);
 
     // the planning context should have a simple setup created
     EXPECT_NE(pc->getOMPLSimpleSetup(), nullptr);
@@ -113,6 +113,8 @@ public:
 
   void testPathConstraints(const std::vector<double>& start, const std::vector<double>& goal)
   {
+    SCOPED_TRACE("testPathConstraints");
+
     // create all the test specific input necessary to make the getPlanningContext call possible
     planning_interface::PlannerConfigurationSettings pconfig_settings;
     pconfig_settings.group = group_name_;
@@ -120,7 +122,7 @@ public:
     pconfig_settings.config = { { "enforce_joint_model_state_space", "0" } };
 
     planning_interface::PlannerConfigurationMap pconfig_map{ { pconfig_settings.name, pconfig_settings } };
-    moveit_msgs::MoveItErrorCodes error_code;
+    moveit_msgs::msg::MoveItErrorCodes error_code;
     planning_interface::MotionPlanRequest request = createRequest(start, goal);
 
     // give it some more time, as rejection sampling of the path constraints occasionally takes some time
@@ -129,7 +131,7 @@ public:
     // create path constraints around start state,  to make sure they are satisfied
     robot_state_->setJointGroupPositions(joint_model_group_, start);
     Eigen::Isometry3d ee_pose = robot_state_->getGlobalLinkTransform(ee_link_name_);
-    geometry_msgs::Quaternion ee_orientation = tf2::toMsg(Eigen::Quaterniond(ee_pose.rotation());
+    geometry_msgs::msg::Quaternion ee_orientation = tf2::toMsg(Eigen::Quaterniond(ee_pose.rotation()));
 
     // setup the planning context manager
     ompl_interface::PlanningContextManager pcm(robot_model_, constraint_sampler_manager_);
@@ -140,7 +142,7 @@ public:
     request.path_constraints.orientation_constraints.push_back(createOrientationConstraint(ee_orientation));
 
     // See if the planning context manager returns the expected planning context
-    auto pc = pcm.getPlanningContext(planning_scene_, request, error_code, node_handle_, false);
+    auto pc = pcm.getPlanningContext(planning_scene_, request, error_code, node_, false);
 
     EXPECT_NE(pc->getOMPLSimpleSetup(), nullptr);
 
@@ -163,7 +165,7 @@ public:
     // solution. We test all of them here.
     for (const robot_trajectory::RobotTrajectoryPtr& trajectory : response.trajectory_)
     {
-      for (std::size_t pt_index = { 0 }; pt_index < trajectory->getWayPointCount(); ++pt_index)
+      for (std::size_t pt_index = 0; pt_index < trajectory->getWayPointCount(); pt_index++)
       {
         EXPECT_TRUE(path_constraints->decide(trajectory->getWayPoint(pt_index)).satisfied);
       }
@@ -176,7 +178,7 @@ public:
         { ee_pose.translation().x(), ee_pose.translation().y(), ee_pose.translation().z() }, { 0.1, 0.1, 0.1 }));
 
     // See if the planning context manager returns the expected planning context
-    pc = pcm.getPlanningContext(planning_scene_, request, error_code, node_handle_, false);
+    pc = pcm.getPlanningContext(planning_scene_, request, error_code, node_, false);
 
     EXPECT_NE(pc->getOMPLSimpleSetup(), nullptr);
 
@@ -198,16 +200,12 @@ public:
     // solution. We test all of them here.
     for (const robot_trajectory::RobotTrajectoryPtr& trajectory : response2.trajectory_)
     {
-      for (std::size_t pt_index = { 0 }; pt_index < trajectory->getWayPointCount(); ++pt_index)
+      for (std::size_t pt_index = 0; pt_index < trajectory->getWayPointCount(); pt_index++)
       {
         EXPECT_TRUE(path_constraints->decide(trajectory->getWayPoint(pt_index)).satisfied);
       }
     }
   }
-
-  // /***************************************************************************
-  //  * END Test implementation
-  //  * ************************************************************************/
 
 protected:
   void SetUp() override
@@ -215,10 +213,6 @@ protected:
     // create all the fixed input necessary for all planning context managers
     constraint_sampler_manager_ = std::make_shared<constraint_samplers::ConstraintSamplerManager>();
     planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
-  }
-
-  void TearDown() override
-  {
   }
 
   /** Create a planning request to plan from a given start state to a joint space goal. **/
@@ -230,40 +224,42 @@ protected:
     request.allowed_planning_time = 5.0;
 
     // fill out start state in request
-    robot_state::RobotState start_state(robot_model_);
+    moveit::core::RobotState start_state(robot_model_);
     start_state.setToDefaultValues();
     start_state.setJointGroupPositions(joint_model_group_, start);
     moveit::core::robotStateToRobotStateMsg(start_state, request.start_state);
 
     // fill out goal state in request
-    robot_state::RobotState goal_state(robot_model_);
+    moveit::core::RobotState goal_state(robot_model_);
     goal_state.setToDefaultValues();
     goal_state.setJointGroupPositions(joint_model_group_, goal);
-    moveit_msgs::Constraints joint_goal =
+
+    moveit_msgs::msg::Constraints joint_goal =
         kinematic_constraints::constructGoalConstraints(goal_state, joint_model_group_, 0.001);
+
     request.goal_constraints.push_back(joint_goal);
 
     return request;
   }
 
   /** \brief Helper function to create a position constraint. **/
-  moveit_msgs::PositionConstraint createPositionConstraint(std::array<double, 3> position,
-                                                           std::array<double, 3> dimensions)
+  moveit_msgs::msg::PositionConstraint createPositionConstraint(std::array<double, 3> position,
+                                                                std::array<double, 3> dimensions)
   {
-    shape_msgs::SolidPrimitive box;
-    box.type = shape_msgs::SolidPrimitive::BOX;
+    shape_msgs::msg::SolidPrimitive box;
+    box.type = shape_msgs::msg::SolidPrimitive::BOX;
     box.dimensions.resize(3);
-    box.dimensions[shape_msgs::SolidPrimitive::BOX_X] = dimensions[0];
-    box.dimensions[shape_msgs::SolidPrimitive::BOX_Y] = dimensions[1];
-    box.dimensions[shape_msgs::SolidPrimitive::BOX_Z] = dimensions[2];
+    box.dimensions[shape_msgs::msg::SolidPrimitive::BOX_X] = dimensions[0];
+    box.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Y] = dimensions[1];
+    box.dimensions[shape_msgs::msg::SolidPrimitive::BOX_Z] = dimensions[2];
 
-    geometry_msgs::Pose box_pose;
+    geometry_msgs::msg::Pose box_pose;
     box_pose.position.x = position[0];
     box_pose.position.y = position[1];
     box_pose.position.z = position[2];
     box_pose.orientation.w = 1.0;
 
-    moveit_msgs::PositionConstraint pc;
+    moveit_msgs::msg::PositionConstraint pc;
     pc.header.frame_id = base_link_name_;
     pc.link_name = ee_link_name_;
     pc.constraint_region.primitives.push_back(box);
@@ -273,9 +269,10 @@ protected:
   }
 
   /** \brief Helper function to create a orientation constraint. **/
-  moveit_msgs::OrientationConstraint createOrientationConstraint(const geometry_msgs::Quaternion& nominal_orientation)
+  moveit_msgs::msg::OrientationConstraint
+  createOrientationConstraint(const geometry_msgs::msg::Quaternion& nominal_orientation)
   {
-    moveit_msgs::OrientationConstraint oc;
+    moveit_msgs::msg::OrientationConstraint oc;
     oc.header.frame_id = base_link_name_;
     oc.link_name = ee_link_name_;
     oc.orientation = nominal_orientation;
@@ -299,7 +296,7 @@ protected:
 
   /** we need a node handle to call getPlanningRequest, but it is never used, as we disable the
    * 'use_constraints_approximation' option. **/
-  ros::NodeHandle node_handle_;
+  rclcpp::Node::SharedPtr node_;
 };
 
 /***************************************************************************
@@ -317,12 +314,12 @@ TEST_F(PandaTestPlanningContext, testSimpleRequest)
 {
   // use the panda "ready" state from the srdf config as start state
   // we know this state should be within limits and self-collision free
-  testSimpleRequest({ 0, -0.785, 0, -2.356, 0, 1.571, 0.785 }, { 0, -0.785, 0, -2.356, 0, 1.571, 0.685 });
+  testSimpleRequest({ 0., -0.785, 0., -2.356, 0, 1.571, 0.785 }, { 0., -0.785, 0., -2.356, 0, 1.571, 0.685 });
 }
 
 TEST_F(PandaTestPlanningContext, testPathConstraints)
 {
-  testPathConstraints({ 0, -0.785, 0, -2.356, 0, 1.571, 0.785 }, { 0, -0.785, 0, -2.356, 0, 1.571, 0.685 });
+  testPathConstraints({ 0., -0.785, 0., -2.356, 0., 1.571, 0.785 }, { .0, -0.785, 0., -2.356, 0., 1.571, 0.685 });
 }
 
 /***************************************************************************
@@ -338,12 +335,12 @@ protected:
 
 TEST_F(FanucTestPlanningContext, testSimpleRequest)
 {
-  testSimpleRequest({ 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0.1 });
+  testSimpleRequest({ 0., 0., 0., 0., 0., 0. }, { 0., 0., 0., 0., 0., 0.1 });
 }
 
 TEST_F(FanucTestPlanningContext, testPathConstraints)
 {
-  testPathConstraints({ 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0.1 });
+  testPathConstraints({ 0., 0., 0., 0., 0., 0. }, { 0., 0., 0., 0., 0., 0.1 });
 }
 
 /***************************************************************************
@@ -351,7 +348,10 @@ TEST_F(FanucTestPlanningContext, testPathConstraints)
  * ************************************************************************/
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "planning_context_manager_test");
   testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  rclcpp::init(argc, argv);
+
+  const int ret = RUN_ALL_TESTS();
+  rclcpp::shutdown();
+  return ret;
 }

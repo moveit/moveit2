@@ -166,7 +166,7 @@ public:
     collision_pub_ = this->create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", 10);
 
     // Create a service client to start the ServoServer
-    servo_start_client_ = this->create_client<std_srvs::srv::Trigger>("/start_servo");
+    servo_start_client_ = this->create_client<std_srvs::srv::Trigger>("/servo_server/start_servo");
     servo_start_client_->wait_for_service(std::chrono::seconds(1));
     servo_start_client_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
 

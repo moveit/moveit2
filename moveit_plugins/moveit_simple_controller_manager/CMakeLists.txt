@@ -13,36 +13,49 @@ find_package(rclcpp REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
 
-include_directories(include)
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+  control_msgs
+  rclcpp
+  rclcpp_action
+  moveit_core
+  pluginlib
+)
+
+include_directories(
+  include
+)
 
 add_library(${PROJECT_NAME} SHARED
   src/moveit_simple_controller_manager.cpp
   src/follow_joint_trajectory_controller_handle.cpp
 )
+
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+
 ament_target_dependencies(${PROJECT_NAME}
-  rclcpp
-  control_msgs
-  pluginlib
-  moveit_core
-  rclcpp_action
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
   Boost
 )
 
-install(TARGETS ${PROJECT_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin)
-
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
 install(DIRECTORY include/ DESTINATION include)
 
 pluginlib_export_plugin_description_file(moveit_core moveit_simple_controller_manager_plugin_description.xml)
+
 ament_export_libraries(${PROJECT_NAME})
+
+ament_export_dependencies(
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
+  Boost
+)
+
 ament_export_include_directories(include)
-ament_export_dependencies(pluginlib)
-ament_export_dependencies(moveit_core)
-ament_export_dependencies(rclcpp_action)
-ament_export_dependencies(control_msgs)
-ament_export_dependencies(Boost)
+
 ament_package()

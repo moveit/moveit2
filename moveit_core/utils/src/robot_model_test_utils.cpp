@@ -115,7 +115,7 @@ RobotModelBuilder::RobotModelBuilder(const std::string& name, const std::string&
 }
 
 void RobotModelBuilder::addChain(const std::string& section, const std::string& type,
-                                 const std::vector<geometry_msgs::msg::Pose>& joint_origins)
+                                 const std::vector<geometry_msgs::msg::Pose>& joint_origins, urdf::Vector3 joint_axis)
 {
   std::vector<std::string> link_names;
   boost::split_regex(link_names, section, boost::regex("->"));
@@ -187,7 +187,7 @@ void RobotModelBuilder::addChain(const std::string& section, const std::string& 
       return;
     }
 
-    joint->axis = urdf::Vector3(1.0, 0.0, 0.0);
+    joint->axis = joint_axis;
     if (joint->type == urdf::Joint::REVOLUTE || joint->type == urdf::Joint::PRISMATIC)
     {
       urdf::JointLimitsSharedPtr limits(new urdf::JointLimits);
@@ -345,6 +345,17 @@ void RobotModelBuilder::addGroup(const std::vector<std::string>& links, const st
   new_group.links_ = links;
   new_group.joints_ = joints;
   srdf_writer_->groups_.push_back(new_group);
+}
+
+void RobotModelBuilder::addEndEffector(const std::string& name, const std::string& parent_link,
+                                       const std::string& parent_group, const std::string& component_group)
+{
+  srdf::Model::EndEffector eef;
+  eef.name_ = name;
+  eef.parent_link_ = parent_link;
+  eef.parent_group_ = parent_group;
+  eef.component_group_ = component_group;
+  srdf_writer_->end_effectors_.push_back(eef);
 }
 
 bool RobotModelBuilder::isValid()

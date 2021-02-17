@@ -126,9 +126,9 @@ public:
     goal_orientation_tolerance_ = 1e-3;  // ~0.1 deg
     allowed_planning_time_ = 5.0;
     num_planning_attempts_ = 1;
-    node_->get_parameter_or<double>("robot_description_planning.joint_limits.default_velocity_scaling_factor",
+    node_->get_parameter_or<double>("robot_description_planning.default_velocity_scaling_factor",
                                     max_velocity_scaling_factor_, 0.1);
-    node_->get_parameter_or<double>("robot_description_planning.joint_limits.default_acceleration_scaling_factor",
+    node_->get_parameter_or<double>("robot_description_planning.default_acceleration_scaling_factor",
                                     max_acceleration_scaling_factor_, 0.1);
     initializing_constraints_ = false;
 
@@ -143,12 +143,8 @@ public:
 
     current_state_monitor_ = getSharedStateMonitor(node_, robot_model_, tf_buffer_);
 
-    rclcpp::Time timeout_for_servers = pnode_->now() + wait_for_servers;
-    if (wait_for_servers == rclcpp::Duration(0.0))
-      timeout_for_servers = rclcpp::Time();  // wait for ever
-
     move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(pnode_, move_group::MOVE_ACTION);
-    move_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
+    move_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
     // TODO(JafarAbdi): Enable once moveit_ros_manipulation is ported
     // pick_action_client_ = rclcpp_action::create_client<moveit_msgs::action::Pickup>(
     //        node_, move_group::PICKUP_ACTION);
@@ -159,7 +155,7 @@ public:
     //    place_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
     execute_action_client_ =
         rclcpp_action::create_client<moveit_msgs::action::ExecuteTrajectory>(pnode_, move_group::EXECUTE_ACTION_NAME);
-    execute_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
+    execute_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
 
     query_service_ =
         pnode_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(move_group::QUERY_PLANNERS_SERVICE_NAME);

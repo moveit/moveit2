@@ -49,7 +49,9 @@ ompl_interface::TSStateStorage::TSStateStorage(const moveit::core::RobotState& s
 ompl_interface::TSStateStorage::~TSStateStorage()
 {
   for (auto& thread_state : thread_states_)
+  {
     delete thread_state.second;
+  }
 }
 
 moveit::core::RobotState* ompl_interface::TSStateStorage::getStateStorage() const
@@ -61,9 +63,12 @@ moveit::core::RobotState* ompl_interface::TSStateStorage::getStateStorage() cons
   if (it == thread_states_.end())
   {
     st = new moveit::core::RobotState(start_state_);
+    st->setToDefaultValues();  // avoid uninitialized memory
     thread_states_[std::this_thread::get_id()] = st;
   }
   else
+  {
     st = it->second;
+  }
   return st;
 }

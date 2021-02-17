@@ -77,6 +77,7 @@ struct ServoParameters
   double lower_singularity_threshold;
   double hard_stop_singularity_threshold;
   double joint_limit_margin;
+  bool low_latency_mode;
   // Collision checking
   bool check_collisions;
   double collision_check_rate;

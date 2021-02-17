@@ -615,13 +615,17 @@ public:
   {
     const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
+    {
+      assert(gstate.size() == jmg->getVariableCount());
       setJointGroupPositions(jmg, &gstate[0]);
+    }
   }
 
   /** \brief Given positions for the variables that make up a group, in the order found in the group (including values
    *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupPositions(const JointModelGroup* group, const std::vector<double>& gstate)
   {
+    assert(gstate.size() == group->getVariableCount());
     setJointGroupPositions(group, &gstate[0]);
   }
 
@@ -635,12 +639,51 @@ public:
   {
     const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
     if (jmg)
+    {
+      assert(values.size() == jmg->getVariableCount());
       setJointGroupPositions(jmg, values);
+    }
   }
 
   /** \brief Given positions for the variables that make up a group, in the order found in the group (including values
    *   of mimic joints), set those as the new values that correspond to the group */
   void setJointGroupPositions(const JointModelGroup* group, const Eigen::VectorXd& values);
+
+  /** \brief Given positions for the variables of active joints that make up a group,
+   * in the order found in the group (excluding values of mimic joints), set those
+   * as the new values that correspond to the group */
+  void setJointGroupActivePositions(const JointModelGroup* group, const std::vector<double>& gstate);
+
+  /** \brief Given positions for the variables of active joints that make up a group,
+   * in the order found in the group (excluding values of mimic joints), set those
+   * as the new values that correspond to the group */
+  void setJointGroupActivePositions(const std::string& joint_group_name, const std::vector<double>& gstate)
+  {
+    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    if (jmg)
+    {
+      assert(gstate.size() == jmg->getActiveVariableCount());
+      setJointGroupActivePositions(jmg, gstate);
+    }
+  }
+
+  /** \brief Given positions for the variables of active joints that make up a group,
+   * in the order found in the group (excluding values of mimic joints), set those
+   * as the new values that correspond to the group */
+  void setJointGroupActivePositions(const JointModelGroup* group, const Eigen::VectorXd& values);
+
+  /** \brief Given positions for the variables of active joints that make up a group,
+   * in the order found in the group (excluding values of mimic joints), set those
+   * as the new values that correspond to the group */
+  void setJointGroupActivePositions(const std::string& joint_group_name, const Eigen::VectorXd& values)
+  {
+    const JointModelGroup* jmg = robot_model_->getJointModelGroup(joint_group_name);
+    if (jmg)
+    {
+      assert(values.size() == jmg->getActiveVariableCount());
+      setJointGroupActivePositions(jmg, values);
+    }
+  }
 
   /** \brief For a given group, copy the position values of the variables that make up the group into another location,
    * in the order that the variables are found in the group. This is not necessarily a contiguous block of memory in the
@@ -899,22 +942,6 @@ public:
   /** \name Setting from Inverse Kinematics
    *  @{
    */
-
-  /**
-   * \brief Convert the frame of reference of the pose to that same frame as the IK solver expects
-   * @param pose - the input to change
-   * @param solver - a kin solver whose base frame is important to us
-   * @return true if no error
-   */
-  bool setToIKSolverFrame(Eigen::Isometry3d& pose, const kinematics::KinematicsBaseConstPtr& solver);
-
-  /**
-   * \brief Convert the frame of reference of the pose to that same frame as the IK solver expects
-   * @param pose - the input to change
-   * @param ik_frame - the name of frame of reference of base of ik solver
-   * @return true if no error
-   */
-  bool setToIKSolverFrame(Eigen::Isometry3d& pose, const std::string& ik_frame);
 
   /** \brief If the group this state corresponds to is a chain and a solver is available, then the joint values can be
      set by computing inverse kinematics.
@@ -1692,6 +1719,22 @@ private:
   void allocMemory();
   void initTransforms();
   void copyFrom(const RobotState& other);
+
+  /**
+   * \brief Transform pose from the robot model's base frame to the reference frame of the IK solver
+   * @param pose - the input to change
+   * @param solver - a kin solver whose base frame is important to us
+   * @return true if no error
+   */
+  inline bool setToIKSolverFrame(Eigen::Isometry3d& pose, const kinematics::KinematicsBaseConstPtr& solver);
+
+  /**
+   * \brief Transform pose from the robot model's base frame to the reference frame of the IK solver
+   * @param pose - the input to change
+   * @param ik_frame - the name of frame of reference of base of ik solver
+   * @return true if no error
+   */
+  bool setToIKSolverFrame(Eigen::Isometry3d& pose, const std::string& ik_frame);
 
   void markDirtyJointTransforms(const JointModel* joint)
   {
