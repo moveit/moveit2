@@ -158,8 +158,8 @@ bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
 
   if (planning_pipelines_.empty())
   {
-    return false;
     RCLCPP_ERROR(LOGGER, "Failed to load any planning pipelines.");
+    return false;
   }
 
   // Retrieve group/pipeline mapping for faster lookup
