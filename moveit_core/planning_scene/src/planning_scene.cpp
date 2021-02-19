@@ -203,8 +203,7 @@ PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(pare
   collision_detector_->cenv_unpadded_ =
       collision_detector_->alloc_->allocateEnv(parent_detector->cenv_unpadded_, world_);
   collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
-  // TODO(andyz): copy padding from parent. Maybe like this?
-  // collision_detector_->copyPadding(parent_detector->collision_detector_);
+  collision_detector_->copyPadding(*parent_detector);
 }
 
 PlanningScenePtr PlanningScene::clone(const PlanningSceneConstPtr& scene)
