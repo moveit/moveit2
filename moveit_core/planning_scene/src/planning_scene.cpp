@@ -310,30 +310,6 @@ void PlanningScene::clearDiffs()
   collision_detector_->copyPadding(*parent_->collision_detector_);
   collision_detector_->cenv_const_ = collision_detector_->cenv_;
 
-  /*
-    // use parent crobot_ if it exists.  Otherwise copy padding from parent.
-    for (std::pair<const std::string, CollisionDetectorPtr>& it : collision_)
-    {
-      if (!it.second->parent_)
-        it.second->findParent(*this);
-
-      if (it.second->parent_)
-      {
-        it.second->cenv_ = it.second->alloc_->allocateEnv(it.second->parent_->cenv_, world_);
-        it.second->cenv_const_ = it.second->cenv_;
-
-        it.second->cenv_unpadded_ = it.second->alloc_->allocateEnv(it.second->parent_->cenv_unpadded_, world_);
-        it.second->cenv_unpadded_const_ = it.second->cenv_unpadded_;
-      }
-      else
-      {
-        it.second->copyPadding(*parent_->collision_detector_);
-
-        it.second->cenv_ = it.second->alloc_->allocateEnv(it.second->parent_->cenv_, world_);
-        it.second->cenv_const_ = it.second->cenv_;
-      }
-    }
-  */
   scene_transforms_.reset();
   robot_state_.reset();
   acm_.reset();

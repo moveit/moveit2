@@ -994,7 +994,7 @@ private:
   collision_detection::World::ObserverCallbackFn current_world_object_update_callback_;
   collision_detection::World::ObserverHandle current_world_object_update_observer_handle_;
 
-  CollisionDetectorPtr collision_detector_;  // copy of one of the entries in collision_.  Never NULL.
+  CollisionDetectorPtr collision_detector_;  // Never NULL.
 
   collision_detection::AllowedCollisionMatrixPtr acm_;  // if NULL use parent's
 
