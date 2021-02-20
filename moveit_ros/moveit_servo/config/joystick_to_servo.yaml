@@ -1,0 +1,34 @@
+
+##########################################################################
+# Modify all parameters related to joystickk to servo here
+##########################################################################
+robot_eef_frame: tool0    # Name of the robot's end effector link defined in URDF/SRDF
+robot_base_frame: base_link  # Name of the robot's base frame used by MoveIt (usually: base_link or world)
+
+cartesian_command_frames:
+  - base_link
+  - tool0
+  - world
+
+joints:
+  - azimuth_joint   # joint1
+  - shoulder_joint  # joint2
+  - elbow_joint     # joint3
+  - roll_joint      # joint4
+  - pitch_joint     # joint5
+  - wrist_joint     # joint6
+  #- joint7
+
+# Do not change this names. The joints are order as in the above list
+joint1_axis: 0  # Left/Right Axis stick left
+joint2_axis: 1  # Up/Down Axis stick left
+joint3_axis: 6  # cross key left/right
+joint4_axis: 7  # cross key up/down
+joint5_axis: 3  # Left/Right Axis stick right
+joint6_axis: 4  # Up/Down Axis stick right
+#joint7_axis: 0  # Left/Right Axis stick left
+
+# Setup for Microsoft Xbox 360 Wired Controller
+enable_joint_commands_button: 4  # LB
+enable_twist_commands_button: 5  # RB
+switch_cartesian_command_frame_button: 1   # B

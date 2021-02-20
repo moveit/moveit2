@@ -1,0 +1,28 @@
+axis_linear:
+  x: 1       # Up/Down Axis stick left
+  y: 0       # Left/Right Axis stick left
+  z: 4       # Up/Down Axis stick right
+scale_linear:
+  x: 0.7
+  y: 0.7
+  z: 0.7
+scale_linear_turbo:
+  x: 1.5
+  y: 1.5
+  z: 1.5
+
+axis_angular:
+  yaw: 3      # Left/Right Axis stick right
+  pitch: 6    # cross key left/right
+  roll: 7     # cross key up/down
+scale_angular:
+  yaw: 0.4
+  pitch: 0.4
+  roll: 0.4
+scale_angluar_turbo:
+  yaw: 1
+  pitch: 1
+  roll: 1
+
+enable_button: 5  # RB
+enable_turbo_button: 1  # B

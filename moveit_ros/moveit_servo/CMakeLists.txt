@@ -93,6 +93,13 @@ add_library(${SERVO_CONTROLLER_INPUT} SHARED src/teleop_demo/joystick_servo_exam
 ament_target_dependencies(${SERVO_CONTROLLER_INPUT} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 rclcpp_components_register_nodes(${SERVO_CONTROLLER_INPUT} "moveit_servo::JoyToServoPub")
 
+# Add executable for generic joystick to servo input
+set(JOYSTICK_TO_SERVO joystick_to_servo)
+add_library(${JOYSTICK_TO_SERVO} SHARED src/teleop_demo/joystick_to_servo.cpp)
+target_include_directories(${JOYSTICK_TO_SERVO} PRIVATE include)
+ament_target_dependencies(${JOYSTICK_TO_SERVO} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+rclcpp_components_register_nodes(${JOYSTICK_TO_SERVO} "moveit_servo::JoystickToServo")
+
 # Add executable to publish fake servo commands for testing/demo purposes
 set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
 add_executable(${FAKE_SERVO_CMDS_NAME} test/publish_fake_jog_commands.cpp)
@@ -109,6 +116,7 @@ install(
     ${COMPOSABLE_NODE_NAME}
     ${SERVO_CONTROLLER_INPUT}
     ${CPP_DEMO_NAME}
+    ${JOYSTICK_TO_SERVO}
     ${FAKE_SERVO_CMDS_NAME}
     ${POSE_TRACKING}
     ${POSE_TRACKING_DEMO_NAME}
