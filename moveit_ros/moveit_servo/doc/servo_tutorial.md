@@ -220,11 +220,11 @@ If joint commands are enabled, the `joystick_to_servo` component maps them to jo
 
 Configuration file [joystick_to_servo.yaml](../config/joystick_to_servo.yaml) provides following options for this component:
 
-  * `cartesian_command_frames`: cartesian frames in which the `TwistStamped` commands can be published. E.g., base_link, tool0, world.
   * `enable_joint_commands_button`: joystick button to enable joint-commands mode.
   * `enable_twist_commands_button`: joystick button to enable cartesian mode, i.e., proxy input twist messages to servo server.
   * `switch_cartesian_command_frame_button`: joystick button to switch cartesian command frame.
   * `switch_joint_axis_mode_button`: joysitck_button to switch joint to joystick axis mapping mode.
+  * `cartesian_command_frames`: cartesian frames in which the `TwistStamped` commands can be published. E.g., base_link, tool0, world.
   * `joints`: list of manipulators joints (usually 6 or 7) used for joint-space servoing
   * `num_joint_axis_control_modes`: number of modes for joint-control. It enables the reuse of the joystick axis for different manipulator joints if needed.
   * `joint<X>_axis`: joystick axis configuration for each manipulator's joint. `<X>` should be replaced with the joint number (starts with 1) in the joint list. If the number of joint-control modes is larger than 1, then a map with `<control_mode>: <joystick_axis>` is expected. The control mode numbering starts with 1.
