@@ -59,40 +59,60 @@ JoystickToServo::JoystickToServo(const rclcpp::NodeOptions& options)
   // Declare parameters
   this->declare_parameter<std::vector<std::string>>(
     "cartesian_command_frames", cartesian_command_frames_);
-  this->declare_parameter<std::vector<std::string>>("joints", joint_names_);
   this->declare_parameter<int>("enable_joint_commands_button", enable_joint_commands_button_);
   this->declare_parameter<int>("enable_twist_commands_button", enable_twist_commands_button_);
   this->declare_parameter<int>(
     "switch_cartesian_command_frame_button", switch_cartesian_command_frame_button_);
+  this->declare_parameter<int>(
+    "switch_joint_axis_mode_button", switch_joint_axis_mode_button_);
+  this->declare_parameter<std::vector<std::string>>("joints", joint_names_);
+  this->declare_parameter<int>("num_joint_axis_control_modes", 0);
 
   //TODO(denis): add info output regarding parameters
   // Read parameters
   cartesian_command_frames_ = this->get_parameter("cartesian_command_frames").as_string_array();
-  joint_names_ = this->get_parameter("joints").as_string_array();
   enable_joint_commands_button_ = this->get_parameter("enable_joint_commands_button").as_int();
   enable_twist_commands_button_ = this->get_parameter("enable_twist_commands_button").as_int();
   switch_cartesian_command_frame_button_ = this->get_parameter("switch_cartesian_command_frame_button").as_int();
+  switch_joint_axis_mode_button_ = this->get_parameter("switch_joint_axis_mode_button").as_int();
 
   RCLCPP_INFO(this->get_logger(),
               "Defined %d cartesian command frames.", cartesian_command_frames_.size());
-  RCLCPP_INFO(this->get_logger(), "Enable button for joint commands: %d", enable_joint_commands_button_);
-  RCLCPP_INFO(this->get_logger(), "Enable button for twist commands: %d", enable_twist_commands_button_);
+  RCLCPP_INFO(this->get_logger(),
+              "Enable button for joint commands: %d", enable_joint_commands_button_);
+  RCLCPP_INFO(this->get_logger(),
+              "Enable button for twist commands: %d", enable_twist_commands_button_);
   RCLCPP_INFO(this->get_logger(),
               "Button to switch command frame: %d", switch_cartesian_command_frame_button_);
+  RCLCPP_INFO(this->get_logger(),
+              "Button to switch joint to joystick mapping mode: %d",
+              switch_joint_axis_mode_button_);
 
+  joint_names_ = this->get_parameter("joints").as_string_array();
   if (joint_names_.empty()) {
     RCLCPP_WARN(this->get_logger(),
                 "No joint names specified. Only cartesian/twist control is available.");
   } else {
     RCLCPP_INFO(this->get_logger(), "Got list with %d joints.", joint_names_.size());
-    joint_axes_.resize(joint_names_.size(), -1);
-    for (uint i = 0; i < joint_names_.size(); ++i) {
-      // Declare and read joint axis parameters
-      this->declare_parameter<int>("joint" + std::to_string(i+1) + "_axis", joint_axes_[i]);
-      // TODO: Maybe it will not work so fast...
-      joint_axes_[i] = this->get_parameter("joint" + std::to_string(i+1) + "_axis").as_int();
-      RCLCPP_INFO(this->get_logger(), "Joint '" + joint_names_[i] + "' using axis: " +
-        std::to_string(joint_axes_[i]));
+    uint num_joint_axis_control_modes = this->get_parameter("num_joint_axis_control_modes").as_int();
+    RCLCPP_INFO(this->get_logger(),
+                "There are %d joint axis mapping-modes defined.", num_joint_axis_control_modes);
+    joint_to_joystick_axes_.resize(num_joint_axis_control_modes);
+    for (uint j = 0; j < num_joint_axis_control_modes; ++j) {
+      joint_to_joystick_axes_[j].resize(joint_names_.size(), -1);
+      for (uint i = 0; i < joint_names_.size(); ++i) {
+        // Declare and read joint axis parameters
+        std::string param_name = "joint" + std::to_string(i+1) + "_axis";
+        if (num_joint_axis_control_modes > 1) {
+          param_name += "." + std::to_string(j+1);
+        }
+        this->declare_parameter<int>(param_name, joint_to_joystick_axes_[j][i]);
+        // TODO: Maybe it will not work so fast...
+        joint_to_joystick_axes_[j][i] = this->get_parameter(param_name).as_int();
+        RCLCPP_INFO(this->get_logger(),
+                    "Joint '%s' using axis: %d in control mode %d.",
+                    joint_names_[i].c_str(), joint_to_joystick_axes_[j][i], j+1);
+      }
     }
   }
 
@@ -121,6 +141,10 @@ void JoystickToServo::convertJoyToCmd(
   if (buttons[switch_cartesian_command_frame_button_]) {
     command_frame_index_ = (command_frame_index_ + 1) % cartesian_command_frames_.size();
   }
+  if (buttons[switch_joint_axis_mode_button_]) {
+    joint_axis_mode_index_ = (joint_axis_mode_index_ + 1) % joint_to_joystick_axes_.size();
+    RCLCPP_INFO(this->get_logger(), "Using joint axis control mode: %d", joint_axis_mode_index_+1);
+  }
 
   if (buttons[enable_joint_commands_button_] && buttons[enable_twist_commands_button_]) {
     RCLCPP_DEBUG(this->get_logger(), "Both enalble buttons are pressed. Not moving!");
@@ -133,7 +157,11 @@ void JoystickToServo::convertJoyToCmd(
 
     for (uint i = 0; i < joint_names_.size(); ++i) {
       joint_msg.joint_names.push_back(joint_names_[i]);
-      joint_msg.velocities.push_back(axes[joint_axes_[i]]);
+      if (joint_to_joystick_axes_[joint_axis_mode_index_][i] != -1) {
+        joint_msg.velocities.push_back(axes[joint_to_joystick_axes_[joint_axis_mode_index_][i]]);
+      } else {
+        joint_msg.velocities.push_back(0.0);
+      }
     }
 
     joint_pub_->publish(joint_msg);

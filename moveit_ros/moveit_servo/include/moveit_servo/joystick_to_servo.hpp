@@ -59,9 +59,8 @@ public:
 
   ~JoystickToServo() = default;
 
-  // To change controls or setup a new controller, all you should to do is change the above enums and the follow 2
-  // functions
-  /** \brief // This converts a joystick axes and buttons array to a TwistStamped or JointJog message
+  /**
+   * @brief // This converts a joystick axes and buttons array to a TwistStamped or JointJog message
    * @param axes The vector of continuous controller joystick axes
    * @param buttons The vector of discrete controller button values
    */
@@ -83,12 +82,14 @@ protected:
   int enable_joint_commands_button_ = -1;
   int enable_twist_commands_button_ = -1;
   int switch_cartesian_command_frame_button_ = -1;
+  int switch_joint_axis_mode_button_ = -1;
 
   std::vector<std::string> cartesian_command_frames_;
   std::vector<std::string> joint_names_;
-  std::vector<int> joint_axes_;
+  std::vector<std::vector<int>> joint_to_joystick_axes_;
 
   int command_frame_index_ = 0;
+  int joint_axis_mode_index_ = 0;
 
   geometry_msgs::msg::Twist::SharedPtr input_twist_;
 
