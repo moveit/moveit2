@@ -41,16 +41,16 @@
 
   <build_depend>eigen</build_depend>
 
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>ament_lint_common</test_depend>
-  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>moveit_resources_fanuc_moveit_config</test_depend>
+  <test_depend>moveit_resources_panda_moveit_config</test_depend>
+  <test_depend>moveit_simple_controller_manager</test_depend>
+  <test_depend>fake_joint_driver</test_depend>
+  <test_depend>warehouse_ros_mongo</test_depend>
+  <test_depend>moveit_planners_ompl</test_depend>
+  <test_depend>rviz2</test_depend>
+  <test_depend>ros_testing</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
   </export>
-
-  <test_depend>moveit_resources_fanuc_moveit_config</test_depend>
-  <test_depend>moveit_resources_panda_moveit_config</test_depend>
-  <!-- TODO(henningkayser): switch to launch_test -->
-  <!-- <test_depend>rostest</test_depend> -->
 </package>

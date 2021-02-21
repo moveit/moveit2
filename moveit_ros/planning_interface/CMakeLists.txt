@@ -86,6 +86,27 @@ add_subdirectory(move_group_interface)
 # add_subdirectory(test)
 add_subdirectory(moveit_cpp)
 
+#############
+## TESTING ##
+#############
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(ros_testing REQUIRED)
+  find_package(Boost REQUIRED COMPONENTS filesystem)
+
+  # Move group interface cpp ompl constrained planning integration test
+  ament_add_gtest_executable(move_group_ompl_constraints_test
+      test/move_group_ompl_constraints_test.cpp
+  )
+
+  target_link_libraries(move_group_ompl_constraints_test ${THIS_PACKAGE_LIBRARIES})
+  ament_target_dependencies(move_group_ompl_constraints_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  add_ros_test(test/launch/move_group_ompl_constraints.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  # end move group interface cpp ompl constrained planning integration test
+
+endif()
+
 ament_export_include_directories(include)
 ament_export_libraries(${THIS_PACKAGE_LIBRARIES})
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
