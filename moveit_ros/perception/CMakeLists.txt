@@ -51,7 +51,9 @@ find_package(OpenMP REQUIRED)
 find_package(OpenCV)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
+  depth_image_octomap_updater/include
   lazy_free_space_updater/include
+  mesh_filter/include
   point_containment_filter/include
   pointcloud_octomap_updater/include
   semantic_world/include
@@ -59,7 +61,9 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 )
 
 set(THIS_PACKAGE_LIBRARIES
+  moveit_depth_image_octomap_updater
   moveit_lazy_free_space_updater
+  moveit_mesh_filter
   moveit_point_containment_filter
   moveit_pointcloud_octomap_updater
   moveit_semantic_world

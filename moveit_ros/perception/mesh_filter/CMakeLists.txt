@@ -1,6 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_mesh_filter)
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/mesh_filter_base.cpp
   src/sensor_model.cpp
   src/stereo_camera_model.cpp
