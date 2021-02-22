@@ -80,17 +80,26 @@ DepthImageOctomapUpdater::~DepthImageOctomapUpdater()
 
 bool DepthImageOctomapUpdater::setParams(const std::string& name_space)
 {
-  return node_->get_parameter(name_space + ".image_topic", image_topic_) &&
-         node_->get_parameter(name_space + ".queue_size", queue_size_) &&
-         node_->get_parameter(name_space + ".near_clipping_plane_distance", near_clipping_plane_distance_) &&
-         node_->get_parameter(name_space + ".far_clipping_plane_distance", far_clipping_plane_distance_) &&
-         node_->get_parameter(name_space + ".shadow_threshold", shadow_threshold_) &&
-         node_->get_parameter(name_space + ".padding_scale", padding_scale_) &&
-         node_->get_parameter(name_space + ".padding_offset", padding_offset_) &&
-         node_->get_parameter(name_space + ".max_update_rate", max_update_rate_) &&
-         node_->get_parameter(name_space + ".skip_vertical_pixels", skip_vertical_pixels_) &&
-         node_->get_parameter(name_space + ".skip_horizontal_pixels", skip_horizontal_pixels_) &&
-         node_->get_parameter(name_space + ".filtered_cloud_topic", filtered_cloud_topic_);
+  try
+  {
+    node_->get_parameter(name_space + ".image_topic", image_topic_) &&
+        node_->get_parameter(name_space + ".queue_size", queue_size_) &&
+        node_->get_parameter(name_space + ".near_clipping_plane_distance", near_clipping_plane_distance_) &&
+        node_->get_parameter(name_space + ".far_clipping_plane_distance", far_clipping_plane_distance_) &&
+        node_->get_parameter(name_space + ".shadow_threshold", shadow_threshold_) &&
+        node_->get_parameter(name_space + ".padding_scale", padding_scale_) &&
+        node_->get_parameter(name_space + ".padding_offset", padding_offset_) &&
+        node_->get_parameter(name_space + ".max_update_rate", max_update_rate_) &&
+        node_->get_parameter(name_space + ".skip_vertical_pixels", skip_vertical_pixels_) &&
+        node_->get_parameter(name_space + ".skip_horizontal_pixels", skip_horizontal_pixels_) &&
+        node_->get_parameter(name_space + ".filtered_cloud_topic", filtered_cloud_topic_);
+    return true;
+  }
+  catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, e.what() << '\n');
+    return false;
+  }
 }
 
 bool DepthImageOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
