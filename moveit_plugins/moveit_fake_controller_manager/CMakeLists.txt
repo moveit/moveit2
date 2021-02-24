@@ -11,11 +11,13 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 
-find_package(Boost REQUIRED thread)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+
+# Finds Boost Components
+include(ConfigExtras.cmake)
 
 add_library(${PROJECT_NAME} SHARED
   src/moveit_fake_controller_manager.cpp
@@ -29,13 +31,24 @@ ament_target_dependencies(${PROJECT_NAME}
   rclcpp
 )
 
-install(TARGETS ${PROJECT_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin)
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(
+  Boost
+  moveit_core
+  moveit_ros_planning
+  pluginlib
+  rclcpp
+)
 
 pluginlib_export_plugin_description_file(moveit_core moveit_fake_controller_manager_plugin_description.xml)
 
-ament_export_libraries(${PROJECT_NAME})
-ament_export_dependencies(${PROJECT_NAME})
-ament_package()
+ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

@@ -12,11 +12,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_msgs
   Boost
 )
-install(TARGETS ${MOVEIT_LIB_NAME}
-        EXPORT ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin)
 
 if(trac_ik_kinematics_plugin_FOUND)
     include_directories(${trac_ik_kinematics_plugin_INCLUDE_DIRS})
@@ -38,11 +33,6 @@ if(trac_ik_kinematics_plugin_FOUND)
     target_link_libraries(${MOVEIT_LIB_NAME} ${trac_ik_kinematics_plugin_LIBRARIES})
     set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES COMPILE_DEFINITIONS "CACHED_IK_KINEMATICS_TRAC_IK")
 endif()
-install(TARGETS ${MOVEIT_LIB_NAME}
-        EXPORT ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin)
 
 # This is just for testing purposes; the arms from Universal Robots have
 # analytic solvers, so caching just adds extra overhead.

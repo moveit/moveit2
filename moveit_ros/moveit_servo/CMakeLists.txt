@@ -107,15 +107,24 @@ install(
   TARGETS
     ${SERVO_LIB_NAME}
     ${COMPOSABLE_NODE_NAME}
-    ${SERVO_CONTROLLER_INPUT}
     ${CPP_DEMO_NAME}
-    ${FAKE_SERVO_CMDS_NAME}
     ${POSE_TRACKING}
     ${POSE_TRACKING_DEMO_NAME}
-  ARCHIVE DESTINATION lib
+    ${SERVO_CONTROLLER_INPUT}
+    ${FAKE_SERVO_CMDS_NAME}
+  EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  DESTINATION lib/${PROJECT_NAME})
+  INCLUDES DESTINATION include
+)
+# Install include, launch, config directories
+install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
+
+ament_export_libraries(export_${PROJECT_NAME})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
 ## TESTING ##
@@ -212,13 +221,4 @@ if(BUILD_TESTING)
 
 endif()
 
-# Install include, launch, config directories
-install(DIRECTORY include/ DESTINATION include)
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
-install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
-
-
-ament_export_include_directories(include)
-ament_export_libraries(${SERVO_LIB_NAME})
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ament_package()

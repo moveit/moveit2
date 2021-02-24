@@ -42,10 +42,3 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 target_include_directories(${MOVEIT_LIB_NAME} PRIVATE "${OGRE_PREFIX_DIR}/include")
 
 install(DIRECTORY include/ DESTINATION include)
-
-install(TARGETS ${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core
-  EXPORT ${MOVEIT_LIB_NAME}
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-)

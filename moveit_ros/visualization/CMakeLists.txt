@@ -13,7 +13,6 @@ endif()
 # definition needed for boost/math/constants/constants.hpp included by Ogre to compile
 add_definitions(-DBOOST_MATH_DISABLE_FLOAT128)
 
-find_package(Boost REQUIRED thread date_time system filesystem)
 find_package(ament_cmake REQUIRED)
 find_package(class_loader REQUIRED)
 find_package(geometric_shapes REQUIRED)
@@ -39,6 +38,9 @@ find_package(rviz_common REQUIRED)
 find_package(rviz_default_plugins REQUIRED)
 find_package(rviz_ogre_vendor REQUIRED)
 
+# Finds Boost Components
+include(ConfigExtras.cmake)
+
 # Qt Stuff
 find_package(Qt5 ${rviz_QT_VERSION} REQUIRED Core Widgets)
 set(QT_LIBRARIES Qt5::Widgets)
@@ -53,6 +55,39 @@ add_definitions(-DQT_NO_KEYWORDS)
 
 # catkin_install_python(PROGRAMS scripts/moveit_joy.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 # catkin_python_setup()
+
+set(THIS_PACKAGE_LIBRARIES
+  moveit_motion_planning_rviz_plugin
+  moveit_motion_planning_rviz_plugin_core
+  moveit_planning_scene_rviz_plugin
+  moveit_planning_scene_rviz_plugin_core
+  moveit_robot_state_rviz_plugin
+  moveit_robot_state_rviz_plugin_core
+  moveit_rviz_plugin_render_tools
+  moveit_trajectory_rviz_plugin
+  moveit_trajectory_rviz_plugin_core
+)
+
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+  class_loader
+  geometric_shapes
+  interactive_markers
+  moveit_ros_planning
+  moveit_ros_planning_interface
+  moveit_msgs
+  moveit_core
+  octomap_msgs
+  moveit_ros_robot_interaction
+  object_recognition_msgs
+  pluginlib
+  rclcpp
+  rclcpp_action
+  rclpy
+  rviz2
+  tf2_eigen
+  Eigen3
+  rviz_ogre_vendor
+)
 
 include_directories(rviz_plugin_render_tools/include
                     robot_state_rviz_plugin/include
@@ -79,30 +114,18 @@ pluginlib_export_plugin_description_file(rviz_common robot_state_rviz_plugin_des
 #  add_rostest(test/moveit_joy.test)
 #endif()
 
-ament_export_libraries(moveit_motion_planning_rviz_plugin_core)
-ament_export_libraries(moveit_planning_scene_rviz_plugin_core)
-ament_export_libraries(moveit_robot_state_rviz_plugin_core)
-ament_export_libraries(moveit_rviz_plugin_render_tools)
-ament_export_libraries(moveit_trajectory_rviz_plugin_core)
-ament_export_include_directories(include)
-ament_export_dependencies(class_loader)
-ament_export_dependencies(geometric_shapes)
-ament_export_dependencies(interactive_markers)
-ament_export_dependencies(moveit_ros_planning)
-ament_export_dependencies(moveit_ros_planning_interface)
-ament_export_dependencies(moveit_msgs)
-ament_export_dependencies(moveit_core)
-ament_export_dependencies(octomap_msgs)
-ament_export_dependencies(moveit_ros_robot_interaction)
-ament_export_dependencies(object_recognition_msgs)
-ament_export_dependencies(pluginlib)
-ament_export_dependencies(rclcpp)
-ament_export_dependencies(rclcpp_action)
-ament_export_dependencies(rclpy)
-ament_export_dependencies(rviz2)
-ament_export_dependencies(tf2_eigen)
-ament_export_dependencies(Eigen3)
-ament_export_dependencies(rviz_ogre_vendor)
-ament_package()
+install(
+  TARGETS ${THIS_PACKAGE_LIBRARIES}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
 
 include_directories("${OGRE_PREFIX_DIR}/include")

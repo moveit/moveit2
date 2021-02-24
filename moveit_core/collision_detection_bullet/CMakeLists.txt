@@ -19,12 +19,7 @@ add_library(collision_detector_bullet_plugin src/collision_detector_bullet_plugi
 set_target_properties(collision_detector_bullet_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(collision_detector_bullet_plugin ${catkin_LIBRARIES} ${MOVEIT_LIB_NAME})
 
-install(TARGETS ${MOVEIT_LIB_NAME} collision_detector_bullet_plugin
-        EXPORT ${MOVEIT_LIB_NAME} collision_detector_bullet_plugin
-        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-        ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
-
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
+install(DIRECTORY include/ DESTINATION include)
 
 install(FILES ../collision_detector_bullet_description.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
