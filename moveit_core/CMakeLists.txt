@@ -7,14 +7,11 @@ moveit_package()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-# boost::iostreams on Windows depends on boost::zlib
-if(WIN32)
-  set(EXTRA_BOOST_COMPONENTS zlib)
-endif()
-find_package(Boost REQUIRED system filesystem date_time thread iostreams regex ${EXTRA_BOOST_COMPONENTS})
-
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
+
+# Finds Boost Components
+include(ConfigExtras.cmake)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 
@@ -107,7 +104,9 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_planning_interface
     moveit_collision_detection
     moveit_collision_detection_fcl
+    collision_detector_fcl_plugin
     # ${BULLET_LIB}
+    # collision_detector_bullet_plugin
     moveit_kinematic_constraints
     moveit_planning_scene
     moveit_constraint_samplers
@@ -197,8 +196,16 @@ add_subdirectory(dynamics_solver)
 #   install(FILES collision_detection_bullet/empty_description.xml DESTINATION share/${PROJECT_NAME} RENAME collision_detector_bullet_description.xml)
 # endif()
 
-ament_export_include_directories(include)
-ament_export_libraries(${THIS_PACKAGE_LIBRARIES})
+install(
+  TARGETS ${THIS_PACKAGE_LIBRARIES}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-ament_package()
+ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

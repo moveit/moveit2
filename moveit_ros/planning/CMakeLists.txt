@@ -5,7 +5,6 @@ project(moveit_ros_planning)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-find_package(Boost REQUIRED system filesystem date_time program_options thread chrono)
 find_package(ament_cmake REQUIRED)
 find_package(moveit_msgs REQUIRED)
 # find_package(moveit_ros_perception REQUIRED)
@@ -24,6 +23,9 @@ find_package(moveit_core REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 
+# Finds Boost Components
+include(ConfigExtras.cmake)
+
 set(THIS_PACKAGE_INCLUDE_DIRS
     rdf_loader/include
     kinematics_plugin_loader/include
@@ -36,7 +38,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     collision_plugin_loader/include
 )
 
-set(libraries
+set(THIS_PACKAGE_LIBRARIES
   moveit_rdf_loader
   moveit_kinematics_plugin_loader
   moveit_robot_model_loader
@@ -85,10 +87,18 @@ add_subdirectory(planning_components_tools)
 add_subdirectory(trajectory_execution_manager)
 add_subdirectory(plan_execution)
 
-ament_export_include_directories(include)
-ament_export_libraries(${libraries})
+install(
+  TARGETS ${THIS_PACKAGE_LIBRARIES}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 pluginlib_export_plugin_description_file(moveit_core "planning_request_adapters_plugin_description.xml")
 
-ament_package()
+ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

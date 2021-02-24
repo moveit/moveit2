@@ -39,10 +39,4 @@ if(BUILD_TESTING)
   target_link_libraries(test_robot_model moveit_test_utils ${MOVEIT_LIB_NAME})
 endif()
 
-install(TARGETS ${MOVEIT_LIB_NAME}
-  EXPORT ${MOVEIT_LIB_NAME}
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-)
 install(DIRECTORY include/ DESTINATION include)

@@ -38,14 +38,6 @@ ament_target_dependencies(moveit_warehouse_services rclcpp Boost warehouse_ros m
 target_link_libraries(moveit_warehouse_services ${MOVEIT_LIB_NAME})
 
 install(
-  TARGETS ${MOVEIT_LIB_NAME}
-  EXPORT ${MOVEIT_LIB_NAME}
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-
-install(
   TARGETS
     moveit_save_to_warehouse
     moveit_warehouse_broadcast

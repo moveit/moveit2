@@ -7,7 +7,6 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 )
 
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   Boost
   urdfdom
@@ -18,12 +17,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   OCTOMAP
 )
 
-install(TARGETS ${MOVEIT_LIB_NAME}
-  EXPORT ${MOVEIT_LIB_NAME}
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-)
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
