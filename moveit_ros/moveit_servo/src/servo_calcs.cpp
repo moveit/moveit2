@@ -177,7 +177,7 @@ void ServoCalcs::start()
   initial_joint_trajectory->header.frame_id = parameters_->planning_frame;
   initial_joint_trajectory->joint_names = internal_joint_state_.name;
   trajectory_msgs::msg::JointTrajectoryPoint point;
-  point.time_from_start = rclcpp::Duration(parameters_->publish_period);
+  point.time_from_start = rclcpp::Duration::from_seconds(parameters_->publish_period);
   if (parameters_->publish_joint_positions)
     planning_scene_monitor_->getStateMonitor()->getCurrentState()->copyJointGroupPositions(joint_model_group_,
                                                                                            point.positions);
@@ -621,7 +621,7 @@ void ServoCalcs::insertRedundantPointsIntoTrajectory(trajectory_msgs::msg::Joint
   // Start from 2 because we already have the first point. End at count+1 so (total #) == count
   for (int i = 2; i < count; ++i)
   {
-    point.time_from_start = rclcpp::Duration(i * parameters_->publish_period);
+    point.time_from_start = rclcpp::Duration::from_seconds(i * parameters_->publish_period);
     joint_trajectory.points[i] = point;
   }
 }
@@ -646,7 +646,7 @@ void ServoCalcs::composeJointTrajMessage(const sensor_msgs::msg::JointState& joi
   joint_trajectory.joint_names = joint_state.name;
 
   trajectory_msgs::msg::JointTrajectoryPoint point;
-  point.time_from_start = rclcpp::Duration(parameters_->publish_period);
+  point.time_from_start = rclcpp::Duration::from_seconds(parameters_->publish_period);
   if (parameters_->publish_joint_positions)
     point.positions = joint_state.position;
   if (parameters_->publish_joint_velocities)
