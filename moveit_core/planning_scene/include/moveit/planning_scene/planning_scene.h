@@ -919,8 +919,6 @@ public:
    * identifies a combination of CollisionWorld/CollisionRobot which can be
    * used together.
    *
-   * This does nothing if this type of collision detector is already being used.
-   *
    * A new PlanningScene uses an FCL collision detector by default.
    *
    * example: to add FCL collision detection (normally not necessary) call

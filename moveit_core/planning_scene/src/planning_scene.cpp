@@ -234,7 +234,6 @@ void PlanningScene::CollisionDetector::copyPadding(const PlanningScene::Collisio
 
 void PlanningScene::setCollisionDetectorType(const collision_detection::CollisionDetectorAllocatorPtr& allocator)
 {
-  const std::string& name = allocator->getName();
   // Temporary copy of the previous (if any), to copy padding
   CollisionDetector prev_coll_detector;
   bool have_previous_coll_detector = false;
@@ -244,8 +243,11 @@ void PlanningScene::setCollisionDetectorType(const collision_detection::Collisio
     prev_coll_detector = *collision_detector_;
   }
 
-  if (name == getCollisionDetectorName())  // already using this collision detector
-    return;
+  // TODO(andyz): uncomment this for a small speed boost when another collision detector type is available in MoveIt2
+  // For now, it is useful in the switchCollisionDetectorType() unit test
+  //  const std::string& name = allocator->getName();
+  //  if (name == getCollisionDetectorName())  // already using this collision detector
+  //    return;
 
   collision_detector_.reset(new CollisionDetector());
 

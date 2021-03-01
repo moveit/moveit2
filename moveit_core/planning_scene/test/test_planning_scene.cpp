@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include <gtest/gtest.h>
+#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/utils/message_checks.h>
 #include <moveit/utils/robot_model_test_utils.h>
@@ -209,6 +210,25 @@ TEST(PlanningScene, loadBadSceneGeometry)
                                "0 0 1 0.3\n"
                                ".\n");
   EXPECT_FALSE(ps->loadGeometryFromStream(malformed_scene_geometry));
+}
+
+// Test the setting of a new collision detector type. For now, only FCL is available in MoveIt2.
+// TODO(andyz): switch to a different type when one becomes available.
+TEST(PlanningScene, switchCollisionDetectorType)
+{
+  moveit::core::RobotModelPtr robot_model = moveit::core::loadTestingRobotModel("pr2");
+  auto ps = std::make_shared<planning_scene::PlanningScene>(robot_model->getURDF(), robot_model->getSRDF());
+  moveit::core::RobotState current_state = ps->getCurrentState();
+  if (ps->isStateColliding(current_state, "left_arm"))
+  {
+    EXPECT_FALSE(ps->isStateValid(current_state, "left_arm"));
+  }
+
+  ps->setCollisionDetectorType(collision_detection::CollisionDetectorAllocatorFCL::create());
+  if (ps->isStateColliding(current_state, "left_arm"))
+  {
+    EXPECT_FALSE(ps->isStateValid(current_state, "left_arm"));
+  }
 }
 
 int main(int argc, char** argv)
