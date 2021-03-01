@@ -23,7 +23,8 @@ joints:
   - joint7
 
 # Do not change this names. The joints are order as in the list above
-num_joint_axis_control_modes: 2
+# Each joystick axis has up to 2 different behaviors, depending on the control mode
+num_joint_axis_control_modes: 2 
 joint1_axis:
   - "1": 0          # Left/Right Axis stick left
 joint2_axis:
