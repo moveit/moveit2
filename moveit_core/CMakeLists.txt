@@ -176,11 +176,11 @@ add_subdirectory(collision_distance_field)
 add_subdirectory(kinematics_metrics)
 add_subdirectory(dynamics_solver)
 # TODO(henningkayser): enable bullet once the library is migrated to ROS2
- if(BULLET_ENABLE)
-   add_subdirectory(collision_detection_bullet)
- else()
-   install(FILES collision_detection_bullet/empty_description.xml DESTINATION share/${PROJECT_NAME} RENAME collision_detector_bullet_description.xml)
- endif()
+if(BULLET_ENABLE)
+add_subdirectory(collision_detection_bullet)
+else()
+install(FILES collision_detection_bullet/empty_description.xml DESTINATION share/${PROJECT_NAME} RENAME collision_detector_bullet_description.xml)
+endif()
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}

@@ -21,7 +21,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   visualization_msgs
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
-  moveit_collision_detection  
+  moveit_collision_detection
   ${BULLET_LIBRARIES}
 )
 
