@@ -51,7 +51,7 @@ moveit_servo::ServoParametersPtr getTestParameters()
   auto output = std::make_shared<moveit_servo::ServoParameters>();
 
   // Populate the fields
-  output->use_gazebo = true;
+  output->use_gazebo = false;
   output->status_topic = "~/status";
   output->cartesian_command_in_topic = "~/delta_twist_cmds";
   output->joint_command_in_topic = "~/delta_joint_cmds";
