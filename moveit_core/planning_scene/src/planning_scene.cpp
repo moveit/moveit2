@@ -252,21 +252,16 @@ void PlanningScene::setCollisionDetectorType(const collision_detection::Collisio
   collision_detector_.reset(new CollisionDetector());
 
   collision_detector_->alloc_ = allocator;
-
   collision_detector_->cenv_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
   collision_detector_->cenv_const_ = collision_detector_->cenv_;
+  collision_detector_->cenv_unpadded_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
+  collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
 
   // Copy padding from the previous collision detector
   if (have_previous_coll_detector)
   {
-    collision_detector_->cenv_unpadded_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
-    collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
     collision_detector_->copyPadding(prev_coll_detector);
   }
-
-  // Allocate unpadded
-  collision_detector_->cenv_unpadded_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
-  collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
 }
 
 const collision_detection::CollisionEnvConstPtr&
