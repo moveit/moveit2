@@ -76,6 +76,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_ros_planning_interface
   moveit_msgs
   moveit_core
+  moveit_ros_warehouse
   octomap_msgs
   moveit_ros_robot_interaction
   object_recognition_msgs

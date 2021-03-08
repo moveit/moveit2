@@ -139,7 +139,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   visualization_msgs
   Eigen3
   eigen3_cmake_module
-  Boost
   OCTOMAP
   # ${BULLET_ENABLE}
 )
