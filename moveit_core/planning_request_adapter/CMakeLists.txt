@@ -14,10 +14,4 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_planning_scene
 )
 
-install(TARGETS ${MOVEIT_LIB_NAME}
-  EXPORT ${MOVEIT_LIB_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
-
 install(DIRECTORY include/ DESTINATION include)

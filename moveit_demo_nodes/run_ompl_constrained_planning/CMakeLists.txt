@@ -24,8 +24,12 @@ ament_target_dependencies(run_ompl_constrained_planning
 
 install(TARGETS run_ompl_constrained_planning
   EXPORT export_${PROJECT_NAME}
-  DESTINATION lib/${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
 )
+ament_export_targets(export_${PROJECT_NAME})
 
 install(DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}

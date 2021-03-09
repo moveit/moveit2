@@ -18,13 +18,6 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_planning_scene_monitor
 )
 
-install(TARGETS ${MOVEIT_LIB_NAME}
-  EXPORT  ${MOVEIT_LIB_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-
 install(DIRECTORY include/ DESTINATION include)
 
 if(CATKIN_ENABLE_TESTING)

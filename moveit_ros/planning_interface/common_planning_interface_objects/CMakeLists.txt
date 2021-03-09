@@ -8,10 +8,4 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
     tf2_ros
 )
 
-install(TARGETS ${MOVEIT_LIB_NAME}
-  EXPORT  ${MOVEIT_LIB_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
-
 install(DIRECTORY include/ DESTINATION include)

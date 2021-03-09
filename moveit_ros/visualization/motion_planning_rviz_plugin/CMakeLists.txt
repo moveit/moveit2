@@ -3,6 +3,7 @@ set(HEADERS
   include/moveit/motion_planning_rviz_plugin/motion_planning_frame.h
   include/moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h
   include/moveit/motion_planning_rviz_plugin/motion_planning_param_widget.h
+  include/moveit/motion_planning_rviz_plugin/interactive_marker_display.h
 )
 qt5_wrap_ui(UIC_FILES
   src/ui/motion_planning_rviz_plugin_frame.ui
@@ -23,6 +24,7 @@ set(SOURCE_FILES
   src/motion_planning_display.cpp
   src/motion_planning_frame_manipulation.cpp
   src/motion_planning_param_widget.cpp
+  src/interactive_marker_display.cpp
   src/icons/icons.qrc
 )
 
@@ -57,8 +59,3 @@ target_include_directories(${MOVEIT_LIB_NAME} PRIVATE "${OGRE_PREFIX_DIR}/includ
 
 install(DIRECTORY include/ DESTINATION include)
 
-install(TARGETS ${MOVEIT_LIB_NAME} ${MOVEIT_LIB_NAME}_core
-  EXPORT ${MOVEIT_LIB_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)

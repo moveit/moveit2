@@ -11,9 +11,4 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   sensor_msgs
 )
 
-install(TARGETS ${MOVEIT_LIB_NAME}
-        EXPORT  ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin)
 install(DIRECTORY include/ DESTINATION include)

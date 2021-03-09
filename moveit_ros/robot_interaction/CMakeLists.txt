@@ -5,7 +5,6 @@ project(moveit_ros_robot_interaction)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-find_package(Boost REQUIRED thread)
 find_package(moveit_ros_planning REQUIRED)
 find_package(interactive_markers REQUIRED)
 find_package(tf2 REQUIRED)
@@ -14,7 +13,17 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(rclcpp REQUIRED)
 
+# Finds Boost Components
+include(ConfigExtras.cmake)
+
 set(MOVEIT_LIB_NAME moveit_robot_interaction)
+
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+  Boost
+  moveit_ros_planning
+  interactive_markers
+  tf2_geometry_msgs
+)
 
 include_directories(include)
 
@@ -27,12 +36,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/robot_interaction.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${MOVEIT_LIB_NAME}
-  Boost
-  moveit_ros_planning
-  interactive_markers
-  tf2_geometry_msgs
-)
+ament_target_dependencies(${MOVEIT_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -42,16 +46,20 @@ if(BUILD_TESTING)
     Boost)
 endif()
 
-install(TARGETS ${MOVEIT_LIB_NAME}
-        EXPORT ${MOVEIT_LIB_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin)
+install(
+  TARGETS ${MOVEIT_LIB_NAME}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
 
 install(DIRECTORY include/ DESTINATION include)
 
 install(DIRECTORY resources DESTINATION share/${PROJECT_NAME})
 
-ament_export_include_directories(include)
-ament_export_libraries(${MOVEIT_LIB_NAME})
-ament_package()
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

@@ -22,19 +22,6 @@ if(WIN32)
 #  set_target_properties(${MOVEIT_LIB_NAME}_python PROPERTIES SUFFIX .pyd)
 endif()
 
-install(TARGETS ${MOVEIT_LIB_NAME}
-  EXPORT ${MOVEIT_LIB_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-
-#install(TARGETS ${MOVEIT_LIB_NAME}_python
-#  EXPORT ${MOVEIT_LIB_NAME}_python
-#  ARCHIVE DESTINATION bin
-#  LIBRARY DESTINATION bin
-#  RUNTIME DESTINATION bin)
-
 install(DIRECTORY include/ DESTINATION include)
 
 #add_executable(demo src/demo.cpp)
