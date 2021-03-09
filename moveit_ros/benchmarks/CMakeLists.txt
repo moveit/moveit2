@@ -13,13 +13,24 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(Boost REQUIRED date_time filesystem)
 find_package(tf2_eigen REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_warehouse REQUIRED)
 find_package(pluginlib REQUIRED)
 
+# Finds Boost Components
+include(ConfigExtras.cmake)
+
 include_directories(include)
+
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+  rclcpp
+  Boost
+  tf2_eigen
+  moveit_ros_planning
+  moveit_ros_warehouse
+  pluginlib
+)
 
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/BenchmarkOptions.cpp
@@ -27,52 +38,32 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
-  rclcpp
-  Boost
-  tf2_eigen
-  moveit_ros_planning
-  moveit_ros_warehouse
-  pluginlib
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
 add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
 ament_target_dependencies(moveit_run_benchmark
-  rclcpp
-  Boost
-  tf2_eigen
-  moveit_ros_planning
-  moveit_ros_warehouse
-  pluginlib
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 target_link_libraries(moveit_run_benchmark ${MOVEIT_LIB_NAME})
 
 add_executable(moveit_combine_predefined_poses_benchmark src/simple_benchmarks/CombinePredefinedPosesBenchmark.cpp)
 ament_target_dependencies(moveit_combine_predefined_poses_benchmark
-  rclcpp
-  Boost
-  tf2_eigen
-  moveit_ros_planning
-  moveit_ros_warehouse
-  pluginlib
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 target_link_libraries(moveit_combine_predefined_poses_benchmark ${MOVEIT_LIB_NAME})
 
-ament_export_include_directories(include)
-ament_export_libraries(${MOVEIT_LIB_NAME})
-ament_export_dependencies(rclcpp)
-ament_export_dependencies(Boost)
-ament_export_dependencies(tf2_eigen)
-ament_export_dependencies(moveit_ros_planning)
-ament_export_dependencies(moveit_ros_warehouse)
-ament_export_dependencies(pluginlib)
-
 install(
   TARGETS ${MOVEIT_LIB_NAME}
-  EXPORT  ${MOVEIT_LIB_NAME}
+  EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
 )
+
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 install(
   TARGETS
@@ -93,4 +84,4 @@ install(DIRECTORY examples/
   DESTINATION share/${PROJECT_NAME}
 )
 
-ament_package()
+ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

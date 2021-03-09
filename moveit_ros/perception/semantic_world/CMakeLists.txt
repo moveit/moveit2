@@ -17,9 +17,3 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 target_link_libraries(${MOVEIT_LIB_NAME} ${OpenCV_LIBRARIES})
 
 install(DIRECTORY include/ DESTINATION include)
-
-install(TARGETS ${MOVEIT_LIB_NAME}
-  EXPORT  ${MOVEIT_LIB_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)

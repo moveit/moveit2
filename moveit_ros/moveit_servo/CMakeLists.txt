@@ -65,13 +65,6 @@ ament_target_dependencies(${COMPOSABLE_NODE_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS
 target_link_libraries(${COMPOSABLE_NODE_NAME} ${SERVO_LIB_NAME})
 rclcpp_components_register_nodes(${COMPOSABLE_NODE_NAME} "moveit_servo::ServoServer")
 
-# Add cpp interface example executable
-set(CPP_DEMO_NAME servo_cpp_demo)
-add_executable(${CPP_DEMO_NAME} src/cpp_interface_demo/servo_cpp_interface_demo.cpp)
-ament_target_dependencies(${CPP_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(${CPP_DEMO_NAME} ${SERVO_LIB_NAME})
-
-
 ########################################
 ## Library for servoing toward a pose ##
 ########################################
@@ -81,17 +74,27 @@ add_library(${POSE_TRACKING} SHARED src/pose_tracking.cpp)
 ament_target_dependencies(${POSE_TRACKING} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(${POSE_TRACKING} ${SERVO_LIB_NAME})
 
-# An example of pose tracking
-set(POSE_TRACKING_DEMO_NAME servo_pose_tracking_demo)
-add_executable(${POSE_TRACKING_DEMO_NAME} src/cpp_interface_demo/pose_tracking_demo.cpp)
-target_link_libraries(${POSE_TRACKING_DEMO_NAME} ${POSE_TRACKING})
-ament_target_dependencies(${POSE_TRACKING_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-
 # Add executable for using a controller
 set(SERVO_CONTROLLER_INPUT servo_controller_input)
 add_library(${SERVO_CONTROLLER_INPUT} SHARED src/teleop_demo/joystick_servo_example.cpp)
 ament_target_dependencies(${SERVO_CONTROLLER_INPUT} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 rclcpp_components_register_nodes(${SERVO_CONTROLLER_INPUT} "moveit_servo::JoyToServoPub")
+
+######################
+## Demo Executables ##
+######################
+
+# Add cpp interface example executable
+set(CPP_DEMO_NAME servo_cpp_demo)
+add_executable(${CPP_DEMO_NAME} src/cpp_interface_demo/servo_cpp_interface_demo.cpp)
+ament_target_dependencies(${CPP_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(${CPP_DEMO_NAME} ${SERVO_LIB_NAME})
+
+# An example of pose tracking
+set(POSE_TRACKING_DEMO_NAME servo_pose_tracking_demo)
+add_executable(${POSE_TRACKING_DEMO_NAME} src/cpp_interface_demo/pose_tracking_demo.cpp)
+target_link_libraries(${POSE_TRACKING_DEMO_NAME} ${POSE_TRACKING})
+ament_target_dependencies(${POSE_TRACKING_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Add executable to publish fake servo commands for testing/demo purposes
 set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
@@ -102,20 +105,43 @@ ament_target_dependencies(${FAKE_SERVO_CMDS_NAME}
   std_srvs
 )
 
+#############
+## Install ##
+#############
+
 # Install Libraries
 install(
   TARGETS
     ${SERVO_LIB_NAME}
     ${COMPOSABLE_NODE_NAME}
-    ${SERVO_CONTROLLER_INPUT}
-    ${CPP_DEMO_NAME}
-    ${FAKE_SERVO_CMDS_NAME}
     ${POSE_TRACKING}
+    ${SERVO_CONTROLLER_INPUT}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+# Install Binaries
+install(
+  TARGETS
+    ${CPP_DEMO_NAME}
     ${POSE_TRACKING_DEMO_NAME}
+    ${FAKE_SERVO_CMDS_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install include, launch, config directories
+install(DIRECTORY include/ DESTINATION include)
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
+
+ament_export_libraries(export_${PROJECT_NAME})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 #############
 ## TESTING ##
@@ -212,13 +238,4 @@ if(BUILD_TESTING)
 
 endif()
 
-# Install include, launch, config directories
-install(DIRECTORY include/ DESTINATION include)
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
-install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
-
-
-ament_export_include_directories(include)
-ament_export_libraries(${SERVO_LIB_NAME})
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 ament_package()

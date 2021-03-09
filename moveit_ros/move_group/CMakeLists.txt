@@ -5,7 +5,6 @@ project(moveit_ros_move_group)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-find_package(Boost REQUIRED system filesystem date_time program_options thread)
 find_package(ament_cmake REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
@@ -16,6 +15,9 @@ find_package(std_srvs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
+
+# Finds Boost Components
+include(ConfigExtras.cmake)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   ament_cmake
@@ -30,6 +32,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_ros_planning
   pluginlib
 )
+
+include_directories(include)
 
 add_library(moveit_move_group_capabilities_base SHARED
   src/move_group_context.cpp
@@ -55,7 +59,6 @@ set_target_properties(moveit_move_group_capabilities_base
 set_target_properties(moveit_move_group_default_capabilities
   PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-target_include_directories(moveit_move_group_capabilities_base PUBLIC include)
 ament_target_dependencies(moveit_move_group_capabilities_base ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_executable(move_group src/move_group.cpp)
@@ -64,10 +67,8 @@ ament_target_dependencies(move_group  ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 target_link_libraries(move_group moveit_move_group_capabilities_base)
 
 add_executable(list_move_group_capabilities src/list_capabilities.cpp)
-target_include_directories(list_move_group_capabilities PUBLIC include)
 ament_target_dependencies(list_move_group_capabilities  ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 
-target_include_directories(moveit_move_group_default_capabilities PUBLIC include)
 ament_target_dependencies(moveit_move_group_default_capabilities ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_move_group_default_capabilities moveit_move_group_capabilities_base)
 
@@ -82,13 +83,17 @@ install(
   TARGETS
     moveit_move_group_default_capabilities
     moveit_move_group_capabilities_base
-  EXPORT moveit_move_group_capabilities_base
-  ARCHIVE DESTINATION lib
+  EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
 )
 
 install(DIRECTORY include/ DESTINATION include)
+
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 install(
   PROGRAMS
@@ -107,14 +112,4 @@ if(BUILD_TESTING)
   # add_rostest(test/test_check_state_validity_in_empty_scene.test)
 endif()
 
-ament_export_libraries(
-  moveit_move_group_capabilities_base
-)
-
-ament_export_dependencies(
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
-
-ament_export_include_directories(include)
-
-ament_package()
+ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
