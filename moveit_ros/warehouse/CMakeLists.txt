@@ -16,15 +16,26 @@ find_package(warehouse_ros REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_ros REQUIRED)
-find_package(Boost REQUIRED thread system filesystem regex date_time program_options)
 find_package(OpenSSL)
+
+# Finds Boost Components
+include(ConfigExtras.cmake)
 
 include_directories(warehouse/include ${OPENSSL_INCLUDE_DIR})
 
 add_subdirectory(warehouse)
 
-ament_export_include_directories(include)
-ament_export_libraries(moveit_warehouse)
+install(
+  TARGETS moveit_warehouse
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+
 ament_export_dependencies(rclcpp)
 ament_export_dependencies(moveit_core)
 ament_export_dependencies(warehouse_ros)
@@ -33,4 +44,4 @@ ament_export_dependencies(tf2_eigen)
 ament_export_dependencies(tf2_ros)
 ament_export_dependencies(Boost)
 
-ament_package()
+ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

@@ -11,7 +11,8 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wpedantic)
 endif()
 
-find_package(Boost REQUIRED thread)
+# Finds Boost Components
+include(ConfigExtras.cmake)
 
 if(WITH_OPENGL)
   # Prefer newer vendor-specific OpenGL library
@@ -66,6 +67,7 @@ set(THIS_PACKAGE_LIBRARIES
   moveit_mesh_filter
   moveit_point_containment_filter
   moveit_pointcloud_octomap_updater
+  moveit_pointcloud_octomap_updater_core
   moveit_semantic_world
 )
 
@@ -100,11 +102,19 @@ endif()
 
 add_subdirectory(semantic_world)
 
-ament_export_include_directories(include)
-ament_export_libraries(${THIS_PACKAGE_LIBRARIES})
+install(
+  TARGETS ${THIS_PACKAGE_LIBRARIES}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor "pointcloud_octomap_updater_plugin_description.xml")
 pluginlib_export_plugin_description_file(moveit_ros_occupancy_map_monitor "depth_image_octomap_updater_plugin_description.xml")
 
-ament_package()
+ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

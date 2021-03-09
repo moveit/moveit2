@@ -58,12 +58,6 @@ ament_target_dependencies(moveit_ompl_planner_plugin
 )
 target_link_libraries(moveit_ompl_planner_plugin ${MOVEIT_LIB_NAME})
 
-install(TARGETS ${MOVEIT_LIB_NAME} moveit_ompl_planner_plugin
-  EXPORT ${MOVEIT_LIB_NAME}
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-)
 install(TARGETS moveit_generate_state_database
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )

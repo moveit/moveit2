@@ -24,23 +24,11 @@ find_package(rclpy REQUIRED)
 # find_package(PythonInterp REQUIRED)
 # find_package(PythonLibs "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" REQUIRED)
 
-find_package(Boost REQUIRED)
-#if(Boost_VERSION LESS 106700)
-#  set(BOOST_PYTHON_COMPONENT python)
-#else()
-#  set(BOOST_PYTHON_COMPONENT python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
-#endif()
-
-find_package(Boost REQUIRED COMPONENTS
-  date_time
-  filesystem
-  program_options
-  #${BOOST_PYTHON_COMPONENT}
-  system
-  thread
-)
 find_package(Eigen3 REQUIRED)
 # find_package(eigenpy REQUIRED)
+
+# Finds Boost Components
+include(ConfigExtras.cmake)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
 #  py_bindings_tools/include
@@ -56,6 +44,7 @@ set(THIS_PACKAGE_LIBRARIES
   moveit_move_group_interface
   moveit_cpp
 #  moveit_py_bindings_tools
+#  moveit_py_bindings_tools_python
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -107,8 +96,16 @@ if(BUILD_TESTING)
 
 endif()
 
-ament_export_include_directories(include)
-ament_export_libraries(${THIS_PACKAGE_LIBRARIES})
+install(
+  TARGETS ${THIS_PACKAGE_LIBRARIES}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-ament_package()
+ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
