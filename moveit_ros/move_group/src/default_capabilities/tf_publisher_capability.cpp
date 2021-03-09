@@ -124,12 +124,12 @@ void TfPublisher::publishPlanningSceneFrames()
 
 void TfPublisher::initialize()
 {
-  rclcpp::Node::SharedPtr n(new rclcpp::Node("TFPublisher"));
+  std::string prefix = context_->node_->get_name();
+  context_->node_->get_parameter_or("planning_scene_frame_publishing_rate", rate_, 10);
+  context_->node_->get_parameter_or("planning_scene_tf_prefix", prefix_, prefix);
+  if (!prefix_.empty())
+    prefix_ += "/";
 
-  std::string prefix = n->get_namespace();
-  prefix += "/";
-  n->get_parameter_or("planning_scene_frame_publishing_rate", rate_, 10);
-  n->get_parameter_or("planning_scene_tf_prefix", prefix_, prefix);
   keep_running_ = true;
 
   RCLCPP_INFO(LOGGER, "Initializing MoveGroupTfPublisher with a frame publishing rate of %d", rate_);

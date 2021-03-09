@@ -223,9 +223,6 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
                                             const std::vector<std::string>& joint_filter) const
 {
   trajectory = moveit_msgs::msg::RobotTrajectory();
-
-  builtin_interfaces::msg::Time stamp = rclcpp::Clock(RCL_ROS_TIME).now();
-
   if (waypoints_.empty())
     return;
   const std::vector<const moveit::core::JointModel*>& jnts =
@@ -258,26 +255,23 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
   if (!onedof.empty())
   {
     trajectory.joint_trajectory.header.frame_id = robot_model_->getModelFrame();
-    trajectory.joint_trajectory.header.stamp = stamp;
+    trajectory.joint_trajectory.header.stamp = rclcpp::Time(0, 0, RCL_ROS_TIME);
     trajectory.joint_trajectory.points.resize(waypoints_.size());
   }
 
   if (!mdof.empty())
   {
     trajectory.multi_dof_joint_trajectory.header.frame_id = robot_model_->getModelFrame();
-    trajectory.multi_dof_joint_trajectory.header.stamp = stamp;
+    trajectory.multi_dof_joint_trajectory.header.stamp = rclcpp::Time(0, 0, RCL_ROS_TIME);
     trajectory.multi_dof_joint_trajectory.points.resize(waypoints_.size());
   }
 
   static const rclcpp::Duration ZERO_DURATION(0.0);
   double total_time = 0.0;
-  rclcpp::Duration dur_total(0, 0);
   for (std::size_t i = 0; i < waypoints_.size(); ++i)
   {
     if (duration_from_previous_.size() > i)
       total_time += duration_from_previous_[i];
-
-    dur_total = rclcpp::Duration(1, 0) * total_time;
 
     if (!onedof.empty())
     {
@@ -310,8 +304,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
         trajectory.joint_trajectory.points[i].effort.clear();
 
       if (duration_from_previous_.size() > i)
-
-        trajectory.joint_trajectory.points[i].time_from_start = dur_total;
+        trajectory.joint_trajectory.points[i].time_from_start = rclcpp::Duration::from_seconds(total_time);
       else
         trajectory.joint_trajectory.points[i].time_from_start = ZERO_DURATION;
     }
@@ -353,7 +346,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
         }
       }
       if (duration_from_previous_.size() > i)
-        trajectory.multi_dof_joint_trajectory.points[i].time_from_start = dur_total;
+        trajectory.multi_dof_joint_trajectory.points[i].time_from_start = rclcpp::Duration::from_seconds(total_time);
       else
         trajectory.multi_dof_joint_trajectory.points[i].time_from_start = ZERO_DURATION;
     }
@@ -364,19 +357,15 @@ void RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::RobotState& refe
                                             const trajectory_msgs::msg::JointTrajectory& trajectory)
 {
   // make a copy just in case the next clear() removes the memory for the reference passed in
-
   const moveit::core::RobotState& copy = reference_state;
   clear();
   std::size_t state_count = trajectory.points.size();
   rclcpp::Time last_time_stamp = trajectory.header.stamp;
   rclcpp::Time this_time_stamp = last_time_stamp;
 
-  rclcpp::Time traj_stamp = trajectory.header.stamp;
-  rclcpp::Duration dur_from_start(0, 0);
-
   for (std::size_t i = 0; i < state_count; ++i)
   {
-    this_time_stamp = traj_stamp + trajectory.points[i].time_from_start;
+    this_time_stamp = rclcpp::Time(trajectory.header.stamp) + trajectory.points[i].time_from_start;
     moveit::core::RobotStatePtr st(new moveit::core::RobotState(copy));
     st->setVariablePositions(trajectory.joint_names, trajectory.points[i].positions);
     if (!trajectory.points[i].velocities.empty())
@@ -393,7 +382,6 @@ void RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::RobotState& refe
 void RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::RobotState& reference_state,
                                             const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
-  geometry_msgs::msg::TransformStamped tf_stamped;
   // make a copy just in case the next clear() removes the memory for the reference passed in
   const moveit::core::RobotState& copy = reference_state;
   clear();
