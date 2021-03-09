@@ -193,30 +193,6 @@ PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(pare
   // record changes to the world
   world_diff_.reset(new collision_detection::WorldDiff(world_));
 
-/*
-  // Set up the same collision detector as the parent
-  const CollisionDetectorPtr& parent_detector = parent_->collision_detector_;
-
-  collision_detector_.reset(new CollisionDetector());
-  collision_detector_->alloc_ = parent_detector->alloc_;
-  collision_detector_->cenv_ = collision_detector_->alloc_->allocateEnv(parent_detector->cenv_, world_);
-  collision_detector_->cenv_const_ = collision_detector_->cenv_;
-  collision_detector_->cenv_unpadded_ =
-      collision_detector_->alloc_->allocateEnv(parent_detector->cenv_unpadded_, world_);
-  collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
-  collision_detector_->copyPadding(*parent_detector);
-*/
-
-/*
-  // Set up the same collision detector as the parent
-  collision_detector_.reset(new CollisionDetector());
-  collision_detector_->alloc_ = parent_->collision_detector_->alloc_;
-  collision_detector_->cenv_ = parent_->collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
-  collision_detector_->cenv_const_ = parent_->collision_detector_->cenv_;
-  collision_detector_->cenv_unpadded_ = parent_->collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
-  collision_detector_->cenv_unpadded_const_ = parent_->collision_detector_->cenv_unpadded_;
-  collision_detector_->copyPadding(*parent_->collision_detector_);
-*/
   setCollisionDetectorType(parent_->collision_detector_->alloc_);
   collision_detector_->copyPadding(*parent_->collision_detector_);
 }
@@ -319,7 +295,10 @@ void PlanningScene::clearDiffs()
   if (current_world_object_update_callback_)
     current_world_object_update_observer_handle_ = world_->addObserver(current_world_object_update_callback_);
 
-  collision_detector_->copyPadding(*parent_->collision_detector_);
+  if (parent_)
+  {
+    collision_detector_->copyPadding(*parent_->collision_detector_);
+  }
   collision_detector_->cenv_const_ = collision_detector_->cenv_;
 
   scene_transforms_.reset();
