@@ -40,10 +40,12 @@
 
 #include <ompl/base/Constraint.h>
 
+#include <moveit/ompl_interface/detail/NearestNeighborsGNAT.h>
 #include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit_msgs/msg/constraints.hpp>
+#include <moveit_msgs/msg/cartesian_trajectory.hpp>
 
 namespace ompl_interface
 {
@@ -333,5 +335,62 @@ Bounds positionConstraintMsgToBoundVector(const moveit_msgs::msg::PositionConstr
 std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotModelConstPtr& robot_model,
                                                      const std::string& group,
                                                      const moveit_msgs::msg::Constraints& constraints);
+
+/******************************************
+ * Toolpath Constraint
+ * ****************************************/
+/** \brief A path constraint for the EEF useful for sanding, painting, drawing, welding, etc
+ * */
+class ToolPathConstraint : public BaseConstraint
+{
+public:
+  ToolPathConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
+                     unsigned int num_dofs, const unsigned int num_cons = 6, double step = 0.01);
+
+  void parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) override;
+
+  void setPath(const moveit_msgs::msg::CartesianTrajectory& msg);
+
+  void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const override;
+
+private:
+  // TODO: Why won't NearestNeighborsGNAT allow me to store pose as Eigen Transform
+  mutable NearestNeighborsGNAT<geometry_msgs::msg::Pose> pose_nn_;  // store poses
+  const double step_;                                               // step size between each waypoint
+};
+
+/**
+ * @brief Distance between two poses
+ * @param pose1 - first pose
+ * @param pose2 - second pose
+ * @return arc length between two quaternion + Eulcidean distance between positions
+ */
+double poseDistance(const geometry_msgs::msg::Pose& pose1, const geometry_msgs::msg::Pose& pose2);
+
+/**
+ * @brief Compose Euclidean distance between two poses
+ * @param pose1 - first pose
+ * @param pose2 - second pose
+ * @return Euclidean distance
+ */
+double euclideanDistance(const geometry_msgs::msg::Pose& pose1, const geometry_msgs::msg::Pose& pose2);
+
+/**
+ * @brief Compose arc length between two quaternions
+ * @param pose1 - first pose
+ * @param pose2 - second pose
+ * @return Arc length
+ */
+double arcLength(const geometry_msgs::msg::Pose& pose1, const geometry_msgs::msg::Pose& pose2);
+
+/**
+ * @brief Interpolated between two poses
+ * @param pose1 - first pose
+ * @param pose2 - second pose
+ * @param step - step from first pose to pose 2 [0 1]
+ * @return Interpolated pose
+ */
+geometry_msgs::msg::Pose poseInterpolator(const geometry_msgs::msg::Pose& pose1, const geometry_msgs::msg::Pose& pose2,
+                                          double step);
 
 }  // namespace ompl_interface

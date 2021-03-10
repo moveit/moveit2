@@ -45,6 +45,8 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_planners_ompl.om
 
 namespace ompl_interface
 {
+static const double MAX_QUATERNION_NORM_ERROR = 1e-9;
+
 Bounds::Bounds() : size_(0)
 {
 }
@@ -384,5 +386,152 @@ std::shared_ptr<BaseConstraint> createOMPLConstraint(const moveit::core::RobotMo
     RCLCPP_ERROR(LOGGER, "No path constraints found in planning request.");
     return nullptr;
   }
+}
+
+/******************************************
+ * Toolpath Constraint
+ * ****************************************/
+ToolPathConstraint::ToolPathConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
+                                       unsigned int num_dofs, const unsigned int num_cons, double step)
+  : BaseConstraint(robot_model, group, num_dofs, num_cons), step_(step)
+{
+  pose_nn_.setDistanceFunction([this](const geometry_msgs::msg::Pose& pose1, const geometry_msgs::msg::Pose& pose2) {
+    return poseDistance(pose1, pose2);
+  });
+}
+
+
+void ToolPathConstraint::parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) override
+{
+  // TODO: Is this needed? Can this be done using setPath()?
+}
+
+
+void ToolPathConstraint::setPath(const moveit_msgs::msg::CartesianTrajectory& msg)
+{
+  // Clear previous path
+  pose_nn_.clear();
+
+  // Interpolate along waypoints and insert into pose_nn_;
+  for (unsigned int i = 0; i < msg.points.size() - 1; i++)
+  {
+    // Insert waypoints
+    pose_nn_.add(msg.points.at(i).point.pose);
+
+    // TODO: Consider arc lenth between the poses to determine the number of interpolation steps
+    // Linearly determine the number of steps
+    const auto num_steps = static_cast<unsigned int>(
+        euclideanDistance(msg.points.at(i).point.pose, msg.points.at(i + 1).point.pose) / step_);
+
+    // Insert interpolated poses
+    auto delta = step_;
+    for (unsigned int j = 0; j < num_steps - 1; j++)
+    {
+      const auto pose = poseInterpolator(msg.points.at(i).point.pose, msg.points.at(i + 1).point.pose, delta);
+      pose_nn_.add(pose);
+      delta += step_;
+    }
+  }
+
+  // Insert last waypoint
+  pose_nn_.add(msg.points.at(msg.points.size() - 1).point.pose);
+}
+
+void ToolPathConstraint::function(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
+                                  Eigen::Ref<Eigen::VectorXd> out) const
+{
+  // TODO: try setting num_dim = 1 in BaseConstraint and using poseDistance as the constraint function
+  // Ideal: F(q_actual) - F(q_nearest_pose) = 0
+
+  // Actual end-effector pose
+  const Eigen::Isometry3d eef_pose_eigen = forwardKinematics(joint_values);
+  const Eigen::Vector3d trans = eef_pose_eigen.translation();
+  const Eigen::Quaterniond eef_quat(eef_pose_eigen.rotation());
+  const Eigen::AngleAxisd eef_aa(eef_quat);
+  const Eigen::Vector3d eef_aa_vec = eef_aa.axis() * eef_aa.angle();
+
+  geometry_msgs::msg::Pose eef_pose;
+  eef_pose.position.x = trans.x();
+  eef_pose.position.y = trans.y();
+  eef_pose.position.z = trans.z();
+
+  eef_pose.orientation.w = eef_quat.w();
+  eef_pose.orientation.x = eef_quat.x();
+  eef_pose.orientation.y = eef_quat.y();
+  eef_pose.orientation.z = eef_quat.z();
+
+  // Nearest end-effector pose in trajectory
+  const geometry_msgs::msg::Pose eef_nearest_pose = pose_nn_.nearest(eef_pose);
+  const Eigen::Quaterniond eef_nearest_quat(eef_nearest_pose.orientation.w, eef_nearest_pose.orientation.x,
+                                            eef_nearest_pose.orientation.y, eef_nearest_pose.orientation.z);
+  const Eigen::AngleAxisd eef_nearest_aa(eef_quat);
+  const Eigen::Vector3d eef_nearest_aa_vec = eef_nearest_aa.axis() * eef_nearest_aa.angle();
+
+  // should be allocated to size coDim, by default this is 6
+  out[0] = eef_pose.position.x - eef_nearest_pose.position.x;
+  out[1] = eef_pose.position.y - eef_nearest_pose.position.y;
+  out[2] = eef_pose.position.z - eef_nearest_pose.position.z;
+
+  out[3] = eef_aa_vec(0) - eef_nearest_aa_vec(0);
+  out[4] = eef_aa_vec(1) - eef_nearest_aa_vec(1);
+  out[5] = eef_aa_vec(2) - eef_nearest_aa_vec(2);
+}
+
+double poseDistance(const geometry_msgs::msg::Pose& pose1, const geometry_msgs::msg::Pose& pose2)
+{
+  return euclideanDistance(pose1, pose2) + arcLength(pose1, pose2);
+}
+
+double euclideanDistance(const geometry_msgs::msg::Pose& pose1, const geometry_msgs::msg::Pose& pose2)
+{
+  const auto dx = pose1.position.x - pose2.position.x;
+  const auto dy = pose1.position.y - pose2.position.y;
+  const auto dz = pose1.position.z - pose2.position.z;
+  return std::sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+double arcLength(const geometry_msgs::msg::Pose& pose1, const geometry_msgs::msg::Pose& pose2)
+{
+  // Distance between two quaternions
+  // https://math.stackexchange.com/questions/90081/quaternion-distance
+  // https://github.com/ompl/ompl/blob/main/src/ompl/base/spaces/src/SO3StateSpace.cpp#L254-L262
+  // dot product between q1 and q2
+  auto dq = std::fabs(pose1.orientation.w * pose2.orientation.w + pose1.orientation.x * pose2.orientation.x +
+                      pose1.orientation.y * pose2.orientation.y + pose1.orientation.z * pose2.orientation.z);
+
+  if (dq > 1.0 - MAX_QUATERNION_NORM_ERROR)
+  {
+    return 0.0;
+  }
+
+  return std::acos(dq);
+}
+
+geometry_msgs::msg::Pose poseInterpolator(const geometry_msgs::msg::Pose& pose1, const geometry_msgs::msg::Pose& pose2,
+                                          double step)
+{
+  // Pose interpolation
+  // https://answers.ros.org/question/299691/interpolation-for-between-two-poses/
+
+  const Eigen::Vector3d t1(pose1.position.x, pose1.position.y, pose1.position.z);
+  const Eigen::Vector3d t2(pose2.position.x, pose2.position.y, pose2.position.z);
+
+  const Eigen::Quaterniond q1(pose1.orientation.w, pose1.orientation.x, pose1.orientation.y, pose1.orientation.z);
+  const Eigen::Quaterniond q2(pose2.orientation.w, pose2.orientation.x, pose2.orientation.y, pose2.orientation.z);
+
+  const Eigen::Vector3d interp_translation = (1.0 - step) * t1 + step * t2;
+  const Eigen::Quaterniond interp_orientation = q1.slerp(step, q2);
+
+  geometry_msgs::msg::Pose interp_pose;
+  interp_pose.position.x = interp_translation.x();
+  interp_pose.position.y = interp_translation.y();
+  interp_pose.position.z = interp_translation.z();
+
+  interp_pose.orientation.w = interp_orientation.w();
+  interp_pose.orientation.x = interp_orientation.x();
+  interp_pose.orientation.y = interp_orientation.y();
+  interp_pose.orientation.z = interp_orientation.z();
+
+  return interp_pose;
 }
 }  // namespace ompl_interface
