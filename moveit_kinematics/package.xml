@@ -42,6 +42,9 @@
   <test_depend>moveit_resources_panda_description</test_depend>
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
 
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
   <export>
     <build_type>ament_cmake</build_type>
     <moveit_core plugin="${prefix}/kdl_kinematics_plugin_description.xml"/>
