@@ -63,6 +63,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 
 set(THIS_PACKAGE_LIBRARIES
   moveit_depth_image_octomap_updater
+  moveit_depth_image_octomap_updater_core
   moveit_lazy_free_space_updater
   moveit_mesh_filter
   moveit_point_containment_filter
