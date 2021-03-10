@@ -55,85 +55,8 @@ inline bool isLinkActive(const std::vector<std::string>& active, const std::stri
 /** \brief Stores a single contact result in the requested way.
  *   \param found Indicates if a contact for this pair of objects has already been found
  *   \return Pointer to the newly inserted contact */
-inline collision_detection::Contact* processResult(ContactTestData& cdata, collision_detection::Contact& contact,
-                                                   const std::pair<std::string, std::string>& key, bool found)
-{
-  // add deepest penetration / smallest distance to result
-  if (cdata.req.distance)
-  {
-    if (contact.depth < cdata.res.distance)
-    {
-      cdata.res.distance = contact.depth;
-    }
-  }
-
-  ROS_DEBUG_STREAM_NAMED("collision_detection.bullet",
-                         "Contact btw " << key.first << " and " << key.second << " dist: " << contact.depth);
-  // case if pair hasn't a contact yet
-  if (!found)
-  {
-    if (contact.depth <= 0)
-    {
-      cdata.res.collision = true;
-    }
-
-    std::vector<collision_detection::Contact> data;
-
-    // if we dont want contacts we are done here
-    if (!cdata.req.contacts)
-    {
-      if (!cdata.req.distance)
-      {
-        cdata.done = true;
-      }
-      return nullptr;
-    }
-    else
-    {
-      data.reserve(cdata.req.max_contacts_per_pair);
-      data.emplace_back(contact);
-      cdata.res.contact_count++;
-    }
-
-    if (cdata.res.contact_count >= cdata.req.max_contacts)
-    {
-      if (!cdata.req.distance)
-      {
-        cdata.done = true;
-      }
-    }
-
-    if (cdata.req.max_contacts_per_pair == 1u)
-    {
-      cdata.pair_done = true;
-    }
-
-    return &(cdata.res.contacts.insert(std::make_pair(key, data)).first->second.back());
-  }
-  else
-  {
-    std::vector<collision_detection::Contact>& dr = cdata.res.contacts[key];
-    dr.emplace_back(contact);
-    cdata.res.contact_count++;
-
-    if (dr.size() >= cdata.req.max_contacts_per_pair)
-    {
-      cdata.pair_done = true;
-    }
-
-    if (cdata.res.contact_count >= cdata.req.max_contacts)
-    {
-      if (!cdata.req.distance)
-      {
-        cdata.done = true;
-      }
-    }
-
-    return &(dr.back());
-  }
-
-  return nullptr;
-}
+collision_detection::Contact* processResult(ContactTestData& cdata, collision_detection::Contact& contact,
+                                            const std::pair<std::string, std::string>& key, bool found);
 
 /**
  * @brief Create a convex hull from vertices using Bullet Convex Hull Computer
@@ -147,68 +70,7 @@ inline collision_detection::Contact* processResult(ContactTestData& cdata, colli
  *                "innerRadius" is the minimum distance of a face to the center of the convex hull.
  * @return The number of faces. If less than zero an error occured when trying to create the convex hull
  */
-inline int createConvexHull(AlignedVector<Eigen::Vector3d>& vertices, std::vector<int>& faces,
-                            const AlignedVector<Eigen::Vector3d>& input, double shrink = -1, double shrinkClamp = -1)
-{
-  vertices.clear();
-  faces.clear();
-
-  btConvexHullComputer conv;
-  btAlignedObjectArray<btVector3> points;
-  points.reserve(static_cast<int>(input.size()));
-  for (const Eigen::Vector3d& v : input)
-  {
-    points.push_back(btVector3(static_cast<btScalar>(v[0]), static_cast<btScalar>(v[1]), static_cast<btScalar>(v[2])));
-  }
-
-  btScalar val = conv.compute(&points[0].getX(), sizeof(btVector3), points.size(), static_cast<btScalar>(shrink),
-                              static_cast<btScalar>(shrinkClamp));
-  if (val < 0)
-  {
-    ROS_ERROR("Failed to create convex hull");
-    return -1;
-  }
-
-  int num_verts = conv.vertices.size();
-  vertices.reserve(static_cast<size_t>(num_verts));
-  for (int i = 0; i < num_verts; i++)
-  {
-    btVector3& v = conv.vertices[i];
-    vertices.push_back(Eigen::Vector3d(v.getX(), v.getY(), v.getZ()));
-  }
-
-  int num_faces = conv.faces.size();
-  faces.reserve(static_cast<size_t>(3 * num_faces));
-  for (int i = 0; i < num_faces; i++)
-  {
-    std::vector<int> face;
-    face.reserve(3);
-
-    const btConvexHullComputer::Edge* source_edge = &(conv.edges[conv.faces[i]]);
-    int a = source_edge->getSourceVertex();
-    face.push_back(a);
-
-    int b = source_edge->getTargetVertex();
-    face.push_back(b);
-
-    const btConvexHullComputer::Edge* edge = source_edge->getNextEdgeOfFace();
-    int c = edge->getTargetVertex();
-    face.push_back(c);
-
-    edge = edge->getNextEdgeOfFace();
-    c = edge->getTargetVertex();
-    while (c != a)
-    {
-      face.push_back(c);
-
-      edge = edge->getNextEdgeOfFace();
-      c = edge->getTargetVertex();
-    }
-    faces.push_back(static_cast<int>(face.size()));
-    faces.insert(faces.end(), face.begin(), face.end());
-  }
-
-  return num_faces;
-}
+int createConvexHull(AlignedVector<Eigen::Vector3d>& vertices, std::vector<int>& faces,
+                     const AlignedVector<Eigen::Vector3d>& input, double shrink = -1, double shrinkClamp = -1);
 
 }  // namespace collision_detection_bullet

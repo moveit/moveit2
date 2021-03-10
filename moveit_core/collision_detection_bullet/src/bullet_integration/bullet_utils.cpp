@@ -40,10 +40,47 @@
 #include <geometric_shapes/shapes.h>
 #include <memory>
 #include <octomap/octomap.h>
-#include <ros/console.h>
+
+static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
 
 namespace collision_detection_bullet
 {
+bool acmCheck(const std::string& body_1, const std::string& body_2,
+              const collision_detection::AllowedCollisionMatrix* acm)
+{
+  collision_detection::AllowedCollision::Type allowed_type;
+
+  if (acm != nullptr)
+  {
+    if (acm->getEntry(body_1, body_2, allowed_type))
+    {
+      if (allowed_type == collision_detection::AllowedCollision::Type::NEVER)
+      {
+        RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
+                            "Not allowed entry in ACM found, collision check between " << body_1 << " and " << body_2);
+        return false;
+      }
+      else
+      {
+        RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
+                            "Entry in ACM found, skipping collision check as allowed " << body_1 << " and " << body_2);
+        return true;
+      }
+    }
+    else
+    {
+      RCLCPP_DEBUG_STREAM(BULLET_LOGGER,
+                          "No entry in ACM found, collision check between " << body_1 << " and " << body_2);
+      return false;
+    }
+  }
+  else
+  {
+    RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "No ACM, collision check between " << body_1 << " and " << body_2);
+    return false;
+  }
+}
+
 btCollisionShape* createShapePrimitive(const shapes::Box* geom, const CollisionObjectType& collision_object_type)
 {
   assert(collision_object_type == CollisionObjectType::USE_SHAPE_TYPE);
@@ -144,13 +181,13 @@ btCollisionShape* createShapePrimitive(const shapes::Mesh* geom, const Collision
       }
       default:
       {
-        ROS_ERROR("This bullet shape type (%d) is not supported for geometry meshs",
-                  static_cast<int>(collision_object_type));
+        RCLCPP_ERROR(BULLET_LOGGER, "This bullet shape type (%d) is not supported for geometry meshs",
+                     static_cast<int>(collision_object_type));
         return nullptr;
       }
     }
   }
-  ROS_ERROR("The mesh is empty!");
+  RCLCPP_ERROR(BULLET_LOGGER, "The mesh is empty!");
   return nullptr;
 }
 
@@ -217,11 +254,141 @@ btCollisionShape* createShapePrimitive(const shapes::OcTree* geom, const Collisi
     }
     default:
     {
-      ROS_ERROR("This bullet shape type (%d) is not supported for geometry octree",
-                static_cast<int>(collision_object_type));
+      RCLCPP_ERROR(BULLET_LOGGER, "This bullet shape type (%d) is not supported for geometry octree",
+                   static_cast<int>(collision_object_type));
       return nullptr;
     }
   }
+}
+
+void updateCollisionObjectFilters(const std::vector<std::string>& active, CollisionObjectWrapper& cow)
+{
+  // if not active make cow part of static
+  if (!isLinkActive(active, cow.getName()))
+  {
+    cow.m_collisionFilterGroup = btBroadphaseProxy::StaticFilter;
+    cow.m_collisionFilterMask = btBroadphaseProxy::KinematicFilter;
+  }
+  else
+  {
+    cow.m_collisionFilterGroup = btBroadphaseProxy::KinematicFilter;
+    cow.m_collisionFilterMask = btBroadphaseProxy::KinematicFilter | btBroadphaseProxy::StaticFilter;
+  }
+
+  if (cow.getBroadphaseHandle())
+  {
+    cow.getBroadphaseHandle()->m_collisionFilterGroup = cow.m_collisionFilterGroup;
+    cow.getBroadphaseHandle()->m_collisionFilterMask = cow.m_collisionFilterMask;
+  }
+  RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "COW " << cow.getName() << " group " << cow.m_collisionFilterGroup << " mask "
+                                            << cow.m_collisionFilterMask);
+}
+
+CollisionObjectWrapperPtr makeCastCollisionObject(const CollisionObjectWrapperPtr& cow)
+{
+  CollisionObjectWrapperPtr new_cow = cow->clone();
+
+  btTransform tf;
+  tf.setIdentity();
+
+  if (btBroadphaseProxy::isConvex(new_cow->getCollisionShape()->getShapeType()))
+  {
+    assert(dynamic_cast<btConvexShape*>(new_cow->getCollisionShape()) != nullptr);
+    btConvexShape* convex = static_cast<btConvexShape*>(new_cow->getCollisionShape());
+
+    // This checks if the collision object is already a cast collision object
+    assert(convex->getShapeType() != CUSTOM_CONVEX_SHAPE_TYPE);
+
+    CastHullShape* shape = new CastHullShape(convex, tf);
+
+    new_cow->manage(shape);
+    new_cow->setCollisionShape(shape);
+  }
+  else if (btBroadphaseProxy::isCompound(new_cow->getCollisionShape()->getShapeType()))
+  {
+    btCompoundShape* compound = static_cast<btCompoundShape*>(new_cow->getCollisionShape());
+    btCompoundShape* new_compound =
+        new btCompoundShape(BULLET_COMPOUND_USE_DYNAMIC_AABB, compound->getNumChildShapes());
+
+    for (int i = 0; i < compound->getNumChildShapes(); ++i)
+    {
+      if (btBroadphaseProxy::isConvex(compound->getChildShape(i)->getShapeType()))
+      {
+        btConvexShape* convex = static_cast<btConvexShape*>(compound->getChildShape(i));
+        assert(convex->getShapeType() != CUSTOM_CONVEX_SHAPE_TYPE);  // This checks if already a cast collision object
+
+        btTransform geom_trans = compound->getChildTransform(i);
+
+        btCollisionShape* subshape = new CastHullShape(convex, tf);
+
+        new_cow->manage(subshape);
+        subshape->setMargin(BULLET_MARGIN);
+        new_compound->addChildShape(geom_trans, subshape);
+      }
+      else if (btBroadphaseProxy::isCompound(compound->getChildShape(i)->getShapeType()))
+      {
+        btCompoundShape* second_compound = static_cast<btCompoundShape*>(compound->getChildShape(i));
+        btCompoundShape* new_second_compound =
+            new btCompoundShape(BULLET_COMPOUND_USE_DYNAMIC_AABB, second_compound->getNumChildShapes());
+        for (int j = 0; j < second_compound->getNumChildShapes(); ++j)
+        {
+          assert(!btBroadphaseProxy::isCompound(second_compound->getChildShape(j)->getShapeType()));
+
+          btConvexShape* convex = static_cast<btConvexShape*>(second_compound->getChildShape(j));
+          assert(convex->getShapeType() != CUSTOM_CONVEX_SHAPE_TYPE);  // This checks if already a cast collision object
+
+          btTransform geom_trans = second_compound->getChildTransform(j);
+
+          btCollisionShape* subshape = new CastHullShape(convex, tf);
+
+          new_cow->manage(subshape);
+          subshape->setMargin(BULLET_MARGIN);
+          new_second_compound->addChildShape(geom_trans, subshape);
+        }
+
+        btTransform geom_trans = compound->getChildTransform(i);
+
+        new_cow->manage(new_second_compound);
+
+        // margin on compound seems to have no effect when positive but has an effect when negative
+        new_second_compound->setMargin(BULLET_MARGIN);
+        new_compound->addChildShape(geom_trans, new_second_compound);
+      }
+      else
+      {
+        RCLCPP_ERROR_STREAM(BULLET_LOGGER,
+                            "I can only collision check convex shapes and compound shapes made of convex shapes");
+        throw std::runtime_error("I can only collision check convex shapes and compound shapes made of convex shapes");
+      }
+    }
+
+    // margin on compound seems to have no effect when positive but has an effect when negative
+    new_compound->setMargin(BULLET_MARGIN);
+    new_cow->manage(new_compound);
+    new_cow->setCollisionShape(new_compound);
+    new_cow->setWorldTransform(cow->getWorldTransform());
+  }
+  else
+  {
+    RCLCPP_ERROR_STREAM(BULLET_LOGGER,
+                        "I can only collision check convex shapes and compound shapes made of convex shapes");
+    throw std::runtime_error("I can only collision check convex shapes and compound shapes made of convex shapes");
+  }
+
+  return new_cow;
+}
+
+void addCollisionObjectToBroadphase(const CollisionObjectWrapperPtr& cow,
+                                    const std::unique_ptr<btBroadphaseInterface>& broadphase,
+                                    const std::unique_ptr<btCollisionDispatcher>& dispatcher)
+{
+  RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Added " << cow->getName() << " to broadphase");
+  btVector3 aabb_min, aabb_max;
+  cow->getAABB(aabb_min, aabb_max);
+
+  int type = cow->getCollisionShape()->getShapeType();
+  cow->setBroadphaseHandle(broadphase->createProxy(aabb_min, aabb_max, type, cow.get(), cow->m_collisionFilterGroup,
+                                                   cow->m_collisionFilterMask, dispatcher.get()));
 }
 
 btCollisionShape* createShapePrimitive(const shapes::ShapeConstPtr& geom,
@@ -255,10 +422,109 @@ btCollisionShape* createShapePrimitive(const shapes::ShapeConstPtr& geom,
     }
     default:
     {
-      ROS_ERROR("This geometric shape type (%d) is not supported using BULLET yet", static_cast<int>(geom->type));
+      RCLCPP_ERROR(BULLET_LOGGER, "This geometric shape type (%d) is not supported using BULLET yet",
+                   static_cast<int>(geom->type));
       return nullptr;
     }
   }
+}
+
+bool BroadphaseFilterCallback::needBroadphaseCollision(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1) const
+{
+  bool cull = !(proxy0->m_collisionFilterMask & proxy1->m_collisionFilterGroup);
+  cull = cull || !(proxy1->m_collisionFilterMask & proxy0->m_collisionFilterGroup);
+
+  if (cull)
+    return false;
+
+  const CollisionObjectWrapper* cow0 = static_cast<const CollisionObjectWrapper*>(proxy0->m_clientObject);
+  const CollisionObjectWrapper* cow1 = static_cast<const CollisionObjectWrapper*>(proxy1->m_clientObject);
+
+  if (!cow0->m_enabled)
+    return false;
+
+  if (!cow1->m_enabled)
+    return false;
+
+  if (cow0->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED &&
+      cow1->getTypeID() == collision_detection::BodyType::ROBOT_LINK)
+    if (cow0->m_touch_links.find(cow1->getName()) != cow0->m_touch_links.end())
+      return false;
+
+  if (cow1->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED &&
+      cow0->getTypeID() == collision_detection::BodyType::ROBOT_LINK)
+    if (cow1->m_touch_links.find(cow0->getName()) != cow1->m_touch_links.end())
+      return false;
+
+  if (cow0->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED &&
+      cow1->getTypeID() == collision_detection::BodyType::ROBOT_ATTACHED)
+    if (cow0->m_touch_links == cow1->m_touch_links)
+      return false;
+
+  RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Broadphase pass " << cow0->getName() << " vs " << cow1->getName());
+  return true;
+}
+
+btScalar BroadphaseContactResultCallback::addSingleResult(btManifoldPoint& cp,
+                                                          const btCollisionObjectWrapper* colObj0Wrap, int partId0,
+                                                          int index0, const btCollisionObjectWrapper* colObj1Wrap,
+                                                          int partId1, int index1)
+{
+  if (cp.m_distance1 > static_cast<btScalar>(contact_distance_))
+  {
+    RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Not close enough for collision with " << cp.m_distance1);
+    return 0;
+  }
+
+  if (cast_)
+  {
+    return addCastSingleResult(cp, colObj0Wrap, index0, colObj1Wrap, index1, collisions_);
+  }
+  else
+  {
+    return addDiscreteSingleResult(cp, colObj0Wrap, colObj1Wrap, collisions_);
+  }
+}
+
+bool TesseractCollisionPairCallback::processOverlap(btBroadphasePair& pair)
+{
+  results_callback_.collisions_.pair_done = false;
+
+  if (results_callback_.collisions_.done)
+  {
+    return false;
+  }
+
+  const CollisionObjectWrapper* cow0 = static_cast<const CollisionObjectWrapper*>(pair.m_pProxy0->m_clientObject);
+  const CollisionObjectWrapper* cow1 = static_cast<const CollisionObjectWrapper*>(pair.m_pProxy1->m_clientObject);
+
+  std::pair<std::string, std::string> pair_names{ cow0->getName(), cow1->getName() };
+  if (results_callback_.needsCollision(cow0, cow1))
+  {
+    RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Processing " << cow0->getName() << " vs " << cow1->getName());
+    btCollisionObjectWrapper obj0_wrap(nullptr, cow0->getCollisionShape(), cow0, cow0->getWorldTransform(), -1, -1);
+    btCollisionObjectWrapper obj1_wrap(nullptr, cow1->getCollisionShape(), cow1, cow1->getWorldTransform(), -1, -1);
+
+    // dispatcher will keep algorithms persistent in the collision pair
+    if (!pair.m_algorithm)
+    {
+      pair.m_algorithm = dispatcher_->findAlgorithm(&obj0_wrap, &obj1_wrap, nullptr, BT_CLOSEST_POINT_ALGORITHMS);
+    }
+
+    if (pair.m_algorithm)
+    {
+      TesseractBroadphaseBridgedManifoldResult contact_point_result(&obj0_wrap, &obj1_wrap, results_callback_);
+      contact_point_result.m_closestPointDistanceThreshold = static_cast<btScalar>(results_callback_.contact_distance_);
+
+      // discrete collision detection query
+      pair.m_algorithm->processCollision(&obj0_wrap, &obj1_wrap, dispatch_info_, &contact_point_result);
+    }
+  }
+  else
+  {
+    RCLCPP_DEBUG_STREAM(BULLET_LOGGER, "Not processing " << cow0->getName() << " vs " << cow1->getName());
+  }
+  return false;
 }
 
 CollisionObjectWrapper::CollisionObjectWrapper(const std::string& name, const collision_detection::BodyType& type_id,
