@@ -41,4 +41,5 @@ before_script:
   - git clone -q -b ros2 --depth=1 https://github.com/ros-planning/moveit_ci.git .moveit_ci
 
 script:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - .moveit_ci/travis.sh
