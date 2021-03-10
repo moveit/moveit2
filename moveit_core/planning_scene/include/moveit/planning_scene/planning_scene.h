@@ -233,53 +233,11 @@ public:
    */
   /**@{*/
 
-  /** \brief Add a new collision detector type.
-   *
-   * A collision detector type is specified with (a shared pointer to) an
-   * allocator which is a subclass of CollisionDetectorAllocator.  This
-   * identifies a combination of CollisionWorld/CollisionRobot which can ve
-   * used together.
-   *
-   * This does nothing if this type of collision detector has already been added.
-   *
-   * A new PlanningScene contains an FCL collision detector.  This FCL
-   * collision detector will always be available unless it is removed by
-   * calling setActiveCollisionDetector() with exclusive=true.
-   *
-   * example: to add FCL collision detection (normally not necessary) call
-   *   planning_scene->addCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
-   *
-   * */
-  void addCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator);
-
-  /** \brief Set the type of collision detector to use.
-   * Calls addCollisionDetector() to add it if it has not already been added.
-   *
-   * If exclusive is true then all other collision detectors will be removed
-   * and only this one will be available.
-   *
-   * example: to use FCL collision call
-   *   planning_scene->setActiveCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
-   */
-  void setActiveCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator,
-                                  bool exclusive = false);
-
-  /** \brief Set the type of collision detector to use.
-   * This type must have already been added with addCollisionDetector().
-   *
-   * Returns true on success, false if \e collision_detector_name is not the
-   * name of a collision detector that has been previously added with
-   * addCollisionDetector(). */
-  bool setActiveCollisionDetector(const std::string& collision_detector_name);
-
-  const std::string& getActiveCollisionDetectorName() const
+  const std::string getCollisionDetectorName() const
   {
-    return active_collision_->alloc_->getName();
+    // If no collision detector is allocated, return an empty string
+    return collision_detector_ ? (collision_detector_->alloc_->getName()) : "";
   }
-
-  /** \brief get the types of collision detector that have already been added.
-   * These are the types which can be passed to setActiveCollisionDetector(). */
-  void getCollisionDetectorNames(std::vector<std::string>& names) const;
 
   /** \brief Get the representation of the world */
   const collision_detection::WorldConstPtr& getWorld() const
@@ -298,13 +256,13 @@ public:
   /** \brief Get the active collision environment */
   const collision_detection::CollisionEnvConstPtr& getCollisionEnv() const
   {
-    return active_collision_->getCollisionEnv();
+    return collision_detector_->getCollisionEnv();
   }
 
   /** \brief Get the active collision detector for the robot */
   const collision_detection::CollisionEnvConstPtr& getCollisionEnvUnpadded() const
   {
-    return active_collision_->getCollisionEnvUnpadded();
+    return collision_detector_->getCollisionEnvUnpadded();
   }
 
   /** \brief Get a specific collision detector for the world.  If not found return active CollisionWorld. */
@@ -316,15 +274,8 @@ public:
   getCollisionEnvUnpadded(const std::string& collision_detector_name) const;
 
   /** \brief Get the representation of the collision robot
-   * This can be used to set padding and link scale on the active collision_robot.
-   * NOTE: After modifying padding and scale on the active robot call
-   * propogateRobotPadding() to copy it to all the other collision detectors. */
+   * This can be used to set padding and link scale on the active collision_robot. */
   const collision_detection::CollisionEnvPtr& getCollisionEnvNonConst();
-
-  /** \brief Copy scale and padding from active CollisionRobot to other CollisionRobots.
-   * This should be called after any changes are made to the scale or padding of the active
-   * CollisionRobot.  This has no effect on the unpadded CollisionRobots. */
-  void propogateRobotPadding();
 
   /** \brief Get the allowed collision matrix */
   const collision_detection::AllowedCollisionMatrix& getAllowedCollisionMatrix() const
@@ -961,6 +912,21 @@ public:
   /** \brief Clone a planning scene. Even if the scene \e scene depends on a parent, the cloned scene will not. */
   static PlanningScenePtr clone(const PlanningSceneConstPtr& scene);
 
+  /** \brief Replace previous collision detector with a new collision detector type (or create new, if none previously).
+   *
+   * The collision detector type is specified with (a shared pointer to) an
+   * allocator which is a subclass of CollisionDetectorAllocator.  This
+   * identifies a combination of CollisionWorld/CollisionRobot which can be
+   * used together.
+   *
+   * A new PlanningScene uses an FCL collision detector by default.
+   *
+   * example: to add FCL collision detection (normally not necessary) call
+   *   planning_scene->setCollisionDetectorType(collision_detection::CollisionDetectorAllocatorFCL::create());
+   *
+   * */
+  void setCollisionDetectorType(const collision_detection::CollisionDetectorAllocatorPtr& allocator);
+
 private:
   /* Private constructor used by the diff() methods. */
   PlanningScene(const PlanningSceneConstPtr& parent);
@@ -993,26 +959,17 @@ private:
     collision_detection::CollisionEnvPtr cenv_unpadded_;
     collision_detection::CollisionEnvConstPtr cenv_unpadded_const_;
 
-    CollisionDetectorConstPtr parent_;  // may be NULL
-
     const collision_detection::CollisionEnvConstPtr& getCollisionEnv() const
     {
-      return cenv_const_ ? cenv_const_ : parent_->getCollisionEnv();
+      return cenv_const_;
     }
     const collision_detection::CollisionEnvConstPtr& getCollisionEnvUnpadded() const
     {
-      return cenv_unpadded_const_ ? cenv_unpadded_const_ : parent_->getCollisionEnvUnpadded();
+      return cenv_unpadded_const_;
     }
-    void findParent(const PlanningScene& scene);
     void copyPadding(const CollisionDetector& src);
   };
   friend struct CollisionDetector;
-
-  using CollisionDetectorIterator = std::map<std::string, CollisionDetectorPtr>::iterator;
-  using CollisionDetectorConstIterator = std::map<std::string, CollisionDetectorPtr>::const_iterator;
-
-  void allocateCollisionDetectors();
-  void allocateCollisionDetectors(CollisionDetector& detector);
 
   std::string name_;  // may be empty
 
@@ -1035,8 +992,7 @@ private:
   collision_detection::World::ObserverCallbackFn current_world_object_update_callback_;
   collision_detection::World::ObserverHandle current_world_object_update_observer_handle_;
 
-  std::map<std::string, CollisionDetectorPtr> collision_;  // never empty
-  CollisionDetectorPtr active_collision_;                  // copy of one of the entries in collision_.  Never NULL.
+  CollisionDetectorPtr collision_detector_;  // Never NULL.
 
   collision_detection::AllowedCollisionMatrixPtr acm_;  // if NULL use parent's
 

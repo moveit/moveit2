@@ -87,7 +87,7 @@ public:
   /**
    * @brief This should be used to load your collision plugin.
    */
-  virtual bool initialize(const planning_scene::PlanningScenePtr& scene, bool exclusive) const = 0;
+  virtual bool initialize(const planning_scene::PlanningScenePtr& scene) const = 0;
 };
 
 }  // namespace collision_detection

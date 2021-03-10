@@ -161,7 +161,7 @@ void PlanningScene::initialize()
   for (const srdf::Model::DisabledCollision& it : dc)
     acm_->setEntry(it.link1_, it.link2_, true);
 
-  setActiveCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
+  setCollisionDetectorType(collision_detection::CollisionDetectorAllocatorFCL::create());
 }
 
 /* return NULL on failure */
@@ -193,22 +193,8 @@ PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(pare
   // record changes to the world
   world_diff_.reset(new collision_detection::WorldDiff(world_));
 
-  // Set up the same collision detectors as the parent
-  for (const std::pair<const std::string, CollisionDetectorPtr>& it : parent_->collision_)
-  {
-    const CollisionDetectorPtr& parent_detector = it.second;
-    CollisionDetectorPtr& detector = collision_[it.first];
-    detector.reset(new CollisionDetector());
-    detector->alloc_ = parent_detector->alloc_;
-    detector->parent_ = parent_detector;
-
-    detector->cenv_ = detector->alloc_->allocateEnv(parent_detector->cenv_, world_);
-    detector->cenv_const_ = detector->cenv_;
-
-    detector->cenv_unpadded_ = detector->alloc_->allocateEnv(parent_detector->cenv_unpadded_, world_);
-    detector->cenv_unpadded_const_ = detector->cenv_unpadded_;
-  }
-  setActiveCollisionDetector(parent_->getActiveCollisionDetectorName());
+  setCollisionDetectorType(parent_->collision_detector_->alloc_);
+  collision_detector_->copyPadding(*parent_->collision_detector_);
 }
 
 PlanningScenePtr PlanningScene::clone(const PlanningSceneConstPtr& scene)
@@ -237,137 +223,64 @@ void PlanningScene::CollisionDetector::copyPadding(const PlanningScene::Collisio
   cenv_->setLinkScale(src.getCollisionEnv()->getLinkScale());
 }
 
-void PlanningScene::propogateRobotPadding()
+void PlanningScene::setCollisionDetectorType(const collision_detection::CollisionDetectorAllocatorPtr& allocator)
 {
-  for (std::pair<const std::string, CollisionDetectorPtr>& it : collision_)
+  // Temporary copy of the previous (if any), to copy padding
+  CollisionDetector prev_coll_detector;
+  bool have_previous_coll_detector = false;
+  if (collision_detector_)
   {
-    if (it.second != active_collision_)
-      it.second->copyPadding(*active_collision_);
-  }
-}
-
-void PlanningScene::CollisionDetector::findParent(const PlanningScene& scene)
-{
-  if (parent_ || !scene.parent_)
-    return;
-
-  CollisionDetectorConstIterator it = scene.parent_->collision_.find(alloc_->getName());
-  if (it != scene.parent_->collision_.end())
-    parent_ = it->second->parent_;
-}
-
-void PlanningScene::addCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator)
-{
-  const std::string& name = allocator->getName();
-  CollisionDetectorPtr& detector = collision_[name];
-
-  if (detector)  // already added this one
-    return;
-
-  detector.reset(new CollisionDetector());
-
-  detector->alloc_ = allocator;
-
-  if (!active_collision_)
-    active_collision_ = detector;
-
-  detector->findParent(*this);
-
-  detector->cenv_ = detector->alloc_->allocateEnv(world_, getRobotModel());
-  detector->cenv_const_ = detector->cenv_;
-
-  // if the current active detector is not the added one, copy its padding to the new one and allocate unpadded
-  if (detector != active_collision_)
-  {
-    detector->cenv_unpadded_ = detector->alloc_->allocateEnv(world_, getRobotModel());
-    detector->cenv_unpadded_const_ = detector->cenv_unpadded_;
-
-    detector->copyPadding(*active_collision_);
+    have_previous_coll_detector = true;
+    prev_coll_detector = *collision_detector_;
   }
 
-  detector->cenv_unpadded_ = detector->alloc_->allocateEnv(world_, getRobotModel());
-  detector->cenv_unpadded_const_ = detector->cenv_unpadded_;
-}
+  // TODO(andyz): uncomment this for a small speed boost when another collision detector type is available in MoveIt2
+  // For now, it is useful in the switchCollisionDetectorType() unit test
+  //  const std::string& name = allocator->getName();
+  //  if (name == getCollisionDetectorName())  // already using this collision detector
+  //    return;
 
-void PlanningScene::setActiveCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator,
-                                               bool exclusive)
-{
-  if (exclusive)
+  collision_detector_.reset(new CollisionDetector());
+
+  collision_detector_->alloc_ = allocator;
+  collision_detector_->cenv_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
+  collision_detector_->cenv_const_ = collision_detector_->cenv_;
+  collision_detector_->cenv_unpadded_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
+  collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
+
+  // Copy padding from the previous collision detector
+  if (have_previous_coll_detector)
   {
-    CollisionDetectorPtr p;
-    CollisionDetectorIterator it = collision_.find(allocator->getName());
-    if (it != collision_.end())
-      p = it->second;
-
-    collision_.clear();
-    active_collision_.reset();
-
-    if (p)
-    {
-      collision_[allocator->getName()] = p;
-      active_collision_ = p;
-      return;
-    }
+    collision_detector_->copyPadding(prev_coll_detector);
   }
-
-  addCollisionDetector(allocator);
-  setActiveCollisionDetector(allocator->getName());
-}
-
-bool PlanningScene::setActiveCollisionDetector(const std::string& collision_detector_name)
-{
-  CollisionDetectorIterator it = collision_.find(collision_detector_name);
-  if (it != collision_.end())
-  {
-    active_collision_ = it->second;
-    return true;
-  }
-  else
-  {
-    RCLCPP_ERROR(LOGGER,
-                 "Cannot setActiveCollisionDetector to '%s' -- it has been added to PlanningScene. "
-                 "Keeping existing active collision detector '%s'",
-                 collision_detector_name.c_str(), active_collision_->alloc_->getName().c_str());
-    return false;
-  }
-}
-
-void PlanningScene::getCollisionDetectorNames(std::vector<std::string>& names) const
-{
-  names.clear();
-  names.reserve(collision_.size());
-  for (const std::pair<const std::string, CollisionDetectorPtr>& it : collision_)
-    names.push_back(it.first);
 }
 
 const collision_detection::CollisionEnvConstPtr&
 PlanningScene::getCollisionEnv(const std::string& collision_detector_name) const
 {
-  CollisionDetectorConstIterator it = collision_.find(collision_detector_name);
-  if (it == collision_.end())
+  if (collision_detector_name != getCollisionDetectorName())
   {
     RCLCPP_ERROR(LOGGER, "Could not get CollisionRobot named '%s'.  Returning active CollisionRobot '%s' instead",
-                 collision_detector_name.c_str(), active_collision_->alloc_->getName().c_str());
-    return active_collision_->getCollisionEnv();
+                 collision_detector_name.c_str(), collision_detector_->alloc_->getName().c_str());
+    return collision_detector_->getCollisionEnv();
   }
 
-  return it->second->getCollisionEnv();
+  return collision_detector_->getCollisionEnv();
 }
 
 const collision_detection::CollisionEnvConstPtr&
 PlanningScene::getCollisionEnvUnpadded(const std::string& collision_detector_name) const
 {
-  CollisionDetectorConstIterator it = collision_.find(collision_detector_name);
-  if (it == collision_.end())
+  if (collision_detector_name != getCollisionDetectorName())
   {
     RCLCPP_ERROR(LOGGER,
                  "Could not get CollisionRobotUnpadded named '%s'. "
                  "Returning active CollisionRobotUnpadded '%s' instead",
-                 collision_detector_name.c_str(), active_collision_->alloc_->getName().c_str());
-    return active_collision_->getCollisionEnvUnpadded();
+                 collision_detector_name.c_str(), collision_detector_->alloc_->getName().c_str());
+    return collision_detector_->getCollisionEnvUnpadded();
   }
 
-  return it->second->getCollisionEnvUnpadded();
+  return collision_detector_->getCollisionEnvUnpadded();
 }
 
 void PlanningScene::clearDiffs()
@@ -382,28 +295,11 @@ void PlanningScene::clearDiffs()
   if (current_world_object_update_callback_)
     current_world_object_update_observer_handle_ = world_->addObserver(current_world_object_update_callback_);
 
-  // use parent crobot_ if it exists.  Otherwise copy padding from parent.
-  for (std::pair<const std::string, CollisionDetectorPtr>& it : collision_)
+  if (parent_)
   {
-    if (!it.second->parent_)
-      it.second->findParent(*this);
-
-    if (it.second->parent_)
-    {
-      it.second->cenv_ = it.second->alloc_->allocateEnv(it.second->parent_->cenv_, world_);
-      it.second->cenv_const_ = it.second->cenv_;
-
-      it.second->cenv_unpadded_ = it.second->alloc_->allocateEnv(it.second->parent_->cenv_unpadded_, world_);
-      it.second->cenv_unpadded_const_ = it.second->cenv_unpadded_;
-    }
-    else
-    {
-      it.second->copyPadding(*parent_->active_collision_);
-
-      it.second->cenv_ = it.second->alloc_->allocateEnv(it.second->parent_->cenv_, world_);
-      it.second->cenv_const_ = it.second->cenv_;
-    }
+    collision_detector_->copyPadding(*parent_->collision_detector_);
   }
+  collision_detector_->cenv_const_ = collision_detector_->cenv_;
 
   scene_transforms_.reset();
   robot_state_.reset();
@@ -439,9 +335,8 @@ void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
     scene->getAllowedCollisionMatrixNonConst() = *acm_;
 
   collision_detection::CollisionEnvPtr active_cenv = scene->getCollisionEnvNonConst();
-  active_cenv->setLinkPadding(active_collision_->cenv_->getLinkPadding());
-  active_cenv->setLinkScale(active_collision_->cenv_->getLinkScale());
-  scene->propogateRobotPadding();
+  active_cenv->setLinkPadding(collision_detector_->cenv_->getLinkPadding());
+  active_cenv->setLinkScale(collision_detector_->cenv_->getLinkScale());
 
   if (world_diff_)
   {
@@ -586,7 +481,7 @@ void PlanningScene::getCollidingLinks(std::vector<std::string>& links, const mov
 
 const collision_detection::CollisionEnvPtr& PlanningScene::getCollisionEnvNonConst()
 {
-  return active_collision_->cenv_;
+  return collision_detector_->cenv_;
 }
 
 moveit::core::RobotState& PlanningScene::getCurrentStateNonConst()
@@ -675,8 +570,8 @@ void PlanningScene::getPlanningSceneDiffMsg(moveit_msgs::msg::PlanningScene& sce
   else
     scene_msg.allowed_collision_matrix = moveit_msgs::msg::AllowedCollisionMatrix();
 
-  active_collision_->cenv_->getPadding(scene_msg.link_padding);
-  active_collision_->cenv_->getScale(scene_msg.link_scale);
+  collision_detector_->cenv_->getPadding(scene_msg.link_padding);
+  collision_detector_->cenv_->getScale(scene_msg.link_scale);
 
   scene_msg.object_colors.clear();
   if (object_colors_)
@@ -1134,10 +1029,6 @@ void PlanningScene::decoupleParent()
   if (!acm_)
     acm_.reset(new collision_detection::AllowedCollisionMatrix(parent_->getAllowedCollisionMatrix()));
 
-  for (std::pair<const std::string, CollisionDetectorPtr>& it : collision_)
-  {
-    it.second->parent_.reset();
-  }
   world_diff_.reset();
 
   if (!object_colors_)
@@ -1205,11 +1096,8 @@ bool PlanningScene::setPlanningSceneDiffMsg(const moveit_msgs::msg::PlanningScen
 
   if (!scene_msg.link_padding.empty() || !scene_msg.link_scale.empty())
   {
-    for (std::pair<const std::string, CollisionDetectorPtr>& it : collision_)
-    {
-      it.second->cenv_->setPadding(scene_msg.link_padding);
-      it.second->cenv_->setScale(scene_msg.link_scale);
-    }
+    collision_detector_->cenv_->setPadding(scene_msg.link_padding);
+    collision_detector_->cenv_->setScale(scene_msg.link_scale);
   }
 
   // if any colors have been specified, replace the ones we have with the specified ones
@@ -1243,11 +1131,8 @@ bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
   scene_transforms_->setTransforms(scene_msg.fixed_frame_transforms);
   setCurrentState(scene_msg.robot_state);
   acm_.reset(new collision_detection::AllowedCollisionMatrix(scene_msg.allowed_collision_matrix));
-  for (std::pair<const std::string, CollisionDetectorPtr>& it : collision_)
-  {
-    it.second->cenv_->setPadding(scene_msg.link_padding);
-    it.second->cenv_->setScale(scene_msg.link_scale);
-  }
+  collision_detector_->cenv_->setPadding(scene_msg.link_padding);
+  collision_detector_->cenv_->setScale(scene_msg.link_scale);
   object_colors_.reset(new ObjectColorMap());
   for (const moveit_msgs::msg::ObjectColor& object_color : scene_msg.object_colors)
     setObjectColor(object_color.id, object_color.color);

@@ -59,7 +59,7 @@ public:
    * @param exclusive If true, sets the new detection robot/world to be the only one.
    * @return True if collision robot/world were added to scene.
    */
-  bool activate(const std::string& name, const planning_scene::PlanningScenePtr& scene, bool exclusive);
+  bool activate(const std::string& name, const planning_scene::PlanningScenePtr& scene);
 
 private:
   MOVEIT_CLASS_FORWARD(CollisionPluginLoaderImpl)  // Defines CollisionPluginLoaderImplPtr, ConstPtr, WeakPtr... etc
