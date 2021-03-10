@@ -61,7 +61,7 @@ template <typename SensorType>
 class MeshFilter : public MeshFilterBase
 {
 public:
-  MOVEIT_DECLARE_PTR_MEMBER(MeshFilter);
+  MOVEIT_DECLARE_PTR_MEMBER(MeshFilter)
 
   /**
    * \brief Constructor
