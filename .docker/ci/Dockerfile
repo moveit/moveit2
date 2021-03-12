@@ -9,9 +9,7 @@ MAINTAINER Dave Coleman dave@picknik.ai
 
 ENV TERM xterm
 
-# Setup catkin workspace
-ENV ROS_WS=/root/ws_moveit
-WORKDIR $ROS_WS
+WORKDIR /root/ws_moveit
 
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
 # https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers
