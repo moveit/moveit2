@@ -45,6 +45,7 @@
 
 // Reflexxes, for smoothing
 #include <reflexxes_wrapper/reflexxes_wrapper.h>
+#include <libreflexxestype2/ReflexxesAPI.h>
 
 // ROS
 #include <rclcpp/rclcpp.hpp>
