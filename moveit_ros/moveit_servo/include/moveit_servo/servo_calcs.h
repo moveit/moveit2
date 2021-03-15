@@ -43,6 +43,9 @@
 #include <mutex>
 #include <thread>
 
+// Reflexxes, for smoothing
+#include <libreflexxestype2/ReflexxesAPI.h>
+
 // ROS
 #include <rclcpp/rclcpp.hpp>
 #include <control_msgs/msg/joint_jog.hpp>
