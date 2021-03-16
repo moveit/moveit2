@@ -84,7 +84,7 @@ add_library(${SERVO_LIB_NAME} SHARED
   src/collision_check.cpp
   src/low_pass_filter.cpp
 )
-#target_link_libraries(${SERVO_LIB_NAME} "libreflexxestype2::export_reflexxestype2")
+target_link_libraries(${SERVO_LIB_NAME} ${libreflexxestype2_LIBRARIES})
 set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${SERVO_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(${SERVO_LIB_NAME} ${SERVO_PARAM_LIB_NAME})
