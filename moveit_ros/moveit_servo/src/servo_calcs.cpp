@@ -171,6 +171,9 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   empty_matrix.setZero();
   tf_moveit_to_ee_frame_ = empty_matrix;
   tf_moveit_to_robot_cmd_frame_ = empty_matrix;
+
+  // Reflexxes for command smoothing
+//  reflexxes_ptr_ = new ReflexxesAPI(6, 0.01, 0);
 }
 
 ServoCalcs::~ServoCalcs()

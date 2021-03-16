@@ -352,5 +352,7 @@ protected:
   rcl_interfaces::msg::SetParametersResult robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter);
 
   friend class ServoFixture;
+  // Use Reflexxes for command smoothing
+  ReflexxesAPI *reflexxes_ptr_;
 };
 }  // namespace moveit_servo
