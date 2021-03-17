@@ -40,6 +40,7 @@ find_package(libreflexxestype2 REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
+find_package(reflexxes_wrapper REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
@@ -51,6 +52,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   libreflexxestype2
   rclcpp
   rclcpp_components
+  reflexxes_wrapper
   std_msgs
   std_srvs
   sensor_msgs

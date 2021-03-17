@@ -173,7 +173,9 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   tf_moveit_to_robot_cmd_frame_ = empty_matrix;
 
   // Reflexxes for command smoothing
-//  reflexxes_ptr_ = new ReflexxesAPI(6, 0.01, 0);
+  reflexxes_ = std::make_unique<ReflexxesAPI>(num_joints_, parameters_->publish_period, 0 /* additional threads */);
+  reflexxes_position_input_param_ = std::make_unique<RMLPositionInputParameters>(num_joints_);
+  reflexxes_position_output_param_ = std::make_unique<RMLPositionOutputParameters>(num_joints_);
 }
 
 ServoCalcs::~ServoCalcs()

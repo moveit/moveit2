@@ -28,6 +28,7 @@
   <depend>libreflexxestype2</depend>
   <depend>moveit_msgs</depend>
   <depend>moveit_ros_planning_interface</depend>
+  <depend>reflexxes_wrapper</depend>
   <depend>sensor_msgs</depend>
   <depend>std_msgs</depend>
   <depend>std_srvs</depend>
