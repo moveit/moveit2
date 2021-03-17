@@ -176,6 +176,37 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   reflexxes_ = std::make_unique<ReflexxesAPI>(num_joints_, parameters_->publish_period, 0 /* additional threads */);
   reflexxes_position_input_param_ = std::make_unique<RMLPositionInputParameters>(num_joints_);
   reflexxes_position_output_param_ = std::make_unique<RMLPositionOutputParameters>(num_joints_);
+  // All joints are active
+  reflexxes_wrapper::setSelectionVectorAllTrue(reflexxes_position_input_param_, num_joints_);
+  // Set velocity and acceleration limits
+  std::vector<double> velocity_limits;
+  std::vector<double> acceleration_limits;
+  for (auto joint : joint_model_group_->getActiveJointModels())
+  {
+    // Some joints do not have bounds defined
+    const auto bound = joint->getVariableBounds(joint->getName());
+
+    if (bound.velocity_bounded_)
+    {
+      // Assume symmetric limits
+      velocity_limits.push_back(bound.max_velocity_);
+    }
+    else
+    {
+      velocity_limits.push_back(DBL_MAX);
+    }
+
+    if (bound.acceleration_bounded_)
+    {
+      // Assume symmetric limits
+      acceleration_limits.push_back(bound.max_acceleration_);
+    }
+    else
+    {
+      acceleration_limits.push_back(DBL_MAX);
+    }
+  }
+  reflexxes_wrapper::setLimits(reflexxes_position_input_param_, num_joints_, velocity_limits, acceleration_limits);
 }
 
 ServoCalcs::~ServoCalcs()
