@@ -89,8 +89,7 @@ plan_execution::PlanWithSensing::PlanWithSensing(
   display_cost_sources_ = false;
 
   // load the sensor manager plugin, if needed
-  auto sensor_manager_params = std::make_shared<rclcpp::SyncParametersClient>(node_);
-  if (sensor_manager_params && sensor_manager_params->has_parameter("moveit_sensor_manager"))
+  if (node_->has_parameter("moveit_sensor_manager"))
   {
     try
     {
@@ -107,7 +106,11 @@ plan_execution::PlanWithSensing::PlanWithSensing(
       try
       {
         if (node_->get_parameter("moveit_sensor_manager", manager))
+        {
           sensor_manager_ = sensor_manager_loader_->createUniqueInstance(manager);
+          if (!sensor_manager_->initialize(node_))
+            RCLCPP_ERROR_STREAM(LOGGER, "Failed to initialize " << manager);
+        }
       }
       catch (const rclcpp::ParameterTypeException& e)
       {
