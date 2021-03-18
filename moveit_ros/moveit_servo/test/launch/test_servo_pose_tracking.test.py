@@ -67,7 +67,7 @@ def generate_servo_test_description(*args,
                                               os.path.join(get_package_share_directory("moveit_servo"), "config", "start_positions.yaml"),
                                               robot_description]
                                 )
-    
+
     # Component nodes for tf and Servo
     test_container = ComposableNodeContainer(
             name='test_pose_tracking_container',
@@ -91,7 +91,8 @@ def generate_servo_test_description(*args,
 
     pose_tracking_gtest = launch_ros.actions.Node(
                 executable=PathJoinSubstitution([LaunchConfiguration('test_binary_dir'), gtest_name]),
-                parameters=[robot_description, robot_description_semantic, pose_tracking_params, servo_params, kinematics_yaml]
+                parameters=[robot_description, robot_description_semantic, pose_tracking_params, servo_params, kinematics_yaml],
+                output='screen',
         )
 
     return launch.LaunchDescription([

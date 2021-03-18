@@ -7,7 +7,7 @@ This tutorial describes `moveit_servo` and aims to get you sending velocity-stre
 Using `moveit_servo` allows you to stream End Effector (EEF) velocity commands to your manipulator and have it execute them concurrently. This enables teleoperation via a wide range of input schemes, or for other autonomous software to control the robot - in visual servoing or closed loop position control for instance.
 
 ### Features
-The primary use of `moveit_servo` is to perform Cartesian EEF commands, but because a lot of joint validation and safety mechanisms are done behind the scenes, `moveit_servo` is also a good option for sending joint commands to your robot. 
+The primary use of `moveit_servo` is to perform Cartesian EEF commands, but because a lot of joint validation and safety mechanisms are done behind the scenes, `moveit_servo` is also a good option for sending joint commands to your robot.
 
 Core features of `moveit_servo` include:
 1) **Cartesian EEF commands** can be sent in any valid frame. If `Servo` can find a transformation to the frame, then it will perform the command in that frame. You can servo in the manipulator planning frame, the tool point center frame, or a specific task's frame.
@@ -35,7 +35,7 @@ Inputs to `moveit_servo` include
 
 
 ### Interface Options
-In ROS2, `moveit_servo` offers 2 interfacing options: a direct C++ API, and as a standalone composable node. 
+In ROS2, `moveit_servo` offers 2 interfacing options: a direct C++ API, and as a standalone node component that receives commands via ROS interfaces.
 
 #### C++ API
 The C++ API is offered as the `Servo` class, defined in `include/moveit_servo/servo.h`. You can add a `Servo` instance to your existing project by:
@@ -69,15 +69,13 @@ The bare minimum requirements for running `moveit_servo` on your robot include:
 Because the kinematics are handled by the core parts of `moveit`, it is recommended that you have a valid `moveit_config` package for your robot and you can run the demo launch file included with it.
 
 #### A note on controllers
-As of now, there is no [ros2_controls controller](https://github.com/ros-controls/ros2_controllers) that can work with `moveit_servo`. ROS1 controllers that worked include `position_controllers/JointGroupPositionControllers` and `velocity_controllers/JointGroupVelocityControllers`. 
-
 A simulated controller, [fake_joint_driver](https://github.com/JafarAbdi/fake_joint/tree/foxy) is used in the `moveit_servo` examples, and should at least be able to get `moveit_servo` working with a simulated version of your robot. Please see [the example config file](../config/panda_controllers.yaml) and [launch file](../launch/servo_cpp_interface_demo.launch.py#L73-L78) for an example of how to set that up for your robot.
 
 ### Installation
 Please see the [Running the Demos](running_the_demos.md) guide for installation instructions. Running at least the C++ Interface Demo will make sure `moveit_servo` is properly installed.
 
 ### Input devices
-The two primary inputs to `moveit_servo` are Cartesian commands and joint commands. These come into `moveit_servo` as [TwistStamped](http://docs.ros.org/melodic/api/geometry_msgs/html/msg/TwistStamped.html) and [JointJog](http://docs.ros.org/api/control_msgs/html/msg/JointJog.html) messages respectively. The source of the commands can be almost anything including: gamepads, voice commands, a SpaceNav mouse, or PID nodes (e.g. for visual servoing). 
+The two primary inputs to `moveit_servo` are Cartesian commands and joint commands. These come into `moveit_servo` as [TwistStamped](http://docs.ros.org/melodic/api/geometry_msgs/html/msg/TwistStamped.html) and [JointJog](http://docs.ros.org/api/control_msgs/html/msg/JointJog.html) messages respectively. The source of the commands can be almost anything including: gamepads, voice commands, a SpaceNav mouse, or PID nodes (e.g. for visual servoing).
 
 The incoming messages do need a few things to be able to work with `moveit_servo`:
 
@@ -135,7 +133,7 @@ container = ComposableNodeContainer(
     )
 ```
 
-Notice the lines: 
+Notice the lines:
 ```python
 servo_params = { 'moveit_servo' : servo_yaml }
 ```
@@ -151,16 +149,16 @@ The C++ API allows you to put the parameters in whatever namespace you want, and
 
 The parameters should be passed into the node as usual, then in your source code you can read them with:
 ```cpp
-#include <moveit_servo/servo_parameters.cpp>
+#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("logger_name");
 auto node = std::make_shared<rclcpp::Node>("servo_demo_node");
 
-auto servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
-if(!moveit_servo::readParameters(servo_parameters, node, LOGGER))
+auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node, LOGGER);
+if(servo_parameters.get() == nullptr)
 {
-  RCLCPP_ERROR(LOGGER, "Could not get parameters");
+  RCLCPP_FATAL(LOGGER, "Could not get parameters");
   return -1;
 }
 ```
