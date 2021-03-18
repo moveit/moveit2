@@ -34,47 +34,30 @@ def generate_launch_description():
     )
 
     # Component yaml files are grouped in separate namespaces
-    robot_description_config = load_file(
-        "moveit_resources_panda_description", "urdf/panda.urdf"
-    )
-    robot_description = {"robot_description": robot_description_config}
+    robot_description_config = load_file('moveit_resources_panda_description', 'urdf/panda.urdf')
+    robot_description = {'robot_description' : robot_description_config}
 
-    robot_description_semantic_config = load_file(
-        "moveit_resources_panda_moveit_config", "config/panda.srdf"
-    )
-    robot_description_semantic = {
-        "robot_description_semantic": robot_description_semantic_config
-    }
+    robot_description_semantic_config = load_file('moveit_resources_panda_moveit_config', 'config/panda.srdf')
+    robot_description_semantic = {'robot_description_semantic' : robot_description_semantic_config}
 
-    kinematics_yaml = load_yaml(
-        "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
-    )
-    robot_description_kinematics = {"robot_description_kinematics": kinematics_yaml}
+    kinematics_yaml = load_yaml('moveit_resources_panda_moveit_config', 'config/kinematics.yaml')
+    robot_description_kinematics = { 'robot_description_kinematics' : kinematics_yaml }
 
-    ompl_planning_pipeline_config = {
-        "ompl": {
-            "planning_plugin": "ompl_interface/OMPLPlanner",
-            "request_adapters": """default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints""",
-            "start_state_max_bounds_error": 0.1,
-        }
-    }
-    ompl_planning_yaml = load_yaml(
-        "moveit_resources_panda_moveit_config", "config/ompl_planning.yaml"
-    )
-    ompl_planning_pipeline_config["ompl"].update(ompl_planning_yaml)
+    ompl_planning_pipeline_config = { 'ompl' : {
+        'planning_plugin' : 'ompl_interface/OMPLPlanner',
+        'request_adapters' : """default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints""" ,
+        'start_state_max_bounds_error' : 0.1 } }
+    ompl_planning_yaml = load_yaml('moveit_resources_panda_moveit_config', 'config/ompl_planning.yaml')
+    ompl_planning_pipeline_config['ompl'].update(ompl_planning_yaml)
 
-    trajectory_execution = {
-        "moveit_manage_controllers": True,
-        "trajectory_execution.allowed_execution_duration_scaling": 1.2,
-        "trajectory_execution.allowed_goal_duration_margin": 0.5,
-        "trajectory_execution.allowed_start_tolerance": 0.01,
-    }
+    trajectory_execution = {'moveit_manage_controllers': True,
+                            'trajectory_execution.allowed_execution_duration_scaling': 1.2,
+                            'trajectory_execution.allowed_goal_duration_margin': 0.5,
+                            'trajectory_execution.allowed_start_tolerance': 0.01}
 
-    controllers_yaml = load_yaml("run_moveit_cpp", "config/fake_controllers.yaml")
-    fake_controller = {
-        "moveit_fake_controller_manager": controllers_yaml,
-        "moveit_controller_manager": "moveit_fake_controller_manager/MoveItFakeControllerManager",
-    }
+    moveit_simple_controllers_yaml = load_yaml('moveit_resources_panda_moveit_config', 'config/fake_controllers.yaml')
+    fake_controller = {'moveit_fake_controller_manager': moveit_simple_controllers_yaml,
+                       'moveit_controller_manager': 'moveit_fake_controller_manager/MoveItFakeControllerManager'}
 
     # MoveItCpp demo executable
     run_moveit_cpp_node = Node(
