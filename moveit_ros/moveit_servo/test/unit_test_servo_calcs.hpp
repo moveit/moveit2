@@ -66,7 +66,8 @@ class FriendServoCalcs : public moveit_servo::ServoCalcs
   FRIEND_TEST(ServoCalcsTestFixture, TestComposeOutputMsg);
 
 public:
-  FriendServoCalcs(const rclcpp::Node::SharedPtr& node, const moveit_servo::ServoParametersPtr& parameters,
+  FriendServoCalcs(const rclcpp::Node::SharedPtr& node,
+                   const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
                    const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 };
 
@@ -87,4 +88,4 @@ protected:
 std::shared_ptr<rclcpp::Node> TEST_NODE;
 std::shared_ptr<tf2_ros::Buffer> TEST_TF_BUFFER;
 std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> TEST_PSM;
-moveit_servo::ServoParametersPtr TEST_PARAMS;
+std::shared_ptr<const moveit_servo::ServoParameters> TEST_PARAMS;

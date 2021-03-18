@@ -43,7 +43,7 @@
 #include <moveit_servo/pose_tracking.h>
 #include <moveit_servo/status_codes.h>
 #include <moveit_servo/servo_parameters.h>
-#include <moveit_servo/servo_parameters.cpp>
+#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/make_shared_from_pool.h>
 #include <thread>
 
@@ -89,11 +89,11 @@ int main(int argc, char** argv)
   executor.add_node(node);
   std::thread executor_thread([&executor]() { executor.spin(); });
 
-  moveit_servo::ServoParametersPtr servo_parameters;
-  servo_parameters = std::make_shared<moveit_servo::ServoParameters>();
-  if (!moveit_servo::readParameters(servo_parameters, node, LOGGER))
+  auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node, LOGGER);
+  ;
+  if (servo_parameters == nullptr)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not get servo parameters!");
+    RCLCPP_FATAL(LOGGER, "Could not get servo parameters!");
     exit(EXIT_FAILURE);
   }
 
