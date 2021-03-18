@@ -58,9 +58,10 @@ TEST_F(ServoFixture, SelfCollision)
   watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_COLLISION);
 
   // Publish some joint jog commands that will bring us to collision
+  rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
   log_time_start = node_->now();
   size_t iterations = 0;
-  while (!sawTrackedStatus() && iterations++ < TIMEOUT_ITERATIONS)
+  while (!sawTrackedStatus() && iterations++ < test_parameters_->timeout_iterations)
   {
     auto msg = std::make_unique<control_msgs::msg::JointJog>();
     msg->header.stamp = node_->now();
@@ -68,10 +69,10 @@ TEST_F(ServoFixture, SelfCollision)
     msg->joint_names.push_back("panda_joint4");
     msg->velocities.push_back(-1.0);
     pub_joint_cmd_->publish(std::move(msg));
-    publish_loop_rate_.sleep();
+    publish_loop_rate.sleep();
   }
 
-  EXPECT_LT(iterations, TIMEOUT_ITERATIONS);
+  EXPECT_LT(iterations, test_parameters_->timeout_iterations);
   log_time_end = node_->now();
   RCLCPP_INFO_STREAM(LOGGER, "Wait for collision: " << (log_time_end - log_time_start).seconds());
 }
@@ -122,18 +123,19 @@ TEST_F(ServoFixture, ExternalCollision)
   watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_COLLISION);
 
   // Now publish twist commands that collide with the box
+  rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
   log_time_start = node_->now();
   size_t iterations = 0;
-  while (!sawTrackedStatus() && iterations++ < TIMEOUT_ITERATIONS)
+  while (!sawTrackedStatus() && iterations++ < test_parameters_->timeout_iterations)
   {
     auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
     msg->header.stamp = node_->now();
     msg->twist.linear.x = 0.2;
     pub_twist_cmd_->publish(std::move(msg));
-    publish_loop_rate_.sleep();
+    publish_loop_rate.sleep();
   }
 
-  EXPECT_LT(iterations, TIMEOUT_ITERATIONS);
+  EXPECT_LT(iterations, test_parameters_->timeout_iterations);
   log_time_end = node_->now();
   RCLCPP_INFO_STREAM(LOGGER, "Wait for collision: " << (log_time_end - log_time_start).seconds());
 }
@@ -142,8 +144,10 @@ TEST_F(ServoFixture, ExternalCollision)
 
 int main(int argc, char** argv)
 {
-  ::testing::InitGoogleTest(&argc, argv);
+  // It is important we init ros before google test because we are going to
+  // create a node durring the google test init.
   rclcpp::init(argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
   int ret = RUN_ALL_TESTS();
   rclcpp::shutdown();

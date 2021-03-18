@@ -52,7 +52,7 @@ namespace moveit_servo
 class Servo
 {
 public:
-  Servo(const rclcpp::Node::SharedPtr& node, ServoParametersPtr parameters,
+  Servo(const rclcpp::Node::SharedPtr& node, ServoParameters::SharedConstPtr parameters,
         planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor);
 
   ~Servo();
@@ -84,22 +84,14 @@ public:
   bool getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform);
 
   /** \brief Get the parameters used by servo node. */
-  const std::shared_ptr<moveit_servo::ServoParameters>& getParameters() const;
-
-  /** \brief Change the controlled link. Often, this is the end effector
-   * This must be a link on the robot since MoveIt tracks the transform (not tf)
-   */
-  void changeRobotLinkCommandFrame(const std::string& new_command_frame)
-  {
-    servo_calcs_->changeRobotLinkCommandFrame(new_command_frame);
-  }
+  const ServoParameters::SharedConstPtr& getParameters() const;
 
 private:
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   // The stored servo parameters
-  ServoParametersPtr parameters_;
+  ServoParameters::SharedConstPtr parameters_;
 
   std::unique_ptr<ServoCalcs> servo_calcs_;
   std::unique_ptr<CollisionCheck> collision_checker_;
