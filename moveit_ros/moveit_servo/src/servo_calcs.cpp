@@ -51,6 +51,8 @@ using namespace std::chrono_literals;  // for s, ms, etc.
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
 constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
+constexpr double SAFE_DEFAULT_VELOCITY_LIMIT = 2;  // rad/s, should be safe for most robots that don't have custom limits defined
+constexpr double SAFE_DEFAULT_ACCELERATION_LIMIT = 5;  // rad/s, should be safe for most robots that don't have custom limits defined
 
 namespace moveit_servo
 {
@@ -195,7 +197,8 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
     }
     else
     {
-      velocity_limits.push_back(3 /*DBL_MAX*/);
+      RCLCPP_ERROR_STREAM(LOGGER, "No vel limit defined. Setting to safe default.");
+      velocity_limits.push_back(SAFE_DEFAULT_VELOCITY_LIMIT);
     }
 
     if (bound.acceleration_bounded_)
@@ -205,7 +208,8 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
     }
     else
     {
-      acceleration_limits.push_back(5 /*DBL_MAX*/);
+      RCLCPP_ERROR_STREAM(LOGGER, "No accel limit defined. Setting to safe default.");
+      acceleration_limits.push_back(SAFE_DEFAULT_ACCELERATION_LIMIT);
     }
   }
   reflexxes_wrapper::setLimits(reflexxes_position_input_param_.get(), num_joints_, velocity_limits, acceleration_limits);
@@ -806,8 +810,8 @@ bool ServoCalcs::enforceVelAccelLimitsWithReflexxes(Eigen::ArrayXd& delta_theta)
 //  *reflexxes_position_input_param_->CurrentAccelerationVector->VecData = *reflexxes_position_output_param_->NewAccelerationVector->VecData;
   for (size_t joint_idx = 0; joint_idx < num_joints_; ++joint_idx)
   {
-    reflexxes_position_input_param_->CurrentVelocityVector->VecData[joint_idx] += reflexxes_position_output_param_->NewVelocityVector->VecData[joint_idx];
-    reflexxes_position_input_param_->CurrentAccelerationVector->VecData[joint_idx] += reflexxes_position_output_param_->NewAccelerationVector->VecData[joint_idx];
+    reflexxes_position_input_param_->CurrentVelocityVector->VecData[joint_idx] = reflexxes_position_output_param_->NewVelocityVector->VecData[joint_idx];
+    reflexxes_position_input_param_->CurrentAccelerationVector->VecData[joint_idx] = reflexxes_position_output_param_->NewAccelerationVector->VecData[joint_idx];
   }
   reflexxes_wrapper::setCurrentPositions(reflexxes_position_input_param_.get(), num_joints_, original_joint_state_.position);
 
