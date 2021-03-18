@@ -81,5 +81,5 @@ def generate_launch_description():
             ],
             output='screen',
     )
-    
+
     return LaunchDescription([ rviz_node, fake_joint_driver_node, container ])

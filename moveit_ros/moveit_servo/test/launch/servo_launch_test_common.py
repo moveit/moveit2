@@ -1,10 +1,11 @@
 import os
 import yaml
 import launch
+import launch_ros
+import launch_testing
 from launch import LaunchDescription
 from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-import launch_testing.actions
 from launch_ros.actions import ComposableNodeContainer, Node
 from launch_ros.descriptions import ComposableNode
 from ament_index_python.packages import get_package_share_directory
@@ -32,7 +33,7 @@ def load_yaml(package_name, file_path):
 def generate_servo_test_description(*args,
                                     gtest_name: SomeSubstitutionsType,
                                     start_position_path: SomeSubstitutionsType = '../config/start_positions.yaml'):
-    
+
     # Get parameters using the demo config file
     servo_yaml = load_yaml('moveit_servo', 'config/panda_simulated_config.yaml')
     servo_params = { 'moveit_servo' : servo_yaml }
@@ -79,9 +80,12 @@ def generate_servo_test_description(*args,
             output='screen',
     )
 
-    servo_gtest = launch_testing.actions.GTest(
-        path=PathJoinSubstitution([LaunchConfiguration('test_binary_dir'), gtest_name]),
-        timeout=40.0, output='screen'
+    # Unknown how to set timeout
+    # https://github.com/ros2/launch/issues/466
+    servo_gtest = launch_ros.actions.Node(
+        executable=PathJoinSubstitution([LaunchConfiguration('test_binary_dir'), gtest_name]),
+        parameters=[servo_params],
+        output='screen',
     )
 
     return launch.LaunchDescription([

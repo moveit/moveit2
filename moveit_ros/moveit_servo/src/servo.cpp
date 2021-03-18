@@ -47,7 +47,7 @@ namespace
 {
 constexpr double ROBOT_STATE_WAIT_TIME = 10.0;  // seconds
 }  // namespace
-Servo::Servo(const rclcpp::Node::SharedPtr& node, ServoParametersPtr parameters,
+Servo::Servo(const rclcpp::Node::SharedPtr& node, ServoParameters::SharedConstPtr parameters,
              planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
   : planning_scene_monitor_(planning_scene_monitor), parameters_(parameters)
 {
@@ -113,7 +113,7 @@ bool Servo::getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform)
   return servo_calcs_->getEEFrameTransform(transform);
 }
 
-const std::shared_ptr<moveit_servo::ServoParameters>& Servo::getParameters() const
+const ServoParameters::SharedConstPtr& Servo::getParameters() const
 {
   return parameters_;
 }

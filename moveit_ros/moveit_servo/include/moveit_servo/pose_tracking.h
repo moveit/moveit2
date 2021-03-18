@@ -86,7 +86,7 @@ class PoseTracking
 {
 public:
   /** \brief Constructor. Loads ROS parameters under the given namespace. */
-  PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParametersPtr& servo_parameters,
+  PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& servo_parameters,
                const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
   PoseTrackingStatusCode moveToPose(const Eigen::Vector3d& positional_tolerance, const double angular_tolerance,
@@ -154,7 +154,7 @@ private:
   void doPostMotionReset();
 
   rclcpp::Node::SharedPtr node_;
-  moveit_servo::ServoParametersPtr servo_parameters_;
+  moveit_servo::ServoParameters::SharedConstPtr servo_parameters_;
 
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   moveit::core::RobotModelConstPtr robot_model_;
