@@ -66,7 +66,6 @@
 // moveit_servo
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
-#include <moveit_servo/low_pass_filter.h>
 
 namespace moveit_servo
 {
@@ -286,8 +285,6 @@ protected:
   // on.
   sensor_msgs::msg::JointState internal_joint_state_, original_joint_state_;
   std::map<std::string, std::size_t> joint_state_name_map_;
-
-  std::vector<LowPassFilter> position_filters_;
 
   trajectory_msgs::msg::JointTrajectory::SharedPtr last_sent_command_;
 

@@ -48,7 +48,6 @@
 #include <std_msgs/msg/float64.hpp>
 
 #include <moveit_servo/servo_parameters.h>
-#include <moveit_servo/low_pass_filter.h>
 
 namespace moveit_servo
 {

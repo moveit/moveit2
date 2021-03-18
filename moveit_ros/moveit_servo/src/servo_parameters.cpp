@@ -135,7 +135,6 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
 
   // Incoming Joint State properties
   declareOrGetParam<std::string>(parameters->joint_topic, ns + ".joint_topic", node, logger);
-  declareOrGetParam<double>(parameters->low_pass_filter_coeff, ns + ".low_pass_filter_coeff", node, logger);
 
   // MoveIt properties
   declareOrGetParam<std::string>(parameters->move_group_name, ns + ".move_group_name", node, logger);
@@ -189,12 +188,6 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
   {
     RCLCPP_WARN(logger, "Parameters 'hard_stop_singularity_threshold' "
                         "and 'lower_singularity_threshold' should be "
-                        "greater than zero. Check yaml file.");
-    return nullptr;
-  }
-  if (parameters->low_pass_filter_coeff <= 0.)
-  {
-    RCLCPP_WARN(logger, "Parameter 'low_pass_filter_coeff' should be "
                         "greater than zero. Check yaml file.");
     return nullptr;
   }

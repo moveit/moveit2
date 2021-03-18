@@ -85,7 +85,6 @@ struct ServoParameters
   bool publish_joint_accelerations;
   // Incoming Joint State properties
   std::string joint_topic;
-  double low_pass_filter_coeff;
   // MoveIt properties
   std::string move_group_name;
   std::string planning_frame;

@@ -84,7 +84,6 @@ add_library(${SERVO_LIB_NAME} SHARED
   src/servo.cpp
   src/servo_calcs.cpp
   src/collision_check.cpp
-  src/low_pass_filter.cpp
 )
 set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${SERVO_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
