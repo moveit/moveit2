@@ -358,7 +358,7 @@ TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
   Eigen::ArrayXd delta_theta = servo_calcs_->parameters_->publish_period * desired_velocity;
 
   // Do the enforcing and check it
-  servo_calcs_->enforceVelLimits(delta_theta);
+  servo_calcs_->enforceVelAccelLimitsWithReflexxes(desired_velocity);
   for (size_t i = 0; i < 7; ++i)
   {
     // We need to check vs radians-per-loop allowable rate (not rad/s)
@@ -366,9 +366,9 @@ TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
   }
 
   // Let's check negative velocity limits too
-  delta_theta *= -1;
-  servo_calcs_->prev_joint_velocity_ = -1 * desired_velocity;
-  servo_calcs_->enforceVelLimits(delta_theta);
+  desired_velocity *= -1;
+  servo_calcs_->prev_joint_velocity_ = desired_velocity;
+  servo_calcs_->enforceVelAccelLimitsWithReflexxes(desired_velocity);
   for (size_t i = 0; i < 7; ++i)
   {
     // We need to check vs radians-per-loop allowable rate (not rad/s)
