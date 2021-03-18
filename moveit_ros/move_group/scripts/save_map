@@ -12,4 +12,3 @@ if save_map_service(filename):
     rospy.loginfo('Succeeded')
 else:
     rospy.loginfo('Failed')
-
