@@ -267,9 +267,6 @@ protected:
   // Flag for staying inactive while there are no incoming commands
   bool wait_for_servo_commands_ = true;
 
-  // Flag saying if the filters were updated during the timer callback
-  bool updated_reflexxes_state_ = false;
-
   // Nonzero status flags
   bool have_nonzero_twist_stamped_ = false;
   bool have_nonzero_joint_command_ = false;

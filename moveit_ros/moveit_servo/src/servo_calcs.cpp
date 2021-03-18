@@ -373,11 +373,8 @@ void ServoCalcs::calculateSingleIteration()
 
   have_nonzero_command_ = have_nonzero_twist_stamped_ || have_nonzero_joint_command_;
 
-  // Don't end this function without updating the filters
-  updated_reflexxes_state_ = false;
-
-  // If paused or while waiting for initial servo commands, just keep the low-pass filters up to date with current
-  // joints so a jump doesn't occur when restarting
+  // If paused or while waiting for initial servo commands, just keep up to date with current joints so a jump doesn't
+  // occur when restarting
   if (wait_for_servo_commands_ || paused_)
   {
     resetReflexxesState(original_joint_state_);
@@ -421,6 +418,7 @@ void ServoCalcs::calculateSingleIteration()
     {
       point.velocities.assign(point.velocities.size(), 0);
     }
+    resetReflexxesState(original_joint_state_);
   }
 
   // Print a warning to the user if both are stale
@@ -489,10 +487,6 @@ void ServoCalcs::calculateSingleIteration()
       multiarray_outgoing_cmd_pub_->publish(std::move(joints));
     }
   }
-
-  // Update the filters if we haven't yet
-  if (!updated_reflexxes_state_)
-    resetReflexxesState(original_joint_state_);
 }
 
 rcl_interfaces::msg::SetParametersResult ServoCalcs::robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter)
@@ -620,9 +614,6 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   if (!applyJointUpdate(delta_theta, internal_joint_state_, prev_joint_velocity_))
     return false;
 
-  // Mark Reflexxes as updated for this cycle
-  updated_reflexxes_state_ = true;
-
   // compose outgoing message
   composeJointTrajMessage(internal_joint_state_, joint_trajectory);
 
@@ -701,8 +692,8 @@ void ServoCalcs::resetReflexxesState(const sensor_msgs::msg::JointState& joint_s
     position_filters_[i].reset(joint_state.position[i]);
   }
   reflexxes_wrapper::setCurrentState(reflexxes_position_input_param_.get(), num_joints_, current_positions, zero_velocities, zero_accelerations);
-
-  updated_reflexxes_state_ = true;
+  reflexxes_wrapper::resetOutputStruct(reflexxes_position_output_param_.get(), num_joints_, current_positions, zero_velocities, zero_accelerations);
+  RCLCPP_ERROR_STREAM(LOGGER, "Reset Reflexxes state!");
 }
 
 void ServoCalcs::composeJointTrajMessage(const sensor_msgs::msg::JointState& joint_state,
