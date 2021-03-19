@@ -109,7 +109,10 @@ plan_execution::PlanWithSensing::PlanWithSensing(
         {
           sensor_manager_ = sensor_manager_loader_->createUniqueInstance(manager);
           if (!sensor_manager_->initialize(node_))
+          {
             RCLCPP_ERROR_STREAM(LOGGER, "Failed to initialize " << manager);
+            sensor_manager_.reset();
+          }
         }
       }
       catch (const rclcpp::ParameterTypeException& e)
