@@ -144,19 +144,6 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
                                                                 shell=True,
                                                                 output='screen')])]
 
-
-    # Warehouse mongodb server
-    mongodb_server_node = Node(
-        package="warehouse_ros_mongo",
-        executable="mongo_wrapper_ros.py",
-        parameters=[
-            {"warehouse_port": 33829},
-            {"warehouse_host": "localhost"},
-            {"warehouse_plugin": "warehouse_ros_mongo::MongoDatabaseConnection"},
-        ],
-        output="screen",
-    )
-
     # test executable
     ompl_constraint_test = launch_ros.actions.Node(executable=PathJoinSubstitution([LaunchConfiguration('test_binary_dir'), gtest_name]),
                                                    parameters=[robot_description,
@@ -172,12 +159,10 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
         static_tf,
         robot_state_publisher,
         ros2_control_node,
-        mongodb_server_node,
         ompl_constraint_test,
         launch_testing.actions.ReadyToTest()
     ] + load_controllers), {'run_move_group_node': run_move_group_node,
          'static_tf': static_tf,
          'robot_state_publisher': robot_state_publisher,
          'ros2_control_node': ros2_control_node,
-         'mongodb_server_node': mongodb_server_node,
          'ompl_constraint_test': ompl_constraint_test}
