@@ -85,4 +85,3 @@ def generate_launch_description():
                                               robot_description])
 
     return LaunchDescription([rviz_node, static_tf, pose_tracking_node, fake_joint_driver_node, robot_state_publisher])
-

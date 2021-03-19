@@ -52,11 +52,11 @@ def doRound(values,decimal_places):
 
     for num in num_vector:
         new_num = round(float(num),decimal_places)
-        print "Old:",num,"New:",new_num
+        print("Old:",num,"New:",new_num)
         new_vector.append(str(new_num))
 
     new = " ".join(new_vector)
-    #print 'Original:', values, '  Updated: ', new
+    #print('Original:', values, '  Updated: ', new)
 
     return new
 
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     #print(doc.tag)
     #doc = etree.parse(io.BytesIO(xml))
     #element=doc.xpath('//ns:asset',namespaces={'ns','http://www.collada.org/2008/03/COLLADASchema'})
-    #print element
+    #print(element)
 
     namespace = 'http://www.collada.org/2008/03/COLLADASchema'
     dom = etree.parse(io.BytesIO(xml))
@@ -121,5 +121,3 @@ if __name__ == '__main__':
     f = open(output_file,'w')
     f.write(etree.tostring(dom))
     f.close()
-
-

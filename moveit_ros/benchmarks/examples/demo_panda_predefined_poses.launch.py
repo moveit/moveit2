@@ -59,4 +59,3 @@ def generate_launch_description():
                                                   ompl_planning_pipeline_config])
 
     return LaunchDescription([moveit_ros_benchmarks_node])
-
