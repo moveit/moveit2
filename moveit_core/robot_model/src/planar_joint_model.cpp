@@ -141,9 +141,8 @@ void PlanarJointModel::getVariableRandomPositionsNearBy(random_numbers::RandomNu
   normalizeRotation(values);
 }
 
-void computeTurnDriveTurnGeometry(const double* from, const double* to,
-                                  double& dx, double& dy,
-                                  double& initial_turn, double& drive_angle, double& final_turn)
+void computeTurnDriveTurnGeometry(const double* from, const double* to, double& dx, double& dy, double& initial_turn,
+                                  double& drive_angle, double& final_turn)
 {
   dx = to[0] - from[0];
   dy = to[1] - from[1];

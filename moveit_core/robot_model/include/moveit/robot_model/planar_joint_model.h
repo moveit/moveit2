@@ -112,8 +112,7 @@ private:
  * @param[out] drive_angle  The orientation in radians that the robot will be driving straight at
  * @param[out] final_turn   The final turn in radians to the target orientation
  */
-void computeTurnDriveTurnGeometry(const double* from, const double* to,
-                                  double& dx, double& dy,
-                                  double& initial_turn, double& drive_angle, double& final_turn);
+void computeTurnDriveTurnGeometry(const double* from, const double* to, double& dx, double& dy, double& initial_turn,
+                                  double& drive_angle, double& final_turn);
 }  // namespace core
 }  // namespace moveit

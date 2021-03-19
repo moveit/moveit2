@@ -987,15 +987,16 @@ JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const
           angular_distance_weight = std::stod(property.value_, &sz);
           if (sz != property.value_.size())
           {
-            RCLCPP_WARN_STREAM(LOGGER, "Extra characters after property " << property.property_name_ <<
-                                       " for joint " << property.joint_name_ << " as double: '" <<
-                                       property.value_.substr(sz) << "'");
+            RCLCPP_WARN_STREAM(LOGGER, "Extra characters after property " << property.property_name_ << " for joint "
+                                                                          << property.joint_name_ << " as double: '"
+                                                                          << property.value_.substr(sz) << "'");
           }
         }
         catch (const std::invalid_argument& e)
         {
-          RCLCPP_ERROR_STREAM(LOGGER, "Unable to parse property " << property.property_name_ << " for joint " <<
-                                      property.joint_name_ << " as double: '" << property.value_ << "'");
+          RCLCPP_ERROR_STREAM(LOGGER, "Unable to parse property " << property.property_name_ << " for joint "
+                                                                  << property.joint_name_ << " as double: '"
+                                                                  << property.value_ << "'");
           continue;
         }
 
@@ -1009,8 +1010,8 @@ JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const
         }
         else
         {
-          RCLCPP_ERROR_STREAM(LOGGER, "Cannot apply property " << property.property_name_ << " to joint type: " <<
-                                      new_joint_model->getTypeName());
+          RCLCPP_ERROR_STREAM(LOGGER, "Cannot apply property " << property.property_name_
+                                                               << " to joint type: " << new_joint_model->getTypeName());
         }
       }
       else if (property.property_name_ == "motion_model")
@@ -1018,7 +1019,7 @@ JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const
         if (new_joint_model->getType() != JointModel::JointType::PLANAR)
         {
           RCLCPP_ERROR(LOGGER, "Cannot apply property %s to joint type: %s", property.property_name_.c_str(),
-                          new_joint_model->getTypeName().c_str());
+                       new_joint_model->getTypeName().c_str());
           continue;
         }
 
@@ -1033,8 +1034,9 @@ JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const
         }
         else
         {
-          RCLCPP_ERROR_STREAM(LOGGER, "Unknown value for property " << property.property_name_ << " (" <<
-                                 property.joint_name_ << "): '" << property.value_ << "'");
+          RCLCPP_ERROR_STREAM(LOGGER, "Unknown value for property " << property.property_name_ << " ("
+                                                                    << property.joint_name_ << "): '" << property.value_
+                                                                    << "'");
           RCLCPP_ERROR(LOGGER, "Valid values are 'holonomic' and 'diff_drive'");
           continue;
         }
