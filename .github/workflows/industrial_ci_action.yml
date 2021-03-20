@@ -8,11 +8,10 @@ on: [push, pull_request]
 
 jobs:
   industrial_ci:
-    strategy:
-      matrix:
-        env:
-          - {ROS_DISTRO: foxy, ROS_REPO: main, CLANG_TIDY: true}
     env:
+      ROS_DISTRO: foxy
+      ROS_REPO: main
+      CLANG_TIDY: true
       CCACHE_DIR: /home/runner/.ccache
       BASEDIR: .base
       UPSTREAM_WORKSPACE: moveit2.repos
@@ -22,13 +21,13 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}-${{ github.sha }}  
+          key: ccache-${{ env.ROS_DISTRO }}-${{ env.ROS_REPO }}-${{ github.sha }}  
           restore-keys: |
-            ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
-      - uses: 'ros-industrial/industrial_ci@master'
-        env: ${{ matrix.env }}
+            ccache-${{ env.ROS_DISTRO }}-${{ env.ROS_REPO }}
+      - uses: 'Briancbn/industrial_ci@pr-coverage'
       - uses: actions/upload-artifact@v2
         if: failure()
         with:
           name: test-results
           path: ${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml
+      - uses: codecov/codecov-action@v1
