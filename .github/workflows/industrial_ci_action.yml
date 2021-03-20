@@ -13,7 +13,7 @@ jobs:
       ROS_REPO: main
       CLANG_TIDY: true
       CCACHE_DIR: /home/runner/.ccache
-      BASEDIR: .base
+      BASEDIR: /home/runner/.base
       UPSTREAM_WORKSPACE: moveit2.repos
     runs-on: ubuntu-latest
     steps:
@@ -21,9 +21,15 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ env.ROS_DISTRO }}-${{ env.ROS_REPO }}-${{ github.sha }}  
+          key: ccache-${{ env.ROS_DISTRO }}-${{ env.ROS_REPO }}-${{ github.sha }}
           restore-keys: |
             ccache-${{ env.ROS_DISTRO }}-${{ env.ROS_REPO }}
+      - uses: actions/cache@v2
+        with:
+          path: ${{ env.BASEDIR }}/upstream_ws
+          key: upstreamws-${{ env.ROS_DISTRO }}-${{ env.ROS_REPO }}-${{ github.sha }}
+          restore-keys: |
+            upstreamws-${{ env.ROS_DISTRO }}-${{ env.ROS_REPO }}
       - uses: 'Briancbn/industrial_ci@pr-coverage'
       - uses: actions/upload-artifact@v2
         if: failure()
