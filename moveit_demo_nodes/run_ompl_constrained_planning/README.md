@@ -2,8 +2,8 @@
 
 # MoveIt 2 Beta - OMPL Constrained Planning Demo
 ## Setup
-Before running the demo add the following lines to `ompl_planning.yaml` in the `panda_config` package 
-bellow `panda_arm:` 
+Before running the demo add the following lines to `ompl_planning.yaml` in the `panda_config` package
+bellow `panda_arm:`
 
 ```
 enforce_constrained_state_space: true
@@ -13,11 +13,11 @@ projection_evaluator: joints(panda_joint1,panda_joint2)
 ## Running
 This demo includes a launch configuration for running MoveGroup and a separate demo node.
 
-- Note: This demo shows how to construct a variety of 
+- Note: This demo shows how to construct a variety of
 constraints. See [util.cpp](https://github.com/ros-planning/moveit2/blob/main/moveit_core/kinematic_constraints/src/utils.cpp) for helper functions to automate constructing the constraint messages.
- 
+
 The MoveGroup setup can be started:
-``` 
+```
 ros2 launch run_ompl_constrained_planning run_move_group.launch.py
 ```
 
@@ -26,7 +26,7 @@ This allows you to start planning and executing motions:
 ros2 launch run_move_group run_move_group_interface.launch.py
 ```
 
-## Details 
+## Details
 ### State space selection process
 There are three options for state space selection.
 
