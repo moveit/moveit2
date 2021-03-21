@@ -12,7 +12,7 @@ jobs:
       ROS_DISTRO: foxy
       ROS_REPO: main
       CCACHE_DIR: /home/runner/.ccache
-      BASEDIR: /home/runner/.base
+      BASEDIR: .base
       UPSTREAM_WORKSPACE: moveit2.repos
     runs-on: ubuntu-latest
     steps:
