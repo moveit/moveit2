@@ -14,7 +14,7 @@ jobs:
             ROS_DISTRO: foxy, ROS_REPO: main, CCOV_UPLOAD: true,
             TARGET_CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS='--coverage' -DCMAKE_CXX_FLAGS='--coverage' --no-warn-unused-cli",
             AFTER_RUN_TARGET_TEST: './.ci.prepare_codecov',
-            ADDITIONAL_DEBS: 'curl lcov grep'
+            ADDITIONAL_DEBS: 'lcov'
           }
           - {ROS_DISTRO: foxy, ROS_REPO: testing, CCOV_UPLOAD: false}
     env:
