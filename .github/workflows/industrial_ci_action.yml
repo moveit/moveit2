@@ -11,6 +11,7 @@ jobs:
     env:
       ROS_DISTRO: foxy
       ROS_REPO: main
+      CLANG_TIDY: true
       CCACHE_DIR: /home/runner/.ccache
       BASEDIR: .base
       UPSTREAM_WORKSPACE: moveit2.repos
@@ -23,12 +24,6 @@ jobs:
           key: ccache-${{ env.ROS_DISTRO }}-${{ env.ROS_REPO }}-${{ github.sha }}
           restore-keys: |
             ccache-${{ env.ROS_DISTRO }}-${{ env.ROS_REPO }}
-      - uses: actions/cache@v2
-        with:
-          path: ${{ env.BASEDIR }}/upstream_ws
-          key: upstreamws-${{ env.ROS_DISTRO }}-${{ env.ROS_REPO }}-${{ github.sha }}
-          restore-keys: |
-            upstreamws-${{ env.ROS_DISTRO }}-${{ env.ROS_REPO }}
       - uses: 'Briancbn/industrial_ci@pr-coverage'
       - uses: actions/upload-artifact@v2
         if: failure()
