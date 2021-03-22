@@ -8,8 +8,6 @@ The MoveIt Motion Planning Framework for **ROS 2**. For ROS 1, see [MoveIt 1](ht
 
 [![Format](https://github.com/ros-planning/moveit2/actions/workflows/format.yml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/format.yml?branch=main) [![BuildAndTest](https://github.com/ros-planning/moveit2/actions/workflows/industrial_ci_action.yml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/industrial_ci_action.yml?branch=main) [![codecov](https://codecov.io/gh/ros-planning/moveit2/branch/main/graph/badge.svg?token=W7uHKcY0ly)](https://codecov.io/gh/ros-planning/moveit2)
 
-[![Code Coverage Grid](https://codecov.io/gh/ros-planning/moveit2/branch/main/graphs/tree.svg)](https://codecov.io/gh/ros-planning/moveit2/branch/main/graphs/tree.svg)
-
 ## General MoveIt Documentation
 
 - [MoveIt Website](http://moveit.ros.org)
