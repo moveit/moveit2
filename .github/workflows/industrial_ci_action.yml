@@ -28,7 +28,7 @@ jobs:
       AFTER_SETUP_UPSTREAM_WORKSPACE: 'vcs pull $BASEDIR/upstream_ws/src'
       CCACHE_DIR: "${{ github.workspace }}/.ccache"
       BASEDIR: ${{ github.workspace }}/.work
-      CACHE_PREFIX: "${{ matrix.ROS_DISTRO }}-${{ matrix.ROS_REPO }}${{ matrix.CCOV_UPLOAD && '-ccov' || '' }}"
+      CACHE_PREFIX: "${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}${{ matrix.env.CCOV_UPLOAD && '-ccov' || '' }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
