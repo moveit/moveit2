@@ -16,7 +16,7 @@ jobs:
             AFTER_RUN_TARGET_TEST: './.ci.prepare_codecov',
             ADDITIONAL_DEBS: 'lcov'
           }
-          - {ROS_DISTRO: foxy, ROS_REPO: testing, CCOV_UPLOAD: false}
+          # - {ROS_DISTRO: foxy, ROS_REPO: testing, CCOV_UPLOAD: false}
     env:
       UPSTREAM_WORKSPACE: moveit2.repos
       CCACHE_DIR: /home/runner/.ccache
