@@ -42,7 +42,7 @@ def generate_launch_description():
     servo_params = { 'moveit_servo' : servo_yaml }
 
     kinematics_yaml = load_yaml('moveit_resources_panda_moveit_config', 'config/kinematics.yaml')
-    
+
     #RViz
     rviz_config_file = get_package_share_directory('moveit_servo') + "/config/demo_rviz_pose_tracking.rviz"
     rviz_node = Node(package='rviz2',

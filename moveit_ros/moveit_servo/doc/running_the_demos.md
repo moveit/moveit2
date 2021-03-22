@@ -31,7 +31,7 @@ colcon build --event-handlers desktop_notification- status- --cmake-args -DCMAKE
 ```
 
 ## Cpp Interface Demo
-The simplest demo is the C++ interface demo. In it, a simulated Panda arm is spawned and shown in Rviz, along with a collision object. 
+The simplest demo is the C++ interface demo. In it, a simulated Panda arm is spawned and shown in Rviz, along with a collision object.
 
 First, a simple joint command is sent to the arm for a few seconds.
 
@@ -47,7 +47,7 @@ ros2 launch moveit_servo servo_cpp_interface_demo.launch.py
 ![Alt Text](Images/C%2B%2B_Interface_Demo.gif)
 
 ## Component Demo
-`moveit_servo` is also offered as a composable node that may be run in a container with other components. 
+`moveit_servo` is also offered as a composable node that may be run in a container with other components.
 
 This demo starts a `moveit_servo` instance in a container with the `tf` publisher. Commands may be sent to the arm by publishing to the `moveit_servo` input topics, and the `moveit_servo` behavior may be controlled by its offered services.
 
@@ -67,11 +67,11 @@ ros2 run moveit_servo fake_command_publisher
 ![Alt Text](Images/Servo_Component_Demo.gif)
 
 ## Teleoperation Demo
-`moveit_servo` is a versatile tool for teleoperating a manipulator. Inputs can include generic `TwistStamped` or `JointJog` commands, collisions can be detected and avoided, and singular positions can be avoided. 
+`moveit_servo` is a versatile tool for teleoperating a manipulator. Inputs can include generic `TwistStamped` or `JointJog` commands, collisions can be detected and avoided, and singular positions can be avoided.
 
-The teleoperation demo spawns a Panda arm and shows it in Rviz with a few simulated tables. Then it uses `moveit_servo` to control the arm following user inputs with a game controller. 
+The teleoperation demo spawns a Panda arm and shows it in Rviz with a few simulated tables. Then it uses `moveit_servo` to control the arm following user inputs with a game controller.
 
-This demo was written for an Xbox 1 controller, but can easily be modified for any generic gamepad that works with the [Joy package](https://index.ros.org/p/joy/#foxy). 
+This demo was written for an Xbox 1 controller, but can easily be modified for any generic gamepad that works with the [Joy package](https://index.ros.org/p/joy/#foxy).
 
 #### To run
 Make sure your controller is plugged in and can be detected by `ros2 run joy joy_node`. Usually this happens automatically after plugging the controller in.

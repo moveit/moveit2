@@ -27,7 +27,7 @@ def load_yaml(package_name, file_path):
 def generate_launch_description():
 
     moveit_ros_benchmarks_yaml = load_yaml('moveit_ros_benchmarks', 'demo_panda_predefined_poses.yaml')
-    moveit_ros_benchmarks_config = { 'benchmark_config' : moveit_ros_benchmarks_yaml }    
+    moveit_ros_benchmarks_config = { 'benchmark_config' : moveit_ros_benchmarks_yaml }
 
     # Component yaml files are grouped in separate namespaces
     robot_description_config = load_file('moveit_resources_panda_description', 'urdf/panda.urdf')
