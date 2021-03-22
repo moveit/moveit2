@@ -28,8 +28,9 @@ jobs:
         uses: pat-s/always-upload-cache@v2.1.3
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}-${{ github.sha }}  
+          key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}-${{ github.sha }}-${{ github.job }}  
           restore-keys: |
+            ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}-${{ github.sha }}
             ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{ matrix.env }}
