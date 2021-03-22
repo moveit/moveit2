@@ -19,6 +19,7 @@ jobs:
           - {ROS_DISTRO: foxy, ROS_REPO: testing, CCOV_UPLOAD: false}
     env:
       UPSTREAM_WORKSPACE: moveit2.repos
+      AFTER_SETUP_UPSTREAM_WORKSPACE: 'vcs pull $BASEDIR/upstream_ws/src'
       CCACHE_DIR: /home/runner/.ccache
       BASEDIR: .base
     runs-on: ubuntu-latest
