@@ -24,19 +24,19 @@ jobs:
       UPSTREAM_WORKSPACE: moveit2.repos
       AFTER_SETUP_UPSTREAM_WORKSPACE: 'vcs pull $BASEDIR/upstream_ws/src'
       CCACHE_DIR: "${{ github.workspace }}/.ccache"
-      BASEDIR: ${{ github.workspace }}
+      BASEDIR: ${{ github.workspace }}/.work
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name:
-        run: sudo apt install -qq -y tree && tree ${{ github.workspace }}
+        run: cat "$GITHUB_WORKSPACE/moveit2.repos"
       - name: cache upstream_ws
         uses: pat-s/always-upload-cache@v2.1.3
         with:
           path: ${{ env.BASEDIR }}/upstream_ws
-          key: upstream_ws-${{ matrix.env.CACHE_PREFIX }}-${{ hashFiles('**/moveit2.repos') }}-${{ github.run_id }}
+          key: upstream_ws-${{ matrix.env.CACHE_PREFIX }}-${{ hashFiles("$GITHUB_WORKSPACE/moveit2.repos") }}-${{ github.run_id }}
           restore-keys: |
-            upstream_ws-${{ matrix.env.CACHE_PREFIX }}-${{ hashFiles('**/moveit2.repos') }}
+            upstream_ws-${{ matrix.env.CACHE_PREFIX }}-${{ hashFiles("$GITHUB_WORKSPACE/moveit2.repos") }}
       - name: cache ccache
         uses: pat-s/always-upload-cache@v2.1.3
         with:
