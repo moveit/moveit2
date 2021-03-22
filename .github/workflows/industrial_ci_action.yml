@@ -19,6 +19,7 @@ jobs:
           }
           - {
             DOCKER_IMAGE: 'moveit/moveit2:foxy-ci-testing',
+            TARGET_CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=RELEASE",
             CCOV_UPLOAD: false
           }
     env:
