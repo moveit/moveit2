@@ -28,11 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: cache target_ws
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.BASEDIR }}/target_ws
-          key: target_ws-${{ matrix.env.CACHE_PREFIX }}-${{ github.sha }}
+      - name:
+        run: sudo apt install -qq -y tree && tree ${{ github.workspace }}
       - name: cache upstream_ws
         uses: pat-s/always-upload-cache@v2.1.3
         with:
