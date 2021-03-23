@@ -1,8 +1,30 @@
 cmake_minimum_required(VERSION 3.5)
 project(moveit_servo)
 
-set(SERVO_LIB_NAME moveit_servo)
-set(COMPOSABLE_NODE_NAME servo_server)
+# C++ Libraries #################################################
+
+# Core C++ library for calculations and collision checking.
+# Provides interface used by the component node.
+set(SERVO_LIB_NAME moveit_servo_lib)
+# C++ library containing the parameters initialization
+# - This is intended to use with the component node when you
+# -   need to read the parameters loaded into servo in a separate
+# -   node.
+set(SERVO_PARAM_LIB_NAME ${SERVO_LIB_NAME}_parameters)
+
+# Pose Tracking
+set(POSE_TRACKING pose_tracking)
+
+# Component Nodes (Shared libraries) ############################
+set(SERVO_COMPONENT_NODE servo_server)
+set(SERVO_CONTROLLER_INPUT servo_controller_input)
+
+# Executable Nodes ##############################################
+set(CPP_DEMO_NAME servo_cpp_demo)
+set(POSE_TRACKING_DEMO_NAME servo_pose_tracking_demo)
+set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
+
+#################################################################
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -43,61 +65,61 @@ include_directories(
   include
 )
 
-#########################################################
-## Library to process realtime twist or joint commands ##
-#########################################################
+###################
+## C++ Libraries ##
+###################
 
-# This library provides an interface for sending realtime twist or joint commands to a robot
+# This library provides a way of loading parameters for servo
+add_library(${SERVO_PARAM_LIB_NAME} SHARED src/servo_parameters.cpp)
+set_target_properties(${SERVO_PARAM_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(${SERVO_PARAM_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+# This library provides a C++ interface for sending realtime twist or joint commands to a robot
 add_library(${SERVO_LIB_NAME} SHARED
   # These files are used to produce differential motion
   src/servo.cpp
   src/servo_calcs.cpp
   src/collision_check.cpp
   src/low_pass_filter.cpp
-  include/moveit_servo/servo_parameters.cpp
 )
 set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${SERVO_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(${SERVO_LIB_NAME} ${SERVO_PARAM_LIB_NAME})
 
-# Add and export library for composable node server
-add_library(${COMPOSABLE_NODE_NAME} SHARED src/servo_server.cpp)
-ament_target_dependencies(${COMPOSABLE_NODE_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(${COMPOSABLE_NODE_NAME} ${SERVO_LIB_NAME})
-rclcpp_components_register_nodes(${COMPOSABLE_NODE_NAME} "moveit_servo::ServoServer")
-
-########################################
-## Library for servoing toward a pose ##
-########################################
-
-set(POSE_TRACKING pose_tracking)
 add_library(${POSE_TRACKING} SHARED src/pose_tracking.cpp)
 ament_target_dependencies(${POSE_TRACKING} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(${POSE_TRACKING} ${SERVO_LIB_NAME})
 
+#####################
+## Component Nodes ##
+#####################
+
+# Add and export library to run as a ROS node component, and receive commands via topics
+add_library(${SERVO_COMPONENT_NODE} SHARED src/servo_server.cpp)
+ament_target_dependencies(${SERVO_COMPONENT_NODE} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(${SERVO_COMPONENT_NODE} ${SERVO_LIB_NAME})
+rclcpp_components_register_nodes(${SERVO_COMPONENT_NODE} "moveit_servo::ServoServer")
+
 # Add executable for using a controller
-set(SERVO_CONTROLLER_INPUT servo_controller_input)
 add_library(${SERVO_CONTROLLER_INPUT} SHARED src/teleop_demo/joystick_servo_example.cpp)
 ament_target_dependencies(${SERVO_CONTROLLER_INPUT} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 rclcpp_components_register_nodes(${SERVO_CONTROLLER_INPUT} "moveit_servo::JoyToServoPub")
 
 ######################
-## Demo Executables ##
+## Executable Nodes ##
 ######################
 
 # Add cpp interface example executable
-set(CPP_DEMO_NAME servo_cpp_demo)
 add_executable(${CPP_DEMO_NAME} src/cpp_interface_demo/servo_cpp_interface_demo.cpp)
 ament_target_dependencies(${CPP_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(${CPP_DEMO_NAME} ${SERVO_LIB_NAME})
 
 # An example of pose tracking
-set(POSE_TRACKING_DEMO_NAME servo_pose_tracking_demo)
 add_executable(${POSE_TRACKING_DEMO_NAME} src/cpp_interface_demo/pose_tracking_demo.cpp)
 target_link_libraries(${POSE_TRACKING_DEMO_NAME} ${POSE_TRACKING})
 ament_target_dependencies(${POSE_TRACKING_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Add executable to publish fake servo commands for testing/demo purposes
-set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
 add_executable(${FAKE_SERVO_CMDS_NAME} test/publish_fake_jog_commands.cpp)
 ament_target_dependencies(${FAKE_SERVO_CMDS_NAME}
   rclcpp
@@ -113,8 +135,9 @@ ament_target_dependencies(${FAKE_SERVO_CMDS_NAME}
 install(
   TARGETS
     ${SERVO_LIB_NAME}
-    ${COMPOSABLE_NODE_NAME}
+    ${SERVO_LIB_NAME}_parameters
     ${POSE_TRACKING}
+    ${SERVO_COMPONENT_NODE}
     ${SERVO_CONTROLLER_INPUT}
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
@@ -167,33 +190,22 @@ if(BUILD_TESTING)
   ament_add_gtest(test_low_pass_filter test/test_low_pass_filter.cpp)
   target_link_libraries(test_low_pass_filter ${SERVO_LIB_NAME})
 
-  # Basic unit test ServoCalcs
-  ament_add_gtest(
-    test_servo
+  # Unit test for ServoCalcs
+  ament_add_gtest_executable(
+    unit_test_servo_calcs
     test/unit_test_servo_calcs.cpp
-    test/test_parameter_struct.hpp
   )
-  target_link_libraries(test_servo ${SERVO_LIB_NAME})
-  ament_target_dependencies(test_servo ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost ament_cmake_gtest ros_testing)
-
-  # Servo parameters launch test
-  add_executable(test_servo_parameters_node
-    test/test_servo_parameters_node.cpp
-    test/test_parameter_struct.hpp)
-  ament_target_dependencies(test_servo_parameters_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
-
-  ament_add_gtest_executable(test_servo_parameters test/test_servo_parameters.cpp)
-  ament_target_dependencies(test_servo_parameters ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  target_link_libraries(test_servo_parameters ${SERVO_LIB_NAME})
-  add_ros_test(test/launch/test_servo_parameters.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-  # End servo parameters launch test
+  target_link_libraries(unit_test_servo_calcs ${SERVO_LIB_NAME})
+  ament_target_dependencies(unit_test_servo_calcs ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+  add_ros_test(test/launch/unit_test_servo_calcs.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  # end Unit test for ServoCalcs
 
   # Servo integration launch test
   ament_add_gtest_executable(test_servo_integration
       test/test_servo_interface.cpp
-      test/test_parameter_struct.hpp
       test/servo_launch_test_common.hpp
   )
+  target_link_libraries(test_servo_integration ${SERVO_PARAM_LIB_NAME})
   ament_target_dependencies(test_servo_integration ${THIS_PACKAGE_INCLUDE_DEPENDS})
   add_ros_test(test/launch/test_servo_integration.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
   # end servo integration launch test
@@ -201,9 +213,9 @@ if(BUILD_TESTING)
   # Servo collision checking integration test
   ament_add_gtest_executable(test_servo_collision
         test/test_servo_collision.cpp
-        test/test_parameter_struct.hpp
         test/servo_launch_test_common.hpp
   )
+  target_link_libraries(test_servo_collision ${SERVO_PARAM_LIB_NAME})
   ament_target_dependencies(test_servo_collision ${THIS_PACKAGE_INCLUDE_DEPENDS})
   add_ros_test(test/launch/test_servo_collision.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
   # end servo collision checking integration test
@@ -211,9 +223,9 @@ if(BUILD_TESTING)
   # Servo singularity checking integration test
   ament_add_gtest_executable(test_servo_singularity
         test/test_servo_singularity.cpp
-        test/test_parameter_struct.hpp
         test/servo_launch_test_common.hpp
   )
+  target_link_libraries(test_servo_singularity ${SERVO_PARAM_LIB_NAME})
   ament_target_dependencies(test_servo_singularity ${THIS_PACKAGE_INCLUDE_DEPENDS})
   add_ros_test(test/launch/test_servo_singularity.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
   # end servo singularity checking integration test

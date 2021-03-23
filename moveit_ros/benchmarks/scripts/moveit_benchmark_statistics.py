@@ -355,7 +355,7 @@ def plotAttribute(cur, planners, attribute, typename):
         measurementsPercentage = [sum(m) * 100. / len(m) for m in measurements]
         ind = range(len(measurements))
         plt.bar(ind, measurementsPercentage, width)
-        ### uncommenting this line will remove the term 'kConfigDefault' from the labels for OMPL Solvers. 
+        ### uncommenting this line will remove the term 'kConfigDefault' from the labels for OMPL Solvers.
         ### Fits situations where you need more control in the plot, such as in an academic publication for example
         #labels = [l.replace('kConfigDefault', '') for l in labels]
 
@@ -371,11 +371,11 @@ def plotAttribute(cur, planners, attribute, typename):
 
         #xtickNames = plt.xticks(labels, rotation=30, fontsize=10)
         #plt.subplots_adjust(bottom=0.3) # Squish the plot into the upper 2/3 of the page.  Leave room for labels
-	
-        ### uncommenting this line will remove the term 'kConfigDefault' from the labels for OMPL Solvers. 
+
+        ### uncommenting this line will remove the term 'kConfigDefault' from the labels for OMPL Solvers.
         ### Fits situations where you need more control in the plot, such as in an academic publication for example
         #labels = [l.replace('kConfigDefault', '') for l in labels]
-        
+
         xtickNames = plt.setp(ax,xticklabels=labels)
         plt.setp(xtickNames, rotation=30, fontsize=8, ha='right')
         for tick in ax.xaxis.get_major_ticks(): # shrink the font size of the x tick labels
@@ -602,4 +602,3 @@ if __name__ == "__main__":
 
     if options.mysqldb:
         saveAsMysql(options.dbname, options.mysqldb)
-

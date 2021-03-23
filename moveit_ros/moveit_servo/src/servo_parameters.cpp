@@ -39,11 +39,11 @@
    Created   : 07/02/2020
 */
 
-#include <rclcpp/rclcpp.hpp>
-
 #include <type_traits>
-
+#include <rclcpp/rclcpp.hpp>
 #include <moveit_servo/servo_parameters.h>
+
+using namespace std::placeholders;  // for _1, _2 etc.
 
 namespace moveit_servo
 {
@@ -54,12 +54,18 @@ void declareOrGetParam(T& output_value, const std::string& param_name, const rcl
   try
   {
     if (node->has_parameter(param_name))
+    {
       node->get_parameter<T>(param_name, output_value);
+    }
     else
+    {
       output_value = node->declare_parameter<T>(param_name, T{});
+    }
   }
   catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
   {
+    RCLCPP_WARN_STREAM(logger, "InvalidParameterTypeException(" << param_name << "): " << e.what());
+
     // Catch a <double> parameter written in the yaml as "1" being considered an <int>
     if (std::is_same<T, double>::value)
     {
@@ -72,23 +78,48 @@ void declareOrGetParam(T& output_value, const std::string& param_name, const rcl
       throw e;
     }
   }
+
   RCLCPP_INFO_STREAM(logger, "Found parameter - " << param_name << ": " << output_value);
 }
 
-/**
- * Declares, reads, and validates parameters used for moveit_servo
- * @param node Shared ptr to node that will the parameters will be declared in. Params should be defined in
- * launch/config files
- * @param logger Logger for outputting warnings about the parameters
- * @param parameters The set up parameters that will be updated. After this call, they can be used to start a Servo
- * instance
- * @param ns Parameter namespace (as loaded in launch files). Defaults to "moveit_servo" but can be changed to allow
- * multiple arms/instances
- * @return true if all parameters were loaded and verified successfully, false otherwise
- */
-bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPtr& node, const rclcpp::Logger& logger,
-                    std::string ns = "moveit_servo")
+rcl_interfaces::msg::SetParametersResult
+ServoParameters::setParametersCallback(std::vector<rclcpp::Parameter> parameters)
 {
+  const std::lock_guard<std::mutex> guard(callback_mutex_);
+  auto result = rcl_interfaces::msg::SetParametersResult();
+  result.successful = true;
+
+  for (const auto& parameter : parameters)
+  {
+    auto search = set_parameter_callbacks_.find(parameter.get_name());
+    if (search != set_parameter_callbacks_.end())
+    {
+      RCLCPP_INFO_STREAM(logger_, "setParametersCallback - "
+                                      << parameter.get_name() << "<" << parameter.get_type_name()
+                                      << ">: " << rclcpp::to_string(parameter.get_parameter_value()));
+      for (const auto& callback : search->second)
+      {
+        result = callback(parameter);
+
+        if (!result.successful)
+        {
+          // Handle automatic parameter set failure
+          return result;
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcpp::Node::SharedPtr& node,
+                                                                     const rclcpp::Logger& logger,
+                                                                     std::string ns, /* = "moveit_servo"*/
+                                                                     bool dynamic_parameters /* = true */)
+{
+  auto parameters = std::shared_ptr<ServoParameters>(new ServoParameters(logger, ns));
+
   // Get the parameters (organized same order as YAML file)
   declareOrGetParam<bool>(parameters->use_gazebo, ns + ".use_gazebo", node, logger);
   declareOrGetParam<std::string>(parameters->status_topic, ns + ".status_topic", node, logger);
@@ -150,44 +181,44 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
   {
     RCLCPP_WARN(logger, "Parameter 'publish_period' should be "
                         "greater than zero. Check yaml file.");
-    return false;
+    return nullptr;
   }
   if (parameters->num_outgoing_halt_msgs_to_publish < 0)
   {
     RCLCPP_WARN(logger, "Parameter 'num_outgoing_halt_msgs_to_publish' should be greater than zero. Check yaml file.");
-    return false;
+    return nullptr;
   }
   if (parameters->hard_stop_singularity_threshold <= parameters->lower_singularity_threshold)
   {
     RCLCPP_WARN(logger, "Parameter 'hard_stop_singularity_threshold' "
                         "should be greater than 'lower_singularity_threshold.' "
                         "Check yaml file.");
-    return false;
+    return nullptr;
   }
   if ((parameters->hard_stop_singularity_threshold <= 0.) || (parameters->lower_singularity_threshold <= 0.))
   {
     RCLCPP_WARN(logger, "Parameters 'hard_stop_singularity_threshold' "
                         "and 'lower_singularity_threshold' should be "
                         "greater than zero. Check yaml file.");
-    return false;
+    return nullptr;
   }
   if (parameters->low_pass_filter_coeff <= 0.)
   {
     RCLCPP_WARN(logger, "Parameter 'low_pass_filter_coeff' should be "
                         "greater than zero. Check yaml file.");
-    return false;
+    return nullptr;
   }
   if (parameters->joint_limit_margin < 0.)
   {
     RCLCPP_WARN(logger, "Parameter 'joint_limit_margin' should be "
                         "greater than or equal to zero. Check yaml file.");
-    return false;
+    return nullptr;
   }
   if (parameters->command_in_type != "unitless" && parameters->command_in_type != "speed_units")
   {
     RCLCPP_WARN(logger, "command_in_type should be 'unitless' or "
                         "'speed_units'. Check yaml file.");
-    return false;
+    return nullptr;
   }
   if (parameters->command_out_type != "trajectory_msgs/JointTrajectory" &&
       parameters->command_out_type != "std_msgs/Float64MultiArray")
@@ -195,7 +226,7 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
     RCLCPP_WARN(logger, "Parameter command_out_type should be "
                         "'trajectory_msgs/JointTrajectory' or "
                         "'std_msgs/Float64MultiArray'. Check yaml file.");
-    return false;
+    return nullptr;
   }
   if (!parameters->publish_joint_positions && !parameters->publish_joint_velocities &&
       !parameters->publish_joint_accelerations)
@@ -204,32 +235,32 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
                         "publish_joint_velocities / "
                         "publish_joint_accelerations must be true. Check "
                         "yaml file.");
-    return false;
+    return nullptr;
   }
   if ((parameters->command_out_type == "std_msgs/Float64MultiArray") && parameters->publish_joint_positions &&
       parameters->publish_joint_velocities)
   {
     RCLCPP_WARN(logger, "When publishing a std_msgs/Float64MultiArray, "
                         "you must select positions OR velocities.");
-    return false;
+    return nullptr;
   }
   // Collision checking
   if (parameters->collision_check_type != "threshold_distance" && parameters->collision_check_type != "stop_distance")
   {
     RCLCPP_WARN(logger, "collision_check_type must be 'threshold_distance' or 'stop_distance'");
-    return false;
+    return nullptr;
   }
   if (parameters->self_collision_proximity_threshold <= 0.)
   {
     RCLCPP_WARN(logger, "Parameter 'self_collision_proximity_threshold' should be "
                         "greater than zero. Check yaml file.");
-    return false;
+    return nullptr;
   }
   if (parameters->scene_collision_proximity_threshold <= 0.)
   {
     RCLCPP_WARN(logger, "Parameter 'scene_collision_proximity_threshold' should be "
                         "greater than zero. Check yaml file.");
-    return false;
+    return nullptr;
   }
   if (parameters->scene_collision_proximity_threshold < parameters->self_collision_proximity_threshold)
   {
@@ -240,22 +271,29 @@ bool readParameters(ServoParametersPtr& parameters, const rclcpp::Node::SharedPt
   {
     RCLCPP_WARN(logger, "Parameter 'collision_check_rate' should be "
                         "greater than zero. Check yaml file.");
-    return false;
+    return nullptr;
   }
   if (parameters->collision_distance_safety_factor < 1)
   {
     RCLCPP_WARN(logger, "Parameter 'collision_distance_safety_factor' should be "
                         "greater than or equal to 1. Check yaml file.");
-    return false;
+    return nullptr;
   }
   if (parameters->min_allowable_collision_distance <= 0)
   {
     RCLCPP_WARN(logger, "Parameter 'min_allowable_collision_distance' should be "
                         "greater than zero. Check yaml file.");
-    return false;
+    return nullptr;
   }
 
-  return true;
+  // register parameter change callback
+  if (dynamic_parameters)
+  {
+    parameters->on_set_parameters_callback_handler_ =
+        node->add_on_set_parameters_callback(std::bind(&ServoParameters::setParametersCallback, parameters.get(), _1));
+  }
+
+  return parameters;
 }
 
 }  // namespace moveit_servo

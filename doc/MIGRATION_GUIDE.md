@@ -10,23 +10,23 @@ This leads to the following basic migration steps:
 1. Replace `LOGNAME` with `rclcpp::Logger` instance:
 
     <b>Old:</b>
-    
+
         constexpr char LOGNAME[] = "logger_name";
-  
+
     <b>New:</b>
-    
+
         static const rclcpp::Logger LOGGER = rclcpp::get_logger("logger_name");
-  
+
 2. Replace logging macros:
 
     <b>Old:</b>
-    
+
         ROS_INFO_NAMED(LOGNAME, "Very important info message");
-   
+
    <b>New:</b>
 
        RCLCPP_INFO(LOGGER, "Very important info message");
-       
+
 ### Logger naming convention
 
 Migrating the loggers is a good opportunity to make logger names more consistent.

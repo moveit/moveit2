@@ -33,7 +33,7 @@
  *********************************************************************/
 
 #include "moveit_servo/pose_tracking.h"
-#include "moveit_servo/servo_parameters.cpp"
+#include "moveit_servo/servo_parameters.h"
 
 #include <chrono>
 using namespace std::literals;
@@ -46,7 +46,7 @@ constexpr size_t LOG_THROTTLE_PERIOD = 10;  // sec
 
 namespace moveit_servo
 {
-PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParametersPtr& servo_parameters,
+PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParameters::SharedConstPtr& servo_parameters,
                            const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
   : node_(node)
   , servo_parameters_(servo_parameters)

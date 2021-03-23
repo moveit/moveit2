@@ -58,4 +58,3 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 target_include_directories(${MOVEIT_LIB_NAME} PRIVATE "${OGRE_PREFIX_DIR}/include")
 
 install(DIRECTORY include/ DESTINATION include)
-
