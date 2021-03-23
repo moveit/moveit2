@@ -3,7 +3,12 @@
 
 name: BuildAndTest
 
-on: [push, pull_request]
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   industrial_ci:
@@ -86,6 +91,6 @@ jobs:
         if: ${{ always() && ! env.CCOV }}
         run:
           du -sh ${{ env.BASEDIR }}/target_ws
-          sudo find ${{ env.BASEDIR }}/target_ws -wholename '**/test_results/**' -delete
+          sudo find ${{ env.BASEDIR }}/target_ws -wholename '*/test_results/*' -delete
           sudo rm -rf ${{ env.BASEDIR }}/target_ws/src
           du -sh ${{ env.BASEDIR }}/target_ws
