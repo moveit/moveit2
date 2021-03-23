@@ -27,6 +27,11 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
 
+  - repo: https://github.com/psf/black
+    rev: 20.8b1
+    hooks:
+      - id: black
+
   - repo: local
     hooks:
       - id: clang-format

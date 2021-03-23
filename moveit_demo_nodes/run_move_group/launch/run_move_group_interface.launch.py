@@ -10,7 +10,7 @@ def load_file(package_name, file_path):
     absolute_file_path = os.path.join(package_path, file_path)
 
     try:
-        with open(absolute_file_path, 'r') as file:
+        with open(absolute_file_path, "r") as file:
             return file.read()
     except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
         return None
@@ -21,7 +21,7 @@ def load_yaml(package_name, file_path):
     absolute_file_path = os.path.join(package_path, file_path)
 
     try:
-        with open(absolute_file_path, 'r') as file:
+        with open(absolute_file_path, "r") as file:
             return yaml.safe_load(file)
     except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
         return None
@@ -29,22 +29,30 @@ def load_yaml(package_name, file_path):
 
 def generate_launch_description():
     # planning_context
-    robot_description_config = load_file('moveit_resources_panda_description', 'urdf/panda.urdf')
-    robot_description = {'robot_description': robot_description_config}
+    robot_description_config = load_file(
+        "moveit_resources_panda_description", "urdf/panda.urdf"
+    )
+    robot_description = {"robot_description": robot_description_config}
 
-    robot_description_semantic_config = load_file('moveit_resources_panda_moveit_config', 'config/panda.srdf')
-    robot_description_semantic = {'robot_description_semantic': robot_description_semantic_config}
+    robot_description_semantic_config = load_file(
+        "moveit_resources_panda_moveit_config", "config/panda.srdf"
+    )
+    robot_description_semantic = {
+        "robot_description_semantic": robot_description_semantic_config
+    }
 
-    kinematics_yaml = load_yaml('moveit_resources_panda_moveit_config', 'config/kinematics.yaml')
+    kinematics_yaml = load_yaml(
+        "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
+    )
 
     # MoveGroupInterface demo executable
-    run_move_group_demo = Node(name='run_move_group',
-                               package='run_move_group',
-                               executable='run_move_group',
-                               prefix='xterm -e',
-                               output='screen',
-                               parameters=[robot_description,
-                                           robot_description_semantic,
-                                           kinematics_yaml])
+    run_move_group_demo = Node(
+        name="run_move_group",
+        package="run_move_group",
+        executable="run_move_group",
+        prefix="xterm -e",
+        output="screen",
+        parameters=[robot_description, robot_description_semantic, kinematics_yaml],
+    )
 
     return LaunchDescription([run_move_group_demo])
