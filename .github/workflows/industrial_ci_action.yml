@@ -12,14 +12,14 @@ jobs:
         env:
           - {
             DOCKER_IMAGE: 'moveit/moveit2:foxy-ci',
-            TARGET_CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=RELWITHDEBINFO -DCMAKE_C_FLAGS='--coverage' -DCMAKE_CXX_FLAGS='--coverage' --no-warn-unused-cli",
+            TARGET_CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_C_FLAGS='--coverage' -DCMAKE_CXX_FLAGS='--coverage' --no-warn-unused-cli",
             AFTER_RUN_TARGET_TEST: './.ci.prepare_codecov',
             ADDITIONAL_DEBS: 'lcov', 
             CCOV_UPLOAD: true
           }
           - {
             DOCKER_IMAGE: 'moveit/moveit2:foxy-ci-testing',
-            TARGET_CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=RELEASE",
+            TARGET_CMAKE_ARGS: "-DCMAKE_BUILD_TYPE=Release",
             CCOV_UPLOAD: false
           }
     env:
