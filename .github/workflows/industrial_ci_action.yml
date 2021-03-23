@@ -23,7 +23,6 @@ jobs:
       UPSTREAM_WORKSPACE: moveit2.repos
       CCOV: ${{ matrix.env.CCOV }}
       AFTER_SETUP_UPSTREAM_WORKSPACE: 'vcs pull $BASEDIR/upstream_ws/src'
-      AFTER_INSTALL_TARGET_DEPENDENCIES: 'df -h && apt-get clean && rm -rf /var/lib/apt/lists/* && df -h'
       TARGET_CMAKE_ARGS: >
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'RelWithDebInfo' || 'Release'}}
         ${{ matrix.env.CCOV && '-DCMAKE_CXX_FLAGS="--coverage" --no-warn-unused-cli' || '' }}
@@ -53,6 +52,7 @@ jobs:
           restore-keys: |
             upstream_ws-${{ env.CACHE_PREFIX }}-${{ hashFiles('moveit2.repos') }}
       - name: cache target_ws
+        if: ${{ ! env.CCOV }}
         uses: pat-s/always-upload-cache@v2.1.3
         with:
           path: ${{ env.BASEDIR }}/target_ws
@@ -82,10 +82,9 @@ jobs:
         with:
           files: ${{ env.BASEDIR }}/coverage.info
       - name: prepare target_ws for cache
-        run: |
-          find ${{ env.BASEDIR }}/target_ws -name "*.gcov" -type f -delete
-          find ${{ env.BASEDIR }}/target_ws -name "*.gcno" -type f -delete
-          find ${{ env.BASEDIR }}/target_ws -name "*.gcda" -type f -delete
-          find ${{ env.BASEDIR }}/target_ws -name test_results -type d -delete
-          rm -rf ${{ env.BASEDIR }}/target_ws/src
+        if: ${{ always() && ! env.CCOV }}
+        run:
+          du -sh ${{ env.BASEDIR }}/target_ws
+          sudo find ${{ env.BASEDIR }}/target_ws -wholename '**/test_results/**' -delete
+          sudo rm -rf ${{ env.BASEDIR }}/target_ws/src
           du -sh ${{ env.BASEDIR }}/target_ws
