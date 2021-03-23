@@ -25,6 +25,7 @@ jobs:
     env:
       UPSTREAM_WORKSPACE: moveit2.repos
       AFTER_SETUP_UPSTREAM_WORKSPACE: 'vcs pull $BASEDIR/upstream_ws/src'
+      AFTER_INSTALL_TARGET_DEPENDENCIES: 'apt-get clean && rm -rf /var/lib/apt/lists/*'
       CCACHE_DIR: "${{ github.workspace }}/.ccache"
       BASEDIR: ${{ github.workspace }}/.work
       CACHE_PREFIX: "${{ matrix.env.DOCKER_IMAGE }}${{ matrix.env.CCOV_UPLOAD && '-ccov' || '' }}"
