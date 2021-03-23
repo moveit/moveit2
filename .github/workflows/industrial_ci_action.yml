@@ -30,6 +30,7 @@ jobs:
       BASEDIR: ${{ github.workspace }}/.work
       CACHE_PREFIX: "${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && '-ccov' || '' }}"
 
+    name: "${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && ' + ccov' || ''}}"
     runs-on: ubuntu-latest
     steps:
       - name: "Free up disk space"
