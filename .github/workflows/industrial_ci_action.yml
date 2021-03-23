@@ -30,6 +30,9 @@ jobs:
       CACHE_PREFIX: "${{ matrix.env.DOCKER_IMAGE }}${{ matrix.env.CCOV_UPLOAD && '-ccov' || '' }}"
     runs-on: ubuntu-latest
     steps:
+      # Workaround for https://github.com/actions/virtual-environments/issues/709
+      - name: free up disk space 
+        run: sudo rm -rf "/usr/local/share/boost" "$AGENT_TOOLSDIRECTORY"
       - uses: actions/checkout@v2
       - name: cache upstream_ws
         uses: pat-s/always-upload-cache@v2.1.3
