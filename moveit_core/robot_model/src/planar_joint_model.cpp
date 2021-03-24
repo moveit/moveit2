@@ -244,12 +244,6 @@ double PlanarJointModel::distance(const double* values1, const double* values2) 
   }
   else if (motion_model_ == DIFF_DRIVE)
   {
-    // Shortcut to avoid extraneous calculations
-    if (values1[0] == values2[0] && values1[1] == values2[1] && values1[2] == values2[2])
-    {
-      return 0.0;
-    }
-
     double dx, dy, initial_turn, drive_angle, final_turn;
     computeTurnDriveTurnGeometry(values1, values2, dx, dy, initial_turn, drive_angle, final_turn);
     return hypot(dx, dy) + angular_distance_weight_ * (fabs(initial_turn) + fabs(final_turn));
