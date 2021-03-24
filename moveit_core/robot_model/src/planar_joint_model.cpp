@@ -146,11 +146,23 @@ void computeTurnDriveTurnGeometry(const double* from, const double* to, double& 
 {
   dx = to[0] - from[0];
   dy = to[1] - from[1];
-  drive_angle = atan2(dy, dx);
-
-  initial_turn = angles::shortest_angular_distance(from[2], drive_angle);
+  const double angle_straight_diff =
+      std::hypot(dx, dy) > 0.01 ? angles::shortest_angular_distance(from[2], std::atan2(dy, dx)) : 0.0;
+  const double angle_backward_diff = angles::normalize_angle(angle_straight_diff - M_PI);
+  const double move_straight_cost =
+      std::abs(angle_straight_diff) + std::abs(angles::shortest_angular_distance(from[2] + angle_straight_diff, to[2]));
+  const double move_backward_cost =
+      std::abs(angle_backward_diff) + std::abs(angles::shortest_angular_distance(from[2] + angle_backward_diff, to[2]));
+  if (move_straight_cost <= move_backward_cost)
+  {
+    initial_turn = angle_straight_diff;
+  }
+  else
+  {
+    initial_turn = angle_backward_diff;
+  }
   drive_angle = from[2] + initial_turn;
-  final_turn = to[2] - drive_angle;
+  final_turn = angles::shortest_angular_distance(drive_angle, to[2]);
 }
 
 void PlanarJointModel::interpolate(const double* from, const double* to, const double t, double* state) const
