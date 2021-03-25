@@ -28,8 +28,6 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 
 target_link_libraries(${MOVEIT_LIB_NAME}
     Qt5::Widgets
-    rviz_common::rviz_common
-    rviz_default_plugins::rviz_default_plugins
 )
 
 ament_target_dependencies(${MOVEIT_LIB_NAME}
@@ -38,6 +36,8 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
     Boost
     octomap_msgs
     rviz_ogre_vendor
+    rviz_common
+    rviz_default_plugins
 )
 target_include_directories(${MOVEIT_LIB_NAME} PRIVATE "${OGRE_PREFIX_DIR}/include")
 

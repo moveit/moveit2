@@ -18,7 +18,7 @@ parameters:
     predefined_poses: # List of named targets
         - ready
         - extended
-planning_pipelines: 
+planning_pipelines:
   pipelines: [pipeline1]
   pipeline1:
     name: ompl
