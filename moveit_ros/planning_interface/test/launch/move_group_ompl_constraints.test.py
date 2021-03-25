@@ -22,8 +22,7 @@ class TestGTestProcessActive(unittest.TestCase):
         run_move_group_node,
         static_tf,
         robot_state_publisher,
-        fake_joint_driver_node,
-        mongodb_server_node,
+        ros2_control_node,
     ):
         proc_info.assertWaitForShutdown(ompl_constraint_test, timeout=4000.0)
 
@@ -37,7 +36,6 @@ class TestGTestProcessPostShutdown(unittest.TestCase):
         run_move_group_node,
         static_tf,
         robot_state_publisher,
-        fake_joint_driver_node,
-        mongodb_server_node,
+        ros2_control_node,
     ):
         launch_testing.asserts.assertExitCodes(proc_info, process=ompl_constraint_test)

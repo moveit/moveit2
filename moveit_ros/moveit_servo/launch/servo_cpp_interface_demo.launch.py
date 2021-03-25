@@ -3,6 +3,8 @@ import yaml
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import ExecuteProcess
+import xacro
 
 
 def load_file(package_name, file_path):
@@ -33,10 +35,14 @@ def generate_launch_description():
     servo_params = {"moveit_servo": servo_yaml}
 
     # Get URDF and SRDF
-    robot_description_config = load_file(
-        "moveit_resources_panda_description", "urdf/panda.urdf"
+    robot_description_config = xacro.process_file(
+        os.path.join(
+            get_package_share_directory("moveit_resources_panda_moveit_config"),
+            "config",
+            "panda.urdf.xacro",
+        )
     )
-    robot_description = {"robot_description": robot_description_config}
+    robot_description = {"robot_description": robot_description_config.toxml()}
 
     robot_description_semantic_config = load_file(
         "moveit_resources_panda_moveit_config", "config/panda.srdf"
@@ -84,32 +90,50 @@ def generate_launch_description():
         parameters=[robot_description, robot_description_semantic],
     )
 
-    # Is a perfect controller without dynamics
-    fake_joint_driver_node = Node(
-        package="fake_joint_driver",
-        executable="fake_joint_driver_node",
+    # ros2_control using FakeSystem as hardware
+    ros2_control_node = Node(
+        package="controller_manager",
+        executable="ros2_control_node",
         parameters=[
-            {"controller_name": "fake_joint_trajectory_controller"},
-            os.path.join(
-                get_package_share_directory("moveit_servo"),
-                "config",
-                "panda_controllers.yaml",
-            ),
-            os.path.join(
-                get_package_share_directory("moveit_servo"),
-                "config",
-                "start_positions.yaml",
-            ),
             robot_description,
+            os.path.join(
+                get_package_share_directory("moveit_resources_panda_moveit_config"),
+                "config",
+                "panda_ros_controllers.yaml",
+            ),
         ],
+        output={
+            "stdout": "screen",
+            "stderr": "screen",
+        },
     )
 
+    # load joint_state_controller
+    load_joint_state_controller = ExecuteProcess(
+        cmd=["ros2 control load_start_controller joint_state_controller"],
+        shell=True,
+        output="screen",
+    )
+    load_controllers = [load_joint_state_controller]
+    # load panda_arm_controller
+    load_controllers += [
+        ExecuteProcess(
+            cmd=["ros2 control load_configure_controller panda_arm_controller"],
+            shell=True,
+            output="screen",
+            on_exit=[
+                ExecuteProcess(
+                    cmd=[
+                        "ros2 control switch_controllers --start-controllers panda_arm_controller"
+                    ],
+                    shell=True,
+                    output="screen",
+                )
+            ],
+        )
+    ]
+
     return LaunchDescription(
-        [
-            rviz_node,
-            static_tf,
-            servo_node,
-            fake_joint_driver_node,
-            robot_state_publisher,
-        ]
+        [rviz_node, static_tf, servo_node, ros2_control_node, robot_state_publisher]
+        + load_controllers
     )

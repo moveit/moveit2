@@ -2,7 +2,9 @@ import os
 import yaml
 from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.actions import ExecuteProcess
 from ament_index_python.packages import get_package_share_directory
+import xacro
 
 
 def load_file(package_name, file_path):
@@ -30,10 +32,14 @@ def load_yaml(package_name, file_path):
 def generate_launch_description():
 
     # planning_context
-    robot_description_config = load_file(
-        "moveit_resources_panda_description", "urdf/panda.urdf"
+    robot_description_config = xacro.process_file(
+        os.path.join(
+            get_package_share_directory("moveit_resources_panda_moveit_config"),
+            "config",
+            "panda.urdf.xacro",
+        )
     )
-    robot_description = {"robot_description": robot_description_config}
+    robot_description = {"robot_description": robot_description_config.toxml()}
 
     robot_description_semantic_config = load_file(
         "moveit_resources_panda_moveit_config", "config/panda.srdf"
@@ -55,18 +61,17 @@ def generate_launch_description():
             "start_state_max_bounds_error": 0.1,
         }
     }
-
     ompl_planning_yaml = load_yaml(
         "moveit_resources_panda_moveit_config", "config/ompl_planning.yaml"
     )
     ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
 
     # Trajectory Execution Functionality
-    controllers_yaml = load_yaml(
-        "run_ompl_constrained_planning", "config/controllers.yaml"
+    moveit_simple_controllers_yaml = load_yaml(
+        "moveit_resources_panda_moveit_config", "config/panda_controllers.yaml"
     )
     moveit_controllers = {
-        "moveit_simple_controller_manager": controllers_yaml,
+        "moveit_simple_controller_manager": moveit_simple_controllers_yaml,
         "moveit_controller_manager": "moveit_simple_controller_manager/MoveItSimpleControllerManager",
     }
 
@@ -89,7 +94,6 @@ def generate_launch_description():
         package="moveit_ros_move_group",
         executable="move_group",
         output="screen",
-        #    prefix='kitty -e gdb -e run --args',
         parameters=[
             robot_description,
             robot_description_semantic,
@@ -104,7 +108,7 @@ def generate_launch_description():
     # RViz
     rviz_config_file = (
         get_package_share_directory("run_ompl_constrained_planning")
-        + "/config/run_move_group.rviz"
+        + "/launch/run_move_group.rviz"
     )
     rviz_node = Node(
         package="rviz2",
@@ -138,25 +142,46 @@ def generate_launch_description():
         parameters=[robot_description],
     )
 
-    # Fake joint driver
-    fake_joint_driver_node = Node(
-        package="fake_joint_driver",
-        executable="fake_joint_driver_node",
-        parameters=[
-            {"controller_name": "panda_arm_controller"},
-            os.path.join(
-                get_package_share_directory("run_ompl_constrained_planning"),
-                "config",
-                "panda_controllers.yaml",
-            ),
-            os.path.join(
-                get_package_share_directory("run_ompl_constrained_planning"),
-                "config",
-                "start_positions.yaml",
-            ),
-            robot_description,
-        ],
+    # ros2_control using FakeSystem as hardware
+    ros2_controllers_path = os.path.join(
+        get_package_share_directory("moveit_resources_panda_moveit_config"),
+        "config",
+        "panda_ros_controllers.yaml",
     )
+    ros2_control_node = Node(
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[robot_description, ros2_controllers_path],
+        output={
+            "stdout": "screen",
+            "stderr": "screen",
+        },
+    )
+
+    # load joint_state_controller
+    load_joint_state_controller = ExecuteProcess(
+        cmd=["ros2 control load_start_controller joint_state_controller"],
+        shell=True,
+        output="screen",
+    )
+    load_controllers = [load_joint_state_controller]
+    # load panda_arm_controller
+    load_controllers += [
+        ExecuteProcess(
+            cmd=["ros2 control load_configure_controller panda_arm_controller"],
+            shell=True,
+            output="screen",
+            on_exit=[
+                ExecuteProcess(
+                    cmd=[
+                        "ros2 control switch_controllers --start-controllers panda_arm_controller"
+                    ],
+                    shell=True,
+                    output="screen",
+                )
+            ],
+        )
+    ]
 
     # Warehouse mongodb server
     mongodb_server_node = Node(
@@ -176,7 +201,8 @@ def generate_launch_description():
             static_tf,
             robot_state_publisher,
             run_move_group_node,
-            fake_joint_driver_node,
+            ros2_control_node,
             mongodb_server_node,
         ]
+        + load_controllers
     )
