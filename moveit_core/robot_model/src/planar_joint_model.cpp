@@ -146,6 +146,15 @@ void computeTurnDriveTurnGeometry(const double* from, const double* to, double& 
 {
   dx = to[0] - from[0];
   dy = to[1] - from[1];
+  // If the translational distance between from & to states is very small, it will cause an unnecessary rotations since
+  // the robot will try to do the following rather than rotating directly to the orientation of `to` state
+  // 1- Align itself with the line connecting the origin of both states
+  // 2- Move to the origin of `to` state
+  // 3- Rotate so it have the same orientation as `to` state
+  // Example: from=[0.0, 0.0, 0.0] - to=[1e-31, 1e-31, -130°]
+  // here the robot will: rotate 45° -> move to the origin of `to` state -> rotate -175°, rather than rotating directly
+  // to -130°
+  // to fix this we added a magic number 0.01 and make the movement pure rotation if the translational distance is less than this number
   const double angle_straight_diff =
       std::hypot(dx, dy) > 0.01 ? angles::shortest_angular_distance(from[2], std::atan2(dy, dx)) : 0.0;
   const double angle_backward_diff =
