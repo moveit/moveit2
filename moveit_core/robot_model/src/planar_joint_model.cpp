@@ -148,7 +148,8 @@ void computeTurnDriveTurnGeometry(const double* from, const double* to, double& 
   dy = to[1] - from[1];
   const double angle_straight_diff =
       std::hypot(dx, dy) > 0.01 ? angles::shortest_angular_distance(from[2], std::atan2(dy, dx)) : 0.0;
-  const double angle_backward_diff = angles::normalize_angle(angle_straight_diff - M_PI);
+  const double angle_backward_diff =
+      angles::normalize_angle(angle_straight_diff - boost::math::constants::pi<double>());
   const double move_straight_cost =
       std::abs(angle_straight_diff) + std::abs(angles::shortest_angular_distance(from[2] + angle_straight_diff, to[2]));
   const double move_backward_cost =
