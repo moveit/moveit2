@@ -36,27 +36,46 @@ def generate_launch_description():
     )
 
     # Component yaml files are grouped in separate namespaces
-    robot_description_config = xacro.process_file(os.path.join(get_package_share_directory('moveit_resources_panda_moveit_config'),
-                                                               'config',
-                                                               'panda.urdf.xacro'))
-    robot_description = {'robot_description' : robot_description_config.toxml()}
+    robot_description_config = xacro.process_file(
+        os.path.join(
+            get_package_share_directory("moveit_resources_panda_moveit_config"),
+            "config",
+            "panda.urdf.xacro",
+        )
+    )
+    robot_description = {"robot_description": robot_description_config.toxml()}
 
-    robot_description_semantic_config = load_file('moveit_resources_panda_moveit_config', 'config/panda.srdf')
-    robot_description_semantic = {'robot_description_semantic' : robot_description_semantic_config}
+    robot_description_semantic_config = load_file(
+        "moveit_resources_panda_moveit_config", "config/panda.srdf"
+    )
+    robot_description_semantic = {
+        "robot_description_semantic": robot_description_semantic_config
+    }
 
-    kinematics_yaml = load_yaml('moveit_resources_panda_moveit_config', 'config/kinematics.yaml')
-    robot_description_kinematics = { 'robot_description_kinematics' : kinematics_yaml }
+    kinematics_yaml = load_yaml(
+        "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
+    )
+    robot_description_kinematics = {"robot_description_kinematics": kinematics_yaml}
 
-    moveit_simple_controllers_yaml = load_yaml('moveit_resources_panda_moveit_config', 'config/panda_controllers.yaml')
-    moveit_controllers = { 'moveit_simple_controller_manager' : moveit_simple_controllers_yaml,
-                           'moveit_controller_manager': 'moveit_simple_controller_manager/MoveItSimpleControllerManager'}
+    moveit_simple_controllers_yaml = load_yaml(
+        "moveit_resources_panda_moveit_config", "config/panda_controllers.yaml"
+    )
+    moveit_controllers = {
+        "moveit_simple_controller_manager": moveit_simple_controllers_yaml,
+        "moveit_controller_manager": "moveit_simple_controller_manager/MoveItSimpleControllerManager",
+    }
 
-    ompl_planning_pipeline_config = { 'ompl' : {
-        'planning_plugin' : 'ompl_interface/OMPLPlanner',
-        'request_adapters' : """default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints""" ,
-        'start_state_max_bounds_error' : 0.1 } }
-    ompl_planning_yaml = load_yaml('moveit_resources_panda_moveit_config', 'config/ompl_planning.yaml')
-    ompl_planning_pipeline_config['ompl'].update(ompl_planning_yaml)
+    ompl_planning_pipeline_config = {
+        "ompl": {
+            "planning_plugin": "ompl_interface/OMPLPlanner",
+            "request_adapters": """default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints""",
+            "start_state_max_bounds_error": 0.1,
+        }
+    }
+    ompl_planning_yaml = load_yaml(
+        "moveit_resources_panda_moveit_config", "config/ompl_planning.yaml"
+    )
+    ompl_planning_pipeline_config["ompl"].update(ompl_planning_yaml)
 
     # MoveItCpp demo executable
     run_moveit_cpp_node = Node(
@@ -108,26 +127,53 @@ def generate_launch_description():
     )
 
     # ros2_control using FakeSystem as hardware
-    ros2_controllers_path = os.path.join(get_package_share_directory("moveit_resources_panda_moveit_config"), "config", "panda_ros_controllers.yaml")
+    ros2_controllers_path = os.path.join(
+        get_package_share_directory("moveit_resources_panda_moveit_config"),
+        "config",
+        "panda_ros_controllers.yaml",
+    )
     ros2_control_node = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
+        package="controller_manager",
+        executable="ros2_control_node",
         parameters=[robot_description, ros2_controllers_path],
         output={
-            'stdout': 'screen',
-            'stderr': 'screen',
+            "stdout": "screen",
+            "stderr": "screen",
         },
     )
 
     # load joint_state_controller
-    load_joint_state_controller = ExecuteProcess(cmd=['ros2 control load_start_controller joint_state_controller'], shell=True, output='screen')
+    load_joint_state_controller = ExecuteProcess(
+        cmd=["ros2 control load_start_controller joint_state_controller"],
+        shell=True,
+        output="screen",
+    )
     load_controllers = [load_joint_state_controller]
     # load panda_arm_controller
-    load_controllers += [ExecuteProcess(cmd=['ros2 control load_configure_controller panda_arm_controller'],
-                                        shell=True,
-                                        output='screen',
-                                        on_exit=[ExecuteProcess(cmd=['ros2 control switch_controllers --start-controllers panda_arm_controller'],
-                                                                shell=True,
-                                                                output='screen')])]
+    load_controllers += [
+        ExecuteProcess(
+            cmd=["ros2 control load_configure_controller panda_arm_controller"],
+            shell=True,
+            output="screen",
+            on_exit=[
+                ExecuteProcess(
+                    cmd=[
+                        "ros2 control switch_controllers --start-controllers panda_arm_controller"
+                    ],
+                    shell=True,
+                    output="screen",
+                )
+            ],
+        )
+    ]
 
-    return LaunchDescription([ static_tf, robot_state_publisher, rviz_node, run_moveit_cpp_node, ros2_control_node ] + load_controllers)
+    return LaunchDescription(
+        [
+            static_tf,
+            robot_state_publisher,
+            rviz_node,
+            run_moveit_cpp_node,
+            ros2_control_node,
+        ]
+        + load_controllers
+    )

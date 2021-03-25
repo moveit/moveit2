@@ -34,9 +34,12 @@ def load_yaml(package_name, file_path):
     except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
         return None
 
-def generate_servo_test_description(*args,
-                                    gtest_name: SomeSubstitutionsType,
-                                    start_position_path: SomeSubstitutionsType = ''):
+
+def generate_servo_test_description(
+    *args,
+    gtest_name: SomeSubstitutionsType,
+    start_position_path: SomeSubstitutionsType = ""
+):
 
     # Get parameters using the demo config file
     servo_yaml = load_yaml("moveit_servo", "config/panda_simulated_config.yaml")
@@ -44,17 +47,27 @@ def generate_servo_test_description(*args,
 
     # Get URDF and SRDF
     if start_position_path:
-        initial_positions_file = os.path.join(os.path.dirname(__file__), start_position_path)
-        robot_description_config = xacro.process_file(os.path.join(get_package_share_directory('moveit_resources_panda_moveit_config'),
-                                                                   'config',
-                                                                   'panda.urdf.xacro'),
-                                                      mappings={'initial_positions_file': initial_positions_file})
+        initial_positions_file = os.path.join(
+            os.path.dirname(__file__), start_position_path
+        )
+        robot_description_config = xacro.process_file(
+            os.path.join(
+                get_package_share_directory("moveit_resources_panda_moveit_config"),
+                "config",
+                "panda.urdf.xacro",
+            ),
+            mappings={"initial_positions_file": initial_positions_file},
+        )
     else:
-        robot_description_config = xacro.process_file(os.path.join(get_package_share_directory('moveit_resources_panda_moveit_config'),
-                                                                   'config',
-                                                                   'panda.urdf.xacro'))
+        robot_description_config = xacro.process_file(
+            os.path.join(
+                get_package_share_directory("moveit_resources_panda_moveit_config"),
+                "config",
+                "panda.urdf.xacro",
+            )
+        )
 
-    robot_description = {'robot_description' : robot_description_config.toxml()}
+    robot_description = {"robot_description": robot_description_config.toxml()}
 
     robot_description_semantic_config = load_file(
         "moveit_resources_panda_moveit_config", "config/panda.srdf"
@@ -64,27 +77,45 @@ def generate_servo_test_description(*args,
     }
 
     # ros2_control using FakeSystem as hardware
-    ros2_controllers_path = os.path.join(get_package_share_directory("moveit_resources_panda_moveit_config"), "config", "panda_ros_controllers.yaml")
+    ros2_controllers_path = os.path.join(
+        get_package_share_directory("moveit_resources_panda_moveit_config"),
+        "config",
+        "panda_ros_controllers.yaml",
+    )
     ros2_control_node = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
+        package="controller_manager",
+        executable="ros2_control_node",
         parameters=[robot_description, ros2_controllers_path],
         output={
-            'stdout': 'screen',
-            'stderr': 'screen',
+            "stdout": "screen",
+            "stderr": "screen",
         },
     )
 
     # load joint_state_controller
-    load_joint_state_controller = ExecuteProcess(cmd=['ros2 control load_start_controller joint_state_controller'], shell=True, output='screen')
+    load_joint_state_controller = ExecuteProcess(
+        cmd=["ros2 control load_start_controller joint_state_controller"],
+        shell=True,
+        output="screen",
+    )
     load_controllers = [load_joint_state_controller]
     # load panda_arm_controller
-    load_controllers += [ExecuteProcess(cmd=['ros2 control load_configure_controller panda_arm_controller'],
-                                        shell=True,
-                                        output='screen',
-                                        on_exit=[ExecuteProcess(cmd=['ros2 control switch_controllers --start-controllers panda_arm_controller'],
-                                                                shell=True,
-                                                                output='screen')])]
+    load_controllers += [
+        ExecuteProcess(
+            cmd=["ros2 control load_configure_controller panda_arm_controller"],
+            shell=True,
+            output="screen",
+            on_exit=[
+                ExecuteProcess(
+                    cmd=[
+                        "ros2 control switch_controllers --start-controllers panda_arm_controller"
+                    ],
+                    shell=True,
+                    output="screen",
+                )
+            ],
+        )
+    ]
 
     # Component nodes for tf and Servo
     test_container = ComposableNodeContainer(
@@ -130,12 +161,21 @@ def generate_servo_test_description(*args,
         output="screen",
     )
 
-    return launch.LaunchDescription([
-        launch.actions.DeclareLaunchArgument(name='test_binary_dir',
-                                             description='Binary directory of package '
-                                                         'containing test executables'),
-        ros2_control_node,
-        test_container,
-        servo_gtest,
-        launch_testing.actions.ReadyToTest()
-    ] + load_controllers), {'test_container': test_container, 'servo_gtest': servo_gtest, 'ros2_control_node': ros2_control_node}
+    return launch.LaunchDescription(
+        [
+            launch.actions.DeclareLaunchArgument(
+                name="test_binary_dir",
+                description="Binary directory of package "
+                "containing test executables",
+            ),
+            ros2_control_node,
+            test_container,
+            servo_gtest,
+            launch_testing.actions.ReadyToTest(),
+        ]
+        + load_controllers
+    ), {
+        "test_container": test_container,
+        "servo_gtest": servo_gtest,
+        "ros2_control_node": ros2_control_node,
+    }

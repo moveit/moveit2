@@ -37,10 +37,14 @@ def generate_launch_description():
     servo_params = {"moveit_servo": servo_yaml}
 
     # Get URDF and SRDF
-    robot_description_config = xacro.process_file(os.path.join(get_package_share_directory('moveit_resources_panda_moveit_config'),
-                                                               'config',
-                                                               'panda.urdf.xacro'))
-    robot_description = {'robot_description' : robot_description_config.toxml()}
+    robot_description_config = xacro.process_file(
+        os.path.join(
+            get_package_share_directory("moveit_resources_panda_moveit_config"),
+            "config",
+            "panda.urdf.xacro",
+        )
+    )
+    robot_description = {"robot_description": robot_description_config.toxml()}
 
     robot_description_semantic_config = load_file(
         "moveit_resources_panda_moveit_config", "config/panda.srdf"
@@ -64,25 +68,46 @@ def generate_launch_description():
 
     # ros2_control using FakeSystem as hardware
     ros2_control_node = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
-        parameters=[robot_description,  os.path.join(get_package_share_directory("moveit_resources_panda_moveit_config"), "config", "panda_ros_controllers.yaml")],
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[
+            robot_description,
+            os.path.join(
+                get_package_share_directory("moveit_resources_panda_moveit_config"),
+                "config",
+                "panda_ros_controllers.yaml",
+            ),
+        ],
         output={
-            'stdout': 'screen',
-            'stderr': 'screen',
+            "stdout": "screen",
+            "stderr": "screen",
         },
     )
 
     # load joint_state_controller
-    load_joint_state_controller = ExecuteProcess(cmd=['ros2 control load_start_controller joint_state_controller'], shell=True, output='screen')
+    load_joint_state_controller = ExecuteProcess(
+        cmd=["ros2 control load_start_controller joint_state_controller"],
+        shell=True,
+        output="screen",
+    )
     load_controllers = [load_joint_state_controller]
     # load panda_arm_controller
-    load_controllers += [ExecuteProcess(cmd=['ros2 control load_configure_controller panda_arm_controller'],
-                                        shell=True,
-                                        output='screen',
-                                        on_exit=[ExecuteProcess(cmd=['ros2 control switch_controllers --start-controllers panda_arm_controller'],
-                                                                shell=True,
-                                                                output='screen')])]
+    load_controllers += [
+        ExecuteProcess(
+            cmd=["ros2 control load_configure_controller panda_arm_controller"],
+            shell=True,
+            output="screen",
+            on_exit=[
+                ExecuteProcess(
+                    cmd=[
+                        "ros2 control switch_controllers --start-controllers panda_arm_controller"
+                    ],
+                    shell=True,
+                    output="screen",
+                )
+            ],
+        )
+    ]
 
     # Launch as much as possible in components
     container = ComposableNodeContainer(
@@ -118,4 +143,6 @@ def generate_launch_description():
         output="screen",
     )
 
-    return LaunchDescription([ rviz_node, ros2_control_node, container ] + load_controllers)
+    return LaunchDescription(
+        [rviz_node, ros2_control_node, container] + load_controllers
+    )

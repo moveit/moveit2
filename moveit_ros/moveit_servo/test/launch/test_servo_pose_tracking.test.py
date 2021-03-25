@@ -42,14 +42,17 @@ def load_yaml(package_name, file_path):
         return None
 
 
-def generate_servo_test_description(*args,
-                                    gtest_name: SomeSubstitutionsType):
+def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
 
     # Get URDF and SRDF
-    robot_description_config = xacro.process_file(os.path.join(get_package_share_directory('moveit_resources_panda_moveit_config'),
-                                                               'config',
-                                                               'panda.urdf.xacro'))
-    robot_description = {'robot_description' : robot_description_config.toxml()}
+    robot_description_config = xacro.process_file(
+        os.path.join(
+            get_package_share_directory("moveit_resources_panda_moveit_config"),
+            "config",
+            "panda.urdf.xacro",
+        )
+    )
+    robot_description = {"robot_description": robot_description_config.toxml()}
 
     robot_description_semantic_config = load_file(
         "moveit_resources_panda_moveit_config", "config/panda.srdf"
@@ -73,27 +76,45 @@ def generate_servo_test_description(*args,
     )
 
     # ros2_control using FakeSystem as hardware
-    ros2_controllers_path = os.path.join(get_package_share_directory("moveit_resources_panda_moveit_config"), "config", "panda_ros_controllers.yaml")
+    ros2_controllers_path = os.path.join(
+        get_package_share_directory("moveit_resources_panda_moveit_config"),
+        "config",
+        "panda_ros_controllers.yaml",
+    )
     ros2_control_node = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
+        package="controller_manager",
+        executable="ros2_control_node",
         parameters=[robot_description, ros2_controllers_path],
         output={
-            'stdout': 'screen',
-            'stderr': 'screen',
+            "stdout": "screen",
+            "stderr": "screen",
         },
     )
 
     # load joint_state_controller
-    load_joint_state_controller = ExecuteProcess(cmd=['ros2 control load_start_controller joint_state_controller'], shell=True, output='screen')
+    load_joint_state_controller = ExecuteProcess(
+        cmd=["ros2 control load_start_controller joint_state_controller"],
+        shell=True,
+        output="screen",
+    )
     load_controllers = [load_joint_state_controller]
     # load panda_arm_controller
-    load_controllers += [ExecuteProcess(cmd=['ros2 control load_configure_controller panda_arm_controller'],
-                                        shell=True,
-                                        output='screen',
-                                        on_exit=[ExecuteProcess(cmd=['ros2 control switch_controllers --start-controllers panda_arm_controller'],
-                                                                shell=True,
-                                                                output='screen')])]
+    load_controllers += [
+        ExecuteProcess(
+            cmd=["ros2 control load_configure_controller panda_arm_controller"],
+            shell=True,
+            output="screen",
+            on_exit=[
+                ExecuteProcess(
+                    cmd=[
+                        "ros2 control switch_controllers --start-controllers panda_arm_controller"
+                    ],
+                    shell=True,
+                    output="screen",
+                )
+            ],
+        )
+    ]
 
     # Component nodes for tf and Servo
     test_container = ComposableNodeContainer(
@@ -119,33 +140,53 @@ def generate_servo_test_description(*args,
     )
 
     pose_tracking_gtest = launch_ros.actions.Node(
-                executable=PathJoinSubstitution([LaunchConfiguration('test_binary_dir'), gtest_name]),
-                parameters=[robot_description, robot_description_semantic, pose_tracking_params, servo_params, kinematics_yaml],
-                output='screen',
-        )
+        executable=PathJoinSubstitution(
+            [LaunchConfiguration("test_binary_dir"), gtest_name]
+        ),
+        parameters=[
+            robot_description,
+            robot_description_semantic,
+            pose_tracking_params,
+            servo_params,
+            kinematics_yaml,
+        ],
+        output="screen",
+    )
 
-    return launch.LaunchDescription([
-        launch.actions.DeclareLaunchArgument(name='test_binary_dir',
-                                             description='Binary directory of package '
-                                                         'containing test executables'),
-        ros2_control_node,
-        test_container,
-        pose_tracking_gtest,
-        launch_testing.actions.ReadyToTest()
-    ] + load_controllers), {'test_container': test_container ,'servo_gtest': pose_tracking_gtest, 'ros2_control_node': ros2_control_node }
+    return launch.LaunchDescription(
+        [
+            launch.actions.DeclareLaunchArgument(
+                name="test_binary_dir",
+                description="Binary directory of package "
+                "containing test executables",
+            ),
+            ros2_control_node,
+            test_container,
+            pose_tracking_gtest,
+            launch_testing.actions.ReadyToTest(),
+        ]
+        + load_controllers
+    ), {
+        "test_container": test_container,
+        "servo_gtest": pose_tracking_gtest,
+        "ros2_control_node": ros2_control_node,
+    }
+
 
 def generate_test_description():
-    return generate_servo_test_description(gtest_name='test_servo_pose_tracking')
+    return generate_servo_test_description(gtest_name="test_servo_pose_tracking")
 
 
 class TestGTestProcessActive(unittest.TestCase):
-
-    def test_gtest_run_complete(self, proc_info, test_container, servo_gtest, ros2_control_node):
+    def test_gtest_run_complete(
+        self, proc_info, test_container, servo_gtest, ros2_control_node
+    ):
         proc_info.assertWaitForShutdown(servo_gtest, timeout=4000.0)
 
 
 @launch_testing.post_shutdown_test()
 class TestGTestProcessPostShutdown(unittest.TestCase):
-
-    def test_gtest_pass(self, proc_info, test_container, servo_gtest, ros2_control_node):
+    def test_gtest_pass(
+        self, proc_info, test_container, servo_gtest, ros2_control_node
+    ):
         launch_testing.asserts.assertExitCodes(proc_info, process=servo_gtest)
