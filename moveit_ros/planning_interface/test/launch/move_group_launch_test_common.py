@@ -79,6 +79,7 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
     ompl_planning_yaml = load_yaml(
         "moveit_resources_panda_moveit_config", "config/ompl_planning.yaml"
     )
+    ompl_planning_yaml["panda_arm"]["enforce_constrained_state_space"] = True
     ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
 
     # Trajectory Execution Functionality
@@ -93,8 +94,8 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
 
     trajectory_execution = {
         "moveit_manage_controllers": True,
-        "trajectory_execution.allowed_execution_duration_scaling": 1.2,
-        "trajectory_execution.allowed_goal_duration_margin": 0.5,
+        "trajectory_execution.allowed_execution_duration_scaling": 1.5,
+        "trajectory_execution.allowed_goal_duration_margin": 1.0,
         "trajectory_execution.allowed_start_tolerance": 0.01,
     }
 
