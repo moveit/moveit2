@@ -37,6 +37,7 @@
     <moveit_hybrid_planning plugin="${prefix}/next_waypoint_sampler_plugin.xml"/>
     <moveit_hybrid_planning plugin="${prefix}/replan_invalidated_trajectory_plugin.xml"/>
     <moveit_hybrid_planning plugin="${prefix}/single_plan_execution_plugin.xml"/>
+    <moveit_hybrid_planning plugin="${prefix}/forward_trajectory_plugin.xml"/>
   </export>
 
 </package>
