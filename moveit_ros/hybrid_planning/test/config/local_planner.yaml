@@ -4,4 +4,5 @@ trajectory_operator_plugin_name: "moveit_hybrid_planning/NextWaypointSampler"
 local_constraint_solver_plugin_name: "moveit_hybrid_planning/DecelerateBeforeCollision"
 local_planning_frequency: 100.0
 global_solution_topic: "global_trajectory"
-local_solution_topic: "panda_arm_controller/joint_trajectory"
+local_solution_topic: "/panda_joint_group_position_controller/commands" # or panda_arm_controller/joint_trajectory
+local_solution_topic_type: "std_msgs/Float64MultiArray" # or trajectory_msgs/JointTrajectory

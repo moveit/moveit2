@@ -1,0 +1,7 @@
+<library path="forward_trajectory_plugin">
+  <class name="moveit_hybrid_planning/ForwardTrajectory" type="moveit_hybrid_planning::ForwardTrajectory" base_class_type="moveit_hybrid_planning::LocalConstraintSolverInterface">
+    <description>
+    Simple trajectory operator plugin that appends new global trajectories to the local planner's reference trajectory and extracts the next trajectory point based on the current robot state and an index.
+    </description>
+  </class>
+</library>
