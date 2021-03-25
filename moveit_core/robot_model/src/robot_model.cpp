@@ -1043,6 +1043,36 @@ JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const
 
         ((PlanarJointModel*)new_joint_model)->setMotionModel(motion_model);
       }
+      else if (property.property_name_ == "min_translational_distance")
+      {
+        if (new_joint_model->getType() != JointModel::JointType::PLANAR)
+        {
+          RCLCPP_ERROR(LOGGER, "Cannot apply property %s to joint type: %s", property.property_name_.c_str(),
+                       new_joint_model->getTypeName().c_str());
+          continue;
+        }
+        double min_translational_distance;
+        try
+        {
+          std::string::size_type sz;
+          min_translational_distance = std::stod(property.value_, &sz);
+          if (sz != property.value_.size())
+          {
+            RCLCPP_WARN_STREAM(LOGGER, "Extra characters after property " << property.property_name_ << " for joint "
+                                                                          << property.joint_name_ << " as double: '"
+                                                                          << property.value_.substr(sz) << "'");
+          }
+        }
+        catch (const std::invalid_argument& e)
+        {
+          RCLCPP_ERROR_STREAM(LOGGER, "Unable to parse property " << property.property_name_ << " for joint "
+                                                                  << property.joint_name_ << " as double: '"
+                                                                  << property.value_ << "'");
+          continue;
+        }
+
+        ((PlanarJointModel*)new_joint_model)->setMinTranslationalDistance(min_translational_distance);
+      }
       else
       {
         RCLCPP_ERROR(LOGGER, "Unknown joint property: %s", property.property_name_.c_str());

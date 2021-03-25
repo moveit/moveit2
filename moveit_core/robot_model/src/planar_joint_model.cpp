@@ -47,7 +47,7 @@ namespace moveit
 namespace core
 {
 PlanarJointModel::PlanarJointModel(const std::string& name)
-  : JointModel(name), angular_distance_weight_(1.0), motion_model_(HOLONOMIC)
+  : JointModel(name), angular_distance_weight_(1.0), motion_model_(HOLONOMIC), min_translational_distance_(1e-5)
 {
   type_ = PLANAR;
 
@@ -141,8 +141,8 @@ void PlanarJointModel::getVariableRandomPositionsNearBy(random_numbers::RandomNu
   normalizeRotation(values);
 }
 
-void computeTurnDriveTurnGeometry(const double* from, const double* to, double& dx, double& dy, double& initial_turn,
-                                  double& drive_angle, double& final_turn)
+void computeTurnDriveTurnGeometry(const double* from, const double* to, const double min_translational_distance,
+                                  double& dx, double& dy, double& initial_turn, double& drive_angle, double& final_turn)
 {
   dx = to[0] - from[0];
   dy = to[1] - from[1];
@@ -154,9 +154,11 @@ void computeTurnDriveTurnGeometry(const double* from, const double* to, double& 
   // Example: from=[0.0, 0.0, 0.0] - to=[1e-31, 1e-31, -130°]
   // here the robot will: rotate 45° -> move to the origin of `to` state -> rotate -175°, rather than rotating directly
   // to -130°
-  // to fix this we added a magic number 0.01 and make the movement pure rotation if the translational distance is less than this number
-  const double angle_straight_diff =
-      std::hypot(dx, dy) > 0.01 ? angles::shortest_angular_distance(from[2], std::atan2(dy, dx)) : 0.0;
+  // to fix this we added a joint property (default value is 1e-5) and make the movement pure rotation if the
+  // translational distance is less than this number
+  const double angle_straight_diff = std::hypot(dx, dy) > min_translational_distance ?
+                                         angles::shortest_angular_distance(from[2], std::atan2(dy, dx)) :
+                                         0.0;
   const double angle_backward_diff =
       angles::normalize_angle(angle_straight_diff - boost::math::constants::pi<double>());
   const double move_straight_cost =
@@ -204,7 +206,7 @@ void PlanarJointModel::interpolate(const double* from, const double* to, const d
   else if (motion_model_ == DIFF_DRIVE)
   {
     double dx, dy, initial_turn, drive_angle, final_turn;
-    computeTurnDriveTurnGeometry(from, to, dx, dy, initial_turn, drive_angle, final_turn);
+    computeTurnDriveTurnGeometry(from, to, min_translational_distance_, dx, dy, initial_turn, drive_angle, final_turn);
 
     double initial_d = fabs(initial_turn) * angular_distance_weight_;
     double drive_d = hypot(dx, dy);
@@ -255,7 +257,8 @@ double PlanarJointModel::distance(const double* values1, const double* values2) 
   else if (motion_model_ == DIFF_DRIVE)
   {
     double dx, dy, initial_turn, drive_angle, final_turn;
-    computeTurnDriveTurnGeometry(values1, values2, dx, dy, initial_turn, drive_angle, final_turn);
+    computeTurnDriveTurnGeometry(values1, values2, min_translational_distance_, dx, dy, initial_turn, drive_angle,
+                                 final_turn);
     return hypot(dx, dy) + angular_distance_weight_ * (fabs(initial_turn) + fabs(final_turn));
   }
 
