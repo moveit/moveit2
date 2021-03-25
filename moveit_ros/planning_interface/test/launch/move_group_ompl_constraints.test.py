@@ -13,6 +13,8 @@ def generate_test_description():
         gtest_name="move_group_ompl_constraints_test"
     )
 
+
+class TestGTestProcessActive(unittest.TestCase):
     def test_gtest_run_complete(
         self,
         proc_info,
