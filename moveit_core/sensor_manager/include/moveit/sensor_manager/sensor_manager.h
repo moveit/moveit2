@@ -83,6 +83,9 @@ public:
   {
   }
 
+  /** @brief Initialization function for the sensor plugin */
+  virtual bool initialize(const rclcpp::Node::SharedPtr& node) = 0;
+
   /** \brief Get the list of known sensors */
   virtual void getSensorsList(std::vector<std::string>& names) const = 0;
 
