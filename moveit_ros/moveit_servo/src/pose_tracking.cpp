@@ -305,13 +305,13 @@ void PoseTracking::stopMotion()
   stop_requested_ = true;
 
   // Send a 0 command to Servo to halt arm motion
-  auto msg = moveit::util::make_shared_from_pool<geometry_msgs::TwistStamped>();
+  auto msg = moveit::util::make_shared_from_pool<geometry_msgs::msg::TwistStamped>();
   {
     std::lock_guard<std::mutex> lock(target_pose_mtx_);
     msg->header.frame_id = target_pose_.header.frame_id;
   }
-  msg->header.stamp = ros::Time::now();
-  twist_stamped_pub_.publish(msg);
+  msg->header.stamp = node_->now();
+  twist_stamped_pub_->publish(*msg);
 }
 
 void PoseTracking::doPostMotionReset()
