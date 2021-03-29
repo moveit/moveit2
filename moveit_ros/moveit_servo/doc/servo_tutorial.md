@@ -69,7 +69,7 @@ The bare minimum requirements for running `moveit_servo` on your robot include:
 Because the kinematics are handled by the core parts of `moveit`, it is recommended that you have a valid `moveit_config` package for your robot and you can run the demo launch file included with it.
 
 #### A note on controllers
-A simulated controller, [fake_joint_driver](https://github.com/JafarAbdi/fake_joint/tree/foxy) is used in the `moveit_servo` examples, and should at least be able to get `moveit_servo` working with a simulated version of your robot. Please see [the example config file](../config/panda_controllers.yaml) and [launch file](../launch/servo_cpp_interface_demo.launch.py#L73-L78) for an example of how to set that up for your robot.
+A simulated controller, [fake_components](https://github.com/ros-controls/ros2_control/tree/master/hardware_interface/src/fake_components) is used in the `moveit_servo` examples, and should at least be able to get `moveit_servo` working with a simulated version of your robot. Please see [the example config file](panda.ros2_control.xacro) and [launch file](../launch/servo_cpp_interface_demo.launch.py#L73-L78) for an example of how to set that up for your robot.
 
 ### Installation
 Please see the [Running the Demos](running_the_demos.md) guide for installation instructions. Running at least the C++ Interface Demo will make sure `moveit_servo` is properly installed.

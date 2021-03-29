@@ -1,20 +1,8 @@
-fake_joint_driver_node:
-  ros__parameters:
-    start_position:
-      joints:
-        - panda_joint1
-        - panda_joint2
-        - panda_joint3
-        - panda_joint4
-        - panda_joint5
-        - panda_joint6
-        - panda_joint7
-      values:
-        - 0.0
-        - -0.785
-        - 0.0
-        - -2.9
-        - 0.0
-        - 1.1
-        - 0.785
-        
+initial_positions:
+  panda_joint1: 0.0
+  panda_joint2: -0.785
+  panda_joint3: 0.0
+  panda_joint4: -2.9
+  panda_joint5: 0.0
+  panda_joint6: 1.1
+  panda_joint7: 0.785

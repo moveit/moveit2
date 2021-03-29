@@ -8,11 +8,11 @@ run_moveit_cpp:
       publish_planning_scene_topic: "/moveit_cpp/publish_planning_scene"
       monitored_planning_scene_topic: "/moveit_cpp/monitored_planning_scene"
       wait_for_initial_state_timeout: 10.0
-    
+
     planning_pipelines:
       #namespace: "moveit_cpp"  # optional, default is ~
       pipeline_names: ["ompl"]
-    
+
     plan_request_params:
       planning_attempts: 10
       planning_pipeline: ompl

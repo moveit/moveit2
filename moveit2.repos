@@ -1,8 +1,4 @@
 repositories:
-  moveit2:
-    type: git
-    url: https://github.com/ros-planning/moveit2
-    version: main
   moveit_msgs:
     type: git
     url: https://github.com/ros-planning/moveit_msgs
@@ -19,28 +15,18 @@ repositories:
     type: git
     url: https://github.com/ros-planning/srdfdom
     version: ros2
-
-# TODO(#283): Switch to master after fixing breaking changes in ros2_control
   ros2_control:
     type: git
     url: https://github.com/ros-controls/ros2_control
-    version: 2c3aad1cb8ad4d23925bceeb5c26e22d6cf859ef
+    version: master
   ros2_controllers:
     type: git
     url: https://github.com/ros-controls/ros2_controllers
-    version: 8587e079490acdd0fabeb2742a3bec3bf551bbc5
-
-# TODO(JafarAbdi): Switch to upstream once PR https://github.com/tork-a/fake_joint/pull/7 is merged
-  fake_joint:
-    type: git
-    url: https://github.com/JafarAbdi/fake_joint
-    version: foxy
-
+    version: master
   warehouse_ros:
     type: git
     url: https://github.com/ros-planning/warehouse_ros
     version: ros2
-
   warehouse_ros_mongo:
     type: git
     url: https://github.com/ros-planning/warehouse_ros_mongo

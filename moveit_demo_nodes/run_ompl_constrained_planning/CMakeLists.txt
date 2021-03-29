@@ -26,16 +26,12 @@ install(TARGETS run_ompl_constrained_planning
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
   INCLUDES DESTINATION include
 )
 ament_export_targets(export_${PROJECT_NAME})
 
 install(DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}
-)
-
-install(DIRECTORY config
   DESTINATION share/${PROJECT_NAME}
 )
 
