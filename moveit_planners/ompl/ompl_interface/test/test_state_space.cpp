@@ -191,7 +191,7 @@ TEST(TestDiffDrive, TestStateSpace)
   moveit::core::RobotModelBuilder builder("mobile_base", "base_link");
   builder.addVirtualJoint("odom_combined", "base_link", "planar", "base_joint");
   builder.addJointProperty("base_joint", "motion_model", "diff_drive");
-  builder.addGroup({}, {"base_joint"}, "base");
+  builder.addGroup({}, { "base_joint" }, "base");
   ASSERT_TRUE(builder.isValid());
 
   auto robot_model = builder.build();
