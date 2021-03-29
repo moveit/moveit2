@@ -119,7 +119,7 @@ private:
  * @param[in]  from                       A vector representing the initial position [x0, y0, theta0]
  * @param[in]  to                         A vector representing the target position  [x1, y1, theta1]
  * @param[in]  min_translational_distance If the translational distance between \p from and \p to is less than this
- *                                        value the motion will be pure rotation
+ *                                        value the motion will be pure rotation (meters)
  * @param[out] dx                         x1 - x0 (meters)
  * @param[out] dy                         y1 - y0 (meters)
  * @param[out] initial_turn               The initial turn in radians to face the target

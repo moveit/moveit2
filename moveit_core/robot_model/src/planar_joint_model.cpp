@@ -146,7 +146,7 @@ void computeTurnDriveTurnGeometry(const double* from, const double* to, const do
 {
   dx = to[0] - from[0];
   dy = to[1] - from[1];
-  // If the translational distance between from & to states is very small, it will cause an unnecessary rotations since
+  // If the translational distance between from & to states is very small, it will cause an unnecessary rotation since
   // the robot will try to do the following rather than rotating directly to the orientation of `to` state
   // 1- Align itself with the line connecting the origin of both states
   // 2- Move to the origin of `to` state
@@ -218,27 +218,27 @@ void PlanarJointModel::interpolate(const double* from, const double* to, const d
     double drive_frac = drive_d / total_d;
     double final_frac = final_d / total_d;
 
-    double pct;
+    double percent;
     if (t <= initial_frac)
     {
-      pct = t / initial_frac;
+      percent = t / initial_frac;
       state[0] = from[0];
       state[1] = from[1];
-      state[2] = from[2] + initial_turn * pct;
+      state[2] = from[2] + initial_turn * percent;
     }
     else if (t <= initial_frac + drive_frac)
     {
-      pct = (t - initial_frac) / drive_frac;
-      state[0] = from[0] + dx * pct;
-      state[1] = from[1] + dy * pct;
+      percent = (t - initial_frac) / drive_frac;
+      state[0] = from[0] + dx * percent;
+      state[1] = from[1] + dy * percent;
       state[2] = drive_angle;
     }
     else
     {
-      pct = (t - initial_frac - drive_frac) / final_frac;
+      percent = (t - initial_frac - drive_frac) / final_frac;
       state[0] = to[0];
       state[1] = to[1];
-      state[2] = drive_angle + final_turn * pct;
+      state[2] = drive_angle + final_turn * percent;
     }
   }
 }
