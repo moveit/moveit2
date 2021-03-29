@@ -975,6 +975,109 @@ JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const
         break;
       }
     }
+
+    for (const srdf::Model::JointProperty& property : srdf_model.getJointProperties(new_joint_model->getName()))
+    {
+      if (property.property_name_ == "angular_distance_weight")
+      {
+        double angular_distance_weight;
+        try
+        {
+          std::string::size_type sz;
+          angular_distance_weight = std::stod(property.value_, &sz);
+          if (sz != property.value_.size())
+          {
+            RCLCPP_WARN_STREAM(LOGGER, "Extra characters after property " << property.property_name_ << " for joint "
+                                                                          << property.joint_name_ << " as double: '"
+                                                                          << property.value_.substr(sz) << "'");
+          }
+        }
+        catch (const std::invalid_argument& e)
+        {
+          RCLCPP_ERROR_STREAM(LOGGER, "Unable to parse property " << property.property_name_ << " for joint "
+                                                                  << property.joint_name_ << " as double: '"
+                                                                  << property.value_ << "'");
+          continue;
+        }
+
+        if (new_joint_model->getType() == JointModel::JointType::PLANAR)
+        {
+          ((PlanarJointModel*)new_joint_model)->setAngularDistanceWeight(angular_distance_weight);
+        }
+        else if (new_joint_model->getType() == JointModel::JointType::FLOATING)
+        {
+          ((FloatingJointModel*)new_joint_model)->setAngularDistanceWeight(angular_distance_weight);
+        }
+        else
+        {
+          RCLCPP_ERROR_STREAM(LOGGER, "Cannot apply property " << property.property_name_
+                                                               << " to joint type: " << new_joint_model->getTypeName());
+        }
+      }
+      else if (property.property_name_ == "motion_model")
+      {
+        if (new_joint_model->getType() != JointModel::JointType::PLANAR)
+        {
+          RCLCPP_ERROR(LOGGER, "Cannot apply property %s to joint type: %s", property.property_name_.c_str(),
+                       new_joint_model->getTypeName().c_str());
+          continue;
+        }
+
+        PlanarJointModel::MotionModel motion_model;
+        if (property.value_ == "holonomic")
+        {
+          motion_model = PlanarJointModel::MotionModel::HOLONOMIC;
+        }
+        else if (property.value_ == "diff_drive")
+        {
+          motion_model = PlanarJointModel::MotionModel::DIFF_DRIVE;
+        }
+        else
+        {
+          RCLCPP_ERROR_STREAM(LOGGER, "Unknown value for property " << property.property_name_ << " ("
+                                                                    << property.joint_name_ << "): '" << property.value_
+                                                                    << "'");
+          RCLCPP_ERROR(LOGGER, "Valid values are 'holonomic' and 'diff_drive'");
+          continue;
+        }
+
+        ((PlanarJointModel*)new_joint_model)->setMotionModel(motion_model);
+      }
+      else if (property.property_name_ == "min_translational_distance")
+      {
+        if (new_joint_model->getType() != JointModel::JointType::PLANAR)
+        {
+          RCLCPP_ERROR(LOGGER, "Cannot apply property %s to joint type: %s", property.property_name_.c_str(),
+                       new_joint_model->getTypeName().c_str());
+          continue;
+        }
+        double min_translational_distance;
+        try
+        {
+          std::string::size_type sz;
+          min_translational_distance = std::stod(property.value_, &sz);
+          if (sz != property.value_.size())
+          {
+            RCLCPP_WARN_STREAM(LOGGER, "Extra characters after property " << property.property_name_ << " for joint "
+                                                                          << property.joint_name_ << " as double: '"
+                                                                          << property.value_.substr(sz) << "'");
+          }
+        }
+        catch (const std::invalid_argument& e)
+        {
+          RCLCPP_ERROR_STREAM(LOGGER, "Unable to parse property " << property.property_name_ << " for joint "
+                                                                  << property.joint_name_ << " as double: '"
+                                                                  << property.value_ << "'");
+          continue;
+        }
+
+        ((PlanarJointModel*)new_joint_model)->setMinTranslationalDistance(min_translational_distance);
+      }
+      else
+      {
+        RCLCPP_ERROR(LOGGER, "Unknown joint property: %s", property.property_name_.c_str());
+      }
+    }
   }
 
   return new_joint_model;
