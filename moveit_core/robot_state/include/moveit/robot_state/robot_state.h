@@ -1429,7 +1429,7 @@ public:
   void interpolate(const RobotState& to, double t, RobotState& state) const;
 
   /**
-  * Interpolate towards "to" state, but only for the joints in the specified group. Mimic joints are correctly updated
+   * Interpolate towards "to" state, but only for the joints in the specified group. Mimic joints are correctly updated
    * and flags are set so that FK is recomputed when needed.
    *
    * @param to interpolate to this state
@@ -1447,7 +1447,7 @@ public:
    * @param t a fraction in the range [0 1]. If 1, the result matches "to" state exactly.
    * @param state holds the result
    * @param joint interpolate only for this joint
-  */
+   */
   void interpolate(const RobotState& to, double t, RobotState& state, const JointModel* joint) const
   {
     const int idx = joint->getFirstVariableIndex();
