@@ -28,8 +28,8 @@ RUN \
     #
     # Download MoveIt source, so that we can fetch all necessary dependencies
     mkdir src && \
-    wget -q https://raw.githubusercontent.com/ros-planning/moveit2/main/moveit2.repos -P src && \
-    vcs import src < src/moveit2.repos && \
+    git clone https://github.com/ros-planning/moveit2.git src/moveit2 -b main && \
+    vcs import src < moveit2/moveit2.repos && \
     #
     # Download all dependencies of MoveIt
     rosdep update && \
@@ -40,6 +40,3 @@ RUN \
     #
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/*
-
-# Continous Integration Setting
-ENV IN_DOCKER 1
