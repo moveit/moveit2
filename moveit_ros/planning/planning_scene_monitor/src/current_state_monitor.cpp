@@ -159,6 +159,7 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
     }
     if (tf_buffer_ && !robot_model_->getMultiDOFJointModels().empty())
     {
+      tf_buffer_->setUsingDedicatedThread(true);
       middleware_handle_->createDynamicTfSubscription(
           std::bind(&CurrentStateMonitor::transfromCallback, this, std::placeholders::_1, false));
       middleware_handle_->createStaticTfSubscription(
