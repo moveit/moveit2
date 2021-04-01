@@ -9,7 +9,7 @@ from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import ComposableNodeContainer, Node
 from launch_ros.descriptions import ComposableNode
 from ament_index_python.packages import get_package_share_directory
-from launch.actions import ExecuteProcess
+from launch.actions import ExecuteProcess, TimerAction
 import xacro
 
 
@@ -92,30 +92,16 @@ def generate_servo_test_description(
         },
     )
 
-    # load joint_state_controller
-    load_joint_state_controller = ExecuteProcess(
-        cmd=["ros2 control load_start_controller joint_state_controller"],
-        shell=True,
-        output="screen",
-    )
-    load_controllers = [load_joint_state_controller]
-    # load panda_arm_controller
-    load_controllers += [
-        ExecuteProcess(
-            cmd=["ros2 control load_configure_controller panda_arm_controller"],
-            shell=True,
-            output="screen",
-            on_exit=[
-                ExecuteProcess(
-                    cmd=[
-                        "ros2 control switch_controllers --start-controllers panda_arm_controller"
-                    ],
-                    shell=True,
-                    output="screen",
-                )
-            ],
-        )
-    ]
+    # Load controllers
+    load_controllers = []
+    for controller in ["panda_arm_controller", "joint_state_controller"]:
+        load_controllers += [
+            ExecuteProcess(
+                cmd=["ros2 run controller_manager spawner.py {}".format(controller)],
+                shell=True,
+                output="screen",
+            )
+        ]
 
     # Component nodes for tf and Servo
     test_container = ComposableNodeContainer(
@@ -170,7 +156,7 @@ def generate_servo_test_description(
             ),
             ros2_control_node,
             test_container,
-            servo_gtest,
+            TimerAction(period=2.0, actions=[servo_gtest]),
             launch_testing.actions.ReadyToTest(),
         ]
         + load_controllers

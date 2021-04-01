@@ -12,7 +12,7 @@ import launch_testing.asserts
 from launch import LaunchDescription
 from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch.actions import ExecuteProcess
+from launch.actions import ExecuteProcess, TimerAction
 
 from ament_index_python.packages import get_package_share_directory
 
@@ -91,30 +91,16 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
         },
     )
 
-    # load joint_state_controller
-    load_joint_state_controller = ExecuteProcess(
-        cmd=["ros2 control load_start_controller joint_state_controller"],
-        shell=True,
-        output="screen",
-    )
-    load_controllers = [load_joint_state_controller]
-    # load panda_arm_controller
-    load_controllers += [
-        ExecuteProcess(
-            cmd=["ros2 control load_configure_controller panda_arm_controller"],
-            shell=True,
-            output="screen",
-            on_exit=[
-                ExecuteProcess(
-                    cmd=[
-                        "ros2 control switch_controllers --start-controllers panda_arm_controller"
-                    ],
-                    shell=True,
-                    output="screen",
-                )
-            ],
-        )
-    ]
+    # Load controllers
+    load_controllers = []
+    for controller in ["panda_arm_controller", "joint_state_controller"]:
+        load_controllers += [
+            ExecuteProcess(
+                cmd=["ros2 run controller_manager spawner.py {}".format(controller)],
+                shell=True,
+                output="screen",
+            )
+        ]
 
     # Component nodes for tf and Servo
     test_container = ComposableNodeContainer(
@@ -162,7 +148,7 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
             ),
             ros2_control_node,
             test_container,
-            pose_tracking_gtest,
+            TimerAction(period=2.0, actions=[pose_tracking_gtest]),
             launch_testing.actions.ReadyToTest(),
         ]
         + load_controllers
