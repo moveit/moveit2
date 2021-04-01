@@ -12,7 +12,7 @@ import launch_testing.asserts
 from launch import LaunchDescription
 from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch.actions import ExecuteProcess
+from launch.actions import ExecuteProcess, TimerAction
 
 from ament_index_python.packages import get_package_share_directory
 
@@ -148,7 +148,7 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
             ),
             ros2_control_node,
             test_container,
-            pose_tracking_gtest,
+            TimerAction(period=2.0, actions=[pose_tracking_gtest]),
             launch_testing.actions.ReadyToTest(),
         ]
         + load_controllers
