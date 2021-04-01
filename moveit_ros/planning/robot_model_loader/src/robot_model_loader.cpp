@@ -131,55 +131,90 @@ void RobotModelLoader::configure(const Options& opt)
         std::string param_name;
         try
         {
-          param_name = prefix + "max_position";
-          double max_position;
-          if (node_->get_parameter(param_name, max_position))
+          bool has_position_limits = false;
+          bool has_vel_limits = false;
+          bool has_acc_limits = false;
+
+          // Need to check before setting to true
+          joint_limit[joint_id].has_position_limits = false;
+
+          // Check if parameter has been declared to avoid exception
+          param_name = prefix + "has_position_limits";
+          if (!node_->has_parameter(param_name))
           {
-            if (canSpecifyPosition(joint_model, joint_id))
+            has_position_limits = node_->declare_parameter(param_name, false);
+          }
+          node_->get_parameter(param_name, has_position_limits);
+
+          param_name = prefix + "has_velocity_limits";
+          if (!node_->has_parameter(param_name))
+          {
+            has_vel_limits = node_->declare_parameter(param_name, false);
+          }
+          node_->get_parameter(param_name, has_vel_limits);
+
+          param_name = prefix + "has_acceleration_limits";
+          if (!node_->has_parameter(param_name))
+          {
+            has_acc_limits = node_->declare_parameter(param_name, false);
+          }
+          node_->get_parameter(param_name, has_acc_limits);
+
+          // All types of joints can handle velocity and accletation limits
+          joint_limit[joint_id].has_velocity_limits = has_vel_limits;
+          joint_limit[joint_id].has_acceleration_limits = has_acc_limits;
+
+          if (has_position_limits && canSpecifyPosition(joint_model, joint_id))
+          {
+            double max_position = 0.0;
+            double min_position = 0.0;
+
+            param_name = prefix + "max_position";
+            if (!node_->has_parameter(param_name))
             {
-              joint_limit[joint_id].has_position_limits = true;
-              joint_limit[joint_id].max_position = max_position;
+              max_position = node_->declare_parameter(param_name, 0.0);
             }
+            node_->get_parameter(param_name, max_position);
+
+            param_name = prefix + "min_position";
+            if (!node_->has_parameter(param_name))
+            {
+              min_position = node_->declare_parameter(param_name, 0.0);
+            }
+            node_->get_parameter(param_name, min_position);
+
+            joint_limit[joint_id].has_position_limits = has_position_limits;
+            joint_limit[joint_id].max_position = max_position;
+            joint_limit[joint_id].min_position = min_position;
           }
 
-          param_name = prefix + "min_position";
-          double min_position;
-          if (node_->get_parameter(param_name, min_position))
+          if (has_vel_limits)
           {
-            if (canSpecifyPosition(joint_model, joint_id))
-            {
-              joint_limit[joint_id].has_position_limits = true;
-              joint_limit[joint_id].min_position = min_position;
-            }
-          }
+            param_name = prefix + "max_velocity";
+            double max_velocity = 0.0;
 
-          param_name = prefix + "max_velocity";
-          double max_velocity;
-          if (node_->get_parameter(param_name, max_velocity))
-          {
-            joint_limit[joint_id].has_velocity_limits = true;
+            if (!node_->has_parameter(param_name))
+            {
+              max_velocity = node_->declare_parameter(param_name, 0.0);
+            }
+
+            node_->get_parameter(param_name, max_velocity);
             joint_limit[joint_id].max_velocity = max_velocity;
           }
 
-          param_name = prefix + "has_velocity_limits";
-          bool has_vel_limits;
-          if (node_->get_parameter(param_name, has_vel_limits))
+          if (has_acc_limits)
           {
-            joint_limit[joint_id].has_velocity_limits = has_vel_limits;
-          }
+            param_name = prefix + "max_acceleration";
+            double max_acc = 0.0;
 
-          param_name = prefix + "max_acceleration";
-          double max_acc;
-          if (node_->get_parameter(param_name, max_acc))
-          {
-            joint_limit[joint_id].has_acceleration_limits = true;
+            if (!node_->has_parameter(param_name))
+            {
+              max_acc = node_->declare_parameter(param_name, 0.0);
+            }
+
+            node_->get_parameter(param_name, max_acc);
             joint_limit[joint_id].max_acceleration = max_acc;
           }
-
-          param_name = prefix + "has_acceleration_limits";
-          bool has_acc_limits;
-          if (node_->get_parameter(param_name, has_acc_limits))
-            joint_limit[joint_id].has_acceleration_limits = has_acc_limits;
         }
         catch (const rclcpp::ParameterTypeException& e)
         {
