@@ -160,7 +160,7 @@ void RobotModelLoader::configure(const Options& opt)
           }
           node_->get_parameter(param_name, has_acc_limits);
 
-          // All types of joints can handle velocity and accletation limits
+          // All types of joints can handle velocity and acceleration limits
           joint_limit[joint_id].has_velocity_limits = has_vel_limits;
           joint_limit[joint_id].has_acceleration_limits = has_acc_limits;
 
