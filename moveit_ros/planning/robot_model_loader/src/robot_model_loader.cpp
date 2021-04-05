@@ -139,7 +139,7 @@ void RobotModelLoader::configure(const Options& opt)
           bool has_position_limits = false;
           if (!node_->has_parameter(param_name))
           {
-            has_position_limits = node_->declare_parameter(param_name, false);
+            node_->declare_parameter(param_name, false);
           }
           node_->get_parameter(param_name, has_position_limits);
 
@@ -147,7 +147,7 @@ void RobotModelLoader::configure(const Options& opt)
           bool has_vel_limits = false;
           if (!node_->has_parameter(param_name))
           {
-            has_vel_limits = node_->declare_parameter(param_name, false);
+            node_->declare_parameter(param_name, false);
           }
           node_->get_parameter(param_name, has_vel_limits);
 
@@ -155,7 +155,7 @@ void RobotModelLoader::configure(const Options& opt)
           bool has_acc_limits = false;
           if (!node_->has_parameter(param_name))
           {
-            has_acc_limits = node_->declare_parameter(param_name, false);
+            node_->declare_parameter(param_name, false);
           }
           node_->get_parameter(param_name, has_acc_limits);
 
