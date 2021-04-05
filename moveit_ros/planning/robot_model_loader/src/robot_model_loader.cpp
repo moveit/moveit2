@@ -139,7 +139,7 @@ void RobotModelLoader::configure(const Options& opt)
           bool has_position_limits = false;
           if (!node_->has_parameter(param_name))
           {
-            node_->declare_parameter(param_name, false);
+            node_->declare_parameter(param_name);
           }
           node_->get_parameter(param_name, has_position_limits);
 
@@ -147,7 +147,7 @@ void RobotModelLoader::configure(const Options& opt)
           bool has_vel_limits = false;
           if (!node_->has_parameter(param_name))
           {
-            node_->declare_parameter(param_name, false);
+            node_->declare_parameter(param_name);
           }
           node_->get_parameter(param_name, has_vel_limits);
 
@@ -155,7 +155,7 @@ void RobotModelLoader::configure(const Options& opt)
           bool has_acc_limits = false;
           if (!node_->has_parameter(param_name))
           {
-            node_->declare_parameter(param_name, false);
+            node_->declare_parameter(param_name);
           }
           node_->get_parameter(param_name, has_acc_limits);
 
@@ -165,19 +165,24 @@ void RobotModelLoader::configure(const Options& opt)
 
           if (has_position_limits && canSpecifyPosition(joint_model, joint_id))
           {
-            param_name = prefix + "max_position";
-            if (!node_->has_parameter(param_name))
+            const auto max_pos_name = prefix + "max_position";
+            if (!node_->has_parameter(max_pos_name))
             {
-              node_->declare_parameter(param_name, 0.0);
+              node_->declare_parameter(max_pos_name);
             }
-            node_->get_parameter(param_name, joint_limit[joint_id].max_position);
 
-            param_name = prefix + "min_position";
-            if (!node_->has_parameter(param_name))
+            const auto min_pos_name = prefix + "min_position";
+            if (!node_->has_parameter(min_pos_name))
             {
-              node_->declare_parameter(param_name, 0.0);
+              node_->declare_parameter(min_pos_name);
             }
-            node_->get_parameter(param_name, joint_limit[joint_id].min_position);
+
+            if (!node_->get_parameter(max_pos_name, joint_limit[joint_id].max_position) ||
+                !node_->get_parameter(min_pos_name, joint_limit[joint_id].min_position))
+            {
+              RCLCPP_ERROR(LOGGER, "Specified a position limit for joint: %s but did not set a max or min position",
+                           joint_limit[joint_id].joint_name.c_str());
+            }
 
             joint_limit[joint_id].has_position_limits = has_position_limits;
           }
@@ -187,22 +192,29 @@ void RobotModelLoader::configure(const Options& opt)
             param_name = prefix + "max_velocity";
             if (!node_->has_parameter(param_name))
             {
-              node_->declare_parameter(param_name, 0.0);
+              node_->declare_parameter(param_name);
             }
 
-            node_->get_parameter(param_name, joint_limit[joint_id].max_velocity);
+            if (!node_->get_parameter(param_name, joint_limit[joint_id].max_velocity))
+            {
+              RCLCPP_ERROR(LOGGER, "Specified a velocity limit for joint: %s but did not set a max velocity",
+                           joint_limit[joint_id].joint_name.c_str());
+            }
           }
 
           if (has_acc_limits)
           {
             param_name = prefix + "max_acceleration";
-
             if (!node_->has_parameter(param_name))
             {
-              node_->declare_parameter(param_name, 0.0);
+              node_->declare_parameter(param_name);
             }
 
-            node_->get_parameter(param_name, joint_limit[joint_id].max_acceleration);
+            if (!node_->get_parameter(param_name, joint_limit[joint_id].max_acceleration))
+            {
+              RCLCPP_ERROR(LOGGER, "Specified an acceleration limit for joint: %s but did not set a max acceleration",
+                           joint_limit[joint_id].joint_name.c_str());
+            }
           }
         }
         catch (const rclcpp::ParameterTypeException& e)
