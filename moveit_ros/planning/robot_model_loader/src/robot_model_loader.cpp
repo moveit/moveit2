@@ -131,15 +131,12 @@ void RobotModelLoader::configure(const Options& opt)
         std::string param_name;
         try
         {
-          bool has_position_limits = false;
-          bool has_vel_limits = false;
-          bool has_acc_limits = false;
-
           // Need to check before setting to true
           joint_limit[joint_id].has_position_limits = false;
 
           // Check if parameter has been declared to avoid exception
           param_name = prefix + "has_position_limits";
+          bool has_position_limits = false;
           if (!node_->has_parameter(param_name))
           {
             has_position_limits = node_->declare_parameter(param_name, false);
@@ -147,6 +144,7 @@ void RobotModelLoader::configure(const Options& opt)
           node_->get_parameter(param_name, has_position_limits);
 
           param_name = prefix + "has_velocity_limits";
+          bool has_vel_limits = false;
           if (!node_->has_parameter(param_name))
           {
             has_vel_limits = node_->declare_parameter(param_name, false);
@@ -154,6 +152,7 @@ void RobotModelLoader::configure(const Options& opt)
           node_->get_parameter(param_name, has_vel_limits);
 
           param_name = prefix + "has_acceleration_limits";
+          bool has_acc_limits = false;
           if (!node_->has_parameter(param_name))
           {
             has_acc_limits = node_->declare_parameter(param_name, false);
