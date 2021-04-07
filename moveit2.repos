@@ -15,6 +15,10 @@ repositories:
     type: git
     url: https://github.com/ros-planning/srdfdom
     version: ros2
+  ros_reflexxes:
+    type: git
+    url: https://github.com/PickNikRobotics/ros_reflexxes
+    version: foxy
   ros2_control:
     type: git
     url: https://github.com/ros-controls/ros2_control
