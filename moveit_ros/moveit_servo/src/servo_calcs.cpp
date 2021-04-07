@@ -38,9 +38,10 @@
  */
 
 #include <cassert>
-#include <thread>
 #include <chrono>
+#include <math.h>
 #include <mutex>
+#include <thread>
 
 #include <std_msgs/msg/bool.h>
 
@@ -51,8 +52,10 @@ using namespace std::chrono_literals;  // for s, ms, etc.
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
 constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
-constexpr double SAFE_DEFAULT_VELOCITY_LIMIT = 2;  // rad/s, should be safe for most robots that don't have custom limits defined
-constexpr double SAFE_DEFAULT_ACCELERATION_LIMIT = 10;  // rad/s, should be safe for most robots that don't have custom limits defined
+constexpr double SAFE_DEFAULT_VELOCITY_LIMIT =
+    M_PI / 2.0;  // rad/s, should be safe for most robots that don't have custom limits defined
+constexpr double SAFE_DEFAULT_ACCELERATION_LIMIT =
+    2 * M_PI;  // rad/s^2, should be safe for most robots that don't have custom limits defined
 
 namespace moveit_servo
 {
@@ -182,10 +185,10 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   // Set velocity and acceleration limits
   std::vector<double> velocity_limits;
   std::vector<double> acceleration_limits;
-  for (auto joint : joint_model_group_->getActiveJointModels())
+  for (const auto& joint : joint_model_group_->getActiveJointModels())
   {
     // Some joints do not have bounds defined
-    const auto bound = joint->getVariableBounds(joint->getName());
+    const auto& bound = joint->getVariableBounds(joint->getName());
 
     if (bound.velocity_bounded_)
     {
