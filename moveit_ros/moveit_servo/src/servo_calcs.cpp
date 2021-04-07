@@ -173,12 +173,12 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
 
   // Reflexxes for command smoothing
   reflexxes_ = std::make_unique<ReflexxesAPI>(num_joints_, parameters_->publish_period, 0 /* additional threads */);
-  reflexxes_position_input_param_ = std::make_unique<RMLPositionInputParameters>(num_joints_);
-  reflexxes_position_output_param_ = std::make_shared<RMLPositionOutputParameters>(num_joints_);
+  reflexxes_velocity_input_param_ = std::make_unique<RMLVelocityInputParameters>(num_joints_);
+  reflexxes_velocity_output_param_ = std::make_shared<RMLVelocityOutputParameters>(num_joints_);
   // All joints are active
-  reflexxes_wrapper::setSelectionVectorAllTrue(reflexxes_position_input_param_.get(), num_joints_);
+  reflexxes_wrapper::setSelectionVectorAllTrue(reflexxes_velocity_input_param_.get(), num_joints_);
   // Initialize positions/vels/accels to zeros. Current positions will be updated later
-  reflexxes_wrapper::initializePositionInputStateToZeros(reflexxes_position_input_param_.get(), num_joints_);
+  reflexxes_wrapper::initializePositionInputStateToZeros(reflexxes_velocity_input_param_.get(), num_joints_);
   // Set velocity and acceleration limits
   std::vector<double> velocity_limits;
   std::vector<double> acceleration_limits;
@@ -209,7 +209,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
       acceleration_limits.push_back(SAFE_DEFAULT_ACCELERATION_LIMIT);
     }
   }
-  reflexxes_wrapper::setLimits(reflexxes_position_input_param_.get(), num_joints_, velocity_limits, acceleration_limits);
+  reflexxes_wrapper::setLimits(reflexxes_velocity_input_param_.get(), num_joints_, velocity_limits, acceleration_limits);
 }
 
 ServoCalcs::~ServoCalcs()
@@ -687,9 +687,9 @@ void ServoCalcs::resetReflexxesState(const sensor_msgs::msg::JointState& joint_s
   {
     current_positions[i] = joint_state.position[i];
   }
-  reflexxes_wrapper::setCurrentState(reflexxes_position_input_param_.get(), num_joints_, current_positions,
+  reflexxes_wrapper::setCurrentState(reflexxes_velocity_input_param_.get(), num_joints_, current_positions,
                                      zero_velocities, zero_accelerations);
-  reflexxes_wrapper::resetOutputStruct(reflexxes_position_output_param_.get(), num_joints_, current_positions,
+  reflexxes_wrapper::resetOutputStruct(reflexxes_velocity_output_param_.get(), num_joints_, current_positions,
                                        zero_velocities, zero_accelerations);
 }
 
@@ -796,12 +796,12 @@ bool ServoCalcs::enforceVelAccelLimitsWithReflexxes(Eigen::ArrayXd& delta_theta)
   // This assumes the hardware tracks the requested vel/accel well.
   for (size_t joint_idx = 0; joint_idx < num_joints_; ++joint_idx)
   {
-    reflexxes_position_input_param_->CurrentVelocityVector->VecData[joint_idx] =
-        reflexxes_position_output_param_->NewVelocityVector->VecData[joint_idx];
-    reflexxes_position_input_param_->CurrentAccelerationVector->VecData[joint_idx] =
-        reflexxes_position_output_param_->NewAccelerationVector->VecData[joint_idx];
+    reflexxes_velocity_input_param_->CurrentVelocityVector->VecData[joint_idx] =
+        reflexxes_velocity_output_param_->NewVelocityVector->VecData[joint_idx];
+    reflexxes_velocity_input_param_->CurrentAccelerationVector->VecData[joint_idx] =
+        reflexxes_velocity_output_param_->NewAccelerationVector->VecData[joint_idx];
   }
-  reflexxes_wrapper::setCurrentPositions(reflexxes_position_input_param_.get(), num_joints_,
+  reflexxes_wrapper::setCurrentPositions(reflexxes_velocity_input_param_.get(), num_joints_,
                                          original_joint_state_.position);
 
   // Update target state in Reflexxes
@@ -813,18 +813,18 @@ bool ServoCalcs::enforceVelAccelLimitsWithReflexxes(Eigen::ArrayXd& delta_theta)
   Eigen::ArrayXd eigen_target_velocities = delta_theta / parameters_->publish_period;
   std::vector<double> target_velocities(eigen_target_velocities.data(),
                                         eigen_target_velocities.data() + eigen_target_velocities.size());
-  reflexxes_wrapper::setTargetState(reflexxes_position_input_param_.get(), num_joints_, target_positions,
+  reflexxes_wrapper::setTargetState(reflexxes_velocity_input_param_.get(), num_joints_, target_positions,
                                     target_velocities);
 
   // Call the Reflexxes algorithm
-  int result = reflexxes_->RMLPosition(*reflexxes_position_input_param_, reflexxes_position_output_param_.get(),
+  int result = reflexxes_->RMLVelocity(*reflexxes_velocity_input_param_, reflexxes_velocity_output_param_.get(),
                                        reflexxes_flags_);
 
   // Calculate the new delta_theta from Reflexxes output
   for (size_t joint_idx = 0; joint_idx < num_joints_; ++joint_idx)
   {
-    delta_theta[joint_idx] = reflexxes_position_output_param_->NewPositionVector->VecData[joint_idx] -
-                             reflexxes_position_input_param_->CurrentPositionVector->VecData[joint_idx];
+    delta_theta[joint_idx] = reflexxes_velocity_output_param_->NewPositionVector->VecData[joint_idx] -
+                             reflexxes_velocity_input_param_->CurrentPositionVector->VecData[joint_idx];
   }
 
   if (result < 0)
