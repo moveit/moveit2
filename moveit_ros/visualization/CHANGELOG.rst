@@ -2,6 +2,19 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2021-04-12)
+------------------
+* Fix EXPORT install in CMake (`#372 <https://github.com/ros-planning/moveit2/issues/372>`_)
+* Add a private node to the interactive marker display (`#342 <https://github.com/ros-planning/moveit2/issues/342>`_)
+* Sync main branch with MoveIt 1 from previous head https://github.com/ros-planning/moveit/commit/0247ed0027ca9d7f1a7f066e62c80c9ce5dbbb5e up to https://github.com/ros-planning/moveit/commit/74b3e30db2e8683ac17b339cc124675ae52a5114
+* [fix] export cmake likbrary install (`#339 <https://github.com/ros-planning/moveit2/issues/339>`_)
+* MTC compatibility fixes (`#323 <https://github.com/ros-planning/moveit2/issues/323>`_)
+* Remove redundant exports
+* moveit_ros_visualization: export libraries and include directory
+* Catch exceptions during RobotModel loading in rviz (`#2468 <https://github.com/ros-planning/moveit2/issues/2468>`_)
+* Fix repo URLs in package.xml files
+* Contributors: Henning Kayser, Jafar Abdi, Simon Schmeisser, Tyler Weaver
+
 2.1.0 (2020-11-23)
 ------------------
 * [fix] Interactive markers not visible in motion planning plugin (`#299 <https://github.com/ros-planning/moveit2/issues/299>`_)

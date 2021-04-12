@@ -2,6 +2,24 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2021-04-12)
+------------------
+* Update launch files to use ros2 control spawner (`#405 <https://github.com/ros-planning/moveit2/issues/405>`_)
+* Use fake_components::GenericSystem from ros2_control (`#361 <https://github.com/ros-planning/moveit2/issues/361>`_)
+* Solved small issue with a message not being logged due to an early return statement (`#368 <https://github.com/ros-planning/moveit2/issues/368>`_)
+* OMPL constrained planning (`#347 <https://github.com/ros-planning/moveit2/issues/347>`_)
+* Sync main branch with MoveIt 1 from previous head https://github.com/ros-planning/moveit/commit/0247ed0027ca9d7f1a7f066e62c80c9ce5dbbb5e up to https://github.com/ros-planning/moveit/commit/74b3e30db2e8683ac17b339cc124675ae52a5114
+* [fix] MGI server timeout, infinite duration by default (`#349 <https://github.com/ros-planning/moveit2/issues/349>`_)
+  By setting the default server timeout duration to -1, the MoveGroupInterface is ensured to be ready to use after construction.
+* [fix] export cmake library install (`#339 <https://github.com/ros-planning/moveit2/issues/339>`_)
+* Fix scaling factor parameter names (`#2452 <https://github.com/ros-planning/moveit2/issues/2452>`_)
+* MTC compatibility fixes (`#323 <https://github.com/ros-planning/moveit2/issues/323>`_)
+* Fix node remapping
+* Make sure planning scene interface have a unique name for the internal node
+* planning_scene_interface: Fix node name being empty
+* Fix repo URLs in package.xml files
+* Contributors: Boston Cleek, FlorisE, Henning Kayser, Jafar Abdi, Shota Aoki, Tyler Weaver
+
 2.1.0 (2020-11-23)
 ------------------
 * [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)

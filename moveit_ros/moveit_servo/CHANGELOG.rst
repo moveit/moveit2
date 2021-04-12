@@ -2,6 +2,26 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2021-04-12)
+------------------
+* Do not output positions at all if they are set to false (`#410 <https://github.com/ros-planning/moveit2/issues/410>`_)
+* Update launch files to use ros2 control spawner (`#405 <https://github.com/ros-planning/moveit2/issues/405>`_)
+* Include boost optional in pose_tracking (`#406 <https://github.com/ros-planning/moveit2/issues/406>`_)
+* Use fake_components::GenericSystem from ros2_control (`#361 <https://github.com/ros-planning/moveit2/issues/361>`_)
+* Fix EXPORT install in CMake (`#372 <https://github.com/ros-planning/moveit2/issues/372>`_)
+* moveit servo: fix constructing duration from double & fix bug in insertRedundantPointsIntoTrajectory function (`#374 <https://github.com/ros-planning/moveit2/issues/374>`_)
+* port pose tracking (`#320 <https://github.com/ros-planning/moveit2/issues/320>`_)
+* Fix 'start_servo' service topic in demo
+* Sync main branch with MoveIt 1 from previous head https://github.com/ros-planning/moveit/commit/0247ed0027ca9d7f1a7f066e62c80c9ce5dbbb5e up to https://github.com/ros-planning/moveit/commit/74b3e30db2e8683ac17b339cc124675ae52a5114
+* Protect paused\_ flag, for thread safety (`#2494 <https://github.com/ros-planning/moveit2/issues/2494>`_)
+* Do not break out of loop -- need to update low pass filters (`#2496 <https://github.com/ros-planning/moveit2/issues/2496>`_)
+* [Servo] Fix initial angle error is always 0 (`#2464 <https://github.com/ros-planning/moveit2/issues/2464>`_)
+* Add an important sleep in Servo pose tracking (`#2463 <https://github.com/ros-planning/moveit2/issues/2463>`_)
+* Prevent moveit_servo transforms between fixed frames from causing timeout (`#2418 <https://github.com/ros-planning/moveit2/issues/2418>`_)
+* [feature] Low latency mode (`#2401 <https://github.com/ros-planning/moveit2/issues/2401>`_)
+* Move timer initialization down to fix potential race condition
+* Contributors: Abishalini Sivaraman, AdamPettinger, AndyZe, Boston Cleek, Henning Kayser, Jafar Abdi, Nathan Brooks, Tyler Weaver
+
 2.1.0 (2020-11-23)
 ------------------
 * [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)

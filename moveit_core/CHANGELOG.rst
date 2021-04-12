@@ -2,6 +2,48 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2021-04-12)
+------------------
+* Update doxygen comments for distance() and interpolate() (`#401 <https://github.com/ros-planning/moveit2/issues/401>`_)
+* Add differential drive joint model (`#390 <https://github.com/ros-planning/moveit2/issues/390>`_)
+  * RobotModelBuilder: Add new function addJointProperty to add a property for a joint
+  * Add angular_distance_weight joint property
+  * Add motion_model joint property
+  * Add min_translational_distance joint property
+* Add initialize function for moveit_sensor_manager plugin (`#386 <https://github.com/ros-planning/moveit2/issues/386>`_)
+* Eliminate ability to keep multiple collision detectors updated (`#364 <https://github.com/ros-planning/moveit2/issues/364>`_)
+  * Fix seg faults in setCollisionDetectorType()
+  * Add unit test for switching collision detector types
+* Port of Bullet collision to ROS2 (`#322 <https://github.com/ros-planning/moveit2/issues/322>`_)
+* Fix EXPORT install in CMake (`#372 <https://github.com/ros-planning/moveit2/issues/372>`_)
+* Bug fixes in main branch (`#362 <https://github.com/ros-planning/moveit2/issues/362>`_)
+  * robot_trajectory: Fix bugs in getRobotTrajectoryMsg function
+  * controller_manager: Use Duration(-1) as infinite timeout
+  * ActionBasedControllerHandle: fix dangling reference in case of timeout
+  * TfPublisher: tf frame name can't start with '/'
+* Sync main branch with MoveIt 1 from previous head https://github.com/ros-planning/moveit/commit/0247ed0027ca9d7f1a7f066e62c80c9ce5dbbb5e up to https://github.com/ros-planning/moveit/commit/74b3e30db2e8683ac17b339cc124675ae52a5114
+* [fix] export cmake library install (`#339 <https://github.com/ros-planning/moveit2/issues/339>`_)
+* Clean up collision-related log statements (`#2480 <https://github.com/ros-planning/moveit2/issues/2480>`_)
+* Fix RobotState::dropAccelerations/dropEffort to not drop velocities (`#2478 <https://github.com/ros-planning/moveit2/issues/2478>`_)
+* Provide a function to set the position of active joints in a JointModelGroup (`#2456 <https://github.com/ros-planning/moveit2/issues/2456>`_)
+  * RobotState::setJointGroupPositions: assert correct size of  vector
+  * setJointGroupActivePositions sets only the positions of active joints
+  * implement JointModelGroup::getActiveVariableCount
+* Fix doxygen documentation for setToIKSolverFrame (`#2461 <https://github.com/ros-planning/moveit2/issues/2461>`_)
+  * Fix doxygen documentation for setToIKSolverFrame
+  * "Convert" -> "Transform"
+  * Make function private. Update comments.
+  * Make inline and private
+  * Longer function should not be inline
+* Fix validation of orientation constraints (`#2434 <https://github.com/ros-planning/moveit2/issues/2434>`_)
+* RobotModelBuilder: Add parameter to specify the joint rotation axis
+* RobotModelBuilder: Allow adding end effectors (`#2454 <https://github.com/ros-planning/moveit2/issues/2454>`_)
+* Delete CollisionRequest min_cost_density
+* Fix OrientationConstraint::decide (`#2414 <https://github.com/ros-planning/moveit2/issues/2414>`_)
+* Changed processing_thread\_ spin to use std::make_unique instead of new (`#2412 <https://github.com/ros-planning/moveit2/issues/2412>`_)
+* Update collision-related comments (`#2382 <https://github.com/ros-planning/moveit2/issues/2382>`_) (`#2388 <https://github.com/ros-planning/moveit2/issues/2388>`_)
+* Contributors: AndyZe, David V. Lu!!, Henning Kayser, Jafar Abdi, Jorge Nicho, Robert Haschke, Simon Schmeisser, Stuart Anderson, Thomas G, Tyler Weaver, sevangelatos
+
 2.1.0 (2020-11-23)
 ------------------
 * [fix] Clang-tidy fixes (`#264 <https://github.com/ros-planning/moveit2/issues/264>`_, `#210 <https://github.com/ros-planning/moveit2/issues/210>`_)

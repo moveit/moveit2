@@ -2,6 +2,21 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2021-04-12)
+------------------
+* Fix porting errors in depth_image_octomap_updater (`#383 <https://github.com/ros-planning/moveit2/issues/383>`_)
+  * Fix error of not being able to receive depth image
+  * Fix mismatching time source
+* Port moveit_ros_perception/depth_image_octomap_updater (`#354 <https://github.com/ros-planning/moveit2/issues/354>`_)
+* Fix EXPORT install in CMake (`#372 <https://github.com/ros-planning/moveit2/issues/372>`_)
+* [fix] export cmake library install (`#339 <https://github.com/ros-planning/moveit2/issues/339>`_)
+* Porting moveit_ros_perception/pointcloud_octomap_updater (`#307 <https://github.com/ros-planning/moveit2/issues/307>`_)
+* Fix repo URLs in package.xml files
+* Contributors: Henning Kayser, Tyler Weaver, Yu Yan
+
+2.0.0 (2020-10-13)
+------------------
+
 1.1.1 (2020-10-13)
 ------------------
 * [fix] various issues with Noetic build (`#2327 <https://github.com/ros-planning/moveit/issues/2327>`_)

@@ -2,6 +2,13 @@
 Changelog for package moveit_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2021-04-12)
+------------------
+* Enable linting for moveit_common package (`#379 <https://github.com/ros-planning/moveit2/issues/379>`_)
+* Enable ament_lint tests (`#340 <https://github.com/ros-planning/moveit2/issues/340>`_)
+* Fix repo URLs in package.xml files
+* Contributors: Henning Kayser, Tyler Weaver
+
 2.1.0 (2020-11-23)
 ------------------
 * [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)
