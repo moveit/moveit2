@@ -2,6 +2,16 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2021-04-12)
+------------------
+* Add differential drive joint model (`#390 <https://github.com/ros-planning/moveit2/issues/390>`_)
+* Fix EXPORT install in CMake (`#372 <https://github.com/ros-planning/moveit2/issues/372>`_)
+* OMPL constrained planning (`#347 <https://github.com/ros-planning/moveit2/issues/347>`_)
+  Co-authored-by: JeroenDM <jeroendemaeyer@live.be>
+* [fix] export cmake library install (`#339 <https://github.com/ros-planning/moveit2/issues/339>`_)
+* Fix repo URLs in package.xml files
+* Contributors: Boston Cleek, David V. Lu!!, Henning Kayser, Tyler Weaver
+
 2.1.0 (2020-11-23)
 ------------------
 * [fix] Rosdep dependencies for ros_testing, OpenMP (`#309 <https://github.com/ros-planning/moveit2/issues/309>`_)

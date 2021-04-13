@@ -2,6 +2,13 @@
 Changelog for package moveit_ros_occupancy_map_monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2021-04-12)
+------------------
+* Fix EXPORT install in CMake (`#372 <https://github.com/ros-planning/moveit2/issues/372>`_)
+* Porting moveit_ros_perception/pointcloud_octomap_updater (`#307 <https://github.com/ros-planning/moveit2/issues/307>`_)
+* Fix repo URLs in package.xml files
+* Contributors: Henning Kayser, Tyler Weaver, Yu Yan
+
 2.1.0 (2020-11-23)
 ------------------
 * [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)

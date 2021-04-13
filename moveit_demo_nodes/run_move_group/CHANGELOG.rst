@@ -2,6 +2,15 @@
 Changelog for package run_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2021-04-12)
+------------------
+* Update launch files to use ros2 control spawner (`#405 <https://github.com/ros-planning/moveit2/issues/405>`_)
+* Use fake_components::GenericSystem from ros2_control (`#361 <https://github.com/ros-planning/moveit2/issues/361>`_)
+* Fix EXPORT install in CMake (`#372 <https://github.com/ros-planning/moveit2/issues/372>`_)
+* MTC compatibility fixes (`#323 <https://github.com/ros-planning/moveit2/issues/323>`_)
+* Fix node remapping
+* Contributors: Henning Kayser, Jafar Abdi, Tyler Weaver
+
 2.1.0 (2020-11-23)
 ------------------
 * [maint] Wrap common cmake code in 'moveit_package()' macro (`#285 <https://github.com/ros-planning/moveit2/issues/285>`_)

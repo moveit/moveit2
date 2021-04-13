@@ -2,6 +2,21 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2021-04-12)
+------------------
+* Declare joint limit parameters (`#408 <https://github.com/ros-planning/moveit2/issues/408>`_)
+* Add initialize function for moveit_sensor_manager plugin (`#386 <https://github.com/ros-planning/moveit2/issues/386>`_)
+* Eliminate ability to keep multiple collision detectors updated (`#364 <https://github.com/ros-planning/moveit2/issues/364>`_)
+* Fix EXPORT install in CMake (`#372 <https://github.com/ros-planning/moveit2/issues/372>`_)
+* Sync main branch with MoveIt 1 from previous head https://github.com/ros-planning/moveit/commit/0247ed0027ca9d7f1a7f066e62c80c9ce5dbbb5e up to https://github.com/ros-planning/moveit/commit/74b3e30db2e8683ac17b339cc124675ae52a5114
+* [fix] export cmake library install (`#339 <https://github.com/ros-planning/moveit2/issues/339>`_)
+* MTC compatibility fixes (`#323 <https://github.com/ros-planning/moveit2/issues/323>`_)
+* trajectory_execution_manager: Fix creating duration from double
+* current_state_monitor: Fix creating duration from double & converting duration to seconds
+* Fix some typos in comments (`#2466 <https://github.com/ros-planning/moveit2/issues/2466>`_)
+* Fix repo URLs in package.xml files
+* Contributors: AndyZe, Boston Cleek, Henning Kayser, Jafar Abdi, Tyler Weaver, Udbhavbisarya23, Yu Yan
+
 2.1.0 (2020-11-23)
 ------------------
 * [improvement] Planning Scene Monitor Node Executor (`#230 <https://github.com/ros-planning/moveit2/issues/230>`_, `#257 <https://github.com/ros-planning/moveit2/issues/257>`_, `#262 <https://github.com/ros-planning/moveit2/issues/262>`_, `#266 <https://github.com/ros-planning/moveit2/issues/266>`_)

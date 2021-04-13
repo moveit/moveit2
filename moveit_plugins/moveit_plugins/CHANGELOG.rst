@@ -2,6 +2,12 @@
 Changelog for package moveit_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2021-04-12)
+------------------
+* Enable ament_lint tests (`#340 <https://github.com/ros-planning/moveit2/issues/340>`_)
+* Compile metapackages
+* Contributors: Henning Kayser, Tyler Weaver
+
 2.1.0 (2020-11-23)
 ------------------
 

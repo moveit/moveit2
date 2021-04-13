@@ -2,6 +2,13 @@
 Changelog for package moveit_fake_controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.1 (2021-04-12)
+------------------
+* Enable ament_lint tests (`#340 <https://github.com/ros-planning/moveit2/issues/340>`_)
+* Fix EXPORT install in CMake (`#372 <https://github.com/ros-planning/moveit2/issues/372>`_)
+* Fix repo URLs in package.xml files
+* Contributors: Henning Kayser, Tyler Weaver
+
 2.1.0 (2020-11-23)
 ------------------
 * [improvement] Enable MoveIt fake controller in demo (`#231 <https://github.com/ros-planning/moveit2/issues/231>`_)
