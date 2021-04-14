@@ -25,7 +25,7 @@ pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
 find_library(LIBFCL_LIBRARIES_FULL ${LIBFCL_LIBRARIES} ${LIBFCL_LIBRARY_DIRS})
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
 
-
+find_package(angles REQUIRED)
 find_package(OCTOMAP REQUIRED)
 find_package(urdfdom REQUIRED)
 find_package(urdf REQUIRED)
@@ -109,6 +109,7 @@ set(THIS_PACKAGE_LIBRARIES
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
+  angles
   eigen_stl_containers
   geometric_shapes
   geometry_msgs
