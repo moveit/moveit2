@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement
  *
- *  Copyright (c) 2019, PickNik Consulting
+ *  Copyright (c) 2019, PickNik Inc.
  *  All rights reserved.
  *
  *********************************************************************/

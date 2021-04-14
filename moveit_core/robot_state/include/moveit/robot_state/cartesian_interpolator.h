@@ -3,7 +3,7 @@
  *
  *  Copyright (c) 2013, Ioan A. Sucan
  *  Copyright (c) 2013, Willow Garage, Inc.
- *  Copyright (c) 2019, PickNik LLC.
+ *  Copyright (c) 2019, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
