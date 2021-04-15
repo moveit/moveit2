@@ -360,7 +360,6 @@ TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
   for (size_t i = 0; i < 7; ++i)
   {
     // We need to check vs radians-per-loop allowable rate (not rad/s)
-    // was EXPECT_LE
     EXPECT_GE(desired_velocity[i], vel_limits[i] * servo_calcs_->parameters_->publish_period);
   }
 
@@ -371,7 +370,6 @@ TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
   for (size_t i = 0; i < 7; ++i)
   {
     // We need to check vs radians-per-loop allowable rate (not rad/s)
-    // was EXPECT_GE
     EXPECT_LE(desired_velocity[i], -1 * vel_limits[i] * servo_calcs_->parameters_->publish_period);
   }
 }
