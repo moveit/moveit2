@@ -74,7 +74,7 @@ TrajectoryVisualization::TrajectoryVisualization(rviz_common::properties::Proper
   , trajectory_slider_dock_panel_(nullptr)
 {
   trajectory_topic_property_ = new rviz_common::properties::RosTopicProperty(
-      "Trajectory Topic", "/move_group/display_planned_path",
+      "Trajectory Topic", "/display_planned_path",
       rosidl_generator_traits::data_type<moveit_msgs::msg::DisplayTrajectory>(),
       "The topic on which the moveit_msgs::msg::DisplayTrajectory messages are received", widget,
       SLOT(changedTrajectoryTopic()), this);

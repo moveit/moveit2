@@ -41,7 +41,7 @@ This open source project is maintained by supporters from around the world — s
   <img src="https://picknik.ai/assets/images/logo.jpg" width="168">
 </a>
 
-[PickNik Robotics](https://picknik.ai/) is leading and organizing the development of MoveIt 2.
+[PickNik Inc.](https://picknik.ai/) is leading and organizing the development of MoveIt 2.
 If you would like to support this project, please contact hello@picknik.ai
 
 <a href="http://rosin-project.eu">

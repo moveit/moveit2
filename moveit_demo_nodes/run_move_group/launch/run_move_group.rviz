@@ -310,7 +310,7 @@ Visualization Manager:
         Show Trail: false
         State Display Time: 0.05 s
         Trail Step Size: 1
-        Trajectory Topic: /move_group/display_planned_path
+        Trajectory Topic: /display_planned_path
       Planning Metrics:
         Payload: 1
         Show Joint Torques: false
