@@ -48,20 +48,17 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 
 set(THIS_PACKAGE_INCLUDE_DIRS
   global_planner/include
-  local_planner/include
-  hybrid_planning_manager/include
-  planner_logic_plugins/include
-  trajectory_operator_plugins/include
-  local_constraint_solver_plugins/include
+  hybrid_planning_manager/hybrid_planning_manager_component/include
+  hybrid_planning_manager/planner_logic_plugins/include
+  local_planner/local_planner_component/include
+  local_planner/trajectory_operator_plugins/include
+  local_planner/local_constraint_solver_plugins/include
 )
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
 add_subdirectory(hybrid_planning_manager)
 add_subdirectory(global_planner)
 add_subdirectory(local_planner)
-add_subdirectory(planner_logic_plugins)
-add_subdirectory(trajectory_operator_plugins)
-add_subdirectory(local_constraint_solver_plugins)
 add_subdirectory(test)
 
 rclcpp_components_register_nodes(moveit_hybrid_planning_manager "moveit_hybrid_planning::HybridPlanningManager")
