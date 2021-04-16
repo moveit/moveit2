@@ -88,6 +88,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   tf2_eigen
   Eigen3
   rviz_ogre_vendor
+  rviz_common
+  rviz_default_plugins
 )
 
 include_directories(rviz_plugin_render_tools/include
