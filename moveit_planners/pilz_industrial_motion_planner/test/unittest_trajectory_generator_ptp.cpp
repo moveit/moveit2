@@ -151,12 +151,12 @@ TEST(TrajectoryGeneratorPTPTest, TestExceptionErrorCodeMapping)
 {
   {
     std::shared_ptr<PtpVelocityProfileSyncFailed> pvpsf_ex{ new PtpVelocityProfileSyncFailed("") };
-    EXPECT_EQ(pvpsf_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+    EXPECT_EQ(pvpsf_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::FAILURE);
   }
 
   {
     std::shared_ptr<PtpNoIkSolutionForGoalPose> pnisfgp_ex{ new PtpNoIkSolutionForGoalPose("") };
-    EXPECT_EQ(pnisfgp_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+    EXPECT_EQ(pnisfgp_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
   }
 }
 
@@ -353,7 +353,7 @@ TEST_P(TrajectoryGeneratorPTPTest, testCartesianGoal)
   pose.pose.orientation.z = 0.0;
   std::vector<double> tolerance_pose(3, 0.01);
   std::vector<double> tolerance_angle(3, 0.01);
-  moveit_msgs::Constraints pose_goal =
+  moveit_msgs::msg::Constraints pose_goal =
       kinematic_constraints::constructGoalConstraints(target_link_, pose, tolerance_pose, tolerance_angle);
   req.goal_constraints.push_back(pose_goal);
 
@@ -361,9 +361,9 @@ TEST_P(TrajectoryGeneratorPTPTest, testCartesianGoal)
   //*** test robot model without gripper ***
   //****************************************
   ASSERT_TRUE(ptp_->generate(planning_scene_, req, res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
-  moveit_msgs::MotionPlanResponse res_msg;
+  moveit_msgs::msg::MotionPlanResponse res_msg;
   res.getMessage(res_msg);
   if (!res_msg.trajectory.joint_trajectory.points.empty())
   {
@@ -402,19 +402,19 @@ TEST_P(TrajectoryGeneratorPTPTest, testCartesianGoalMissingLinkNameConstraints)
   pose.pose.orientation.z = 0.0;
   std::vector<double> tolerance_pose(3, 0.01);
   std::vector<double> tolerance_angle(3, 0.01);
-  moveit_msgs::Constraints pose_goal =
+  moveit_msgs::msg::Constraints pose_goal =
       kinematic_constraints::constructGoalConstraints(target_link_, pose, tolerance_pose, tolerance_angle);
   req.goal_constraints.push_back(pose_goal);
 
   planning_interface::MotionPlanRequest req_no_position_constaint_link_name = req;
   req_no_position_constaint_link_name.goal_constraints.front().position_constraints.front().link_name = "";
   ASSERT_FALSE(ptp_->generate(planning_scene_, req_no_position_constaint_link_name, res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
 
   planning_interface::MotionPlanRequest req_no_orientation_constaint_link_name = req;
   req_no_orientation_constaint_link_name.goal_constraints.front().orientation_constraints.front().link_name = "";
   ASSERT_FALSE(ptp_->generate(planning_scene_, req_no_orientation_constaint_link_name, res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
 }
 
 /**
@@ -436,12 +436,12 @@ TEST_P(TrajectoryGeneratorPTPTest, testInvalidCartesianGoal)
   pose.pose.orientation.z = 0.0;
   std::vector<double> tolerance_pose(3, 0.01);
   std::vector<double> tolerance_angle(3, 0.01);
-  moveit_msgs::Constraints pose_goal =
+  moveit_msgs::msg::Constraints pose_goal =
       kinematic_constraints::constructGoalConstraints(target_link_, pose, tolerance_pose, tolerance_angle);
   req.goal_constraints.push_back(pose_goal);
 
   ASSERT_FALSE(ptp_->generate(planning_scene_, req, res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
   EXPECT_EQ(res.trajectory_, nullptr);
 }
 
@@ -458,8 +458,8 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalAlreadyReached)
   ASSERT_TRUE(robot_model_->getJointModelGroup(planning_group_)->getActiveJointModelNames().size())
       << "No link exists in the planning group.";
 
-  moveit_msgs::Constraints gc;
-  moveit_msgs::JointConstraint jc;
+  moveit_msgs::msg::Constraints gc;
+  moveit_msgs::msg::JointConstraint jc;
   jc.joint_name = robot_model_->getJointModelGroup(planning_group_)->getActiveJointModelNames().front();
   jc.position = 0.0;
   gc.joint_constraints.push_back(jc);
@@ -467,9 +467,9 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalAlreadyReached)
 
   // TODO lin and circ has different settings
   ASSERT_TRUE(ptp_->generate(planning_scene_, req, res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
-  moveit_msgs::MotionPlanResponse res_msg;
+  moveit_msgs::msg::MotionPlanResponse res_msg;
   res.getMessage(res_msg);
   EXPECT_EQ(1u, res_msg.trajectory.joint_trajectory.points.size());
 }
@@ -523,8 +523,8 @@ TEST_P(TrajectoryGeneratorPTPTest, testScalingFactor)
   planning_interface::MotionPlanRequest req;
   testutils::createDummyRequest(robot_model_, planning_group_, req);
   req.start_state.joint_state.position[2] = 0.1;
-  moveit_msgs::Constraints gc;
-  moveit_msgs::JointConstraint jc;
+  moveit_msgs::msg::Constraints gc;
+  moveit_msgs::msg::JointConstraint jc;
   jc.joint_name = "prbt_joint_1";
   jc.position = 1.5;
   gc.joint_constraints.push_back(jc);
@@ -539,9 +539,9 @@ TEST_P(TrajectoryGeneratorPTPTest, testScalingFactor)
   req.max_acceleration_scaling_factor = 1.0 / 3.0;
 
   ASSERT_TRUE(ptp_->generate(planning_scene_, req, res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
-  moveit_msgs::MotionPlanResponse res_msg;
+  moveit_msgs::msg::MotionPlanResponse res_msg;
   res.getMessage(res_msg);
   EXPECT_TRUE(checkTrajectory(res_msg.trajectory.joint_trajectory, req, planner_limits_.getJointLimitContainer()));
 
@@ -652,8 +652,8 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalAndAlmostZeroStartVelocity)
   // Set velocity to all 1e-16
   req.start_state.joint_state.velocity = std::vector<double>(req.start_state.joint_state.position.size(), 1e-16);
 
-  moveit_msgs::Constraints gc;
-  moveit_msgs::JointConstraint jc;
+  moveit_msgs::msg::Constraints gc;
+  moveit_msgs::msg::JointConstraint jc;
   jc.joint_name = "prbt_joint_1";
   jc.position = 1.5;
   gc.joint_constraints.push_back(jc);
@@ -666,9 +666,9 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalAndAlmostZeroStartVelocity)
   req.goal_constraints.push_back(gc);
 
   ASSERT_TRUE(ptp_->generate(planning_scene_, req, res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
-  moveit_msgs::MotionPlanResponse res_msg;
+  moveit_msgs::msg::MotionPlanResponse res_msg;
   res.getMessage(res_msg);
   EXPECT_TRUE(checkTrajectory(res_msg.trajectory.joint_trajectory, req, planner_limits_.getJointLimitContainer()));
 
@@ -787,8 +787,8 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalNoStartVel)
   req.start_state.joint_state.position[4] = 0.3;
   req.start_state.joint_state.position[2] = 0.11;
 
-  moveit_msgs::Constraints gc;
-  moveit_msgs::JointConstraint jc;
+  moveit_msgs::msg::Constraints gc;
+  moveit_msgs::msg::JointConstraint jc;
 
   jc.joint_name = "prbt_joint_1";
   jc.position = 1.5;
@@ -808,9 +808,9 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalNoStartVel)
   req.goal_constraints.push_back(gc);
 
   ASSERT_TRUE(ptp_->generate(planning_scene_, req, res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
-  moveit_msgs::MotionPlanResponse res_msg;
+  moveit_msgs::msg::MotionPlanResponse res_msg;
   res.getMessage(res_msg);
   EXPECT_TRUE(checkTrajectory(res_msg.trajectory.joint_trajectory, req, planner_limits_.getJointLimitContainer()));
 

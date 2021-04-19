@@ -1,47 +1,18 @@
-cmake_minimum_required(VERSION 3.1.3)
+cmake_minimum_required(VERSION 3.10.2)
 project(pilz_industrial_motion_planner_testutils)
 
-## Add support for C++11, supported in ROS Kinetic and newer
-add_definitions(-std=c++11)
-add_definitions(-Wall)
-add_definitions(-Wextra)
-add_definitions(-Wno-unused-parameter)
-add_definitions(-Werror)
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
 
-find_package(catkin REQUIRED COMPONENTS
-  tf2_eigen
-  moveit_core
-  moveit_msgs
-)
-
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(moveit_core REQUIRED)
+find_package(moveit_msgs REQUIRED)
+find_package(tf2_eigen REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS)
-
-################
-## Clang tidy ##
-################
-if(CATKIN_ENABLE_CLANG_TIDY)
-  find_program(
-    CLANG_TIDY_EXE
-    NAMES "clang-tidy"
-    DOC "Path to clang-tidy executable"
-  )
-  if(NOT CLANG_TIDY_EXE)
-    message(FATAL_ERROR "clang-tidy not found.")
-  else()
-    message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
-  endif()
-endif()
-
-###################################
-## catkin specific configuration ##
-###################################
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS moveit_core moveit_msgs
-  DEPENDS Boost
-)
 
 ###########
 ## Build ##
@@ -49,14 +20,10 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-)
+include_directories(include)
 
 ## Declare a C++ library
-add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME} SHARED
   src/cartesianconfiguration.cpp
   src/jointconfiguration.cpp
   src/robotconfiguration.cpp
@@ -65,24 +32,45 @@ add_library(${PROJECT_NAME}
 )
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}
-  ${catkin_LIBRARIES}
+ament_target_dependencies(${PROJECT_NAME}
+  Boost
+  Eigen3
+  eigen3_cmake_module
+  rclcpp
+  moveit_core
+  moveit_msgs
+  tf2_eigen
 )
-
-add_dependencies(${PROJECT_NAME}
-  ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##
 #############
 
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.h"
-  PATTERN ".svn" EXCLUDE
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
 )
 
-## Mark executables and/or libraries for installation
-install(TARGETS ${PROJECT_NAME}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
+install(DIRECTORY include/ DESTINATION include)
+
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(rclcpp moveit_core moveit_msgs tf2_eigen)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+
+  # These don't pass yet, disable them for now
+  set(ament_cmake_copyright_FOUND TRUE)
+  set(ament_cmake_cppcheck_FOUND TRUE)
+  set(ament_cmake_cpplint_FOUND TRUE)
+  set(ament_cmake_uncrustify_FOUND TRUE)
+
+  # Run all lint tests in package.xml except those listed above
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+ament_package()

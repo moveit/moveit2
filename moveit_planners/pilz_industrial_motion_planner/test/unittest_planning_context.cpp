@@ -200,7 +200,7 @@ TYPED_TEST(PlanningContextTest, NoRequest)
   bool result = this->planning_context_->solve(res);
 
   EXPECT_FALSE(result) << testutils::demangel(typeid(TypeParam).name());
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code_.val)
       << testutils::demangel(typeid(TypeParam).name());
 }
 
@@ -218,14 +218,14 @@ TYPED_TEST(PlanningContextTest, SolveValidRequest)
   bool result = this->planning_context_->solve(res);
 
   EXPECT_TRUE(result) << testutils::demangel(typeid(TypeParam).name());
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code_.val)
       << testutils::demangel(typeid(TypeParam).name());
 
   planning_interface::MotionPlanDetailedResponse res_detailed;
   bool result_detailed = this->planning_context_->solve(res_detailed);
 
   EXPECT_TRUE(result_detailed) << testutils::demangel(typeid(TypeParam).name());
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code_.val)
       << testutils::demangel(typeid(TypeParam).name());
 }
 
@@ -241,7 +241,7 @@ TYPED_TEST(PlanningContextTest, SolveValidRequestDetailedResponse)
   bool result = this->planning_context_->solve(res);
 
   EXPECT_TRUE(result) << testutils::demangel(typeid(TypeParam).name());
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, res.error_code_.val)
       << testutils::demangel(typeid(TypeParam).name());
 }
 
@@ -261,7 +261,7 @@ TYPED_TEST(PlanningContextTest, SolveOnTerminated)
   bool result = this->planning_context_->solve(res);
   EXPECT_FALSE(result) << testutils::demangel(typeid(TypeParam).name());
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::PLANNING_FAILED, res.error_code_.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED, res.error_code_.val)
       << testutils::demangel(typeid(TypeParam).name());
 }
 

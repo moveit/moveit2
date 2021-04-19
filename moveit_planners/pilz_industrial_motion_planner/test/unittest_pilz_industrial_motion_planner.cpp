@@ -189,8 +189,8 @@ TEST_P(CommandPlannerTest, CheckEmptyPlannerIdForServiceRequest)
  */
 TEST_P(CommandPlannerTest, CheckPlanningContextRequestNull)
 {
-  moveit_msgs::MotionPlanRequest req;
-  moveit_msgs::MoveItErrorCodes error_code;
+  moveit_msgs::msg::MotionPlanRequest req;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
   EXPECT_EQ(nullptr, planner_instance_->getPlanningContext(nullptr, req, error_code));
 }
 
@@ -200,8 +200,8 @@ TEST_P(CommandPlannerTest, CheckPlanningContextRequestNull)
  */
 TEST_P(CommandPlannerTest, CheckPlanningContextRequest)
 {
-  moveit_msgs::MotionPlanRequest req;
-  moveit_msgs::MoveItErrorCodes error_code;
+  moveit_msgs::msg::MotionPlanRequest req;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
 
   // Check for the algorithms
   std::vector<std::string> algs;

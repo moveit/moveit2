@@ -120,7 +120,7 @@ bool testutils::getExpectedGoalPose(const moveit::core::RobotModelConstPtr& robo
 }
 
 bool testutils::isGoalReached(const trajectory_msgs::JointTrajectory& trajectory,
-                              const std::vector<moveit_msgs::JointConstraint>& goal,
+                              const std::vector<moveit_msgs::msg::JointConstraint>& goal,
                               const double joint_position_tolerance, const double joint_velocity_tolerance)
 {
   trajectory_msgs::JointTrajectoryPoint last_point = trajectory.points.back();
@@ -366,7 +366,7 @@ bool testutils::isVelocityBounded(const trajectory_msgs::JointTrajectory& trajec
         std::cerr << "[ Fail     ] Joint velocity limit violated in " << i << "th waypoint of joint: "
                   << " Joint Name: " << trajectory.joint_names.at(i) << "; Position: " << point.positions.at(i)
                   << "; Velocity: " << point.velocities.at(i) << "; Acceleration: " << point.accelerations.at(i)
-                  << "; Time from start: " << point.time_from_start.toSec()
+                  << "; Time from start: " << point.time_from_start.seconds()
                   << "; Velocity Limit: " << joint_limits.getLimit(trajectory.joint_names.at(i)).max_velocity
                   << std::endl;
 
@@ -410,7 +410,7 @@ bool testutils::isAccelerationBounded(const trajectory_msgs::JointTrajectory& tr
           std::cerr << "[ Fail     ] Deceleration limit violated of joint: " << trajectory.joint_names.at(i)
                     << ": Position: " << point.positions.at(i) << "; Velocity: " << point.velocities.at(i)
                     << "; Acceleration: " << point.accelerations.at(i)
-                    << "; Time from start: " << point.time_from_start.toSec()
+                    << "; Time from start: " << point.time_from_start.seconds()
                     << ". Deceleration Limit: " << joint_limits.getLimit(trajectory.joint_names.at(i)).max_deceleration
                     << std::endl;
           return false;
@@ -424,7 +424,7 @@ bool testutils::isAccelerationBounded(const trajectory_msgs::JointTrajectory& tr
           std::cerr << "[ Fail     ] Acceleration limit violated of joint: " << trajectory.joint_names.at(i)
                     << ": Position: " << point.positions.at(i) << "; Velocity: " << point.velocities.at(i)
                     << "; Acceleration: " << point.accelerations.at(i)
-                    << "; Time from start: " << point.time_from_start.toSec()
+                    << "; Time from start: " << point.time_from_start.seconds()
                     << ". Acceleration Limit: " << joint_limits.getLimit(trajectory.joint_names.at(i)).max_acceleration
                     << std::endl;
 
@@ -450,7 +450,7 @@ bool testutils::isPositionBounded(const trajectory_msgs::JointTrajectory& trajec
         std::cerr << "[ Fail     ] Joint position limit violated in " << i << "th waypoint of joint: "
                   << " Joint Name: " << trajectory.joint_names.at(i) << "; Position: " << point.positions.at(i)
                   << "; Velocity: " << point.velocities.at(i) << "; Acceleration: " << point.accelerations.at(i)
-                  << "; Time from start: " << point.time_from_start.toSec()
+                  << "; Time from start: " << point.time_from_start.seconds()
                   << "; Max Position: " << joint_limits.getLimit(trajectory.joint_names.at(i)).max_position
                   << "; Min Position: " << joint_limits.getLimit(trajectory.joint_names.at(i)).min_position
                   << std::endl;
@@ -678,7 +678,7 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
                                                   double joint_velocity_tolerance, double joint_accleration_tolerance)
 {
   // convert to msgs
-  moveit_msgs::RobotTrajectory first_traj, blend_traj, second_traj;
+  moveit_msgs::msg::RobotTrajectory first_traj, blend_traj, second_traj;
   res.first_trajectory->getRobotTrajectoryMsg(first_traj);
   res.blend_trajectory->getRobotTrajectoryMsg(blend_traj);
   res.second_trajectory->getRobotTrajectoryMsg(second_traj);
@@ -703,7 +703,7 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
   for (std::size_t i = 0; i < first_end.positions.size(); ++i)
   {
     double blend_start_velo =
-        (blend_start.positions.at(i) - first_end.positions.at(i)) / blend_start.time_from_start.toSec();
+        (blend_start.positions.at(i) - first_end.positions.at(i)) / blend_start.time_from_start.seconds();
     if (fabs(blend_start_velo - blend_start.velocities.at(i)) > joint_velocity_tolerance)
     {
       std::cout << "Velocity computed from positions are different from the "
@@ -715,7 +715,7 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
       return false;
     }
 
-    double blend_start_acc = (blend_start_velo - first_end.velocities.at(i)) / blend_start.time_from_start.toSec();
+    double blend_start_acc = (blend_start_velo - first_end.velocities.at(i)) / blend_start.time_from_start.seconds();
     if (fabs(blend_start_acc - blend_start.accelerations.at(i)) > joint_velocity_tolerance)
     {
       std::cout << "Acceleration computed from positions/velocities are "
@@ -750,7 +750,7 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
   for (std::size_t i = 0; i < blend_end.positions.size(); ++i)
   {
     double second_start_velo =
-        (second_start.positions.at(i) - blend_end.positions.at(i)) / second_start.time_from_start.toSec();
+        (second_start.positions.at(i) - blend_end.positions.at(i)) / second_start.time_from_start.seconds();
     if (fabs(second_start_velo - second_start.velocities.at(i)) > joint_accleration_tolerance)
     {
       std::cout << "Velocity computed from positions are different from the "
@@ -761,7 +761,7 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
       return false;
     }
 
-    double second_start_acc = (second_start_velo - blend_end.velocities.at(i)) / second_start.time_from_start.toSec();
+    double second_start_acc = (second_start_velo - blend_end.velocities.at(i)) / second_start.time_from_start.seconds();
     if (fabs(second_start_acc - second_start.accelerations.at(i)) > joint_accleration_tolerance)
     {
       std::cout << "Acceleration computed from positions/velocities are "
@@ -991,7 +991,7 @@ void testutils::getOriChange(Eigen::Matrix3d& ori1, Eigen::Matrix3d& ori2)
 }
 
 void testutils::createFakeCartTraj(const robot_trajectory::RobotTrajectoryPtr& traj, const std::string& link_name,
-                                   moveit_msgs::RobotTrajectory& fake_traj)
+                                   moveit_msgs::msg::RobotTrajectory& fake_traj)
 {
   fake_traj.joint_trajectory.joint_names.push_back("x");
   fake_traj.joint_trajectory.joint_names.push_back("y");
@@ -1048,7 +1048,7 @@ bool testutils::generateTrajFromBlendTestData(
     const double& sampling_time_2, planning_interface::MotionPlanResponse& res_1,
     planning_interface::MotionPlanResponse& res_2, double& dis_1, double& dis_2)
 {
-  const robot_model::RobotModelConstPtr robot_model = scene->getRobotModel();
+  const moveit::core::RobotModelConstPtr robot_model = scene->getRobotModel();
 
   // generate first trajectory
   planning_interface::MotionPlanRequest req_1;
@@ -1115,7 +1115,7 @@ bool testutils::checkBlendResult(const pilz_industrial_motion_planner::Trajector
   // ++++++++++++++++++++++
   // + Check trajectories +
   // ++++++++++++++++++++++
-  moveit_msgs::RobotTrajectory traj_msg;
+  moveit_msgs::msg::RobotTrajectory traj_msg;
   blend_res.first_trajectory->getRobotTrajectoryMsg(traj_msg);
   if (!testutils::checkJointTrajectory(traj_msg.joint_trajectory, limits.getJointLimitContainer()))
   {
@@ -1165,13 +1165,13 @@ bool testutils::checkBlendResult(const pilz_industrial_motion_planner::Trajector
   // ++++++++++++++++++++++++
   //  ros::NodeHandle nh;
   //  ros::Publisher pub =
-  //  nh.advertise<moveit_msgs::DisplayTrajectory>("my_planned_path", 1);
+  //  nh.advertise<moveit_msgs::msg::DisplayTrajectory>("my_planned_path", 1);
   //  ros::Duration duration(1.0);
   //  duration.sleep();
 
   //  // visualize the joint trajectory
-  //  moveit_msgs::DisplayTrajectory displayTrajectory;
-  //  moveit_msgs::RobotTrajectory res_first_traj_msg, res_blend_traj_msg,
+  //  moveit_msgs::msg::DisplayTrajectory displayTrajectory;
+  //  moveit_msgs::msg::RobotTrajectory res_first_traj_msg, res_blend_traj_msg,
   //  res_second_traj_msg;
   //  blend_res.first_trajectory->getRobotTrajectoryMsg(res_first_traj_msg);
   //  blend_res.blend_trajectory->getRobotTrajectoryMsg(res_blend_traj_msg);
@@ -1188,7 +1188,7 @@ bool testutils::checkBlendResult(const pilz_industrial_motion_planner::Trajector
 void testutils::generateRequestMsgFromBlendTestData(const moveit::core::RobotModelConstPtr& robot_model,
                                                     const testutils::BlendTestData& data, const std::string& planner_id,
                                                     const std::string& group_name, const std::string& link_name,
-                                                    moveit_msgs::MotionSequenceRequest& req_list)
+                                                    moveit_msgs::msg::MotionSequenceRequest& req_list)
 {
   // motion plan request of first trajectory
   planning_interface::MotionPlanRequest req_1;
@@ -1236,7 +1236,7 @@ void testutils::generateRequestMsgFromBlendTestData(const moveit::core::RobotMod
 
   double blend_radius = 0.5 * std::min(dis_1, dis_2);
 
-  moveit_msgs::MotionSequenceItem blend_req_1, blend_req_2;
+  moveit_msgs::msg::MotionSequenceItem blend_req_1, blend_req_2;
   blend_req_1.req = req_1;
   blend_req_1.blend_radius = blend_radius;
   blend_req_2.req = req_2;

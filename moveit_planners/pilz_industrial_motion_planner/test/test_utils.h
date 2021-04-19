@@ -130,16 +130,17 @@ inline sensor_msgs::JointState generateJointState(const std::vector<double>& pos
   return generateJointState(pos, std::vector<double>(), joint_prefix);
 }
 
-inline moveit_msgs::Constraints generateJointConstraint(const std::vector<double>& pos_list,
-                                                        const std::string& joint_prefix = testutils::JOINT_NAME_PREFIX)
+inline moveit_msgs::msg::Constraints
+generateJointConstraint(const std::vector<double>& pos_list,
+                        const std::string& joint_prefix = testutils::JOINT_NAME_PREFIX)
 {
-  moveit_msgs::Constraints gc;
+  moveit_msgs::msg::Constraints gc;
 
   auto pos_it = pos_list.begin();
 
   for (size_t i = 0; i < pos_list.size(); ++i)
   {
-    moveit_msgs::JointConstraint jc;
+    moveit_msgs::msg::JointConstraint jc;
     jc.joint_name = testutils::getJointName(i + 1, joint_prefix);
     jc.position = *pos_it;
     gc.joint_constraints.push_back(jc);
@@ -181,7 +182,7 @@ void createPTPRequest(const std::string& planning_group, const moveit::core::Rob
  * @return true if satisfied
  */
 bool isGoalReached(const trajectory_msgs::JointTrajectory& trajectory,
-                   const std::vector<moveit_msgs::JointConstraint>& goal, const double joint_position_tolerance,
+                   const std::vector<moveit_msgs::msg::JointConstraint>& goal, const double joint_position_tolerance,
                    const double joint_velocity_tolerance = 1.0e-6);
 
 /**
@@ -376,7 +377,7 @@ void getLinLinPosesWithoutOriChange(const std::string& frame_id, sensor_msgs::Jo
 void getOriChange(Eigen::Matrix3d& ori1, Eigen::Matrix3d& ori2);
 
 void createFakeCartTraj(const robot_trajectory::RobotTrajectoryPtr& traj, const std::string& link_name,
-                        moveit_msgs::RobotTrajectory& fake_traj);
+                        moveit_msgs::msg::RobotTrajectory& fake_traj);
 
 inline geometry_msgs::Quaternion fromEuler(double a, double b, double c)
 {
@@ -444,7 +445,8 @@ bool generateTrajFromBlendTestData(const planning_scene::PlanningSceneConstPtr& 
 
 void generateRequestMsgFromBlendTestData(const moveit::core::RobotModelConstPtr& robot_model, const BlendTestData& data,
                                          const std::string& planner_id, const std::string& group_name,
-                                         const std::string& link_name, moveit_msgs::MotionSequenceRequest& req_list);
+                                         const std::string& link_name,
+                                         moveit_msgs::msg::MotionSequenceRequest& req_list);
 
 void checkRobotModel(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group_name,
                      const std::string& link_name);

@@ -34,9 +34,11 @@
 
 #pragma once
 
+#include <rclcpp/service.hpp>
+
 #include <moveit/move_group/move_group_capability.h>
 
-#include <moveit_msgs/GetMotionSequence.h>
+#include <moveit_msgs/srv/get_motion_sequence.hpp>
 
 namespace pilz_industrial_motion_planner
 {
@@ -56,10 +58,11 @@ public:
   void initialize() override;
 
 private:
-  bool plan(moveit_msgs::GetMotionSequence::Request& req, moveit_msgs::GetMotionSequence::Response& res);
+  bool plan(const moveit_msgs::srv::GetMotionSequence::Request::SharedPtr req,
+            moveit_msgs::srv::GetMotionSequence::Response::SharedPtr res);
 
 private:
-  ros::ServiceServer sequence_service_;
+  rclcpp::Service<moveit_msgs::srv::GetMotionSequence>::SharedPtr sequence_service_;
   std::unique_ptr<CommandListManager> command_list_manager_;
 };
 

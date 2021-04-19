@@ -135,19 +135,19 @@ void IntegrationTestCommandListManager::SetUp()
 TEST_F(IntegrationTestCommandListManager, TestExceptionErrorCodeMapping)
 {
   std::shared_ptr<NegativeBlendRadiusException> nbr_ex{ new NegativeBlendRadiusException("") };
-  EXPECT_EQ(nbr_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  EXPECT_EQ(nbr_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
 
   std::shared_ptr<LastBlendRadiusNotZeroException> lbrnz_ex{ new LastBlendRadiusNotZeroException("") };
-  EXPECT_EQ(lbrnz_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  EXPECT_EQ(lbrnz_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
 
   std::shared_ptr<StartStateSetException> sss_ex{ new StartStateSetException("") };
-  EXPECT_EQ(sss_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
+  EXPECT_EQ(sss_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
 
   std::shared_ptr<OverlappingBlendRadiiException> obr_ex{ new OverlappingBlendRadiiException("") };
-  EXPECT_EQ(obr_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  EXPECT_EQ(obr_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
 
   std::shared_ptr<PlanningPipelineException> pp_ex{ new PlanningPipelineException("") };
-  EXPECT_EQ(pp_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+  EXPECT_EQ(pp_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::FAILURE);
 }
 
 /**
@@ -183,7 +183,7 @@ TEST_F(IntegrationTestCommandListManager, concatThreeSegments)
   EXPECT_TRUE(hasStrictlyIncreasingTime(res123_vec.front())) << "Time steps not strictly positively increasing";
 
   ROS_INFO("step 2: only first segment");
-  moveit_msgs::MotionSequenceRequest req_1;
+  moveit_msgs::msg::MotionSequenceRequest req_1;
   req_1.items.resize(1);
   req_1.items.at(0).req = seq.getCmd(0).toRequest();
   req_1.items.at(0).blend_radius = 0.;
@@ -194,7 +194,7 @@ TEST_F(IntegrationTestCommandListManager, concatThreeSegments)
             req_1.items.at(0).req.start_state.joint_state.name.size());
 
   ROS_INFO("step 3: only second segment");
-  moveit_msgs::MotionSequenceRequest req_2;
+  moveit_msgs::msg::MotionSequenceRequest req_2;
   req_2.items.resize(1);
   req_2.items.at(0).req = seq.getCmd(1).toRequest();
   req_2.items.at(0).blend_radius = 0.;
@@ -205,7 +205,7 @@ TEST_F(IntegrationTestCommandListManager, concatThreeSegments)
             req_2.items.at(0).req.start_state.joint_state.name.size());
 
   ROS_INFO("step 4: only third segment");
-  moveit_msgs::MotionSequenceRequest req_3;
+  moveit_msgs::msg::MotionSequenceRequest req_3;
   req_3.items.resize(1);
   req_3.items.at(0).req = seq.getCmd(2).toRequest();
   req_3.items.at(0).blend_radius = 0.;
@@ -338,7 +338,7 @@ TEST_F(IntegrationTestCommandListManager, blendTwoSegments)
 {
   Sequence seq{ data_loader_->getSequence("SimpleSequence") };
   ASSERT_EQ(seq.size(), 2u);
-  moveit_msgs::MotionSequenceRequest req{ seq.toRequest() };
+  moveit_msgs::msg::MotionSequenceRequest req{ seq.toRequest() };
   RobotTrajCont res_vec{ manager_->solve(scene_, pipeline_, req) };
   EXPECT_EQ(res_vec.size(), 1u);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
@@ -346,12 +346,12 @@ TEST_F(IntegrationTestCommandListManager, blendTwoSegments)
             req.items.at(0).req.start_state.joint_state.name.size());
 
   ros::NodeHandle nh;
-  ros::Publisher pub = nh.advertise<moveit_msgs::DisplayTrajectory>("my_planned_path", 1);
+  ros::Publisher pub = nh.advertise<moveit_msgs::msg::DisplayTrajectory>("my_planned_path", 1);
   ros::Duration duration(1.0);  // wait to notify possible subscribers
   duration.sleep();
 
-  moveit_msgs::DisplayTrajectory display_trajectory;
-  moveit_msgs::RobotTrajectory rob_traj_msg;
+  moveit_msgs::msg::DisplayTrajectory display_trajectory;
+  moveit_msgs::msg::RobotTrajectory rob_traj_msg;
   res_vec.front()->getRobotTrajectoryMsg(rob_traj_msg);
   display_trajectory.trajectory.push_back(rob_traj_msg);
   pub.publish(display_trajectory);
@@ -372,7 +372,7 @@ TEST_F(IntegrationTestCommandListManager, blendTwoSegments)
  */
 TEST_F(IntegrationTestCommandListManager, emptyList)
 {
-  moveit_msgs::MotionSequenceRequest empty_list;
+  moveit_msgs::msg::MotionSequenceRequest empty_list;
   RobotTrajCont res_vec{ manager_->solve(scene_, pipeline_, empty_list) };
   EXPECT_TRUE(res_vec.empty());
 }
@@ -409,7 +409,7 @@ TEST_F(IntegrationTestCommandListManager, startStateNotFirstGoal)
   Sequence seq{ data_loader_->getSequence("SimpleSequence") };
   ASSERT_GE(seq.size(), 2u);
   const LinCart& lin{ seq.getCmd<LinCart>(0) };
-  moveit_msgs::MotionSequenceRequest req{ seq.toRequest() };
+  moveit_msgs::msg::MotionSequenceRequest req{ seq.toRequest() };
   req.items.at(1).req.start_state = lin.getGoalConfiguration().toMoveitMsgsRobotState();
   EXPECT_THROW(manager_->solve(scene_, pipeline_, req), StartStateSetException);
 }
@@ -525,18 +525,18 @@ TEST_F(IntegrationTestCommandListManager, TestExecutionTime)
   EXPECT_EQ(res_single_vec.size(), 1u);
   EXPECT_GT(res_single_vec.front()->getWayPointCount(), 0u);
 
-  moveit_msgs::MotionSequenceRequest req{ seq.toRequest() };
+  moveit_msgs::msg::MotionSequenceRequest req{ seq.toRequest() };
   // Create large request by making copies of the original sequence commands
   // and adding them to the end of the original sequence.
   const size_t n{ req.items.size() };
   for (size_t i = 0; i < n; ++i)
   {
-    moveit_msgs::MotionSequenceItem item{ req.items.at(i) };
+    moveit_msgs::msg::MotionSequenceItem item{ req.items.at(i) };
     if (i == 0)
     {
       // Remove start state because only the first request
       // is allowed to have a start state in a sequence.
-      item.req.start_state = moveit_msgs::RobotState();
+      item.req.start_state = moveit_msgs::msg::RobotState();
     }
     req.items.push_back(item);
   }

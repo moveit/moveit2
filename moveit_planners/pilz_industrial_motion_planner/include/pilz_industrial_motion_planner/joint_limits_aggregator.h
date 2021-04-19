@@ -37,7 +37,7 @@
 #include "pilz_industrial_motion_planner/joint_limits_container.h"
 #include "pilz_industrial_motion_planner/joint_limits_extension.h"
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_interface/planning_response.h>
@@ -72,12 +72,13 @@ public:
    * @note The acceleration/deceleration can only be set via the parameter
    * server since they are not supported
    * in the urdf so far.
-   * @param nh Node handle in whose namespace the joint limit parameters are
-   * expected.
+   * @param node Node to use for accessing joint limit parameters
+   * @param param_namespace Namespace to use for looking up node parameters
    * @param joint_models The joint models
    * @return Container containing the limits
    */
-  static JointLimitsContainer getAggregatedLimits(const ros::NodeHandle& nh,
+  static JointLimitsContainer getAggregatedLimits(const rclcpp::Node::SharedPtr& node,
+                                                  const std::string& param_namespace,
                                                   const std::vector<const moveit::core::JointModel*>& joint_models);
 
 protected:

@@ -36,7 +36,240 @@
 #define JOINT_LIMITS_INTERFACE_EXTENSION_H
 
 #include "pilz_industrial_motion_planner/joint_limits_extension.h"
-#include <joint_limits_interface/joint_limits_rosparam.h>
+
+// TODO(henning): Re-include when this is available, until then the headers content is copied below
+// #include <joint_limits_interface/joint_limits_rosparam.hpp>
+//////////////////////////////////////////////////////////////
+// start of <joint_limits_interface/joint_limits_rosparam.hpp>
+//////////////////////////////////////////////////////////////
+/// Populate a JointLimits instance from the ROS parameter server.
+/**
+ * It is assumed that the following parameter structure is followed on the provided NodeHandle. Unspecified parameters
+ * are simply not added to the joint limits specification.
+ * \code
+ * joint_limits:
+ *   foo_joint:
+ *     has_position_limits: true
+ *     min_position: 0.0
+ *     max_position: 1.0
+ *     has_velocity_limits: true
+ *     max_velocity: 2.0
+ *     has_acceleration_limits: true
+ *     max_acceleration: 5.0
+ *     has_jerk_limits: true
+ *     max_jerk: 100.0
+ *     has_effort_limits: true
+ *     max_effort: 20.0
+ *   bar_joint:
+ *     has_position_limits: false # Continuous joint
+ *     has_velocity_limits: true
+ *     max_velocity: 4.0
+ * \endcode
+ *
+ * This specification is similar to the one used by <a href="http://moveit.ros.org/wiki/MoveIt!">MoveIt!</a>,
+ * but additionally supports jerk and effort limits.
+ *
+ * \param[in] joint_name Name of joint whose limits are to be fetched.
+ * \param[in] node NodeHandle where the joint limits are specified.
+ * \param[out] limits Where joint limit data gets written into. Limits specified in the parameter server will overwrite
+ * existing values. Values in \p limits not specified in the parameter server remain unchanged.
+ * \return True if a limits specification is found (ie. the \p joint_limits/joint_name parameter exists in \p node),
+ * false otherwise.
+ */
+namespace joint_limits_interface
+{
+inline bool getJointLimits(const std::string& joint_name, const rclcpp::Node::SharedPtr& node, JointLimits& limits)
+{
+  const std::string param_base_name = "joint_limits." + joint_name;
+  try
+  {
+    if (!node->has_parameter(param_base_name + ".has_position_limits") &&
+        !node->has_parameter(param_base_name + ".min_position") &&
+        !node->has_parameter(param_base_name + ".max_position") &&
+        !node->has_parameter(param_base_name + ".has_velocity_limits") &&
+        !node->has_parameter(param_base_name + ".min_velocity") &&
+        !node->has_parameter(param_base_name + ".max_velocity") &&
+        !node->has_parameter(param_base_name + ".has_acceleration_limits") &&
+        !node->has_parameter(param_base_name + ".max_acceleration") &&
+        !node->has_parameter(param_base_name + ".has_jerk_limits") &&
+        !node->has_parameter(param_base_name + ".max_jerk") &&
+        !node->has_parameter(param_base_name + ".has_effort_limits") &&
+        !node->has_parameter(param_base_name + ".max_effort") &&
+        !node->has_parameter(param_base_name + ".angle_wraparound") &&
+        !node->has_parameter(param_base_name + ".has_soft_limits") &&
+        !node->has_parameter(param_base_name + ".k_position") &&
+        !node->has_parameter(param_base_name + ".k_velocity") &&
+        !node->has_parameter(param_base_name + ".soft_lower_limit") &&
+        !node->has_parameter(param_base_name + ".soft_upper_limit"))
+    {
+      RCLCPP_ERROR_STREAM(node->get_logger(), "No joint limits specification found for joint '"
+                                                  << joint_name << "' in the parameter server (node: "
+                                                  << std::string(node->get_name()) + " param name: " + param_base_name
+                                                  << ").");
+      return false;
+    }
+  }
+  catch (const std::exception& ex)
+  {
+    RCLCPP_ERROR_STREAM(node->get_logger(), ex.what());
+    return false;
+  }
+
+  // Position limits
+  bool has_position_limits = false;
+  if (node->get_parameter(param_base_name + ".has_position_limits", has_position_limits))
+  {
+    if (!has_position_limits)
+    {
+      limits.has_position_limits = false;
+    }
+    double min_pos, max_pos;
+    if (has_position_limits && node->get_parameter(param_base_name + ".min_position", min_pos) &&
+        node->get_parameter(param_base_name + ".max_position", max_pos))
+    {
+      limits.has_position_limits = true;
+      limits.min_position = min_pos;
+      limits.max_position = max_pos;
+    }
+
+    bool angle_wraparound;
+    if (!has_position_limits && node->get_parameter(param_base_name + ".angle_wraparound", angle_wraparound))
+    {
+      limits.angle_wraparound = angle_wraparound;
+    }
+  }
+
+  // Velocity limits
+  bool has_velocity_limits = false;
+  if (node->get_parameter(param_base_name + ".has_velocity_limits", has_velocity_limits))
+  {
+    if (!has_velocity_limits)
+    {
+      limits.has_velocity_limits = false;
+    }
+    double max_vel;
+    if (has_velocity_limits && node->get_parameter(param_base_name + ".max_velocity", max_vel))
+    {
+      limits.has_velocity_limits = true;
+      limits.max_velocity = max_vel;
+    }
+  }
+
+  // Acceleration limits
+  bool has_acceleration_limits = false;
+  if (node->get_parameter(param_base_name + ".has_acceleration_limits", has_acceleration_limits))
+  {
+    if (!has_acceleration_limits)
+    {
+      limits.has_acceleration_limits = false;
+    }
+    double max_acc;
+    if (has_acceleration_limits && node->get_parameter(param_base_name + ".max_acceleration", max_acc))
+    {
+      limits.has_acceleration_limits = true;
+      limits.max_acceleration = max_acc;
+    }
+  }
+
+  // Jerk limits
+  bool has_jerk_limits = false;
+  if (node->get_parameter(param_base_name + ".has_jerk_limits", has_jerk_limits))
+  {
+    if (!has_jerk_limits)
+    {
+      limits.has_jerk_limits = false;
+    }
+    double max_jerk;
+    if (has_jerk_limits && node->get_parameter(param_base_name + ".max_jerk", max_jerk))
+    {
+      limits.has_jerk_limits = true;
+      limits.max_jerk = max_jerk;
+    }
+  }
+
+  // Effort limits
+  bool has_effort_limits = false;
+  if (node->get_parameter(param_base_name + ".has_effort_limits", has_effort_limits))
+  {
+    if (!has_effort_limits)
+    {
+      limits.has_effort_limits = false;
+    }
+    double max_effort;
+    if (has_effort_limits && node->get_parameter(param_base_name + ".max_effort", max_effort))
+    {
+      limits.has_effort_limits = true;
+      limits.max_effort = max_effort;
+    }
+  }
+
+  return true;
+}
+
+/// Populate a SoftJointLimits instance from the ROS parameter server.
+/**
+ * It is assumed that the following parameter structure is followed on the provided NodeHandle. Only completely
+ * specified soft joint limits specifications will be considered valid. \code joint_limits: foo_joint: soft_lower_limit:
+ * 0.0 soft_upper_limit: 1.0 k_position: 10.0 k_velocity: 10.0 \endcode
+ *
+ * This specification is similar to the specification of the safety_controller tag in the URDF, adapted to the parameter
+ * server.
+ *
+ * \param[in] joint_name Name of joint whose limits are to be fetched.
+ * \param[in] node NodeHandle where the joint limits are specified.
+ * \param[out] soft_limits Where soft joint limit data gets written into. Limits specified in the parameter server will
+ * overwrite existing values. \return True if a complete soft limits specification is found (ie. if all \p k_position,
+ * \p k_velocity, \p soft_lower_limit and \p soft_upper_limit exist in \p joint_limits/joint_name namespace), false
+ * otherwise.
+ */
+inline bool getSoftJointLimits(const std::string& joint_name, const rclcpp::Node::SharedPtr& node,
+                               SoftJointLimits& soft_limits)
+{
+  const std::string param_base_name = "joint_limits." + joint_name;
+  try
+  {
+    if (!node->has_parameter(param_base_name + ".has_soft_limits") &&
+        !node->has_parameter(param_base_name + ".k_velocity") &&
+        !node->has_parameter(param_base_name + ".k_position") &&
+        !node->has_parameter(param_base_name + ".soft_lower_limit") &&
+        !node->has_parameter(param_base_name + ".soft_upper_limit"))
+    {
+      RCLCPP_DEBUG_STREAM(node->get_logger(), "No soft joint limits specification found for joint '"
+                                                  << joint_name << "' in the parameter server (node: "
+                                                  << std::string(node->get_name()) + " param name: " + param_base_name
+                                                  << ").");
+      return false;
+    }
+  }
+  catch (const std::exception& ex)
+  {
+    RCLCPP_ERROR_STREAM(node->get_logger(), ex.what());
+    return false;
+  }
+
+  // Override soft limits if complete specification is found
+  bool has_soft_limits;
+  if (node->get_parameter(param_base_name + ".has_soft_limits", has_soft_limits))
+  {
+    if (has_soft_limits && node->has_parameter(param_base_name + ".k_position") &&
+        node->has_parameter(param_base_name + ".k_velocity") &&
+        node->has_parameter(param_base_name + ".soft_lower_limit") &&
+        node->has_parameter(param_base_name + ".soft_upper_limit"))
+    {
+      node->get_parameter(param_base_name + ".k_position", soft_limits.k_position);
+      node->get_parameter(param_base_name + ".k_velocity", soft_limits.k_velocity);
+      node->get_parameter(param_base_name + ".soft_lower_limit", soft_limits.min_position);
+      node->get_parameter(param_base_name + ".soft_upper_limit", soft_limits.max_position);
+      return true;
+    }
+  }
+
+  return false;
+}
+}  // namespace joint_limits_interface
+//////////////////////////////////////////////////////////////
+// end of <joint_limits_interface/joint_limits_rosparam.hpp>
+//////////////////////////////////////////////////////////////
 
 namespace pilz_industrial_motion_planner
 {
@@ -45,52 +278,31 @@ namespace joint_limits_interface
 /**
  * @see joint_limits_inteface::getJointLimits(...)
  */
-inline bool getJointLimits(const std::string& joint_name, const ros::NodeHandle& nh,
+inline bool getJointLimits(const std::string& joint_name, const rclcpp::Node::SharedPtr& node,
                            joint_limits_interface::JointLimits& limits)
 {
-  // Node handle scoped where the joint limits are
-  // defined (copied from ::joint_limits_interface::getJointLimits(joint_name,
-  // nh, limits)
-  ros::NodeHandle limits_nh;
-  try
-  {
-    const std::string limits_namespace = "joint_limits/" + joint_name;
-    if (!nh.hasParam(limits_namespace))
-    {
-      ROS_DEBUG_STREAM("No joint limits specification found for joint '"
-                       << joint_name << "' in the parameter server (namespace "
-                       << nh.getNamespace() + "/" + limits_namespace << ").");
-      return false;
-    }
-    limits_nh = ros::NodeHandle(nh, limits_namespace);
-  }
-  catch (const ros::InvalidNameException& ex)
-  {
-    ROS_ERROR_STREAM(ex.what());
-    return false;
-  }
-
   // Set the existing limits
-  if (!::joint_limits_interface::getJointLimits(joint_name, nh, limits))
+  if (!::joint_limits_interface::getJointLimits(joint_name, node, limits))
   {
     return false;  // LCOV_EXCL_LINE // The case where getJointLimits returns
                    // false is covered above.
   }
 
-  // Deceleration limits
-  bool has_deceleration_limits = false;
-  if (limits_nh.getParam("has_deceleration_limits", has_deceleration_limits))
+  try
   {
-    if (!has_deceleration_limits)
+    // Deceleration limits
+    const std::string limits_namespace = "joint_limits." + joint_name;
+    limits.has_deceleration_limits = node->declare_parameter(limits_namespace + ".has_deceleration_limits", false);
+    if (limits.has_deceleration_limits)
     {
-      limits.has_deceleration_limits = false;
+      limits.max_deceleration =
+          node->declare_parameter(limits_namespace + ".max_deceleration", limits.max_deceleration);
     }
-    double max_dec;
-    if (has_deceleration_limits && limits_nh.getParam("max_deceleration", max_dec))
-    {
-      limits.has_deceleration_limits = true;
-      limits.max_deceleration = max_dec;
-    }
+  }
+  catch (const std::exception& ex)
+  {
+    RCLCPP_WARN_STREAM(node->get_logger(), "Failed loading deceleration limits");
+    limits.has_deceleration_limits = false;
   }
 
   return true;

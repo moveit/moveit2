@@ -110,14 +110,14 @@ void IntegrationTestSequenceService::SetUp()
  */
 TEST_F(IntegrationTestSequenceService, TestSendingOfEmptySequence)
 {
-  moveit_msgs::MotionSequenceRequest empty_list;
+  moveit_msgs::msg::MotionSequenceRequest empty_list;
 
   moveit_msgs::GetMotionSequence srv;
   srv.request.request = empty_list;
 
   ASSERT_TRUE(client_.call(srv));
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.response.error_code.val) << "Planning failed.";
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, srv.response.response.error_code.val) << "Planning failed.";
   EXPECT_TRUE(srv.response.response.planned_trajectories.empty());
 }
 
@@ -145,7 +145,7 @@ TEST_F(IntegrationTestSequenceService, TestDifferingGroupNames)
 
   ASSERT_TRUE(client_.call(srv));
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME, srv.response.response.error_code.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME, srv.response.response.error_code.val)
       << "Planning should have failed but did not.";
   EXPECT_TRUE(srv.response.response.planned_trajectories.empty());
 }
@@ -171,7 +171,7 @@ TEST_F(IntegrationTestSequenceService, TestNegativeBlendRadius)
 
   ASSERT_TRUE(client_.call(srv));
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, srv.response.response.error_code.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN, srv.response.response.error_code.val)
       << "Planning should have failed but did not.";
   EXPECT_TRUE(srv.response.response.planned_trajectories.empty());
 }
@@ -197,7 +197,7 @@ TEST_F(IntegrationTestSequenceService, TestOverlappingBlendRadii)
 
   ASSERT_TRUE(client_.call(srv));
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, srv.response.response.error_code.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN, srv.response.response.error_code.val)
       << "Incorrect error code";
   EXPECT_TRUE(srv.response.response.planned_trajectories.empty());
 }
@@ -224,7 +224,8 @@ TEST_F(IntegrationTestSequenceService, TestTooLargeBlendRadii)
 
   ASSERT_TRUE(client_.call(srv));
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, srv.response.response.error_code.val) << "Incorrect error code";
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::FAILURE, srv.response.response.error_code.val)
+      << "Incorrect error code";
   EXPECT_TRUE(srv.response.response.planned_trajectories.empty());
 }
 
@@ -244,7 +245,7 @@ TEST_F(IntegrationTestSequenceService, TestTooLargeBlendRadii)
 TEST_F(IntegrationTestSequenceService, TestSecondTrajInvalidStartState)
 {
   Sequence seq{ data_loader_->getSequence("ComplexSequence") };
-  moveit_msgs::MotionSequenceRequest req_list{ seq.toRequest() };
+  moveit_msgs::msg::MotionSequenceRequest req_list{ seq.toRequest() };
 
   // Set start state
   using std::placeholders::_1;
@@ -256,7 +257,7 @@ TEST_F(IntegrationTestSequenceService, TestSecondTrajInvalidStartState)
 
   ASSERT_TRUE(client_.call(srv));
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE, srv.response.response.error_code.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE, srv.response.response.error_code.val)
       << "Incorrect error code.";
   EXPECT_TRUE(srv.response.response.planned_trajectories.empty());
 }
@@ -285,7 +286,7 @@ TEST_F(IntegrationTestSequenceService, TestFirstGoalNotReachable)
 
   ASSERT_TRUE(client_.call(srv));
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION, srv.response.response.error_code.val)
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION, srv.response.response.error_code.val)
       << "Incorrect error code.";
   EXPECT_TRUE(srv.response.response.planned_trajectories.empty());
 }
@@ -315,7 +316,8 @@ TEST_F(IntegrationTestSequenceService, TestInvalidLinkName)
 
   ASSERT_TRUE(client_.call(srv));
 
-  EXPECT_NE(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.response.error_code.val) << "Incorrect error code.";
+  EXPECT_NE(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, srv.response.response.error_code.val)
+      << "Incorrect error code.";
   EXPECT_TRUE(srv.response.response.planned_trajectories.empty());
 }
 
@@ -333,19 +335,19 @@ TEST_F(IntegrationTestSequenceService, TestInvalidLinkName)
 TEST_F(IntegrationTestSequenceService, TestLargeRequest)
 {
   Sequence seq{ data_loader_->getSequence("ComplexSequence") };
-  moveit_msgs::MotionSequenceRequest req{ seq.toRequest() };
+  moveit_msgs::msg::MotionSequenceRequest req{ seq.toRequest() };
   // Make copy of sequence commands and add them to the end of sequence.
   // Create large request by making copies of the original sequence commands
   // and adding them to the end of the original sequence.
   size_t n{ req.items.size() };
   for (size_t i = 0; i < n; ++i)
   {
-    moveit_msgs::MotionSequenceItem item{ req.items.at(i) };
+    moveit_msgs::msg::MotionSequenceItem item{ req.items.at(i) };
     if (i == 0)
     {
       // Remove start state because only the first request
       // is allowed to have a start state in a sequence.
-      item.req.start_state = moveit_msgs::RobotState();
+      item.req.start_state = moveit_msgs::msg::RobotState();
     }
     req.items.push_back(item);
   }
@@ -355,7 +357,8 @@ TEST_F(IntegrationTestSequenceService, TestLargeRequest)
 
   ASSERT_TRUE(client_.call(srv));
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.response.error_code.val) << "Incorrect error code.";
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, srv.response.response.error_code.val)
+      << "Incorrect error code.";
   EXPECT_EQ(srv.response.response.planned_trajectories.size(), 1u);
   EXPECT_GT(srv.response.response.planned_trajectories.front().joint_trajectory.points.size(), 0u)
       << "Trajectory should contain points.";
@@ -384,7 +387,8 @@ TEST_F(IntegrationTestSequenceService, TestComplexSequenceWithoutBlending)
 
   ASSERT_TRUE(client_.call(srv));
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.response.error_code.val) << "Incorrect error code.";
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, srv.response.response.error_code.val)
+      << "Incorrect error code.";
   EXPECT_EQ(srv.response.response.planned_trajectories.size(), 1u);
   EXPECT_GT(srv.response.response.planned_trajectories.front().joint_trajectory.points.size(), 0u)
       << "Trajectory should contain points.";
@@ -411,7 +415,8 @@ TEST_F(IntegrationTestSequenceService, TestComplexSequenceWithBlending)
 
   ASSERT_TRUE(client_.call(srv));
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.response.error_code.val) << "Incorrect error code.";
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, srv.response.response.error_code.val)
+      << "Incorrect error code.";
   EXPECT_EQ(srv.response.response.planned_trajectories.size(), 1u);
   EXPECT_GT(srv.response.response.planned_trajectories.front().joint_trajectory.points.size(), 0u)
       << "Trajectory should contain points.";

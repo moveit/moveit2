@@ -246,7 +246,7 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIKSolver)
 
     std::vector<std::vector<double>> ik_solutions;
     kinematics::KinematicsResult ik_result;
-    moveit_msgs::MoveItErrorCodes err_code;
+    moveit_msgs::msg::MoveItErrorCodes err_code;
     kinematics::KinematicsQueryOptions options = kinematics::KinematicsQueryOptions();
 
     // compute all ik solutions
@@ -704,7 +704,7 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testGenerateJointTrajectoryWithI
   std::map<std::string, double> initial_joint_position;
   double sampling_time{ 0.1 };
   trajectory_msgs::JointTrajectory joint_trajectory;
-  moveit_msgs::MoveItErrorCodes error_code;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
   bool check_self_collision{ false };
 
   EXPECT_FALSE(pilz_industrial_motion_planner::generateJointTrajectory(

@@ -34,20 +34,20 @@
 
 #pragma once
 
-#include <ros/duration.h>
+#include <rclcpp/duration.hpp>
 
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/Twist.h>
-#include <geometry_msgs/Twist.h>
+#include <geometry_msgs/msg/pose.hpp>
+#include <geometry_msgs/msg/twist.hpp>
+#include <geometry_msgs/msg/twist.hpp>
 
 namespace pilz_industrial_motion_planner
 {
 struct CartesianTrajectoryPoint
 {
-  geometry_msgs::Pose pose;
-  geometry_msgs::Twist velocity;
-  geometry_msgs::Twist acceleartion;
-  ros::Duration time_from_start;
+  geometry_msgs::msg::Pose pose;
+  geometry_msgs::msg::Twist velocity;
+  geometry_msgs::msg::Twist acceleartion;
+  rclcpp::Duration time_from_start{ 0, 0 };
 };
 
 }  // namespace pilz_industrial_motion_planner

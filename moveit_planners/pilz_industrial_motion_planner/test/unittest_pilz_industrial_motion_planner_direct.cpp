@@ -106,12 +106,12 @@ TEST(CommandPlannerTestDirect, FailOnLoadContext)
   pilz_industrial_motion_planner::PlanningContextLoaderPtr planning_context_loader(new TestPlanningContextLoader());
   planner.registerContextLoader(planning_context_loader);
 
-  moveit_msgs::MotionPlanRequest req;
+  moveit_msgs::msg::MotionPlanRequest req;
   req.planner_id = "Test_Algorithm";
 
-  moveit_msgs::MoveItErrorCodes error_code;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
   EXPECT_FALSE(planner.getPlanningContext(nullptr, req, error_code));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::PLANNING_FAILED, error_code.val);
+  EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED, error_code.val);
 }
 
 int main(int argc, char** argv)

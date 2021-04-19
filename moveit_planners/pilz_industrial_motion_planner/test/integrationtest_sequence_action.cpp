@@ -83,13 +83,13 @@ protected:
 
 public:
   MOCK_METHOD0(active_callback, void());
-  MOCK_METHOD1(feedback_callback, void(const moveit_msgs::MoveGroupSequenceFeedbackConstPtr& feedback));
+  MOCK_METHOD1(feedback_callback, void(const moveit_msgs::msg::MoveGroupSequenceFeedbackConstPtr& feedback));
   MOCK_METHOD2(done_callback, void(const actionlib::SimpleClientGoalState& state,
-                                   const moveit_msgs::MoveGroupSequenceResultConstPtr& result));
+                                   const moveit_msgs::msg::MoveGroupSequenceResultConstPtr& result));
 
 protected:
   ros::NodeHandle ph_{ "~" };
-  actionlib::SimpleActionClient<moveit_msgs::MoveGroupSequenceAction> ac_{ ph_, SEQUENCE_ACTION_NAME, true };
+  actionlib::SimpleActionClient<moveit_msgs::msg::MoveGroupSequenceAction> ac_{ ph_, SEQUENCE_ACTION_NAME, true };
   std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
 
   robot_model_loader::RobotModelLoader model_loader_;
@@ -146,11 +146,12 @@ void IntegrationTestSequenceAction::SetUp()
  */
 TEST_F(IntegrationTestSequenceAction, TestSendingOfEmptySequence)
 {
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
 
   ac_.sendGoalAndWait(seq_goal);
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Execution of sequence failed.";
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+      << "Execution of sequence failed.";
   EXPECT_TRUE(res->response.planned_trajectories.empty());
 }
 
@@ -172,12 +173,13 @@ TEST_F(IntegrationTestSequenceAction, TestDifferingGroupNames)
   MotionCmd& cmd{ seq.getCmd(1) };
   cmd.setPlanningGroup("WrongGroupName");
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
 
   ac_.sendGoalAndWait(seq_goal);
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME) << "Incorrect error code.";
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME)
+      << "Incorrect error code.";
   EXPECT_TRUE(res->response.planned_trajectories.empty());
 }
 
@@ -198,13 +200,13 @@ TEST_F(IntegrationTestSequenceAction, TestNegativeBlendRadius)
   Sequence seq{ data_loader_->getSequence("ComplexSequence") };
   seq.setBlendRadius(0, -1.0);
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
 
   ac_.sendGoalAndWait(seq_goal);
 
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN)
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN)
       << "Incorrect error code.";
   EXPECT_TRUE(res->response.planned_trajectories.empty());
 }
@@ -227,13 +229,14 @@ TEST_F(IntegrationTestSequenceAction, TestOverlappingBlendRadii)
   Sequence seq{ data_loader_->getSequence("ComplexSequence") };
   seq.setBlendRadius(0, 10 * seq.getBlendRadius(0));
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
 
   ac_.sendGoalAndWait(seq_goal);
 
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN) << "Incorrect error code";
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN)
+      << "Incorrect error code";
   EXPECT_TRUE(res->response.planned_trajectories.empty());
 }
 
@@ -256,13 +259,13 @@ TEST_F(IntegrationTestSequenceAction, TestTooLargeBlendRadii)
   seq.erase(2, seq.size());
   seq.setBlendRadius(0, 10 * seq.getBlendRadius(seq.size() - 2));
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
 
   ac_.sendGoalAndWait(seq_goal);
 
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::FAILURE) << "Incorrect error code";
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::FAILURE) << "Incorrect error code";
   EXPECT_TRUE(res->response.planned_trajectories.empty());
 }
 
@@ -286,12 +289,12 @@ TEST_F(IntegrationTestSequenceAction, TestInvalidCmd)
   // Erase certain command to invalid command following the command in sequence.
   seq.erase(3, 4);
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
 
   ac_.sendGoalAndWait(seq_goal);
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_NE(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Incorrect error code.";
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_NE(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS) << "Incorrect error code.";
   EXPECT_TRUE(res->response.planned_trajectories.empty());
 }
 
@@ -315,12 +318,12 @@ TEST_F(IntegrationTestSequenceAction, TestInvalidLinkName)
   CircInterimCart& circ{ seq.getCmd<CircInterimCart>(1) };
   circ.getGoalConfiguration().setLinkName("InvalidLinkName");
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
 
   ac_.sendGoalAndWait(seq_goal);
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_NE(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Incorrect error code.";
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_NE(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS) << "Incorrect error code.";
   EXPECT_TRUE(res->response.planned_trajectories.empty());
 }
 
@@ -333,7 +336,7 @@ MATCHER_P(FeedbackStateEq, state, "")
 }
 MATCHER(IsResultSuccess, "")
 {
-  return arg->response.error_code.val == moveit_msgs::MoveItErrorCodes::SUCCESS;
+  return arg->response.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
 }
 MATCHER(IsResultNotEmpty, "")
 {
@@ -365,7 +368,7 @@ TEST_F(IntegrationTestSequenceAction, TestActionServerCallbacks)
   // We do not need the complete sequence, just two commands.
   seq.erase(2, seq.size());
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
 
   // set expectations (no guarantee, that done callback is called before idle
@@ -415,13 +418,13 @@ TEST_F(IntegrationTestSequenceAction, TestPlanOnlyFlag)
   // We do not need the complete sequence, just two commands.
   seq.erase(2, seq.size());
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.planning_options.plan_only = true;
   seq_goal.request = seq.toRequest();
 
   ac_.sendGoalAndWait(seq_goal);
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Sequence execution failed.";
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS) << "Sequence execution failed.";
   EXPECT_FALSE(res->response.planned_trajectories.empty()) << "Planned trajectory is empty";
 
   ASSERT_TRUE(isAtExpectedPosition(*(move_group_->getCurrentState()), start_config.toRobotState(),
@@ -448,15 +451,16 @@ TEST_F(IntegrationTestSequenceAction, TestIgnoreRobotStateForPlanOnly)
   seq.erase(2, seq.size());
 
   // create request
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.planning_options.plan_only = true;
   seq_goal.request = seq.toRequest();
 
   seq_goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
 
   ac_.sendGoalAndWait(seq_goal);
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Execution of sequence failed.";
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+      << "Execution of sequence failed.";
   EXPECT_FALSE(res->response.planned_trajectories.empty()) << "Planned trajectory is empty";
 
   ASSERT_TRUE(isAtExpectedPosition(*(move_group_->getCurrentState()), start_config.toRobotState(),
@@ -482,14 +486,14 @@ TEST_F(IntegrationTestSequenceAction, TestNegativeBlendRadiusForPlanOnly)
   Sequence seq{ data_loader_->getSequence("ComplexSequence") };
   seq.setBlendRadius(0, -1.0);
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
   seq_goal.planning_options.plan_only = true;
 
   ac_.sendGoalAndWait(seq_goal);
 
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN)
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN)
       << "Incorrect error code.";
   EXPECT_TRUE(res->response.planned_trajectories.empty());
 }
@@ -513,14 +517,15 @@ TEST_F(IntegrationTestSequenceAction, TestIgnoreRobotState)
   seq.erase(2, seq.size());
 
   // create request
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
 
   seq_goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
 
   ac_.sendGoalAndWait(seq_goal);
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Execution of sequence failed.";
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+      << "Execution of sequence failed.";
   EXPECT_FALSE(res->response.planned_trajectories.empty()) << "Planned trajectory is empty";
 }
 
@@ -538,28 +543,28 @@ TEST_F(IntegrationTestSequenceAction, TestIgnoreRobotState)
 TEST_F(IntegrationTestSequenceAction, TestLargeRequest)
 {
   Sequence seq{ data_loader_->getSequence("ComplexSequence") };
-  moveit_msgs::MotionSequenceRequest req{ seq.toRequest() };
+  moveit_msgs::msg::MotionSequenceRequest req{ seq.toRequest() };
   // Create large request by making copies of the original sequence commands
   // and adding them to the end of the original sequence.
   size_t n{ req.items.size() };
   for (size_t i = 0; i < n; ++i)
   {
-    moveit_msgs::MotionSequenceItem item{ req.items.at(i) };
+    moveit_msgs::msg::MotionSequenceItem item{ req.items.at(i) };
     if (i == 0)
     {
       // Remove start state because only the first request
       // is allowed to have a start state in a sequence.
-      item.req.start_state = moveit_msgs::RobotState();
+      item.req.start_state = moveit_msgs::msg::RobotState();
     }
     req.items.push_back(item);
   }
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = req;
 
   ac_.sendGoalAndWait(seq_goal);
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Incorrect error code.";
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS) << "Incorrect error code.";
   EXPECT_FALSE(res->response.planned_trajectories.empty()) << "Planned trajectory is empty";
 }
 
@@ -581,12 +586,12 @@ TEST_F(IntegrationTestSequenceAction, TestComplexSequenceWithoutBlending)
 
   seq.setAllBlendRadiiToZero();
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
 
   ac_.sendGoalAndWait(seq_goal);
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
   EXPECT_FALSE(res->response.planned_trajectories.empty()) << "Planned trajectory is empty";
 }
 
@@ -606,12 +611,12 @@ TEST_F(IntegrationTestSequenceAction, TestComplexSequenceWithBlending)
 {
   Sequence seq{ data_loader_->getSequence("ComplexSequence") };
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
 
   ac_.sendGoalAndWait(seq_goal);
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
   EXPECT_FALSE(res->response.planned_trajectories.empty()) << "Planned trajectory is empty";
 }
 

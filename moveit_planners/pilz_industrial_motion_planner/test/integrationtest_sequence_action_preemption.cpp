@@ -86,13 +86,13 @@ protected:
 
 public:
   MOCK_METHOD0(active_callback, void());
-  MOCK_METHOD1(feedback_callback, void(const moveit_msgs::MoveGroupSequenceFeedbackConstPtr& feedback));
+  MOCK_METHOD1(feedback_callback, void(const moveit_msgs::msg::MoveGroupSequenceFeedbackConstPtr& feedback));
   MOCK_METHOD2(done_callback, void(const actionlib::SimpleClientGoalState& state,
-                                   const moveit_msgs::MoveGroupSequenceResultConstPtr& result));
+                                   const moveit_msgs::msg::MoveGroupSequenceResultConstPtr& result));
 
 protected:
   ros::NodeHandle ph_{ "~" };
-  actionlib::SimpleActionClient<moveit_msgs::MoveGroupSequenceAction> ac_{ ph_, SEQUENCE_ACTION_NAME, true };
+  actionlib::SimpleActionClient<moveit_msgs::msg::MoveGroupSequenceAction> ac_{ ph_, SEQUENCE_ACTION_NAME, true };
   std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
 
   robot_model_loader::RobotModelLoader model_loader_;
@@ -152,7 +152,7 @@ TEST_F(IntegrationTestSequenceAction, TestCancellingOfGoal)
 {
   Sequence seq{ data_loader_->getSequence("ComplexSequence") };
 
-  moveit_msgs::MoveGroupSequenceGoal seq_goal;
+  moveit_msgs::msg::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
 
   ac_.sendGoal(seq_goal);
@@ -162,8 +162,8 @@ TEST_F(IntegrationTestSequenceAction, TestCancellingOfGoal)
   ac_.cancelGoal();
   ac_.waitForResult(ros::Duration(WAIT_FOR_RESULT_TIME_OUT));
 
-  moveit_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->response.error_code.val, moveit_msgs::MoveItErrorCodes::PREEMPTED)
+  moveit_msgs::msg::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
       << "Error code should be preempted.";
 }
 

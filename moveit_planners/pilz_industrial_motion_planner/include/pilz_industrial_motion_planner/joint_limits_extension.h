@@ -35,7 +35,62 @@
 #ifndef JOINT_LIMITS_EXTENSION_H
 #define JOINT_LIMITS_EXTENSION_H
 
-#include <joint_limits_interface/joint_limits.h>
+// TODO(henning): Re-include when this is available, until then the headers content is copied below
+// #include <joint_limits_interface/joint_limits.h>
+/////////////////////////////////////////////////////
+// start of <joint_limits_interface/joint_limits.hpp>
+// //////////////////////////////////////////////////
+namespace joint_limits_interface
+{
+struct JointLimits
+{
+  JointLimits()
+    : min_position(0.0)
+    , max_position(0.0)
+    , max_velocity(0.0)
+    , max_acceleration(0.0)
+    , max_jerk(0.0)
+    , max_effort(0.0)
+    , has_position_limits(false)
+    , has_velocity_limits(false)
+    , has_acceleration_limits(false)
+    , has_jerk_limits(false)
+    , has_effort_limits(false)
+    , angle_wraparound(false)
+  {
+  }
+
+  double min_position;
+  double max_position;
+  double max_velocity;
+  double max_acceleration;
+  double max_jerk;
+  double max_effort;
+
+  bool has_position_limits;
+  bool has_velocity_limits;
+  bool has_acceleration_limits;
+  bool has_jerk_limits;
+  bool has_effort_limits;
+  bool angle_wraparound;
+};
+
+struct SoftJointLimits
+{
+  SoftJointLimits() : min_position(0.0), max_position(0.0), k_position(0.0), k_velocity(0.0)
+  {
+  }
+
+  double min_position;
+  double max_position;
+  double k_position;
+  double k_velocity;
+};
+}  // namespace joint_limits_interface
+///////////////////////////////////////////////////
+// end of <joint_limits_interface/joint_limits.hpp>
+// ////////////////////////////////////////////////
+
 #include <map>
 #include <string>
 

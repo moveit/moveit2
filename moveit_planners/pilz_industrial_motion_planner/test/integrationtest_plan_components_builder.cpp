@@ -83,16 +83,16 @@ void IntegrationTestPlanComponentBuilder::SetUp()
 TEST_F(IntegrationTestPlanComponentBuilder, TestExceptionErrorCodeMapping)
 {
   std::shared_ptr<NoBlenderSetException> nbs_ex{ new NoBlenderSetException("") };
-  EXPECT_EQ(nbs_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+  EXPECT_EQ(nbs_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::FAILURE);
 
   std::shared_ptr<NoTipFrameFunctionSetException> ntffse_ex{ new NoTipFrameFunctionSetException("") };
-  EXPECT_EQ(ntffse_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+  EXPECT_EQ(ntffse_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::FAILURE);
 
   std::shared_ptr<NoRobotModelSetException> nrms_ex{ new NoRobotModelSetException("") };
-  EXPECT_EQ(nrms_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+  EXPECT_EQ(nrms_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::FAILURE);
 
   std::shared_ptr<BlendingFailedException> bf_ex{ new BlendingFailedException("") };
-  EXPECT_EQ(bf_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+  EXPECT_EQ(bf_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::FAILURE);
 }
 
 /**
