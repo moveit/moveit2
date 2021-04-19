@@ -360,17 +360,17 @@ TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
   for (size_t i = 0; i < 7; ++i)
   {
     // We need to check vs radians-per-loop allowable rate (not rad/s)
-    EXPECT_GE(desired_velocity[i], vel_limits[i] * servo_calcs_->parameters_->publish_period);
+    EXPECT_LE(desired_velocity[i], vel_limits[i] * servo_calcs_->parameters_->publish_period);
   }
 
-  // Let's check the negative velocities too
+  // Let's check negative velocity limits too
   desired_velocity *= -1;
   servo_calcs_->prev_joint_velocity_ = desired_velocity;
   servo_calcs_->enforceVelLimits(desired_velocity);
   for (size_t i = 0; i < 7; ++i)
   {
     // We need to check vs radians-per-loop allowable rate (not rad/s)
-    EXPECT_LE(desired_velocity[i], -1 * vel_limits[i] * servo_calcs_->parameters_->publish_period);
+    EXPECT_GE(desired_velocity[i], -1 * vel_limits[i] * servo_calcs_->parameters_->publish_period);
   }
 }
 
