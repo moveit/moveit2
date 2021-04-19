@@ -138,6 +138,7 @@ DecelerateBeforeCollision::solve(const robot_trajectory::RobotTrajectory& local_
   }
 
   // Replace local trajectory with goal command
+  local_solution.header.stamp = node_handle_->get_clock()->now();
   local_solution.joint_names = joint_trajectory.joint_names;
   local_solution.points = { command_goal_point };
 
