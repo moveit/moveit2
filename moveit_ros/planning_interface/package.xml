@@ -22,8 +22,7 @@
 
   <depend>moveit_core</depend>
   <depend>moveit_ros_planning</depend>
-  <!-- TODO(JafarAbdi): uncomment after porting moveit_ros_warehouse -->
-  <!--depend>moveit_ros_warehouse</depend-->
+  <depend>moveit_ros_warehouse</depend>
   <depend>moveit_ros_move_group</depend>
   <!-- TODO(JafarAbdi): uncomment after porting moveit_ros_manipulation -->
   <!--depend>moveit_ros_manipulation</depend-->
@@ -44,7 +43,6 @@
   <test_depend>moveit_resources_fanuc_moveit_config</test_depend>
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
   <test_depend>moveit_simple_controller_manager</test_depend>
-  <test_depend>warehouse_ros_mongo</test_depend>
   <test_depend>moveit_planners_ompl</test_depend>
   <test_depend>rviz2</test_depend>
   <test_depend>ros_testing</test_depend>

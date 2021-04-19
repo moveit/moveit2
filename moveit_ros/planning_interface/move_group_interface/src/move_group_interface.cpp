@@ -39,8 +39,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <memory>
-// TODO(JafarAbdi): Enable once moveit_ros_warehouse is ported
-// #include <moveit/warehouse/constraints_storage.h>
+#include <moveit/warehouse/constraints_storage.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/move_group/capability_names.h>
 #include <moveit/move_group_interface/move_group_interface.h>
@@ -1193,22 +1192,19 @@ public:
 
   bool setPathConstraints(const std::string& constraint)
   {
-    // TODO(JafarAbdi): Enable once moveit_ros_warehouse is ported
-    //    if (constraints_storage_)
-    //    {
-    //
-    //      moveit_warehouse::ConstraintsWithMetadata msg_m;
-    //      if (constraints_storage_->getConstraints(msg_m, constraint, robot_model_->getName(), opt_.group_name_))
-    //      {
-    //        path_constraints_.reset(new
-    //        moveit_msgs::msg::Constraints(static_cast<moveit_msgs::msg::Constraints>(*msg_m)));
-    //        return true;
-    //      }
-    //      else
-    //        return false;
-    //    }
-    //    else
-    return false;
+    if (constraints_storage_)
+    {
+      moveit_warehouse::ConstraintsWithMetadata msg_m;
+      if (constraints_storage_->getConstraints(msg_m, constraint, robot_model_->getName(), opt_.group_name_))
+      {
+        path_constraints_.reset(new moveit_msgs::msg::Constraints(static_cast<moveit_msgs::msg::Constraints>(*msg_m)));
+        return true;
+      }
+      else
+        return false;
+    }
+    else
+      return false;
   }
 
   void clearPathConstraints()
@@ -1235,9 +1231,8 @@ public:
     }
 
     std::vector<std::string> c;
-    // TODO(JafarAbdi): Enable once moveit_ros_warehouse is ported
-    //    if (constraints_storage_)
-    //      constraints_storage_->getKnownConstraints(c, robot_model_->getName(), opt_.group_name_);
+    if (constraints_storage_)
+      constraints_storage_->getKnownConstraints(c, robot_model_->getName(), opt_.group_name_);
 
     return c;
   }
@@ -1288,20 +1283,19 @@ private:
   void initializeConstraintsStorageThread(const std::string& host, unsigned int port)
   {
     // Set up db
-    // TODO(JafarAbdi): Enable once moveit_ros_warehouse is ported
-    //    try
-    //    {
-    //      warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase();
-    //      conn->setParams(host, port);
-    //      if (conn->connect())
-    //      {
-    //        constraints_storage_.reset(new moveit_warehouse::ConstraintsStorage(conn));
-    //      }
-    //    }
-    //    catch (std::exception& ex)
-    //    {
-    //      RCLCPP_ERROR(LOGGER, "%s", ex.what());
-    //    }
+    try
+    {
+      warehouse_ros::DatabaseConnection::Ptr conn = moveit_warehouse::loadDatabase(node_);
+      conn->setParams(host, port);
+      if (conn->connect())
+      {
+        constraints_storage_.reset(new moveit_warehouse::ConstraintsStorage(conn));
+      }
+    }
+    catch (std::exception& ex)
+    {
+      RCLCPP_ERROR(LOGGER, "%s", ex.what());
+    }
     initializing_constraints_ = false;
   }
 
@@ -1356,8 +1350,7 @@ private:
   rclcpp::Client<moveit_msgs::srv::SetPlannerParams>::SharedPtr set_params_service_;
   rclcpp::Client<moveit_msgs::srv::GetCartesianPath>::SharedPtr cartesian_path_service_;
   // rclcpp::Client<moveit_msgs::srv::GraspPlanning>::SharedPtr plan_grasps_service_;
-  // TODO(JafarAbdi): Enable once moveit_ros_warehouse is ported
-  // std::unique_ptr<moveit_warehouse::ConstraintsStorage> constraints_storage_;
+  std::unique_ptr<moveit_warehouse::ConstraintsStorage> constraints_storage_;
   std::unique_ptr<boost::thread> constraints_init_thread_;
   bool initializing_constraints_;
 };
