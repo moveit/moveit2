@@ -505,8 +505,8 @@ TEST_F(ServoCalcsTestFixture, TestComposeOutputMsg)
 
 int main(int argc, char** argv)
 {
-  ::testing::InitGoogleTest(&argc, argv);
   rclcpp::init(argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
   // Set up the shared node
   TEST_NODE = std::make_shared<rclcpp::Node>("servo_calcs_test");
