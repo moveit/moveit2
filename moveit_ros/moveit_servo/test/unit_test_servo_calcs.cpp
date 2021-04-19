@@ -363,7 +363,7 @@ TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
     EXPECT_LE(desired_velocity[i], vel_limits[i] * servo_calcs_->parameters_->publish_period);
   }
 
-  // Let's check the negative velocities too
+  // Let's check negative velocity limits too
   desired_velocity *= -1;
   servo_calcs_->prev_joint_velocity_ = desired_velocity;
   servo_calcs_->enforceVelLimits(desired_velocity);
@@ -505,8 +505,8 @@ TEST_F(ServoCalcsTestFixture, TestComposeOutputMsg)
 
 int main(int argc, char** argv)
 {
-  ::testing::InitGoogleTest(&argc, argv);
   rclcpp::init(argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
   // Set up the shared node
   TEST_NODE = std::make_shared<rclcpp::Node>("servo_calcs_test");
