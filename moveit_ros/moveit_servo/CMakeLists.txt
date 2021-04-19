@@ -243,12 +243,12 @@ if(BUILD_TESTING)
 
   # Flaky, disabling until it is fixed
   # pose_tracking
-  # ament_add_gtest_executable(test_servo_pose_tracking
-  #       test/pose_tracking_test.cpp
-  # )
-  # ament_target_dependencies(test_servo_pose_tracking ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  # target_link_libraries(test_servo_pose_tracking ${POSE_TRACKING})
-  # add_ros_test(test/launch/test_servo_pose_tracking.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  ament_add_gtest_executable(test_servo_pose_tracking
+        test/pose_tracking_test.cpp
+  )
+  ament_target_dependencies(test_servo_pose_tracking ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  target_link_libraries(test_servo_pose_tracking ${POSE_TRACKING})
+  add_ros_test(test/launch/test_servo_pose_tracking.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
   # # low_latency
   # add_rostest_gtest(servo_low_latency_test
