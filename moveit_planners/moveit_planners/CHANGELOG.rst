@@ -2,6 +2,9 @@
 Changelog for package moveit_planners
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.2 (2021-04-20)
+------------------
+
 2.1.1 (2021-04-12)
 ------------------
 * Enable ament_lint tests (`#340 <https://github.com/ros-planning/moveit2/issues/340>`_)

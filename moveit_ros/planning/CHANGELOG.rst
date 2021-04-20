@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.2 (2021-04-20)
+------------------
+* Unify PickNik name in copyrights (`#419 <https://github.com/ros-planning/moveit2/issues/419>`_)
+* Contributors: Tyler Weaver
+
 2.1.1 (2021-04-12)
 ------------------
 * Declare joint limit parameters (`#408 <https://github.com/ros-planning/moveit2/issues/408>`_)

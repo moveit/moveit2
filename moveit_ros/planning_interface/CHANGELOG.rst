@@ -2,6 +2,15 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.2 (2021-04-20)
+------------------
+* Re-enable test_servo_pose_tracking integration test (`#423 <https://github.com/ros-planning/moveit2/issues/423>`_)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* Re-enable moveit_ros_warehouse for moveit_ros_planning_interface (`#424 <https://github.com/ros-planning/moveit2/issues/424>`_)
+  * Remove warehouse_ros_mongo from moveit_ros_planning_interface test depends
+* Unify PickNik name in copyrights (`#419 <https://github.com/ros-planning/moveit2/issues/419>`_)
+* Contributors: Jafar Abdi, Tyler Weaver, Vatan Aksoy Tezer
+
 2.1.1 (2021-04-12)
 ------------------
 * Update launch files to use ros2 control spawner (`#405 <https://github.com/ros-planning/moveit2/issues/405>`_)

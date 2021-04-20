@@ -2,6 +2,12 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.2 (2021-04-20)
+------------------
+* Fix robot_model & moveit_ros_visualization dependencies (`#421 <https://github.com/ros-planning/moveit2/issues/421>`_)
+* Unify PickNik name in copyrights (`#419 <https://github.com/ros-planning/moveit2/issues/419>`_)
+* Contributors: Jafar Abdi, Tyler Weaver
+
 2.1.1 (2021-04-12)
 ------------------
 * Update doxygen comments for distance() and interpolate() (`#401 <https://github.com/ros-planning/moveit2/issues/401>`_)
