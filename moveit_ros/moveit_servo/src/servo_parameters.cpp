@@ -39,9 +39,9 @@
    Created   : 07/02/2020
 */
 
-#include <type_traits>
-#include <rclcpp/rclcpp.hpp>
 #include <moveit_servo/servo_parameters.h>
+#include <rclcpp/rclcpp.hpp>
+#include <type_traits>
 
 using namespace std::placeholders;  // for _1, _2 etc.
 
@@ -65,18 +65,8 @@ void declareOrGetParam(T& output_value, const std::string& param_name, const rcl
   catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
   {
     RCLCPP_WARN_STREAM(logger, "InvalidParameterTypeException(" << param_name << "): " << e.what());
-
-    // Catch a <double> parameter written in the yaml as "1" being considered an <int>
-    if (std::is_same<T, double>::value)
-    {
-      node->undeclare_parameter(param_name);
-      output_value = node->declare_parameter<int>(param_name, 0);
-    }
-    else
-    {
-      RCLCPP_ERROR_STREAM(logger, "Error getting parameter \'" << param_name << "\', check parameter type in YAML file");
-      throw e;
-    }
+    RCLCPP_ERROR_STREAM(logger, "Error getting parameter \'" << param_name << "\', check parameter type in YAML file");
+    throw e;
   }
 
   RCLCPP_INFO_STREAM(logger, "Found parameter - " << param_name << ": " << output_value);
