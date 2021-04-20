@@ -174,8 +174,8 @@ TEST_F(ConstrainedPlanningTestFixture, PositionConstraint)
 
 int main(int argc, char** argv)
 {
-  ::testing::InitGoogleTest(&argc, argv);
   rclcpp::init(argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
   int ret = RUN_ALL_TESTS();
   rclcpp::shutdown();
