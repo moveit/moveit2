@@ -2,6 +2,13 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.2 (2021-04-20)
+------------------
+* Re-enable test_servo_pose_tracking integration test (`#423 <https://github.com/ros-planning/moveit2/issues/423>`_)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* Unify PickNik name in copyrights (`#419 <https://github.com/ros-planning/moveit2/issues/419>`_)
+* Contributors: Tyler Weaver, Vatan Aksoy Tezer
+
 2.1.1 (2021-04-12)
 ------------------
 * Do not output positions at all if they are set to false (`#410 <https://github.com/ros-planning/moveit2/issues/410>`_)

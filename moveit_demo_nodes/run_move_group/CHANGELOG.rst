@@ -2,6 +2,12 @@
 Changelog for package run_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.2 (2021-04-20)
+------------------
+* Remove move_group namespace from MotionPlanning display (`#420 <https://github.com/ros-planning/moveit2/issues/420>`_)
+* Fix node install directory in run_move_group (`#418 <https://github.com/ros-planning/moveit2/issues/418>`_)
+* Contributors: Vatan Aksoy Tezer
+
 2.1.1 (2021-04-12)
 ------------------
 * Update launch files to use ros2 control spawner (`#405 <https://github.com/ros-planning/moveit2/issues/405>`_)
