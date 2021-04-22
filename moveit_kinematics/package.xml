@@ -41,6 +41,7 @@
   <test_depend>moveit_resources_fanuc_moveit_config</test_depend>
   <test_depend>moveit_resources_panda_description</test_depend>
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

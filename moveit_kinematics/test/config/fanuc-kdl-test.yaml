@@ -1,0 +1,19 @@
+tip_link: "tool0"
+root_link: "base_link"
+group: "manipulator"
+ik_timeout: 0.2
+tolerance: 0.1 ## TODO(henningkayser): set arg
+joint_names:
+  - "joint_1"
+  - "joint_2"
+  - "joint_3"
+  - "joint_4"
+  - "joint_5"
+  - "joint_6"
+
+# kdl_params
+ik_plugin_name: "kdl_kinematics_plugin/KDLKinematicsPlugin" # TODO(henningkayser): set arg
+num_ik_cb_tests: 0
+num_ik_multiple_tests: 0
+num_nearest_ik_tests: 0
+publish_trajectory: False
