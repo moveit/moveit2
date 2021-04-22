@@ -40,6 +40,17 @@ add_subdirectory(ikfast_kinematics_plugin)
 add_subdirectory(cached_ik_kinematics_plugin)
 add_subdirectory(test)
 
+install(TARGETS
+  moveit_kdl_kinematics_plugin
+  moveit_lma_kinematics_plugin
+  moveit_srv_kinematics_plugin
+  moveit_cached_ik_kinematics_plugin
+  EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_export_libraries(
     moveit_kdl_kinematics_plugin
     moveit_lma_kinematics_plugin
