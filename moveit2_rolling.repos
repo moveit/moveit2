@@ -1,0 +1,61 @@
+repositories:
+  control_toolbox:
+    type: git
+    url: https://github.com/ros-controls/control_toolbox
+    version: ros2-master
+  geometric_shapes:
+    type: git
+    url: https://github.com/ros-planning/geometric_shapes
+    version: ros2
+  moveit_msgs:
+    type: git
+    url: https://github.com/ros-planning/moveit_msgs
+    version: ros2
+  moveit_resources:
+    type: git
+    url: https://github.com/ros-planning/moveit_resources
+    version: ros2
+  object_recognition_msgs:
+    type: git
+    url: https://github.com/wg-perception/object_recognition_msgs
+    version: ros2
+  octomap:
+    type: git
+    url: https://github.com/octomap/octomap
+    version: devel
+  octomap_msgs:
+    type: git
+    url: https://github.com/OctoMap/octomap_msgs
+    version: ros2
+  ompl:
+    type: git
+    url: https://github.com/ompl/ompl
+    version: 1.5.0
+  random_numbers:
+    type: git
+    url: https://github.com/ros-planning/random_numbers
+    version: ros2
+  realtime_tools:
+    type: git
+    url: https://github.com/ros-controls/realtime_tools
+    version: foxy-devel
+  ros2_control:
+    type: git
+    url: https://github.com/ros-controls/ros2_control
+    version: master
+  ros2_controllers:
+    type: git
+    url: https://github.com/ros-controls/ros2_controllers
+    version: master
+  srdfdom:
+    type: git
+    url: https://github.com/ros-planning/srdfdom
+    version: ros2
+  warehouse_ros:
+    type: git
+    url: https://github.com/ros-planning/warehouse_ros
+    version: ros2
+  warehouse_ros_mongo:
+    type: git
+    url: https://github.com/ros-planning/warehouse_ros_mongo
+    version: ros2
