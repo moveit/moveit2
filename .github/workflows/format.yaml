@@ -1,7 +1,7 @@
 # This is a format job. Pre-commit has a first-party GitHub action, so we use
 # that: https://github.com/pre-commit/action
 
-name: Format
+name: Formatting (pre-commit)
 
 on:
   workflow_dispatch:
