@@ -136,9 +136,9 @@ public:
     }
     rclcpp_action::Client<control_msgs::action::GripperCommand>::SendGoalOptions send_goal_options;
     // Active callback
-    send_goal_options.goal_response_callback = [this](const auto& /* unused-arg */) {
-      RCLCPP_DEBUG_STREAM(LOGGER, name_ << " started execution");
-    };
+    send_goal_options.goal_response_callback =
+        [this](std::shared_future<rclcpp_action::Client<control_msgs::action::GripperCommand>::GoalHandle::SharedPtr>
+               /* unused-arg */) { RCLCPP_DEBUG_STREAM(LOGGER, name_ << " started execution"); };
     // Send goal
     auto current_goal_future = controller_action_client_->async_send_goal(goal, send_goal_options);
     current_goal_ = current_goal_future.get();
@@ -213,6 +213,6 @@ private:
    * joint is considered the command.
    */
   std::set<std::string> command_joints_;
-};
+};  // namespace moveit_simple_controller_manager
 
 }  // end namespace moveit_simple_controller_manager
