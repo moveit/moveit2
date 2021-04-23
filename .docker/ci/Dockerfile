@@ -29,7 +29,7 @@ RUN \
     # Download MoveIt source, so that we can fetch all necessary dependencies
     mkdir src && \
     git clone https://github.com/ros-planning/moveit2.git src/moveit2 -b main && \
-    vcs import src < moveit2/moveit2.repos && \
+    vcs import src < src/moveit2/moveit2.repos && \
     #
     # Download all dependencies of MoveIt
     rosdep update && \
