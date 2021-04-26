@@ -1,14 +1,12 @@
+import launch_testing
 import os
-import yaml
+import pytest
 import unittest
-
+import yaml
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
-import launch_testing
-from ament_index_python.packages import get_package_share_directory
 from launch_testing.util import KeepAliveProc
-
-import pytest
 
 
 def load_file(package_name, file_path):
@@ -74,17 +72,22 @@ def generate_test_description():
         output="screen",
     )
 
-    return LaunchDescription(
-        [
-            panda_kdl,
-            KeepAliveProc(),
-            launch_testing.actions.ReadyToTest(),
-        ]
-    ), {"panda_kdl": panda_kdl},
+    return (
+        LaunchDescription(
+            [
+                panda_kdl,
+                KeepAliveProc(),
+                launch_testing.actions.ReadyToTest(),
+            ]
+        ),
+        {"panda_kdl": panda_kdl},
+    )
+
 
 class TestTerminatingProcessStops(unittest.TestCase):
     def test_gtest_run_complete(self, proc_info, panda_kdl):
         proc_info.assertWaitForShutdown(process=panda_kdl, timeout=4000.0)
+
 
 @launch_testing.post_shutdown_test()
 class TestOutcome(unittest.TestCase):

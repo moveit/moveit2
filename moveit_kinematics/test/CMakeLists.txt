@@ -4,7 +4,6 @@ if(BUILD_TESTING)
   find_package(moveit_resources REQUIRED)
   find_package(moveit_ros_planning REQUIRED)
 
-  # pluginlib_export_plugin_description_file(kdl_kinematics kdl_kinematics_plugin_description.xml)
   ament_add_gtest_executable(test_kinematics_plugin test_kinematics_plugin.cpp)
   ament_target_dependencies(test_kinematics_plugin moveit_ros_planning pluginlib)
   target_link_libraries(test_kinematics_plugin moveit_kdl_kinematics_plugin)
@@ -13,13 +12,11 @@ if(BUILD_TESTING)
     target_compile_options(test_kinematics_plugin PRIVATE -Wno-deprecated-declarations)
   endif()
 
-  set(DEPS DEPENDENCIES test_kinematics_plugin)
   set(ARGS ARGS ik_plugin:=kdl_kinematics_plugin/KDLKinematicsPlugin)
   add_launch_test(launch/fanuc-kdl-singular.test.py)
   add_launch_test(launch/fanuc-kdl.test.py)
   add_launch_test(launch/panda-kdl-singular.test.py)
   add_launch_test(launch/panda-kdl.test.py)
-  # add_launch_test(panda-kdl.test ${DEPS} ${ARGS})
 
   # LMA solver seems to have less precision
   #set(ARGS ARGS ik_plugin:=lma_kinematics_plugin/LMAKinematicsPlugin tolerance:=0.0005)

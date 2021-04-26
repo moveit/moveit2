@@ -1,13 +1,12 @@
+import launch_testing
 import os
-import yaml
+import pytest
 import unittest
-
+import yaml
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
-import launch_testing
-from ament_index_python.packages import get_package_share_directory
-
-import pytest
+from launch_testing.util import KeepAliveProc
 
 
 def load_file(package_name, file_path):
@@ -60,17 +59,6 @@ def generate_test_description():
         "num_ik_tests": 0,
     }
 
-    unit_tests_poses = {
-        "unit_test_poses": {
-            "size": 1,
-            "pose_0": {
-                "pose": [0.0, 0.0, -0.1, 0.0, 0.0, 0.0],
-                "joints": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                "type": "relative",
-            },
-        }
-    }
-
     panda_kdl_singular = Node(
         package="moveit_kinematics",
         executable="test_kinematics_plugin",
@@ -85,12 +73,21 @@ def generate_test_description():
         output="screen",
     )
 
-    return LaunchDescription(
-        [
-            panda_kdl_singular,
-            launch_testing.actions.ReadyToTest(),
-        ]
+    return (
+        LaunchDescription(
+            [
+                panda_kdl_singular,
+                KeepAliveProc(),
+                launch_testing.actions.ReadyToTest(),
+            ]
+        ),
+        {"panda_kdl_singular": panda_kdl_singular},
     )
+
+
+class TestTerminatingProcessStops(unittest.TestCase):
+    def test_gtest_run_complete(self, proc_info, panda_kdl_singular):
+        proc_info.assertWaitForShutdown(process=panda_kdl_singular, timeout=4000.0)
 
 
 @launch_testing.post_shutdown_test()
