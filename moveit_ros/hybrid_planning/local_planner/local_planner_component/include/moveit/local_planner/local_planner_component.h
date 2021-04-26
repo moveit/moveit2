@@ -46,6 +46,9 @@
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 
+#include <std_msgs/msg/float64.hpp>
+#include <std_msgs/msg/float64_multi_array.hpp>
+
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
@@ -109,6 +112,7 @@ public:
       declareOrGetParam<double>("local_planning_frequency", local_planning_frequency, 1.0, node);
       declareOrGetParam<std::string>("global_solution_topic", global_solution_topic, undefined, node);
       declareOrGetParam<std::string>("local_solution_topic", local_solution_topic, undefined, node);
+      declareOrGetParam<std::string>("local_solution_topic_type", local_solution_topic_type, undefined, node);
     }
 
     std::string robot_description;
@@ -118,6 +122,7 @@ public:
     std::string local_constraint_solver_plugin_name;
     std::string global_solution_topic;
     std::string local_solution_topic;
+    std::string local_solution_topic_type;
     double local_planning_frequency;
   };
 
@@ -164,7 +169,8 @@ private:
   rclcpp_action::Server<moveit_msgs::action::LocalPlanner>::SharedPtr local_planning_request_server_;
 
   // Local solution publisher
-  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr local_solution_publisher_;
+  rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr local_trajectory_publisher_;
+  rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr local_solution_publisher_;
 
   // Local constraint solver plugin loader
   std::unique_ptr<pluginlib::ClassLoader<moveit_hybrid_planning::LocalConstraintSolverInterface>>
