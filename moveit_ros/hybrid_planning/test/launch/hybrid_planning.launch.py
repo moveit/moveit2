@@ -59,13 +59,6 @@ def generate_launch_description():
     )
     robot_description_kinematics = {"robot_description_kinematics": kinematics_yaml}
 
-    moveit_simple_controllers_yaml = load_yaml(
-        "moveit_resources_panda_moveit_config", "config/panda_controllers.yaml"
-    )
-    moveit_controllers = {
-        "moveit_simple_controller_manager": moveit_simple_controllers_yaml,
-        "moveit_controller_manager": "moveit_simple_controller_manager/MoveItSimpleControllerManager",
-    }
 
     ompl_planning_pipeline_config = {
         "ompl": {
