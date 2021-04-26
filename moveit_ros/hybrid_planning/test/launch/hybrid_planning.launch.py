@@ -59,7 +59,6 @@ def generate_launch_description():
     )
     robot_description_kinematics = {"robot_description_kinematics": kinematics_yaml}
 
-
     ompl_planning_pipeline_config = {
         "ompl": {
             "planning_plugin": "ompl_interface/OMPLPlanner",
@@ -156,9 +155,9 @@ def generate_launch_description():
 
     # ros2_control using FakeSystem as hardware
     ros2_controllers_path = os.path.join(
-        get_package_share_directory("moveit_resources_panda_moveit_config"),
+        get_package_share_directory("moveit_hybrid_planning"),
         "config",
-        "panda_ros_controllers.yaml",
+        "demo_controller.yaml",
     )
     ros2_control_node = Node(
         package="controller_manager",
@@ -181,13 +180,15 @@ def generate_launch_description():
     # load panda_arm_controller
     load_controllers += [
         ExecuteProcess(
-            cmd=["ros2 control load_configure_controller panda_arm_controller"],
+            cmd=[
+                "ros2 control load_configure_controller panda_joint_group_position_controller"
+            ],
             shell=True,
             output="screen",
             on_exit=[
                 ExecuteProcess(
                     cmd=[
-                        "ros2 control switch_controllers --start-controllers panda_arm_controller"
+                        "ros2 control switch_controllers --start-controllers panda_joint_group_position_controller"
                     ],
                     shell=True,
                     output="screen",
