@@ -206,6 +206,13 @@ if(BUILD_TESTING)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
+
+  # This has to be exported here because it is needed to link for the test
+  #  in collision_distance_field but exporting only works from the top level
+  #  cmake file (this one).  This means that if tests link external libraries
+  #  they need to be exported like this or libraries that depend on this one
+  #  will throw a cmake error about a missing find_package when they build.
+  ament_export_dependencies(resource_retriever)
 endif()
 
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
