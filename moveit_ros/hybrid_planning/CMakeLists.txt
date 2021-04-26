@@ -14,6 +14,7 @@ find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(std_srvs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 find_package(control_toolbox REQUIRED)
@@ -40,6 +41,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
   moveit_ros_planning
   moveit_msgs
+  std_msgs
   std_srvs
   tf2_ros
   trajectory_msgs

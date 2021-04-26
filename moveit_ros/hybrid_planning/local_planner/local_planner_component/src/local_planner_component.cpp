@@ -188,8 +188,20 @@ bool LocalPlannerComponent::initialize()
       });
 
   // Initialize local solution publisher
-  local_solution_publisher_ =
-      this->create_publisher<trajectory_msgs::msg::JointTrajectory>(config_.local_solution_topic, 1);
+  if (config_.local_solution_topic_type == "trajectory_msgs/JointTrajectory")
+  {
+    local_trajectory_publisher_ =
+        this->create_publisher<trajectory_msgs::msg::JointTrajectory>(config_.local_solution_topic, 1);
+  }
+  else if (config_.local_solution_topic_type == "std_msgs/Float64MultiArray")
+  {
+    local_solution_publisher_ =
+        this->create_publisher<std_msgs::msg::Float64MultiArray>(config_.local_solution_topic, 1);
+  }
+  else if (config_.local_solution_topic_type == "CUSTOM")
+  {
+    // Local solution publisher is defined by the local constraint solver plugin
+  }
 
   state_ = moveit_hybrid_planning::LocalPlannerState::READY;
   return true;
@@ -260,8 +272,32 @@ void LocalPlannerComponent::executePlanningLoopRun()
         local_planning_goal_handle_->publish_feedback(local_feedback);
       }
 
-      // Publish control command
-      local_solution_publisher_->publish(local_solution);
+      // Use the same message interface to controllers like MoveIt servo to use application dependend controller
+      // (See https://github.com/ros-planning/moveit2/blob/main/moveit_ros/moveit_servo/src/servo_calcs.cpp)
+      // Format outgoing msg in the right format
+      // (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
+      if (config_.local_solution_topic_type == "trajectory_msgs/JointTrajectory")
+      {
+        local_trajectory_publisher_->publish(local_solution);
+      }
+      else if (config_.local_solution_topic_type == "std_msgs/Float64MultiArray")
+      {
+        // Transform "trajectory_msgs/JointTrajectory" to "std_msgs/Float64MultiArray"
+        auto joints = std::make_unique<std_msgs::msg::Float64MultiArray>();
+        if (!local_solution.points.empty())
+        {
+          joints->data = local_solution.points[0].positions;
+        }
+        else if (!local_solution.points.empty())
+        {
+          joints->data = local_solution.points[0].velocities;
+        }
+        local_solution_publisher_->publish(std::move(joints));
+      }
+      else if (config_.local_solution_topic_type == "CUSTOM")
+      {
+        // Local solution publisher is defined by the local constraint solver plugin
+      }
       break;
     }
     default:
