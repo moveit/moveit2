@@ -33,47 +33,33 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: Simple local solver plugin that stops in front of a collision object.
+   Description: Simple trajectory operator that samples the next global trajectory waypoint as local goal constraint
+   based on the current robot state. When the waypoint is reached the index that marks the current local goal constraint
+   is updated to the next global trajectory waypoint. Global trajectory updates simply replace the reference trajectory.
  */
 
-#pragma once
-
-#include <rclcpp/rclcpp.hpp>
-#include <moveit/local_planner/local_constraint_solver_interface.h>
-#include <control_toolbox/pid.hpp>
+#include <moveit/local_planner/trajectory_operator_interface.h>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 
 namespace moveit_hybrid_planning
 {
-struct PIDConfig
-{
-  // Default values
-  double k_p = 1;
-  double k_i = 0;
-  double k_d = 0;
-  double windup_limit = 0.1;
-  double d_t = 0.01;  // s
-};
-
-class DecelerateBeforeCollision : public LocalConstraintSolverInterface
+class SimpleSampler : public TrajectoryOperatorInterface
 {
 public:
-  DecelerateBeforeCollision();
-  ~DecelerateBeforeCollision() override{};
-  bool initialize(const rclcpp::Node::SharedPtr& node,
-                  const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-                  const std::string& group_name) override;
+  SimpleSampler(){};
+  ~SimpleSampler() override{};
 
-  moveit_msgs::action::LocalPlanner::Feedback solve(const robot_trajectory::RobotTrajectory& local_trajectory,
-                                                    const std::vector<moveit_msgs::msg::Constraints>& local_constraints,
-                                                    trajectory_msgs::msg::JointTrajectory& local_solution) override;
+  bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
+                  const std::string& group_name) override;
+  bool addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory) override;
+  robot_trajectory::RobotTrajectory getLocalTrajectory(const moveit::core::RobotState& current_state) override;
+  double getTrajectoryProgress(const moveit::core::RobotState& current_state) override;
+  bool reset() override;
 
 private:
-  rclcpp::Node::SharedPtr node_handle_;
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-  bool path_invalidation_event_send_;  // Send path invalidation event only once
-  // Map from joint name to controller
-  std::map<std::string, control_toolbox::Pid> joint_position_pids_;
-  PIDConfig pid_config_;
-  rclcpp::Rate loop_rate_;
+  std::size_t
+      next_waypoint_index_;  // Indicates which reference trajectory waypoint is the current local goal constrained
+  bool pass_through_;  // If true, the reference_trajectory is simply forwarded each time the getLocalTrajectory() function is called
+  trajectory_processing::TimeOptimalTrajectoryGeneration time_parametrization_;
 };
 }  // namespace moveit_hybrid_planning
