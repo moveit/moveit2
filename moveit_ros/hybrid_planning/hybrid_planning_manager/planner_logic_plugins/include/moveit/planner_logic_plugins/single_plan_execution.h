@@ -33,6 +33,8 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
+   Description: This planner logic plugin runs the global planner once and starts executing the global solution
+    with the local planner.
  */
 
 #include <moveit/hybrid_planning_manager/planner_logic_interface.h>

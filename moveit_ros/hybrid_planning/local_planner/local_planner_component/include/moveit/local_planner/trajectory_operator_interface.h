@@ -88,6 +88,12 @@ public:
    * @return A value between 0.0 (start) to 1.0 (completion).
    */
   virtual double getTrajectoryProgress(const moveit::core::RobotState& current_state) = 0;
+
+  /**
+   * Reset trajectory operator to some user-defined initial state
+   * @return True if reset was successful
+   */
+  virtual bool reset() = 0;
   virtual ~TrajectoryOperatorInterface(){};
 
 protected:

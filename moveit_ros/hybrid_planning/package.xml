@@ -34,8 +34,7 @@
 
   <export>
     <build_type>ament_cmake</build_type>
-    <moveit_hybrid_planning plugin="${prefix}/decelerate_before_collision_plugin.xml"/>
-    <moveit_hybrid_planning plugin="${prefix}/next_waypoint_sampler_plugin.xml"/>
+    <moveit_hybrid_planning plugin="${prefix}/simple_sampler_plugin.xml"/>
     <moveit_hybrid_planning plugin="${prefix}/replan_invalidated_trajectory_plugin.xml"/>
     <moveit_hybrid_planning plugin="${prefix}/single_plan_execution_plugin.xml"/>
     <moveit_hybrid_planning plugin="${prefix}/forward_trajectory_plugin.xml"/>
