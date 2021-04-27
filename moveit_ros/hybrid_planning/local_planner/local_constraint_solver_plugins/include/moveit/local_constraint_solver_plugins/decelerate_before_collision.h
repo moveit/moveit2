@@ -66,6 +66,10 @@ public:
   moveit_msgs::action::LocalPlanner::Feedback solve(const robot_trajectory::RobotTrajectory& local_trajectory,
                                                     const std::vector<moveit_msgs::msg::Constraints>& local_constraints,
                                                     trajectory_msgs::msg::JointTrajectory& local_solution) override;
+  bool reset() override
+  {
+    return true;
+  };
 
 private:
   rclcpp::Node::SharedPtr node_handle_;

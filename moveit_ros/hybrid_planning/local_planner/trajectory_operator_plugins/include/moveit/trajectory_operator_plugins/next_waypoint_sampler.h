@@ -54,6 +54,10 @@ public:
   bool addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory) override;
   robot_trajectory::RobotTrajectory getLocalTrajectory(const moveit::core::RobotState& current_state) override;
   double getTrajectoryProgress(const moveit::core::RobotState& current_state) override;
+  bool reset() override
+  {
+    return true;
+  };
 
 private:
   std::size_t index_;
