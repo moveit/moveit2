@@ -32,11 +32,6 @@ def load_yaml(package_name, file_path):
 
 
 def generate_launch_description():
-    # moveit_cpp.yaml is passed by filename for now since it's node specific
-    moveit_cpp_yaml_file_name = (
-        get_package_share_directory("run_moveit_cpp") + "/config/moveit_cpp.yaml"
-    )
-
     # Component yaml files are grouped in separate namespaces
     robot_description_config = xacro.process_file(
         os.path.join(
@@ -57,7 +52,6 @@ def generate_launch_description():
     kinematics_yaml = load_yaml(
         "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
     )
-    robot_description_kinematics = {"robot_description_kinematics": kinematics_yaml}
 
     ompl_planning_pipeline_config = {
         "ompl": {
@@ -169,33 +163,19 @@ def generate_launch_description():
         },
     )
 
-    # load joint_state_controller
-    load_joint_state_controller = ExecuteProcess(
-        cmd=["ros2 control load_start_controller joint_state_controller"],
-        shell=True,
-        output="screen",
-    )
-    load_controllers = [load_joint_state_controller]
-
-    # load panda_arm_controller
-    load_controllers += [
-        ExecuteProcess(
-            cmd=[
-                "ros2 control load_configure_controller panda_joint_group_position_controller"
-            ],
-            shell=True,
-            output="screen",
-            on_exit=[
-                ExecuteProcess(
-                    cmd=[
-                        "ros2 control switch_controllers --start-controllers panda_joint_group_position_controller"
-                    ],
-                    shell=True,
-                    output="screen",
-                )
-            ],
-        )
-    ]
+    # Load controllers
+    load_controllers = []
+    for controller in [
+        "joint_state_controller",
+        "panda_joint_group_position_controller",
+    ]:
+        load_controllers += [
+            ExecuteProcess(
+                cmd=["ros2 run controller_manager spawner.py {}".format(controller)],
+                shell=True,
+                output="screen",
+            )
+        ]
 
     # Test node
     test_request_node = Node(

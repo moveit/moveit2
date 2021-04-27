@@ -34,6 +34,7 @@
 
 /* Author: Sebastian Jahr
    Description: Simple local solver plugin that forwards the next waypoint of the sampled local trajectory.
+   Additionally, it is possible to enable collision checking, which lets the robot stop in front of a collision object.
  */
 
 #pragma once
@@ -51,9 +52,16 @@ public:
   bool initialize(const rclcpp::Node::SharedPtr& node,
                   const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                   const std::string& group_name) override;
+  bool reset() override;
 
   moveit_msgs::action::LocalPlanner::Feedback solve(const robot_trajectory::RobotTrajectory& local_trajectory,
                                                     const std::vector<moveit_msgs::msg::Constraints>& local_constraints,
                                                     trajectory_msgs::msg::JointTrajectory& local_solution) override;
+
+private:
+  rclcpp::Node::SharedPtr node_handle_;
+  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  bool path_invalidation_event_send_;  // Send path invalidation event only once
+  bool stop_before_collision_;
 };
 }  // namespace moveit_hybrid_planning
