@@ -1,7 +1,0 @@
-<library path="next_waypoint_sampler_plugin">
-  <class name="moveit_hybrid_planning/NextWaypointSampler" type="moveit_hybrid_planning::NextWaypointSampler" base_class_type="moveit_hybrid_planning::TrajectoryOperatorInterface">
-    <description>
-    Simple trajectory operator plugin that appends new global trajectories to the local planner's reference trajectory and extracts the next trajectory point based on the current robot state and an index.
-    </description>
-  </class>
-</library>
