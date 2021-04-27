@@ -228,8 +228,9 @@ void LocalPlannerComponent::executePlanningLoopRun()
     case moveit_hybrid_planning::LocalPlannerState::ABORT:
     {
       local_planning_goal_handle_->abort(result);
+      local_constraint_solver_instance_->reset();
+      trajectory_operator_instance_->reset();
       timer_->cancel();
-      RCLCPP_ERROR(LOGGER, "Local planner somehow failed :(");
 
       // TODO(sjahr) add proper reset function
       state_ = moveit_hybrid_planning::LocalPlannerState::READY;
@@ -252,6 +253,8 @@ void LocalPlannerComponent::executePlanningLoopRun()
       {
         local_planning_goal_handle_->succeed(result);
         state_ = moveit_hybrid_planning::LocalPlannerState::READY;
+        local_constraint_solver_instance_->reset();
+        trajectory_operator_instance_->reset();
         timer_->cancel();
         break;
       }
@@ -304,7 +307,9 @@ void LocalPlannerComponent::executePlanningLoopRun()
     {
       local_planning_goal_handle_->abort(result);
       timer_->cancel();
-      RCLCPP_ERROR(LOGGER, "Local planner somehow failed :(");
+      local_constraint_solver_instance_->reset();
+      trajectory_operator_instance_->reset();
+      RCLCPP_ERROR(LOGGER, "Local planner somehow failed :(");  // TODO(sjahr) Add more detailed failure information
       state_ = moveit_hybrid_planning::LocalPlannerState::READY;
       break;
     }

@@ -78,6 +78,12 @@ public:
   solve(const robot_trajectory::RobotTrajectory& local_trajectory,
         const std::vector<moveit_msgs::msg::Constraints>& local_constraints,
         trajectory_msgs::msg::JointTrajectory& local_solution) = 0;
+
+  /**
+   * Reset local constraint solver to some user-defined initial state
+   * @return True if reset was successful
+   */
+  virtual bool reset() = 0;
   virtual ~LocalConstraintSolverInterface(){};
 
 protected:

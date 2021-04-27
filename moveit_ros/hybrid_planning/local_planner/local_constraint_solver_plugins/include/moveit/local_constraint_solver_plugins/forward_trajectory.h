@@ -51,6 +51,10 @@ public:
   bool initialize(const rclcpp::Node::SharedPtr& node,
                   const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                   const std::string& group_name) override;
+  bool reset() override
+  {
+    return true;
+  };
 
   moveit_msgs::action::LocalPlanner::Feedback solve(const robot_trajectory::RobotTrajectory& local_trajectory,
                                                     const std::vector<moveit_msgs::msg::Constraints>& local_constraints,
