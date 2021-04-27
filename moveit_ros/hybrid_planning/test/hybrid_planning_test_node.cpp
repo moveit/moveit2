@@ -214,7 +214,7 @@ public:
     send_goal_options.feedback_callback =
         [](rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanning>::SharedPtr /*unused*/,
            const std::shared_ptr<const moveit_msgs::action::HybridPlanning::Feedback> feedback) {
-          RCLCPP_INFO(LOGGER, feedback->feedback);
+          RCLCPP_INFO(LOGGER, feedback->feedback.c_str());
         };
 
     RCLCPP_INFO(LOGGER, "Sending hybrid planning goal");

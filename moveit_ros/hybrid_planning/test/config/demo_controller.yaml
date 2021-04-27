@@ -18,6 +18,12 @@ panda_arm_controller:
       - panda_joint5
       - panda_joint6
       - panda_joint7
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+
 panda_joint_group_position_controller:
   ros__parameters:
     joints:

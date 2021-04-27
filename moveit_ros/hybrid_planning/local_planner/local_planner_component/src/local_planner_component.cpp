@@ -52,8 +52,10 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   : Node("local_planner_component", options)
 {
   state_ = moveit_hybrid_planning::LocalPlannerState::UNCONFIGURED;
+  local_planner_feedback_ = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
 
   // Initialize local planner after construction
+  // TODO(sjahr) Remove once life cycle component nodes are available
   timer_ = this->create_wall_timer(1ms, [this]() {
     switch (state_)
     {
@@ -69,8 +71,8 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
         }
         else
         {
-          const std::string error = "Failed to initialize global planner";
-          RCLCPP_FATAL(LOGGER, error);
+          timer_->cancel();
+          throw std::runtime_error("Failed to initialize local planner");
         }
       default:
         break;
@@ -90,9 +92,8 @@ bool LocalPlannerComponent::initialize()
       node_ptr, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor");
   if (!planning_scene_monitor_->getPlanningScene())
   {
-    const std::string error = "Unable to configure planning scene monitor";
-    RCLCPP_FATAL(LOGGER, error);
-    throw std::runtime_error(error);
+    RCLCPP_ERROR(LOGGER, "Unable to configure planning scene monitor");
+    return false;
   }
 
   // Start state and scene monitors
@@ -110,21 +111,23 @@ bool LocalPlannerComponent::initialize()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_FATAL(LOGGER, "Exception while creating trajectory operator plugin loader %s", ex.what());
+    RCLCPP_ERROR(LOGGER, "Exception while creating trajectory operator plugin loader: '%s'", ex.what());
+    return false;
   }
   try
   {
     trajectory_operator_instance_ =
         trajectory_operator_loader_->createUniqueInstance(config_.trajectory_operator_plugin_name);
     if (!trajectory_operator_instance_->initialize(node_ptr, planning_scene_monitor_->getRobotModel(),
-                                                   "panda_arm"))  // TODO(sjahr) add default group param
+                                                   config_.group_name))  // TODO(sjahr) add default group param
       throw std::runtime_error("Unable to initialize trajectory operator plugin");
     RCLCPP_INFO(LOGGER, "Using trajectory operator interface '%s'", config_.trajectory_operator_plugin_name.c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading trajectory operator '%s': %s",
+    RCLCPP_ERROR(LOGGER, "Exception while loading trajectory operator '%s': '%s'",
                  config_.trajectory_operator_plugin_name.c_str(), ex.what());
+    return false;
   }
 
   // Load local constraint solver
@@ -136,20 +139,22 @@ bool LocalPlannerComponent::initialize()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_FATAL(LOGGER, "Exception while creating constraint solver plugin loader %s", ex.what());
+    RCLCPP_ERROR(LOGGER, "Exception while creating constraint solver plugin loader '%s'", ex.what());
+    return false;
   }
   try
   {
     local_constraint_solver_instance_ =
         local_constraint_solver_plugin_loader_->createUniqueInstance(config_.local_constraint_solver_plugin_name);
-    if (!local_constraint_solver_instance_->initialize(node_ptr, planning_scene_monitor_, "panda_arm"))
+    if (!local_constraint_solver_instance_->initialize(node_ptr, planning_scene_monitor_, config_.group_name))
       throw std::runtime_error("Unable to initialize constraint solver plugin");
     RCLCPP_INFO(LOGGER, "Using constraint solver interface '%s'", config_.local_constraint_solver_plugin_name.c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading constraint solver '%s': %s",
+    RCLCPP_ERROR(LOGGER, "Exception while loading constraint solver '%s': '%s'",
                  config_.local_constraint_solver_plugin_name.c_str(), ex.what());
+    return false;
   }
 
   // Initialize local planning request action server
@@ -181,13 +186,21 @@ bool LocalPlannerComponent::initialize()
         moveit::core::RobotState start_state(planning_scene_monitor_->getRobotModel());
         moveit::core::robotStateMsgToRobotState(msg->trajectory_start, start_state);
         new_trajectory.setRobotTrajectoryMsg(start_state, msg->trajectory);
-        trajectory_operator_instance_->addTrajectorySegment(new_trajectory);
+        *local_planner_feedback_ = trajectory_operator_instance_->addTrajectorySegment(new_trajectory);
+
+        // Feedback is only send when the hybrid planning architecture should react to a discrete event that occurred
+        // when the reference trajectory is updated
+        if (!local_planner_feedback_->feedback.empty())
+        {
+          local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
+        }
 
         // Update local planner state
         state_ = moveit_hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE;
       });
 
   // Initialize local solution publisher
+  RCLCPP_INFO(LOGGER, "Using '%s' as local solution topic type", config_.local_solution_topic_type.c_str());
   if (config_.local_solution_topic_type == "trajectory_msgs/JointTrajectory")
   {
     local_trajectory_publisher_ =
@@ -228,8 +241,9 @@ void LocalPlannerComponent::executePlanningLoopRun()
     case moveit_hybrid_planning::LocalPlannerState::ABORT:
     {
       local_planning_goal_handle_->abort(result);
+      local_constraint_solver_instance_->reset();
+      trajectory_operator_instance_->reset();
       timer_->cancel();
-      RCLCPP_ERROR(LOGGER, "Local planner somehow failed :(");
 
       // TODO(sjahr) add proper reset function
       state_ = moveit_hybrid_planning::LocalPlannerState::READY;
@@ -252,27 +266,40 @@ void LocalPlannerComponent::executePlanningLoopRun()
       {
         local_planning_goal_handle_->succeed(result);
         state_ = moveit_hybrid_planning::LocalPlannerState::READY;
+        local_constraint_solver_instance_->reset();
+        trajectory_operator_instance_->reset();
         timer_->cancel();
         break;
       }
 
       // Get local goal trajectory to follow
       robot_trajectory::RobotTrajectory local_trajectory =
-          trajectory_operator_instance_->getLocalTrajectory(current_robot_state);
-      const auto goal = local_planning_goal_handle_->get_goal();
+          robot_trajectory::RobotTrajectory(planning_scene_monitor_->getRobotModel(), config_.group_name);
+      *local_planner_feedback_ =
+          trajectory_operator_instance_->getLocalTrajectory(current_robot_state, local_trajectory);
+
+      // Feedback is only send when the hybrid planning architecture should react to a discrete event that occurred
+      // during the identification of the local planning problem
+      if (!local_planner_feedback_->feedback.empty())
+      {
+        local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
+      }
 
       // Solve local planning problem
       trajectory_msgs::msg::JointTrajectory local_solution;
-      auto local_feedback = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
-      *local_feedback =
-          local_constraint_solver_instance_->solve(local_trajectory, goal->local_constraints, local_solution);
 
-      if (!local_feedback->feedback.empty())
+      // Feedback is only send when the hybrid planning architecture should react to a discrete event that occurred
+      // while computing a local solution
+      *local_planner_feedback_ = local_constraint_solver_instance_->solve(
+          local_trajectory, local_planning_goal_handle_->get_goal(), local_solution);
+
+      // Feedback is only send when the hybrid planning architecture should react to a discrete event
+      if (!local_planner_feedback_->feedback.empty())
       {
-        local_planning_goal_handle_->publish_feedback(local_feedback);
+        local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
       }
 
-      // Use the same message interface to controllers like MoveIt servo to use application dependend controller
+      // Use a configurable message interface like MoveIt serve
       // (See https://github.com/ros-planning/moveit2/blob/main/moveit_ros/moveit_servo/src/servo_calcs.cpp)
       // Format outgoing msg in the right format
       // (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
@@ -304,7 +331,9 @@ void LocalPlannerComponent::executePlanningLoopRun()
     {
       local_planning_goal_handle_->abort(result);
       timer_->cancel();
-      RCLCPP_ERROR(LOGGER, "Local planner somehow failed :(");
+      local_constraint_solver_instance_->reset();
+      trajectory_operator_instance_->reset();
+      RCLCPP_ERROR(LOGGER, "Local planner somehow failed :(");  // TODO(sjahr) Add more detailed failure information
       state_ = moveit_hybrid_planning::LocalPlannerState::READY;
       break;
     }

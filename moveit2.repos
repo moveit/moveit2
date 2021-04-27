@@ -1,4 +1,9 @@
 repositories:
+# TODO(sjahr): Remove once hybrid planning action definitions are finalized and merged
+  moveit_msgs:
+    type: git
+    url: https://github.com/sjahr/moveit_msgs
+    version: hybrid_planning
   geometric_shapes:
     type: git
     url: https://github.com/ros-planning/geometric_shapes

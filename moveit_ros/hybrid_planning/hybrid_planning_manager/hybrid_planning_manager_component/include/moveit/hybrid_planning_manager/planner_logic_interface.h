@@ -39,11 +39,76 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit/hybrid_planning_manager/hybrid_planning_events.h>
 
 namespace moveit_hybrid_planning
 {
+// TODO(sjahr): Move this into utility package
+class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
+{
+public:
+  MoveItErrorCode()
+  {
+    val = 0;
+  }
+  MoveItErrorCode(int code)
+  {
+    val = code;
+  }
+  MoveItErrorCode(const moveit_msgs::msg::MoveItErrorCodes& code)
+  {
+    val = code.val;
+  }
+  explicit operator bool() const
+  {
+    return val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  }
+  bool operator==(const int code) const
+  {
+    return val == code;
+  }
+  bool operator!=(const int code) const
+  {
+    return val != code;
+  }
+};
+
+// Describes the outcome of a reaction to an event in the hybrid planning architecture
+struct ReactionResult
+{
+  ReactionResult(const BasicHybridPlanningEvent& planning_event, const std::string& error_msg, const int& error_code)
+    : error_message(error_msg), error_code(error_code)
+  {
+    switch (planning_event)
+    {
+      case moveit_hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
+        event = "Hybrid planning request received";
+        break;
+      case moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_PLANNING_ACTION_FINISHED:
+        event = "Global planning action finished";
+        break;
+      case moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
+        event = "Global solution available";
+        break;
+      case moveit_hybrid_planning::BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
+        event = "Local planning action finished";
+        break;
+    }
+  };
+  ReactionResult(const std::string& event, const std::string& error_msg, const int& error_code)
+    : event(event), error_message(error_msg), error_code(error_code){};
+
+  // Event that triggered the reaction
+  std::string event;
+
+  // Additional error description
+  std::string error_message;
+
+  // Error code
+  MoveItErrorCode error_code;
+};
+
 class HybridPlanningManager;  // Forward declaration
 
 /**
@@ -65,16 +130,16 @@ public:
   /**
    * React to event defined in BasicHybridPlanningEvent enum
    * @param event Basic hybrid planning event
-   * @return true if reaction was successful
+   * @return Reaction result that summarizes the outcome of the reaction
    */
-  virtual bool react(BasicHybridPlanningEvent event) = 0;
+  virtual ReactionResult react(const BasicHybridPlanningEvent& event) = 0;
 
   /**
    * React to custom event
    * @param event Encoded as string
-   * @return true if reaction was successful
+   * @return Reaction result that summarizes the outcome of the reaction
    */
-  virtual bool react(const std::string& event) = 0;
+  virtual ReactionResult react(const std::string& event) = 0;
   virtual ~PlannerLogicInterface(){};
 
 protected:

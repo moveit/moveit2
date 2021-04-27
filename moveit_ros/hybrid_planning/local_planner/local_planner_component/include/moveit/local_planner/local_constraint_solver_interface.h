@@ -70,14 +70,20 @@ public:
   /**
    * Solve local planning problem for the current loop run
    * @param local_trajectory The local trajectory to pursue
-   * @param local_constraints Local goal constraints
+   * @param local_goal Local goal constraints
    * @param local_solution solution plan in joint space
    * @return Feedback event from the current solver call i.e. "Collision detected"
    */
   virtual moveit_msgs::action::LocalPlanner::Feedback
   solve(const robot_trajectory::RobotTrajectory& local_trajectory,
-        const std::vector<moveit_msgs::msg::Constraints>& local_constraints,
+        const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> local_goal,
         trajectory_msgs::msg::JointTrajectory& local_solution) = 0;
+
+  /**
+   * Reset local constraint solver to some user-defined initial state
+   * @return True if reset was successful
+   */
+  virtual bool reset() = 0;
   virtual ~LocalConstraintSolverInterface(){};
 
 protected:

@@ -80,6 +80,7 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
   global_trajectory_pub_ = this->create_publisher<moveit_msgs::msg::MotionPlanResponse>("global_trajectory", 1);
 
   // Initialize global planner after construction
+  // TODO(sjahr) Remove once life cycle component nodes are available
   timer_ = this->create_wall_timer(1ms, [this]() {
     if (initialized_)
     {
@@ -90,9 +91,8 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
       initialized_ = this->init();
       if (!initialized_)
       {
-        const std::string error = "Failed to initialize global planner";
         timer_->cancel();
-        throw std::runtime_error(error);
+        throw std::runtime_error("Failed to initialize global planner");
       }
     }
   });
@@ -110,18 +110,16 @@ bool GlobalPlannerComponent::init()
   RCLCPP_DEBUG(LOGGER, "Configuring Planning Scene Monitor");
   if (!planning_scene_monitor_->getPlanningScene())
   {
-    const std::string error = "Unable to configure planning scene monitor";
-    RCLCPP_FATAL(LOGGER, error);
-    throw std::runtime_error(error);
+    RCLCPP_ERROR(LOGGER, "Unable to configure planning scene monitor");
+    return false;
   }
 
   robot_model_ = planning_scene_monitor_->getRobotModel();
   if (!robot_model_)
   {
-    const std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
-                              "parameter server.";
-    RCLCPP_FATAL(LOGGER, error);
-    throw std::runtime_error(error);
+    RCLCPP_ERROR(LOGGER, "Unable to construct robot model. Please make sure all needed information is on the "
+                         "parameter server.");
+    return false;
   }
 
   // Start state and scene monitors
@@ -163,7 +161,6 @@ void GlobalPlannerComponent::globalPlanningRequestCallback(
   const auto goal = goal_handle->get_goal();
 
   // Plan global trajectory
-  RCLCPP_INFO(LOGGER, "Start global planning");
   moveit_msgs::msg::MotionPlanResponse planning_solution = plan(goal->request);
 
   // Publish global planning solution to the local planner
