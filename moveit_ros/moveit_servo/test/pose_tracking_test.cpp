@@ -202,6 +202,13 @@ TEST_F(PoseTrackingFixture, OutgoingMsgTest)
 
   tracker_->moveToPose(translation_tolerance_, ROTATION_TOLERANCE, 1 /* target pose timeout */);
 
+  // Check that the last set of published joint velocities is all zero after calling stopMotion
+  tracker_->stopMotion();
+  for (const auto& joint_velocity : last_received_msg.points[0].velocities)
+  {
+    EXPECT_EQ(joint_velocity, 0.0);
+  }
+
   target_pub_thread.join();
 }
 
