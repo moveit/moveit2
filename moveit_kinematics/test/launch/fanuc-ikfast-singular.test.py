@@ -36,21 +36,21 @@ def generate_test_description():
 
     # Component yaml files are grouped in separate namespaces
     robot_description_config = load_file(
-        "moveit_resources_panda_description", "urdf/panda.urdf"
+        "moveit_resources_fanuc_description", "urdf/fanuc.urdf"
     )
     robot_description = {"robot_description": robot_description_config}
 
     robot_description_semantic_config = load_file(
-        "moveit_resources_panda_moveit_config", "config/panda.srdf"
+        "moveit_resources_fanuc_moveit_config", "config/fanuc.srdf"
     )
     robot_description_semantic = {
         "robot_description_semantic": robot_description_semantic_config
     }
     kinematics_yaml = load_yaml(
-        "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
+        "moveit_resources_fanuc_moveit_config", "config/kinematics.yaml"
     )
     robot_description_kinematics = {"robot_description_kinematics": kinematics_yaml}
-    test_param = load_yaml("moveit_kinematics", "config/panda-kdl-test.yaml")
+    test_param = load_yaml("moveit_kinematics", "config/fanuc-ikfast-test.yaml")
 
     private_params = {
         "seed": [-0.5, -0.5, 0.3, -2, 0.8, 1.8, 1.9],
@@ -61,7 +61,7 @@ def generate_test_description():
     fanuc_ikfast_singular = Node(
         package="moveit_kinematics",
         executable="test_kinematics_plugin",
-        name="panda_kdl",
+        name="fanuc_ikfast_singular",
         parameters=[
             robot_description,
             robot_description_semantic,
