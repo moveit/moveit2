@@ -19,12 +19,17 @@ repos:
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
+      - id: check-json
       - id: check-merge-conflict
       - id: check-symlinks
+      - id: check-toml
       - id: check-yaml
       - id: debug-statements
+      - id: destroyed-symlinks
+      - id: detect-private-key
       - id: end-of-file-fixer
       - id: mixed-line-ending
+      - id: pretty-format-json
       - id: trailing-whitespace
 
   - repo: https://github.com/psf/black
