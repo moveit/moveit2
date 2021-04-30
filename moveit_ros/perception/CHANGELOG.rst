@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.2 (2021-04-20)
+------------------
+
 2.1.1 (2021-04-12)
 ------------------
 * Fix porting errors in depth_image_octomap_updater (`#383 <https://github.com/ros-planning/moveit2/issues/383>`_)

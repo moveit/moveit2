@@ -1,7 +1,7 @@
 # This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
 # For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
 
-name: BuildAndTest
+name: Build and Test (Foxy)
 
 on:
   workflow_dispatch:
@@ -16,26 +16,26 @@ jobs:
     strategy:
       matrix:
         env:
-          - IMAGE: 'foxy-ci'
+          - IMAGE: foxy-ci
             CCOV: true
-          - IMAGE: 'foxy-ci-testing'
+          - IMAGE: foxy-ci-testing
             IKFAST_TEST: true
             CLANG_TIDY: true
     env:
       DOCKER_IMAGE: moveit/moveit2:${{ matrix.env.IMAGE }}
       UPSTREAM_WORKSPACE: moveit2.repos
-      AFTER_SETUP_UPSTREAM_WORKSPACE: 'vcs pull $BASEDIR/upstream_ws/src'
+      AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
       BEFORE_TARGET_TEST_EMBED: ${{ matrix.env.IKFAST_TEST && 'set +u && source moveit_kinematics/test/test_ikfast_plugins.sh && set -u' || '' }}
       AFTER_RUN_TARGET_TEST: ${{ matrix.env.CCOV && './.ci.prepare_codecov' || '' }}
       TARGET_CMAKE_ARGS: >
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'RelWithDebInfo' || 'Release'}}
         ${{ matrix.env.CCOV && '-DCMAKE_CXX_FLAGS="--coverage" --no-warn-unused-cli' || '' }}
-      CCACHE_DIR: "${{ github.workspace }}/.ccache"
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
       BASEDIR: ${{ github.workspace }}/.work
-      CACHE_PREFIX: "${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && '-ccov' || '' }}"
-      CLANG_TIDY_BASE_REF: "${{ github.base_ref || github.ref }}"
+      CACHE_PREFIX: ${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && '-ccov' || '' }}
+      CLANG_TIDY_BASE_REF: ${{ github.base_ref || github.ref }}
 
-    name: "${{ matrix.env.IMAGE }}${{ contains(matrix.env.IKFAST_TEST, 'ikfast') && ' + ikfast' || ''}}${{ matrix.env.CCOV && ' + ccov' || ''}}${{ matrix.env.CLANG_TIDY && ' + clang-tidy' || '' }}"
+    name: ${{ matrix.env.IMAGE }}${{ contains(matrix.env.IKFAST_TEST, 'ikfast') && ' + ikfast' || ''}}${{ matrix.env.CCOV && ' + ccov' || ''}}${{ matrix.env.CLANG_TIDY && ' + clang-tidy' || '' }}
     runs-on: ubuntu-latest
     steps:
       - name: "Free up disk space"
@@ -78,9 +78,8 @@ jobs:
           restore-keys: |
             ccache-${{ env.CACHE_PREFIX }}-${{ github.sha }}
             ccache-${{ env.CACHE_PREFIX }}
-      # https://github.com/ros-industrial/industrial_ci/pull/649
       - name: industrial_ci
-        uses: 'tylerjw/industrial_ci@clang-tidy-modified-filter'
+        uses: 'ros-industrial/industrial_ci@master'
         env: ${{ matrix.env }}
       - name: upload test artifacts (on failure)
         uses: actions/upload-artifact@v2

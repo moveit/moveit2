@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.2 (2021-04-20)
+------------------
+* Fix robot_model & moveit_ros_visualization dependencies (`#421 <https://github.com/ros-planning/moveit2/issues/421>`_)
+* Remove move_group namespace from MotionPlanning display (`#420 <https://github.com/ros-planning/moveit2/issues/420>`_)
+* Contributors: Jafar Abdi, Vatan Aksoy Tezer
+
 2.1.1 (2021-04-12)
 ------------------
 * Fix EXPORT install in CMake (`#372 <https://github.com/ros-planning/moveit2/issues/372>`_)

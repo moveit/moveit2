@@ -2,6 +2,9 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.2 (2021-04-20)
+------------------
+
 2.1.1 (2021-04-12)
 ------------------
 * Add differential drive joint model (`#390 <https://github.com/ros-planning/moveit2/issues/390>`_)
