@@ -39,19 +39,18 @@
 
 #include <moveit/kinematic_constraints/utils.h>
 
-
 namespace moveit_hybrid_planning
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 
-bool SimpleSampler::initialize(const rclcpp::Node::SharedPtr& node,
-                                     const moveit::core::RobotModelConstPtr& robot_model, const std::string& group_name)
+bool SimpleSampler::initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
+                               const std::string& group_name)
 {
   // Load parameter & initialize member variables
   if (node->has_parameter("pass_through"))
-      node->get_parameter<bool>("pass_through", pass_through_);
+    node->get_parameter<bool>("pass_through", pass_through_);
   else
-      pass_through_ = node->declare_parameter<bool>("pass_through", false);
+    pass_through_ = node->declare_parameter<bool>("pass_through", false);
 
   reference_trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, group_name);
   next_waypoint_index_ = 0;
@@ -71,7 +70,8 @@ bool SimpleSampler::addTrajectorySegment(const robot_trajectory::RobotTrajectory
   return true;
 }
 
-bool SimpleSampler::reset(){
+bool SimpleSampler::reset()
+{
   // Reset index
   next_waypoint_index_ = 0;
   reference_trajectory_->clear();
@@ -81,25 +81,26 @@ robot_trajectory::RobotTrajectory SimpleSampler::getLocalTrajectory(const moveit
 {
   robot_trajectory::RobotTrajectory local_trajectory(reference_trajectory_->getRobotModel(),
                                                      reference_trajectory_->getGroupName());
-  if(pass_through_){
+  if (pass_through_)
+  {
     // Use reference_trajectory as local trajectory
     local_trajectory.swap(*reference_trajectory_);
   }
-  else {
-  // Get next desired robot state
-  moveit::core::RobotState next_desired_goal_state = reference_trajectory_->getWayPoint(next_waypoint_index_);
-
-  // Check if state reached
-  if (next_desired_goal_state.distance(current_state) <= 0.1)
+  else
   {
-    // Update index (and thus desired robot state)
-    next_waypoint_index_ += 1;
-  }
+    // Get next desired robot state
+    moveit::core::RobotState next_desired_goal_state = reference_trajectory_->getWayPoint(next_waypoint_index_);
 
-  // Construct local trajectory containing the next three global trajectory waypoints
-  local_trajectory.addSuffixWayPoint(
-          reference_trajectory_->getWayPoint(next_waypoint_index_),
-          reference_trajectory_->getWayPointDurationFromPrevious(next_waypoint_index_));
+    // Check if state reached
+    if (next_desired_goal_state.distance(current_state) <= 0.1)
+    {
+      // Update index (and thus desired robot state)
+      next_waypoint_index_ += 1;
+    }
+
+    // Construct local trajectory containing the next three global trajectory waypoints
+    local_trajectory.addSuffixWayPoint(reference_trajectory_->getWayPoint(next_waypoint_index_),
+                                       reference_trajectory_->getWayPointDurationFromPrevious(next_waypoint_index_));
   }
   return local_trajectory;
 }
