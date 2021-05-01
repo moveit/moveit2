@@ -117,7 +117,6 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
         current_state_command.zeroAccelerations();
       }
       robot_command.empty();
-      RCLCPP_INFO(LOGGER, "A");
       robot_command.addSuffixWayPoint(current_state, 0.0);
     }
   }

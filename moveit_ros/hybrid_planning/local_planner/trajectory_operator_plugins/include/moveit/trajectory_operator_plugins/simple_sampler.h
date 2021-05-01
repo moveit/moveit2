@@ -33,9 +33,9 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: Simple trajectory operator that samples the next global trajectory waypoint as local goal constraint based
-   on the current robot state. When the waypoint is reached the index that marks the current local goal constraint is updated
-   to the next global trajectory waypoint. Global trajectory updates simply replace the reference trajectory.
+   Description: Simple trajectory operator that samples the next global trajectory waypoint as local goal constraint
+   based on the current robot state. When the waypoint is reached the index that marks the current local goal constraint
+   is updated to the next global trajectory waypoint. Global trajectory updates simply replace the reference trajectory.
  */
 
 #include <moveit/local_planner/trajectory_operator_interface.h>
@@ -57,8 +57,9 @@ public:
   bool reset() override;
 
 private:
-  std::size_t next_waypoint_index_; // Indicates which reference trajectory waypoint is the current local goal constrained
-  bool pass_through_; // If true, the reference_trajectory is simply forwarded each time the getLocalTrajectory() function is called
+  std::size_t
+      next_waypoint_index_;  // Indicates which reference trajectory waypoint is the current local goal constrained
+  bool pass_through_;  // If true, the reference_trajectory is simply forwarded each time the getLocalTrajectory() function is called
   trajectory_processing::TimeOptimalTrajectoryGeneration time_parametrization_;
 };
 }  // namespace moveit_hybrid_planning
