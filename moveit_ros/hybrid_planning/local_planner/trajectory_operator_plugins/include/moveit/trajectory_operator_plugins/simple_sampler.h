@@ -35,7 +35,7 @@
 /* Author: Sebastian Jahr
    Description: Simple trajectory operator that samples the next global trajectory waypoint as local goal constraint based
    on the current robot state. When the waypoint is reached the index that marks the current local goal constraint is updated
-   to the next global trajectory waypoint. Global trajectory updates are simply appended to the reference trajectory.
+   to the next global trajectory waypoint. Global trajectory updates simply replace the reference trajectory.
  */
 
 #include <moveit/local_planner/trajectory_operator_interface.h>
@@ -43,24 +43,22 @@
 
 namespace moveit_hybrid_planning
 {
-class NextWaypointSampler : public TrajectoryOperatorInterface
+class SimpleSampler : public TrajectoryOperatorInterface
 {
 public:
-  NextWaypointSampler(){};
-  ~NextWaypointSampler() override{};
+  SimpleSampler(){};
+  ~SimpleSampler() override{};
 
   bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                   const std::string& group_name) override;
   bool addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory) override;
   robot_trajectory::RobotTrajectory getLocalTrajectory(const moveit::core::RobotState& current_state) override;
   double getTrajectoryProgress(const moveit::core::RobotState& current_state) override;
-  bool reset() override
-  {
-    return true;
-  };
+  bool reset() override;
 
 private:
-  std::size_t index_;
+  std::size_t next_waypoint_index_; // Indicates which reference trajectory waypoint is the current local goal constrained
+  bool pass_through_; // If true, the reference_trajectory is simply forwarded each time the getLocalTrajectory() function is called
   trajectory_processing::TimeOptimalTrajectoryGeneration time_parametrization_;
 };
 }  // namespace moveit_hybrid_planning
