@@ -29,7 +29,6 @@ set(LIBRARIES
   local_constraint_solver_interface
   simple_sampler_plugin
   single_plan_execution_plugin
-  decelerate_before_collision_plugin
   replan_invalidated_trajectory_plugin
   forward_trajectory_plugin
 )
@@ -79,7 +78,6 @@ install(DIRECTORY test/config DESTINATION share/${PROJECT_NAME})
 
 pluginlib_export_plugin_description_file(moveit_hybrid_planning single_plan_execution_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning simple_sampler_plugin.xml)
-pluginlib_export_plugin_description_file(moveit_hybrid_planning decelerate_before_collision_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning replan_invalidated_trajectory_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning forward_trajectory_plugin.xml)
 
