@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, KU Leuven
+ *  Copyright (c) 2021, KU Leuven
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -74,8 +74,8 @@ public:
     for (auto const& joint_name : robot_state_->getVariableNames())
     {
       auto const expected_value = robot_state_->getVariablePosition(joint_name);
-      auto const acutal_value = robot_state_stored->getVariablePosition(joint_name);
-      EXPECT_EQ(acutal_value, expected_value) << "Expecting joint value for " << joint_name << " to match.";
+      auto const actual_value = robot_state_stored->getVariablePosition(joint_name);
+      EXPECT_EQ(actual_value, expected_value) << "Expecting joint value for " << joint_name << " to match.";
     }
   }
 
