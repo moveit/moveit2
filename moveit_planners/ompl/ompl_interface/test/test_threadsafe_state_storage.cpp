@@ -38,7 +38,6 @@ This test checks if a state can be set in TSSafeStateStorage and correctly retri
 The skeleton of this test was taken from test_state_validity_checker.cpp by Jeroen De Maeyer.
 */
 
-
 #include "load_test_robot.h"
 #include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
 #include <gtest/gtest.h>
@@ -46,48 +45,44 @@ The skeleton of this test was taken from test_state_validity_checker.cpp by Jero
 /** \brief This flag sets the verbosity level for the state validity checker. **/
 constexpr bool VERBOSE = false;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger(
-    "moveit.ompl_planning.test.test_thread_safe_storage");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_thread_safe_storage");
 
 /** \brief Generic implementation of the tests that can be executed on different robots. **/
-class TestThreadSafeStateStorage : public ompl_interface_testing::LoadTestRobot,
-    public testing::Test
+class TestThreadSafeStateStorage : public ompl_interface_testing::LoadTestRobot, public testing::Test
 {
 public:
-    TestThreadSafeStateStorage(const std::string & robot_name, const std::string & group_name)
-      : LoadTestRobot(robot_name, group_name)
+  TestThreadSafeStateStorage(const std::string& robot_name, const std::string& group_name)
+    : LoadTestRobot(robot_name, group_name)
+  {
+  }
+
+  /** This test if a state is correctly set in TSStateStorage. State is read back and compared with the original state **/
+  void testReadback(const std::vector<double>& position_in_limits)
+  {
+    SCOPED_TRACE("testConstruction");
+
+    // Set the robot_state_ to the given position
+    robot_state_->setJointGroupPositions(joint_model_group_, position_in_limits);
+
+    // Construct the TSStateStorage using the constructor taking the robot state
+    ompl_interface::TSStateStorage const tss(*robot_state_);
+
+    // Readback the stored state
+    auto robot_state_stored = tss.getStateStorage();
+
+    // Check if robot_state_stored's joint angles matches with what we set
+    for (auto const& joint_name : robot_state_->getVariableNames())
     {
+      auto const expected_value = robot_state_->getVariablePosition(joint_name);
+      auto const acutal_value = robot_state_stored->getVariablePosition(joint_name);
+      EXPECT_EQ(acutal_value, expected_value) << "Expecting joint value for " << joint_name << " to match.";
     }
-
-    /** This test if a state is correctly set in TSStateStorage. State is read back and compared with the original state **/
-    void testReadback(const std::vector<double> & position_in_limits)
-    {
-        SCOPED_TRACE("testConstruction");
-
-        // Set the robot_state_ to the given position
-        robot_state_->setJointGroupPositions(joint_model_group_, position_in_limits);
-
-        // Construct the TSStateStorage using the constructor taking the robot state
-        ompl_interface::TSStateStorage const tss(*robot_state_);
-
-        // Readback the stored state
-        auto robot_state_stored = tss.getStateStorage();
-
-        // Check if robot_state_stored's joint angles matches with what we set
-        for (auto const & joint_name: robot_state_->getVariableNames()) {
-            auto const expected_value = robot_state_->getVariablePosition(joint_name);
-            auto const acutal_value = robot_state_stored->getVariablePosition(joint_name);
-            EXPECT_EQ(
-                acutal_value,
-                expected_value) << "Expecting joint value for " << joint_name << " to match.";
-        }
-    }
+  }
 
 protected:
-    void SetUp() override
-    {
-    }
-
+  void SetUp() override
+  {
+  }
 };
 
 // /***************************************************************************
@@ -96,17 +91,15 @@ protected:
 class PandaTest : public TestThreadSafeStateStorage
 {
 protected:
-    PandaTest()
-      : TestThreadSafeStateStorage("panda", "panda_arm")
-    {
-    }
+  PandaTest() : TestThreadSafeStateStorage("panda", "panda_arm")
+  {
+  }
 };
 
 TEST_F(PandaTest, testConstruction)
 {
-    testReadback({0., -0.785, 0., -2.356, 0., 1.571, 0.785});
+  testReadback({ 0., -0.785, 0., -2.356, 0., 1.571, 0.785 });
 }
-
 
 /***************************************************************************
  * Run all tests on the Fanuc robot
@@ -114,22 +107,21 @@ TEST_F(PandaTest, testConstruction)
 class FanucTest : public TestThreadSafeStateStorage
 {
 protected:
-    FanucTest()
-      : TestThreadSafeStateStorage("fanuc", "manipulator")
-    {
-    }
+  FanucTest() : TestThreadSafeStateStorage("fanuc", "manipulator")
+  {
+  }
 };
 
 TEST_F(FanucTest, testConstructor)
 {
-    testReadback({0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
+  testReadback({ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });
 }
 
 /***************************************************************************
  * MAIN
  * ************************************************************************/
-int main(int argc, char ** argv)
+int main(int argc, char** argv)
 {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
 }
