@@ -172,6 +172,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
         {
           scene_->getCollisionEnvNonConst()->setLinkScale(it.first, it.second);
         }
+        scene_->propogateRobotPadding();
       }
       catch (moveit::ConstructException& e)
       {

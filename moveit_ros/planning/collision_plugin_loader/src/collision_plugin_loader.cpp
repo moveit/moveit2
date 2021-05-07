@@ -70,7 +70,7 @@ public:
     return plugin;
   }
 
-  bool activate(const std::string& name, const planning_scene::PlanningScenePtr& scene)
+  bool activate(const std::string& name, const planning_scene::PlanningScenePtr& scene, bool exclusive)
   {
     std::map<std::string, CollisionPluginPtr>::iterator it = plugins_.find(name);
     if (it == plugins_.end())
@@ -78,13 +78,13 @@ public:
       CollisionPluginPtr plugin = load(name);
       if (plugin)
       {
-        return plugin->initialize(scene);
+        return plugin->initialize(scene, exclusive);
       }
       return false;
     }
     if (it->second)
     {
-      return it->second->initialize(scene);
+      return it->second->initialize(scene, exclusive);
     }
     return false;
   }
@@ -101,9 +101,10 @@ CollisionPluginLoader::CollisionPluginLoader()
 
 CollisionPluginLoader::~CollisionPluginLoader() = default;
 
-bool CollisionPluginLoader::activate(const std::string& name, const planning_scene::PlanningScenePtr& scene)
+bool CollisionPluginLoader::activate(const std::string& name, const planning_scene::PlanningScenePtr& scene,
+                                     bool exclusive)
 {
-  return loader_->activate(name, scene);
+  return loader_->activate(name, scene, exclusive);
 }
 
 void CollisionPluginLoader::setupScene(const rclcpp::Node::SharedPtr& node,
@@ -136,8 +137,8 @@ void CollisionPluginLoader::setupScene(const rclcpp::Node::SharedPtr& node,
     return;
   }
 
-  activate(collision_detector_name, scene);
-  RCLCPP_INFO(LOGGER, "Using collision detector: %s", scene->getCollisionDetectorName().c_str());
+  activate(collision_detector_name, scene, true);
+  RCLCPP_INFO(LOGGER, "Using collision detector: %s", scene->getActiveCollisionDetectorName().c_str());
 }
 
 }  // namespace collision_detection
