@@ -179,40 +179,20 @@ void OMPLInterface::loadPlannerConfigurations()
     std::map<std::string, std::string> specific_group_params;
     for (const std::string& k : KNOWN_GROUP_PARAMS)
     {
-      std::string param_name{ group_name };
+      std::string param_name{ group_name_param };
       param_name += ".";
       param_name += k;
       if (node_->has_parameter(param_name))
       {
-        std::string value;
-        if (node_->get_parameter(param_name, value))
-        {
-          if (!value.empty())
-            specific_group_params[k] = value;
-          continue;
-        }
-
-        double value_d;
-        if (node_->get_parameter(param_name, value_d))
-        {
-          // convert to string using no locale
-          specific_group_params[k] = moveit::core::toString(value_d);
-          continue;
-        }
-
-        int value_i;
-        if (node_->get_parameter(param_name, value_i))
-        {
-          specific_group_params[k] = std::to_string(value_i);
-          continue;
-        }
-
-        bool value_b;
-        if (node_->get_parameter(param_name, value_b))
-        {
-          specific_group_params[k] = std::to_string(value_b);
-          continue;
-        }
+        const rclcpp::Parameter parameter = node_->get_parameter(param_name);
+        if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
+          specific_group_params[k] = parameter.as_string();
+        else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
+          specific_group_params[k] = moveit::core::toString(parameter.as_double());
+        else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
+          specific_group_params[k] = std::to_string(parameter.as_int());
+        else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_BOOL)
+          specific_group_params[k] = std::to_string(parameter.as_bool());
       }
     }
 
