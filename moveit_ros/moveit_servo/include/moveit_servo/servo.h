@@ -38,8 +38,10 @@
 
 #pragma once
 
+// System
 #include <memory>
 
+// Moveit2
 #include <moveit_servo/collision_check.h>
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo_calcs.h>
@@ -85,6 +87,9 @@ public:
 
   /** \brief Get the parameters used by servo node. */
   const ServoParameters::SharedConstPtr& getParameters() const;
+
+  // Give test access to private/protected methods
+  friend class ServoFixture;
 
 private:
   // Pointer to the collision environment
