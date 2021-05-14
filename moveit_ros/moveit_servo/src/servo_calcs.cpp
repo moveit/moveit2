@@ -50,7 +50,7 @@
 using namespace std::chrono_literals;  // for s, ms, etc.
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
-constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::nanoseconds(30ms).count();
+constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
 
 namespace moveit_servo
 {
