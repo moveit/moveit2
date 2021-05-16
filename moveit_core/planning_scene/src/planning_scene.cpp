@@ -297,9 +297,19 @@ void PlanningScene::clearDiffs()
 
   if (parent_)
   {
-    collision_detector_->copyPadding(*parent_->collision_detector_);
+    collision_detector_->cenv_ = collision_detector_->alloc_->allocateEnv(parent_->collision_detector_->cenv_, world_);
+    collision_detector_->cenv_const_ = collision_detector_->cenv_;
+
+    collision_detector_->cenv_unpadded_ =
+        collision_detector_->alloc_->allocateEnv(parent_->collision_detector_->cenv_unpadded_, world_);
+    collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
   }
-  collision_detector_->cenv_const_ = collision_detector_->cenv_;
+  else
+  {
+    collision_detector_->copyPadding(*parent_->collision_detector_);
+    collision_detector_->cenv_ = collision_detector_->alloc_->allocateEnv(parent_->collision_detector_->cenv_, world_);
+    collision_detector_->cenv_const_ = collision_detector_->cenv_;
+  }
 
   scene_transforms_.reset();
   robot_state_.reset();
