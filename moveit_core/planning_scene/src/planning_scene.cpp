@@ -1029,6 +1029,7 @@ void PlanningScene::decoupleParent()
   if (!acm_)
     acm_.reset(new collision_detection::AllowedCollisionMatrix(parent_->getAllowedCollisionMatrix()));
 
+  parent_.reset();
   world_diff_.reset();
 
   if (!object_colors_)
