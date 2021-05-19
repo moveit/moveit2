@@ -56,7 +56,6 @@ public:
    * @brief Load a collision detection robot/world into a planning scene instance.
    * @param name The plugin name.
    * @param scene The planning scene instance.
-   * @param exclusive If true, sets the new detection robot/world to be the only one.
    * @return True if collision robot/world were added to scene.
    */
   bool activate(const std::string& name, const planning_scene::PlanningScenePtr& scene);
