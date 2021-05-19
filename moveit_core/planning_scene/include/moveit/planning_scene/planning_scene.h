@@ -952,7 +952,7 @@ private:
 
   MOVEIT_STRUCT_FORWARD(CollisionDetector)
 
-  /* Construct a new CollisionDector from allocator, copy-construct environments from parent_detector if specified */
+  /* Construct a new CollisionDector from allocator, copy-construct environments from parent_detector if not null */
   void allocateCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator,
                                  const CollisionDetectorPtr& parent_detector);
 

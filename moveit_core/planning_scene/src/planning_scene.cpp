@@ -226,7 +226,7 @@ void PlanningScene::CollisionDetector::copyPadding(const PlanningScene::Collisio
 void PlanningScene::allocateCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator,
                                               const CollisionDetectorPtr& parent_detector)
 {
-  // Temporary store the previous (if any) collision detector to copy padding from
+  // Temporarily keep pointer to the previous (if any) collision detector to copy padding from
   CollisionDetectorPtr prev_coll_detector = collision_detector_;
 
   // Construct a fresh CollisionDetector and store allocator
