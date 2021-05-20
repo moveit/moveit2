@@ -169,50 +169,41 @@ void OMPLInterface::loadPlannerConfigurations()
   for (const std::string& group_name : robot_model_->getJointModelGroupNames())
   {
     // the set of planning parameters that can be specific for the group (inherited by configurations of that group)
-    static const std::string KNOWN_GROUP_PARAMS[] = { "projection_evaluator", "longest_valid_segment_fraction",
-                                                      "enforce_joint_model_state_space",
-                                                      "enforce_constrained_state_space" };
+    // with their expected parameter type
+    static const std::pair<std::string, rclcpp::ParameterType> KNOWN_GROUP_PARAMS[] = {
+      { "projection_evaluator", rclcpp::ParameterType::PARAMETER_STRING },
+      { "longest_valid_segment_fraction", rclcpp::ParameterType::PARAMETER_DOUBLE },
+      { "enforce_joint_model_state_space", rclcpp::ParameterType::PARAMETER_BOOL },
+      { "enforce_constrained_state_space", rclcpp::ParameterType::PARAMETER_BOOL }
+    };
 
     const std::string group_name_param = parameter_namespace_ + "." + group_name;
 
     // get parameters specific for the robot planning group
     std::map<std::string, std::string> specific_group_params;
-    for (const std::string& k : KNOWN_GROUP_PARAMS)
+    for (const auto& k : KNOWN_GROUP_PARAMS)
     {
-      std::string param_name{ group_name };
+      std::string param_name{ group_name_param };
       param_name += ".";
-      param_name += k;
+      param_name += k.first;
       if (node_->has_parameter(param_name))
       {
-        std::string value;
-        if (node_->get_parameter(param_name, value))
+        const rclcpp::Parameter parameter = node_->get_parameter(param_name);
+        if (parameter.get_type() != k.second)
         {
-          if (!value.empty())
-            specific_group_params[k] = value;
+          RCLCPP_ERROR_STREAM(LOGGER, "Invalid type for parameter '" << k.first << "' expected ["
+                                                                     << rclcpp::to_string(k.second) << "] got ["
+                                                                     << rclcpp::to_string(parameter.get_type()) << "]");
           continue;
         }
-
-        double value_d;
-        if (node_->get_parameter(param_name, value_d))
-        {
-          // convert to string using no locale
-          specific_group_params[k] = moveit::core::toString(value_d);
-          continue;
-        }
-
-        int value_i;
-        if (node_->get_parameter(param_name, value_i))
-        {
-          specific_group_params[k] = std::to_string(value_i);
-          continue;
-        }
-
-        bool value_b;
-        if (node_->get_parameter(param_name, value_b))
-        {
-          specific_group_params[k] = std::to_string(value_b);
-          continue;
-        }
+        if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
+          specific_group_params[k.first] = parameter.as_string();
+        else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
+          specific_group_params[k.first] = moveit::core::toString(parameter.as_double());
+        else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
+          specific_group_params[k.first] = std::to_string(parameter.as_int());
+        else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_BOOL)
+          specific_group_params[k.first] = std::to_string(parameter.as_bool());
       }
     }
 
@@ -239,7 +230,7 @@ void OMPLInterface::loadPlannerConfigurations()
 
     // get parameters specific to each planner type
     std::vector<std::string> config_names;
-    if (node_->get_parameter(group_name + ".planner_configs", config_names))
+    if (node_->get_parameter(group_name_param + ".planner_configs", config_names))
     {
       for (const auto& planner_id : config_names)
       {
