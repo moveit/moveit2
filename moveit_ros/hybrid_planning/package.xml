@@ -28,6 +28,7 @@
   <depend>trajectory_msgs</depend>
   <depend>pluginlib</depend>
   <depend>control_toolbox</depend>
+  <depend>moveit_servo</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
@@ -38,6 +39,7 @@
     <moveit_hybrid_planning plugin="${prefix}/replan_invalidated_trajectory_plugin.xml"/>
     <moveit_hybrid_planning plugin="${prefix}/single_plan_execution_plugin.xml"/>
     <moveit_hybrid_planning plugin="${prefix}/forward_trajectory_plugin.xml"/>
+    <moveit_hybrid_planning plugin="${prefix}/servo_solver_plugin.xml"/>
   </export>
 
 </package>

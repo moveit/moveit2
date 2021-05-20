@@ -99,7 +99,7 @@ enum class LocalPlannerState : int8_t
 class LocalPlannerComponent : public rclcpp::Node
 {
 public:
-  /// Struct that contains configuration of the local planner component node
+  // Struct that contains configuration of the local planner component node
   struct LocalPlannerConfig
   {
     void load(const rclcpp::Node::SharedPtr& node)

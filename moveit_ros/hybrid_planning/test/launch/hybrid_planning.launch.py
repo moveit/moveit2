@@ -81,6 +81,10 @@ def generate_launch_description():
         "moveit_hybrid_planning", "config/hybrid_planning_manager.yaml"
     )
 
+    # Get parameters for the Servo node
+    servo_yaml = load_yaml("moveit_hybrid_planning", "config/servo_solver.yaml")
+    servo_params = {"moveit_servo": servo_yaml}
+
     # Generate launch description with multiple components
     container = ComposableNodeContainer(
         name="hybrid_planning_container",
@@ -109,6 +113,7 @@ def generate_launch_description():
                     robot_description,
                     robot_description_semantic,
                     kinematics_yaml,
+                    servo_params,
                 ],
             ),
             ComposableNode(

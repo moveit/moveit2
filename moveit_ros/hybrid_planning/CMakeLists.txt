@@ -18,6 +18,7 @@ find_package(std_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 find_package(control_toolbox REQUIRED)
+find_package(moveit_servo REQUIRED)
 
 set(LIBRARIES
   moveit_hybrid_planning_manager
@@ -31,6 +32,7 @@ set(LIBRARIES
   single_plan_execution_plugin
   replan_invalidated_trajectory_plugin
   forward_trajectory_plugin
+  servo_solver_plugin
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -45,6 +47,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   tf2_ros
   trajectory_msgs
   control_toolbox
+  moveit_servo
 )
 
 set(THIS_PACKAGE_INCLUDE_DIRS
@@ -78,6 +81,7 @@ install(DIRECTORY test/config DESTINATION share/${PROJECT_NAME})
 
 pluginlib_export_plugin_description_file(moveit_hybrid_planning single_plan_execution_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning simple_sampler_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_hybrid_planning servo_solver_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning replan_invalidated_trajectory_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning forward_trajectory_plugin.xml)
 
