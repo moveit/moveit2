@@ -54,41 +54,13 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     node_ = node;
-    if (!node_->get_parameter(parameter_namespace + "." + DT_PARAM_NAME, max_dt_offset_))
+    max_dt_offset_ = getParam(node_, LOGGER, parameter_namespace, DT_PARAM_NAME, 0.5);
+    jiggle_fraction_ = getParam(node_, LOGGER, parameter_namespace, JIGGLE_PARAM_NAME, 0.02);
+    sampling_attempts_ = getParam(node_, LOGGER, parameter_namespace, ATTEMPTS_PARAM_NAME, 100);
+    if (sampling_attempts_ < 1)
     {
-      max_dt_offset_ = 0.5;
-      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
-    }
-    else
-    {
-      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", DT_PARAM_NAME.c_str(), max_dt_offset_);
-    }
-
-    if (!node_->get_parameter(parameter_namespace + "." + JIGGLE_PARAM_NAME, jiggle_fraction_))
-    {
-      jiggle_fraction_ = 0.02;
-      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", JIGGLE_PARAM_NAME.c_str(),
-                  jiggle_fraction_);
-    }
-    else
-    {
-      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", JIGGLE_PARAM_NAME.c_str(), jiggle_fraction_);
-    }
-
-    if (!node_->get_parameter(parameter_namespace + "." + ATTEMPTS_PARAM_NAME, sampling_attempts_))
-    {
-      sampling_attempts_ = 100;
-      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f,", ATTEMPTS_PARAM_NAME.c_str(),
-                  sampling_attempts_);
-    }
-    else
-    {
-      if (sampling_attempts_ < 1)
-      {
-        sampling_attempts_ = 1;
-        RCLCPP_WARN(LOGGER, "Param '%s' needs to be at least 1.", ATTEMPTS_PARAM_NAME.c_str());
-      }
-      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", ATTEMPTS_PARAM_NAME.c_str(), sampling_attempts_);
+      sampling_attempts_ = 1;
+      RCLCPP_WARN(LOGGER, "Param '%s' needs to be at least 1.", ATTEMPTS_PARAM_NAME.c_str());
     }
   }
 
