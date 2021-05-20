@@ -90,6 +90,7 @@ public:
                             const planning_interface::MotionPlanRequest& req,
                             planning_interface::MotionPlanResponse& res,
                             std::vector<std::size_t>& added_path_index) const = 0;
+
 protected:
   /** \brief Helper param for getting a parameter using a namespace **/
   template <typename T>

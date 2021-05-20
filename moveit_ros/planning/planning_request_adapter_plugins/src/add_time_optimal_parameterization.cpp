@@ -83,6 +83,7 @@ public:
 
     return result;
   }
+
 protected:
   double path_tolerance_;
   double resample_dt_;
