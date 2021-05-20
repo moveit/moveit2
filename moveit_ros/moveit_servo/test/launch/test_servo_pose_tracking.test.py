@@ -1,23 +1,19 @@
 import os
-import yaml
-import unittest
 import pytest
-import xacro
-
-import launch_ros
 import launch
+import launch_ros
 import launch_testing.actions
 import launch_testing.asserts
-
-from launch import LaunchDescription
-from launch.some_substitutions_type import SomeSubstitutionsType
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch.actions import ExecuteProcess, TimerAction
-
+import unittest
+import xacro
+import yaml
 from ament_index_python.packages import get_package_share_directory
-
+from launch import LaunchDescription
 from launch_ros.actions import Node, ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
+from launch.actions import ExecuteProcess, TimerAction
+from launch.some_substitutions_type import SomeSubstitutionsType
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 
 
 def load_file(package_name, file_path):
@@ -164,10 +160,8 @@ def generate_test_description():
 
 
 class TestGTestProcessActive(unittest.TestCase):
-    def test_gtest_run_complete(
-        self, proc_info, test_container, servo_gtest, ros2_control_node
-    ):
-        proc_info.assertWaitForShutdown(servo_gtest, timeout=4000.0)
+    def test_gtest_run_complete(self, servo_gtest):
+        self.proc_info.assertWaitForShutdown(servo_gtest, timeout=4000.0)
 
 
 @launch_testing.post_shutdown_test()

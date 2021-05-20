@@ -9,8 +9,7 @@ from servo_launch_test_common import generate_servo_test_description
 
 def generate_test_description():
     return generate_servo_test_description(
-        gtest_name="test_servo_collision",
-        start_position_path="../config/collision_start_positions.yaml",
+        gtest_name="basic_servo_tests",
     )
 
 
