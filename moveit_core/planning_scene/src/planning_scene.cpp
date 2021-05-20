@@ -161,7 +161,7 @@ void PlanningScene::initialize()
   for (const srdf::Model::DisabledCollision& it : dc)
     acm_->setEntry(it.link1_, it.link2_, true);
 
-  setCollisionDetectorType(collision_detection::CollisionDetectorAllocatorFCL::create());
+  allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
 }
 
 /* return NULL on failure */
@@ -193,7 +193,7 @@ PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(pare
   // record changes to the world
   world_diff_.reset(new collision_detection::WorldDiff(world_));
 
-  setCollisionDetectorType(parent_->collision_detector_->alloc_);
+  allocateCollisionDetector(parent_->collision_detector_->alloc_, parent_->collision_detector_);
   collision_detector_->copyPadding(*parent_->collision_detector_);
 }
 
@@ -223,36 +223,37 @@ void PlanningScene::CollisionDetector::copyPadding(const PlanningScene::Collisio
   cenv_->setLinkScale(src.getCollisionEnv()->getLinkScale());
 }
 
-void PlanningScene::setCollisionDetectorType(const collision_detection::CollisionDetectorAllocatorPtr& allocator)
+void PlanningScene::allocateCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator,
+                                              const CollisionDetectorPtr& parent_detector)
 {
-  // Temporary copy of the previous (if any), to copy padding
-  CollisionDetector prev_coll_detector;
-  bool have_previous_coll_detector = false;
-  if (collision_detector_)
-  {
-    have_previous_coll_detector = true;
-    prev_coll_detector = *collision_detector_;
-  }
+  // Temporarily keep pointer to the previous (if any) collision detector to copy padding from
+  CollisionDetectorPtr prev_coll_detector = collision_detector_;
 
-  // TODO(andyz): uncomment this for a small speed boost when another collision detector type is available in MoveIt2
-  // For now, it is useful in the switchCollisionDetectorType() unit test
-  //  const std::string& name = allocator->getName();
-  //  if (name == getCollisionDetectorName())  // already using this collision detector
-  //    return;
-
+  // Construct a fresh CollisionDetector and store allocator
   collision_detector_.reset(new CollisionDetector());
-
   collision_detector_->alloc_ = allocator;
-  collision_detector_->cenv_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
-  collision_detector_->cenv_const_ = collision_detector_->cenv_;
-  collision_detector_->cenv_unpadded_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
-  collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
 
-  // Copy padding from the previous collision detector
-  if (have_previous_coll_detector)
+  // If parent_detector is specified, copy-construct collision environments (copies link shapes and attached objects)
+  // Otherwise, construct new collision environment from world and robot model
+  if (parent_detector)
   {
-    collision_detector_->copyPadding(prev_coll_detector);
+    collision_detector_->cenv_ = collision_detector_->alloc_->allocateEnv(parent_detector->cenv_, world_);
+    collision_detector_->cenv_unpadded_ =
+        collision_detector_->alloc_->allocateEnv(parent_detector->cenv_unpadded_, world_);
   }
+  else
+  {
+    collision_detector_->cenv_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
+    collision_detector_->cenv_unpadded_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
+
+    // Copy padding to collision_detector_->cenv_
+    if (prev_coll_detector)
+      collision_detector_->copyPadding(*prev_coll_detector);
+  }
+
+  // Assign const pointers
+  collision_detector_->cenv_const_ = collision_detector_->cenv_;
+  collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
 }
 
 const collision_detection::CollisionEnvConstPtr&
@@ -295,11 +296,8 @@ void PlanningScene::clearDiffs()
   if (current_world_object_update_callback_)
     current_world_object_update_observer_handle_ = world_->addObserver(current_world_object_update_callback_);
 
-  if (parent_)
-  {
-    collision_detector_->copyPadding(*parent_->collision_detector_);
-  }
-  collision_detector_->cenv_const_ = collision_detector_->cenv_;
+  // Reset collision detector to the the parent's version
+  allocateCollisionDetector(parent_->collision_detector_->alloc_, parent_->collision_detector_);
 
   scene_transforms_.reset();
   robot_state_.reset();
