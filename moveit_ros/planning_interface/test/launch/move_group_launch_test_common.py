@@ -80,6 +80,9 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
         "moveit_resources_panda_moveit_config", "config/ompl_planning.yaml"
     )
     ompl_planning_yaml["panda_arm"]["enforce_constrained_state_space"] = True
+    ompl_planning_yaml["panda_arm"][
+        "projection_evaluator"
+    ] = "joints(panda_joint1,panda_joint2)"
     ompl_planning_pipeline_config["move_group"].update(ompl_planning_yaml)
 
     # Trajectory Execution Functionality
