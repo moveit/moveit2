@@ -32,15 +32,15 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Tyler Weaver
-   Desc:   Test for the low latency mode of servo
+/* Author: Tyler Weaver, Andy Zelenak
+   Desc:   Basic Functionality tests
 */
 
-// C++
+// System
 #include <string>
 
 // ROS
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 // Testing
 #include <gtest/gtest.h>
@@ -48,138 +48,118 @@
 // Servo
 #include <moveit_servo/make_shared_from_pool.h>
 #include <moveit_servo/servo.h>
-
-static const std::string LOGNAME = "servo_low_latency_test";
+#include "servo_launch_test_common.hpp"
 
 namespace moveit_servo
 {
-class ServoFixture : public ::testing::Test
-{
-public:
-  void SetUp() override
-  {
-    // Wait for several key topics / parameters
-    ros::topic::waitForMessage<sensor_msgs::JointState>("/joint_states");
-    while (!nh_.hasParam("/robot_description") && ros::ok())
-    {
-      ros::Duration(0.1).sleep();
-    }
-
-    // Load the planning scene monitor
-    planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>("robot_description");
-    planning_scene_monitor_->startSceneMonitor();
-    planning_scene_monitor_->startStateMonitor();
-    planning_scene_monitor_->startWorldGeometryMonitor(
-        planning_scene_monitor::PlanningSceneMonitor::DEFAULT_COLLISION_OBJECT_TOPIC,
-        planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_WORLD_TOPIC,
-        false /* skip octomap monitor */);
-
-    // Create moveit_servo
-    servo_ = std::make_shared<Servo>(nh_, planning_scene_monitor_);
-  }
-  void TearDown() override
-  {
-  }
-
-protected:
-  ros::NodeHandle nh_{ "~" };
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-  moveit_servo::ServoPtr servo_;
-};  // class ServoFixture
-
 TEST_F(ServoFixture, SendTwistStampedTest)
 {
-  servo_->start();
+  auto log_time_start = node_->now();
+  ASSERT_TRUE(setupStartClient());
+  auto log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
 
-  auto parameters = servo_->getParameters();
+  // Start Servo
+  ASSERT_TRUE(start());
+  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
+
+  auto parameters = servo_parameters_;
 
   // count trajectory messages sent by servo
   size_t received_count = 0;
-  boost::function<void(const trajectory_msgs::JointTrajectoryConstPtr&)> traj_callback =
-      [&received_count](const trajectory_msgs::JointTrajectoryConstPtr& /*msg*/) { ++received_count; };
-  auto traj_sub = nh_.subscribe(parameters.command_out_topic, 1, traj_callback);
+  std::function<void(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
+      [&received_count](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) { ++received_count; };
+  auto traj_sub = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
+      resolveServoTopicName(parameters->command_out_topic), 1, traj_callback);
 
   // Create publisher to send servo commands
-  auto twist_stamped_pub = nh_.advertise<geometry_msgs::TwistStamped>(parameters.cartesian_command_in_topic, 1);
+  auto twist_stamped_pub = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
+      resolveServoTopicName(parameters->cartesian_command_in_topic), 1);
 
   constexpr double test_duration = 1.0;
-  const double publish_period = parameters.publish_period;
+  const double publish_period = parameters->publish_period;
   const size_t num_commands = static_cast<size_t>(test_duration / publish_period);
 
   // Set the rate differently from the publish period from the parameters to show that
   // the number of outputs is set by the number of commands sent and not the rate they are sent.
-  ros::Rate publish_rate(2. / publish_period);
+  rclcpp::Rate publish_rate(2. / publish_period);
 
   // Send a few Cartesian velocity commands
-  for (size_t i = 0; i < num_commands && ros::ok(); ++i)
+  for (size_t i = 0; i < num_commands && rclcpp::ok(); ++i)
   {
-    auto msg = moveit::util::make_shared_from_pool<geometry_msgs::TwistStamped>();
-    msg->header.stamp = ros::Time::now();
-    msg->header.frame_id = "panda_link0";
-    msg->twist.angular.y = 1.0;
+    geometry_msgs::msg::TwistStamped msg;
+    msg.header.stamp = node_->now();
+    msg.header.frame_id = "panda_link0";
+    msg.twist.angular.y = 1.0;
 
     // Send the message
-    twist_stamped_pub.publish(msg);
+    twist_stamped_pub->publish(msg);
     publish_rate.sleep();
   }
 
   EXPECT_GT(received_count, num_commands - 20);
   EXPECT_GT(received_count, (unsigned)0);
   EXPECT_LT(received_count, num_commands + 20);
-  servo_->setPaused(true);
 }
 
 TEST_F(ServoFixture, SendJointServoTest)
 {
-  servo_->start();
+  auto log_time_start = node_->now();
+  ASSERT_TRUE(setupStartClient());
+  auto log_time_end = node_->now();
+  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
 
-  auto parameters = servo_->getParameters();
+  // Start Servo
+  ASSERT_TRUE(start());
+  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
+
+  auto parameters = servo_parameters_;
+  auto cmd_out_topic = resolveServoTopicName(parameters->command_out_topic);
+  auto cmd_in_topic = resolveServoTopicName(parameters->joint_command_in_topic);
+  RCLCPP_INFO_STREAM(LOGGER, "\nOut: " << cmd_out_topic << " In: " << cmd_in_topic << "\n");
 
   // count trajectory messages sent by servo
   size_t received_count = 0;
-  boost::function<void(const trajectory_msgs::JointTrajectoryConstPtr&)> traj_callback =
-      [&received_count](const trajectory_msgs::JointTrajectoryConstPtr& /*msg*/) { ++received_count; };
-  auto traj_sub = nh_.subscribe(parameters.command_out_topic, 1, traj_callback);
+  std::function<void(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
+      [&received_count](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) { ++received_count; };
+  auto traj_sub = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(cmd_out_topic, 1, traj_callback);
 
   // Create publisher to send servo commands
-  auto joint_servo_pub = nh_.advertise<control_msgs::JointJog>(parameters.joint_command_in_topic, 1);
+  auto joint_servo_pub = node_->create_publisher<control_msgs::msg::JointJog>(cmd_in_topic, 1);
 
   constexpr double test_duration = 1.0;
-  const double publish_period = parameters.publish_period;
+  const double publish_period = parameters->publish_period;
   const size_t num_commands = static_cast<size_t>(test_duration / publish_period);
 
   // Set the rate differently from the publish period from the parameters to show that
   // the number of outputs is set by the number of commands sent and not the rate they are sent.
-  ros::Rate publish_rate(2. / publish_period);
+  rclcpp::Rate publish_rate(2. / publish_period);
 
   // Send a few joint velocity commands
-  for (size_t i = 0; i < num_commands && ros::ok(); ++i)
+  for (size_t i = 0; i < num_commands && rclcpp::ok(); ++i)
   {
-    auto msg = moveit::util::make_shared_from_pool<control_msgs::JointJog>();
-    msg->header.stamp = ros::Time::now();
-    msg->header.frame_id = "panda_link3";
-    msg->velocities.push_back(0.1);
+    control_msgs::msg::JointJog msg;
+    msg.header.stamp = node_->now();
+    msg.header.frame_id = "panda_link3";
+    msg.velocities.push_back(0.1);
 
     // Send the message
-    joint_servo_pub.publish(msg);
+    joint_servo_pub->publish(msg);
     publish_rate.sleep();
   }
 
   EXPECT_GT(received_count, num_commands - 20);
   EXPECT_GT(received_count, (unsigned)0);
   EXPECT_LT(received_count, num_commands + 20);
-  servo_->setPaused(true);
 }
 }  // namespace moveit_servo
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, LOGNAME);
-  testing::InitGoogleTest(&argc, argv);
-
-  ros::AsyncSpinner spinner(8);
-  spinner.start();
+  rclcpp::init(argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
   int result = RUN_ALL_TESTS();
+  rclcpp::shutdown();
   return result;
 }

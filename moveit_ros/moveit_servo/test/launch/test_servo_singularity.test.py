@@ -1,8 +1,7 @@
+import launch_testing
 import os
 import sys
 import unittest
-
-import launch_testing.asserts
 
 sys.path.append(os.path.dirname(__file__))
 from servo_launch_test_common import generate_servo_test_description
@@ -15,16 +14,14 @@ def generate_test_description():
     )
 
 
-class TestGTestProcessActive(unittest.TestCase):
-    def test_gtest_run_complete(
-        self, proc_info, servo_gtest, test_container, ros2_control_node
-    ):
-        proc_info.assertWaitForShutdown(servo_gtest, timeout=4000.0)
+class TestGTestWaitForCompletion(unittest.TestCase):
+    # Waits for test to complete, then waits a bit to make sure result files are generated
+    def test_gtest_run_complete(self, servo_gtest):
+        self.proc_info.assertWaitForShutdown(servo_gtest, timeout=4000.0)
 
 
 @launch_testing.post_shutdown_test()
 class TestGTestProcessPostShutdown(unittest.TestCase):
-    def test_gtest_pass(
-        self, proc_info, servo_gtest, test_container, ros2_control_node
-    ):
+    # Checks if the test has been completed with acceptable exit codes (successful codes)
+    def test_gtest_pass(self, proc_info, servo_gtest):
         launch_testing.asserts.assertExitCodes(proc_info, process=servo_gtest)
