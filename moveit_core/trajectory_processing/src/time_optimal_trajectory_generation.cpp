@@ -993,6 +993,10 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
 
   // Compute sample count
   size_t sample_count = std::ceil(parameterized.getDuration() / resample_dt_);
+  if (sample_count < num_points)
+  {
+    sample_count = num_points;
+  }
 
   // Resample and fill in trajectory
   moveit::core::RobotState waypoint = moveit::core::RobotState(trajectory.getWayPoint(0));
