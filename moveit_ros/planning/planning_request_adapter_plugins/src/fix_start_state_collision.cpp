@@ -78,7 +78,7 @@ public:
     if (!node_->get_parameter(parameter_namespace + "." + ATTEMPTS_PARAM_NAME, sampling_attempts_))
     {
       sampling_attempts_ = 100;
-      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f,", ATTEMPTS_PARAM_NAME.c_str(),
+      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %d,", ATTEMPTS_PARAM_NAME.c_str(),
                   sampling_attempts_);
     }
     else
@@ -88,7 +88,7 @@ public:
         sampling_attempts_ = 1;
         RCLCPP_WARN(LOGGER, "Param '%s' needs to be at least 1.", ATTEMPTS_PARAM_NAME.c_str());
       }
-      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", ATTEMPTS_PARAM_NAME.c_str(), sampling_attempts_);
+      RCLCPP_INFO(LOGGER, "Param '%s' was set to %d", ATTEMPTS_PARAM_NAME.c_str(), sampling_attempts_);
     }
   }
 
