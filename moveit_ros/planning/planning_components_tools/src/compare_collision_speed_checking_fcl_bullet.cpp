@@ -180,11 +180,11 @@ void runCollisionDetection(unsigned int trials, const planning_scene::PlanningSc
 
   if (col_detector == CollisionDetector::FCL)
   {
-    scene->setActiveCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
+    scene->allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
   }
   else
   {
-    scene->setActiveCollisionDetector(collision_detection::CollisionDetectorAllocatorBullet::create());
+    scene->allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorBullet::create());
   }
 
   collision_detection::CollisionResult res;
@@ -308,7 +308,7 @@ int main(int argc, char** argv)
   planning_scene_monitor::PlanningSceneMonitor psm(planning_scene, ROBOT_DESCRIPTION);
   psm.startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
   psm.startSceneMonitor();
-  planning_scene->setActiveCollisionDetector(collision_detection::CollisionDetectorAllocatorBullet::create());
+  planning_scene->allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorBullet::create());
 
   collision_detection::CollisionRequest req;
   collision_detection::CollisionResult res;
@@ -333,7 +333,7 @@ int main(int argc, char** argv)
     runCollisionDetection(trials, planning_scene, sampled_states, CollisionDetector::BULLET, true);
     runCollisionDetection(trials, planning_scene, sampled_states, CollisionDetector::FCL, true);
 
-    planning_scene->setActiveCollisionDetector(collision_detection::CollisionDetectorAllocatorBullet::create());
+    planning_scene->allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorBullet::create());
 
     clutterWorld(planning_scene, 100, CollisionObjectType::MESH);
 
