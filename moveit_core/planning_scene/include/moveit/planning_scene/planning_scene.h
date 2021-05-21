@@ -912,7 +912,7 @@ public:
   /** \brief Clone a planning scene. Even if the scene \e scene depends on a parent, the cloned scene will not. */
   static PlanningScenePtr clone(const PlanningSceneConstPtr& scene);
 
-  /** \brief Replace previous collision detector with a new collision detector type (or create new, if none previously).
+  /** \brief Allocate a new collision detector and replace the previous one if there was any.
    *
    * The collision detector type is specified with (a shared pointer to) an
    * allocator which is a subclass of CollisionDetectorAllocator.  This
@@ -922,10 +922,13 @@ public:
    * A new PlanningScene uses an FCL collision detector by default.
    *
    * example: to add FCL collision detection (normally not necessary) call
-   *   planning_scene->setCollisionDetectorType(collision_detection::CollisionDetectorAllocatorFCL::create());
+   *   planning_scene->allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
    *
    * */
-  void setCollisionDetectorType(const collision_detection::CollisionDetectorAllocatorPtr& allocator);
+  void allocateCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator)
+  {
+    allocateCollisionDetector(allocator, nullptr /* no parent_detector */);
+  }
 
 private:
   /* Private constructor used by the diff() methods. */
@@ -948,6 +951,10 @@ private:
   static void poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::Isometry3d& out);
 
   MOVEIT_STRUCT_FORWARD(CollisionDetector)
+
+  /* Construct a new CollisionDector from allocator, copy-construct environments from parent_detector if not null */
+  void allocateCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator,
+                                 const CollisionDetectorPtr& parent_detector);
 
   /* \brief A set of compatible collision detectors */
   struct CollisionDetector
