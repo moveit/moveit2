@@ -49,7 +49,6 @@
 #include <sstream>
 #include <algorithm>
 #include <ctype.h>
-#include <boost/filesystem.hpp>
 
 typedef collision_detection::CollisionEnvDistanceField DefaultCEnvType;
 
