@@ -50,7 +50,7 @@
 using namespace std::chrono_literals;  // for s, ms, etc.
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
-constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::nanoseconds(30ms).count();
+constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
 
 namespace moveit_servo
 {
@@ -582,7 +582,7 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   composeJointTrajMessage(internal_joint_state_, joint_trajectory);
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
-  if (!enforcePositionLimits())
+  if (!enforcePositionLimits(joint_trajectory))
   {
     suddenHalt(joint_trajectory);
     status_ = StatusCode::JOINT_BOUND;
@@ -755,76 +755,46 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
 
 void ServoCalcs::enforceVelLimits(Eigen::ArrayXd& delta_theta)
 {
+  // Convert to joint angle velocities for checking and applying joint specific velocity limits.
   Eigen::ArrayXd velocity = delta_theta / parameters_->publish_period;
 
-  std::size_t joint_delta_index = 0;
-  // Track the smallest velocity scaling factor required, across all joints
-  double velocity_limit_scaling_factor = 1;
-
-  for (auto joint : joint_model_group_->getActiveJointModels())
+  std::size_t joint_delta_index{ 0 };
+  double velocity_scaling_factor{ 1.0 };
+  for (const moveit::core::JointModel* joint : joint_model_group_->getActiveJointModels())
   {
-    // Some joints do not have bounds defined
-    const auto bound = joint->getVariableBounds(joint->getName());
-
-    if (bound.velocity_bounded_)
+    const auto& bounds = joint->getVariableBounds(joint->getName());
+    if (bounds.velocity_bounded_ && velocity(joint_delta_index) != 0.0)
     {
-      velocity(joint_delta_index) = delta_theta(joint_delta_index) / parameters_->publish_period;
-
-      bool clip_velocity = false;
-      double velocity_limit = 0.0;
-      if (velocity(joint_delta_index) < bound.min_velocity_)
-      {
-        clip_velocity = true;
-        velocity_limit = bound.min_velocity_;
-      }
-      else if (velocity(joint_delta_index) > bound.max_velocity_)
-      {
-        clip_velocity = true;
-        velocity_limit = bound.max_velocity_;
-      }
-
-      // Apply velocity bounds
-      if (clip_velocity)
-      {
-        const double scaling_factor =
-            fabs(velocity_limit * parameters_->publish_period) / fabs(delta_theta(joint_delta_index));
-
-        // Store the scaling factor if it's the smallest yet
-        if (scaling_factor < velocity_limit_scaling_factor)
-          velocity_limit_scaling_factor = scaling_factor;
-      }
+      const double unbounded_velocity = velocity(joint_delta_index);
+      // Clamp each joint velocity to a joint specific [min_velocity, max_velocity] range.
+      const auto bounded_velocity = std::min(std::max(unbounded_velocity, bounds.min_velocity_), bounds.max_velocity_);
+      velocity_scaling_factor = std::min(velocity_scaling_factor, bounded_velocity / unbounded_velocity);
     }
     ++joint_delta_index;
   }
 
-  // Apply the velocity scaling to all joints
-  if (velocity_limit_scaling_factor < 1)
-  {
-    for (joint_delta_index = 0; joint_delta_index < joint_model_group_->getActiveJointModels().size();
-         ++joint_delta_index)
-    {
-      delta_theta(joint_delta_index) = velocity_limit_scaling_factor * delta_theta(joint_delta_index);
-      velocity(joint_delta_index) = velocity_limit_scaling_factor * velocity(joint_delta_index);
-    }
-  }
+  // Convert back to joint angle increments.
+  delta_theta = velocity_scaling_factor * velocity * parameters_->publish_period;
 }
 
-bool ServoCalcs::enforcePositionLimits()
+bool ServoCalcs::enforcePositionLimits(trajectory_msgs::msg::JointTrajectory& joint_trajectory) const
 {
+  // Halt if we're past a joint margin and joint velocity is moving even farther past
   bool halting = false;
+  double joint_angle = 0;
 
   for (auto joint : joint_model_group_->getActiveJointModels())
   {
-    // Halt if we're past a joint margin and joint velocity is moving even farther past
-    double joint_angle = 0;
     for (std::size_t c = 0; c < original_joint_state_.name.size(); ++c)
     {
+      // Use the most recent robot joint state
       if (original_joint_state_.name[c] == joint->getName())
       {
         joint_angle = original_joint_state_.position.at(c);
         break;
       }
     }
+
     if (!current_state_->satisfiesPositionBounds(joint, -parameters_->joint_limit_margin))
     {
       const std::vector<moveit_msgs::msg::JointLimits> limits = joint->getVariableBoundsMsg();
@@ -832,9 +802,14 @@ bool ServoCalcs::enforcePositionLimits()
       // Joint limits are not defined for some joints. Skip them.
       if (!limits.empty())
       {
-        if ((current_state_->getJointVelocities(joint)[0] < 0 &&
+        // Check if pending velocity command is moving in the right direction
+        auto joint_itr =
+            std::find(joint_trajectory.joint_names.begin(), joint_trajectory.joint_names.end(), joint->getName());
+        auto joint_idx = std::distance(joint_trajectory.joint_names.begin(), joint_itr);
+
+        if ((joint_trajectory.points[0].velocities[joint_idx] < 0 &&
              (joint_angle < (limits[0].min_position + parameters_->joint_limit_margin))) ||
-            (current_state_->getJointVelocities(joint)[0] > 0 &&
+            (joint_trajectory.points[0].velocities[joint_idx] > 0 &&
              (joint_angle > (limits[0].max_position - parameters_->joint_limit_margin))))
         {
           rclcpp::Clock& clock = *node_->get_clock();
@@ -842,10 +817,12 @@ bool ServoCalcs::enforcePositionLimits()
                                       node_->get_name()
                                           << " " << joint->getName() << " close to a position limit. Halting.");
           halting = true;
+          break;
         }
       }
     }
   }
+
   return !halting;
 }
 

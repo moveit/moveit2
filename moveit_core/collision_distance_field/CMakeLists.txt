@@ -29,24 +29,22 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(resource_retriever REQUIRED)
 
-  if(WIN32)
-    # TODO add windows paths
-  else()
-    set(append_library_dirs "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../planning_scene;${CMAKE_CURRENT_BINARY_DIR}/../distance_field;${CMAKE_CURRENT_BINARY_DIR}/../collision_detection;${CMAKE_CURRENT_BINARY_DIR}/../robot_state;${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../utils")
-  endif()
-
   ament_add_gtest(test_collision_distance_field test/test_collision_distance_field.cpp)
+  ament_target_dependencies(test_collision_distance_field
+    Boost
+    geometric_shapes
+    OCTOMAP
+    srdfdom
+    resource_retriever
+  )
   target_link_libraries(test_collision_distance_field
     ${MOVEIT_LIB_NAME}
     moveit_collision_detection
-    moveit_collision_distance_field
+    moveit_distance_field
+    moveit_robot_model
     moveit_robot_state
     moveit_test_utils
-    ${geometric_shapes_LIBRARIES}
-    ${OCTOMAP_LIBRARIES}
-    ${srdfdom_LIBRARIES}
-    resource_retriever::resource_retriever
-    moveit_distance_field
+    moveit_transforms
     moveit_planning_scene
   )
 endif()

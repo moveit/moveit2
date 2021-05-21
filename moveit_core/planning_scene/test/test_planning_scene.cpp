@@ -224,7 +224,7 @@ TEST(PlanningScene, switchCollisionDetectorType)
     EXPECT_FALSE(ps->isStateValid(current_state, "left_arm"));
   }
 
-  ps->setCollisionDetectorType(collision_detection::CollisionDetectorAllocatorFCL::create());
+  ps->allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
   if (ps->isStateColliding(current_state, "left_arm"))
   {
     EXPECT_FALSE(ps->isStateValid(current_state, "left_arm"));

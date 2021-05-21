@@ -96,4 +96,9 @@ if(BUILD_TESTING)
   target_link_libraries(test_constrained_state_validity_checker ${MOVEIT_LIB_NAME})
   set_target_properties(test_constrained_state_validity_checker PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 
+  ament_add_gtest(test_threadsafe_state_storage test/test_threadsafe_state_storage.cpp)
+  ament_target_dependencies(test_threadsafe_state_storage moveit_core OMPL Boost Eigen3)
+  target_link_libraries(test_threadsafe_state_storage ${MOVEIT_LIB_NAME})
+  set_target_properties(test_threadsafe_state_storage PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
+
 endif()
