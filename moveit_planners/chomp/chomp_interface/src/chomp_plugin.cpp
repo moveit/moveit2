@@ -82,7 +82,7 @@ public:
 
     // create PlanningScene using hybrid collision detector
     planning_scene::PlanningScenePtr ps = planning_scene->diff();
-    ps->setActiveCollisionDetector(collision_detection::CollisionDetectorAllocatorHybrid::create(), true);
+    ps->allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorHybrid::create());
 
     // retrieve and configure existing context
     const CHOMPPlanningContextPtr& context = planning_contexts_.at(req.group_name);
