@@ -61,7 +61,7 @@ def generate_test_description():
 
     unit_tests_poses = {
         "unit_test_poses": {
-            "size": 6,
+            "size": 12,
             "pose_0": {
                 "pose": [0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
                 "joints": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -135,6 +135,7 @@ def generate_test_description():
             robot_description_kinematics,
             test_param,
             private_params,
+            unit_tests_poses,
         ],
         output="screen",
     )

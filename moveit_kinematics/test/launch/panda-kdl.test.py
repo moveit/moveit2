@@ -58,6 +58,7 @@ def generate_test_description():
         "num_fk_tests": 100,
         "num_ik_tests": 100,
     }
+
     panda_kdl = Node(
         package="moveit_kinematics",
         executable="test_kinematics_plugin",

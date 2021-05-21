@@ -445,6 +445,10 @@ TEST_F(KinematicsTest, unitIK)
   auto validate_ik = [&](const geometry_msgs::msg::Pose& goal, std::vector<double>& truth) {
     // compute IK
     moveit_msgs::msg::MoveItErrorCodes error_code;
+    // kinematics_solver_->searchPositionIK(goal, seed_, timeout_,
+    //                                      const_cast<const std::vector<double>&>(consistency_limits_), sol, error_code);
+
+    RCLCPP_INFO(LOGGER, "Goal %f %f %f\n", goal.position.x, goal.position.y, goal.position.z);
     kinematics_solver_->searchPositionIK(goal, seed_, timeout_,
                                          const_cast<const std::vector<double>&>(consistency_limits_), sol, error_code);
     ASSERT_EQ(error_code.val, error_code.SUCCESS);
@@ -507,6 +511,7 @@ TEST_F(KinematicsTest, unitIK)
       FAIL() << "Found invalid 'type' in " << pose_name << ": should be one of '" << POSE_TYPE_RELATIVE << "' or '"
              << POSE_TYPE_ABSOLUTE << "'";
 
+    RCLCPP_INFO(LOGGER, "Pose type: %s", POSE_TYPE_RELATIVE);
     std::string desc;
     {
       SCOPED_TRACE(desc);

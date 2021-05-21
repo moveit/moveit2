@@ -1,7 +1,7 @@
 tip_link: "panda_link8"
 root_link: "panda_link0"
 group: "panda_arm"
-ik_timeout: 0.2
+ik_timeout: 1.0
 tolerance: 0.1 ## TODO(henningkayser): set arg
 joint_names:
   - "panda_joint1"
