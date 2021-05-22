@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.3 (2021-05-22)
+------------------
+* Configure OMPL projection_evaluator in move_group_launch_test_common.py (`#470 <https://github.com/ros-planning/moveit2/issues/470>`_)
+* Contributors: Jafar Abdi
+
 2.1.2 (2021-04-20)
 ------------------
 * Re-enable test_servo_pose_tracking integration test (`#423 <https://github.com/ros-planning/moveit2/issues/423>`_)

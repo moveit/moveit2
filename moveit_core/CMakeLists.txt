@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.2)
-project(moveit_core VERSION 2.1.2 LANGUAGES CXX)
+project(moveit_core VERSION 2.1.3 LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)

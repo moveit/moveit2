@@ -2,6 +2,16 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.3 (2021-05-22)
+------------------
+* Delete exclusive arg for collision detector creation (`#466 <https://github.com/ros-planning/moveit2/issues/466>`_)
+  * Delete exclusive arg for collision detector creation
+  * Rename setActiveCollisionDetector->allocateCollisionDetector everywhere
+* Cleanup collision_distance_field test dependencies (`#465 <https://github.com/ros-planning/moveit2/issues/465>`_)
+* Fix PlanningScene CollisionDetector diff handling (`#464 <https://github.com/ros-planning/moveit2/issues/464>`_)
+* Fix joint limit handling when velocities aren't included in robot state (`#451 <https://github.com/ros-planning/moveit2/issues/451>`_)
+* Contributors: AndyZe, Henning Kayser
+
 2.1.2 (2021-04-20)
 ------------------
 * Fix robot_model & moveit_ros_visualization dependencies (`#421 <https://github.com/ros-planning/moveit2/issues/421>`_)
