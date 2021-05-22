@@ -54,7 +54,6 @@ def generate_test_description():
 
     private_params = {
         "seed": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        "consistency_limits": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         "num_fk_tests": 0,
         "num_ik_tests": 0,
     }
@@ -63,8 +62,7 @@ def generate_test_description():
         "unit_test_poses": {
             "size": 1,
             "pose_0": {
-                "pose": [0.0, 0.0, 0.0, 0.0, 0.0, 0.1],
-                "joints": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "pose": [0.0, 0.0, 0.1, 0.0, 0.0, 0.0],
                 "type": "relative",
             },
         }

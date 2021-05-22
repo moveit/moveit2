@@ -442,13 +442,17 @@ TEST_F(KinematicsTest, unitIK)
   Eigen::Isometry3d initial, goal;
   tf2::fromMsg(poses[0], initial);
 
+  RCLCPP_INFO(LOGGER, "Initial: %f %f %f %f %f %f %f\n", poses[0].position.x, poses[0].position.y, poses[0].position.z,
+              poses[0].orientation.x, poses[0].orientation.y, poses[0].orientation.z, poses[0].orientation.w);
+
   auto validate_ik = [&](const geometry_msgs::msg::Pose& goal, std::vector<double>& truth) {
     // compute IK
     moveit_msgs::msg::MoveItErrorCodes error_code;
-    // kinematics_solver_->searchPositionIK(goal, seed_, timeout_,
-    //                                      const_cast<const std::vector<double>&>(consistency_limits_), sol, error_code);
 
-    RCLCPP_INFO(LOGGER, "Goal %f %f %f\n", goal.position.x, goal.position.y, goal.position.z);
+    RCLCPP_INFO(LOGGER, "Goal %f %f %f %f %f %f %f\n", goal.position.x, goal.position.y, goal.position.z,
+                goal.orientation.x, goal.orientation.y, goal.orientation.z, goal.orientation.w);
+    RCLCPP_INFO_STREAM(LOGGER, "Recompiling");
+
     kinematics_solver_->searchPositionIK(goal, seed_, timeout_,
                                          const_cast<const std::vector<double>&>(consistency_limits_), sol, error_code);
     ASSERT_EQ(error_code.val, error_code.SUCCESS);
@@ -489,9 +493,13 @@ TEST_F(KinematicsTest, unitIK)
     const std::string pose_param = TEST_POSES_PARAM + "." + pose_name;
     goal = initial;  // reset goal to initial
     ground_truth.clear();
+
     node_->get_parameter_or(pose_param + ".joints", ground_truth, ground_truth);
-    ASSERT_EQ(ground_truth.size(), joints_.size())
-        << "Test pose '" << pose_name << "' has invalid 'joints' vector size";
+    if (!ground_truth.empty())
+    {
+      ASSERT_EQ(ground_truth.size(), joints_.size())
+          << "Test pose '" << pose_name << "' has invalid 'joints' vector size";
+    }
 
     pose_values.clear();
     node_->get_parameter_or(pose_param + ".pose", pose_values, pose_values);

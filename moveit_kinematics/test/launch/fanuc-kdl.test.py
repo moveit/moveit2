@@ -59,6 +59,56 @@ def generate_test_description():
         "num_ik_tests": 100,
     }
 
+    unit_tests_poses = {
+        "unit_test_poses": {
+            "size": 6,
+            "pose_0": {
+                "pose": [0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "joints": [0.0, -0.152627, -0.367847, 0.0, -0.46478, 0.0],
+                "type": "relative",
+            },
+            "pose_1": {
+                "pose": [0.0, 0.1, 0.0, 0.0, 0.0, 0.0],
+                "joints": [
+                    0.1582256,
+                    -0.3066389,
+                    -0.490349,
+                    0.250946,
+                    -0.5159858,
+                    -0.319381,
+                ],
+                "type": "relative",
+            },
+            "pose_2": {
+                "pose": [0.0, 0.0, 0.1, 0.0, 0.0, 0.0],
+                "joints": [0.0, -0.287588, -0.324304, 0.0, -0.643285, 0.0],
+                "type": "relative",
+            },
+            "pose_3": {
+                "pose": [0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "joints": [
+                    -0.0159181,
+                    -0.319276,
+                    -0.499953,
+                    -0.231014,
+                    -0.511806,
+                    0.212341,
+                ],
+                "type": "relative",
+            },
+            "pose_4": {
+                "pose": [0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "joints": [0.0, -0.331586, -0.520375, 0.0, -0.391211, 0.0],
+                "type": "relative",
+            },
+            "pose_5": {
+                "pose": [0.1, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "joints": [0.0, -0.32, -0.5, 0.0, -0.5, -0.1],
+                "type": "relative",
+            },
+        }
+    }
+
     fanuc_kdl = Node(
         package="moveit_kinematics",
         executable="test_kinematics_plugin",
@@ -69,6 +119,7 @@ def generate_test_description():
             robot_description_kinematics,
             test_param,
             private_params,
+            unit_tests_poses,
         ],
         output="screen",
     )
