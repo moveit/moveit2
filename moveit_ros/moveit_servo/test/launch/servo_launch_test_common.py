@@ -122,6 +122,16 @@ def generate_servo_test_description(
                 name="static_tf2_broadcaster",
                 parameters=[{"/child_frame_id": "panda_link0", "/frame_id": "world"}],
             ),
+        ],
+        output="screen",
+    )
+
+    servo_server_container = ComposableNodeContainer(
+        name="servo_server_container",
+        namespace="/",
+        package="rclcpp_components",
+        executable="component_container",
+        composable_node_descriptions=[
             ComposableNode(
                 package="moveit_servo",
                 plugin="moveit_servo::ServoServer",
@@ -155,12 +165,14 @@ def generate_servo_test_description(
                 "containing test executables",
             ),
             ros2_control_node,
+            servo_server_container,
             test_container,
             TimerAction(period=2.0, actions=[servo_gtest]),
             launch_testing.actions.ReadyToTest(),
         ]
         + load_controllers
     ), {
+        "servo_container": servo_server_container,
         "test_container": test_container,
         "servo_gtest": servo_gtest,
         "ros2_control_node": ros2_control_node,

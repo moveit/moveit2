@@ -345,9 +345,9 @@ TEST_F(ServoCalcsTestFixture, TestEnforcePosLimits)
 TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
 {
   // First, define the velocity limits (from panda URDF)
-  std::vector<double> vel_limits{ 2.3925, 2.3925, 2.3925, 2.3925, 2.8710, 2.8710, 2.8710 };
+  std::vector<double> vel_limits{ 2.1750, 2.1750, 2.1750, 2.1750, 2.610, 2.610, 2.610 };
 
-  // Lets test the Velocity limits first
+  // Let's test the Velocity limits first
   // Set prev_joint_velocity_ == desired_velocity, both above the limits
   // to avoid acceleration limits (accel is 0)
   Eigen::ArrayXd desired_velocity(7);
@@ -355,22 +355,24 @@ TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)
   desired_velocity *= servo_calcs_->parameters_->publish_period;  // rad/loop
   servo_calcs_->prev_joint_velocity_ = desired_velocity;
 
+  Eigen::ArrayXd delta_theta = servo_calcs_->parameters_->publish_period * desired_velocity;
+
   // Do the enforcing and check it
-  servo_calcs_->enforceVelLimits(desired_velocity);
+  servo_calcs_->enforceVelLimits(delta_theta);
   for (size_t i = 0; i < 7; ++i)
   {
     // We need to check vs radians-per-loop allowable rate (not rad/s)
-    EXPECT_LE(desired_velocity[i], vel_limits[i] * servo_calcs_->parameters_->publish_period);
+    EXPECT_LE(delta_theta[i], vel_limits[i] * servo_calcs_->parameters_->publish_period);
   }
 
   // Let's check negative velocity limits too
-  desired_velocity *= -1;
-  servo_calcs_->prev_joint_velocity_ = desired_velocity;
-  servo_calcs_->enforceVelLimits(desired_velocity);
+  delta_theta *= -1;
+  servo_calcs_->prev_joint_velocity_ = -1 * desired_velocity;
+  servo_calcs_->enforceVelLimits(delta_theta);
   for (size_t i = 0; i < 7; ++i)
   {
     // We need to check vs radians-per-loop allowable rate (not rad/s)
-    EXPECT_GE(desired_velocity[i], -1 * vel_limits[i] * servo_calcs_->parameters_->publish_period);
+    EXPECT_GE(delta_theta[i], -1 * vel_limits[i] * servo_calcs_->parameters_->publish_period);
   }
 }
 

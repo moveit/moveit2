@@ -156,7 +156,7 @@ protected:
   void enforceVelLimits(Eigen::ArrayXd& delta_theta);
 
   /** \brief Avoid overshooting joint limits */
-  bool enforcePositionLimits();
+  bool enforcePositionLimits(trajectory_msgs::msg::JointTrajectory& joint_trajectory) const;
 
   /** \brief Possibly calculate a velocity scaling factor, due to proximity of
    * singularity and direction of motion
@@ -347,5 +347,7 @@ protected:
   // dynamic parameters
   std::string robot_link_command_frame_;
   rcl_interfaces::msg::SetParametersResult robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter);
+
+  friend class ServoFixture;
 };
 }  // namespace moveit_servo
