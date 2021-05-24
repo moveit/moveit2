@@ -2,6 +2,9 @@
 Changelog for package moveit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.3 (2021-05-22)
+------------------
+
 2.1.2 (2021-04-20)
 ------------------
 * Unify PickNik name in copyrights (`#419 <https://github.com/ros-planning/moveit2/issues/419>`_)
