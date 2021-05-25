@@ -2,6 +2,14 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.3 (2021-05-22)
+------------------
+* Refactor Servo velocity bounds enforcement. Disable flaky unit tests. (`#428 <https://github.com/ros-planning/moveit2/issues/428>`_)
+* Fix joint limit handling when velocities aren't included in robot state (`#451 <https://github.com/ros-planning/moveit2/issues/451>`_)
+* Fix Servo logging frequency (`#457 <https://github.com/ros-planning/moveit2/issues/457>`_)
+* Replace last ament_export_libraries macro calls with ament_export_targets (`#448 <https://github.com/ros-planning/moveit2/issues/448>`_)
+* Contributors: AndyZe, Sebastian Jahr, Vatan Aksoy Tezer
+
 2.1.2 (2021-04-20)
 ------------------
 * Re-enable test_servo_pose_tracking integration test (`#423 <https://github.com/ros-planning/moveit2/issues/423>`_)

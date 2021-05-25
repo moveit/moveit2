@@ -179,7 +179,7 @@ public:
     // create a writable planning scene
     planning_scene::PlanningScenePtr planning_scene = ps->diff();
     ROS_DEBUG_STREAM("Configuring Planning Scene for CHOMP ...");
-    planning_scene->setActiveCollisionDetector(hybrid_cd, true);
+    planning_scene->allocateCollisionDetector(hybrid_cd);
 
     chomp::ChompPlanner chomp_planner;
     planning_interface::MotionPlanDetailedResponse res_detailed;

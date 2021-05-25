@@ -113,7 +113,7 @@ public:
     planning_scene::PlanningScenePtr ps = planning_scene->diff();
 
     // set FCL for the collision
-    ps->setActiveCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create(), true);
+    ps->allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
 
     // retrieve and configure existing context
     const TrajOptPlanningContextPtr& context = planning_contexts_.at(req.group_name);

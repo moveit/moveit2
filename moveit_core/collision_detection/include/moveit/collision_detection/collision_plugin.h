@@ -66,9 +66,9 @@ MOVEIT_CLASS_FORWARD(CollisionPlugin)  // Defines CollisionPluginPtr, ConstPtr, 
  *   class MyCollisionDetectionLoader : public CollisionPlugin
  *   {
  *   public:
- *     virtual bool initialize(const planning_scene::PlanningScenePtr& scene, bool exclusive) const
+ *     virtual bool initialize(const planning_scene::PlanningScenePtr& scene) const
  *     {
- *       scene->setActiveCollisionDetector(my_collision_checker::MyCollisionDetectorAllocator::create(), exclusive);
+ *       scene->allocateCollisionDetector(my_collision_checker::MyCollisionDetectorAllocator::create());
          return true;
  *     }
  *   };

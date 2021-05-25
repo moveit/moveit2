@@ -2,6 +2,12 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.3 (2021-05-22)
+------------------
+* Fix incomplete start states in OMPL ThreadSafeStateStorage (`#455 <https://github.com/ros-planning/moveit2/issues/455>`_)
+* ompl_interface: Fix loading group's specific parameters (`#461 <https://github.com/ros-planning/moveit2/issues/461>`_)
+* Contributors: Jafar Abdi, Pradeep Rajendran
+
 2.1.2 (2021-04-20)
 ------------------
 

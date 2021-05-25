@@ -2,6 +2,11 @@
 Changelog for package run_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.3 (2021-05-22)
+------------------
+* Load panda_hand_controller (`#460 <https://github.com/ros-planning/moveit2/issues/460>`_)
+* Contributors: Jafar Abdi
+
 2.1.2 (2021-04-20)
 ------------------
 * Remove move_group namespace from MotionPlanning display (`#420 <https://github.com/ros-planning/moveit2/issues/420>`_)

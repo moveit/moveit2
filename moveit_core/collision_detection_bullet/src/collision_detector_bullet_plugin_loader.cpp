@@ -39,9 +39,9 @@
 
 namespace collision_detection
 {
-bool CollisionDetectorBtPluginLoader::initialize(const planning_scene::PlanningScenePtr& scene, bool exclusive) const
+bool CollisionDetectorBtPluginLoader::initialize(const planning_scene::PlanningScenePtr& scene) const
 {
-  scene->allocateCollisionDetector(CollisionDetectorAllocatorBullet::create(), exclusive);
+  scene->allocateCollisionDetector(CollisionDetectorAllocatorBullet::create());
   return true;
 }
 }  // namespace collision_detection

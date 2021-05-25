@@ -2,6 +2,16 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.3 (2021-05-22)
+------------------
+* Delete exclusive arg for collision detector creation (`#466 <https://github.com/ros-planning/moveit2/issues/466>`_)
+  * Delete exclusive arg for collision detector creation
+  * Rename setActiveCollisionDetector->allocateCollisionDetector everywhere
+* Cleanup collision_distance_field test dependencies (`#465 <https://github.com/ros-planning/moveit2/issues/465>`_)
+* Fix PlanningScene CollisionDetector diff handling (`#464 <https://github.com/ros-planning/moveit2/issues/464>`_)
+* Fix joint limit handling when velocities aren't included in robot state (`#451 <https://github.com/ros-planning/moveit2/issues/451>`_)
+* Contributors: AndyZe, Henning Kayser
+
 2.1.2 (2021-04-20)
 ------------------
 * Fix robot_model & moveit_ros_visualization dependencies (`#421 <https://github.com/ros-planning/moveit2/issues/421>`_)
@@ -116,163 +126,163 @@ Changelog for package moveit_core
 
 1.1.1 (2020-10-13)
 ------------------
-* [feature] Handle multiple link libraries for FCL (`#2325 <https://github.com/ros-planning/moveit/issues/2325>`_)
-* [feature] Adapt to API changes in geometric_shapes (`#2324 <https://github.com/ros-planning/moveit/issues/2324>`_)
-* [fix] clang-tidy issues (`#2337 <https://github.com/ros-planning/moveit/issues/2337>`_)
-* [fix] various issues with Noetic build (`#2327 <https://github.com/ros-planning/moveit/issues/2327>`_)
-* [maint] Depend on ros-noetic-fcl (0.6) in Noetic (`#2359 <https://github.com/ros-planning/moveit/issues/2359>`_)
-* [maint] Cleanup MSA includes (`#2351 <https://github.com/ros-planning/moveit/issues/2351>`_)
-* [maint] Add comment to MOVEIT_CLASS_FORWARD (`#2315 <https://github.com/ros-planning/moveit/issues/2315>`_)
+* [feature] Handle multiple link libraries for FCL (`ros-planning:moveit#2325 <https://github.com/ros-planning/moveit/issues/2325>`_)
+* [feature] Adapt to API changes in geometric_shapes (`ros-planning:moveit#2324 <https://github.com/ros-planning/moveit/issues/2324>`_)
+* [fix] clang-tidy issues (`ros-planning:moveit#2337 <https://github.com/ros-planning/moveit/issues/2337>`_)
+* [fix] various issues with Noetic build (`ros-planning:moveit#2327 <https://github.com/ros-planning/moveit/issues/2327>`_)
+* [maint] Depend on ros-noetic-fcl (0.6) in Noetic (`ros-planning:moveit#2359 <https://github.com/ros-planning/moveit/issues/2359>`_)
+* [maint] Cleanup MSA includes (`ros-planning:moveit#2351 <https://github.com/ros-planning/moveit/issues/2351>`_)
+* [maint] Add comment to MOVEIT_CLASS_FORWARD (`ros-planning:moveit#2315 <https://github.com/ros-planning/moveit/issues/2315>`_)
 * Contributors: Felix von Drigalski, G.A. vd. Hoorn, Robert Haschke
 
 1.1.0 (2020-09-04)
 ------------------
-* [feature] Add a utility to print collision pairs (`#2275 <https://github.com/ros-planning/moveit/issues/2275>`_)
-* [feature] Fix subframes disappearing when object is detached/scaled/renamed (`#1866 <https://github.com/ros-planning/moveit/issues/1866>`_)
-* [feature] Use Eigen::Transform::linear() instead of rotation() (`#1964 <https://github.com/ros-planning/moveit/issues/1964>`_)
-* [feature] Utilize new geometric_shapes functions to improve performance (`#2038 <https://github.com/ros-planning/moveit/issues/2038>`_)
-* [feature] move_group pick place test (`#2031 <https://github.com/ros-planning/moveit/issues/2031>`_)
-* [feature] Split collision proximity threshold (`#2008 <https://github.com/ros-planning/moveit/issues/2008>`_)
-* [feature] Integration test to defend subframe tutorial (`#1757 <https://github.com/ros-planning/moveit/issues/1757>`_)
-* [feature] List missing joints in group states (`#1935 <https://github.com/ros-planning/moveit/issues/1935>`_)
-* [feature] Improve documentation for setJointPositions() (`#1921 <https://github.com/ros-planning/moveit/issues/1921>`_)
-* [feature] Installs an empty plugin description xml file if bullet is not found (`#1898 <https://github.com/ros-planning/moveit/issues/1898>`_)
-* [feature] Bullet collision detection (`#1839 <https://github.com/ros-planning/moveit/issues/1839>`_)
-* [feature] Improve RobotState documentation (`#1846 <https://github.com/ros-planning/moveit/issues/1846>`_)
-* [feature] Adapt cmake for Bullet (`#1744 <https://github.com/ros-planning/moveit/issues/1744>`_)
-* [feature] Unified Collision Environment Bullet (`#1572 <https://github.com/ros-planning/moveit/issues/1572>`_)
-* [feature] Adding continuous collision detection to Bullet (`#1551 <https://github.com/ros-planning/moveit/issues/1551>`_)
-* [feature] Bullet Collision Detection (`#1504 <https://github.com/ros-planning/moveit/issues/1504>`_)
-* [feature] Generic collision detection test suite (`#1543 <https://github.com/ros-planning/moveit/issues/1543>`_)
-* [feature] Empty collision checker template for usage with tesseract and bullet (`#1499 <https://github.com/ros-planning/moveit/issues/1499>`_)
-* [feature] Add deepcopy option for RobotTrajectory's copy constructor (`#1760 <https://github.com/ros-planning/moveit/issues/1760>`_)
-* [feature] Enable code-coverage test (`#1776 <https://github.com/ros-planning/moveit/issues/1776>`_)
-* [feature] Provide UniquePtr macros (`#1771 <https://github.com/ros-planning/moveit/issues/1771>`_)
-* [feature] Improve variable name in RobotModel (`#1752 <https://github.com/ros-planning/moveit/issues/1752>`_)
-* [feature] Adding documentation to collision detection (`#1645 <https://github.com/ros-planning/moveit/issues/1645>`_)
-* [feature] Unified Collision Environment Integration (`#1584 <https://github.com/ros-planning/moveit/issues/1584>`_)
-* [feature] Document discretization behavior in KinematicsBase (`#1602 <https://github.com/ros-planning/moveit/issues/1602>`_)
-* [feature] Rename lm to link_model (`#1592 <https://github.com/ros-planning/moveit/issues/1592>`_)
-* [feature] Allow ROS namespaces for planning request adapters (`#1530 <https://github.com/ros-planning/moveit/issues/1530>`_)
-* [feature] Add named frames to CollisionObjects (`#1439 <https://github.com/ros-planning/moveit/issues/1439>`_)
-* [feature] More verbose "id" argument in PlanningScene, RobotState & CollisionWorld functions (`#1450 <https://github.com/ros-planning/moveit/issues/1450>`_)
-* [feature] Separate source file for CartesianInterpolator (`#1149 <https://github.com/ros-planning/moveit/issues/1149>`_)
-* [fix] Various fixes for upcoming Noetic release (`#2180 <https://github.com/ros-planning/moveit/issues/2180>`_)
+* [feature] Add a utility to print collision pairs (`ros-planning:moveit#2275 <https://github.com/ros-planning/moveit/issues/2275>`_)
+* [feature] Fix subframes disappearing when object is detached/scaled/renamed (`ros-planning:moveit#1866 <https://github.com/ros-planning/moveit/issues/1866>`_)
+* [feature] Use Eigen::Transform::linear() instead of rotation() (`ros-planning:moveit#1964 <https://github.com/ros-planning/moveit/issues/1964>`_)
+* [feature] Utilize new geometric_shapes functions to improve performance (`ros-planning:moveit#2038 <https://github.com/ros-planning/moveit/issues/2038>`_)
+* [feature] move_group pick place test (`ros-planning:moveit#2031 <https://github.com/ros-planning/moveit/issues/2031>`_)
+* [feature] Split collision proximity threshold (`ros-planning:moveit#2008 <https://github.com/ros-planning/moveit/issues/2008>`_)
+* [feature] Integration test to defend subframe tutorial (`ros-planning:moveit#1757 <https://github.com/ros-planning/moveit/issues/1757>`_)
+* [feature] List missing joints in group states (`ros-planning:moveit#1935 <https://github.com/ros-planning/moveit/issues/1935>`_)
+* [feature] Improve documentation for setJointPositions() (`ros-planning:moveit#1921 <https://github.com/ros-planning/moveit/issues/1921>`_)
+* [feature] Installs an empty plugin description xml file if bullet is not found (`ros-planning:moveit#1898 <https://github.com/ros-planning/moveit/issues/1898>`_)
+* [feature] Bullet collision detection (`ros-planning:moveit#1839 <https://github.com/ros-planning/moveit/issues/1839>`_)
+* [feature] Improve RobotState documentation (`ros-planning:moveit#1846 <https://github.com/ros-planning/moveit/issues/1846>`_)
+* [feature] Adapt cmake for Bullet (`ros-planning:moveit#1744 <https://github.com/ros-planning/moveit/issues/1744>`_)
+* [feature] Unified Collision Environment Bullet (`ros-planning:moveit#1572 <https://github.com/ros-planning/moveit/issues/1572>`_)
+* [feature] Adding continuous collision detection to Bullet (`ros-planning:moveit#1551 <https://github.com/ros-planning/moveit/issues/1551>`_)
+* [feature] Bullet Collision Detection (`ros-planning:moveit#1504 <https://github.com/ros-planning/moveit/issues/1504>`_)
+* [feature] Generic collision detection test suite (`ros-planning:moveit#1543 <https://github.com/ros-planning/moveit/issues/1543>`_)
+* [feature] Empty collision checker template for usage with tesseract and bullet (`ros-planning:moveit#1499 <https://github.com/ros-planning/moveit/issues/1499>`_)
+* [feature] Add deepcopy option for RobotTrajectory's copy constructor (`ros-planning:moveit#1760 <https://github.com/ros-planning/moveit/issues/1760>`_)
+* [feature] Enable code-coverage test (`ros-planning:moveit#1776 <https://github.com/ros-planning/moveit/issues/1776>`_)
+* [feature] Provide UniquePtr macros (`ros-planning:moveit#1771 <https://github.com/ros-planning/moveit/issues/1771>`_)
+* [feature] Improve variable name in RobotModel (`ros-planning:moveit#1752 <https://github.com/ros-planning/moveit/issues/1752>`_)
+* [feature] Adding documentation to collision detection (`ros-planning:moveit#1645 <https://github.com/ros-planning/moveit/issues/1645>`_)
+* [feature] Unified Collision Environment Integration (`ros-planning:moveit#1584 <https://github.com/ros-planning/moveit/issues/1584>`_)
+* [feature] Document discretization behavior in KinematicsBase (`ros-planning:moveit#1602 <https://github.com/ros-planning/moveit/issues/1602>`_)
+* [feature] Rename lm to link_model (`ros-planning:moveit#1592 <https://github.com/ros-planning/moveit/issues/1592>`_)
+* [feature] Allow ROS namespaces for planning request adapters (`ros-planning:moveit#1530 <https://github.com/ros-planning/moveit/issues/1530>`_)
+* [feature] Add named frames to CollisionObjects (`ros-planning:moveit#1439 <https://github.com/ros-planning/moveit/issues/1439>`_)
+* [feature] More verbose "id" argument in PlanningScene, RobotState & CollisionWorld functions (`ros-planning:moveit#1450 <https://github.com/ros-planning/moveit/issues/1450>`_)
+* [feature] Separate source file for CartesianInterpolator (`ros-planning:moveit#1149 <https://github.com/ros-planning/moveit/issues/1149>`_)
+* [fix] Various fixes for upcoming Noetic release (`ros-planning:moveit#2180 <https://github.com/ros-planning/moveit/issues/2180>`_)
 * [fix] Change FloatingJointModel::getStateSpaceDimension return value to 7
-* [fix] collision world: check for empty shapes vector before access (`#2026 <https://github.com/ros-planning/moveit/issues/2026>`_)
-* [fix] Fix Condition for Adding current DistanceResultData to DistanceMap for DistanceRequestType::SINGLE (`#1963 <https://github.com/ros-planning/moveit/issues/1963>`_)
-* [fix] Do not override empty URDF link collision geometry (`#1952 <https://github.com/ros-planning/moveit/issues/1952>`_)
-* [fix] Fix issue in unpadded collision checking (`#1899 <https://github.com/ros-planning/moveit/issues/1899>`_)
-* [fix] Remove object from collision world only once (`#1900 <https://github.com/ros-planning/moveit/issues/1900>`_)
-* [fix] Initialize zero dynamics in CurrentStateMonitor (`#1883 <https://github.com/ros-planning/moveit/issues/1883>`_)
-* [fix] getFrameInfo(): Avoid double search for link name (`#1853 <https://github.com/ros-planning/moveit/issues/1853>`_)
-* [fix] Fix RobotTrajectory's copy constructor (`#1834 <https://github.com/ros-planning/moveit/issues/1834>`_)
-* [fix] Fix flaky moveit_cpp test (`#1781 <https://github.com/ros-planning/moveit/issues/1781>`_)
-* [fix] Fix doc string OrientationConstraint (`#1793 <https://github.com/ros-planning/moveit/issues/1793>`_)
-* [fix] Move ASSERT() into test setup (`#1657 <https://github.com/ros-planning/moveit/issues/1657>`_)
-* [fix] Add missing dependencies to library (`#1746 <https://github.com/ros-planning/moveit/issues/1746>`_)
-* [fix] Fix clang-tidy for unified collision environment (`#1638 <https://github.com/ros-planning/moveit/issues/1638>`_)
-* [fix] PlanningRequestAdapter::initialize() = 0 (`#1621 <https://github.com/ros-planning/moveit/issues/1621>`_)
-* [fix] Fix World::getTransform (`#1553 <https://github.com/ros-planning/moveit/issues/1553>`_)
-* [fix] Link moveit_robot_model from moveit_test_utils (`#1534 <https://github.com/ros-planning/moveit/issues/1534>`_)
-* [maint] Move constraint representation dox to moveit_tutorials (`#2147 <https://github.com/ros-planning/moveit/issues/2147>`_)
-* [maint] Update dependencies for python3 in noetic (`#2131 <https://github.com/ros-planning/moveit/issues/2131>`_)
-* [maint] clang-tidy fixes (`#2050 <https://github.com/ros-planning/moveit/issues/2050>`_, `#2004 <https://github.com/ros-planning/moveit/issues/2004>`_, `#1419 <https://github.com/ros-planning/moveit/issues/1419>`_)
-* [maint] Replace namespaces robot_state and robot_model with moveit::core (`#1924 <https://github.com/ros-planning/moveit/issues/1924>`_)
-* [maint] Rename PR2-related collision test files (`#1856 <https://github.com/ros-planning/moveit/issues/1856>`_)
-* [maint] Fix compiler warnings (`#1773 <https://github.com/ros-planning/moveit/issues/1773>`_)
-* [maint] Add missing licenses (`#1716 <https://github.com/ros-planning/moveit/issues/1716>`_) (`#1720 <https://github.com/ros-planning/moveit/issues/1720>`_)
-* [maint] Move isEmpty() test functions to moveit_core/utils (`#1627 <https://github.com/ros-planning/moveit/issues/1627>`_)
-* [maint] Switch from include guards to pragma once (`#1615 <https://github.com/ros-planning/moveit/issues/1615>`_)
-* [maint] Remove ! from MoveIt name (`#1590 <https://github.com/ros-planning/moveit/issues/1590>`_)
+* [fix] collision world: check for empty shapes vector before access (`ros-planning:moveit#2026 <https://github.com/ros-planning/moveit/issues/2026>`_)
+* [fix] Fix Condition for Adding current DistanceResultData to DistanceMap for DistanceRequestType::SINGLE (`ros-planning:moveit#1963 <https://github.com/ros-planning/moveit/issues/1963>`_)
+* [fix] Do not override empty URDF link collision geometry (`ros-planning:moveit#1952 <https://github.com/ros-planning/moveit/issues/1952>`_)
+* [fix] Fix issue in unpadded collision checking (`ros-planning:moveit#1899 <https://github.com/ros-planning/moveit/issues/1899>`_)
+* [fix] Remove object from collision world only once (`ros-planning:moveit#1900 <https://github.com/ros-planning/moveit/issues/1900>`_)
+* [fix] Initialize zero dynamics in CurrentStateMonitor (`ros-planning:moveit#1883 <https://github.com/ros-planning/moveit/issues/1883>`_)
+* [fix] getFrameInfo(): Avoid double search for link name (`ros-planning:moveit#1853 <https://github.com/ros-planning/moveit/issues/1853>`_)
+* [fix] Fix RobotTrajectory's copy constructor (`ros-planning:moveit#1834 <https://github.com/ros-planning/moveit/issues/1834>`_)
+* [fix] Fix flaky moveit_cpp test (`ros-planning:moveit#1781 <https://github.com/ros-planning/moveit/issues/1781>`_)
+* [fix] Fix doc string OrientationConstraint (`ros-planning:moveit#1793 <https://github.com/ros-planning/moveit/issues/1793>`_)
+* [fix] Move ASSERT() into test setup (`ros-planning:moveit#1657 <https://github.com/ros-planning/moveit/issues/1657>`_)
+* [fix] Add missing dependencies to library (`ros-planning:moveit#1746 <https://github.com/ros-planning/moveit/issues/1746>`_)
+* [fix] Fix clang-tidy for unified collision environment (`ros-planning:moveit#1638 <https://github.com/ros-planning/moveit/issues/1638>`_)
+* [fix] PlanningRequestAdapter::initialize() = 0 (`ros-planning:moveit#1621 <https://github.com/ros-planning/moveit/issues/1621>`_)
+* [fix] Fix World::getTransform (`ros-planning:moveit#1553 <https://github.com/ros-planning/moveit/issues/1553>`_)
+* [fix] Link moveit_robot_model from moveit_test_utils (`ros-planning:moveit#1534 <https://github.com/ros-planning/moveit/issues/1534>`_)
+* [maint] Move constraint representation dox to moveit_tutorials (`ros-planning:moveit#2147 <https://github.com/ros-planning/moveit/issues/2147>`_)
+* [maint] Update dependencies for python3 in noetic (`ros-planning:moveit#2131 <https://github.com/ros-planning/moveit/issues/2131>`_)
+* [maint] clang-tidy fixes (`ros-planning:moveit#2050 <https://github.com/ros-planning/moveit/issues/2050>`_, `ros-planning:moveit#2004 <https://github.com/ros-planning/moveit/issues/2004>`_, `ros-planning:moveit#1419 <https://github.com/ros-planning/moveit/issues/1419>`_)
+* [maint] Replace namespaces robot_state and robot_model with moveit::core (`ros-planning:moveit#1924 <https://github.com/ros-planning/moveit/issues/1924>`_)
+* [maint] Rename PR2-related collision test files (`ros-planning:moveit#1856 <https://github.com/ros-planning/moveit/issues/1856>`_)
+* [maint] Fix compiler warnings (`ros-planning:moveit#1773 <https://github.com/ros-planning/moveit/issues/1773>`_)
+* [maint] Add missing licenses (`ros-planning:moveit#1716 <https://github.com/ros-planning/moveit/issues/1716>`_) (`ros-planning:moveit#1720 <https://github.com/ros-planning/moveit/issues/1720>`_)
+* [maint] Move isEmpty() test functions to moveit_core/utils (`ros-planning:moveit#1627 <https://github.com/ros-planning/moveit/issues/1627>`_)
+* [maint] Switch from include guards to pragma once (`ros-planning:moveit#1615 <https://github.com/ros-planning/moveit/issues/1615>`_)
+* [maint] Remove ! from MoveIt name (`ros-planning:moveit#1590 <https://github.com/ros-planning/moveit/issues/1590>`_)
 * Contributors: AndyZe, Aris Synodinos, Ayush Garg, Bryce Willey, Dale Koenig, Dave Coleman, Felix von Drigalski, Henning Kayser, Jafar Abdi, Jens P, Jere Liukkonen, Jeroen, John Stechschulte, Jonas Wittmann, Jonathan Binney, Markus Vieth, Martin Pecka, Michael Ferguson, Michael Görner, Mike Lautman, Niklas Fiedler, Patrick Beeson, Robert Haschke, Sean Yen, Shivang Patel, Tyler Weaver, Wolfgang Merkt, Yu, Yan, tsijs, v4hn
 
 1.0.6 (2020-08-19)
 ------------------
-* [maint] Adapt repository for splitted moveit_resources layout (`#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
+* [maint] Adapt repository for splitted moveit_resources layout (`ros-planning:moveit#2199 <https://github.com/ros-planning/moveit/issues/2199>`_)
 * [maint] Migrate to clang-format-10, Fix warnings
-* [maint] Optimize includes (`#2229 <https://github.com/ros-planning/moveit/issues/2229>`_)
-* [maint] Fix docs in robot_state.h (`#2215 <https://github.com/ros-planning/moveit/issues/2215>`_)
+* [maint] Optimize includes (`ros-planning:moveit#2229 <https://github.com/ros-planning/moveit/issues/2229>`_)
+* [maint] Fix docs in robot_state.h (`ros-planning:moveit#2215 <https://github.com/ros-planning/moveit/issues/2215>`_)
 * Contributors: Jeroen, Markus Vieth, Michael Görner, Robert Haschke
 
 1.0.5 (2020-07-08)
 ------------------
-* [fix]     Fix memory leaks related to geometric shapes usage (`#2138 <https://github.com/ros-planning/moveit/issues/2138>`_)
-* [fix]     Prevent collision checking segfault if octomap has NULL root pointer (`#2104 <https://github.com/ros-planning/moveit/issues/2104>`_)
-* [feature] Allow to parameterize input trajectory density of Time Optimal trajectory generation (`#2185 <https://github.com/ros-planning/moveit/issues/2185>`_)
-* [maint]   Optional C++ version setting (`#2166 <https://github.com/ros-planning/moveit/issues/2166>`_)
-* [maint]   Added missing boost::regex dependency (`#2163 <https://github.com/ros-planning/moveit/issues/2163>`_)
-* [maint]   PropagationDistanceField: Replace eucDistSq with squaredNorm (`#2101 <https://github.com/ros-planning/moveit/issues/2101>`_)
-* [fix]     Fix getTransform() (`#2113 <https://github.com/ros-planning/moveit/issues/2113>`_)
+* [fix]     Fix memory leaks related to geometric shapes usage (`ros-planning:moveit#2138 <https://github.com/ros-planning/moveit/issues/2138>`_)
+* [fix]     Prevent collision checking segfault if octomap has NULL root pointer (`ros-planning:moveit#2104 <https://github.com/ros-planning/moveit/issues/2104>`_)
+* [feature] Allow to parameterize input trajectory density of Time Optimal trajectory generation (`ros-planning:moveit#2185 <https://github.com/ros-planning/moveit/issues/2185>`_)
+* [maint]   Optional C++ version setting (`ros-planning:moveit#2166 <https://github.com/ros-planning/moveit/issues/2166>`_)
+* [maint]   Added missing boost::regex dependency (`ros-planning:moveit#2163 <https://github.com/ros-planning/moveit/issues/2163>`_)
+* [maint]   PropagationDistanceField: Replace eucDistSq with squaredNorm (`ros-planning:moveit#2101 <https://github.com/ros-planning/moveit/issues/2101>`_)
+* [fix]     Fix getTransform() (`ros-planning:moveit#2113 <https://github.com/ros-planning/moveit/issues/2113>`_)
   - PlanningScene::getTransforms().getTransform() -> PlanningScene::getFrameTransform()
   - PlanningScene::getTransforms().canTransform() -> PlanningScene::knowsFrameTransform()
-* [fix]     Change FloatingJointModel::getStateSpaceDimension return value to 7 (`#2106 <https://github.com/ros-planning/moveit/issues/2106>`_)
-* [fix]     Check for empty quaternion message (`#2089 <https://github.com/ros-planning/moveit/issues/2089>`_)
-* [fix]     TOTG: Fix parameterization for single-waypoint trajectories (`#2054 <https://github.com/ros-planning/moveit/issues/2054>`_)
+* [fix]     Change FloatingJointModel::getStateSpaceDimension return value to 7 (`ros-planning:moveit#2106 <https://github.com/ros-planning/moveit/issues/2106>`_)
+* [fix]     Check for empty quaternion message (`ros-planning:moveit#2089 <https://github.com/ros-planning/moveit/issues/2089>`_)
+* [fix]     TOTG: Fix parameterization for single-waypoint trajectories (`ros-planning:moveit#2054 <https://github.com/ros-planning/moveit/issues/2054>`_)
   - RobotState: Added interfaces to zero and remove dynamics
-* [maint]   Remove unused angles.h includes (`#1985 <https://github.com/ros-planning/moveit/issues/1985>`_)
+* [maint]   Remove unused angles.h includes (`ros-planning:moveit#1985 <https://github.com/ros-planning/moveit/issues/1985>`_)
 * Contributors: Felix von Drigalski, Henning Kayser, Michael Görner, Jere Liukkonen, John Stechschulte, Patrick Beeson, Robert Haschke, Tyler Weaver, Wolfgang Merkt
 
 1.0.4 (2020-05-30)
 ------------------
-* Fix broken IKFast generator (`#2116 <https://github.com/ros-planning/moveit/issues/2116>`_)
+* Fix broken IKFast generator (`ros-planning:moveit#2116 <https://github.com/ros-planning/moveit/issues/2116>`_)
 * Contributors: Robert Haschke
 
 1.0.3 (2020-04-26)
 ------------------
-* [feature] Allow to filter for joint when creating a RobotTrajectory message (`#1927 <https://github.com/ros-planning/moveit/issues/1927>`_)
+* [feature] Allow to filter for joint when creating a RobotTrajectory message (`ros-planning:moveit#1927 <https://github.com/ros-planning/moveit/issues/1927>`_)
 * [fix]     Fix RobotState::copyFrom()
-* [fix]     Fix segfault in totg (`#1861 <https://github.com/ros-planning/moveit/issues/1861>`_)
+* [fix]     Fix segfault in totg (`ros-planning:moveit#1861 <https://github.com/ros-planning/moveit/issues/1861>`_)
 * [fix]     Handle incomplete group states
-* [fix]     Fix issue in totg giving invalid accelerations (`#1729 <https://github.com/ros-planning/moveit/issues/1729>`_)
-* [feature] New isValidVelocityMove() for checking time between two waypoints given velocity (`#684 <https://github.com/ros-planning/moveit/issues/684>`_)
-* [maint]   Apply clang-tidy fix to entire code base (`#1394 <https://github.com/ros-planning/moveit/issues/1394>`_)
-* [fix]     Fix Condition for adding current DistanceResultData to DistanceMap (`#1968 <https://github.com/ros-planning/moveit/issues/1968>`_)
-* [maint]   Fix various build issues on Windows (`#1880 <https://github.com/ros-planning/moveit/issues/1880>`_)
-  * remove GCC extensions (`#1583 <https://github.com/ros-planning/moveit/issues/1583>`_)
-  * Fix binary artifact install locations. (`#1575 <https://github.com/ros-planning/moveit/issues/1575>`_)
-* [maint]   Use CMAKE_CXX_STANDARD to enforce c++14 (`#1607 <https://github.com/ros-planning/moveit/issues/1607>`_)
-* [fix]     Delete attached body before adding a new one with same id (`#1821 <https://github.com/ros-planning/moveit/issues/1821>`_)
-* [maint]   Provide UniquePtr macros (`#1771 <https://github.com/ros-planning/moveit/issues/1771>`_)
-* [maint]   Updated deprecation method: MOVEIT_DEPRECATED -> [[deprecated]] (`#1748 <https://github.com/ros-planning/moveit/issues/1748>`_)
-* [feature] Add RobotTrajectory::getDuration() (`#1554 <https://github.com/ros-planning/moveit/issues/1554>`_)
+* [fix]     Fix issue in totg giving invalid accelerations (`ros-planning:moveit#1729 <https://github.com/ros-planning/moveit/issues/1729>`_)
+* [feature] New isValidVelocityMove() for checking time between two waypoints given velocity (`ros-planning:moveit#684 <https://github.com/ros-planning/moveit/issues/684>`_)
+* [maint]   Apply clang-tidy fix to entire code base (`ros-planning:moveit#1394 <https://github.com/ros-planning/moveit/issues/1394>`_)
+* [fix]     Fix Condition for adding current DistanceResultData to DistanceMap (`ros-planning:moveit#1968 <https://github.com/ros-planning/moveit/issues/1968>`_)
+* [maint]   Fix various build issues on Windows (`ros-planning:moveit#1880 <https://github.com/ros-planning/moveit/issues/1880>`_)
+  * remove GCC extensions (`ros-planning:moveit#1583 <https://github.com/ros-planning/moveit/issues/1583>`_)
+  * Fix binary artifact install locations. (`ros-planning:moveit#1575 <https://github.com/ros-planning/moveit/issues/1575>`_)
+* [maint]   Use CMAKE_CXX_STANDARD to enforce c++14 (`ros-planning:moveit#1607 <https://github.com/ros-planning/moveit/issues/1607>`_)
+* [fix]     Delete attached body before adding a new one with same id (`ros-planning:moveit#1821 <https://github.com/ros-planning/moveit/issues/1821>`_)
+* [maint]   Provide UniquePtr macros (`ros-planning:moveit#1771 <https://github.com/ros-planning/moveit/issues/1771>`_)
+* [maint]   Updated deprecation method: MOVEIT_DEPRECATED -> [[deprecated]] (`ros-planning:moveit#1748 <https://github.com/ros-planning/moveit/issues/1748>`_)
+* [feature] Add RobotTrajectory::getDuration() (`ros-planning:moveit#1554 <https://github.com/ros-planning/moveit/issues/1554>`_)
 * Contributors: Ayush Garg, Dale Koenig, Dave Coleman, Felix von Drigalski, Jafar Abdi, Jeroen, Michael Görner, Mike Lautman, Niklas Fiedler, Robert Haschke, Sean Yen, Yu, Yan
 
 1.0.2 (2019-06-28)
 ------------------
-* [fix] Removed MessageFilter for /collision_object messages (`#1406 <https://github.com/ros-planning/moveit/issues/1406>`_)
-* [fix] Update robot state transforms when initializing a planning scene (`#1474 <https://github.com/ros-planning/moveit/issues/1474>`_)
-* [fix] Fix segfault when detaching attached collision object (`#1438 <https://github.com/ros-planning/moveit/issues/1438>`_)
-* [fix] Normalize quaternions when adding new or moving collision objects (`#1420 <https://github.com/ros-planning/moveit/issues/1420>`_)
-* [fix] Minor bug fixes in (collision) distance field (`#1392 <https://github.com/ros-planning/moveit/issues/1392>`_)
+* [fix] Removed MessageFilter for /collision_object messages (`ros-planning:moveit#1406 <https://github.com/ros-planning/moveit/issues/1406>`_)
+* [fix] Update robot state transforms when initializing a planning scene (`ros-planning:moveit#1474 <https://github.com/ros-planning/moveit/issues/1474>`_)
+* [fix] Fix segfault when detaching attached collision object (`ros-planning:moveit#1438 <https://github.com/ros-planning/moveit/issues/1438>`_)
+* [fix] Normalize quaternions when adding new or moving collision objects (`ros-planning:moveit#1420 <https://github.com/ros-planning/moveit/issues/1420>`_)
+* [fix] Minor bug fixes in (collision) distance field (`ros-planning:moveit#1392 <https://github.com/ros-planning/moveit/issues/1392>`_)
 * [fix] Remove obsolete moveit_resources/config.h ()
-* [fix] Fix test utilities in moveit_core (`#1391 <https://github.com/ros-planning/moveit/issues/1391>`_, `#1409 <https://github.com/ros-planning/moveit/issues/1409>`_, `#1412 <https://github.com/ros-planning/moveit/issues/1412>`_)
+* [fix] Fix test utilities in moveit_core (`ros-planning:moveit#1391 <https://github.com/ros-planning/moveit/issues/1391>`_, `ros-planning:moveit#1409 <https://github.com/ros-planning/moveit/issues/1409>`_, `ros-planning:moveit#1412 <https://github.com/ros-planning/moveit/issues/1412>`_)
 * Contributors: Bryce Willey, Henning Kayser, Mike Lautman, Robert Haschke, tsijs
 
 1.0.1 (2019-03-08)
 ------------------
-* [capability] Graphically print current robot joint states with joint limits (`#1358 <https://github.com/ros-planning/moveit/issues/1358>`_)
-* [improve] Apply clang tidy fix to entire code base (Part 1) (`#1366 <https://github.com/ros-planning/moveit/issues/1366>`_)
+* [capability] Graphically print current robot joint states with joint limits (`ros-planning:moveit#1358 <https://github.com/ros-planning/moveit/issues/1358>`_)
+* [improve] Apply clang tidy fix to entire code base (Part 1) (`ros-planning:moveit#1366 <https://github.com/ros-planning/moveit/issues/1366>`_)
 * Contributors: Dave Coleman, Robert Haschke, Yu, Yan
 
 1.0.0 (2019-02-24)
 ------------------
-* [fix] catkin_lint issues (`#1341 <https://github.com/ros-planning/moveit/issues/1341>`_)
-* [fix] invert waypoint velocities on reverse (`#1335 <https://github.com/ros-planning/moveit/issues/1335>`_)
-* [fix] Added missing robot state update to iterative spline parameterization to prevent warnings. (`#1298 <https://github.com/ros-planning/moveit/issues/1298>`_)
-* [fix] robot_model_test_utils depends on message generation (`#1286 <https://github.com/ros-planning/moveit/issues/1286>`_)
-* [improve] cleanup LMA kinematics solver `#1318 <https://github.com/ros-planning/moveit/issues/1318>`_
-* [improve] Remove (redundant) random seeding and #attempts from RobotState::setFromIK() as the IK solver perform random seeding themselves. `#1288 <https://github.com/ros-planning/moveit/issues/1288>`_
-* [improve] Make FCL shape cache thread-local (`#1316 <https://github.com/ros-planning/moveit/issues/1316>`_)
-* [improve] Kinematics tests, kdl cleanup `#1272 <https://github.com/ros-planning/moveit/issues/1272>`_, `#1294 <https://github.com/ros-planning/moveit/issues/1294>`_
-* [maintenance] Add coverage analysis for moveit_core (`#1133 <https://github.com/ros-planning/moveit/issues/1133>`_)
-* [improve] computeCartesianPath: limit joint-space jumps with IK consistency limits (`#1293 <https://github.com/ros-planning/moveit/issues/1293>`_)
+* [fix] catkin_lint issues (`ros-planning:moveit#1341 <https://github.com/ros-planning/moveit/issues/1341>`_)
+* [fix] invert waypoint velocities on reverse (`ros-planning:moveit#1335 <https://github.com/ros-planning/moveit/issues/1335>`_)
+* [fix] Added missing robot state update to iterative spline parameterization to prevent warnings. (`ros-planning:moveit#1298 <https://github.com/ros-planning/moveit/issues/1298>`_)
+* [fix] robot_model_test_utils depends on message generation (`ros-planning:moveit#1286 <https://github.com/ros-planning/moveit/issues/1286>`_)
+* [improve] cleanup LMA kinematics solver `ros-planning:moveit#1318 <https://github.com/ros-planning/moveit/issues/1318>`_
+* [improve] Remove (redundant) random seeding and ros-planning:moveit#attempts from RobotState::setFromIK() as the IK solver perform random seeding themselves. `ros-planning:moveit#1288 <https://github.com/ros-planning/moveit/issues/1288>`_
+* [improve] Make FCL shape cache thread-local (`ros-planning:moveit#1316 <https://github.com/ros-planning/moveit/issues/1316>`_)
+* [improve] Kinematics tests, kdl cleanup `ros-planning:moveit#1272 <https://github.com/ros-planning/moveit/issues/1272>`_, `ros-planning:moveit#1294 <https://github.com/ros-planning/moveit/issues/1294>`_
+* [maintenance] Add coverage analysis for moveit_core (`ros-planning:moveit#1133 <https://github.com/ros-planning/moveit/issues/1133>`_)
+* [improve] computeCartesianPath: limit joint-space jumps with IK consistency limits (`ros-planning:moveit#1293 <https://github.com/ros-planning/moveit/issues/1293>`_)
 * Contributors: Alexander Gutenkunst, Dave Coleman, Jonathan Binney, Martin Oehler, Michael Görner, Mike Lautman, Robert Haschke, Simon Schmeisser
 
 0.10.8 (2018-12-24)
 -------------------
-* [enhancement] Tool to generate constraint approximation databases (`#1253 <https://github.com/ros-planning/moveit/issues/1253>`_)
-* [fix] Fixed uninitialized RobotState transforms (`#1271 <https://github.com/ros-planning/moveit/issues/1271>`_)
+* [enhancement] Tool to generate constraint approximation databases (`ros-planning:moveit#1253 <https://github.com/ros-planning/moveit/issues/1253>`_)
+* [fix] Fixed uninitialized RobotState transforms (`ros-planning:moveit#1271 <https://github.com/ros-planning/moveit/issues/1271>`_)
 * Contributors: Michael Görner, Robert Haschke
 
 0.10.7 (2018-12-13)
@@ -280,22 +290,22 @@ Changelog for package moveit_core
 
 0.10.6 (2018-12-09)
 -------------------
-* [fix] Fixed various memory leaks (`#1104 <https://github.com/ros-planning/moveit/issues/1104>`_)
-* [fix] Fixed computation of Jacobian for prismatic joints (`#1192 <https://github.com/ros-planning/moveit/issues/1192>`_)
-* [enhancement] Add support for FCL 0.6 (`#1156 <https://github.com/ros-planning/moveit/issues/1156>`_)
-* [enhancement] Pass RobotModel to IK, avoiding multiple loading (`#1166 <https://github.com/ros-planning/moveit/issues/1166>`_)
-* [enhancement] RobotTrajectory: Allow appending part of other trajectory (`#1213 <https://github.com/ros-planning/moveit/issues/1213>`_)
-* [maintenance] Rearranged CHOMP-related modules within moveit_planners/chomp (`#1251 <https://github.com/ros-planning/moveit/issues/1251>`_)
-* [maintenance] Replaced Eigen::Affine3d -> Eigen::Isometry3d (`#1096 <https://github.com/ros-planning/moveit/issues/1096>`_)
-* [maintenance] Use C++14 (`#1146 <https://github.com/ros-planning/moveit/issues/1146>`_)
+* [fix] Fixed various memory leaks (`ros-planning:moveit#1104 <https://github.com/ros-planning/moveit/issues/1104>`_)
+* [fix] Fixed computation of Jacobian for prismatic joints (`ros-planning:moveit#1192 <https://github.com/ros-planning/moveit/issues/1192>`_)
+* [enhancement] Add support for FCL 0.6 (`ros-planning:moveit#1156 <https://github.com/ros-planning/moveit/issues/1156>`_)
+* [enhancement] Pass RobotModel to IK, avoiding multiple loading (`ros-planning:moveit#1166 <https://github.com/ros-planning/moveit/issues/1166>`_)
+* [enhancement] RobotTrajectory: Allow appending part of other trajectory (`ros-planning:moveit#1213 <https://github.com/ros-planning/moveit/issues/1213>`_)
+* [maintenance] Rearranged CHOMP-related modules within moveit_planners/chomp (`ros-planning:moveit#1251 <https://github.com/ros-planning/moveit/issues/1251>`_)
+* [maintenance] Replaced Eigen::Affine3d -> Eigen::Isometry3d (`ros-planning:moveit#1096 <https://github.com/ros-planning/moveit/issues/1096>`_)
+* [maintenance] Use C++14 (`ros-planning:moveit#1146 <https://github.com/ros-planning/moveit/issues/1146>`_)
 * [maintenance] Code Cleanup
-  * `#1179 <https://github.com/ros-planning/moveit/issues/1179>`_
-  * `#1180 <https://github.com/ros-planning/moveit/issues/1180>`_
-  * `#1185 <https://github.com/ros-planning/moveit/issues/1185>`_
-  * `#1193 <https://github.com/ros-planning/moveit/issues/1193>`_
-  * `#1194 <https://github.com/ros-planning/moveit/issues/1194>`_
-  * `#1196 <https://github.com/ros-planning/moveit/issues/1196>`_
-* [maintenance] RobotModelBuilder to facilitate testing (`#1176 <https://github.com/ros-planning/moveit/issues/1176>`_)
+  * `ros-planning:moveit#1179 <https://github.com/ros-planning/moveit/issues/1179>`_
+  * `ros-planning:moveit#1180 <https://github.com/ros-planning/moveit/issues/1180>`_
+  * `ros-planning:moveit#1185 <https://github.com/ros-planning/moveit/issues/1185>`_
+  * `ros-planning:moveit#1193 <https://github.com/ros-planning/moveit/issues/1193>`_
+  * `ros-planning:moveit#1194 <https://github.com/ros-planning/moveit/issues/1194>`_
+  * `ros-planning:moveit#1196 <https://github.com/ros-planning/moveit/issues/1196>`_
+* [maintenance] RobotModelBuilder to facilitate testing (`ros-planning:moveit#1176 <https://github.com/ros-planning/moveit/issues/1176>`_)
 * Contributors: Robert Haschke, 2scholz, Alex Moriarty, Bryce Willey, Dave Coleman, Immanuel Martini, Michael Görner, Milutin Nikolic
 
 0.10.5 (2018-11-01)
@@ -306,70 +316,70 @@ Changelog for package moveit_core
 
 0.10.3 (2018-10-29)
 -------------------
-* [fix] compiler warnings (`#1089 <https://github.com/ros-planning/moveit/issues/1089>`_)
-* [code] cleanup (`#1107 <https://github.com/ros-planning/moveit/issues/1107>`_, `#1099 <https://github.com/ros-planning/moveit/issues/1099>`_, `#1108 <https://github.com/ros-planning/moveit/issues/1108>`_)
+* [fix] compiler warnings (`ros-planning:moveit#1089 <https://github.com/ros-planning/moveit/issues/1089>`_)
+* [code] cleanup (`ros-planning:moveit#1107 <https://github.com/ros-planning/moveit/issues/1107>`_, `ros-planning:moveit#1099 <https://github.com/ros-planning/moveit/issues/1099>`_, `ros-planning:moveit#1108 <https://github.com/ros-planning/moveit/issues/1108>`_)
 * Contributors: Robert Haschke, Simon Schmeisser
 
 0.10.2 (2018-10-24)
 -------------------
-* [fix] TFs in subgroups of rigidly-connected links (`#912 <https://github.com/ros-planning/moveit/issues/912>`_)
-* [fix] Chomp package handling issue `#1086 <https://github.com/ros-planning/moveit/issues/1086>`_ that was introduced in `ubi-agni/hotfix-#1012 <https://github.com/ubi-agni/hotfix-/issues/1012>`_
-* [fix] CurrentStateMonitor update callback for floating joints to handle non-identity joint origins `#984 <https://github.com/ros-planning/moveit/issues/984>`_
-* [fix] Eigen alignment issuses due to missing aligned allocation (`#1039 <https://github.com/ros-planning/moveit/issues/1039>`_)
-* [fix] illegal pointer access (`#989 <https://github.com/ros-planning/moveit/issues/989>`_)
-* [fix] reset moveit_msgs::RobotState.is_diff to false (`#968 <https://github.com/ros-planning/moveit/issues/968>`_) This fixes a regression introduced in `#939 <https://github.com/ros-planning/moveit/issues/939>`_.
-* [fix] continous joint limits are always satisfied (`#729 <https://github.com/ros-planning/moveit/issues/729>`_)
-* [maintenance] using LOGNAME variable rather than strings (`#1079 <https://github.com/ros-planning/moveit/issues/1079>`_)
-* [capability][chomp] Addition of CHOMP planning adapter for optimizing result of other planners (`#1012 <https://github.com/ros-planning/moveit/issues/1012>`_)
-* [enhancement] Add missing distance check functions to allValid collision checker (`#986 <https://github.com/ros-planning/moveit/issues/986>`_)
-* [enhancement] Allow chains to have only one active joint (`#983 <https://github.com/ros-planning/moveit/issues/983>`_)
-* [enhancement] collision_detection convenience (`#957 <https://github.com/ros-planning/moveit/issues/957>`_)
-* [doc] Document why to use only one IK attempt in computeCartesianPath (`#1076 <https://github.com/ros-planning/moveit/issues/1076>`_)
+* [fix] TFs in subgroups of rigidly-connected links (`ros-planning:moveit#912 <https://github.com/ros-planning/moveit/issues/912>`_)
+* [fix] Chomp package handling issue `ros-planning:moveit#1086 <https://github.com/ros-planning/moveit/issues/1086>`_ that was introduced in `ubi-agni/hotfix-ros-planning:moveit#1012 <https://github.com/ubi-agni/hotfix-/issues/1012>`_
+* [fix] CurrentStateMonitor update callback for floating joints to handle non-identity joint origins `ros-planning:moveit#984 <https://github.com/ros-planning/moveit/issues/984>`_
+* [fix] Eigen alignment issuses due to missing aligned allocation (`ros-planning:moveit#1039 <https://github.com/ros-planning/moveit/issues/1039>`_)
+* [fix] illegal pointer access (`ros-planning:moveit#989 <https://github.com/ros-planning/moveit/issues/989>`_)
+* [fix] reset moveit_msgs::RobotState.is_diff to false (`ros-planning:moveit#968 <https://github.com/ros-planning/moveit/issues/968>`_) This fixes a regression introduced in `ros-planning:moveit#939 <https://github.com/ros-planning/moveit/issues/939>`_.
+* [fix] continous joint limits are always satisfied (`ros-planning:moveit#729 <https://github.com/ros-planning/moveit/issues/729>`_)
+* [maintenance] using LOGNAME variable rather than strings (`ros-planning:moveit#1079 <https://github.com/ros-planning/moveit/issues/1079>`_)
+* [capability][chomp] Addition of CHOMP planning adapter for optimizing result of other planners (`ros-planning:moveit#1012 <https://github.com/ros-planning/moveit/issues/1012>`_)
+* [enhancement] Add missing distance check functions to allValid collision checker (`ros-planning:moveit#986 <https://github.com/ros-planning/moveit/issues/986>`_)
+* [enhancement] Allow chains to have only one active joint (`ros-planning:moveit#983 <https://github.com/ros-planning/moveit/issues/983>`_)
+* [enhancement] collision_detection convenience (`ros-planning:moveit#957 <https://github.com/ros-planning/moveit/issues/957>`_)
+* [doc] Document why to use only one IK attempt in computeCartesianPath (`ros-planning:moveit#1076 <https://github.com/ros-planning/moveit/issues/1076>`_)
 * Contributors: Adrian Zwiener, Andrey Troitskiy, Dave Coleman, Jonathan Binney, Michael Görner, Mike Lautman, Mohmmad Ayman, Raghavender Sahdev, Robert Haschke, Simon Schmeisser, dcconner, mike lautman
 
 0.10.1 (2018-05-25)
 -------------------
-* Clang tidy moveit_core (`#880 <https://github.com/ros-planning/moveit/issues/880>`_) (`#911 <https://github.com/ros-planning/moveit/issues/911>`_)
-* Allow to retrieve Jacobian of a child link of a move group. (`#877 <https://github.com/ros-planning/moveit/issues/877>`_)
-* migration from tf to tf2 API (`#830 <https://github.com/ros-planning/moveit/issues/830>`_)
-* Switch to ROS_LOGGER from CONSOLE_BRIDGE (`#874 <https://github.com/ros-planning/moveit/issues/874>`_)
-* Add ability to request detailed distance information from fcl (`#662 <https://github.com/ros-planning/moveit/issues/662>`_)
-* allow checking for absolute joint-space jumps in Cartesian path (`#843 <https://github.com/ros-planning/moveit/issues/843>`_)
-* Simplify adding colored CollisionObjects (`#810 <https://github.com/ros-planning/moveit/issues/810>`_)
+* Clang tidy moveit_core (`ros-planning:moveit#880 <https://github.com/ros-planning/moveit/issues/880>`_) (`ros-planning:moveit#911 <https://github.com/ros-planning/moveit/issues/911>`_)
+* Allow to retrieve Jacobian of a child link of a move group. (`ros-planning:moveit#877 <https://github.com/ros-planning/moveit/issues/877>`_)
+* migration from tf to tf2 API (`ros-planning:moveit#830 <https://github.com/ros-planning/moveit/issues/830>`_)
+* Switch to ROS_LOGGER from CONSOLE_BRIDGE (`ros-planning:moveit#874 <https://github.com/ros-planning/moveit/issues/874>`_)
+* Add ability to request detailed distance information from fcl (`ros-planning:moveit#662 <https://github.com/ros-planning/moveit/issues/662>`_)
+* allow checking for absolute joint-space jumps in Cartesian path (`ros-planning:moveit#843 <https://github.com/ros-planning/moveit/issues/843>`_)
+* Simplify adding colored CollisionObjects (`ros-planning:moveit#810 <https://github.com/ros-planning/moveit/issues/810>`_)
 * updateMimicJoint(group->getMimicJointModels()) -> updateMimicJoints(group)
-* improve RobotState::updateStateWithLinkAt() (`#765 <https://github.com/ros-planning/moveit/issues/765>`_)
-* fix computation of shape_extents\_ of links w/o shapes (`#766 <https://github.com/ros-planning/moveit/issues/766>`_)
-* Fix computation of axis-aligned bounding box (`#703 <https://github.com/ros-planning/moveit/issues/703>`_)
+* improve RobotState::updateStateWithLinkAt() (`ros-planning:moveit#765 <https://github.com/ros-planning/moveit/issues/765>`_)
+* fix computation of shape_extents\_ of links w/o shapes (`ros-planning:moveit#766 <https://github.com/ros-planning/moveit/issues/766>`_)
+* Fix computation of axis-aligned bounding box (`ros-planning:moveit#703 <https://github.com/ros-planning/moveit/issues/703>`_)
 * RobotModel::getRigidlyConnectedParentLinkModel()
   ... to compute earliest parent link that is rigidly connected to a given link
-* Iterative cubic spline interpolation (`#441 <https://github.com/ros-planning/moveit/issues/441>`_)
+* Iterative cubic spline interpolation (`ros-planning:moveit#441 <https://github.com/ros-planning/moveit/issues/441>`_)
 * Contributors: Bryce Willey, Ian McMahon, Ken Anderson, Levi Armstrong, Maarten de Vries, Martin Pecka, Michael Görner, Mike Lautman, Patrick Holthaus, Robert Haschke, Victor Lamoine, Xiaojian Ma
 
 0.9.11 (2017-12-25)
 -------------------
-* [fix] #723; attached bodies are not shown in trajectory visualization anymore `#724 <https://github.com/ros-planning/moveit/issues/724>`_
-* [fix] Shortcomings in kinematics plugins `#714 <https://github.com/ros-planning/moveit/issues/714>`_
+* [fix] ros-planning:moveit#723; attached bodies are not shown in trajectory visualization anymore `ros-planning:moveit#724 <https://github.com/ros-planning/moveit/issues/724>`_
+* [fix] Shortcomings in kinematics plugins `ros-planning:moveit#714 <https://github.com/ros-planning/moveit/issues/714>`_
 * Contributors: Henning Kayser, Michael Görner, Robert Haschke
 
 0.9.10 (2017-12-09)
 -------------------
-* [fix] Add missing logWarn argument (`#707 <https://github.com/ros-planning/moveit/issues/707>`_)
-* [fix] IKConstraintSampler: Fixed transform from end-effector to ik chain tip. `#582 <https://github.com/ros-planning/moveit/issues/582>`_
-* [fix] robotStateMsgToRobotState: is_diff==true => not empty `#589 <https://github.com/ros-planning/moveit/issues/589>`_
-* [capability] Multi DOF Trajectory only providing translation not velocity (`#555 <https://github.com/ros-planning/moveit/issues/555>`_)
-* [capability] Adds parameter lookup function for kinematics plugins (`#701 <https://github.com/ros-planning/moveit/issues/701>`_)
-* [improve] Make operator bool() explicit `#696 <https://github.com/ros-planning/moveit/pull/696>`_
-* [improve] Get msgs from Planning Scene `#663 <https://github.com/ros-planning/moveit/issues/663>`_
-* [improve] moveit_core: export DEPENDS on LIBFCL `#632 <https://github.com/ros-planning/moveit/pull/632>`_
-* [improve] RobotState: Changed multi-waypoint version of computeCartesianPath to test joint space jumps after all waypoints are generated. (`#576 <https://github.com/ros-planning/moveit/issues/576>`_)
-* [improve] Better debug output for IK tip frames (`#603 <https://github.com/ros-planning/moveit/issues/603>`_)
-* [improve] New debug console colors YELLOW PURPLE (`#604 <https://github.com/ros-planning/moveit/issues/604>`_)
+* [fix] Add missing logWarn argument (`ros-planning:moveit#707 <https://github.com/ros-planning/moveit/issues/707>`_)
+* [fix] IKConstraintSampler: Fixed transform from end-effector to ik chain tip. `ros-planning:moveit#582 <https://github.com/ros-planning/moveit/issues/582>`_
+* [fix] robotStateMsgToRobotState: is_diff==true => not empty `ros-planning:moveit#589 <https://github.com/ros-planning/moveit/issues/589>`_
+* [capability] Multi DOF Trajectory only providing translation not velocity (`ros-planning:moveit#555 <https://github.com/ros-planning/moveit/issues/555>`_)
+* [capability] Adds parameter lookup function for kinematics plugins (`ros-planning:moveit#701 <https://github.com/ros-planning/moveit/issues/701>`_)
+* [improve] Make operator bool() explicit `ros-planning:moveit#696 <https://github.com/ros-planning/moveit/pull/696>`_
+* [improve] Get msgs from Planning Scene `ros-planning:moveit#663 <https://github.com/ros-planning/moveit/issues/663>`_
+* [improve] moveit_core: export DEPENDS on LIBFCL `ros-planning:moveit#632 <https://github.com/ros-planning/moveit/pull/632>`_
+* [improve] RobotState: Changed multi-waypoint version of computeCartesianPath to test joint space jumps after all waypoints are generated. (`ros-planning:moveit#576 <https://github.com/ros-planning/moveit/issues/576>`_)
+* [improve] Better debug output for IK tip frames (`ros-planning:moveit#603 <https://github.com/ros-planning/moveit/issues/603>`_)
+* [improve] New debug console colors YELLOW PURPLE (`ros-planning:moveit#604 <https://github.com/ros-planning/moveit/issues/604>`_)
 * Contributors: Dave Coleman, Dennis Hartmann, Henning Kayser, Isaac I.Y. Saito, Jorge Nicho, Michael Görner, Phil, Sarah Elliott, Simon Schmeisser, TroyCordie, v4hn
 
 0.9.9 (2017-08-06)
 ------------------
-* [fix][moveit_core] segfault due to missing string format parameter. (`#547 <https://github.com/ros-planning/moveit/issues/547>`_)
-* [fix][moveit_core] doc-comment for robot_state::computeAABB (`#516 <https://github.com/ros-planning/moveit/issues/516>`_)
+* [fix][moveit_core] segfault due to missing string format parameter. (`ros-planning:moveit#547 <https://github.com/ros-planning/moveit/issues/547>`_)
+* [fix][moveit_core] doc-comment for robot_state::computeAABB (`ros-planning:moveit#516 <https://github.com/ros-planning/moveit/issues/516>`_)
 * Contributors: Martin Pecka, henhenhen
 
 0.9.8 (2017-06-21)
@@ -377,47 +387,47 @@ Changelog for package moveit_core
 
 0.9.7 (2017-06-05)
 ------------------
-* [fix] checks for empty name arrays messages before parsing the robot state message data (`#499 <https://github.com/ros-planning/moveit/issues/499>`_)
+* [fix] checks for empty name arrays messages before parsing the robot state message data (`ros-planning:moveit#499 <https://github.com/ros-planning/moveit/issues/499>`_)
 * Contributors: Jorge Nicho, Michael Goerner
 
 0.9.6 (2017-04-12)
 ------------------
-* [fix] PlanarJointModel::getVariableRandomPositionsNearBy (`#464 <https://github.com/ros-planning/moveit/issues/464>`_)
+* [fix] PlanarJointModel::getVariableRandomPositionsNearBy (`ros-planning:moveit#464 <https://github.com/ros-planning/moveit/issues/464>`_)
 * Contributors: Tamaki Nishino
 
 0.9.5 (2017-03-08)
 ------------------
-* [fix][moveit_ros_warehouse] gcc6 build error `#423 <https://github.com/ros-planning/moveit/pull/423>`_
-* [enhancement] Remove "catch (...)" instances, catch std::exception instead of std::runtime_error (`#445 <https://github.com/ros-planning/moveit/issues/445>`_)
+* [fix][moveit_ros_warehouse] gcc6 build error `ros-planning:moveit#423 <https://github.com/ros-planning/moveit/pull/423>`_
+* [enhancement] Remove "catch (...)" instances, catch std::exception instead of std::runtime_error (`ros-planning:moveit#445 <https://github.com/ros-planning/moveit/issues/445>`_)
 * Contributors: Bence Magyar, Dave Coleman
 
 0.9.4 (2017-02-06)
 ------------------
-* [fix] PlanningScene: Don't reset color information of existing objects when new entries are added (`#410 <https://github.com/ros-planning/moveit/issues/410>`_)
-* [fix] update link transforms in UnionConstraintSampler::project (`#384 <https://github.com/ros-planning/moveit/issues/384>`_)
-* [capability Addition of Set Joint Model Group Velocities and Accelerations Functions (`#402 <https://github.com/ros-planning/moveit/issues/402>`_)
-* [capability] time parameterization: use constants (`#380 <https://github.com/ros-planning/moveit/issues/380>`_)
-* [enhancement] multiple shapes in an attached collision object `#421 <https://github.com/ros-planning/moveit/pull/421>`_
-* [maintenance] Use static_cast to cast to const. (`#433 <https://github.com/ros-planning/moveit/issues/433>`_)
-* [maintenance] ompl_interface: uniform & simplified handling of the default planner (`#371 <https://github.com/ros-planning/moveit/issues/371>`_)
+* [fix] PlanningScene: Don't reset color information of existing objects when new entries are added (`ros-planning:moveit#410 <https://github.com/ros-planning/moveit/issues/410>`_)
+* [fix] update link transforms in UnionConstraintSampler::project (`ros-planning:moveit#384 <https://github.com/ros-planning/moveit/issues/384>`_)
+* [capability Addition of Set Joint Model Group Velocities and Accelerations Functions (`ros-planning:moveit#402 <https://github.com/ros-planning/moveit/issues/402>`_)
+* [capability] time parameterization: use constants (`ros-planning:moveit#380 <https://github.com/ros-planning/moveit/issues/380>`_)
+* [enhancement] multiple shapes in an attached collision object `ros-planning:moveit#421 <https://github.com/ros-planning/moveit/pull/421>`_
+* [maintenance] Use static_cast to cast to const. (`ros-planning:moveit#433 <https://github.com/ros-planning/moveit/issues/433>`_)
+* [maintenance] ompl_interface: uniform & simplified handling of the default planner (`ros-planning:moveit#371 <https://github.com/ros-planning/moveit/issues/371>`_)
 * Contributors: Dave Coleman, Maarten de Vries, Michael Goerner, Mike Lautman, Ruben
 
 0.9.3 (2016-11-16)
 ------------------
-* [fix] Replace unused service dependency with msg dep (`#361 <https://github.com/ros-planning/moveit/issues/361>`_)
-* [fix] cleanup urdfdom compatibility (`#319 <https://github.com/ros-planning/moveit/issues/319>`_)
-* [fix] Fix missing compatibility header for Wily `#364 <https://github.com/ros-planning/moveit/issues/364>`_)
-* [enhancement] Improved RobotState feedback for setFromIK() (`#342 <https://github.com/ros-planning/moveit/issues/342>`_)
-* [maintenance] Updated package.xml maintainers and author emails `#330 <https://github.com/ros-planning/moveit/issues/330>`_
+* [fix] Replace unused service dependency with msg dep (`ros-planning:moveit#361 <https://github.com/ros-planning/moveit/issues/361>`_)
+* [fix] cleanup urdfdom compatibility (`ros-planning:moveit#319 <https://github.com/ros-planning/moveit/issues/319>`_)
+* [fix] Fix missing compatibility header for Wily `ros-planning:moveit#364 <https://github.com/ros-planning/moveit/issues/364>`_)
+* [enhancement] Improved RobotState feedback for setFromIK() (`ros-planning:moveit#342 <https://github.com/ros-planning/moveit/issues/342>`_)
+* [maintenance] Updated package.xml maintainers and author emails `ros-planning:moveit#330 <https://github.com/ros-planning/moveit/issues/330>`_
 * Contributors: Dave Coleman, Ian McMahon, Robert Haschke
 
 0.9.2 (2016-11-05)
 ------------------
-* [Fix] CHANGELOG encoding for 0.9.1 (Fix `#318 <https://github.com/ros-planning/moveit/issues/318>`_). (`#327 <https://github.com/ros-planning/moveit/issues/327>`_)
-* [Capability] compatibility to urdfdom < 0.4 (`#317 <https://github.com/ros-planning/moveit/issues/317>`_)
+* [Fix] CHANGELOG encoding for 0.9.1 (Fix `ros-planning:moveit#318 <https://github.com/ros-planning/moveit/issues/318>`_). (`ros-planning:moveit#327 <https://github.com/ros-planning/moveit/issues/327>`_)
+* [Capability] compatibility to urdfdom < 0.4 (`ros-planning:moveit#317 <https://github.com/ros-planning/moveit/issues/317>`_)
 * [Capability] New isValidVelocityMove() for checking maximum velocity between two robot states given time delta
-* [Maintenance] Travis check code formatting (`#309 <https://github.com/ros-planning/moveit/issues/309>`_)
-* [Maintenance] Auto format codebase using clang-format (`#284 <https://github.com/ros-planning/moveit/issues/284>`_)
+* [Maintenance] Travis check code formatting (`ros-planning:moveit#309 <https://github.com/ros-planning/moveit/issues/309>`_)
+* [Maintenance] Auto format codebase using clang-format (`ros-planning:moveit#284 <https://github.com/ros-planning/moveit/issues/284>`_)
 * Contributors: Dave Coleman, Isaac I. Y. Saito, Robert Haschke
 
 0.8.2 (2016-06-17)
