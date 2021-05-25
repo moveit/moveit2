@@ -1,6 +1,6 @@
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
-  find_package(launch_testing_ament_cmake REQUIRED)
+  find_package(ros_testing REQUIRED)
   find_package(moveit_resources_fanuc_description REQUIRED)
   find_package(moveit_resources_fanuc_moveit_config REQUIRED)
   find_package(moveit_resources_panda_description REQUIRED)
@@ -15,16 +15,19 @@ if(BUILD_TESTING)
     target_compile_options(test_kinematics_plugin PRIVATE -Wno-deprecated-declarations)
   endif()
 
+  # KDL testing
   set(ARGS ARGS ik_plugin:=kdl_kinematics_plugin/KDLKinematicsPlugin)
-  add_launch_test(launch/fanuc-kdl-singular.test.py)
-  add_launch_test(launch/fanuc-kdl.test.py)
-  add_launch_test(launch/panda-kdl-singular.test.py)
-  add_launch_test(launch/panda-kdl.test.py)
+  add_ros_test(launch/fanuc-kdl-singular.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  add_ros_test(launch/fanuc-kdl.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  add_ros_test(launch/panda-kdl-singular.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  add_ros_test(launch/panda-kdl.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
-  # LMA solver seems to have less precision
-  #set(ARGS ARGS ik_plugin:=lma_kinematics_plugin/LMAKinematicsPlugin tolerance:=0.0005)
-  # add_launch_test(fanuc-kdl-test.py)# ${DEPS} ${ARGS})
-  # add_launch_test(panda-kdl.test ${DEPS} ${ARGS})
+  # LMA testing
+  set(ARGS ARGS ik_plugin:=lma_kinematics_plugin/LMAKinematicsPlugin)
+  add_ros_test(launch/fanuc-lma-singular.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  add_ros_test(launch/fanuc-lma.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  add_ros_test(launch/panda-lma-singular.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  add_ros_test(launch/panda-lma.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
   # Run ikfast tests only if the corresponding packages were built
   find_package(fanuc_ikfast_plugin QUIET)
