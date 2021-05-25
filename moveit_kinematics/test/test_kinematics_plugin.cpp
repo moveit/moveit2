@@ -405,9 +405,9 @@ static bool parsePose(const std::vector<double>& pose_values, Eigen::Isometry3d&
   Eigen::Quaterniond q;
   if (pose_values.size() == 6)
   {
-    q = Eigen::AngleAxisd(pose_values[4], Eigen::Vector3d::UnitX()) *
-        Eigen::AngleAxisd(pose_values[5], Eigen::Vector3d::UnitY()) *
-        Eigen::AngleAxisd(pose_values[6], Eigen::Vector3d::UnitZ());
+    q = Eigen::AngleAxisd(pose_values[3], Eigen::Vector3d::UnitX()) *
+        Eigen::AngleAxisd(pose_values[4], Eigen::Vector3d::UnitY()) *
+        Eigen::AngleAxisd(pose_values[5], Eigen::Vector3d::UnitZ());
   }
   else if (pose_values.size() == 7)
   {
@@ -442,16 +442,15 @@ TEST_F(KinematicsTest, unitIK)
   Eigen::Isometry3d initial, goal;
   tf2::fromMsg(poses[0], initial);
 
-  RCLCPP_INFO(LOGGER, "Initial: %f %f %f %f %f %f %f\n", poses[0].position.x, poses[0].position.y, poses[0].position.z,
-              poses[0].orientation.x, poses[0].orientation.y, poses[0].orientation.z, poses[0].orientation.w);
+  RCLCPP_DEBUG(LOGGER, "Initial: %f %f %f %f %f %f %f\n", poses[0].position.x, poses[0].position.y, poses[0].position.z,
+               poses[0].orientation.x, poses[0].orientation.y, poses[0].orientation.z, poses[0].orientation.w);
 
   auto validate_ik = [&](const geometry_msgs::msg::Pose& goal, std::vector<double>& truth) {
     // compute IK
     moveit_msgs::msg::MoveItErrorCodes error_code;
 
-    RCLCPP_INFO(LOGGER, "Goal %f %f %f %f %f %f %f\n", goal.position.x, goal.position.y, goal.position.z,
-                goal.orientation.x, goal.orientation.y, goal.orientation.z, goal.orientation.w);
-    RCLCPP_INFO_STREAM(LOGGER, "Recompiling");
+    RCLCPP_DEBUG(LOGGER, "Goal %f %f %f %f %f %f %f\n", goal.position.x, goal.position.y, goal.position.z,
+                 goal.orientation.x, goal.orientation.y, goal.orientation.z, goal.orientation.w);
 
     kinematics_solver_->searchPositionIK(goal, seed_, timeout_,
                                          const_cast<const std::vector<double>&>(consistency_limits_), sol, error_code);
@@ -508,7 +507,16 @@ TEST_F(KinematicsTest, unitIK)
 
     Eigen::Isometry3d pose;
     ASSERT_TRUE(parsePose(pose_values, pose)) << "Failed to parse 'pose' vector in: " << pose_name;
-
+    if (pose_values.size() == 7)
+    {
+      RCLCPP_DEBUG(LOGGER, "Pose Input (7): %f %f %f %f %f %f %f\n", pose_values.at(0), pose_values.at(1),
+                   pose_values.at(2), pose_values.at(3), pose_values.at(4), pose_values.at(5), pose_values.at(6));
+    }
+    else if (pose_values.size() == 6)
+    {
+      RCLCPP_DEBUG(LOGGER, "Pose Input (6): %f %f %f %f %f %f\n", pose_values.at(0), pose_values.at(1),
+                   pose_values.at(2), pose_values.at(3), pose_values.at(4), pose_values.at(5));
+    }
     std::string pose_type = "POSE_TYPE_RELATIVE";
     node_->get_parameter_or(pose_param + ".type", pose_type, pose_type);
     if (pose_type == POSE_TYPE_RELATIVE)
@@ -519,7 +527,6 @@ TEST_F(KinematicsTest, unitIK)
       FAIL() << "Found invalid 'type' in " << pose_name << ": should be one of '" << POSE_TYPE_RELATIVE << "' or '"
              << POSE_TYPE_ABSOLUTE << "'";
 
-    RCLCPP_INFO(LOGGER, "Pose type: %s", POSE_TYPE_RELATIVE);
     std::string desc;
     {
       SCOPED_TRACE(desc);
