@@ -37,10 +37,11 @@
 #include <GL/glew.h>
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
+#include <GLUT/glut.h>
 #else
 #include <GL/glu.h>
-#endif
 #include <GL/glut.h>
+#endif
 #include <GL/freeglut.h>
 #include <moveit/mesh_filter/gl_renderer.h>
 #include <sstream>
