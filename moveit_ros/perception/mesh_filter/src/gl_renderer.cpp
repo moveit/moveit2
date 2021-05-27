@@ -41,8 +41,8 @@
 #else
 #include <GL/glu.h>
 #include <GL/glut.h>
-#endif
 #include <GL/freeglut.h>
+#endif
 #include <moveit/mesh_filter/gl_renderer.h>
 #include <sstream>
 #include <fstream>
