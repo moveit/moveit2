@@ -52,13 +52,6 @@ def generate_test_description():
     robot_description_kinematics = {"robot_description_kinematics": kinematics_yaml}
     test_param = load_yaml("moveit_kinematics", "config/panda-kdl-test.yaml")
 
-    private_params = {
-        "seed": [-0.5, -0.5, 0.3, -2, 0.8, 1.8, 1.9],
-        "consistency_limits": [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
-        "num_fk_tests": 100,
-        "num_ik_tests": 100,
-    }
-
     panda_kdl = Node(
         package="moveit_kinematics",
         executable="test_kinematics_plugin",
@@ -68,7 +61,6 @@ def generate_test_description():
             robot_description_semantic,
             robot_description_kinematics,
             test_param,
-            private_params,
         ],
         output="screen",
     )

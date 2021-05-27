@@ -30,17 +30,18 @@ if(BUILD_TESTING)
   add_ros_test(launch/panda-lma.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
   # Run ikfast tests only if the corresponding packages were built
-  find_package(fanuc_ikfast_plugin QUIET)
-  if(fanuc_ikfast_plugin_FOUND)
-    add_ros_test(launch/fanuc-ikfast.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-    add_ros_test(launch/fanuc-ikfast-singular.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-  endif()
+  # TODO (vatanaksoytezer): Enable ikfast tests
+  # find_package(fanuc_ikfast_plugin QUIET)
+  # if(fanuc_ikfast_plugin_FOUND)
+  #   add_ros_test(launch/fanuc-ikfast.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  #   add_ros_test(launch/fanuc-ikfast-singular.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  # endif()
 
-  find_package(panda_ikfast_plugin QUIET)
-  if(panda_ikfast_plugin_FOUND)
-    add_ros_test(launch/panda-ikfast.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-    add_ros_test(launch/panda-ikfast-singular.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-  endif()
+  # find_package(panda_ikfast_plugin QUIET)
+  # if(panda_ikfast_plugin_FOUND)
+  #   add_ros_test(launch/panda-ikfast.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  #   add_ros_test(launch/panda-ikfast-singular.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  # endif()
 
   # Benchmarking program for cached_ik_kinematics
   add_executable(benchmark_ik benchmark_ik.cpp)

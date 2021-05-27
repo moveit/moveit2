@@ -50,23 +50,7 @@ def generate_test_description():
         "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
     )
     robot_description_kinematics = {"robot_description_kinematics": kinematics_yaml}
-    test_param = load_yaml("moveit_kinematics", "config/panda-lma-test.yaml")
-
-    private_params = {
-        "seed": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        "num_fk_tests": 0,
-        "num_ik_tests": 0,
-    }
-
-    unit_tests_poses = {
-        "unit_test_poses": {
-            "size": 1,
-            "pose_0": {
-                "pose": [0.0, 0.0, 0.1, 0.0, 0.0, 0.0],
-                "type": "relative",
-            },
-        }
-    }
+    test_param = load_yaml("moveit_kinematics", "config/panda-lma-singular-test.yaml")
 
     panda_lma_singular = Node(
         package="moveit_kinematics",
@@ -77,8 +61,6 @@ def generate_test_description():
             robot_description_semantic,
             robot_description_kinematics,
             test_param,
-            private_params,
-            unit_tests_poses,
         ],
         output="screen",
     )

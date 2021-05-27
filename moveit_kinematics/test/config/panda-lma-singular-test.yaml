@@ -20,21 +20,26 @@ num_nearest_ik_tests: 0
 publish_trajectory: False
 
 # Test inputs
-num_fk_tests: 100
-num_ik_tests: 100
+num_fk_tests: 0
+num_ik_tests: 0
 seed:
-  - -0.5
-  - -0.5
-  - 0.3
-  - -2
-  - 0.8
-  - 1.8
-  - 1.9
-consistency_limits:
-  - 0.4
-  - 0.4
-  - 0.4
-  - 0.4
-  - 0.4
-  - 0.4
-  - 0.4
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.0
+
+# Test poses
+unit_tests_poses:
+  size: 1
+  pose_0:
+    pose:
+    - 0.0
+    - 0.0
+    - 0.1
+    - 0.0
+    - 0.0
+    - 0.0
+    type: "relative"
