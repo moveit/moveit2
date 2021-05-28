@@ -109,25 +109,25 @@ class SharedData
     ASSERT_TRUE(bool(kinematics_loader_)) << "Failed to instantiate ClassLoader";
 
     // load parameters
-    node_->get_parameter_or("group", group_name_, UNDEFINED);
-    node_->get_parameter_or("tip_link", tip_link_, UNDEFINED);
-    node_->get_parameter_or("root_link", root_link_, UNDEFINED);
-    node_->get_parameter_or("joint_names", joints_, joints_);
+    ASSERT_TRUE(node_->get_parameter("group", group_name_));
+    ASSERT_TRUE(node_->get_parameter("tip_link", tip_link_));
+    ASSERT_TRUE(node_->get_parameter("root_link", root_link_));
+    ASSERT_TRUE(node_->get_parameter("joint_names", joints_));
     node_->get_parameter_or("seed", seed_, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });
     ASSERT_TRUE(seed_.empty() || seed_.size() == joints_.size()) << "If set, 'seed' size must match 'joint_names' size";
     node_->get_parameter_or("consistency_limits", consistency_limits_, consistency_limits_);
     ASSERT_TRUE(consistency_limits_.empty() || consistency_limits_.size() == joints_.size())
         << "If set, 'consistency_limits' size must match 'joint_names' size";
-    node_->get_parameter_or("ik_timeout", timeout_, 1.0);
+    ASSERT_TRUE(node_->get_parameter("ik_timeout", timeout_));
     ASSERT_TRUE(timeout_ > 0.0) << "'ik_timeout' must be more than 0.0 seconds";
-    node_->get_parameter_or("tolerance", tolerance_, tolerance_);
+    ASSERT_TRUE(node_->get_parameter("tolerance", tolerance_));
     ASSERT_TRUE(tolerance_ > 0.0) << "'tolerance' must be greater than 0.0";
-    node_->get_parameter_or("num_fk_tests", num_fk_tests_, 0);
-    node_->get_parameter_or("num_ik_cb_tests", num_ik_cb_tests_, 0);
-    node_->get_parameter_or("num_ik_tests", num_ik_tests_, 0);
-    node_->get_parameter_or("num_ik_multiple_tests", num_ik_multiple_tests_, 0);
-    node_->get_parameter_or("num_nearest_ik_tests", num_nearest_ik_tests_, 0);
-    node_->get_parameter_or("ik_plugin_name", ik_plugin_name_, UNDEFINED);
+    ASSERT_TRUE(node_->get_parameter("num_fk_tests", num_fk_tests_));
+    ASSERT_TRUE(node_->get_parameter("num_ik_cb_tests", num_ik_cb_tests_));
+    ASSERT_TRUE(node_->get_parameter("num_ik_tests", num_ik_tests_));
+    ASSERT_TRUE(node_->get_parameter("num_ik_multiple_tests", num_ik_multiple_tests_));
+    ASSERT_TRUE(node_->get_parameter("num_nearest_ik_tests", num_nearest_ik_tests_));
+    ASSERT_TRUE(node_->get_parameter("ik_plugin_name", ik_plugin_name_));
     node_->get_parameter_or("publish_trajectory", publish_trajectory_, false);
 
     ASSERT_TRUE(robot_model_->hasJointModelGroup(group_name_));
@@ -507,16 +507,6 @@ TEST_F(KinematicsTest, unitIK)
 
     Eigen::Isometry3d pose;
     ASSERT_TRUE(parsePose(pose_values, pose)) << "Failed to parse 'pose' vector in: " << pose_name;
-    if (pose_values.size() == 7)
-    {
-      RCLCPP_DEBUG(LOGGER, "Pose Input (7): %f %f %f %f %f %f %f\n", pose_values.at(0), pose_values.at(1),
-                   pose_values.at(2), pose_values.at(3), pose_values.at(4), pose_values.at(5), pose_values.at(6));
-    }
-    else if (pose_values.size() == 6)
-    {
-      RCLCPP_DEBUG(LOGGER, "Pose Input (6): %f %f %f %f %f %f\n", pose_values.at(0), pose_values.at(1),
-                   pose_values.at(2), pose_values.at(3), pose_values.at(4), pose_values.at(5));
-    }
     std::string pose_type = "POSE_TYPE_RELATIVE";
     node_->get_parameter_or(pose_param + ".type", pose_type, pose_type);
     if (pose_type == POSE_TYPE_RELATIVE)
