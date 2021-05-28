@@ -105,7 +105,7 @@ TEST_F(MoveItCppTest, GetCurrentStateTest)
   auto robot_model = moveit_cpp_ptr->getRobotModel();
   auto robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
   EXPECT_TRUE(moveit_cpp_ptr->getCurrentState(robot_state, 0.0));
-  // Make sure the Panda robot is in "ready" state which is loaded from fake_controller.yaml
+  // Make sure the Panda robot is in "ready" state which is loaded from yaml
   std::vector<double> joints_vals;
   robot_state->copyJointGroupPositions(PLANNING_GROUP, joints_vals);
   EXPECT_NEAR(joints_vals[0], 0.0, 0.001);     // panda_joint1
