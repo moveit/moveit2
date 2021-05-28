@@ -17,27 +17,5 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>roscpp</depend>
-
-  <build_depend>roslint</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-
-  <exec_depend>canopen_motor_node</exec_depend>
-  <exec_depend>joint_state_controller</exec_depend>
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>topic_tools</exec_depend>
-  <exec_depend>rosservice</exec_depend>
   <exec_depend>xacro</exec_depend>
-  <exec_depend>controller_manager</exec_depend>
-
-  <test_depend>rostest</test_depend>
-  <test_depend>moveit_core</test_depend>
-  <test_depend>moveit_ros_planning</test_depend>
-  <test_depend>cmake_modules</test_depend>
-  <test_depend>eigen</test_depend>
-  <test_depend>roslaunch</test_depend>
-  <test_depend>rviz</test_depend> <!-- test_urdf.launch for acceptance test -->
-  <test_depend>joint_state_publisher</test_depend> <!-- test_urdf.launch -->
-  <test_depend>rosunit</test_depend>
-  <test_depend>code_coverage</test_depend>
 </package>
