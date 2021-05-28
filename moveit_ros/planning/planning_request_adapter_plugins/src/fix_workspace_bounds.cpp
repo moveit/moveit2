@@ -50,16 +50,7 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     node_ = node;
-    if (!node_->get_parameter(parameter_namespace + "." + WBOUNDS_PARAM_NAME, workspace_extent_))
-    {
-      workspace_extent_ = 10.0;
-      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", WBOUNDS_PARAM_NAME.c_str(),
-                  workspace_extent_);
-    }
-    else
-    {
-      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", WBOUNDS_PARAM_NAME.c_str(), workspace_extent_);
-    }
+    workspace_extent_ = getParam(node_, LOGGER, parameter_namespace, WBOUNDS_PARAM_NAME, 10.0);
     workspace_extent_ /= 2.0;
   }
 

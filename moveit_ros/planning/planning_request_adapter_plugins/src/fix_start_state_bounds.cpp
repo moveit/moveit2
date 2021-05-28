@@ -54,28 +54,8 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     node_ = node;
-    std::string bounds_param =
-        parameter_namespace.empty() ? BOUNDS_PARAM_NAME : parameter_namespace + "." + BOUNDS_PARAM_NAME;
-    if (!node_->get_parameter(bounds_param, bounds_dist_))
-    {
-      bounds_dist_ = 0.05;
-      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", bounds_param.c_str(), bounds_dist_);
-    }
-    else
-    {
-      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", bounds_param.c_str(), bounds_dist_);
-    }
-
-    std::string dt_param = parameter_namespace.empty() ? DT_PARAM_NAME : parameter_namespace + "." + DT_PARAM_NAME;
-    if (!node_->get_parameter(dt_param, max_dt_offset_))
-    {
-      max_dt_offset_ = 0.5;
-      RCLCPP_INFO(LOGGER, "Param '%s' was not set. Using default value: %f", dt_param.c_str(), max_dt_offset_);
-    }
-    else
-    {
-      RCLCPP_INFO(LOGGER, "Param '%s' was set to %f", dt_param.c_str(), max_dt_offset_);
-    }
+    bounds_dist_ = getParam(node_, LOGGER, parameter_namespace, BOUNDS_PARAM_NAME, 0.05);
+    max_dt_offset_ = getParam(node_, LOGGER, parameter_namespace, DT_PARAM_NAME, 0.5);
   }
 
   std::string getDescription() const override
