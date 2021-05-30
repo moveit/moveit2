@@ -154,6 +154,9 @@ private:
   /** \brief Callback function executed for each change to the world environment */
   void notifyObjectChange(const ObjectConstPtr& obj, World::Action action);
 
+  /** \brief Check if enable_nearest_distance_points is available */
+  void checkFCLNearestDistCapability(const DistanceRequest& req) const;
+
   World::ObserverHandle observer_handle_;
 };
 }  // namespace collision_detection

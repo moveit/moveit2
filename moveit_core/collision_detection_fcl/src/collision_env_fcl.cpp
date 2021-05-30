@@ -312,6 +312,8 @@ void CollisionEnvFCL::checkRobotCollisionHelper(const CollisionRequest& req, Col
 void CollisionEnvFCL::distanceSelf(const DistanceRequest& req, DistanceResult& res,
                                    const moveit::core::RobotState& state) const
 {
+  checkFCLNearestDistCapability(req);
+
   FCLManager manager;
   allocSelfCollisionBroadPhase(state, manager);
   DistanceData drd(&req, &res);
@@ -322,6 +324,8 @@ void CollisionEnvFCL::distanceSelf(const DistanceRequest& req, DistanceResult& r
 void CollisionEnvFCL::distanceRobot(const DistanceRequest& req, DistanceResult& res,
                                     const moveit::core::RobotState& state) const
 {
+  checkFCLNearestDistCapability(req);
+
   FCLObject fcl_obj;
   constructFCLObjectRobot(state, fcl_obj);
 
@@ -406,6 +410,23 @@ void CollisionEnvFCL::notifyObjectChange(const ObjectConstPtr& obj, World::Actio
     if (action & (World::DESTROY | World::REMOVE_SHAPE))
       cleanCollisionGeometryCache();
   }
+}
+
+void CollisionEnvFCL::checkFCLNearestDistCapability(const DistanceRequest& req) const
+{
+#if MOVEIT_FCL_VERSION < FCL_VERSION_CHECK(0, 6, 0)
+  if (req.enable_nearest_points)
+  {
+    // Known issues:
+    //   https://github.com/flexible-collision-library/fcl/issues/171,
+    //   https://github.com/flexible-collision-library/fcl/pull/288
+    RCLCPP_ERROR(LOGGER, "You requested a distance check with enable_nearest_points=true, "
+                         "but the FCL version MoveIt was compiled against (%d.%d.%d) "
+                         "is known to return bogus nearest points. Please update your FCL "
+                         "to at least 0.6.0.",
+                         FCL_MAJOR_VERSION, FCL_MINOR_VERSION, FCL_PATCH_VERSION);
+  }
+#endif
 }
 
 void CollisionEnvFCL::updatedPaddingOrScaling(const std::vector<std::string>& links)
