@@ -49,8 +49,11 @@
 #include <boost/noncopyable.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
+#include <boost/thread/thread.hpp>
 #include <memory>
 #include <thread>
+
+#include "visibility_control.h"
 
 namespace planning_scene_monitor
 {
@@ -59,7 +62,7 @@ MOVEIT_CLASS_FORWARD(PlanningSceneMonitor)  // Defines PlanningSceneMonitorPtr, 
 /**
  * @brief PlanningSceneMonitor
  * Subscribes to the topic \e planning_scene */
-class PlanningSceneMonitor : private boost::noncopyable
+class MOVEIT_PLANNING_SCENE_MONITOR_PUBLIC PlanningSceneMonitor : private boost::noncopyable
 {
 public:
   enum SceneUpdateType
