@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.2)
-project(moveit_core VERSION 2.1.4 LANGUAGES CXX)
+project(moveit_core VERSION 2.1.3 LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -18,12 +18,19 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 # TODO: Move collision detection into separate packages
 find_package(Bullet 2.87 REQUIRED)
 
-find_package(PkgConfig REQUIRED)
+find_package(PkgConfig)
 
-pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
-# replace LIBFCL_LIBRARIES with full path to the library
-find_library(LIBFCL_LIBRARIES_FULL ${LIBFCL_LIBRARIES} ${LIBFCL_LIBRARY_DIRS})
-set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
+if(PkgConfig_FOUND)
+  pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
+  # replace LIBFCL_LIBRARIES with full path to the library
+  find_library(LIBFCL_LIBRARIES_FULL ${LIBFCL_LIBRARIES} ${LIBFCL_LIBRARY_DIRS})
+  set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
+  set(FCL_NAME "LIBFCL")
+else()
+  find_package(FCL 0.5.0 QUIET)
+  set(LIBFCL_INCLUDE_DIRS "${FCL_INCLUDE_DIRS}")
+  set(FCL_NAME "FCL")
+endif()
 
 find_package(angles REQUIRED)
 find_package(OCTOMAP REQUIRED)
@@ -129,6 +136,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   eigen3_cmake_module
   OCTOMAP
   ${BULLET_ENABLE}
+  ${FCL_NAME}
 )
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
 
