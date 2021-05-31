@@ -48,6 +48,7 @@
 #include <pluginlib/class_loader.hpp>
 
 #include <memory>
+#include <deque>
 
 namespace trajectory_execution_manager
 {
