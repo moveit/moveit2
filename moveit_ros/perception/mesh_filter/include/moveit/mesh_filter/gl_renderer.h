@@ -46,6 +46,9 @@
 #include <string>
 #include <boost/thread.hpp>
 
+#undef near
+#undef far
+
 namespace mesh_filter
 {
 MOVEIT_CLASS_FORWARD(GLRenderer)  // Defines GLRendererPtr, ConstPtr, WeakPtr... etc
