@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.4 (2021-05-31)
+------------------
+* Disable flaky test (`#482 <https://github.com/ros-planning/moveit2/issues/482>`_)
+* Delete MoveIt fake_controller_manager (`#471 <https://github.com/ros-planning/moveit2/issues/471>`_)
+* Contributors: AndyZe, Vatan Aksoy Tezer
+
 2.1.3 (2021-05-22)
 ------------------
 * Configure OMPL projection_evaluator in move_group_launch_test_common.py (`#470 <https://github.com/ros-planning/moveit2/issues/470>`_)

@@ -2,6 +2,9 @@
 Changelog for package run_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.4 (2021-05-31)
+------------------
+
 2.1.3 (2021-05-22)
 ------------------
 * Load panda_hand_controller (`#460 <https://github.com/ros-planning/moveit2/issues/460>`_)
