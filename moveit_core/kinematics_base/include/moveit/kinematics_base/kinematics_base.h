@@ -43,6 +43,8 @@
 #include <boost/function.hpp>
 #include <string>
 
+#include "visibility_control.h"
+
 namespace moveit
 {
 namespace core
@@ -140,7 +142,7 @@ MOVEIT_CLASS_FORWARD(KinematicsBase)  // Defines KinematicsBasePtr, ConstPtr, We
  * @class KinematicsBase
  * @brief Provides an interface for kinematics solvers.
  */
-class KinematicsBase
+class MOVEIT_KINEMATICS_BASE_PUBLIC KinematicsBase
 {
 public:
   static const rclcpp::Logger LOGGER;
