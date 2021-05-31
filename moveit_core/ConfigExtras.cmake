@@ -1,8 +1,9 @@
 # Extras module needed for dependencies to find boost components
 
-# boost::iostreams on Windows depends on boost::zlib
 if(WIN32)
-  set(EXTRA_BOOST_COMPONENTS zlib)
+  # Fix linking errors on windows
+  add_definitions(-DBOOST_ALL_NO_LIB)
+  add_definitions(-DBOOST_ALL_DYN_LINK)
 endif()
 find_package(Boost REQUIRED
   chrono
@@ -14,5 +15,4 @@ find_package(Boost REQUIRED
   serialization
   system
   thread
-  ${EXTRA_BOOST_COMPONENTS}
 )
