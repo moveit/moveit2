@@ -39,13 +39,15 @@
 #include <moveit/mesh_filter/sensor_model.h>
 #include <string>
 
+#include "visibility_control.h"
+
 namespace mesh_filter
 {
 /**
  * \brief Model for Disparity based devices. E.g stereo camera systems or OpenNI compatible devices
  * \author Suat Gedikli <gedikli@willowgarage.com>
  */
-class StereoCameraModel : public SensorModel
+class MOVEIT_MESH_FILTER_PUBLIC StereoCameraModel : public SensorModel
 {
 public:
   /**
