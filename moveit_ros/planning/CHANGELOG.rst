@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.4 (2021-05-31)
+------------------
+* PlanningRequestAdapter helper method getParam()  (`#468 <https://github.com/ros-planning/moveit2/issues/468>`_)
+  * Implement parameters for adapter plugins
+* Contributors: David V. Lu!!
+
 2.1.3 (2021-05-22)
 ------------------
 * Delete exclusive arg for collision detector creation (`#466 <https://github.com/ros-planning/moveit2/issues/466>`_)

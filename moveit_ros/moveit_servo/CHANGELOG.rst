@@ -2,6 +2,11 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.4 (2021-05-31)
+------------------
+* Delete MoveIt fake_controller_manager (`#471 <https://github.com/ros-planning/moveit2/issues/471>`_)
+* Contributors: AndyZe
+
 2.1.3 (2021-05-22)
 ------------------
 * Refactor Servo velocity bounds enforcement. Disable flaky unit tests. (`#428 <https://github.com/ros-planning/moveit2/issues/428>`_)

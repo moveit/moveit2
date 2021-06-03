@@ -2,6 +2,11 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.4 (2021-05-31)
+------------------
+* Enable LMA and KDL kinematic launch tests (`#435 <https://github.com/ros-planning/moveit2/issues/435>`_)
+* Contributors: Vatan Aksoy Tezer
+
 2.1.3 (2021-05-22)
 ------------------
 * Replace last ament_export_libraries macro calls with ament_export_targets (`#448 <https://github.com/ros-planning/moveit2/issues/448>`_)
