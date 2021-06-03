@@ -37,9 +37,13 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/BenchmarkExecutor.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+if(WIN32)
+  set(EXTRA_LIB ws2_32.lib)
+endif()
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
+target_link_libraries(${MOVEIT_LIB_NAME} ${EXTRA_LIB})
 
 add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
 ament_target_dependencies(moveit_run_benchmark
