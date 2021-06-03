@@ -2,7 +2,7 @@
 
 # boost::iostreams on Windows depends on boost::zlib
 if(WIN32)
-  set(EXTRA_BOOST_COMPONENTS zlib)
+#  set(EXTRA_BOOST_COMPONENTS zlib)
 endif()
 find_package(Boost REQUIRED
   chrono
