@@ -2,6 +2,7 @@ set(MOVEIT_LIB_NAME moveit_trajectory_execution_manager)
 
 add_library(${MOVEIT_LIB_NAME} SHARED src/trajectory_execution_manager.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE "TRAJECTORY_EXECUTION_MANAGER_BUILDING_DLL")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_core
   moveit_ros_occupancy_map_monitor
