@@ -15,7 +15,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   Eigen3
   Boost
 )
-target_link_libraries(${MOVEIT_LIB_NAME} ${gl_LIBS} GLUT::GLUT ${GLEW_LIBRARIES})
+target_link_libraries(${MOVEIT_LIB_NAME} ${gl_LIBS} GLUT::GLUT ${GLEW_LIBRARIES}  /usr/local/opt/glew/lib/libGLEW.dylib /usr/local/opt/freeglut/lib/libglut.dylib)
 
 # TODO: enable testing
 # if(CATKIN_ENABLE_TESTING)
