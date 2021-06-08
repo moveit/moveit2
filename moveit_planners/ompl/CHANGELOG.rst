@@ -2,6 +2,9 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.4 (2021-05-31)
+------------------
+
 2.1.3 (2021-05-22)
 ------------------
 * Fix incomplete start states in OMPL ThreadSafeStateStorage (`#455 <https://github.com/ros-planning/moveit2/issues/455>`_)
