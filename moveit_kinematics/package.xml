@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>moveit_kinematics</name>
-  <version>2.1.3</version>
+  <version>2.1.4</version>
   <description>Package for all inverse kinematics solvers in MoveIt</description>
 
   <author email="dave@picknik.ai">Dave Coleman</author>
@@ -35,15 +35,16 @@
   <exec_depend>urdfdom</exec_depend> <!-- provides check_urdf -->
   <exec_depend>python-lxml</exec_depend>
 
-  <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>moveit_ros_planning</test_depend>
   <test_depend>moveit_resources_fanuc_description</test_depend>
   <test_depend>moveit_resources_fanuc_moveit_config</test_depend>
   <test_depend>moveit_resources_panda_description</test_depend>
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
 
+  <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
+  <test_depend>ros_testing</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
