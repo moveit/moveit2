@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.10.2)
 project(moveit_ros_perception)
 
 # Common cmake code applied to all moveit packages
