@@ -18,6 +18,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 # TODO: Move collision detection into separate packages
 find_package(Bullet 2.87 REQUIRED)
 
+if(BULLET_ENABLE)
+  set(BULLET_INC "collision_detection_bullet/include")
+  set(BULLET_LIB "moveit_collision_detection_bullet")
+endif()
+
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
@@ -128,7 +133,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   Eigen3
   eigen3_cmake_module
   OCTOMAP
-  ${BULLET_ENABLE}
 )
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
 
@@ -176,11 +180,13 @@ add_subdirectory(distance_field)
 add_subdirectory(collision_distance_field)
 add_subdirectory(kinematics_metrics)
 add_subdirectory(dynamics_solver)
+
 # TODO(henningkayser): enable bullet once the library is migrated to ROS2
 if(BULLET_ENABLE)
-add_subdirectory(collision_detection_bullet)
+  add_subdirectory(collision_detection_bullet)
+  pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 else()
-install(FILES collision_detection_bullet/empty_description.xml DESTINATION share/${PROJECT_NAME} RENAME collision_detector_bullet_description.xml)
+  install(FILES collision_detection_bullet/empty_description.xml DESTINATION share/${PROJECT_NAME} RENAME collision_detector_bullet_description.xml)
 endif()
 
 install(
