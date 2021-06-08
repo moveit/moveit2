@@ -15,13 +15,7 @@ include(ConfigExtras.cmake)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 
-# TODO: Move collision detection into separate packages
 find_package(Bullet 2.87 REQUIRED)
-
-if(BULLET_ENABLE)
-  set(BULLET_INC "collision_detection_bullet/include")
-  set(BULLET_LIB "moveit_collision_detection_bullet")
-endif()
 
 find_package(PkgConfig REQUIRED)
 
@@ -64,7 +58,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     backtrace/include
     collision_detection/include
     collision_detection_fcl/include
-    ${BULLET_INC}
+    collision_detection_bullet/include
     constraint_samplers/include
     controller_manager/include
     distance_field/include
@@ -98,7 +92,7 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_planning_interface
     moveit_collision_detection
     moveit_collision_detection_fcl
-    ${BULLET_LIB}
+    moveit_collision_detection_bullet
     moveit_kinematic_constraints
     moveit_planning_scene
     moveit_constraint_samplers
@@ -134,7 +128,9 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   eigen3_cmake_module
   OCTOMAP
 )
+
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
+pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
   ${LIBFCL_INCLUDE_DIRS}
@@ -180,14 +176,9 @@ add_subdirectory(distance_field)
 add_subdirectory(collision_distance_field)
 add_subdirectory(kinematics_metrics)
 add_subdirectory(dynamics_solver)
+add_subdirectory(collision_detection_bullet)
 
-# TODO(henningkayser): enable bullet once the library is migrated to ROS2
-if(BULLET_ENABLE)
-  add_subdirectory(collision_detection_bullet)
-  pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
-else()
-  install(FILES collision_detection_bullet/empty_description.xml DESTINATION share/${PROJECT_NAME} RENAME collision_detector_bullet_description.xml)
-endif()
+pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
