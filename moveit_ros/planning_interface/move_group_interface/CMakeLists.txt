@@ -3,6 +3,7 @@ set(MOVEIT_LIB_NAME moveit_move_group_interface)
 add_library(${MOVEIT_LIB_NAME} SHARED src/move_group_interface.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(${MOVEIT_LIB_NAME} moveit_common_planning_interface_objects moveit_planning_scene_interface ${Boost_THREAD_LIBRARY})
+target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE "MOVEIT_MOVE_GROUP_INTERFACE_BUILDING_DLL")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_core
   moveit_msgs
