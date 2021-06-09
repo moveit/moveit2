@@ -36,6 +36,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/robot_interaction.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE "MOVEIT_ROS_ROBOT_INTERACTION_BUILDING_DLL")
 ament_target_dependencies(${MOVEIT_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)
