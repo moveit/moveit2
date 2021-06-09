@@ -879,6 +879,7 @@ bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::msg::Ro
         for (std::size_t j = 0; j < jnames.size(); ++j)
           bijection[j] = index[jnames[j]];
 
+        parts[i].multi_dof_joint_trajectory.header.frame_id = trajectory.multi_dof_joint_trajectory.header.frame_id;
         parts[i].multi_dof_joint_trajectory.points.resize(trajectory.multi_dof_joint_trajectory.points.size());
         for (std::size_t j = 0; j < trajectory.multi_dof_joint_trajectory.points.size(); ++j)
         {
