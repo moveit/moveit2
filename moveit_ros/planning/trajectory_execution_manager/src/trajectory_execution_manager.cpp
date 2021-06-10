@@ -166,8 +166,11 @@ void TrajectoryExecutionManager::initialize()
 
   // other configuration steps
   reloadControllerInformation();
-  event_topic_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
+  
+  event_node_ = rclcpp::Node::make_shared("trajectory_event_node");
+  event_topic_subscriber_ = event_node_->create_subscription<std_msgs::msg::String>(
       EXECUTION_EVENT_TOPIC, 100, std::bind(&TrajectoryExecutionManager::receiveEvent, this, std::placeholders::_1));
+  event_node_thread_ = std::thread([this]() { rclcpp::spin(event_node_); });
 
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_execution_duration_scaling",
                                       allowed_execution_duration_scaling_);

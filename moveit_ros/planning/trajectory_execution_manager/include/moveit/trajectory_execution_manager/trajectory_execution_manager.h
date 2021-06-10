@@ -315,8 +315,10 @@ private:
 
   rclcpp::Node::SharedPtr node_;
   rclcpp::Node::SharedPtr controller_mgr_node_;
+  rclcpp::Node::SharedPtr event_node_;
   std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> private_executor_;
   std::thread private_executor_thread_;
+  std::thread event_node_thread_;
   moveit::core::RobotModelConstPtr robot_model_;
   planning_scene_monitor::CurrentStateMonitorPtr csm_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr event_topic_subscriber_;
