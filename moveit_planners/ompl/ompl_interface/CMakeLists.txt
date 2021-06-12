@@ -82,9 +82,11 @@ if(BUILD_TESTING)
   ament_target_dependencies(test_planning_context_manager moveit_core tf2_eigen OMPL Boost Eigen3)
   target_link_libraries(test_planning_context_manager ${MOVEIT_LIB_NAME})
 
-  ament_add_gtest(test_ompl_constraints test/test_ompl_constraints.cpp)
-  ament_target_dependencies(test_ompl_constraints moveit_core OMPL Boost Eigen3)
-  target_link_libraries(test_ompl_constraints ${MOVEIT_LIB_NAME})
+  # Disabling flaky test
+  # TODO (vatanaksoytezer): Uncomment once this is fixed
+  # ament_add_gtest(test_ompl_constraints test/test_ompl_constraints.cpp)
+  # ament_target_dependencies(test_ompl_constraints moveit_core OMPL Boost Eigen3)
+  # target_link_libraries(test_ompl_constraints ${MOVEIT_LIB_NAME})
 
   ament_add_gtest(test_constrained_planning_state_space test/test_constrained_planning_state_space.cpp)
   ament_target_dependencies(test_constrained_planning_state_space moveit_core OMPL Boost Eigen3)
