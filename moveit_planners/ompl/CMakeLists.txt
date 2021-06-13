@@ -15,10 +15,6 @@ find_package(tf2_eigen REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(ompl REQUIRED)
 
-if(APPLE)
-    find_package(ode REQUIRED)
-endif()
-
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wno-overloaded-virtual)
 endif()
@@ -39,9 +35,6 @@ install(TARGETS moveit_ompl_interface moveit_ompl_planner_plugin
 )
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(moveit_core ompl)
-if(APPLE)
-    target_link_libraries(moveit_ompl_interface ${ODE_LIBRARIES})
-endif()
 
 pluginlib_export_plugin_description_file(moveit_core ompl_interface_plugin_description.xml)
 
