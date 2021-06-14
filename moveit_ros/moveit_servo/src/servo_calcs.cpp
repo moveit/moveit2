@@ -807,10 +807,17 @@ bool ServoCalcs::enforcePositionLimits(trajectory_msgs::msg::JointTrajectory& jo
             std::find(joint_trajectory.joint_names.begin(), joint_trajectory.joint_names.end(), joint->getName());
         auto joint_idx = std::distance(joint_trajectory.joint_names.begin(), joint_itr);
 
-        if ((joint_trajectory.points[0].velocities[joint_idx] < 0 &&
-             (joint_angle < (limits[0].min_position + parameters_->joint_limit_margin))) ||
-            (joint_trajectory.points[0].velocities[joint_idx] > 0 &&
-             (joint_angle > (limits[0].max_position - parameters_->joint_limit_margin))))
+        const bool near_min_position =
+            parameters_->publish_joint_velocities ?
+                joint_trajectory.points[0].velocities[joint_idx] < 0 &&
+                    (joint_angle < (limits[0].min_position + parameters_->joint_limit_margin)) :
+                joint_angle < (limits[0].min_position + parameters_->joint_limit_margin);
+        const bool near_max_position =
+            parameters_->publish_joint_velocities ?
+                joint_trajectory.points[0].velocities[joint_idx] > 0 &&
+                    (joint_angle > (limits[0].max_position - parameters_->joint_limit_margin)) :
+                joint_angle > (limits[0].max_position - parameters_->joint_limit_margin);
+        if (near_min_position || near_max_position)
         {
           rclcpp::Clock& clock = *node_->get_clock();
           RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
