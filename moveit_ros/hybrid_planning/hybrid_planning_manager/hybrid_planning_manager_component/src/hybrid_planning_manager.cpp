@@ -48,6 +48,7 @@ HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
 {
   initialized_ = false;
   // Initialize hybrid planning component after after construction
+  // TODO(sjahr) Remove once life cycle component nodes are available
   timer_ = this->create_wall_timer(1ms, [this]() {
     if (initialized_)
     {
