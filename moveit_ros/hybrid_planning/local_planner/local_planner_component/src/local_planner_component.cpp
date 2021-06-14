@@ -54,6 +54,7 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   state_ = moveit_hybrid_planning::LocalPlannerState::UNCONFIGURED;
 
   // Initialize local planner after construction
+  // TODO(sjahr) Remove once life cycle component nodes are available
   timer_ = this->create_wall_timer(1ms, [this]() {
     switch (state_)
     {
