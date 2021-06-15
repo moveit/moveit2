@@ -39,6 +39,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <memory>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <moveit/warehouse/constraints_storage.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/move_group/capability_names.h>
