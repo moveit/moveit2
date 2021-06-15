@@ -48,10 +48,13 @@ bool SimpleSampler::initialize(const rclcpp::Node::SharedPtr& node, const moveit
 {
   // Load parameter & initialize member variables
   if (node->has_parameter("pass_through"))
+  {
     node->get_parameter<bool>("pass_through", pass_through_);
+  }
   else
+  {
     pass_through_ = node->declare_parameter<bool>("pass_through", false);
-
+  }
   reference_trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, group_name);
   next_waypoint_index_ = 0;
   return true;
@@ -91,7 +94,7 @@ SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
   if (pass_through_)
   {
     // Use reference_trajectory as local trajectory
-    local_trajectory.swap(*reference_trajectory_);
+    local_trajectory.append(*reference_trajectory_, 0.0, 0, reference_trajectory_->getWayPointCount());
   }
   else
   {
