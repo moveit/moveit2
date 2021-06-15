@@ -108,7 +108,7 @@ SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
       next_waypoint_index_ += 1;
     }
 
-    // Construct local trajectory containing the next three global trajectory waypoints
+    // Construct local trajectory containing the next global trajectory waypoint
     local_trajectory.addSuffixWayPoint(reference_trajectory_->getWayPoint(next_waypoint_index_),
                                        reference_trajectory_->getWayPointDurationFromPrevious(next_waypoint_index_));
   }
