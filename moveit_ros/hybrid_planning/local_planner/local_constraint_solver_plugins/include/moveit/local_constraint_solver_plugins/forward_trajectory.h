@@ -54,9 +54,10 @@ public:
                   const std::string& group_name) override;
   bool reset() override;
 
-  moveit_msgs::action::LocalPlanner::Feedback solve(const robot_trajectory::RobotTrajectory& local_trajectory,
-                                                    const std::vector<moveit_msgs::msg::Constraints>& local_constraints,
-                                                    trajectory_msgs::msg::JointTrajectory& local_solution) override;
+  moveit_msgs::action::LocalPlanner::Feedback
+  solve(const robot_trajectory::RobotTrajectory& local_trajectory,
+        const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> local_goal,
+        trajectory_msgs::msg::JointTrajectory& local_solution) override;
 
 private:
   rclcpp::Node::SharedPtr node_handle_;

@@ -43,6 +43,9 @@
 
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
+
+#include <moveit_msgs/action/local_planner.hpp>
+
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 
@@ -72,14 +75,17 @@ public:
    * @param new_trajectory New reference trajectory segment to add
    * @return True if segment was successfully added
    */
-  virtual bool addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory) = 0;
+  virtual moveit_msgs::action::LocalPlanner::Feedback
+  addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory) = 0;
 
   /**
    * Return the current local constraints based on the newest robot state
    * @param current_state Current RobotState
    * @return Current local constraints that define the local planning goal
    */
-  virtual robot_trajectory::RobotTrajectory getLocalTrajectory(const moveit::core::RobotState& current_state) = 0;
+  virtual moveit_msgs::action::LocalPlanner::Feedback
+  getLocalTrajectory(const moveit::core::RobotState& current_state,
+                     robot_trajectory::RobotTrajectory& local_trajectory) = 0;
 
   /**
    * Return the processing status of the reference trajectory's execution based on a user defined

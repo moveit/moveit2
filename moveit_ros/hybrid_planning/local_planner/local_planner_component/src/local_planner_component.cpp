@@ -52,6 +52,7 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   : Node("local_planner_component", options)
 {
   state_ = moveit_hybrid_planning::LocalPlannerState::UNCONFIGURED;
+  local_planner_feedback_ = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
 
   // Initialize local planner after construction
   // TODO(sjahr) Remove once life cycle component nodes are available
@@ -182,13 +183,18 @@ bool LocalPlannerComponent::initialize()
         moveit::core::RobotState start_state(planning_scene_monitor_->getRobotModel());
         moveit::core::robotStateMsgToRobotState(msg->trajectory_start, start_state);
         new_trajectory.setRobotTrajectoryMsg(start_state, msg->trajectory);
-        trajectory_operator_instance_->addTrajectorySegment(new_trajectory);
+        *local_planner_feedback_ = trajectory_operator_instance_->addTrajectorySegment(new_trajectory);
+        if (!local_planner_feedback_->feedback.empty())
+        {
+          local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
+        }
 
         // Update local planner state
         state_ = moveit_hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE;
       });
 
   // Initialize local solution publisher
+  RCLCPP_INFO(LOGGER, "Using '%s' as local solution topic type", config_.local_solution_topic_type.c_str());
   if (config_.local_solution_topic_type == "trajectory_msgs/JointTrajectory")
   {
     local_trajectory_publisher_ =
@@ -262,21 +268,25 @@ void LocalPlannerComponent::executePlanningLoopRun()
 
       // Get local goal trajectory to follow
       robot_trajectory::RobotTrajectory local_trajectory =
-          trajectory_operator_instance_->getLocalTrajectory(current_robot_state);
-      const auto goal = local_planning_goal_handle_->get_goal();
+          robot_trajectory::RobotTrajectory(planning_scene_monitor_->getRobotModel(), "panda_arm");
+      *local_planner_feedback_ =
+          trajectory_operator_instance_->getLocalTrajectory(current_robot_state, local_trajectory);
+      if (!local_planner_feedback_->feedback.empty())
+      {
+        local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
+      }
 
       // Solve local planning problem
       trajectory_msgs::msg::JointTrajectory local_solution;
-      auto local_feedback = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
-      *local_feedback =
-          local_constraint_solver_instance_->solve(local_trajectory, goal->local_constraints, local_solution);
+      *local_planner_feedback_ = local_constraint_solver_instance_->solve(
+          local_trajectory, local_planning_goal_handle_->get_goal(), local_solution);
 
-      if (!local_feedback->feedback.empty())
+      if (!local_planner_feedback_->feedback.empty())
       {
-        local_planning_goal_handle_->publish_feedback(local_feedback);
+        local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
       }
 
-      // Use the same message interface to controllers like MoveIt servo to use application dependend controller
+      // Use the configuarable message interface like MoveIt serve
       // (See https://github.com/ros-planning/moveit2/blob/main/moveit_ros/moveit_servo/src/servo_calcs.cpp)
       // Format outgoing msg in the right format
       // (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).

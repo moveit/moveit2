@@ -57,7 +57,8 @@ bool SimpleSampler::initialize(const rclcpp::Node::SharedPtr& node, const moveit
   return true;
 }
 
-bool SimpleSampler::addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory)
+moveit_msgs::action::LocalPlanner::Feedback
+SimpleSampler::addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory)
 {
   // Reset trajectory operator to delete old reference trajectory
   reset();
@@ -67,7 +68,9 @@ bool SimpleSampler::addTrajectorySegment(const robot_trajectory::RobotTrajectory
 
   // Parametrize trajectory and calculate velocity and accelerations
   time_parametrization_.computeTimeStamps(*reference_trajectory_);
-  return true;
+
+  // Return empty feedback
+  return feedback_;
 }
 
 bool SimpleSampler::reset()
@@ -77,10 +80,14 @@ bool SimpleSampler::reset()
   reference_trajectory_->clear();
   return true;
 }
-robot_trajectory::RobotTrajectory SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state)
+moveit_msgs::action::LocalPlanner::Feedback
+SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
+                                  robot_trajectory::RobotTrajectory& local_trajectory)
 {
-  robot_trajectory::RobotTrajectory local_trajectory(reference_trajectory_->getRobotModel(),
-                                                     reference_trajectory_->getGroupName());
+  // Delete previous local trajectory
+  local_trajectory.clear();
+
+  // Determine current local trajectory based on configured behavior
   if (pass_through_)
   {
     // Use reference_trajectory as local trajectory
@@ -102,7 +109,9 @@ robot_trajectory::RobotTrajectory SimpleSampler::getLocalTrajectory(const moveit
     local_trajectory.addSuffixWayPoint(reference_trajectory_->getWayPoint(next_waypoint_index_),
                                        reference_trajectory_->getWayPointDurationFromPrevious(next_waypoint_index_));
   }
-  return local_trajectory;
+
+  // Return empty feedback
+  return feedback_;
 }
 
 double SimpleSampler::getTrajectoryProgress(const moveit::core::RobotState& current_state)

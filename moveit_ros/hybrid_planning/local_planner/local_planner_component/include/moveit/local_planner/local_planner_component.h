@@ -152,8 +152,11 @@ private:
   // Timer to periodically call executePlanningLoopRun()
   rclcpp::TimerBase::SharedPtr timer_;
 
-  // Current action goal handle
+  // Latest action goal handle
   std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>> local_planning_goal_handle_;
+
+  // Local planner feedback
+  std::shared_ptr<moveit_msgs::action::LocalPlanner::Feedback> local_planner_feedback_;
 
   // Planning scene monitor to get the current planning scene
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
