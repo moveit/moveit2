@@ -164,7 +164,6 @@ void GlobalPlannerComponent::globalPlanningRequestCallback(
   const auto goal = goal_handle->get_goal();
 
   // Plan global trajectory
-  RCLCPP_INFO(LOGGER, "Start global planning");
   moveit_msgs::msg::MotionPlanResponse planning_solution = plan(goal->request);
 
   // Publish global planning solution to the local planner
