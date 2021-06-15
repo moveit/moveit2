@@ -119,7 +119,7 @@ bool LocalPlannerComponent::initialize()
     trajectory_operator_instance_ =
         trajectory_operator_loader_->createUniqueInstance(config_.trajectory_operator_plugin_name);
     if (!trajectory_operator_instance_->initialize(node_ptr, planning_scene_monitor_->getRobotModel(),
-                                                   "panda_arm"))  // TODO(sjahr) add default group param
+                                                   config_.group_name))  // TODO(sjahr) add default group param
       throw std::runtime_error("Unable to initialize trajectory operator plugin");
     RCLCPP_INFO(LOGGER, "Using trajectory operator interface '%s'", config_.trajectory_operator_plugin_name.c_str());
   }
@@ -184,6 +184,9 @@ bool LocalPlannerComponent::initialize()
         moveit::core::robotStateMsgToRobotState(msg->trajectory_start, start_state);
         new_trajectory.setRobotTrajectoryMsg(start_state, msg->trajectory);
         *local_planner_feedback_ = trajectory_operator_instance_->addTrajectorySegment(new_trajectory);
+
+        // Feedback is only send when the hybrid planning architecture should react to a discrete event that occurred
+        // when the reference trajectory is updated
         if (!local_planner_feedback_->feedback.empty())
         {
           local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
@@ -268,9 +271,12 @@ void LocalPlannerComponent::executePlanningLoopRun()
 
       // Get local goal trajectory to follow
       robot_trajectory::RobotTrajectory local_trajectory =
-          robot_trajectory::RobotTrajectory(planning_scene_monitor_->getRobotModel(), "panda_arm");
+          robot_trajectory::RobotTrajectory(planning_scene_monitor_->getRobotModel(), config_.group_name);
       *local_planner_feedback_ =
           trajectory_operator_instance_->getLocalTrajectory(current_robot_state, local_trajectory);
+
+      // Feedback is only send when the hybrid planning architecture should react to a discrete event that occurred
+      // during the identification of the local planning problem
       if (!local_planner_feedback_->feedback.empty())
       {
         local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
@@ -278,15 +284,19 @@ void LocalPlannerComponent::executePlanningLoopRun()
 
       // Solve local planning problem
       trajectory_msgs::msg::JointTrajectory local_solution;
+
+      // Feedback is only send when the hybrid planning architecture should react to a discrete event that occurred
+      // while computing a local solution
       *local_planner_feedback_ = local_constraint_solver_instance_->solve(
           local_trajectory, local_planning_goal_handle_->get_goal(), local_solution);
 
+      // Feedback is only send when the hybrid planning architecture should react to a discrete event
       if (!local_planner_feedback_->feedback.empty())
       {
         local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
       }
 
-      // Use the configuarable message interface like MoveIt serve
+      // Use a configurable message interface like MoveIt serve
       // (See https://github.com/ros-planning/moveit2/blob/main/moveit_ros/moveit_servo/src/servo_calcs.cpp)
       // Format outgoing msg in the right format
       // (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
