@@ -10,7 +10,9 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/bullet_integration/ros_bullet_utils.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-
+ament_target_dependencies(${MOVEIT_LIB_NAME} SYSTEM
+  BULLET
+)
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   rmw_implementation
@@ -22,21 +24,23 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_collision_detection
-  ${BULLET_LIBRARIES}
 )
 
 add_library(collision_detector_bullet_plugin SHARED src/collision_detector_bullet_plugin_loader.cpp)
 set_target_properties(collision_detector_bullet_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(collision_detector_bullet_plugin PUBLIC
-  ${MOVEIT_LIB_NAME}
-  moveit_planning_scene
+ament_target_dependencies(collision_detector_bullet_plugin SYSTEM
+  BULLET
 )
-ament_target_dependencies(collision_detector_bullet_plugin PUBLIC
+ament_target_dependencies(collision_detector_bullet_plugin
   rclcpp
   urdf
   visualization_msgs
   pluginlib
   rmw_implementation
+)
+target_link_libraries(collision_detector_bullet_plugin
+  ${MOVEIT_LIB_NAME}
+  moveit_planning_scene
 )
 
 install(DIRECTORY include/ DESTINATION include)

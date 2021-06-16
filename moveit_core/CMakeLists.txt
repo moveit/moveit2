@@ -127,6 +127,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   Eigen3
   eigen3_cmake_module
   OCTOMAP
+  Bullet
 )
 
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
@@ -134,7 +135,6 @@ pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_d
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
   ${LIBFCL_INCLUDE_DIRS}
-  ${BULLET_INCLUDE_DIRS}
 )
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
