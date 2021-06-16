@@ -21,7 +21,7 @@ if(WITH_OPENGL)
   endif()
   find_package(OpenGL REQUIRED)
   find_package(GLEW REQUIRED)
-  
+
   set(gl_LIBS ${gl_LIBS} ${OPENGL_LIBRARIES})
   if(APPLE)
     find_package(FreeGLUT REQUIRED)
