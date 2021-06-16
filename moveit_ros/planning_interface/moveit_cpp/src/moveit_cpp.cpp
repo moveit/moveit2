@@ -38,7 +38,8 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/common_planning_interface_objects/common_objects.h>
-
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <geometry_msgs/msg/quaternion_stamped.hpp>
 #include <tf2/utils.h>
 #include <tf2_ros/transform_listener.h>
 #include <rclcpp/rclcpp.hpp>
@@ -67,7 +68,7 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
   if (!loadPlanningSceneMonitor(options.planning_scene_monitor_options))
   {
     const std::string error = "Unable to configure planning scene monitor";
-    RCLCPP_FATAL(LOGGER, error);
+    RCLCPP_FATAL_STREAM(LOGGER, error);
     throw std::runtime_error(error);
   }
 
@@ -76,7 +77,7 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
   {
     const std::string error = "Unable to construct robot model. Please make sure all needed information is on the "
                               "parameter server.";
-    RCLCPP_FATAL(LOGGER, error);
+    RCLCPP_FATAL_STREAM(LOGGER, error);
     throw std::runtime_error(error);
   }
 
@@ -84,7 +85,7 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
   if (load_planning_pipelines && !loadPlanningPipelines(options.planning_pipeline_options))
   {
     const std::string error = "Failed to load planning pipelines from parameter server";
-    RCLCPP_FATAL(LOGGER, error);
+    RCLCPP_FATAL_STREAM(LOGGER, error);
     throw std::runtime_error(error);
   }
 
