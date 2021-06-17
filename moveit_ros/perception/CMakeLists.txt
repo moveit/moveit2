@@ -25,14 +25,10 @@ if(WITH_OPENGL)
   set(gl_LIBS ${gl_LIBS} ${OPENGL_LIBRARIES})
   if(APPLE)
     find_package(FreeGLUT REQUIRED)
-    set(GLUT_LIBS FreeGLUT::freeglut)
-    set(GLEW_LIBRARIES
-      ${GLEW_LIBRARIES}
-      GLEW::GLEW
-    )
+    set(SYSTEM_GL_LIBRARIES ${GLEW_LIBRARIES} GLEW::GLEW FreeGLUT::freeglut)
   else()
     find_package(GLUT REQUIRED)
-    set(GLUT_LIBS GLUT::GLUT)
+    set(SYSTEM_GL_LIBRARIES ${GLEW_LIBRARIES} GLUT::GLUT)
   endif()
   set(perception_GL_INCLUDE_DIRS "mesh_filter/include" "depth_image_octomap_updater/include")
   set(SYSTEM_GL_INCLUDE_DIRS ${GLEW_INCLUDE_DIR} ${GLUT_INCLUDE_DIR})

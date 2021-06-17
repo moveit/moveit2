@@ -16,7 +16,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   Boost
 )
 
-target_link_libraries(${MOVEIT_LIB_NAME} ${gl_LIBS} ${GLUT_LIBS} ${GLEW_LIBRARIES})
+target_link_libraries(${MOVEIT_LIB_NAME} ${gl_LIBS} ${SYSTEM_GL_LIBRARIES})
 
 # TODO: enable testing
 # if(CATKIN_ENABLE_TESTING)
