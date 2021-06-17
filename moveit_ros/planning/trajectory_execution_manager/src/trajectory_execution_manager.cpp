@@ -166,7 +166,7 @@ void TrajectoryExecutionManager::initialize()
 
   // other configuration steps
   reloadControllerInformation();
-  // The default callback group for rclcpp::Node is MutuallyExclusive which mean we can not call
+  // The default callback group for rclcpp::Node is MutuallyExclusive which means we cannot call
   // receiveEvent while processing a different callback, to fix this we create a new callback group (the type is not
   // important since we only use it to process one callback) and associate event_topic_subscriber_ with this callback group
   auto callback_group = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
