@@ -315,15 +315,17 @@ TEST_F(ServoCalcsTestFixture, TestEnforcePosLimits)
   servo_calcs_->original_joint_state_ = joint_state;
   servo_calcs_->current_state_->setVariableValues(joint_state);
 
+  trajectory_msgs::msg::JointTrajectory joint_trajectory;
+  servo_calcs_->composeJointTrajMessage(joint_state, joint_trajectory);
   // Test here, expecting to be violating joint position limits
-  EXPECT_FALSE(servo_calcs_->enforcePositionLimits());
+  EXPECT_FALSE(servo_calcs_->enforcePositionLimits(joint_trajectory));
 
   // At the upper limits with negative velocity, we should not be 'violating'
   velocity.assign(9, -1.0);
   joint_state = getJointState(position, velocity);
   servo_calcs_->original_joint_state_ = joint_state;
   servo_calcs_->current_state_->setVariableValues(joint_state);
-  EXPECT_TRUE(servo_calcs_->enforcePositionLimits());
+  EXPECT_TRUE(servo_calcs_->enforcePositionLimits(joint_trajectory));
 
   // However, if we change 1 of the joints to the bottom limit and stay negative velocity
   // We expect to violate joint position limits again
@@ -331,7 +333,7 @@ TEST_F(ServoCalcsTestFixture, TestEnforcePosLimits)
   joint_state = getJointState(position, velocity);
   servo_calcs_->original_joint_state_ = joint_state;
   servo_calcs_->current_state_->setVariableValues(joint_state);
-  EXPECT_FALSE(servo_calcs_->enforcePositionLimits());
+  EXPECT_FALSE(servo_calcs_->enforcePositionLimits(joint_trajectory));
 
   // For completeness, we'll set the position to lower limits with positive vel and expect a pass
   std::vector<double> lower_position{ 0, 0, -2.8973, -1.7628, -2.8973, -3.0718, -2.8973, -0.0175, -2.8973 };
@@ -339,7 +341,7 @@ TEST_F(ServoCalcsTestFixture, TestEnforcePosLimits)
   joint_state = getJointState(lower_position, velocity);
   servo_calcs_->original_joint_state_ = joint_state;
   servo_calcs_->current_state_->setVariableValues(joint_state);
-  EXPECT_TRUE(servo_calcs_->enforcePositionLimits());
+  EXPECT_TRUE(servo_calcs_->enforcePositionLimits(joint_trajectory));
 }
 
 TEST_F(ServoCalcsTestFixture, TestEnforceVelLimits)

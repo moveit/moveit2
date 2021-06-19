@@ -92,7 +92,7 @@ if(BUILD_TESTING)
 
   # target_link_libraries(move_group_ompl_constraints_test ${THIS_PACKAGE_LIBRARIES})
   # ament_target_dependencies(move_group_ompl_constraints_test ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  # add_ros_test(test/launch/move_group_ompl_constraints.test.py ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+  # add_ros_test(test/launch/move_group_ompl_constraints.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
   # end move group interface cpp ompl constrained planning integration test
 
 endif()

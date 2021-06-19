@@ -28,7 +28,6 @@ def generate_test_description():
         ),
         parameters=[servo_params],
         output="screen",
-        # prefix="kitty gdb -e run --args"
     )
 
     return (

@@ -31,3 +31,11 @@ repositories:
     type: git
     url: https://github.com/ros-planning/warehouse_ros_mongo
     version: ros2
+  osrf_pycommon:
+    type: git
+    url: https://github.com/osrf/osrf_pycommon
+    version: hidmic/foxy/backport-70
+  launch:
+    type: git
+    url: https://github.com/ros2/launch
+    version: hidmic/adapt/mjeronimo/backport-476-to-foxy
