@@ -39,7 +39,7 @@ repositories:
     type: git
     url: https://github.com/ros2/launch
     version: master
-   launch_ros:
+  launch_ros:
     type: git
     url: https://github.com/ros2/launch_ros
     version: master
