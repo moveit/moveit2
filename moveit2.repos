@@ -34,8 +34,12 @@ repositories:
   osrf_pycommon:
     type: git
     url: https://github.com/osrf/osrf_pycommon
-    version: hidmic/foxy/backport-70
+    version: master
   launch:
     type: git
     url: https://github.com/ros2/launch
-    version: hidmic/adapt/mjeronimo/backport-476-to-foxy
+    version: master
+   launch_ros:
+    type: git
+    url: https://github.com/ros2/launch_ros
+    version: master
