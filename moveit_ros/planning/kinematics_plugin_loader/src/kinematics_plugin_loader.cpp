@@ -132,7 +132,7 @@ public:
     tip_debug << "Planning group '" << jmg->getName() << "' has tip(s): ";
     for (const auto& tip : tips)
       tip_debug << tip << ", ";
-    RCLCPP_DEBUG(LOGGER, tip_debug.str());
+    RCLCPP_DEBUG_STREAM(LOGGER, tip_debug.str());
 
     return tips;
   }

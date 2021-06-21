@@ -459,7 +459,7 @@ rcl_interfaces::msg::SetParametersResult ServoCalcs::robotLinkCommandFrameCallba
   rcl_interfaces::msg::SetParametersResult result;
   result.successful = true;
   robot_link_command_frame_ = parameter.as_string();
-  RCLCPP_INFO(LOGGER, "robot_link_command_frame changed to: " + robot_link_command_frame_);
+  RCLCPP_INFO_STREAM(LOGGER, "robot_link_command_frame changed to: " + robot_link_command_frame_);
   return result;
 };
 

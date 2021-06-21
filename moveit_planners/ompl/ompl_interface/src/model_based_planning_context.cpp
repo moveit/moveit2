@@ -974,7 +974,7 @@ bool ompl_interface::ModelBasedPlanningContext::loadConstraintApproximations(con
     constraints_library_->loadConstraintApproximations(constraint_path);
     std::stringstream ss;
     constraints_library_->printConstraintApproximations(ss);
-    RCLCPP_INFO(LOGGER, ss.str());
+    RCLCPP_INFO_STREAM(LOGGER, ss.str());
     return true;
   }
   return false;
