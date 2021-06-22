@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_core VERSION 2.0.0 LANGUAGES CXX)
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()
@@ -13,7 +15,9 @@ find_package(Eigen3 REQUIRED)
 # Finds Boost Components
 include(ConfigExtras.cmake)
 
+if(NOT MSVC)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
+endif()
 
 # TODO: Move collision detection into separate packages
 find_package(Bullet 2.87 REQUIRED)
