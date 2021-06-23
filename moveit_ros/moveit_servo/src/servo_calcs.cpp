@@ -785,17 +785,17 @@ bool ServoCalcs::enforcePositionLimits(sensor_msgs::msg::JointState& joint_state
 
   for (auto joint : joint_model_group_->getActiveJointModels())
   {
-    for (std::size_t c = 0; c < original_joint_state_.name.size(); ++c)
+    for (std::size_t c = 0; c < joint_state.name.size(); ++c)
     {
       // Use the most recent robot joint state
-      if (original_joint_state_.name[c] == joint->getName())
+      if (joint_state.name[c] == joint->getName())
       {
-        joint_angle = original_joint_state_.position.at(c);
+        joint_angle = joint_state.position.at(c);
         break;
       }
     }
 
-    if (!current_state_->satisfiesPositionBounds(joint, -parameters_->joint_limit_margin))
+    if (!joint->satisfiesPositionBounds(&joint_angle, -parameters_->joint_limit_margin))
     {
       const std::vector<moveit_msgs::msg::JointLimits> limits = joint->getVariableBoundsMsg();
 
