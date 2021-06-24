@@ -321,7 +321,7 @@ protected:
 
   const int gazebo_redundant_message_count_ = 30;
 
-  uint num_joints_;
+  uint32_t num_joints_;
 
   // True -> allow drift in this dimension. In the command frame. [x, y, z, roll, pitch, yaw]
   std::array<bool, 6> drift_dimensions_ = { { false, false, false, false, false, false } };

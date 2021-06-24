@@ -53,6 +53,7 @@
 #include <unistd.h>
 #else
 #include <winsock2.h>
+#undef max
 #endif
 
 using namespace moveit_ros_benchmarks;

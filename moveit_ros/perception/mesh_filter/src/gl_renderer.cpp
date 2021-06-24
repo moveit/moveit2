@@ -49,6 +49,10 @@
 #include <vector>
 #include <boost/thread.hpp>
 #include <rclcpp/rclcpp.hpp>
+#ifdef _WIN32
+#undef near
+#undef far
+#endif
 
 using namespace std;
 
