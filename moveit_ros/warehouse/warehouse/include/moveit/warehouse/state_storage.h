@@ -39,6 +39,7 @@
 #include <moveit/warehouse/moveit_message_storage.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit_msgs/msg/robot_state.hpp>
+#include "moveit/warehouse/visibility_control.hpp"
 
 namespace moveit_warehouse
 {
@@ -47,7 +48,7 @@ typedef warehouse_ros::MessageCollection<moveit_msgs::msg::RobotState>::Ptr Robo
 
 MOVEIT_CLASS_FORWARD(RobotStateStorage)  // Defines RobotStateStoragePtr, ConstPtr, WeakPtr... etc
 
-class RobotStateStorage : public MoveItMessageStorage
+class MOVEIT_WAREHOUSE_PUBLIC RobotStateStorage : public MoveItMessageStorage
 {
 public:
   static const std::string DATABASE_NAME;

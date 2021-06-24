@@ -42,6 +42,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
+#include <moveit/planning_pipeline/visibility_control.hpp>
 
 #include <memory>
 
@@ -54,7 +55,7 @@ namespace planning_pipeline
     planning plugin and the
     planning_request_adapter::PlanningRequestAdapter plugins, in the
     specified order. */
-class PlanningPipeline
+class MOVEIT_PLANNING_PIPELINE_PUBLIC PlanningPipeline
 {
 public:
   /** \brief When motion plans are computed and they are supposed to be automatically displayed, they are sent to this

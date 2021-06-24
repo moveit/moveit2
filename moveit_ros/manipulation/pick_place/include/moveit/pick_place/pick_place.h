@@ -39,6 +39,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/pick_place/manipulation_pipeline.h>
 #include <moveit/pick_place/pick_place_params.h>
+#include <moveit/pick_place/visibility_control.hpp>
 #include <moveit/constraint_sampler_manager_loader/constraint_sampler_manager_loader.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit_msgs/PickupAction.h>
@@ -113,11 +114,11 @@ public:
 class PickPlace : private boost::noncopyable, public std::enable_shared_from_this<PickPlace>
 {
 public:
-  static const std::string DISPLAY_PATH_TOPIC;
-  static const std::string DISPLAY_GRASP_TOPIC;
+  MOVEIT_PICK_PLACE_PLANNER_PUBLIC static const std::string DISPLAY_PATH_TOPIC;
+  MOVEIT_PICK_PLACE_PLANNER_PUBLIC static const std::string DISPLAY_GRASP_TOPIC;
 
   // the amount of time (maximum) to wait for achieving a grasp posture
-  static const double DEFAULT_GRASP_POSTURE_COMPLETION_DURATION;  // seconds
+  MOVEIT_PICK_PLACE_PLANNER_PUBLIC static const double DEFAULT_GRASP_POSTURE_COMPLETION_DURATION;  // seconds
 
   PickPlace(const planning_pipeline::PlanningPipelinePtr& planning_pipeline);
 

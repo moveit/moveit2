@@ -37,6 +37,7 @@
 #pragma once
 
 #include "moveit/warehouse/moveit_message_storage.h"
+#include "moveit/warehouse/visibility_control.hpp"
 #include <moveit/macros/class_forward.h>
 #include <moveit_msgs/msg/planning_scene.hpp>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
@@ -54,7 +55,7 @@ typedef warehouse_ros::MessageCollection<moveit_msgs::msg::RobotTrajectory>::Ptr
 
 MOVEIT_CLASS_FORWARD(PlanningSceneStorage)  // Defines PlanningSceneStoragePtr, ConstPtr, WeakPtr... etc
 
-class PlanningSceneStorage : public MoveItMessageStorage
+class MOVEIT_WAREHOUSE_PUBLIC PlanningSceneStorage : public MoveItMessageStorage
 {
 public:
   static const std::string DATABASE_NAME;

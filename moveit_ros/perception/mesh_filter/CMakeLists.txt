@@ -8,6 +8,13 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/gl_mesh.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+
+# Causes the visibility macros to use dllexport rather than dllimport,
+# which is appropriate when building the dll but not consuming it.
+target_compile_definitions(${MOVEIT_LIB_NAME}
+  PRIVATE "MESH_FILTER_BUILDING_LIBRARY")
+
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   moveit_core
@@ -15,7 +22,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   Eigen3
   Boost
 )
-target_link_libraries(${MOVEIT_LIB_NAME} ${gl_LIBS} GLUT::GLUT ${GLEW_LIBRARIES})
+target_link_libraries(${MOVEIT_LIB_NAME} ${gl_LIBS} GLUT::GLUT GLEW::glew)
 
 # TODO: enable testing
 # if(CATKIN_ENABLE_TESTING)

@@ -56,6 +56,8 @@
 
 #include <rclcpp_action/rclcpp_action.hpp>
 
+#include <moveit/move_group_interface/visibility_control.hpp>
+
 #include <memory>
 #include <utility>
 #include <tf2_ros/buffer.h>
@@ -101,7 +103,7 @@ MOVEIT_CLASS_FORWARD(MoveGroupInterface)  // Defines MoveGroupInterfacePtr, Cons
     \brief Client class to conveniently use the ROS interfaces provided by the move_group node.
 
     This class includes many default settings to make things easy to use. */
-class MoveGroupInterface
+class MOVE_GROUP_INTERFACE_PUBLIC MoveGroupInterface
 {
 public:
   /** \brief Default ROS parameter name from where to read the robot's URDF. Set to 'robot_description' */

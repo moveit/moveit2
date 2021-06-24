@@ -234,6 +234,7 @@ public:
    */
   /**@{*/
 
+  PLANNING_SCENE_PUBLIC
   const std::string getCollisionDetectorName() const
   {
     // If no collision detector is allocated, return an empty string

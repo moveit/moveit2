@@ -45,6 +45,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/background_processing/background_processing.h>
 #include <rclcpp/rclcpp.hpp>
+#include <moveit/planning_scene_rviz_plugin/visibility_control.hpp>
 #endif
 
 namespace Ogre
@@ -66,7 +67,7 @@ class EnumProperty;
 
 namespace moveit_rviz_plugin
 {
-class PlanningSceneDisplay : public rviz_common::Display
+class PLANNING_SCENE_RVIZ_PLUGIN_PUBLIC PlanningSceneDisplay : public rviz_common::Display
 {
   Q_OBJECT
 

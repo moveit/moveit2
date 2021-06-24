@@ -31,7 +31,7 @@ set(SOURCE_FILES
 set(MOVEIT_LIB_NAME moveit_motion_planning_rviz_plugin)
 add_library(${MOVEIT_LIB_NAME}_core SHARED ${SOURCE_FILES} ${HEADERS} ${UIC_FILES})
 set_target_properties(${MOVEIT_LIB_NAME}_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+set_target_properties(${MOVEIT_LIB_NAME}_core PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 target_link_libraries(${MOVEIT_LIB_NAME}_core moveit_rviz_plugin_render_tools moveit_planning_scene_rviz_plugin)
 ament_target_dependencies(${MOVEIT_LIB_NAME}_core
   Boost

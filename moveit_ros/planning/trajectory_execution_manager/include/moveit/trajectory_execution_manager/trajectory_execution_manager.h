@@ -47,6 +47,7 @@
 #include <moveit/controller_manager/controller_manager.h>
 #include <boost/thread.hpp>
 #include <pluginlib/class_loader.hpp>
+#include <moveit/trajectory_execution_manager/visibility_control.hpp>
 
 #include <memory>
 
@@ -57,7 +58,7 @@ MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager)  // Defines TrajectoryExecution
 // Two modes:
 // Managed controllers
 // Unmanaged controllers: given the trajectory,
-class TrajectoryExecutionManager
+class MOVEIT_TRAJECTORY_EXECUTION_MANAGER_PUBLIC TrajectoryExecutionManager
 {
 public:
   static const std::string EXECUTION_EVENT_TOPIC;
