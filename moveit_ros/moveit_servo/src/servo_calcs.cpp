@@ -585,7 +585,8 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   if (!joints_to_halt.empty())
   {
     status_ = StatusCode::JOINT_BOUND;
-    if (servo_type == ServoType::JOINT_SPACE)
+    if ((servo_type == ServoType::JOINT_SPACE && !parameters_->halt_all_joints_in_joint_mode) ||
+        (servo_type == ServoType::CARTESIAN_SPACE && !parameters_->halt_all_joints_in_cartesian_mode))
     {
       suddenHalt(internal_joint_state_, joints_to_halt);
       prev_joint_velocity_ =
@@ -593,7 +594,6 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
     }
     else
     {
-      // servo_type == ServoType::CARTESIAN_SPACE
       suddenHalt(internal_joint_state_, joint_model_group_->getActiveJointModels());
       prev_joint_velocity_.setZero();
     }
