@@ -151,13 +151,16 @@ protected:
    * Is handled differently for position vs. velocity control.
    */
   void suddenHalt(trajectory_msgs::msg::JointTrajectory& joint_trajectory) const;
-  void suddenHalt(sensor_msgs::msg::JointState& joint_state) const;
+  void suddenHalt(sensor_msgs::msg::JointState& joint_state,
+                  const std::vector<const moveit::core::JointModel*>& joints_to_halt) const;
 
   /** \brief  Scale the delta theta to match joint velocity/acceleration limits */
   void enforceVelLimits(Eigen::ArrayXd& delta_theta);
 
-  /** \brief Avoid overshooting joint limits */
-  bool enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) const;
+  /** \brief Avoid overshooting joint limits
+      \return Vector of the joints that violate the position limits
+   */
+  std::vector<const moveit::core::JointModel*> enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) const;
 
   /** \brief Possibly calculate a velocity scaling factor, due to proximity of
    * singularity and direction of motion

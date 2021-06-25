@@ -41,6 +41,7 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <experimental/iterator>
 
 #include <std_msgs/msg/bool.h>
 
@@ -579,11 +580,13 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   updated_filters_ = true;
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
-  if (!enforcePositionLimits(internal_joint_state_))
+  const auto joints_to_halt = enforcePositionLimits(internal_joint_state_);
+  if (!joints_to_halt.empty())
   {
-    suddenHalt(internal_joint_state_);
+    suddenHalt(internal_joint_state_, joints_to_halt);
     status_ = StatusCode::JOINT_BOUND;
-    prev_joint_velocity_.setZero();
+    prev_joint_velocity_ =
+        Eigen::ArrayXd::Map(internal_joint_state_.velocity.data(), internal_joint_state_.velocity.size());
   }
 
   // compose outgoing message
@@ -777,12 +780,12 @@ void ServoCalcs::enforceVelLimits(Eigen::ArrayXd& delta_theta)
   delta_theta = velocity_scaling_factor * velocity * parameters_->publish_period;
 }
 
-bool ServoCalcs::enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) const
+std::vector<const moveit::core::JointModel*>
+ServoCalcs::enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) const
 {
   // Halt if we're past a joint margin and joint velocity is moving even farther past
-  bool halting = false;
   double joint_angle = 0;
-
+  std::vector<const moveit::core::JointModel*> joints_to_halt;
   for (auto joint : joint_model_group_->getActiveJointModels())
   {
     for (std::size_t c = 0; c < joint_state.name.size(); ++c)
@@ -811,18 +814,23 @@ bool ServoCalcs::enforcePositionLimits(sensor_msgs::msg::JointState& joint_state
             (joint_state.velocity.at(joint_idx) > 0 &&
              (joint_angle > (limits[0].max_position - parameters_->joint_limit_margin))))
         {
-          rclcpp::Clock& clock = *node_->get_clock();
-          RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                      node_->get_name()
-                                          << " " << joint->getName() << " close to a position limit. Halting.");
-          halting = true;
-          break;
+          joints_to_halt.push_back(joint);
         }
       }
     }
   }
-
-  return !halting;
+  if (!joints_to_halt.empty())
+  {
+    std::ostringstream joints_names;
+    auto joiner = std::experimental::make_ostream_joiner(joints_names, ", ");
+    std::transform(joints_to_halt.cbegin(), joints_to_halt.cend(), joiner,
+                   [](const auto& joint) { return joint->getName(); });
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                node_->get_name()
+                                    << " " << joints_names.str() << " close to a position limit. Halting.");
+  }
+  return joints_to_halt;
 }
 
 // Suddenly halt for a joint limit or other critical issue.
@@ -861,11 +869,20 @@ void ServoCalcs::suddenHalt(trajectory_msgs::msg::JointTrajectory& joint_traject
   }
 }
 
-void ServoCalcs::suddenHalt(sensor_msgs::msg::JointState& joint_state) const
+void ServoCalcs::suddenHalt(sensor_msgs::msg::JointState& joint_state,
+                            const std::vector<const moveit::core::JointModel*>& joints_to_halt) const
 {
-  // Set the position to the original position, and velocity to 0
-  joint_state.position = original_joint_state_.position;
-  joint_state.velocity.assign(joint_state.position.size(), 0.0);
+  // Set the position to the original position, and velocity to 0 for input joints
+  for (const auto& joint_to_halt : joints_to_halt)
+  {
+    const auto joint_it = std::find(joint_state.name.cbegin(), joint_state.name.cend(), joint_to_halt->getName());
+    if (joint_it != joint_state.name.cend())
+    {
+      const auto joint_index = std::distance(joint_state.name.cbegin(), joint_it);
+      joint_state.position.at(joint_index) = original_joint_state_.position.at(joint_index);
+      joint_state.velocity.at(joint_index) = 0.0;
+    }
+  }
 }
 
 // Parse the incoming joint msg for the joints of our MoveGroup
