@@ -66,6 +66,12 @@
 
 namespace moveit_servo
 {
+enum class ServoType
+{
+  CARTESIAN_SPACE,
+  JOINT_SPACE
+};
+
 class ServoCalcs
 {
 public:
@@ -182,7 +188,8 @@ protected:
    * @param delta_theta Eigen vector of joint delta's, from joint or Cartesian servo calcs
    * @param joint_trajectory Output trajectory message
    */
-  bool internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory);
+  bool internalServoUpdate(Eigen::ArrayXd& delta_theta, trajectory_msgs::msg::JointTrajectory& joint_trajectory,
+                           const ServoType servo_type);
 
   /** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
    * Also calculates the previous velocity

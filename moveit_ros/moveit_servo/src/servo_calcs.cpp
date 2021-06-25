@@ -530,7 +530,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
   delta_theta_ = pseudo_inverse * delta_x;
   delta_theta_ *= velocityScalingFactorForSingularity(delta_x, svd, pseudo_inverse);
 
-  return internalServoUpdate(delta_theta_, joint_trajectory);
+  return internalServoUpdate(delta_theta_, joint_trajectory, ServoType::CARTESIAN_SPACE);
 }
 
 bool ServoCalcs::jointServoCalcs(const control_msgs::msg::JointJog& cmd,
@@ -544,11 +544,12 @@ bool ServoCalcs::jointServoCalcs(const control_msgs::msg::JointJog& cmd,
   delta_theta_ = scaleJointCommand(cmd);
 
   // Perform interal servo with the command
-  return internalServoUpdate(delta_theta_, joint_trajectory);
+  return internalServoUpdate(delta_theta_, joint_trajectory, ServoType::JOINT_SPACE);
 }
 
 bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
-                                     trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+                                     trajectory_msgs::msg::JointTrajectory& joint_trajectory,
+                                     const ServoType servo_type)
 {
   // Set internal joint state from original
   internal_joint_state_ = original_joint_state_;
@@ -583,10 +584,19 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   const auto joints_to_halt = enforcePositionLimits(internal_joint_state_);
   if (!joints_to_halt.empty())
   {
-    suddenHalt(internal_joint_state_, joints_to_halt);
     status_ = StatusCode::JOINT_BOUND;
-    prev_joint_velocity_ =
-        Eigen::ArrayXd::Map(internal_joint_state_.velocity.data(), internal_joint_state_.velocity.size());
+    if (servo_type == ServoType::JOINT_SPACE)
+    {
+      suddenHalt(internal_joint_state_, joints_to_halt);
+      prev_joint_velocity_ =
+          Eigen::ArrayXd::Map(internal_joint_state_.velocity.data(), internal_joint_state_.velocity.size());
+    }
+    else
+    {
+      // servo_type == ServoType::CARTESIAN_SPACE
+      suddenHalt(internal_joint_state_, joint_model_group_->getActiveJointModels());
+      prev_joint_velocity_.setZero();
+    }
   }
 
   // compose outgoing message
