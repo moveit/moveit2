@@ -39,9 +39,6 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <moveit/utils/message_checks.h>
 #include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-
-#include <geometry_msgs/msg/pose_stamped.h>
 
 using namespace moveit::core;
 

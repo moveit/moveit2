@@ -41,6 +41,8 @@
   <depend>moveit_msgs</depend>
   <depend>octomap</depend>
   <depend>octomap_msgs</depend>
+  <depend>pluginlib</depend>
+  <depend>pybind11_vendor</depend>
   <depend>random_numbers</depend>
   <depend>sensor_msgs</depend>
   <depend>shape_msgs</depend>
@@ -51,6 +53,8 @@
   <depend>tf2_geometry_msgs</depend>
   <depend>trajectory_msgs</depend>
   <depend>visualization_msgs</depend>
+
+  <doc_depend>python3-sphinx-rtd-theme</doc_depend>
 
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
   <test_depend>moveit_resources_pr2_description</test_depend>

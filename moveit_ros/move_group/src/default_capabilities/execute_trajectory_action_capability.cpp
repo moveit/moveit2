@@ -36,6 +36,7 @@
 
 #include "execute_trajectory_action_capability.h"
 
+#include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/plan_execution/plan_execution.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/kinematic_constraints/utils.h>
@@ -55,7 +56,7 @@ void MoveGroupExecuteTrajectoryAction::initialize()
   using std::placeholders::_1;
   using std::placeholders::_2;
 
-  auto node = context_->node_;
+  auto node = context_->moveit_cpp_->getNode();
   // start the move action server
   execute_action_server_ = rclcpp_action::create_server<ExecTrajectory>(
       node->get_node_base_interface(), node->get_node_clock_interface(), node->get_node_logging_interface(),

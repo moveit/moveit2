@@ -48,7 +48,7 @@ typedef std::pair<std::vector<std::size_t>, std::map<std::size_t, std::pair<std:
     ConstrainedStateMetadata;
 typedef ompl::base::StateStorageWithMetadata<ConstrainedStateMetadata> ConstraintApproximationStateStorage;
 
-MOVEIT_CLASS_FORWARD(ConstraintApproximation)
+MOVEIT_CLASS_FORWARD(ConstraintApproximation);
 
 class ConstraintApproximation
 {
@@ -155,7 +155,7 @@ struct ConstraintApproximationConstructionResults
   double sampling_success_rate;
 };
 
-MOVEIT_CLASS_FORWARD(ConstraintsLibrary)  // Defines ConstraintsLibraryPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(ConstraintsLibrary);  // Defines ConstraintsLibraryPtr, ConstPtr, WeakPtr... etc
 
 class ConstraintsLibrary
 {

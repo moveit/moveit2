@@ -60,7 +60,7 @@ ChompParameters::ChompParameters()
   pseudo_inverse_ridge_factor_ = 1e-4;
 
   joint_update_limit_ = 0.1;
-  min_clearence_ = 0.2;
+  min_clearance_ = 0.2;
   collision_threshold_ = 0.07;
   // random_jump_amount_ = 1.0;
   use_stochastic_descent_ = true;
@@ -79,5 +79,19 @@ void ChompParameters::setRecoveryParams(double learning_rate, double ridge_facto
   this->ridge_factor_ = ridge_factor;
   this->planning_time_limit_ = planning_time_limit;
   this->max_iterations_ = max_iterations;
+}
+
+const std::vector<std::string> ChompParameters::VALID_INITIALIZATION_METHODS{ "quintic-spline", "linear", "cubic",
+                                                                              "fillTrajectory" };
+
+bool ChompParameters::setTrajectoryInitializationMethod(std::string method)
+{
+  if (std::find(VALID_INITIALIZATION_METHODS.cbegin(), VALID_INITIALIZATION_METHODS.cend(), method) !=
+      VALID_INITIALIZATION_METHODS.end())
+  {
+    this->trajectory_initialization_method_ = std::move(method);
+    return true;
+  }
+  return false;
 }
 }  // namespace chomp

@@ -47,12 +47,12 @@
 
 namespace shapes
 {
-MOVEIT_CLASS_FORWARD(Shape)  // Defines ShapePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(Shape);  // Defines ShapePtr, ConstPtr, WeakPtr... etc
 }
 
 namespace collision_detection
 {
-MOVEIT_CLASS_FORWARD(World)  // Defines WorldPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(World);  // Defines WorldPtr, ConstPtr, WeakPtr... etc
 
 /** \brief Maintain a representation of the environment */
 class World
@@ -72,7 +72,7 @@ public:
   /* Collision Bodies                                                   */
   /**********************************************************************/
 
-  MOVEIT_STRUCT_FORWARD(Object)
+  MOVEIT_STRUCT_FORWARD(Object);
 
   /** \brief A representation of an object */
   struct Object

@@ -150,15 +150,11 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   {
     robot_model_ = rm_loader_->getModel();
     scene_ = scene;
-    collision_loader_.setupScene(pnode_, scene_);
-    scene_const_ = scene_;
     if (!scene_)
     {
       try
       {
         scene_.reset(new planning_scene::PlanningScene(rm_loader_->getModel()));
-        collision_loader_.setupScene(pnode_, scene_);
-        scene_const_ = scene_;
         configureCollisionMatrix(scene_);
         configureDefaultPadding();
 
@@ -177,11 +173,14 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
       {
         RCLCPP_ERROR(LOGGER, "Configuration of planning scene failed");
         scene_.reset();
-        scene_const_ = scene_;
       }
     }
+    // scene_const_ is set regardless if scene_ is null or not
+    scene_const_ = scene_;
     if (scene_)
     {
+      // The scene_ is loaded on the collision loader only if it was correctly instantiated
+      collision_loader_.setupScene(node_, scene_);
       scene_->setAttachedBodyUpdateCallback(boost::bind(&PlanningSceneMonitor::currentStateAttachedBodyUpdateCallback,
                                                         this, boost::placeholders::_1, boost::placeholders::_2));
       scene_->setCollisionObjectUpdateCallback(boost::bind(&PlanningSceneMonitor::currentWorldObjectUpdateCallback,
@@ -614,18 +613,25 @@ void PlanningSceneMonitor::newPlanningSceneCallback(moveit_msgs::msg::PlanningSc
 
 void PlanningSceneMonitor::clearOctomap()
 {
-  if (scene_->getWorldNonConst()->removeObject(scene_->OCTOMAP_NS))
-    triggerSceneUpdateEvent(UPDATE_SCENE);
-  if (octomap_monitor_)
+  bool removed = false;
   {
-    octomap_monitor_->getOcTreePtr()->lockWrite();
-    octomap_monitor_->getOcTreePtr()->clear();
-    octomap_monitor_->getOcTreePtr()->unlockWrite();
+    boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_);
+    removed = scene_->getWorldNonConst()->removeObject(scene_->OCTOMAP_NS);
+
+    if (octomap_monitor_)
+    {
+      octomap_monitor_->getOcTreePtr()->lockWrite();
+      octomap_monitor_->getOcTreePtr()->clear();
+      octomap_monitor_->getOcTreePtr()->unlockWrite();
+    }
+    else
+    {
+      RCLCPP_WARN(LOGGER, "Unable to clear octomap since no octomap monitor has been initialized");
+    }  // Lift the scoped lock before calling triggerSceneUpdateEvent to avoid deadlock
   }
-  else
-  {
-    RCLCPP_WARN(LOGGER, "Unable to clear octomap since no octomap monitor has been initialized");
-  }
+
+  if (removed)
+    triggerSceneUpdateEvent(UPDATE_GEOMETRY);
 }
 
 bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::PlanningScene& scene)
@@ -1406,7 +1412,7 @@ void PlanningSceneMonitor::clearUpdateCallbacks()
 void PlanningSceneMonitor::setPlanningScenePublishingFrequency(double hz)
 {
   publish_planning_scene_frequency_ = hz;
-  RCLCPP_DEBUG(LOGGER, "Maximum frquency for publishing a planning scene is now %lf Hz",
+  RCLCPP_DEBUG(LOGGER, "Maximum frequency for publishing a planning scene is now %lf Hz",
                publish_planning_scene_frequency_);
 }
 

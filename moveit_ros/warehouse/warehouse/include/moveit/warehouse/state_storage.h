@@ -47,7 +47,7 @@ namespace moveit_warehouse
 typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotState>::ConstPtr RobotStateWithMetadata;
 typedef warehouse_ros::MessageCollection<moveit_msgs::msg::RobotState>::Ptr RobotStateCollection;
 
-MOVEIT_CLASS_FORWARD(RobotStateStorage)  // Defines RobotStateStoragePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(RobotStateStorage);  // Defines RobotStateStoragePtr, ConstPtr, WeakPtr... etc
 
 class MOVEIT_ROS_WAREHOUSE_PUBLIC RobotStateStorage : public MoveItMessageStorage
 {

@@ -54,7 +54,7 @@
 
 namespace trajectory_execution_manager
 {
-MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager)  // Defines TrajectoryExecutionManagerPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager);  // Defines TrajectoryExecutionManagerPtr, ConstPtr, WeakPtr... etc
 
 // Two modes:
 // Managed controllers

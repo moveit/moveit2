@@ -35,6 +35,8 @@
 /* Author: Ioan Sucan */
 
 #include "plan_service_capability.h"
+
+#include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/move_group/capability_names.h>
 
@@ -53,7 +55,7 @@ void MoveGroupPlanService::initialize()
   using std::placeholders::_2;
   using std::placeholders::_3;
 
-  plan_service_ = context_->node_->create_service<moveit_msgs::srv::GetMotionPlan>(
+  plan_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetMotionPlan>(
       PLANNER_SERVICE_NAME, std::bind(&MoveGroupPlanService::computePlanService, this, _1, _2, _3));
 }
 
@@ -64,14 +66,23 @@ bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_
   RCLCPP_INFO(LOGGER, "Received new planning service request...");
   // before we start planning, ensure that we have the latest robot state received...
   if (static_cast<bool>(req->motion_plan_request.start_state.is_diff))
-    context_->planning_scene_monitor_->waitForCurrentRobotState(context_->node_->get_clock()->now());
+    context_->planning_scene_monitor_->waitForCurrentRobotState(context_->moveit_cpp_->getNode()->get_clock()->now());
   context_->planning_scene_monitor_->updateFrameTransforms();
+
+  // Select planning_pipeline to handle request
+  const planning_pipeline::PlanningPipelinePtr planning_pipeline =
+      resolvePlanningPipeline(req->motion_plan_request.pipeline_id);
+  if (!planning_pipeline)
+  {
+    res->motion_plan_response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    return true;
+  }
 
   planning_scene_monitor::LockedPlanningSceneRO ps(context_->planning_scene_monitor_);
   try
   {
     planning_interface::MotionPlanResponse mp_res;
-    context_->planning_pipeline_->generatePlan(ps, req->motion_plan_request, mp_res);
+    planning_pipeline->generatePlan(ps, req->motion_plan_request, mp_res);
     mp_res.getMessage(res->motion_plan_response);
   }
   catch (std::exception& ex)

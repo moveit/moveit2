@@ -57,7 +57,12 @@ except:
 
 
 class PlanningSceneInterface(object):
-    """ Simple interface to making updates to a planning scene """
+    """
+    Python interface for a C++ PlanningSceneInterface.
+    Uses both C++ wrapped methods and scene manipulation topics
+    to manipulate the PlanningScene managed by the PlanningSceneMonitor.
+    See wrap_python_planning_scene_interface.cpp for the wrapped methods.
+    """
 
     def __init__(self, ns="", synchronous=False, service_timeout=5.0):
         """ Create a planning scene interface; it uses both C++ wrapped methods and scene manipulation topics. """
@@ -88,31 +93,27 @@ class PlanningSceneInterface(object):
             else:
                 self._pub_co.publish(collision_object)
 
+    def add_object(self, collision_object):
+        """ Add an object to the planning scene """
+        self.__submit(collision_object, attach=False)
+
     def add_sphere(self, name, pose, radius=1):
-        """
-        Add a sphere to the planning scene
-        """
+        """ Add a sphere to the planning scene """
         co = self.__make_sphere(name, pose, radius)
         self.__submit(co, attach=False)
 
     def add_cylinder(self, name, pose, height, radius):
-        """
-        Add a cylinder to the planning scene
-        """
+        """ Add a cylinder to the planning scene """
         co = self.__make_cylinder(name, pose, height, radius)
         self.__submit(co, attach=False)
 
     def add_mesh(self, name, pose, filename, size=(1, 1, 1)):
-        """
-        Add a mesh to the planning scene
-        """
+        """ Add a mesh to the planning scene """
         co = self.__make_mesh(name, pose, filename, size)
         self.__submit(co, attach=False)
 
     def add_box(self, name, pose, size=(1, 1, 1)):
-        """
-        Add a box to the planning scene
-        """
+        """ Add a box to the planning scene """
         co = self.__make_box(name, pose, size)
         self.__submit(co, attach=False)
 
@@ -128,6 +129,10 @@ class PlanningSceneInterface(object):
         co.planes = [p]
         co.plane_poses = [pose.pose]
         self.__submit(co, attach=False)
+
+    def attach_object(self, attached_collision_object):
+        """ Attach an object in the planning scene """
+        self.__submit(attached_collision_object, attach=True)
 
     def attach_mesh(
         self, link, name, pose=None, filename="", size=(1, 1, 1), touch_links=[]
@@ -156,6 +161,11 @@ class PlanningSceneInterface(object):
             aco.touch_links = [link]
         self.__submit(aco, attach=True)
 
+    def clear(self):
+        """ Remove all objects from the planning scene """
+        self.remove_attached_object()
+        self.remove_world_object()
+
     def remove_world_object(self, name=None):
         """
         Remove an object from planning scene, or all if no name is provided
@@ -166,13 +176,18 @@ class PlanningSceneInterface(object):
             co.id = name
         self.__submit(co, attach=False)
 
-    def remove_attached_object(self, link, name=None):
+    def remove_attached_object(self, link=None, name=None):
         """
-        Remove an attached object from planning scene, or all objects attached to this link if no name is provided
+        Remove an attached object from the robot, or all objects attached to the link if no name is provided,
+        or all attached objects in the scene if neither link nor name are provided.
+
+        Removed attached objects remain in the scene as world objects.
+        Call remove_world_object afterwards to remove them from the scene.
         """
         aco = AttachedCollisionObject()
         aco.object.operation = CollisionObject.REMOVE
-        aco.link_name = link
+        if link is not None:
+            aco.link_name = link
         if name is not None:
             aco.object.id = name
         self.__submit(aco, attach=True)
@@ -230,10 +245,18 @@ class PlanningSceneInterface(object):
             aobjs[key] = msg
         return aobjs
 
+    def apply_planning_scene(self, planning_scene_message):
+        """
+        Applies the planning scene message.
+        """
+        return self._psi.apply_planning_scene(
+            conversions.msg_to_string(planning_scene_message)
+        )
+
     @staticmethod
     def __make_existing(name):
         """
-        Create an empty Collision Object, used when the object already exists
+        Create an empty Collision Object. Used when the object already exists
         """
         co = CollisionObject()
         co.id = name

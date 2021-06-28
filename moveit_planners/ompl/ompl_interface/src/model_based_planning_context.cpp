@@ -55,15 +55,8 @@
 #include <ompl/tools/config/SelfConfig.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
 #include <ompl/datastructures/PDF.h>
-// TODO: remove when ROS Melodic and older are no longer supported
-#if OMPL_VERSION_VALUE < 1005000
-#include <ompl/base/PlannerTerminationCondition.h>
-#else
-// IterationTerminationCondition was moved to a separate file and
-// CostConvergenceTerminationCondition was added in OMPL 1.5.0.
 #include <ompl/base/terminationconditions/IterationTerminationCondition.h>
 #include <ompl/base/terminationconditions/CostConvergenceTerminationCondition.h>
-#endif
 
 #include "ompl/base/objectives/PathLengthOptimizationObjective.h"
 #include "ompl/base/objectives/MechanicalWorkOptimizationObjective.h"
@@ -974,7 +967,7 @@ bool ompl_interface::ModelBasedPlanningContext::loadConstraintApproximations(con
     constraints_library_->loadConstraintApproximations(constraint_path);
     std::stringstream ss;
     constraints_library_->printConstraintApproximations(ss);
-    RCLCPP_INFO(LOGGER, ss.str());
+    RCLCPP_INFO_STREAM(LOGGER, ss.str());
     return true;
   }
   return false;

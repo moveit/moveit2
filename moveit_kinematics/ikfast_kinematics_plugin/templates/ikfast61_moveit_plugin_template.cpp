@@ -48,24 +48,6 @@
 #include <tf2_kdl/tf2_kdl.h>
 #include <tf2_eigen/tf2_eigen.h>
 
-// TODO(JafarAbdi): Copied from eigen_conversions/eigen_kdl
-namespace tf
-{
-template <typename T>
-void transformEigenToKDLImpl(const T& e, KDL::Frame& k)
-{
-  for (unsigned int i = 0; i < 3; ++i)
-    k.p[i] = e(i, 3);
-  for (unsigned int i = 0; i < 9; ++i)
-    k.M.data[i] = e(i / 3, i % 3);
-}
-
-void transformEigenToKDL(const Eigen::Isometry3d& e, KDL::Frame& k)
-{
-  transformEigenToKDLImpl(e, k);
-}
-}  // namespace tf
-
 using namespace moveit::core;
 
 // Need a floating point tolerance when checking joint limits, in case the joint starts at limit
@@ -1409,7 +1391,7 @@ void IKFastKinematicsPlugin::transformToChainFrame(const geometry_msgs::msg::Pos
     if (base_transform_required_)
       ik_eigen_pose = chain_base_to_group_base_ * ik_eigen_pose;
 
-    tf::transformEigenToKDL(ik_eigen_pose, ik_pose_chain);
+    tf2::fromMsg(tf2::toMsg(ik_eigen_pose), ik_pose_chain);
   }
   else
   {

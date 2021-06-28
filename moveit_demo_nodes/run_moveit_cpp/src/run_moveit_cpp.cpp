@@ -58,12 +58,12 @@ public:
   void run()
   {
     RCLCPP_INFO(LOGGER, "Initialize MoveItCpp");
-    moveit_cpp_ = std::make_shared<moveit::planning_interface::MoveItCpp>(node_);
+    moveit_cpp_ = std::make_shared<moveit_cpp::MoveItCpp>(node_);
     moveit_cpp_->getPlanningSceneMonitor()->providePlanningSceneService();  // let RViz display query PlanningScene
     moveit_cpp_->getPlanningSceneMonitor()->setPlanningScenePublishingFrequency(100);
 
     RCLCPP_INFO(LOGGER, "Initialize PlanningComponent");
-    moveit::planning_interface::PlanningComponent arm("panda_arm", moveit_cpp_);
+    moveit_cpp::PlanningComponent arm("panda_arm", moveit_cpp_);
 
     // A little delay before running the plan
     rclcpp::sleep_for(std::chrono::seconds(3));
@@ -109,7 +109,7 @@ public:
 private:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_publisher_;
-  moveit::planning_interface::MoveItCppPtr moveit_cpp_;
+  moveit_cpp::MoveItCppPtr moveit_cpp_;
 };
 
 int main(int argc, char** argv)
