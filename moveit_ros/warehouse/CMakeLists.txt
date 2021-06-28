@@ -16,12 +16,11 @@ find_package(warehouse_ros REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_ros REQUIRED)
-find_package(OpenSSL)
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
 
-include_directories(warehouse/include ${OPENSSL_INCLUDE_DIR})
+include_directories(warehouse/include)
 
 add_subdirectory(warehouse)
 
