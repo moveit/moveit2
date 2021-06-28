@@ -34,9 +34,13 @@
 
 /* Author: Ioan Sucan */
 
+#include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/move_group/move_group_capability.h>
 #include <moveit/robot_state/conversions.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+#include <sstream>
+#include <string>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_capabilities_base.move_group_capability");
 
@@ -201,4 +205,30 @@ bool move_group::MoveGroupCapability::performTransform(geometry_msgs::msg::PoseS
     return false;
   }
   return true;
+}
+
+planning_pipeline::PlanningPipelinePtr
+move_group::MoveGroupCapability::resolvePlanningPipeline(const std::string& pipeline_id) const
+{
+  if (pipeline_id.empty())
+  {
+    // Without specified planning pipeline we use the default
+    return context_->planning_pipeline_;
+  }
+  else
+  {
+    // Attempt to get the planning pipeline for the specified identifier
+    try
+    {
+      auto pipeline = context_->moveit_cpp_->getPlanningPipelines().at(pipeline_id);
+      RCLCPP_INFO(LOGGER, "Using planning pipeline '%s'", pipeline_id.c_str());
+      return pipeline;
+    }
+    catch (const std::out_of_range&)
+    {
+      RCLCPP_WARN(LOGGER, "Couldn't find requested planning pipeline '%s'", pipeline_id.c_str());
+    }
+  }
+
+  return planning_pipeline::PlanningPipelinePtr();
 }

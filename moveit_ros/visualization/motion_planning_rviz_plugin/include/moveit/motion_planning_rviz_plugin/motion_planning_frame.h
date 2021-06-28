@@ -76,9 +76,9 @@ class MotionPlanningUI;
 
 namespace moveit_warehouse
 {
-MOVEIT_CLASS_FORWARD(PlanningSceneStorage)  // Defines PlanningSceneStoragePtr, ConstPtr, WeakPtr... etc
-MOVEIT_CLASS_FORWARD(ConstraintsStorage)    // Defines ConstraintsStoragePtr, ConstPtr, WeakPtr... etc
-MOVEIT_CLASS_FORWARD(RobotStateStorage)     // Defines RobotStateStoragePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(PlanningSceneStorage);  // Defines PlanningSceneStoragePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(ConstraintsStorage);    // Defines ConstraintsStoragePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(RobotStateStorage);     // Defines RobotStateStoragePtr, ConstPtr, WeakPtr... etc
 }  // namespace moveit_warehouse
 
 namespace moveit_rviz_plugin
@@ -142,6 +142,8 @@ protected:
   typedef std::map<std::string, moveit_msgs::msg::RobotState> RobotStateMap;
   typedef std::pair<std::string, moveit_msgs::msg::RobotState> RobotStatePair;
   RobotStateMap robot_states_;
+  std::string default_planning_pipeline_;
+  std::vector<moveit_msgs::msg::PlannerInterfaceDescription> planner_descriptions_;
 
 Q_SIGNALS:
   void planningFinished();
@@ -151,6 +153,7 @@ private Q_SLOTS:
 
   // Context tab
   void databaseConnectButtonClicked();
+  void planningPipelineIndexChanged(int index);
   void planningAlgorithmIndexChanged(int index);
   void resetDbButtonClicked();
   void approximateIKChanged(int state);
@@ -227,7 +230,8 @@ private:
   void computeDatabaseConnectButtonClicked();
   void computeDatabaseConnectButtonClickedHelper(int mode);
   void computeResetDbButtonClicked(const std::string& db);
-  void populatePlannersList(const moveit_msgs::msg::PlannerInterfaceDescription& desc);
+  void populatePlannersList(const std::vector<moveit_msgs::msg::PlannerInterfaceDescription>& desc);
+  void populatePlannerDescription(const moveit_msgs::msg::PlannerInterfaceDescription& desc);
 
   // Planning tab
   void computePlanButtonClicked();

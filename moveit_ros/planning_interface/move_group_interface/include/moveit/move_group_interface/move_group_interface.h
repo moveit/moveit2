@@ -94,7 +94,7 @@ public:
   }
 };
 
-MOVEIT_CLASS_FORWARD(MoveGroupInterface)  // Defines MoveGroupInterfacePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(MoveGroupInterface);  // Defines MoveGroupInterfacePtr, ConstPtr, WeakPtr... etc
 
 /** \class MoveGroupInterface move_group_interface.h moveit/planning_interface/move_group_interface.h
 
@@ -125,7 +125,7 @@ public:
     moveit::core::RobotModelConstPtr robot_model_;
   };
 
-  MOVEIT_STRUCT_FORWARD(Plan)
+  MOVEIT_STRUCT_FORWARD(Plan);
 
   /// The representation of a motion plan (as ROS messasges)
   struct Plan
@@ -215,7 +215,10 @@ public:
    * of DOF. */
   unsigned int getVariableCount() const;
 
-  /** \brief Get the description of the planning plugin loaded by the action server */
+  /** \brief Get the descriptions of all planning plugins loaded by the action server */
+  bool getInterfaceDescriptions(std::vector<moveit_msgs::msg::PlannerInterfaceDescription>& desc) const;
+
+  /** \brief Get the description of the default planning plugin loaded by the action server */
   bool getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc) const;
 
   /** \brief Get the planner parameters for given group and planner_id */
@@ -226,7 +229,15 @@ public:
   void setPlannerParams(const std::string& planner_id, const std::string& group,
                         const std::map<std::string, std::string>& params, bool bReplace = false);
 
-  /** \brief Get the default planner for a given group (or global default) */
+  std::string getDefaultPlanningPipelineId() const;
+
+  /** \brief Specify a planning pipeline to be used for further planning */
+  void setPlanningPipelineId(const std::string& pipeline_id);
+
+  /** \brief Get the current planning_pipeline_id */
+  const std::string& getPlanningPipelineId() const;
+
+  /** \brief Get the default planner of the current planning pipeline for the given group (or the pipeline's default) */
   std::string getDefaultPlannerId(const std::string& group = "") const;
 
   /** \brief Specify a planner to be used for further planning */

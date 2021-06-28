@@ -36,6 +36,7 @@
 #include <pluginlib/class_loader.hpp>
 #include <memory>
 
+static const std::string LOGNAME = "collision_detection";
 namespace collision_detection
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_plugin_loader");
@@ -110,7 +111,10 @@ void CollisionPluginLoader::setupScene(const rclcpp::Node::SharedPtr& node,
                                        const planning_scene::PlanningScenePtr& scene)
 {
   if (!scene)
+  {
+    RCLCPP_WARN(LOGGER, "Cannot setup scene, PlanningScenePtr is null.");
     return;
+  }
 
   std::string param_name;
   std::string collision_detector_name;

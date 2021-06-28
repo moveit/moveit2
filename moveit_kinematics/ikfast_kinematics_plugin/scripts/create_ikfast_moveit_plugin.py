@@ -301,7 +301,7 @@ def update_ikfast_package(args):
 
     # Create plugin definition .xml file
     ik_library_name = args.namespace + "_moveit_ikfast_plugin"
-    plugin_def = etree.Element("library", path="lib/lib" + ik_library_name)
+    plugin_def = etree.Element("library", path=ik_library_name)
     setattr(args, "plugin_name", args.namespace + "/IKFastKinematicsPlugin")
     cl = etree.SubElement(
         plugin_def,

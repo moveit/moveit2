@@ -37,22 +37,21 @@
 
 #pragma once
 
+#include <rclcpp/rclcpp.hpp>
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/robot_state/robot_state.h>
 #include <geometry_msgs/msg/pose_stamped.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit_msgs/msg/move_it_error_codes.h>
 
-namespace moveit
+namespace moveit_cpp
 {
-namespace planning_interface
-{
-MOVEIT_CLASS_FORWARD(PlanningComponent)  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(PlanningComponent);  // Defines PlanningComponentPtr, ConstPtr, WeakPtr... etc
 
 class PlanningComponent
 {
 public:
-  MOVEIT_STRUCT_FORWARD(PlanSolution)
+  MOVEIT_STRUCT_FORWARD(PlanSolution);
 
   class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
   {
@@ -223,5 +222,13 @@ private:
   /** \brief Reset all member variables */
   void clearContents();
 };
+}  // namespace moveit_cpp
+
+namespace moveit
+{
+namespace planning_interface
+{
+using PlanningComponent [[deprecated("use moveit_cpp")]] = moveit_cpp::PlanningComponent;
+[[deprecated("use moveit_cpp")]] MOVEIT_DECLARE_PTR(PlanningComponent, moveit_cpp::PlanningComponent);
 }  // namespace planning_interface
 }  // namespace moveit

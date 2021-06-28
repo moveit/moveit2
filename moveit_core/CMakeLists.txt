@@ -49,6 +49,8 @@ find_package(trajectory_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(common_interfaces REQUIRED)
 find_package(pluginlib REQUIRED)
+# TODO: Port python bindings
+# find_package(pybind11 REQUIRED)
 
 # Set target file path for version.h
 set(VERSION_FILE_PATH ${CMAKE_BINARY_DIR}/include)
@@ -77,6 +79,8 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     planning_request_adapter/include
     planning_scene/include
     profiler/include
+    # TODO: Port python bindings
+    # python/tools/include
     sensor_manager/include
     trajectory_processing/include
     utils/include
@@ -99,6 +103,8 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_constraint_samplers
     moveit_planning_request_adapter
     moveit_profiler
+    # TODO: Port python bindings
+    # moveit_python_tools
     moveit_trajectory_processing
     moveit_distance_field
     moveit_collision_distance_field
@@ -183,6 +189,34 @@ else()
 install(FILES collision_detection_bullet/empty_description.xml DESTINATION share/${PROJECT_NAME} RENAME collision_detector_bullet_description.xml)
 endif()
 
+# TODO: Port python bindings
+# add_subdirectory(python)
+# set(pymoveit_libs
+#   moveit_collision_detection
+#   moveit_kinematic_constraints
+#   moveit_planning_scene
+#   moveit_python_tools
+#   moveit_robot_model
+#   moveit_robot_state
+#   moveit_transforms
+# )
+#
+# pybind_add_module(pymoveit_core
+#     python/pymoveit_core.cpp
+#     collision_detection/src/pycollision_detection.cpp
+#     robot_model/src/pyrobot_model.cpp
+#     robot_state/src/pyrobot_state.cpp
+#     transforms/src/pytransforms.cpp
+#     planning_scene/src/pyplanning_scene.cpp
+#     kinematic_constraints/src/pykinematic_constraint.cpp
+# )
+# target_include_directories(pymoveit_core SYSTEM PRIVATE ${catkin_INCLUDE_DIRS})
+# target_link_libraries(pymoveit_core PRIVATE ${pymoveit_libs} ${catkin_LIBRARIES})
+#
+# #catkin_lint: ignore_once undefined_target (pymoveit_core is defined by pybind_add_module)
+# install(TARGETS pymoveit_core LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
+
+
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
   EXPORT export_${PROJECT_NAME}
@@ -202,6 +236,7 @@ if(BUILD_TESTING)
   set(ament_cmake_copyright_FOUND TRUE)
   set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
+  set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
   set(ament_cmake_lint_cmake_FOUND TRUE)
 
