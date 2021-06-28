@@ -120,7 +120,8 @@ bool DepthImageOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   mesh_filter_->setShadowThreshold(shadow_threshold_);
   mesh_filter_->setPaddingOffset(padding_offset_);
   mesh_filter_->setPaddingScale(padding_scale_);
-  mesh_filter_->setTransformCallback(boost::bind(&DepthImageOctomapUpdater::getShapeTransform, this, _1, _2));
+  mesh_filter_->setTransformCallback(boost::bind(&DepthImageOctomapUpdater::getShapeTransform, this,
+                                                 boost::placeholders::_1, boost::placeholders::_2));
 
   // init rclcpp time default value
   last_update_time_ = node_->now();
@@ -140,9 +141,11 @@ void DepthImageOctomapUpdater::start()
 
   pub_filtered_label_image_ = filtered_label_transport_->advertiseCamera("filtered_label", 1);
 
-  sub_depth_image_ = image_transport::create_camera_subscription(
-      node_.get(), image_topic_, boost::bind(&DepthImageOctomapUpdater::depthImageCallback, this, _1, _2), "raw",
-      custom_qos);
+  sub_depth_image_ =
+      image_transport::create_camera_subscription(node_.get(), image_topic_,
+                                                  boost::bind(&DepthImageOctomapUpdater::depthImageCallback, this,
+                                                              boost::placeholders::_1, boost::placeholders::_2),
+                                                  "raw", custom_qos);
 }
 
 void DepthImageOctomapUpdater::stop()
