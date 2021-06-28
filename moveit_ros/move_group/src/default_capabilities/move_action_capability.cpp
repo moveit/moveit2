@@ -36,6 +36,7 @@
 
 #include "move_action_capability.h"
 
+#include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/plan_execution/plan_execution.h>
 #include <moveit/plan_execution/plan_with_sensing.h>
@@ -60,7 +61,7 @@ void MoveGroupMoveAction::initialize()
   using std::placeholders::_1;
   using std::placeholders::_2;
 
-  auto node = context_->node_;
+  auto node = context_->moveit_cpp_->getNode();
   execute_action_server_ = rclcpp_action::create_server<MGAction>(
       node, MOVE_ACTION,
       [](const rclcpp_action::GoalUUID& /*unused*/, std::shared_ptr<const MGAction::Goal> /*unused*/) {
@@ -194,9 +195,18 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
     return;
   }
 
+  // Select planning_pipeline to handle request
+  const planning_pipeline::PlanningPipelinePtr planning_pipeline =
+      resolvePlanningPipeline(goal->get_goal()->request.pipeline_id);
+  if (!planning_pipeline)
+  {
+    action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    return;
+  }
+
   try
   {
-    context_->planning_pipeline_->generatePlan(the_scene, goal->get_goal()->request, res);
+    planning_pipeline->generatePlan(the_scene, goal->get_goal()->request, res);
   }
   catch (std::exception& ex)
   {
@@ -214,12 +224,21 @@ bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::Mo
 {
   setMoveState(PLANNING, nullptr);
 
-  planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor_);
   bool solved = false;
   planning_interface::MotionPlanResponse res;
+
+  // Select planning_pipeline to handle request
+  const planning_pipeline::PlanningPipelinePtr planning_pipeline = resolvePlanningPipeline(req.pipeline_id);
+  if (!planning_pipeline)
+  {
+    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    return solved;
+  }
+
+  planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor_);
   try
   {
-    solved = context_->planning_pipeline_->generatePlan(plan.planning_scene_, req, res);
+    solved = planning_pipeline->generatePlan(plan.planning_scene_, req, res);
   }
   catch (std::exception& ex)
   {

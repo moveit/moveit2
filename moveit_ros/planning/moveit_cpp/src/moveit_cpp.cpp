@@ -36,17 +36,10 @@
 
 #include <stdexcept>
 #include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
-#include <moveit/common_planning_interface_objects/common_objects.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
-#include <tf2/utils.h>
-#include <tf2_ros/transform_listener.h>
-#include <rclcpp/rclcpp.hpp>
 
-namespace moveit
-{
-namespace planning_interface
+namespace moveit_cpp
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning_interface.moveit_cpp");
 constexpr char PLANNING_PLUGIN_PARAM[] = "planning_plugin";
@@ -111,10 +104,15 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opti
   {
     // Start state and scene monitors
     RCLCPP_INFO(LOGGER, "Listening to '%s' for joint states", options.joint_state_topic.c_str());
+    // Subscribe to JointState sensor messages
     planning_scene_monitor_->startStateMonitor(options.joint_state_topic, options.attached_collision_object_topic);
+    // Publish planning scene updates to remote monitors like RViz
     planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
-                                                          options.publish_planning_scene_topic);
-    planning_scene_monitor_->startSceneMonitor(options.monitored_planning_scene_topic);
+                                                          options.monitored_planning_scene_topic);
+    // Monitor and apply planning scene updates from remote publishers like the PlanningSceneInterface
+    planning_scene_monitor_->startSceneMonitor(options.publish_planning_scene_topic);
+    // Monitor requests for changes in the collision environment
+    planning_scene_monitor_->startWorldGeometryMonitor();
   }
   else
   {
@@ -154,6 +152,7 @@ bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
       RCLCPP_ERROR(LOGGER, "Failed to initialize planning pipeline '%s'.", planning_pipeline_name.c_str());
       continue;
     }
+
     planning_pipelines_[planning_pipeline_name] = pipeline;
   }
 
@@ -310,5 +309,4 @@ void MoveItCpp::clearContents()
   robot_model_.reset();
   planning_pipelines_.clear();
 }
-}  // namespace planning_interface
-}  // namespace moveit
+}  // namespace moveit_cpp

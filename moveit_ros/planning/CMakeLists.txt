@@ -36,6 +36,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     trajectory_execution_manager/include
     plan_execution/include
     collision_plugin_loader/include
+    moveit_cpp/include
 )
 
 set(THIS_PACKAGE_LIBRARIES
@@ -49,6 +50,7 @@ set(THIS_PACKAGE_LIBRARIES
   moveit_planning_scene_monitor
   moveit_collision_plugin_loader
   moveit_default_planning_request_adapter_plugins
+  moveit_cpp
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -84,6 +86,7 @@ add_subdirectory(planning_scene_monitor)
 add_subdirectory(planning_components_tools)
 add_subdirectory(trajectory_execution_manager)
 add_subdirectory(plan_execution)
+add_subdirectory(moveit_cpp)
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}

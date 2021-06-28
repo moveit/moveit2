@@ -69,7 +69,7 @@ public:
    * this topic (visualization_msgs::MarkerArray) */
   static const std::string MOTION_CONTACTS_TOPIC;
 
-  /** \brief Given a robot model (\e model), a node handle (\e nh), initialize the planning pipeline.
+  /** \brief Given a robot model (\e model), a node handle (\e pipeline_nh), initialize the planning pipeline.
       \param model The robot model for which this pipeline is initialized.
       \param node The ROS node that should be used for reading parameters needed for configuration
       \param the parameter namespace where the planner configurations are stored
@@ -83,7 +83,7 @@ public:
                    const std::string& planning_plugin_param_name = "planning_plugin",
                    const std::string& adapter_plugins_param_name = "request_adapters");
 
-  /** \brief Given a robot model (\e model), a node handle (\e nh), initialize the planning pipeline.
+  /** \brief Given a robot model (\e model), a node handle (\e pipeline_nh), initialize the planning pipeline.
       \param model The robot model for which this pipeline is initialized.
       \param node The ROS node that should be used for reading parameters needed for configuration
       \param the parameter namespace where the planner configurations are stored
@@ -200,5 +200,5 @@ private:
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr contacts_publisher_;
 };
 
-MOVEIT_CLASS_FORWARD(PlanningPipeline)  // Defines PlanningPipelinePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(PlanningPipeline);  // Defines PlanningPipelinePtr, ConstPtr, WeakPtr... etc
 }  // namespace planning_pipeline

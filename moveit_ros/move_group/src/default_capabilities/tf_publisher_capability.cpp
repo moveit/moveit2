@@ -35,6 +35,7 @@
 /* Author: Jonas Tietz */
 
 #include "tf_publisher_capability.h"
+#include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/utils/message_checks.h>
 #include <moveit/move_group/capability_names.h>
 #include <tf2_ros/transform_broadcaster.h>
@@ -76,14 +77,14 @@ void publishSubframes(tf2_ros::TransformBroadcaster& broadcaster, const moveit::
 
 void TfPublisher::publishPlanningSceneFrames()
 {
-  tf2_ros::TransformBroadcaster broadcaster(context_->node_);
+  tf2_ros::TransformBroadcaster broadcaster(context_->moveit_cpp_->getNode());
   geometry_msgs::msg::TransformStamped transform;
   rclcpp::Rate rate(rate_);
 
   while (keep_running_)
   {
     {
-      rclcpp::Time stamp = context_->node_->get_clock()->now();
+      rclcpp::Time stamp = context_->moveit_cpp_->getNode()->get_clock()->now();
       planning_scene_monitor::LockedPlanningSceneRO locked_planning_scene(context_->planning_scene_monitor_);
       collision_detection::WorldConstPtr world = locked_planning_scene->getWorld();
       std::string planning_frame = locked_planning_scene->getPlanningFrame();
@@ -124,9 +125,9 @@ void TfPublisher::publishPlanningSceneFrames()
 
 void TfPublisher::initialize()
 {
-  std::string prefix = context_->node_->get_name();
-  context_->node_->get_parameter_or("planning_scene_frame_publishing_rate", rate_, 10);
-  context_->node_->get_parameter_or("planning_scene_tf_prefix", prefix_, prefix);
+  std::string prefix = context_->moveit_cpp_->getNode()->get_name();
+  context_->moveit_cpp_->getNode()->get_parameter_or("planning_scene_frame_publishing_rate", rate_, 10);
+  context_->moveit_cpp_->getNode()->get_parameter_or("planning_scene_tf_prefix", prefix_, prefix);
   if (!prefix_.empty())
     prefix_ += "/";
 

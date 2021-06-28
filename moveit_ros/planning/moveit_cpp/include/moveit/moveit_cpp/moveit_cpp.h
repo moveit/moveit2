@@ -39,6 +39,7 @@
 
 #pragma once
 
+#include <rclcpp/rclcpp.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
@@ -46,11 +47,9 @@
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 
-namespace moveit
+namespace moveit_cpp
 {
-namespace planning_interface
-{
-MOVEIT_CLASS_FORWARD(MoveItCpp)  // Defines MoveItCppPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(MoveItCpp);  // Defines MoveItCppPtr, ConstPtr, WeakPtr... etc
 
 class MoveItCpp
 {
@@ -190,5 +189,13 @@ private:
   /** \brief Initialize and setup the planning pipelines */
   bool loadPlanningPipelines(const PlanningPipelineOptions& options);
 };
+}  // namespace moveit_cpp
+
+namespace moveit
+{
+namespace planning_interface
+{
+using MoveItCpp [[deprecated("use moveit_cpp")]] = moveit_cpp::MoveItCpp;
+[[deprecated("use moveit_cpp")]] MOVEIT_DECLARE_PTR(MoveItCpp, moveit_cpp::MoveItCpp);
 }  // namespace planning_interface
 }  // namespace moveit

@@ -64,7 +64,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualizatio
 // Base class contructor
 // ******************************************************************************************
 PlanningSceneDisplay::PlanningSceneDisplay(bool listen_to_planning_scene, bool show_scene_robot)
-  : Display(), model_is_loading_(false), planning_scene_needs_render_(true), current_scene_time_(0.0f)
+  : Display(), planning_scene_needs_render_(true), current_scene_time_(0.0f)
 {
   move_group_ns_property_ = new rviz_common::properties::StringProperty("Move Group Namespace", "",
                                                                         "The name of the ROS namespace in "
@@ -216,12 +216,12 @@ void PlanningSceneDisplay::onInitialize()
 
 void PlanningSceneDisplay::reset()
 {
-  planning_scene_render_.reset();
   if (planning_scene_robot_)
     planning_scene_robot_->clear();
-
-  addBackgroundJob(boost::bind(&PlanningSceneDisplay::loadRobotModel, this), "loadRobotModel");
   Display::reset();
+
+  if (isEnabled())
+    addBackgroundJob(boost::bind(&PlanningSceneDisplay::loadRobotModel, this), "loadRobotModel");
 
   if (planning_scene_robot_)
   {
@@ -533,7 +533,6 @@ void PlanningSceneDisplay::loadRobotModel()
 {
   // wait for other robot loadRobotModel() calls to complete;
   boost::mutex::scoped_lock _(robot_model_loading_lock_);
-  model_is_loading_ = true;
 
   // we need to make sure the clearing of the robot model is in the main thread,
   // so that rendering operations do not have data removed from underneath,
@@ -549,15 +548,14 @@ void PlanningSceneDisplay::loadRobotModel()
     planning_scene_monitor_->addUpdateCallback(
         boost::bind(&PlanningSceneDisplay::sceneMonitorReceivedUpdate, this, boost::placeholders::_1));
     addMainLoopJob(boost::bind(&PlanningSceneDisplay::onRobotModelLoaded, this));
-    setStatus(rviz_common::properties::StatusProperty::Ok, "PlanningScene", "Planning Scene Loaded Successfully");
     waitForAllMainLoopJobs();
   }
   else
   {
-    setStatus(rviz_common::properties::StatusProperty::Error, "PlanningScene", "No Planning Scene Loaded");
+    addMainLoopJob([this]() {
+      setStatus(rviz_common::properties::StatusProperty::Error, "PlanningScene", "No Planning Scene Loaded");
+    });
   }
-
-  model_is_loading_ = false;
 }
 
 // This should always run in the main GUI thread!
@@ -579,6 +577,8 @@ void PlanningSceneDisplay::onRobotModelLoaded()
   bool old_state = scene_name_property_->blockSignals(true);
   scene_name_property_->setStdString(ps->getName());
   scene_name_property_->blockSignals(old_state);
+
+  setStatus(rviz_common::properties::StatusProperty::Ok, "PlanningScene", "Planning Scene Loaded Successfully");
 }
 
 void PlanningSceneDisplay::onNewPlanningSceneState()
@@ -658,9 +658,9 @@ void PlanningSceneDisplay::update(float wall_dt, float ros_dt)
 void PlanningSceneDisplay::updateInternal(float wall_dt, float /*ros_dt*/)
 {
   current_scene_time_ += wall_dt;
-  if ((current_scene_time_ > scene_display_time_property_->getFloat() && planning_scene_render_ &&
-       robot_state_needs_render_) ||
-      planning_scene_needs_render_)
+  if (planning_scene_render_ &&
+      ((current_scene_time_ > scene_display_time_property_->getFloat() && robot_state_needs_render_) ||
+       planning_scene_needs_render_))
   {
     renderPlanningScene();
     calculateOffsetPosition();

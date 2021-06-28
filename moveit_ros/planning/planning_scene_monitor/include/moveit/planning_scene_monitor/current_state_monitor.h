@@ -90,26 +90,58 @@ public:
   /** @brief Query whether we have joint state information for all DOFs in the kinematic model
    *  @return False if we have no joint state information for one or more of the joints
    */
-  bool haveCompleteState() const;
+  inline bool haveCompleteState() const
+  {
+    return haveCompleteStateHelper(rclcpp::Time(0, 0, RCL_ROS_TIME), nullptr);
+  }
 
   /** @brief Query whether we have joint state information for all DOFs in the kinematic model
+   *  @param oldest_allowed_update_time All joint information must be from this time or more current
+   *  @return False if we have no joint state information for one of the joints or if our state
+   *  information is more than \e age old*/
+  inline bool haveCompleteState(const rclcpp::Time& oldest_allowed_update_time) const
+  {
+    return haveCompleteStateHelper(oldest_allowed_update_time, nullptr);
+  }
+
+  /** @brief Query whether we have joint state information for all DOFs in the kinematic model
+   *  @param age Joint information must be at most this old
    *  @return False if we have no joint state information for one of the joints or if our state
    *  information is more than \e age old
    */
-  bool haveCompleteState(const rclcpp::Duration& age) const;
+  inline bool haveCompleteState(const rclcpp::Duration& age) const
+  {
+    return haveCompleteStateHelper(node_->now() - age, nullptr);
+  }
 
   /** @brief Query whether we have joint state information for all DOFs in the kinematic model
    *  @param missing_joints Returns the list of joints that are missing
    *  @return False if we have no joint state information for one or more of the joints
    */
-  bool haveCompleteState(std::vector<std::string>& missing_joints) const;
+  inline bool haveCompleteState(std::vector<std::string>& missing_joints) const
+  {
+    return haveCompleteStateHelper(rclcpp::Time(0, 0, RCL_ROS_TIME), &missing_joints);
+  }
 
   /** @brief Query whether we have joint state information for all DOFs in the kinematic model
-   *  @param age The max allowed age of the joint state information
-   *  @param missing_states Returns the list of joints that are missing
+   *  @param oldest_allowed_update_time All joint information must be from this time or more current
+   *  @param missing_joints Returns the list of joints that are missing
    *  @return False if we have no joint state information for one of the joints or if our state
    *  information is more than \e age old*/
-  bool haveCompleteState(const rclcpp::Duration& age, std::vector<std::string>& missing_states) const;
+  inline bool haveCompleteState(const rclcpp::Time& oldest_allowed_update_time,
+                                std::vector<std::string>& missing_joints) const
+  {
+    return haveCompleteStateHelper(oldest_allowed_update_time, &missing_joints);
+  }
+
+  /** @brief Query whether we have joint state information for all DOFs in the kinematic model
+   *  @return False if we have no joint state information for one of the joints or if our state
+   *  information is more than \e age old
+   */
+  inline bool haveCompleteState(const rclcpp::Duration& age, std::vector<std::string>& missing_joints) const
+  {
+    return haveCompleteStateHelper(node_->now() - age, &missing_joints);
+  }
 
   /** @brief Get the current state
    *  @return Returns the current state */
@@ -181,6 +213,9 @@ public:
   }
 
 private:
+  bool haveCompleteStateHelper(const rclcpp::Time& oldest_allowed_update_time,
+                               std::vector<std::string>* missing_joints) const;
+
   void jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
   void tfCallback();
 
@@ -203,5 +238,5 @@ private:
   std::shared_ptr<TFConnection> tf_connection_;
 };
 
-MOVEIT_CLASS_FORWARD(CurrentStateMonitor)  // Defines CurrentStateMonitorPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(CurrentStateMonitor);  // Defines CurrentStateMonitorPtr, ConstPtr, WeakPtr... etc
 }  // namespace planning_scene_monitor

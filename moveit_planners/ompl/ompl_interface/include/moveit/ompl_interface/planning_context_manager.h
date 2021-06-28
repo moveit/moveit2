@@ -267,7 +267,7 @@ protected:
   MultiQueryPlannerAllocator planner_allocator_;
 
 private:
-  MOVEIT_STRUCT_FORWARD(CachedContexts)
+  MOVEIT_STRUCT_FORWARD(CachedContexts);
   CachedContextsPtr cached_contexts_;
 };
 }  // namespace ompl_interface

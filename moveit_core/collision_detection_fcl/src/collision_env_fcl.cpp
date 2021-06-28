@@ -50,6 +50,29 @@ namespace collision_detection
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection_fcl.collision_env_fcl");
 const std::string CollisionDetectorAllocatorFCL::NAME("FCL");
 
+namespace
+{
+// Check whether this FCL version supports the requested computations
+void checkFCLCapabilities(const DistanceRequest& req)
+{
+#if MOVEIT_FCL_VERSION < FCL_VERSION_CHECK(0, 6, 0)
+  static rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+  if (req.enable_nearest_points)
+  {
+    // Known issues:
+    //   https://github.com/flexible-collision-library/fcl/issues/171,
+    //   https://github.com/flexible-collision-library/fcl/pull/288
+    RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 2000,
+                          "You requested a distance check with enable_nearest_points=true, "
+                          "but the FCL version MoveIt was compiled against (%d.%d.%d) "
+                          "is known to return bogus nearest points. Please update your FCL "
+                          "to at least 0.6.0.",
+                          FCL_MAJOR_VERSION, FCL_MINOR_VERSION, FCL_PATCH_VERSION);
+  }
+#endif
+}
+}  // namespace
+
 CollisionEnvFCL::CollisionEnvFCL(const moveit::core::RobotModelConstPtr& model, double padding, double scale)
   : CollisionEnv(model, padding, scale)
 {
@@ -312,6 +335,8 @@ void CollisionEnvFCL::checkRobotCollisionHelper(const CollisionRequest& req, Col
 void CollisionEnvFCL::distanceSelf(const DistanceRequest& req, DistanceResult& res,
                                    const moveit::core::RobotState& state) const
 {
+  checkFCLCapabilities(req);
+
   FCLManager manager;
   allocSelfCollisionBroadPhase(state, manager);
   DistanceData drd(&req, &res);
@@ -322,6 +347,8 @@ void CollisionEnvFCL::distanceSelf(const DistanceRequest& req, DistanceResult& r
 void CollisionEnvFCL::distanceRobot(const DistanceRequest& req, DistanceResult& res,
                                     const moveit::core::RobotState& state) const
 {
+  checkFCLCapabilities(req);
+
   FCLObject fcl_obj;
   constructFCLObjectRobot(state, fcl_obj);
 

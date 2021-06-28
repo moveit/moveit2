@@ -39,41 +39,45 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/macros/class_forward.h>
 
+namespace moveit_cpp
+{
+MOVEIT_CLASS_FORWARD(MoveItCpp);
+}
+
 namespace planning_scene_monitor
 {
-MOVEIT_CLASS_FORWARD(PlanningSceneMonitor)  // Defines PlanningSceneMonitorPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(PlanningSceneMonitor);  // Defines PlanningSceneMonitorPtr, ConstPtr, WeakPtr... etc
 }
 
 namespace planning_pipeline
 {
-MOVEIT_CLASS_FORWARD(PlanningPipeline)  // Defines PlanningPipelinePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(PlanningPipeline);  // Defines PlanningPipelinePtr, ConstPtr, WeakPtr... etc
 }
 
 namespace plan_execution
 {
-MOVEIT_CLASS_FORWARD(PlanExecution)    // Defines PlanExecutionPtr, ConstPtr, WeakPtr... etc
-MOVEIT_CLASS_FORWARD(PlanWithSensing)  // Defines PlanWithSensingPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(PlanExecution);    // Defines PlanExecutionPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(PlanWithSensing);  // Defines PlanWithSensingPtr, ConstPtr, WeakPtr... etc
 }  // namespace plan_execution
 
 namespace trajectory_execution_manager
 {
-MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager)  // Defines TrajectoryExecutionManagerPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager);  // Defines TrajectoryExecutionManagerPtr, ConstPtr, WeakPtr... etc
 }
 
 namespace move_group
 {
-MOVEIT_STRUCT_FORWARD(MoveGroupContext)
+MOVEIT_STRUCT_FORWARD(MoveGroupContext);
 
 struct MoveGroupContext
 {
-  MoveGroupContext(const rclcpp::Node::SharedPtr& node,
-                   const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+  MoveGroupContext(const moveit_cpp::MoveItCppPtr& moveit_cpp, const std::string& default_planning_pipeline,
                    bool allow_trajectory_execution = false, bool debug = false);
   ~MoveGroupContext();
 
   bool status() const;
 
-  rclcpp::Node::SharedPtr node_;
+  moveit_cpp::MoveItCppPtr moveit_cpp_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   trajectory_execution_manager::TrajectoryExecutionManagerPtr trajectory_execution_manager_;
   planning_pipeline::PlanningPipelinePtr planning_pipeline_;
