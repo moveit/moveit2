@@ -45,14 +45,14 @@
 
 namespace shapes
 {
-MOVEIT_CLASS_FORWARD(Shape)  // Defines ShapePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(Shape);  // Defines ShapePtr, ConstPtr, WeakPtr... etc
 }
 
 namespace moveit
 {
 namespace semantic_world
 {
-MOVEIT_CLASS_FORWARD(SemanticWorld)  // Defines SemanticWorldPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(SemanticWorld);  // Defines SemanticWorldPtr, ConstPtr, WeakPtr... etc
 
 /**
  * @brief A (simple) semantic world representation for pick and place and other tasks.

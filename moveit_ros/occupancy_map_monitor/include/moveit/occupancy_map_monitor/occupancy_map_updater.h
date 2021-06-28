@@ -51,7 +51,7 @@ using TransformCacheProvider = boost::function<bool(const std::string&, const rc
 
 class OccupancyMapMonitor;
 
-MOVEIT_CLASS_FORWARD(OccupancyMapUpdater)  // Defines OccupancyMapUpdaterPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(OccupancyMapUpdater);  // Defines OccupancyMapUpdaterPtr, ConstPtr, WeakPtr... etc
 
 /** \brief Base class for classes which update the occupancy map.
  */

@@ -319,10 +319,11 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
             std::stringstream ss;
             for (std::size_t it : index)
               ss << it << " ";
-            RCLCPP_ERROR(LOGGER,
-                         "Computed path is not valid. Invalid states at index locations: [%s] out of "
-                         "%ld. Explanations follow in command line. Contacts are published on %s",
-                         ss.str().c_str(), state_count, contacts_publisher_->get_topic_name());
+
+            RCLCPP_ERROR_STREAM(LOGGER, "Computed path is not valid. Invalid states at index locations: [ "
+                                            << ss.str() << "] out of " << state_count
+                                            << ". Explanations follow in command line. Contacts are published on "
+                                            << contacts_publisher_->get_topic_name());
 
             // call validity checks in verbose mode for the problematic states
             visualization_msgs::msg::MarkerArray arr;

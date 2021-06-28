@@ -52,7 +52,7 @@ enum MoveGroupState
   LOOK
 };
 
-MOVEIT_CLASS_FORWARD(MoveGroupCapability)  // Defines MoveGroupCapabilityPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(MoveGroupCapability);  // Defines MoveGroupCapabilityPtr, ConstPtr, WeakPtr... etc
 
 class MoveGroupCapability
 {
@@ -93,6 +93,8 @@ protected:
   clearRequestStartState(const planning_interface::MotionPlanRequest& request) const;
   moveit_msgs::msg::PlanningScene clearSceneRobotState(const moveit_msgs::msg::PlanningScene& scene) const;
   bool performTransform(geometry_msgs::msg::PoseStamped& pose_msg, const std::string& target_frame) const;
+
+  planning_pipeline::PlanningPipelinePtr resolvePlanningPipeline(const std::string& pipeline_id) const;
 
   std::string capability_name_;
   MoveGroupContextPtr context_;

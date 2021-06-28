@@ -44,7 +44,7 @@
 
 namespace constraint_samplers
 {
-MOVEIT_CLASS_FORWARD(ConstraintSamplerManager)  // Defines ConstraintSamplerManagerPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(ConstraintSamplerManager);  // Defines ConstraintSamplerManagerPtr, ConstPtr, WeakPtr... etc
 
 /**
  * \brief This class assists in the generation of a ConstraintSampler for a

@@ -82,7 +82,6 @@ plan_execution::PlanExecution::PlanExecution(
 
   default_max_replan_attempts_ = 5;
 
-  preempt_requested_ = false;
   new_scene_update_ = false;
 
   // we want to be notified when new information is available
@@ -100,7 +99,7 @@ plan_execution::PlanExecution::~PlanExecution()
 
 void plan_execution::PlanExecution::stop()
 {
-  preempt_requested_ = true;
+  preempt_.request();
 }
 
 std::string plan_execution::PlanExecution::getErrorCodeString(const moveit_msgs::msg::MoveItErrorCodes& error_code)
@@ -162,7 +161,9 @@ void plan_execution::PlanExecution::planAndExecute(ExecutableMotionPlan& plan,
 void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& plan, const Options& opt)
 {
   // perform initial configuration steps & various checks
-  preempt_requested_ = false;
+  preempt_.checkAndClear();  // clear any previous preempt_ request
+
+  bool preempt_requested = false;
 
   // run the actual motion plan & execution
   unsigned int max_replan_attempts =
@@ -190,7 +191,8 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
             opt.plan_callback_(plan) :
             opt.repair_plan_callback_(plan, trajectory_execution_manager_->getCurrentExpectedTrajectoryIndex());
 
-    if (preempt_requested_)
+    preempt_requested = preempt_.checkAndClear();
+    if (preempt_requested)
       break;
 
     // if planning fails in a manner that is not recoverable, we exit the loop,
@@ -219,23 +221,23 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
       if (opt.before_execution_callback_)
         opt.before_execution_callback_();
 
-      if (preempt_requested_)
+      preempt_requested = preempt_.checkAndClear();
+      if (preempt_requested)
         break;
 
       // execute the trajectory, and monitor its execution
-      plan.error_code_ = executeAndMonitor(plan);
+      plan.error_code_ = executeAndMonitor(plan, false);
     }
 
-    // if we are done, then we exit the loop
-    if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
-      break;
+    if (plan.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
+      preempt_requested = true;
 
-    // if execution failed in a manner that we do not consider recoverable, we exit the loop (with failure)
+    // if execution succeeded or failed in a manner that we do not consider recoverable, we exit the loop (with failure)
     if (plan.error_code_.val != moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
       break;
     else
     {
-      // othewrise, we wait (if needed)
+      // otherwise, we wait (if needed)
       if (opt.replan_delay_ > 0.0)
       {
         RCLCPP_INFO(LOGGER, "Waiting for a %lf seconds before attempting a new plan ...", opt.replan_delay_);
@@ -244,9 +246,14 @@ void plan_execution::PlanExecution::planAndExecuteHelper(ExecutableMotionPlan& p
         RCLCPP_INFO(node_->get_logger(), "Done waiting");
       }
     }
-  } while (!preempt_requested_ && max_replan_attempts > replan_attempts);
 
-  if (preempt_requested_)
+    preempt_requested = preempt_.checkAndClear();
+    if (preempt_requested)
+      break;
+
+  } while (replan_attempts < max_replan_attempts);
+
+  if (preempt_requested)
   {
     RCLCPP_DEBUG(LOGGER, "PlanExecution was preempted");
     plan.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
@@ -312,8 +319,12 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
   return true;
 }
 
-moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMonitor(ExecutableMotionPlan& plan)
+moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMonitor(ExecutableMotionPlan& plan,
+                                                                                    bool reset_preempted)
 {
+  if (reset_preempted)
+    preempt_.checkAndClear();
+
   if (!plan.planning_scene_monitor_)
     plan.planning_scene_monitor_ = planning_scene_monitor_;
   if (!plan.planning_scene_)
@@ -408,7 +419,9 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
   // wait for path to be done, while checking that the path does not become invalid
   rclcpp::WallRate r(100);
   path_became_invalid_ = false;
-  while (rclcpp::ok() && !execution_complete_ && !preempt_requested_ && !path_became_invalid_)
+  bool preempt_requested = false;
+
+  while (rclcpp::ok() && !execution_complete_ && !path_became_invalid_)
   {
     r.sleep();
     // check the path if there was an environment update in the meantime
@@ -424,10 +437,14 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
         break;
       }
     }
+
+    preempt_requested = preempt_.checkAndClear();
+    if (preempt_requested)
+      break;
   }
 
   // stop execution if needed
-  if (preempt_requested_)
+  if (preempt_requested)
   {
     RCLCPP_INFO(LOGGER, "Stopping execution due to preempt request");
     trajectory_execution_manager_->stopExecution();
@@ -459,7 +476,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
     result.val = moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE;
   else
   {
-    if (preempt_requested_)
+    if (preempt_requested)
     {
       result.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
     }
@@ -508,7 +525,7 @@ void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const E
     {
       // execution of side-effect failed
       RCLCPP_ERROR(LOGGER, "Execution of path-completion side-effect failed. Preempting.");
-      preempt_requested_ = true;
+      preempt_.request();
       return;
     }
 

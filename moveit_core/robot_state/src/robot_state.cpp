@@ -904,6 +904,7 @@ double RobotState::distance(const RobotState& other, const JointModelGroup* join
 
 void RobotState::interpolate(const RobotState& to, double t, RobotState& state) const
 {
+  moveit::core::checkInterpolationParamBounds(LOGGER, t);
   robot_model_->interpolate(getVariablePositions(), to.getVariablePositions(), t, state.getVariablePositions());
 
   memset(state.dirty_joint_transforms_, 1, state.robot_model_->getJointModelCount() * sizeof(unsigned char));
@@ -912,6 +913,7 @@ void RobotState::interpolate(const RobotState& to, double t, RobotState& state) 
 
 void RobotState::interpolate(const RobotState& to, double t, RobotState& state, const JointModelGroup* joint_group) const
 {
+  moveit::core::checkInterpolationParamBounds(LOGGER, t);
   const std::vector<const JointModel*>& jm = joint_group->getActiveJointModels();
   for (const JointModel* joint : jm)
   {

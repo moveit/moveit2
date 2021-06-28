@@ -35,6 +35,7 @@
 /* Author: David Hershberger */
 
 #include "clear_octomap_service_capability.h"
+#include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/move_group/capability_names.h>
 
 static const rclcpp::Logger LOGGER =
@@ -50,7 +51,7 @@ void move_group::ClearOctomapService::initialize()
   using std::placeholders::_2;
   using std::placeholders::_3;
 
-  service_ = context_->node_->create_service<std_srvs::srv::Empty>(
+  service_ = context_->moveit_cpp_->getNode()->create_service<std_srvs::srv::Empty>(
       CLEAR_OCTOMAP_SERVICE_NAME, std::bind(&ClearOctomapService::clearOctomap, this, _1, _2));
 }
 

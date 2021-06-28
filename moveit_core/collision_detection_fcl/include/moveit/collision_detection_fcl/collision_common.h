@@ -57,7 +57,7 @@
 
 namespace collision_detection
 {
-MOVEIT_STRUCT_FORWARD(CollisionGeometryData)
+MOVEIT_STRUCT_FORWARD(CollisionGeometryData);
 
 /** \brief Wrapper around world, link and attached objects' geometry data. */
 struct CollisionGeometryData
@@ -195,7 +195,7 @@ struct DistanceData
   bool done;
 };
 
-MOVEIT_STRUCT_FORWARD(FCLGeometry)
+MOVEIT_STRUCT_FORWARD(FCLGeometry);
 
 /** \brief Bundles the \e CollisionGeometryData and FCL collision geometry representation into a single class. */
 struct FCLGeometry

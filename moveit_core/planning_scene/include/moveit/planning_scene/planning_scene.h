@@ -60,7 +60,7 @@
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene
 {
-MOVEIT_CLASS_FORWARD(PlanningScene)  // Defines PlanningScenePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(PlanningScene);  // Defines PlanningScenePtr, ConstPtr, WeakPtr... etc
 
 /** \brief This is the function signature for additional feasibility checks to be imposed on states (in addition to
    respecting constraints and collision avoidance).
@@ -729,8 +729,10 @@ public:
   void removeObjectType(const std::string& id);
   void getKnownObjectTypes(ObjectTypeMap& kc) const;
 
-  /** \brief Clear the diffs accumulated for this planning scene, with respect to the parent. This function is a no-op
-   * if there is no parent specified. */
+  /** \brief Clear the diffs accumulated for this planning scene, with respect to:
+   * the parent PlanningScene (if it exists)
+   * the parent CollisionDetector (if it exists)
+   * This function is a no-op if there is no parent planning scene. */
   void clearDiffs();
 
   /** \brief If there is a parent specified for this scene, then the diffs with respect to that parent are applied to a
@@ -950,7 +952,7 @@ private:
   /** convert Pose msg to Eigen::Isometry, normalizing the quaternion part if necessary. */
   static void poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::Isometry3d& out);
 
-  MOVEIT_STRUCT_FORWARD(CollisionDetector)
+  MOVEIT_STRUCT_FORWARD(CollisionDetector);
 
   /* Construct a new CollisionDector from allocator, copy-construct environments from parent_detector if not null */
   void allocateCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator,

@@ -68,7 +68,7 @@ protected:
 };
 
 MOVEIT_CLASS_FORWARD(
-    ActionBasedControllerHandleBase)  // Defines ActionBasedControllerHandleBasePtr, ConstPtr, WeakPtr... etc
+    ActionBasedControllerHandleBase);  // Defines ActionBasedControllerHandleBasePtr, ConstPtr, WeakPtr... etc
 
 /*
  * This is a simple base class, which handles all of the action creation/etc
