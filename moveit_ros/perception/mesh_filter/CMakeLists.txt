@@ -15,7 +15,8 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   Eigen3
   Boost
 )
-target_link_libraries(${MOVEIT_LIB_NAME} ${gl_LIBS} GLUT::GLUT ${GLEW_LIBRARIES})
+
+target_link_libraries(${MOVEIT_LIB_NAME} ${gl_LIBS} ${SYSTEM_GL_LIBRARIES})
 
 # TODO: Port to ROS2
 # add_library(moveit_depth_self_filter SHARED
