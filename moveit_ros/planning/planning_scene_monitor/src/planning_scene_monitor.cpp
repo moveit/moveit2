@@ -42,8 +42,8 @@
 
 #include <tf2/exceptions.h>
 #include <tf2/LinearMath/Transform.h>
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <moveit/profiler/profiler.h>
 
 #include <boost/algorithm/string/join.hpp>

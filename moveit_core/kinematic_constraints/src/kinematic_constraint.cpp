@@ -41,7 +41,7 @@
 #include <moveit/collision_detection_fcl/collision_env_fcl.h>
 #include <geometric_shapes/check_isometry.h>
 #include <boost/math/constants/constants.hpp>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <boost/bind.hpp>
 #include <limits>
 #include <memory>

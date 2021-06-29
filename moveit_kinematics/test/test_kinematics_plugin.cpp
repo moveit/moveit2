@@ -40,7 +40,7 @@
 #include <boost/bind.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 
 // MoveIt
 #include <moveit/kinematics_base/kinematics_base.h>

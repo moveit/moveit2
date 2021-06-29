@@ -36,7 +36,7 @@
 
 #include <stdexcept>
 #include <moveit/moveit_cpp/moveit_cpp.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
 
 namespace moveit_cpp

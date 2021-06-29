@@ -49,8 +49,8 @@
 #include <pilz_industrial_motion_planner_testutils/command_types_typedef.h>
 #include <pilz_industrial_motion_planner_testutils/xml_testdata_loader.h>
 #include <ros/ros.h>
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include "test_utils.h"
 

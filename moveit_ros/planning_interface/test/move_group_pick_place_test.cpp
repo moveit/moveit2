@@ -53,7 +53,7 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 
 // TF2
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 static const std::string PLANNING_GROUP = "panda_arm";
 constexpr double PLANNING_TIME_S = 45.0;

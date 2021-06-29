@@ -37,7 +37,7 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
 #include <urdf_parser/urdf_parser.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <gtest/gtest.h>
 #include <sstream>
 #include <algorithm>

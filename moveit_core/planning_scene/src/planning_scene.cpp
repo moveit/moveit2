@@ -45,7 +45,7 @@
 #include <moveit/robot_state/attached_body.h>
 #include <moveit/utils/message_checks.h>
 #include <octomap_msgs/conversions.h>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <memory>
 #include <set>
 

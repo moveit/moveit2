@@ -41,7 +41,7 @@
 #include <moveit/robot_state/conversions.h>
 #include <object_recognition_msgs/action/object_recognition.hpp>
 
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
 

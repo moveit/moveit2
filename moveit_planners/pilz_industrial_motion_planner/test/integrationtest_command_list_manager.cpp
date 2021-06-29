@@ -47,7 +47,7 @@
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit_msgs/MotionPlanResponse.h>
 
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 
 #include <pilz_industrial_motion_planner_testutils/gripper.h>
 #include <pilz_industrial_motion_planner_testutils/lin.h>

@@ -1,7 +1,7 @@
 #include <moveit/kinematic_constraints/kinematic_constraint.h>
 #include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/utils/robot_model_test_utils.h>
 #include <boost/math/constants/constants.hpp>
 
