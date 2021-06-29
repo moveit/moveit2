@@ -39,10 +39,12 @@
 #include <moveit/collision_detection/collision_detector_allocator.h>
 #include <moveit/collision_detection_bullet/collision_env_bullet.h>
 
+#include "visibility_control.h"
+
 namespace collision_detection
 {
 /** \brief An allocator for Bullet collision detectors */
-class CollisionDetectorAllocatorBullet
+class COLLISION_DETECTION_BULLET_PUBLIC CollisionDetectorAllocatorBullet
   : public CollisionDetectorAllocatorTemplate<CollisionEnvBullet, CollisionDetectorAllocatorBullet>
 {
 public:

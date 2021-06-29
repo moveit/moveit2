@@ -10,6 +10,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/bullet_integration/ros_bullet_utils.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE COLLISION_DETECTION_BULLET_BUILDING_DLL)
 ament_target_dependencies(${MOVEIT_LIB_NAME} SYSTEM
   BULLET
 )
