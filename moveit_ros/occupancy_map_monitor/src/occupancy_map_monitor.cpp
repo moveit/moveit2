@@ -156,7 +156,7 @@ void OccupancyMapMonitor::initialize()
       RCLCPP_ERROR(LOGGER, "List of sensors is empty!");
   }
   else
-    RCLCPP_ERROR(LOGGER, "Failed to find 3D sensor plugin parameters for octomap generation");
+    RCLCPP_ERROR(LOGGER, "No 3D sensor plugin(s) defined for octomap updates");
 
   /* advertise a service for loading octomaps from disk */
   auto save_map_service_callback = [this](const std::shared_ptr<rmw_request_id_t> request_header,

@@ -54,7 +54,7 @@ static const double DEFAULT_RESOLUTION = .02;
 static const double DEFAULT_COLLISION_TOLERANCE = 0.0;
 static const double DEFAULT_MAX_PROPOGATION_DISTANCE = .25;
 
-MOVEIT_CLASS_FORWARD(CollisionEnvDistanceField)  // Defines CollisionEnvDistanceFieldPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(CollisionEnvDistanceField);  // Defines CollisionEnvDistanceFieldPtr, ConstPtr, WeakPtr... etc
 
 class CollisionEnvDistanceField : public CollisionEnv
 {
@@ -136,7 +136,7 @@ public:
   //                                 collision_detection::AllowedCollisionMatrix
   //                                 &acm) const;
 
-  MOVEIT_STRUCT_FORWARD(DistanceFieldCacheEntryWorld)
+  MOVEIT_STRUCT_FORWARD(DistanceFieldCacheEntryWorld);
   struct DistanceFieldCacheEntryWorld
   {
     std::map<std::string, std::vector<PosedBodyPointDecompositionPtr>> posed_body_point_decompositions_;

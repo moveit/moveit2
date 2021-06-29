@@ -46,6 +46,9 @@
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo_calcs.h>
 
+// testing
+#include <gtest/gtest.h>
+
 namespace moveit_servo
 {
 /**

@@ -42,6 +42,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <thread>
+#include <atomic>
 
 // ROS
 #include <rclcpp/rclcpp.hpp>

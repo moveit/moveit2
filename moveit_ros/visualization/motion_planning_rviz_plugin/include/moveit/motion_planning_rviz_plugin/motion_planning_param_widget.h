@@ -43,7 +43,7 @@ namespace moveit
 {
 namespace planning_interface
 {
-MOVEIT_CLASS_FORWARD(MoveGroupInterface)  // Defines MoveGroupInterfacePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(MoveGroupInterface);  // Defines MoveGroupInterfacePtr, ConstPtr, WeakPtr... etc
 }
 }  // namespace moveit
 
