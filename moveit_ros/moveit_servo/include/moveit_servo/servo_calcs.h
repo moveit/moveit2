@@ -165,7 +165,7 @@ protected:
   void enforceVelLimits(Eigen::ArrayXd& delta_theta);
 
   /** \brief Avoid overshooting joint limits
-      \return Vector of the joints that violate the position limits
+      \return Vector of the joints that would move farther past position margin limits
    */
   std::vector<const moveit::core::JointModel*> enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) const;
 
