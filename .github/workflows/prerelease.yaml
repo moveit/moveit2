@@ -5,6 +5,7 @@ name: pre-release
 
 on:
   workflow_dispatch:
+  pull_request:
 
 jobs:
   default:
@@ -16,6 +17,7 @@ jobs:
     env:
       ROS_DISTRO: ${{ matrix.distro }}
       PRERELEASE: true
+      UPSTREAM_WORKSPACE: github:ros-planning/warehouse_ros#ros2
       BASEDIR: ${{ github.workspace }}/.work
 
     name: "${{ matrix.distro }}"
