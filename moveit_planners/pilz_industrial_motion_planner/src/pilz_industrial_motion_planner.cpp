@@ -44,7 +44,7 @@
 // Boost includes
 #include <boost/scoped_ptr.hpp>
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 
 #include <pluginlib/class_loader.h>
 
