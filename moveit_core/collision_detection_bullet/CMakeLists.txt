@@ -1,6 +1,6 @@
 set(MOVEIT_LIB_NAME moveit_collision_detection_bullet)
 
-add_library(${MOVEIT_LIB_NAME}
+add_library(${MOVEIT_LIB_NAME} SHARED
   src/bullet_integration/bullet_utils.cpp
   src/bullet_integration/bullet_discrete_bvh_manager.cpp
   src/bullet_integration/bullet_cast_bvh_manager.cpp
@@ -10,7 +10,9 @@ add_library(${MOVEIT_LIB_NAME}
   src/bullet_integration/ros_bullet_utils.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-
+ament_target_dependencies(${MOVEIT_LIB_NAME} SYSTEM
+  BULLET
+)
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
   rmw_implementation
@@ -22,11 +24,13 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_collision_detection
-  ${BULLET_LIBRARIES}
 )
 
-add_library(collision_detector_bullet_plugin src/collision_detector_bullet_plugin_loader.cpp)
+add_library(collision_detector_bullet_plugin SHARED src/collision_detector_bullet_plugin_loader.cpp)
 set_target_properties(collision_detector_bullet_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(collision_detector_bullet_plugin SYSTEM
+  BULLET
+)
 ament_target_dependencies(collision_detector_bullet_plugin
   rclcpp
   urdf
@@ -39,15 +43,13 @@ target_link_libraries(collision_detector_bullet_plugin
   moveit_planning_scene
 )
 
+install(DIRECTORY include/ DESTINATION include)
 install(TARGETS ${MOVEIT_LIB_NAME} EXPORT ${MOVEIT_LIB_NAME}
   TARGETS collision_detector_bullet_plugin EXPORT collision_detector_bullet_plugin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
 )
-install(DIRECTORY include/ DESTINATION include)
-
-install(DIRECTORY include/ DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION})
 
 if(BUILD_TESTING)
   if(WIN32)

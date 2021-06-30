@@ -48,7 +48,7 @@ Visualization Manager:
       Enabled: true
       Move Group Namespace: ""
       Name: PlanningScene
-      Planning Scene Topic: /moveit_cpp/publish_planning_scene
+      Planning Scene Topic: /moveit_cpp/monitored_planning_scene
       Robot Description: robot_description
       Scene Geometry:
         Scene Alpha: 0.8999999761581421

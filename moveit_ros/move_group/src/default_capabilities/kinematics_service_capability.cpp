@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include "kinematics_service_capability.h"
+#include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/utils/message_checks.h>
 #include <tf2_eigen/tf2_eigen.h>
@@ -55,9 +56,9 @@ void MoveGroupKinematicsService::initialize()
   using std::placeholders::_2;
   using std::placeholders::_3;
 
-  fk_service_ = context_->node_->create_service<moveit_msgs::srv::GetPositionFK>(
+  fk_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPositionFK>(
       FK_SERVICE_NAME, std::bind(&MoveGroupKinematicsService::computeFKService, this, _1, _2, _3));
-  ik_service_ = context_->node_->create_service<moveit_msgs::srv::GetPositionIK>(
+  ik_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPositionIK>(
       IK_SERVICE_NAME, std::bind(&MoveGroupKinematicsService::computeIKService, this, _1, _2, _3));
 }
 
@@ -83,7 +84,10 @@ void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& 
   const moveit::core::JointModelGroup* jmg = rs.getJointModelGroup(req.group_name);
   if (jmg)
   {
-    moveit::core::robotStateMsgToRobotState(req.robot_state, rs);
+    if (!moveit::core::isEmpty(req.robot_state))
+    {
+      moveit::core::robotStateMsgToRobotState(req.robot_state, rs);
+    }
     const std::string& default_frame = context_->planning_scene_monitor_->getRobotModel()->getModelFrame();
 
     if (req.pose_stamped_vector.empty() || req.pose_stamped_vector.size() == 1)
@@ -210,7 +214,7 @@ bool MoveGroupKinematicsService::computeFKService(const std::shared_ptr<rmw_requ
       res->pose_stamped.resize(res->pose_stamped.size() + 1);
       res->pose_stamped.back().pose = tf2::toMsg(rs.getGlobalLinkTransform(req->fk_link_names[i]));
       res->pose_stamped.back().header.frame_id = default_frame;
-      res->pose_stamped.back().header.stamp = context_->node_->get_clock()->now();
+      res->pose_stamped.back().header.stamp = context_->moveit_cpp_->getNode()->get_clock()->now();
       if (do_transform)
         if (!performTransform(res->pose_stamped.back(), req->header.frame_id))
           tf_problem = true;
