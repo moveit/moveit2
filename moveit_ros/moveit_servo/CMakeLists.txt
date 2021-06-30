@@ -20,7 +20,6 @@ set(SERVO_COMPONENT_NODE servo_server)
 set(SERVO_CONTROLLER_INPUT servo_controller_input)
 
 # Executable Nodes ##############################################
-set(CPP_DEMO_NAME servo_cpp_demo)
 set(POSE_TRACKING_DEMO_NAME servo_pose_tracking_demo)
 set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
 
@@ -108,11 +107,6 @@ rclcpp_components_register_nodes(${SERVO_CONTROLLER_INPUT} "moveit_servo::JoyToS
 ######################
 ## Executable Nodes ##
 ######################
-
-# Add cpp interface example executable
-add_executable(${CPP_DEMO_NAME} src/cpp_interface_demo/servo_cpp_interface_demo.cpp)
-ament_target_dependencies(${CPP_DEMO_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(${CPP_DEMO_NAME} ${SERVO_LIB_NAME})
 
 # An example of pose tracking
 add_executable(${POSE_TRACKING_DEMO_NAME} src/cpp_interface_demo/pose_tracking_demo.cpp)
