@@ -2,6 +2,30 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2021-06-30)
+------------------
+* Enable Bullet and fix plugin configuration (`#489 <https://github.com/ros-planning/moveit2/issues/489>`_)
+* Fix typo in joint_model_group.h (`#510 <https://github.com/ros-planning/moveit2/issues/510>`_)
+* Enable Rolling and Galactic CI (`#494 <https://github.com/ros-planning/moveit2/issues/494>`_)
+* Add pluginlib dependency (`#485 <https://github.com/ros-planning/moveit2/issues/485>`_)
+* [sync] MoveIt's master branch up-to https://github.com/ros-planning/moveit/commit/0d0a6a171b3fbea97a0c4f284e13433ba66a4ea4
+  * Use thread_local var's in FCL distanceCallback() (`#2698 <https://github.com/ros-planning/moveit/issues/2698>`_)
+  * Remove octomap from catkin_packages LIBRARIES entries (`#2700 <https://github.com/ros-planning/moveit/issues/2700>`_)
+  * CI: Use compiler flag --pedantic (`#2691 <https://github.com/ros-planning/moveit/issues/2691>`_)
+  * Remove deprecated header deprecation.h (`#2693 <https://github.com/ros-planning/moveit/issues/2693>`_)
+  * collision_detection_fcl: Report link_names in correct order (`#2682 <https://github.com/ros-planning/moveit/issues/2682>`_)
+  * RobotState interpolation: warn if interpolation parameter is out of range [0, 1] (`#2664 <https://github.com/ros-planning/moveit/issues/2664>`_)
+  * Add sphinx-rtd-theme for python docs as a dependency (`#2645 <https://github.com/ros-planning/moveit/issues/2645>`_)
+  * Set rotation value of cartesian MaxEEFStep by default (`#2614 <https://github.com/ros-planning/moveit/issues/2614>`_)
+  * Lock the Bullet collision environment, for thread safety (`#2598 <https://github.com/ros-planning/moveit/issues/2598>`_)
+  * Make setToIKSolverFrame accessible again (`#2580 <https://github.com/ros-planning/moveit/issues/2580>`_)
+  * Python bindings for moveit_core (`#2547 <https://github.com/ros-planning/moveit/issues/2547>`_)
+  * Add get_active_joint_names (`#2533 <https://github.com/ros-planning/moveit/issues/2533>`_)
+  * Update doxygen comments for distance() and interpolate() (`#2528 <https://github.com/ros-planning/moveit/issues/2528>`_)
+  * Replaced eigen+kdl conversions with tf2_eigen + tf2_kdl (`#2472 <https://github.com/ros-planning/moveit/issues/2472>`_)
+  * Fix logic, improve function comment for clearDiffs() (`#2497 <https://github.com/ros-planning/moveit/issues/2497>`_)
+* Contributors: 0Nel, AndyZe, David V. Lu!!, Felix von Drigalski, JafarAbdi, Jochen Sprickerhof, John Stechschulte, Jorge Nicho, Max Schwarz, Michael Görner, Peter Mitrano, Robert Haschke, Simon Schmeisser, Tyler Weaver, Vatan Aksoy Tezer, petkovich
+
 2.1.4 (2021-05-31)
 ------------------
 * PlanningRequestAdapter helper method getParam()  (`#468 <https://github.com/ros-planning/moveit2/issues/468>`_)

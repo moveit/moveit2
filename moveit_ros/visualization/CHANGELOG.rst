@@ -2,6 +2,16 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2021-06-30)
+------------------
+* Declare warehouse params in rviz plugin (`#513 <https://github.com/ros-planning/moveit2/issues/513>`_)
+* [sync] MoveIt's master branch up-to https://github.com/ros-planning/moveit/commit/0d0a6a171b3fbea97a0c4f284e13433ba66a4ea4
+  * CI: Use compiler flag --pedantic (`#2691 <https://github.com/ros-planning/moveit/issues/2691>`_)
+  * Runtime fixes to PlanningSceneDisplay, MotionPlanningDisplay (`#2618 <https://github.com/ros-planning/moveit/issues/2618>`_),(`#2588 <https://github.com/ros-planning/moveit2/issues/2588>`_)
+  * Support multiple planning pipelines with MoveGroup via MoveItCpp (`#2127 <https://github.com/ros-planning/moveit/issues/2127>`_)
+    * Allow selecting planning pipeline in RViz MotionPlanningDisplay
+* Contributors: Bjar Ne, Henning Kayser, JafarAbdi, Michael Görner, Robert Haschke, Tyler Weaver
+
 2.1.4 (2021-05-31)
 ------------------
 

@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_robot_interaction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2021-06-30)
+------------------
+* Enable Rolling and Galactic CI (`#494 <https://github.com/ros-planning/moveit2/issues/494>`_)
+* [sync] MoveIt's master branch up-to https://github.com/ros-planning/moveit/commit/0d0a6a171b3fbea97a0c4f284e13433ba66a4ea4
+* Contributors: JafarAbdi, Tyler Weaver, Vatan Aksoy Tezer
+
 2.1.4 (2021-05-31)
 ------------------
 

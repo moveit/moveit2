@@ -2,6 +2,14 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2021-06-30)
+------------------
+* [sync] MoveIt's master branch up-to https://github.com/ros-planning/moveit/commit/0d0a6a171b3fbea97a0c4f284e13433ba66a4ea4
+  * Improve ikfast QUIET handling (`#2685 <https://github.com/ros-planning/moveit/issues/2685>`_)
+  * ikfast script: install sympy 0.7.1 from git (`#2650 <https://github.com/ros-planning/moveit/issues/2650>`_)
+  * Replaced eigen+kdl conversions with tf2_eigen + tf2_kdl (`#2472 <https://github.com/ros-planning/moveit/issues/2472>`_)
+* Contributors: JafarAbdi, Robert Haschke, Tyler Weaver, ags-dy, petkovich
+
 2.1.4 (2021-05-31)
 ------------------
 * Enable LMA and KDL kinematic launch tests (`#435 <https://github.com/ros-planning/moveit2/issues/435>`_)
