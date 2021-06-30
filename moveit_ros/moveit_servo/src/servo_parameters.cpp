@@ -200,8 +200,8 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
   }
   if (parameters->joint_limit_margin < 0.)
   {
-    RCLCPP_WARN(logger, "Parameter 'joint_limit_margin' is usually "
-                        "greater than or equal to zero, although negative values are allowed for special use cases. "
+    RCLCPP_WARN(logger, "Parameter 'joint_limit_margin' should usually be  greater than or equal to zero, "
+                        "although negative values can be used if the specified joint limits are actually soft. "
                         "Check yaml file.");
   }
   if (parameters->command_in_type != "unitless" && parameters->command_in_type != "speed_units")
