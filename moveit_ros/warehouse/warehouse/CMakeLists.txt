@@ -11,7 +11,6 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME} rclcpp Boost moveit_core warehouse_ros moveit_ros_planning)
-target_link_libraries(${MOVEIT_LIB_NAME} ${OPENSSL_CRYPTO_LIBRARY})
 target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE MOVEIT_ROS_WAREHOUSE_BUILDING_DLL)
 
 add_executable(moveit_warehouse_broadcast src/broadcast.cpp)
