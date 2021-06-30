@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include "state_validation_service_capability.h"
+#include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/utils/message_checks.h>
 #include <moveit/collision_detection/collision_tools.h>
@@ -52,7 +53,7 @@ void MoveGroupStateValidationService::initialize()
   using std::placeholders::_2;
   using std::placeholders::_3;
 
-  validity_service_ = context_->node_->create_service<moveit_msgs::srv::GetStateValidity>(
+  validity_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetStateValidity>(
       STATE_VALIDITY_SERVICE_NAME, std::bind(&MoveGroupStateValidationService::computeService, this, _1, _2, _3));
 }
 
@@ -83,7 +84,7 @@ bool MoveGroupStateValidationService::computeService(
   // copy contacts if any
   if (cres.collision)
   {
-    rclcpp::Time time_now = context_->node_->get_clock()->now();
+    rclcpp::Time time_now = context_->moveit_cpp_->getNode()->get_clock()->now();
     res->contacts.reserve(cres.contact_count);
     res->valid = false;
     for (collision_detection::CollisionResult::ContactMap::const_iterator it = cres.contacts.begin();

@@ -15,7 +15,6 @@ include(ConfigExtras.cmake)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 
-# TODO: Move collision detection into separate packages
 find_package(Bullet 2.87 REQUIRED)
 
 find_package(PkgConfig REQUIRED)
@@ -49,6 +48,8 @@ find_package(trajectory_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(common_interfaces REQUIRED)
 find_package(pluginlib REQUIRED)
+# TODO: Port python bindings
+# find_package(pybind11 REQUIRED)
 
 # Set target file path for version.h
 set(VERSION_FILE_PATH ${CMAKE_BINARY_DIR}/include)
@@ -59,7 +60,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     backtrace/include
     collision_detection/include
     collision_detection_fcl/include
-    ${BULLET_INC}
+    collision_detection_bullet/include
     constraint_samplers/include
     controller_manager/include
     distance_field/include
@@ -77,6 +78,8 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     planning_request_adapter/include
     planning_scene/include
     profiler/include
+    # TODO: Port python bindings
+    # python/tools/include
     sensor_manager/include
     trajectory_processing/include
     utils/include
@@ -93,12 +96,14 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_planning_interface
     moveit_collision_detection
     moveit_collision_detection_fcl
-    ${BULLET_LIB}
+    moveit_collision_detection_bullet
     moveit_kinematic_constraints
     moveit_planning_scene
     moveit_constraint_samplers
     moveit_planning_request_adapter
     moveit_profiler
+    # TODO: Port python bindings
+    # moveit_python_tools
     moveit_trajectory_processing
     moveit_distance_field
     moveit_collision_distance_field
@@ -128,13 +133,14 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   Eigen3
   eigen3_cmake_module
   OCTOMAP
-  ${BULLET_ENABLE}
+  Bullet
 )
+
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
+pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
   ${LIBFCL_INCLUDE_DIRS}
-  ${BULLET_INCLUDE_DIRS}
 )
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
@@ -176,12 +182,37 @@ add_subdirectory(distance_field)
 add_subdirectory(collision_distance_field)
 add_subdirectory(kinematics_metrics)
 add_subdirectory(dynamics_solver)
-# TODO(henningkayser): enable bullet once the library is migrated to ROS2
-if(BULLET_ENABLE)
 add_subdirectory(collision_detection_bullet)
-else()
-install(FILES collision_detection_bullet/empty_description.xml DESTINATION share/${PROJECT_NAME} RENAME collision_detector_bullet_description.xml)
-endif()
+
+pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
+
+# TODO: Port python bindings
+# add_subdirectory(python)
+# set(pymoveit_libs
+#   moveit_collision_detection
+#   moveit_kinematic_constraints
+#   moveit_planning_scene
+#   moveit_python_tools
+#   moveit_robot_model
+#   moveit_robot_state
+#   moveit_transforms
+# )
+#
+# pybind_add_module(pymoveit_core
+#     python/pymoveit_core.cpp
+#     collision_detection/src/pycollision_detection.cpp
+#     robot_model/src/pyrobot_model.cpp
+#     robot_state/src/pyrobot_state.cpp
+#     transforms/src/pytransforms.cpp
+#     planning_scene/src/pyplanning_scene.cpp
+#     kinematic_constraints/src/pykinematic_constraint.cpp
+# )
+# target_include_directories(pymoveit_core SYSTEM PRIVATE ${catkin_INCLUDE_DIRS})
+# target_link_libraries(pymoveit_core PRIVATE ${pymoveit_libs} ${catkin_LIBRARIES})
+#
+# #catkin_lint: ignore_once undefined_target (pymoveit_core is defined by pybind_add_module)
+# install(TARGETS pymoveit_core LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
+
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
@@ -202,6 +233,7 @@ if(BUILD_TESTING)
   set(ament_cmake_copyright_FOUND TRUE)
   set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
+  set(ament_cmake_flake8_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
   set(ament_cmake_lint_cmake_FOUND TRUE)
 

@@ -57,7 +57,17 @@ namespace moveit
 /** \brief Core components of MoveIt */
 namespace core
 {
-MOVEIT_CLASS_FORWARD(RobotModel)  // Defines RobotModelPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(RobotModel);  // Defines RobotModelPtr, ConstPtr, WeakPtr... etc
+
+static inline void checkInterpolationParamBounds(const rclcpp::Logger& LOGGER, double t)
+{
+  if (std::isnan(t) || std::isinf(t))
+  {
+    throw Exception("Interpolation parameter is NaN or inf.");
+  }
+
+  RCLCPP_WARN_STREAM_EXPRESSION(LOGGER, t < 0. || t > 1., "Interpolation parameter is not in the range [0, 1]: " << t);
+}
 
 /** \brief Definition of a kinematic model. This class is not thread
     safe, however multiple instances can be created */
@@ -159,6 +169,12 @@ public:
   const std::vector<const JointModel*>& getActiveJointModels() const
   {
     return active_joint_model_vector_const_;
+  }
+
+  /** \brief Get the array of active joint names, in the order they appear in the robot state. */
+  const std::vector<std::string>& getActiveJointModelNames() const
+  {
+    return active_joint_model_names_vector_;
   }
 
   /** \brief Get the array of joints that are active (not fixed, not mimic) in this model */
@@ -512,6 +528,9 @@ protected:
 
   /** \brief The vector of joints in the model, in the order they appear in the state vector */
   std::vector<JointModel*> active_joint_model_vector_;
+
+  /** \brief The vector of joint names that corresponds to active_joint_model_vector_ */
+  std::vector<std::string> active_joint_model_names_vector_;
 
   /** \brief The vector of joints in the model, in the order they appear in the state vector */
   std::vector<const JointModel*> active_joint_model_vector_const_;

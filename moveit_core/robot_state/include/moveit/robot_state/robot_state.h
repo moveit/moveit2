@@ -59,7 +59,7 @@ namespace moveit
 {
 namespace core
 {
-MOVEIT_CLASS_FORWARD(RobotState)  // Defines RobotStatePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(RobotState);  // Defines RobotStatePtr, ConstPtr, WeakPtr... etc
 
 /** \brief Signature for functions that can verify that if the group \e joint_group in \e robot_state is set to \e
    joint_group_variable_values
@@ -1735,18 +1735,13 @@ public:
 
   std::string getStateTreeString(const std::string& prefix = "") const;
 
-private:
-  void allocMemory();
-  void initTransforms();
-  void copyFrom(const RobotState& other);
-
   /**
    * \brief Transform pose from the robot model's base frame to the reference frame of the IK solver
    * @param pose - the input to change
    * @param solver - a kin solver whose base frame is important to us
    * @return true if no error
    */
-  inline bool setToIKSolverFrame(Eigen::Isometry3d& pose, const kinematics::KinematicsBaseConstPtr& solver);
+  bool setToIKSolverFrame(Eigen::Isometry3d& pose, const kinematics::KinematicsBaseConstPtr& solver);
 
   /**
    * \brief Transform pose from the robot model's base frame to the reference frame of the IK solver
@@ -1755,6 +1750,11 @@ private:
    * @return true if no error
    */
   bool setToIKSolverFrame(Eigen::Isometry3d& pose, const std::string& ik_frame);
+
+private:
+  void allocMemory();
+  void initTransforms();
+  void copyFrom(const RobotState& other);
 
   void markDirtyJointTransforms(const JointModel* joint)
   {

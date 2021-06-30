@@ -62,7 +62,6 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
-
 #include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
 
 // static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_planning_context_manager");

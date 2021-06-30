@@ -40,7 +40,6 @@
 #include <moveit/macros/declare_ptr.h>
 #include <moveit/mesh_filter/gl_renderer.h>
 #include <moveit/mesh_filter/mesh_filter_base.h>
-#include <boost/function.hpp>
 
 // forward declarations
 namespace shapes
@@ -61,7 +60,7 @@ template <typename SensorType>
 class MeshFilter : public MeshFilterBase
 {
 public:
-  MOVEIT_DECLARE_PTR_MEMBER(MeshFilter)
+  MOVEIT_DECLARE_PTR_MEMBER(MeshFilter);
 
   /**
    * \brief Constructor
