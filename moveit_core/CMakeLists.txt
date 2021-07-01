@@ -31,6 +31,7 @@ else()
   find_package(FCL 0.5.0)
   set(LIBFCL_INCLUDE_DIRS "${FCL_INCLUDE_DIRS}")
   set(FCL_NAME "FCL")
+  set(EXTRA_INCLUDE "FCL")
   find_package(Bullet ${BULLET_VERSION} REQUIRED)
 endif()
 
@@ -144,7 +145,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   eigen3_cmake_module
   OCTOMAP
   Bullet
-  ${FCL_NAME}
+  ${EXTRA_INCLUDE}
 )
 
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
