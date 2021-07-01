@@ -42,10 +42,17 @@
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.warehouse_connector");
 
 #ifdef _WIN32
-  void kill(int, int) { RCLCPP_ERROR(LOGGER, "Warehouse connector not supported on Windows"); } // Should never be called
-  int fork() { RCLCPP_ERROR(LOGGER, "Warehouse connector not supported on Windows"); return -1; }
+void kill(int, int)
+{
+  RCLCPP_ERROR(LOGGER, "Warehouse connector not supported on Windows");
+}  // Should never be called
+int fork()
+{
+  RCLCPP_ERROR(LOGGER, "Warehouse connector not supported on Windows");
+  return -1;
+}
 #else
-  #include <unistd.h>
+#include <unistd.h>
 #endif
 
 namespace moveit_warehouse
