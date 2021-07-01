@@ -28,6 +28,10 @@
 
 
 macro(moveit_package)
+  # Set ${PROJECT_NAME}_VERSION
+  find_package(ament_cmake REQUIRED)
+  ament_package_xml()
+
   if(NOT "${CMAKE_CXX_STANDARD}")
     set(CMAKE_CXX_STANDARD 14)
   endif()
