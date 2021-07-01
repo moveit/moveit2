@@ -2,6 +2,21 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2021-06-30)
+------------------
+* Enable Rolling and Galactic CI (`#494 <https://github.com/ros-planning/moveit2/issues/494>`_)
+* [sync] with MoveIt's master branch up-to https://github.com/ros-planning/moveit/commit/0d0a6a171b3fbea97a0c4f284e13433ba66a4ea4
+  * Allow selecting planning pipeline in MotionSequenceAction (`#2657 <https://github.com/ros-planning/moveit/issues/2657>`_)
+  * planning_interface: synchronize async interfaces in test (`#2640 <https://github.com/ros-planning/moveit/issues/2640>`_)
+  * Add planning_pipeline_id setting to Python MGI (`#2622 <https://github.com/ros-planning/moveit/issues/2622>`_)
+  * fix docstring in MGI API (`#2626 <https://github.com/ros-planning/moveit/issues/2626>`_)
+  * Support multiple planning pipelines with MoveGroup via MoveItCpp (`#2127 <https://github.com/ros-planning/moveit/issues/2127>`_)
+    * Deprecate namespace moveit::planning_interface in favor of moveit_cpp
+  * add get_active_joint_names (`#2533 <https://github.com/ros-planning/moveit/issues/2533>`_)
+  * Add debugging log statement for a common error (`#2509 <https://github.com/ros-planning/moveit/issues/2509>`_)
+  * Replaced eigen+kdl conversions with tf2_eigen + tf2_kdl (`#2472 <https://github.com/ros-planning/moveit/issues/2472>`_)
+* Contributors: Felix von Drigalski, Henning Kayser, JafarAbdi, Michael Görner, Peter Mitrano, Robert Haschke, Tyler Weaver, Vatan Aksoy Tezer, petkovich
+
 2.1.4 (2021-05-31)
 ------------------
 * Disable flaky test (`#482 <https://github.com/ros-planning/moveit2/issues/482>`_)

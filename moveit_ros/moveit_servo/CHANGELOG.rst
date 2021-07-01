@@ -2,6 +2,22 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2021-06-30)
+------------------
+* Allow a negative joint margin (`#501 <https://github.com/ros-planning/moveit2/issues/501>`_)
+* Move servo doc and examples to moveit2_tutorials (`#486 <https://github.com/ros-planning/moveit2/issues/486>`_)
+* Remove faulty gtest include (`#526 <https://github.com/ros-planning/moveit2/issues/526>`_)
+* Fix segfault when publish_joint_velocities set to false and a joint is close to position limit (`#497 <https://github.com/ros-planning/moveit2/issues/497>`_)
+* Enable Rolling and Galactic CI (`#494 <https://github.com/ros-planning/moveit2/issues/494>`_)
+* [sync] MoveIt's master branch up-to https://github.com/ros-planning/moveit/commit/0d0a6a171b3fbea97a0c4f284e13433ba66a4ea4
+  * Misspelled MoveIt (`#2692 <https://github.com/ros-planning/moveit/issues/2692>`_)
+  * Avoid joint jump when SuddenHalt() is called in velocity mode (`#2594 <https://github.com/ros-planning/moveit/issues/2594>`_)
+  * Halt Servo command on Pose Tracking stop (`#2501 <https://github.com/ros-planning/moveit/issues/2501>`_)
+  * stop_requested\_ flag clearing fix (`#2537 <https://github.com/ros-planning/moveit/issues/2537>`_)
+  * add missing include (`#2519 <https://github.com/ros-planning/moveit/issues/2519>`_)
+  * Refactor velocity bounds enforcement (`#2471 <https://github.com/ros-planning/moveit/issues/2471>`_)
+* Contributors: AdamPettinger, AndyZe, Henning Kayser, Jafar Abdi, JafarAbdi, Jere Liukkonen, Michael Görner, Nathan Brooks, Robert Haschke, Tyler Weaver, Vatan Aksoy Tezer, parunapu
+
 2.1.4 (2021-05-31)
 ------------------
 * Delete MoveIt fake_controller_manager (`#471 <https://github.com/ros-planning/moveit2/issues/471>`_)

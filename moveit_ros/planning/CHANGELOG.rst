@@ -2,6 +2,25 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2021-06-30)
+------------------
+* Fix stopping the TrajectoryExecutionManager's execution (`#506 <https://github.com/ros-planning/moveit2/issues/506>`_)
+* Enable Rolling and Galactic CI (`#494 <https://github.com/ros-planning/moveit2/issues/494>`_)
+* [sync] MoveIt's master branch up-to https://github.com/ros-planning/moveit/commit/0d0a6a171b3fbea97a0c4f284e13433ba66a4ea4
+  * PSM: Don't read padding parameters from private namespace (`#2706 <https://github.com/ros-planning/moveit/issues/2706>`_)
+  * MSA: Fix template (max_safe_path_cost) (`#2703 <https://github.com/ros-planning/moveit/issues/2703>`_)
+  * CI: Use compiler flag --pedantic (`#2691 <https://github.com/ros-planning/moveit/issues/2691>`_)
+  * CI: Fail on warnings (`#2687 <https://github.com/ros-planning/moveit/issues/2687>`_)
+  * Refine CSM::haveCompleteState (`#2663 <https://github.com/ros-planning/moveit/issues/2663>`_)
+  * Use private namespace instead of child for PlanningPipeline topics (`#2652 <https://github.com/ros-planning/moveit/issues/2652>`_)
+  * Print error before returning (`#2639 <https://github.com/ros-planning/moveit/issues/2639>`_)
+  * Simplify logic in PSM (`#2632 <https://github.com/ros-planning/moveit/issues/2632>`_)
+  * PlanExecution: Correctly handle preempt-requested flag (`#2554 <https://github.com/ros-planning/moveit/issues/2554>`_)
+  * Support multiple planning pipelines with MoveGroup via MoveItCpp (`#2127 <https://github.com/ros-planning/moveit/issues/2127>`_)
+    * Deprecate namespace moveit::planning_interface in favor of moveit_cpp
+  * thread safety in clear octomap & only update geometry (`#2500 <https://github.com/ros-planning/moveit/issues/2500>`_)
+* Contributors: Henning Kayser, Jafar Abdi, JafarAbdi, Luc Bettaieb, Martin Günther, Michael Görner, Robert Haschke, Simon Schmeisser, Tyler Weaver, Vatan Aksoy Tezer, v4hn
+
 2.1.4 (2021-05-31)
 ------------------
 * PlanningRequestAdapter helper method getParam()  (`#468 <https://github.com/ros-planning/moveit2/issues/468>`_)

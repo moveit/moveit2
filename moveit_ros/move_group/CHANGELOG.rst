@@ -2,6 +2,14 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2021-06-30)
+------------------
+* Fix deprecated planner namespace in MoveGroup (`#524 <https://github.com/ros-planning/moveit2/issues/524>`_)
+* [sync] MoveIt's master branch up-to https://github.com/ros-planning/moveit/commit/0d0a6a171b3fbea97a0c4f284e13433ba66a4ea4
+  * Support multiple planning pipelines with MoveGroup via MoveItCpp (`#2127 <https://github.com/ros-planning/moveit/issues/2127>`_)
+  * Fix missing isEmpty check in compute_ik service (`#2544 <https://github.com/ros-planning/moveit/issues/2544>`_)
+* Contributors: Henning Kayser, Jafar Abdi, JafarAbdi, Michael Görner, Robert Haschke, Tyler Weaver
+
 2.1.4 (2021-05-31)
 ------------------
 
