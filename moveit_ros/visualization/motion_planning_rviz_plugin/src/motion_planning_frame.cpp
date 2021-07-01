@@ -381,7 +381,7 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       return;
     RCLCPP_INFO(LOGGER, "Constructing new MoveGroup connection for group '%s' in namespace '%s'", group.c_str(),
                 planning_display_->getMoveGroupNS().c_str());
-    moveit::planning_interface::MoveGroupInterface::Options opt(group);
+    moveit::planning_interface::MoveGroupInterface::Options opt(group, planning_display_->getMoveGroupNS());
     opt.robot_model_ = robot_model;
     opt.robot_description_.clear();
     try
