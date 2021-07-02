@@ -2,6 +2,15 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2021-06-30)
+------------------
+* Enable Rolling and Galactic CI (`#494 <https://github.com/ros-planning/moveit2/issues/494>`_)
+* Temporarily disable flaky OMPL test (`#495 <https://github.com/ros-planning/moveit2/issues/495>`_)
+* [sync] MoveIt's master branch up-to https://github.com/ros-planning/moveit/commit/0d0a6a171b3fbea97a0c4f284e13433ba66a4ea4
+  * CI: Use compiler flag --pedantic (`#2691 <https://github.com/ros-planning/moveit/issues/2691>`_)
+  * Replaced eigen+kdl conversions with tf2_eigen + tf2_kdl (`#2472 <https://github.com/ros-planning/moveit/issues/2472>`_)
+* Contributors: JafarAbdi, Michael Görner, Robert Haschke, Tyler Weaver, Vatan Aksoy Tezer, petkovich
+
 2.1.4 (2021-05-31)
 ------------------
 

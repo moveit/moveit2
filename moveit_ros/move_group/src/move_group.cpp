@@ -264,6 +264,7 @@ int main(int argc, char** argv)
     else
     {
       RCLCPP_WARN(LOGGER, "Falling back to using the the move_group node namespace (deprecated behavior).");
+      default_planning_pipeline = "move_group";
       moveit_cpp_options.planning_pipeline_options.pipeline_names = { default_planning_pipeline };
       moveit_cpp_options.planning_pipeline_options.parent_namespace = nh->get_effective_namespace();
     }

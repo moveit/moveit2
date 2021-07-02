@@ -2,6 +2,15 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.0 (2021-06-30)
+------------------
+* Compilation fixes for MoveIt on macOS (`#498 <https://github.com/ros-planning/moveit2/issues/498>`_)
+* [sync] MoveIt's master branch up-to https://github.com/ros-planning/moveit/commit/0d0a6a171b3fbea97a0c4f284e13433ba66a4ea4
+  * document solution in ROS_ERROR on failed self-filtering (`#2627 <https://github.com/ros-planning/moveit/issues/2627>`_)
+  * Fixed flood of errors on startup for `mesh_filter` (`#2550 <https://github.com/ros-planning/moveit/issues/2550>`_)
+  * Enable mesh filter (`#2448 <https://github.com/ros-planning/moveit/issues/2448>`_)
+* Contributors: Jafar Abdi, JafarAbdi, John Stechschulte, Michael Görner, Nisala Kalupahana, Robert Haschke, Simon Schmeisser, Tyler Weaver
+
 2.1.4 (2021-05-31)
 ------------------
 
