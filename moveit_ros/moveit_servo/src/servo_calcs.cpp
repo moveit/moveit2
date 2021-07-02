@@ -578,16 +578,16 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   // Mark the lowpass filters as updated for this cycle
   updated_filters_ = true;
 
-  // compose outgoing message
-  composeJointTrajMessage(internal_joint_state_, joint_trajectory);
-
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
-  if (!enforcePositionLimits(joint_trajectory))
+  if (!enforcePositionLimits(internal_joint_state_))
   {
-    suddenHalt(joint_trajectory);
+    suddenHalt(internal_joint_state_);
     status_ = StatusCode::JOINT_BOUND;
     prev_joint_velocity_.setZero();
   }
+
+  // compose outgoing message
+  composeJointTrajMessage(internal_joint_state_, joint_trajectory);
 
   // Modify the output message if we are using gazebo
   if (parameters_->use_gazebo)
@@ -777,7 +777,7 @@ void ServoCalcs::enforceVelLimits(Eigen::ArrayXd& delta_theta)
   delta_theta = velocity_scaling_factor * velocity * parameters_->publish_period;
 }
 
-bool ServoCalcs::enforcePositionLimits(trajectory_msgs::msg::JointTrajectory& joint_trajectory) const
+bool ServoCalcs::enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) const
 {
   // Halt if we're past a joint margin and joint velocity is moving even farther past
   bool halting = false;
@@ -785,17 +785,17 @@ bool ServoCalcs::enforcePositionLimits(trajectory_msgs::msg::JointTrajectory& jo
 
   for (auto joint : joint_model_group_->getActiveJointModels())
   {
-    for (std::size_t c = 0; c < original_joint_state_.name.size(); ++c)
+    for (std::size_t c = 0; c < joint_state.name.size(); ++c)
     {
       // Use the most recent robot joint state
-      if (original_joint_state_.name[c] == joint->getName())
+      if (joint_state.name[c] == joint->getName())
       {
-        joint_angle = original_joint_state_.position.at(c);
+        joint_angle = joint_state.position.at(c);
         break;
       }
     }
 
-    if (!current_state_->satisfiesPositionBounds(joint, -parameters_->joint_limit_margin))
+    if (!joint->satisfiesPositionBounds(&joint_angle, -parameters_->joint_limit_margin))
     {
       const std::vector<moveit_msgs::msg::JointLimits> limits = joint->getVariableBoundsMsg();
 
@@ -803,13 +803,12 @@ bool ServoCalcs::enforcePositionLimits(trajectory_msgs::msg::JointTrajectory& jo
       if (!limits.empty())
       {
         // Check if pending velocity command is moving in the right direction
-        auto joint_itr =
-            std::find(joint_trajectory.joint_names.begin(), joint_trajectory.joint_names.end(), joint->getName());
-        auto joint_idx = std::distance(joint_trajectory.joint_names.begin(), joint_itr);
+        auto joint_itr = std::find(joint_state.name.begin(), joint_state.name.end(), joint->getName());
+        auto joint_idx = std::distance(joint_state.name.begin(), joint_itr);
 
-        if ((joint_trajectory.points[0].velocities[joint_idx] < 0 &&
+        if ((joint_state.velocity.at(joint_idx) < 0 &&
              (joint_angle < (limits[0].min_position + parameters_->joint_limit_margin))) ||
-            (joint_trajectory.points[0].velocities[joint_idx] > 0 &&
+            (joint_state.velocity.at(joint_idx) > 0 &&
              (joint_angle > (limits[0].max_position - parameters_->joint_limit_margin))))
         {
           rclcpp::Clock& clock = *node_->get_clock();
@@ -860,6 +859,13 @@ void ServoCalcs::suddenHalt(trajectory_msgs::msg::JointTrajectory& joint_traject
     if (parameters_->publish_joint_velocities)
       point.velocities[i] = 0;
   }
+}
+
+void ServoCalcs::suddenHalt(sensor_msgs::msg::JointState& joint_state) const
+{
+  // Set the position to the original position, and velocity to 0
+  joint_state.position = original_joint_state_.position;
+  joint_state.velocity.assign(joint_state.position.size(), 0.0);
 }
 
 // Parse the incoming joint msg for the joints of our MoveGroup
