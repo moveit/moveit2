@@ -53,7 +53,7 @@
 #include <memory>
 #include <thread>
 
-#include "visibility_control.h"
+#include <moveit/planning_scene_monitor/visibility_control.h>
 
 namespace planning_scene_monitor
 {

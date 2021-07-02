@@ -43,7 +43,7 @@
 #include <boost/function.hpp>
 #include <string>
 
-#include "visibility_control.h"
+#include <moveit/kinematics_base/visibility_control.h>
 
 namespace moveit
 {

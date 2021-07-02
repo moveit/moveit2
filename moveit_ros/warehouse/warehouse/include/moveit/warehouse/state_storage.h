@@ -40,7 +40,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit_msgs/msg/robot_state.hpp>
 
-#include "visibility_control.h"
+#include <moveit/warehouse/visibility_control.h>
 
 namespace moveit_warehouse
 {

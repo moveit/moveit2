@@ -42,7 +42,7 @@
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 
-#include "visibility_control.h"
+#include <moveit/warehouse/visibility_control.h>
 
 namespace moveit_warehouse
 {

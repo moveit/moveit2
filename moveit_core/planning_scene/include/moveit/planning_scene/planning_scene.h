@@ -57,7 +57,7 @@
 #include <memory>
 #include "rclcpp/rclcpp.hpp"
 
-#include "visibility_control.h"
+#include <moveit/planning_scene/visibility_control.h>
 
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene

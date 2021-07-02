@@ -50,7 +50,7 @@
 #include <memory>
 #include <deque>
 
-#include "visibility_control.h"
+#include <moveit/trajectory_execution_manager/visibility_control.h>
 
 namespace trajectory_execution_manager
 {

@@ -38,7 +38,8 @@
 
 #include <moveit/collision_detection/collision_detector_allocator.h>
 #include <moveit/collision_detection/allvalid/collision_env_allvalid.h>
-#include "../visibility_control.h"
+
+#include <moveit/collision_detection/visibility_control.h>
 
 namespace collision_detection
 {

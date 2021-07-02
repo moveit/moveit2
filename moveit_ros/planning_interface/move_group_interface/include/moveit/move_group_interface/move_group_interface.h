@@ -60,7 +60,7 @@
 #include <utility>
 #include <tf2_ros/buffer.h>
 
-#include "visibility_control.h"
+#include <moveit/move_group_interface/visibility_control.h>
 
 namespace moveit
 {

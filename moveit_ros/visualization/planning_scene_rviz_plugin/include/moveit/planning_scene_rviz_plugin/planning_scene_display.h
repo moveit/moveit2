@@ -47,7 +47,7 @@
 #include <rclcpp/rclcpp.hpp>
 #endif
 
-#include "visibility_control.h"
+#include <moveit/planning_scene_rviz_plugin/visibility_control.h>
 
 namespace Ogre
 {

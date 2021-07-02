@@ -40,7 +40,7 @@
 #include <boost/thread.hpp>
 #include <boost/function.hpp>
 
-#include "visibility_control.h"
+#include <moveit/robot_interaction/visibility_control.h>
 
 namespace robot_interaction
 {

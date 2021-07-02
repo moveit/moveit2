@@ -39,7 +39,7 @@
 #include <moveit/mesh_filter/sensor_model.h>
 #include <string>
 
-#include "visibility_control.h"
+#include <moveit/mesh_filter/visibility_control.h>
 
 namespace mesh_filter
 {

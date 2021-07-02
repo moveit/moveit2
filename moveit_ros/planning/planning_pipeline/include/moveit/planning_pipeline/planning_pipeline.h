@@ -45,7 +45,7 @@
 
 #include <memory>
 
-#include "visibility_control.h"
+#include <moveit/planning_pipeline/visibility_control.h>
 
 /** \brief Planning pipeline */
 namespace planning_pipeline
