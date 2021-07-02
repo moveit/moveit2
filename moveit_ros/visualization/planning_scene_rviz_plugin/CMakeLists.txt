@@ -4,7 +4,7 @@ add_library(${MOVEIT_LIB_NAME}_core SHARED
   src/planning_scene_display.cpp
   include/moveit/planning_scene_rviz_plugin/planning_scene_display.h)
 set_target_properties(${MOVEIT_LIB_NAME}_core PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_compile_definitions(${MOVEIT_LIB_NAME}_core PRIVATE "MOVEIT_PLANNING_SCENE_RVIZ_PLUGIN_BUILDING_DLL")
+target_compile_definitions(${MOVEIT_LIB_NAME}_core PRIVATE "PLANNING_SCENE_RVIZ_PLUGIN_BUILDING_DLL")
 target_link_libraries(${MOVEIT_LIB_NAME}_core moveit_rviz_plugin_render_tools)
 ament_target_dependencies(${MOVEIT_LIB_NAME}_core
     rclcpp

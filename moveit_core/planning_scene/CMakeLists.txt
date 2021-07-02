@@ -3,7 +3,7 @@ set(MOVEIT_LIB_NAME moveit_planning_scene)
 add_library(${MOVEIT_LIB_NAME} SHARED src/planning_scene.cpp)
 #TODO: Fix the versioning
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE "MOVEIT_PLANNING_SCENE_BUILDING_DLL")
+target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE "PLANNING_SCENE_BUILDING_DLL")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   Boost
   rclcpp

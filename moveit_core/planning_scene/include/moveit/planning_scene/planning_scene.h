@@ -87,7 +87,7 @@ using ObjectTypeMap = std::map<std::string, object_recognition_msgs::msg::Object
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
     geometry, the robot geometry and state are maintained. */
-class MOVEIT_PLANNING_SCENE_PUBLIC PlanningScene : private boost::noncopyable,
+class PLANNING_SCENE_PUBLIC PlanningScene : private boost::noncopyable,
                                                    public std::enable_shared_from_this<PlanningScene>
 {
 public:

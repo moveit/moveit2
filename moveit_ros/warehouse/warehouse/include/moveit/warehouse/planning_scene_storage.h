@@ -56,7 +56,7 @@ typedef warehouse_ros::MessageCollection<moveit_msgs::msg::RobotTrajectory>::Ptr
 
 MOVEIT_CLASS_FORWARD(PlanningSceneStorage);  // Defines PlanningSceneStoragePtr, ConstPtr, WeakPtr... etc
 
-class MOVEIT_ROS_WAREHOUSE_PUBLIC PlanningSceneStorage : public MoveItMessageStorage
+class WAREHOUSE_PUBLIC PlanningSceneStorage : public MoveItMessageStorage
 {
 public:
   static const std::string DATABASE_NAME;

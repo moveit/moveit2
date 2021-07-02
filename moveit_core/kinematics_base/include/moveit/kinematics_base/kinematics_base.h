@@ -142,7 +142,7 @@ MOVEIT_CLASS_FORWARD(KinematicsBase);  // Defines KinematicsBasePtr, ConstPtr, W
  * @class KinematicsBase
  * @brief Provides an interface for kinematics solvers.
  */
-class MOVEIT_KINEMATICS_BASE_PUBLIC KinematicsBase
+class KINEMATICS_BASE_PUBLIC KinematicsBase
 {
 public:
   static const rclcpp::Logger LOGGER;

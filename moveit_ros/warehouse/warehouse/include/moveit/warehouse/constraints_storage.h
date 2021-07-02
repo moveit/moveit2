@@ -49,7 +49,7 @@ typedef warehouse_ros::MessageCollection<moveit_msgs::msg::Constraints>::Ptr Con
 
 MOVEIT_CLASS_FORWARD(ConstraintsStorage);  // Defines ConstraintsStoragePtr, ConstPtr, WeakPtr... etc
 
-class MOVEIT_ROS_WAREHOUSE_PUBLIC ConstraintsStorage : public MoveItMessageStorage
+class WAREHOUSE_PUBLIC ConstraintsStorage : public MoveItMessageStorage
 {
 public:
   static const std::string DATABASE_NAME;

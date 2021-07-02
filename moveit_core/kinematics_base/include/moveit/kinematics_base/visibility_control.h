@@ -33,38 +33,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef MOVEIT_KINEMATICS_BASE__VISIBILITY_CONTROL_H_
-#define MOVEIT_KINEMATICS_BASE__VISIBILITY_CONTROL_H_
+#ifndef KINEMATICS_BASE__VISIBILITY_CONTROL_H_
+#define KINEMATICS_BASE__VISIBILITY_CONTROL_H_
 
 // This logic was borrowed (then namespaced) from the examples on the gcc wiki:
 //     https://gcc.gnu.org/wiki/Visibility
 
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef __GNUC__
-#define MOVEIT_KINEMATICS_BASE_EXPORT __attribute__((dllexport))
-#define MOVEIT_KINEMATICS_BASE_IMPORT __attribute__((dllimport))
+#define KINEMATICS_BASE_EXPORT __attribute__((dllexport))
+#define KINEMATICS_BASE_IMPORT __attribute__((dllimport))
 #else
-#define MOVEIT_KINEMATICS_BASE_EXPORT __declspec(dllexport)
-#define MOVEIT_KINEMATICS_BASE_IMPORT __declspec(dllimport)
+#define KINEMATICS_BASE_EXPORT __declspec(dllexport)
+#define KINEMATICS_BASE_IMPORT __declspec(dllimport)
 #endif
-#ifdef MOVEIT_KINEMATICS_BASE_BUILDING_DLL
-#define MOVEIT_KINEMATICS_BASE_PUBLIC MOVEIT_KINEMATICS_BASE_EXPORT
+#ifdef KINEMATICS_BASE_BUILDING_DLL
+#define KINEMATICS_BASE_PUBLIC KINEMATICS_BASE_EXPORT
 #else
-#define MOVEIT_KINEMATICS_BASE_PUBLIC MOVEIT_KINEMATICS_BASE_IMPORT
+#define KINEMATICS_BASE_PUBLIC KINEMATICS_BASE_IMPORT
 #endif
-#define MOVEIT_KINEMATICS_BASE_PUBLIC_TYPE MOVEIT_KINEMATICS_BASE_PUBLIC
-#define MOVEIT_KINEMATICS_BASE_LOCAL
+#define KINEMATICS_BASE_PUBLIC_TYPE KINEMATICS_BASE_PUBLIC
+#define KINEMATICS_BASE_LOCAL
 #else
-#define MOVEIT_KINEMATICS_BASE_EXPORT __attribute__((visibility("default")))
-#define MOVEIT_KINEMATICS_BASE_IMPORT
+#define KINEMATICS_BASE_EXPORT __attribute__((visibility("default")))
+#define KINEMATICS_BASE_IMPORT
 #if __GNUC__ >= 4
-#define MOVEIT_KINEMATICS_BASE_PUBLIC __attribute__((visibility("default")))
-#define MOVEIT_KINEMATICS_BASE_LOCAL __attribute__((visibility("hidden")))
+#define KINEMATICS_BASE_PUBLIC __attribute__((visibility("default")))
+#define KINEMATICS_BASE_LOCAL __attribute__((visibility("hidden")))
 #else
-#define MOVEIT_KINEMATICS_BASE_PUBLIC
-#define MOVEIT_KINEMATICS_BASE_LOCAL
+#define KINEMATICS_BASE_PUBLIC
+#define KINEMATICS_BASE_LOCAL
 #endif
-#define MOVEIT_KINEMATICS_BASE_PUBLIC_TYPE
+#define KINEMATICS_BASE_PUBLIC_TYPE
 #endif
 
-#endif  // MOVEIT_KINEMATICS_BASE__VISIBILITY_CONTROL_H_
+#endif  // KINEMATICS_BASE__VISIBILITY_CONTROL_H_

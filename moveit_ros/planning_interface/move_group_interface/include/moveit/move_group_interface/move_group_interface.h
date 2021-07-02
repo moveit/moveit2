@@ -103,7 +103,7 @@ MOVEIT_CLASS_FORWARD(MoveGroupInterface);  // Defines MoveGroupInterfacePtr, Con
     \brief Client class to conveniently use the ROS interfaces provided by the move_group node.
 
     This class includes many default settings to make things easy to use. */
-class MOVEIT_MOVE_GROUP_INTERFACE_PUBLIC MoveGroupInterface
+class MOVE_GROUP_INTERFACE_PUBLIC MoveGroupInterface
 {
 public:
   /** \brief Default ROS parameter name from where to read the robot's URDF. Set to 'robot_description' */

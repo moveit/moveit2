@@ -62,7 +62,7 @@ MOVEIT_CLASS_FORWARD(PlanningSceneMonitor);  // Defines PlanningSceneMonitorPtr,
 /**
  * @brief PlanningSceneMonitor
  * Subscribes to the topic \e planning_scene */
-class MOVEIT_PLANNING_SCENE_MONITOR_PUBLIC PlanningSceneMonitor : private boost::noncopyable
+class PLANNING_SCENE_MONITOR_PUBLIC PlanningSceneMonitor : private boost::noncopyable
 {
 public:
   enum SceneUpdateType

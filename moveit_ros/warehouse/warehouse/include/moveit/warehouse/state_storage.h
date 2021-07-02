@@ -49,7 +49,7 @@ typedef warehouse_ros::MessageCollection<moveit_msgs::msg::RobotState>::Ptr Robo
 
 MOVEIT_CLASS_FORWARD(RobotStateStorage);  // Defines RobotStateStoragePtr, ConstPtr, WeakPtr... etc
 
-class MOVEIT_ROS_WAREHOUSE_PUBLIC RobotStateStorage : public MoveItMessageStorage
+class WAREHOUSE_PUBLIC RobotStateStorage : public MoveItMessageStorage
 {
 public:
   static const std::string DATABASE_NAME;

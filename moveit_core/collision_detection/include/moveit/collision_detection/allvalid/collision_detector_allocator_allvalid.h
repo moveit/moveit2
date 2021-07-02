@@ -44,7 +44,7 @@
 namespace collision_detection
 {
 /** \brief An allocator for AllValid collision detectors */
-class MOVEIT_COLLISION_DETECTION_PUBLIC CollisionDetectorAllocatorAllValid
+class COLLISION_DETECTION_PUBLIC CollisionDetectorAllocatorAllValid
   : public CollisionDetectorAllocatorTemplate<CollisionEnvAllValid, CollisionDetectorAllocatorAllValid>
 {
 public:

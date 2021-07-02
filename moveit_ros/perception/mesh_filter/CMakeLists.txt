@@ -16,7 +16,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   Boost
 )
 target_link_libraries(${MOVEIT_LIB_NAME} ${gl_LIBS} GLUT::GLUT ${GLEW_LIBRARIES})
-target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE "MOVEIT_MESH_FILTER_BUILDING_DLL")
+target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE "MESH_FILTER_BUILDING_DLL")
 
 target_link_libraries(${MOVEIT_LIB_NAME} ${gl_LIBS} ${SYSTEM_GL_LIBRARIES})
 
