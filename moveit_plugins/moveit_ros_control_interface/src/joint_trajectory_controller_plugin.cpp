@@ -34,7 +34,7 @@
 
 /* Author: Mathias Lüdtke */
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <moveit_ros_control_interface/ControllerHandle.h>
 #include <pluginlib/class_list_macros.hpp>
 #include <moveit_simple_controller_manager/follow_joint_trajectory_controller_handle.h>
@@ -48,11 +48,12 @@ namespace moveit_ros_control_interface
 class JointTrajectoryControllerAllocator : public ControllerHandleAllocator
 {
 public:
-  moveit_controller_manager::MoveItControllerHandlePtr alloc(const std::string& name,
+  moveit_controller_manager::MoveItControllerHandlePtr alloc(const rclcpp::Node::SharedPtr& node,
+                                                             const std::string& name,
                                                              const std::vector<std::string>& /* resources */) override
   {
     return std::make_shared<moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle>(
-        name, "follow_joint_trajectory");
+        node, name, "follow_joint_trajectory");
   }
 };
 
