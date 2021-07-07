@@ -211,6 +211,30 @@ inline ompl::base::Planner* MultiQueryPlannerAllocator::allocatePersistentPlanne
 {
   return nullptr;
 };
+template <>
+inline ompl::base::Planner*
+MultiQueryPlannerAllocator::allocatePersistentPlanner<ompl::geometric::PRM>(const ob::PlannerData& data)
+{
+  return new og::PRM(data);
+};
+template <>
+inline ompl::base::Planner*
+MultiQueryPlannerAllocator::allocatePersistentPlanner<ompl::geometric::PRMstar>(const ob::PlannerData& data)
+{
+  return new og::PRMstar(data);
+};
+template <>
+inline ompl::base::Planner*
+MultiQueryPlannerAllocator::allocatePersistentPlanner<ompl::geometric::LazyPRM>(const ob::PlannerData& data)
+{
+  return new og::LazyPRM(data);
+};
+template <>
+inline ompl::base::Planner*
+MultiQueryPlannerAllocator::allocatePersistentPlanner<ompl::geometric::LazyPRMstar>(const ob::PlannerData& data)
+{
+  return new og::LazyPRMstar(data);
+};
 
 PlanningContextManager::PlanningContextManager(moveit::core::RobotModelConstPtr robot_model,
                                                constraint_samplers::ConstraintSamplerManagerPtr csm)
