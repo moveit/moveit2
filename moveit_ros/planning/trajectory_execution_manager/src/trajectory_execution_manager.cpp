@@ -1075,6 +1075,8 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
     // empty trajectories don't need to configure anything
     return true;
   }
+
+  reloadControllerInformation();
   std::set<std::string> actuated_joints;
 
   auto is_actuated = [this](const std::string& joint_name) -> bool {
@@ -1769,11 +1771,11 @@ bool TrajectoryExecutionManager::ensureActiveControllers(const std::vector<std::
         for (const std::string& controller_to_activate : controllers_to_activate)
         {
           ControllerInformation& ci = known_controllers_[controller_to_activate];
-          ci.last_update_ = rclcpp::Time();
+          ci.last_update_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
         }
         // reset the state update cache
         for (const std::string& controller_to_activate : controllers_to_deactivate)
-          known_controllers_[controller_to_activate].last_update_ = rclcpp::Time();
+          known_controllers_[controller_to_activate].last_update_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
         return controller_manager_->switchControllers(controllers_to_activate, controllers_to_deactivate);
       }
       else
