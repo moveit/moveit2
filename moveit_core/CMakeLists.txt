@@ -13,7 +13,7 @@ find_package(Eigen3 REQUIRED)
 # Finds Boost Components
 include(ConfigExtras.cmake)
 
-find_package(BULLET 2.87 REQUIRED)
+find_package(Bullet 2.87 REQUIRED)
 find_package(FCL 0.5.0 REQUIRED)
 find_package(angles REQUIRED)
 find_package(OCTOMAP REQUIRED)
