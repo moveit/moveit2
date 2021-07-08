@@ -12,7 +12,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
   urdfdom
   urdfdom_headers
-  ${FCL_NAME}
+  FCL
   Boost
   visualization_msgs
 )

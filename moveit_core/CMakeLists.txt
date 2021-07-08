@@ -13,28 +13,8 @@ find_package(Eigen3 REQUIRED)
 # Finds Boost Components
 include(ConfigExtras.cmake)
 
-find_package(PkgConfig)
-set(BULLET_VERSION 2.87)
-
-if(PKGCONFIG_FOUND)
-  pkg_check_modules(BULLET bullet)
-  find_package_handle_standard_args(BULLET
-                                    REQUIRED_VARS BULLET_LIBRARIES BULLET_INCLUDE_DIRS
-                                    VERSION_VAR ${BULLET_VERSION})
-
-  pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
-  # replace LIBFCL_LIBRARIES with full path to the library
-  find_library(LIBFCL_LIBRARIES_FULL ${LIBFCL_LIBRARIES} ${LIBFCL_LIBRARY_DIRS})
-  set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
-  set(FCL_NAME "LIBFCL")
-else()
-  find_package(FCL 0.5.0)
-  set(LIBFCL_INCLUDE_DIRS "${FCL_INCLUDE_DIRS}")
-  set(FCL_NAME "FCL")
-  set(EXTRA_INCLUDE "FCL")
-  find_package(Bullet ${BULLET_VERSION} REQUIRED)
-endif()
-
+find_package(BULLET 2.87 REQUIRED)
+find_package(FCL 0.5.0 REQUIRED)
 find_package(angles REQUIRED)
 find_package(OCTOMAP REQUIRED)
 find_package(urdfdom REQUIRED)
@@ -145,15 +125,13 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   eigen3_cmake_module
   OCTOMAP
   Bullet
-  ${EXTRA_INCLUDE}
+  FCL
 )
 
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
 pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 
-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
-  ${LIBFCL_INCLUDE_DIRS}
-)
+include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS})
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
                     ${VERSION_FILE_PATH})
