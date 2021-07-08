@@ -28,7 +28,6 @@ else()
 endif()
 
 find_package(Bullet 2.87 REQUIRED)
-find_package(fcl 0.5.0 REQUIRED)
 find_package(angles REQUIRED)
 find_package(OCTOMAP REQUIRED)
 find_package(urdfdom REQUIRED)
