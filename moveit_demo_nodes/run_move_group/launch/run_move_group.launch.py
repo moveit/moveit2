@@ -90,6 +90,12 @@ def generate_launch_description():
         "publish_transforms_updates": True,
     }
 
+    joint_limits_yaml = {
+        "robot_description_planning": load_yaml(
+            "moveit_resources_panda_moveit_config", "config/joint_limits.yaml"
+        )
+    }
+
     # Start the actual move_group node/action server
     run_move_group_node = Node(
         package="moveit_ros_move_group",
@@ -103,6 +109,7 @@ def generate_launch_description():
             trajectory_execution,
             moveit_controllers,
             planning_scene_monitor_parameters,
+            joint_limits_yaml,
         ],
     )
 
@@ -121,6 +128,7 @@ def generate_launch_description():
             robot_description_semantic,
             ompl_planning_pipeline_config,
             kinematics_yaml,
+            joint_limits_yaml,
         ],
     )
 
