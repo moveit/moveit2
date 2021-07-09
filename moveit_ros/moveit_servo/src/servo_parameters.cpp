@@ -49,7 +49,7 @@ namespace moveit_servo
 {
 template <typename T>
 void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
-                       const rclcpp::Logger& logger)
+                       const rclcpp::Logger& logger, const T default_value)
 {
   try
   {
@@ -59,7 +59,7 @@ void declareOrGetParam(T& output_value, const std::string& param_name, const rcl
     }
     else
     {
-      output_value = node->declare_parameter<T>(param_name, T{});
+      output_value = node->declare_parameter<T>(param_name, default_value);
     }
   }
   catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
@@ -146,6 +146,10 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
   declareOrGetParam<double>(parameters->incoming_command_timeout, ns + ".incoming_command_timeout", node, logger);
   declareOrGetParam<int>(parameters->num_outgoing_halt_msgs_to_publish, ns + ".num_outgoing_halt_msgs_to_publish", node,
                          logger);
+  declareOrGetParam<bool>(parameters->halt_all_joints_in_joint_mode, ns + ".halt_all_joints_in_joint_mode", node,
+                          logger, true);
+  declareOrGetParam<bool>(parameters->halt_all_joints_in_cartesian_mode, ns + ".halt_all_joints_in_cartesian_mode",
+                          node, logger, true);
 
   // Configure handling of singularities and joint limits
   declareOrGetParam<double>(parameters->lower_singularity_threshold, ns + ".lower_singularity_threshold", node, logger);
