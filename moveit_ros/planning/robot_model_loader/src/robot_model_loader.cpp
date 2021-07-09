@@ -144,24 +144,22 @@ void RobotModelLoader::configure(const Options& opt)
           node_->get_parameter(param_name, has_position_limits);
 
           param_name = prefix + "has_velocity_limits";
-          bool has_vel_limits = false;
           if (!node_->has_parameter(param_name))
           {
             node_->declare_parameter(param_name);
           }
-          node_->get_parameter(param_name, has_vel_limits);
+          bool has_vel_limits = false;
+          if (node_->get_parameter(param_name, has_vel_limits))
+            joint_limit[joint_id].has_velocity_limits = has_vel_limits;
 
           param_name = prefix + "has_acceleration_limits";
-          bool has_acc_limits = false;
           if (!node_->has_parameter(param_name))
           {
             node_->declare_parameter(param_name);
           }
-          node_->get_parameter(param_name, has_acc_limits);
-
-          // All types of joints can handle velocity and acceleration limits
-          joint_limit[joint_id].has_velocity_limits = has_vel_limits;
-          joint_limit[joint_id].has_acceleration_limits = has_acc_limits;
+          bool has_acc_limits = false;
+          if (node_->get_parameter(param_name, has_acc_limits))
+            joint_limit[joint_id].has_acceleration_limits = has_acc_limits;
 
           if (has_position_limits && canSpecifyPosition(joint_model, joint_id))
           {
