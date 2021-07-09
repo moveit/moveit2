@@ -13,9 +13,6 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 ament_target_dependencies(${MOVEIT_LIB_NAME} SYSTEM
   BULLET
 )
-if(APPLE)
-  target_link_directories(${MOVEIT_LIB_NAME} PUBLIC ${BULLET_LIBRARY_DIRS})
-endif()
 
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp

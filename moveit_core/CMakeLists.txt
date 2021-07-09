@@ -13,8 +13,6 @@ find_package(Eigen3 REQUIRED)
 # Finds Boost Components
 include(ConfigExtras.cmake)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
-
 find_package(Bullet 2.87 REQUIRED)
 
 find_package(PkgConfig REQUIRED)
