@@ -2,6 +2,12 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.1 (2021-07-12)
+------------------
+* Fix test dependencies (`#539 <https://github.com/ros-planning/moveit2/issues/539>`_)
+* Add persistent planner support back (`#537 <https://github.com/ros-planning/moveit2/issues/537>`_)
+* Contributors: Jochen Sprickerhof, Michael Görner
+
 2.2.0 (2021-06-30)
 ------------------
 * Enable Rolling and Galactic CI (`#494 <https://github.com/ros-planning/moveit2/issues/494>`_)

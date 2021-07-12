@@ -2,6 +2,12 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.1 (2021-07-12)
+------------------
+* Pluginlib Deprecation Fix (`#542 <https://github.com/ros-planning/moveit2/issues/542>`_)
+* Set project VERSION in moveit_common, fix sonames (`#532 <https://github.com/ros-planning/moveit2/issues/532>`_)
+* Contributors: David V. Lu!!, Henning Kayser
+
 2.2.0 (2021-06-30)
 ------------------
 * Enable Bullet and fix plugin configuration (`#489 <https://github.com/ros-planning/moveit2/issues/489>`_)

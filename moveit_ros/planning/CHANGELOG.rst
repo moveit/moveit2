@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.1 (2021-07-12)
+------------------
+* Fix unwanted override of URDF joint limit defaults (`#546 <https://github.com/ros-planning/moveit2/issues/546>`_)
+* Contributors: Jafar Abdi
+
 2.2.0 (2021-06-30)
 ------------------
 * Fix stopping the TrajectoryExecutionManager's execution (`#506 <https://github.com/ros-planning/moveit2/issues/506>`_)

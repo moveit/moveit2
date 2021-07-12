@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.1 (2021-07-12)
+------------------
+
 2.2.0 (2021-06-30)
 ------------------
 * Compilation fixes for MoveIt on macOS (`#498 <https://github.com/ros-planning/moveit2/issues/498>`_)
