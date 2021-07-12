@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_warehouse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.1 (2021-07-12)
+------------------
+
 2.2.0 (2021-06-30)
 ------------------
 * Clean warehouse_ros OpenSSL depend (`#514 <https://github.com/ros-planning/moveit2/issues/514>`_)
