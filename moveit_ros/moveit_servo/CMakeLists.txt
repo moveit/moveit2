@@ -85,7 +85,7 @@ set_target_properties(${SERVO_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VE
 ament_target_dependencies(${SERVO_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(${SERVO_LIB_NAME} ${SERVO_PARAM_LIB_NAME})
 
-add_library(${POSE_TRACKING} SHARED src/pose_tracking.cpp src/servo_parameters.cpp)
+add_library(${POSE_TRACKING} SHARED src/pose_tracking.cpp)
 ament_target_dependencies(${POSE_TRACKING} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(${POSE_TRACKING} ${SERVO_LIB_NAME})
 
