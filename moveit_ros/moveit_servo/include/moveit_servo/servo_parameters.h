@@ -155,4 +155,31 @@ private:
   rcl_interfaces::msg::SetParametersResult setParametersCallback(std::vector<rclcpp::Parameter> parameters);
 };
 
+// Helper template for declaring and getting ros param
+// Must be declared here to ensure template class is built for required templates when included
+template <typename T>
+void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
+                       const rclcpp::Logger& logger)
+{
+  try
+  {
+    if (node->has_parameter(param_name))
+    {
+      node->get_parameter<T>(param_name, output_value);
+    }
+    else
+    {
+      output_value = node->declare_parameter<T>(param_name, T{});
+    }
+  }
+  catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
+  {
+    RCLCPP_WARN_STREAM(logger, "InvalidParameterTypeException(" << param_name << "): " << e.what());
+    RCLCPP_ERROR_STREAM(logger, "Error getting parameter \'" << param_name << "\', check parameter type in YAML file");
+    throw e;
+  }
+
+  RCLCPP_INFO_STREAM(logger, "Found parameter - " << param_name << ": " << output_value);
+}
+
 }  // namespace moveit_servo
