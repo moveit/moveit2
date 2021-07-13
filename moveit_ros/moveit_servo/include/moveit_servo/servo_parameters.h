@@ -164,7 +164,7 @@ void declareOrGetParam(T& output_value, const std::string& param_name, const rcl
     }
     else
     {
-      output_value = node->declare_parameter<T>(param_name, T{});
+      output_value = node->declare_parameter<T>(param_name, default_value);
     }
   }
   catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
