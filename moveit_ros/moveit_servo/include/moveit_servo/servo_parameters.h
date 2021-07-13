@@ -50,11 +50,6 @@ constexpr size_t ROS_QUEUE_SIZE = 2;
 
 using SetParameterCallbackType = std::function<rcl_interfaces::msg::SetParametersResult(const rclcpp::Parameter&)>;
 
-// Helper template for declaring and getting ros param
-template <typename T>
-void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
-                       const rclcpp::Logger& logger, const T default_value = T{});
-
 // ROS params to be read. See the yaml file in /config for a description of each.
 struct ServoParameters
 {
@@ -159,7 +154,7 @@ private:
 // Must be declared here to ensure template class is built for required templates when included
 template <typename T>
 void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
-                       const rclcpp::Logger& logger)
+                       const rclcpp::Logger& logger, const T default_value = T{})
 {
   try
   {
