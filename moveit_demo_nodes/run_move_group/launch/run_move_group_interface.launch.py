@@ -45,6 +45,12 @@ def generate_launch_description():
         "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
     )
 
+    joint_limits_yaml = {
+        "robot_description_planning": load_yaml(
+            "moveit_resources_panda_moveit_config", "config/joint_limits.yaml"
+        )
+    }
+
     # MoveGroupInterface demo executable
     run_move_group_demo = Node(
         name="run_move_group",
@@ -52,7 +58,12 @@ def generate_launch_description():
         executable="run_move_group",
         prefix="xterm -e",
         output="screen",
-        parameters=[robot_description, robot_description_semantic, kinematics_yaml],
+        parameters=[
+            robot_description,
+            robot_description_semantic,
+            kinematics_yaml,
+            joint_limits_yaml,
+        ],
     )
 
     return LaunchDescription([run_move_group_demo])

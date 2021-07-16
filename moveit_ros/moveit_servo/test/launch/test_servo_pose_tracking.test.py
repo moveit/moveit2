@@ -56,6 +56,11 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
     robot_description_semantic = {
         "robot_description_semantic": robot_description_semantic_config
     }
+    joint_limits_yaml = {
+        "robot_description_planning": load_yaml(
+            "moveit_resources_panda_moveit_config", "config/joint_limits.yaml"
+        )
+    }
 
     # Get parameters for the Pose Tracking node
     pose_tracking_yaml = load_yaml("moveit_servo", "config/pose_tracking_settings.yaml")
@@ -131,6 +136,7 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
             pose_tracking_params,
             servo_params,
             kinematics_yaml,
+            joint_limits_yaml,
         ],
         output="screen",
     )
