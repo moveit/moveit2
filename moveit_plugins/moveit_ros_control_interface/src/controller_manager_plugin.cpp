@@ -393,7 +393,7 @@ public:
     }
     request->strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
 
-    if (!request->start_controllers.empty() || request->stop_controllers.empty())
+    if (!request->start_controllers.empty() || !request->stop_controllers.empty())
     {  // something to switch?
       auto result_future = switch_controller_service_->async_send_request(request);
       if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
