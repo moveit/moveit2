@@ -131,18 +131,37 @@ void RobotModelLoader::configure(const Options& opt)
         std::string param_name;
         try
         {
-          // Need to check before setting to true
-          joint_limit[joint_id].has_position_limits = false;
+          const auto max_pos_name = prefix + "max_position";
+          if (!node_->has_parameter(max_pos_name))
+          {
+            node_->declare_parameter(max_pos_name);
+          }
+          double max_position;
+          if (node_->get_parameter(max_pos_name, max_position))
+          {
+            if (canSpecifyPosition(joint_model, joint_id))
+            {
+              joint_limit[joint_id].has_position_limits = true;
+              joint_limit[joint_id].max_position = max_position;
+            }
+          }
+
+          const auto min_pos_name = prefix + "min_position";
+          if (!node_->has_parameter(min_pos_name))
+          {
+            node_->declare_parameter(min_pos_name);
+          }
+          double min_position;
+          if (node_->get_parameter(min_pos_name, min_position))
+          {
+            if (canSpecifyPosition(joint_model, joint_id))
+            {
+              joint_limit[joint_id].has_position_limits = true;
+              joint_limit[joint_id].min_position = min_position;
+            }
+          }
 
           // Check if parameter has been declared to avoid exception
-          param_name = prefix + "has_position_limits";
-          bool has_position_limits = false;
-          if (!node_->has_parameter(param_name))
-          {
-            node_->declare_parameter(param_name);
-          }
-          node_->get_parameter(param_name, has_position_limits);
-
           param_name = prefix + "has_velocity_limits";
           if (!node_->has_parameter(param_name))
           {
@@ -160,30 +179,6 @@ void RobotModelLoader::configure(const Options& opt)
           bool has_acc_limits = false;
           if (node_->get_parameter(param_name, has_acc_limits))
             joint_limit[joint_id].has_acceleration_limits = has_acc_limits;
-
-          if (has_position_limits && canSpecifyPosition(joint_model, joint_id))
-          {
-            const auto max_pos_name = prefix + "max_position";
-            if (!node_->has_parameter(max_pos_name))
-            {
-              node_->declare_parameter(max_pos_name);
-            }
-
-            const auto min_pos_name = prefix + "min_position";
-            if (!node_->has_parameter(min_pos_name))
-            {
-              node_->declare_parameter(min_pos_name);
-            }
-
-            if (!node_->get_parameter(max_pos_name, joint_limit[joint_id].max_position) ||
-                !node_->get_parameter(min_pos_name, joint_limit[joint_id].min_position))
-            {
-              RCLCPP_ERROR(LOGGER, "Specified a position limit for joint: %s but did not set a max or min position",
-                           joint_limit[joint_id].joint_name.c_str());
-            }
-
-            joint_limit[joint_id].has_position_limits = has_position_limits;
-          }
 
           if (has_vel_limits)
           {
