@@ -84,7 +84,7 @@ bool checkTimeout(const rclcpp::Clock::SharedPtr& clock, rclcpp::Time& t, double
  * @param[in] claimed_interface claimed interface as joint_name/INTERFACE_TYPE
  * @return joint_name part of the /p claimed_interface
  */
-std::string getJointName(const std::string& claimed_interface)
+std::string parseJointNameFromResource(const std::string& claimed_interface)
 {
   const auto index = claimed_interface.find('/');
   if (index == std::string::npos)
@@ -158,7 +158,9 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
         auto& claimed_interfaces = active_controllers_.insert(std::make_pair(controller.name, controller))
                                        .first->second.claimed_interfaces;  // without namespace
         std::transform(claimed_interfaces.cbegin(), claimed_interfaces.cend(), claimed_interfaces.begin(),
-                       [](const std::string& claimed_interface) { return getJointName(claimed_interface); });
+                       [](const std::string& claimed_interface) {
+                         return parseJointNameFromResource(claimed_interface);
+                       });
       }
       if (loader_.isClassAvailable(controller.type))
       {
@@ -166,7 +168,9 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
         auto controller_it = managed_controllers_.insert(std::make_pair(absname, controller)).first;  // with namespace
         auto& claimed_interfaces = controller_it->second.claimed_interfaces;
         std::transform(claimed_interfaces.cbegin(), claimed_interfaces.cend(), claimed_interfaces.begin(),
-                       [](const std::string& claimed_interface) { return getJointName(claimed_interface); });
+                       [](const std::string& claimed_interface) {
+                         return parseJointNameFromResource(claimed_interface);
+                       });
         allocate(absname, controller_it->second);
       }
     }
@@ -193,7 +197,7 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
       // Collect claimed resources across different hardware interfaces
       for (const auto& resource : controller.claimed_interfaces)
       {
-        resources.push_back(getJointName(resource));
+        resources.push_back(parseJointNameFromResource(resource));
       }
 
       moveit_controller_manager::MoveItControllerHandlePtr handle =
