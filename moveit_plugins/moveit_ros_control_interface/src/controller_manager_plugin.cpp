@@ -144,7 +144,9 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
     auto result_future = list_controllers_service_->async_send_request(request);
     if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Failed to read controllers from " << list_controllers_service_->get_service_name());
+      RCLCPP_WARN_STREAM(LOGGER, "Failed to read controllers from " << list_controllers_service_->get_service_name()
+                                                                    << " within " << SERVICE_CALL_TIMEOUT
+                                                                    << " seconds");
       return;
     }
 
@@ -396,7 +398,10 @@ public:
       auto result_future = switch_controller_service_->async_send_request(request);
       if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "Could switch controllers at " << switch_controller_service_->get_service_name());
+        RCLCPP_ERROR_STREAM(LOGGER, "Couldn't switch controllers at " << switch_controller_service_->get_service_name()
+                                                                      << " within " << SERVICE_CALL_TIMEOUT
+                                                                      << " seconds");
+        return false;
       }
       discover(true);
       return result_future.get()->ok;
