@@ -5,8 +5,10 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/current_state_monitor.cpp
   src/trajectory_monitor.cpp
 )
+include(GenerateExportHeader)
+generate_export_header(${MOVEIT_LIB_NAME})
+target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE "PLANNING_SCENE_MONITOR_BUILDING_DLL")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_ros_occupancy_map_monitor
   message_filters
@@ -37,3 +39,4 @@ install(TARGETS demo_scene
 )
 
 install(DIRECTORY include/ DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)

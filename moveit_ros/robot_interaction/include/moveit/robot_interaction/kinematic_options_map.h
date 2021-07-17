@@ -40,23 +40,23 @@
 #include <boost/thread.hpp>
 #include <boost/function.hpp>
 
-#include <moveit/robot_interaction/visibility_control.h>
+#include "moveit_robot_interaction_export.h"
 
 namespace robot_interaction
 {
 // Maintains a set of KinematicOptions with a key/value mapping and a default
 // value.
-class ROBOT_INTERACTION_PUBLIC KinematicOptionsMap
+class KinematicOptionsMap
 {
 public:
   /// Constructor - set all options to reasonable default values.
   KinematicOptionsMap();
 
   /// When used as \e key this means the default value
-  static const std::string DEFAULT;
+  static MOVEIT_ROBOT_INTERACTION_EXPORT const std::string DEFAULT;
 
   /// When used as \e key this means set ALL keys (including default)
-  static const std::string ALL;
+  static MOVEIT_ROBOT_INTERACTION_EXPORT const std::string ALL;
 
   /// Set \e state using inverse kinematics.
   /// @param state the state to set

@@ -47,7 +47,7 @@
 #include <rclcpp/rclcpp.hpp>
 #endif
 
-#include <moveit/planning_scene_rviz_plugin/visibility_control.h>
+#include "moveit_planning_scene_rviz_plugin_core_export.h"
 
 namespace Ogre
 {
@@ -68,7 +68,7 @@ class EnumProperty;
 
 namespace moveit_rviz_plugin
 {
-class PLANNING_SCENE_RVIZ_PLUGIN_PUBLIC PlanningSceneDisplay : public rviz_common::Display
+class MOVEIT_PLANNING_SCENE_RVIZ_PLUGIN_CORE_EXPORT PlanningSceneDisplay : public rviz_common::Display
 {
   Q_OBJECT
 

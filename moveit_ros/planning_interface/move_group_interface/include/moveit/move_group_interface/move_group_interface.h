@@ -60,7 +60,7 @@
 #include <utility>
 #include <tf2_ros/buffer.h>
 
-#include <moveit/move_group_interface/visibility_control.h>
+#include "moveit_move_group_interface_export.h"
 
 namespace moveit
 {
@@ -103,11 +103,11 @@ MOVEIT_CLASS_FORWARD(MoveGroupInterface);  // Defines MoveGroupInterfacePtr, Con
     \brief Client class to conveniently use the ROS interfaces provided by the move_group node.
 
     This class includes many default settings to make things easy to use. */
-class MOVE_GROUP_INTERFACE_PUBLIC MoveGroupInterface
+class MoveGroupInterface
 {
 public:
   /** \brief Default ROS parameter name from where to read the robot's URDF. Set to 'robot_description' */
-  static const std::string ROBOT_DESCRIPTION;
+  static MOVEIT_MOVE_GROUP_INTERFACE_EXPORT const std::string ROBOT_DESCRIPTION;
 
   /** \brief Specification of options to use when constructing the MoveGroupInterface class */
   struct Options

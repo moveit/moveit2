@@ -40,7 +40,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit_msgs/msg/constraints.hpp>
 
-#include <moveit/warehouse/visibility_control.h>
+#include "moveit_warehouse_export.h"
 
 namespace moveit_warehouse
 {
@@ -49,14 +49,14 @@ typedef warehouse_ros::MessageCollection<moveit_msgs::msg::Constraints>::Ptr Con
 
 MOVEIT_CLASS_FORWARD(ConstraintsStorage);  // Defines ConstraintsStoragePtr, ConstPtr, WeakPtr... etc
 
-class WAREHOUSE_PUBLIC ConstraintsStorage : public MoveItMessageStorage
+class ConstraintsStorage : public MoveItMessageStorage
 {
 public:
-  static const std::string DATABASE_NAME;
+  static MOVEIT_WAREHOUSE_EXPORT const std::string DATABASE_NAME;
 
-  static const std::string CONSTRAINTS_ID_NAME;
-  static const std::string CONSTRAINTS_GROUP_NAME;
-  static const std::string ROBOT_NAME;
+  static MOVEIT_WAREHOUSE_EXPORT const std::string CONSTRAINTS_ID_NAME;
+  static MOVEIT_WAREHOUSE_EXPORT const std::string CONSTRAINTS_GROUP_NAME;
+  static MOVEIT_WAREHOUSE_EXPORT const std::string ROBOT_NAME;
 
   ConstraintsStorage(warehouse_ros::DatabaseConnection::Ptr conn);
 

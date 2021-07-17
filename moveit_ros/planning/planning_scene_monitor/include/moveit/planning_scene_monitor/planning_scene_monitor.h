@@ -53,7 +53,7 @@
 #include <memory>
 #include <thread>
 
-#include <moveit/planning_scene_monitor/visibility_control.h>
+#include "moveit_planning_scene_monitor_export.h"
 
 namespace planning_scene_monitor
 {
@@ -62,7 +62,7 @@ MOVEIT_CLASS_FORWARD(PlanningSceneMonitor);  // Defines PlanningSceneMonitorPtr,
 /**
  * @brief PlanningSceneMonitor
  * Subscribes to the topic \e planning_scene */
-class PLANNING_SCENE_MONITOR_PUBLIC PlanningSceneMonitor : private boost::noncopyable
+class PlanningSceneMonitor : private boost::noncopyable
 {
 public:
   enum SceneUpdateType
@@ -85,27 +85,27 @@ public:
   };
 
   /// The name of the topic used by default for receiving joint states
-  static const std::string DEFAULT_JOINT_STATES_TOPIC;  // "/joint_states"
+  static MOVEIT_PLANNING_SCENE_MONITOR_EXPORT const std::string DEFAULT_JOINT_STATES_TOPIC;  // "/joint_states"
 
   /// The name of the topic used by default for attached collision objects
-  static const std::string DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC;  // "/attached_collision_object"
+  static MOVEIT_PLANNING_SCENE_MONITOR_EXPORT const std::string DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC;  // "/attached_collision_object"
 
   /// The name of the topic used by default for receiving collision objects in the world
-  static const std::string DEFAULT_COLLISION_OBJECT_TOPIC;  // "/collision_object"
+  static MOVEIT_PLANNING_SCENE_MONITOR_EXPORT const std::string DEFAULT_COLLISION_OBJECT_TOPIC;  // "/collision_object"
 
   /// The name of the topic used by default for receiving geometry information about a planning scene (complete
   /// overwrite of world geometry)
-  static const std::string DEFAULT_PLANNING_SCENE_WORLD_TOPIC;  // "/planning_scene_world"
+  static MOVEIT_PLANNING_SCENE_MONITOR_EXPORT const std::string DEFAULT_PLANNING_SCENE_WORLD_TOPIC;  // "/planning_scene_world"
 
   /// The name of the topic used by default for receiving full planning scenes or planning scene diffs
-  static const std::string DEFAULT_PLANNING_SCENE_TOPIC;  // "/planning_scene"
+  static MOVEIT_PLANNING_SCENE_MONITOR_EXPORT const std::string DEFAULT_PLANNING_SCENE_TOPIC;  // "/planning_scene"
 
   /// The name of the service used by default for requesting full planning scene state
-  static const std::string DEFAULT_PLANNING_SCENE_SERVICE;  // "/get_planning_scene"
+  static MOVEIT_PLANNING_SCENE_MONITOR_EXPORT const std::string DEFAULT_PLANNING_SCENE_SERVICE;  // "/get_planning_scene"
 
   /// The name of the topic used by default for publishing the monitored planning scene (this is without "/" in the
   /// name, so the topic is prefixed by the node name)
-  static const std::string MONITORED_PLANNING_SCENE_TOPIC;  // "monitored_planning_scene"
+  static MOVEIT_PLANNING_SCENE_MONITOR_EXPORT const std::string MONITORED_PLANNING_SCENE_TOPIC;  // "monitored_planning_scene"
 
   /** @brief Constructor
    *  @param robot_description The name of the ROS parameter that contains the URDF (in string format)

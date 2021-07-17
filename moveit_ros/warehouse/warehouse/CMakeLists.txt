@@ -9,9 +9,11 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/state_storage.cpp
   src/warehouse_connector.cpp
 )
+include(GenerateExportHeader)
+generate_export_header(${MOVEIT_LIB_NAME})
+target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME} rclcpp Boost moveit_core warehouse_ros moveit_ros_planning)
-target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE WAREHOUSE_BUILDING_DLL)
 
 add_executable(moveit_warehouse_broadcast src/broadcast.cpp)
 ament_target_dependencies(moveit_warehouse_broadcast rclcpp Boost warehouse_ros moveit_ros_planning)
@@ -48,3 +50,4 @@ install(
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 install(DIRECTORY include/ DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)

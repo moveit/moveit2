@@ -57,7 +57,7 @@
 #include <memory>
 #include "rclcpp/rclcpp.hpp"
 
-#include <moveit/planning_scene/visibility_control.h>
+#include "moveit_planning_scene_export.h"
 
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene
@@ -87,7 +87,7 @@ using ObjectTypeMap = std::map<std::string, object_recognition_msgs::msg::Object
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
     geometry, the robot geometry and state are maintained. */
-class PLANNING_SCENE_PUBLIC PlanningScene : private boost::noncopyable,
+class PlanningScene : private boost::noncopyable,
                                             public std::enable_shared_from_this<PlanningScene>
 {
 public:
@@ -102,8 +102,8 @@ public:
       const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model,
       const collision_detection::WorldPtr& world = collision_detection::WorldPtr(new collision_detection::World()));
 
-  static const std::string OCTOMAP_NS;
-  static const std::string DEFAULT_SCENE_NAME;
+  static MOVEIT_PLANNING_SCENE_EXPORT const std::string OCTOMAP_NS;
+  static MOVEIT_PLANNING_SCENE_EXPORT const std::string DEFAULT_SCENE_NAME;
 
   ~PlanningScene();
 

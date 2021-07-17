@@ -39,15 +39,15 @@
 #include <moveit/collision_detection/collision_detector_allocator.h>
 #include <moveit/collision_detection_bullet/collision_env_bullet.h>
 
-#include <moveit/collision_detection_bullet/visibility_control.h>
+#include "moveit_collision_detection_bullet_export.h"
 
 namespace collision_detection
 {
 /** \brief An allocator for Bullet collision detectors */
-class COLLISION_DETECTION_BULLET_PUBLIC CollisionDetectorAllocatorBullet
+class CollisionDetectorAllocatorBullet
   : public CollisionDetectorAllocatorTemplate<CollisionEnvBullet, CollisionDetectorAllocatorBullet>
 {
 public:
-  static const std::string NAME;  // defined in collision_env_bullet.cpp
+  static MOVEIT_COLLISION_DETECTION_BULLET_EXPORT const std::string NAME;  // defined in collision_env_bullet.cpp
 };
 }  // namespace collision_detection

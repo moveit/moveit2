@@ -9,8 +9,10 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/bullet_integration/contact_checker_common.cpp
   src/bullet_integration/ros_bullet_utils.cpp
 )
+include(GenerateExportHeader)
+generate_export_header(${MOVEIT_LIB_NAME})
+target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_compile_definitions(${MOVEIT_LIB_NAME} PRIVATE COLLISION_DETECTION_BULLET_BUILDING_DLL)
 ament_target_dependencies(${MOVEIT_LIB_NAME} SYSTEM
   BULLET
 )
@@ -45,6 +47,7 @@ target_link_libraries(collision_detector_bullet_plugin
 )
 
 install(DIRECTORY include/ DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)
 install(TARGETS ${MOVEIT_LIB_NAME} EXPORT ${MOVEIT_LIB_NAME}
   TARGETS collision_detector_bullet_plugin EXPORT collision_detector_bullet_plugin
   LIBRARY DESTINATION lib
