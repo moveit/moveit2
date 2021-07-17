@@ -150,7 +150,8 @@ public:
   };
 
   /** \brief predefined sensor model for OpenNI compatible devices (e.g., PrimeSense, Kinect, Asus Xtion) */
-  static MOVEIT_MESH_FILTER_EXPORT const StereoCameraModel::Parameters& REGISTERED_PSDK_PARAMS;  // NOLINT(readability-identifier-naming)
+  static MOVEIT_MESH_FILTER_EXPORT const StereoCameraModel::Parameters&
+      REGISTERED_PSDK_PARAMS;  // NOLINT(readability-identifier-naming)
 
   /** \brief source code of the vertex shader used to render the meshes*/
   static MOVEIT_MESH_FILTER_EXPORT const std::string RENDER_VERTEX_SHADER_SOURCE;
