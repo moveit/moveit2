@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.1 (2021-07-12)
+------------------
+
 2.2.0 (2021-06-30)
 ------------------
 * Fix deprecated planner namespace in MoveGroup (`#524 <https://github.com/ros-planning/moveit2/issues/524>`_)

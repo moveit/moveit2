@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.1 (2021-07-12)
+------------------
+* Fix test dependencies (`#539 <https://github.com/ros-planning/moveit2/issues/539>`_)
+* Contributors: Jochen Sprickerhof
+
 2.2.0 (2021-06-30)
 ------------------
 * Enable Rolling and Galactic CI (`#494 <https://github.com/ros-planning/moveit2/issues/494>`_)

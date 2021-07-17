@@ -53,7 +53,7 @@ using SetParameterCallbackType = std::function<rcl_interfaces::msg::SetParameter
 // Helper template for declaring and getting ros param
 template <typename T>
 void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
-                       const rclcpp::Logger& logger);
+                       const rclcpp::Logger& logger, const T default_value = T{});
 
 // ROS params to be read. See the yaml file in /config for a description of each.
 struct ServoParameters
@@ -93,6 +93,8 @@ struct ServoParameters
   // Stopping behaviour
   double incoming_command_timeout;
   int num_outgoing_halt_msgs_to_publish;
+  bool halt_all_joints_in_joint_mode;
+  bool halt_all_joints_in_cartesian_mode;
   // Configure handling of singularities and joint limits
   double lower_singularity_threshold;
   double hard_stop_singularity_threshold;

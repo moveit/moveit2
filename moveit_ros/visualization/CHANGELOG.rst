@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.1 (2021-07-12)
+------------------
+
 2.2.0 (2021-06-30)
 ------------------
 * Declare warehouse params in rviz plugin (`#513 <https://github.com/ros-planning/moveit2/issues/513>`_)

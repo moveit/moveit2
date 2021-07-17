@@ -2,6 +2,12 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.1 (2021-07-12)
+------------------
+* moveit_servo: Add a parameter to halt only joints that violate position limits  (`#515 <https://github.com/ros-planning/moveit2/issues/515>`_)
+  Add halt_all_joints_in_joint_mode & halt_all_joints_in_cartesian_mode parameters to decide whether to halt all joints or some of them in case of joint limit violation
+* Contributors: Jafar Abdi
+
 2.2.0 (2021-06-30)
 ------------------
 * Allow a negative joint margin (`#501 <https://github.com/ros-planning/moveit2/issues/501>`_)
