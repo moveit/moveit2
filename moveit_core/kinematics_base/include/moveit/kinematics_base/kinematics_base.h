@@ -142,12 +142,12 @@ MOVEIT_CLASS_FORWARD(KinematicsBase);  // Defines KinematicsBasePtr, ConstPtr, W
  * @class KinematicsBase
  * @brief Provides an interface for kinematics solvers.
  */
-class KinematicsBase
+class MOVEIT_KINEMATICS_BASE_EXPORT KinematicsBase
 {
 public:
-  static MOVEIT_KINEMATICS_BASE_EXPORT const rclcpp::Logger LOGGER;
-  static MOVEIT_KINEMATICS_BASE_EXPORT const double DEFAULT_SEARCH_DISCRETIZATION; /* = 0.1 */
-  static MOVEIT_KINEMATICS_BASE_EXPORT const double DEFAULT_TIMEOUT;               /* = 1.0 */
+  static const rclcpp::Logger LOGGER;
+  static const double DEFAULT_SEARCH_DISCRETIZATION; /* = 0.1 */
+  static const double DEFAULT_TIMEOUT;               /* = 1.0 */
 
   /** @brief Signature for a callback to validate an IK solution. Typically used for collision checking. */
   using IKCallbackFn = boost::function<void(const geometry_msgs::msg::Pose&, const std::vector<double>&,

@@ -49,13 +49,13 @@ typedef warehouse_ros::MessageCollection<moveit_msgs::msg::RobotState>::Ptr Robo
 
 MOVEIT_CLASS_FORWARD(RobotStateStorage);  // Defines RobotStateStoragePtr, ConstPtr, WeakPtr... etc
 
-class RobotStateStorage : public MoveItMessageStorage
+class MOVEIT_WAREHOUSE_EXPORT RobotStateStorage : public MoveItMessageStorage
 {
 public:
-  static MOVEIT_WAREHOUSE_EXPORT const std::string DATABASE_NAME;
+  static const std::string DATABASE_NAME;
 
-  static MOVEIT_WAREHOUSE_EXPORT const std::string STATE_NAME;
-  static MOVEIT_WAREHOUSE_EXPORT const std::string ROBOT_NAME;
+  static const std::string STATE_NAME;
+  static const std::string ROBOT_NAME;
 
   RobotStateStorage(warehouse_ros::DatabaseConnection::Ptr conn);
 

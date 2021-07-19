@@ -87,7 +87,7 @@ using ObjectTypeMap = std::map<std::string, object_recognition_msgs::msg::Object
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
     geometry, the robot geometry and state are maintained. */
-class PlanningScene : private boost::noncopyable, public std::enable_shared_from_this<PlanningScene>
+class MOVEIT_PLANNING_SCENE_EXPORT PlanningScene : private boost::noncopyable, public std::enable_shared_from_this<PlanningScene>
 {
 public:
   /** \brief construct using an existing RobotModel */
@@ -101,8 +101,8 @@ public:
       const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model,
       const collision_detection::WorldPtr& world = collision_detection::WorldPtr(new collision_detection::World()));
 
-  static MOVEIT_PLANNING_SCENE_EXPORT const std::string OCTOMAP_NS;
-  static MOVEIT_PLANNING_SCENE_EXPORT const std::string DEFAULT_SCENE_NAME;
+  static const std::string OCTOMAP_NS;
+  static const std::string DEFAULT_SCENE_NAME;
 
   ~PlanningScene();
 
