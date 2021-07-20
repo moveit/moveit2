@@ -88,16 +88,14 @@ public:
   static const std::string DEFAULT_JOINT_STATES_TOPIC;  // "/joint_states"
 
   /// The name of the topic used by default for attached collision objects
-  static const std::string
-      DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC;  // "/attached_collision_object"
+  static const std::string DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC;  // "/attached_collision_object"
 
   /// The name of the topic used by default for receiving collision objects in the world
   static const std::string DEFAULT_COLLISION_OBJECT_TOPIC;  // "/collision_object"
 
   /// The name of the topic used by default for receiving geometry information about a planning scene (complete
   /// overwrite of world geometry)
-  static const std::string
-      DEFAULT_PLANNING_SCENE_WORLD_TOPIC;  // "/planning_scene_world"
+  static const std::string DEFAULT_PLANNING_SCENE_WORLD_TOPIC;  // "/planning_scene_world"
 
   /// The name of the topic used by default for receiving full planning scenes or planning scene diffs
   static const std::string DEFAULT_PLANNING_SCENE_TOPIC;  // "/planning_scene"
@@ -107,8 +105,7 @@ public:
 
   /// The name of the topic used by default for publishing the monitored planning scene (this is without "/" in the
   /// name, so the topic is prefixed by the node name)
-  static const std::string
-      MONITORED_PLANNING_SCENE_TOPIC;  // "monitored_planning_scene"
+  static const std::string MONITORED_PLANNING_SCENE_TOPIC;  // "monitored_planning_scene"
 
   /** @brief Constructor
    *  @param robot_description The name of the ROS parameter that contains the URDF (in string format)
