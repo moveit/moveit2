@@ -358,7 +358,7 @@ TEST_F(FloatingJointRobot, TestDefaultParameterization)
   // if we put an invalid type in the message.
   moveit::core::Transforms tf(robot_model_->getModelFrame());
 
-  moveit_msgs::OrientationConstraint ocm;
+  moveit_msgs::msg::OrientationConstraint ocm;
   ocm.link_name = "ee";
   ocm.header.frame_id = robot_model_->getModelFrame();
   ocm.orientation.y = 0.0;
@@ -377,7 +377,7 @@ TEST_F(FloatingJointRobot, TestDefaultParameterization)
   EXPECT_TRUE(oc.configure(ocm, tf));
 
   // check if the expected default parameterization was set
-  EXPECT_EQ(oc.getParameterizationType(), moveit_msgs::OrientationConstraint::XYZ_EULER_ANGLES);
+  EXPECT_EQ(oc.getParameterizationType(), moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES);
 }
 
 TEST_F(FloatingJointRobot, OrientationConstraintsParameterization)
@@ -388,13 +388,13 @@ TEST_F(FloatingJointRobot, OrientationConstraintsParameterization)
   robot_state.update();
 
   // center the orientation constraints around the current orientation of the link
-  geometry_msgs::Pose p = tf2::toMsg(robot_state.getGlobalLinkTransform("ee"));
+  geometry_msgs::msg::Pose p = tf2::toMsg(robot_state.getGlobalLinkTransform("ee"));
 
   // we also need the name of the base link
   moveit::core::Transforms tf(robot_model_->getModelFrame());
 
   // create message to configure orientation constraints
-  moveit_msgs::OrientationConstraint ocm;
+  moveit_msgs::msg::OrientationConstraint ocm;
   ocm.link_name = "ee";
   ocm.header.frame_id = robot_model_->getModelFrame();
   ocm.orientation = p.orientation;
@@ -405,12 +405,12 @@ TEST_F(FloatingJointRobot, OrientationConstraintsParameterization)
 
   // create orientation constraints with the xyz_euler_angle parameterization
   kinematic_constraints::OrientationConstraint oc_euler(robot_model_);
-  ocm.parameterization = moveit_msgs::OrientationConstraint::XYZ_EULER_ANGLES;
+  ocm.parameterization = moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES;
   EXPECT_TRUE(oc_euler.configure(ocm, tf));
 
   // create orientation constraints with the rotation_vector parameterization
   kinematic_constraints::OrientationConstraint oc_rotvec(robot_model_);
-  ocm.parameterization = moveit_msgs::OrientationConstraint::ROTATION_VECTOR;
+  ocm.parameterization = moveit_msgs::msg::OrientationConstraint::ROTATION_VECTOR;
   EXPECT_TRUE(oc_rotvec.configure(ocm, tf));
 
   // Constraints should be satisfied for current state because we created them around the current orientation
@@ -459,7 +459,7 @@ TEST_F(FloatingJointRobot, OrientationConstraintsParameterization)
   robot_state.setToDefaultValues();
   robot_state.update();
 
-  ocm.parameterization = moveit_msgs::OrientationConstraint::XYZ_EULER_ANGLES;
+  ocm.parameterization = moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES;
   ocm.orientation = tf2::toMsg(xyz_intrinsix_to_quat(0.1, 0.2, -0.3));
   EXPECT_TRUE(oc_euler.configure(ocm, tf));
   EXPECT_TRUE(oc_euler.decide(robot_state).satisfied);
@@ -468,7 +468,7 @@ TEST_F(FloatingJointRobot, OrientationConstraintsParameterization)
   EXPECT_TRUE(oc_euler.configure(ocm, tf));
   EXPECT_FALSE(oc_euler.decide(robot_state).satisfied);
 
-  ocm.parameterization = moveit_msgs::OrientationConstraint::ROTATION_VECTOR;
+  ocm.parameterization = moveit_msgs::msg::OrientationConstraint::ROTATION_VECTOR;
   ocm.orientation = tf2::toMsg(rotation_vector_to_quat(0.1, 0.2, -0.3));
   EXPECT_TRUE(oc_rotvec.configure(ocm, tf));
   EXPECT_TRUE(oc_rotvec.decide(robot_state).satisfied);

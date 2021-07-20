@@ -615,12 +615,12 @@ bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstra
 
   parameterization_type_ = oc.parameterization;
   // validate the parameterization, set to default value if invalid
-  if (parameterization_type_ != moveit_msgs::OrientationConstraint::XYZ_EULER_ANGLES &&
-      parameterization_type_ != moveit_msgs::OrientationConstraint::ROTATION_VECTOR)
+  if (parameterization_type_ != moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES &&
+      parameterization_type_ != moveit_msgs::msg::OrientationConstraint::ROTATION_VECTOR)
   {
-    ROS_WARN_NAMED("kinematic_constraints",
-                   "Unknown parameterization for orientation constraint tolerance, using default (XYZ_EULER_ANGLES).");
-    parameterization_type_ = moveit_msgs::OrientationConstraint::XYZ_EULER_ANGLES;
+    RCLCPP_WARN(LOGGER,
+                "Unknown parameterization for orientation constraint tolerance, using default (XYZ_EULER_ANGLES).");
+    parameterization_type_ = moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES;
   }
 
   absolute_x_axis_tolerance_ = fabs(oc.absolute_x_axis_tolerance);
@@ -691,7 +691,7 @@ ConstraintEvaluationResult OrientationConstraint::decide(const moveit::core::Rob
   // This needs to live outside the if-block scope (as xyz_rotation points to its data).
   std::tuple<Eigen::Vector3d, bool> euler_angles_error;
   Eigen::Vector3d xyz_rotation;
-  if (parameterization_type_ == moveit_msgs::OrientationConstraint::XYZ_EULER_ANGLES)
+  if (parameterization_type_ == moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES)
   {
     euler_angles_error = CalcEulerAngles(diff.linear());
     // Converting from a rotation matrix to intrinsic XYZ Euler angles has 2 singularities:
@@ -712,7 +712,7 @@ ConstraintEvaluationResult OrientationConstraint::decide(const moveit::core::Rob
     // Account for angle wrapping
     xyz_rotation = xyz_rotation.unaryExpr(&normalizeAbsoluteAngle);
   }
-  else if (parameterization_type_ == moveit_msgs::OrientationConstraint::ROTATION_VECTOR)
+  else if (parameterization_type_ == moveit_msgs::msg::OrientationConstraint::ROTATION_VECTOR)
   {
     Eigen::AngleAxisd aa(diff.linear());
     xyz_rotation = aa.axis() * aa.angle();
@@ -723,8 +723,7 @@ ConstraintEvaluationResult OrientationConstraint::decide(const moveit::core::Rob
   else
   {
     /* The parameterization type should be validated in configure, so this should never happen. */
-    ROS_ERROR_STREAM_NAMED("kinematic_constraints",
-                           "The parameterization type for the orientation constraints is invalid.");
+    RCLCPP_ERROR(LOGGER, "The parameterization type for the orientation constraints is invalid.");
   }
 
   bool result = xyz_rotation(2) < absolute_z_axis_tolerance_ + std::numeric_limits<double>::epsilon() &&
@@ -739,8 +738,8 @@ ConstraintEvaluationResult OrientationConstraint::decide(const moveit::core::Rob
                 "Orientation constraint %s for link '%s'. Quaternion desired: %f %f %f %f, quaternion "
                 "actual: %f %f %f %f, error: x=%f, y=%f, z=%f, tolerance: x=%f, y=%f, z=%f",
                 result ? "satisfied" : "violated", link_model_->getName().c_str(), q_des.x(), q_des.y(), q_des.z(),
-                q_des.w(), q_act.x(), q_act.y(), q_act.z(), q_act.w(), xyz(0), xyz(1), xyz(2),
-                absolute_x_axis_tolerance_, absolute_y_axis_tolerance_, absolute_z_axis_tolerance_);
+                q_des.w(), q_act.x(), q_act.y(), q_act.z(), q_act.w(), xyz_rotation(0), xyz_rotation(1),
+                xyz_rotation(2), absolute_x_axis_tolerance_, absolute_y_axis_tolerance_, absolute_z_axis_tolerance_);
   }
 
   return ConstraintEvaluationResult(result, constraint_weight_ * (xyz_rotation(0) + xyz_rotation(1) + xyz_rotation(2)));
