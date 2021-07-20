@@ -46,17 +46,17 @@ namespace robot_interaction
 {
 // Maintains a set of KinematicOptions with a key/value mapping and a default
 // value.
-class KinematicOptionsMap
+class MOVEIT_ROBOT_INTERACTION_EXPORT KinematicOptionsMap
 {
 public:
   /// Constructor - set all options to reasonable default values.
   KinematicOptionsMap();
 
   /// When used as \e key this means the default value
-  static MOVEIT_ROBOT_INTERACTION_EXPORT const std::string DEFAULT;
+  static const std::string DEFAULT;
 
   /// When used as \e key this means set ALL keys (including default)
-  static MOVEIT_ROBOT_INTERACTION_EXPORT const std::string ALL;
+  static const std::string ALL;
 
   /// Set \e state using inverse kinematics.
   /// @param state the state to set

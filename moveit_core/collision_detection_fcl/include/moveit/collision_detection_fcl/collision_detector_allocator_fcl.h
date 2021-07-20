@@ -44,10 +44,10 @@
 namespace collision_detection
 {
 /** \brief An allocator for FCL collision detectors */
-class CollisionDetectorAllocatorFCL
+class MOVEIT_COLLISION_DETECTION_FCL_EXPORT CollisionDetectorAllocatorFCL
   : public CollisionDetectorAllocatorTemplate<CollisionEnvFCL, CollisionDetectorAllocatorFCL>
 {
 public:
-  static MOVEIT_COLLISION_DETECTION_FCL_EXPORT const std::string NAME;  // defined in collision_env_fcl.cpp
+  static const std::string NAME;  // defined in collision_env_fcl.cpp
 };
 }  // namespace collision_detection

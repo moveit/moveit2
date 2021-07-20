@@ -59,10 +59,10 @@ MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager);  // Defines TrajectoryExecutio
 // Two modes:
 // Managed controllers
 // Unmanaged controllers: given the trajectory,
-class TrajectoryExecutionManager
+class MOVEIT_TRAJECTORY_EXECUTION_MANAGER_EXPORT TrajectoryExecutionManager
 {
 public:
-  static MOVEIT_TRAJECTORY_EXECUTION_MANAGER_EXPORT const std::string EXECUTION_EVENT_TOPIC;
+  static const std::string EXECUTION_EVENT_TOPIC;
 
   /// Definition of the function signature that is called when the execution of all the pushed trajectories completes.
   /// The status of the overall execution is passed as argument

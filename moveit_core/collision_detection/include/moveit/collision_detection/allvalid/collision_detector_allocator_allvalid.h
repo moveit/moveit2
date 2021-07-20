@@ -44,10 +44,10 @@
 namespace collision_detection
 {
 /** \brief An allocator for AllValid collision detectors */
-class CollisionDetectorAllocatorAllValid
+class MOVEIT_COLLISION_DETECTION_EXPORT CollisionDetectorAllocatorAllValid
   : public CollisionDetectorAllocatorTemplate<CollisionEnvAllValid, CollisionDetectorAllocatorAllValid>
 {
 public:
-  static MOVEIT_COLLISION_DETECTION_EXPORT const std::string NAME;  // defined in collision_env_allvalid.cpp
+  static const std::string NAME;  // defined in collision_env_allvalid.cpp
 };
 }  // namespace collision_detection
