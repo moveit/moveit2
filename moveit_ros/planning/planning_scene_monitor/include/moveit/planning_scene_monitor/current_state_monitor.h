@@ -56,6 +56,53 @@ class CurrentStateMonitor
   using TFConnection = boost::signals2::connection;
 
 public:
+  /**
+   * @brief      This class contains the rcl interfaces for easier testing
+   */
+  class RclInterface
+  {
+  public:
+    /**
+     * @brief      Destroys the object.
+     */
+    virtual ~RclInterface() = default;
+
+    /**
+     * @brief      Get the current time
+     *
+     * @return     Time object representing the time when this is called
+     */
+    virtual rclcpp::Time now() const = 0;
+
+    /**
+     * @brief      Creates a joint state subscription
+     *
+     * @param[in]  topic     The topic
+     * @param[in]  callback  The callback
+     */
+    virtual void createJointStateSubscription(const std::string& topic, JointStateUpdateCallback callback) = 0;
+
+    /**
+     * @brief      Reset the joint state subscription
+     */
+    virtual void resetJointStateSubscription() = 0;
+
+    /**
+     * @brief      Get the joint state topic name
+     *
+     * @return     The joint state topic name.
+     */
+    virtual std::string getJointStateTopicName() const = 0;
+  };
+
+  /** @brief Constructor.
+   *  @param rcl_interface   The rcl middleware interface
+   *  @param robot_model     The current kinematic model to build on
+   *  @param tf_buffer       A pointer to the tf2_ros Buffer to use
+   */
+  CurrentStateMonitor(std::unique_ptr<RclInterface> rcl_interface, const moveit::core::RobotModelConstPtr& robot_model,
+                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
+
   /** @brief Constructor.
    *  @param node A shared_ptr to a node used for subscription to joint_states_topic
    *  @param robot_model The current kinematic model to build on
@@ -111,7 +158,7 @@ public:
    */
   inline bool haveCompleteState(const rclcpp::Duration& age) const
   {
-    return haveCompleteStateHelper(node_->now() - age, nullptr);
+    return haveCompleteStateHelper(rcl_interface_->now() - age, nullptr);
   }
 
   /** @brief Query whether we have joint state information for all DOFs in the kinematic model
@@ -140,7 +187,7 @@ public:
    */
   inline bool haveCompleteState(const rclcpp::Duration& age, std::vector<std::string>& missing_joints) const
   {
-    return haveCompleteStateHelper(node_->now() - age, &missing_joints);
+    return haveCompleteStateHelper(rcl_interface_->now() - age, &missing_joints);
   }
 
   /** @brief Get the current state
@@ -219,7 +266,7 @@ private:
   void jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
   void tfCallback();
 
-  std::shared_ptr<rclcpp::Node> node_;
+  std::unique_ptr<RclInterface> rcl_interface_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   moveit::core::RobotModelConstPtr robot_model_;
   moveit::core::RobotState robot_state_;
@@ -228,7 +275,6 @@ private:
   bool copy_dynamics_;  // Copy velocity and effort from joint_state
   rclcpp::Time monitor_start_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
   double error_;
-  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
   rclcpp::Time current_state_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
   mutable std::mutex state_update_lock_;
