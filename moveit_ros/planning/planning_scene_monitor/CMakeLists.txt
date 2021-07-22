@@ -41,15 +41,11 @@ install(DIRECTORY include/ DESTINATION include)
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_cmake_gmock REQUIRED)
-  find_package(ros_testing REQUIRED)
-  find_package(moveit_core REQUIRED)
 
   ament_add_gmock(current_state_monitor_tests
     test/current_state_monitor_tests.cpp
   )
   target_link_libraries(current_state_monitor_tests
-    moveit_core::moveit_test_utils
-    moveit_core::moveit_robot_model
     ${MOVEIT_LIB_NAME}
   )
 endif()

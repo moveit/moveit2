@@ -64,7 +64,7 @@ RobotState::RobotState(const RobotModelConstPtr& robot_model)
   , dirty_collision_body_transforms_(nullptr)
   , rng_(nullptr)
 {
-  if (!robot_model)
+  if (robot_model == nullptr)
   {
     throw std::invalid_argument("RobotState cannot be constructed with nullptr RobotModelConstPtr");
   }

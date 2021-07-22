@@ -57,16 +57,15 @@ struct MockRclInterface : public planning_scene_monitor::CurrentStateMonitor::Rc
 TEST(StartStopTest, CurrentStateMonitorTests)
 {
   auto mock_rcl_interface = std::make_unique<MockRclInterface>();
-  auto clock = std::make_shared<rclcpp::Clock>();
-  moveit::core::RobotModelPtr robot_model = moveit::core::loadTestingRobotModel("panda");
-  auto tf_buffer = std::make_shared<tf2_ros::Buffer>(clock);
-
   EXPECT_CALL(*mock_rcl_interface, createJointStateSubscription);
   EXPECT_CALL(*mock_rcl_interface, resetJointStateSubscription);
   EXPECT_CALL(*mock_rcl_interface, now);
 
-  planning_scene_monitor::CurrentStateMonitor current_state_monitor(std::move(mock_rcl_interface), robot_model,
-                                                                    tf_buffer);
+  planning_scene_monitor::CurrentStateMonitor current_state_monitor{
+    std::move(mock_rcl_interface), moveit::core::loadTestingRobotModel("panda"),
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+  };
+
   current_state_monitor.startStateMonitor();
 
   EXPECT_TRUE(current_state_monitor.isActive());
@@ -78,25 +77,10 @@ TEST(StartStopTest, CurrentStateMonitorTests)
 
 TEST(NoModelTest, CurrentStateMonitorTests)
 {
-  auto mock_rcl_interface = std::make_unique<MockRclInterface>();
-  auto clock = std::make_shared<rclcpp::Clock>();
-  moveit::core::RobotModelPtr robot_model = nullptr;
-  auto tf_buffer = std::make_shared<tf2_ros::Buffer>(clock);
-
-  try
-  {
-    planning_scene_monitor::CurrentStateMonitor current_state_monitor(std::move(mock_rcl_interface), robot_model,
-                                                                      tf_buffer);
-    FAIL() << "Expected std::invalid_argument";
-  }
-  catch (std::invalid_argument const& err)
-  {
-    EXPECT_EQ(err.what(), std::string("RobotState cannot be constructed with nullptr RobotModelConstPtr"));
-  }
-  catch (...)
-  {
-    FAIL() << "Expected std::invalid_argument";
-  }
+  EXPECT_THROW(planning_scene_monitor::CurrentStateMonitor _(
+                   std::make_unique<MockRclInterface>(), nullptr,
+                   std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())),
+               std::invalid_argument);
 }
 
 int main(int argc, char** argv)
