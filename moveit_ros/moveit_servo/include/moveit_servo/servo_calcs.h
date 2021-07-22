@@ -127,9 +127,6 @@ protected:
   /** \brief Parse the incoming joint msg for the joints of our MoveGroup */
   void updateJoints();
 
-  /** \brief Finds the worst case stopping time based on accel limits, for collision checking */
-  void calculateWorstCaseStopTime();
-
   /**
    * Checks a JointJog msg for valid (non-NaN) velocities
    * @param cmd the desired joint servo command
