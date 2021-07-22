@@ -48,8 +48,8 @@
 
 namespace moveit_rviz_plugin
 {
-MOVEIT_CLASS_FORWARD(OcTreeRender)  // Defines OcTreeRenderPtr, ConstPtr, WeakPtr... etc
-MOVEIT_CLASS_FORWARD(RenderShapes)  // Defines RenderShapesPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(OcTreeRender);  // Defines OcTreeRenderPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(RenderShapes);  // Defines RenderShapesPtr, ConstPtr, WeakPtr... etc
 
 class RenderShapes
 {

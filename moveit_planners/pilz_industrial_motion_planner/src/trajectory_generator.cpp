@@ -36,8 +36,6 @@
 
 #include <cassert>
 
-#include <eigen_conversions/eigen_kdl.h>
-#include <eigen_conversions/eigen_msg.h>
 #include <kdl/velocityprofile_trap.hpp>
 #include <moveit/robot_state/conversions.h>
 
@@ -187,7 +185,7 @@ void TrajectoryGenerator::checkGoalConstraints(
   if (goal_constraints.size() != 1)
   {
     std::ostringstream os;
-    os << "Exaclty one goal constraint required, but " << goal_constraints.size() << " goal constraints given";
+    os << "Exactly one goal constraint required, but " << goal_constraints.size() << " goal constraints given";
     throw NotExactlyOneGoalConstraintGiven(os.str());
   }
 

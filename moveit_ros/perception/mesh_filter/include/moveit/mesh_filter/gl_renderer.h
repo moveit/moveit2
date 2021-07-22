@@ -44,11 +44,13 @@
 #include <GL/gl.h>
 #endif
 #include <string>
-#include <boost/thread.hpp>
+#include <thread>
+#include <mutex>
+#include <map>
 
 namespace mesh_filter
 {
-MOVEIT_CLASS_FORWARD(GLRenderer)  // Defines GLRendererPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(GLRenderer);  // Defines GLRendererPtr, ConstPtr, WeakPtr... etc
 
 /** \brief Abstracts the OpenGL frame buffer objects, and provides an interface to render meshes, and retrieve the color
  * and depth ap from opengl.
@@ -294,10 +296,10 @@ private:
   float cy_;
 
   /** \brief map from thread id to OpenGL context */
-  static std::map<boost::thread::id, std::pair<unsigned, GLuint> > context_;
+  static std::map<std::thread::id, std::pair<unsigned, GLuint> > context_;
 
   /* \brief lock for context map */
-  static boost::mutex context_lock_;
+  static std::mutex context_lock_;
 
   static bool glutInitialized_;
 };

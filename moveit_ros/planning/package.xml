@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package format="2">
   <name>moveit_ros_planning</name>
-  <version>2.1.4</version>
+  <version>2.2.1</version>
   <description>Planning components of MoveIt that use ROS</description>
   <author email="isucan@google.com">Ioan Sucan</author>
   <author email="robot.moveit@gmail.com">Sachin Chitta</author>
@@ -41,6 +41,13 @@
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
+
+  <test_depend>moveit_resources_panda_moveit_config</test_depend>
+
+  <!-- we moved moveit_cpp from planning_interface in this version,
+       so files conflict. replace provides a migration path for deb/rpm -->
+  <conflict version_lt="2.1.5">moveit_ros_planning_interface</conflict>
+  <replace version_lt="2.1.5">moveit_ros_planning_interface</replace>
 
   <export>
     <build_type>ament_cmake</build_type>

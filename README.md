@@ -6,9 +6,10 @@ The MoveIt Motion Planning Framework for **ROS 2**. For ROS 1, see [MoveIt 1](ht
 
 ## Continuous Integration Status
 
-
 [![Formatting (pre-commit)](https://github.com/ros-planning/moveit2/actions/workflows/format.yaml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/format.yaml?query=branch%3Amain)
 [![Build and Test (Foxy)](https://github.com/ros-planning/moveit2/actions/workflows/build_and_test.yaml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/build_and_test.yaml?query=branch%3Amain)
+[![Build and Test (Rolling)](https://github.com/ros-planning/moveit2/actions/workflows/build_and_test_rolling.yaml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/build_and_test_rolling.yaml?query=branch%3Amain)
+[![Build and Test (Galactic)](https://github.com/ros-planning/moveit2/actions/workflows/build_and_test_galactic.yaml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/build_and_test_galactic.yaml?query=branch%3Amain)
 [![Code Coverage](https://codecov.io/gh/ros-planning/moveit2/branch/main/graph/badge.svg?token=W7uHKcY0ly)](https://codecov.io/gh/ros-planning/moveit2)
 
 ## General MoveIt Documentation

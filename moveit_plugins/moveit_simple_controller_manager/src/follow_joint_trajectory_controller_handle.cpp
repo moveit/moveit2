@@ -63,14 +63,17 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
 
   rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SendGoalOptions send_goal_options;
   // Active callback
-  send_goal_options.goal_response_callback = [this](const auto& future) {
-    RCLCPP_INFO_STREAM(LOGGER, name_ << " started execution");
-    const auto& goal_handle = future.get();
-    if (!goal_handle)
-      RCLCPP_WARN(LOGGER, "Goal request rejected");
-    else
-      RCLCPP_INFO(LOGGER, "Goal request accepted!");
-  };
+  send_goal_options.goal_response_callback =
+      [this](
+          std::shared_future<rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::GoalHandle::SharedPtr>
+              future) {
+        RCLCPP_INFO_STREAM(LOGGER, name_ << " started execution");
+        const auto& goal_handle = future.get();
+        if (!goal_handle)
+          RCLCPP_WARN(LOGGER, "Goal request rejected");
+        else
+          RCLCPP_INFO(LOGGER, "Goal request accepted!");
+      };
 
   done_ = false;
   last_exec_ = moveit_controller_manager::ExecutionStatus::RUNNING;

@@ -42,7 +42,7 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_interface/planning_interface.h>
 
-#include <pluginlib/class_loader.h>
+#include <pluginlib/class_loader.hpp>
 
 // Boost includes
 #include <boost/scoped_ptr.hpp>
@@ -50,7 +50,7 @@
 namespace pilz_industrial_motion_planner
 {
 /**
- * @brief Moveit Plugin for Planning with Standart Robot Commands
+ * @brief MoveIt Plugin for Planning with Standard Robot Commands
  * This planner is dedicated to return a instance of PlanningContext that
  * corresponds to the requested motion command
  * set as planner_id in the MotionPlanRequest).
@@ -134,6 +134,6 @@ private:
   pilz_industrial_motion_planner::CartesianLimit cartesian_limit_;
 };
 
-MOVEIT_CLASS_FORWARD(CommandPlanner)
+MOVEIT_CLASS_FORWARD(CommandPlanner);
 
 }  // namespace pilz_industrial_motion_planner

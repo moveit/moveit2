@@ -207,6 +207,14 @@ void MotionPlanningDisplay::onInitialize()
 {
   PlanningSceneDisplay::onInitialize();
 
+  // Prepare database parameters
+  if (!node_->has_parameter("warehouse_host"))
+    node_->declare_parameter<std::string>("warehouse_host", "127.0.0.1");
+  if (!node_->has_parameter("warehouse_plugin"))
+    node_->declare_parameter<std::string>("warehouse_plugin", "warehouse_ros_mongo::MongoDatabaseConnection");
+  if (!node_->has_parameter("warehouse_port"))
+    node_->declare_parameter<int>("warehouse_port", 33829);
+
   // Planned Path Display
   trajectory_visual_->onInitialize(node_, planning_scene_node_, context_);
   QColor qcolor = attached_body_color_property_->getColor();
@@ -309,11 +317,14 @@ void MotionPlanningDisplay::reset()
   // Planned Path Display
   trajectory_visual_->reset();
 
+  bool enabled = this->isEnabled();
   frame_->disable();
-  frame_->enable();
-
-  query_robot_start_->setVisible(query_start_state_property_->getBool());
-  query_robot_goal_->setVisible(query_goal_state_property_->getBool());
+  if (enabled)
+  {
+    frame_->enable();
+    query_robot_start_->setVisible(query_start_state_property_->getBool());
+    query_robot_goal_->setVisible(query_goal_state_property_->getBool());
+  }
 }
 
 void MotionPlanningDisplay::backgroundJobUpdate(moveit::tools::BackgroundProcessing::JobEvent /*unused*/,
