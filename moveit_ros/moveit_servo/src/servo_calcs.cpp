@@ -44,8 +44,10 @@
 
 #include <std_msgs/msg/bool.h>
 // Optionally schedule a thread deadline for closer-to-realtime performance
+#if defined(__linux__)
 #include <linux/sched.h>
 #include <sys/syscall.h>
+#endif
 
 // #include <moveit_servo/make_shared_from_pool.h> // TODO(adamp): create an issue about this
 #include <moveit_servo/servo_calcs.h>
@@ -220,7 +222,8 @@ void ServoCalcs::start()
   stop_requested_ = false;
 
   thread_ = std::thread([this] {
-    // Optionally schedule a thread deadline for better realtime performance
+  // Optionally schedule a thread deadline for better realtime performance
+#if defined(__linux__)
     if (parameters_->schedule_thread_deadline)
     {
       struct SchedAttr
@@ -231,9 +234,9 @@ void ServoCalcs::start()
         int32_t sched_nice;
         uint32_t sched_priority;
         // Allocate 100% of the period to this thread. (Exact values don't matter, just the 100%)
-        uint64_t sched_runtime = 1 * 1000 * 1000;
-        uint64_t sched_deadline = 1 * 1000 * 1000 * 1000;
-        uint64_t sched_period = 1 * 1000 * 1000 * 1000;
+        uint64_t sched_runtime = 1 * 1e9;  // nanoseconds
+        uint64_t sched_deadline = 1 * 1e9;
+        uint64_t sched_period = 1 * 1e9;
       };
 
       SchedAttr attr;
@@ -244,6 +247,7 @@ void ServoCalcs::start()
                                    "as it could be.");
       }
     }
+#endif
 
     mainCalcLoop();
   });
