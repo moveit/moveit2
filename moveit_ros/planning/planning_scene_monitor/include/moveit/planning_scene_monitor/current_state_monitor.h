@@ -47,7 +47,7 @@
 
 namespace planning_scene_monitor
 {
-using JointStateUpdateCallback = boost::function<void(const sensor_msgs::msg::JointState::ConstSharedPtr&)>;
+using JointStateUpdateCallback = std::function<void(sensor_msgs::msg::JointState::ConstSharedPtr)>;
 
 /** @class CurrentStateMonitor
     @brief Monitors the joint_states topic and tf to maintain the current state of the robot. */
@@ -263,7 +263,7 @@ private:
   bool haveCompleteStateHelper(const rclcpp::Time& oldest_allowed_update_time,
                                std::vector<std::string>* missing_joints) const;
 
-  void jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
+  void jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
   void tfCallback();
 
   std::unique_ptr<RclInterface> rcl_interface_;
