@@ -43,6 +43,9 @@
 #include <mutex>
 
 #include <std_msgs/msg/bool.h>
+// Optionally schedule a thread deadline for closer-to-realtime performance
+#include <linux/sched.h>
+#include <sys/syscall.h>
 
 // #include <moveit_servo/make_shared_from_pool.h> // TODO(adamp): create an issue about this
 #include <moveit_servo/servo_calcs.h>
@@ -215,7 +218,35 @@ void ServoCalcs::start()
                                   current_state_->getGlobalLinkTransform(robot_link_command_frame_);
 
   stop_requested_ = false;
-  thread_ = std::thread([this] { mainCalcLoop(); });
+
+  thread_ = std::thread([this] {
+    // Optionally schedule a thread deadline for better realtime performance
+    if (parameters_->schedule_thread_deadline)
+    {
+      struct SchedAttr
+      {
+        uint32_t size;
+        uint32_t sched_policy = SCHED_DEADLINE;
+        uint64_t sched_flags;
+        int32_t sched_nice;
+        uint32_t sched_priority;
+        // Allocate 100% of the period to this thread. (Exact values don't matter, just the 100%)
+        uint64_t sched_runtime = 1 * 1000 * 1000;
+        uint64_t sched_deadline = 1 * 1000 * 1000 * 1000;
+        uint64_t sched_period = 1 * 1000 * 1000 * 1000;
+      };
+
+      SchedAttr attr;
+      attr.size = sizeof(attr);
+      if (!syscall(0, &attr, 0))
+      {
+        RCLCPP_WARN_STREAM(LOGGER, "Thread deadline was not set successfully. Realtime performance will not be as good "
+                                   "as it could be.");
+      }
+    }
+
+    mainCalcLoop();
+  });
   new_input_cmd_ = false;
 }
 

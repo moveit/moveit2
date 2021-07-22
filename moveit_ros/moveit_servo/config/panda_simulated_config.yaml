@@ -15,6 +15,7 @@ scale:
 ## Properties of outgoing commands
 publish_period: 0.034  # 1/Nominal publish rate [seconds]
 low_latency_mode: false  # Set this to true to publish as soon as an incoming Twist command is received (publish_period is ignored)
+schedule_thread_deadline: true  # For better realtime performance
 
 # What type of topic does your robot driver expect?
 # Currently supported are std_msgs/Float64MultiArray or trajectory_msgs/JointTrajectory

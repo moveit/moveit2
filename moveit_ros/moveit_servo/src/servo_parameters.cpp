@@ -132,6 +132,7 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
   declareOrGetParam<bool>(parameters->publish_joint_velocities, ns + ".publish_joint_velocities", node, logger);
   declareOrGetParam<bool>(parameters->publish_joint_accelerations, ns + ".publish_joint_accelerations", node, logger);
   declareOrGetParam<bool>(parameters->low_latency_mode, ns + ".low_latency_mode", node, logger);
+  declareOrGetParam<bool>(parameters->schedule_thread_deadline, ns + ".schedule_thread_deadline", node, logger);
 
   // Incoming Joint State properties
   declareOrGetParam<std::string>(parameters->joint_topic, ns + ".joint_topic", node, logger);
