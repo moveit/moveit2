@@ -35,7 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
-#include <moveit/planning_scene_monitor/current_state_monitor_rcl_interface.hpp>
+#include <moveit/planning_scene_monitor/current_state_monitor_middleware_handle.hpp>
 
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
@@ -50,10 +50,10 @@ namespace
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.current_state_monitor");
 }
 
-CurrentStateMonitor::CurrentStateMonitor(std::unique_ptr<CurrentStateMonitor::RclInterface> rcl_interface,
+CurrentStateMonitor::CurrentStateMonitor(std::unique_ptr<CurrentStateMonitor::MiddlewareHandle> middleware_handle,
                                          const moveit::core::RobotModelConstPtr& robot_model,
                                          const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
-  : rcl_interface_(std::move(rcl_interface))
+  : middleware_handle_(std::move(middleware_handle))
   , tf_buffer_(tf_buffer)
   , robot_model_(robot_model)
   , robot_state_(robot_model)
@@ -67,7 +67,7 @@ CurrentStateMonitor::CurrentStateMonitor(std::unique_ptr<CurrentStateMonitor::Rc
 CurrentStateMonitor::CurrentStateMonitor(const rclcpp::Node::SharedPtr& node,
                                          const moveit::core::RobotModelConstPtr& robot_model,
                                          const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
-  : CurrentStateMonitor(std::make_unique<CurrentStateMonitorRclInterface>(node), robot_model, tf_buffer)
+  : CurrentStateMonitor(std::make_unique<CurrentStateMonitorMiddlewareHandle>(node), robot_model, tf_buffer)
 {
 }
 
@@ -154,7 +154,7 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
     }
     else
     {
-      rcl_interface_->createJointStateSubscription(
+      middleware_handle_->createJointStateSubscription(
           joint_states_topic, std::bind(&CurrentStateMonitor::jointStateCallback, this, std::placeholders::_1));
     }
     if (tf_buffer_ && !robot_model_->getMultiDOFJointModels().empty())
@@ -165,7 +165,7 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
       //     tf_buffer_->_addTransformsChangedListener(std::bind(&CurrentStateMonitor::tfCallback, this))));
     }
     state_monitor_started_ = true;
-    monitor_start_time_ = rcl_interface_->now();
+    monitor_start_time_ = middleware_handle_->now();
     RCLCPP_INFO(LOGGER, "Listening to joint states on topic '%s'", joint_states_topic.c_str());
   }
 }
@@ -179,7 +179,7 @@ void CurrentStateMonitor::stopStateMonitor()
 {
   if (state_monitor_started_)
   {
-    rcl_interface_->resetJointStateSubscription();
+    middleware_handle_->resetJointStateSubscription();
     if (tf_buffer_ && tf_connection_)
     {
       // TODO (anasarrak): replace this for the appropiate function, there is no similar
@@ -194,7 +194,7 @@ void CurrentStateMonitor::stopStateMonitor()
 
 std::string CurrentStateMonitor::getMonitoredTopic() const
 {
-  return rcl_interface_->getJointStateTopicName();
+  return middleware_handle_->getJointStateTopicName();
 }
 
 bool CurrentStateMonitor::haveCompleteStateHelper(const rclcpp::Time& oldest_allowed_update_time,
@@ -227,7 +227,7 @@ bool CurrentStateMonitor::haveCompleteStateHelper(const rclcpp::Time& oldest_all
 
 bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait_time) const
 {
-  rclcpp::Time start = rcl_interface_->now();
+  rclcpp::Time start = middleware_handle_->now();
   rclcpp::Duration elapsed(0, 0);
   rclcpp::Duration timeout = rclcpp::Duration::from_seconds(wait_time);
 
@@ -235,7 +235,7 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
   while (current_state_time_ < t)
   {
     state_update_condition_.wait_for(lock, (timeout - elapsed).to_chrono<std::chrono::duration<double>>());
-    elapsed = rcl_interface_->now() - start;
+    elapsed = middleware_handle_->now() - start;
     if (elapsed > timeout)
     {
       RCLCPP_INFO(LOGGER,

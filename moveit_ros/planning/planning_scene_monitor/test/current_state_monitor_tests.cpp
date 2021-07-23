@@ -46,7 +46,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_ros/buffer.h"
 
-struct MockRclInterface : public planning_scene_monitor::CurrentStateMonitor::RclInterface
+struct MockMiddlewareHandle : public planning_scene_monitor::CurrentStateMonitor::MiddlewareHandle
 {
   MOCK_METHOD(rclcpp::Time, now, (), (const, override));
   MOCK_METHOD(void, createJointStateSubscription,
@@ -57,13 +57,13 @@ struct MockRclInterface : public planning_scene_monitor::CurrentStateMonitor::Rc
 
 TEST(CurrentStateMonitorTests, StartCreateSubscriptionTest)
 {
-  auto mock_rcl_interface = std::make_unique<MockRclInterface>();
-  // THEN we expect it to call createJointStateSubscription on the RclInterface
-  EXPECT_CALL(*mock_rcl_interface, createJointStateSubscription);
+  auto mock_middleware_handle = std::make_unique<MockMiddlewareHandle>();
+  // THEN we expect it to call createJointStateSubscription on the MiddlewareHandle
+  EXPECT_CALL(*mock_middleware_handle, createJointStateSubscription);
 
   // GIVEN a CurrentStateMonitor
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
-    std::move(mock_rcl_interface), moveit::core::loadTestingRobotModel("panda"),
+    std::move(mock_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
     std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
   };
 
@@ -75,7 +75,7 @@ TEST(CurrentStateMonitorTests, StartActiveTest)
 {
   // GIVEN a CurrentStateMonitor
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
-    std::make_unique<MockRclInterface>(), moveit::core::loadTestingRobotModel("panda"),
+    std::make_unique<MockMiddlewareHandle>(), moveit::core::loadTestingRobotModel("panda"),
     std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
   };
 
@@ -88,15 +88,15 @@ TEST(CurrentStateMonitorTests, StartActiveTest)
 
 TEST(CurrentStateMonitorTests, StopResetSubscriptionTest)
 {
-  auto mock_rcl_interface = std::make_unique<MockRclInterface>();
+  auto mock_middleware_handle = std::make_unique<MockMiddlewareHandle>();
 
-  // THEN we expect it to call now and resetJointStateSubscription on the RclInterface
-  EXPECT_CALL(*mock_rcl_interface, resetJointStateSubscription);
-  EXPECT_CALL(*mock_rcl_interface, now);
+  // THEN we expect it to call now and resetJointStateSubscription on the MiddlewareHandle
+  EXPECT_CALL(*mock_middleware_handle, resetJointStateSubscription);
+  EXPECT_CALL(*mock_middleware_handle, now);
 
   // GIVEN a CurrentStateMonitor that is started
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
-    std::move(mock_rcl_interface), moveit::core::loadTestingRobotModel("panda"),
+    std::move(mock_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
     std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
   };
   current_state_monitor.startStateMonitor();
@@ -107,11 +107,11 @@ TEST(CurrentStateMonitorTests, StopResetSubscriptionTest)
 
 TEST(CurrentStateMonitorTests, StopNotActiveTest)
 {
-  auto mock_rcl_interface = std::make_unique<MockRclInterface>();
+  auto mock_middleware_handle = std::make_unique<MockMiddlewareHandle>();
 
   // GIVEN a CurrentStateMonitor that is started
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
-    std::move(mock_rcl_interface), moveit::core::loadTestingRobotModel("panda"),
+    std::move(mock_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
     std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
   };
   current_state_monitor.startStateMonitor();
@@ -125,16 +125,16 @@ TEST(CurrentStateMonitorTests, StopNotActiveTest)
 
 TEST(CurrentStateMonitorTests, DestructStopTest)
 {
-  auto mock_rcl_interface = std::make_unique<MockRclInterface>();
+  auto mock_middleware_handle = std::make_unique<MockMiddlewareHandle>();
 
   // THEN we expect it to be stopped and resetJointStateSubscription and now to be called
-  EXPECT_CALL(*mock_rcl_interface, resetJointStateSubscription);
-  EXPECT_CALL(*mock_rcl_interface, now);
+  EXPECT_CALL(*mock_middleware_handle, resetJointStateSubscription);
+  EXPECT_CALL(*mock_middleware_handle, now);
 
   // GIVEN a CurrentStateMonitor that we started
   {
     planning_scene_monitor::CurrentStateMonitor current_state_monitor{
-      std::move(mock_rcl_interface), moveit::core::loadTestingRobotModel("panda"),
+      std::move(mock_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
       std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
     };
     current_state_monitor.startStateMonitor();
@@ -151,7 +151,7 @@ TEST(CurrentStateMonitorTests, NoModelTest)
   // WHEN the CurrentStateMonitor is constructed with it
   // THEN we expect the monitor to throw because of the invalid model
   EXPECT_THROW(planning_scene_monitor::CurrentStateMonitor _(
-                   std::make_unique<MockRclInterface>(), robot_model,
+                   std::make_unique<MockMiddlewareHandle>(), robot_model,
                    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())),
                std::invalid_argument);
 }

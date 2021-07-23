@@ -34,58 +34,49 @@
 
 /* Author: Tyler Weaver */
 
-#pragma once
-
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <moveit/planning_scene_monitor/current_state_monitor_middleware_handle.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/joint_state.hpp>
 #include <string>
 
 namespace planning_scene_monitor
 {
-/**
- * @brief      This class contains the rcl interfaces for CurrentStateMontior
- */
-class CurrentStateMonitorRclInterface : public CurrentStateMonitor::RclInterface
+namespace
 {
-public:
-  /**
-   * @brief      Constructor
-   *
-   * @param[in]  node  The ros node
-   */
-  CurrentStateMonitorRclInterface(const rclcpp::Node::SharedPtr& node);
+static const auto SUBSCRIPTION_QOS = rclcpp::QoS(25);
+}
 
-  /**
-   * @brief      Get the current time
-   *
-   * @return     Time object representing the time when this is called
-   */
-  rclcpp::Time now() const override;
+CurrentStateMonitorMiddlewareHandle::CurrentStateMonitorMiddlewareHandle(const rclcpp::Node::SharedPtr& node)
+  : node_(node)
+{
+}
 
-  /**
-   * @brief      Creates a joint state subscription
-   *
-   * @param[in]  topic     The topic
-   * @param[in]  callback  The callback
-   */
-  void createJointStateSubscription(const std::string& topic, JointStateUpdateCallback callback) override;
+rclcpp::Time CurrentStateMonitorMiddlewareHandle::now() const
+{
+  return node_->now();
+}
 
-  /**
-   * @brief      Reset the joint state subscription
-   */
-  void resetJointStateSubscription() override;
+void CurrentStateMonitorMiddlewareHandle::createJointStateSubscription(const std::string& topic,
+                                                                       JointStateUpdateCallback callback)
+{
+  joint_state_subscription_ =
+      node_->create_subscription<sensor_msgs::msg::JointState>(topic, SUBSCRIPTION_QOS, callback);
+}
 
-  /**
-   * @brief      Get the joint state topic name
-   *
-   * @return     The joint state topic name.
-   */
-  std::string getJointStateTopicName() const override;
+void CurrentStateMonitorMiddlewareHandle::resetJointStateSubscription()
+{
+  joint_state_subscription_.reset();
+}
 
-private:
-  rclcpp::Node::SharedPtr node_;
-  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscription_;
-};
+std::string CurrentStateMonitorMiddlewareHandle::getJointStateTopicName() const
+{
+  if (joint_state_subscription_)
+  {
+    return joint_state_subscription_->get_topic_name();
+  }
+  else
+  {
+    return "";
+  }
+}
 
 }  // namespace planning_scene_monitor

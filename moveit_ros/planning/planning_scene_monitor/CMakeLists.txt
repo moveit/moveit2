@@ -3,7 +3,7 @@ set(MOVEIT_LIB_NAME moveit_planning_scene_monitor)
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/planning_scene_monitor.cpp
   src/current_state_monitor.cpp
-  src/current_state_monitor_rcl_interface.cpp
+  src/current_state_monitor_middleware_handle.cpp
   src/trajectory_monitor.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")

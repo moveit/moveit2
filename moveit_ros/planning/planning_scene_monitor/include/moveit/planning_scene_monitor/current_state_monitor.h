@@ -58,15 +58,15 @@ class CurrentStateMonitor
 
 public:
   /**
-   * @brief      This class contains the rcl interfaces for easier testing
+   * @brief      Dependency injection class for testing the CurrentStateMonitor
    */
-  class RclInterface
+  class MiddlewareHandle
   {
   public:
     /**
      * @brief      Destroys the object.
      */
-    virtual ~RclInterface() = default;
+    virtual ~MiddlewareHandle() = default;
 
     /**
      * @brief      Get the current time
@@ -97,17 +97,18 @@ public:
   };
 
   /** @brief Constructor.
-   *  @param rcl_interface   The rcl middleware interface
-   *  @param robot_model     The current kinematic model to build on
-   *  @param tf_buffer       A pointer to the tf2_ros Buffer to use
+   *  @param middleware_handle   The ros middleware handle
+   *  @param robot_model         The current kinematic model to build on
+   *  @param tf_buffer           A pointer to the tf2_ros Buffer to use
    */
-  CurrentStateMonitor(std::unique_ptr<RclInterface> rcl_interface, const moveit::core::RobotModelConstPtr& robot_model,
+  CurrentStateMonitor(std::unique_ptr<MiddlewareHandle> middleware_handle,
+                      const moveit::core::RobotModelConstPtr& robot_model,
                       const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
 
   /** @brief Constructor.
-   *  @param node A shared_ptr to a node used for subscription to joint_states_topic
-   *  @param robot_model The current kinematic model to build on
-   *  @param tf_buffer A pointer to the tf2_ros Buffer to use
+   *  @param node          A shared_ptr to a node used for subscription to joint_states_topic
+   *  @param robot_model   The current kinematic model to build on
+   *  @param tf_buffer     A pointer to the tf2_ros Buffer to use
    */
   CurrentStateMonitor(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                       const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
@@ -159,7 +160,7 @@ public:
    */
   inline bool haveCompleteState(const rclcpp::Duration& age) const
   {
-    return haveCompleteStateHelper(rcl_interface_->now() - age, nullptr);
+    return haveCompleteStateHelper(middleware_handle_->now() - age, nullptr);
   }
 
   /** @brief Query whether we have joint state information for all DOFs in the kinematic model
@@ -188,7 +189,7 @@ public:
    */
   inline bool haveCompleteState(const rclcpp::Duration& age, std::vector<std::string>& missing_joints) const
   {
-    return haveCompleteStateHelper(rcl_interface_->now() - age, &missing_joints);
+    return haveCompleteStateHelper(middleware_handle_->now() - age, &missing_joints);
   }
 
   /** @brief Get the current state
@@ -267,7 +268,7 @@ private:
   void jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
   void tfCallback();
 
-  std::unique_ptr<RclInterface> rcl_interface_;
+  std::unique_ptr<MiddlewareHandle> middleware_handle_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   moveit::core::RobotModelConstPtr robot_model_;
   moveit::core::RobotState robot_state_;
