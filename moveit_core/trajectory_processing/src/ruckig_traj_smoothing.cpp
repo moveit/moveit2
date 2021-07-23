@@ -100,7 +100,6 @@ bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& traje
     ruckig_input.max_jerk[i] = DEFAULT_MAX_JERK;
 
     const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[i]);
-    //    ruckig_input.max_acceleration[i] = max_acceleration_scaling_factor * MAX_ACCEL;
 
     // This assumes min/max bounds are symmetric
     if (bounds.velocity_bounded_)
