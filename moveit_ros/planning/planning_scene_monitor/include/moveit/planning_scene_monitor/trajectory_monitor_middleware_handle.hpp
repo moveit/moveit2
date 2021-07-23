@@ -58,7 +58,7 @@ class TrajectoryMonitorMiddlewareHandle : public TrajectoryMonitor::MiddlewareHa
   /**
    * @brief      Add sleep using rate
    */
-  void addSleep();
+  void sleep();
 
   private:
     rclcpp::Rate rate_;

@@ -119,7 +119,7 @@ void planning_scene_monitor::TrajectoryMonitor::recordStates()
 
   while (record_states_thread_)
   {
-    middleware_handle_->addSleep();
+    middleware_handle_->sleep();
     std::pair<moveit::core::RobotStatePtr, rclcpp::Time> state = current_state_monitor_->getCurrentStateAndTime();
     if (trajectory_.empty())
     {

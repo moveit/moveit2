@@ -68,7 +68,7 @@ public:
     /**
      * @brief      Add sleep using rate
      */
-    virtual void addSleep() = 0;
+    virtual void sleep() = 0;
   };
 
   /** @brief Constructor.
