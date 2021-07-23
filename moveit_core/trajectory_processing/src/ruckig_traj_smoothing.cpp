@@ -36,14 +36,14 @@
  *   POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <limits>
-#include <Eigen/Geometry>
 #include <algorithm>
 #include <cmath>
-#include <moveit/trajectory_processing/ruckig.h>
+#include <Eigen/Geometry>
+#include <limits>
+#include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
+#include <rclcpp/rclcpp.hpp>
 #include <ruckig/ruckig.hpp>
 #include <vector>
-#include "rclcpp/rclcpp.hpp"
 
 namespace trajectory_processing
 {
@@ -58,7 +58,8 @@ bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& traje
                                         const double max_velocity_scaling_factor,
                                         const double max_acceleration_scaling_factor) const
 {
-  if (trajectory.getWayPointCount() < 2)
+  size_t num_waypoints = trajectory.getWayPointCount();
+  if (num_waypoints < 2)
   {
     RCLCPP_WARN_STREAM(LOGGER, "Trajectory does not have enough points to smooth with Ruckig");
     return true;
@@ -118,6 +119,35 @@ bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& traje
     {
       ruckig_input.max_acceleration[i] = max_acceleration_scaling_factor * DEFAULT_MAX_ACCELERATION;
     }
+  }
+
+  ruckig::Result ruckig_result;
+  for (size_t waypoint = 0; waypoint < num_waypoints - 1; ++waypoint)
+  {
+    moveit::core::RobotStatePtr robot_state = trajectory.getWayPointPtr(waypoint + 1);
+    for (size_t joint = 0; joint < num_dof; ++joint)
+    {
+      // Feed output from the previous timestep back as input
+      ruckig_input.current_position[joint] = ruckig_output.new_position[joint];
+      ruckig_input.current_velocity[joint] = ruckig_output.new_velocity[joint];
+      ruckig_input.current_acceleration[joint] = ruckig_output.new_acceleration[joint];
+
+      // Target state is the next waypoint
+      ruckig_input.target_position[joint] = robot_state->getVariablePosition(joint);
+      ruckig_input.target_velocity[joint] = robot_state->getVariableVelocity(joint);
+      ruckig_input.target_acceleration[joint] = robot_state->getVariableAcceleration(joint);
+    }
+    ruckig_result = ruckig.update(ruckig_input, ruckig_output);
+
+    if (ruckig_result != ruckig::Result::Working)
+    {
+      RCLCPP_INFO_STREAM(LOGGER, "Ruckig failed at waypoint " << waypoint);
+      continue;  // skip to next waypoint
+    }
+
+    // Store result back in the trajectory data structure
+    robot_state->setVariableVelocities(ruckig_output.new_velocity);
+    robot_state->setVariablePositions(ruckig_output.new_position);
   }
 
   return true;
