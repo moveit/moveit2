@@ -45,8 +45,7 @@
 
 namespace planning_scene_monitor
 {
-using TrajectoryStateAddedCallback =
-    std::function<void(const moveit::core::RobotStateConstPtr&, const rclcpp::Time&)>;
+using TrajectoryStateAddedCallback = std::function<void(const moveit::core::RobotStateConstPtr&, const rclcpp::Time&)>;
 
 MOVEIT_CLASS_FORWARD(TrajectoryMonitor);  // Defines TrajectoryMonitorPtr, ConstPtr, WeakPtr... etc
 
@@ -56,11 +55,11 @@ class TrajectoryMonitor
 {
 public:
   /**
-  * @brief      This class contains the rcl interfaces for easier testing
-  */
+   * @brief      This class contains the rcl interfaces for easier testing
+   */
   class MiddlewareHandle
   {
-    public:
+  public:
     /**
      * @brief      Destroys the object.
      */
@@ -75,7 +74,8 @@ public:
   /** @brief Constructor.
    */
   TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, double sampling_frequency = 0.0);
-  TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, std::unique_ptr<MiddlewareHandle> middleware_handle, double sampling_frequency = 0.0);
+  TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor,
+                    std::unique_ptr<MiddlewareHandle> middleware_handle, double sampling_frequency = 0.0);
 
   ~TrajectoryMonitor();
 

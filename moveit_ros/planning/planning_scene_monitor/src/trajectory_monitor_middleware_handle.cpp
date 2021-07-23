@@ -39,11 +39,14 @@
 
 namespace planning_scene_monitor
 {
-  planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::TrajectoryMonitorMiddlewareHandle(const double sampling_frequency)
-  : rate_(sampling_frequency) {}
-
-  void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::sleep()
-  {
-    rate_.sleep();
-  }
+planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::TrajectoryMonitorMiddlewareHandle(
+    const double sampling_frequency)
+  : rate_(sampling_frequency)
+{
 }
+
+void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::sleep()
+{
+  rate_.sleep();
+}
+}  // namespace planning_scene_monitor

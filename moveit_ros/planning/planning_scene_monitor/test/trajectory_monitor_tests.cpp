@@ -66,7 +66,7 @@ struct MockCurrentStateMonitorMiddlewareHandle : public planning_scene_monitor::
 void waitFor(std::chrono::seconds timeout, std::function<bool()> done)
 {
   const auto start = std::chrono::steady_clock::now();
-  while((std::chrono::steady_clock::now() - start) < timeout)
+  while ((std::chrono::steady_clock::now() - start) < timeout)
   {
     if (done())
     {
@@ -88,23 +88,20 @@ TEST(TrajectoryMonitorTests, test1)
   planning_scene_monitor::CurrentStateMonitorPtr current_state_monitor;
 
   current_state_monitor = std::make_unique<planning_scene_monitor::CurrentStateMonitor>(
-    std::move(mock_current_state_monitor_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
-    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
-  );
+      std::move(mock_current_state_monitor_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
+      std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()));
 
-  planning_scene_monitor::TrajectoryMonitor trajectory_monitor{
-    current_state_monitor, std::move(mock_trajectory_monitor_middleware_handle), 10.0
-  };
+  planning_scene_monitor::TrajectoryMonitor trajectory_monitor{ current_state_monitor,
+                                                                std::move(mock_trajectory_monitor_middleware_handle),
+                                                                10.0 };
 
-  std::atomic<bool> callback_called{false};
-  trajectory_monitor.setOnStateAddCallback([&](const moveit::core::RobotStateConstPtr& robot_state, const rclcpp::Time& time){
-    callback_called = true;
-  });
+  std::atomic<bool> callback_called{ false };
+  trajectory_monitor.setOnStateAddCallback(
+      [&](const moveit::core::RobotStateConstPtr& robot_state, const rclcpp::Time& time) { callback_called = true; });
 
   // WHEN we call the startTrajectoryMonitor function
   trajectory_monitor.startTrajectoryMonitor();
-  waitFor(10s, [&]() {return callback_called == true;});
-
+  waitFor(10s, [&]() { return callback_called == true; });
 }
 
 int main(int argc, char** argv)

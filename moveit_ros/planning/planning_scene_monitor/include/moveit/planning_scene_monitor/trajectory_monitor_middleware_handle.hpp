@@ -47,7 +47,7 @@ namespace planning_scene_monitor
  */
 class TrajectoryMonitorMiddlewareHandle : public TrajectoryMonitor::MiddlewareHandle
 {
-  public:
+public:
   /**
    * @brief      Constructor
    *
@@ -60,7 +60,7 @@ class TrajectoryMonitorMiddlewareHandle : public TrajectoryMonitor::MiddlewareHa
    */
   void sleep();
 
-  private:
-    rclcpp::Rate rate_;
+private:
+  rclcpp::Rate rate_;
 };
-}
+}  // namespace planning_scene_monitor
