@@ -41,11 +41,12 @@
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <boost/thread.hpp>
 #include <memory>
+#include <functional>
 
 namespace planning_scene_monitor
 {
 using TrajectoryStateAddedCallback =
-    boost::function<void(const moveit::core::RobotStateConstPtr&, const rclcpp::Time&)>;
+    std::function<void(const moveit::core::RobotStateConstPtr&, const rclcpp::Time&)>;
 
 MOVEIT_CLASS_FORWARD(TrajectoryMonitor);  // Defines TrajectoryMonitorPtr, ConstPtr, WeakPtr... etc
 
@@ -74,7 +75,7 @@ public:
   /** @brief Constructor.
    */
   TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, double sampling_frequency = 0.0);
-  TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, std::unique_ptr<MiddlewareHandle> rcl_interface, double sampling_frequency = 0.0);
+  TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, std::unique_ptr<MiddlewareHandle> middleware_handle, double sampling_frequency = 0.0);
 
   ~TrajectoryMonitor();
 
