@@ -234,9 +234,9 @@ void ServoCalcs::start()
         int32_t sched_nice;
         uint32_t sched_priority;
         // Allocate 100% of the period to this thread. (Exact values don't matter, just the 100%)
-        uint64_t sched_runtime = 1 * 1e9;  // nanoseconds
-        uint64_t sched_deadline = 1 * 1e9;
-        uint64_t sched_period = 1 * 1e9;
+        uint64_t sched_runtime = 1e9;  // nanoseconds
+        uint64_t sched_deadline = 1e9;
+        uint64_t sched_period = 1e9;
       };
 
       SchedAttr attr;
