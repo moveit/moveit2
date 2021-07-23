@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/planning_scene_monitor/trajectory_monitor.h>
+#include <moveit/planning_scene_monitor/trajectory_monitor_rcl_interface.hpp>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <rclcpp/rate.hpp>
 #include <limits>
@@ -44,12 +45,20 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_sce
 
 planning_scene_monitor::TrajectoryMonitor::TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor,
                                                              double sampling_frequency)
+  : TrajectoryMonitor(state_monitor, std::make_unique<TrajectoryMonitorRclInterface>(), sampling_frequency)
+{
+}
+
+planning_scene_monitor::TrajectoryMonitor::TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, std::unique_ptr<TrajectoryMonitor::RclInterface> rcl_interface,
+                                                             double sampling_frequency)
   : current_state_monitor_(state_monitor)
+  , rcl_interface_(std::move(rcl_interface))
   , sampling_frequency_(sampling_frequency)
   , trajectory_(current_state_monitor_->getRobotModel(), "")
 {
   setSamplingFrequency(sampling_frequency);
 }
+
 
 planning_scene_monitor::TrajectoryMonitor::~TrajectoryMonitor()
 {
@@ -108,11 +117,11 @@ void planning_scene_monitor::TrajectoryMonitor::recordStates()
   if (!current_state_monitor_)
     return;
 
-  rclcpp::Rate rate(sampling_frequency_);
+  rcl_interface_->createRateForSleep(sampling_frequency_);
 
   while (record_states_thread_)
   {
-    rate.sleep();
+    rcl_interface_->addSleep();
     std::pair<moveit::core::RobotStatePtr, rclcpp::Time> state = current_state_monitor_->getCurrentStateAndTime();
     if (trajectory_.empty())
     {

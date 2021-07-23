@@ -47,16 +47,41 @@ namespace planning_scene_monitor
 using TrajectoryStateAddedCallback =
     boost::function<void(const moveit::core::RobotStateConstPtr&, const rclcpp::Time&)>;
 
-MOVEIT_CLASS_FORWARD(TrajectoryMonitor);  // Defines TrajectoryMonitorPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(TrajectoryMonitor)  // Defines TrajectoryMonitorPtr, ConstPtr, WeakPtr... etc
 
 /** @class TrajectoryMonitor
     @brief Monitors the joint_states topic and tf to record the trajectory of the robot. */
 class TrajectoryMonitor
 {
 public:
+  /**
+  * @brief      This class contains the rcl interfaces for easier testing
+  */
+  class RclInterface
+  {
+    public:
+    /**
+     * @brief      Destroys the object.
+     */
+    virtual ~RclInterface() = default;
+
+    /**
+     * @brief      Create a rate
+     *
+     * @param[in] sampling_frequency The sampling frequency
+     */
+    void createRateForSleep(const double sampling_frequency) override;
+
+    /**
+     * @brief      Add sleep using rate
+     */
+    void addSleep(const double sampling_frequency) override;
+  };
+
   /** @brief Constructor.
    */
   TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, double sampling_frequency = 0.0);
+  TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, std::unique_ptr<RclInterface> rcl_interface, double sampling_frequency = 0.0);
 
   ~TrajectoryMonitor();
 
@@ -96,6 +121,7 @@ private:
   void recordStates();
 
   CurrentStateMonitorConstPtr current_state_monitor_;
+  std::unique_ptr<RclInterface> rcl_interface_;
   double sampling_frequency_;
 
   robot_trajectory::RobotTrajectory trajectory_;
