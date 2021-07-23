@@ -57,6 +57,7 @@ struct MockRclInterface : public planning_scene_monitor::CurrentStateMonitor::Rc
 
 TEST(StartStopTest, CurrentStateMonitorTests)
 {
+  // GIVEN a CurrentStateMonitor
   auto mock_rcl_interface = std::make_unique<MockRclInterface>();
   EXPECT_CALL(*mock_rcl_interface, createJointStateSubscription);
   EXPECT_CALL(*mock_rcl_interface, resetJointStateSubscription);
@@ -67,19 +68,49 @@ TEST(StartStopTest, CurrentStateMonitorTests)
     std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
   };
 
+  // WHEN we start the current state monitor
   current_state_monitor.startStateMonitor();
+  // THEN we expect it to call createJointStateSubscription on the RclInterface
 
+  // THEN we expect it to be active
   EXPECT_TRUE(current_state_monitor.isActive());
 
+  // WHEN we stop the current state monitor
   current_state_monitor.stopStateMonitor();
+  // THEN we expect it to call now and resetJointStateSubscription on the RclInterface
 
+  // THEN we expect it to not be active
   EXPECT_FALSE(current_state_monitor.isActive());
+}
+
+TEST(DestructStopTest, CurrentStateMonitorTests)
+{
+  auto mock_rcl_interface = std::make_unique<MockRclInterface>();
+  EXPECT_CALL(*mock_rcl_interface, createJointStateSubscription);
+  EXPECT_CALL(*mock_rcl_interface, resetJointStateSubscription);
+  EXPECT_CALL(*mock_rcl_interface, now);
+
+  // GIVEN a CurrentStateMonitor that we started
+  {
+    planning_scene_monitor::CurrentStateMonitor current_state_monitor{
+      std::move(mock_rcl_interface), moveit::core::loadTestingRobotModel("panda"),
+      std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+    };
+    current_state_monitor.startStateMonitor();
+    EXPECT_TRUE(current_state_monitor.isActive());
+  }
+  // WHEN it is  destructed
+  // THEN we expect it to be stopped and resetJointStateSubscription and now to be called
 }
 
 TEST(NoModelTest, CurrentStateMonitorTests)
 {
+  // GIVEN an unitialized robot model
+  moveit::core::RobotModelPtr robot_model = nullptr;
+  // WHEN the CurrentStateMonitor is constructed with it
+  // THEN we expect the monitor to throw because of the invalid model
   EXPECT_THROW(planning_scene_monitor::CurrentStateMonitor _(
-                   std::make_unique<MockRclInterface>(), nullptr,
+                   std::make_unique<MockRclInterface>(), robot_model,
                    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())),
                std::invalid_argument);
 }
