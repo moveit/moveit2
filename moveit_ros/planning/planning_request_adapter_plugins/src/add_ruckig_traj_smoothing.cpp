@@ -45,10 +45,10 @@ using namespace trajectory_processing;
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_traj_smoothing");
 
 /** @brief This adapter uses the time-optimal trajectory generation method */
-class AddTrajectorySmoothing : public planning_request_adapter::PlanningRequestAdapter
+class AddRuckigTrajectorySmoothing : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  AddTrajSmoothing() : planning_request_adapter::PlanningRequestAdapter()
+  AddRuckigTrajectorySmoothing() : planning_request_adapter::PlanningRequestAdapter()
   {
   }
 
@@ -84,5 +84,5 @@ public:
 
 }  // namespace default_planner_request_adapters
 
-CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::AddTrajectorySmoothing,
+CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::AddRuckigTrajectorySmoothing,
                             planning_request_adapter::PlanningRequestAdapter)

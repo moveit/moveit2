@@ -47,4 +47,10 @@
     </description>
   </class>
 
+  <class name="default_planner_request_adapters/AddRuckigTrajectorySmoothing" type="default_planner_request_adapters::AddRuckigTrajectorySmoothing" base_class_type="planning_request_adapter::PlanningRequestAdapter">
+    <description>
+      Adds jerk-limited trajectory smoothing via ruckig. Does not compute timesteps.
+    </description>
+  </class>
+
 </library>
