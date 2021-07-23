@@ -5,7 +5,7 @@ find_package(ruckig REQUIRED)
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/iterative_time_parameterization.cpp
   src/iterative_spline_parameterization.cpp
-  src/ruckig.cpp
+  src/ruckig_traj_smoothing.cpp
   src/trajectory_tools.cpp
   src/time_optimal_trajectory_generation.cpp
 )
