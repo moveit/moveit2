@@ -55,14 +55,13 @@ struct MockRclInterface : public planning_scene_monitor::CurrentStateMonitor::Rc
   MOCK_METHOD(std::string, getJointStateTopicName, (), (const, override));
 };
 
-TEST(StartStopTest, CurrentStateMonitorTests)
+TEST(CurrentStateMonitorTests, StartCreateSubscriptionTest)
 {
-  // GIVEN a CurrentStateMonitor
   auto mock_rcl_interface = std::make_unique<MockRclInterface>();
+  // THEN we expect it to call createJointStateSubscription on the RclInterface
   EXPECT_CALL(*mock_rcl_interface, createJointStateSubscription);
-  EXPECT_CALL(*mock_rcl_interface, resetJointStateSubscription);
-  EXPECT_CALL(*mock_rcl_interface, now);
 
+  // GIVEN a CurrentStateMonitor
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
     std::move(mock_rcl_interface), moveit::core::loadTestingRobotModel("panda"),
     std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
@@ -70,23 +69,65 @@ TEST(StartStopTest, CurrentStateMonitorTests)
 
   // WHEN we start the current state monitor
   current_state_monitor.startStateMonitor();
-  // THEN we expect it to call createJointStateSubscription on the RclInterface
+}
+
+TEST(CurrentStateMonitorTests, StartActiveTest)
+{
+  // GIVEN a CurrentStateMonitor
+  planning_scene_monitor::CurrentStateMonitor current_state_monitor{
+    std::make_unique<MockRclInterface>(), moveit::core::loadTestingRobotModel("panda"),
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+  };
+
+  // WHEN we start the current state monitor
+  current_state_monitor.startStateMonitor();
 
   // THEN we expect it to be active
   EXPECT_TRUE(current_state_monitor.isActive());
+}
+
+TEST(CurrentStateMonitorTests, StopResetSubscriptionTest)
+{
+  auto mock_rcl_interface = std::make_unique<MockRclInterface>();
+
+  // THEN we expect it to call now and resetJointStateSubscription on the RclInterface
+  EXPECT_CALL(*mock_rcl_interface, resetJointStateSubscription);
+  EXPECT_CALL(*mock_rcl_interface, now);
+
+  // GIVEN a CurrentStateMonitor that is started
+  planning_scene_monitor::CurrentStateMonitor current_state_monitor{
+    std::move(mock_rcl_interface), moveit::core::loadTestingRobotModel("panda"),
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+  };
+  current_state_monitor.startStateMonitor();
 
   // WHEN we stop the current state monitor
   current_state_monitor.stopStateMonitor();
-  // THEN we expect it to call now and resetJointStateSubscription on the RclInterface
+}
+
+TEST(CurrentStateMonitorTests, StopNotActiveTest)
+{
+  auto mock_rcl_interface = std::make_unique<MockRclInterface>();
+
+  // GIVEN a CurrentStateMonitor that is started
+  planning_scene_monitor::CurrentStateMonitor current_state_monitor{
+    std::move(mock_rcl_interface), moveit::core::loadTestingRobotModel("panda"),
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+  };
+  current_state_monitor.startStateMonitor();
+
+  // WHEN we stop the current state monitor
+  current_state_monitor.stopStateMonitor();
 
   // THEN we expect it to not be active
   EXPECT_FALSE(current_state_monitor.isActive());
 }
 
-TEST(DestructStopTest, CurrentStateMonitorTests)
+TEST(CurrentStateMonitorTests, DestructStopTest)
 {
   auto mock_rcl_interface = std::make_unique<MockRclInterface>();
-  EXPECT_CALL(*mock_rcl_interface, createJointStateSubscription);
+
+  // THEN we expect it to be stopped and resetJointStateSubscription and now to be called
   EXPECT_CALL(*mock_rcl_interface, resetJointStateSubscription);
   EXPECT_CALL(*mock_rcl_interface, now);
 
@@ -100,13 +141,13 @@ TEST(DestructStopTest, CurrentStateMonitorTests)
     EXPECT_TRUE(current_state_monitor.isActive());
   }
   // WHEN it is  destructed
-  // THEN we expect it to be stopped and resetJointStateSubscription and now to be called
 }
 
-TEST(NoModelTest, CurrentStateMonitorTests)
+TEST(CurrentStateMonitorTests, NoModelTest)
 {
   // GIVEN an unitialized robot model
   moveit::core::RobotModelPtr robot_model = nullptr;
+
   // WHEN the CurrentStateMonitor is constructed with it
   // THEN we expect the monitor to throw because of the invalid model
   EXPECT_THROW(planning_scene_monitor::CurrentStateMonitor _(
