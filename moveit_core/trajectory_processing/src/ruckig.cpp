@@ -41,6 +41,7 @@
 #include <algorithm>
 #include <cmath>
 #include <moveit/trajectory_processing/ruckig.h>
+#include <ruckig/ruckig.hpp>
 #include <vector>
 #include "rclcpp/rclcpp.hpp"
 
@@ -49,7 +50,9 @@ namespace trajectory_processing
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit_trajectory_processing.time_optimal_trajectory_generation");
 constexpr double DEFAULT_TIMESTEP = 0.001;
-constexpr double MAX_JERK = 1000;  // rad/s^3
+constexpr double DEFAULT_MAX_VELOCITY = 10;       // rad/s
+constexpr double DEFAULT_MAX_ACCELERATION = 100;  // rad/s^2
+constexpr double DEFAULT_MAX_JERK = 1e6;          // rad/s^3
 
 bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
                                         const double max_velocity_scaling_factor,
@@ -71,33 +74,50 @@ bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& traje
   const size_t num_dof = group->getVariableCount();
 
   // Instantiate the smoother
-  // ruckig::Ruckig<0> ruckig{num_dof, DEFAULT_TIMESTEP};
-  // ruckig::InputParameter<0> ruckig_input{NUM_DOF};
-  // ruckig::OutputParameter<0> ruckig_output{NUM_DOF};
+  ruckig::Ruckig<0> ruckig{ num_dof, DEFAULT_TIMESTEP };
+  ruckig::InputParameter<0> ruckig_input{ num_dof };
+  ruckig::OutputParameter<0> ruckig_output{ num_dof };
 
   // Initialize the smoother
   std::vector<double> current_positions_vector;
   current_positions_vector.assign(trajectory.getFirstWayPoint().getVariablePositions(),
                                   trajectory.getFirstWayPoint().getVariablePositions() + num_dof);
-  //  std::copy_n(current_positions_vector.begin(), num_dof, ruckig_input.current_position.begin());
+  std::copy_n(current_positions_vector.begin(), num_dof, ruckig_input.current_position.begin());
   // Assume starting from rest
   std::vector<double> zero_vector(num_dof, 0.0);
-  //  std::copy_n(zero_vector.begin(), num_dof, ruckig_input.current_velocity.begin());
-  //  std::copy_n(zero_vector.begin(), num_dof, ruckig_input.current_acceleration.begin());
+  std::copy_n(zero_vector.begin(), num_dof, ruckig_input.current_velocity.begin());
+  std::copy_n(zero_vector.begin(), num_dof, ruckig_input.current_acceleration.begin());
   // Initialize output data struct
-  //  ruckig_output.new_velocity = ruckig_input.current_velocity;
-  //  ruckig_output.new_acceleration = ruckig_input.current_acceleration;
+  ruckig_output.new_velocity = ruckig_input.current_velocity;
+  ruckig_output.new_acceleration = ruckig_input.current_acceleration;
   // Kinematic limits (vel/accel/jerk)
   const std::vector<std::string>& vars = group->getVariableNames();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
   for (size_t i = 0; i < num_dof; ++i)
   {
-    // TODO(andyz): read this from joint_limits.yaml if/when it becomes supported
-    //    ruckig_input.max_jerk[i] = MAX_JERK;
+    // TODO(andyz): read this from the joint group if/when jerk becomes supported
+    ruckig_input.max_jerk[i] = DEFAULT_MAX_JERK;
 
     const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[i]);
     //    ruckig_input.max_acceleration[i] = max_acceleration_scaling_factor * MAX_ACCEL;
-    //    ruckig_input.max_velocity[i] = max_velocity_scaling_factor * MAX_VEL;
+
+    // This assumes min/max bounds are symmetric
+    if (bounds.velocity_bounded_)
+    {
+      ruckig_input.max_velocity[i] = max_velocity_scaling_factor * bounds.max_velocity_;
+    }
+    else
+    {
+      ruckig_input.max_velocity[i] = max_velocity_scaling_factor * DEFAULT_MAX_VELOCITY;
+    }
+    if (bounds.acceleration_bounded_)
+    {
+      ruckig_input.max_acceleration[i] = max_acceleration_scaling_factor * bounds.max_acceleration_;
+    }
+    else
+    {
+      ruckig_input.max_acceleration[i] = max_acceleration_scaling_factor * DEFAULT_MAX_ACCELERATION;
+    }
   }
 
   return true;
