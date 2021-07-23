@@ -132,6 +132,7 @@ bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& traje
       ruckig_input.current_velocity[joint] = ruckig_output.new_velocity[joint];
       ruckig_input.current_acceleration[joint] = ruckig_output.new_acceleration[joint];
 
+      
       // Target state is the next waypoint
       ruckig_input.target_position[joint] = robot_state->getVariablePosition(joint);
       ruckig_input.target_velocity[joint] = robot_state->getVariableVelocity(joint);
