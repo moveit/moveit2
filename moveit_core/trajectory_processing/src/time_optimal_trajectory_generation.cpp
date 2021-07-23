@@ -49,6 +49,7 @@ namespace trajectory_processing
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit_trajectory_processing.time_optimal_trajectory_generation");
 
+constexpr double DEFAULT_TIMESTEP = 0.001;
 constexpr double EPS = 0.000001;
 class LinearPathSegment : public PathSegment
 {
@@ -464,7 +465,7 @@ bool Trajectory::getNextAccelerationSwitchingPoint(double path_pos, TrajectorySt
 bool Trajectory::getNextVelocitySwitchingPoint(double path_pos, TrajectoryStep& next_switching_point,
                                                double& before_acceleration, double& after_acceleration)
 {
-  const double step_size = 0.001;
+  const double step_size = DEFAULT_TIMESTEP;
   const double accuracy = 0.000001;
 
   bool start = false;
@@ -984,7 +985,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   }
 
   // Now actually call the algorithm
-  Trajectory parameterized(Path(points, path_tolerance_), max_velocity, max_acceleration, 0.001);
+  Trajectory parameterized(Path(points, path_tolerance_), max_velocity, max_acceleration, DEFAULT_TIMESTEP);
   if (!parameterized.isValid())
   {
     RCLCPP_ERROR(LOGGER, "Unable to parameterize trajectory.");
