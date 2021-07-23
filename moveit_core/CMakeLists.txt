@@ -134,6 +134,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   eigen3_cmake_module
   OCTOMAP
   Bullet
+  ruckig
 )
 
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
