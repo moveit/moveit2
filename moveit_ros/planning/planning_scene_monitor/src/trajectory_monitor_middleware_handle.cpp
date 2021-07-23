@@ -34,20 +34,16 @@
 
 /* Author: Abishalini Sivaraman */
 
-#include <moveit/planning_scene_monitor/trajectory_monitor_rcl_interface.hpp>
+#include <moveit/planning_scene_monitor/trajectory_monitor_middleware_handle.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 namespace planning_scene_monitor
 {
-  TrajectoryMonitorRclInterface::TrajectoryMonitorRclInterface() {}
+  planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::TrajectoryMonitorMiddlewareHandle(const double sampling_frequency)
+  : rate_(sampling_frequency) {}
 
-  void TrajectoryMonitorRclInterface::createRate(const double sampling_frequency)
+  void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::addSleep()
   {
-    rate_ = new rclcpp::Rate(sampling_frequency);
-  }
-
-  void TrajectoryMonitorRclInterface::addSleep();
-  {
-    rate_ = new rclcpp::Rate(sampling_frequency);
     rate_.sleep();
   }
 }

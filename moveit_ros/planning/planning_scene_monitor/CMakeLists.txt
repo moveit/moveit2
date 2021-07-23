@@ -5,7 +5,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/current_state_monitor.cpp
   src/current_state_monitor_middleware_handle.cpp
   src/trajectory_monitor.cpp
-  src/trajectory_monitor_rcl_interface.cpp
+  src/trajectory_monitor_middleware_handle.cpp
 )
 include(GenerateExportHeader)
 generate_export_header(${MOVEIT_LIB_NAME})

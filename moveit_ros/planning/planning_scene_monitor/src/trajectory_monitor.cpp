@@ -35,7 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/planning_scene_monitor/trajectory_monitor.h>
-#include <moveit/planning_scene_monitor/trajectory_monitor_rcl_interface.hpp>
+#include <moveit/planning_scene_monitor/trajectory_monitor_middleware_handle.hpp>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <rclcpp/rate.hpp>
 #include <limits>
@@ -45,14 +45,14 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_sce
 
 planning_scene_monitor::TrajectoryMonitor::TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor,
                                                              double sampling_frequency)
-  : TrajectoryMonitor(state_monitor, std::make_unique<TrajectoryMonitorRclInterface>(), sampling_frequency)
+  : TrajectoryMonitor(state_monitor, std::make_unique<TrajectoryMonitorMiddlewareHandle>(sampling_frequency), sampling_frequency)
 {
 }
 
-planning_scene_monitor::TrajectoryMonitor::TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, std::unique_ptr<TrajectoryMonitor::RclInterface> rcl_interface,
+planning_scene_monitor::TrajectoryMonitor::TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, std::unique_ptr<TrajectoryMonitor::MiddlewareHandle> middleware_handle,
                                                              double sampling_frequency)
   : current_state_monitor_(state_monitor)
-  , rcl_interface_(std::move(rcl_interface))
+  , middleware_handle_(std::move(middleware_handle))
   , sampling_frequency_(sampling_frequency)
   , trajectory_(current_state_monitor_->getRobotModel(), "")
 {
@@ -117,11 +117,9 @@ void planning_scene_monitor::TrajectoryMonitor::recordStates()
   if (!current_state_monitor_)
     return;
 
-  rcl_interface_->createRateForSleep(sampling_frequency_);
-
   while (record_states_thread_)
   {
-    rcl_interface_->addSleep();
+    middleware_handle_->addSleep();
     std::pair<moveit::core::RobotStatePtr, rclcpp::Time> state = current_state_monitor_->getCurrentStateAndTime();
     if (trajectory_.empty())
     {

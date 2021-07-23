@@ -45,28 +45,22 @@ namespace planning_scene_monitor
 /**
  * @brief      This class contains the rcl interfaces for CurrentStateMonitor
  */
-class TrajectoryMonitorRclInterface : public TrajectoryMonitor::RclInterface
+class TrajectoryMonitorMiddlewareHandle : public TrajectoryMonitor::MiddlewareHandle
 {
+  public:
   /**
    * @brief      Constructor
    *
    * @param[in]  node  The ros node
    */
-  TrajectoryMonitorRclInterface();
-
-  /**
-   * @brief      Create a rate
-   *
-   * @param[in] sampling_frequency The sampling frequency
-   */
-  void createRateForSleep(const double sampling_frequency);
+  TrajectoryMonitorMiddlewareHandle(const double sampling_frequency);
 
   /**
    * @brief      Add sleep using rate
    */
-  void addSleep(const double sampling_frequency);
+  void addSleep();
 
   private:
     rclcpp::Rate rate_;
-}
+};
 }
