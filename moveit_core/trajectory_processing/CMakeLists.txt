@@ -1,5 +1,7 @@
 set(MOVEIT_LIB_NAME moveit_trajectory_processing)
 
+find_package(ruckig REQUIRED)
+
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/iterative_time_parameterization.cpp
   src/iterative_spline_parameterization.cpp
@@ -21,6 +23,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_robot_state
   moveit_robot_trajectory
+  ruckig::ruckig
 )
 
 install(DIRECTORY include/ DESTINATION include)
