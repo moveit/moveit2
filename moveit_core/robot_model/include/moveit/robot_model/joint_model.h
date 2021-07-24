@@ -45,6 +45,8 @@
 #include <random_numbers/random_numbers.h>
 #include <Eigen/Geometry>
 
+#undef near
+
 namespace moveit
 {
 namespace core
