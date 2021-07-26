@@ -1016,6 +1016,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     {
       waypoint.setVariablePosition(idx[j], position[j]);
       waypoint.setVariableVelocity(idx[j], velocity[j]);
+      RCLCPP_ERROR_STREAM(LOGGER, "TOTG vel: " << velocity[j]);
       waypoint.setVariableAcceleration(idx[j], acceleration[j]);
     }
 
