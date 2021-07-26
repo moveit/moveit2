@@ -53,7 +53,7 @@ public:
    *
    * @param[in]  node  The ros node
    */
-  TrajectoryMonitorMiddlewareHandle(const double sampling_frequency);
+  TrajectoryMonitorMiddlewareHandle(double sampling_frequency);
 
   /**
    * @brief      Add sleep using rate

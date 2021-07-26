@@ -76,12 +76,12 @@ void waitFor(std::chrono::seconds timeout, std::function<bool()> done)
   }
 }
 
-TEST(TrajectoryMonitorTests, test1)
+TEST(TrajectoryMonitorTests, SleepAtLeastOnce)
 {
   auto mock_trajectory_monitor_middleware_handle = std::make_unique<MockTrajectoryMonitorMiddlewareHandle>();
   auto mock_current_state_monitor_middleware_handle = std::make_unique<MockCurrentStateMonitorMiddlewareHandle>();
 
-  // THEN we expect it to call addSleep function
+  // THEN we expect it to call sleep function
   EXPECT_CALL(*mock_trajectory_monitor_middleware_handle, sleep).Times(::testing::AtLeast(1));
 
   // GIVEN a TrajectoryMonitor is started

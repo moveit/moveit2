@@ -39,8 +39,7 @@
 
 namespace planning_scene_monitor
 {
-planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::TrajectoryMonitorMiddlewareHandle(
-    const double sampling_frequency)
+planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::TrajectoryMonitorMiddlewareHandle(double sampling_frequency)
   : rate_(sampling_frequency)
 {
 }
