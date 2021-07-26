@@ -43,20 +43,21 @@
 namespace planning_scene_monitor
 {
 /**
- * @brief      This class contains the rcl interfaces for CurrentStateMonitor
+ * @brief      This class contains the ROS2 interfaces for TrajectoryMonitor.
+ *             This class is useful for testing by mocking the functions in the class below.
  */
 class TrajectoryMonitorMiddlewareHandle : public TrajectoryMonitor::MiddlewareHandle
 {
 public:
   /**
-   * @brief      Constructor
+   * @brief      Constructor for TrajectoryMonitor
    *
-   * @param[in]  node  The ros node
+   * @param[in]  sampling_frequency  Used to create ROS2 Rate
    */
   TrajectoryMonitorMiddlewareHandle(double sampling_frequency);
 
   /**
-   * @brief      Add sleep using rate
+   * @brief      sleep function using Rate
    */
   void sleep();
 
