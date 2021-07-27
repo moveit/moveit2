@@ -3,6 +3,7 @@ set(MOVEIT_LIB_NAME moveit_planning_scene_monitor)
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/planning_scene_monitor.cpp
   src/current_state_monitor.cpp
+  src/current_state_monitor_middleware_handle.cpp
   src/trajectory_monitor.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
@@ -36,3 +37,15 @@ install(TARGETS demo_scene
 )
 
 install(DIRECTORY include/ DESTINATION include)
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_cmake_gmock REQUIRED)
+
+  ament_add_gmock(current_state_monitor_tests
+    test/current_state_monitor_tests.cpp
+  )
+  target_link_libraries(current_state_monitor_tests
+    ${MOVEIT_LIB_NAME}
+  )
+endif()
