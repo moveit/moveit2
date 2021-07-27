@@ -390,7 +390,7 @@ void CurrentStateMonitor::updateMultiDofJoints()
       const std::string& parent_frame =
           joint->getParentLinkModel() ? joint->getParentLinkModel()->getName() : robot_model_->getModelFrame();
 
-      rclcpp::Time latest_common_time = rclcpp::Time(0, 0, RCL_ROS_TIME);
+      rclcpp::Time latest_common_time(0, 0, RCL_ROS_TIME);
       geometry_msgs::msg::TransformStamped transf;
       try
       {

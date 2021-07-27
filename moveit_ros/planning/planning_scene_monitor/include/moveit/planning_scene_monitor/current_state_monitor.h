@@ -312,6 +312,7 @@ public:
 private:
   bool haveCompleteStateHelper(const rclcpp::Time& oldest_allowed_update_time,
                                std::vector<std::string>* missing_joints) const;
+
   void jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
   void updateMultiDofJoints();
   void transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static);
@@ -325,7 +326,6 @@ private:
   bool copy_dynamics_;  // Copy velocity and effort from joint_state
   rclcpp::Time monitor_start_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
   double error_;
-
   rclcpp::Time current_state_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
   mutable std::mutex state_update_lock_;
