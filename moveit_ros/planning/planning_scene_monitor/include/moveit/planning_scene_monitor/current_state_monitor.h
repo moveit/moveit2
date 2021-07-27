@@ -94,16 +94,14 @@ public:
      *
      * @param[in]  callback  The callback
      */
-    virtual void
-    createStaticTfSubscription(TfCallback callback) = 0;
+    virtual void createStaticTfSubscription(TfCallback callback) = 0;
 
     /**
      * @brief      Creates a dynamic transform message subscription
      *
      * @param[in]  callback  The callback
      */
-    virtual void
-    createDynamicTfSubscription(TfCallback callback) = 0;
+    virtual void createDynamicTfSubscription(TfCallback callback) = 0;
 
     /**
      * @brief      Reset the joint state subscription
