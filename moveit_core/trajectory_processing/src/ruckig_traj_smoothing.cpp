@@ -44,11 +44,10 @@
 
 namespace trajectory_processing
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit_trajectory_processing.time_optimal_trajectory_generation");
-constexpr double DEFAULT_MAX_VELOCITY = DBL_MAX;      // rad/s
-constexpr double DEFAULT_MAX_ACCELERATION = DBL_MAX;  // rad/s^2
-constexpr double DEFAULT_MAX_JERK = DBL_MAX;          // rad/s^3
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_trajectory_processing.ruckig_traj_smoothing");
+constexpr double DEFAULT_MAX_VELOCITY = 5;       // rad/s
+constexpr double DEFAULT_MAX_ACCELERATION = 10;  // rad/s^2
+constexpr double DEFAULT_MAX_JERK = 20;          // rad/s^3
 
 bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
                                         const double max_velocity_scaling_factor,
@@ -75,7 +74,6 @@ bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& traje
 
   // Instantiate the smoother
   double timestep = trajectory.getAverageSegmentDuration();
-  RCLCPP_ERROR_STREAM(LOGGER, "timestep: " << timestep);
   ruckig::Ruckig<0> ruckig{ num_dof, timestep };
   ruckig::InputParameter<0> ruckig_input{ num_dof };
   ruckig::OutputParameter<0> ruckig_output{ num_dof };
@@ -93,9 +91,6 @@ bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& traje
     current_positions_vector.at(i) = waypoint->getVariablePosition(idx[i]);
     current_velocities_vector.at(i) = waypoint->getVariableVelocity(idx[i]);
     current_accelerations_vector.at(i) = waypoint->getVariableAcceleration(idx[i]);
-    RCLCPP_ERROR_STREAM(LOGGER, "Initial position: " << current_positions_vector.at(i));
-    RCLCPP_ERROR_STREAM(LOGGER, "Initial velocity: " << current_velocities_vector.at(i));
-    RCLCPP_ERROR_STREAM(LOGGER, "Initial acceleration: " << current_accelerations_vector.at(i));
   }
   std::copy_n(current_positions_vector.begin(), num_dof, ruckig_input.current_position.begin());
   std::copy_n(current_velocities_vector.begin(), num_dof, ruckig_input.current_velocity.begin());
@@ -132,10 +127,6 @@ bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& traje
     {
       ruckig_input.max_acceleration[i] = max_acceleration_scaling_factor * DEFAULT_MAX_ACCELERATION;
     }
-
-    RCLCPP_ERROR_STREAM(LOGGER, "Max vel: " << ruckig_input.max_velocity[i]);
-    RCLCPP_ERROR_STREAM(LOGGER, "Max accel: " << ruckig_input.max_acceleration[i]);
-    RCLCPP_ERROR_STREAM(LOGGER, "Max jerk: " << ruckig_input.max_jerk[i]);
   }
 
   ruckig::Result ruckig_result;
@@ -154,13 +145,6 @@ bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& traje
       ruckig_input.target_position[joint] = next_waypoint->getVariablePosition(idx[joint]);
       ruckig_input.target_velocity[joint] = next_waypoint->getVariableVelocity(idx[joint]);
       ruckig_input.target_acceleration[joint] = next_waypoint->getVariableAcceleration(idx[joint]);
-
-      RCLCPP_ERROR_STREAM(LOGGER, "Target pos: " << ruckig_input.target_position[joint]
-                                                 << "  Current pos: " << ruckig_input.current_position[joint]);
-      RCLCPP_ERROR_STREAM(LOGGER, "Target vel: " << ruckig_input.target_velocity[joint]
-                                                 << "  Current vel: " << ruckig_input.current_velocity[joint]);
-      RCLCPP_ERROR_STREAM(LOGGER, "Target accel: " << ruckig_input.target_acceleration[joint]
-                                                   << "  Current accel: " << ruckig_input.current_acceleration[joint]);
     }
     ruckig_result = ruckig.update(ruckig_input, ruckig_output);
 
@@ -174,12 +158,6 @@ bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& traje
     // Overwrite pos/vel/accel of the target waypoint
     for (size_t joint = 0; joint < num_dof; ++joint)
     {
-      // RCLCPP_ERROR_STREAM(LOGGER, "Target pos: " << ruckig_input.target_position[joint]
-      //                                            << "  Smoothed pos: " << ruckig_output.new_position[joint]);
-      // RCLCPP_ERROR_STREAM(LOGGER, "Target vel: " << ruckig_input.target_velocity[joint]
-      //                                            << "  Smoothed vel: " << ruckig_output.new_velocity[joint]);
-      // RCLCPP_ERROR_STREAM(LOGGER, "Target accel: " << ruckig_input.target_acceleration[joint]
-      //                                              << "  Smoothed accel: " << ruckig_output.new_acceleration[joint]);
       next_waypoint->setVariablePosition(idx[joint], ruckig_output.new_position[joint]);
       next_waypoint->setVariableVelocity(idx[joint], ruckig_output.new_velocity[joint]);
       next_waypoint->setVariableAcceleration(idx[joint], ruckig_output.new_acceleration[joint]);
