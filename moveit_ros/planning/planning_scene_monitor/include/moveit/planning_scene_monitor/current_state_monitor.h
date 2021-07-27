@@ -67,6 +67,8 @@ public:
   class MiddlewareHandle
   {
   public:
+    using TfCallback = std::function<void(const tf2_msgs::msg::TFMessage::ConstSharedPtr)>;
+
     /**
      * @brief      Destroys the object.
      */
@@ -93,7 +95,7 @@ public:
      * @param[in]  callback  The callback
      */
     virtual void
-    createStaticTfSubscription(std::function<void(const tf2_msgs::msg::TFMessage::ConstSharedPtr)> callback) = 0;
+    createStaticTfSubscription(TfCallback callback) = 0;
 
     /**
      * @brief      Creates a dynamic transform message subscription
@@ -101,7 +103,7 @@ public:
      * @param[in]  callback  The callback
      */
     virtual void
-    createDynamicTfSubscription(std::function<void(const tf2_msgs::msg::TFMessage::ConstSharedPtr)> callback) = 0;
+    createDynamicTfSubscription(TfCallback callback) = 0;
 
     /**
      * @brief      Reset the joint state subscription
