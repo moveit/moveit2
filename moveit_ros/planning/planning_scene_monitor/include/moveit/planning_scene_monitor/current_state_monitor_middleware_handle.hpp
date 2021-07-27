@@ -110,6 +110,25 @@ public:
    */
   bool sleepFor(const std::chrono::nanoseconds& nanoseconds) const override;
 
+  /**
+   * @brief      Get the static transform topic name
+   *
+   * @return     The static transform topic name.
+   */
+  std::string getStaticTfTopicName() const override;
+
+  /**
+   * @brief      Get the dynamic transform topic name
+   *
+   * @return     The dynamic transform topic name.
+   */
+  std::string getDynamicTfTopicName() const override;
+
+  /**
+   * @brief      Reset the static & dynamic transform subscriptions
+   */
+  void resetTfSubscriptions() override;
+
 private:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscription_;

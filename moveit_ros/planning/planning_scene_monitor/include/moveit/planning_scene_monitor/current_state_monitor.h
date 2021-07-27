@@ -123,6 +123,25 @@ public:
      * @return     True if sleep happened as expected.
      */
     virtual bool sleepFor(const std::chrono::nanoseconds& nanoseconds) const = 0;
+
+    /**
+     * @brief      Get the static transform topic name
+     *
+     * @return     The static transform topic name.
+     */
+    virtual std::string getStaticTfTopicName() const = 0;
+
+    /**
+     * @brief      Get the dynamic transform topic name
+     *
+     * @return     The dynamic transform topic name.
+     */
+    virtual std::string getDynamicTfTopicName() const = 0;
+
+    /**
+     * @brief      Reset the static & dynamic transform subscriptions
+     */
+    virtual void resetTfSubscriptions() = 0;
   };
 
   /** @brief Constructor.
@@ -306,10 +325,6 @@ private:
   bool copy_dynamics_;  // Copy velocity and effort from joint_state
   rclcpp::Time monitor_start_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
   double error_;
-
-  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
-  rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr transform_subscriber_;
-  rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr static_transfrom_subscriber_;
 
   rclcpp::Time current_state_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 

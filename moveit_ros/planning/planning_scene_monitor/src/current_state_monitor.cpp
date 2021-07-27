@@ -183,8 +183,7 @@ void CurrentStateMonitor::stopStateMonitor()
     middleware_handle_->resetJointStateSubscription();
     if (tf_buffer_)
     {
-      transform_subscriber_.reset();
-      static_transfrom_subscriber_.reset();
+      middleware_handle_->resetTfSubscriptions();
     }
     RCLCPP_DEBUG(LOGGER, "No longer listening for joint states");
     state_monitor_started_ = false;
@@ -461,8 +460,8 @@ void CurrentStateMonitor::transformCallback(const tf2_msgs::msg::TFMessage::Cons
     try
     {
       tf_buffer_->setTransform(transform,
-                               is_static ? static_transfrom_subscriber_->get_topic_name() :
-                                           transform_subscriber_->get_topic_name(),
+                               is_static ? middleware_handle_->getStaticTfTopicName() :
+                                           middleware_handle_->getDynamicTfTopicName(),
                                is_static);
     }
     catch (tf2::TransformException& ex)
