@@ -161,9 +161,9 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
     {
       tf_buffer_->setUsingDedicatedThread(true);
       middleware_handle_->createDynamicTfSubscription(
-          std::bind(&CurrentStateMonitor::transfromCallback, this, std::placeholders::_1, false));
+          std::bind(&CurrentStateMonitor::transformCallback, this, std::placeholders::_1, false));
       middleware_handle_->createStaticTfSubscription(
-          std::bind(&CurrentStateMonitor::transfromCallback, this, std::placeholders::_1, true));
+          std::bind(&CurrentStateMonitor::transformCallback, this, std::placeholders::_1, true));
     }
     state_monitor_started_ = true;
     monitor_start_time_ = middleware_handle_->now();
@@ -454,7 +454,7 @@ void CurrentStateMonitor::updateMultiDofJoints()
 }
 
 // Copied from https://github.com/ros2/geometry2/blob/ros2/tf2_ros/src/transform_listener.cpp
-void CurrentStateMonitor::transfromCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static)
+void CurrentStateMonitor::transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static)
 {
   for (const auto& transform : msg->transforms)
   {
