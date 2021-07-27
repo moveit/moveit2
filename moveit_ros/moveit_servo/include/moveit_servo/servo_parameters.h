@@ -151,7 +151,8 @@ private:
 };
 
 // Helper template for declaring and getting ros param
-// Must be declared here to ensure template class is built for required templates when included
+// Must be declared here to ensure template class is built for required templates when included.
+// (The CPP file can't just be included because not everything there is templated, so you'd get duplicate symbols)
 template <typename T>
 void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
                        const rclcpp::Logger& logger, const T default_value = T{})
