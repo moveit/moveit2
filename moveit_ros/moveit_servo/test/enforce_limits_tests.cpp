@@ -80,7 +80,7 @@ protected:
 
 TEST_F(EnforceLimitsTests, VelocityScalingTest)
 {
-  // Request joint angle changes that are too fast, given the control period in servo settings YAML file.
+  // Request joint angle changes that are too fast given the control period.
   Eigen::ArrayXd delta_theta(7);
   delta_theta[0] = 0;  // rad
   delta_theta[1] = 0.01;
