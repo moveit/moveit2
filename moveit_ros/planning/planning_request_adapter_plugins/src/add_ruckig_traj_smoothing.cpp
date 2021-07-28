@@ -69,8 +69,8 @@ public:
     {
       RCLCPP_DEBUG(LOGGER, " Running '%s'", getDescription().c_str());
       RuckigSmoothing smoother;
-      if (!smoother.computeTimeStamps(*res.trajectory_, req.max_velocity_scaling_factor,
-                                      req.max_acceleration_scaling_factor))
+      if (!smoother.applySmoothing(*res.trajectory_, req.max_velocity_scaling_factor,
+                                   req.max_acceleration_scaling_factor))
       {
         RCLCPP_WARN(LOGGER, " Trajectory smoothing for the solution path failed.");
         result = false;

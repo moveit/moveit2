@@ -49,9 +49,9 @@ constexpr double DEFAULT_MAX_VELOCITY = 5;       // rad/s
 constexpr double DEFAULT_MAX_ACCELERATION = 10;  // rad/s^2
 constexpr double DEFAULT_MAX_JERK = 20;          // rad/s^3
 
-bool RuckigSmoothing::computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
-                                        const double max_velocity_scaling_factor,
-                                        const double max_acceleration_scaling_factor) const
+bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
+                                     const double max_velocity_scaling_factor,
+                                     const double max_acceleration_scaling_factor) const
 {
   const moveit::core::JointModelGroup* group = trajectory.getGroup();
   if (!group)
