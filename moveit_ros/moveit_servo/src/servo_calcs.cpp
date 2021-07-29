@@ -46,6 +46,7 @@
 
 // #include <moveit_servo/make_shared_from_pool.h> // TODO(adamp): create an issue about this
 #include <moveit_servo/servo_calcs.h>
+#include <moveit_servo/enforce_limits.hpp>
 
 using namespace std::chrono_literals;  // for s, ms, etc.
 
@@ -550,7 +551,7 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   internal_joint_state_ = original_joint_state_;
 
   // Enforce SRDF Velocity, Acceleration limits
-  enforceVelLimits(delta_theta);
+  delta_theta = enforceVelocityLimits(joint_model_group_, parameters_->publish_period, delta_theta);
 
   // Apply collision scaling
   double collision_scale = collision_velocity_scale_;
@@ -759,30 +760,6 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
   }
 
   return velocity_scale;
-}
-
-void ServoCalcs::enforceVelLimits(Eigen::ArrayXd& delta_theta)
-{
-  // Convert to joint angle velocities for checking and applying joint specific velocity limits.
-  Eigen::ArrayXd velocity = delta_theta / parameters_->publish_period;
-
-  std::size_t joint_delta_index{ 0 };
-  double velocity_scaling_factor{ 1.0 };
-  for (const moveit::core::JointModel* joint : joint_model_group_->getActiveJointModels())
-  {
-    const auto& bounds = joint->getVariableBounds(joint->getName());
-    if (bounds.velocity_bounded_ && velocity(joint_delta_index) != 0.0)
-    {
-      const double unbounded_velocity = velocity(joint_delta_index);
-      // Clamp each joint velocity to a joint specific [min_velocity, max_velocity] range.
-      const auto bounded_velocity = std::min(std::max(unbounded_velocity, bounds.min_velocity_), bounds.max_velocity_);
-      velocity_scaling_factor = std::min(velocity_scaling_factor, bounded_velocity / unbounded_velocity);
-    }
-    ++joint_delta_index;
-  }
-
-  // Convert back to joint angle increments.
-  delta_theta = velocity_scaling_factor * velocity * parameters_->publish_period;
 }
 
 std::vector<const moveit::core::JointModel*>

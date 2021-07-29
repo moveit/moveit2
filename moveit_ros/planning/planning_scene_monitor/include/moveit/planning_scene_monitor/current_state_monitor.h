@@ -36,18 +36,19 @@
 
 #pragma once
 
-#include <tf2_ros/buffer.h>
-#include <moveit/robot_state/robot_state.h>
-#include <sensor_msgs/msg/joint_state.hpp>
-#include <boost/function.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition_variable.hpp>
 #include <boost/signals2.hpp>
+#include <boost/thread/condition_variable.hpp>
+#include <boost/thread/mutex.hpp>
+#include <functional>
+#include <moveit/robot_state/robot_state.h>
 #include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <string>
+#include <tf2_ros/buffer.h>
 
 namespace planning_scene_monitor
 {
-using JointStateUpdateCallback = boost::function<void(const sensor_msgs::msg::JointState::ConstSharedPtr&)>;
+using JointStateUpdateCallback = std::function<void(sensor_msgs::msg::JointState::ConstSharedPtr)>;
 
 /** @class CurrentStateMonitor
     @brief Monitors the joint_states topic and tf to maintain the current state of the robot. */
@@ -56,10 +57,58 @@ class CurrentStateMonitor
   using TFConnection = boost::signals2::connection;
 
 public:
+  /**
+   * @brief      Dependency injection class for testing the CurrentStateMonitor
+   */
+  class MiddlewareHandle
+  {
+  public:
+    /**
+     * @brief      Destroys the object.
+     */
+    virtual ~MiddlewareHandle() = default;
+
+    /**
+     * @brief      Get the current time
+     *
+     * @return     Time object representing the time when this is called
+     */
+    virtual rclcpp::Time now() const = 0;
+
+    /**
+     * @brief      Creates a joint state subscription
+     *
+     * @param[in]  topic     The topic
+     * @param[in]  callback  The callback
+     */
+    virtual void createJointStateSubscription(const std::string& topic, JointStateUpdateCallback callback) = 0;
+
+    /**
+     * @brief      Reset the joint state subscription
+     */
+    virtual void resetJointStateSubscription() = 0;
+
+    /**
+     * @brief      Get the joint state topic name
+     *
+     * @return     The joint state topic name.
+     */
+    virtual std::string getJointStateTopicName() const = 0;
+  };
+
   /** @brief Constructor.
-   *  @param node A shared_ptr to a node used for subscription to joint_states_topic
-   *  @param robot_model The current kinematic model to build on
-   *  @param tf_buffer A pointer to the tf2_ros Buffer to use
+   *  @param middleware_handle   The ros middleware handle
+   *  @param robot_model         The current kinematic model to build on
+   *  @param tf_buffer           A pointer to the tf2_ros Buffer to use
+   */
+  CurrentStateMonitor(std::unique_ptr<MiddlewareHandle> middleware_handle,
+                      const moveit::core::RobotModelConstPtr& robot_model,
+                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
+
+  /** @brief Constructor.
+   *  @param node          A shared_ptr to a node used for subscription to joint_states_topic
+   *  @param robot_model   The current kinematic model to build on
+   *  @param tf_buffer     A pointer to the tf2_ros Buffer to use
    */
   CurrentStateMonitor(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                       const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
@@ -111,7 +160,7 @@ public:
    */
   inline bool haveCompleteState(const rclcpp::Duration& age) const
   {
-    return haveCompleteStateHelper(node_->now() - age, nullptr);
+    return haveCompleteStateHelper(middleware_handle_->now() - age, nullptr);
   }
 
   /** @brief Query whether we have joint state information for all DOFs in the kinematic model
@@ -140,7 +189,7 @@ public:
    */
   inline bool haveCompleteState(const rclcpp::Duration& age, std::vector<std::string>& missing_joints) const
   {
-    return haveCompleteStateHelper(node_->now() - age, &missing_joints);
+    return haveCompleteStateHelper(middleware_handle_->now() - age, &missing_joints);
   }
 
   /** @brief Get the current state
@@ -216,10 +265,10 @@ private:
   bool haveCompleteStateHelper(const rclcpp::Time& oldest_allowed_update_time,
                                std::vector<std::string>* missing_joints) const;
 
-  void jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
+  void jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
   void tfCallback();
 
-  std::shared_ptr<rclcpp::Node> node_;
+  std::unique_ptr<MiddlewareHandle> middleware_handle_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   moveit::core::RobotModelConstPtr robot_model_;
   moveit::core::RobotState robot_state_;
@@ -228,7 +277,6 @@ private:
   bool copy_dynamics_;  // Copy velocity and effort from joint_state
   rclcpp::Time monitor_start_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
   double error_;
-  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
   rclcpp::Time current_state_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
   mutable std::mutex state_update_lock_;

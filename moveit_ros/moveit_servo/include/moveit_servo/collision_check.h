@@ -65,7 +65,10 @@ public:
 
   ~CollisionCheck()
   {
-    timer_->cancel();
+    if (timer_)
+    {
+      timer_->cancel();
+    }
   }
 
   /** \brief start the Timer that regulates collision check rate */
