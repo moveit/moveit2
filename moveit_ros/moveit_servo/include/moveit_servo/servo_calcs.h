@@ -161,9 +161,6 @@ protected:
   void suddenHalt(sensor_msgs::msg::JointState& joint_state,
                   const std::vector<const moveit::core::JointModel*>& joints_to_halt) const;
 
-  /** \brief  Scale the delta theta to match joint velocity/acceleration limits */
-  void enforceVelLimits(Eigen::ArrayXd& delta_theta);
-
   /** \brief Avoid overshooting joint limits
       \return Vector of the joints that would move farther past position margin limits
    */
@@ -359,7 +356,5 @@ protected:
   // dynamic parameters
   std::string robot_link_command_frame_;
   rcl_interfaces::msg::SetParametersResult robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter);
-
-  friend class ServoFixture;
 };
 }  // namespace moveit_servo
