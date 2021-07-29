@@ -39,7 +39,9 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/rviz_plugin_render_tools/render_shapes.h>
+
 #include <rviz_common/properties/color_property.hpp>
+
 #include <OgreMaterial.h>
 
 namespace moveit_rviz_plugin

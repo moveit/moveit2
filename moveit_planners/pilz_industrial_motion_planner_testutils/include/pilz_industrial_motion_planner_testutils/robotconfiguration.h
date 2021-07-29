@@ -35,13 +35,13 @@
 #ifndef ROBOTCONFIGURATION_H
 #define ROBOTCONFIGURATION_H
 
-#include <string>
-#include <utility>
+#include "goalconstraintsmsgconvertible.h"
+#include "robotstatemsgconvertible.h"
 
 #include <moveit/robot_model/robot_model.h>
 
-#include "goalconstraintsmsgconvertible.h"
-#include "robotstatemsgconvertible.h"
+#include <string>
+#include <utility>
 
 namespace pilz_industrial_motion_planner_testutils
 {

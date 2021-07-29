@@ -50,17 +50,17 @@
 
 #include "load_test_robot.h"
 
-#include <limits>
-#include <ostream>
-
-#include <gtest/gtest.h>
-
 #include <moveit/ompl_interface/detail/state_validity_checker.h>
 #include <moveit/ompl_interface/model_based_planning_context.h>
 #include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
 #include <moveit/planning_scene/planning_scene.h>
 
+#include <gtest/gtest.h>
+
 #include <ompl/geometric/SimpleSetup.h>
+
+#include <limits>
+#include <ostream>
 
 /** \brief This flag sets the verbosity level for the state validity checker. **/
 constexpr bool VERBOSE = false;

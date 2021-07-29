@@ -36,13 +36,17 @@
 
 #pragma once
 
-#include <moveit/distance_field/voxel_grid.h>
-#include <moveit/distance_field/distance_field.h>
-#include <vector>
-#include <Eigen/Core>
-#include <set>
-#include <octomap/octomap.h>
 #include "rclcpp/rclcpp.hpp"
+
+#include <moveit/distance_field/distance_field.h>
+#include <moveit/distance_field/voxel_grid.h>
+
+#include <octomap/octomap.h>
+
+#include <Eigen/Core>
+
+#include <set>
+#include <vector>
 
 namespace EigenSTL
 {

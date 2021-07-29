@@ -36,33 +36,33 @@
 
 #pragma once
 
-#include <QWidget>
-#include <QTreeWidgetItem>
 #include <QListWidgetItem>
+#include <QTreeWidgetItem>
+#include <QWidget>
 
 #ifndef Q_MOC_RUN
 #include <moveit/macros/class_forward.h>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_interaction/robot_interaction.h>
 #include <moveit/robot_interaction/interaction_handler.h>
+#include <moveit/robot_interaction/robot_interaction.h>
 // TODO (ddengster): Enable when moveit_ros_perception is ported
 // #include <moveit/semantic_world/semantic_world.h>
 
-#include <interactive_markers/interactive_marker_server.hpp>
-#include <rviz_default_plugins/displays/interactive_markers/interactive_marker.hpp>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
-#include <rclcpp_action/rclcpp_action.hpp>
-#include <object_recognition_msgs/action/object_recognition.hpp>
 
+#include <interactive_markers/interactive_marker_server.hpp>
+#include <object_recognition_msgs/action/object_recognition.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
+#include <rviz_default_plugins/displays/interactive_markers/interactive_marker.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/empty.hpp>
 #include <std_srvs/srv/empty.hpp>
 #endif
 
 #include <map>
-#include <string>
 #include <memory>
+#include <string>
 
 namespace rviz_common
 {

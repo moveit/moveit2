@@ -34,10 +34,11 @@
 
 /* Author: Mark Moll */
 
-#include <boost/filesystem/fstream.hpp>
-#include <numeric>
-
 #include <moveit/cached_ik_kinematics_plugin/cached_ik_kinematics_plugin.h>
+
+#include <boost/filesystem/fstream.hpp>
+
+#include <numeric>
 
 namespace cached_ik_kinematics_plugin
 {

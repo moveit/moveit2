@@ -35,16 +35,16 @@
 #ifndef TESTDATA_LOADER_H
 #define TESTDATA_LOADER_H
 
-#include <string>
-#include <utility>
+#include "cartesianconfiguration.h"
+#include "command_types_typedef.h"
+#include "gripper.h"
+#include "jointconfiguration.h"
+#include "sequence.h"
 
 #include <moveit/robot_model/robot_model.h>
 
-#include "jointconfiguration.h"
-#include "cartesianconfiguration.h"
-#include "command_types_typedef.h"
-#include "sequence.h"
-#include "gripper.h"
+#include <string>
+#include <utility>
 
 namespace pilz_industrial_motion_planner_testutils
 {

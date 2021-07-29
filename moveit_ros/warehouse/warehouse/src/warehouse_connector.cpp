@@ -34,11 +34,14 @@
 
 /* Author: E. Gil Jones */
 
+#include "rclcpp/rclcpp.hpp"
+
+#include <moveit/warehouse/warehouse_connector.h>
+
 #include <sys/types.h>
+
 #include <signal.h>
 #include <unistd.h>
-#include <rclcpp/rclcpp.hpp>
-#include <moveit/warehouse/warehouse_connector.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.warehouse_connector");
 

@@ -36,13 +36,16 @@
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
-#include <tf2_ros/buffer.h>
-#include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
+#include "rclcpp/rclcpp.hpp"
+
+#include <moveit/lazy_free_space_updater/lazy_free_space_updater.h>
 #include <moveit/mesh_filter/mesh_filter.h>
 #include <moveit/mesh_filter/stereo_camera_model.h>
-#include <moveit/lazy_free_space_updater/lazy_free_space_updater.h>
+#include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
+
 #include <image_transport/image_transport.hpp>
+#include <tf2_ros/buffer.h>
+
 #include <memory>
 
 namespace occupancy_map_monitor

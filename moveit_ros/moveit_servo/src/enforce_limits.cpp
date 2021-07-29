@@ -37,11 +37,12 @@
  *      Author    : Brian O'Neil, Andy Zelenak, Blake Anderson, Tyler Weaver
  */
 
-#include <Eigen/Core>
-#include <sensor_msgs/msg/joint_state.hpp>
-
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit_servo/enforce_limits.hpp>
+
+#include <sensor_msgs/msg/joint_state.hpp>
+
+#include <Eigen/Core>
 
 namespace moveit_servo
 {

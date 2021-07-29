@@ -38,10 +38,11 @@
 
 #pragma once
 
-#include <thread>
+#include "rclcpp/rclcpp.hpp"
+
 #include <mutex>
+#include <thread>
 #include <vector>
-#include <rclcpp/rclcpp.hpp>
 
 namespace moveit_servo
 {

@@ -20,16 +20,19 @@
 
 #pragma once
 
+#include <moveit/collision_detection/collision_common.h>
+
+#include <geometric_shapes/shapes.h>
+
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <Eigen/StdVector>
-#include <geometric_shapes/shapes.h>
-#include <unordered_map>
-#include <vector>
-#include <memory>
+
 #include <functional>
 #include <map>
-#include <moveit/collision_detection/collision_common.h>
+#include <memory>
+#include <unordered_map>
+#include <vector>
 
 namespace collision_detection_bullet
 {

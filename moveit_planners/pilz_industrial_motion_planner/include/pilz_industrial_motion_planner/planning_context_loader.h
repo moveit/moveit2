@@ -36,12 +36,10 @@
 
 #include "pilz_industrial_motion_planner/limits_container.h"
 
-#include <memory>
-#include <vector>
-
 #include <moveit/planning_interface/planning_interface.h>
 
-#include "pilz_industrial_motion_planner/limits_container.h"
+#include <memory>
+#include <vector>
 
 namespace pilz_industrial_motion_planner
 {

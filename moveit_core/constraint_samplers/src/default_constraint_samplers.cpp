@@ -35,8 +35,10 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/constraint_samplers/default_constraint_samplers.h>
-#include <cassert>
+
 #include <boost/bind.hpp>
+
+#include <cassert>
 
 namespace constraint_samplers
 {

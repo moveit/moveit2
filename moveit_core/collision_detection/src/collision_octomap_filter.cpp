@@ -34,14 +34,18 @@
 
 /* Author: Adam Leeper */
 
+#include "rclcpp/rclcpp.hpp"
+
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit/collision_detection/collision_octomap_filter.h>
-#include <octomap/math/Vector3.h>
-#include <octomap/math/Utils.h>
-#include <octomap/octomap.h>
+
 #include <geometric_shapes/shapes.h>
+
+#include <octomap/math/Utils.h>
+#include <octomap/math/Vector3.h>
+#include <octomap/octomap.h>
+
 #include <memory>
-#include "rclcpp/rclcpp.hpp"
 
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.collision_octomap_filter");

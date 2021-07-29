@@ -35,16 +35,15 @@
 #include <gtest/gtest.h>
 
 // Boost includes
-#include <boost/scoped_ptr.hpp>
-
-#include <pluginlib/class_loader.hpp>
+#include "pilz_industrial_motion_planner/planning_context_loader.h"
+#include "test_utils.h"
 
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
-#include "pilz_industrial_motion_planner/planning_context_loader.h"
+#include <pluginlib/class_loader.hpp>
 
-#include "test_utils.h"
+#include <boost/scoped_ptr.hpp>
 
 const std::string PARAM_MODEL_NO_GRIPPER_NAME{ "robot_description" };
 const std::string PARAM_MODEL_WITH_GRIPPER_NAME{ "robot_description_pg70" };

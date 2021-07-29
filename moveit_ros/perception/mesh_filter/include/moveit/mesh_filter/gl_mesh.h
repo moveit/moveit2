@@ -36,8 +36,9 @@
 
 #pragma once
 
-#include <Eigen/Geometry>  // for Isometry3d
 #include <GL/glew.h>
+
+#include <Eigen/Geometry>  // for Isometry3d
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #else

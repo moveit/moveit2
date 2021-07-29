@@ -47,19 +47,23 @@
 #include "pilz_industrial_motion_planner/trajectory_blend_request.h"
 #include "pilz_industrial_motion_planner/trajectory_blend_response.h"
 #include "pilz_industrial_motion_planner/trajectory_generator.h"
-#include <boost/core/demangle.hpp>
-#include <math.h>
+
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit_msgs/Constraints.h>
 #include <moveit_msgs/MoveGroupAction.h>
+
 #include <ros/console.h>
 #include <sensor_msgs/JointState.h>
-#include <string>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/convert.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+#include <boost/core/demangle.hpp>
+
+#include <math.h>
+#include <string>
 #include <utility>
 
 namespace testutils

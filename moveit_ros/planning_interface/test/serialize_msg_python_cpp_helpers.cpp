@@ -34,10 +34,13 @@
 
 /* Author: Bjarne von Horn */
 
-#include <Python.h>
-#include <boost/python.hpp>
 #include <moveit/py_bindings_tools/serialize_msg.h>
+
 #include <geometry_msgs/Vector3.h>
+
+#include <boost/python.hpp>
+
+#include <Python.h>
 #include <cstring>
 
 namespace bp = boost::python;

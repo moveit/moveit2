@@ -1,10 +1,10 @@
 #pragma once
+#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/robot_model/robot_model.h>
+
 #include <trajopt/common.hpp>
 #include <trajopt/json_marshal.hpp>
 #include <trajopt_sco/optimizers.hpp>
-
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/planning_scene/planning_scene.h>
 
 #include <memory>
 

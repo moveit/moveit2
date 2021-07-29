@@ -34,11 +34,13 @@
 
 /* Author: Ioan Sucan */
 
+#include "rclcpp/rclcpp.hpp"
+
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
+
 #include <class_loader/class_loader.hpp>
-#include <rclcpp/rclcpp.hpp>
 
 namespace default_planner_request_adapters
 {

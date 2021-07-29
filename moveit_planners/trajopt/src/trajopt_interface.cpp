@@ -34,27 +34,26 @@
 
 /* Author: Omid Heidari */
 
+#include "trajopt_interface/trajopt_interface.h"
+
+#include "trajopt_interface/problem_description.h"
+
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/robot_state/conversions.h>
-
 #include <moveit_msgs/MotionPlanRequest.h>
-
-#include <trajopt_sco/sco_common.hpp>
-#include <trajopt_sco/optimizers.hpp>
-#include <trajopt_sco/solver_interface.hpp>
-
-#include <trajopt/trajectory_costs.hpp>
 
 #include <ros/ros.h>
 #include <rosparam_shortcuts/rosparam_shortcuts.h>
+#include <trajopt/trajectory_costs.hpp>
+#include <trajopt_sco/optimizers.hpp>
+#include <trajopt_sco/sco_common.hpp>
+#include <trajopt_sco/solver_interface.hpp>
+
+#include <Eigen/Geometry>
 
 #include <limits>
-#include <vector>
-#include <Eigen/Geometry>
 #include <unordered_map>
-
-#include "trajopt_interface/trajopt_interface.h"
-#include "trajopt_interface/problem_description.h"
+#include <vector>
 
 namespace trajopt_interface
 {

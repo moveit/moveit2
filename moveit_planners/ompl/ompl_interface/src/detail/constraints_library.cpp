@@ -34,13 +34,15 @@
 
 /* Author: Ioan Sucan */
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem.hpp>
-#include <fstream>
 #include <moveit/ompl_interface/detail/constrained_sampler.h>
 #include <moveit/ompl_interface/detail/constraints_library.h>
 #include <moveit/profiler/profiler.h>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem.hpp>
 #include <ompl/tools/config/SelfConfig.h>
+
+#include <fstream>
 #include <utility>
 
 namespace ompl_interface

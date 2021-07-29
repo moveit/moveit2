@@ -37,6 +37,7 @@
 
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/trajectory_processing/iterative_spline_parameterization.h>
+
 #include <class_loader/class_loader.hpp>
 
 namespace default_planner_request_adapters

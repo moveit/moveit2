@@ -36,10 +36,11 @@
 
 #pragma once
 
-#include <moveit/collision_detection/world.h>
 #include <moveit/collision_detection/collision_env.h>
-#include <moveit/macros/class_forward.h>
+#include <moveit/collision_detection/world.h>
 #include <moveit/collision_detection_fcl/fcl_compat.h>
+#include <moveit/macros/class_forward.h>
+
 #include <geometric_shapes/check_isometry.h>
 
 #if (MOVEIT_FCL_VERSION >= FCL_VERSION_CHECK(0, 6, 0))

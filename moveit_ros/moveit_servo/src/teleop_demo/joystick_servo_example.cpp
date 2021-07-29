@@ -39,12 +39,15 @@
  */
 
 // ROS
-#include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/joy.hpp>
-#include <geometry_msgs/msg/twist_stamped.hpp>
-#include <control_msgs/msg/joint_jog.hpp>
-#include <std_srvs/srv/trigger.hpp>
+#include "rclcpp/rclcpp.hpp"
+
 #include <moveit_msgs/msg/planning_scene.hpp>
+
+#include <control_msgs/msg/joint_jog.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <sensor_msgs/msg/joy.hpp>
+#include <std_srvs/srv/trigger.hpp>
+
 #include <thread>
 
 // We'll just set up parameters here

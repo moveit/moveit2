@@ -34,9 +34,9 @@
 
 #pragma once
 
-#include <string>
-
 #include <moveit/robot_trajectory/robot_trajectory.h>
+
+#include <string>
 
 namespace pilz_industrial_motion_planner
 {

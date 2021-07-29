@@ -35,10 +35,10 @@
 #ifndef MOTIONCMD_H
 #define MOTIONCMD_H
 
-#include <string>
-#include <memory>
-
 #include "motionplanrequestconvertible.h"
+
+#include <memory>
+#include <string>
 
 namespace pilz_industrial_motion_planner_testutils
 {

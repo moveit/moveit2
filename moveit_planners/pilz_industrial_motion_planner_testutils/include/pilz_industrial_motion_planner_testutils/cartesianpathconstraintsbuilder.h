@@ -35,11 +35,11 @@
 #ifndef CARTESIANPATHCONSTRAINTSBUILDER_H
 #define CARTESIANPATHCONSTRAINTSBUILDER_H
 
-#include <string>
+#include "cartesianconfiguration.h"
 
 #include <moveit_msgs/Constraints.h>
 
-#include "cartesianconfiguration.h"
+#include <string>
 
 namespace pilz_industrial_motion_planner_testutils
 {

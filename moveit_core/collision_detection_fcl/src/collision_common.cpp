@@ -35,19 +35,21 @@
 /* Author: Ioan Sucan, Jia Pan */
 
 #include <moveit/collision_detection_fcl/collision_common.h>
-#include <geometric_shapes/shapes.h>
 #include <moveit/collision_detection_fcl/fcl_compat.h>
+
+#include <geometric_shapes/shapes.h>
 
 #if (MOVEIT_FCL_VERSION >= FCL_VERSION_CHECK(0, 6, 0))
 #include <fcl/geometry/bvh/BVH_model.h>
 #include <fcl/geometry/octree/octree.h>
 #else
 #include <fcl/BVH/BVH_model.h>
-#include <fcl/shape/geometric_shapes.h>
 #include <fcl/octree.h>
+#include <fcl/shape/geometric_shapes.h>
 #endif
 
 #include <boost/thread/mutex.hpp>
+
 #include <memory>
 
 namespace collision_detection

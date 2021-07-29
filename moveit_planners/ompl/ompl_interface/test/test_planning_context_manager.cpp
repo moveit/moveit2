@@ -52,17 +52,16 @@
 
 #include "load_test_robot.h"
 
-#include <gtest/gtest.h>
-
-#include <tf2_eigen/tf2_eigen.h>
-
-#include <moveit/ompl_interface/planning_context_manager.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/planning_interface/planning_request.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/kinematic_constraints/utils.h>
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
+#include <moveit/kinematic_constraints/utils.h>
 #include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
+#include <moveit/ompl_interface/planning_context_manager.h>
+#include <moveit/planning_interface/planning_request.h>
+#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/robot_state/conversions.h>
+
+#include <gtest/gtest.h>
+#include <tf2_eigen/tf2_eigen.h>
 
 // static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_planning_context_manager");
 

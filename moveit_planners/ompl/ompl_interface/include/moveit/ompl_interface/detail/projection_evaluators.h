@@ -36,9 +36,10 @@
 
 #pragma once
 
-#include <ompl/config.h>
-#include <ompl/base/ProjectionEvaluator.h>
 #include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
+
+#include <ompl/base/ProjectionEvaluator.h>
+#include <ompl/config.h>
 
 // TODO: remove when ROS Lunar and older are no longer supported
 #if OMPL_VERSION_VALUE >= 1004000  // Version greater than 1.4.0

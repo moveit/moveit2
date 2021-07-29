@@ -36,10 +36,13 @@
 
 #pragma once
 
+#include "rclcpp/rclcpp.hpp"
+
 #include <moveit/macros/class_forward.h>
-#include <urdf/model.h>
+
 #include <srdfdom/model.h>
-#include <rclcpp/rclcpp.hpp>
+
+#include <urdf/model.h>
 
 namespace rdf_loader
 {

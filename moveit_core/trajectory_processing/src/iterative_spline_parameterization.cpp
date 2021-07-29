@@ -34,8 +34,9 @@
 
 /* Author: Ken Anderson */
 
-#include <moveit/trajectory_processing/iterative_spline_parameterization.h>
 #include <moveit/robot_state/conversions.h>
+#include <moveit/trajectory_processing/iterative_spline_parameterization.h>
+
 #include <vector>
 
 static const double VLIMIT = 1.0;  // default if not specified in model

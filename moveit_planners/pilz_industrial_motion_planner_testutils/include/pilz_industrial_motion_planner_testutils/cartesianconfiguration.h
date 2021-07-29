@@ -35,19 +35,21 @@
 #ifndef CARTESIANCONFIGURATION_H
 #define CARTESIANCONFIGURATION_H
 
-#include <vector>
-#include <sstream>
+#include "jointconfiguration.h"
+#include "robotconfiguration.h"
 
-#include <boost/optional.hpp>
+#include <moveit/kinematic_constraints/utils.h>
+#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/robot_state.h>
+
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/kinematic_constraints/utils.h>
 
-#include "robotconfiguration.h"
-#include "jointconfiguration.h"
+#include <boost/optional.hpp>
+
+#include <sstream>
+#include <vector>
 
 namespace pilz_industrial_motion_planner_testutils
 {

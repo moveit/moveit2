@@ -32,13 +32,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <gtest/gtest.h>
+#include "test_utils.h"
+
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/robot_state/conversions.h>
+
+#include <gtest/gtest.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-
-#include "test_utils.h"
 
 pilz_industrial_motion_planner::JointLimitsContainer
 testutils::createFakeLimits(const std::vector<std::string>& joint_names)

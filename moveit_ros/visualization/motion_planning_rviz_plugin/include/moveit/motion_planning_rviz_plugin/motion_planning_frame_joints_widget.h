@@ -38,12 +38,14 @@
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
+
 #include <Eigen/SVD>
+
 #include <QAbstractItemModel>
-#include <QWidget>
 #include <QStyledItemDelegate>
-#include <vector>
+#include <QWidget>
 #include <memory>
+#include <vector>
 
 class QSlider;
 

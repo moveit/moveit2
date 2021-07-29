@@ -34,12 +34,14 @@
 
 /* Author: Ioan Sucan */
 
+#include <moveit/collision_detection/collision_tools.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit/collision_detection/collision_tools.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
-#include <boost/tokenizer.hpp>
+
 #include <boost/algorithm/string/join.hpp>
+#include <boost/tokenizer.hpp>
+
 #include <sstream>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning.planning_pipeline");

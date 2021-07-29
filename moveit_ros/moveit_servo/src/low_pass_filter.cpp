@@ -38,9 +38,10 @@
  */
 
 #include <moveit_servo/low_pass_filter.h>
+
 #include <cmath>
-#include <string>
 #include <stdexcept>
+#include <string>
 
 namespace moveit_servo
 {

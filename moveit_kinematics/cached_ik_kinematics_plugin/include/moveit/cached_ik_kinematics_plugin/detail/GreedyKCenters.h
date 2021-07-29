@@ -39,6 +39,7 @@
 #pragma once
 
 #include <boost/numeric/ublas/matrix.hpp>
+
 #include <functional>
 #include <random>
 

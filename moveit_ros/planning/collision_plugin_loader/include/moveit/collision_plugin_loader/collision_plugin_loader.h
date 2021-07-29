@@ -34,9 +34,10 @@
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
-#include <moveit/macros/class_forward.h>
+#include "rclcpp/rclcpp.hpp"
+
 #include <moveit/collision_detection/collision_plugin.h>
+#include <moveit/macros/class_forward.h>
 
 namespace collision_detection
 {

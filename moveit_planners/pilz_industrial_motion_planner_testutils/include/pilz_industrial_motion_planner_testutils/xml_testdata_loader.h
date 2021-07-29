@@ -35,15 +35,15 @@
 #ifndef XML_TESTDATA_LOADER_H
 #define XML_TESTDATA_LOADER_H
 
-#include <string>
-#include <vector>
-#include <functional>
-#include <map>
-#include <memory>
+#include "pilz_industrial_motion_planner_testutils/testdata_loader.h"
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "pilz_industrial_motion_planner_testutils/testdata_loader.h"
+#include <functional>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace pt = boost::property_tree;
 namespace pilz_industrial_motion_planner_testutils

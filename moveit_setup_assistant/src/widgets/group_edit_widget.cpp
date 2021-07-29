@@ -34,6 +34,10 @@
 
 /* Author: Dave Coleman */
 
+#include "group_edit_widget.h"
+
+#include <pluginlib/class_loader.hpp>  // for loading all avail kinematic planners
+
 #include <QComboBox>
 #include <QFileDialog>
 #include <QFormLayout>
@@ -45,9 +49,6 @@
 #include <QPushButton>
 #include <QString>
 #include <QVBoxLayout>
-
-#include "group_edit_widget.h"
-#include <pluginlib/class_loader.hpp>  // for loading all avail kinematic planners
 
 namespace moveit_setup_assistant
 {

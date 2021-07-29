@@ -40,8 +40,8 @@
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
-#include <memory>
 #include <limits>
+#include <memory>
 
 namespace planning_scene_monitor
 {

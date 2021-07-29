@@ -34,18 +34,18 @@
 
 #pragma once
 
-#include <string>
-
-#include <boost/optional.hpp>
+#include "moveit_msgs/MotionSequenceRequest.h"
+#include "pilz_industrial_motion_planner/plan_components_builder.h"
+#include "pilz_industrial_motion_planner/trajectory_blender.h"
+#include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
 
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit_msgs/MotionPlanResponse.h>
 
-#include "moveit_msgs/MotionSequenceRequest.h"
-#include "pilz_industrial_motion_planner/plan_components_builder.h"
-#include "pilz_industrial_motion_planner/trajectory_blender.h"
-#include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
+#include <boost/optional.hpp>
+
+#include <string>
 
 namespace pilz_industrial_motion_planner
 {

@@ -36,7 +36,7 @@
    Desc:   Simple utility to see all the collision objects in a planning scene, including attached
 */
 
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp/rclcpp.hpp"
 
 // MoveIt
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>

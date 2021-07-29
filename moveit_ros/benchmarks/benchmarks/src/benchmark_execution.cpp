@@ -40,20 +40,20 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
 
-#include <boost/regex.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/variables_map.hpp>
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/math/constants/constants.hpp>
-#include <boost/progress.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include <tf2_eigen/tf2_eigen.h>
+
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/math/constants/constants.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/progress.hpp>
+#include <boost/regex.hpp>
+#include <boost/tokenizer.hpp>
 
 #include <fstream>
 #include <memory>

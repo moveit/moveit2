@@ -37,8 +37,9 @@
 */
 
 #include <moveit/utils/robot_model_test_utils.h>
-#include <gtest/gtest.h>
 #include <moveit_servo/enforce_limits.hpp>
+
+#include <gtest/gtest.h>
 
 namespace
 {

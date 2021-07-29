@@ -1,14 +1,15 @@
-#include <moveit/robot_state/conversions.h>
+#include "trajopt_interface/trajopt_planning_context.h"
+
+#include "trajopt_interface/trajopt_interface.h"
+
 #include <moveit/planning_interface/planning_interface.h>
-#include <moveit_msgs/MotionPlanRequest.h>
 #include <moveit/planning_scene/planning_scene.h>
+#include <moveit/robot_state/conversions.h>
+#include <moveit_msgs/MotionPlanRequest.h>
 
 #include <ros/console.h>
 
 #include <Eigen/Geometry>
-
-#include "trajopt_interface/trajopt_planning_context.h"
-#include "trajopt_interface/trajopt_interface.h"
 
 namespace trajopt_interface
 {

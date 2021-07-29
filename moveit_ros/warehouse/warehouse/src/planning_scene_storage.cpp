@@ -35,9 +35,12 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/warehouse/planning_scene_storage.h>
-#include <boost/regex.hpp>
-#include <utility>
+
 #include <rclcpp/serialization.hpp>
+
+#include <boost/regex.hpp>
+
+#include <utility>
 
 const std::string moveit_warehouse::PlanningSceneStorage::DATABASE_NAME = "moveit_planning_scenes";
 

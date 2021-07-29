@@ -35,8 +35,10 @@
 /* Author: Acorn Pooley */
 
 #include <moveit/robot_interaction/kinematic_options.h>
-#include <boost/static_assert.hpp>
+
 #include <rclcpp/logging.hpp>
+
+#include <boost/static_assert.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_robot_interaction.kinematic_options");
 

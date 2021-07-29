@@ -35,10 +35,10 @@
 #pragma once
 
 #include "pilz_industrial_motion_planner/limits_container.h"
-#include <moveit/robot_model/robot_model.h>
-
 #include "pilz_industrial_motion_planner/trajectory_blend_request.h"
 #include "pilz_industrial_motion_planner/trajectory_blend_response.h"
+
+#include <moveit/robot_model/robot_model.h>
 
 namespace pilz_industrial_motion_planner
 {

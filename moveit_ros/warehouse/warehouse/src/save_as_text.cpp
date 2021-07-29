@@ -34,16 +34,18 @@
 
 /* Author: Ioan Sucan */
 
+#include "rclcpp/rclcpp.hpp"
+
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/robot_state/conversions.h>
+#include <moveit/warehouse/constraints_storage.h>
 #include <moveit/warehouse/planning_scene_storage.h>
 #include <moveit/warehouse/state_storage.h>
-#include <moveit/warehouse/constraints_storage.h>
+
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_state/conversions.h>
-#include <rclcpp/rclcpp.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 

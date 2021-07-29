@@ -36,9 +36,11 @@
 
 #pragma once
 
-#include <moveit/constraint_samplers/constraint_sampler.h>
-#include <visualization_msgs/msg/marker_array.hpp>
 #include "rclcpp/rclcpp.hpp"
+
+#include <moveit/constraint_samplers/constraint_sampler.h>
+
+#include <visualization_msgs/msg/marker_array.hpp>
 
 namespace constraint_samplers
 {

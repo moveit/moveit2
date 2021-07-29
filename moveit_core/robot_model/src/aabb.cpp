@@ -35,6 +35,7 @@
 /* Author: Martin Pecka */
 
 #include <moveit/robot_model/aabb.h>
+
 #include <geometric_shapes/check_isometry.h>
 
 void moveit::core::AABB::extendWithTransformedBox(const Eigen::Isometry3d& transform, const Eigen::Vector3d& box)

@@ -35,14 +35,15 @@
 /* Author: Suat Gedikli */
 
 #include <moveit/mesh_filter/depth_self_filter_nodelet.h>
-#include <moveit/mesh_filter/stereo_camera_model.h>
 #include <moveit/mesh_filter/mesh_filter.h>
-#include <ros/ros.h>
-#include <image_transport/subscriber_filter.h>
-#include <sensor_msgs/image_encodings.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/mesh_filter/stereo_camera_model.h>
 #include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
+
 #include <cv_bridge/cv_bridge.h>
+#include <image_transport/subscriber_filter.h>
+#include <ros/ros.h>
+#include <sensor_msgs/image_encodings.h>
 
 namespace enc = sensor_msgs::image_encodings;
 

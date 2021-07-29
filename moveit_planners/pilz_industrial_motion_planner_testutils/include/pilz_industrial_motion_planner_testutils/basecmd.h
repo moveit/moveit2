@@ -35,9 +35,9 @@
 #ifndef BASECMD_H
 #define BASECMD_H
 
-#include <string>
-
 #include "motioncmd.h"
+
+#include <string>
 
 namespace pilz_industrial_motion_planner_testutils
 {

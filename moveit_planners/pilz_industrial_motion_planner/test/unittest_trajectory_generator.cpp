@@ -32,11 +32,11 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <memory>
+#include "pilz_industrial_motion_planner/trajectory_generator.h"
 
 #include <gtest/gtest.h>
 
-#include "pilz_industrial_motion_planner/trajectory_generator.h"
+#include <memory>
 
 using namespace pilz_industrial_motion_planner;
 

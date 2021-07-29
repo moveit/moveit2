@@ -34,18 +34,22 @@
 
 /* Author: Ioan Sucan */
 
-#include <boost/algorithm/string.hpp>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
-#include <geometric_shapes/shape_operations.h>
 #include <moveit/collision_detection/collision_tools.h>
-#include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
 #include <moveit/exceptions/exceptions.h>
+#include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/attached_body.h>
+#include <moveit/robot_state/conversions.h>
+#include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/utils/message_checks.h>
+
+#include <geometric_shapes/shape_operations.h>
+
 #include <octomap_msgs/conversions.h>
 #include <tf2_eigen/tf2_eigen.h>
+
+#include <boost/algorithm/string.hpp>
+
 #include <memory>
 #include <set>
 

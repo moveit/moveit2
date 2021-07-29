@@ -36,8 +36,10 @@
 
 #pragma once
 
-#include <eigen3/Eigen/Core>
 #include <chomp_motion_planner/chomp_trajectory.h>
+
+#include <eigen3/Eigen/Core>
+
 #include <vector>
 
 namespace chomp

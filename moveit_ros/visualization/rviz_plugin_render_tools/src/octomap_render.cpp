@@ -36,11 +36,11 @@
 
 #include <moveit/rviz_plugin_render_tools/octomap_render.h>
 
-#include <octomap_msgs/msg/octomap.hpp>
 #include <octomap/octomap.h>
+#include <octomap_msgs/msg/octomap.hpp>
 
-#include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
 
 namespace moveit_rviz_plugin
 {

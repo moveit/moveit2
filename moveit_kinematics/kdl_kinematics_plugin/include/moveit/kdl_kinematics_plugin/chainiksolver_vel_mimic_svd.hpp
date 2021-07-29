@@ -25,11 +25,12 @@
 
 #pragma once
 
-#include <kdl/config.h>
+#include <moveit/kdl_kinematics_plugin/joint_mimic.hpp>
+
 #include <kdl/chainiksolver.hpp>
 #include <kdl/chainjnttojacsolver.hpp>
+#include <kdl/config.h>
 
-#include <moveit/kdl_kinematics_plugin/joint_mimic.hpp>
 #include <Eigen/SVD>
 
 namespace KDL

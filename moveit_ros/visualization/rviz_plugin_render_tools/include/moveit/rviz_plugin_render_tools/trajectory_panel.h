@@ -37,14 +37,14 @@
 #pragma once
 
 #ifndef Q_MOC_RUN
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp/rclcpp.hpp"
 #endif
 
 #include <rviz_common/panel.hpp>
 
-#include <QSlider>
 #include <QLabel>
 #include <QPushButton>
+#include <QSlider>
 
 namespace moveit_rviz_plugin
 {

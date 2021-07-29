@@ -34,11 +34,12 @@
 
 #pragma once
 
-#include <eigen3/Eigen/Eigen>
+#include "pilz_industrial_motion_planner/trajectory_generator.h"
+
 #include <kdl/path.hpp>
 #include <kdl/velocityprofile.hpp>
 
-#include "pilz_industrial_motion_planner/trajectory_generator.h"
+#include <eigen3/Eigen/Eigen>
 
 using namespace pilz_industrial_motion_planner;
 

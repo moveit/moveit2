@@ -34,10 +34,10 @@
 
 #pragma once
 
+#include <moveit_msgs/MoveItErrorCodes.h>
+
 #include <stdexcept>
 #include <string>
-
-#include <moveit_msgs/MoveItErrorCodes.h>
 
 namespace pilz_industrial_motion_planner
 {

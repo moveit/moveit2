@@ -40,15 +40,16 @@
 #include <string>
 
 // ROS
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp/rclcpp.hpp"
 
 // Testing
 #include <gtest/gtest.h>
 
 // Servo
+#include "servo_launch_test_common.hpp"
+
 #include <moveit_servo/make_shared_from_pool.h>
 #include <moveit_servo/servo.h>
-#include "servo_launch_test_common.hpp"
 
 namespace moveit_servo
 {

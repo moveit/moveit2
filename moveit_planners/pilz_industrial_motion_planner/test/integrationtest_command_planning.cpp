@@ -32,12 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <gtest/gtest.h>
-
-#include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
+#include "test_utils.h"
 
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/planning_interface/planning_request.h>
@@ -46,13 +41,18 @@
 #include <moveit_msgs/Constraints.h>
 #include <moveit_msgs/GetMotionPlan.h>
 #include <moveit_msgs/JointConstraint.h>
+
+#include <gtest/gtest.h>
 #include <pilz_industrial_motion_planner_testutils/command_types_typedef.h>
 #include <pilz_industrial_motion_planner_testutils/xml_testdata_loader.h>
 #include <ros/ros.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
-#include "test_utils.h"
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 
 const double EPSILON = 1.0e-6;
 const std::string PLAN_SERVICE_NAME = "/plan_kinematic_path";

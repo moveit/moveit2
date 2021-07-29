@@ -37,6 +37,7 @@
 /* Author: Ioan Sucan, Sachin Chitta, Acorn Pooley, Mario Prats, Dave Coleman */
 
 #include <moveit/robot_state/cartesian_interpolator.h>
+
 #include <geometric_shapes/check_isometry.h>
 
 namespace moveit

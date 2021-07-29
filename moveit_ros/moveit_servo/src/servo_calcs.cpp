@@ -37,16 +37,16 @@
  *      Author    : Brian O'Neil, Andy Zelenak, Blake Anderson
  */
 
-#include <cassert>
-#include <thread>
-#include <chrono>
-#include <mutex>
-
 #include <std_msgs/msg/bool.h>
 
+#include <cassert>
+#include <chrono>
+#include <mutex>
+#include <thread>
+
 // #include <moveit_servo/make_shared_from_pool.h> // TODO(adamp): create an issue about this
-#include <moveit_servo/servo_calcs.h>
 #include <moveit_servo/enforce_limits.hpp>
+#include <moveit_servo/servo_calcs.h>
 
 using namespace std::chrono_literals;  // for s, ms, etc.
 

@@ -35,11 +35,14 @@
 /* Author: Dave Coleman */
 
 // SA
-#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
 #include "setup_assistant_widget.h"
+
 #include "header_widget.h"
+#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
 
 // Qt
+#include <pluginlib/class_loader.hpp>  // for loading all avail kinematic planners
+
 #include <QApplication>
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -51,13 +54,13 @@
 #include <QSplitter>
 #include <QStackedWidget>
 #include <QString>
-#include <pluginlib/class_loader.hpp>  // for loading all avail kinematic planners
 // Rviz
-#include <rviz/render_panel.h>
-#include <rviz/visualization_manager.h>
-#include <rviz/view_manager.h>
-#include <rviz/default_plugin/view_controllers/orbit_view_controller.h>
 #include <moveit/robot_state_rviz_plugin/robot_state_display.h>
+
+#include <rviz/default_plugin/view_controllers/orbit_view_controller.h>
+#include <rviz/render_panel.h>
+#include <rviz/view_manager.h>
+#include <rviz/visualization_manager.h>
 
 namespace moveit_setup_assistant
 {

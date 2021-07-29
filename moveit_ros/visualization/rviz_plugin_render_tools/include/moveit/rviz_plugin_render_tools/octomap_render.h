@@ -36,13 +36,15 @@
 
 #pragma once
 
+#include <moveit/rviz_plugin_render_tools/octomap_render.h>
+
+#include <OGRE/OgrePrerequisites.h>
+#include <octomap/octomap.h>
+#include <rviz_common/properties/color_property.hpp>
+#include <rviz_default_plugins/displays/pointcloud/point_cloud_helpers.hpp>
+
 #include <memory>
 #include <vector>
-#include <octomap/octomap.h>
-#include <rviz_default_plugins/displays/pointcloud/point_cloud_helpers.hpp>
-#include <rviz_common/properties/color_property.hpp>
-#include <moveit/rviz_plugin_render_tools/octomap_render.h>
-#include <OGRE/OgrePrerequisites.h>
 
 namespace octomap
 {

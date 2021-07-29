@@ -39,15 +39,18 @@
  *      Desc      : Loads a Servo instance without launching or parameters
  */
 
-#include <gtest/gtest.h>
+#include "unit_test_servo_calcs.hpp"
+
 #include <moveit_servo/servo.h>
+
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <gtest/gtest.h>
+
+#include <boost/filesystem/path.hpp>
 
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <boost/filesystem/path.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
-#include "unit_test_servo_calcs.hpp"
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.unit_test_servo_calcs.cpp");
 

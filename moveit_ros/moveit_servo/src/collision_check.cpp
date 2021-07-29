@@ -37,9 +37,9 @@
  *      Author    : Brian O'Neil, Andy Zelenak, Blake Anderson
  */
 
-#include <std_msgs/msg/float64.hpp>
-
 #include <moveit_servo/collision_check.h>
+
+#include <std_msgs/msg/float64.hpp>
 // #include <moveit_servo/make_shared_from_pool.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.collision_check");

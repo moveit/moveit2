@@ -37,10 +37,12 @@
 #pragma once
 
 #include <ros/ros.h>
-#include <Python.h>
+
 #include <boost/python.hpp>
-#include <string>
+
+#include <Python.h>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 
 namespace moveit

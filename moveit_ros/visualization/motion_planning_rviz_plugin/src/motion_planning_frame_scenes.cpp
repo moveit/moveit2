@@ -33,28 +33,25 @@
  *********************************************************************/
 
 /* Author: Ioan Sucan */
-#include <moveit/warehouse/planning_scene_storage.h>
+#include "ui_motion_planning_rviz_plugin_frame.h"
+
+#include <moveit/kinematic_constraints/utils.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
+#include <moveit/robot_interaction/interactive_marker_helpers.h>
+#include <moveit/robot_state/conversions.h>
 #include <moveit/warehouse/constraints_storage.h>
+#include <moveit/warehouse/planning_scene_storage.h>
 #include <moveit/warehouse/state_storage.h>
 
-#include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/robot_interaction/interactive_marker_helpers.h>
-
 #include <interactive_markers/tools.hpp>
-
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/window_manager_interface.hpp>
 
-#include <QMessageBox>
-#include <QInputDialog>
-
-#include "ui_motion_planning_rviz_plugin_frame.h"
-
 #include <boost/math/constants/constants.hpp>
 
+#include <QInputDialog>
+#include <QMessageBox>
 #include <memory>
 
 namespace moveit_rviz_plugin

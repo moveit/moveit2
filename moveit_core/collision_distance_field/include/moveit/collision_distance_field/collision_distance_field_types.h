@@ -36,24 +36,26 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <memory>
-#include <float.h>
-
-#include <geometric_shapes/shapes.h>
-#include <geometric_shapes/bodies.h>
-#include <octomap/OcTree.h>
-
-#include <moveit/macros/class_forward.h>
-#include <moveit/distance_field/distance_field.h>
-#include <moveit/distance_field/propagation_distance_field.h>
-#include <visualization_msgs/msg/marker_array.hpp>
 #include "rclcpp/clock.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time.hpp"
 #include "rclcpp/utilities.hpp"
+
+#include <moveit/distance_field/distance_field.h>
+#include <moveit/distance_field/propagation_distance_field.h>
+#include <moveit/macros/class_forward.h>
+
+#include <geometric_shapes/bodies.h>
+#include <geometric_shapes/shapes.h>
+
+#include <octomap/OcTree.h>
+#include <visualization_msgs/msg/marker_array.hpp>
+
+#include <algorithm>
+#include <float.h>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace collision_detection
 {

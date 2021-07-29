@@ -39,6 +39,7 @@
  */
 
 #include "servo_launch_test_common.hpp"
+
 #include <moveit_msgs/msg/planning_scene.hpp>
 
 namespace moveit_servo

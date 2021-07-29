@@ -36,11 +36,13 @@
 
 #pragma once
 
-#include <string>
-#include <map>
-#include <vector>
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp/rclcpp.hpp"
+
 #include <moveit_msgs/msg/workspace_parameters.hpp>
+
+#include <map>
+#include <string>
+#include <vector>
 
 namespace moveit_ros_benchmarks
 {

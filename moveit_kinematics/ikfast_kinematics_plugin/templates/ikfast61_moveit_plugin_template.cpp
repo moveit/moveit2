@@ -41,12 +41,15 @@
  * This file, including the ikfast cpp from OpenRAVE below, forms a MoveIt kinematics plugin.
  */
 
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp/rclcpp.hpp"
+
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <moveit/robot_state/robot_state.h>
-#include <Eigen/Geometry>
-#include <tf2_kdl/tf2_kdl.h>
+
 #include <tf2_eigen/tf2_eigen.h>
+#include <tf2_kdl/tf2_kdl.h>
+
+#include <Eigen/Geometry>
 
 using namespace moveit::core;
 

@@ -33,20 +33,22 @@
  *********************************************************************/
 
 #include "pilz_industrial_motion_planner/trajectory_generator_circ.h"
+
 #include "pilz_industrial_motion_planner/path_circle_generator.h"
 
-#include <cassert>
-#include <sstream>
+#include <moveit/robot_state/conversions.h>
 
 #include <kdl/rotational_interpolation_sa.hpp>
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>
 #include <kdl/utilities/utility.h>
-#include <moveit/robot_state/conversions.h>
 #include <ros/ros.h>
 #include <tf2_eigen/tf2_eigen.h>
-#include <tf2_kdl/tf2_kdl.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_kdl/tf2_kdl.h>
+
+#include <cassert>
+#include <sstream>
 
 namespace pilz_industrial_motion_planner
 {

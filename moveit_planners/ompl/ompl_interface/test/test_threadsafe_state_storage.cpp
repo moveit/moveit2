@@ -39,7 +39,9 @@ The skeleton of this test was taken from test_state_validity_checker.cpp by Jero
 */
 
 #include "load_test_robot.h"
+
 #include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
+
 #include <gtest/gtest.h>
 
 /** \brief This flag sets the verbosity level for the state validity checker. **/

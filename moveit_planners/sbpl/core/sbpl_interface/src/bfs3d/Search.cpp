@@ -33,8 +33,10 @@
  *********************************************************************/
 
 #include <sbpl_interface/bfs3d/BFS_3D.h>
-#include <iostream>
+
 #include <boost/thread.hpp>
+
+#include <iostream>
 
 namespace sbpl_interface
 {

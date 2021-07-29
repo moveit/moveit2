@@ -34,15 +34,15 @@
 
 #include "pilz_industrial_motion_planner_testutils/xml_testdata_loader.h"
 
-#include <iostream>
-
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/optional.hpp>
-
 #include "pilz_industrial_motion_planner_testutils/default_values.h"
 #include "pilz_industrial_motion_planner_testutils/exception_types.h"
 #include "pilz_industrial_motion_planner_testutils/xml_constants.h"
+
+#include <boost/algorithm/string.hpp>
+#include <boost/optional.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
+#include <iostream>
 
 namespace pt = boost::property_tree;
 namespace pilz_industrial_motion_planner_testutils

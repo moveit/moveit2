@@ -34,8 +34,9 @@
 
 #include "pilz_industrial_motion_planner_testutils/sequence.h"
 
-#include <algorithm>
 #include <boost/variant.hpp>
+
+#include <algorithm>
 
 namespace pilz_industrial_motion_planner_testutils
 {

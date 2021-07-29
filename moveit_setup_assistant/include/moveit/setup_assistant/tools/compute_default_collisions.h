@@ -36,8 +36,9 @@
 
 #pragma once
 
-#include <map>
 #include <moveit/macros/class_forward.h>
+
+#include <map>
 namespace planning_scene
 {
 MOVEIT_CLASS_FORWARD(PlanningScene)  // Defines PlanningScenePtr, ConstPtr, WeakPtr... etc

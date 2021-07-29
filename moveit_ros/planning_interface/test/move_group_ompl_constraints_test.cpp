@@ -40,14 +40,15 @@
 #include <gtest/gtest.h>
 
 // ROS
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp/rclcpp.hpp"
+
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_eigen/tf2_eigen.h>
 
 // MoveIt
+#include <moveit/macros/console_colors.h>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit/macros/console_colors.h>
 #include <moveit_msgs/msg/constraints.hpp>
 
 // acuracy tested for position and orientation

@@ -38,9 +38,10 @@
 
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
+
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 namespace moveit
 {

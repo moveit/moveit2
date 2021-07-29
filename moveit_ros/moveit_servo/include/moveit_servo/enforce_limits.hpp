@@ -38,10 +38,11 @@
 
 #pragma once
 
-#include <Eigen/Core>
+#include <moveit/robot_model/joint_model_group.h>
+
 #include <sensor_msgs/msg/joint_state.hpp>
 
-#include <moveit/robot_model/joint_model_group.h>
+#include <Eigen/Core>
 
 namespace moveit_servo
 {

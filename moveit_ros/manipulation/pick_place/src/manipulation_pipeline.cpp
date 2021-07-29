@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/pick_place/manipulation_pipeline.h>
+
 #include <ros/console.h>
 
 namespace pick_place

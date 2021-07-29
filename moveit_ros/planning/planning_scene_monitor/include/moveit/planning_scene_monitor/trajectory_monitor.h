@@ -39,7 +39,9 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
+
 #include <boost/thread.hpp>
+
 #include <memory>
 
 namespace planning_scene_monitor

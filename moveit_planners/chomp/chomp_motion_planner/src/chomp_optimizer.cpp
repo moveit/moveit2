@@ -34,15 +34,18 @@
 
 /* Author: Mrinal Kalakrishnan */
 
-#include <chomp_motion_planner/chomp_optimizer.h>
-#include <ros/ros.h>
-#include <visualization_msgs/MarkerArray.h>
-#include <chomp_motion_planner/chomp_utils.h>
+#include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <eigen3/Eigen/LU>
+
+#include <chomp_motion_planner/chomp_optimizer.h>
+#include <chomp_motion_planner/chomp_utils.h>
+#include <ros/ros.h>
+#include <visualization_msgs/MarkerArray.h>
+
 #include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/LU>
+
 #include <random>
 
 namespace chomp

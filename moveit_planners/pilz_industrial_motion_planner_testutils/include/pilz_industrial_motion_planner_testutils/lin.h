@@ -35,9 +35,9 @@
 #ifndef LIN_H
 #define LIN_H
 
-#include <stdexcept>
-
 #include "basecmd.h"
+
+#include <stdexcept>
 
 namespace pilz_industrial_motion_planner_testutils
 {

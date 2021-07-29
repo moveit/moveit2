@@ -36,14 +36,16 @@
 
 #pragma once
 
-#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <geometric_shapes/bodies.h>
-#include <boost/function.hpp>
-#include <vector>
-#include <set>
-#include <map>
 
+#include <sensor_msgs/msg/point_cloud2.hpp>
+
+#include <boost/function.hpp>
 #include <boost/thread/mutex.hpp>
+
+#include <map>
+#include <set>
+#include <vector>
 
 namespace point_containment_filter
 {

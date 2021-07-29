@@ -35,9 +35,9 @@
 #ifndef CIRCAUXILIARY_H
 #define CIRCAUXILIARY_H
 
-#include <string>
-
 #include <moveit_msgs/Constraints.h>
+
+#include <string>
 
 namespace pilz_industrial_motion_planner_testutils
 {

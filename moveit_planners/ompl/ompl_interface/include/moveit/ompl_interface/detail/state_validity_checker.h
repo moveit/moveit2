@@ -47,8 +47,9 @@
 
 #pragma once
 
-#include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
 #include <moveit/collision_detection/collision_common.h>
+#include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
+
 #include <ompl/base/StateValidityChecker.h>
 
 namespace ompl_interface

@@ -38,13 +38,14 @@
 
 #pragma once
 
+#include <moveit/rviz_plugin_render_tools/trajectory_visualization.h>
+
 #include <rviz_common/display.hpp>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
-
-#include <moveit/rviz_plugin_render_tools/trajectory_visualization.h>
 #ifndef Q_MOC_RUN
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp/rclcpp.hpp"
+
 #include <moveit/rdf_loader/rdf_loader.h>
 #endif
 

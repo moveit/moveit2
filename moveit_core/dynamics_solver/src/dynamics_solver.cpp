@@ -37,10 +37,11 @@
 #include <moveit/dynamics_solver/dynamics_solver.h>
 
 // KDL
-#include <kdl/jntarray.hpp>
-#include <kdl_parser/kdl_parser.hpp>
-#include <kdl/tree.hpp>
 #include "rclcpp/rclcpp.hpp"
+
+#include <kdl/jntarray.hpp>
+#include <kdl/tree.hpp>
+#include <kdl_parser/kdl_parser.hpp>
 
 namespace dynamics_solver
 {

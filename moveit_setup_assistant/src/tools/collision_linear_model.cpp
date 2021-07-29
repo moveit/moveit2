@@ -35,6 +35,7 @@
 /* Author: Robert Haschke */
 
 #include "collision_linear_model.h"
+
 #include "collision_matrix_model.h"
 
 #include <QItemSelection>

@@ -34,8 +34,9 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/constraint_samplers/union_constraint_sampler.h>
 #include <moveit/constraint_samplers/default_constraint_samplers.h>
+#include <moveit/constraint_samplers/union_constraint_sampler.h>
+
 #include <algorithm>
 
 namespace constraint_samplers

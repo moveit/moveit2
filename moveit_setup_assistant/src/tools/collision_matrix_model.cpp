@@ -35,14 +35,16 @@
 /* Author: Robert Haschke */
 
 #include "collision_matrix_model.h"
-#include <boost/unordered_map.hpp>
+
 #include <boost/assign.hpp>
-#include <QVector>
+#include <boost/unordered_map.hpp>
+
+#include <QApplication>
 #include <QBrush>
 #include <QColor>
-#include <QPalette>
-#include <QApplication>
 #include <QItemSelection>
+#include <QPalette>
+#include <QVector>
 
 using namespace moveit_setup_assistant;
 

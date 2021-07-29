@@ -34,9 +34,6 @@
 
 /* Author: Tyler Weaver */
 
-#include <memory>
-#include <string>
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "moveit/planning_scene_monitor/current_state_monitor.h"
@@ -45,6 +42,9 @@
 #include "rclcpp/node_interfaces/node_topics_interface.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_ros/buffer.h"
+
+#include <memory>
+#include <string>
 
 struct MockMiddlewareHandle : public planning_scene_monitor::CurrentStateMonitor::MiddlewareHandle
 {

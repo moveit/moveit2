@@ -36,8 +36,9 @@
 
 #pragma once
 
-#include <rviz_default_plugins/robot/link_updater.hpp>
 #include <moveit/robot_state/robot_state.h>
+
+#include <rviz_default_plugins/robot/link_updater.hpp>
 
 namespace moveit_rviz_plugin
 {

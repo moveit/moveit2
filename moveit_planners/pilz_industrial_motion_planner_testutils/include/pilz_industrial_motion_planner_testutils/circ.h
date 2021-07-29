@@ -35,10 +35,10 @@
 #ifndef CIRC_H
 #define CIRC_H
 
-#include <memory>
-
 #include "basecmd.h"
 #include "circauxiliary.h"
+
+#include <memory>
 
 namespace pilz_industrial_motion_planner_testutils
 {

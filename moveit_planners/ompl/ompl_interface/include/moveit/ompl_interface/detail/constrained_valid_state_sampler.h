@@ -36,10 +36,11 @@
 
 #pragma once
 
-#include <ompl/base/StateSampler.h>
-#include <ompl/base/ValidStateSampler.h>
 #include <moveit/constraint_samplers/constraint_sampler.h>
 #include <moveit/macros/class_forward.h>
+
+#include <ompl/base/StateSampler.h>
+#include <ompl/base/ValidStateSampler.h>
 
 namespace ompl_interface
 {

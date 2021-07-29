@@ -35,15 +35,15 @@
 #ifndef COMMAND_TYPES_TYPEDEF_H
 #define COMMAND_TYPES_TYPEDEF_H
 
-#include <boost/variant.hpp>
-
-#include "ptp.h"
-#include "lin.h"
+#include "cartesianconfiguration.h"
 #include "circ.h"
+#include "circ_auxiliary_types.h"
 #include "gripper.h"
 #include "jointconfiguration.h"
-#include "cartesianconfiguration.h"
-#include "circ_auxiliary_types.h"
+#include "lin.h"
+#include "ptp.h"
+
+#include <boost/variant.hpp>
 
 namespace pilz_industrial_motion_planner_testutils
 {

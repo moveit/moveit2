@@ -35,9 +35,9 @@
 #ifndef PTP_H
 #define PTP_H
 
-#include <stdexcept>
-
 #include "basecmd.h"
+
+#include <stdexcept>
 
 namespace pilz_industrial_motion_planner_testutils
 {

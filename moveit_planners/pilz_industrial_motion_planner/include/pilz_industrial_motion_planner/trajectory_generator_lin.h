@@ -34,11 +34,12 @@
 
 #pragma once
 
-#include <eigen3/Eigen/Eigen>
-#include <kdl/rotational_interpolation_sa.hpp>
-
 #include "pilz_industrial_motion_planner/trajectory_generator.h"
 #include "pilz_industrial_motion_planner/velocity_profile_atrap.h"
+
+#include <kdl/rotational_interpolation_sa.hpp>
+
+#include <eigen3/Eigen/Eigen>
 
 using namespace pilz_industrial_motion_planner;
 

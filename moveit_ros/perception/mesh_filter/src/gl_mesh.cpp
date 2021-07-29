@@ -35,9 +35,12 @@
 /* Author: Suat Gedikli */
 
 #include <moveit/mesh_filter/gl_mesh.h>
+
 #include <geometric_shapes/shapes.h>
-#include <stdexcept>
+
 #include <Eigen/Eigen>
+
+#include <stdexcept>
 
 using namespace std;
 using namespace Eigen;

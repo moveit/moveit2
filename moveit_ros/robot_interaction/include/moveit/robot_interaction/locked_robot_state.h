@@ -39,6 +39,7 @@
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
+
 #include <boost/function.hpp>
 #include <boost/thread.hpp>
 

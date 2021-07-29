@@ -43,24 +43,24 @@
 
 #include "load_test_robot.h"
 
-#include <memory>
-#include <string>
-#include <iostream>
-
-#include <gtest/gtest.h>
-#include <Eigen/Dense>
-
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/utils/robot_model_test_utils.h>
 #include <moveit/ompl_interface/detail/ompl_constraints.h>
+#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/robot_state.h>
+#include <moveit/utils/robot_model_test_utils.h>
 #include <moveit_msgs/msg/constraints.hpp>
 
-#include <ompl/util/Exception.h>
+#include <gtest/gtest.h>
+
+#include <Eigen/Dense>
+#include <ompl/base/ConstrainedSpaceInformation.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/constraint/ProjectedStateSpace.h>
-#include <ompl/base/ConstrainedSpaceInformation.h>
+#include <ompl/util/Exception.h>
+
+#include <iostream>
+#include <memory>
+#include <string>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_ompl_constraints");
 

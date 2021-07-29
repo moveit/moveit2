@@ -38,10 +38,14 @@
 
 #include <moveit/robot_model/link_model.h>
 #include <moveit/transforms/transforms.h>
+
 #include <geometric_shapes/check_isometry.h>
-#include <eigen_stl_containers/eigen_stl_containers.h>
-#include <boost/function.hpp>
+
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
+
+#include <boost/function.hpp>
+#include <eigen_stl_containers/eigen_stl_containers.h>
+
 #include <set>
 
 namespace moveit

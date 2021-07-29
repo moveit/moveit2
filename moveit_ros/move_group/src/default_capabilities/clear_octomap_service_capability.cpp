@@ -35,8 +35,9 @@
 /* Author: David Hershberger */
 
 #include "clear_octomap_service_capability.h"
-#include <moveit/moveit_cpp/moveit_cpp.h>
+
 #include <moveit/move_group/capability_names.h>
+#include <moveit/moveit_cpp/moveit_cpp.h>
 
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit_move_group_default_capabilities.clear_octomap_service_capability");

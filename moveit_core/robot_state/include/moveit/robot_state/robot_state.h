@@ -40,13 +40,15 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/attached_body.h>
 #include <moveit/transforms/transforms.h>
-#include <sensor_msgs/msg/joint_state.hpp>
-#include <visualization_msgs/msg/marker_array.hpp>
-#include <std_msgs/msg/color_rgba.hpp>
+
 #include <geometry_msgs/msg/twist.hpp>
-#include <cassert>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <std_msgs/msg/color_rgba.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 #include <boost/assert.hpp>
+
+#include <cassert>
 
 /* Terminology
    * Model Frame: RobotModel's root frame == PlanningScene's planning frame

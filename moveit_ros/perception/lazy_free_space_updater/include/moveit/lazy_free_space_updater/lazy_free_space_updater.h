@@ -37,7 +37,9 @@
 #pragma once
 
 #include <moveit/occupancy_map_monitor/occupancy_map.h>
+
 #include <boost/thread.hpp>
+
 #include <deque>
 #include <unordered_map>
 

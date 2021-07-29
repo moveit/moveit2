@@ -35,23 +35,24 @@
 /* Author: Ioan Sucan, Mathias Lüdtke, Dave Coleman */
 
 // MoveIt
-#include <moveit/rdf_loader/rdf_loader.h>
 #include <moveit/profiler/profiler.h>
+#include <moveit/rdf_loader/rdf_loader.h>
 
 // ROS 2
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/string.hpp>
+#include "rclcpp/rclcpp.hpp"
+
 #include <ament_index_cpp/get_package_prefix.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <std_msgs/msg/string.hpp>
 
 // Boost
 #include <boost/filesystem.hpp>
 
 // C++
-#include <fstream>
-#include <streambuf>
 #include <algorithm>
 #include <chrono>
+#include <fstream>
+#include <streambuf>
 
 namespace rdf_loader
 {

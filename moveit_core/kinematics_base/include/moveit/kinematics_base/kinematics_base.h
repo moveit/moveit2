@@ -36,11 +36,15 @@
 
 #pragma once
 
-#include <geometry_msgs/msg/pose.hpp>
-#include <moveit_msgs/msg/move_it_error_codes.hpp>
-#include <moveit/macros/class_forward.h>
 #include "rclcpp/rclcpp.hpp"
+
+#include <moveit/macros/class_forward.h>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
+
+#include <geometry_msgs/msg/pose.hpp>
+
 #include <boost/function.hpp>
+
 #include <string>
 
 namespace moveit

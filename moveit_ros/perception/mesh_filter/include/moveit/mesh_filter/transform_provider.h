@@ -36,11 +36,12 @@
 
 #pragma once
 
-#include <string>
 #include <moveit/macros/class_forward.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/mesh_filter/mesh_filter_base.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+
 #include <map>
+#include <string>
 
 namespace tf2_ros
 {

@@ -41,14 +41,14 @@
 #include <thread>
 
 // ROS
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp/rclcpp.hpp"
 
 // Testing
 #include <gtest/gtest.h>
 
 // Servo
-#include <moveit_servo/pose_tracking.h>
 #include <moveit_servo/make_shared_from_pool.h>
+#include <moveit_servo/pose_tracking.h>
 #include <moveit_servo/servo_parameters.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.pose_tracking_test");

@@ -33,27 +33,25 @@
  *********************************************************************/
 
 /* Author: Ioan Sucan, Mario Prats */
+#include "ui_motion_planning_rviz_plugin_frame.h"
+
+#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
+#include <moveit/robot_interaction/interactive_marker_helpers.h>
+#include <moveit/robot_state/conversions.h>
 #include <moveit/warehouse/planning_scene_storage.h>
 
-#include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/robot_interaction/interactive_marker_helpers.h>
+#include <geometric_shapes/shape_operations.h>
 
 #include <interactive_markers/tools.hpp>
-
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
 #include <rviz_common/window_manager_interface.hpp>
-
 #include <tf2_eigen/tf2_eigen.h>
-#include <geometric_shapes/shape_operations.h>
 
-#include <QMessageBox>
-#include <QInputDialog>
 #include <QFileDialog>
-
-#include "ui_motion_planning_rviz_plugin_frame.h"
+#include <QInputDialog>
+#include <QMessageBox>
 
 namespace
 {

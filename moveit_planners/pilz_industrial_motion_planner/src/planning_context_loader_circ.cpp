@@ -33,6 +33,7 @@
  *********************************************************************/
 
 #include "pilz_industrial_motion_planner/planning_context_loader_circ.h"
+
 #include "moveit/planning_scene/planning_scene.h"
 #include "pilz_industrial_motion_planner/planning_context_base.h"
 #include "pilz_industrial_motion_planner/planning_context_circ.h"

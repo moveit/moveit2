@@ -36,10 +36,12 @@
 
 #pragma once
 
+#include <moveit/macros/declare_ptr.h>
+
+#include <Eigen/Core>
+
 #include <algorithm>
 #include <cmath>
-#include <Eigen/Core>
-#include <moveit/macros/declare_ptr.h>
 
 namespace distance_field
 {

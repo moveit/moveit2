@@ -38,8 +38,8 @@
 #pragma once
 
 #include <kinematics_base/kinematics_base.h>
-#include <planning_models/robot_model.h>
 #include <planning_models/kinematic_state.h>
+#include <planning_models/robot_model.h>
 
 #include <memory>
 

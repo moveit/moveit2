@@ -34,7 +34,8 @@
 
 /* Author: Dave Coleman */
 
-#include <class_loader/class_loader.hpp>
 #include <moveit/trajectory_rviz_plugin/trajectory_display.h>
+
+#include <class_loader/class_loader.hpp>
 
 CLASS_LOADER_REGISTER_CLASS(moveit_rviz_plugin::TrajectoryDisplay, rviz_common::Display)

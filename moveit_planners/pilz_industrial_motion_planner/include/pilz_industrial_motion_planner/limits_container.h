@@ -36,6 +36,7 @@
 
 #include "pilz_industrial_motion_planner/cartesian_limit.h"
 #include "pilz_industrial_motion_planner/joint_limits_container.h"
+
 #include <math.h>
 
 namespace pilz_industrial_motion_planner

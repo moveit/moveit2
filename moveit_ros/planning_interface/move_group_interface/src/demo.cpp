@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/move_group_interface/move_group_interface.h>
+
 #include <ros/ros.h>
 
 void demoPick(moveit::planning_interface::MoveGroupInterface& group)

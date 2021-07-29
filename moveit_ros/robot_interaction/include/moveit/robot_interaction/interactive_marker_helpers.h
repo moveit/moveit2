@@ -36,9 +36,9 @@
 
 #pragma once
 
-#include <visualization_msgs/msg/interactive_marker.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <std_msgs/msg/color_rgba.hpp>
+#include <visualization_msgs/msg/interactive_marker.hpp>
 
 namespace robot_interaction
 {

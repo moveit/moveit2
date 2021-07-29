@@ -37,11 +37,11 @@
 #include "pilz_industrial_motion_planner/joint_limits_container.h"
 #include "pilz_industrial_motion_planner/joint_limits_extension.h"
 
-#include <ros/ros.h>
-
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_interface/planning_response.h>
 #include <moveit/robot_model/joint_model.h>
+
+#include <ros/ros.h>
 
 #include <map>
 

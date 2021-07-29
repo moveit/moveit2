@@ -34,12 +34,12 @@
 
 /* Author: Jeroen De Maeyer, Boston Cleek */
 
-#include <algorithm>
-#include <iterator>
-
 #include <moveit/ompl_interface/detail/ompl_constraints.h>
 
 #include <tf2_eigen/tf2_eigen.h>
+
+#include <algorithm>
+#include <iterator>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_planners_ompl.ompl_constraints");
 

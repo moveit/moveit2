@@ -35,17 +35,18 @@
 #ifndef JOINTCONFIGURATION_H
 #define JOINTCONFIGURATION_H
 
+#include "robotconfiguration.h"
+
+#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/robot_state.h>
+
+#include <sensor_msgs/JointState.h>
+
+#include <functional>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
-#include <functional>
-#include <stdexcept>
-
-#include <sensor_msgs/JointState.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_state/conversions.h>
-
-#include "robotconfiguration.h"
 
 namespace pilz_industrial_motion_planner_testutils
 {

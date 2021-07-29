@@ -34,12 +34,13 @@
 
 #include "pilz_industrial_motion_planner/trajectory_generator.h"
 
-#include <cassert>
+#include "pilz_industrial_motion_planner/limits_container.h"
 
-#include <kdl/velocityprofile_trap.hpp>
 #include <moveit/robot_state/conversions.h>
 
-#include "pilz_industrial_motion_planner/limits_container.h"
+#include <kdl/velocityprofile_trap.hpp>
+
+#include <cassert>
 
 namespace pilz_industrial_motion_planner
 {

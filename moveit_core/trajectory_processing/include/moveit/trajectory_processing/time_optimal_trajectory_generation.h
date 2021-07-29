@@ -38,9 +38,11 @@
 
 #pragma once
 
-#include <Eigen/Core>
-#include <list>
 #include <moveit/robot_trajectory/robot_trajectory.h>
+
+#include <Eigen/Core>
+
+#include <list>
 
 namespace trajectory_processing
 {

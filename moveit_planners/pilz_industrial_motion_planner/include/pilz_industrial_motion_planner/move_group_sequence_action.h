@@ -34,12 +34,12 @@
 
 #pragma once
 
-#include <memory>
+#include <moveit/move_group/move_group_capability.h>
+#include <moveit_msgs/MoveGroupSequenceAction.h>
 
 #include <actionlib/server/simple_action_server.h>
-#include <moveit/move_group/move_group_capability.h>
 
-#include <moveit_msgs/MoveGroupSequenceAction.h>
+#include <memory>
 
 namespace pilz_industrial_motion_planner
 {

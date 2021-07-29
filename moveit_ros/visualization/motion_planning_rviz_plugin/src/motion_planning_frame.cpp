@@ -34,27 +34,26 @@
 
 /* Author: Ioan Sucan */
 
+#include "ui_motion_planning_rviz_plugin_frame.h"
+
 #include <moveit/common_planning_interface_objects/common_objects.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
 #include <moveit/move_group/capability_names.h>
 
 #include <geometric_shapes/shape_operations.h>
 
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
+#include <std_srvs/srv/empty.hpp>
 #include <tf2_ros/buffer.h>
 
-#include <std_srvs/srv/empty.hpp>
-
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QFileDialog>
 #include <QComboBox>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QMessageBox>
 #include <QShortcut>
-
-#include "ui_motion_planning_rviz_plugin_frame.h"
 
 namespace moveit_rviz_plugin
 {

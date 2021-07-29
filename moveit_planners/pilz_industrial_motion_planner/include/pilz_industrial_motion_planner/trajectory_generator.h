@@ -34,19 +34,21 @@
 
 #pragma once
 
-#include <sstream>
-#include <string>
-
-#include <Eigen/Geometry>
-#include <kdl/frames.hpp>
-#include <kdl/trajectory.hpp>
-#include <moveit/planning_interface/planning_interface.h>
-#include <moveit/robot_model/robot_model.h>
-
 #include "pilz_industrial_motion_planner/joint_limits_extension.h"
 #include "pilz_industrial_motion_planner/limits_container.h"
 #include "pilz_industrial_motion_planner/trajectory_functions.h"
 #include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
+
+#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/robot_model/robot_model.h>
+
+#include <kdl/frames.hpp>
+#include <kdl/trajectory.hpp>
+
+#include <Eigen/Geometry>
+
+#include <sstream>
+#include <string>
 
 using namespace pilz_industrial_motion_planner;
 

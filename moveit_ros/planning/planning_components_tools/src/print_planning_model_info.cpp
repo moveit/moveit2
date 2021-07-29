@@ -34,8 +34,9 @@
 
 /* Author: Ioan Sucan */
 
+#include "rclcpp/rclcpp.hpp"
+
 #include <moveit/robot_model_loader/robot_model_loader.h>
-#include <rclcpp/rclcpp.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 

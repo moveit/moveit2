@@ -36,9 +36,15 @@
 
 // SA
 #include "robot_poses_widget.h"
+
 #include "header_widget.h"
+
 #include <moveit_msgs/msg/joint_limits.hpp>
 // Qt
+#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/robot_state/conversions.h>
+#include <moveit_msgs/msg/display_robot_state.hpp>
+
 #include <QApplication>
 #include <QComboBox>
 #include <QDoubleValidator>
@@ -51,10 +57,6 @@
 #include <QSlider>
 #include <QStackedWidget>
 #include <QTableWidget>
-
-#include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/msg/display_robot_state.hpp>
-#include <moveit/planning_scene/planning_scene.h>
 
 namespace moveit_setup_assistant
 {

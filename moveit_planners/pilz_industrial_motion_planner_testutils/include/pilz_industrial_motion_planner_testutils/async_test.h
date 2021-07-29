@@ -17,15 +17,14 @@
 #ifndef ASYNC_TEST_H
 #define ASYNC_TEST_H
 
-#include <mutex>
-#include <condition_variable>
+#include <gmock/gmock.h>
+#include <ros/ros.h>
+
 #include <algorithm>
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <string>
-
-#include <gmock/gmock.h>
-
-#include <ros/ros.h>
 
 namespace testing
 {

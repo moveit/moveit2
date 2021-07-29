@@ -34,8 +34,10 @@
 
 /* Author: Tyler Weaver */
 
+#include "rclcpp/rclcpp.hpp"
+
 #include <moveit/planning_scene_monitor/current_state_monitor_middleware_handle.hpp>
-#include <rclcpp/rclcpp.hpp>
+
 #include <string>
 
 namespace planning_scene_monitor

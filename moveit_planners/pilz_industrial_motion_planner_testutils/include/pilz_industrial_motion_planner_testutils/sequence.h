@@ -35,15 +35,15 @@
 #ifndef SEQUENCE_H
 #define SEQUENCE_H
 
-#include <stdexcept>
-#include <vector>
-#include <utility>
-#include <typeinfo>
+#include "command_types_typedef.h"
+#include "motioncmd.h"
 
 #include <moveit_msgs/MotionSequenceRequest.h>
 
-#include "command_types_typedef.h"
-#include "motioncmd.h"
+#include <stdexcept>
+#include <typeinfo>
+#include <utility>
+#include <vector>
 
 namespace pilz_industrial_motion_planner_testutils
 {

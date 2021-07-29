@@ -36,7 +36,9 @@
 
 #include <moveit/planning_scene_monitor/trajectory_monitor.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
+
 #include <rclcpp/rate.hpp>
+
 #include <limits>
 #include <memory>
 

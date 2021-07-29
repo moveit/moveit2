@@ -34,9 +34,11 @@
 
 /* Author: Ioan Sucan, E. Gil Jones */
 
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/profiler/profiler.h>
 #include "rclcpp/rclcpp.hpp"
+
+#include <moveit/profiler/profiler.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
+
 #include <typeinfo>
 
 namespace robot_model_loader

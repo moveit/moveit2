@@ -36,14 +36,14 @@
 
 #pragma once
 
-#include <ostream>
+#include <moveit/macros/class_forward.h>
+#include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
+#include <moveit/robot_model/robot_model.h>
+#include <moveit_msgs/msg/constraints.hpp>
 
 #include <ompl/base/Constraint.h>
 
-#include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/macros/class_forward.h>
-#include <moveit_msgs/msg/constraints.hpp>
+#include <ostream>
 
 namespace ompl_interface
 {

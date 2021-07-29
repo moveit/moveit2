@@ -35,17 +35,16 @@
 #pragma once
 
 #include "pilz_industrial_motion_planner/limits_container.h"
-
-#include <ros/ros.h>
+#include "pilz_industrial_motion_planner/planning_context_base.h"
+#include "pilz_industrial_motion_planner/trajectory_generator_circ.h"
 
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_interface/planning_response.h>
 
+#include <ros/ros.h>
+
 #include <atomic>
 #include <thread>
-
-#include "pilz_industrial_motion_planner/planning_context_base.h"
-#include "pilz_industrial_motion_planner/trajectory_generator_circ.h"
 
 namespace pilz_industrial_motion_planner
 {

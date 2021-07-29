@@ -34,11 +34,13 @@
 
 /* Author: Ioan Sucan, Sachin Chitta */
 
-#include <chrono>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <boost/thread.hpp>
+
+#include <chrono>
 
 using namespace std::chrono_literals;
 

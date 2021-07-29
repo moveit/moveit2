@@ -35,10 +35,10 @@
 #ifndef GOALCONSTRAINTSMSGCONVERTIBLE_H
 #define GOALCONSTRAINTSMSGCONVERTIBLE_H
 
-#include <string>
-
-#include <moveit_msgs/Constraints.h>
 #include <moveit/robot_model/robot_model.h>
+#include <moveit_msgs/Constraints.h>
+
+#include <string>
 
 namespace pilz_industrial_motion_planner_testutils
 {

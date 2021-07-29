@@ -36,15 +36,18 @@
 
 #pragma once
 
-#include <urdf_model/model.h>
-#include <urdf/model.h>
-#include <Eigen/Geometry>
-#include <Eigen/LU>  // provides LU decomposition
-#include <kdl/chainiksolver.hpp>
+#include "rclcpp/rclcpp.hpp"
+
+#include <moveit_msgs/msg/kinematic_solver_info.hpp>
 #include <moveit_msgs/srv/get_position_fk.hpp>
 #include <moveit_msgs/srv/get_position_ik.hpp>
-#include <moveit_msgs/msg/kinematic_solver_info.hpp>
-#include "rclcpp/rclcpp.hpp"
+
+#include <kdl/chainiksolver.hpp>
+#include <urdf/model.h>
+#include <urdf_model/model.h>
+
+#include <Eigen/Geometry>
+#include <Eigen/LU>  // provides LU decomposition
 
 namespace pr2_arm_kinematics
 {

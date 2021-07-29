@@ -34,6 +34,15 @@
 
 /* Author: Dave Coleman */
 
+#include "default_collisions_widget.h"
+
+#include "../tools/collision_linear_model.h"
+#include "../tools/collision_matrix_model.h"
+#include "../tools/rotated_header_view.h"
+#include "header_widget.h"
+
+#include <ros/console.h>
+
 #include <QAction>
 #include <QApplication>
 #include <QButtonGroup>
@@ -54,13 +63,6 @@
 #include <QString>
 #include <QTableView>
 #include <QVBoxLayout>
-
-#include "default_collisions_widget.h"
-#include "header_widget.h"
-#include "../tools/collision_matrix_model.h"
-#include "../tools/collision_linear_model.h"
-#include "../tools/rotated_header_view.h"
-#include <ros/console.h>
 
 namespace moveit_setup_assistant
 {

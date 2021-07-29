@@ -34,10 +34,10 @@
 
 #pragma once
 
+#include "cartesian_trajectory_point.h"
+
 #include <string>
 #include <vector>
-
-#include "cartesian_trajectory_point.h"
 
 namespace pilz_industrial_motion_planner
 {

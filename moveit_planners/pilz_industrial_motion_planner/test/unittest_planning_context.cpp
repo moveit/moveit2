@@ -32,24 +32,22 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <boost/core/demangle.hpp>
-#include <gtest/gtest.h>
-
-#include <moveit_msgs/MoveItErrorCodes.h>
-
-#include <moveit/planning_interface/planning_interface.h>
-
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-
 #include "pilz_industrial_motion_planner/joint_limits_container.h"
 #include "pilz_industrial_motion_planner/planning_context_circ.h"
 #include "pilz_industrial_motion_planner/planning_context_lin.h"
 #include "pilz_industrial_motion_planner/planning_context_ptp.h"
-
 #include "test_utils.h"
+
+#include <moveit/kinematic_constraints/utils.h>
+#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit_msgs/MoveItErrorCodes.h>
+
+#include <gtest/gtest.h>
+
+#include <boost/core/demangle.hpp>
 
 const std::string PARAM_MODEL_NO_GRIPPER_NAME{ "robot_description" };
 const std::string PARAM_MODEL_WITH_GRIPPER_NAME{ "robot_description_pg70" };

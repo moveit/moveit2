@@ -32,12 +32,16 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <gtest/gtest.h>
 #include <moveit/mesh_filter/mesh_filter.h>
 #include <moveit/mesh_filter/stereo_camera_model.h>
-#include <geometric_shapes/shapes.h>
+
 #include <geometric_shapes/shape_operations.h>
+#include <geometric_shapes/shapes.h>
+
+#include <gtest/gtest.h>
+
 #include <eigen3/Eigen/Eigen>
+
 #include <vector>
 
 using namespace mesh_filter;

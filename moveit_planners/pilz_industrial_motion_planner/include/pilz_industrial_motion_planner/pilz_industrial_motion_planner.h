@@ -34,8 +34,6 @@
 
 #pragma once
 
-#include <ros/ros.h>
-
 #include "pilz_industrial_motion_planner/joint_limits_extension.h"
 #include "pilz_industrial_motion_planner/planning_context_loader.h"
 
@@ -43,6 +41,7 @@
 #include <moveit/planning_interface/planning_interface.h>
 
 #include <pluginlib/class_loader.hpp>
+#include <ros/ros.h>
 
 // Boost includes
 #include <boost/scoped_ptr.hpp>

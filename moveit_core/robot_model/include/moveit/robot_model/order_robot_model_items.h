@@ -34,16 +34,20 @@
 
 /* Author: Ioan Sucan */
 
+#pragma once
+
+#include <moveit/robot_model/link_model.h>
+#include <moveit/robot_model/robot_model.h>
+
 namespace moveit
 {
 namespace core
 {
 namespace
 {
-
 struct OrderLinksByIndex
 {
-  bool operator()(const LinkModel *a, const LinkModel *b) const
+  bool operator()(const LinkModel* a, const LinkModel* b) const
   {
     return a->getLinkIndex() < b->getLinkIndex();
   }
@@ -51,7 +55,7 @@ struct OrderLinksByIndex
 
 struct OrderJointsByIndex
 {
-  bool operator()(const JointModel *a, const JointModel *b) const
+  bool operator()(const JointModel* a, const JointModel* b) const
   {
     return a->getJointIndex() < b->getJointIndex();
   }
@@ -59,7 +63,7 @@ struct OrderJointsByIndex
 
 struct OrderGroupsByName
 {
-  bool operator()(const JointModelGroup *a, const JointModelGroup *b) const
+  bool operator()(const JointModelGroup* a, const JointModelGroup* b) const
   {
     return a->getName() < b->getName();
   }

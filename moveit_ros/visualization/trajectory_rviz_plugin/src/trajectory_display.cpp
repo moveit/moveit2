@@ -37,6 +37,7 @@
 */
 
 #include <moveit/trajectory_rviz_plugin/trajectory_display.h>
+
 #include <rviz_common/properties/string_property.hpp>
 
 namespace moveit_rviz_plugin

@@ -36,6 +36,7 @@
 #define JOINT_LIMITS_INTERFACE_EXTENSION_H
 
 #include "pilz_industrial_motion_planner/joint_limits_extension.h"
+
 #include <joint_limits_interface/joint_limits_rosparam.h>
 
 namespace pilz_industrial_motion_planner

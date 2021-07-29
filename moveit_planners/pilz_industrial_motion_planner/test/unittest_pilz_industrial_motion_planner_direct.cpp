@@ -32,13 +32,13 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <memory>
-
-#include <gtest/gtest.h>
-
 #include "pilz_industrial_motion_planner/pilz_industrial_motion_planner.h"
 #include "pilz_industrial_motion_planner/planning_context_loader_ptp.h"
 #include "pilz_industrial_motion_planner/planning_exceptions.h"
+
+#include <gtest/gtest.h>
+
+#include <memory>
 
 using namespace pilz_industrial_motion_planner;
 

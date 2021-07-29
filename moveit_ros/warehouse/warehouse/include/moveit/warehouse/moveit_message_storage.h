@@ -37,8 +37,9 @@
 #pragma once
 
 #include <warehouse_ros/database_connection.h>
-#include <vector>
+
 #include <string>
+#include <vector>
 
 namespace moveit_warehouse
 {

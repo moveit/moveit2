@@ -35,14 +35,16 @@
 /* Author: Dave Coleman, Michael 'v4hn' Goerner */
 
 // Qt
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QMessageBox>
+#include "author_information_widget.h"
+
+#include "header_widget.h"
+
 #include <QApplication>
 #include <QLabel>
 #include <QLineEdit>
-#include "author_information_widget.h"
-#include "header_widget.h"
+#include <QMessageBox>
+#include <QPushButton>
+#include <QVBoxLayout>
 
 namespace moveit_setup_assistant
 {

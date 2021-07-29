@@ -32,12 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <functional>
-#include <gtest/gtest.h>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
+#include "moveit_msgs/GetMotionSequence.h"
+#include "moveit_msgs/MotionSequenceRequest.h"
+#include "pilz_industrial_motion_planner/capability_names.h"
 
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/robot_model/robot_model.h>
@@ -47,14 +44,17 @@
 #include <moveit_msgs/GetMotionPlan.h>
 #include <moveit_msgs/JointConstraint.h>
 #include <moveit_msgs/MotionPlanResponse.h>
-#include <ros/ros.h>
 
+#include <gtest/gtest.h>
 #include <pilz_industrial_motion_planner_testutils/sequence.h>
 #include <pilz_industrial_motion_planner_testutils/xml_testdata_loader.h>
+#include <ros/ros.h>
 
-#include "moveit_msgs/GetMotionSequence.h"
-#include "moveit_msgs/MotionSequenceRequest.h"
-#include "pilz_industrial_motion_planner/capability_names.h"
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 
 // Parameters from parameter server
 const std::string TEST_DATA_FILE_NAME("testdata_file_name");

@@ -34,10 +34,12 @@
 
 /* Author: Ioan Sucan */
 
-#include <rclcpp/rclcpp.hpp>
+#include "rclcpp/rclcpp.hpp"
+
+#include <moveit/collision_detection/collision_tools.h>
 #include <moveit/plan_execution/plan_with_sensing.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit/collision_detection/collision_tools.h>
+
 #include <boost/algorithm/string/join.hpp>
 
 // #include <dynamic_reconfigure/server.h>

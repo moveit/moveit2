@@ -34,7 +34,8 @@
 
 /* Author: Ioan Sucan */
 
-#include <class_loader/class_loader.hpp>
 #include <moveit/depth_image_octomap_updater/depth_image_octomap_updater.h>
+
+#include <class_loader/class_loader.hpp>
 
 CLASS_LOADER_REGISTER_CLASS(occupancy_map_monitor::DepthImageOctomapUpdater, occupancy_map_monitor::OccupancyMapUpdater)

@@ -35,6 +35,7 @@
 #include "pilz_industrial_motion_planner/joint_limits_container.h"
 
 #include "ros/ros.h"
+
 #include <stdexcept>
 
 namespace pilz_industrial_motion_planner

@@ -34,8 +34,8 @@
 
 /* Author: Mathias Lüdtke */
 
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
 #include <moveit/rdf_loader/rdf_loader.h>
+#include <moveit/setup_assistant/tools/moveit_config_data.h>
 
 #include <boost/program_options.hpp>
 

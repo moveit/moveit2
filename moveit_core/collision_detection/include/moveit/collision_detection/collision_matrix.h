@@ -39,10 +39,11 @@
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit/macros/class_forward.h>
 #include <moveit_msgs/msg/allowed_collision_matrix.hpp>
+
 #include <iostream>
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 namespace collision_detection
 {

@@ -38,7 +38,8 @@
 
 #include "pilz_industrial_motion_planner/move_group_sequence_action.h"
 
-#include <time.h>
+#include "pilz_industrial_motion_planner/command_list_manager.h"
+#include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
 
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/plan_execution/plan_execution.h>
@@ -48,8 +49,7 @@
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/utils/message_checks.h>
 
-#include "pilz_industrial_motion_planner/command_list_manager.h"
-#include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
+#include <time.h>
 
 namespace pilz_industrial_motion_planner
 {

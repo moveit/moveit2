@@ -34,12 +34,14 @@
 
 #include "moveit/collision_detection_bullet/bullet_integration/bullet_utils.h"
 
+#include <geometric_shapes/shapes.h>
+
 #include <BulletCollision/CollisionDispatch/btConvexConvexAlgorithm.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/Gimpact/btGImpactShape.h>
-#include <geometric_shapes/shapes.h>
-#include <memory>
 #include <octomap/octomap.h>
+
+#include <memory>
 
 static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
 

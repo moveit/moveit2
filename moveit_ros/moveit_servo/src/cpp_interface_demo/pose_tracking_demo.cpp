@@ -36,15 +36,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#include <std_msgs/msg/int8.hpp>
-#include <geometry_msgs/msg/transform_stamped.hpp>
-
-#include <moveit_servo/servo.h>
-#include <moveit_servo/pose_tracking.h>
-#include <moveit_servo/status_codes.h>
-#include <moveit_servo/servo_parameters.h>
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/make_shared_from_pool.h>
+#include <moveit_servo/pose_tracking.h>
+#include <moveit_servo/servo.h>
+#include <moveit_servo/servo_parameters.h>
+#include <moveit_servo/status_codes.h>
+
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <std_msgs/msg/int8.hpp>
+
 #include <thread>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.pose_tracking_demo");

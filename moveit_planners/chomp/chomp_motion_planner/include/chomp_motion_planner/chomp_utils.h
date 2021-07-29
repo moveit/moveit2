@@ -36,9 +36,11 @@
 
 #pragma once
 
-#include <iostream>
-#include <Eigen/Core>
 #include <moveit/planning_scene/planning_scene.h>
+
+#include <Eigen/Core>
+
+#include <iostream>
 
 namespace chomp
 {

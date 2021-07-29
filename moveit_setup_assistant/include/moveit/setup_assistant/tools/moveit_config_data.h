@@ -39,9 +39,11 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_scene/planning_scene.h>                     // for getting kinematic model
 #include <moveit/setup_assistant/tools/compute_default_collisions.h>  // for LinkPairMap
-#include <yaml-cpp/yaml.h>                                            // outputing yaml config files
-#include <urdf/model.h>                                               // to share throughout app
-#include <srdfdom/srdf_writer.h>                                      // for writing srdf data
+
+#include <srdfdom/srdf_writer.h>  // for writing srdf data
+
+#include <urdf/model.h>     // to share throughout app
+#include <yaml-cpp/yaml.h>  // outputing yaml config files
 
 #include <utility>
 
