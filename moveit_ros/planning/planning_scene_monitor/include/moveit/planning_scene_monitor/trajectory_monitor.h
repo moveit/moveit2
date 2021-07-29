@@ -37,9 +37,11 @@
 #pragma once
 
 #include <moveit/macros/class_forward.h>
+#include <moveit/robot_state/robot_state.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <boost/thread.hpp>
+#include <rclcpp/time.hpp>
 #include <memory>
 #include <functional>
 
@@ -71,7 +73,9 @@ public:
     virtual void sleep() = 0;
   };
 
-  /** @brief Constructor.
+  /** @brief Constructor
+   *  @param[in]  state_monitor
+   *  @param[in]  sampling_frequency
    */
   TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, double sampling_frequency = 0.0);
   TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor,

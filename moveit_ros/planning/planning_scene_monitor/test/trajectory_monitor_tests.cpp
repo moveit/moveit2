@@ -95,6 +95,7 @@ TEST(TrajectoryMonitorTests, SleepAtLeastOnce)
                                                                 std::move(mock_trajectory_monitor_middleware_handle),
                                                                 10.0 };
 
+  // Set the trajectory monitor callback so we can block until
   std::atomic<bool> callback_called{ false };
   trajectory_monitor.setOnStateAddCallback(
       [&](const moveit::core::RobotStateConstPtr& robot_state, const rclcpp::Time& time) { callback_called = true; });

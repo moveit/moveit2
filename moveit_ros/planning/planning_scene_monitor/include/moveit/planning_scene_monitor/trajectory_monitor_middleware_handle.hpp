@@ -37,7 +37,6 @@
 #pragma once
 
 #include <moveit/planning_scene_monitor/trajectory_monitor.h>
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <rclcpp/rclcpp.hpp>
 
 namespace planning_scene_monitor
@@ -57,7 +56,7 @@ public:
   TrajectoryMonitorMiddlewareHandle(double sampling_frequency);
 
   /**
-   * @brief      sleep function using Rate
+   * @brief      Sleeps for time specified by @p sampling_frequency
    */
   void sleep();
 
