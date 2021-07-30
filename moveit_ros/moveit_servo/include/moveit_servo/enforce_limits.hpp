@@ -1,8 +1,8 @@
 /*******************************************************************************
- *      Title     : low_pass_filter.h
+ *      Title     : enforce_limits.h
  *      Project   : moveit_servo
- *      Created   : 1/11/2019
- *      Author    : Andy Zelenak
+ *      Created   : 7/5/2021
+ *      Author    : Brian O'Neil, Andy Zelenak, Blake Anderson, Tyler Weaver
  *
  * BSD 3-Clause License
  *
@@ -38,32 +38,23 @@
 
 #pragma once
 
-#include <cstddef>
+#include <Eigen/Core>
+#include <sensor_msgs/msg/joint_state.hpp>
+
+#include <moveit/robot_model/joint_model_group.h>
 
 namespace moveit_servo
 {
 /**
- * Class LowPassFilter - Filter a signal to soften jerks.
- * This is a first-order Butterworth low-pass filter.
+ * @brief      Scale the delta theta to match joint velocity/acceleration limits
  *
- * TODO: Use ROS filters package (http://wiki.ros.org/filters, https://github.com/ros/filters)
+ * @param[in]  joint_model_group   The joint model group
+ * @param[in]  publish_period      The publish period of servo (used for calculating joint velocity)
+ * @param[in]  delta_theta         The delta theta input
+ *
+ * @return     The delta theta output
  */
-class LowPassFilter
-{
-public:
-  // Larger filter_coeff-> more smoothing of servo commands, but more lag.
-  // Rough plot, with cutoff frequency on the y-axis:
-  // https://www.wolframalpha.com/input/?i=plot+arccot(c)
-  explicit LowPassFilter(double low_pass_filter_coeff);
-  double filter(double new_measurement);
-  void reset(double data);
+Eigen::ArrayXd enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_group, double publish_period,
+                                     const Eigen::ArrayXd& delta_theta);
 
-private:
-  static constexpr std::size_t FILTER_LENGTH = 2;
-  double previous_measurements_[FILTER_LENGTH];
-  double previous_filtered_measurement_;
-  // Scale and feedback term are calculated from supplied filter coefficient
-  double scale_term_;
-  double feedback_term_;
-};
 }  // namespace moveit_servo

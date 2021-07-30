@@ -40,11 +40,13 @@
 #include <boost/thread.hpp>
 #include <boost/function.hpp>
 
+#include "moveit_robot_interaction_export.h"
+
 namespace robot_interaction
 {
 // Maintains a set of KinematicOptions with a key/value mapping and a default
 // value.
-class KinematicOptionsMap
+class MOVEIT_ROBOT_INTERACTION_EXPORT KinematicOptionsMap
 {
 public:
   /// Constructor - set all options to reasonable default values.

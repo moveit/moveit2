@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Willow Garage, Inc.
+ *  Copyright (c) 2021, PickNik, Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of PickNik nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,22 +32,60 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Acorn Pooley, Ioan Sucan */
+/* Author: Tyler Weaver */
 
 #pragma once
 
-#include <moveit/collision_detection/collision_detector_allocator.h>
-#include <moveit/collision_detection_fcl/collision_env_fcl.h>
+#include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <string>
 
-#include "moveit_collision_detection_fcl_export.h"
-
-namespace collision_detection
+namespace planning_scene_monitor
 {
-/** \brief An allocator for FCL collision detectors */
-class MOVEIT_COLLISION_DETECTION_FCL_EXPORT CollisionDetectorAllocatorFCL
-  : public CollisionDetectorAllocatorTemplate<CollisionEnvFCL, CollisionDetectorAllocatorFCL>
+/**
+ * @brief      This class contains the ros interfaces for CurrentStateMontior
+ */
+class CurrentStateMonitorMiddlewareHandle : public CurrentStateMonitor::MiddlewareHandle
 {
 public:
-  static const std::string NAME;  // defined in collision_env_fcl.cpp
+  /**
+   * @brief      Constructor
+   *
+   * @param[in]  node  The ros node
+   */
+  CurrentStateMonitorMiddlewareHandle(const rclcpp::Node::SharedPtr& node);
+
+  /**
+   * @brief      Get the current time
+   *
+   * @return     Time object representing the time when this is called
+   */
+  rclcpp::Time now() const override;
+
+  /**
+   * @brief      Creates a joint state subscription
+   *
+   * @param[in]  topic     The topic
+   * @param[in]  callback  The callback
+   */
+  void createJointStateSubscription(const std::string& topic, JointStateUpdateCallback callback) override;
+
+  /**
+   * @brief      Reset the joint state subscription
+   */
+  void resetJointStateSubscription() override;
+
+  /**
+   * @brief      Get the joint state topic name
+   *
+   * @return     The joint state topic name.
+   */
+  std::string getJointStateTopicName() const override;
+
+private:
+  rclcpp::Node::SharedPtr node_;
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscription_;
 };
-}  // namespace collision_detection
+
+}  // namespace planning_scene_monitor
