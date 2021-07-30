@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Willow Garage, Inc.
+ *  Copyright (c) 2021, PickNik, Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of PickNik nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,22 +32,51 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Acorn Pooley, Ioan Sucan */
+/* Author: Tyler Weaver */
 
-#pragma once
+#include <moveit/planning_scene_monitor/current_state_monitor_middleware_handle.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <string>
 
-#include <moveit/collision_detection/collision_detector_allocator.h>
-#include <moveit/collision_detection_fcl/collision_env_fcl.h>
-
-#include "moveit_collision_detection_fcl_export.h"
-
-namespace collision_detection
+namespace planning_scene_monitor
 {
-/** \brief An allocator for FCL collision detectors */
-class MOVEIT_COLLISION_DETECTION_FCL_EXPORT CollisionDetectorAllocatorFCL
-  : public CollisionDetectorAllocatorTemplate<CollisionEnvFCL, CollisionDetectorAllocatorFCL>
+namespace
 {
-public:
-  static const std::string NAME;  // defined in collision_env_fcl.cpp
-};
-}  // namespace collision_detection
+static const auto SUBSCRIPTION_QOS = rclcpp::QoS(25);
+}
+
+CurrentStateMonitorMiddlewareHandle::CurrentStateMonitorMiddlewareHandle(const rclcpp::Node::SharedPtr& node)
+  : node_(node)
+{
+}
+
+rclcpp::Time CurrentStateMonitorMiddlewareHandle::now() const
+{
+  return node_->now();
+}
+
+void CurrentStateMonitorMiddlewareHandle::createJointStateSubscription(const std::string& topic,
+                                                                       JointStateUpdateCallback callback)
+{
+  joint_state_subscription_ =
+      node_->create_subscription<sensor_msgs::msg::JointState>(topic, SUBSCRIPTION_QOS, callback);
+}
+
+void CurrentStateMonitorMiddlewareHandle::resetJointStateSubscription()
+{
+  joint_state_subscription_.reset();
+}
+
+std::string CurrentStateMonitorMiddlewareHandle::getJointStateTopicName() const
+{
+  if (joint_state_subscription_)
+  {
+    return joint_state_subscription_->get_topic_name();
+  }
+  else
+  {
+    return "";
+  }
+}
+
+}  // namespace planning_scene_monitor

@@ -42,6 +42,8 @@
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 
+#include "moveit_warehouse_export.h"
+
 namespace moveit_warehouse
 {
 typedef warehouse_ros::MessageWithMetadata<moveit_msgs::msg::PlanningScene>::ConstPtr PlanningSceneWithMetadata;
@@ -54,7 +56,7 @@ typedef warehouse_ros::MessageCollection<moveit_msgs::msg::RobotTrajectory>::Ptr
 
 MOVEIT_CLASS_FORWARD(PlanningSceneStorage);  // Defines PlanningSceneStoragePtr, ConstPtr, WeakPtr... etc
 
-class PlanningSceneStorage : public MoveItMessageStorage
+class MOVEIT_WAREHOUSE_EXPORT PlanningSceneStorage : public MoveItMessageStorage
 {
 public:
   static const std::string DATABASE_NAME;
