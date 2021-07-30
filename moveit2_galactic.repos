@@ -1,0 +1,10 @@
+# TODO(henningkayser): Remove once ros2_control is released (https://github.com/ros-controls/ros2_control/issues/421)
+repositories:
+  ros2_control:
+    type: git
+    url: https://github.com/ros-controls/ros2_control
+    version: master
+  ros2_controllers:
+    type: git
+    url: https://github.com/ros-controls/ros2_controllers
+    version: master
