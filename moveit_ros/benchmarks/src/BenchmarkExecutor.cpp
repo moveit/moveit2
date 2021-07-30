@@ -49,11 +49,14 @@
 #include <boost/math/constants/constants.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <limits>
 #ifndef _WIN32
 #include <unistd.h>
 #else
 #include <winsock2.h>
 #endif
+
+#undef max
 
 using namespace moveit_ros_benchmarks;
 
