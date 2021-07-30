@@ -37,13 +37,12 @@
 #include <memory>
 #include <chrono>
 #include <thread>
+#include <atomic>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "moveit/planning_scene_monitor/trajectory_monitor.h"
 #include "moveit/planning_scene_monitor/current_state_monitor.h"
 #include "moveit/utils/robot_model_test_utils.h"
-#include "rclcpp/node_interfaces/node_clock_interface.hpp"
-#include "rclcpp/node_interfaces/node_topics_interface.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "tf2_ros/buffer.h"
 
@@ -85,9 +84,7 @@ TEST(TrajectoryMonitorTests, SleepAtLeastOnce)
   EXPECT_CALL(*mock_trajectory_monitor_middleware_handle, sleep).Times(::testing::AtLeast(1));
 
   // GIVEN a TrajectoryMonitor is started
-  planning_scene_monitor::CurrentStateMonitorPtr current_state_monitor;
-
-  current_state_monitor = std::make_unique<planning_scene_monitor::CurrentStateMonitor>(
+  auto current_state_monitor = std::make_shared<planning_scene_monitor::CurrentStateMonitor>(
       std::move(mock_current_state_monitor_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
       std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()));
 
@@ -95,7 +92,7 @@ TEST(TrajectoryMonitorTests, SleepAtLeastOnce)
                                                                 std::move(mock_trajectory_monitor_middleware_handle),
                                                                 10.0 };
 
-  // Set the trajectory monitor callback so we can block until
+  // Set the trajectory monitor callback so we can block until at least one sample was taken.
   std::atomic<bool> callback_called{ false };
   trajectory_monitor.setOnStateAddCallback(
       [&](const moveit::core::RobotStateConstPtr& robot_state, const rclcpp::Time& time) { callback_called = true; });
