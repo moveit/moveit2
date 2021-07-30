@@ -33,7 +33,6 @@ def load_yaml(package_name, file_path):
 
 @pytest.mark.rostest
 def generate_test_description():
-
     # Component yaml files are grouped in separate namespaces
     robot_description_config = load_file(
         "moveit_resources_panda_description", "urdf/panda.urdf"
@@ -50,6 +49,11 @@ def generate_test_description():
         "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
     )
     robot_description_kinematics = {"robot_description_kinematics": kinematics_yaml}
+    joint_limits_yaml = {
+        "robot_description_planning": load_yaml(
+            "moveit_resources_panda_moveit_config", "config/joint_limits.yaml"
+        )
+    }
     test_param = load_yaml("moveit_kinematics", "config/panda-lma-singular-test.yaml")
 
     panda_lma_singular = Node(
@@ -60,6 +64,7 @@ def generate_test_description():
             robot_description,
             robot_description_semantic,
             robot_description_kinematics,
+            joint_limits_yaml,
             test_param,
         ],
         output="screen",
