@@ -36,10 +36,11 @@
 /* Author: Acorn Pooley, Ioan Sucan */
 
 #include <gtest/gtest.h>
+#include <urdf_parser/urdf_parser.h>
+
 #include <moveit/robot_interaction/locked_robot_state.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
-#include <urdf_parser/urdf_parser.h>
 
 static const char* URDF_STR = "<?xml version=\"1.0\" ?>"
                               "<robot name=\"one_robot\">"

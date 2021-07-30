@@ -36,24 +36,26 @@
 /* Author: Ioan Sucan, Adam Leeper */
 
 #include "moveit/robot_interaction/robot_interaction.h"
-#include <moveit/robot_interaction/interaction_handler.h>
-#include <moveit/robot_interaction/interactive_marker_helpers.h>
-#include <moveit/robot_interaction/kinematic_options_map.h>
-#include <moveit/transforms/transforms.h>
-#include <interactive_markers/interactive_marker_server.hpp>
-#include <interactive_markers/menu_handler.hpp>
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <tf2/LinearMath/Transform.h>
-#include <boost/lexical_cast.hpp>
-#include <boost/math/constants/constants.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include <algorithm>
 #include <limits>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/math/constants/constants.hpp>
+
+#include <interactive_markers/interactive_marker_server.hpp>
+#include <interactive_markers/menu_handler.hpp>
+#include <tf2/LinearMath/Transform.h>
+#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+#include <moveit/robot_interaction/interaction_handler.h>
+#include <moveit/robot_interaction/interactive_marker_helpers.h>
+#include <moveit/robot_interaction/kinematic_options_map.h>
+#include <moveit/transforms/transforms.h>
 
 namespace robot_interaction
 {
@@ -408,7 +410,7 @@ void RobotInteraction::addEndEffectorMarkers(const InteractionHandlerPtr& handle
   moveit::core::RobotStateConstPtr rstate = handler->getState();
   const std::vector<std::string>& link_names = rstate->getJointModelGroup(eef.eef_group)->getLinkModelNames();
   visualization_msgs::msg::MarkerArray marker_array;
-  rstate->getRobotMarkers(marker_array, link_names, marker_color, eef.eef_group, rclcpp::Duration(0.0));
+  rstate->getRobotMarkers(marker_array, link_names, marker_color, eef.eef_group, rclcpp::Duration::from_seconds(0));
   tf2::Transform tf_root_to_link;
   tf2::fromMsg(tf2::toMsg(rstate->getGlobalLinkTransform(eef.parent_link)), tf_root_to_link);
   // Release the ptr count on the kinematic state

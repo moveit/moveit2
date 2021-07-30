@@ -35,11 +35,14 @@
 
 /* Author: Ioan Sucan, Dave Coleman */
 
-#include <moveit/robot_state/conversions.h>
-#include <geometric_shapes/shape_operations.h>
-#include <tf2_eigen/tf2_eigen.h>
 #include <boost/lexical_cast.hpp>
-#include "rclcpp/rclcpp.hpp"
+
+#include <geometric_shapes/shape_operations.h>
+
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_eigen/tf2_eigen.h>
+
+#include <moveit/robot_state/conversions.h>
 
 namespace moveit
 {

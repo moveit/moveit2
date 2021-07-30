@@ -38,13 +38,14 @@
 #include <memory>
 #include <string>
 
+#include <rclcpp/rclcpp.hpp>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "moveit/planning_scene_monitor/current_state_monitor.h"
 #include "moveit/utils/robot_model_test_utils.h"
 #include "rclcpp/node_interfaces/node_clock_interface.hpp"
 #include "rclcpp/node_interfaces/node_topics_interface.hpp"
-#include "rclcpp/rclcpp.hpp"
 #include "tf2_ros/buffer.h"
 
 struct MockMiddlewareHandle : public planning_scene_monitor::CurrentStateMonitor::MiddlewareHandle

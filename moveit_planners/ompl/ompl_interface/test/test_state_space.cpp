@@ -34,19 +34,19 @@
 
 /* Author: Ioan Sucan */
 
+#include <fstream>
 #include <limits>
+
+#include <boost/filesystem/path.hpp>
+#include <ompl/util/Exception.h>
+
+#include <gtest/gtest.h>
+#include <urdf_parser/urdf_parser.h>
 
 #include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
 #include <moveit/ompl_interface/parameterization/work_space/pose_model_state_space.h>
-
-#include <urdf_parser/urdf_parser.h>
-
-#include <ompl/util/Exception.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/utils/robot_model_test_utils.h>
-#include <gtest/gtest.h>
-#include <fstream>
-#include <boost/filesystem/path.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_state_space");
 

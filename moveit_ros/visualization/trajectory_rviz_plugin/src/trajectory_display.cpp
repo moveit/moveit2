@@ -36,8 +36,9 @@
    Desc:   Wraps a trajectory_visualization playback class for Rviz into a stand alone display
 */
 
-#include <moveit/trajectory_rviz_plugin/trajectory_display.h>
 #include <rviz_common/properties/string_property.hpp>
+
+#include <moveit/trajectory_rviz_plugin/trajectory_display.h>
 
 namespace moveit_rviz_plugin
 {

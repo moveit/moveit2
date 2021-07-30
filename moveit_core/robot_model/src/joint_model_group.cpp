@@ -35,14 +35,17 @@
 
 /* Author: Ioan Sucan, Dave Coleman */
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_model/joint_model_group.h>
-#include <moveit/robot_model/revolute_joint_model.h>
-#include <moveit/exceptions/exceptions.h>
-#include <boost/lexical_cast.hpp>
 #include <algorithm>
-#include "order_robot_model_items.inc"
-#include "rclcpp/rclcpp.hpp"
+
+#include <boost/lexical_cast.hpp>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include <moveit/exceptions/exceptions.h>
+#include <moveit/robot_model/joint_model_group.h>
+#include <moveit/robot_model/order_robot_model_items.hpp>
+#include <moveit/robot_model/revolute_joint_model.h>
+#include <moveit/robot_model/robot_model.h>
 
 namespace moveit
 {

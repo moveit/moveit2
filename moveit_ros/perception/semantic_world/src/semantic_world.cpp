@@ -34,21 +34,23 @@
 
 /* Author: Sachin Chitta */
 
+#include <geometry_msgs/msg/quaternion.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
-#include <geometry_msgs/msg/quaternion.hpp>
 
 // MoveIt
-#include <moveit/semantic_world/semantic_world.h>
 #include <geometric_shapes/shape_operations.h>
+
+#include <moveit/semantic_world/semantic_world.h>
 #include <moveit_msgs/msg/planning_scene.hpp>
 
 // OpenCV
 #include <opencv2/imgproc/imgproc.hpp>
 
 // Eigen
-#include <tf2_eigen/tf2_eigen.h>
 #include <Eigen/Geometry>
+
+#include <tf2_eigen/tf2_eigen.h>
 
 namespace moveit
 {

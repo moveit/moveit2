@@ -39,9 +39,11 @@
    Created   : 07/02/2020
 */
 
-#include <moveit_servo/servo_parameters.h>
-#include <rclcpp/rclcpp.hpp>
 #include <type_traits>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include <moveit_servo/servo_parameters.h>
 
 using namespace std::placeholders;  // for _1, _2 etc.
 

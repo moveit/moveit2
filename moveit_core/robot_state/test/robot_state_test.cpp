@@ -33,15 +33,17 @@
  *********************************************************************/
 
 /* Author: Ioan Sucan */
+#include <algorithm>
+#include <ctype.h>
+#include <sstream>
+
+#include <gtest/gtest.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <urdf_parser/urdf_parser.h>
+
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
-#include <urdf_parser/urdf_parser.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <gtest/gtest.h>
-#include <sstream>
-#include <algorithm>
-#include <ctype.h>
 
 static bool sameStringIgnoringWS(const std::string& s1, const std::string& s2)
 {

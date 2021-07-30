@@ -36,9 +36,9 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <moveit/python/pybind_rosmsg_typecasters.h>
 
 #include <moveit/planning_scene/planning_scene.h>
+#include <moveit/python/pybind_rosmsg_typecasters.h>
 
 namespace py = pybind11;
 using namespace planning_scene;

@@ -37,13 +37,16 @@
 
 #pragma once
 
+#include <iostream>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
-#include <iostream>
-#include <moveit_msgs/msg/joint_limits.hpp>
-#include <random_numbers/random_numbers.h>
+
 #include <Eigen/Geometry>
+
+#include <random_numbers/random_numbers.h>
+
+#include <moveit_msgs/msg/joint_limits.hpp>
 
 #undef near
 

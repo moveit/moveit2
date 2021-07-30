@@ -37,9 +37,9 @@
 #pragma once
 
 #include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit_msgs/msg/move_it_error_codes.hpp>
-#include <moveit_msgs/msg/motion_plan_response.hpp>
 #include <moveit_msgs/msg/motion_plan_detailed_response.hpp>
+#include <moveit_msgs/msg/motion_plan_response.hpp>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
 
 namespace planning_interface
 {

@@ -34,25 +34,24 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/common_planning_interface_objects/common_objects.h>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
-#include <moveit/move_group/capability_names.h>
+#include <QComboBox>
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QShortcut>
 
 #include <geometric_shapes/shape_operations.h>
 
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
+#include <std_srvs/srv/empty.hpp>
 #include <tf2_ros/buffer.h>
 
-#include <std_srvs/srv/empty.hpp>
-
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QFileDialog>
-#include <QComboBox>
-#include <QShortcut>
+#include <moveit/common_planning_interface_objects/common_objects.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h>
+#include <moveit/move_group/capability_names.h>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
 
@@ -393,7 +392,8 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       // /std::shared_ptr<tf2_ros::Buffer> tf_buffer = context_->getFrameManager()->getTF2BufferPtr();
       std::shared_ptr<tf2_ros::Buffer> tf_buffer = moveit::planning_interface::getSharedTF();
 #endif
-      move_group_.reset(new moveit::planning_interface::MoveGroupInterface(node_, opt, tf_buffer, rclcpp::Duration(30)));
+      move_group_.reset(new moveit::planning_interface::MoveGroupInterface(node_, opt, tf_buffer,
+                                                                           rclcpp::Duration::from_seconds(30)));
       if (planning_scene_storage_)
         move_group_->setConstraintsDatabase(ui_->database_host->text().toStdString(), ui_->database_port->value());
     }

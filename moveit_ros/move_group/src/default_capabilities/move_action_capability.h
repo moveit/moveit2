@@ -36,10 +36,12 @@
 
 #pragma once
 
-#include <moveit/move_group/move_group_capability.h>
-#include <rclcpp_action/rclcpp_action.hpp>
-#include <moveit_msgs/action/move_group.hpp>
 #include <memory>
+
+#include <rclcpp_action/rclcpp_action.hpp>
+
+#include <moveit/move_group/move_group_capability.h>
+#include <moveit_msgs/action/move_group.hpp>
 
 namespace move_group
 {

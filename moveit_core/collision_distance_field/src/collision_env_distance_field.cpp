@@ -34,15 +34,18 @@
 
 /* Author: E. Gil Jones */
 
-#include <moveit/robot_model/robot_model.h>
-#include <tf2_eigen/tf2_eigen.h>
-#include <moveit/collision_distance_field/collision_env_distance_field.h>
-#include <moveit/collision_distance_field/collision_common_distance_field.h>
-#include <moveit/distance_field/propagation_distance_field.h>
-#include <moveit/collision_distance_field/collision_detector_allocator_distance_field.h>
-#include <boost/bind.hpp>
 #include <memory>
 #include <utility>
+
+#include <boost/bind.hpp>
+
+#include <tf2_eigen/tf2_eigen.h>
+
+#include <moveit/collision_distance_field/collision_common_distance_field.h>
+#include <moveit/collision_distance_field/collision_detector_allocator_distance_field.h>
+#include <moveit/collision_distance_field/collision_env_distance_field.h>
+#include <moveit/distance_field/propagation_distance_field.h>
+#include <moveit/robot_model/robot_model.h>
 
 namespace collision_detection
 {
@@ -997,7 +1000,7 @@ void CollisionEnvDistanceField::createCollisionModelMarker(const moveit::core::R
   sphere_marker.pose.orientation.z = 0;
   sphere_marker.pose.orientation.w = 1;
   sphere_marker.color = robot_color;
-  sphere_marker.lifetime = rclcpp::Duration(0);
+  sphere_marker.lifetime = rclcpp::Duration::from_seconds(0);
 
   unsigned int id = 0;
   const moveit::core::JointModelGroup* joint_group = state.getJointModelGroup(distance_field_cache_entry_->group_name_);

@@ -34,24 +34,23 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/utils/message_checks.h>
-#include <moveit/exceptions/exceptions.h>
-#include <moveit_msgs/srv/get_planning_scene.hpp>
-
-#include <tf2/exceptions.h>
-#include <tf2/LinearMath/Transform.h>
-#include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <moveit/profiler/profiler.h>
-
-#include <boost/algorithm/string/join.hpp>
+#include <chrono>
 #include <memory>
 
-#include <std_msgs/msg/string.hpp>
+#include <boost/algorithm/string/join.hpp>
 
-#include <chrono>
+#include <std_msgs/msg/string.hpp>
+#include <tf2/LinearMath/Transform.h>
+#include <tf2/exceptions.h>
+#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+#include <moveit/exceptions/exceptions.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/profiler/profiler.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/utils/message_checks.h>
+#include <moveit_msgs/srv/get_planning_scene.hpp>
 using namespace std::chrono_literals;
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_scene_monitor.planning_scene_monitor");
@@ -205,7 +204,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     node_->get_parameter_or(robot_description_ + "_planning.shape_transform_cache_lookup_wait_time", temp_wait_time,
                             temp_wait_time);
 
-  shape_transform_cache_lookup_wait_time_ = rclcpp::Duration((int64_t)temp_wait_time * 1.0e+9);
+  shape_transform_cache_lookup_wait_time_ = rclcpp::Duration::from_nanoseconds((int64_t)temp_wait_time * 1.0e+9);
 
   state_update_pending_ = false;
   // Period for 0.1 sec

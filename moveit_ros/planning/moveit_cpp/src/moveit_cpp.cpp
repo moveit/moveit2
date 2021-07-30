@@ -35,9 +35,11 @@
 /* Author: Henning Kayser */
 
 #include <stdexcept>
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+#include <moveit/moveit_cpp/moveit_cpp.h>
 
 namespace moveit_cpp
 {

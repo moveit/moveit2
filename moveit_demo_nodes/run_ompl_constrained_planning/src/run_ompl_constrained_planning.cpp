@@ -40,9 +40,9 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <visualization_msgs/msg/marker.hpp>
 
+#include <moveit/macros/console_colors.h>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit/macros/console_colors.h>
 #include <moveit_msgs/msg/constraints.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("ompl_constrained_planning_demo");
@@ -406,7 +406,7 @@ private:
 
     marker.type = visualization_msgs::msg::Marker::CUBE;
     marker.action = visualization_msgs::msg::Marker::ADD;
-    marker.lifetime = rclcpp::Duration(0);
+    marker.lifetime = rclcpp::Duration::from_seconds(0);
 
     marker.color.a = 0.5;
     marker.pose = pose;
@@ -428,7 +428,7 @@ private:
 
     marker.type = visualization_msgs::msg::Marker::SPHERE;
     marker.action = visualization_msgs::msg::Marker::ADD;
-    marker.lifetime = rclcpp::Duration(0);
+    marker.lifetime = rclcpp::Duration::from_seconds(0);
 
     marker.pose = pose;
     marker.scale.x = 0.05;

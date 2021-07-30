@@ -37,10 +37,12 @@
 
 #pragma once
 
-#include <moveit_simple_controller_manager/action_based_controller_handle.h>
+#include <functional>
+
 #include <control_msgs/action/follow_joint_trajectory.hpp>
 #include <control_msgs/msg/joint_tolerance.hpp>
-#include <functional>
+
+#include <moveit_simple_controller_manager/action_based_controller_handle.h>
 
 namespace moveit_simple_controller_manager
 {

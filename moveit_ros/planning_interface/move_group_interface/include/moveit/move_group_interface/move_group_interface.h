@@ -39,26 +39,25 @@
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit_msgs/msg/robot_trajectory.hpp>
-#include <moveit_msgs/msg/robot_state.hpp>
-#include <moveit_msgs/msg/planner_interface_description.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/grasp.hpp>
+#include <moveit_msgs/msg/planner_interface_description.hpp>
+#include <moveit_msgs/msg/robot_state.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 // #include <moveit_msgs/msg/place_location.hpp>
 
 // #include <moveit_msgs/action/pickup.hpp>
 // #include <moveit_msgs/action/place.hpp>
-#include <moveit_msgs/action/move_group.hpp>
-#include <moveit_msgs/action/execute_trajectory.hpp>
-
-#include <moveit_msgs/msg/motion_plan_request.hpp>
-#include <geometry_msgs/msg/pose_stamped.h>
-
-#include <rclcpp_action/rclcpp_action.hpp>
-
 #include <memory>
 #include <utility>
+
+#include <geometry_msgs/msg/pose_stamped.h>
+#include <rclcpp_action/rclcpp_action.hpp>
 #include <tf2_ros/buffer.h>
+
+#include <moveit_msgs/action/execute_trajectory.hpp>
+#include <moveit_msgs/action/move_group.hpp>
+#include <moveit_msgs/msg/motion_plan_request.hpp>
 
 #include "moveit_move_group_interface_export.h"
 
@@ -154,7 +153,7 @@ public:
     */
   MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const Options& opt,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration(-1));
+                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration::from_seconds(-1));
 
   /**
       \brief Construct a client for the MoveGroup action for a particular \e group.
@@ -165,7 +164,7 @@ public:
     */
   MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const std::string& group,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration(-1));
+                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration::from_seconds(-1));
 
   ~MoveGroupInterface();
 

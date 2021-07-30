@@ -35,9 +35,9 @@
 /* Author: Mrinal Kalakrishnan, Ken Anderson */
 
 #include <gtest/gtest.h>
+#include <rclcpp/rclcpp.hpp>
 
 #include <moveit/distance_field/voxel_grid.h>
-#include "rclcpp/rclcpp.hpp"
 
 using namespace distance_field;
 

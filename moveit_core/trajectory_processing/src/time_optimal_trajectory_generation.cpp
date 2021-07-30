@@ -36,13 +36,16 @@
  *   POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <limits>
-#include <Eigen/Geometry>
 #include <algorithm>
 #include <cmath>
-#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+#include <limits>
 #include <vector>
-#include "rclcpp/rclcpp.hpp"
+
+#include <Eigen/Geometry>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 
 namespace trajectory_processing
 {

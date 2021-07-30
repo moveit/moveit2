@@ -36,10 +36,12 @@
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
-#include <moveit/controller_manager/controller_manager.h>
 #include <iostream>
 #include <map>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include <moveit/controller_manager/controller_manager.h>
 
 namespace test_moveit_controller_manager
 {
@@ -60,7 +62,7 @@ public:
     return true;
   }
 
-  bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(0.0)) override
+  bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration::from_seconds(0.0)) override
   {
     (void)timeout;
     return false;

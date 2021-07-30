@@ -36,10 +36,11 @@
 
 #pragma once
 
+#include <rviz_default_plugins/robot/robot.hpp>
+
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/rviz_plugin_render_tools/octomap_render.h>
-#include <rviz_default_plugins/robot/robot.hpp>
 
 namespace moveit_rviz_plugin
 {

@@ -40,11 +40,11 @@
 #include <rclcpp/rclcpp.hpp>
 #endif
 
-#include <rviz_common/panel.hpp>
-
-#include <QSlider>
 #include <QLabel>
 #include <QPushButton>
+#include <QSlider>
+
+#include <rviz_common/panel.hpp>
 
 namespace moveit_rviz_plugin
 {

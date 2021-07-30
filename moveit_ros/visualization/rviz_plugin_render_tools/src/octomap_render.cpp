@@ -34,13 +34,13 @@
 
 /* Author: Julius Kammerl */
 
-#include <moveit/rviz_plugin_render_tools/octomap_render.h>
-
-#include <octomap_msgs/msg/octomap.hpp>
-#include <octomap/octomap.h>
-
-#include <OgreSceneNode.h>
 #include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
+
+#include <octomap/octomap.h>
+#include <octomap_msgs/msg/octomap.hpp>
+
+#include <moveit/rviz_plugin_render_tools/octomap_render.h>
 
 namespace moveit_rviz_plugin
 {

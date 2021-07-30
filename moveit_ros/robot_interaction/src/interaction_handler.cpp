@@ -36,22 +36,24 @@
 
 /* Author: Ioan Sucan, Adam Leeper */
 
-#include <moveit/robot_interaction/interaction_handler.h>
-#include <moveit/robot_interaction/robot_interaction.h>
-#include <moveit/robot_interaction/interactive_marker_helpers.h>
-#include <moveit/robot_interaction/kinematic_options_map.h>
-#include <moveit/transforms/transforms.h>
+#include <algorithm>
+
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <boost/lexical_cast.hpp>
+#include <boost/math/constants/constants.hpp>
+
 #include <interactive_markers/interactive_marker_server.hpp>
 #include <interactive_markers/menu_handler.hpp>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <boost/lexical_cast.hpp>
-#include <boost/math/constants/constants.hpp>
-#include <algorithm>
 
-#include <Eigen/Core>
-#include <Eigen/Geometry>
+#include <moveit/robot_interaction/interaction_handler.h>
+#include <moveit/robot_interaction/interactive_marker_helpers.h>
+#include <moveit/robot_interaction/kinematic_options_map.h>
+#include <moveit/robot_interaction/robot_interaction.h>
+#include <moveit/transforms/transforms.h>
 
 namespace robot_interaction
 {

@@ -42,17 +42,18 @@
 #include <string>
 
 // ROS
-#include <rclcpp/rclcpp.hpp>
-#include <std_srvs/srv/trigger.hpp>
-#include <std_msgs/msg/int8.hpp>
-#include <std_msgs/msg/float64.hpp>
-#include <std_msgs/msg/float64_multi_array.hpp>
 #include <control_msgs/msg/joint_jog.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
-#include <trajectory_msgs/msg/joint_trajectory.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <moveit_msgs/srv/change_drift_dimensions.hpp>
+#include <std_msgs/msg/float64.hpp>
+#include <std_msgs/msg/float64_multi_array.hpp>
+#include <std_msgs/msg/int8.hpp>
+#include <std_srvs/srv/trigger.hpp>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
+
 #include <moveit_msgs/srv/change_control_dimensions.hpp>
+#include <moveit_msgs/srv/change_drift_dimensions.hpp>
 
 // Testing
 #include <gtest/gtest.h>

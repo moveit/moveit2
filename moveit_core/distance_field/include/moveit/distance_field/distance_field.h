@@ -36,15 +36,16 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/distance_field/voxel_grid.h>
-#include <visualization_msgs/msg/marker.hpp>
-#include <visualization_msgs/msg/marker_array.hpp>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <eigen_stl_containers/eigen_stl_containers.h>
+
+#include <rclcpp/rclcpp.hpp>
+#include <visualization_msgs/msg/marker.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
+
+#include <moveit/distance_field/voxel_grid.h>
 #include <moveit/macros/class_forward.h>
-#include "rclcpp/rclcpp.hpp"
 
 namespace shapes
 {

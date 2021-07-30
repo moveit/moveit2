@@ -37,11 +37,13 @@
 
 #pragma once
 
+#include <memory>
+
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
+
 #include <moveit/controller_manager/controller_manager.h>
 #include <moveit/macros/class_forward.h>
-#include <memory>
 
 namespace moveit_simple_controller_manager
 {
@@ -139,7 +141,7 @@ public:
   virtual void
   controllerDoneCallback(const typename rclcpp_action::ClientGoalHandle<T>::WrappedResult& wrapped_result) = 0;
 
-  bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(-1)) override
+  bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration::from_seconds(-1)) override
   {
     auto result_callback_done = std::make_shared<std::promise<bool>>();
     auto result_future = controller_action_client_->async_get_result(

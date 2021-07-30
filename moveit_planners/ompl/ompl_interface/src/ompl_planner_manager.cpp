@@ -34,11 +34,11 @@
 
 /* Author: Ioan Sucan, Dave Coleman */
 
+#include <ompl/util/Console.h>
+
 #include <moveit/ompl_interface/ompl_interface.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
-
-#include <ompl/util/Console.h>
 
 namespace ompl_interface
 {

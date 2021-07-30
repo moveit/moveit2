@@ -34,9 +34,10 @@
 
 /* Author: Ioan Sucan, Michael Ferguson */
 
+#include <class_loader/class_loader.hpp>
+
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
-#include <class_loader/class_loader.hpp>
 
 namespace default_planner_request_adapters
 {

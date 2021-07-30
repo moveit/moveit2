@@ -35,18 +35,21 @@
 
 /* Author: Ioan Sucan, Sachin Chitta, Acorn Pooley, Mario Prats, Dave Coleman */
 
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_state/cartesian_interpolator.h>
-#include <moveit/transforms/transforms.h>
+#include <boost/bind.hpp>
+
 #include <geometric_shapes/check_isometry.h>
 #include <geometric_shapes/shape_operations.h>
+
+#include <rclcpp/rclcpp.hpp>
 #include <tf2_eigen/tf2_eigen.h>
+
 #include <moveit/backtrace/backtrace.h>
-#include <moveit/profiler/profiler.h>
 #include <moveit/macros/console_colors.h>
-#include <boost/bind.hpp>
+#include <moveit/profiler/profiler.h>
 #include <moveit/robot_model/aabb.h>
-#include "rclcpp/rclcpp.hpp"
+#include <moveit/robot_state/cartesian_interpolator.h>
+#include <moveit/robot_state/robot_state.h>
+#include <moveit/transforms/transforms.h>
 
 namespace moveit
 {

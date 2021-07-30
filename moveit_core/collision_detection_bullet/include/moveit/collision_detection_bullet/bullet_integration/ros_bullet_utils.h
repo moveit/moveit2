@@ -22,10 +22,11 @@
 
 #include <sstream>
 
-#include <octomap_msgs/conversions.h>
 #include <geometric_shapes/shape_messages.h>
-#include <geometric_shapes/shapes.h>
 #include <geometric_shapes/shape_operations.h>
+#include <geometric_shapes/shapes.h>
+
+#include <octomap_msgs/conversions.h>
 #include <rclcpp/logging.hpp>
 
 #include <moveit/collision_detection_bullet/bullet_integration/basic_types.h>

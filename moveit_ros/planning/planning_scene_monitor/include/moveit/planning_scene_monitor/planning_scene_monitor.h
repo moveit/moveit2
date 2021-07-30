@@ -36,22 +36,25 @@
 
 #pragma once
 
+#include <memory>
+#include <thread>
+
+#include <boost/noncopyable.hpp>
+#include <boost/thread/recursive_mutex.hpp>
+#include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/thread.hpp>
+
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
-#include <moveit/macros/class_forward.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
+
 #include <moveit/collision_plugin_loader/collision_plugin_loader.h>
+#include <moveit/macros/class_forward.h>
+#include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
+#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/thread/shared_mutex.hpp>
-#include <boost/thread/recursive_mutex.hpp>
-#include <boost/thread/thread.hpp>
-#include <memory>
-#include <thread>
 
 #include "moveit_planning_scene_monitor_export.h"
 

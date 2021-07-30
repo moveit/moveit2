@@ -34,10 +34,13 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/planning_request_adapter/planning_request_adapter.h>
-#include <boost/bind.hpp>
 #include <algorithm>
-#include "rclcpp/rclcpp.hpp"
+
+#include <boost/bind.hpp>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include <moveit/planning_request_adapter/planning_request_adapter.h>
 
 // we could really use some c++11 lambda functions here :)
 

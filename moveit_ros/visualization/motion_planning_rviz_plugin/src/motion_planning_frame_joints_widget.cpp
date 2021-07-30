@@ -34,14 +34,15 @@
 
 /* Author: Robert Haschke */
 
-#include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
-
-#include "ui_motion_planning_rviz_plugin_frame_joints.h"
-#include <QPainter>
-#include <QSlider>
 #include <QEvent>
 #include <QMouseEvent>
+#include <QPainter>
+#include <QSlider>
+
+#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h>
+
+#include "ui_motion_planning_rviz_plugin_frame_joints.h"
 
 namespace moveit_rviz_plugin
 {

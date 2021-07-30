@@ -35,12 +35,16 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/robot_model/planar_joint_model.h>
-#include <geometric_shapes/check_isometry.h>
-#include <angles/angles.h>
-#include <boost/math/constants/constants.hpp>
-#include <limits>
 #include <cmath>
+#include <limits>
+
+#include <boost/math/constants/constants.hpp>
+
+#include <geometric_shapes/check_isometry.h>
+
+#include <angles/angles.h>
+
+#include <moveit/robot_model/planar_joint_model.h>
 
 namespace moveit
 {

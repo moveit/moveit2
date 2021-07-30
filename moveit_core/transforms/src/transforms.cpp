@@ -34,11 +34,14 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/transforms/transforms.h>
-#include <geometric_shapes/check_isometry.h>
-#include <tf2_eigen/tf2_eigen.h>
 #include <boost/algorithm/string/trim.hpp>
-#include "rclcpp/rclcpp.hpp"
+
+#include <geometric_shapes/check_isometry.h>
+
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_eigen/tf2_eigen.h>
+
+#include <moveit/transforms/transforms.h>
 
 namespace moveit
 {

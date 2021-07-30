@@ -34,10 +34,12 @@
 
 /* Author: Ioan Sucan */
 
-#include <rclcpp/rclcpp.hpp>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <tf2_ros/transform_listener.h>
 #include <memory>
+
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_ros/transform_listener.h>
+
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
@@ -89,7 +91,7 @@ int main(int argc, char** argv)
     mk.color.g = 0.5f;
     mk.color.b = 1.0f;
     mk.color.a = 0.3f;
-    mk.lifetime = rclcpp::Duration(lifetime);
+    mk.lifetime = rclcpp::Duration::from_seconds(lifetime);
     visualization_msgs::msg::MarkerArray arr;
     arr.markers.push_back(mk);
     pub_markers->publish(arr);
@@ -136,7 +138,7 @@ int main(int argc, char** argv)
             mk.pose.orientation.w = 1.0;
             mk.scale.x = mk.scale.y = mk.scale.z = radius;
             mk.color = color;
-            mk.lifetime = rclcpp::Duration(lifetime);
+            mk.lifetime = rclcpp::Duration::from_seconds(lifetime);
             arr.markers.push_back(mk);
             pub_markers->publish(arr);
           }

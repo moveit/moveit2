@@ -33,6 +33,7 @@
  *********************************************************************/
 
 #include <boost/core/demangle.hpp>
+
 #include <gtest/gtest.h>
 
 #include <moveit/planning_interface/planning_interface.h>
@@ -48,7 +49,6 @@
 #include "pilz_industrial_motion_planner/trajectory_generator_circ.h"
 #include "pilz_industrial_motion_planner/trajectory_generator_lin.h"
 #include "pilz_industrial_motion_planner/trajectory_generator_ptp.h"
-
 #include "test_utils.h"
 
 const std::string PARAM_MODEL_NO_GRIPPER_NAME{ "robot_description" };

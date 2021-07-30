@@ -34,8 +34,9 @@
 
 /* Author: Ioan Sucan */
 
+#include <rclcpp/rclcpp.hpp>
+
 #include <moveit/background_processing/background_processing.h>
-#include "rclcpp/rclcpp.hpp"
 
 namespace moveit
 {

@@ -35,23 +35,23 @@
 /* Author: Ioan Sucan, Mathias Lüdtke, Dave Coleman */
 
 // MoveIt
-#include <moveit/rdf_loader/rdf_loader.h>
 #include <moveit/profiler/profiler.h>
+#include <moveit/rdf_loader/rdf_loader.h>
 
 // ROS 2
-#include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/string.hpp>
 #include <ament_index_cpp/get_package_prefix.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
 
 // Boost
 #include <boost/filesystem.hpp>
 
 // C++
-#include <fstream>
-#include <streambuf>
 #include <algorithm>
 #include <chrono>
+#include <fstream>
+#include <streambuf>
 
 namespace rdf_loader
 {
@@ -67,7 +67,7 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
 
   // Check if the robot_description parameter is declared, declare it if it's not declared yet
   if (!node->has_parameter(robot_description))
-    node->declare_parameter(robot_description);
+    node->declare_parameter<std::string>(robot_description);
   std::string robot_description_content;
   node->get_parameter_or(robot_description, robot_description_content, std::string());
 
@@ -88,7 +88,7 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
   const std::string srdf_description = robot_description + "_semantic";
   // Check if the robot_description_semantic parameter is declared, declare it if it's not declared yet
   if (!node->has_parameter(srdf_description))
-    node->declare_parameter(srdf_description);
+    node->declare_parameter<std::string>(srdf_description);
   std::string srdf_description_content;
   node->get_parameter_or(srdf_description, srdf_description_content, std::string());
 

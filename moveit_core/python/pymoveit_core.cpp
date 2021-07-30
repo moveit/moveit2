@@ -34,10 +34,12 @@
 
 /* Author: Peter Mitrano */
 
+#include <srdfdom/model.h>
+
 #include <pybind11/pybind11.h>
 #include <urdf_parser/urdf_parser.h>
+
 #include <moveit/robot_model/robot_model.h>
-#include <srdfdom/model.h>
 
 namespace py = pybind11;
 

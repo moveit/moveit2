@@ -34,14 +34,13 @@
 
 /* Author: Sachin Chitta */
 
-#include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
+#include <object_recognition_msgs/action/object_recognition.hpp>
+#include <tf2_eigen/tf2_eigen.h>
 
 #include <moveit/kinematic_constraints/utils.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
 #include <moveit/robot_state/conversions.h>
-#include <object_recognition_msgs/action/object_recognition.hpp>
-
-#include <tf2_eigen/tf2_eigen.h>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
 

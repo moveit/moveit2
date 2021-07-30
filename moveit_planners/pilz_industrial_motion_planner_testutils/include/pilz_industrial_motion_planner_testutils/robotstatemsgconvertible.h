@@ -35,8 +35,8 @@
 #ifndef ROBOTSTATEMSGCONVERTIBLE_H
 #define ROBOTSTATEMSGCONVERTIBLE_H
 
-#include <moveit_msgs/RobotState.h>
 #include <moveit/robot_model/robot_model.h>
+#include <moveit_msgs/RobotState.h>
 
 namespace pilz_industrial_motion_planner_testutils
 {

@@ -39,6 +39,7 @@
 #pragma once
 
 #include <memory>
+
 #include <boost/pool/pool_alloc.hpp>
 
 namespace moveit

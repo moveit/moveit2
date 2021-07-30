@@ -34,11 +34,13 @@
 
 /* Author: E. Gil Jones */
 
-#include <moveit/collision_distance_field/collision_distance_field_types.h>
+#include <memory>
+
 #include <geometric_shapes/body_operations.h>
+
+#include <moveit/collision_distance_field/collision_distance_field_types.h>
 #include <moveit/distance_field/distance_field.h>
 #include <moveit/distance_field/find_internal_points.h>
-#include <memory>
 
 const static double EPSILON = 0.0001;
 

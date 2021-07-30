@@ -39,19 +39,15 @@
 #pragma once
 
 // C++
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
-#include <atomic>
 
 // ROS
-#include <rclcpp/rclcpp.hpp>
 #include <control_msgs/msg/joint_jog.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit_msgs/srv/change_drift_dimensions.hpp>
-#include <moveit_msgs/srv/change_control_dimensions.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
@@ -60,10 +56,15 @@
 #include <tf2_eigen/tf2_eigen.h>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit_msgs/srv/change_control_dimensions.hpp>
+#include <moveit_msgs/srv/change_drift_dimensions.hpp>
+
 // moveit_servo
+#include <moveit_servo/low_pass_filter.h>
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
-#include <moveit_servo/low_pass_filter.h>
 
 namespace moveit_servo
 {

@@ -37,19 +37,22 @@
 #pragma once
 
 #include <boost/thread/mutex.hpp>
-#include <moveit/macros/class_forward.h>
+
 #include <rviz_common/display.hpp>
 #include <rviz_common/panel_dock_widget.hpp>
 #include <rviz_common/properties/int_property.hpp>
 #include <rviz_common/properties/ros_topic_property.hpp>
 
+#include <moveit/macros/class_forward.h>
+
 #ifndef Q_MOC_RUN
-#include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
-#include <moveit/rviz_plugin_render_tools/trajectory_panel.h>
 #include <rclcpp/rclcpp.hpp>
+
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
+#include <moveit/rviz_plugin_render_tools/trajectory_panel.h>
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #endif
 

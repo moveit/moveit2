@@ -34,22 +34,24 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/kinematic_constraints/kinematic_constraint.h>
-#include <moveit/constraint_samplers/default_constraint_samplers.h>
-#include <moveit/constraint_samplers/union_constraint_sampler.h>
-#include <moveit/constraint_samplers/constraint_sampler_manager.h>
-#include <moveit/constraint_samplers/constraint_sampler_tools.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <fstream>
+
+#include <boost/bind.hpp>
 
 #include <geometric_shapes/shape_operations.h>
-#include <visualization_msgs/msg/marker_array.hpp>
 
 #include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
-#include <fstream>
-#include <boost/bind.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
+
+#include <moveit/constraint_samplers/constraint_sampler_manager.h>
+#include <moveit/constraint_samplers/constraint_sampler_tools.h>
+#include <moveit/constraint_samplers/default_constraint_samplers.h>
+#include <moveit/constraint_samplers/union_constraint_sampler.h>
+#include <moveit/kinematic_constraints/kinematic_constraint.h>
+#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/robot_state/conversions.h>
+#include <moveit/utils/robot_model_test_utils.h>
 
 #include "pr2_arm_kinematics_plugin.h"
 

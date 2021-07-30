@@ -34,12 +34,15 @@
 
 /* Author: Ioan Sucan, Adam Leeper */
 
-#include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit/robot_state/conversions.h>
-#include <tf2_eigen/tf2_eigen.h>
-#include <boost/math/constants/constants.hpp>
 #include <numeric>
-#include "rclcpp/rclcpp.hpp"
+
+#include <boost/math/constants/constants.hpp>
+
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_eigen/tf2_eigen.h>
+
+#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_trajectory/robot_trajectory.h>
 
 namespace robot_trajectory
 {
@@ -266,7 +269,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
     trajectory.multi_dof_joint_trajectory.points.resize(waypoints_.size());
   }
 
-  static const rclcpp::Duration ZERO_DURATION(0.0);
+  static const rclcpp::Duration ZERO_DURATION = rclcpp::Duration::from_seconds(0);
   double total_time = 0.0;
   for (std::size_t i = 0; i < waypoints_.size(); ++i)
   {

@@ -35,11 +35,10 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/move_group/move_group_context.h>
-
 #include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/plan_execution/plan_execution.h>
 #include <moveit/plan_execution/plan_with_sensing.h>
+#include <moveit/planning_pipeline/planning_pipeline.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_capabilities_base.move_group_context");
 

@@ -36,10 +36,12 @@
 
 #pragma once
 
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/kinematic_constraints/kinematic_constraint.h>
 #include <vector>
-#include "rclcpp/rclcpp.hpp"
+
+#include <rclcpp/rclcpp.hpp>
+
+#include <moveit/kinematic_constraints/kinematic_constraint.h>
+#include <moveit/planning_scene/planning_scene.h>
 /**
  * \brief The constraint samplers namespace contains a number of
  * methods for generating samples based on a constraint or set of

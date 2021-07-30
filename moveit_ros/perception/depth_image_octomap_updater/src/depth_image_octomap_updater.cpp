@@ -34,17 +34,20 @@
 
 /* Author: Ioan Sucan, Suat Gedikli */
 
-#include <moveit/depth_image_octomap_updater/depth_image_octomap_updater.h>
-#include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <tf2/LinearMath/Vector3.h>
-#include <tf2/LinearMath/Transform.h>
-#include <geometric_shapes/shape_operations.h>
-#include <sensor_msgs/image_encodings.hpp>
+#include <memory>
 #include <stdint.h>
 
-#include <memory>
 #include <boost/bind.hpp>
+
+#include <geometric_shapes/shape_operations.h>
+
+#include <sensor_msgs/image_encodings.hpp>
+#include <tf2/LinearMath/Transform.h>
+#include <tf2/LinearMath/Vector3.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+#include <moveit/depth_image_octomap_updater/depth_image_octomap_updater.h>
+#include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 
 namespace occupancy_map_monitor
 {
@@ -274,7 +277,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
         catch (tf2::TransformException& ex)
         {
           std::chrono::duration<double, std::nano> tmp_duration(TEST_DT);
-          static const rclcpp::Duration D(tmp_duration.count());
+          static const rclcpp::Duration D = rclcpp::Duration::from_nanoseconds(tmp_duration.count());
           err = ex.what();
           std::this_thread::sleep_for(D.to_chrono<std::chrono::seconds>());
         }

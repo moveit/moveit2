@@ -34,10 +34,12 @@
 
 /* Author: Ioan Sucan */
 
-#include <pluginlib/class_loader.hpp>
-#include <moveit/planning_request_adapter/planning_request_adapter.h>
-#include <rclcpp/rclcpp.hpp>
 #include <memory>
+
+#include <pluginlib/class_loader.hpp>
+#include <rclcpp/rclcpp.hpp>
+
+#include <moveit/planning_request_adapter/planning_request_adapter.h>
 
 int main(int argc, char** argv)
 {
