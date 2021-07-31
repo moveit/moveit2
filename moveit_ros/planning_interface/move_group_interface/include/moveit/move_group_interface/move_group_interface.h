@@ -60,6 +60,8 @@
 #include <utility>
 #include <tf2_ros/buffer.h>
 
+#include "moveit_move_group_interface_export.h"
+
 namespace moveit
 {
 /** \brief Simple interface to MoveIt components */
@@ -101,7 +103,7 @@ MOVEIT_CLASS_FORWARD(MoveGroupInterface);  // Defines MoveGroupInterfacePtr, Con
     \brief Client class to conveniently use the ROS interfaces provided by the move_group node.
 
     This class includes many default settings to make things easy to use. */
-class MoveGroupInterface
+class MOVEIT_MOVE_GROUP_INTERFACE_EXPORT MoveGroupInterface
 {
 public:
   /** \brief Default ROS parameter name from where to read the robot's URDF. Set to 'robot_description' */

@@ -64,6 +64,12 @@ def generate_launch_description():
     )
     ompl_planning_pipeline_config["ompl"].update(ompl_planning_yaml)
 
+    joint_limits_yaml = {
+        "robot_description_planning": load_yaml(
+            "moveit_resources_panda_moveit_config", "config/joint_limits.yaml"
+        )
+    }
+
     # moveit_ros_benchmark demo executable
     moveit_ros_benchmarks_node = Node(
         node_name="moveit_run_benchmark",
@@ -77,6 +83,7 @@ def generate_launch_description():
             robot_description_semantic,
             robot_description_kinematics,
             ompl_planning_pipeline_config,
+            joint_limits_yaml,
         ],
     )
 

@@ -26,6 +26,11 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 
 find_package(OpenMP REQUIRED)
 
+# Used to link in ODE, an OMPL dependency, on macOS
+if(APPLE)
+  target_link_directories(${MOVEIT_LIB_NAME} PUBLIC ${OMPL_LIBRARY_DIRS})
+endif()
+
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_core
   moveit_msgs

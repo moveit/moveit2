@@ -48,6 +48,9 @@
 #include <pluginlib/class_loader.hpp>
 
 #include <memory>
+#include <deque>
+
+#include "moveit_trajectory_execution_manager_export.h"
 
 namespace trajectory_execution_manager
 {
@@ -56,7 +59,7 @@ MOVEIT_CLASS_FORWARD(TrajectoryExecutionManager);  // Defines TrajectoryExecutio
 // Two modes:
 // Managed controllers
 // Unmanaged controllers: given the trajectory,
-class TrajectoryExecutionManager
+class MOVEIT_TRAJECTORY_EXECUTION_MANAGER_EXPORT TrajectoryExecutionManager
 {
 public:
   static const std::string EXECUTION_EVENT_TOPIC;
