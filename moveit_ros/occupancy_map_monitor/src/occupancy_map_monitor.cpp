@@ -72,8 +72,7 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
                                          const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
   : middleware_handle_{ std::move(middleware_handle) }
   , tf_buffer_{ tf_buffer }
-  , map_frame_{ "" }
-  , map_resolution_{ 0.0 }
+  , parameters_{ 0.0, "", {} }
   , debug_info_{ false }
   , mesh_handle_count_{ 0 }
   , active_{ false }
@@ -84,29 +83,25 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
   }
 
   // Get the parameters
-  map_frame_ = middleware_handle_->getMapFrameParameter();
-  map_resolution_ = middleware_handle_->getMapResolutionParameter();
+  parameters_ = middleware_handle_->getParameters();
 
-  RCLCPP_DEBUG(LOGGER, "Using resolution = %lf m for building octomap", map_resolution_);
+  RCLCPP_DEBUG(LOGGER, "Using resolution = %lf m for building octomap", parameters_.map_resolution);
 
-  if (tf_buffer_ != nullptr && map_frame_.empty())
+  if (tf_buffer_ != nullptr && parameters_.map_frame.empty())
   {
     RCLCPP_WARN(LOGGER, "No target frame specified for Octomap. No transforms will be applied to received data.");
   }
-  if (tf_buffer_ == nullptr && !map_frame_.empty())
+  if (tf_buffer_ == nullptr && !parameters_.map_frame.empty())
   {
     RCLCPP_WARN(LOGGER, "Target frame specified but no TF instance (buffer) specified."
                         "No transforms will be applied to received data.");
   }
 
-  tree_ = std::make_shared<OccMapTree>(map_resolution_);
+  tree_ = std::make_shared<OccMapTree>(parameters_.map_resolution);
   tree_const_ = tree_;
 
-  for (const auto& pair : middleware_handle_->getSensorPluginsParameter())
+  for (const auto& [sensor_name, sensor_type] : parameters_.sensor_plugins)
   {
-    const auto& sensor_name = pair.first;
-    const auto& sensor_type = pair.second;
-
     auto occupancy_map_updater = middleware_handle_->loadOccupancyMapUpdater(sensor_type);
 
     // Verify the updater was loaded
@@ -188,7 +183,7 @@ void OccupancyMapMonitor::publishDebugInformation(bool flag)
 void OccupancyMapMonitor::setMapFrame(const std::string& frame)
 {
   std::lock_guard<std::mutex> _(parameters_lock_);  // we lock since an updater could specify a new frame for us
-  map_frame_ = frame;
+  parameters_.map_frame = frame;
 }
 
 ShapeHandle OccupancyMapMonitor::excludeShape(const shapes::ShapeConstPtr& shape)

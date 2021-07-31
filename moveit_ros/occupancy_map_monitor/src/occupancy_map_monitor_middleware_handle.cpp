@@ -55,7 +55,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.occupancy_ma
 OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const rclcpp::Node::SharedPtr& node,
                                                                          double map_resolution,
                                                                          const std::string& map_frame)
-  : node_{ node }, map_resolution_{ map_resolution }, map_frame_{ map_frame }, sensor_plugins_{}
+  : node_{ node }, parameters_{ map_resolution, map_frame, {} }
 {
   try
   {
@@ -68,18 +68,19 @@ OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const r
     throw ex;
   }
 
-  if (map_resolution_ <= std::numeric_limits<double>::epsilon())
+  if (parameters_.map_resolution <= std::numeric_limits<double>::epsilon())
   {
-    if (!node_->get_parameter("octomap_resolution", map_resolution_))
+    if (!node_->get_parameter("octomap_resolution", parameters_.map_resolution))
     {
-      map_resolution_ = 0.1;
-      RCLCPP_WARN(LOGGER, "Resolution not specified for Octomap. Assuming resolution = %g instead", map_resolution_);
+      parameters_.map_resolution = 0.1;
+      RCLCPP_WARN(LOGGER, "Resolution not specified for Octomap. Assuming resolution = %g instead",
+                  parameters_.map_resolution);
     }
   }
 
-  if (map_frame.empty())
+  if (parameters_.map_frame.empty())
   {
-    node_->get_parameter("octomap_frame", map_frame_);
+    node_->get_parameter("octomap_frame", parameters_.map_frame);
   }
 
   std::vector<std::string> sensor_names;
@@ -107,24 +108,14 @@ OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const r
     }
     else
     {
-      sensor_plugins_.push_back(std::make_pair(sensor_name, sensor_plugin));
+      parameters_.sensor_plugins.push_back(std::make_pair(sensor_name, sensor_plugin));
     }
   }
 }
 
-double OccupancyMapMonitorMiddlewareHandle::getMapResolutionParameter() const
+OccupancyMapMonitor::Parameters OccupancyMapMonitorMiddlewareHandle::getParameters() const
 {
-  return map_resolution_;
-}
-
-std::string OccupancyMapMonitorMiddlewareHandle::getMapFrameParameter() const
-{
-  return map_frame_;
-}
-
-std::vector<std::pair<std::string, std::string>> OccupancyMapMonitorMiddlewareHandle::getSensorPluginsParameter() const
-{
-  return sensor_plugins_;
+  return parameters_;
 }
 
 OccupancyMapUpdaterPtr OccupancyMapMonitorMiddlewareHandle::loadOccupancyMapUpdater(const std::string& sensor_plugin)

@@ -66,34 +66,20 @@ public:
                                       const std::string& map_frame);
 
   /**
-   * @brief      Gets the map resolution parameter.
+   * @brief      Gets the parameters struct.
    *
-   * @return     The map resolution parameter.
+   * @return     The parameters.
    */
-  double getMapResolutionParameter() const override;
-
-  /**
-   * @brief      Gets the map frame parameter.
-   *
-   * @return     The map frame parameter.
-   */
-  std::string getMapFrameParameter() const override;
-
-  /**
-   * @brief      Gets the list of sensor plugins from the parameters.
-   *
-   * @return     The list of names of sensors and their plugin type string.  Used for input to loadOccupancyMapUpdater.
-   */
-  std::vector<std::pair<std::string, std::string>> getSensorPluginsParameter() const override;
+  OccupancyMapMonitor::Parameters getParameters() const override;
 
   /**
    * @brief      Loads an occupancy map updater using pluginlib.
    *
-   * @param[in]  sensor_plugin  The sensor plugin (string from list returned by getSensorPluginsParameter)
+   * @param[in]  sensor_plugin  The sensor plugin type string
    *
-   * @return     The occupancy map updater.
+   * @return     The occupancy map updater pointer.
    */
-  OccupancyMapUpdaterPtr loadOccupancyMapUpdater(const std::string& sensor_plugin) override;
+  OccupancyMapUpdaterPtr loadOccupancyMapUpdater(const std::string& sensor_plugin);
 
   /**
    * @brief      Initializes the occupancy map updater.  This must be called because of the interface of OccupancyMapUpdater.
@@ -125,9 +111,7 @@ private:
   std::unique_ptr<pluginlib::ClassLoader<OccupancyMapUpdater>>
       updater_plugin_loader_; /*!< Pluginlib loader for OccupancyMapUpdater */
 
-  double map_resolution_;                                           /*!< map resolution parameter */
-  std::string map_frame_;                                           /*!< map frame parameter */
-  std::vector<std::pair<std::string, std::string>> sensor_plugins_; /*!< sensor name and sensor plugin parameter */
+  OccupancyMapMonitor::Parameters parameters_; /*!< ROS parameters for OccupancyMapMonitor */
 };
 
 }  // namespace occupancy_map_monitor

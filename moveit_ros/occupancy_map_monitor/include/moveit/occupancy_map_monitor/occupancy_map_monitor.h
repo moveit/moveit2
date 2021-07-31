@@ -57,6 +57,16 @@ class OccupancyMapMonitor
 {
 public:
   /**
+   * @brief      This class describes parameters that are normally provided through ROS Parameters.
+   */
+  struct Parameters
+  {
+    double map_resolution;
+    std::string map_frame;
+    std::vector<std::pair<std::string, std::string>> sensor_plugins;
+  };
+
+  /**
    * @brief      This class contains the rcl interfaces for easier testing
    */
   class MiddlewareHandle
@@ -75,25 +85,11 @@ public:
     virtual ~MiddlewareHandle() = default;
 
     /**
-     * @brief      Getter for the map resolution parameter.
+     * @brief      Gets the parameters struct.
      *
-     * @return     The map resolution parameter.
+     * @return     The parameters.
      */
-    virtual double getMapResolutionParameter() const = 0;
-
-    /**
-     * @brief      Getter for the map frame parameter.
-     *
-     * @return     The map frame parameter.
-     */
-    virtual std::string getMapFrameParameter() const = 0;
-
-    /**
-     * @brief      Getter for the list of sensor plugins that can be loaded.
-     *
-     * @return     A list of pairs of sensor names and plugin types for use by loadOccupancyMapUpdater.
-     */
-    virtual std::vector<std::pair<std::string, std::string>> getSensorPluginsParameter() const = 0;
+    virtual Parameters getParameters() const = 0;
 
     /**
      * @brief      Loads an occupancy map updater based on string.
@@ -194,7 +190,7 @@ public:
    */
   const std::string& getMapFrame() const
   {
-    return map_frame_;
+    return parameters_.map_frame;
   }
 
   /**
@@ -211,7 +207,7 @@ public:
    */
   double getMapResolution() const
   {
-    return map_resolution_;
+    return parameters_.map_resolution;
   }
 
   /**
@@ -323,9 +319,8 @@ private:
 
   std::unique_ptr<MiddlewareHandle> middleware_handle_; /*!< The abstract interface to ros */
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;          /*!< TF buffer */
-  std::string map_frame_;                               /*!< Map frame parameter */
-  double map_resolution_;                               /*!< Map resolution parameter */
-  std::mutex parameters_lock_;                          /*!< Mutex for synchronizing access to parameters */
+  Parameters parameters_;
+  std::mutex parameters_lock_; /*!< Mutex for synchronizing access to parameters */
 
   OccMapTreePtr tree_;            /*!< Oct map tree */
   OccMapTreeConstPtr tree_const_; /*!< Shared pointer to a const oct map tree */

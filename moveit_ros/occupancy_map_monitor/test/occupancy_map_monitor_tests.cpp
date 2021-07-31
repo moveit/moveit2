@@ -47,9 +47,7 @@
 
 struct MockMiddlewareHandle : public occupancy_map_monitor::OccupancyMapMonitor::MiddlewareHandle
 {
-  MOCK_METHOD(double, getMapResolutionParameter, (), (const, override));
-  MOCK_METHOD(std::string, getMapFrameParameter, (), (const, override));
-  MOCK_METHOD((std::vector<std::pair<std::string, std::string>>), getSensorPluginsParameter, (), (const, override));
+  MOCK_METHOD(occupancy_map_monitor::OccupancyMapMonitor::Parameters, getParameters, (), (const, override));
   MOCK_METHOD(occupancy_map_monitor::OccupancyMapUpdaterPtr, loadOccupancyMapUpdater,
               (const std::string& sensor_plugin), (override));
   MOCK_METHOD(void, initializeOccupancyMapUpdater,
@@ -68,9 +66,7 @@ TEST(OccupancyMapMonitorTests, ConstructorTest)
   auto mock_middleware_handle = std::make_unique<MockMiddlewareHandle>();
 
   // THEN we expect it to call these methods on the MiddlewareHandle
-  EXPECT_CALL(*mock_middleware_handle, getMapFrameParameter).Times(1);
-  EXPECT_CALL(*mock_middleware_handle, getMapResolutionParameter).Times(1);
-  EXPECT_CALL(*mock_middleware_handle, getSensorPluginsParameter).Times(1);
+  EXPECT_CALL(*mock_middleware_handle, getParameters).Times(1);
   EXPECT_CALL(*mock_middleware_handle, createSaveMapService).Times(1);
   EXPECT_CALL(*mock_middleware_handle, createLoadMapService).Times(1);
   EXPECT_CALL(*mock_middleware_handle, loadOccupancyMapUpdater).Times(0);
