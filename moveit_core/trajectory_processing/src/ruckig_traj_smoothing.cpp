@@ -62,7 +62,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   size_t num_waypoints = trajectory.getWayPointCount();
   if (num_waypoints < 2)
   {
-    RCLCPP_WARN_STREAM(LOGGER, "Trajectory does not have enough points to smooth with Ruckig");
+    RCLCPP_ERROR(LOGGER, "Trajectory does not have enough points to smooth with Ruckig");
     return false;
   }
 
@@ -104,7 +104,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   const moveit::core::RobotModel& rmodel = group->getParentModel();
   for (size_t i = 0; i < num_dof; ++i)
   {
-    // TODO(andyz): read this from the joint group if/when jerk becomes supported
+    // TODO(andyz): read this from the joint group if/when jerk limits are added to the JointModel
     ruckig_input.max_jerk[i] = DEFAULT_MAX_JERK;
 
     const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars[i]);
