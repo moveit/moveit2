@@ -1515,7 +1515,7 @@ bool RobotState::setToIKSolverFrame(Eigen::Isometry3d& pose, const std::string& 
         getLinkModel((!ik_frame.empty() && ik_frame[0] == '/') ? ik_frame.substr(1) : ik_frame);
     if (!link_model)
     {
-      RCLCPP_ERROR(LOGGER, "The following IK frame does not exist:", ik_frame.c_str());
+      RCLCPP_ERROR(LOGGER, "The following IK frame does not exist: %s", ik_frame.c_str());
       return false;
     }
     pose = getGlobalLinkTransform(link_model).inverse() * pose;
@@ -1673,7 +1673,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
           const moveit::core::LinkModel* link_model = getLinkModel(pose_frame);
           if (!link_model)
           {
-            RCLCPP_ERROR(LOGGER, "The following Pose Frame does not exist ", pose_frame.c_str());
+            RCLCPP_ERROR(LOGGER, "The following Pose Frame does not exist: %s", pose_frame.c_str());
             return false;
           }
           const moveit::core::LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();

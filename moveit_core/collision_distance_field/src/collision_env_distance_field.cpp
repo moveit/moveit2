@@ -941,7 +941,7 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
       }
 
       dfce->distance_field_->addPointsToField(all_points);
-      RCLCPP_DEBUG(LOGGER, "CollisionRobot distance field has been initialized with %d points.", all_points.size());
+      RCLCPP_DEBUG(LOGGER, "CollisionRobot distance field has been initialized with %zu points.", all_points.size());
     }
   }
   return dfce;
@@ -1171,14 +1171,14 @@ void CollisionEnvDistanceField::getGroupStateRepresentation(const DistanceFieldC
         link_size = Eigen::Vector3d(diameter, diameter, diameter);
         link_origin = link_bd->getBoundingSphereCenter() - 0.5 * link_size;
 
-        RCLCPP_DEBUG(LOGGER, "Creating PosedDistanceField for link %s with size [%i, %i , %i] and origin %i %i %i ",
+        RCLCPP_DEBUG(LOGGER, "Creating PosedDistanceField for link %s with size [%f, %f , %f] and origin %f %f %f ",
                      dfce->link_names_[i].c_str(), link_size.x(), link_size.y(), link_size.z(), link_origin.x(),
                      link_origin.y(), link_origin.z());
 
         gsr->link_distance_fields_.push_back(PosedDistanceFieldPtr(new PosedDistanceField(
             link_size, link_origin, resolution_, max_propogation_distance_, use_signed_distance_field_)));
         gsr->link_distance_fields_.back()->addPointsToField(link_bd->getCollisionPoints());
-        RCLCPP_DEBUG(LOGGER, "Created PosedDistanceField for link %s with %d points", dfce->link_names_[i].c_str(),
+        RCLCPP_DEBUG(LOGGER, "Created PosedDistanceField for link %s with %zu points", dfce->link_names_[i].c_str(),
                      link_bd->getCollisionPoints().size());
 
         gsr->link_body_decompositions_.back()->updatePose(state.getFrameTransform(ls->getName()));
@@ -1260,7 +1260,7 @@ bool CollisionEnvDistanceField::compareCacheEntryToState(const DistanceFieldCach
         fabs(dfce->state_values_[dfce->state_check_indices_[i]] - new_state_values[dfce->state_check_indices_[i]]);
     if (diff > EPSILON)
     {
-      RCLCPP_WARN(LOGGER, "State for Variable %s has changed by %s radians",
+      RCLCPP_WARN(LOGGER, "State for Variable %s has changed by %f radians",
                   state.getVariableNames()[dfce->state_check_indices_[i]].c_str(), diff);
       return false;
     }
