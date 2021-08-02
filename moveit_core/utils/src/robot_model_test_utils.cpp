@@ -242,7 +242,7 @@ void RobotModelBuilder::addCollisionBox(const std::string& link_name, const std:
 {
   if (dims.size() != 3)
   {
-    RCLCPP_ERROR(LOGGER, "There can only be 3 dimensions of a box (given %zu!)");
+    RCLCPP_ERROR(LOGGER, "There can only be 3 dimensions of a box (given %zu!)", dims.size());
     is_valid_ = false;
     return;
   }
