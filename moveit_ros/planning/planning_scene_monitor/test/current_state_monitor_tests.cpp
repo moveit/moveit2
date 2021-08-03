@@ -34,6 +34,7 @@
 
 /* Author: Tyler Weaver */
 
+#include <chrono>
 #include <memory>
 #include <string>
 
@@ -154,6 +155,36 @@ TEST(CurrentStateMonitorTests, NoModelTest)
                    std::make_unique<MockMiddlewareHandle>(), robot_model,
                    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())),
                std::invalid_argument);
+}
+
+TEST(CurrentStateMonitorTests, HaveCompleteStateConstructFalse)
+{
+  // GIVEN a CurrentStateMonitor
+  planning_scene_monitor::CurrentStateMonitor current_state_monitor{
+    std::make_unique<MockMiddlewareHandle>(), moveit::core::loadTestingRobotModel("panda"),
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+  };
+
+  // WHEN it is constructed
+  // THEN we expect haveCompleteState to be false
+  EXPECT_FALSE(current_state_monitor.haveCompleteState());
+}
+
+TEST(CurrentStateMonitorTests, WaitForCompleteStateWaits)
+{
+  // GIVEN a CurrentStateMonitor
+  planning_scene_monitor::CurrentStateMonitor current_state_monitor{
+    std::make_unique<MockMiddlewareHandle>(), moveit::core::loadTestingRobotModel("panda"),
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+  };
+
+  // WHEN we wait for complete state
+  auto start = std::chrono::steady_clock::now();
+  current_state_monitor.waitForCompleteState(0.1);
+  auto end = std::chrono::steady_clock::now();
+
+  // THEN we expect it waited for atleast 0.05 seconds
+  EXPECT_GT(std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count(), 5e+7);
 }
 
 int main(int argc, char** argv)

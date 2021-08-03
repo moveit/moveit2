@@ -251,13 +251,13 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
 
 bool CurrentStateMonitor::waitForCompleteState(double wait_time) const
 {
-  double slept_time = 0.0;
-  double sleep_step_s = std::min(0.05, wait_time / 10.0);
-  rclcpp::Duration sleep_step(sleep_step_s);
-  while (!haveCompleteState() && slept_time < wait_time)
+  const double sleep_step_s = std::min(0.05, wait_time / 10.0);
+  const auto sleep_step_duration = rclcpp::Duration::from_seconds(sleep_step_s);
+  double slept_time_s = 0.0;
+  while (!haveCompleteState() && slept_time_s < wait_time)
   {
-    rclcpp::sleep_for(sleep_step.to_chrono<std::chrono::nanoseconds>());
-    slept_time += sleep_step_s;
+    rclcpp::sleep_for(sleep_step_duration.to_chrono<std::chrono::nanoseconds>());
+    slept_time_s += sleep_step_s;
   }
   return haveCompleteState();
 }
