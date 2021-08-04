@@ -19,7 +19,7 @@ jobs:
             ROS_REPO: main
             CCOV: true
           - ROS_DISTRO: rolling
-            ROS_REPO: main
+            ROS_REPO: testing
             IKFAST_TEST: true
             CLANG_TIDY: true
     env:
