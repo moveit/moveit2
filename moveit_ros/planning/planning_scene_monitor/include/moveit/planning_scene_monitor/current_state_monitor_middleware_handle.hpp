@@ -36,10 +36,13 @@
 
 #pragma once
 
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <chrono>
+#include <string>
+
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <string>
+
+#include <moveit/planning_scene_monitor/current_state_monitor.h>
 
 namespace planning_scene_monitor
 {
@@ -82,6 +85,15 @@ public:
    * @return     The joint state topic name.
    */
   std::string getJointStateTopicName() const override;
+
+  /**
+   * @brief      Uses rclcpp::sleep_for to sleep
+   *
+   * @param[in]  nanoseconds  The nanoseconds to sleep for
+   *
+   * @return     Return of rclcpp::sleep_for
+   */
+  bool sleepFor(const std::chrono::nanoseconds& nanoseconds) const override;
 
 private:
   rclcpp::Node::SharedPtr node_;

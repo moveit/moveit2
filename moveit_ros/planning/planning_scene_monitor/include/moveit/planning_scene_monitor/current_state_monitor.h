@@ -36,15 +36,19 @@
 
 #pragma once
 
+#include <chrono>
+#include <functional>
+#include <string>
+
 #include <boost/signals2.hpp>
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/mutex.hpp>
-#include <functional>
-#include <moveit/robot_state/robot_state.h>
+
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <string>
 #include <tf2_ros/buffer.h>
+
+#include <moveit/robot_state/robot_state.h>
 
 namespace planning_scene_monitor
 {
@@ -94,6 +98,15 @@ public:
      * @return     The joint state topic name.
      */
     virtual std::string getJointStateTopicName() const = 0;
+
+    /**
+     * @brief      Block for the specified amount of time.
+     *
+     * @param[in]  nanoseconds  The nanoseconds to sleep
+     *
+     * @return     True if sleep happened as expected.
+     */
+    virtual bool sleepFor(const std::chrono::nanoseconds& nanoseconds) const = 0;
   };
 
   /** @brief Constructor.
@@ -210,18 +223,18 @@ public:
    *  @return Returns the map from joint names to joint state values*/
   std::map<std::string, double> getCurrentStateValues() const;
 
-  /** @brief Wait for at most \e wait_time seconds (default 1s) for a robot state more recent than t
-   *  @return true on success, false if up-to-date robot state wasn't received within \e wait_time
+  /** @brief Wait for at most \e wait_time_s seconds (default 1s) for a robot state more recent than t
+   *  @return true on success, false if up-to-date robot state wasn't received within \e wait_time_s
    */
-  bool waitForCurrentState(const rclcpp::Time& t = rclcpp::Clock(RCL_ROS_TIME).now(), double wait_time = 1.0) const;
+  bool waitForCurrentState(const rclcpp::Time& t = rclcpp::Clock(RCL_ROS_TIME).now(), double wait_time_s = 1.0) const;
 
-  /** @brief Wait for at most \e wait_time seconds until the complete robot state is known.
+  /** @brief Wait for at most \e wait_time_s seconds until the complete robot state is known.
       @return true if the full state is known */
-  bool waitForCompleteState(double wait_time) const;
+  bool waitForCompleteState(double wait_time_s) const;
 
-  /** @brief Wait for at most \e wait_time seconds until the joint values from the group \e group are known. Return true
-   * if values for all joints in \e group are known */
-  bool waitForCompleteState(const std::string& group, double wait_time) const;
+  /** @brief Wait for at most \e wait_time_s seconds until the joint values from the group \e group are known. Return
+   * true if values for all joints in \e group are known */
+  bool waitForCompleteState(const std::string& group, double wait_time_s) const;
 
   /** @brief Get the time point when the monitor was started */
   const rclcpp::Time& getMonitorStartTime() const
