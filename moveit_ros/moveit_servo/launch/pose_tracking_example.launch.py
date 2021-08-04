@@ -59,6 +59,11 @@ def generate_launch_description():
     kinematics_yaml = load_yaml(
         "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
     )
+    joint_limits_yaml = {
+        "robot_description_planning": load_yaml(
+            "moveit_resources_panda_moveit_config", "config/joint_limits.yaml"
+        )
+    }
 
     # RViz
     rviz_config_file = (
@@ -72,7 +77,12 @@ def generate_launch_description():
         # prefix=['xterm -e gdb -ex run --args'],
         output="log",
         arguments=["-d", rviz_config_file],
-        parameters=[robot_description, robot_description_semantic, kinematics_yaml],
+        parameters=[
+            robot_description,
+            robot_description_semantic,
+            kinematics_yaml,
+            joint_limits_yaml,
+        ],
     )
 
     # Publishes tf's for the robot
@@ -103,6 +113,7 @@ def generate_launch_description():
             kinematics_yaml,
             pose_tracking_params,
             servo_params,
+            joint_limits_yaml,
         ],
     )
 

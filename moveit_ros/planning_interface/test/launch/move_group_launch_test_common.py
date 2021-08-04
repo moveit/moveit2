@@ -108,6 +108,11 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
         "publish_state_updates": True,
         "publish_transforms_updates": True,
     }
+    joint_limits_yaml = {
+        "robot_description_planning": load_yaml(
+            "moveit_resources_panda_moveit_config", "config/joint_limits.yaml"
+        )
+    }
 
     # Start the actual move_group node/action server
     run_move_group_node = Node(
@@ -122,6 +127,7 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
             trajectory_execution,
             moveit_controllers,
             planning_scene_monitor_parameters,
+            joint_limits_yaml,
         ],
     )
 

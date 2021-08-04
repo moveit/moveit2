@@ -6,6 +6,9 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/current_state_monitor_middleware_handle.cpp
   src/trajectory_monitor.cpp
 )
+include(GenerateExportHeader)
+generate_export_header(${MOVEIT_LIB_NAME})
+target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_ros_occupancy_map_monitor
@@ -37,6 +40,7 @@ install(TARGETS demo_scene
 )
 
 install(DIRECTORY include/ DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
