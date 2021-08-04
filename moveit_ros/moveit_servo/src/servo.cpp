@@ -58,13 +58,6 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, ServoParameters::SharedConstPt
   }
   planning_scene_monitor->getStateMonitor()->enableCopyDynamics(true);
 
-  if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState(parameters_->move_group_name,
-                                                                        ROBOT_STATE_WAIT_TIME))
-  {
-    RCLCPP_FATAL(LOGGER, "Timeout waiting for current state");
-    exit(EXIT_FAILURE);
-  }
-
   servo_calcs_ = std::make_unique<ServoCalcs>(node, parameters, planning_scene_monitor_);
 
   collision_checker_ = std::make_unique<CollisionCheck>(node, parameters, planning_scene_monitor_);
@@ -72,6 +65,13 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, ServoParameters::SharedConstPt
 
 void Servo::start()
 {
+  if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState(parameters_->move_group_name,
+                                                                        ROBOT_STATE_WAIT_TIME))
+  {
+    RCLCPP_ERROR(LOGGER, "Timeout waiting for current state");
+    return;
+  }
+
   setPaused(false);
 
   // Crunch the numbers in this timer

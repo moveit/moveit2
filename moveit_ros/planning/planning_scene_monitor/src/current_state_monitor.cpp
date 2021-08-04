@@ -225,11 +225,11 @@ bool CurrentStateMonitor::haveCompleteStateHelper(const rclcpp::Time& oldest_all
   return (missing_joints == nullptr) || missing_joints->empty();
 }
 
-bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait_time) const
+bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait_time_s) const
 {
   rclcpp::Time start = middleware_handle_->now();
   rclcpp::Duration elapsed(0, 0);
-  rclcpp::Duration timeout = rclcpp::Duration::from_seconds(wait_time);
+  rclcpp::Duration timeout = rclcpp::Duration::from_seconds(wait_time_s);
 
   std::unique_lock<std::mutex> lock(state_update_lock_);
   while (current_state_time_ < t)
@@ -242,29 +242,29 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
                   "Didn't received robot state (joint angles) with recent timestamp within "
                   "%f seconds.\n"
                   "Check clock synchronization if your are running ROS across multiple machines!",
-                  wait_time);
+                  wait_time_s);
       return false;
     }
   }
   return true;
 }
 
-bool CurrentStateMonitor::waitForCompleteState(double wait_time) const
+bool CurrentStateMonitor::waitForCompleteState(double wait_time_s) const
 {
-  double slept_time = 0.0;
-  double sleep_step_s = std::min(0.05, wait_time / 10.0);
-  rclcpp::Duration sleep_step(sleep_step_s);
-  while (!haveCompleteState() && slept_time < wait_time)
+  const double sleep_step_s = std::min(0.05, wait_time_s / 10.0);
+  const auto sleep_step_duration = rclcpp::Duration::from_seconds(sleep_step_s);
+  double slept_time_s = 0.0;
+  while (!haveCompleteState() && slept_time_s < wait_time_s)
   {
-    rclcpp::sleep_for(sleep_step.to_chrono<std::chrono::nanoseconds>());
-    slept_time += sleep_step_s;
+    middleware_handle_->sleepFor(sleep_step_duration.to_chrono<std::chrono::nanoseconds>());
+    slept_time_s += sleep_step_s;
   }
   return haveCompleteState();
 }
 
-bool CurrentStateMonitor::waitForCompleteState(const std::string& group, double wait_time) const
+bool CurrentStateMonitor::waitForCompleteState(const std::string& group, double wait_time_s) const
 {
-  if (waitForCompleteState(wait_time))
+  if (waitForCompleteState(wait_time_s))
     return true;
   bool ok = true;
 
