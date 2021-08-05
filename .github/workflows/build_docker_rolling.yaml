@@ -32,7 +32,7 @@ jobs:
       - name: Build image
         run: |
           echo Building docker ${{ env.IMAGE_ID }}:${{ env.VERSION }}
-          docker build . --build-arg ROS_DISTRO=${{ env.ROS_DISTRO }} --file .docker/${{ env.DOCKERFILE }}/Dockerfile --tag ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+          docker build . --build-arg ROS_DISTRO=${{ env.ROS_DISTRO }} --file .docker/${{ matrix.env.DOCKERFILE }}/Dockerfile --tag ${{ env.IMAGE_ID }}:${{ env.VERSION }}
 
       - name: Log in to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
