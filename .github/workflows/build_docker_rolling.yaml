@@ -2,6 +2,7 @@ name: Build Dockers (Rolling)
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
     branches:
       - main
