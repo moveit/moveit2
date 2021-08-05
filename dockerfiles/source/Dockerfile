@@ -1,9 +1,8 @@
-# moveit/moveit2:foxy-source
+# ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-source
 # Downloads the moveit source code and install remaining debian dependencies
 
 ARG ROS_DISTRO=foxy
-# FROM moveit/moveit2:${ROS_DISTRO}-ci-testing
-FROM ros:${ROS_DISTRO}-ros-base-focal
+FROM ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci-testing
 
 MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
 MAINTAINER Dave Coleman dave@picknik.ai
