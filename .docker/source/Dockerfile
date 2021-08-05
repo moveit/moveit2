@@ -2,7 +2,8 @@
 # Downloads the moveit source code and install remaining debian dependencies
 
 ARG ROS_DISTRO=foxy
-FROM moveit/moveit2:${ROS_DISTRO}-ci-testing
+# FROM moveit/moveit2:${ROS_DISTRO}-ci-testing
+FROM ros:${ROS_DISTRO}-ros-base-focal
 
 MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
 MAINTAINER Dave Coleman dave@picknik.ai
