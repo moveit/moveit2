@@ -23,16 +23,15 @@ jobs:
       contents: read
     env:
       ROS_DISTRO: rolling
-      IMAGE_NAME: moveit2
-      IMAGE_ID: ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
-      VERSION: ${{ env.ROS_DISTRO }}-${{ matrix.env.DOCKERFILE }}
+      IMAGE_ID: ghcr.io/${{ github.repository_owner }}/moveit2
+      VERSION: $ROS_DISTRO-${{ matrix.env.DOCKERFILE }}
 
     steps:
       - uses: actions/checkout@v2
 
       - name: Build image
         run: |
-          echo Building docker ${{ env.IMAGE_NAME }}
+          echo Building docker ${{ env.IMAGE_ID }}:${{ env.VERSION }}
           docker build . --build-arg ROS_DISTRO=${{ env.ROS_DISTRO }} --file .docker/${{ env.DOCKERFILE }}/Dockerfile --tag ${{ env.IMAGE_ID }}:${{ env.VERSION }}
 
       - name: Log in to registry
