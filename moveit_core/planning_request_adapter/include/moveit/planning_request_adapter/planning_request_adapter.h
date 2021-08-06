@@ -107,7 +107,7 @@ protected:
     }
     else
     {
-      RCLCPP_INFO(logger, "Param '%s' was set to %s", full_name.c_str(), std::to_string(default_value).c_str());
+      RCLCPP_INFO(logger, "Param '%s' was set to %s", full_name.c_str(), std::to_string(value).c_str());
       return value;
     }
   }
