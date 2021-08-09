@@ -222,7 +222,7 @@ void RobotModelLoader::configure(const Options& opt)
   if (model_ && opt.load_kinematics_solvers_)
     loadKinematicsSolvers();
 
-  RCLCPP_DEBUG(node_->get_logger(), "Loaded kinematic model in %d seconds", (clock.now() - start).seconds());
+  RCLCPP_DEBUG(node_->get_logger(), "Loaded kinematic model in %f seconds", (clock.now() - start).seconds());
 }
 
 void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::KinematicsPluginLoaderPtr& kloader)

@@ -312,7 +312,7 @@ void BodyDecomposition::init(const std::vector<shapes::ShapeConstPtr>& shapes, c
   }
   bodies::mergeBoundingSpheres(bounding_spheres, relative_bounding_sphere_);
 
-  RCLCPP_DEBUG(LOGGER, "BodyDecomposition generated %i collision spheres out of %i shapes", collision_spheres_.size(),
+  RCLCPP_DEBUG(LOGGER, "BodyDecomposition generated %zu collision spheres out of %zu shapes", collision_spheres_.size(),
                shapes.size());
 }
 

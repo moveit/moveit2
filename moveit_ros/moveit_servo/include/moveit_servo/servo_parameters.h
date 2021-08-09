@@ -98,11 +98,8 @@ struct ServoParameters
   // Collision checking
   bool check_collisions;
   double collision_check_rate;
-  std::string collision_check_type;
   double self_collision_proximity_threshold;
   double scene_collision_proximity_threshold;
-  double collision_distance_safety_factor;
-  double min_allowable_collision_distance;
 
   /**
    * Declares, reads, and validates parameters used for moveit_servo

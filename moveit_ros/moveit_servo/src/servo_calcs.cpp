@@ -297,10 +297,6 @@ void ServoCalcs::calculateSingleIteration()
   // 2) so the low-pass filters are up to date and don't cause a jump
   updateJoints();
 
-  // Calculate and publish worst stop time for collision checker
-  if (parameters_->check_collisions && parameters_->collision_check_type == "stop_distance")
-    calculateWorstCaseStopTime();
-
   // Update from latest state
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 
@@ -881,60 +877,6 @@ void ServoCalcs::updateJoints()
 
   // Cache the original joints in case they need to be reset
   original_joint_state_ = internal_joint_state_;
-}
-
-// Calculate worst case joint stop time, for collision checking
-void ServoCalcs::calculateWorstCaseStopTime()
-{
-  std::string joint_name = "";
-  moveit::core::JointModel::Bounds kinematic_bounds;
-  double accel_limit = 0;
-  double joint_velocity = 0;
-  double worst_case_stop_time = 0;
-  for (size_t jt_state_idx = 0; jt_state_idx < internal_joint_state_.velocity.size(); ++jt_state_idx)
-  {
-    joint_name = internal_joint_state_.name[jt_state_idx];
-
-    // Get acceleration limit for this joint
-    for (auto joint_model : joint_model_group_->getActiveJointModels())
-    {
-      if (joint_model->getName() == joint_name)
-      {
-        kinematic_bounds = joint_model->getVariableBounds();
-        // Some joints do not have acceleration limits
-        if (kinematic_bounds[0].acceleration_bounded_)
-        {
-          // Be conservative when calculating overall acceleration limit from min and max limits
-          accel_limit =
-              std::min(fabs(kinematic_bounds[0].min_acceleration_), fabs(kinematic_bounds[0].max_acceleration_));
-        }
-        else
-        {
-          rclcpp::Clock& clock = *node_->get_clock();
-          RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                       "An acceleration limit is not defined for this joint; minimum stop distance "
-                                       "should not be used for collision checking");
-
-          // TODO(adamp): figure out what to do here. We definitely don't want to allow 'stop_distance' collision
-          // checking with no acceleration limits defined.
-        }
-        break;
-      }
-    }
-
-    // Get the current joint velocity
-    joint_velocity = internal_joint_state_.velocity[jt_state_idx];
-
-    // Calculate worst case stop time
-    worst_case_stop_time = std::max(worst_case_stop_time, fabs(joint_velocity / accel_limit));
-  }
-
-  // publish message
-  {
-    auto msg = std::make_unique<std_msgs::msg::Float64>();
-    msg->data = worst_case_stop_time;
-    worst_case_stop_time_pub_->publish(std::move(msg));
-  }
 }
 
 bool ServoCalcs::checkValidCommand(const control_msgs::msg::JointJog& cmd)
