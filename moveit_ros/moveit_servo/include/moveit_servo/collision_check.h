@@ -52,12 +52,6 @@
 
 namespace moveit_servo
 {
-enum CollisionCheckType
-{
-  K_THRESHOLD_DISTANCE = 1,
-  K_STOP_DISTANCE = 2
-};
-
 class CollisionCheck
 {
 public:
@@ -109,7 +103,6 @@ private:
   // Scale robot velocity according to collision proximity and user-defined thresholds.
   // I scaled exponentially (cubic power) so velocity drops off quickly after the threshold.
   // Proximity decreasing --> decelerate
-  CollisionCheckType collision_check_type_;
   double velocity_scale_ = 1;
   double self_collision_distance_ = 0;
   double scene_collision_distance_ = 0;

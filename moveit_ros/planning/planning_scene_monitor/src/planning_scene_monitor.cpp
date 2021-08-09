@@ -1022,7 +1022,7 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
   while (last_robot_motion_time_ < t &&  // Wait until the state update actually reaches the scene.
          timeout > std::chrono::seconds())
   {
-    RCLCPP_DEBUG(LOGGER, "last robot motion: %i ago", (t - last_robot_motion_time_).seconds());
+    RCLCPP_DEBUG(LOGGER, "last robot motion: %f ago", (t - last_robot_motion_time_).seconds());
     new_scene_update_condition_.wait_for(lock, boost::chrono::nanoseconds((int)timeout.count()));
     timeout -= std::chrono::system_clock::now() - start;  // compute remaining wait_time
   }
@@ -1031,7 +1031,7 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
   if (!success && prev_robot_motion_time != last_robot_motion_time_)
     RCLCPP_WARN(LOGGER, "Maybe failed to update robot state, time diff: %.3fs", (t - last_robot_motion_time_).seconds());
 
-  RCLCPP_DEBUG(LOGGER, "sync done: robot motion: %i scene update: %i", (t - last_robot_motion_time_).seconds(),
+  RCLCPP_DEBUG(LOGGER, "sync done: robot motion: %f scene update: %f", (t - last_robot_motion_time_).seconds(),
                (t - last_update_time_).seconds());
   return success;
 }

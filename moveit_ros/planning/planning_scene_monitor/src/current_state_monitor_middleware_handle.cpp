@@ -34,9 +34,12 @@
 
 /* Author: Tyler Weaver */
 
-#include <moveit/planning_scene_monitor/current_state_monitor_middleware_handle.hpp>
-#include <rclcpp/rclcpp.hpp>
+#include <chrono>
 #include <string>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include <moveit/planning_scene_monitor/current_state_monitor_middleware_handle.hpp>
 
 namespace planning_scene_monitor
 {
@@ -77,6 +80,11 @@ std::string CurrentStateMonitorMiddlewareHandle::getJointStateTopicName() const
   {
     return "";
   }
+}
+
+bool CurrentStateMonitorMiddlewareHandle::sleepFor(const std::chrono::nanoseconds& nanoseconds) const
+{
+  return rclcpp::sleep_for(nanoseconds);
 }
 
 }  // namespace planning_scene_monitor
