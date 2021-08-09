@@ -46,11 +46,14 @@
 
 namespace trajectory_processing
 {
+namespace
+{
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit_trajectory_processing.time_optimal_trajectory_generation");
-
-constexpr double DEFAULT_TIMESTEP = 0.001;
+constexpr double DEFAULT_TIMESTEP = 1e-3;
 constexpr double EPS = 1e-6;
+}  // namespace
+
 class LinearPathSegment : public PathSegment
 {
 public:
