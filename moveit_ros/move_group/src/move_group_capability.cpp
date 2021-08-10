@@ -37,7 +37,7 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/move_group/move_group_capability.h>
 #include <moveit/robot_state/conversions.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include <sstream>
 #include <string>

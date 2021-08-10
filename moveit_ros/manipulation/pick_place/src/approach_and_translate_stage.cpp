@@ -38,7 +38,7 @@
 #include <moveit/pick_place/approach_and_translate_stage.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/robot_state/cartesian_interpolator.h>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <ros/console.h>
 
 namespace pick_place

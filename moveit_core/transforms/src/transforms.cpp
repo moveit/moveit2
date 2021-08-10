@@ -36,7 +36,7 @@
 
 #include <moveit/transforms/transforms.h>
 #include <geometric_shapes/check_isometry.h>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include "rclcpp/rclcpp.hpp"
 

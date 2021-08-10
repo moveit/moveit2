@@ -43,7 +43,7 @@
 
 #include <std_srvs/srv/empty.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
@@ -415,7 +415,7 @@ void MotionPlanningFrame::populatePlannersList(const std::vector<moveit_msgs::ms
 void MotionPlanningFrame::populatePlannerDescription(const moveit_msgs::msg::PlannerInterfaceDescription& desc)
 {
   std::string group = planning_display_->getCurrentPlanningGroup();
-  RCLCPP_INFO(LOGGER, "POPULATING PLANNERS %d grp: %s", desc.planner_ids.size(), group.c_str());
+  RCLCPP_INFO(LOGGER, "POPULATING PLANNERS %zu grp: %s", desc.planner_ids.size(), group.c_str());
   ui_->planning_algorithm_combo_box->clear();
 
   // set the label for the planning library

@@ -47,7 +47,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 // Eigen
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <Eigen/Geometry>
 
 namespace moveit

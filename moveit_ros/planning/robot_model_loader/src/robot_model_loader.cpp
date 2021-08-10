@@ -134,7 +134,7 @@ void RobotModelLoader::configure(const Options& opt)
           const auto max_pos_name = prefix + "max_position";
           if (!node_->has_parameter(max_pos_name))
           {
-            node_->declare_parameter(max_pos_name);
+            node_->declare_parameter<double>(max_pos_name);
           }
           double max_position;
           if (node_->get_parameter(max_pos_name, max_position))
@@ -149,7 +149,7 @@ void RobotModelLoader::configure(const Options& opt)
           const auto min_pos_name = prefix + "min_position";
           if (!node_->has_parameter(min_pos_name))
           {
-            node_->declare_parameter(min_pos_name);
+            node_->declare_parameter<double>(min_pos_name);
           }
           double min_position;
           if (node_->get_parameter(min_pos_name, min_position))
@@ -165,7 +165,7 @@ void RobotModelLoader::configure(const Options& opt)
           param_name = prefix + "has_velocity_limits";
           if (!node_->has_parameter(param_name))
           {
-            node_->declare_parameter(param_name);
+            node_->declare_parameter<bool>(param_name);
           }
           bool has_vel_limits = false;
           if (node_->get_parameter(param_name, has_vel_limits))
@@ -174,7 +174,7 @@ void RobotModelLoader::configure(const Options& opt)
           param_name = prefix + "has_acceleration_limits";
           if (!node_->has_parameter(param_name))
           {
-            node_->declare_parameter(param_name);
+            node_->declare_parameter<bool>(param_name);
           }
           bool has_acc_limits = false;
           if (node_->get_parameter(param_name, has_acc_limits))
@@ -185,7 +185,7 @@ void RobotModelLoader::configure(const Options& opt)
             param_name = prefix + "max_velocity";
             if (!node_->has_parameter(param_name))
             {
-              node_->declare_parameter(param_name);
+              node_->declare_parameter<double>(param_name);
             }
 
             if (!node_->get_parameter(param_name, joint_limit[joint_id].max_velocity))
@@ -200,7 +200,7 @@ void RobotModelLoader::configure(const Options& opt)
             param_name = prefix + "max_acceleration";
             if (!node_->has_parameter(param_name))
             {
-              node_->declare_parameter(param_name);
+              node_->declare_parameter<double>(param_name);
             }
 
             if (!node_->get_parameter(param_name, joint_limit[joint_id].max_acceleration))

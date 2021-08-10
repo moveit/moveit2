@@ -51,7 +51,7 @@
 #include <boost/progress.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 

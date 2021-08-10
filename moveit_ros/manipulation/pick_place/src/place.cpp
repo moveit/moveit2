@@ -40,7 +40,7 @@
 #include <moveit/pick_place/plan_stage.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/utils/message_checks.h>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <ros/console.h>
 
 namespace pick_place

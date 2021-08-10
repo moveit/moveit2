@@ -37,7 +37,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include <moveit/collision_distance_field/collision_common_distance_field.h>
 #include <boost/thread/mutex.hpp>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <memory>
 
 namespace collision_detection

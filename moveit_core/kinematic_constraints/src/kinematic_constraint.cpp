@@ -41,7 +41,7 @@
 #include <moveit/collision_detection_fcl/collision_env_fcl.h>
 #include <geometric_shapes/check_isometry.h>
 #include <boost/math/constants/constants.hpp>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <boost/bind.hpp>
 #include <limits>
 #include <memory>
@@ -951,7 +951,7 @@ void VisibilityConstraint::getMarkers(const moveit::core::RobotState& state,
   mk.pose.orientation.y = 0;
   mk.pose.orientation.z = 0;
   mk.pose.orientation.w = 1;
-  mk.lifetime = rclcpp::Duration(60);
+  mk.lifetime = rclcpp::Duration(std::chrono::seconds(60));
   // this scale necessary to make results look reasonable
   mk.scale.x = .01;
   mk.color.a = 1.0;

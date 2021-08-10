@@ -41,7 +41,7 @@
 #include <moveit/robot_state/conversions.h>
 #include <object_recognition_msgs/action/object_recognition.hpp>
 
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
 
@@ -83,7 +83,7 @@ void MotionPlanningFrame::processDetectedObjects()
   double max_z = ui_->roi_center_z->value() + ui_->roi_size_z->value() / 2.0;
 
   rclcpp::Time start_time = rclcpp::Clock().now();
-  while (object_ids.empty() && (rclcpp::Clock().now() - start_time) <= rclcpp::Duration(3.0))
+  while (object_ids.empty() && (rclcpp::Clock().now() - start_time) <= rclcpp::Duration(std::chrono::seconds(3)))
   {
     // collect all objects in region of interest
     {

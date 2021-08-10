@@ -42,7 +42,7 @@
 // ROS
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 
 // MoveIt
 #include <moveit/move_group_interface/move_group_interface.h>

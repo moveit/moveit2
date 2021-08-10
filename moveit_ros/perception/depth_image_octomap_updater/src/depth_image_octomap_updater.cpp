@@ -36,7 +36,7 @@
 
 #include <moveit/depth_image_octomap_updater/depth_image_octomap_updater.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2/LinearMath/Vector3.h>
 #include <tf2/LinearMath/Transform.h>
 #include <geometric_shapes/shape_operations.h>
@@ -274,7 +274,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
         catch (tf2::TransformException& ex)
         {
           std::chrono::duration<double, std::nano> tmp_duration(TEST_DT);
-          static const rclcpp::Duration D(tmp_duration.count());
+          static const rclcpp::Duration D(tmp_duration);
           err = ex.what();
           std::this_thread::sleep_for(D.to_chrono<std::chrono::seconds>());
         }

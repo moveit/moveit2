@@ -49,7 +49,7 @@ int main(int argc, char** argv)
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node);
   double radius = 0.02;
-  double lifetime = 600.0;
+  int lifetime = 600;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(node->get_clock());
   std::shared_ptr<tf2_ros::TransformListener> tf_listener =
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
     mk.color.g = 0.5f;
     mk.color.b = 1.0f;
     mk.color.a = 0.3f;
-    mk.lifetime = rclcpp::Duration(lifetime);
+    mk.lifetime = rclcpp::Duration(std::chrono::seconds(lifetime));
     visualization_msgs::msg::MarkerArray arr;
     arr.markers.push_back(mk);
     pub_markers->publish(arr);
@@ -136,7 +136,7 @@ int main(int argc, char** argv)
             mk.pose.orientation.w = 1.0;
             mk.scale.x = mk.scale.y = mk.scale.z = radius;
             mk.color = color;
-            mk.lifetime = rclcpp::Duration(lifetime);
+            mk.lifetime = rclcpp::Duration(std::chrono::seconds(lifetime));
             arr.markers.push_back(mk);
             pub_markers->publish(arr);
           }

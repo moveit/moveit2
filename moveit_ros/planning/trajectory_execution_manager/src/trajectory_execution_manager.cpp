@@ -37,7 +37,7 @@
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <moveit/robot_state/robot_state.h>
 #include <geometric_shapes/check_isometry.h>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 
 namespace trajectory_execution_manager
 {
@@ -45,7 +45,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.trajectory_e
 
 const std::string TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC = "trajectory_execution_event";
 
-static const rclcpp::Duration DEFAULT_CONTROLLER_INFORMATION_VALIDITY_AGE(1.0);
+static const rclcpp::Duration DEFAULT_CONTROLLER_INFORMATION_VALIDITY_AGE(std::chrono::seconds(1));
 static const double DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN = 0.5;  // allow 0.5s more than the expected execution time
                                                                     // before triggering a trajectory cancel (applied
                                                                     // after scaling)
@@ -1431,11 +1431,11 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
 
     // compute the expected duration of the trajectory and find the part of the trajectory that takes longest to execute
     rclcpp::Time current_time = node_->now();
-    rclcpp::Duration expected_trajectory_duration(0.0);
+    rclcpp::Duration expected_trajectory_duration(std::chrono::seconds(0));
     int longest_part = -1;
     for (std::size_t i = 0; i < context.trajectory_parts_.size(); ++i)
     {
-      rclcpp::Duration d(0.0);
+      rclcpp::Duration d(std::chrono::seconds(0));
       if (!(context.trajectory_parts_[i].joint_trajectory.points.empty() &&
             context.trajectory_parts_[i].multi_dof_joint_trajectory.points.empty()))
       {
@@ -1446,10 +1446,10 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
                               current_time);
         d = d +
             std::max(context.trajectory_parts_[i].joint_trajectory.points.empty() ?
-                         rclcpp::Duration(0.0) :
+                         rclcpp::Duration(std::chrono::seconds(0)) :
                          rclcpp::Duration(context.trajectory_parts_[i].joint_trajectory.points.back().time_from_start),
                      context.trajectory_parts_[i].multi_dof_joint_trajectory.points.empty() ?
-                         rclcpp::Duration(0.0) :
+                         rclcpp::Duration(std::chrono::seconds(0)) :
                          rclcpp::Duration(
                              context.trajectory_parts_[i].multi_dof_joint_trajectory.points.back().time_from_start));
 
@@ -1489,7 +1489,7 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
       if (context.trajectory_parts_[longest_part].joint_trajectory.points.size() >=
           context.trajectory_parts_[longest_part].multi_dof_joint_trajectory.points.size())
       {
-        rclcpp::Duration d(0.0);
+        rclcpp::Duration d(std::chrono::seconds(0));
         if (rclcpp::Time(context.trajectory_parts_[longest_part].joint_trajectory.header.stamp) > current_time)
           d = rclcpp::Time(context.trajectory_parts_[longest_part].joint_trajectory.header.stamp) - current_time;
         for (trajectory_msgs::msg::JointTrajectoryPoint& point :
@@ -1498,7 +1498,7 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
       }
       else
       {
-        rclcpp::Duration d(0.0);
+        rclcpp::Duration d(std::chrono::seconds(0));
         if (rclcpp::Time(context.trajectory_parts_[longest_part].multi_dof_joint_trajectory.header.stamp) > current_time)
           d = rclcpp::Time(context.trajectory_parts_[longest_part].multi_dof_joint_trajectory.header.stamp) -
               current_time;

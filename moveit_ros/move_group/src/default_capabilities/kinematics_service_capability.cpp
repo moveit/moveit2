@@ -38,7 +38,7 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/utils/message_checks.h>
-#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/move_group/capability_names.h>
 
 namespace move_group
