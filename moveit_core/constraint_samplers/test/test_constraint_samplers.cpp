@@ -38,11 +38,11 @@
 
 #include <boost/bind.hpp>
 
-#include <geometric_shapes/shape_operations.h>
-
-#include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
+
 #include <visualization_msgs/msg/marker_array.hpp>
+
+#include <geometric_shapes/shape_operations.h>
 
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
 #include <moveit/constraint_samplers/constraint_sampler_tools.h>
@@ -54,6 +54,8 @@
 #include <moveit/utils/robot_model_test_utils.h>
 
 #include "pr2_arm_kinematics_plugin.h"
+
+#include "gtest/gtest.h"
 
 class LoadPlanningModelsPr2 : public testing::Test
 {

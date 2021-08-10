@@ -40,10 +40,11 @@
 
 #include <actionlib/server/simple_action_server.h>
 
-#include <moveit/move_group/move_group_capability.h>
-#include <moveit/pick_place/pick_place.h>
 #include <moveit_msgs/PickupAction.h>
 #include <moveit_msgs/PlaceAction.h>
+
+#include <moveit/move_group/move_group_capability.h>
+#include <moveit/pick_place/pick_place.h>
 
 namespace move_group
 {

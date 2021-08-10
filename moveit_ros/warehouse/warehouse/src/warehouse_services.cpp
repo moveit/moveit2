@@ -36,13 +36,14 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit/warehouse/state_storage.h>
 #include <moveit_msgs/srv/check_if_robot_state_exists_in_warehouse.hpp>
 #include <moveit_msgs/srv/delete_robot_state_from_warehouse.hpp>
 #include <moveit_msgs/srv/get_robot_state_from_warehouse.hpp>
 #include <moveit_msgs/srv/list_robot_states_in_warehouse.hpp>
 #include <moveit_msgs/srv/rename_robot_state_in_warehouse.hpp>
 #include <moveit_msgs/srv/save_robot_state_to_warehouse.hpp>
+
+#include <moveit/warehouse/state_storage.h>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 

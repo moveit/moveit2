@@ -50,7 +50,6 @@
  *
  **/
 
-#include <gtest/gtest.h>
 #include <tf2_eigen/tf2_eigen.h>
 
 #include <moveit/constraint_samplers/constraint_sampler_manager.h>
@@ -62,6 +61,8 @@
 #include <moveit/robot_state/conversions.h>
 
 #include "load_test_robot.h"
+
+#include "gtest/gtest.h"
 
 // static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_planning_context_manager");
 

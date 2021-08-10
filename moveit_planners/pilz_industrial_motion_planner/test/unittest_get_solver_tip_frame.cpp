@@ -38,11 +38,12 @@
 #include <vector>
 
 #include <gmock/gmock.h>
-#include <gtest/gtest.h>
 
 #include <moveit/robot_model/joint_model_group.h>
 
 #include "pilz_industrial_motion_planner/tip_frame_getter.h"
+
+#include "gtest/gtest.h"
 
 namespace pilz_industrial_motion_planner
 {

@@ -39,10 +39,10 @@
 #include <geometric_shapes/shape_operations.h>
 #include <geometric_shapes/shapes.h>
 
-#include <gtest/gtest.h>
-
 #include <moveit/mesh_filter/mesh_filter.h>
 #include <moveit/mesh_filter/stereo_camera_model.h>
+
+#include "gtest/gtest.h"
 
 using namespace mesh_filter;
 using namespace Eigen;

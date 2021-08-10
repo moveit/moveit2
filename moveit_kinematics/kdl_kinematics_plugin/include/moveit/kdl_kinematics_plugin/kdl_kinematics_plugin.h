@@ -37,13 +37,12 @@
 #pragma once
 
 // ROS
-#include <random_numbers/random_numbers.h>
-
 #include <rclcpp/rclcpp.hpp>
+
+#include <random_numbers/random_numbers.h>
 
 // ROS msgs
 #include <geometry_msgs/msg/pose_stamped.hpp>
-
 #include <moveit_msgs/msg/kinematic_solver_info.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit_msgs/srv/get_position_fk.hpp>

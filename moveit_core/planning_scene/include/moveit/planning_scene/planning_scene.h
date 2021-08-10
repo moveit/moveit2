@@ -42,8 +42,13 @@
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 
-#include <octomap_msgs/msg/octomap_with_pose.hpp>
 #include <rclcpp/rclcpp.hpp>
+
+#include <moveit_msgs/msg/constraints.hpp>
+#include <moveit_msgs/msg/planning_scene.hpp>
+#include <moveit_msgs/msg/planning_scene_components.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <octomap_msgs/msg/octomap_with_pose.hpp>
 
 #include <moveit/collision_detection/collision_detector_allocator.h>
 #include <moveit/collision_detection/collision_env.h>
@@ -55,10 +60,6 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/transforms/transforms.h>
-#include <moveit_msgs/msg/constraints.hpp>
-#include <moveit_msgs/msg/planning_scene.hpp>
-#include <moveit_msgs/msg/planning_scene_components.hpp>
-#include <moveit_msgs/msg/robot_trajectory.hpp>
 
 #include "moveit_planning_scene_export.h"
 

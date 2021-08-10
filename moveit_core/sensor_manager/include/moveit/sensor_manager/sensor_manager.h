@@ -40,9 +40,9 @@
 #include <vector>
 
 #include <geometry_msgs/msg/point_stamped.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 
 #include <moveit/macros/class_forward.h>
-#include <moveit_msgs/msg/robot_trajectory.hpp>
 
 /// Namespace for the base class of a MoveIt sensor manager
 namespace moveit_sensor_manager

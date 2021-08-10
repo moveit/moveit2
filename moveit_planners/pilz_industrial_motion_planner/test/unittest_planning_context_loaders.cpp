@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 // Boost includes
 #include <boost/scoped_ptr.hpp>

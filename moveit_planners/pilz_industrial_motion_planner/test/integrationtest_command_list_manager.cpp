@@ -36,7 +36,6 @@
 #include <memory>
 #include <string>
 
-#include <gtest/gtest.h>
 #include <pilz_industrial_motion_planner_testutils/gripper.h>
 #include <pilz_industrial_motion_planner_testutils/lin.h>
 #include <pilz_industrial_motion_planner_testutils/sequence.h>
@@ -45,15 +44,18 @@
 #include <ros/time.h>
 #include <tf2_eigen/tf2_eigen.h>
 
+#include <moveit_msgs/DisplayTrajectory.h>
+#include <moveit_msgs/MotionPlanResponse.h>
+
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit_msgs/DisplayTrajectory.h>
-#include <moveit_msgs/MotionPlanResponse.h>
 
 #include "pilz_industrial_motion_planner/command_list_manager.h"
 #include "pilz_industrial_motion_planner/tip_frame_getter.h"
 #include "test_utils.h"
+
+#include "gtest/gtest.h"
 
 const std::string ROBOT_DESCRIPTION_STR{ "robot_description" };
 const std::string EMPTY_VALUE{ "" };

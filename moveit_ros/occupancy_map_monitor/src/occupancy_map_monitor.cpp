@@ -38,10 +38,11 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit/occupancy_map_monitor/occupancy_map.h>
-#include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 #include <moveit_msgs/srv/load_map.hpp>
 #include <moveit_msgs/srv/save_map.hpp>
+
+#include <moveit/occupancy_map_monitor/occupancy_map.h>
+#include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 
 namespace occupancy_map_monitor
 {

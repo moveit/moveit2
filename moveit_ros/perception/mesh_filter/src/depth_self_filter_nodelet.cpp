@@ -37,6 +37,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/subscriber_filter.h>
 #include <ros/ros.h>
+
 #include <sensor_msgs/image_encodings.h>
 
 #include <moveit/mesh_filter/depth_self_filter_nodelet.h>

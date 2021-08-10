@@ -42,6 +42,7 @@
 #include <chomp_motion_planner/chomp_optimizer.h>
 #include <chomp_motion_planner/chomp_utils.h>
 #include <ros/ros.h>
+
 #include <visualization_msgs/MarkerArray.h>
 
 #include <moveit/planning_scene/planning_scene.h>

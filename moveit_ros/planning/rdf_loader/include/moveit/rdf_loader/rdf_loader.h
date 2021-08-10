@@ -36,10 +36,10 @@
 
 #pragma once
 
-#include <srdfdom/model.h>
-
 #include <rclcpp/rclcpp.hpp>
 #include <urdf/model.h>
+
+#include <srdfdom/model.h>
 
 #include <moveit/macros/class_forward.h>
 

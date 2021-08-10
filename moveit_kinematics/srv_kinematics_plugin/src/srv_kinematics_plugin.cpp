@@ -41,9 +41,10 @@
 
 #include <class_loader/class_loader.hpp>
 
+#include <moveit_msgs/srv/get_position_ik.hpp>
+
 #include <moveit/robot_state/conversions.h>
 #include <moveit/srv_kinematics_plugin/srv_kinematics_plugin.h>
-#include <moveit_msgs/srv/get_position_ik.hpp>
 
 // register SRVKinematics as a KinematicsBase implementation
 CLASS_LOADER_REGISTER_CLASS(srv_kinematics_plugin::SrvKinematicsPlugin, kinematics::KinematicsBase)

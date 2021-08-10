@@ -34,9 +34,10 @@
 
 #pragma once
 
+#include <ros/duration.h>
+
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Twist.h>
-#include <ros/duration.h>
 
 namespace pilz_industrial_motion_planner
 {

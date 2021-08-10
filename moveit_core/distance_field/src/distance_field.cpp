@@ -34,12 +34,12 @@
 
 /* Author: Mrinal Kalakrishnan, Ken Anderson, E. Gil Jones */
 
-#include <geometric_shapes/body_operations.h>
-
 #include <octomap/OcTree.h>
 #include <octomap/octomap.h>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_eigen/tf2_eigen.h>
+
+#include <geometric_shapes/body_operations.h>
 
 #include <moveit/distance_field/distance_field.h>
 #include <moveit/distance_field/find_internal_points.h>

@@ -42,12 +42,13 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
-#include <gtest/gtest.h>
 #include <ros/package.h>
 #include <urdf_parser/urdf_parser.h>
 
 #include <moveit/setup_assistant/tools/moveit_config_data.h>
 #include <moveit/utils/robot_model_test_utils.h>
+
+#include "gtest/gtest.h"
 
 // This tests writing/parsing of ros_controller.yaml
 class MoveItConfigData : public testing::Test

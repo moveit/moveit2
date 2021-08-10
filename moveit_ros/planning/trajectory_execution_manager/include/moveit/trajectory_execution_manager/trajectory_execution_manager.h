@@ -43,6 +43,8 @@
 
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
+
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/string.hpp>
 
@@ -50,7 +52,6 @@
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 #include <moveit/robot_model/robot_model.h>
-#include <moveit_msgs/msg/robot_trajectory.hpp>
 
 #include "moveit_trajectory_execution_manager_export.h"
 

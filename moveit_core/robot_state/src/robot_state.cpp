@@ -37,11 +37,11 @@
 
 #include <boost/bind.hpp>
 
-#include <geometric_shapes/check_isometry.h>
-#include <geometric_shapes/shape_operations.h>
-
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_eigen/tf2_eigen.h>
+
+#include <geometric_shapes/check_isometry.h>
+#include <geometric_shapes/shape_operations.h>
 
 #include <moveit/backtrace/backtrace.h>
 #include <moveit/macros/console_colors.h>

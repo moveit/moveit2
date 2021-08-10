@@ -46,7 +46,7 @@
 #include <ros/ros.h>
 
 // The Testing Framework and Utils
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 // MoveIt
 #include <moveit/move_group_interface/move_group_interface.h>

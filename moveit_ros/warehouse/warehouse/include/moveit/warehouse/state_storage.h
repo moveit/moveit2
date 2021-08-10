@@ -36,9 +36,10 @@
 
 #pragma once
 
+#include <moveit_msgs/msg/robot_state.hpp>
+
 #include <moveit/macros/class_forward.h>
 #include <moveit/warehouse/moveit_message_storage.h>
-#include <moveit_msgs/msg/robot_state.hpp>
 
 #include "moveit_warehouse_export.h"
 

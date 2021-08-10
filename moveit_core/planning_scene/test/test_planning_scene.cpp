@@ -40,13 +40,14 @@
 
 #include <boost/filesystem/path.hpp>
 
-#include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
 
 #include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/utils/message_checks.h>
 #include <moveit/utils/robot_model_test_utils.h>
+
+#include "gtest/gtest.h"
 
 TEST(PlanningScene, LoadRestore)
 {

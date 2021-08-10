@@ -40,11 +40,12 @@
 
 #include <boost/function.hpp>
 
-#include <geometry_msgs/msg/pose.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit/macros/class_forward.h>
+#include <geometry_msgs/msg/pose.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
+
+#include <moveit/macros/class_forward.h>
 
 #include "moveit_kinematics_base_export.h"
 

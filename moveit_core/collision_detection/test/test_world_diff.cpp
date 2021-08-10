@@ -36,9 +36,9 @@
 
 #include <geometric_shapes/shapes.h>
 
-#include <gtest/gtest.h>
-
 #include <moveit/collision_detection/world_diff.h>
+
+#include "gtest/gtest.h"
 
 TEST(WorldDiff, TrackChanges)
 {

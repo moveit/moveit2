@@ -40,6 +40,7 @@
 #include <string>
 
 #include <rclcpp/rclcpp.hpp>
+
 #include <sensor_msgs/msg/joint_state.hpp>
 
 #include <moveit/planning_scene_monitor/current_state_monitor.h>

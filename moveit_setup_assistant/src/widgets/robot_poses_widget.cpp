@@ -54,9 +54,10 @@
 #include <QStackedWidget>
 #include <QTableWidget>
 
+#include <moveit_msgs/msg/display_robot_state.hpp>
+
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/msg/display_robot_state.hpp>
 
 namespace moveit_setup_assistant
 {

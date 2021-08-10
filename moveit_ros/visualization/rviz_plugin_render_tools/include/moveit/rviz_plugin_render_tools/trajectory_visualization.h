@@ -48,12 +48,13 @@
 #ifndef Q_MOC_RUN
 #include <rclcpp/rclcpp.hpp>
 
+#include <moveit_msgs/msg/display_trajectory.hpp>
+
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
 #include <moveit/rviz_plugin_render_tools/trajectory_panel.h>
-#include <moveit_msgs/msg/display_trajectory.hpp>
 #endif
 
 namespace rviz

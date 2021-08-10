@@ -43,14 +43,15 @@
 
 #include <memory>
 
-#include <geometry_msgs/msg/pose.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit/kinematics_base/kinematics_base.h>
-#include <moveit/robot_state/robot_state.h>
+#include <geometry_msgs/msg/pose.hpp>
 #include <moveit_msgs/msg/kinematic_solver_info.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit_msgs/srv/get_position_ik.hpp>
+
+#include <moveit/kinematics_base/kinematics_base.h>
+#include <moveit/robot_state/robot_state.h>
 
 namespace srv_kinematics_plugin
 {

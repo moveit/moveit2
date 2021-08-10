@@ -42,9 +42,9 @@
 
 #include <boost/math/constants/constants.hpp>
 
-#include <geometric_shapes/shape_operations.h>
-
 #include <rclcpp/rclcpp.hpp>
+
+#include <geometric_shapes/shape_operations.h>
 
 #include <moveit/profiler/profiler.h>
 #include <moveit/robot_model/order_robot_model_items.hpp>

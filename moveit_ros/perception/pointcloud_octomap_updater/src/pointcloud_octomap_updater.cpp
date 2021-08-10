@@ -39,12 +39,13 @@
 
 #include <boost/bind.hpp>
 
-#include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2/LinearMath/Vector3.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/create_timer_interface.h>
 #include <tf2_ros/create_timer_ros.h>
+
+#include <sensor_msgs/point_cloud2_iterator.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 #include <moveit/pointcloud_octomap_updater/pointcloud_octomap_updater.h>

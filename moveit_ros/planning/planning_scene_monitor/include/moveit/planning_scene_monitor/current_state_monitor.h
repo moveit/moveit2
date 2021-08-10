@@ -45,8 +45,9 @@
 #include <boost/thread/mutex.hpp>
 
 #include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/joint_state.hpp>
 #include <tf2_ros/buffer.h>
+
+#include <sensor_msgs/msg/joint_state.hpp>
 
 #include <moveit/robot_state/robot_state.h>
 

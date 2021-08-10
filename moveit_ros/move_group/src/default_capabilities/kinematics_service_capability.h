@@ -36,9 +36,10 @@
 
 #pragma once
 
-#include <moveit/move_group/move_group_capability.h>
 #include <moveit_msgs/srv/get_position_fk.hpp>
 #include <moveit_msgs/srv/get_position_ik.hpp>
+
+#include <moveit/move_group/move_group_capability.h>
 
 namespace move_group
 {

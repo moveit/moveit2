@@ -37,13 +37,14 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/robot_state/robot_state.h>
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/grasp.hpp>
 #include <moveit_msgs/msg/planner_interface_description.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
+
+#include <moveit/macros/class_forward.h>
+#include <moveit/robot_state/robot_state.h>
 // #include <moveit_msgs/msg/place_location.hpp>
 
 // #include <moveit_msgs/action/pickup.hpp>
@@ -51,10 +52,10 @@
 #include <memory>
 #include <utility>
 
-#include <geometry_msgs/msg/pose_stamped.h>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <tf2_ros/buffer.h>
 
+#include <geometry_msgs/msg/pose_stamped.h>
 #include <moveit_msgs/action/execute_trajectory.hpp>
 #include <moveit_msgs/action/move_group.hpp>
 #include <moveit_msgs/msg/motion_plan_request.hpp>

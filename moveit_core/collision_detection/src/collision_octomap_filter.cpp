@@ -36,12 +36,12 @@
 
 #include <memory>
 
-#include <geometric_shapes/shapes.h>
-
 #include <octomap/math/Utils.h>
 #include <octomap/math/Vector3.h>
 #include <octomap/octomap.h>
 #include <rclcpp/rclcpp.hpp>
+
+#include <geometric_shapes/shapes.h>
 
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit/collision_detection/collision_octomap_filter.h>

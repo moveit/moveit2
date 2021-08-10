@@ -41,9 +41,9 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
-
 #include <moveit_servo/servo_calcs.h>
+
+#include "gtest/gtest.h"
 
 const std::vector<std::string> PANDA_JOINT_NAMES{ "panda_finger_joint1", "panda_finger_joint2", "panda_joint1",
                                                   "panda_joint2",        "panda_joint3",        "panda_joint4",

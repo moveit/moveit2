@@ -6,18 +6,22 @@ MaxEmptyLinesToKeep: 1
 SortIncludes: true
 IncludeBlocks: Regroup
 IncludeCategories:
+- Regex: '^\"(gmock|gtest)'
+  Priority: 8
 - Regex: '^\"'
-  Priority: 5000
+  Priority: 7
+- Regex: '^\<.*msgs'
+  Priority: 4
 - Regex: '^\<moveit'
-  Priority: 4000
+  Priority: 6
 - Regex: '^\<(geometric_shapes|srdfdom|warehouse_ros|random_numbers)'
-  Priority: 3000
+  Priority: 5
 - Regex: '^\<(boost|Eigen|fcl|ompl)'
-  Priority: 2000
-- Regex: '^<.*/.*'
-  Priority: 3500
+  Priority: 2
 - Regex: '^<[^/]*>'
-  Priority: 1000
+  Priority: 1
+- Regex: '^<.*/.*'
+  Priority: 3
 
 Standard:        Auto
 IndentWidth:     2

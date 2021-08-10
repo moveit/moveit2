@@ -39,10 +39,10 @@
 
 #include <Eigen/Eigen>
 
+#include <sensor_msgs/image_encodings.h>
+
 #include <geometric_shapes/shape_operations.h>
 #include <geometric_shapes/shapes.h>
-
-#include <sensor_msgs/image_encodings.h>
 
 #include <moveit/mesh_filter/gl_mesh.h>
 #include <moveit/mesh_filter/mesh_filter.h>

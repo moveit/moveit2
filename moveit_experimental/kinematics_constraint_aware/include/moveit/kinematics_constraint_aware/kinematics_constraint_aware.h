@@ -42,7 +42,6 @@
 
 // ROS msgs
 #include <geometry_msgs/PoseStamped.h>
-
 #include <moveit_msgs/GetConstraintAwarePositionIK.h>
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>

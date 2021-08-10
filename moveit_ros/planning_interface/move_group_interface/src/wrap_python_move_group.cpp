@@ -42,8 +42,9 @@
 
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_ros/buffer.h>
+
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/py_bindings_tools/gil_releaser.h>

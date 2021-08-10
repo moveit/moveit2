@@ -39,6 +39,7 @@
 
 #include <boost/python.hpp>
 
+#include <moveit_msgs/msg/robot_state.hpp>
 #include <visualization_msgs/MarkerArray.h>
 
 #include <moveit/common_planning_interface_objects/common_objects.h>
@@ -47,7 +48,6 @@
 #include <moveit/py_bindings_tools/roscpp_initializer.h>
 #include <moveit/py_bindings_tools/serialize_msg.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/msg/robot_state.hpp>
 
 /** @cond IGNORE */
 

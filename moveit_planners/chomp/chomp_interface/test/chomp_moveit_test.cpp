@@ -34,11 +34,12 @@
 
 /// \author Bence Magyar
 
-#include <gtest/gtest.h>
 #include <ros/ros.h>
 
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
+
+#include "gtest/gtest.h"
 
 class CHOMPMoveitTest : public ::testing::Test
 {

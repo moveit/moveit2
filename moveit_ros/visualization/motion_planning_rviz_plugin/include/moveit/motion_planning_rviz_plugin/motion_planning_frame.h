@@ -50,14 +50,14 @@
 // #include <moveit/semantic_world/semantic_world.h>
 
 #include <interactive_markers/interactive_marker_server.hpp>
-#include <object_recognition_msgs/action/object_recognition.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <rviz_default_plugins/displays/interactive_markers/interactive_marker.hpp>
-#include <std_msgs/msg/bool.hpp>
-#include <std_msgs/msg/empty.hpp>
 #include <std_srvs/srv/empty.hpp>
 
 #include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <object_recognition_msgs/action/object_recognition.hpp>
+#include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/empty.hpp>
 #endif
 
 #include <map>

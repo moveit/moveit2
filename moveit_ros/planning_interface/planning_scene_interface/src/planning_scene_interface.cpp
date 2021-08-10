@@ -36,10 +36,11 @@
 
 #include <algorithm>
 
-#include <moveit/move_group/capability_names.h>
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <moveit_msgs/srv/apply_planning_scene.hpp>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
+
+#include <moveit/move_group/capability_names.h>
+#include <moveit/planning_scene_interface/planning_scene_interface.h>
 
 namespace moveit
 {

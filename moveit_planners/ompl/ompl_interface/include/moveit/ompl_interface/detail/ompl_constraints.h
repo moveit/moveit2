@@ -40,10 +40,11 @@
 
 #include <ompl/base/Constraint.h>
 
+#include <moveit_msgs/msg/constraints.hpp>
+
 #include <moveit/macros/class_forward.h>
 #include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
 #include <moveit/robot_model/robot_model.h>
-#include <moveit_msgs/msg/constraints.hpp>
 
 namespace ompl_interface
 {

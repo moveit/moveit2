@@ -38,12 +38,13 @@
 
 #include <boost/thread/mutex.hpp>
 
-#include <object_recognition_msgs/msg/table_array.hpp>
 #include <rclcpp/rclcpp.hpp>
+
+#include <moveit_msgs/msg/collision_object.hpp>
+#include <object_recognition_msgs/msg/table_array.hpp>
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_scene/planning_scene.h>
-#include <moveit_msgs/msg/collision_object.hpp>
 
 namespace shapes
 {

@@ -43,13 +43,14 @@
 #include <class_loader/class_loader.hpp>
 #include <ros/ros.h>
 
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+
 #include <moveit/collision_distance_field/collision_detector_allocator_hybrid.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit_msgs/msg/robot_trajectory.hpp>
 
 namespace chomp
 {

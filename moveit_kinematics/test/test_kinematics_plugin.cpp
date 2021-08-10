@@ -39,12 +39,15 @@
 
 #include <boost/bind.hpp>
 
-#include <gtest/gtest.h>
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_eigen/tf2_eigen.h>
 
+#include "gtest/gtest.h"
+
 // MoveIt
+#include <moveit_msgs/msg/display_trajectory.hpp>
+
 #include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <moveit/rdf_loader/rdf_loader.h>
@@ -53,7 +56,6 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/utils/robot_model_test_utils.h>
-#include <moveit_msgs/msg/display_trajectory.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_kinematics_plugin");
 const std::string ROBOT_DESCRIPTION_PARAM = "robot_description";

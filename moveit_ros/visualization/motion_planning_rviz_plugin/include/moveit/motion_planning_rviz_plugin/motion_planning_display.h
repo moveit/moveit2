@@ -44,6 +44,8 @@
 
 #ifndef Q_MOC_RUN
 #include <rclcpp/rclcpp.hpp>
+
+#include <moveit_msgs/msg/display_trajectory.hpp>
 #include <std_msgs/msg/string.hpp>
 
 #include <moveit/dynamics_solver/dynamics_solver.h>
@@ -52,7 +54,6 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_interaction/interaction_handler.h>
 #include <moveit/robot_interaction/robot_interaction.h>
-#include <moveit_msgs/msg/display_trajectory.hpp>
 #endif
 
 #include <memory>

@@ -38,10 +38,10 @@
 
 #include <utility>
 
-#include <srdfdom/srdf_writer.h>  // for writing srdf data
-
 #include <urdf/model.h>     // to share throughout app
 #include <yaml-cpp/yaml.h>  // outputing yaml config files
+
+#include <srdfdom/srdf_writer.h>  // for writing srdf data
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/planning_scene/planning_scene.h>                     // for getting kinematic model

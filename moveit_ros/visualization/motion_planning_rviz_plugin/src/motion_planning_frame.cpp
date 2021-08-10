@@ -40,12 +40,12 @@
 #include <QMessageBox>
 #include <QShortcut>
 
-#include <geometric_shapes/shape_operations.h>
-
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
 #include <std_srvs/srv/empty.hpp>
 #include <tf2_ros/buffer.h>
+
+#include <geometric_shapes/shape_operations.h>
 
 #include <moveit/common_planning_interface_objects/common_objects.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>

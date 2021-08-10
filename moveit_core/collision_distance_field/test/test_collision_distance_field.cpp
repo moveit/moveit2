@@ -39,10 +39,9 @@
 #include <fstream>
 #include <sstream>
 
-#include <geometric_shapes/shape_operations.h>
-
-#include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
+
+#include <geometric_shapes/shape_operations.h>
 
 #include <moveit/collision_distance_field/collision_distance_field_types.h>
 #include <moveit/collision_distance_field/collision_env_distance_field.h>
@@ -50,6 +49,8 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/transforms/transforms.h>
 #include <moveit/utils/robot_model_test_utils.h>
+
+#include "gtest/gtest.h"
 
 typedef collision_detection::CollisionEnvDistanceField DefaultCEnvType;
 

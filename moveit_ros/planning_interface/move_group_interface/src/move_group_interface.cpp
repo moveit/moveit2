@@ -40,6 +40,13 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <moveit_msgs/action/execute_trajectory.hpp>
+#include <moveit_msgs/srv/execute_known_trajectory.hpp>
+#include <moveit_msgs/srv/get_cartesian_path.hpp>
+#include <moveit_msgs/srv/get_planner_params.hpp>
+#include <moveit_msgs/srv/grasp_planning.hpp>
+#include <moveit_msgs/srv/query_planner_interfaces.hpp>
+#include <moveit_msgs/srv/set_planner_params.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include <moveit/common_planning_interface_objects/common_objects.h>
@@ -52,23 +59,17 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <moveit/warehouse/constraints_storage.h>
-#include <moveit_msgs/action/execute_trajectory.hpp>
-#include <moveit_msgs/srv/execute_known_trajectory.hpp>
-#include <moveit_msgs/srv/get_cartesian_path.hpp>
-#include <moveit_msgs/srv/get_planner_params.hpp>
-#include <moveit_msgs/srv/grasp_planning.hpp>
-#include <moveit_msgs/srv/query_planner_interfaces.hpp>
-#include <moveit_msgs/srv/set_planner_params.hpp>
 // TODO(JafarAbdi): Enable once moveit_ros_manipulation is ported
 // #include <moveit_msgs/msg/place_location.hpp>
 // #include <moveit_msgs/action/pickup.hpp>
 // #include <moveit_msgs/action/place.hpp>
 
-#include <geometry_msgs/msg/transform_stamped.h>
-#include <std_msgs/msg/string.hpp>
 #include <tf2/utils.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_ros/transform_listener.h>
+
+#include <geometry_msgs/msg/transform_stamped.h>
+#include <std_msgs/msg/string.hpp>
 
 namespace moveit
 {

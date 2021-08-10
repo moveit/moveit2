@@ -40,9 +40,10 @@
 
 #include <message_filters/subscriber.h>
 #include <rclcpp/rclcpp.hpp>
-#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <tf2_ros/message_filter.h>
 #include <tf2_ros/transform_listener.h>
+
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
 #include <moveit/point_containment_filter/shape_mask.h>

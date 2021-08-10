@@ -34,7 +34,7 @@
 
 #pragma once
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 #ifndef INSTANTIATE_TEST_SUITE_P  // prior to gtest 1.10
 #define INSTANTIATE_TEST_SUITE_P(...) INSTANTIATE_TEST_CASE_P(__VA_ARGS__)
 #endif
@@ -49,16 +49,17 @@
 #include <boost/core/demangle.hpp>
 
 #include <ros/console.h>
-#include <sensor_msgs/JointState.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/convert.h>
+
+#include <moveit_msgs/Constraints.h>
+#include <moveit_msgs/MoveGroupAction.h>
+#include <sensor_msgs/JointState.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit_msgs/Constraints.h>
-#include <moveit_msgs/MoveGroupAction.h>
 
 #include "moveit_msgs/MotionSequenceRequest.h"
 #include "pilz_industrial_motion_planner/limits_container.h"

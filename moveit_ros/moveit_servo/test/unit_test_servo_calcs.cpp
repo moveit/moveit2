@@ -48,9 +48,10 @@
 #include <boost/filesystem/path.hpp>
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
-#include <gtest/gtest.h>
 
 #include <moveit_servo/servo.h>
+
+#include "gtest/gtest.h"
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.unit_test_servo_calcs.cpp");
 

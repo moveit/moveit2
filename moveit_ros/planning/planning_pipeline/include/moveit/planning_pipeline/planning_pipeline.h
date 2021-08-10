@@ -40,11 +40,12 @@
 
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
+
+#include <moveit_msgs/msg/display_trajectory.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
-#include <moveit_msgs/msg/display_trajectory.hpp>
 
 #include "moveit_planning_pipeline_export.h"
 

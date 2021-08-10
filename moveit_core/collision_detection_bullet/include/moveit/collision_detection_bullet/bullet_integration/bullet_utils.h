@@ -36,9 +36,9 @@
 
 #include <btBulletCollisionCommon.h>
 
-#include <geometric_shapes/mesh_operations.h>
-
 #include <rclcpp/logging.hpp>
+
+#include <geometric_shapes/mesh_operations.h>
 
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit/collision_detection_bullet/bullet_integration/basic_types.h>

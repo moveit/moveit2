@@ -38,12 +38,13 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
+
+#include <moveit_msgs/msg/constraints.hpp>
 #include <visualization_msgs/msg/marker.hpp>
 
 #include <moveit/macros/console_colors.h>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit_msgs/msg/constraints.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("ompl_constrained_planning_demo");
 static const std::string PLANNING_GROUP = "panda_arm";

@@ -38,13 +38,14 @@
 #include <ctype.h>
 #include <sstream>
 
-#include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
 
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/cartesian_interpolator.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
+
+#include "gtest/gtest.h"
 
 class OneRobot : public testing::Test
 {

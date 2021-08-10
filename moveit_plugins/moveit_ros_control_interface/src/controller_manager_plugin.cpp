@@ -39,11 +39,12 @@
 
 #include <boost/bimap.hpp>
 
-#include <controller_manager_msgs/ListControllers.h>
-#include <controller_manager_msgs/SwitchController.h>
 #include <pluginlib/class_list_macros.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <ros/ros.h>
+
+#include <controller_manager_msgs/ListControllers.h>
+#include <controller_manager_msgs/SwitchController.h>
 
 #include <moveit/controller_manager/controller_manager.h>
 #include <moveit/macros/class_forward.h>

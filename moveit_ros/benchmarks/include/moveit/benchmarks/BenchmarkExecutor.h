@@ -42,9 +42,9 @@
 
 #include <boost/function.hpp>
 
-#include <warehouse_ros/database_loader.h>
-
 #include <pluginlib/class_loader.hpp>
+
+#include <warehouse_ros/database_loader.h>
 
 #include <moveit/benchmarks/BenchmarkOptions.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>

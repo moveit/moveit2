@@ -37,7 +37,7 @@
 */
 
 // Testing
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 // ROS
 #include <rclcpp/rclcpp.hpp>
@@ -45,10 +45,11 @@
 #include <tf2_eigen/tf2_eigen.h>
 
 // MoveIt
+#include <moveit_msgs/msg/constraints.hpp>
+
 #include <moveit/macros/console_colors.h>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit_msgs/msg/constraints.hpp>
 
 // acuracy tested for position and orientation
 static const double EPSILON = 1e-2;

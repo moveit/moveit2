@@ -39,10 +39,12 @@
 
 #include <boost/algorithm/string/join.hpp>
 
-#include <std_msgs/msg/string.hpp>
 #include <tf2/LinearMath/Transform.h>
 #include <tf2/exceptions.h>
 #include <tf2_eigen/tf2_eigen.h>
+
+#include <moveit_msgs/srv/get_planning_scene.hpp>
+#include <std_msgs/msg/string.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include <moveit/exceptions/exceptions.h>
@@ -50,7 +52,6 @@
 #include <moveit/profiler/profiler.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/utils/message_checks.h>
-#include <moveit_msgs/srv/get_planning_scene.hpp>
 using namespace std::chrono_literals;
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_scene_monitor.planning_scene_monitor");

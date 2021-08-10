@@ -39,6 +39,8 @@
 #include <iostream>
 #include <vector>
 
+#include <moveit_msgs/msg/constraints.hpp>
+
 #include <geometric_shapes/bodies.h>
 
 #include <moveit/collision_detection/collision_env.h>
@@ -46,7 +48,6 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/transforms/transforms.h>
-#include <moveit_msgs/msg/constraints.hpp>
 
 /** \brief Representation and evaluation of kinematic constraints */
 namespace kinematic_constraints

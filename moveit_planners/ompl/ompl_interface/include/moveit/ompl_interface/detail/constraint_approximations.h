@@ -40,6 +40,7 @@
 
 #include <kinematic_constraints/kinematic_constraint.h>
 #include <planning_scene/planning_scene.h>
+
 #include <visualization_msgs/msg/marker_array.h>
 
 #include <moveit/macros/declare_ptr.h>

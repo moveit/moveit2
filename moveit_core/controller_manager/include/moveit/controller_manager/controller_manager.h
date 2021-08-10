@@ -41,8 +41,9 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit/macros/class_forward.h>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
+
+#include <moveit/macros/class_forward.h>
 
 /// Namespace for the base class of a MoveIt controller manager
 namespace moveit_controller_manager

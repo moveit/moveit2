@@ -49,9 +49,10 @@
 #include <trajopt_sco/sco_common.hpp>
 #include <trajopt_sco/solver_interface.hpp>
 
+#include <moveit_msgs/MotionPlanRequest.h>
+
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/MotionPlanRequest.h>
 
 #include "trajopt_interface/problem_description.h"
 

@@ -39,10 +39,11 @@
 // KDL
 #include <memory>
 
-#include <geometry_msgs/msg/vector3.hpp>
-#include <geometry_msgs/msg/wrench.hpp>
 #include <kdl/chain.hpp>
 #include <kdl/chainidsolver_recursive_newton_euler.hpp>
+
+#include <geometry_msgs/msg/vector3.hpp>
+#include <geometry_msgs/msg/wrench.hpp>
 
 #include <moveit/robot_state/robot_state.h>
 

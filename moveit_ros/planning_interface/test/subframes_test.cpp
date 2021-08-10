@@ -47,7 +47,7 @@
 #include <ros/ros.h>
 
 // The Testing Framework and Utils
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 // MoveIt
 #include <moveit/move_group_interface/move_group_interface.h>
@@ -56,6 +56,7 @@
 
 // TF2
 #include <tf2_eigen/tf2_eigen.h>
+
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 constexpr double EPSILON = 1e-2;

@@ -36,10 +36,11 @@
 
 #include <fstream>
 
-#include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
 
 #include <moveit/transforms/transforms.h>
+
+#include "gtest/gtest.h"
 
 TEST(Transforms, Simple)
 {

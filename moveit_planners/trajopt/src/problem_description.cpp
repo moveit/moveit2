@@ -43,9 +43,10 @@
 #include <trajopt_utils/logging.hpp>
 #include <trajopt_utils/vector_ops.hpp>
 
+#include <moveit_msgs/MotionPlanRequest.h>
+
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
-#include <moveit_msgs/MotionPlanRequest.h>
 
 #include "trajopt_interface/kinematic_terms.h"
 

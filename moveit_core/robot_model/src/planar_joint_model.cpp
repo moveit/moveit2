@@ -40,9 +40,9 @@
 
 #include <boost/math/constants/constants.hpp>
 
-#include <geometric_shapes/check_isometry.h>
-
 #include <angles/angles.h>
+
+#include <geometric_shapes/check_isometry.h>
 
 #include <moveit/robot_model/planar_joint_model.h>
 

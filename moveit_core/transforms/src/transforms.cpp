@@ -36,10 +36,10 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
-#include <geometric_shapes/check_isometry.h>
-
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_eigen/tf2_eigen.h>
+
+#include <geometric_shapes/check_isometry.h>
 
 #include <moveit/transforms/transforms.h>
 

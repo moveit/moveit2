@@ -38,9 +38,10 @@
 
 #include <boost/bind.hpp>
 
-#include <octomap_msgs/conversions.h>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/transform_listener.h>
+
+#include <octomap_msgs/conversions.h>
 
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 

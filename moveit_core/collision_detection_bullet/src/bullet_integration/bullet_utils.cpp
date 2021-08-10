@@ -36,12 +36,12 @@
 
 #include <memory>
 
-#include <geometric_shapes/shapes.h>
-
 #include <BulletCollision/CollisionDispatch/btConvexConvexAlgorithm.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/Gimpact/btGImpactShape.h>
 #include <octomap/octomap.h>
+
+#include <geometric_shapes/shapes.h>
 
 static const rclcpp::Logger BULLET_LOGGER = rclcpp::get_logger("collision_detection.bullet");
 

@@ -34,9 +34,9 @@
 
 /* Author: Ioan Sucan */
 
-#include <geometric_shapes/solid_primitive_dims.h>
-
 #include <rclcpp/rclcpp.hpp>
+
+#include <geometric_shapes/solid_primitive_dims.h>
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 

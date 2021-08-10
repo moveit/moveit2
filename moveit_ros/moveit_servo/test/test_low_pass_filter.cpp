@@ -39,9 +39,9 @@
  *      Desc      : Unit test for moveit_servo::LowPassFilter
  */
 
-#include <gtest/gtest.h>
-
 #include <moveit_servo/low_pass_filter.h>
+
+#include "gtest/gtest.h"
 
 TEST(MOVEIT_SERVO, FilterConverge)
 {

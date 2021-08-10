@@ -39,9 +39,10 @@
 #include <boost/math/constants/constants.hpp>
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
-#include <geometry_msgs/msg/pose.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <urdf_parser/urdf_parser.h>
+
+#include <geometry_msgs/msg/pose.hpp>
 
 #include <moveit/utils/robot_model_test_utils.h>
 

@@ -39,9 +39,10 @@
 #include <algorithm>
 #include <cmath>
 
-#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <kdl_parser/kdl_parser.hpp>
 #include <tf2_kdl/tf2_kdl.h>
+
+#include <geometry_msgs/msg/pose_stamped.hpp>
 
 #include <moveit/robot_model/robot_model.h>
 

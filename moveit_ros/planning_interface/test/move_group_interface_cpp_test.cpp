@@ -49,7 +49,7 @@
 #include <ros/ros.h>
 
 // The Testing Framework and Utils
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 
 // MoveIt
 #include <moveit/common_planning_interface_objects/common_objects.h>
@@ -59,6 +59,7 @@
 
 // TF2
 #include <tf2_eigen/tf2_eigen.h>
+
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 // 10um acuracy tested for position and orientation

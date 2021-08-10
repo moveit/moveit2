@@ -38,6 +38,8 @@
 
 #include <tf2_eigen/tf2_eigen.h>
 
+#include <moveit_msgs/msg/display_trajectory.hpp>
+
 #include <moveit/collision_detection/collision_tools.h>
 #include <moveit/move_group/capability_names.h>
 #include <moveit/moveit_cpp/moveit_cpp.h>
@@ -47,7 +49,6 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit/utils/message_checks.h>
-#include <moveit_msgs/msg/display_trajectory.hpp>
 
 namespace
 {

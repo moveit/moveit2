@@ -43,8 +43,9 @@
 #include <kdl/utilities/error.h>
 #include <ros/ros.h>
 #include <tf2_eigen/tf2_eigen.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_kdl/tf2_kdl.h>
+
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include <moveit/robot_state/conversions.h>
 

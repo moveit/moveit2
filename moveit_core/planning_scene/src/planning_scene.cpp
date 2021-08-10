@@ -39,10 +39,11 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <geometric_shapes/shape_operations.h>
+#include <tf2_eigen/tf2_eigen.h>
 
 #include <octomap_msgs/conversions.h>
-#include <tf2_eigen/tf2_eigen.h>
+
+#include <geometric_shapes/shape_operations.h>
 
 #include <moveit/collision_detection/collision_tools.h>
 #include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>

@@ -34,10 +34,11 @@
 
 /* Author: Ioan Sucan */
 
-#include <geometric_shapes/body_operations.h>
-
 #include <rclcpp/rclcpp.hpp>
+
 #include <sensor_msgs/point_cloud2_iterator.hpp>
+
+#include <geometric_shapes/body_operations.h>
 
 #include <moveit/point_containment_filter/shape_mask.h>
 

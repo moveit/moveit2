@@ -34,8 +34,9 @@
 
 /* Author: Sachin Chitta */
 
-#include <object_recognition_msgs/action/object_recognition.hpp>
 #include <tf2_eigen/tf2_eigen.h>
+
+#include <object_recognition_msgs/action/object_recognition.hpp>
 
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>

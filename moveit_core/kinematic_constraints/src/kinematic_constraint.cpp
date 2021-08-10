@@ -41,12 +41,12 @@
 #include <boost/bind.hpp>
 #include <boost/math/constants/constants.hpp>
 
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_eigen/tf2_eigen.h>
+
 #include <geometric_shapes/body_operations.h>
 #include <geometric_shapes/check_isometry.h>
 #include <geometric_shapes/shape_operations.h>
-
-#include <rclcpp/rclcpp.hpp>
-#include <tf2_eigen/tf2_eigen.h>
 
 #include <moveit/collision_detection_fcl/collision_env_fcl.h>
 #include <moveit/kinematic_constraints/kinematic_constraint.h>

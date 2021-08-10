@@ -43,9 +43,9 @@
 #include <boost/function.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include <geometric_shapes/bodies.h>
-
 #include <sensor_msgs/msg/point_cloud2.hpp>
+
+#include <geometric_shapes/bodies.h>
 
 namespace point_containment_filter
 {
