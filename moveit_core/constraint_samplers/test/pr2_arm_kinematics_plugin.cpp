@@ -36,7 +36,11 @@
 
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <kdl_parser/kdl_parser.hpp>
+#if __has_include(<tf2_kdl/tf2_kdl.hpp>)
 #include <tf2_kdl/tf2_kdl.hpp>
+#else
+#include <tf2_kdl/tf2_kdl.h>
+#endif
 #include <algorithm>
 #include <cmath>
 
