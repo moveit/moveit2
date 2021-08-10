@@ -45,6 +45,17 @@ namespace kinematics_plugin_loader
 {
 MOVEIT_CLASS_FORWARD(KinematicsPluginLoader);  // Defines KinematicsPluginLoaderPtr, ConstPtr, WeakPtr... etc
 
+template <typename ParameterT>
+rclcpp::Parameter declare_parameter(const rclcpp::Node::SharedPtr& node, const std::string& parameter_name)
+{
+  if (!node->has_parameter(parameter_name))
+    node->declare_parameter<ParameterT>(parameter_name);
+  rclcpp::Parameter parameter;
+  if (!node->get_parameter(parameter_name, parameter))
+    RCLCPP_DEBUG_STREAM(LOGGER, "Parameter `" << parameter_name << "` doesn't exists");
+  return parameter;
+}
+
 /** \brief Helper class for loading kinematics solvers */
 class KinematicsPluginLoader
 {
