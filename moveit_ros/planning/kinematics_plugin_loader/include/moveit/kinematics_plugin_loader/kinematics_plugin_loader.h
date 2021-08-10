@@ -52,7 +52,7 @@ rclcpp::Parameter declare_parameter(const rclcpp::Node::SharedPtr& node, const s
     node->declare_parameter<ParameterT>(parameter_name);
   rclcpp::Parameter parameter;
   if (!node->get_parameter(parameter_name, parameter))
-    RCLCPP_DEBUG_STREAM(LOGGER, "Parameter `" << parameter_name << "` doesn't exists");
+    RCLCPP_DEBUG_STREAM(node->get_logger(), "Parameter `" << parameter_name << "` doesn't exists");
   return parameter;
 }
 
