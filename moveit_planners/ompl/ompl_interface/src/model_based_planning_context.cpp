@@ -34,36 +34,34 @@
 
 /* Author: Ioan Sucan */
 
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
-
-#include <moveit/ompl_interface/model_based_planning_context.h>
-#include <moveit/ompl_interface/detail/state_validity_checker.h>
-#include <moveit/ompl_interface/detail/constrained_sampler.h>
-#include <moveit/ompl_interface/detail/constrained_goal_sampler.h>
-#include <moveit/ompl_interface/detail/goal_union.h>
-#include <moveit/ompl_interface/detail/projection_evaluators.h>
-#include <moveit/ompl_interface/detail/constraints_library.h>
+#include <boost/algorithm/string/trim.hpp>
+#include <ompl/base/goals/GoalLazySamples.h>
+#include <ompl/base/samplers/UniformValidStateSampler.h>
+#include <ompl/base/spaces/SE3StateSpace.h>
+#include <ompl/base/terminationconditions/CostConvergenceTerminationCondition.h>
+#include <ompl/base/terminationconditions/IterationTerminationCondition.h>
+#include <ompl/config.h>
+#include <ompl/datastructures/PDF.h>
+#include <ompl/geometric/planners/prm/LazyPRM.h>
+#include <ompl/tools/config/SelfConfig.h>
 
 #include <moveit/kinematic_constraints/utils.h>
+#include <moveit/ompl_interface/detail/constrained_goal_sampler.h>
+#include <moveit/ompl_interface/detail/constrained_sampler.h>
+#include <moveit/ompl_interface/detail/constraints_library.h>
+#include <moveit/ompl_interface/detail/goal_union.h>
+#include <moveit/ompl_interface/detail/projection_evaluators.h>
+#include <moveit/ompl_interface/detail/state_validity_checker.h>
+#include <moveit/ompl_interface/model_based_planning_context.h>
 #include <moveit/profiler/profiler.h>
 #include <moveit/utils/lexical_casts.h>
 
-#include <ompl/config.h>
-#include <ompl/base/samplers/UniformValidStateSampler.h>
-#include <ompl/base/goals/GoalLazySamples.h>
-#include <ompl/tools/config/SelfConfig.h>
-#include <ompl/base/spaces/SE3StateSpace.h>
-#include <ompl/datastructures/PDF.h>
-#include <ompl/base/terminationconditions/IterationTerminationCondition.h>
-#include <ompl/base/terminationconditions/CostConvergenceTerminationCondition.h>
-
-#include "ompl/base/objectives/PathLengthOptimizationObjective.h"
+#include "ompl/base/objectives/MaximizeMinClearanceObjective.h"
 #include "ompl/base/objectives/MechanicalWorkOptimizationObjective.h"
 #include "ompl/base/objectives/MinimaxObjective.h"
+#include "ompl/base/objectives/PathLengthOptimizationObjective.h"
 #include "ompl/base/objectives/StateCostIntegralObjective.h"
-#include "ompl/base/objectives/MaximizeMinClearanceObjective.h"
-#include <ompl/geometric/planners/prm/LazyPRM.h>
 
 namespace ompl_interface
 {

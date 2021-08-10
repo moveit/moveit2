@@ -33,7 +33,6 @@
  *********************************************************************/
 
 #include <gtest/gtest.h>
-
 #include <ros/ros.h>
 
 #include "pilz_industrial_motion_planner/cartesian_limit.h"

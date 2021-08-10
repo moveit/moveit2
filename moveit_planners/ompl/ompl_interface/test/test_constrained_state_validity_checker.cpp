@@ -35,10 +35,13 @@
 
 /* Author: Jeroen De Maeyer */
 
-#include "load_test_robot.h"
-
 #include <limits>
 #include <ostream>
+
+#include <ompl/base/ConstrainedSpaceInformation.h>
+#include <ompl/base/Constraint.h>
+#include <ompl/base/spaces/constraint/ProjectedStateSpace.h>
+#include <ompl/geometric/SimpleSetup.h>
 
 #include <gtest/gtest.h>
 
@@ -47,10 +50,7 @@
 #include <moveit/ompl_interface/parameterization/joint_space/constrained_planning_state_space.h>
 #include <moveit/planning_scene/planning_scene.h>
 
-#include <ompl/geometric/SimpleSetup.h>
-#include <ompl/base/Constraint.h>
-#include <ompl/base/ConstrainedSpaceInformation.h>
-#include <ompl/base/spaces/constraint/ProjectedStateSpace.h>
+#include "load_test_robot.h"
 
 /** \brief This flag sets the verbosity level for the state validity checker. **/
 constexpr bool VERBOSE = false;

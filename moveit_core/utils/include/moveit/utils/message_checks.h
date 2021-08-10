@@ -41,10 +41,10 @@
  *
  */
 
+#include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/planning_scene.hpp>
 #include <moveit_msgs/msg/planning_scene_world.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
-#include <moveit_msgs/msg/constraints.hpp>
 
 namespace moveit
 {

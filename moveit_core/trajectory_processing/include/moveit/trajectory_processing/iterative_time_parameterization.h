@@ -37,6 +37,7 @@
 #pragma once
 
 #include <moveit/robot_trajectory/robot_trajectory.h>
+
 #include "rclcpp/rclcpp.hpp"
 
 namespace trajectory_processing

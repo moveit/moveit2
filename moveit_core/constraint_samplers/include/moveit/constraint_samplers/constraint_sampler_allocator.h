@@ -38,6 +38,7 @@
 
 #include <moveit/constraint_samplers/constraint_sampler.h>
 #include <moveit/macros/class_forward.h>
+
 #include "rclcpp/rclcpp.hpp"
 
 namespace constraint_samplers

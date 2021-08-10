@@ -37,8 +37,9 @@
 #include "moveit/profiler/profiler.h"
 #if MOVEIT_ENABLE_PROFILING
 
-#include <vector>
 #include <algorithm>
+#include <vector>
+
 #include <rclcpp/rclcpp.hpp>
 
 namespace moveit

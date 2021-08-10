@@ -37,12 +37,15 @@
 */
 
 #include <thread>
+
 #include <rclcpp/rclcpp.hpp>
+
+#include <moveit_msgs/msg/display_robot_state.hpp>
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
+
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/moveit_cpp/planning_component.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/msg/display_robot_state.hpp>
-#include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_cpp_demo");
 

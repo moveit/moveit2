@@ -35,8 +35,9 @@
 /* Author: Chittaranjan Srinivas Swaminathan */
 
 #include <chomp_interface/chomp_planning_context.h>
-#include <moveit/trajectory_processing/iterative_time_parameterization.h>
+
 #include <moveit/robot_state/conversions.h>
+#include <moveit/trajectory_processing/iterative_time_parameterization.h>
 
 namespace chomp_interface
 {

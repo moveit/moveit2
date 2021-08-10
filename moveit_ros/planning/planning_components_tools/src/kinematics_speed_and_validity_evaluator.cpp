@@ -34,10 +34,11 @@
 
 /* Author: Ioan Sucan */
 
+#include <rclcpp/rclcpp.hpp>
+
+#include <moveit/profiler/profiler.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit/profiler/profiler.h>
-#include <rclcpp/rclcpp.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("inverse_kinematics_test");
 static const std::string ROBOT_DESCRIPTION = "robot_description";

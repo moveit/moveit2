@@ -35,7 +35,9 @@
 /* Author: Ioan Sucan */
 
 #include <chrono>
+
 #include <rclcpp/rclcpp.hpp>
+
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 using namespace std::chrono_literals;

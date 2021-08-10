@@ -36,11 +36,13 @@
 
 #pragma once
 
+#include <deque>
+
+#include <moveit_msgs/msg/robot_state.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
+
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit_msgs/msg/robot_trajectory.hpp>
-#include <moveit_msgs/msg/robot_state.hpp>
-#include <deque>
 
 #include "rcl/error_handling.h"
 #include "rcl/time.h"

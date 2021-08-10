@@ -48,10 +48,10 @@
  *    The test do show what is minimally required to create a working StateValidityChecker.
  **/
 
-#include "load_test_robot.h"
-
 #include <limits>
 #include <ostream>
+
+#include <ompl/geometric/SimpleSetup.h>
 
 #include <gtest/gtest.h>
 
@@ -60,7 +60,7 @@
 #include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
 #include <moveit/planning_scene/planning_scene.h>
 
-#include <ompl/geometric/SimpleSetup.h>
+#include "load_test_robot.h"
 
 /** \brief This flag sets the verbosity level for the state validity checker. **/
 constexpr bool VERBOSE = false;

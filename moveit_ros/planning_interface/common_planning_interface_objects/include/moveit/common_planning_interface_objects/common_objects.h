@@ -37,7 +37,9 @@
 #pragma once
 
 #include <memory>
+
 #include <tf2_ros/buffer.h>
+
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
 
 namespace moveit

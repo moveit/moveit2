@@ -34,9 +34,10 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/lazy_free_space_updater/lazy_free_space_updater.h>
-#include <rclcpp/logging.hpp>
 #include <rclcpp/clock.hpp>
+#include <rclcpp/logging.hpp>
+
+#include <moveit/lazy_free_space_updater/lazy_free_space_updater.h>
 
 namespace occupancy_map_monitor
 {

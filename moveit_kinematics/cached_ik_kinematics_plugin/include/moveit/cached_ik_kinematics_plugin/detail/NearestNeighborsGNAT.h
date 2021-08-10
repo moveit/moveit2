@@ -38,11 +38,13 @@
 
 #pragma once
 
-#include <moveit/exceptions/exceptions.h>
 #include <algorithm>
 #include <queue>
 #include <unordered_set>
 #include <utility>
+
+#include <moveit/exceptions/exceptions.h>
+
 #include "GreedyKCenters.h"
 #include "NearestNeighbors.h"
 

@@ -34,22 +34,24 @@
 
 /* Author: Ryan Luna */
 
+#include <tf2_eigen/tf2_eigen.h>
+
 #include <moveit/benchmarks/BenchmarkExecutor.h>
 #include <moveit/utils/lexical_casts.h>
 #include <moveit/version.h>
-#include <tf2_eigen/tf2_eigen.h>
 
 // TODO(henningkayser): Switch to boost/timer/progress_display.hpp with Boost 1.72
 // boost/progress.hpp is deprecated and will be replaced by boost/timer/progress_display.hpp in Boost 1.72.
 // Until then we need to suppress the deprecation warning.
 #define BOOST_ALLOW_DEPRECATED_HEADERS
-#include <boost/regex.hpp>
 #include <boost/progress.hpp>
+#include <boost/regex.hpp>
 #undef BOOST_ALLOW_DEPRECATED_HEADERS
-#include <boost/math/constants/constants.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <limits>
+
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/math/constants/constants.hpp>
 #ifndef _WIN32
 #include <unistd.h>
 #else

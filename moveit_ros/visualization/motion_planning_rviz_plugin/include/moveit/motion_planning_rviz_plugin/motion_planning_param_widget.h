@@ -36,8 +36,9 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
 #include <rviz_common/properties/property_tree_widget.hpp>
+
+#include <moveit/macros/class_forward.h>
 
 namespace moveit
 {

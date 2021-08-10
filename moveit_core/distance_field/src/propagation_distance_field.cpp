@@ -34,11 +34,14 @@
 
 /* Author: Mrinal Kalakrishnan, Ken Anderson */
 
-#include <moveit/distance_field/propagation_distance_field.h>
-#include <visualization_msgs/msg/marker.h>
-#include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+
+#include <visualization_msgs/msg/marker.h>
+
+#include <moveit/distance_field/propagation_distance_field.h>
+
 #include "rclcpp/rclcpp.hpp"
 
 namespace distance_field

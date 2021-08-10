@@ -41,14 +41,17 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 #endif
-#include <GL/freeglut.h>
-#include <moveit/mesh_filter/gl_renderer.h>
-#include <sstream>
 #include <fstream>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
+
 #include <boost/thread.hpp>
+
+#include <GL/freeglut.h>
 #include <rclcpp/rclcpp.hpp>
+
+#include <moveit/mesh_filter/gl_renderer.h>
 
 using namespace std;
 

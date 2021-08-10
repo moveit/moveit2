@@ -36,12 +36,15 @@
 
 #pragma once
 
-#include <visualization_msgs/msg/interactive_marker_feedback.hpp>
-#include <visualization_msgs/msg/interactive_marker.hpp>
-#include <interactive_markers/menu_handler.hpp>
-#include <moveit/robot_state/robot_state.h>
 #include <boost/function.hpp>
 #include <boost/thread.hpp>
+
+#include <interactive_markers/menu_handler.hpp>
+
+#include <visualization_msgs/msg/interactive_marker.hpp>
+#include <visualization_msgs/msg/interactive_marker_feedback.hpp>
+
+#include <moveit/robot_state/robot_state.h>
 
 namespace moveit
 {

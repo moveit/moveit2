@@ -27,19 +27,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "moveit/motion_planning_rviz_plugin/interactive_marker_display.h"
+
 #include <map>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "rviz_common/display_context.hpp"
 #include "rviz_common/properties/bool_property.hpp"
 #include "rviz_common/validate_floats.hpp"
-#include "rviz_common/display_context.hpp"
-
+#include "rviz_default_plugins/displays/interactive_markers/interactive_marker.hpp"
 #include "rviz_default_plugins/displays/interactive_markers/interactive_marker_namespace_property.hpp"
-
-#include "moveit/motion_planning_rviz_plugin/interactive_marker_display.h"
 
 namespace rviz_default_plugins
 {

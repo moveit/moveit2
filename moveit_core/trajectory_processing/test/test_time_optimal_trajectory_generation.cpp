@@ -37,6 +37,7 @@
  */
 
 #include <gtest/gtest.h>
+
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 
 using trajectory_processing::Path;

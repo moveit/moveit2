@@ -36,7 +36,6 @@
 #include <string>
 
 #include <gtest/gtest.h>
-
 #include <ros/ros.h>
 
 #include <moveit/robot_model_loader/robot_model_loader.h>

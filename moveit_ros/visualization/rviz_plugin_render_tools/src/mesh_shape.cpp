@@ -27,17 +27,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <ogre_helpers/mesh_shape.hpp>
-
+#include <OgreEntity.h>
+#include <OgreManualObject.h>
+#include <OgreMaterialManager.h>
 #include <OgreMesh.h>
 #include <OgreMeshManager.h>
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
-#include <OgreEntity.h>
-#include <OgreMaterialManager.h>
-#include <OgreManualObject.h>
 
 #include <boost/lexical_cast.hpp>
+
+#include <ogre_helpers/mesh_shape.hpp>
 #include <rviz_common/logging.hpp>
 
 namespace rviz_rendering

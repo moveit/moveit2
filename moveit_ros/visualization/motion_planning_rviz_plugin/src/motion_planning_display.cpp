@@ -34,44 +34,41 @@
 
 /* Author: Ioan Sucan, Dave Coleman, Adam Leeper, Sachin Chitta */
 
-#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
-#include <moveit/robot_interaction/kinematic_options_map.h>
-#include <moveit/rviz_plugin_render_tools/planning_link_updater.h>
-#include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
+#include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
+#include <QShortcut>
 
-#include <rviz_default_plugins/robot/robot.hpp>
-#include <rviz_default_plugins/robot/robot_link.hpp>
-#include <moveit/motion_planning_rviz_plugin/interactive_marker_display.h>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/format.hpp>
 
-#include <rviz_common/properties/property.hpp>
-#include <rviz_common/properties/string_property.hpp>
-#include <rviz_common/properties/bool_property.hpp>
-#include <rviz_common/properties/float_property.hpp>
-#include <rviz_common/properties/ros_topic_property.hpp>
-#include <rviz_common/properties/editable_enum_property.hpp>
-#include <rviz_common/properties/color_property.hpp>
+#include <rviz_common/display.hpp>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
 #include <rviz_common/panel_dock_widget.hpp>
+#include <rviz_common/properties/bool_property.hpp>
+#include <rviz_common/properties/color_property.hpp>
+#include <rviz_common/properties/editable_enum_property.hpp>
+#include <rviz_common/properties/float_property.hpp>
+#include <rviz_common/properties/property.hpp>
+#include <rviz_common/properties/ros_topic_property.hpp>
+#include <rviz_common/properties/string_property.hpp>
 #include <rviz_common/window_manager_interface.hpp>
-#include <rviz_common/display.hpp>
+#include <rviz_default_plugins/robot/robot.hpp>
+#include <rviz_default_plugins/robot/robot_link.hpp>
 #include <rviz_rendering/objects/movable_text.hpp>
-
-#include <OgreSceneManager.h>
-#include <OgreSceneNode.h>
 #include <rviz_rendering/objects/shape.hpp>
 
+#include <moveit/motion_planning_rviz_plugin/interactive_marker_display.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
+#include <moveit/robot_interaction/kinematic_options_map.h>
 #include <moveit/robot_state/conversions.h>
+#include <moveit/rviz_plugin_render_tools/planning_link_updater.h>
+#include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
-
-#include <boost/format.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string/trim.hpp>
-
-#include <QShortcut>
+#include <moveit/utils/rclcpp_utils.h>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
-#include <moveit/utils/rclcpp_utils.h>
 
 namespace moveit_rviz_plugin
 {

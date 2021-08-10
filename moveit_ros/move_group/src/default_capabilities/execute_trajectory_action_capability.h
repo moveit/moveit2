@@ -40,11 +40,13 @@
 
 #pragma once
 
-#include <moveit/move_group/move_group_capability.h>
+#include <memory>
+
 #include <rclcpp_action/rclcpp_action.hpp>
+
 #include <moveit_msgs/action/execute_trajectory.hpp>
 
-#include <memory>
+#include <moveit/move_group/move_group_capability.h>
 
 namespace move_group
 {

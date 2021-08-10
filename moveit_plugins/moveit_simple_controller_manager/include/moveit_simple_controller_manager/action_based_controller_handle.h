@@ -37,11 +37,13 @@
 
 #pragma once
 
+#include <memory>
+
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
+
 #include <moveit/controller_manager/controller_manager.h>
 #include <moveit/macros/class_forward.h>
-#include <memory>
 
 namespace moveit_simple_controller_manager
 {

@@ -34,13 +34,17 @@
 
 /* Author: Adam Leeper */
 
+#include <memory>
+
+#include <octomap/math/Utils.h>
+#include <octomap/math/Vector3.h>
+#include <octomap/octomap.h>
+
+#include <geometric_shapes/shapes.h>
+
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit/collision_detection/collision_octomap_filter.h>
-#include <octomap/math/Vector3.h>
-#include <octomap/math/Utils.h>
-#include <octomap/octomap.h>
-#include <geometric_shapes/shapes.h>
-#include <memory>
+
 #include "rclcpp/rclcpp.hpp"
 
 // Logger

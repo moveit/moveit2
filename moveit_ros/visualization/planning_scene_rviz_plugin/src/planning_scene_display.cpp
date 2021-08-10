@@ -35,26 +35,24 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/common_planning_interface_objects/common_objects.h>
-#include <moveit/planning_scene_rviz_plugin/planning_scene_display.h>
-#include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
-#include <moveit/rviz_plugin_render_tools/octomap_render.h>
-
-#include <rviz_common/transformation/transformation_manager.hpp>
-#include <rviz_default_plugins/robot/robot.hpp>
-#include <rviz_default_plugins/robot/robot_link.hpp>
-
-#include <rviz_common/properties/property.hpp>
-#include <rviz_common/properties/bool_property.hpp>
-#include <rviz_common/properties/float_property.hpp>
-#include <rviz_common/properties/color_property.hpp>
-#include <rviz_common/properties/enum_property.hpp>
-#include <rviz_common/display_context.hpp>
-#include <tf2_ros/buffer.h>
-
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/properties/bool_property.hpp>
+#include <rviz_common/properties/color_property.hpp>
+#include <rviz_common/properties/enum_property.hpp>
+#include <rviz_common/properties/float_property.hpp>
+#include <rviz_common/properties/property.hpp>
+#include <rviz_common/transformation/transformation_manager.hpp>
+#include <rviz_default_plugins/robot/robot.hpp>
+#include <rviz_default_plugins/robot/robot_link.hpp>
+#include <tf2_ros/buffer.h>
+
+#include <moveit/common_planning_interface_objects/common_objects.h>
+#include <moveit/planning_scene_rviz_plugin/planning_scene_display.h>
+#include <moveit/rviz_plugin_render_tools/octomap_render.h>
+#include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
 #include <moveit/utils/rclcpp_utils.h>
 
 namespace moveit_rviz_plugin

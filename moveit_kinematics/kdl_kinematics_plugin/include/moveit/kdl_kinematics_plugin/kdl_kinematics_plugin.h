@@ -38,27 +38,28 @@
 
 // ROS
 #include <rclcpp/rclcpp.hpp>
+
 #include <random_numbers/random_numbers.h>
 
 // ROS msgs
 #include <geometry_msgs/msg/pose_stamped.hpp>
-#include <moveit_msgs/srv/get_position_fk.hpp>
-#include <moveit_msgs/srv/get_position_ik.hpp>
 #include <moveit_msgs/msg/kinematic_solver_info.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
+#include <moveit_msgs/srv/get_position_fk.hpp>
+#include <moveit_msgs/srv/get_position_ik.hpp>
 
 // KDL
-#include <kdl/config.h>
 #include <kdl/chainfksolver.hpp>
 #include <kdl/chainiksolver.hpp>
+#include <kdl/config.h>
 
 // MoveIt
-#include <moveit/kinematics_base/kinematics_base.h>
+#include <cfloat>
+
 #include <moveit/kdl_kinematics_plugin/joint_mimic.hpp>
+#include <moveit/kinematics_base/kinematics_base.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
-
-#include <cfloat>
 
 namespace KDL
 {

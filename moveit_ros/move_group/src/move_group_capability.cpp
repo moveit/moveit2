@@ -34,13 +34,14 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/move_group/move_group_capability.h>
-#include <moveit/robot_state/conversions.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-
 #include <sstream>
 #include <string>
+
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+#include <moveit/move_group/move_group_capability.h>
+#include <moveit/moveit_cpp/moveit_cpp.h>
+#include <moveit/robot_state/conversions.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_capabilities_base.move_group_capability");
 

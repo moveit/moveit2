@@ -36,10 +36,12 @@
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
-#include <moveit/controller_manager/controller_manager.h>
 #include <iostream>
 #include <map>
+
+#include <rclcpp/rclcpp.hpp>
+
+#include <moveit/controller_manager/controller_manager.h>
 
 namespace test_moveit_controller_manager
 {

@@ -34,10 +34,11 @@
 
 /* Author: Ioan Sucan */
 
+#include <rclcpp/rclcpp.hpp>
+
+#include <moveit/profiler/profiler.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit/profiler/profiler.h>
-#include <rclcpp/rclcpp.hpp>
 
 using namespace std::chrono_literals;
 

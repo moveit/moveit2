@@ -37,8 +37,8 @@
  *      Author    : Andy Zelenak
  */
 
-#include <moveit_servo/servo_server.h>
 #include <moveit_servo/servo_parameters.h>
+#include <moveit_servo/servo_server.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_server");
 

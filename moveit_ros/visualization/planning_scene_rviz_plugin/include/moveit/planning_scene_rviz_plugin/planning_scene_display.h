@@ -37,14 +37,15 @@
 #pragma once
 
 #include <rviz_common/display.hpp>
-#include <rviz_default_plugins/robot/robot.hpp>
-#include <rviz_common/properties/string_property.hpp>
 #include <rviz_common/properties/ros_topic_property.hpp>
+#include <rviz_common/properties/string_property.hpp>
+#include <rviz_default_plugins/robot/robot.hpp>
 #ifndef Q_MOC_RUN
-#include <moveit/rviz_plugin_render_tools/planning_scene_render.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/background_processing/background_processing.h>
 #include <rclcpp/rclcpp.hpp>
+
+#include <moveit/background_processing/background_processing.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/rviz_plugin_render_tools/planning_scene_render.h>
 #endif
 
 #include "moveit_planning_scene_rviz_plugin_core_export.h"

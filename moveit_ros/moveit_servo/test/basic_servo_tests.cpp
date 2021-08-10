@@ -48,6 +48,7 @@
 // Servo
 #include <moveit_servo/make_shared_from_pool.h>
 #include <moveit_servo/servo.h>
+
 #include "servo_launch_test_common.hpp"
 
 namespace moveit_servo

@@ -37,13 +37,15 @@
 #pragma once
 
 // KDL
+#include <memory>
+
 #include <kdl/chain.hpp>
 #include <kdl/chainidsolver_recursive_newton_euler.hpp>
 
-#include <moveit/robot_state/robot_state.h>
 #include <geometry_msgs/msg/vector3.hpp>
 #include <geometry_msgs/msg/wrench.hpp>
-#include <memory>
+
+#include <moveit/robot_state/robot_state.h>
 
 /** \brief This namespace includes the dynamics_solver library */
 namespace dynamics_solver

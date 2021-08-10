@@ -35,10 +35,11 @@
 /* Author: Jeroen De Maeyer */
 
 #pragma once
+#include <fstream>
+
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
-#include <fstream>
 
 namespace ompl_interface_testing
 {

@@ -35,6 +35,7 @@
 /* Author: Simon Schmeisser */
 
 #include <gtest/gtest.h>
+
 #include <moveit/collision_detection/allvalid/collision_detector_allocator_allvalid.h>
 #include <moveit/collision_detection/allvalid/collision_env_allvalid.h>
 

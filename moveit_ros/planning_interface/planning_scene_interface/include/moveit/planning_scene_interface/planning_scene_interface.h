@@ -36,12 +36,13 @@
 
 #pragma once
 
+#include <moveit_msgs/msg/attached_collision_object.hpp>
+#include <moveit_msgs/msg/collision_object.hpp>
+#include <moveit_msgs/msg/object_color.hpp>
+#include <moveit_msgs/msg/planning_scene.hpp>
+
 #include <moveit/macros/class_forward.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit_msgs/msg/object_color.hpp>
-#include <moveit_msgs/msg/collision_object.hpp>
-#include <moveit_msgs/msg/attached_collision_object.hpp>
-#include <moveit_msgs/msg/planning_scene.hpp>
 
 namespace moveit
 {

@@ -36,14 +36,15 @@
 
 #pragma once
 
-#include <moveit/collision_detection/collision_common.h>
-#include <moveit_msgs/msg/cost_source.hpp>
 #include <moveit_msgs/msg/contact_information.hpp>
+#include <moveit_msgs/msg/cost_source.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 
-#include "rclcpp/rclcpp.hpp"
+#include <moveit/collision_detection/collision_common.h>
+
 #include "rcl/time.h"
 #include "rclcpp/clock.hpp"
+#include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time.hpp"
 
 namespace collision_detection

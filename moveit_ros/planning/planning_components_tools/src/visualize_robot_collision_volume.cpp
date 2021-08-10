@@ -34,10 +34,12 @@
 
 /* Author: Ioan Sucan */
 
-#include <rclcpp/rclcpp.hpp>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <tf2_ros/transform_listener.h>
 #include <memory>
+
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_ros/transform_listener.h>
+
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 

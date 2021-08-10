@@ -34,16 +34,20 @@
 
 /* Author: Ioan Sucan, Dave Coleman */
 
-#include <moveit/kinematics_plugin_loader/kinematics_plugin_loader.h>
-#include <moveit/rdf_loader/rdf_loader.h>
-#include <pluginlib/class_loader.hpp>
-#include <boost/thread/mutex.hpp>
-#include <sstream>
-#include <vector>
 #include <map>
 #include <memory>
-#include "rclcpp/rclcpp.hpp"
+#include <sstream>
+#include <vector>
+
+#include <boost/thread/mutex.hpp>
+
+#include <pluginlib/class_loader.hpp>
+
+#include <moveit/kinematics_plugin_loader/kinematics_plugin_loader.h>
 #include <moveit/profiler/profiler.h>
+#include <moveit/rdf_loader/rdf_loader.h>
+
+#include "rclcpp/rclcpp.hpp"
 
 namespace kinematics_plugin_loader
 {

@@ -34,15 +34,19 @@
 
 /* Author: Martin Pecka */
 
+#include <fstream>
+
+#include <boost/filesystem.hpp>
+
+#include <gtest/gtest.h>
+#include <tf2/LinearMath/Vector3.h>
+#include <urdf_parser/urdf_parser.h>
+
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 #include <moveit/robot_model/aabb.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
-#include <urdf_parser/urdf_parser.h>
-#include <fstream>
-#include <boost/filesystem.hpp>
-#include <gtest/gtest.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <tf2/LinearMath/Vector3.h>
 #include <moveit/utils/robot_model_test_utils.h>
 
 // To visualize bbox of the PR2, set this to 1.
@@ -51,9 +55,11 @@
 #endif
 
 #if VISUALIZE_PR2_RVIZ
-#include "rclcpp/rclcpp.hpp"
 #include <visualization_msgs/msg/marker.h>
+
 #include <geometric_shapes/shape_operations.h>
+
+#include "rclcpp/rclcpp.hpp"
 #endif
 
 class TestAABB : public testing::Test

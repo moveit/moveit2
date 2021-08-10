@@ -36,20 +36,23 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
 #include <algorithm>
-#include <memory>
 #include <float.h>
+#include <memory>
+#include <string>
+#include <vector>
 
-#include <geometric_shapes/shapes.h>
-#include <geometric_shapes/bodies.h>
 #include <octomap/OcTree.h>
 
-#include <moveit/macros/class_forward.h>
+#include <visualization_msgs/msg/marker_array.hpp>
+
+#include <geometric_shapes/bodies.h>
+#include <geometric_shapes/shapes.h>
+
 #include <moveit/distance_field/distance_field.h>
 #include <moveit/distance_field/propagation_distance_field.h>
-#include <visualization_msgs/msg/marker_array.hpp>
+#include <moveit/macros/class_forward.h>
+
 #include "rclcpp/clock.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time.hpp"

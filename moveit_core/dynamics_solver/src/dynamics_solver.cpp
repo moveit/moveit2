@@ -38,8 +38,9 @@
 
 // KDL
 #include <kdl/jntarray.hpp>
-#include <kdl_parser/kdl_parser.hpp>
 #include <kdl/tree.hpp>
+#include <kdl_parser/kdl_parser.hpp>
+
 #include "rclcpp/rclcpp.hpp"
 
 namespace dynamics_solver

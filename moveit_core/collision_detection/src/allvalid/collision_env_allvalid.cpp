@@ -34,8 +34,9 @@
 
 /* Author: Ioan Sucan, Jia Pan, Jens Petit */
 
-#include <moveit/collision_detection/allvalid/collision_env_allvalid.h>
 #include <moveit/collision_detection/allvalid/collision_detector_allocator_allvalid.h>
+#include <moveit/collision_detection/allvalid/collision_env_allvalid.h>
+
 #include "rclcpp/rclcpp.hpp"
 
 // Logger

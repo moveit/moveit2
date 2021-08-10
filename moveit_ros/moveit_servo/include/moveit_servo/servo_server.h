@@ -40,8 +40,9 @@
 
 #pragma once
 
-#include <moveit_servo/servo.h>
 #include <std_srvs/srv/trigger.hpp>
+
+#include <moveit_servo/servo.h>
 
 namespace moveit_servo
 {

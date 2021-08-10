@@ -36,15 +36,19 @@
 
 #pragma once
 
-#include <moveit/rviz_plugin_render_tools/octomap_render.h>
-#include <moveit/macros/class_forward.h>
-#include <geometric_shapes/shapes.h>
-#include <rviz_common/properties/color_property.hpp>
-#include <rviz_common/display_context.hpp>
-#include <rviz_rendering/objects/shape.hpp>
 #include <OgreColourValue.h>
-#include <Eigen/Geometry>
 #include <memory>
+
+#include <Eigen/Geometry>
+
+#include <rviz_common/display_context.hpp>
+#include <rviz_common/properties/color_property.hpp>
+#include <rviz_rendering/objects/shape.hpp>
+
+#include <geometric_shapes/shapes.h>
+
+#include <moveit/macros/class_forward.h>
+#include <moveit/rviz_plugin_render_tools/octomap_render.h>
 
 namespace moveit_rviz_plugin
 {

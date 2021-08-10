@@ -34,11 +34,13 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/planning_scene_monitor/trajectory_monitor.h>
-#include <moveit/trajectory_processing/trajectory_tools.h>
-#include <rclcpp/rate.hpp>
 #include <limits>
 #include <memory>
+
+#include <rclcpp/rate.hpp>
+
+#include <moveit/planning_scene_monitor/trajectory_monitor.h>
+#include <moveit/trajectory_processing/trajectory_tools.h>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_scene_monitor.trajectory_monitor");
 

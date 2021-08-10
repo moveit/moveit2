@@ -33,7 +33,10 @@
  *********************************************************************/
 
 #include <boost/core/demangle.hpp>
+
 #include <gtest/gtest.h>
+
+#include <moveit_msgs/MoveItErrorCodes.h>
 
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
@@ -41,14 +44,12 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit_msgs/MoveItErrorCodes.h>
 
 #include "pilz_industrial_motion_planner/joint_limits_aggregator.h"
 #include "pilz_industrial_motion_planner/joint_limits_container.h"
 #include "pilz_industrial_motion_planner/trajectory_generator_circ.h"
 #include "pilz_industrial_motion_planner/trajectory_generator_lin.h"
 #include "pilz_industrial_motion_planner/trajectory_generator_ptp.h"
-
 #include "test_utils.h"
 
 const std::string PARAM_MODEL_NO_GRIPPER_NAME{ "robot_description" };

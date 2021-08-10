@@ -34,12 +34,15 @@
 
 /* Author: Ioan Sucan, Jon Binney */
 
+#include <boost/bind.hpp>
+
 #include <rclcpp/rclcpp.hpp>
-#include <moveit_msgs/srv/save_map.hpp>
+
 #include <moveit_msgs/srv/load_map.hpp>
+#include <moveit_msgs/srv/save_map.hpp>
+
 #include <moveit/occupancy_map_monitor/occupancy_map.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-#include <boost/bind.hpp>
 
 namespace occupancy_map_monitor
 {

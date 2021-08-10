@@ -39,6 +39,7 @@
 #pragma once
 
 #include <Eigen/Core>
+
 #include <sensor_msgs/msg/joint_state.hpp>
 
 #include <moveit/robot_model/joint_model_group.h>

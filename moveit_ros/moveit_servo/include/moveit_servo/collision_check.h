@@ -42,13 +42,13 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/float64.hpp>
 
-#include <moveit_servo/servo_parameters.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit_servo/low_pass_filter.h>
+#include <moveit_servo/servo_parameters.h>
 
 namespace moveit_servo
 {
