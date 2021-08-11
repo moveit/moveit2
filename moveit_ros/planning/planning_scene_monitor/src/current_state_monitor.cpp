@@ -313,15 +313,7 @@ void CurrentStateMonitor::jointStateCallback(sensor_msgs::msg::JointState::Const
       if (jm->getVariableCount() != 1)
         continue;
 
-      // TODO(JafarAbdi): Replace with insert_or_assign once we have C++17 support
-      auto joint_time_it = joint_time_.find(jm);
-      if (joint_time_it != joint_time_.end())
-      {
-        // key already exists, perform assignment.
-        joint_time_it->second = joint_state->header.stamp;
-      }
-      else
-        joint_time_.emplace(jm, rclcpp::Time(0, 0, RCL_ROS_TIME));
+      joint_time_.insert_or_assign(jm, joint_state->header.stamp);
 
       if (robot_state_.getJointPositions(jm)[0] != joint_state->position[i])
       {
@@ -407,9 +399,7 @@ void CurrentStateMonitor::updateMultiDofJoints()
         continue;
       }
 
-      // TODO(JafarAbdi): Replace with insert_or_assign once we have C++17 support
-      auto joint_time_it = joint_time_.find(joint);
-      if (joint_time_it == joint_time_.end())
+      if (auto joint_time_it = joint_time_.find(joint); joint_time_it == joint_time_.end())
         joint_time_.emplace(joint, rclcpp::Time(0, 0, RCL_ROS_TIME));
 
       // allow update if time is more recent or if it is a static transform (time = 0)
