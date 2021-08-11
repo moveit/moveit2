@@ -108,7 +108,7 @@ OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const r
     }
     else
     {
-      parameters_.sensor_plugins.push_back(std::make_pair(sensor_name, sensor_plugin));
+      parameters_.sensor_plugins.emplace_back(sensor_name, sensor_plugin);
     }
   }
 }
