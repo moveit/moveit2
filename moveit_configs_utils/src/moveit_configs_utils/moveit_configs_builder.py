@@ -1,10 +1,9 @@
 from pathlib import Path
 from typing import Optional, List
 import logging
-import xacro
 from ament_index_python.packages import get_package_share_directory
 
-from parameter_builder import ParameterBuilder, load_yaml
+from parameter_builder import ParameterBuilder, load_yaml, load_xacro
 
 
 class MoveItConfigs(object):
@@ -26,6 +25,7 @@ class MoveItConfigs(object):
     move_group_capabilities = None
     move_group = None
     joint_limits = None
+    moveit_cpp = None
 
 
 class MoveItConfigsBuilder(ParameterBuilder):
@@ -69,27 +69,25 @@ class MoveItConfigsBuilder(ParameterBuilder):
 
     def robot_description(self, file_name: Optional[str] = None, mappings: dict = None):
         if file_name is None:
-            robot_description_file = xacro.process_file(
-                self.__urdf_package / self.__urdf_filename, mappings=mappings
-            )
+            robot_description_file_path = self.__urdf_package / self.__urdf_filename
         else:
-            robot_description_file = xacro.process_file(
-                self._package_path / file_name, mappings=mappings
-            )
+            robot_description_file_path = self._package_path / file_name
         self.__moveit_configs.robot_description = {
-            self.__robot_description: robot_description_file.toxml()
+            self.__robot_description: load_xacro(
+                robot_description_file_path, mappings=mappings
+            )
         }
         return self
 
     def robot_description_semantic(
         self, file_name: Optional[str] = None, mappings: dict = None
     ):
-        robot_description_semantic = xacro.process_file(
-            self._package_path / (file_name or self.__srdf_filename),
-            mappings=mappings,
-        )
         self.__moveit_configs.robot_description_semantic = {
-            self.__robot_description + "_semantic": robot_description_semantic.toxml()
+            self.__robot_description
+            + "_semantic": load_xacro(
+                self._package_path / (file_name or self.__srdf_filename),
+                mappings=mappings,
+            )
         }
         return self
 
@@ -109,6 +107,12 @@ class MoveItConfigsBuilder(ParameterBuilder):
                 self._package_path / (file_name or "config/joint_limits.yaml")
             )
         }
+        return self
+
+    def moveit_cpp(self, file_name: Optional[str] = None):
+        self.__moveit_configs.moveit_cpp = load_yaml(
+            self._package_path / (file_name or "config/moveit_cpp.yaml")
+        )
         return self
 
     def trajectory_execution(
@@ -151,7 +155,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         if pipelines is None:
             pipelines = ["ompl"]
             default_planning_pipeline = pipelines[0]
-        elif default_planning_pipeline not in pipelines:
+        if default_planning_pipeline not in pipelines:
             raise RuntimeError(
                 f"default_planning_pipeline: `{default_planning_pipeline}` doesn't name any of the input pipelines "
                 f"`{','.join(pipelines)}`"
@@ -179,6 +183,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
             parameters.update(self.__moveit_configs.trajectory_execution)
             parameters.update(self.__moveit_configs.planning_scene_monitor)
             parameters.update(self.__moveit_configs.joint_limits)
+            parameters.update(self.__moveit_configs.moveit_cpp)
         return parameters
 
 
