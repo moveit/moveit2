@@ -3,11 +3,9 @@
 <package format="3">
   <name>moveit_configs_utils</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="cafer.abdi@gmail.com">jafar_abdi</maintainer>
-  <license>TODO: License declaration</license>
-
-  <buildtool_depend>ament_python</buildtool_depend>
+  <description>Python library for loading moveit config parameters in launch files</description>
+  <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
+  <license>BSD</license>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
