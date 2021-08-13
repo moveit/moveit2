@@ -13,16 +13,16 @@ def generate_test_description():
 
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
-            .robot_description()
-            .robot_description_semantic()
-            .robot_description_kinematics()
-            .joint_limits()
-            .moveit_configs()
+        .robot_description()
+        .robot_description_semantic()
+        .robot_description_kinematics()
+        .joint_limits()
+        .moveit_configs()
     )
     test_param = (
         ParameterBuilder("moveit_kinematics")
-            .yaml("config/panda-lma-test.yaml")
-            .to_dict()
+        .yaml("config/panda-lma-test.yaml")
+        .to_dict()
     )
 
     panda_lma = Node(
