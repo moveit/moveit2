@@ -159,7 +159,7 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
     }
     if (tf_buffer_ && !robot_model_->getMultiDOFJointModels().empty())
     {
-      // If a dedicated thread is enabled for the buffer this probably mean the user is adding them either through
+      // If a dedicated thread is enabled for the buffer this probably means the user is adding them either through
       // tf2_ros::TransformListener or themselves, so we print a warning message warning that transformCallback is doing
       // the same duplicate operation
       if (tf_buffer_->isUsingDedicatedThread())
