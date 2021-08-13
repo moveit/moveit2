@@ -74,7 +74,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
             )
         else:
             robot_description_file = xacro.process_file(
-                self._package_path / "config" / file_name, mappings=mappings
+                self._package_path / file_name, mappings=mappings
             )
         self.__moveit_configs.robot_description = {
             self.__robot_description: robot_description_file.toxml()
@@ -85,8 +85,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self, file_name: Optional[str] = None, mappings: dict = None
     ):
         robot_description_semantic = xacro.process_file(
-            self._package_path
-            / (("config/" + file_name) if file_name else self.__srdf_filename),
+            self._package_path / (file_name or self.__srdf_filename),
             mappings=mappings,
         )
         self.__moveit_configs.robot_description_semantic = {
@@ -98,7 +97,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.robot_description_kinematics = {
             self.__robot_description
             + "_kinematics": load_yaml(
-                self._package_path / "config" / (file_name or "kinematics.yaml")
+                self._package_path / (file_name or "config/kinematics.yaml")
             )
         }
         return self
@@ -107,7 +106,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.joint_limits = {
             self.__robot_description
             + "_planning": load_yaml(
-                self._package_path / "config" / (file_name or "joint_limits.yaml")
+                self._package_path / (file_name or "config/joint_limits.yaml")
             )
         }
         return self
@@ -123,8 +122,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.trajectory_execution.update(
             load_yaml(
                 self._package_path
-                / "config"
-                / (file_name or self.__robot_name + "_controllers.yaml")
+                / (file_name or f"config/{self.__robot_name}_controllers.yaml")
             )
         )
         return self
@@ -155,7 +153,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
             default_planning_pipeline = pipelines[0]
         elif default_planning_pipeline not in pipelines:
             raise RuntimeError(
-                f"default_planning_pipeline: `{default_planning_pipeline}` doesn't name any of the input pipelines `{','.join(pipelines)}`"
+                f"default_planning_pipeline: `{default_planning_pipeline}` doesn't name any of the input pipelines "
+                f"`{','.join(pipelines)}`"
             )
         self.__moveit_configs.planning_pipelines = {
             "planning_pipelines": pipelines,
@@ -170,15 +169,16 @@ class MoveItConfigsBuilder(ParameterBuilder):
     def moveit_configs(self):
         return self.__moveit_configs
 
-    def to_dict(self):
+    def to_dict(self, include_moveit_configs: bool = True):
         parameters = self._parameters
-        parameters.update(self.__moveit_configs.robot_description)
-        parameters.update(self.__moveit_configs.robot_description_semantic)
-        parameters.update(self.__moveit_configs.robot_description_kinematics)
-        parameters.update(self.__moveit_configs.planning_pipelines)
-        parameters.update(self.__moveit_configs.trajectory_execution)
-        parameters.update(self.__moveit_configs.planning_scene_monitor)
-        parameters.update(self.__moveit_configs.joint_limits)
+        if include_moveit_configs:
+            parameters.update(self.__moveit_configs.robot_description)
+            parameters.update(self.__moveit_configs.robot_description_semantic)
+            parameters.update(self.__moveit_configs.robot_description_kinematics)
+            parameters.update(self.__moveit_configs.planning_pipelines)
+            parameters.update(self.__moveit_configs.trajectory_execution)
+            parameters.update(self.__moveit_configs.planning_scene_monitor)
+            parameters.update(self.__moveit_configs.joint_limits)
         return parameters
 
 
