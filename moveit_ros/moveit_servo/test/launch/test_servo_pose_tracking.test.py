@@ -18,7 +18,7 @@ from parameter_builder import ParameterBuilder
 def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
-        .robot_description(file_name="config/panda.urdf.xacro")
+        .robot_description(file_path="config/panda.urdf.xacro")
         .robot_description_semantic()
         .robot_description_kinematics()
         .joint_limits()

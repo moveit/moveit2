@@ -38,7 +38,7 @@ def generate_servo_test_description(
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(
-            file_name="config/panda.urdf.xacro", mappings=robot_description_mappings
+            file_path="config/panda.urdf.xacro", mappings=robot_description_mappings
         )
         .robot_description_semantic()
         .robot_description_kinematics()

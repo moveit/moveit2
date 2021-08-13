@@ -67,11 +67,11 @@ class MoveItConfigsBuilder(ParameterBuilder):
             ]["SRDF"]["relative_path"]
         self.__robot_description = robot_description
 
-    def robot_description(self, file_name: Optional[str] = None, mappings: dict = None):
-        if file_name is None:
+    def robot_description(self, file_path: Optional[str] = None, mappings: dict = None):
+        if file_path is None:
             robot_description_file_path = self.__urdf_package / self.__urdf_filename
         else:
-            robot_description_file_path = self._package_path / file_name
+            robot_description_file_path = self._package_path / file_path
         self.__moveit_configs.robot_description = {
             self.__robot_description: load_xacro(
                 robot_description_file_path, mappings=mappings
@@ -80,44 +80,44 @@ class MoveItConfigsBuilder(ParameterBuilder):
         return self
 
     def robot_description_semantic(
-        self, file_name: Optional[str] = None, mappings: dict = None
+        self, file_path: Optional[str] = None, mappings: dict = None
     ):
         self.__moveit_configs.robot_description_semantic = {
             self.__robot_description
             + "_semantic": load_xacro(
-                self._package_path / (file_name or self.__srdf_filename),
+                self._package_path / (file_path or self.__srdf_filename),
                 mappings=mappings,
             )
         }
         return self
 
-    def robot_description_kinematics(self, file_name: Optional[str] = None):
+    def robot_description_kinematics(self, file_path: Optional[str] = None):
         self.__moveit_configs.robot_description_kinematics = {
             self.__robot_description
             + "_kinematics": load_yaml(
-                self._package_path / (file_name or "config/kinematics.yaml")
+                self._package_path / (file_path or "config/kinematics.yaml")
             )
         }
         return self
 
-    def joint_limits(self, file_name: Optional[str] = None):
+    def joint_limits(self, file_path: Optional[str] = None):
         self.__moveit_configs.joint_limits = {
             self.__robot_description
             + "_planning": load_yaml(
-                self._package_path / (file_name or "config/joint_limits.yaml")
+                self._package_path / (file_path or "config/joint_limits.yaml")
             )
         }
         return self
 
-    def moveit_cpp(self, file_name: Optional[str] = None):
+    def moveit_cpp(self, file_path: Optional[str] = None):
         self.__moveit_configs.moveit_cpp = load_yaml(
-            self._package_path / (file_name or "config/moveit_cpp.yaml")
+            self._package_path / (file_path or "config/moveit_cpp.yaml")
         )
         return self
 
     def trajectory_execution(
         self,
-        file_name: Optional[str] = None,
+        file_path: Optional[str] = None,
         moveit_manage_controllers: bool = True,
     ):
         self.__moveit_configs.trajectory_execution = {
@@ -126,7 +126,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.trajectory_execution.update(
             load_yaml(
                 self._package_path
-                / (file_name or f"config/{self.__robot_name}_controllers.yaml")
+                / (file_path or f"config/{self.__robot_name}_controllers.yaml")
             )
         )
         return self
@@ -194,7 +194,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
 #         .robot_description_semantic()
 #         .robot_description_kinematics()
 #         .joint_limits()
-#         .trajectory_execution(file_name="panda_gripper_controllers.yaml")
+#         .trajectory_execution(file_path="panda_gripper_controllers.yaml")
 #         .planning_scene_monitor()
 #         .planning_pipelines()
 #         .moveit_configs()
