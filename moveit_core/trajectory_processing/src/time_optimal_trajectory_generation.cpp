@@ -54,8 +54,6 @@ constexpr double DEFAULT_TIMESTEP = 1e-3;
 constexpr double EPS = 1e-6;
 }  // namespace
 
-constexpr double DEFAULT_TIMESTEP = 0.001;
-constexpr double EPS = 1e-6;
 class LinearPathSegment : public PathSegment
 {
 public:
@@ -470,8 +468,6 @@ bool Trajectory::getNextAccelerationSwitchingPoint(double path_pos, TrajectorySt
 bool Trajectory::getNextVelocitySwitchingPoint(double path_pos, TrajectoryStep& next_switching_point,
                                                double& before_acceleration, double& after_acceleration)
 {
-  const double step_size = DEFAULT_TIMESTEP;
-
   bool start = false;
   path_pos -= DEFAULT_TIMESTEP;
   do
