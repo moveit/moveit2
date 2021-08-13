@@ -53,7 +53,7 @@ private:
    * \brief Feed previous output back as input for next iteration. Get next target state from the next waypoint.
    */
   void getNextCurrentTargetStates(ruckig::InputParameter<0>& ruckig_input, ruckig::OutputParameter<0>& ruckig_output,
-                                  const moveit::core::RobotStatePtr next_waypoint, const size_t num_dof,
+                                  const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
                                   const std::vector<int>& idx);
 
   /**
@@ -67,6 +67,6 @@ private:
   /**
    * \brief Return L2-norm of velocity, taking all joints into account.
    */
-  double getTargetVelocityMagnitude(const ruckig::InputParameter<0>& ruckig_input, const size_t num_dof);
+  double getTargetVelocityMagnitude(const ruckig::InputParameter<0>& ruckig_input, size_t num_dof);
 };
 }  // namespace trajectory_processing

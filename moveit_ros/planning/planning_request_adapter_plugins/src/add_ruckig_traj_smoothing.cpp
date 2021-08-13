@@ -57,7 +57,7 @@ public:
 
   std::string getDescription() const override
   {
-    return "Add Trajectory Smoothing";
+    return "Add Ruckig trajectory smoothing.";
   }
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
@@ -67,7 +67,7 @@ public:
     bool result = planner(planning_scene, req, res);
     if (result && res.trajectory_)
     {
-      RCLCPP_DEBUG(LOGGER, " Running '%s'", getDescription().c_str());
+      RCLCPP_DEBUG_STREAM(LOGGER, " Running " << getDescription());
       RuckigSmoothing smoother;
       if (!smoother.applySmoothing(*res.trajectory_, req.max_velocity_scaling_factor,
                                    req.max_acceleration_scaling_factor))
