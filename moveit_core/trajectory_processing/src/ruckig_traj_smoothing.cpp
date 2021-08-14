@@ -175,6 +175,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       next_waypoint->setVariableVelocity(idx.at(joint), ruckig_output.new_velocity.at(joint));
       next_waypoint->setVariableAcceleration(idx.at(joint), ruckig_output.new_acceleration.at(joint));
     }
+    next_waypoint->update();
   }
 
   return true;
