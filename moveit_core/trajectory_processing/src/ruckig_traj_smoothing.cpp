@@ -134,7 +134,6 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   ruckig::Result ruckig_result;
   for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
   {
-    waypoint = trajectory.getWayPointPtr(waypoint_idx);
     moveit::core::RobotStatePtr next_waypoint = trajectory.getWayPointPtr(waypoint_idx + 1);
 
     getNextCurrentTargetStates(ruckig_input, ruckig_output, next_waypoint, num_dof, idx);
