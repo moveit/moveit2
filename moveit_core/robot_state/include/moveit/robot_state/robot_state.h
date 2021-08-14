@@ -1291,7 +1291,7 @@ public:
    *   A related, more comprehensive function is |getFrameTransform|, which additionally to link frames
    *   also searches for attached object frames and their subframes.
    *
-   *   This will throw a std::runtime_error if the passed link is not found
+   *   This will throw an exception if the passed link is not found
    *
    *  The returned transformation is always a valid isometry.
    */
