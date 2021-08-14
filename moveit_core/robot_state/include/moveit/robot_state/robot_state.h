@@ -1304,7 +1304,7 @@ public:
   {
     if (!link)
     {
-      throw std::runtime_error("Invalid link");
+      throw Exception("Invalid link");
     }
     updateLinkTransforms();
     return global_link_transforms_[link->getLinkIndex()];
@@ -1319,7 +1319,7 @@ public:
   {
     if (!link)
     {
-      throw std::runtime_error("Invalid link");
+      throw Exception("Invalid link");
     }
     BOOST_VERIFY(checkLinkTransforms());
     return global_link_transforms_[link->getLinkIndex()];
