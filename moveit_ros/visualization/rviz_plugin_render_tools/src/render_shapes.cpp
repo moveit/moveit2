@@ -156,11 +156,14 @@ void RenderShapes::renderShape(Ogre::SceneNode* node, const shapes::Shape* s, co
 
     case shapes::OCTREE:
     {
-      OcTreeRenderPtr octree(new OcTreeRender(static_cast<const shapes::OcTree*>(s)->octree, octree_voxel_rendering,
-                                              octree_color_mode, 0u, node));
-      octree->setPosition(position);
-      octree->setOrientation(orientation);
-      octree_voxel_grids_.push_back(octree);
+      if (octree_voxel_rendering != OCTOMAP_DISABLED)
+      {
+        auto octree = std::make_shared<moveit_rviz_plugin::OcTreeRender>(
+            static_cast<const shapes::OcTree*>(s)->octree, octree_voxel_rendering, octree_color_mode, 0u, node);
+        octree->setPosition(position);
+        octree->setOrientation(orientation);
+        octree_voxel_grids_.push_back(octree);
+      }
     }
     break;
 

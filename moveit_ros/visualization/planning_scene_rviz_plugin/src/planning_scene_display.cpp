@@ -112,6 +112,7 @@ PlanningSceneDisplay::PlanningSceneDisplay(bool listen_to_planning_scene, bool s
   octree_render_property_->addOption("Occupied Voxels", OCTOMAP_OCCUPIED_VOXELS);
   octree_render_property_->addOption("Free Voxels", OCTOMAP_FREE_VOXELS);
   octree_render_property_->addOption("All Voxels", OCTOMAP_FREE_VOXELS | OCTOMAP_OCCUPIED_VOXELS);
+  octree_render_property_->addOption("Disabled", OCTOMAP_DISABLED);
 
   octree_coloring_property_ = new rviz_common::properties::EnumProperty(
       "Voxel Coloring", "Z-Axis", "Select voxel coloring mode", scene_category_, SLOT(changedOctreeColorMode()), this);
