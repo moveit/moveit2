@@ -46,6 +46,8 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
+#include <tf2_msgs/msg/tf_message.hpp>
+
 #include <tf2_ros/buffer.h>
 
 #include <moveit/robot_state/robot_state.h>
@@ -58,8 +60,6 @@ using JointStateUpdateCallback = std::function<void(sensor_msgs::msg::JointState
     @brief Monitors the joint_states topic and tf to maintain the current state of the robot. */
 class CurrentStateMonitor
 {
-  using TFConnection = boost::signals2::connection;
-
 public:
   /**
    * @brief      Dependency injection class for testing the CurrentStateMonitor
@@ -67,6 +67,8 @@ public:
   class MiddlewareHandle
   {
   public:
+    using TfCallback = std::function<void(const tf2_msgs::msg::TFMessage::ConstSharedPtr)>;
+
     /**
      * @brief      Destroys the object.
      */
@@ -88,6 +90,20 @@ public:
     virtual void createJointStateSubscription(const std::string& topic, JointStateUpdateCallback callback) = 0;
 
     /**
+     * @brief      Creates a static transform message subscription
+     *
+     * @param[in]  callback  The callback
+     */
+    virtual void createStaticTfSubscription(TfCallback callback) = 0;
+
+    /**
+     * @brief      Creates a dynamic transform message subscription
+     *
+     * @param[in]  callback  The callback
+     */
+    virtual void createDynamicTfSubscription(TfCallback callback) = 0;
+
+    /**
      * @brief      Reset the joint state subscription
      */
     virtual void resetJointStateSubscription() = 0;
@@ -107,6 +123,25 @@ public:
      * @return     True if sleep happened as expected.
      */
     virtual bool sleepFor(const std::chrono::nanoseconds& nanoseconds) const = 0;
+
+    /**
+     * @brief      Get the static transform topic name
+     *
+     * @return     The static transform topic name.
+     */
+    virtual std::string getStaticTfTopicName() const = 0;
+
+    /**
+     * @brief      Get the dynamic transform topic name
+     *
+     * @return     The dynamic transform topic name.
+     */
+    virtual std::string getDynamicTfTopicName() const = 0;
+
+    /**
+     * @brief      Reset the static & dynamic transform subscriptions
+     */
+    virtual void resetTfSubscriptions() = 0;
   };
 
   /** @brief Constructor.
@@ -279,7 +314,8 @@ private:
                                std::vector<std::string>* missing_joints) const;
 
   void jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
-  void tfCallback();
+  void updateMultiDofJoints();
+  void transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static);
 
   std::unique_ptr<MiddlewareHandle> middleware_handle_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
@@ -295,8 +331,6 @@ private:
   mutable std::mutex state_update_lock_;
   mutable std::condition_variable state_update_condition_;
   std::vector<JointStateUpdateCallback> update_callbacks_;
-
-  std::shared_ptr<TFConnection> tf_connection_;
 };
 
 MOVEIT_CLASS_FORWARD(CurrentStateMonitor);  // Defines CurrentStateMonitorPtr, ConstPtr, WeakPtr... etc
