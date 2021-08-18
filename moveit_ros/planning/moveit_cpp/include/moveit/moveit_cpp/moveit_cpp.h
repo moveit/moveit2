@@ -45,7 +45,6 @@
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <moveit/robot_state/robot_state.h>
 #include <tf2_ros/buffer.h>
-#include <tf2_ros/transform_listener.h>
 
 namespace moveit_cpp
 {
@@ -170,7 +169,6 @@ private:
 
   // TF
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
   // Planning
   std::map<std::string, planning_pipeline::PlanningPipelinePtr> planning_pipelines_;
