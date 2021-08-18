@@ -154,7 +154,7 @@ public:
     */
   MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const Options& opt,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration(-1));
+                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration::from_seconds(-1));
 
   /**
       \brief Construct a client for the MoveGroup action for a particular \e group.
@@ -165,7 +165,7 @@ public:
     */
   MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const std::string& group,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration(-1));
+                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration::from_seconds(-1));
 
   ~MoveGroupInterface();
 

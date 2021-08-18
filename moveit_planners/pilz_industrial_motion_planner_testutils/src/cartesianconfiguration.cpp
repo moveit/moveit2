@@ -35,7 +35,11 @@
 #include "pilz_industrial_motion_planner_testutils/cartesianconfiguration.h"
 
 #include <stdexcept>
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#endif
 
 namespace pilz_industrial_motion_planner_testutils
 {
