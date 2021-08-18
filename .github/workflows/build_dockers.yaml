@@ -33,8 +33,7 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push image
-        run: |
-          docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+        run: docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
 
   build_ci_docker:
     strategy:
@@ -61,8 +60,7 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push image
-        run: |
-          docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+        run: docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
 
   build_ci_testing_docker:
     needs: build_ci_docker
@@ -90,8 +88,7 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push image
-        run: |
-          docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+        run: docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
 
   build_source_docker:
     needs: build_ci_testing_docker
@@ -119,5 +116,4 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push image
-        run: |
-          docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+        run: docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
