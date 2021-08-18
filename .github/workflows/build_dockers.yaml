@@ -8,14 +8,98 @@ on:
       - main
 
 jobs:
-  build_docker:
+  build_release_docker:
     strategy:
       matrix:
         ROS_DISTRO: [rolling, galactic]
-        DOCKERFILE: [ci, ci-testing, source, release]
-
+        DOCKERFILE: [release]
     runs-on: ubuntu-latest
-    concurrency: ${{ matrix.ROS_DISTRO }}
+    permissions:
+      packages: write
+      contents: read
+    env:
+      IMAGE_ID: ghcr.io/${{ github.repository_owner }}/moveit2
+      VERSION: ${{ matrix.ROS_DISTRO }}-${{ matrix.DOCKERFILE }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          echo Building docker ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+          docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file dockerfiles/${{ matrix.DOCKERFILE }}/Dockerfile --tag ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: |
+          docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+
+  build_ci_docker:
+    strategy:
+      matrix:
+        ROS_DISTRO: [rolling, galactic]
+        DOCKERFILE: [ci]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    env:
+      IMAGE_ID: ghcr.io/${{ github.repository_owner }}/moveit2
+      VERSION: ${{ matrix.ROS_DISTRO }}-${{ matrix.DOCKERFILE }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          echo Building docker ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+          docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file dockerfiles/${{ matrix.DOCKERFILE }}/Dockerfile --tag ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: |
+          docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+
+  build_ci_testing_docker:
+    needs: build_ci_docker
+    strategy:
+      matrix:
+        ROS_DISTRO: [rolling, galactic]
+        DOCKERFILE: [ci-testing]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    env:
+      IMAGE_ID: ghcr.io/${{ github.repository_owner }}/moveit2
+      VERSION: ${{ matrix.ROS_DISTRO }}-${{ matrix.DOCKERFILE }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          echo Building docker ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+          docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file dockerfiles/${{ matrix.DOCKERFILE }}/Dockerfile --tag ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: |
+          docker push ${{ env.IMAGE_ID }}:${{ env.VERSION }}
+
+  build_source_docker:
+    needs: build_ci_testing_docker
+    strategy:
+      matrix:
+        ROS_DISTRO: [rolling, galactic]
+        DOCKERFILE: [source]
+    runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
