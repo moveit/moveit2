@@ -13,9 +13,8 @@ jobs:
       matrix:
         ROS_DISTRO: [rolling, galactic]
         DOCKERFILE: [ci, ci-testing, source, release]
-
+    concurrency: docker-${{ matrix.ROS_DISTRO }}
     runs-on: ubuntu-latest
-    concurrency: ${{ matrix.ROS_DISTRO }}
     permissions:
       packages: write
       contents: read
