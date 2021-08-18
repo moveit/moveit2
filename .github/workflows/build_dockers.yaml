@@ -10,6 +10,7 @@ on:
 jobs:
   release:
     strategy:
+      fail-fast: false
       matrix:
         ROS_DISTRO: [rolling, galactic]
     runs-on: ubuntu-latest
@@ -36,6 +37,7 @@ jobs:
 
   ci:
     strategy:
+      fail-fast: false
       matrix:
         ROS_DISTRO: [rolling, galactic]
     runs-on: ubuntu-latest
@@ -63,6 +65,7 @@ jobs:
   ci-testing:
     needs: ci
     strategy:
+      fail-fast: false
       matrix:
         ROS_DISTRO: [rolling, galactic]
     runs-on: ubuntu-latest
@@ -90,6 +93,7 @@ jobs:
   source:
     needs: ci-testing
     strategy:
+      fail-fast: false
       matrix:
         ROS_DISTRO: [rolling, galactic]
     runs-on: ubuntu-latest
