@@ -37,7 +37,6 @@
  *      Author    : Joe Schornak
  */
 
-
 #include <moveit_servo/servo_server.h>
 
 int main(int argc, char* argv[])
