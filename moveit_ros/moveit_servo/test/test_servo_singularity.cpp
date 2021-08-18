@@ -51,8 +51,8 @@ TEST_F(ServoFixture, ReachSingular)
   ASSERT_TRUE(start());
   EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
 
-  // Look for DECELERATE_FOR_SINGULARITY status
-  watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_SINGULARITY);
+  // Look for DECELERATE_FOR_APPROACHING_SINGULARITY status
+  watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY);
 
   // Publish some twist commands that will bring us to singularity
   rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);

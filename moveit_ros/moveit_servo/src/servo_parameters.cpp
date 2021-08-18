@@ -133,6 +133,8 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
 
   // Configure handling of singularities and joint limits
   declareOrGetParam<double>(parameters->lower_singularity_threshold, ns + ".lower_singularity_threshold", node, logger);
+  declareOrGetParam<double>(parameters->approaching_stop_singularity_threshold,
+                            ns + ".approaching_stop_singularity_threshold", node, logger);
   declareOrGetParam<double>(parameters->hard_stop_singularity_threshold, ns + ".hard_stop_singularity_threshold", node,
                             logger);
   declareOrGetParam<double>(parameters->joint_limit_margin, ns + ".joint_limit_margin", node, logger);
@@ -157,6 +159,13 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
     RCLCPP_WARN(logger, "Parameter 'num_outgoing_halt_msgs_to_publish' should be greater than zero. Check yaml file.");
     return nullptr;
   }
+  if (parameters->hard_stop_singularity_threshold < parameters->approaching_stop_singularity_threshold)
+  {
+    RCLCPP_WARN(logger, "Parameter 'hard_stop_singularity_threshold' "
+                        "should be greater than/equal to 'approaching_stop_singularity_threshold.' "
+                        "Check yaml file.");
+    return nullptr;
+  }
   if (parameters->hard_stop_singularity_threshold <= parameters->lower_singularity_threshold)
   {
     RCLCPP_WARN(logger, "Parameter 'hard_stop_singularity_threshold' "
@@ -164,9 +173,18 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
                         "Check yaml file.");
     return nullptr;
   }
-  if ((parameters->hard_stop_singularity_threshold <= 0.) || (parameters->lower_singularity_threshold <= 0.))
+  if (parameters->approaching_stop_singularity_threshold <= parameters->lower_singularity_threshold)
   {
-    RCLCPP_WARN(logger, "Parameters 'hard_stop_singularity_threshold' "
+    RCLCPP_WARN(logger, "Parameter 'approaching_stop_singularity_threshold' "
+                        "should be greater than 'lower_singularity_threshold.' "
+                        "Check yaml file.");
+    return nullptr;
+  }
+  if ((parameters->hard_stop_singularity_threshold <= 0.) ||
+      (parameters->approaching_stop_singularity_threshold <= 0.) || (parameters->lower_singularity_threshold <= 0.))
+  {
+    RCLCPP_WARN(logger, "Parameters 'hard_stop_singularity_threshold', "
+                        "'approaching_stop_singularity_threshold', "
                         "and 'lower_singularity_threshold' should be "
                         "greater than zero. Check yaml file.");
     return nullptr;

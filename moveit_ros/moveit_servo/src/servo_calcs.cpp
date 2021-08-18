@@ -803,29 +803,29 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
 
   // If this dot product is positive, we're moving toward singularity ==> decelerate
   double dot = vector_toward_singularity.dot(commanded_velocity);
-  if (dot > 0)
+  // When condition > lower_singularity_threshold and moving closer to singularity, scale between
+  // lower_singularity_threshold and approaching_stop_singularity_threshold
+  // When condition > lower_singularity_threshold and moving away from to singularity, scale more conservatively between
+  // lower_singularity_threshold and hard_stop_singularity_threshold.
+  double upper_threshold =
+      dot > 0 ? parameters_->approaching_stop_singularity_threshold : parameters_->hard_stop_singularity_threshold;
+  if ((ini_condition > parameters_->lower_singularity_threshold) && (ini_condition < upper_threshold))
   {
-    // Ramp velocity down linearly when the Jacobian condition is between lower_singularity_threshold and
-    // hard_stop_singularity_threshold, and we're moving towards the singularity
-    if ((ini_condition > parameters_->lower_singularity_threshold) &&
-        (ini_condition < parameters_->hard_stop_singularity_threshold))
-    {
-      velocity_scale =
-          1. - (ini_condition - parameters_->lower_singularity_threshold) /
-                   (parameters_->hard_stop_singularity_threshold - parameters_->lower_singularity_threshold);
-      status_ = StatusCode::DECELERATE_FOR_SINGULARITY;
-      rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
-    }
+    velocity_scale = 1. - (ini_condition - parameters_->lower_singularity_threshold) /
+                              (upper_threshold - parameters_->lower_singularity_threshold);
+    status_ =
+        dot > 0 ? StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY : StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY;
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
+  }
 
-    // Very close to singularity, so halt.
-    else if (ini_condition > parameters_->hard_stop_singularity_threshold)
-    {
-      velocity_scale = 0;
-      status_ = StatusCode::HALT_FOR_SINGULARITY;
-      rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
-    }
+  // Very close to singularity, so halt.
+  else if (ini_condition > upper_threshold)
+  {
+    velocity_scale = 0;
+    status_ = StatusCode::HALT_FOR_SINGULARITY;
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, SERVO_STATUS_CODE_MAP.at(status_));
   }
 
   return velocity_scale;
