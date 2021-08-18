@@ -54,7 +54,7 @@ jobs:
           df -h
       - uses: actions/checkout@v2
       - name: cache upstream_ws
-        uses: pat-s/always-upload-cache@v2.1.3
+        uses: pat-s/always-upload-cache@v2.1.5
         with:
           path: ${{ env.BASEDIR }}/upstream_ws
           key: upstream_ws-${{ env.CACHE_PREFIX }}-${{ hashFiles('moveit2_rolling.repos') }}-${{ github.run_id }}
@@ -63,14 +63,14 @@ jobs:
       # The target directory cache doesn't include the source directory because
       # that comes from the checkout.  See "prepare target_ws for cache" task below
       - name: cache target_ws
-        uses: pat-s/always-upload-cache@v2.1.3
+        uses: pat-s/always-upload-cache@v2.1.5
         with:
           path: ${{ env.BASEDIR }}/target_ws
           key: target_ws-${{ env.CACHE_PREFIX }}-${{ hashFiles('**/CMakeLists.txt', '**/package.xml') }}-${{ github.run_id }}
           restore-keys: |
             target_ws-${{ env.CACHE_PREFIX }}-${{ hashFiles('**/CMakeLists.txt', '**/package.xml') }}
       - name: cache ccache
-        uses: pat-s/always-upload-cache@v2.1.3
+        uses: pat-s/always-upload-cache@v2.1.5
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ env.CACHE_PREFIX }}-${{ github.sha }}-${{ github.run_id }}
