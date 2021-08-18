@@ -49,10 +49,7 @@ int main(int argc, char* argv[])
 
   auto node = std::make_shared<moveit_servo::ServoServer>(options);
 
-  rclcpp::executors::MultiThreadedExecutor exec;
-  exec.add_node(node);
-  exec.spin();
-  exec.remove_node(node);
+  rclcpp::spin(node);
 
   rclcpp::shutdown();
 }
