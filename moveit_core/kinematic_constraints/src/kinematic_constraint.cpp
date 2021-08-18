@@ -955,7 +955,7 @@ void VisibilityConstraint::getMarkers(const moveit::core::RobotState& state,
   mk.pose.orientation.y = 0;
   mk.pose.orientation.z = 0;
   mk.pose.orientation.w = 1;
-  mk.lifetime = rclcpp::Duration(std::chrono::seconds(60));
+  mk.lifetime = rclcpp::Duration::from_seconds(60);
   // this scale necessary to make results look reasonable
   mk.scale.x = .01;
   mk.color.a = 1.0;

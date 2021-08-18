@@ -416,8 +416,7 @@ void RobotInteraction::addEndEffectorMarkers(const InteractionHandlerPtr& handle
   moveit::core::RobotStateConstPtr rstate = handler->getState();
   const std::vector<std::string>& link_names = rstate->getJointModelGroup(eef.eef_group)->getLinkModelNames();
   visualization_msgs::msg::MarkerArray marker_array;
-  rstate->getRobotMarkers(marker_array, link_names, marker_color, eef.eef_group,
-                          rclcpp::Duration(std::chrono::seconds(0)));
+  rstate->getRobotMarkers(marker_array, link_names, marker_color, eef.eef_group, rclcpp::Duration::from_seconds(0));
   tf2::Transform tf_root_to_link;
   tf2::fromMsg(tf2::toMsg(rstate->getGlobalLinkTransform(eef.parent_link)), tf_root_to_link);
   // Release the ptr count on the kinematic state

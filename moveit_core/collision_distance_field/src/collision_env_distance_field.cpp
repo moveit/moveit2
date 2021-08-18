@@ -1001,7 +1001,7 @@ void CollisionEnvDistanceField::createCollisionModelMarker(const moveit::core::R
   sphere_marker.pose.orientation.z = 0;
   sphere_marker.pose.orientation.w = 1;
   sphere_marker.color = robot_color;
-  sphere_marker.lifetime = rclcpp::Duration(std::chrono::seconds(0));
+  sphere_marker.lifetime = rclcpp::Duration::from_seconds(0);
 
   unsigned int id = 0;
   const moveit::core::JointModelGroup* joint_group = state.getJointModelGroup(distance_field_cache_entry_->group_name_);

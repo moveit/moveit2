@@ -87,7 +87,7 @@ void MotionPlanningFrame::processDetectedObjects()
   double max_z = ui_->roi_center_z->value() + ui_->roi_size_z->value() / 2.0;
 
   rclcpp::Time start_time = rclcpp::Clock().now();
-  while (object_ids.empty() && (rclcpp::Clock().now() - start_time) <= rclcpp::Duration(std::chrono::seconds(3)))
+  while (object_ids.empty() && (rclcpp::Clock().now() - start_time) <= rclcpp::Duration::from_seconds(3))
   {
     // collect all objects in region of interest
     {

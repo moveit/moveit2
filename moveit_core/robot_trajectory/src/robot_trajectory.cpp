@@ -270,7 +270,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
     trajectory.multi_dof_joint_trajectory.points.resize(waypoints_.size());
   }
 
-  static const rclcpp::Duration ZERO_DURATION(std::chrono::seconds(0));
+  static const auto ZERO_DURATION = rclcpp::Duration::from_seconds(0);
   double total_time = 0.0;
   for (std::size_t i = 0; i < waypoints_.size(); ++i)
   {
