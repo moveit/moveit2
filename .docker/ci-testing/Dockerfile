@@ -1,8 +1,8 @@
-# moveit/moveit2:foxy-ci-testing
+# ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci-testing
 # CI image using the ROS testing repository
 
 ARG ROS_DISTRO=foxy
-FROM moveit/moveit2:${ROS_DISTRO}-ci
+FROM ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci
 
 MAINTAINER Dave Coleman dave@picknik.ai
 MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
