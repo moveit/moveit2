@@ -75,6 +75,21 @@ public:
   void createJointStateSubscription(const std::string& topic, JointStateUpdateCallback callback) override;
 
   /**
+   * @brief      Creates a static transform message subscription
+   *
+   * @param[in]  callback  The callback
+   */
+  void createStaticTfSubscription(std::function<void(const tf2_msgs::msg::TFMessage::ConstSharedPtr)> callback) override;
+
+  /**
+   * @brief      Creates a dynamic transform message subscription
+   *
+   * @param[in]  callback  The callback
+   */
+  void
+  createDynamicTfSubscription(std::function<void(const tf2_msgs::msg::TFMessage::ConstSharedPtr)> callback) override;
+
+  /**
    * @brief      Reset the joint state subscription
    */
   void resetJointStateSubscription() override;
@@ -95,9 +110,30 @@ public:
    */
   bool sleepFor(const std::chrono::nanoseconds& nanoseconds) const override;
 
+  /**
+   * @brief      Get the static transform topic name
+   *
+   * @return     The static transform topic name.
+   */
+  std::string getStaticTfTopicName() const override;
+
+  /**
+   * @brief      Get the dynamic transform topic name
+   *
+   * @return     The dynamic transform topic name.
+   */
+  std::string getDynamicTfTopicName() const override;
+
+  /**
+   * @brief      Reset the static & dynamic transform subscriptions
+   */
+  void resetTfSubscriptions() override;
+
 private:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscription_;
+  rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr transform_subscriber_;
+  rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr static_transform_subscriber_;
 };
 
 }  // namespace planning_scene_monitor

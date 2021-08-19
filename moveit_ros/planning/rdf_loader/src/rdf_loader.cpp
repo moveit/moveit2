@@ -67,7 +67,7 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
 
   // Check if the robot_description parameter is declared, declare it if it's not declared yet
   if (!node->has_parameter(robot_description))
-    node->declare_parameter(robot_description);
+    node->declare_parameter(robot_description, rclcpp::ParameterType::PARAMETER_STRING);
   std::string robot_description_content;
   node->get_parameter_or(robot_description, robot_description_content, std::string());
 
@@ -88,7 +88,7 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
   const std::string srdf_description = robot_description + "_semantic";
   // Check if the robot_description_semantic parameter is declared, declare it if it's not declared yet
   if (!node->has_parameter(srdf_description))
-    node->declare_parameter(srdf_description);
+    node->declare_parameter(srdf_description, rclcpp::ParameterType::PARAMETER_STRING);
   std::string srdf_description_content;
   node->get_parameter_or(srdf_description, srdf_description_content, std::string());
 

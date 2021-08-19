@@ -34,11 +34,19 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/kinematic_constraints/utils.h>
 #include <geometric_shapes/solid_primitive_dims.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <moveit/kinematic_constraints/utils.h>
 #include <moveit/utils/message_checks.h>
+#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#else
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#endif
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#endif
 
 using namespace moveit::core;
 
@@ -147,8 +155,8 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const moveit::core::Robot
   {
     goal.joint_constraints[i].joint_name = jmg->getVariableNames()[i];
     goal.joint_constraints[i].position = vals[i];
-    goal.joint_constraints[i].tolerance_above = tolerance_below;
-    goal.joint_constraints[i].tolerance_below = tolerance_above;
+    goal.joint_constraints[i].tolerance_above = tolerance_above;
+    goal.joint_constraints[i].tolerance_below = tolerance_below;
     goal.joint_constraints[i].weight = 1.0;
   }
 
