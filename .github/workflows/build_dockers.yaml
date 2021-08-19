@@ -18,7 +18,7 @@ jobs:
       packages: write
       contents: read
     env:
-      IMAGE_ID: ghcr.io/${{ github.repository_owner }}/moveit2
+      IMAGE_ID: ghcr.io/ros-planning/moveit2
       VERSION: ${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
     steps:
@@ -45,7 +45,7 @@ jobs:
       packages: write
       contents: read
     env:
-      IMAGE_ID: ghcr.io/${{ github.repository_owner }}/moveit2
+      IMAGE_ID: ghcr.io/ros-planning/moveit2
       VERSION: ${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
     steps:
@@ -73,7 +73,7 @@ jobs:
       packages: write
       contents: read
     env:
-      IMAGE_ID: ghcr.io/${{ github.repository_owner }}/moveit2
+      IMAGE_ID: ghcr.io/ros-planning/moveit2
       VERSION: ${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
     steps:
@@ -101,7 +101,7 @@ jobs:
       packages: write
       contents: read
     env:
-      IMAGE_ID: ghcr.io/${{ github.repository_owner }}/moveit2
+      IMAGE_ID: ghcr.io/ros-planning/moveit2
       VERSION: ${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
     steps:
