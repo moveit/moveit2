@@ -21,17 +21,26 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Build image
-        run: |
-          echo Building docker ${{ env.IMAGE }}
-          docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file .docker/${{ github.job }}/Dockerfile --tag ${{ env.IMAGE }}
-
-      - name: Log in to registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Push image
-        run: docker push ${{ env.IMAGE }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Github Containter Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          file: .docker/${{ github.job }}/Dockerfile
+          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+          pull: true
+          push: true
+          no-cache: false
+          cache-from: type=registry,ref=${{ env.IMAGE }}
+          cache-to: type=inline
+          tags: ${{ env.IMAGE }}
 
   ci:
     strategy:
@@ -47,17 +56,26 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Build image
-        run: |
-          echo Building docker ${{ env.IMAGE }}
-          docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file .docker/${{ github.job }}/Dockerfile --tag ${{ env.IMAGE }}
-
-      - name: Log in to registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Push image
-        run: docker push ${{ env.IMAGE }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Github Containter Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          file: .docker/${{ github.job }}/Dockerfile
+          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+          pull: true
+          push: true
+          no-cache: false
+          cache-from: type=registry,ref=${{ env.IMAGE }}
+          cache-to: type=inline
+          tags: ${{ env.IMAGE }}
 
   ci-testing:
     needs: ci
@@ -74,17 +92,27 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Github Containter Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          file: .docker/${{ github.job }}/Dockerfile
+          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+          pull: true
+          push: true
+          no-cache: false
+          cache-from: type=registry,ref=${{ env.IMAGE }}
+          cache-to: type=inline
+          tags: ${{ env.IMAGE }}
 
-      - name: Build image
-        run: |
-          echo Building docker ${{ env.IMAGE }}
-          docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file .docker/${{ github.job }}/Dockerfile --tag ${{ env.IMAGE }}
-
-      - name: Log in to registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Push image
-        run: docker push ${{ env.IMAGE }}
 
   source:
     needs: ci-testing
@@ -101,14 +129,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Build image
-        run: |
-          echo Building docker ${{ env.IMAGE }}
-          docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file .docker/${{ github.job }}/Dockerfile --tag ${{ env.IMAGE }}
-
-      - name: Log in to registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Push image
-        run: docker push ${{ env.IMAGE }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Github Containter Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          file: .docker/${{ github.job }}/Dockerfile
+          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+          pull: true
+          push: true
+          no-cache: false
+          cache-from: type=registry,ref=${{ env.IMAGE }}
+          cache-to: type=inline
+          tags: ${{ env.IMAGE }}
