@@ -34,7 +34,6 @@ jobs:
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          pull: true
           push: true
           cache-from: type=registry,ref=${{ env.IMAGE }}
           cache-to: type=inline
@@ -67,7 +66,6 @@ jobs:
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          pull: true
           push: true
           cache-from: type=registry,ref=${{ env.IMAGE }}
           cache-to: type=inline
@@ -101,7 +99,6 @@ jobs:
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          pull: true
           push: true
           cache-from: type=registry,ref=${{ env.IMAGE }}
           cache-to: type=inline
@@ -136,7 +133,6 @@ jobs:
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          pull: true
           push: true
           cache-from: type=registry,ref=${{ env.IMAGE }}
           cache-to: type=inline
