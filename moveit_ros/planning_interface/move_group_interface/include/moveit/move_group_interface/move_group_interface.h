@@ -1006,6 +1006,25 @@ public:
 
   /**@}*/
 
+  /**
+   * \name Manage goal constraints
+   */
+  /**@{*/
+  /** \brief Get the actual set of constraints in use with this MoveGroupInterface.
+    @return A copy of the current goal constraints set for this interface
+    */
+  std::vector<moveit_msgs::msg::Constraints> getGoalConstraints() const;
+
+  /** \brief Specify a set of goal constraints to use.
+      This replaces any goal constraints set in previous calls to setGoalConstraints(). */
+  void setGoalConstraints(const std::vector<moveit_msgs::msg::Constraints>& constraints);
+
+  /** \brief Specify that no goal constraints are to be used.
+      This removes any goal constraints set in previous calls to setGoalConstraints(). */
+  void clearGoalConstraints();
+
+  /**@}*/
+
 protected:
   /** return the full RobotState of the joint-space target, only for internal use */
   const moveit::core::RobotState& getTargetRobotState() const;

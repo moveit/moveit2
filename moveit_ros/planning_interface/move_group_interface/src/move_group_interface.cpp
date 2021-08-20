@@ -84,7 +84,8 @@ enum ActiveTargetType
   JOINT,
   POSE,
   POSITION,
-  ORIENTATION
+  ORIENTATION,
+  CONSTRAINTS,
 };
 
 // Function to support both Rolling and Humble on the main branch
@@ -1157,6 +1158,10 @@ public:
         }
       }
     }
+    else if (active_target_ == CONSTRAINTS)
+    {
+      request.goal_constraints = goal_constraints_;
+    }
     else
       RCLCPP_ERROR(LOGGER, "Unable to construct MotionPlanRequest representation");
 
@@ -1321,6 +1326,21 @@ public:
     return node_->get_clock();
   }
 
+  std::vector<moveit_msgs::msg::Constraints> getGoalConstraints() const
+  {
+    return goal_constraints_;
+  }
+
+  void setGoalConstraints(const std::vector<moveit_msgs::msg::Constraints>& constraints)
+  {
+    goal_constraints_ = constraints;
+  }
+
+  void clearGoalConstraints()
+  {
+    goal_constraints_.clear();
+  }
+
 private:
   void initializeConstraintsStorageThread(const std::string& host, unsigned int port)
   {
@@ -1380,6 +1400,9 @@ private:
   // pose goal;
   // for each link we have a set of possible goal locations;
   std::map<std::string, std::vector<geometry_msgs::msg::PoseStamped>> pose_targets_;
+
+  // constraints goal
+  std::vector<moveit_msgs::msg::Constraints> goal_constraints_;
 
   // common properties for goals
   ActiveTargetType active_target_;
@@ -2392,6 +2415,22 @@ bool MoveGroupInterface::detachObject(const std::string& name)
 void MoveGroupInterface::constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& goal_out)
 {
   impl_->constructMotionPlanRequest(goal_out);
+}
+
+std::vector<moveit_msgs::msg::Constraints> MoveGroupInterface::getGoalConstraints() const
+{
+  return impl_->getGoalConstraints();
+}
+
+void MoveGroupInterface::setGoalConstraints(const std::vector<moveit_msgs::msg::Constraints>& constraints)
+{
+  impl_->setGoalConstraints(constraints);
+  impl_->setTargetType(CONSTRAINTS);
+}
+
+void MoveGroupInterface::clearGoalConstraints()
+{
+  impl_->clearGoalConstraints();
 }
 
 }  // namespace planning_interface
