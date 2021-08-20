@@ -48,11 +48,6 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
   if (!controller_action_client_)
     return false;
 
-  if (!trajectory.multi_dof_joint_trajectory.points.empty())
-  {
-    RCLCPP_WARN_STREAM(LOGGER, name_ << " cannot execute multi-dof trajectories.");
-  }
-
   if (done_)
     RCLCPP_INFO_STREAM(LOGGER, "sending trajectory to " << name_);
   else
@@ -60,6 +55,7 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
 
   control_msgs::action::FollowJointTrajectory::Goal goal = goal_template_;
   goal.trajectory = trajectory.joint_trajectory;
+  goal.multi_dof_trajectory = trajectory.multi_dof_joint_trajectory;
 
   rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SendGoalOptions send_goal_options;
   // Active callback
