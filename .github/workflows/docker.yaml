@@ -1,0 +1,114 @@
+name: docker
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [rolling, galactic]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    env:
+      IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          echo Building docker ${{ env.IMAGE }}
+          docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file .docker/${{ github.job }}/Dockerfile --tag ${{ env.IMAGE }}
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: docker push ${{ env.IMAGE }}
+
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [rolling, galactic]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    env:
+      IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          echo Building docker ${{ env.IMAGE }}
+          docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file .docker/${{ github.job }}/Dockerfile --tag ${{ env.IMAGE }}
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: docker push ${{ env.IMAGE }}
+
+  ci-testing:
+    needs: ci
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [rolling, galactic]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    env:
+      IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          echo Building docker ${{ env.IMAGE }}
+          docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file .docker/${{ github.job }}/Dockerfile --tag ${{ env.IMAGE }}
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: docker push ${{ env.IMAGE }}
+
+  source:
+    needs: ci-testing
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [rolling, galactic]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    env:
+      IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |
+          echo Building docker ${{ env.IMAGE }}
+          docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file .docker/${{ github.job }}/Dockerfile --tag ${{ env.IMAGE }}
+
+      - name: Log in to registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: docker push ${{ env.IMAGE }}

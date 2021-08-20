@@ -36,7 +36,11 @@
 
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/robot_state/conversions.h>
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#endif
 #include <boost/math/constants/constants.hpp>
 #include <numeric>
 #include "rclcpp/rclcpp.hpp"
@@ -266,7 +270,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
     trajectory.multi_dof_joint_trajectory.points.resize(waypoints_.size());
   }
 
-  static const rclcpp::Duration ZERO_DURATION(0.0);
+  static const auto ZERO_DURATION = rclcpp::Duration::from_seconds(0);
   double total_time = 0.0;
   for (std::size_t i = 0; i < waypoints_.size(); ++i)
   {
