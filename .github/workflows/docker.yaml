@@ -46,93 +46,110 @@ jobs:
           cache-to: type=inline
           tags: ${{ env.IMAGE }}
 
-      # - name: Build image
-      #   run: |
-      #     echo Building docker ${{ env.IMAGE }}
-      #     docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file .docker/${{ github.job }}/Dockerfile --tag ${{ env.IMAGE }}
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [rolling, galactic]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    env:
+      IMAGE: ghcr.io/vatanaksoytezer/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
-      # - name: Log in to registry
-      #   run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Github Containter Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          file: .docker/${{ github.job }}/Dockerfile
+          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+          pull: true
+          push: true
+          no-cache: false
+          cache-from: type=registry,ref=${{ env.IMAGE }}
+          cache-to: type=inline
+          tags: ${{ env.IMAGE }}
 
-      # - name: Push image
-      #   run: docker push ${{ env.IMAGE }}
+  ci-testing:
+    needs: ci
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [rolling, galactic]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    env:
+      IMAGE: ghcr.io/vatanaksoytezer/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
-  # ci:
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       ROS_DISTRO: [rolling, galactic]
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     packages: write
-  #     contents: read
-  #   env:
-  #     IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Github Containter Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          file: .docker/${{ github.job }}/Dockerfile
+          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+          pull: true
+          push: true
+          no-cache: false
+          cache-from: type=registry,ref=${{ env.IMAGE }}
+          cache-to: type=inline
+          tags: ${{ env.IMAGE }}
 
-  #   steps:
-  #     - uses: actions/checkout@v2
 
-  #     - name: Build image
-  #       run: |
-  #         echo Building docker ${{ env.IMAGE }}
-  #         docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file .docker/${{ github.job }}/Dockerfile --tag ${{ env.IMAGE }}
+  source:
+    needs: ci-testing
+    strategy:
+      fail-fast: false
+      matrix:
+        ROS_DISTRO: [rolling, galactic]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    env:
+      IMAGE: ghcr.io/vatanaksoytezer/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
-  #     - name: Log in to registry
-  #       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-  #     - name: Push image
-  #       run: docker push ${{ env.IMAGE }}
-
-  # ci-testing:
-  #   needs: ci
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       ROS_DISTRO: [rolling, galactic]
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     packages: write
-  #     contents: read
-  #   env:
-  #     IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
-
-  #   steps:
-  #     - uses: actions/checkout@v2
-
-  #     - name: Build image
-  #       run: |
-  #         echo Building docker ${{ env.IMAGE }}
-  #         docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file .docker/${{ github.job }}/Dockerfile --tag ${{ env.IMAGE }}
-
-  #     - name: Log in to registry
-  #       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-  #     - name: Push image
-  #       run: docker push ${{ env.IMAGE }}
-
-  # source:
-  #   needs: ci-testing
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       ROS_DISTRO: [rolling, galactic]
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     packages: write
-  #     contents: read
-  #   env:
-  #     IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
-
-  #   steps:
-  #     - uses: actions/checkout@v2
-
-  #     - name: Build image
-  #       run: |
-  #         echo Building docker ${{ env.IMAGE }}
-  #         docker build . --build-arg ROS_DISTRO=${{ matrix.ROS_DISTRO }} --file .docker/${{ github.job }}/Dockerfile --tag ${{ env.IMAGE }}
-
-  #     - name: Log in to registry
-  #       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-  #     - name: Push image
-  #       run: docker push ${{ env.IMAGE }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Github Containter Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          file: .docker/${{ github.job }}/Dockerfile
+          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
+          pull: true
+          push: true
+          no-cache: false
+          cache-from: type=registry,ref=${{ env.IMAGE }}
+          cache-to: type=inline
+          tags: ${{ env.IMAGE }}
