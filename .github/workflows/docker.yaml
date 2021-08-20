@@ -44,7 +44,6 @@ jobs:
           no-cache: false
           cache-from: type=registry,ref=${{ env.IMAGE }}
           cache-to: type=inline
-          target: builder
           tags: ${{ env.IMAGE }}
 
       # - name: Build image
