@@ -16,6 +16,7 @@ RUN \
     # Download moveit source so that we can get necessary dependencies
     git clone https://github.com/ros-planning/moveit2.git -b main && \
     vcs import < moveit2/moveit2.repos && \
+    if [ -r moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import < moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
     #
     # Update apt package list as cache is cleared in previous container
     # Usually upgrading involves a few packages only (if container builds became out-of-sync)
