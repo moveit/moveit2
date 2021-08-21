@@ -55,18 +55,19 @@ bool declareAndGetParam(double& output_value, const std::string& param_name, con
     {
       node->declare_parameter<double>(param_name, std::numeric_limits<double>::quiet_NaN());
     }
-    output_value = node->get_parameter<double>(param_name, output_value);
+    node->get_parameter<double>(param_name, output_value);
     if (std::isnan(output_value))
     {
-      RCLCPP_ERROR(node->get_logger(), "Parameter \'%s\', is not set in the config file.", param_name);
+      RCLCPP_ERROR(node->get_logger(), "Parameter \'%s\', is not set in the config file.", param_name.c_str());
       return false;
     }
     return true;
   }
   catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
   {
-    RCLCPP_WARN(node->get_logger(), "InvalidParameterTypeException(\'%s\'): ", param_name, e.what());
-    RCLCPP_ERROR(node->get_logger(), "Error getting parameter \'%s\', check parameter type in YAML file", param_name);
+    RCLCPP_WARN(node->get_logger(), "InvalidParameterTypeException(\'%s\'): %s", param_name.c_str(), e.what());
+    RCLCPP_ERROR(node->get_logger(), "Error getting parameter \'%s\', check parameter type in YAML file",
+                 param_name.c_str());
     throw e;
   }
 }

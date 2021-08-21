@@ -36,16 +36,51 @@
 #define JOINT_LIMITS_INTERFACE_EXTENSION_H
 
 #include "pilz_industrial_motion_planner/joint_limits_extension.h"
+#include <limits>
 
 // TODO(henning): Re-include when this is available, until then the headers content is copied below
-// #include <joint_limits_interface/joint_limits_rosparam.hpp>
+// TODO(sjahr): Current implementation does not offer the desired API (08/2021). Use draft from dstogl instead
+// (https://github.com/ros-controls/ros2_control/pull/462/files) #include <joint_limits_interface/joint_limits_rosparam.hpp>
 //////////////////////////////////////////////////////////////
 // start of <joint_limits_interface/joint_limits_rosparam.hpp>
+namespace joint_limits_interface
+{
+inline bool declare_parameters(const std::string& joint_name, const rclcpp::Node::SharedPtr& node)
+{
+  const std::string param_base_name = "joint_limits." + joint_name;
+  try
+  {
+    node->declare_parameter<bool>(param_base_name + ".has_position_limits", false);
+    node->declare_parameter<double>(param_base_name + ".min_position", std::numeric_limits<double>::quiet_NaN());
+    node->declare_parameter<double>(param_base_name + ".max_position", std::numeric_limits<double>::quiet_NaN());
+    node->declare_parameter<bool>(param_base_name + ".has_velocity_limits", false);
+    node->declare_parameter<double>(param_base_name + ".min_velocity", std::numeric_limits<double>::quiet_NaN());
+    node->declare_parameter<double>(param_base_name + ".max_velocity", std::numeric_limits<double>::quiet_NaN());
+    node->declare_parameter<bool>(param_base_name + ".has_acceleration_limits", false);
+    node->declare_parameter<double>(param_base_name + ".max_acceleration", std::numeric_limits<double>::quiet_NaN());
+    node->declare_parameter<bool>(param_base_name + ".has_jerk_limits", false);
+    node->declare_parameter<double>(param_base_name + ".max_jerk", std::numeric_limits<double>::quiet_NaN());
+    node->declare_parameter<bool>(param_base_name + ".has_effort_limits", false);
+    node->declare_parameter<double>(param_base_name + ".max_effort", std::numeric_limits<double>::quiet_NaN());
+    node->declare_parameter<bool>(param_base_name + ".angle_wraparound", false);
+    node->declare_parameter<bool>(param_base_name + ".has_soft_limits", false);
+    node->declare_parameter<double>(param_base_name + ".k_position", std::numeric_limits<double>::quiet_NaN());
+    node->declare_parameter<double>(param_base_name + ".k_velocity", std::numeric_limits<double>::quiet_NaN());
+    node->declare_parameter<double>(param_base_name + ".soft_lower_limit", std::numeric_limits<double>::quiet_NaN());
+    node->declare_parameter<double>(param_base_name + ".soft_upper_limit", std::numeric_limits<double>::quiet_NaN());
+  }
+  catch (const std::exception& ex)
+  {
+    RCLCPP_ERROR(node->get_logger(), "%s", ex.what());
+    return false;
+  }
+  return true;
+}
 //////////////////////////////////////////////////////////////
-/// Populate a JointLimits instance from the ROS parameter server.
+/// Populate a JointLimits instance from the ROS2 node parameters.
 /**
- * It is assumed that the following parameter structure is followed on the provided NodeHandle. Unspecified parameters
- * are simply not added to the joint limits specification.
+ * It is assumed that the following parameter structure is followed on the provided NodeHandle to the node. Unspecified
+ * parameters are simply not added to the joint limits specification.
  * \code
  * joint_limits:
  *   foo_joint:
@@ -71,13 +106,11 @@
  *
  * \param[in] joint_name Name of joint whose limits are to be fetched.
  * \param[in] node NodeHandle where the joint limits are specified.
- * \param[out] limits Where joint limit data gets written into. Limits specified in the parameter server will overwrite
- * existing values. Values in \p limits not specified in the parameter server remain unchanged.
+ * \param[out] limits Where joint limit data gets written into. Limits specified in the node parameters will overwrite
+ * existing values. Values in \p limits not specified in the node parameters remain unchanged.
  * \return True if a limits specification is found (ie. the \p joint_limits/joint_name parameter exists in \p node),
  * false otherwise.
  */
-namespace joint_limits_interface
-{
 inline bool getJointLimits(const std::string& joint_name, const rclcpp::Node::SharedPtr& node, JointLimits& limits)
 {
   const std::string param_base_name = "joint_limits." + joint_name;
@@ -103,7 +136,7 @@ inline bool getJointLimits(const std::string& joint_name, const rclcpp::Node::Sh
         !node->has_parameter(param_base_name + ".soft_upper_limit"))
     {
       RCLCPP_ERROR_STREAM(node->get_logger(), "No joint limits specification found for joint '"
-                                                  << joint_name << "' in the parameter server (node: "
+                                                  << joint_name << "' in the node parameter (node: "
                                                   << std::string(node->get_name()) + " param name: " + param_base_name
                                                   << ").");
       return false;
@@ -206,18 +239,17 @@ inline bool getJointLimits(const std::string& joint_name, const rclcpp::Node::Sh
   return true;
 }
 
-/// Populate a SoftJointLimits instance from the ROS parameter server.
+/// Populate a SoftJointLimits instance from the ROS2 node parameters.
 /**
  * It is assumed that the following parameter structure is followed on the provided NodeHandle. Only completely
  * specified soft joint limits specifications will be considered valid. \code joint_limits: foo_joint: soft_lower_limit:
  * 0.0 soft_upper_limit: 1.0 k_position: 10.0 k_velocity: 10.0 \endcode
  *
- * This specification is similar to the specification of the safety_controller tag in the URDF, adapted to the parameter
- * server.
+ * This specification is similar to the specification of the safety_controller tag in the URDF, adapted to the node paramters.
  *
  * \param[in] joint_name Name of joint whose limits are to be fetched.
  * \param[in] node NodeHandle where the joint limits are specified.
- * \param[out] soft_limits Where soft joint limit data gets written into. Limits specified in the parameter server will
+ * \param[out] soft_limits Where soft joint limit data gets written into. Limits specified in the node parameters will
  * overwrite existing values. \return True if a complete soft limits specification is found (ie. if all \p k_position,
  * \p k_velocity, \p soft_lower_limit and \p soft_upper_limit exist in \p joint_limits/joint_name namespace), false
  * otherwise.
@@ -235,7 +267,7 @@ inline bool getSoftJointLimits(const std::string& joint_name, const rclcpp::Node
         !node->has_parameter(param_base_name + ".soft_upper_limit"))
     {
       RCLCPP_DEBUG_STREAM(node->get_logger(), "No soft joint limits specification found for joint '"
-                                                  << joint_name << "' in the parameter server (node: "
+                                                  << joint_name << "' in the node parameter (node: "
                                                   << std::string(node->get_name()) + " param name: " + param_base_name
                                                   << ").");
       return false;
@@ -287,7 +319,6 @@ inline bool getJointLimits(const std::string& joint_name, const rclcpp::Node::Sh
     return false;  // LCOV_EXCL_LINE // The case where getJointLimits returns
                    // false is covered above.
   }
-
   try
   {
     // Deceleration limits
@@ -296,7 +327,7 @@ inline bool getJointLimits(const std::string& joint_name, const rclcpp::Node::Sh
     if (limits.has_deceleration_limits)
     {
       limits.max_deceleration =
-          node->declare_parameter(limits_namespace + ".max_deceleration", limits.max_deceleration);
+          node->declare_parameter(limits_namespace + ".max_deceleration", std::numeric_limits<double>::quiet_NaN());
     }
   }
   catch (const std::exception& ex)

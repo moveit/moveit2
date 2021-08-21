@@ -32,36 +32,63 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#pragma once
+#include <gtest/gtest.h>
 
 #include <rclcpp/rclcpp.hpp>
-#include "pilz_industrial_motion_planner/cartesian_limit.h"
 
-namespace pilz_industrial_motion_planner
-{
+#include "pilz_industrial_motion_planner/cartesian_limit.h"
+#include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
+
 /**
- * @brief Obtains cartesian limits from the node parameters
+ * @brief Unittest of the CartesianLimitsAggregator class
  */
-class CartesianLimitsAggregator
+class CartesianLimitsAggregator : public ::testing::Test
 {
-public:
-  /**
-   * @brief Loads cartesian limits from the node parameters
-   *
-   * The parameters are expected to be under "~/cartesian_limits" of the given
-   * node handle.
-   * The following limits can be specified:
-   * - "max_trans_vel", the maximum translational velocity [m/s]
-   * - "max_trans_acc, the maximum translational acceleration [m/s^2]
-   * - "max_trans_dec", the maximum translational deceleration (<= 0) [m/s^2]
-   * - "max_rot_vel", the maximum rotational velocity [rad/s]
-   * - "max_rot_acc", the maximum rotational acceleration [rad/s^2]
-   * - "max_rot_dec", the maximum rotational deceleration (<= 0)[rad/s^2]
-   * @param node node to access the parameters
-   * @param param_namespace the parameter name to access the parameters
-   * @return the obtained cartesian limits
-   */
-  static CartesianLimit getAggregatedLimits(const rclcpp::Node::SharedPtr& node, const std::string& param_namespace);
+protected:
+  void SetUp() override
+  {
+    node_ = rclcpp::Node::make_shared("unittest_cartesian_limits_aggregator");
+  }
+  rclcpp::Node::SharedPtr node_;
 };
 
-}  // namespace pilz_industrial_motion_planner
+/**
+ * @brief Check if only velocity is set
+ */
+TEST_F(CartesianLimitsAggregator, OnlyVelocity)
+{
+  pilz_industrial_motion_planner::CartesianLimit limit =
+      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node_, "only_vel");
+  EXPECT_TRUE(limit.hasMaxTranslationalVelocity());
+  EXPECT_EQ(limit.getMaxTranslationalVelocity(), 10);
+  EXPECT_FALSE(limit.hasMaxTranslationalAcceleration());
+  EXPECT_FALSE(limit.hasMaxTranslationalDeceleration());
+  EXPECT_FALSE(limit.hasMaxRotationalVelocity());
+}
+
+/**
+ * @brief Check if all values are set correctly
+ */
+TEST_F(CartesianLimitsAggregator, AllValues)
+{
+  pilz_industrial_motion_planner::CartesianLimit limit =
+      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node_, "all_values");
+  EXPECT_TRUE(limit.hasMaxTranslationalVelocity());
+  EXPECT_EQ(limit.getMaxTranslationalVelocity(), 1);
+
+  EXPECT_TRUE(limit.hasMaxTranslationalAcceleration());
+  EXPECT_EQ(limit.getMaxTranslationalAcceleration(), 2);
+
+  EXPECT_TRUE(limit.hasMaxTranslationalDeceleration());
+  EXPECT_EQ(limit.getMaxTranslationalDeceleration(), -3);
+
+  EXPECT_TRUE(limit.hasMaxRotationalVelocity());
+  EXPECT_EQ(limit.getMaxRotationalVelocity(), 4);
+}
+
+int main(int argc, char** argv)
+{
+  rclcpp::init(argc, argv);
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

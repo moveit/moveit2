@@ -52,7 +52,7 @@
 
 namespace pilz_industrial_motion_planner
 {
-static const std::string PARAM_NAMESPACE_LIMTS = "robot_description_planning";
+static const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner");
 
 bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
@@ -67,11 +67,11 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
 
   // Obtain the aggregated joint limits
   aggregated_limit_active_joints_ = pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
-      node, PARAM_NAMESPACE_LIMTS, model->getActiveJointModels());
+      node, PARAM_NAMESPACE_LIMITS, model->getActiveJointModels());
 
   // Obtain cartesian limits
   cartesian_limit_ =
-      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node, PARAM_NAMESPACE_LIMTS);
+      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node, PARAM_NAMESPACE_LIMITS);
 
   // Load the planning context loader
   planner_context_loader = std::make_unique<pluginlib::ClassLoader<PlanningContextLoader>>(

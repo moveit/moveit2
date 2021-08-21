@@ -35,8 +35,11 @@
 #ifndef JOINT_LIMITS_EXTENSION_H
 #define JOINT_LIMITS_EXTENSION_H
 
+#include <limits>
+
 // TODO(henning): Re-include when this is available, until then the headers content is copied below
-// #include <joint_limits_interface/joint_limits.h>
+// TODO(sjahr): Current implementation does not offer the desired API (08/2021). Use draft from dstogl instead
+// (https://github.com/ros-controls/ros2_control/pull/462/files) #include <joint_limits_interface/joint_limits.h>
 /////////////////////////////////////////////////////
 // start of <joint_limits_interface/joint_limits.hpp>
 // //////////////////////////////////////////////////
@@ -45,12 +48,12 @@ namespace joint_limits_interface
 struct JointLimits
 {
   JointLimits()
-    : min_position(0.0)
-    , max_position(0.0)
-    , max_velocity(0.0)
-    , max_acceleration(0.0)
-    , max_jerk(0.0)
-    , max_effort(0.0)
+    : min_position(std::numeric_limits<double>::quiet_NaN())
+    , max_position(std::numeric_limits<double>::quiet_NaN())
+    , max_velocity(std::numeric_limits<double>::quiet_NaN())
+    , max_acceleration(std::numeric_limits<double>::quiet_NaN())
+    , max_jerk(std::numeric_limits<double>::quiet_NaN())
+    , max_effort(std::numeric_limits<double>::quiet_NaN())
     , has_position_limits(false)
     , has_velocity_limits(false)
     , has_acceleration_limits(false)
@@ -77,7 +80,11 @@ struct JointLimits
 
 struct SoftJointLimits
 {
-  SoftJointLimits() : min_position(0.0), max_position(0.0), k_position(0.0), k_velocity(0.0)
+  SoftJointLimits()
+    : min_position(std::numeric_limits<double>::quiet_NaN())
+    , max_position(std::numeric_limits<double>::quiet_NaN())
+    , k_position(std::numeric_limits<double>::quiet_NaN())
+    , k_velocity(std::numeric_limits<double>::quiet_NaN())
   {
   }
 

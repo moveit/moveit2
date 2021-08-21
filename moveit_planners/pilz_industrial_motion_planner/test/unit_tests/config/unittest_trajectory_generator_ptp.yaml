@@ -1,0 +1,6 @@
+planning_group : "manipulator"
+target_link : "prbt_tcp"
+joint_position_tolerance : 1.0e-8
+joint_velocity_tolerance : 1.0e-8
+joint_acceleration_tolerance : 1.0e-8
+pose_norm_tolerance : 1.0e-6

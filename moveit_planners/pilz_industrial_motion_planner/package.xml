@@ -46,11 +46,15 @@
   <test_depend>cmake_modules</test_depend>
   <test_depend>code_coverage</test_depend>
   -->
+  <test_depend>rostest</test_depend>
   <test_depend>pilz_industrial_motion_planner_testutils</test_depend>
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
   <test_depend>moveit_resources_prbt_moveit_config</test_depend>
   <test_depend>moveit_resources_prbt_support</test_depend>
   <test_depend>moveit_resources_prbt_pg70_support</test_depend>
+  <test_depend>moveit_configs_utils</test_depend>
+  <test_depend>parameter_builder</test_depend>
+  <test_depend>boost</test_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
