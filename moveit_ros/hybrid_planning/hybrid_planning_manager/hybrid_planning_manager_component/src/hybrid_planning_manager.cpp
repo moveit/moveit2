@@ -78,7 +78,7 @@ bool HybridPlanningManager::initialize()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_FATAL(LOGGER, "Exception while creating planner logic plugin loader '%s'", ex.what());
+    RCLCPP_ERROR(LOGGER, "Exception while creating planner logic plugin loader '%s'", ex.what());
   }
   // TODO(sjahr) Refactor parameter declaration and use repository wide solution
   std::string logic_plugin_name = "";
@@ -110,8 +110,7 @@ bool HybridPlanningManager::initialize()
       rclcpp_action::create_client<moveit_msgs::action::LocalPlanner>(this, "local_planning_action");
   if (!local_planner_action_client_->wait_for_action_server(2s))
   {
-    const std::string error = "Local planner action server not available after waiting";
-    RCLCPP_FATAL(LOGGER, error);
+    RCLCPP_ERROR(LOGGER, "Local planner action server not available after waiting");
     return false;
   }
 
@@ -120,8 +119,7 @@ bool HybridPlanningManager::initialize()
       rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(this, "global_planning_action");
   if (!global_planner_action_client_->wait_for_action_server(2s))
   {
-    const std::string error = "Global planner action server not available after waiting";
-    RCLCPP_FATAL(LOGGER, error);
+    RCLCPP_ERROR(LOGGER, "Global planner action server not available after waiting");
     return false;
   }
 
