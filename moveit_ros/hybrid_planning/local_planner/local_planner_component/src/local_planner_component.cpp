@@ -71,8 +71,8 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
         }
         else
         {
-          const std::string error = "Failed to initialize global planner";
-          RCLCPP_FATAL(LOGGER, error);
+          timer_->cancel();
+          throw std::runtime_error("Failed to initialize local planner");
         }
       default:
         break;
@@ -92,9 +92,8 @@ bool LocalPlannerComponent::initialize()
       node_ptr, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor");
   if (!planning_scene_monitor_->getPlanningScene())
   {
-    const std::string error = "Unable to configure planning scene monitor";
-    RCLCPP_FATAL(LOGGER, error);
-    throw std::runtime_error(error);
+    RCLCPP_ERROR(LOGGER, "Unable to configure planning scene monitor");
+    return false;
   }
 
   // Start state and scene monitors
@@ -112,7 +111,8 @@ bool LocalPlannerComponent::initialize()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_FATAL(LOGGER, "Exception while creating trajectory operator plugin loader %s", ex.what());
+    RCLCPP_ERROR(LOGGER, "Exception while creating trajectory operator plugin loader: '%s'", ex.what());
+    return false;
   }
   try
   {
@@ -125,8 +125,9 @@ bool LocalPlannerComponent::initialize()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading trajectory operator '%s': %s",
+    RCLCPP_ERROR(LOGGER, "Exception while loading trajectory operator '%s': '%s'",
                  config_.trajectory_operator_plugin_name.c_str(), ex.what());
+    return false;
   }
 
   // Load local constraint solver
@@ -138,20 +139,22 @@ bool LocalPlannerComponent::initialize()
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_FATAL(LOGGER, "Exception while creating constraint solver plugin loader %s", ex.what());
+    RCLCPP_ERROR(LOGGER, "Exception while creating constraint solver plugin loader '%s'", ex.what());
+    return false;
   }
   try
   {
     local_constraint_solver_instance_ =
         local_constraint_solver_plugin_loader_->createUniqueInstance(config_.local_constraint_solver_plugin_name);
-    if (!local_constraint_solver_instance_->initialize(node_ptr, planning_scene_monitor_, "panda_arm"))
+    if (!local_constraint_solver_instance_->initialize(node_ptr, planning_scene_monitor_, config_.group_name))
       throw std::runtime_error("Unable to initialize constraint solver plugin");
     RCLCPP_INFO(LOGGER, "Using constraint solver interface '%s'", config_.local_constraint_solver_plugin_name.c_str());
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading constraint solver '%s': %s",
+    RCLCPP_ERROR(LOGGER, "Exception while loading constraint solver '%s': '%s'",
                  config_.local_constraint_solver_plugin_name.c_str(), ex.what());
+    return false;
   }
 
   // Initialize local planning request action server
