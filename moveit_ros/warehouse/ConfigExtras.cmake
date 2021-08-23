@@ -1,11 +1,11 @@
 # Extras module needed for dependencies to find boost components
 
 find_package(
-  Boost REQUIRED
+  Boost
+  REQUIRED
   thread
   system
   filesystem
   regex
   date_time
-  program_options
-)
+  program_options)

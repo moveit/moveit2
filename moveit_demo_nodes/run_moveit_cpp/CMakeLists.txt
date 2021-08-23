@@ -16,31 +16,24 @@ find_package(moveit_ros_planning_interface REQUIRED)
 # This shouldn't be necessary (required by moveit_simple_controller_manager)
 find_package(rosidl_default_runtime REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+# uncomment the following section in order to fill in further dependencies
+# manually. find_package(<dependency> REQUIRED)
 
 add_executable(run_moveit_cpp src/run_moveit_cpp.cpp)
-ament_target_dependencies(run_moveit_cpp
-  moveit_ros_planning_interface
-  Boost
-)
+ament_target_dependencies(run_moveit_cpp moveit_ros_planning_interface Boost)
 
-install(TARGETS run_moveit_cpp
+install(
+  TARGETS run_moveit_cpp
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
-  INCLUDES DESTINATION include
-)
+  INCLUDES
+  DESTINATION include)
 ament_export_targets(export_${PROJECT_NAME})
 
-install(DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}
-)
-install(DIRECTORY config
-  DESTINATION share/${PROJECT_NAME}
-)
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

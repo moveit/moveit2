@@ -1,30 +1,25 @@
 cmake_minimum_required(VERSION 3.1.3)
 project(pilz_industrial_motion_planner_testutils)
 
-## Add support for C++11, supported in ROS Kinetic and newer
+# Add support for C++11, supported in ROS Kinetic and newer
 add_definitions(-std=c++11)
 add_definitions(-Wall)
 add_definitions(-Wextra)
 add_definitions(-Wno-unused-parameter)
 add_definitions(-Werror)
 
-find_package(catkin REQUIRED COMPONENTS
-  tf2_eigen
-  moveit_core
-  moveit_msgs
-)
+find_package(catkin REQUIRED COMPONENTS tf2_eigen moveit_core moveit_msgs)
 
 find_package(Boost REQUIRED COMPONENTS)
 
-################
-## Clang tidy ##
-################
+# ##############################################################################
+# Clang tidy ##
+# ##############################################################################
 if(CATKIN_ENABLE_CLANG_TIDY)
   find_program(
     CLANG_TIDY_EXE
     NAMES "clang-tidy"
-    DOC "Path to clang-tidy executable"
-  )
+    DOC "Path to clang-tidy executable")
   if(NOT CLANG_TIDY_EXE)
     message(FATAL_ERROR "clang-tidy not found.")
   else()
@@ -33,56 +28,50 @@ if(CATKIN_ENABLE_CLANG_TIDY)
   endif()
 endif()
 
-###################################
-## catkin specific configuration ##
-###################################
+# ##############################################################################
+# catkin specific configuration ##
+# ##############################################################################
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS moveit_core moveit_msgs
-  DEPENDS Boost
-)
-
-###########
-## Build ##
-###########
-
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(
+  INCLUDE_DIRS
   include
-  ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-)
+  LIBRARIES
+  ${PROJECT_NAME}
+  CATKIN_DEPENDS
+  moveit_core
+  moveit_msgs
+  DEPENDS
+  Boost)
 
-## Declare a C++ library
-add_library(${PROJECT_NAME}
-  src/cartesianconfiguration.cpp
-  src/jointconfiguration.cpp
-  src/robotconfiguration.cpp
-  src/sequence.cpp
-  src/xml_testdata_loader.cpp
-)
+# ##############################################################################
+# Build ##
+# ##############################################################################
 
-## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}
-  ${catkin_LIBRARIES}
-)
+# Specify additional locations of header files Your package locations should be
+# listed before other locations
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
-add_dependencies(${PROJECT_NAME}
-  ${catkin_EXPORTED_TARGETS})
+# Declare a C++ library
+add_library(
+  ${PROJECT_NAME}
+  src/cartesianconfiguration.cpp src/jointconfiguration.cpp
+  src/robotconfiguration.cpp src/sequence.cpp src/xml_testdata_loader.cpp)
 
-#############
-## Install ##
-#############
+# Specify libraries to link a library or executable target against
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
-install(DIRECTORY include/${PROJECT_NAME}/
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
+
+# ##############################################################################
+# Install ##
+# ##############################################################################
+
+install(
+  DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.h"
-  PATTERN ".svn" EXCLUDE
-)
+  FILES_MATCHING
+  PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE)
 
-## Mark executables and/or libraries for installation
+# Mark executables and/or libraries for installation
 install(TARGETS ${PROJECT_NAME}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
+        LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

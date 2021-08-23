@@ -18,25 +18,29 @@ find_package(LAPACK REQUIRED)
 include_directories(include)
 
 set(IKFAST_LIBRARY_NAME _LIBRARY_NAME_)
-add_library(${IKFAST_LIBRARY_NAME} SHARED src/_ROBOT_NAME___GROUP_NAME__ikfast_moveit_plugin.cpp)
-ament_target_dependencies(${IKFAST_LIBRARY_NAME}
+add_library(${IKFAST_LIBRARY_NAME} SHARED
+            src/_ROBOT_NAME___GROUP_NAME__ikfast_moveit_plugin.cpp)
+ament_target_dependencies(
+  ${IKFAST_LIBRARY_NAME}
   rclcpp
   moveit_core
   pluginlib
   tf2_kdl
   orocos_kdl
-  tf2_eigen
-)
+  tf2_eigen)
 # suppress warnings about unused variables in OpenRave's solver code
-target_compile_options(${IKFAST_LIBRARY_NAME} PRIVATE -Wno-unused-variable -Wno-unused-parameter)
+target_compile_options(${IKFAST_LIBRARY_NAME} PRIVATE -Wno-unused-variable
+                                                      -Wno-unused-parameter)
 
-install(TARGETS ${IKFAST_LIBRARY_NAME}
+install(
+  TARGETS ${IKFAST_LIBRARY_NAME}
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME})
 
-pluginlib_export_plugin_description_file(moveit_core _ROBOT_NAME___GROUP_NAME__moveit_ikfast_plugin_description.xml)
+pluginlib_export_plugin_description_file(
+  moveit_core _ROBOT_NAME___GROUP_NAME__moveit_ikfast_plugin_description.xml)
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(moveit_core)

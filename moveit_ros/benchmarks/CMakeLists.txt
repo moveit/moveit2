@@ -23,39 +23,29 @@ include(ConfigExtras.cmake)
 
 include_directories(include)
 
-set(THIS_PACKAGE_INCLUDE_DEPENDS
-  rclcpp
-  Boost
-  tf2_eigen
-  moveit_ros_planning
-  moveit_ros_warehouse
-  pluginlib
-)
+set(THIS_PACKAGE_INCLUDE_DEPENDS rclcpp Boost tf2_eigen moveit_ros_planning
+                                 moveit_ros_warehouse pluginlib)
 
-add_library(${MOVEIT_LIB_NAME} SHARED
-  src/BenchmarkOptions.cpp
-  src/BenchmarkExecutor.cpp
-)
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+add_library(${MOVEIT_LIB_NAME} SHARED src/BenchmarkOptions.cpp
+                                      src/BenchmarkExecutor.cpp)
+set_target_properties(${MOVEIT_LIB_NAME}
+                      PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 if(WIN32)
   set(EXTRA_LIB ws2_32.lib)
 endif()
-ament_target_dependencies(${MOVEIT_LIB_NAME}
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
+ament_target_dependencies(${MOVEIT_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(${MOVEIT_LIB_NAME} ${EXTRA_LIB})
 
 add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
-ament_target_dependencies(moveit_run_benchmark
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
+ament_target_dependencies(moveit_run_benchmark ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_run_benchmark ${MOVEIT_LIB_NAME})
 
-add_executable(moveit_combine_predefined_poses_benchmark src/simple_benchmarks/CombinePredefinedPosesBenchmark.cpp)
+add_executable(moveit_combine_predefined_poses_benchmark
+               src/simple_benchmarks/CombinePredefinedPosesBenchmark.cpp)
 ament_target_dependencies(moveit_combine_predefined_poses_benchmark
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
-target_link_libraries(moveit_combine_predefined_poses_benchmark ${MOVEIT_LIB_NAME})
+                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_combine_predefined_poses_benchmark
+                      ${MOVEIT_LIB_NAME})
 
 install(
   TARGETS ${MOVEIT_LIB_NAME}
@@ -63,30 +53,21 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
+  INCLUDES
+  DESTINATION include)
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-install(
-  TARGETS
-    moveit_run_benchmark
-    moveit_combine_predefined_poses_benchmark
-  DESTINATION lib/${PROJECT_NAME}
-)
+install(TARGETS moveit_run_benchmark moveit_combine_predefined_poses_benchmark
+        DESTINATION lib/${PROJECT_NAME})
 
-install(DIRECTORY include/
-  DESTINATION include
-)
+install(DIRECTORY include/ DESTINATION include)
 
 install(PROGRAMS scripts/moveit_benchmark_statistics.py
-  DESTINATION lib/${PROJECT_NAME}
-)
+        DESTINATION lib/${PROJECT_NAME})
 
-install(DIRECTORY examples/
-  DESTINATION share/${PROJECT_NAME}
-)
+install(DIRECTORY examples/ DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

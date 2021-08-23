@@ -48,8 +48,7 @@ find_package(trajectory_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(common_interfaces REQUIRED)
 find_package(pluginlib REQUIRED)
-# TODO: Port python bindings
-# find_package(pybind11 REQUIRED)
+# TODO: Port python bindings find_package(pybind11 REQUIRED)
 
 # Set target file path for version.h
 set(VERSION_FILE_PATH ${CMAKE_BINARY_DIR}/include)
@@ -78,12 +77,10 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     planning_request_adapter/include
     planning_scene/include
     profiler/include
-    # TODO: Port python bindings
-    # python/tools/include
+    # TODO: Port python bindings python/tools/include
     sensor_manager/include
     trajectory_processing/include
-    utils/include
-)
+    utils/include)
 
 set(THIS_PACKAGE_LIBRARIES
     moveit_exceptions
@@ -102,59 +99,61 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_constraint_samplers
     moveit_planning_request_adapter
     moveit_profiler
-    # TODO: Port python bindings
-    # moveit_python_tools
+    # TODO: Port python bindings moveit_python_tools
     moveit_trajectory_processing
     moveit_distance_field
     moveit_collision_distance_field
     moveit_kinematics_metrics
     moveit_dynamics_solver
     moveit_utils
-    moveit_test_utils
-)
+    moveit_test_utils)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  angles
-  eigen_stl_containers
-  geometric_shapes
-  geometry_msgs
-  kdl_parser
-  moveit_msgs
-  octomap_msgs
-  random_numbers
-  sensor_msgs
-  shape_msgs
-  srdfdom
-  std_msgs
-  tf2_eigen
-  tf2_geometry_msgs
-  trajectory_msgs
-  visualization_msgs
-  Eigen3
-  eigen3_cmake_module
-  OCTOMAP
-  Bullet
-)
+    angles
+    eigen_stl_containers
+    geometric_shapes
+    geometry_msgs
+    kdl_parser
+    moveit_msgs
+    octomap_msgs
+    random_numbers
+    sensor_msgs
+    shape_msgs
+    srdfdom
+    std_msgs
+    tf2_eigen
+    tf2_geometry_msgs
+    trajectory_msgs
+    visualization_msgs
+    Eigen3
+    eigen3_cmake_module
+    OCTOMAP
+    Bullet)
 
-pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
-pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
+pluginlib_export_plugin_description_file(moveit_core
+                                         collision_detector_fcl_description.xml)
+pluginlib_export_plugin_description_file(
+  moveit_core collision_detector_bullet_description.xml)
 
-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
-  ${LIBFCL_INCLUDE_DIRS}
-)
+include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS} ${LIBFCL_INCLUDE_DIRS})
 
-include_directories(${THIS_PACKAGE_INCLUDE_DIRS}
-                    ${VERSION_FILE_PATH})
+include_directories(${THIS_PACKAGE_INCLUDE_DIRS} ${VERSION_FILE_PATH})
 
 # Generate and install version.h
-string(REGEX REPLACE "^([0-9]+)\\..*" "\\1" MOVEIT_VERSION_MAJOR "${${PROJECT_NAME}_VERSION}")
-string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1" MOVEIT_VERSION_MINOR "${${PROJECT_NAME}_VERSION}")
-string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" MOVEIT_VERSION_PATCH "${${PROJECT_NAME}_VERSION}")
+string(REGEX REPLACE "^([0-9]+)\\..*" "\\1" MOVEIT_VERSION_MAJOR
+                     "${${PROJECT_NAME}_VERSION}")
+string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1" MOVEIT_VERSION_MINOR
+                     "${${PROJECT_NAME}_VERSION}")
+string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" MOVEIT_VERSION_PATCH
+                     "${${PROJECT_NAME}_VERSION}")
 set(MOVEIT_VERSION_EXTRA "Alpha")
-set(MOVEIT_VERSION "${MOVEIT_VERSION_MAJOR}.${MOVEIT_VERSION_MINOR}.${MOVEIT_VERSION_PATCH}-${MOVEIT_VERSION_EXTRA}")
+set(MOVEIT_VERSION
+    "${MOVEIT_VERSION_MAJOR}.${MOVEIT_VERSION_MINOR}.${MOVEIT_VERSION_PATCH}-${MOVEIT_VERSION_EXTRA}"
+)
 message(STATUS " *** Building MoveIt ${MOVEIT_VERSION} ***")
 configure_file("version/version.h.in" "${VERSION_FILE_PATH}/moveit/version.h")
-install(FILES "${VERSION_FILE_PATH}/moveit/version.h" DESTINATION include/moveit)
+install(FILES "${VERSION_FILE_PATH}/moveit/version.h"
+        DESTINATION include/moveit)
 
 add_subdirectory(version)
 add_subdirectory(macros)
@@ -184,35 +183,25 @@ add_subdirectory(kinematics_metrics)
 add_subdirectory(dynamics_solver)
 add_subdirectory(collision_detection_bullet)
 
-pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
+pluginlib_export_plugin_description_file(
+  moveit_core collision_detector_bullet_description.xml)
 
-# TODO: Port python bindings
-# add_subdirectory(python)
-# set(pymoveit_libs
-#   moveit_collision_detection
-#   moveit_kinematic_constraints
-#   moveit_planning_scene
-#   moveit_python_tools
-#   moveit_robot_model
-#   moveit_robot_state
-#   moveit_transforms
-# )
+# TODO: Port python bindings add_subdirectory(python) set(pymoveit_libs
+# moveit_collision_detection moveit_kinematic_constraints moveit_planning_scene
+# moveit_python_tools moveit_robot_model moveit_robot_state moveit_transforms )
 #
-# pybind_add_module(pymoveit_core
-#     python/pymoveit_core.cpp
-#     collision_detection/src/pycollision_detection.cpp
-#     robot_model/src/pyrobot_model.cpp
-#     robot_state/src/pyrobot_state.cpp
-#     transforms/src/pytransforms.cpp
-#     planning_scene/src/pyplanning_scene.cpp
-#     kinematic_constraints/src/pykinematic_constraint.cpp
-# )
-# target_include_directories(pymoveit_core SYSTEM PRIVATE ${catkin_INCLUDE_DIRS})
-# target_link_libraries(pymoveit_core PRIVATE ${pymoveit_libs} ${catkin_LIBRARIES})
+# pybind_add_module(pymoveit_core python/pymoveit_core.cpp
+# collision_detection/src/pycollision_detection.cpp
+# robot_model/src/pyrobot_model.cpp robot_state/src/pyrobot_state.cpp
+# transforms/src/pytransforms.cpp planning_scene/src/pyplanning_scene.cpp
+# kinematic_constraints/src/pykinematic_constraint.cpp )
+# target_include_directories(pymoveit_core SYSTEM PRIVATE
+# ${catkin_INCLUDE_DIRS}) target_link_libraries(pymoveit_core PRIVATE
+# ${pymoveit_libs} ${catkin_LIBRARIES})
 #
-# #catkin_lint: ignore_once undefined_target (pymoveit_core is defined by pybind_add_module)
-# install(TARGETS pymoveit_core LIBRARY DESTINATION ${CATKIN_GLOBAL_PYTHON_DESTINATION})
-
+# #catkin_lint: ignore_once undefined_target (pymoveit_core is defined by
+# pybind_add_module) install(TARGETS pymoveit_core LIBRARY DESTINATION
+# ${CATKIN_GLOBAL_PYTHON_DESTINATION})
 
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
@@ -220,8 +209,8 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
+  INCLUDES
+  DESTINATION include)
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})

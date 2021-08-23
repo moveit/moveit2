@@ -6,8 +6,9 @@ set(MOVEIT_LIB_NAME ${PROJECT_NAME})
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-# Disable -Wpedantic warnings due to the warnings in ros-dashing-octomap
-# TODO: add -Wpedantic warnings back when PR(https://github.com/OctoMap/octomap/pull/275) is merged
+# Disable -Wpedantic warnings due to the warnings in ros-dashing-octomap TODO:
+# add -Wpedantic warnings back when
+# PR(https://github.com/OctoMap/octomap/pull/275) is merged
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wno-pedantic)
 endif()
@@ -28,34 +29,26 @@ find_package(geometric_shapes REQUIRED)
 find_package(tf2_ros REQUIRED)
 
 include_directories(include)
-include_directories(SYSTEM
-  ${EIGEN3_INCLUDE_DIRS}
-  ${X11_INCLUDE_DIR}
-)
+include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  rclcpp
-  moveit_core
-  moveit_msgs
-  pluginlib
-  octomap
-  geometric_shapes
-  Boost
-)
+    rclcpp
+    moveit_core
+    moveit_msgs
+    pluginlib
+    octomap
+    geometric_shapes
+    Boost)
 
-add_library(${MOVEIT_LIB_NAME} SHARED
-  src/occupancy_map_monitor.cpp
-  src/occupancy_map_updater.cpp
-)
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${MOVEIT_LIB_NAME}
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
+add_library(${MOVEIT_LIB_NAME} SHARED src/occupancy_map_monitor.cpp
+                                      src/occupancy_map_updater.cpp)
+set_target_properties(${MOVEIT_LIB_NAME}
+                      PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(${MOVEIT_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_executable(moveit_ros_occupancy_map_server src/occupancy_map_server.cpp)
 ament_target_dependencies(moveit_ros_occupancy_map_server
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
+                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_ros_occupancy_map_server ${MOVEIT_LIB_NAME})
 
 install(
@@ -64,12 +57,11 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
+  INCLUDES
+  DESTINATION include)
 
 install(TARGETS moveit_ros_occupancy_map_server
-  DESTINATION lib/${PROJECT_NAME}/
-)
+        DESTINATION lib/${PROJECT_NAME}/)
 install(DIRECTORY include/ DESTINATION include)
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)

@@ -18,35 +18,29 @@ include(ConfigExtras.cmake)
 
 set(MOVEIT_LIB_NAME moveit_robot_interaction)
 
-set(THIS_PACKAGE_INCLUDE_DEPENDS
-  Boost
-  moveit_ros_planning
-  interactive_markers
-  tf2_geometry_msgs
-)
+set(THIS_PACKAGE_INCLUDE_DEPENDS Boost moveit_ros_planning interactive_markers
+                                 tf2_geometry_msgs)
 
 include_directories(include)
 
-add_library(${MOVEIT_LIB_NAME} SHARED
-  src/interactive_marker_helpers.cpp
-  src/kinematic_options.cpp
-  src/kinematic_options_map.cpp
-  src/locked_robot_state.cpp
-  src/interaction_handler.cpp
-  src/robot_interaction.cpp
-)
+add_library(
+  ${MOVEIT_LIB_NAME} SHARED
+  src/interactive_marker_helpers.cpp src/kinematic_options.cpp
+  src/kinematic_options_map.cpp src/locked_robot_state.cpp
+  src/interaction_handler.cpp src/robot_interaction.cpp)
 include(GenerateExportHeader)
 generate_export_header(${MOVEIT_LIB_NAME})
-target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+target_include_directories(
+  ${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+set_target_properties(${MOVEIT_LIB_NAME}
+                      PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(locked_robot_state_test test/locked_robot_state_test.cpp)
   target_link_libraries(locked_robot_state_test ${MOVEIT_LIB_NAME})
-  ament_target_dependencies(locked_robot_state_test
-    Boost)
+  ament_target_dependencies(locked_robot_state_test Boost)
 endif()
 
 install(
@@ -55,11 +49,12 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
+  INCLUDES
+  DESTINATION include)
 
 install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h
+        DESTINATION include)
 
 install(DIRECTORY resources DESTINATION share/${PROJECT_NAME})
 

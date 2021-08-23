@@ -22,31 +22,25 @@ find_package(moveit_msgs REQUIRED)
 include(ConfigExtras.cmake)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
-  kdl_kinematics_plugin/include
-  lma_kinematics_plugin/include
-  srv_kinematics_plugin/include
-  cached_ik_kinematics_plugin/include
-)
+    kdl_kinematics_plugin/include lma_kinematics_plugin/include
+    srv_kinematics_plugin/include cached_ik_kinematics_plugin/include)
 
 set(THIS_PACKAGE_LIBRARIES
-  moveit_cached_ik_kinematics_base
-  moveit_cached_ik_kinematics_plugin
-  moveit_kdl_kinematics_plugin
-  moveit_lma_kinematics_plugin
-  moveit_srv_kinematics_plugin
-)
+    moveit_cached_ik_kinematics_base moveit_cached_ik_kinematics_plugin
+    moveit_kdl_kinematics_plugin moveit_lma_kinematics_plugin
+    moveit_srv_kinematics_plugin)
 
-set(THIS_PACKAGE_INCLUDE_DEPENDS
-  pluginlib
-  moveit_core
-  moveit_ros_planning
-  Boost
-)
+set(THIS_PACKAGE_INCLUDE_DEPENDS pluginlib moveit_core moveit_ros_planning
+                                 Boost)
 
-pluginlib_export_plugin_description_file(moveit_core kdl_kinematics_plugin_description.xml)
-pluginlib_export_plugin_description_file(moveit_core lma_kinematics_plugin_description.xml)
-pluginlib_export_plugin_description_file(moveit_core srv_kinematics_plugin_description.xml)
-pluginlib_export_plugin_description_file(moveit_core cached_ik_kinematics_plugin_description.xml)
+pluginlib_export_plugin_description_file(moveit_core
+                                         kdl_kinematics_plugin_description.xml)
+pluginlib_export_plugin_description_file(moveit_core
+                                         lma_kinematics_plugin_description.xml)
+pluginlib_export_plugin_description_file(moveit_core
+                                         srv_kinematics_plugin_description.xml)
+pluginlib_export_plugin_description_file(
+  moveit_core cached_ik_kinematics_plugin_description.xml)
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
@@ -63,8 +57,8 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
+  INCLUDES
+  DESTINATION include)
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})

@@ -11,28 +11,25 @@ find_package(moveit_ros_planning_interface REQUIRED)
 # This shouldn't be necessary (required by moveit_simple_controller_manager)
 find_package(rosidl_default_runtime REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+# uncomment the following section in order to fill in further dependencies
+# manually. find_package(<dependency> REQUIRED)
 
-add_executable(run_ompl_constrained_planning src/run_ompl_constrained_planning.cpp)
+add_executable(run_ompl_constrained_planning
+               src/run_ompl_constrained_planning.cpp)
 
 ament_target_dependencies(run_ompl_constrained_planning
-  moveit_ros_planning_interface
-  Boost
-)
+                          moveit_ros_planning_interface Boost)
 
-install(TARGETS run_ompl_constrained_planning
+install(
+  TARGETS run_ompl_constrained_planning
   EXPORT export_${PROJECT_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
-  INCLUDES DESTINATION include
-)
+  INCLUDES
+  DESTINATION include)
 ament_export_targets(export_${PROJECT_NAME})
 
-install(DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}
-)
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 ament_package()

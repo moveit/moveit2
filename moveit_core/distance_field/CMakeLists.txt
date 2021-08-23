@@ -1,21 +1,20 @@
 set(MOVEIT_LIB_NAME moveit_distance_field)
 
-add_library(${MOVEIT_LIB_NAME} SHARED
-  src/distance_field.cpp
-  src/find_internal_points.cpp
-  src/propagation_distance_field.cpp
-)
+add_library(
+  ${MOVEIT_LIB_NAME} SHARED src/distance_field.cpp src/find_internal_points.cpp
+                            src/propagation_distance_field.cpp)
 
-set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(${MOVEIT_LIB_NAME}
+set_target_properties(${MOVEIT_LIB_NAME}
+                      PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(
+  ${MOVEIT_LIB_NAME}
   Boost
   urdfdom
   urdfdom_headers
   visualization_msgs
   geometric_shapes
   tf2_eigen
-  OCTOMAP
-)
+  OCTOMAP)
 
 install(DIRECTORY include/ DESTINATION include)
 

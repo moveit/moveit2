@@ -12,7 +12,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_compile_options(-Wno-deprecated-register)
 endif()
 
-# definition needed for boost/math/constants/constants.hpp included by Ogre to compile
+# definition needed for boost/math/constants/constants.hpp included by Ogre to
+# compile
 add_definitions(-DBOOST_MATH_DISABLE_FLOAT128)
 
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
@@ -20,18 +21,19 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 endif()
 
 find_package(Boost REQUIRED COMPONENTS thread filesystem system program_options)
-find_package(catkin REQUIRED COMPONENTS
-  moveit_core
-  moveit_ros_planning
-  moveit_ros_visualization
-  rviz
-  rosconsole
-  roscpp
-  urdf
-  srdfdom
-)
+find_package(
+  catkin REQUIRED
+  COMPONENTS moveit_core
+             moveit_ros_planning
+             moveit_ros_visualization
+             rviz
+             rosconsole
+             roscpp
+             urdf
+             srdfdom)
 find_package(ompl REQUIRED)
-include_directories(SYSTEM ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${OMPL_INCLUDE_DIRS})
+include_directories(SYSTEM ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+                    ${OMPL_INCLUDE_DIRS})
 include_directories(include)
 
 # Qt Stuff
@@ -53,57 +55,51 @@ include_directories(SYSTEM ${YAMLCPP_INCLUDE_DIRS})
 
 catkin_package(
   INCLUDE_DIRS
-    include
+  include
   LIBRARIES
-    ${PROJECT_NAME}_tools
+  ${PROJECT_NAME}_tools
   CATKIN_DEPENDS
-    moveit_ros_planning
-    moveit_ros_visualization
-    roscpp
-)
+  moveit_ros_planning
+  moveit_ros_visualization
+  roscpp)
 
 # Header files that need Qt Moc pre-processing for use with Qt signals, etc:
 set(HEADERS
-  src/widgets/navigation_widget.h
-  src/widgets/header_widget.h
-  src/widgets/setup_assistant_widget.h
-  src/widgets/start_screen_widget.h
-  src/widgets/planning_groups_widget.h
-  src/widgets/double_list_widget.h
-  src/widgets/kinematic_chain_widget.h
-  src/widgets/group_edit_widget.h
-  src/widgets/default_collisions_widget.h
-  src/widgets/robot_poses_widget.h
-  src/widgets/end_effectors_widget.h
-  src/widgets/virtual_joints_widget.h
-  src/widgets/passive_joints_widget.h
-  src/widgets/perception_widget.h
-  src/widgets/ros_controllers_widget.h
-  src/widgets/controller_edit_widget.h
-  src/widgets/configuration_files_widget.h
-  src/widgets/setup_screen_widget.h
-  src/widgets/simulation_widget.h
-  src/widgets/author_information_widget.h
-)
+    src/widgets/navigation_widget.h
+    src/widgets/header_widget.h
+    src/widgets/setup_assistant_widget.h
+    src/widgets/start_screen_widget.h
+    src/widgets/planning_groups_widget.h
+    src/widgets/double_list_widget.h
+    src/widgets/kinematic_chain_widget.h
+    src/widgets/group_edit_widget.h
+    src/widgets/default_collisions_widget.h
+    src/widgets/robot_poses_widget.h
+    src/widgets/end_effectors_widget.h
+    src/widgets/virtual_joints_widget.h
+    src/widgets/passive_joints_widget.h
+    src/widgets/perception_widget.h
+    src/widgets/ros_controllers_widget.h
+    src/widgets/controller_edit_widget.h
+    src/widgets/configuration_files_widget.h
+    src/widgets/setup_screen_widget.h
+    src/widgets/simulation_widget.h
+    src/widgets/author_information_widget.h)
 
 # Tools Library
-add_library(${PROJECT_NAME}_tools
-  src/tools/compute_default_collisions.cpp
-  src/tools/moveit_config_data.cpp
-  src/tools/collision_linear_model.cpp
-  src/tools/collision_matrix_model.cpp
-  src/tools/rotated_header_view.cpp
-)
-set_target_properties(${PROJECT_NAME}_tools PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${PROJECT_NAME}_tools
-  ${YAMLCPP_LIBRARIES}
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${QT_LIBRARIES}
-)
+add_library(
+  ${PROJECT_NAME}_tools
+  src/tools/compute_default_collisions.cpp src/tools/moveit_config_data.cpp
+  src/tools/collision_linear_model.cpp src/tools/collision_matrix_model.cpp
+  src/tools/rotated_header_view.cpp)
+set_target_properties(${PROJECT_NAME}_tools
+                      PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+target_link_libraries(${PROJECT_NAME}_tools ${YAMLCPP_LIBRARIES}
+                      ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES})
 
 # Main Widgets Library - all screens (navigation options)
-add_library(${PROJECT_NAME}_widgets
+add_library(
+  ${PROJECT_NAME}_widgets
   src/widgets/start_screen_widget.cpp
   src/widgets/planning_groups_widget.cpp
   src/widgets/double_list_widget.cpp
@@ -124,34 +120,34 @@ add_library(${PROJECT_NAME}_widgets
   src/widgets/setup_screen_widget.cpp
   src/widgets/simulation_widget.cpp
   src/widgets/author_information_widget.cpp
-  ${HEADERS}
-)
-set_target_properties(${PROJECT_NAME}_widgets PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${PROJECT_NAME}_widgets
+  ${HEADERS})
+set_target_properties(${PROJECT_NAME}_widgets
+                      PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+target_link_libraries(${PROJECT_NAME}_widgets ${PROJECT_NAME}_tools
+                      ${QT_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+# executables
+add_executable(${PROJECT_NAME} src/setup_assistant_main.cpp)
+target_link_libraries(
+  ${PROJECT_NAME}
+  ${PROJECT_NAME}_widgets
   ${PROJECT_NAME}_tools
   ${QT_LIBRARIES}
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
-)
-
-# executables
-add_executable(${PROJECT_NAME} src/setup_assistant_main.cpp)
-target_link_libraries(${PROJECT_NAME}
-  ${PROJECT_NAME}_widgets ${PROJECT_NAME}_tools
-  ${QT_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES} log4cxx
-)
+  log4cxx)
 
 add_executable(${PROJECT_NAME}_updater src/collisions_updater.cpp)
-target_link_libraries(${PROJECT_NAME}_updater
-  ${PROJECT_NAME}_tools ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_updater ${PROJECT_NAME}_tools
+                      ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 set_target_properties(${PROJECT_NAME}_updater
-                      PROPERTIES OUTPUT_NAME collisions_updater
-                      PREFIX "")
+                      PROPERTIES OUTPUT_NAME collisions_updater PREFIX "")
 
 install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_updater
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-install(TARGETS ${PROJECT_NAME}_widgets ${PROJECT_NAME}_tools
+install(
+  TARGETS ${PROJECT_NAME}_widgets ${PROJECT_NAME}_tools
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION})
