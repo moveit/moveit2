@@ -52,6 +52,9 @@
 /** \brief Planning pipeline */
 namespace planning_pipeline
 {
+constexpr char PLANNING_PLUGIN_PARAM_NAME[] = "planning_plugin";
+constexpr char ADAPTER_PLUGINS_PARAM_NAME[] = "request_adapters";
+
 /** \brief This class facilitates loading planning plugins and
     planning request adapted plugins.  and allows calling
     planning_interface::PlanningContext::solve() from a loaded
@@ -61,8 +64,117 @@ namespace planning_pipeline
 class MOVEIT_PLANNING_PIPELINE_EXPORT PlanningPipeline
 {
 public:
+  /**
+   * @brief      This class contains the rcl interfaces for easier testing
+   */
+  class MiddlewareHandle
+  {
+  public:
+    /**
+     * @brief      Destroys the object.
+     */
+    virtual ~MiddlewareHandle() = default;
+
+    /**
+     * @brief     Check if parameter exists
+     */
+    virtual bool has_parameter(const std::string& name) const = 0;
+
+    /**
+     * @brief     Get parameter of specific plugin
+     * @param[in] pluginName name of plugin that has parameter
+     * @param[in] parameters container for parameters
+     */
+    virtual void get_parameters(const std::string& pluginName, std::string& parameters) const = 0;
+    /**
+     * @brief     Create a display path publisher
+     * @param[in] topic the topic
+     */
+    virtual void createDisplayPathPublisher(const std::string& topic) = 0;
+
+    /**
+     * @brief     Create a received request publisher
+     * @param[in] topic the topic
+     */
+    virtual void createReceivedRequestPublisher(const std::string& topic) = 0;
+
+    /**
+     * @brief     Create a contacts publisher
+     * @param[in] topic the topic
+     */
+    virtual void createContactsPublisher(const std::string& topic) = 0;
+
+    /**
+     * @brief     Get topic name of Contacts Publisher
+     */
+
+    virtual std::string getContactsTopicName() const = 0;
+
+    /**
+     * @brief     Reset a display path publisher
+     */
+    virtual void resetDisplayPathPublisher() = 0;
+
+    /**
+     * @brief     Reset a received request publisher
+     */
+    virtual void resetReceivedRequestPublisher() = 0;
+
+    /**
+     * @brief     Reset a contacts publisher
+     */
+    virtual void resetContactsPublisher() = 0;
+
+    /**
+     * @brief     Create a planner plugin
+     * @param[in] name plugin name
+     */
+    virtual void createPlannerPlugin(const std::string& name, const moveit::core::RobotModelConstPtr& robot_model) = 0;]
+
+    /**
+     * @brief Retrieves a pointer to a planner manager
+     */
+    virtual const planning_interface::PlannerManagerPtr& getPlannerManager() const = 0;
+
+    /**
+     * @brief     Create a adapter plugin
+     * @param[in] name plugin name
+     */
+    virtual void createAdapterPlugins(const std::vector<std::string>& name) = 0;
+
+    /**
+     * @brief
+     */
+    virtual bool plan(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                      const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
+                      std::vector<std::size_t>& adapter_added_state_index) = 0;
+
+    /**
+     * @brief     Terminate planner instance
+     */
+    virtual void terminatePlannerPlugin() = 0;
+
+    /**
+     * @brief     Publish received motion plan request
+     * @param[in] req Received Motion Plan to be published
+     */
+    virtual void publishReceivedRequest(const planning_interface::MotionPlanRequest& req) = 0;
+
+    /**
+     * @brief     Publish contact markers
+     * @param[in] markerArray Contact Marker Array to be published
+     */
+    virtual void publishContactsMarkerArray(const visualization_msgs::msg::MarkerArray& markerArray) = 0;
+
+    /**
+     * @brief     Publish Display Trejectory Path
+     * @param[in] displayTrajectory Display Trajectory to be published
+     */
+    virtual void publishDisplayPathTrejectory(const moveit_msgs::msg::DisplayTrajectory& displayTrajectory) = 0;
+  };
+
   /** \brief When motion plans are computed and they are supposed to be automatically displayed, they are sent to this
-   * topic (moveit_msgs::msg::DisplauTrajectory) */
+   * topic (moveit_msgs::msg::DisplayTrajectory) */
   static const std::string DISPLAY_PATH_TOPIC;
 
   /** \brief When motion planning requests are received and they are supposed to be automatically published, they are
@@ -73,24 +185,50 @@ public:
    * this topic (visualization_msgs::MarkerArray) */
   static const std::string MOTION_CONTACTS_TOPIC;
 
+  /** @brief Constructor.
+   *  \param model The robot model for which this pipeline is initialized.
+   *  @param rcl_interface   The rcl middleware interface
+   *  \param parameter_namespace the parameter namespace where the planner configurations are stored
+   *  \param planning_plugin_param_name The name of the ROS parameter under which the name of the planning plugin is
+   *  specified
+   *  \param adapter_plugins_param_name The name of the ROS parameter under which the names of the request adapter
+   *  plugins are specified (plugin names separated by space; order matters)
+   */
+  PlanningPipeline(const moveit::core::RobotModelConstPtr& model, std::unique_ptr<MiddlewareHandle> middleware_handle,
+                   const std::string& parameter_namespace,
+                   const std::string& planning_plugin_param_name = PLANNING_PLUGIN_PARAM_NAME,
+                   const std::string& adapter_plugins_param_name = ADAPTER_PLUGINS_PARAM_NAME);
+
   /** \brief Given a robot model (\e model), a node handle (\e pipeline_nh), initialize the planning pipeline.
       \param model The robot model for which this pipeline is initialized.
       \param node The ROS node that should be used for reading parameters needed for configuration
-      \param the parameter namespace where the planner configurations are stored
+      \param parameter_namespace parameter namespace where the planner configurations are stored
       \param planning_plugin_param_name The name of the ROS parameter under which the name of the planning plugin is
      specified
       \param adapter_plugins_param_name The name of the ROS parameter under which the names of the request adapter
      plugins are specified (plugin names separated by space; order matters)
   */
+
   PlanningPipeline(const moveit::core::RobotModelConstPtr& model, const std::shared_ptr<rclcpp::Node>& node,
                    const std::string& parameter_namespace,
-                   const std::string& planning_plugin_param_name = "planning_plugin",
-                   const std::string& adapter_plugins_param_name = "request_adapters");
+                   const std::string& planning_plugin_param_name = PLANNING_PLUGIN_PARAM_NAME,
+                   const std::string& adapter_plugins_param_name = ADAPTER_PLUGINS_PARAM_NAME);
+
+  /** @brief Constructor.
+   *  \param model The robot model for which this pipeline is initialized.
+   *  @param rcl_interface   The rcl middleware interface
+      \param paramenter_namespace the parameter namespace where the planner configurations are stored
+      \param planning_plugin_name The name of the planning plugin to load
+      \param adapter_plugins_names The names of the planning request adapter plugins to load
+   */
+  PlanningPipeline(const moveit::core::RobotModelConstPtr& model, std::unique_ptr<MiddlewareHandle> middleware_handle,
+                   const std::string& parameter_namespace, const std::string& planning_plugin_name,
+                   const std::vector<std::string>& adapter_plugin_names);
 
   /** \brief Given a robot model (\e model), a node handle (\e pipeline_nh), initialize the planning pipeline.
       \param model The robot model for which this pipeline is initialized.
       \param node The ROS node that should be used for reading parameters needed for configuration
-      \param the parameter namespace where the planner configurations are stored
+      \param paramenter_namespace the parameter namespace where the planner configurations are stored
       \param planning_plugin_name The name of the planning plugin to load
       \param adapter_plugins_names The names of the planning request adapter plugins to load
   */
@@ -113,19 +251,19 @@ public:
   /** \brief Get the flag set by displayComputedMotionPlans() */
   bool getDisplayComputedMotionPlans() const
   {
-    return display_computed_motion_plans_;
+    return is_displaying_computed_motion_plans_;
   }
 
   /** \brief Get the flag set by publishReceivedRequests() */
   bool getPublishReceivedRequests() const
   {
-    return publish_received_requests_;
+    return is_publishing_received_requests_;
   }
 
   /** \brief Get the flag set by checkSolutionPaths() */
   bool getCheckSolutionPaths() const
   {
-    return check_solution_paths_;
+    return is_checking_solution_paths_;
   }
 
   /** \brief Call the motion planner plugin and the sequence of planning request adapters (if any).
@@ -160,13 +298,13 @@ public:
   /** \brief Get the names of the planning request adapter plugins used */
   const std::vector<std::string>& getAdapterPluginNames() const
   {
-    return adapter_plugin_names_;
+    return adapter_plugin_names_
   }
 
   /** \brief Get the planner manager for the loaded planning plugin */
   const planning_interface::PlannerManagerPtr& getPlannerManager()
   {
-    return planner_instance_;
+    return middleware_handle_->getPlannerManager();
   }
 
   /** \brief Get the robot model that this pipeline is using */
@@ -178,39 +316,30 @@ public:
   /** \brief Get current status of the planning pipeline */
   [[nodiscard]] bool isActive() const
   {
-    return active_;
+    return is_active_;
   }
 
 private:
   void configure();
 
   // Flag that indicates whether or not the planning pipeline is currently solving a planning problem
-  mutable std::atomic<bool> active_;
+  mutable std::atomic<bool> is_active_;
 
   std::shared_ptr<rclcpp::Node> node_;
   std::string parameter_namespace_;
   /// Flag indicating whether motion plans should be published as a moveit_msgs::msg::DisplayTrajectory
-  bool display_computed_motion_plans_;
-  rclcpp::Publisher<moveit_msgs::msg::DisplayTrajectory>::SharedPtr display_path_publisher_;
+  bool is_displaying_computed_motion_plans_;
 
   /// Flag indicating whether received requests should be published just before beginning processing (useful for
   /// debugging)
-  bool publish_received_requests_;
-  rclcpp::Publisher<moveit_msgs::msg::MotionPlanRequest>::SharedPtr received_request_publisher_;
-
-  std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager> > planner_plugin_loader_;
-  planning_interface::PlannerManagerPtr planner_instance_;
+  bool is_publishing_received_requests_;
   std::string planner_plugin_name_;
-
-  std::unique_ptr<pluginlib::ClassLoader<planning_request_adapter::PlanningRequestAdapter> > adapter_plugin_loader_;
-  std::unique_ptr<planning_request_adapter::PlanningRequestAdapterChain> adapter_chain_;
   std::vector<std::string> adapter_plugin_names_;
 
   moveit::core::RobotModelConstPtr robot_model_;
 
   /// Flag indicating whether the reported plans should be checked once again, by the planning pipeline itself
-  bool check_solution_paths_;
-  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr contacts_publisher_;
+  bool is_checking_solution_paths_;
 };
 
 MOVEIT_CLASS_FORWARD(PlanningPipeline);  // Defines PlanningPipelinePtr, ConstPtr, WeakPtr... etc
