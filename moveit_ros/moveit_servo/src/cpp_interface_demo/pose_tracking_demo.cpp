@@ -90,7 +90,7 @@ int main(int argc, char** argv)
   std::thread executor_thread([&executor]() { executor.spin(); });
 
   auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node, LOGGER);
-  ;
+
   if (servo_parameters == nullptr)
   {
     RCLCPP_FATAL(LOGGER, "Could not get servo parameters!");

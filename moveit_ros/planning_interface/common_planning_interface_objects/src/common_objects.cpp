@@ -36,7 +36,6 @@
 
 #include <moveit/common_planning_interface_objects/common_objects.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
-#include <tf2_ros/transform_listener.h>
 
 using namespace planning_scene_monitor;
 using namespace robot_model_loader;
@@ -101,13 +100,10 @@ std::shared_ptr<tf2_ros::Buffer> getSharedTF()
   SharedStorage& s = getSharedStorage();
   boost::mutex::scoped_lock slock(s.lock_);
 
-  typedef CoupledDeleter<tf2_ros::Buffer, tf2_ros::TransformListener> Deleter;
   std::shared_ptr<tf2_ros::Buffer> buffer = s.tf_buffer_.lock();
   if (!buffer)
   {
-    tf2_ros::Buffer* raw = new tf2_ros::Buffer(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME));
-    // assign custom deleter to also delete associated TransformListener
-    buffer.reset(raw, Deleter(new tf2_ros::TransformListener(*raw)));
+    buffer = std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME));
     s.tf_buffer_ = buffer;
   }
   return buffer;

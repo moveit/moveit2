@@ -149,23 +149,23 @@ public:
      it has to be of type ros::CallbackQueue
         (which is the default type of callback queues used in ROS)
       \param tf_buffer. Specify a TF2_ROS Buffer instance to use. If not specified,
-                        one will be constructed internally along with an internal TF2_ROS TransformListener
+                        one will be constructed internally
       \param wait_for_servers. Timeout for connecting to action servers. -1 time means unlimited waiting.
     */
   MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const Options& opt,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration(-1));
+                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration::from_seconds(-1));
 
   /**
       \brief Construct a client for the MoveGroup action for a particular \e group.
 
       \param tf_buffer. Specify a TF2_ROS Buffer instance to use. If not specified,
-                        one will be constructed internally along with an internal TF2_ROS TransformListener
+                        one will be constructed internally
       \param wait_for_servers. Timeout for connecting to action servers. -1 time means unlimited waiting.
     */
   MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const std::string& group,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration(-1));
+                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration::from_seconds(-1));
 
   ~MoveGroupInterface();
 

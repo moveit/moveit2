@@ -37,7 +37,11 @@
 #include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
 #include <moveit/kdl_kinematics_plugin/chainiksolver_vel_mimic_svd.hpp>
 
+#if __has_include(<tf2_kdl/tf2_kdl.hpp>)
+#include <tf2_kdl/tf2_kdl.hpp>
+#else
 #include <tf2_kdl/tf2_kdl.h>
+#endif
 #include <tf2/transform_datatypes.h>
 
 #include <kdl_parser/kdl_parser.hpp>
@@ -333,7 +337,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
 
   if (ik_seed_state.size() != dimension_)
   {
-    RCLCPP_ERROR(LOGGER, "Seed state must have size %d instead of size %d\n", dimension_, ik_seed_state.size());
+    RCLCPP_ERROR(LOGGER, "Seed state must have size %d instead of size %zu\n", dimension_, ik_seed_state.size());
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
@@ -344,7 +348,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
   {
     if (consistency_limits.size() != dimension_)
     {
-      RCLCPP_ERROR(LOGGER, "Consistency limits must be empty or have size %d instead of size %d\n", dimension_,
+      RCLCPP_ERROR(LOGGER, "Consistency limits must be empty or have size %d instead of size %zu\n", dimension_,
                    consistency_limits.size());
       error_code.val = error_code.NO_IK_SOLUTION;
       return false;

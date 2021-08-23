@@ -1,8 +1,8 @@
-# moveit/moveit2:foxy-source
+# ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-source
 # Downloads the moveit source code and install remaining debian dependencies
 
 ARG ROS_DISTRO=foxy
-FROM moveit/moveit2:${ROS_DISTRO}-ci-testing
+FROM ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci-testing
 
 MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
 MAINTAINER Dave Coleman dave@picknik.ai
@@ -16,6 +16,7 @@ RUN \
     # Download moveit source so that we can get necessary dependencies
     git clone https://github.com/ros-planning/moveit2.git -b main && \
     vcs import < moveit2/moveit2.repos && \
+    if [ -r moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import < moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
     #
     # Update apt package list as cache is cleared in previous container
     # Usually upgrading involves a few packages only (if container builds became out-of-sync)

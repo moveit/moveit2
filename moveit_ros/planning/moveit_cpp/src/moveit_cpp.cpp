@@ -36,7 +36,11 @@
 
 #include <stdexcept>
 #include <moveit/moveit_cpp/moveit_cpp.h>
+#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#else
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#endif
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
 
 namespace moveit_cpp
@@ -55,7 +59,6 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
 {
   if (!tf_buffer_)
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
-  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
   // Configure planning scene monitor
   if (!loadPlanningSceneMonitor(options.planning_scene_monitor_options))
@@ -303,7 +306,6 @@ const std::shared_ptr<tf2_ros::Buffer>& MoveItCpp::getTFBuffer() const
 
 void MoveItCpp::clearContents()
 {
-  tf_listener_.reset();
   tf_buffer_.reset();
   planning_scene_monitor_.reset();
   robot_model_.reset();
