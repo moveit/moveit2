@@ -948,8 +948,10 @@ const AttachedBody* RobotState::getAttachedBody(const std::string& id) const
   std::map<std::string, AttachedBody*>::const_iterator it = attached_body_map_.find(id);
   if (it == attached_body_map_.end())
   {
-    RCLCPP_ERROR(LOGGER, "Attached body '%s' not found", id.c_str());
-    return nullptr;
+    std::stringstream ss;
+    ss << "Attached body '" << id.c_str() << "'' not found";
+    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+    throw Exception(ss.str());
   }
   else
     return it->second;

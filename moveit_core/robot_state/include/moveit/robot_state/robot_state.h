@@ -1631,7 +1631,7 @@ public:
   /** \brief Clear all attached bodies. This calls delete on the AttachedBody instances, if needed. */
   void clearAttachedBodies();
 
-  /** \brief Get the attached body named \e name. Return NULL if not found. */
+  /** \brief Get the attached body named \e name. Throws exception if not found. */
   const AttachedBody* getAttachedBody(const std::string& name) const;
 
   /** \brief Check if an attached body named \e id exists in this state */

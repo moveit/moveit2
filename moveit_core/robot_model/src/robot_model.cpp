@@ -455,8 +455,11 @@ const JointModelGroup* RobotModel::getEndEffector(const std::string& name) const
     it = joint_model_group_map_.find(name);
     if (it != joint_model_group_map_.end() && it->second->isEndEffector())
       return it->second;
-    RCLCPP_ERROR(LOGGER, "End-effector '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
-    return nullptr;
+
+    std::stringstream ss;
+    ss << "End-effector '" << name.c_str() << "'' not found in model '" << model_name_.c_str() << "'";
+    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+    throw Exception(ss.str());
   }
   return it->second;
 }
@@ -469,8 +472,11 @@ JointModelGroup* RobotModel::getEndEffector(const std::string& name)
     it = joint_model_group_map_.find(name);
     if (it != joint_model_group_map_.end() && it->second->isEndEffector())
       return it->second;
-    RCLCPP_ERROR(LOGGER, "End-effector '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
-    return nullptr;
+
+    std::stringstream ss;
+    ss << "End-effector '" << name.c_str() << "'' not found in model '" << model_name_.c_str() << "'";
+    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+    throw Exception(ss.str());
   }
   return it->second;
 }
@@ -485,8 +491,10 @@ const JointModelGroup* RobotModel::getJointModelGroup(const std::string& name) c
   JointModelGroupMap::const_iterator it = joint_model_group_map_.find(name);
   if (it == joint_model_group_map_.end())
   {
-    RCLCPP_ERROR(LOGGER, "Group '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
-    return nullptr;
+    std::stringstream ss;
+    ss << "Group '" << name.c_str() << "'' not found in model '" << model_name_.c_str() << "'";
+    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+    throw Exception(ss.str());
   }
   return it->second;
 }
@@ -496,8 +504,10 @@ JointModelGroup* RobotModel::getJointModelGroup(const std::string& name)
   JointModelGroupMap::const_iterator it = joint_model_group_map_.find(name);
   if (it == joint_model_group_map_.end())
   {
-    RCLCPP_ERROR(LOGGER, "Group '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
-    return nullptr;
+    std::stringstream ss;
+    ss << "Group '" << name.c_str() << "'' not found in model '" << model_name_.c_str() << "'";
+    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+    throw Exception(ss.str());
   }
   return it->second;
 }
@@ -788,12 +798,20 @@ bool RobotModel::addJointModelGroup(const srdf::Model::Group& gc)
 
 JointModel* RobotModel::buildRecursive(LinkModel* parent, const urdf::Link* urdf_link, const srdf::Model& srdf_model)
 {
+  if (urdf_link == nullptr)
+  {
+    throw Exception("urdf_link cannot be nullptr");
+  }
+
   // construct the joint
   JointModel* joint = urdf_link->parent_joint ?
                           constructJointModel(urdf_link->parent_joint.get(), urdf_link, srdf_model) :
                           constructJointModel(nullptr, urdf_link, srdf_model);
+
   if (joint == nullptr)
-    return nullptr;
+  {
+    throw Exception("Failed to create joint.");
+  }
 
   // bookkeeping for the joint
   joint_model_map_[joint->getName()] = joint;
@@ -1224,16 +1242,21 @@ const JointModel* RobotModel::getJointModel(const std::string& name) const
   JointModelMap::const_iterator it = joint_model_map_.find(name);
   if (it != joint_model_map_.end())
     return it->second;
-  RCLCPP_ERROR(LOGGER, "Joint '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
-  return nullptr;
+
+  std::stringstream ss;
+  ss << "Joint '" << name.c_str() << "'' not found in model '" << model_name_.c_str() << "'";
+  RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+  throw Exception(ss.str());
 }
 
 const JointModel* RobotModel::getJointModel(int index) const
 {
   if (index < 0 || index >= static_cast<int>(joint_model_vector_.size()))
   {
-    RCLCPP_ERROR(LOGGER, "Joint index '%i' out of bounds of joints in model '%s'", index, model_name_.c_str());
-    return nullptr;
+    std::stringstream ss;
+    ss << "Joint index '" << index << "'' out of bounds of joints in model '" << model_name_.c_str() << "'";
+    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+    throw Exception(ss.str());
   }
   assert(joint_model_vector_[index]->getJointIndex() == index);
   return joint_model_vector_[index];
@@ -1244,8 +1267,11 @@ JointModel* RobotModel::getJointModel(const std::string& name)
   JointModelMap::const_iterator it = joint_model_map_.find(name);
   if (it != joint_model_map_.end())
     return it->second;
-  RCLCPP_ERROR(LOGGER, "Joint '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
-  return nullptr;
+
+  std::stringstream ss;
+  ss << "Joint '" << name.c_str() << "'' not found in model '" << model_name_.c_str() << "'";
+  RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+  throw Exception(ss.str());
 }
 
 const LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_link) const
@@ -1257,8 +1283,10 @@ const LinkModel* RobotModel::getLinkModel(int index) const
 {
   if (index < 0 || index >= static_cast<int>(link_model_vector_.size()))
   {
-    RCLCPP_ERROR(LOGGER, "Link index '%i' out of bounds of links in model '%s'", index, model_name_.c_str());
-    return nullptr;
+    std::stringstream ss;
+    ss << "Link index '" << index << "'' out of bounds of links in model '" << model_name_.c_str() << "'";
+    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+    throw Exception(ss.str());
   }
   assert(link_model_vector_[index]->getLinkIndex() == index);
   return link_model_vector_[index];
@@ -1273,10 +1301,16 @@ LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_link)
     return it->second;
 
   if (has_link)
+  {
     *has_link = false;  // Report failure via argument
-  else                  // Otherwise print error
-    RCLCPP_ERROR(LOGGER, "Link '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
-  return nullptr;
+    return nullptr;
+  }
+
+  // Otherwise throw error
+  std::stringstream ss;
+  ss << "Link '" << name.c_str() << "'' out of bounds of links in model '" << model_name_.c_str() << "'";
+  RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+  throw Exception(ss.str());
 }
 
 const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel* link)
