@@ -21,8 +21,6 @@ jobs:
       contents: read
     env:
       IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
-    outputs:
-      no_cache: ${{ steps.check.outputs.no_cache }}
 
     steps:
       - name: Set up Docker Buildx
@@ -33,21 +31,13 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Check apt updates
-        if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-        run: |
-            apt-get update -o Dir::Etc::sourcelist="${SOURCELIST}"
-            apt-get --simulate upgrade -o Dir::Etc::sourcelist="${SOURCELIST}" \
-            | grep "^0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.$" \
-            && echo "::set-output name=trigger::false" \
-            || echo "::set-output name=trigger::true"
-            echo "::set-output name=no_cache::true"
       - name: Build and Push
         uses: docker/build-push-action@v2
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: true
+          no_cache: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
           cache-from: type=registry,ref=${{ env.IMAGE }}
           cache-to: type=inline
           tags: ${{ env.IMAGE }}
@@ -79,6 +69,7 @@ jobs:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: true
+          no_cache: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
           cache-from: type=registry,ref=${{ env.IMAGE }}
           cache-to: type=inline
           tags: ${{ env.IMAGE }}
