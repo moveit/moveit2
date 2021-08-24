@@ -580,8 +580,8 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
       {
         std::string topic_name = int_marker_move_topics_[i];
         std::string marker_name = int_marker_names_[i];
-        std::function<void(const geometry_msgs::msg::PoseStamped::SharedPtr)> subscription_callback =
-            [this, marker_name](const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
+        std::function<void(geometry_msgs::msg::PoseStamped::SharedPtr)> subscription_callback =
+            [this, marker_name](geometry_msgs::msg::PoseStamped::SharedPtr msg) {
               moveInteractiveMarker(marker_name, msg);
             };
         auto subscription =
@@ -689,7 +689,7 @@ bool RobotInteraction::showingMarkers(const InteractionHandlerPtr& handler)
 }
 
 void RobotInteraction::moveInteractiveMarker(const std::string& name,
-                                             const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg)
+                                             geometry_msgs::msg::PoseStamped::ConstSharedPtr msg)
 {
   std::map<std::string, std::size_t>::const_iterator it = shown_markers_.find(name);
   if (it != shown_markers_.end())
@@ -709,7 +709,7 @@ void RobotInteraction::moveInteractiveMarker(const std::string& name,
 }
 
 void RobotInteraction::processInteractiveMarkerFeedback(
-    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
+    visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
   // perform some validity checks
   boost::unique_lock<boost::mutex> ulock(marker_access_lock_);

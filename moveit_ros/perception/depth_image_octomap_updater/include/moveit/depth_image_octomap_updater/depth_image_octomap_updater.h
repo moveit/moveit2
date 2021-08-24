@@ -61,8 +61,8 @@ public:
   void forgetShape(ShapeHandle handle) override;
 
 private:
-  void depthImageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
-                          const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg);
+  void depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
+                          sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg);
   bool getShapeTransform(mesh_filter::MeshHandle h, Eigen::Isometry3d& transform) const;
   void stopHelper();
 

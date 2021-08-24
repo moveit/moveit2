@@ -265,7 +265,7 @@ void TrajectoryExecutionManager::processEvent(const std::string& event)
     RCLCPP_WARN_STREAM(LOGGER, "Unknown event type: '" << event << "'");
 }
 
-void TrajectoryExecutionManager::receiveEvent(const std_msgs::msg::String::SharedPtr event)
+void TrajectoryExecutionManager::receiveEvent(std_msgs::msg::String::SharedPtr event)
 {
   RCLCPP_INFO_STREAM(LOGGER, "Received event '" << event->data << "'");
   processEvent(event->data);

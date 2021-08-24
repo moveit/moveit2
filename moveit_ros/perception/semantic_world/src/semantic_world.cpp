@@ -472,7 +472,7 @@ std::string SemanticWorld::findObjectTable(const geometry_msgs::msg::Pose& pose,
   return std::string();
 }
 
-void SemanticWorld::tableCallback(const object_recognition_msgs::msg::TableArray::SharedPtr msg)
+void SemanticWorld::tableCallback(object_recognition_msgs::msg::TableArray::SharedPtr msg)
 {
   table_array_ = *msg;
   RCLCPP_INFO(LOGGER, "Table callback with %d tables", (int)table_array_.tables.size());

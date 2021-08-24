@@ -43,7 +43,7 @@
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.occupancy_map_server");
 
-static void publishOctomap(const rclcpp::Publisher<octomap_msgs::msg::Octomap>::SharedPtr& octree_binary_pub,
+static void publishOctomap(rclcpp::Publisher<octomap_msgs::msg::Octomap>::SharedPtr& octree_binary_pub,
                            occupancy_map_monitor::OccupancyMapMonitor* server)
 {
   octomap_msgs::msg::Octomap map;

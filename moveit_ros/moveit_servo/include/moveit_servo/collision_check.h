@@ -85,7 +85,7 @@ private:
   planning_scene_monitor::LockedPlanningSceneRO getLockedPlanningSceneRO() const;
 
   /** \brief Callback for collision stopping time, from the thread that is aware of velocity and acceleration */
-  void worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg);
+  void worstCaseStopTimeCB(std_msgs::msg::Float64::SharedPtr msg);
 
   // Pointer to the ROS node
   const std::shared_ptr<rclcpp::Node> node_;

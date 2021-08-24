@@ -1265,7 +1265,7 @@ void PlanningSceneMonitor::stopStateMonitor()
   }
 }
 
-void PlanningSceneMonitor::onStateUpdate(const sensor_msgs::msg::JointState::ConstSharedPtr& /*joint_state */)
+void PlanningSceneMonitor::onStateUpdate(sensor_msgs::msg::JointState::ConstSharedPtr& /*joint_state */)
 {
   const std::chrono::system_clock::time_point& n = std::chrono::system_clock::now();
   std::chrono::duration<double> dt = n - last_robot_state_update_wall_time_;

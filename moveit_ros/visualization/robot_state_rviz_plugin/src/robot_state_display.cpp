@@ -305,7 +305,7 @@ void RobotStateDisplay::changedRobotStateTopic()
       robot_state_topic_property_->getStdString(), 10, std::bind(&RobotStateDisplay::newRobotStateCallback, this, _1));
 }
 
-void RobotStateDisplay::newRobotStateCallback(const moveit_msgs::msg::DisplayRobotState::ConstSharedPtr state_msg)
+void RobotStateDisplay::newRobotStateCallback(moveit_msgs::msg::DisplayRobotState::ConstSharedPtr state_msg)
 {
   if (!robot_model_)
     return;

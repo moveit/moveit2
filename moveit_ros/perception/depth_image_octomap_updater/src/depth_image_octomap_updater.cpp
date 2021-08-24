@@ -215,8 +215,8 @@ bool host_is_big_endian()
 
 static const bool HOST_IS_BIG_ENDIAN = host_is_big_endian();
 
-void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
-                                                  const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg)
+void DepthImageOctomapUpdater::depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
+                                                  sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg)
 {
   RCLCPP_DEBUG(LOGGER, "Received a new depth image message (frame = '%s', encoding='%s')",
                depth_msg->header.frame_id.c_str(), depth_msg->encoding.c_str());

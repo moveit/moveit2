@@ -167,7 +167,7 @@ void PointCloudOctomapUpdater::updateMask(const sensor_msgs::msg::PointCloud2& /
 {
 }
 
-void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud_msg)
+void PointCloudOctomapUpdater::cloudMsgCallback(sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud_msg)
 {
   RCLCPP_DEBUG(LOGGER, "Received a new point cloud message");
   rclcpp::Time start = rclcpp::Clock(RCL_ROS_TIME).now();

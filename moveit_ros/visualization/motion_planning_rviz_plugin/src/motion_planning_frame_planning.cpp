@@ -555,22 +555,22 @@ void MotionPlanningFrame::configureForPlanning()
     planning_display_->dropVisualizedTrajectory();
 }
 
-void MotionPlanningFrame::remotePlanCallback(const std_msgs::msg::Empty::ConstSharedPtr /*msg*/)
+void MotionPlanningFrame::remotePlanCallback(std_msgs::msg::Empty::ConstSharedPtr /*msg*/)
 {
   planButtonClicked();
 }
 
-void MotionPlanningFrame::remoteExecuteCallback(const std_msgs::msg::Empty::ConstSharedPtr /*msg*/)
+void MotionPlanningFrame::remoteExecuteCallback(std_msgs::msg::Empty::ConstSharedPtr /*msg*/)
 {
   executeButtonClicked();
 }
 
-void MotionPlanningFrame::remoteStopCallback(const std_msgs::msg::Empty::ConstSharedPtr /*msg*/)
+void MotionPlanningFrame::remoteStopCallback(std_msgs::msg::Empty::ConstSharedPtr /*msg*/)
 {
   stopButtonClicked();
 }
 
-void MotionPlanningFrame::remoteUpdateStartStateCallback(const std_msgs::msg::Empty::ConstSharedPtr /*msg*/)
+void MotionPlanningFrame::remoteUpdateStartStateCallback(std_msgs::msg::Empty::ConstSharedPtr /*msg*/)
 {
   if (move_group_ && planning_display_)
   {
@@ -584,7 +584,7 @@ void MotionPlanningFrame::remoteUpdateStartStateCallback(const std_msgs::msg::Em
   }
 }
 
-void MotionPlanningFrame::remoteUpdateGoalStateCallback(const std_msgs::msg::Empty::ConstSharedPtr /*msg*/)
+void MotionPlanningFrame::remoteUpdateGoalStateCallback(std_msgs::msg::Empty::ConstSharedPtr /*msg*/)
 {
   if (move_group_ && planning_display_)
   {
@@ -598,7 +598,7 @@ void MotionPlanningFrame::remoteUpdateGoalStateCallback(const std_msgs::msg::Emp
   }
 }
 
-void MotionPlanningFrame::remoteUpdateCustomStartStateCallback(const moveit_msgs::msg::RobotState::ConstSharedPtr msg)
+void MotionPlanningFrame::remoteUpdateCustomStartStateCallback(moveit_msgs::msg::RobotState::ConstSharedPtr msg)
 {
   moveit_msgs::msg::RobotState msg_no_attached(*msg);
   msg_no_attached.attached_collision_objects.clear();
@@ -616,7 +616,7 @@ void MotionPlanningFrame::remoteUpdateCustomStartStateCallback(const moveit_msgs
   }
 }
 
-void MotionPlanningFrame::remoteUpdateCustomGoalStateCallback(const moveit_msgs::msg::RobotState::ConstSharedPtr msg)
+void MotionPlanningFrame::remoteUpdateCustomGoalStateCallback(moveit_msgs::msg::RobotState::ConstSharedPtr msg)
 {
   moveit_msgs::msg::RobotState msg_no_attached(*msg);
   msg_no_attached.attached_collision_objects.clear();

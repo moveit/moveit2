@@ -158,8 +158,8 @@ TEST_F(PoseTrackingFixture, OutgoingMsgTest)
   // halt Servoing when first msg to ros_control is received
   // and test some conditions
   trajectory_msgs::msg::JointTrajectory last_received_msg;
-  std::function<void(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
-      [&/* this */](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) {
+  std::function<void(trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
+      [&/* this */](trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) {
         EXPECT_EQ(msg->header.frame_id, "panda_link0");
         // Check for an expected joint position command
         // As of now, the robot doesn't actually move because there are no controllers enabled.

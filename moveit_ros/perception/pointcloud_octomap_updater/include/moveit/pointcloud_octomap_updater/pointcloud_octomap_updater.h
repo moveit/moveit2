@@ -68,7 +68,7 @@ protected:
 
 private:
   bool getShapeTransform(ShapeHandle h, Eigen::Isometry3d& transform) const;
-  void cloudMsgCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud_msg);
+  void cloudMsgCallback(sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud_msg);
   void stopHelper();
 
   // TODO: Enable private node for publishing filtered point cloud

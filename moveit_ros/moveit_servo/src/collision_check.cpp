@@ -159,7 +159,7 @@ void CollisionCheck::run()
   }
 }
 
-void CollisionCheck::worstCaseStopTimeCB(const std_msgs::msg::Float64::SharedPtr msg)
+void CollisionCheck::worstCaseStopTimeCB(std_msgs::msg::Float64::SharedPtr msg)
 {
   worst_case_stop_time_ = msg.get()->data;
 }

@@ -212,7 +212,7 @@ void InteractionHandler::clearMenuHandler()
 }
 
 void InteractionHandler::handleGeneric(
-    const GenericInteraction& g, const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
+    const GenericInteraction& g, visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
   if (g.process_feedback)
   {
@@ -229,7 +229,7 @@ void InteractionHandler::handleGeneric(
 
 void InteractionHandler::handleEndEffector(
     const EndEffectorInteraction& eef,
-    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
+    visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
   if (feedback->event_type != visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE)
     return;
@@ -260,7 +260,7 @@ void InteractionHandler::handleEndEffector(
 }
 
 void InteractionHandler::handleJoint(const JointInteraction& vj,
-                                     const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
+                                     visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback)
 {
   if (feedback->event_type != visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE)
     return;
@@ -293,7 +293,7 @@ void InteractionHandler::handleJoint(const JointInteraction& vj,
 // MUST hold state_lock_ when calling this!
 void InteractionHandler::updateStateGeneric(
     moveit::core::RobotState* state, const GenericInteraction* g,
-    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr* feedback, StateChangeCallbackFn* callback)
+    visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr* feedback, StateChangeCallbackFn* callback)
 {
   bool ok = g->process_feedback(*state, *feedback);
   bool error_state_changed = setErrorState(g->marker_name_suffix, !ok);
@@ -378,7 +378,7 @@ bool InteractionHandler::getErrorState(const std::string& name) const
 }
 
 bool InteractionHandler::transformFeedbackPose(
-    const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback,
+    visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback,
     const geometry_msgs::msg::Pose& offset, geometry_msgs::msg::PoseStamped& tpose)
 {
   tpose.header = feedback->header;

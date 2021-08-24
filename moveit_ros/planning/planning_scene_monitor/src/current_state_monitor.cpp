@@ -460,7 +460,7 @@ void CurrentStateMonitor::updateMultiDofJoints()
 }
 
 // Copied from https://github.com/ros2/geometry2/blob/ros2/tf2_ros/src/transform_listener.cpp
-void CurrentStateMonitor::transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static)
+void CurrentStateMonitor::transformCallback(tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static)
 {
   for (const auto& transform : msg->transforms)
   {

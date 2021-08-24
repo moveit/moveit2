@@ -67,8 +67,8 @@ TEST_F(ServoFixture, SendTwistStampedTest)
 
   // count trajectory messages sent by servo
   size_t received_count = 0;
-  std::function<void(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
-      [&received_count](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) { ++received_count; };
+  std::function<void(trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
+      [&received_count](trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) { ++received_count; };
   auto traj_sub = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
       resolveServoTopicName(parameters->command_out_topic), 1, traj_callback);
 
@@ -120,8 +120,8 @@ TEST_F(ServoFixture, SendJointServoTest)
 
   // count trajectory messages sent by servo
   size_t received_count = 0;
-  std::function<void(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
-      [&received_count](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) { ++received_count; };
+  std::function<void(trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
+      [&received_count](trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) { ++received_count; };
   auto traj_sub = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(cmd_out_topic, 1, traj_callback);
 
   // Create publisher to send servo commands

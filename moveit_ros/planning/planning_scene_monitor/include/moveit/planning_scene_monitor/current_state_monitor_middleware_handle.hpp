@@ -79,7 +79,7 @@ public:
    *
    * @param[in]  callback  The callback
    */
-  void createStaticTfSubscription(std::function<void(const tf2_msgs::msg::TFMessage::ConstSharedPtr)> callback) override;
+  void createStaticTfSubscription(std::function<void(tf2_msgs::msg::TFMessage::ConstSharedPtr)> callback) override;
 
   /**
    * @brief      Creates a dynamic transform message subscription
@@ -87,7 +87,7 @@ public:
    * @param[in]  callback  The callback
    */
   void
-  createDynamicTfSubscription(std::function<void(const tf2_msgs::msg::TFMessage::ConstSharedPtr)> callback) override;
+  createDynamicTfSubscription(std::function<void(tf2_msgs::msg::TFMessage::ConstSharedPtr)> callback) override;
 
   /**
    * @brief      Reset the joint state subscription

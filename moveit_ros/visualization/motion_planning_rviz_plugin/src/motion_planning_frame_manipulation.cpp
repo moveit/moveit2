@@ -168,7 +168,7 @@ void MotionPlanningFrame::triggerObjectDetection()
 }
 
 void MotionPlanningFrame::listenDetectedObjects(
-    const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr /*msg*/)
+    object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr /*msg*/)
 {
   rclcpp::sleep_for(std::chrono::seconds(1));
   planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::processDetectedObjects, this));

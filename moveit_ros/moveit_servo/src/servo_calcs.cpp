@@ -1085,7 +1085,7 @@ bool ServoCalcs::getEEFrameTransform(geometry_msgs::msg::TransformStamped& trans
   return true;
 }
 
-void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr msg)
+void ServoCalcs::twistStampedCB(geometry_msgs::msg::TwistStamped::SharedPtr msg)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_twist_stamped_ = msg;
@@ -1099,7 +1099,7 @@ void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPt
   input_cv_.notify_all();
 }
 
-void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::SharedPtr msg)
+void ServoCalcs::jointCmdCB(control_msgs::msg::JointJog::SharedPtr msg)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_joint_cmd_ = msg;
@@ -1113,7 +1113,7 @@ void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::SharedPtr msg)
   input_cv_.notify_all();
 }
 
-void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::SharedPtr msg)
+void ServoCalcs::collisionVelocityScaleCB(std_msgs::msg::Float64::SharedPtr msg)
 {
   collision_velocity_scale_ = msg.get()->data;
 }

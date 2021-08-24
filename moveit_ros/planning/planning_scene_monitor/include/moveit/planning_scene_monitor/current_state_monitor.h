@@ -67,7 +67,7 @@ public:
   class MiddlewareHandle
   {
   public:
-    using TfCallback = std::function<void(const tf2_msgs::msg::TFMessage::ConstSharedPtr)>;
+    using TfCallback = std::function<void(tf2_msgs::msg::TFMessage::ConstSharedPtr)>;
 
     /**
      * @brief      Destroys the object.
@@ -315,7 +315,7 @@ private:
 
   void jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
   void updateMultiDofJoints();
-  void transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static);
+  void transformCallback(tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static);
 
   std::unique_ptr<MiddlewareHandle> middleware_handle_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;

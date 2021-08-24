@@ -70,7 +70,7 @@ void onSceneUpdate(planning_scene_monitor::PlanningSceneMonitor* psm, moveit_war
     RCLCPP_INFO(LOGGER, "Scene name is empty. Not saving.");
 }
 
-void onMotionPlanRequest(const moveit_msgs::msg::MotionPlanRequest::ConstSharedPtr req,
+void onMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest::ConstSharedPtr req,
                          planning_scene_monitor::PlanningSceneMonitor* psm, moveit_warehouse::PlanningSceneStorage* pss)
 {
   if (psm->getPlanningScene()->getName().empty())
@@ -81,7 +81,7 @@ void onMotionPlanRequest(const moveit_msgs::msg::MotionPlanRequest::ConstSharedP
   pss->addPlanningQuery(*req, psm->getPlanningScene()->getName());
 }
 
-void onConstraints(const moveit_msgs::msg::Constraints::ConstSharedPtr msg, moveit_warehouse::ConstraintsStorage* cs)
+void onConstraints(moveit_msgs::msg::Constraints::ConstSharedPtr msg, moveit_warehouse::ConstraintsStorage* cs)
 {
   if (msg->name.empty())
   {
@@ -102,7 +102,7 @@ void onConstraints(const moveit_msgs::msg::Constraints::ConstSharedPtr msg, move
   }
 }
 
-void onRobotState(const moveit_msgs::msg::RobotState::ConstSharedPtr msg, moveit_warehouse::RobotStateStorage* rs)
+void onRobotState(moveit_msgs::msg::RobotState::ConstSharedPtr msg, moveit_warehouse::RobotStateStorage* rs)
 {
   std::vector<std::string> names;
   rs->getKnownRobotStates(names);

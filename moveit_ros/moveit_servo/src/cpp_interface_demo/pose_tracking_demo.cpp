@@ -60,7 +60,7 @@ public:
   }
 
 private:
-  void statusCB(const std_msgs::msg::Int8::ConstSharedPtr msg)
+  void statusCB(std_msgs::msg::Int8::ConstSharedPtr msg)
   {
     moveit_servo::StatusCode latest_status = static_cast<moveit_servo::StatusCode>(msg->data);
     if (latest_status != status_)

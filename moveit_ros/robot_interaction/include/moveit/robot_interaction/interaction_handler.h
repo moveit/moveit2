@@ -191,17 +191,17 @@ public:
   /** \brief Update the internal state maintained by the handler using
    * information from the received feedback message. */
   virtual void handleEndEffector(const EndEffectorInteraction& eef,
-                                 const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback);
+                                 visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback);
 
   /** \brief Update the internal state maintained by the handler using
    * information from the received feedback message. */
   virtual void handleJoint(const JointInteraction& vj,
-                           const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback);
+                           visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback);
 
   /** \brief Update the internal state maintained by the handler using
    * information from the received feedback message. */
   virtual void handleGeneric(const GenericInteraction& g,
-                             const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback);
+                             visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback);
 
   /** \brief Check if the marker corresponding to this end-effector leads to an
    * invalid state */
@@ -219,7 +219,7 @@ public:
   void clearError();
 
 protected:
-  bool transformFeedbackPose(const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback,
+  bool transformFeedbackPose(visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr& feedback,
                              const geometry_msgs::msg::Pose& offset, geometry_msgs::msg::PoseStamped& tpose);
 
   const std::string name_;
@@ -232,7 +232,7 @@ private:
   // Update RobotState using a generic interaction feedback message.
   // YOU MUST LOCK state_lock_ BEFORE CALLING THIS.
   void updateStateGeneric(moveit::core::RobotState* state, const GenericInteraction* g,
-                          const visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr* feedback,
+                          visualization_msgs::msg::InteractiveMarkerFeedback::ConstSharedPtr* feedback,
                           StateChangeCallbackFn* callback);
 
   // Update RobotState for a new pose of an eef.

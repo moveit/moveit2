@@ -536,13 +536,13 @@ private:
   void scenePublishingThread();
 
   // called by current_state_monitor_ when robot state (as monitored on joint state topic) changes
-  void onStateUpdate(const sensor_msgs::msg::JointState::ConstSharedPtr& joint_state);
+  void onStateUpdate(sensor_msgs::msg::JointState::ConstSharedPtr& joint_state);
 
   // called by state_update_timer_ when a state update it pending
   void stateUpdateTimerCallback();
 
   // Callback for a new planning scene msg
-  void newPlanningSceneCallback(const moveit_msgs::msg::PlanningScene::SharedPtr scene);
+  void newPlanningSceneCallback(moveit_msgs::msg::PlanningScene::SharedPtr scene);
 
   // Callback for requesting the full planning scene via service
   void getPlanningSceneServiceCallback(moveit_msgs::srv::GetPlanningScene::Request::SharedPtr req,
