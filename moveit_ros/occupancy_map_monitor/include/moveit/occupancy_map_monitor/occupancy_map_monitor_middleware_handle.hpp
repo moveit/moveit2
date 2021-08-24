@@ -79,7 +79,7 @@ public:
    *
    * @return     The occupancy map updater pointer.
    */
-  OccupancyMapUpdaterPtr loadOccupancyMapUpdater(const std::string& sensor_plugin);
+  OccupancyMapUpdaterPtr loadOccupancyMapUpdater(const std::string& sensor_plugin) override;
 
   /**
    * @brief      Initializes the occupancy map updater.  This must be called because of the interface of OccupancyMapUpdater.
