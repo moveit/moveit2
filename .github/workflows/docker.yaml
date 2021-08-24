@@ -102,6 +102,7 @@ jobs:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: true
+          no_cache: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
           cache-from: type=registry,ref=${{ env.IMAGE }}
           cache-to: type=inline
           tags: ${{ env.IMAGE }}
