@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - IMAGE: rolling-ci-testing
+          - IMAGE: rolling-ci
             CCOV: true
           - IMAGE: rolling-ci-testing
             IKFAST_TEST: true
