@@ -457,7 +457,7 @@ const JointModelGroup* RobotModel::getEndEffector(const std::string& name) const
       return it->second;
 
     std::stringstream ss;
-    ss << "End-effector '" << name.c_str() << "'' not found in model '" << model_name_.c_str() << "'";
+    ss << "End-effector '" << name.c_str() << "' not found in model '" << model_name_.c_str() << "'";
     RCLCPP_ERROR_STREAM(LOGGER, ss.str());
     throw Exception(ss.str());
   }
@@ -474,7 +474,7 @@ JointModelGroup* RobotModel::getEndEffector(const std::string& name)
       return it->second;
 
     std::stringstream ss;
-    ss << "End-effector '" << name.c_str() << "'' not found in model '" << model_name_.c_str() << "'";
+    ss << "End-effector '" << name.c_str() << "' not found in model '" << model_name_.c_str() << "'";
     RCLCPP_ERROR_STREAM(LOGGER, ss.str());
     throw Exception(ss.str());
   }
@@ -492,7 +492,7 @@ const JointModelGroup* RobotModel::getJointModelGroup(const std::string& name) c
   if (it == joint_model_group_map_.end())
   {
     std::stringstream ss;
-    ss << "Group '" << name.c_str() << "'' not found in model '" << model_name_.c_str() << "'";
+    ss << "Group '" << name.c_str() << "' not found in model '" << model_name_.c_str() << "'";
     RCLCPP_ERROR_STREAM(LOGGER, ss.str());
     throw Exception(ss.str());
   }
@@ -505,7 +505,7 @@ JointModelGroup* RobotModel::getJointModelGroup(const std::string& name)
   if (it == joint_model_group_map_.end())
   {
     std::stringstream ss;
-    ss << "Group '" << name.c_str() << "'' not found in model '" << model_name_.c_str() << "'";
+    ss << "Group '" << name.c_str() << "' not found in model '" << model_name_.c_str() << "'";
     RCLCPP_ERROR_STREAM(LOGGER, ss.str());
     throw Exception(ss.str());
   }
@@ -1244,7 +1244,7 @@ const JointModel* RobotModel::getJointModel(const std::string& name) const
     return it->second;
 
   std::stringstream ss;
-  ss << "Joint '" << name.c_str() << "'' not found in model '" << model_name_.c_str() << "'";
+  ss << "Joint '" << name.c_str() << "' not found in model '" << model_name_.c_str() << "'";
   RCLCPP_ERROR_STREAM(LOGGER, ss.str());
   throw Exception(ss.str());
 }
@@ -1254,7 +1254,7 @@ const JointModel* RobotModel::getJointModel(int index) const
   if (index < 0 || index >= static_cast<int>(joint_model_vector_.size()))
   {
     std::stringstream ss;
-    ss << "Joint index '" << index << "'' out of bounds of joints in model '" << model_name_.c_str() << "'";
+    ss << "Joint index '" << index << "' out of bounds of joints in model '" << model_name_.c_str() << "'";
     RCLCPP_ERROR_STREAM(LOGGER, ss.str());
     throw Exception(ss.str());
   }
@@ -1269,7 +1269,7 @@ JointModel* RobotModel::getJointModel(const std::string& name)
     return it->second;
 
   std::stringstream ss;
-  ss << "Joint '" << name.c_str() << "'' not found in model '" << model_name_.c_str() << "'";
+  ss << "Joint '" << name.c_str() << "' not found in model '" << model_name_.c_str() << "'";
   RCLCPP_ERROR_STREAM(LOGGER, ss.str());
   throw Exception(ss.str());
 }
@@ -1284,7 +1284,7 @@ const LinkModel* RobotModel::getLinkModel(int index) const
   if (index < 0 || index >= static_cast<int>(link_model_vector_.size()))
   {
     std::stringstream ss;
-    ss << "Link index '" << index << "'' out of bounds of links in model '" << model_name_.c_str() << "'";
+    ss << "Link index '" << index << "' out of bounds of links in model '" << model_name_.c_str() << "'";
     RCLCPP_ERROR_STREAM(LOGGER, ss.str());
     throw Exception(ss.str());
   }
@@ -1308,7 +1308,7 @@ LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_link)
 
   // Otherwise throw error
   std::stringstream ss;
-  ss << "Link '" << name.c_str() << "'' out of bounds of links in model '" << model_name_.c_str() << "'";
+  ss << "Link '" << name.c_str() << "' out of bounds of links in model '" << model_name_.c_str() << "'";
   RCLCPP_ERROR_STREAM(LOGGER, ss.str());
   throw Exception(ss.str());
 }

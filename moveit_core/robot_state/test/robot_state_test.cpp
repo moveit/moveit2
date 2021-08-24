@@ -387,13 +387,13 @@ TEST_F(OneRobot, FK)
   const moveit::core::JointModelGroup* g_one = model->getJointModelGroup("base_from_joints");
   const moveit::core::JointModelGroup* g_two = model->getJointModelGroup("base_from_base_to_tip");
   const moveit::core::JointModelGroup* g_three = model->getJointModelGroup("base_with_subgroups");
-  const moveit::core::JointModelGroup* g_four = model->getJointModelGroup("base_with_bad_subgroups");
   const moveit::core::JointModelGroup* g_mim = model->getJointModelGroup("mim_joints");
+  EXPECT_THROW(model->getJointModelGroup("base_with_bad_subgroups"), moveit::Exception);
 
   ASSERT_TRUE(g_one != nullptr);
   ASSERT_TRUE(g_two != nullptr);
   ASSERT_TRUE(g_three != nullptr);
-  ASSERT_TRUE(g_four == nullptr);
+  ASSERT_TRUE(g_mim != nullptr);
 
   // joint_b is a fixed joint, so no one should have it
   ASSERT_EQ(g_one->getJointModelNames().size(), 3u);

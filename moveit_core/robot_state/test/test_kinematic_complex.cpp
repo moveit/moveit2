@@ -122,11 +122,8 @@ TEST_F(LoadPlanningModelsPr2, GroupInit)
   srdf_model->initString(*urdf_model_, SMODEL1);
   moveit::core::RobotModel robot_model1(urdf_model_, srdf_model);
 
-  const moveit::core::JointModelGroup* left_arm_base_tip_group = robot_model1.getJointModelGroup("left_arm_base_tip");
-  ASSERT_TRUE(left_arm_base_tip_group == nullptr);
-
-  const moveit::core::JointModelGroup* left_arm_joints_group = robot_model1.getJointModelGroup("left_arm_joints");
-  ASSERT_TRUE(left_arm_joints_group == nullptr);
+  EXPECT_THROW(robot_model1.getJointModelGroup("left_arm_base_tip"), moveit::Exception);
+  EXPECT_THROW(robot_model1.getJointModelGroup("left_arm_joints"), moveit::Exception);
 
   static const std::string SMODEL2 = "<?xml version=\"1.0\" ?>"
                                      "<robot name=\"pr2\">"
@@ -149,10 +146,10 @@ TEST_F(LoadPlanningModelsPr2, GroupInit)
 
   moveit::core::RobotModelPtr robot_model2(new moveit::core::RobotModel(urdf_model_, srdf_model));
 
-  left_arm_base_tip_group = robot_model2->getJointModelGroup("left_arm_base_tip");
+  const moveit::core::JointModelGroup* left_arm_base_tip_group = robot_model2->getJointModelGroup("left_arm_base_tip");
   ASSERT_TRUE(left_arm_base_tip_group != nullptr);
 
-  left_arm_joints_group = robot_model2->getJointModelGroup("left_arm_joints");
+  const moveit::core::JointModelGroup* left_arm_joints_group = robot_model2->getJointModelGroup("left_arm_joints");
   ASSERT_TRUE(left_arm_joints_group != nullptr);
 
   EXPECT_EQ(left_arm_base_tip_group->getJointModels().size(), 9u);

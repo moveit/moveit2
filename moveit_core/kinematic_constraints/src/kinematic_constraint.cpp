@@ -151,12 +151,12 @@ bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
     std::size_t pos = jc.joint_name.find_last_of('/');
     if (pos != std::string::npos)
     {
-      joint_model_ = robot_model_->getJointModel(jc.joint_name.substr(0, pos));
+      std::string name = jc.joint_name.substr(0, pos);
+      if (robot_model_->hasJointModel(name))
+        joint_model_ = robot_model_->getJointModel(name);
       if (pos + 1 < jc.joint_name.length())
         local_variable_name_ = jc.joint_name.substr(pos + 1);
     }
-    else
-      joint_model_ = robot_model_->getJointModel(jc.joint_name);
   }
 
   if (joint_model_)
@@ -342,8 +342,11 @@ bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& p
   // clearing before we configure to get rid of any old data
   clear();
 
-  link_model_ = robot_model_->getLinkModel(pc.link_name);
-  if (link_model_ == nullptr)
+  try
+  {
+    link_model_ = robot_model_->getLinkModel(pc.link_name);
+  }
+  catch (const moveit::Exception& e)
   {
     RCLCPP_WARN(LOGGER, "Position constraint link model %s not found in kinematic model. Constraint invalid.",
                 pc.link_name.c_str());
@@ -563,8 +566,11 @@ bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstra
   // clearing out any old data
   clear();
 
-  link_model_ = robot_model_->getLinkModel(oc.link_name);
-  if (!link_model_)
+  try
+  {
+    link_model_ = robot_model_->getLinkModel(oc.link_name);
+  }
+  catch (const moveit::Exception& e)
   {
     RCLCPP_WARN(LOGGER, "Could not find link model for link name %s", oc.link_name.c_str());
     return false;

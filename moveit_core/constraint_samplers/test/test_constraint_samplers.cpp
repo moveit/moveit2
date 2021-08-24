@@ -281,8 +281,7 @@ TEST_F(LoadPlanningModelsPr2, IKConstraintsSamplerSimple)
 
   EXPECT_FALSE(pc.configure(pcm, tf));
 
-  constraint_samplers::IKConstraintSampler ik_bad(ps_, "l_arm");
-  EXPECT_FALSE(ik_bad.isValid());
+  EXPECT_THROW(constraint_samplers::IKConstraintSampler ik_bad(ps_, "l_arm"), moveit::Exception);
 
   constraint_samplers::IKConstraintSampler iks(ps_, "left_arm");
   EXPECT_FALSE(iks.configure(constraint_samplers::IKSamplingPose()));
