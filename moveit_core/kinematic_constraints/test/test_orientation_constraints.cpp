@@ -47,6 +47,8 @@
 #endif
 #include <boost/math/constants/constants.hpp>
 
+#include <moveit/utils/robot_model_test_utils.h>
+
 class SphericalRobot : public testing::Test
 {
 protected:
