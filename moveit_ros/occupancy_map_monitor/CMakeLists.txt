@@ -45,6 +45,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/occupancy_map_monitor.cpp
+  src/occupancy_map_monitor_middleware_handle.cpp
   src/occupancy_map_updater.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
@@ -86,6 +87,15 @@ if(BUILD_TESTING)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
+
+  find_package(ament_cmake_gmock REQUIRED)
+
+  ament_add_gmock(occupancy_map_monitor_tests
+    test/occupancy_map_monitor_tests.cpp
+  )
+  target_link_libraries(occupancy_map_monitor_tests
+    ${MOVEIT_LIB_NAME}
+  )
 endif()
 
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
