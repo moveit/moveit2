@@ -17,7 +17,9 @@ limitations under the License.
 -->
 
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:macro name="prbt" params="prefix">
+  <xacro:macro name="prbt" params="
+    prefix
+    initial_positions:=${dict(joint_1=0.0,joint_2=0.0,joint_3=0.0,joint_4=0.0,joint_5=0.0,joint_6=0.0)}">
 
     <!-- Height of Foot -->
     <xacro:property name="L0" value="0.2604" />
@@ -30,6 +32,15 @@ limitations under the License.
 
     <!-- Distance last joint to flange -->
     <xacro:property name="L3" value="0.0840" />
+
+    <!-- ros2 control include -->
+    <xacro:include filename="$(find moveit_resources_prbt_support)/urdf/prbt.ros2_control.xacro" />
+    <!-- ros2 control instance -->
+    <xacro:prbt_ros2_control
+      name="PRBTPositionHardwareInterface" prefix="${prefix}"
+      use_fake_hardware="true"
+      initial_positions="${initial_positions}"
+      fake_sensor_commands="true"/>
 
     <!-- robot foot link -->
     <link name="${prefix}base_link">

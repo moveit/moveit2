@@ -25,5 +25,3 @@ gripper_joint_trajectory_controller:
   state_publish_rate:  25
   action_monitor_rate: 10
   required_drive_mode: 7
-
-

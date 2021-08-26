@@ -15,7 +15,11 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit-resources/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit-resources</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>xacro</exec_depend>
+
+  <export>
+      <build_type>ament_cmake</build_type>
+  </export>
 </package>
