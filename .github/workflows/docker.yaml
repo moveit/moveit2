@@ -20,7 +20,8 @@ jobs:
       packages: write
       contents: read
     env:
-      IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
     steps:
       - name: Set up Docker Buildx
@@ -31,6 +32,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push
         uses: docker/build-push-action@v2
         with:
@@ -38,9 +44,11 @@ jobs:
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: true
           no-cache: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-          cache-from: type=registry,ref=${{ env.IMAGE }}
+          cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
-          tags: ${{ env.IMAGE }}
+          tags: |
+            ${{ env.GH_IMAGE }}
+            ${{ env.DH_IMAGE }}
 
   ci:
     strategy:
@@ -52,7 +60,8 @@ jobs:
       packages: write
       contents: read
     env:
-      IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
     steps:
       - name: Set up Docker Buildx
@@ -63,6 +72,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push
         uses: docker/build-push-action@v2
         with:
@@ -70,9 +84,11 @@ jobs:
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: true
           no-cache: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-          cache-from: type=registry,ref=${{ env.IMAGE }}
+          cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
-          tags: ${{ env.IMAGE }}
+          tags: |
+            ${{ env.GH_IMAGE }}
+            ${{ env.DH_IMAGE }}
 
   ci-testing:
     needs: ci
@@ -85,7 +101,8 @@ jobs:
       packages: write
       contents: read
     env:
-      IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
     steps:
       - name: Set up Docker Buildx
@@ -96,6 +113,11 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push
         uses: docker/build-push-action@v2
         with:
@@ -103,10 +125,11 @@ jobs:
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: true
           no-cache: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-          cache-from: type=registry,ref=${{ env.IMAGE }}
+          cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
-          tags: ${{ env.IMAGE }}
-
+          tags: |
+            ${{ env.GH_IMAGE }}
+            ${{ env.DH_IMAGE }}
 
   source:
     needs: ci-testing
@@ -119,7 +142,8 @@ jobs:
       packages: write
       contents: read
     env:
-      IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
     steps:
       - name: Set up Docker Buildx
@@ -130,12 +154,19 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push
         uses: docker/build-push-action@v2
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: true
-          cache-from: type=registry,ref=${{ env.IMAGE }}
+          cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
-          tags: ${{ env.IMAGE }}
+          tags: |
+            ${{ env.GH_IMAGE }}
+            ${{ env.DH_IMAGE }}
