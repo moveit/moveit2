@@ -41,7 +41,10 @@
 #include <moveit/robot_model/link_model.h>
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <srdfdom/model.h>
+
+#include <absl/status/statusor.h>
 #include <boost/function.hpp>
+
 #include <set>
 
 namespace moveit
@@ -134,7 +137,7 @@ public:
   bool hasLinkModel(const std::string& link) const;
 
   /** \brief Get a joint by its name. Throw an exception if the joint is not part of this group. */
-  const JointModel* getJointModel(const std::string& joint) const;
+  const absl::StatusOr<const JointModel*> getJointModel(const std::string& joint) const;
 
   /** \brief Get a link by its name. Throw an exception if the link is not part of this group. */
   const LinkModel* getLinkModel(const std::string& link) const;

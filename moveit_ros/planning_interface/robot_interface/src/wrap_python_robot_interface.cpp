@@ -135,10 +135,10 @@ public:
   bp::list getJointLimits(const std::string& name) const
   {
     bp::list result;
-    const moveit::core::JointModel* jm = robot_model_->getJointModel(name);
-    if (jm)
+    const auto jm = robot_model_->getJointModel(name);
+    if (jm.ok())
     {
-      const std::vector<moveit_msgs::msg::JointLimits>& lim = jm->getVariableBoundsMsg();
+      const std::vector<moveit_msgs::msg::JointLimits>& lim = jm.value()->getVariableBoundsMsg();
       for (const moveit_msgs::msg::JointLimits& joint_limit : lim)
       {
         bp::list l;
@@ -200,11 +200,11 @@ public:
     if (!ensureCurrentState())
       return l;
     moveit::core::RobotStatePtr state = current_state_monitor_->getCurrentState();
-    const moveit::core::JointModel* jm = state->getJointModel(name);
-    if (jm)
+    const auto jm = state->getJointModel(name);
+    if (jm.ok())
     {
-      const double* pos = state->getJointPositions(jm);
-      const unsigned int sz = jm->getVariableCount();
+      const double* pos = state->getJointPositions(jm.value());
+      const unsigned int sz = jm.value()->getVariableCount();
       for (unsigned int i = 0; i < sz; ++i)
         l.append(pos[i]);
     }

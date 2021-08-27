@@ -218,7 +218,8 @@ bool KDLKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
   unsigned int joint_counter = 0;
   for (std::size_t i = 0; i < kdl_chain_.getNrOfSegments(); ++i)
   {
-    const moveit::core::JointModel* jm = robot_model_->getJointModel(kdl_chain_.segments[i].getJoint().getName());
+    const moveit::core::JointModel* jm =
+        robot_model_->getJointModel(kdl_chain_.segments[i].getJoint().getName()).value();
 
     // first check whether it belongs to the set of active joints in the group
     if (jm->getMimic() == nullptr && jm->getVariableCount() > 0)
@@ -249,7 +250,7 @@ bool KDLKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
     if (!mimic_joint.active)
     {
       const moveit::core::JointModel* joint_model =
-          joint_model_group_->getJointModel(mimic_joint.joint_name)->getMimic();
+          joint_model_group_->getJointModel(mimic_joint.joint_name).value()->getMimic();
       for (JointMimic& mimic_joint_recal : mimic_joints_)
       {
         if (mimic_joint_recal.joint_name == joint_model->getName())

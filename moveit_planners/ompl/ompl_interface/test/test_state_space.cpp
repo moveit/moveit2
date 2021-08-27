@@ -166,8 +166,11 @@ TEST_F(LoadPlanningModelsPr2, StateSpaceCopy)
     std::vector<std::string> joint_model_names = joint_model_group->getActiveJointModelNames();
     for (std::size_t joint_index = 0; joint_index < joint_model_group->getVariableCount(); ++joint_index)
     {
-      const moveit::core::JointModel* joint_model = joint_model_group->getJointModel(joint_model_names[joint_index]);
-      EXPECT_NE(joint_model, nullptr);
+      const auto get_joint_model_result = joint_model_group->getJointModel(joint_model_names[joint_index]);
+      EXPECT_TRUE(get_joint_model_result.ok());
+      const moveit::core::JointModel* joint_model = get_joint_model_result.value();
+      EXPECT_FALSE(joint_model == nullptr);
+
       joint_model_state_space.copyJointToOMPLState(state, robot_state, joint_model, joint_index);
     }
 

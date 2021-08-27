@@ -477,16 +477,16 @@ void ROSControllersWidget::previewSelectedJoints(const std::vector<std::string>&
 
   for (const std::string& joint : joints)
   {
-    const moveit::core::JointModel* joint_model = config_data_->getRobotModel()->getJointModel(joint);
+    const auto joint_model = config_data_->getRobotModel()->getJointModel(joint);
 
     // Check that a joint model was found
-    if (!joint_model)
+    if (!joint_model.ok())
     {
       continue;
     }
 
     // Get the name of the link
-    const std::string link = joint_model->getChildLinkModel()->getName();
+    const std::string link = joint_model.value()->getChildLinkModel()->getName();
 
     if (link.empty())
     {

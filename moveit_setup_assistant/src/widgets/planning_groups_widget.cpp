@@ -325,10 +325,10 @@ void PlanningGroupsWidget::loadGroupsTreeRecursive(srdf::Model::Group& group_it,
     std::string joint_name;
 
     // Get the type of joint this is
-    const moveit::core::JointModel* jm = model->getJointModel(*joint_it);
-    if (jm)  // check if joint model was found
+    const auto jm = model->getJointModel(*joint_it);
+    if (jm.ok())  // check if joint model was found
     {
-      joint_name = *joint_it + " - " + jm->getTypeName();
+      joint_name = *joint_it + " - " + jm.value()->getTypeName();
     }
     else
     {

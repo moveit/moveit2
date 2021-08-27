@@ -1794,11 +1794,11 @@ bool MoveGroupInterface::setJointValueTarget(const std::string& joint_name, doub
 bool MoveGroupInterface::setJointValueTarget(const std::string& joint_name, const std::vector<double>& values)
 {
   impl_->setTargetType(JOINT);
-  const moveit::core::JointModel* jm = impl_->getJointModelGroup()->getJointModel(joint_name);
-  if (jm && jm->getVariableCount() == values.size())
+  const auto jm = impl_->getJointModelGroup()->getJointModel(joint_name);
+  if (jm.ok() && jm.value()->getVariableCount() == values.size())
   {
-    impl_->getTargetRobotState().setJointPositions(jm, values);
-    return impl_->getTargetRobotState().satisfiesBounds(jm, impl_->getGoalJointTolerance());
+    impl_->getTargetRobotState().setJointPositions(jm.value(), values);
+    return impl_->getTargetRobotState().satisfiesBounds(jm.value(), impl_->getGoalJointTolerance());
   }
 
   RCLCPP_ERROR_STREAM(LOGGER,

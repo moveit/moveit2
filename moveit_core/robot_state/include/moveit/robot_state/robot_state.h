@@ -40,13 +40,16 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/attached_body.h>
 #include <moveit/transforms/transforms.h>
+
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <std_msgs/msg/color_rgba.hpp>
 #include <geometry_msgs/msg/twist.hpp>
-#include <cassert>
 
+#include <absl/status/statusor.h>
 #include <boost/assert.hpp>
+
+#include <cassert>
 
 /* Terminology
    * Model Frame: RobotModel's root frame == PlanningScene's planning frame
@@ -125,7 +128,7 @@ public:
   }
 
   /** \brief Get the model of a particular joint */
-  const JointModel* getJointModel(const std::string& joint) const
+  const absl::StatusOr<JointModel*> getJointModel(const std::string& joint) const
   {
     return robot_model_->getJointModel(joint);
   }
@@ -514,12 +517,12 @@ public:
    */
   void setJointPositions(const std::string& joint_name, const double* position)
   {
-    setJointPositions(robot_model_->getJointModel(joint_name), position);
+    setJointPositions(robot_model_->getJointModel(joint_name).value(), position);
   }
 
   void setJointPositions(const std::string& joint_name, const std::vector<double>& position)
   {
-    setJointPositions(robot_model_->getJointModel(joint_name), &position[0]);
+    setJointPositions(robot_model_->getJointModel(joint_name).value(), &position[0]);
   }
 
   void setJointPositions(const JointModel* joint, const std::vector<double>& position)
@@ -536,7 +539,7 @@ public:
 
   void setJointPositions(const std::string& joint_name, const Eigen::Isometry3d& transform)
   {
-    setJointPositions(robot_model_->getJointModel(joint_name), transform);
+    setJointPositions(robot_model_->getJointModel(joint_name).value(), transform);
   }
 
   void setJointPositions(const JointModel* joint, const Eigen::Isometry3d& transform)
@@ -556,7 +559,7 @@ public:
 
   const double* getJointPositions(const std::string& joint_name) const
   {
-    return getJointPositions(robot_model_->getJointModel(joint_name));
+    return getJointPositions(robot_model_->getJointModel(joint_name).value());
   }
 
   const double* getJointPositions(const JointModel* joint) const
@@ -566,7 +569,7 @@ public:
 
   const double* getJointVelocities(const std::string& joint_name) const
   {
-    return getJointVelocities(robot_model_->getJointModel(joint_name));
+    return getJointVelocities(robot_model_->getJointModel(joint_name).value());
   }
 
   const double* getJointVelocities(const JointModel* joint) const
@@ -576,7 +579,7 @@ public:
 
   const double* getJointAccelerations(const std::string& joint_name) const
   {
-    return getJointAccelerations(robot_model_->getJointModel(joint_name));
+    return getJointAccelerations(robot_model_->getJointModel(joint_name).value());
   }
 
   const double* getJointAccelerations(const JointModel* joint) const
@@ -586,7 +589,7 @@ public:
 
   const double* getJointEffort(const std::string& joint_name) const
   {
-    return getJointEffort(robot_model_->getJointModel(joint_name));
+    return getJointEffort(robot_model_->getJointModel(joint_name).value());
   }
 
   const double* getJointEffort(const JointModel* joint) const
@@ -1359,7 +1362,7 @@ public:
 
   const Eigen::Isometry3d& getJointTransform(const std::string& joint_name)
   {
-    return getJointTransform(robot_model_->getJointModel(joint_name));
+    return getJointTransform(robot_model_->getJointModel(joint_name).value());
   }
 
   const Eigen::Isometry3d& getJointTransform(const JointModel* joint)
@@ -1376,7 +1379,7 @@ public:
 
   const Eigen::Isometry3d& getJointTransform(const std::string& joint_name) const
   {
-    return getJointTransform(robot_model_->getJointModel(joint_name));
+    return getJointTransform(robot_model_->getJointModel(joint_name).value());
   }
 
   const Eigen::Isometry3d& getJointTransform(const JointModel* joint) const

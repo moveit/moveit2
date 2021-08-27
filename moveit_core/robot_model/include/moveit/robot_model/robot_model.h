@@ -48,6 +48,9 @@
 #include <moveit/robot_model/planar_joint_model.h>
 #include <moveit/robot_model/revolute_joint_model.h>
 #include <moveit/robot_model/prismatic_joint_model.h>
+
+#include <absl/status/statusor.h>
+
 #include <Eigen/Geometry>
 #include <iostream>
 
@@ -136,13 +139,13 @@ public:
   bool hasJointModel(const std::string& name) const;
 
   /** \brief Get a joint by its name. Output error and return NULL when the joint is missing. */
-  const JointModel* getJointModel(const std::string& joint) const;
+  const absl::StatusOr<JointModel*> getJointModel(const std::string& joint) const;
 
   /** \brief Get a joint by its index. Output error and return NULL when the link is missing. */
-  const JointModel* getJointModel(int index) const;
+  const absl::StatusOr<JointModel*> getJointModel(int index) const;
 
   /** \brief Get a joint by its name. Output error and return NULL when the joint is missing. */
-  JointModel* getJointModel(const std::string& joint);
+  absl::StatusOr<JointModel*> getJointModel(const std::string& joint);
 
   /** \brief Get the array of joints, in the order they appear
       in the robot state. */

@@ -23,6 +23,8 @@ foreach(LIBFCL_LIBRARY ${LIBFCL_LIBRARIES})
 endforeach()
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
 
+find_package(absl REQUIRED statusor)
+
 find_package(Bullet 2.87 REQUIRED)
 find_package(angles REQUIRED)
 find_package(OCTOMAP REQUIRED)
@@ -114,6 +116,7 @@ set(THIS_PACKAGE_LIBRARIES
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
+  absl
   angles
   eigen_stl_containers
   geometric_shapes

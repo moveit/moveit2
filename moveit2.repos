@@ -11,3 +11,7 @@ repositories:
     type: git
     url: https://github.com/ros-planning/warehouse_ros_mongo
     version: ros2
+  abseil-cpp:
+    type: git
+    url: https://github.com/PickNikRobotics/abseil-cpp.git
+    version: master

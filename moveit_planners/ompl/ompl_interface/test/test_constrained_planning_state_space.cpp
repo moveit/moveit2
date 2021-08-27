@@ -212,7 +212,9 @@ protected:
 
     for (std::size_t joint_index = 0; joint_index < num_dofs_; joint_index++)
     {
-      const moveit::core::JointModel* joint_model = joint_model_group_->getJointModel(joint_model_names[joint_index]);
+      const auto get_joint_model_result = joint_model_group_->getJointModel(joint_model_names[joint_index]);
+      EXPECT_TRUE(get_joint_model_result.ok());
+      const moveit::core::JointModel* joint_model = get_joint_model_result.value();
       EXPECT_FALSE(joint_model == nullptr);
 
       RCLCPP_DEBUG_STREAM(LOGGER, "Joint model: " << joint_model->getName() << " index: " << joint_index);

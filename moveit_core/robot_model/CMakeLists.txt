@@ -14,7 +14,9 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/robot_model.cpp
 )
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+
 ament_target_dependencies(${MOVEIT_LIB_NAME}
+  absl
   angles
   moveit_msgs
   Eigen3
@@ -28,6 +30,7 @@ target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_profiler
   moveit_exceptions
   moveit_kinematics_base
+  absl::statusor
 )
 
 if(BUILD_TESTING)
@@ -37,7 +40,10 @@ if(BUILD_TESTING)
     rclcpp
     Boost
   )
-  target_link_libraries(test_robot_model moveit_test_utils ${MOVEIT_LIB_NAME})
+  target_link_libraries(test_robot_model
+    ${MOVEIT_LIB_NAME}
+    moveit_test_utils
+  )
 endif()
 
 install(DIRECTORY include/ DESTINATION include)

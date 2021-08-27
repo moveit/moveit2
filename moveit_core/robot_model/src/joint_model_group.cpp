@@ -39,8 +39,13 @@
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_model/revolute_joint_model.h>
 #include <moveit/exceptions/exceptions.h>
+
+#include <absl/status/status.h>
+#include <absl/status/statusor.h>
 #include <boost/lexical_cast.hpp>
+
 #include <algorithm>
+
 #include "order_robot_model_items.inc"
 #include "rclcpp/rclcpp.hpp"
 
@@ -302,13 +307,15 @@ const LinkModel* JointModelGroup::getLinkModel(const std::string& name) const
   return it->second;
 }
 
-const JointModel* JointModelGroup::getJointModel(const std::string& name) const
+const absl::StatusOr<const JointModel*> JointModelGroup::getJointModel(const std::string& name) const
 {
   JointModelMapConst::const_iterator it = joint_model_map_.find(name);
   if (it == joint_model_map_.end())
   {
-    RCLCPP_ERROR(LOGGER, "Joint '%s' not found in group '%s'", name.c_str(), name_.c_str());
-    return nullptr;
+    std::stringstream ss;
+    ss << "Joint '" << name.c_str() << "' not found in group '" << name_.c_str() << "'";
+    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+    return absl::NotFoundError(ss.str());
   }
   return it->second;
 }
@@ -574,7 +581,7 @@ bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik
     if (it == joint_variables_index_map_.end())
     {
       // skip reported fixed joints
-      if (hasJointModel(ik_jname) && getJointModel(ik_jname)->getType() == JointModel::FIXED)
+      if (hasJointModel(ik_jname) && getJointModel(ik_jname).value()->getType() == JointModel::FIXED)
         continue;
       RCLCPP_ERROR(LOGGER,
                    "IK solver computes joint values for joint '%s' "
@@ -582,7 +589,7 @@ bool JointModelGroup::computeIKIndexBijection(const std::vector<std::string>& ik
                    ik_jname.c_str(), getName().c_str());
       return false;
     }
-    const JointModel* jm = getJointModel(ik_jname);
+    const JointModel* jm = getJointModel(ik_jname).value();
     for (unsigned int k = 0; k < jm->getVariableCount(); ++k)
       joint_bijection.push_back(it->second + k);
   }

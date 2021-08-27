@@ -5,6 +5,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED src/kinematics_base.cpp)
 include(GenerateExportHeader)
 generate_export_header(${MOVEIT_LIB_NAME})
 target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+target_link_libraries(${MOVEIT_LIB_NAME} absl::statusor)
 
 # This line is needed to ensure that messages are done being built before this is built
 ament_target_dependencies(

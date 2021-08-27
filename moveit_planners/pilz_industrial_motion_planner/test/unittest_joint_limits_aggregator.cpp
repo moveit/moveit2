@@ -104,9 +104,9 @@ TEST_F(JointLimitsAggregator, CorrectOverwriteByParamterPosition)
     // Check that nothing else changed
     else
     {
-      EXPECT_EQ(robot_model_->getJointModel(lim.first)->getVariableBounds()[0].min_position_,
+      EXPECT_EQ(robot_model_->getJointModel(lim.first).value()->getVariableBounds()[0].min_position_,
                 container.getLimit(lim.first).min_position);
-      EXPECT_EQ(robot_model_->getJointModel(lim.first)->getVariableBounds()[0].max_position_,
+      EXPECT_EQ(robot_model_->getJointModel(lim.first).value()->getVariableBounds()[0].max_position_,
                 container.getLimit(lim.first).max_position);
     }
   }
@@ -133,7 +133,7 @@ TEST_F(JointLimitsAggregator, CorrectOverwriteByParamterVelocity)
     }
     else
     {
-      EXPECT_EQ(robot_model_->getJointModel(lim.first)->getVariableBounds()[0].max_velocity_,
+      EXPECT_EQ(robot_model_->getJointModel(lim.first).value()->getVariableBounds()[0].max_velocity_,
                 container.getLimit(lim.first).max_velocity);
     }
   }

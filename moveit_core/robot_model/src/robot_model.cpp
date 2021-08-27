@@ -36,13 +36,19 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/robot_model/robot_model.h>
-#include <geometric_shapes/shape_operations.h>
-#include <boost/math/constants/constants.hpp>
 #include <moveit/profiler/profiler.h>
+
+#include <geometric_shapes/shape_operations.h>
+
+#include <absl/status/status.h>
+#include <absl/status/statusor.h>
+#include <boost/math/constants/constants.hpp>
+
 #include <algorithm>
 #include <limits>
 #include <cmath>
 #include <memory>
+
 #include "order_robot_model_items.inc"
 #include "rclcpp/rclcpp.hpp"
 
@@ -339,7 +345,7 @@ void RobotModel::buildGroupStates(const srdf::Model& srdf_model)
       {
         if (jmg->hasJointModel(jt->first))
         {
-          const JointModel* jm = jmg->getJointModel(jt->first);
+          const JointModel* jm = jmg->getJointModel(jt->first).value();
           const std::vector<std::string>& vn = jm->getVariableNames();
           // Remove current joint name from remaining list.
           auto it_found = std::find(remaining_joints.begin(), remaining_joints.end(), jm);
@@ -733,7 +739,7 @@ bool RobotModel::addJointModelGroup(const srdf::Model::Group& gc)
   // add joints
   for (const std::string& joint : gc.joints_)
   {
-    const JointModel* j = getJointModel(joint);
+    const JointModel* j = getJointModel(joint).value();
     if (j)
       jset.insert(j);
   }
@@ -1219,33 +1225,45 @@ bool RobotModel::hasLinkModel(const std::string& name) const
   return link_model_map_.find(name) != link_model_map_.end();
 }
 
-const JointModel* RobotModel::getJointModel(const std::string& name) const
+const absl::StatusOr<JointModel*> RobotModel::getJointModel(const std::string& name) const
 {
   JointModelMap::const_iterator it = joint_model_map_.find(name);
   if (it != joint_model_map_.end())
     return it->second;
-  RCLCPP_ERROR(LOGGER, "Joint '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
-  return nullptr;
+
+  {
+    std::stringstream ss;
+    ss << "Joint '" << name.c_str() << "' not found in model '" << model_name_.c_str() << "'";
+    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+    return absl::NotFoundError(ss.str());
+  }
 }
 
-const JointModel* RobotModel::getJointModel(int index) const
+const absl::StatusOr<JointModel*> RobotModel::getJointModel(int index) const
 {
   if (index < 0 || index >= static_cast<int>(joint_model_vector_.size()))
   {
-    RCLCPP_ERROR(LOGGER, "Joint index '%i' out of bounds of joints in model '%s'", index, model_name_.c_str());
-    return nullptr;
+    std::stringstream ss;
+    ss << "Joint index '" << index << "' out of bounds of joints in model '" << model_name_.c_str() << "'";
+    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+    return absl::OutOfRangeError(ss.str());
   }
   assert(joint_model_vector_[index]->getJointIndex() == index);
   return joint_model_vector_[index];
 }
 
-JointModel* RobotModel::getJointModel(const std::string& name)
+absl::StatusOr<JointModel*> RobotModel::getJointModel(const std::string& name)
 {
   JointModelMap::const_iterator it = joint_model_map_.find(name);
   if (it != joint_model_map_.end())
     return it->second;
-  RCLCPP_ERROR(LOGGER, "Joint '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
-  return nullptr;
+
+  {
+    std::stringstream ss;
+    ss << "Joint '" << name.c_str() << "' not found in model '" << model_name_.c_str() << "'";
+    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
+    return absl::NotFoundError(ss.str());
+  }
 }
 
 const LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_link) const

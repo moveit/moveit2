@@ -323,9 +323,11 @@ void CurrentStateMonitor::jointStateCallback(sensor_msgs::msg::JointState::Const
     current_state_time_ = joint_state->header.stamp;
     for (std::size_t i = 0; i < n; ++i)
     {
-      const moveit::core::JointModel* jm = robot_model_->getJointModel(joint_state->name[i]);
-      if (!jm)
+      auto get_joint_model_result = robot_model_->getJointModel(joint_state->name[i]);
+      if (!get_joint_model_result.ok())
         continue;
+
+      const moveit::core::JointModel* jm = get_joint_model_result.value();
       // ignore fixed joints, multi-dof joints (they should not even be in the message)
       if (jm->getVariableCount() != 1)
         continue;

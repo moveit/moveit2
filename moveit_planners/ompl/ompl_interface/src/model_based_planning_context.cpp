@@ -183,7 +183,7 @@ ompl_interface::ModelBasedPlanningContext::getProjectionEvaluator(const std::str
       ss >> joint >> std::ws;
       if (getJointModelGroup()->hasJointModel(joint))
       {
-        unsigned int variable_count = getJointModelGroup()->getJointModel(joint)->getVariableCount();
+        unsigned int variable_count = getJointModelGroup()->getJointModel(joint).value()->getVariableCount();
         if (variable_count > 0)
         {
           int idx = getJointModelGroup()->getVariableGroupIndex(joint);

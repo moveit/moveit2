@@ -489,18 +489,18 @@ TEST_F(OneRobot, FK)
   std::map<std::string, double> upd_a;
   upd_a["joint_a"] = 0.2;
   state.setVariablePositions(upd_a);
-  EXPECT_TRUE(state.satisfiesBounds(model->getJointModel("joint_a")));
+  EXPECT_TRUE(state.satisfiesBounds(model->getJointModel("joint_a").ok()));
   EXPECT_NEAR(state.getVariablePosition("joint_a"), 0.2, 1e-3);
   state.enforceBounds();
   EXPECT_NEAR(state.getVariablePosition("joint_a"), 0.2, 1e-3);
 
   upd_a["joint_a"] = 3.2;
   state.setVariablePositions(upd_a);
-  EXPECT_TRUE(state.satisfiesBounds(model->getJointModel("joint_a")));
+  EXPECT_TRUE(state.satisfiesBounds(model->getJointModel("joint_a").ok()));
   EXPECT_NEAR(state.getVariablePosition("joint_a"), 3.2, 1e-3);
   state.enforceBounds();
   EXPECT_NEAR(state.getVariablePosition("joint_a"), -3.083185, 1e-3);
-  EXPECT_TRUE(state.satisfiesBounds(model->getJointModel("joint_a")));
+  EXPECT_TRUE(state.satisfiesBounds(model->getJointModel("joint_a").ok()));
 
   // mimic joints
   state.setToDefaultValues();

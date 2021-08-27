@@ -101,7 +101,7 @@ void PassiveJointsWidget::focusGiven()
   }
   std::vector<std::string> active_joints;
   for (const std::string& joint : joints)
-    if (model->getJointModel(joint)->getVariableCount() > 0)
+    if (model->getJointModel(joint).value()->getVariableCount() > 0)
       active_joints.push_back(joint);
 
   // Set the available joints (left box)

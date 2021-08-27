@@ -763,7 +763,7 @@ void ChompOptimizer::computeJointProperties(int trajectory_point)
 {
   for (int j = 0; j < num_joints_; j++)
   {
-    const moveit::core::JointModel* joint_model = state_.getJointModel(joint_names_[j]);
+    const moveit::core::JointModel* joint_model = state_.getJointModel(joint_names_[j]).value();
     const moveit::core::RevoluteJointModel* revolute_joint =
         dynamic_cast<const moveit::core::RevoluteJointModel*>(joint_model);
     const moveit::core::PrismaticJointModel* prismatic_joint =
@@ -1060,12 +1060,12 @@ void ChompOptimizer::perturbTrajectory()
 
 //     RobotState *::JointState* jointState = jointStates[i];
 //     const RevoluteJointModel* revolute_joint
-//       = dynamic_cast<const RevoluteJointModel*>(jointState->getJointModel());
+//       = dynamic_cast<const RevoluteJointModel*>(jointState->getJointModel().value());
 //     if(revolute_joint && revolute_joint->continuous_) {
 //       continuous = true;
 //     }
 
-//     map<string, pair<double, double> > bounds = jointState->getJointModel()->getAllVariableBounds();
+//     map<string, pair<double, double> > bounds = jointState->getJointModel().value()->getAllVariableBounds();
 //     int j = 0;
 //     for(map<string, pair<double, double> >::iterator it = bounds.begin(); it != bounds.end(); it++)
 //     {

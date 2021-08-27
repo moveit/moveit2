@@ -23,6 +23,7 @@
   <buildtool_export_depend>eigen3_cmake_module</buildtool_export_depend>
   <build_depend>moveit_common</build_depend>
 
+  <depend>absl</depend>
   <depend>angles</depend>
   <depend>rclcpp</depend>
   <depend>common_interfaces</depend>

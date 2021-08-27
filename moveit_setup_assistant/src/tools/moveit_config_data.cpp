@@ -1282,8 +1282,8 @@ std::string MoveItConfigData::decideProjectionJoints(const std::string& planning
   if (joints.size() >= 2)
   {
     // Check that the first two joints have only 1 variable
-    if (group->getJointModel(joints[0])->getVariableCount() == 1 &&
-        group->getJointModel(joints[1])->getVariableCount() == 1)
+    if (group->getJointModel(joints[0]).value()->getVariableCount() == 1 &&
+        group->getJointModel(joints[1]).value()->getVariableCount() == 1)
     {
       // Just choose the first two joints.
       joint_pair = "joints(" + joints[0] + "," + joints[1] + ")";

@@ -72,7 +72,8 @@ TEST_F(LoadPlanningModelsPr2, Model)
   for (std::size_t i = 0; i < joints.size(); ++i)
   {
     ASSERT_EQ(joints[i]->getJointIndex(), static_cast<int>(i));
-    ASSERT_EQ(robot_model_->getJointModel(joints[i]->getName()), joints[i]);
+    ASSERT_TRUE(robot_model_->getJointModel(joints[i]->getName()).ok());
+    ASSERT_EQ(robot_model_->getJointModel(joints[i]->getName()).value(), joints[i]);
   }
   const std::vector<const moveit::core::LinkModel*>& links = robot_model_->getLinkModels();
   for (std::size_t i = 0; i < links.size(); ++i)

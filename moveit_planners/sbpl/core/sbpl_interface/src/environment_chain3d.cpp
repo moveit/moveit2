@@ -646,7 +646,7 @@ void EnvironmentChain3D::setMotionPrimitives(const std::string& group_name)
   const planning_models::RobotModel::JointModelGroup* jmg = joint_state_group_->getJointModelGroup();
   for (unsigned int i = 0; i < jmg->getActiveDOFNames().size(); i++)
   {
-    const planning_models::RobotModel::JointModel* joint = jmg->getJointModel(jmg->getActiveDOFNames()[i]);
+    const planning_models::RobotModel::JointModel* joint = jmg->getJointModel(jmg->getActiveDOFNames()[i]).value();
     boost::shared_ptr<JointMotionWrapper> jmw(new JointMotionWrapper(joint));
     joint_motion_wrappers_.push_back(jmw);
     // TODO - figure out which DOFs have something to do with end effector position

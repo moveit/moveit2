@@ -145,18 +145,18 @@ bool JointConstraint::configure(const moveit_msgs::msg::JointConstraint& jc)
   joint_variable_name_ = jc.joint_name;
   local_variable_name_.clear();
   if (robot_model_->hasJointModel(joint_variable_name_))
-    joint_model_ = robot_model_->getJointModel(joint_variable_name_);
+    joint_model_ = robot_model_->getJointModel(joint_variable_name_).value();
   else
   {
     std::size_t pos = jc.joint_name.find_last_of('/');
     if (pos != std::string::npos)
     {
-      joint_model_ = robot_model_->getJointModel(jc.joint_name.substr(0, pos));
+      std::string name = jc.joint_name.substr(0, pos);
+      if (robot_model_->hasJointModel(name))
+        joint_model_ = robot_model_->getJointModel(name).value();
       if (pos + 1 < jc.joint_name.length())
         local_variable_name_ = jc.joint_name.substr(pos + 1);
     }
-    else
-      joint_model_ = robot_model_->getJointModel(jc.joint_name);
   }
 
   if (joint_model_)
