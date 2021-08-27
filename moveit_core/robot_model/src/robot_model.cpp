@@ -1234,7 +1234,6 @@ const absl::StatusOr<JointModel*> RobotModel::getJointModel(const std::string& n
   {
     std::stringstream ss;
     ss << "Joint '" << name.c_str() << "' not found in model '" << model_name_.c_str() << "'";
-    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
     return absl::NotFoundError(ss.str());
   }
 }
@@ -1245,7 +1244,6 @@ const absl::StatusOr<JointModel*> RobotModel::getJointModel(int index) const
   {
     std::stringstream ss;
     ss << "Joint index '" << index << "' out of bounds of joints in model '" << model_name_.c_str() << "'";
-    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
     return absl::OutOfRangeError(ss.str());
   }
   assert(joint_model_vector_[index]->getJointIndex() == index);
@@ -1261,7 +1259,6 @@ absl::StatusOr<JointModel*> RobotModel::getJointModel(const std::string& name)
   {
     std::stringstream ss;
     ss << "Joint '" << name.c_str() << "' not found in model '" << model_name_.c_str() << "'";
-    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
     return absl::NotFoundError(ss.str());
   }
 }

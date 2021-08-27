@@ -314,7 +314,6 @@ const absl::StatusOr<const JointModel*> JointModelGroup::getJointModel(const std
   {
     std::stringstream ss;
     ss << "Joint '" << name.c_str() << "' not found in group '" << name_.c_str() << "'";
-    RCLCPP_ERROR_STREAM(LOGGER, ss.str());
     return absl::NotFoundError(ss.str());
   }
   return it->second;
