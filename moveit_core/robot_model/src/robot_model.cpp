@@ -1217,7 +1217,7 @@ shapes::ShapePtr RobotModel::constructShape(const urdf::Geometry* geom)
 
 bool RobotModel::hasJointModel(const std::string& name) const
 {
-  return joint_model_map_.find(name) != joint_model_map_.end();
+  return getJointModel(name).ok();
 }
 
 bool RobotModel::hasLinkModel(const std::string& name) const

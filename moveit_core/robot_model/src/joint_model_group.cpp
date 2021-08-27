@@ -288,7 +288,7 @@ void JointModelGroup::getSubgroups(std::vector<const JointModelGroup*>& sub_grou
 
 bool JointModelGroup::hasJointModel(const std::string& joint) const
 {
-  return joint_model_map_.find(joint) != joint_model_map_.end();
+  return getJointModel(joint).ok();
 }
 
 bool JointModelGroup::hasLinkModel(const std::string& link) const
