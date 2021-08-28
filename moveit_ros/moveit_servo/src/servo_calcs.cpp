@@ -1030,7 +1030,7 @@ bool ServoCalcs::checkValidCommand(const geometry_msgs::msg::TwistStamped& cmd)
   }
 
   // Check that the command frame is known
-  if (!current_state_->knowsFrameTransform(cmd.header.frame_id))
+  if (!cmd.header.frame_id.empty() && !current_state_->knowsFrameTransform(cmd.header.frame_id))
   {
     rclcpp::Clock& clock = *node_->get_clock();
     RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
