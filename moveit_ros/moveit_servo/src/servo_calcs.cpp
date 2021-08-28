@@ -251,8 +251,7 @@ void ServoCalcs::start()
   auto check_link_is_known = [this](const std::string& frame_name) {
     if (!current_state_->knowsFrameTransform(frame_name))
     {
-      std::string error_string = "Unknown frame: " + frame_name;
-      throw std::runtime_error(error_string);
+      throw std::runtime_error{ "Unknown frame: " + frame_name };
     }
   };
   check_link_is_known(parameters_->planning_frame);

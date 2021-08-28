@@ -85,7 +85,11 @@ public:
 
   ~ServoCalcs();
 
-  /** \brief Start the timer where we do work and publish outputs */
+  /**
+   * Start the timer where we do work and publish outputs
+   *
+   * @exception can throw a std::runtime_error if the setup was not completed
+   */
   void start();
 
   /**
