@@ -787,7 +787,7 @@ ServoCalcs::enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) con
 
     if (!joint->satisfiesPositionBounds(&joint_angle, -parameters_->joint_limit_margin))
     {
-      const std::vector<moveit_msgs::msg::JointLimits> limits = joint->getVariableBoundsMsg();
+      const std::vector<moveit_msgs::msg::JointLimits>& limits = joint->getVariableBoundsMsg();
 
       // Joint limits are not defined for some joints. Skip them.
       if (!limits.empty())
