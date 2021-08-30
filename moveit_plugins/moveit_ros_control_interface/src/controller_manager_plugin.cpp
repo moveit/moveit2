@@ -55,29 +55,11 @@
 #include <memory>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.plugins.ros_control_interface");
-static const double CONTROLLER_INFORMATION_VALIDITY_AGE = 1.0;
+static const rclcpp::Duration CONTROLLER_INFORMATION_VALIDITY_AGE = rclcpp::Duration::from_seconds(1.0);
 static const double SERVICE_CALL_TIMEOUT = 1.0;
 
 namespace moveit_ros_control_interface
 {
-/**
- * \brief check for timeout
- * @param t timestamp to check, is update if timeout duration was passed
- * @param[in] timeout timeout duration in seconds
- * @param[in] force force timeout
- * @return True if timeout duration was passed
- */
-bool checkTimeout(const rclcpp::Clock::SharedPtr& clock, rclcpp::Time& t, double timeout, bool force = false)
-{
-  rclcpp::Time now = clock->now();
-  if (force || (now - t) >= rclcpp::Duration::from_seconds(timeout))
-  {
-    t = now;
-    return true;
-  }
-  return false;
-}
-
 /**
  * \brief Get joint name from resource name reported by ros2_control, since claimed_interfaces return by ros2_control
  * will have the interface name as suffix joint_name/INTERFACE_TYPE
@@ -137,8 +119,11 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
    */
   void discover(bool force = false)
   {
-    if (!checkTimeout(node_->get_clock(), controllers_stamp_, CONTROLLER_INFORMATION_VALIDITY_AGE, force))
+    // Skip if controller stamp is too new for new discovery, enforce update if force==true
+    if (!force && ((node_->now() - controllers_stamp_) < CONTROLLER_INFORMATION_VALIDITY_AGE))
       return;
+
+    controllers_stamp_ = node_->now();
 
     auto request = std::make_shared<controller_manager_msgs::srv::ListControllers::Request>();
     auto result_future = list_controllers_service_->async_send_request(request);
@@ -432,8 +417,11 @@ class MoveItMultiControllerManager : public moveit_controller_manager::MoveItCon
    */
   void discover()
   {
-    if (!checkTimeout(node_->get_clock(), controller_managers_stamp_, CONTROLLER_INFORMATION_VALIDITY_AGE))
+    // Skip if last discovery is too new for discovery rate
+    if ((node_->now() - controller_managers_stamp_) < CONTROLLER_INFORMATION_VALIDITY_AGE)
       return;
+
+    controller_managers_stamp_ = node_->now();
 
     const std::map<std::string, std::vector<std::string>> services = node_->get_service_names_and_types();
 
