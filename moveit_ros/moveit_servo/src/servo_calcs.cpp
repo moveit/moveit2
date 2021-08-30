@@ -107,6 +107,11 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   // MoveIt Setup
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   joint_model_group_ = current_state_->getJointModelGroup(parameters_->move_group_name);
+  if (joint_model_group_ == nullptr)
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << parameters_->move_group_name << "`");
+    throw std::runtime_error("Invalid move group name");
+  }
   prev_joint_velocity_ = Eigen::ArrayXd::Zero(joint_model_group_->getActiveJointModels().size());
 
   // Subscribe to command topics
