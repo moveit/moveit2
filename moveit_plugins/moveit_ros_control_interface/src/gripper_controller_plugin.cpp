@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2015, Fraunhofer IPA
+ *  Copyright (c) 2021, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,28 +32,31 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Mathias Lüdtke */
+/* Author: Joseph Schornak */
 
-#pragma once
-
-#include <moveit/controller_manager/controller_manager.h>
-#include <moveit/macros/class_forward.h>
+#include <rclcpp/rclcpp.hpp>
+#include <moveit_ros_control_interface/ControllerHandle.h>
+#include <pluginlib/class_list_macros.hpp>
+#include <moveit_simple_controller_manager/gripper_controller_handle.h>
+#include <memory>
 
 namespace moveit_ros_control_interface
 {
-MOVEIT_CLASS_FORWARD(ControllerHandleAllocator);  // Defines ControllerHandleAllocatorPtr, ConstPtr, WeakPtr... etc
-
 /**
- * Base class for MoveItControllerHandle allocators
+ * \brief Simple allocator for moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle instances.
  */
-class ControllerHandleAllocator
+class GripperControllerAllocator : public ControllerHandleAllocator
 {
 public:
-  virtual moveit_controller_manager::MoveItControllerHandlePtr
-  alloc(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::vector<std::string>& resources) = 0;
-  virtual ~ControllerHandleAllocator()
+  moveit_controller_manager::MoveItControllerHandlePtr alloc(const rclcpp::Node::SharedPtr& node,
+                                                             const std::string& name,
+                                                             const std::vector<std::string>& /* resources */) override
   {
+    return std::make_shared<moveit_simple_controller_manager::GripperControllerHandle>(node, name, "gripper_cmd");
   }
 };
 
 }  // namespace moveit_ros_control_interface
+
+PLUGINLIB_EXPORT_CLASS(moveit_ros_control_interface::GripperControllerAllocator,
+                       moveit_ros_control_interface::ControllerHandleAllocator);
