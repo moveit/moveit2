@@ -1,5 +1,5 @@
-# moveit/moveit2:foxy-ci
-# ROS base image augmented with all MoveIt dependencies to use for CI on Travis
+# ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci
+# ROS base image augmented with all MoveIt dependencies to use for CI
 
 ARG ROS_DISTRO=foxy
 FROM ros:${ROS_DISTRO}-ros-base-focal
@@ -30,6 +30,7 @@ RUN \
     mkdir src && \
     git clone https://github.com/ros-planning/moveit2.git src/moveit2 -b main && \
     vcs import src < src/moveit2/moveit2.repos && \
+    if [ -r src/moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import src < src/moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
     #
     # Download all dependencies of MoveIt
     rosdep update && \
