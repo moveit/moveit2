@@ -48,8 +48,7 @@ target_link_libraries(collision_detector_bullet_plugin
 
 install(DIRECTORY include/ DESTINATION include)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)
-install(TARGETS ${MOVEIT_LIB_NAME} EXPORT ${MOVEIT_LIB_NAME}
-  TARGETS collision_detector_bullet_plugin EXPORT collision_detector_bullet_plugin
+install(TARGETS ${MOVEIT_LIB_NAME} collision_detector_bullet_plugin EXPORT ${MOVEIT_LIB_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
