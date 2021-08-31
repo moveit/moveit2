@@ -33,6 +33,9 @@
   <depend>tf2_eigen</depend>
   <depend>trajectory_msgs</depend>
 
+  <exec_depend>gripper_controllers</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+  <exec_depend>joint_trajectory_controller</exec_depend>
   <exec_depend>joy</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
