@@ -129,7 +129,7 @@ bool DepthImageOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
 
 void DepthImageOctomapUpdater::start()
 {
-  rmw_qos_profile_t custom_qos = rmw_qos_profile_system_default;
+  rmw_qos_profile_t custom_qos = rmw_qos_profile_sensor_data;
   pub_model_depth_image_ = model_depth_transport_->advertiseCamera("model_depth", 1);
 
   std::string prefix = "";

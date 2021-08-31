@@ -77,13 +77,13 @@ void mesh_filter::DepthSelfFiltering::onInit()
 
   std::lock_guard<std::mutex> lock(connect_mutex_);
   pub_filtered_depth_image_ =
-      filtered_depth_transport_->advertiseCamera("/filtered/depth", queue_size_, itssc, itssc, rssc, rssc);
+      filtered_depth_transport_->advertiseCamera("/filtered/depth", queue_size_, itssc, itssc, rssc, rssc, rmw_qos_profile_sensor_data);
   pub_filtered_label_image_ =
-      filtered_label_transport_->advertiseCamera("/filtered/labels", queue_size_, itssc, itssc, rssc, rssc);
+      filtered_label_transport_->advertiseCamera("/filtered/labels", queue_size_, itssc, itssc, rssc, rssc, rmw_qos_profile_sensor_data);
   pub_model_depth_image_ =
-      model_depth_transport_->advertiseCamera("/model/depth", queue_size_, itssc, itssc, rssc, rssc);
+      model_depth_transport_->advertiseCamera("/model/depth", queue_size_, itssc, itssc, rssc, rssc, rmw_qos_profile_sensor_data);
   pub_model_label_image_ =
-      model_depth_transport_->advertiseCamera("/model/label", queue_size_, itssc, itssc, rssc, rssc);
+      model_depth_transport_->advertiseCamera("/model/label", queue_size_, itssc, itssc, rssc, rssc, rmw_qos_profile_sensor_data);
 
   filtered_depth_ptr_ = std::make_shared<cv_bridge::CvImage>();
   filtered_label_ptr_ = std::make_shared<cv_bridge::CvImage>();
@@ -209,7 +209,7 @@ void mesh_filter::DepthSelfFiltering::connectCb()
   {
     image_transport::TransportHints hints("raw", ros::TransportHints(), getPrivateNodeHandle());
     sub_depth_image_ =
-        input_depth_transport_->subscribeCamera("depth", queue_size_, &DepthSelfFiltering::depthCb, this, hints);
+        input_depth_transport_->subscribeCamera("depth", queue_size_, &DepthSelfFiltering::depthCb, this, hints, rmw_qos_profile_sensor_data);
   }
 }
 
