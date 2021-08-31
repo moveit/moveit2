@@ -3,6 +3,10 @@ repositories:
     type: git
     url: https://github.com/ros-planning/geometric_shapes
     version: ros2
+  moveit_resources:
+    type: git
+    url: https://github.com/ros-planning/moveit_resources
+    version: ros2
   warehouse_ros:
     type: git
     url: https://github.com/ros-planning/warehouse_ros
