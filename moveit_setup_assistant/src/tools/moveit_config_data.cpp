@@ -993,10 +993,10 @@ bool MoveItConfigData::outputROSControllersYAML(const std::string& file_path)
     // Joint State Controller
     emitter << YAML::Comment("Publish all joint states");
     emitter << YAML::Newline << YAML::Comment("Creates the /joint_states topic necessary in ROS");
-    emitter << YAML::Key << "joint_state_controller" << YAML::Value << YAML::BeginMap;
+    emitter << YAML::Key << "joint_state_broadcaster" << YAML::Value << YAML::BeginMap;
     {
       emitter << YAML::Key << "type";
-      emitter << YAML::Value << "joint_state_controller/JointStateController";
+      emitter << YAML::Value << "joint_state_broadcaster/JointStateBroadcaster";
       emitter << YAML::Key << "publish_rate";
       emitter << YAML::Value << "50";
       emitter << YAML::EndMap;

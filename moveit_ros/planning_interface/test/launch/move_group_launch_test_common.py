@@ -167,7 +167,7 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
 
     # Load controllers
     load_controllers = []
-    for controller in ["panda_arm_controller", "joint_state_controller"]:
+    for controller in ["panda_arm_controller", "joint_state_broadcaster"]:
         load_controllers += [
             ExecuteProcess(
                 cmd=["ros2 run controller_manager spawner.py {}".format(controller)],
