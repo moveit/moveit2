@@ -75,35 +75,34 @@ const std::string PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_SERVICE = "get_pl
 const std::string PlanningSceneMonitor::MONITORED_PLANNING_SCENE_TOPIC = "monitored_planning_scene";
 
 PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
-                                           const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name)
-  : PlanningSceneMonitor(node, planning_scene::PlanningScenePtr(), robot_description, tf_buffer, name)
+                                           const std::string& name)
+  : PlanningSceneMonitor(node, planning_scene::PlanningScenePtr(), robot_description, name)
 {
 }
 
 PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                            const planning_scene::PlanningScenePtr& scene,
-                                           const std::string& robot_description,
-                                           const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name)
+                                           const std::string& robot_description, const std::string& name)
   : PlanningSceneMonitor(node, scene, std::make_shared<robot_model_loader::RobotModelLoader>(node, robot_description),
-                         tf_buffer, name)
+                         name)
 {
 }
 
 PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                            const robot_model_loader::RobotModelLoaderPtr& rm_loader,
-                                           const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name)
-  : PlanningSceneMonitor(node, planning_scene::PlanningScenePtr(), rm_loader, tf_buffer, name)
+                                           const std::string& name)
+  : PlanningSceneMonitor(node, planning_scene::PlanningScenePtr(), rm_loader, name)
 {
 }
 
 PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                            const planning_scene::PlanningScenePtr& scene,
                                            const robot_model_loader::RobotModelLoaderPtr& rm_loader,
-                                           const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name)
+                                           const std::string& name)
   : monitor_name_(name)
   , node_(node)
   , private_executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
-  , tf_buffer_(tf_buffer)
+  , tf_buffer_(std::make_shared<tf2_ros::Buffer>(node->get_clock()))
   , dt_state_update_(0.0)
   , shape_transform_cache_lookup_wait_time_(0, 0)
   , rm_loader_(rm_loader)
@@ -116,6 +115,8 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                      std::to_string(reinterpret_cast<std::size_t>(this)));
   new_args.push_back("--");
   pnode_ = std::make_shared<rclcpp::Node>("_", node_->get_namespace(), rclcpp::NodeOptions().arguments(new_args));
+  startTFListener();
+  tf_buffer_->setUsingDedicatedThread(true);
   // use same callback queue as root_nh_
   // root_nh_.setCallbackQueue(&queue_);
   // nh_.setCallbackQueue(&queue_);
@@ -1100,8 +1101,6 @@ void PlanningSceneMonitor::stopSceneMonitor()
 bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_frame, const rclcpp::Time& target_time,
                                                   occupancy_map_monitor::ShapeTransformCache& cache) const
 {
-  if (!tf_buffer_)
-    return false;
   try
   {
     boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
@@ -1224,6 +1223,7 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
     {
       current_state_monitor_.reset(new CurrentStateMonitor(pnode_, getRobotModel(), tf_buffer_));
     }
+    startTFListener();
     current_state_monitor_->addUpdateCallback(
         boost::bind(&PlanningSceneMonitor::onStateUpdate, this, boost::placeholders::_1));
     current_state_monitor_->startStateMonitor(joint_states_topic);
@@ -1456,9 +1456,6 @@ void PlanningSceneMonitor::getUpdatedFrameTransforms(std::vector<geometry_msgs::
 
 void PlanningSceneMonitor::updateFrameTransforms()
 {
-  if (!tf_buffer_)
-    return;
-
   if (scene_)
   {
     std::vector<geometry_msgs::msg::TransformStamped> transforms;
@@ -1553,5 +1550,16 @@ void PlanningSceneMonitor::configureDefaultPadding()
 
   RCLCPP_DEBUG_STREAM(LOGGER, "Loaded " << default_robot_link_padd_.size() << " default link paddings");
   RCLCPP_DEBUG_STREAM(LOGGER, "Loaded " << default_robot_link_scale_.size() << " default link scales");
+}
+
+void PlanningSceneMonitor::startTFListener()
+{
+  // No need to start the tf_listener if we have a current state monitor and multi-dof joints
+  if (current_state_monitor_ && !robot_model_->getMultiDOFJointModels().empty())
+  {
+    tf_listener_.reset();
+    return;
+  }
+  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 }
 }  // namespace planning_scene_monitor

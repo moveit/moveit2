@@ -113,7 +113,6 @@ public:
    *  @param name A name identifying this planning scene monitor
    */
   PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
-                       const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
                        const std::string& name = "");
 
   /** @brief Constructor
@@ -122,7 +121,6 @@ public:
    *  @param name A name identifying this planning scene monitor
    */
   PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const robot_model_loader::RobotModelLoaderPtr& rml,
-                       const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
                        const std::string& name = "");
 
   /** @brief Constructor
@@ -132,9 +130,7 @@ public:
    *  @param name A name identifying this planning scene monitor
    */
   PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene,
-                       const std::string& robot_description,
-                       const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                       const std::string& name = "");
+                       const std::string& robot_description, const std::string& name = "");
 
   /** @brief Constructor
    *  @param scene The scene instance to maintain up to date with monitored information
@@ -143,9 +139,7 @@ public:
    *  @param name A name identifying this planning scene monitor
    */
   PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene,
-                       const robot_model_loader::RobotModelLoaderPtr& rml,
-                       const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                       const std::string& name = "");
+                       const robot_model_loader::RobotModelLoaderPtr& rml, const std::string& name = "");
 
   ~PlanningSceneMonitor();
 
@@ -321,6 +315,10 @@ public:
    */
   void startSceneMonitor(const std::string& scene_topic = DEFAULT_PLANNING_SCENE_TOPIC);
 
+  /** @brief Start the tf listener
+   */
+  void startTFListener();
+
   /** @brief Request a full planning scene state using a service call
    *         Be careful not to use this in conjunction with providePlanningSceneService(),
    *         as it will create a pointless feedback loop.
@@ -470,6 +468,7 @@ protected:
   std::thread private_executor_thread_;
 
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
   std::string robot_description_;
 

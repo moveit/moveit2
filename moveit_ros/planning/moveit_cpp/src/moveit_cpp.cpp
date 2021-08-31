@@ -55,11 +55,8 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<
 
 MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
-  : node_(node), tf_buffer_(tf_buffer)
+  : node_(node)
 {
-  if (!tf_buffer_)
-    tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
-
   // Configure planning scene monitor
   if (!loadPlanningSceneMonitor(options.planning_scene_monitor_options))
   {
@@ -100,7 +97,7 @@ MoveItCpp::~MoveItCpp()
 bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& options)
 {
   planning_scene_monitor_.reset(
-      new planning_scene_monitor::PlanningSceneMonitor(node_, options.robot_description, tf_buffer_, options.name));
+      new planning_scene_monitor::PlanningSceneMonitor(node_, options.robot_description, options.name));
   // Allows us to sycronize to Rviz and also publish collision objects to ourselves
   RCLCPP_DEBUG(LOGGER, "Configuring Planning Scene Monitor");
   if (planning_scene_monitor_->getPlanningScene())
@@ -301,12 +298,11 @@ bool MoveItCpp::execute(const std::string& group_name, const robot_trajectory::R
 
 const std::shared_ptr<tf2_ros::Buffer>& MoveItCpp::getTFBuffer() const
 {
-  return tf_buffer_;
+  return planning_scene_monitor_->getTFClient();
 }
 
 void MoveItCpp::clearContents()
 {
-  tf_buffer_.reset();
   planning_scene_monitor_.reset();
   robot_model_.reset();
   planning_pipelines_.clear();

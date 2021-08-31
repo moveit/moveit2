@@ -167,9 +167,6 @@ private:
   moveit::core::RobotModelConstPtr robot_model_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
-  // TF
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-
   // Planning
   std::map<std::string, planning_pipeline::PlanningPipelinePtr> planning_pipelines_;
   std::map<std::string, std::set<std::string>> groups_pipelines_map_;
