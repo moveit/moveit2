@@ -18,11 +18,11 @@ repositories:
   ros2_control:
     type: git
     url: https://github.com/ros-controls/ros2_control
-    version: master
+    version: foxy
   ros2_controllers:
     type: git
     url: https://github.com/ros-controls/ros2_controllers
-    version: master
+    version: foxy
   warehouse_ros:
     type: git
     url: https://github.com/ros-planning/warehouse_ros
