@@ -1,5 +1,9 @@
 # TODO(henningkayser): Remove once ros2_control is released (https://github.com/ros-controls/ros2_control/issues/421)
 repositories:
+  moveit_resources:
+    type: git
+    url: https://github.com/ros-planning/moveit_resources
+    version: ros2
   ros2_control:
     type: git
     url: https://github.com/ros-controls/ros2_control
