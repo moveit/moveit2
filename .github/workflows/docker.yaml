@@ -200,7 +200,6 @@ jobs:
           push: true
           cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
-          no-cache: true
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
