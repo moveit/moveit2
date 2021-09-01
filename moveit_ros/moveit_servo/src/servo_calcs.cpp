@@ -107,6 +107,11 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   // MoveIt Setup
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   joint_model_group_ = current_state_->getJointModelGroup(parameters_->move_group_name);
+  if (joint_model_group_ == nullptr)
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << parameters_->move_group_name << "`");
+    throw std::runtime_error("Invalid move group name");
+  }
   prev_joint_velocity_ = Eigen::ArrayXd::Zero(joint_model_group_->getActiveJointModels().size());
 
   // Subscribe to command topics
@@ -782,7 +787,7 @@ ServoCalcs::enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) con
 
     if (!joint->satisfiesPositionBounds(&joint_angle, -parameters_->joint_limit_margin))
     {
-      const std::vector<moveit_msgs::msg::JointLimits> limits = joint->getVariableBoundsMsg();
+      const std::vector<moveit_msgs::msg::JointLimits>& limits = joint->getVariableBoundsMsg();
 
       // Joint limits are not defined for some joints. Skip them.
       if (!limits.empty())
