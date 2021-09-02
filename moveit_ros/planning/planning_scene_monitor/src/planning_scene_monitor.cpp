@@ -111,7 +111,9 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
   std::vector<std::string> new_args = rclcpp::NodeOptions().arguments();
   new_args.push_back("--ros-args");
   new_args.push_back("-r");
-  new_args.push_back(std::string("__node:=") + node_->get_name() + "_private");
+  // Add random ID to prevent warnings about multiple publishers within the same node
+  new_args.push_back(std::string("__node:=") + node_->get_name() + "_private_" +
+                     std::to_string(reinterpret_cast<std::size_t>(this)));
   new_args.push_back("--");
   pnode_ = std::make_shared<rclcpp::Node>("_", node_->get_namespace(), rclcpp::NodeOptions().arguments(new_args));
   // use same callback queue as root_nh_
