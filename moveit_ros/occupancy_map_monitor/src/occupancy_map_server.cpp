@@ -82,8 +82,7 @@ int main(int argc, char** argv)
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("occupancy_map_server");
   rclcpp::QoS qos(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_default));
-  auto octree_binary_pub =
-      node->create_publisher<octomap_msgs::msg::Octomap>("octomap_binary", qos);
+  auto octree_binary_pub = node->create_publisher<octomap_msgs::msg::Octomap>("octomap_binary", qos);
   auto clock_ptr = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
   std::shared_ptr<tf2_ros::Buffer> buffer = std::make_shared<tf2_ros::Buffer>(clock_ptr, tf2::durationFromSec(5.0));
   tf2_ros::TransformListener listener(*buffer, node, false /* spin_thread - disables executor */);
