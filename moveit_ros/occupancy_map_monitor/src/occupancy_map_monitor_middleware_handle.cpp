@@ -81,6 +81,10 @@ OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const r
   if (parameters_.map_frame.empty())
   {
     node_->get_parameter("octomap_frame", parameters_.map_frame);
+    if (parameters_.map_frame.empty())
+    {
+      RCLCPP_ERROR(LOGGER, "No 'map_frame' defined for octomap updates");
+    }
   }
 
   std::vector<std::string> sensor_names;
