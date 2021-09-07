@@ -7,6 +7,7 @@ from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import ComposableNodeContainer, Node
 from launch_ros.descriptions import ComposableNode
+from launch.actions import ExecuteProcess
 from ament_index_python.packages import get_package_share_directory
 import xacro
 
@@ -39,27 +40,13 @@ def generate_launch_description():
     servo_yaml = load_yaml("moveit_servo", "config/panda_simulated_config.yaml")
     servo_params = {"moveit_servo": servo_yaml}
 
-    # Get URDF and SRDF
-    if start_position_path:
-        initial_positions_file = os.path.join(
-            os.path.dirname(__file__), start_position_path
+    robot_description_config = xacro.process_file(
+        os.path.join(
+            get_package_share_directory("moveit_resources_panda_moveit_config"),
+            "config",
+            "panda.urdf.xacro",
         )
-        robot_description_config = xacro.process_file(
-            os.path.join(
-                get_package_share_directory("moveit_resources_panda_moveit_config"),
-                "config",
-                "panda.urdf.xacro",
-            ),
-            mappings={"initial_positions_file": initial_positions_file},
-        )
-    else:
-        robot_description_config = xacro.process_file(
-            os.path.join(
-                get_package_share_directory("moveit_resources_panda_moveit_config"),
-                "config",
-                "panda.urdf.xacro",
-            )
-        )
+    )
 
     robot_description = {"robot_description": robot_description_config.toxml()}
 
