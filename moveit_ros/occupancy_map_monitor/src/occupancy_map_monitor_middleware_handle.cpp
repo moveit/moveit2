@@ -83,7 +83,7 @@ OccupancyMapMonitorMiddlewareHandle::OccupancyMapMonitorMiddlewareHandle(const r
     node_->get_parameter("octomap_frame", parameters_.map_frame);
     if (parameters_.map_frame.empty())
     {
-      RCLCPP_ERROR(LOGGER, "No 'map_frame' defined for octomap updates");
+      RCLCPP_ERROR(LOGGER, "No 'octomap_frame' parameter defined for octomap updates");
     }
   }
 
