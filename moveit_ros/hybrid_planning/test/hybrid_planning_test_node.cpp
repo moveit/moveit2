@@ -158,7 +158,7 @@ public:
       scene->processCollisionObjectMsg(collision_object_1_);
     }  // Unlock PlanningScene
 
-    RCLCPP_INFO(LOGGER, "Wait 2s see collision object");
+    RCLCPP_INFO(LOGGER, "Wait 2s for the collision object");
     rclcpp::sleep_for(2s);
 
     // Setup motion planning goal taken from motion_planning_api tutorial
@@ -173,23 +173,37 @@ public:
     // Configure a valid robot state
     robot_state->setToDefaultValues(joint_model_group, "ready");
 
-    auto goal_msg = moveit_msgs::action::HybridPlanning::Goal();
+    // Create desired motion goal
+    moveit_msgs::msg::MotionPlanRequest goal_motion_request;
 
-    moveit::core::robotStateToRobotStateMsg(*robot_state, goal_msg.request.start_state);
-    goal_msg.request.group_name = planning_group;
-    goal_msg.request.num_planning_attempts = 10;
-    goal_msg.request.max_velocity_scaling_factor = 0.1;
-    goal_msg.request.max_acceleration_scaling_factor = 0.1;
-    goal_msg.request.allowed_planning_time = 2.0;
-    goal_msg.request.planner_id = "ompl";
+    moveit::core::robotStateToRobotStateMsg(*robot_state, goal_motion_request.start_state);
+    goal_motion_request.group_name = planning_group;
+    goal_motion_request.num_planning_attempts = 10;
+    goal_motion_request.max_velocity_scaling_factor = 0.1;
+    goal_motion_request.max_acceleration_scaling_factor = 0.1;
+    goal_motion_request.allowed_planning_time = 2.0;
+    goal_motion_request.planner_id = "ompl";
+    goal_motion_request.pipeline_id = "ompl";
 
     moveit::core::RobotState goal_state(robot_model);
     std::vector<double> joint_values = { 0.0, 0.0, 0.0, 0.0, 0.0, 1.571, 0.785 };
     goal_state.setJointGroupPositions(joint_model_group, joint_values);
 
-    goal_msg.request.goal_constraints.resize(1);
-    goal_msg.request.goal_constraints[0] =
+    goal_motion_request.goal_constraints.resize(1);
+    goal_motion_request.goal_constraints[0] =
         kinematic_constraints::constructGoalConstraints(goal_state, joint_model_group);
+
+    // Create Hybrid Planning action request
+    moveit_msgs::msg::MotionSequenceItem sequence_item;
+    sequence_item.req = goal_motion_request;
+    sequence_item.blend_radius = 0.0;  // Single goal
+
+    moveit_msgs::msg::MotionSequenceRequest sequence_request;
+    sequence_request.items.push_back(sequence_item);
+
+    auto goal_action_request = moveit_msgs::action::HybridPlanning::Goal();
+    goal_action_request.planning_group = planning_group;
+    goal_action_request.motion_sequence = sequence_request;
 
     auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::HybridPlanning>::SendGoalOptions();
     send_goal_options.result_callback =
@@ -219,7 +233,7 @@ public:
 
     RCLCPP_INFO(LOGGER, "Sending hybrid planning goal");
     // Ask server to achieve some goal and wait until it's accepted
-    auto goal_handle_future = hp_action_client_->async_send_goal(goal_msg, send_goal_options);
+    auto goal_handle_future = hp_action_client_->async_send_goal(goal_action_request, send_goal_options);
   }
 
 private:
