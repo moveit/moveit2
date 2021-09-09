@@ -12,6 +12,7 @@ find_package(rclcpp_components REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
+find_package(moveit_ros_planning_interface REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -24,6 +25,8 @@ set(LIBRARIES
   moveit_local_planner_component
   moveit_global_planner_component
   planner_logic_interface
+  global_planner_interface
+  motion_planning_pipeline_plugin
   single_plan_execution_plugin
   trajectory_operator_interface
   local_constraint_solver_interface
@@ -39,6 +42,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   rclcpp_action
   moveit_core
   moveit_ros_planning
+  moveit_ros_planning_interface
   moveit_msgs
   std_msgs
   std_srvs
@@ -48,7 +52,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 )
 
 set(THIS_PACKAGE_INCLUDE_DIRS
-  global_planner/include
+  global_planner/global_planner_component/include
+  global_planner/global_planner_plugins/include
   hybrid_planning_manager/hybrid_planning_manager_component/include
   hybrid_planning_manager/planner_logic_plugins/include
   local_planner/local_planner_component/include
@@ -69,14 +74,16 @@ rclcpp_components_register_nodes(moveit_local_planner_component "moveit_hybrid_p
 install(TARGETS ${LIBRARIES} hybrid_planning_test_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME})
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+  INCLUDES DESTINATION include)
 
-install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS} DESTINATION include)
+#install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS} DESTINATION include)
 
 install(DIRECTORY test/launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY test/config DESTINATION share/${PROJECT_NAME})
 
 pluginlib_export_plugin_description_file(moveit_hybrid_planning single_plan_execution_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_hybrid_planning moveit_planning_pipeline_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning simple_sampler_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning replan_invalidated_trajectory_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning forward_trajectory_plugin.xml)
