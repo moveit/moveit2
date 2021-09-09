@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, PickNik Inc.
+ *  Copyright (c) 2021, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,47 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/local_planner/local_constraint_solver_interface.h>
+/* Author: Sebastian Jahr
+   Description: Defines an interface for a global motion planner plugin implementation used in the global planner
+   component node.
+ */
 
-namespace moveit_hybrid_planning
+#pragma once
+
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
+
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+
+#include <moveit_msgs/action/global_planner.hpp>
+#include <moveit_msgs/msg/motion_plan_response.hpp>
+
+namespace moveit::hybrid_planning
 {
-// Empty because this library only defines an interface
-}
+/**
+ * Class GlobalPlannerInterface - Base class for a global planner implementation
+ */
+class GlobalPlannerInterface
+{
+public:
+  /**
+   * Initialize global planner
+   * @return True if initialization was successful
+   */
+  virtual bool initialize(const rclcpp::Node::SharedPtr& node) = 0;
+
+  /**
+   * Solve global planning problem
+   * @param global_goal_handle Action goal handle to access the planning goal and publish feedback during planning
+   * @return Motion Plan that contains the solution for a given motion planning problem
+   */
+  virtual moveit_msgs::msg::MotionPlanResponse plan(
+      const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> global_goal_handle) = 0;
+
+  /**
+   * Reset global planner plugin. This should never fail.
+   * @return True if reset was successful
+   */
+  virtual bool reset() noexcept = 0;
+};
+}  // namespace moveit::hybrid_planning

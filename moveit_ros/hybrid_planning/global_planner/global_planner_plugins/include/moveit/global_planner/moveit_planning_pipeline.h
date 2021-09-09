@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, PickNik Inc.
+ *  Copyright (c) 2021, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,33 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/local_planner/trajectory_operator_interface.h>
+/* Author: Sebastian Jahr
+   Description: Global planner plugin that utilizes MoveIt's planning pipeline accessed via the MoveItCpp API*/
 
-namespace moveit_hybrid_planning
+#pragma once
+
+#include <rclcpp/rclcpp.hpp>
+#include <moveit/global_planner/global_planner_interface.h>
+
+// MoveitCpp
+#include <moveit/moveit_cpp/moveit_cpp.h>
+#include <moveit/moveit_cpp/planning_component.h>
+
+namespace moveit::hybrid_planning
 {
-// Empty because this library only defines an interface
-}
+class MoveItPlanningPipeline : public GlobalPlannerInterface
+{
+public:
+  MoveItPlanningPipeline() = default;
+  ~MoveItPlanningPipeline() = default;
+  bool initialize(const rclcpp::Node::SharedPtr& node) override;
+  bool reset() noexcept override;
+  moveit_msgs::msg::MotionPlanResponse
+  plan(const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> global_goal_handle)
+      override;
+
+private:
+  rclcpp::Node::SharedPtr node_ptr_;
+  std::shared_ptr<moveit_cpp::MoveItCpp> moveit_cpp_;
+};
+}  // namespace moveit::hybrid_planning

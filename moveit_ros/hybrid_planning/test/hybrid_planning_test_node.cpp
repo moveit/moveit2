@@ -33,6 +33,7 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
+   Description: A demonstration that re-plans around a moving box.
  */
 
 #include <thread>
@@ -47,12 +48,15 @@
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/robot_state/conversions.h>
 
-#include <moveit_msgs/action/hybrid_planning.hpp>
+#include <moveit_msgs/action/hybrid_planner.hpp>
 #include <moveit_msgs/msg/display_robot_state.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 
 using namespace std::chrono_literals;
+namespace
+{
 const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
+}
 
 class HybridPlanningDemo
 {
@@ -60,7 +64,7 @@ public:
   HybridPlanningDemo(const rclcpp::Node::SharedPtr& node)
   {
     node_ = node;
-    hp_action_client_ = rclcpp_action::create_client<moveit_msgs::action::HybridPlanning>(node_, "run_hybrid_planning"),
+    hp_action_client_ = rclcpp_action::create_client<moveit_msgs::action::HybridPlanner>(node_, "run_hybrid_planning"),
     robot_state_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state", 1);
 
     collision_object_1_.header.frame_id = "panda_link0";
@@ -80,7 +84,8 @@ public:
 
     // Add new collision object as soon as global trajectory is available.
     global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
-        "global_trajectory", 1, [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr msg) {
+        "global_trajectory", rclcpp::SystemDefaultsQoS(),
+        [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr msg) {
           // Remove old collision objects
           collision_object_1_.operation = collision_object_1_.REMOVE;
 
@@ -117,11 +122,15 @@ public:
   {
     RCLCPP_INFO(LOGGER, "Initialize Planning Scene Monitor");
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
-    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
     planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
         node_, "robot_description", tf_buffer_, "planning_scene_monitor");
-    if (planning_scene_monitor_->getPlanningScene() != nullptr)
+    if (!planning_scene_monitor_->getPlanningScene())
+    {
+      RCLCPP_ERROR(LOGGER, "The planning scene was not retrieved!");
+      return;
+    }
+    else
     {
       planning_scene_monitor_->startStateMonitor();
       planning_scene_monitor_->providePlanningSceneService();  // let RViz display query PlanningScene
@@ -158,7 +167,7 @@ public:
       scene->processCollisionObjectMsg(collision_object_1_);
     }  // Unlock PlanningScene
 
-    RCLCPP_INFO(LOGGER, "Wait 2s see collision object");
+    RCLCPP_INFO(LOGGER, "Wait 2s for the collision object");
     rclcpp::sleep_for(2s);
 
     // Setup motion planning goal taken from motion_planning_api tutorial
@@ -173,31 +182,45 @@ public:
     // Configure a valid robot state
     robot_state->setToDefaultValues(joint_model_group, "ready");
 
-    auto goal_msg = moveit_msgs::action::HybridPlanning::Goal();
+    // Create desired motion goal
+    moveit_msgs::msg::MotionPlanRequest goal_motion_request;
 
-    moveit::core::robotStateToRobotStateMsg(*robot_state, goal_msg.request.start_state);
-    goal_msg.request.group_name = planning_group;
-    goal_msg.request.num_planning_attempts = 10;
-    goal_msg.request.max_velocity_scaling_factor = 0.1;
-    goal_msg.request.max_acceleration_scaling_factor = 0.1;
-    goal_msg.request.allowed_planning_time = 2.0;
-    goal_msg.request.planner_id = "ompl";
+    moveit::core::robotStateToRobotStateMsg(*robot_state, goal_motion_request.start_state);
+    goal_motion_request.group_name = planning_group;
+    goal_motion_request.num_planning_attempts = 10;
+    goal_motion_request.max_velocity_scaling_factor = 0.1;
+    goal_motion_request.max_acceleration_scaling_factor = 0.1;
+    goal_motion_request.allowed_planning_time = 2.0;
+    goal_motion_request.planner_id = "ompl";
+    goal_motion_request.pipeline_id = "ompl";
 
     moveit::core::RobotState goal_state(robot_model);
     std::vector<double> joint_values = { 0.0, 0.0, 0.0, 0.0, 0.0, 1.571, 0.785 };
     goal_state.setJointGroupPositions(joint_model_group, joint_values);
 
-    goal_msg.request.goal_constraints.resize(1);
-    goal_msg.request.goal_constraints[0] =
+    goal_motion_request.goal_constraints.resize(1);
+    goal_motion_request.goal_constraints[0] =
         kinematic_constraints::constructGoalConstraints(goal_state, joint_model_group);
 
-    auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::HybridPlanning>::SendGoalOptions();
+    // Create Hybrid Planning action request
+    moveit_msgs::msg::MotionSequenceItem sequence_item;
+    sequence_item.req = goal_motion_request;
+    sequence_item.blend_radius = 0.0;  // Single goal
+
+    moveit_msgs::msg::MotionSequenceRequest sequence_request;
+    sequence_request.items.push_back(sequence_item);
+
+    auto goal_action_request = moveit_msgs::action::HybridPlanner::Goal();
+    goal_action_request.planning_group = planning_group;
+    goal_action_request.motion_sequence = sequence_request;
+
+    auto send_goal_options = rclcpp_action::Client<moveit_msgs::action::HybridPlanner>::SendGoalOptions();
     send_goal_options.result_callback =
-        [](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanning>::WrappedResult& result) {
+        [](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanner>::WrappedResult& result) {
           switch (result.code)
           {
             case rclcpp_action::ResultCode::SUCCEEDED:
-              RCLCPP_INFO(LOGGER, "Hybrid planning goal succeded");
+              RCLCPP_INFO(LOGGER, "Hybrid planning goal succeeded");
               break;
             case rclcpp_action::ResultCode::ABORTED:
               RCLCPP_ERROR(LOGGER, "Hybrid planning goal was aborted");
@@ -212,19 +235,19 @@ public:
           }
         };
     send_goal_options.feedback_callback =
-        [](rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanning>::SharedPtr /*unused*/,
-           const std::shared_ptr<const moveit_msgs::action::HybridPlanning::Feedback> feedback) {
+        [](rclcpp_action::ClientGoalHandle<moveit_msgs::action::HybridPlanner>::SharedPtr /*unused*/,
+           const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Feedback> feedback) {
           RCLCPP_INFO(LOGGER, feedback->feedback.c_str());
         };
 
     RCLCPP_INFO(LOGGER, "Sending hybrid planning goal");
     // Ask server to achieve some goal and wait until it's accepted
-    auto goal_handle_future = hp_action_client_->async_send_goal(goal_msg, send_goal_options);
+    auto goal_handle_future = hp_action_client_->async_send_goal(goal_action_request, send_goal_options);
   }
 
 private:
   rclcpp::Node::SharedPtr node_;
-  rclcpp_action::Client<moveit_msgs::action::HybridPlanning>::SharedPtr hp_action_client_;
+  rclcpp_action::Client<moveit_msgs::action::HybridPlanner>::SharedPtr hp_action_client_;
   rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_publisher_;
   rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_solution_subscriber_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
@@ -238,7 +261,6 @@ private:
 
   // TF
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 };
 
 int main(int argc, char** argv)
@@ -247,7 +269,7 @@ int main(int argc, char** argv)
   rclcpp::NodeOptions node_options;
   node_options.automatically_declare_parameters_from_overrides(true);
 
-  rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("hybrid_planning_test_node", "", node_options);
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("hybrid_planning_test_node", "", node_options);
 
   HybridPlanningDemo demo(node);
   std::thread run_demo([&demo]() {
@@ -257,6 +279,6 @@ int main(int argc, char** argv)
 
   rclcpp::spin(node);
   run_demo.join();
-
+  rclcpp::shutdown();
   return 0;
 }

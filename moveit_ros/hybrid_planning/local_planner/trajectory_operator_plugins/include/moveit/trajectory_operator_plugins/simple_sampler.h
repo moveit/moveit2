@@ -41,13 +41,13 @@
 #include <moveit/local_planner/trajectory_operator_interface.h>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 
-namespace moveit_hybrid_planning
+namespace moveit::hybrid_planning
 {
 class SimpleSampler : public TrajectoryOperatorInterface
 {
 public:
-  SimpleSampler(){};
-  ~SimpleSampler() override{};
+  SimpleSampler() = default;
+  ~SimpleSampler() = default;
 
   bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                   const std::string& group_name) override;
@@ -66,4 +66,4 @@ private:
   moveit_msgs::action::LocalPlanner::Feedback feedback_;  // Empty feedback
   trajectory_processing::TimeOptimalTrajectoryGeneration time_parametrization_;
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning

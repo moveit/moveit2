@@ -42,6 +42,8 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 
+#include <pluginlib/class_loader.hpp>
+
 #include <moveit_msgs/action/local_planner.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
@@ -59,7 +61,7 @@
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 
-namespace moveit_hybrid_planning
+namespace moveit::hybrid_planning
 {
 // TODO(sjahr) Refactor and use repository wide solution
 template <typename T>
@@ -114,6 +116,8 @@ public:
       declareOrGetParam<std::string>("global_solution_topic", global_solution_topic, undefined, node);
       declareOrGetParam<std::string>("local_solution_topic", local_solution_topic, undefined, node);
       declareOrGetParam<std::string>("local_solution_topic_type", local_solution_topic_type, undefined, node);
+      declareOrGetParam<bool>("publish_joint_positions", publish_joint_positions, false, node);
+      declareOrGetParam<bool>("publish_joint_velocities", publish_joint_velocities, false, node);
     }
 
     std::string group_name;
@@ -125,6 +129,8 @@ public:
     std::string global_solution_topic;
     std::string local_solution_topic;
     std::string local_solution_topic_type;
+    bool publish_joint_positions;
+    bool publish_joint_velocities;
     double local_planning_frequency;
   };
 
@@ -140,7 +146,7 @@ public:
   bool initialize();
 
   /**
-   * Handle the planners current job based on the internal state each loop run when the planner is started.
+   * Handle the planners current job based on the internal state each iteration when the planner is started.
    */
   void executePlanningLoopRun();
 
@@ -178,17 +184,15 @@ private:
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr local_solution_publisher_;
 
   // Local constraint solver plugin loader
-  std::unique_ptr<pluginlib::ClassLoader<moveit_hybrid_planning::LocalConstraintSolverInterface>>
-      local_constraint_solver_plugin_loader_;
+  std::unique_ptr<pluginlib::ClassLoader<LocalConstraintSolverInterface>> local_constraint_solver_plugin_loader_;
 
-  // Local constrain solver instance to compute a local solution each loop run
-  std::shared_ptr<moveit_hybrid_planning::LocalConstraintSolverInterface> local_constraint_solver_instance_;
+  // Local constrain solver instance to compute a local solution each iteration
+  std::shared_ptr<LocalConstraintSolverInterface> local_constraint_solver_instance_;
 
   // Trajectory operator plugin
-  std::unique_ptr<pluginlib::ClassLoader<moveit_hybrid_planning::TrajectoryOperatorInterface>>
-      trajectory_operator_loader_;
+  std::unique_ptr<pluginlib::ClassLoader<TrajectoryOperatorInterface>> trajectory_operator_loader_;
 
   // Trajectory_operator instance handle trajectory matching and blending
-  std::shared_ptr<moveit_hybrid_planning::TrajectoryOperatorInterface> trajectory_operator_instance_;
+  std::shared_ptr<TrajectoryOperatorInterface> trajectory_operator_instance_;
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning

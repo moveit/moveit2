@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, PickNik Inc.
+ *  Copyright (c) 2021, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,56 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
+   Description: A global planner component node that is customizable through plugins.
  */
 
-#include <moveit/hybrid_planning_manager/planner_logic_interface.h>
+#pragma once
 
-namespace moveit_hybrid_planning
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
+
+#include <pluginlib/class_loader.hpp>
+
+#include <moveit/global_planner/global_planner_interface.h>
+
+#include <moveit_msgs/action/global_planner.hpp>
+#include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit_msgs/msg/motion_plan_response.hpp>
+
+namespace moveit::hybrid_planning
 {
-// Empty because this library only defines an interface
-}  // namespace moveit_hybrid_planning
+// Component node containing the global planner
+class GlobalPlannerComponent : public rclcpp::Node
+{
+public:
+  GlobalPlannerComponent(const rclcpp::NodeOptions& options);
+
+private:
+  rclcpp::TimerBase::SharedPtr timer_;
+  bool initialized_;
+
+  std::string global_planner_name_;
+
+  // Global planner plugin loader
+  std::unique_ptr<pluginlib::ClassLoader<GlobalPlannerInterface>> global_planner_plugin_loader_;
+
+  // Global planner instance
+  std::shared_ptr<GlobalPlannerInterface> global_planner_instance_;
+
+  moveit_msgs::msg::MotionPlanResponse last_global_solution_;
+
+  // Global planning request action server
+  rclcpp_action::Server<moveit_msgs::action::GlobalPlanner>::SharedPtr global_planning_request_server_;
+
+  // Global trajectory publisher
+  rclcpp::Publisher<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_trajectory_pub_;
+
+  // Goal callback for global planning request action server
+  void globalPlanningRequestCallback(
+      std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle);
+
+  // Initialize planning scene monitor and load pipelines
+  bool initializeGlobalPlanner();
+};
+
+}  // namespace moveit::hybrid_planning

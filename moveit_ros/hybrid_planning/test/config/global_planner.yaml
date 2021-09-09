@@ -1,4 +1,9 @@
-publish_planning_scene_topic: "/planning_scene"
-
+global_planner_name: "moveit_hybrid_planning/MoveItPlanningPipeline"
+planning_scene_monitor_options:
+  monitored_planning_scene_topic: "planning_scene"
 planning_pipelines:
   pipeline_names: ["ompl"]
+  namespace: ""
+
+# Trajectory Execution Functionality
+moveit_controller_manager": "moveit_simple_controller_manager/MoveItSimpleControllerManager"

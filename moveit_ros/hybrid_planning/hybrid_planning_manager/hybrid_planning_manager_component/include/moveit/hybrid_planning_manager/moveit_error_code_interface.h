@@ -33,22 +33,39 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: This planner logic plugin runs the global planner once and starts executing the global solution
-    with the local planner.
+   Description: Defines an interface for setting and comparing MoveIt error codes.
  */
 
-#include <moveit/hybrid_planning_manager/planner_logic_interface.h>
-#include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
+#pragma once
 
 namespace moveit::hybrid_planning
 {
-class SinglePlanExecution : public PlannerLogicInterface
+class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
 {
 public:
-  SinglePlanExecution() = default;
-  ~SinglePlanExecution() = default;
-  bool initialize(const std::shared_ptr<HybridPlanningManager>& hybrid_planning_manager) override;
-  ReactionResult react(const HybridPlanningEvent& event) override;
-  ReactionResult react(const std::string& event) override;
+  MoveItErrorCode()
+  {
+    val = 0;
+  }
+  MoveItErrorCode(int code)
+  {
+    val = code;
+  }
+  MoveItErrorCode(const moveit_msgs::msg::MoveItErrorCodes& code)
+  {
+    val = code.val;
+  }
+  explicit operator bool() const
+  {
+    return val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  }
+  bool operator==(const int code) const
+  {
+    return val == code;
+  }
+  bool operator!=(const int code) const
+  {
+    return val != code;
+  }
 };
 }  // namespace moveit::hybrid_planning

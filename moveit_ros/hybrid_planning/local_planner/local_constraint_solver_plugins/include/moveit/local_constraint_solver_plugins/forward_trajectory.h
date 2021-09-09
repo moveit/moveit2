@@ -42,13 +42,13 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/local_planner/local_constraint_solver_interface.h>
 
-namespace moveit_hybrid_planning
+namespace moveit::hybrid_planning
 {
 class ForwardTrajectory : public LocalConstraintSolverInterface
 {
 public:
-  ForwardTrajectory(){};
-  ~ForwardTrajectory() override{};
+  ForwardTrajectory() = default;
+  ~ForwardTrajectory() = default;
   bool initialize(const rclcpp::Node::SharedPtr& node,
                   const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                   const std::string& group_name) override;
@@ -65,4 +65,4 @@ private:
   bool path_invalidation_event_send_;  // Send path invalidation event only once
   bool stop_before_collision_;
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning

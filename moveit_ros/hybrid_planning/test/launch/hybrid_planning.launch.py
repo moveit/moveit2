@@ -80,11 +80,11 @@ def generate_launch_description():
         name="hybrid_planning_container",
         namespace="/",
         package="rclcpp_components",
-        executable="component_container",
+        executable="component_container_mt",
         composable_node_descriptions=[
             ComposableNode(
                 package="moveit_hybrid_planning",
-                plugin="moveit_hybrid_planning::GlobalPlannerComponent",
+                plugin="moveit::hybrid_planning::GlobalPlannerComponent",
                 name="global_planner",
                 parameters=[
                     global_planner_param,
@@ -96,7 +96,7 @@ def generate_launch_description():
             ),
             ComposableNode(
                 package="moveit_hybrid_planning",
-                plugin="moveit_hybrid_planning::LocalPlannerComponent",
+                plugin="moveit::hybrid_planning::LocalPlannerComponent",
                 name="local_planner",
                 parameters=[
                     local_planner_param,
@@ -107,7 +107,7 @@ def generate_launch_description():
             ),
             ComposableNode(
                 package="moveit_hybrid_planning",
-                plugin="moveit_hybrid_planning::HybridPlanningManager",
+                plugin="moveit::hybrid_planning::HybridPlanningManager",
                 name="hybrid_planning_manager",
                 parameters=[hybrid_planning_manager_param],
             ),
@@ -166,12 +166,12 @@ def generate_launch_description():
     # Load controllers
     load_controllers = []
     for controller in [
-        "joint_state_controller",
+        "joint_state_broadcaster",
         "panda_joint_group_position_controller",
     ]:
         load_controllers += [
             ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner.py {}".format(controller)],
+                cmd=["ros2 run controller_manager spawner {}".format(controller)],
                 shell=True,
                 output="screen",
             )
