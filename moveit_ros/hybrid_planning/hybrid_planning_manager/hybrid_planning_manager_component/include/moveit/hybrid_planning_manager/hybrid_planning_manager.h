@@ -115,7 +115,6 @@ private:
 
   // Shared hybrid planning goal handle
   std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanning>> hybrid_planning_goal_handle_;
-  moveit_msgs::msg::MotionPlanRequest latest_hybrid_planning_goal_;
 
   // Frequently updated feedback for the hybrid planning action requester
   std::shared_ptr<moveit_msgs::action::HybridPlanning_Feedback> hybrid_planning_progess_;
