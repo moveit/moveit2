@@ -60,7 +60,18 @@ jobs:
           sudo rm -rf /usr/local
           df -h
       - uses: actions/checkout@v2
+      - name: Check if upstream dependencies changed
+        id: upstream_ws_changed
+        shell: bash
+        run: |
+          sudo apt-get install -qq jq
+          URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${{ github.event.pull_request.number }}/files"
+          REPOS_CHANGED='false'
+          if [ -n "$(curl -s -X GET -G $URL | jq -r '.[] | .filename' | grep "moveit2*.repos")" ]; then REPOS_CHANGED='true';fi
+          echo set-output name=REPOS_CHANGED::${REPOS_CHANGED}
+          echo ::set-output name=REPOS_CHANGED::${REPOS_CHANGED}
       - name: cache upstream_ws
+        if: steps.upstream_ws_changed.outputs.REPOS_CHANGED == 'false'
         uses: pat-s/always-upload-cache@v2.1.5
         with:
           path: ${{ env.BASEDIR }}/upstream_ws
