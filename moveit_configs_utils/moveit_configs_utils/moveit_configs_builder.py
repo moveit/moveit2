@@ -141,14 +141,12 @@ class MoveItConfigsBuilder(ParameterBuilder):
     __urdf_filename: str
     __srdf_filename: str
     __robot_description: str
-
     # Look-up for robot_name_moveit_config package
     def __init__(self, robot_name: str, robot_description="robot_description"):
         super().__init__(robot_name + "_moveit_config")
         self.__robot_name = robot_name
         setup_assistant_file = self._package_path / ".setup_assistant"
         if not setup_assistant_file.exists():
-            # TODO: Should this throw an exception .?
             logging.warning(
                 f"\x1b[33;21mPackage `{self._package_path}` doesn't have `.setup_assistant` file "
                 f"-- using config/{robot_name}.urdf and config/{robot_name}.srdf\x1b[0m"
