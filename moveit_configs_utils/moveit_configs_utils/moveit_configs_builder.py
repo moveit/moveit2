@@ -7,25 +7,131 @@ from parameter_builder import ParameterBuilder, load_yaml, load_xacro
 
 
 class MoveItConfigs(object):
-    def __setattr__(self, name, value):
-        if hasattr(self, name):
-            object.__setattr__(self, name, value)
-        else:
-            raise AttributeError(
-                f"Cannot set name {name} on object of type {self.__class__.__name__}"
-            )
+    __slots__ = [
+        "__robot_description",
+        "__robot_description_semantic",
+        "__robot_description_planning",
+        "__robot_description_kinematics",
+        "__planning_pipelines",
+        "__trajectory_execution",
+        "__planning_scene_monitor",
+        "__move_group_capabilities",
+        "__move_group",
+        "__joint_limits",
+        "__moveit_cpp",
+    ]
 
-    robot_description = None
-    robot_description_semantic = None
-    robot_description_planning = None
-    robot_description_kinematics = None
-    planning_pipelines = None
-    trajectory_execution = None
-    planning_scene_monitor = None
-    move_group_capabilities = None
-    move_group = None
-    joint_limits = None
-    moveit_cpp = None
+    def __init__(self, **kwargs):
+        assert all(
+            "__" + key in self.__slots__ for key in kwargs.keys()
+        ), "Invalid arguments passed to constructor: %s" % ", ".join(
+            sorted(k for k in kwargs.keys() if "__" + k not in self.__slots__)
+        )
+        self.__robot_description = kwargs.get("robot_description", None)
+        self.__robot_description_semantic = kwargs.get(
+            "robot_description_semantic", None
+        )
+        self.__robot_description_planning = kwargs.get(
+            "robot_description_planning", None
+        )
+        self.__robot_description_kinematics = kwargs.get(
+            "robot_description_kinematics", None
+        )
+        self.__planning_pipelines = kwargs.get("planning_pipelines", None)
+        self.__trajectory_execution = kwargs.get("trajectory_execution", None)
+        self.__planning_scene_monitor = kwargs.get("planning_scene_monitor", None)
+        self.__move_group_capabilities = kwargs.get("move_group_capabilities", None)
+        self.__move_group = kwargs.get("move_group", None)
+        self.__joint_limits = kwargs.get("joint_limits", None)
+        self.__moveit_cpp = kwargs.get("moveit_cpp", None)
+
+    @property
+    def robot_description(self):
+        return self.__robot_description
+
+    @robot_description.setter
+    def robot_description(self, value):
+        self.__robot_description = value
+
+    @property
+    def robot_description_semantic(self):
+        return self.__robot_description_semantic
+
+    @robot_description_semantic.setter
+    def robot_description_semantic(self, value):
+        self.__robot_description_semantic = value
+
+    @property
+    def robot_description_planning(self):
+        return self.__robot_description_planning
+
+    @robot_description_planning.setter
+    def robot_description_planning(self, value):
+        self.__robot_description_planning = value
+
+    @property
+    def robot_description_kinematics(self):
+        return self.__robot_description_kinematics
+
+    @robot_description_kinematics.setter
+    def robot_description_kinematics(self, value):
+        self.__robot_description_kinematics = value
+
+    @property
+    def planning_pipelines(self):
+        return self.__planning_pipelines
+
+    @planning_pipelines.setter
+    def planning_pipelines(self, value):
+        self.__planning_pipelines = value
+
+    @property
+    def trajectory_execution(self):
+        return self.__trajectory_execution
+
+    @trajectory_execution.setter
+    def trajectory_execution(self, value):
+        self.__trajectory_execution = value
+
+    @property
+    def planning_scene_monitor(self):
+        return self.__planning_scene_monitor
+
+    @planning_scene_monitor.setter
+    def planning_scene_monitor(self, value):
+        self.__planning_scene_monitor = value
+
+    @property
+    def move_group_capabilities(self):
+        return self.__move_group_capabilities
+
+    @move_group_capabilities.setter
+    def move_group_capabilities(self, value):
+        self.__move_group_capabilities = value
+
+    @property
+    def move_group(self):
+        return self.__move_group
+
+    @move_group.setter
+    def move_group(self, value):
+        self.__move_group = value
+
+    @property
+    def joint_limits(self):
+        return self.__joint_limits
+
+    @joint_limits.setter
+    def joint_limits(self, value):
+        self.__joint_limits = value
+
+    @property
+    def moveit_cpp(self):
+        return self.__moveit_cpp
+
+    @moveit_cpp.setter
+    def moveit_cpp(self, value):
+        self.__moveit_cpp = value
 
 
 class MoveItConfigsBuilder(ParameterBuilder):
