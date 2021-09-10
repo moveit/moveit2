@@ -11,11 +11,11 @@ sys.path.append(os.path.dirname(__file__))
 
 def generate_test_description():
     # Get parameters using the demo config file
-    servo_params = {
-        "moveit_servo": ParameterBuilder("moveit_servo")
-        .yaml("config/panda_simulated_config.yaml")
+    servo_params = (
+        ParameterBuilder("moveit_servo")
+        .yaml("config/panda_simulated_config.yaml", parameter_namespace="moveit_servo")
         .to_dict()
-    }
+    )
 
     test_binary_dir_arg = launch.actions.DeclareLaunchArgument(
         name="test_binary_dir",
