@@ -71,7 +71,7 @@ jobs:
           echo set-output name=REPOS_CHANGED::${REPOS_CHANGED}
           echo ::set-output name=REPOS_CHANGED::${REPOS_CHANGED}
       - name: cache upstream_ws
-        if: ${{ steps.upstream_ws_changed.outputs.REPOS_CHANGED }}
+        if: steps.upstream_ws_changed.outputs.REPOS_CHANGED
         uses: pat-s/always-upload-cache@v2.1.5
         with:
           path: ${{ env.BASEDIR }}/upstream_ws
