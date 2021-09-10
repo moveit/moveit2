@@ -141,6 +141,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
     __urdf_filename: str
     __srdf_filename: str
     __robot_description: str
+
     # Look-up for robot_name_moveit_config package
     def __init__(self, robot_name: str, robot_description="robot_description"):
         super().__init__(robot_name + "_moveit_config")
