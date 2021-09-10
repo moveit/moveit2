@@ -280,14 +280,22 @@ class MoveItConfigsBuilder(ParameterBuilder):
     def to_dict(self, include_moveit_configs: bool = True):
         parameters = self._parameters
         if include_moveit_configs:
-            parameters.update(self.__moveit_configs.robot_description)
-            parameters.update(self.__moveit_configs.robot_description_semantic)
-            parameters.update(self.__moveit_configs.robot_description_kinematics)
-            parameters.update(self.__moveit_configs.planning_pipelines)
-            parameters.update(self.__moveit_configs.trajectory_execution)
-            parameters.update(self.__moveit_configs.planning_scene_monitor)
-            parameters.update(self.__moveit_configs.joint_limits)
-            parameters.update(self.__moveit_configs.moveit_cpp)
+            if self.__moveit_configs.robot_description:
+                parameters.update(self.__moveit_configs.robot_description)
+            if self.__moveit_configs.robot_description_semantic:
+                parameters.update(self.__moveit_configs.robot_description_semantic)
+            if self.__moveit_configs.robot_description_kinematics:
+                parameters.update(self.__moveit_configs.robot_description_kinematics)
+            if self.__moveit_configs.planning_pipelines:
+                parameters.update(self.__moveit_configs.planning_pipelines)
+            if self.__moveit_configs.trajectory_execution:
+                parameters.update(self.__moveit_configs.trajectory_execution)
+            if self.__moveit_configs.planning_scene_monitor:
+                parameters.update(self.__moveit_configs.planning_scene_monitor)
+            if self.__moveit_configs.joint_limits:
+                parameters.update(self.__moveit_configs.joint_limits)
+            if self.__moveit_configs.moveit_cpp:
+                parameters.update(self.__moveit_configs.moveit_cpp)
         return parameters
 
 
