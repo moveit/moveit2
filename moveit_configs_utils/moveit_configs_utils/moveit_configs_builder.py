@@ -19,6 +19,7 @@ class MoveItConfigs(object):
         "__move_group",
         "__joint_limits",
         "__moveit_cpp",
+        "__cartesian_limits",
     ]
 
     def __init__(self, **kwargs):
@@ -44,6 +45,7 @@ class MoveItConfigs(object):
         self.__move_group = kwargs.get("move_group", None)
         self.__joint_limits = kwargs.get("joint_limits", None)
         self.__moveit_cpp = kwargs.get("moveit_cpp", None)
+        self.__cartesian_limits = kwargs.get("cartesian_limits", None)
 
     @property
     def robot_description(self):
@@ -132,6 +134,14 @@ class MoveItConfigs(object):
     @moveit_cpp.setter
     def moveit_cpp(self, value):
         self.__moveit_cpp = value
+
+    @property
+    def cartesian_limits(self):
+        return self.__cartesian_limits
+
+    @cartesian_limits.setter
+    def cartesian_limits(self, value):
+        self.__cartesian_limits = value
 
 
 class MoveItConfigsBuilder(ParameterBuilder):
@@ -275,6 +285,12 @@ class MoveItConfigsBuilder(ParameterBuilder):
             )
         return self
 
+    def cartesian_limits(self, file_path: Optional[str] = None):
+        self.__moveit_configs.cartesian_limits = load_yaml(
+            self._package_path / (file_path or "config/cartesian_limits.yaml")
+        )
+        return self
+
     def to_moveit_configs(self):
         return self.__moveit_configs
 
@@ -297,4 +313,6 @@ class MoveItConfigsBuilder(ParameterBuilder):
                 parameters.update(self.__moveit_configs.joint_limits)
             if self.__moveit_configs.moveit_cpp:
                 parameters.update(self.__moveit_configs.moveit_cpp)
+            if self.__moveit_configs.cartesian_limits:
+                parameters.update(self.__moveit_configs.cartesian_limits)
         return parameters
