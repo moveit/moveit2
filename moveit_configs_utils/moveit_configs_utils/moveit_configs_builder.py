@@ -276,7 +276,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
             )
         return self
 
-    def moveit_configs(self):
+    def to_moveit_configs(self):
         return self.__moveit_configs
 
     def to_dict(self, include_moveit_configs: bool = True):
@@ -303,5 +303,5 @@ class MoveItConfigsBuilder(ParameterBuilder):
 #         .trajectory_execution(file_path="panda_gripper_controllers.yaml")
 #         .planning_scene_monitor()
 #         .planning_pipelines()
-#         .moveit_configs()
+#         .to_moveit_configs()
 # )

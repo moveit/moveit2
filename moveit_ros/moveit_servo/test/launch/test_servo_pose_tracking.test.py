@@ -22,7 +22,7 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
         .robot_description_semantic()
         .robot_description_kinematics()
         .joint_limits()
-        .moveit_configs()
+        .to_moveit_configs()
     )
 
     # Get parameters for the Pose Tracking and Servo nodes

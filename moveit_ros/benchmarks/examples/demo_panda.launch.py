@@ -22,7 +22,7 @@ def generate_launch_description():
         .robot_description_kinematics()
         .joint_limits()
         .planning_pipelines()
-        .moveit_configs()
+        .to_moveit_configs()
     )
 
     # moveit_ros_benchmark demo executable

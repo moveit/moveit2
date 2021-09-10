@@ -20,7 +20,7 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
         .trajectory_execution(file_path="config/panda_gripper_controllers.yaml")
         .planning_scene_monitor()
         .planning_pipelines()
-        .moveit_configs()
+        .to_moveit_configs()
     )
 
     moveit_config.planning_pipelines["ompl"]["panda_arm"][
