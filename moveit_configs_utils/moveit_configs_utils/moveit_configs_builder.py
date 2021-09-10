@@ -297,17 +297,3 @@ class MoveItConfigsBuilder(ParameterBuilder):
             if self.__moveit_configs.moveit_cpp:
                 parameters.update(self.__moveit_configs.moveit_cpp)
         return parameters
-
-
-# USAGE
-# moveit_config = (
-#     MoveItConfigsBuilder("ROBOT_NAME")
-#         .robot_description()
-#         .robot_description_semantic()
-#         .robot_description_kinematics()
-#         .joint_limits()
-#         .trajectory_execution(file_path="panda_gripper_controllers.yaml")
-#         .planning_scene_monitor()
-#         .planning_pipelines()
-#         .to_moveit_configs()
-# )
