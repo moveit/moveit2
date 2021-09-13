@@ -87,7 +87,6 @@ add_library(${SERVO_LIB_NAME} SHARED
   # These files are used to produce differential motion
   src/collision_check.cpp
   src/enforce_limits.cpp
-  src/low_pass_filter.cpp
   src/servo.cpp
   src/servo_calcs.cpp
 )
@@ -200,8 +199,8 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   # Lowpass filter unit test
-  ament_add_gtest(test_low_pass_filter test/test_low_pass_filter.cpp)
-  target_link_libraries(test_low_pass_filter ${SERVO_LIB_NAME})
+#  ament_add_gtest(test_low_pass_filter test/test_low_pass_filter.cpp)
+#  target_link_libraries(test_low_pass_filter ${SERVO_LIB_NAME})
 
   # Unit test for ServoCalcs
   # TODO (vatanaksoytezer): Rewrite this similar to enforce limits test

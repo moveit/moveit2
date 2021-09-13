@@ -167,9 +167,6 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   {
     // A map for the indices of incoming joint commands
     joint_state_name_map_[internal_joint_state_.name[i]] = i;
-
-    // Low-pass filters for the joint positions
-    position_filters_.emplace_back(parameters_->low_pass_filter_coeff);
   }
 
   // Load the smoothing plugin
@@ -648,13 +645,12 @@ bool ServoCalcs::applyJointUpdate(Eigen::ArrayXd& delta_theta, sensor_msgs::msg:
     return false;
   }
 
+  smoother_->doSmoothing(delta_theta);
+
   for (std::size_t i = 0; i < joint_state.position.size(); ++i)
   {
     // Increment joint
     joint_state.position[i] += delta_theta[i];
-
-    // Lowpass filter position
-    joint_state.position[i] = position_filters_[i].filter(joint_state.position[i]);
 
     // Calculate joint velocity
     joint_state.velocity[i] = delta_theta[i] / parameters_->publish_period;
@@ -662,9 +658,6 @@ bool ServoCalcs::applyJointUpdate(Eigen::ArrayXd& delta_theta, sensor_msgs::msg:
     // Save this velocity for future accel calculations
     previous_vel[i] = joint_state.velocity[i];
   }
-
-  // TODO(andyz): calculate velocity after this, not before
-  smoother_->doSmoothing(delta_theta);
 
   return true;
 }
@@ -689,12 +682,7 @@ void ServoCalcs::insertRedundantPointsIntoTrajectory(trajectory_msgs::msg::Joint
 
 void ServoCalcs::resetLowPassFilters(const sensor_msgs::msg::JointState& joint_state)
 {
-  for (std::size_t i = 0; i < position_filters_.size(); ++i)
-  {
-    position_filters_[i].reset(joint_state.position[i]);
-  }
   smoother_->reset(joint_state.position);
-
   updated_filters_ = true;
 }
 
