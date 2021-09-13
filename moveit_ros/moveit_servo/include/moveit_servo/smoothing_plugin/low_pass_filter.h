@@ -41,6 +41,7 @@
 #include <cstddef>
 
 #include <moveit/robot_model/robot_model.h>
+#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/smoothing_plugin/smoothing_base_class.h>
 
 namespace moveit_servo
@@ -87,9 +88,10 @@ public:
    * @param node ROS node, used for parameter retrieval
    * @param robot_model typically used to retrieve vel/accel/jerk limits
    * @param num_joints number of actuated joints in the JointGroup Servo controls
+   * @param parameters access to all Servo parameters that have been parsed from yaml
    * @return True if initialization was successful
    */
-  bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints);
+  bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints, const std::shared_ptr<const moveit_servo::ServoParameters>& parameters);
 
   /**
    * Smooth the command signals for all DOF
@@ -109,6 +111,7 @@ public:
   };
 
 private:
+  rclcpp::Node::SharedPtr node_;
   std::vector<LowpassFilterImpl> position_filters_;
   size_t num_joints_;
 };

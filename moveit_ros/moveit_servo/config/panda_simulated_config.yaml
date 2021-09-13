@@ -28,6 +28,7 @@ publish_joint_accelerations: false
 ## Smoothing plugin
 # The default plugin is a Butterworth lowpass filter that requires this parameter.
 # It must be >1.0, typically in the range 1.0 < coefficient < 100.0.
+# If you use a different plugin, replace with the relevant parameters.
 low_pass_filter_coeff: 2.0  # Larger --> trust the filtered data more, trust the measurements less.
 
 ## MoveIt properties
