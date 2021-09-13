@@ -99,10 +99,11 @@ public:
   bool doSmoothing(Eigen::ArrayXd& delta_theta);
 
   /**
-   * Reset local constraint solver to some user-defined initial state
+   * Reset to a given joint state
+   * @param joint_positions reset the filters to these joint positions
    * @return True if reset was successful
    */
-  bool reset()
+  bool reset(const std::vector<double> joint_positions)
   {
     return true;
   };

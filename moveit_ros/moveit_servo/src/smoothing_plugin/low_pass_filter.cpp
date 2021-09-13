@@ -57,7 +57,10 @@ bool LowPassFilter::initialize(rclcpp::Node::SharedPtr node, moveit::core::Robot
   num_joints_ = num_joints;
 
   double filter_coeff = 1.5;
-  node->get_parameter("moveit_servo/low_pass_filter_coeff", filter_coeff);
+  if (!node->get_parameter("moveit_servo/low_pass_filter_coeff", filter_coeff))
+  {
+    RCLCPP_WARN_STREAM(node->get_logger(), "Low pass filter coefficient parameter was not defined. Using the default, " << filter_coeff);
+  }
 
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
