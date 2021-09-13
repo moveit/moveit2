@@ -1,0 +1,7 @@
+<library path="low_pass_filter">
+  <class name="moveit_servo/LowPassFilter" type="moveit_servo::LowPassFilter" base_class_type="moveit_servo::SmoothingBaseClass">
+    <description>
+    Simple Butterworth 1st order lowpass filter that only has one tuneable parameter.
+    </description>
+  </class>
+</library>

@@ -172,6 +172,28 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
     position_filters_.emplace_back(parameters_->low_pass_filter_coeff);
   }
 
+  // Load the smoothing plugin
+  pluginlib::ClassLoader<moveit_servo::SmoothingBaseClass> smoothing_loader("moveit_servo", "moveit_servo::SmoothingBaseClass");
+  // For now, there is only one option for smoothing plugins
+  // TODO(andyz): load from parameter
+  std::string SMOOTHER_PLUGIN_NAME = "moveit_servo/LowPassFilter";
+  try
+  {
+    smoother_ = smoothing_loader.createSharedInstance(SMOOTHER_PLUGIN_NAME);
+  }
+  catch (pluginlib::PluginlibException& ex)
+  {
+    RCLCPP_ERROR(LOGGER, "Exception while loading the smoothing plugin '%s': '%s'",
+                 SMOOTHER_PLUGIN_NAME.c_str(), ex.what());
+    std::exit(EXIT_FAILURE);
+  }
+
+  // Initialize the smoothing plugin
+  if (SMOOTHER_PLUGIN_NAME == "moveit_servo/LowPassFilter")
+  {
+    smoother_->initialize(planning_scene_monitor_->getRobotModel(), num_joints_);
+  }
+
   // A matrix of all zeros is used to check whether matrices have been initialized
   Eigen::Matrix3d empty_matrix;
   empty_matrix.setZero();
