@@ -52,20 +52,15 @@ void LowpassFilterImpl::reset(double data)
   previous_filtered_measurement_ = data;
 }
 
-bool LowPassFilter::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints)
+bool LowPassFilter::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints, const std::shared_ptr<const moveit_servo::ServoParameters>& parameters)
 {
+  node_ = node;
   num_joints_ = num_joints;
-
-  double filter_coeff = 1.5;
-  if (!node->get_parameter("moveit_servo/low_pass_filter_coeff", filter_coeff))
-  {
-    RCLCPP_WARN_STREAM(node->get_logger(), "Low pass filter coefficient parameter was not defined. Using the default, " << filter_coeff);
-  }
 
   for (std::size_t i = 0; i < num_joints_; ++i)
   {
     // Low-pass filters for the joint positions
-    position_filters_.emplace_back(filter_coeff);
+    position_filters_.emplace_back(parameters->low_pass_filter_coeff);
   }
 
   return true;

@@ -188,7 +188,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   // Initialize the smoothing plugin
   if (SMOOTHER_PLUGIN_NAME == "moveit_servo/LowPassFilter")
   {
-    smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints_);
+    smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints_, parameters_);
   }
 
   // A matrix of all zeros is used to check whether matrices have been initialized
