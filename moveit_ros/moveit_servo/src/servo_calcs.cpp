@@ -635,7 +635,7 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   return true;
 }
 
-bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state,
+bool ServoCalcs::applyJointUpdate(Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state,
                                   Eigen::ArrayXd& previous_vel)
 {
   // All the sizes must match
@@ -663,6 +663,10 @@ bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs
     // Save this velocity for future accel calculations
     previous_vel[i] = joint_state.velocity[i];
   }
+
+  // TODO(andyz): calculate velocity after this, not before
+  smoother_->doSmoothing(delta_theta);
+
   return true;
 }
 

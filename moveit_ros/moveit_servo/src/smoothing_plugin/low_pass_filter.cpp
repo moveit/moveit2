@@ -29,6 +29,29 @@ LowpassFilterImpl::LowpassFilterImpl(double low_pass_filter_coeff)
     throw std::length_error("moveit_servo::LowpassFilterImpl: Filter coefficient value resulted in feedback term of 0");
 }
 
+double LowpassFilterImpl::filter(double new_measurement)
+{
+  // Push in the new measurement
+  previous_measurements_[1] = previous_measurements_[0];
+  previous_measurements_[0] = new_measurement;
+
+  double new_filtered_measurement = scale_term_ * (previous_measurements_[1] + previous_measurements_[0] -
+                                                   feedback_term_ * previous_filtered_measurement_);
+
+  // Store the new filtered measurement
+  previous_filtered_measurement_ = new_filtered_measurement;
+
+  return new_filtered_measurement;
+}
+
+void LowpassFilterImpl::reset(double data)
+{
+  previous_measurements_[0] = data;
+  previous_measurements_[1] = data;
+
+  previous_filtered_measurement_ = data;
+}
+
 bool LowPassFilter::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints)
 {
   num_joints_ = num_joints;
@@ -42,6 +65,16 @@ bool LowPassFilter::initialize(rclcpp::Node::SharedPtr node, moveit::core::Robot
     position_filters_.emplace_back(filter_coeff);
   }
 
+  return true;
+};
+
+bool LowPassFilter::doSmoothing(Eigen::ArrayXd& delta_theta)
+{
+  for (uint i = 0; i < delta_theta.size(); ++i)
+  {
+    // Lowpass filter the position command
+    delta_theta[i] = position_filters_.at(i).filter(delta_theta[i]);
+  }
   return true;
 };
 
