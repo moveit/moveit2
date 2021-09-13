@@ -22,30 +22,19 @@ class MoveItConfigs(object):
         "__cartesian_limits",
     ]
 
-    def __init__(self, **kwargs):
-        assert all(
-            "__" + key in self.__slots__ for key in kwargs.keys()
-        ), "Invalid arguments passed to constructor: %s" % ", ".join(
-            sorted(k for k in kwargs.keys() if "__" + k not in self.__slots__)
-        )
-        self.__robot_description = kwargs.get("robot_description", None)
-        self.__robot_description_semantic = kwargs.get(
-            "robot_description_semantic", None
-        )
-        self.__robot_description_planning = kwargs.get(
-            "robot_description_planning", None
-        )
-        self.__robot_description_kinematics = kwargs.get(
-            "robot_description_kinematics", None
-        )
-        self.__planning_pipelines = kwargs.get("planning_pipelines", None)
-        self.__trajectory_execution = kwargs.get("trajectory_execution", None)
-        self.__planning_scene_monitor = kwargs.get("planning_scene_monitor", None)
-        self.__move_group_capabilities = kwargs.get("move_group_capabilities", None)
-        self.__move_group = kwargs.get("move_group", None)
-        self.__joint_limits = kwargs.get("joint_limits", None)
-        self.__moveit_cpp = kwargs.get("moveit_cpp", None)
-        self.__cartesian_limits = kwargs.get("cartesian_limits", None)
+    def __init__(self):
+        self.robot_description = {}
+        self.robot_description_semantic = {}
+        self.robot_description_planning = {}
+        self.robot_description_kinematics = {}
+        self.planning_pipelines = {}
+        self.trajectory_execution = {}
+        self.planning_scene_monitor = {}
+        self.move_group_capabilities = {}
+        self.move_group = {}
+        self.joint_limits = {}
+        self.moveit_cpp = {}
+        self.cartesian_limits = {}
 
     @property
     def robot_description(self):
@@ -142,6 +131,19 @@ class MoveItConfigs(object):
     @cartesian_limits.setter
     def cartesian_limits(self, value):
         self.__cartesian_limits = value
+
+    def to_dict(self):
+        parameters = {}
+        parameters.update(self.robot_description)
+        parameters.update(self.robot_description_semantic)
+        parameters.update(self.robot_description_kinematics)
+        parameters.update(self.planning_pipelines)
+        parameters.update(self.trajectory_execution)
+        parameters.update(self.planning_scene_monitor)
+        parameters.update(self.joint_limits)
+        parameters.update(self.moveit_cpp)
+        parameters.update(self.cartesian_limits)
+        return parameters
 
 
 class MoveItConfigsBuilder(ParameterBuilder):
@@ -297,22 +299,5 @@ class MoveItConfigsBuilder(ParameterBuilder):
     def to_dict(self, include_moveit_configs: bool = True):
         parameters = self._parameters
         if include_moveit_configs:
-            if self.__moveit_configs.robot_description:
-                parameters.update(self.__moveit_configs.robot_description)
-            if self.__moveit_configs.robot_description_semantic:
-                parameters.update(self.__moveit_configs.robot_description_semantic)
-            if self.__moveit_configs.robot_description_kinematics:
-                parameters.update(self.__moveit_configs.robot_description_kinematics)
-            if self.__moveit_configs.planning_pipelines:
-                parameters.update(self.__moveit_configs.planning_pipelines)
-            if self.__moveit_configs.trajectory_execution:
-                parameters.update(self.__moveit_configs.trajectory_execution)
-            if self.__moveit_configs.planning_scene_monitor:
-                parameters.update(self.__moveit_configs.planning_scene_monitor)
-            if self.__moveit_configs.joint_limits:
-                parameters.update(self.__moveit_configs.joint_limits)
-            if self.__moveit_configs.moveit_cpp:
-                parameters.update(self.__moveit_configs.moveit_cpp)
-            if self.__moveit_configs.cartesian_limits:
-                parameters.update(self.__moveit_configs.cartesian_limits)
+            parameters.update(self.__moveit_configs.to_dict())
         return parameters
