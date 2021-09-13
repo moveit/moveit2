@@ -47,11 +47,12 @@ class SmoothingBaseClass
 public:
   /**
    * Initialize the smoothing algorithm
+   * @param node ROS node, typically used for parameter retrieval
    * @param robot_model typically used to retrieve vel/accel/jerk limits
    * @param num_joints number of actuated joints in the JointGroup Servo controls
    * @return True if initialization was successful
    */
-  virtual bool initialize(moveit::core::RobotModelConstPtr robot_model, const size_t num_joints) = 0;
+  virtual bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints) = 0;
 
   virtual bool doSmoothing() = 0;
 
