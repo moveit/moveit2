@@ -298,8 +298,8 @@ protected:
   sensor_msgs::msg::JointState internal_joint_state_, original_joint_state_;
   std::map<std::string, std::size_t> joint_state_name_map_;
 
-  // Smoothing algorithm (loads a plugin)
   std::vector<LowPassFilter> position_filters_;
+  // Smoothing algorithm (loads a plugin)
   std::shared_ptr<moveit_servo::SmoothingBaseClass> smoother_;
 
   trajectory_msgs::msg::JointTrajectory::SharedPtr last_sent_command_;

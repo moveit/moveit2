@@ -45,6 +45,34 @@
 
 namespace moveit_servo
 {
+
+/**
+ * Class LowpassFilterImpl - Implementation of a signal filter to soften jerks.
+ * This is a first-order Butterworth low-pass filter. First-order was chosen for 2 reasons:
+ * - It doesn't overshoot
+ * - Computational efficiency
+ */
+class LowpassFilterImpl
+{
+public:
+  /**
+   * Constructor.
+   * @param low_pass_filter_coeff Larger filter_coeff-> more smoothing of servo commands, but more lag.
+   * Rough plot, with cutoff frequency on the y-axis:
+   * https://www.wolframalpha.com/input/?i=plot+arccot(c)
+   */
+  LowpassFilterImpl(double low_pass_filter_coeff);
+
+private:
+  static constexpr std::size_t FILTER_LENGTH = 2;
+  double previous_measurements_[FILTER_LENGTH];
+  double previous_filtered_measurement_;
+  // Scale and feedback term are calculated from supplied filter coefficient
+  double scale_term_;
+  double feedback_term_;
+};
+
+// Plugin
 class LowPassFilter : public SmoothingBaseClass
 {
 public:
@@ -52,11 +80,12 @@ public:
 
   /**
    * Initialize the smoothing algorithm
+   * @param node ROS node, used for parameter retrieval
    * @param robot_model typically used to retrieve vel/accel/jerk limits
    * @param num_joints number of actuated joints in the JointGroup Servo controls
    * @return True if initialization was successful
    */
-  bool initialize(moveit::core::RobotModelConstPtr robot_model, const size_t num_joints);
+  bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints);
 
   bool doSmoothing()
   {
@@ -71,5 +100,9 @@ public:
   {
     return true;
   };
+
+private:
+  std::vector<LowpassFilterImpl> position_filters_;
+  size_t num_joints_;
 };
-}
+} // namespace moveit_servo
