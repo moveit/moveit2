@@ -693,6 +693,7 @@ void ServoCalcs::resetLowPassFilters(const sensor_msgs::msg::JointState& joint_s
   {
     position_filters_[i].reset(joint_state.position[i]);
   }
+  smoother_->reset(joint_state.position);
 
   updated_filters_ = true;
 }
