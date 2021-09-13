@@ -52,13 +52,13 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 )
 
 set(THIS_PACKAGE_INCLUDE_DIRS
-  global_planner/global_planner_component/include
-  global_planner/global_planner_plugins/include
-  hybrid_planning_manager/hybrid_planning_manager_component/include
-  hybrid_planning_manager/planner_logic_plugins/include
-  local_planner/local_planner_component/include
-  local_planner/trajectory_operator_plugins/include
-  local_planner/local_constraint_solver_plugins/include
+  global_planner/global_planner_component/include/
+  global_planner/global_planner_plugins/include/
+  hybrid_planning_manager/hybrid_planning_manager_component/include/
+  hybrid_planning_manager/planner_logic_plugins/include/
+  local_planner/local_planner_component/include/
+  local_planner/trajectory_operator_plugins/include/
+  local_planner/local_constraint_solver_plugins/include/
 )
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
@@ -77,7 +77,7 @@ install(TARGETS ${LIBRARIES} hybrid_planning_test_node
   RUNTIME DESTINATION lib/${PROJECT_NAME}
   INCLUDES DESTINATION include)
 
-#install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS} DESTINATION include)
+install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS} DESTINATION include)
 
 install(DIRECTORY test/launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY test/config DESTINATION share/${PROJECT_NAME})
