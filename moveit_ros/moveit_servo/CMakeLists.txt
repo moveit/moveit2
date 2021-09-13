@@ -31,34 +31,35 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(std_srvs REQUIRED)
-find_package(sensor_msgs REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(control_toolbox REQUIRED)
-find_package(moveit_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(moveit_msgs REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(trajectory_msgs REQUIRED)
-find_package(moveit_ros_planning REQUIRED)
+
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  rclcpp
-  rclcpp_components
-  std_msgs
-  std_srvs
-  sensor_msgs
   control_msgs
   control_toolbox
-  moveit_msgs
   geometry_msgs
+  moveit_msgs
+  moveit_ros_planning
+  rclcpp
+  rclcpp_components
+  sensor_msgs
+  std_msgs
+  std_srvs
   tf2_eigen
   trajectory_msgs
-  moveit_ros_planning
 )
 
 include_directories(
