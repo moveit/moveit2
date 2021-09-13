@@ -36,15 +36,15 @@
  *      Project   : moveit_servo
  *      Created   : 07/21/2020
  *      Author    : Adam Pettinger
- *      Desc      : Unit test for moveit_servo::LowPassFilter
+ *      Desc      : Unit test for moveit_servo::LowpassFilterImpl
  */
 
 #include <gtest/gtest.h>
-#include <moveit_servo/low_pass_filter.h>
+#include <moveit_servo/smoothing_plugin/low_pass_filter.h>
 
 TEST(MOVEIT_SERVO, FilterConverge)
 {
-  moveit_servo::LowPassFilter lpf(2.0);
+  moveit_servo::LowpassFilterImpl lpf(2.0);
   EXPECT_DOUBLE_EQ(0.0, lpf.filter(0.0));
   double value;
   for (size_t i = 0; i < 100; ++i)
@@ -60,7 +60,7 @@ TEST(MOVEIT_SERVO, FilterConverge)
 
 TEST(MOVEIT_SERVO, FilterReset)
 {
-  moveit_servo::LowPassFilter lpf(2.0);
+  moveit_servo::LowpassFilterImpl lpf(2.0);
   EXPECT_DOUBLE_EQ(0.0, lpf.filter(0.0));
   lpf.reset(5.0);
   double value = lpf.filter(5.0);
