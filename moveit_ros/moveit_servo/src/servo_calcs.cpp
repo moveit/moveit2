@@ -170,7 +170,8 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   }
 
   // Load the smoothing plugin
-  pluginlib::ClassLoader<moveit_servo::SmoothingBaseClass> smoothing_loader("moveit_servo", "moveit_servo::SmoothingBaseClass");
+  pluginlib::ClassLoader<moveit_servo::SmoothingBaseClass> smoothing_loader("moveit_servo",
+                                                                            "moveit_servo::SmoothingBaseClass");
   // For now, there is only one option for smoothing plugins
   // TODO(andyz): load from parameter
   std::string SMOOTHER_PLUGIN_NAME = "moveit_servo/LowPassFilter";
@@ -180,8 +181,8 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading the smoothing plugin '%s': '%s'",
-                 SMOOTHER_PLUGIN_NAME.c_str(), ex.what());
+    RCLCPP_ERROR(LOGGER, "Exception while loading the smoothing plugin '%s': '%s'", SMOOTHER_PLUGIN_NAME.c_str(),
+                 ex.what());
     std::exit(EXIT_FAILURE);
   }
 

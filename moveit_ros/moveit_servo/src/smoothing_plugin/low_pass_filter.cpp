@@ -23,7 +23,8 @@ LowpassFilterImpl::LowpassFilterImpl(double low_pass_filter_coeff)
     throw std::length_error("moveit_servo::LowpassFilterImpl: infinite scale_term_");
 
   if (low_pass_filter_coeff < 1)
-    throw std::length_error("moveit_servo::LowpassFilterImpl: Filter coefficient < 1. makes the lowpass filter unstable");
+    throw std::length_error(
+        "moveit_servo::LowpassFilterImpl: Filter coefficient < 1. makes the lowpass filter unstable");
 
   if (std::abs(feedback_term_) < EPSILON)
     throw std::length_error("moveit_servo::LowpassFilterImpl: Filter coefficient value resulted in feedback term of 0");
@@ -52,7 +53,9 @@ void LowpassFilterImpl::reset(double data)
   previous_filtered_measurement_ = data;
 }
 
-bool LowPassFilter::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints, const std::shared_ptr<const moveit_servo::ServoParameters>& parameters)
+bool LowPassFilter::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
+                               const size_t num_joints,
+                               const std::shared_ptr<const moveit_servo::ServoParameters>& parameters)
 {
   node_ = node;
   num_joints_ = num_joints;
@@ -76,7 +79,7 @@ bool LowPassFilter::doSmoothing(Eigen::ArrayXd& delta_theta)
   return true;
 };
 
-}
+}  // namespace moveit_servo
 
 #include <pluginlib/class_list_macros.hpp>
 PLUGINLIB_EXPORT_CLASS(moveit_servo::LowPassFilter, moveit_servo::SmoothingBaseClass)

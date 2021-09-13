@@ -46,7 +46,6 @@
 
 namespace moveit_servo
 {
-
 /**
  * Class LowpassFilterImpl - Implementation of a signal filter to soften jerks.
  * This is a first-order Butterworth low-pass filter. First-order was chosen for 2 reasons:
@@ -91,7 +90,8 @@ public:
    * @param parameters access to all Servo parameters that have been parsed from yaml
    * @return True if initialization was successful
    */
-  bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints, const std::shared_ptr<const moveit_servo::ServoParameters>& parameters);
+  bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints,
+                  const std::shared_ptr<const moveit_servo::ServoParameters>& parameters);
 
   /**
    * Smooth the command signals for all DOF
@@ -115,4 +115,4 @@ private:
   std::vector<LowpassFilterImpl> position_filters_;
   size_t num_joints_;
 };
-} // namespace moveit_servo
+}  // namespace moveit_servo
