@@ -15,14 +15,14 @@ def generate_launch_description():
         .to_dict()
     )
 
-    moveit_config = (
+    moveit_configs = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description()
         .robot_description_semantic()
         .robot_description_kinematics()
         .joint_limits()
         .planning_pipelines()
-        .to_moveit_configs()
+        .to_dict()
     )
 
     # moveit_ros_benchmark demo executable
@@ -34,11 +34,7 @@ def generate_launch_description():
         output="screen",
         parameters=[
             moveit_ros_benchmarks_config,
-            moveit_config.robot_description,
-            moveit_config.robot_description_semantic,
-            moveit_config.robot_description_kinematics,
-            moveit_config.planning_pipelines,
-            moveit_config.joint_limits,
+            moveit_configs,
         ],
     )
 

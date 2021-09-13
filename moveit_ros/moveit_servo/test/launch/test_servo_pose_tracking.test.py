@@ -88,11 +88,8 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
             [LaunchConfiguration("test_binary_dir"), gtest_name]
         ),
         parameters=[
-            moveit_config.robot_description,
-            moveit_config.robot_description_semantic,
+            moveit_config.to_dict(),
             servo_params,
-            moveit_config.robot_description_kinematics,
-            moveit_config.joint_limits,
         ],
         output="screen",
     )

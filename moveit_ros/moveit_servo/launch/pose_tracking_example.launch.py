@@ -37,12 +37,7 @@ def generate_launch_description():
         # prefix=['xterm -e gdb -ex run --args'],
         output="log",
         arguments=["-d", rviz_config_file],
-        parameters=[
-            moveit_config.robot_description,
-            moveit_config.robot_description_semantic,
-            moveit_config.robot_description_kinematics,
-            moveit_config.joint_limits,
-        ],
+        parameters=[moveit_config.to_dict()],
     )
 
     # Publishes tf's for the robot
@@ -68,11 +63,8 @@ def generate_launch_description():
         # prefix=['xterm -e gdb -ex run --args'],
         output="screen",
         parameters=[
-            moveit_config.robot_description,
-            moveit_config.robot_description_semantic,
-            moveit_config.robot_description_kinematics,
+            moveit_config.to_dict(),
             servo_params,
-            moveit_config.joint_limits,
         ],
     )
 

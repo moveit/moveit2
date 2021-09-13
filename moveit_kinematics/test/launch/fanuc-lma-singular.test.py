@@ -11,13 +11,13 @@ from parameter_builder import ParameterBuilder
 @pytest.mark.rostest
 def generate_test_description():
 
-    moveit_config = (
+    moveit_configs = (
         MoveItConfigsBuilder("moveit_resources_fanuc")
         .robot_description()
         .robot_description_semantic()
         .robot_description_kinematics()
         .joint_limits()
-        .to_moveit_configs()
+        .to_dict()
     )
     test_param = (
         ParameterBuilder("moveit_kinematics")
@@ -30,10 +30,7 @@ def generate_test_description():
         executable="test_kinematics_plugin",
         name="fanuc_lma_singular",
         parameters=[
-            moveit_config.robot_description,
-            moveit_config.robot_description_semantic,
-            moveit_config.robot_description_kinematics,
-            moveit_config.joint_limits,
+            moveit_configs,
             test_param,
         ],
         output="screen",
