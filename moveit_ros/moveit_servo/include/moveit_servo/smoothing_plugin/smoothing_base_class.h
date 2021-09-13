@@ -69,9 +69,6 @@ public:
    * @param joint_positions reset the filters to these joint positions
    * @return True if reset was successful
    */
-  virtual bool reset(const std::vector<double> joint_positions) = 0;
-
-protected:
-  SmoothingBaseClass(){};
+  virtual bool reset(const std::vector<double>& joint_positions) = 0;
 };
 }  // namespace moveit_servo
