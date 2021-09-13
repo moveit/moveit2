@@ -199,8 +199,8 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   # Lowpass filter unit test
-#  ament_add_gtest(test_low_pass_filter test/test_low_pass_filter.cpp)
-#  target_link_libraries(test_low_pass_filter ${SERVO_LIB_NAME})
+  ament_add_gtest(test_low_pass_filter test/test_low_pass_filter.cpp)
+  target_link_libraries(test_low_pass_filter low_pass_filter)
 
   # Unit test for ServoCalcs
   # TODO (vatanaksoytezer): Rewrite this similar to enforce limits test
