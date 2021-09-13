@@ -63,6 +63,10 @@ public:
    */
   LowpassFilterImpl(double low_pass_filter_coeff);
 
+  double filter(double new_measurement);
+
+  void reset(double data);
+
 private:
   static constexpr std::size_t FILTER_LENGTH = 2;
   double previous_measurements_[FILTER_LENGTH];
@@ -87,10 +91,12 @@ public:
    */
   bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints);
 
-  bool doSmoothing()
-  {
-    return true;
-  };
+  /**
+   * Smooth the command signals for all DOF
+   * @param delta_theta array of incremental joint position commands
+   * @return True if initialization was successful
+   */
+  bool doSmoothing(Eigen::ArrayXd& delta_theta);
 
   /**
    * Reset local constraint solver to some user-defined initial state

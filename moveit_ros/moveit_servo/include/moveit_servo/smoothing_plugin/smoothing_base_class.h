@@ -54,7 +54,12 @@ public:
    */
   virtual bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints) = 0;
 
-  virtual bool doSmoothing() = 0;
+  /**
+   * Smooth an array of joint position deltas
+   * @param delta_theta array of incremental joint position commands
+   * @return True if initialization was successful
+   */
+  virtual bool doSmoothing(Eigen::ArrayXd& delta_theta) = 0;
 
   /**
    * Reset local constraint solver to some user-defined initial state
