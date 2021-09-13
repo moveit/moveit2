@@ -45,13 +45,14 @@
 #include <atomic>
 
 // ROS
-#include <rclcpp/rclcpp.hpp>
 #include <control_msgs/msg/joint_jog.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit_msgs/srv/change_drift_dimensions.hpp>
 #include <moveit_msgs/srv/change_control_dimensions.hpp>
+#include <pluginlib/class_loader.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
@@ -68,6 +69,7 @@
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
 #include <moveit_servo/low_pass_filter.h>
+#include <moveit_servo/smoothing_plugin/smoothing_base_class.h>
 
 namespace moveit_servo
 {
@@ -296,7 +298,9 @@ protected:
   sensor_msgs::msg::JointState internal_joint_state_, original_joint_state_;
   std::map<std::string, std::size_t> joint_state_name_map_;
 
+  // Smoothing algorithm (loads a plugin)
   std::vector<LowPassFilter> position_filters_;
+  std::shared_ptr<moveit_servo::SmoothingBaseClass> smoother_;
 
   trajectory_msgs::msg::JointTrajectory::SharedPtr last_sent_command_;
 
