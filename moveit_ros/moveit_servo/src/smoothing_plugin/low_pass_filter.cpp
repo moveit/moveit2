@@ -68,12 +68,12 @@ bool LowPassFilter::initialize(rclcpp::Node::SharedPtr node, moveit::core::Robot
   return true;
 };
 
-bool LowPassFilter::doSmoothing(Eigen::ArrayXd& delta_theta)
+bool LowPassFilter::doSmoothing(std::vector<double>& position_vector)
 {
-  for (Eigen::Index i = 0; i < delta_theta.size(); ++i)
+  for (size_t i = 0; i < position_vector.size(); ++i)
   {
     // Lowpass filter the position command
-    delta_theta[i] = position_filters_.at(i).filter(delta_theta[i]);
+    position_vector[i] = position_filters_.at(i).filter(position_vector[i]);
   }
   return true;
 };
@@ -84,7 +84,6 @@ bool LowPassFilter::reset(const std::vector<double>& joint_positions)
   {
     position_filters_.at(joint_idx).reset(joint_positions.at(joint_idx));
   }
-
   return true;
 };
 

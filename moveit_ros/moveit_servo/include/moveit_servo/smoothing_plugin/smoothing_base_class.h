@@ -61,7 +61,7 @@ public:
    * @param delta_theta array of incremental joint position commands
    * @return True if initialization was successful
    */
-  virtual bool doSmoothing(Eigen::ArrayXd& delta_theta) = 0;
+  virtual bool doSmoothing(std::vector<double>& position_vector) = 0;
 
   /**
    * Reset to a given joint state
