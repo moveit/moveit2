@@ -174,7 +174,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
                                                                             "moveit_servo::SmoothingBaseClass");
   // For now, there is only one option for smoothing plugins
   // TODO(andyz): load from parameter
-  std::string SMOOTHER_PLUGIN_NAME = "moveit_servo/LowPassFilter";
+  const std::string SMOOTHER_PLUGIN_NAME = "moveit_servo/LowPassFilter";
   try
   {
     smoother_ = smoothing_loader.createSharedInstance(SMOOTHER_PLUGIN_NAME);

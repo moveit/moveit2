@@ -45,11 +45,10 @@ double LowpassFilterImpl::filter(double new_measurement)
   return new_filtered_measurement;
 }
 
-void LowpassFilterImpl::reset(double data)
+void LowpassFilterImpl::reset(const double data)
 {
   previous_measurements_[0] = data;
   previous_measurements_[1] = data;
-
   previous_filtered_measurement_ = data;
 }
 
@@ -71,11 +70,21 @@ bool LowPassFilter::initialize(rclcpp::Node::SharedPtr node, moveit::core::Robot
 
 bool LowPassFilter::doSmoothing(Eigen::ArrayXd& delta_theta)
 {
-  for (uint i = 0; i < delta_theta.size(); ++i)
+  for (Eigen::Index i = 0; i < delta_theta.size(); ++i)
   {
     // Lowpass filter the position command
     delta_theta[i] = position_filters_.at(i).filter(delta_theta[i]);
   }
+  return true;
+};
+
+bool LowPassFilter::reset(const std::vector<double>& joint_positions)
+{
+  for (size_t joint_idx = 0; joint_idx < joint_positions.size(); ++joint_idx)
+  {
+    position_filters_.at(joint_idx).reset(joint_positions.at(joint_idx));
+  }
+
   return true;
 };
 

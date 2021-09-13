@@ -65,11 +65,11 @@ public:
 
   double filter(double new_measurement);
 
-  void reset(double data);
+  void reset(const double data);
 
 private:
   static constexpr std::size_t FILTER_LENGTH = 2;
-  double previous_measurements_[FILTER_LENGTH];
+  std::array<double, FILTER_LENGTH> previous_measurements_;
   double previous_filtered_measurement_;
   // Scale and feedback term are calculated from supplied filter coefficient
   double scale_term_;
@@ -91,24 +91,21 @@ public:
    * @return True if initialization was successful
    */
   bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, const size_t num_joints,
-                  const std::shared_ptr<const moveit_servo::ServoParameters>& parameters);
+                  const std::shared_ptr<const moveit_servo::ServoParameters>& parameters) override;
 
   /**
    * Smooth the command signals for all DOF
    * @param delta_theta array of incremental joint position commands
    * @return True if initialization was successful
    */
-  bool doSmoothing(Eigen::ArrayXd& delta_theta);
+  bool doSmoothing(Eigen::ArrayXd& delta_theta) override;
 
   /**
    * Reset to a given joint state
    * @param joint_positions reset the filters to these joint positions
    * @return True if reset was successful
    */
-  bool reset(const std::vector<double> joint_positions)
-  {
-    return true;
-  };
+  bool reset(const std::vector<double>& joint_positions) override;
 
 private:
   rclcpp::Node::SharedPtr node_;
