@@ -53,8 +53,7 @@ public:
    * @param parameters access to all Servo parameters that have been parsed from yaml
    * @return True if initialization was successful
    */
-  virtual bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
-                          const size_t num_joints,
+  virtual bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, size_t num_joints,
                           const std::shared_ptr<const moveit_servo::ServoParameters>& parameters) = 0;
 
   /**

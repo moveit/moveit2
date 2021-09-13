@@ -53,7 +53,7 @@ void LowpassFilterImpl::reset(const double data)
 }
 
 bool LowPassFilter::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
-                               const size_t num_joints,
+                               size_t num_joints,
                                const std::shared_ptr<const moveit_servo::ServoParameters>& parameters)
 {
   node_ = node;
