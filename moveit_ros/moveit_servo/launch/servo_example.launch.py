@@ -1,14 +1,11 @@
 import os
 import yaml
-import launch
-import launch_ros
 from launch import LaunchDescription
-from launch.some_substitutions_type import SomeSubstitutionsType
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
-from launch_ros.actions import ComposableNodeContainer, Node
+from launch_ros.actions import Node
+from ament_index_python.packages import get_package_share_directory
+from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 from launch.actions import ExecuteProcess
-from ament_index_python.packages import get_package_share_directory
 import xacro
 
 
@@ -35,11 +32,11 @@ def load_yaml(package_name, file_path):
 
 
 def generate_launch_description():
-
-    # Get parameters using the demo config file
+    # Get parameters for the Servo node
     servo_yaml = load_yaml("moveit_servo", "config/panda_simulated_config.yaml")
     servo_params = {"moveit_servo": servo_yaml}
 
+    # Get URDF and SRDF
     robot_description_config = xacro.process_file(
         os.path.join(
             get_package_share_directory("moveit_resources_panda_moveit_config"),
@@ -47,7 +44,6 @@ def generate_launch_description():
             "panda.urdf.xacro",
         )
     )
-
     robot_description = {"robot_description": robot_description_config.toxml()}
 
     robot_description_semantic_config = load_file(
@@ -56,11 +52,20 @@ def generate_launch_description():
     robot_description_semantic = {
         "robot_description_semantic": robot_description_semantic_config
     }
-    joint_limits_yaml = {
-        "robot_description_planning": load_yaml(
-            "moveit_resources_panda_moveit_config", "config/joint_limits.yaml"
-        )
-    }
+
+    # RViz
+    rviz_config_file = (
+        get_package_share_directory("moveit2_tutorials")
+        + "/config/demo_rviz_config.rviz"
+    )
+    rviz_node = Node(
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        output="log",
+        arguments=["-d", rviz_config_file],
+        parameters=[robot_description, robot_description_semantic],
+    )
 
     # ros2_control using FakeSystem as hardware
     ros2_controllers_path = os.path.join(
@@ -89,9 +94,9 @@ def generate_launch_description():
             )
         ]
 
-    # Component nodes for tf and Servo
-    component_container = ComposableNodeContainer(
-        name="test_servo_integration_container",
+    # Launch as much as possible in components
+    container = ComposableNodeContainer(
+        name="moveit_servo_demo_container",
         namespace="/",
         package="rclcpp_components",
         executable="component_container",
@@ -106,7 +111,30 @@ def generate_launch_description():
                 package="tf2_ros",
                 plugin="tf2_ros::StaticTransformBroadcasterNode",
                 name="static_tf2_broadcaster",
-                parameters=[{"/child_frame_id": "panda_link0", "/frame_id": "world"}],
+                parameters=[{"child_frame_id": "/panda_link0", "frame_id": "/world"}],
+            ),
+            ComposableNode(
+                package="moveit_servo",
+                plugin="moveit_servo::ServoServer",
+                name="servo_server",
+                parameters=[
+                    servo_params,
+                    robot_description,
+                    robot_description_semantic,
+                ],
+                extra_arguments=[{"use_intra_process_comms": True}],
+            ),
+            ComposableNode(
+                package="moveit_servo",
+                plugin="moveit_servo::JoyToServoPub",
+                name="controller_to_servo_node",
+                extra_arguments=[{"use_intra_process_comms": True}],
+            ),
+            ComposableNode(
+                package="joy",
+                plugin="joy::Joy",
+                name="joy_node",
+                extra_arguments=[{"use_intra_process_comms": True}],
             ),
         ],
         output="screen",
@@ -119,7 +147,6 @@ def generate_launch_description():
             servo_params,
             robot_description,
             robot_description_semantic,
-            joint_limits_yaml,
         ],
         output={
             "stdout": "screen",
@@ -127,11 +154,6 @@ def generate_launch_description():
         },
     )
 
-    return launch.LaunchDescription(
-        [
-            ros2_control_node,
-            servo_node,
-            component_container,
-        ]
-        + load_controllers
+    return LaunchDescription(
+        [rviz_node, ros2_control_node, servo_node, container] + load_controllers
     )
