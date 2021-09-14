@@ -101,6 +101,18 @@ def generate_launch_description():
         package="rclcpp_components",
         executable="component_container",
         composable_node_descriptions=[
+            # Example of launching Servo as a node component
+            # ComposableNode(
+            #     package="moveit_servo",
+            #     plugin="moveit_servo::ServoServer",
+            #     name="servo_server",
+            #     parameters=[
+            #         servo_params,
+            #         robot_description,
+            #         robot_description_semantic,
+            #     ],
+            #     extra_arguments=[{"use_intra_process_comms": True}],
+            # ),
             ComposableNode(
                 package="robot_state_publisher",
                 plugin="robot_state_publisher::RobotStatePublisher",
