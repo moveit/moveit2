@@ -98,6 +98,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   , stop_requested_(true)
   , paused_(false)
   , robot_link_command_frame_(parameters->robot_link_command_frame)
+  , smoothing_loader_("moveit_core", "smoothing_plugins::SmoothingBaseClass")
 {
   // Register callback for changes in robot_link_command_frame
   parameters_->registerSetParameterCallback(parameters->ns + ".robot_link_command_frame",
@@ -170,14 +171,12 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   }
 
   // Load the smoothing plugin
-  pluginlib::ClassLoader<smoothing_plugins::SmoothingBaseClass> smoothing_loader(
-      "moveit_core", "smoothing_plugins::SmoothingBaseClass");
   // For now, there is only one option for smoothing plugins
-  // TODO(andyz): load from parameter
+  // TODO(andyz): load name from parameter
   const std::string smoother_plugin_name = "smoothing_plugins::ButterworthFilterPlugin";
   try
   {
-    smoother_ = smoothing_loader.createSharedInstance(smoother_plugin_name);
+    smoother_ = smoothing_loader_.createSharedInstance(smoother_plugin_name);
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -187,9 +186,10 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   }
 
   // Initialize the smoothing plugin
-  if (smoother_plugin_name == "moveit_servo/LowPassFilter")
+  if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints_))
   {
-    smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints_);
+    RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
+    std::exit(EXIT_FAILURE);
   }
 
   // A matrix of all zeros is used to check whether matrices have been initialized
