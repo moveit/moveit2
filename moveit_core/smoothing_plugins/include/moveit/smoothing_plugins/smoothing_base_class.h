@@ -40,7 +40,7 @@
 
 #include <moveit/robot_model/robot_model.h>
 
-namespace moveit_servo
+namespace smoothing_plugins
 {
 class SmoothingBaseClass
 {
@@ -50,11 +50,10 @@ public:
    * @param node ROS node, typically used for parameter retrieval
    * @param robot_model typically used to retrieve vel/accel/jerk limits
    * @param num_joints number of actuated joints in the JointGroup Servo controls
-   * @param parameters access to all Servo parameters that have been parsed from yaml
    * @return True if initialization was successful
    */
-  virtual bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, size_t num_joints,
-                          const std::shared_ptr<const moveit_servo::ServoParameters>& parameters) = 0;
+  virtual bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
+                          size_t num_joints) = 0;
 
   /**
    * Smooth an array of joint position deltas
@@ -70,4 +69,4 @@ public:
    */
   virtual bool reset(const std::vector<double>& joint_positions) = 0;
 };
-}  // namespace moveit_servo
+}  // namespace smoothing_plugins

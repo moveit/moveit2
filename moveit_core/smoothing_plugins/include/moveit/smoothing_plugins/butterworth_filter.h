@@ -41,18 +41,17 @@
 #include <cstddef>
 
 #include <moveit/robot_model/robot_model.h>
-#include <moveit_servo/servo_parameters.h>
-#include <moveit_servo/smoothing_plugin/smoothing_base_class.h>
+#include <moveit/smoothing_plugins/smoothing_base_class.h>
 
-namespace moveit_servo
+namespace smoothing_plugins
 {
 /**
- * Class LowpassFilterImpl - Implementation of a signal filter to soften jerks.
+ * Class ButterworthFilter - Implementation of a signal filter to soften jerks.
  * This is a first-order Butterworth low-pass filter. First-order was chosen for 2 reasons:
  * - It doesn't overshoot
  * - Computational efficiency
  */
-class LowpassFilterImpl
+class ButterworthFilter
 {
 public:
   /**
@@ -61,7 +60,7 @@ public:
    * Rough plot, with cutoff frequency on the y-axis:
    * https://www.wolframalpha.com/input/?i=plot+arccot(c)
    */
-  LowpassFilterImpl(double low_pass_filter_coeff);
+  ButterworthFilter(double low_pass_filter_coeff);
 
   double filter(double new_measurement);
 
@@ -77,21 +76,20 @@ private:
 };
 
 // Plugin
-class LowPassFilter : public SmoothingBaseClass
+class ButterworthFilterPlugin : public SmoothingBaseClass
 {
 public:
-  LowPassFilter(){};
+  ButterworthFilterPlugin(){};
 
   /**
    * Initialize the smoothing algorithm
    * @param node ROS node, used for parameter retrieval
    * @param robot_model typically used to retrieve vel/accel/jerk limits
    * @param num_joints number of actuated joints in the JointGroup Servo controls
-   * @param parameters access to all Servo parameters that have been parsed from yaml
    * @return True if initialization was successful
    */
-  bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model, size_t num_joints,
-                  const std::shared_ptr<const moveit_servo::ServoParameters>& parameters) override;
+  bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
+                  size_t num_joints) override;
 
   /**
    * Smooth the command signals for all DOF
@@ -109,7 +107,7 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
-  std::vector<LowpassFilterImpl> position_filters_;
+  std::vector<ButterworthFilter> position_filters_;
   size_t num_joints_;
 };
-}  // namespace moveit_servo
+}  // namespace smoothing_plugins
