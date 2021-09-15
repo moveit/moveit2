@@ -66,12 +66,17 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::c
     // TODO(andyz): read the parameter from yaml
     position_filters_.emplace_back(1.5);
   }
+  RCLCPP_ERROR_STREAM(node_->get_logger(), "Filter vector size: " << position_filters_.size());
 
   return true;
 };
 
 bool ButterworthFilterPlugin::doSmoothing(std::vector<double>& position_vector)
 {
+  if (position_vector.size() != position_filters_.size())
+  {
+    return false;
+  }
   for (size_t i = 0; i < position_vector.size(); ++i)
   {
     // Lowpass filter the position command
@@ -82,6 +87,10 @@ bool ButterworthFilterPlugin::doSmoothing(std::vector<double>& position_vector)
 
 bool ButterworthFilterPlugin::reset(const std::vector<double>& joint_positions)
 {
+  if (joint_positions.size() != position_filters_.size())
+  {
+    return false;
+  }
   for (size_t joint_idx = 0; joint_idx < joint_positions.size(); ++joint_idx)
   {
     position_filters_.at(joint_idx).reset(joint_positions.at(joint_idx));

@@ -360,5 +360,8 @@ protected:
   // dynamic parameters
   std::string robot_link_command_frame_;
   rcl_interfaces::msg::SetParametersResult robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter);
+
+  // Load a smoothing plugin
+  pluginlib::ClassLoader<smoothing_plugins::SmoothingBaseClass> smoothing_loader_;
 };
 }  // namespace moveit_servo
