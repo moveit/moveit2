@@ -82,36 +82,39 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     # TODO: Port python bindings
     # python/tools/include
     sensor_manager/include
+    smoothing_plugins/include
     trajectory_processing/include
     utils/include
 )
 
 set(THIS_PACKAGE_LIBRARIES
-    moveit_exceptions
     moveit_background_processing
-    moveit_kinematics_base
-    moveit_robot_model
-    moveit_transforms
-    moveit_robot_state
-    moveit_robot_trajectory
-    moveit_planning_interface
+    moveit_butterworth_filter
+    moveit_collision_distance_field
     moveit_collision_detection
     moveit_collision_detection_fcl
     moveit_collision_detection_bullet
-    moveit_kinematic_constraints
-    moveit_planning_scene
+    moveit_dynamics_solver
     moveit_constraint_samplers
+    moveit_distance_field
+    moveit_exceptions
+    moveit_kinematics_base
+    moveit_kinematic_constraints
+    moveit_kinematics_metrics
+    moveit_planning_interface
+    moveit_planning_scene
     moveit_planning_request_adapter
     moveit_profiler
     # TODO: Port python bindings
     # moveit_python_tools
-    moveit_trajectory_processing
-    moveit_distance_field
-    moveit_collision_distance_field
-    moveit_kinematics_metrics
-    moveit_dynamics_solver
-    moveit_utils
+    moveit_robot_model
+    moveit_robot_state
+    moveit_robot_trajectory
+#    smoothing_base_class
     moveit_test_utils
+    moveit_trajectory_processing
+    moveit_transforms
+    moveit_utils
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -137,9 +140,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   Bullet
   ruckig
 )
-
-pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
-pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
   ${LIBFCL_INCLUDE_DIRS}
@@ -178,6 +178,7 @@ add_subdirectory(robot_model)
 add_subdirectory(robot_state)
 add_subdirectory(robot_trajectory)
 add_subdirectory(sensor_manager)
+add_subdirectory(smoothing_plugins)
 add_subdirectory(trajectory_processing)
 add_subdirectory(transforms)
 add_subdirectory(utils)
@@ -186,8 +187,6 @@ add_subdirectory(version)
 add_subdirectory(collision_detection)
 add_subdirectory(collision_detection_bullet)
 add_subdirectory(collision_detection_fcl)
-
-pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 
 # TODO: Port python bindings
 # add_subdirectory(python)
@@ -228,6 +227,11 @@ install(
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+# Plugin exports
+pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
+pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
+pluginlib_export_plugin_description_file(moveit_core butterworth_filter_plugin.xml)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

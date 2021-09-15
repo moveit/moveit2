@@ -32,19 +32,19 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/*      Title     : test_low_pass_filters.cpp
- *      Project   : moveit_servo
+/*      Title     : test_butterworth_filter.cpp
+ *      Project   : moveit_core
  *      Created   : 07/21/2020
  *      Author    : Adam Pettinger
- *      Desc      : Unit test for moveit_servo::LowpassFilterImpl
+ *      Desc      : Unit test for moveit::ButterworthFilter
  */
 
 #include <gtest/gtest.h>
-#include <moveit_servo/smoothing_plugin/low_pass_filter.h>
+#include <moveit/smoothing_plugins/butterworth_filter.h>
 
-TEST(MOVEIT_SERVO, FilterConverge)
+TEST(SMOOTHING_PLUGINS, FilterConverge)
 {
-  moveit_servo::LowpassFilterImpl lpf(2.0);
+  smoothing_plugins::ButterworthFilter lpf(2.0);
   EXPECT_DOUBLE_EQ(0.0, lpf.filter(0.0));
   double value;
   for (size_t i = 0; i < 100; ++i)
@@ -58,9 +58,9 @@ TEST(MOVEIT_SERVO, FilterConverge)
   EXPECT_NE(5.0, lpf.filter(100.0));
 }
 
-TEST(MOVEIT_SERVO, FilterReset)
+TEST(SMOOTHING_PLUGINS, FilterReset)
 {
-  moveit_servo::LowpassFilterImpl lpf(2.0);
+  smoothing_plugins::ButterworthFilter lpf(2.0);
   EXPECT_DOUBLE_EQ(0.0, lpf.filter(0.0));
   lpf.reset(5.0);
   double value = lpf.filter(5.0);
