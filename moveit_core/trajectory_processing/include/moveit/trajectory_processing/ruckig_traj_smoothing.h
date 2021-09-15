@@ -45,28 +45,30 @@ namespace trajectory_processing
 class RuckigSmoothing
 {
 public:
-  bool applySmoothing(robot_trajectory::RobotTrajectory& trajectory, const double max_velocity_scaling_factor = 1.0,
-                      const double max_acceleration_scaling_factor = 1.0);
+  static bool applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
+                             const double max_velocity_scaling_factor = 1.0,
+                             const double max_acceleration_scaling_factor = 1.0);
 
 private:
   /**
    * \brief Feed previous output back as input for next iteration. Get next target state from the next waypoint.
    */
-  void getNextCurrentTargetStates(ruckig::InputParameter<0>& ruckig_input, ruckig::OutputParameter<0>& ruckig_output,
-                                  const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
-                                  const std::vector<int>& idx);
+  static void getNextCurrentTargetStates(ruckig::InputParameter<0>& ruckig_input,
+                                         ruckig::OutputParameter<0>& ruckig_output,
+                                         const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
+                                         const std::vector<int>& idx);
 
   /**
    * \brief Check for backward motion of any joint at a waypoint.
    *
    * \return true if backward motion is detected on any joint
    */
-  bool checkForBackwardMotion(const size_t num_dof, const ruckig::InputParameter<0>& ruckig_input,
-                              const ruckig::OutputParameter<0>& ruckig_output);
+  static bool checkForBackwardMotion(const size_t num_dof, const ruckig::InputParameter<0>& ruckig_input,
+                                     const ruckig::OutputParameter<0>& ruckig_output);
 
   /**
    * \brief Return L2-norm of velocity, taking all joints into account.
    */
-  double getTargetVelocityMagnitude(const ruckig::InputParameter<0>& ruckig_input, size_t num_dof);
+  static double getTargetVelocityMagnitude(const ruckig::InputParameter<0>& ruckig_input, size_t num_dof);
 };
 }  // namespace trajectory_processing

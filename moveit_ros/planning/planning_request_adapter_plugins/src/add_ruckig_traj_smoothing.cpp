@@ -67,10 +67,8 @@ public:
     bool result = planner(planning_scene, req, res);
     if (result && res.trajectory_)
     {
-      RCLCPP_DEBUG_STREAM(LOGGER, " Running " << getDescription());
-      RuckigSmoothing smoother;
-      if (!smoother.applySmoothing(*res.trajectory_, req.max_velocity_scaling_factor,
-                                   req.max_acceleration_scaling_factor))
+      if (!smoother_.applySmoothing(*res.trajectory_, req.max_velocity_scaling_factor,
+                                    req.max_acceleration_scaling_factor))
       {
         RCLCPP_WARN(LOGGER, " Trajectory smoothing for the solution path failed.");
         result = false;
@@ -79,6 +77,9 @@ public:
 
     return result;
   }
+
+private:
+  RuckigSmoothing smoother_;
 };
 
 }  // namespace default_planner_request_adapters
