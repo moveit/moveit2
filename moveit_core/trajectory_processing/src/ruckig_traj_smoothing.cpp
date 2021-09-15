@@ -153,6 +153,12 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       for (size_t joint = 0; joint < num_dof; ++joint)
       {
         ruckig_input.target_velocity.at(joint) *= 0.9;
+        // Propogate the change in velocity to position and acceleration, too.
+        // This derives from a first-order approximation, e.g. x_i+1 = x_i + v_i * delta_t
+        // and 0.9 * x_i+1 = 0.9 * (x_i + v_i * delta_t)
+        ruckig_input.target_position.at(joint) -= (0.9 * 0.9 - 1) * timestep * ruckig_input.target_velocity.at(joint);
+        ruckig_input.target_acceleration.at(joint) =
+            (ruckig_input.target_velocity.at(joint) - ruckig_output.new_velocity.at(joint)) / timestep;
       }
       velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, num_dof);
       // Run Ruckig
