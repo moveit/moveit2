@@ -66,8 +66,6 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::c
     // TODO(andyz): read the parameter from yaml
     position_filters_.emplace_back(1.5);
   }
-  RCLCPP_ERROR_STREAM(node_->get_logger(), "Filter vector size: " << position_filters_.size());
-
   return true;
 };
 

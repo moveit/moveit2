@@ -172,17 +172,14 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   }
 
   // Load the smoothing plugin
-  // For now, there is only one option for smoothing plugins
-  // TODO(andyz): load name from parameter
-  const std::string smoother_plugin_name = "smoothing_plugins::ButterworthFilterPlugin";
   try
   {
-    smoother_ = smoothing_loader_.createSharedInstance(smoother_plugin_name);
+    smoother_ = smoothing_loader_.createSharedInstance(parameters_->smoothing_filter_plugin_name);
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading the smoothing plugin '%s': '%s'", smoother_plugin_name.c_str(),
-                 ex.what());
+    RCLCPP_ERROR(LOGGER, "Exception while loading the smoothing plugin '%s': '%s'",
+                 parameters_->smoothing_filter_plugin_name.c_str(), ex.what());
     std::exit(EXIT_FAILURE);
   }
 
