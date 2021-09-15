@@ -25,11 +25,8 @@ publish_joint_positions: true
 publish_joint_velocities: false
 publish_joint_accelerations: false
 
-## Smoothing plugin
-# The default plugin is a Butterworth lowpass filter that requires this parameter.
-# It must be >1.0, typically in the range 1.0 < coefficient < 100.0.
-# If you use a different plugin, replace with the relevant parameters.
-low_pass_filter_coeff: 2.0  # Larger --> trust the filtered data more, trust the measurements less.
+## Plugins for smoothing outgoing commands
+smoothing_filter_plugin_name: "smoothing_plugins::ButterworthFilterPlugin"
 
 ## MoveIt properties
 move_group_name:  panda_arm  # Often 'manipulator' or 'arm'
