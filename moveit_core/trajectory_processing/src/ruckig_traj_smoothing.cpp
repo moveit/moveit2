@@ -143,7 +143,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
     // If the requested velocity is too great, a joint can actually "move backward" to give itself more time to
     // accelerate to the target velocity. Iterate and decrease velocities until that behavior is gone.
-    bool backward_motion_detected = checkForBackwardMotion(num_dof, ruckig_input, ruckig_output);
+    bool backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
 
     double minimum_velocity_magnitude = 0.01;  // rad/s
     double velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, num_dof);
@@ -158,7 +158,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       // Run Ruckig
       ruckig_result = ruckig.update(ruckig_input, ruckig_output);
       // check for backward motion
-      backward_motion_detected = checkForBackwardMotion(num_dof, ruckig_input, ruckig_output);
+      backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
     }
 
     if (ruckig_result != ruckig::Result::Working)
@@ -191,18 +191,16 @@ double RuckigSmoothing::getTargetVelocityMagnitude(const ruckig::InputParameter<
   return sqrt(vel_magnitude);
 }
 
-bool RuckigSmoothing::checkForBackwardMotion(const size_t num_dof, const ruckig::InputParameter<0>& ruckig_input,
-                                             const ruckig::OutputParameter<0>& ruckig_output)
+bool RuckigSmoothing::checkForLaggingMotion(const size_t num_dof, const ruckig::InputParameter<0>& ruckig_input,
+                                            const ruckig::OutputParameter<0>& ruckig_output)
 {
   // Check for backward motion of any joint
   for (size_t joint = 0; joint < num_dof; ++joint)
   {
-    // Negative result indicates different signs --> opposing directions of motion
-    if (((ruckig_output.new_position.at(joint) - ruckig_input.current_position.at(joint)) /
-         ruckig_input.target_velocity.at(joint)) < 1)
+    // This indicates the jerk-limited output lags the target output
+    if ((ruckig_output.new_velocity.at(joint) / ruckig_input.target_velocity.at(joint)) < 1)
     {
       return true;
-      break;
     }
   }
   return false;

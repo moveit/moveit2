@@ -59,12 +59,12 @@ private:
                                          const std::vector<int>& idx);
 
   /**
-   * \brief Check for backward motion of any joint at a waypoint.
+   * \brief Check for lagging motion of any joint at a waypoint.
    *
-   * \return true if backward motion is detected on any joint
+   * \return true if lagging motion is detected on any joint
    */
-  static bool checkForBackwardMotion(const size_t num_dof, const ruckig::InputParameter<0>& ruckig_input,
-                                     const ruckig::OutputParameter<0>& ruckig_output);
+  static bool checkForLaggingMotion(const size_t num_dof, const ruckig::InputParameter<0>& ruckig_input,
+                                    const ruckig::OutputParameter<0>& ruckig_output);
 
   /**
    * \brief Return L2-norm of velocity, taking all joints into account.
