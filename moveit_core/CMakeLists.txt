@@ -110,7 +110,6 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_robot_model
     moveit_robot_state
     moveit_robot_trajectory
-#    smoothing_base_class
     moveit_test_utils
     moveit_trajectory_processing
     moveit_transforms
@@ -231,7 +230,7 @@ ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 # Plugin exports
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
 pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
-pluginlib_export_plugin_description_file(moveit_core butterworth_filter_plugin.xml)
+pluginlib_export_plugin_description_file(moveit_core filter_plugin_butterworth.xml)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
