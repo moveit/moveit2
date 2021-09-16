@@ -60,11 +60,6 @@ jobs:
           sudo rm -rf /usr/local
           df -h
       - uses: actions/checkout@v2
-      - name: Check for upstream dependencies
-        id: upstream_ws
-        run: |
-          eval "FILES=(${UPSTREAM_WORKSPACE:-})" || true
-          (IFS=','; echo ::set-output name=FILES::"${FILES[*]}")
       - name: cache upstream_ws
         uses: pat-s/always-upload-cache@v2.1.5
         with:
@@ -72,7 +67,7 @@ jobs:
           key: ${{ env.CACHE_PREFIX }}-${{ github.run_id }}
           restore-keys: ${{ env.CACHE_PREFIX }}
         env:
-          CACHE_PREFIX: upstream_ws-${{ matrix.env.IMAGE }}-${{ hashFiles(steps.upstream_ws.outputs.FILES, '.github/workflows/ci.yaml') }}
+          CACHE_PREFIX: upstream_ws-${{ matrix.env.IMAGE }}-${{ hashFiles('moveit2_*.repos', '.github/workflows/ci.yaml') }}
       # The target directory cache doesn't include the source directory because
       # that comes from the checkout.  See "prepare target_ws for cache" task below
       - name: cache target_ws
