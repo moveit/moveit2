@@ -58,10 +58,11 @@ public:
 
   /**
    * Smooth an array of joint position deltas
-   * @param delta_theta array of incremental joint position commands
+   * @param delta_theta array of joint position commands
+   * @param delta_theta array of joint velocity commands
    * @return True if initialization was successful
    */
-  virtual bool doSmoothing(std::vector<double>& position_vector) = 0;
+  virtual bool doSmoothing(std::vector<double>& position_vector, std::vector<double>& velocity_vector) = 0;
 
   /**
    * Reset to a given joint state

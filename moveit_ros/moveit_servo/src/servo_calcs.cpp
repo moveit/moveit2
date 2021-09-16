@@ -647,16 +647,16 @@ bool ServoCalcs::applyJointUpdate(Eigen::ArrayXd& delta_theta, sensor_msgs::msg:
   {
     // Increment joint
     joint_state.position[i] += delta_theta[i];
-  }
 
-  smoother_->doSmoothing(joint_state.position);
-
-  for (std::size_t i = 0; i < joint_state.position.size(); ++i)
-  {
     // Calculate joint velocity
     joint_state.velocity[i] =
         (joint_state.position.at(i) - original_joint_state_.position.at(i)) / parameters_->publish_period;
+  }
 
+  smoother_->doSmoothing(joint_state.position, joint_state.velocity);
+
+  for (std::size_t i = 0; i < joint_state.position.size(); ++i)
+  {
     // Save this velocity for future accel calculations
     previous_vel[i] = joint_state.velocity[i];
   }

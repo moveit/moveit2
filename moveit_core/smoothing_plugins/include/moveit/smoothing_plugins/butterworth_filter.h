@@ -81,29 +81,11 @@ class ButterworthFilterPlugin : public SmoothingBaseClass
 public:
   ButterworthFilterPlugin(){};
 
-  /**
-   * Initialize the smoothing algorithm
-   * @param node ROS node, used for parameter retrieval
-   * @param group joint group of interest
-   * @param num_dof number of actuated joints in the JointGroup Servo controls
-   * @param timestep control loop period [seconds]
-   * @return True if initialization was successful
-   */
   bool initialize(rclcpp::Node::SharedPtr node, const moveit::core::JointModelGroup& group /*unused*/, size_t num_dof,
                   double /*unused*/) override;
 
-  /**
-   * Smooth the command signals for all DOF
-   * @param joint_positions array of joint position commands
-   * @return True if initialization was successful
-   */
-  bool doSmoothing(std::vector<double>& position_vector) override;
+  bool doSmoothing(std::vector<double>& position_vector, std::vector<double>& /*unused*/) override;
 
-  /**
-   * Reset to a given joint state
-   * @param joint_positions reset the filters to these joint positions
-   * @return True if reset was successful
-   */
   bool reset(const std::vector<double>& joint_positions) override;
 
 private:

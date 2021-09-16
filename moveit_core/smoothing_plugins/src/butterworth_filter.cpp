@@ -69,7 +69,7 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, const mov
   return true;
 };
 
-bool ButterworthFilterPlugin::doSmoothing(std::vector<double>& position_vector)
+bool ButterworthFilterPlugin::doSmoothing(std::vector<double>& position_vector, std::vector<double>& /*unused*/)
 {
   if (position_vector.size() != position_filters_.size())
   {

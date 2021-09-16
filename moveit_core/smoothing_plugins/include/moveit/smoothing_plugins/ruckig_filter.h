@@ -64,32 +64,15 @@ class RuckigFilterPlugin : public SmoothingBaseClass
 public:
   RuckigFilterPlugin(){};
 
-  /**
-   * Initialize the smoothing algorithm
-   * @param node ROS node, used for parameter retrieval
-   * @param group joint group of interest
-   * @param num_dof number of actuated joints in the JointGroup Servo controls
-   * @param timestep control loop period [seconds]
-   * @return True if initialization was successful
-   */
   bool initialize(rclcpp::Node::SharedPtr node, const moveit::core::JointModelGroup& group, size_t num_dof,
                   double timestep) override;
 
-  /**
-   * Smooth the command signals for all DOF
-   * @param position_vector array of joint position commands
-   * @return True if initialization was successful
-   */
-  bool doSmoothing(std::vector<double>& position_vector) override;
+  bool doSmoothing(std::vector<double>& /*unused*/, std::vector<double>& velocity_vector) override;
 
-  /**
-   * Reset to a given joint state. Assumes the robot is at rest.
-   * @param joint_positions reset the filters to these joint positions
-   * @return True if reset was successful
-   */
   bool reset(const std::vector<double>& joint_positions) override;
 
 private:
+  size_t num_dof_;
   std::shared_ptr<ruckig::Ruckig<0>> ruckig_;
   std::shared_ptr<ruckig::InputParameter<0>> ruckig_input_;
   std::shared_ptr<ruckig::OutputParameter<0>> ruckig_output_;
