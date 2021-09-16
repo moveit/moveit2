@@ -50,7 +50,7 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
 const std::string UNDEFINED = "<undefined>";
 
 GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& options)
-  : Node("global_planner_component", options)
+  : Node("global_planner_component", options), initialized_(false)
 {
   // Initialize global planner after construction
   // TODO(sjahr) Remove once life cycle component nodes are available
