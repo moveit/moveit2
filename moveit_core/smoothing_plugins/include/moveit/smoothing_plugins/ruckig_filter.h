@@ -73,7 +73,7 @@ public:
 
 private:
   size_t num_dof_;
-  std::shared_ptr<ruckig::Ruckig<0>> ruckig_;
+  std::shared_ptr<ruckig::Ruckig<0, true /*debug*/>> ruckig_;
   std::shared_ptr<ruckig::InputParameter<0>> ruckig_input_;
   std::shared_ptr<ruckig::OutputParameter<0>> ruckig_output_;
 };

@@ -13,7 +13,7 @@ bool RuckigFilterPlugin::initialize(rclcpp::Node::SharedPtr node, const moveit::
                                     size_t num_dof, double timestep)
 {
   num_dof_ = num_dof;
-  ruckig_ = std::make_shared<ruckig::Ruckig<0>>(num_dof_, timestep);
+  ruckig_ = std::make_shared<ruckig::Ruckig<0, true /*debug*/>>(num_dof_, timestep);
   ruckig_input_ = std::make_shared<ruckig::InputParameter<0>>(num_dof_);
   ruckig_output_ = std::make_shared<ruckig::OutputParameter<0>>(num_dof_);
 
@@ -67,14 +67,23 @@ bool RuckigFilterPlugin::doSmoothing(std::vector<double>& /*unused*/, std::vecto
     ruckig_input_->target_acceleration.at(joint) = 0;
   }
 
-  ruckig::Result result = ruckig_->update(*ruckig_input_, *ruckig_output_);
+  //  ruckig::Result result = ruckig_->update(*ruckig_input_, *ruckig_output_);
 
-  return (result == ruckig::Result::Finished);
+  return true;  //(result == ruckig::Result::Finished);
 };
 
 bool RuckigFilterPlugin::reset(const std::vector<double>& joint_positions)
 {
-  // TODO: set output vel/accel to zero
+  std::copy_n(joint_positions.begin(), num_dof_, ruckig_input_->current_position.begin());
+  std::vector<double> zero_vector(num_dof_, 0);
+  std::copy_n(zero_vector.begin(), num_dof_, ruckig_input_->current_velocity.begin());
+  std::copy_n(zero_vector.begin(), num_dof_, ruckig_input_->current_acceleration.begin());
+
+  // Initialize output data struct
+  ruckig_output_->new_position = ruckig_input_->current_position;
+  ruckig_output_->new_velocity = ruckig_input_->current_velocity;
+  ruckig_output_->new_acceleration = ruckig_input_->current_acceleration;
+
   return true;
 };
 
