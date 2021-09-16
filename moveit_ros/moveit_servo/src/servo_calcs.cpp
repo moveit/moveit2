@@ -183,7 +183,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   }
 
   // Initialize the smoothing plugin
-  if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints_))
+  if (!smoother_->initialize(node_, *joint_model_group_, num_joints_, parameters_->publish_period))
   {
     RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
     std::exit(EXIT_FAILURE);

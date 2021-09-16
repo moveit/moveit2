@@ -54,13 +54,13 @@ void ButterworthFilter::reset(const double data)
   previous_filtered_measurement_ = data;
 }
 
-bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
-                                         size_t num_joints)
+bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, const moveit::core::JointModelGroup& /*unused*/,
+                                         size_t num_dof, double /*unused*/)
 {
   node_ = node;
-  num_joints_ = num_joints;
+  num_dof_ = num_dof;
 
-  for (std::size_t i = 0; i < num_joints_; ++i)
+  for (std::size_t i = 0; i < num_dof_; ++i)
   {
     // Low-pass filters for the joint positions
     // TODO(andyz): read the parameter from yaml

@@ -41,6 +41,8 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/smoothing_plugins/smoothing_base_class.h>
 
+#include <ruckig/ruckig.hpp>
+
 namespace smoothing_plugins
 {
 /**
@@ -65,12 +67,13 @@ public:
   /**
    * Initialize the smoothing algorithm
    * @param node ROS node, used for parameter retrieval
-   * @param robot_model typically used to retrieve vel/accel/jerk limits
-   * @param num_joints number of actuated joints in the JointGroup Servo controls
+   * @param group joint group of interest
+   * @param num_dof number of actuated joints in the JointGroup Servo controls
+   * @param timestep control loop period [seconds]
    * @return True if initialization was successful
    */
-  bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
-                  size_t num_joints) override;
+  bool initialize(rclcpp::Node::SharedPtr node, const moveit::core::JointModelGroup& group, size_t num_dof,
+                  double timestep) override;
 
   /**
    * Smooth the command signals for all DOF
@@ -80,10 +83,15 @@ public:
   bool doSmoothing(std::vector<double>& position_vector) override;
 
   /**
-   * Reset to a given joint state
+   * Reset to a given joint state. Assumes the robot is at rest.
    * @param joint_positions reset the filters to these joint positions
    * @return True if reset was successful
    */
   bool reset(const std::vector<double>& joint_positions) override;
+
+private:
+  std::shared_ptr<ruckig::Ruckig<0>> ruckig_;
+  std::shared_ptr<ruckig::InputParameter<0>> ruckig_input_;
+  std::shared_ptr<ruckig::OutputParameter<0>> ruckig_output_;
 };
 }  // namespace smoothing_plugins
