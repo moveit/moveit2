@@ -58,7 +58,7 @@ public:
 
 private:
   rclcpp::TimerBase::SharedPtr timer_;
-  bool initialized_{ false };
+  bool initialized_;
 
   std::string global_planner_name_;
 
