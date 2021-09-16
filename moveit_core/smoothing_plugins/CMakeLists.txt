@@ -13,7 +13,6 @@ set_target_properties(moveit_butterworth_filter PROPERTIES VERSION
 )
 target_link_libraries(moveit_butterworth_filter
   moveit_robot_model
-  ruckig::ruckig
 )
 
 add_library(moveit_ruckig_filter SHARED
@@ -29,6 +28,7 @@ set_target_properties(moveit_ruckig_filter PROPERTIES VERSION
 )
 target_link_libraries(moveit_ruckig_filter
   moveit_robot_model
+  ruckig::ruckig
 )
 
 # Installation

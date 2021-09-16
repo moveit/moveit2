@@ -13,13 +13,14 @@ bool RuckigFilterPlugin::initialize(rclcpp::Node::SharedPtr node, const moveit::
                                     size_t num_dof, double timestep)
 {
   num_dof_ = num_dof;
+  node_ = node;
   ruckig_ = std::make_shared<ruckig::Ruckig<0, true /*debug*/>>(num_dof_, timestep);
   ruckig_input_ = std::make_shared<ruckig::InputParameter<0>>(num_dof_);
   ruckig_output_ = std::make_shared<ruckig::OutputParameter<0>>(num_dof_);
 
   // Velocity mode works best for smoothing one waypoint at a time
   ruckig_input_->control_interface = ruckig::ControlInterface::Velocity;
-  ruckig_input_->synchronization = ruckig::Synchronization::Time;
+  //  ruckig_input_->synchronization = ruckig::Synchronization::Time;
 
   // Kinematic limits
   const std::vector<std::string>& vars = group.getVariableNames();
@@ -67,9 +68,36 @@ bool RuckigFilterPlugin::doSmoothing(std::vector<double>& /*unused*/, std::vecto
     ruckig_input_->target_acceleration.at(joint) = 0;
   }
 
-  //  ruckig::Result result = ruckig_->update(*ruckig_input_, *ruckig_output_);
+  /*
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "current pos[0]:  " << ruckig_input_->current_position.at(0));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "current pos[6]:  " << ruckig_input_->current_position.at(6));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "current vel[0]:  " << ruckig_input_->current_velocity.at(0));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "current vel[6]:  " << ruckig_input_->current_velocity.at(6));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "current accel[0]:  " << ruckig_input_->current_acceleration.at(0));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "current accel[6]:  " << ruckig_input_->current_acceleration.at(6));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "target vel[0]:  " << ruckig_input_->target_velocity.at(0));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "target vel[6]:  " << ruckig_input_->target_velocity.at(6));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "target accel[0]:  " << ruckig_input_->target_acceleration.at(0));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "target accel[6]:  " << ruckig_input_->target_acceleration.at(6));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "max vel[0]:  " << ruckig_input_->max_velocity.at(0));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "max vel[6]:  " << ruckig_input_->max_velocity.at(6));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "max accel[0]:  " << ruckig_input_->max_acceleration.at(0));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "max accel[6]:  " << ruckig_input_->max_acceleration.at(6));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "max jerk[0]:  " << ruckig_input_->max_jerk.at(0));
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "max jerk[6]:  " << ruckig_input_->max_jerk.at(6));
+  */
 
-  return true;  //(result == ruckig::Result::Finished);
+  ruckig::Result result;
+  if (ruckig_)
+  {
+    result = ruckig_->update(*ruckig_input_, *ruckig_output_);
+  }
+  else
+  {
+    return false;
+  }
+
+  return result == ruckig::Result::Finished;
 };
 
 bool RuckigFilterPlugin::reset(const std::vector<double>& joint_positions)
