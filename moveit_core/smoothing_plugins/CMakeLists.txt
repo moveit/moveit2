@@ -1,21 +1,3 @@
-# Plugin base class
-
-# add_library(smoothing_base_class SHARED
-#   src/smoothing_base_class.cpp
-# )
-# include(GenerateExportHeader)
-# generate_export_header(smoothing_base_class)
-# target_include_directories(smoothing_base_class PUBLIC
-#   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-# )
-# set_target_properties(smoothing_base_class PROPERTIES VERSION
-#   "${${PROJECT_NAME}_VERSION}"
-# )
-# target_link_libraries(smoothing_base_class
-#   moveit_robot_model
-#   pluginlib
-# )
-
 # Plugin implementations
 
 add_library(moveit_butterworth_filter SHARED
@@ -31,7 +13,6 @@ set_target_properties(moveit_butterworth_filter PROPERTIES VERSION
 )
 target_link_libraries(moveit_butterworth_filter
   moveit_robot_model
-#  smoothing_base_class
 )
 
 # Installation
