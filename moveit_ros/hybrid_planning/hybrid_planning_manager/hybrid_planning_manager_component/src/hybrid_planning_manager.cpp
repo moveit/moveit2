@@ -44,9 +44,8 @@ using namespace std::chrono_literals;
 const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
 
 HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
-  : Node("hybrid_planning_manager", options)
+  : Node("hybrid_planning_manager", options), initialized_(false)
 {
-  initialized_ = false;
   // Initialize hybrid planning component after after construction
   // TODO(sjahr) Remove once life cycle component nodes are available
   timer_ = this->create_wall_timer(1ms, [this]() {
