@@ -33,12 +33,10 @@
  *********************************************************************/
 
 /* Author: Andy Zelenak
-   Description: A first-order Butterworth low-pass filter. There is only one parameter to tune.
+   Description: Jerk-limited smoothing with the Ruckig library.
  */
 
 #pragma once
-
-#include <cstddef>
 
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/smoothing_plugins/smoothing_base_class.h>
@@ -46,40 +44,23 @@
 namespace smoothing_plugins
 {
 /**
- * Class ButterworthFilter - Implementation of a signal filter to soften jerks.
- * This is a first-order Butterworth low-pass filter. First-order was chosen for 2 reasons:
- * - It doesn't overshoot
- * - Computational efficiency
+ * Class RuckigFilter - Implementation of a signal filter to soften jerks.
  */
-class ButterworthFilter
+class RuckigFilter
 {
 public:
-  /**
-   * Constructor.
-   * @param low_pass_filter_coeff Larger filter_coeff-> more smoothing of servo commands, but more lag.
-   * Rough plot, with cutoff frequency on the y-axis:
-   * https://www.wolframalpha.com/input/?i=plot+arccot(c)
-   */
-  ButterworthFilter(double low_pass_filter_coeff);
+  RuckigFilter();
 
-  double filter(double new_measurement);
+  double filter();
 
-  void reset(const double data);
-
-private:
-  static constexpr std::size_t FILTER_LENGTH = 2;
-  std::array<double, FILTER_LENGTH> previous_measurements_;
-  double previous_filtered_measurement_;
-  // Scale and feedback term are calculated from supplied filter coefficient
-  double scale_term_;
-  double feedback_term_;
+  void reset();
 };
 
 // Plugin
-class ButterworthFilterPlugin : public SmoothingBaseClass
+class RuckigFilterPlugin : public SmoothingBaseClass
 {
 public:
-  ButterworthFilterPlugin(){};
+  RuckigFilterPlugin(){};
 
   /**
    * Initialize the smoothing algorithm
@@ -93,7 +74,7 @@ public:
 
   /**
    * Smooth the command signals for all DOF
-   * @param joint_positions array of joint position commands
+   * @param position_vector array of joint position commands
    * @return True if initialization was successful
    */
   bool doSmoothing(std::vector<double>& position_vector) override;
@@ -104,10 +85,5 @@ public:
    * @return True if reset was successful
    */
   bool reset(const std::vector<double>& joint_positions) override;
-
-private:
-  rclcpp::Node::SharedPtr node_;
-  std::vector<ButterworthFilter> position_filters_;
-  size_t num_joints_;
 };
 }  // namespace smoothing_plugins
