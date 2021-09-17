@@ -74,10 +74,5 @@ public:
    * @return True if reset was successful
    */
   virtual bool reset() = 0;
-  virtual ~GlobalPlannerInterface(){};
-
-protected:
-  /** \brief Constructor */
-  GlobalPlannerInterface(){};
 };
 }  // namespace moveit_hybrid_planning

@@ -50,7 +50,7 @@ class MoveItPlanningPipeline : public GlobalPlannerInterface
 {
 public:
   MoveItPlanningPipeline(){};
-  ~MoveItPlanningPipeline() override{};
+  ~MoveItPlanningPipeline(){};
   bool initialize(const rclcpp::Node::SharedPtr& node) override;
   bool reset() override;
   moveit_msgs::msg::MotionPlanResponse

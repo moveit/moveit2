@@ -140,12 +140,8 @@ public:
    * @return Reaction result that summarizes the outcome of the reaction
    */
   virtual ReactionResult react(const std::string& event) = 0;
-  virtual ~PlannerLogicInterface(){};
 
 protected:
-  /** \brief Constructor */
-  PlannerLogicInterface(){};
-
   // The hybrid planning manager instance that runs this logic plugin
   std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planning_manager_ = nullptr;
 };
