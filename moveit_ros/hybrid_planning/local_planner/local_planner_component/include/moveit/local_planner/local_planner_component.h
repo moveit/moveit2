@@ -140,7 +140,7 @@ public:
   bool initialize();
 
   /**
-   * Handle the planners current job based on the internal state each loop run when the planner is started.
+   * Handle the planners current job based on the internal state each iteration when the planner is started.
    */
   void executePlanningLoopRun();
 
@@ -181,7 +181,7 @@ private:
   std::unique_ptr<pluginlib::ClassLoader<moveit_hybrid_planning::LocalConstraintSolverInterface>>
       local_constraint_solver_plugin_loader_;
 
-  // Local constrain solver instance to compute a local solution each loop run
+  // Local constrain solver instance to compute a local solution each iteration
   std::shared_ptr<moveit_hybrid_planning::LocalConstraintSolverInterface> local_constraint_solver_instance_;
 
   // Trajectory operator plugin

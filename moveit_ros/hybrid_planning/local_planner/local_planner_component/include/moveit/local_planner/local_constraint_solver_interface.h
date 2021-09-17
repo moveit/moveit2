@@ -68,7 +68,7 @@ public:
                           const std::string& group_name) = 0;
 
   /**
-   * Solve local planning problem for the current loop run
+   * Solve local planning problem for the current iteration
    * @param local_trajectory The local trajectory to pursue
    * @param local_goal Local goal constraints
    * @param local_solution solution plan in joint space
