@@ -84,10 +84,5 @@ public:
    * @return True if reset was successful
    */
   virtual bool reset() = 0;
-  virtual ~LocalConstraintSolverInterface(){};
-
-protected:
-  /** \brief Constructor */
-  LocalConstraintSolverInterface(){};
 };
 }  // namespace moveit_hybrid_planning
