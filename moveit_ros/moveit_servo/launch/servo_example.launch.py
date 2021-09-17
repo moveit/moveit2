@@ -127,17 +127,6 @@ def generate_launch_description():
             ),
             ComposableNode(
                 package="moveit_servo",
-                plugin="moveit_servo::ServoServer",
-                name="servo_server",
-                parameters=[
-                    servo_params,
-                    robot_description,
-                    robot_description_semantic,
-                ],
-                extra_arguments=[{"use_intra_process_comms": True}],
-            ),
-            ComposableNode(
-                package="moveit_servo",
                 plugin="moveit_servo::JoyToServoPub",
                 name="controller_to_servo_node",
                 extra_arguments=[{"use_intra_process_comms": True}],
