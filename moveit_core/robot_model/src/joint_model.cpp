@@ -157,6 +157,12 @@ void JointModel::setVariableBounds(const std::vector<moveit_msgs::msg::JointLimi
           variable_bounds_[j].min_acceleration_ = -joint_limit.max_acceleration;
           variable_bounds_[j].max_acceleration_ = joint_limit.max_acceleration;
         }
+        variable_bounds_[j].jerk_bounded_ = joint_limit.has_jerk_limits;
+        if (joint_limit.has_jerk_limits)
+        {
+          variable_bounds_[j].min_jerk_ = -joint_limit.max_jerk;
+          variable_bounds_[j].max_jerk_ = joint_limit.max_jerk;
+        }
         break;
       }
   computeVariableBoundsMsg();
