@@ -1,5 +1,5 @@
 <library path="moveit_ruckig_filter">
-  <class type="smoothing_plugins::RuckigFilterPlugin" base_class_type="smoothing_plugins::SmoothingBaseClass">
+  <class type="single_waypt_smoothing_plugins::RuckigFilterPlugin" base_class_type="single_waypt_smoothing_plugins::SmoothingBaseClass">
     <description>
     Jerk-limited smoothing with the Ruckig library.
     </description>

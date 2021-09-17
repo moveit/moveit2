@@ -40,11 +40,11 @@
  */
 
 #include <gtest/gtest.h>
-#include <moveit/smoothing_plugins/butterworth_filter.h>
+#include <moveit/single_waypt_smoothing_plugins/butterworth_filter.h>
 
 TEST(SMOOTHING_PLUGINS, FilterConverge)
 {
-  smoothing_plugins::ButterworthFilter lpf(2.0);
+  single_waypt_smoothing_plugins::ButterworthFilter lpf(2.0);
   EXPECT_DOUBLE_EQ(0.0, lpf.filter(0.0));
   double value;
   for (size_t i = 0; i < 100; ++i)
@@ -60,7 +60,7 @@ TEST(SMOOTHING_PLUGINS, FilterConverge)
 
 TEST(SMOOTHING_PLUGINS, FilterReset)
 {
-  smoothing_plugins::ButterworthFilter lpf(2.0);
+  single_waypt_smoothing_plugins::ButterworthFilter lpf(2.0);
   EXPECT_DOUBLE_EQ(0.0, lpf.filter(0.0));
   lpf.reset(5.0);
   double value = lpf.filter(5.0);

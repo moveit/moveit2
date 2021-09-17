@@ -1,6 +1,6 @@
-#include <moveit/smoothing_plugins/ruckig_filter.h>
+#include <moveit/single_waypt_smoothing_plugins/ruckig_filter.h>
 
-namespace smoothing_plugins
+namespace single_waypt_smoothing_plugins
 {
 namespace
 {
@@ -115,7 +115,8 @@ bool RuckigFilterPlugin::reset(const std::vector<double>& joint_positions)
   return true;
 };
 
-}  // namespace smoothing_plugins
+}  // namespace single_waypt_smoothing_plugins
 
 #include <pluginlib/class_list_macros.hpp>
-PLUGINLIB_EXPORT_CLASS(smoothing_plugins::RuckigFilterPlugin, smoothing_plugins::SmoothingBaseClass)
+PLUGINLIB_EXPORT_CLASS(single_waypt_smoothing_plugins::RuckigFilterPlugin,
+                       single_waypt_smoothing_plugins::SmoothingBaseClass)

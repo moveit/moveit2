@@ -98,7 +98,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   , stop_requested_(true)
   , paused_(false)
   , robot_link_command_frame_(parameters->robot_link_command_frame)
-  , smoothing_loader_("moveit_core", "smoothing_plugins::SmoothingBaseClass")
+  , smoothing_loader_("moveit_core", "single_waypt_smoothing_plugins::SmoothingBaseClass")
 {
   // Register callback for changes in robot_link_command_frame
   parameters_->registerSetParameterCallback(parameters->ns + ".robot_link_command_frame",

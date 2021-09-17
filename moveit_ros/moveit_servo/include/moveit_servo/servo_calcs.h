@@ -68,7 +68,7 @@
 // moveit_servo
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
-#include <moveit/smoothing_plugins/smoothing_base_class.h>
+#include <moveit/single_waypt_smoothing_plugins/smoothing_base_class.h>
 
 namespace moveit_servo
 {
@@ -298,7 +298,7 @@ protected:
   std::map<std::string, std::size_t> joint_state_name_map_;
 
   // Smoothing algorithm (loads a plugin)
-  std::shared_ptr<smoothing_plugins::SmoothingBaseClass> smoother_;
+  std::shared_ptr<single_waypt_smoothing_plugins::SmoothingBaseClass> smoother_;
 
   trajectory_msgs::msg::JointTrajectory::SharedPtr last_sent_command_;
 
@@ -361,6 +361,6 @@ protected:
   rcl_interfaces::msg::SetParametersResult robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter);
 
   // Load a smoothing plugin
-  pluginlib::ClassLoader<smoothing_plugins::SmoothingBaseClass> smoothing_loader_;
+  pluginlib::ClassLoader<single_waypt_smoothing_plugins::SmoothingBaseClass> smoothing_loader_;
 };
 }  // namespace moveit_servo

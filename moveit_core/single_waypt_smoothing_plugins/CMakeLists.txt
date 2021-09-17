@@ -1,3 +1,6 @@
+# Filtering plugins for realtime control.
+# They smooth a single waypoint at a time.
+
 # Plugin implementations
 
 add_library(moveit_butterworth_filter SHARED
