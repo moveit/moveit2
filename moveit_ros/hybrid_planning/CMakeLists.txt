@@ -49,7 +49,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   std_srvs
   tf2_ros
   trajectory_msgs
-  control_toolbox
 )
 
 set(THIS_PACKAGE_INCLUDE_DIRS
