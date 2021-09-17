@@ -47,7 +47,7 @@ class SimpleSampler : public TrajectoryOperatorInterface
 {
 public:
   SimpleSampler(){};
-  ~SimpleSampler() override{};
+  ~SimpleSampler(){};
 
   bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                   const std::string& group_name) override;

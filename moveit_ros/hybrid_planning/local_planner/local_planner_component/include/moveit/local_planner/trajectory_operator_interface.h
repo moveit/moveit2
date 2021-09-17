@@ -100,12 +100,8 @@ public:
    * @return True if reset was successful
    */
   virtual bool reset() = 0;
-  virtual ~TrajectoryOperatorInterface(){};
 
 protected:
-  /** \brief Constructor */
-  TrajectoryOperatorInterface(){};
-
   // Reference trajectory to be precessed
   robot_trajectory::RobotTrajectoryPtr reference_trajectory_;
   std::string group_;
