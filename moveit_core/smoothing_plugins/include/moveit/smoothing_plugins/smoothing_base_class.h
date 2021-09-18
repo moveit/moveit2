@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Andy Zelenak
-   Description: Defines an interface for smoothing algorithms.
+   Description: Defines a pluginlib interface for smoothing algorithms.
  */
 
 #pragma once
