@@ -102,6 +102,7 @@ def generate_launch_description():
         executable="component_container",
         composable_node_descriptions=[
             # Example of launching Servo as a node component
+            # Assuming ROS2 intraprocess communications works well, this is a more efficient way.
             # ComposableNode(
             #     package="moveit_servo",
             #     plugin="moveit_servo::ServoServer",
@@ -140,7 +141,8 @@ def generate_launch_description():
         ],
         output="screen",
     )
-
+    # Launch a standalone Servo node.
+    # As opposed to a node component, this may be necessary (for example) if Servo is running on a different PC
     servo_node = Node(
         package="moveit_servo",
         executable="servo_server_node",
