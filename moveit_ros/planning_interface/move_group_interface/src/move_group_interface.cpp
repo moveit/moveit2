@@ -144,7 +144,7 @@ public:
     if (joint_model_group_->isChain())
       end_effector_link_ = joint_model_group_->getLinkModelNames().back();
     pose_reference_frame_ = getRobotModel()->getModelFrame();
-
+    // Append the slash between two topic components
     trajectory_event_publisher_ = pnode_->create_publisher<std_msgs::msg::String>(
         rclcpp::names::append(opt_.move_group_namespace_,
                               trajectory_execution_manager::TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC),
