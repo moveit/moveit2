@@ -29,6 +29,11 @@
   <depend>trajectory_msgs</depend>
   <depend>pluginlib</depend>
 
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>moveit_resources_panda_moveit_config</exec_depend>
+
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
