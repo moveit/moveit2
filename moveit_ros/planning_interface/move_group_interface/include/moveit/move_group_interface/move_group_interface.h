@@ -112,7 +112,7 @@ public:
   /** \brief Specification of options to use when constructing the MoveGroupInterface class */
   struct Options
   {
-    Options(std::string group_name, std::string move_group_namespace = "", std::string desc = ROBOT_DESCRIPTION)
+    Options(std::string group_name, std::string desc = ROBOT_DESCRIPTION, std::string move_group_namespace = "")
       : group_name_(std::move(group_name))
       , robot_description_(std::move(desc))
       , move_group_namespace_(std::move(move_group_namespace))
