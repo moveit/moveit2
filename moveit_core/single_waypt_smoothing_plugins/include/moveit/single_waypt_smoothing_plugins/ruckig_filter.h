@@ -45,19 +45,6 @@
 
 namespace single_waypt_smoothing_plugins
 {
-/**
- * Class RuckigFilter - Implementation of a signal filter to soften jerks.
- */
-class RuckigFilter
-{
-public:
-  RuckigFilter();
-
-  double filter();
-
-  void reset();
-};
-
 // Plugin
 class RuckigFilterPlugin : public SmoothingBaseClass
 {
