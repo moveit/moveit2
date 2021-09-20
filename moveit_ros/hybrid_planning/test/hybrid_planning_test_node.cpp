@@ -117,7 +117,6 @@ public:
   {
     RCLCPP_INFO(LOGGER, "Initialize Planning Scene Monitor");
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
-    tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 
     planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
         node_, "robot_description", tf_buffer_, "planning_scene_monitor");
@@ -211,7 +210,7 @@ public:
           switch (result.code)
           {
             case rclcpp_action::ResultCode::SUCCEEDED:
-              RCLCPP_INFO(LOGGER, "Hybrid planning goal succeded");
+              RCLCPP_INFO(LOGGER, "Hybrid planning goal succeeded");
               break;
             case rclcpp_action::ResultCode::ABORTED:
               RCLCPP_ERROR(LOGGER, "Hybrid planning goal was aborted");
@@ -252,7 +251,6 @@ private:
 
   // TF
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 };
 
 int main(int argc, char** argv)
