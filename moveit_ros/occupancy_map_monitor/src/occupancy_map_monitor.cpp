@@ -35,7 +35,6 @@
 /* Author: Ioan Sucan, Jon Binney */
 
 #include <moveit/collision_detection/occupancy_map.h>
-
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor_middleware_handle.hpp>
 #include <moveit_msgs/srv/load_map.hpp>
