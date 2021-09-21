@@ -492,8 +492,8 @@ TEST_F(KinematicsTest, unitIK)
   for (size_t i = 0; i < expected_test_poses; ++i)  // NOLINT(modernize-loop-convert)
   {
     const std::string pose_name = "pose_" + std::to_string(i);
-    const std::string pose_param = TEST_POSES_PARAM + "." + pose_name;
-    goal = initial;  // reset goal to initial
+    const std::string pose_param = TEST_POSES_PARAM + "." + pose_name;  // NOLINT
+    goal = initial;                                                     // reset goal to initial
     ground_truth.clear();
 
     node_->get_parameter_or(pose_param + ".joints", ground_truth, ground_truth);
