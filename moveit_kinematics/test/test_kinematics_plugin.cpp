@@ -476,8 +476,8 @@ TEST_F(KinematicsTest, unitIK)
   };
 
   std::vector<double> ground_truth, pose_values;
-  constexpr char POSE_TYPE_RELATIVE[] = "relative";
-  constexpr char POSE_TYPE_ABSOLUTE[] = "absolute";
+  constexpr char post_type_relative[] = "relative";
+  constexpr char post_type_absolute[] = "absolute";
 
   /* process tests definitions on parameter server of the form
      pose_1:
@@ -510,15 +510,15 @@ TEST_F(KinematicsTest, unitIK)
 
     Eigen::Isometry3d pose;
     ASSERT_TRUE(parsePose(pose_values, pose)) << "Failed to parse 'pose' vector in: " << pose_name;
-    std::string pose_type = "POSE_TYPE_RELATIVE";
+    std::string pose_type = "post_type_relative";
     node_->get_parameter_or(pose_param + ".type", pose_type, pose_type);
-    if (pose_type == POSE_TYPE_RELATIVE)
+    if (pose_type == post_type_relative)
       goal = goal * pose;
-    else if (pose_type == POSE_TYPE_ABSOLUTE)
+    else if (pose_type == post_type_absolute)
       goal = pose;
     else
-      FAIL() << "Found invalid 'type' in " << pose_name << ": should be one of '" << POSE_TYPE_RELATIVE << "' or '"
-             << POSE_TYPE_ABSOLUTE << "'";
+      FAIL() << "Found invalid 'type' in " << pose_name << ": should be one of '" << post_type_relative << "' or '"
+             << post_type_absolute << "'";
 
     std::string desc;
     {
