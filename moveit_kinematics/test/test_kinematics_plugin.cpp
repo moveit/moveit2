@@ -63,7 +63,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_kinematics_plugin"
 const std::string ROBOT_DESCRIPTION_PARAM = "robot_description";
 const double DEFAULT_SEARCH_DISCRETIZATION = 0.01f;
 const double EXPECTED_SUCCESS_RATE = 0.8;
-const double DEFAULT_TOLERANCE = 1e-5;
 static const std::string UNDEFINED = "<undefined>";
 
 // As loading of parameters is quite slow, we share them across all tests

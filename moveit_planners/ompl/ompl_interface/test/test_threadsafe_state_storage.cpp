@@ -42,9 +42,6 @@ The skeleton of this test was taken from test_state_validity_checker.cpp by Jero
 #include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
 #include <gtest/gtest.h>
 
-/** \brief This flag sets the verbosity level for the state validity checker. **/
-constexpr bool VERBOSE = false;
-
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_thread_safe_storage");
 
 /** \brief Generic implementation of the tests that can be executed on different robots. **/
