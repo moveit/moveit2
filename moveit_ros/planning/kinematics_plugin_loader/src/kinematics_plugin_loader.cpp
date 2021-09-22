@@ -56,7 +56,7 @@ rclcpp::Parameter declare_parameter(const rclcpp::Node::SharedPtr& node, const s
     node->declare_parameter(parameter_name, ParamType);
   rclcpp::Parameter parameter;
   if (!node->get_parameter(parameter_name, parameter))
-    RCLCPP_INFO_STREAM(LOGGER, "Parameter `" << parameter_name << "` doesn't exists");
+    RCLCPP_DEBUG_STREAM(LOGGER, "Parameter `" << parameter_name << "` doesn't exists");
   return parameter;
 }
 class KinematicsPluginLoader::KinematicsLoaderImpl
@@ -302,20 +302,20 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
 
       if (default_solver_plugin_.empty())
       {
-        RCLCPP_INFO(LOGGER, "Loading settings for kinematics solvers from the ROS param server ...");
+        RCLCPP_DEBUG(LOGGER, "Loading settings for kinematics solvers from the ROS param server ...");
         // read the list of plugin names for possible kinematics solvers
         for (const srdf::Model::Group& known_group : known_groups)
         {
           std::string base_param_name = known_group.name_;
           std::string ksolver_param_name = base_param_name + ".kinematics_solver";
-          RCLCPP_INFO(LOGGER, "Looking for param %s ", ksolver_param_name.c_str());
+          RCLCPP_DEBUG(LOGGER, "Looking for param %s ", ksolver_param_name.c_str());
           rclcpp::Parameter ksolver_param =
               declare_parameter<rclcpp::ParameterType::PARAMETER_STRING>(node_, ksolver_param_name);
           if (ksolver_param.get_type() == rclcpp::ParameterType::PARAMETER_NOT_SET)
           {
             base_param_name = robot_description_ + "_kinematics." + known_group.name_;
             ksolver_param_name = base_param_name + ".kinematics_solver";
-            RCLCPP_INFO(LOGGER, "Looking for param %s ", ksolver_param_name.c_str());
+            RCLCPP_DEBUG(LOGGER, "Looking for param %s ", ksolver_param_name.c_str());
             ksolver_param = declare_parameter<rclcpp::ParameterType::PARAMETER_STRING>(node_, ksolver_param_name);
           }
           if (ksolver_param.get_type() != rclcpp::ParameterType::PARAMETER_NOT_SET)
