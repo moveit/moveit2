@@ -3,8 +3,8 @@ repositories:
   ros2_control:
     type: git
     url: https://github.com/ros-controls/ros2_control
-    version: master
+    version: 0.8.0
   ros2_controllers:
     type: git
     url: https://github.com/ros-controls/ros2_controllers
-    version: master
+    version: 0.5.0

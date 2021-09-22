@@ -56,12 +56,12 @@ namespace
 void checkFCLCapabilities(const DistanceRequest& req)
 {
 #if MOVEIT_FCL_VERSION < FCL_VERSION_CHECK(0, 6, 0)
-  static rclcpp::Clock steady_clock(RCL_STEADY_TIME);
   if (req.enable_nearest_points)
   {
     // Known issues:
     //   https://github.com/flexible-collision-library/fcl/issues/171,
     //   https://github.com/flexible-collision-library/fcl/pull/288
+    rclcpp::Clock steady_clock(RCL_STEADY_TIME);
     RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 2000,
                           "You requested a distance check with enable_nearest_points=true, "
                           "but the FCL version MoveIt was compiled against (%d.%d.%d) "
