@@ -9,6 +9,10 @@ on:
       - closed
       - labeled
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   backport:
     if: github.event.pull_request.merged == true
