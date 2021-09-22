@@ -476,8 +476,8 @@ TEST_F(KinematicsTest, unitIK)
   };
 
   std::vector<double> ground_truth, pose_values;
-  constexpr char post_type_relative[] = "relative";
-  constexpr char post_type_absolute[] = "absolute";
+  constexpr char pose_type_relative[] = "relative";
+  constexpr char pose_type_absolute[] = "absolute";
 
   /* process tests definitions on parameter server of the form
      pose_1:
