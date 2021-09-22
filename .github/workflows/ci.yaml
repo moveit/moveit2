@@ -1,7 +1,7 @@
 # This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
 # For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
 
-name: Build and Test (Foxy)
+name: CI (Foxy)
 
 on:
   workflow_dispatch:
@@ -22,7 +22,8 @@ jobs:
             IKFAST_TEST: true
             CLANG_TIDY: true
     env:
-      DOCKER_IMAGE: moveit/moveit2:${{ matrix.env.IMAGE }}
+      CXXFLAGS: "-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-deprecated-copy"
+      DOCKER_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.env.IMAGE }}
       # The released versions of all upstream repos are current
       # UPSTREAM_WORKSPACE: moveit2.repos
       # AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
@@ -35,6 +36,9 @@ jobs:
       BASEDIR: ${{ github.workspace }}/.work
       CACHE_PREFIX: ${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && '-ccov' || '' }}
       CLANG_TIDY_BASE_REF: ${{ github.base_ref || github.ref }}
+      BEFORE_CLANG_TIDY_CHECKS: (cd $TARGET_REPO_PATH; clang-tidy --list-checks)
+      CC: ${{ matrix.env.CLANG_TIDY && 'clang' }}
+      CXX: ${{ matrix.env.CLANG_TIDY && 'clang++' }}
 
     name: ${{ matrix.env.IMAGE }}${{ contains(matrix.env.IKFAST_TEST, 'ikfast') && ' + ikfast' || ''}}${{ matrix.env.CCOV && ' + ccov' || ''}}${{ matrix.env.CLANG_TIDY && ' + clang-tidy' || '' }}
     runs-on: ubuntu-latest
