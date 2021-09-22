@@ -45,7 +45,7 @@
 #include <memory>
 #include <string>
 
-namespace occupancy_map_monitor
+namespace collision_detection
 {
 typedef octomap::OcTreeNode OccMapNode;
 
@@ -118,4 +118,4 @@ private:
 
 using OccMapTreePtr = std::shared_ptr<OccMapTree>;
 using OccMapTreeConstPtr = std::shared_ptr<const OccMapTree>;
-}  // namespace occupancy_map_monitor
+}  // namespace collision_detection

@@ -44,7 +44,6 @@
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.collision_check");
 static const double MIN_RECOMMENDED_COLLISION_RATE = 10;
-constexpr double EPSILON = 1e-6;                       // For very small numeric comparisons
 constexpr size_t ROS_LOG_THROTTLE_PERIOD = 30 * 1000;  // Milliseconds to throttle logs inside loops
 
 namespace moveit_servo

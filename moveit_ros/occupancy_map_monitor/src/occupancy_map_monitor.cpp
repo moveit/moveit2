@@ -34,7 +34,8 @@
 
 /* Author: Ioan Sucan, Jon Binney */
 
-#include <moveit/occupancy_map_monitor/occupancy_map.h>
+#include <moveit/collision_detection/occupancy_map.h>
+
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor_middleware_handle.hpp>
 #include <moveit_msgs/srv/load_map.hpp>
@@ -97,7 +98,7 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
                         "No transforms will be applied to received data.");
   }
 
-  tree_ = std::make_shared<OccMapTree>(parameters_.map_resolution);
+  tree_ = std::make_shared<collision_detection::OccMapTree>(parameters_.map_resolution);
   tree_const_ = tree_;
 
   for (const auto& [sensor_name, sensor_type] : parameters_.sensor_plugins)
