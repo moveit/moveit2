@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: foxy
+        ROS_DISTRO: [foxy]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -66,7 +66,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: foxy
+        ROS_DISTRO: [foxy]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -118,7 +118,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: foxy
+        ROS_DISTRO: [foxy]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -170,7 +170,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: foxy
+        ROS_DISTRO: [foxy]
     runs-on: ubuntu-latest
     permissions:
       packages: write
