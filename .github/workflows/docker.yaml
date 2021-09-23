@@ -27,6 +27,7 @@ jobs:
     steps:
       - name: Check for apt updates
         uses: addnab/docker-run-action@v3
+        continue-on-error: true
         id: apt
         with:
           image: ${{ env.GH_IMAGE }}
@@ -78,6 +79,7 @@ jobs:
     steps:
       - name: Check for apt updates
         uses: addnab/docker-run-action@v3
+        continue-on-error: true
         id: apt
         with:
           image: ${{ env.GH_IMAGE }}
@@ -130,6 +132,7 @@ jobs:
     steps:
       - name: Check for apt updates
         uses: addnab/docker-run-action@v3
+        continue-on-error: true
         id: apt
         with:
           image: ${{ env.GH_IMAGE }}
