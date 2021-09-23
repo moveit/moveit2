@@ -93,7 +93,7 @@ public:
 
   /**
    * Smooth the command signals for all DOF
-   * @param delta_theta array of incremental joint position commands
+   * @param position_vector array of joint position commands
    * @return True if initialization was successful
    */
   bool doSmoothing(std::vector<double>& position_vector) override;

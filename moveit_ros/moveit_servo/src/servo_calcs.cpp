@@ -630,7 +630,7 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   return true;
 }
 
-bool ServoCalcs::applyJointUpdate(Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state,
+bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state,
                                   Eigen::ArrayXd& previous_vel)
 {
   // All the sizes must match

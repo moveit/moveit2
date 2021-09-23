@@ -198,7 +198,7 @@ protected:
    * @param previous_vel Eigen vector of previous velocities being updated
    * @return Returns false if there is a problem, true otherwise
    */
-  bool applyJointUpdate(Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state,
+  bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state,
                         Eigen::ArrayXd& previous_vel);
 
   /** \brief Gazebo simulations have very strict message timestamp requirements.
