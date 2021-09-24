@@ -232,6 +232,7 @@ ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
 pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 pluginlib_export_plugin_description_file(moveit_core filter_plugin_butterworth.xml)
+pluginlib_export_plugin_description_file(moveit_core filter_plugin_ruckig.xml)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

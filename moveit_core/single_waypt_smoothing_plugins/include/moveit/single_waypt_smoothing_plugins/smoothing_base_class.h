@@ -47,20 +47,21 @@ class SmoothingBaseClass
 public:
   /**
    * Initialize the smoothing algorithm
-   * @param node ROS node, typically used for parameter retrieval
-   * @param robot_model typically used to retrieve vel/accel/jerk limits
-   * @param num_joints number of actuated joints in the JointGroup Servo controls
+   * @param group joint group of interest
+   * @param num_dof number of actuated joints in the JointGroup Servo controls
+   * @param timestep control loop period [seconds]
    * @return True if initialization was successful
    */
-  virtual bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
-                          size_t num_joints) = 0;
+  virtual bool initialize(rclcpp::Node::SharedPtr node, const moveit::core::JointModelGroup& group /*unused*/,
+                          size_t num_dof, double timestep) = 0;
 
   /**
    * Smooth an array of joint position deltas
-   * @param position_vector array of joint position commands
+   * @param delta_theta array of joint position commands
+   * @param delta_theta array of joint velocity commands
    * @return True if initialization was successful
    */
-  virtual bool doSmoothing(std::vector<double>& position_vector) = 0;
+  virtual bool doSmoothing(std::vector<double>& position_vector, std::vector<double>& velocity_vector) = 0;
 
   /**
    * Reset to a given joint state
