@@ -45,8 +45,8 @@ namespace moveit_hybrid_planning
 class SinglePlanExecution : public PlannerLogicInterface
 {
 public:
-  SinglePlanExecution(){};
-  ~SinglePlanExecution(){};
+  SinglePlanExecution() = default;
+  ~SinglePlanExecution() = default;
   bool
   initialize(const std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager>& hybrid_planning_manager) override;
   ReactionResult react(const BasicHybridPlanningEvent& event) override;

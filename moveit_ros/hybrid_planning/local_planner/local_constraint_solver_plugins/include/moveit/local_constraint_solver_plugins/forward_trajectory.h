@@ -47,8 +47,8 @@ namespace moveit_hybrid_planning
 class ForwardTrajectory : public LocalConstraintSolverInterface
 {
 public:
-  ForwardTrajectory(){};
-  ~ForwardTrajectory(){};
+  ForwardTrajectory() = default;
+  ~ForwardTrajectory() = default;
   bool initialize(const rclcpp::Node::SharedPtr& node,
                   const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                   const std::string& group_name) override;
