@@ -3,4 +3,3 @@ add_library(forward_trajectory_plugin SHARED
 )
 set_target_properties(forward_trajectory_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(forward_trajectory_plugin ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(forward_trajectory_plugin local_constraint_solver_interface)
