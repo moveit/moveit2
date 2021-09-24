@@ -4,3 +4,6 @@ planning_scene_monitor_options:
 planning_pipelines:
   pipeline_names: ["ompl"]
   namespace: ""
+
+# Trajectory Execution Functionality
+moveit_controller_manager": "moveit_simple_controller_manager/MoveItSimpleControllerManager"
