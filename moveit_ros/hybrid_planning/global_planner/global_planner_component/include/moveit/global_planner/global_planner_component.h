@@ -40,6 +40,8 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 
+#include <pluginlib/class_loader.hpp>
+
 #include <moveit/global_planner/global_planner_interface.h>
 
 #include <moveit_msgs/action/global_planner.hpp>

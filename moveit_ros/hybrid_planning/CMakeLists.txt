@@ -11,6 +11,7 @@ find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
+find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_components REQUIRED)
@@ -24,11 +25,6 @@ set(LIBRARIES
   moveit_global_planner_component
   moveit_hybrid_planning_manager
   moveit_local_planner_component
-  # Intefaces
-  global_planner_interface
-  local_constraint_solver_interface
-  planner_logic_interface
-  trajectory_operator_interface
   # Plugins
   forward_trajectory_plugin
   motion_planning_pipeline_plugin
@@ -45,6 +41,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_ros_planning
   moveit_ros_planning_interface
   moveit_msgs
+  pluginlib
   std_msgs
   std_srvs
   tf2_ros

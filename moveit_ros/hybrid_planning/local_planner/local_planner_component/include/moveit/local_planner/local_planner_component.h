@@ -42,6 +42,8 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 
+#include <pluginlib/class_loader.hpp>
+
 #include <moveit_msgs/action/local_planner.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
