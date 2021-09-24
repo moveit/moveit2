@@ -52,8 +52,10 @@
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 
 using namespace std::chrono_literals;
+namespace
+{
 const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
-
+}
 class HybridPlanningDemo
 {
 public:

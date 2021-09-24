@@ -38,10 +38,14 @@
 #include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
 #include <moveit/hybrid_planning_manager/hybrid_planning_events.h>
 
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
+}
+
 namespace moveit_hybrid_planning
 {
 using namespace std::chrono_literals;
-const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
 
 HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
   : Node("hybrid_planning_manager", options), initialized_(false)

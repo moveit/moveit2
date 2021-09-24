@@ -39,10 +39,13 @@
 
 #include <moveit/kinematic_constraints/utils.h>
 
-namespace moveit_hybrid_planning
+namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
+}
 
+namespace moveit_hybrid_planning
+{
 bool SimpleSampler::initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                                const std::string& group_name)
 {

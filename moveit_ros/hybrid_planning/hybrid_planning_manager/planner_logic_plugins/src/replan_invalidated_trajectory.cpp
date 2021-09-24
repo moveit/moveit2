@@ -37,10 +37,13 @@
 
 #include <moveit/planner_logic_plugins/replan_invalidated_trajectory.h>
 
-namespace moveit_hybrid_planning
+namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
+}
 
+namespace moveit_hybrid_planning
+{
 ReactionResult ReplanInvalidatedTrajectory::react(const std::string& event)
 {
   if (event == "collision_ahead")
