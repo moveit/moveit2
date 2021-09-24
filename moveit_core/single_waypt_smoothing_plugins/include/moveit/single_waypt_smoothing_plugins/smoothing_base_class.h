@@ -40,7 +40,7 @@
 
 #include <moveit/robot_model/robot_model.h>
 
-namespace smoothing_plugins
+namespace single_waypt_smoothing_plugins
 {
 class SmoothingBaseClass
 {
@@ -69,4 +69,4 @@ public:
    */
   virtual bool reset(const std::vector<double>& joint_positions) = 0;
 };
-}  // namespace smoothing_plugins
+}  // namespace single_waypt_smoothing_plugins
