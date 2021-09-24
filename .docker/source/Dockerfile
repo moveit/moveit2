@@ -9,8 +9,6 @@ MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 # Export ROS_UNDERLAY for downstream docker containers
 ENV ROS_UNDERLAY /root/ws_moveit/install
-# Environment variable used in instructions on moveit.ros.org website for running clang-tidy
-ENV CATKIN_WS $(realpath $ROS_UNDERLAY/..)
 WORKDIR $ROS_UNDERLAY/..
 
 # Copy MoveIt sources from docker context
