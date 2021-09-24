@@ -3,4 +3,3 @@ add_library(motion_planning_pipeline_plugin SHARED
 )
 set_target_properties(motion_planning_pipeline_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(motion_planning_pipeline_plugin ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(motion_planning_pipeline_plugin global_planner_interface)
