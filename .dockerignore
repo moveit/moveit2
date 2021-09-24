@@ -1,7 +1,7 @@
 # ignore everything
 *
 # but include these:
-!moveit2.repos
+!moveit2*.repos
 !**/package.xml
 !**/COLCON_IGNORE
 

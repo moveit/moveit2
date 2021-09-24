@@ -1,4 +1,3 @@
-
 # syntax = docker/dockerfile:1.3
 
 # ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-source
