@@ -43,10 +43,14 @@
 #include <chrono>
 #include <thread>
 
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
+}
+
 namespace moveit_hybrid_planning
 {
 using namespace std::chrono_literals;
-const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
 const std::string UNDEFINED = "<undefined>";
 
 GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& options)

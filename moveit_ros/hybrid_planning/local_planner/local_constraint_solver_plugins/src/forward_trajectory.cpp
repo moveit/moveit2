@@ -39,10 +39,13 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
 
-namespace moveit_hybrid_planning
+namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
+}
 
+namespace moveit_hybrid_planning
+{
 bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
                                    const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                                    const std::string& group_name)
