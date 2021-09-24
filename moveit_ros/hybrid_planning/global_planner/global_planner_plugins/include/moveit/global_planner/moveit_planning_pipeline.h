@@ -49,8 +49,8 @@ namespace moveit_hybrid_planning
 class MoveItPlanningPipeline : public GlobalPlannerInterface
 {
 public:
-  MoveItPlanningPipeline(){};
-  ~MoveItPlanningPipeline(){};
+  MoveItPlanningPipeline() = default;
+  ~MoveItPlanningPipeline() = default;
   bool initialize(const rclcpp::Node::SharedPtr& node) override;
   bool reset() override;
   moveit_msgs::msg::MotionPlanResponse

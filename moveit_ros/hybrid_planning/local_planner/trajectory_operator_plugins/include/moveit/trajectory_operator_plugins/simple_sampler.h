@@ -46,8 +46,8 @@ namespace moveit_hybrid_planning
 class SimpleSampler : public TrajectoryOperatorInterface
 {
 public:
-  SimpleSampler(){};
-  ~SimpleSampler(){};
+  SimpleSampler() = default;
+  ~SimpleSampler() = default;
 
   bool initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                   const std::string& group_name) override;
