@@ -77,6 +77,9 @@ bool MoveItPlanningPipeline::initialize(const rclcpp::Node::SharedPtr& node)
   node->declare_parameter<double>(PLAN_REQUEST_PARAM_NS + "max_velocity_scaling_factor", 1.0);
   node->declare_parameter<double>(PLAN_REQUEST_PARAM_NS + "max_acceleration_scaling_factor", 1.0);
 
+  // Trajectory Execution Functionality (required by the MoveItPlanningPipeline but not used within hybrid planning)
+  node->declare_parameter<std::string>("moveit_controller_manager", UNDEFINED);
+
   node_ptr_ = node;
 
   // Initialize MoveItCpp API
