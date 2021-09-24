@@ -408,6 +408,14 @@ void ServoCalcs::calculateSingleIteration()
     rclcpp::Clock& clock = *node_->get_clock();
     RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "All-zero command. Doing nothing.");
   }
+  // Skip servoing publication if both types of commands are stale.
+  else if (twist_command_is_stale_ && joint_command_is_stale_)
+  {
+    ok_to_publish_ = false;
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                 "Skipping publishing because commands are stale.");
+  }
   else
   {
     ok_to_publish_ = true;
