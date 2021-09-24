@@ -52,6 +52,7 @@ using namespace std::chrono_literals;  // for s, ms, etc.
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_calcs");
 constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(3000).count();
+static constexpr double STOPPED_VELOCITY_EPS = 1e-4;  // rad/s
 
 namespace moveit_servo
 {
@@ -96,6 +97,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   , parameters_(parameters)
   , planning_scene_monitor_(planning_scene_monitor)
   , stop_requested_(true)
+  , done_stopping_(false)
   , paused_(false)
   , robot_link_command_frame_(parameters->robot_link_command_frame)
   , smoothing_loader_("moveit_core", "smoothing_plugins::SmoothingBaseClass")
@@ -334,8 +336,8 @@ void ServoCalcs::calculateSingleIteration()
   joint_command_is_stale_ = ((node_->now() - latest_joint_command_stamp_) >=
                              rclcpp::Duration::from_seconds(parameters_->incoming_command_timeout));
 
-  have_nonzero_twist_stamped_ = latest_nonzero_twist_stamped_;
-  have_nonzero_joint_command_ = latest_nonzero_joint_cmd_;
+  have_nonzero_twist_stamped_ = latest_twist_cmd_is_nonzero_;
+  have_nonzero_joint_command_ = latest_joint_cmd_is_nonzero_;
 
   // Get the transform from MoveIt planning frame to servoing command frame
   // Calculate this transform to ensure it is available via C++ API
@@ -402,11 +404,15 @@ void ServoCalcs::calculateSingleIteration()
   }
 
   // If we should halt
-  if (!have_nonzero_command_)
+  if (!have_nonzero_command_ && !done_stopping_)
   {
-    suddenHalt(*joint_trajectory);
+    filteredHalt(*joint_trajectory);
     have_nonzero_twist_stamped_ = false;
     have_nonzero_joint_command_ = false;
+  }
+  else
+  {
+    done_stopping_ = false;
   }
 
   // Skip the servoing publication if all inputs have been zero for several cycles in a row.
@@ -842,40 +848,48 @@ ServoCalcs::enforcePositionLimits(sensor_msgs::msg::JointState& joint_state) con
   return joints_to_halt;
 }
 
-// Suddenly halt for a joint limit or other critical issue.
-// Is handled differently for position vs. velocity control.
-void ServoCalcs::suddenHalt(trajectory_msgs::msg::JointTrajectory& joint_trajectory) const
+void ServoCalcs::filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // Prepare the joint trajectory message to stop the robot
   joint_trajectory.points.clear();
   joint_trajectory.points.emplace_back();
-  trajectory_msgs::msg::JointTrajectoryPoint& point = joint_trajectory.points.front();
 
-  // When sending out trajectory_msgs/JointTrajectory type messages, the "trajectory" is just a single point.
-  // That point cannot have the same timestamp as the start of trajectory execution since that would mean the
-  // arm has to reach the first trajectory point the moment execution begins. To prevent errors about points
-  // being 0 seconds in the past, the smallest supported timestep is added as time from start to the trajectory point.
-  point.time_from_start = rclcpp::Duration(0, 1);
-
-  if (parameters_->publish_joint_positions)
-    point.positions.resize(num_joints_);
-  if (parameters_->publish_joint_velocities)
-    point.velocities.resize(num_joints_);
-
-  // Assert the following loop is safe to execute
+  // Deceleration algorithm:
+  // Set positions to original_joint_state_
+  // Filter
+  // Calculate velocities
+  // Check if velocities are close to zero. Round to zero, if so.
+  // Set done_stopping_ flag
   assert(original_joint_state_.position.size() >= num_joints_);
-
-  // Set the positions and velocities vectors
-  for (std::size_t i = 0; i < num_joints_; ++i)
+  joint_trajectory.points[0].positions = original_joint_state_.position;
+  smoother_->doSmoothing(joint_trajectory.points[0].positions);
+  done_stopping_ = true;
+  if (parameters_->publish_joint_velocities)
   {
-    // For position-controlled robots, can reset the joints to a known, good state
-    if (parameters_->publish_joint_positions)
-      point.positions[i] = original_joint_state_.position[i];
-
-    // For velocity-controlled robots, stop
-    if (parameters_->publish_joint_velocities)
-      point.velocities[i] = 0;
+    joint_trajectory.points[0].velocities = std::vector<double>(num_joints_, 0);
+    for (std::size_t i = 0; i < num_joints_; ++i)
+    {
+      joint_trajectory.points[0].velocities.at(i) =
+          (joint_trajectory.points[0].positions.at(i) - original_joint_state_.position.at(i)) /
+          parameters_->publish_period;
+      // If velocity is very close to zero, round to zero
+      if (joint_trajectory.points[0].velocities.at(i) < STOPPED_VELOCITY_EPS)
+      {
+        joint_trajectory.points[0].velocities.at(i) = 0;
+      }
+      else
+      {
+        done_stopping_ = false;
+      }
+    }
+    // If every joint is very close to stopped, round velocity to zero
+    if (done_stopping_)
+    {
+      joint_trajectory.points[0].velocities = std::vector<double>(num_joints_, 0);
+    }
   }
+
+  joint_trajectory.points[0].time_from_start = rclcpp::Duration::from_seconds(parameters_->publish_period);
 }
 
 void ServoCalcs::suddenHalt(sensor_msgs::msg::JointState& joint_state,
@@ -894,7 +908,6 @@ void ServoCalcs::suddenHalt(sensor_msgs::msg::JointState& joint_state,
   }
 }
 
-// Parse the incoming joint msg for the joints of our MoveGroup
 void ServoCalcs::updateJoints()
 {
   // Get the latest joint group positions
@@ -1116,7 +1129,7 @@ void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPt
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_twist_stamped_ = msg;
-  latest_nonzero_twist_stamped_ = isNonZero(*latest_twist_stamped_.get());
+  latest_twist_cmd_is_nonzero_ = isNonZero(*latest_twist_stamped_.get());
 
   if (msg.get()->header.stamp != rclcpp::Time(0.))
     latest_twist_command_stamp_ = msg.get()->header.stamp;
@@ -1130,7 +1143,7 @@ void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::SharedPtr msg)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   latest_joint_cmd_ = msg;
-  latest_nonzero_joint_cmd_ = isNonZero(*latest_joint_cmd_.get());
+  latest_joint_cmd_is_nonzero_ = isNonZero(*latest_joint_cmd_.get());
 
   if (msg.get()->header.stamp != rclcpp::Time(0.))
     latest_joint_command_stamp_ = msg.get()->header.stamp;
