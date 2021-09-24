@@ -43,10 +43,15 @@
 #include <moveit/robot_state/conversions.h>
 
 #include <moveit_msgs/msg/constraints.hpp>
+
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
+}
+
 namespace moveit_hybrid_planning
 {
 using namespace std::chrono_literals;
-const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 
 LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   : Node("local_planner_component", options)
