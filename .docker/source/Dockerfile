@@ -4,14 +4,12 @@
 # ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-source
 # Downloads the moveit source code and install remaining debian dependencies
 
-ARG ROS_DISTRO=foxy
+ARG ROS_DISTRO=rolling
 FROM ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci-testing
 MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 # Export ROS_UNDERLAY for downstream docker containers
 ENV ROS_UNDERLAY /root/ws_moveit/install
-# Environment variable used in instructions on moveit.ros.org website for running clang-tidy
-ENV CATKIN_WS $(realpath $ROS_UNDERLAY/..)
 WORKDIR $ROS_UNDERLAY/..
 
 # Copy MoveIt sources from docker context

@@ -1,7 +1,7 @@
 # ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci
 # ROS base image augmented with all MoveIt dependencies to use for CI
 
-ARG ROS_DISTRO=foxy
+ARG ROS_DISTRO=rolling
 FROM ros:${ROS_DISTRO}-ros-base-focal
 MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
