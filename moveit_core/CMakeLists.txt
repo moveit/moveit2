@@ -82,7 +82,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     # TODO: Port python bindings
     # python/tools/include
     sensor_manager/include
-    single_waypt_smoothing_plugins/include
+    online_signal_smoothing/include
     trajectory_processing/include
     utils/include
 )
@@ -177,7 +177,7 @@ add_subdirectory(robot_model)
 add_subdirectory(robot_state)
 add_subdirectory(robot_trajectory)
 add_subdirectory(sensor_manager)
-add_subdirectory(single_waypt_smoothing_plugins)
+add_subdirectory(online_signal_smoothing)
 add_subdirectory(trajectory_processing)
 add_subdirectory(transforms)
 add_subdirectory(utils)
