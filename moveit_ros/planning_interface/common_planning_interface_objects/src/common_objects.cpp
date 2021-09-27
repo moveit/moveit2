@@ -73,22 +73,6 @@ SharedStorage& getSharedStorage()
   return *storage;
 #endif
 }
-
-// Deleter that, additionally to T*, deletes another object too
-template <typename T, typename O>
-struct CoupledDeleter
-{
-  const O* other_;
-  CoupledDeleter(const O* other = nullptr) : other_(other)
-  {
-  }
-
-  void operator()(const T* p)
-  {
-    delete other_;
-    delete p;
-  }
-};
 }  // namespace
 
 namespace moveit
