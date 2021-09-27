@@ -383,14 +383,6 @@ void ServoCalcs::calculateSingleIteration()
     }
   }
 
-  // Print a warning to the user if both are stale
-  if (twist_command_is_stale_ && joint_command_is_stale_)
-  {
-    rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                "Stale command. Try a larger 'incoming_command_timeout' parameter?");
-  }
-
   // If we should halt
   if (!have_nonzero_command_)
   {
@@ -414,7 +406,7 @@ void ServoCalcs::calculateSingleIteration()
     ok_to_publish_ = false;
     rclcpp::Clock& clock = *node_->get_clock();
     RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                 "Skipping publishing because commands are stale.");
+                                 "Skipping publishing because incoming commands are stale.");
   }
   else
   {
