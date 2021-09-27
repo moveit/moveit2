@@ -663,7 +663,19 @@ bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs
         (joint_state.position.at(i) - original_joint_state_.position.at(i)) / parameters_->publish_period;
   }
 
-  smoother_->doSmoothing(joint_state.position, joint_state.velocity);
+  try
+  {
+    smoother_->doSmoothing(joint_state.position, joint_state.velocity);
+  }
+  catch (std::exception& e)
+  {
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                "Smoothing failed in applyJointUpdate()! Stopping.");
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, e.what());
+    joint_state.position = original_joint_state_.position;
+    joint_state.velocity = std::vector<double>(num_joints_, 0.0);
+  }
 
   for (std::size_t i = 0; i < joint_state.position.size(); ++i)
   {
@@ -865,7 +877,20 @@ void ServoCalcs::filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_traje
   // Set done_stopping_ flag
   assert(original_joint_state_.position.size() >= num_joints_);
   joint_trajectory.points[0].positions = original_joint_state_.position;
-  smoother_->doSmoothing(joint_trajectory.points[0].positions, joint_trajectory.points[0].velocities);
+
+  try
+  {
+    smoother_->doSmoothing(joint_trajectory.points[0].positions, joint_trajectory.points[0].velocities);
+  }
+  catch (std::exception& e)
+  {
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Smoothing failed in filteredHalt()! Stopping.");
+    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, e.what());
+    joint_trajectory.points[0].positions = original_joint_state_.position;
+    joint_trajectory.points[0].velocities = std::vector<double>(num_joints_, 0.0);
+  }
+
   done_stopping_ = true;
   if (parameters_->publish_joint_velocities)
   {
