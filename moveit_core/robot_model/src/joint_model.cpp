@@ -183,6 +183,8 @@ void JointModel::computeVariableBoundsMsg()
     lim.has_acceleration_limits = variable_bounds_[i].acceleration_bounded_;
     lim.max_acceleration =
         std::min(fabs(variable_bounds_[i].min_acceleration_), fabs(variable_bounds_[i].max_acceleration_));
+    lim.has_jerk_limits = variable_bounds_[i].jerk_bounded_;
+    lim.max_jerk = std::min(fabs(variable_bounds_[i].min_jerk_), fabs(variable_bounds_[i].max_jerk_));
     variable_bounds_msg_.push_back(lim);
   }
 }
@@ -240,6 +242,11 @@ std::ostream& operator<<(std::ostream& out, const VariableBounds& b)
   printBoundHelper(out, b.min_acceleration_);
   out << ", ";
   printBoundHelper(out, b.max_acceleration_);
+  out << "]; "
+      << "J." << (b.jerk_bounded_ ? "bounded" : "unbounded") << " [";
+  printBoundHelper(out, b.min_jerk_);
+  out << ", ";
+  printBoundHelper(out, b.max_jerk_);
   out << "];";
   return out;
 }
