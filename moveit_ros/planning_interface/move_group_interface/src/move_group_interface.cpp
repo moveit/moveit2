@@ -219,7 +219,7 @@ public:
     // wait until future is done
     if (rclcpp::spin_until_future_complete(pnode_, future_response) == rclcpp::FutureReturnCode::SUCCESS)
     {
-      auto response = future_response.get();
+      const auto& response = future_response.get();
       if (!response->planner_interfaces.empty())
       {
         desc = response->planner_interfaces.front();
@@ -235,7 +235,7 @@ public:
     auto future_response = query_service_->async_send_request(req);
     if (rclcpp::spin_until_future_complete(pnode_, future_response) == rclcpp::FutureReturnCode::SUCCESS)
     {
-      auto response = future_response.get();
+      const auto& response = future_response.get();
       if (!response->planner_interfaces.empty())
       {
         desc = response->planner_interfaces;
