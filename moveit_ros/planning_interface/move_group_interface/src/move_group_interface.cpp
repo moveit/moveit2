@@ -214,14 +214,15 @@ public:
   bool getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc)
   {
     auto req = std::make_shared<moveit_msgs::srv::QueryPlannerInterfaces::Request>();
-    auto response = query_service_->async_send_request(req);
+    auto future_response = query_service_->async_send_request(req);
 
     // wait until future is done
-    if (rclcpp::spin_until_future_complete(pnode_, response) == rclcpp::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(pnode_, future_response) == rclcpp::FutureReturnCode::SUCCESS)
     {
-      if (!response.get()->planner_interfaces.empty())
+      const auto& response = future_response.get();
+      if (!response->planner_interfaces.empty())
       {
-        desc = response.get()->planner_interfaces.front();
+        desc = response->planner_interfaces.front();
         return true;
       }
     }
@@ -231,12 +232,13 @@ public:
   bool getInterfaceDescriptions(std::vector<moveit_msgs::msg::PlannerInterfaceDescription>& desc)
   {
     auto req = std::make_shared<moveit_msgs::srv::QueryPlannerInterfaces::Request>();
-    auto res = query_service_->async_send_request(req);
-    if (rclcpp::spin_until_future_complete(pnode_, res) == rclcpp::FutureReturnCode::SUCCESS)
+    auto future_response = query_service_->async_send_request(req);
+    if (rclcpp::spin_until_future_complete(pnode_, future_response) == rclcpp::FutureReturnCode::SUCCESS)
     {
-      if (!res.get()->planner_interfaces.empty())
+      const auto& response = future_response.get();
+      if (!response->planner_interfaces.empty())
       {
-        desc = res.get()->planner_interfaces;
+        desc = response->planner_interfaces;
         return true;
       }
     }
