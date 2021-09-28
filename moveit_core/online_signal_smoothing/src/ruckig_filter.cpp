@@ -7,6 +7,7 @@ namespace
 constexpr double DEFAULT_MAX_VELOCITY = 5;       // rad/s
 constexpr double DEFAULT_MAX_ACCELERATION = 10;  // rad/s^2
 constexpr double DEFAULT_MAX_JERK = 20;          // rad/s^3
+constexpr double VELOCITY_EPS_RAD_S = 1e-3;      // rad/s
 }  // namespace
 
 bool RuckigFilterPlugin::initialize(rclcpp::Node::SharedPtr node, const moveit::core::JointModelGroup& group,
@@ -58,7 +59,7 @@ bool RuckigFilterPlugin::doSmoothing(std::vector<double>& /*unused*/, std::vecto
   // Feed output from the previous timestep back as input
   for (size_t joint = 0; joint < num_dof_; ++joint)
   {
-    ruckig_input_->current_position.at(joint) = ruckig_output_->new_position.at(joint);
+    // We don't update position since Ruckig is in velocity control mode
     ruckig_input_->current_velocity.at(joint) = ruckig_output_->new_velocity.at(joint);
     ruckig_input_->current_acceleration.at(joint) = ruckig_output_->new_acceleration.at(joint);
 
@@ -66,6 +67,21 @@ bool RuckigFilterPlugin::doSmoothing(std::vector<double>& /*unused*/, std::vecto
     ruckig_input_->target_velocity.at(joint) = velocity_vector.at(joint);
     // Set a target of zero acceleration
     ruckig_input_->target_acceleration.at(joint) = 0;
+  }
+
+  // Ruckig (like other smoothing algorithms incl. TOTG) does not do well when the requested state almost matches the
+  // current state. So, skip smoothing if (target_state ~= current_state)
+  double magnitude_velocity_difference = 0;
+  for (size_t joint = 0; joint < num_dof_; ++joint)
+  {
+    magnitude_velocity_difference +=
+        pow((ruckig_input_->target_velocity.at(joint) - ruckig_input_->current_velocity.at(joint)), 2.);
+  }
+  magnitude_velocity_difference = sqrt(magnitude_velocity_difference);
+  if (magnitude_velocity_difference < VELOCITY_EPS_RAD_S)
+  {
+    // velocity_vector is returned unmodified
+    return true;
   }
 
   ruckig::Result result;
@@ -76,6 +92,12 @@ bool RuckigFilterPlugin::doSmoothing(std::vector<double>& /*unused*/, std::vecto
   else
   {
     return false;
+  }
+
+  // Update output
+  if (result == ruckig::Result::Finished)
+  {
+    velocity_vector = ruckig_output_->new_velocity;
   }
 
   return result == ruckig::Result::Finished;
