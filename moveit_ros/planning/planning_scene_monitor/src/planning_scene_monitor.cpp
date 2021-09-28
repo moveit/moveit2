@@ -115,7 +115,7 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                      std::to_string(reinterpret_cast<std::size_t>(this)));
   new_args.push_back("--");
   pnode_ = std::make_shared<rclcpp::Node>("_", node_->get_namespace(), rclcpp::NodeOptions().arguments(new_args));
-  startTFListener();
+  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
   tf_buffer_->setUsingDedicatedThread(true);
   // use same callback queue as root_nh_
   // root_nh_.setCallbackQueue(&queue_);
@@ -1223,7 +1223,6 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
     {
       current_state_monitor_.reset(new CurrentStateMonitor(pnode_, getRobotModel(), tf_buffer_));
     }
-    startTFListener();
     current_state_monitor_->addUpdateCallback(
         boost::bind(&PlanningSceneMonitor::onStateUpdate, this, boost::placeholders::_1));
     current_state_monitor_->startStateMonitor(joint_states_topic);
@@ -1550,16 +1549,5 @@ void PlanningSceneMonitor::configureDefaultPadding()
 
   RCLCPP_DEBUG_STREAM(LOGGER, "Loaded " << default_robot_link_padd_.size() << " default link paddings");
   RCLCPP_DEBUG_STREAM(LOGGER, "Loaded " << default_robot_link_scale_.size() << " default link scales");
-}
-
-void PlanningSceneMonitor::startTFListener()
-{
-  // No need to start the tf_listener if we have a current state monitor and multi-dof joints
-  if (current_state_monitor_ && !robot_model_->getMultiDOFJointModels().empty())
-  {
-    tf_listener_.reset();
-    return;
-  }
-  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
 }
 }  // namespace planning_scene_monitor

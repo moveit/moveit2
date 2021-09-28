@@ -315,10 +315,6 @@ public:
    */
   void startSceneMonitor(const std::string& scene_topic = DEFAULT_PLANNING_SCENE_TOPIC);
 
-  /** @brief Start the tf listener
-   */
-  void startTFListener();
-
   /** @brief Request a full planning scene state using a service call
    *         Be careful not to use this in conjunction with providePlanningSceneService(),
    *         as it will create a pointless feedback loop.
