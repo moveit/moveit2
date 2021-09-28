@@ -322,7 +322,7 @@ protected:
   // Main tracking / result publisher loop
   std::thread thread_;
   bool stop_requested_;
-  std::atomic<bool> done_stopping_;
+  std::atomic<bool> stop_in_progress_;
 
   // Status
   StatusCode status_ = StatusCode::NO_WARNING;

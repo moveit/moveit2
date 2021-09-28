@@ -97,7 +97,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   , parameters_(parameters)
   , planning_scene_monitor_(planning_scene_monitor)
   , stop_requested_(true)
-  , done_stopping_(false)
+  , stop_in_progress_(false)
   , paused_(false)
   , robot_link_command_frame_(parameters->robot_link_command_frame)
   , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
@@ -358,7 +358,7 @@ void ServoCalcs::calculateSingleIteration()
 
   // If paused or while waiting for initial servo commands, just keep the low-pass filters up to date with current
   // joints so a jump doesn't occur when restarting
-  if (wait_for_servo_commands_ || paused_)
+  if ((wait_for_servo_commands_ || paused_) && !stop_in_progress_)
   {
     resetLowPassFilters(original_joint_state_);
 
@@ -404,15 +404,12 @@ void ServoCalcs::calculateSingleIteration()
   }
 
   // If we should halt
-  if (!have_nonzero_command_ && !done_stopping_)
+  if (!have_nonzero_command_ || stop_in_progress_)
   {
     filteredHalt(*joint_trajectory);
     have_nonzero_twist_stamped_ = false;
     have_nonzero_joint_command_ = false;
-  }
-  else
-  {
-    done_stopping_ = false;
+    stop_in_progress_ = true;
   }
 
   // Skip the servoing publication if all inputs have been zero for several cycles in a row.
@@ -874,7 +871,7 @@ void ServoCalcs::filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_traje
   // Filter
   // Calculate velocities
   // Check if velocities are close to zero. Round to zero, if so.
-  // Set done_stopping_ flag
+  // Set stop_in_progress_ flag
   assert(original_joint_state_.position.size() >= num_joints_);
   joint_trajectory.points[0].positions = original_joint_state_.position;
 
@@ -891,7 +888,7 @@ void ServoCalcs::filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_traje
     joint_trajectory.points[0].velocities = std::vector<double>(num_joints_, 0.0);
   }
 
-  done_stopping_ = true;
+  stop_in_progress_ = false;
   if (parameters_->publish_joint_velocities)
   {
     joint_trajectory.points[0].velocities = std::vector<double>(num_joints_, 0);
@@ -907,13 +904,14 @@ void ServoCalcs::filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_traje
       }
       else
       {
-        done_stopping_ = false;
+        stop_in_progress_ = true;
       }
     }
     // If every joint is very close to stopped, round velocity to zero
-    if (done_stopping_)
+    if (!stop_in_progress_)
     {
       joint_trajectory.points[0].velocities = std::vector<double>(num_joints_, 0);
+      joint_trajectory.points[0].accelerations = std::vector<double>(num_joints_, 0);
     }
   }
 
