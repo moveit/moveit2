@@ -432,7 +432,7 @@ void MotionPlanningFrame::populatePlannerDescription(const moveit_msgs::msg::Pla
   {
     for (const std::string& planner_id : desc.planner_ids)
     {
-      RCLCPP_INFO(LOGGER, "planner id: %s", planner_id.c_str());
+      RCLCPP_DEBUG(LOGGER, "planner id: %s", planner_id.c_str());
       if (planner_id == group)
         found_group = true;
       else if (planner_id.substr(0, group.length()) == group)
