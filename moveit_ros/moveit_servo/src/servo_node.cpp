@@ -82,12 +82,19 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
       node_, robot_description_name, "planning_scene_monitor");
   planning_scene_monitor_->startStateMonitor(servo_parameters->joint_topic);
-  planning_scene_monitor_->startSceneMonitor();
+  planning_scene_monitor_->startSceneMonitor(servo_parameters->monitored_planning_scene_topic);
   planning_scene_monitor_->setPlanningScenePublishingFrequency(25);
   planning_scene_monitor_->getStateMonitor()->enableCopyDynamics(true);
   planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
                                                         std::string(node_->get_fully_qualified_name()) +
                                                             "/publish_planning_scene");
+  // If the planning scene monitor in servo is the primary one we provide /get_planning_scene service so RViz displays
+  // or secondary planning scene monitors can fetch the scene, otherwise we request the planning scene from the
+  // primary planning scene monitor (e.g. move_group)
+  if (servo_parameters->is_primary_planning_scene_monitor)
+    planning_scene_monitor_->providePlanningSceneService();
+  else
+    planning_scene_monitor_->requestPlanningSceneState();
 
   // Create Servo
   servo_ = std::make_unique<moveit_servo::Servo>(node_, servo_parameters, planning_scene_monitor_);

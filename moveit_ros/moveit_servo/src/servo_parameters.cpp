@@ -40,6 +40,7 @@
 */
 
 #include <moveit_servo/servo_parameters.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <rclcpp/rclcpp.hpp>
 #include <type_traits>
 
@@ -115,6 +116,11 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
   declareOrGetParam<std::string>(parameters->move_group_name, ns + ".move_group_name", node, logger);
   declareOrGetParam<std::string>(parameters->planning_frame, ns + ".planning_frame", node, logger);
   declareOrGetParam<std::string>(parameters->ee_frame_name, ns + ".ee_frame_name", node, logger);
+  declareOrGetParam<bool>(parameters->is_primary_planning_scene_monitor, ns + ".is_primary_planning_scene_monitor",
+                          node, logger, true);
+  declareOrGetParam<std::string>(parameters->monitored_planning_scene_topic, ns + ".monitored_planning_scene_topic",
+                                 node, logger,
+                                 planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC);
 
   // Stopping behaviour
   declareOrGetParam<double>(parameters->incoming_command_timeout, ns + ".incoming_command_timeout", node, logger);

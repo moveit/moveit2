@@ -83,6 +83,8 @@ struct ServoParameters
   std::string move_group_name;
   std::string planning_frame;
   std::string ee_frame_name;
+  bool is_primary_planning_scene_monitor;
+  std::string monitored_planning_scene_topic;
   // Stopping behaviour
   double incoming_command_timeout;
   int num_outgoing_halt_msgs_to_publish;
