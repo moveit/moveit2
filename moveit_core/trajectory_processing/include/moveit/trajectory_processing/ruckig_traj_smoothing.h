@@ -70,5 +70,12 @@ private:
    * \brief Return L2-norm of velocity, taking all joints into account.
    */
   static double getTargetVelocityMagnitude(const ruckig::InputParameter<0>& ruckig_input, size_t num_dof);
+
+  /**
+   * \brief Check if the joint positions of two waypoints are very similar.
+   */
+  static bool checkForIdenticalWaypoints(const moveit::core::RobotState& prev_waypoint,
+                                         const moveit::core::RobotState& next_waypoint, const size_t num_dof,
+                                         const std::vector<int>& joint_idx);
 };
 }  // namespace trajectory_processing
