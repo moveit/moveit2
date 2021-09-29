@@ -50,6 +50,8 @@ constexpr double DEFAULT_MAX_VELOCITY = 5;           // rad/s
 constexpr double DEFAULT_MAX_ACCELERATION = 10;      // rad/s^2
 constexpr double DEFAULT_MAX_JERK = 20;              // rad/s^3
 constexpr double IDENTICAL_POSITION_EPSILON = 1e-3;  // rad
+constexpr size_t MAX_DURATION_EXTENSION_ATTEMPTS = 5;
+constexpr size_t DURATION_EXTENSION_FRACTION = 1.1;
 }  // namespace
 
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
@@ -132,79 +134,90 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   }
 
   ruckig::Result ruckig_result;
-  for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
+  bool smoothing_complete = false;
+  robot_trajectory::RobotTrajectory original_trajectory_copy = trajectory;
+  size_t duration_extenstion_attempts = 0;
+  while (rclcpp::ok() && (duration_extenstion_attempts < MAX_DURATION_EXTENSION_ATTEMPTS) && !smoothing_complete)
   {
-    moveit::core::RobotStatePtr next_waypoint = trajectory.getWayPointPtr(waypoint_idx + 1);
-
-    getNextCurrentTargetStates(ruckig_input, ruckig_output, next_waypoint, num_dof, idx);
-
-    // Run Ruckig
-    ruckig_result = ruckig.update(ruckig_input, ruckig_output);
-
-    // If the requested velocity is too great, a joint can actually "move backward" to give itself more time to
-    // accelerate to the target velocity. Iterate and decrease velocities until that behavior is gone.
-    bool backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
-
-    double minimum_velocity_magnitude = 0.01;  // rad/s
-    double velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, num_dof);
-    while (backward_motion_detected && rclcpp::ok() && (velocity_magnitude > minimum_velocity_magnitude))
+    trajectory = original_trajectory_copy;
+    for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
     {
-      // Skip repeated waypoints with no change in position. Ruckig does not handle this well and there's really no need
-      // to smooth it Simply set it equal to the previous (identical) waypoint.
-      if (checkForIdenticalWaypoints(*trajectory.getWayPointPtr(waypoint_idx), *next_waypoint, num_dof, idx))
-      {
-        *next_waypoint = trajectory.getWayPoint(waypoint_idx);
-        continue;
-      }
+      moveit::core::RobotStatePtr next_waypoint = trajectory.getWayPointPtr(waypoint_idx + 1);
 
-      // decrease target velocity
-      for (size_t joint = 0; joint < num_dof; ++joint)
-      {
-        ruckig_input.target_velocity.at(joint) *= 0.9;
-        // Propogate the change in velocity to acceleration, too.
-        // We don't change the position to ensure the exact target position is achieved.
-        ruckig_input.target_acceleration.at(joint) =
-            (ruckig_input.target_velocity.at(joint) - ruckig_output.new_velocity.at(joint)) / timestep;
-      }
-      velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, num_dof);
+      getNextCurrentTargetStates(ruckig_input, ruckig_output, next_waypoint, num_dof, idx);
+
       // Run Ruckig
       ruckig_result = ruckig.update(ruckig_input, ruckig_output);
 
-      // check for backward motion
-      backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
-    }
-    /*
-        // If ruckig failed, the duration of the seed trajectory likely wasn't long enough.
-        // try duration extension several times.
-        if (ruckig_result != ruckig::Result::Working)
+      // If the requested velocity is too great, a joint can actually "move backward" to give itself more time to
+      // accelerate to the target velocity. Iterate and decrease velocities until that behavior is gone.
+      bool backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
+
+      double minimum_velocity_magnitude = 0.01;  // rad/s
+      double velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, num_dof);
+      while (backward_motion_detected && rclcpp::ok() && (velocity_magnitude > minimum_velocity_magnitude))
+      {
+        // Skip repeated waypoints with no change in position. Ruckig does not handle this well and there's really no
+        // need to smooth it Simply set it equal to the previous (identical) waypoint.
+        if (checkForIdenticalWaypoints(*trajectory.getWayPointPtr(waypoint_idx), *next_waypoint, num_dof, idx))
         {
-          // If Ruckig failed, it's likely because the original seed trajectory did not have a long enough duration.
-          // Extend the duration and try again.
-          // We do this by repeating the last waypoint.
-          // TODO: parameterize the fraction
-          // TODO: add success indication to while loop
-          // TODO: set a max duration extension parameter
-          size_t last_index = trajectory.getWayPointCount() - 1;
-          trajectory.setWayPointDurationFromPrevious(
-              last_index, 0.1 * trajectory.getWaypointDurationFromStart(trajectory.getWayPointCount() - 1));
+          *next_waypoint = trajectory.getWayPoint(waypoint_idx);
           continue;
         }
-    */
-    if (ruckig_result != ruckig::Result::Working)
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "Ruckig trajectory smoothing failed at waypoint " << waypoint_idx);
-      RCLCPP_ERROR_STREAM(LOGGER, "Ruckig error: " << ruckig_result);
-      return false;
+
+        // decrease target velocity
+        for (size_t joint = 0; joint < num_dof; ++joint)
+        {
+          ruckig_input.target_velocity.at(joint) *= 0.9;
+          // Propogate the change in velocity to acceleration, too.
+          // We don't change the position to ensure the exact target position is achieved.
+          ruckig_input.target_acceleration.at(joint) =
+              (ruckig_input.target_velocity.at(joint) - ruckig_output.new_velocity.at(joint)) / timestep;
+        }
+        velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, num_dof);
+        // Run Ruckig
+        ruckig_result = ruckig.update(ruckig_input, ruckig_output);
+
+        // check for backward motion
+        backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
+      }
+
+      // Overwrite pos/vel/accel of the target waypoint
+      for (size_t joint = 0; joint < num_dof; ++joint)
+      {
+        next_waypoint->setVariablePosition(idx.at(joint), ruckig_output.new_position.at(joint));
+        next_waypoint->setVariableVelocity(idx.at(joint), ruckig_output.new_velocity.at(joint));
+        next_waypoint->setVariableAcceleration(idx.at(joint), ruckig_output.new_acceleration.at(joint));
+      }
+      next_waypoint->update();
     }
 
-    // Overwrite pos/vel/accel of the target waypoint
-    for (size_t joint = 0; joint < num_dof; ++joint)
+    // If ruckig failed, the duration of the seed trajectory likely wasn't long enough.
+    // try duration extension several times.
+    if (ruckig_result == ruckig::Result::Working)
     {
-      next_waypoint->setVariablePosition(idx.at(joint), ruckig_output.new_position.at(joint));
-      next_waypoint->setVariableVelocity(idx.at(joint), ruckig_output.new_velocity.at(joint));
-      next_waypoint->setVariableAcceleration(idx.at(joint), ruckig_output.new_acceleration.at(joint));
+      smoothing_complete = true;
     }
-    next_waypoint->update();
+    else
+    {
+      // If Ruckig failed, it's likely because the original seed trajectory did not have a long enough duration.
+      // Extend the duration and try again.
+      for (size_t waypoint_idx = 1; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
+      {
+        trajectory.setWayPointDurationFromPrevious(
+            waypoint_idx, DURATION_EXTENSION_FRACTION * trajectory.getWayPointDurationFromPrevious(waypoint_idx));
+        // TODO(andyz): re-calculate waypoint velocity and acceleration here?
+      }
+      ++duration_extenstion_attempts;
+      continue;
+    }
+  }
+
+  if (ruckig_result != ruckig::Result::Working)
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Ruckig trajectory smoothing failed");
+    RCLCPP_ERROR_STREAM(LOGGER, "Ruckig error: " << ruckig_result);
+    return false;
   }
 
   return true;
