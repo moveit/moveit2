@@ -84,25 +84,8 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   ruckig::OutputParameter<0> ruckig_output{ num_dof };
 
   // Initialize the smoother
-  //  ruckig_input.synchronization = ruckig::Synchronization::Time;
   const std::vector<int>& idx = group->getVariableIndexList();
-  std::vector<double> current_positions_vector(num_dof);
-  std::vector<double> current_velocities_vector(num_dof);
-  std::vector<double> current_accelerations_vector(num_dof);
-  moveit::core::RobotStatePtr waypoint = trajectory.getFirstWayPointPtr();
-  for (size_t i = 0; i < num_dof; ++i)
-  {
-    current_positions_vector.at(i) = waypoint->getVariablePosition(idx.at(i));
-    current_velocities_vector.at(i) = waypoint->getVariableVelocity(idx.at(i));
-    current_accelerations_vector.at(i) = waypoint->getVariableAcceleration(idx.at(i));
-  }
-  std::copy_n(current_positions_vector.begin(), num_dof, ruckig_input.current_position.begin());
-  std::copy_n(current_velocities_vector.begin(), num_dof, ruckig_input.current_velocity.begin());
-  std::copy_n(current_accelerations_vector.begin(), num_dof, ruckig_input.current_acceleration.begin());
-  // Initialize output data struct
-  ruckig_output.new_position = ruckig_input.current_position;
-  ruckig_output.new_velocity = ruckig_input.current_velocity;
-  ruckig_output.new_acceleration = ruckig_input.current_acceleration;
+  initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), num_dof, idx);
 
   // Kinematic limits (vel/accel/jerk)
   const std::vector<std::string>& vars = group->getVariableNames();
@@ -135,11 +118,10 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
   ruckig::Result ruckig_result;
   bool smoothing_complete = false;
-  robot_trajectory::RobotTrajectory original_trajectory_copy = trajectory;
-  size_t duration_extenstion_attempts = 0;
-  while (rclcpp::ok() && (duration_extenstion_attempts < MAX_DURATION_EXTENSION_ATTEMPTS) && !smoothing_complete)
+  robot_trajectory::RobotTrajectory original_trajectory_copy(trajectory);
+  size_t duration_extension_attempts = 0;
+  while (rclcpp::ok() && (duration_extension_attempts < MAX_DURATION_EXTENSION_ATTEMPTS) && !smoothing_complete)
   {
-    trajectory = original_trajectory_copy;
     for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
     {
       moveit::core::RobotStatePtr next_waypoint = trajectory.getWayPointPtr(waypoint_idx + 1);
@@ -200,16 +182,17 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     }
     else
     {
-      // If Ruckig failed, it's likely because the original seed trajectory did not have a long enough duration.
-      // Extend the duration and try again.
-      for (size_t waypoint_idx = 1; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
+      // If Ruckig failed, it's likely because the original seed trajectory did not have a long enough duration when
+      // jerk is taken into account. Extend the duration and try again.
+      trajectory = original_trajectory_copy;
+      initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), num_dof, idx);
+      for (size_t waypoint_idx = 1; waypoint_idx < num_waypoints; ++waypoint_idx)
       {
         trajectory.setWayPointDurationFromPrevious(
             waypoint_idx, DURATION_EXTENSION_FRACTION * trajectory.getWayPointDurationFromPrevious(waypoint_idx));
         // TODO(andyz): re-calculate waypoint velocity and acceleration here?
       }
-      ++duration_extenstion_attempts;
-      continue;
+      ++duration_extension_attempts;
     }
   }
 
@@ -221,6 +204,30 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   }
 
   return true;
+}
+
+void RuckigSmoothing::initializeRuckigState(ruckig::InputParameter<0>& ruckig_input,
+                                            ruckig::OutputParameter<0>& ruckig_output,
+                                            const moveit::core::RobotState& first_waypoint, size_t num_dof,
+                                            const std::vector<int>& idx)
+{
+  std::vector<double> current_positions_vector(num_dof);
+  std::vector<double> current_velocities_vector(num_dof);
+  std::vector<double> current_accelerations_vector(num_dof);
+
+  for (size_t i = 0; i < num_dof; ++i)
+  {
+    current_positions_vector.at(i) = first_waypoint.getVariablePosition(idx.at(i));
+    current_velocities_vector.at(i) = first_waypoint.getVariableVelocity(idx.at(i));
+    current_accelerations_vector.at(i) = first_waypoint.getVariableAcceleration(idx.at(i));
+  }
+  std::copy_n(current_positions_vector.begin(), num_dof, ruckig_input.current_position.begin());
+  std::copy_n(current_velocities_vector.begin(), num_dof, ruckig_input.current_velocity.begin());
+  std::copy_n(current_accelerations_vector.begin(), num_dof, ruckig_input.current_acceleration.begin());
+  // Initialize output data struct
+  ruckig_output.new_position = ruckig_input.current_position;
+  ruckig_output.new_velocity = ruckig_input.current_velocity;
+  ruckig_output.new_acceleration = ruckig_input.current_acceleration;
 }
 
 bool RuckigSmoothing::checkForIdenticalWaypoints(const moveit::core::RobotState& prev_waypoint,

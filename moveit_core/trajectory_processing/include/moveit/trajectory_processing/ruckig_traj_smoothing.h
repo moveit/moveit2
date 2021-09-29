@@ -77,5 +77,12 @@ private:
   static bool checkForIdenticalWaypoints(const moveit::core::RobotState& prev_waypoint,
                                          const moveit::core::RobotState& next_waypoint, const size_t num_dof,
                                          const std::vector<int>& joint_idx);
+
+  /**
+   * \brief Initialize Ruckig position/vel/accel
+   */
+  static void initializeRuckigState(ruckig::InputParameter<0>& ruckig_input, ruckig::OutputParameter<0>& ruckig_output,
+                                    const moveit::core::RobotState& first_waypoint, size_t num_dof,
+                                    const std::vector<int>& joint_idx);
 };
 }  // namespace trajectory_processing
