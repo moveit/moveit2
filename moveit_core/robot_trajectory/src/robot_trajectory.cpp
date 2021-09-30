@@ -504,4 +504,75 @@ bool RobotTrajectory::getStateAtDurationFromStart(const double request_duration,
   return true;
 }
 
+void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes) const
+{
+  size_t num_points = getWayPointCount();
+  if (num_points == 0)
+  {
+    out << "Empty trajectory.";
+    return;
+  }
+
+  std::ios::fmtflags old_settings = out.flags();
+  int old_precision = out.precision();
+  out << std::fixed << std::setprecision(2);
+
+  out << "Trajectory has " << num_points << " points over " << getDuration() << " seconds\n";
+
+  if (variable_indexes.empty())
+  {
+    if (group_)
+    {
+      variable_indexes = group_->getVariableIndexList();
+    }
+    else
+    {
+      size_t variable_count = robot_model_->getVariableCount();
+      variable_indexes.reserve(variable_count);
+      for (size_t i = 0; i < variable_count; i++)
+      {
+        variable_indexes.push_back(i);
+      }
+    }
+  }
+
+  for (size_t p_i = 0; p_i < num_points; p_i++)
+  {
+    const moveit::core::RobotState& point = getWayPoint(p_i);
+    out << "  waypoint " << std::setw(3) << p_i;
+    out << " time " << std::setw(5) << getWayPointDurationFromStart(p_i);
+    out << " pos ";
+    for (int index : variable_indexes)
+    {
+      out << point.getVariablePosition(index) << " ";
+    }
+    if (point.hasVelocities())
+    {
+      out << "vel ";
+      for (int index : variable_indexes)
+      {
+        out << point.getVariableVelocity(index) << " ";
+      }
+    }
+    if (point.hasAccelerations())
+    {
+      out << "acc ";
+      for (int index : variable_indexes)
+      {
+        out << point.getVariableAcceleration(index) << " ";
+      }
+    }
+    out << "\n";
+  }
+
+  out.flags(old_settings);
+  out.precision(old_precision);
+}
+
+std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory)
+{
+  trajectory.print(out);
+  return out;
+}
+
 }  // end of namespace robot_trajectory

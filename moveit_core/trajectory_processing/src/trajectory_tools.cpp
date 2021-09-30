@@ -35,7 +35,6 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/trajectory_processing/trajectory_tools.h>
-#include <sstream>
 
 namespace trajectory_processing
 {
@@ -48,54 +47,4 @@ std::size_t trajectoryWaypointCount(const moveit_msgs::msg::RobotTrajectory& tra
 {
   return std::max(trajectory.joint_trajectory.points.size(), trajectory.multi_dof_joint_trajectory.points.size());
 }
-
-std::string toString(const robot_trajectory::RobotTrajectory& trajectory, bool print_jerk)
-{
-  const moveit::core::JointModelGroup* group = trajectory.getGroup();
-  const std::vector<int>& idx = group->getVariableIndexList();
-  unsigned int count = trajectory.getWayPointCount();
-
-  if (count == 0)
-  {
-    return "Empty trajectory.";
-  }
-
-  std::stringstream ss;
-  ss << "Trajectory has " << count << " points over " << trajectory.getWayPointDurationFromStart(count - 1)
-     << " seconds.\n";
-  for (unsigned i = 0; i < count; i++)
-  {
-    const moveit::core::RobotState& point = trajectory.getWayPoint(i);
-    ss << "  waypoint " << i << "\t";
-    ss << "time " << trajectory.getWayPointDurationFromStart(i);
-    ss << " pos ";
-    for (int index : idx)
-    {
-      ss << point.getVariablePosition(index) << " ";
-    }
-    ss << "vel ";
-    for (int index : idx)
-    {
-      ss << point.getVariableVelocity(index) << " ";
-    }
-    ss << "acc ";
-    for (int index : idx)
-    {
-      ss << point.getVariableAcceleration(index) << " ";
-    }
-    if (print_jerk && i > 0)
-    {
-      const moveit::core::RobotState& prev = trajectory.getWayPoint(i - 1);
-      ss << "jrk ";
-      double dt = trajectory.getWayPointDurationFromStart(i) - trajectory.getWayPointDurationFromStart(i - 1);
-      for (int index : idx)
-      {
-        ss << (point.getVariableAcceleration(index) - prev.getVariableAcceleration(index)) / dt << " ";
-      }
-    }
-    ss << "\n";
-  }
-  return ss.str();
-}
-
 }  // namespace trajectory_processing
