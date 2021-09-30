@@ -41,6 +41,7 @@
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/trajectory_processing/iterative_spline_parameterization.h>
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
+#include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/utils/robot_model_test_utils.h>
 #include "rclcpp/rclcpp.hpp"
 
@@ -111,32 +112,6 @@ int initStraightTrajectory(robot_trajectory::RobotTrajectory& trajectory, double
   return 0;
 }
 
-void printTrajectory(robot_trajectory::RobotTrajectory& trajectory)
-{
-  const moveit::core::JointModelGroup* group = trajectory.getGroup();
-  const std::vector<int>& idx = group->getVariableIndexList();
-  unsigned int count = trajectory.getWayPointCount();
-
-  std::cout << "trajectory length is " << trajectory.getWayPointDurationFromStart(count - 1) << " seconds."
-            << std::endl;
-  std::cout << "  Trajectory Points" << std::endl;
-  for (unsigned i = 0; i < count; i++)
-  {
-    moveit::core::RobotStatePtr point = trajectory.getWayPointPtr(i);
-    printf("  waypoint %2d time %6.2f pos %6.2f vel %6.2f acc %6.2f ", i, trajectory.getWayPointDurationFromStart(i),
-           point->getVariablePosition(idx[0]), point->getVariableVelocity(idx[0]),
-           point->getVariableAcceleration(idx[0]));
-    if (i > 0)
-    {
-      moveit::core::RobotStatePtr prev = trajectory.getWayPointPtr(i - 1);
-      printf("jrk %6.2f",
-             (point->getVariableAcceleration(idx[0]) - prev->getVariableAcceleration(idx[0])) /
-                 (trajectory.getWayPointDurationFromStart(i) - trajectory.getWayPointDurationFromStart(i - 1)));
-    }
-    printf("\n");
-  }
-}
-
 TEST(TestTimeParameterization, TestIterativeParabolic)
 {
   trajectory_processing::IterativeParabolicTimeParameterization time_parameterization;
@@ -147,7 +122,7 @@ TEST(TestTimeParameterization, TestIterativeParabolic)
 
   std::cout << "IterativeParabolicTimeParameterization  took " << (std::chrono::system_clock::now() - wt).count()
             << std::endl;
-  printTrajectory(TRAJECTORY);
+  std::cout << trajectory_processing::toString(TRAJECTORY);
   ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 3.0);
 }
 
@@ -159,7 +134,7 @@ TEST(TestTimeParameterization, TestIterativeSpline)
   auto wt = std::chrono::system_clock::now();
   EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
   std::cout << "IterativeSplineParameterization took " << (std::chrono::system_clock::now() - wt).count() << std::endl;
-  printTrajectory(TRAJECTORY);
+  std::cout << trajectory_processing::toString(TRAJECTORY);
   ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 5.0);
 }
 
@@ -172,7 +147,7 @@ TEST(TestTimeParameterization, TestIterativeSplineAddPoints)
   EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
   std::cout << "IterativeSplineParameterization with added points took "
             << (std::chrono::system_clock::now() - wt).count() << std::endl;
-  printTrajectory(TRAJECTORY);
+  std::cout << trajectory_processing::toString(TRAJECTORY);
   ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 5.0);
 }
 
@@ -182,7 +157,7 @@ TEST(TestTimeParameterization, TestRepeatedPoint)
   EXPECT_EQ(initRepeatedPointTrajectory(TRAJECTORY), 0);
 
   EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
-  printTrajectory(TRAJECTORY);
+  std::cout << trajectory_processing::toString(TRAJECTORY);
   ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 0.001);
 }
 
