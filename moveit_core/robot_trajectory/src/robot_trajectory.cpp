@@ -515,7 +515,7 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
 
   std::ios::fmtflags old_settings = out.flags();
   int old_precision = out.precision();
-  out << std::fixed << std::setprecision(2);
+  out << std::fixed << std::setprecision(3);
 
   out << "Trajectory has " << num_points << " points over " << getDuration() << " seconds\n";
 
@@ -544,14 +544,14 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
     out << " pos ";
     for (int index : variable_indexes)
     {
-      out << point.getVariablePosition(index) << " ";
+      out << std::setw(6) << point.getVariablePosition(index) << " ";
     }
     if (point.hasVelocities())
     {
       out << "vel ";
       for (int index : variable_indexes)
       {
-        out << point.getVariableVelocity(index) << " ";
+        out << std::setw(6) << point.getVariableVelocity(index) << " ";
       }
     }
     if (point.hasAccelerations())
@@ -559,7 +559,7 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
       out << "acc ";
       for (int index : variable_indexes)
       {
-        out << point.getVariableAcceleration(index) << " ";
+        out << std::setw(6) << point.getVariableAcceleration(index) << " ";
       }
     }
     out << "\n";
@@ -567,6 +567,7 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
 
   out.flags(old_settings);
   out.precision(old_precision);
+  out.flush();
 }
 
 std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory)
