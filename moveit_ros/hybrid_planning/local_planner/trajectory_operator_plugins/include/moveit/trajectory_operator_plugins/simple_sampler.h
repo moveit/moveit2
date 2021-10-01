@@ -33,10 +33,12 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: Simple trajectory operator that samples the next global trajectory waypoint as local goal constraint
+   Description: A Trajectory Operator Plugin that samples the next global trajectory waypoint as local goal constraint
    based on the current robot state. When the waypoint is reached the index that marks the current local goal constraint
    is updated to the next global trajectory waypoint. Global trajectory updates simply replace the reference trajectory.
  */
+
+#pragma once
 
 #include <moveit/local_planner/trajectory_operator_interface.h>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>

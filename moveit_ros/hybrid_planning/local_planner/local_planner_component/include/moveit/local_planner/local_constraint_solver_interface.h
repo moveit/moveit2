@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: Defines an interface for a local constraint solver plugin implementation for the local planner component node.
+   Description: Defines an interface for a Local Constraint Solver Plugin implementation for the Local Planner Component node.
  */
 
 #pragma once

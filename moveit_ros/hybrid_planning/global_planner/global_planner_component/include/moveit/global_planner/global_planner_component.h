@@ -33,6 +33,8 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
+   Description: Implementation of the Global Planner Component node which solves global motion planning requests as
+   defined by the Global Planner Plugin and shares the solution with the other components.
  */
 
 #pragma once
@@ -55,8 +57,6 @@ class GlobalPlannerComponent : public rclcpp::Node
 {
 public:
   GlobalPlannerComponent(const rclcpp::NodeOptions& options);
-
-  // TODO(sjahr) implement get_last_solution service
 
 private:
   rclcpp::TimerBase::SharedPtr timer_;
@@ -85,5 +85,4 @@ private:
   // Initialize planning scene monitor and load pipelines
   bool init();
 };
-
 }  // namespace moveit_hybrid_planning

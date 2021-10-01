@@ -33,10 +33,12 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: Simple hybrid planning logic that runs the global planner once and starts executing the global solution
-   with the local planner. In case the local planner detects a collision the global planner is rerun to update the
-   invalidated global trajectory.
+   Description: A Planner Logic Plugin that runs the global planner initially once and executes the global solution
+   with the local planner afterwards. In case the local planner detects a collision the global planner is re-run to
+   update the invalidated global trajectory.
  */
+
+#pragma once
 
 #include <moveit/planner_logic_plugins/single_plan_execution.h>
 

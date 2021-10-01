@@ -33,8 +33,9 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: A local planner component node that is customizable through plugins that implement the local planning
-   problem solver algorithm and the trajectory matching and blending.
+   Description: The Local Planner Component node blends global trajectories into an internal reference trajectory and matches
+   and solves each iteration the local planning problem. How these problems are solved is defined by the Trajectory Operator
+   Plugin and the Local Solver Plugin implementations. The local solution is published via a ROS topic.
  */
 
 #pragma once

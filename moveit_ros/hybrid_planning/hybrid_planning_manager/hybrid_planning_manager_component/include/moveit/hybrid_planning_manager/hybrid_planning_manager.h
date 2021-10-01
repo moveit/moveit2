@@ -33,7 +33,8 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: The hybrid planning manager component node that serves as the control unit of the whole architecture.
+   Description: Implementation of the Hybrid Planning Manager component node which serves as API and control unit of the
+   whole architecture.
  */
 
 #pragma once

@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: Simple local solver plugin that forwards the next waypoint of the sampled local trajectory.
+   Description: A Local Solver Plugin that forwards the next waypoint of the sampled local trajectory.
    Additionally, it is possible to enable collision checking, which lets the robot stop in front of a collision object.
  */
 

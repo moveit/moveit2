@@ -33,8 +33,8 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: Defines an interface for a global motion planner plugin implementation used in the global planner
-   component node.
+   Description: Defines an interface for a Global Planner Plugin implementation used in the Global Planner
+   Component node.
  */
 
 #pragma once
