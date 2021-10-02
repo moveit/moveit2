@@ -160,7 +160,8 @@ public:
   double getDistanceGradient(double x, double y, double z, double& gradient_x, double& gradient_y, double& gradient_z,
                              bool& in_bounds) const
   {
-    Eigen::Vector3d rel_pos = pose_.inverse() * Eigen::Vector3d(x, y, z);
+    // Transpose of a rotation matrix equals its inverse, but computationally cheaper
+    Eigen::Vector3d rel_pos = pose_.linear().transpose() * Eigen::Vector3d(x, y, z);
     double gx, gy, gz;
     double res = distance_field::PropagationDistanceField::getDistanceGradient(rel_pos.x(), rel_pos.y(), rel_pos.z(),
                                                                                gx, gy, gz, in_bounds);
