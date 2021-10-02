@@ -120,13 +120,13 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   bool smoothing_complete = false;
   robot_trajectory::RobotTrajectory original_trajectory_copy(trajectory);
   size_t duration_extension_attempts = 0;
-  while (rclcpp::ok() && (duration_extension_attempts < MAX_DURATION_EXTENSION_ATTEMPTS) && !smoothing_complete)
+  while ((duration_extension_attempts < MAX_DURATION_EXTENSION_ATTEMPTS) && !smoothing_complete)
   {
     for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
     {
       moveit::core::RobotStatePtr next_waypoint = trajectory.getWayPointPtr(waypoint_idx + 1);
 
-      getNextCurrentTargetStates(ruckig_input, ruckig_output, next_waypoint, num_dof, idx);
+      getNextRuckigInput(ruckig_output, next_waypoint, num_dof, idx, ruckig_input);
 
       // Run Ruckig
       ruckig_result = ruckig.update(ruckig_input, ruckig_output);
@@ -137,11 +137,11 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
       double minimum_velocity_magnitude = 0.01;  // rad/s
       double velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, num_dof);
-      while (backward_motion_detected && rclcpp::ok() && (velocity_magnitude > minimum_velocity_magnitude))
+      while (backward_motion_detected && (velocity_magnitude > minimum_velocity_magnitude))
       {
         // Skip repeated waypoints with no change in position. Ruckig does not handle this well and there's really no
         // need to smooth it Simply set it equal to the previous (identical) waypoint.
-        if (checkForIdenticalWaypoints(*trajectory.getWayPointPtr(waypoint_idx), *next_waypoint, num_dof, idx))
+        if (checkForIdenticalWaypoints(*trajectory.getWayPointPtr(waypoint_idx), *next_waypoint, trajectory.getGroup()))
         {
           *next_waypoint = trajectory.getWayPoint(waypoint_idx);
           continue;
@@ -231,17 +231,10 @@ void RuckigSmoothing::initializeRuckigState(ruckig::InputParameter<0>& ruckig_in
 }
 
 bool RuckigSmoothing::checkForIdenticalWaypoints(const moveit::core::RobotState& prev_waypoint,
-                                                 const moveit::core::RobotState& next_waypoint, const size_t num_dof,
-                                                 const std::vector<int>& joint_idx)
+                                                 const moveit::core::RobotState& next_waypoint,
+                                                 const moveit::core::JointModelGroup* joint_group)
 {
-  double magnitude_position_difference = 0;
-  for (size_t joint = 0; joint < num_dof; ++joint)
-  {
-    magnitude_position_difference += pow((prev_waypoint.getVariablePosition(joint_idx.at(joint)) -
-                                          next_waypoint.getVariablePosition(joint_idx.at(joint))),
-                                         2.);
-  }
-  magnitude_position_difference = sqrt(magnitude_position_difference);
+  double magnitude_position_difference = prev_waypoint.distance(next_waypoint, joint_group);
 
   if (magnitude_position_difference > IDENTICAL_POSITION_EPSILON)
   {
@@ -278,11 +271,13 @@ bool RuckigSmoothing::checkForLaggingMotion(const size_t num_dof, const ruckig::
   return false;
 }
 
-void RuckigSmoothing::getNextCurrentTargetStates(ruckig::InputParameter<0>& ruckig_input,
-                                                 ruckig::OutputParameter<0>& ruckig_output,
-                                                 const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
-                                                 const std::vector<int>& idx)
+void RuckigSmoothing::getNextRuckigInput(const ruckig::OutputParameter<0>& ruckig_output,
+                                         const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
+                                         const std::vector<int>& idx, ruckig::InputParameter<0>& ruckig_input)
 {
+  // TODO(andyz): replace this method with the new OutputParameter pass_to_input() when it's available
+  // ruckig_output.pass_to_input(ruckig_input);
+
   for (size_t joint = 0; joint < num_dof; ++joint)
   {
     // Feed output from the previous timestep back as input

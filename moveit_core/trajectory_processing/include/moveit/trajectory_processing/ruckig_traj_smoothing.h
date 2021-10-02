@@ -53,10 +53,9 @@ private:
   /**
    * \brief Feed previous output back as input for next iteration. Get next target state from the next waypoint.
    */
-  static void getNextCurrentTargetStates(ruckig::InputParameter<0>& ruckig_input,
-                                         ruckig::OutputParameter<0>& ruckig_output,
-                                         const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
-                                         const std::vector<int>& idx);
+  static void getNextRuckigInput(const ruckig::OutputParameter<0>& ruckig_output,
+                                 const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
+                                 const std::vector<int>& idx, ruckig::InputParameter<0>& ruckig_input);
 
   /**
    * \brief Check for lagging motion of any joint at a waypoint.
@@ -75,8 +74,8 @@ private:
    * \brief Check if the joint positions of two waypoints are very similar.
    */
   static bool checkForIdenticalWaypoints(const moveit::core::RobotState& prev_waypoint,
-                                         const moveit::core::RobotState& next_waypoint, const size_t num_dof,
-                                         const std::vector<int>& joint_idx);
+                                         const moveit::core::RobotState& next_waypoint,
+                                         const moveit::core::JointModelGroup* joint_group);
 
   /**
    * \brief Initialize Ruckig position/vel/accel
