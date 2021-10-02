@@ -26,6 +26,7 @@ jobs:
     steps:
       - name: Check for apt updates
         uses: addnab/docker-run-action@v3
+        continue-on-error: true
         id: apt
         with:
           image: ${{ env.GH_IMAGE }}
@@ -77,6 +78,7 @@ jobs:
     steps:
       - name: Check for apt updates
         uses: addnab/docker-run-action@v3
+        continue-on-error: true
         id: apt
         with:
           image: ${{ env.GH_IMAGE }}
@@ -129,6 +131,7 @@ jobs:
     steps:
       - name: Check for apt updates
         uses: addnab/docker-run-action@v3
+        continue-on-error: true
         id: apt
         with:
           image: ${{ env.GH_IMAGE }}
@@ -179,6 +182,7 @@ jobs:
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
 
     steps:
+      - uses: actions/checkout@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to Github Containter Registry
@@ -192,15 +196,17 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: "Remove .dockerignore"
+        run: rm .dockerignore  # enforce full source context
       - name: Build and Push
         uses: docker/build-push-action@v2
         with:
+          context: .
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: true
           cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
-          no-cache: true
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}

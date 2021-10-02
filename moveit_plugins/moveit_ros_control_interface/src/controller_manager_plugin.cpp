@@ -138,7 +138,8 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
     managed_controllers_.clear();
     active_controllers_.clear();
 
-    for (const controller_manager_msgs::msg::ControllerState& controller : result_future.get()->controller)
+    const auto& result = result_future.get();
+    for (const controller_manager_msgs::msg::ControllerState& controller : result->controller)
     {
       if (isActive(controller))
       {
