@@ -68,25 +68,31 @@ rclcpp_components_register_nodes(moveit_hybrid_planning_manager "moveit_hybrid_p
 rclcpp_components_register_nodes(moveit_global_planner_component "moveit_hybrid_planning::GlobalPlannerComponent")
 rclcpp_components_register_nodes(moveit_local_planner_component "moveit_hybrid_planning::LocalPlannerComponent")
 
-install(TARGETS ${LIBRARIES} hybrid_planning_test_node
+# Install targets
+install(
+  TARGETS
+    ${LIBRARIES}
+    hybrid_planning_test_node
+  EXPORT ${PROJECT_NAME}Targets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
-  INCLUDES DESTINATION include)
+  INCLUDES DESTINATION include
+)
 
 install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS} DESTINATION include)
 
 install(DIRECTORY test/launch DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY test/config DESTINATION share/${PROJECT_NAME})
 
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME}Targets)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+
 pluginlib_export_plugin_description_file(moveit_hybrid_planning single_plan_execution_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning moveit_planning_pipeline_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning simple_sampler_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning replan_invalidated_trajectory_plugin.xml)
 pluginlib_export_plugin_description_file(moveit_hybrid_planning forward_trajectory_plugin.xml)
-
-ament_export_include_directories(include)
-ament_export_libraries(${LIBRARIES})
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 ament_package()
