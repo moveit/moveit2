@@ -58,7 +58,7 @@ ReactionResult SinglePlanExecution::processEvent(const BasicHybridPlanningEvent&
   switch (event)
   {
     case moveit_hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
-      if (!hybrid_planning_manager_->planGlobalTrajectory())  // Start global planning
+      if (!hybrid_planning_manager_->sendGlobalPlannerAction())  // Start global planning
       {
         hybrid_planning_manager_->sendHybridPlanningResponse(false);
       }

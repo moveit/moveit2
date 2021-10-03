@@ -87,7 +87,7 @@ public:
    * Send global planning request to global planner component
    * @return Global planner successfully started yes/no
    */
-  bool planGlobalTrajectory();
+  bool sendGlobalPlannerAction();
 
   /**
    * Send local planning request to local planner component

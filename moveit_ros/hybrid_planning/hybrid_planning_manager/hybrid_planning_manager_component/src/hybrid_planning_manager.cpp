@@ -159,7 +159,7 @@ bool HybridPlanningManager::initialize()
   return true;
 }
 
-bool HybridPlanningManager::planGlobalTrajectory()
+bool HybridPlanningManager::sendGlobalPlannerAction()
 {
   auto global_goal_options = rclcpp_action::Client<moveit_msgs::action::GlobalPlanner>::SendGoalOptions();
 
