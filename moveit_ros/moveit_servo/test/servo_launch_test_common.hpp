@@ -104,19 +104,18 @@ public:
     // Init ROS interfaces
     // Publishers
     pub_twist_cmd_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
-        resolveServoTopicName(servo_parameters_->cartesian_command_in_topic), 10);
+        resolveServoTopicName(servo_parameters_->cartesian_command_in_topic), rclcpp::SystemDefaultsQoS());
     pub_joint_cmd_ = node_->create_publisher<control_msgs::msg::JointJog>(
-        resolveServoTopicName(servo_parameters_->joint_command_in_topic), 10);
+        resolveServoTopicName(servo_parameters_->joint_command_in_topic), rclcpp::SystemDefaultsQoS());
+
+    // Subscriber
+    sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
+        resolveServoTopicName(servo_parameters_->status_topic), rclcpp::SystemDefaultsQoS(),
+        std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
   }
 
   void TearDown() override
   {
-    // If the stop client isn't null, we set it up and likely started the Servo. Stop it.
-    // Otherwise the Servo is still running when another test starts...
-    if (!client_servo_stop_)
-    {
-      client_servo_stop_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-    }
     executor_->cancel();
     if (executor_thread_.joinable())
       executor_thread_.join();
@@ -128,42 +127,6 @@ public:
       return topic_name.replace(0, 1, test_parameters_->servo_node_name);
     else
       return topic_name;
-  }
-
-  // Set up for callbacks (so they aren't run for EVERY test)
-  bool setupStartClient()
-  {
-    // Start client
-    client_servo_start_ = node_->create_client<std_srvs::srv::Trigger>(resolveServoTopicName("~/start_servo"));
-    while (!client_servo_start_->service_is_ready())
-    {
-      if (!rclcpp::ok())
-      {
-        RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
-        return false;
-      }
-      RCLCPP_INFO(LOGGER, "client_servo_start_ service not available, waiting again...");
-      rclcpp::sleep_for(500ms);
-    }
-
-    // If we setup the start client, also setup the stop client...
-    client_servo_stop_ = node_->create_client<std_srvs::srv::Trigger>(resolveServoTopicName("~/stop_servo"));
-    while (!client_servo_stop_->service_is_ready())
-    {
-      if (!rclcpp::ok())
-      {
-        RCLCPP_ERROR(LOGGER, "Interrupted while waiting for the service. Exiting.");
-        return false;
-      }
-      RCLCPP_INFO(LOGGER, "client_servo_stop_ service not available, waiting again...");
-      rclcpp::sleep_for(500ms);
-    }
-
-    // Status sub (we need this to check that we've started / stopped)
-    sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
-        resolveServoTopicName(servo_parameters_->status_topic), 10,
-        std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
-    return true;
   }
 
   bool setupPauseClient()
@@ -235,7 +198,7 @@ public:
   bool setupCollisionScaleSub()
   {
     sub_collision_scale_ = node_->create_subscription<std_msgs::msg::Float64>(
-        resolveServoTopicName("~/collision_velocity_scale"), ROS_QUEUE_SIZE,
+        resolveServoTopicName("~/collision_velocity_scale"), rclcpp::SystemDefaultsQoS(),
         std::bind(&ServoFixture::collisionScaleCB, this, std::placeholders::_1));
     return true;
   }
@@ -245,14 +208,14 @@ public:
     if (command_type == "trajectory_msgs/JointTrajectory")
     {
       sub_trajectory_cmd_output_ = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-          resolveServoTopicName(servo_parameters_->command_out_topic), 10,
+          resolveServoTopicName(servo_parameters_->command_out_topic), rclcpp::SystemDefaultsQoS(),
           std::bind(&ServoFixture::trajectoryCommandCB, this, std::placeholders::_1));
       return true;
     }
     else if (command_type == "std_msgs/Float64MultiArray")
     {
       sub_array_cmd_output_ = node_->create_subscription<std_msgs::msg::Float64MultiArray>(
-          resolveServoTopicName(servo_parameters_->command_out_topic), 10,
+          resolveServoTopicName(servo_parameters_->command_out_topic), rclcpp::SystemDefaultsQoS(),
           std::bind(&ServoFixture::arrayCommandCB, this, std::placeholders::_1));
       return true;
     }
@@ -266,7 +229,7 @@ public:
   bool setupJointStateSub()
   {
     sub_joint_state_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-        resolveServoTopicName(servo_parameters_->joint_topic), 10,
+        resolveServoTopicName(servo_parameters_->joint_topic), rclcpp::SystemDefaultsQoS(),
         std::bind(&ServoFixture::jointStateCB, this, std::placeholders::_1));
     return true;
   }
@@ -362,10 +325,22 @@ public:
     num_joint_state_ = 0;
   }
 
+  bool haveReceivedTrajCommand()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    return latest_traj_cmd_ != nullptr;
+  }
+
   trajectory_msgs::msg::JointTrajectory getLatestTrajCommand()
   {
     const std::lock_guard<std::mutex> lock(latest_state_mutex_);
     return *latest_traj_cmd_;
+  }
+
+  bool haveReceivedArrayCommand()
+  {
+    const std::lock_guard<std::mutex> lock(latest_state_mutex_);
+    return latest_array_cmd_ != nullptr;
   }
 
   std_msgs::msg::Float64MultiArray getLatestArrayCommand()
@@ -399,20 +374,11 @@ public:
     return status_seen_;
   }
 
-  bool start()
+  bool waitForIncreasingStatus()
   {
-    auto time_start = node_->now();
-    auto start_result = client_servo_start_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-    if (!start_result.get()->success)
-    {
-      RCLCPP_ERROR(LOGGER, "Error returned form service call to start servo");
-      return false;
-    }
-    RCLCPP_INFO_STREAM(LOGGER, "Wait for start servo: " << (node_->now() - time_start).seconds());
-
-    // Test that status messages start
+    // Test that status messages are being received
     rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
-    time_start = node_->now();
+    auto time_start = node_->now();
     auto num_statuses_start = getNumStatus();
     size_t iterations = 0;
     while (getNumStatus() == num_statuses_start && iterations++ < test_parameters_->timeout_iterations)
@@ -429,40 +395,6 @@ public:
     }
 
     return getNumStatus() > num_statuses_start;
-  }
-
-  bool stop()
-  {
-    auto time_start = node_->now();
-    auto stop_result = client_servo_stop_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
-    if (!stop_result.get()->success)
-    {
-      RCLCPP_ERROR(LOGGER, "Error returned form service call to stop servo");
-      return false;
-    }
-    RCLCPP_INFO_STREAM(LOGGER, "Wait for stop servo service: " << (node_->now() - time_start).seconds());
-
-    // Test that status messages stop
-    rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
-    time_start = node_->now();
-    size_t num_statuses_start = 0;
-    size_t iterations = 0;
-    do
-    {
-      num_statuses_start = getNumStatus();
-      // Wait 4x the loop rate
-      for (size_t i = 0; i < 4; ++i)
-        publish_loop_rate.sleep();
-    } while (getNumStatus() != num_statuses_start && ++iterations < test_parameters_->timeout_iterations);
-    RCLCPP_INFO_STREAM(LOGGER, "Wait for status to stop: " << (node_->now() - time_start).seconds());
-
-    if (iterations >= test_parameters_->timeout_iterations)
-    {
-      RCLCPP_ERROR(LOGGER, "Timeout waiting for status num increasing");
-      return false;
-    }
-
-    return true;
   }
 
 protected:
@@ -483,8 +415,6 @@ protected:
   // ROS interfaces
 
   // Service Clients
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_start_;
-  rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_stop_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_pause_;
   rclcpp::Client<std_srvs::srv::Trigger>::SharedPtr client_servo_unpause_;
   rclcpp::Client<moveit_msgs::srv::ChangeControlDimensions>::SharedPtr client_change_control_dims_;
@@ -509,11 +439,11 @@ protected:
   double latest_collision_scale_;
 
   size_t num_joint_state_;
-  sensor_msgs::msg::JointState::ConstSharedPtr latest_joint_state_;
+  sensor_msgs::msg::JointState::ConstSharedPtr latest_joint_state_ = nullptr;
 
   size_t num_commands_;
-  trajectory_msgs::msg::JointTrajectory::SharedPtr latest_traj_cmd_;
-  std_msgs::msg::Float64MultiArray::ConstSharedPtr latest_array_cmd_;
+  trajectory_msgs::msg::JointTrajectory::SharedPtr latest_traj_cmd_ = nullptr;
+  std_msgs::msg::Float64MultiArray::ConstSharedPtr latest_array_cmd_ = nullptr;
 
   bool status_seen_;
   StatusCode status_tracking_code_ = StatusCode::NO_WARNING;

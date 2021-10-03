@@ -105,8 +105,8 @@ def generate_launch_description():
             # Assuming ROS2 intraprocess communications works well, this is a more efficient way.
             # ComposableNode(
             #     package="moveit_servo",
-            #     plugin="moveit_servo::ServoServer",
-            #     name="servo_server",
+            #     plugin="moveit_servo::ServoNode",
+            #     name="servo_node",
             #     parameters=[
             #         servo_params,
             #         robot_description,
@@ -130,13 +130,11 @@ def generate_launch_description():
                 package="moveit_servo",
                 plugin="moveit_servo::JoyToServoPub",
                 name="controller_to_servo_node",
-                extra_arguments=[{"use_intra_process_comms": True}],
             ),
             ComposableNode(
                 package="joy",
                 plugin="joy::Joy",
                 name="joy_node",
-                extra_arguments=[{"use_intra_process_comms": True}],
             ),
         ],
         output="screen",
@@ -145,7 +143,7 @@ def generate_launch_description():
     # As opposed to a node component, this may be necessary (for example) if Servo is running on a different PC
     servo_node = Node(
         package="moveit_servo",
-        executable="servo_server_node",
+        executable="servo_node_main",
         parameters=[
             servo_params,
             robot_description,

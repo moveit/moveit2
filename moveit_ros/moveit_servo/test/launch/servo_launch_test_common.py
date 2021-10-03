@@ -113,7 +113,7 @@ def generate_servo_test_description(
         name="test_servo_integration_container",
         namespace="/",
         package="rclcpp_components",
-        executable="component_container",
+        executable="component_container_mt",
         composable_node_descriptions=[
             ComposableNode(
                 package="robot_state_publisher",
@@ -135,7 +135,7 @@ def generate_servo_test_description(
         name="servo_container",
         namespace="/",
         package="rclcpp_components",
-        executable="component_container",
+        executable="component_container_mt",
         composable_node_descriptions=[
             ComposableNode(
                 package="moveit_servo",
@@ -147,7 +147,6 @@ def generate_servo_test_description(
                     robot_description_semantic,
                     joint_limits_yaml,
                 ],
-                extra_arguments=[{"use_intra_process_comm": True}],
             ),
         ],
         output="screen",

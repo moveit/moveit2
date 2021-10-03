@@ -40,53 +40,13 @@
 
 namespace moveit_servo
 {
-TEST_F(ServoFixture, StartStopTest)
-{
-  // Setup the start/stop clients, and the command callback
-  auto log_time_start = node_->now();
-  ASSERT_TRUE(setupStartClient());
-  ASSERT_TRUE(setupJointStateSub());
-  auto log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
-
-  // Wait for a joint state message to ensure fake_joint_driver is up
-  rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
-  log_time_start = node_->now();
-  bool got_msg = false;
-  while (!got_msg)
-  {
-    if (getNumJointState() > 0)
-      got_msg = true;
-
-    publish_loop_rate.sleep();
-  }
-  ASSERT_TRUE(got_msg);
-  log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Wait for joint state message time: " << (log_time_end - log_time_start).seconds());
-
-  // Try to start Servo
-  ASSERT_TRUE(start());
-  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
-
-  // Now stop servo
-  ASSERT_TRUE(stop());
-
-  // Restart and recheck Servo
-  ASSERT_TRUE(start());
-  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
-}
-
 TEST_F(ServoFixture, SendTwistStampedTest)
 {
-  auto log_time_start = node_->now();
-  ASSERT_TRUE(setupStartClient());
-  ASSERT_TRUE(setupCommandSub(servo_parameters_->command_out_type));
-  auto log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
+  // Make sure servo is running
+  ASSERT_TRUE(waitForIncreasingStatus()) << "Servo is not running";
 
-  // Start Servo
-  ASSERT_TRUE(start());
-  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
+  // setup listener for command subscription for counters
+  ASSERT_TRUE(setupCommandSub(servo_parameters_->command_out_type));
 
   // We want to count the number of commands Servo publishes, we need timing
   auto time_start = node_->now();
@@ -119,15 +79,11 @@ TEST_F(ServoFixture, SendTwistStampedTest)
 
 TEST_F(ServoFixture, SendJointServoTest)
 {
-  auto log_time_start = node_->now();
-  ASSERT_TRUE(setupStartClient());
-  ASSERT_TRUE(setupCommandSub(servo_parameters_->command_out_type));
-  auto log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
+  // Make sure servo is running
+  ASSERT_TRUE(waitForIncreasingStatus()) << "Servo is not running";
 
-  // Start Servo
-  ASSERT_TRUE(start());
-  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
+  // setup listener for command subscription for counters
+  ASSERT_TRUE(setupCommandSub(servo_parameters_->command_out_type));
 
   // We want to count the number of commands Servo publishes, we need timing
   auto time_start = node_->now();
@@ -153,7 +109,7 @@ TEST_F(ServoFixture, SendJointServoTest)
 
   // Compare actual number received to expected number
   auto num_expected = (time_end - time_start).seconds() / servo_parameters_->publish_period;
-  log_time_end = node_->now();
+  auto log_time_end = node_->now();
   RCLCPP_INFO_STREAM(LOGGER, "Wait publish messages: " << (time_end - time_start).seconds());
 
   EXPECT_GT(num_received, 0.5 * num_expected);
@@ -162,16 +118,24 @@ TEST_F(ServoFixture, SendJointServoTest)
   // Now let's test the Servo input going stale
   // We expect the command we were publishing above to continue for a while, then
   // to continually receive Servo output, but with 0 velocity/delta_position
-  log_time_start = node_->now();
+  auto log_time_start = node_->now();
 
   // Allow the last command to go stale and measure the output position
   const int sleep_time = 1.5 * 1000 * servo_parameters_->incoming_command_timeout;
   rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
-  double joint_position_first = getLatestTrajCommand().points[0].positions[0];
+  ASSERT_TRUE(haveReceivedTrajCommand());
+  auto latest_joint_command = getLatestTrajCommand();
+  ASSERT_GT(latest_joint_command.points.size(), 0U);
+  ASSERT_GT(latest_joint_command.points[0].positions.size(), 0U);
+  double joint_position_first = latest_joint_command.points[0].positions[0];
 
   // Now if we sleep a bit longer and check again, it should be the same
   rclcpp::sleep_for(std::chrono::milliseconds(sleep_time));
-  double joint_position_later = getLatestTrajCommand().points[0].positions[0];
+  ASSERT_TRUE(haveReceivedTrajCommand());
+  latest_joint_command = getLatestTrajCommand();
+  ASSERT_GT(latest_joint_command.points.size(), 0U);
+  ASSERT_GT(latest_joint_command.points[0].positions.size(), 0U);
+  double joint_position_later = latest_joint_command.points[0].positions[0];
   EXPECT_NEAR(joint_position_first, joint_position_later, 0.001);
 
   log_time_end = node_->now();
@@ -180,11 +144,8 @@ TEST_F(ServoFixture, SendJointServoTest)
 
 TEST_F(ServoFixture, DynamicParameterTest)
 {
-  ASSERT_TRUE(setupStartClient());
-
-  // Start Servo
-  ASSERT_TRUE(start());
-  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
+  // Make sure servo is running
+  ASSERT_TRUE(waitForIncreasingStatus()) << "Servo is not running";
 
   auto set_parameters_client =
       node_->create_client<rcl_interfaces::srv::SetParameters>(test_parameters_->servo_node_name + "/set_parameters");

@@ -4,6 +4,7 @@ API changes in MoveIt releases
 
 ## ROS Rolling
 - ServoServer was renamed to ServoNode
+- Start and Stop services are deprecated from ServoNode.  Please use pause and unpause serice calls for pausing and resuming servo based control.
 
 ## ROS Noetic
 - RobotModel no longer overrides empty URDF collision geometry by matching the visual geometry of the link.

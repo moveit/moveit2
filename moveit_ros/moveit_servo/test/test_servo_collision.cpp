@@ -45,21 +45,15 @@ namespace moveit_servo
 {
 TEST_F(ServoFixture, SelfCollision)
 {
-  auto log_time_start = node_->now();
-  ASSERT_TRUE(setupStartClient());
-  auto log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
-
-  // Start Servo
-  ASSERT_TRUE(start());
-  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
+  // Make sure servo is running
+  ASSERT_TRUE(waitForIncreasingStatus()) << "Servo is not running";
 
   // Look for DECELERATE_FOR_COLLISION status
   watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_COLLISION);
 
   // Publish some joint jog commands that will bring us to collision
   rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
-  log_time_start = node_->now();
+  auto log_time_start = node_->now();
   size_t iterations = 0;
   while (!sawTrackedStatus() && iterations++ < test_parameters_->timeout_iterations)
   {
@@ -73,7 +67,7 @@ TEST_F(ServoFixture, SelfCollision)
   }
 
   EXPECT_LT(iterations, test_parameters_->timeout_iterations);
-  log_time_end = node_->now();
+  auto log_time_end = node_->now();
   RCLCPP_INFO_STREAM(LOGGER, "Wait for collision: " << (log_time_end - log_time_start).seconds());
 }
 
@@ -82,13 +76,8 @@ TEST_F(ServoFixture, ExternalCollision)
   // NOTE: This test is meant to be run after the SelfCollision test
   // It assumes the position is where the robot ends in SelfCollision test
 
-  auto log_time_start = node_->now();
-  ASSERT_TRUE(setupStartClient());
-  auto log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
-
-  // Start Servo
-  ASSERT_TRUE(start());
+  // Make sure servo is running
+  ASSERT_TRUE(waitForIncreasingStatus()) << "Servo is not running";
 
   // Create collision object, in the way of servoing
   moveit_msgs::msg::CollisionObject collision_object;
@@ -124,7 +113,7 @@ TEST_F(ServoFixture, ExternalCollision)
 
   // Now publish twist commands that collide with the box
   rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
-  log_time_start = node_->now();
+  auto log_time_start = node_->now();
   size_t iterations = 0;
   while (!sawTrackedStatus() && iterations++ < test_parameters_->timeout_iterations)
   {
@@ -136,7 +125,7 @@ TEST_F(ServoFixture, ExternalCollision)
   }
 
   EXPECT_LT(iterations, test_parameters_->timeout_iterations);
-  log_time_end = node_->now();
+  auto log_time_end = node_->now();
   RCLCPP_INFO_STREAM(LOGGER, "Wait for collision: " << (log_time_end - log_time_start).seconds());
 }
 

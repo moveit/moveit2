@@ -47,13 +47,17 @@
 #include <moveit_msgs/msg/planning_scene.hpp>
 #include <thread>
 
+namespace
+{
 // We'll just set up parameters here
 const std::string JOY_TOPIC = "/joy";
 const std::string TWIST_TOPIC = "/servo_node/delta_twist_cmds";
 const std::string JOINT_TOPIC = "/servo_node/delta_joint_cmds";
-const size_t ROS_QUEUE_SIZE = 10;
 const std::string EEF_FRAME_ID = "panda_hand";
 const std::string BASE_FRAME_ID = "panda_link0";
+const size_t AXIS_SIZE = 8;
+const size_t BUTTON_SIZE = 11;
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.joystick_servo_example");
 
 // Enums for button names -> axis/button array index
 // For XBOX 1 controller
@@ -87,6 +91,18 @@ enum Button
 // This will map the default values for the axes
 std::map<Axis, double> AXIS_DEFAULTS = { { LEFT_TRIGGER, 1.0 }, { RIGHT_TRIGGER, 1.0 } };
 std::map<Button, double> BUTTON_DEFAULTS;
+
+}  // namespace
+
+bool checkAxisArraySize(const std::vector<float>& axes)
+{
+  return (!(axes.size() < AXIS_SIZE));
+}
+
+bool checkButtonsArraySize(const std::vector<int>& buttons)
+{
+  return (!(buttons.size() < BUTTON_SIZE));
+}
 
 // To change controls or setup a new controller, all you should to do is change the above enums and the follow 2
 // functions
@@ -159,16 +175,12 @@ public:
   {
     // Setup pub/sub
     joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
-        JOY_TOPIC, ROS_QUEUE_SIZE, std::bind(&JoyToServoPub::joyCB, this, std::placeholders::_1));
+        JOY_TOPIC, rclcpp::SystemDefaultsQoS(), std::bind(&JoyToServoPub::joyCB, this, std::placeholders::_1));
 
-    twist_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>(TWIST_TOPIC, ROS_QUEUE_SIZE);
-    joint_pub_ = this->create_publisher<control_msgs::msg::JointJog>(JOINT_TOPIC, ROS_QUEUE_SIZE);
-    collision_pub_ = this->create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", 10);
-
-    // Create a service client to start the ServoNode
-    servo_start_client_ = this->create_client<std_srvs::srv::Trigger>("/servo_node/start_servo");
-    servo_start_client_->wait_for_service(std::chrono::seconds(1));
-    servo_start_client_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+    twist_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>(TWIST_TOPIC, rclcpp::SystemDefaultsQoS());
+    joint_pub_ = this->create_publisher<control_msgs::msg::JointJog>(JOINT_TOPIC, rclcpp::SystemDefaultsQoS());
+    collision_pub_ =
+        this->create_publisher<moveit_msgs::msg::PlanningScene>("/planning_scene", rclcpp::SystemDefaultsQoS());
 
     // Load the collision scene asynchronously
     collision_pub_thread_ = std::thread([this]() {
@@ -220,6 +232,12 @@ public:
 
   void joyCB(const sensor_msgs::msg::Joy::SharedPtr msg)
   {
+    // Check the range of buttons message
+    if (!checkAxisArraySize(msg->axes) || !checkButtonsArraySize(msg->buttons))
+    {
+      return;
+    }
+
     // Create the messages we might publish
     auto twist_msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
     auto joint_msg = std::make_unique<control_msgs::msg::JointJog>();

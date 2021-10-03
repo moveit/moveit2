@@ -45,11 +45,8 @@ namespace moveit_servo
 {
 TEST_F(ServoFixture, ReachSingular)
 {
-  ASSERT_TRUE(setupStartClient());
-
-  // Start Servo
-  ASSERT_TRUE(start());
-  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
+  // Make sure servo is running
+  ASSERT_TRUE(waitForIncreasingStatus()) << "Servo is not running";
 
   // Look for DECELERATE_FOR_SINGULARITY status
   watchForStatus(moveit_servo::StatusCode::DECELERATE_FOR_SINGULARITY);

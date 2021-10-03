@@ -54,14 +54,8 @@ namespace moveit_servo
 {
 TEST_F(ServoFixture, SendTwistStampedTest)
 {
-  auto log_time_start = node_->now();
-  ASSERT_TRUE(setupStartClient());
-  auto log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
-
   // Start Servo
-  ASSERT_TRUE(start());
-  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
+  ASSERT_TRUE(waitForIncreasingStatus());
 
   auto parameters = servo_parameters_;
 
@@ -70,11 +64,11 @@ TEST_F(ServoFixture, SendTwistStampedTest)
   std::function<void(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
       [&received_count](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) { ++received_count; };
   auto traj_sub = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-      resolveServoTopicName(parameters->command_out_topic), 1, traj_callback);
+      resolveServoTopicName(parameters->command_out_topic), rclcpp::SystemDefaultsQoS(), traj_callback);
 
   // Create publisher to send servo commands
   auto twist_stamped_pub = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
-      resolveServoTopicName(parameters->cartesian_command_in_topic), 1);
+      resolveServoTopicName(parameters->cartesian_command_in_topic), rclcpp::SystemDefaultsQoS());
 
   constexpr double test_duration = 1.0;
   const double publish_period = parameters->publish_period;
@@ -104,14 +98,8 @@ TEST_F(ServoFixture, SendTwistStampedTest)
 
 TEST_F(ServoFixture, SendJointServoTest)
 {
-  auto log_time_start = node_->now();
-  ASSERT_TRUE(setupStartClient());
-  auto log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
-
   // Start Servo
-  ASSERT_TRUE(start());
-  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
+  ASSERT_TRUE(waitForIncreasingStatus());
 
   auto parameters = servo_parameters_;
   auto cmd_out_topic = resolveServoTopicName(parameters->command_out_topic);
@@ -122,10 +110,12 @@ TEST_F(ServoFixture, SendJointServoTest)
   size_t received_count = 0;
   std::function<void(const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr)> traj_callback =
       [&received_count](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr msg) { ++received_count; };
-  auto traj_sub = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(cmd_out_topic, 1, traj_callback);
+  auto traj_sub = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
+      cmd_out_topic, rclcpp::SystemDefaultsQoS(), traj_callback);
 
   // Create publisher to send servo commands
-  auto joint_servo_pub = node_->create_publisher<control_msgs::msg::JointJog>(cmd_in_topic, 1);
+  auto joint_servo_pub =
+      node_->create_publisher<control_msgs::msg::JointJog>(cmd_in_topic, rclcpp::SystemDefaultsQoS());
 
   constexpr double test_duration = 1.0;
   const double publish_period = parameters->publish_period;
