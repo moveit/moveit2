@@ -53,7 +53,7 @@ bool SinglePlanExecution::initialize(
   return true;
 }
 
-ReactionResult SinglePlanExecution::react(const BasicHybridPlanningEvent& event)
+ReactionResult SinglePlanExecution::processEvent(const BasicHybridPlanningEvent& event)
 {
   switch (event)
   {
@@ -81,7 +81,7 @@ ReactionResult SinglePlanExecution::react(const BasicHybridPlanningEvent& event)
   return ReactionResult(event, "", moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 }
 
-ReactionResult SinglePlanExecution::react(const std::string& event)
+ReactionResult SinglePlanExecution::processEvent(const std::string& event)
 {
   return ReactionResult(event, "'Single-Plan-Execution' plugin cannot handle events given as string.",
                         moveit_msgs::msg::MoveItErrorCodes::FAILURE);
