@@ -65,7 +65,7 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
     }
     else
     {
-      initialized_ = this->init();
+      initialized_ = this->initialize();
       if (!initialized_)
       {
         timer_->cancel();
@@ -75,7 +75,7 @@ GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& option
   });
 }
 
-bool GlobalPlannerComponent::init()
+bool GlobalPlannerComponent::initialize()
 {
   auto node_ptr = shared_from_this();
 
@@ -92,7 +92,7 @@ bool GlobalPlannerComponent::init()
         RCLCPP_INFO(LOGGER, "Received request to cancel global planning goal");
         if (!global_planner_instance_->reset())
         {
-          throw std::runtime_error("Failed to reset the global planner while aborting current global planning");
+          RCLCPP_ERROR(LOGGER, "Failed to reset the global planner while aborting current global planning");
         }
         return rclcpp_action::CancelResponse::ACCEPT;
       },
@@ -154,7 +154,7 @@ void GlobalPlannerComponent::globalPlanningRequestCallback(
   // Reset the global planner
   if (!global_planner_instance_->reset())
   {
-    throw std::runtime_error("Failed to reset the global planner");
+    RCLCPP_ERROR(LOGGER, "Failed to reset the global planner while aborting current global planning");
   }
 };
 }  // namespace moveit_hybrid_planning
