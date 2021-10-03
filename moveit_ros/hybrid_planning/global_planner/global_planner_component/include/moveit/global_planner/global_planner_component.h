@@ -82,7 +82,7 @@ private:
   void globalPlanningRequestCallback(
       std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle);
 
-  // Initialize planning scene monitor and load pipelines
-  bool init();
+  // Load and initialized global planner plugin and ROS 2 action and topic interfaces
+  bool initialize();
 };
 }  // namespace moveit_hybrid_planning
