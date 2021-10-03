@@ -44,7 +44,7 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
 
 namespace moveit_hybrid_planning
 {
-ReactionResult ReplanInvalidatedTrajectory::react(const std::string& event)
+ReactionResult ReplanInvalidatedTrajectory::processEvent(const std::string& event)
 {
   if (event == "collision_ahead")
   {

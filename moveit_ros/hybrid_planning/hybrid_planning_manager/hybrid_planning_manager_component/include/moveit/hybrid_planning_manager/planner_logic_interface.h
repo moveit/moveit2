@@ -132,14 +132,14 @@ public:
    * @param event Basic hybrid planning event
    * @return Reaction result that summarizes the outcome of the reaction
    */
-  virtual ReactionResult react(const BasicHybridPlanningEvent& event) = 0;
+  virtual ReactionResult processEvent(const BasicHybridPlanningEvent& event) = 0;
 
   /**
    * React to custom event
    * @param event Encoded as string
    * @return Reaction result that summarizes the outcome of the reaction
    */
-  virtual ReactionResult react(const std::string& event) = 0;
+  virtual ReactionResult processEvent(const std::string& event) = 0;
 
 protected:
   // The hybrid planning manager instance that runs this logic plugin
