@@ -42,7 +42,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/local_planner/local_constraint_solver_interface.h>
 
-namespace moveit_hybrid_planning
+namespace moveit::hybrid_planning
 {
 class ForwardTrajectory : public LocalConstraintSolverInterface
 {
@@ -65,4 +65,4 @@ private:
   bool path_invalidation_event_send_;  // Send path invalidation event only once
   bool stop_before_collision_;
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning

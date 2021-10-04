@@ -42,7 +42,7 @@
 #include <moveit/hybrid_planning_manager/planner_logic_interface.h>
 #include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
 
-namespace moveit_hybrid_planning
+namespace moveit::hybrid_planning
 {
 class SinglePlanExecution : public PlannerLogicInterface
 {
@@ -50,8 +50,8 @@ public:
   SinglePlanExecution() = default;
   ~SinglePlanExecution() = default;
   bool
-  initialize(const std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager>& hybrid_planning_manager) override;
+  initialize(const std::shared_ptr<moveit::hybrid_planning::HybridPlanningManager>& hybrid_planning_manager) override;
   ReactionResult processEvent(const BasicHybridPlanningEvent& event) override;
   ReactionResult processEvent(const std::string& event) override;
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning

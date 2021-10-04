@@ -44,19 +44,19 @@
 
 #include <moveit_msgs/msg/constraints.hpp>
 
+using namespace std::chrono_literals;
+
+namespace moveit::hybrid_planning
+{
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 }
 
-namespace moveit_hybrid_planning
-{
-using namespace std::chrono_literals;
-
 LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   : Node("local_planner_component", options)
 {
-  state_ = moveit_hybrid_planning::LocalPlannerState::UNCONFIGURED;
+  state_ = LocalPlannerState::UNCONFIGURED;
   local_planner_feedback_ = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
 
   // Initialize local planner after construction
@@ -64,15 +64,15 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   timer_ = this->create_wall_timer(1ms, [this]() {
     switch (state_)
     {
-      case moveit_hybrid_planning::LocalPlannerState::READY:
+      case LocalPlannerState::READY:
       {
         timer_->cancel();
         break;
       }
-      case moveit_hybrid_planning::LocalPlannerState::UNCONFIGURED:
+      case LocalPlannerState::UNCONFIGURED:
         if (this->initialize())
         {
-          state_ = moveit_hybrid_planning::LocalPlannerState::READY;
+          state_ = LocalPlannerState::READY;
         }
         else
         {
@@ -110,9 +110,8 @@ bool LocalPlannerComponent::initialize()
   // Load trajectory operator plugin
   try
   {
-    trajectory_operator_loader_ =
-        std::make_unique<pluginlib::ClassLoader<moveit_hybrid_planning::TrajectoryOperatorInterface>>(
-            "moveit_hybrid_planning", "moveit_hybrid_planning::TrajectoryOperatorInterface");
+    trajectory_operator_loader_ = std::make_unique<pluginlib::ClassLoader<TrajectoryOperatorInterface>>(
+        "moveit_hybrid_planning", "moveit::hybrid_planning::TrajectoryOperatorInterface");
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -138,9 +137,8 @@ bool LocalPlannerComponent::initialize()
   // Load local constraint solver
   try
   {
-    local_constraint_solver_plugin_loader_ =
-        std::make_unique<pluginlib::ClassLoader<moveit_hybrid_planning::LocalConstraintSolverInterface>>(
-            "moveit_hybrid_planning", "moveit_hybrid_planning::LocalConstraintSolverInterface");
+    local_constraint_solver_plugin_loader_ = std::make_unique<pluginlib::ClassLoader<LocalConstraintSolverInterface>>(
+        "moveit_hybrid_planning", "moveit::hybrid_planning::LocalConstraintSolverInterface");
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -201,7 +199,7 @@ bool LocalPlannerComponent::initialize()
         }
 
         // Update local planner state
-        state_ = moveit_hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE;
+        state_ = LocalPlannerState::LOCAL_PLANNING_ACTIVE;
       });
 
   // Initialize local solution publisher
@@ -221,7 +219,7 @@ bool LocalPlannerComponent::initialize()
     // Local solution publisher is defined by the local constraint solver plugin
   }
 
-  state_ = moveit_hybrid_planning::LocalPlannerState::READY;
+  state_ = LocalPlannerState::READY;
   return true;
 }
 
@@ -233,17 +231,17 @@ void LocalPlannerComponent::executePlanningLoopRun()
   switch (state_)
   {
     // If READY start waiting for trajectory
-    case moveit_hybrid_planning::LocalPlannerState::READY:
+    case LocalPlannerState::READY:
     {
-      state_ = moveit_hybrid_planning::LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY;
+      state_ = LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY;
       break;
     }
     // Wait for global solution to be published
-    case moveit_hybrid_planning::LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY:
+    case LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY:
       // Do nothing
       break;
     // Notify action client that local planning failed
-    case moveit_hybrid_planning::LocalPlannerState::ABORT:
+    case LocalPlannerState::ABORT:
     {
       local_planning_goal_handle_->abort(result);
       local_constraint_solver_instance_->reset();
@@ -251,11 +249,11 @@ void LocalPlannerComponent::executePlanningLoopRun()
       timer_->cancel();
 
       // TODO(sjahr) add proper reset function
-      state_ = moveit_hybrid_planning::LocalPlannerState::READY;
+      state_ = LocalPlannerState::READY;
       break;
     }
     // If the planner received an action request and a global solution it starts to plan locally
-    case moveit_hybrid_planning::LocalPlannerState::LOCAL_PLANNING_ACTIVE:
+    case LocalPlannerState::LOCAL_PLANNING_ACTIVE:
     {
       // Read current planning scene
       planning_scene_monitor_->updateFrameTransforms();
@@ -270,7 +268,7 @@ void LocalPlannerComponent::executePlanningLoopRun()
       if (trajectory_operator_instance_->getTrajectoryProgress(current_robot_state) == 1.0)
       {
         local_planning_goal_handle_->succeed(result);
-        state_ = moveit_hybrid_planning::LocalPlannerState::READY;
+        state_ = LocalPlannerState::READY;
         local_constraint_solver_instance_->reset();
         trajectory_operator_instance_->reset();
         timer_->cancel();
@@ -339,13 +337,13 @@ void LocalPlannerComponent::executePlanningLoopRun()
       local_constraint_solver_instance_->reset();
       trajectory_operator_instance_->reset();
       RCLCPP_ERROR(LOGGER, "Local planner somehow failed :(");  // TODO(sjahr) Add more detailed failure information
-      state_ = moveit_hybrid_planning::LocalPlannerState::READY;
+      state_ = LocalPlannerState::READY;
       break;
     }
   }
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning
 
 // Register the component with class_loader
 #include <rclcpp_components/register_node_macro.hpp>
-RCLCPP_COMPONENTS_REGISTER_NODE(moveit_hybrid_planning::LocalPlannerComponent)
+RCLCPP_COMPONENTS_REGISTER_NODE(moveit::hybrid_planning::LocalPlannerComponent)

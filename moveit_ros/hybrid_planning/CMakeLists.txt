@@ -64,9 +64,9 @@ add_subdirectory(global_planner)
 add_subdirectory(local_planner)
 add_subdirectory(test)
 
-rclcpp_components_register_nodes(moveit_hybrid_planning_manager "moveit_hybrid_planning::HybridPlanningManager")
-rclcpp_components_register_nodes(moveit_global_planner_component "moveit_hybrid_planning::GlobalPlannerComponent")
-rclcpp_components_register_nodes(moveit_local_planner_component "moveit_hybrid_planning::LocalPlannerComponent")
+rclcpp_components_register_nodes(moveit_hybrid_planning_manager "moveit::hybrid_planning::HybridPlanningManager")
+rclcpp_components_register_nodes(moveit_global_planner_component "moveit::hybrid_planning::GlobalPlannerComponent")
+rclcpp_components_register_nodes(moveit_local_planner_component "moveit::hybrid_planning::LocalPlannerComponent")
 
 # Install targets
 install(

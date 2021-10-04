@@ -39,13 +39,13 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
 
+namespace moveit::hybrid_planning
+{
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
 }
 
-namespace moveit_hybrid_planning
-{
 const std::string PLANNING_SCENE_MONITOR_NS = "planning_scene_monitor_options.";
 const std::string PLANNING_PIPELINES_NS = "planning_pipelines.";
 const std::string PLAN_REQUEST_PARAM_NS = "plan_request_params.";
@@ -138,8 +138,8 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
 
   return response;
 }
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(moveit_hybrid_planning::MoveItPlanningPipeline, moveit_hybrid_planning::GlobalPlannerInterface);
+PLUGINLIB_EXPORT_CLASS(moveit::hybrid_planning::MoveItPlanningPipeline, moveit::hybrid_planning::GlobalPlannerInterface);

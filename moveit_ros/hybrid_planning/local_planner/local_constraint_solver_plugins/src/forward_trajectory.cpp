@@ -39,13 +39,13 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
 
+namespace moveit::hybrid_planning
+{
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 }
 
-namespace moveit_hybrid_planning
-{
 bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
                                    const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
                                    const std::string& group_name)
@@ -132,9 +132,9 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
 
   return feedback_result;
 }
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning
 
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(moveit_hybrid_planning::ForwardTrajectory,
-                       moveit_hybrid_planning::LocalConstraintSolverInterface);
+PLUGINLIB_EXPORT_CLASS(moveit::hybrid_planning::ForwardTrajectory,
+                       moveit::hybrid_planning::LocalConstraintSolverInterface);

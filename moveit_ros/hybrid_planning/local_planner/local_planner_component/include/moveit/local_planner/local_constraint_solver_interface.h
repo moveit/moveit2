@@ -51,7 +51,7 @@
 
 #include <trajectory_msgs/msg/joint_trajectory.h>
 
-namespace moveit_hybrid_planning
+namespace moveit::hybrid_planning
 {
 /**
  * Class LocalConstraintSolverInterface - Base class for a local constrain solver.
@@ -85,4 +85,4 @@ public:
    */
   virtual bool reset() = 0;
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning

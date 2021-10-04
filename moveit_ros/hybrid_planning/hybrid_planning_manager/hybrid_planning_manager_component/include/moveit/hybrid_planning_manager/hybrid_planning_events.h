@@ -37,7 +37,7 @@
  */
 #pragma once
 
-namespace moveit_hybrid_planning
+namespace moveit::hybrid_planning
 {
 /**
  * Enum class BasicHybridPlanningEvent - This class defines the most basic events that are likely to occur during hybrid planning
@@ -54,4 +54,4 @@ enum class BasicHybridPlanningEvent
   // Indicates that the local planning action finished (Does not indicate planning success! The action response contains this information)
   LOCAL_PLANNING_ACTION_FINISHED,
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning

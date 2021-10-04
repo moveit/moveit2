@@ -42,7 +42,7 @@
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit/hybrid_planning_manager/hybrid_planning_events.h>
 
-namespace moveit_hybrid_planning
+namespace moveit::hybrid_planning
 {
 // TODO(sjahr): Move this into utility package
 class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
@@ -82,16 +82,16 @@ struct ReactionResult
   {
     switch (planning_event)
     {
-      case moveit_hybrid_planning::BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
+      case BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
         event = "Hybrid planning request received";
         break;
-      case moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_PLANNING_ACTION_FINISHED:
+      case BasicHybridPlanningEvent::GLOBAL_PLANNING_ACTION_FINISHED:
         event = "Global planning action finished";
         break;
-      case moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
+      case BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
         event = "Global solution available";
         break;
-      case moveit_hybrid_planning::BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
+      case BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
         event = "Local planning action finished";
         break;
     }
@@ -124,8 +124,7 @@ public:
    * @param hybrid_planning_manager The hybrid planning manager instance to initialize this logic with.
    * @return true if initialization was successful
    */
-  virtual bool
-  initialize(const std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager>& hybrid_planning_manager) = 0;
+  virtual bool initialize(const std::shared_ptr<HybridPlanningManager>& hybrid_planning_manager) = 0;
 
   /**
    * React to event defined in BasicHybridPlanningEvent enum
@@ -143,6 +142,6 @@ public:
 
 protected:
   // The hybrid planning manager instance that runs this logic plugin
-  std::shared_ptr<moveit_hybrid_planning::HybridPlanningManager> hybrid_planning_manager_ = nullptr;
+  std::shared_ptr<HybridPlanningManager> hybrid_planning_manager_ = nullptr;
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning

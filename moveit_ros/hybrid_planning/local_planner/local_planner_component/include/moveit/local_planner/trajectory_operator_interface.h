@@ -49,7 +49,7 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
 
-namespace moveit_hybrid_planning
+namespace moveit::hybrid_planning
 {
 /**
  * Class TrajectoryOperatorInterface - Base class for a trajectory operator. The operator's task is manage the local
@@ -106,4 +106,4 @@ protected:
   robot_trajectory::RobotTrajectoryPtr reference_trajectory_;
   std::string group_;
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning

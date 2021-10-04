@@ -52,6 +52,9 @@
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 
 using namespace std::chrono_literals;
+
+namespace moveit::hybrid_planning
+{
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
@@ -254,6 +257,7 @@ private:
   // TF
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
 };
+}  // namespace moveit::hybrid_planning
 
 int main(int argc, char** argv)
 {
@@ -263,7 +267,7 @@ int main(int argc, char** argv)
 
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("hybrid_planning_test_node", "", node_options);
 
-  HybridPlanningDemo demo(node);
+  moveit::hybrid_planning::HybridPlanningDemo demo(node);
   std::thread run_demo([&demo]() {
     rclcpp::sleep_for(5s);
     demo.run();

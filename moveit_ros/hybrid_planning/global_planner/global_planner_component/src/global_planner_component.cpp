@@ -43,13 +43,13 @@
 #include <chrono>
 #include <thread>
 
+namespace moveit::hybrid_planning
+{
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
 }
 
-namespace moveit_hybrid_planning
-{
 using namespace std::chrono_literals;
 const std::string UNDEFINED = "<undefined>";
 
@@ -105,9 +105,8 @@ bool GlobalPlannerComponent::initialize()
 
   try
   {
-    global_planner_plugin_loader_ =
-        std::make_unique<pluginlib::ClassLoader<moveit_hybrid_planning::GlobalPlannerInterface>>(
-            "moveit_hybrid_planning", "moveit_hybrid_planning::GlobalPlannerInterface");
+    global_planner_plugin_loader_ = std::make_unique<pluginlib::ClassLoader<GlobalPlannerInterface>>(
+        "moveit_hybrid_planning", "moveit::hybrid_planning::GlobalPlannerInterface");
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -157,8 +156,8 @@ void GlobalPlannerComponent::globalPlanningRequestCallback(
     RCLCPP_ERROR(LOGGER, "Failed to reset the global planner while aborting current global planning");
   }
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning
 
 // Register the component with class_loader
 #include <rclcpp_components/register_node_macro.hpp>
-RCLCPP_COMPONENTS_REGISTER_NODE(moveit_hybrid_planning::GlobalPlannerComponent)
+RCLCPP_COMPONENTS_REGISTER_NODE(moveit::hybrid_planning::GlobalPlannerComponent)
