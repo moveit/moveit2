@@ -64,8 +64,8 @@ ReactionResult SinglePlanExecution::processEvent(const BasicHybridPlanningEvent&
       }
       break;
     case moveit_hybrid_planning::BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
-      std::call_once(LOCAL_PLANNER_STARTED, [this]() {     // ensure the local planner is not started twice
-        if (!hybrid_planning_manager_->runLocalPlanner())  // Start local planning
+      std::call_once(LOCAL_PLANNER_STARTED, [this]() {            // ensure the local planner is not started twice
+        if (!hybrid_planning_manager_->sendLocalPlannerAction())  // Start local planning
         {
           hybrid_planning_manager_->sendHybridPlanningResponse(false);
         }

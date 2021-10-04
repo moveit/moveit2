@@ -93,7 +93,7 @@ public:
    * Send local planning request to local planner component
    * @return Local planner successfully started yes/no
    */
-  bool runLocalPlanner();
+  bool sendLocalPlannerAction();
 
   /**
    * Send back hybrid planning response
