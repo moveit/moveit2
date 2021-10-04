@@ -50,7 +50,7 @@ constexpr double DEFAULT_MAX_VELOCITY = 5;           // rad/s
 constexpr double DEFAULT_MAX_ACCELERATION = 10;      // rad/s^2
 constexpr double DEFAULT_MAX_JERK = 20;              // rad/s^3
 constexpr double IDENTICAL_POSITION_EPSILON = 1e-3;  // rad
-constexpr size_t MAX_DURATION_EXTENSION_ATTEMPTS = 5;
+constexpr double MAX_DURATION_EXTENSION_FACTOR = 1.5;
 constexpr size_t DURATION_EXTENSION_FRACTION = 1.1;
 }  // namespace
 
@@ -119,8 +119,8 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   ruckig::Result ruckig_result;
   bool smoothing_complete = false;
   robot_trajectory::RobotTrajectory original_trajectory_copy(trajectory);
-  size_t duration_extension_attempts = 0;
-  while ((duration_extension_attempts < MAX_DURATION_EXTENSION_ATTEMPTS) && !smoothing_complete)
+  double duration_extension_factor = 1;
+  while ((duration_extension_factor < MAX_DURATION_EXTENSION_FACTOR) && !smoothing_complete)
   {
     for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
     {
@@ -186,13 +186,13 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       // jerk is taken into account. Extend the duration and try again.
       trajectory = original_trajectory_copy;
       initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), num_dof, idx);
+      duration_extension_factor *= DURATION_EXTENSION_FRACTION;
       for (size_t waypoint_idx = 1; waypoint_idx < num_waypoints; ++waypoint_idx)
       {
         trajectory.setWayPointDurationFromPrevious(
             waypoint_idx, DURATION_EXTENSION_FRACTION * trajectory.getWayPointDurationFromPrevious(waypoint_idx));
         // TODO(andyz): re-calculate waypoint velocity and acceleration here?
       }
-      ++duration_extension_attempts;
     }
   }
 
