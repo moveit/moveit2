@@ -99,7 +99,7 @@ def generate_launch_description():
         name="moveit_servo_demo_container",
         namespace="/",
         package="rclcpp_components",
-        executable="component_container",
+        executable="component_container_mt",
         composable_node_descriptions=[
             # Example of launching Servo as a node component
             # Assuming ROS2 intraprocess communications works well, this is a more efficient way.
