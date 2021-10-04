@@ -47,7 +47,7 @@
 #include <moveit_msgs/action/global_planner.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 
-namespace moveit_hybrid_planning
+namespace moveit::hybrid_planning
 {
 /**
  * Class GlobalPlannerInterface - Base class for a global planner implementation
@@ -75,4 +75,4 @@ public:
    */
   virtual bool reset() = 0;
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning

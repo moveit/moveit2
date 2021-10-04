@@ -44,7 +44,7 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/moveit_cpp/planning_component.h>
 
-namespace moveit_hybrid_planning
+namespace moveit::hybrid_planning
 {
 class MoveItPlanningPipeline : public GlobalPlannerInterface
 {
@@ -61,4 +61,4 @@ private:
   rclcpp::Node::SharedPtr node_ptr_;
   std::shared_ptr<moveit_cpp::MoveItCpp> moveit_cpp_;
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning

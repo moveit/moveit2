@@ -50,7 +50,7 @@
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 
-namespace moveit_hybrid_planning
+namespace moveit::hybrid_planning
 {
 // Component node containing the global planner
 class GlobalPlannerComponent : public rclcpp::Node
@@ -65,10 +65,10 @@ private:
   std::string global_planner_name_;
 
   // Global planner plugin loader
-  std::unique_ptr<pluginlib::ClassLoader<moveit_hybrid_planning::GlobalPlannerInterface>> global_planner_plugin_loader_;
+  std::unique_ptr<pluginlib::ClassLoader<GlobalPlannerInterface>> global_planner_plugin_loader_;
 
   // Global planner instance
-  std::shared_ptr<moveit_hybrid_planning::GlobalPlannerInterface> global_planner_instance_;
+  std::shared_ptr<GlobalPlannerInterface> global_planner_instance_;
 
   moveit_msgs::msg::MotionPlanResponse last_global_solution_;
 
@@ -85,4 +85,4 @@ private:
   // Load and initialized global planner plugin and ROS 2 action and topic interfaces
   bool initialize();
 };
-}  // namespace moveit_hybrid_planning
+}  // namespace moveit::hybrid_planning
