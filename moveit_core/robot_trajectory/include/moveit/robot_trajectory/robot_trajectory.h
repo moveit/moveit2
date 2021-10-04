@@ -296,7 +296,7 @@ private:
   rclcpp::Clock clock_ros_;
 };
 
-/** \brief Operator overload for printing trajectory to a stream */
+/** @brief Operator overload for printing trajectory to a stream */
 std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory);
 
 }  // namespace robot_trajectory

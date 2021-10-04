@@ -527,16 +527,13 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
     }
     else
     {
-      size_t variable_count = robot_model_->getVariableCount();
-      variable_indexes.reserve(variable_count);
-      for (size_t i = 0; i < variable_count; i++)
-      {
-        variable_indexes.push_back(i);
-      }
+      // use all variables
+      variable_indexes.resize(robot_model_->getVariableCount());
+      std::iota(variable_indexes.begin(), variable_indexes.end(), 0);
     }
   }
 
-  for (size_t p_i = 0; p_i < num_points; p_i++)
+  for (size_t p_i = 0; p_i < num_points; ++p_i)
   {
     const moveit::core::RobotState& point = getWayPoint(p_i);
     out << "  waypoint " << std::setw(3) << p_i;
@@ -560,6 +557,14 @@ void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes
       for (int index : variable_indexes)
       {
         out << std::setw(6) << point.getVariableAcceleration(index) << " ";
+      }
+    }
+    if (point.hasEffort())
+    {
+      out << "eff ";
+      for (int index : variable_indexes)
+      {
+        out << std::setw(6) << point.getVariableEffort(index) << " ";
       }
     }
     out << "\n";
