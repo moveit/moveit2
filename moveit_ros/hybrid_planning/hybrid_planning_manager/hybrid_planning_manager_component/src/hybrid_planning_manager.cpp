@@ -206,7 +206,7 @@ bool HybridPlanningManager::sendGlobalPlannerAction()
   return true;  // return always success TODO(sjahr) add more error checking
 };
 
-bool HybridPlanningManager::runLocalPlanner()
+bool HybridPlanningManager::sendLocalPlannerAction()
 {
   // Setup empty dummy goal (Global trajectory is subscribed by the local planner) TODO(sjahr) pass goal as function argument
   auto local_goal_msg = moveit_msgs::action::LocalPlanner::Goal();
