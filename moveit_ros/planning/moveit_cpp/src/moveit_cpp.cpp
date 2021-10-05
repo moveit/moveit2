@@ -48,14 +48,11 @@ namespace moveit_cpp
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning_interface.moveit_cpp");
 constexpr char PLANNING_PLUGIN_PARAM[] = "planning_plugin";
 
-MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
-  : MoveItCpp(node, Options(node), tf_buffer)
+MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node) : MoveItCpp(node, Options(node))
 {
 }
 
-MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options,
-                     const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
-  : node_(node)
+MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options) : node_(node)
 {
   // Configure planning scene monitor
   if (!loadPlanningSceneMonitor(options.planning_scene_monitor_options))
