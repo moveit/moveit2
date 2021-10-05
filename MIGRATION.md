@@ -2,6 +2,9 @@
 
 API changes in MoveIt releases
 
+## ROS Rolling
+- ServoServer was renamed to ServoNode
+
 ## ROS Noetic
 - RobotModel no longer overrides empty URDF collision geometry by matching the visual geometry of the link.
 - Planned trajectories are *slow* by default.

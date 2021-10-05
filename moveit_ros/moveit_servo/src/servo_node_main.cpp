@@ -31,13 +31,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/*      Title     : servo_server_node.cpp
+/*      Title     : servo_node_main.cpp
  *      Project   : moveit_servo
  *      Created   : 08/18/2021
  *      Author    : Joe Schornak
  */
 
-#include <moveit_servo/servo_server.h>
+#include <moveit_servo/servo_node.h>
 
 int main(int argc, char* argv[])
 {
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
   rclcpp::NodeOptions options;
   options.automatically_declare_parameters_from_overrides(true);
 
-  auto node = std::make_shared<moveit_servo::ServoServer>(options);
+  auto node = std::make_shared<moveit_servo::ServoNode>(options);
 
   rclcpp::spin(node);
 

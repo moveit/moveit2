@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit/occupancy_map_monitor/occupancy_map.h>
+#include <moveit/collision_detection/occupancy_map.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
 #include <moveit_msgs/srv/load_map.hpp>
 #include <moveit_msgs/srv/save_map.hpp>
@@ -165,20 +165,16 @@ public:
    */
   void stopMonitor();
 
-  /**
-   * @brief Get a pointer to the underlying octree for this monitor. Lock the tree before reading or writing using this
-   *  pointer. The value of this pointer stays the same throughout the existance of the monitor instance.
-   */
-  const OccMapTreePtr& getOcTreePtr()
+  /** @brief Get a pointer to the underlying octree for this monitor. Lock the tree before reading or writing using this
+   *  pointer. The value of this pointer stays the same throughout the existance of the monitor instance. */
+  const collision_detection::OccMapTreePtr& getOcTreePtr()
   {
     return tree_;
   }
 
-  /**
-   * @brief Get a const pointer to the underlying octree for this monitor. Lock the
-   *  tree before reading this pointer
-   */
-  const OccMapTreeConstPtr& getOcTreePtr() const
+  /** @brief Get a const pointer to the underlying octree for this monitor. Lock the
+   *  tree before reading this pointer */
+  const collision_detection::OccMapTreeConstPtr& getOcTreePtr() const
   {
     return tree_const_;
   }
@@ -322,8 +318,8 @@ private:
   Parameters parameters_;
   std::mutex parameters_lock_; /*!< Mutex for synchronizing access to parameters */
 
-  OccMapTreePtr tree_;            /*!< Oct map tree */
-  OccMapTreeConstPtr tree_const_; /*!< Shared pointer to a const oct map tree */
+  collision_detection::OccMapTreePtr tree_;            /*!< Oct map tree */
+  collision_detection::OccMapTreeConstPtr tree_const_; /*!< Shared pointer to a const oct map tree */
 
   std::vector<OccupancyMapUpdaterPtr> map_updaters_;             /*!< The Occupancy map updaters */
   std::vector<std::map<ShapeHandle, ShapeHandle>> mesh_handles_; /*!< The mesh handles */

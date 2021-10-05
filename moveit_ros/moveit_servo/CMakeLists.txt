@@ -16,11 +16,11 @@ set(SERVO_PARAM_LIB_NAME ${SERVO_LIB_NAME}_parameters)
 set(POSE_TRACKING pose_tracking)
 
 # Component Nodes (Shared libraries) ############################
-set(SERVO_COMPONENT_NODE servo_server)
+set(SERVO_COMPONENT_NODE servo_node)
 set(SERVO_CONTROLLER_INPUT servo_controller_input)
 
 # Executable Nodes ##############################################
-set(SERVO_SERVER_NODE_NAME servo_server_node)
+set(SERVO_NODE_MAIN_NAME servo_node_main)
 set(POSE_TRACKING_DEMO_NAME servo_pose_tracking_demo)
 set(FAKE_SERVO_CMDS_NAME fake_command_publisher)
 
@@ -96,10 +96,10 @@ target_link_libraries(${POSE_TRACKING} ${SERVO_LIB_NAME})
 #####################
 
 # Add and export library to run as a ROS node component, and receive commands via topics
-add_library(${SERVO_COMPONENT_NODE} SHARED src/servo_server.cpp)
+add_library(${SERVO_COMPONENT_NODE} SHARED src/servo_node.cpp)
 ament_target_dependencies(${SERVO_COMPONENT_NODE} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(${SERVO_COMPONENT_NODE} ${SERVO_LIB_NAME})
-rclcpp_components_register_nodes(${SERVO_COMPONENT_NODE} "moveit_servo::ServoServer")
+rclcpp_components_register_nodes(${SERVO_COMPONENT_NODE} "moveit_servo::ServoNode")
 
 # Add executable for using a controller
 add_library(${SERVO_CONTROLLER_INPUT} SHARED src/teleop_demo/joystick_servo_example.cpp)
@@ -111,9 +111,9 @@ rclcpp_components_register_nodes(${SERVO_CONTROLLER_INPUT} "moveit_servo::JoyToS
 ######################
 
 # An executable node for the servo server
-add_executable(${SERVO_SERVER_NODE_NAME} src/servo_server_node.cpp)
-target_link_libraries(${SERVO_SERVER_NODE_NAME} ${SERVO_COMPONENT_NODE})
-ament_target_dependencies(${SERVO_SERVER_NODE_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+add_executable(${SERVO_NODE_MAIN_NAME} src/servo_node_main.cpp)
+target_link_libraries(${SERVO_NODE_MAIN_NAME} ${SERVO_COMPONENT_NODE})
+ament_target_dependencies(${SERVO_NODE_MAIN_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # An example of pose tracking
 add_executable(${POSE_TRACKING_DEMO_NAME} src/cpp_interface_demo/pose_tracking_demo.cpp)
@@ -150,7 +150,7 @@ install(
 # Install Binaries
 install(
   TARGETS
-    ${SERVO_SERVER_NODE_NAME}
+    ${SERVO_NODE_MAIN_NAME}
     ${CPP_DEMO_NAME}
     ${POSE_TRACKING_DEMO_NAME}
     ${FAKE_SERVO_CMDS_NAME}

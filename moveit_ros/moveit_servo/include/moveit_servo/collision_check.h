@@ -110,11 +110,6 @@ private:
   bool paused_ = false;
 
   // Variables for stop-distance-based collision checking
-  double current_collision_distance_ = 0;
-  double derivative_of_collision_distance_ = 0;
-  double prev_collision_distance_ = 0;
-  double est_time_to_collision_ = 0;
-  double safety_factor_ = 1000;
   double worst_case_stop_time_ = std::numeric_limits<double>::max();
 
   const double self_velocity_scale_coefficient_;
