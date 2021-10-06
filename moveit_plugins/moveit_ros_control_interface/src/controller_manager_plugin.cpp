@@ -157,17 +157,18 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
                        });
       }
 
+      // All controllers are added to the map of managed controllers, independent of whether they are currently active or not.
+      std::string absname = getAbsName(controller.name);
+      auto controller_it = managed_controllers_.insert(std::make_pair(absname, controller)).first;  // with namespace
+      // Get the names of the interfaces that would be claimed by this currently-inactive controller if it was activated.
+      auto& required_interfaces = controller_it->second.required_command_interfaces;
+      std::transform(required_interfaces.cbegin(), required_interfaces.cend(), required_interfaces.begin(),
+                     [](const std::string& required_interface) {
+                       return parseJointNameFromResource(required_interface);
+                     });
       // Instantiate a controller handle if one is available for this type of controller.
       if (loader_.isClassAvailable(controller.type))
       {
-        std::string absname = getAbsName(controller.name);
-        auto controller_it = managed_controllers_.insert(std::make_pair(absname, controller)).first;  // with namespace
-        // Get the names of the interfaces that would be claimed by this currently-inactive controller if it was activated.
-        auto& required_interfaces = controller_it->second.required_command_interfaces;
-        std::transform(required_interfaces.cbegin(), required_interfaces.cend(), required_interfaces.begin(),
-                       [](const std::string& required_interface) {
-                         return parseJointNameFromResource(required_interface);
-                       });
         allocate(absname, controller_it->second);
       }
     }
