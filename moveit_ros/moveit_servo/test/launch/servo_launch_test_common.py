@@ -131,16 +131,16 @@ def generate_servo_test_description(
         output="screen",
     )
 
-    servo_server_container = ComposableNodeContainer(
-        name="servo_server_container",
+    servo_container = ComposableNodeContainer(
+        name="servo_container",
         namespace="/",
         package="rclcpp_components",
         executable="component_container",
         composable_node_descriptions=[
             ComposableNode(
                 package="moveit_servo",
-                plugin="moveit_servo::ServoServer",
-                name="servo_server",
+                plugin="moveit_servo::ServoNode",
+                name="servo_node",
                 parameters=[
                     servo_params,
                     robot_description,
@@ -171,14 +171,14 @@ def generate_servo_test_description(
                 "containing test executables",
             ),
             ros2_control_node,
-            servo_server_container,
+            servo_container,
             test_container,
             TimerAction(period=2.0, actions=[servo_gtest]),
             launch_testing.actions.ReadyToTest(),
         ]
         + load_controllers
     ), {
-        "servo_container": servo_server_container,
+        "servo_container": servo_container,
         "test_container": test_container,
         "servo_gtest": servo_gtest,
         "ros2_control_node": ros2_control_node,
