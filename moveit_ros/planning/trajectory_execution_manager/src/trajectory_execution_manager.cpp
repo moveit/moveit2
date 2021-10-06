@@ -582,6 +582,10 @@ void TrajectoryExecutionManager::reloadControllerInformation()
           }
         }
   }
+  else
+  {
+    RCLCPP_ERROR(LOGGER, "Failed to reload controllers: `controller_manager_` does not exist.");
+  }
 }
 
 void TrajectoryExecutionManager::updateControllerState(const std::string& controller, const rclcpp::Duration& age)
@@ -1713,7 +1717,12 @@ bool TrajectoryExecutionManager::ensureActiveControllers(const std::vector<std::
       std::map<std::string, ControllerInformation>::const_iterator it = known_controllers_.find(controller);
       if (it == known_controllers_.end())
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "Controller " << controller << " is not known");
+        std::stringstream stream;
+        for (const auto& controller : known_controllers_)
+        {
+          stream << " `" << controller.first << "`";
+        }
+        RCLCPP_WARN_STREAM(LOGGER, "Controller " << controller << " is not known. Known controllers: " << stream.str());
         return false;
       }
       if (!it->second.state_.active_)
