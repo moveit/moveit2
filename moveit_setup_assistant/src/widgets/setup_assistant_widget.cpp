@@ -43,29 +43,29 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QCloseEvent>
-#include <QFont>
 #include <QHBoxLayout>
-#include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSplitter>
 #include <QStackedWidget>
 #include <QString>
-#include <pluginlib/class_loader.hpp>  // for loading all avail kinematic planners
 // Rviz
-#include <rviz/render_panel.h>
-#include <rviz/visualization_manager.h>
-#include <rviz/view_manager.h>
-#include <rviz/default_plugin/view_controllers/orbit_view_controller.h>
+#include <rviz_common/render_panel.hpp>
+#include <rviz_common/visualization_manager.hpp>
+#include <rviz_common/view_manager.hpp>
+#include <rviz_common/view_controller.hpp>
 #include <moveit/robot_state_rviz_plugin/robot_state_display.h>
+// GetPath
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 namespace moveit_setup_assistant
 {
 // ******************************************************************************************
 // Outer User Interface for MoveIt Configuration Assistant
 // ******************************************************************************************
-SetupAssistantWidget::SetupAssistantWidget(QWidget* parent, const boost::program_options::variables_map& args)
-  : QWidget(parent)
+SetupAssistantWidget::SetupAssistantWidget(rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node,
+                                           QWidget* parent, const boost::program_options::variables_map& args)
+  : QWidget(parent), node_(node)
 {
   rviz_manager_ = nullptr;
   rviz_render_panel_ = nullptr;
@@ -78,7 +78,8 @@ SetupAssistantWidget::SetupAssistantWidget(QWidget* parent, const boost::program
     config_data_->debug_ = true;
 
   // Setting the window icon
-  std::string moveit_ros_visualization_package_path = ros::package::getPath("moveit_ros_visualization");
+  std::string moveit_ros_visualization_package_path =
+      ament_index_cpp::get_package_share_directory("moveit_ros_visualization");
   moveit_ros_visualization_package_path += "/icons/classes/MotionPlanning.png";
   this->setWindowIcon(QIcon(moveit_ros_visualization_package_path.c_str()));
 
@@ -234,6 +235,7 @@ void SetupAssistantWidget::moveToScreen(const int index)
 // ******************************************************************************************
 void SetupAssistantWidget::progressPastStartScreen()
 {
+  /*
   // Load all widgets ------------------------------------------------
 
   // Self-Collisions
@@ -357,6 +359,7 @@ void SetupAssistantWidget::progressPastStartScreen()
   {
     moveToScreen(3);
   }
+  */
 }
 
 // ******************************************************************************************
@@ -364,7 +367,7 @@ void SetupAssistantWidget::progressPastStartScreen()
 // ******************************************************************************************
 void SetupAssistantWidget::updateTimer()
 {
-  ros::spinOnce();  // keep ROS node alive
+  // ros::spinOnce();  // keep ROS node alive
 }
 
 // ******************************************************************************************
@@ -373,12 +376,13 @@ void SetupAssistantWidget::updateTimer()
 void SetupAssistantWidget::loadRviz()
 {
   // Create rviz frame
-  rviz_render_panel_ = new rviz::RenderPanel();
+  rviz_render_panel_ = new rviz_common::RenderPanel();
   rviz_render_panel_->setMinimumWidth(200);
   rviz_render_panel_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-  rviz_manager_ = new rviz::VisualizationManager(rviz_render_panel_);
-  rviz_render_panel_->initialize(rviz_manager_->getSceneManager(), rviz_manager_);
+  rviz_manager_ = new rviz_common::VisualizationManager(rviz_render_panel_, node_, nullptr,
+                                                        node_.lock()->get_raw_node()->get_clock());
+  // rviz_render_panel_->initialize(rviz_manager_->getSceneManager(), rviz_manager_);
   rviz_manager_->initialize();
   rviz_manager_->startUpdate();
 
@@ -399,7 +403,7 @@ void SetupAssistantWidget::loadRviz()
   robot_state_display_->setVisible(true);
 
   // Zoom into robot
-  rviz::ViewController* view = rviz_manager_->getViewManager()->getCurrent();
+  rviz_common::ViewController* view = rviz_manager_->getViewManager()->getCurrent();
   view->subProp("Distance")->setValue(4.0f);
 
   // Add Rviz to Planning Groups Widget

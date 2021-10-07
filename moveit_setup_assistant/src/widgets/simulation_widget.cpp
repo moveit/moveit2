@@ -137,7 +137,7 @@ void SimulationWidget::generateURDFClick()
     std::regex start_reg_ex("<inertial");
     std::regex end_reg_ex("</inertial");
 
-    // Search for inertial elemnts using regex
+    // Search for inertial elements using regex
     std::regex_search(gazebo_compatible_urdf_string, start_match, start_reg_ex);
     std::regex_search(gazebo_compatible_urdf_string, end_match, end_reg_ex);
 

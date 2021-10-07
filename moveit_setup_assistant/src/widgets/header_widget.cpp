@@ -134,7 +134,7 @@ LoadPathWidget::LoadPathWidget(const QString& title, const QString& instructions
   connect(browse_button, SIGNAL(clicked()), this, SLOT(btnFileDialog()));
   hlayout->addWidget(browse_button);
 
-  // Add horizontal layer to verticle layer
+  // Add horizontal layer to vertical layer
   layout->addLayout(hlayout);
 
   setLayout(layout);

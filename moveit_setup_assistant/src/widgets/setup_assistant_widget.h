@@ -36,23 +36,28 @@
 
 #pragma once
 
+#include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
+
 // Qt
+#include <QWidget>
+#include <QStackedWidget>
+#include <QAbstractTableModel>
 class QSplitter;
 
 // Setup Assistant
 #include "navigation_widget.h"
 #include "start_screen_widget.h"
-#include "default_collisions_widget.h"
-#include "planning_groups_widget.h"
-#include "robot_poses_widget.h"
-#include "end_effectors_widget.h"
-#include "virtual_joints_widget.h"
-#include "passive_joints_widget.h"
-#include "author_information_widget.h"
-#include "simulation_widget.h"
-#include "configuration_files_widget.h"
-#include "perception_widget.h"
-#include "ros_controllers_widget.h"
+// #include "default_collisions_widget.h"
+// #include "planning_groups_widget.h"
+// #include "robot_poses_widget.h"
+// #include "end_effectors_widget.h"
+// #include "virtual_joints_widget.h"
+// #include "passive_joints_widget.h"
+// #include "author_information_widget.h"
+// #include "simulation_widget.h"
+// #include "configuration_files_widget.h"
+// #include "perception_widget.h"
+// #include "ros_controllers_widget.h"
 
 #ifndef Q_MOC_RUN
 #include <moveit/setup_assistant/tools/moveit_config_data.h>
@@ -63,12 +68,12 @@ class QSplitter;
 #endif
 
 // Forward declarations
-namespace rviz
+namespace rviz_common
 {
 class GridDisplay;
 class RenderPanel;
 class VisualizationManager;
-}  // namespace rviz
+}  // namespace rviz_common
 
 namespace moveit_rviz_plugin
 {
@@ -91,7 +96,8 @@ public:
    * @param parent - used by Qt for destructing all elements
    * @return
    */
-  SetupAssistantWidget(QWidget* parent, const boost::program_options::variables_map& args);
+  SetupAssistantWidget(rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node, QWidget* parent,
+                       const boost::program_options::variables_map& args);
 
   /**
    * Deconstructor
@@ -189,6 +195,7 @@ private:
   // ******************************************************************************************
   // Variables
   // ******************************************************************************************
+  rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node_;
   QList<QString> nav_name_list_;
   NavigationWidget* navs_view_;
 
@@ -199,23 +206,23 @@ private:
   boost::mutex change_screen_lock_;
 
   // Rviz Panel
-  rviz::RenderPanel* rviz_render_panel_;
-  rviz::VisualizationManager* rviz_manager_;
+  rviz_common::RenderPanel* rviz_render_panel_;
+  rviz_common::VisualizationManager* rviz_manager_;
   moveit_rviz_plugin::RobotStateDisplay* robot_state_display_;
 
   // Screen Widgets
   StartScreenWidget* start_screen_widget_;
-  DefaultCollisionsWidget* default_collisions_widget_;
-  PlanningGroupsWidget* planning_groups_widget;
-  RobotPosesWidget* robot_poses_widget_;
-  EndEffectorsWidget* end_effectors_widget_;
-  VirtualJointsWidget* virtual_joints_widget_;
-  PassiveJointsWidget* passive_joints_widget_;
-  AuthorInformationWidget* author_information_widget_;
-  ConfigurationFilesWidget* configuration_files_widget_;
-  SimulationWidget* simulation_widget_;
-  PerceptionWidget* perception_widget_;
-  ROSControllersWidget* controllers_widget_;
+  //   DefaultCollisionsWidget* default_collisions_widget_;
+  //   PlanningGroupsWidget* planning_groups_widget;
+  //   RobotPosesWidget* robot_poses_widget_;
+  //   EndEffectorsWidget* end_effectors_widget_;
+  //   VirtualJointsWidget* virtual_joints_widget_;
+  //   PassiveJointsWidget* passive_joints_widget_;
+  //   AuthorInformationWidget* author_information_widget_;
+  //   ConfigurationFilesWidget* configuration_files_widget_;
+  //   SimulationWidget* simulation_widget_;
+  //   PerceptionWidget* perception_widget_;
+  //   ROSControllersWidget* controllers_widget_;
 
   /// Contains all the configuration data for the setup assistant
   MoveItConfigDataPtr config_data_;

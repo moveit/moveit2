@@ -127,7 +127,7 @@ PerceptionWidget::PerceptionWidget(QWidget* parent, const MoveItConfigDataPtr& c
   max_update_rate_field_->setMaximumWidth(400);
   point_cloud_form_layout->addRow("Max Update Rate:", max_update_rate_field_);
 
-  // Piont Cloud form layout
+  // Point Cloud form layout
   point_cloud_group_->setLayout(point_cloud_form_layout);
   layout->addWidget(point_cloud_group_);
 
@@ -298,11 +298,11 @@ void PerceptionWidget::loadSensorPluginsComboBox()
   // Add None option, the default
   sensor_plugin_field_->addItem("None");
 
-  // Add the two avilable plugins to combo box
+  // Add the two available plugins to combo box
   sensor_plugin_field_->addItem("Point Cloud");
   sensor_plugin_field_->addItem("Depth Map");
 
-  // Load deafult config, or use the one in the config package if exists
+  // Load default config, or use the one in the config package if exists
   std::vector<std::map<std::string, GenericParameter> > sensors_vec_map = config_data_->getSensorPluginConfig();
   for (std::map<std::string, GenericParameter>& sensor_plugin_config : sensors_vec_map)
   {

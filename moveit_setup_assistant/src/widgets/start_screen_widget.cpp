@@ -50,7 +50,8 @@
 #include <QVBoxLayout>
 
 // ROS
-#include <ros/package.h>  // for getting file path for loadng images
+#include <rviz_common/logging.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>  // for getting file path for loadng images
 // SA
 #include "header_widget.h"  // title and instructions
 #include "start_screen_widget.h"
@@ -97,7 +98,7 @@ StartScreenWidget::StartScreenWidget(QWidget* parent, const MoveItConfigDataPtr&
   std::string image_path = "./resources/MoveIt_Setup_Assistant2.png";
   if (chdir(config_data_->setup_assistant_path_.c_str()) != 0)
   {
-    ROS_ERROR("FAILED TO CHANGE PACKAGE TO moveit_setup_assistant");
+    RVIZ_COMMON_LOG_ERROR("FAILED TO CHANGE PACKAGE TO moveit_setup_assistant");
   }
 
   if (right_image_->load(image_path.c_str()))
@@ -107,7 +108,7 @@ StartScreenWidget::StartScreenWidget(QWidget* parent, const MoveItConfigDataPtr&
   }
   else
   {
-    ROS_ERROR_STREAM("FAILED TO LOAD " << image_path);
+    RVIZ_COMMON_LOG_ERROR_STREAM("FAILED TO LOAD " << image_path);
   }
 
   right_layout->addWidget(right_image_label_);
@@ -191,7 +192,7 @@ StartScreenWidget::StartScreenWidget(QWidget* parent, const MoveItConfigDataPtr&
   hlayout->addLayout(right_layout);
   layout->addLayout(hlayout);
 
-  // Verticle Spacer
+  // Vertical Spacer
   layout->addItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
   // Attach bottom layout
@@ -329,7 +330,7 @@ bool StartScreenWidget::loadPackageSettings(bool show_warnings)
   if (!config_data_->setPackagePath(package_path_input))
   {
     if (show_warnings)
-      QMessageBox::critical(this, "Error Loading Files", "The specified path is not a directory or is not accessable");
+      QMessageBox::critical(this, "Error Loading Files", "The specified path is not a directory or is not accessible");
     return false;
   }
 
@@ -360,7 +361,7 @@ bool StartScreenWidget::loadPackageSettings(bool show_warnings)
 }
 
 // ******************************************************************************************
-// Load exisiting package files
+// Load existing package files
 // ******************************************************************************************
 bool StartScreenWidget::loadExistingFiles()
 {
@@ -377,18 +378,18 @@ bool StartScreenWidget::loadExistingFiles()
 
   // Get the URDF path using the loaded .setup_assistant data and check it
   if (!createFullURDFPath())
-    return false;  // error occured
+    return false;  // error occurred
 
   // use xacro args from GUI
   config_data_->xacro_args_ = stack_path_->getArgs().toStdString();
 
   // Load the URDF
   if (!loadURDFFile(config_data_->urdf_path_, config_data_->xacro_args_))
-    return false;  // error occured
+    return false;  // error occurred
 
   // Get the SRDF path using the loaded .setup_assistant data and check it
   if (!createFullSRDFPath(config_data_->config_pkg_path_))
-    return false;  // error occured
+    return false;  // error occurred
 
   // Progress Indicator
   progress_bar_->setValue(50);
@@ -396,7 +397,7 @@ bool StartScreenWidget::loadExistingFiles()
 
   // Load the SRDF
   if (!loadSRDFFile(config_data_->srdf_path_))
-    return false;  // error occured
+    return false;  // error occurred
 
   // Progress Indicator
   progress_bar_->setValue(60);
@@ -455,7 +456,7 @@ bool StartScreenWidget::loadExistingFiles()
 
   next_label_->show();  // only show once the files have been loaded
 
-  ROS_INFO("Loading Setup Assistant Complete");
+  RVIZ_COMMON_LOG_INFO("Loading Setup Assistant Complete");
   return true;  // success!
 }
 
@@ -537,7 +538,7 @@ bool StartScreenWidget::loadNewFiles()
 
   next_label_->show();  // only show once the files have been loaded
 
-  ROS_INFO("Loading Setup Assistant Complete");
+  RVIZ_COMMON_LOG_INFO("Loading Setup Assistant Complete");
   return true;  // success!
 }
 
@@ -569,22 +570,22 @@ bool StartScreenWidget::loadURDFFile(const std::string& urdf_file_path, const st
   }
   config_data_->urdf_from_xacro_ = rdf_loader::RDFLoader::isXacroFile(urdf_file_path);
 
-  ROS_INFO_STREAM("Loaded " << config_data_->urdf_model_->getName() << " robot model.");
+  RVIZ_COMMON_LOG_INFO_STREAM("Loaded " << config_data_->urdf_model_->getName() << " robot model.");
 
   // Load the robot model to the parameter server
-  ros::NodeHandle nh;
+  // ros::NodeHandle nh;
   int steps = 0;
-  while (!nh.ok() && steps < 4)
+  while (/*!nh.ok() && */ steps < 4)
   {
-    ROS_WARN("Waiting for node handle");
-    ros::Duration(1).sleep();
+    RVIZ_COMMON_LOG_WARNING("Waiting for node handle");
+    // ros::Duration(1).sleep();
     steps++;
-    ros::spinOnce();
+    // ros::spinOnce();
   }
 
-  ROS_INFO("Setting Param Server with Robot Description");
-  // ROS_WARN("Ignore the following error message 'Failed to contact master'. This is a known issue.");
-  nh.setParam("/robot_description", config_data_->urdf_string_);
+  RVIZ_COMMON_LOG_INFO("Setting Param Server with Robot Description");
+  // RVIZ_COMMON_LOG_WARNING("Ignore the following error message 'Failed to contact master'. This is a known issue.");
+  // nh.setParam("/robot_description", config_data_->urdf_string_);
 
   return true;
 }
@@ -618,21 +619,21 @@ bool StartScreenWidget::setSRDFFile(const std::string& srdf_string)
     QMessageBox::warning(this, "Error Loading Files", "SRDF file not a valid semantic robot description model.");
     return false;
   }
-  ROS_INFO_STREAM("Robot semantic model successfully loaded.");
+  RVIZ_COMMON_LOG_INFO_STREAM("Robot semantic model successfully loaded.");
 
   // Load to param server
-  ros::NodeHandle nh;
+  // ros::NodeHandle nh;
   int steps = 0;
-  while (!nh.ok() && steps < 4)
+  while (/*!nh.ok() && */ steps < 4)
   {
-    ROS_WARN("Waiting for node handle");
-    ros::Duration(1).sleep();
+    RVIZ_COMMON_LOG_WARNING("Waiting for node handle");
+    // ros::Duration(1).sleep();
     steps++;
-    ros::spinOnce();
+    // ros::spinOnce();
   }
 
-  ROS_INFO("Setting Param Server with Robot Semantic Description");
-  nh.setParam("/robot_description_semantic", srdf_string);
+  RVIZ_COMMON_LOG_INFO("Setting Param Server with Robot Semantic Description");
+  // nh.setParam("/robot_description_semantic", srdf_string);
 
   return true;
 }
@@ -660,7 +661,7 @@ bool StartScreenWidget::extractPackageNameFromPath()
   else
   {
     // Check that ROS can find the package
-    const std::string robot_desc_pkg_path = ros::package::getPath(package_name);
+    const std::string robot_desc_pkg_path = ament_index_cpp::get_package_share_directory(package_name);
 
     if (robot_desc_pkg_path.empty())
     {
@@ -675,8 +676,8 @@ bool StartScreenWidget::extractPackageNameFromPath()
     config_data_->urdf_pkg_relative_path_ = relative_path;
   }
 
-  ROS_DEBUG_STREAM("URDF Package Name: " << config_data_->urdf_pkg_name_);
-  ROS_DEBUG_STREAM("URDF Package Path: " << config_data_->urdf_pkg_relative_path_);
+  RVIZ_COMMON_LOG_DEBUG_STREAM("URDF Package Name: " << config_data_->urdf_pkg_name_);
+  RVIZ_COMMON_LOG_DEBUG_STREAM("URDF Package Path: " << config_data_->urdf_pkg_relative_path_);
 
   return true;  // success
 }
@@ -708,7 +709,7 @@ bool StartScreenWidget::createFullURDFPath()
   // Check if a package name was provided
   if (config_data_->urdf_pkg_name_.empty())
   {
-    ROS_WARN("The URDF path is absolute to the filesystem and not relative to a ROS package/stack");
+    RVIZ_COMMON_LOG_WARNING("The URDF path is absolute to the filesystem and not relative to a ROS package/stack");
   }
 
   return true;  // success
@@ -808,7 +809,7 @@ SelectModeWidget::SelectModeWidget(QWidget* parent) : QFrame(parent)
   btn_exist_->setCheckable(true);
   hlayout->addWidget(btn_exist_);
 
-  // Add horizontal layer to verticle layer
+  // Add horizontal layer to vertical layer
   layout->addLayout(hlayout);
   setLayout(layout);
   btn_new_->setCheckable(true);
