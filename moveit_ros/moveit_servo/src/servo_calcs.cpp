@@ -157,6 +157,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
 
   // Publish status
   status_pub_ = node_->create_publisher<std_msgs::msg::Int8>(parameters_->status_topic, ROS_QUEUE_SIZE);
+  condition_pub_ = node_->create_publisher<std_msgs::msg::Float64>("~/condition", ROS_QUEUE_SIZE);
 
   internal_joint_state_.name = joint_model_group_->getActiveJointModelNames();
   num_joints_ = internal_joint_state_.name.size();
@@ -383,14 +384,6 @@ void ServoCalcs::calculateSingleIteration()
     }
   }
 
-  // Print a warning to the user if both are stale
-  if (twist_command_is_stale_ && joint_command_is_stale_)
-  {
-    rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                "Stale command. Try a larger 'incoming_command_timeout' parameter?");
-  }
-
   // If we should halt
   if (!have_nonzero_command_)
   {
@@ -407,6 +400,14 @@ void ServoCalcs::calculateSingleIteration()
     ok_to_publish_ = false;
     rclcpp::Clock& clock = *node_->get_clock();
     RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "All-zero command. Doing nothing.");
+  }
+  // Skip servoing publication if both types of commands are stale.
+  else if (twist_command_is_stale_ && joint_command_is_stale_)
+  {
+    ok_to_publish_ = false;
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                 "Skipping publishing because incoming commands are stale.");
   }
   else
   {
@@ -712,6 +713,10 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
   Eigen::VectorXd vector_toward_singularity = svd.matrixU().col(num_dimensions - 1);
 
   double ini_condition = svd.singularValues()(0) / svd.singularValues()(svd.singularValues().size() - 1);
+
+  auto condition_msg = std::make_unique<std_msgs::msg::Float64>();
+  condition_msg->data = ini_condition;
+  condition_pub_->publish(std::move(condition_msg));
 
   // This singular vector tends to flip direction unpredictably. See R. Bro,
   // "Resolving the Sign Ambiguity in the Singular Value Decomposition".

@@ -43,8 +43,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <type_traits>
 
-using namespace std::placeholders;  // for _1, _2 etc.
-
 namespace moveit_servo
 {
 rcl_interfaces::msg::SetParametersResult
@@ -236,6 +234,7 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
   // register parameter change callback
   if (dynamic_parameters)
   {
+    using std::placeholders::_1;
     parameters->on_set_parameters_callback_handler_ =
         node->add_on_set_parameters_callback(std::bind(&ServoParameters::setParametersCallback, parameters.get(), _1));
   }
