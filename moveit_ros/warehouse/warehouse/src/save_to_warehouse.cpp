@@ -145,11 +145,7 @@ int main(int argc, char** argv)
   if (!conn->connect())
     return 1;
 
-  rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_SYSTEM_TIME);
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(clock);
-  std::shared_ptr<tf2_ros::TransformListener> tf_listener =
-      std::make_shared<tf2_ros::TransformListener>(*tf_buffer, node);
-  planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION, tf_buffer);
+  planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (!psm.getPlanningScene())
   {
     RCLCPP_ERROR(LOGGER, "Unable to initialize PlanningSceneMonitor");
