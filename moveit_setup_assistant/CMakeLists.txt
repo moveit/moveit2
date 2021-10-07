@@ -1,16 +1,9 @@
 cmake_minimum_required(VERSION 3.10.2)
 project(moveit_setup_assistant)
 
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
@@ -27,13 +20,9 @@ find_package(srdfdom REQUIRED)
 find_package(ompl REQUIRED)
 
 # Qt Stuff
-if(rviz_QT_VERSION AND rviz_QT_VERSION VERSION_LESS "5")
-  find_package(Qt4 ${rviz_QT_VERSION} REQUIRED QtCore QtGui)
-  include(${QT_USE_FILE})
-else()
-  find_package(Qt5 ${rviz_QT_VERSION} REQUIRED Core Widgets)
-  set(QT_LIBRARIES Qt5::Widgets)
-endif()
+find_package(Qt5 ${rviz_QT_VERSION} REQUIRED Core Widgets)
+set(QT_LIBRARIES Qt5::Widgets)
+
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
