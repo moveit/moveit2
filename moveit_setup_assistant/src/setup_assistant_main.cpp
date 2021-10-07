@@ -35,12 +35,12 @@
 /* Author: Dave Coleman */
 
 #include "widgets/setup_assistant_widget.h"
-#include <ros/ros.h>
+#include <rviz_common/ros_integration/ros_client_abstraction.hpp>
 #include <QApplication>
-#include <QMessageBox>
 #include <boost/program_options.hpp>
 #include <signal.h>
 #include <locale.h>
+#include <iostream>
 
 static void siginthandler(int /*param*/)
 {
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
   po::variables_map vm;
   try
   {
-    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::store(po::command_line_parser(argc, argv).options(desc).allow_unregistered().run(), vm);
     po::notify(vm);
 
     if (vm.count("help"))
@@ -79,14 +79,10 @@ int main(int argc, char** argv)
     std::cerr << e.what() << std::endl;
     usage(desc, 1);
   }
-  // Start ROS Node
-  ros::init(argc, argv, "moveit_setup_assistant", ros::init_options::NoSigintHandler);
 
-  // ROS Spin
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
-
-  ros::NodeHandle nh;
+  // Start ROS
+  auto client = std::make_unique<rviz_common::ros_integration::RosClientAbstraction>();
+  auto node = client->init(argc, argv, "moveit_setup_assistant", false);
 
   // Create Qt Application
   QApplication qt_app(argc, argv);
@@ -94,7 +90,7 @@ int main(int argc, char** argv)
   setlocale(LC_NUMERIC, "C");
 
   // Load Qt Widget
-  moveit_setup_assistant::SetupAssistantWidget saw(nullptr, vm);
+  moveit_setup_assistant::SetupAssistantWidget saw(node, nullptr, vm);
   saw.setMinimumWidth(1090);
   saw.setMinimumHeight(600);
   //  saw.setWindowState( Qt::WindowMaximized );
@@ -107,7 +103,6 @@ int main(int argc, char** argv)
   const int result = qt_app.exec();
 
   // Shutdown ROS
-  ros::shutdown();
 
   return result;
 }

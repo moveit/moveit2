@@ -40,7 +40,7 @@
 #include <boost/thread.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/assign.hpp>
-#include <ros/console.h>
+#include <rviz_common/logging.hpp>
 
 namespace moveit_setup_assistant
 {
@@ -186,7 +186,7 @@ LinkPairMap computeDefaultCollisions(const planning_scene::PlanningSceneConstPtr
   // LinkGraph is a custom type of a map with a LinkModel as key and a set of LinkModels as second
   LinkGraph link_graph;
 
-  // ROS_INFO_STREAM("Initial allowed Collision Matrix Size = " << scene.getAllowedCollisions().getSize() );
+  // RVIZ_COMMON_LOG_INFO_STREAM("Initial allowed Collision Matrix Size = " << scene.getAllowedCollisions().getSize() );
 
   // 0. GENERATE ALL POSSIBLE LINK PAIRS -------------------------------------------------------------
   // Generate a list of unique link pairs for all links with geometry. Order pairs alphabetically.
@@ -228,7 +228,7 @@ LinkPairMap computeDefaultCollisions(const planning_scene::PlanningSceneConstPtr
   // Compute the links that are always in collision
   unsigned int num_always =
       disableAlwaysInCollision(*scene, link_pairs, req, links_seen_colliding, min_collision_fraction);
-  // ROS_INFO("Links seen colliding total = %d", int(links_seen_colliding.size()));
+  // RVIZ_COMMON_LOG_INFO("Links seen colliding total = %d", int(links_seen_colliding.size()));
   *progress = 8;  // Progress bar feedback
   boost::this_thread::interruption_point();
 
@@ -240,7 +240,7 @@ LinkPairMap computeDefaultCollisions(const planning_scene::PlanningSceneConstPtr
     num_never = disableNeverInCollision(num_trials, *scene, link_pairs, req, links_seen_colliding, progress);
   }
 
-  // ROS_INFO("Link pairs seen colliding ever: %d", int(links_seen_colliding.size()));
+  // RVIZ_COMMON_LOG_INFO("Link pairs seen colliding ever: %d", int(links_seen_colliding.size()));
 
   if (verbose)
   {
@@ -252,20 +252,20 @@ LinkPairMap computeDefaultCollisions(const planning_scene::PlanningSceneConstPtr
         ++num_disabled;
     }
 
-    ROS_INFO("-------------------------------------------------------------------------------");
-    ROS_INFO("Statistics:");
+    RVIZ_COMMON_LOG_INFO("-------------------------------------------------------------------------------");
+    RVIZ_COMMON_LOG_INFO("Statistics:");
     unsigned int num_links = int(link_graph.size());
     double num_possible = boost::math::binomial_coefficient<double>(num_links, 2);  // n choose 2
     unsigned int num_sometimes = num_possible - num_disabled;
 
-    ROS_INFO("%6d : %s", num_links, "Total Links");
-    ROS_INFO("%6.0f : %s", num_possible, "Total possible collisions");
-    ROS_INFO("%6d : %s", num_always, "Always in collision");
-    ROS_INFO("%6d : %s", num_never, "Never in collision");
-    ROS_INFO("%6d : %s", num_default, "Default in collision");
-    ROS_INFO("%6d : %s", num_adjacent, "Adjacent links disabled");
-    ROS_INFO("%6d : %s", num_sometimes, "Sometimes in collision");
-    ROS_INFO("%6d : %s", num_disabled, "TOTAL DISABLED");
+    RVIZ_COMMON_LOG_INFO("Total Links : " + std::to_string(num_links));
+    RVIZ_COMMON_LOG_INFO("Total possible collisions : " + std::to_string(num_possible));
+    RVIZ_COMMON_LOG_INFO("Always in collision : " + std::to_string(num_always));
+    RVIZ_COMMON_LOG_INFO("Never in collision : " + std::to_string(num_never));
+    RVIZ_COMMON_LOG_INFO("Default in collision : " + std::to_string(num_default));
+    RVIZ_COMMON_LOG_INFO("Adjacent links disabled : " + std::to_string(num_adjacent));
+    RVIZ_COMMON_LOG_INFO("Sometimes in collision : " + std::to_string(num_sometimes));
+    RVIZ_COMMON_LOG_INFO("TOTAL DISABLED : " + std::to_string(num_disabled));
 
     /*ROS_INFO("Copy to Spreadsheet:");
     ROS_INFO_STREAM(num_links << "\t" << num_possible << "\t" << num_always << "\t" << num_never
@@ -384,7 +384,7 @@ void computeConnectionGraph(const moveit::core::LinkModel* start_link, LinkGraph
       }
     }
   }
-  // ROS_INFO("Generated connection graph with %d links", int(link_graph.size()));
+  // RVIZ_COMMON_LOG_INFO("Generated connection graph with %d links", int(link_graph.size()));
 }
 
 // ******************************************************************************************
@@ -409,7 +409,7 @@ void computeConnectionGraphRec(const moveit::core::LinkModel* start_link, LinkGr
   }
   else
   {
-    ROS_ERROR("Joint exists in URDF with no link!");
+    RVIZ_COMMON_LOG_ERROR("Joint exists in URDF with no link!");
   }
 }
 
@@ -425,7 +425,7 @@ unsigned int disableAdjacentLinks(planning_scene::PlanningScene& scene, LinkGrap
     for (std::set<const moveit::core::LinkModel*>::const_iterator adj_it = link_graph_it->second.begin();
          adj_it != link_graph_it->second.end(); ++adj_it)
     {
-      // ROS_INFO("Disabled %s to %s", link_graph_it->first->getName().c_str(), (*adj_it)->getName().c_str() );
+      // RVIZ_COMMON_LOG_INFO("Disabled %s to %s", link_graph_it->first->getName().c_str(), (*adj_it)->getName().c_str() );
 
       // Check if either of the links have no geometry. If so, do not add (are we sure?)
       if (!link_graph_it->first->getShapes().empty() && !(*adj_it)->getShapes().empty())  // both links have geometry
@@ -437,7 +437,7 @@ unsigned int disableAdjacentLinks(planning_scene::PlanningScene& scene, LinkGrap
       }
     }
   }
-  // ROS_INFO("Disabled %d adjancent link pairs from collision checking", num_disabled);
+  // RVIZ_COMMON_LOG_INFO("Disabled %d adjancent link pairs from collision checking", num_disabled);
 
   return num_disabled;
 }
@@ -465,7 +465,7 @@ unsigned int disableDefaultCollisions(planning_scene::PlanningScene& scene, Link
     scene.getAllowedCollisionMatrixNonConst().setEntry(it->first.first, it->first.second, true);
   }
 
-  // ROS_INFO("Disabled %d link pairs that are in collision in default state from collision checking", num_disabled);
+  // RVIZ_COMMON_LOG_INFO("Disabled %d link pairs that are in collision in default state from collision checking", num_disabled);
 
   return num_disabled;
 }
@@ -511,7 +511,7 @@ unsigned int disableAlwaysInCollision(planning_scene::PlanningScene& scene, Link
       if (nc >= req.max_contacts)
       {
         req.max_contacts *= 2;  // double the max contacts that the CollisionRequest checks for
-        // ROS_INFO("Doubling max_contacts to %d", int(req.max_contacts));
+        // RVIZ_COMMON_LOG_INFO("Doubling max_contacts to %d", int(req.max_contacts));
       }
     }
 
@@ -539,7 +539,7 @@ unsigned int disableAlwaysInCollision(planning_scene::PlanningScene& scene, Link
     if (found == 0)
       done = true;
 
-    // ROS_INFO("Disabled %u link pairs that are always in collision from collision checking", found);
+    // RVIZ_COMMON_LOG_INFO("Disabled %u link pairs that are always in collision from collision checking", found);
   }
 
   return num_disabled;
@@ -558,7 +558,7 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
   boost::mutex lock;           // used for sharing the same data structures
 
   int num_threads = boost::thread::hardware_concurrency();  // how many cores does this computer have?
-  // ROS_INFO_STREAM("Performing " << num_trials << " trials for 'always in collision' checking on " <<
+  // RVIZ_COMMON_LOG_INFO_STREAM("Performing " << num_trials << " trials for 'always in collision' checking on " <<
   //   num_threads << " threads...");
 
   for (int i = 0; i < num_threads; ++i)
@@ -573,7 +573,7 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
   }
   catch (boost::thread_interrupted)
   {
-    ROS_WARN("disableNeverInCollision interrupted");
+    RVIZ_COMMON_LOG_WARNING("disableNeverInCollision interrupted");
     bgroup.interrupt_all();
     bgroup.join_all();  // wait for all threads to interrupt
     throw;
@@ -597,7 +597,7 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
       }
     }
   }
-  // ROS_INFO("Disabled %d link pairs that are never in collision", num_disabled);
+  // RVIZ_COMMON_LOG_INFO("Disabled %d link pairs that are never in collision", num_disabled);
 
   return num_disabled;
 }
@@ -607,7 +607,7 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
 // ******************************************************************************************
 void disableNeverInCollisionThread(ThreadComputation tc)
 {
-  // ROS_INFO_STREAM("Thread " << tc.thread_id_ << " running " << tc.num_trials_ << " trials");
+  // RVIZ_COMMON_LOG_INFO_STREAM("Thread " << tc.thread_id_ << " running " << tc.num_trials_ << " trials");
 
   // User feedback vars
   const unsigned int progress_interval = tc.num_trials_ / 20;  // show progress update every 5%

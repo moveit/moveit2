@@ -36,6 +36,7 @@
 
 #include <moveit/setup_assistant/tools/moveit_config_data.h>
 #include <moveit/rdf_loader/rdf_loader.h>
+#include <rviz_common/logging.hpp>
 
 #include <boost/program_options.hpp>
 
@@ -45,20 +46,20 @@ bool loadSetupAssistantConfig(moveit_setup_assistant::MoveItConfigData& config_d
 {
   if (!config_data.setPackagePath(pkg_path))
   {
-    ROS_ERROR_STREAM("Could not set package path '" << pkg_path << "'");
+    RVIZ_COMMON_LOG_ERROR_STREAM("Could not set package path '" << pkg_path << "'");
     return false;
   }
 
   std::string setup_assistant_path;
   if (!config_data.getSetupAssistantYAMLPath(setup_assistant_path))
   {
-    ROS_ERROR_STREAM("Could not resolve path to .setup_assistant");
+    RVIZ_COMMON_LOG_ERROR_STREAM("Could not resolve path to .setup_assistant");
     return false;
   }
 
   if (!config_data.inputSetupAssistantYAML(setup_assistant_path))
   {
-    ROS_ERROR_STREAM("Could not parse .setup_assistant file from '" << setup_assistant_path << "'");
+    RVIZ_COMMON_LOG_ERROR_STREAM("Could not parse .setup_assistant file from '" << setup_assistant_path << "'");
     return false;
   }
 
@@ -75,24 +76,24 @@ bool setup(moveit_setup_assistant::MoveItConfigData& config_data, bool keep_old,
   std::string urdf_string;
   if (!rdf_loader::RDFLoader::loadXmlFileToString(urdf_string, config_data.urdf_path_, xacro_args))
   {
-    ROS_ERROR_STREAM("Could not load URDF from '" << config_data.urdf_path_ << "'");
+    RVIZ_COMMON_LOG_ERROR_STREAM("Could not load URDF from '" << config_data.urdf_path_ << "'");
     return false;
   }
   if (!config_data.urdf_model_->initString(urdf_string))
   {
-    ROS_ERROR_STREAM("Could not parse URDF from '" << config_data.urdf_path_ << "'");
+    RVIZ_COMMON_LOG_ERROR_STREAM("Could not parse URDF from '" << config_data.urdf_path_ << "'");
     return false;
   }
 
   std::string srdf_string;
   if (!rdf_loader::RDFLoader::loadXmlFileToString(srdf_string, config_data.srdf_path_, xacro_args))
   {
-    ROS_ERROR_STREAM("Could not load SRDF from '" << config_data.srdf_path_ << "'");
+    RVIZ_COMMON_LOG_ERROR_STREAM("Could not load SRDF from '" << config_data.srdf_path_ << "'");
     return false;
   }
   if (!config_data.srdf_->initString(*config_data.urdf_model_, srdf_string))
   {
-    ROS_ERROR_STREAM("Could not parse SRDF from '" << config_data.srdf_path_ << "'");
+    RVIZ_COMMON_LOG_ERROR_STREAM("Could not parse SRDF from '" << config_data.srdf_path_ << "'");
     return false;
   }
 
@@ -126,22 +127,19 @@ int main(int argc, char* argv[])
   uint32_t never_trials = 0;
 
   po::options_description desc("Allowed options");
-  desc.add_options()("help", "show help")("config-pkg", po::value(&config_pkg_path), "path to MoveIt config package")(
-      "urdf", po::value(&urdf_path),
-      "path to URDF ( or xacro)")("srdf", po::value(&srdf_path),
-                                  "path to SRDF ( or xacro)")("output", po::value(&output_path), "output path for SRDF")
-
+  desc.add_options()
+      ("help", "show help")
+      ("config-pkg", po::value(&config_pkg_path), "path to MoveIt config package")
+      ("urdf", po::value(&urdf_path), "path to URDF ( or xacro)")
+      ("srdf", po::value(&srdf_path), "path to SRDF ( or xacro)")
+      ("output", po::value(&output_path), "output path for SRDF")
       ("xacro-args", po::value<std::vector<std::string> >()->composing(), "additional arguments for xacro")
-
-          ("default", po::bool_switch(&include_default), "disable default colliding pairs")(
-              "always", po::bool_switch(&include_always), "disable always colliding pairs")
-
-              ("keep", po::bool_switch(&keep_old), "keep disabled link from SRDF")("verbose", po::bool_switch(&verbose),
-                                                                                   "verbose output")
-
-                  ("trials", po::value(&never_trials), "number of trials for searching never colliding pairs")(
-                      "min-collision-fraction", po::value(&min_collision_fraction),
-                      "fraction of small sample size to determine links that are alwas colliding");
+      ("default", po::bool_switch(&include_default), "disable default colliding pairs")
+      ("always", po::bool_switch(&include_always), "disable always colliding pairs")
+      ("keep", po::bool_switch(&keep_old), "keep disabled link from SRDF")
+      ("verbose", po::bool_switch(&verbose),"verbose output")
+      ("trials", po::value(&never_trials), "number of trials for searching never colliding pairs")
+      ("min-collision-fraction", po::value(&min_collision_fraction), "fraction of small sample size to determine links that are alwas colliding");
 
   po::positional_options_description pos_desc;
   pos_desc.add("xacro-args", -1);
@@ -162,18 +160,18 @@ int main(int argc, char* argv[])
   {
     if (!loadSetupAssistantConfig(config_data, config_pkg_path))
     {
-      ROS_ERROR_STREAM("Could not load config at '" << config_pkg_path << "'");
+      RVIZ_COMMON_LOG_ERROR_STREAM("Could not load config at '" << config_pkg_path << "'");
       return 1;
     }
   }
   else if (urdf_path.empty() || srdf_path.empty())
   {
-    ROS_ERROR_STREAM("Please provide config package or URDF and SRDF path");
+    RVIZ_COMMON_LOG_ERROR_STREAM("Please provide config package or URDF and SRDF path");
     return 1;
   }
   else if (rdf_loader::RDFLoader::isXacroFile(srdf_path) && output_path.empty())
   {
-    ROS_ERROR_STREAM("Please provide a different output file for SRDF xacro input file");
+    RVIZ_COMMON_LOG_ERROR_STREAM("Please provide a different output file for SRDF xacro input file");
     return 1;
   }
 
@@ -189,7 +187,7 @@ int main(int argc, char* argv[])
 
   if (!setup(config_data, keep_old, xacro_args))
   {
-    ROS_ERROR_STREAM("Could not setup updater");
+    RVIZ_COMMON_LOG_ERROR_STREAM("Could not setup updater");
     return 1;
   }
 
