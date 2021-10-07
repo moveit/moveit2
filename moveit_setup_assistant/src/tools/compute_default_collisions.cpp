@@ -326,7 +326,7 @@ void computeLinkPairs(const planning_scene::PlanningScene& scene, LinkPairMap& l
 
   std::pair<std::string, std::string> temp_pair;
 
-  // Loop through every combination of name pairs, AB and BA, n^2
+  // Loop through every combination of name pairs, 'AB' and 'BA', n^2
   for (std::size_t i = 0; i < names.size(); ++i)
   {
     for (std::size_t j = i + 1; j < names.size(); ++j)
@@ -343,7 +343,7 @@ void computeConnectionGraph(const moveit::core::LinkModel* start_link, LinkGraph
 {
   link_graph.clear();  // make sure the edges structure is clear
 
-  // Recurively build adj list of link connections
+  // Recursively build adj list of link connections
   computeConnectionGraphRec(start_link, link_graph);
 
   // Repeatidly check for links with no geometry and remove them, then re-check until no more removals are detected
@@ -366,7 +366,7 @@ void computeConnectionGraph(const moveit::core::LinkModel* start_link, LinkGraph
           temp_list.push_back(adj_it);
         }
 
-        // Make all preceeding and succeeding links to the no-shape link fully connected
+        // Make all proceeding and succeeding links to the no-shape link fully connected
         // so that they don't collision check with themselves
         for (std::size_t i = 0; i < temp_list.size(); ++i)
         {
@@ -437,7 +437,7 @@ unsigned int disableAdjacentLinks(planning_scene::PlanningScene& scene, LinkGrap
       }
     }
   }
-  // RVIZ_COMMON_LOG_INFO("Disabled %d adjancent link pairs from collision checking", num_disabled);
+  // RVIZ_COMMON_LOG_INFO("Disabled %d adjacent link pairs from collision checking", num_disabled);
 
   return num_disabled;
 }

@@ -106,7 +106,7 @@ bool setup(moveit_setup_assistant::MoveItConfigData& config_data, bool keep_old,
 moveit_setup_assistant::LinkPairMap compute(moveit_setup_assistant::MoveItConfigData& config_data, uint32_t trials,
                                             double min_collision_fraction, bool verbose)
 {
-  // TODO: spin thread and print progess if verbose
+  // TODO: spin thread and print progress if verbose
   unsigned int collision_progress;
   return moveit_setup_assistant::computeDefaultCollisions(config_data.getPlanningScene(), &collision_progress,
                                                           trials > 0, trials, min_collision_fraction, verbose);
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
       "verbose", po::bool_switch(&verbose), "verbose output")("trials", po::value(&never_trials),
                                                               "number of trials for searching never colliding pairs")(
       "min-collision-fraction", po::value(&min_collision_fraction),
-      "fraction of small sample size to determine links that are alwas colliding");
+      "fraction of small sample size to determine links that are always colliding");
 
   po::positional_options_description pos_desc;
   pos_desc.add("xacro-args", -1);

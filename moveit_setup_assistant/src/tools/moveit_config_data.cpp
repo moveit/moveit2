@@ -685,7 +685,7 @@ std::vector<OMPLPlannerDescription> MoveItConfigData::getOMPLPlanners()
                     "dist new state to nearest neighbor to disqualify as frontier. "
                     "default: 0.0 set in setup()");
   trrt.addParameter("frountierNodeRatio", "0.1", "1/10, or 1 nonfrontier for every 10 frontier. default: 0.1");
-  trrt.addParameter("k_constant", "0.0", "value used to normalize expresssion. default: 0.0 set in setup()");
+  trrt.addParameter("k_constant", "0.0", "value used to normalize expression. default: 0.0 set in setup()");
   planner_des.push_back(trrt);
 
   OMPLPlannerDescription prm("PRM", "geometric");
@@ -1771,7 +1771,7 @@ bool MoveItConfigData::inputSetupAssistantYAML(const std::string& file_path)
     RVIZ_COMMON_LOG_ERROR_STREAM(e.what());
   }
 
-  return false;  // if it gets to this point an error has occured
+  return false;  // if it gets to this point an error has occurred
 }
 
 // ******************************************************************************************
@@ -1880,7 +1880,7 @@ bool MoveItConfigData::input3DSensorsYAML(const std::string& default_file_path, 
     RVIZ_COMMON_LOG_ERROR_STREAM("Error parsing sensors yaml: " << e.what());
   }
 
-  return false;  // if it gets to this point an error has occured
+  return false;  // if it gets to this point an error has occurred
 }
 
 // ******************************************************************************************
@@ -1910,7 +1910,7 @@ srdf::Model::Group* MoveItConfigData::findGroupByName(const std::string& name)
   // Check if subgroup was found
   if (searched_group == nullptr)  // not found
   {
-    RVIZ_COMMON_LOG_ERROR_STREAM("An internal error has occured while searching for groups. Group '"
+    RVIZ_COMMON_LOG_ERROR_STREAM("An internal error has occurred while searching for groups. Group '"
                                  << name
                                  << "' was not found "
                                     "in the SRDF.");
@@ -1985,7 +1985,7 @@ std::vector<ROSControlConfig>& MoveItConfigData::getROSControllers()
 }
 
 // ******************************************************************************************
-// Used to add a sensor plugin configuation parameter to the sensor plugin configuration parameter list
+// Used to add a sensor plugin configuration parameter to the sensor plugin configuration parameter list
 // ******************************************************************************************
 void MoveItConfigData::addGenericParameterToSensorPluginConfig(const std::string& name, const std::string& value,
                                                                const std::string& /*comment*/)
