@@ -50,8 +50,7 @@ int main(int argc, char** argv)
   double radius = 0.02;
   int lifetime = 600;
 
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer = std::make_shared<tf2_ros::Buffer>(node->get_clock());
-  planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION, tf_buffer);
+  planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (psm.getPlanningScene())
   {
     psm.startWorldGeometryMonitor();
