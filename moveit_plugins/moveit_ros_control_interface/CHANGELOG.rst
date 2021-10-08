@@ -2,6 +2,18 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.0 (2021-10-08)
+------------------
+* moveit_ros_control_interface: Fix dangling reference (`#710 <https://github.com/ros-planning/moveit2/issues/710>`_)
+* Port moveit ros control interface to ROS2 (`#545 <https://github.com/ros-planning/moveit2/issues/545>`_)
+  * Port moveit_ros_control_interface to ROS2
+  * Multiple fixes to trajectory_execution_manager
+* Fix reversed check in switchControllers (`#2726 <https://github.com/ros-planning/moveit2/issues/2726>`_)
+* Contributors: Jafar Abdi, Nathan Brooks, Joe Schornak, Henning Kayser
+
+2.2.1 (2021-07-12)
+------------------
+
 1.1.1 (2020-10-13)
 ------------------
 * [maint] Add comment to MOVEIT_CLASS_FORWARD (`#2315 <https://github.com/ros-planning/moveit/issues/2315>`_)
