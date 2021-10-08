@@ -2,8 +2,8 @@
 Changelog for package run_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.0 (2021-10-08)
+------------------
 * Migrate to joint_state_broadcaster (`#657 <https://github.com/ros-planning/moveit2/issues/657>`_)
 * Add missing exec dependencies to demo packages (`#581 <https://github.com/ros-planning/moveit2/issues/581>`_)
 * Fix loading joint_limits.yaml in demo and test launch files (`#544 <https://github.com/ros-planning/moveit2/issues/544>`_)

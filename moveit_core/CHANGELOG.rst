@@ -2,8 +2,8 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.0 (2021-10-08)
+------------------
 * Add debug print function to RobotTrajectory (`#715 <https://github.com/ros-planning/moveit2/issues/715>`_)
 * Small matrix calc speedup in collision_distance_field_types (`#666 <https://github.com/ros-planning/moveit2/issues/666>`_)
   * Use transpose of rotation matrix in collision_distance_field_types

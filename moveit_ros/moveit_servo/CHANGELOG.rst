@@ -2,8 +2,8 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.0 (2021-10-08)
+------------------
 * Make TF buffer & listener in PSM private (`#654 <https://github.com/ros-planning/moveit2/issues/654>`_)
 * Rename ServoServer to ServerNode (`#649 <https://github.com/ros-planning/moveit2/issues/649>`_)
 * Fix std::placeholders namespace conflict (`#713 <https://github.com/ros-planning/moveit2/issues/713>`_)

@@ -2,8 +2,8 @@
 Changelog for package moveit_simple_controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.3.0 (2021-10-08)
+------------------
 * Fix cmake warnings (`#690 <https://github.com/ros-planning/moveit2/issues/690>`_)
   * Fix -Wformat-security
   * Fix -Wunused-variable
