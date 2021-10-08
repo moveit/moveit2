@@ -1,0 +1,46 @@
+<package format="2">
+  <name>moveit_collisions_updater</name>
+  <version>1.1.5</version>
+
+  <description>Generates a configuration package that makes it easy to use MoveIt</description>
+
+  <author email="dave@picknik.ai">Dave Coleman</author>
+
+  <maintainer email="dave@picknik.ai">Dave Coleman</maintainer>
+  <maintainer email="rhaschke@techfak.uni-bielefeld.de">Robert Haschke</maintainer>
+  <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://moveit.ros.org</url>
+  <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
+  <url type="repository">https://github.com/ros-planning/moveit2</url>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <build_depend>moveit_common</build_depend>
+  <build_depend>libogre-dev</build_depend>
+  <build_depend>ompl</build_depend>
+  <build_depend>rviz2</build_depend>
+  <build_depend>rviz_common</build_depend>
+
+  <depend>ament_index_cpp</depend>
+  <depend>moveit_core</depend>
+  <depend>moveit_ros_planning</depend>
+  <depend>moveit_ros_visualization</depend>
+  <depend>rclcpp</depend>
+  <depend>urdf</depend>
+  <depend>yaml-cpp</depend>
+  <depend>srdfdom</depend>
+
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>moveit_resources_panda_moveit_config</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
