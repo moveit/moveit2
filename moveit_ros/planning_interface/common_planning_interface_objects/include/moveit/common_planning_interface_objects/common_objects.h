@@ -39,12 +39,16 @@
 #include <memory>
 #include <tf2_ros/buffer.h>
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
 
 namespace moveit
 {
 namespace planning_interface
 {
 std::shared_ptr<tf2_ros::Buffer> getSharedTF();
+
+robot_model_loader::RobotModelLoaderPtr getSharedRobotModelLoader(const rclcpp::Node::SharedPtr& node,
+                                                                  const std::string& robot_description);
 
 moveit::core::RobotModelConstPtr getSharedRobotModel(const rclcpp::Node::SharedPtr& node,
                                                      const std::string& robot_description);

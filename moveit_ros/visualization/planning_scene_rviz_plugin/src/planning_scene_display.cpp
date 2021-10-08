@@ -518,9 +518,9 @@ void PlanningSceneDisplay::unsetLinkColor(rviz_default_plugins::robot::Robot* ro
 // ******************************************************************************************
 planning_scene_monitor::PlanningSceneMonitorPtr PlanningSceneDisplay::createPlanningSceneMonitor()
 {
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer = moveit::planning_interface::getSharedTF();
-  return std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
-      node_, robot_description_property_->getStdString(), tf_buffer, getNameStd() + "_planning_scene_monitor");
+  auto rml = moveit::planning_interface::getSharedRobotModelLoader(node_, robot_description_property_->getStdString());
+  return std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, rml,
+                                                                        getNameStd() + "_planning_scene_monitor");
 }
 
 void PlanningSceneDisplay::clearRobotModel()

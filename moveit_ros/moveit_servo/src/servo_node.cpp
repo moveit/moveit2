@@ -76,9 +76,8 @@ bool ServoNode::init()
 
   // Set up planning_scene_monitor
   auto node_ptr = shared_from_this();
-  tf_buffer_ = std::make_shared<tf2_ros::Buffer>(this->get_clock());
   planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
-      node_ptr, robot_description_name, tf_buffer_, "planning_scene_monitor");
+      node_ptr, robot_description_name, "planning_scene_monitor");
 
   // Get the servo parameters
   auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node_ptr, LOGGER);
@@ -122,7 +121,6 @@ bool ServoNode::init()
 void ServoNode::reset()
 {
   servo_.reset();
-  tf_buffer_.reset();
   planning_scene_monitor_.reset();
   is_initialized_ = false;
 }
