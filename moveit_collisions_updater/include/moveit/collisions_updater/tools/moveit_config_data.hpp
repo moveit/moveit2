@@ -42,6 +42,7 @@
 #include <yaml-cpp/yaml.h>                                                 // outputting yaml config files
 #include <urdf/model.h>                                                    // to share throughout app
 #include <srdfdom/srdf_writer.h>                                           // for writing srdf data
+#include <rclcpp/rclcpp.hpp>
 
 #include <utility>
 
@@ -58,6 +59,9 @@ static const std::string MOVEIT_ROBOT_STATE = "moveit_robot_state";
 // Default kin solver values
 static const double DEFAULT_KIN_SOLVER_SEARCH_RESOLUTION = 0.005;
 static const double DEFAULT_KIN_SOLVER_TIMEOUT = 0.005;
+
+// Used for logging
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_updater");
 
 // ******************************************************************************************
 // Structs

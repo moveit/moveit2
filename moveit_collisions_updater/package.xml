@@ -21,8 +21,6 @@
   <build_depend>moveit_common</build_depend>
   <build_depend>libogre-dev</build_depend>
   <build_depend>ompl</build_depend>
-  <build_depend>rviz2</build_depend>
-  <build_depend>rviz_common</build_depend>
 
   <depend>ament_index_cpp</depend>
   <depend>moveit_core</depend>
@@ -34,7 +32,6 @@
   <depend>srdfdom</depend>
 
   <exec_depend>xacro</exec_depend>
-  <exec_depend>rviz2</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

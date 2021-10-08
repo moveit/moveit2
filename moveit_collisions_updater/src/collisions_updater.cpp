@@ -36,7 +36,6 @@
 
 #include <moveit/collisions_updater/tools/moveit_config_data.hpp>
 #include <moveit/rdf_loader/rdf_loader.h>
-#include <rviz_common/logging.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include <boost/program_options.hpp>

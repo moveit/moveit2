@@ -10,8 +10,6 @@ find_package(ament_cmake REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_visualization REQUIRED)
-find_package(rviz2 REQUIRED)
-find_package(rviz_common REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(urdf REQUIRED)
 find_package(srdfdom REQUIRED)
@@ -33,8 +31,6 @@ ament_target_dependencies(
   "moveit_core"
   "moveit_ros_planning"
   "moveit_ros_visualization"
-  "rviz2"
-  "rviz_common"
   "rclcpp"
   "urdf"
   "srdfdom"
@@ -54,8 +50,6 @@ ament_target_dependencies(
   "moveit_core"
   "moveit_ros_planning"
   "moveit_ros_visualization"
-  "rviz2"
-  "rviz_common"
   "rclcpp"
   "urdf"
   "srdfdom"
