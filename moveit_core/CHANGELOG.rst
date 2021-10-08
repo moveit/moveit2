@@ -2,6 +2,48 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.0 (2021-10-08)
+------------------
+* Add debug print function to RobotTrajectory (`#715 <https://github.com/ros-planning/moveit2/issues/715>`_)
+* Small matrix calc speedup in collision_distance_field_types (`#666 <https://github.com/ros-planning/moveit2/issues/666>`_)
+  * Use transpose of rotation matrix in collision_distance_field_types
+  * Add comment
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Fix cmake install in collision_detection_bullet (`#685 <https://github.com/ros-planning/moveit2/issues/685>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Fix cmake warnings (`#690 <https://github.com/ros-planning/moveit2/issues/690>`_)
+  * Fix -Wformat-security
+  * Fix -Wunused-variable
+  * Fix -Wunused-lambda-capture
+  * Fix -Wdeprecated-declarations
+  * Fix clang-tidy, readability-identifier-naming in moveit_kinematics
+* Add Ruckig trajectory_processing plugin (jerk-limited) (`#571 <https://github.com/ros-planning/moveit2/issues/571>`_)
+* New orientation constraint parameterization (`#550 <https://github.com/ros-planning/moveit2/issues/550>`_)
+* Pulled in changes from the ROS MoveIt PR 'New orientation constraint parameterization `#2402 <https://github.com/ros-planning/moveit2/issues/2402>`_'.
+* Fix constraint tolerance assignment (`#622 <https://github.com/ros-planning/moveit2/issues/622>`_)
+* Fix warnings in Galactic and Rolling (`#598 <https://github.com/ros-planning/moveit2/issues/598>`_)
+  * Use __has_includes preprocessor directive for deprecated headers
+  * Fix parameter template types
+  * Proper initialization of smart pointers, rclcpp::Duration
+* Check for nullptr on getGlobalLinkTransform (`#611 <https://github.com/ros-planning/moveit2/issues/611>`_)
+* Minor documentation and cleanup of TOTG plugin (`#584 <https://github.com/ros-planning/moveit2/issues/584>`_)
+* Fixed message when parameter was found (`#595 <https://github.com/ros-planning/moveit2/issues/595>`_)
+* Fix some format strings (`#587 <https://github.com/ros-planning/moveit2/issues/587>`_)
+* Fixes for Windows (`#530 <https://github.com/ros-planning/moveit2/issues/530>`_)
+* Tests for CurrentStateMonitor using dependency injection (`#562 <https://github.com/ros-planning/moveit2/issues/562>`_)
+* Refactors for OccMapTree in PlanningScene (`#2684 <https://github.com/ros-planning/moveit2/issues/2684>`_)
+* Add new orientation constraint parameterization (`#2402 <https://github.com/ros-planning/moveit2/issues/2402>`_)
+* Avoid push_back within getAttachedBodyObjects (`#2732 <https://github.com/ros-planning/moveit2/issues/2732>`_)
+* Port `#2721 <https://github.com/ros-planning/moveit2/issues/2721>`_ (fixed padding collision attached objects) to Master (`#2731 <https://github.com/ros-planning/moveit2/issues/2731>`_)
+* New RobotState interpolation test (`#2665 <https://github.com/ros-planning/moveit2/issues/2665>`_)
+  * started interpolation test
+  * more tests
+  * test interpolation bounds checking
+* use lockable octomap for MotionPlanningDisplay
+* Implement checkCollision with default ACM as wrapper
+* Move OccMapTree to moveit_core/collision_detection
+* Contributors: AdamPettinger, Akash, AndyZe, Bjar Ne, David V. Lu!!, George Stavrinos, Henning Kayser, Jafar Abdi, Jeroen, John Stechschulte, Michael J. Park, Nathan Brooks, Robert Haschke, Simon Schmeisser, Tyler Weaver, Vatan Aksoy Tezer, Jack, Wyatt Rees, Nisala Kalupahana, Jorge Nicho, Lior Lustgarten
+
 2.2.1 (2021-07-12)
 ------------------
 * Pluginlib Deprecation Fix (`#542 <https://github.com/ros-planning/moveit2/issues/542>`_)

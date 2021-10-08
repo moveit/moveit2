@@ -2,6 +2,21 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.0 (2021-10-08)
+------------------
+* Fix cmake warnings (`#690 <https://github.com/ros-planning/moveit2/issues/690>`_)
+  * Fix -Wformat-security
+  * Fix -Wunused-variable
+  * Fix -Wunused-lambda-capture
+  * Fix -Wdeprecated-declarations
+  * Fix clang-tidy, readability-identifier-naming in moveit_kinematics
+* Fix warnings in Galactic and Rolling (`#598 <https://github.com/ros-planning/moveit2/issues/598>`_)
+  * Use __has_includes preprocessor directive for deprecated headers
+  * Fix parameter template types
+  * Proper initialization of smart pointers, rclcpp::Duration
+* Fix loading joint_limits.yaml in demo and test launch files (`#544 <https://github.com/ros-planning/moveit2/issues/544>`_)
+* Contributors: David V. Lu, Henning Kayser, Jafar Abdi, Vatan Aksoy Tezer
+
 2.2.1 (2021-07-12)
 ------------------
 * Pluginlib Deprecation Fix (`#542 <https://github.com/ros-planning/moveit2/issues/542>`_)
