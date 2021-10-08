@@ -1911,9 +1911,9 @@ srdf::Model::Group* MoveItConfigData::findGroupByName(const std::string& name)
   if (searched_group == nullptr)  // not found
   {
     RCLCPP_ERROR_STREAM(LOGGER, "An internal error has occurred while searching for groups. Group '"
-                                 << name
-                                 << "' was not found "
-                                    "in the SRDF.");
+                                    << name
+                                    << "' was not found "
+                                       "in the SRDF.");
     exit(-1);
   }
 
