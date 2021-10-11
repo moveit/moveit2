@@ -147,7 +147,6 @@ def generate_servo_test_description(
                     robot_description_semantic,
                     joint_limits_yaml,
                 ],
-                extra_arguments=[{"use_intra_process_comm": True}],
             ),
         ],
         output="screen",
