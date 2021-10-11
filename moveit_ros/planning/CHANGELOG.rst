@@ -2,6 +2,31 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.0 (2021-10-08)
+------------------
+* Make TF buffer & listener in PSM private (`#654 <https://github.com/ros-planning/moveit2/issues/654>`_)
+* kinematics_plugin_loader: Revert accidental change in logging level (`#692 <https://github.com/ros-planning/moveit2/issues/692>`_)
+* Add Ruckig trajectory_processing plugin (jerk-limited) (`#571 <https://github.com/ros-planning/moveit2/issues/571>`_)
+* PlanningSceneMonitor: Fix warning about having two publisher with the same node (`#662 <https://github.com/ros-planning/moveit2/issues/662>`_)
+* Port moveit ros control interface to ROS2 (`#545 <https://github.com/ros-planning/moveit2/issues/545>`_)
+* OccupancyMapMonitor tests using Dependency Injection (`#569 <https://github.com/ros-planning/moveit2/issues/569>`_)
+* Fix reversed check (`#623 <https://github.com/ros-planning/moveit2/issues/623>`_)
+* follow_joint_trajectory_controller_handle: publish new multi_dof_trajectory field (`#492 <https://github.com/ros-planning/moveit2/issues/492>`_)
+* Fix warnings in Galactic and Rolling (`#598 <https://github.com/ros-planning/moveit2/issues/598>`_)
+  * Use __has_includes preprocessor directive for deprecated headers
+  * Fix parameter template types
+  * Proper initialization of smart pointers, rclcpp::Duration
+* Create a transform subscribers to enable virtual joints (`#310 <https://github.com/ros-planning/moveit2/issues/310>`_)
+* Minor documentation and cleanup of TOTG plugin (`#584 <https://github.com/ros-planning/moveit2/issues/584>`_)
+* Wait for complete state duration fix (`#590 <https://github.com/ros-planning/moveit2/issues/590>`_)
+* Fix some format strings (`#587 <https://github.com/ros-planning/moveit2/issues/587>`_)
+* Fixes for Windows (`#530 <https://github.com/ros-planning/moveit2/issues/530>`_)
+* Tests for CurrentStateMonitor using dependency injection (`#562 <https://github.com/ros-planning/moveit2/issues/562>`_)
+* Fix joint's position limits loading (`#553 <https://github.com/ros-planning/moveit2/issues/553>`_)
+* Refactors for OccMapTree in PlanningScene (`#2684 <https://github.com/ros-planning/moveit2/issues/2684>`_)
+* Move OccMapTree to moveit_core/collision_detection
+* Contributors: Akash, AndyZe, Bjar Ne, Henning Kayser, Jafar Abdi, Nathan Brooks, Simon Schmeisser, Tyler Weaver, Vatan Aksoy Tezer, Wyatt Rees, Jack, Dave Coleman,  Joe Schornak, Nisala Kalupahana, Lior Lustgarten, Jorge Nicho
+
 2.2.1 (2021-07-12)
 ------------------
 * Fix unwanted override of URDF joint limit defaults (`#546 <https://github.com/ros-planning/moveit2/issues/546>`_)

@@ -2,6 +2,32 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.0 (2021-10-08)
+------------------
+* Support passing MoveGroup's namespace to MoveGroupInterface (`#533 <https://github.com/ros-planning/moveit2/issues/533>`_)
+* Add getSharedRobotModelLoader to fix race condition when having multiple displays for the same node (`#525 <https://github.com/ros-planning/moveit2/issues/525>`_)
+* Make TF buffer & listener in PSM private (`#654 <https://github.com/ros-planning/moveit2/issues/654>`_)
+  * Add private buffer & tf listener to PSM
+  * Remove coupled deleter
+  * Decouple PSM from CSM
+  * Deprecate old constructors
+* mesh_shape: Fix resource group for meshes (`#672 <https://github.com/ros-planning/moveit2/issues/672>`_)
+* Fix warnings in Galactic and Rolling (`#598 <https://github.com/ros-planning/moveit2/issues/598>`_)
+  * Use __has_includes preprocessor directive for deprecated headers
+  * Fix parameter template types
+  * Proper initialization of smart pointers, rclcpp::Duration
+* Add option to disable Octomap in Rviz Rendering Tools (`#606 <https://github.com/ros-planning/moveit2/issues/606>`_)
+* Fixes for Windows (`#530 <https://github.com/ros-planning/moveit2/issues/530>`_)
+* Support arbitrary realtime-factors in trajectory visualization (`#2745 <https://github.com/ros-planning/moveit2/issues/2745>`_)
+* Fix joints tab
+* MP frame: Fix handling of mimic + passive joints
+* Switch order of manipulation and joints tab
+* Fix trajectory panel (`#2737 <https://github.com/ros-planning/moveit2/issues/2737>`_)
+  * TrajectoryPanel: Only set paused\_ via pauseButton() to keep "Pause/Play" button in correct state
+  * simplify code on the side
+* moveit_joy: RuntimeError: dictionary changed size during iteration (`#2628 <https://github.com/ros-planning/moveit2/issues/2628>`_)
+* Contributors: AdamPettinger, Akash, Henning Kayser, Jafar Abdi, Michael Görner, Nisala Kalupahana, Jorge Nicho, Henning Kayser, Robert Haschke, Vatan Aksoy Tezer, Tyler Weaver, Lior Lustgarten
+
 2.2.1 (2021-07-12)
 ------------------
 
