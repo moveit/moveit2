@@ -8,7 +8,8 @@ on:
   pull_request:
   push:
     branches:
-      - main
+      # TODO(sjahr): Revert to main before merging
+      - feature/hybrid_planning
 
 jobs:
   pre-commit:
