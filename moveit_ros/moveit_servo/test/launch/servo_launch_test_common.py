@@ -113,7 +113,7 @@ def generate_servo_test_description(
         name="test_servo_integration_container",
         namespace="/",
         package="rclcpp_components",
-        executable="component_container",
+        executable="component_container_mt",
         composable_node_descriptions=[
             ComposableNode(
                 package="robot_state_publisher",
@@ -135,7 +135,7 @@ def generate_servo_test_description(
         name="servo_container",
         namespace="/",
         package="rclcpp_components",
-        executable="component_container",
+        executable="component_container_mt",
         composable_node_descriptions=[
             ComposableNode(
                 package="moveit_servo",
