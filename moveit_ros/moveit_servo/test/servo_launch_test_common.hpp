@@ -104,9 +104,9 @@ public:
     // Init ROS interfaces
     // Publishers
     pub_twist_cmd_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
-        resolveServoTopicName(servo_parameters_->cartesian_command_in_topic), 10);
+        resolveServoTopicName(servo_parameters_->cartesian_command_in_topic), rclcpp::SystemDefaultsQoS());
     pub_joint_cmd_ = node_->create_publisher<control_msgs::msg::JointJog>(
-        resolveServoTopicName(servo_parameters_->joint_command_in_topic), 10);
+        resolveServoTopicName(servo_parameters_->joint_command_in_topic), rclcpp::SystemDefaultsQoS());
   }
 
   void TearDown() override
@@ -161,7 +161,7 @@ public:
 
     // Status sub (we need this to check that we've started / stopped)
     sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
-        resolveServoTopicName(servo_parameters_->status_topic), 10,
+        resolveServoTopicName(servo_parameters_->status_topic), rclcpp::SystemDefaultsQoS(),
         std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
     return true;
   }
@@ -235,7 +235,7 @@ public:
   bool setupCollisionScaleSub()
   {
     sub_collision_scale_ = node_->create_subscription<std_msgs::msg::Float64>(
-        resolveServoTopicName("~/collision_velocity_scale"), ROS_QUEUE_SIZE,
+        resolveServoTopicName("~/collision_velocity_scale"), rclcpp::SystemDefaultsQoS(),
         std::bind(&ServoFixture::collisionScaleCB, this, std::placeholders::_1));
     return true;
   }
@@ -245,14 +245,14 @@ public:
     if (command_type == "trajectory_msgs/JointTrajectory")
     {
       sub_trajectory_cmd_output_ = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
-          resolveServoTopicName(servo_parameters_->command_out_topic), 10,
+          resolveServoTopicName(servo_parameters_->command_out_topic), rclcpp::SystemDefaultsQoS(),
           std::bind(&ServoFixture::trajectoryCommandCB, this, std::placeholders::_1));
       return true;
     }
     else if (command_type == "std_msgs/Float64MultiArray")
     {
       sub_array_cmd_output_ = node_->create_subscription<std_msgs::msg::Float64MultiArray>(
-          resolveServoTopicName(servo_parameters_->command_out_topic), 10,
+          resolveServoTopicName(servo_parameters_->command_out_topic), rclcpp::SystemDefaultsQoS(),
           std::bind(&ServoFixture::arrayCommandCB, this, std::placeholders::_1));
       return true;
     }
@@ -266,7 +266,7 @@ public:
   bool setupJointStateSub()
   {
     sub_joint_state_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-        resolveServoTopicName(servo_parameters_->joint_topic), 10,
+        resolveServoTopicName(servo_parameters_->joint_topic), rclcpp::SystemDefaultsQoS(),
         std::bind(&ServoFixture::jointStateCB, this, std::placeholders::_1));
     return true;
   }
