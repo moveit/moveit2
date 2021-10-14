@@ -52,17 +52,17 @@ bool SinglePlanExecution::initialize(const std::shared_ptr<HybridPlanningManager
   return true;
 }
 
-ReactionResult SinglePlanExecution::processEvent(const BasicHybridPlanningEvent& event)
+ReactionResult SinglePlanExecution::processEvent(const HybridPlanningEvent& event)
 {
   switch (event)
   {
-    case BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
+    case HybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
       if (!hybrid_planning_manager_->sendGlobalPlannerAction())  // Start global planning
       {
         hybrid_planning_manager_->sendHybridPlanningResponse(false);
       }
       break;
-    case BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
+    case HybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
       std::call_once(LOCAL_PLANNER_STARTED, [this]() {            // ensure the local planner is not started twice
         if (!hybrid_planning_manager_->sendLocalPlannerAction())  // Start local planning
         {
@@ -70,7 +70,7 @@ ReactionResult SinglePlanExecution::processEvent(const BasicHybridPlanningEvent&
         }
       });
       break;
-    case BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
+    case HybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
       hybrid_planning_manager_->sendHybridPlanningResponse(true);
       break;
     default:

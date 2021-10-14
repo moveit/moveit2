@@ -77,21 +77,21 @@ public:
 // Describes the outcome of a reaction to an event in the hybrid planning architecture
 struct ReactionResult
 {
-  ReactionResult(const BasicHybridPlanningEvent& planning_event, const std::string& error_msg, const int& error_code)
+  ReactionResult(const HybridPlanningEvent& planning_event, const std::string& error_msg, const int& error_code)
     : error_message(error_msg), error_code(error_code)
   {
     switch (planning_event)
     {
-      case BasicHybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
+      case HybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
         event = "Hybrid planning request received";
         break;
-      case BasicHybridPlanningEvent::GLOBAL_PLANNING_ACTION_FINISHED:
+      case HybridPlanningEvent::GLOBAL_PLANNING_ACTION_FINISHED:
         event = "Global planning action finished";
         break;
-      case BasicHybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
+      case HybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
         event = "Global solution available";
         break;
-      case BasicHybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
+      case HybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
         event = "Local planning action finished";
         break;
     }
@@ -127,11 +127,11 @@ public:
   virtual bool initialize(const std::shared_ptr<HybridPlanningManager>& hybrid_planning_manager) = 0;
 
   /**
-   * React to event defined in BasicHybridPlanningEvent enum
+   * React to event defined in HybridPlanningEvent enum
    * @param event Basic hybrid planning event
    * @return Reaction result that summarizes the outcome of the reaction
    */
-  virtual ReactionResult processEvent(const BasicHybridPlanningEvent& event) = 0;
+  virtual ReactionResult processEvent(const HybridPlanningEvent& event) = 0;
 
   /**
    * React to custom event
