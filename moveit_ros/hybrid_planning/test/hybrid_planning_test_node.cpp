@@ -275,6 +275,6 @@ int main(int argc, char** argv)
 
   rclcpp::spin(node);
   run_demo.join();
-
+  rclcpp::shutdown();
   return 0;
 }
