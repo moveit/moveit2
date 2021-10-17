@@ -65,6 +65,14 @@ def generate_launch_description():
     )
     ompl_planning_pipeline_config["ompl"].update(ompl_planning_yaml)
 
+    moveit_simple_controllers_yaml = load_yaml(
+        "moveit_resources_panda_moveit_config", "config/panda_controllers.yaml"
+    )
+    moveit_controllers = {
+        "moveit_simple_controller_manager": moveit_simple_controllers_yaml,
+        "moveit_controller_manager": "moveit_simple_controller_manager/MoveItSimpleControllerManager",
+    }
+
     global_planner_param = load_yaml(
         "moveit_hybrid_planning", "config/global_planner.yaml"
     )
@@ -92,6 +100,7 @@ def generate_launch_description():
                     robot_description_semantic,
                     kinematics_yaml,
                     ompl_planning_pipeline_config,
+                    moveit_controllers,
                 ],
             ),
             ComposableNode(
@@ -153,6 +162,7 @@ def generate_launch_description():
         "config",
         "demo_controller.yaml",
     )
+
     ros2_control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
@@ -171,7 +181,7 @@ def generate_launch_description():
     ]:
         load_controllers += [
             ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
+                cmd=["ros2 run controller_manager spawner.py {}".format(controller)],
                 shell=True,
                 output="screen",
             )
