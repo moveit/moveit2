@@ -50,8 +50,8 @@ constexpr double DEFAULT_MAX_VELOCITY = 5;           // rad/s
 constexpr double DEFAULT_MAX_ACCELERATION = 10;      // rad/s^2
 constexpr double DEFAULT_MAX_JERK = 20;              // rad/s^3
 constexpr double IDENTICAL_POSITION_EPSILON = 1e-3;  // rad
-constexpr double MAX_DURATION_EXTENSION_FACTOR = 1.5;
-constexpr size_t DURATION_EXTENSION_FRACTION = 1.1;
+constexpr double MAX_DURATION_EXTENSION_FACTOR = 5.0;
+constexpr double DURATION_EXTENSION_FRACTION = 1.1;
 }  // namespace
 
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
@@ -79,7 +79,8 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
   // Instantiate the smoother
   double timestep = trajectory.getAverageSegmentDuration();
-  ruckig::Ruckig<0> ruckig{ num_dof, timestep };
+  std::unique_ptr<ruckig::Ruckig<0>> ruckig_ptr;
+  ruckig_ptr.reset(new ruckig::Ruckig<0>{ num_dof, timestep });
   ruckig::InputParameter<0> ruckig_input{ num_dof };
   ruckig::OutputParameter<0> ruckig_output{ num_dof };
 
@@ -118,7 +119,6 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
   ruckig::Result ruckig_result;
   bool smoothing_complete = false;
-  robot_trajectory::RobotTrajectory original_trajectory_copy(trajectory);
   double duration_extension_factor = 1;
   while ((duration_extension_factor < MAX_DURATION_EXTENSION_FACTOR) && !smoothing_complete)
   {
@@ -129,7 +129,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       getNextRuckigInput(ruckig_output, next_waypoint, num_dof, idx, ruckig_input);
 
       // Run Ruckig
-      ruckig_result = ruckig.update(ruckig_input, ruckig_output);
+      ruckig_result = ruckig_ptr->update(ruckig_input, ruckig_output);
 
       // If the requested velocity is too great, a joint can actually "move backward" to give itself more time to
       // accelerate to the target velocity. Iterate and decrease velocities until that behavior is gone.
@@ -158,7 +158,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
         }
         velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, num_dof);
         // Run Ruckig
-        ruckig_result = ruckig.update(ruckig_input, ruckig_output);
+        ruckig_result = ruckig_ptr->update(ruckig_input, ruckig_output);
 
         // check for backward motion
         backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
@@ -175,7 +175,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     }
 
     // If ruckig failed, the duration of the seed trajectory likely wasn't long enough.
-    // try duration extension several times.
+    // Try duration extension several times.
     if (ruckig_result == ruckig::Result::Working)
     {
       smoothing_complete = true;
@@ -184,7 +184,6 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     {
       // If Ruckig failed, it's likely because the original seed trajectory did not have a long enough duration when
       // jerk is taken into account. Extend the duration and try again.
-      trajectory = original_trajectory_copy;
       initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), num_dof, idx);
       duration_extension_factor *= DURATION_EXTENSION_FRACTION;
       for (size_t waypoint_idx = 1; waypoint_idx < num_waypoints; ++waypoint_idx)
@@ -193,6 +192,9 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
             waypoint_idx, DURATION_EXTENSION_FRACTION * trajectory.getWayPointDurationFromPrevious(waypoint_idx));
         // TODO(andyz): re-calculate waypoint velocity and acceleration here?
       }
+
+      timestep = trajectory.getAverageSegmentDuration();
+      ruckig_ptr.reset(new ruckig::Ruckig<0>{ num_dof, timestep });
     }
   }
 
