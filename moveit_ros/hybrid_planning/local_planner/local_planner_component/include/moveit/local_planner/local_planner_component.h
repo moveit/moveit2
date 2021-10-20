@@ -117,6 +117,8 @@ public:
       declareOrGetParam<std::string>("global_solution_topic", global_solution_topic, undefined, node);
       declareOrGetParam<std::string>("local_solution_topic", local_solution_topic, undefined, node);
       declareOrGetParam<std::string>("local_solution_topic_type", local_solution_topic_type, undefined, node);
+      declareOrGetParam<bool>("publish_joint_positions", publish_joint_positions, false, node);
+      declareOrGetParam<bool>("publish_joint_velocities", publish_joint_velocities, false, node);
     }
 
     std::string group_name;
@@ -128,6 +130,8 @@ public:
     std::string global_solution_topic;
     std::string local_solution_topic;
     std::string local_solution_topic_type;
+    bool publish_joint_positions;
+    bool publish_joint_velocities;
     double local_planning_frequency;
   };
 
