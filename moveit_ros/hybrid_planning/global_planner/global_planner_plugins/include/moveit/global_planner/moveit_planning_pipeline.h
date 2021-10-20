@@ -46,6 +46,35 @@
 
 namespace moveit::hybrid_planning
 {
+class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
+{
+public:
+  MoveItErrorCode()
+  {
+    val = 0;
+  }
+  MoveItErrorCode(int code)
+  {
+    val = code;
+  }
+  MoveItErrorCode(const moveit_msgs::msg::MoveItErrorCodes& code)
+  {
+    val = code.val;
+  }
+  explicit operator bool() const
+  {
+    return val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  }
+  bool operator==(const int code) const
+  {
+    return val == code;
+  }
+  bool operator!=(const int code) const
+  {
+    return val != code;
+  }
+};
+
 class MoveItPlanningPipeline : public GlobalPlannerInterface
 {
 public:
