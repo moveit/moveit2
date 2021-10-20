@@ -81,6 +81,7 @@ bool HybridPlanningManager::initialize()
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception while creating planner logic plugin loader '%s'", ex.what());
+    return false;
   }
   // TODO(sjahr) Refactor parameter declaration and use repository wide solution
   std::string logic_plugin_name = "";
@@ -105,6 +106,7 @@ bool HybridPlanningManager::initialize()
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception while loading planner logic '%s': '%s'", logic_plugin_name.c_str(), ex.what());
+    return false;
   }
 
   // Initialize local planning action client
