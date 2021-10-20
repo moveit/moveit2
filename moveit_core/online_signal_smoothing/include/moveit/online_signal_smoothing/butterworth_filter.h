@@ -61,6 +61,7 @@ public:
    * https://www.wolframalpha.com/input/?i=plot+arccot(c)
    */
   ButterworthFilter(double low_pass_filter_coeff);
+  ButterworthFilter() = delete;
 
   double filter(double new_measurement);
 
@@ -79,8 +80,6 @@ private:
 class ButterworthFilterPlugin : public SmoothingBaseClass
 {
 public:
-  ButterworthFilterPlugin(){};
-
   /**
    * Initialize the smoothing algorithm
    * @param node ROS node, used for parameter retrieval
