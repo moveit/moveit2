@@ -120,7 +120,6 @@ public:
 
   void run()
   {
-    RCLCPP_INFO(LOGGER, "Initialize Planning Scene Monitor");
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
 
     planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(

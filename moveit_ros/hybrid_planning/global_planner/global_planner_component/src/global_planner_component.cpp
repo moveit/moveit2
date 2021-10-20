@@ -85,11 +85,11 @@ bool GlobalPlannerComponent::initialize()
       this->get_node_waitables_interface(), "global_planning_action",
       [](const rclcpp_action::GoalUUID& /*unused*/,
          std::shared_ptr<const moveit_msgs::action::GlobalPlanner::Goal> /*unused*/) {
-        RCLCPP_INFO(LOGGER, "Received global planning goal request");
+        RCLCPP_DEBUG(LOGGER, "Received global planning goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
       [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>>& /*unused*/) {
-        RCLCPP_INFO(LOGGER, "Received request to cancel global planning goal");
+        RCLCPP_DEBUG(LOGGER, "Received request to cancel global planning goal");
         if (!global_planner_instance_->reset())
         {
           RCLCPP_ERROR(LOGGER, "Failed to reset the global planner while aborting current global planning");
