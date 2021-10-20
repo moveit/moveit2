@@ -1,41 +1,45 @@
 # Base class
-
-add_library(moveit_smoothing_base_class SHARED
+set(SMOOTHING_BASE_LIB moveit_smoothing_base)
+add_library(${SMOOTHING_BASE_LIB} SHARED
   src/smoothing_base_class.cpp
 )
 include(GenerateExportHeader)
-generate_export_header(moveit_smoothing_base_class)
-target_include_directories(moveit_smoothing_base_class PUBLIC
+generate_export_header(${SMOOTHING_BASE_LIB})
+target_include_directories(${SMOOTHING_BASE_LIB} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
-set_target_properties(moveit_smoothing_base_class PROPERTIES VERSION
+set_target_properties(${SMOOTHING_BASE_LIB} PROPERTIES VERSION
   "${${PROJECT_NAME}_VERSION}"
 )
-target_link_libraries(moveit_smoothing_base_class
-  moveit_robot_model
+ament_target_dependencies(${SMOOTHING_BASE_LIB}
+  rclcpp
 )
 
 # Plugin implementations
-
-add_library(moveit_butterworth_filter SHARED
+set(BUTTERWORTH_FILTER_LIB moveit_butterworth_filter)
+add_library(${BUTTERWORTH_FILTER_LIB} SHARED
   src/butterworth_filter.cpp
 )
-include(GenerateExportHeader)
-generate_export_header(moveit_butterworth_filter)
-target_include_directories(moveit_butterworth_filter PUBLIC
+generate_export_header(${BUTTERWORTH_FILTER_LIB})
+target_include_directories(${BUTTERWORTH_FILTER_LIB} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
-set_target_properties(moveit_butterworth_filter PROPERTIES VERSION
+set_target_properties(${BUTTERWORTH_FILTER_LIB} PROPERTIES VERSION
   "${${PROJECT_NAME}_VERSION}"
 )
-target_link_libraries(moveit_butterworth_filter
-  moveit_smoothing_base_class
+target_link_libraries(${BUTTERWORTH_FILTER_LIB}
+  ${SMOOTHING_BASE_LIB}
+  moveit_robot_model
+)
+ament_target_dependencies(${BUTTERWORTH_FILTER_LIB}
+  srdfdom  # include dependency from moveit_robot_model
 )
 
 # Installation
 
 install(DIRECTORY include/ DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_butterworth_filter_export.h DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${SMOOTHING_BASE_LIB}_export.h DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${BUTTERWORTH_FILTER_LIB}_export.h DESTINATION include)
 
 # Testing
 
@@ -46,5 +50,5 @@ if(BUILD_TESTING)
 
   # Lowpass filter unit test
   ament_add_gtest(test_butterworth_filter test/test_butterworth_filter.cpp)
-  target_link_libraries(test_butterworth_filter moveit_butterworth_filter)
+  target_link_libraries(test_butterworth_filter ${BUTTERWORTH_FILTER_LIB})
 endif()

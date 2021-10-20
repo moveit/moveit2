@@ -110,7 +110,7 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_robot_model
     moveit_robot_state
     moveit_robot_trajectory
-    moveit_smoothing_base_class
+    moveit_smoothing_base
     moveit_test_utils
     moveit_trajectory_processing
     moveit_transforms

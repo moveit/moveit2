@@ -38,15 +38,26 @@
 
 #pragma once
 
-#include <moveit/robot_model/robot_model.h>
+#include "rclcpp/rclcpp.hpp"
+#include <moveit/macros/class_forward.h>
+
+#include "moveit_smoothing_base_export.h"
+
+namespace moveit
+{
+namespace core
+{
+MOVEIT_CLASS_FORWARD(RobotModel);
+}  // namespace core
+}  // namespace moveit
 
 namespace online_signal_smoothing
 {
 class SmoothingBaseClass
 {
 public:
-  SmoothingBaseClass() = default;
-  ~SmoothingBaseClass() = default;
+  SmoothingBaseClass();
+  virtual ~SmoothingBaseClass();
 
   /**
    * Initialize the smoothing algorithm
