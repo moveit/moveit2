@@ -33,6 +33,9 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
+   Description: Test node which implements a minimal proof-of-concept demo. After the inital global planning is done,
+   the planning scene changes in a way that invalidates the global solution and Hybrid Planning needs to handle it based
+   on the configured plugins.
  */
 
 #include <thread>
