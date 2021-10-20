@@ -42,8 +42,6 @@
 
 namespace
 {
-constexpr double EPSILON = 5e-3;
-constexpr double PANDA_MAX_JOINT_VEL = 2.610;  // rad/s
 constexpr double PUBLISH_PERIOD = 0.01;
 
 void checkVelocityLimits(const moveit::core::JointModelGroup* joint_model_group, const Eigen::ArrayXd& delta_theta)

@@ -309,6 +309,7 @@ protected:
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr worst_case_stop_time_pub_;
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_outgoing_cmd_pub_;
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr multiarray_outgoing_cmd_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr condition_pub_;
   rclcpp::Service<moveit_msgs::srv::ChangeControlDimensions>::SharedPtr control_dimensions_server_;
   rclcpp::Service<moveit_msgs::srv::ChangeDriftDimensions>::SharedPtr drift_dimensions_server_;
   rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_servo_status_;

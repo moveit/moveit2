@@ -44,7 +44,6 @@
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.collision_check");
 static const double MIN_RECOMMENDED_COLLISION_RATE = 10;
-constexpr double EPSILON = 1e-6;                       // For very small numeric comparisons
 constexpr size_t ROS_LOG_THROTTLE_PERIOD = 30 * 1000;  // Milliseconds to throttle logs inside loops
 
 namespace moveit_servo
@@ -73,10 +72,10 @@ CollisionCheck::CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParamete
 
   // ROS pubs/subs
   collision_velocity_scale_pub_ =
-      node_->create_publisher<std_msgs::msg::Float64>("~/collision_velocity_scale", ROS_QUEUE_SIZE);
+      node_->create_publisher<std_msgs::msg::Float64>("~/collision_velocity_scale", rclcpp::SystemDefaultsQoS());
 
   worst_case_stop_time_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
-      "~/worst_case_stop_time", ROS_QUEUE_SIZE,
+      "~/worst_case_stop_time", rclcpp::SystemDefaultsQoS(),
       std::bind(&CollisionCheck::worstCaseStopTimeCB, this, std::placeholders::_1));
 
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();

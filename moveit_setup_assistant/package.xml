@@ -16,26 +16,28 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <build_depend>moveit_common</build_depend>
   <build_depend>libogre-dev</build_depend>
-  <build_depend>qtbase5-dev</build_depend>
-  <build_depend>libqt5-opengl-dev</build_depend>
   <build_depend>ompl</build_depend>
-  <build_depend>rviz</build_depend>
 
+  <depend>ament_index_cpp</depend>
   <depend>moveit_core</depend>
   <depend>moveit_ros_planning</depend>
   <depend>moveit_ros_visualization</depend>
-  <depend>rosconsole</depend>
-  <depend>roscpp</depend>
+  <depend>rclcpp</depend>
   <depend>urdf</depend>
   <depend>yaml-cpp</depend>
-  <depend version_gt="0.3.1">srdfdom</depend>
+  <depend>srdfdom</depend>
 
   <exec_depend>xacro</exec_depend>
-  <exec_depend>rviz</exec_depend>
 
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
   <test_depend>ament_cmake_gtest</test_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

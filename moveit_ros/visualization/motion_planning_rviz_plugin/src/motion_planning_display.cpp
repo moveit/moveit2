@@ -1140,8 +1140,8 @@ void MotionPlanningDisplay::onRobotModelLoaded()
   PlanningSceneDisplay::onRobotModelLoaded();
   trajectory_visual_->onRobotModelLoaded(getRobotModel());
 
-  robot_interaction_.reset(
-      new robot_interaction::RobotInteraction(getRobotModel(), node_, "rviz_moveit_motion_planning_display"));
+  robot_interaction_.reset(new robot_interaction::RobotInteraction(
+      getRobotModel(), node_, rclcpp::names::append(getMoveGroupNS(), "rviz_moveit_motion_planning_display")));
   robot_interaction::KinematicOptions o;
   o.state_validity_callback_ = boost::bind(&MotionPlanningDisplay::isIKSolutionCollisionFree, this,
                                            boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3);

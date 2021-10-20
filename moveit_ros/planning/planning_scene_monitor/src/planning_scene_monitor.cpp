@@ -75,35 +75,34 @@ const std::string PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_SERVICE = "get_pl
 const std::string PlanningSceneMonitor::MONITORED_PLANNING_SCENE_TOPIC = "monitored_planning_scene";
 
 PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
-                                           const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name)
-  : PlanningSceneMonitor(node, planning_scene::PlanningScenePtr(), robot_description, tf_buffer, name)
+                                           const std::string& name)
+  : PlanningSceneMonitor(node, planning_scene::PlanningScenePtr(), robot_description, name)
 {
 }
 
 PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                            const planning_scene::PlanningScenePtr& scene,
-                                           const std::string& robot_description,
-                                           const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name)
+                                           const std::string& robot_description, const std::string& name)
   : PlanningSceneMonitor(node, scene, std::make_shared<robot_model_loader::RobotModelLoader>(node, robot_description),
-                         tf_buffer, name)
+                         name)
 {
 }
 
 PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                            const robot_model_loader::RobotModelLoaderPtr& rm_loader,
-                                           const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name)
-  : PlanningSceneMonitor(node, planning_scene::PlanningScenePtr(), rm_loader, tf_buffer, name)
+                                           const std::string& name)
+  : PlanningSceneMonitor(node, planning_scene::PlanningScenePtr(), rm_loader, name)
 {
 }
 
 PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                                            const planning_scene::PlanningScenePtr& scene,
                                            const robot_model_loader::RobotModelLoaderPtr& rm_loader,
-                                           const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name)
+                                           const std::string& name)
   : monitor_name_(name)
   , node_(node)
   , private_executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
-  , tf_buffer_(tf_buffer)
+  , tf_buffer_(std::make_shared<tf2_ros::Buffer>(node->get_clock()))
   , dt_state_update_(0.0)
   , shape_transform_cache_lookup_wait_time_(0, 0)
   , rm_loader_(rm_loader)
@@ -116,6 +115,8 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
                      std::to_string(reinterpret_cast<std::size_t>(this)));
   new_args.push_back("--");
   pnode_ = std::make_shared<rclcpp::Node>("_", node_->get_namespace(), rclcpp::NodeOptions().arguments(new_args));
+  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+  tf_buffer_->setUsingDedicatedThread(true);
   // use same callback queue as root_nh_
   // root_nh_.setCallbackQueue(&queue_);
   // nh_.setCallbackQueue(&queue_);
@@ -396,7 +397,7 @@ void PlanningSceneMonitor::scenePublishingThread()
   {
     moveit_msgs::msg::PlanningScene msg;
     {
-      occupancy_map_monitor::OccMapTree::ReadLock lock;
+      collision_detection::OccMapTree::ReadLock lock;
       if (octomap_monitor_)
         lock = octomap_monitor_->getOcTreePtr()->reading();
       scene_->getPlanningSceneMsg(msg);
@@ -423,7 +424,7 @@ void PlanningSceneMonitor::scenePublishingThread()
             is_full = true;
           else
           {
-            occupancy_map_monitor::OccMapTree::ReadLock lock;
+            collision_detection::OccMapTree::ReadLock lock;
             if (octomap_monitor_)
               lock = octomap_monitor_->getOcTreePtr()->reading();
             scene_->getPlanningSceneDiffMsg(msg);
@@ -454,7 +455,7 @@ void PlanningSceneMonitor::scenePublishingThread()
           }
           if (is_full)
           {
-            occupancy_map_monitor::OccMapTree::ReadLock lock;
+            collision_detection::OccMapTree::ReadLock lock;
             if (octomap_monitor_)
               lock = octomap_monitor_->getOcTreePtr()->reading();
             scene_->getPlanningSceneMsg(msg);
@@ -1100,8 +1101,6 @@ void PlanningSceneMonitor::stopSceneMonitor()
 bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_frame, const rclcpp::Time& target_time,
                                                   occupancy_map_monitor::ShapeTransformCache& cache) const
 {
-  if (!tf_buffer_)
-    return false;
   try
   {
     boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
@@ -1456,9 +1455,6 @@ void PlanningSceneMonitor::getUpdatedFrameTransforms(std::vector<geometry_msgs::
 
 void PlanningSceneMonitor::updateFrameTransforms()
 {
-  if (!tf_buffer_)
-    return;
-
   if (scene_)
   {
     std::vector<geometry_msgs::msg::TransformStamped> transforms;

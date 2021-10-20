@@ -56,7 +56,7 @@ public:
   StatusMonitor(const rclcpp::Node::SharedPtr& node, const std::string& topic)
   {
     sub_ = node->create_subscription<std_msgs::msg::Int8>(
-        topic, 1, std::bind(&StatusMonitor::statusCB, this, std::placeholders::_1));
+        topic, rclcpp::SystemDefaultsQoS(), std::bind(&StatusMonitor::statusCB, this, std::placeholders::_1));
   }
 
 private:
@@ -126,7 +126,8 @@ int main(int argc, char** argv)
   moveit_servo::PoseTracking tracker(node, servo_parameters, planning_scene_monitor);
 
   // Make a publisher for sending pose commands
-  auto target_pose_pub = node->create_publisher<geometry_msgs::msg::PoseStamped>("target_pose", 1 /* queue */);
+  auto target_pose_pub =
+      node->create_publisher<geometry_msgs::msg::PoseStamped>("target_pose", rclcpp::SystemDefaultsQoS());
 
   // Subscribe to servo status (and log it when it changes)
   StatusMonitor status_monitor(node, servo_parameters->status_topic);
