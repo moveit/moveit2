@@ -184,12 +184,12 @@ private:
   std::unique_ptr<pluginlib::ClassLoader<LocalConstraintSolverInterface>> local_constraint_solver_plugin_loader_;
 
   // Local constrain solver instance to compute a local solution each iteration
-  std::shared_ptr<LocalConstraintSolverInterface> local_constraint_solver_instance_;
+  pluginlib::UniquePtr<LocalConstraintSolverInterface> local_constraint_solver_instance_;
 
   // Trajectory operator plugin
   std::unique_ptr<pluginlib::ClassLoader<TrajectoryOperatorInterface>> trajectory_operator_loader_;
 
   // Trajectory_operator instance handle trajectory matching and blending
-  std::shared_ptr<TrajectoryOperatorInterface> trajectory_operator_instance_;
+  pluginlib::UniquePtr<TrajectoryOperatorInterface> trajectory_operator_instance_;
 };
 }  // namespace moveit::hybrid_planning
