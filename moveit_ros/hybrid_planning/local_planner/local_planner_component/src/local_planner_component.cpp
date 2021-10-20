@@ -51,7 +51,10 @@ namespace moveit::hybrid_planning
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
-}
+
+// If the trajectory progress reaches more than 0.999 the global goal state is considered as reached
+const float THRESHHOLD = 0.001;
+}  // namespace
 
 LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   : Node("local_planner_component", options)
@@ -263,7 +266,7 @@ void LocalPlannerComponent::executePlanningLoopRun()
       auto current_robot_state = planning_scene->getCurrentStateNonConst();
 
       // Check if the global goal is reached
-      if (trajectory_operator_instance_->getTrajectoryProgress(current_robot_state) == 1.0)
+      if (std::abs(trajectory_operator_instance_->getTrajectoryProgress(current_robot_state) - 1.0) < THRESHHOLD)
       {
         local_planning_goal_handle_->succeed(result);
         state_ = LocalPlannerState::READY;

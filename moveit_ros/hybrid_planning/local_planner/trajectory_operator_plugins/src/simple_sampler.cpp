@@ -105,7 +105,7 @@ SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
     moveit::core::RobotState next_desired_goal_state = reference_trajectory_->getWayPoint(next_waypoint_index_);
 
     // Check if state reached
-    if (next_desired_goal_state.distance(current_state) <= 0.1)
+    if (next_desired_goal_state.distance(current_state) < 0.1)
     {
       // Update index (and thus desired robot state)
       next_waypoint_index_ += 1;
