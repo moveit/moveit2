@@ -106,7 +106,7 @@ private:
   std::unique_ptr<pluginlib::ClassLoader<PlannerLogicInterface>> planner_logic_plugin_loader_;
 
   // Planner logic instance to implement reactive behavior
-  std::shared_ptr<PlannerLogicInterface> planner_logic_instance_;
+  pluginlib::UniquePtr<PlannerLogicInterface> planner_logic_instance_;
 
   // Timer to trigger events periodically
   rclcpp::TimerBase::SharedPtr timer_;

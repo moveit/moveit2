@@ -68,7 +68,7 @@ private:
   std::unique_ptr<pluginlib::ClassLoader<GlobalPlannerInterface>> global_planner_plugin_loader_;
 
   // Global planner instance
-  std::shared_ptr<GlobalPlannerInterface> global_planner_instance_;
+  pluginlib::UniquePtr<GlobalPlannerInterface> global_planner_instance_;
 
   moveit_msgs::msg::MotionPlanResponse last_global_solution_;
 
