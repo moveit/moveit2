@@ -95,6 +95,18 @@ bool LocalPlannerComponent::initialize()
   // Load planner parameter
   config_.load(node_ptr);
 
+  // Validate config
+  if (config_.local_solution_topic_type == "std_msgs/Float64MultiArray")
+  {
+    if ((config_.publish_joint_positions && config_.publish_joint_velocities) ||
+        (!config_.publish_joint_positions && !config_.publish_joint_velocities))
+    {
+      RCLCPP_ERROR(LOGGER, "When publishing a std_msgs/Float64MultiArray, you must select positions OR velocities. "
+                           "Enabling both or none is not possible!");
+      return false;
+    }
+  }
+
   // Configure planning scene monitor
   planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
       node_ptr, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor");
@@ -303,10 +315,10 @@ void LocalPlannerComponent::executePlanningLoopRun()
         local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
       }
 
-      // Use a configurable message interface like MoveIt serve
+      // Use a configurable message interface like MoveIt servo
       // (See https://github.com/ros-planning/moveit2/blob/main/moveit_ros/moveit_servo/src/servo_calcs.cpp)
       // Format outgoing msg in the right format
-      // (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
+      // (trajectory_msgs/JointTrajectory or joint positions/velocities in form of std_msgs/Float64MultiArray).
       if (config_.local_solution_topic_type == "trajectory_msgs/JointTrajectory")
       {
         local_trajectory_publisher_->publish(local_solution);
@@ -317,11 +329,14 @@ void LocalPlannerComponent::executePlanningLoopRun()
         auto joints = std::make_unique<std_msgs::msg::Float64MultiArray>();
         if (!local_solution.points.empty())
         {
-          joints->data = local_solution.points[0].positions;
-        }
-        else if (!local_solution.points.empty())
-        {
-          joints->data = local_solution.points[0].velocities;
+          if (config_.publish_joint_positions)
+          {
+            joints->data = local_solution.points[0].positions;
+          }
+          else if (config_.publish_joint_velocities)
+          {
+            joints->data = local_solution.points[0].velocities;
+          }
         }
         local_solution_publisher_->publish(std::move(joints));
       }
