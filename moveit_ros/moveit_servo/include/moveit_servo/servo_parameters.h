@@ -38,16 +38,14 @@
 
 #pragma once
 
-#include <thread>
 #include <mutex>
+#include <thread>
 #include <vector>
+
 #include <rclcpp/rclcpp.hpp>
 
 namespace moveit_servo
 {
-// Size of queues used in ros pub/sub/service
-constexpr size_t ROS_QUEUE_SIZE = 2;
-
 using SetParameterCallbackType = std::function<rcl_interfaces::msg::SetParametersResult(const rclcpp::Parameter&)>;
 
 // ROS params to be read. See the yaml file in /config for a description of each.

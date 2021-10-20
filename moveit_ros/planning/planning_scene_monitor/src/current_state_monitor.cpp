@@ -167,15 +167,6 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
     }
     if (tf_buffer_ && !robot_model_->getMultiDOFJointModels().empty())
     {
-      // If a dedicated thread is enabled for the buffer this probably means the user is adding them either through
-      // tf2_ros::TransformListener or themselves, so we print a warning message warning that transformCallback is doing
-      // the same duplicate operation
-      if (tf_buffer_->isUsingDedicatedThread())
-      {
-        RCLCPP_WARN(LOGGER, "The tf2_ros::Buffer is attached to tf2_ros::TransformListener and the internal tf "
-                            "subscribers inside CurrentStateMonitor, you may want to remove the transform listener to "
-                            "avoid duplicate addition to the same transforms");
-      }
       tf_buffer_->setUsingDedicatedThread(true);
       middleware_handle_->createDynamicTfSubscription(
           std::bind(&CurrentStateMonitor::transformCallback, this, std::placeholders::_1, false));

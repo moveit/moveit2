@@ -112,8 +112,10 @@ public:
   /** \brief Specification of options to use when constructing the MoveGroupInterface class */
   struct Options
   {
-    Options(std::string group_name, std::string desc = ROBOT_DESCRIPTION)
-      : group_name_(std::move(group_name)), robot_description_(std::move(desc))
+    Options(std::string group_name, std::string desc = ROBOT_DESCRIPTION, std::string move_group_namespace = "")
+      : group_name_(std::move(group_name))
+      , robot_description_(std::move(desc))
+      , move_group_namespace_(std::move(move_group_namespace))
     {
     }
 
@@ -125,6 +127,9 @@ public:
 
     /// Optionally, an instance of the RobotModel to use can be also specified
     moveit::core::RobotModelConstPtr robot_model_;
+
+    /// The namespace for the move group node
+    std::string move_group_namespace_;
   };
 
   MOVEIT_STRUCT_FORWARD(Plan);

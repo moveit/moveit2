@@ -108,7 +108,7 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
         name="test_pose_tracking_container",
         namespace="/",
         package="rclcpp_components",
-        executable="component_container",
+        executable="component_container_mt",
         composable_node_descriptions=[
             ComposableNode(
                 package="robot_state_publisher",

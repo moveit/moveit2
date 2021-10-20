@@ -74,11 +74,12 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParam
 
   // Connect to Servo ROS interfaces
   target_pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
-      "target_pose", 1, std::bind(&PoseTracking::targetPoseCallback, this, std::placeholders::_1));
+      "target_pose", rclcpp::SystemDefaultsQoS(),
+      std::bind(&PoseTracking::targetPoseCallback, this, std::placeholders::_1));
 
   // Publish outgoing twist commands to the Servo object
-  twist_stamped_pub_ =
-      node_->create_publisher<geometry_msgs::msg::TwistStamped>(servo_->getParameters()->cartesian_command_in_topic, 1);
+  twist_stamped_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(
+      servo_->getParameters()->cartesian_command_in_topic, rclcpp::SystemDefaultsQoS());
 }
 
 PoseTrackingStatusCode PoseTracking::moveToPose(const Eigen::Vector3d& positional_tolerance,

@@ -117,11 +117,13 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   // Subscribe to command topics
   using std::placeholders::_1;
   using std::placeholders::_2;
-  twist_stamped_sub_ = node_->create_subscription<geometry_msgs::msg::TwistStamped>(
-      parameters_->cartesian_command_in_topic, ROS_QUEUE_SIZE, std::bind(&ServoCalcs::twistStampedCB, this, _1));
+  twist_stamped_sub_ =
+      node_->create_subscription<geometry_msgs::msg::TwistStamped>(parameters_->cartesian_command_in_topic,
+                                                                   rclcpp::SystemDefaultsQoS(),
+                                                                   std::bind(&ServoCalcs::twistStampedCB, this, _1));
 
   joint_cmd_sub_ = node_->create_subscription<control_msgs::msg::JointJog>(
-      parameters_->joint_command_in_topic, ROS_QUEUE_SIZE, std::bind(&ServoCalcs::jointCmdCB, this, _1));
+      parameters_->joint_command_in_topic, rclcpp::SystemDefaultsQoS(), std::bind(&ServoCalcs::jointCmdCB, this, _1));
 
   // ROS Server for allowing drift in some dimensions
   drift_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeDriftDimensions>(
@@ -136,27 +138,30 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
       "~/reset_servo_status", std::bind(&ServoCalcs::resetServoStatus, this, _1, _2));
 
   // Subscribe to the collision_check topic
-  collision_velocity_scale_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
-      "~/collision_velocity_scale", ROS_QUEUE_SIZE, std::bind(&ServoCalcs::collisionVelocityScaleCB, this, _1));
+  collision_velocity_scale_sub_ =
+      node_->create_subscription<std_msgs::msg::Float64>("~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
+                                                         std::bind(&ServoCalcs::collisionVelocityScaleCB, this, _1));
 
   // Publish to collision_check for worst stop time
-  worst_case_stop_time_pub_ = node_->create_publisher<std_msgs::msg::Float64>("~/worst_case_stop_time", ROS_QUEUE_SIZE);
+  worst_case_stop_time_pub_ =
+      node_->create_publisher<std_msgs::msg::Float64>("~/worst_case_stop_time", rclcpp::SystemDefaultsQoS());
 
   // Publish freshly-calculated joints to the robot.
   // Put the outgoing msg in the right format (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
   if (parameters_->command_out_type == "trajectory_msgs/JointTrajectory")
   {
-    trajectory_outgoing_cmd_pub_ =
-        node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(parameters_->command_out_topic, ROS_QUEUE_SIZE);
+    trajectory_outgoing_cmd_pub_ = node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(
+        parameters_->command_out_topic, rclcpp::SystemDefaultsQoS());
   }
   else if (parameters_->command_out_type == "std_msgs/Float64MultiArray")
   {
-    multiarray_outgoing_cmd_pub_ =
-        node_->create_publisher<std_msgs::msg::Float64MultiArray>(parameters_->command_out_topic, ROS_QUEUE_SIZE);
+    multiarray_outgoing_cmd_pub_ = node_->create_publisher<std_msgs::msg::Float64MultiArray>(
+        parameters_->command_out_topic, rclcpp::SystemDefaultsQoS());
   }
 
   // Publish status
-  status_pub_ = node_->create_publisher<std_msgs::msg::Int8>(parameters_->status_topic, ROS_QUEUE_SIZE);
+  status_pub_ = node_->create_publisher<std_msgs::msg::Int8>(parameters_->status_topic, rclcpp::SystemDefaultsQoS());
+  condition_pub_ = node_->create_publisher<std_msgs::msg::Float64>("~/condition", rclcpp::SystemDefaultsQoS());
 
   internal_joint_state_.name = joint_model_group_->getActiveJointModelNames();
   num_joints_ = internal_joint_state_.name.size();
@@ -383,14 +388,6 @@ void ServoCalcs::calculateSingleIteration()
     }
   }
 
-  // Print a warning to the user if both are stale
-  if (twist_command_is_stale_ && joint_command_is_stale_)
-  {
-    rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                "Stale command. Try a larger 'incoming_command_timeout' parameter?");
-  }
-
   // If we should halt
   if (!have_nonzero_command_)
   {
@@ -407,6 +404,14 @@ void ServoCalcs::calculateSingleIteration()
     ok_to_publish_ = false;
     rclcpp::Clock& clock = *node_->get_clock();
     RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "All-zero command. Doing nothing.");
+  }
+  // Skip servoing publication if both types of commands are stale.
+  else if (twist_command_is_stale_ && joint_command_is_stale_)
+  {
+    ok_to_publish_ = false;
+    rclcpp::Clock& clock = *node_->get_clock();
+    RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
+                                 "Skipping publishing because incoming commands are stale.");
   }
   else
   {
@@ -712,6 +717,10 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
   Eigen::VectorXd vector_toward_singularity = svd.matrixU().col(num_dimensions - 1);
 
   double ini_condition = svd.singularValues()(0) / svd.singularValues()(svd.singularValues().size() - 1);
+
+  auto condition_msg = std::make_unique<std_msgs::msg::Float64>();
+  condition_msg->data = ini_condition;
+  condition_pub_->publish(std::move(condition_msg));
 
   // This singular vector tends to flip direction unpredictably. See R. Bro,
   // "Resolving the Sign Ambiguity in the Singular Value Decomposition".
