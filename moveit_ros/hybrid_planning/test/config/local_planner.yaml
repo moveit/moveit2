@@ -1,4 +1,3 @@
-
 robot_description: "robot_description"
 trajectory_operator_plugin_name: "moveit_hybrid_planning/SimpleSampler"
 local_constraint_solver_plugin_name: "moveit_hybrid_planning/ForwardTrajectory"
