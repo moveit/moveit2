@@ -238,14 +238,7 @@ bool RuckigSmoothing::checkForIdenticalWaypoints(const moveit::core::RobotState&
 {
   double magnitude_position_difference = prev_waypoint.distance(next_waypoint, joint_group);
 
-  if (magnitude_position_difference > IDENTICAL_POSITION_EPSILON)
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
+  return (magnitude_position_difference <= IDENTICAL_POSITION_EPSILON);
 }
 
 double RuckigSmoothing::getTargetVelocityMagnitude(const ruckig::InputParameter<0>& ruckig_input, size_t num_dof)
