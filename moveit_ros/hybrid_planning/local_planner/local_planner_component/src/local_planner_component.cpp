@@ -102,7 +102,6 @@ bool LocalPlannerComponent::initialize()
   }
 
   // Start state and scene monitors
-  RCLCPP_INFO(LOGGER, "Starting planning scene monitors");
   planning_scene_monitor_->startSceneMonitor();
   planning_scene_monitor_->startWorldGeometryMonitor();
   planning_scene_monitor_->startStateMonitor();
@@ -167,11 +166,11 @@ bool LocalPlannerComponent::initialize()
       this->get_node_waitables_interface(), "local_planning_action",
       [](const rclcpp_action::GoalUUID& /*unused*/,
          std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> /*unused*/) {
-        RCLCPP_INFO(LOGGER, "Received local planning goal request");
+        RCLCPP_DEBUG(LOGGER, "Received local planning goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
       [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>>& /*unused*/) {
-        RCLCPP_INFO(LOGGER, "Received request to cancel local planning goal");
+        RCLCPP_DEBUG(LOGGER, "Received request to cancel local planning goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>> goal_handle) {
@@ -203,7 +202,6 @@ bool LocalPlannerComponent::initialize()
       });
 
   // Initialize local solution publisher
-  RCLCPP_INFO(LOGGER, "Using '%s' as local solution topic type", config_.local_solution_topic_type.c_str());
   if (config_.local_solution_topic_type == "trajectory_msgs/JointTrajectory")
   {
     local_trajectory_publisher_ =
