@@ -11,7 +11,6 @@ scale:
   rotational:  0.006 # Max angular velocity. Rads per publish_period. Unit is [rad/s]. Only used for Cartesian commands.
   # Max joint angular/linear velocity. Rads or Meters per publish period. Only used for joint commands on joint_command_in_topic.
   joint: 0.01
-low_pass_filter_coeff: 2.0  # Larger --> trust the filtered data more, trust the measurements less.
 
 ## Properties of outgoing commands
 low_latency_mode: false  # Set this to true to tie the output rate to the input rate
@@ -26,6 +25,9 @@ command_out_type: trajectory_msgs/JointTrajectory
 publish_joint_positions: true
 publish_joint_velocities: false
 publish_joint_accelerations: false
+
+## Plugins for smoothing outgoing commands
+smoothing_filter_plugin_name: "online_signal_smoothing::ButterworthFilterPlugin"
 
 ## MoveIt properties
 move_group_name:  panda_arm  # Often 'manipulator' or 'arm'

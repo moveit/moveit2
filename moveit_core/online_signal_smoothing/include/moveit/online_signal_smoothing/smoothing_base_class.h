@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, PickNik Inc.
+ *  Copyright (c) 2021, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,42 +32,55 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/*      Title     : test_low_pass_filters.cpp
- *      Project   : moveit_servo
- *      Created   : 07/21/2020
- *      Author    : Adam Pettinger
- *      Desc      : Unit test for moveit_servo::LowPassFilter
+/* Author: Andy Zelenak
+   Description: Defines a pluginlib interface for smoothing algorithms.
  */
 
-#include <gtest/gtest.h>
-#include <moveit_servo/low_pass_filter.h>
+#pragma once
 
-TEST(MOVEIT_SERVO, FilterConverge)
+#include "rclcpp/rclcpp.hpp"
+#include <moveit/macros/class_forward.h>
+
+#include "moveit_smoothing_base_export.h"
+
+namespace moveit
 {
-  moveit_servo::LowPassFilter lpf(2.0);
-  EXPECT_DOUBLE_EQ(0.0, lpf.filter(0.0));
-  double value;
-  for (size_t i = 0; i < 100; ++i)
-  {
-    value = lpf.filter(5.0);
-  }
-  // Check that the filter converges to expected value after many identical messages
-  EXPECT_DOUBLE_EQ(5.0, value);
-
-  // Then check that a different measurement changes the value
-  EXPECT_NE(5.0, lpf.filter(100.0));
-}
-
-TEST(MOVEIT_SERVO, FilterReset)
+namespace core
 {
-  moveit_servo::LowPassFilter lpf(2.0);
-  EXPECT_DOUBLE_EQ(0.0, lpf.filter(0.0));
-  lpf.reset(5.0);
-  double value = lpf.filter(5.0);
+MOVEIT_CLASS_FORWARD(RobotModel);
+}  // namespace core
+}  // namespace moveit
 
-  // Check that the filter was properly set to the desired value
-  EXPECT_DOUBLE_EQ(5.0, value);
+namespace online_signal_smoothing
+{
+class SmoothingBaseClass
+{
+public:
+  SmoothingBaseClass();
+  virtual ~SmoothingBaseClass();
 
-  // Then check that a different measurement changes the value
-  EXPECT_NE(5.0, lpf.filter(100.0));
-}
+  /**
+   * Initialize the smoothing algorithm
+   * @param node ROS node, typically used for parameter retrieval
+   * @param robot_model typically used to retrieve vel/accel/jerk limits
+   * @param num_joints number of actuated joints in the JointGroup Servo controls
+   * @return True if initialization was successful
+   */
+  virtual bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
+                          size_t num_joints) = 0;
+
+  /**
+   * Smooth an array of joint position deltas
+   * @param position_vector array of joint position commands
+   * @return True if initialization was successful
+   */
+  virtual bool doSmoothing(std::vector<double>& position_vector) = 0;
+
+  /**
+   * Reset to a given joint state
+   * @param joint_positions reset the filters to these joint positions
+   * @return True if reset was successful
+   */
+  virtual bool reset(const std::vector<double>& joint_positions) = 0;
+};
+}  // namespace online_signal_smoothing
