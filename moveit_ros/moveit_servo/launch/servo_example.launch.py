@@ -55,8 +55,7 @@ def generate_launch_description():
 
     # RViz
     rviz_config_file = (
-        get_package_share_directory("moveit2_tutorials")
-        + "/config/demo_rviz_config.rviz"
+        get_package_share_directory("moveit_servo") + "/config/demo_rviz_config.rviz"
     )
     rviz_node = Node(
         package="rviz2",
@@ -142,7 +141,7 @@ def generate_launch_description():
     # As opposed to a node component, this may be necessary (for example) if Servo is running on a different PC
     servo_node = Node(
         package="moveit_servo",
-        executable="servo_server_node",
+        executable="servo_node_main",
         parameters=[
             servo_params,
             robot_description,

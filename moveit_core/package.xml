@@ -70,7 +70,5 @@
 
   <export>
     <build_type>ament_cmake</build_type>
-    <moveit_core plugin="${prefix}/collision_detector_fcl_description.xml"/>
-    <moveit_core plugin="${prefix}/collision_detector_bullet_description.xml"/>
   </export>
 </package>
