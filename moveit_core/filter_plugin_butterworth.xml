@@ -1,0 +1,7 @@
+<library path="moveit_butterworth_filter">
+  <class type="online_signal_smoothing::ButterworthFilterPlugin" base_class_type="online_signal_smoothing::SmoothingBaseClass">
+    <description>
+    Simple Butterworth 1st order lowpass filter that only has one tuneable parameter and does not overshoot.
+    </description>
+  </class>
+</library>
