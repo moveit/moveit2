@@ -101,7 +101,7 @@ bool GlobalPlannerComponent::initialize()
   global_trajectory_pub_ = this->create_publisher<moveit_msgs::msg::MotionPlanResponse>("global_trajectory", 1);
 
   // Load global planner plugin
-  global_planner_name_ = this->declare_parameter<std::string>("global_planner_name", UNDEFINED);
+  planner_plugin_name_ = this->declare_parameter<std::string>("global_planner_name", UNDEFINED);
 
   try
   {
@@ -115,21 +115,21 @@ bool GlobalPlannerComponent::initialize()
   }
   try
   {
-    global_planner_instance_ = global_planner_plugin_loader_->createUniqueInstance(global_planner_name_);
+    global_planner_instance_ = global_planner_plugin_loader_->createUniqueInstance(planner_plugin_name_);
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading global planner '%s': '%s'", global_planner_name_.c_str(), ex.what());
+    RCLCPP_ERROR(LOGGER, "Exception while loading global planner '%s': '%s'", planner_plugin_name_.c_str(), ex.what());
     return false;
   }
 
   // Initialize global planner plugin
   if (!global_planner_instance_->initialize(node_ptr))
   {
-    RCLCPP_ERROR(LOGGER, "Unable to initialize global planner plugin '%s'", global_planner_name_.c_str());
+    RCLCPP_ERROR(LOGGER, "Unable to initialize global planner plugin '%s'", planner_plugin_name_.c_str());
     return false;
   }
-  RCLCPP_INFO(LOGGER, "Using global planner plugin '%s'", global_planner_name_.c_str());
+  RCLCPP_INFO(LOGGER, "Using global planner plugin '%s'", planner_plugin_name_.c_str());
   return true;
 }
 

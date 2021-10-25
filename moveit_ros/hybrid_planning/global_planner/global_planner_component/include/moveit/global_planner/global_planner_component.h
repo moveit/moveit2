@@ -62,7 +62,8 @@ private:
   rclcpp::TimerBase::SharedPtr timer_;
   bool initialized_;
 
-  std::string global_planner_name_;
+  // Name of the global planner plugin that is used
+  std::string planner_plugin_name_;
 
   // Global planner plugin loader
   std::unique_ptr<pluginlib::ClassLoader<GlobalPlannerInterface>> global_planner_plugin_loader_;
