@@ -93,7 +93,6 @@ bool PointCloudOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   shape_mask_ = std::make_unique<point_containment_filter::ShapeMask>();
   shape_mask_->setTransformCallback(boost::bind(&PointCloudOctomapUpdater::getShapeTransform, this,
                                                 boost::placeholders::_1, boost::placeholders::_2));
-  last_update_time_ = node_->now();
   return true;
 }
 
@@ -175,10 +174,9 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
   if (max_update_rate_ > 0)
   {
     // ensure we are not updating the octomap representation too often
-    if ((rclcpp::Clock(RCL_ROS_TIME).now() - last_update_time_) <=
-        rclcpp::Duration(std::chrono::duration<double>(1.0 / max_update_rate_)))
+    if ((node_->now() - last_update_time_) <= rclcpp::Duration::from_seconds(1.0 / max_update_rate_))
       return;
-    last_update_time_ = rclcpp::Clock(RCL_ROS_TIME).now();
+    last_update_time_ = node_->now();
   }
 
   if (monitor_->getMapFrame().empty())

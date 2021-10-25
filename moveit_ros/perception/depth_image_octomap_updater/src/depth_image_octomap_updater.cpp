@@ -128,9 +128,6 @@ bool DepthImageOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   mesh_filter_->setTransformCallback(boost::bind(&DepthImageOctomapUpdater::getShapeTransform, this,
                                                  boost::placeholders::_1, boost::placeholders::_2));
 
-  // init rclcpp time default value
-  last_update_time_ = node_->now();
-
   return true;
 }
 
@@ -225,7 +222,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
   if (max_update_rate_ > 0)
   {
     // ensure we are not updating the octomap representation too often
-    if (node_->now() - last_update_time_ <= rclcpp::Duration(std::chrono::duration<double>(1.0 / max_update_rate_)))
+    if (node_->now() - last_update_time_ <= rclcpp::Duration::from_seconds(1.0 / max_update_rate_))
       return;
     last_update_time_ = node_->now();
   }
