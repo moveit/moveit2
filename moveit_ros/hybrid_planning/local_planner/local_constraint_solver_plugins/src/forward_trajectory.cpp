@@ -61,7 +61,7 @@ bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
   return true;
 }
 
-bool ForwardTrajectory::reset()
+bool ForwardTrajectory::reset() noexcept
 {
   path_invalidation_event_send_ = false;
   return true;

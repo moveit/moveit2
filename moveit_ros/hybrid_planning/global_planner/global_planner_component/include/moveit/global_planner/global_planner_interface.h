@@ -73,6 +73,6 @@ public:
    * Reset global planner plugin
    * @return True if reset was successful
    */
-  virtual bool reset() = 0;
+  virtual bool reset() noexcept = 0;
 };
 }  // namespace moveit::hybrid_planning

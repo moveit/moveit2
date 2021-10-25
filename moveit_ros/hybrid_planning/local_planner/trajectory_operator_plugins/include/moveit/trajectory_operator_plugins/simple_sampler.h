@@ -59,7 +59,7 @@ public:
   getLocalTrajectory(const moveit::core::RobotState& current_state,
                      robot_trajectory::RobotTrajectory& local_trajectory) override;
   double getTrajectoryProgress(const moveit::core::RobotState& current_state) override;
-  bool reset() override;
+  bool reset() noexcept override;
 
 private:
   std::size_t

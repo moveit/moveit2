@@ -79,7 +79,7 @@ SimpleSampler::addTrajectorySegment(const robot_trajectory::RobotTrajectory& new
   return feedback_;
 }
 
-bool SimpleSampler::reset()
+bool SimpleSampler::reset() noexcept
 {
   // Reset index
   next_waypoint_index_ = 0;
