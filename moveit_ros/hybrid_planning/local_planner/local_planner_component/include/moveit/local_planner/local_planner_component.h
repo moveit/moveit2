@@ -149,7 +149,7 @@ public:
   /**
    * Handle the planners current job based on the internal state each iteration when the planner is started.
    */
-  void executePlanningLoopRun();
+  void executeIteration();
 
 private:
   // Planner configuration
@@ -158,7 +158,7 @@ private:
   // Current planner state
   LocalPlannerState state_;
 
-  // Timer to periodically call executePlanningLoopRun()
+  // Timer to periodically call executeIteration()
   rclcpp::TimerBase::SharedPtr timer_;
 
   // Latest action goal handle

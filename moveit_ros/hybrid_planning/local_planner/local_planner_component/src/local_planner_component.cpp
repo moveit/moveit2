@@ -192,7 +192,7 @@ bool LocalPlannerComponent::initialize()
         local_planning_goal_handle_ = std::move(goal_handle);
         // Start local planning loop when an action request is received
         timer_ = this->create_wall_timer(1s / config_.local_planning_frequency,
-                                         std::bind(&LocalPlannerComponent::executePlanningLoopRun, this));
+                                         std::bind(&LocalPlannerComponent::executeIteration, this));
       });
 
   // Initialize global trajectory listener
@@ -236,7 +236,7 @@ bool LocalPlannerComponent::initialize()
   return true;
 }
 
-void LocalPlannerComponent::executePlanningLoopRun()
+void LocalPlannerComponent::executeIteration()
 {
   auto result = std::make_shared<moveit_msgs::action::LocalPlanner::Result>();
 
