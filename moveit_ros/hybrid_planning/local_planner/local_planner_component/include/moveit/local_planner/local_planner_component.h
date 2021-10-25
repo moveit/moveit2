@@ -99,7 +99,7 @@ enum class LocalPlannerState : int8_t
 /**
  * Class LocalPlannerComponent - ROS 2 component node that implements a local planner.
  */
-class LocalPlannerComponent : public rclcpp::Node
+class LocalPlannerComponent
 {
 public:
   /// Struct that contains configuration of the local planner component node
@@ -151,7 +151,16 @@ public:
    */
   void executeIteration();
 
+  // This function is required to make this class a valid NodeClass
+  // see https://docs.ros2.org/foxy/api/rclcpp_components/register__node__macro_8hpp.html
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface()
+  {
+    return node_->get_node_base_interface();
+  }
+
 private:
+  std::shared_ptr<rclcpp::Node> node_;
+
   // Planner configuration
   LocalPlannerConfig config_;
 
