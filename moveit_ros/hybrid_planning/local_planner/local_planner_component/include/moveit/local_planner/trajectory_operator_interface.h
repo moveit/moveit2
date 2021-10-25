@@ -99,7 +99,7 @@ public:
    * Reset trajectory operator to some user-defined initial state
    * @return True if reset was successful
    */
-  virtual bool reset() = 0;
+  virtual bool reset() noexcept = 0;
 
 protected:
   // Reference trajectory to be precessed

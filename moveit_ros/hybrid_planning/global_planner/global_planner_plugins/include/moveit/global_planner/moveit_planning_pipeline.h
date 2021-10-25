@@ -81,7 +81,7 @@ public:
   MoveItPlanningPipeline() = default;
   ~MoveItPlanningPipeline() = default;
   bool initialize(const rclcpp::Node::SharedPtr& node) override;
-  bool reset() override;
+  bool reset() noexcept override;
   moveit_msgs::msg::MotionPlanResponse
   plan(const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> global_goal_handle)
       override;
