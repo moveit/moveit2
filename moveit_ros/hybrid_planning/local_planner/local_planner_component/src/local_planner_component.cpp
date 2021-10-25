@@ -57,43 +57,21 @@ const float THRESHHOLD = 0.001;
 }  // namespace
 
 LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
-  : Node("local_planner_component", options)
+  : node_{ std::make_shared<rclcpp::Node>("local_planner_component", options) }
 {
   state_ = LocalPlannerState::UNCONFIGURED;
   local_planner_feedback_ = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
 
-  // Initialize local planner after construction
-  // TODO(sjahr) Remove once life cycle component nodes are available
-  timer_ = this->create_wall_timer(1ms, [this]() {
-    switch (state_)
-    {
-      case LocalPlannerState::READY:
-      {
-        timer_->cancel();
-        break;
-      }
-      case LocalPlannerState::UNCONFIGURED:
-        if (this->initialize())
-        {
-          state_ = LocalPlannerState::READY;
-        }
-        else
-        {
-          timer_->cancel();
-          throw std::runtime_error("Failed to initialize local planner");
-        }
-      default:
-        break;
-    }
-  });
+  if (!this->initialize())
+  {
+    throw std::runtime_error("Failed to initialize local planner component");
+  }
 }
 
 bool LocalPlannerComponent::initialize()
 {
-  const auto node_ptr = shared_from_this();
-
   // Load planner parameter
-  config_.load(node_ptr);
+  config_.load(node_);
 
   // Validate config
   if (config_.local_solution_topic_type == "std_msgs/Float64MultiArray")
@@ -109,7 +87,7 @@ bool LocalPlannerComponent::initialize()
 
   // Configure planning scene monitor
   planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
-      node_ptr, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor");
+      node_, "robot_description", tf_buffer_, "local_planner/planning_scene_monitor");
   if (!planning_scene_monitor_->getPlanningScene())
   {
     RCLCPP_ERROR(LOGGER, "Unable to configure planning scene monitor");
@@ -136,7 +114,7 @@ bool LocalPlannerComponent::initialize()
   {
     trajectory_operator_instance_ =
         trajectory_operator_loader_->createUniqueInstance(config_.trajectory_operator_plugin_name);
-    if (!trajectory_operator_instance_->initialize(node_ptr, planning_scene_monitor_->getRobotModel(),
+    if (!trajectory_operator_instance_->initialize(node_, planning_scene_monitor_->getRobotModel(),
                                                    config_.group_name))  // TODO(sjahr) add default group param
       throw std::runtime_error("Unable to initialize trajectory operator plugin");
     RCLCPP_INFO(LOGGER, "Using trajectory operator interface '%s'", config_.trajectory_operator_plugin_name.c_str());
@@ -163,7 +141,7 @@ bool LocalPlannerComponent::initialize()
   {
     local_constraint_solver_instance_ =
         local_constraint_solver_plugin_loader_->createUniqueInstance(config_.local_constraint_solver_plugin_name);
-    if (!local_constraint_solver_instance_->initialize(node_ptr, planning_scene_monitor_, config_.group_name))
+    if (!local_constraint_solver_instance_->initialize(node_, planning_scene_monitor_, config_.group_name))
       throw std::runtime_error("Unable to initialize constraint solver plugin");
     RCLCPP_INFO(LOGGER, "Using constraint solver interface '%s'", config_.local_constraint_solver_plugin_name.c_str());
   }
@@ -177,8 +155,7 @@ bool LocalPlannerComponent::initialize()
   // Initialize local planning request action server
   using namespace std::placeholders;
   local_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::LocalPlanner>(
-      this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
-      this->get_node_waitables_interface(), "local_planning_action",
+      node_, "local_planning_action",
       [](const rclcpp_action::GoalUUID& /*unused*/,
          std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> /*unused*/) {
         RCLCPP_DEBUG(LOGGER, "Received local planning goal request");
@@ -191,12 +168,12 @@ bool LocalPlannerComponent::initialize()
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>> goal_handle) {
         local_planning_goal_handle_ = std::move(goal_handle);
         // Start local planning loop when an action request is received
-        timer_ = this->create_wall_timer(1s / config_.local_planning_frequency,
-                                         std::bind(&LocalPlannerComponent::executeIteration, this));
+        timer_ = node_->create_wall_timer(1s / config_.local_planning_frequency,
+                                          std::bind(&LocalPlannerComponent::executeIteration, this));
       });
 
   // Initialize global trajectory listener
-  global_solution_subscriber_ = create_subscription<moveit_msgs::msg::MotionPlanResponse>(
+  global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
       config_.global_solution_topic, 1, [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr msg) {
         // Add received trajectory to internal reference trajectory
         robot_trajectory::RobotTrajectory new_trajectory(planning_scene_monitor_->getRobotModel(), msg->group_name);
@@ -220,12 +197,12 @@ bool LocalPlannerComponent::initialize()
   if (config_.local_solution_topic_type == "trajectory_msgs/JointTrajectory")
   {
     local_trajectory_publisher_ =
-        this->create_publisher<trajectory_msgs::msg::JointTrajectory>(config_.local_solution_topic, 1);
+        node_->create_publisher<trajectory_msgs::msg::JointTrajectory>(config_.local_solution_topic, 1);
   }
   else if (config_.local_solution_topic_type == "std_msgs/Float64MultiArray")
   {
     local_solution_publisher_ =
-        this->create_publisher<std_msgs::msg::Float64MultiArray>(config_.local_solution_topic, 1);
+        node_->create_publisher<std_msgs::msg::Float64MultiArray>(config_.local_solution_topic, 1);
   }
   else if (config_.local_solution_topic_type == "CUSTOM")
   {
