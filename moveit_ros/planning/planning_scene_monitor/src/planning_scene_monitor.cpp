@@ -218,7 +218,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     node_->get_parameter_or(robot_description_ + "_planning.shape_transform_cache_lookup_wait_time", temp_wait_time,
                             temp_wait_time);
 
-  shape_transform_cache_lookup_wait_time_ = rclcpp::Duration(std::chrono::nanoseconds((int64_t)temp_wait_time));
+  shape_transform_cache_lookup_wait_time_ = rclcpp::Duration::from_seconds(temp_wait_time);
 
   state_update_pending_ = false;
   // Period for 0.1 sec

@@ -89,7 +89,7 @@ bool OccupancyMapUpdater::updateTransformCache(const std::string& target_frame, 
       RCLCPP_ERROR_THROTTLE(
           LOGGER, steady_clock, 1000,
           "Transform cache was not updated. Self-filtering may fail. If transforms were not available yet, consider "
-          "setting robot_description_planning/shape_transform_cache_lookup_wait_time to wait longer for transforms");
+          "setting robot_description_planning.shape_transform_cache_lookup_wait_time to wait longer for transforms");
     }
     return success;
   }
