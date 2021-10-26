@@ -32,9 +32,8 @@ jobs:
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
       AFTER_RUN_TARGET_TEST: ${{ matrix.env.CCOV && './.ci.prepare_codecov' || '' }}
       TARGET_CMAKE_ARGS: >
-        -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'RelWithDebInfo' || 'Release'}}
-        -DCMAKE_CXX_FLAGS="$CXXFLAGS ${{ matrix.env.CCOV && '--coverage'}}"
-        --no-warn-unused-cli
+        -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'Debug' || 'Release'}}
+        -DCMAKE_CXX_FLAGS="${{ matrix.env.CLANG_TIDY != 'pedantic' && '-Werror ' || '' }}${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer'}}"
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       BASEDIR: ${{ github.workspace }}/.work
       CLANG_TIDY_BASE_REF: ${{ github.base_ref || github.ref }}
@@ -46,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Free up disk space"
-        if: ${{ matrix.env.CCOV }}
+        if: matrix.env.CCOV
         run: |
           sudo apt-get -qq purge build-essential "ghc*"
           sudo apt-get clean
@@ -71,7 +70,7 @@ jobs:
       # The target directory cache doesn't include the source directory because
       # that comes from the checkout.  See "prepare target_ws for cache" task below
       - name: cache target_ws
-        if: ${{ ! matrix.env.CCOV }}
+        if: "!matrix.env.CCOV"
         uses: pat-s/always-upload-cache@v2.1.5
         with:
           path: ${{ env.BASEDIR }}/target_ws
@@ -89,28 +88,39 @@ jobs:
             ${{ env.CACHE_PREFIX }}
         env:
           CACHE_PREFIX: ccache-${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && '-ccov' || '' }}
-
       - name: generate ikfast packages
-        if: ${{ matrix.env.IKFAST_TEST }}
-        run: |
-          moveit_kinematics/test/test_ikfast_plugins.sh
-      - id: industrial_ci
+        if: matrix.env.IKFAST_TEST
+        run: moveit_kinematics/test/test_ikfast_plugins.sh
+      - id: ici
+        name: Run industrial_ci
         uses: ros-industrial/industrial_ci@master
         env: ${{ matrix.env }}
-
       - name: upload test artifacts (on failure)
         uses: actions/upload-artifact@v2
-        if: steps.industrial_ci.outcome != 'success'
+        if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
         with:
           name: test-results-${{ matrix.env.IMAGE }}
           path: ${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml
+      - name: Generate codecov report
+        uses: rhaschke/lcov-action@main
+        if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        with:
+          docker: $DOCKER_IMAGE
+          workdir: ${{ env.BASEDIR }}/target_ws
+          ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
       - name: upload codecov report
-        uses: codecov/codecov-action@v1
-        if: ${{ matrix.env.CCOV }}
+        uses: codecov/codecov-action@v2
+        if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
           files: ${{ env.BASEDIR }}/coverage.info
+      - name: Upload clang-tidy changes
+        uses: rhaschke/upload-git-patch-action@main
+        if: matrix.env.CLANG_TIDY
+        with:
+          name: clang-tidy
+          path: ${{ env.BASEDIR }}/target_ws/src/$(basename $(pwd))
       - name: prepare target_ws for cache
-        if: ${{ always() && ! matrix.env.CCOV }}
+        if: "!matrix.env.CCOV"
         run: |
           du -sh ${{ env.BASEDIR }}/target_ws
           sudo find ${{ env.BASEDIR }}/target_ws -wholename '*/test_results/*' -delete
