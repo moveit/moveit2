@@ -20,3 +20,9 @@ jobs:
     - name: Install clang-format-10
       run: sudo apt-get install clang-format-10
     - uses: pre-commit/action@v2.0.3
+      id: precommit
+    - name: Upload pre-commit changes
+      if: failure() && steps.precommit.outcome == 'failure'
+      uses: rhaschke/upload-git-patch-action@main
+      with:
+        name: pre-commit
