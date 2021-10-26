@@ -30,7 +30,6 @@ jobs:
       # Pull any updates to the upstream workspace (after restoring it from cache)
       AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
-      AFTER_RUN_TARGET_TEST: ${{ matrix.env.CCOV && './.ci.prepare_codecov' || '' }}
       TARGET_CMAKE_ARGS: >
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'Debug' || 'Release'}}
         -DCMAKE_CXX_FLAGS="${{ matrix.env.CLANG_TIDY != 'pedantic' && '-Werror ' || '' }}${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer'}}"
@@ -112,7 +111,7 @@ jobs:
         uses: codecov/codecov-action@v2
         if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
-          files: ${{ env.BASEDIR }}/coverage.info
+          files: ${{ env.BASEDIR }}/target_ws/coverage.info
       - name: Upload clang-tidy changes
         uses: rhaschke/upload-git-patch-action@main
         if: matrix.env.CLANG_TIDY
