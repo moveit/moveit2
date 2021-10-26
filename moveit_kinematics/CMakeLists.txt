@@ -26,6 +26,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
   lma_kinematics_plugin/include
   srv_kinematics_plugin/include
   cached_ik_kinematics_plugin/include
+  planar_kinematics_plugin/include
 )
 
 set(THIS_PACKAGE_LIBRARIES
@@ -33,6 +34,7 @@ set(THIS_PACKAGE_LIBRARIES
   moveit_cached_ik_kinematics_plugin
   moveit_kdl_kinematics_plugin
   moveit_lma_kinematics_plugin
+  moveit_planar_kinematics_plugin
   moveit_srv_kinematics_plugin
 )
 
@@ -47,6 +49,7 @@ pluginlib_export_plugin_description_file(moveit_core kdl_kinematics_plugin_descr
 pluginlib_export_plugin_description_file(moveit_core lma_kinematics_plugin_description.xml)
 pluginlib_export_plugin_description_file(moveit_core srv_kinematics_plugin_description.xml)
 pluginlib_export_plugin_description_file(moveit_core cached_ik_kinematics_plugin_description.xml)
+pluginlib_export_plugin_description_file(moveit_core planar_kinematics_plugin_description.xml)
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})
 
@@ -54,6 +57,7 @@ add_subdirectory(cached_ik_kinematics_plugin)
 add_subdirectory(ikfast_kinematics_plugin)
 add_subdirectory(kdl_kinematics_plugin)
 add_subdirectory(lma_kinematics_plugin)
+add_subdirectory(planar_kinematics_plugin)
 add_subdirectory(srv_kinematics_plugin)
 add_subdirectory(test)
 

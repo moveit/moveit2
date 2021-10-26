@@ -1,0 +1,8 @@
+<library path="planar_kinematics_plugin">
+  <class type="planar_kinematics_plugin::PlanarKinematicsPlugin"
+         base_class_type="kinematics::KinematicsBase">
+    <description>
+        MoveIt inverse kinematics solver for mobile base and chain of 1-DOF joints.
+    </description>
+  </class>
+</library>
