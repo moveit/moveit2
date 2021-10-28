@@ -259,7 +259,7 @@ bool PlanarKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
     state_->setJointGroupPositions(mobile_base_jmg_, &solution[mobile_base_index_]);
     state_->updateLinkTransforms();
     // Convert the desired pose from the arm + mobile base solver base frame to the arm group base frame
-    const auto arm_b_T_ik_pose = tf2::toMsg(state_->getFrameTransform(arm_ik_solver->getBaseFrame()).inverse() *
+    const auto arm_b_t_ik_pose = tf2::toMsg(state_->getFrameTransform(arm_ik_solver->getBaseFrame()).inverse() *
                                             state_->getFrameTransform(getBaseFrame()) * eigen_ik_pose);
 
     // We can't use the solution_callback directly with the IK solver for the arm since we'll only get the joint values
@@ -279,7 +279,7 @@ bool PlanarKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
         solution_callback(ik_pose, jmg_solution, error_code);
       };
     }
-    const bool ik_valid = arm_ik_solver->searchPositionIK(arm_b_T_ik_pose, arm_jmg_ik_seed_state, timeout * 0.5,
+    const bool ik_valid = arm_ik_solver->searchPositionIK(arm_b_t_ik_pose, arm_jmg_ik_seed_state, timeout * 0.5,
                                                           arm_jmg_consistency_limits, arm_jmg_solution,
                                                           arm_solution_callback, error_code, options);
 
@@ -300,14 +300,14 @@ bool PlanarKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
       state_->setJointGroupPositions(arm_jmg_, &arm_jmg_solution[0]);
     state_->updateLinkTransforms();
     // The transformation for the tip frame w.r.t. the mobile base link given the arm's joint values
-    const auto mobile_base_link_T_current =
+    const auto mobile_base_link_t_current =
         state_->getFrameTransform(mobile_base_joint_->getChildLinkModel()->getName()).inverse() *
         state_->getFrameTransform(getTipFrame());
     // The error for the mobile base link
-    const auto T_mobile_base_link = eigen_ik_pose * mobile_base_link_T_current.inverse();
+    const auto t_mobile_base_link = eigen_ik_pose * mobile_base_link_t_current.inverse();
 
-    Eigen::AngleAxisd rotation(T_mobile_base_link.rotation());
-    Eigen::Map<Eigen::Vector2d>(&solution.at(mobile_base_index_)) = T_mobile_base_link.translation().block<2, 1>(0, 0);
+    Eigen::AngleAxisd rotation(t_mobile_base_link.rotation());
+    Eigen::Map<Eigen::Vector2d>(&solution.at(mobile_base_index_)) = t_mobile_base_link.translation().block<2, 1>(0, 0);
     // Check if the rotation is a pure yaw
     const double angle = rotation.axis()(2) * rotation.angle();
     if (std::abs(rotation.angle()) - std::abs(angle) < 1e-2)
