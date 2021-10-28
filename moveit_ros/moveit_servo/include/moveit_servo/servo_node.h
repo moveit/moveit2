@@ -50,6 +50,7 @@ class ServoNode
 public:
   ServoNode(const rclcpp::NodeOptions& options);
 
+  // NOLINTNEXTLINE(readability-identifier-naming)
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface()
   {
     return node_->get_node_base_interface();
