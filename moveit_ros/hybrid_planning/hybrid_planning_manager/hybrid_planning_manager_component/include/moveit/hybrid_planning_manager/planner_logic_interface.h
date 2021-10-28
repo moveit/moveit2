@@ -41,6 +41,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <moveit/hybrid_planning_manager/hybrid_planning_events.h>
+#include <moveit/hybrid_planning_manager/hybrid_planning_interface.h>
 
 namespace moveit::hybrid_planning
 {
@@ -109,7 +110,7 @@ struct ReactionResult
   MoveItErrorCode error_code;
 };
 
-class HybridPlanningManager;  // Forward declaration
+class HybridPlanningInterface;  // Forward declaration
 
 /**
  * Class PlannerLogicInterface - Base class for a planner logic. The logic defines how to react to different events that
@@ -121,10 +122,10 @@ class PlannerLogicInterface
 public:
   /**
    * Initialize the planner logic
-   * @param hybrid_planning_manager The hybrid planning manager instance to initialize this logic with.
+   * @param hybrid_planning_interface Shared pointer to hybrid planning interface
    * @return true if initialization was successful
    */
-  virtual bool initialize(const std::shared_ptr<HybridPlanningManager>& hybrid_planning_manager) = 0;
+  virtual bool initialize(const std::shared_ptr<HybridPlanningInterface>& hybrid_planning_interface) = 0;
 
   /**
    * React to event defined in HybridPlanningEvent enum
@@ -141,7 +142,7 @@ public:
   virtual ReactionResult processEvent(const std::string& event) = 0;
 
 protected:
-  // The hybrid planning manager instance that runs this logic plugin
-  std::shared_ptr<HybridPlanningManager> hybrid_planning_manager_ = nullptr;
+  // The hybrid planning interface to access communication interfaces between the components
+  std::shared_ptr<HybridPlanningInterface> hybrid_planning_interface_ = nullptr;
 };
 }  // namespace moveit::hybrid_planning

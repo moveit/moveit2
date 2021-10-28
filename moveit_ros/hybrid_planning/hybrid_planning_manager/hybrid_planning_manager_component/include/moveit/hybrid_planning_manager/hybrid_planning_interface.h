@@ -33,8 +33,7 @@
  *********************************************************************/
 
 /* Author: Sebastian Jahr
-   Description: Implementation of the Hybrid Planning Manager component node which serves as API and control unit of the
-   whole architecture.
+   Description: TODO
  */
 
 #pragma once
@@ -46,45 +45,65 @@
 #include <moveit_msgs/action/global_planner.hpp>
 #include <moveit_msgs/action/hybrid_planning.hpp>
 
-#include <moveit/hybrid_planning_manager/hybrid_planning_interface.h>
 #include <moveit/hybrid_planning_manager/planner_logic_interface.h>
-
-#include <pluginlib/class_loader.hpp>
 
 namespace moveit::hybrid_planning
 {
+class PlannerLogicInterface;  // Forward declaration
+
 /**
- * Class HybridPlanningManager - ROS 2 component node that implements the hybrid planning manager.
+ * Class HybridPlanningInterface - This class contains the ROS 2 communication interfaces to interact with the other
+ * nodes of the architecture and convenience fuctions to simplify communication
  */
-class HybridPlanningManager
+class HybridPlanningInterface
 {
 public:
   /** \brief Constructor */
-  HybridPlanningManager(const rclcpp::NodeOptions& options);
+  HybridPlanningInterface(const rclcpp::Node::SharedPtr& node,
+                          const std::shared_ptr<PlannerLogicInterface>& planning_logic_);
 
   /**
-   * Load and initialized planner logic plugin and ROS 2 action and topic interfaces
-   * @return Initialization successfull yes/no
+   * Hybrid planning goal callback for hybrid planning request server
+   * @param goal_handle Hybrid planning goal handle to access feedback and response
    */
-  bool initialize();
+  void hybridPlanningRequestCallback(
+      std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanning>> goal_handle);
 
-  // This function is required to make this class a valid NodeClass
-  // see https://docs.ros2.org/foxy/api/rclcpp_components/register__node__macro_8hpp.html
-  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface()
-  {
-    return node_->get_node_base_interface();
-  }
+  /**
+   * Send global planning request to global planner component
+   * @return Global planner successfully started yes/no
+   */
+  bool sendGlobalPlannerAction();
+
+  /**
+   * Send local planning request to local planner component
+   * @return Local planner successfully started yes/no
+   */
+  bool sendLocalPlannerAction();
+
+  /**
+   * Send back hybrid planning response
+   * @param success Indicates whether hybrid planning was successful
+   */
+  void sendHybridPlanningResponse(bool success);
 
 private:
   std::shared_ptr<rclcpp::Node> node_;
 
-  // Planner logic plugin loader
-  std::unique_ptr<pluginlib::ClassLoader<PlannerLogicInterface>> planner_logic_plugin_loader_;
+  // Shared hybrid planning goal handle
+  std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanning>> hybrid_planning_goal_handle_;
 
-  // Planner logic instance to implement reactive behavior
-  std::shared_ptr<PlannerLogicInterface> planner_logic_instance_;
+  // Planning request action clients
+  rclcpp_action::Client<moveit_msgs::action::LocalPlanner>::SharedPtr local_planner_action_client_;
+  rclcpp_action::Client<moveit_msgs::action::GlobalPlanner>::SharedPtr global_planner_action_client_;
 
-  // Interface to interact with the other components of the Hybrid Planning Architecture
-  std::shared_ptr<HybridPlanningInterface> hybrid_planning_interface_;
+  // Hybrid planning request action server
+  rclcpp_action::Server<moveit_msgs::action::HybridPlanning>::SharedPtr hybrid_planning_request_server_;
+
+  // Global solution subscriber
+  rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_solution_sub_;
+
+  // Planner logic instance to process events
+  std::shared_ptr<PlannerLogicInterface> planner_logic_;
 };
 }  // namespace moveit::hybrid_planning

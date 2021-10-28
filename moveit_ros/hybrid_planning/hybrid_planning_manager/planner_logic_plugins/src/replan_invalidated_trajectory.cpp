@@ -48,9 +48,9 @@ ReactionResult ReplanInvalidatedTrajectory::processEvent(const std::string& even
 {
   if (event == "collision_ahead")
   {
-    if (!hybrid_planning_manager_->sendGlobalPlannerAction())  // Start global planning
+    if (!hybrid_planning_interface_->sendGlobalPlannerAction())  // Start global planning
     {
-      hybrid_planning_manager_->sendHybridPlanningResponse(false);
+      hybrid_planning_interface_->sendHybridPlanningResponse(false);
     }
     return ReactionResult(event, "", moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
   }

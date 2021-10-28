@@ -25,6 +25,8 @@ set(LIBRARIES
   moveit_global_planner_component
   moveit_hybrid_planning_manager
   moveit_local_planner_component
+  # Libraries
+  moveit_hybrid_planning_interface
   # Plugins
   forward_trajectory_plugin
   motion_planning_pipeline_plugin
