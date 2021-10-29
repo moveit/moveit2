@@ -36,6 +36,7 @@
  */
 
 #include <moveit/global_planner/moveit_planning_pipeline.h>
+#include <moveit/msg_builders/moveit_error_codes_builder.hpp>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
 
@@ -50,6 +51,8 @@ const std::string PLANNING_SCENE_MONITOR_NS = "planning_scene_monitor_options.";
 const std::string PLANNING_PIPELINES_NS = "planning_pipelines.";
 const std::string PLAN_REQUEST_PARAM_NS = "plan_request_params.";
 const std::string UNDEFINED = "<undefined>";
+
+using moveit::msg_builders::MoveItErrorCodesBuilder;
 
 bool MoveItPlanningPipeline::initialize(const rclcpp::Node::SharedPtr& node)
 {
@@ -91,7 +94,7 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
   if ((global_goal_handle->get_goal())->motion_sequence.items.empty())
   {
     RCLCPP_ERROR(LOGGER, "Global planner received an empty motion sequence. Abort Global Planning.");
-    response.error_code = MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+    response.error_code = MoveItErrorCodesBuilder(moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
     return response;
   }
 

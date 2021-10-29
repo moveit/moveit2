@@ -56,14 +56,6 @@ const std::string UNDEFINED = "<undefined>";
 GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& options)
   : node_{ std::make_shared<rclcpp::Node>("global_planner_component", options) }
 {
-  if (!initialize())
-  {
-    throw std::runtime_error("Failed to initialize Global Planner Component");
-  }
-}
-
-bool GlobalPlannerComponent::initialize()
-{
   // Initialize global planning request action server
   global_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::GlobalPlanner>(
       node_, "global_planning_action",
@@ -95,7 +87,7 @@ bool GlobalPlannerComponent::initialize()
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception while creating global planner plugin loader: '%s'", ex.what());
-    return false;
+    throw ex;
   }
   try
   {
@@ -104,17 +96,16 @@ bool GlobalPlannerComponent::initialize()
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception while loading global planner '%s': '%s'", planner_plugin_name_.c_str(), ex.what());
-    return false;
+    throw ex;
   }
 
   // Initialize global planner plugin
   if (!global_planner_instance_->initialize(node_))
   {
     RCLCPP_ERROR(LOGGER, "Unable to initialize global planner plugin '%s'", planner_plugin_name_.c_str());
-    return false;
+    throw std::runtime_error("Failed to initialize global planner plugin");
   }
   RCLCPP_INFO(LOGGER, "Using global planner plugin '%s'", planner_plugin_name_.c_str());
-  return true;
 }
 
 void GlobalPlannerComponent::globalPlanningRequestCallback(

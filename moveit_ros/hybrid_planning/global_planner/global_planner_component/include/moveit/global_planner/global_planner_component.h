@@ -56,6 +56,12 @@ namespace moveit::hybrid_planning
 class GlobalPlannerComponent
 {
 public:
+  /**
+   * @brief Construct a GlobalPlannerComponent
+   * @details If this fails it throws an exception
+   *
+   * @param options The node options from ROS
+   */
   GlobalPlannerComponent(const rclcpp::NodeOptions& options);
 
   // This function is required to make this class a valid NodeClass
@@ -88,8 +94,5 @@ private:
   // Goal callback for global planning request action server
   void globalPlanningRequestCallback(
       std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::GlobalPlanner>> goal_handle);
-
-  // Load and initialized global planner plugin and ROS 2 action and topic interfaces
-  bool initialize();
 };
 }  // namespace moveit::hybrid_planning

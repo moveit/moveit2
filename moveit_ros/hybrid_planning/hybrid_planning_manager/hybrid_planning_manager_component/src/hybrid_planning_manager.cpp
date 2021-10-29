@@ -50,14 +50,6 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
 HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
   : node_{ std::make_shared<rclcpp::Node>("global_planner_component", options) }
 {
-  if (!initialize())
-  {
-    throw std::runtime_error("Failed to initialize global planner");
-  }
-}
-
-bool HybridPlanningManager::initialize()
-{
   // Create planning logic plugin loader
   try
   {
@@ -67,7 +59,7 @@ bool HybridPlanningManager::initialize()
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception while creating planner logic plugin loader '%s'", ex.what());
-    return false;
+    throw ex;
   }
 
   // TODO(sjahr) Refactor parameter declaration and use repository wide solution
@@ -95,9 +87,8 @@ bool HybridPlanningManager::initialize()
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception while loading planner logic '%s': '%s'", logic_plugin_name.c_str(), ex.what());
-    return false;
+    throw ex;
   }
-  return true;
 
   // Create hybrid planning interface
   hybrid_planning_interface_ = std::make_shared<HybridPlanningInterface>(node_, planner_logic_instance_);

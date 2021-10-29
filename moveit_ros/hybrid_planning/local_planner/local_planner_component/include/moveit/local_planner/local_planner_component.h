@@ -139,14 +139,6 @@ public:
   LocalPlannerComponent(const rclcpp::NodeOptions& options);
 
   /**
-   * Initialize and start planning scene monitor to listen to the planning scene topic.
-   * Load trajectory_operator and constraint solver plugin.
-   * Initialize ROS 2 interfaces
-   * @return true if scene monitor and plugins are successfully initialized
-   */
-  bool initialize();
-
-  /**
    * Handle the planners current job based on the internal state each iteration when the planner is started.
    */
   void executeIteration();

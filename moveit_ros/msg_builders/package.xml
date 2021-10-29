@@ -1,8 +1,8 @@
 <package format="2">
-  <name>moveit_hybrid_planning</name>
+  <name>moveit_msg_builders</name>
   <version>2.3.0</version>
-  <description>Hybrid planning components of MoveIt 2</description>
-  <author email="sebastian.jahr@picknik.ai">Sebastian Jahr</author>
+  <description>Message builders for MoveIt</description>
+  <author email="tyler@picknik.ai">Tyler Weaver</author>
 
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
@@ -16,24 +16,8 @@
   <build_depend>moveit_common</build_depend>
 
   <depend>ament_index_cpp</depend>
-  <depend>moveit_core</depend>
-  <depend>moveit_msg_builders</depend>
   <depend>moveit_msgs</depend>
-  <depend>moveit_ros_planning</depend>
-  <depend>moveit_ros_planning_interface</depend>
-  <depend>pluginlib</depend>
   <depend>rclcpp</depend>
-  <depend>rclcpp_action</depend>
-  <depend>rclcpp_components</depend>
-  <depend>std_msgs</depend>
-  <depend>std_srvs</depend>
-  <depend>tf2_ros</depend>
-  <depend>trajectory_msgs</depend>
-
-  <exec_depend>controller_manager</exec_depend>
-  <exec_depend>robot_state_publisher</exec_depend>
-  <exec_depend>rviz2</exec_depend>
-  <exec_depend>moveit_resources_panda_moveit_config</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
