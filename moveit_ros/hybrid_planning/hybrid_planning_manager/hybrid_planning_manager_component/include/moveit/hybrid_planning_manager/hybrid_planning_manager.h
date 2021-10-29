@@ -62,12 +62,6 @@ public:
   /** \brief Constructor */
   HybridPlanningManager(const rclcpp::NodeOptions& options);
 
-  /**
-   * Load and initialized planner logic plugin and ROS 2 action and topic interfaces
-   * @return Initialization successfull yes/no
-   */
-  bool initialize();
-
   // This function is required to make this class a valid NodeClass
   // see https://docs.ros2.org/foxy/api/rclcpp_components/register__node__macro_8hpp.html
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface()

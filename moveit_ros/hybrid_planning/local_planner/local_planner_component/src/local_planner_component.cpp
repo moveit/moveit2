@@ -62,14 +62,6 @@ LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   state_ = LocalPlannerState::UNCONFIGURED;
   local_planner_feedback_ = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
 
-  if (!this->initialize())
-  {
-    throw std::runtime_error("Failed to initialize local planner component");
-  }
-}
-
-bool LocalPlannerComponent::initialize()
-{
   // Load planner parameter
   config_.load(node_);
 
@@ -81,7 +73,8 @@ bool LocalPlannerComponent::initialize()
     {
       RCLCPP_ERROR(LOGGER, "When publishing a std_msgs/Float64MultiArray, you must select positions OR velocities. "
                            "Enabling both or none is not possible!");
-      return false;
+      throw std::runtime_error("When publishing a std_msgs/Float64MultiArray, you must select positions OR velocities. "
+                               "Enabling both or none is not possible!");
     }
   }
 
@@ -91,7 +84,7 @@ bool LocalPlannerComponent::initialize()
   if (!planning_scene_monitor_->getPlanningScene())
   {
     RCLCPP_ERROR(LOGGER, "Unable to configure planning scene monitor");
-    return false;
+    throw std::runtime_error("Unable to configure planning scene monitor");
   }
 
   // Start state and scene monitors
@@ -108,7 +101,7 @@ bool LocalPlannerComponent::initialize()
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception while creating trajectory operator plugin loader: '%s'", ex.what());
-    return false;
+    throw ex;
   }
   try
   {
@@ -123,7 +116,7 @@ bool LocalPlannerComponent::initialize()
   {
     RCLCPP_ERROR(LOGGER, "Exception while loading trajectory operator '%s': '%s'",
                  config_.trajectory_operator_plugin_name.c_str(), ex.what());
-    return false;
+    throw ex;
   }
 
   // Load local constraint solver
@@ -135,7 +128,7 @@ bool LocalPlannerComponent::initialize()
   catch (pluginlib::PluginlibException& ex)
   {
     RCLCPP_ERROR(LOGGER, "Exception while creating constraint solver plugin loader '%s'", ex.what());
-    return false;
+    throw ex;
   }
   try
   {
@@ -149,7 +142,7 @@ bool LocalPlannerComponent::initialize()
   {
     RCLCPP_ERROR(LOGGER, "Exception while loading constraint solver '%s': '%s'",
                  config_.local_constraint_solver_plugin_name.c_str(), ex.what());
-    return false;
+    throw ex;
   }
 
   // Initialize local planning request action server
@@ -210,7 +203,6 @@ bool LocalPlannerComponent::initialize()
   }
 
   state_ = LocalPlannerState::READY;
-  return true;
 }
 
 void LocalPlannerComponent::executeIteration()

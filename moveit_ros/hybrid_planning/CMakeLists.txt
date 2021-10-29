@@ -8,6 +8,7 @@ moveit_package()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(moveit_core REQUIRED)
+find_package(moveit_msg_builders REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
@@ -36,14 +37,15 @@ set(LIBRARIES
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  rclcpp
-  rclcpp_components
-  rclcpp_action
   moveit_core
+  moveit_msg_builders
+  moveit_msgs
   moveit_ros_planning
   moveit_ros_planning_interface
-  moveit_msgs
   pluginlib
+  rclcpp
+  rclcpp_action
+  rclcpp_components
   std_msgs
   std_srvs
   tf2_ros
