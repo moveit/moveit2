@@ -315,7 +315,7 @@ public:
     }
     reference operator*() const
     {
-      return std::pair<moveit::core::RobotStatePtr, double>(*waypoint_iterator, *duration_iterator);
+      return std::pair{*waypoint_iterator, *duration_iterator};
     }
   };
 
