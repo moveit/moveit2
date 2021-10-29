@@ -2,8 +2,7 @@
 A Hybrid Planning architecture. You can find more information in the project's issues[#300](https://github.com/ros-planning/moveit2/issues/300), [#433](https://github.com/ros-planning/moveit2/issues/433) and on the [MoveIt 2 roadmap](https://moveit.ros.org/documentation/contributing/roadmap/). Furthermore, there is an extensive tutorial available [here](https://github.com/ros-planning/moveit2_tutorials/pull/97).
 
 ## Getting started
-1. Build moveit2 from source and make sure you use [this fork](https://github.com/sjahr/moveit_msgs) of moveit_msgs for the hybrid planning specific action definitions
-2. To start the demo run:
+To start the demo run:
 ```
 ros2 launch moveit_hybrid_planning hybrid_planning.launch.py
 ```
