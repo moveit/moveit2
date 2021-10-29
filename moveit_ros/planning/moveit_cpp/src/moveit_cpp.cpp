@@ -36,7 +36,11 @@
 
 #include <stdexcept>
 #include <moveit/moveit_cpp/moveit_cpp.h>
+#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#else
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#endif
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
 
 namespace moveit_cpp
@@ -44,19 +48,12 @@ namespace moveit_cpp
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros_planning_interface.moveit_cpp");
 constexpr char PLANNING_PLUGIN_PARAM[] = "planning_plugin";
 
-MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
-  : MoveItCpp(node, Options(node), tf_buffer)
+MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node) : MoveItCpp(node, Options(node))
 {
 }
 
-MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options,
-                     const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
-  : node_(node), tf_buffer_(tf_buffer)
+MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options) : node_(node)
 {
-  if (!tf_buffer_)
-    tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
-  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
-
   // Configure planning scene monitor
   if (!loadPlanningSceneMonitor(options.planning_scene_monitor_options))
   {
@@ -97,7 +94,7 @@ MoveItCpp::~MoveItCpp()
 bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& options)
 {
   planning_scene_monitor_.reset(
-      new planning_scene_monitor::PlanningSceneMonitor(node_, options.robot_description, tf_buffer_, options.name));
+      new planning_scene_monitor::PlanningSceneMonitor(node_, options.robot_description, options.name));
   // Allows us to sycronize to Rviz and also publish collision objects to ourselves
   RCLCPP_DEBUG(LOGGER, "Configuring Planning Scene Monitor");
   if (planning_scene_monitor_->getPlanningScene())
@@ -298,13 +295,11 @@ bool MoveItCpp::execute(const std::string& group_name, const robot_trajectory::R
 
 const std::shared_ptr<tf2_ros::Buffer>& MoveItCpp::getTFBuffer() const
 {
-  return tf_buffer_;
+  return planning_scene_monitor_->getTFClient();
 }
 
 void MoveItCpp::clearContents()
 {
-  tf_listener_.reset();
-  tf_buffer_.reset();
   planning_scene_monitor_.reset();
   robot_model_.reset();
   planning_pipelines_.clear();

@@ -67,7 +67,7 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
 
   // Check if the robot_description parameter is declared, declare it if it's not declared yet
   if (!node->has_parameter(robot_description))
-    node->declare_parameter(robot_description);
+    node->declare_parameter(robot_description, rclcpp::ParameterType::PARAMETER_STRING);
   std::string robot_description_content;
   node->get_parameter_or(robot_description, robot_description_content, std::string());
 
@@ -88,7 +88,7 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
   const std::string srdf_description = robot_description + "_semantic";
   // Check if the robot_description_semantic parameter is declared, declare it if it's not declared yet
   if (!node->has_parameter(srdf_description))
-    node->declare_parameter(srdf_description);
+    node->declare_parameter(srdf_description, rclcpp::ParameterType::PARAMETER_STRING);
   std::string srdf_description_content;
   node->get_parameter_or(srdf_description, srdf_description_content, std::string());
 
@@ -192,7 +192,11 @@ bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& pa
     cmd += xacro_arg + " ";
   cmd += path;
 
+#ifdef _WIN32
+  FILE* pipe = _popen(cmd.c_str(), "r");
+#else
   FILE* pipe = popen(cmd.c_str(), "r");
+#endif
   if (!pipe)
   {
     RCLCPP_ERROR(LOGGER, "Unable to load path");
@@ -205,7 +209,11 @@ bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& pa
     if (fgets(pipe_buffer, 128, pipe) != nullptr)
       buffer += pipe_buffer;
   }
+#ifdef _WIN32
+  _pclose(pipe);
+#else
   pclose(pipe);
+#endif
 
   return true;
 }

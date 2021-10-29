@@ -36,7 +36,11 @@
 
 #include <moveit/pick_place/reachable_valid_pose_filter.h>
 #include <moveit/kinematic_constraints/utils.h>
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#endif
 #include <boost/bind.hpp>
 #include <ros/console.h>
 

@@ -112,6 +112,7 @@ PlanningSceneDisplay::PlanningSceneDisplay(bool listen_to_planning_scene, bool s
   octree_render_property_->addOption("Occupied Voxels", OCTOMAP_OCCUPIED_VOXELS);
   octree_render_property_->addOption("Free Voxels", OCTOMAP_FREE_VOXELS);
   octree_render_property_->addOption("All Voxels", OCTOMAP_FREE_VOXELS | OCTOMAP_OCCUPIED_VOXELS);
+  octree_render_property_->addOption("Disabled", OCTOMAP_DISABLED);
 
   octree_coloring_property_ = new rviz_common::properties::EnumProperty(
       "Voxel Coloring", "Z-Axis", "Select voxel coloring mode", scene_category_, SLOT(changedOctreeColorMode()), this);
@@ -517,9 +518,9 @@ void PlanningSceneDisplay::unsetLinkColor(rviz_default_plugins::robot::Robot* ro
 // ******************************************************************************************
 planning_scene_monitor::PlanningSceneMonitorPtr PlanningSceneDisplay::createPlanningSceneMonitor()
 {
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer = moveit::planning_interface::getSharedTF();
-  return std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
-      node_, robot_description_property_->getStdString(), tf_buffer, getNameStd() + "_planning_scene_monitor");
+  auto rml = moveit::planning_interface::getSharedRobotModelLoader(node_, robot_description_property_->getStdString());
+  return std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, rml,
+                                                                        getNameStd() + "_planning_scene_monitor");
 }
 
 void PlanningSceneDisplay::clearRobotModel()

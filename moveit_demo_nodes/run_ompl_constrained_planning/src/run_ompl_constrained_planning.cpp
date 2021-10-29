@@ -406,7 +406,7 @@ private:
 
     marker.type = visualization_msgs::msg::Marker::CUBE;
     marker.action = visualization_msgs::msg::Marker::ADD;
-    marker.lifetime = rclcpp::Duration(0);
+    marker.lifetime = rclcpp::Duration::from_seconds(0);
 
     marker.color.a = 0.5;
     marker.pose = pose;
@@ -428,7 +428,7 @@ private:
 
     marker.type = visualization_msgs::msg::Marker::SPHERE;
     marker.action = visualization_msgs::msg::Marker::ADD;
-    marker.lifetime = rclcpp::Duration(0);
+    marker.lifetime = rclcpp::Duration::from_seconds(0);
 
     marker.pose = pose;
     marker.scale.x = 0.05;

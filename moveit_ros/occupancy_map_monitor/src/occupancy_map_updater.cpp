@@ -37,6 +37,10 @@
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
 
+#include <rclcpp/rclcpp.hpp>
+
+#include <string>
+
 namespace occupancy_map_monitor
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.occupancy_map_updater");

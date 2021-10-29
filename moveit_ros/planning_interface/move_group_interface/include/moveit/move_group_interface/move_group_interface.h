@@ -60,6 +60,8 @@
 #include <utility>
 #include <tf2_ros/buffer.h>
 
+#include "moveit_move_group_interface_export.h"
+
 namespace moveit
 {
 /** \brief Simple interface to MoveIt components */
@@ -101,7 +103,7 @@ MOVEIT_CLASS_FORWARD(MoveGroupInterface);  // Defines MoveGroupInterfacePtr, Con
     \brief Client class to conveniently use the ROS interfaces provided by the move_group node.
 
     This class includes many default settings to make things easy to use. */
-class MoveGroupInterface
+class MOVEIT_MOVE_GROUP_INTERFACE_EXPORT MoveGroupInterface
 {
 public:
   /** \brief Default ROS parameter name from where to read the robot's URDF. Set to 'robot_description' */
@@ -110,8 +112,10 @@ public:
   /** \brief Specification of options to use when constructing the MoveGroupInterface class */
   struct Options
   {
-    Options(std::string group_name, std::string desc = ROBOT_DESCRIPTION)
-      : group_name_(std::move(group_name)), robot_description_(std::move(desc))
+    Options(std::string group_name, std::string desc = ROBOT_DESCRIPTION, std::string move_group_namespace = "")
+      : group_name_(std::move(group_name))
+      , robot_description_(std::move(desc))
+      , move_group_namespace_(std::move(move_group_namespace))
     {
     }
 
@@ -123,6 +127,9 @@ public:
 
     /// Optionally, an instance of the RobotModel to use can be also specified
     moveit::core::RobotModelConstPtr robot_model_;
+
+    /// The namespace for the move group node
+    std::string move_group_namespace_;
   };
 
   MOVEIT_STRUCT_FORWARD(Plan);
@@ -147,23 +154,23 @@ public:
      it has to be of type ros::CallbackQueue
         (which is the default type of callback queues used in ROS)
       \param tf_buffer. Specify a TF2_ROS Buffer instance to use. If not specified,
-                        one will be constructed internally along with an internal TF2_ROS TransformListener
+                        one will be constructed internally
       \param wait_for_servers. Timeout for connecting to action servers. -1 time means unlimited waiting.
     */
   MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const Options& opt,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration(-1));
+                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration::from_seconds(-1));
 
   /**
       \brief Construct a client for the MoveGroup action for a particular \e group.
 
       \param tf_buffer. Specify a TF2_ROS Buffer instance to use. If not specified,
-                        one will be constructed internally along with an internal TF2_ROS TransformListener
+                        one will be constructed internally
       \param wait_for_servers. Timeout for connecting to action servers. -1 time means unlimited waiting.
     */
   MoveGroupInterface(const rclcpp::Node::SharedPtr& node, const std::string& group,
                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer = std::shared_ptr<tf2_ros::Buffer>(),
-                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration(-1));
+                     const rclcpp::Duration& wait_for_servers = rclcpp::Duration::from_seconds(-1));
 
   ~MoveGroupInterface();
 

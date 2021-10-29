@@ -1,34 +1,34 @@
-# moveit/moveit2:foxy-source
+# syntax = docker/dockerfile:1.3
+
+# ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-source
 # Downloads the moveit source code and install remaining debian dependencies
 
-ARG ROS_DISTRO=foxy
-FROM moveit/moveit2:${ROS_DISTRO}-ci-testing
-
+ARG ROS_DISTRO=rolling
+FROM ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci-testing
 MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
-MAINTAINER Dave Coleman dave@picknik.ai
 
+# Export ROS_UNDERLAY for downstream docker containers
 ENV ROS_UNDERLAY /root/ws_moveit/install
-WORKDIR $ROS_UNDERLAY/../src
+WORKDIR $ROS_UNDERLAY/..
+
+# Copy MoveIt sources from docker context
+COPY . src/moveit2
 
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
 # https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers
-RUN \
-    # Download moveit source so that we can get necessary dependencies
-    git clone https://github.com/ros-planning/moveit2.git -b main && \
-    vcs import < moveit2/moveit2.repos && \
+RUN --mount=type=cache,target=/root/.ccache/ \
+    # Enable ccache
+    PATH=/usr/lib/ccache:$PATH && \
+    # Fetch required upstream sources for building
+    vcs import src < src/moveit2/moveit2.repos && \
+    if [ -r src/moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import src < src/moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
     #
-    # Update apt package list as cache is cleared in previous container
-    # Usually upgrading involves a few packages only (if container builds became out-of-sync)
-    apt-get -qq update && \
-    apt-get -qq dist-upgrade && \
-    #
-    rosdep update && \
-    rosdep install -y --from-paths . --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
-    rm -rf /var/lib/apt/lists/*
-
-# Build the workspace
-RUN cd $ROS_UNDERLAY/.. && . /opt/ros/${ROS_DISTRO}/setup.sh &&\
+    . /opt/ros/${ROS_DISTRO}/setup.sh &&\
     colcon build \
             --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-              --ament-cmake-args -DCMAKE_BUILD_TYPE=Release \
-            --event-handlers desktop_notification- status-
+            --ament-cmake-args -DCMAKE_BUILD_TYPE=Release \
+            --event-handlers desktop_notification- status- && \
+    ccache -s && \
+    #
+    # Update /ros_entrypoint.sh to source our new workspace
+    sed -i "s#/opt/ros/\$ROS_DISTRO/setup.bash#$ROS_UNDERLAY/setup.sh#g" /ros_entrypoint.sh

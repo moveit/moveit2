@@ -9,6 +9,9 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/bullet_integration/contact_checker_common.cpp
   src/bullet_integration/ros_bullet_utils.cpp
 )
+include(GenerateExportHeader)
+generate_export_header(${MOVEIT_LIB_NAME})
+target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME} SYSTEM
   BULLET
@@ -44,12 +47,13 @@ target_link_libraries(collision_detector_bullet_plugin
 )
 
 install(DIRECTORY include/ DESTINATION include)
-install(TARGETS ${MOVEIT_LIB_NAME} EXPORT ${MOVEIT_LIB_NAME}
-  TARGETS collision_detector_bullet_plugin EXPORT collision_detector_bullet_plugin
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)
+install(TARGETS ${MOVEIT_LIB_NAME} collision_detector_bullet_plugin EXPORT export_${MOVEIT_LIB_NAME}
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
 )
+ament_export_targets(export_${MOVEIT_LIB_NAME} HAS_LIBRARY_TARGET)
 
 if(BUILD_TESTING)
   if(WIN32)
@@ -61,15 +65,21 @@ if(BUILD_TESTING)
   ament_add_gtest(test_bullet_collision_detection test/test_bullet_collision_detection_pr2.cpp)
   target_link_libraries(test_bullet_collision_detection moveit_test_utils ${MOVEIT_LIB_NAME})
   # TODO: remove if transition to gtest's new API TYPED_TEST_SUITE_P is finished
-  target_compile_options(test_bullet_collision_detection PRIVATE -Wno-deprecated-declarations)
+  if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(test_bullet_collision_detection PRIVATE -Wno-deprecated-declarations)
+  endif()
 
   ament_add_gtest(test_bullet_collision_detection_panda test/test_bullet_collision_detection_panda.cpp)
   target_link_libraries(test_bullet_collision_detection_panda moveit_test_utils ${MOVEIT_LIB_NAME})
   # TODO: remove if transition to gtest's new API TYPED_TEST_SUITE_P is finished
-  target_compile_options(test_bullet_collision_detection_panda PRIVATE -Wno-deprecated-declarations)
+  if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(test_bullet_collision_detection_panda PRIVATE -Wno-deprecated-declarations)
+  endif()
 
   ament_add_gtest(test_bullet_continuous_collision_checking test/test_bullet_continuous_collision_checking.cpp)
   target_link_libraries(test_bullet_continuous_collision_checking moveit_test_utils ${MOVEIT_LIB_NAME})
   # TODO: remove if transition to gtest's new API TYPED_TEST_SUITE_P is finished
-  target_compile_options(test_bullet_continuous_collision_checking PRIVATE -Wno-deprecated-declarations)
+  if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(test_bullet_continuous_collision_checking PRIVATE -Wno-deprecated-declarations)
+  endif()
 endif()

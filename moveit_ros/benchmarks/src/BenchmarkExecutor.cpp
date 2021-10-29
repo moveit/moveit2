@@ -37,7 +37,11 @@
 #include <moveit/benchmarks/BenchmarkExecutor.h>
 #include <moveit/utils/lexical_casts.h>
 #include <moveit/version.h>
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#endif
 
 // TODO(henningkayser): Switch to boost/timer/progress_display.hpp with Boost 1.72
 // boost/progress.hpp is deprecated and will be replaced by boost/timer/progress_display.hpp in Boost 1.72.
@@ -49,11 +53,14 @@
 #include <boost/math/constants/constants.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <limits>
 #ifndef _WIN32
 #include <unistd.h>
 #else
 #include <winsock2.h>
 #endif
+
+#undef max
 
 using namespace moveit_ros_benchmarks;
 

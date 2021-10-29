@@ -35,20 +35,33 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <moveit/planning_scene_monitor/current_state_monitor_middleware_handle.hpp>
 
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#endif
+#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#else
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#endif
 
+#include <memory>
 #include <limits>
 
 namespace planning_scene_monitor
 {
+namespace
+{
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.current_state_monitor");
+}
 
-planning_scene_monitor::CurrentStateMonitor::CurrentStateMonitor(const rclcpp::Node::SharedPtr& node,
-                                                                 const moveit::core::RobotModelConstPtr& robot_model,
-                                                                 const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
-  : node_(node)
+CurrentStateMonitor::CurrentStateMonitor(std::unique_ptr<CurrentStateMonitor::MiddlewareHandle> middleware_handle,
+                                         const moveit::core::RobotModelConstPtr& robot_model,
+                                         const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
+  : middleware_handle_(std::move(middleware_handle))
   , tf_buffer_(tf_buffer)
   , robot_model_(robot_model)
   , robot_state_(robot_model)
@@ -57,6 +70,13 @@ planning_scene_monitor::CurrentStateMonitor::CurrentStateMonitor(const rclcpp::N
   , error_(std::numeric_limits<double>::epsilon())
 {
   robot_state_.setToDefaultValues();
+}
+
+CurrentStateMonitor::CurrentStateMonitor(const rclcpp::Node::SharedPtr& node,
+                                         const moveit::core::RobotModelConstPtr& robot_model,
+                                         const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
+  : CurrentStateMonitor(std::make_unique<CurrentStateMonitorMiddlewareHandle>(node), robot_model, tf_buffer)
+{
 }
 
 CurrentStateMonitor::~CurrentStateMonitor()
@@ -137,19 +157,24 @@ void CurrentStateMonitor::startStateMonitor(const std::string& joint_states_topi
   {
     joint_time_.clear();
     if (joint_states_topic.empty())
+    {
       RCLCPP_ERROR(LOGGER, "The joint states topic cannot be an empty string");
+    }
     else
-      joint_state_subscriber_ = node_->create_subscription<sensor_msgs::msg::JointState>(
-          joint_states_topic, 25, std::bind(&CurrentStateMonitor::jointStateCallback, this, std::placeholders::_1));
+    {
+      middleware_handle_->createJointStateSubscription(
+          joint_states_topic, std::bind(&CurrentStateMonitor::jointStateCallback, this, std::placeholders::_1));
+    }
     if (tf_buffer_ && !robot_model_->getMultiDOFJointModels().empty())
     {
-      // TODO (anasarrak): replace this for the appropiate function, there is no similar
-      // function in ros2/geometry2.
-      // tf_connection_.reset(new TFConnection(
-      //     tf_buffer_->_addTransformsChangedListener(std::bind(&CurrentStateMonitor::tfCallback, this))));
+      tf_buffer_->setUsingDedicatedThread(true);
+      middleware_handle_->createDynamicTfSubscription(
+          std::bind(&CurrentStateMonitor::transformCallback, this, std::placeholders::_1, false));
+      middleware_handle_->createStaticTfSubscription(
+          std::bind(&CurrentStateMonitor::transformCallback, this, std::placeholders::_1, true));
     }
     state_monitor_started_ = true;
-    monitor_start_time_ = node_->now();
+    monitor_start_time_ = middleware_handle_->now();
     RCLCPP_INFO(LOGGER, "Listening to joint states on topic '%s'", joint_states_topic.c_str());
   }
 }
@@ -163,13 +188,10 @@ void CurrentStateMonitor::stopStateMonitor()
 {
   if (state_monitor_started_)
   {
-    joint_state_subscriber_.reset();
-    if (tf_buffer_ && tf_connection_)
+    middleware_handle_->resetJointStateSubscription();
+    if (tf_buffer_)
     {
-      // TODO (anasarrak): replace this for the appropiate function, there is no similar
-      // function in ros2/geometry2.
-      // tf_buffer_->_removeTransformsChangedListener(*tf_connection_);
-      tf_connection_.reset();
+      middleware_handle_->resetTfSubscriptions();
     }
     RCLCPP_DEBUG(LOGGER, "No longer listening for joint states");
     state_monitor_started_ = false;
@@ -178,10 +200,7 @@ void CurrentStateMonitor::stopStateMonitor()
 
 std::string CurrentStateMonitor::getMonitoredTopic() const
 {
-  if (joint_state_subscriber_)
-    return joint_state_subscriber_->get_topic_name();
-  else
-    return "";
+  return middleware_handle_->getJointStateTopicName();
 }
 
 bool CurrentStateMonitor::haveCompleteStateHelper(const rclcpp::Time& oldest_allowed_update_time,
@@ -212,46 +231,46 @@ bool CurrentStateMonitor::haveCompleteStateHelper(const rclcpp::Time& oldest_all
   return (missing_joints == nullptr) || missing_joints->empty();
 }
 
-bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait_time) const
+bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait_time_s) const
 {
-  rclcpp::Time start = node_->now();
+  rclcpp::Time start = middleware_handle_->now();
   rclcpp::Duration elapsed(0, 0);
-  rclcpp::Duration timeout = rclcpp::Duration::from_seconds(wait_time);
+  rclcpp::Duration timeout = rclcpp::Duration::from_seconds(wait_time_s);
 
   std::unique_lock<std::mutex> lock(state_update_lock_);
   while (current_state_time_ < t)
   {
     state_update_condition_.wait_for(lock, (timeout - elapsed).to_chrono<std::chrono::duration<double>>());
-    elapsed = node_->now() - start;
+    elapsed = middleware_handle_->now() - start;
     if (elapsed > timeout)
     {
       RCLCPP_INFO(LOGGER,
                   "Didn't received robot state (joint angles) with recent timestamp within "
                   "%f seconds.\n"
                   "Check clock synchronization if your are running ROS across multiple machines!",
-                  wait_time);
+                  wait_time_s);
       return false;
     }
   }
   return true;
 }
 
-bool CurrentStateMonitor::waitForCompleteState(double wait_time) const
+bool CurrentStateMonitor::waitForCompleteState(double wait_time_s) const
 {
-  double slept_time = 0.0;
-  double sleep_step_s = std::min(0.05, wait_time / 10.0);
-  rclcpp::Duration sleep_step(sleep_step_s);
-  while (!haveCompleteState() && slept_time < wait_time)
+  const double sleep_step_s = std::min(0.05, wait_time_s / 10.0);
+  const auto sleep_step_duration = rclcpp::Duration::from_seconds(sleep_step_s);
+  double slept_time_s = 0.0;
+  while (!haveCompleteState() && slept_time_s < wait_time_s)
   {
-    rclcpp::sleep_for(sleep_step.to_chrono<std::chrono::nanoseconds>());
-    slept_time += sleep_step_s;
+    middleware_handle_->sleepFor(sleep_step_duration.to_chrono<std::chrono::nanoseconds>());
+    slept_time_s += sleep_step_s;
   }
   return haveCompleteState();
 }
 
-bool CurrentStateMonitor::waitForCompleteState(const std::string& group, double wait_time) const
+bool CurrentStateMonitor::waitForCompleteState(const std::string& group, double wait_time_s) const
 {
-  if (waitForCompleteState(wait_time))
+  if (waitForCompleteState(wait_time_s))
     return true;
   bool ok = true;
 
@@ -276,7 +295,7 @@ bool CurrentStateMonitor::waitForCompleteState(const std::string& group, double 
   return ok;
 }
 
-void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr joint_state)
+void CurrentStateMonitor::jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state)
 {
   if (joint_state->name.size() != joint_state->position.size())
   {
@@ -302,7 +321,7 @@ void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState:
       if (jm->getVariableCount() != 1)
         continue;
 
-      joint_time_[jm] = joint_state->header.stamp;
+      joint_time_.insert_or_assign(jm, joint_state->header.stamp);
 
       if (robot_state_.getJointPositions(jm)[0] != joint_state->position[i])
       {
@@ -356,7 +375,7 @@ void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState:
   state_update_condition_.notify_all();
 }
 
-void CurrentStateMonitor::tfCallback()
+void CurrentStateMonitor::updateMultiDofJoints()
 {
   // read multi-dof joint states from TF, if needed
   const std::vector<const moveit::core::JointModel*>& multi_dof_joints = robot_model_->getMultiDOFJointModels();
@@ -371,7 +390,7 @@ void CurrentStateMonitor::tfCallback()
       const std::string& parent_frame =
           joint->getParentLinkModel() ? joint->getParentLinkModel()->getName() : robot_model_->getModelFrame();
 
-      rclcpp::Time latest_common_time;
+      rclcpp::Time latest_common_time(0, 0, RCL_ROS_TIME);
       geometry_msgs::msg::TransformStamped transf;
       try
       {
@@ -388,8 +407,11 @@ void CurrentStateMonitor::tfCallback()
         continue;
       }
 
+      if (auto joint_time_it = joint_time_.find(joint); joint_time_it == joint_time_.end())
+        joint_time_.emplace(joint, rclcpp::Time(0, 0, RCL_ROS_TIME));
+
       // allow update if time is more recent or if it is a static transform (time = 0)
-      if (latest_common_time <= joint_time_[joint] && latest_common_time > rclcpp::Time(0))
+      if (latest_common_time <= joint_time_[joint] && latest_common_time > rclcpp::Time(0, 0, RCL_ROS_TIME))
         continue;
       joint_time_[joint] = latest_common_time;
 
@@ -416,7 +438,7 @@ void CurrentStateMonitor::tfCallback()
   {
     // stub joint state: multi-dof joints are not modelled in the message,
     // but we should still trigger the update callbacks
-    sensor_msgs::msg::JointState::ConstSharedPtr joint_state(new sensor_msgs::msg::JointState);
+    auto joint_state = std::make_shared<sensor_msgs::msg::JointState>();
     for (JointStateUpdateCallback& update_callback : update_callbacks_)
       update_callback(joint_state);
   }
@@ -428,4 +450,25 @@ void CurrentStateMonitor::tfCallback()
   }
 }
 
+// Copied from https://github.com/ros2/geometry2/blob/ros2/tf2_ros/src/transform_listener.cpp
+void CurrentStateMonitor::transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static)
+{
+  for (const auto& transform : msg->transforms)
+  {
+    try
+    {
+      tf_buffer_->setTransform(transform,
+                               is_static ? middleware_handle_->getStaticTfTopicName() :
+                                           middleware_handle_->getDynamicTfTopicName(),
+                               is_static);
+    }
+    catch (tf2::TransformException& ex)
+    {
+      std::string temp = ex.what();
+      RCLCPP_ERROR(LOGGER, "Failure to set recieved transform from %s to %s with error: %s\n",
+                   transform.child_frame_id.c_str(), transform.header.frame_id.c_str(), temp.c_str());
+    }
+  }
+  updateMultiDofJoints();
+}
 }  // namespace planning_scene_monitor

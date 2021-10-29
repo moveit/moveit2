@@ -40,47 +40,12 @@
 
 #pragma once
 
-#include <moveit_servo/servo.h>
-#include <std_srvs/srv/trigger.hpp>
+#pragma message("Header `servo_server.h` is deprecated, please use `servo_node.h`")
+
+#include <moveit_servo/servo_node.h>
 
 namespace moveit_servo
 {
-class ServoServer : public rclcpp::Node
-{
-public:
-  ServoServer(const rclcpp::NodeOptions& options);
+using ServoServer [[deprecated("use ServoNode from servo_node.h")]] = ServoNode;
 
-private:
-  bool init();
-
-  void reset();
-
-  rclcpp::TimerBase::SharedPtr initialization_timer_;
-
-  std::unique_ptr<moveit_servo::Servo> servo_;
-  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-  std::shared_ptr<planning_scene_monitor::PlanningSceneMonitor> planning_scene_monitor_;
-
-  /** \brief Start the servo */
-  void startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-               std::shared_ptr<std_srvs::srv::Trigger::Response> response);
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr start_servo_service_;
-
-  /** \brief Stop the servo */
-  void stopCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-              std::shared_ptr<std_srvs::srv::Trigger::Response> response);
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr stop_servo_service_;
-
-  /** \brief Pause servo */
-  void pauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-               std::shared_ptr<std_srvs::srv::Trigger::Response> response);
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr pause_servo_service_;
-
-  /** \brief Unpause servo */
-  void unpauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
-                 std::shared_ptr<std_srvs::srv::Trigger::Response> response);
-  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr unpause_servo_service_;
-
-  bool is_initialized_;
-};
 }  // namespace moveit_servo

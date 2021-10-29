@@ -45,25 +45,30 @@
 #include <atomic>
 
 // ROS
-#include <rclcpp/rclcpp.hpp>
 #include <control_msgs/msg/joint_jog.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit_msgs/srv/change_drift_dimensions.hpp>
 #include <moveit_msgs/srv/change_control_dimensions.hpp>
+#include <pluginlib/class_loader.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/float64.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <std_msgs/msg/int8.hpp>
 #include <std_srvs/srv/empty.hpp>
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#endif
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 // moveit_servo
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
-#include <moveit_servo/low_pass_filter.h>
+#include <moveit/online_signal_smoothing/smoothing_base_class.h>
 
 namespace moveit_servo
 {
@@ -127,9 +132,6 @@ protected:
   /** \brief Parse the incoming joint msg for the joints of our MoveGroup */
   void updateJoints();
 
-  /** \brief Finds the worst case stopping time based on accel limits, for collision checking */
-  void calculateWorstCaseStopTime();
-
   /**
    * Checks a JointJog msg for valid (non-NaN) velocities
    * @param cmd the desired joint servo command
@@ -154,15 +156,15 @@ protected:
    */
   Eigen::VectorXd scaleJointCommand(const control_msgs::msg::JointJog& command);
 
+  /** \brief Come to a halt in a smooth way. Apply a smoothing plugin, if one is configured.
+   */
+  void filteredHalt(trajectory_msgs::msg::JointTrajectory& joint_trajectory);
+
   /** \brief Suddenly halt for a joint limit or other critical issue.
    * Is handled differently for position vs. velocity control.
    */
-  void suddenHalt(trajectory_msgs::msg::JointTrajectory& joint_trajectory) const;
   void suddenHalt(sensor_msgs::msg::JointState& joint_state,
                   const std::vector<const moveit::core::JointModel*>& joints_to_halt) const;
-
-  /** \brief  Scale the delta theta to match joint velocity/acceleration limits */
-  void enforceVelLimits(Eigen::ArrayXd& delta_theta);
 
   /** \brief Avoid overshooting joint limits
       \return Vector of the joints that would move farther past position margin limits
@@ -193,7 +195,7 @@ protected:
                            const ServoType servo_type);
 
   /** \brief Joint-wise update of a sensor_msgs::msg::JointState with given delta's
-   * Also calculates the previous velocity
+   * Also filters and calculates the previous velocity
    * @param delta_theta Eigen vector of joint delta's
    * @param joint_state The joint state msg being updated
    * @param previous_vel Eigen vector of previous velocities being updated
@@ -298,7 +300,8 @@ protected:
   sensor_msgs::msg::JointState internal_joint_state_, original_joint_state_;
   std::map<std::string, std::size_t> joint_state_name_map_;
 
-  std::vector<LowPassFilter> position_filters_;
+  // Smoothing algorithm (loads a plugin)
+  std::shared_ptr<online_signal_smoothing::SmoothingBaseClass> smoother_;
 
   trajectory_msgs::msg::JointTrajectory::SharedPtr last_sent_command_;
 
@@ -311,6 +314,7 @@ protected:
   rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr worst_case_stop_time_pub_;
   rclcpp::Publisher<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_outgoing_cmd_pub_;
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr multiarray_outgoing_cmd_pub_;
+  rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr condition_pub_;
   rclcpp::Service<moveit_msgs::srv::ChangeControlDimensions>::SharedPtr control_dimensions_server_;
   rclcpp::Service<moveit_msgs::srv::ChangeDriftDimensions>::SharedPtr drift_dimensions_server_;
   rclcpp::Service<std_srvs::srv::Empty>::SharedPtr reset_servo_status_;
@@ -318,6 +322,7 @@ protected:
   // Main tracking / result publisher loop
   std::thread thread_;
   bool stop_requested_;
+  std::atomic<bool> done_stopping_;
 
   // Status
   StatusCode status_ = StatusCode::NO_WARNING;
@@ -333,7 +338,7 @@ protected:
 
   const int gazebo_redundant_message_count_ = 30;
 
-  uint num_joints_;
+  unsigned int num_joints_;
 
   // True -> allow drift in this dimension. In the command frame. [x, y, z, roll, pitch, yaw]
   std::array<bool, 6> drift_dimensions_ = { { false, false, false, false, false, false } };
@@ -349,8 +354,8 @@ protected:
   control_msgs::msg::JointJog::ConstSharedPtr latest_joint_cmd_;
   rclcpp::Time latest_twist_command_stamp_ = rclcpp::Time(0., RCL_ROS_TIME);
   rclcpp::Time latest_joint_command_stamp_ = rclcpp::Time(0., RCL_ROS_TIME);
-  bool latest_nonzero_twist_stamped_ = false;
-  bool latest_nonzero_joint_cmd_ = false;
+  bool latest_twist_cmd_is_nonzero_ = false;
+  bool latest_joint_cmd_is_nonzero_ = false;
 
   // input condition variable used for low latency mode
   std::condition_variable input_cv_;
@@ -360,6 +365,7 @@ protected:
   std::string robot_link_command_frame_;
   rcl_interfaces::msg::SetParametersResult robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter);
 
-  friend class ServoFixture;
+  // Load a smoothing plugin
+  pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader_;
 };
 }  // namespace moveit_servo

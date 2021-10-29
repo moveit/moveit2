@@ -1,101 +1,95 @@
-cmake_minimum_required(VERSION 3.1.3)
+cmake_minimum_required(VERSION 3.10.2)
 project(moveit_ros_control_interface)
 
-if(NOT "${CMAKE_CXX_STANDARD}")
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+find_package(ament_cmake REQUIRED)
 
-find_package(catkin REQUIRED COMPONENTS
-  actionlib
-  controller_manager_msgs
-  moveit_core
-  moveit_simple_controller_manager
-  pluginlib
-  trajectory_msgs
-)
-## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED COMPONENTS system thread)
-
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES
-    ${PROJECT_NAME}_plugin
-    ${PROJECT_NAME}_trajectory_plugin
-  CATKIN_DEPENDS
-    actionlib
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+    rclcpp_action
     controller_manager_msgs
     moveit_core
+    moveit_simple_controller_manager
+    pluginlib
     trajectory_msgs
-  DEPENDS Boost
 )
 
-include_directories(include)
-include_directories(SYSTEM ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+foreach(dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  find_package(${dependency} REQUIRED)
+endforeach()
 
-add_library(${PROJECT_NAME}_plugin
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
+
+# Finds Boost Components
+include(ConfigExtras.cmake)
+
+add_library(${PROJECT_NAME}_plugin SHARED
   src/controller_manager_plugin.cpp
 )
 set_target_properties(${PROJECT_NAME}_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${PROJECT_NAME}_plugin
-  ${catkin_LIBRARIES} ${Boost_LIBRARIES}
+target_include_directories(${PROJECT_NAME}_plugin PRIVATE include)
+ament_target_dependencies(${PROJECT_NAME}_plugin
+    ${THIS_PACKAGE_INCLUDE_DEPENDS}
+    Boost
 )
 
-add_library(${PROJECT_NAME}_trajectory_plugin
+add_library(${PROJECT_NAME}_trajectory_plugin SHARED
   src/joint_trajectory_controller_plugin.cpp
 )
 set_target_properties(${PROJECT_NAME}_trajectory_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${PROJECT_NAME}_trajectory_plugin
-  ${catkin_LIBRARIES} ${Boost_LIBRARIES}
+target_include_directories(${PROJECT_NAME}_trajectory_plugin PRIVATE include)
+ament_target_dependencies(${PROJECT_NAME}_trajectory_plugin
+    ${THIS_PACKAGE_INCLUDE_DEPENDS}
+    Boost
 )
 
+add_library(${PROJECT_NAME}_gripper_plugin SHARED
+  src/gripper_controller_plugin.cpp
+)
+set_target_properties(${PROJECT_NAME}_gripper_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+target_include_directories(${PROJECT_NAME}_gripper_plugin PRIVATE include)
+ament_target_dependencies(${PROJECT_NAME}_gripper_plugin
+    ${THIS_PACKAGE_INCLUDE_DEPENDS}
+    Boost
+)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+
+  # These don't pass yet, disable them for now
+  set(ament_cmake_copyright_FOUND TRUE)
+  set(ament_cmake_cppcheck_FOUND TRUE)
+  set(ament_cmake_cpplint_FOUND TRUE)
+  set(ament_cmake_uncrustify_FOUND TRUE)
+
+  # Run all lint tests in package.xml except those listed above
+  ament_lint_auto_find_test_dependencies()
+endif()
 
 #############
 ## Install ##
 #############
 
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
-
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
-#   scripts/my_python_script
-#   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
 ## Mark executables and/or libraries for installation
-install(TARGETS ${PROJECT_NAME}_plugin ${PROJECT_NAME}_trajectory_plugin
-ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+install(TARGETS ${PROJECT_NAME}_plugin ${PROJECT_NAME}_trajectory_plugin ${PROJECT_NAME}_gripper_plugin
+EXPORT export_${PROJECT_NAME}
+ARCHIVE DESTINATION lib
+LIBRARY DESTINATION lib
+RUNTIME DESTINATION bin
 )
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-)
-install(FILES moveit_core_plugins.xml moveit_ros_control_interface_plugins.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  DESTINATION include
 )
 
-## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+pluginlib_export_plugin_description_file(moveit_core moveit_core_plugins.xml)
+pluginlib_export_plugin_description_file(moveit_ros_control_interface moveit_ros_control_interface_plugins.xml)
 
-#############
-## Testing ##
-#############
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(
+    ${THIS_PACKAGE_INCLUDE_DEPENDS}
+    Boost
+)
 
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_canopen_master.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
-
-## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)
+ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

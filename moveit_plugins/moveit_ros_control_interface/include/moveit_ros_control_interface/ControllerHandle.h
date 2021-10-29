@@ -41,7 +41,7 @@
 
 namespace moveit_ros_control_interface
 {
-MOVEIT_CLASS_FORWARD(ControllerHandleAllocator)  // Defines ControllerHandleAllocatorPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(ControllerHandleAllocator);  // Defines ControllerHandleAllocatorPtr, ConstPtr, WeakPtr... etc
 
 /**
  * Base class for MoveItControllerHandle allocators
@@ -49,8 +49,8 @@ MOVEIT_CLASS_FORWARD(ControllerHandleAllocator)  // Defines ControllerHandleAllo
 class ControllerHandleAllocator
 {
 public:
-  virtual moveit_controller_manager::MoveItControllerHandlePtr alloc(const std::string& name,
-                                                                     const std::vector<std::string>& resources) = 0;
+  virtual moveit_controller_manager::MoveItControllerHandlePtr
+  alloc(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::vector<std::string>& resources) = 0;
   virtual ~ControllerHandleAllocator()
   {
   }

@@ -37,11 +37,12 @@
 #pragma once
 
 #include <moveit/macros/class_forward.h>
-#include <moveit/planning_scene/planning_scene.h>                     // for getting kinematic model
-#include <moveit/setup_assistant/tools/compute_default_collisions.h>  // for LinkPairMap
-#include <yaml-cpp/yaml.h>                                            // outputing yaml config files
-#include <urdf/model.h>                                               // to share throughout app
-#include <srdfdom/srdf_writer.h>                                      // for writing srdf data
+#include <moveit/planning_scene/planning_scene.h>                       // for getting kinematic model
+#include <moveit/setup_assistant/tools/compute_default_collisions.hpp>  // for LinkPairMap
+#include <yaml-cpp/yaml.h>                                              // outputting yaml config files
+#include <urdf/model.h>                                                 // to share throughout app
+#include <srdfdom/srdf_writer.h>                                        // for writing srdf data
+#include <rclcpp/rclcpp.hpp>
 
 #include <utility>
 
@@ -58,6 +59,9 @@ static const std::string MOVEIT_ROBOT_STATE = "moveit_robot_state";
 // Default kin solver values
 static const double DEFAULT_KIN_SOLVER_SEARCH_RESOLUTION = 0.005;
 static const double DEFAULT_KIN_SOLVER_TIMEOUT = 0.005;
+
+// Used for logging
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_updater");
 
 // ******************************************************************************************
 // Structs
@@ -174,7 +178,7 @@ private:
   std::string comment_;  // comment briefly describing what this parameter does
 };
 
-MOVEIT_CLASS_FORWARD(MoveItConfigData)  // Defines MoveItConfigDataPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(MoveItConfigData);  // Defines MoveItConfigDataPtr, ConstPtr, WeakPtr... etc
 
 /** \brief This class is shared with all widgets and contains the common configuration data
     needed for generating each robot's MoveIt configuration package.

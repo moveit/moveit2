@@ -85,7 +85,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
 
   // add more tabs
   joints_tab_ = new MotionPlanningFrameJointsWidget(planning_display_, ui_->tabWidget);
-  ui_->tabWidget->addTab(joints_tab_, "Joints");
+  ui_->tabWidget->insertTab(2, joints_tab_, "Joints");
   connect(planning_display_, SIGNAL(queryStartStateChanged()), joints_tab_, SLOT(queryStartStateChanged()));
   connect(planning_display_, SIGNAL(queryGoalStateChanged()), joints_tab_, SLOT(queryGoalStateChanged()));
 
@@ -381,7 +381,8 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       return;
     RCLCPP_INFO(LOGGER, "Constructing new MoveGroup connection for group '%s' in namespace '%s'", group.c_str(),
                 planning_display_->getMoveGroupNS().c_str());
-    moveit::planning_interface::MoveGroupInterface::Options opt(group);
+    moveit::planning_interface::MoveGroupInterface::Options opt(
+        group, moveit::planning_interface::MoveGroupInterface::ROBOT_DESCRIPTION, planning_display_->getMoveGroupNS());
     opt.robot_model_ = robot_model;
     opt.robot_description_.clear();
     try
@@ -393,7 +394,8 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       // /std::shared_ptr<tf2_ros::Buffer> tf_buffer = context_->getFrameManager()->getTF2BufferPtr();
       std::shared_ptr<tf2_ros::Buffer> tf_buffer = moveit::planning_interface::getSharedTF();
 #endif
-      move_group_.reset(new moveit::planning_interface::MoveGroupInterface(node_, opt, tf_buffer, rclcpp::Duration(30)));
+      move_group_ = std::make_shared<moveit::planning_interface::MoveGroupInterface>(
+          node_, opt, tf_buffer, rclcpp::Duration::from_seconds(30));
       if (planning_scene_storage_)
         move_group_->setConstraintsDatabase(ui_->database_host->text().toStdString(), ui_->database_port->value());
     }

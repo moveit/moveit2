@@ -37,12 +37,15 @@
 #pragma once
 
 #include <octomap/octomap.h>
+
 #include <boost/thread/locks.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/function.hpp>
-#include <memory>
 
-namespace occupancy_map_monitor
+#include <memory>
+#include <string>
+
+namespace collision_detection
 {
 typedef octomap::OcTreeNode OccMapNode;
 
@@ -115,4 +118,4 @@ private:
 
 using OccMapTreePtr = std::shared_ptr<OccMapTree>;
 using OccMapTreeConstPtr = std::shared_ptr<const OccMapTree>;
-}  // namespace occupancy_map_monitor
+}  // namespace collision_detection

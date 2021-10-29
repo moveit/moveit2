@@ -35,8 +35,6 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/common_planning_interface_objects/common_objects.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <tf2_ros/transform_listener.h>
 
 using namespace planning_scene_monitor;
 using namespace robot_model_loader;
@@ -54,12 +52,14 @@ struct SharedStorage
     tf_buffer_.reset();
     state_monitors_.clear();
     models_.clear();
+    robot_model_loaders_.clear();
   }
 
-  boost::mutex lock_;
+  std::recursive_mutex lock_;
   std::weak_ptr<tf2_ros::Buffer> tf_buffer_;
   std::map<std::string, moveit::core::RobotModelWeakPtr> models_;
   std::map<std::string, CurrentStateMonitorWeakPtr> state_monitors_;
+  std::map<std::string, RobotModelLoaderWeakPtr> robot_model_loaders_;
 };
 
 SharedStorage& getSharedStorage()
@@ -74,22 +74,6 @@ SharedStorage& getSharedStorage()
   return *storage;
 #endif
 }
-
-// Deleter that, additionally to T*, deletes another object too
-template <typename T, typename O>
-struct CoupledDeleter
-{
-  const O* other_;
-  CoupledDeleter(const O* other = nullptr) : other_(other)
-  {
-  }
-
-  void operator()(const T* p)
-  {
-    delete other_;
-    delete p;
-  }
-};
 }  // namespace
 
 namespace moveit
@@ -99,32 +83,45 @@ namespace planning_interface
 std::shared_ptr<tf2_ros::Buffer> getSharedTF()
 {
   SharedStorage& s = getSharedStorage();
-  boost::mutex::scoped_lock slock(s.lock_);
+  std::scoped_lock slock(s.lock_);
 
-  typedef CoupledDeleter<tf2_ros::Buffer, tf2_ros::TransformListener> Deleter;
   std::shared_ptr<tf2_ros::Buffer> buffer = s.tf_buffer_.lock();
   if (!buffer)
   {
-    tf2_ros::Buffer* raw = new tf2_ros::Buffer(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME));
-    // assign custom deleter to also delete associated TransformListener
-    buffer.reset(raw, Deleter(new tf2_ros::TransformListener(*raw)));
+    buffer = std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME));
     s.tf_buffer_ = buffer;
   }
   return buffer;
+}
+
+robot_model_loader::RobotModelLoaderPtr getSharedRobotModelLoader(const rclcpp::Node::SharedPtr& node,
+                                                                  const std::string& robot_description)
+{
+  SharedStorage& s = getSharedStorage();
+  std::scoped_lock slock(s.lock_);
+  auto it = s.robot_model_loaders_
+                .insert(std::make_pair(node->get_fully_qualified_name() + robot_description,
+                                       robot_model_loader::RobotModelLoaderWeakPtr()))
+                .first;
+  auto rml = it->second.lock();
+  if (!rml)
+  {
+    rml = std::make_shared<RobotModelLoader>(node, robot_description);
+    it->second = rml;
+  }
+  return rml;
 }
 
 moveit::core::RobotModelConstPtr getSharedRobotModel(const rclcpp::Node::SharedPtr& node,
                                                      const std::string& robot_description)
 {
   SharedStorage& s = getSharedStorage();
-  boost::mutex::scoped_lock slock(s.lock_);
+  std::scoped_lock slock(s.lock_);
   auto it = s.models_.insert(std::make_pair(robot_description, moveit::core::RobotModelWeakPtr())).first;
   moveit::core::RobotModelPtr model = it->second.lock();
   if (!model)
   {
-    RobotModelLoader::Options opt(robot_description);
-    opt.load_kinematics_solvers_ = true;
-    RobotModelLoaderPtr loader(new RobotModelLoader(node, opt));
+    RobotModelLoaderPtr loader = getSharedRobotModelLoader(node, robot_description);
     // create an aliasing shared_ptr
     model = moveit::core::RobotModelPtr(loader, loader->getModel().get());
     it->second = model;
@@ -137,7 +134,7 @@ CurrentStateMonitorPtr getSharedStateMonitor(const rclcpp::Node::SharedPtr& node
                                              const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
 {
   SharedStorage& s = getSharedStorage();
-  boost::mutex::scoped_lock slock(s.lock_);
+  std::scoped_lock slock(s.lock_);
   auto it = s.state_monitors_.insert(std::make_pair(robot_model->getName(), CurrentStateMonitorWeakPtr())).first;
   CurrentStateMonitorPtr monitor = it->second.lock();
   if (!monitor)

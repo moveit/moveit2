@@ -36,30 +36,127 @@
 
 #pragma once
 
-#include <tf2_ros/buffer.h>
-#include <moveit/robot_state/robot_state.h>
-#include <sensor_msgs/msg/joint_state.hpp>
-#include <boost/function.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition_variable.hpp>
+#include <chrono>
+#include <functional>
+#include <string>
+
 #include <boost/signals2.hpp>
+#include <boost/thread/condition_variable.hpp>
+#include <boost/thread/mutex.hpp>
+
 #include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <tf2_msgs/msg/tf_message.hpp>
+
+#include <tf2_ros/buffer.h>
+
+#include <moveit/robot_state/robot_state.h>
 
 namespace planning_scene_monitor
 {
-using JointStateUpdateCallback = boost::function<void(const sensor_msgs::msg::JointState::ConstSharedPtr&)>;
+using JointStateUpdateCallback = std::function<void(sensor_msgs::msg::JointState::ConstSharedPtr)>;
 
 /** @class CurrentStateMonitor
     @brief Monitors the joint_states topic and tf to maintain the current state of the robot. */
 class CurrentStateMonitor
 {
-  using TFConnection = boost::signals2::connection;
-
 public:
+  /**
+   * @brief      Dependency injection class for testing the CurrentStateMonitor
+   */
+  class MiddlewareHandle
+  {
+  public:
+    using TfCallback = std::function<void(const tf2_msgs::msg::TFMessage::ConstSharedPtr)>;
+
+    /**
+     * @brief      Destroys the object.
+     */
+    virtual ~MiddlewareHandle() = default;
+
+    /**
+     * @brief      Get the current time
+     *
+     * @return     Time object representing the time when this is called
+     */
+    virtual rclcpp::Time now() const = 0;
+
+    /**
+     * @brief      Creates a joint state subscription
+     *
+     * @param[in]  topic     The topic
+     * @param[in]  callback  The callback
+     */
+    virtual void createJointStateSubscription(const std::string& topic, JointStateUpdateCallback callback) = 0;
+
+    /**
+     * @brief      Creates a static transform message subscription
+     *
+     * @param[in]  callback  The callback
+     */
+    virtual void createStaticTfSubscription(TfCallback callback) = 0;
+
+    /**
+     * @brief      Creates a dynamic transform message subscription
+     *
+     * @param[in]  callback  The callback
+     */
+    virtual void createDynamicTfSubscription(TfCallback callback) = 0;
+
+    /**
+     * @brief      Reset the joint state subscription
+     */
+    virtual void resetJointStateSubscription() = 0;
+
+    /**
+     * @brief      Get the joint state topic name
+     *
+     * @return     The joint state topic name.
+     */
+    virtual std::string getJointStateTopicName() const = 0;
+
+    /**
+     * @brief      Block for the specified amount of time.
+     *
+     * @param[in]  nanoseconds  The nanoseconds to sleep
+     *
+     * @return     True if sleep happened as expected.
+     */
+    virtual bool sleepFor(const std::chrono::nanoseconds& nanoseconds) const = 0;
+
+    /**
+     * @brief      Get the static transform topic name
+     *
+     * @return     The static transform topic name.
+     */
+    virtual std::string getStaticTfTopicName() const = 0;
+
+    /**
+     * @brief      Get the dynamic transform topic name
+     *
+     * @return     The dynamic transform topic name.
+     */
+    virtual std::string getDynamicTfTopicName() const = 0;
+
+    /**
+     * @brief      Reset the static & dynamic transform subscriptions
+     */
+    virtual void resetTfSubscriptions() = 0;
+  };
+
   /** @brief Constructor.
-   *  @param node A shared_ptr to a node used for subscription to joint_states_topic
-   *  @param robot_model The current kinematic model to build on
-   *  @param tf_buffer A pointer to the tf2_ros Buffer to use
+   *  @param middleware_handle   The ros middleware handle
+   *  @param robot_model         The current kinematic model to build on
+   *  @param tf_buffer           A pointer to the tf2_ros Buffer to use
+   */
+  CurrentStateMonitor(std::unique_ptr<MiddlewareHandle> middleware_handle,
+                      const moveit::core::RobotModelConstPtr& robot_model,
+                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
+
+  /** @brief Constructor.
+   *  @param node          A shared_ptr to a node used for subscription to joint_states_topic
+   *  @param robot_model   The current kinematic model to build on
+   *  @param tf_buffer     A pointer to the tf2_ros Buffer to use
    */
   CurrentStateMonitor(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                       const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
@@ -111,7 +208,7 @@ public:
    */
   inline bool haveCompleteState(const rclcpp::Duration& age) const
   {
-    return haveCompleteStateHelper(node_->now() - age, nullptr);
+    return haveCompleteStateHelper(middleware_handle_->now() - age, nullptr);
   }
 
   /** @brief Query whether we have joint state information for all DOFs in the kinematic model
@@ -140,7 +237,7 @@ public:
    */
   inline bool haveCompleteState(const rclcpp::Duration& age, std::vector<std::string>& missing_joints) const
   {
-    return haveCompleteStateHelper(node_->now() - age, &missing_joints);
+    return haveCompleteStateHelper(middleware_handle_->now() - age, &missing_joints);
   }
 
   /** @brief Get the current state
@@ -161,18 +258,18 @@ public:
    *  @return Returns the map from joint names to joint state values*/
   std::map<std::string, double> getCurrentStateValues() const;
 
-  /** @brief Wait for at most \e wait_time seconds (default 1s) for a robot state more recent than t
-   *  @return true on success, false if up-to-date robot state wasn't received within \e wait_time
+  /** @brief Wait for at most \e wait_time_s seconds (default 1s) for a robot state more recent than t
+   *  @return true on success, false if up-to-date robot state wasn't received within \e wait_time_s
    */
-  bool waitForCurrentState(const rclcpp::Time& t = rclcpp::Clock(RCL_ROS_TIME).now(), double wait_time = 1.0) const;
+  bool waitForCurrentState(const rclcpp::Time& t = rclcpp::Clock(RCL_ROS_TIME).now(), double wait_time_s = 1.0) const;
 
-  /** @brief Wait for at most \e wait_time seconds until the complete robot state is known.
+  /** @brief Wait for at most \e wait_time_s seconds until the complete robot state is known.
       @return true if the full state is known */
-  bool waitForCompleteState(double wait_time) const;
+  bool waitForCompleteState(double wait_time_s) const;
 
-  /** @brief Wait for at most \e wait_time seconds until the joint values from the group \e group are known. Return true
-   * if values for all joints in \e group are known */
-  bool waitForCompleteState(const std::string& group, double wait_time) const;
+  /** @brief Wait for at most \e wait_time_s seconds until the joint values from the group \e group are known. Return
+   * true if values for all joints in \e group are known */
+  bool waitForCompleteState(const std::string& group, double wait_time_s) const;
 
   /** @brief Get the time point when the monitor was started */
   const rclcpp::Time& getMonitorStartTime() const
@@ -216,10 +313,11 @@ private:
   bool haveCompleteStateHelper(const rclcpp::Time& oldest_allowed_update_time,
                                std::vector<std::string>* missing_joints) const;
 
-  void jointStateCallback(const sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
-  void tfCallback();
+  void jointStateCallback(sensor_msgs::msg::JointState::ConstSharedPtr joint_state);
+  void updateMultiDofJoints();
+  void transformCallback(const tf2_msgs::msg::TFMessage::ConstSharedPtr msg, const bool is_static);
 
-  std::shared_ptr<rclcpp::Node> node_;
+  std::unique_ptr<MiddlewareHandle> middleware_handle_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   moveit::core::RobotModelConstPtr robot_model_;
   moveit::core::RobotState robot_state_;
@@ -228,14 +326,11 @@ private:
   bool copy_dynamics_;  // Copy velocity and effort from joint_state
   rclcpp::Time monitor_start_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
   double error_;
-  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
   rclcpp::Time current_state_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
   mutable std::mutex state_update_lock_;
   mutable std::condition_variable state_update_condition_;
   std::vector<JointStateUpdateCallback> update_callbacks_;
-
-  std::shared_ptr<TFConnection> tf_connection_;
 };
 
 MOVEIT_CLASS_FORWARD(CurrentStateMonitor);  // Defines CurrentStateMonitorPtr, ConstPtr, WeakPtr... etc

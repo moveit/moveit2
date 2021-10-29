@@ -46,10 +46,14 @@
 
 namespace trajectory_processing
 {
+namespace
+{
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit_trajectory_processing.time_optimal_trajectory_generation");
+constexpr double DEFAULT_TIMESTEP = 1e-3;
+constexpr double EPS = 1e-6;
+}  // namespace
 
-constexpr double EPS = 0.000001;
 class LinearPathSegment : public PathSegment
 {
 public:
@@ -464,14 +468,11 @@ bool Trajectory::getNextAccelerationSwitchingPoint(double path_pos, TrajectorySt
 bool Trajectory::getNextVelocitySwitchingPoint(double path_pos, TrajectoryStep& next_switching_point,
                                                double& before_acceleration, double& after_acceleration)
 {
-  const double step_size = 0.001;
-  const double accuracy = 0.000001;
-
   bool start = false;
-  path_pos -= step_size;
+  path_pos -= DEFAULT_TIMESTEP;
   do
   {
-    path_pos += step_size;
+    path_pos += DEFAULT_TIMESTEP;
 
     if (getMinMaxPhaseSlope(path_pos, getVelocityMaxPathVelocity(path_pos), false) >=
         getVelocityMaxPathVelocityDeriv(path_pos))
@@ -487,9 +488,9 @@ bool Trajectory::getNextVelocitySwitchingPoint(double path_pos, TrajectoryStep& 
     return true;  // end of trajectory reached
   }
 
-  double before_path_pos = path_pos - step_size;
+  double before_path_pos = path_pos - DEFAULT_TIMESTEP;
   double after_path_pos = path_pos;
-  while (after_path_pos - before_path_pos > accuracy)
+  while (after_path_pos - before_path_pos > EPS)
   {
     path_pos = (before_path_pos + after_path_pos) / 2.0;
     if (getMinMaxPhaseSlope(path_pos, getVelocityMaxPathVelocity(path_pos), false) >
@@ -984,7 +985,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   }
 
   // Now actually call the algorithm
-  Trajectory parameterized(Path(points, path_tolerance_), max_velocity, max_acceleration, 0.001);
+  Trajectory parameterized(Path(points, path_tolerance_), max_velocity, max_acceleration, DEFAULT_TIMESTEP);
   if (!parameterized.isValid())
   {
     RCLCPP_ERROR(LOGGER, "Unable to parameterize trajectory.");

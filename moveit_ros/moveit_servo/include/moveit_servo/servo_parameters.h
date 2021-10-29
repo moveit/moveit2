@@ -38,22 +38,15 @@
 
 #pragma once
 
-#include <thread>
 #include <mutex>
+#include <thread>
 #include <vector>
+
 #include <rclcpp/rclcpp.hpp>
 
 namespace moveit_servo
 {
-// Size of queues used in ros pub/sub/service
-constexpr size_t ROS_QUEUE_SIZE = 2;
-
 using SetParameterCallbackType = std::function<rcl_interfaces::msg::SetParametersResult(const rclcpp::Parameter&)>;
-
-// Helper template for declaring and getting ros param
-template <typename T>
-void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
-                       const rclcpp::Logger& logger, const T default_value = T{});
 
 // ROS params to be read. See the yaml file in /config for a description of each.
 struct ServoParameters
@@ -83,9 +76,9 @@ struct ServoParameters
   bool publish_joint_positions;
   bool publish_joint_velocities;
   bool publish_joint_accelerations;
-  // Incoming Joint State properties
+  // Plugins for smoothing outgoing commands
   std::string joint_topic;
-  double low_pass_filter_coeff;
+  std::string smoothing_filter_plugin_name;
   // MoveIt properties
   std::string move_group_name;
   std::string planning_frame;
@@ -103,11 +96,8 @@ struct ServoParameters
   // Collision checking
   bool check_collisions;
   double collision_check_rate;
-  std::string collision_check_type;
   double self_collision_proximity_threshold;
   double scene_collision_proximity_threshold;
-  double collision_distance_safety_factor;
-  double min_allowable_collision_distance;
 
   /**
    * Declares, reads, and validates parameters used for moveit_servo
@@ -154,5 +144,33 @@ private:
   // For registering with add_on_set_parameters_callback after initializing data
   rcl_interfaces::msg::SetParametersResult setParametersCallback(std::vector<rclcpp::Parameter> parameters);
 };
+
+// Helper template for declaring and getting ros param
+// Must be declared here to ensure template class is built for required templates when included.
+// (The CPP file can't just be included because not everything there is templated, so you'd get duplicate symbols)
+template <typename T>
+void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
+                       const rclcpp::Logger& logger, const T default_value = T{})
+{
+  try
+  {
+    if (node->has_parameter(param_name))
+    {
+      node->get_parameter<T>(param_name, output_value);
+    }
+    else
+    {
+      output_value = node->declare_parameter<T>(param_name, default_value);
+    }
+  }
+  catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
+  {
+    RCLCPP_WARN_STREAM(logger, "InvalidParameterTypeException(" << param_name << "): " << e.what());
+    RCLCPP_ERROR_STREAM(logger, "Error getting parameter \'" << param_name << "\', check parameter type in YAML file");
+    throw e;
+  }
+
+  RCLCPP_INFO_STREAM(logger, "Found parameter - " << param_name << ": " << output_value);
+}
 
 }  // namespace moveit_servo

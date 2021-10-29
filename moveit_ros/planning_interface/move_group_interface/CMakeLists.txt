@@ -1,6 +1,9 @@
 set(MOVEIT_LIB_NAME moveit_move_group_interface)
 
 add_library(${MOVEIT_LIB_NAME} SHARED src/move_group_interface.cpp)
+include(GenerateExportHeader)
+generate_export_header(${MOVEIT_LIB_NAME})
+target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(${MOVEIT_LIB_NAME} moveit_common_planning_interface_objects moveit_planning_scene_interface ${Boost_THREAD_LIBRARY})
 ament_target_dependencies(${MOVEIT_LIB_NAME}
@@ -24,6 +27,7 @@ if(WIN32)
 endif()
 
 install(DIRECTORY include/ DESTINATION include)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATION include)
 
 #add_executable(demo src/demo.cpp)
 #target_link_libraries(demo ${MOVEIT_LIB_NAME} ${LIBS} ${Boost_LIBRARIES})

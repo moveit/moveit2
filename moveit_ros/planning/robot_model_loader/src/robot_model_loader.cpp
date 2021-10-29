@@ -131,13 +131,13 @@ void RobotModelLoader::configure(const Options& opt)
         std::string param_name;
         try
         {
-          const auto max_pos_name = prefix + "max_position";
-          if (!node_->has_parameter(max_pos_name))
+          param_name = prefix + "max_position";
+          if (!node_->has_parameter(param_name))
           {
-            node_->declare_parameter(max_pos_name);
+            node_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_DOUBLE);
           }
           double max_position;
-          if (node_->get_parameter(max_pos_name, max_position))
+          if (node_->get_parameter(param_name, max_position))
           {
             if (canSpecifyPosition(joint_model, joint_id))
             {
@@ -146,13 +146,13 @@ void RobotModelLoader::configure(const Options& opt)
             }
           }
 
-          const auto min_pos_name = prefix + "min_position";
-          if (!node_->has_parameter(min_pos_name))
+          param_name = prefix + "min_position";
+          if (!node_->has_parameter(param_name))
           {
-            node_->declare_parameter(min_pos_name);
+            node_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_DOUBLE);
           }
           double min_position;
-          if (node_->get_parameter(min_pos_name, min_position))
+          if (node_->get_parameter(param_name, min_position))
           {
             if (canSpecifyPosition(joint_model, joint_id))
             {
@@ -165,7 +165,7 @@ void RobotModelLoader::configure(const Options& opt)
           param_name = prefix + "has_velocity_limits";
           if (!node_->has_parameter(param_name))
           {
-            node_->declare_parameter(param_name);
+            node_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_BOOL);
           }
           bool has_vel_limits = false;
           if (node_->get_parameter(param_name, has_vel_limits))
@@ -174,7 +174,7 @@ void RobotModelLoader::configure(const Options& opt)
           param_name = prefix + "has_acceleration_limits";
           if (!node_->has_parameter(param_name))
           {
-            node_->declare_parameter(param_name);
+            node_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_BOOL);
           }
           bool has_acc_limits = false;
           if (node_->get_parameter(param_name, has_acc_limits))
@@ -185,7 +185,7 @@ void RobotModelLoader::configure(const Options& opt)
             param_name = prefix + "max_velocity";
             if (!node_->has_parameter(param_name))
             {
-              node_->declare_parameter(param_name);
+              node_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_DOUBLE);
             }
 
             if (!node_->get_parameter(param_name, joint_limit[joint_id].max_velocity))
@@ -200,7 +200,7 @@ void RobotModelLoader::configure(const Options& opt)
             param_name = prefix + "max_acceleration";
             if (!node_->has_parameter(param_name))
             {
-              node_->declare_parameter(param_name);
+              node_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_DOUBLE);
             }
 
             if (!node_->get_parameter(param_name, joint_limit[joint_id].max_acceleration))
@@ -212,7 +212,7 @@ void RobotModelLoader::configure(const Options& opt)
         }
         catch (const rclcpp::ParameterTypeException& e)
         {
-          RCLCPP_ERROR(LOGGER, "When getting the parameter %s: %s", param_name.c_str(), e.what());
+          RCLCPP_ERROR_STREAM(LOGGER, "When getting the parameter " << param_name.c_str() << ": " << e.what());
         }
       }
       joint_model->setVariableBounds(joint_limit);
@@ -222,7 +222,7 @@ void RobotModelLoader::configure(const Options& opt)
   if (model_ && opt.load_kinematics_solvers_)
     loadKinematicsSolvers();
 
-  RCLCPP_DEBUG(node_->get_logger(), "Loaded kinematic model in %d seconds", (clock.now() - start).seconds());
+  RCLCPP_DEBUG(node_->get_logger(), "Loaded kinematic model in %f seconds", (clock.now() - start).seconds());
 }
 
 void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::KinematicsPluginLoaderPtr& kloader)

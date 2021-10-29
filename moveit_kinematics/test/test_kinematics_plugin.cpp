@@ -40,7 +40,11 @@
 #include <boost/bind.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#endif
 
 // MoveIt
 #include <moveit/kinematics_base/kinematics_base.h>
@@ -59,7 +63,6 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_kinematics_plugin"
 const std::string ROBOT_DESCRIPTION_PARAM = "robot_description";
 const double DEFAULT_SEARCH_DISCRETIZATION = 0.01f;
 const double EXPECTED_SUCCESS_RATE = 0.8;
-const double DEFAULT_TOLERANCE = 1e-5;
 static const std::string UNDEFINED = "<undefined>";
 
 // As loading of parameters is quite slow, we share them across all tests
@@ -473,8 +476,8 @@ TEST_F(KinematicsTest, unitIK)
   };
 
   std::vector<double> ground_truth, pose_values;
-  constexpr char POSE_TYPE_RELATIVE[] = "relative";
-  constexpr char POSE_TYPE_ABSOLUTE[] = "absolute";
+  constexpr char pose_type_relative[] = "relative";
+  constexpr char pose_type_absolute[] = "absolute";
 
   /* process tests definitions on parameter server of the form
      pose_1:
@@ -489,8 +492,8 @@ TEST_F(KinematicsTest, unitIK)
   for (size_t i = 0; i < expected_test_poses; ++i)  // NOLINT(modernize-loop-convert)
   {
     const std::string pose_name = "pose_" + std::to_string(i);
-    const std::string pose_param = TEST_POSES_PARAM + "." + pose_name;
-    goal = initial;  // reset goal to initial
+    const std::string pose_param = TEST_POSES_PARAM + "." + pose_name;  // NOLINT
+    goal = initial;                                                     // reset goal to initial
     ground_truth.clear();
 
     node_->get_parameter_or(pose_param + ".joints", ground_truth, ground_truth);
@@ -507,15 +510,15 @@ TEST_F(KinematicsTest, unitIK)
 
     Eigen::Isometry3d pose;
     ASSERT_TRUE(parsePose(pose_values, pose)) << "Failed to parse 'pose' vector in: " << pose_name;
-    std::string pose_type = "POSE_TYPE_RELATIVE";
+    std::string pose_type = "pose_type_relative";
     node_->get_parameter_or(pose_param + ".type", pose_type, pose_type);
-    if (pose_type == POSE_TYPE_RELATIVE)
+    if (pose_type == pose_type_relative)
       goal = goal * pose;
-    else if (pose_type == POSE_TYPE_ABSOLUTE)
+    else if (pose_type == pose_type_absolute)
       goal = pose;
     else
-      FAIL() << "Found invalid 'type' in " << pose_name << ": should be one of '" << POSE_TYPE_RELATIVE << "' or '"
-             << POSE_TYPE_ABSOLUTE << "'";
+      FAIL() << "Found invalid 'type' in " << pose_name << ": should be one of '" << pose_type_relative << "' or '"
+             << pose_type_absolute << "'";
 
     std::string desc;
     {

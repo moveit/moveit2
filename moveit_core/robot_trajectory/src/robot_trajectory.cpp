@@ -36,7 +36,11 @@
 
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/robot_state/conversions.h>
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#endif
 #include <boost/math/constants/constants.hpp>
 #include <numeric>
 #include "rclcpp/rclcpp.hpp"
@@ -266,7 +270,7 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
     trajectory.multi_dof_joint_trajectory.points.resize(waypoints_.size());
   }
 
-  static const rclcpp::Duration ZERO_DURATION(0.0);
+  static const auto ZERO_DURATION = rclcpp::Duration::from_seconds(0);
   double total_time = 0.0;
   for (std::size_t i = 0; i < waypoints_.size(); ++i)
   {
@@ -498,6 +502,83 @@ bool RobotTrajectory::getStateAtDurationFromStart(const double request_duration,
   // after);
   waypoints_[before]->interpolate(*waypoints_[after], blend, *output_state);
   return true;
+}
+
+void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes) const
+{
+  size_t num_points = getWayPointCount();
+  if (num_points == 0)
+  {
+    out << "Empty trajectory.";
+    return;
+  }
+
+  std::ios::fmtflags old_settings = out.flags();
+  int old_precision = out.precision();
+  out << std::fixed << std::setprecision(3);
+
+  out << "Trajectory has " << num_points << " points over " << getDuration() << " seconds\n";
+
+  if (variable_indexes.empty())
+  {
+    if (group_)
+    {
+      variable_indexes = group_->getVariableIndexList();
+    }
+    else
+    {
+      // use all variables
+      variable_indexes.resize(robot_model_->getVariableCount());
+      std::iota(variable_indexes.begin(), variable_indexes.end(), 0);
+    }
+  }
+
+  for (size_t p_i = 0; p_i < num_points; ++p_i)
+  {
+    const moveit::core::RobotState& point = getWayPoint(p_i);
+    out << "  waypoint " << std::setw(3) << p_i;
+    out << " time " << std::setw(5) << getWayPointDurationFromStart(p_i);
+    out << " pos ";
+    for (int index : variable_indexes)
+    {
+      out << std::setw(6) << point.getVariablePosition(index) << " ";
+    }
+    if (point.hasVelocities())
+    {
+      out << "vel ";
+      for (int index : variable_indexes)
+      {
+        out << std::setw(6) << point.getVariableVelocity(index) << " ";
+      }
+    }
+    if (point.hasAccelerations())
+    {
+      out << "acc ";
+      for (int index : variable_indexes)
+      {
+        out << std::setw(6) << point.getVariableAcceleration(index) << " ";
+      }
+    }
+    if (point.hasEffort())
+    {
+      out << "eff ";
+      for (int index : variable_indexes)
+      {
+        out << std::setw(6) << point.getVariableEffort(index) << " ";
+      }
+    }
+    out << "\n";
+  }
+
+  out.flags(old_settings);
+  out.precision(old_precision);
+  out.flush();
+}
+
+std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory)
+{
+  trajectory.print(out);
+  return out;
 }
 
 }  // end of namespace robot_trajectory

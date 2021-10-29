@@ -13,17 +13,17 @@ find_package(Eigen3 REQUIRED)
 # Finds Boost Components
 include(ConfigExtras.cmake)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
-
-find_package(Bullet 2.87 REQUIRED)
-
 find_package(PkgConfig REQUIRED)
-
 pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
-# replace LIBFCL_LIBRARIES with full path to the library
-find_library(LIBFCL_LIBRARIES_FULL ${LIBFCL_LIBRARIES} ${LIBFCL_LIBRARY_DIRS})
+# replace LIBFCL_LIBRARIES with full paths to the libraries
+set(LIBFCL_LIBRARIES_FULL "")
+foreach(LIBFCL_LIBRARY ${LIBFCL_LIBRARIES})
+  find_library(${LIBFCL_LIBRARY}_LIB ${LIBFCL_LIBRARY} ${LIBFCL_LIBRARY_DIRS})
+  list(APPEND LIBFCL_LIBRARIES_FULL ${${LIBFCL_LIBRARY}_LIB})
+endforeach()
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
 
+find_package(Bullet 2.87 REQUIRED)
 find_package(angles REQUIRED)
 find_package(OCTOMAP REQUIRED)
 find_package(urdfdom REQUIRED)
@@ -40,6 +40,7 @@ find_package(kdl_parser REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(octomap_msgs REQUIRED)
 find_package(random_numbers REQUIRED)
+find_package(ruckig REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
 find_package(srdfdom REQUIRED)
@@ -74,6 +75,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     robot_trajectory/include
     kinematic_constraints/include
     macros/include
+    online_signal_smoothing/include
     planning_interface/include
     planning_request_adapter/include
     planning_scene/include
@@ -86,31 +88,33 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 )
 
 set(THIS_PACKAGE_LIBRARIES
-    moveit_exceptions
     moveit_background_processing
-    moveit_kinematics_base
-    moveit_robot_model
-    moveit_transforms
-    moveit_robot_state
-    moveit_robot_trajectory
-    moveit_planning_interface
+    moveit_butterworth_filter
+    moveit_collision_distance_field
     moveit_collision_detection
     moveit_collision_detection_fcl
     moveit_collision_detection_bullet
-    moveit_kinematic_constraints
-    moveit_planning_scene
+    moveit_dynamics_solver
     moveit_constraint_samplers
+    moveit_distance_field
+    moveit_exceptions
+    moveit_kinematics_base
+    moveit_kinematic_constraints
+    moveit_kinematics_metrics
+    moveit_planning_interface
+    moveit_planning_scene
     moveit_planning_request_adapter
     moveit_profiler
     # TODO: Port python bindings
     # moveit_python_tools
-    moveit_trajectory_processing
-    moveit_distance_field
-    moveit_collision_distance_field
-    moveit_kinematics_metrics
-    moveit_dynamics_solver
-    moveit_utils
+    moveit_robot_model
+    moveit_robot_state
+    moveit_robot_trajectory
+    moveit_smoothing_base
     moveit_test_utils
+    moveit_trajectory_processing
+    moveit_transforms
+    moveit_utils
 )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -134,10 +138,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   eigen3_cmake_module
   OCTOMAP
   Bullet
+  ruckig
 )
-
-pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
-pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}
   ${LIBFCL_INCLUDE_DIRS}
@@ -156,35 +158,35 @@ message(STATUS " *** Building MoveIt ${MOVEIT_VERSION} ***")
 configure_file("version/version.h.in" "${VERSION_FILE_PATH}/moveit/version.h")
 install(FILES "${VERSION_FILE_PATH}/moveit/version.h" DESTINATION include/moveit)
 
-add_subdirectory(version)
-add_subdirectory(macros)
-add_subdirectory(backtrace)
-add_subdirectory(exceptions)
-add_subdirectory(profiler)
-add_subdirectory(utils)
 add_subdirectory(background_processing)
-add_subdirectory(robot_model)
-add_subdirectory(collision_detection)
-add_subdirectory(kinematics_base)
-add_subdirectory(transforms)
-add_subdirectory(robot_state)
-add_subdirectory(collision_detection_fcl)
-add_subdirectory(robot_trajectory)
-add_subdirectory(kinematic_constraints)
-add_subdirectory(trajectory_processing)
-add_subdirectory(planning_scene)
-add_subdirectory(controller_manager)
-add_subdirectory(sensor_manager)
+add_subdirectory(backtrace)
+add_subdirectory(collision_distance_field)
 add_subdirectory(constraint_samplers)
+add_subdirectory(controller_manager)
+add_subdirectory(distance_field)
+add_subdirectory(dynamics_solver)
+add_subdirectory(exceptions)
+add_subdirectory(kinematics_base)
+add_subdirectory(kinematic_constraints)
+add_subdirectory(kinematics_metrics)
+add_subdirectory(macros)
+add_subdirectory(online_signal_smoothing)
 add_subdirectory(planning_interface)
 add_subdirectory(planning_request_adapter)
-add_subdirectory(distance_field)
-add_subdirectory(collision_distance_field)
-add_subdirectory(kinematics_metrics)
-add_subdirectory(dynamics_solver)
-add_subdirectory(collision_detection_bullet)
+add_subdirectory(planning_scene)
+add_subdirectory(profiler)
+add_subdirectory(robot_model)
+add_subdirectory(robot_state)
+add_subdirectory(robot_trajectory)
+add_subdirectory(sensor_manager)
+add_subdirectory(trajectory_processing)
+add_subdirectory(transforms)
+add_subdirectory(utils)
+add_subdirectory(version)
 
-pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
+add_subdirectory(collision_detection)
+add_subdirectory(collision_detection_bullet)
+add_subdirectory(collision_detection_fcl)
 
 # TODO: Port python bindings
 # add_subdirectory(python)
@@ -225,6 +227,11 @@ install(
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+# Plugin exports
+pluginlib_export_plugin_description_file(moveit_core collision_detector_fcl_description.xml)
+pluginlib_export_plugin_description_file(moveit_core collision_detector_bullet_description.xml)
+pluginlib_export_plugin_description_file(moveit_core filter_plugin_butterworth.xml)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

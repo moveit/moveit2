@@ -39,7 +39,11 @@
 #include <stdexcept>
 #include <sstream>
 #include <memory>
+#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#else
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#endif
 #include <moveit/warehouse/constraints_storage.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/move_group/capability_names.h>
@@ -57,6 +61,7 @@
 #include <moveit_msgs/srv/grasp_planning.hpp>
 #include <moveit_msgs/srv/get_planner_params.hpp>
 #include <moveit_msgs/srv/set_planner_params.hpp>
+#include <moveit/utils/rclcpp_utils.h>
 // TODO(JafarAbdi): Enable once moveit_ros_manipulation is ported
 // #include <moveit_msgs/msg/place_location.hpp>
 // #include <moveit_msgs/action/pickup.hpp>
@@ -65,7 +70,11 @@
 #include <std_msgs/msg/string.hpp>
 #include <geometry_msgs/msg/transform_stamped.h>
 #include <tf2/utils.h>
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#endif
 #include <tf2_ros/transform_listener.h>
 
 namespace moveit
@@ -135,15 +144,20 @@ public:
     if (joint_model_group_->isChain())
       end_effector_link_ = joint_model_group_->getLinkModelNames().back();
     pose_reference_frame_ = getRobotModel()->getModelFrame();
-
+    // Append the slash between two topic components
     trajectory_event_publisher_ = pnode_->create_publisher<std_msgs::msg::String>(
-        trajectory_execution_manager::TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC, 1);
+        rclcpp::names::append(opt_.move_group_namespace_,
+                              trajectory_execution_manager::TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC),
+        1);
     attached_object_publisher_ = pnode_->create_publisher<moveit_msgs::msg::AttachedCollisionObject>(
-        planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC, 1);
+        rclcpp::names::append(opt_.move_group_namespace_,
+                              planning_scene_monitor::PlanningSceneMonitor::DEFAULT_ATTACHED_COLLISION_OBJECT_TOPIC),
+        1);
 
     current_state_monitor_ = getSharedStateMonitor(node_, robot_model_, tf_buffer_);
 
-    move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(pnode_, move_group::MOVE_ACTION);
+    move_action_client_ = rclcpp_action::create_client<moveit_msgs::action::MoveGroup>(
+        pnode_, rclcpp::names::append(opt_.move_group_namespace_, move_group::MOVE_ACTION));
     move_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
     // TODO(JafarAbdi): Enable once moveit_ros_manipulation is ported
     // pick_action_client_ = rclcpp_action::create_client<moveit_msgs::action::Pickup>(
@@ -153,19 +167,19 @@ public:
     //    place_action_client_ = rclcpp_action::create_client<moveit_msgs::action::Place>(
     //        node_, move_group::PLACE_ACTION);
     //    place_action_client_->wait_for_action_server(std::chrono::nanoseconds(timeout_for_servers.nanoseconds()));
-    execute_action_client_ =
-        rclcpp_action::create_client<moveit_msgs::action::ExecuteTrajectory>(pnode_, move_group::EXECUTE_ACTION_NAME);
+    execute_action_client_ = rclcpp_action::create_client<moveit_msgs::action::ExecuteTrajectory>(
+        pnode_, rclcpp::names::append(opt_.move_group_namespace_, move_group::EXECUTE_ACTION_NAME));
     execute_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
 
-    query_service_ =
-        pnode_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(move_group::QUERY_PLANNERS_SERVICE_NAME);
-    get_params_service_ =
-        pnode_->create_client<moveit_msgs::srv::GetPlannerParams>(move_group::GET_PLANNER_PARAMS_SERVICE_NAME);
-    set_params_service_ =
-        pnode_->create_client<moveit_msgs::srv::SetPlannerParams>(move_group::SET_PLANNER_PARAMS_SERVICE_NAME);
+    query_service_ = pnode_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::QUERY_PLANNERS_SERVICE_NAME));
+    get_params_service_ = pnode_->create_client<moveit_msgs::srv::GetPlannerParams>(
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::GET_PLANNER_PARAMS_SERVICE_NAME));
+    set_params_service_ = pnode_->create_client<moveit_msgs::srv::SetPlannerParams>(
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::SET_PLANNER_PARAMS_SERVICE_NAME));
 
-    cartesian_path_service_ =
-        pnode_->create_client<moveit_msgs::srv::GetCartesianPath>(move_group::CARTESIAN_PATH_SERVICE_NAME);
+    cartesian_path_service_ = pnode_->create_client<moveit_msgs::srv::GetCartesianPath>(
+        rclcpp::names::append(opt_.move_group_namespace_, move_group::CARTESIAN_PATH_SERVICE_NAME));
 
     // plan_grasps_service_ = pnode_->create_client<moveit_msgs::srv::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
 
@@ -206,14 +220,15 @@ public:
   bool getInterfaceDescription(moveit_msgs::msg::PlannerInterfaceDescription& desc)
   {
     auto req = std::make_shared<moveit_msgs::srv::QueryPlannerInterfaces::Request>();
-    auto response = query_service_->async_send_request(req);
+    auto future_response = query_service_->async_send_request(req);
 
     // wait until future is done
-    if (rclcpp::spin_until_future_complete(pnode_, response) == rclcpp::FutureReturnCode::SUCCESS)
+    if (rclcpp::spin_until_future_complete(pnode_, future_response) == rclcpp::FutureReturnCode::SUCCESS)
     {
-      if (!response.get()->planner_interfaces.empty())
+      const auto& response = future_response.get();
+      if (!response->planner_interfaces.empty())
       {
-        desc = response.get()->planner_interfaces.front();
+        desc = response->planner_interfaces.front();
         return true;
       }
     }
@@ -223,12 +238,13 @@ public:
   bool getInterfaceDescriptions(std::vector<moveit_msgs::msg::PlannerInterfaceDescription>& desc)
   {
     auto req = std::make_shared<moveit_msgs::srv::QueryPlannerInterfaces::Request>();
-    auto res = query_service_->async_send_request(req);
-    if (rclcpp::spin_until_future_complete(pnode_, res) == rclcpp::FutureReturnCode::SUCCESS)
+    auto future_response = query_service_->async_send_request(req);
+    if (rclcpp::spin_until_future_complete(pnode_, future_response) == rclcpp::FutureReturnCode::SUCCESS)
     {
-      if (!res.get()->planner_interfaces.empty())
+      const auto& response = future_response.get();
+      if (!response->planner_interfaces.empty())
       {
-        desc = res.get()->planner_interfaces;
+        desc = response->planner_interfaces;
         return true;
       }
     }

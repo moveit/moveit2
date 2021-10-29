@@ -173,7 +173,7 @@ void Profiler::console()
   std::stringstream ss;
   ss << std::endl;
   status(ss, true);
-  RCLCPP_INFO(LOGGER, ss.str().c_str());
+  RCLCPP_INFO(LOGGER, "%s", ss.str().c_str());
 }
 
 /// @cond IGNORE
