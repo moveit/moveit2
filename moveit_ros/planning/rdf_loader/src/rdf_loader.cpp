@@ -65,47 +65,22 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
 
   auto start = node->now();
 
-  // Check if the robot_description parameter is declared, declare it if it's not declared yet
-  if (!node->has_parameter(robot_description))
-    node->declare_parameter(robot_description, rclcpp::ParameterType::PARAMETER_STRING);
-  std::string robot_description_content;
-  node->get_parameter_or(robot_description, robot_description_content, std::string());
-
-  if (robot_description_content.empty())
-  {
-    RCLCPP_INFO_ONCE(LOGGER, "Robot model parameter not found! Did you remap '%s'?\n", robot_description.c_str());
-    return;
-  }
-
-  std::unique_ptr<urdf::Model> urdf(new urdf::Model());
-  if (!urdf->initString(robot_description_content))
-  {
-    RCLCPP_INFO(LOGGER, "Unable to parse URDF from parameter: '%s'", robot_description.c_str());
-    return;
-  }
-  urdf_ = std::move(urdf);
+  std::string description_content = description_loader_.loadInitialValue(
+      node, robot_description, std::bind(&RDFLoader::descriptionUpdateCallback, this, std::placeholders::_1));
 
   const std::string srdf_description = robot_description + "_semantic";
-  // Check if the robot_description_semantic parameter is declared, declare it if it's not declared yet
-  if (!node->has_parameter(srdf_description))
-    node->declare_parameter(srdf_description, rclcpp::ParameterType::PARAMETER_STRING);
-  std::string srdf_description_content;
-  node->get_parameter_or(srdf_description, srdf_description_content, std::string());
+  std::string semantic_content = semantic_loader_.loadInitialValue(
+      node, srdf_description, std::bind(&RDFLoader::semanticUpdateCallback, this, std::placeholders::_1));
 
-  if (srdf_description_content.empty())
+  if (!loadURDFFromString(description_content))
   {
-    RCLCPP_INFO_ONCE(LOGGER, "Robot semantic description not found. Did you forget to define or remap '%s'?\n",
-                     srdf_description.c_str());
     return;
   }
 
-  srdf::ModelSharedPtr srdf(new srdf::Model());
-  if (!srdf->initString(*urdf_, srdf_description_content))
+  if (!loadSRDFFromString(semantic_content))
   {
-    RCLCPP_ERROR(LOGGER, "Unable to parse SRDF from parameter '%s'", srdf_description.c_str());
     return;
   }
-  srdf_ = std::move(srdf);
 
   RCLCPP_INFO_STREAM(LOGGER, "Loaded robot model in " << (node->now() - start).seconds() << " seconds");
 }
@@ -115,22 +90,34 @@ RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_str
   moveit::tools::Profiler::ScopedStart prof_start;
   moveit::tools::Profiler::ScopedBlock prof_block("RDFLoader(string)");
 
-  auto umodel = std::make_unique<urdf::Model>();
-  if (umodel->initString(urdf_string))
+  if (loadURDFFromString(urdf_string))
   {
-    auto smodel = std::make_shared<srdf::Model>();
-    if (!smodel->initString(*umodel, srdf_string))
-    {
-      RCLCPP_ERROR(LOGGER, "Unable to parse SRDF");
-    }
-    urdf_ = std::move(umodel);
-    srdf_ = std::move(smodel);
+    loadSRDFFromString(srdf_string);
   }
-  else
+}
+
+bool RDFLoader::loadURDFFromString(const std::string& content)
+{
+  std::unique_ptr<urdf::Model> urdf(new urdf::Model());
+  if (!urdf->initString(content))
   {
-    RCLCPP_ERROR(LOGGER, "Unable to parse URDF");
-    urdf_.reset();
+    RCLCPP_INFO(LOGGER, "Unable to parse URDF");
+    return false;
   }
+  urdf_ = std::move(urdf);
+  return true;
+}
+
+bool RDFLoader::loadSRDFFromString(const std::string& content)
+{
+  srdf::ModelSharedPtr srdf(new srdf::Model());
+  if (!srdf->initString(*urdf_, content))
+  {
+    RCLCPP_ERROR(LOGGER, "Unable to parse SRDF");
+    return false;
+  }
+  srdf_ = std::move(srdf);
+  return true;
 }
 
 bool RDFLoader::isXacroFile(const std::string& path)
@@ -248,5 +235,21 @@ bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& pack
   path = path / relative_path;
 
   return loadXmlFileToString(buffer, path.string(), xacro_args);
+}
+
+void RDFLoader::descriptionUpdateCallback(const std::string& new_description)
+{
+  if (external_description_update_cb_)
+  {
+    external_description_update_cb_(new_description);
+  }
+}
+
+void RDFLoader::semanticUpdateCallback(const std::string& new_semantic)
+{
+  if (external_semantic_update_cb_)
+  {
+    external_semantic_update_cb_(new_semantic);
+  }
 }
 }  // namespace rdf_loader

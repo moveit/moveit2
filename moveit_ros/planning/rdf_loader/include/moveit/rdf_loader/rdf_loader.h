@@ -37,6 +37,7 @@
 #pragma once
 
 #include <moveit/macros/class_forward.h>
+#include <moveit/rdf_loader/string_loader.h>
 #include <urdf/model.h>
 #include <srdfdom/model.h>
 #include <rclcpp/rclcpp.hpp>
@@ -46,17 +47,24 @@ namespace rdf_loader
 MOVEIT_CLASS_FORWARD(RDFLoader);  // Defines RDFLoaderPtr, ConstPtr, WeakPtr... etc
 
 /** @class RDFLoader
- *  @brief Default constructor
- *  @param robot_description The string name corresponding to the ROS param where the URDF is loaded*/
+ */
 class RDFLoader
 {
 public:
   /** @brief Default constructor
-   *  @param robot_description The string name corresponding to the ROS param where the URDF is loaded; the SRDF is
-   * assumed to be at the same param name + the "_semantic" suffix */
+   *
+   *  Loads the URDF from a parameter given by the string argument,
+   *  and the SRDF that has the same name + the "_semantic" suffix
+   *
+   *  If the parameter does not exist, attempt to subscribe to topics
+   *  with the same name and type std_msgs::msg::String.
+   *
+   *  @param node ROS interface for parameters / topics
+   *  @param robot_description The string name corresponding to the URDF
+   */
   RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& robot_description = "robot_description");
 
-  /** \brief Initialize the robot model from a string representation of the URDF and SRDF documents */
+  /** @brief Initialize the robot model from a string representation of the URDF and SRDF documents */
   RDFLoader(const std::string& urdf_string, const std::string& srdf_string);
 
   /** @brief Get the resolved parameter name for the robot description */
@@ -75,6 +83,16 @@ public:
   const srdf::ModelSharedPtr& getSRDF() const
   {
     return srdf_;
+  }
+
+  void addDescriptionUpdateCallback(StringCallback cb)
+  {
+    external_description_update_cb_ = cb;
+  }
+
+  void addSemanticUpdateCallback(StringCallback cb)
+  {
+    external_semantic_update_cb_ = cb;
   }
 
   /** @brief determine if given path points to a xacro file */
@@ -97,7 +115,20 @@ public:
                                   const std::string& relative_path, const std::vector<std::string>& xacro_args);
 
 private:
+  bool loadURDFFromString(const std::string& content);
+  bool loadSRDFFromString(const std::string& content);
+
+  void descriptionUpdateCallback(const std::string& new_description);
+  void semanticUpdateCallback(const std::string& new_semantic);
+
+  StringCallback external_description_update_cb_;
+  StringCallback external_semantic_update_cb_;
+
   std::string robot_description_;
+
+  StringLoader description_loader_;
+  StringLoader semantic_loader_;
+
   srdf::ModelSharedPtr srdf_;
   urdf::ModelInterfaceSharedPtr urdf_;
 };
