@@ -54,7 +54,9 @@ bool PlanarKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node,
   storeValues(robot_model, group_name, base_frame, tip_frames, search_discretization);
   joint_model_group_ = robot_model_->getJointModelGroup(group_name);
   if (!joint_model_group_)
+  {
     return false;
+  }
 
   std::vector<const moveit::core::JointModelGroup*> sub_groups;
   joint_model_group_->getSubgroups(sub_groups);
@@ -134,7 +136,7 @@ bool PlanarKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node,
   }
 
   // Setup the joint state groups that we need
-  state_.reset(new moveit::core::RobotState(robot_model_));
+  state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
 
   initialized_ = true;
   RCLCPP_DEBUG(LOGGER, "KDL solver initialized");
