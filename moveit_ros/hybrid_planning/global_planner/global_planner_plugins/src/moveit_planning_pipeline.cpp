@@ -88,20 +88,20 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
   moveit_msgs::msg::MotionPlanResponse response;
 
   // Process goal
-  if ((global_goal_handle->get_goal())->desired_motion_sequence.items.empty())
+  if ((global_goal_handle->get_goal())->motion_sequence.items.empty())
   {
     RCLCPP_ERROR(LOGGER, "Global planner received an empty motion sequence. Abort Global Planning.");
     response.error_code = MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
     return response;
   }
 
-  if ((global_goal_handle->get_goal())->desired_motion_sequence.items.size() > 1)
+  if ((global_goal_handle->get_goal())->motion_sequence.items.size() > 1)
   {
     RCLCPP_WARN(LOGGER, "Global planner received motion sequence request with more than one item but the "
                         "'moveit_planning_pipeline' plugin only accepts one item. Just using the first item as global "
                         "planning goal!");
   }
-  auto motion_plan_req = (global_goal_handle->get_goal())->desired_motion_sequence.items[0].req;
+  auto motion_plan_req = (global_goal_handle->get_goal())->motion_sequence.items[0].req;
 
   // Set parameters required by the planning component
   node_ptr_->set_parameter({ PLAN_REQUEST_PARAM_NS + "planner_id", motion_plan_req.planner_id });

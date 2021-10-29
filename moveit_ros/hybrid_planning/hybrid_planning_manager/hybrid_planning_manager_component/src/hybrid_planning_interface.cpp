@@ -137,8 +137,8 @@ bool HybridPlanningInterface::sendGlobalPlannerAction()
 
   // Forward global trajectory goal from hybrid planning request TODO(sjahr) pass goal as function argument
   auto global_goal_msg = moveit_msgs::action::GlobalPlanner::Goal();
-  global_goal_msg.desired_motion_sequence =
-      (hybrid_planning_goal_handle_->get_goal())->motion_sequence;  // latest_desired_motion_sequence;
+  global_goal_msg.motion_sequence =
+      (hybrid_planning_goal_handle_->get_goal())->motion_sequence;  // latest desired motion sequence
   global_goal_msg.planning_group = (hybrid_planning_goal_handle_->get_goal())->planning_group;  // planning_group_;
   // Send global planning goal and wait until it's accepted
   auto goal_handle_future = global_planner_action_client_->async_send_goal(global_goal_msg, global_goal_options);
