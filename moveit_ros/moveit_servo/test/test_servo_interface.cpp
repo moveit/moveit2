@@ -40,42 +40,6 @@
 
 namespace moveit_servo
 {
-TEST_F(ServoFixture, StartStopTest)
-{
-  // Setup the start/stop clients, and the command callback
-  auto log_time_start = node_->now();
-  ASSERT_TRUE(setupStartClient());
-  ASSERT_TRUE(setupJointStateSub());
-  auto log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Setup time: " << (log_time_end - log_time_start).seconds());
-
-  // Wait for a joint state message to ensure fake_joint_driver is up
-  rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
-  log_time_start = node_->now();
-  bool got_msg = false;
-  while (!got_msg)
-  {
-    if (getNumJointState() > 0)
-      got_msg = true;
-
-    publish_loop_rate.sleep();
-  }
-  ASSERT_TRUE(got_msg);
-  log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Wait for joint state message time: " << (log_time_end - log_time_start).seconds());
-
-  // Try to start Servo
-  ASSERT_TRUE(start());
-  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
-
-  // Now stop servo
-  ASSERT_TRUE(stop());
-
-  // Restart and recheck Servo
-  ASSERT_TRUE(start());
-  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
-}
-
 TEST_F(ServoFixture, SendTwistStampedTest)
 {
   auto log_time_start = node_->now();
