@@ -194,7 +194,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       }
 
       timestep = trajectory.getAverageSegmentDuration();
-      ruckig_ptr.reset(new ruckig::Ruckig<0>{ num_dof, timestep });
+      ruckig_ptr = std::make_unique<ruckig::Ruckig<0>>(num_dof, timestep);
     }
   }
 
