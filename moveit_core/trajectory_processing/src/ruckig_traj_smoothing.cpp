@@ -45,13 +45,14 @@ namespace trajectory_processing
 {
 namespace
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_trajectory_processing.ruckig_traj_smoothing");
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_trajectory_processing.ruckig_traj_smoothing");
 constexpr double DEFAULT_MAX_VELOCITY = 5;           // rad/s
 constexpr double DEFAULT_MAX_ACCELERATION = 10;      // rad/s^2
 constexpr double DEFAULT_MAX_JERK = 20;              // rad/s^3
 constexpr double IDENTICAL_POSITION_EPSILON = 1e-3;  // rad
 constexpr double MAX_DURATION_EXTENSION_FACTOR = 5.0;
 constexpr double DURATION_EXTENSION_FRACTION = 1.1;
+constexpr double MINIMUM_VELOCITY_SEARCH_MAGNITUDE = 0.01;  // rad/s. Stop searching when velocity drops below this
 }  // namespace
 
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
@@ -80,7 +81,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   // Instantiate the smoother
   double timestep = trajectory.getAverageSegmentDuration();
   std::unique_ptr<ruckig::Ruckig<0>> ruckig_ptr;
-  ruckig_ptr.reset(new ruckig::Ruckig<0>{ num_dof, timestep });
+  ruckig_ptr = std::make_unique<ruckig::Ruckig<0>>(num_dof, timestep);
   ruckig::InputParameter<0> ruckig_input{ num_dof };
   ruckig::OutputParameter<0> ruckig_output{ num_dof };
 
@@ -135,9 +136,8 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       // accelerate to the target velocity. Iterate and decrease velocities until that behavior is gone.
       bool backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
 
-      double minimum_velocity_magnitude = 0.01;  // rad/s
       double velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, num_dof);
-      while (backward_motion_detected && (velocity_magnitude > minimum_velocity_magnitude))
+      while (backward_motion_detected && (velocity_magnitude > MINIMUM_VELOCITY_SEARCH_MAGNITUDE))
       {
         // Skip repeated waypoints with no change in position. Ruckig does not handle this well and there's really no
         // need to smooth it Simply set it equal to the previous (identical) waypoint.
@@ -200,8 +200,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
   if (ruckig_result != ruckig::Result::Working)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Ruckig trajectory smoothing failed");
-    RCLCPP_ERROR_STREAM(LOGGER, "Ruckig error: " << ruckig_result);
+    RCLCPP_ERROR_STREAM(LOGGER, "Ruckig trajectory smoothing failed. Ruckig error: " << ruckig_result);
     return false;
   }
 
