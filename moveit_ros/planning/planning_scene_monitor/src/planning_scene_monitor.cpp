@@ -1115,38 +1115,44 @@ bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_fram
                          std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& link_shape_handle :
          link_shape_handles_)
     {
-      tf_buffer_->canTransform(target_frame, link_shape_handle.first->getName(), target_time,
-                               shape_transform_cache_lookup_wait_time_);
-      Eigen::Isometry3d ttr = tf2::transformToEigen(
-          tf_buffer_->lookupTransform(target_frame, link_shape_handle.first->getName(), target_time));
-      for (std::size_t j = 0; j < link_shape_handle.second.size(); ++j)
-        cache[link_shape_handle.second[j].first] =
-            ttr * link_shape_handle.first->getCollisionOriginTransforms()[link_shape_handle.second[j].second];
+      if (tf_buffer_->canTransform(target_frame, link_shape_handle.first->getName(), target_time,
+                                   shape_transform_cache_lookup_wait_time_))
+      {
+        Eigen::Isometry3d ttr = tf2::transformToEigen(
+            tf_buffer_->lookupTransform(target_frame, link_shape_handle.first->getName(), target_time));
+        for (std::size_t j = 0; j < link_shape_handle.second.size(); ++j)
+          cache[link_shape_handle.second[j].first] =
+              ttr * link_shape_handle.first->getCollisionOriginTransforms()[link_shape_handle.second[j].second];
+      }
     }
     for (const std::pair<const moveit::core::AttachedBody* const,
                          std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>&
              attached_body_shape_handle : attached_body_shape_handles_)
     {
-      tf_buffer_->canTransform(target_frame, attached_body_shape_handle.first->getAttachedLinkName(), target_time,
-                               shape_transform_cache_lookup_wait_time_);
-      Eigen::Isometry3d transform = tf2::transformToEigen(tf_buffer_->lookupTransform(
-          target_frame, attached_body_shape_handle.first->getAttachedLinkName(), target_time));
-      for (std::size_t k = 0; k < attached_body_shape_handle.second.size(); ++k)
-        cache[attached_body_shape_handle.second[k].first] =
-            transform *
-            attached_body_shape_handle.first->getShapePosesInLinkFrame()[attached_body_shape_handle.second[k].second];
+      if (tf_buffer_->canTransform(target_frame, attached_body_shape_handle.first->getAttachedLinkName(), target_time,
+                                   shape_transform_cache_lookup_wait_time_))
+      {
+        Eigen::Isometry3d transform = tf2::transformToEigen(tf_buffer_->lookupTransform(
+            target_frame, attached_body_shape_handle.first->getAttachedLinkName(), target_time));
+        for (std::size_t k = 0; k < attached_body_shape_handle.second.size(); ++k)
+          cache[attached_body_shape_handle.second[k].first] =
+              transform *
+              attached_body_shape_handle.first->getShapePosesInLinkFrame()[attached_body_shape_handle.second[k].second];
+      }
     }
     {
-      tf_buffer_->canTransform(target_frame, scene_->getPlanningFrame(), target_time,
-                               shape_transform_cache_lookup_wait_time_);
-      Eigen::Isometry3d transform =
-          tf2::transformToEigen(tf_buffer_->lookupTransform(target_frame, scene_->getPlanningFrame(), target_time));
-      for (const std::pair<const std::string,
-                           std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>>>&
-               collision_body_shape_handle : collision_body_shape_handles_)
-        for (const std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>& it :
-             collision_body_shape_handle.second)
-          cache[it.first] = transform * (*it.second);
+      if (tf_buffer_->canTransform(target_frame, scene_->getPlanningFrame(), target_time,
+                                   shape_transform_cache_lookup_wait_time_))
+      {
+        Eigen::Isometry3d transform =
+            tf2::transformToEigen(tf_buffer_->lookupTransform(target_frame, scene_->getPlanningFrame(), target_time));
+        for (const std::pair<const std::string,
+                             std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>>>&
+                 collision_body_shape_handle : collision_body_shape_handles_)
+          for (const std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>& it :
+               collision_body_shape_handle.second)
+            cache[it.first] = transform * (*it.second);
+      }
     }
   }
   catch (tf2::TransformException& ex)
