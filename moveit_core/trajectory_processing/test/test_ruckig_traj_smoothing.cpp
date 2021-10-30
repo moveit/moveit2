@@ -39,26 +39,38 @@
 
 namespace
 {
+constexpr double TIMESTEP = 0.01;  // sec
+
 class RuckigTests : public testing::Test
 {
 protected:
   void SetUp() override
   {
-    // TODO(andyz): load a robot model and initialize trajectory_
     robot_model_ = moveit::core::loadTestingRobotModel("panda");
     trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, "panda_arm");
   }
 
-  trajectory_processing::RuckigSmoothing smoother_;
   moveit::core::RobotModelPtr robot_model_;
-  robot_trajectory::RobotTrajectoryConstPtr trajectory_;
+  robot_trajectory::RobotTrajectoryPtr trajectory_;
+  trajectory_processing::RuckigSmoothing smoother_;
 };
 
 }  // namespace
 
-TEST(RuckigTests, simple_functionality)
+TEST_F(RuckigTests, empty_trajectory)
 {
-  //  EXPECT_TRUE(smoother_.applySmoothing(trajectory,
+  // This should fail because the trajectory is empty
+  EXPECT_FALSE(
+      smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
+}
+
+TEST_F(RuckigTests, basic_trajectory)
+{
+  // robot_state::RobotState robot_state(robot_model_);
+  // trajectory_->addSuffixWayPoint(&robot_state, TIMESTEP);
+  // trajectory_->addSuffixWayPoint(&robot_state, TIMESTEP);
+
+  // EXPECT_TRUE(smoother_.applySmoothing(trajectory,
   //                                       1.0 /* max vel scaling factor */,
   //                                       1.0 /* max accel scaling factor */));
 }
