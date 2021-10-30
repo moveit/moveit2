@@ -269,7 +269,7 @@ void RuckigSmoothing::getNextRuckigInput(const ruckig::OutputParameter<0>& rucki
                                          const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
                                          const std::vector<int>& idx, ruckig::InputParameter<0>& ruckig_input)
 {
-  // TODO(andyz): replace this method with the new OutputParameter pass_to_input() when it's available
+  // TODO(andyz): https://github.com/ros-planning/moveit2/issues/766
   // ruckig_output.pass_to_input(ruckig_input);
 
   for (size_t joint = 0; joint < num_dof; ++joint)
