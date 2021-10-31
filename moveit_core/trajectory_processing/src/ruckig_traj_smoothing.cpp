@@ -176,6 +176,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
     // If ruckig failed, the duration of the seed trajectory likely wasn't long enough.
     // Try duration extension several times.
+    // TODO: see issue 767.  (https://github.com/ros-planning/moveit2/issues/767)
     if (ruckig_result == ruckig::Result::Working)
     {
       smoothing_complete = true;
@@ -198,7 +199,9 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     }
   }
 
-  if (ruckig_result != ruckig::Result::Working)
+  // Either of these results is acceptable.
+  // Working means smoothing worked well but the final target position wasn't exactly achieved (I think) -- Andy Z.
+  if ((ruckig_result != ruckig::Result::Working) && (ruckig_result != ruckig::Result::Finished))
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Ruckig trajectory smoothing failed. Ruckig error: " << ruckig_result);
     return false;
