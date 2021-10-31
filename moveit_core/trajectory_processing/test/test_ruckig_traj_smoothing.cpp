@@ -35,11 +35,13 @@
 
 #include <gtest/gtest.h>
 #include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
+#include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
 
 namespace
 {
-constexpr double TIMESTEP = 0.01;  // sec
+constexpr double DEFAULT_TIMESTEP = 0.1;  // sec
+constexpr char JOINT_GROUP[] = "panda_arm";
 
 class RuckigTests : public testing::Test
 {
@@ -47,7 +49,7 @@ protected:
   void SetUp() override
   {
     robot_model_ = moveit::core::loadTestingRobotModel("panda");
-    trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, "panda_arm");
+    trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, JOINT_GROUP);
   }
 
   moveit::core::RobotModelPtr robot_model_;
@@ -64,15 +66,39 @@ TEST_F(RuckigTests, empty_trajectory)
       smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
 }
 
+TEST_F(RuckigTests, not_enough_waypoints)
+{
+  moveit::core::RobotState robot_state(robot_model_);
+  // First waypoint is default joint positions
+  trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
+
+  robot_state.update();
+
+  // Fails due to not enough waypoints
+  EXPECT_FALSE(
+      smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
+}
+
 TEST_F(RuckigTests, basic_trajectory)
 {
-  // robot_state::RobotState robot_state(robot_model_);
-  // trajectory_->addSuffixWayPoint(&robot_state, TIMESTEP);
-  // trajectory_->addSuffixWayPoint(&robot_state, TIMESTEP);
+  moveit::core::RobotState robot_state(robot_model_);
+  // First waypoint is default joint positions
+  trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
 
-  // EXPECT_TRUE(smoother_.applySmoothing(trajectory,
-  //                                       1.0 /* max vel scaling factor */,
-  //                                       1.0 /* max accel scaling factor */));
+  // Second waypoint has slightly-different joint positions
+  std::vector<double> joint_positions;
+  robot_state.copyJointGroupPositions(JOINT_GROUP, joint_positions);
+  joint_positions.at(0) += 0.05;
+  robot_state.setJointGroupPositions(JOINT_GROUP, joint_positions);
+  trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
+
+  joint_positions.at(0) += 0.05;
+  robot_state.setJointGroupPositions(JOINT_GROUP, joint_positions);
+  trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
+
+  robot_state.update();
+  EXPECT_TRUE(
+      smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
 }
 
 int main(int argc, char** argv)
