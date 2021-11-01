@@ -69,7 +69,7 @@ protected:
 
   bool waitForMessage(const rclcpp::Duration timeout);
 
-  void stringCallback(const std_msgs::msg::String::ConstSharedPtr& msg);
+  void stringCallback(const std_msgs::msg::String::SharedPtr msg);
 
   std::shared_ptr<rclcpp::Node> node_;
   std::string name_;

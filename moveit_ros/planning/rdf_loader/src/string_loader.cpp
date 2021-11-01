@@ -139,7 +139,7 @@ bool StringLoader::waitForMessage(const rclcpp::Duration timeout)
   return false;
 }
 
-void StringLoader::stringCallback(const std_msgs::msg::String::ConstSharedPtr& msg)
+void StringLoader::stringCallback(const std_msgs::msg::String::SharedPtr msg)
 {
   if (msg->data == content_)
   {
