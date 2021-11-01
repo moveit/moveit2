@@ -245,10 +245,12 @@ if(BUILD_TESTING)
   add_ros_test(test/launch/test_basic_servo.test.py TIMEOUT 120 ARGS "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
   # Enforce limits unit tests
-  ament_add_gtest(enforce_limits_tests
-    test/enforce_limits_tests.cpp
-  )
+  ament_add_gtest(enforce_limits_tests test/enforce_limits_tests.cpp)
   target_link_libraries(enforce_limits_tests ${SERVO_LIB_NAME})
+
+  # Topic resampler tests
+  ament_add_gtest(topic_resampler_tests test/topic_resampler_tests.cpp)
+  target_link_libraries(topic_resampler_tests ${SERVO_LIB_NAME})
 
 endif()
 

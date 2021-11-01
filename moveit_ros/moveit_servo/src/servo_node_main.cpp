@@ -38,6 +38,7 @@
  */
 
 #include <moveit_servo/servo_node.h>
+#include <rclcpp/rclcpp.hpp>
 
 int main(int argc, char* argv[])
 {
@@ -48,7 +49,10 @@ int main(int argc, char* argv[])
 
   auto servo_node = std::make_shared<moveit_servo::ServoNode>(options);
 
-  rclcpp::spin(servo_node->get_node_base_interface());
+  rclcpp::executors::MultiThreadedExecutor executor;
+  executor.add_node(servo_node->get_node_base_interface());
+  executor.spin();
 
   rclcpp::shutdown();
+  return 0;
 }
