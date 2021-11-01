@@ -75,7 +75,7 @@ protected:
     double duration_from_previous = 0.1;
     std::size_t waypoint_count = 5;
     for (std::size_t ix = 0; ix < waypoint_count; ++ix)
-      trajectory->addSuffixWayPoint(robot_state_, duration_from_previous);
+      trajectory->addSuffixWayPoint(*robot_state_, duration_from_previous);
     // Quick check that getDuration is working correctly
     EXPECT_EQ(trajectory->getDuration(), duration_from_previous * waypoint_count)
         << "Generated trajectory duration incorrect";
