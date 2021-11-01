@@ -226,9 +226,9 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryIterator)
   }
 
   unsigned int count = 0;
-  for (auto waypoint_and_duration : *trajectory)
+  for (const auto& waypoint_and_duration : *trajectory)
   {
-    auto waypoint = waypoint_and_duration.first;
+    const auto& waypoint = waypoint_and_duration.first;
     waypoint->copyJointGroupPositions(arm_jmg_name_, positions);
     EXPECT_EQ(start_pos + count * 0.01, positions[0]);
     count++;

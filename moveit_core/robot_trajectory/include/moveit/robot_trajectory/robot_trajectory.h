@@ -279,7 +279,7 @@ public:
    */
   bool getStateAtDurationFromStart(const double request_duration, moveit::core::RobotStatePtr& output_state) const;
 
-  class iterator : public std::iterator<std::input_iterator_tag, std::pair<moveit::core::RobotStatePtr, double>, long,
+  class Iterator : public std::iterator<std::input_iterator_tag, std::pair<moveit::core::RobotStatePtr, double>, long,
                                         const std::pair<moveit::core::RobotStatePtr, double>*,
                                         std::pair<moveit::core::RobotStatePtr, double> >
   {
@@ -288,28 +288,28 @@ public:
     bool duration_is_empty = false;
 
   public:
-    explicit iterator(std::deque<moveit::core::RobotStatePtr>::iterator _waypoint_iterator,
+    explicit Iterator(std::deque<moveit::core::RobotStatePtr>::iterator _waypoint_iterator,
                       std::deque<double>::iterator _duration_iterator)
       : waypoint_iterator(_waypoint_iterator), duration_iterator(_duration_iterator)
     {
     }
-    iterator& operator++()
+    Iterator& operator++()
     {
       waypoint_iterator++;
       duration_iterator++;
       return *this;
     }
-    iterator operator++(int)
+    Iterator operator++(int)
     {
-      iterator retval = *this;
+      Iterator retval = *this;
       ++(*this);
       return retval;
     }
-    bool operator==(iterator other) const
+    bool operator==(Iterator other) const
     {
       return ((waypoint_iterator == other.waypoint_iterator) && (duration_iterator == other.duration_iterator));
     }
-    bool operator!=(iterator other) const
+    bool operator!=(Iterator other) const
     {
       return !(*this == other);
     }
@@ -319,15 +319,15 @@ public:
     }
   };
 
-  RobotTrajectory::iterator begin()
+  RobotTrajectory::Iterator begin()
   {
     assert(waypoints_.size() == duration_from_previous_.size());
-    return iterator(waypoints_.begin(), duration_from_previous_.begin());
+    return Iterator(waypoints_.begin(), duration_from_previous_.begin());
   }
-  RobotTrajectory::iterator end()
+  RobotTrajectory::Iterator end()
   {
     assert(waypoints_.size() == duration_from_previous_.size());
-    return iterator(waypoints_.end(), duration_from_previous_.end());
+    return Iterator(waypoints_.end(), duration_from_previous_.end());
   }
   /** @brief Print information about the trajectory
    * @param out              Stream to print to
