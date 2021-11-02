@@ -129,6 +129,15 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
       getNextRuckigInput(ruckig_output, next_waypoint, num_dof, idx, ruckig_input);
 
+      // Skip repeated waypoints with no change in position. Ruckig does not handle this well and there's really no
+      // need to smooth it. Simply leave it equal to the previous (identical) waypoint.
+      bool identical_waypoint =
+          checkForIdenticalWaypoints(*trajectory.getWayPointPtr(waypoint_idx), *next_waypoint, trajectory.getGroup());
+      if (identical_waypoint)
+      {
+        continue;
+      }
+
       // Run Ruckig
       ruckig_result = ruckig_ptr->update(ruckig_input, ruckig_output);
 
@@ -139,14 +148,6 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       double velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, num_dof);
       while (backward_motion_detected && (velocity_magnitude > MINIMUM_VELOCITY_SEARCH_MAGNITUDE))
       {
-        // Skip repeated waypoints with no change in position. Ruckig does not handle this well and there's really no
-        // need to smooth it Simply set it equal to the previous (identical) waypoint.
-        if (checkForIdenticalWaypoints(*trajectory.getWayPointPtr(waypoint_idx), *next_waypoint, trajectory.getGroup()))
-        {
-          *next_waypoint = trajectory.getWayPoint(waypoint_idx);
-          continue;
-        }
-
         // decrease target velocity
         for (size_t joint = 0; joint < num_dof; ++joint)
         {
