@@ -60,10 +60,9 @@ public:
           case ompl::msg::LOG_DEV2:
           case ompl::msg::LOG_DEV1:
           case ompl::msg::LOG_DEBUG:
-            RCLCPP_DEBUG(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
-            break;
           case ompl::msg::LOG_INFO:
-            RCLCPP_INFO(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
+            // LOG_INFO too verbose for MoveIt usage, so we reduce the logger level to DEBUG
+            RCLCPP_DEBUG(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
             break;
           case ompl::msg::LOG_WARN:
             RCLCPP_WARN(OMPL_LOGGER, "%s:%i - %s", filename, line, text.c_str());
