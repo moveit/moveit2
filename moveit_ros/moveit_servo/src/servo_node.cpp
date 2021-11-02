@@ -81,6 +81,7 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   // Set up planning_scene_monitor
   planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
       node_, robot_description_name, "planning_scene_monitor");
+  planning_scene_monitor_->providePlanningSceneService();
   planning_scene_monitor_->startStateMonitor(servo_parameters->joint_topic);
   planning_scene_monitor_->startSceneMonitor();
   planning_scene_monitor_->setPlanningScenePublishingFrequency(25);
