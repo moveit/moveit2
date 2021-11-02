@@ -86,7 +86,8 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   planning_scene_monitor_->setPlanningScenePublishingFrequency(25);
   planning_scene_monitor_->getStateMonitor()->enableCopyDynamics(true);
   planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
-                                                        "~/publish_planning_scene");
+                                                        std::string(node_->get_fully_qualified_name()) +
+                                                            "/publish_planning_scene");
 
   // Create Servo
   servo_ = std::make_unique<moveit_servo::Servo>(node_, servo_parameters, planning_scene_monitor_);
