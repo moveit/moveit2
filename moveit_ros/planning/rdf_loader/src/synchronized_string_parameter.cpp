@@ -34,12 +34,12 @@
 
 /* Author: David Lu!! */
 
-#include <moveit/rdf_loader/string_loader.h>
+#include <moveit/rdf_loader/synchronized_string_parameter.h>
 
 namespace rdf_loader
 {
-std::string StringLoader::loadInitialValue(const std::shared_ptr<rclcpp::Node>& node, const std::string& name,
-                                           StringCallback parent_callback)
+std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<rclcpp::Node>& node,
+                                                          const std::string& name, StringCallback parent_callback)
 {
   node_ = node;
   name_ = name;
@@ -91,7 +91,7 @@ std::string StringLoader::loadInitialValue(const std::shared_ptr<rclcpp::Node>& 
   return content_;
 }
 
-bool StringLoader::getMainParameter()
+bool SynchronizedStringParameter::getMainParameter()
 {
   // Check if the parameter is declared, declare it if it's not declared yet
   if (!node_->has_parameter(name_))
@@ -104,7 +104,7 @@ bool StringLoader::getMainParameter()
   return !content_.empty();
 }
 
-bool StringLoader::shouldPublish()
+bool SynchronizedStringParameter::shouldPublish()
 {
   std::string publish_param = "publish_" + name_;
   bool publish_string;
@@ -116,11 +116,11 @@ bool StringLoader::shouldPublish()
   return publish_string;
 }
 
-bool StringLoader::waitForMessage(const rclcpp::Duration timeout)
+bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
 {
   string_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
       name_, rclcpp::QoS(1).transient_local().reliable(),
-      std::bind(&StringLoader::stringCallback, this, std::placeholders::_1));
+      std::bind(&SynchronizedStringParameter::stringCallback, this, std::placeholders::_1));
 
   rclcpp::WaitSet wait_set;
   wait_set.add_subscription(string_subscriber_);
@@ -139,7 +139,7 @@ bool StringLoader::waitForMessage(const rclcpp::Duration timeout)
   return false;
 }
 
-void StringLoader::stringCallback(const std_msgs::msg::String::SharedPtr msg)
+void SynchronizedStringParameter::stringCallback(const std_msgs::msg::String::SharedPtr msg)
 {
   if (msg->data == content_)
   {

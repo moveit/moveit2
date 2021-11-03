@@ -44,7 +44,7 @@ namespace rdf_loader
 using StringCallback = std::function<void(const std::string&)>;
 
 /**
- * @brief StringLoader is a way to load a string from the ROS environment.
+ * @brief SynchronizedStringParameter is a way to load a string from the ROS environment.
  *
  * First it tries to load the string from a parameter.
  * If that fails, it subscribes to a std_msgs::String topic of the same name to get the value.
@@ -56,7 +56,7 @@ using StringCallback = std::function<void(const std::string&)>;
  * By default, the subscription will be killed after the first message is recieved.
  * If the parameter NAME_continuous is true, then the parent_callback will be called on every subsequent message.
  */
-class StringLoader
+class SynchronizedStringParameter
 {
 public:
   std::string loadInitialValue(const std::shared_ptr<rclcpp::Node>& node, const std::string& name,

@@ -37,7 +37,7 @@
 #pragma once
 
 #include <moveit/macros/class_forward.h>
-#include <moveit/rdf_loader/string_loader.h>
+#include <moveit/rdf_loader/synchronized_string_parameter.h>
 #include <urdf/model.h>
 #include <srdfdom/model.h>
 #include <rclcpp/rclcpp.hpp>
@@ -126,8 +126,8 @@ private:
 
   std::string robot_description_;
 
-  StringLoader description_loader_;
-  StringLoader semantic_loader_;
+  SynchronizedStringParameter description_ssp_;
+  SynchronizedStringParameter semantic_ssp_;
 
   srdf::ModelSharedPtr srdf_;
   urdf::ModelInterfaceSharedPtr urdf_;

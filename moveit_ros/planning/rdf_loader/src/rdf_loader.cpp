@@ -65,11 +65,11 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
 
   auto start = node->now();
 
-  std::string description_content = description_loader_.loadInitialValue(
+  std::string description_content = description_ssp_.loadInitialValue(
       node, robot_description, std::bind(&RDFLoader::descriptionUpdateCallback, this, std::placeholders::_1));
 
   const std::string srdf_description = robot_description + "_semantic";
-  std::string semantic_content = semantic_loader_.loadInitialValue(
+  std::string semantic_content = semantic_ssp_.loadInitialValue(
       node, srdf_description, std::bind(&RDFLoader::semanticUpdateCallback, this, std::placeholders::_1));
 
   if (!loadURDFFromString(description_content))
@@ -98,7 +98,7 @@ RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_str
 
 bool RDFLoader::loadURDFFromString(const std::string& content)
 {
-  std::unique_ptr<urdf::Model> urdf(new urdf::Model());
+  std::unique_ptr<urdf::Model> urdf = std::make_unique<urdf::Model>();
   if (!urdf->initString(content))
   {
     RCLCPP_INFO(LOGGER, "Unable to parse URDF");
