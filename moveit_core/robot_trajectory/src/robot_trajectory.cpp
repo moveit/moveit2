@@ -47,6 +47,11 @@
 
 namespace robot_trajectory
 {
+RobotTrajectory::RobotTrajectory(const moveit::core::RobotModelConstPtr& robot_model)
+  : robot_model_(robot_model), group_(nullptr)
+{
+}
+
 RobotTrajectory::RobotTrajectory(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group)
   : robot_model_(robot_model), group_(group.empty() ? nullptr : robot_model->getJointModelGroup(group))
 {
@@ -69,11 +74,6 @@ RobotTrajectory::RobotTrajectory(const RobotTrajectory& other, bool deepcopy)
       this->waypoints_.emplace_back(std::make_shared<moveit::core::RobotState>(*waypoint));
     }
   }
-}
-
-void RobotTrajectory::setGroupName(const std::string& group_name)
-{
-  group_ = robot_model_->getJointModelGroup(group_name);
 }
 
 const std::string& RobotTrajectory::getGroupName() const
@@ -105,11 +105,11 @@ void RobotTrajectory::swap(RobotTrajectory& other)
   duration_from_previous_.swap(other.duration_from_previous_);
 }
 
-void RobotTrajectory::append(const RobotTrajectory& source, double dt, size_t start_index, size_t end_index)
+RobotTrajectory& RobotTrajectory::append(const RobotTrajectory& source, double dt, size_t start_index, size_t end_index)
 {
   end_index = std::min(end_index, source.waypoints_.size());
   if (start_index >= end_index)
-    return;
+    return *this;
   waypoints_.insert(waypoints_.end(), std::next(source.waypoints_.begin(), start_index),
                     std::next(source.waypoints_.begin(), end_index));
   std::size_t index = duration_from_previous_.size();
@@ -118,9 +118,11 @@ void RobotTrajectory::append(const RobotTrajectory& source, double dt, size_t st
                                  std::next(source.duration_from_previous_.begin(), end_index));
   if (duration_from_previous_.size() > index)
     duration_from_previous_[index] += dt;
+
+  return *this;
 }
 
-void RobotTrajectory::reverse()
+RobotTrajectory& RobotTrajectory::reverse()
 {
   std::reverse(waypoints_.begin(), waypoints_.end());
   for (moveit::core::RobotStatePtr& waypoint : waypoints_)
@@ -134,12 +136,14 @@ void RobotTrajectory::reverse()
     std::reverse(duration_from_previous_.begin(), duration_from_previous_.end());
     duration_from_previous_.pop_back();
   }
+
+  return *this;
 }
 
-void RobotTrajectory::unwind()
+RobotTrajectory& RobotTrajectory::unwind()
 {
   if (waypoints_.empty())
-    return;
+    return *this;
 
   const std::vector<const moveit::core::JointModel*>& cont_joints =
       group_ ? group_->getContinuousJointModels() : robot_model_->getContinuousJointModels();
@@ -169,12 +173,14 @@ void RobotTrajectory::unwind()
   }
   for (moveit::core::RobotStatePtr& waypoint : waypoints_)
     waypoint->update();
+
+  return *this;
 }
 
-void RobotTrajectory::unwind(const moveit::core::RobotState& state)
+RobotTrajectory& RobotTrajectory::unwind(const moveit::core::RobotState& state)
 {
   if (waypoints_.empty())
-    return;
+    return *this;
 
   const std::vector<const moveit::core::JointModel*>& cont_joints =
       group_ ? group_->getContinuousJointModels() : robot_model_->getContinuousJointModels();
@@ -215,12 +221,8 @@ void RobotTrajectory::unwind(const moveit::core::RobotState& state)
   }
   for (moveit::core::RobotStatePtr& waypoint : waypoints_)
     waypoint->update();
-}
 
-void RobotTrajectory::clear()
-{
-  waypoints_.clear();
-  duration_from_previous_.clear();
+  return *this;
 }
 
 void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& trajectory,
@@ -357,11 +359,11 @@ void RobotTrajectory::getRobotTrajectoryMsg(moveit_msgs::msg::RobotTrajectory& t
   }
 }
 
-void RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::RobotState& reference_state,
-                                            const trajectory_msgs::msg::JointTrajectory& trajectory)
+RobotTrajectory& RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::RobotState& reference_state,
+                                                        const trajectory_msgs::msg::JointTrajectory& trajectory)
 {
   // make a copy just in case the next clear() removes the memory for the reference passed in
-  const moveit::core::RobotState& copy = reference_state;
+  const moveit::core::RobotState copy(reference_state);  // NOLINT
   clear();
   std::size_t state_count = trajectory.points.size();
   rclcpp::Time last_time_stamp = trajectory.header.stamp;
@@ -381,10 +383,12 @@ void RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::RobotState& refe
     addSuffixWayPoint(st, (this_time_stamp - last_time_stamp).seconds());
     last_time_stamp = this_time_stamp;
   }
+
+  return *this;
 }
 
-void RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::RobotState& reference_state,
-                                            const moveit_msgs::msg::RobotTrajectory& trajectory)
+RobotTrajectory& RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::RobotState& reference_state,
+                                                        const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
   // make a copy just in case the next clear() removes the memory for the reference passed in
   const moveit::core::RobotState& copy = reference_state;
@@ -428,15 +432,16 @@ void RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::RobotState& refe
     addSuffixWayPoint(st, (this_time_stamp - last_time_stamp).seconds());
     last_time_stamp = this_time_stamp;
   }
+  return *this;
 }
 
-void RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::RobotState& reference_state,
-                                            const moveit_msgs::msg::RobotState& state,
-                                            const moveit_msgs::msg::RobotTrajectory& trajectory)
+RobotTrajectory& RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::RobotState& reference_state,
+                                                        const moveit_msgs::msg::RobotState& state,
+                                                        const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
   moveit::core::RobotState st(reference_state);
   moveit::core::robotStateMsgToRobotState(state, st);
-  setRobotTrajectoryMsg(st, trajectory);
+  return setRobotTrajectoryMsg(st, trajectory);
 }
 
 void RobotTrajectory::findWayPointIndicesForDurationAfterStart(const double& duration, int& before, int& after,
