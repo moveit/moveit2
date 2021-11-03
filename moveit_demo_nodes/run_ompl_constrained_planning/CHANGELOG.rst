@@ -2,6 +2,17 @@
 Changelog for package run_ompl_constrained_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.0 (2021-10-08)
+------------------
+* Migrate to joint_state_broadcaster (`#657 <https://github.com/ros-planning/moveit2/issues/657>`_)
+* Fix warnings in Galactic and Rolling (`#598 <https://github.com/ros-planning/moveit2/issues/598>`_)
+  * Use __has_includes preprocessor directive for deprecated headers
+  * Fix parameter template types
+  * Proper initialization of smart pointers, rclcpp::Duration
+* Add missing exec dependencies to demo packages (`#581 <https://github.com/ros-planning/moveit2/issues/581>`_)
+* Fix loading joint_limits.yaml in demo and test launch files (`#544 <https://github.com/ros-planning/moveit2/issues/544>`_)
+* Contributors: Henning Kayser, Jafar Abdi, Vatan Aksoy Tezer
+
 2.2.1 (2021-07-12)
 ------------------
 

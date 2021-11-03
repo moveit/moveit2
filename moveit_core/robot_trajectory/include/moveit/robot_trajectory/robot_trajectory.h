@@ -273,6 +273,21 @@ public:
    */
   bool getStateAtDurationFromStart(const double request_duration, moveit::core::RobotStatePtr& output_state) const;
 
+  /** @brief Print information about the trajectory
+   * @param out              Stream to print to
+   * @param variable_indexes The indexes of the variables to print.
+   *                         If empty/not specified and the group is defined, then uses the indexes for the group
+   *                         If empty and the group is not defined, uses ALL variables in robot_model
+   *
+   * e.g.
+   * Trajectory has 13 points over 2.965 seconds
+   *   waypoint   0 time 0.000 pos  0.000 vel  0.000 acc  0.000
+   *   waypoint   1 time 0.067 pos  0.001 vel  0.033 acc  1.000
+   *   waypoint   2 time 0.665 pos  0.200 vel  0.632 acc  1.000
+   *   ...
+   */
+  void print(std::ostream& out, std::vector<int> variable_indexes = std::vector<int>()) const;
+
 private:
   moveit::core::RobotModelConstPtr robot_model_;
   const moveit::core::JointModelGroup* group_;
@@ -280,4 +295,8 @@ private:
   std::deque<double> duration_from_previous_;
   rclcpp::Clock clock_ros_;
 };
+
+/** @brief Operator overload for printing trajectory to a stream */
+std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory);
+
 }  // namespace robot_trajectory

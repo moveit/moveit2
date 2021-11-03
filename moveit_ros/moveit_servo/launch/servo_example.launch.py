@@ -55,8 +55,7 @@ def generate_launch_description():
 
     # RViz
     rviz_config_file = (
-        get_package_share_directory("moveit2_tutorials")
-        + "/config/demo_rviz_config.rviz"
+        get_package_share_directory("moveit_servo") + "/config/demo_rviz_config.rviz"
     )
     rviz_node = Node(
         package="rviz2",
@@ -88,7 +87,7 @@ def generate_launch_description():
     for controller in ["panda_arm_controller", "joint_state_broadcaster"]:
         load_controllers += [
             ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner.py {}".format(controller)],
+                cmd=["ros2 run controller_manager spawner {}".format(controller)],
                 shell=True,
                 output="screen",
             )
@@ -99,7 +98,7 @@ def generate_launch_description():
         name="moveit_servo_demo_container",
         namespace="/",
         package="rclcpp_components",
-        executable="component_container",
+        executable="component_container_mt",
         composable_node_descriptions=[
             # Example of launching Servo as a node component
             # Assuming ROS2 intraprocess communications works well, this is a more efficient way.
@@ -112,7 +111,6 @@ def generate_launch_description():
             #         robot_description,
             #         robot_description_semantic,
             #     ],
-            #     extra_arguments=[{"use_intra_process_comms": True}],
             # ),
             ComposableNode(
                 package="robot_state_publisher",
@@ -130,13 +128,11 @@ def generate_launch_description():
                 package="moveit_servo",
                 plugin="moveit_servo::JoyToServoPub",
                 name="controller_to_servo_node",
-                extra_arguments=[{"use_intra_process_comms": True}],
             ),
             ComposableNode(
                 package="joy",
                 plugin="joy::Joy",
                 name="joy_node",
-                extra_arguments=[{"use_intra_process_comms": True}],
             ),
         ],
         output="screen",
@@ -145,7 +141,7 @@ def generate_launch_description():
     # As opposed to a node component, this may be necessary (for example) if Servo is running on a different PC
     servo_node = Node(
         package="moveit_servo",
-        executable="servo_server_node",
+        executable="servo_node_main",
         parameters=[
             servo_params,
             robot_description,

@@ -504,4 +504,81 @@ bool RobotTrajectory::getStateAtDurationFromStart(const double request_duration,
   return true;
 }
 
+void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes) const
+{
+  size_t num_points = getWayPointCount();
+  if (num_points == 0)
+  {
+    out << "Empty trajectory.";
+    return;
+  }
+
+  std::ios::fmtflags old_settings = out.flags();
+  int old_precision = out.precision();
+  out << std::fixed << std::setprecision(3);
+
+  out << "Trajectory has " << num_points << " points over " << getDuration() << " seconds\n";
+
+  if (variable_indexes.empty())
+  {
+    if (group_)
+    {
+      variable_indexes = group_->getVariableIndexList();
+    }
+    else
+    {
+      // use all variables
+      variable_indexes.resize(robot_model_->getVariableCount());
+      std::iota(variable_indexes.begin(), variable_indexes.end(), 0);
+    }
+  }
+
+  for (size_t p_i = 0; p_i < num_points; ++p_i)
+  {
+    const moveit::core::RobotState& point = getWayPoint(p_i);
+    out << "  waypoint " << std::setw(3) << p_i;
+    out << " time " << std::setw(5) << getWayPointDurationFromStart(p_i);
+    out << " pos ";
+    for (int index : variable_indexes)
+    {
+      out << std::setw(6) << point.getVariablePosition(index) << " ";
+    }
+    if (point.hasVelocities())
+    {
+      out << "vel ";
+      for (int index : variable_indexes)
+      {
+        out << std::setw(6) << point.getVariableVelocity(index) << " ";
+      }
+    }
+    if (point.hasAccelerations())
+    {
+      out << "acc ";
+      for (int index : variable_indexes)
+      {
+        out << std::setw(6) << point.getVariableAcceleration(index) << " ";
+      }
+    }
+    if (point.hasEffort())
+    {
+      out << "eff ";
+      for (int index : variable_indexes)
+      {
+        out << std::setw(6) << point.getVariableEffort(index) << " ";
+      }
+    }
+    out << "\n";
+  }
+
+  out.flags(old_settings);
+  out.precision(old_precision);
+  out.flush();
+}
+
+std::ostream& operator<<(std::ostream& out, const RobotTrajectory& trajectory)
+{
+  trajectory.print(out);
+  return out;
+}
+
 }  // end of namespace robot_trajectory

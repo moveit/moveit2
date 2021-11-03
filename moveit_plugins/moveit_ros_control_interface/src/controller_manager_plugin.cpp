@@ -413,7 +413,7 @@ class MoveItMultiControllerManager : public moveit_controller_manager::MoveItCon
     node_ = node;
   }
   /**
-   * \brief  Poll ROS master for services and filters all controller_manager/list_controllers instances
+   * \brief  Poll for services and filter all controller_manager/list_controllers instances
    * Throttled down to 1 Hz, controller_managers_mutex_ must be locked externally
    */
   void discover()
@@ -434,7 +434,7 @@ class MoveItMultiControllerManager : public moveit_controller_manager::MoveItCon
       {
         std::string ns = service_name.substr(0, found);
         if (controller_managers_.find(ns) == controller_managers_.end())
-        {  // create MoveItControllerManager if it does not exists
+        {  // create MoveItControllerManager if it does not exist
           RCLCPP_INFO_STREAM(LOGGER, "Adding controller_manager interface for node at namespace " << ns);
           auto controller_manager = std::make_shared<moveit_ros_control_interface::MoveItControllerManager>(ns);
           controller_manager->initialize(node_);
