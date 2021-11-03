@@ -279,13 +279,10 @@ public:
    */
   bool getStateAtDurationFromStart(const double request_duration, moveit::core::RobotStatePtr& output_state) const;
 
-  class Iterator : public std::iterator<std::input_iterator_tag, std::pair<moveit::core::RobotStatePtr, double>, long,
-                                        const std::pair<moveit::core::RobotStatePtr, double>*,
-                                        std::pair<moveit::core::RobotStatePtr, double> >
+  class Iterator
   {
     std::deque<moveit::core::RobotStatePtr>::iterator waypoint_iterator;
     std::deque<double>::iterator duration_iterator;
-    bool duration_is_empty = false;
 
   public:
     explicit Iterator(std::deque<moveit::core::RobotStatePtr>::iterator _waypoint_iterator,
@@ -313,10 +310,17 @@ public:
     {
       return !(*this == other);
     }
-    reference operator*() const
+    std::pair<moveit::core::RobotStatePtr, double> operator*() const
     {
       return std::pair{ *waypoint_iterator, *duration_iterator };
     }
+
+    // iterator traits
+    using difference_type = long;
+    using value_type = std::pair<moveit::core::RobotStatePtr, double>;
+    using pointer = const std::pair<moveit::core::RobotStatePtr, double>*;
+    using reference = std::pair<moveit::core::RobotStatePtr, double>;
+    using iterator_category = std::input_iterator_tag;
   };
 
   RobotTrajectory::Iterator begin()
