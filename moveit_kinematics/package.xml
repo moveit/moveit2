@@ -1,12 +1,9 @@
 <?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_kinematics</name>
   <version>2.3.0</version>
   <description>Package for all inverse kinematics solvers in MoveIt</description>
-
-  <author email="dave@picknik.ai">Dave Coleman</author>
-  <author email="isucan@google.com">Ioan Sucan</author>
-  <author email="robot.moveit@gmail.com">Sachin Chitta</author>
 
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
@@ -19,6 +16,10 @@
   <url type="website">http://moveit.ros.org</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
+
+  <author email="dave@picknik.ai">Dave Coleman</author>
+  <author email="isucan@google.com">Ioan Sucan</author>
+  <author email="robot.moveit@gmail.com">Sachin Chitta</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>moveit_common</build_depend>
