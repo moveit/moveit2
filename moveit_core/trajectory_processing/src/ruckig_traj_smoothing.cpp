@@ -66,7 +66,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     return false;
   }
 
-  const size_t num_waypoints = trajectory.getWayPointCount();
+  size_t num_waypoints = trajectory.getWayPointCount();
   if (num_waypoints < 2)
   {
     RCLCPP_ERROR(LOGGER, "Trajectory does not have enough points to smooth with Ruckig");
@@ -77,6 +77,33 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
   // This lib does not actually work properly when angles wrap around, so we need to unwind the path first
   trajectory.unwind();
+
+  // Create a copy of the desired trajectory so we can revert it as needed.
+  // Remove repeated waypoints with no change in position. Ruckig does not handle this well and there's really no
+  // need to smooth it. Repeated waypoints cause circular motions.
+  robot_trajectory::RobotTrajectory requested_trajectory(trajectory.getRobotModel(), trajectory.getGroup());
+  for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
+  {
+    bool identical_waypoint = checkForIdenticalWaypoints(
+        *trajectory.getWayPointPtr(waypoint_idx), *trajectory.getWayPointPtr(waypoint_idx + 1), trajectory.getGroup());
+    if (identical_waypoint)
+    {
+      continue;
+    }
+    else
+    {
+      requested_trajectory.addSuffixWayPoint(trajectory.getWayPoint(waypoint_idx),
+                                             trajectory.getWayPointDurationFromPrevious(waypoint_idx));
+    }
+  }
+  trajectory = requested_trajectory;
+
+  num_waypoints = trajectory.getWayPointCount();
+  if (num_waypoints < 2)
+  {
+    RCLCPP_ERROR(LOGGER, "Trajectory does not have enough points to smooth with Ruckig");
+    return false;
+  }
 
   // Instantiate the smoother
   double timestep = trajectory.getAverageSegmentDuration();
@@ -129,15 +156,6 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
       getNextRuckigInput(ruckig_output, next_waypoint, num_dof, idx, ruckig_input);
 
-      // Skip repeated waypoints with no change in position. Ruckig does not handle this well and there's really no
-      // need to smooth it. Simply leave it equal to the previous (identical) waypoint.
-      bool identical_waypoint =
-          checkForIdenticalWaypoints(*trajectory.getWayPointPtr(waypoint_idx), *next_waypoint, trajectory.getGroup());
-      if (identical_waypoint)
-      {
-        continue;
-      }
-
       // Run Ruckig
       ruckig_result = ruckig_ptr->update(ruckig_input, ruckig_output);
 
@@ -184,6 +202,9 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     }
     else
     {
+      // Reset changes:
+      trajectory = requested_trajectory;
+
       // If Ruckig failed, it's likely because the original seed trajectory did not have a long enough duration when
       // jerk is taken into account. Extend the duration and try again.
       initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), num_dof, idx);
