@@ -83,6 +83,7 @@ protected:
         << "Generated trajectory duration incorrect";
     EXPECT_EQ(waypoint_count, trajectory->getWayPointDurations().size())
         << "Generated trajectory has the wrong number of waypoints";
+    EXPECT_EQ(waypoint_count, trajectory->size());
   }
 
   void copyTrajectory(const robot_trajectory::RobotTrajectoryPtr& trajectory,
@@ -240,6 +241,50 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDeepCopy)
 
   // Check that we updated the value correctly in the trajectory
   EXPECT_NE(trajectory_first_state_after_update[0], trajectory_copy_first_state_after_update[0]);
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryIterator)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+
+  ASSERT_EQ(5u, trajectory->size());
+  std::vector<double> positions;
+
+  double start_pos = 0.0;
+
+  for (size_t i = 0; i < trajectory->size(); i++)
+  {
+    auto waypoint = trajectory->getWayPointPtr(i);
+    // modify joint values
+    waypoint->copyJointGroupPositions(arm_jmg_name_, positions);
+    start_pos = positions[0];
+    positions[0] += 0.01 * i;
+    waypoint->setJointGroupPositions(arm_jmg_name_, positions);
+  }
+
+  unsigned int count = 0;
+  for (const auto& waypoint_and_duration : *trajectory)
+  {
+    const auto& waypoint = waypoint_and_duration.first;
+    waypoint->copyJointGroupPositions(arm_jmg_name_, positions);
+    EXPECT_EQ(start_pos + count * 0.01, positions[0]);
+    count++;
+  }
+
+  EXPECT_EQ(count, trajectory->size());
+
+  // Consistency checks
+  EXPECT_EQ(trajectory->begin(), trajectory->begin());
+  EXPECT_EQ(trajectory->end(), trajectory->end());
+
+  // trajectory has length 5; incrementing begin 5 times should reach the end
+  EXPECT_NE(trajectory->begin(), trajectory->end());
+  EXPECT_NE(++trajectory->begin(), trajectory->end());
+  EXPECT_NE(++(++trajectory->begin()), trajectory->end());
+  EXPECT_NE(++(++(++trajectory->begin())), trajectory->end());
+  EXPECT_NE(++(++(++(++trajectory->begin()))), trajectory->end());
+  EXPECT_EQ(++(++(++(++(++trajectory->begin())))), trajectory->end());
 }
 
 int main(int argc, char** argv)
