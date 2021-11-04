@@ -79,7 +79,6 @@ CollisionCheck::CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParamete
       std::bind(&CollisionCheck::worstCaseStopTimeCB, this, std::placeholders::_1));
 
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  acm_ = getLockedPlanningSceneRO()->getAllowedCollisionMatrix();
 }
 
 planning_scene_monitor::LockedPlanningSceneRO CollisionCheck::getLockedPlanningSceneRO() const
@@ -114,8 +113,8 @@ void CollisionCheck::run()
 
   collision_result_.clear();
   // Self-collisions and scene collisions are checked separately so different thresholds can be used
-  getLockedPlanningSceneRO()->getCollisionEnvUnpadded()->checkSelfCollision(collision_request_, collision_result_,
-                                                                            *current_state_, acm_);
+  getLockedPlanningSceneRO()->getCollisionEnvUnpadded()->checkSelfCollision(
+      collision_request_, collision_result_, *current_state_, getLockedPlanningSceneRO()->getAllowedCollisionMatrix());
   self_collision_distance_ = collision_result_.distance;
   collision_detected_ |= collision_result_.collision;
   collision_result_.print();
