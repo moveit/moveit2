@@ -2,6 +2,13 @@
 Changelog for package run_moveit_cpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.0 (2021-10-08)
+------------------
+* Migrate to joint_state_broadcaster (`#657 <https://github.com/ros-planning/moveit2/issues/657>`_)
+* Add missing exec dependencies to demo packages (`#581 <https://github.com/ros-planning/moveit2/issues/581>`_)
+* Fix loading joint_limits.yaml in demo and test launch files (`#544 <https://github.com/ros-planning/moveit2/issues/544>`_)
+* Contributors: Henning Kayser, Jafar Abdi, Vatan Aksoy Tezer
+
 2.2.1 (2021-07-12)
 ------------------
 

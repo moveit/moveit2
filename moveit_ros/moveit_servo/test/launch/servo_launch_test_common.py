@@ -102,7 +102,7 @@ def generate_servo_test_description(
     for controller in ["panda_arm_controller", "joint_state_broadcaster"]:
         load_controllers += [
             ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner.py {}".format(controller)],
+                cmd=["ros2 run controller_manager spawner {}".format(controller)],
                 shell=True,
                 output="screen",
             )
@@ -113,7 +113,7 @@ def generate_servo_test_description(
         name="test_servo_integration_container",
         namespace="/",
         package="rclcpp_components",
-        executable="component_container",
+        executable="component_container_mt",
         composable_node_descriptions=[
             ComposableNode(
                 package="robot_state_publisher",
@@ -131,27 +131,39 @@ def generate_servo_test_description(
         output="screen",
     )
 
-    servo_container = ComposableNodeContainer(
-        name="servo_container",
-        namespace="/",
-        package="rclcpp_components",
-        executable="component_container",
-        composable_node_descriptions=[
-            ComposableNode(
-                package="moveit_servo",
-                plugin="moveit_servo::ServoNode",
-                name="servo_node",
-                parameters=[
-                    servo_params,
-                    robot_description,
-                    robot_description_semantic,
-                    joint_limits_yaml,
-                ],
-                extra_arguments=[{"use_intra_process_comm": True}],
-            ),
-        ],
+    servo_node = Node(
+        package="moveit_servo",
+        executable="servo_node_main",
         output="screen",
+        parameters=[
+            servo_params,
+            robot_description,
+            robot_description_semantic,
+            joint_limits_yaml,
+        ],
     )
+
+    # NOTE: The smoothing plugin doesn't seem to be accessible from containers
+    # servo_container = ComposableNodeContainer(
+    #     name="servo_container",
+    #     namespace="/",
+    #     package="rclcpp_components",
+    #     executable="component_container_mt",
+    #     composable_node_descriptions=[
+    #         ComposableNode(
+    #             package="moveit_servo",
+    #             plugin="moveit_servo::ServoNode",
+    #             name="servo_node",
+    #             parameters=[
+    #                 servo_params,
+    #                 robot_description,
+    #                 robot_description_semantic,
+    #                 joint_limits_yaml,
+    #             ],
+    #         ),
+    #     ],
+    #     output="screen",
+    # )
 
     # Unknown how to set timeout
     # https://github.com/ros2/launch/issues/466
@@ -171,14 +183,14 @@ def generate_servo_test_description(
                 "containing test executables",
             ),
             ros2_control_node,
-            servo_container,
+            servo_node,
             test_container,
             TimerAction(period=2.0, actions=[servo_gtest]),
             launch_testing.actions.ReadyToTest(),
         ]
         + load_controllers
     ), {
-        "servo_container": servo_container,
+        "servo_node": servo_node,
         "test_container": test_container,
         "servo_gtest": servo_gtest,
         "ros2_control_node": ros2_control_node,

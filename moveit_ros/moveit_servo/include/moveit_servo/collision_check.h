@@ -48,7 +48,6 @@
 #include <std_msgs/msg/float64.hpp>
 
 #include <moveit_servo/servo_parameters.h>
-#include <moveit_servo/low_pass_filter.h>
 
 namespace moveit_servo
 {
@@ -98,7 +97,6 @@ private:
 
   // Robot state and collision matrix from planning scene
   std::shared_ptr<moveit::core::RobotState> current_state_;
-  collision_detection::AllowedCollisionMatrix acm_;
 
   // Scale robot velocity according to collision proximity and user-defined thresholds.
   // I scaled exponentially (cubic power) so velocity drops off quickly after the threshold.

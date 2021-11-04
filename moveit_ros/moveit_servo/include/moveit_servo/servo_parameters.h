@@ -38,16 +38,14 @@
 
 #pragma once
 
-#include <thread>
 #include <mutex>
+#include <thread>
 #include <vector>
+
 #include <rclcpp/rclcpp.hpp>
 
 namespace moveit_servo
 {
-// Size of queues used in ros pub/sub/service
-constexpr size_t ROS_QUEUE_SIZE = 2;
-
 using SetParameterCallbackType = std::function<rcl_interfaces::msg::SetParametersResult(const rclcpp::Parameter&)>;
 
 // ROS params to be read. See the yaml file in /config for a description of each.
@@ -78,13 +76,15 @@ struct ServoParameters
   bool publish_joint_positions;
   bool publish_joint_velocities;
   bool publish_joint_accelerations;
-  // Incoming Joint State properties
+  // Plugins for smoothing outgoing commands
   std::string joint_topic;
-  double low_pass_filter_coeff;
+  std::string smoothing_filter_plugin_name;
   // MoveIt properties
   std::string move_group_name;
   std::string planning_frame;
   std::string ee_frame_name;
+  bool is_primary_planning_scene_monitor;
+  std::string monitored_planning_scene_topic;
   // Stopping behaviour
   double incoming_command_timeout;
   int num_outgoing_halt_msgs_to_publish;

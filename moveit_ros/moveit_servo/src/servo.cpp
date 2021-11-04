@@ -42,25 +42,19 @@
 
 namespace moveit_servo
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
 namespace
 {
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
 constexpr double ROBOT_STATE_WAIT_TIME = 10.0;  // seconds
 }  // namespace
+
 Servo::Servo(const rclcpp::Node::SharedPtr& node, ServoParameters::SharedConstPtr parameters,
              planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
-  : planning_scene_monitor_(planning_scene_monitor), parameters_(parameters)
+  : planning_scene_monitor_{ planning_scene_monitor }
+  , parameters_{ parameters }
+  , servo_calcs_{ node, parameters, planning_scene_monitor_ }
+  , collision_checker_{ node, parameters, planning_scene_monitor_ }
 {
-  // Confirm the planning scene monitor is ready to be used
-  if (!planning_scene_monitor_->getStateMonitor())
-  {
-    planning_scene_monitor_->startStateMonitor(parameters_->joint_topic);
-  }
-  planning_scene_monitor->getStateMonitor()->enableCopyDynamics(true);
-
-  servo_calcs_ = std::make_unique<ServoCalcs>(node, parameters, planning_scene_monitor_);
-
-  collision_checker_ = std::make_unique<CollisionCheck>(node, parameters, planning_scene_monitor_);
 }
 
 void Servo::start()
@@ -75,11 +69,11 @@ void Servo::start()
   setPaused(false);
 
   // Crunch the numbers in this timer
-  servo_calcs_->start();
+  servo_calcs_.start();
 
   // Check collisions in this timer
   if (parameters_->check_collisions)
-    collision_checker_->start();
+    collision_checker_.start();
 }
 
 Servo::~Servo()
@@ -89,28 +83,28 @@ Servo::~Servo()
 
 void Servo::setPaused(bool paused)
 {
-  servo_calcs_->setPaused(paused);
-  collision_checker_->setPaused(paused);
+  servo_calcs_.setPaused(paused);
+  collision_checker_.setPaused(paused);
 }
 
 bool Servo::getCommandFrameTransform(Eigen::Isometry3d& transform)
 {
-  return servo_calcs_->getCommandFrameTransform(transform);
+  return servo_calcs_.getCommandFrameTransform(transform);
 }
 
 bool Servo::getCommandFrameTransform(geometry_msgs::msg::TransformStamped& transform)
 {
-  return servo_calcs_->getCommandFrameTransform(transform);
+  return servo_calcs_.getCommandFrameTransform(transform);
 }
 
 bool Servo::getEEFrameTransform(Eigen::Isometry3d& transform)
 {
-  return servo_calcs_->getEEFrameTransform(transform);
+  return servo_calcs_.getEEFrameTransform(transform);
 }
 
 bool Servo::getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform)
 {
-  return servo_calcs_->getEEFrameTransform(transform);
+  return servo_calcs_.getEEFrameTransform(transform);
 }
 
 const ServoParameters::SharedConstPtr& Servo::getParameters() const

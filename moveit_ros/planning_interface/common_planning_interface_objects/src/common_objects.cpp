@@ -55,7 +55,7 @@ struct SharedStorage
     robot_model_loaders_.clear();
   }
 
-  boost::mutex lock_;
+  std::recursive_mutex lock_;
   std::weak_ptr<tf2_ros::Buffer> tf_buffer_;
   std::map<std::string, moveit::core::RobotModelWeakPtr> models_;
   std::map<std::string, CurrentStateMonitorWeakPtr> state_monitors_;
@@ -83,7 +83,7 @@ namespace planning_interface
 std::shared_ptr<tf2_ros::Buffer> getSharedTF()
 {
   SharedStorage& s = getSharedStorage();
-  boost::mutex::scoped_lock slock(s.lock_);
+  std::scoped_lock slock(s.lock_);
 
   std::shared_ptr<tf2_ros::Buffer> buffer = s.tf_buffer_.lock();
   if (!buffer)
@@ -98,7 +98,7 @@ robot_model_loader::RobotModelLoaderPtr getSharedRobotModelLoader(const rclcpp::
                                                                   const std::string& robot_description)
 {
   SharedStorage& s = getSharedStorage();
-  boost::mutex::scoped_lock slock(s.lock_);
+  std::scoped_lock slock(s.lock_);
   auto it = s.robot_model_loaders_
                 .insert(std::make_pair(node->get_fully_qualified_name() + robot_description,
                                        robot_model_loader::RobotModelLoaderWeakPtr()))
@@ -116,7 +116,7 @@ moveit::core::RobotModelConstPtr getSharedRobotModel(const rclcpp::Node::SharedP
                                                      const std::string& robot_description)
 {
   SharedStorage& s = getSharedStorage();
-  boost::mutex::scoped_lock slock(s.lock_);
+  std::scoped_lock slock(s.lock_);
   auto it = s.models_.insert(std::make_pair(robot_description, moveit::core::RobotModelWeakPtr())).first;
   moveit::core::RobotModelPtr model = it->second.lock();
   if (!model)
@@ -134,7 +134,7 @@ CurrentStateMonitorPtr getSharedStateMonitor(const rclcpp::Node::SharedPtr& node
                                              const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
 {
   SharedStorage& s = getSharedStorage();
-  boost::mutex::scoped_lock slock(s.lock_);
+  std::scoped_lock slock(s.lock_);
   auto it = s.state_monitors_.insert(std::make_pair(robot_model->getName(), CurrentStateMonitorWeakPtr())).first;
   CurrentStateMonitorPtr monitor = it->second.lock();
   if (!monitor)
