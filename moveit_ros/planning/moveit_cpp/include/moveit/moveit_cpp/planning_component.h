@@ -178,6 +178,9 @@ public:
   /** \brief Set the goal constraints generated from a named target state */
   bool setGoal(const std::string& named_target);
 
+  /** \brief Set the path constraints generated from a moveit msg Constraints */
+  bool setPathConstraints(const moveit_msgs::msg::Constraints& path_constraints);
+
   /** \brief Run a plan from start or current state to fulfill the last goal constraints provided by setGoal() using
    * default parameters. */
   PlanSolution plan();
@@ -205,6 +208,7 @@ private:
   // The start state used in the planning motion request
   moveit::core::RobotStatePtr considered_start_state_;
   std::vector<moveit_msgs::msg::Constraints> current_goal_constraints_;
+  moveit_msgs::msg::Constraints current_path_constraints_;
   PlanRequestParameters plan_request_parameters_;
   moveit_msgs::msg::WorkspaceParameters workspace_parameters_;
   bool workspace_parameters_set_ = false;
