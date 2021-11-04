@@ -46,6 +46,8 @@ namespace rdf_loader
 {
 MOVEIT_CLASS_FORWARD(RDFLoader);  // Defines RDFLoaderPtr, ConstPtr, WeakPtr... etc
 
+using NewModelCallback = std::function<void()>;
+
 /** @class RDFLoader
  */
 class RDFLoader
@@ -85,14 +87,9 @@ public:
     return srdf_;
   }
 
-  void addDescriptionUpdateCallback(StringCallback cb)
+  void setNewModelCallback(NewModelCallback cb)
   {
-    external_description_update_cb_ = cb;
-  }
-
-  void addSemanticUpdateCallback(StringCallback cb)
-  {
-    external_semantic_update_cb_ = cb;
+    new_model_cb_ = cb;
   }
 
   /** @brief determine if given path points to a xacro file */
@@ -115,16 +112,15 @@ public:
                                   const std::string& relative_path, const std::vector<std::string>& xacro_args);
 
 private:
-  bool loadURDFFromString(const std::string& content);
-  bool loadSRDFFromString(const std::string& content);
+  bool loadFromStrings();
 
   void urdfUpdateCallback(const std::string& new_urdf_string);
   void srdfUpdateCallback(const std::string& new_srdf_string);
 
-  StringCallback external_description_update_cb_;
-  StringCallback external_semantic_update_cb_;
+  NewModelCallback new_model_cb_;
 
   std::string ros_name_;
+  std::string urdf_string_, srdf_string_;
 
   SynchronizedStringParameter urdf_ssp_;
   SynchronizedStringParameter srdf_ssp_;

@@ -64,19 +64,14 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
 
   auto start = node->now();
 
-  std::string urdf_string = urdf_ssp_.loadInitialValue(
-      node, ros_name, std::bind(&RDFLoader::urdfUpdateCallback, this, std::placeholders::_1));
+  urdf_string_ = urdf_ssp_.loadInitialValue(node, ros_name,
+                                            std::bind(&RDFLoader::urdfUpdateCallback, this, std::placeholders::_1));
 
   const std::string srdf_name = ros_name + "_semantic";
-  std::string srdf_string = srdf_ssp_.loadInitialValue(
-      node, srdf_name, std::bind(&RDFLoader::srdfUpdateCallback, this, std::placeholders::_1));
+  srdf_string_ = srdf_ssp_.loadInitialValue(node, srdf_name,
+                                            std::bind(&RDFLoader::srdfUpdateCallback, this, std::placeholders::_1));
 
-  if (!loadURDFFromString(urdf_string))
-  {
-    return;
-  }
-
-  if (!loadSRDFFromString(srdf_string))
+  if (!loadFromStrings())
   {
     return;
   }
@@ -85,36 +80,34 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
 }
 
 RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_string)
+  : urdf_string_(urdf_string), srdf_string_(srdf_string)
 {
   moveit::tools::Profiler::ScopedStart prof_start;
   moveit::tools::Profiler::ScopedBlock prof_block("RDFLoader(string)");
 
-  if (loadURDFFromString(urdf_string))
+  if (!loadFromStrings())
   {
-    loadSRDFFromString(srdf_string);
+    return;
   }
 }
 
-bool RDFLoader::loadURDFFromString(const std::string& urdf_string)
+bool RDFLoader::loadFromStrings()
 {
   std::unique_ptr<urdf::Model> urdf = std::make_unique<urdf::Model>();
-  if (!urdf->initString(urdf_string))
+  if (!urdf->initString(urdf_string_))
   {
     RCLCPP_INFO(LOGGER, "Unable to parse URDF");
     return false;
   }
-  urdf_ = std::move(urdf);
-  return true;
-}
 
-bool RDFLoader::loadSRDFFromString(const std::string& content)
-{
-  srdf::ModelSharedPtr srdf(new srdf::Model());
-  if (!srdf->initString(*urdf_, content))
+  srdf::ModelSharedPtr srdf = std::make_shared<srdf::Model>();
+  if (!srdf->initString(*urdf, srdf_string_))
   {
     RCLCPP_ERROR(LOGGER, "Unable to parse SRDF");
     return false;
   }
+
+  urdf_ = std::move(urdf);
   srdf_ = std::move(srdf);
   return true;
 }
@@ -238,17 +231,27 @@ bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& pack
 
 void RDFLoader::urdfUpdateCallback(const std::string& new_urdf_string)
 {
-  if (external_description_update_cb_)
+  urdf_string_ = new_urdf_string;
+  if (!loadFromStrings())
   {
-    external_description_update_cb_(new_urdf_string);
+    return;
+  }
+  if (new_model_cb_)
+  {
+    new_model_cb_();
   }
 }
 
 void RDFLoader::srdfUpdateCallback(const std::string& new_srdf_string)
 {
-  if (external_semantic_update_cb_)
+  srdf_string_ = new_srdf_string;
+  if (!loadFromStrings())
   {
-    external_semantic_update_cb_(new_srdf_string);
+    return;
+  }
+  if (new_model_cb_)
+  {
+    new_model_cb_();
   }
 }
 }  // namespace rdf_loader
