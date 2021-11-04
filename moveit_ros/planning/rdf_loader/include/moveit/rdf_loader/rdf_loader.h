@@ -60,9 +60,9 @@ public:
    *  with the same name and type std_msgs::msg::String.
    *
    *  @param node ROS interface for parameters / topics
-   *  @param robot_description The string name corresponding to the URDF
+   *  @param ros_name The string name corresponding to the URDF
    */
-  RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& robot_description = "robot_description");
+  RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name = "robot_description");
 
   /** @brief Initialize the robot model from a string representation of the URDF and SRDF documents */
   RDFLoader(const std::string& urdf_string, const std::string& srdf_string);
@@ -70,7 +70,7 @@ public:
   /** @brief Get the resolved parameter name for the robot description */
   const std::string& getRobotDescription() const
   {
-    return robot_description_;
+    return ros_name_;
   }
 
   /** @brief Get the parsed URDF model*/
@@ -118,16 +118,16 @@ private:
   bool loadURDFFromString(const std::string& content);
   bool loadSRDFFromString(const std::string& content);
 
-  void descriptionUpdateCallback(const std::string& new_description);
-  void semanticUpdateCallback(const std::string& new_semantic);
+  void urdfUpdateCallback(const std::string& new_urdf_string);
+  void srdfUpdateCallback(const std::string& new_srdf_string);
 
   StringCallback external_description_update_cb_;
   StringCallback external_semantic_update_cb_;
 
-  std::string robot_description_;
+  std::string ros_name_;
 
-  SynchronizedStringParameter description_ssp_;
-  SynchronizedStringParameter semantic_ssp_;
+  SynchronizedStringParameter urdf_ssp_;
+  SynchronizedStringParameter srdf_ssp_;
 
   srdf::ModelSharedPtr srdf_;
   urdf::ModelInterfaceSharedPtr urdf_;

@@ -57,27 +57,26 @@ namespace rdf_loader
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_rdf_loader.rdf_loader");
 
-RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& robot_description)
-  : robot_description_(robot_description)
+RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name) : ros_name_(ros_name)
 {
   moveit::tools::Profiler::ScopedStart prof_start;
   moveit::tools::Profiler::ScopedBlock prof_block("RDFLoader(robot_description)");
 
   auto start = node->now();
 
-  std::string description_content = description_ssp_.loadInitialValue(
-      node, robot_description, std::bind(&RDFLoader::descriptionUpdateCallback, this, std::placeholders::_1));
+  std::string urdf_string = urdf_ssp_.loadInitialValue(
+      node, ros_name, std::bind(&RDFLoader::urdfUpdateCallback, this, std::placeholders::_1));
 
-  const std::string srdf_description = robot_description + "_semantic";
-  std::string semantic_content = semantic_ssp_.loadInitialValue(
-      node, srdf_description, std::bind(&RDFLoader::semanticUpdateCallback, this, std::placeholders::_1));
+  const std::string srdf_name = ros_name + "_semantic";
+  std::string srdf_string = srdf_ssp_.loadInitialValue(
+      node, srdf_name, std::bind(&RDFLoader::srdfUpdateCallback, this, std::placeholders::_1));
 
-  if (!loadURDFFromString(description_content))
+  if (!loadURDFFromString(urdf_string))
   {
     return;
   }
 
-  if (!loadSRDFFromString(semantic_content))
+  if (!loadSRDFFromString(srdf_string))
   {
     return;
   }
@@ -96,10 +95,10 @@ RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_str
   }
 }
 
-bool RDFLoader::loadURDFFromString(const std::string& content)
+bool RDFLoader::loadURDFFromString(const std::string& urdf_string)
 {
   std::unique_ptr<urdf::Model> urdf = std::make_unique<urdf::Model>();
-  if (!urdf->initString(content))
+  if (!urdf->initString(urdf_string))
   {
     RCLCPP_INFO(LOGGER, "Unable to parse URDF");
     return false;
@@ -237,19 +236,19 @@ bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& pack
   return loadXmlFileToString(buffer, path.string(), xacro_args);
 }
 
-void RDFLoader::descriptionUpdateCallback(const std::string& new_description)
+void RDFLoader::urdfUpdateCallback(const std::string& new_urdf_string)
 {
   if (external_description_update_cb_)
   {
-    external_description_update_cb_(new_description);
+    external_description_update_cb_(new_urdf_string);
   }
 }
 
-void RDFLoader::semanticUpdateCallback(const std::string& new_semantic)
+void RDFLoader::srdfUpdateCallback(const std::string& new_srdf_string)
 {
   if (external_semantic_update_cb_)
   {
-    external_semantic_update_cb_(new_semantic);
+    external_semantic_update_cb_(new_srdf_string);
   }
 }
 }  // namespace rdf_loader
