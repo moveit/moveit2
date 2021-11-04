@@ -426,8 +426,8 @@ void ServoCalcs::calculateSingleIteration()
     }
   }
 
-  // If we should halt
-  if (!have_nonzero_command_ && !done_stopping_)
+  // Print a warning to the user if both are stale
+  if (twist_command_is_stale_ && joint_command_is_stale_)
   {
     filteredHalt(*joint_trajectory);
   }
