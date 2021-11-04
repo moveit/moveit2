@@ -4,8 +4,9 @@
   <name>run_moveit_cpp</name>
   <version>2.3.0</version>
   <description>TODO: Package description</description>
+  <author email="henningkayser@picknik.ai">Henning Kayser</author>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
-  <license>TODO: License declaration</license>
+  <license>BSD</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>moveit_common</build_depend>

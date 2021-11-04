@@ -4,6 +4,7 @@
   <name>run_move_group</name>
   <version>2.3.0</version>
   <description>Demo launch file for running a MoveGroup setup</description>
+  <author email="henningkayser@picknik.ai">Henning Kayser</author>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <license>BSD</license>
 

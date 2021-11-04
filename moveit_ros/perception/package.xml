@@ -7,7 +7,8 @@
   <author email="jon.binney@gmail.com">Jon Binney</author>
   <author email="gedikli@willowgarage.com">Suat Gedikli</author>
 
-  <maintainer email="mferguson@fetchrobotics.com">Michael Ferguson</maintainer>
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
   <license>BSD</license>

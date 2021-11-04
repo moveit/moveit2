@@ -7,6 +7,8 @@
   <author email="mferguson@fetchrobotics.com">Michael Ferguson</author>
   <author email="isucan@google.com">Ioan Sucan</author>
 
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="me@v4hn.de">Michael Görner</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
