@@ -212,7 +212,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       for (size_t waypoint_idx = 1; waypoint_idx < num_waypoints; ++waypoint_idx)
       {
         trajectory.setWayPointDurationFromPrevious(
-            waypoint_idx, DURATION_EXTENSION_FRACTION * trajectory.getWayPointDurationFromPrevious(waypoint_idx));
+            waypoint_idx, duration_extension_factor * trajectory.getWayPointDurationFromPrevious(waypoint_idx));
         // TODO(andyz): re-calculate waypoint velocity and acceleration here?
       }
 
