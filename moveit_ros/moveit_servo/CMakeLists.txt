@@ -86,6 +86,8 @@ ament_target_dependencies(${SERVO_PARAM_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS
 add_library(${SERVO_LIB_NAME} SHARED
   # These files are used to produce differential motion
   src/collision_check.cpp
+  src/detail/input_check_valid.cpp
+  src/detail/servo_pipeline.cpp
   src/enforce_limits.cpp
   src/servo.cpp
   src/servo_calcs.cpp
@@ -252,6 +254,26 @@ if(BUILD_TESTING)
     test/enforce_limits_tests.cpp
   )
   target_link_libraries(enforce_limits_tests ${SERVO_LIB_NAME})
+
+  # Input check valid
+  ament_add_gtest(input_check_valid_tests test/input_check_valid_tests.cpp)
+  target_link_libraries(input_check_valid_tests ${SERVO_LIB_NAME})
+
+  # Input resampler tests
+  ament_add_gtest(input_resampler_tests test/input_resampler_tests.cpp)
+  target_link_libraries(input_resampler_tests ${SERVO_LIB_NAME})
+
+  # Input stale command tests
+  ament_add_gtest(input_stale_command_tests test/input_stale_command_tests.cpp)
+  target_link_libraries(input_stale_command_tests ${SERVO_LIB_NAME})
+
+  # Input subscriber tests
+  ament_add_gtest(input_subscriber_tests test/input_subscriber_tests.cpp)
+  target_link_libraries(input_subscriber_tests ${SERVO_LIB_NAME})
+
+  # Servo pipeline tests
+  ament_add_gtest(servo_pipeline_tests test/servo_pipeline_tests.cpp)
+  target_link_libraries(servo_pipeline_tests ${SERVO_LIB_NAME})
 
 endif()
 

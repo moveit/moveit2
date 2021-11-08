@@ -55,7 +55,7 @@ struct ServoParameters
   using SharedConstPtr = std::shared_ptr<const ServoParameters>;
 
   // Parameter namespace
-  const std::string ns;
+  std::string ns{ "moveit_servo" };
 
   // ROS Parameters
   // Note that all of these are effectively const because the only way to create one of these
@@ -141,11 +141,6 @@ struct ServoParameters
   static std::optional<ServoParameters> validate(ServoParameters parameters);
 
 private:
-  // Private constructor because we only want this object to be created through the builder method makeServoParameters
-  ServoParameters()
-  {
-  }
-
   struct CallbackHandler
   {
     // callback handler for the on set parameters callback

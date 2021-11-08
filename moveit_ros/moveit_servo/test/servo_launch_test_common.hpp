@@ -65,10 +65,29 @@
 
 using namespace std::chrono_literals;
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_launch_test_common.hpp");
-
 namespace moveit_servo
 {
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_launch_test_common.hpp");
+
+bool waitFor(const rclcpp::Node::SharedPtr& node, std::function<bool()> condition, rclcpp::Duration timeout,
+             rclcpp::Duration poll_period = rclcpp::Duration::from_seconds(0.01f))
+{
+  auto start = node->now();
+  do
+  {
+    if (condition())
+    {
+      return true;
+    }
+    rclcpp::sleep_for(poll_period.to_chrono<std::chrono::milliseconds>());
+  } while (start - node->now() < timeout);
+  return false;
+}
+
+}  // namespace
+
 class ServoFixture : public ::testing::Test
 {
 public:
@@ -410,25 +429,15 @@ public:
     }
     RCLCPP_INFO_STREAM(LOGGER, "Wait for start servo: " << (node_->now() - time_start).seconds());
 
-    // Test that status messages start
-    rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
-    time_start = node_->now();
-    auto num_statuses_start = getNumStatus();
-    size_t iterations = 0;
-    while (getNumStatus() == num_statuses_start && iterations++ < test_parameters_->timeout_iterations)
+    // Test that there is a subscriber hooked up to twist stamped publisher
+    if (!waitFor(
+            node_, [&]() { return pub_joint_cmd_->get_subscription_count() > 0; }, rclcpp::Duration::from_seconds(10.f)))
     {
-      publish_loop_rate.sleep();
-    }
-
-    RCLCPP_INFO_STREAM(LOGGER, "Wait for status num increasing: " << (node_->now() - time_start).seconds());
-
-    if (iterations >= test_parameters_->timeout_iterations)
-    {
-      RCLCPP_ERROR(LOGGER, "Timeout waiting for status num increasing");
+      RCLCPP_ERROR(LOGGER, "Timeout waiting for subscriber to TwistStamped publisher");
       return false;
     }
 
-    return getNumStatus() > num_statuses_start;
+    return true;
   }
 
   bool stop()

@@ -43,8 +43,9 @@
 
 // Moveit2
 #include <moveit_servo/collision_check.h>
-#include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/servo_calcs.h>
+#include <moveit_servo/servo_parameters.h>
+#include <moveit_servo/detail/servo_pipeline.hpp>
 
 namespace moveit_servo
 {
@@ -56,11 +57,6 @@ class Servo
 public:
   Servo(const rclcpp::Node::SharedPtr& node, ServoParameters::SharedConstPtr parameters,
         planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor);
-
-  ~Servo();
-
-  /** \brief start servo node */
-  void start();
 
   /** \brief Pause or unpause processing servo commands while keeping the timers alive */
   void setPaused(bool paused);
@@ -100,6 +96,7 @@ private:
 
   ServoCalcs servo_calcs_;
   CollisionCheck collision_checker_;
+  detail::ServoPipeline servo_pipeline_;
 };
 
 // ServoPtr using alias

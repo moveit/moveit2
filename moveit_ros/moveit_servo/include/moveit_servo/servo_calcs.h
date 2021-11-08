@@ -66,9 +66,10 @@
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
 // moveit_servo
+#include <moveit/online_signal_smoothing/smoothing_base_class.h>
+#include <moveit_servo/detail/input_command.hpp>
 #include <moveit_servo/servo_parameters.h>
 #include <moveit_servo/status_codes.h>
-#include <moveit/online_signal_smoothing/smoothing_base_class.h>
 
 namespace moveit_servo
 {
@@ -78,16 +79,13 @@ enum class ServoType
   JOINT_SPACE
 };
 
-class ServoCalcs
+class ServoCalcs : public detail::InputVisitor
 {
 public:
   ServoCalcs(rclcpp::Node::SharedPtr node, const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
              const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor);
 
-  ~ServoCalcs();
-
-  /** \brief Start the timer where we do work and publish outputs */
-  void start();
+  ~ServoCalcs() override = default;
 
   /**
    * Get the MoveIt planning link transform.
@@ -112,16 +110,26 @@ public:
   /** \brief Pause or unpause processing servo commands while keeping the timers alive */
   void setPaused(bool paused);
 
+  /**
+   * @brief      Function call operator for input visitor.
+   *
+   * @param[in]  input_command  The input command
+   */
+  void operator()(geometry_msgs::msg::TwistStamped input_command) override;
+
+  /**
+   * @brief      Function call operator for input visitor.
+   *
+   * @param[in]  input_command  The input command
+   */
+  void operator()(control_msgs::msg::JointJog input_command) override;
+
+  /**
+   * @brief      Halt the robot arm
+   */
+  void halt();
+
 protected:
-  /** \brief Run the main calculation loop */
-  void mainCalcLoop();
-
-  /** \brief Do calculations for a single iteration. Publish one outgoing command */
-  void calculateSingleIteration();
-
-  /** \brief Stop the currently running thread */
-  void stop();
-
   /** \brief Do servoing calculations for Cartesian twist commands. */
   bool cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
                            trajectory_msgs::msg::JointTrajectory& joint_trajectory);
@@ -131,20 +139,6 @@ protected:
 
   /** \brief Parse the incoming joint msg for the joints of our MoveGroup */
   void updateJoints();
-
-  /**
-   * Checks a JointJog msg for valid (non-NaN) velocities
-   * @param cmd the desired joint servo command
-   * @return true if this represents a valid joint servo command, false otherwise
-   */
-  bool checkValidCommand(const control_msgs::msg::JointJog& cmd);
-
-  /**
-   * Checks a TwistStamped msg for valid (non-NaN) velocities
-   * @param cmd the desired twist servo command
-   * @return true if this represents a valid servo twist command, false otherwise
-   */
-  bool checkValidCommand(const geometry_msgs::msg::TwistStamped& cmd);
 
   /** \brief If incoming velocity commands are from a unitless joystick, scale them to physical units.
    * Also, multiply by timestep to calculate a position change.
@@ -233,12 +227,7 @@ protected:
    */
   void enforceControlDimensions(geometry_msgs::msg::TwistStamped& command);
 
-  /* \brief Callback for joint subsription */
-  void jointStateCB(const sensor_msgs::msg::JointState::SharedPtr msg);
-
   /* \brief Command callbacks */
-  void twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr msg);
-  void jointCmdCB(const control_msgs::msg::JointJog::SharedPtr msg);
   void collisionVelocityScaleCB(const std_msgs::msg::Float64::SharedPtr msg);
 
   /**
@@ -261,6 +250,30 @@ protected:
   bool resetServoStatus(const std::shared_ptr<std_srvs::srv::Empty::Request> req,
                         std::shared_ptr<std_srvs::srv::Empty::Response> res);
 
+  /**
+   * @brief      Publish the status message
+   */
+  void publishStatus();
+
+  /**
+   * @brief      Update the internal robot state
+   */
+  void updateState();
+
+  /**
+   * @brief      Test if paused and reset the smooter if we are paused
+   *
+   * @return     true if we should do an early exit of the operator functions, false if not
+   */
+  bool pausedEarlyExit();
+
+  /**
+   * @brief      Prepare and publish the joint trajectory message
+   *
+   * @param[in]  joint_trajectory  The joint trajectory message
+   */
+  void publishJointTrajectory(std::unique_ptr<trajectory_msgs::msg::JointTrajectory> joint_trajectory);
+
   // Pointer to the ROS node
   std::shared_ptr<rclcpp::Node> node_;
 
@@ -269,13 +282,6 @@ protected:
 
   // Pointer to the collision environment
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-
-  // Track the number of cycles during which motion has not occurred.
-  // Will avoid re-publishing zero velocities endlessly.
-  int zero_velocity_count_ = 0;
-
-  // Flag for staying inactive while there are no incoming commands
-  bool wait_for_servo_commands_ = true;
 
   // Flag saying if the filters were updated during the timer callback
   bool updated_filters_ = false;
@@ -327,9 +333,6 @@ protected:
   // Status
   StatusCode status_ = StatusCode::NO_WARNING;
   std::atomic<bool> paused_;
-  bool twist_command_is_stale_ = false;
-  bool joint_command_is_stale_ = false;
-  bool ok_to_publish_ = false;
   double collision_velocity_scale_ = 1.0;
 
   // Use ArrayXd type to enable more coefficient-wise operations
@@ -350,16 +353,6 @@ protected:
   mutable std::mutex main_loop_mutex_;
   Eigen::Isometry3d tf_moveit_to_robot_cmd_frame_;
   Eigen::Isometry3d tf_moveit_to_ee_frame_;
-  geometry_msgs::msg::TwistStamped::ConstSharedPtr latest_twist_stamped_;
-  control_msgs::msg::JointJog::ConstSharedPtr latest_joint_cmd_;
-  rclcpp::Time latest_twist_command_stamp_ = rclcpp::Time(0., RCL_ROS_TIME);
-  rclcpp::Time latest_joint_command_stamp_ = rclcpp::Time(0., RCL_ROS_TIME);
-  bool latest_twist_cmd_is_nonzero_ = false;
-  bool latest_joint_cmd_is_nonzero_ = false;
-
-  // input condition variable used for low latency mode
-  std::condition_variable input_cv_;
-  bool new_input_cmd_ = false;
 
   // dynamic parameters
   std::string robot_link_command_frame_;

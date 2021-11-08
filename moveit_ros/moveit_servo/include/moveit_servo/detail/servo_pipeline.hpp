@@ -1,7 +1,7 @@
 /*******************************************************************************
  * BSD 3-Clause License
  *
- * Copyright (c) 2019, Los Alamos National Security, LLC
+ * Copyright (c) 2021, PickNik Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,67 +31,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-/*      Title     : servo.cpp
+/*      Title     : servo_pipeline.hpp
  *      Project   : moveit_servo
- *      Created   : 3/9/2017
- *      Author    : Brian O'Neil, Andy Zelenak, Blake Anderson
+ *      Created   : 11/06/2021
+ *      Author    : Tyler Weaver
  */
 
+#pragma once
+
 #include <functional>
-#include <moveit_servo/make_shared_from_pool.h>
-#include <moveit_servo/servo.h>
-#include <moveit_servo/detail/servo_pipeline.hpp>
+#include <memory>
+#include <moveit_servo/detail/input_command.hpp>
+#include <moveit_servo/detail/input_subscriber.hpp>
+#include <moveit_servo/servo_parameters.h>
+#include <rclcpp/rclcpp.hpp>
 
 namespace moveit_servo
 {
-namespace
+namespace detail
 {
-const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo");
-}  // namespace
-
-Servo::Servo(const rclcpp::Node::SharedPtr& node, ServoParameters::SharedConstPtr parameters,
-             planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
-  : planning_scene_monitor_{ planning_scene_monitor }
-  , parameters_{ parameters }
-  , servo_calcs_{ node, parameters, planning_scene_monitor_ }
-  , collision_checker_{ node, parameters, planning_scene_monitor_ }
-  , servo_pipeline_{ node, parameters, [&]() { servo_calcs_.halt(); }, &servo_calcs_ }
+class ServoPipeline
 {
-  // Check collisions in this timer
-  if (parameters_->check_collisions)
-    collision_checker_.start();
-  setPaused(false);
-}
+  std::vector<std::unique_ptr<InputVisitor>> input_visitors_;
+  std::unique_ptr<InputSubscriber> input_subscriber_;
 
-void Servo::setPaused(bool paused)
-{
-  servo_calcs_.setPaused(paused);
-  collision_checker_.setPaused(paused);
-}
+public:
+  /**
+   * @brief ServoPipeline contains all the servo steps
+   * @details Currently this only contains steps for the input, hence the next pointer
+   *
+   * @param node ROS node
+   * @param halt function for sending a message that will stop the robot
+   * @param next the next visitor to execute after the pipeline, normally ServoCalcs
+   */
+  ServoPipeline(rclcpp::Node::SharedPtr node, std::shared_ptr<const moveit_servo::ServoParameters> parameters,
+                std::function<void()> halt, InputVisitor* next);
+};
 
-bool Servo::getCommandFrameTransform(Eigen::Isometry3d& transform)
-{
-  return servo_calcs_.getCommandFrameTransform(transform);
-}
-
-bool Servo::getCommandFrameTransform(geometry_msgs::msg::TransformStamped& transform)
-{
-  return servo_calcs_.getCommandFrameTransform(transform);
-}
-
-bool Servo::getEEFrameTransform(Eigen::Isometry3d& transform)
-{
-  return servo_calcs_.getEEFrameTransform(transform);
-}
-
-bool Servo::getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform)
-{
-  return servo_calcs_.getEEFrameTransform(transform);
-}
-
-const ServoParameters::SharedConstPtr& Servo::getParameters() const
-{
-  return parameters_;
-}
-
+}  // namespace detail
 }  // namespace moveit_servo

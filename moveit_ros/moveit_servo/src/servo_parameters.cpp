@@ -251,6 +251,7 @@ ServoParameters ServoParameters::get(const std::string& ns,
                                      const rclcpp::node_interfaces::NodeParametersInterface::SharedPtr& node_parameters)
 {
   auto parameters = ServoParameters{};
+  parameters.ns = ns;
 
   // ROS Parameters
   parameters.use_gazebo = node_parameters->get_parameter(ns + ".use_gazebo").as_bool();

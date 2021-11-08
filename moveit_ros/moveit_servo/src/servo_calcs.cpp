@@ -58,6 +58,8 @@ namespace moveit_servo
 {
 namespace
 {
+constexpr double ROBOT_STATE_WAIT_TIME = 10.0;  // seconds
+
 // Helper function for detecting zeroed message
 bool isNonZero(const geometry_msgs::msg::TwistStamped& msg)
 {
@@ -124,13 +126,6 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   // Subscribe to command topics
   using std::placeholders::_1;
   using std::placeholders::_2;
-  twist_stamped_sub_ =
-      node_->create_subscription<geometry_msgs::msg::TwistStamped>(parameters_->cartesian_command_in_topic,
-                                                                   rclcpp::SystemDefaultsQoS(),
-                                                                   std::bind(&ServoCalcs::twistStampedCB, this, _1));
-
-  joint_cmd_sub_ = node_->create_subscription<control_msgs::msg::JointJog>(
-      parameters_->joint_command_in_topic, rclcpp::SystemDefaultsQoS(), std::bind(&ServoCalcs::jointCmdCB, this, _1));
 
   // ROS Server for allowing drift in some dimensions
   drift_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeDriftDimensions>(
@@ -224,17 +219,6 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   empty_matrix.setZero();
   tf_moveit_to_ee_frame_ = empty_matrix;
   tf_moveit_to_robot_cmd_frame_ = empty_matrix;
-}
-
-ServoCalcs::~ServoCalcs()
-{
-  stop();
-}
-
-void ServoCalcs::start()
-{
-  // Stop the thread if we are currently running
-  stop();
 
   // Set up the "last" published message, in case we need to send it first
   auto initial_joint_trajectory = std::make_unique<trajectory_msgs::msg::JointTrajectory>();
@@ -261,80 +245,18 @@ void ServoCalcs::start()
   initial_joint_trajectory->points.push_back(point);
   last_sent_command_ = std::move(initial_joint_trajectory);
 
-  current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-  tf_moveit_to_ee_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
-                           current_state_->getGlobalLinkTransform(parameters_->ee_frame_name);
-  tf_moveit_to_robot_cmd_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
-                                  current_state_->getGlobalLinkTransform(robot_link_command_frame_);
-
-  stop_requested_ = false;
-  thread_ = std::thread([this] { mainCalcLoop(); });
-  new_input_cmd_ = false;
-}
-
-void ServoCalcs::stop()
-{
-  // Request stop
-  stop_requested_ = true;
-
-  // Notify condition variable in case the thread is blocked on it
+  if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState(parameters_->move_group_name,
+                                                                        ROBOT_STATE_WAIT_TIME))
   {
-    // scope so the mutex is unlocked after so the thread can continue
-    // and therefore be joinable
-    const std::lock_guard<std::mutex> lock(main_loop_mutex_);
-    new_input_cmd_ = false;
-    input_cv_.notify_all();
+    RCLCPP_ERROR(LOGGER, "Timeout waiting for complete state");
+    throw std::runtime_error("Timeout waiting for complete state");
   }
 
-  // Join the thread
-  if (thread_.joinable())
-  {
-    thread_.join();
-  }
+  updateState();
+  resetLowPassFilters(original_joint_state_);
 }
 
-void ServoCalcs::mainCalcLoop()
-{
-  rclcpp::Rate rate(1.0 / parameters_->publish_period);
-
-  while (rclcpp::ok() && !stop_requested_)
-  {
-    // lock the input state mutex
-    std::unique_lock<std::mutex> main_loop_lock(main_loop_mutex_);
-
-    // low latency mode -- begin calculations as soon as a new command is received.
-    if (parameters_->low_latency_mode)
-    {
-      input_cv_.wait(main_loop_lock, [this] { return (new_input_cmd_ || stop_requested_); });
-    }
-
-    // reset new_input_cmd_ flag
-    new_input_cmd_ = false;
-
-    // run servo calcs
-    const auto start_time = node_->now();
-    calculateSingleIteration();
-    const auto run_duration = node_->now() - start_time;
-
-    // Log warning when the run duration was longer than the period
-    if (run_duration.seconds() > parameters_->publish_period)
-    {
-      rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                  "run_duration: " << run_duration.seconds() << " (" << parameters_->publish_period
-                                                   << ")");
-    }
-
-    // normal mode, unlock input mutex and wait for the period of the loop
-    if (!parameters_->low_latency_mode)
-    {
-      main_loop_lock.unlock();
-      rate.sleep();
-    }
-  }
-}
-
-void ServoCalcs::calculateSingleIteration()
+void ServoCalcs::publishStatus()
 {
   // Publish status each loop iteration
   auto status_msg = std::make_unique<std_msgs::msg::Int8>();
@@ -343,6 +265,15 @@ void ServoCalcs::calculateSingleIteration()
 
   // After we publish, status, reset it back to no warnings
   status_ = StatusCode::NO_WARNING;
+}
+
+void ServoCalcs::updateState()
+{
+  // Reset this variable to make sure the filters are updated each iteration
+  updated_filters_ = false;
+
+  // Publish the status every time we update the internal state
+  publishStatus();
 
   // Always update the joints and end-effector transform for 2 reasons:
   // 1) in case the getCommandFrameTransform() method is being used
@@ -351,20 +282,6 @@ void ServoCalcs::calculateSingleIteration()
 
   // Update from latest state
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
-
-  if (latest_twist_stamped_)
-    twist_stamped_cmd_ = *latest_twist_stamped_;
-  if (latest_joint_cmd_)
-    joint_servo_cmd_ = *latest_joint_cmd_;
-
-  // Check for stale cmds
-  twist_command_is_stale_ = ((node_->now() - latest_twist_command_stamp_) >=
-                             rclcpp::Duration::from_seconds(parameters_->incoming_command_timeout));
-  joint_command_is_stale_ = ((node_->now() - latest_joint_command_stamp_) >=
-                             rclcpp::Duration::from_seconds(parameters_->incoming_command_timeout));
-
-  have_nonzero_twist_stamped_ = latest_twist_cmd_is_nonzero_;
-  have_nonzero_joint_command_ = latest_joint_cmd_is_nonzero_;
 
   // Get the transform from MoveIt planning frame to servoing command frame
   // Calculate this transform to ensure it is available via C++ API
@@ -377,44 +294,76 @@ void ServoCalcs::calculateSingleIteration()
   // Calculate this transform to ensure it is available via C++ API
   tf_moveit_to_ee_frame_ = current_state_->getGlobalLinkTransform(parameters_->planning_frame).inverse() *
                            current_state_->getGlobalLinkTransform(parameters_->ee_frame_name);
+}
 
-  have_nonzero_command_ = have_nonzero_twist_stamped_ || have_nonzero_joint_command_;
-
-  // Don't end this function without updating the filters
-  updated_filters_ = false;
-
-  // If paused or while waiting for initial servo commands, just keep the low-pass filters up to date with current
-  // joints so a jump doesn't occur when restarting
-  if (wait_for_servo_commands_ || paused_)
+void ServoCalcs::publishJointTrajectory(std::unique_ptr<trajectory_msgs::msg::JointTrajectory> joint_trajectory)
+{
+  // Clear out position commands if user did not request them (can cause interpolation issues)
+  if (!parameters_->publish_joint_positions)
   {
-    resetLowPassFilters(original_joint_state_);
+    joint_trajectory->points[0].positions.clear();
+  }
+  // Likewise for velocity and acceleration
+  if (!parameters_->publish_joint_velocities)
+  {
+    joint_trajectory->points[0].velocities.clear();
+  }
+  if (!parameters_->publish_joint_accelerations)
+  {
+    joint_trajectory->points[0].accelerations.clear();
+  }
 
-    // Check if there are any new commands with valid timestamp
-    wait_for_servo_commands_ =
-        twist_stamped_cmd_.header.stamp == rclcpp::Time(0.) && joint_servo_cmd_.header.stamp == rclcpp::Time(0.);
+  // Put the outgoing msg in the right format
+  // (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
+  if (parameters_->command_out_type == "trajectory_msgs/JointTrajectory")
+  {
+    // When a joint_trajectory_controller receives a new command, a stamp of 0 indicates "begin immediately"
+    // See http://wiki.ros.org/joint_trajectory_controller#Trajectory_replacement
+    joint_trajectory->header.stamp = rclcpp::Time(0);
+    *last_sent_command_ = *joint_trajectory;
+    trajectory_outgoing_cmd_pub_->publish(std::move(joint_trajectory));
+  }
+  else if (parameters_->command_out_type == "std_msgs/Float64MultiArray")
+  {
+    auto joints = std::make_unique<std_msgs::msg::Float64MultiArray>();
+    if (parameters_->publish_joint_positions && !joint_trajectory->points.empty())
+      joints->data = joint_trajectory->points[0].positions;
+    else if (parameters_->publish_joint_velocities && !joint_trajectory->points.empty())
+      joints->data = joint_trajectory->points[0].velocities;
+    *last_sent_command_ = *joint_trajectory;
+    multiarray_outgoing_cmd_pub_->publish(std::move(joints));
+  }
+}
 
+bool ServoCalcs::pausedEarlyExit()
+{
+  if (paused_)
+  {
     // Early exit
+    resetLowPassFilters(original_joint_state_);
+    return true;
+  }
+
+  return false;
+}
+
+void ServoCalcs::operator()(geometry_msgs::msg::TwistStamped input_command)
+{
+  const std::lock_guard<std::mutex> lock(main_loop_mutex_);
+  updateState();
+  if (pausedEarlyExit())
+  {
     return;
   }
 
-  // If not waiting for initial command, and not paused.
   // Do servoing calculations only if the robot should move, for efficiency
   // Create new outgoing joint trajectory command message
   auto joint_trajectory = std::make_unique<trajectory_msgs::msg::JointTrajectory>();
 
-  // Prioritize cartesian servoing above joint servoing
-  // Only run commands if not stale and nonzero
-  if (have_nonzero_twist_stamped_ && !twist_command_is_stale_)
+  // Only run commands if nonzero
+  if (isNonZero(input_command))
   {
-    if (!cartesianServoCalcs(twist_stamped_cmd_, *joint_trajectory))
-    {
-      resetLowPassFilters(original_joint_state_);
-      return;
-    }
-  }
-  else if (have_nonzero_joint_command_ && !joint_command_is_stale_)
-  {
-    if (!jointServoCalcs(joint_servo_cmd_, *joint_trajectory))
+    if (!cartesianServoCalcs(input_command, *joint_trajectory))
     {
       resetLowPassFilters(original_joint_state_);
       return;
@@ -430,93 +379,79 @@ void ServoCalcs::calculateSingleIteration()
     }
   }
 
-  // Print a warning to the user if both are stale
-  if (twist_command_is_stale_ && joint_command_is_stale_)
-  {
-    filteredHalt(*joint_trajectory);
-  }
-  else
-  {
-    done_stopping_ = false;
-  }
-
-  // Skip the servoing publication if all inputs have been zero for several cycles in a row.
-  // num_outgoing_halt_msgs_to_publish == 0 signifies that we should keep republishing forever.
-  if (!have_nonzero_command_ && done_stopping_ && (parameters_->num_outgoing_halt_msgs_to_publish != 0) &&
-      (zero_velocity_count_ > parameters_->num_outgoing_halt_msgs_to_publish))
-  {
-    ok_to_publish_ = false;
-    rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "All-zero command. Doing nothing.");
-  }
-  // Skip servoing publication if both types of commands are stale.
-  else if (twist_command_is_stale_ && joint_command_is_stale_)
-  {
-    ok_to_publish_ = false;
-    rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_DEBUG_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                 "Skipping publishing because incoming commands are stale.");
-  }
-  else
-  {
-    ok_to_publish_ = true;
-  }
-
-  // Store last zero-velocity message flag to prevent superfluous warnings.
-  // Cartesian and joint commands must both be zero.
-  if (!have_nonzero_command_ && done_stopping_)
-  {
-    // Avoid overflow
-    if (zero_velocity_count_ < std::numeric_limits<int>::max())
-      ++zero_velocity_count_;
-  }
-  else
-  {
-    zero_velocity_count_ = 0;
-  }
-
-  if (ok_to_publish_ && !paused_)
-  {
-    // Clear out position commands if user did not request them (can cause interpolation issues)
-    if (!parameters_->publish_joint_positions)
-    {
-      joint_trajectory->points[0].positions.clear();
-    }
-    // Likewise for velocity and acceleration
-    if (!parameters_->publish_joint_velocities)
-    {
-      joint_trajectory->points[0].velocities.clear();
-    }
-    if (!parameters_->publish_joint_accelerations)
-    {
-      joint_trajectory->points[0].accelerations.clear();
-    }
-
-    // Put the outgoing msg in the right format
-    // (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
-    if (parameters_->command_out_type == "trajectory_msgs/JointTrajectory")
-    {
-      // When a joint_trajectory_controller receives a new command, a stamp of 0 indicates "begin immediately"
-      // See http://wiki.ros.org/joint_trajectory_controller#Trajectory_replacement
-      joint_trajectory->header.stamp = rclcpp::Time(0);
-      *last_sent_command_ = *joint_trajectory;
-      trajectory_outgoing_cmd_pub_->publish(std::move(joint_trajectory));
-    }
-    else if (parameters_->command_out_type == "std_msgs/Float64MultiArray")
-    {
-      auto joints = std::make_unique<std_msgs::msg::Float64MultiArray>();
-      if (parameters_->publish_joint_positions && !joint_trajectory->points.empty())
-        joints->data = joint_trajectory->points[0].positions;
-      else if (parameters_->publish_joint_velocities && !joint_trajectory->points.empty())
-        joints->data = joint_trajectory->points[0].velocities;
-      *last_sent_command_ = *joint_trajectory;
-      multiarray_outgoing_cmd_pub_->publish(std::move(joints));
-    }
-  }
+  // Publish the joint trajectory message
+  publishJointTrajectory(std::move(joint_trajectory));
 
   // Update the filters if we haven't yet
   if (!updated_filters_)
+  {
     resetLowPassFilters(original_joint_state_);
+  }
+}
+
+void ServoCalcs::operator()(control_msgs::msg::JointJog input_command)
+{
+  const std::lock_guard<std::mutex> lock(main_loop_mutex_);
+  updateState();
+  if (pausedEarlyExit())
+  {
+    return;
+  }
+
+  // Do servoing calculations only if the robot should move, for efficiency
+  // Create new outgoing joint trajectory command message
+  auto joint_trajectory = std::make_unique<trajectory_msgs::msg::JointTrajectory>();
+
+  // Only run commands if nonzero
+  if (isNonZero(input_command))
+  {
+    if (!jointServoCalcs(input_command, *joint_trajectory))
+    {
+      resetLowPassFilters(original_joint_state_);
+      return;
+    }
+  }
+  else
+  {
+    // Joint trajectory is not populated with anything, so set it to the last positions and 0 velocity
+    *joint_trajectory = *last_sent_command_;
+    for (auto& point : joint_trajectory->points)
+    {
+      point.velocities.assign(point.velocities.size(), 0);
+    }
+  }
+
+  // Publish the joint trajectory message
+  publishJointTrajectory(std::move(joint_trajectory));
+
+  // Update the filters if we haven't yet
+  if (!updated_filters_)
+  {
+    resetLowPassFilters(original_joint_state_);
+  }
+}
+
+void ServoCalcs::halt()
+{
+  rclcpp::Clock& clock = *node_->get_clock();
+  RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD, "Halting");
+
+  const std::lock_guard<std::mutex> lock(main_loop_mutex_);
+  updateState();
+  if (pausedEarlyExit())
+  {
+    return;
+  }
+
+  auto joint_trajectory = std::make_unique<trajectory_msgs::msg::JointTrajectory>();
+
+  joint_trajectory->header.stamp = node_->now();
+  joint_trajectory->header.frame_id = parameters_->planning_frame;
+  joint_trajectory->joint_names = internal_joint_state_.name;
+
+  filteredHalt(*joint_trajectory);
+
+  publishJointTrajectory(std::move(joint_trajectory));
 }
 
 rcl_interfaces::msg::SetParametersResult ServoCalcs::robotLinkCommandFrameCallback(const rclcpp::Parameter& parameter)
@@ -533,10 +468,6 @@ rcl_interfaces::msg::SetParametersResult ServoCalcs::robotLinkCommandFrameCallba
 bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
                                      trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
-  // Check for nan's in the incoming command
-  if (!checkValidCommand(cmd))
-    return false;
-
   // Set uncontrolled dimensions to 0 in command frame
   enforceControlDimensions(cmd);
 
@@ -601,10 +532,6 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
 bool ServoCalcs::jointServoCalcs(const control_msgs::msg::JointJog& cmd,
                                  trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
-  // Check for nan's
-  if (!checkValidCommand(cmd))
-    return false;
-
   // Apply user-defined scaling
   delta_theta_ = scaleJointCommand(cmd);
 
@@ -966,48 +893,6 @@ void ServoCalcs::updateJoints()
   original_joint_state_ = internal_joint_state_;
 }
 
-bool ServoCalcs::checkValidCommand(const control_msgs::msg::JointJog& cmd)
-{
-  for (double velocity : cmd.velocities)
-  {
-    if (std::isnan(velocity))
-    {
-      rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                  "nan in incoming command. Skipping this datapoint.");
-      return false;
-    }
-  }
-  return true;
-}
-
-bool ServoCalcs::checkValidCommand(const geometry_msgs::msg::TwistStamped& cmd)
-{
-  if (std::isnan(cmd.twist.linear.x) || std::isnan(cmd.twist.linear.y) || std::isnan(cmd.twist.linear.z) ||
-      std::isnan(cmd.twist.angular.x) || std::isnan(cmd.twist.angular.y) || std::isnan(cmd.twist.angular.z))
-  {
-    rclcpp::Clock& clock = *node_->get_clock();
-    RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                "nan in incoming command. Skipping this datapoint.");
-    return false;
-  }
-
-  // If incoming commands should be in the range [-1:1], check for |delta|>1
-  if (parameters_->command_in_type == "unitless")
-  {
-    if ((fabs(cmd.twist.linear.x) > 1) || (fabs(cmd.twist.linear.y) > 1) || (fabs(cmd.twist.linear.z) > 1) ||
-        (fabs(cmd.twist.angular.x) > 1) || (fabs(cmd.twist.angular.y) > 1) || (fabs(cmd.twist.angular.z) > 1))
-    {
-      rclcpp::Clock& clock = *node_->get_clock();
-      RCLCPP_WARN_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
-                                  "Component of incoming command is >1. Skipping this datapoint.");
-      return false;
-    }
-  }
-
-  return true;
-}
-
 // Scale the incoming jog command
 Eigen::VectorXd ServoCalcs::scaleCartesianCommand(const geometry_msgs::msg::TwistStamped& command)
 {
@@ -1170,34 +1055,6 @@ bool ServoCalcs::getEEFrameTransform(geometry_msgs::msg::TransformStamped& trans
   transform =
       convertIsometryToTransform(tf_moveit_to_ee_frame_, parameters_->planning_frame, parameters_->ee_frame_name);
   return true;
-}
-
-void ServoCalcs::twistStampedCB(const geometry_msgs::msg::TwistStamped::SharedPtr msg)
-{
-  const std::lock_guard<std::mutex> lock(main_loop_mutex_);
-  latest_twist_stamped_ = msg;
-  latest_twist_cmd_is_nonzero_ = isNonZero(*latest_twist_stamped_.get());
-
-  if (msg.get()->header.stamp != rclcpp::Time(0.))
-    latest_twist_command_stamp_ = msg.get()->header.stamp;
-
-  // notify that we have a new input
-  new_input_cmd_ = true;
-  input_cv_.notify_all();
-}
-
-void ServoCalcs::jointCmdCB(const control_msgs::msg::JointJog::SharedPtr msg)
-{
-  const std::lock_guard<std::mutex> lock(main_loop_mutex_);
-  latest_joint_cmd_ = msg;
-  latest_joint_cmd_is_nonzero_ = isNonZero(*latest_joint_cmd_.get());
-
-  if (msg.get()->header.stamp != rclcpp::Time(0.))
-    latest_joint_command_stamp_ = msg.get()->header.stamp;
-
-  // notify that we have a new input
-  new_input_cmd_ = true;
-  input_cv_.notify_all();
 }
 
 void ServoCalcs::collisionVelocityScaleCB(const std_msgs::msg::Float64::SharedPtr msg)
