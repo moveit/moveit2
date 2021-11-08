@@ -45,8 +45,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.planning_sce
 
 planning_scene_monitor::TrajectoryMonitor::TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor,
                                                              double sampling_frequency)
-  : TrajectoryMonitor(state_monitor, std::make_unique<TrajectoryMonitorMiddlewareHandle>(),
-                      sampling_frequency)
+  : TrajectoryMonitor(state_monitor, std::make_unique<TrajectoryMonitorMiddlewareHandle>(), sampling_frequency)
 {
 }
 
