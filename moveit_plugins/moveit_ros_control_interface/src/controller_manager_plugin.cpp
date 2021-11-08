@@ -100,7 +100,12 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
   HandleMap handles_;
 
   rclcpp::Time controllers_stamp_{ 0, 0, RCL_ROS_TIME };
+
+  /**
+   * @brief Protects access to managed_controllers_, active_controllers_, allocators_, handles_, and controllers_stamp.
+   */
   std::mutex controllers_mutex_;
+
   rclcpp::Node::SharedPtr node_;
   rclcpp::Client<controller_manager_msgs::srv::ListControllers>::SharedPtr list_controllers_service_;
   rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedPtr switch_controller_service_;
