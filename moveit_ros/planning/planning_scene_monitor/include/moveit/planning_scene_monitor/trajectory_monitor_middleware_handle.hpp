@@ -53,14 +53,12 @@ public:
    *
    * @param[in]  sampling_frequency  Used to create ROS2 Rate
    */
-  TrajectoryMonitorMiddlewareHandle(double sampling_frequency);
+  TrajectoryMonitorMiddlewareHandle();
 
   /**
    * @brief      Sleeps for time specified by @p sampling_frequency
    */
-  void sleep();
+  void sleep(double sampling_frequency);
 
-private:
-  rclcpp::Rate rate_;
 };
 }  // namespace planning_scene_monitor

@@ -50,7 +50,7 @@ using namespace std::chrono_literals;
 
 struct MockTrajectoryMonitorMiddlewareHandle : public planning_scene_monitor::TrajectoryMonitor::MiddlewareHandle
 {
-  MOCK_METHOD(void, sleep, (), (override));
+  MOCK_METHOD(void, sleep, (double sampling_frequency), (override));
 };
 
 struct MockCurrentStateMonitorMiddlewareHandle : public planning_scene_monitor::CurrentStateMonitor::MiddlewareHandle
@@ -60,6 +60,12 @@ struct MockCurrentStateMonitorMiddlewareHandle : public planning_scene_monitor::
               (const std::string& topic, planning_scene_monitor::JointStateUpdateCallback callback), (override));
   MOCK_METHOD(void, resetJointStateSubscription, (), (override));
   MOCK_METHOD(std::string, getJointStateTopicName, (), (const, override));
+  MOCK_METHOD(bool, sleepFor, (const std::chrono::nanoseconds& nanoseconds), (const, override));
+  MOCK_METHOD(void, createStaticTfSubscription, (TfCallback callback), (override));
+  MOCK_METHOD(void, createDynamicTfSubscription, (TfCallback callback), (override));
+  MOCK_METHOD(std::string, getStaticTfTopicName, (), (const, override));
+  MOCK_METHOD(std::string, getDynamicTfTopicName, (), (const, override));
+  MOCK_METHOD(void, resetTfSubscriptions, (), (override));
 };
 
 void waitFor(std::chrono::seconds timeout, std::function<bool()> done)

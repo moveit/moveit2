@@ -68,9 +68,9 @@ public:
     virtual ~MiddlewareHandle() = default;
 
     /**
-     * @brief      Add sleep using rate
+     * @brief      Sleep the handle for some prescribed amount of time.
      */
-    virtual void sleep() = 0;
+    virtual void sleep(double sampling_freqency) = 0;
   };
 
   /** @brief Constructor
@@ -78,6 +78,11 @@ public:
    *  @param[in]  sampling_frequency
    */
   TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor, double sampling_frequency = 0.0);
+
+  /** @brief Constructor with middleware handle as input parameter
+   *  @param[in]  state_monitor
+   *  @param[in]  sampling_frequency
+   */
   TrajectoryMonitor(const CurrentStateMonitorConstPtr& state_monitor,
                     std::unique_ptr<MiddlewareHandle> middleware_handle, double sampling_frequency = 0.0);
 
@@ -118,7 +123,9 @@ public:
 private:
   void recordStates();
 
+  // Samples robot states.
   CurrentStateMonitorConstPtr current_state_monitor_;
+  // Interface for communicating with ROS.
   std::unique_ptr<MiddlewareHandle> middleware_handle_;
   double sampling_frequency_;
 

@@ -39,13 +39,13 @@
 
 namespace planning_scene_monitor
 {
-planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::TrajectoryMonitorMiddlewareHandle(double sampling_frequency)
-  : rate_(sampling_frequency)
+planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::TrajectoryMonitorMiddlewareHandle()
 {
 }
 
-void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::sleep()
+void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::sleep(double sampling_frequency)
 {
-  rate_.sleep();
+  rclcpp::Rate rate(sampling_frequency);
+  rate.sleep();
 }
 }  // namespace planning_scene_monitor
