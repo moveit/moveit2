@@ -34,50 +34,53 @@
 
 /* Author: David V. Lu!! */
 
-#pragma once
-
-#include <std_msgs/msg/string.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
+#include <fstream>
+#include <sstream>
+#include <sys/stat.h>
 
-namespace rdf_loader
+int main(int argc, char** argv)
 {
-using StringCallback = std::function<void(const std::string&)>;
+  rclcpp::init(argc, argv);
+  auto node = std::make_shared<rclcpp::Node>("boring_string_publisher");
 
-/**
- * @brief SynchronizedStringParameter is a way to load a string from the ROS environment.
- *
- * First it tries to load the string from a parameter.
- * If that fails, it subscribes to a std_msgs::String topic of the same name to get the value.
- *
- * If the parameter is loaded successfully, you can publish the value as a String msg if the publish_NAME param is true.
- *
- * You can specify how long to wait for a subscribed message with NAME_timeout (double in seconds)
- *
- * By default, the subscription will be killed after the first message is recieved.
- * If the parameter NAME_continuous is true, then the parent_callback will be called on every subsequent message.
- */
-class SynchronizedStringParameter
-{
-public:
-  std::string loadInitialValue(const std::shared_ptr<rclcpp::Node>& node, const std::string& name,
-                               StringCallback parent_callback = {});
+  // Get Two String Parameters
+  std::string topic, content_path;
+  node->declare_parameter("topic", rclcpp::ParameterType::PARAMETER_STRING);
+  node->get_parameter("topic", topic);
+  node->declare_parameter("content_path", rclcpp::ParameterType::PARAMETER_STRING);
+  node->get_parameter("content_path", content_path);
 
-protected:
-  bool getMainParameter();
+  if (content_path.empty())
+  {
+    RCLCPP_FATAL(node->get_logger(), "content_path parameter was not specified or is empty");
+    return -1;
+  }
 
-  bool shouldPublish();
+  // Check if content exists
+  struct stat statistics;
+  if (stat(content_path.c_str(), &statistics) != 0)
+  {
+    RCLCPP_FATAL(node->get_logger(), "%s does not exist!", content_path.c_str());
+    return -1;
+  }
 
-  bool waitForMessage(const rclcpp::Duration timeout);
+  // Set Up Publisher
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr string_publisher =
+      node->create_publisher<std_msgs::msg::String>(topic, rclcpp::QoS(1).transient_local());
 
-  void stringCallback(const std_msgs::msg::String::SharedPtr msg);
+  // Read in Content
+  std::ifstream content_stream(content_path.c_str());
+  std::stringstream buffer;
+  buffer << content_stream.rdbuf();
 
-  std::shared_ptr<rclcpp::Node> node_;
-  std::string name_;
-  StringCallback parent_callback_;
+  // Publish Content
+  std_msgs::msg::String msg;
+  msg.data = buffer.str();
+  string_publisher->publish(msg);
 
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr string_subscriber_;
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr string_publisher_;
-
-  std::string content_;
-};
-}  // namespace rdf_loader
+  rclcpp::spin(node);
+  rclcpp::shutdown();
+  return 0;
+}

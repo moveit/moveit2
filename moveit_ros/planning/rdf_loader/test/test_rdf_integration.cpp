@@ -34,50 +34,44 @@
 
 /* Author: David V. Lu!! */
 
-#pragma once
-
-#include <std_msgs/msg/string.hpp>
+#include <moveit/rdf_loader/rdf_loader.h>
 #include <rclcpp/rclcpp.hpp>
+#include <gtest/gtest.h>
 
-namespace rdf_loader
+TEST(RDFIntegration, default_arguments)
 {
-using StringCallback = std::function<void(const std::string&)>;
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("default_arguments");
+  rdf_loader::RDFLoader loader(node);
+  ASSERT_NE(nullptr, loader.getURDF());
+  EXPECT_EQ("kermit", loader.getURDF()->name_);
+  ASSERT_NE(nullptr, loader.getSRDF());
+  EXPECT_EQ("kermit", loader.getSRDF()->getName());
+}
 
-/**
- * @brief SynchronizedStringParameter is a way to load a string from the ROS environment.
- *
- * First it tries to load the string from a parameter.
- * If that fails, it subscribes to a std_msgs::String topic of the same name to get the value.
- *
- * If the parameter is loaded successfully, you can publish the value as a String msg if the publish_NAME param is true.
- *
- * You can specify how long to wait for a subscribed message with NAME_timeout (double in seconds)
- *
- * By default, the subscription will be killed after the first message is recieved.
- * If the parameter NAME_continuous is true, then the parent_callback will be called on every subsequent message.
- */
-class SynchronizedStringParameter
+TEST(RDFIntegration, non_existent)
 {
-public:
-  std::string loadInitialValue(const std::shared_ptr<rclcpp::Node>& node, const std::string& name,
-                               StringCallback parent_callback = {});
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("non_existent");
+  rdf_loader::RDFLoader loader(node, "DNE");
+  ASSERT_EQ(nullptr, loader.getURDF());
+  ASSERT_EQ(nullptr, loader.getSRDF());
+}
 
-protected:
-  bool getMainParameter();
+TEST(RDFIntegration, topic_based)
+{
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("topic_based");
+  rdf_loader::RDFLoader loader(node, "topic_description");
+  ASSERT_NE(nullptr, loader.getURDF());
+  EXPECT_EQ("gonzo", loader.getURDF()->name_);
+  ASSERT_NE(nullptr, loader.getSRDF());
+  EXPECT_EQ("gonzo", loader.getSRDF()->getName());
+}
 
-  bool shouldPublish();
+int main(int argc, char** argv)
+{
+  rclcpp::init(argc, argv);
+  ::testing::InitGoogleTest(&argc, argv);
 
-  bool waitForMessage(const rclcpp::Duration timeout);
-
-  void stringCallback(const std_msgs::msg::String::SharedPtr msg);
-
-  std::shared_ptr<rclcpp::Node> node_;
-  std::string name_;
-  StringCallback parent_callback_;
-
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr string_subscriber_;
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr string_publisher_;
-
-  std::string content_;
-};
-}  // namespace rdf_loader
+  int ret = RUN_ALL_TESTS();
+  rclcpp::shutdown();
+  return ret;
+}

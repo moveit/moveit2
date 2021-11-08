@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: David Lu!! */
+/* Author: David V. Lu!! */
 
 #include <moveit/rdf_loader/synchronized_string_parameter.h>
 
