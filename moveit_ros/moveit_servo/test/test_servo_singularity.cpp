@@ -71,7 +71,8 @@ TEST_F(ServoFixture, ReachSingular)
   // Test that we didn't timeout
   EXPECT_LT(iterations, test_parameters_->timeout_iterations);
   auto log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Wait for DECELERATE_FOR_LEAVING_SINGULARITY: " << (log_time_end - log_time_start).seconds());
+  RCLCPP_INFO_STREAM(LOGGER,
+                     "Wait for DECELERATE_FOR_LEAVING_SINGULARITY: " << (log_time_end - log_time_start).seconds());
 
   // Look for NO_WARNING status
   watchForStatus(moveit_servo::StatusCode::NO_WARNING);
@@ -122,7 +123,8 @@ TEST_F(ServoFixture, ReachSingular)
   // Test that we didn't timeout
   EXPECT_LT(iterations, test_parameters_->timeout_iterations);
   log_time_end = node_->now();
-  RCLCPP_INFO_STREAM(LOGGER, "Wait for DECELERATE_FOR_APPROACHING_SINGULARITY: " << (log_time_end - log_time_start).seconds());
+  RCLCPP_INFO_STREAM(LOGGER,
+                     "Wait for DECELERATE_FOR_APPROACHING_SINGULARITY: " << (log_time_end - log_time_start).seconds());
 
   // Continue moving towards singularity until we are halted
   // Look for HALT_FOR_SINGULARITY status

@@ -137,7 +137,8 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
                             logger);
   // Default approaching_stop_singularity_threshold to hard_stop_singularity_threshold
   declareOrGetParam<double>(parameters->approaching_stop_singularity_threshold,
-                            ns + ".approaching_stop_singularity_threshold", node, logger, parameters->hard_stop_singularity_threshold);
+                            ns + ".approaching_stop_singularity_threshold", node, logger,
+                            parameters->hard_stop_singularity_threshold);
   declareOrGetParam<double>(parameters->joint_limit_margin, ns + ".joint_limit_margin", node, logger);
 
   // Collision checking
