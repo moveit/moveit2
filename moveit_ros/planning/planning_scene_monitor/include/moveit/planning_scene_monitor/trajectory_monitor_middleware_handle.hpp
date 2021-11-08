@@ -58,6 +58,6 @@ public:
   /**
    * @brief      Sleeps for time specified by @p sampling_frequency
    */
-  void sleep(double sampling_frequency);
+  void sleep(double sampling_frequency) override;
 };
 }  // namespace planning_scene_monitor
