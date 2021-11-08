@@ -58,6 +58,8 @@ namespace moveit_servo
 {
 namespace
 {
+constexpr char CONDITION_TOPIC[] = "~/condition";
+
 // Helper function for detecting zeroed message
 bool isNonZero(const geometry_msgs::msg::TwistStamped& msg)
 {
@@ -164,7 +166,7 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
 
   // Publish status
   status_pub_ = node_->create_publisher<std_msgs::msg::Int8>(parameters_->status_topic, rclcpp::SystemDefaultsQoS());
-  condition_pub_ = node_->create_publisher<std_msgs::msg::Float64>("~/condition", rclcpp::SystemDefaultsQoS());
+  condition_pub_ = node_->create_publisher<std_msgs::msg::Float64>(CONDITION_TOPIC, rclcpp::SystemDefaultsQoS());
 
   internal_joint_state_.name = joint_model_group_->getActiveJointModelNames();
   num_joints_ = internal_joint_state_.name.size();
@@ -820,7 +822,7 @@ double ServoCalcs::velocityScalingFactorForSingularity(const Eigen::VectorXd& co
   }
 
   // Very close to singularity, so halt.
-  else if (ini_condition > upper_threshold)
+  else if (ini_condition >= upper_threshold)
   {
     velocity_scale = 0;
     status_ = StatusCode::HALT_FOR_SINGULARITY;
