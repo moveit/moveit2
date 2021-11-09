@@ -38,6 +38,7 @@
 #include <Eigen/Core>
 #include <list>
 #include <moveit/robot_trajectory/robot_trajectory.h>
+#include <trackjoint/trajectory_generator.h>
 
 namespace trajectory_processing
 {

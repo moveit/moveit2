@@ -44,6 +44,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
 find_package(srdfdom REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(trackjoint REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(common_interfaces REQUIRED)
@@ -131,6 +132,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   std_msgs
   tf2_eigen
   tf2_geometry_msgs
+  trackjoint
   trajectory_msgs
   visualization_msgs
   Eigen3
