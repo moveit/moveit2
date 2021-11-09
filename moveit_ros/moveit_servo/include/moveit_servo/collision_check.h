@@ -97,7 +97,6 @@ private:
 
   // Robot state and collision matrix from planning scene
   std::shared_ptr<moveit::core::RobotState> current_state_;
-  collision_detection::AllowedCollisionMatrix acm_;
 
   // Scale robot velocity according to collision proximity and user-defined thresholds.
   // I scaled exponentially (cubic power) so velocity drops off quickly after the threshold.
