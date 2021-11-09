@@ -51,8 +51,18 @@ public:
 
 private:
   /**
-   * \brief Initialize TrackJoint position/vel/accel
+   * \brief Set TrackJoint position/vel/accel
    */
-  static void initializeTrackJointState();
+  static void setTrackJointState(const size_t waypoint_idx, const robot_trajectory::RobotTrajectory& trajectory,
+                                 const size_t num_dof, const std::vector<int>& joint_group_indices,
+                                 std::vector<trackjoint::KinematicState>& joint_states);
+
+  /**
+   * \brief Set TrackJoint position/vel/accel limits
+   */
+  static void setTrackJointLimits(const moveit::core::JointModelGroup* group, const size_t num_dof,
+                                  const double max_velocity_scaling_factor,
+                                  const double max_acceleration_scaling_factor,
+                                  std::vector<trackjoint::Limits>& limits);
 };
 }  // namespace trajectory_processing
