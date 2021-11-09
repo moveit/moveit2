@@ -40,7 +40,6 @@ find_package(kdl_parser REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(octomap_msgs REQUIRED)
 find_package(random_numbers REQUIRED)
-find_package(ruckig REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
 find_package(srdfdom REQUIRED)
@@ -138,7 +137,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   eigen3_cmake_module
   OCTOMAP
   Bullet
-  ruckig
 )
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}

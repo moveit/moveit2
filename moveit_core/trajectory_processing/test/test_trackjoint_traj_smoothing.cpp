@@ -34,7 +34,7 @@
 /* Author: Andy Zelenak */
 
 #include <gtest/gtest.h>
-#include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
+#include <moveit/trajectory_processing/trackjoint_traj_smoothing.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
 
@@ -43,7 +43,7 @@ namespace
 constexpr double DEFAULT_TIMESTEP = 0.1;  // sec
 constexpr char JOINT_GROUP[] = "panda_arm";
 
-class RuckigTests : public testing::Test
+class TrackJointTests : public testing::Test
 {
 protected:
   void SetUp() override
@@ -54,19 +54,19 @@ protected:
 
   moveit::core::RobotModelPtr robot_model_;
   robot_trajectory::RobotTrajectoryPtr trajectory_;
-  trajectory_processing::RuckigSmoothing smoother_;
+  trajectory_processing::TrackJointSmoothing smoother_;
 };
 
 }  // namespace
 
-TEST_F(RuckigTests, empty_trajectory)
+TEST_F(TrackJointTests, empty_trajectory)
 {
   // This should fail because the trajectory is empty
   EXPECT_FALSE(
       smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
 }
 
-TEST_F(RuckigTests, not_enough_waypoints)
+TEST_F(TrackJointTests, not_enough_waypoints)
 {
   moveit::core::RobotState robot_state(robot_model_);
   // First waypoint is default joint positions
@@ -79,7 +79,7 @@ TEST_F(RuckigTests, not_enough_waypoints)
       smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
 }
 
-TEST_F(RuckigTests, basic_trajectory)
+TEST_F(TrackJointTests, basic_trajectory)
 {
   moveit::core::RobotState robot_state(robot_model_);
   // First waypoint is default joint positions

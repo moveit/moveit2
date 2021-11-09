@@ -34,7 +34,7 @@
 /* Author: Jack Center, Wyatt Rees, Andy Zelenak */
 
 #include <moveit/planning_request_adapter/planning_request_adapter.h>
-#include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
+#include <moveit/trajectory_processing/trackjoint_traj_smoothing.h>
 #include <class_loader/class_loader.hpp>
 
 namespace default_planner_request_adapters
@@ -44,10 +44,10 @@ using namespace trajectory_processing;
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.add_traj_smoothing");
 
 /** @brief This adapter uses the time-optimal trajectory generation method */
-class AddRuckigTrajectorySmoothing : public planning_request_adapter::PlanningRequestAdapter
+class AddTrackJointTrajectorySmoothing : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  AddRuckigTrajectorySmoothing() : planning_request_adapter::PlanningRequestAdapter()
+  AddTrackJointTrajectorySmoothing() : planning_request_adapter::PlanningRequestAdapter()
   {
   }
 
@@ -57,7 +57,7 @@ public:
 
   std::string getDescription() const override
   {
-    return "Add Ruckig trajectory smoothing.";
+    return "Add TrackJoint trajectory smoothing.";
   }
 
   bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& planning_scene,
@@ -79,10 +79,10 @@ public:
   }
 
 private:
-  RuckigSmoothing smoother_;
+  TrackJointSmoothing smoother_;
 };
 
 }  // namespace default_planner_request_adapters
 
-CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::AddRuckigTrajectorySmoothing,
+CLASS_LOADER_REGISTER_CLASS(default_planner_request_adapters::AddTrackJointTrajectorySmoothing,
                             planning_request_adapter::PlanningRequestAdapter)

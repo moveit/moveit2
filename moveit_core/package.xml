@@ -57,7 +57,6 @@
   <depend>tf2_geometry_msgs</depend>
   <depend>trajectory_msgs</depend>
   <depend>visualization_msgs</depend>
-  <depend>ruckig</depend>
 
   <doc_depend>python3-sphinx-rtd-theme</doc_depend>
 

@@ -3,7 +3,7 @@ set(MOVEIT_LIB_NAME moveit_trajectory_processing)
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/iterative_time_parameterization.cpp
   src/iterative_spline_parameterization.cpp
-  src/ruckig_traj_smoothing.cpp
+  src/trackjoint_traj_smoothing.cpp
   src/trajectory_tools.cpp
   src/time_optimal_trajectory_generation.cpp
 )
@@ -21,7 +21,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_robot_state
   moveit_robot_trajectory
-  ruckig::ruckig
 )
 
 install(DIRECTORY include/ DESTINATION include)
@@ -41,8 +40,8 @@ if(BUILD_TESTING)
   ament_add_gtest(test_time_optimal_trajectory_generation test/test_time_optimal_trajectory_generation.cpp)
   target_link_libraries(test_time_optimal_trajectory_generation ${MOVEIT_LIB_NAME})
 
-  ament_add_gtest(test_ruckig_traj_smoothing test/test_ruckig_traj_smoothing.cpp)
-  target_link_libraries(test_ruckig_traj_smoothing
+  ament_add_gtest(test_trackjoint_traj_smoothing test/test_trackjoint_traj_smoothing.cpp)
+  target_link_libraries(test_trackjoint_traj_smoothing
     ${MOVEIT_LIB_NAME}
     moveit_test_utils
   )
