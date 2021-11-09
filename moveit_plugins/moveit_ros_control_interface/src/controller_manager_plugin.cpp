@@ -156,6 +156,8 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
         // Get the names of the interfaces currently claimed by the active controller.
         auto& claimed_interfaces = active_controllers_.insert(std::make_pair(controller.name, controller))
                                        .first->second.claimed_interfaces;  // without namespace
+        // Modify the claimed interface names in-place to only include the name of the joint and not the command type
+        // (e.g. position, velocity, etc.).
         std::transform(claimed_interfaces.cbegin(), claimed_interfaces.cend(), claimed_interfaces.begin(),
                        [](const std::string& claimed_interface) {
                          return parseJointNameFromResource(claimed_interface);
@@ -169,6 +171,8 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
         auto controller_it = managed_controllers_.insert(std::make_pair(absname, controller)).first;  // with namespace
         // Get the names of the interfaces that would be claimed by this currently-inactive controller if it was activated.
         auto& required_interfaces = controller_it->second.required_command_interfaces;
+        // Modify the required interface names in-place to only include the name of the joint and not the command type
+        // (e.g. position, velocity, etc.).
         std::transform(required_interfaces.cbegin(), required_interfaces.cend(), required_interfaces.begin(),
                        [](const std::string& required_interface) {
                          return parseJointNameFromResource(required_interface);
