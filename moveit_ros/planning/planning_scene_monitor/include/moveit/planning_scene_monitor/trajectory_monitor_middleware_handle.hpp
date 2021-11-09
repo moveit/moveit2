@@ -53,11 +53,19 @@ public:
    *
    * @param[in]  sampling_frequency  Used to create ROS2 Rate
    */
-  TrajectoryMonitorMiddlewareHandle();
+  TrajectoryMonitorMiddlewareHandle(double sampling_frequency);
+
+  /**
+   * @brief    Set Rate using sampling frequency
+   */
+  void setRate(double sampling_frequency) override;
 
   /**
    * @brief      Sleeps for time specified by @p sampling_frequency
    */
-  void sleep(double sampling_frequency) override;
+  void sleep() override;
+
+private:
+  std::unique_ptr<rclcpp::Rate> rate_;
 };
 }  // namespace planning_scene_monitor

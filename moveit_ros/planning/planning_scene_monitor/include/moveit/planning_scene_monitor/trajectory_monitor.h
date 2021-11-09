@@ -68,9 +68,14 @@ public:
     virtual ~MiddlewareHandle() = default;
 
     /**
+     * @brief      set Rate using sampling frequency
+     */
+    virtual void setRate(double sampling_frequency) = 0;
+
+    /**
      * @brief      Sleep the handle for some prescribed amount of time.
      */
-    virtual void sleep(double sampling_freqency) = 0;
+    virtual void sleep() = 0;
   };
 
   /** @brief Constructor

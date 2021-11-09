@@ -50,7 +50,8 @@ using namespace std::chrono_literals;
 
 struct MockTrajectoryMonitorMiddlewareHandle : public planning_scene_monitor::TrajectoryMonitor::MiddlewareHandle
 {
-  MOCK_METHOD(void, sleep, (double sampling_frequency), (override));
+  MOCK_METHOD(void, setRate, (double sampling_frequency), (override));
+  MOCK_METHOD(void, sleep, (), (override));
 };
 
 struct MockCurrentStateMonitorMiddlewareHandle : public planning_scene_monitor::CurrentStateMonitor::MiddlewareHandle
@@ -105,7 +106,7 @@ TEST(TrajectoryMonitorTests, SleepAtLeastOnce)
 
   // WHEN we call the startTrajectoryMonitor function
   trajectory_monitor.startTrajectoryMonitor();
-  waitFor(10s, [&]() { return callback_called == true; });
+  waitFor(10s, [&]() { return static_cast<bool>(callback_called); });
 }
 
 int main(int argc, char** argv)
