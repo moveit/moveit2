@@ -82,39 +82,18 @@ public:
     : ActionBasedControllerHandleBase(name, logger_name), node_(node), done_(true), namespace_(ns)
   {
     controller_action_client_ = rclcpp_action::create_client<T>(node_, getActionName());
-
-    unsigned int attempts = 0;
-    double timeout;
-    node_->get_parameter_or("trajectory_execution.controller_connection_timeout", timeout, 15.0);
-
-    if (timeout == 0.0)
-    {
-      while (rclcpp::ok() && !controller_action_client_->wait_for_action_server(std::chrono::seconds(5)))
-      {
-        RCLCPP_WARN_STREAM(LOGGER, "Waiting for " << getActionName() << " to come up");
-      }
-    }
-    else
-    {
-      while (rclcpp::ok() &&
-             !controller_action_client_->wait_for_action_server(std::chrono::duration<double>(timeout / 3)) &&
-             ++attempts < 3)
-      {
-        RCLCPP_WARN_STREAM(LOGGER, "Waiting for " << getActionName() << " to come up");
-      }
-    }
-    if (!controller_action_client_->action_server_is_ready())
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "Action client not connected: " << getActionName());
-      controller_action_client_.reset();
-    }
-
     last_exec_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
   }
 
   bool isConnected() const
   {
-    return static_cast<bool>(controller_action_client_);
+    if (!controller_action_client_->action_server_is_ready())
+    {
+      RCLCPP_ERROR_STREAM(LOGGER, "Action client not connected: " << getActionName());
+      return false;
+    }
+
+    return true;
   }
 
   bool cancelExecution() override
