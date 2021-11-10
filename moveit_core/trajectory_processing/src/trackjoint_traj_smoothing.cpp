@@ -55,27 +55,30 @@ constexpr double DEFAULT_MAX_JERK = 20;                       // rad/s^3
 constexpr double DEFAULT_WAYPOINT_POSITION_TOLERANCE = 1e-4;  // rad
 }  // namespace
 
-bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& desired_trajectory,
+bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& reference_trajectory,
                                          const double max_velocity_scaling_factor,
                                          const double max_acceleration_scaling_factor)
 {
-  const moveit::core::JointModelGroup* group = desired_trajectory.getGroup();
+  const moveit::core::JointModelGroup* group = reference_trajectory.getGroup();
   if (!group)
   {
     RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
     return false;
   }
 
-  const size_t num_waypoints = desired_trajectory.getWayPointCount();
+  const size_t num_waypoints = reference_trajectory.getWayPointCount();
   if (num_waypoints < 2)
   {
     RCLCPP_ERROR(LOGGER, "Trajectory does not have enough points to smooth with TrackJoint.");
     return false;
   }
 
-  robot_trajectory::RobotTrajectory outgoing_trajectory = desired_trajectory;
+  robot_trajectory::RobotTrajectory outgoing_trajectory = reference_trajectory;
   // Clear the waypoints
   outgoing_trajectory.clear();
+  // ... but keep the first wayopint
+  outgoing_trajectory.addSuffixWayPoint(reference_trajectory.getWayPoint(0),
+                                        reference_trajectory.getWayPointDurationFromPrevious(0));
 
   const size_t num_dof = group->getVariableCount();
 
@@ -83,7 +86,7 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& desi
   const std::vector<int>& joint_group_indices = group->getVariableIndexList();
 
   // This lib does not work properly when angles wrap around, so we need to unwind the path first
-  desired_trajectory.unwind();
+  reference_trajectory.unwind();
 
   // Current state
   std::vector<trackjoint::KinematicState> current_joint_states(num_dof);
@@ -106,11 +109,11 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& desi
   // Do smoothing
   for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
   {
-    setTrackJointState(waypoint_idx, desired_trajectory, num_dof, joint_group_indices, current_joint_states);
-    setTrackJointState(waypoint_idx, desired_trajectory, num_dof, joint_group_indices, goal_joint_states);
+    setTrackJointState(waypoint_idx, reference_trajectory, num_dof, joint_group_indices, current_joint_states);
+    setTrackJointState(waypoint_idx, reference_trajectory, num_dof, joint_group_indices, goal_joint_states);
 
-    desired_duration = desired_trajectory.getWayPointDurationFromPrevious(waypoint_idx + 1);
-    max_duration = 20 * desired_duration;
+    desired_duration = reference_trajectory.getWayPointDurationFromPrevious(waypoint_idx + 1);
+    max_duration = 1000;  // 10 * desired_duration;
 
     traj_gen.reset(DEFAULT_TRACKJOINT_TIMESTEP, desired_duration, max_duration, current_joint_states, goal_joint_states,
                    limits, DEFAULT_WAYPOINT_POSITION_TOLERANCE, false /* use_streaming_mode */);
@@ -123,28 +126,41 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& desi
                                       << trackjoint::ERROR_CODE_MAP.at(error_code));
       return false;
     }
+
+    addTrackJointOutpointToRobotTrajectory(reference_trajectory, num_dof, joint_group_indices, trackjoint_output,
+                                           outgoing_trajectory);
   }
 
-  buildRobotTrajectoryFromTrackJointOutput(desired_trajectory, num_dof, joint_group_indices, trackjoint_output,
-                                           outgoing_trajectory);
-
-  desired_trajectory = outgoing_trajectory;
+  RCLCPP_ERROR_STREAM(LOGGER, "Input waypoint count: " << outgoing_trajectory.getWayPointCount());
+  reference_trajectory = outgoing_trajectory;
+  RCLCPP_ERROR_STREAM(LOGGER, "Smoothed waypoint count: " << outgoing_trajectory.getWayPointCount());
   return true;
 }
 
-void TrackJointSmoothing::buildRobotTrajectoryFromTrackJointOutput(
-    const robot_trajectory::RobotTrajectory& desired_trajectory, const size_t num_dof,
+void TrackJointSmoothing::addTrackJointOutpointToRobotTrajectory(
+    const robot_trajectory::RobotTrajectory& reference_trajectory, const size_t num_dof,
     const std::vector<int>& joint_group_indices, const std::vector<trackjoint::JointTrajectory>& trackjoint_output,
-    robot_trajectory::RobotTrajectory& trajectory)
+    robot_trajectory::RobotTrajectory& new_trajectory)
 {
-  moveit::core::RobotState waypoint = desired_trajectory.getWayPoint(0);
+  // We will overwrite this waypoint
+  moveit::core::RobotState waypoint = reference_trajectory.getWayPoint(0);
 
-  for (const trackjoint::JointTrajectory& trackjoint_waypoint : trackjoint_output)
+  double timestep;
+
+  for (size_t waypoint_idx = 0; waypoint_idx < trackjoint_output.size(); ++waypoint_idx)
   {
+    const trackjoint::JointTrajectory& trackjoint_waypoint = trackjoint_output.at(waypoint_idx);
+
+    timestep = trackjoint_output.at(0).elapsed_times(waypoint_idx);
+
     for (size_t joint = 0; joint < num_dof; ++joint)
     {
-      ;
+      waypoint.setVariablePosition(joint_group_indices.at(joint), trackjoint_output.at(joint).positions(waypoint_idx));
+      waypoint.setVariableVelocity(joint_group_indices.at(joint), trackjoint_output.at(joint).velocities(waypoint_idx));
+      waypoint.setVariableAcceleration(joint_group_indices.at(joint),
+                                       trackjoint_output.at(joint).accelerations(waypoint_idx));
     }
+    new_trajectory.addSuffixWayPoint(waypoint, timestep);
   }
 }
 
