@@ -1705,6 +1705,8 @@ bool TrajectoryExecutionManager::ensureActiveController(const std::string& contr
 
 bool TrajectoryExecutionManager::ensureActiveControllers(const std::vector<std::string>& controllers)
 {
+  reloadControllerInformation();
+
   updateControllersState(DEFAULT_CONTROLLER_INFORMATION_VALIDITY_AGE);
 
   if (manage_controllers_)
