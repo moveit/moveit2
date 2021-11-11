@@ -268,7 +268,9 @@ bool KDLKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
 
 bool KDLKinematicsPlugin::timedOut(const rclcpp::Time& start_time, double duration) const
 {
-  return ((node_->now() - start_time).seconds() >= duration);
+  static rclcpp::Clock clock{ RCL_STEADY_TIME };
+
+  return ((clock.now() - start_time).seconds() >= duration);
 }
 
 bool KDLKinematicsPlugin::getPositionIK(const geometry_msgs::msg::Pose& ik_pose,
@@ -323,7 +325,9 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
-  rclcpp::Time start_time = node_->now();
+  static rclcpp::Clock clock{ RCL_STEADY_TIME };
+
+  rclcpp::Time start_time = clock.now();
   if (!initialized_)
   {
     RCLCPP_ERROR(LOGGER, "kinematics solver not initialized");
@@ -409,13 +413,13 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
 
       // solution passed consistency check and solution callback
       error_code.val = error_code.SUCCESS;
-      RCLCPP_DEBUG_STREAM(LOGGER, "Solved after " << (node_->now() - start_time).seconds() << " < " << timeout
+      RCLCPP_DEBUG_STREAM(LOGGER, "Solved after " << (clock.now() - start_time).seconds() << " < " << timeout
                                                   << "s and " << attempt << " attempts");
       return true;
     }
   } while (!timedOut(start_time, timeout));
 
-  RCLCPP_DEBUG_STREAM(LOGGER, "IK timed out after " << (node_->now() - start_time).seconds() << " > " << timeout
+  RCLCPP_DEBUG_STREAM(LOGGER, "IK timed out after " << (clock.now() - start_time).seconds() << " > " << timeout
                                                     << "s and " << attempt << " attempts");
   error_code.val = error_code.TIMED_OUT;
   return false;
