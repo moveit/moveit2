@@ -85,17 +85,6 @@ public:
     last_exec_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
   }
 
-  bool isConnected() const
-  {
-    if (!controller_action_client_->action_server_is_ready())
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "Action client not connected: " << getActionName());
-      return false;
-    }
-
-    return true;
-  }
-
   bool cancelExecution() override
   {
     if (!controller_action_client_)
@@ -160,6 +149,11 @@ public:
   }
 
 protected:
+  bool isConnected() const
+  {
+    return controller_action_client_->action_server_is_ready();
+  }
+
   const rclcpp::Node::SharedPtr node_;
   std::string getActionName() const
   {

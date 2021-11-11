@@ -48,6 +48,12 @@ bool FollowJointTrajectoryControllerHandle::sendTrajectory(const moveit_msgs::ms
   if (!controller_action_client_)
     return false;
 
+  if (!isConnected())
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Action client not connected to action server: " << getActionName());
+    return false;
+  }
+
   if (done_)
     RCLCPP_INFO_STREAM(LOGGER, "sending trajectory to " << name_);
   else

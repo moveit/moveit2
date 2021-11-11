@@ -47,7 +47,7 @@
 namespace moveit_simple_controller_manager
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.plugins.moveit_simple_controller_manager");
-static const std::string PARAM_BASE_NAME = "moveit_simple_controller_manager.";
+static const std::string PARAM_BASE_NAME = "moveit_simple_controller_manager";
 class MoveItSimpleControllerManager : public moveit_controller_manager::MoveItControllerManager
 {
 public:
@@ -103,46 +103,39 @@ public:
         if (type == "GripperCommand")
         {
           new_handle = std::make_shared<GripperControllerHandle>(node_, controller_name, action_ns);
-          if (static_cast<GripperControllerHandle*>(new_handle.get())->isConnected())
+          bool parallel_gripper = false;
+          if (node_->get_parameter(PARAM_BASE_NAME + ".parallel", parallel_gripper) && parallel_gripper)
           {
-            bool parallel_gripper = false;
-            if (node_->get_parameter(controller_param + "parallel", parallel_gripper) && parallel_gripper)
+            if (controller_joints.size() != 2)
             {
-              if (controller_joints.size() != 2)
-              {
-                RCLCPP_ERROR_STREAM(LOGGER, "Parallel Gripper requires exactly two joints, " << controller_joints.size()
-                                                                                             << " are specified");
-                continue;
-              }
-              static_cast<GripperControllerHandle*>(new_handle.get())
-                  ->setParallelJawGripper(controller_joints[0], controller_joints[1]);
+              RCLCPP_ERROR_STREAM(LOGGER, "Parallel Gripper requires exactly two joints, " << controller_joints.size()
+                                                                                           << " are specified");
+              continue;
             }
-            else
-            {
-              std::string command_joint;
-              if (!node_->get_parameter(PARAM_BASE_NAME + "command_joint", command_joint))
-                command_joint = controller_joints[0];
-
-              static_cast<GripperControllerHandle*>(new_handle.get())->setCommandJoint(command_joint);
-            }
-
-            bool allow_failure;
-            node_->get_parameter_or(PARAM_BASE_NAME + "allow_failure", allow_failure, false);
-            static_cast<GripperControllerHandle*>(new_handle.get())->allowFailure(allow_failure);
-
-            RCLCPP_INFO_STREAM(LOGGER, "Added GripperCommand controller for " << controller_name);
-            controllers_[controller_name] = new_handle;
+            static_cast<GripperControllerHandle*>(new_handle.get())
+                ->setParallelJawGripper(controller_joints[0], controller_joints[1]);
           }
+          else
+          {
+            std::string command_joint;
+            if (!node_->get_parameter(PARAM_BASE_NAME + ".command_joint", command_joint))
+              command_joint = controller_joints[0];
+
+            static_cast<GripperControllerHandle*>(new_handle.get())->setCommandJoint(command_joint);
+          }
+
+          bool allow_failure;
+          node_->get_parameter_or(PARAM_BASE_NAME + ".allow_failure", allow_failure, false);
+          static_cast<GripperControllerHandle*>(new_handle.get())->allowFailure(allow_failure);
+
+          RCLCPP_INFO_STREAM(LOGGER, "Added GripperCommand controller for " << controller_name);
+          controllers_[controller_name] = new_handle;
         }
         else if (type == "FollowJointTrajectory")
         {
-          auto h = new FollowJointTrajectoryControllerHandle(node_, controller_name, action_ns);
-          new_handle.reset(h);
-          if (h->isConnected())
-          {
-            RCLCPP_INFO_STREAM(LOGGER, "Added FollowJointTrajectory controller for " << controller_name);
-            controllers_[controller_name] = new_handle;
-          }
+          new_handle = std::make_shared<FollowJointTrajectoryControllerHandle>(node_, controller_name, action_ns);
+          RCLCPP_INFO_STREAM(LOGGER, "Added FollowJointTrajectory controller for " << controller_name);
+          controllers_[controller_name] = new_handle;
         }
         else
         {
