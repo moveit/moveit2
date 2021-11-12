@@ -885,7 +885,7 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
     if (updated_map.count(state_variable_name) == 0)
     {
       dfce->state_check_indices_.push_back(dfce->state_values_.size() - 1);
-      RCLCPP_DEBUG(LOGGER, "Non-group joint %p will be checked for state changes", state_variable_name.c_str());
+      RCLCPP_DEBUG(LOGGER, "Non-group joint %s will be checked for state changes", state_variable_name.c_str());
     }
   }
 

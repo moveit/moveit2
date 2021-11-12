@@ -38,7 +38,8 @@
 #include <moveit/collision_detection/test_collision_common_pr2.h>
 
 INSTANTIATE_TYPED_TEST_CASE_P(FCLCollisionCheck, CollisionDetectorTest,
-                              collision_detection::CollisionDetectorAllocatorFCL);
+                              collision_detection::CollisionDetectorAllocatorFCL,
+                              /* ... */);
 
 int main(int argc, char* argv[])
 {

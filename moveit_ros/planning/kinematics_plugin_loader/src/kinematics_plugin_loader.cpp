@@ -200,7 +200,7 @@ public:
           RCLCPP_DEBUG(LOGGER,
                        "Successfully allocated and initialized a kinematics solver of type '%s' with search "
                        "resolution %lf for group '%s' at address %p",
-                       it->second[i].c_str(), search_res, jmg->getName().c_str(), result.get());
+                       it->second[i].c_str(), search_res, jmg->getName().c_str(), static_cast<void*>(result.get()));
           break;
         }
       }

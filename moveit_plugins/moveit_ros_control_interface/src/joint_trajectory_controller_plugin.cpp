@@ -60,4 +60,4 @@ public:
 }  // namespace moveit_ros_control_interface
 
 PLUGINLIB_EXPORT_CLASS(moveit_ros_control_interface::JointTrajectoryControllerAllocator,
-                       moveit_ros_control_interface::ControllerHandleAllocator);
+                       moveit_ros_control_interface::ControllerHandleAllocator)

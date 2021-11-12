@@ -38,7 +38,8 @@
 #include <moveit/collision_detection/test_collision_common_panda.h>
 
 INSTANTIATE_TYPED_TEST_CASE_P(BulletCollisionCheckPanda, CollisionDetectorPandaTest,
-                              collision_detection::CollisionDetectorAllocatorBullet);
+                              collision_detection::CollisionDetectorAllocatorBullet,
+                              /* ... */);
 
 int main(int argc, char* argv[])
 {

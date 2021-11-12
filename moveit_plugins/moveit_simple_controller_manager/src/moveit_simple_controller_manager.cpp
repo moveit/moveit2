@@ -254,4 +254,4 @@ protected:
 }  // end namespace moveit_simple_controller_manager
 
 PLUGINLIB_EXPORT_CLASS(moveit_simple_controller_manager::MoveItSimpleControllerManager,
-                       moveit_controller_manager::MoveItControllerManager);
+                       moveit_controller_manager::MoveItControllerManager)

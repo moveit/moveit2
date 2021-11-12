@@ -63,7 +63,7 @@ ompl_interface::ConstrainedGoalSampler::ConstrainedGoalSampler(const ModelBasedP
 {
   if (!constraint_sampler_)
     default_sampler_ = si_->allocStateSampler();
-  RCLCPP_DEBUG(LOGGER, "Constructed a ConstrainedGoalSampler instance at address %p", this);
+  RCLCPP_DEBUG(LOGGER, "Constructed a ConstrainedGoalSampler instance at address %p", static_cast<void*>(this));
   startSampling();
 }
 

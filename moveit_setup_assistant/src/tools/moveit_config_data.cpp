@@ -889,7 +889,7 @@ srdf::Model::GroupState MoveItConfigData::getDefaultStartPose()
   if (!srdf_->group_states_.empty())
     return srdf_->group_states_[0];
   else
-    return srdf::Model::GroupState{ .name_ = "todo_state_name", .group_ = "todo_group_name", .joint_values_ = {} };
+    return srdf::Model::GroupState{ "todo_state_name", "todo_group_name", {} };
 }
 
 // ******************************************************************************************

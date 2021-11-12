@@ -43,7 +43,7 @@ macro(moveit_package)
 
   if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Enable warnings
-    add_compile_options(-Wall -Wextra
+    add_compile_options(-Wall -Wextra -Wpedantic
       -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual
       -Wno-unused-parameter -Wno-unused-function)
   else()
@@ -63,6 +63,9 @@ macro(moveit_package)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # This too often has false-positives
     add_compile_options(-Wno-maybe-uninitialized)
+  endif()
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-Wno-gnu-zero-variadic-macro-arguments)
   endif()
 
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

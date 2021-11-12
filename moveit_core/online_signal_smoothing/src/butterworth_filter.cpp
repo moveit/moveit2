@@ -102,7 +102,7 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::c
     position_filters_.emplace_back(1.5 /* filter coefficient, should be >1 */);
   }
   return true;
-};
+}
 
 bool ButterworthFilterPlugin::doSmoothing(std::vector<double>& position_vector)
 {
@@ -118,7 +118,7 @@ bool ButterworthFilterPlugin::doSmoothing(std::vector<double>& position_vector)
     position_vector[i] = position_filters_.at(i).filter(position_vector[i]);
   }
   return true;
-};
+}
 
 bool ButterworthFilterPlugin::reset(const std::vector<double>& joint_positions)
 {
@@ -133,7 +133,7 @@ bool ButterworthFilterPlugin::reset(const std::vector<double>& joint_positions)
     position_filters_.at(joint_idx).reset(joint_positions.at(joint_idx));
   }
   return true;
-};
+}
 
 }  // namespace online_signal_smoothing
 
