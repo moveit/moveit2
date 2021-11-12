@@ -163,7 +163,7 @@ bool MotionPlanningFrame::computeCartesianPlan()
     RCLCPP_INFO(LOGGER, "Computing time stamps %s", success ? "SUCCEDED" : "FAILED");
 
     // Store trajectory in current_plan_
-    current_plan_.reset(new moveit::planning_interface::MoveGroupInterface::Plan());
+    current_plan_ = std::make_shared<moveit::planning_interface::MoveGroupInterface::Plan>();
     rt.getRobotTrajectoryMsg(current_plan_->trajectory_);
     current_plan_->planning_time_ = (rclcpp::Clock().now() - start).seconds();
     return success;
@@ -173,7 +173,7 @@ bool MotionPlanningFrame::computeCartesianPlan()
 
 bool MotionPlanningFrame::computeJointSpacePlan()
 {
-  current_plan_.reset(new moveit::planning_interface::MoveGroupInterface::Plan());
+  current_plan_ = std::make_shared<moveit::planning_interface::MoveGroupInterface::Plan>();
   return move_group_->plan(*current_plan_) == moveit::planning_interface::MoveItErrorCode::SUCCESS;
 }
 

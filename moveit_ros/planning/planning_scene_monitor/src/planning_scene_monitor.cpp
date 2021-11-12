@@ -165,7 +165,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     {
       try
       {
-        scene_.reset(new planning_scene::PlanningScene(rm_loader_->getModel()));
+        scene_ = std::make_shared<planning_scene::PlanningScene>(rm_loader_->getModel());
         configureCollisionMatrix(scene_);
         configureDefaultPadding();
 
@@ -385,7 +385,8 @@ void PlanningSceneMonitor::startPublishingPlanningScene(SceneUpdateType update_t
     planning_scene_publisher_ = pnode_->create_publisher<moveit_msgs::msg::PlanningScene>(planning_scene_topic, 100);
     RCLCPP_INFO(LOGGER, "Publishing maintained planning scene on '%s'", planning_scene_topic.c_str());
     monitorDiffs(true);
-    publish_planning_scene_.reset(new boost::thread(boost::bind(&PlanningSceneMonitor::scenePublishingThread, this)));
+    publish_planning_scene_ =
+        std::make_unique<boost::thread>(boost::bind(&PlanningSceneMonitor::scenePublishingThread, this));
   }
 }
 
@@ -1182,8 +1183,8 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
   {
     if (!octomap_monitor_)
     {
-      octomap_monitor_.reset(
-          new occupancy_map_monitor::OccupancyMapMonitor(node_, tf_buffer_, scene_->getPlanningFrame()));
+      octomap_monitor_ =
+          std::make_unique<occupancy_map_monitor::OccupancyMapMonitor>(node_, tf_buffer_, scene_->getPlanningFrame());
       excludeRobotLinksFromOctree();
       excludeAttachedBodiesFromOctree();
       excludeWorldObjectsFromOctree();
@@ -1221,7 +1222,7 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
   {
     if (!current_state_monitor_)
     {
-      current_state_monitor_.reset(new CurrentStateMonitor(pnode_, getRobotModel(), tf_buffer_));
+      current_state_monitor_ = std::make_shared<CurrentStateMonitor>(pnode_, getRobotModel(), tf_buffer_);
     }
     current_state_monitor_->addUpdateCallback(
         boost::bind(&PlanningSceneMonitor::onStateUpdate, this, boost::placeholders::_1));

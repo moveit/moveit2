@@ -63,7 +63,7 @@ public:
   {
     // Load planning scene
     if (!psm_)
-      psm_.reset(new planning_scene_monitor::PlanningSceneMonitor(node_, "robot_description"));
+      psm_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, "robot_description");
     if (!psm_->newPlanningSceneMessage(scene_msg))
     {
       RCLCPP_ERROR(LOGGER, "Failed to load planning scene");
