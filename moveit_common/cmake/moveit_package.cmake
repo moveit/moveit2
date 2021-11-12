@@ -33,7 +33,7 @@ macro(moveit_package)
   ament_package_xml()
 
   # Enable backward_ros on every moveit package
-  find_package(backward_ros REQUIRED)
+  find_package(backward_ros QUIET)
 
   if(NOT "${CMAKE_CXX_STANDARD}")
     set(CMAKE_CXX_STANDARD 17)
