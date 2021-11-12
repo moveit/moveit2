@@ -71,7 +71,7 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   node_->get_parameter_or("robot_description_name", robot_description_name, robot_description_name);
 
   // Get the servo parameters
-  auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node_, LOGGER);
+  auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node_);
   if (servo_parameters == nullptr)
   {
     RCLCPP_ERROR(LOGGER, "Failed to load the servo parameters");

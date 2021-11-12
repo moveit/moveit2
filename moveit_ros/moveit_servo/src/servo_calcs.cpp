@@ -103,9 +103,13 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
 {
   // Register callback for changes in robot_link_command_frame
-  parameters_->registerSetParameterCallback(parameters->ns + ".robot_link_command_frame",
-                                            std::bind(&ServoCalcs::robotLinkCommandFrameCallback, this,
-                                                      std::placeholders::_1));
+  bool callback_success = parameters_->registerSetParameterCallback(
+      parameters->ns + ".robot_link_command_frame",
+      std::bind(&ServoCalcs::robotLinkCommandFrameCallback, this, std::placeholders::_1));
+  if (!callback_success)
+  {
+    throw std::runtime_error("Failed to register setParameterCallback");
+  }
 
   // MoveIt Setup
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();

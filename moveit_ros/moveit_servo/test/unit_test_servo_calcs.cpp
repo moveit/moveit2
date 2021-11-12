@@ -528,7 +528,7 @@ int main(int argc, char** argv)
   TEST_PSM->startStateMonitor();
 
   // read parameters and store them in shared pointer to constant
-  TEST_PARAMS = moveit_servo::ServoParameters::makeServoParameters(TEST_NODE, LOGGER);
+  TEST_PARAMS = moveit_servo::ServoParameters::makeServoParameters(TEST_NODE);
   if (TEST_PARAMS == nullptr)
   {
     RCLCPP_FATAL(LOGGER, "Failed to load the servo parameters");

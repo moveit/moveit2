@@ -66,7 +66,7 @@ public:
     executor_->add_node(node_);
     executor_thread_ = std::thread([this]() { this->executor_->spin(); });
 
-    servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_, LOGGER);
+    servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_);
     ;
     if (servo_parameters_ == nullptr)
     {
