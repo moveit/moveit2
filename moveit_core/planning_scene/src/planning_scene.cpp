@@ -1164,7 +1164,7 @@ collision_detection::OccMapTreePtr createOctomap(const octomap_msgs::msg::Octoma
   else
   {
     std::stringstream datastream;
-    if (map.data.size() > 0)
+    if (!map.data.empty())
     {
       datastream.write((const char*)&map.data[0], map.data.size());
       om->readData(datastream);

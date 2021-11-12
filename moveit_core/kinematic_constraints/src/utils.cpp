@@ -531,7 +531,7 @@ bool constructConstraints(const rclcpp::Node::SharedPtr& node, const std::string
     return false;
 
   for (auto& constraint_id : constraint_ids)
-    constraint_id = constraints_param + constraint_id;
+    constraint_id.insert(0, constraints_param);
 
   return collectConstraints(node, constraint_ids, constraints);
 }
