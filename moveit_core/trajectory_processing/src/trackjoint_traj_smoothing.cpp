@@ -102,22 +102,46 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
   // Initialize the smoothing object
   trackjoint::TrajectoryGenerator traj_gen(num_dof, DEFAULT_TRACKJOINT_TIMESTEP, desired_duration, max_duration,
                                            current_joint_states, goal_joint_states, limits,
-                                           DEFAULT_WAYPOINT_POSITION_TOLERANCE, false /* use_streaming_mode */);
+                                           DEFAULT_WAYPOINT_POSITION_TOLERANCE, false /* high speed mode */);
   std::vector<trackjoint::JointTrajectory> trackjoint_output(num_dof);
   trackjoint::ErrorCodeEnum error_code;
 
   // Do smoothing
   for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
   {
+    RCLCPP_ERROR_STREAM(LOGGER, "Doing waypoint " << waypoint_idx);
     setTrackJointState(waypoint_idx, reference_trajectory, num_dof, joint_group_indices, current_joint_states);
-    setTrackJointState(waypoint_idx, reference_trajectory, num_dof, joint_group_indices, goal_joint_states);
+    setTrackJointState(waypoint_idx + 1, reference_trajectory, num_dof, joint_group_indices, goal_joint_states);
 
     desired_duration = reference_trajectory.getWayPointDurationFromPrevious(waypoint_idx + 1);
-    max_duration = 1000;  // 10 * desired_duration;
+    max_duration = 100 * desired_duration;
 
     traj_gen.reset(DEFAULT_TRACKJOINT_TIMESTEP, desired_duration, max_duration, current_joint_states, goal_joint_states,
-                   limits, DEFAULT_WAYPOINT_POSITION_TOLERANCE, false /* use_streaming_mode */);
+                   limits, DEFAULT_WAYPOINT_POSITION_TOLERANCE, false /* high speed mode */);
     error_code = traj_gen.inputChecking(current_joint_states, goal_joint_states, limits, DEFAULT_TRACKJOINT_TIMESTEP);
+    if (error_code != trackjoint::ErrorCodeEnum::NO_ERROR)
+    {
+      RCLCPP_ERROR_STREAM(LOGGER, "Invalid input to TrackJoint smoothing algorithm. Error code: "
+                                      << trackjoint::ERROR_CODE_MAP.at(error_code));
+
+      // Usually the acceleration is exceeded.
+      // TODO(andyz): remove when done debugging
+      const auto waypoint_ptr = reference_trajectory.getWayPointPtr(waypoint_idx);
+      const auto target_waypoint_ptr = reference_trajectory.getWayPointPtr(waypoint_idx);
+      for (size_t joint = 0; joint < num_dof; ++joint)
+      {
+        RCLCPP_INFO_STREAM(LOGGER,
+                           "Input accel: " << waypoint_ptr->getVariableAcceleration(joint_group_indices.at(joint))
+                                           << " / " << current_joint_states.at(joint).acceleration << " / "
+                                           << limits.at(joint).acceleration_limit);
+        RCLCPP_INFO_STREAM(LOGGER, "Target accel: "
+                                       << target_waypoint_ptr->getVariableAcceleration(joint_group_indices.at(joint))
+                                       << " / " << goal_joint_states.at(joint).acceleration << " / "
+                                       << limits.at(joint).acceleration_limit);
+      }
+
+      return false;
+    }
 
     error_code = traj_gen.generateTrajectories(&trackjoint_output);
     if (error_code != trackjoint::ErrorCodeEnum::NO_ERROR)
@@ -126,12 +150,16 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
                                       << trackjoint::ERROR_CODE_MAP.at(error_code));
       return false;
     }
+    else
+    {
+      RCLCPP_WARN_STREAM(LOGGER, "Success!");
+    }
 
     addTrackJointOutpointToRobotTrajectory(reference_trajectory, num_dof, joint_group_indices, trackjoint_output,
                                            outgoing_trajectory);
   }
 
-  RCLCPP_ERROR_STREAM(LOGGER, "Input waypoint count: " << outgoing_trajectory.getWayPointCount());
+  RCLCPP_ERROR_STREAM(LOGGER, "Input waypoint count: " << reference_trajectory.getWayPointCount());
   reference_trajectory = outgoing_trajectory;
   RCLCPP_ERROR_STREAM(LOGGER, "Smoothed waypoint count: " << outgoing_trajectory.getWayPointCount());
   return true;
@@ -147,10 +175,8 @@ void TrackJointSmoothing::addTrackJointOutpointToRobotTrajectory(
 
   double timestep;
 
-  for (size_t waypoint_idx = 0; waypoint_idx < trackjoint_output.size(); ++waypoint_idx)
+  for (size_t waypoint_idx = 1; waypoint_idx < trackjoint_output.size(); ++waypoint_idx)
   {
-    const trackjoint::JointTrajectory& trackjoint_waypoint = trackjoint_output.at(waypoint_idx);
-
     timestep = trackjoint_output.at(0).elapsed_times(waypoint_idx);
 
     for (size_t joint = 0; joint < num_dof; ++joint)
@@ -186,6 +212,8 @@ void TrackJointSmoothing::setTrackJointLimits(const moveit::core::JointModelGrou
                                               const double max_acceleration_scaling_factor,
                                               std::vector<trackjoint::Limits>& limits)
 {
+  limits.resize(num_dof);
+
   const std::vector<std::string>& vars = group->getVariableNames();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
 
@@ -209,14 +237,19 @@ void TrackJointSmoothing::setTrackJointLimits(const moveit::core::JointModelGrou
 
     if (bounds.acceleration_bounded_)
     {
-      single_joint_limits.velocity_limit = max_acceleration_scaling_factor * bounds.max_acceleration_;
+      single_joint_limits.acceleration_limit = max_acceleration_scaling_factor * bounds.max_acceleration_;
     }
     else
     {
-      single_joint_limits.velocity_limit = max_acceleration_scaling_factor * DEFAULT_MAX_ACCELERATION;
+      single_joint_limits.acceleration_limit = max_acceleration_scaling_factor * DEFAULT_MAX_ACCELERATION;
     }
 
-    limits.at(0) = single_joint_limits;
+    RCLCPP_WARN_STREAM(LOGGER, "jerk  limit: " << single_joint_limits.jerk_limit);
+    RCLCPP_WARN_STREAM(LOGGER, "accel limit: " << single_joint_limits.acceleration_limit);
+    RCLCPP_WARN_STREAM(LOGGER, "vel   limit: " << single_joint_limits.velocity_limit);
+
+    limits.at(joint) = single_joint_limits;
   }
+  RCLCPP_WARN_STREAM(LOGGER, "Done retrieving kinematic limits.");
 }
 }  // namespace trajectory_processing
