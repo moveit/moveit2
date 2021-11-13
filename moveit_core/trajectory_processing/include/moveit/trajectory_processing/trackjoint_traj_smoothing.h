@@ -45,6 +45,9 @@ namespace trajectory_processing
 class TrackJointSmoothing
 {
 public:
+  /**
+   * \brief Run the smoothing algorithm
+   */
   static bool applySmoothing(robot_trajectory::RobotTrajectory& reference_trajectory,
                              const double max_velocity_scaling_factor = 1.0,
                              const double max_acceleration_scaling_factor = 1.0);
@@ -65,9 +68,19 @@ private:
                                   const double max_acceleration_scaling_factor,
                                   std::vector<trackjoint::Limits>& limits);
 
+  /**
+   * \brief Append TrackJoint output to a RobotTrajectory
+   */
   static void addTrackJointOutpointToRobotTrajectory(const robot_trajectory::RobotTrajectory& reference_trajectory,
                                                      const size_t num_dof, const std::vector<int>& joint_group_indices,
                                                      const std::vector<trackjoint::JointTrajectory>& trackjoint_output,
                                                      robot_trajectory::RobotTrajectory& new_trajectory);
+
+  /**
+   * \brief Save a csv file for each joint
+   */
+  static void saveRobotTrajectoryToCSV(const std::string& base_filepath,
+                                       const robot_trajectory::RobotTrajectory& trajectory, const size_t num_dof,
+                                       const std::vector<int>& joint_group_indices);
 };
 }  // namespace trajectory_processing

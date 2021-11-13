@@ -88,6 +88,10 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
   // This lib does not work properly when angles wrap around, so we need to unwind the path first
   reference_trajectory.unwind();
 
+  // Save the reference trajectory to datafile, for analysis
+  // TODO(andyz): delete when done testing
+  saveRobotTrajectoryToCSV("/home/andy/Downloads/TrackJoint/input_", reference_trajectory, num_dof, joint_group_indices);
+
   // Current state
   std::vector<trackjoint::KinematicState> current_joint_states(num_dof);
   // Goal state
@@ -159,10 +163,38 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
                                            outgoing_trajectory);
   }
 
+  // Save final output to data file, for analysis
+  // TODO(andyz): delete when done testing
+  saveRobotTrajectoryToCSV("/home/andy/Downloads/TrackJoint/output_", outgoing_trajectory, num_dof, joint_group_indices);
+
   RCLCPP_ERROR_STREAM(LOGGER, "Input waypoint count: " << reference_trajectory.getWayPointCount());
   reference_trajectory = outgoing_trajectory;
   RCLCPP_ERROR_STREAM(LOGGER, "Smoothed waypoint count: " << outgoing_trajectory.getWayPointCount());
   return true;
+}
+
+void TrackJointSmoothing::saveRobotTrajectoryToCSV(const std::string& base_filepath,
+                                                   const robot_trajectory::RobotTrajectory& trajectory,
+                                                   const size_t num_dof, const std::vector<int>& joint_group_indices)
+{
+  std::ofstream output_file;
+  std::string output_path;
+
+  for (size_t joint = 0; joint < num_dof; ++joint)
+  {
+    output_path = base_filepath + std::to_string(joint + 1) + ".csv";
+
+    // Append to file
+    output_file.open(output_path, std::ofstream::out | std::ofstream::app);
+
+    for (size_t waypoint_idx = 0; waypoint_idx < trajectory.getWayPointCount(); ++waypoint_idx)
+    {
+      auto waypoint = trajectory.getWayPoint(waypoint_idx);
+      output_file << waypoint.getVariablePosition(joint_group_indices.at(joint)) << std::endl;
+    }
+    output_file.clear();
+    output_file.close();
+  }
 }
 
 void TrackJointSmoothing::addTrackJointOutpointToRobotTrajectory(
