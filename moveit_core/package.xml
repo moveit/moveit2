@@ -6,10 +6,11 @@
   <author email="isucan@google.com">Ioan Sucan</author>
   <author email="robot.moveit@gmail.com">Sachin Chitta</author>
   <author email="acorn.pooley@sri.com">Acorn Pooley</author>
+  <author email="dave@picknik.ai">Dave Coleman</author>
 
-  <maintainer email="dave@picknik.ai">Dave Coleman</maintainer>
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="me@v4hn.de">Michael Görner</maintainer>
-  <maintainer email="mferguson@fetchrobotics.com">Michael Ferguson</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
   <license>BSD</license>

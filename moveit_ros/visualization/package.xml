@@ -7,8 +7,9 @@
   <author email="dave@picknik.ai">Dave Coleman</author>
   <author email="robot.moveit@gmail.com">Sachin Chitta</author>
 
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="jon.binney@gmail.com">Jon Binney</maintainer>
-  <maintainer email="mferguson@fetchrobotics.com">Michael Ferguson</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
   <license>BSD</license>
