@@ -79,8 +79,8 @@ MoveItCpp::MoveItCpp(const rclcpp::Node::SharedPtr& node, const Options& options
     throw std::runtime_error(error);
   }
 
-  trajectory_execution_manager_.reset(new trajectory_execution_manager::TrajectoryExecutionManager(
-      node_, robot_model_, planning_scene_monitor_->getStateMonitor()));
+  trajectory_execution_manager_ = std::make_shared<trajectory_execution_manager::TrajectoryExecutionManager>(
+      node_, robot_model_, planning_scene_monitor_->getStateMonitor());
 
   RCLCPP_DEBUG(LOGGER, "MoveItCpp running");
 }
@@ -93,8 +93,8 @@ MoveItCpp::~MoveItCpp()
 
 bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& options)
 {
-  planning_scene_monitor_.reset(
-      new planning_scene_monitor::PlanningSceneMonitor(node_, options.robot_description, options.name));
+  planning_scene_monitor_ =
+      std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, options.robot_description, options.name);
   // Allows us to sycronize to Rviz and also publish collision objects to ourselves
   RCLCPP_DEBUG(LOGGER, "Configuring Planning Scene Monitor");
   if (planning_scene_monitor_->getPlanningScene())
@@ -141,8 +141,8 @@ bool MoveItCpp::loadPlanningPipelines(const PlanningPipelineOptions& options)
     }
     RCLCPP_INFO(LOGGER, "Loading planning pipeline '%s'", planning_pipeline_name.c_str());
     planning_pipeline::PlanningPipelinePtr pipeline;
-    pipeline.reset(
-        new planning_pipeline::PlanningPipeline(robot_model_, node_, planning_pipeline_name, PLANNING_PLUGIN_PARAM));
+    pipeline = std::make_shared<planning_pipeline::PlanningPipeline>(robot_model_, node_, planning_pipeline_name,
+                                                                     PLANNING_PLUGIN_PARAM);
 
     if (!pipeline->getPlannerManager())
     {
@@ -199,7 +199,7 @@ bool MoveItCpp::getCurrentState(moveit::core::RobotStatePtr& current_state, doub
   }
   {  // Lock planning scene
     planning_scene_monitor::LockedPlanningSceneRO scene(planning_scene_monitor_);
-    current_state.reset(new moveit::core::RobotState(scene->getCurrentState()));
+    current_state = std::make_shared<moveit::core::RobotState>(scene->getCurrentState());
   }  // Unlock planning scene
   return true;
 }

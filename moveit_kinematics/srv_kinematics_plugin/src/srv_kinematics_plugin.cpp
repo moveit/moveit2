@@ -114,7 +114,7 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
   lookupParam(node_, "kinematics_solver_service_name", ik_service_name, std::string("solve_ik"));
 
   // Setup the joint state groups that we need
-  robot_state_.reset(new moveit::core::RobotState(robot_model_));
+  robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
   robot_state_->setToDefaultValues();
 
   // Create the ROS2 service client

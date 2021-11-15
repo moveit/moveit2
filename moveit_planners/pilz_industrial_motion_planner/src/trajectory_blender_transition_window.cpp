@@ -35,6 +35,7 @@
 #include "pilz_industrial_motion_planner/trajectory_blender_transition_window.h"
 
 #include <algorithm>
+#include <memory>
 #include <math.h>
 #if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
@@ -101,12 +102,12 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
     // LCOV_EXCL_STOP
   }
 
-  res.first_trajectory = std::shared_ptr<robot_trajectory::RobotTrajectory>(
-      new robot_trajectory::RobotTrajectory(req.first_trajectory->getRobotModel(), req.first_trajectory->getGroup()));
-  res.blend_trajectory = std::shared_ptr<robot_trajectory::RobotTrajectory>(
-      new robot_trajectory::RobotTrajectory(req.first_trajectory->getRobotModel(), req.first_trajectory->getGroup()));
-  res.second_trajectory = std::shared_ptr<robot_trajectory::RobotTrajectory>(
-      new robot_trajectory::RobotTrajectory(req.first_trajectory->getRobotModel(), req.first_trajectory->getGroup()));
+  res.first_trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(req.first_trajectory->getRobotModel(),
+                                                                             req.first_trajectory->getGroup());
+  res.blend_trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(req.first_trajectory->getRobotModel(),
+                                                                             req.first_trajectory->getGroup());
+  res.second_trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(req.first_trajectory->getRobotModel(),
+                                                                              req.first_trajectory->getGroup());
 
   // set the three trajectories after blending in response
   // erase the points [first_intersection_index, back()] from the first

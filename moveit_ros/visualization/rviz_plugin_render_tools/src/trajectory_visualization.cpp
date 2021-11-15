@@ -161,7 +161,7 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
   trajectory_topic_property_->initialize(ros_node_abstraction);
 
   // Load trajectory robot
-  display_path_robot_.reset(new RobotStateVisualization(scene_node_, context_, "Planned Path", widget_));
+  display_path_robot_ = std::make_shared<RobotStateVisualization>(scene_node_, context_, "Planned Path", widget_);
   display_path_robot_->setVisualVisible(display_path_visual_enabled_property_->getBool());
   display_path_robot_->setCollisionVisible(display_path_collision_enabled_property_->getBool());
   display_path_robot_->setVisible(false);
@@ -201,7 +201,7 @@ void TrajectoryVisualization::onRobotModelLoaded(const moveit::core::RobotModelC
   }
 
   // Load robot state
-  robot_state_.reset(new moveit::core::RobotState(robot_model_));
+  robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
   robot_state_->setToDefaultValues();
 
   // Load rviz robot
