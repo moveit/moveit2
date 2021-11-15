@@ -124,7 +124,7 @@ public:
 
     joint_model_group_ = getRobotModel()->getJointModelGroup(opt.group_name_);
 
-    joint_state_target_.reset(new moveit::core::RobotState(getRobotModel()));
+    joint_state_target_ = std::make_shared<moveit::core::RobotState>(getRobotModel());
     joint_state_target_->setToDefaultValues();
     active_target_ = JOINT;
     can_look_ = false;
@@ -388,7 +388,7 @@ public:
 
   void setStartState(const moveit::core::RobotState& start_state)
   {
-    considered_start_state_.reset(new moveit::core::RobotState(start_state));
+    considered_start_state_ = std::make_shared<moveit::core::RobotState>(start_state);
   }
 
   void setStartStateToCurrentState()
@@ -1250,7 +1250,7 @@ public:
 
   void setPathConstraints(const moveit_msgs::msg::Constraints& constraint)
   {
-    path_constraints_.reset(new moveit_msgs::msg::Constraints(constraint));
+    path_constraints_ = std::make_unique<moveit_msgs::msg::Constraints>(constraint);
   }
 
   bool setPathConstraints(const std::string& constraint)
@@ -1260,7 +1260,8 @@ public:
       moveit_warehouse::ConstraintsWithMetadata msg_m;
       if (constraints_storage_->getConstraints(msg_m, constraint, robot_model_->getName(), opt_.group_name_))
       {
-        path_constraints_.reset(new moveit_msgs::msg::Constraints(static_cast<moveit_msgs::msg::Constraints>(*msg_m)));
+        path_constraints_ =
+            std::make_unique<moveit_msgs::msg::Constraints>(static_cast<moveit_msgs::msg::Constraints>(*msg_m));
         return true;
       }
       else
@@ -1277,7 +1278,7 @@ public:
 
   void setTrajectoryConstraints(const moveit_msgs::msg::TrajectoryConstraints& constraint)
   {
-    trajectory_constraints_.reset(new moveit_msgs::msg::TrajectoryConstraints(constraint));
+    trajectory_constraints_ = std::make_unique<moveit_msgs::msg::TrajectoryConstraints>(constraint);
   }
 
   void clearTrajectoryConstraints()
@@ -1321,8 +1322,8 @@ public:
     initializing_constraints_ = true;
     if (constraints_init_thread_)
       constraints_init_thread_->join();
-    constraints_init_thread_.reset(
-        new boost::thread(boost::bind(&MoveGroupInterfaceImpl::initializeConstraintsStorageThread, this, host, port)));
+    constraints_init_thread_ = std::make_unique<boost::thread>(
+        boost::bind(&MoveGroupInterfaceImpl::initializeConstraintsStorageThread, this, host, port));
   }
 
   void setWorkspace(double minx, double miny, double minz, double maxx, double maxy, double maxz)
@@ -1352,7 +1353,7 @@ private:
       conn->setParams(host, port);
       if (conn->connect())
       {
-        constraints_storage_.reset(new moveit_warehouse::ConstraintsStorage(conn));
+        constraints_storage_ = std::make_unique<moveit_warehouse::ConstraintsStorage>(conn);
       }
     }
     catch (std::exception& ex)

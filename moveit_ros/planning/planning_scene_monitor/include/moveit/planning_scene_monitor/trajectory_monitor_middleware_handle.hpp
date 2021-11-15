@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2018 Pilz GmbH & Co. KG
+ *  Copyright (c) 2021, PickNik, Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Pilz GmbH & Co. KG nor the names of its
+ *   * Neither the name of PickNik nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,44 +32,40 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "pilz_industrial_motion_planner/planning_context_loader_circ.h"
-#include "moveit/planning_scene/planning_scene.h"
-#include "pilz_industrial_motion_planner/planning_context_base.h"
-#include "pilz_industrial_motion_planner/planning_context_circ.h"
+/* Author: Abishalini Sivaraman */
 
-#include <pluginlib/class_list_macros.hpp>
+#pragma once
 
-pilz_industrial_motion_planner::PlanningContextLoaderCIRC::PlanningContextLoaderCIRC()
+#include <moveit/planning_scene_monitor/trajectory_monitor.h>
+#include <rclcpp/rclcpp.hpp>
+
+namespace planning_scene_monitor
 {
-  alg_ = "CIRC";
-}
-
-pilz_industrial_motion_planner::PlanningContextLoaderCIRC::~PlanningContextLoaderCIRC()
+/**
+ * @brief      This class contains the ROS2 interfaces for TrajectoryMonitor.
+ *             This class is useful for testing by mocking the functions in the class below.
+ */
+class TrajectoryMonitorMiddlewareHandle : public TrajectoryMonitor::MiddlewareHandle
 {
-}
+public:
+  /**
+   * @brief      Constructor for TrajectoryMonitor
+   *
+   * @param[in]  sampling_frequency  Used to create ROS2 Rate
+   */
+  TrajectoryMonitorMiddlewareHandle(double sampling_frequency);
 
-bool pilz_industrial_motion_planner::PlanningContextLoaderCIRC::loadContext(
-    planning_interface::PlanningContextPtr& planning_context, const std::string& name, const std::string& group) const
-{
-  if (limits_set_ && model_set_)
-  {
-    planning_context = std::make_shared<PlanningContextCIRC>(name, group, model_, limits_);
-    return true;
-  }
-  else
-  {
-    if (!limits_set_)
-    {
-      ROS_ERROR_STREAM("Limits are not defined. Cannot load planning context. "
-                       "Call setLimits loadContext");
-    }
-    if (!model_set_)
-    {
-      ROS_ERROR_STREAM("Robot model was not set");
-    }
-    return false;
-  }
-}
+  /**
+   * @brief    Set Rate using sampling frequency
+   */
+  void setRate(double sampling_frequency) override;
 
-PLUGINLIB_EXPORT_CLASS(pilz_industrial_motion_planner::PlanningContextLoaderCIRC,
-                       pilz_industrial_motion_planner::PlanningContextLoader)
+  /**
+   * @brief      Sleeps for time specified by @p sampling_frequency
+   */
+  void sleep() override;
+
+private:
+  std::unique_ptr<rclcpp::Rate> rate_;
+};
+}  // namespace planning_scene_monitor
