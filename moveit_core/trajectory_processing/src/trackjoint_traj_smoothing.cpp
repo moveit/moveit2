@@ -52,7 +52,7 @@ constexpr double DEFAULT_TRACKJOINT_TIMESTEP = 0.001;
 constexpr double DEFAULT_MAX_VELOCITY = 5;                    // rad/s
 constexpr double DEFAULT_MAX_ACCELERATION = 10;               // rad/s^2
 constexpr double DEFAULT_MAX_JERK = 20;                       // rad/s^3
-constexpr double DEFAULT_WAYPOINT_POSITION_TOLERANCE = 1e-4;  // rad
+constexpr double DEFAULT_WAYPOINT_POSITION_TOLERANCE = 1e-5;  // rad
 }  // namespace
 
 bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& reference_trajectory,
@@ -110,11 +110,13 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
   std::vector<trackjoint::JointTrajectory> trackjoint_output(num_dof);
   trackjoint::ErrorCodeEnum error_code;
 
+  // Initial state
+  setTrackJointState(0, reference_trajectory, num_dof, joint_group_indices, current_joint_states);
+
   // Do smoothing
   for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Doing waypoint " << waypoint_idx);
-    setTrackJointState(waypoint_idx, reference_trajectory, num_dof, joint_group_indices, current_joint_states);
     setTrackJointState(waypoint_idx + 1, reference_trajectory, num_dof, joint_group_indices, goal_joint_states);
 
     desired_duration = reference_trajectory.getWayPointDurationFromPrevious(waypoint_idx + 1);
@@ -161,6 +163,8 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
 
     addTrackJointOutpointToRobotTrajectory(reference_trajectory, num_dof, joint_group_indices, trackjoint_output,
                                            outgoing_trajectory);
+
+    current_joint_states = goal_joint_states;
   }
 
   // Save final output to data file, for analysis
@@ -183,9 +187,7 @@ void TrackJointSmoothing::saveRobotTrajectoryToCSV(const std::string& base_filep
   for (size_t joint = 0; joint < num_dof; ++joint)
   {
     output_path = base_filepath + std::to_string(joint + 1) + ".csv";
-
-    // Append to file
-    output_file.open(output_path, std::ofstream::out | std::ofstream::app);
+    output_file.open(output_path, std::ofstream::out);
 
     for (size_t waypoint_idx = 0; waypoint_idx < trajectory.getWayPointCount(); ++waypoint_idx)
     {
