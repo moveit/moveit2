@@ -150,13 +150,13 @@ void PlanningScene::initialize()
 {
   name_ = DEFAULT_SCENE_NAME;
 
-  scene_transforms_.reset(new SceneTransforms(this));
+  scene_transforms_ = std::make_shared<SceneTransforms>(this);
 
-  robot_state_.reset(new moveit::core::RobotState(robot_model_));
+  robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
   robot_state_->setToDefaultValues();
   robot_state_->update();
 
-  acm_.reset(new collision_detection::AllowedCollisionMatrix());
+  acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>();
   // Use default collision operations in the SRDF to setup the acm
   const std::vector<std::string>& collision_links = robot_model_->getLinkModelNamesWithCollisionGeometry();
   acm_->setEntry(collision_links, collision_links, false);
@@ -192,11 +192,11 @@ PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(pare
 
   // maintain a separate world.  Copy on write ensures that most of the object
   // info is shared until it is modified.
-  world_.reset(new collision_detection::World(*parent_->world_));
+  world_ = std::make_shared<collision_detection::World>(*parent_->world_);
   world_const_ = world_;
 
   // record changes to the world
-  world_diff_.reset(new collision_detection::WorldDiff(world_));
+  world_diff_ = std::make_shared<collision_detection::WorldDiff>(world_);
 
   allocateCollisionDetector(parent_->collision_detector_->alloc_, parent_->collision_detector_);
   collision_detector_->copyPadding(*parent_->collision_detector_);
@@ -235,7 +235,7 @@ void PlanningScene::allocateCollisionDetector(const collision_detection::Collisi
   CollisionDetectorPtr prev_coll_detector = collision_detector_;
 
   // Construct a fresh CollisionDetector and store allocator
-  collision_detector_.reset(new CollisionDetector());
+  collision_detector_ = std::make_shared<CollisionDetector>();
   collision_detector_->alloc_ = allocator;
 
   // If parent_detector is specified, copy-construct collision environments (copies link shapes and attached objects)
@@ -295,9 +295,9 @@ void PlanningScene::clearDiffs()
     return;
 
   // clear everything, reset the world, record diffs
-  world_.reset(new collision_detection::World(*parent_->world_));
+  world_ = std::make_shared<collision_detection::World>(*parent_->world_);
   world_const_ = world_;
-  world_diff_.reset(new collision_detection::WorldDiff(world_));
+  world_diff_ = std::make_shared<collision_detection::WorldDiff>(world_);
   if (current_world_object_update_callback_)
     current_world_object_update_observer_handle_ = world_->addObserver(current_world_object_update_callback_);
 
@@ -484,7 +484,7 @@ moveit::core::RobotState& PlanningScene::getCurrentStateNonConst()
 {
   if (!robot_state_)
   {
-    robot_state_.reset(new moveit::core::RobotState(parent_->getCurrentState()));
+    robot_state_ = std::make_shared<moveit::core::RobotState>(parent_->getCurrentState());
     robot_state_->setAttachedBodyUpdateCallback(current_state_attached_body_callback_);
   }
   robot_state_->update();
@@ -517,7 +517,7 @@ void PlanningScene::setCollisionObjectUpdateCallback(const collision_detection::
 collision_detection::AllowedCollisionMatrix& PlanningScene::getAllowedCollisionMatrixNonConst()
 {
   if (!acm_)
-    acm_.reset(new collision_detection::AllowedCollisionMatrix(parent_->getAllowedCollisionMatrix()));
+    acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(parent_->getAllowedCollisionMatrix());
   return *acm_;
 }
 
@@ -536,7 +536,7 @@ moveit::core::Transforms& PlanningScene::getTransformsNonConst()
   {
     // The only case when there are no transforms is if this planning scene has a parent. When a non-const version of
     // the planning scene is requested, a copy of the parent's transforms is forced
-    scene_transforms_.reset(new SceneTransforms(this));
+    scene_transforms_ = std::make_shared<SceneTransforms>(this);
     scene_transforms_->setAllTransforms(parent_->getTransforms().getAllTransforms());
   }
   return *scene_transforms_;
@@ -977,7 +977,7 @@ void PlanningScene::setCurrentState(const moveit_msgs::msg::RobotState& state)
   {
     if (!robot_state_)
     {
-      robot_state_.reset(new moveit::core::RobotState(parent_->getCurrentState()));
+      robot_state_ = std::make_shared<moveit::core::RobotState>(parent_->getCurrentState());
       robot_state_->setAttachedBodyUpdateCallback(current_state_attached_body_callback_);
     }
     moveit::core::robotStateMsgToRobotState(getTransforms(), state_no_attached, *robot_state_);
@@ -1012,18 +1012,18 @@ void PlanningScene::decoupleParent()
   // This child planning scene did not have its own copy of frame transforms
   if (!scene_transforms_)
   {
-    scene_transforms_.reset(new SceneTransforms(this));
+    scene_transforms_ = std::make_shared<SceneTransforms>(this);
     scene_transforms_->setAllTransforms(parent_->getTransforms().getAllTransforms());
   }
 
   if (!robot_state_)
   {
-    robot_state_.reset(new moveit::core::RobotState(parent_->getCurrentState()));
+    robot_state_ = std::make_shared<moveit::core::RobotState>(parent_->getCurrentState());
     robot_state_->setAttachedBodyUpdateCallback(current_state_attached_body_callback_);
   }
 
   if (!acm_)
-    acm_.reset(new collision_detection::AllowedCollisionMatrix(parent_->getAllowedCollisionMatrix()));
+    acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(parent_->getAllowedCollisionMatrix());
 
   world_diff_.reset();
 
@@ -1031,7 +1031,7 @@ void PlanningScene::decoupleParent()
   {
     ObjectColorMap kc;
     parent_->getKnownObjectColors(kc);
-    object_colors_.reset(new ObjectColorMap(kc));
+    object_colors_ = std::make_unique<ObjectColorMap>(kc);
   }
   else
   {
@@ -1046,7 +1046,7 @@ void PlanningScene::decoupleParent()
   {
     ObjectTypeMap kc;
     parent_->getKnownObjectTypes(kc);
-    object_types_.reset(new ObjectTypeMap(kc));
+    object_types_ = std::make_unique<ObjectTypeMap>(kc);
   }
   else
   {
@@ -1077,7 +1077,7 @@ bool PlanningScene::setPlanningSceneDiffMsg(const moveit_msgs::msg::PlanningScen
   if (!scene_msg.fixed_frame_transforms.empty())
   {
     if (!scene_transforms_)
-      scene_transforms_.reset(new SceneTransforms(this));
+      scene_transforms_ = std::make_shared<SceneTransforms>(this);
     scene_transforms_->setTransforms(scene_msg.fixed_frame_transforms);
   }
 
@@ -1088,7 +1088,7 @@ bool PlanningScene::setPlanningSceneDiffMsg(const moveit_msgs::msg::PlanningScen
 
   // if at least some links are mentioned in the allowed collision matrix, then we have an update
   if (!scene_msg.allowed_collision_matrix.entry_names.empty())
-    acm_.reset(new collision_detection::AllowedCollisionMatrix(scene_msg.allowed_collision_matrix));
+    acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(scene_msg.allowed_collision_matrix);
 
   if (!scene_msg.link_padding.empty() || !scene_msg.link_scale.empty())
   {
@@ -1126,10 +1126,10 @@ bool PlanningScene::setPlanningSceneMsg(const moveit_msgs::msg::PlanningScene& s
   object_types_.reset();
   scene_transforms_->setTransforms(scene_msg.fixed_frame_transforms);
   setCurrentState(scene_msg.robot_state);
-  acm_.reset(new collision_detection::AllowedCollisionMatrix(scene_msg.allowed_collision_matrix));
+  acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(scene_msg.allowed_collision_matrix);
   collision_detector_->cenv_->setPadding(scene_msg.link_padding);
   collision_detector_->cenv_->setScale(scene_msg.link_scale);
-  object_colors_.reset(new ObjectColorMap());
+  object_colors_ = std::make_unique<ObjectColorMap>();
   for (const moveit_msgs::msg::ObjectColor& object_color : scene_msg.object_colors)
     setObjectColor(object_color.id, object_color.color);
   world_->clearObjects();
@@ -1164,7 +1164,7 @@ collision_detection::OccMapTreePtr createOctomap(const octomap_msgs::msg::Octoma
   else
   {
     std::stringstream datastream;
-    if (map.data.size() > 0)
+    if (!map.data.empty())
     {
       datastream.write((const char*)&map.data[0], map.data.size());
       om->readData(datastream);
@@ -1284,7 +1284,7 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
 
   if (!robot_state_)  // there must be a parent in this case
   {
-    robot_state_.reset(new moveit::core::RobotState(parent_->getCurrentState()));
+    robot_state_ = std::make_shared<moveit::core::RobotState>(parent_->getCurrentState());
     robot_state_->setAttachedBodyUpdateCallback(current_state_attached_body_callback_);
   }
   robot_state_->update();
@@ -1836,7 +1836,7 @@ const object_recognition_msgs::msg::ObjectType& PlanningScene::getObjectType(con
 void PlanningScene::setObjectType(const std::string& object_id, const object_recognition_msgs::msg::ObjectType& type)
 {
   if (!object_types_)
-    object_types_.reset(new ObjectTypeMap());
+    object_types_ = std::make_unique<ObjectTypeMap>();
   (*object_types_)[object_id] = type;
 }
 
@@ -1898,7 +1898,7 @@ void PlanningScene::setObjectColor(const std::string& object_id, const std_msgs:
     return;
   }
   if (!object_colors_)
-    object_colors_.reset(new ObjectColorMap());
+    object_colors_ = std::make_unique<ObjectColorMap>();
   (*object_colors_)[object_id] = color;
 }
 

@@ -107,9 +107,15 @@ const std::string& PlanningComponent::getPlanningGroupName() const
   return group_name_;
 }
 
+bool PlanningComponent::setPathConstraints(const moveit_msgs::msg::Constraints& path_constraints)
+{
+  current_path_constraints_ = path_constraints;
+  return true;
+}
+
 PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParameters& parameters)
 {
-  last_plan_solution_.reset(new PlanSolution());
+  last_plan_solution_ = std::make_shared<PlanSolution>();
   if (!joint_model_group_)
   {
     RCLCPP_ERROR(LOGGER, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
@@ -155,6 +161,8 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   }
   req.goal_constraints = current_goal_constraints_;
 
+  req.path_constraints = current_path_constraints_;
+
   // Run planning attempt
   ::planning_interface::MotionPlanResponse res;
   if (planning_pipeline_names_.find(parameters.planning_pipeline) == planning_pipeline_names_.end())
@@ -196,7 +204,7 @@ PlanningComponent::PlanSolution PlanningComponent::plan()
 
 bool PlanningComponent::setStartState(const moveit::core::RobotState& start_state)
 {
-  considered_start_state_.reset(new moveit::core::RobotState(start_state));
+  considered_start_state_ = std::make_shared<moveit::core::RobotState>(start_state);
   return true;
 }
 

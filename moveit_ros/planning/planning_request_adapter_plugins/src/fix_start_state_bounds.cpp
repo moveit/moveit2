@@ -133,7 +133,7 @@ public:
         if (start_state.satisfiesBounds(jmodel, bounds_dist_))
         {
           if (!prefix_state)
-            prefix_state.reset(new moveit::core::RobotState(start_state));
+            prefix_state = std::make_shared<moveit::core::RobotState>(start_state);
           start_state.enforceBounds(jmodel);
           change_req = true;
           RCLCPP_INFO(LOGGER, "Starting state is just outside bounds (joint '%s'). Assuming within bounds.",

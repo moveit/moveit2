@@ -39,6 +39,8 @@
 #include <moveit/trajectory_rviz_plugin/trajectory_display.h>
 #include <rviz_common/properties/string_property.hpp>
 
+#include <memory>
+
 namespace moveit_rviz_plugin
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.visualization.trajectory_display");
@@ -51,7 +53,7 @@ TrajectoryDisplay::TrajectoryDisplay() : Display()
       "Robot Description", "robot_description", "The name of the ROS parameter where the URDF for the robot is loaded",
       this, SLOT(changedRobotDescription()), this);
 
-  trajectory_visual_.reset(new TrajectoryVisualization(this, this));
+  trajectory_visual_ = std::make_shared<TrajectoryVisualization>(this, this);
 }
 
 TrajectoryDisplay::~TrajectoryDisplay() = default;
@@ -74,7 +76,7 @@ void TrajectoryDisplay::loadRobotModel()
 {
   try
   {
-    rdf_loader_.reset(new rdf_loader::RDFLoader(node_, robot_description_property_->getStdString()));
+    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_, robot_description_property_->getStdString());
 
     if (!rdf_loader_->getURDF())
     {
@@ -85,8 +87,8 @@ void TrajectoryDisplay::loadRobotModel()
     this->setStatus(rviz_common::properties::StatusProperty::Ok, "Robot Model", "Successfully loaded");
 
     const srdf::ModelSharedPtr& srdf =
-        rdf_loader_->getSRDF() ? rdf_loader_->getSRDF() : srdf::ModelSharedPtr(new srdf::Model());
-    robot_model_.reset(new moveit::core::RobotModel(rdf_loader_->getURDF(), srdf));
+        rdf_loader_->getSRDF() ? rdf_loader_->getSRDF() : std::make_shared<srdf::Model>();
+    robot_model_ = std::make_shared<moveit::core::RobotModel>(rdf_loader_->getURDF(), srdf);
 
     // Send to child class
     trajectory_visual_->onRobotModelLoaded(robot_model_);
