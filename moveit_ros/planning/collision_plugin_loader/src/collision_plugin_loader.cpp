@@ -48,7 +48,8 @@ public:
   {
     try
     {
-      loader_.reset(new pluginlib::ClassLoader<CollisionPlugin>("moveit_core", "collision_detection::CollisionPlugin"));
+      loader_ = std::make_shared<pluginlib::ClassLoader<CollisionPlugin>>("moveit_core",
+                                                                          "collision_detection::CollisionPlugin");
     }
     catch (pluginlib::PluginlibException& e)
     {
@@ -91,13 +92,13 @@ public:
   }
 
 private:
-  std::shared_ptr<pluginlib::ClassLoader<CollisionPlugin> > loader_;
+  std::shared_ptr<pluginlib::ClassLoader<CollisionPlugin>> loader_;
   std::map<std::string, CollisionPluginPtr> plugins_;
 };
 
 CollisionPluginLoader::CollisionPluginLoader()
 {
-  loader_.reset(new CollisionPluginLoaderImpl());
+  loader_ = std::make_shared<CollisionPluginLoaderImpl>();
 }
 
 CollisionPluginLoader::~CollisionPluginLoader() = default;

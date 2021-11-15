@@ -85,7 +85,7 @@ void World::addToObject(const std::string& id, const std::vector<shapes::ShapeCo
   ObjectPtr& obj = objects_[id];
   if (!obj)
   {
-    obj.reset(new Object(id));
+    obj = std::make_shared<Object>(id);
     action |= CREATE;
   }
 
@@ -104,7 +104,7 @@ void World::addToObject(const std::string& id, const shapes::ShapeConstPtr& shap
   ObjectPtr& obj = objects_[id];
   if (!obj)
   {
-    obj.reset(new Object(id));
+    obj = std::make_shared<Object>(id);
     action |= CREATE;
   }
 
@@ -134,7 +134,7 @@ World::ObjectConstPtr World::getObject(const std::string& object_id) const
 void World::ensureUnique(ObjectPtr& obj)
 {
   if (obj && !obj.unique())
-    obj.reset(new Object(*obj));
+    obj = std::make_shared<Object>(*obj);
 }
 
 bool World::hasObject(const std::string& object_id) const
