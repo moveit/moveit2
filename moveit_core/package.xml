@@ -1,12 +1,9 @@
 <?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_core</name>
   <version>2.3.0</version>
   <description>Core libraries used by MoveIt</description>
-  <author email="isucan@google.com">Ioan Sucan</author>
-  <author email="robot.moveit@gmail.com">Sachin Chitta</author>
-  <author email="acorn.pooley@sri.com">Acorn Pooley</author>
-  <author email="dave@picknik.ai">Dave Coleman</author>
 
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
@@ -14,9 +11,15 @@
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
   <license>BSD</license>
+
   <url type="website">http://moveit.ros.org</url>
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
+
+  <author email="isucan@google.com">Ioan Sucan</author>
+  <author email="robot.moveit@gmail.com">Sachin Chitta</author>
+  <author email="acorn.pooley@sri.com">Acorn Pooley</author>
+  <author email="dave@picknik.ai">Dave Coleman</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>pkg-config</buildtool_depend>
