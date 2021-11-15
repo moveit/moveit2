@@ -40,6 +40,7 @@
 #include <moveit/planning_interface/planning_request.h>
 #include <moveit/planning_interface/planning_response.h>
 #include <moveit/planning_scene/planning_scene.h>
+#include <moveit/robot_state/robot_state.h>
 
 namespace chomp
 {
@@ -49,8 +50,20 @@ public:
   ChompPlanner() = default;
   virtual ~ChompPlanner() = default;
 
-  bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const planning_interface::MotionPlanRequest& req, const ChompParameters& params,
-             planning_interface::MotionPlanDetailedResponse& res) const;
+  bool solve(
+    const planning_scene::PlanningSceneConstPtr & planning_scene,
+    const planning_interface::MotionPlanRequest & req, const ChompParameters & params,
+    planning_interface::MotionPlanDetailedResponse & res) const;
+
+  bool computePoseIK(
+    const moveit::core::RobotModelConstPtr & robot_model, const std::string & group_name,
+    const std::string & link_name, const Eigen::Isometry3d & pose, const std::string & frame_id,
+    const std::map<std::string, double> & seed, std::map<std::string, double> & solution,
+    bool check_self_collision = true, const double timeout = 0.0) const;
+
+  bool isStateColliding(
+    const bool test_for_self_collision, const moveit::core::RobotModelConstPtr & robot_model,
+    moveit::core::RobotState * state, const moveit::core::JointModelGroup * const group,
+    const double * const ik_solution) const;
 };
 }  // namespace chomp

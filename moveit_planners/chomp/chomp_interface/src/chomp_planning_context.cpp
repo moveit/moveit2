@@ -35,32 +35,36 @@
 /* Author: Chittaranjan Srinivas Swaminathan */
 
 #include <chomp_interface/chomp_planning_context.h>
-#include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit/robot_state/conversions.h>
+#include <moveit/trajectory_processing/iterative_time_parameterization.h>
+
+#include "rclcpp/rclcpp.hpp"
 
 namespace chomp_interface
 {
-CHOMPPlanningContext::CHOMPPlanningContext(const std::string& name, const std::string& group,
-                                           const moveit::core::RobotModelConstPtr& model, ros::NodeHandle& nh)
-  : planning_interface::PlanningContext(name, group), robot_model_(model)
+rclcpp::Logger LOGGER3 = rclcpp::get_logger("chomp_optimizer");
+
+CHOMPPlanningContext::CHOMPPlanningContext(
+  const std::string & name, const std::string & group,
+  const moveit::core::RobotModelConstPtr & model, rclcpp::Node::SharedPtr nh)
+: planning_interface::PlanningContext(name, group), robot_model_(model)
 {
   chomp_interface_ = CHOMPInterfacePtr(new CHOMPInterface(nh));
 }
 
-bool CHOMPPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
+bool CHOMPPlanningContext::solve(planning_interface::MotionPlanDetailedResponse & res)
 {
   return chomp_interface_->solve(planning_scene_, request_, chomp_interface_->getParams(), res);
 }
 
-bool CHOMPPlanningContext::solve(planning_interface::MotionPlanResponse& res)
+bool CHOMPPlanningContext::solve(planning_interface::MotionPlanResponse & res)
 {
   planning_interface::MotionPlanDetailedResponse res_detailed;
   bool planning_success = solve(res_detailed);
 
   res.error_code_ = res_detailed.error_code_;
 
-  if (planning_success)
-  {
+  if (planning_success) {
     res.trajectory_ = res_detailed.trajectory_[0];
     res.planning_time_ = res_detailed.processing_time_[0];
   }
@@ -74,8 +78,6 @@ bool CHOMPPlanningContext::terminate()
   return true;
 }
 
-void CHOMPPlanningContext::clear()
-{
-}
+void CHOMPPlanningContext::clear() {}
 
-} /* namespace chomp_interface */
+}  // namespace chomp_interface

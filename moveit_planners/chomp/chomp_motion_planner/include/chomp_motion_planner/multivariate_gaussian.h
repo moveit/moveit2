@@ -36,12 +36,12 @@
 
 #pragma once
 
-#include <eigen3/Eigen/Core>
-#include <eigen3/Eigen/Cholesky>
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/normal_distribution.hpp>
 #include <boost/random/mersenne_twister.hpp>
+#include <boost/random/normal_distribution.hpp>
+#include <boost/random/variate_generator.hpp>
 #include <cstdlib>
+#include <eigen3/Eigen/Cholesky>
+#include <eigen3/Eigen/Core>
 
 namespace chomp
 {
@@ -52,10 +52,11 @@ class MultivariateGaussian
 {
 public:
   template <typename Derived1, typename Derived2>
-  MultivariateGaussian(const Eigen::MatrixBase<Derived1>& mean, const Eigen::MatrixBase<Derived2>& covariance);
+  MultivariateGaussian(
+    const Eigen::MatrixBase<Derived1> & mean, const Eigen::MatrixBase<Derived2> & covariance);
 
   template <typename Derived>
-  void sample(Eigen::MatrixBase<Derived>& output);
+  void sample(Eigen::MatrixBase<Derived> & output);
 
 private:
   Eigen::VectorXd mean_;                /**< Mean of the gaussian distribution */
@@ -71,24 +72,23 @@ private:
 //////////////////////// template function definitions follow //////////////////////////////
 
 template <typename Derived1, typename Derived2>
-MultivariateGaussian::MultivariateGaussian(const Eigen::MatrixBase<Derived1>& mean,
-                                           const Eigen::MatrixBase<Derived2>& covariance)
-  : mean_(mean)
-  , covariance_(covariance)
-  , covariance_cholesky_(covariance_.llt().matrixL())
-  , rng_()
-  , normal_dist_(0.0, 1.0)
-  , gaussian_(rng_, normal_dist_)
+MultivariateGaussian::MultivariateGaussian(
+  const Eigen::MatrixBase<Derived1> & mean, const Eigen::MatrixBase<Derived2> & covariance)
+: mean_(mean),
+  covariance_(covariance),
+  covariance_cholesky_(covariance_.llt().matrixL()),
+  rng_(),
+  normal_dist_(0.0, 1.0),
+  gaussian_(rng_, normal_dist_)
 {
   rng_.seed(rand());
   size_ = mean.rows();
 }
 
 template <typename Derived>
-void MultivariateGaussian::sample(Eigen::MatrixBase<Derived>& output)
+void MultivariateGaussian::sample(Eigen::MatrixBase<Derived> & output)
 {
-  for (int i = 0; i < size_; ++i)
-    output(i) = gaussian_();
+  for (int i = 0; i < size_; ++i) output(i) = gaussian_();
   output = mean_ + covariance_cholesky_ * output;
 }
 }  // namespace chomp

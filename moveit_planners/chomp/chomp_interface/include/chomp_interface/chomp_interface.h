@@ -36,29 +36,29 @@
 
 #pragma once
 
-#include <chomp_motion_planner/chomp_planner.h>
 #include <chomp_motion_planner/chomp_parameters.h>
-#include <ros/ros.h>
+#include <chomp_motion_planner/chomp_planner.h>
+
+#include <rclcpp/rclcpp.hpp>
 
 namespace chomp_interface
 {
-MOVEIT_CLASS_FORWARD(CHOMPInterface)  // Defines CHOMPInterfacePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(CHOMPInterface);  // Defines CHOMPInterfacePtr, ConstPtr, WeakPtr... etc
 
 class CHOMPInterface : public chomp::ChompPlanner
 {
 public:
-  CHOMPInterface(const ros::NodeHandle& nh = ros::NodeHandle("~"));
+  //CHOMPInterface();
+  CHOMPInterface(const rclcpp::Node::SharedPtr nh);
+  //CHOMPInterface(const rclcpp::Node& nh = rclcpp::Node("~"));
 
-  const chomp::ChompParameters& getParams() const
-  {
-    return params_;
-  }
+  const chomp::ChompParameters & getParams() const { return params_; }
 
 protected:
   /** @brief Configure everything using the param server */
   void loadParams();
 
-  ros::NodeHandle nh_;  /// The ROS node handle
+  std::shared_ptr<rclcpp::Node> nh_;  /// The ROS node handle
 
   chomp::ChompParameters params_;
 };

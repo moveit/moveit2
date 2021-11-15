@@ -1,72 +1,85 @@
-cmake_minimum_required(VERSION 3.1.3)
+cmake_minimum_required(VERSION 3.5)
 project(moveit_planners_chomp)
 
-if(NOT "${CMAKE_CXX_STANDARD}")
+# Default to C99
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
+endif()
+
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
 endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
-# find catkin in isolation so that CATKIN_ENABLE_TESTING is defined
-find_package(catkin REQUIRED)
-if(CATKIN_ENABLE_TESTING)
-  set(CHOMP_TEST_DEPS moveit_ros_planning_interface)
-else()
-  set(CHOMP_TEST_DEPS)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-find_package(catkin REQUIRED COMPONENTS
-  roscpp
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(moveit_core REQUIRED)
+#find_package(moveit_ros_planning REQUIRED)
+find_package(chomp_motion_planner REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
+
+set(THIS_PACKAGE_INCLUDE_DEPENDS 
+  moveit_core
+  #moveit_ros_planning
+  chomp_motion_planner
   moveit_core
   pluginlib
-  chomp_motion_planner
-  ${CHOMP_TEST_DEPS}
+  rclcpp
 )
 
-find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED)
-
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp moveit_core pluginlib
+include_directories(
+  include
 )
 
-include_directories(include)
-include_directories(SYSTEM
-  ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
+set(MOVEIT_LIB_NAME moveit_chomp_interface)
+
+add_library(${MOVEIT_LIB_NAME} SHARED 
+  src/chomp_interface.cpp 
+  src/chomp_planning_context.cpp)
+set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
+ament_target_dependencies(${MOVEIT_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
+add_library(moveit_chomp_planner_plugin SHARED src/chomp_plugin.cpp)
+ament_target_dependencies(moveit_chomp_planner_plugin ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_chomp_planner_plugin 
+  #chomp_interface
+  #moveit_planning_scene
+  ${MOVEIT_LIB_NAME}
 )
 
-add_library(${PROJECT_NAME} src/chomp_interface.cpp src/chomp_planning_context.cpp)
-set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
-
-add_library(chomp_planner_plugin src/chomp_plugin.cpp)
-set_target_properties(chomp_planner_plugin PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(chomp_planner_plugin ${PROJECT_NAME} ${catkin_LIBRARIES})
-
-install(FILES chomp_interface_plugin_description.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
-install(DIRECTORY include/chomp_interface/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+install(
+  TARGETS ${MOVEIT_LIB_NAME} moveit_chomp_planner_plugin
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
-install(TARGETS ${PROJECT_NAME} chomp_planner_plugin
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
-if(CATKIN_ENABLE_TESTING)
-  # additional test dependencies
-  find_package(rostest REQUIRED)
-  add_rostest_gtest(chomp_moveit_test
-    test/chomp_moveit.test
-    test/chomp_moveit_test.cpp)
-  target_link_libraries(chomp_moveit_test
-    ${catkin_LIBRARIES}
-    ${rostest_LIBRARIES})
+pluginlib_export_plugin_description_file(moveit_core chomp_interface_plugin_description.xml)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # the following line skips the linter which checks for copyrights
+  # uncomment the line when a copyright and license is not present in all source files
+  #set(ament_cmake_copyright_FOUND TRUE)
+  # the following line skips cpplint (only works in a git repo)
+  # uncomment the line when this package is not in a git repo
+  #set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
 endif()
+
+ament_package()
