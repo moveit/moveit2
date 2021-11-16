@@ -1,20 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(moveit_planners_chomp)
 
-# Default to C99
-if(NOT CMAKE_C_STANDARD)
-  set(CMAKE_C_STANDARD 99)
-endif()
-
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()
@@ -22,14 +8,12 @@ moveit_package()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(moveit_core REQUIRED)
-#find_package(moveit_ros_planning REQUIRED)
 find_package(chomp_motion_planner REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
-  #moveit_ros_planning
   chomp_motion_planner
   moveit_core
   pluginlib
@@ -51,8 +35,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 add_library(moveit_chomp_planner_plugin SHARED src/chomp_plugin.cpp)
 ament_target_dependencies(moveit_chomp_planner_plugin ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_chomp_planner_plugin
-  #chomp_interface
-  #moveit_planning_scene
   ${MOVEIT_LIB_NAME}
 )
 

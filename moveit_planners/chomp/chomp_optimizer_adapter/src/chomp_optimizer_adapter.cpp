@@ -43,9 +43,9 @@
 #include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 
-#include <class_loader/class_loader.hpp>
 #include <eigen3/Eigen/Core>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
+#include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <vector>
 
@@ -73,7 +73,7 @@ public:
       params_.max_iterations_ = 200;
       RCLCPP_DEBUG(LOGGER, "Param max_iterations was not set. Using default value: %s", params_.max_iterations_);
     }
-    if (!node->get_parameter("max_iterations_after_collision_free", params_.max_iterations_after_collision_free_))
+    if (!node->get_parameter("chomp.max_iterations_after_collision_free", params_.max_iterations_after_collision_free_))
     {
       params_.max_iterations_after_collision_free_ = 5;
       RCLCPP_DEBUG(LOGGER, "Param max_iterations_after_collision_free was not set. Using default value: %s",
@@ -102,7 +102,7 @@ public:
       RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_velocity was not set. Using default value: %s",
                    params_.smoothness_cost_velocity_);
     }
-    if (!node->get_parameter("smoothness_cost_acceleration", params_.smoothness_cost_acceleration_))
+    if (!node->get_parameter("chomp.smoothness_cost_acceleration", params_.smoothness_cost_acceleration_))
     {
       params_.smoothness_cost_acceleration_ = 1.0;
       RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_acceleration was not set. Using default value: %s",
@@ -137,7 +137,7 @@ public:
       RCLCPP_DEBUG(LOGGER, "Param joint_update_limit was not set. Using default value: %s", params_.joint_update_limit_);
     }
     // TODO: remove this warning after 06/2022
-    if (!node->has_parameter("min_clearance") && node->has_parameter("min_clearence"))
+    if (!node->has_parameter("chomp.min_clearance") && node->has_parameter("chomp.min_clearence"))
       RCLCPP_WARN(LOGGER, "The param 'min_clearence' has been renamed to 'min_clearance', please update your "
                           "config!");
     if (!node->get_parameter("chomp.min_clearance", params_.min_clearance_))

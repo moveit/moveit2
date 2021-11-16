@@ -83,73 +83,17 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
     return false;
   }
 
-  // Convert to joint space goal.
-  planning_interface::MotionPlanRequest req_mod;
   if (req.goal_constraints[0].joint_constraints.empty() || !req.goal_constraints[0].position_constraints.empty() ||
       !req.goal_constraints[0].orientation_constraints.empty())
   {
-    RCLCPP_INFO(LOGGER, "Converting work-space to joint-space goal ...");
-
-    geometry_msgs::msg::Point p =
-        req.goal_constraints.at(0).position_constraints.at(0).constraint_region.primitive_poses.at(0).position;
-    p.x -= req.goal_constraints.at(0).position_constraints.at(0).target_point_offset.x;
-    p.y -= req.goal_constraints.at(0).position_constraints.at(0).target_point_offset.y;
-    p.z -= req.goal_constraints.at(0).position_constraints.at(0).target_point_offset.z;
-
-    geometry_msgs::msg::Pose pose;
-    pose.position = p;
-    pose.orientation = req.goal_constraints.at(0).orientation_constraints.at(0).orientation;
-    tf2::Quaternion q;
-    tf2::fromMsg(pose.orientation, q);
-    pose.orientation = tf2::toMsg(q.normalize());
-    Eigen::Isometry3d pose_eigen;
-    tf2::fromMsg(pose, pose_eigen);
-    moveit::core::RobotModelConstPtr robot_model = planning_scene->getRobotModel();
-
-    std::map<std::string, double> start_joint_position;
-    for (std::size_t i = 0; i < req.start_state.joint_state.name.size(); ++i)
-    {
-      start_joint_position[req.start_state.joint_state.name[i]] = req.start_state.joint_state.position[i];
-    }
-
-    std::map<std::string, double> goal_joint_position;
-    if (!computePoseIK(robot_model, req.group_name, req.goal_constraints.at(0).position_constraints.at(0).link_name,
-                       pose_eigen, robot_model->getModelFrame(), start_joint_position, goal_joint_position))
-    {
-      throw std::runtime_error("No IK solution for goal pose");
-    }
-
-    req_mod.group_name = req.group_name;
-    req_mod.goal_constraints.resize(1);
-    req_mod.goal_constraints[0].joint_constraints.resize(goal_joint_position.size());
-    const std::vector<std::string> joint_names =
-        robot_model->getJointModelGroup(req.group_name)->getActiveJointModelNames();
-    RCLCPP_INFO(LOGGER, "The joint space goal is:");
-    for (std::size_t i = 0; i < goal_joint_position.size(); ++i)
-    {
-      req_mod.goal_constraints[0].joint_constraints[i].joint_name = joint_names[i];
-      req_mod.goal_constraints[0].joint_constraints[i].position = goal_joint_position[joint_names[i]];
-      RCLCPP_INFO(LOGGER, "(%d) %s: %.3f", i, req_mod.goal_constraints[0].joint_constraints[i].joint_name.c_str(),
-                  req_mod.goal_constraints[0].joint_constraints[i].position);
-    }
+    RCLCPP_ERROR(LOGGER, "Only joint-space goals are supported");
+    res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
+    return false;
   }
-  else
-  {
-    req_mod = req;
-  }
-
-  // if (
-  //   req.goal_constraints[0].joint_constraints.empty() ||
-  //   !req.goal_constraints[0].position_constraints.empty() ||
-  //   !req.goal_constraints[0].orientation_constraints.empty()) {
-  //   RCLCPP_ERROR(LOGGER, "Only joint-space goals are supported");
-  //   res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-  //   return false;
-  // }
 
   const size_t goal_index = trajectory.getNumPoints() - 1;
   moveit::core::RobotState goal_state(start_state);
-  for (const moveit_msgs::msg::JointConstraint& joint_constraint : req_mod.goal_constraints[0].joint_constraints)
+  for (const moveit_msgs::msg::JointConstraint& joint_constraint : req.goal_constraints[0].joint_constraints)
     goal_state.setVariablePosition(joint_constraint.joint_name, joint_constraint.position);
   if (!goal_state.satisfiesBounds())
   {
@@ -157,10 +101,10 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
     res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE;
     return false;
   }
-  robotStateToArray(goal_state, req_mod.group_name, trajectory.getTrajectoryPoint(goal_index));
+  robotStateToArray(goal_state, req.group_name, trajectory.getTrajectoryPoint(goal_index));
 
   const moveit::core::JointModelGroup* model_group =
-      planning_scene->getRobotModel()->getJointModelGroup(req_mod.group_name);
+      planning_scene->getRobotModel()->getJointModelGroup(req.group_name);
   // fix the goal to move the shortest angular distance for wrap-around joints:
   for (size_t i = 0; i < model_group->getActiveJointModels().size(); i++)
   {
@@ -338,79 +282,6 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   res.processing_time_[0] = (double)count / 1000.0;
 
   return true;
-}
-
-bool ChompPlanner::computePoseIK(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group_name,
-                                 const std::string& link_name, const Eigen::Isometry3d& pose,
-                                 const std::string& frame_id, const std::map<std::string, double>& seed,
-                                 std::map<std::string, double>& solution, bool check_self_collision,
-                                 const double timeout) const
-{
-  if (!robot_model->hasJointModelGroup(group_name))
-  {
-    RCLCPP_ERROR(LOGGER, "Robot model has no planning group named as %s", group_name);
-    return false;
-  }
-
-  if (!robot_model->getJointModelGroup(group_name)->canSetStateFromIK(link_name))
-  {
-    RCLCPP_ERROR(LOGGER, "No valid IK solver exists for %s in planning group %s", link_name, group_name);
-    return false;
-  }
-
-  if (frame_id != robot_model->getModelFrame())
-  {
-    RCLCPP_ERROR(LOGGER, "Given frame (%s) is unequal to model frame(%s)", frame_id, robot_model->getModelFrame());
-    return false;
-  }
-
-  moveit::core::RobotState rstate(robot_model);
-  // By setting the robot state to default values, we basically allow
-  // the user of this function to supply an incomplete or even empty seed.
-  rstate.setToDefaultValues();
-  rstate.setVariablePositions(seed);
-
-  moveit::core::GroupStateValidityCallbackFn ik_constraint_function;
-
-  ik_constraint_function = std::bind(&ChompPlanner::isStateColliding, this, check_self_collision, robot_model,
-                                     std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-
-  // Call Inverse Kinematics solver.
-  if (rstate.setFromIK(robot_model->getJointModelGroup(group_name), pose, link_name, timeout, ik_constraint_function))
-  {
-    // copy the solution
-    for (const std::string& joint_name : robot_model->getJointModelGroup(group_name)->getActiveJointModelNames())
-    {
-      solution[joint_name] = rstate.getVariablePosition(joint_name);
-      RCLCPP_ERROR(LOGGER, "%s: %.4f", joint_name.c_str(), solution[joint_name]);
-    }
-    return true;
-  }
-  else
-  {
-    RCLCPP_ERROR(LOGGER, "Inverse kinematics found no solution.");
-    return false;
-  }
-}
-
-bool ChompPlanner::isStateColliding(const bool test_for_self_collision,
-                                    const moveit::core::RobotModelConstPtr& robot_model,
-                                    moveit::core::RobotState* rstate, const moveit::core::JointModelGroup* const group,
-                                    const double* const ik_solution) const
-{
-  if (!test_for_self_collision)
-  {
-    return true;
-  }
-
-  rstate->setJointGroupPositions(group, ik_solution);
-  rstate->update();
-  collision_detection::CollisionRequest collision_req;
-  collision_req.group_name = group->getName();
-  collision_detection::CollisionResult collision_res;
-  planning_scene::PlanningScene(robot_model).checkSelfCollision(collision_req, collision_res, *rstate);
-
-  return !collision_res.collision;
 }
 
 }  // namespace chomp

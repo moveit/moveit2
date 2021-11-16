@@ -34,9 +34,10 @@
 
 /* Author: Mrinal Kalakrishnan */
 
-#pragma once
+#include <string>
+#include <vector>
 
-#include "rclcpp/rclcpp.hpp"
+#pragma once
 
 namespace chomp
 {

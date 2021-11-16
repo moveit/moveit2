@@ -13,8 +13,11 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   Boost
 )
 
+message(WARNING "trac_ik found: " ${trac_ik_kinematics_plugin_FOUND})
 if(trac_ik_kinematics_plugin_FOUND)
     include_directories(${trac_ik_kinematics_plugin_INCLUDE_DIRS})
+    message(WARNING "include dir: " ${trac_ik_kinematics_plugin_INCLUDE_DIRS})
+    message(WARNING "include dir: " ${trac_ik_kinematics_plugin_INCLUDE_DIRS})
 endif()
 
 set(MOVEIT_LIB_NAME moveit_cached_ik_kinematics_plugin)

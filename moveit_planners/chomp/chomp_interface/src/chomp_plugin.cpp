@@ -54,7 +54,6 @@ public:
 
   bool initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
                   const std::string& parameter_namespace) override
-  // bool initialize(const moveit::core::RobotModelConstPtr& model, const std::string& ns) override
   {
     std::string actual_ns;
     if (parameter_namespace.empty())

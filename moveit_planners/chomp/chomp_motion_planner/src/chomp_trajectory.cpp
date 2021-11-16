@@ -36,8 +36,6 @@
 
 #include <chomp_motion_planner/chomp_trajectory.h>
 
-#include "rclcpp/rclcpp.hpp"
-
 namespace chomp
 {
 ChompTrajectory::ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_model, double duration,

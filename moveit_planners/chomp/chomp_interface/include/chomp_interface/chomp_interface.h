@@ -48,9 +48,7 @@ MOVEIT_CLASS_FORWARD(CHOMPInterface);  // Defines CHOMPInterfacePtr, ConstPtr, W
 class CHOMPInterface : public chomp::ChompPlanner
 {
 public:
-  // CHOMPInterface();
-  CHOMPInterface(const rclcpp::Node::SharedPtr nh);
-  // CHOMPInterface(const rclcpp::Node& nh = rclcpp::Node("~"));
+  CHOMPInterface(const rclcpp::Node::SharedPtr node);
 
   const chomp::ChompParameters& getParams() const
   {
@@ -61,7 +59,7 @@ protected:
   /** @brief Configure everything using the param server */
   void loadParams();
 
-  std::shared_ptr<rclcpp::Node> nh_;  /// The ROS node handle
+  std::shared_ptr<rclcpp::Node> node_;  /// The ROS node
 
   chomp::ChompParameters params_;
 };
