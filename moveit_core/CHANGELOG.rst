@@ -2,8 +2,8 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.2 (2021-11-16)
+------------------
 * collision_detection_bullet: Fix target installation (`#658 <https://github.com/ros-planning/moveit2/issues/658>`_)
 * Fix broken test (`#701 <https://github.com/ros-planning/moveit2/issues/701>`_)
 * Fixes for Windows (`#530 <https://github.com/ros-planning/moveit2/issues/530>`_)

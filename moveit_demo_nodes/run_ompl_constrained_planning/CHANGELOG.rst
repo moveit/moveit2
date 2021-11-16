@@ -2,8 +2,8 @@
 Changelog for package run_ompl_constrained_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.2.2 (2021-11-16)
+------------------
 * Migrate to joint_state_broadcaster (`#656 <https://github.com/ros-planning/moveit2/issues/656>`_)
 * Add missing exec dependencies to demo packages (`#582 <https://github.com/ros-planning/moveit2/issues/582>`_)
 * Fix loading joint_limits.yaml in demo and test launch files (`#544 <https://github.com/ros-planning/moveit2/issues/544>`_)
