@@ -7,10 +7,11 @@
   <author email="raghavendersahdev@gmail.com">Raghavender Sahdev</author>
   <maintainer email="raghavendersahdev@gmail.com">Raghavender Sahdev</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
+  <maintainer email="andreas@botbuilt.com">atenpas</maintainer>
 
   <license>BSD</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>moveit_common</build_depend>
 
   <depend>moveit_core</depend>
