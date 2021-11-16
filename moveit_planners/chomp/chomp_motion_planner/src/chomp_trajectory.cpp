@@ -40,33 +40,28 @@
 
 namespace chomp
 {
-ChompTrajectory::ChompTrajectory(
-  const moveit::core::RobotModelConstPtr & robot_model, double duration, double discretization,
-  const std::string & group_name)
-: ChompTrajectory(
-    robot_model, static_cast<size_t>(duration / discretization) + 1, discretization, group_name)
+ChompTrajectory::ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_model, double duration,
+                                 double discretization, const std::string& group_name)
+  : ChompTrajectory(robot_model, static_cast<size_t>(duration / discretization) + 1, discretization, group_name)
 {
 }
 
-ChompTrajectory::ChompTrajectory(
-  const moveit::core::RobotModelConstPtr & robot_model, size_t num_points, double discretization,
-  const std::string & group_name)
-: planning_group_name_(group_name),
-  num_points_(num_points),
-  discretization_(discretization),
-  duration_((num_points - 1) * discretization),
-  start_index_(1),
-  end_index_(num_points_ - 2)
+ChompTrajectory::ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_model, size_t num_points,
+                                 double discretization, const std::string& group_name)
+  : planning_group_name_(group_name)
+  , num_points_(num_points)
+  , discretization_(discretization)
+  , duration_((num_points - 1) * discretization)
+  , start_index_(1)
+  , end_index_(num_points_ - 2)
 {
-  const moveit::core::JointModelGroup * model_group =
-    robot_model->getJointModelGroup(planning_group_name_);
+  const moveit::core::JointModelGroup* model_group = robot_model->getJointModelGroup(planning_group_name_);
   num_joints_ = model_group->getActiveJointModels().size();
   init();
 }
 
-ChompTrajectory::ChompTrajectory(
-  const ChompTrajectory & source_traj, const std::string & group_name, int diff_rule_length)
-: planning_group_name_(group_name), discretization_(source_traj.discretization_)
+ChompTrajectory::ChompTrajectory(const ChompTrajectory& source_traj, const std::string& group_name, int diff_rule_length)
+  : planning_group_name_(group_name), discretization_(source_traj.discretization_)
 {
   num_joints_ = source_traj.getNumJoints();
 
@@ -86,34 +81,39 @@ ChompTrajectory::ChompTrajectory(
   full_trajectory_index_.resize(num_points_);
 
   // now copy the trajectories over:
-  for (size_t i = 0; i < num_points_; i++) {
+  for (size_t i = 0; i < num_points_; i++)
+  {
     int source_traj_point = i - start_extra;
-    if (source_traj_point < 0) source_traj_point = 0;
+    if (source_traj_point < 0)
+      source_traj_point = 0;
     if (static_cast<size_t>(source_traj_point) >= source_traj.num_points_)
       source_traj_point = source_traj.num_points_ - 1;
     full_trajectory_index_[i] = source_traj_point;
-    getTrajectoryPoint(i) =
-      const_cast<ChompTrajectory &>(source_traj).getTrajectoryPoint(source_traj_point);
+    getTrajectoryPoint(i) = const_cast<ChompTrajectory&>(source_traj).getTrajectoryPoint(source_traj_point);
   }
 }
 
-void ChompTrajectory::init() { trajectory_.resize(num_points_, num_joints_); }
+void ChompTrajectory::init()
+{
+  trajectory_.resize(num_points_, num_joints_);
+}
 
-void ChompTrajectory::updateFromGroupTrajectory(const ChompTrajectory & group_trajectory)
+void ChompTrajectory::updateFromGroupTrajectory(const ChompTrajectory& group_trajectory)
 {
   size_t num_vars_free = end_index_ - start_index_ + 1;
   trajectory_.block(start_index_, 0, num_vars_free, num_joints_) =
-    group_trajectory.trajectory_.block(
-      group_trajectory.start_index_, 0, num_vars_free, num_joints_);
+      group_trajectory.trajectory_.block(group_trajectory.start_index_, 0, num_vars_free, num_joints_);
 }
 
 void ChompTrajectory::fillInLinearInterpolation()
 {
   double start_index = start_index_ - 1;
   double end_index = end_index_ + 1;
-  for (size_t i = 0; i < num_joints_; i++) {
+  for (size_t i = 0; i < num_joints_; i++)
+  {
     double theta = ((*this)(end_index, i) - (*this)(start_index, i)) / (end_index - 1);
-    for (size_t j = start_index + 1; j < end_index; j++) {
+    for (size_t j = start_index + 1; j < end_index; j++)
+    {
       (*this)(j, i) = (*this)(start_index, i) + j * theta;
     }
   }
@@ -126,13 +126,15 @@ void ChompTrajectory::fillInCubicInterpolation()
   double dt = 0.001;
   std::vector<double> coeffs(4, 0);
   double total_time = (end_index - 1) * dt;
-  for (size_t i = 0; i < num_joints_; i++) {
+  for (size_t i = 0; i < num_joints_; i++)
+  {
     coeffs[0] = (*this)(start_index, i);
     coeffs[2] = (3 / (pow(total_time, 2))) * ((*this)(end_index, i) - (*this)(start_index, i));
     coeffs[3] = (-2 / (pow(total_time, 3))) * ((*this)(end_index, i) - (*this)(start_index, i));
 
     double t;
-    for (size_t j = start_index + 1; j < end_index; j++) {
+    for (size_t j = start_index + 1; j < end_index; j++)
+    {
       t = j * dt;
       (*this)(j, i) = coeffs[0] + coeffs[2] * pow(t, 2) + coeffs[3] * pow(t, 3);
     }
@@ -147,12 +149,14 @@ void ChompTrajectory::fillInMinJerk()
   td[0] = 1.0;
   td[1] = (end_index - start_index) * discretization_;
 
-  for (unsigned int i = 2; i <= 5; i++) td[i] = td[i - 1] * td[1];
+  for (unsigned int i = 2; i <= 5; i++)
+    td[i] = td[i - 1] * td[1];
 
   // calculate the spline coefficients for each joint:
   // (these are for the special case of zero start and end vel and acc)
   std::vector<double[6]> coeff(num_joints_);
-  for (size_t i = 0; i < num_joints_; i++) {
+  for (size_t i = 0; i < num_joints_; i++)
+  {
     double x0 = (*this)(start_index, i);
     double x1 = (*this)(end_index, i);
     coeff[i][0] = x0;
@@ -164,51 +168,57 @@ void ChompTrajectory::fillInMinJerk()
   }
 
   // now fill in the joint positions at each time step
-  for (size_t i = start_index + 1; i < end_index; i++) {
+  for (size_t i = start_index + 1; i < end_index; i++)
+  {
     double ti[6];  // powers of the time index point
     ti[0] = 1.0;
     ti[1] = (i - start_index) * discretization_;
-    for (unsigned int k = 2; k <= 5; k++) ti[k] = ti[k - 1] * ti[1];
+    for (unsigned int k = 2; k <= 5; k++)
+      ti[k] = ti[k - 1] * ti[1];
 
-    for (size_t j = 0; j < num_joints_; j++) {
+    for (size_t j = 0; j < num_joints_; j++)
+    {
       (*this)(i, j) = 0.0;
-      for (unsigned int k = 0; k <= 5; k++) {
+      for (unsigned int k = 0; k <= 5; k++)
+      {
         (*this)(i, j) += ti[k] * coeff[j][k];
       }
     }
   }
 }
 
-bool ChompTrajectory::fillInFromTrajectory(const robot_trajectory::RobotTrajectory & trajectory)
+bool ChompTrajectory::fillInFromTrajectory(const robot_trajectory::RobotTrajectory& trajectory)
 {
   // check if input trajectory has less than two states (start and goal), function returns false if condition is true
-  if (trajectory.getWayPointCount() < 2) return false;
+  if (trajectory.getWayPointCount() < 2)
+    return false;
 
   const size_t max_output_index = getNumPoints() - 1;
   const size_t max_input_index = trajectory.getWayPointCount() - 1;
 
-  const moveit::core::JointModelGroup * group = trajectory.getGroup();
+  const moveit::core::JointModelGroup* group = trajectory.getGroup();
   moveit::core::RobotState interpolated(trajectory.getRobotModel());
-  for (size_t i = 0; i <= max_output_index; i++) {
+  for (size_t i = 0; i <= max_output_index; i++)
+  {
     double fraction = static_cast<double>(i * max_input_index) / max_output_index;
     const size_t prev_idx = std::trunc(fraction);  // integer part
     fraction = fraction - prev_idx;                // fractional part
     const size_t next_idx = prev_idx == max_input_index ? prev_idx : prev_idx + 1;
-    trajectory.getWayPoint(prev_idx).interpolate(
-      trajectory.getWayPoint(next_idx), fraction, interpolated, group);
+    trajectory.getWayPoint(prev_idx).interpolate(trajectory.getWayPoint(next_idx), fraction, interpolated, group);
     assignCHOMPTrajectoryPointFromRobotState(interpolated, i, group);
   }
   return true;
 }
 
-void ChompTrajectory::assignCHOMPTrajectoryPointFromRobotState(
-  const moveit::core::RobotState & source, size_t chomp_trajectory_point_index,
-  const moveit::core::JointModelGroup * group)
+void ChompTrajectory::assignCHOMPTrajectoryPointFromRobotState(const moveit::core::RobotState& source,
+                                                               size_t chomp_trajectory_point_index,
+                                                               const moveit::core::JointModelGroup* group)
 {
   Eigen::MatrixXd::RowXpr target = getTrajectoryPoint(chomp_trajectory_point_index);
   assert(group->getActiveJointModels().size() == static_cast<size_t>(target.cols()));
   size_t joint_index = 0;
-  for (const moveit::core::JointModel * jm : group->getActiveJointModels()) {
+  for (const moveit::core::JointModel* jm : group->getActiveJointModels())
+  {
     assert(jm->getVariableCount() == 1);
     target[joint_index++] = source.getVariablePosition(jm->getFirstVariableIndex());
   }

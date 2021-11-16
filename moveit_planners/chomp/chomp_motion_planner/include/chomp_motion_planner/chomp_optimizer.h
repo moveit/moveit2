@@ -53,10 +53,9 @@ namespace chomp
 class ChompOptimizer
 {
 public:
-  ChompOptimizer(
-    ChompTrajectory * trajectory, const planning_scene::PlanningSceneConstPtr & planning_scene,
-    const std::string & planning_group, const ChompParameters * parameters,
-    const moveit::core::RobotState & start_state);
+  ChompOptimizer(ChompTrajectory* trajectory, const planning_scene::PlanningSceneConstPtr& planning_scene,
+                 const std::string& planning_group, const ChompParameters* parameters,
+                 const moveit::core::RobotState& start_state);
 
   virtual ~ChompOptimizer();
 
@@ -71,9 +70,15 @@ public:
     // Nothing for now.
   }
 
-  bool isInitialized() const { return initialized_; }
+  bool isInitialized() const
+  {
+    return initialized_;
+  }
 
-  bool isCollisionFree() const { return is_collision_free_; }
+  bool isCollisionFree() const
+  {
+    return is_collision_free_;
+  }
 
 private:
   inline double getPotential(double field_distance, double radius, double clearance)
@@ -83,26 +88,27 @@ private:
     if (d >= clearance)  // everything is fine
     {
       return 0.0;
-    } else if (d >= 0.0)  // transition phase, no collision yet
+    }
+    else if (d >= 0.0)  // transition phase, no collision yet
     {
       const double diff = (d - clearance);
       const double gradient_magnitude = diff / clearance;
       return 0.5 * gradient_magnitude * diff;  // 0.5 * (d - clearance)^2 / clearance
-    } else                                     // d < 0.0: collision
+    }
+    else  // d < 0.0: collision
     {
       return -d + 0.5 * clearance;  // linearly increase, starting from 0.5 * clearance
     }
   }
   template <typename Derived>
-  void getJacobian(
-    int trajectoryPoint, Eigen::Vector3d & collision_point_pos, std::string & jointName,
-    Eigen::MatrixBase<Derived> & jacobian) const;
+  void getJacobian(int trajectoryPoint, Eigen::Vector3d& collision_point_pos, std::string& jointName,
+                   Eigen::MatrixBase<Derived>& jacobian) const;
 
   // void getRandomState(const moveit::core::RobotState& currentState,
   //                     const std::string& group_name,
   //                     Eigen::VectorXd& state_vec);
 
-  void setRobotStateFromPoint(ChompTrajectory & group_trajectory, int i);
+  void setRobotStateFromPoint(ChompTrajectory& group_trajectory, int i);
 
   // collision_proximity::CollisionProximitySpace::TrajectorySafety checkCurrentIterValidity();
 
@@ -115,16 +121,16 @@ private:
   int iteration_;
   unsigned int collision_free_iteration_;
 
-  ChompTrajectory * full_trajectory_;
-  const moveit::core::RobotModelConstPtr & robot_model_;
+  ChompTrajectory* full_trajectory_;
+  const moveit::core::RobotModelConstPtr& robot_model_;
   std::string planning_group_;
-  const ChompParameters * parameters_;
+  const ChompParameters* parameters_;
   ChompTrajectory group_trajectory_;
   planning_scene::PlanningSceneConstPtr planning_scene_;
   moveit::core::RobotState state_;
   moveit::core::RobotState start_state_;
-  const moveit::core::JointModelGroup * joint_model_group_;
-  const collision_detection::CollisionEnvHybrid * hy_env_;
+  const moveit::core::JointModelGroup* joint_model_group_;
+  const collision_detection::CollisionEnvHybrid* hy_env_;
 
   std::vector<ChompCost> joint_costs_;
   collision_detection::GroupStateRepresentationPtr gsr_;
@@ -152,9 +158,8 @@ private:
   std::vector<MultivariateGaussian> multivariate_gaussian_;
   double stochasticity_factor_;
 
-  std::vector<int>
-    state_is_in_collision_; /**< Array containing a boolean about collision info for each point in the
-                                              trajectory */
+  std::vector<int> state_is_in_collision_; /**< Array containing a boolean about collision info for each point in the
+                                                             trajectory */
   std::vector<std::vector<int> > point_is_in_collision_;
   bool is_collision_free_;
   double worst_collision_cost_state_;
@@ -174,21 +179,23 @@ private:
   std::vector<std::string> joint_names_;
   std::map<std::string, std::map<std::string, bool> > joint_parent_map_;
 
-  inline bool isParent(const std::string & childLink, const std::string & parentLink) const
+  inline bool isParent(const std::string& childLink, const std::string& parentLink) const
   {
-    if (childLink == parentLink) {
+    if (childLink == parentLink)
+    {
       return true;
     }
 
-    if (joint_parent_map_.find(childLink) == joint_parent_map_.end()) {
+    if (joint_parent_map_.find(childLink) == joint_parent_map_.end())
+    {
       // ROS_ERROR("%s was not in joint parent map! for lookup of %s", childLink.c_str(), parentLink.c_str());
       return false;
     }
-    const std::map<std::string, bool> & parents = joint_parent_map_.at(childLink);
+    const std::map<std::string, bool>& parents = joint_parent_map_.at(childLink);
     return (parents.find(parentLink) != parents.end() && parents.at(parentLink));
   }
 
-  void registerParents(const moveit::core::JointModel * model);
+  void registerParents(const moveit::core::JointModel* model);
   void initialize();
   void calculateSmoothnessIncrements();
   void calculateCollisionIncrements();

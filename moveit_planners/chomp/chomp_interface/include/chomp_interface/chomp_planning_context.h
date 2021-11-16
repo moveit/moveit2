@@ -43,21 +43,19 @@
 
 namespace chomp_interface
 {
-MOVEIT_CLASS_FORWARD(
-  CHOMPPlanningContext);  // Defines CHOMPPlanningContextPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(CHOMPPlanningContext);  // Defines CHOMPPlanningContextPtr, ConstPtr, WeakPtr... etc
 
 class CHOMPPlanningContext : public planning_interface::PlanningContext
 {
 public:
-  bool solve(planning_interface::MotionPlanResponse & res) override;
-  bool solve(planning_interface::MotionPlanDetailedResponse & res) override;
+  bool solve(planning_interface::MotionPlanResponse& res) override;
+  bool solve(planning_interface::MotionPlanDetailedResponse& res) override;
 
   void clear() override;
   bool terminate() override;
 
-  CHOMPPlanningContext(
-    const std::string & name, const std::string & group,
-    const moveit::core::RobotModelConstPtr & model, rclcpp::Node::SharedPtr nh);
+  CHOMPPlanningContext(const std::string& name, const std::string& group, const moveit::core::RobotModelConstPtr& model,
+                       rclcpp::Node::SharedPtr nh);
 
   ~CHOMPPlanningContext() override = default;
 

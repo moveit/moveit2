@@ -27,7 +27,7 @@ find_package(chomp_motion_planner REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 
-set(THIS_PACKAGE_INCLUDE_DEPENDS 
+set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
   #moveit_ros_planning
   chomp_motion_planner
@@ -42,15 +42,15 @@ include_directories(
 
 set(MOVEIT_LIB_NAME moveit_chomp_interface)
 
-add_library(${MOVEIT_LIB_NAME} SHARED 
-  src/chomp_interface.cpp 
+add_library(${MOVEIT_LIB_NAME} SHARED
+  src/chomp_interface.cpp
   src/chomp_planning_context.cpp)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${MOVEIT_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_library(moveit_chomp_planner_plugin SHARED src/chomp_plugin.cpp)
 ament_target_dependencies(moveit_chomp_planner_plugin ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_chomp_planner_plugin 
+target_link_libraries(moveit_chomp_planner_plugin
   #chomp_interface
   #moveit_planning_scene
   ${MOVEIT_LIB_NAME}

@@ -48,11 +48,14 @@ MOVEIT_CLASS_FORWARD(CHOMPInterface);  // Defines CHOMPInterfacePtr, ConstPtr, W
 class CHOMPInterface : public chomp::ChompPlanner
 {
 public:
-  //CHOMPInterface();
+  // CHOMPInterface();
   CHOMPInterface(const rclcpp::Node::SharedPtr nh);
-  //CHOMPInterface(const rclcpp::Node& nh = rclcpp::Node("~"));
+  // CHOMPInterface(const rclcpp::Node& nh = rclcpp::Node("~"));
 
-  const chomp::ChompParameters & getParams() const { return params_; }
+  const chomp::ChompParameters& getParams() const
+  {
+    return params_;
+  }
 
 protected:
   /** @brief Configure everything using the param server */

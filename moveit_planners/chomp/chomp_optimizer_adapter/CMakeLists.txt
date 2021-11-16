@@ -25,7 +25,7 @@ find_package(chomp_motion_planner REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(pluginlib REQUIRED)
 
-set(THIS_PACKAGE_INCLUDE_DEPENDS 
+set(THIS_PACKAGE_INCLUDE_DEPENDS
   chomp_motion_planner
   moveit_core
   pluginlib

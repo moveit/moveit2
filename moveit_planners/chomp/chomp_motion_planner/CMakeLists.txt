@@ -25,7 +25,7 @@ find_package(moveit_core REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(trajectory_msgs REQUIRED)
 
-set(THIS_PACKAGE_INCLUDE_DEPENDS 
+set(THIS_PACKAGE_INCLUDE_DEPENDS
   moveit_core
   rclcpp
   trajectory_msgs
@@ -36,7 +36,7 @@ include_directories(
   include
 )
 
-add_library(${PROJECT_NAME} SHARED 
+add_library(${PROJECT_NAME} SHARED
   src/chomp_cost.cpp
   src/chomp_parameters.cpp
   src/chomp_trajectory.cpp

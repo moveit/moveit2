@@ -72,8 +72,8 @@ ChompParameters::ChompParameters()
 
 ChompParameters::~ChompParameters() = default;
 
-void ChompParameters::setRecoveryParams(
-  double learning_rate, double ridge_factor, int planning_time_limit, int max_iterations)
+void ChompParameters::setRecoveryParams(double learning_rate, double ridge_factor, int planning_time_limit,
+                                        int max_iterations)
 {
   this->learning_rate_ = learning_rate;
   this->ridge_factor_ = ridge_factor;
@@ -81,14 +81,14 @@ void ChompParameters::setRecoveryParams(
   this->max_iterations_ = max_iterations;
 }
 
-const std::vector<std::string> ChompParameters::VALID_INITIALIZATION_METHODS{
-  "quintic-spline", "linear", "cubic", "fillTrajectory"};
+const std::vector<std::string> ChompParameters::VALID_INITIALIZATION_METHODS{ "quintic-spline", "linear", "cubic",
+                                                                              "fillTrajectory" };
 
 bool ChompParameters::setTrajectoryInitializationMethod(std::string method)
 {
-  if (
-    std::find(VALID_INITIALIZATION_METHODS.cbegin(), VALID_INITIALIZATION_METHODS.cend(), method) !=
-    VALID_INITIALIZATION_METHODS.end()) {
+  if (std::find(VALID_INITIALIZATION_METHODS.cbegin(), VALID_INITIALIZATION_METHODS.cend(), method) !=
+      VALID_INITIALIZATION_METHODS.end())
+  {
     this->trajectory_initialization_method_ = std::move(method);
     return true;
   }

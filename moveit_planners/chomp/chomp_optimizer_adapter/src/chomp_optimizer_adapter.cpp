@@ -56,142 +56,138 @@ rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_planner");
 class OptimizerAdapter : public planning_request_adapter::PlanningRequestAdapter
 {
 public:
-  OptimizerAdapter() : planning_request_adapter::PlanningRequestAdapter() {}
-
-  void initialize(
-    const rclcpp::Node::SharedPtr & node, const std::string & parameter_namespace) override
+  OptimizerAdapter() : planning_request_adapter::PlanningRequestAdapter()
   {
-    if (!node->get_parameter("chomp.planning_time_limit", params_.planning_time_limit_)) {
+  }
+
+  void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
+  {
+    if (!node->get_parameter("chomp.planning_time_limit", params_.planning_time_limit_))
+    {
       params_.planning_time_limit_ = 10.0;
-      RCLCPP_DEBUG(
-        LOGGER, "Param planning_time_limit was not set. Using default value: %s",
-        params_.planning_time_limit_);
+      RCLCPP_DEBUG(LOGGER, "Param planning_time_limit was not set. Using default value: %s",
+                   params_.planning_time_limit_);
     }
-    if (!node->get_parameter("chomp.max_iterations", params_.max_iterations_)) {
+    if (!node->get_parameter("chomp.max_iterations", params_.max_iterations_))
+    {
       params_.max_iterations_ = 200;
-      RCLCPP_DEBUG(
-        LOGGER, "Param max_iterations was not set. Using default value: %s",
-        params_.max_iterations_);
+      RCLCPP_DEBUG(LOGGER, "Param max_iterations was not set. Using default value: %s", params_.max_iterations_);
     }
-    if (!node->get_parameter(
-          "max_iterations_after_collision_free", params_.max_iterations_after_collision_free_)) {
+    if (!node->get_parameter("max_iterations_after_collision_free", params_.max_iterations_after_collision_free_))
+    {
       params_.max_iterations_after_collision_free_ = 5;
-      RCLCPP_DEBUG(
-        LOGGER, "Param max_iterations_after_collision_free was not set. Using default value: %s",
-        params_.max_iterations_after_collision_free_);
+      RCLCPP_DEBUG(LOGGER, "Param max_iterations_after_collision_free was not set. Using default value: %s",
+                   params_.max_iterations_after_collision_free_);
     }
-    if (!node->get_parameter("chomp.smoothness_cost_weight", params_.smoothness_cost_weight_)) {
+    if (!node->get_parameter("chomp.smoothness_cost_weight", params_.smoothness_cost_weight_))
+    {
       params_.smoothness_cost_weight_ = 0.1;
-      RCLCPP_DEBUG(
-        LOGGER, "Param smoothness_cost_weight was not set. Using default value: %s",
-        params_.smoothness_cost_weight_);
+      RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_weight was not set. Using default value: %s",
+                   params_.smoothness_cost_weight_);
     }
-    if (!node->get_parameter("chomp.obstacle_cost_weight", params_.obstacle_cost_weight_)) {
+    if (!node->get_parameter("chomp.obstacle_cost_weight", params_.obstacle_cost_weight_))
+    {
       params_.obstacle_cost_weight_ = 1.0;
-      RCLCPP_DEBUG(
-        LOGGER, "Param obstacle_cost_weight was not set. Using default value: %s",
-        params_.obstacle_cost_weight_);
+      RCLCPP_DEBUG(LOGGER, "Param obstacle_cost_weight was not set. Using default value: %s",
+                   params_.obstacle_cost_weight_);
     }
-    if (!node->get_parameter("chomp.learning_rate", params_.learning_rate_)) {
+    if (!node->get_parameter("chomp.learning_rate", params_.learning_rate_))
+    {
       params_.learning_rate_ = 0.01;
-      RCLCPP_DEBUG(
-        LOGGER, "Param learning_rate was not set. Using default value: %s", params_.learning_rate_);
+      RCLCPP_DEBUG(LOGGER, "Param learning_rate was not set. Using default value: %s", params_.learning_rate_);
     }
-    if (!node->get_parameter("chomp.smoothness_cost_velocity", params_.smoothness_cost_velocity_)) {
+    if (!node->get_parameter("chomp.smoothness_cost_velocity", params_.smoothness_cost_velocity_))
+    {
       params_.smoothness_cost_velocity_ = 0.0;
-      RCLCPP_DEBUG(
-        LOGGER, "Param smoothness_cost_velocity was not set. Using default value: %s",
-        params_.smoothness_cost_velocity_);
+      RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_velocity was not set. Using default value: %s",
+                   params_.smoothness_cost_velocity_);
     }
-    if (!node->get_parameter(
-          "smoothness_cost_acceleration", params_.smoothness_cost_acceleration_)) {
+    if (!node->get_parameter("smoothness_cost_acceleration", params_.smoothness_cost_acceleration_))
+    {
       params_.smoothness_cost_acceleration_ = 1.0;
-      RCLCPP_DEBUG(
-        LOGGER, "Param smoothness_cost_acceleration was not set. Using default value: %s",
-        params_.smoothness_cost_acceleration_);
+      RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_acceleration was not set. Using default value: %s",
+                   params_.smoothness_cost_acceleration_);
     }
-    if (!node->get_parameter("chomp.smoothness_cost_jerk", params_.smoothness_cost_jerk_)) {
+    if (!node->get_parameter("chomp.smoothness_cost_jerk", params_.smoothness_cost_jerk_))
+    {
       params_.smoothness_cost_jerk_ = 0.0;
-      RCLCPP_DEBUG(
-        LOGGER, "Param smoothness_cost_jerk_ was not set. Using default value: %s",
-        params_.smoothness_cost_jerk_);
+      RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_jerk_ was not set. Using default value: %s",
+                   params_.smoothness_cost_jerk_);
     }
-    if (!node->get_parameter("chomp.ridge_factor", params_.ridge_factor_)) {
+    if (!node->get_parameter("chomp.ridge_factor", params_.ridge_factor_))
+    {
       params_.ridge_factor_ = 0.0;
-      RCLCPP_DEBUG(
-        LOGGER, "Param ridge_factor_ was not set. Using default value: %s", params_.ridge_factor_);
+      RCLCPP_DEBUG(LOGGER, "Param ridge_factor_ was not set. Using default value: %s", params_.ridge_factor_);
     }
-    if (!node->get_parameter("chomp.use_pseudo_inverse", params_.use_pseudo_inverse_)) {
+    if (!node->get_parameter("chomp.use_pseudo_inverse", params_.use_pseudo_inverse_))
+    {
       params_.use_pseudo_inverse_ = 0.0;
-      RCLCPP_DEBUG(
-        LOGGER, "Param use_pseudo_inverse_ was not set. Using default value: %s",
-        params_.use_pseudo_inverse_);
+      RCLCPP_DEBUG(LOGGER, "Param use_pseudo_inverse_ was not set. Using default value: %s",
+                   params_.use_pseudo_inverse_);
     }
-    if (!node->get_parameter(
-          "chomp.pseudo_inverse_ridge_factor", params_.pseudo_inverse_ridge_factor_)) {
+    if (!node->get_parameter("chomp.pseudo_inverse_ridge_factor", params_.pseudo_inverse_ridge_factor_))
+    {
       params_.pseudo_inverse_ridge_factor_ = 1e-4;
-      RCLCPP_DEBUG(
-        LOGGER, "Param pseudo_inverse_ridge_factor was not set. Using default value: %s",
-        params_.pseudo_inverse_ridge_factor_);
+      RCLCPP_DEBUG(LOGGER, "Param pseudo_inverse_ridge_factor was not set. Using default value: %s",
+                   params_.pseudo_inverse_ridge_factor_);
     }
-    if (!node->get_parameter("chomp.joint_update_limit", params_.joint_update_limit_)) {
+    if (!node->get_parameter("chomp.joint_update_limit", params_.joint_update_limit_))
+    {
       params_.joint_update_limit_ = 0.1;
-      RCLCPP_DEBUG(
-        LOGGER, "Param joint_update_limit was not set. Using default value: %s",
-        params_.joint_update_limit_);
+      RCLCPP_DEBUG(LOGGER, "Param joint_update_limit was not set. Using default value: %s", params_.joint_update_limit_);
     }
     // TODO: remove this warning after 06/2022
     if (!node->has_parameter("min_clearance") && node->has_parameter("min_clearence"))
-      RCLCPP_WARN(
-        LOGGER,
-        "The param 'min_clearence' has been renamed to 'min_clearance', please update your "
-        "config!");
-    if (!node->get_parameter("chomp.min_clearance", params_.min_clearance_)) {
+      RCLCPP_WARN(LOGGER, "The param 'min_clearence' has been renamed to 'min_clearance', please update your "
+                          "config!");
+    if (!node->get_parameter("chomp.min_clearance", params_.min_clearance_))
+    {
       params_.min_clearance_ = 0.2;
-      RCLCPP_DEBUG(
-        LOGGER, "Param min_clearance was not set. Using default value: %s", params_.min_clearance_);
+      RCLCPP_DEBUG(LOGGER, "Param min_clearance was not set. Using default value: %s", params_.min_clearance_);
     }
-    if (!node->get_parameter("chomp.collision_threshold", params_.collision_threshold_)) {
+    if (!node->get_parameter("chomp.collision_threshold", params_.collision_threshold_))
+    {
       params_.collision_threshold_ = 0.07;
-      RCLCPP_DEBUG(
-        LOGGER, "Param collision_threshold_ was not set. Using default value: %s",
-        params_.collision_threshold_);
+      RCLCPP_DEBUG(LOGGER, "Param collision_threshold_ was not set. Using default value: %s",
+                   params_.collision_threshold_);
     }
-    if (!node->get_parameter("chomp.use_stochastic_descent", params_.use_stochastic_descent_)) {
+    if (!node->get_parameter("chomp.use_stochastic_descent", params_.use_stochastic_descent_))
+    {
       params_.use_stochastic_descent_ = true;
-      RCLCPP_DEBUG(
-        LOGGER, "Param use_stochastic_descent was not set. Using default value: %s",
-        params_.use_stochastic_descent_);
+      RCLCPP_DEBUG(LOGGER, "Param use_stochastic_descent was not set. Using default value: %s",
+                   params_.use_stochastic_descent_);
     }
     params_.trajectory_initialization_method_ = "quintic-spline";
     std::string method;
-    if (
-      node->get_parameter("chomp.trajectory_initialization_method", method) &&
-      !params_.setTrajectoryInitializationMethod(method)) {
-      RCLCPP_ERROR(
-        LOGGER,
-        "Attempted to set trajectory_initialization_method to invalid value '%s'. Using default "
-        "'%s' instead.",
-        method, params_.trajectory_initialization_method_);
+    if (node->get_parameter("chomp.trajectory_initialization_method", method) &&
+        !params_.setTrajectoryInitializationMethod(method))
+    {
+      RCLCPP_ERROR(LOGGER,
+                   "Attempted to set trajectory_initialization_method to invalid value '%s'. Using default "
+                   "'%s' instead.",
+                   method, params_.trajectory_initialization_method_);
     }
   }
 
-  std::string getDescription() const override { return "CHOMP Optimizer"; }
+  std::string getDescription() const override
+  {
+    return "CHOMP Optimizer";
+  }
 
-  bool adaptAndPlan(
-    const PlannerFn & planner, const planning_scene::PlanningSceneConstPtr & ps,
-    const planning_interface::MotionPlanRequest & req, planning_interface::MotionPlanResponse & res,
-    std::vector<std::size_t> & /*added_path_index*/) const override
+  bool adaptAndPlan(const PlannerFn& planner, const planning_scene::PlanningSceneConstPtr& ps,
+                    const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
+                    std::vector<std::size_t>& /*added_path_index*/) const override
   {
     RCLCPP_DEBUG(LOGGER, "CHOMP: adaptAndPlan ...");
 
     // following call to planner() calls the OMPL planner and stores the trajectory inside the MotionPlanResponse res
     // variable which is then used by CHOMP for optimization of the computed trajectory
-    if (!planner(ps, req, res)) return false;
+    if (!planner(ps, req, res))
+      return false;
 
     // create a hybrid collision detector to set the collision checker as hybrid
     collision_detection::CollisionDetectorAllocatorPtr hybrid_cd(
-      collision_detection::CollisionDetectorAllocatorHybrid::create());
+        collision_detection::CollisionDetectorAllocatorHybrid::create());
 
     // create a writable planning scene
     planning_scene::PlanningScenePtr planning_scene = ps->diff();
@@ -204,7 +200,8 @@ public:
 
     bool planning_success = chomp_planner.solve(planning_scene, req, params_, res_detailed);
 
-    if (planning_success) {
+    if (planning_success)
+    {
       res.trajectory_ = res_detailed.trajectory_[0];
       res.planning_time_ += res_detailed.processing_time_[0];
     }
@@ -218,5 +215,4 @@ private:
 };
 }  // namespace chomp
 
-CLASS_LOADER_REGISTER_CLASS(
-  chomp::OptimizerAdapter, planning_request_adapter::PlanningRequestAdapter)
+CLASS_LOADER_REGISTER_CLASS(chomp::OptimizerAdapter, planning_request_adapter::PlanningRequestAdapter)
