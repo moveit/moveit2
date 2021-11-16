@@ -84,15 +84,12 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   robot_trajectory::RobotTrajectory requested_trajectory(trajectory.getRobotModel(), trajectory.getGroup());
   for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
   {
+    const auto current_waypoint_ptr = trajectory.getWayPointPtr(waypoint_idx);
     bool identical_waypoint = checkForIdenticalWaypoints(
-        *trajectory.getWayPointPtr(waypoint_idx), *trajectory.getWayPointPtr(waypoint_idx + 1), trajectory.getGroup());
-    if (identical_waypoint)
+        *current_waypoint_ptr, *trajectory.getWayPointPtr(waypoint_idx + 1), trajectory.getGroup());
+    if (!identical_waypoint)
     {
-      continue;
-    }
-    else
-    {
-      requested_trajectory.addSuffixWayPoint(trajectory.getWayPoint(waypoint_idx),
+      requested_trajectory.addSuffixWayPoint(*current_waypoint_ptr,
                                              trajectory.getWayPointDurationFromPrevious(waypoint_idx));
     }
   }
