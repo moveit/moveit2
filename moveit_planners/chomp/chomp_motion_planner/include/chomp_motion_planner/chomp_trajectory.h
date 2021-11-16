@@ -36,15 +36,14 @@
 
 #pragma once
 
-#include <trajectory_msgs/JointTrajectory.h>
-#include <moveit/robot_model/robot_model.h>
 #include <chomp_motion_planner/chomp_utils.h>
+#include <moveit/robot_model/robot_model.h>
 
+#include <eigen3/Eigen/Core>
 #include <moveit_msgs/msg/motion_plan_detailed_response.hpp>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
-
+#include <trajectory_msgs/msg/joint_trajectory.hpp>
 #include <vector>
-#include <eigen3/Eigen/Core>
 
 namespace chomp
 {
@@ -73,7 +72,7 @@ public:
   ChompTrajectory(const ChompTrajectory& source_traj, const std::string& group_name, int diff_rule_length);
 
   ChompTrajectory(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group_name,
-                  const trajectory_msgs::JointTrajectory& traj);
+                  const trajectory_msgs::msg::JointTrajectory& traj);
 
   /**
    * \brief Destructor

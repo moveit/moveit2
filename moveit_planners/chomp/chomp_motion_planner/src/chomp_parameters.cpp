@@ -36,6 +36,8 @@
 
 #include <chomp_motion_planner/chomp_parameters.h>
 
+#include <algorithm>
+
 namespace chomp
 {
 ChompParameters::ChompParameters()

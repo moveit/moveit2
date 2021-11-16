@@ -34,18 +34,21 @@
 
 /* Author: Chittaranjan Srinivas Swaminathan */
 
-#include <memory>
 #include <chomp_interface/chomp_planning_context.h>
-#include <moveit/trajectory_processing/iterative_time_parameterization.h>
 #include <moveit/robot_state/conversions.h>
+#include <moveit/trajectory_processing/iterative_time_parameterization.h>
+
+#include "rclcpp/rclcpp.hpp"
 
 namespace chomp_interface
 {
+rclcpp::Logger LOGGER3 = rclcpp::get_logger("chomp_optimizer");
+
 CHOMPPlanningContext::CHOMPPlanningContext(const std::string& name, const std::string& group,
-                                           const moveit::core::RobotModelConstPtr& model, ros::NodeHandle& nh)
+                                           const moveit::core::RobotModelConstPtr& model, rclcpp::Node::SharedPtr nh)
   : planning_interface::PlanningContext(name, group), robot_model_(model)
 {
-  chomp_interface_ = std::make_shared<CHOMPInterface>(nh);
+  chomp_interface_ = CHOMPInterfacePtr(new CHOMPInterface(nh));
 }
 
 bool CHOMPPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
@@ -79,4 +82,4 @@ void CHOMPPlanningContext::clear()
 {
 }
 
-} /* namespace chomp_interface */
+}  // namespace chomp_interface
