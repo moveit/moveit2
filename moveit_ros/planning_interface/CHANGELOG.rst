@@ -2,6 +2,15 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add getSharedRobotModelLoader to fix race condition when having multiple displays for the same node (`#525 <https://github.com/ros-planning/moveit2/issues/525>`_)
+* common_objects: getSharedRobotModelLoader fix deadlock (`#734 <https://github.com/ros-planning/moveit2/issues/734>`_)
+* Migrate to joint_state_broadcaster (`#656 <https://github.com/ros-planning/moveit2/issues/656>`_)
+* Fix loading joint_limits.yaml in demo and test launch files (`#544 <https://github.com/ros-planning/moveit2/issues/544>`_)
+* Fixes for Windows (`#530 <https://github.com/ros-planning/moveit2/issues/530>`_)
+* Contributors: Akash, Lior Lustgarten, Tyler Weaver, Vatan Aksoy Tezer, Henning Kayser, Jorge Nicho, Nisala Kalupahana, Jafar Abdi
+
 2.2.1 (2021-07-12)
 ------------------
 * Fix test dependencies (`#539 <https://github.com/ros-planning/moveit2/issues/539>`_)

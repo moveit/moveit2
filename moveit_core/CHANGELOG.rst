@@ -2,6 +2,14 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* collision_detection_bullet: Fix target installation (`#658 <https://github.com/ros-planning/moveit2/issues/658>`_)
+* Fix broken test (`#701 <https://github.com/ros-planning/moveit2/issues/701>`_)
+* Fixes for Windows (`#530 <https://github.com/ros-planning/moveit2/issues/530>`_)
+* Tests for CurrentStateMonitor using dependency injection (`#562 <https://github.com/ros-planning/moveit2/issues/562>`_)
+* Contributors: Akash, Robert Haschke, Lior Lustgarten, Tyler Weaver, Vatan Aksoy Tezer, Henning Kayser, Jorge Nicho, Nisala Kalupahana, Jafar Abdi
+
 2.2.1 (2021-07-12)
 ------------------
 * Pluginlib Deprecation Fix (`#542 <https://github.com/ros-planning/moveit2/issues/542>`_)

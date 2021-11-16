@@ -2,6 +2,14 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* MoveitCpp - path constraints added from PlanningComponent (`#752 <https://github.com/ros-planning/moveit2/issues/752>`_)
+* Fixes for Windows (`#530 <https://github.com/ros-planning/moveit2/issues/530>`_)
+* Tests for CurrentStateMonitor using dependency injection (`#562 <https://github.com/ros-planning/moveit2/issues/562>`_)
+* Fix joint's position limits loading (`#553 <https://github.com/ros-planning/moveit2/issues/553>`_)
+* Contributors: Akash, Marco Lapolla, Lior Lustgarten, Tyler Weaver, Vatan Aksoy Tezer, Henning Kayser, Jorge Nicho, Nisala Kalupahana, Jafar Abdi
+
 2.2.1 (2021-07-12)
 ------------------
 * Fix unwanted override of URDF joint limit defaults (`#546 <https://github.com/ros-planning/moveit2/issues/546>`_)

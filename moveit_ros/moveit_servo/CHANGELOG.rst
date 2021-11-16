@@ -2,6 +2,18 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Migrate to joint_state_broadcaster (`#656 <https://github.com/ros-planning/moveit2/issues/656>`_)
+* Fix missing include in servo example (`#609 <https://github.com/ros-planning/moveit2/issues/609>`_)
+* Fix loading joint_limits.yaml in demo and test launch files (`#544 <https://github.com/ros-planning/moveit2/issues/544>`_)
+* Fixes for Windows (`#530 <https://github.com/ros-planning/moveit2/issues/530>`_)
+* Refactor out velocity limit enforcement with test (`#540 <https://github.com/ros-planning/moveit2/issues/540>`_)
+* Refactor moveit_servo::LowPassFilter to be assignable (`#572 <https://github.com/ros-planning/moveit2/issues/572>`_)
+* Fix MoveIt Servo compilation on macOS (`#555 <https://github.com/ros-planning/moveit2/issues/555>`_)
+* Fix segfault if servo collision checking is disabled (`#568 <https://github.com/ros-planning/moveit2/issues/568>`_)
+* Contributors: Akash, Griswald Brooks, Joseph Schornak, Nisala Kalupahana, Lior Lustgarten, Tyler Weaver, Vatan Aksoy Tezer, Henning Kayser, Jorge Nicho, Nisala Kalupahana, Jafar Abdi, Adam Pettinger
+
 2.2.1 (2021-07-12)
 ------------------
 * moveit_servo: Add a parameter to halt only joints that violate position limits  (`#515 <https://github.com/ros-planning/moveit2/issues/515>`_)

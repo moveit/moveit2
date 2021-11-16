@@ -2,6 +2,11 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix linking issues for ODE on macOS (`#549 <https://github.com/ros-planning/moveit2/issues/549>`_)
+* Contributors: Nisala Kalupahana, Henning Kayser
+
 2.2.1 (2021-07-12)
 ------------------
 * Fix test dependencies (`#539 <https://github.com/ros-planning/moveit2/issues/539>`_)

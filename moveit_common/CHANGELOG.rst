@@ -2,6 +2,9 @@
 Changelog for package moveit_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.2.1 (2021-07-12)
 ------------------
 * Set project VERSION in moveit_common, fix sonames (`#532 <https://github.com/ros-planning/moveit2/issues/532>`_)
