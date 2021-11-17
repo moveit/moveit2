@@ -65,76 +65,76 @@ public:
     if (!node->get_parameter("chomp.planning_time_limit", params_.planning_time_limit_))
     {
       params_.planning_time_limit_ = 10.0;
-      RCLCPP_DEBUG(LOGGER, "Param planning_time_limit was not set. Using default value: %s",
+      RCLCPP_DEBUG(LOGGER, "Param planning_time_limit was not set. Using default value: %f",
                    params_.planning_time_limit_);
     }
     if (!node->get_parameter("chomp.max_iterations", params_.max_iterations_))
     {
       params_.max_iterations_ = 200;
-      RCLCPP_DEBUG(LOGGER, "Param max_iterations was not set. Using default value: %s", params_.max_iterations_);
+      RCLCPP_DEBUG(LOGGER, "Param max_iterations was not set. Using default value: %d", params_.max_iterations_);
     }
     if (!node->get_parameter("chomp.max_iterations_after_collision_free", params_.max_iterations_after_collision_free_))
     {
       params_.max_iterations_after_collision_free_ = 5;
-      RCLCPP_DEBUG(LOGGER, "Param max_iterations_after_collision_free was not set. Using default value: %s",
+      RCLCPP_DEBUG(LOGGER, "Param max_iterations_after_collision_free was not set. Using default value: %d",
                    params_.max_iterations_after_collision_free_);
     }
     if (!node->get_parameter("chomp.smoothness_cost_weight", params_.smoothness_cost_weight_))
     {
       params_.smoothness_cost_weight_ = 0.1;
-      RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_weight was not set. Using default value: %s",
+      RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_weight was not set. Using default value: %f",
                    params_.smoothness_cost_weight_);
     }
     if (!node->get_parameter("chomp.obstacle_cost_weight", params_.obstacle_cost_weight_))
     {
       params_.obstacle_cost_weight_ = 1.0;
-      RCLCPP_DEBUG(LOGGER, "Param obstacle_cost_weight was not set. Using default value: %s",
+      RCLCPP_DEBUG(LOGGER, "Param obstacle_cost_weight was not set. Using default value: %f",
                    params_.obstacle_cost_weight_);
     }
     if (!node->get_parameter("chomp.learning_rate", params_.learning_rate_))
     {
       params_.learning_rate_ = 0.01;
-      RCLCPP_DEBUG(LOGGER, "Param learning_rate was not set. Using default value: %s", params_.learning_rate_);
+      RCLCPP_DEBUG(LOGGER, "Param learning_rate was not set. Using default value: %f", params_.learning_rate_);
     }
     if (!node->get_parameter("chomp.smoothness_cost_velocity", params_.smoothness_cost_velocity_))
     {
       params_.smoothness_cost_velocity_ = 0.0;
-      RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_velocity was not set. Using default value: %s",
+      RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_velocity was not set. Using default value: %f",
                    params_.smoothness_cost_velocity_);
     }
     if (!node->get_parameter("chomp.smoothness_cost_acceleration", params_.smoothness_cost_acceleration_))
     {
       params_.smoothness_cost_acceleration_ = 1.0;
-      RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_acceleration was not set. Using default value: %s",
+      RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_acceleration was not set. Using default value: %f",
                    params_.smoothness_cost_acceleration_);
     }
     if (!node->get_parameter("chomp.smoothness_cost_jerk", params_.smoothness_cost_jerk_))
     {
       params_.smoothness_cost_jerk_ = 0.0;
-      RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_jerk_ was not set. Using default value: %s",
+      RCLCPP_DEBUG(LOGGER, "Param smoothness_cost_jerk_ was not set. Using default value: %f",
                    params_.smoothness_cost_jerk_);
     }
     if (!node->get_parameter("chomp.ridge_factor", params_.ridge_factor_))
     {
       params_.ridge_factor_ = 0.0;
-      RCLCPP_DEBUG(LOGGER, "Param ridge_factor_ was not set. Using default value: %s", params_.ridge_factor_);
+      RCLCPP_DEBUG(LOGGER, "Param ridge_factor_ was not set. Using default value: %f", params_.ridge_factor_);
     }
     if (!node->get_parameter("chomp.use_pseudo_inverse", params_.use_pseudo_inverse_))
     {
       params_.use_pseudo_inverse_ = 0.0;
-      RCLCPP_DEBUG(LOGGER, "Param use_pseudo_inverse_ was not set. Using default value: %s",
+      RCLCPP_DEBUG(LOGGER, "Param use_pseudo_inverse_ was not set. Using default value: %d",
                    params_.use_pseudo_inverse_);
     }
     if (!node->get_parameter("chomp.pseudo_inverse_ridge_factor", params_.pseudo_inverse_ridge_factor_))
     {
       params_.pseudo_inverse_ridge_factor_ = 1e-4;
-      RCLCPP_DEBUG(LOGGER, "Param pseudo_inverse_ridge_factor was not set. Using default value: %s",
+      RCLCPP_DEBUG(LOGGER, "Param pseudo_inverse_ridge_factor was not set. Using default value: %f",
                    params_.pseudo_inverse_ridge_factor_);
     }
     if (!node->get_parameter("chomp.joint_update_limit", params_.joint_update_limit_))
     {
       params_.joint_update_limit_ = 0.1;
-      RCLCPP_DEBUG(LOGGER, "Param joint_update_limit was not set. Using default value: %s", params_.joint_update_limit_);
+      RCLCPP_DEBUG(LOGGER, "Param joint_update_limit was not set. Using default value: %f", params_.joint_update_limit_);
     }
     // TODO: remove this warning after 06/2022
     if (!node->has_parameter("chomp.min_clearance") && node->has_parameter("chomp.min_clearence"))
@@ -143,18 +143,18 @@ public:
     if (!node->get_parameter("chomp.min_clearance", params_.min_clearance_))
     {
       params_.min_clearance_ = 0.2;
-      RCLCPP_DEBUG(LOGGER, "Param min_clearance was not set. Using default value: %s", params_.min_clearance_);
+      RCLCPP_DEBUG(LOGGER, "Param min_clearance was not set. Using default value: %f", params_.min_clearance_);
     }
     if (!node->get_parameter("chomp.collision_threshold", params_.collision_threshold_))
     {
       params_.collision_threshold_ = 0.07;
-      RCLCPP_DEBUG(LOGGER, "Param collision_threshold_ was not set. Using default value: %s",
+      RCLCPP_DEBUG(LOGGER, "Param collision_threshold_ was not set. Using default value: %f",
                    params_.collision_threshold_);
     }
     if (!node->get_parameter("chomp.use_stochastic_descent", params_.use_stochastic_descent_))
     {
       params_.use_stochastic_descent_ = true;
-      RCLCPP_DEBUG(LOGGER, "Param use_stochastic_descent was not set. Using default value: %s",
+      RCLCPP_DEBUG(LOGGER, "Param use_stochastic_descent was not set. Using default value: %d",
                    params_.use_stochastic_descent_);
     }
     params_.trajectory_initialization_method_ = "quintic-spline";
@@ -165,7 +165,7 @@ public:
       RCLCPP_ERROR(LOGGER,
                    "Attempted to set trajectory_initialization_method to invalid value '%s'. Using default "
                    "'%s' instead.",
-                   method, params_.trajectory_initialization_method_);
+                   method.c_str(), params_.trajectory_initialization_method_.c_str());
     }
   }
 

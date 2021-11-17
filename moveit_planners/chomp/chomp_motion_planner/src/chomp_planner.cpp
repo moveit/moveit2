@@ -118,7 +118,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
       {
         double start = (trajectory)(0, i);
         double end = (trajectory)(goal_index, i);
-        RCLCPP_INFO(LOGGER, "Start is %s end %s short %f", start, end, shortestAngularDistance(start, end));
+        RCLCPP_INFO(LOGGER, "Start is %f end %f short %f", start, end, shortestAngularDistance(start, end));
         (trajectory)(goal_index, i) = start + shortestAngularDistance(start, end);
       }
     }
@@ -189,7 +189,8 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
       return false;
     }
 
-    RCLCPP_DEBUG(LOGGER, "Optimization took %f sec to create", (std::chrono::system_clock::now() - create_time).count());
+    RCLCPP_DEBUG(LOGGER, "Optimization took %ld sec to create",
+                 (std::chrono::system_clock::now() - create_time).count());
 
     bool optimization_result = optimizer->optimize();
 
@@ -221,7 +222,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   // resetting the CHOMP Parameters to the original values after a successful plan
   params_nonconst.setRecoveryParams(org_learning_rate, org_ridge_factor, org_planning_time_limit, org_max_iterations);
 
-  RCLCPP_DEBUG(LOGGER, "Optimization actually took %f sec to run",
+  RCLCPP_DEBUG(LOGGER, "Optimization actually took %ld sec to run",
                (std::chrono::system_clock::now() - create_time).count());
   create_time = std::chrono::system_clock::now();
   // assume that the trajectory is now optimized, fill in the output structure:
@@ -246,8 +247,8 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   res.trajectory_.resize(1);
   res.trajectory_[0] = result;
 
-  RCLCPP_DEBUG(LOGGER, "Bottom took %f sec to create", (std::chrono::system_clock::now() - create_time).count());
-  RCLCPP_DEBUG(LOGGER, "Serviced planning request in %f wall-seconds",
+  RCLCPP_DEBUG(LOGGER, "Bottom took %ld sec to create", (std::chrono::system_clock::now() - create_time).count());
+  RCLCPP_DEBUG(LOGGER, "Serviced planning request in %ld wall-seconds",
                (std::chrono::system_clock::now() - start_time).count());
 
   res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
@@ -271,7 +272,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   {
     if (!jc.configure(constraint) || !jc.decide(last_state).satisfied)
     {
-      RCLCPP_ERROR(LOGGER, "Goal constraints are violated: %s", constraint.joint_name);
+      RCLCPP_ERROR(LOGGER, "Goal constraints are violated: %s", constraint.joint_name.c_str());
       res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::GOAL_CONSTRAINTS_VIOLATED;
       return false;
     }
