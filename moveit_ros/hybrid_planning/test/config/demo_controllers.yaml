@@ -1,6 +1,6 @@
 controller_manager:
   ros__parameters:
-    update_rate: 500.0  # Hz
+    update_rate: 500  # Hz
     panda_arm_controller:
       type: joint_trajectory_controller/JointTrajectoryController
     joint_state_broadcaster:

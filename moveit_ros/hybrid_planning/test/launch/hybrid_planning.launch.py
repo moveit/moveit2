@@ -160,7 +160,7 @@ def generate_launch_description():
     ros2_controllers_path = os.path.join(
         get_package_share_directory("moveit_hybrid_planning"),
         "config",
-        "demo_controller.yaml",
+        "demo_controllers.yaml",
     )
 
     ros2_control_node = Node(
@@ -181,7 +181,7 @@ def generate_launch_description():
     ]:
         load_controllers += [
             ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner.py {}".format(controller)],
+                cmd=["ros2 run controller_manager spawner {}".format(controller)],
                 shell=True,
                 output="screen",
             )
