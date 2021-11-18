@@ -48,9 +48,10 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
 }
 
 HybridPlanningInterface::HybridPlanningInterface(const rclcpp::Node::SharedPtr& node,
-                                                 const std::shared_ptr<PlannerLogicInterface>& planning_logic_)
+                                                 const std::shared_ptr<PlannerLogicInterface>& planner_logic)
 {
   node_ = node;
+  planner_logic_ = planner_logic;
 
   // Initialize local planning action client
   local_planner_action_client_ =
