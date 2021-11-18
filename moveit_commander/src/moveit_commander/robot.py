@@ -52,7 +52,7 @@ class RobotCommander(object):
             """
             @return number of the list that _Joint__get_joint_limits
                     methods returns.
-            @see: http://docs.ros.org/indigo/api/moveit_core/html/classmoveit_1_1core_1_1JointModel.html#details
+            @see: http://docs.ros.org/en/noetic/api/moveit_core/html/cpp/classmoveit_1_1core_1_1JointModel.html#details
                   for more about variable.
             """
             return len(self.__get_joint_limits())
