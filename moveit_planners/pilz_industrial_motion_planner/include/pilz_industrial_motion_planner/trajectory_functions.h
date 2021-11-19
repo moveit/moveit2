@@ -176,7 +176,7 @@ bool isRobotStateEqual(const moveit::core::RobotState& state1, const moveit::cor
                        const std::string& joint_group_name, double epsilon);
 
 /**
- * @brief check if the robot state have zero velocity/acceleartion
+ * @brief check if the robot state have zero velocity/acceleration
  * @param state
  * @param group
  * @param EPSILON

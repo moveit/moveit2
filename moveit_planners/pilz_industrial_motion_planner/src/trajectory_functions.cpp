@@ -36,9 +36,15 @@
 
 #include <moveit/planning_scene/planning_scene.h>
 #include <tf2/LinearMath/Quaternion.h>
+
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
-#include <tf2_kdl/tf2_kdl.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#endif
 
 namespace
 {
@@ -235,7 +241,7 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
   for (std::vector<double>::const_iterator time_iter = time_samples.begin(); time_iter != time_samples.end();
        ++time_iter)
   {
-    tf2::fromMsg(tf2::toMsg(trajectory.Pos(*time_iter)), pose_sample);
+    tf2::transformKDLToEigen(trajectory.Pos(*time_iter), pose_sample);
 
     if (!computePoseIK(scene, group_name, link_name, pose_sample, robot_model->getModelFrame(), ik_solution_last,
                        ik_solution, check_self_collision))
@@ -386,7 +392,7 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
 
     // compute the waypoint
     trajectory_msgs::msg::JointTrajectoryPoint waypoint_joint;
-    waypoint_joint.time_from_start = rclcpp::Duration(trajectory.points.at(i).time_from_start);
+    waypoint_joint.time_from_start = trajectory.points.at(i).time_from_start;
     for (const auto& joint_name : joint_trajectory.joint_names)
     {
       waypoint_joint.positions.push_back(ik_solution.at(joint_name));

@@ -13,17 +13,14 @@ include_directories(
 )
 
 # pilz_industrial_motion_testhelpers
-add_library(${PROJECT_NAME}_testhelpers
+add_library(${PROJECT_NAME}_test_utils
   test_utils.cpp
-  ${CMAKE_SOURCE_DIR}/src/trajectory_generator.cpp
-  ${CMAKE_SOURCE_DIR}/src/trajectory_generator_circ.cpp
-  ${CMAKE_SOURCE_DIR}/src/trajectory_generator_lin.cpp
-  ${CMAKE_SOURCE_DIR}/src/trajectory_generator_ptp.cpp
-  ${CMAKE_SOURCE_DIR}/src/path_circle_generator.cpp
-  ${CMAKE_SOURCE_DIR}/src/velocity_profile_atrap.cpp
 )
-ament_target_dependencies(${PROJECT_NAME}_testhelpers ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(${PROJECT_NAME}_testhelpers ${PROJECT_NAME}_lib)
+ament_target_dependencies(${PROJECT_NAME}_test_utils ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(${PROJECT_NAME}_test_utils
+  joint_limits_common
+  trajectory_generation_common
+)
 
 # Unit tests
 add_subdirectory(unit_tests)

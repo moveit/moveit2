@@ -94,10 +94,8 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_planning_context", node_options);
 
     // load robot model
-    rdf_loader::RDFLoader rdf_loader(node_, "robot_description");
-    moveit::core::RobotModelConstPtr robot_model_ =
-        std::make_shared<moveit::core::RobotModel>(rdf_loader.getURDF(), rdf_loader.getSRDF());
-
+    robot_model_loader::RobotModelLoader rm_loader(node_);
+    robot_model_ = rm_loader.getModel();
     ASSERT_FALSE(robot_model_ == nullptr) << "There is no robot model!";
 
     // get parameters
@@ -192,7 +190,7 @@ protected:
 };
 
 // Define the types we need to test
-TYPED_TEST_SUITE(PlanningContextTest, PlanningContextTestTypes);
+TYPED_TEST_SUITE(PlanningContextTest, PlanningContextTestTypes, /* ... */);
 
 /**
  * @brief No request is set. Check the output of solve. Using robot model

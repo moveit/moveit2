@@ -69,9 +69,8 @@ protected:
   void createPlannerInstance()
   {
     // load robot model
-    rdf_loader::RDFLoader rdf_loader(node_, "robot_description");
-    moveit::core::RobotModelConstPtr robot_model_ =
-        std::make_shared<moveit::core::RobotModel>(rdf_loader.getURDF(), rdf_loader.getSRDF());
+    robot_model_loader::RobotModelLoader rm_loader(node_);
+    robot_model_ = rm_loader.getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
 
     // Load planner name from node parameters
@@ -94,8 +93,7 @@ protected:
     try
     {
       planner_instance_.reset(planner_plugin_loader_->createUnmanagedInstance(planner_plugin_name_));
-      ASSERT_TRUE(planner_instance_->initialize(robot_model_, node_, "robot_description_planning"))
-          << "Initialzing the planner instance failed.";
+      ASSERT_TRUE(planner_instance_->initialize(robot_model_, node_, "")) << "Initialzing the planner instance failed.";
     }
     catch (pluginlib::PluginlibException& ex)
     {

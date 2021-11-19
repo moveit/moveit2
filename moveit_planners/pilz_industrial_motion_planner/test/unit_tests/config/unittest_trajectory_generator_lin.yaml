@@ -1,4 +1,3 @@
-testdata_file_name : "test_data/prbt/testdata_sequence.xml"  # TODO(sjahr): Decide at which point the absolute path is created
 planning_group : "manipulator"
 target_link_hand_computed_data : "prbt_flange"
 random_trial_number : 100

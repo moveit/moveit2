@@ -1,18 +1,23 @@
-<library path="planning_context_loader_ptp">
-  <class type="pilz_industrial_motion_planner::PlanningContextLoaderPTP"
-         base_class_type="pilz_industrial_motion_planner::PlanningContextLoader">
-    <description>Loader for PTP Context</description>
-  </class>
-</library>
-<library path="planning_context_loader_lin">
-  <class type="pilz_industrial_motion_planner::PlanningContextLoaderLIN"
-         base_class_type="pilz_industrial_motion_planner::PlanningContextLoader">
-    <description>Loader for LIN Context</description>
-  </class>
-</library>
-<library path="planning_context_loader_circ">
-  <class type="pilz_industrial_motion_planner::PlanningContextLoaderCIRC"
-         base_class_type="pilz_industrial_motion_planner::PlanningContextLoader">
-    <description>Loader for CIRC Context</description>
-  </class>
-</library>
+<class_libraries>
+  <library path="planning_context_loader_ptp">
+    <class name="pilz_industrial_motion_planner/PlanningContextLoaderPTP"
+           type="pilz_industrial_motion_planner::PlanningContextLoaderPTP"
+           base_class_type="pilz_industrial_motion_planner::PlanningContextLoader">
+      <description>Loader for PTP Context</description>
+    </class>
+  </library>
+  <library path="planning_context_loader_lin">
+    <class name="pilz_industrial_motion_planner/PlanningContextLoaderLIN"
+           type="pilz_industrial_motion_planner::PlanningContextLoaderLIN"
+           base_class_type="pilz_industrial_motion_planner::PlanningContextLoader">
+      <description>Loader for LIN Context</description>
+    </class>
+  </library>
+  <library path="planning_context_loader_circ">
+    <class name="pilz_industrial_motion_planner/PlanningContextLoaderCIRC"
+           type="pilz_industrial_motion_planner::PlanningContextLoaderCIRC"
+           base_class_type="pilz_industrial_motion_planner::PlanningContextLoader">
+      <description>Loader for CIRC Context</description>
+    </class>
+  </library>
+</class_libraries>

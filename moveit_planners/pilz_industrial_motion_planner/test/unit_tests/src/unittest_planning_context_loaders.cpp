@@ -66,10 +66,8 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_planning_context_loader", node_options);
 
     // load robot model
-    rdf_loader::RDFLoader rdf_loader(node_, "robot_description");
-    moveit::core::RobotModelConstPtr robot_model_ =
-        std::make_shared<moveit::core::RobotModel>(rdf_loader.getURDF(), rdf_loader.getSRDF());
-
+    robot_model_loader::RobotModelLoader rm_loader(node_);
+    robot_model_ = rm_loader.getModel();
     ASSERT_FALSE(robot_model_ == nullptr) << "There is no robot model!";
 
     // Load the plugin
@@ -121,10 +119,9 @@ protected:
 INSTANTIATE_TEST_SUITE_P(
     InstantiationName, PlanningContextLoadersTest,
     ::testing::Values(
-        std::vector<std::string>{ "pilz_industrial_motion_planner::PlanningContextLoaderPTP", "PTP" },  // Test for PTP
-        std::vector<std::string>{ "pilz_industrial_motion_planner::PlanningContextLoaderLIN", "LIN" },  // Test for LIN
-        std::vector<std::string>{ "pilz_industrial_motion_planner::PlanningContextLoaderCIRC", "CIRC" }
-        // Test for CIRC
+        std::vector<std::string>{ "pilz_industrial_motion_planner/PlanningContextLoaderPTP", "PTP" },   // Test for PTP
+        std::vector<std::string>{ "pilz_industrial_motion_planner/PlanningContextLoaderLIN", "LIN" },   // Test for LIN
+        std::vector<std::string>{ "pilz_industrial_motion_planner/PlanningContextLoaderCIRC", "CIRC" }  // Test for CIRC
         ));
 
 /**

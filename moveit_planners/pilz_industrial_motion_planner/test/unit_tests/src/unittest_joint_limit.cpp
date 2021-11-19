@@ -59,9 +59,8 @@ TEST_F(JointLimitTest, SimpleRead)
   // Joints limits interface
   JointLimits joint_limits_extended;
 
-  // TODO(sjahr): This might change once the fully ros2_control's joint limit interface is used again!
-  EXPECT_TRUE(::joint_limits_interface::declare_parameters("joint_1", node_));
-  EXPECT_TRUE(getJointLimits("joint_1", node_, joint_limits_extended));
+  EXPECT_TRUE(declareParameters("joint_1", "", node_));
+  EXPECT_TRUE(getJointLimits("joint_1", "", node_, joint_limits_extended));
 
   EXPECT_EQ(1, joint_limits_extended.max_acceleration);
   EXPECT_EQ(-1, joint_limits_extended.max_deceleration);
@@ -72,7 +71,7 @@ TEST_F(JointLimitTest, readNonExistingJointLimit)
   // Joints limits interface
   JointLimits joint_limits_extended;
 
-  EXPECT_FALSE(getJointLimits("anything", node_, joint_limits_extended));
+  EXPECT_FALSE(getJointLimits("anything", "", node_, joint_limits_extended));
 }
 
 /**
@@ -85,7 +84,7 @@ TEST_F(JointLimitTest, readInvalidParameterName)
   // Joints limits interface
   JointLimits joint_limits_extended;
 
-  EXPECT_FALSE(getJointLimits("~anything", node_, joint_limits_extended));
+  EXPECT_FALSE(getJointLimits("~anything", "", node_, joint_limits_extended));
 }
 
 TEST_F(JointLimitTest, OldRead)
@@ -93,9 +92,8 @@ TEST_F(JointLimitTest, OldRead)
   // Joints limits interface
   JointLimits joint_limits;
 
-  // TODO(sjahr): This might change once the fully ros2_control's joint limit interface is used again!
-  EXPECT_TRUE(::joint_limits_interface::declare_parameters("joint_1", node_));
-  EXPECT_TRUE(getJointLimits("joint_1", node_, joint_limits));
+  EXPECT_TRUE(declareParameters("joint_1", "", node_));
+  EXPECT_TRUE(getJointLimits("joint_1", "", node_, joint_limits));
 
   EXPECT_EQ(1, joint_limits.max_acceleration);
 }

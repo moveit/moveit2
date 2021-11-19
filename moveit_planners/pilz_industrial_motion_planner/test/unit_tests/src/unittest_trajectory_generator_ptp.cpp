@@ -71,8 +71,8 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_trajectory_generator_ptp", node_options);
 
     // load robot model
-    rdf_loader::RDFLoader rdf_loader(node_, "robot_description");
-    robot_model_ = std::make_shared<moveit::core::RobotModel>(rdf_loader.getURDF(), rdf_loader.getSRDF());
+    robot_model_loader::RobotModelLoader rm_loader(node_);
+    robot_model_ = rm_loader.getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
     planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 

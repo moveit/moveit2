@@ -82,8 +82,8 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_trajectory_blender_transition_window", node_options);
 
     // load robot model
-    rdf_loader::RDFLoader rdf_loader(node_, "robot_description");
-    robot_model_ = std::make_shared<moveit::core::RobotModel>(rdf_loader.getURDF(), rdf_loader.getSRDF());
+    robot_model_loader::RobotModelLoader rm_loader(node_);
+    robot_model_ = rm_loader.getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
     planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
@@ -662,7 +662,7 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
 
       // add to trajectory
       waypoint.pose = waypoint_pose;
-      waypoint.time_from_start = rclcpp::Duration::from_nanoseconds(
+      waypoint.time_from_start = rclcpp::Duration::from_seconds(
           time_from_start_offset + time_scaling_factor * lin_traj->getWayPointDurationFromStart(i));
       cart_traj.points.push_back(waypoint);
     }

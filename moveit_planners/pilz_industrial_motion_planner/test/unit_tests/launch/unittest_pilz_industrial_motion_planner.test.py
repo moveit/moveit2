@@ -1,32 +1,26 @@
 import launch_testing
 import pytest
 import unittest
-from moveit_configs_utils import MoveItConfigsBuilder
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch_testing.util import KeepAliveProc
+
+import sys
+import os
+
+sys.path.append(os.path.dirname(__file__))
+from common_parameters import load_moveit_config
 
 
 @pytest.mark.rostest
 def generate_test_description():
 
     # Load the context
-    test_config = (
-        MoveItConfigsBuilder("moveit_resources_prbt")
-        .robot_description(
-            file_path=get_package_share_directory("moveit_resources_prbt_support")
-            + "/urdf/prbt.xacro"
-        )
-        .robot_description_semantic(file_path="config/prbt.srdf.xacro")
-        .robot_description_kinematics(file_path="config/kinematics.yaml")
-        .joint_limits(file_path="config/joint_limits.yaml")
-        .cartesian_limits(file_path="config/cartesian_limits.yaml")
-        .to_moveit_configs()
-    )
+    test_config = load_moveit_config()
 
     planning_plugin = {
-        "planning_plugin": "pilz_industrial_motion_planner::CommandPlanner"
+        "planning_plugin": "pilz_industrial_motion_planner/CommandPlanner"
     }
 
     # run test
@@ -38,8 +32,7 @@ def generate_test_description():
             test_config.robot_description,
             test_config.robot_description_semantic,
             test_config.robot_description_kinematics,
-            test_config.joint_limits,
-            test_config.cartesian_limits,
+            test_config.robot_description_planning,
             planning_plugin,
         ],
         output="screen",

@@ -55,6 +55,18 @@ using namespace pilz_industrial_motion_planner_testutils;
 
 static const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
 
+// Parameter names
+const std::string TEST_DATA_FILE_NAME("testdata_file_name");
+const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
+const std::string TARGET_LINK_HCD("target_link_hand_computed_data");
+const std::string RANDOM_TEST_TRIAL_NUM("random_trial_number");
+const std::string JOINT_POSITION_TOLERANCE("joint_position_tolerance");
+const std::string JOINT_VELOCITY_TOLERANCE("joint_velocity_tolerance");
+const std::string POSE_TRANSFORM_MATRIX_NORM_TOLERANCE("pose_norm_tolerance");
+const std::string ROTATION_AXIS_NORM_TOLERANCE("rot_axis_norm_tolerance");
+const std::string VELOCITY_SCALING_FACTOR("velocity_scaling_factor");
+const std::string OTHER_TOLERANCE("other_tolerance");
+
 /**
  * @brief Parameterized unittest of trajectory generator LIN to enable tests
  * against
@@ -76,10 +88,22 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_trajectory_generator_lin", node_options);
 
     // load robot model
-    rdf_loader::RDFLoader rdf_loader(node_, "robot_description");
-    robot_model_ = std::make_shared<moveit::core::RobotModel>(rdf_loader.getURDF(), rdf_loader.getSRDF());
+    robot_model_loader::RobotModelLoader rm_loader(node_);
+    robot_model_ = rm_loader.getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
     planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
+
+    // get parameters
+    ASSERT_TRUE(node_->get_parameter(TEST_DATA_FILE_NAME, test_data_file_name_));
+    ASSERT_TRUE(node_->get_parameter(PARAM_PLANNING_GROUP_NAME, planning_group_));
+    ASSERT_TRUE(node_->get_parameter(TARGET_LINK_HCD, target_link_hcd_));
+    ASSERT_TRUE(node_->get_parameter(RANDOM_TEST_TRIAL_NUM, random_trial_num_));
+    ASSERT_TRUE(node_->get_parameter(JOINT_POSITION_TOLERANCE, joint_position_tolerance_));
+    ASSERT_TRUE(node_->get_parameter(JOINT_VELOCITY_TOLERANCE, joint_velocity_tolerance_));
+    ASSERT_TRUE(node_->get_parameter(POSE_TRANSFORM_MATRIX_NORM_TOLERANCE, pose_norm_tolerance_));
+    ASSERT_TRUE(node_->get_parameter(ROTATION_AXIS_NORM_TOLERANCE, rot_axis_norm_tolerance_));
+    ASSERT_TRUE(node_->get_parameter(VELOCITY_SCALING_FACTOR, velocity_scaling_factor_));
+    ASSERT_TRUE(node_->get_parameter(OTHER_TOLERANCE, other_tolerance_));
 
     testutils::checkRobotModel(robot_model_, planning_group_, target_link_hcd_);
 

@@ -37,66 +37,7 @@
 
 #include <limits>
 
-// TODO(henning): Re-include when this is available, until then the headers content is copied below
-// TODO(sjahr): Current implementation does not offer the desired API (08/2021). Use draft from dstogl instead
-// (https://github.com/ros-controls/ros2_control/pull/462/files) #include <joint_limits_interface/joint_limits.h>
-/////////////////////////////////////////////////////
-// start of <joint_limits_interface/joint_limits.hpp>
-// //////////////////////////////////////////////////
-namespace joint_limits_interface
-{
-struct JointLimits
-{
-  JointLimits()
-    : min_position(std::numeric_limits<double>::quiet_NaN())
-    , max_position(std::numeric_limits<double>::quiet_NaN())
-    , max_velocity(std::numeric_limits<double>::quiet_NaN())
-    , max_acceleration(std::numeric_limits<double>::quiet_NaN())
-    , max_jerk(std::numeric_limits<double>::quiet_NaN())
-    , max_effort(std::numeric_limits<double>::quiet_NaN())
-    , has_position_limits(false)
-    , has_velocity_limits(false)
-    , has_acceleration_limits(false)
-    , has_jerk_limits(false)
-    , has_effort_limits(false)
-    , angle_wraparound(false)
-  {
-  }
-
-  double min_position;
-  double max_position;
-  double max_velocity;
-  double max_acceleration;
-  double max_jerk;
-  double max_effort;
-
-  bool has_position_limits;
-  bool has_velocity_limits;
-  bool has_acceleration_limits;
-  bool has_jerk_limits;
-  bool has_effort_limits;
-  bool angle_wraparound;
-};
-
-struct SoftJointLimits
-{
-  SoftJointLimits()
-    : min_position(std::numeric_limits<double>::quiet_NaN())
-    , max_position(std::numeric_limits<double>::quiet_NaN())
-    , k_position(std::numeric_limits<double>::quiet_NaN())
-    , k_velocity(std::numeric_limits<double>::quiet_NaN())
-  {
-  }
-
-  double min_position;
-  double max_position;
-  double k_position;
-  double k_velocity;
-};
-}  // namespace joint_limits_interface
-///////////////////////////////////////////////////
-// end of <joint_limits_interface/joint_limits.hpp>
-// ////////////////////////////////////////////////
+#include <joint_limits/joint_limits.hpp>
 
 #include <map>
 #include <string>
@@ -109,7 +50,7 @@ namespace joint_limits_interface
  * @brief Extends joint_limits_interface::JointLimits with a deceleration
  * parameter
  */
-struct JointLimits : ::joint_limits_interface::JointLimits
+struct JointLimits : joint_limits::JointLimits
 {
   JointLimits() : max_deceleration(0.0), has_deceleration_limits(false)
   {

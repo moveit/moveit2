@@ -43,8 +43,6 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-static const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
-
 /**
  * @brief Unittest of the JointLimitsAggregator class
  */
@@ -54,12 +52,12 @@ protected:
   void SetUp() override
   {
     rclcpp::NodeOptions node_options;
-    node_options.automatically_declare_parameters_from_overrides(true);
+    // node_options.automatically_declare_parameters_from_overrides(true);
     node_ = rclcpp::Node::make_shared("unittest_joint_limits_aggregator", node_options);
 
     // load robot model
-    rdf_loader::RDFLoader rdf_loader(node_, "robot_description");
-    robot_model_ = std::make_shared<moveit::core::RobotModel>(rdf_loader.getURDF(), rdf_loader.getSRDF());
+    robot_model_loader::RobotModelLoader rm_loader(node_);
+    robot_model_ = rm_loader.getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
   }
 
@@ -75,7 +73,7 @@ protected:
 TEST_F(JointLimitsAggregator, ExpectedMapSize)
 {
   pilz_industrial_motion_planner::JointLimitsContainer container =
-      pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(node_, PARAM_NAMESPACE_LIMITS,
+      pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(node_, "",
                                                                                  robot_model_->getActiveJointModels());
 
   EXPECT_EQ(robot_model_->getActiveJointModels().size(), container.getCount());
@@ -88,10 +86,10 @@ TEST_F(JointLimitsAggregator, ExpectedMapSize)
 TEST_F(JointLimitsAggregator, CorrectOverwriteByParamterPosition)
 {
   pilz_industrial_motion_planner::JointLimitsContainer container =
-      pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(node_, PARAM_NAMESPACE_LIMITS,
+      pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(node_, "all_valid",
                                                                                  robot_model_->getActiveJointModels());
 
-  for (std::pair<std::string, pilz_industrial_motion_planner::JointLimit> lim : container)
+  for (const auto& lim : container)
   {
     // Check for the overwrite
     if (lim.first == "prbt_joint_1")
@@ -117,10 +115,10 @@ TEST_F(JointLimitsAggregator, CorrectOverwriteByParamterPosition)
 TEST_F(JointLimitsAggregator, CorrectOverwriteByParamterVelocity)
 {
   pilz_industrial_motion_planner::JointLimitsContainer container =
-      pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(node_, PARAM_NAMESPACE_LIMITS,
+      pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(node_, "all_valid",
                                                                                  robot_model_->getActiveJointModels());
 
-  for (std::pair<std::string, pilz_industrial_motion_planner::JointLimit> lim : container)
+  for (const auto& lim : container)
   {
     // Check that velocity was only changed in joint "prbt_joint_3"
     if (lim.first == "prbt_joint_3")
@@ -141,10 +139,10 @@ TEST_F(JointLimitsAggregator, CorrectOverwriteByParamterVelocity)
 TEST_F(JointLimitsAggregator, CorrectSettingAccelerationAndDeceleration)
 {
   pilz_industrial_motion_planner::JointLimitsContainer container =
-      pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(node_, PARAM_NAMESPACE_LIMITS,
+      pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(node_, "all_valid",
                                                                                  robot_model_->getActiveJointModels());
 
-  for (std::pair<std::string, pilz_industrial_motion_planner::JointLimit> lim : container)
+  for (const auto& lim : container)
   {
     if (lim.first == "prbt_joint_4")
     {
@@ -153,12 +151,12 @@ TEST_F(JointLimitsAggregator, CorrectSettingAccelerationAndDeceleration)
     }
     else if (lim.first == "prbt_joint_5")
     {
-      EXPECT_EQ(0, container.getLimit(lim.first).max_acceleration) << lim.first;
+      EXPECT_TRUE(std::isnan(container.getLimit(lim.first).max_acceleration)) << lim.first;
       EXPECT_EQ(-6.6, container.getLimit(lim.first).max_deceleration) << lim.first;
     }
     else
     {
-      EXPECT_EQ(0, container.getLimit(lim.first).max_acceleration) << lim.first;
+      EXPECT_TRUE(std::isnan(container.getLimit(lim.first).max_acceleration)) << lim.first;
       EXPECT_EQ(0, container.getLimit(lim.first).max_deceleration) << lim.first;
     }
   }
@@ -170,11 +168,11 @@ TEST_F(JointLimitsAggregator, CorrectSettingAccelerationAndDeceleration)
 TEST_F(JointLimitsAggregator, LimitsViolationPosition)
 {
   EXPECT_THROW(pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
-                   node_, PARAM_NAMESPACE_LIMITS, robot_model_->getActiveJointModels()),
+                   node_, "violate_position_min", robot_model_->getActiveJointModels()),
                pilz_industrial_motion_planner::AggregationBoundsViolationException);
 
   EXPECT_THROW(pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
-                   node_, PARAM_NAMESPACE_LIMITS, robot_model_->getActiveJointModels()),
+                   node_, "violate_position_max", robot_model_->getActiveJointModels()),
                pilz_industrial_motion_planner::AggregationBoundsViolationException);
 }
 
@@ -184,7 +182,7 @@ TEST_F(JointLimitsAggregator, LimitsViolationPosition)
 TEST_F(JointLimitsAggregator, LimitsViolationVelocity)
 {
   EXPECT_THROW(pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
-                   node_, PARAM_NAMESPACE_LIMITS, robot_model_->getActiveJointModels()),
+                   node_, "violate_velocity", robot_model_->getActiveJointModels()),
                pilz_industrial_motion_planner::AggregationBoundsViolationException);
 }
 

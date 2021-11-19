@@ -36,8 +36,13 @@
 
 #include <cassert>
 
-#include <tf2_kdl/tf2_kdl.h>
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_kdl/tf2_kdl.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#include <tf2_kdl/tf2_kdl.h>
+#endif
 #include <kdl/velocityprofile_trap.hpp>
 #include <moveit/robot_state/conversions.h>
 

@@ -33,7 +33,6 @@
  *********************************************************************/
 
 #include "pilz_industrial_motion_planner/planning_context_loader.h"
-#include <rclcpp/rclcpp.hpp>
 
 pilz_industrial_motion_planner::PlanningContextLoader::PlanningContextLoader() : limits_set_(false), model_set_(false)
 {
