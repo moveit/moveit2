@@ -1,0 +1,28 @@
+pull_request_rules:
+  - name: backport to foxy at reviewers discretion
+    conditions:
+      - base=main
+      - "label=backport-foxy"
+    actions:
+      backport:
+        branches:
+          - foxy
+
+  - name: ask to resolve conflict
+    conditions:
+      - conflict
+      - author!=mergify
+    actions:
+        comment:
+          message: This pull request is in conflict. Could you fix it @{{author}}?
+
+  - name: development targets main branch
+    conditions:
+      - base!=main
+      - author!=mergify
+    actions:
+        comment:
+          message: |
+            @{{author}}, all pull requests must be targeted towards the `main` development branch.
+            Once merged into `main`, it is possible to backport to @{{base}}, but it must be in `main`
+            to have these changes reflected into new distributions.
