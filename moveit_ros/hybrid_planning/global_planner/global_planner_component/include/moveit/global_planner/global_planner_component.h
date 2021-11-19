@@ -52,16 +52,23 @@
 namespace moveit::hybrid_planning
 {
 // Component node containing the global planner
-class GlobalPlannerComponent : public rclcpp::Node
+class GlobalPlannerComponent
 {
 public:
   GlobalPlannerComponent(const rclcpp::NodeOptions& options);
 
-private:
-  rclcpp::TimerBase::SharedPtr timer_;
-  bool initialized_;
+  // This function is required to make this class a valid NodeClass
+  // see https://docs.ros2.org/foxy/api/rclcpp_components/register__node__macro_8hpp.html
+  // Skip linting due to unconventional function naming
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr get_node_base_interface()  // NOLINT
+  {
+    return node_->get_node_base_interface();  // NOLINT
+  }
 
-  std::string global_planner_name_;
+private:
+  std::shared_ptr<rclcpp::Node> node_;
+
+  std::string planner_plugin_name_;
 
   // Global planner plugin loader
   std::unique_ptr<pluginlib::ClassLoader<GlobalPlannerInterface>> global_planner_plugin_loader_;

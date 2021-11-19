@@ -60,7 +60,7 @@ public:
         trajectory_msgs::msg::JointTrajectory& local_solution) override;
 
 private:
-  rclcpp::Node::SharedPtr node_handle_;
+  rclcpp::Node::SharedPtr node_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   bool path_invalidation_event_send_;  // Send path invalidation event only once
   bool stop_before_collision_;

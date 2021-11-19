@@ -58,6 +58,7 @@ public:
                      robot_trajectory::RobotTrajectory& local_trajectory) override;
   double getTrajectoryProgress(const moveit::core::RobotState& current_state) override;
   bool reset() override;
+  size_t getTargetWayPointIndex() override;
 
 private:
   std::size_t
@@ -65,5 +66,6 @@ private:
   bool pass_through_;  // If true, the reference_trajectory is simply forwarded each time the getLocalTrajectory() function is called
   moveit_msgs::action::LocalPlanner::Feedback feedback_;  // Empty feedback
   trajectory_processing::TimeOptimalTrajectoryGeneration time_parametrization_;
+  const moveit::core::JointModelGroup* joint_group_;
 };
 }  // namespace moveit::hybrid_planning

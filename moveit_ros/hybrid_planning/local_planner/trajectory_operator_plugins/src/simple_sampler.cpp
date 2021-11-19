@@ -36,13 +36,14 @@
 
 #include <moveit/kinematic_constraints/utils.h>
 
+namespace moveit::hybrid_planning
+{
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
-}
+constexpr double WAYPOINT_RADIAN_TOLERANCE = 0.2;  // rad: L1-norm sum for all joints
+}  // namespace
 
-namespace moveit::hybrid_planning
-{
 bool SimpleSampler::initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                                const std::string& group_name)
 {
@@ -57,6 +58,7 @@ bool SimpleSampler::initialize(const rclcpp::Node::SharedPtr& node, const moveit
   }
   reference_trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, group_name);
   next_waypoint_index_ = 0;
+  joint_group_ = robot_model->getJointModelGroup(group_name);
   return true;
 }
 
@@ -101,11 +103,11 @@ SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
     // Get next desired robot state
     moveit::core::RobotState next_desired_goal_state = reference_trajectory_->getWayPoint(next_waypoint_index_);
 
-    // Check if state reached
-    if (next_desired_goal_state.distance(current_state) <= 0.1)
+    // Check if state is reached
+    if (next_desired_goal_state.distance(current_state, joint_group_) <= WAYPOINT_RADIAN_TOLERANCE)
     {
       // Update index (and thus desired robot state)
-      next_waypoint_index_ += 1;
+      next_waypoint_index_ = std::min(next_waypoint_index_ + 1, reference_trajectory_->getWayPointCount() - 1);
     }
 
     // Construct local trajectory containing the next global trajectory waypoint
@@ -115,6 +117,11 @@ SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
 
   // Return empty feedback
   return feedback_;
+}
+
+size_t SimpleSampler::getTargetWayPointIndex()
+{
+  return next_waypoint_index_;
 }
 
 double SimpleSampler::getTrajectoryProgress(const moveit::core::RobotState& current_state)

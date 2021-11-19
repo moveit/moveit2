@@ -51,35 +51,19 @@ using namespace std::chrono_literals;
 const std::string UNDEFINED = "<undefined>";
 
 GlobalPlannerComponent::GlobalPlannerComponent(const rclcpp::NodeOptions& options)
-  : Node("global_planner_component", options), initialized_(false)
+  : node_{ std::make_shared<rclcpp::Node>("global_planner_component", options) }
 {
-  // Initialize global planner after construction
-  // TODO(sjahr) Remove once life cycle component nodes are available
-  timer_ = this->create_wall_timer(1ms, [this]() {
-    if (initialized_)
-    {
-      timer_->cancel();
-    }
-    else
-    {
-      initialized_ = this->initializeGlobalPlanner();
-      if (!initialized_)
-      {
-        timer_->cancel();
-        throw std::runtime_error("Failed to initialize global planner");
-      }
-    }
-  });
+  if (!initializeGlobalPlanner())
+  {
+    throw std::runtime_error("Failed to initialize Global Planner Component");
+  }
 }
 
 bool GlobalPlannerComponent::initializeGlobalPlanner()
 {
-  auto node_ptr = shared_from_this();
-
   // Initialize global planning request action server
   global_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::GlobalPlanner>(
-      this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
-      this->get_node_waitables_interface(), "global_planning_action",
+      node_, "global_planning_action",
       [](const rclcpp_action::GoalUUID& /*unused*/,
          std::shared_ptr<const moveit_msgs::action::GlobalPlanner::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received global planning goal request");
@@ -95,10 +79,10 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
       },
       std::bind(&GlobalPlannerComponent::globalPlanningRequestCallback, this, std::placeholders::_1));
 
-  global_trajectory_pub_ = this->create_publisher<moveit_msgs::msg::MotionPlanResponse>("global_trajectory", 1);
+  global_trajectory_pub_ = node_->create_publisher<moveit_msgs::msg::MotionPlanResponse>("global_trajectory", 1);
 
   // Load global planner plugin
-  global_planner_name_ = this->declare_parameter<std::string>("global_planner_name", UNDEFINED);
+  planner_plugin_name_ = node_->declare_parameter<std::string>("global_planner_name", UNDEFINED);
 
   try
   {
@@ -112,21 +96,21 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
   }
   try
   {
-    global_planner_instance_ = global_planner_plugin_loader_->createUniqueInstance(global_planner_name_);
+    global_planner_instance_ = global_planner_plugin_loader_->createUniqueInstance(planner_plugin_name_);
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Exception while loading global planner '%s': '%s'", global_planner_name_.c_str(), ex.what());
+    RCLCPP_ERROR(LOGGER, "Exception while loading global planner '%s': '%s'", planner_plugin_name_.c_str(), ex.what());
     return false;
   }
 
   // Initialize global planner plugin
-  if (!global_planner_instance_->initialize(node_ptr))
+  if (!global_planner_instance_->initialize(node_))
   {
-    RCLCPP_ERROR(LOGGER, "Unable to initialize global planner plugin '%s'", global_planner_name_.c_str());
+    RCLCPP_ERROR(LOGGER, "Unable to initialize global planner plugin '%s'", planner_plugin_name_.c_str());
     return false;
   }
-  RCLCPP_INFO(LOGGER, "Using global planner plugin '%s'", global_planner_name_.c_str());
+  RCLCPP_INFO(LOGGER, "Using global planner plugin '%s'", planner_plugin_name_.c_str());
   return true;
 }
 

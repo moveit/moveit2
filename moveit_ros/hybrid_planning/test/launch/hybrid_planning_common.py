@@ -1,12 +1,14 @@
-import os
-import yaml
+# Return a list of nodes we commonly launch for the demo. Nice for testing use.
 import launch
+import os
 import xacro
+import yaml
+
 from ament_index_python.packages import get_package_share_directory
-from launch_ros.actions import Node
-from launch_ros.actions import ComposableNodeContainer
 from launch.actions import ExecuteProcess
+from launch_ros.actions import Node
 from launch_ros.descriptions import ComposableNode
+from launch_ros.actions import ComposableNodeContainer
 
 
 def load_file(package_name, file_path):
@@ -31,7 +33,7 @@ def load_yaml(package_name, file_path):
         return None
 
 
-def generate_launch_description():
+def generate_common_hybrid_launch_description():
     # Component yaml files are grouped in separate namespaces
     robot_description_config = xacro.process_file(
         os.path.join(
@@ -177,23 +179,22 @@ def generate_launch_description():
             )
         ]
 
-    # Test node
-    test_request_node = Node(
+    # Demo node
+    demo_node = Node(
         package="moveit_hybrid_planning",
-        executable="hybrid_planning_test_node",
-        name="hybrid_planning_test_node",
+        executable="hybrid_planning_demo_node",
+        name="hybrid_planning_demo_node",
         output="screen",
         parameters=[robot_description, robot_description_semantic],
     )
 
-    return launch.LaunchDescription(
-        [
-            container,
-            static_tf,
-            rviz_node,
-            robot_state_publisher,
-            test_request_node,
-            ros2_control_node,
-        ]
-        + load_controllers
-    )
+    launched_nodes = [
+        container,
+        static_tf,
+        rviz_node,
+        robot_state_publisher,
+        demo_node,
+        ros2_control_node,
+    ] + load_controllers
+
+    return launched_nodes

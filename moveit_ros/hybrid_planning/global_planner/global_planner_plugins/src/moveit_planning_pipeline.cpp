@@ -86,7 +86,7 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
 {
   moveit_msgs::msg::MotionPlanResponse response;
 
-  if ((global_goal_handle->get_goal())->motion_sequence.items.size() == 0)
+  if ((global_goal_handle->get_goal())->motion_sequence.items.empty())
   {
     RCLCPP_WARN(LOGGER, "Global planner received motion sequence request with no items. At least one is needed.");
     response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
@@ -119,6 +119,11 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
 
   // Plan motion
   auto plan_solution = planning_components->plan(plan_params);
+  if (plan_solution.error_code != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+  {
+    response.error_code = plan_solution.error_code;
+    return response;
+  }
 
   // Transform solution into MotionPlanResponse and publish it
   response.trajectory_start = plan_solution.start_state;

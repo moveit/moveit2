@@ -53,7 +53,7 @@ bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
   else
     stop_before_collision_ = node->declare_parameter<bool>("stop_before_collision", false);
   planning_scene_monitor_ = planning_scene_monitor;
-  node_handle_ = node;
+  node_ = node;
   path_invalidation_event_send_ = false;
   return true;
 }
@@ -69,12 +69,16 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
                          const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> local_goal,
                          trajectory_msgs::msg::JointTrajectory& local_solution)
 {
+  // A message every once in awhile is useful in case the local planner gets stuck
+  RCLCPP_INFO_THROTTLE(LOGGER, *node_->get_clock(), 2000 /* ms */, "The local planner is solving...");
+
   // Create controller command trajectory
   robot_trajectory::RobotTrajectory robot_command(local_trajectory.getRobotModel(), local_trajectory.getGroupName());
 
   // Feedback
   moveit_msgs::action::LocalPlanner::Feedback feedback_result;
 
+  // If this flag is set, ignore collisions
   if (!stop_before_collision_)
   {
     robot_command.addSuffixWayPoint(local_trajectory.getWayPoint(0), 0.0);
@@ -84,13 +88,17 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
     // Get current planning scene
     planning_scene_monitor_->updateFrameTransforms();
 
-    planning_scene_monitor::LockedPlanningSceneRO locked_planning_scene(planning_scene_monitor_);
-
-    // Get Current State
-    const moveit::core::RobotState& current_state = locked_planning_scene->getCurrentState();
+    moveit::core::RobotStatePtr current_state;
+    bool is_path_valid = false;
+    // Lock the planning scene as briefly as possible
+    {
+      planning_scene_monitor::LockedPlanningSceneRO locked_planning_scene(planning_scene_monitor_);
+      current_state = std::make_shared<moveit::core::RobotState>(locked_planning_scene->getCurrentState());
+      is_path_valid = locked_planning_scene->isPathValid(local_trajectory, local_trajectory.getGroupName(), false);
+    }
 
     // Check if path is valid
-    if (locked_planning_scene->isPathValid(local_trajectory, local_trajectory.getGroupName(), false))
+    if (is_path_valid)
     {
       if (path_invalidation_event_send_)
       {
@@ -108,7 +116,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
       }
       RCLCPP_INFO(LOGGER, "Collision ahead, hold current position");
       // Keep current position
-      moveit::core::RobotState current_state_command(current_state);
+      moveit::core::RobotState current_state_command(*current_state);
       if (current_state_command.hasVelocities())
       {
         current_state_command.zeroVelocities();
@@ -118,7 +126,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
         current_state_command.zeroAccelerations();
       }
       robot_command.empty();
-      robot_command.addSuffixWayPoint(current_state, 0.0);
+      robot_command.addSuffixWayPoint(*current_state, 0.0);
     }
   }
 

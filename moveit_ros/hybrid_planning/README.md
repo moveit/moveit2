@@ -4,7 +4,7 @@ A Hybrid Planning architecture. You can find more information in the project's i
 ## Getting started
 To start the demo run:
 ```
-ros2 launch moveit_hybrid_planning hybrid_planning.launch.py
+ros2 launch moveit_hybrid_planning hybrid_planning_demo.launch.py
 ```
 You can exchange the planner logic plugin in the hybrid_planning_manager.yaml. Currently available demo plugins are:
 - planner logic plugins:
