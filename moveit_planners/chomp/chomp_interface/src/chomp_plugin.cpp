@@ -43,7 +43,7 @@
 
 namespace chomp_interface
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_optimizer");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_optimizer");
 
 class CHOMPPlannerManager : public planning_interface::PlannerManager
 {
@@ -69,7 +69,7 @@ public:
     for (const std::string& group : model->getJointModelGroupNames())
     {
       planning_contexts_[group] =
-          CHOMPPlanningContextPtr(new CHOMPPlanningContext("chomp_planning_context", group, model, nh_ptr));
+          std::make_shared<CHOMPPlanningContext>("chomp_planning_context", group, model, nh_ptr);
     }
     return true;
   }

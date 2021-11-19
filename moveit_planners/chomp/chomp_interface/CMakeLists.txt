@@ -64,4 +64,11 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+# TODO: Enable testing ()
+#if(CATKIN_ENABLE_TESTING)
+  #set(CHOMP_TEST_DEPS moveit_ros_planning_interface)
+#else()
+  #set(CHOMP_TEST_DEPS)
+#endif()
+
 ament_package()

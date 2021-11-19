@@ -38,7 +38,7 @@
 
 namespace chomp_interface
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_optimizer");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_optimizer");
 
 CHOMPInterface::CHOMPInterface(rclcpp::Node::SharedPtr node) : ChompPlanner(), node_(node)
 {
@@ -68,10 +68,6 @@ void CHOMPInterface::loadParams()
   node_->get_parameter_or("chomp.pseudo_inverse_ridge_factor", params_.pseudo_inverse_ridge_factor_, 1e-4);
 
   node_->get_parameter_or("chomp.joint_update_limit", params_.joint_update_limit_, 0.1);
-  // TODO: remove this warning after 06/2022
-  if (!node_->has_parameter("chomp.collision_clearance") && node_->has_parameter("chomp.collision_clearence"))
-    RCLCPP_WARN(LOGGER, "The param 'collision_clearence' has been renamed to 'collision_clearance', please update "
-                        "your config!");
   node_->get_parameter_or("chomp.collision_clearance", params_.min_clearance_, 0.2);
   node_->get_parameter_or("chomp.collision_threshold", params_.collision_threshold_, 0.07);
   // node_->param("random_jump_amount", params_.random_jump_amount_, 1.0);

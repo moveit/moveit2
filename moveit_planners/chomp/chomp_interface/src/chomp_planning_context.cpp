@@ -42,13 +42,11 @@
 
 namespace chomp_interface
 {
-rclcpp::Logger LOGGER3 = rclcpp::get_logger("chomp_optimizer");
-
 CHOMPPlanningContext::CHOMPPlanningContext(const std::string& name, const std::string& group,
-                                           const moveit::core::RobotModelConstPtr& model, rclcpp::Node::SharedPtr nh)
+                                           const moveit::core::RobotModelConstPtr& model, rclcpp::Node::SharedPtr node)
   : planning_interface::PlanningContext(name, group), robot_model_(model)
 {
-  chomp_interface_ = CHOMPInterfacePtr(new CHOMPInterface(nh));
+  chomp_interface_ = std::make_shared<CHOMPInterface>(node);
 }
 
 bool CHOMPPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)

@@ -45,13 +45,13 @@
 
 #include <eigen3/Eigen/Core>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
-#include <pluginlib/class_loader.hpp>
+#include <pluginlib/class_list_macros.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <vector>
 
 namespace chomp
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_planner");
+static rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_planner");
 
 class OptimizerAdapter : public planning_request_adapter::PlanningRequestAdapter
 {
@@ -136,14 +136,10 @@ public:
       params_.joint_update_limit_ = 0.1;
       RCLCPP_DEBUG(LOGGER, "Param joint_update_limit was not set. Using default value: %f", params_.joint_update_limit_);
     }
-    // TODO: remove this warning after 06/2022
-    if (!node->has_parameter("chomp.min_clearance") && node->has_parameter("chomp.min_clearence"))
-      RCLCPP_WARN(LOGGER, "The param 'min_clearence' has been renamed to 'min_clearance', please update your "
-                          "config!");
-    if (!node->get_parameter("chomp.min_clearance", params_.min_clearance_))
+    if (!node->get_parameter("chomp.collision_clearance", params_.min_clearance_))
     {
       params_.min_clearance_ = 0.2;
-      RCLCPP_DEBUG(LOGGER, "Param min_clearance was not set. Using default value: %f", params_.min_clearance_);
+      RCLCPP_DEBUG(LOGGER, "Param collision_clearance was not set. Using default value: %f", params_.min_clearance_);
     }
     if (!node->get_parameter("chomp.collision_threshold", params_.collision_threshold_))
     {
@@ -215,4 +211,4 @@ private:
 };
 }  // namespace chomp
 
-CLASS_LOADER_REGISTER_CLASS(chomp::OptimizerAdapter, planning_request_adapter::PlanningRequestAdapter)
+PLUGINLIB_EXPORT_CLASS(chomp::OptimizerAdapter, planning_request_adapter::PlanningRequestAdapter)

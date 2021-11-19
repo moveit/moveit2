@@ -38,9 +38,21 @@
 #include <chomp_motion_planner/chomp_planner.h>
 #include <chomp_motion_planner/chomp_trajectory.h>
 #include <moveit/robot_state/conversions.h>
+#if __has_include(<tf2/LinearMath/Quaternion.hpp>)
+#include <tf2/LinearMath/Quaternion.hpp>
+#else
 #include <tf2/LinearMath/Quaternion.h>
+#endif
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#else
 #include <tf2_eigen/tf2_eigen.h>
+#endif
+#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#else
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#endif
 
 #include <chrono>
 
@@ -48,7 +60,7 @@
 
 namespace chomp
 {
-rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_planner");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_planner");
 
 bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
                          const planning_interface::MotionPlanRequest& req, const ChompParameters& params,
@@ -181,7 +193,8 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
 
     // initialize a ChompOptimizer object to load up the optimizer with default parameters or with updated parameters in
     // case of a recovery behaviour
-    optimizer.reset(new ChompOptimizer(&trajectory, planning_scene, req.group_name, &params_nonconst, start_state));
+    optimizer =
+        std::make_unique<ChompOptimizer>(&trajectory, planning_scene, req.group_name, &params_nonconst, start_state);
     if (!optimizer->isInitialized())
     {
       RCLCPP_ERROR(LOGGER, "Could not initialize optimizer");
