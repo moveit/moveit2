@@ -79,9 +79,11 @@ class ActionBasedControllerHandle : public ActionBasedControllerHandleBase
 public:
   ActionBasedControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::string& ns,
                               const std::string& logger_name)
-    : ActionBasedControllerHandleBase(name, logger_name), node_(node), done_(true), namespace_(ns)
+    : ActionBasedControllerHandleBase(name, logger_name), done_(true), namespace_(ns)
   {
-    controller_action_client_ = rclcpp_action::create_client<T>(node_, getActionName());
+    // Creating the action client does not ensure that the action server is actually running. Executing trajectories
+    // through the controller handle will fail if the server is not running when an action goal message is sent.
+    controller_action_client_ = rclcpp_action::create_client<T>(node, getActionName());
     last_exec_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
   }
 
@@ -203,11 +205,6 @@ protected:
       last_exec_ = moveit_controller_manager::ExecutionStatus::FAILED;
     done_ = true;
   }
-
-  /**
-   * @brief Node used to create the action client.
-   */
-  const rclcpp::Node::SharedPtr node_;
 
   /**
    * @brief Status after last trajectory execution.
