@@ -165,11 +165,12 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
                                            outgoing_trajectory);
 
     current_joint_states = goal_joint_states;
-  }
 
-  // Save final output to data file, for analysis
-  // TODO(andyz): delete when done testing
-  saveRobotTrajectoryToCSV("/home/andy/Downloads/TrackJoint/output_", outgoing_trajectory, num_dof, joint_group_indices);
+    // Save final output to data file, for analysis
+    // TODO(andyz): delete when done testing
+    traj_gen.saveTrajectoriesToFile(trackjoint_output, "/home/andy/Downloads/TrackJoint/", true /* append */);
+    //  saveRobotTrajectoryToCSV("/home/andy/Downloads/TrackJoint/output_", outgoing_trajectory, num_dof, joint_group_indices);
+  }
 
   RCLCPP_ERROR_STREAM(LOGGER, "Input waypoint count: " << reference_trajectory.getWayPointCount());
   reference_trajectory = outgoing_trajectory;
