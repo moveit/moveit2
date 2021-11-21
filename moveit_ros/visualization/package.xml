@@ -1,14 +1,12 @@
-<package format="2">
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>moveit_ros_visualization</name>
   <version>2.3.0</version>
   <description>Components of MoveIt that offer visualization</description>
-
-  <author email="isucan@google.com">Ioan Sucan</author>
-  <author email="dave@picknik.ai">Dave Coleman</author>
-  <author email="robot.moveit@gmail.com">Sachin Chitta</author>
-
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="jon.binney@gmail.com">Jon Binney</maintainer>
-  <maintainer email="mferguson@fetchrobotics.com">Michael Ferguson</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
   <license>BSD</license>
@@ -16,6 +14,10 @@
   <url type="website">http://moveit.ros.org</url>
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
+
+  <author email="isucan@google.com">Ioan Sucan</author>
+  <author email="dave@picknik.ai">Dave Coleman</author>
+  <author email="robot.moveit@gmail.com">Sachin Chitta</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>pkg-config</buildtool_depend>

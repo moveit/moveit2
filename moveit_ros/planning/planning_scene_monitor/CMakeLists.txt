@@ -5,6 +5,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/current_state_monitor.cpp
   src/current_state_monitor_middleware_handle.cpp
   src/trajectory_monitor.cpp
+  src/trajectory_monitor_middleware_handle.cpp
 )
 include(GenerateExportHeader)
 generate_export_header(${MOVEIT_LIB_NAME})
@@ -50,6 +51,12 @@ if(BUILD_TESTING)
     test/current_state_monitor_tests.cpp
   )
   target_link_libraries(current_state_monitor_tests
+    ${MOVEIT_LIB_NAME}
+  )
+  ament_add_gmock(trajectory_monitor_tests
+    test/trajectory_monitor_tests.cpp
+  )
+  target_link_libraries(trajectory_monitor_tests
     ${MOVEIT_LIB_NAME}
   )
 endif()
