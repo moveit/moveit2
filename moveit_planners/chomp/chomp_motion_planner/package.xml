@@ -5,8 +5,6 @@
   <version>1.1.5</version>
   <description>chomp_motion_planner</description>
 
-  <author email="gjones@willowgarage.com">Gil Jones</author>
-  <author email="mail@mrinal.net">Mrinal Kalakrishnan</author>
   <maintainer email="chitt@live.in">Chittaranjan Srinivas Swaminathan</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
