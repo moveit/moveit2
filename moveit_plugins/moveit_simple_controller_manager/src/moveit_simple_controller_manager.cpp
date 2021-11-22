@@ -47,7 +47,7 @@
 namespace moveit_simple_controller_manager
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.plugins.moveit_simple_controller_manager");
-static const std::string PARAM_BASE_NAME = "moveit_simple_controller_manager";
+static const std::string PARAM_BASE_NAME = "moveit_simple_controller_manager.";
 class MoveItSimpleControllerManager : public moveit_controller_manager::MoveItControllerManager
 {
 public:
@@ -58,13 +58,13 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
     node_ = node;
-    if (!node_->has_parameter(PARAM_BASE_NAME + ".controller_names"))
+    if (!node_->has_parameter(PARAM_BASE_NAME + "controller_names"))
     {
       RCLCPP_ERROR_STREAM(LOGGER, "No controller_names specified.");
       return;
     }
     rclcpp::Parameter controller_names_param;
-    node_->get_parameter(PARAM_BASE_NAME + ".controller_names", controller_names_param);
+    node_->get_parameter(PARAM_BASE_NAME + "controller_names", controller_names_param);
     if (controller_names_param.get_type() != rclcpp::ParameterType::PARAMETER_STRING_ARRAY)
     {
       RCLCPP_ERROR(LOGGER, "Parameter controller_names should be specified as a string array");
@@ -74,26 +74,26 @@ public:
     /* actually create each controller */
     for (const std::string& controller_name : controller_names)
     {
+      const auto controller_param = PARAM_BASE_NAME + controller_name + ".";
       try
       {
         std::string action_ns;
-        if (!node_->get_parameter(PARAM_BASE_NAME + "." + controller_name + ".action_ns", action_ns))
+        if (!node_->get_parameter(controller_param + "action_ns", action_ns))
         {
           RCLCPP_ERROR_STREAM(LOGGER, "No action namespace specified for controller " << controller_name);
-          RCLCPP_ERROR_STREAM(LOGGER, "Parameter: " << (PARAM_BASE_NAME + "." + controller_name + ".action"));
+          RCLCPP_ERROR_STREAM(LOGGER, "Parameter: " << (controller_param + "action_ns"));
           continue;
         }
 
         std::string type;
-        if (!node_->get_parameter(PARAM_BASE_NAME + "." + controller_name + ".type", type))
+        if (!node_->get_parameter(controller_param + "type", type))
         {
           RCLCPP_ERROR_STREAM(LOGGER, "No type specified for controller " << controller_name);
           continue;
         }
 
         std::vector<std::string> controller_joints;
-        if (!node_->get_parameter(PARAM_BASE_NAME + "." + controller_name + ".joints", controller_joints) ||
-            controller_joints.empty())
+        if (!node_->get_parameter(controller_param + "joints", controller_joints) || controller_joints.empty())
         {
           RCLCPP_ERROR_STREAM(LOGGER, "No joints specified for controller " << controller_name);
           continue;
@@ -106,7 +106,7 @@ public:
           if (static_cast<GripperControllerHandle*>(new_handle.get())->isConnected())
           {
             bool parallel_gripper = false;
-            if (node_->get_parameter(PARAM_BASE_NAME + ".parallel", parallel_gripper) && parallel_gripper)
+            if (node_->get_parameter(controller_param + "parallel", parallel_gripper) && parallel_gripper)
             {
               if (controller_joints.size() != 2)
               {
@@ -120,14 +120,14 @@ public:
             else
             {
               std::string command_joint;
-              if (!node_->get_parameter(PARAM_BASE_NAME + ".command_joint", command_joint))
+              if (!node_->get_parameter(PARAM_BASE_NAME + "command_joint", command_joint))
                 command_joint = controller_joints[0];
 
               static_cast<GripperControllerHandle*>(new_handle.get())->setCommandJoint(command_joint);
             }
 
             bool allow_failure;
-            node_->get_parameter_or(PARAM_BASE_NAME + ".allow_failure", allow_failure, false);
+            node_->get_parameter_or(PARAM_BASE_NAME + "allow_failure", allow_failure, false);
             static_cast<GripperControllerHandle*>(new_handle.get())->allowFailure(allow_failure);
 
             RCLCPP_INFO_STREAM(LOGGER, "Added GripperCommand controller for " << controller_name);
@@ -156,7 +156,7 @@ public:
         }
 
         moveit_controller_manager::MoveItControllerManager::ControllerState state;
-        node_->get_parameter_or(PARAM_BASE_NAME + "." + controller_name + ".default", state.default_, false);
+        node_->get_parameter_or(controller_param + "default", state.default_, false);
         state.active_ = true;
 
         controller_states_[controller_name] = state;
