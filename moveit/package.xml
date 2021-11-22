@@ -1,14 +1,13 @@
 <?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit</name>
   <version>2.3.0</version>
   <description>Meta package that contains all essential packages of MoveIt 2</description>
-  <maintainer email="dave@picknik.ai">Dave Coleman</maintainer>
-  <maintainer email="mferguson@fetchrobotics.com">Michael Ferguson</maintainer>
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="me@v4hn.de">Michael Görner</maintainer>
   <maintainer email="rhaschke@techfak.uni-bielefeld.de">Robert Haschke</maintainer>
-  <maintainer email="imcmahon01@gmail.com">Ian McMahon</maintainer>
-  <maintainer email="130s@2000.jukuin.keio.ac.jp">Isaac I. Y. Saito</maintainer>
 
   <license>BSD</license>
 
@@ -18,6 +17,7 @@
 
   <author email="isucan@google.com">Ioan Sucan</author>
   <author email="robot.moveit@gmail.com">Sachin Chitta</author>
+  <author email="dave@picknik.ai">Dave Coleman</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <!--

@@ -6,6 +6,7 @@
   <description>Demo launch file for running a MoveGroup setup</description>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <license>BSD</license>
+  <author email="henningkayser@picknik.ai">Henning Kayser</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>moveit_common</build_depend>
