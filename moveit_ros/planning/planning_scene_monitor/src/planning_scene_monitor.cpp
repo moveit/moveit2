@@ -937,7 +937,7 @@ void PlanningSceneMonitor::excludeWorldObjectFromOctree(const collision_detectio
     occupancy_map_monitor::ShapeHandle h = octomap_monitor_->excludeShape(obj->shapes_[i]);
     if (h)
     {
-      collision_body_shape_handles_[obj->id_].push_back(std::make_pair(h, &obj->shape_poses_[i]));
+      collision_body_shape_handles_[obj->id_].push_back(std::make_pair(h, &obj->global_shape_poses_[i]));
       found = true;
     }
   }
@@ -1129,7 +1129,7 @@ bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_fram
       for (std::size_t k = 0; k < attached_body_shape_handle.second.size(); ++k)
         cache[attached_body_shape_handle.second[k].first] =
             transform *
-            attached_body_shape_handle.first->getFixedTransforms()[attached_body_shape_handle.second[k].second];
+            attached_body_shape_handle.first->getShapePosesInLinkFrame()[attached_body_shape_handle.second[k].second];
     }
     {
       tf_buffer_->canTransform(target_frame, scene_->getPlanningFrame(), target_time,

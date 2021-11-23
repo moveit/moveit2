@@ -158,6 +158,7 @@ void MotionPlanningFrame::clearScene()
 
 void MotionPlanningFrame::sceneScaleChanged(int value)
 {
+  const double scaling_factor = (double)value / 100.0;  // The GUI slider gives percent values
   if (scaled_object_)
   {
     planning_scene_monitor::LockedPlanningSceneRW ps = planning_display_->getPlanningSceneRW();
@@ -165,17 +166,23 @@ void MotionPlanningFrame::sceneScaleChanged(int value)
     {
       if (ps->getWorld()->hasObject(scaled_object_->id_))
       {
-        const moveit::core::FixedTransformsMap subframes = scaled_object_->subframe_poses_;  // Keep subframes
         ps->getWorldNonConst()->removeObject(scaled_object_->id_);
         for (std::size_t i = 0; i < scaled_object_->shapes_.size(); ++i)
         {
           shapes::Shape* s = scaled_object_->shapes_[i]->clone();
-          s->scale((double)value / 100.0);
-          ps->getWorldNonConst()->addToObject(scaled_object_->id_, shapes::ShapeConstPtr(s),
-                                              scaled_object_->shape_poses_[i]);
+          s->scale(scaling_factor);
+
+          Eigen::Isometry3d scaled_shape_pose = scaled_object_->shape_poses_[i];
+          scaled_shape_pose.translation() *= scaling_factor;
+
+          ps->getWorldNonConst()->addToObject(scaled_object_->id_, scaled_object_->pose_, shapes::ShapeConstPtr(s),
+                                              scaled_shape_pose);
         }
-        // TODO(felixvd): Scale subframes too
-        ps->getWorldNonConst()->setSubframesOfObject(scaled_object_->id_, subframes);
+        moveit::core::FixedTransformsMap scaled_subframes = scaled_object_->subframe_poses_;
+        for (auto& subframe_pair : scaled_subframes)
+          subframe_pair.second.translation() *= scaling_factor;
+
+        ps->getWorldNonConst()->setSubframesOfObject(scaled_object_->id_, scaled_subframes);
         setLocalSceneEdited();
         scene_marker_->processMessage(createObjectMarkerMsg(ps->getWorld()->getObject(scaled_object_->id_)));
         planning_display_->queueRenderSceneGeometry();
@@ -199,6 +206,8 @@ void MotionPlanningFrame::sceneScaleStartChange()
     if (ps)
     {
       scaled_object_ = ps->getWorld()->getObject(sel[0]->text().toStdString());
+      scaled_object_subframes_ = scaled_object_->subframe_poses_;
+      scaled_object_shape_poses_ = scaled_object_->shape_poses_;
     }
   }
 }
@@ -260,9 +269,9 @@ static QString decideStatusText(const moveit::core::AttachedBody* attached_body)
 {
   QString status_text = "'" + QString::fromStdString(attached_body->getName()) + "' is attached to '" +
                         QString::fromStdString(attached_body->getAttachedLinkName()) + "'.";
-  if (!attached_body->getSubframeTransforms().empty())
+  if (!attached_body->getSubframes().empty())
   {
-    status_text += subframe_poses_to_qstring(attached_body->getSubframeTransforms());
+    status_text += subframe_poses_to_qstring(attached_body->getSubframes());
   }
   return status_text;
 }
@@ -318,7 +327,7 @@ void MotionPlanningFrame::selectedCollisionObjectChanged()
 
           if (obj->shapes_.size() == 1)
           {
-            obj_pose = obj->shape_poses_[0];  // valid isometry by contract
+            obj_pose = obj->pose_;  // valid isometry by contract
             Eigen::Vector3d xyz = obj_pose.linear().eulerAngles(0, 1, 2);
             update_scene_marker = true;  // do the marker update outside locked scope to avoid deadlock
 
@@ -385,7 +394,7 @@ void MotionPlanningFrame::updateCollisionObjectPose(bool update_marker_position)
   if (ps)
   {
     collision_detection::CollisionEnv::ObjectConstPtr obj = ps->getWorld()->getObject(sel[0]->text().toStdString());
-    if (obj && obj->shapes_.size() == 1)
+    if (obj)
     {
       Eigen::Isometry3d p;
       p.translation()[0] = ui_->object_x->value();
@@ -397,7 +406,7 @@ void MotionPlanningFrame::updateCollisionObjectPose(bool update_marker_position)
            Eigen::AngleAxisd(ui_->object_ry->value(), Eigen::Vector3d::UnitY()) *
            Eigen::AngleAxisd(ui_->object_rz->value(), Eigen::Vector3d::UnitZ()));
 
-      ps->getWorldNonConst()->moveShapeInObject(obj->id_, obj->shapes_[0], p);
+      ps->getWorldNonConst()->moveObjectAbsolute(obj->id_, p);
       planning_display_->queueRenderSceneGeometry();
       setLocalSceneEdited();
 
@@ -481,7 +490,7 @@ void MotionPlanningFrame::copySelectedCollisionObject()
       continue;
 
     // find a name for the copy
-    name = std::string("Copy of ").append(name);
+    name.insert(0, "Copy of ");
     if (ps->getWorld()->hasObject(name))
     {
       name += " ";
@@ -762,7 +771,11 @@ MotionPlanningFrame::createObjectMarkerMsg(const collision_detection::CollisionE
   double scale;
   shapes::computeShapeBoundingSphere(obj->shapes_[0].get(), center, scale);
   geometry_msgs::msg::PoseStamped shape_pose = tf2::toMsg(tf2::Stamped<Eigen::Isometry3d>(
-      obj->shape_poses_[0], std::chrono::system_clock::now(), planning_display_->getRobotModel()->getModelFrame()));
+      obj->pose_, std::chrono::system_clock::now(), planning_display_->getRobotModel()->getModelFrame()));
+  // TODO(felixvd): Consider where to place the object marker.
+  //                obj->pose*obj->shape_poses_[0] is backwards compatible, sits on the visible part of
+  //                the object, and is more difficult to implement now.
+  //                obj->pose is easier to implement and makes more sense.
   scale = (scale + center.cwiseAbs().maxCoeff()) * 2.0 * 1.2;  // add padding of 20% size
 
   // create an interactive marker msg for the given shape
@@ -837,10 +850,12 @@ void MotionPlanningFrame::renameCollisionObject(QListWidgetItem* item)
     if (obj)
     {
       known_collision_objects_[item->type()].first = item_text;
+      const Eigen::Isometry3d pose = obj->pose_;
       const moveit::core::FixedTransformsMap subframes = obj->subframe_poses_;  // Keep subframes
-      // TODO(felixvd): Scale the subframes with the object
+
       ps->getWorldNonConst()->removeObject(obj->id_);
       ps->getWorldNonConst()->addToObject(known_collision_objects_[item->type()].first, obj->shapes_, obj->shape_poses_);
+      ps->getWorldNonConst()->setObjectPose(obj->id_, pose);
       ps->getWorldNonConst()->setSubframesOfObject(obj->id_, subframes);
       if (scene_marker_)
       {
@@ -860,8 +875,8 @@ void MotionPlanningFrame::renameCollisionObject(QListWidgetItem* item)
       known_collision_objects_[item->type()].first = item_text;
       moveit::core::AttachedBody* new_ab =
           new moveit::core::AttachedBody(ab->getAttachedLink(), known_collision_objects_[item->type()].first,
-                                         ab->getShapes(), ab->getFixedTransforms(), ab->getTouchLinks(),
-                                         ab->getDetachPosture(), ab->getSubframeTransforms());
+                                         ab->getPose(), ab->getShapes(), ab->getShapePoses(), ab->getTouchLinks(),
+                                         ab->getDetachPosture(), ab->getSubframes());
       cs.clearAttachedBody(ab->getName());
       cs.attachBody(new_ab);
     }

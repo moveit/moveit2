@@ -202,10 +202,11 @@ static void _attachedBodyToMsg(const AttachedBody& attached_body, moveit_msgs::m
     aco.touch_links.push_back(touch_link);
   aco.object.header.frame_id = aco.link_name;
   aco.object.id = attached_body.getName();
+  aco.object.pose = tf2::toMsg(attached_body.getPose());
 
   aco.object.operation = moveit_msgs::msg::CollisionObject::ADD;
   const std::vector<shapes::ShapeConstPtr>& ab_shapes = attached_body.getShapes();
-  const EigenSTL::vector_Isometry3d& ab_tf = attached_body.getFixedTransforms();
+  const EigenSTL::vector_Isometry3d& shape_poses = attached_body.getShapePoses();
   ShapeVisitorAddToCollisionObject sv(&aco.object);
   aco.object.primitives.clear();
   aco.object.meshes.clear();
@@ -219,13 +220,13 @@ static void _attachedBodyToMsg(const AttachedBody& attached_body, moveit_msgs::m
     if (shapes::constructMsgFromShape(ab_shapes[j].get(), sm))
     {
       geometry_msgs::msg::Pose p;
-      p = tf2::toMsg(ab_tf[j]);
+      p = tf2::toMsg(shape_poses[j]);
       sv.addToObject(sm, p);
     }
   }
   aco.object.subframe_names.clear();
   aco.object.subframe_poses.clear();
-  for (const auto& frame_pair : attached_body.getSubframeTransforms())
+  for (const auto& frame_pair : attached_body.getSubframes())
   {
     aco.object.subframe_names.push_back(frame_pair.first);
     geometry_msgs::msg::Pose pose;
@@ -269,6 +270,9 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
       const LinkModel* lm = state.getLinkModel(aco.link_name);
       if (lm)
       {
+        Eigen::Isometry3d object_pose;
+        tf2::fromMsg(aco.object.pose, object_pose);
+
         std::vector<shapes::ShapeConstPtr> shapes;
         EigenSTL::vector_Isometry3d poses;
 
@@ -320,26 +324,23 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
         if (!Transforms::sameFrame(aco.object.header.frame_id, aco.link_name))
         {
           bool frame_found = false;
-          Eigen::Isometry3d t0;
-          t0 = state.getFrameTransform(aco.object.header.frame_id, &frame_found);
+          Eigen::Isometry3d world_to_header_frame;
+          world_to_header_frame = state.getFrameTransform(aco.object.header.frame_id, &frame_found);
           if (!frame_found)
           {
             if (tf && tf->canTransform(aco.object.header.frame_id))
-              t0 = tf->getTransform(aco.object.header.frame_id);
+              world_to_header_frame = tf->getTransform(aco.object.header.frame_id);
             else
             {
-              t0.setIdentity();
+              world_to_header_frame.setIdentity();
               RCLCPP_ERROR(LOGGER,
                            "Cannot properly transform from frame '%s'. "
                            "The pose of the attached body may be incorrect",
                            aco.object.header.frame_id.c_str());
             }
           }
-          Eigen::Isometry3d t = state.getGlobalLinkTransform(lm).inverse() * t0;
-          for (Eigen::Isometry3d& pose : poses)
-            pose = t * pose;
-          for (auto& subframe_pose : subframe_poses)
-            subframe_pose.second = t * subframe_pose.second;
+          Eigen::Isometry3d t = world_to_header_frame.inverse() * state.getGlobalLinkTransform(lm);
+          object_pose = object_pose * t;
         }
 
         if (shapes.empty())
@@ -354,8 +355,8 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
                          "The robot state already had an object named '%s' attached to link '%s'. "
                          "The object was replaced.",
                          aco.object.id.c_str(), aco.link_name.c_str());
-          state.attachBody(aco.object.id, shapes, poses, aco.touch_links, aco.link_name, aco.detach_posture,
-                           subframe_poses);
+          state.attachBody(aco.object.id, object_pose, shapes, poses, aco.touch_links, aco.link_name,
+                           aco.detach_posture, subframe_poses);
           RCLCPP_DEBUG(LOGGER, "Attached object '%s' to link '%s'", aco.object.id.c_str(), aco.link_name.c_str());
         }
       }
