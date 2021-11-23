@@ -84,7 +84,7 @@ public:
     , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   {
     // read parameters and store them in shared pointer to constant
-    servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_, LOGGER, "moveit_servo", false);
+    servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_, "moveit_servo", false);
     if (servo_parameters_ == nullptr)
     {
       RCLCPP_FATAL(LOGGER, "Failed to load the servo parameters");
