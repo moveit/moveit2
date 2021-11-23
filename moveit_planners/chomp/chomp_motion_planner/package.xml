@@ -4,12 +4,14 @@
   <name>chomp_motion_planner</name>
   <version>1.1.5</version>
   <description>chomp_motion_planner</description>
-
   <maintainer email="chitt@live.in">Chittaranjan Srinivas Swaminathan</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
   <license>BSD</license>
   <url>http://ros.org/wiki/chomp_motion_planner</url>
+
+  <author email="gjones@willowgarage.com">Gil Jones</author>
+  <author email="mail@mrinal.net">Mrinal Kalakrishnan</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>moveit_common</build_depend>
