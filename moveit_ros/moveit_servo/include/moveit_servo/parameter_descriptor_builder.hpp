@@ -26,6 +26,14 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+/* Author    : Tyler Weaver
+   Desc      : Creates a parameter descriptor message used to describe parameters
+   Title     : parameter_descriptor_builder.hpp
+   Project   : moveit_servo
+*/
+
+// TODO(823): Move this into a separate message_builder package
+
 #pragma once
 
 #include <rcl_interfaces/msg/floating_point_range.hpp>
