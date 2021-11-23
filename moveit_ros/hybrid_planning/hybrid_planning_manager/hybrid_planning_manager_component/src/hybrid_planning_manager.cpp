@@ -179,16 +179,24 @@ bool HybridPlanningManager::sendGlobalPlannerAction()
   global_goal_options.result_callback =
       [this](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::GlobalPlanner>::WrappedResult& global_result) {
         // Reaction result from the latest event
-        ReactionResult reaction_result =
-            planner_logic_instance_->react(HybridPlanningEvent::GLOBAL_PLANNING_ACTION_FINISHED);
-        auto result = std::make_shared<moveit_msgs::action::HybridPlanner::Result>();
-        if (reaction_result.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+        if(global_result.code == rclcpp_action::ResultCode::SUCCEEDED)
         {
+          ReactionResult reaction_result =
+              planner_logic_instance_->react(HybridPlanningEvent::GLOBAL_PLANNING_ACTION_FINISHED);
           auto result = std::make_shared<moveit_msgs::action::HybridPlanner::Result>();
-          result->error_code.val = reaction_result.error_code.val;
-          result->error_message = reaction_result.error_message;
+          if (reaction_result.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+          {
+            auto result = std::make_shared<moveit_msgs::action::HybridPlanner::Result>();
+            result->error_code.val = reaction_result.error_code.val;
+            result->error_message = reaction_result.error_message;
+            hybrid_planning_goal_handle_->abort(result);
+            RCLCPP_ERROR(LOGGER, "Hybrid Planning Manager failed to react to  '%s'", reaction_result.event.c_str());
+          }
+        } else {
+          auto result = std::make_shared<moveit_msgs::action::HybridPlanner::Result>();
+          result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+          result->error_message = "Global planner failed to find a solution";
           hybrid_planning_goal_handle_->abort(result);
-          RCLCPP_ERROR(LOGGER, "Hybrid Planning Manager failed to react to  '%s'", reaction_result.event.c_str());
         }
       };
 
