@@ -39,7 +39,10 @@
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
-}
+// If stuck for this many iterations or more, abort the local planning action
+constexpr size_t STUCK_ITERATIONS_THRESHOLD = 10;
+constexpr double STUCK_THRESHOLD_RAD = 1e-4;  // L1-norm sum across all joints
+}  // namespace
 
 namespace moveit::hybrid_planning
 {
@@ -55,11 +58,14 @@ bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
   planning_scene_monitor_ = planning_scene_monitor;
   node_ = node;
   path_invalidation_event_send_ = false;
+  num_iterations_stuck_ = 0;
   return true;
 }
 
 bool ForwardTrajectory::reset()
 {
+  num_iterations_stuck_ = 0;
+  prev_waypoint_target_.reset();
   path_invalidation_event_send_ = false;
   return true;
 };
@@ -127,6 +133,29 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
       }
       robot_command.empty();
       robot_command.addSuffixWayPoint(*current_state, 0.0);
+    }
+
+    // Detect if the local solver is stuck
+    if (!prev_waypoint_target_)
+    {
+      // Just initialize if this is the first iteration
+      prev_waypoint_target_ = robot_command.getFirstWayPointPtr();
+    }
+    else
+    {
+      if (prev_waypoint_target_->distance(*robot_command.getFirstWayPointPtr()) <= STUCK_THRESHOLD_RAD)
+      {
+        ++num_iterations_stuck_;
+        if (num_iterations_stuck_ > STUCK_ITERATIONS_THRESHOLD)
+        {
+          num_iterations_stuck_ = 0;
+          prev_waypoint_target_ = nullptr;
+          feedback_result.feedback = "local_planner_stuck";
+          path_invalidation_event_send_ = true;  // Set feedback flag
+          RCLCPP_INFO(LOGGER, "The local planner has been stuck for several iterations. Aborting.");
+        }
+      }
+      prev_waypoint_target_ = robot_command.getFirstWayPointPtr();
     }
   }
 

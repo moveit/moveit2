@@ -51,6 +51,14 @@ ReactionResult ReplanInvalidatedTrajectory::react(const std::string& event)
     }
     return ReactionResult(event, "", moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
   }
+  if (event == "local_planner_stuck")
+  {
+    if (!hybrid_planning_manager_->sendGlobalPlannerAction())  // Start global planning
+    {
+      hybrid_planning_manager_->sendHybridPlanningResponse(false);
+    }
+    return ReactionResult(event, "", moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  }
   else
   {
     return ReactionResult(event, "'ReplanInvalidatedTrajectory' plugin cannot handle this event.",

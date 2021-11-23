@@ -205,9 +205,5 @@ private:
 
   // Trajectory_operator instance handle trajectory matching and blending
   std::shared_ptr<TrajectoryOperatorInterface> trajectory_operator_instance_;
-
-  // Detect when the local planner gets stuck
-  size_t num_iterations_stuck_;
-  size_t prev_waypoint_idx_;
 };
 }  // namespace moveit::hybrid_planning

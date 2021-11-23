@@ -34,7 +34,8 @@
 
 /* Author: Sebastian Jahr
    Description: Simple local solver plugin that forwards the next waypoint of the sampled local trajectory.
-   Additionally, it is possible to enable collision checking, which lets the robot stop in front of a collision object.
+   The local solver stops for two conditions: invalid waypoint (likely due to collision) or if it has been stuck for
+   several iterations.
  */
 
 #pragma once
@@ -64,5 +65,9 @@ private:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   bool path_invalidation_event_send_;  // Send path invalidation event only once
   bool stop_before_collision_;
+
+  // Detect when the local planner gets stuck
+  size_t num_iterations_stuck_;
+  moveit::core::RobotStatePtr prev_waypoint_target_;
 };
 }  // namespace moveit::hybrid_planning
