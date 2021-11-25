@@ -293,7 +293,7 @@ TEST_F(DistanceFieldCollisionDetectionTester, AttachedBodyTester)
   std::vector<shapes::ShapeConstPtr> shapes;
   EigenSTL::vector_Isometry3d poses;
   shapes.push_back(shapes::ShapeConstPtr(new shapes::Box(.25, .25, .25)));
-  poses.push_back(Eigen::Isometry3d::Identity());
+  poses.push_back(identity);
   std::set<std::string> touch_links;
   trajectory_msgs::msg::JointTrajectory empty_state;
   moveit::core::AttachedBody* attached_body = new moveit::core::AttachedBody(

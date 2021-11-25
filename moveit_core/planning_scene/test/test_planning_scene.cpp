@@ -169,19 +169,25 @@ TEST(PlanningScene, loadGoodSceneGeometry)
   std::istringstream good_scene_geometry;
   good_scene_geometry.str("foobar_scene\n"
                           "* foo\n"
+                          "0 0 0\n"
+                          "0 0 0 1\n"
                           "1\n"
                           "box\n"
                           "2.58 1.36 0.31\n"
                           "1.49257 1.00222 0.170051\n"
                           "0 0 4.16377e-05 1\n"
                           "0 0 1 0.3\n"
+                          "0\n"
                           "* bar\n"
+                          "0 0 0\n"
+                          "0 0 0 1\n"
                           "1\n"
                           "cylinder\n"
                           "0.02 0.0001\n"
                           "0.453709 0.499136 0.355051\n"
                           "0 0 4.16377e-05 1\n"
                           "1 0 0 1\n"
+                          "0\n"
                           ".\n");
   EXPECT_TRUE(ps->loadGeometryFromStream(good_scene_geometry));
   EXPECT_EQ(ps->getName(), "foobar_scene");
@@ -229,6 +235,78 @@ TEST(PlanningScene, switchCollisionDetectorType)
   {
     EXPECT_FALSE(ps->isStateValid(current_state, "left_arm"));
   }
+}
+
+TEST(PlanningScene, rememberMetadataWhenAttached)
+{
+  moveit::core::RobotModelPtr robot_model(moveit::core::RobotModelBuilder("empty_robot", "base_link").build());
+  planning_scene::PlanningScene scene(robot_model);
+
+  // prepare planning scene message to add a colored object
+  moveit_msgs::msg::PlanningScene scene_msg;
+  scene_msg.robot_model_name = robot_model->getName();
+  scene_msg.is_diff = true;
+  scene_msg.robot_state.is_diff = true;
+
+  moveit_msgs::msg::CollisionObject co;
+  co.header.frame_id = "base_link";
+  co.id = "blue_sphere";
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  co.pose.orientation.w = 1.0;
+  {
+    // set valid primitive
+    shape_msgs::msg::SolidPrimitive primitive;
+    primitive.type = shape_msgs::msg::SolidPrimitive::SPHERE;
+    primitive.dimensions.push_back(/* SPHERE_RADIUS */ 1.0);
+    co.primitives.push_back(primitive);
+    geometry_msgs::msg::Pose pose;
+    pose.orientation.w = 1.0;
+    co.primitive_poses.push_back(pose);
+  }
+  // meta-data 1: object type
+  co.type.key = "blue_sphere_type";
+  co.type.db = "{'type':'CustomDB'}";
+  scene_msg.world.collision_objects.push_back(co);
+
+  // meta-data 2: object color
+  moveit_msgs::msg::ObjectColor color;
+  color.id = co.id;
+  color.color.b = 1.0;
+  color.color.a = 1.0;
+  scene_msg.object_colors.push_back(color);
+
+  EXPECT_FALSE(scene.hasObjectColor(co.id)) << "scene knows color before adding it(?)";
+  EXPECT_FALSE(scene.hasObjectType(co.id)) << "scene knows type before adding it(?)";
+
+  // add object to scene
+  scene.usePlanningSceneMsg(scene_msg);
+
+  EXPECT_TRUE(scene.hasObjectColor(co.id)) << "scene failed to add object color";
+  EXPECT_EQ(scene.getObjectColor(co.id), color.color) << "scene added wrong object color";
+  EXPECT_TRUE(scene.hasObjectType(co.id)) << "scene failed to add object type";
+  EXPECT_EQ(scene.getObjectType(co.id), co.type) << "scene added wrong object type";
+
+  // attach object
+  moveit_msgs::msg::AttachedCollisionObject aco;
+  aco.object.operation = moveit_msgs::msg::CollisionObject::ADD;
+  aco.object.id = co.id;
+  aco.link_name = robot_model->getModelFrame();
+  scene.processAttachedCollisionObjectMsg(aco);
+
+  EXPECT_EQ(scene.getObjectColor(co.id), color.color) << "scene forgot object color after it got attached";
+  EXPECT_EQ(scene.getObjectType(co.id), co.type) << "scene forgot object type after it got attached";
+
+  // trying to remove object from the scene while it is attached is expected to fail
+  co.operation = moveit_msgs::msg::CollisionObject::REMOVE;
+  EXPECT_FALSE(scene.processCollisionObjectMsg(co))
+      << "scene removed attached object from collision world (although it's not there)";
+
+  // detach again right away
+  aco.object.operation = moveit_msgs::msg::CollisionObject::REMOVE;
+  scene.processAttachedCollisionObjectMsg(aco);
+
+  EXPECT_EQ(scene.getObjectColor(co.id), color.color) << "scene forgot specified color after attach/detach";
+  EXPECT_EQ(scene.getObjectType(co.id), co.type) << "scene forgot specified type after attach/detach";
 }
 
 int main(int argc, char** argv)
