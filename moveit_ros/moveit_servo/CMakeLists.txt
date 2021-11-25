@@ -75,7 +75,10 @@ include_directories(
 ###################
 
 # This library provides a way of loading parameters for servo
-add_library(${SERVO_PARAM_LIB_NAME} SHARED src/servo_parameters.cpp)
+add_library(${SERVO_PARAM_LIB_NAME} SHARED
+  src/servo_parameters.cpp
+  src/parameter_descriptor_builder.cpp
+)
 set_target_properties(${SERVO_PARAM_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${SERVO_PARAM_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 

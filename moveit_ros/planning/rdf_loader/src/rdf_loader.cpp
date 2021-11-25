@@ -118,13 +118,13 @@ RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_str
   auto umodel = std::make_unique<urdf::Model>();
   if (umodel->initString(urdf_string))
   {
-    srdf_ = std::make_shared<srdf::Model>();
-    if (!srdf_->initString(*urdf_, srdf_string))
+    auto smodel = std::make_shared<srdf::Model>();
+    if (!smodel->initString(*umodel, srdf_string))
     {
       RCLCPP_ERROR(LOGGER, "Unable to parse SRDF");
-      srdf_.reset();
     }
     urdf_ = std::move(umodel);
+    srdf_ = std::move(smodel);
   }
   else
   {

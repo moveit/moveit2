@@ -70,8 +70,8 @@ protected:
 MOVEIT_CLASS_FORWARD(
     ActionBasedControllerHandleBase);  // Defines ActionBasedControllerHandleBasePtr, ConstPtr, WeakPtr... etc
 
-/*
- * This is a simple base class, which handles all of the action creation/etc
+/**
+ * @brief Base class for controller handles that interact with a controller through a ROS action server.
  */
 template <typename T>
 class ActionBasedControllerHandle : public ActionBasedControllerHandleBase
@@ -79,44 +79,18 @@ class ActionBasedControllerHandle : public ActionBasedControllerHandleBase
 public:
   ActionBasedControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::string& ns,
                               const std::string& logger_name)
-    : ActionBasedControllerHandleBase(name, logger_name), node_(node), done_(true), namespace_(ns)
+    : ActionBasedControllerHandleBase(name, logger_name), done_(true), namespace_(ns)
   {
-    controller_action_client_ = rclcpp_action::create_client<T>(node_, getActionName());
-
-    unsigned int attempts = 0;
-    double timeout;
-    node_->get_parameter_or("trajectory_execution.controller_connection_timeout", timeout, 15.0);
-
-    if (timeout == 0.0)
-    {
-      while (rclcpp::ok() && !controller_action_client_->wait_for_action_server(std::chrono::seconds(5)))
-      {
-        RCLCPP_WARN_STREAM(LOGGER, "Waiting for " << getActionName() << " to come up");
-      }
-    }
-    else
-    {
-      while (rclcpp::ok() &&
-             !controller_action_client_->wait_for_action_server(std::chrono::duration<double>(timeout / 3)) &&
-             ++attempts < 3)
-      {
-        RCLCPP_WARN_STREAM(LOGGER, "Waiting for " << getActionName() << " to come up");
-      }
-    }
-    if (!controller_action_client_->action_server_is_ready())
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "Action client not connected: " << getActionName());
-      controller_action_client_.reset();
-    }
-
+    // Creating the action client does not ensure that the action server is actually running. Executing trajectories
+    // through the controller handle will fail if the server is not running when an action goal message is sent.
+    controller_action_client_ = rclcpp_action::create_client<T>(node, getActionName());
     last_exec_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
   }
 
-  bool isConnected() const
-  {
-    return static_cast<bool>(controller_action_client_);
-  }
-
+  /**
+   * @brief Cancels trajectory execution by triggering the controller action server's cancellation callback.
+   * @return True if cancellation was accepted, false if cancellation failed.
+   */
   bool cancelExecution() override
   {
     if (!controller_action_client_)
@@ -136,9 +110,18 @@ public:
     return true;
   }
 
+  /**
+   * @brief Callback function to call when the result is received from the controller action server.
+   * @param wrapped_result
+   */
   virtual void
   controllerDoneCallback(const typename rclcpp_action::ClientGoalHandle<T>::WrappedResult& wrapped_result) = 0;
 
+  /**
+   * @brief Blocks waiting for the action result to be received.
+   * @param timeout Duration to wait for a result before failing. Default value indicates no timeout.
+   * @return True if a result was received, false on timeout.
+   */
   bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration::from_seconds(-1.0)) override
   {
     auto result_callback_done = std::make_shared<std::promise<bool>>();
@@ -181,7 +164,19 @@ public:
   }
 
 protected:
-  const rclcpp::Node::SharedPtr node_;
+  /**
+   * @brief Check if the controller's action server is ready to receive action goals.
+   * @return True if the action server is ready, false if it is not ready or does not exist.
+   */
+  bool isConnected() const
+  {
+    return controller_action_client_->action_server_is_ready();
+  }
+
+  /**
+   * @brief Get the full name of the action using the action namespace and base name.
+   * @return The action name.
+   */
   std::string getActionName() const
   {
     if (namespace_.empty())
@@ -190,6 +185,11 @@ protected:
       return name_ + "/" + namespace_;
   }
 
+  /**
+   * @brief Indicate that the controller handle is done executing the trajectory and set the controller manager handle's
+   * ExecutionStatus based on the received action ResultCode.
+   * @param rclcpp_action::ResultCode to convert to moveit_controller_manager::ExecutionStatus.
+   */
   void finishControllerExecution(const rclcpp_action::ResultCode& state)
   {
     RCLCPP_DEBUG_STREAM(LOGGER, "Controller " << name_ << " is done with state " << static_cast<int>(state));
@@ -206,21 +206,35 @@ protected:
     done_ = true;
   }
 
-  /* execution status */
+  /**
+   * @brief Status after last trajectory execution.
+   */
   moveit_controller_manager::ExecutionStatus last_exec_;
+
+  /**
+   * @brief Indicates whether the controller handle is done executing its current trajectory.
+   */
   bool done_;
 
-  /* the controller namespace, for instance, topics will map to name/ns/goal,
-   * name/ns/result, etc */
+  /**
+   * @brief The controller namespace. The controller action server's topics will map to name/ns/goal, name/ns/result, etc.
+   */
   std::string namespace_;
 
-  /* the joints controlled by this controller */
+  /**
+   * @brief The joints controlled by this controller.
+   */
   std::vector<std::string> joints_;
 
-  /* action client */
+  /**
+   * @brief Action client to send trajectories to the controller's action server.
+   */
   typename rclcpp_action::Client<T>::SharedPtr controller_action_client_;
-  /* Current goal that have been sent to the action server */
+
+  /**
+   * @brief Current goal that has been sent to the action server.
+   */
   typename rclcpp_action::ClientGoalHandle<T>::SharedPtr current_goal_;
 };
 
-}  // end namespace moveit_simple_controller_manager
+}  // namespace moveit_simple_controller_manager
