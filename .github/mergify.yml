@@ -23,6 +23,4 @@ pull_request_rules:
     actions:
         comment:
           message: |
-            @{{author}}, all pull requests must be targeted towards the `main` development branch.
-            Once merged into `main`, it is possible to backport to {{base}}, but it must be in `main`
-            to have these changes reflected into new distributions.
+            Please target the `main` branch for development, we will backport the changes to {{base}} for you if approved and if they don't break API.
