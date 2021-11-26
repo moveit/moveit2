@@ -265,10 +265,8 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
                (std::chrono::system_clock::now() - start_time).count());
 
   res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
-  int count =
-      std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start_time).count();
   res.processing_time_.resize(1);
-  res.processing_time_[0] = (double)count / 1000.0;
+  res.processing_time_[0] = std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count();
 
   // report planning failure if path has collisions
   if (not optimizer->isCollisionFree())
@@ -291,9 +289,8 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
     }
   }
 
-  count = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start_time).count();
   res.processing_time_.resize(1);
-  res.processing_time_[0] = (double)count / 1000.0;
+  res.processing_time_[0] = std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count();
 
   return true;
 }

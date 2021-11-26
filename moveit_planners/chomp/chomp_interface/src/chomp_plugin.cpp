@@ -55,21 +55,9 @@ public:
   bool initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
                   const std::string& parameter_namespace) override
   {
-    std::string actual_ns;
-    if (parameter_namespace.empty())
-    {
-      actual_ns = "~";
-    }
-    else
-    {
-      actual_ns = parameter_namespace;
-    }
-    std::shared_ptr<rclcpp::Node> nh_ptr = std::make_shared<rclcpp::Node>(actual_ns);
-
     for (const std::string& group : model->getJointModelGroupNames())
     {
-      planning_contexts_[group] =
-          std::make_shared<CHOMPPlanningContext>("chomp_planning_context", group, model, nh_ptr);
+      planning_contexts_[group] = std::make_shared<CHOMPPlanningContext>("chomp_planning_context", group, model, node);
     }
     return true;
   }

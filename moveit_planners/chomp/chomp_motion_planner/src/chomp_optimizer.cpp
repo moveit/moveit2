@@ -97,11 +97,11 @@ void ChompOptimizer::initialize()
   collision_detection::CollisionRequest req;
   collision_detection::CollisionResult res;
   req.group_name = planning_group_;
-  // TODO
-  // ros::WallTime wt = ros::WallTime::now();
+
+  const auto wt = std::chrono::high_resolution_clock::now();
   hy_env_->getCollisionGradients(req, res, state_, &planning_scene_->getAllowedCollisionMatrix(), gsr_);
-  // TODO
-  // RCLCPP_INFO(LOGGER,"First coll check took " << (ros::WallTime::now() - wt));
+  RCLCPP_INFO(LOGGER, "First coll check took %f sec",
+              std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - wt).count());
   num_collision_points_ = 0;
   for (const collision_detection::GradientInfo& gradient : gsr_->gradients_)
   {
@@ -301,8 +301,8 @@ void ChompOptimizer::registerParents(const moveit::core::JointModel* model)
 bool ChompOptimizer::optimize()
 {
   bool optimization_result = 0;
-  // TODO
-  // ros::WallTime start_time = ros::WallTime::now();
+
+  const auto start_time = std::chrono::high_resolution_clock::now();
   // double averageCostVelocity = 0.0;
   // int currentCostIter = 0;
   int cost_window = 10;
@@ -313,15 +313,12 @@ bool ChompOptimizer::optimize()
   // iterate
   for (iteration_ = 0; iteration_ < parameters_->max_iterations_; iteration_++)
   {
-    // TODO
-    // ros::WallTime for_time = ros::WallTime::now();
     performForwardKinematics();
-    // ROS_DEBUG("Forward kinematics took " << (ros::WallTime::now() - for_time));
     double c_cost = getCollisionCost();
     double s_cost = getSmoothnessCost();
     double cost = c_cost + s_cost;
 
-    // RCLCPP_INFO(LOGGER,"Collision cost " << cCost << " smoothness cost " << sCost);
+    RCLCPP_INFO(LOGGER, "Collision cost %f, smoothness cost: %f", c_cost, s_cost);
 
     /// TODO: HMC BASED COMMENTED CODE BELOW, Need to uncomment and perform extensive testing by varying the HMC
     /// parameters values in the chomp_planning.yaml file so that CHOMP can find optimal paths
@@ -523,9 +520,11 @@ bool ChompOptimizer::optimize()
 
   RCLCPP_INFO(LOGGER, "Terminated after %d iterations, using path from iteration %d", iteration_,
               last_improvement_iteration_);
-  // TODO
-  // RCLCPP_INFO(LOGGER,"Optimization core finished in %f sec", (ros::WallTime::now() - start_time).toSec());
-  // RCLCPP_INFO(LOGGER,"Time per iteration " << (ros::WallTime::now() - start_time).toSec() / (iteration_ * 1.0));
+  RCLCPP_INFO(LOGGER, "Optimization core finished in %f sec",
+              std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count());
+  RCLCPP_INFO(LOGGER, "Time per iteration %f sec",
+              std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count() /
+                  (iteration_ * 1.0));
 
   return optimization_result;
 }
