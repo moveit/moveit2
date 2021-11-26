@@ -167,11 +167,12 @@ public:
   const Eigen::Isometry3d& getTransform(const std::string& name, bool& frame_found) const;
 
   /** \brief Get the global transform to a shape of an object with multiple shapes.
-   * shape_number is the index of the object (counting from 0) and needs to be valid. */
+   * shape_index is the index of the object (counting from 0) and needs to be valid.
+   * This function is used to construct the collision environment. */
   const Eigen::Isometry3d& getGlobalShapeTransform(const std::string& object_id, int shape_index) const;
 
-  /** \brief Get the global transform to a shape of an object with multiple shapes.
-   * shape_number is the index of the object (counting from 0) and needs to be valid. */
+  /** \brief Get the global transforms to the shapes of an object.
+   * This function is used to construct the collision environment. */
   const EigenSTL::vector_Isometry3d& getGlobalShapeTransforms(const std::string& object_id) const;
 
   /** \brief Add a pose and shapes to an object in the map.
@@ -184,7 +185,10 @@ public:
    * This function makes repeated calls to addToObjectInternal() to add the
    * shapes one by one. */
   void addToObject(const std::string& object_id, const std::vector<shapes::ShapeConstPtr>& shapes,
-                   const EigenSTL::vector_Isometry3d& shape_poses);
+                   const EigenSTL::vector_Isometry3d& shape_poses)
+  {
+    addToObject(object_id, Eigen::Isometry3d::Identity(), shapes, shape_poses);
+  }
 
   /** \brief Add a pose and shape to an object.
    * If the object already exists, this call will add the shape to the object
@@ -192,15 +196,21 @@ public:
    * specified shape is added. This calls addToObjectInternal().
    * shape_pose is defined relative to the object's pose, not to the world frame. */
   void addToObject(const std::string& object_id, const Eigen::Isometry3d& pose, const shapes::ShapeConstPtr& shape,
-                   const Eigen::Isometry3d& shape_pose);
+                   const Eigen::Isometry3d& shape_pose)
+  {
+    addToObject(object_id, pose, std::vector<shapes::ShapeConstPtr>{ shape }, EigenSTL::vector_Isometry3d{ shape_pose });
+  }
 
   /** \brief Add a shape to an object.
    * If the object already exists, this call will add the shape to the object
    * at the specified pose. Otherwise, the object is created and the
    * specified shape is added. This calls addToObjectInternal().
    * shape_pose is defined relative to the object's pose, not to the world frame. */
-  void addToObject(const std::string& object_id, const shapes::ShapeConstPtr& shape,
-                   const Eigen::Isometry3d& shape_pose);
+  void addToObject(const std::string& object_id, const shapes::ShapeConstPtr& shape, const Eigen::Isometry3d& shape_pose)
+  {
+    addToObject(object_id, Eigen::Isometry3d::Identity(), std::vector<shapes::ShapeConstPtr>{ shape },
+                EigenSTL::vector_Isometry3d{ shape_pose });
+  }
 
   /** \brief Update the pose of a shape in an object. Shape equality is
    * verified by comparing pointers. Returns true on success. */
@@ -213,10 +223,8 @@ public:
    */
   bool moveObject(const std::string& object_id, const Eigen::Isometry3d& transform);
 
-  /** \brief Move the object pose (thus moving all shapes and subframes in the object)
-   * to the given transform specified in world frame. The transform replaces the old pose.
-   */
-  bool moveObjectAbsolute(const std::string& object_id, const Eigen::Isometry3d& transform);
+  /** \brief Set the pose of an object. The pose is specified in the world frame. */
+  bool setObjectPose(const std::string& object_id, const Eigen::Isometry3d& pose);
 
   /** \brief Remove shape from object.
    * Shape equality is verified by comparing pointers. Ownership of the
@@ -234,9 +242,6 @@ public:
 
   /** \brief Set subframes on an object. The frames are relative to the object pose. */
   bool setSubframesOfObject(const std::string& object_id, const moveit::core::FixedTransformsMap& subframe_poses);
-
-  /** \brief Set the pose of an object. The pose is specified in the world frame. */
-  bool setObjectPose(const std::string& object_id, const Eigen::Isometry3d& pose);
 
   /** \brief Clear all objects.
    * If there are no other pointers to corresponding instances of Objects,

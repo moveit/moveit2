@@ -950,6 +950,10 @@ private:
   bool processCollisionObjectRemove(const moveit_msgs::msg::CollisionObject& object);
   bool processCollisionObjectMove(const moveit_msgs::msg::CollisionObject& object);
 
+  /* For exporting and importing the planning scene */
+  bool readPoseFromText(std::istream& in, Eigen::Isometry3d& pose) const;
+  void writePoseToText(std::ostream& out, const Eigen::Isometry3d& pose) const;
+
   /** convert Pose msg to Eigen::Isometry, normalizing the quaternion part if necessary. */
   static void poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::Isometry3d& out);
 

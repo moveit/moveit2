@@ -296,7 +296,7 @@ TYPED_TEST_P(CollisionDetectorTest, AttachedBodyTester)
   ASSERT_FALSE(res.collision);
 
   shapes::Shape* shape = new shapes::Box(.1, .1, .1);
-  this->cenv_->getWorld()->addToObject("box", shapes::ShapeConstPtr(shape), pos1);
+  this->cenv_->getWorld()->addToObject("box", pos1, shapes::ShapeConstPtr(shape), Eigen::Isometry3d::Identity());
 
   res = collision_detection::CollisionResult();
   this->cenv_->checkRobotCollision(req, res, robot_state, *this->acm_);
@@ -332,7 +332,7 @@ TYPED_TEST_P(CollisionDetectorTest, AttachedBodyTester)
 
   pos1.translation().x() = 5.01;
   shapes::Shape* coll = new shapes::Box(.1, .1, .1);
-  this->cenv_->getWorld()->addToObject("coll", shapes::ShapeConstPtr(coll), pos1);
+  this->cenv_->getWorld()->addToObject("coll", pos1, shapes::ShapeConstPtr(coll), Eigen::Isometry3d::Identity());
   res = collision_detection::CollisionResult();
   this->cenv_->checkRobotCollision(req, res, robot_state, *this->acm_);
   ASSERT_TRUE(res.collision);
@@ -407,7 +407,7 @@ TYPED_TEST_P(CollisionDetectorTest, ConvertObjectToAttached)
   Eigen::Isometry3d pos2 = Eigen::Isometry3d::Identity();
   pos2.translation().x() = 10.0;
 
-  this->cenv_->getWorld()->addToObject("kinect", shape, pos1);
+  this->cenv_->getWorld()->addToObject("kinect", pos1, shape, Eigen::Isometry3d::Identity());
 
   moveit::core::RobotState robot_state(this->robot_model_);
   robot_state.setToDefaultValues();
@@ -477,7 +477,7 @@ TYPED_TEST_P(CollisionDetectorTest, TestCollisionMapAdditionSpeed)
   auto start = std::chrono::system_clock::now();
   this->cenv_->getWorld()->addToObject("map", shapes, poses);
   double t = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count();
-  // TODO: investigate why bullet collision checking is considerably slower here
+  // TODO (j-petit): investigate why bullet collision checking is considerably slower here
   EXPECT_GE(5.0, t);
   // this is not really a failure; it is just that slow;
   // looking into doing collision checking with a voxel grid.

@@ -274,42 +274,26 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
         tf2::fromMsg(aco.object.pose, object_pose);
 
         std::vector<shapes::ShapeConstPtr> shapes;
-        EigenSTL::vector_Isometry3d poses;
+        EigenSTL::vector_Isometry3d shape_poses;
+        const auto num_shapes = aco.object.primitives.size() + aco.object.meshes.size() + aco.object.planes.size();
+        shapes.reserve(num_shapes);
+        shape_poses.reserve(num_shapes);
+
+        auto append = [&shapes, &shape_poses](shapes::Shape* s, const geometry_msgs::msg::Pose& pose_msg) {
+          if (!s)
+            return;
+          Eigen::Isometry3d pose;
+          tf2::fromMsg(pose_msg, pose);
+          shapes.emplace_back(shapes::ShapeConstPtr(s));
+          shape_poses.emplace_back(std::move(pose));
+        };
 
         for (std::size_t i = 0; i < aco.object.primitives.size(); ++i)
-        {
-          shapes::Shape* s = shapes::constructShapeFromMsg(aco.object.primitives[i]);
-          if (s)
-          {
-            Eigen::Isometry3d p;
-            tf2::fromMsg(aco.object.primitive_poses[i], p);
-            shapes.push_back(shapes::ShapeConstPtr(s));
-            poses.push_back(p);
-          }
-        }
+          append(shapes::constructShapeFromMsg(aco.object.primitives[i]), aco.object.primitive_poses[i]);
         for (std::size_t i = 0; i < aco.object.meshes.size(); ++i)
-        {
-          shapes::Shape* s = shapes::constructShapeFromMsg(aco.object.meshes[i]);
-          if (s)
-          {
-            Eigen::Isometry3d p;
-            tf2::fromMsg(aco.object.mesh_poses[i], p);
-            shapes.push_back(shapes::ShapeConstPtr(s));
-            poses.push_back(p);
-          }
-        }
+          append(shapes::constructShapeFromMsg(aco.object.meshes[i]), aco.object.mesh_poses[i]);
         for (std::size_t i = 0; i < aco.object.planes.size(); ++i)
-        {
-          shapes::Shape* s = shapes::constructShapeFromMsg(aco.object.planes[i]);
-          if (s)
-          {
-            Eigen::Isometry3d p;
-            tf2::fromMsg(aco.object.plane_poses[i], p);
-
-            shapes.push_back(shapes::ShapeConstPtr(s));
-            poses.push_back(p);
-          }
-        }
+          append(shapes::constructShapeFromMsg(aco.object.planes[i]), aco.object.plane_poses[i]);
 
         moveit::core::FixedTransformsMap subframe_poses;
         for (std::size_t i = 0; i < aco.object.subframe_poses.size(); ++i)
@@ -320,7 +304,7 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
           subframe_poses[name] = p;
         }
 
-        // Transform shape poses and subframes to link frame
+        // Transform shape pose to link frame
         if (!Transforms::sameFrame(aco.object.header.frame_id, aco.link_name))
         {
           bool frame_found = false;
@@ -339,8 +323,7 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
                            aco.object.header.frame_id.c_str());
             }
           }
-          Eigen::Isometry3d t = world_to_header_frame.inverse() * state.getGlobalLinkTransform(lm);
-          object_pose = object_pose * t;
+          object_pose = state.getGlobalLinkTransform(lm).inverse() * world_to_header_frame * object_pose;
         }
 
         if (shapes.empty())
@@ -355,7 +338,7 @@ static void _msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::Att
                          "The robot state already had an object named '%s' attached to link '%s'. "
                          "The object was replaced.",
                          aco.object.id.c_str(), aco.link_name.c_str());
-          state.attachBody(aco.object.id, object_pose, shapes, poses, aco.touch_links, aco.link_name,
+          state.attachBody(aco.object.id, object_pose, shapes, shape_poses, aco.touch_links, aco.link_name,
                            aco.detach_posture, subframe_poses);
           RCLCPP_DEBUG(LOGGER, "Attached object '%s' to link '%s'", aco.object.id.c_str(), aco.link_name.c_str());
         }
