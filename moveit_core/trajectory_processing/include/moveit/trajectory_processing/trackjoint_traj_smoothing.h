@@ -82,5 +82,13 @@ private:
   static void saveRobotTrajectoryToCSV(const std::string& base_filepath,
                                        const robot_trajectory::RobotTrajectory& trajectory, const size_t num_dof,
                                        const std::vector<int>& joint_group_indices);
+
+  /**
+   * \brief Apply a final low-pass filtering between waypoints to ensure small positional inaccuracies (like 1e-4) do
+   * not violate jerk limits.
+   */
+  static bool doIterativeLowPassFilter(const size_t num_dof, const std::vector<int>& joint_group_indices,
+                                       const std::vector<trackjoint::Limits>& limits,
+                                       robot_trajectory::RobotTrajectory& trajectory);
 };
 }  // namespace trajectory_processing

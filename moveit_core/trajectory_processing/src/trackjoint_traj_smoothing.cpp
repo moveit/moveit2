@@ -37,6 +37,7 @@
 #include <cmath>
 #include <Eigen/Geometry>
 #include <limits>
+#include <moveit/online_signal_smoothing/butterworth_filter.h>
 #include <moveit/trajectory_processing/trackjoint_traj_smoothing.h>
 #include <rclcpp/rclcpp.hpp>
 #include <trackjoint/error_codes.h>
@@ -53,6 +54,7 @@ constexpr double DEFAULT_MAX_VELOCITY = 5;                    // rad/s
 constexpr double DEFAULT_MAX_ACCELERATION = 10;               // rad/s^2
 constexpr double DEFAULT_MAX_JERK = 20;                       // rad/s^3
 constexpr double DEFAULT_WAYPOINT_POSITION_TOLERANCE = 1e-5;  // rad
+constexpr double LOWPASS_FILTER_COEFFICIENT = 20.0;           // The minimum feasible filter coefficient is 1.0
 }  // namespace
 
 bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& reference_trajectory,
@@ -116,7 +118,6 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
   // Do smoothing
   for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 1; ++waypoint_idx)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Doing waypoint " << waypoint_idx);
     setTrackJointState(waypoint_idx + 1, reference_trajectory, num_dof, joint_group_indices, goal_joint_states);
 
     desired_duration = reference_trajectory.getWayPointDurationFromPrevious(waypoint_idx + 1);
@@ -129,23 +130,6 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
     {
       RCLCPP_ERROR_STREAM(LOGGER, "Invalid input to TrackJoint smoothing algorithm. Error code: "
                                       << trackjoint::ERROR_CODE_MAP.at(error_code));
-
-      // Usually the acceleration is exceeded.
-      // TODO(andyz): remove when done debugging
-      const auto waypoint_ptr = reference_trajectory.getWayPointPtr(waypoint_idx);
-      const auto target_waypoint_ptr = reference_trajectory.getWayPointPtr(waypoint_idx);
-      for (size_t joint = 0; joint < num_dof; ++joint)
-      {
-        RCLCPP_INFO_STREAM(LOGGER,
-                           "Input accel: " << waypoint_ptr->getVariableAcceleration(joint_group_indices.at(joint))
-                                           << " / " << current_joint_states.at(joint).acceleration << " / "
-                                           << limits.at(joint).acceleration_limit);
-        RCLCPP_INFO_STREAM(LOGGER, "Target accel: "
-                                       << target_waypoint_ptr->getVariableAcceleration(joint_group_indices.at(joint))
-                                       << " / " << goal_joint_states.at(joint).acceleration << " / "
-                                       << limits.at(joint).acceleration_limit);
-      }
-
       return false;
     }
 
@@ -156,25 +140,61 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
                                       << trackjoint::ERROR_CODE_MAP.at(error_code));
       return false;
     }
-    else
-    {
-      RCLCPP_WARN_STREAM(LOGGER, "Success!");
-    }
+
+    // Save final output to data file, for analysis
+    // TODO(andyz): delete when done testing
+    traj_gen.saveTrajectoriesToFile(trackjoint_output, "/home/andy/Downloads/TrackJoint/", true /* append */);
 
     addTrackJointOutpointToRobotTrajectory(reference_trajectory, num_dof, joint_group_indices, trackjoint_output,
                                            outgoing_trajectory);
 
     current_joint_states = goal_joint_states;
-
-    // Save final output to data file, for analysis
-    // TODO(andyz): delete when done testing
-    traj_gen.saveTrajectoriesToFile(trackjoint_output, "/home/andy/Downloads/TrackJoint/", true /* append */);
-    //  saveRobotTrajectoryToCSV("/home/andy/Downloads/TrackJoint/output_", outgoing_trajectory, num_dof, joint_group_indices);
   }
 
-  RCLCPP_ERROR_STREAM(LOGGER, "Input waypoint count: " << reference_trajectory.getWayPointCount());
+  // Iteratively smooth the trackjoint output with a low-pass filter to ensure smoothness between waypoints.
+  // A very small numerical mismatch between waypoint positions (like 1e-4) can cause a large jerk spike.
+  // This increases the filter coefficient for each joint until jerk limits are satisfied.
+  // TODO(andyz): as of now, it only applies one filter coefficient
+  if (!doIterativeLowPassFilter(num_dof, joint_group_indices, limits, outgoing_trajectory))
+  {
+    // This should never happen
+    RCLCPP_ERROR_STREAM(LOGGER, "Iterative smoothing with a lowpass filter failed.");
+    return false;
+  }
+
+  RCLCPP_INFO_STREAM(LOGGER, "TrackJoint input waypoint count: " << reference_trajectory.getWayPointCount());
   reference_trajectory = outgoing_trajectory;
-  RCLCPP_ERROR_STREAM(LOGGER, "Smoothed waypoint count: " << outgoing_trajectory.getWayPointCount());
+  RCLCPP_INFO_STREAM(LOGGER, "TrackJoint smoothed waypoint count: " << outgoing_trajectory.getWayPointCount());
+  return true;
+}
+
+bool TrackJointSmoothing::doIterativeLowPassFilter(const size_t num_dof, const std::vector<int>& joint_group_indices,
+                                                   const std::vector<trackjoint::Limits>& limits,
+                                                   robot_trajectory::RobotTrajectory& trajectory)
+{
+  // For each joint
+  for (size_t joint_idx = 0; joint_idx < num_dof; ++joint_idx)
+  {
+    online_signal_smoothing::ButterworthFilter joint_filter(LOWPASS_FILTER_COEFFICIENT);
+
+    // Initialize joint position
+    joint_filter.reset(trajectory.getFirstWayPointPtr()->getVariablePosition(joint_group_indices.at(joint_idx)));
+
+    // Step through and filter each waypoint
+    for (size_t waypoint_idx = 1; waypoint_idx < trajectory.getWayPointCount(); ++waypoint_idx)
+    {
+      auto next_waypoint = trajectory.getWayPointPtr(waypoint_idx);
+      auto prev_waypoint = trajectory.getWayPointPtr(waypoint_idx - 1);
+      double filtered_position =
+          joint_filter.filter(next_waypoint->getVariablePosition(joint_group_indices.at(joint_idx)));
+      // Overwrite the previous value with the filtered value
+      next_waypoint->setVariablePosition(joint_group_indices.at(joint_idx), filtered_position);
+
+      // TODO(andyz): Check if jerk limit is satisfied, i.e. check for discontinuities. Increase filter coefficient if
+      // not. This probably should involve conversion to splines to calculate the derivatives.
+    }
+  }
+
   return true;
 }
 

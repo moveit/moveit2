@@ -20,6 +20,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   Boost
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
+  moveit_butterworth_filter
   moveit_robot_state
   moveit_robot_trajectory
 )
