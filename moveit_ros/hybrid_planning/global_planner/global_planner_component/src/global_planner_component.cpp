@@ -119,25 +119,22 @@ void GlobalPlannerComponent::globalPlanningRequestCallback(
 {
   // Plan global trajectory
   moveit_msgs::msg::MotionPlanResponse planning_solution = global_planner_instance_->plan(goal_handle);
+
+  // Send action response
+  auto result = std::make_shared<moveit_msgs::action::GlobalPlanner::Result>();
+  result->response = planning_solution;
+
   if (planning_solution.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     // Publish global planning solution to the local planner
     global_trajectory_pub_->publish(planning_solution);
-
-    // Send action response
-    auto result = std::make_shared<moveit_msgs::action::GlobalPlanner::Result>();
-    result->response = planning_solution;
     goal_handle->succeed(result);
-
-    // Save newest planning solution
-    last_global_solution_ = planning_solution;  // TODO(sjahr) Add Service to expose this
   }
   else
   {
-    auto result = std::make_shared<moveit_msgs::action::GlobalPlanner::Result>();
-    result->response = planning_solution;
     goal_handle->abort(result);
   }
+
   // Reset the global planner
   global_planner_instance_->reset();
 };

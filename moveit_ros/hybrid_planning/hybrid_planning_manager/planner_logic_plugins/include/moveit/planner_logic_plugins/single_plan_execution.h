@@ -50,5 +50,8 @@ public:
   bool initialize(const std::shared_ptr<HybridPlanningManager>& hybrid_planning_manager) override;
   ReactionResult react(const HybridPlanningEvent& event) override;
   ReactionResult react(const std::string& event) override;
+
+private:
+  bool local_planner_started_ = false;
 };
 }  // namespace moveit::hybrid_planning

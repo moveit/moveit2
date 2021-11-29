@@ -76,8 +76,6 @@ private:
   // Global planner instance
   std::shared_ptr<GlobalPlannerInterface> global_planner_instance_;
 
-  moveit_msgs::msg::MotionPlanResponse last_global_solution_;
-
   // Global planning request action server
   rclcpp_action::Server<moveit_msgs::action::GlobalPlanner>::SharedPtr global_planning_request_server_;
 

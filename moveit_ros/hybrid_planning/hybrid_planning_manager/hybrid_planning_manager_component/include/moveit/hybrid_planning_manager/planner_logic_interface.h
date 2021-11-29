@@ -48,7 +48,7 @@ namespace moveit::hybrid_planning
 // Describes the outcome of a reaction to an event in the hybrid planning architecture
 struct ReactionResult
 {
-  ReactionResult(const HybridPlanningEvent& planning_event, const std::string& error_msg, const int& error_code)
+  ReactionResult(const HybridPlanningEvent& planning_event, const std::string& error_msg, int error_code)
     : error_message(error_msg), error_code(error_code)
   {
     switch (planning_event)
@@ -56,18 +56,32 @@ struct ReactionResult
       case HybridPlanningEvent::HYBRID_PLANNING_REQUEST_RECEIVED:
         event = "Hybrid planning request received";
         break;
-      case HybridPlanningEvent::GLOBAL_PLANNING_ACTION_FINISHED:
-        event = "Global planning action finished";
+      case HybridPlanningEvent::GLOBAL_PLANNING_ACTION_SUCCESSFUL:
+        event = "Global planning action successful";
+        break;
+      case HybridPlanningEvent::GLOBAL_PLANNING_ACTION_ABORTED:
+        event = "Global planning action aborted";
+        break;
+      case HybridPlanningEvent::GLOBAL_PLANNING_ACTION_CANCELED:
+        event = "Global planning action canceled";
         break;
       case HybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE:
         event = "Global solution available";
         break;
-      case HybridPlanningEvent::LOCAL_PLANNING_ACTION_FINISHED:
-        event = "Local planning action finished";
+      case HybridPlanningEvent::LOCAL_PLANNING_ACTION_SUCCESSFUL:
+        event = "Local planning action successful";
         break;
+      case HybridPlanningEvent::LOCAL_PLANNING_ACTION_ABORTED:
+        event = "Local planning action aborted";
+        break;
+      case HybridPlanningEvent::LOCAL_PLANNING_ACTION_CANCELED:
+        event = "Local planning action canceled";
+        break;
+      case HybridPlanningEvent::UNDEFINED:
+        event = "Undefined event";
     }
   };
-  ReactionResult(const std::string& event, const std::string& error_msg, const int& error_code)
+  ReactionResult(const std::string& event, const std::string& error_msg, int error_code)
     : event(event), error_message(error_msg), error_code(error_code){};
 
   // Event that triggered the reaction
