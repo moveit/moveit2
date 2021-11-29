@@ -425,16 +425,16 @@ bool ChompOptimizer::optimize()
       }
       else
       {
-        // RCLCPP_INFO(LOGGER,"cCost " << cCost << " over threshold " << parameters_->getCollisionThreshold());
+        RCLCPP_INFO(LOGGER, "cCost %f over threshold %f", c_cost, parameters_->collision_threshold_);
       }
     }
 
-    // TODO
-    // if ((ros::WallTime::now() - start_time).toSec() > parameters_->planning_time_limit_)
-    //{
-    // ROS_WARN("Breaking out early due to time limit constraints.");
-    // break;
-    //}
+    if (std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count() >
+        parameters_->planning_time_limit_)
+    {
+      RCLCPP_WARN(LOGGER, "Breaking out early due to time limit constraints.");
+      break;
+    }
 
     /// TODO: HMC BASED COMMENTED CODE BELOW, Need to uncomment and perform extensive testing by varying the HMC
     /// parameters values in the chomp_planning.yaml file so that CHOMP can find optimal paths
