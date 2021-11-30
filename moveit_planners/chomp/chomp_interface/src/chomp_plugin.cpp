@@ -32,18 +32,19 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <memory>
-
+#include <chomp_interface/chomp_planning_context.h>
+#include <moveit/collision_distance_field/collision_detector_allocator_hybrid.h>
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_model/robot_model.h>
-#include <moveit/collision_distance_field/collision_detector_allocator_hybrid.h>
-#include <chomp_interface/chomp_planning_context.h>
 
 #include <pluginlib/class_list_macros.hpp>
+#include <vector>
 
 namespace chomp_interface
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_optimizer");
+
 class CHOMPPlannerManager : public planning_interface::PlannerManager
 {
 public:
@@ -51,15 +52,12 @@ public:
   {
   }
 
-  bool initialize(const moveit::core::RobotModelConstPtr& model, const std::string& ns) override
+  bool initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
+                  const std::string& parameter_namespace) override
   {
-    ros::NodeHandle nh("~");
-    if (!ns.empty())
-      nh = ros::NodeHandle(ns);
-
     for (const std::string& group : model->getJointModelGroupNames())
     {
-      planning_contexts_[group] = std::make_shared<CHOMPPlanningContext>("chomp_planning_context", group, model, nh);
+      planning_contexts_[group] = std::make_shared<CHOMPPlanningContext>("chomp_planning_context", group, model, node);
     }
     return true;
   }
@@ -73,14 +71,14 @@ public:
 
     if (req.group_name.empty())
     {
-      ROS_ERROR("No group specified to plan for");
+      RCLCPP_ERROR(LOGGER, "No group specified to plan for");
       error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
       return planning_interface::PlanningContextPtr();
     }
 
     if (!planning_scene)
     {
-      ROS_ERROR("No planning scene supplied as input");
+      RCLCPP_ERROR(LOGGER, "No planning scene supplied as input");
       error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       return planning_interface::PlanningContextPtr();
     }
@@ -121,4 +119,4 @@ protected:
 
 }  // namespace chomp_interface
 
-PLUGINLIB_EXPORT_CLASS(chomp_interface::CHOMPPlannerManager, planning_interface::PlannerManager);
+PLUGINLIB_EXPORT_CLASS(chomp_interface::CHOMPPlannerManager, planning_interface::PlannerManager)
