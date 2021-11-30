@@ -921,8 +921,7 @@ void ChompOptimizer::performForwardKinematics()
 
   is_collision_free_ = true;
 
-  // TODO
-  // ros::WallDuration total_dur(0.0);
+  auto total_dur = std::chrono::duration<double>::zero();
 
   // for each point in the trajectory
   for (int i = start; i <= end; ++i)
@@ -932,12 +931,10 @@ void ChompOptimizer::performForwardKinematics()
     collision_detection::CollisionResult res;
     req.group_name = planning_group_;
     setRobotStateFromPoint(group_trajectory_, i);
-    // TODO
-    // ros::WallTime grad = ros::WallTime::now();
+    auto grad = std::chrono::system_clock::now();
 
     hy_env_->getCollisionGradients(req, res, state_, nullptr, gsr_);
-    // TODO
-    // total_dur += (ros::WallTime::now() - grad);
+    total_dur += (std::chrono::system_clock::now() - grad);
     computeJointProperties(i);
     state_is_in_collision_[i] = false;
 
