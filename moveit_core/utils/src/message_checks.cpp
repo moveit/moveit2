@@ -69,5 +69,15 @@ bool isEmpty(const moveit_msgs::msg::Constraints& constr)
          constr.visibility_constraints.empty() && constr.joint_constraints.empty();
 }
 
+bool isEmpty(const geometry_msgs::msg::Quaternion& msg)
+{
+  return msg.x == 0.0 && msg.y == 0.0 && msg.z == 0.0 && msg.w == 0.0;
+}
+
+bool isEmpty(const geometry_msgs::msg::Pose& msg)
+{
+  return msg.position.x == 0.0 && msg.position.y == 0.0 && msg.position.z == 0.0 && isEmpty(msg.orientation);
+}
+
 }  // namespace core
 }  // namespace moveit

@@ -1351,35 +1351,6 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
   if (object.object.operation == moveit_msgs::msg::CollisionObject::ADD ||
       object.object.operation == moveit_msgs::msg::CollisionObject::APPEND)
   {
-    // STEP 0: Check message validity
-    if (object.object.primitives.size() != object.object.primitive_poses.size())
-    {
-      RCLCPP_ERROR(LOGGER, "Number of primitive shapes does not match number of poses "
-                           "in attached collision object message");
-      return false;
-    }
-
-    if (object.object.meshes.size() != object.object.mesh_poses.size())
-    {
-      RCLCPP_ERROR(LOGGER, "Number of meshes does not match number of poses "
-                           "in attached collision object message");
-      return false;
-    }
-
-    if (object.object.planes.size() != object.object.plane_poses.size())
-    {
-      RCLCPP_ERROR(LOGGER, "Number of planes does not match number of poses "
-                           "in attached collision object message");
-      return false;
-    }
-
-    if (object.object.subframe_names.size() != object.object.subframe_poses.size())
-    {
-      RCLCPP_ERROR(LOGGER, "Number of frame names does not match number of frames in collision object "
-                           "message");
-      return false;
-    }
-
     const moveit::core::LinkModel* link_model = getRobotModel()->getLinkModel(object.link_name);
     if (link_model)
     {
@@ -1418,44 +1389,12 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
       else  // If object is not in the world, use the message contents
       {
         Eigen::Isometry3d header_frame_to_object_pose;
-        PlanningScene::poseMsgToEigen(object.object.pose, header_frame_to_object_pose);
-        // TODO(felixvd): Use _msgToAttachedBody from robot_state/conversions.cpp here and
-        //                make a helper function for the other branch (getAttachedBodyFromWorld)
+        if (!shapesAndPosesFromCollisionObjectMessage(object.object, header_frame_to_object_pose, shapes, shape_poses))
+          return false;
         const Eigen::Isometry3d world_to_header_frame = getFrameTransform(object.object.header.frame_id);
         const Eigen::Isometry3d link_to_header_frame =
             robot_state_->getGlobalLinkTransform(link_model).inverse() * world_to_header_frame;
         object_pose_in_link = link_to_header_frame * header_frame_to_object_pose;
-
-        for (std::size_t i = 0; i < object.object.primitives.size(); ++i)
-        {
-          if (shapes::Shape* shape = shapes::constructShapeFromMsg(object.object.primitives[i]))
-          {
-            Eigen::Isometry3d shape_pose;
-            PlanningScene::poseMsgToEigen(object.object.primitive_poses[i], shape_pose);
-            shapes.push_back(shapes::ShapeConstPtr(shape));
-            shape_poses.push_back(shape_pose);
-          }
-        }
-        for (std::size_t i = 0; i < object.object.meshes.size(); ++i)
-        {
-          if (shapes::Shape* shape = shapes::constructShapeFromMsg(object.object.meshes[i]))
-          {
-            Eigen::Isometry3d shape_pose;
-            PlanningScene::poseMsgToEigen(object.object.mesh_poses[i], shape_pose);
-            shapes.push_back(shapes::ShapeConstPtr(shape));
-            shape_poses.push_back(shape_pose);
-          }
-        }
-        for (std::size_t i = 0; i < object.object.planes.size(); ++i)
-        {
-          if (shapes::Shape* shape = shapes::constructShapeFromMsg(object.object.planes[i]))
-          {
-            Eigen::Isometry3d shape_pose;
-            PlanningScene::poseMsgToEigen(object.object.plane_poses[i], shape_pose);
-            shapes.push_back(shapes::ShapeConstPtr(shape));
-            shape_poses.push_back(shape_pose);
-          }
-        }
 
         Eigen::Isometry3d subframe_pose;
         for (std::size_t i = 0; i < object.object.subframe_poses.size(); ++i)
@@ -1507,10 +1446,7 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
         const moveit::core::AttachedBody* ab = robot_state_->getAttachedBody(object.object.id);
 
         // Allow overriding the body's pose if provided, otherwise keep the old one
-        if (object.object.pose.position.x == 0 && object.object.pose.position.y == 0 &&
-            object.object.pose.position.z == 0 && object.object.pose.orientation.x == 0 &&
-            object.object.pose.orientation.y == 0 && object.object.pose.orientation.z == 0 &&
-            object.object.pose.orientation.w == 0)
+        if (moveit::core::isEmpty(object.object.pose))
           object_pose_in_link = ab->getPose();  // Keep old pose
 
         shapes.insert(shapes.end(), ab->getShapes().begin(), ab->getShapes().end());
@@ -1645,38 +1581,96 @@ void PlanningScene::poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::I
   out = translation * quaternion;
 }
 
+bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::msg::CollisionObject& object,
+                                                             Eigen::Isometry3d& object_pose,
+                                                             std::vector<shapes::ShapeConstPtr>& shapes,
+                                                             EigenSTL::vector_Isometry3d& shape_poses)
+{
+  if (object.primitives.size() < object.primitive_poses.size())
+  {
+    RCLCPP_ERROR(LOGGER, "More primitive shape poses than shapes in collision object message.");
+    return false;
+  }
+  if (object.meshes.size() < object.mesh_poses.size())
+  {
+    RCLCPP_ERROR(LOGGER, "More mesh poses than meshes in collision object message.");
+    return false;
+  }
+  if (object.planes.size() < object.plane_poses.size())
+  {
+    RCLCPP_ERROR(LOGGER, "More plane poses than planes in collision object message.");
+    return false;
+  }
+
+  const int num_shapes = object.primitives.size() + object.meshes.size() + object.planes.size();
+  shapes.reserve(num_shapes);
+  shape_poses.reserve(num_shapes);
+
+  PlanningScene::poseMsgToEigen(object.pose, object_pose);
+
+  bool switch_object_pose_and_shape_pose = false;
+  if (num_shapes == 1)
+    if (moveit::core::isEmpty(object.pose))
+    {
+      switch_object_pose_and_shape_pose = true;  // If the object pose is not set but the shape pose is,
+                                                 // use the shape's pose as the object pose.
+    }
+
+  auto append = [&object_pose, &shapes, &shape_poses,
+                 &switch_object_pose_and_shape_pose](shapes::Shape* s, const geometry_msgs::msg::Pose& pose_msg) {
+    if (!s)
+      return;
+    Eigen::Isometry3d pose;
+    PlanningScene::poseMsgToEigen(pose_msg, pose);
+    if (!switch_object_pose_and_shape_pose)
+      shape_poses.emplace_back(std::move(pose));
+    else
+    {
+      shape_poses.emplace_back(std::move(object_pose));
+      object_pose = pose;
+    }
+    shapes.emplace_back(shapes::ShapeConstPtr(s));
+  };
+
+  auto treat_shape_vectors = [&append](const auto& shape_vector,        // the shape_msgs of each type
+                                       const auto& shape_poses_vector,  // std::vector<const geometry_msgs::Pose>
+                                       const std::string& shape_type) {
+    if (shape_vector.size() > shape_poses_vector.size())
+    {
+      RCLCPP_DEBUG_STREAM(LOGGER, "Number of " << shape_type
+                                               << " does not match number of poses "
+                                                  "in collision object message. Assuming identity.");
+      for (std::size_t i = 0; i < shape_vector.size(); ++i)
+      {
+        if (i >= shape_poses_vector.size())
+          append(shapes::constructShapeFromMsg(shape_vector[i]),
+                 geometry_msgs::msg::Pose());  // Empty shape pose => Identity
+        else
+          append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]);
+      }
+    }
+    else
+      for (std::size_t i = 0; i < shape_vector.size(); ++i)
+        append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]);
+  };
+
+  treat_shape_vectors(object.primitives, object.primitive_poses, std::string("primitive_poses"));
+  treat_shape_vectors(object.meshes, object.mesh_poses, std::string("meshes"));
+  treat_shape_vectors(object.planes, object.plane_poses, std::string("planes"));
+  return true;
+}
+
 bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionObject& object)
 {
+  if (!knowsFrameTransform(object.header.frame_id))
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Unknown frame: " << object.header.frame_id);
+    return false;
+  }
+
   if (object.primitives.empty() && object.meshes.empty() && object.planes.empty())
   {
     RCLCPP_ERROR(LOGGER, "There are no shapes specified in the collision object message");
-    return false;
-  }
-
-  // TODO (felixvd): Factor these 3 conditions out of here and processAttachedCollisionObject,
-  //                and fill the pose vectors with Identity transforms instead of stopping.
-  if (object.primitives.size() != object.primitive_poses.size())
-  {
-    RCLCPP_ERROR(LOGGER, "Number of primitive shapes does not match number of poses "
-                         "in collision object message");
-    return false;
-  }
-
-  if (object.meshes.size() != object.mesh_poses.size())
-  {
-    RCLCPP_ERROR(LOGGER, "Number of meshes does not match number of poses in collision object message");
-    return false;
-  }
-
-  if (object.planes.size() != object.plane_poses.size())
-  {
-    RCLCPP_ERROR(LOGGER, "Number of planes does not match number of poses in collision object message");
-    return false;
-  }
-
-  if (!knowsFrameTransform(object.header.frame_id))
-  {
-    RCLCPP_ERROR(LOGGER, "Unknown frame: %s", object.header.frame_id.c_str());
     return false;
   }
 
@@ -1686,30 +1680,11 @@ bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionO
 
   const Eigen::Isometry3d& world_to_object_header_transform = getFrameTransform(object.header.frame_id);
   Eigen::Isometry3d header_to_pose_transform;
-  PlanningScene::poseMsgToEigen(object.pose, header_to_pose_transform);
-  const Eigen::Isometry3d object_frame_transform = world_to_object_header_transform * header_to_pose_transform;
-
   std::vector<shapes::ShapeConstPtr> shapes;
   EigenSTL::vector_Isometry3d shape_poses;
-  const auto num_shapes = object.primitives.size() + object.meshes.size() + object.planes.size();
-  shapes.reserve(num_shapes);
-  shape_poses.reserve(num_shapes);
-
-  auto append = [&shapes, &shape_poses](shapes::Shape* s, const geometry_msgs::msg::Pose& pose_msg) {
-    if (!s)
-      return;
-    Eigen::Isometry3d pose;
-    PlanningScene::poseMsgToEigen(pose_msg, pose);
-    shapes.emplace_back(shapes::ShapeConstPtr(s));
-    shape_poses.emplace_back(std::move(pose));
-  };
-
-  for (std::size_t i = 0; i < object.primitives.size(); ++i)
-    append(shapes::constructShapeFromMsg(object.primitives[i]), object.primitive_poses[i]);
-  for (std::size_t i = 0; i < object.meshes.size(); ++i)
-    append(shapes::constructShapeFromMsg(object.meshes[i]), object.mesh_poses[i]);
-  for (std::size_t i = 0; i < object.planes.size(); ++i)
-    append(shapes::constructShapeFromMsg(object.planes[i]), object.plane_poses[i]);
+  if (!shapesAndPosesFromCollisionObjectMessage(object, header_to_pose_transform, shapes, shape_poses))
+    return false;
+  const Eigen::Isometry3d object_frame_transform = world_to_object_header_transform * header_to_pose_transform;
 
   world_->addToObject(object.id, object_frame_transform, shapes, shape_poses);
 
