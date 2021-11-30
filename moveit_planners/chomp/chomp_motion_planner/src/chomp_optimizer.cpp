@@ -523,8 +523,7 @@ bool ChompOptimizer::optimize()
   RCLCPP_INFO(LOGGER, "Optimization core finished in %f sec",
               std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count());
   RCLCPP_INFO(LOGGER, "Time per iteration %f sec",
-              std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() /
-                  (iteration_ * 1.0));
+              std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() / (iteration_ * 1.0));
 
   return optimization_result;
 }
