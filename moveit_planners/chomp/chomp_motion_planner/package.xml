@@ -2,8 +2,9 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>chomp_motion_planner</name>
-  <version>1.1.5</version>
+  <version>1.1.6</version>
   <description>chomp_motion_planner</description>
+
   <maintainer email="chitt@live.in">Chittaranjan Srinivas Swaminathan</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
