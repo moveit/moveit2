@@ -98,10 +98,10 @@ void ChompOptimizer::initialize()
   collision_detection::CollisionResult res;
   req.group_name = planning_group_;
 
-  const auto wt = std::chrono::high_resolution_clock::now();
+  const auto wt = std::chrono::system_clock::now();
   hy_env_->getCollisionGradients(req, res, state_, &planning_scene_->getAllowedCollisionMatrix(), gsr_);
   RCLCPP_INFO(LOGGER, "First coll check took %f sec",
-              std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - wt).count());
+              std::chrono::duration<double>(std::chrono::system_clock::now() - wt).count());
   num_collision_points_ = 0;
   for (const collision_detection::GradientInfo& gradient : gsr_->gradients_)
   {
@@ -302,7 +302,7 @@ bool ChompOptimizer::optimize()
 {
   bool optimization_result = 0;
 
-  const auto start_time = std::chrono::high_resolution_clock::now();
+  const auto start_time = std::chrono::system_clock::now();
   // double averageCostVelocity = 0.0;
   // int currentCostIter = 0;
   int cost_window = 10;
@@ -429,7 +429,7 @@ bool ChompOptimizer::optimize()
       }
     }
 
-    if (std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count() >
+    if (std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() >
         parameters_->planning_time_limit_)
     {
       RCLCPP_WARN(LOGGER, "Breaking out early due to time limit constraints.");
@@ -521,9 +521,9 @@ bool ChompOptimizer::optimize()
   RCLCPP_INFO(LOGGER, "Terminated after %d iterations, using path from iteration %d", iteration_,
               last_improvement_iteration_);
   RCLCPP_INFO(LOGGER, "Optimization core finished in %f sec",
-              std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count());
+              std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count());
   RCLCPP_INFO(LOGGER, "Time per iteration %f sec",
-              std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start_time).count() /
+              std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() /
                   (iteration_ * 1.0));
 
   return optimization_result;
