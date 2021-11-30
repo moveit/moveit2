@@ -66,7 +66,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
                          const planning_interface::MotionPlanRequest& req, const ChompParameters& params,
                          planning_interface::MotionPlanDetailedResponse& res) const
 {
-  std::chrono::time_point<std::chrono::system_clock> start_time = std::chrono::system_clock::now();
+  auto start_time = std::chrono::system_clock::now();
   if (!planning_scene)
   {
     RCLCPP_ERROR(LOGGER, "No planning scene initialized.");
@@ -162,7 +162,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
               (params.trajectory_initialization_method_).c_str());
 
   // optimize!
-  std::chrono::time_point<std::chrono::system_clock> create_time = std::chrono::system_clock::now();
+  auto create_time = std::chrono::system_clock::now();
 
   int replan_count = 0;
   bool replan_flag = false;
