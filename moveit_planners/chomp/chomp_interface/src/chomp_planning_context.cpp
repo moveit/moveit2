@@ -46,11 +46,7 @@ CHOMPPlanningContext::CHOMPPlanningContext(const std::string& name, const std::s
                                            const moveit::core::RobotModelConstPtr& model, rclcpp::Node::SharedPtr node)
   : planning_interface::PlanningContext(name, group), robot_model_(model)
 {
-<<<<<<< HEAD
-  chomp_interface_ = CHOMPInterfacePtr(new CHOMPInterface(nh));
-=======
   chomp_interface_ = std::make_shared<CHOMPInterface>(node);
->>>>>>> 045820820 (Port CHOMP Motion Planner to ROS 2 (#809))
 }
 
 bool CHOMPPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)

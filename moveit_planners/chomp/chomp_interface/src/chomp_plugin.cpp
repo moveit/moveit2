@@ -32,11 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-<<<<<<< HEAD
-=======
 #include <chomp_interface/chomp_planning_context.h>
 #include <moveit/collision_distance_field/collision_detector_allocator_hybrid.h>
->>>>>>> 045820820 (Port CHOMP Motion Planner to ROS 2 (#809))
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_model/robot_model.h>
@@ -60,12 +57,7 @@ public:
   {
     for (const std::string& group : model->getJointModelGroupNames())
     {
-<<<<<<< HEAD
-      planning_contexts_[group] =
-          CHOMPPlanningContextPtr(new CHOMPPlanningContext("chomp_planning_context", group, model, nh));
-=======
       planning_contexts_[group] = std::make_shared<CHOMPPlanningContext>("chomp_planning_context", group, model, node);
->>>>>>> 045820820 (Port CHOMP Motion Planner to ROS 2 (#809))
     }
     return true;
   }

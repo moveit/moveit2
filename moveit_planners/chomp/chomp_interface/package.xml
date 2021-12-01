@@ -5,15 +5,7 @@
   <version>1.1.6</version>
   <description>The interface for using CHOMP within MoveIt</description>
 
-<<<<<<< HEAD
-  <version>1.1.5</version>
-  <author email="gjones@willowgarage.com">Gil Jones</author>
-
   <maintainer email="chitt@live.in">Chittaranjan Srinivas Swaminathan</maintainer>
-  <maintainer email="dave@picknik.ai">Dave Coleman</maintainer>
-=======
-  <maintainer email="chitt@live.in">Chittaranjan Srinivas Swaminathan</maintainer>
->>>>>>> 045820820 (Port CHOMP Motion Planner to ROS 2 (#809))
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
 
