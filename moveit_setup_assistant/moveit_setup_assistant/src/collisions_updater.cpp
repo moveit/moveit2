@@ -34,85 +34,16 @@
 
 /* Author: Mathias Lüdtke */
 
-#include <moveit/setup_assistant/tools/moveit_config_data.hpp>
+#include <moveit_setup_srdf_plugins/default_collisions.hpp>
+#include <moveit_setup_framework/data/package_settings_config.hpp>
+#include <moveit_setup_framework/data/srdf_config.hpp>
+#include <moveit_setup_framework/data/urdf_config.hpp>
 #include <moveit/rdf_loader/rdf_loader.h>
 #include <rclcpp/rclcpp.hpp>
 
 #include <boost/program_options.hpp>
 
 namespace po = boost::program_options;
-
-bool loadSetupAssistantConfig(moveit_setup_assistant::MoveItConfigData& config_data, const std::string& pkg_path)
-{
-  static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_updater");
-  if (!config_data.setPackagePath(pkg_path))
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not set package path '" << pkg_path << "'");
-    return false;
-  }
-
-  std::string setup_assistant_path;
-  if (!config_data.getSetupAssistantYAMLPath(setup_assistant_path))
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not resolve path to .setup_assistant");
-    return false;
-  }
-
-  if (!config_data.inputSetupAssistantYAML(setup_assistant_path))
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not parse .setup_assistant file from '" << setup_assistant_path << "'");
-    return false;
-  }
-
-  config_data.createFullURDFPath();  // might fail at this point
-
-  config_data.createFullSRDFPath(config_data.config_pkg_path_);  // might fail at this point
-
-  return true;
-}
-
-bool setup(moveit_setup_assistant::MoveItConfigData& config_data, bool keep_old,
-           const std::vector<std::string>& xacro_args)
-{
-  static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_updater");
-  std::string urdf_string;
-  if (!rdf_loader::RDFLoader::loadXmlFileToString(urdf_string, config_data.urdf_path_, xacro_args))
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not load URDF from '" << config_data.urdf_path_ << "'");
-    return false;
-  }
-  if (!config_data.urdf_model_->initString(urdf_string))
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not parse URDF from '" << config_data.urdf_path_ << "'");
-    return false;
-  }
-
-  std::string srdf_string;
-  if (!rdf_loader::RDFLoader::loadXmlFileToString(srdf_string, config_data.srdf_path_, xacro_args))
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not load SRDF from '" << config_data.srdf_path_ << "'");
-    return false;
-  }
-  if (!config_data.srdf_->initString(*config_data.urdf_model_, srdf_string))
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not parse SRDF from '" << config_data.srdf_path_ << "'");
-    return false;
-  }
-
-  if (!keep_old)
-    config_data.srdf_->disabled_collisions_.clear();
-
-  return true;
-}
-
-moveit_setup_assistant::LinkPairMap compute(moveit_setup_assistant::MoveItConfigData& config_data, uint32_t trials,
-                                            double min_collision_fraction, bool verbose)
-{
-  // TODO: spin thread and print progress if verbose
-  unsigned int collision_progress;
-  return moveit_setup_assistant::computeDefaultCollisions(config_data.getPlanningScene(), &collision_progress,
-                                                          trials > 0, trials, min_collision_fraction, verbose);
-}
 
 int main(int argc, char* argv[])
 {
@@ -155,14 +86,24 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  moveit_setup_assistant::MoveItConfigData config_data;
-  static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_updater");
+  rclcpp::init(argc, argv);
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("collision_updater");
+  rclcpp::Logger LOGGER = node->get_logger();
+  moveit_setup_framework::DataWarehousePtr config_data = std::make_shared<moveit_setup_framework::DataWarehouse>(node);
+
+  moveit_setup_srdf_plugins::DefaultCollisions setup_step;
+  setup_step.initialize(node, config_data);
 
   if (!config_pkg_path.empty())
   {
-    if (!loadSetupAssistantConfig(config_data, config_pkg_path))
+    auto package_settings = config_data->get<moveit_setup_framework::PackageSettingsConfig>("package_settings");
+    try
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Could not load config at '" << config_pkg_path << "'");
+      package_settings->loadExisting(config_pkg_path);
+    }
+    catch (const std::runtime_error& e)
+    {
+      RCLCPP_ERROR_STREAM(LOGGER, "Could not load config at '" << config_pkg_path << "'. " << e.what());
       return 1;
     }
   }
@@ -177,33 +118,50 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  auto srdf_config = config_data->get<moveit_setup_framework::SRDFConfig>("srdf");
+
   // overwrite config paths if applicable
   if (!urdf_path.empty())
-    config_data.urdf_path_ = urdf_path;
-  if (!srdf_path.empty())
-    config_data.srdf_path_ = srdf_path;
-
-  std::vector<std::string> xacro_args;
-  if (vm.count("xacro-args"))
-    xacro_args = vm["xacro-args"].as<std::vector<std::string> >();
-
-  if (!setup(config_data, keep_old, xacro_args))
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not setup updater");
-    return 1;
+    auto config = config_data->get<moveit_setup_framework::URDFConfig>("urdf");
+
+    std::vector<std::string> xacro_args;
+    if (vm.count("xacro-args"))
+      xacro_args = vm["xacro-args"].as<std::vector<std::string> >();
+
+    config->loadFromPath(urdf_path, xacro_args);
+  }
+  if (!srdf_path.empty())
+  {
+    srdf_config->loadSRDFFile(srdf_path);
   }
 
-  moveit_setup_assistant::LinkPairMap link_pairs = compute(config_data, never_trials, min_collision_fraction, verbose);
+  if (!keep_old)
+    srdf_config->getDisabledCollisions().clear();
+
+  setup_step.startGenerationThread(never_trials, min_collision_fraction, verbose);
+  int thread_progress;
+  int last_progress = 0;
+  while ((thread_progress = setup_step.getThreadProgress()) < 100)
+  {
+    if (thread_progress - last_progress > 10)
+    {
+      RCLCPP_INFO(LOGGER, "%d%% complete...", thread_progress);
+      last_progress = thread_progress;
+    }
+  }
+  setup_step.joinGenerationThread();
+  RCLCPP_INFO(LOGGER, "100%% complete...");
 
   size_t skip_mask = 0;
   if (!include_default)
-    skip_mask |= (1 << moveit_setup_assistant::DEFAULT);
+    skip_mask |= (1 << moveit_setup_srdf_plugins::DEFAULT);
   if (!include_always)
-    skip_mask |= (1 << moveit_setup_assistant::ALWAYS);
+    skip_mask |= (1 << moveit_setup_srdf_plugins::ALWAYS);
 
-  config_data.setCollisionLinkPairs(link_pairs, skip_mask);
+  setup_step.linkPairsToSRDFSorted(skip_mask);
 
-  config_data.srdf_->writeSRDF(output_path.empty() ? config_data.srdf_path_ : output_path);
+  srdf_config->write(output_path.empty() ? srdf_config->getPath() : output_path);
 
   return 0;
 }

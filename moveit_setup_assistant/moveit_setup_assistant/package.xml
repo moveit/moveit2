@@ -19,20 +19,12 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <build_depend>moveit_common</build_depend>
-  <build_depend>libogre-dev</build_depend>
-  <build_depend>ompl</build_depend>
-
   <depend>ament_index_cpp</depend>
-  <depend>moveit_core</depend>
-  <depend>moveit_ros_planning</depend>
-  <depend>moveit_ros_visualization</depend>
+  <depend>moveit_setup_framework</depend>
+  <depend>moveit_setup_srdf_plugins</depend> <!-- For collision_updater executable -->
+  <depend>pluginlib</depend>
+  <depend>qtbase5-dev</depend>
   <depend>rclcpp</depend>
-  <depend>urdf</depend>
-  <depend>yaml-cpp</depend>
-  <depend>srdfdom</depend>
-
-  <exec_depend>xacro</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

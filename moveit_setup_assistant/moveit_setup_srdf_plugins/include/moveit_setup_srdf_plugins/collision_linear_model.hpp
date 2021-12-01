@@ -41,10 +41,10 @@
 #include <QVector>
 
 #ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/compute_default_collisions.h>
+#include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
 #endif
 
-#include "collision_matrix_model.h"
+#include <moveit_setup_srdf_plugins/collision_matrix_model.hpp>
 
 class CollisionLinearModel : public QAbstractProxyModel
 {
@@ -66,7 +66,7 @@ public:
   QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
   QModelIndex parent(const QModelIndex& child) const override;
   QVariant data(const QModelIndex& index, int role) const override;
-  moveit_setup_assistant::DisabledReason reason(int row) const;
+  moveit_setup_srdf_plugins::DisabledReason reason(int row) const;
 
   bool setData(const QModelIndex& index, const QVariant& value, int role) override;
   void setEnabled(const QItemSelection& selection, bool value);

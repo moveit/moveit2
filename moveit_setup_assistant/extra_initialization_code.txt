@@ -1,0 +1,69 @@
+  // Load the allowed collision matrix
+  config_data_->loadAllowedCollisionMatrix();
+
+  // Load kinematics yaml file if available --------------------------------------------------
+  fs::path kinematics_yaml_path = config_data_->config_pkg_path_;
+  kinematics_yaml_path /= "config/kinematics.yaml";
+
+  if (!config_data_->inputKinematicsYAML(kinematics_yaml_path.make_preferred().string()))
+  {
+    QMessageBox::warning(this, "No Kinematic YAML File",
+                         QString("Failed to parse kinematics yaml file. This file is not critical but any previous "
+                                 "kinematic solver settings have been lost. To re-populate this file edit each "
+                                 "existing planning group and choose a solver, then save each change. \n\nFile error "
+                                 "at location ")
+                             .append(kinematics_yaml_path.make_preferred().string().c_str()));
+  }
+  else
+  {
+    fs::path planning_context_launch_path = config_data_->config_pkg_path_;
+    planning_context_launch_path /= "launch/planning_context.launch";
+    config_data_->inputPlanningContextLaunch(planning_context_launch_path.make_preferred().string());
+  }
+
+  // Load 3d_sensors config file
+  load3DSensorsFile();
+
+  // Load ros controllers yaml file if available-----------------------------------------------
+  fs::path ros_controllers_yaml_path = config_data_->config_pkg_path_;
+  ros_controllers_yaml_path /= "config/ros_controllers.yaml";
+  config_data_->inputROSControllersYAML(ros_controllers_yaml_path.make_preferred().string());
+
+  fs::path ompl_yaml_path = config_data_->config_pkg_path_;
+  ompl_yaml_path /= "config/ompl_planning.yaml";
+  config_data_->inputOMPLYAML(ompl_yaml_path.make_preferred().string());
+
+  // DONE LOADING --------------------------------------------------------------------------
+
+  // Progress Indicator
+  progress_bar_->setValue(70);
+  QApplication::processEvents();
+
+  // Progress Indicator
+  progress_bar_->setValue(100);
+  QApplication::processEvents();
+
+
+// ******************************************************************************************
+// Loads sensors_3d yaml file
+// ******************************************************************************************
+bool StartScreenWidget::load3DSensorsFile()
+{
+  // Loads parameters values from sensors_3d yaml file if available
+  fs::path sensors_3d_yaml_path = config_data_->config_pkg_path_;
+  sensors_3d_yaml_path /= "config/sensors_3d.yaml";
+
+  // Default parameters values are always loaded but overridden by values existing in sensors_3d
+  fs::path default_sensors_3d_yaml_path = "templates/moveit_config_pkg_template/config/sensors_3d.yaml";
+
+  if (!fs::is_regular_file(sensors_3d_yaml_path))
+  {
+    return config_data_->input3DSensorsYAML(default_sensors_3d_yaml_path.make_preferred().string());
+  }
+  else
+  {
+    return config_data_->input3DSensorsYAML(default_sensors_3d_yaml_path.make_preferred().string(),
+                                            sensors_3d_yaml_path.make_preferred().string());
+  }
+  return true;
+}

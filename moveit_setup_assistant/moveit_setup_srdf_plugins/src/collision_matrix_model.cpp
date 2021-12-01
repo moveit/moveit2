@@ -34,7 +34,7 @@
 
 /* Author: Robert Haschke */
 
-#include "collision_matrix_model.h"
+#include <moveit_setup_srdf_plugins/collision_matrix_model.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/assign.hpp>
 #include <QVector>
@@ -44,30 +44,29 @@
 #include <QApplication>
 #include <QItemSelection>
 
-using namespace moveit_setup_assistant;
+using namespace moveit_setup_srdf_plugins;
 
 /// Boost mapping of reasons for disabling a link pair to strings
-static const boost::unordered_map<moveit_setup_assistant::DisabledReason, const char*> LONG_REASONS_TO_STRING =
+static const boost::unordered_map<moveit_setup_srdf_plugins::DisabledReason, const char*> LONG_REASONS_TO_STRING =
     boost::assign::map_list_of  // clang-format off
-    ( moveit_setup_assistant::NEVER, "Never in Collision" )
-    ( moveit_setup_assistant::DEFAULT, "Collision by Default" )
-    ( moveit_setup_assistant::ADJACENT, "Adjacent Links" )
-    ( moveit_setup_assistant::ALWAYS, "Always in Collision" )
-    ( moveit_setup_assistant::USER, "User Disabled" )
-    ( moveit_setup_assistant::NOT_DISABLED, "");  // clang-format on
+    ( moveit_setup_srdf_plugins::NEVER, "Never in Collision" )
+    ( moveit_setup_srdf_plugins::DEFAULT, "Collision by Default" )
+    ( moveit_setup_srdf_plugins::ADJACENT, "Adjacent Links" )
+    ( moveit_setup_srdf_plugins::ALWAYS, "Always in Collision" )
+    ( moveit_setup_srdf_plugins::USER, "User Disabled" )
+    ( moveit_setup_srdf_plugins::NOT_DISABLED, "");  // clang-format on
 
 /// Boost mapping of reasons to a background color
-static const boost::unordered_map<moveit_setup_assistant::DisabledReason, QVariant> LONG_REASONS_TO_BRUSH =
+static const boost::unordered_map<moveit_setup_srdf_plugins::DisabledReason, QVariant> LONG_REASONS_TO_BRUSH =
     boost::assign::map_list_of  // clang-format off
-    ( moveit_setup_assistant::NEVER, QBrush(QColor("lightgreen")) )
-    ( moveit_setup_assistant::DEFAULT, QBrush(QColor("lightpink")) )
-    ( moveit_setup_assistant::ADJACENT, QBrush(QColor("powderblue")) )
-    ( moveit_setup_assistant::ALWAYS, QBrush(QColor("tomato")) )
-    ( moveit_setup_assistant::USER, QBrush(QColor("yellow")) )
-    ( moveit_setup_assistant::NOT_DISABLED, QBrush());  // clang-format on
+    ( moveit_setup_srdf_plugins::NEVER, QBrush(QColor("lightgreen")) )
+    ( moveit_setup_srdf_plugins::DEFAULT, QBrush(QColor("lightpink")) )
+    ( moveit_setup_srdf_plugins::ADJACENT, QBrush(QColor("powderblue")) )
+    ( moveit_setup_srdf_plugins::ALWAYS, QBrush(QColor("tomato")) )
+    ( moveit_setup_srdf_plugins::USER, QBrush(QColor("yellow")) )
+    ( moveit_setup_srdf_plugins::NOT_DISABLED, QBrush());  // clang-format on
 
-CollisionMatrixModel::CollisionMatrixModel(moveit_setup_assistant::LinkPairMap& pairs,
-                                           const std::vector<std::string>& names, QObject* parent)
+CollisionMatrixModel::CollisionMatrixModel(LinkPairMap& pairs, const std::vector<std::string>& names, QObject* parent)
   : QAbstractTableModel(parent), pairs(pairs), std_names(names)
 {
   int idx = 0;
@@ -79,7 +78,7 @@ CollisionMatrixModel::CollisionMatrixModel(moveit_setup_assistant::LinkPairMap& 
 }
 
 // return item in pairs map given a normalized index, use item(normalized(index))
-moveit_setup_assistant::LinkPairMap::iterator CollisionMatrixModel::item(const QModelIndex& index)
+LinkPairMap::iterator CollisionMatrixModel::item(const QModelIndex& index)
 {
   int r = visual_to_index[index.row()], c = visual_to_index[index.column()];
   if (r == c)
@@ -107,7 +106,7 @@ QVariant CollisionMatrixModel::data(const QModelIndex& index, int role) const
   if (index.isValid() && index.row() == index.column() && role == Qt::BackgroundRole)
     return QApplication::palette().window();
 
-  moveit_setup_assistant::LinkPairMap::const_iterator item = this->item(index);
+  LinkPairMap::const_iterator item = this->item(index);
   if (item == pairs.end())
     return QVariant();
 
@@ -123,11 +122,11 @@ QVariant CollisionMatrixModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-moveit_setup_assistant::DisabledReason CollisionMatrixModel::reason(const QModelIndex& index) const
+moveit_setup_srdf_plugins::DisabledReason CollisionMatrixModel::reason(const QModelIndex& index) const
 {
-  moveit_setup_assistant::LinkPairMap::const_iterator item = this->item(index);
+  LinkPairMap::const_iterator item = this->item(index);
   if (item == pairs.end())
-    return moveit_setup_assistant::NOT_DISABLED;
+    return moveit_setup_srdf_plugins::NOT_DISABLED;
   return item->second.reason;
 }
 
@@ -135,7 +134,7 @@ bool CollisionMatrixModel::setData(const QModelIndex& index, const QVariant& val
 {
   if (role == Qt::CheckStateRole)
   {
-    moveit_setup_assistant::LinkPairMap::iterator item = this->item(index);
+    LinkPairMap::iterator item = this->item(index);
     if (item == pairs.end())
       return false;
 
@@ -146,12 +145,12 @@ bool CollisionMatrixModel::setData(const QModelIndex& index, const QVariant& val
     item->second.disable_check = new_value;
 
     // Handle USER Reasons: 1) pair is disabled by user
-    if (item->second.disable_check && item->second.reason == moveit_setup_assistant::NOT_DISABLED)
-      item->second.reason = moveit_setup_assistant::USER;
+    if (item->second.disable_check && item->second.reason == moveit_setup_srdf_plugins::NOT_DISABLED)
+      item->second.reason = moveit_setup_srdf_plugins::USER;
 
     // Handle USER Reasons: 2) pair was disabled by user and now is enabled (not checked)
-    else if (!item->second.disable_check && item->second.reason == moveit_setup_assistant::USER)
-      item->second.reason = moveit_setup_assistant::NOT_DISABLED;
+    else if (!item->second.disable_check && item->second.reason == moveit_setup_srdf_plugins::USER)
+      item->second.reason = moveit_setup_srdf_plugins::NOT_DISABLED;
 
     QModelIndex mirror = this->index(index.column(), index.row());
     Q_EMIT dataChanged(index, index);

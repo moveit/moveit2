@@ -34,41 +34,31 @@
 
 /* Author: Dave Coleman */
 
-// SA
-#include "virtual_joints_widget.h"
-#include "header_widget.h"
+#include <moveit_setup_srdf_plugins/virtual_joints_widget.hpp>
+#include <moveit_setup_framework/qt/helper_widgets.hpp>
 
 // Qt
 #include <QApplication>
-#include <QComboBox>
 #include <QFormLayout>
 #include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
 #include <QMessageBox>
-#include <QPushButton>
-#include <QStackedWidget>
 #include <QString>
-#include <QTableWidget>
 #include <QVBoxLayout>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_srdf_plugins
 {
-// ******************************************************************************************
-// Constructor
-// ******************************************************************************************
-VirtualJointsWidget::VirtualJointsWidget(QWidget* parent, const MoveItConfigDataPtr& config_data)
-  : SetupScreenWidget(parent), config_data_(config_data)
+void VirtualJointsWidget::onInit()
 {
   // Basic widget container
   QVBoxLayout* layout = new QVBoxLayout();
 
   // Top Header Area ------------------------------------------------
 
-  HeaderWidget* header = new HeaderWidget("Define Virtual Joints",
-                                          "Create a virtual joint between a robot link and an external frame of "
-                                          "reference (considered fixed with respect to the robot).",
-                                          this);
+  auto header =
+      new moveit_setup_framework::HeaderWidget("Define Virtual Joints",
+                                               "Create a virtual joint between a robot link and an external frame of "
+                                               "reference (considered fixed with respect to the robot).",
+                                               this);
   layout->addWidget(header);
 
   // Create contents screens ---------------------------------------
@@ -241,7 +231,7 @@ void VirtualJointsWidget::showNewScreen()
   stacked_widget_->setCurrentIndex(1);
 
   // Announce that this widget is in modal mode
-  Q_EMIT isModal(true);
+  Q_EMIT setModalMode(true);
 }
 
 // ******************************************************************************************
@@ -284,7 +274,14 @@ void VirtualJointsWidget::edit(const std::string& name)
   current_edit_vjoint_ = name;
 
   // Find the selected in datastruture
-  srdf::Model::VirtualJoint* vjoint = findVJointByName(name);
+  srdf::Model::VirtualJoint* vjoint = setup_step_.findVJointByName(name);
+
+  // Check if vjoint was found
+  if (vjoint == nullptr)  // not found
+  {
+    QMessageBox::critical(this, "Error Saving", "An internal error has occured while saving. Quitting.");
+    QApplication::quit();
+  }
 
   // Set vjoint name
   vjoint_name_field_->setText(vjoint->name_.c_str());
@@ -312,7 +309,7 @@ void VirtualJointsWidget::edit(const std::string& name)
   stacked_widget_->setCurrentIndex(1);
 
   // Announce that this widget is in modal mode
-  Q_EMIT isModal(true);
+  Q_EMIT setModalMode(true);
 }
 
 // ******************************************************************************************
@@ -337,42 +334,11 @@ void VirtualJointsWidget::loadChildLinksComboBox()
   // Remove all old links
   child_link_field_->clear();
 
-  // Get all links in robot model
-  std::vector<const moveit::core::LinkModel*> link_models = config_data_->getRobotModel()->getLinkModels();
-
   // Add all links to combo box
-  for (std::vector<const moveit::core::LinkModel*>::const_iterator link_it = link_models.begin();
-       link_it < link_models.end(); ++link_it)
+  for (auto link_name : setup_step_.getLinkNames())
   {
-    child_link_field_->addItem((*link_it)->getName().c_str());
+    child_link_field_->addItem(link_name.c_str());
   }
-}
-
-// ******************************************************************************************
-// Find the associated data by name
-// ******************************************************************************************
-srdf::Model::VirtualJoint* VirtualJointsWidget::findVJointByName(const std::string& name)
-{
-  // Find the group state we are editing based on the vjoint name
-  srdf::Model::VirtualJoint* searched_group = nullptr;  // used for holding our search results
-
-  for (srdf::Model::VirtualJoint& virtual_joint : config_data_->srdf_->virtual_joints_)
-  {
-    if (virtual_joint.name_ == name)  // string match
-    {
-      searched_group = &virtual_joint;  // convert to pointer from iterator
-      break;                            // we are done searching
-    }
-  }
-
-  // Check if vjoint was found
-  if (searched_group == nullptr)  // not found
-  {
-    QMessageBox::critical(this, "Error Saving", "An internal error has occurred while saving. Quitting.");
-    QApplication::quit();
-  }
-
-  return searched_group;
 }
 
 // ******************************************************************************************
@@ -401,21 +367,11 @@ void VirtualJointsWidget::deleteSelected()
   }
 
   // Delete vjoint from vector
-  for (std::vector<srdf::Model::VirtualJoint>::iterator vjoint_it = config_data_->srdf_->virtual_joints_.begin();
-       vjoint_it != config_data_->srdf_->virtual_joints_.end(); ++vjoint_it)
-  {
-    // check if this is the group we want to delete
-    if (vjoint_it->name_ == current_edit_vjoint_)  // string match
-    {
-      config_data_->srdf_->virtual_joints_.erase(vjoint_it);
-      break;
-    }
-  }
+  setup_step_.deleteByName(current_edit_vjoint_);
 
   // Reload main screen table
   loadDataTable();
-  config_data_->changes |= MoveItConfigData::VIRTUAL_JOINTS;
-  Q_EMIT referenceFrameChanged();
+  rviz_panel_->updateFixedFrame();
 }
 
 // ******************************************************************************************
@@ -426,9 +382,8 @@ void VirtualJointsWidget::doneEditing()
   // Get a reference to the supplied strings
   const std::string vjoint_name = vjoint_name_field_->text().trimmed().toStdString();
   const std::string parent_name = parent_name_field_->text().trimmed().toStdString();
-
-  // Used for editing existing groups
-  srdf::Model::VirtualJoint* searched_data = nullptr;
+  const std::string child_link = child_link_field_->currentText().trimmed().toStdString();
+  const std::string joint_type = joint_type_field_->currentText().trimmed().toStdString();
 
   // Check that name field is not empty
   if (vjoint_name.empty())
@@ -444,68 +399,28 @@ void VirtualJointsWidget::doneEditing()
     return;
   }
 
-  // Check if this is an existing vjoint
-  if (!current_edit_vjoint_.empty())
-  {
-    // Find the group we are editing based on the goup name string
-    searched_data = findVJointByName(current_edit_vjoint_);
-  }
-
-  // Check that the vjoint name is unique
-  for (const auto& virtual_joint : config_data_->srdf_->virtual_joints_)
-  {
-    if (virtual_joint.name_.compare(vjoint_name) == 0)  // the names are the same
-    {
-      // is this our existing vjoint? check if vjoint pointers are same
-      if (&virtual_joint != searched_data)
-      {
-        QMessageBox::warning(this, "Error Saving", "A virtual joint already exists with that name!");
-        return;
-      }
-    }
-  }
-
   // Check that a joint type was selected
-  if (joint_type_field_->currentText().isEmpty())
+  if (joint_type.empty())
   {
     QMessageBox::warning(this, "Error Saving", "A joint type must be chosen!");
     return;
   }
 
   // Check that a child link was selected
-  if (child_link_field_->currentText().isEmpty())
+  if (child_link.empty())
   {
     QMessageBox::warning(this, "Error Saving", "A child link must be chosen!");
     return;
   }
 
-  config_data_->changes |= MoveItConfigData::VIRTUAL_JOINTS;
-
-  // Save the new vjoint name or create the new vjoint ----------------------------
-  bool is_new = false;
-
-  if (searched_data == nullptr)  // create new
+  try
   {
-    is_new = true;
-    searched_data = new srdf::Model::VirtualJoint();
+    setup_step_.create(current_edit_vjoint_, vjoint_name, parent_name, child_link, joint_type);
   }
-
-  // Copy name data ----------------------------------------------------
-  searched_data->name_ = vjoint_name;
-  searched_data->parent_frame_ = parent_name;
-  searched_data->child_link_ = child_link_field_->currentText().toStdString();
-  searched_data->type_ = joint_type_field_->currentText().toStdString();
-
-  bool emit_frame_notice = false;
-
-  // Insert new vjoints into group state vector --------------------------
-  if (is_new)
+  catch (const std::runtime_error& e)
   {
-    if (searched_data->child_link_ == config_data_->getRobotModel()->getRootLinkName())
-      emit_frame_notice = true;
-    config_data_->srdf_->virtual_joints_.push_back(*searched_data);
-    config_data_->updateRobotModel();
-    delete searched_data;
+    QMessageBox::warning(this, "Error Saving", e.what());
+    return;
   }
 
   // Finish up ------------------------------------------------------
@@ -517,13 +432,9 @@ void VirtualJointsWidget::doneEditing()
   stacked_widget_->setCurrentIndex(0);
 
   // Announce that this widget is not in modal mode
-  Q_EMIT isModal(false);
+  Q_EMIT setModalMode(false);
 
-  // if the root frame changed for the robot, emit the signal
-  if (emit_frame_notice)
-  {
-    Q_EMIT referenceFrameChanged();
-  }
+  rviz_panel_->updateFixedFrame();
 }
 
 // ******************************************************************************************
@@ -535,7 +446,7 @@ void VirtualJointsWidget::cancelEditing()
   stacked_widget_->setCurrentIndex(0);
 
   // Announce that this widget is not in modal mode
-  Q_EMIT isModal(false);
+  Q_EMIT setModalMode(false);
 }
 
 // ******************************************************************************************
@@ -548,12 +459,14 @@ void VirtualJointsWidget::loadDataTable()
   data_table_->setDisabled(true);         // make sure we disable it so that the cellChanged event is not called
   data_table_->clearContents();
 
+  auto virtual_joints = setup_step_.getVirtualJoints();
+
   // Set size of datatable
-  data_table_->setRowCount(config_data_->srdf_->virtual_joints_.size());
+  data_table_->setRowCount(virtual_joints.size());
 
   // Loop through every virtual joint
   int row = 0;
-  for (const auto& virtual_joint : config_data_->srdf_->virtual_joints_)
+  for (const auto& virtual_joint : virtual_joints)
   {
     // Create row elements
     QTableWidgetItem* data_name = new QTableWidgetItem(virtual_joint.name_.c_str());
@@ -586,7 +499,7 @@ void VirtualJointsWidget::loadDataTable()
   data_table_->resizeColumnToContents(3);
 
   // Show edit button if applicable
-  if (!config_data_->srdf_->virtual_joints_.empty())
+  if (!virtual_joints.empty())
     btn_edit_->show();
 }
 
@@ -605,4 +518,7 @@ void VirtualJointsWidget::focusGiven()
   loadChildLinksComboBox();
 }
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_srdf_plugins
+
+#include <pluginlib/class_list_macros.hpp>  // NOLINT
+PLUGINLIB_EXPORT_CLASS(moveit_setup_srdf_plugins::VirtualJointsWidget, moveit_setup_framework::SetupStepWidget)

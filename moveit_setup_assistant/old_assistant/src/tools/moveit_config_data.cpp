@@ -41,7 +41,6 @@
 #include <boost/filesystem/path.hpp>        // for creating folders/files
 #include <boost/filesystem/operations.hpp>  // is_regular_file, is_directory, etc.
 #include <boost/algorithm/string/trim.hpp>
-#include <tinyxml.h>
 
 // ROS
 #include <rclcpp/rclcpp.hpp>
@@ -60,10 +59,6 @@ namespace fs = boost::filesystem;
 // ******************************************************************************************
 MoveItConfigData::MoveItConfigData() : config_pkg_generated_timestamp_(0)
 {
-  // Create an instance of SRDF writer and URDF model for all widgets to share
-  srdf_ = std::make_shared<srdf::SRDFWriter>();
-  urdf_model_ = std::make_shared<urdf::Model>();
-
   // Not in debug mode
   debug_ = false;
 
@@ -79,126 +74,6 @@ MoveItConfigData::MoveItConfigData() : config_pkg_generated_timestamp_(0)
 // Destructor
 // ******************************************************************************************
 MoveItConfigData::~MoveItConfigData() = default;
-
-// ******************************************************************************************
-// Load a robot model
-// ******************************************************************************************
-void MoveItConfigData::setRobotModel(const moveit::core::RobotModelPtr& robot_model)
-{
-  robot_model_ = robot_model;
-}
-
-// ******************************************************************************************
-// Provide a kinematic model. Load a new one if necessary
-// ******************************************************************************************
-moveit::core::RobotModelConstPtr MoveItConfigData::getRobotModel()
-{
-  if (!robot_model_)
-  {
-    // Initialize with a URDF Model Interface and a SRDF Model
-    robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_->srdf_model_);
-  }
-
-  return robot_model_;
-}
-
-// ******************************************************************************************
-// Update the Kinematic Model with latest SRDF modifications
-// ******************************************************************************************
-void MoveItConfigData::updateRobotModel()
-{
-  RCLCPP_INFO_STREAM(LOGGER, "Updating kinematic model");
-
-  // Tell SRDF Writer to create new SRDF Model, use original URDF model
-  srdf_->updateSRDFModel(*urdf_model_);
-
-  // Create new kin model
-  robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_->srdf_model_);
-
-  // Reset the planning scene
-  planning_scene_.reset();
-}
-
-// ******************************************************************************************
-// Provide a shared planning scene
-// ******************************************************************************************
-planning_scene::PlanningScenePtr MoveItConfigData::getPlanningScene()
-{
-  if (!planning_scene_)
-  {
-    // make sure kinematic model exists
-    getRobotModel();
-
-    // Allocate an empty planning scene
-    planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
-  }
-  return planning_scene_;
-}
-
-// ******************************************************************************************
-// Load the allowed collision matrix from the SRDF's list of link pairs
-// ******************************************************************************************
-void MoveItConfigData::loadAllowedCollisionMatrix()
-{
-  // Clear the allowed collision matrix
-  allowed_collision_matrix_.clear();
-
-  // Update the allowed collision matrix, in case there has been a change
-  for (const auto& disabled_collision : srdf_->disabled_collisions_)
-  {
-    allowed_collision_matrix_.setEntry(disabled_collision.link1_, disabled_collision.link2_, true);
-  }
-}
-
-// ******************************************************************************************
-// Output MoveIt Setup Assistant hidden settings file
-// ******************************************************************************************
-bool MoveItConfigData::outputSetupAssistantFile(const std::string& file_path)
-{
-  YAML::Emitter emitter;
-  emitter << YAML::BeginMap;
-
-  // Output every available planner ---------------------------------------------------
-  emitter << YAML::Key << "moveit_setup_assistant_config";
-
-  emitter << YAML::Value << YAML::BeginMap;
-
-  // URDF Path Location
-  emitter << YAML::Key << "URDF";
-  emitter << YAML::Value << YAML::BeginMap;
-  emitter << YAML::Key << "package" << YAML::Value << urdf_pkg_name_;
-  emitter << YAML::Key << "relative_path" << YAML::Value << urdf_pkg_relative_path_;
-  emitter << YAML::Key << "xacro_args" << YAML::Value << xacro_args_;
-  emitter << YAML::EndMap;
-
-  /// SRDF Path Location
-  emitter << YAML::Key << "SRDF";
-  emitter << YAML::Value << YAML::BeginMap;
-  emitter << YAML::Key << "relative_path" << YAML::Value << srdf_pkg_relative_path_;
-  emitter << YAML::EndMap;
-
-  /// Package generation time
-  emitter << YAML::Key << "CONFIG";
-  emitter << YAML::Value << YAML::BeginMap;
-  emitter << YAML::Key << "author_name" << YAML::Value << author_name_;
-  emitter << YAML::Key << "author_email" << YAML::Value << author_email_;
-  emitter << YAML::Key << "generated_timestamp" << YAML::Value << std::time(nullptr);  // TODO: is this cross-platform?
-  emitter << YAML::EndMap;
-
-  emitter << YAML::EndMap;
-
-  std::ofstream output_stream(file_path.c_str(), std::ios_base::trunc);
-  if (!output_stream.good())
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for writing " << file_path);
-    return false;
-  }
-
-  output_stream << emitter.c_str();
-  output_stream.close();
-
-  return true;  // file created successfully
-}
 
 // ******************************************************************************************
 // Output OMPL Planning config files
@@ -1208,59 +1083,6 @@ bool MoveItConfigData::outputJointLimitsYAML(const std::string& file_path)
 }
 
 // ******************************************************************************************
-// Set list of collision link pairs in SRDF; sorted; with optional filter
-// ******************************************************************************************
-
-class SortableDisabledCollision
-{
-public:
-  SortableDisabledCollision(const srdf::Model::DisabledCollision& dc)
-    : dc_(dc), key_(dc.link1_ < dc.link2_ ? (dc.link1_ + "|" + dc.link2_) : (dc.link2_ + "|" + dc.link1_))
-  {
-  }
-  operator const srdf::Model::DisabledCollision &() const
-  {
-    return dc_;
-  }
-  bool operator<(const SortableDisabledCollision& other) const
-  {
-    return key_ < other.key_;
-  }
-
-private:
-  const srdf::Model::DisabledCollision dc_;
-  const std::string key_;
-};
-
-void MoveItConfigData::setCollisionLinkPairs(const moveit_setup_assistant::LinkPairMap& link_pairs, size_t skip_mask)
-{
-  // Create temp disabled collision
-  srdf::Model::DisabledCollision dc;
-
-  std::set<SortableDisabledCollision> disabled_collisions;
-  disabled_collisions.insert(srdf_->disabled_collisions_.begin(), srdf_->disabled_collisions_.end());
-
-  // copy the data in this class's LinkPairMap datastructure to srdf::Model::DisabledCollision format
-  for (const std::pair<const std::pair<std::string, std::string>, LinkPairData>& link_pair : link_pairs)
-  {
-    // Only copy those that are actually disabled
-    if (link_pair.second.disable_check)
-    {
-      if ((1 << link_pair.second.reason) & skip_mask)
-        continue;
-
-      dc.link1_ = link_pair.first.first;
-      dc.link2_ = link_pair.first.second;
-      dc.reason_ = moveit_setup_assistant::disabledReasonToString(link_pair.second.reason);
-
-      disabled_collisions.insert(SortableDisabledCollision(dc));
-    }
-  }
-
-  srdf_->disabled_collisions_.assign(disabled_collisions.begin(), disabled_collisions.end());
-}
-
-// ******************************************************************************************
 // Decide the best two joints to be used for the projection evaluator
 // ******************************************************************************************
 std::string MoveItConfigData::decideProjectionJoints(const std::string& planning_group)
@@ -1596,87 +1418,6 @@ bool MoveItConfigData::addDefaultControllers()
 }
 
 // ******************************************************************************************
-// Set package path; try to resolve path from package name if directory does not exist
-// ******************************************************************************************
-bool MoveItConfigData::setPackagePath(const std::string& pkg_path)
-{
-  std::string full_package_path;
-
-  // check that the folder exists
-  if (!fs::is_directory(pkg_path))
-  {
-    // does not exist, check if its a package
-    full_package_path = ament_index_cpp::get_package_share_directory(pkg_path);
-
-    // check that the folder exists
-    if (!fs::is_directory(full_package_path))
-    {
-      return false;
-    }
-  }
-  else
-  {
-    // they inputted a full path
-    full_package_path = pkg_path;
-  }
-
-  config_pkg_path_ = full_package_path;
-  return true;
-}
-
-// ******************************************************************************************
-// Extract the package/stack name from an absolute file path
-// Input:  path
-// Output: package name and relative path
-// ******************************************************************************************
-bool MoveItConfigData::extractPackageNameFromPath(const std::string& path, std::string& package_name,
-                                                  std::string& relative_filepath) const
-{
-  fs::path sub_path = path;  // holds the directory less one folder
-  fs::path relative_path;    // holds the path after the sub_path
-
-  bool package_found = false;
-
-  // truncate path step by step and check if it contains a package.xml
-  while (!sub_path.empty())
-  {
-    RCLCPP_DEBUG_STREAM(LOGGER, "checking in " << sub_path.make_preferred().string());
-    if (fs::is_regular_file(sub_path / "package.xml"))
-    {
-      RCLCPP_DEBUG_STREAM(LOGGER, "Found package.xml in " << sub_path.make_preferred().string());
-      package_found = true;
-      relative_filepath = relative_path.string();
-      package_name = sub_path.leaf().string();
-      break;
-    }
-    relative_path = sub_path.leaf() / relative_path;
-    sub_path.remove_leaf();
-  }
-
-  // Assign data to moveit_config_data
-  if (!package_found)
-  {
-    // No package name found, we must be outside ROS
-    return false;
-  }
-
-  RCLCPP_DEBUG_STREAM(LOGGER, "Package name for file \"" << path << "\" is \"" << package_name << "\"");
-  return true;
-}
-
-// ******************************************************************************************
-// Resolve path to .setup_assistant file
-// ******************************************************************************************
-
-bool MoveItConfigData::getSetupAssistantYAMLPath(std::string& path)
-{
-  path = appendPaths(config_pkg_path_, ".setup_assistant");
-
-  // Check if the old package is a setup assistant package
-  return fs::is_regular_file(path);
-}
-
-// ******************************************************************************************
 // Make the full URDF path using the loaded .setup_assistant data
 // ******************************************************************************************
 bool MoveItConfigData::createFullURDFPath()
@@ -1706,72 +1447,6 @@ bool MoveItConfigData::createFullURDFPath()
 
   // Check that this file exits -------------------------------------------------
   return fs::is_regular_file(urdf_path_);
-}
-
-// ******************************************************************************************
-// Make the full SRDF path using the loaded .setup_assistant data
-// ******************************************************************************************
-bool MoveItConfigData::createFullSRDFPath(const std::string& package_path)
-{
-  srdf_path_ = appendPaths(package_path, srdf_pkg_relative_path_);
-
-  return fs::is_regular_file(srdf_path_);
-}
-
-// ******************************************************************************************
-// Input .setup_assistant file - contains data used for the MoveIt Setup Assistant
-// ******************************************************************************************
-bool MoveItConfigData::inputSetupAssistantYAML(const std::string& file_path)
-{
-  // Load file
-  std::ifstream input_stream(file_path.c_str());
-  if (!input_stream.good())
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for reading " << file_path);
-    return false;
-  }
-
-  // Begin parsing
-  try
-  {
-    const YAML::Node& doc = YAML::Load(input_stream);
-
-    // Get title node
-    if (const YAML::Node& title_node = doc["moveit_setup_assistant_config"])
-    {
-      // URDF Properties
-      if (const YAML::Node& urdf_node = title_node["URDF"])
-      {
-        if (!parse(urdf_node, "package", urdf_pkg_name_))
-          return false;  // if we do not find this value we cannot continue
-
-        if (!parse(urdf_node, "relative_path", urdf_pkg_relative_path_))
-          return false;  // if we do not find this value we cannot continue
-
-        parse(urdf_node, "xacro_args", xacro_args_);
-      }
-      // SRDF Properties
-      if (const YAML::Node& srdf_node = title_node["SRDF"])
-      {
-        if (!parse(srdf_node, "relative_path", srdf_pkg_relative_path_))
-          return false;  // if we do not find this value we cannot continue
-      }
-      // Package generation time
-      if (const YAML::Node& config_node = title_node["CONFIG"])
-      {
-        parse(config_node, "author_name", author_name_);
-        parse(config_node, "author_email", author_email_);
-        parse(config_node, "generated_timestamp", config_pkg_generated_timestamp_);
-      }
-      return true;
-    }
-  }
-  catch (YAML::ParserException& e)  // Catch errors
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, e.what());
-  }
-
-  return false;  // if it gets to this point an error has occurred
 }
 
 // ******************************************************************************************
@@ -1881,16 +1556,6 @@ bool MoveItConfigData::input3DSensorsYAML(const std::string& default_file_path, 
   }
 
   return false;  // if it gets to this point an error has occurred
-}
-
-// ******************************************************************************************
-// Helper Function for joining a file path and a file name, or two file paths, etc, in a cross-platform way
-// ******************************************************************************************
-std::string MoveItConfigData::appendPaths(const std::string& path1, const std::string& path2)
-{
-  fs::path result = path1;
-  result /= path2;
-  return result.make_preferred().string();
 }
 
 srdf::Model::Group* MoveItConfigData::findGroupByName(const std::string& name)

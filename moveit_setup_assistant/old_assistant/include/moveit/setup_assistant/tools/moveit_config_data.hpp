@@ -36,32 +36,16 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/planning_scene/planning_scene.h>                       // for getting kinematic model
-#include <moveit/setup_assistant/tools/compute_default_collisions.hpp>  // for LinkPairMap
-#include <yaml-cpp/yaml.h>                                              // outputting yaml config files
-#include <urdf/model.h>                                                 // to share throughout app
-#include <srdfdom/srdf_writer.h>                                        // for writing srdf data
-#include <rclcpp/rclcpp.hpp>
+#include <moveit/setup_assistant/tools/compute_default_collisions.h>  // for LinkPairMap
+#include <yaml-cpp/yaml.h>                                            // outputing yaml config files
 
 #include <utility>
 
 namespace moveit_setup_assistant
 {
-// ******************************************************************************************
-// Constants
-// ******************************************************************************************
-
-// Used for loading kinematic model
-static const std::string ROBOT_DESCRIPTION = "robot_description";
-static const std::string MOVEIT_ROBOT_STATE = "moveit_robot_state";
-
 // Default kin solver values
 static const double DEFAULT_KIN_SOLVER_SEARCH_RESOLUTION = 0.005;
 static const double DEFAULT_KIN_SOLVER_TIMEOUT = 0.005;
-
-// Used for logging
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_updater");
 
 // ******************************************************************************************
 // Structs
@@ -178,8 +162,6 @@ private:
   std::string comment_;  // comment briefly describing what this parameter does
 };
 
-MOVEIT_CLASS_FORWARD(MoveItConfigData);  // Defines MoveItConfigDataPtr, ConstPtr, WeakPtr... etc
-
 /** \brief This class is shared with all widgets and contains the common configuration data
     needed for generating each robot's MoveIt configuration package.
 
@@ -209,91 +191,18 @@ public:
   };
   unsigned long changes;  // bitfield of changes (composed of InformationFields)
 
-  // All of the data needed for creating a MoveIt Configuration Files
-
-  // ******************************************************************************************
-  // URDF Data
-  // ******************************************************************************************
-
-  /// Full file-system path to urdf
-  std::string urdf_path_;
-
-  /// Name of package containing urdf (note: this may be empty b/c user may not have urdf in pkg)
-  std::string urdf_pkg_name_;
-
-  /// Path relative to urdf package (note: this may be same as urdf_path_)
-  std::string urdf_pkg_relative_path_;
-
-  /// Flag indicating whether the URDF was loaded from .xacro format
-  bool urdf_from_xacro_;
-  /// xacro arguments
-  std::string xacro_args_;
-
-  /// URDF robot model
-  urdf::ModelSharedPtr urdf_model_;
-
-  /// URDF robot model string
-  std::string urdf_string_;
-
-  // ******************************************************************************************
-  // SRDF Data
-  // ******************************************************************************************
-
-  /// Full file-system path to srdf
-  std::string srdf_path_;
-
-  /// Path relative to loaded configuration package
-  std::string srdf_pkg_relative_path_;
-
-  /// SRDF Data and Writer
-  srdf::SRDFWriterPtr srdf_;
-
-  // ******************************************************************************************
-  // Other Data
-  // ******************************************************************************************
-
   /// Planning groups extra data not found in srdf but used in config files
   std::map<std::string, GroupMetaData> group_meta_data_;
 
   /// Setup Assistants package's path for when we use its templates
   std::string setup_assistant_path_;
 
-  /// Loaded configuration package path - if an existing package was loaded, holds that path
-  std::string config_pkg_path_;
-
   /// Location that moveit_setup_assistant stores its templates
   std::string template_package_path_;
-
-  /// Is this application in debug mode?
-  bool debug_;
-
-  /// Allowed collision matrix for robot poses
-  collision_detection::AllowedCollisionMatrix allowed_collision_matrix_;
-
-  /// Timestamp when configuration package was generated, if it was previously generated
-  std::time_t config_pkg_generated_timestamp_;
-
-  /// Name of the author of this config
-  std::string author_name_;
-
-  /// Email of the author of this config
-  std::string author_email_;
 
   // ******************************************************************************************
   // Public Functions
   // ******************************************************************************************
-
-  /// Load a robot model
-  void setRobotModel(const moveit::core::RobotModelPtr& robot_model);
-
-  /// Provide a shared kinematic model loader
-  moveit::core::RobotModelConstPtr getRobotModel();
-
-  /// Update the Kinematic Model with latest SRDF modifications
-  void updateRobotModel();
-
-  /// Provide a shared planning scene
-  planning_scene::PlanningScenePtr getPlanningScene();
 
   /**
    * Find the associated group by name
@@ -302,9 +211,6 @@ public:
    * @return pointer to data in datastructure
    */
   srdf::Model::Group* findGroupByName(const std::string& name);
-
-  /// Load the allowed collision matrix from the SRDF's list of link pairs
-  void loadAllowedCollisionMatrix();
 
   // ******************************************************************************************
   // Public Functions for outputting configuration and setting files
@@ -340,13 +246,6 @@ public:
    * \return gazebo compatible urdf or empty if error encountered
    */
   std::string getGazeboCompatibleURDF();
-
-  /**
-   * \brief Set list of collision link pairs in SRDF; sorted; with optional filter
-   * \param link_pairs list of collision link pairs
-   * \param skip_mask mask of shifted moveit_setup_assistant::DisabledReason values that will be skipped
-   */
-  void setCollisionLinkPairs(const moveit_setup_assistant::LinkPairMap& link_pairs, size_t skip_mask = 0);
 
   /**
    * \brief Decide the best two joints to be used for the projection evaluator
@@ -402,44 +301,6 @@ public:
    * \return true if controllers were added to the ros_controllers_config_ data structure
    */
   bool addDefaultControllers();
-
-  /**
-   * Set package path; try to resolve path from package name if directory does not exist
-   * @param pkg_path path to package or package name
-   * @return true if the path was set
-   */
-  bool setPackagePath(const std::string& pkg_path);
-
-  /**
-   * determine the package name containing a given file path
-   * @param path to a file
-   * @param package_name holds the ros package name if found
-   * @param relative_filepath holds the relative path of the file to the package root
-   * @return whether the file belongs to a known package
-   */
-  bool extractPackageNameFromPath(const std::string& path, std::string& package_name,
-                                  std::string& relative_filepath) const;
-
-  /**
-   * Resolve path to .setup_assistant file
-   * @param path resolved path
-   * @return true if the path could be resolved
-   */
-  bool getSetupAssistantYAMLPath(std::string& path);
-
-  /// Make the full URDF path using the loaded .setup_assistant data
-  bool createFullURDFPath();
-
-  /// Make the full SRDF path using the loaded .setup_assistant data
-  bool createFullSRDFPath(const std::string& package_path);
-
-  /**
-   * Input .setup_assistant file - contains data used for the MoveIt Setup Assistant
-   *
-   * @param file_path path to .setup_assistant file
-   * @return true if the file was read correctly
-   */
-  bool inputSetupAssistantYAML(const std::string& file_path);
 
   /**
    * Input sensors_3d file - contains 3d sensors config data
@@ -532,14 +393,8 @@ private:
   /// Sensor plugin configuration parameter list, each sensor plugin type is a map
   std::vector<std::map<std::string, GenericParameter> > sensors_plugin_config_parameter_list_;
 
-  /// Shared kinematic model
-  moveit::core::RobotModelPtr robot_model_;
-
   /// ROS Controllers config data
   std::vector<ROSControlConfig> ros_controllers_config_;
-
-  /// Shared planning scene
-  planning_scene::PlanningScenePtr planning_scene_;
 };
 
 }  // namespace moveit_setup_assistant
