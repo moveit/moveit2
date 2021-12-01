@@ -36,24 +36,18 @@
 
 #pragma once
 
-// Qt
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QTableWidget;
-class QStackedWidget;
-class QComboBox;
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_srdf_plugins/virtual_joints.hpp>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QStackedWidget>
+#include <QComboBox>
+#include <QTableWidget>
 
-// SA
-#ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
-#endif
-
-#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
-
-namespace moveit_setup_assistant
+namespace moveit_setup_srdf_plugins
 {
-class VirtualJointsWidget : public SetupScreenWidget
+class VirtualJointsWidget : public moveit_setup_framework::SetupStepWidget
 {
   Q_OBJECT
 
@@ -61,11 +55,18 @@ public:
   // ******************************************************************************************
   // Public Functions
   // ******************************************************************************************
+  moveit_setup_framework::SetupStep& getSetupStep() override
+  {
+    return setup_step_;
+  }
 
-  VirtualJointsWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
+  void onInit() override;
 
   /// Received when this widget is chosen from the navigation menu
   void focusGiven() override;
+
+protected:
+  VirtualJoints setup_step_;
 
   // ******************************************************************************************
   // Qt Components
@@ -110,37 +111,16 @@ private Q_SLOTS:
   /// Cancel changes
   void cancelEditing();
 
-Q_SIGNALS:
-
-  // ******************************************************************************************
-  // Emitted Signals
-  // ******************************************************************************************
-
-  /// Event sent when this widget updated the root joint, which changes the frame of reference for the model
-  void referenceFrameChanged();
-
 private:
   // ******************************************************************************************
   // Variables
   // ******************************************************************************************
-
-  /// Contains all the configuration data for the setup assistant
-  moveit_setup_assistant::MoveItConfigDataPtr config_data_;
-
   /// Orignal name of vjoint currently being edited. This is used to find the element in the vector
   std::string current_edit_vjoint_;
 
   // ******************************************************************************************
   // Private Functions
   // ******************************************************************************************
-
-  /**
-   * Find the associated data by name
-   *
-   * @param name - name of data to find in datastructure
-   * @return pointer to data in datastructure
-   */
-  srdf::Model::VirtualJoint* findVJointByName(const std::string& name);
 
   /**
    * Create the main list view of vjoints for robot
@@ -182,4 +162,4 @@ private:
   void edit(const std::string& name);
 };
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_srdf_plugins

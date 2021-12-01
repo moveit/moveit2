@@ -36,28 +36,28 @@
 
 #pragma once
 
+#include "moveit_setup_framework/qt/setup_step_widget.hpp"
+#include "moveit_setup_framework/qt/helper_widgets.hpp"
+#include <rclcpp/node.hpp>
+#include <QWidget>
+#include <QFrame>
 class QLabel;
 class QProgressBar;
 class QPushButton;
 
 #ifndef Q_MOC_RUN
-#include <urdf/model.h>                                       // for testing a valid urdf is loaded
-#include <srdfdom/model.h>                                    // for testing a valid srdf is loaded
-#include <moveit/setup_assistant/tools/moveit_config_data.h>  // common datastructure class
+#include <moveit_setup_core_plugins/start_screen.hpp>
 #endif
 
-#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
-
-namespace moveit_setup_assistant
+namespace moveit_setup_core_plugins
 {
 // Class Prototypes
 class SelectModeWidget;
-class LoadPathArgsWidget;
 
 /**
  * \brief Start screen user interface for MoveIt Configuration Assistant
  */
-class StartScreenWidget : public SetupScreenWidget
+class StartScreenWidget : public moveit_setup_framework::SetupStepWidget
 {
   Q_OBJECT
 
@@ -66,27 +66,28 @@ public:
   // Public Functions
   // ******************************************************************************************
 
-  /**
-   * \brief Start screen user interface for MoveIt Configuration Assistant
-   */
-  StartScreenWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
+  void onInit() override;
 
   ~StartScreenWidget() override;
+
+  void focusGiven() override;
 
   // ******************************************************************************************
   // Qt Components
   // ******************************************************************************************
   SelectModeWidget* select_mode_;
-  LoadPathArgsWidget* stack_path_;
-  LoadPathArgsWidget* urdf_file_;
+  moveit_setup_framework::LoadPathArgsWidget* stack_path_;
+  moveit_setup_framework::LoadPathArgsWidget* urdf_file_;
   QPushButton* btn_load_;
   QLabel* next_label_;
-  QProgressBar* progress_bar_;
+  QProgressBar* progress_bar_;  // TODO: Note that since the refactoring, the progress bar is less useful than before
   QImage* right_image_;
   QLabel* right_image_label_;
 
-  /// Contains all the configuration data for the setup assistant
-  moveit_setup_assistant::MoveItConfigDataPtr config_data_;
+  moveit_setup_framework::SetupStep& getSetupStep() override
+  {
+    return setup_step_;
+  }
 
 private Q_SLOTS:
 
@@ -109,22 +110,12 @@ private Q_SLOTS:
   /// enable xacro arguments
   void onUrdfPathChanged(const QString& path);
 
-Q_SIGNALS:
-
-  // ******************************************************************************************
-  // Emitted Signal Functions
-  // ******************************************************************************************
-
-  /// Event that is fired when the start screen has all its requirements completed and user can move on
-  void readyToProgress();
-
-  /// Inform the parent widget to load rviz. This is done so that progress bar can be more accurate
-  void loadRviz();
-
 private:
   // ******************************************************************************************
   // Variables
   // ******************************************************************************************
+  rclcpp::Node::SharedPtr node_;
+  StartScreen setup_step_;
 
   /// Create new config files, or load existing one?
   bool create_new_package_;
@@ -141,24 +132,6 @@ private:
 
   /// Load exisiting package files
   bool loadExistingFiles();
-
-  /// Load URDF File to Parameter Server
-  bool loadURDFFile(const std::string& urdf_file_path, const std::string& xacro_args);
-
-  /// Load SRDF File
-  bool loadSRDFFile(const std::string& srdf_file_path);
-
-  /// Put SRDF File on Parameter Server
-  bool setSRDFFile(const std::string& srdf_string);
-
-  //// Extract the package/stack name and relative path to urdf from an absolute path name
-  bool extractPackageNameFromPath();
-
-  /// Make the full URDF path using the loaded .setup_assistant data
-  bool createFullURDFPath();
-
-  /// Make the full SRDF path using the loaded .setup_assistant data
-  bool createFullSRDFPath(const std::string& package_path);
 
   /// Loads sensors_3d yaml file
   bool load3DSensorsFile();
@@ -185,4 +158,4 @@ public:
   QPushButton* btn_exist_;
   QLabel* widget_instructions_;
 };
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_core_plugins

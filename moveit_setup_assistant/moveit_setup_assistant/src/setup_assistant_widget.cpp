@@ -35,50 +35,45 @@
 /* Author: Dave Coleman */
 
 // SA
-#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
-#include "setup_assistant_widget.h"
-#include "header_widget.h"
+#include "moveit_setup_assistant/setup_assistant_widget.hpp"
+#include <moveit_setup_framework/data/urdf_config.hpp>
+#include <moveit_setup_framework/data/package_settings_config.hpp>
 
 // Qt
 #include <QApplication>
-#include <QCheckBox>
 #include <QCloseEvent>
-#include <QFont>
 #include <QHBoxLayout>
-#include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSplitter>
 #include <QStackedWidget>
 #include <QString>
 #include <pluginlib/class_loader.hpp>  // for loading all avail kinematic planners
-// Rviz
-#include <rviz/render_panel.h>
-#include <rviz/visualization_manager.h>
-#include <rviz/view_manager.h>
-#include <rviz/default_plugin/view_controllers/orbit_view_controller.h>
-#include <moveit/robot_state_rviz_plugin/robot_state_display.h>
+// GetPath
+#include <ament_index_cpp/get_package_share_directory.hpp>
 
 namespace moveit_setup_assistant
 {
 // ******************************************************************************************
 // Outer User Interface for MoveIt Configuration Assistant
 // ******************************************************************************************
-SetupAssistantWidget::SetupAssistantWidget(QWidget* parent, const boost::program_options::variables_map& args)
+SetupAssistantWidget::SetupAssistantWidget(rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node,
+                                           QWidget* parent, const boost::program_options::variables_map& args)
   : QWidget(parent)
+  , node_abstraction_(node)
+  , node_(node_abstraction_.lock()->get_raw_node())
+  , widget_loader_("moveit_setup_framework", "moveit_setup_framework::SetupStepWidget")
 {
-  rviz_manager_ = nullptr;
-  rviz_render_panel_ = nullptr;
-
   // Create object to hold all MoveIt configuration data
-  config_data_ = std::make_shared<MoveItConfigData>();
+  config_data_ = std::make_shared<moveit_setup_framework::DataWarehouse>(node_);
 
   // Set debug mode flag if necessary
   if (args.count("debug"))
-    config_data_->debug_ = true;
+    config_data_->debug = true;
 
   // Setting the window icon
-  std::string moveit_ros_visualization_package_path = ros::package::getPath("moveit_ros_visualization");
+  std::string moveit_ros_visualization_package_path =
+      ament_index_cpp::get_package_share_directory("moveit_ros_visualization");
   moveit_ros_visualization_package_path += "/icons/classes/MotionPlanning.png";
   this->setWindowIcon(QIcon(moveit_ros_visualization_package_path.c_str()));
 
@@ -88,64 +83,68 @@ SetupAssistantWidget::SetupAssistantWidget(QWidget* parent, const boost::program
 
   // Create main content stack for various screens
   main_content_ = new QStackedWidget();
-  current_index_ = 0;
+  current_index_ = -1;
 
-  // Screens --------------------------------------------------------
+  // Setup Steps --------------------------------------------------------
+  std::vector<std::string> setup_steps;
+  // TODO: The list of setup steps should be read from a parameter with some as the default
+  // TODO: (or be configured dynamically in some other step)
+  setup_steps.push_back("moveit_setup_core_plugins::StartScreenWidget");
+  setup_steps.push_back("moveit_setup_srdf_plugins::DefaultCollisionsWidget");
+  setup_steps.push_back("moveit_setup_srdf_plugins::VirtualJointsWidget");
+  setup_steps.push_back("moveit_setup_core_plugins::ConfigurationFilesWidget");
+  node_->declare_parameter("setup_steps", setup_steps);
+  setup_steps = node_->get_parameter("setup_steps").as_string_array();
 
-  // Start Screen
-  start_screen_widget_ = new StartScreenWidget(this, config_data_);
-  start_screen_widget_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-  connect(start_screen_widget_, SIGNAL(readyToProgress()), this, SLOT(progressPastStartScreen()));
-  connect(start_screen_widget_, SIGNAL(loadRviz()), this, SLOT(loadRviz()));
-  main_content_->addWidget(start_screen_widget_);
+  // Rviz View Right Pane ---------------------------------------------------
+  rviz_panel_ = new moveit_setup_framework::RVizPanel(this, node_abstraction_, config_data_);
+  rviz_panel_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+  rviz_panel_->hide();  // do not show until after the start screen
+
+  for (const std::string& step_class : setup_steps)
+  {
+    auto widget = widget_loader_.createSharedInstance(step_class);
+    widget->initialize(node_, this, rviz_panel_, config_data_);
+
+    connect(widget.get(), SIGNAL(dataUpdated()), this, SLOT(onDataUpdate()));
+    connect(widget.get(), SIGNAL(advanceRequest()), this, SLOT(onAdvanceRequest()));
+    connect(widget.get(), SIGNAL(setModalMode(bool)), this, SLOT(onModalModeUpdate(bool)));
+    const std::string name = widget->getSetupStep().getName();
+    steps_.push_back(widget);
+
+    main_content_->addWidget(widget.get());
+
+    nav_name_list_ << name.c_str();
+  }
 
   // Pass command arg values to start screen and show appropriate part of screen
   if (args.count("urdf_path"))
   {
-    start_screen_widget_->urdf_file_->setPath(args["urdf_path"].as<std::string>());
-    start_screen_widget_->select_mode_->btn_new_->click();
+    std::string urdf_path = args["urdf_path"].as<std::string>();
+    auto config = config_data_->get<moveit_setup_framework::URDFConfig>("urdf");
+    config->loadFromPath(urdf_path);
   }
   if (args.count("config_pkg"))
   {
-    start_screen_widget_->stack_path_->setPath(args["config_pkg"].as<std::string>());
-    start_screen_widget_->select_mode_->btn_exist_->click();
+    std::string config_pkg = args["config_pkg"].as<std::string>();
+    auto package_settings = config_data_->get<moveit_setup_framework::PackageSettingsConfig>("package_settings");
+    package_settings->loadExisting(config_pkg);
   }
-  else
-  {
-    start_screen_widget_->stack_path_->setPath(QString(getenv("PWD")));
-  }
-
-  // Add Navigation Buttons (but do not load widgets yet except start screen)
-  nav_name_list_ << "Start";
-  nav_name_list_ << "Self-Collisions";
-  nav_name_list_ << "Virtual Joints";
-  nav_name_list_ << "Planning Groups";
-  nav_name_list_ << "Robot Poses";
-  nav_name_list_ << "End Effectors";
-  nav_name_list_ << "Passive Joints";
-  nav_name_list_ << "ROS Control";
-  nav_name_list_ << "Simulation";
-  nav_name_list_ << "3D Perception";
-  nav_name_list_ << "Author Information";
-  nav_name_list_ << "Configuration Files";
 
   // Navigation Left Pane --------------------------------------------------
   navs_view_ = new NavigationWidget(this);
   navs_view_->setNavs(nav_name_list_);
-  navs_view_->setDisabled(true);
-  navs_view_->setSelected(0);  // start screen
-
-  // Rviz View Right Pane ---------------------------------------------------
-  rviz_container_ = new QWidget(this);
-  rviz_container_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-  rviz_container_->hide();  // do not show until after the start screen
+  if (!steps_.empty())
+  {
+    moveToScreen(0);
+  }
 
   // Split screen -----------------------------------------------------
   splitter_ = new QSplitter(Qt::Horizontal, this);
   splitter_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   splitter_->addWidget(navs_view_);
   splitter_->addWidget(main_content_);
-  splitter_->addWidget(rviz_container_);
+  splitter_->addWidget(rviz_panel_);
   splitter_->setHandleWidth(6);
   // splitter_->setCollapsible( 0, false ); // don't let navigation collapse
   layout->addWidget(splitter_);
@@ -164,35 +163,36 @@ SetupAssistantWidget::SetupAssistantWidget(QWidget* parent, const boost::program
 }
 
 // ******************************************************************************************
-// Decontructor
-// ******************************************************************************************
-SetupAssistantWidget::~SetupAssistantWidget()
-{
-  if (rviz_manager_ != nullptr)
-    rviz_manager_->removeAllDisplays();
-  if (rviz_render_panel_ != nullptr)
-    delete rviz_render_panel_;
-  if (rviz_manager_ != nullptr)
-    delete rviz_manager_;
-}
-
-void SetupAssistantWidget::virtualJointReferenceFrameChanged()
-{
-  if (rviz_manager_ && robot_state_display_)
-  {
-    rviz_manager_->setFixedFrame(QString::fromStdString(config_data_->getRobotModel()->getModelFrame()));
-    robot_state_display_->reset();
-    robot_state_display_->setVisible(true);
-  }
-}
-
-// ******************************************************************************************
 // Change screens of Setup Assistant
 // ******************************************************************************************
 void SetupAssistantWidget::navigationClicked(const QModelIndex& index)
 {
   // Convert QModelIndex to int
   moveToScreen(index.row());
+}
+
+void SetupAssistantWidget::onDataUpdate()
+{
+  for (size_t index = 0; index < steps_.size(); index++)
+  {
+    bool ready = steps_[index]->isReady();
+    navs_view_->setEnabled(index, ready);
+  }
+
+  if (rviz_panel_->isReadyForInitialization())
+  {
+    rviz_panel_->initialize();
+    // Replace logo with Rviz screen
+    rviz_panel_->show();
+  }
+}
+
+void SetupAssistantWidget::onAdvanceRequest()
+{
+  if (static_cast<unsigned int>(current_index_ + 1) < steps_.size())
+  {
+    moveToScreen(current_index_ + 1);
+  }
 }
 
 // ******************************************************************************************
@@ -205,157 +205,29 @@ void SetupAssistantWidget::moveToScreen(const int index)
   if (current_index_ != index)
   {
     // Send the focus lost command to the screen widget
-    SetupScreenWidget* ssw = qobject_cast<SetupScreenWidget*>(main_content_->widget(current_index_));
-    if (!ssw->focusLost())
+    if (current_index_ >= 0)
     {
-      navs_view_->setSelected(current_index_);
-      return;  // switching not accepted
+      auto ssw = steps_[current_index_];
+      if (!ssw->focusLost())
+      {
+        navs_view_->setSelected(current_index_);
+        return;  // switching not accepted
+      }
     }
 
     current_index_ = index;
 
     // Unhighlight anything on robot
-    unhighlightAll();
+    rviz_panel_->unhighlightAll();
 
     // Change screens
     main_content_->setCurrentIndex(index);
 
     // Send the focus given command to the screen widget
-    ssw = qobject_cast<SetupScreenWidget*>(main_content_->widget(index));
-    ssw->focusGiven();
+    steps_[current_index_]->focusGiven();
 
     // Change navigation selected option
-    navs_view_->setSelected(index);  // Select first item in list
-  }
-}
-
-// ******************************************************************************************
-// Loads other windows, enables navigation
-// ******************************************************************************************
-void SetupAssistantWidget::progressPastStartScreen()
-{
-  // Load all widgets ------------------------------------------------
-
-  // Self-Collisions
-  default_collisions_widget_ = new DefaultCollisionsWidget(this, config_data_);
-  main_content_->addWidget(default_collisions_widget_);
-  connect(default_collisions_widget_, SIGNAL(highlightLink(const std::string&, const QColor&)), this,
-          SLOT(highlightLink(const std::string&, const QColor&)));
-  connect(default_collisions_widget_, SIGNAL(highlightGroup(const std::string&)), this,
-          SLOT(highlightGroup(const std::string&)));
-  connect(default_collisions_widget_, SIGNAL(unhighlightAll()), this, SLOT(unhighlightAll()));
-
-  // Virtual Joints
-  virtual_joints_widget_ = new VirtualJointsWidget(this, config_data_);
-  main_content_->addWidget(virtual_joints_widget_);
-  connect(virtual_joints_widget_, SIGNAL(isModal(bool)), this, SLOT(setModalMode(bool)));
-  connect(virtual_joints_widget_, SIGNAL(highlightLink(const std::string&, const QColor&)), this,
-          SLOT(highlightLink(const std::string&, const QColor&)));
-  connect(virtual_joints_widget_, SIGNAL(highlightGroup(const std::string&)), this,
-          SLOT(highlightGroup(const std::string&)));
-  connect(virtual_joints_widget_, SIGNAL(unhighlightAll()), this, SLOT(unhighlightAll()));
-  connect(virtual_joints_widget_, SIGNAL(referenceFrameChanged()), this, SLOT(virtualJointReferenceFrameChanged()));
-
-  // Planning Groups
-  planning_groups_widget = new PlanningGroupsWidget(this, config_data_);
-  main_content_->addWidget(planning_groups_widget);
-  connect(planning_groups_widget, SIGNAL(isModal(bool)), this, SLOT(setModalMode(bool)));
-  connect(planning_groups_widget, SIGNAL(highlightLink(const std::string&, const QColor&)), this,
-          SLOT(highlightLink(const std::string&, const QColor&)));
-  connect(planning_groups_widget, SIGNAL(highlightGroup(const std::string&)), this,
-          SLOT(highlightGroup(const std::string&)));
-  connect(planning_groups_widget, SIGNAL(unhighlightAll()), this, SLOT(unhighlightAll()));
-
-  // Robot Poses
-  robot_poses_widget_ = new RobotPosesWidget(this, config_data_);
-  main_content_->addWidget(robot_poses_widget_);
-  connect(robot_poses_widget_, SIGNAL(isModal(bool)), this, SLOT(setModalMode(bool)));
-  connect(robot_poses_widget_, SIGNAL(highlightLink(const std::string&, const QColor&)), this,
-          SLOT(highlightLink(const std::string&, const QColor&)));
-  connect(robot_poses_widget_, SIGNAL(highlightGroup(const std::string&)), this,
-          SLOT(highlightGroup(const std::string&)));
-  connect(robot_poses_widget_, SIGNAL(unhighlightAll()), this, SLOT(unhighlightAll()));
-
-  // End Effectors
-  end_effectors_widget_ = new EndEffectorsWidget(this, config_data_);
-  main_content_->addWidget(end_effectors_widget_);
-  connect(end_effectors_widget_, SIGNAL(isModal(bool)), this, SLOT(setModalMode(bool)));
-  connect(end_effectors_widget_, SIGNAL(highlightLink(const std::string&, const QColor&)), this,
-          SLOT(highlightLink(const std::string&, const QColor&)));
-  connect(end_effectors_widget_, SIGNAL(highlightGroup(const std::string&)), this,
-          SLOT(highlightGroup(const std::string&)));
-  connect(end_effectors_widget_, SIGNAL(unhighlightAll()), this, SLOT(unhighlightAll()));
-
-  // Virtual Joints
-  passive_joints_widget_ = new PassiveJointsWidget(this, config_data_);
-  main_content_->addWidget(passive_joints_widget_);
-  connect(passive_joints_widget_, SIGNAL(isModal(bool)), this, SLOT(setModalMode(bool)));
-  connect(passive_joints_widget_, SIGNAL(highlightLink(const std::string&, const QColor&)), this,
-          SLOT(highlightLink(const std::string&, const QColor&)));
-  connect(passive_joints_widget_, SIGNAL(highlightGroup(const std::string&)), this,
-          SLOT(highlightGroup(const std::string&)));
-  connect(passive_joints_widget_, SIGNAL(unhighlightAll()), this, SLOT(unhighlightAll()));
-
-  // ROS Controllers
-  controllers_widget_ = new ROSControllersWidget(this, config_data_);
-  main_content_->addWidget(controllers_widget_);
-  connect(controllers_widget_, SIGNAL(isModal(bool)), this, SLOT(setModalMode(bool)));
-  connect(controllers_widget_, SIGNAL(highlightLink(const std::string&, const QColor&)), this,
-          SLOT(highlightLink(const std::string&, const QColor&)));
-  connect(controllers_widget_, SIGNAL(highlightGroup(const std::string&)), this,
-          SLOT(highlightGroup(const std::string&)));
-  connect(controllers_widget_, SIGNAL(unhighlightAll()), this, SLOT(unhighlightAll()));
-
-  // Simulation Screen
-  simulation_widget_ = new SimulationWidget(this, config_data_);
-  main_content_->addWidget(simulation_widget_);
-  connect(simulation_widget_, SIGNAL(isModal(bool)), this, SLOT(setModalMode(bool)));
-  connect(simulation_widget_, SIGNAL(highlightLink(const std::string&, const QColor&)), this,
-          SLOT(highlightLink(const std::string&, const QColor&)));
-  connect(simulation_widget_, SIGNAL(highlightGroup(const std::string&)), this,
-          SLOT(highlightGroup(const std::string&)));
-  connect(simulation_widget_, SIGNAL(unhighlightAll()), this, SLOT(unhighlightAll()));
-
-  // Perception
-  perception_widget_ = new PerceptionWidget(this, config_data_);
-  main_content_->addWidget(perception_widget_);
-  connect(perception_widget_, SIGNAL(isModal(bool)), this, SLOT(setModalMode(bool)));
-  connect(perception_widget_, SIGNAL(highlightLink(const std::string&, const QColor&)), this,
-          SLOT(highlightLink(const std::string&, const QColor&)));
-  connect(perception_widget_, SIGNAL(highlightGroup(const std::string&)), this,
-          SLOT(highlightGroup(const std::string&)));
-  connect(perception_widget_, SIGNAL(unhighlightAll()), this, SLOT(unhighlightAll()));
-
-  // Author Information
-  author_information_widget_ = new AuthorInformationWidget(this, config_data_);
-  main_content_->addWidget(author_information_widget_);
-  connect(author_information_widget_, SIGNAL(isModal(bool)), this, SLOT(setModalMode(bool)));
-  connect(author_information_widget_, SIGNAL(highlightLink(const std::string&, const QColor&)), this,
-          SLOT(highlightLink(const std::string&, const QColor&)));
-  connect(author_information_widget_, SIGNAL(highlightGroup(const std::string&)), this,
-          SLOT(highlightGroup(const std::string&)));
-  connect(author_information_widget_, SIGNAL(unhighlightAll()), this, SLOT(unhighlightAll()));
-
-  // Configuration Files
-  configuration_files_widget_ = new ConfigurationFilesWidget(this, config_data_);
-  main_content_->addWidget(configuration_files_widget_);
-
-  // Enable all nav buttons -------------------------------------------
-  for (int i = 0; i < nav_name_list_.count(); ++i)
-  {
-    navs_view_->setEnabled(i, true);
-  }
-
-  // Enable navigation
-  navs_view_->setDisabled(false);
-
-  // Replace logo with Rviz screen
-  rviz_container_->show();
-
-  // Move to next screen in debug mode
-  if (config_data_->debug_)
-  {
-    moveToScreen(3);
+    navs_view_->setSelected(index);
   }
 }
 
@@ -364,126 +236,8 @@ void SetupAssistantWidget::progressPastStartScreen()
 // ******************************************************************************************
 void SetupAssistantWidget::updateTimer()
 {
-  ros::spinOnce();  // keep ROS node alive
-}
-
-// ******************************************************************************************
-// Load Rviz once we have a robot description ready
-// ******************************************************************************************
-void SetupAssistantWidget::loadRviz()
-{
-  // Create rviz frame
-  rviz_render_panel_ = new rviz::RenderPanel();
-  rviz_render_panel_->setMinimumWidth(200);
-  rviz_render_panel_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-  rviz_manager_ = new rviz::VisualizationManager(rviz_render_panel_);
-  rviz_render_panel_->initialize(rviz_manager_->getSceneManager(), rviz_manager_);
-  rviz_manager_->initialize();
-  rviz_manager_->startUpdate();
-
-  // Set the fixed and target frame
-  rviz_manager_->setFixedFrame(QString::fromStdString(config_data_->getRobotModel()->getModelFrame()));
-
-  // Create the MoveIt Rviz Plugin and attach to display
-  robot_state_display_ = new moveit_rviz_plugin::RobotStateDisplay();
-  robot_state_display_->setName("Robot State");
-
-  rviz_manager_->addDisplay(robot_state_display_, true);
-
-  // Set the topic on which the moveit_msgs::msg::PlanningScene messages are received
-  robot_state_display_->subProp("Robot State Topic")->setValue(QString::fromStdString(MOVEIT_ROBOT_STATE));
-
-  // Set robot description
-  robot_state_display_->subProp("Robot Description")->setValue(QString::fromStdString(ROBOT_DESCRIPTION));
-  robot_state_display_->setVisible(true);
-
-  // Zoom into robot
-  rviz::ViewController* view = rviz_manager_->getViewManager()->getCurrent();
-  view->subProp("Distance")->setValue(4.0f);
-
-  // Add Rviz to Planning Groups Widget
-  QVBoxLayout* rviz_layout = new QVBoxLayout();
-  rviz_layout->addWidget(rviz_render_panel_);
-  rviz_container_->setLayout(rviz_layout);
-
-  // visual / collision buttons
-  auto btn_layout = new QHBoxLayout();
-  rviz_layout->addLayout(btn_layout);
-
-  QCheckBox* btn;
-  btn_layout->addWidget(btn = new QCheckBox("visual"), 0);
-  btn->setChecked(true);
-  connect(btn, &QCheckBox::toggled,
-          [this](bool checked) { robot_state_display_->subProp("Visual Enabled")->setValue(checked); });
-
-  btn_layout->addWidget(btn = new QCheckBox("collision"), 1);
-  btn->setChecked(false);
-  connect(btn, &QCheckBox::toggled,
-          [this](bool checked) { robot_state_display_->subProp("Collision Enabled")->setValue(checked); });
-
-  rviz_container_->show();
-}
-
-// ******************************************************************************************
-// Highlight a robot link
-// ******************************************************************************************
-void SetupAssistantWidget::highlightLink(const std::string& link_name, const QColor& color)
-{
-  const moveit::core::LinkModel* lm = config_data_->getRobotModel()->getLinkModel(link_name);
-  if (!lm->getShapes().empty())  // skip links with no geometry
-    robot_state_display_->setLinkColor(link_name, color);
-}
-
-// ******************************************************************************************
-// Highlight a robot group
-// ******************************************************************************************
-void SetupAssistantWidget::highlightGroup(const std::string& group_name)
-{
-  // Highlight the selected planning group by looping through the links
-  if (!config_data_->getRobotModel()->hasJointModelGroup(group_name))
-    return;
-
-  const moveit::core::JointModelGroup* joint_model_group =
-      config_data_->getRobotModel()->getJointModelGroup(group_name);
-  if (joint_model_group)
-  {
-    const std::vector<const moveit::core::LinkModel*>& link_models = joint_model_group->getLinkModels();
-    // Iterate through the links
-    for (std::vector<const moveit::core::LinkModel*>::const_iterator link_it = link_models.begin();
-         link_it < link_models.end(); ++link_it)
-      highlightLink((*link_it)->getName(), QColor(255, 0, 0));
-  }
-}
-
-// ******************************************************************************************
-// Unhighlight all robot links
-// ******************************************************************************************
-void SetupAssistantWidget::unhighlightAll()
-{
-  // Get the names of the all links robot
-  const std::vector<std::string>& links = config_data_->getRobotModel()->getLinkModelNamesWithCollisionGeometry();
-
-  // Quit if no links found
-  if (links.empty())
-  {
-    return;
-  }
-
-  // check if rviz is ready
-  if (!rviz_manager_ || !robot_state_display_)
-  {
-    return;
-  }
-
-  // Iterate through the links
-  for (std::vector<std::string>::const_iterator link_it = links.begin(); link_it < links.end(); ++link_it)
-  {
-    if ((*link_it).empty())
-      continue;
-
-    robot_state_display_->unsetLinkColor(*link_it);
-  }
+  // TODO: Figure out if there's a ROS 2 equivalent of this that needs to be run
+  // ros::spinOnce();  // keep ROS node alive
 }
 
 // ******************************************************************************************
@@ -492,7 +246,7 @@ void SetupAssistantWidget::unhighlightAll()
 void SetupAssistantWidget::closeEvent(QCloseEvent* event)
 {
   // Only prompt to close if not in debug mode
-  if (!config_data_->debug_)
+  if (!config_data_->debug)
   {
     if (QMessageBox::question(this, "Exit Setup Assistant",
                               QString("Are you sure you want to exit the MoveIt Setup Assistant?"),
@@ -520,7 +274,7 @@ bool SetupAssistantWidget::notify(QObject* /*receiver*/, QEvent* /*event*/)
 // ******************************************************************************************
 // Change the widget modal state based on subwidgets state
 // ******************************************************************************************
-void SetupAssistantWidget::setModalMode(bool isModal)
+void SetupAssistantWidget::onModalModeUpdate(bool isModal)
 {
   navs_view_->setDisabled(isModal);
 

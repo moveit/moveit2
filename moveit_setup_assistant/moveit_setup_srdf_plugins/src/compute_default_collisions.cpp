@@ -35,13 +35,13 @@
 /* Author: Dave Coleman */
 
 #include <moveit/planning_scene/planning_scene.h>
-#include <moveit/setup_assistant/tools/compute_default_collisions.hpp>
+#include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
 #include <boost/math/special_functions/binomial.hpp>  // for statistics at end
 #include <boost/thread.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/assign.hpp>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_srdf_plugins
 {
 // ******************************************************************************************
 // Custom Types, Enums and Structs
@@ -677,4 +677,4 @@ DisabledReason disabledReasonFromString(const std::string& reason)
   return r;
 }
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_srdf_plugins

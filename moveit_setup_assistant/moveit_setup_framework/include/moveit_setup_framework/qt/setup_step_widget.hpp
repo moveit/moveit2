@@ -35,42 +35,84 @@
 /* Author: Dave Coleman */
 
 #pragma once
-
+#include <rclcpp/node.hpp>
+#include <moveit_setup_framework/setup_step.hpp>
+#include <moveit_setup_framework/qt/rviz_panel.hpp>
 #include <QWidget>
 
-// ******************************************************************************************
-// Provides the title and instructions
-// ******************************************************************************************
-class SetupScreenWidget : public QWidget
+namespace moveit_setup_framework
+{
+/**
+ * @brief The GUI code for one SetupStep
+ */
+class SetupStepWidget : public QWidget
 {
   Q_OBJECT
-
 public:
-  SetupScreenWidget(QWidget* parent) : QWidget(parent)
+  /**
+   * @brief Called after construction to initialize the step
+   * @param parent_node Shared pointer to the parent node
+   * @param parent_widget Pointer to the parent gui element
+   * @param rviz_panel Pointer to the shared rviz panel
+   * @param config_data All the data
+   */
+  void initialize(const rclcpp::Node::SharedPtr& parent_node, QWidget* parent_widget, RVizPanel* rviz_panel,
+                  const DataWarehousePtr& config_data)
+  {
+    getSetupStep().initialize(parent_node, config_data);
+    setParent(parent_widget);
+    rviz_panel_ = rviz_panel;
+    debug_ = config_data->debug;
+    onInit();
+  }
+
+  virtual void onInit()
   {
   }
 
-  /// function called when widget is activated, allows to update/initialize GUI
-  virtual void focusGiven();
+  /**
+   * @brief function called when widget is activated, allows to update/initialize GUI
+   */
+  virtual void focusGiven()
+  {
+  }
 
-  /// function called when widget lost focus, allows to accept/reject changes and to reject switching (returning false)
-  virtual bool focusLost();
+  /**
+   * @brief function called when widget loses focus, although switching away can be rejected
+   *
+   * @return If the widget should not be switched away from, return false
+   */
+  virtual bool focusLost()
+  {
+    return true;  // accept switching by default
+  }
+
+  /**
+   * @brief Return a reference to the SetupStep object
+   */
+  virtual SetupStep& getSetupStep() = 0;
+
+  bool isReady()
+  {
+    return getSetupStep().isReady();
+  }
 
   // ******************************************************************************************
   // Emitted Signal Functions
   // ******************************************************************************************
 
 Q_SIGNALS:
+  /// When the underlying data has been updated (which can cause other steps to become "Ready")
+  void dataUpdated();
 
-  /// Event for when the current screen is in modal view. Essential disabled the left navigation
-  void isModal(bool isModal);
+  /// When this signal is received, the GUI should attempt to advance to the next step.
+  void advanceRequest();
 
-  /// Event for telling rviz to highlight a link of the robot
-  void highlightLink(const std::string& name, const QColor& /*_t2*/);
+  /// Event for when the current screen is in modal view. Disables the left navigation
+  void setModalMode(bool isModal);
 
-  /// Event for telling rviz to highlight a group of the robot
-  void highlightGroup(const std::string& name);
-
-  /// Event for telling rviz to unhighlight all links of the robot
-  void unhighlightAll();
+protected:
+  RVizPanel* rviz_panel_;
+  bool debug_;
 };
+}  // namespace moveit_setup_framework

@@ -47,55 +47,49 @@
 #include <QSplitter>
 #include <QVBoxLayout>
 
-#include "configuration_files_widget.h"
-#include "header_widget.h"
+#include "moveit_setup_core_plugins/configuration_files_widget.hpp"
 
 // Boost
-#include <boost/algorithm/string.hpp>       // for string find and replace in templates
+#include <boost/algorithm/string.hpp>       // string trim
 #include <boost/filesystem/path.hpp>        // for creating folders/files
 #include <boost/filesystem/operations.hpp>  // is_regular_file, is_directory, etc.
 // Read write files
 #include <iostream>  // For writing yaml and launch files
 #include <fstream>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_core_plugins
 {
-// Boost file system
-namespace fs = boost::filesystem;
-
-const std::string SETUP_ASSISTANT_FILE = ".setup_assistant";
-
 // ******************************************************************************************
 // Outer User Interface for MoveIt Configuration Assistant
 // ******************************************************************************************
-ConfigurationFilesWidget::ConfigurationFilesWidget(QWidget* parent, const MoveItConfigDataPtr& config_data)
-  : SetupScreenWidget(parent), config_data_(config_data), has_generated_pkg_(false), first_focusGiven_(true)
+void ConfigurationFilesWidget::onInit()
 {
+  has_generated_pkg_ = false;
+
   // Basic widget container
   QVBoxLayout* layout = new QVBoxLayout();
 
   // Top Header Area ------------------------------------------------
 
-  HeaderWidget* header =
-      new HeaderWidget("Generate Configuration Files",
-                       "Create or update the configuration files package needed to run your robot with MoveIt. Uncheck "
-                       "files to disable them from being generated - this is useful if you have made custom changes to "
-                       "them. Files in orange have been automatically detected as changed.",
-                       this);
+  auto header = new moveit_setup_framework::HeaderWidget(
+      "Generate Configuration Files",
+      "Create or update the configuration files package needed to run your robot with MoveIt. Uncheck "
+      "files to disable them from being generated - this is useful if you have made custom changes to "
+      "them. Files in orange have been automatically detected as changed.",
+      this);
   layout->addWidget(header);
 
   // Path Widget ----------------------------------------------------
 
   // Stack Path Dialog
-  stack_path_ = new LoadPathWidget("Configuration Package Save Path",
-                                   "Specify the desired directory for the MoveIt configuration package to be "
-                                   "generated. Overwriting an existing configuration package directory is acceptable. "
-                                   "Example: <i>/u/robot/ros/panda_moveit_config</i>",
-                                   this, true);  // is directory
+  stack_path_ = new moveit_setup_framework::LoadPathWidget(
+      "Configuration Package Save Path",
+      "Specify the desired directory for the MoveIt configuration package to be "
+      "generated. Overwriting an existing configuration package directory is acceptable. "
+      "Example: <i>/u/robot/ros/panda_moveit_config</i>",
+      this, true);  // is directory
   layout->addWidget(stack_path_);
-
-  // Pass the package path from start screen to configuration files screen
-  stack_path_->setPath(config_data_->config_pkg_path_);
+  connect(stack_path_, SIGNAL(pathChanged(QString)), this, SLOT(onPackagePathChanged(QString)));
 
   // Generated Files List -------------------------------------------
   QLabel* generated_list = new QLabel("Files to be generated: (checked)", this);
@@ -174,418 +168,10 @@ ConfigurationFilesWidget::ConfigurationFilesWidget(QWidget* parent, const MoveIt
   this->setLayout(layout);
 }
 
-// ******************************************************************************************
-// Populate the 'Files to be generated' list
-// ******************************************************************************************
-bool ConfigurationFilesWidget::loadGenFiles()
+void ConfigurationFilesWidget::onPackagePathChanged(const QString& path)
 {
-  GenerateFile file;          // re-used
-  std::string template_path;  // re-used
-  const std::string robot_name = config_data_->srdf_->robot_name_;
-
-  gen_files_.clear();  // reset vector
-
-  // Get template package location ----------------------------------------------------------------------
-  fs::path template_package_path = config_data_->setup_assistant_path_;
-  template_package_path /= "templates";
-  template_package_path /= "moveit_config_pkg_template";
-  config_data_->template_package_path_ = template_package_path.make_preferred().string();
-
-  if (!fs::is_directory(config_data_->template_package_path_))
-  {
-    QMessageBox::critical(
-        this, "Error Generating",
-        QString("Unable to find package template directory: ").append(config_data_->template_package_path_.c_str()));
-    return false;
-  }
-
-  // -------------------------------------------------------------------------------------------------------------------
-  // ROS PACKAGE FILES AND FOLDERS ----------------------------------------------------------------------------
-  // -------------------------------------------------------------------------------------------------------------------
-
-  // package.xml --------------------------------------------------------------------------------------
-  // Note: we call the file package.xml.template so that it isn't automatically indexed by rosprofile
-  // in the scenario where we want to disabled the setup_assistant by renaming its root package.xml
-  file.file_name_ = "package.xml";
-  file.rel_path_ = file.file_name_;
-  template_path = config_data_->appendPaths(config_data_->template_package_path_, "package.xml.template");
-  file.description_ = "Defines a ROS package";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = MoveItConfigData::AUTHOR_INFO;
-  gen_files_.push_back(file);
-
-  // CMakeLists.txt --------------------------------------------------------------------------------------
-  file.file_name_ = "CMakeLists.txt";
-  file.rel_path_ = file.file_name_;
-  template_path = config_data_->appendPaths(config_data_->template_package_path_, file.file_name_);
-  file.description_ = "CMake build system configuration file";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // -------------------------------------------------------------------------------------------------------------------
-  // CONIG FILES -------------------------------------------------------------------------------------------------------
-  // -------------------------------------------------------------------------------------------------------------------
-  std::string config_path = "config";
-
-  // config/ --------------------------------------------------------------------------------------
-  file.file_name_ = "config/";
-  file.rel_path_ = file.file_name_;
-  file.description_ = "Folder containing all MoveIt configuration files for your robot. This folder is required and "
-                      "cannot be disabled.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::createFolder, this, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // robot.srdf ----------------------------------------------------------------------------------------------
-  file.file_name_ = config_data_->srdf_pkg_relative_path_.empty() ? config_data_->urdf_model_->getName() + ".srdf" :
-                                                                    config_data_->srdf_pkg_relative_path_;
-  file.rel_path_ = config_data_->srdf_pkg_relative_path_.empty() ?
-                       config_data_->appendPaths(config_path, file.file_name_) :
-                       config_data_->srdf_pkg_relative_path_;
-  file.description_ = "SRDF (<a href='http://www.ros.org/wiki/srdf'>Semantic Robot Description Format</a>) is a "
-                      "representation of semantic information about robots. This format is intended to represent "
-                      "information about the robot that is not in the URDF file, but it is useful for a variety of "
-                      "applications. The intention is to include information that has a semantic aspect to it.";
-  file.gen_func_ = boost::bind(&srdf::SRDFWriter::writeSRDF, config_data_->srdf_, _1);
-  file.write_on_changes = MoveItConfigData::SRDF;
-  gen_files_.push_back(file);
-  // special step required so the generated .setup_assistant yaml has this value
-  config_data_->srdf_pkg_relative_path_ = file.rel_path_;
-
-  // ompl_planning.yaml --------------------------------------------------------------------------------------
-  file.file_name_ = "ompl_planning.yaml";
-  file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);
-  file.description_ = "Configures the OMPL (<a href='http://ompl.kavrakilab.org/'>Open Motion Planning Library</a>) "
-                      "planning plugin. For every planning group defined in the SRDF, a number of planning "
-                      "configurations are specified (under planner_configs). Additionally, default settings for the "
-                      "state space to plan in for a particular group can be specified, such as the collision checking "
-                      "resolution. Each planning configuration specified for a group must be defined under the "
-                      "planner_configs tag. While defining a planner configuration, the only mandatory parameter is "
-                      "'type', which is the name of the motion planner to be used. Any other planner-specific "
-                      "parameters can be defined but are optional.";
-  file.gen_func_ = boost::bind(&MoveItConfigData::outputOMPLPlanningYAML, config_data_, _1);
-  file.write_on_changes = MoveItConfigData::GROUPS;
-  gen_files_.push_back(file);
-
-  // chomp_planning.yaml  --------------------------------------------------------------------------------------
-  file.file_name_ = "chomp_planning.yaml";
-  file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);
-  file.description_ = "Specifies which chomp planning plugin parameters to be used for the CHOMP planner";
-  file.gen_func_ = boost::bind(&MoveItConfigData::outputCHOMPPlanningYAML, config_data_, _1);
-  file.write_on_changes = MoveItConfigData::GROUPS;  // need to double check if this is actually correct!
-  gen_files_.push_back(file);
-
-  // kinematics.yaml  --------------------------------------------------------------------------------------
-  file.file_name_ = "kinematics.yaml";
-  file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);
-  file.description_ = "Specifies which kinematic solver plugin to use for each planning group in the SRDF, as well as "
-                      "the kinematic solver search resolution.";
-  file.gen_func_ = boost::bind(&MoveItConfigData::outputKinematicsYAML, config_data_, _1);
-  file.write_on_changes = MoveItConfigData::GROUPS | MoveItConfigData::GROUP_KINEMATICS;
-  gen_files_.push_back(file);
-
-  // joint_limits.yaml --------------------------------------------------------------------------------------
-  file.file_name_ = "joint_limits.yaml";
-  file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);
-  file.description_ = "Contains additional information about joints that appear in your planning groups that is not "
-                      "contained in the URDF, as well as allowing you to set maximum and minimum limits for velocity "
-                      "and acceleration than those contained in your URDF. This information is used by our trajectory "
-                      "filtering system to assign reasonable velocities and timing for the trajectory before it is "
-                      "passed to the robots controllers.";
-  file.gen_func_ = boost::bind(&MoveItConfigData::outputJointLimitsYAML, config_data_, _1);
-  file.write_on_changes = 0;  // Can they be changed?
-  gen_files_.push_back(file);
-
-  // cartesian_limits.yaml --------------------------------------------------------------------------------------
-  file.file_name_ = "cartesian_limits.yaml";
-  file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);
-  template_path = config_data_->appendPaths(config_data_->template_package_path_, file.rel_path_);
-  file.description_ = "Cartesian velocity for planning in the workspace."
-                      "The velocity is used by pilz industrial motion planner as maximum velocity for cartesian "
-                      "planning requests scaled by the velocity scaling factor of an individual planning request.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;  // Can they be changed?
-  gen_files_.push_back(file);
-
-  // fake_controllers.yaml --------------------------------------------------------------------------------------
-  file.file_name_ = "fake_controllers.yaml";
-  file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);
-  file.description_ = "Creates dummy configurations for controllers that correspond to defined groups. This is mostly "
-                      "useful for testing.";
-  file.gen_func_ = boost::bind(&MoveItConfigData::outputFakeControllersYAML, config_data_, _1);
-  file.write_on_changes = MoveItConfigData::GROUPS;
-  gen_files_.push_back(file);
-
-  // ros_controllers.yaml --------------------------------------------------------------------------------------
-  file.file_name_ = "ros_controllers.yaml";
-  file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);
-  file.description_ = "Creates configurations for ros_controllers.";
-  file.gen_func_ = boost::bind(&MoveItConfigData::outputROSControllersYAML, config_data_, _1);
-  file.write_on_changes = MoveItConfigData::GROUPS;
-  gen_files_.push_back(file);
-
-  // sensors_3d.yaml --------------------------------------------------------------------------------------
-  file.file_name_ = "sensors_3d.yaml";
-  file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);
-  file.description_ = "Creates configurations 3d sensors.";
-  file.gen_func_ = boost::bind(&MoveItConfigData::output3DSensorPluginYAML, config_data_, _1);
-  file.write_on_changes = MoveItConfigData::SENSORS_CONFIG;
-  gen_files_.push_back(file);
-
-  // -------------------------------------------------------------------------------------------------------------------
-  // LAUNCH FILES ------------------------------------------------------------------------------------------------------
-  // -------------------------------------------------------------------------------------------------------------------
-  std::string launch_path = "launch";
-  const std::string template_launch_path = config_data_->appendPaths(config_data_->template_package_path_, launch_path);
-
-  // launch/ --------------------------------------------------------------------------------------
-  file.file_name_ = "launch/";
-  file.rel_path_ = file.file_name_;
-  file.description_ = "Folder containing all MoveIt launch files for your robot. "
-                      "This folder is required and cannot be disabled.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::createFolder, this, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // move_group.launch --------------------------------------------------------------------------------------
-  file.file_name_ = "move_group.launch";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Launches the move_group node that provides the MoveGroup action and other parameters <a "
-                      "href='http://moveit.ros.org/doxygen/"
-                      "classmoveit_1_1planning__interface_1_1MoveGroup.html#details'>MoveGroup action</a>";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // planning_context.launch --------------------------------------------------------------------------------------
-  file.file_name_ = "planning_context.launch";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Loads settings for the ROS parameter server, required for running MoveIt. This includes the "
-                      "SRDF, joints_limits.yaml file, ompl_planning.yaml file, optionally the URDF, etc";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // moveit_rviz.launch --------------------------------------------------------------------------------------
-  file.file_name_ = "moveit_rviz.launch";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Visualize in Rviz the robot's planning groups running with interactive markers that allow goal "
-                      "states to be set.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // ompl_planning_pipeline.launch
-  // --------------------------------------------------------------------------------------
-  file.file_name_ = "ompl_planning_pipeline.launch.xml";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Intended to be included in other launch files that require the OMPL planning plugin. Defines "
-                      "the proper plugin name on the parameter server and a default selection of planning request "
-                      "adapters.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // pilz_industrial_motion_planner_planning_pipeline.launch
-  // --------------------------------------------------------------------------------------
-  file.file_name_ = "pilz_industrial_motion_planner_planning_pipeline.launch.xml";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Intended to be included in other launch files that require the Pilz industrial motion planner "
-                      "planning plugin. Defines the proper plugin name on the parameter server and a default selection "
-                      "of planning request adapters.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // chomp_planning_pipeline.launch
-  // --------------------------------------------------------------------------------------
-  file.file_name_ = "chomp_planning_pipeline.launch.xml";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Intended to be included in other launch files that require the CHOMP planning plugin. Defines "
-                      "the proper plugin name on the parameter server and a default selection of planning request "
-                      "adapters.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // planning_pipeline.launch --------------------------------------------------------------------------------------
-  file.file_name_ = "planning_pipeline.launch.xml";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Helper launch file that can choose between different planning pipelines to be loaded.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // warehouse_settings.launch --------------------------------------------------------------------------------------
-  file.file_name_ = "warehouse_settings.launch.xml";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Helper launch file that specifies default settings for MongoDB.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // warehouse.launch --------------------------------------------------------------------------------------
-  file.file_name_ = "warehouse.launch";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Launch file for starting MongoDB.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // default_warehouse_db.launch --------------------------------------------------------------------------------------
-  file.file_name_ = "default_warehouse_db.launch";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Launch file for starting the warehouse with a default MongoDB.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // run_benchmark_ompl.launch --------------------------------------------------------------------------------------
-  file.file_name_ = "run_benchmark_ompl.launch";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Launch file for benchmarking OMPL planners";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // sensor_manager.launch --------------------------------------------------------------------------------------
-  file.file_name_ = "sensor_manager.launch.xml";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Helper launch file that can choose between different sensor managers to be loaded.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // robot_moveit_controller_manager.launch ------------------------------------------------------------------
-  file.file_name_ = robot_name + "_moveit_controller_manager.launch.xml";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, "moveit_controller_manager.launch.xml");
-  file.description_ = "Placeholder for settings specific to the MoveIt controller manager implemented for you robot.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // robot_moveit_sensor_manager.launch ------------------------------------------------------------------
-  file.file_name_ = robot_name + "_moveit_sensor_manager.launch.xml";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, "moveit_sensor_manager.launch.xml");
-  file.description_ = "Placeholder for settings specific to the MoveIt sensor manager implemented for you robot.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // trajectory_execution.launch ------------------------------------------------------------------
-  file.file_name_ = "trajectory_execution.launch.xml";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Loads settings for the ROS parameter server required for executing trajectories using the "
-                      "trajectory_execution_manager::TrajectoryExecutionManager.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(
-      file);  // trajectory_execution.launch ------------------------------------------------------------------
-
-  file.file_name_ = "fake_moveit_controller_manager.launch.xml";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Loads a fake controller plugin.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // demo.launch ------------------------------------------------------------------
-  file.file_name_ = "demo.launch";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Run a demo of MoveIt.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // gazebo.launch ------------------------------------------------------------------
-  file.file_name_ = "gazebo.launch";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, "gazebo.launch");
-  file.description_ = "Gazebo launch file which also launches ros_controllers and sends robot urdf to param server, "
-                      "then using gazebo_ros pkg the robot is spawned to Gazebo";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  gen_files_.push_back(file);
-
-  // demo_gazebo.launch ------------------------------------------------------------------
-  file.file_name_ = "demo_gazebo.launch";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Run a demo of MoveIt with Gazebo and Rviz";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // joystick_control.launch ------------------------------------------------------------------
-  file.file_name_ = "joystick_control.launch";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, file.file_name_);
-  file.description_ = "Control the Rviz Motion Planning Plugin with a joystick";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // setup_assistant.launch ------------------------------------------------------------------
-  file.file_name_ = "setup_assistant.launch";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(
-      template_launch_path, "edit_configuration_package.launch");  // named this so that this launch file is not mixed
-                                                                   // up with the SA's real launch file
-  file.description_ = "Launch file for easily re-starting the MoveIt Setup Assistant to edit this robot's generated "
-                      "configuration package.";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // ros_controllers.launch ------------------------------------------------------------------
-  file.file_name_ = "ros_controllers.launch";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, "ros_controllers.launch");
-  file.description_ = "ros_controllers launch file";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = MoveItConfigData::GROUPS;
-  gen_files_.push_back(file);
-
-  // moveit.rviz ------------------------------------------------------------------
-  file.file_name_ = "moveit.rviz";
-  file.rel_path_ = config_data_->appendPaths(launch_path, file.file_name_);
-  template_path = config_data_->appendPaths(template_launch_path, "moveit.rviz");
-  file.description_ = "Configuration file for Rviz with the Motion Planning Plugin already setup. Used by passing "
-                      "roslaunch moveit_rviz.launch config:=true";
-  file.gen_func_ = boost::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, _1);
-  file.write_on_changes = 0;
-  gen_files_.push_back(file);
-
-  // -------------------------------------------------------------------------------------------------------------------
-  // OTHER FILES -------------------------------------------------------------------------------------------------------
-  // -------------------------------------------------------------------------------------------------------------------
-
-  // .setup_assistant ------------------------------------------------------------------
-  file.file_name_ = SETUP_ASSISTANT_FILE;
-  file.rel_path_ = file.file_name_;
-  file.description_ = "MoveIt Setup Assistant's hidden settings file. You should not need to edit this file.";
-  file.gen_func_ = boost::bind(&MoveItConfigData::outputSetupAssistantFile, config_data_, _1);
-  file.write_on_changes = -1;  // write on any changes
-  gen_files_.push_back(file);
-
-  return true;
+  setup_step_.setPackagePath(path.toStdString());
+  focusGiven();
 }
 
 // ******************************************************************************************
@@ -593,51 +179,11 @@ bool ConfigurationFilesWidget::loadGenFiles()
 // ******************************************************************************************
 bool ConfigurationFilesWidget::checkDependencies()
 {
-  QStringList dependencies;
+  std::vector<std::string> dependencies = setup_step_.getIncompleteWarnings();
   bool required_actions = false;
 
-  // Check that at least 1 planning group exists
-  if (config_data_->srdf_->groups_.empty())
-  {
-    dependencies << "No robot model planning groups have been created";
-  }
-
-  // Check that at least 1 link pair is disabled from collision checking
-  if (config_data_->srdf_->disabled_collisions_.empty())
-  {
-    dependencies << "No self-collisions have been disabled";
-  }
-
-  // Check that there is at least 1 end effector added
-  if (config_data_->srdf_->end_effectors_.empty())
-  {
-    dependencies << "No end effectors have been added";
-  }
-
-  // Check that there is at least 1 virtual joint added
-  if (config_data_->srdf_->virtual_joints_.empty())
-  {
-    dependencies << "No virtual joints have been added";
-  }
-
-  // Check that there is a author name
-  if (config_data_->author_name_.find_first_not_of(' ') == std::string::npos)
-  {
-    // There is no name or it consists of whitespaces only
-    dependencies << "<b>No author name added</b>";
-    required_actions = true;
-  }
-
-  // Check that email information is filled
-  QRegExp mail_regex("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b");
-  mail_regex.setCaseSensitivity(Qt::CaseInsensitive);
-  mail_regex.setPatternSyntax(QRegExp::RegExp);
-  QString test_email = QString::fromStdString(config_data_->author_email_);
-  if (!mail_regex.exactMatch(test_email))
-  {
-    dependencies << "<b>No valid email address added</b>";
-    required_actions = true;
-  }
+  // Note that MSA 1.0 required that you have valid author information before proceedings, and if not, would
+  // set required_actions to true here. We ignore this for now.
 
   // Display all accumumlated errors:
   if (!dependencies.empty())
@@ -655,9 +201,9 @@ bool ConfigurationFilesWidget::checkDependencies()
                     "otherwise the setup cannot be completed:<br /><ul>";
     }
 
-    for (int i = 0; i < dependencies.size(); ++i)
+    for (unsigned int i = 0; i < dependencies.size(); ++i)
     {
-      dep_message.append("<li>").append(dependencies.at(i)).append("</li>");
+      dep_message.append("<li>").append(QString::fromStdString(dependencies.at(i))).append("</li>");
     }
 
     if (!required_actions)
@@ -687,7 +233,7 @@ void ConfigurationFilesWidget::updateProgress()
   action_num_++;
 
   // Calc percentage
-  progress_bar_->setValue(double(action_num_) / gen_files_.size() * 100);
+  progress_bar_->setValue(double(action_num_) / setup_step_.getNumFiles() * 100);
 
   // allow the progress bar to be shown
   QApplication::processEvents();
@@ -712,9 +258,12 @@ void ConfigurationFilesWidget::changeActionDesc(int id)
 void ConfigurationFilesWidget::changeCheckedState(QListWidgetItem* item)
 {
   std::size_t index = item->data(Qt::UserRole).toUInt();
+
+  auto gen_file = setup_step_.getGeneratedFiles()[index];
+
   bool generate = (item->checkState() == Qt::Checked);
 
-  if (!generate && (gen_files_[index].write_on_changes & config_data_->changes))
+  if (!generate && gen_file->hasChanges())
   {
     QMessageBox::warning(this, "Package Generation",
                          "You should generate this file to ensure your changes will take "
@@ -722,7 +271,7 @@ void ConfigurationFilesWidget::changeCheckedState(QListWidgetItem* item)
   }
 
   // Enable/disable file
-  gen_files_[index].generate_ = generate;
+  setup_step_.setShouldGenerate(gen_file->getRelativePath(), generate);
 }
 
 // ******************************************************************************************
@@ -730,23 +279,16 @@ void ConfigurationFilesWidget::changeCheckedState(QListWidgetItem* item)
 // ******************************************************************************************
 void ConfigurationFilesWidget::focusGiven()
 {
-  if (first_focusGiven_)
-  {
-    // only generate list once
-    first_focusGiven_ = false;
+  // Pass the package path from start screen to configuration files screen
+  stack_path_->setPath(setup_step_.getPackagePath());
 
-    // Load this list of all files to be generated
-    loadGenFiles();
-  }
-
-  // Which files have been modified outside the Setup Assistant?
-  bool files_already_modified = checkGenFiles();
+  setup_step_.loadFiles();
 
   // disable reaction to checkbox changes
   disconnect(action_list_, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(changeCheckedState(QListWidgetItem*)));
 
   // Show files in GUI
-  bool have_conflicting_changes = showGenFiles();
+  showGenFiles();
 
   // react to manual changes only (not programmatic ones)
   connect(action_list_, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(changeCheckedState(QListWidgetItem*)));
@@ -754,7 +296,8 @@ void ConfigurationFilesWidget::focusGiven()
   // Allow list box to populate
   QApplication::processEvents();
 
-  if (files_already_modified)
+  // Which files have been modified outside the Setup Assistant?
+  if (setup_step_.hasModifiedFiles())
   {
     // Some were found to be modified
     QString msg("Some files have been modified outside of the Setup Assistant (according to timestamp). "
@@ -762,7 +305,7 @@ void ConfigurationFilesWidget::focusGiven()
                 "files manually is necessary, "
                 "but we recommend you check the list and enable the checkbox next to files you would like to "
                 "overwrite. ");
-    if (have_conflicting_changes)
+    if (setup_step_.hasConflictingFiles())
       msg += "<br/><font color='red'>Attention:</font> Some files (<font color='red'>marked red</font>) are changed "
              "both, externally and in Setup Assistant.";
     QMessageBox::information(this, "Files Modified", msg);
@@ -770,99 +313,33 @@ void ConfigurationFilesWidget::focusGiven()
 }
 
 // ******************************************************************************************
-// Check the list of files to be generated for modification
-// Returns true if files were detected as modified
-// ******************************************************************************************
-bool ConfigurationFilesWidget::checkGenFiles()
-{
-  // Check if we are 'editing' a prev generated config pkg
-  if (config_data_->config_pkg_path_.empty())
-    return false;  // this is a new package
-
-  // Check if we have the previous modification timestamp to compare agains
-  if (config_data_->config_pkg_generated_timestamp_ == 0)
-    return false;  // this package has not been generated with a timestamp, backwards compatible.
-
-  static const std::time_t TIME_MOD_TOLERANCE = 10;
-
-  // Check all old file's modification time
-  bool found_modified = false;
-  for (GenerateFile& gen_file : gen_files_)
-  {
-    GenerateFile* file = &gen_file;
-
-    fs::path file_path = config_data_->appendPaths(config_data_->config_pkg_path_, file->rel_path_);
-
-    // Don't disable folders from being generated
-    if (fs::is_directory(file_path))
-      continue;
-
-    if (fs::is_regular_file(file_path))
-    {
-      std::time_t mod_time = fs::last_write_time(file_path);
-
-      // ROS_DEBUG_STREAM("File " << file->file_name_ << " file modified " << mod_time << " pkg modified " <<
-      // config_data_->config_pkg_generated_timestamp_);
-
-      if (mod_time > config_data_->config_pkg_generated_timestamp_ + TIME_MOD_TOLERANCE ||
-          mod_time < config_data_->config_pkg_generated_timestamp_ - TIME_MOD_TOLERANCE)
-      {
-        ROS_INFO_STREAM("Manual editing detected: not over-writing by default file " << file->file_name_);
-
-        if (file->write_on_changes & config_data_->changes)
-          ROS_WARN_STREAM("Editing in Setup Assistant conflicts with external editing of file " << file->file_name_);
-
-        file->generate_ = false;  // do not overwrite by default
-        file->modified_ = true;
-        found_modified = true;
-      }
-      else
-      {
-        file->modified_ = false;
-      }
-    }
-  }
-
-  // Warn user if files have been modified outside Setup Assistant
-  return found_modified;
-}
-
-// ******************************************************************************************
 // Show the list of files to be generated
 // ******************************************************************************************
-bool ConfigurationFilesWidget::showGenFiles()
+void ConfigurationFilesWidget::showGenFiles()
 {
-  bool have_conflicting_changes = false;
   action_list_->clear();
 
+  auto gen_files = setup_step_.getGeneratedFiles();
+
   // Display this list in the GUI
-  for (std::size_t i = 0; i < gen_files_.size(); ++i)
+  for (std::size_t i = 0; i < gen_files.size(); ++i)
   {
-    GenerateFile* file = &gen_files_[i];
+    auto gen_file = gen_files[i];
 
     // Create a formatted row
-    QListWidgetItem* item = new QListWidgetItem(QString(file->rel_path_.c_str()), action_list_, 0);
-
-    fs::path file_path = config_data_->appendPaths(config_data_->config_pkg_path_, file->rel_path_);
+    QListWidgetItem* item = new QListWidgetItem(QString(gen_file->getRelativePath().c_str()), action_list_, 0);
 
     // Checkbox
-    item->setCheckState(file->generate_ ? Qt::Checked : Qt::Unchecked);
-    // externally modified?
-    if (file->modified_)
-    {
-      if (file->write_on_changes & config_data_->changes)
-      {
-        have_conflicting_changes = true;
-        item->setForeground(QBrush(QColor(255, 0, 0)));
-      }
-      else
-        item->setForeground(QBrush(QColor(255, 135, 0)));
-    }
+    item->setCheckState(setup_step_.shouldGenerate(gen_file) ? Qt::Checked : Qt::Unchecked);
 
-    // Don't allow folders to be disabled
-    if (fs::is_directory(file_path))
+    auto status = gen_file->getStatus();
+    if (status == FileStatus::CONFLICTED)
     {
-      item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+      item->setForeground(QBrush(QColor(255, 0, 0)));
+    }
+    else if (status == FileStatus::EXTERNALLY_MODIFIED)
+    {
+      item->setForeground(QBrush(QColor(255, 135, 0)));
     }
 
     // Link the gen_files_ index to this item
@@ -870,12 +347,11 @@ bool ConfigurationFilesWidget::showGenFiles()
 
     // Add actions to list
     action_list_->addItem(item);
-    action_desc_.append(QString(file->description_.c_str()));
+    action_desc_.append(QString(gen_file->getDescription().c_str()));
   }
 
   // Select the first item in the list so that a description is visible
   action_list_->setCurrentRow(0);
-  return have_conflicting_changes;
 }
 
 // ******************************************************************************************
@@ -892,7 +368,7 @@ void ConfigurationFilesWidget::savePackage()
 
   if (!generatePackage())
   {
-    ROS_ERROR_STREAM("Failed to generate entire configuration package");
+    RCLCPP_ERROR_STREAM(setup_step_.getLogger(), "Failed to generate entire configuration package");
     return;
   }
 
@@ -930,23 +406,18 @@ bool ConfigurationFilesWidget::generatePackage()
   // Trim whitespace from user input
   boost::trim(new_package_path);
 
-  // Get the package name ---------------------------------------------------------------------------------
-  new_package_name_ = getPackageName(new_package_path);
-
-  const std::string setup_assistant_file = config_data_->appendPaths(new_package_path, SETUP_ASSISTANT_FILE);
-
   // Make sure old package is correct package type and verify over write
-  if (fs::is_directory(new_package_path) && !fs::is_empty(new_package_path))
+  if (setup_step_.isExistingConfig())
   {
     // Check if the old package is a setup assistant package. If it is not, quit
-    if (!fs::is_regular_file(setup_assistant_file))
+    if (!setup_step_.hasSetupAssistantFile())
     {
       QMessageBox::warning(
           this, "Incorrect Folder/Package",
           QString("The chosen package location already exists but was not previously created using this MoveIt Setup "
                   "Assistant. "
                   "If this is a mistake, add the missing file: ")
-              .append(setup_assistant_file.c_str()));
+              .append(moveit_setup_framework::SETUP_ASSISTANT_FILE.c_str()));
       return false;
     }
 
@@ -961,48 +432,28 @@ bool ConfigurationFilesWidget::generatePackage()
       return false;  // abort
     }
   }
-  else  // this is a new package (but maybe the folder already exists)
-  {
-    // Create new directory ------------------------------------------------------------------
-    try
-    {
-      fs::create_directory(new_package_path) && !fs::is_directory(new_package_path);
-    }
-    catch (...)
-    {
-      QMessageBox::critical(this, "Error Generating Files",
-                            QString("Unable to create directory ").append(new_package_path.c_str()));
-      return false;
-    }
-  }
 
   // Begin to create files and folders ----------------------------------------------------------------------
   std::string absolute_path;
 
-  for (GenerateFile& gen_file : gen_files_)
+  for (auto& gen_file : setup_step_.getGeneratedFiles())
   {
-    GenerateFile* file = &gen_file;
-
     // Check if we should skip this file
-    if (!file->generate_)
+    if (!setup_step_.shouldGenerate(gen_file))
     {
       continue;
     }
 
     // Create the absolute path
-    absolute_path = config_data_->appendPaths(new_package_path, file->rel_path_);
-    ROS_DEBUG_STREAM("Creating file " << absolute_path);
-
-    // Clear template strings in case export is run multiple times with changes in between
-    template_strings_.clear();
+    RCLCPP_DEBUG_STREAM(setup_step_.getLogger(), "Creating file " << gen_file->getPath());
 
     // Run the generate function
-    if (!file->gen_func_(absolute_path))
+    if (!gen_file->write())
     {
       // Error occured
       QMessageBox::critical(this, "Error Generating File",
                             QString("Failed to generate folder or file: '")
-                                .append(file->rel_path_.c_str())
+                                .append(gen_file->getRelativePath().c_str())
                                 .append("' at location:\n")
                                 .append(absolute_path.c_str()));
       return false;
@@ -1027,52 +478,19 @@ void ConfigurationFilesWidget::exitSetupAssistant()
 }
 
 // ******************************************************************************************
-// Get the last folder name in a directory path
-// ******************************************************************************************
-const std::string ConfigurationFilesWidget::getPackageName(std::string package_path)
-{
-  // Remove end slash if there is one
-  if (!package_path.compare(package_path.size() - 1, 1, "/"))
-  {
-    package_path = package_path.substr(0, package_path.size() - 1);
-  }
-
-  // Get the last directory name
-  std::string package_name;
-  fs::path fs_package_path = package_path;
-
-  package_name = fs_package_path.filename().string();
-
-  // check for empty
-  if (package_name.empty())
-    package_name = "unknown";
-
-  return package_name;
-}
-
-// ******************************************************************************************
 // Check that no group is empty (without links/joints/etc)
 // ******************************************************************************************
 bool ConfigurationFilesWidget::noGroupsEmpty()
 {
   // Loop through all groups
-  for (const auto& group : config_data_->srdf_->groups_)
+  std::string invalid_group = setup_step_.getInvalidGroupName();
+  if (!invalid_group.empty())
   {
-    // Whenever 1 of the 4 component types are found, stop checking this group
-    if (!group.joints_.empty())
-      continue;
-    if (!group.links_.empty())
-      continue;
-    if (!group.chains_.empty())
-      continue;
-    if (!group.subgroups_.empty())
-      continue;
-
     // This group has no contents, bad
     QMessageBox::warning(
         this, "Empty Group",
         QString("The planning group '")
-            .append(group.name_.c_str())
+            .append(invalid_group.c_str())
             .append("' is empty and has no subcomponents associated with it (joints/links/chains/subgroups). You must "
                     "edit or remove this planning group before this configuration package can be saved."));
     return false;
@@ -1080,177 +498,7 @@ bool ConfigurationFilesWidget::noGroupsEmpty()
 
   return true;  // good
 }
+}  // namespace moveit_setup_core_plugins
 
-// ******************************************************************************************
-// Load the strings that will be replaced in all templates
-// ******************************************************************************************
-void ConfigurationFilesWidget::loadTemplateStrings()
-{
-  // Pair 1
-  addTemplateString("[GENERATED_PACKAGE_NAME]", new_package_name_);
-
-  // Pair 2
-  std::string urdf_location = config_data_->urdf_pkg_name_.empty() ? config_data_->urdf_path_ :
-                                                                     "$(find " + config_data_->urdf_pkg_name_ + ")/" +
-                                                                         config_data_->urdf_pkg_relative_path_;
-  addTemplateString("[URDF_LOCATION]", urdf_location);
-
-  // Pair 3
-  if (config_data_->urdf_from_xacro_)
-    addTemplateString("[URDF_LOAD_ATTRIBUTE]",
-                      "command=\"xacro " + config_data_->xacro_args_ + " '" + urdf_location + "'\"");
-  else
-    addTemplateString("[URDF_LOAD_ATTRIBUTE]", "textfile=\"" + urdf_location + "\"");
-
-  // Pair 4
-  addTemplateString("[ROBOT_NAME]", config_data_->srdf_->robot_name_);
-
-  // Pair 5
-  addTemplateString("[ROBOT_ROOT_LINK]", config_data_->getRobotModel()->getRootLinkName());
-
-  // Pair 6
-  addTemplateString("[PLANNING_FRAME]", config_data_->getRobotModel()->getModelFrame());
-
-  // Pair 7
-  std::stringstream vjb;
-  for (std::size_t i = 0; i < config_data_->srdf_->virtual_joints_.size(); ++i)
-  {
-    const srdf::Model::VirtualJoint& vj = config_data_->srdf_->virtual_joints_[i];
-    vjb << "  <node pkg=\"tf2_ros\" type=\"static_transform_publisher\" name=\"virtual_joint_broadcaster_" << i
-        << "\" args=\"0 0 0 0 0 0 " << vj.parent_frame_ << " " << vj.child_link_ << "\" />" << std::endl;
-  }
-  addTemplateString("[VIRTUAL_JOINT_BROADCASTER]", vjb.str());
-
-  // Pair 8 - Add dependencies to package.xml if the robot.urdf file is relative to a ROS package
-  if (config_data_->urdf_pkg_name_.empty())
-  {
-    addTemplateString("[OTHER_DEPENDENCIES", "");  // not relative to a ROS package
-  }
-  else
-  {
-    std::stringstream deps;
-    deps << "  <run_depend>" << config_data_->urdf_pkg_name_ << "</run_depend>\n";
-    addTemplateString("[OTHER_DEPENDENCIES]", deps.str());  // not relative to a ROS package
-  }
-
-  // Pair 9 - Add ROS Controllers to ros_controllers.launch file
-  if (config_data_->getROSControllers().empty())
-  {
-    addTemplateString("[ROS_CONTROLLERS]", "");
-  }
-  else
-  {
-    std::stringstream controllers;
-    for (ROSControlConfig& controller : config_data_->getROSControllers())
-    {
-      // Check if the controller belongs to controller_list namespace
-      if (controller.type_ != "FollowJointTrajectory")
-        controllers << controller.name_ << " ";
-    }
-    addTemplateString("[ROS_CONTROLLERS]", controllers.str());
-  }
-
-  // Pair 10 - Add parameter files for the kinematics solvers that should be loaded
-  // in addition to kinematics.yaml by planning_context.launch
-  std::string kinematics_parameters_files_block;
-  for (const auto& groups : config_data_->group_meta_data_)
-  {
-    if (groups.second.kinematics_parameters_file_.empty())
-      continue;
-
-    // add a linebreak if we have more than one entry
-    if (!kinematics_parameters_files_block.empty())
-      kinematics_parameters_files_block += "\n";
-
-    std::string line = "    <rosparam command=\"load\" ns=\"" + groups.first + "\" file=\"" +
-                       groups.second.kinematics_parameters_file_ + "\"/>";
-    kinematics_parameters_files_block += line;
-  }
-  addTemplateString("[KINEMATICS_PARAMETERS_FILE_NAMES_BLOCK]", kinematics_parameters_files_block);
-
-  addTemplateString("[AUTHOR_NAME]", config_data_->author_name_);
-  addTemplateString("[AUTHOR_EMAIL]", config_data_->author_email_);
-}
-
-// ******************************************************************************************
-// Insert a string pair into the template_strings_ datastructure
-// ******************************************************************************************
-bool ConfigurationFilesWidget::addTemplateString(const std::string& key, const std::string& value)
-{
-  template_strings_.push_back(std::pair<std::string, std::string>(key, value));
-
-  return true;
-}
-
-// ******************************************************************************************
-// Copy a template from location <template_path> to location <output_path> and replace package name
-// ******************************************************************************************
-bool ConfigurationFilesWidget::copyTemplate(const std::string& template_path, const std::string& output_path)
-{
-  // Check if template strings have been loaded yet
-  if (template_strings_.empty())
-  {
-    loadTemplateStrings();
-  }
-
-  // Error check file
-  if (!fs::is_regular_file(template_path))
-  {
-    ROS_ERROR_STREAM("Unable to find template file " << template_path);
-    return false;
-  }
-
-  // Load file
-  std::ifstream template_stream(template_path.c_str());
-  if (!template_stream.good())  // File not found
-  {
-    ROS_ERROR_STREAM("Unable to load file " << template_path);
-    return false;
-  }
-
-  // Load the file to a string using an efficient memory allocation technique
-  std::string template_string;
-  template_stream.seekg(0, std::ios::end);
-  template_string.reserve(template_stream.tellg());
-  template_stream.seekg(0, std::ios::beg);
-  template_string.assign((std::istreambuf_iterator<char>(template_stream)), std::istreambuf_iterator<char>());
-  template_stream.close();
-
-  // Replace keywords in string ------------------------------------------------------------
-  for (std::pair<std::string, std::string>& it : template_strings_)
-  {
-    boost::replace_all(template_string, it.first, it.second);
-  }
-
-  // Save string to new location -----------------------------------------------------------
-  std::ofstream output_stream(output_path.c_str(), std::ios_base::trunc);
-  if (!output_stream.good())
-  {
-    ROS_ERROR_STREAM("Unable to open file for writing " << output_path);
-    return false;
-  }
-
-  output_stream << template_string.c_str();
-  output_stream.close();
-
-  return true;  // file created successfully
-}
-
-// ******************************************************************************************
-// Create a folder
-// ******************************************************************************************
-bool ConfigurationFilesWidget::createFolder(const std::string& output_path)
-{
-  if (!fs::is_directory(output_path))
-  {
-    if (!fs::create_directory(output_path))
-    {
-      QMessageBox::critical(this, "Error Generating Files",
-                            QString("Unable to create directory ").append(output_path.c_str()));
-      return false;
-    }
-  }
-  return true;
-}
-
-}  // namespace moveit_setup_assistant
+#include <pluginlib/class_list_macros.hpp>  // NOLINT
+PLUGINLIB_EXPORT_CLASS(moveit_setup_core_plugins::ConfigurationFilesWidget, moveit_setup_framework::SetupStepWidget)

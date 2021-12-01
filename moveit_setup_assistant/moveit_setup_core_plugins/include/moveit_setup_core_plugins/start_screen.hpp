@@ -32,16 +32,37 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Dave Coleman */
+#pragma once
+#include <moveit_setup_framework/setup_step.hpp>
+#include <moveit_setup_framework/data/package_settings_config.hpp>
+#include <moveit_setup_framework/data/srdf_config.hpp>
+#include <moveit_setup_framework/data/urdf_config.hpp>
 
-#include "setup_screen_widget.h"
-#include <iostream>
-
-void SetupScreenWidget::focusGiven()
+namespace moveit_setup_core_plugins
 {
-}
-
-bool SetupScreenWidget::focusLost()
+class StartScreen : public moveit_setup_framework::SetupStep
 {
-  return true;  // accept switching by default
-}
+public:
+  std::string getName() const override
+  {
+    return "Start Screen";
+  }
+
+  void onInit() override;
+
+  std::string getURDFPath();
+  std::string getXacroArgs();
+  std::string getPackagePath();
+
+  bool isXacroFile();
+
+  void loadURDFFile(const std::string& urdf_file_path, const std::string& xacro_args);
+
+  void loadExisting(const std::string& package_path);
+
+protected:
+  std::shared_ptr<moveit_setup_framework::PackageSettingsConfig> package_settings_;
+  std::shared_ptr<moveit_setup_framework::SRDFConfig> srdf_config_;
+  std::shared_ptr<moveit_setup_framework::URDFConfig> urdf_config_;
+};
+}  // namespace moveit_setup_core_plugins
