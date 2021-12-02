@@ -88,7 +88,8 @@ void MoveGroupSequenceAction::executeSequenceCallback(const moveit_msgs::MoveGro
 
   // before we start planning, ensure that we have the latest robot state
   // received...
-  context_->planning_scene_monitor_->waitForCurrentRobotState(ros::Time::now());
+  auto node = context_->moveit_cpp_->getNode();
+  context_->planning_scene_monitor_->waitForCurrentRobotState(node->get_clock()->now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   moveit_msgs::MoveGroupSequenceResult action_res;

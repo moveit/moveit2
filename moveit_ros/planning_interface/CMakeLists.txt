@@ -5,6 +5,7 @@ project(moveit_ros_planning_interface)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
+find_package(backward_ros)
 find_package(ament_cmake REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_core REQUIRED)
