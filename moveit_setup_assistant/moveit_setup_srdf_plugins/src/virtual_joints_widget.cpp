@@ -335,7 +335,7 @@ void VirtualJointsWidget::loadChildLinksComboBox()
   child_link_field_->clear();
 
   // Add all links to combo box
-  for (auto link_name : setup_step_.getLinkNames())
+  for (const auto& link_name : setup_step_.getLinkNames())
   {
     child_link_field_->addItem(link_name.c_str());
   }

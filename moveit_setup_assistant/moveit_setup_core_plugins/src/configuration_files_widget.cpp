@@ -201,9 +201,9 @@ bool ConfigurationFilesWidget::checkDependencies()
                     "otherwise the setup cannot be completed:<br /><ul>";
     }
 
-    for (unsigned int i = 0; i < dependencies.size(); ++i)
+    for (const auto& dependency : dependencies)
     {
-      dep_message.append("<li>").append(QString::fromStdString(dependencies.at(i))).append("</li>");
+      dep_message.append("<li>").append(QString::fromStdString(dependency)).append("</li>");
     }
 
     if (!required_actions)

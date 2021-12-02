@@ -169,7 +169,7 @@ void SRDFConfig::collectVariables(std::vector<TemplateVariable>& variables)
 
   std::stringstream vjb;
   unsigned int counter = 0;
-  for (auto vj : srdf_.virtual_joints_)
+  for (const auto& vj : srdf_.virtual_joints_)
   {
     if (vj.type_ == "fixed")
     {

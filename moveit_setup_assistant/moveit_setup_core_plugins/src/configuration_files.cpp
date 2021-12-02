@@ -47,7 +47,7 @@ void ConfigurationFiles::loadTemplateVariables()
 {
   auto& variables = moveit_setup_framework::TemplatedGeneratedFile::variables_;
   variables.clear();
-  for (auto config : config_data_->getConfigured())
+  for (const auto& config : config_data_->getConfigured())
   {
     config->collectVariables(variables);
   }
@@ -67,7 +67,7 @@ void ConfigurationFiles::loadFiles()
 
   gen_files_.clear();
 
-  for (auto config : config_data_->getConfigured())
+  for (const auto& config : config_data_->getConfigured())
   {
     config->collectFiles(package_path, gen_time, gen_files_);
   }

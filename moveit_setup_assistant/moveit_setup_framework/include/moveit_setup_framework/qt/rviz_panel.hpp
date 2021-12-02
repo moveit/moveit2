@@ -60,7 +60,7 @@ class RVizPanel : public QWidget, public rviz_common::WindowManagerInterface
 public:
   RVizPanel(QWidget* parent, rviz_common::ros_integration::RosNodeAbstractionIface::WeakPtr node_abstraction,
             DataWarehousePtr config_data);
-  ~RVizPanel();
+  ~RVizPanel() override;
 
   bool isReadyForInitialization() const
   {

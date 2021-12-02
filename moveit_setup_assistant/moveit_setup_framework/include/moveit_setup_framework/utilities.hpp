@@ -85,30 +85,21 @@ inline bool extractPackageNameFromPath(const std::string& path, std::string& pac
   boost::filesystem::path sub_path = path;  // holds the directory less one folder
   boost::filesystem::path relative_path;    // holds the path after the sub_path
 
-  bool package_found = false;
-
   // truncate path step by step and check if it contains a package.xml
   while (!sub_path.empty())
   {
     if (boost::filesystem::is_regular_file(sub_path / "package.xml"))
     {
-      package_found = true;
       relative_filepath = relative_path.string();
       package_name = sub_path.leaf().string();
-      break;
+      return true;
     }
     relative_path = sub_path.leaf() / relative_path;
     sub_path.remove_leaf();
   }
 
-  // Assign data to moveit_config_data
-  if (!package_found)
-  {
-    // No package name found, we must be outside ROS
-    return false;
-  }
-
-  return true;
+  // No package name found, we must be outside ROS
+  return false;
 }
 
 // Formerly "parse"
