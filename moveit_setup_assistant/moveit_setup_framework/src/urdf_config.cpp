@@ -46,7 +46,7 @@ void URDFConfig::onInit()
   parent_node_->declare_parameter("robot_description", rclcpp::ParameterType::PARAMETER_STRING);
 }
 
-void URDFConfig::loadPrevious(const std::string&, const YAML::Node& node)
+void URDFConfig::loadPrevious(const std::string& /*config_package_path*/, const YAML::Node& node)
 {
   if (!getYamlProperty(node, "package", urdf_pkg_name_))
   {

@@ -43,7 +43,7 @@ const std::unordered_map<std::string, std::string>
 
 const std::regex MAIL_REGEX("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b", std::regex::icase);
 
-void PackageSettingsConfig::loadPrevious(const std::string&, const YAML::Node& node)
+void PackageSettingsConfig::loadPrevious(const std::string& /*config_package_path*/, const YAML::Node& node)
 {
   getYamlProperty(node, "author_name", author_name_);
   getYamlProperty(node, "author_email", author_email_);
@@ -157,7 +157,7 @@ bool PackageSettingsConfig::GeneratedSettings::writeYaml(YAML::Emitter& emitter)
   emitter << YAML::Key << "moveit_setup_assistant_config";
   emitter << YAML::Value << YAML::BeginMap;
 
-  for (auto config : parent_.config_data_->getConfigured())
+  for (const auto& config : parent_.config_data_->getConfigured())
   {
     YAML::Node node = config->saveToYaml();
     if (!node.size())

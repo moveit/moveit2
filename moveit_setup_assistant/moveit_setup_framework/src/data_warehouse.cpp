@@ -92,7 +92,7 @@ std::vector<SetupConfigPtr> DataWarehouse::getConfigured()
 std::vector<std::string> DataWarehouse::getRegisteredNames() const
 {
   std::vector<std::string> names;
-  for (auto type_pair : registered_types_)
+  for (const auto& type_pair : registered_types_)
   {
     names.push_back(type_pair.first);
   }
