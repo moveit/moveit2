@@ -36,13 +36,13 @@
 
 #pragma once
 
+#include <chomp_motion_planner/chomp_cost.h>
 #include <chomp_motion_planner/chomp_parameters.h>
 #include <chomp_motion_planner/chomp_trajectory.h>
-#include <chomp_motion_planner/chomp_cost.h>
 #include <chomp_motion_planner/multivariate_gaussian.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/planning_scene/planning_scene.h>
 #include <moveit/collision_distance_field/collision_env_hybrid.h>
+#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/robot_model/robot_model.h>
 
 #include <Eigen/Core>
 #include <Eigen/StdVector>
@@ -159,7 +159,7 @@ private:
   double stochasticity_factor_;
 
   std::vector<int> state_is_in_collision_; /**< Array containing a boolean about collision info for each point in the
-                                              trajectory */
+                                                                            trajectory */
   std::vector<std::vector<int> > point_is_in_collision_;
   bool is_collision_free_;
   double worst_collision_cost_state_;

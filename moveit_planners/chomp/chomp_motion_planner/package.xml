@@ -1,10 +1,9 @@
-<package format="2">
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>chomp_motion_planner</name>
+  <version>1.1.6</version>
   <description>chomp_motion_planner</description>
-
-  <version>1.1.5</version>
-  <author email="gjones@willowgarage.com">Gil Jones</author>
-  <author email="mail@mrinal.net">Mrinal Kalakrishnan</author>
 
   <maintainer email="chitt@live.in">Chittaranjan Srinivas Swaminathan</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
@@ -12,9 +11,20 @@
   <license>BSD</license>
   <url>http://ros.org/wiki/chomp_motion_planner</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <author email="gjones@willowgarage.com">Gil Jones</author>
+  <author email="mail@mrinal.net">Mrinal Kalakrishnan</author>
 
-  <build_depend>roscpp</build_depend>
-  <build_depend>moveit_core</build_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>moveit_common</build_depend>
 
+  <depend>moveit_core</depend>
+  <depend>rclcpp</depend>
+  <depend>trajectory_msgs</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>
