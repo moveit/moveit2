@@ -56,6 +56,7 @@ namespace pilz_industrial_motion_planner
 {
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit.pilz_industrial_motion_planner.move_group_sequence_action");
+
 MoveGroupSequenceAction::MoveGroupSequenceAction() : MoveGroupCapability("SequenceAction")
 {
 }
@@ -64,6 +65,8 @@ void MoveGroupSequenceAction::initialize()
 {
   // start the move action server
   RCLCPP_INFO_STREAM(LOGGER, "initialize move group sequence action");
+  action_callback_group_ =
+      context_->moveit_cpp_->getNode()->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
   move_action_server_ = rclcpp_action::create_server<moveit_msgs::action::MoveGroupSequence>(
       context_->moveit_cpp_->getNode(), "sequence_move_group",
       [](const rclcpp_action::GoalUUID& /* unused */,
@@ -71,26 +74,22 @@ void MoveGroupSequenceAction::initialize()
         RCLCPP_DEBUG(LOGGER, "Received action goal");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [this](const std::shared_ptr<
-             rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroupSequence>> /* unused goal_handle */) {
+      [this](const std::shared_ptr<MoveGroupSequenceGoalHandle> /* unused goal_handle */) {
         RCLCPP_DEBUG(LOGGER, "Canceling action goal");
         preemptMoveCallback();
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      [this](
-          const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroupSequence>> goal_handle) {
-        // Return quickly to avoid blocking executor
-        std::thread(std::bind(&MoveGroupSequenceAction::executeSequenceCallback, this, std::placeholders::_1),
-                    goal_handle)
-            .detach();
-      });
+      [this](const std::shared_ptr<MoveGroupSequenceGoalHandle> goal_handle) {
+        RCLCPP_DEBUG(LOGGER, "Accepting new action goal");
+        executeSequenceCallback(goal_handle);
+      },
+      rcl_action_server_get_default_options(), action_callback_group_);
 
   command_list_manager_ = std::make_unique<pilz_industrial_motion_planner::CommandListManager>(
       context_->moveit_cpp_->getNode(), context_->planning_scene_monitor_->getRobotModel());
 }
 
-void MoveGroupSequenceAction::executeSequenceCallback(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroupSequence>> goal_handle)
+void MoveGroupSequenceAction::executeSequenceCallback(const std::shared_ptr<MoveGroupSequenceGoalHandle> goal_handle)
 {
   // Notify that goal is being executed
   goal_handle_ = goal_handle;

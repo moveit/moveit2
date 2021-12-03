@@ -44,6 +44,7 @@
 namespace pilz_industrial_motion_planner
 {
 class CommandListManager;
+using MoveGroupSequenceGoalHandle = rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroupSequence>;
 
 /**
  * @brief Provide action to handle multiple trajectories and execute the result
@@ -64,8 +65,7 @@ private:
   using PlannedTrajMsgs = moveit_msgs::msg::MotionSequenceResponse::_planned_trajectories_type;
 
 private:
-  void executeSequenceCallback(
-      const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroupSequence>> goal_handle);
+  void executeSequenceCallback(const std::shared_ptr<MoveGroupSequenceGoalHandle> goal_handle);
   void
   executeSequenceCallbackPlanAndExecute(const moveit_msgs::action::MoveGroupSequence::Goal::ConstSharedPtr& goal,
                                         const moveit_msgs::action::MoveGroupSequence::Result::SharedPtr& action_res);
@@ -83,8 +83,9 @@ private:
                            PlannedTrajMsgs& plannedTrajsMsgs);
 
 private:
+  rclcpp::CallbackGroup::SharedPtr action_callback_group_;
   std::shared_ptr<rclcpp_action::Server<moveit_msgs::action::MoveGroupSequence>> move_action_server_;
-  std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::MoveGroupSequence>> goal_handle_;
+  std::shared_ptr<MoveGroupSequenceGoalHandle> goal_handle_;
   moveit_msgs::action::MoveGroupSequence::Feedback::SharedPtr move_feedback_;
 
   move_group::MoveGroupState move_state_{ move_group::IDLE };
