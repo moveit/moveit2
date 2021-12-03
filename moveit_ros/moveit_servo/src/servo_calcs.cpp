@@ -149,10 +149,6 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
       node_->create_subscription<std_msgs::msg::Float64>("~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
                                                          std::bind(&ServoCalcs::collisionVelocityScaleCB, this, _1));
 
-  // Publish to collision_check for worst stop time
-  worst_case_stop_time_pub_ =
-      node_->create_publisher<std_msgs::msg::Float64>("~/worst_case_stop_time", rclcpp::SystemDefaultsQoS());
-
   // Publish freshly-calculated joints to the robot.
   // Put the outgoing msg in the right format (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
   if (parameters_->command_out_type == "trajectory_msgs/JointTrajectory")
