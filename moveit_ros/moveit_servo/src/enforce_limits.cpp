@@ -78,7 +78,7 @@ Eigen::ArrayXd enforceVelocityLimits(const moveit::core::JointModelGroup* joint_
   // Get the velocity scaling factor
   double velocity_scaling_factor = getVelocityScalingFactor(joint_model_group, velocity);
 
-  // Scale the resulting detas to avoid violating limits.
+  // Scale the resulting deltas to avoid violating limits.
   return velocity_scaling_factor * velocity * publish_period;
 }
 
