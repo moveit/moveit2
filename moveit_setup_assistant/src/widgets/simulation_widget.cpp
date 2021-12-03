@@ -165,7 +165,7 @@ void SimulationWidget::generateURDFClick()
       inertial_closing_matches.push_back(it->position());
     }
 
-    for (std::size_t match_number = 0; match_number < inertial_opening_matches.size() - 1; match_number++)
+    for (std::size_t match_number = 0; match_number < inertial_opening_matches.size() - 1; ++match_number)
     {
       // Show the unmodified elements in black
       simulation_text_->setTextColor(QColor("black"));

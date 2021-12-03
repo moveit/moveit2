@@ -306,14 +306,14 @@ protected:
 inline void EnvironmentChain3D::convertCoordToJointAngles(const std::vector<int>& coord, std::vector<double>& angles)
 {
   angles.resize(coord.size());
-  for (size_t i = 0; i < coord.size(); i++)
+  for (size_t i = 0; i < coord.size(); ++i)
     angles[i] = coord[i] * angle_discretization_;
 }
 
 inline void EnvironmentChain3D::convertJointAnglesToCoord(const std::vector<double>& angle, std::vector<int>& coord)
 {
   coord.resize(angle.size());
-  for (unsigned int i = 0; i < angle.size(); i++)
+  for (unsigned int i = 0; i < angle.size(); ++i)
   {
     // NOTE: Added 3/1/09
     double pos_angle = angle[i];
