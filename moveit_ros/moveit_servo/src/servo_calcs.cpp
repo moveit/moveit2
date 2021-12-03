@@ -638,7 +638,7 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   updated_filters_ = true;
 
   // Enforce SRDF velocity limits
-  delta_theta = enforceVelocityLimits(joint_model_group_, parameters_->publish_period, delta_theta);
+  enforceVelocityLimits(joint_model_group_, parameters_->publish_period, internal_joint_state_);
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
   const auto joints_to_halt = enforcePositionLimits(internal_joint_state_);
