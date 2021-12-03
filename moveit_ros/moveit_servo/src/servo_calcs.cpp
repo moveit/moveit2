@@ -1004,7 +1004,7 @@ bool ServoCalcs::checkValidCommand(const geometry_msgs::msg::TwistStamped& cmd)
   return true;
 }
 
-// Scale the incoming jog command
+// Scale the incoming jog command. Returns a vector of position deltas
 Eigen::VectorXd ServoCalcs::scaleCartesianCommand(const geometry_msgs::msg::TwistStamped& command)
 {
   Eigen::VectorXd result(6);

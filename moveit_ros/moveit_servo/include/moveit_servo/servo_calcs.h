@@ -148,11 +148,13 @@ protected:
 
   /** \brief If incoming velocity commands are from a unitless joystick, scale them to physical units.
    * Also, multiply by timestep to calculate a position change.
+   * @return a vector of position deltas
    */
   Eigen::VectorXd scaleCartesianCommand(const geometry_msgs::msg::TwistStamped& command);
 
   /** \brief If incoming velocity commands are from a unitless joystick, scale them to physical units.
    * Also, multiply by timestep to calculate a position change.
+   * @return a vector of position deltas
    */
   Eigen::VectorXd scaleJointCommand(const control_msgs::msg::JointJog& command);
 
