@@ -8,16 +8,16 @@ This file should be deleted once all tasks are complete. Also delete `SETUP_STEP
    * [ ] Author Information
    * [x] Configuration Files
  * `moveit_setup_srdf_plugins`
-   * [ ] Self-Collisions
+   * [x] Self-Collisions
    * [x] Virtual Joints
    * [ ] Planning Groups
    * [ ] Robot Poses
    * [ ] End Effectors
    * [ ] Passive Joints
  * `moveit_setup_app_plugins`
-  * [ ] ROS Control
-  * [ ] Simulation
-  * [ ] Perception
+   * [ ] ROS Control
+   * [ ] Simulation
+   * [ ] Perception
 
 ### Instructions for migrating steps
 Let `SETUP_STEP` be the name of the step you are migrating. You should already have files named `SETUP_STEP_widget.hpp` and `SETUP_STEP_widget.cpp`.
