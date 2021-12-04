@@ -32,8 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef CHECKS_H
-#define CHECKS_H
+#pragma once
+
+//#ifndef CHECKS_H replaced with pragma once
+//#define CHECKS_H
 
 #include <gtest/gtest.h>
 #include <moveit/robot_state/robot_state.h>
@@ -59,4 +61,4 @@ namespace pilz_industrial_motion_planner_testutils
 }
 }  // namespace pilz_industrial_motion_planner_testutils
 
-#endif  // CENTERAUXILIARY_H
+//#endif  // CENTERAUXILIARY_H

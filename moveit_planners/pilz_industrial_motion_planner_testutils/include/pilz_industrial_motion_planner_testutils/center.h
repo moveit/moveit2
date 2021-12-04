@@ -32,8 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef CENTERAUXILIARY_H
-#define CENTERAUXILIARY_H
+#pragma once
+
+//#ifndef CENTERAUXILIARY_H replaced with pragma once
+//#define CENTERAUXILIARY_H
 
 #include "circauxiliary.h"
 
@@ -57,4 +59,4 @@ std::string Center<ConfigType, BuilderType>::getConstraintName() const
 }
 }  // namespace pilz_industrial_motion_planner_testutils
 
-#endif  // CENTERAUXILIARY_H
+//#endif  // CENTERAUXILIARY_H

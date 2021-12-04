@@ -32,8 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef CARTESIANPATHCONSTRAINTSBUILDER_H
-#define CARTESIANPATHCONSTRAINTSBUILDER_H
+#pragma once
+
+//#ifndef CARTESIANPATHCONSTRAINTSBUILDER_H replaced with pragma once
+//#define CARTESIANPATHCONSTRAINTSBUILDER_H
 
 #include <string>
 
@@ -87,4 +89,4 @@ inline moveit_msgs::Constraints CartesianPathConstraintsBuilder::toPathConstrain
 }
 }  // namespace pilz_industrial_motion_planner_testutils
 
-#endif  // CARTESIANPATHCONSTRAINTSBUILDER_H
+//#endif  // CARTESIANPATHCONSTRAINTSBUILDER_H

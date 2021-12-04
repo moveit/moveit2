@@ -32,8 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef PTP_H
-#define PTP_H
+#pragma once
+
+//#ifndef PTP_H
+//#define PTP_H
 
 #include <stdexcept>
 
@@ -64,4 +66,4 @@ inline std::string Ptp<StartType, GoalType>::getPlannerId() const
 }
 }  // namespace pilz_industrial_motion_planner_testutils
 
-#endif  // PTP_H
+//#endif  // PTP_H

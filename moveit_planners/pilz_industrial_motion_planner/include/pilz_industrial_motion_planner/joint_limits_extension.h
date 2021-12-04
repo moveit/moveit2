@@ -32,8 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JOINT_LIMITS_EXTENSION_H
-#define JOINT_LIMITS_EXTENSION_H
+#pragma once
+
+//#ifndef JOINT_LIMITS_EXTENSION_H replaced with pragma once
+//#define JOINT_LIMITS_EXTENSION_H
 
 #include <joint_limits_interface/joint_limits.h>
 #include <map>
@@ -64,4 +66,4 @@ typedef joint_limits_interface::JointLimits JointLimit;
 typedef std::map<std::string, JointLimit> JointLimitsMap;
 }  // namespace pilz_industrial_motion_planner
 
-#endif  // JOINT_LIMITS_EXTENSION_H
+//#endif  // JOINT_LIMITS_EXTENSION_H

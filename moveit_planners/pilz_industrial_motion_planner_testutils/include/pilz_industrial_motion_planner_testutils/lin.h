@@ -32,8 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef LIN_H
-#define LIN_H
+#pragma once
+
+//#ifndef LIN_H
+//#define LIN_H
 
 #include <stdexcept>
 
@@ -64,4 +66,4 @@ inline std::string Lin<StartType, GoalType>::getPlannerId() const
 }
 }  // namespace pilz_industrial_motion_planner_testutils
 
-#endif  // LIN_H
+//#endif  // LIN_H

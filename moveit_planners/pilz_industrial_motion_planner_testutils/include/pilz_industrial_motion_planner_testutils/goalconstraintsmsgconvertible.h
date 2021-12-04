@@ -32,8 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef GOALCONSTRAINTSMSGCONVERTIBLE_H
-#define GOALCONSTRAINTSMSGCONVERTIBLE_H
+#pragma once
+
+//#ifndef GOALCONSTRAINTSMSGCONVERTIBLE_H
+//#define GOALCONSTRAINTSMSGCONVERTIBLE_H
 
 #include <string>
 
@@ -53,4 +55,4 @@ public:
 };
 }  // namespace pilz_industrial_motion_planner_testutils
 
-#endif  // GOALCONSTRAINTSMSGCONVERTIBLE_H
+//#endif  // GOALCONSTRAINTSMSGCONVERTIBLE_H

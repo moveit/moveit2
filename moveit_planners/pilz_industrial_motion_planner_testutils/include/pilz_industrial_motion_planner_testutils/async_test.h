@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef ASYNC_TEST_H
-#define ASYNC_TEST_H
+#pragma once
+
+//#ifndef ASYNC_TEST_H replaced with pragma once
+//#define ASYNC_TEST_H
 
 #include <mutex>
 #include <condition_variable>
@@ -173,4 +175,4 @@ inline bool AsyncTest::barricade(std::initializer_list<std::string> clear_events
 
 }  // namespace testing
 
-#endif  // ASYNC_TEST_H
+//#endif  // ASYNC_TEST_H

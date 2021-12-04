@@ -31,9 +31,10 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+#pragma once
 
-#ifndef COMMAND_TYPES_TYPEDEF_H
-#define COMMAND_TYPES_TYPEDEF_H
+//#ifndef COMMAND_TYPES_TYPEDEF_H replaced with pragma once
+//#define COMMAND_TYPES_TYPEDEF_H
 
 #include <boost/variant.hpp>
 
@@ -66,4 +67,4 @@ typedef boost::variant<PtpJoint, PtpJointCart, PtpCart, LinJoint, LinCart, CircC
     CmdVariant;
 }  // namespace pilz_industrial_motion_planner_testutils
 
-#endif  // COMMAND_TYPES_TYPEDEF_H
+//#endif  // COMMAND_TYPES_TYPEDEF_H

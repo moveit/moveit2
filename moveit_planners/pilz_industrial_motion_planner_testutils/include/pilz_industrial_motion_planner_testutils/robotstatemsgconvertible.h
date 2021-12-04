@@ -32,8 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef ROBOTSTATEMSGCONVERTIBLE_H
-#define ROBOTSTATEMSGCONVERTIBLE_H
+#pragma once
+
+//#ifndef ROBOTSTATEMSGCONVERTIBLE_H
+//#define ROBOTSTATEMSGCONVERTIBLE_H
 
 #include <moveit_msgs/RobotState.h>
 #include <moveit/robot_model/robot_model.h>
@@ -51,4 +53,4 @@ public:
 };
 }  // namespace pilz_industrial_motion_planner_testutils
 
-#endif  // ROBOTSTATEMSGCONVERTIBLE_H
+//#endif  // ROBOTSTATEMSGCONVERTIBLE_H

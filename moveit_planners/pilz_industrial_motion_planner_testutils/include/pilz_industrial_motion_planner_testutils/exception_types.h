@@ -32,8 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef EXCEPTION_TYPES_H
-#define EXCEPTION_TYPES_H
+#pragma once
+
+//#ifndef EXCEPTION_TYPES_H
+//#define EXCEPTION_TYPES_H
 
 #include <stdexcept>
 #include <string>
@@ -49,4 +51,4 @@ public:
 };
 }  // namespace pilz_industrial_motion_planner_testutils
 
-#endif  // EXCEPTION_TYPES_H
+//#endif  // EXCEPTION_TYPES_H

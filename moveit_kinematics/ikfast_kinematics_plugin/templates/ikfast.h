@@ -36,8 +36,10 @@
 #include <list>
 #include <stdexcept>
 
-#ifndef IKFAST_HEADER_COMMON
-#define IKFAST_HEADER_COMMON
+#pragma once
+
+//#ifndef IKFAST_HEADER_COMMON replaced with pragma once
+//#define IKFAST_HEADER_COMMON
 
 /// should be the same as ikfast.__version__
 #define IKFAST_VERSION 61

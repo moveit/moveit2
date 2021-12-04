@@ -31,9 +31,10 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+#pragma once
 
-#ifndef CIRCAUXILIARY_H
-#define CIRCAUXILIARY_H
+//#ifndef CIRCAUXILIARY_H replaced with pragma once
+//#define CIRCAUXILIARY_H
 
 #include <string>
 
@@ -88,4 +89,4 @@ inline moveit_msgs::Constraints CircAuxiliary<ConfigType, BuilderType>::toPathCo
 }
 }  // namespace pilz_industrial_motion_planner_testutils
 
-#endif  // CIRCAUXILIARY_H
+//#endif  // CIRCAUXILIARY_H

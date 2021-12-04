@@ -31,9 +31,10 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+#pragma once
 
-#ifndef CARTESIANCONFIGURATION_H
-#define CARTESIANCONFIGURATION_H
+//#ifndef CARTESIANCONFIGURATION_H replaced with pragma once
+//#define CARTESIANCONFIGURATION_H
 
 #include <vector>
 #include <sstream>
@@ -183,4 +184,4 @@ inline const boost::optional<double> CartesianConfiguration::getAngleTolerance()
 }
 }  // namespace pilz_industrial_motion_planner_testutils
 
-#endif  // CARTESIANCONFIGURATION_H
+//#endif  // CARTESIANCONFIGURATION_H

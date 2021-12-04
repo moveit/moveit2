@@ -32,8 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JOINT_LIMITS_INTERFACE_EXTENSION_H
-#define JOINT_LIMITS_INTERFACE_EXTENSION_H
+#pragma once
+
+//#ifndef JOINT_LIMITS_INTERFACE_EXTENSION_H replaced with pragma once
+//#define JOINT_LIMITS_INTERFACE_EXTENSION_H
 
 #include "pilz_industrial_motion_planner/joint_limits_extension.h"
 #include <joint_limits_interface/joint_limits_rosparam.h>
@@ -98,4 +100,4 @@ inline bool getJointLimits(const std::string& joint_name, const ros::NodeHandle&
 }  // namespace joint_limits_interface
 }  // namespace pilz_industrial_motion_planner
 
-#endif  // JOINT_LIMITS_INTERFACE_EXTENSION_H
+//#endif  // JOINT_LIMITS_INTERFACE_EXTENSION_H

@@ -31,9 +31,10 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+#pragma once
 
-#ifndef CIRC_AUXILIARY_TYPES_H
-#define CIRC_AUXILIARY_TYPES_H
+//#ifndef CIRC_AUXILIARY_TYPES_H replaced with pragma once
+//#define CIRC_AUXILIARY_TYPES_H
 
 #include "center.h"
 #include "interim.h"
@@ -46,4 +47,4 @@ using CartesianCenter = Center<CartesianConfiguration, CartesianPathConstraintsB
 using CartesianInterim = Interim<CartesianConfiguration, CartesianPathConstraintsBuilder>;
 }  // namespace pilz_industrial_motion_planner_testutils
 
-#endif  // CIRC_AUXILIARY_TYPES_H
+//#endif  // CIRC_AUXILIARY_TYPES_H
