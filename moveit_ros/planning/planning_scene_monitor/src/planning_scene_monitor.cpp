@@ -1034,7 +1034,7 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
   boost::shared_lock<boost::shared_mutex> lock(scene_update_mutex_);
   rclcpp::Time prev_robot_motion_time = last_robot_motion_time_;
   while (last_robot_motion_time_ < t &&  // Wait until the state update actually reaches the scene.
-         timeout > rclcpp::Duration(0))
+         timeout > rclcpp::Duration(0, 0))
   {
     RCLCPP_DEBUG(LOGGER, "last robot motion: %f ago", (t - last_robot_motion_time_).seconds());
     new_scene_update_condition_.wait_for(lock, boost::chrono::nanoseconds(static_cast<int>(timeout.seconds())));
