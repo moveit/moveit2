@@ -32,6 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <rclcpp/logging.hpp>
+
 #include "pilz_industrial_motion_planner/pilz_industrial_motion_planner.h"
 
 #include "pilz_industrial_motion_planner/planning_context_loader.h"
@@ -50,12 +52,14 @@
 
 namespace pilz_industrial_motion_planner
 {
-static const std::string PARAM_NAMESPACE_LIMTS = "robot_description_planning";
+static const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner");
 
-bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, const std::string& ns)
+bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
+                                const std::string& ns)
 {
   // Call parent class initialize
-  planning_interface::PlannerManager::initialize(model, ns);
+  planning_interface::PlannerManager::initialize(model, node, ns);
 
   // Store the model and the namespace
   model_ = model;
@@ -63,11 +67,11 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
 
   // Obtain the aggregated joint limits
   aggregated_limit_active_joints_ = pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
-      ros::NodeHandle(PARAM_NAMESPACE_LIMTS), model->getActiveJointModels());
+      node, PARAM_NAMESPACE_LIMITS, model->getActiveJointModels());
 
   // Obtain cartesian limits
-  cartesian_limit_ = pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(
-      ros::NodeHandle(PARAM_NAMESPACE_LIMTS));
+  cartesian_limit_ =
+      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node, PARAM_NAMESPACE_LIMITS);
 
   // Load the planning context loader
   planner_context_loader = std::make_unique<pluginlib::ClassLoader<PlanningContextLoader>>(
@@ -81,13 +85,13 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
     ss << factory << " ";
   }
 
-  ROS_INFO_STREAM("Available plugins: " << ss.str());
+  RCLCPP_INFO_STREAM(LOGGER, "Available plugins: " << ss.str());
 
   // Load each factory
   for (const auto& factory : factories)
   {
-    ROS_INFO_STREAM("About to load: " << factory);
-    PlanningContextLoaderPtr loader_pointer(planner_context_loader->createInstance(factory));
+    RCLCPP_INFO_STREAM(LOGGER, "About to load: " << factory);
+    PlanningContextLoaderPtr loader_pointer(planner_context_loader->createSharedInstance(factory));
 
     pilz_industrial_motion_planner::LimitsContainer limits;
     limits.setJointLimits(aggregated_limit_active_joints_);
@@ -119,15 +123,18 @@ void CommandPlanner::getPlanningAlgorithms(std::vector<std::string>& algs) const
 
 planning_interface::PlanningContextPtr
 CommandPlanner::getPlanningContext(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                   const moveit_msgs::MotionPlanRequest& req,
-                                   moveit_msgs::MoveItErrorCodes& error_code) const
+                                   const moveit_msgs::msg::MotionPlanRequest& req,
+                                   moveit_msgs::msg::MoveItErrorCodes& error_code) const
 {
-  ROS_DEBUG_STREAM("Loading PlanningContext for request\n<request>\n" << req << "\n</request>");
+  // TODO(henningkayser): print req
+  // RCLCPP_DEBUG_STREAM(LOGGER, "Loading PlanningContext for request\n<request>\n" << req << "\n</request>");
+  RCLCPP_DEBUG(LOGGER, "Loading PlanningContext");
 
   // Check that a loaded for this request exists
   if (!canServiceRequest(req))
   {
-    ROS_ERROR_STREAM("No ContextLoader for planner_id " << req.planner_id.c_str() << " found. Planning not possible.");
+    RCLCPP_ERROR_STREAM(LOGGER, "No ContextLoader for planner_id " << req.planner_id.c_str()
+                                                                   << " found. Planning not possible.");
     return nullptr;
   }
 
@@ -135,19 +142,19 @@ CommandPlanner::getPlanningContext(const planning_scene::PlanningSceneConstPtr& 
 
   if (context_loader_map_.at(req.planner_id)->loadContext(planning_context, req.planner_id, req.group_name))
   {
-    ROS_DEBUG_STREAM("Found planning context loader for " << req.planner_id << " group:" << req.group_name);
+    RCLCPP_DEBUG_STREAM(LOGGER, "Found planning context loader for " << req.planner_id << " group:" << req.group_name);
     planning_context->setMotionPlanRequest(req);
     planning_context->setPlanningScene(planning_scene);
     return planning_context;
   }
   else
   {
-    error_code.val = moveit_msgs::MoveItErrorCodes::PLANNING_FAILED;
+    error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
     return nullptr;
   }
 }
 
-bool CommandPlanner::canServiceRequest(const moveit_msgs::MotionPlanRequest& req) const
+bool CommandPlanner::canServiceRequest(const moveit_msgs::msg::MotionPlanRequest& req) const
 {
   return context_loader_map_.find(req.planner_id) != context_loader_map_.end();
 }
@@ -159,7 +166,7 @@ void CommandPlanner::registerContextLoader(
   if (context_loader_map_.find(planning_context_loader->getAlgorithm()) == context_loader_map_.end())
   {
     context_loader_map_[planning_context_loader->getAlgorithm()] = planning_context_loader;
-    ROS_INFO_STREAM("Registered Algorithm [" << planning_context_loader->getAlgorithm() << "]");
+    RCLCPP_INFO_STREAM(LOGGER, "Registered Algorithm [" << planning_context_loader->getAlgorithm() << "]");
   }
   else
   {

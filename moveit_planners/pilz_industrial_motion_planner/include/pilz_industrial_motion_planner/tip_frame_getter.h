@@ -43,8 +43,8 @@
 
 namespace pilz_industrial_motion_planner
 {
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoSolverException, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(MoreThanOneTipFrameException, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoSolverException, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(MoreThanOneTipFrameException, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
 
 /**
  * @returns true if the JointModelGroup has a solver, false otherwise.
