@@ -32,7 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include "ros/ros.h"
+#include <limits>
+#include <rclcpp/rclcpp.hpp>
 
 #include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
 
@@ -45,50 +46,75 @@ static const std::string PARAM_MAX_ROT_VEL = "max_rot_vel";
 static const std::string PARAM_MAX_ROT_ACC = "max_rot_acc";
 static const std::string PARAM_MAX_ROT_DEC = "max_rot_dec";
 
-pilz_industrial_motion_planner::CartesianLimit
-pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(const ros::NodeHandle& nh)
+// TODO(sjahr) Refactor and use repository wide solution
+bool declareAndGetParam(double& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node)
 {
-  std::string param_prefix = PARAM_CARTESIAN_LIMITS_NS + "/";
+  try
+  {
+    if (!node->has_parameter(param_name))
+    {
+      node->declare_parameter<double>(param_name, std::numeric_limits<double>::quiet_NaN());
+    }
+    node->get_parameter<double>(param_name, output_value);
+    if (std::isnan(output_value))
+    {
+      RCLCPP_ERROR(node->get_logger(), "Parameter \'%s\', is not set in the config file.", param_name.c_str());
+      return false;
+    }
+    return true;
+  }
+  catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
+  {
+    RCLCPP_WARN(node->get_logger(), "InvalidParameterTypeException(\'%s\'): %s", param_name.c_str(), e.what());
+    RCLCPP_ERROR(node->get_logger(), "Error getting parameter \'%s\', check parameter type in YAML file",
+                 param_name.c_str());
+    throw e;
+  }
+}
+
+pilz_industrial_motion_planner::CartesianLimit
+pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(const rclcpp::Node::SharedPtr& node,
+                                                                               const std::string& param_namespace)
+{
+  std::string param_prefix = param_namespace + "." + PARAM_CARTESIAN_LIMITS_NS + ".";
 
   pilz_industrial_motion_planner::CartesianLimit cartesian_limit;
 
   // translational velocity
   double max_trans_vel;
-  if (nh.getParam(param_prefix + PARAM_MAX_TRANS_VEL, max_trans_vel))
+  if (declareAndGetParam(max_trans_vel, param_prefix + PARAM_MAX_TRANS_VEL, node))
   {
     cartesian_limit.setMaxTranslationalVelocity(max_trans_vel);
   }
 
   // translational acceleration
   double max_trans_acc;
-  if (nh.getParam(param_prefix + PARAM_MAX_TRANS_ACC, max_trans_acc))
+  if (declareAndGetParam(max_trans_acc, param_prefix + PARAM_MAX_TRANS_ACC, node))
   {
     cartesian_limit.setMaxTranslationalAcceleration(max_trans_acc);
   }
 
   // translational deceleration
   double max_trans_dec;
-  if (nh.getParam(param_prefix + PARAM_MAX_TRANS_DEC, max_trans_dec))
+  if (declareAndGetParam(max_trans_dec, param_prefix + PARAM_MAX_TRANS_DEC, node))
   {
     cartesian_limit.setMaxTranslationalDeceleration(max_trans_dec);
   }
 
   // rotational velocity
   double max_rot_vel;
-  if (nh.getParam(param_prefix + PARAM_MAX_ROT_VEL, max_rot_vel))
+  if (declareAndGetParam(max_rot_vel, param_prefix + PARAM_MAX_ROT_VEL, node))
   {
     cartesian_limit.setMaxRotationalVelocity(max_rot_vel);
   }
 
   // rotational acceleration + deceleration deprecated
   // LCOV_EXCL_START
-  if (nh.hasParam(param_prefix + PARAM_MAX_ROT_ACC) || nh.hasParam(param_prefix + PARAM_MAX_ROT_DEC))
+  if (node->has_parameter(param_prefix + PARAM_MAX_ROT_ACC) || node->has_parameter(param_prefix + PARAM_MAX_ROT_DEC))
   {
-    ROS_WARN_STREAM("Ignoring cartesian limits parameters for rotational "
-                    "acceleration / deceleration;"
-                    << "these parameters are deprecated and are automatically "
-                       "calculated from"
-                    << "translational to rotational ratio.");
+    RCLCPP_WARN(node->get_logger(),
+                "Ignoring cartesian limits parameters for rotational acceleration / deceleration; these parameters are "
+                "deprecated and are automatically calculated from translational to rotational ratio.");
   }
   // LCOV_EXCL_STOP
 

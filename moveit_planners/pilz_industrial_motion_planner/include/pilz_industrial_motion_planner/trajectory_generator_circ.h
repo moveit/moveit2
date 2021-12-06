@@ -45,18 +45,22 @@ using namespace pilz_industrial_motion_planner;
 
 namespace pilz_industrial_motion_planner
 {
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircleNoPlane, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircleToSmall, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CenterPointDifferentRadius, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircTrajectoryConversionFailure, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(UnknownPathConstraintName, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoPositionConstraints, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoPrimitivePose, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircleNoPlane, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircleToSmall, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CenterPointDifferentRadius, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircTrajectoryConversionFailure,
+                                   moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(UnknownPathConstraintName, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoPositionConstraints, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoPrimitivePose, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
 
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(UnknownLinkNameOfAuxiliaryPoint, moveit_msgs::MoveItErrorCodes::INVALID_LINK_NAME);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NumberOfConstraintsMismatch, moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircJointMissingInStartState, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircInverseForGoalIncalculable, moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(UnknownLinkNameOfAuxiliaryPoint,
+                                   moveit_msgs::msg::MoveItErrorCodes::INVALID_LINK_NAME);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NumberOfConstraintsMismatch,
+                                   moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircJointMissingInStartState,
+                                   moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircInverseForGoalIncalculable, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
 
 /**
  * @brief This class implements a trajectory generator of arcs in Cartesian
@@ -78,7 +82,7 @@ public:
    * @throw TrajectoryGeneratorInvalidLimitsException
    *
    */
-  TrajectoryGeneratorCIRC(const robot_model::RobotModelConstPtr& robot_model,
+  TrajectoryGeneratorCIRC(const moveit::core::RobotModelConstPtr& robot_model,
                           const pilz_industrial_motion_planner::LimitsContainer& planner_limits);
 
 private:
@@ -89,7 +93,7 @@ private:
 
   void plan(const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
             const MotionPlanInfo& plan_info, const double& sampling_time,
-            trajectory_msgs::JointTrajectory& joint_trajectory) override;
+            trajectory_msgs::msg::JointTrajectory& joint_trajectory) override;
 
   /**
    * @brief Construct a KDL::Path object for a Cartesian path of an arc.

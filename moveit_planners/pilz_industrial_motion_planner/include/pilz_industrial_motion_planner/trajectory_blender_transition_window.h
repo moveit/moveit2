@@ -107,7 +107,7 @@ private:
    * @return
    */
   bool validateRequest(const pilz_industrial_motion_planner::TrajectoryBlendRequest& req, double& sampling_time,
-                       moveit_msgs::MoveItErrorCodes& error_code) const;
+                       moveit_msgs::msg::MoveItErrorCodes& error_code) const;
   /**
    * @brief searchBlendPoint
    * @param req: trajectory blend request

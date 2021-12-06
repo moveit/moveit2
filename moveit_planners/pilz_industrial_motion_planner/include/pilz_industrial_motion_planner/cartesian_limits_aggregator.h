@@ -34,18 +34,19 @@
 
 #pragma once
 
+#include <rclcpp/rclcpp.hpp>
 #include "pilz_industrial_motion_planner/cartesian_limit.h"
 
 namespace pilz_industrial_motion_planner
 {
 /**
- * @brief Obtains cartesian limits from the parameter server
+ * @brief Obtains cartesian limits from the node parameters
  */
 class CartesianLimitsAggregator
 {
 public:
   /**
-   * @brief Loads cartesian limits from the parameter server
+   * @brief Loads cartesian limits from the node parameters
    *
    * The parameters are expected to be under "~/cartesian_limits" of the given
    * node handle.
@@ -56,10 +57,11 @@ public:
    * - "max_rot_vel", the maximum rotational velocity [rad/s]
    * - "max_rot_acc", the maximum rotational acceleration [rad/s^2]
    * - "max_rot_dec", the maximum rotational deceleration (<= 0)[rad/s^2]
-   * @param nh node handle to access the parameters
+   * @param node node to access the parameters
+   * @param param_namespace the parameter name to access the parameters
    * @return the obtained cartesian limits
    */
-  static CartesianLimit getAggregatedLimits(const ros::NodeHandle& nh);
+  static CartesianLimit getAggregatedLimits(const rclcpp::Node::SharedPtr& node, const std::string& param_namespace);
 };
 
 }  // namespace pilz_industrial_motion_planner

@@ -40,9 +40,9 @@
 
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit_msgs/MotionPlanResponse.h>
+#include <moveit_msgs/msg/motion_plan_response.hpp>
+#include <moveit_msgs/msg/motion_sequence_request.hpp>
 
-#include "moveit_msgs/MotionSequenceRequest.h"
 #include "pilz_industrial_motion_planner/plan_components_builder.h"
 #include "pilz_industrial_motion_planner/trajectory_blender.h"
 #include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
@@ -52,11 +52,14 @@ namespace pilz_industrial_motion_planner
 using RobotTrajCont = std::vector<robot_trajectory::RobotTrajectoryPtr>;
 
 // List of exceptions which can be thrown by the CommandListManager class.
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NegativeBlendRadiusException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LastBlendRadiusNotZeroException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(StartStateSetException, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(OverlappingBlendRadiiException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PlanningPipelineException, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NegativeBlendRadiusException,
+                                   moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LastBlendRadiusNotZeroException,
+                                   moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(StartStateSetException, moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(OverlappingBlendRadiiException,
+                                   moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PlanningPipelineException, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
 
 /**
  * @brief This class orchestrates the planning of single commands and
@@ -65,7 +68,7 @@ CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PlanningPipelineException, moveit_msgs::MoveI
 class CommandListManager
 {
 public:
-  CommandListManager(const ros::NodeHandle& nh, const robot_model::RobotModelConstPtr& model);
+  CommandListManager(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& model);
 
   /**
    * @brief Generates trajectories for the specified list of motion commands.
@@ -100,11 +103,11 @@ public:
    */
   RobotTrajCont solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
                       const planning_pipeline::PlanningPipelinePtr& planning_pipeline,
-                      const moveit_msgs::MotionSequenceRequest& req_list);
+                      const moveit_msgs::msg::MotionSequenceRequest& req_list);
 
 private:
   using MotionResponseCont = std::vector<planning_interface::MotionPlanResponse>;
-  using RobotState_OptRef = boost::optional<const robot_state::RobotState&>;
+  using RobotState_OptRef = boost::optional<const moveit::core::RobotState&>;
   using RadiiCont = std::vector<double>;
   using GroupNamesCont = std::vector<std::string>;
 
@@ -129,7 +132,7 @@ private:
    */
   MotionResponseCont solveSequenceItems(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                         const planning_pipeline::PlanningPipelinePtr& planning_pipeline,
-                                        const moveit_msgs::MotionSequenceRequest& req_list) const;
+                                        const moveit_msgs::msg::MotionSequenceRequest& req_list) const;
 
   /**
    * @return TRUE if the blending radii of specified trajectories overlap,
@@ -152,7 +155,7 @@ private:
    * from group.
    */
   static void setStartState(const MotionResponseCont& motion_plan_responses, const std::string& group_name,
-                            moveit_msgs::RobotState& start_state);
+                            moveit_msgs::msg::RobotState& start_state);
 
   /**
    * @return Container of radii extracted from the specified request list.
@@ -163,7 +166,7 @@ private:
    * - blend raddi between different groups.
    */
   static RadiiCont extractBlendRadii(const moveit::core::RobotModel& model,
-                                     const moveit_msgs::MotionSequenceRequest& req_list);
+                                     const moveit_msgs::msg::MotionSequenceRequest& req_list);
 
   /**
    * @return True in case of an invalid blend radii between specified
@@ -171,40 +174,42 @@ private:
    * - blend radii between end-effectors and
    * - blend raddi between different groups.
    */
-  static bool isInvalidBlendRadii(const moveit::core::RobotModel& model, const moveit_msgs::MotionSequenceItem& item_A,
-                                  const moveit_msgs::MotionSequenceItem& item_B);
+  static bool isInvalidBlendRadii(const moveit::core::RobotModel& model,
+                                  const moveit_msgs::msg::MotionSequenceItem& item_A,
+                                  const moveit_msgs::msg::MotionSequenceItem& item_B);
 
   /**
    * @brief Checks that all blend radii are greater or equal to zero.
    */
-  static void checkForNegativeRadii(const moveit_msgs::MotionSequenceRequest& req_list);
+  static void checkForNegativeRadii(const moveit_msgs::msg::MotionSequenceRequest& req_list);
 
   /**
    * @brief Checks that last blend radius is zero.
    */
-  static void checkLastBlendRadiusZero(const moveit_msgs::MotionSequenceRequest& req_list);
+  static void checkLastBlendRadiusZero(const moveit_msgs::msg::MotionSequenceRequest& req_list);
 
   /**
    * @brief Checks that only the first request of the specified group has
    * a start state in the specified request list.
    */
-  static void checkStartStatesOfGroup(const moveit_msgs::MotionSequenceRequest& req_list, const std::string& group_name);
+  static void checkStartStatesOfGroup(const moveit_msgs::msg::MotionSequenceRequest& req_list,
+                                      const std::string& group_name);
 
   /**
    * @brief Checks that each group in the specified request list has only
    * one start state.
    */
-  static void checkStartStates(const moveit_msgs::MotionSequenceRequest& req_list);
+  static void checkStartStates(const moveit_msgs::msg::MotionSequenceRequest& req_list);
 
   /**
    * @return Returns all group names which are present in the specified
    * request.
    */
-  static GroupNamesCont getGroupNames(const moveit_msgs::MotionSequenceRequest& req_list);
+  static GroupNamesCont getGroupNames(const moveit_msgs::msg::MotionSequenceRequest& req_list);
 
 private:
-  //! Node handle
-  ros::NodeHandle nh_;
+  //! Node
+  const rclcpp::Node::SharedPtr node_;
 
   //! Robot model
   moveit::core::RobotModelConstPtr model_;
@@ -214,7 +219,7 @@ private:
   PlanComponentsBuilder plan_comp_builder_;
 };
 
-inline void CommandListManager::checkLastBlendRadiusZero(const moveit_msgs::MotionSequenceRequest& req_list)
+inline void CommandListManager::checkLastBlendRadiusZero(const moveit_msgs::msg::MotionSequenceRequest& req_list)
 {
   if (req_list.items.back().blend_radius != 0.0)
   {
