@@ -1030,7 +1030,7 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
   // However, scene updates are only published if the robot actually moves. Hence we need a timeout!
   // As publishing planning scene updates is throttled (2Hz by default), a 1s timeout is a suitable default.
   auto start = node_->get_clock()->now();
-  auto timeout = rclcpp::Duration(wait_time);
+  auto timeout = rclcpp::Duration::from_seconds(wait_time);
   boost::shared_lock<boost::shared_mutex> lock(scene_update_mutex_);
   rclcpp::Time prev_robot_motion_time = last_robot_motion_time_;
   while (last_robot_motion_time_ < t &&  // Wait until the state update actually reaches the scene.
