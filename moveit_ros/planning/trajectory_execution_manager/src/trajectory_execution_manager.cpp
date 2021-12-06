@@ -51,8 +51,8 @@ const std::string TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC = "trajector
 
 static const auto DEFAULT_CONTROLLER_INFORMATION_VALIDITY_AGE = rclcpp::Duration::from_seconds(1);
 constexpr double DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN = 0.5;  // allow 0.5s more than the expected execution time
-                                                                    // before triggering a trajectory cancel (applied
-                                                                    // after scaling)
+                                                                 // before triggering a trajectory cancel (applied
+                                                                 // after scaling)
 // allow the execution of a trajectory to take more time than expected (scaled by a value > 1)
 constexpr double DEFAULT_CONTROLLER_GOAL_DURATION_SCALING = 1.1;
 
