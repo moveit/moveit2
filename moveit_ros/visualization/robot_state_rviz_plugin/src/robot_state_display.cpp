@@ -386,7 +386,7 @@ void RobotStateDisplay::initializeLoader()
     return;
   }
 
-  rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_, robot_description_property_->getStdString());
+  rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_, robot_description_property_->getStdString(), true);
   loadRobotModel();
   rdf_loader_->setNewModelCallback(std::bind(&RobotStateDisplay::loadRobotModel, this));
 }

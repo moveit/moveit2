@@ -61,10 +61,16 @@ public:
    *  If the parameter does not exist, attempt to subscribe to topics
    *  with the same name and type std_msgs::msg::String.
    *
+   *  (specifying default_continuous_value/default_timeout allows users
+   *   to specify values without setting ros parameters)
+   *
    *  @param node ROS interface for parameters / topics
    *  @param ros_name The string name corresponding to the URDF
+   *  @param default_continuous_value Default value for parameter with "_continuous" suffix.
+   *  @param default_timeout Default value for parameter with "_timeout" suffix.
    */
-  RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name = "robot_description");
+  RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name = "robot_description",
+            bool default_continuous_value = false, double default_timeout = 10.0);
 
   /** @brief Initialize the robot model from a string representation of the URDF and SRDF documents */
   RDFLoader(const std::string& urdf_string, const std::string& srdf_string);

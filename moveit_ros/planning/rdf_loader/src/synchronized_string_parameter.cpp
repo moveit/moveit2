@@ -39,7 +39,8 @@
 namespace rdf_loader
 {
 std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<rclcpp::Node>& node,
-                                                          const std::string& name, StringCallback parent_callback)
+                                                          const std::string& name, StringCallback parent_callback,
+                                                          bool default_continuous_value, double default_timeout)
 {
   node_ = node;
   name_ = name;
@@ -66,7 +67,7 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
     node_->declare_parameter(keep_open_param, rclcpp::ParameterType::PARAMETER_BOOL);
   }
   bool keep_open;
-  node_->get_parameter_or(keep_open_param, keep_open, false);
+  node_->get_parameter_or(keep_open_param, keep_open, default_continuous_value);
 
   std::string timeout_param = name_ + "_timeout";
   if (!node_->has_parameter(timeout_param))
@@ -74,7 +75,7 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
     node_->declare_parameter(timeout_param, rclcpp::ParameterType::PARAMETER_DOUBLE);
   }
   double d_timeout;
-  node_->get_parameter_or(timeout_param, d_timeout, 10.0);  // ten second default
+  node_->get_parameter_or(timeout_param, d_timeout, default_timeout);  // ten second default
   rclcpp::Duration timeout = rclcpp::Duration::from_seconds(d_timeout);
 
   if (!waitForMessage(timeout))

@@ -57,19 +57,23 @@ namespace rdf_loader
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_rdf_loader.rdf_loader");
 
-RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name) : ros_name_(ros_name)
+RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name,
+                     bool default_continuous_value, double default_timeout)
+  : ros_name_(ros_name)
 {
   moveit::tools::Profiler::ScopedStart prof_start;
   moveit::tools::Profiler::ScopedBlock prof_block("RDFLoader(robot_description)");
 
   auto start = node->now();
 
-  urdf_string_ = urdf_ssp_.loadInitialValue(node, ros_name,
-                                            std::bind(&RDFLoader::urdfUpdateCallback, this, std::placeholders::_1));
+  urdf_string_ =
+      urdf_ssp_.loadInitialValue(node, ros_name, std::bind(&RDFLoader::urdfUpdateCallback, this, std::placeholders::_1),
+                                 default_continuous_value, default_timeout);
 
   const std::string srdf_name = ros_name + "_semantic";
   srdf_string_ = srdf_ssp_.loadInitialValue(node, srdf_name,
-                                            std::bind(&RDFLoader::srdfUpdateCallback, this, std::placeholders::_1));
+                                            std::bind(&RDFLoader::srdfUpdateCallback, this, std::placeholders::_1),
+                                            default_continuous_value, default_timeout);
 
   if (!loadFromStrings())
   {
