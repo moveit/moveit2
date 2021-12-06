@@ -166,7 +166,7 @@ TEST(CurrentStateMonitorTests, HaveCompleteStateConstructFalse)
   // GIVEN a CurrentStateMonitor
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
     std::make_unique<MockMiddlewareHandle>(), moveit::core::loadTestingRobotModel("panda"),
-    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()), false
   };
 
   // WHEN it is constructed
@@ -188,7 +188,7 @@ TEST(CurrentStateMonitorTests, WaitForCompleteStateWaits)
   // GIVEN a CurrentStateMonitor
   planning_scene_monitor::CurrentStateMonitor current_state_monitor{
     std::move(mock_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
-    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
+    std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()), false
   };
 
   // WHEN we wait for complete state for 1s
