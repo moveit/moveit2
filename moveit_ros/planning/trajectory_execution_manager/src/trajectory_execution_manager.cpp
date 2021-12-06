@@ -181,6 +181,8 @@ void TrajectoryExecutionManager::initialize()
       EXECUTION_EVENT_TOPIC, 100, std::bind(&TrajectoryExecutionManager::receiveEvent, this, std::placeholders::_1),
       options);
 
+  controller_mgr_node_->get_parameter("trajectory_execution.execution_duration_monitoring",
+                                      execution_duration_monitoring_);
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_execution_duration_scaling",
                                       allowed_execution_duration_scaling_);
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_goal_duration_margin",
