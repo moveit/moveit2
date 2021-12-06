@@ -1,0 +1,7 @@
+planning_group : "manipulator"
+target_link : "prbt_tcp"
+cartesian_position_tolerance : 1.0e-3
+angular_acc_tolerance : 1.0e-3
+rot_axis_norm_tolerance : 1.0e-6
+acceleration_tolerance : 1.0e-3
+other_tolerance : 1.0e-6

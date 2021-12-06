@@ -37,7 +37,7 @@
 
 #include <string>
 
-#include <moveit_msgs/Constraints.h>
+#include <moveit_msgs/msg/constraints.hpp>
 
 namespace pilz_industrial_motion_planner_testutils
 {
@@ -54,7 +54,7 @@ public:
   const ConfigType& getConfiguration() const;
 
 public:
-  moveit_msgs::Constraints toPathConstraints() const;
+  moveit_msgs::msg::Constraints toPathConstraints() const;
 
 private:
   virtual std::string getConstraintName() const = 0;
@@ -82,7 +82,7 @@ inline const ConfigType& CircAuxiliary<ConfigType, BuilderType>::getConfiguratio
 }
 
 template <class ConfigType, class BuilderType>
-inline moveit_msgs::Constraints CircAuxiliary<ConfigType, BuilderType>::toPathConstraints() const
+inline moveit_msgs::msg::Constraints CircAuxiliary<ConfigType, BuilderType>::toPathConstraints() const
 {
   return BuilderType().setConstraintName(getConstraintName()).setConfiguration(getConfiguration()).toPathConstraints();
 }

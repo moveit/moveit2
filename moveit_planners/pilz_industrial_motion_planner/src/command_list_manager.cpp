@@ -40,7 +40,7 @@
 
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/robot_state/conversions.h>
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 #include "pilz_industrial_motion_planner/cartesian_limits_aggregator.h"
 #include "pilz_industrial_motion_planner/joint_limits_aggregator.h"
@@ -51,20 +51,21 @@
 namespace pilz_industrial_motion_planner
 {
 static const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.command_list_manager");
 
-CommandListManager::CommandListManager(const ros::NodeHandle& nh, const moveit::core::RobotModelConstPtr& model)
-  : nh_(nh), model_(model)
+CommandListManager::CommandListManager(const rclcpp::Node::SharedPtr& node,
+                                       const moveit::core::RobotModelConstPtr& model)
+  : node_(node), model_(model)
 {
   // Obtain the aggregated joint limits
   pilz_industrial_motion_planner::JointLimitsContainer aggregated_limit_active_joints;
 
   aggregated_limit_active_joints = pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
-      ros::NodeHandle(PARAM_NAMESPACE_LIMITS), model_->getActiveJointModels());
+      node_, PARAM_NAMESPACE_LIMITS, model_->getActiveJointModels());
 
   // Obtain cartesian limits
   pilz_industrial_motion_planner::CartesianLimit cartesian_limit =
-      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(
-          ros::NodeHandle(PARAM_NAMESPACE_LIMITS));
+      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node_, PARAM_NAMESPACE_LIMITS);
 
   pilz_industrial_motion_planner::LimitsContainer limits;
   limits.setJointLimits(aggregated_limit_active_joints);
@@ -77,7 +78,7 @@ CommandListManager::CommandListManager(const ros::NodeHandle& nh, const moveit::
 
 RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                         const planning_pipeline::PlanningPipelinePtr& planning_pipeline,
-                                        const moveit_msgs::MotionSequenceRequest& req_list)
+                                        const moveit_msgs::msg::MotionSequenceRequest& req_list)
 {
   if (req_list.items.empty())
   {
@@ -167,7 +168,7 @@ CommandListManager::getPreviousEndState(const MotionResponseCont& motion_plan_re
 }
 
 void CommandListManager::setStartState(const MotionResponseCont& motion_plan_responses, const std::string& group_name,
-                                       moveit_msgs::RobotState& start_state)
+                                       moveit_msgs::msg::RobotState& start_state)
 {
   RobotState_OptRef rob_state_op{ getPreviousEndState(motion_plan_responses, group_name) };
   if (rob_state_op)
@@ -177,8 +178,8 @@ void CommandListManager::setStartState(const MotionResponseCont& motion_plan_res
 }
 
 bool CommandListManager::isInvalidBlendRadii(const moveit::core::RobotModel& model,
-                                             const moveit_msgs::MotionSequenceItem& item_A,
-                                             const moveit_msgs::MotionSequenceItem& item_B)
+                                             const moveit_msgs::msg::MotionSequenceItem& item_A,
+                                             const moveit_msgs::msg::MotionSequenceItem& item_B)
 {
   // Zero blend radius is always valid
   if (item_A.blend_radius == 0.)
@@ -189,31 +190,33 @@ bool CommandListManager::isInvalidBlendRadii(const moveit::core::RobotModel& mod
   // No blending between different groups
   if (item_A.req.group_name != item_B.req.group_name)
   {
-    ROS_WARN_STREAM("Blending between different groups (in this case: \""
-                    << item_A.req.group_name << "\" and \"" << item_B.req.group_name << "\") not allowed");
+    RCLCPP_WARN_STREAM(LOGGER, "Blending between different groups (in this case: \""
+                                   << item_A.req.group_name << "\" and \"" << item_B.req.group_name
+                                   << "\") not allowed");
     return true;
   }
 
   // No blending for groups without solver
   if (!hasSolver(model.getJointModelGroup(item_A.req.group_name)))
   {
-    ROS_WARN_STREAM("Blending for groups without solver not allowed");
+    RCLCPP_WARN_STREAM(LOGGER, "Blending for groups without solver not allowed");
     return true;
   }
 
   return false;
 }
 
-CommandListManager::RadiiCont CommandListManager::extractBlendRadii(const moveit::core::RobotModel& model,
-                                                                    const moveit_msgs::MotionSequenceRequest& req_list)
+CommandListManager::RadiiCont
+CommandListManager::extractBlendRadii(const moveit::core::RobotModel& model,
+                                      const moveit_msgs::msg::MotionSequenceRequest& req_list)
 {
   RadiiCont radii(req_list.items.size(), 0.);
   for (RadiiCont::size_type i = 0; i < (radii.size() - 1); ++i)
   {
     if (isInvalidBlendRadii(model, req_list.items.at(i), req_list.items.at(i + 1)))
     {
-      ROS_WARN_STREAM("Invalid blend radii between commands: [" << i << "] and [" << i + 1
-                                                                << "] => Blend radii set to zero");
+      RCLCPP_WARN_STREAM(LOGGER, "Invalid blend radii between commands: [" << i << "] and [" << i + 1
+                                                                           << "] => Blend radii set to zero");
       continue;
     }
     radii.at(i) = req_list.items.at(i).blend_radius;
@@ -224,7 +227,7 @@ CommandListManager::RadiiCont CommandListManager::extractBlendRadii(const moveit
 CommandListManager::MotionResponseCont
 CommandListManager::solveSequenceItems(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                        const planning_pipeline::PlanningPipelinePtr& planning_pipeline,
-                                       const moveit_msgs::MotionSequenceRequest& req_list) const
+                                       const moveit_msgs::msg::MotionSequenceRequest& req_list) const
 {
   MotionResponseCont motion_plan_responses;
   size_t curr_req_index{ 0 };
@@ -239,29 +242,29 @@ CommandListManager::solveSequenceItems(const planning_scene::PlanningSceneConstP
     if (res.error_code_.val != res.error_code_.SUCCESS)
     {
       std::ostringstream os;
-      os << "Could not solve request\n---\n" << req << "\n---\n";
+      os << "Could not solve request\n";  // TODO(henning): re-enable "---\n" << req << "\n---\n";
       throw PlanningPipelineException(os.str(), res.error_code_.val);
     }
     motion_plan_responses.emplace_back(res);
-    ROS_DEBUG_STREAM("Solved [" << ++curr_req_index << "/" << num_req << "]");
+    RCLCPP_DEBUG_STREAM(LOGGER, "Solved [" << ++curr_req_index << "/" << num_req << "]");
   }
   return motion_plan_responses;
 }
 
-void CommandListManager::checkForNegativeRadii(const moveit_msgs::MotionSequenceRequest& req_list)
+void CommandListManager::checkForNegativeRadii(const moveit_msgs::msg::MotionSequenceRequest& req_list)
 {
   if (!std::all_of(req_list.items.begin(), req_list.items.end(),
-                   [](const moveit_msgs::MotionSequenceItem& req) { return (req.blend_radius >= 0.); }))
+                   [](const moveit_msgs::msg::MotionSequenceItem& req) { return (req.blend_radius >= 0.); }))
   {
     throw NegativeBlendRadiusException("All blending radii MUST be non negative");
   }
 }
 
-void CommandListManager::checkStartStatesOfGroup(const moveit_msgs::MotionSequenceRequest& req_list,
+void CommandListManager::checkStartStatesOfGroup(const moveit_msgs::msg::MotionSequenceRequest& req_list,
                                                  const std::string& group_name)
 {
   bool first_elem{ true };
-  for (const moveit_msgs::MotionSequenceItem& item : req_list.items)
+  for (const moveit_msgs::msg::MotionSequenceItem& item : req_list.items)
   {
     if (item.req.group_name != group_name)
     {
@@ -285,7 +288,7 @@ void CommandListManager::checkStartStatesOfGroup(const moveit_msgs::MotionSequen
   }
 }
 
-void CommandListManager::checkStartStates(const moveit_msgs::MotionSequenceRequest& req_list)
+void CommandListManager::checkStartStates(const moveit_msgs::msg::MotionSequenceRequest& req_list)
 {
   if (req_list.items.size() <= 1)
   {
@@ -299,11 +302,12 @@ void CommandListManager::checkStartStates(const moveit_msgs::MotionSequenceReque
   }
 }
 
-CommandListManager::GroupNamesCont CommandListManager::getGroupNames(const moveit_msgs::MotionSequenceRequest& req_list)
+CommandListManager::GroupNamesCont
+CommandListManager::getGroupNames(const moveit_msgs::msg::MotionSequenceRequest& req_list)
 {
   GroupNamesCont group_names;
   std::for_each(req_list.items.cbegin(), req_list.items.cend(),
-                [&group_names](const moveit_msgs::MotionSequenceItem& item) {
+                [&group_names](const moveit_msgs::msg::MotionSequenceItem& item) {
                   if (std::find(group_names.cbegin(), group_names.cend(), item.req.group_name) == group_names.cend())
                   {
                     group_names.emplace_back(item.req.group_name);

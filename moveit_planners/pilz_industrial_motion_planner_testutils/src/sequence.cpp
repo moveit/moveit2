@@ -65,21 +65,21 @@ public:
   }
 };
 
-moveit_msgs::MotionSequenceRequest Sequence::toRequest() const
+moveit_msgs::msg::MotionSequenceRequest Sequence::toRequest() const
 {
-  moveit_msgs::MotionSequenceRequest req;
+  moveit_msgs::msg::MotionSequenceRequest req;
 
   std::vector<std::string> group_names;
   for (const auto& cmd : cmds_)
   {
-    moveit_msgs::MotionSequenceItem item;
+    moveit_msgs::msg::MotionSequenceItem item;
     item.req = boost::apply_visitor(ToReqVisitor(), cmd.first);
 
     if (std::find(group_names.begin(), group_names.end(), item.req.group_name) != group_names.end())
     {
       // Remove start state because only the first request of a group
       // is allowed to have a start state in a sequence.
-      item.req.start_state = moveit_msgs::RobotState();
+      item.req.start_state = moveit_msgs::msg::RobotState();
     }
     else
     {

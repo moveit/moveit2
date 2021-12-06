@@ -694,7 +694,7 @@ PlanningContextLoaderCIRC
 --
 +getPlanningContext(const planning_scene::PlanningSceneConstPtr&amp; planning_scene,
 const planning_interface::MotionPlanRequest&amp; req,
-moveit_msgs::MoveItErrorCodes&amp; error_code):planning_interface::PlanningContextPtr
+moveit_msgs::msg::MoveItErrorCodes&amp; error_code):planning_interface::PlanningContextPtr
 --
 </panel_attributes>
     <additional_attributes/>
