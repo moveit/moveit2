@@ -50,9 +50,12 @@ const std::string UNDEFINED = "<undefined>";
 
 bool MoveItPlanningPipeline::initialize(const rclcpp::Node::SharedPtr& node)
 {
+  // TODO(andyz): how to standardize this for planning pipelines other than ompl?
+  // Maybe use loadPlanningPipelines() from moveit_cpp.cpp
+
   // Declare planning pipeline paramter
   node->declare_parameter<std::vector<std::string>>(PLANNING_PIPELINES_NS + "pipeline_names",
-                                                    std::vector<std::string>({ "ompl" }));
+                                                    std::vector<std::string>({ UNDEFINED }));
   node->declare_parameter<std::string>(PLANNING_PIPELINES_NS + "namespace", UNDEFINED);
 
   // Default PlanRequestParameters. These can be overriden when plan() is called
@@ -62,6 +65,7 @@ bool MoveItPlanningPipeline::initialize(const rclcpp::Node::SharedPtr& node)
   node->declare_parameter<double>(PLAN_REQUEST_PARAM_NS + "planning_time", 1.0);
   node->declare_parameter<double>(PLAN_REQUEST_PARAM_NS + "max_velocity_scaling_factor", 1.0);
   node->declare_parameter<double>(PLAN_REQUEST_PARAM_NS + "max_acceleration_scaling_factor", 1.0);
+  node->declare_parameter<std::string>("ompl.planning_plugin", "ompl_interface/OMPLPlanner");
 
   // Trajectory Execution Functionality (required by the MoveItPlanningPipeline but not used within hybrid planning)
   node->declare_parameter<std::string>("moveit_controller_manager", UNDEFINED);

@@ -55,7 +55,8 @@ def generate_common_hybrid_launch_description():
         "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
     )
 
-    ompl_planning_pipeline_config = {
+    # The global planner uses the typical OMPL parameters
+    planning_pipelines_config = {
         "ompl": {
             "planning_plugin": "ompl_interface/OMPLPlanner",
             "request_adapters": """default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints""",
@@ -65,8 +66,17 @@ def generate_common_hybrid_launch_description():
     ompl_planning_yaml = load_yaml(
         "moveit_resources_panda_moveit_config", "config/ompl_planning.yaml"
     )
-    ompl_planning_pipeline_config["ompl"].update(ompl_planning_yaml)
+    planning_pipelines_config["ompl"].update(ompl_planning_yaml)
 
+    moveit_simple_controllers_yaml = load_yaml(
+        "moveit_resources_panda_moveit_config", "config/panda_controllers.yaml"
+    )
+    moveit_controllers = {
+        "moveit_simple_controller_manager": moveit_simple_controllers_yaml,
+        "moveit_controller_manager": "moveit_simple_controller_manager/MoveItSimpleControllerManager",
+    }
+
+    # Any parameters that are unique to your plugins go here
     global_planner_param = load_yaml(
         "moveit_hybrid_planning", "config/global_planner.yaml"
     )
@@ -93,7 +103,8 @@ def generate_common_hybrid_launch_description():
                     robot_description,
                     robot_description_semantic,
                     kinematics_yaml,
-                    ompl_planning_pipeline_config,
+                    planning_pipelines_config,
+                    moveit_controllers
                 ],
             ),
             ComposableNode(
