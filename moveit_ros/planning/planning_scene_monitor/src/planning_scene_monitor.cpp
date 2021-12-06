@@ -1037,7 +1037,7 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
          timeout > rclcpp::Duration(0, 0))
   {
     RCLCPP_DEBUG(LOGGER, "last robot motion: %f ago", (t - last_robot_motion_time_).seconds());
-    new_scene_update_condition_.wait_for(lock, boost::chrono::nanoseconds(static_cast<int>(timeout.seconds())));
+    new_scene_update_condition_.wait_for(lock, boost::chrono::nanoseconds(timeout.nanoseconds()));
     timeout = timeout - (node_->get_clock()->now() - start);  // compute remaining wait_time
   }
   bool success = last_robot_motion_time_ >= t;
