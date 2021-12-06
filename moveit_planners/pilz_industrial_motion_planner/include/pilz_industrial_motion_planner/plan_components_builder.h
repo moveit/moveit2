@@ -51,10 +51,10 @@ namespace pilz_industrial_motion_planner
 using TipFrameFunc_t = std::function<const std::string&(const std::string&)>;
 
 // List of exceptions which can be thrown by the PlanComponentsBuilder class.
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoBlenderSetException, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoTipFrameFunctionSetException, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoRobotModelSetException, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(BlendingFailedException, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoBlenderSetException, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoTipFrameFunctionSetException, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoRobotModelSetException, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(BlendingFailedException, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
 
 /**
  * @brief Helper class to encapsulate the merge and blend process of

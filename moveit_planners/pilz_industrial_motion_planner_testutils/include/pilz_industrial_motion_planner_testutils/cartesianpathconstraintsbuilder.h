@@ -36,14 +36,14 @@
 
 #include <string>
 
-#include <moveit_msgs/Constraints.h>
+#include <moveit_msgs/msg/constraints.hpp>
 
 #include "cartesianconfiguration.h"
 
 namespace pilz_industrial_motion_planner_testutils
 {
 /**
- * @brief Helper class to build moveit_msgs::Constraints from a
+ * @brief Helper class to build moveit_msgs::msg::Constraints from a
  * given configuration.
  */
 class CartesianPathConstraintsBuilder
@@ -52,7 +52,7 @@ public:
   CartesianPathConstraintsBuilder& setConstraintName(const std::string& constraint_name);
   CartesianPathConstraintsBuilder& setConfiguration(const CartesianConfiguration& configuration);
 
-  moveit_msgs::Constraints toPathConstraints() const;
+  moveit_msgs::msg::Constraints toPathConstraints() const;
 
 private:
   std::string constraint_name_;
@@ -73,13 +73,13 @@ CartesianPathConstraintsBuilder::setConfiguration(const CartesianConfiguration& 
   return *this;
 }
 
-inline moveit_msgs::Constraints CartesianPathConstraintsBuilder::toPathConstraints() const
+inline moveit_msgs::msg::Constraints CartesianPathConstraintsBuilder::toPathConstraints() const
 {
-  moveit_msgs::PositionConstraint pos_constraint;
+  moveit_msgs::msg::PositionConstraint pos_constraint;
   pos_constraint.link_name = configuration_.getLinkName();
   pos_constraint.constraint_region.primitive_poses.push_back(configuration_.getPose());
 
-  moveit_msgs::Constraints path_constraints;
+  moveit_msgs::msg::Constraints path_constraints;
   path_constraints.name = constraint_name_;
   path_constraints.position_constraints.push_back(pos_constraint);
   return path_constraints;
