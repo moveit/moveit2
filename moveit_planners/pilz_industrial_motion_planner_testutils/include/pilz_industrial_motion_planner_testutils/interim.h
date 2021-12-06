@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef INTERIMAXILIARY_H
-//#define INTERIMAXILIARY_H
-
 #include "circauxiliary.h"
 
 namespace pilz_industrial_motion_planner_testutils

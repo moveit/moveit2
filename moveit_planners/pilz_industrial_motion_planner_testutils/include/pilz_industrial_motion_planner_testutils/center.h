@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef CENTERAUXILIARY_H replaced with pragma once
-//#define CENTERAUXILIARY_H
-
 #include "circauxiliary.h"
 
 namespace pilz_industrial_motion_planner_testutils

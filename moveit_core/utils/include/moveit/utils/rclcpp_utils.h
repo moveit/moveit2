@@ -27,9 +27,6 @@
 
 #pragma once
 
-//#ifndef ROSCPP_NAMES_H  replaced this with pragma once
-//#define ROSCPP_NAMES_H
-
 #include <string>
 
 // TODO(JafarAbdi): This's taken from ros_comm/../names.cpp for MoveIt 2 beta release -- remove when it's ported

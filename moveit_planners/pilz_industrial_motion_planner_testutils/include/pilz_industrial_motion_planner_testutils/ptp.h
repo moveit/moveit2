@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef PTP_H
-//#define PTP_H
-
 #include <stdexcept>
 
 #include "basecmd.h"

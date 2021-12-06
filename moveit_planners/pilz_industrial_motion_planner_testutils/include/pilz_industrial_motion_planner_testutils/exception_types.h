@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef EXCEPTION_TYPES_H
-//#define EXCEPTION_TYPES_H
-
 #include <stdexcept>
 #include <string>
 

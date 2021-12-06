@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef CARTESIANPATHCONSTRAINTSBUILDER_H replaced with pragma once
-//#define CARTESIANPATHCONSTRAINTSBUILDER_H
-
 #include <string>
 
 #include <moveit_msgs/Constraints.h>

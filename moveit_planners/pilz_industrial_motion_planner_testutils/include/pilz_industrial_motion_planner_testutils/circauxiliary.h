@@ -31,13 +31,10 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+
 #pragma once
 
-//#ifndef CIRCAUXILIARY_H replaced with pragma once
-//#define CIRCAUXILIARY_H
-
 #include <string>
-
 #include <moveit_msgs/Constraints.h>
 
 namespace pilz_industrial_motion_planner_testutils

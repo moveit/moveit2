@@ -31,10 +31,8 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#pragma once
 
-//#ifndef COMMAND_TYPES_TYPEDEF_H replaced with pragma once
-//#define COMMAND_TYPES_TYPEDEF_H
+#pragma once
 
 #include <boost/variant.hpp>
 

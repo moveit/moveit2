@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef ROBOTCONFIGURATION_H
-//#define ROBOTCONFIGURATION_H
-
 #include <string>
 #include <utility>
 

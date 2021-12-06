@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef GOALCONSTRAINTSMSGCONVERTIBLE_H
-//#define GOALCONSTRAINTSMSGCONVERTIBLE_H
-
 #include <string>
 
 #include <moveit_msgs/Constraints.h>

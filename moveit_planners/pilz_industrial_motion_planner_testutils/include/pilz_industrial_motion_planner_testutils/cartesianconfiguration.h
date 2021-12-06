@@ -31,10 +31,8 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-#pragma once
 
-//#ifndef CARTESIANCONFIGURATION_H replaced with pragma once
-//#define CARTESIANCONFIGURATION_H
+#pragma once
 
 #include <vector>
 #include <sstream>

@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef BASECMD_H replaced with pragma once
-//#define BASECMD_H
-
 #include <string>
 
 #include "motioncmd.h"

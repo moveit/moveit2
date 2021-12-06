@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef DEFAULT_VALUES_H replaced with pragma once
-//#define DEFAULT_VALUES_H
-
 /*
  * @brief This file contains all default values needed for testing.
  */

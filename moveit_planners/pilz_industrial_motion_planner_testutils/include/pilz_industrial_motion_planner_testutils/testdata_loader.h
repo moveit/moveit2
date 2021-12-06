@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef TESTDATA_LOADER_H
-//#define TESTDATA_LOADER_H
-
 #include <string>
 #include <utility>
 

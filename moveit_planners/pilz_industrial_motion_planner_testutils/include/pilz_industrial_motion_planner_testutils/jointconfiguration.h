@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef JOINTCONFIGURATION_H
-//#define JOINTCONFIGURATION_H
-
 #include <string>
 #include <utility>
 #include <vector>

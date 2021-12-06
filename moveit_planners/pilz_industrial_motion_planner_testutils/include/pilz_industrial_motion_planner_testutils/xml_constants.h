@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef XML_CONSTANTS_H
-//#define XML_CONSTANTS_H
-
 #include <string>
 
 namespace pilz_industrial_motion_planner_testutils

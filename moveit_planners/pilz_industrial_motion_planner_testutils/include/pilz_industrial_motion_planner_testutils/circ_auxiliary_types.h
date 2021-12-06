@@ -31,10 +31,9 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
+
 #pragma once
 
-//#ifndef CIRC_AUXILIARY_TYPES_H replaced with pragma once
-//#define CIRC_AUXILIARY_TYPES_H
 
 #include "center.h"
 #include "interim.h"

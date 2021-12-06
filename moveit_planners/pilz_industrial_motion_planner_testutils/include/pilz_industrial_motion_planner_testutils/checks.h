@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef CHECKS_H replaced with pragma once
-//#define CHECKS_H
-
 #include <gtest/gtest.h>
 #include <moveit/robot_state/robot_state.h>
 

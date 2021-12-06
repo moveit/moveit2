@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef XML_TESTDATA_LOADER_H
-//#define XML_TESTDATA_LOADER_H
-
 #include <string>
 #include <vector>
 #include <functional>

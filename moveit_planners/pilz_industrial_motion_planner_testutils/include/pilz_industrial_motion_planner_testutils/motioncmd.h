@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef MOTIONCMD_H
-//#define MOTIONCMD_H
-
 #include <string>
 #include <memory>
 

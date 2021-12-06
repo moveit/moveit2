@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef CIRC_H replaced with pragma once
-//#define CIRC_H
-
 #include <memory>
 
 #include "basecmd.h"

@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef ROBOTSTATEMSGCONVERTIBLE_H
-//#define ROBOTSTATEMSGCONVERTIBLE_H
-
 #include <moveit_msgs/RobotState.h>
 #include <moveit/robot_model/robot_model.h>
 

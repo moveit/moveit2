@@ -34,9 +34,6 @@
 
 #pragma once
 
-//#ifndef GRIPPER_H
-//#define GRIPPER_H
-
 #include "ptp.h"
 #include "jointconfiguration.h"
 

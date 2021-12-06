@@ -16,9 +16,6 @@
 
 #pragma once
 
-//#ifndef ASYNC_TEST_H replaced with pragma once
-//#define ASYNC_TEST_H
-
 #include <mutex>
 #include <condition_variable>
 #include <algorithm>
