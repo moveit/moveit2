@@ -1,0 +1,9 @@
+planning_group : "manipulator"
+target_link_hand_computed_data : "prbt_flange"
+random_trial_number : 100
+joint_position_tolerance : 1.0e-3
+joint_velocity_tolerance : 0.3
+pose_norm_tolerance : 1.0e-6
+rot_axis_norm_tolerance : 1.0e-6
+other_tolerance : 1.0e-5
+velocity_scaling_factor : 0.1

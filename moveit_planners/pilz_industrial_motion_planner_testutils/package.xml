@@ -17,14 +17,26 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
 
-  <build_depend>moveit_core</build_depend>
-  <build_depend>moveit_msgs</build_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>eigen3_cmake_module</buildtool_depend>
+  <buildtool_export_depend>eigen3_cmake_module</buildtool_export_depend>
+  <build_depend>moveit_common</build_depend>
+
+  <depend>rclcpp</depend>
+  <depend>moveit_core</depend>
+  <depend>moveit_msgs</depend>
+
   <build_depend>tf2_eigen</build_depend>
 
-  <exec_depend>moveit_core</exec_depend>
-  <exec_depend>moveit_msgs</exec_depend>
+  <!--
   <exec_depend>moveit_commander</exec_depend>
+  -->
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 
 </package>

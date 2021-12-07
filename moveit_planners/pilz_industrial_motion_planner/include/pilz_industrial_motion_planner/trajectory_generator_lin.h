@@ -47,11 +47,11 @@ namespace pilz_industrial_motion_planner
 {
 // TODO date type of units
 
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinTrajectoryConversionFailure, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinTrajectoryConversionFailure, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
 
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(JointNumberMismatch, moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinJointMissingInStartState, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinInverseForGoalIncalculable, moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(JointNumberMismatch, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinJointMissingInStartState, moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinInverseForGoalIncalculable, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
 
 /**
  * @brief This class implements a linear trajectory generator in Cartesian
@@ -67,7 +67,7 @@ public:
    * @param model: robot model
    * @param planner_limits: limits in joint and Cartesian spaces
    */
-  TrajectoryGeneratorLIN(const robot_model::RobotModelConstPtr& robot_model,
+  TrajectoryGeneratorLIN(const moveit::core::RobotModelConstPtr& robot_model,
                          const pilz_industrial_motion_planner::LimitsContainer& planner_limits);
 
 private:
@@ -76,7 +76,7 @@ private:
 
   void plan(const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
             const MotionPlanInfo& plan_info, const double& sampling_time,
-            trajectory_msgs::JointTrajectory& joint_trajectory) override;
+            trajectory_msgs::msg::JointTrajectory& joint_trajectory) override;
 
   /**
    * @brief construct a KDL::Path object for a Cartesian straight line

@@ -24,10 +24,7 @@
   <exec_depend>moveit_planners_chomp</exec_depend>
   -->
   <exec_depend>moveit_planners_ompl</exec_depend>
-  <!--
-  TODO(#315): Enable after Pilz motion planner has been ported
   <exec_depend>pilz_industrial_motion_planner</exec_depend>
-  -->
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
