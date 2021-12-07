@@ -945,47 +945,6 @@ bool MoveItConfigData::outputROSControllersYAML(const std::string& file_path)
 }
 
 // ******************************************************************************************
-// Output 3D Sensor configuration file
-// ******************************************************************************************
-bool MoveItConfigData::output3DSensorPluginYAML(const std::string& file_path)
-{
-  YAML::Emitter emitter;
-  emitter << YAML::BeginMap;
-
-  emitter << YAML::Comment("The name of this file shouldn't be changed, or else the Setup Assistant won't detect it");
-  emitter << YAML::Key << "sensors";
-  emitter << YAML::Value << YAML::BeginSeq;
-
-  for (auto& sensors_plugin_config : sensors_plugin_config_parameter_list_)
-  {
-    emitter << YAML::BeginMap;
-
-    for (auto& parameter : sensors_plugin_config)
-    {
-      emitter << YAML::Key << parameter.first;
-      emitter << YAML::Value << parameter.second.getValue();
-    }
-    emitter << YAML::EndMap;
-  }
-
-  emitter << YAML::EndSeq;
-
-  emitter << YAML::EndMap;
-
-  std::ofstream output_stream(file_path.c_str(), std::ios_base::trunc);
-  if (!output_stream.good())
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for writing " << file_path);
-    return false;
-  }
-
-  output_stream << emitter.c_str();
-  output_stream.close();
-
-  return true;  // file created successfully
-}
-
-// ******************************************************************************************
 // Output joint limits config files
 // ******************************************************************************************
 bool MoveItConfigData::outputJointLimitsYAML(const std::string& file_path)
@@ -1449,115 +1408,6 @@ bool MoveItConfigData::createFullURDFPath()
   return fs::is_regular_file(urdf_path_);
 }
 
-// ******************************************************************************************
-// Input sensors_3d yaml file
-// ******************************************************************************************
-bool MoveItConfigData::input3DSensorsYAML(const std::string& default_file_path, const std::string& file_path)
-{
-  // Load default parameters file
-  std::ifstream default_input_stream(default_file_path.c_str());
-  if (!default_input_stream.good())
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for reading " << default_file_path);
-    return false;
-  }
-
-  // Parse default parameters values
-  try
-  {
-    const YAML::Node& doc = YAML::Load(default_input_stream);
-
-    // Get sensors node
-    if (const YAML::Node& sensors_node = doc["sensors"])
-    {
-      // Make sue that the sensors are written as a sequence
-      if (sensors_node.IsSequence())
-      {
-        GenericParameter sensor_param;
-        std::map<std::string, GenericParameter> sensor_map;
-
-        // Loop over the sensors available in the file
-        for (const YAML::Node& sensor : sensors_node)
-        {
-          if (const YAML::Node& sensor_node = sensor)
-          {
-            for (YAML::const_iterator sensor_it = sensor_node.begin(); sensor_it != sensor_node.end(); ++sensor_it)
-            {
-              sensor_param.setName(sensor_it->first.as<std::string>());
-              sensor_param.setValue(sensor_it->second.as<std::string>());
-
-              // Set the key as the parameter name to make accessing it easier
-              sensor_map[sensor_it->first.as<std::string>()] = sensor_param;
-            }
-            sensors_plugin_config_parameter_list_.push_back(sensor_map);
-          }
-        }
-      }
-    }
-  }
-  catch (YAML::ParserException& e)  // Catch errors
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Error parsing default sensors yaml: " << e.what());
-  }
-
-  // Is there a sensors config in the package?
-  if (file_path.empty())
-  {
-    return true;
-  }
-
-  // Load file
-  std::ifstream input_stream(file_path.c_str());
-  if (!input_stream.good())
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for reading " << file_path);
-    return false;
-  }
-
-  // Begin parsing
-  try
-  {
-    const YAML::Node& doc = YAML::Load(input_stream);
-    // Get sensors node
-    const YAML::Node& sensors_node = doc["sensors"];
-
-    // Make sure that the sensors are written as a sequence
-    if (sensors_node && sensors_node.IsSequence())
-    {
-      GenericParameter sensor_param;
-      std::map<std::string, GenericParameter> sensor_map;
-      bool empty_node = true;
-
-      // Loop over the sensors available in the file
-      for (const YAML::Node& sensor : sensors_node)
-      {
-        if (const YAML::Node& sensor_node = sensor)
-        {
-          for (YAML::const_iterator sensor_it = sensor_node.begin(); sensor_it != sensor_node.end(); ++sensor_it)
-          {
-            empty_node = false;
-            sensor_param.setName(sensor_it->first.as<std::string>());
-            sensor_param.setValue(sensor_it->second.as<std::string>());
-
-            // Set the key as the parameter name to make accessing it easier
-            sensor_map[sensor_it->first.as<std::string>()] = sensor_param;
-          }
-          // Don't push empty nodes
-          if (!empty_node)
-            sensors_plugin_config_parameter_list_.push_back(sensor_map);
-        }
-      }
-    }
-    return true;
-  }
-  catch (YAML::ParserException& e)  // Catch errors
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Error parsing sensors yaml: " << e.what());
-  }
-
-  return false;  // if it gets to this point an error has occured
-}
-
 srdf::Model::Group* MoveItConfigData::findGroupByName(const std::string& name)
 {
   // Find the group we are editing based on the goup name string
@@ -1645,38 +1495,6 @@ bool MoveItConfigData::addROSController(const ROSControlConfig& new_controller)
 std::vector<ROSControlConfig>& MoveItConfigData::getROSControllers()
 {
   return ros_controllers_config_;
-}
-
-// ******************************************************************************************
-// Used to add a sensor plugin configuation parameter to the sensor plugin configuration parameter list
-// ******************************************************************************************
-void MoveItConfigData::addGenericParameterToSensorPluginConfig(const std::string& name, const std::string& value,
-                                                               const std::string& /*comment*/)
-{
-  // Use index 0 since we only write one plugin
-  GenericParameter new_parameter;
-  new_parameter.setName(name);
-  new_parameter.setValue(value);
-  sensors_plugin_config_parameter_list_[0][name] = new_parameter;
-}
-
-// ******************************************************************************************
-// Used to get sensor plugin configuration parameter list
-// ******************************************************************************************
-std::vector<std::map<std::string, GenericParameter>> MoveItConfigData::getSensorPluginConfig()
-{
-  return sensors_plugin_config_parameter_list_;
-}
-
-// ******************************************************************************************
-// Used to clear sensor plugin configuration parameter list
-// ******************************************************************************************
-void MoveItConfigData::clearSensorPluginConfig()
-{
-  for (std::map<std::string, GenericParameter>& param_id : sensors_plugin_config_parameter_list_)
-  {
-    param_id.clear();
-  }
 }
 
 }  // namespace moveit_setup_assistant

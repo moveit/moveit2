@@ -120,48 +120,6 @@ public:
   std::string type_;  // type of planner (geometric)
 };
 
-/**
- * Reusable parameter class which may be used in reading and writing configuration files
- */
-class GenericParameter
-{
-public:
-  GenericParameter()
-  {
-    comment_ = "";
-  };
-
-  void setName(std::string name)
-  {
-    name_ = std::move(name);
-  };
-  void setValue(std::string value)
-  {
-    value_ = std::move(value);
-  };
-  void setComment(std::string comment)
-  {
-    comment_ = std::move(comment);
-  };
-  std::string getName()
-  {
-    return name_;
-  };
-  std::string getValue()
-  {
-    return value_;
-  };
-  std::string getComment()
-  {
-    return comment_;
-  };
-
-private:
-  std::string name_;     // name of parameter
-  std::string value_;    // value parameter will receive (but as a string)
-  std::string comment_;  // comment briefly describing what this parameter does
-};
-
 /** \brief This class is shared with all widgets and contains the common configuration data
     needed for generating each robot's MoveIt configuration package.
 
@@ -232,7 +190,6 @@ public:
                                        std::vector<ROSControlConfig>& ros_controllers_config_output);
 
   bool outputROSControllersYAML(const std::string& file_path);
-  bool output3DSensorPluginYAML(const std::string& file_path);
 
   /**
    * \brief Helper function to get the controller that is controlling the joint
@@ -303,15 +260,6 @@ public:
   bool addDefaultControllers();
 
   /**
-   * Input sensors_3d file - contains 3d sensors config data
-   *
-   * @param default_file_path path to sensors_3d yaml file which contains default parameter values
-   * @param file_path path to sensors_3d yaml file in the config package
-   * @return true if the file was read correctly
-   */
-  bool input3DSensorsYAML(const std::string& default_file_path, const std::string& file_path = "");
-
-  /**
    * Helper Function for joining a file path and a file name, or two file paths, etc,
    * in a cross-platform way
    *
@@ -351,22 +299,6 @@ public:
   bool deleteROSController(const std::string& controller_name);
 
   /**
-   * \brief Used for adding a sensor plugin configuation prameter to the sensor plugin configuration parameter list
-   */
-  void addGenericParameterToSensorPluginConfig(const std::string& name, const std::string& value = "",
-                                               const std::string& comment = "");
-
-  /**
-   * \brief Clear the sensor plugin configuration parameter list
-   */
-  void clearSensorPluginConfig();
-
-  /**
-   * \brief Used for adding a sensor plugin configuation parameter to the sensor plugin configuration parameter list
-   */
-  std::vector<std::map<std::string, GenericParameter> > getSensorPluginConfig();
-
-  /**
    * \brief Helper function to get the default start pose for moveit_sim_hw_interface
    */
   srdf::Model::GroupState getDefaultStartPose();
@@ -389,9 +321,6 @@ private:
   // ******************************************************************************************
   // Private Vars
   // ******************************************************************************************
-
-  /// Sensor plugin configuration parameter list, each sensor plugin type is a map
-  std::vector<std::map<std::string, GenericParameter> > sensors_plugin_config_parameter_list_;
 
   /// ROS Controllers config data
   std::vector<ROSControlConfig> ros_controllers_config_;

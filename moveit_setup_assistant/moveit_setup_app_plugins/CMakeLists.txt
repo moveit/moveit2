@@ -18,10 +18,13 @@ set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
 qt5_wrap_cpp(MOC_FILES
-    # include/moveit_setup_app_plugins/SOMETHING.hpp
+    include/moveit_setup_app_plugins/perception_widget.hpp
 )
 
 add_library(${PROJECT_NAME}
+    src/perception_config.cpp
+    src/perception.cpp
+    src/perception_widget.cpp
     ${MOC_FILES}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
