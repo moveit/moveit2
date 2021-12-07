@@ -17,7 +17,7 @@ This file should be deleted once all tasks are complete. Also delete `SETUP_STEP
  * `moveit_setup_app_plugins`
    * [ ] ROS Control
    * [ ] Simulation
-   * [ ] Perception
+   * [x] Perception
 
 ### Instructions for migrating steps
 Let `SETUP_STEP` be the name of the step you are migrating. You should already have files named `SETUP_STEP_widget.hpp` and `SETUP_STEP_widget.cpp`.
@@ -31,7 +31,6 @@ Let `SETUP_STEP` be the name of the step you are migrating. You should already h
  1. In the appropriate package, edit the CMake to
   * add the file `include/PACKAGE_NAME/X_widget.hpp` to the call to `qt5_wrap_cpp`
   * add the file `X_widget.cpp` and `X.cpp` to the call to `add_library`
- 1. If you are migrating something in `moveit_setup_app_plugins` and this instruction is still here, remove `COLCON_IGNORE` from the package (and then remove this instruction)
  1. In `X_widget.hpp`
   * Add these headers
      * `#include <moveit_setup_framework/qt/setup_step_widget.hpp>`
@@ -51,7 +50,7 @@ Let `SETUP_STEP` be the name of the step you are migrating. You should already h
   * Replace `#include "SETUP_STEP_widget.h"` with `#include <PACKAGE_NAME/SETUP_STEP_widget.hpp>`
   * Replace `#include "header_widget.h"` with `#include <moveit_setup_framework/qt/helper_widgets.hpp>`
   * Change the namespace to `PACKAGE_NAME`
-  * Replace the constructor with `void SETUP_STEP::onInit()`
+  * Replace the constructor with `void SETUP_STEPWidget::onInit()`
   * Replace `HeaderWidget* header = new HeaderWidget` with `auto header = new moveit_setup_framework::HeaderWidget`
   * Replace `Q_EMIT isModal` with `Q_EMIT setModalMode`
   * Replace `Q_EMIT highlightLink(` with `rviz_panel_->highlightLink(`
