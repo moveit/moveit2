@@ -93,7 +93,7 @@ TEST(TrajectoryMonitorTests, SleepAtLeastOnce)
   // GIVEN a TrajectoryMonitor is started
   auto current_state_monitor = std::make_shared<planning_scene_monitor::CurrentStateMonitor>(
       std::move(mock_current_state_monitor_middleware_handle), moveit::core::loadTestingRobotModel("panda"),
-      std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()));
+      std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>()), false);
 
   planning_scene_monitor::TrajectoryMonitor trajectory_monitor{ current_state_monitor,
                                                                 std::move(mock_trajectory_monitor_middleware_handle),
