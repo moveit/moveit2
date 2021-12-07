@@ -575,7 +575,7 @@ bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
     cmd.twist.angular.z = angular_vector(2);
   }
 
-  Eigen::VectorXd delta_x = scaleCartesianCommand(cmd);
+  Eigen::VectorXd delta_x = scaleCartesianTwistToCartesianPositionDelta(cmd);
 
   // Convert from cartesian commands to joint commands
   Eigen::MatrixXd jacobian = current_state_->getJacobian(joint_model_group_);
@@ -601,7 +601,7 @@ bool ServoCalcs::jointServoCalcs(const control_msgs::msg::JointJog& cmd,
     return false;
 
   // Apply user-defined scaling
-  delta_theta_ = scaleJointCommand(cmd);
+  delta_theta_ = scaleJointCommandToJointPositionDelta(cmd);
 
   // Perform interal servo with the command
   return internalServoUpdate(delta_theta_, joint_trajectory, ServoType::JOINT_SPACE);
@@ -996,30 +996,35 @@ bool ServoCalcs::checkValidCommand(const geometry_msgs::msg::TwistStamped& cmd)
 }
 
 // Scale the incoming jog command. Returns a vector of position deltas
-Eigen::VectorXd ServoCalcs::scaleCartesianCommand(const geometry_msgs::msg::TwistStamped& command)
+Eigen::VectorXd ServoCalcs::scaleCartesianTwistToCartesianPositionDelta(const geometry_msgs::msg::TwistStamped& command)
 {
   Eigen::VectorXd result(6);
   result.setZero();  // Or the else case below leads to misery
 
+  // Add a user-defined, constant delay to the timestep.
+  // This can help if the robot's low-level controllers are not very responsive, or to account for network latency.
+  // Effectively it moves the carrot farther ahead.
+  double timestep = parameters_->publish_period + parameters_->system_latency_compensation;
+
   // Apply user-defined scaling if inputs are unitless [-1:1]
   if (parameters_->command_in_type == "unitless")
   {
-    result[0] = parameters_->linear_scale * parameters_->publish_period * command.twist.linear.x;
-    result[1] = parameters_->linear_scale * parameters_->publish_period * command.twist.linear.y;
-    result[2] = parameters_->linear_scale * parameters_->publish_period * command.twist.linear.z;
-    result[3] = parameters_->rotational_scale * parameters_->publish_period * command.twist.angular.x;
-    result[4] = parameters_->rotational_scale * parameters_->publish_period * command.twist.angular.y;
-    result[5] = parameters_->rotational_scale * parameters_->publish_period * command.twist.angular.z;
+    result[0] = parameters_->linear_scale * timestep * command.twist.linear.x;
+    result[1] = parameters_->linear_scale * timestep * command.twist.linear.y;
+    result[2] = parameters_->linear_scale * timestep * command.twist.linear.z;
+    result[3] = parameters_->rotational_scale * timestep * command.twist.angular.x;
+    result[4] = parameters_->rotational_scale * timestep * command.twist.angular.y;
+    result[5] = parameters_->rotational_scale * timestep * command.twist.angular.z;
   }
   // Otherwise, commands are in m/s and rad/s
   else if (parameters_->command_in_type == "speed_units")
   {
-    result[0] = command.twist.linear.x * parameters_->publish_period;
-    result[1] = command.twist.linear.y * parameters_->publish_period;
-    result[2] = command.twist.linear.z * parameters_->publish_period;
-    result[3] = command.twist.angular.x * parameters_->publish_period;
-    result[4] = command.twist.angular.y * parameters_->publish_period;
-    result[5] = command.twist.angular.z * parameters_->publish_period;
+    result[0] = command.twist.linear.x * timestep;
+    result[1] = command.twist.linear.y * timestep;
+    result[2] = command.twist.linear.z * timestep;
+    result[3] = command.twist.angular.x * timestep;
+    result[4] = command.twist.angular.y * timestep;
+    result[5] = command.twist.angular.z * timestep;
   }
   else
   {
@@ -1030,10 +1035,15 @@ Eigen::VectorXd ServoCalcs::scaleCartesianCommand(const geometry_msgs::msg::Twis
   return result;
 }
 
-Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog& command)
+Eigen::VectorXd ServoCalcs::scaleJointCommandToJointPositionDelta(const control_msgs::msg::JointJog& command)
 {
   Eigen::VectorXd result(num_joints_);
   result.setZero();
+
+  // Add a user-defined, constant delay to the timestep.
+  // This can help if the robot's low-level controllers are not very responsive, or to account for network latency.
+  // Effectively it moves the carrot farther ahead.
+  double timestep = parameters_->publish_period + parameters_->system_latency_compensation;
 
   std::size_t c;
   for (std::size_t m = 0; m < command.joint_names.size(); ++m)
@@ -1050,10 +1060,10 @@ Eigen::VectorXd ServoCalcs::scaleJointCommand(const control_msgs::msg::JointJog&
     }
     // Apply user-defined scaling if inputs are unitless [-1:1]
     if (parameters_->command_in_type == "unitless")
-      result[c] = command.velocities[m] * parameters_->joint_scale * parameters_->publish_period;
+      result[c] = command.velocities[m] * parameters_->joint_scale * timestep;
     // Otherwise, commands are in m/s and rad/s
     else if (parameters_->command_in_type == "speed_units")
-      result[c] = command.velocities[m] * parameters_->publish_period;
+      result[c] = command.velocities[m] * timestep;
     else
     {
       rclcpp::Clock& clock = *node_->get_clock();

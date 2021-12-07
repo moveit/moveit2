@@ -148,15 +148,15 @@ protected:
 
   /** \brief If incoming velocity commands are from a unitless joystick, scale them to physical units.
    * Also, multiply by timestep to calculate a position change.
-   * @return a vector of position deltas
+   * @return a vector of Cartesian deltas
    */
-  Eigen::VectorXd scaleCartesianCommand(const geometry_msgs::msg::TwistStamped& command);
+  Eigen::VectorXd scaleCartesianTwistToCartesianPositionDelta(const geometry_msgs::msg::TwistStamped& command);
 
   /** \brief If incoming velocity commands are from a unitless joystick, scale them to physical units.
    * Also, multiply by timestep to calculate a position change.
-   * @return a vector of position deltas
+   * @return a vector of joint position deltas
    */
-  Eigen::VectorXd scaleJointCommand(const control_msgs::msg::JointJog& command);
+  Eigen::VectorXd scaleJointCommandToJointPositionDelta(const control_msgs::msg::JointJog& command);
 
   /** \brief Come to a halt in a smooth way. Apply a smoothing plugin, if one is configured.
    */
