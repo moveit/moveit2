@@ -318,7 +318,8 @@ void move_group::MoveGroupPickPlaceAction::executePickupCallback(
   setPickupState(PLANNING);
 
   // before we start planning, ensure that we have the latest robot state received...
-  context_->planning_scene_monitor_->waitForCurrentRobotState(ros::Time::now());
+  auto node = context_->moveit_cpp_->getNode();
+  context_->planning_scene_monitor_->waitForCurrentRobotState(node->get_clock()->now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   moveit_msgs::action::PickupGoalConstPtr goal;
@@ -365,7 +366,8 @@ void move_group::MoveGroupPickPlaceAction::executePlaceCallback(const moveit_msg
   setPlaceState(PLANNING);
 
   // before we start planning, ensure that we have the latest robot state received...
-  context_->planning_scene_monitor_->waitForCurrentRobotState(ros::Time::now());
+  auto node = context_->moveit_cpp_->getNode();
+  context_->planning_scene_monitor_->waitForCurrentRobotState(node->get_clock()->now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   moveit_msgs::action::PlaceResult action_res;
