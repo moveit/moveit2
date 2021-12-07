@@ -109,7 +109,7 @@ public:
   const moveit::core::RobotModelConstPtr& getRobotModel() const;
 
   /// wait for robot state more recent than t
-  bool waitForCurrentRobotState(const rclcpp::Time& t = rclcpp::Clock().now());
+  bool waitForCurrentRobotState(const rclcpp::Time& t);
   /// get read-only access to planning scene
   planning_scene_monitor::LockedPlanningSceneRO getPlanningSceneRO() const;
   /// get write access to planning scene

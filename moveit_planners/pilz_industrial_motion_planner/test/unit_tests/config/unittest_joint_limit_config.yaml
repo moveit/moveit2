@@ -1,0 +1,55 @@
+joint_limits:
+  joint_1:
+    has_position_limits: false
+    has_velocity_limits: false
+    has_acceleration_limits: true
+    max_acceleration: 1.0
+    has_deceleration_limits: true
+    max_deceleration: -1.0
+    has_jerk_limits: false
+    has_soft_limits: false
+  joint_2:
+    has_position_limits: false
+    has_velocity_limits: false
+    has_acceleration_limits: true
+    max_acceleration: 2.0
+    has_deceleration_limits: true
+    max_deceleration: -2.0
+    has_jerk_limits: false
+    has_soft_limits: false
+  joint_3:
+    has_position_limits: false
+    has_velocity_limits: false
+    has_acceleration_limits: true
+    max_acceleration: 3.0
+    has_deceleration_limits: true
+    max_deceleration: -3.0
+    has_jerk_limits: false
+    has_soft_limits: false
+  joint_4:
+    has_position_limits: false
+    has_velocity_limits: false
+    has_acceleration_limits: true
+    max_acceleration: 4.0
+    has_deceleration_limits: true
+    max_deceleration: -4.0
+    has_jerk_limits: false
+    has_soft_limits: false
+  joint_5:
+    has_position_limits: false
+    has_velocity_limits: false
+    has_acceleration_limits: true
+    max_acceleration: 5.0
+    has_deceleration_limits: true
+    max_deceleration: -5.0
+    has_jerk_limits: false
+    has_soft_limits: false
+  joint_6:
+    has_position_limits: false
+    has_velocity_limits: false
+    has_acceleration_limits: true
+    max_acceleration: 6.0
+    has_deceleration_limits: true
+    max_deceleration: -6.0
+    has_jerk_limits: false
+    has_soft_limits: false

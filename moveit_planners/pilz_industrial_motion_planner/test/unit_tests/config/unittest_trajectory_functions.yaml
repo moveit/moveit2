@@ -1,0 +1,5 @@
+planning_group : "manipulator"
+group_tip_link : "prbt_flange"
+tcp_link : "prbt_tcp"
+ik_fast_link : "prbt_flange"
+random_test_number : 1000

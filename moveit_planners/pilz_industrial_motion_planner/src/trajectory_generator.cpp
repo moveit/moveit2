@@ -36,6 +36,13 @@
 
 #include <cassert>
 
+#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
+#include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_kdl/tf2_kdl.hpp>
+#else
+#include <tf2_eigen/tf2_eigen.h>
+#include <tf2_kdl/tf2_kdl.h>
+#endif
 #include <kdl/velocityprofile_trap.hpp>
 #include <moveit/robot_state/conversions.h>
 
@@ -43,6 +50,7 @@
 
 namespace pilz_industrial_motion_planner
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator");
 void TrajectoryGenerator::cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& /*req*/) const
 {
   // Empty implementation, in case the derived class does not want
@@ -81,7 +89,7 @@ void TrajectoryGenerator::checkForValidGroupName(const std::string& group_name) 
   }
 }
 
-void TrajectoryGenerator::checkStartState(const moveit_msgs::RobotState& start_state) const
+void TrajectoryGenerator::checkStartState(const moveit_msgs::msg::RobotState& start_state) const
 {
   if (start_state.joint_state.name.empty())
   {
@@ -107,7 +115,7 @@ void TrajectoryGenerator::checkStartState(const moveit_msgs::RobotState& start_s
   }
 }
 
-void TrajectoryGenerator::checkJointGoalConstraint(const moveit_msgs::Constraints& constraint,
+void TrajectoryGenerator::checkJointGoalConstraint(const moveit_msgs::msg::Constraints& constraint,
                                                    const std::vector<std::string>& expected_joint_names,
                                                    const std::string& group_name) const
 {
@@ -138,13 +146,13 @@ void TrajectoryGenerator::checkJointGoalConstraint(const moveit_msgs::Constraint
   }
 }
 
-void TrajectoryGenerator::checkCartesianGoalConstraint(const moveit_msgs::Constraints& constraint,
+void TrajectoryGenerator::checkCartesianGoalConstraint(const moveit_msgs::msg::Constraints& constraint,
                                                        const std::string& group_name) const
 {
   assert(constraint.position_constraints.size() == 1);
   assert(constraint.orientation_constraints.size() == 1);
-  const moveit_msgs::PositionConstraint& pos_constraint{ constraint.position_constraints.front() };
-  const moveit_msgs::OrientationConstraint& ori_constraint{ constraint.orientation_constraints.front() };
+  const moveit_msgs::msg::PositionConstraint& pos_constraint{ constraint.position_constraints.front() };
+  const moveit_msgs::msg::OrientationConstraint& ori_constraint{ constraint.orientation_constraints.front() };
 
   if (pos_constraint.link_name.empty())
   {
@@ -179,7 +187,7 @@ void TrajectoryGenerator::checkCartesianGoalConstraint(const moveit_msgs::Constr
 }
 
 void TrajectoryGenerator::checkGoalConstraints(
-    const moveit_msgs::MotionPlanRequest::_goal_constraints_type& goal_constraints,
+    const moveit_msgs::msg::MotionPlanRequest::_goal_constraints_type& goal_constraints,
     const std::vector<std::string>& expected_joint_names, const std::string& group_name) const
 {
   if (goal_constraints.size() != 1)
@@ -189,7 +197,7 @@ void TrajectoryGenerator::checkGoalConstraints(
     throw NotExactlyOneGoalConstraintGiven(os.str());
   }
 
-  const moveit_msgs::Constraints& goal_con{ goal_constraints.front() };
+  const moveit_msgs::msg::Constraints& goal_con{ goal_constraints.front() };
   if (!isOnlyOneGoalTypeGiven(goal_con))
   {
     throw OnlyOneGoalTypeAllowed("Only cartesian XOR joint goal allowed");
@@ -215,26 +223,26 @@ void TrajectoryGenerator::validateRequest(const planning_interface::MotionPlanRe
 }
 
 void TrajectoryGenerator::setSuccessResponse(const moveit::core::RobotState& start_state, const std::string& group_name,
-                                             const trajectory_msgs::JointTrajectory& joint_trajectory,
-                                             const ros::Time& planning_start,
+                                             const trajectory_msgs::msg::JointTrajectory& joint_trajectory,
+                                             const rclcpp::Time& planning_start,
                                              planning_interface::MotionPlanResponse& res) const
 {
   robot_trajectory::RobotTrajectoryPtr rt(new robot_trajectory::RobotTrajectory(robot_model_, group_name));
   rt->setRobotTrajectoryMsg(start_state, joint_trajectory);
 
   res.trajectory_ = rt;
-  res.error_code_.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
-  res.planning_time_ = (ros::Time::now() - planning_start).toSec();
+  res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  res.planning_time_ = (clock_->now() - planning_start).seconds();
 }
 
-void TrajectoryGenerator::setFailureResponse(const ros::Time& planning_start,
+void TrajectoryGenerator::setFailureResponse(const rclcpp::Time& planning_start,
                                              planning_interface::MotionPlanResponse& res) const
 {
   if (res.trajectory_)
   {
     res.trajectory_->clear();
   }
-  res.planning_time_ = (ros::Time::now() - planning_start).toSec();
+  res.planning_time_ = (clock_->now() - planning_start).seconds();
 }
 
 std::unique_ptr<KDL::VelocityProfile>
@@ -261,8 +269,8 @@ bool TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
                                    const planning_interface::MotionPlanRequest& req,
                                    planning_interface::MotionPlanResponse& res, double sampling_time)
 {
-  ROS_INFO_STREAM("Generating " << req.planner_id << " trajectory...");
-  ros::Time planning_begin = ros::Time::now();
+  RCLCPP_INFO_STREAM(LOGGER, "Generating " << req.planner_id << " trajectory...");
+  rclcpp::Time planning_begin = clock_->now();
 
   try
   {
@@ -270,7 +278,7 @@ bool TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   }
   catch (const MoveItErrorCodeException& ex)
   {
-    ROS_ERROR_STREAM(ex.what());
+    RCLCPP_ERROR_STREAM(LOGGER, ex.what());
     res.error_code_.val = ex.getErrorCode();
     setFailureResponse(planning_begin, res);
     return false;
@@ -282,7 +290,7 @@ bool TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   }
   catch (const MoveItErrorCodeException& ex)
   {
-    ROS_ERROR_STREAM(ex.what());
+    RCLCPP_ERROR_STREAM(LOGGER, ex.what());
     res.error_code_.val = ex.getErrorCode();
     setFailureResponse(planning_begin, res);
     return false;
@@ -295,20 +303,20 @@ bool TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   }
   catch (const MoveItErrorCodeException& ex)
   {
-    ROS_ERROR_STREAM(ex.what());
+    RCLCPP_ERROR_STREAM(LOGGER, ex.what());
     res.error_code_.val = ex.getErrorCode();
     setFailureResponse(planning_begin, res);
     return false;
   }
 
-  trajectory_msgs::JointTrajectory joint_trajectory;
+  trajectory_msgs::msg::JointTrajectory joint_trajectory;
   try
   {
     plan(scene, req, plan_info, sampling_time, joint_trajectory);
   }
   catch (const MoveItErrorCodeException& ex)
   {
-    ROS_ERROR_STREAM(ex.what());
+    RCLCPP_ERROR_STREAM(LOGGER, ex.what());
     res.error_code_.val = ex.getErrorCode();
     setFailureResponse(planning_begin, res);
     return false;
