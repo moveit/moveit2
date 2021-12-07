@@ -10,6 +10,7 @@ API changes in MoveIt releases
     - Planning scene geometry text files (`.scene`) have changed format. Add a line `0 0 0 0 0 0 1` under each line with an asterisk to upgrade old files if required.
 - add API for passing RNG to setToRandomPositionsNearBy
 - Static member variable interface of the CollisionDetectorAllocatorTemplate for the string NAME was replaced with a virtual method `getName`.
+- Enhance `RDFLoader` to load from string parameter OR string topic (and add the ability to publish a string topic).
 
 ## ROS Noetic
 - RobotModel no longer overrides empty URDF collision geometry by matching the visual geometry of the link.

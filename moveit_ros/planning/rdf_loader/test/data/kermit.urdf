@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<robot name="kermit">
+  <material name="green">
+    <color rgba="0.18 0.78 0.02 1"/>
+  </material>
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder length="1.0" radius="0.2"/>
+      </geometry>
+      <material name="green"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="1.0" radius="0.2"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="flipper">
+    <visual>
+      <geometry>
+        <box size="0.15 0.15 1.0"/>
+      </geometry>
+      <material name="green"/>
+      <origin xyz="0.0 0.0 0.5"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.15 0.15 1.0"/>
+      </geometry>
+      <origin xyz="0.0 0.0 0.5"/>
+    </collision>
+  </link>
+  <joint name="joint_a" type="continuous">
+    <parent link="base_link"/>
+    <child link="flipper"/>
+    <axis xyz="0 1 0"/>
+    <origin xyz="0.0 0.0 0.5"/>
+  </joint>
+</robot>
