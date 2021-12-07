@@ -104,7 +104,7 @@ def generate_common_hybrid_launch_description():
                     robot_description_semantic,
                     kinematics_yaml,
                     planning_pipelines_config,
-                    moveit_controllers
+                    moveit_controllers,
                 ],
             ),
             ComposableNode(

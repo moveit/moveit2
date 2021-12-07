@@ -101,9 +101,6 @@ public:
    */
   virtual bool reset() = 0;
 
-  /** \brief Return the most recent target waypoint index */
-  virtual size_t getTargetWayPointIndex() = 0;
-
 protected:
   // Reference trajectory to be precessed
   robot_trajectory::RobotTrajectoryPtr reference_trajectory_;
