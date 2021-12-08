@@ -604,6 +604,8 @@ private:
   collision_detection::CollisionPluginLoader collision_loader_;
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr callback_handler_;
+
+  bool use_sim_time_;
 };
 
 /** \brief This is a convenience class for obtaining access to an

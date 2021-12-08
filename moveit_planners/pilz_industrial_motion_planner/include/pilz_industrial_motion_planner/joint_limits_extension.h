@@ -34,7 +34,10 @@
 
 #pragma once
 
-#include <joint_limits_interface/joint_limits.h>
+#include <limits>
+
+#include <joint_limits/joint_limits.hpp>
+
 #include <map>
 #include <string>
 
@@ -46,7 +49,7 @@ namespace joint_limits_interface
  * @brief Extends joint_limits_interface::JointLimits with a deceleration
  * parameter
  */
-struct JointLimits : ::joint_limits_interface::JointLimits
+struct JointLimits : joint_limits::JointLimits
 {
   JointLimits() : max_deceleration(0.0), has_deceleration_limits(false)
   {

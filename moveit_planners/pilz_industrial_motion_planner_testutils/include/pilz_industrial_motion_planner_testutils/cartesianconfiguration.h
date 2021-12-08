@@ -38,8 +38,8 @@
 #include <sstream>
 
 #include <boost/optional.hpp>
-#include <geometry_msgs/Pose.h>
-#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/msg/pose.hpp>
+#include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_state/conversions.h>
@@ -65,15 +65,15 @@ public:
                          const moveit::core::RobotModelConstPtr& robot_model);
 
 public:
-  moveit_msgs::Constraints toGoalConstraints() const override;
-  moveit_msgs::RobotState toMoveitMsgsRobotState() const override;
+  moveit_msgs::msg::Constraints toGoalConstraints() const override;
+  moveit_msgs::msg::RobotState toMoveitMsgsRobotState() const override;
 
   void setLinkName(const std::string& link_name);
   const std::string& getLinkName() const;
 
-  void setPose(const geometry_msgs::Pose& pose);
-  const geometry_msgs::Pose& getPose() const;
-  geometry_msgs::Pose& getPose();
+  void setPose(const geometry_msgs::msg::Pose& pose);
+  const geometry_msgs::msg::Pose& getPose() const;
+  geometry_msgs::msg::Pose& getPose();
 
   void setSeed(const JointConfiguration& config);
   const JointConfiguration& getSeed() const;
@@ -87,12 +87,12 @@ public:
   const boost::optional<double> getAngleTolerance() const;
 
 private:
-  static geometry_msgs::Pose toPose(const std::vector<double>& pose);
-  static geometry_msgs::PoseStamped toStampedPose(const geometry_msgs::Pose& pose);
+  static geometry_msgs::msg::Pose toPose(const std::vector<double>& pose);
+  static geometry_msgs::msg::PoseStamped toStampedPose(const geometry_msgs::msg::Pose& pose);
 
 private:
   std::string link_name_;
-  geometry_msgs::Pose pose_;
+  geometry_msgs::msg::Pose pose_;
 
   //! @brief The dimensions of the sphere associated with the target region
   //! of the position constraint.
@@ -118,22 +118,22 @@ inline const std::string& CartesianConfiguration::getLinkName() const
   return link_name_;
 }
 
-inline void CartesianConfiguration::setPose(const geometry_msgs::Pose& pose)
+inline void CartesianConfiguration::setPose(const geometry_msgs::msg::Pose& pose)
 {
   pose_ = pose;
 }
 
-inline const geometry_msgs::Pose& CartesianConfiguration::getPose() const
+inline const geometry_msgs::msg::Pose& CartesianConfiguration::getPose() const
 {
   return pose_;
 }
 
-inline geometry_msgs::Pose& CartesianConfiguration::getPose()
+inline geometry_msgs::msg::Pose& CartesianConfiguration::getPose()
 {
   return pose_;
 }
 
-inline moveit_msgs::Constraints CartesianConfiguration::toGoalConstraints() const
+inline moveit_msgs::msg::Constraints CartesianConfiguration::toGoalConstraints() const
 {
   if (!tolerance_pose_ || !tolerance_angle_)
   {

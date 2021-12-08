@@ -114,8 +114,8 @@ protected:
   moveit::core::RobotModelConstPtr model_;
 };
 
-typedef boost::shared_ptr<PlanningContextLoader> PlanningContextLoaderPtr;
-typedef boost::shared_ptr<const PlanningContextLoader> PlanningContextLoaderConstPtr;
+typedef std::shared_ptr<PlanningContextLoader> PlanningContextLoaderPtr;
+typedef std::shared_ptr<const PlanningContextLoader> PlanningContextLoaderConstPtr;
 
 template <typename T>
 bool PlanningContextLoader::loadContext(planning_interface::PlanningContextPtr& planning_context,
@@ -130,12 +130,12 @@ bool PlanningContextLoader::loadContext(planning_interface::PlanningContextPtr& 
   {
     if (!limits_set_)
     {
-      ROS_ERROR_STREAM("Limits are not defined. Cannot load planning context. "
-                       "Call setLimits loadContext");
+      RCLCPP_ERROR(rclcpp::get_logger("planning_context_loader"),
+                   "Limits are not defined. Cannot load planning context. Call setLimits loadContext");
     }
     if (!model_set_)
     {
-      ROS_ERROR_STREAM("Robot model was not set");
+      RCLCPP_ERROR(rclcpp::get_logger("planning_context_loader"), "Robot model was not set");
     }
     return false;
   }

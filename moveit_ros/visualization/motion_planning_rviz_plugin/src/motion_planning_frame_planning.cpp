@@ -575,7 +575,7 @@ void MotionPlanningFrame::remoteUpdateStartStateCallback(const std_msgs::msg::Em
 {
   if (move_group_ && planning_display_)
   {
-    planning_display_->waitForCurrentRobotState();
+    planning_display_->waitForCurrentRobotState(node_->get_clock()->now());
     const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
     {
@@ -589,7 +589,7 @@ void MotionPlanningFrame::remoteUpdateGoalStateCallback(const std_msgs::msg::Emp
 {
   if (move_group_ && planning_display_)
   {
-    planning_display_->waitForCurrentRobotState();
+    planning_display_->waitForCurrentRobotState(node_->get_clock()->now());
     const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
     {
@@ -606,7 +606,7 @@ void MotionPlanningFrame::remoteUpdateCustomStartStateCallback(const moveit_msgs
   msg_no_attached.is_diff = true;
   if (move_group_ && planning_display_)
   {
-    planning_display_->waitForCurrentRobotState();
+    planning_display_->waitForCurrentRobotState(node_->get_clock()->now());
     const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
     {
@@ -624,7 +624,7 @@ void MotionPlanningFrame::remoteUpdateCustomGoalStateCallback(const moveit_msgs:
   msg_no_attached.is_diff = true;
   if (move_group_ && planning_display_)
   {
-    planning_display_->waitForCurrentRobotState();
+    planning_display_->waitForCurrentRobotState(node_->get_clock()->now());
     const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
     {
