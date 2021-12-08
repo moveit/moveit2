@@ -1,0 +1,7 @@
+<library path="single_plan_execution_plugin">
+  <class name="moveit_hybrid_planning/SinglePlanExecution" type="moveit::hybrid_planning::SinglePlanExecution" base_class_type="moveit::hybrid_planning::PlannerLogicInterface">
+    <description>
+    Simple hybrid planning logic that runs the global planner once and execute the global solution with the local planner.
+    </description>
+  </class>
+</library>
