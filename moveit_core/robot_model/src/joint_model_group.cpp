@@ -640,7 +640,7 @@ bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
     // remove frame reference, if specified
     const std::string& tip_local = tip[0] == '/' ? tip.substr(1) : tip;
     const std::string& tip_frame_local = tip_frame[0] == '/' ? tip_frame.substr(1) : tip_frame;
-    RCLCPP_WARN(LOGGER, "comparing input tip: %s to this groups tip: %s ", tip_local.c_str(), tip_frame_local.c_str());
+    RCLCPP_DEBUG(LOGGER, "comparing input tip: %s to this groups tip: %s ", tip_local.c_str(), tip_frame_local.c_str());
 
     // Check if the IK solver's tip is the same as the frame of inquiry
     if (tip_local != tip_frame_local)

@@ -34,7 +34,6 @@
 
 /* Author: Mrinal Kalakrishnan */
 
-#include <ros/ros.h>
 #include <chomp_motion_planner/chomp_trajectory.h>
 
 namespace chomp

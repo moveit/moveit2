@@ -34,9 +34,10 @@
 
 /* Author: Mrinal Kalakrishnan */
 
-#pragma once
+#include <string>
+#include <vector>
 
-#include <ros/ros.h>
+#pragma once
 
 namespace chomp
 {

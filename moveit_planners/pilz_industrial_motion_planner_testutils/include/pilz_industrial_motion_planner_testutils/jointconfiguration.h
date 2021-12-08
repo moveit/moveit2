@@ -41,7 +41,7 @@
 #include <functional>
 #include <stdexcept>
 
-#include <sensor_msgs/JointState.h>
+#include <sensor_msgs/msg/joint_state.hpp>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_state/conversions.h>
 
@@ -81,21 +81,21 @@ public:
 
   size_t size() const;
 
-  moveit_msgs::Constraints toGoalConstraints() const override;
-  moveit_msgs::RobotState toMoveitMsgsRobotState() const override;
+  moveit_msgs::msg::Constraints toGoalConstraints() const override;
+  moveit_msgs::msg::RobotState toMoveitMsgsRobotState() const override;
 
-  sensor_msgs::JointState toSensorMsg() const;
+  sensor_msgs::msg::JointState toSensorMsg() const;
 
-  robot_state::RobotState toRobotState() const;
+  moveit::core::RobotState toRobotState() const;
 
   void setCreateJointNameFunc(CreateJointNameFunc create_joint_name_func);
 
 private:
-  moveit_msgs::RobotState toMoveitMsgsRobotStateWithoutModel() const;
-  moveit_msgs::RobotState toMoveitMsgsRobotStateWithModel() const;
+  moveit_msgs::msg::RobotState toMoveitMsgsRobotStateWithoutModel() const;
+  moveit_msgs::msg::RobotState toMoveitMsgsRobotStateWithModel() const;
 
-  moveit_msgs::Constraints toGoalConstraintsWithoutModel() const;
-  moveit_msgs::Constraints toGoalConstraintsWithModel() const;
+  moveit_msgs::msg::Constraints toGoalConstraintsWithoutModel() const;
+  moveit_msgs::msg::Constraints toGoalConstraintsWithModel() const;
 
 private:
   //! Joint positions
@@ -106,12 +106,12 @@ private:
 
 std::ostream& operator<<(std::ostream& /*os*/, const JointConfiguration& /*obj*/);
 
-inline moveit_msgs::Constraints JointConfiguration::toGoalConstraints() const
+inline moveit_msgs::msg::Constraints JointConfiguration::toGoalConstraints() const
 {
   return robot_model_ ? toGoalConstraintsWithModel() : toGoalConstraintsWithoutModel();
 }
 
-inline moveit_msgs::RobotState JointConfiguration::toMoveitMsgsRobotState() const
+inline moveit_msgs::msg::RobotState JointConfiguration::toMoveitMsgsRobotState() const
 {
   return robot_model_ ? toMoveitMsgsRobotStateWithModel() : toMoveitMsgsRobotStateWithoutModel();
 }

@@ -87,8 +87,12 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
   std::string ns_;
   pluginlib::ClassLoader<ControllerHandleAllocator> loader_;
   typedef std::map<std::string, controller_manager_msgs::msg::ControllerState> ControllersMap;
+
+  /** @brief Controllers that can be activated and deactivated by this plugin. */
   ControllersMap managed_controllers_;
+  /** @brief Controllers that are currently active. */
   ControllersMap active_controllers_;
+
   typedef std::map<std::string, ControllerHandleAllocatorPtr> AllocatorsMap;
   AllocatorsMap allocators_;
 
@@ -96,7 +100,12 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
   HandleMap handles_;
 
   rclcpp::Time controllers_stamp_{ 0, 0, RCL_ROS_TIME };
+
+  /**
+   * @brief Protects access to managed_controllers_, active_controllers_, allocators_, handles_, and controllers_stamp.
+   */
   std::mutex controllers_mutex_;
+
   rclcpp::Node::SharedPtr node_;
   rclcpp::Client<controller_manager_msgs::srv::ListControllers>::SharedPtr list_controllers_service_;
   rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedPtr switch_controller_service_;
@@ -141,23 +150,32 @@ class MoveItControllerManager : public moveit_controller_manager::MoveItControll
     const auto& result = result_future.get();
     for (const controller_manager_msgs::msg::ControllerState& controller : result->controller)
     {
+      // If the controller is active, add it to the map of active controllers.
       if (isActive(controller))
       {
+        // Get the names of the interfaces currently claimed by the active controller.
         auto& claimed_interfaces = active_controllers_.insert(std::make_pair(controller.name, controller))
                                        .first->second.claimed_interfaces;  // without namespace
+        // Modify the claimed interface names in-place to only include the name of the joint and not the command type
+        // (e.g. position, velocity, etc.).
         std::transform(claimed_interfaces.cbegin(), claimed_interfaces.cend(), claimed_interfaces.begin(),
                        [](const std::string& claimed_interface) {
                          return parseJointNameFromResource(claimed_interface);
                        });
       }
+
+      // Instantiate a controller handle if one is available for this type of controller.
       if (loader_.isClassAvailable(controller.type))
       {
         std::string absname = getAbsName(controller.name);
         auto controller_it = managed_controllers_.insert(std::make_pair(absname, controller)).first;  // with namespace
-        auto& claimed_interfaces = controller_it->second.claimed_interfaces;
-        std::transform(claimed_interfaces.cbegin(), claimed_interfaces.cend(), claimed_interfaces.begin(),
-                       [](const std::string& claimed_interface) {
-                         return parseJointNameFromResource(claimed_interface);
+        // Get the names of the interfaces that would be claimed by this currently-inactive controller if it was activated.
+        auto& required_interfaces = controller_it->second.required_command_interfaces;
+        // Modify the required interface names in-place to only include the name of the joint and not the command type
+        // (e.g. position, velocity, etc.).
+        std::transform(required_interfaces.cbegin(), required_interfaces.cend(), required_interfaces.begin(),
+                       [](const std::string& required_interface) {
+                         return parseJointNameFromResource(required_interface);
                        });
         allocate(absname, controller_it->second);
       }
@@ -236,6 +254,9 @@ public:
         getAbsName("controller_manager/list_controllers"));
     switch_controller_service_ = node_->create_client<controller_manager_msgs::srv::SwitchController>(
         getAbsName("controller_manager/switch_controller"));
+
+    std::scoped_lock<std::mutex> lock(controllers_mutex_);
+    discover(true);
   }
   /**
    * \brief Find and return the pre-allocated handle for the given controller.
@@ -244,7 +265,7 @@ public:
    */
   moveit_controller_manager::MoveItControllerHandlePtr getControllerHandle(const std::string& name) override
   {
-    std::unique_lock<std::mutex> lock(controllers_mutex_);
+    std::scoped_lock<std::mutex> lock(controllers_mutex_);
     HandleMap::iterator it = handles_.find(name);
     if (it != handles_.end())
     {  // controller is is manager by this interface
@@ -259,7 +280,7 @@ public:
    */
   void getControllersList(std::vector<std::string>& names) override
   {
-    std::unique_lock<std::mutex> lock(controllers_mutex_);
+    std::scoped_lock<std::mutex> lock(controllers_mutex_);
     discover();
 
     for (std::pair<const std::string, controller_manager_msgs::msg::ControllerState>& managed_controller :
@@ -275,7 +296,7 @@ public:
    */
   void getActiveControllers(std::vector<std::string>& names) override
   {
-    std::unique_lock<std::mutex> lock(controllers_mutex_);
+    std::scoped_lock<std::mutex> lock(controllers_mutex_);
     discover();
 
     for (std::pair<const std::string, controller_manager_msgs::msg::ControllerState>& managed_controller :
@@ -287,19 +308,19 @@ public:
   }
 
   /**
-   * \brief Read resources from cached controller states
+   * \brief Read interface names required by each controller from the cached controller state info.
    * @param[in] name name of controller (with namespace)
    * @param[out] joints
    */
   void getControllerJoints(const std::string& name, std::vector<std::string>& joints) override
   {
-    std::unique_lock<std::mutex> lock(controllers_mutex_);
+    std::scoped_lock<std::mutex> lock(controllers_mutex_);
     ControllersMap::iterator it = managed_controllers_.find(name);
     if (it != managed_controllers_.end())
     {
-      for (const auto& claimed_resource : it->second.claimed_interfaces)
+      for (const auto& required_resource : it->second.required_command_interfaces)
       {
-        joints.push_back(claimed_resource);
+        joints.push_back(required_resource);
       }
     }
   }
@@ -311,7 +332,7 @@ public:
    */
   ControllerState getControllerState(const std::string& name) override
   {
-    std::unique_lock<std::mutex> lock(controllers_mutex_);
+    std::scoped_lock<std::mutex> lock(controllers_mutex_);
     discover();
 
     ControllerState c;
@@ -332,7 +353,7 @@ public:
    */
   bool switchControllers(const std::vector<std::string>& activate, const std::vector<std::string>& deactivate) override
   {
-    std::unique_lock<std::mutex> lock(controllers_mutex_);
+    std::scoped_lock<std::mutex> lock(controllers_mutex_);
     discover(true);
 
     typedef boost::bimap<std::string, std::string> resources_bimap;
@@ -360,15 +381,17 @@ public:
       }
     }
 
+    // For each controller to activate, find conflicts between the interfaces required by that controller and the
+    // interfaces claimed by currently-active controllers.
     for (const std::string& it : activate)
     {
       ControllersMap::iterator c = managed_controllers_.find(it);
       if (c != managed_controllers_.end())
       {  // controller belongs to this manager
         request->start_controllers.push_back(c->second.name);
-        for (const auto& claimed_resource : c->second.claimed_interfaces)
+        for (const auto& required_resource : c->second.required_command_interfaces)
         {
-          resources_bimap::right_const_iterator res = claimed_resources.right.find(claimed_resource);
+          resources_bimap::right_const_iterator res = claimed_resources.right.find(required_resource);
           if (res != claimed_resources.right.end())
           {                                                    // resource is claimed
             request->stop_controllers.push_back(res->second);  // add claiming controller to stop list
@@ -377,6 +400,9 @@ public:
         }
       }
     }
+
+    // Setting level to STRICT means that the controller switch will only be committed if all controllers are
+    // successfully activated or deactivated.
     request->strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
 
     if (!request->start_controllers.empty() || !request->stop_controllers.empty())

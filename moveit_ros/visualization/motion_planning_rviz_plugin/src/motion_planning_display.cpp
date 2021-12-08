@@ -179,7 +179,7 @@ MotionPlanningDisplay::MotionPlanningDisplay()
       SLOT(changedQueryJointViolationColor()), this);
 
   // Trajectory playback / planned path category ---------------------------------------------
-  trajectory_visual_.reset(new TrajectoryVisualization(path_category_, this));
+  trajectory_visual_ = std::make_shared<TrajectoryVisualization>(path_category_, this);
 
   // Start background jobs
   background_process_.setJobUpdateEvent(
@@ -219,8 +219,8 @@ void MotionPlanningDisplay::onInitialize()
   QColor qcolor = attached_body_color_property_->getColor();
   trajectory_visual_->setDefaultAttachedObjectColor(qcolor);
 
-  query_robot_start_.reset(
-      new RobotStateVisualization(planning_scene_node_, context_, "Planning Request Start", nullptr));
+  query_robot_start_ =
+      std::make_shared<RobotStateVisualization>(planning_scene_node_, context_, "Planning Request Start", nullptr);
   query_robot_start_->setCollisionVisible(false);
   query_robot_start_->setVisualVisible(true);
   query_robot_start_->setVisible(query_start_state_property_->getBool());
@@ -232,7 +232,8 @@ void MotionPlanningDisplay::onInitialize()
   color.a = 1.0f;
   query_robot_start_->setDefaultAttachedObjectColor(color);
 
-  query_robot_goal_.reset(new RobotStateVisualization(planning_scene_node_, context_, "Planning Request Goal", nullptr));
+  query_robot_goal_ =
+      std::make_shared<RobotStateVisualization>(planning_scene_node_, context_, "Planning Request Goal", nullptr);
   query_robot_goal_->setCollisionVisible(false);
   query_robot_goal_->setVisualVisible(true);
   query_robot_goal_->setVisible(query_goal_state_property_->getBool());
@@ -476,8 +477,8 @@ void MotionPlanningDisplay::renderWorkspaceBox()
 
   if (!workspace_box_)
   {
-    workspace_box_.reset(
-        new rviz_rendering::Shape(rviz_rendering::Shape::Cube, context_->getSceneManager(), planning_scene_node_));
+    workspace_box_ = std::make_unique<rviz_rendering::Shape>(rviz_rendering::Shape::Cube, context_->getSceneManager(),
+                                                             planning_scene_node_);
     workspace_box_->setColor(0.0f, 0.0f, 0.6f, 0.3f);
   }
 
@@ -1140,8 +1141,8 @@ void MotionPlanningDisplay::onRobotModelLoaded()
   PlanningSceneDisplay::onRobotModelLoaded();
   trajectory_visual_->onRobotModelLoaded(getRobotModel());
 
-  robot_interaction_.reset(new robot_interaction::RobotInteraction(
-      getRobotModel(), node_, rclcpp::names::append(getMoveGroupNS(), "rviz_moveit_motion_planning_display")));
+  robot_interaction_ = std::make_shared<robot_interaction::RobotInteraction>(
+      getRobotModel(), node_, rclcpp::names::append(getMoveGroupNS(), "rviz_moveit_motion_planning_display"));
   robot_interaction::KinematicOptions o;
   o.state_validity_callback_ = boost::bind(&MotionPlanningDisplay::isIKSolutionCollisionFree, this,
                                            boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3);
@@ -1155,10 +1156,10 @@ void MotionPlanningDisplay::onRobotModelLoaded()
 
   // initialize previous state, start state, and goal state to current state
   previous_state_ = std::make_shared<moveit::core::RobotState>(getPlanningSceneRO()->getCurrentState());
-  query_start_state_.reset(new robot_interaction::InteractionHandler(robot_interaction_, "start", *previous_state_,
-                                                                     planning_scene_monitor_->getTFClient()));
-  query_goal_state_.reset(new robot_interaction::InteractionHandler(robot_interaction_, "goal", *previous_state_,
-                                                                    planning_scene_monitor_->getTFClient()));
+  query_start_state_ = std::make_shared<robot_interaction::InteractionHandler>(
+      robot_interaction_, "start", *previous_state_, planning_scene_monitor_->getTFClient());
+  query_goal_state_ = std::make_shared<robot_interaction::InteractionHandler>(
+      robot_interaction_, "goal", *previous_state_, planning_scene_monitor_->getTFClient());
   query_start_state_->setUpdateCallback(boost::bind(&MotionPlanningDisplay::scheduleDrawQueryStartState, this,
                                                     boost::placeholders::_1, boost::placeholders::_2));
   query_goal_state_->setUpdateCallback(boost::bind(&MotionPlanningDisplay::scheduleDrawQueryGoalState, this,
@@ -1183,7 +1184,7 @@ void MotionPlanningDisplay::onRobotModelLoaded()
     planning_group_property_->setStdString(groups[0]);
 
   modified_groups_.clear();
-  kinematics_metrics_.reset(new kinematics_metrics::KinematicsMetrics(getRobotModel()));
+  kinematics_metrics_ = std::make_shared<kinematics_metrics::KinematicsMetrics>(getRobotModel());
 
   geometry_msgs::msg::Vector3 gravity_vector;
   gravity_vector.x = 0.0;
@@ -1193,7 +1194,8 @@ void MotionPlanningDisplay::onRobotModelLoaded()
   dynamics_solver_.clear();
   for (const std::string& group : groups)
     if (getRobotModel()->getJointModelGroup(group)->isChain())
-      dynamics_solver_[group].reset(new dynamics_solver::DynamicsSolver(getRobotModel(), group, gravity_vector));
+      dynamics_solver_[group] =
+          std::make_shared<dynamics_solver::DynamicsSolver>(getRobotModel(), group, gravity_vector);
 
   if (frame_)
     frame_->fillPlanningGroupOptions();
@@ -1447,8 +1449,8 @@ void MotionPlanningDisplay::visualizePlaceLocations(const std::vector<geometry_m
   place_locations_display_.resize(place_poses.size());
   for (std::size_t i = 0; i < place_poses.size(); ++i)
   {
-    place_locations_display_[i].reset(
-        new rviz_rendering::Shape(rviz_rendering::Shape::Sphere, context_->getSceneManager()));
+    place_locations_display_[i] =
+        std::make_shared<rviz_rendering::Shape>(rviz_rendering::Shape::Sphere, context_->getSceneManager());
     place_locations_display_[i]->setColor(1.0f, 0.0f, 0.0f, 0.3f);
     Ogre::Vector3 center(place_poses[i].pose.position.x, place_poses[i].pose.position.y, place_poses[i].pose.position.z);
     Ogre::Vector3 extents(0.02, 0.02, 0.02);

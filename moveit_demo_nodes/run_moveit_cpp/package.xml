@@ -3,9 +3,10 @@
 <package format="3">
   <name>run_moveit_cpp</name>
   <version>2.3.0</version>
-  <description>TODO: Package description</description>
+  <description>A minimal example implementation of a MoveItCpp application</description>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
-  <license>TODO: License declaration</license>
+  <license>BSD</license>
+  <author email="henningkayser@picknik.ai">Henning Kayser</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>moveit_common</build_depend>

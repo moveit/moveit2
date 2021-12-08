@@ -116,11 +116,11 @@ bool DepthImageOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   filtered_label_transport_ = std::make_unique<image_transport::ImageTransport>(node_);
 
   tf_buffer_ = monitor_->getTFClient();
-  free_space_updater_.reset(new LazyFreeSpaceUpdater(tree_));
+  free_space_updater_ = std::make_unique<LazyFreeSpaceUpdater>(tree_);
 
   // create our mesh filter
-  mesh_filter_.reset(new mesh_filter::MeshFilter<mesh_filter::StereoCameraModel>(
-      mesh_filter::MeshFilterBase::TransformCallback(), mesh_filter::StereoCameraModel::REGISTERED_PSDK_PARAMS));
+  mesh_filter_ = std::make_unique<mesh_filter::MeshFilter<mesh_filter::StereoCameraModel>>(
+      mesh_filter::MeshFilterBase::TransformCallback(), mesh_filter::StereoCameraModel::REGISTERED_PSDK_PARAMS);
   mesh_filter_->parameters().setDepthRange(near_clipping_plane_distance_, far_clipping_plane_distance_);
   mesh_filter_->setShadowThreshold(shadow_threshold_);
   mesh_filter_->setPaddingOffset(padding_offset_);

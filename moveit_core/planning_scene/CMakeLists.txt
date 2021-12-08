@@ -46,6 +46,10 @@ if(BUILD_TESTING)
   )
   target_link_libraries(test_planning_scene moveit_test_utils ${MOVEIT_LIB_NAME})
 
+  ament_add_gtest(test_collision_objects test/test_collision_objects.cpp
+    APPEND_LIBRARY_DIRS "${append_library_dirs}")
+  target_link_libraries(test_collision_objects moveit_test_utils ${MOVEIT_LIB_NAME})
+
   ament_add_gtest(test_multi_threaded test/test_multi_threaded.cpp
     APPEND_LIBRARY_DIRS "${append_library_dirs}")
   target_link_libraries(test_multi_threaded moveit_test_utils ${MOVEIT_LIB_NAME})

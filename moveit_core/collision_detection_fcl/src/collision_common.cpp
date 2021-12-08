@@ -49,6 +49,7 @@
 
 #include <boost/thread/mutex.hpp>
 #include <memory>
+#include <type_traits>
 
 namespace collision_detection
 {
@@ -680,24 +681,6 @@ FCLShapeCache& GetShapeCache()
   return cache;
 }
 
-template <typename T1, typename T2>
-struct IfSameType
-{
-  enum
-  {
-    VALUE = 0
-  };
-};
-
-template <typename T>
-struct IfSameType<T, T>
-{
-  enum
-  {
-    VALUE = 1
-  };
-};
-
 /** \brief Templated helper function creating new collision geometry out of general object using an arbitrary bounding
  *  volume (BV).
  *
@@ -738,7 +721,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
   // attached objects could have previously been World::Object; we try to move them
   // from their old cache to the new one, if possible. the code is not pretty, but should help
   // when we attach/detach objects that are in the world
-  if (IfSameType<T, moveit::core::AttachedBody>::VALUE == 1)
+  if (std::is_same<T, moveit::core::AttachedBody>::value)
   {
     // get the cache that corresponds to objects; maybe this attached object used to be a world object
     FCLShapeCache& othercache = GetShapeCache<BV, World::Object>();
@@ -771,7 +754,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
       // world objects could have previously been attached objects; we try to move them
       // from their old cache to the new one, if possible. the code is not pretty, but should help
       // when we attach/detach objects that are in the world
-      if (IfSameType<T, World::Object>::VALUE == 1)
+      if (std::is_same<T, World::Object>::value)
   {
     // get the cache that corresponds to objects; maybe this attached object used to be a world object
     FCLShapeCache& othercache = GetShapeCache<BV, moveit::core::AttachedBody>();

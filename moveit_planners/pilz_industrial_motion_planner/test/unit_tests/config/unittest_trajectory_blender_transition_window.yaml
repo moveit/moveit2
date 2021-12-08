@@ -1,0 +1,7 @@
+planning_group : "manipulator"
+target_link : "prbt_tcp"
+cartesian_velocity_tolerance : 1.0e-6
+cartesian_angular_velocity_tolerance : 1.0e-6
+joint_velocity_tolerance : 1.0e-6
+joint_acceleration_tolerance : 1.0e-2
+sampling_time : 0.01
