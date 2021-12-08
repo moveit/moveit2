@@ -1,0 +1,3 @@
+add_executable(hybrid_planning_demo_node hybrid_planning_demo_node.cpp)
+ament_target_dependencies(hybrid_planning_demo_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(hybrid_planning_demo_node ${LIBRARIES})
