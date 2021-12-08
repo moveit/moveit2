@@ -1,0 +1,7 @@
+<library path="simple_sampler_plugin">
+  <class name="moveit_hybrid_planning/SimpleSampler" type="moveit::hybrid_planning::SimpleSampler" base_class_type="moveit::hybrid_planning::TrajectoryOperatorInterface">
+    <description>
+    Simple trajectory operator plugin that updates the local planner's reference trajectory by simple replacing it and extracts the next trajectory point based on the current robot state and an index.
+    </description>
+  </class>
+</library>
