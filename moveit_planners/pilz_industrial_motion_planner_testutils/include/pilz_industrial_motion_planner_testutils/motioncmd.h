@@ -88,5 +88,3 @@ inline void MotionCmd::setAccelerationScale(double acceleration_scale)
 
 using MotionCmdUPtr = std::unique_ptr<MotionCmd>;
 }  // namespace pilz_industrial_motion_planner_testutils
-
-//#endif  // MOTIONCMD_H

@@ -123,5 +123,3 @@ planning_interface::MotionPlanRequest BaseCmd<StartType, GoalType>::toRequest() 
   return req;
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-//#endif  // BASECMD_H

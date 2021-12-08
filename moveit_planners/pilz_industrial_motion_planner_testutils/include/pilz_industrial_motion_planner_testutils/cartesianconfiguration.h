@@ -181,5 +181,3 @@ inline const boost::optional<double> CartesianConfiguration::getAngleTolerance()
   return tolerance_angle_;
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-//#endif  // CARTESIANCONFIGURATION_H

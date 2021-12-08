@@ -49,5 +49,3 @@ public:
   virtual moveit_msgs::msg::RobotState toMoveitMsgsRobotState() const = 0;
 };
 }  // namespace pilz_industrial_motion_planner_testutils
-
-//#endif  // ROBOTSTATEMSGCONVERTIBLE_H

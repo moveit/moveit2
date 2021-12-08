@@ -172,5 +172,3 @@ inline bool AsyncTest::barricade(std::initializer_list<std::string> clear_events
 }
 
 }  // namespace testing
-
-//#endif  // ASYNC_TEST_H

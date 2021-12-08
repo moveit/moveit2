@@ -47,5 +47,3 @@ public:
   }
 };
 }  // namespace pilz_industrial_motion_planner_testutils
-
-//#endif  // EXCEPTION_TYPES_H

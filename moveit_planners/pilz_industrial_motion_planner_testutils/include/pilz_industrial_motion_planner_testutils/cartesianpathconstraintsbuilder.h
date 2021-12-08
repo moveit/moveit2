@@ -85,5 +85,3 @@ inline moveit_msgs::msg::Constraints CartesianPathConstraintsBuilder::toPathCons
   return path_constraints;
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-//#endif  // CARTESIANPATHCONSTRAINTSBUILDER_H

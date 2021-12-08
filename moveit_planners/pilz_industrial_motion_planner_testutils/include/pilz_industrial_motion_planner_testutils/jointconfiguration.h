@@ -140,5 +140,3 @@ inline void JointConfiguration::setCreateJointNameFunc(CreateJointNameFunc creat
   create_joint_name_func_ = std::move(create_joint_name_func);
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-//#endif  // JOINTCONFIGURATION_H

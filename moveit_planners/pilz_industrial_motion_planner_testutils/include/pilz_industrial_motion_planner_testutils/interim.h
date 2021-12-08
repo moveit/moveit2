@@ -55,5 +55,3 @@ std::string Interim<ConfigType, BuilderType>::getConstraintName() const
   return "interim";
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-//#endif  // INTERIMAXILIARY_H

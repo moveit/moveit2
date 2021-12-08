@@ -87,5 +87,3 @@ inline void RobotConfiguration::clearModel()
   robot_model_ = nullptr;
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-//#endif  // ROBOTCONFIGURATION_H

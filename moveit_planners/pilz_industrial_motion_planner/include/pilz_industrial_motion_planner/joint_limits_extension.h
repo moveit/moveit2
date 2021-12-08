@@ -65,5 +65,3 @@ struct JointLimits : joint_limits::JointLimits
 typedef joint_limits_interface::JointLimits JointLimit;
 typedef std::map<std::string, JointLimit> JointLimitsMap;
 }  // namespace pilz_industrial_motion_planner
-
-//#endif  // JOINT_LIMITS_EXTENSION_H

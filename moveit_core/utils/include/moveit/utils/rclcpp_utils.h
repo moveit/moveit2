@@ -39,5 +39,3 @@ std::string clean(const std::string& name);
 std::string append(const std::string& left, const std::string& right);
 }  // namespace names
 }  // namespace rclcpp
-
-//#endif  // ROSCPP_NAMES_H
