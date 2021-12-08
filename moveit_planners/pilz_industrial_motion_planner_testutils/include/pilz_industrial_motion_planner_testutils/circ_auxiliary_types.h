@@ -34,7 +34,6 @@
 
 #pragma once
 
-
 #include "center.h"
 #include "interim.h"
 #include "cartesianconfiguration.h"
