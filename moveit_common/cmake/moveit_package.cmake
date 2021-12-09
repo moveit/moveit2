@@ -46,6 +46,13 @@ macro(moveit_package)
     add_compile_options(-Wall -Wextra
       -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual
       -Wno-unused-parameter -Wno-unused-function)
+
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=gold -Wl,--version OUTPUT_VARIABLE stdout ERROR_QUIET)
+    if("${stdout}" MATCHES "GNU gold")
+      add_compile_options(-fuse-ld=gold)
+    else()
+      message(WARNING "GNU gold linker isn't available, using the default system linker.")
+    endif()
   else()
     # Defaults for Microsoft C++ compiler
     add_compile_options(/W3 /wd4251 /wd4068 /wd4275)
