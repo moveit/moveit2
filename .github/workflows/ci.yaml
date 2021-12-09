@@ -32,6 +32,7 @@ jobs:
       # Pull any updates to the upstream workspace (after restoring it from cache)
       AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
+      AFTER_BUILD_TARGET_WORKSPACE: ccache -s
       TARGET_CMAKE_ARGS: >
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'Debug' || 'Release'}}
         -DCMAKE_CXX_FLAGS="${{ matrix.env.CLANG_TIDY != 'pedantic' && '-Werror ' || '' }}${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer'}}"
@@ -89,7 +90,6 @@ jobs:
             ${{ env.CACHE_PREFIX }}
         env:
           CACHE_PREFIX: ccache-${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && '-ccov' || '' }}
-
       - name: Generate ikfast packages
         if: matrix.env.IKFAST_TEST
         run: moveit_kinematics/test/test_ikfast_plugins.sh
@@ -97,7 +97,6 @@ jobs:
         name: Run industrial_ci
         uses: ros-industrial/industrial_ci@master
         env: ${{ matrix.env }}
-
       - name: Upload test artifacts (on failure)
         uses: actions/upload-artifact@v2
         if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
