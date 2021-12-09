@@ -47,11 +47,15 @@ macro(moveit_package)
       -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual
       -Wno-unused-parameter -Wno-unused-function)
 
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=gold -Wl,--version OUTPUT_VARIABLE stdout ERROR_QUIET)
-    if("${stdout}" MATCHES "GNU gold")
+    # Use lld or gold if they are installed (both are much, much more performant than ld)
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=lld -Wl,--version OUTPUT_VARIABLE lld_test ERROR_QUIET)
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=gold -Wl,--version OUTPUT_VARIABLE gold_test ERROR_QUIET)
+    if("${lld_test}" MATCHES "LLD")
+      add_compile_options(-fuse-ld=lld)
+    elseif("${gold_test}" MATCHES "GNU gold")
       add_compile_options(-fuse-ld=gold)
     else()
-      message(WARNING "GNU gold linker isn't available, using the default system linker.")
+      message(WARNING "GNU gold or LLD linkers are not available, using the default system linker.")
     endif()
   else()
     # Defaults for Microsoft C++ compiler
