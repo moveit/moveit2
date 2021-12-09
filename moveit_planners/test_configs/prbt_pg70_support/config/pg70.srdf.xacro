@@ -68,5 +68,5 @@ limitations under the License.
 
   <!-- instantiate gripper -->
   <xacro:prbt_pg70 prefix="$(arg prefix)"/>
-  
+
 </robot>

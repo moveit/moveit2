@@ -3,7 +3,7 @@
   <arg name="gripper" default="" />
   <arg name="execution_type" default="interpolate" />
 
-  <!-- This file makes it easy to include the settings for trajectory execution  -->  
+  <!-- This file makes it easy to include the settings for trajectory execution  -->
 
   <!-- Flag indicating whether MoveIt! is allowed to load/unload  or switch controllers -->
   <arg name="moveit_manage_controllers" default="true"/>
@@ -15,12 +15,12 @@
   <param name="trajectory_execution/allowed_goal_duration_margin" value="0.5"/> <!-- default 0.5 -->
   <!-- Allowed joint-value tolerance for validation that trajectory's first point matches current robot state -->
   <param name="trajectory_execution/allowed_start_tolerance" value="0.01"/> <!-- default 0.01 -->
-  
+
   <!-- Load the robot specific controller manager; this sets the moveit_controller_manager ROS parameter -->
   <arg name="moveit_controller_manager" default="prbt" />
   <include file="$(find moveit_resources_prbt_moveit_config)/launch/$(arg moveit_controller_manager)_moveit_controller_manager.launch.xml">
     <arg name="gripper" value="$(arg gripper)" />
     <arg name="execution_type" value="$(arg execution_type)" />
   </include>
-  
+
 </launch>

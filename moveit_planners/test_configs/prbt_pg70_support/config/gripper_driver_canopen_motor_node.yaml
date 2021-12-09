@@ -22,7 +22,7 @@
 nodes:
   prbt_gripper_finger_left_joint:
     id: 12
-    # Scaling: The gripper pos is stated (over CAN) for both fingers, 
+    # Scaling: The gripper pos is stated (over CAN) for both fingers,
     # but is needed as pos for single finger in URDF-Modell.
     pos_to_device: "pos*1e6*2"
     pos_from_device: "obj6064*5e-7"

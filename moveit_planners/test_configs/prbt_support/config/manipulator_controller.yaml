@@ -18,7 +18,7 @@
 # This file declares the different controller types which can then be
 # instanciated by the controller manager. In this file only controllers
 # for the manipulator are declared (no gripper).
-# 
+#
 # See also: http://wiki.ros.org/joint_trajectory_controller?distro=lunar
 #
 

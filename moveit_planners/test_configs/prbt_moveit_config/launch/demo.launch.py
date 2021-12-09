@@ -9,6 +9,7 @@ from launch.actions import ExecuteProcess
 from ament_index_python.packages import get_package_share_directory
 import xacro
 
+
 def load_file(package_name, file_path):
     package_path = get_package_share_directory(package_name)
     absolute_file_path = os.path.join(package_path, file_path)
@@ -29,6 +30,7 @@ def load_yaml(package_name, file_path):
             return yaml.safe_load(file)
     except EnvironmentError:  # parent of IOError, OSError *and* WindowsError where available
         return None
+
 
 def generate_launch_description():
 
@@ -64,11 +66,11 @@ def generate_launch_description():
     cartesian_limits_yaml = load_yaml(
         "moveit_resources_prbt_moveit_config", "config/cartesian_limits.yaml"
     )
-    robot_description_planning = {"robot_description_planning":
-      {
-        **joint_limits_yaml,
-        **cartesian_limits_yaml,
-      }
+    robot_description_planning = {
+        "robot_description_planning": {
+            **joint_limits_yaml,
+            **cartesian_limits_yaml,
+        }
     }
     kinematics_yaml = load_yaml(
         "moveit_resources_prbt_moveit_config", "config/kinematics.yaml"
@@ -88,7 +90,7 @@ def generate_launch_description():
             "planning_plugin": "ompl_interface/OMPLPlanner",
             "request_adapters": """default_planner_request_adapters/AddTimeOptimalParameterization default_planner_request_adapters/FixWorkspaceBounds default_planner_request_adapters/FixStartStateBounds default_planner_request_adapters/FixStartStateCollision default_planner_request_adapters/FixStartStatePathConstraints""",
             "start_state_max_bounds_error": 0.1,
-        }
+        },
     }
     ompl_planning_yaml = load_yaml(
         "moveit_resources_prbt_moveit_config", "config/ompl_planning.yaml"
@@ -137,7 +139,9 @@ def generate_launch_description():
 
     # RViz
     # tutorial_mode = LaunchConfiguration("rviz_tutorial")
-    rviz_base = os.path.join(get_package_share_directory("moveit_resources_prbt_moveit_config"), "launch")
+    rviz_base = os.path.join(
+        get_package_share_directory("moveit_resources_prbt_moveit_config"), "launch"
+    )
     rviz_full_config = os.path.join(rviz_base, "moveit.rviz")
     rviz_node = Node(
         package="rviz2",
@@ -219,7 +223,7 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            #tutorial_arg,
+            # tutorial_arg,
             # db_arg,
             rviz_node,
             static_tf,

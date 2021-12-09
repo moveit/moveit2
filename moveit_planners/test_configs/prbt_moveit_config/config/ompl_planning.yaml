@@ -20,7 +20,7 @@ planner_configs:
   KPIECEkConfigDefault:
     type: geometric::KPIECE
     range: 0.0  # Max motion added to tree. ==> maxDistance_ default: 0.0, if 0.0, set on setup()
-    goal_bias: 0.05  # When close to goal select goal, with this probability. default: 0.05 
+    goal_bias: 0.05  # When close to goal select goal, with this probability. default: 0.05
     border_fraction: 0.9  # Fraction of time focused on boarder default: 0.9 (0.0,1.]
     failed_expansion_score_factor: 0.5  # When extending motion fails, scale score by factor. default: 0.5
     min_valid_path_fraction: 0.5  # Accept partially valid moves above fraction. default: 0.5
@@ -44,7 +44,7 @@ planner_configs:
     temp_change_factor: 2.0  # how much to increase or decrease temp. default: 2.0
     min_temperature: 10e-10  # lower limit of temp change. default: 10e-10
     init_temperature: 10e-6  # initial temperature. default: 10e-6
-    frountier_threshold: 0.0  # dist new state to nearest neighbor to disqualify as frontier. default: 0.0 set in setup() 
+    frountier_threshold: 0.0  # dist new state to nearest neighbor to disqualify as frontier. default: 0.0 set in setup()
     frountierNodeRatio: 0.1  # 1/10, or 1 nonfrontier for every 10 frontier. default: 0.1
     k_constant: 0.0  # value used to normalize expresssion. default: 0.0 set in setup()
   PRMkConfigDefault:
@@ -75,9 +75,9 @@ planner_configs:
   STRIDEkConfigDefault:
     type: geometric::STRIDE
     range: 0.0  # Max motion added to tree. ==> maxDistance_ default: 0.0, if 0.0, set on setup()
-    goal_bias: 0.05  # When close to goal select goal, with this probability. default: 0.05 
+    goal_bias: 0.05  # When close to goal select goal, with this probability. default: 0.05
     use_projected_distance: 0  # whether nearest neighbors are computed based on distances in a projection of the state rather distances in the state space itself. default: 0
-    degree: 16  # desired degree of a node in the Geometric Near-neightbor Access Tree (GNAT). default: 16 
+    degree: 16  # desired degree of a node in the Geometric Near-neightbor Access Tree (GNAT). default: 16
     max_degree: 18  # max degree of a node in the GNAT. default: 12
     min_degree: 12  # min degree of a node in the GNAT. default: 12
     max_pts_per_leaf: 6  # max points per leaf in the GNAT. default: 6
@@ -88,13 +88,13 @@ planner_configs:
     range: 0.0  # Max motion added to tree. ==> maxDistance_ default: 0.0, if 0.0, set on setup()
     temp_change_factor: 0.1  # how much to increase or decrease temp. default: 0.1
     init_temperature: 100  # initial temperature. default: 100
-    frountier_threshold: 0.0  # dist new state to nearest neighbor to disqualify as frontier. default: 0.0 set in setup() 
+    frountier_threshold: 0.0  # dist new state to nearest neighbor to disqualify as frontier. default: 0.0 set in setup()
     frountier_node_ratio: 0.1  # 1/10, or 1 nonfrontier for every 10 frontier. default: 0.1
     cost_threshold: 1e300  # the cost threshold. Any motion cost that is not better will not be expanded. default: inf
   LBTRRTkConfigDefault:
     type: geometric::LBTRRT
     range: 0.0  # Max motion added to tree. ==> maxDistance_ default: 0.0, if 0.0, set on setup()
-    goal_bias: 0.05  # When close to goal select goal, with this probability. default: 0.05 
+    goal_bias: 0.05  # When close to goal select goal, with this probability. default: 0.05
     epsilon: 0.4  # optimality approximation factor. default: 0.4
   BiESTkConfigDefault:
     type: geometric::BiEST
@@ -102,7 +102,7 @@ planner_configs:
   ProjESTkConfigDefault:
     type: geometric::ProjEST
     range: 0.0  # Max motion added to tree. ==> maxDistance_ default: 0.0, if 0.0, set on setup()
-    goal_bias: 0.05  # When close to goal select goal, with this probability. default: 0.05 
+    goal_bias: 0.05  # When close to goal select goal, with this probability. default: 0.05
   LazyPRMkConfigDefault:
     type: geometric::LazyPRM
     range: 0.0  # Max motion added to tree. ==> maxDistance_ default: 0.0, if 0.0, set on setup()
