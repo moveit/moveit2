@@ -111,7 +111,8 @@ void MoveGroupSequenceAction::executeSequenceCallback(const std::shared_ptr<Move
 
   // before we start planning, ensure that we have the latest robot state
   // received...
-  context_->planning_scene_monitor_->waitForCurrentRobotState(context_->moveit_cpp_->getNode()->now());
+  auto node = context_->moveit_cpp_->getNode();
+  context_->planning_scene_monitor_->waitForCurrentRobotState(node->get_clock()->now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   const auto action_res = std::make_shared<moveit_msgs::action::MoveGroupSequence::Result>();
