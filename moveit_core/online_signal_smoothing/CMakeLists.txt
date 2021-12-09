@@ -46,7 +46,6 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${BUTTERWORTH_FILTER_LIB}_export.h DES
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   find_package(ament_cmake_gtest REQUIRED)
-  find_package(ros_testing REQUIRED)
 
   # Lowpass filter unit test
   ament_add_gtest(test_butterworth_filter test/test_butterworth_filter.cpp)

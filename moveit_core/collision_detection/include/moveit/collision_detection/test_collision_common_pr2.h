@@ -296,7 +296,7 @@ TYPED_TEST_P(CollisionDetectorTest, AttachedBodyTester)
   ASSERT_FALSE(res.collision);
 
   shapes::Shape* shape = new shapes::Box(.1, .1, .1);
-  this->cenv_->getWorld()->addToObject("box", shapes::ShapeConstPtr(shape), pos1);
+  this->cenv_->getWorld()->addToObject("box", pos1, shapes::ShapeConstPtr(shape), Eigen::Isometry3d::Identity());
 
   res = collision_detection::CollisionResult();
   this->cenv_->checkRobotCollision(req, res, robot_state, *this->acm_);
@@ -311,7 +311,7 @@ TYPED_TEST_P(CollisionDetectorTest, AttachedBodyTester)
   shapes.push_back(shapes::ShapeConstPtr(shape));
   poses.push_back(Eigen::Isometry3d::Identity());
   std::vector<std::string> touch_links;
-  robot_state.attachBody("box", shapes, poses, touch_links, "r_gripper_palm_link");
+  robot_state.attachBody("box", poses[0], shapes, poses, touch_links, "r_gripper_palm_link");
 
   res = collision_detection::CollisionResult();
   this->cenv_->checkSelfCollision(req, res, robot_state, *this->acm_);
@@ -323,7 +323,7 @@ TYPED_TEST_P(CollisionDetectorTest, AttachedBodyTester)
   touch_links.push_back("r_gripper_palm_link");
   touch_links.push_back("r_gripper_motor_accelerometer_link");
   shapes[0] = std::make_shared<shapes::Box>(.1, .1, .1);
-  robot_state.attachBody("box", shapes, poses, touch_links, "r_gripper_palm_link");
+  robot_state.attachBody("box", poses[0], shapes, poses, touch_links, "r_gripper_palm_link");
   robot_state.update();
 
   res = collision_detection::CollisionResult();
@@ -332,7 +332,7 @@ TYPED_TEST_P(CollisionDetectorTest, AttachedBodyTester)
 
   pos1.translation().x() = 5.01;
   shapes::Shape* coll = new shapes::Box(.1, .1, .1);
-  this->cenv_->getWorld()->addToObject("coll", shapes::ShapeConstPtr(coll), pos1);
+  this->cenv_->getWorld()->addToObject("coll", pos1, shapes::ShapeConstPtr(coll), Eigen::Isometry3d::Identity());
   res = collision_detection::CollisionResult();
   this->cenv_->checkRobotCollision(req, res, robot_state, *this->acm_);
   ASSERT_TRUE(res.collision);
@@ -374,7 +374,7 @@ TYPED_TEST_P(CollisionDetectorTest, DiffSceneTester)
   poses.push_back(Eigen::Isometry3d::Identity());
 
   std::vector<std::string> touch_links;
-  robot_state.attachBody("kinect", shapes, poses, touch_links, "r_gripper_palm_link");
+  robot_state.attachBody("kinect", poses[0], shapes, poses, touch_links, "r_gripper_palm_link");
 
   before = std::chrono::system_clock::now();
   new_cenv->checkSelfCollision(req, res, robot_state);
@@ -407,7 +407,7 @@ TYPED_TEST_P(CollisionDetectorTest, ConvertObjectToAttached)
   Eigen::Isometry3d pos2 = Eigen::Isometry3d::Identity();
   pos2.translation().x() = 10.0;
 
-  this->cenv_->getWorld()->addToObject("kinect", shape, pos1);
+  this->cenv_->getWorld()->addToObject("kinect", pos1, shape, Eigen::Isometry3d::Identity());
 
   moveit::core::RobotState robot_state(this->robot_model_);
   robot_state.setToDefaultValues();
@@ -435,13 +435,16 @@ TYPED_TEST_P(CollisionDetectorTest, ConvertObjectToAttached)
   robot_state2.update();
 
   std::vector<std::string> touch_links;
-  robot_state1.attachBody("kinect", object->shapes_, object->shape_poses_, touch_links, "r_gripper_palm_link");
+  Eigen::Isometry3d identity_transform{ Eigen::Isometry3d::Identity() };
+  robot_state1.attachBody("kinect", identity_transform, object->shapes_, object->shape_poses_, touch_links,
+                          "r_gripper_palm_link");
 
   EigenSTL::vector_Isometry3d other_poses;
   other_poses.push_back(pos2);
 
   // This creates a new set of constant properties for the attached body, which happens to be the same as the one above;
-  robot_state2.attachBody("kinect", object->shapes_, object->shape_poses_, touch_links, "r_gripper_palm_link");
+  robot_state2.attachBody("kinect", identity_transform, object->shapes_, object->shape_poses_, touch_links,
+                          "r_gripper_palm_link");
 
   // going to take a while, but that's fine
   res = collision_detection::CollisionResult();
@@ -474,7 +477,7 @@ TYPED_TEST_P(CollisionDetectorTest, TestCollisionMapAdditionSpeed)
   auto start = std::chrono::system_clock::now();
   this->cenv_->getWorld()->addToObject("map", shapes, poses);
   double t = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - start).count();
-  // TODO: investigate why bullet collision checking is considerably slower here
+  // TODO (j-petit): investigate why bullet collision checking is considerably slower here
   EXPECT_GE(5.0, t);
   // this is not really a failure; it is just that slow;
   // looking into doing collision checking with a voxel grid.

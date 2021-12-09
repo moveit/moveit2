@@ -51,7 +51,7 @@ struct TrajectoryBlendResponse
   robot_trajectory::RobotTrajectoryPtr second_trajectory;
 
   // Error code
-  moveit_msgs::MoveItErrorCodes error_code;
+  moveit_msgs::msg::MoveItErrorCodes error_code;
 };
 
 }  // namespace pilz_industrial_motion_planner

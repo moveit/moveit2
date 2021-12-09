@@ -66,6 +66,12 @@ public:
     if (!controller_action_client_)
       return false;
 
+    if (!isConnected())
+    {
+      RCLCPP_ERROR_STREAM(LOGGER, "Action client not connected to action server: " << getActionName());
+      return false;
+    }
+
     if (!trajectory.multi_dof_joint_trajectory.points.empty())
     {
       RCLCPP_ERROR(LOGGER, "Gripper cannot execute multi-dof trajectories.");

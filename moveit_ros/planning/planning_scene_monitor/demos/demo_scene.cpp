@@ -65,6 +65,7 @@ void sendKnife(const rclcpp::Node::SharedPtr& node)
   co.id = "knife";
   co.header.stamp = rclcpp::Clock().now();
   co.header.frame_id = aco.link_name;
+  co.pose.orientation.w = 1.0;
   co.operation = moveit_msgs::msg::CollisionObject::ADD;
   co.primitives.resize(1);
   co.primitives[0].type = shape_msgs::msg::SolidPrimitive::BOX;

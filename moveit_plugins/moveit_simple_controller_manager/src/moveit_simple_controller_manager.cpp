@@ -44,10 +44,42 @@
 #include <algorithm>
 #include <map>
 
+namespace
+{
+/**
+ * @brief Create a string by adding a provided separator character between each of a variable number of input arguments.
+ * @param separator Char to use as the separator.
+ * @param content Variable number of input arguments to concatentate.
+ * @return Concatenated result string.
+ */
+template <typename... T>
+std::string concatenateWithSeparator(char separator, T... content)
+{
+  std::string result;
+  (result.append(content).append({ separator }), ...);
+  result.erase(result.end() - 1);  // delete trailing separator
+  return result;
+}
+
+/**
+ * @brief Compose a parameter name used to load controller configuration from a ROS parameter by concatenating strings
+ * separated by the `.` character.
+ * @param strings One or more strings, each corresponding to a part of the full parameter name.
+ * @return std::string concatenating the input parameters separated by the `.` character. For example:
+ * base_namespace.controller_name.param_name
+ */
+template <typename... T>
+std::string makeParameterName(T... strings)
+{
+  return concatenateWithSeparator<T...>('.', strings...);
+}
+
+}  // namespace
+
 namespace moveit_simple_controller_manager
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.plugins.moveit_simple_controller_manager");
-static const std::string PARAM_BASE_NAME = "moveit_simple_controller_manager.";
+static const std::string PARAM_BASE_NAME = "moveit_simple_controller_manager";
 class MoveItSimpleControllerManager : public moveit_controller_manager::MoveItControllerManager
 {
 public:
@@ -58,13 +90,13 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
     node_ = node;
-    if (!node_->has_parameter(PARAM_BASE_NAME + "controller_names"))
+    if (!node_->has_parameter(makeParameterName(PARAM_BASE_NAME, "controller_names")))
     {
       RCLCPP_ERROR_STREAM(LOGGER, "No controller_names specified.");
       return;
     }
     rclcpp::Parameter controller_names_param;
-    node_->get_parameter(PARAM_BASE_NAME + "controller_names", controller_names_param);
+    node_->get_parameter(makeParameterName(PARAM_BASE_NAME, "controller_names"), controller_names_param);
     if (controller_names_param.get_type() != rclcpp::ParameterType::PARAMETER_STRING_ARRAY)
     {
       RCLCPP_ERROR(LOGGER, "Parameter controller_names should be specified as a string array");
@@ -74,26 +106,27 @@ public:
     /* actually create each controller */
     for (const std::string& controller_name : controller_names)
     {
-      const auto controller_param = PARAM_BASE_NAME + controller_name + ".";
       try
       {
         std::string action_ns;
-        if (!node_->get_parameter(controller_param + "action_ns", action_ns))
+        const std::string& action_ns_param = makeParameterName(PARAM_BASE_NAME, controller_name, "action_ns");
+        if (!node_->get_parameter(action_ns_param, action_ns))
         {
-          RCLCPP_ERROR_STREAM(LOGGER, "No action namespace specified for controller " << controller_name);
-          RCLCPP_ERROR_STREAM(LOGGER, "Parameter: " << (controller_param + "action_ns"));
+          RCLCPP_ERROR_STREAM(LOGGER, "No action namespace specified for controller `"
+                                          << controller_name << "` through parameter `" << action_ns_param << "`");
           continue;
         }
 
         std::string type;
-        if (!node_->get_parameter(controller_param + "type", type))
+        if (!node_->get_parameter(makeParameterName(PARAM_BASE_NAME, controller_name, "type"), type))
         {
           RCLCPP_ERROR_STREAM(LOGGER, "No type specified for controller " << controller_name);
           continue;
         }
 
         std::vector<std::string> controller_joints;
-        if (!node_->get_parameter(controller_param + "joints", controller_joints) || controller_joints.empty())
+        if (!node_->get_parameter(makeParameterName(PARAM_BASE_NAME, controller_name, "joints"), controller_joints) ||
+            controller_joints.empty())
         {
           RCLCPP_ERROR_STREAM(LOGGER, "No joints specified for controller " << controller_name);
           continue;
@@ -103,46 +136,39 @@ public:
         if (type == "GripperCommand")
         {
           new_handle = std::make_shared<GripperControllerHandle>(node_, controller_name, action_ns);
-          if (static_cast<GripperControllerHandle*>(new_handle.get())->isConnected())
+          bool parallel_gripper = false;
+          if (node_->get_parameter(makeParameterName(PARAM_BASE_NAME, "parallel"), parallel_gripper) && parallel_gripper)
           {
-            bool parallel_gripper = false;
-            if (node_->get_parameter(controller_param + "parallel", parallel_gripper) && parallel_gripper)
+            if (controller_joints.size() != 2)
             {
-              if (controller_joints.size() != 2)
-              {
-                RCLCPP_ERROR_STREAM(LOGGER, "Parallel Gripper requires exactly two joints, " << controller_joints.size()
-                                                                                             << " are specified");
-                continue;
-              }
-              static_cast<GripperControllerHandle*>(new_handle.get())
-                  ->setParallelJawGripper(controller_joints[0], controller_joints[1]);
+              RCLCPP_ERROR_STREAM(LOGGER, "Parallel Gripper requires exactly two joints, " << controller_joints.size()
+                                                                                           << " are specified");
+              continue;
             }
-            else
-            {
-              std::string command_joint;
-              if (!node_->get_parameter(PARAM_BASE_NAME + "command_joint", command_joint))
-                command_joint = controller_joints[0];
-
-              static_cast<GripperControllerHandle*>(new_handle.get())->setCommandJoint(command_joint);
-            }
-
-            bool allow_failure;
-            node_->get_parameter_or(PARAM_BASE_NAME + "allow_failure", allow_failure, false);
-            static_cast<GripperControllerHandle*>(new_handle.get())->allowFailure(allow_failure);
-
-            RCLCPP_INFO_STREAM(LOGGER, "Added GripperCommand controller for " << controller_name);
-            controllers_[controller_name] = new_handle;
+            static_cast<GripperControllerHandle*>(new_handle.get())
+                ->setParallelJawGripper(controller_joints[0], controller_joints[1]);
           }
+          else
+          {
+            std::string command_joint;
+            if (!node_->get_parameter(makeParameterName(PARAM_BASE_NAME, "command_joint"), command_joint))
+              command_joint = controller_joints[0];
+
+            static_cast<GripperControllerHandle*>(new_handle.get())->setCommandJoint(command_joint);
+          }
+
+          bool allow_failure;
+          node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, "allow_failure"), allow_failure, false);
+          static_cast<GripperControllerHandle*>(new_handle.get())->allowFailure(allow_failure);
+
+          RCLCPP_INFO_STREAM(LOGGER, "Added GripperCommand controller for " << controller_name);
+          controllers_[controller_name] = new_handle;
         }
         else if (type == "FollowJointTrajectory")
         {
-          auto h = new FollowJointTrajectoryControllerHandle(node_, controller_name, action_ns);
-          new_handle.reset(h);
-          if (h->isConnected())
-          {
-            RCLCPP_INFO_STREAM(LOGGER, "Added FollowJointTrajectory controller for " << controller_name);
-            controllers_[controller_name] = new_handle;
-          }
+          new_handle = std::make_shared<FollowJointTrajectoryControllerHandle>(node_, controller_name, action_ns);
+          RCLCPP_INFO_STREAM(LOGGER, "Added FollowJointTrajectory controller for " << controller_name);
+          controllers_[controller_name] = new_handle;
         }
         else
         {
@@ -156,7 +182,7 @@ public:
         }
 
         moveit_controller_manager::MoveItControllerManager::ControllerState state;
-        node_->get_parameter_or(controller_param + "default", state.default_, false);
+        node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, controller_name, "default"), state.default_, false);
         state.active_ = true;
 
         controller_states_[controller_name] = state;

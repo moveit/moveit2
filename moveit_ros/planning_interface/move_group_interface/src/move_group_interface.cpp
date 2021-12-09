@@ -742,6 +742,7 @@ public:
       RCLCPP_INFO_STREAM(LOGGER, "MoveGroup action client/server not ready");
       return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
+    RCLCPP_INFO_STREAM(LOGGER, "MoveGroup action client/server ready");
 
     moveit_msgs::action::MoveGroup::Goal goal;
     constructGoal(goal);

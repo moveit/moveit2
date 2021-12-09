@@ -688,6 +688,15 @@ public:
    * is set */
   bool usePlanningSceneMsg(const moveit_msgs::msg::PlanningScene& scene);
 
+  /** \brief Takes the object message and returns the object pose, shapes and shape poses.
+   * If the object pose is empty (identity) but the shape pose is set, this uses the shape
+   * pose as the object pose. The shape pose becomes the identity instead.
+   */
+  bool shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::msg::CollisionObject& object,
+                                                Eigen::Isometry3d& object_pose_in_header_frame,
+                                                std::vector<shapes::ShapeConstPtr>& shapes,
+                                                EigenSTL::vector_Isometry3d& shape_poses);
+
   bool processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject& object);
   bool processAttachedCollisionObjectMsg(const moveit_msgs::msg::AttachedCollisionObject& object);
 
@@ -949,6 +958,10 @@ private:
   bool processCollisionObjectAdd(const moveit_msgs::msg::CollisionObject& object);
   bool processCollisionObjectRemove(const moveit_msgs::msg::CollisionObject& object);
   bool processCollisionObjectMove(const moveit_msgs::msg::CollisionObject& object);
+
+  /* For exporting and importing the planning scene */
+  bool readPoseFromText(std::istream& in, Eigen::Isometry3d& pose) const;
+  void writePoseToText(std::ostream& out, const Eigen::Isometry3d& pose) const;
 
   /** convert Pose msg to Eigen::Isometry, normalizing the quaternion part if necessary. */
   static void poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::Isometry3d& out);
