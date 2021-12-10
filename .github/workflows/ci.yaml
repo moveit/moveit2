@@ -32,6 +32,7 @@ jobs:
       # Pull any updates to the upstream workspace (after restoring it from cache)
       AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
+      # Log ccache statistics
       AFTER_BUILD_TARGET_WORKSPACE: ccache -s
       TARGET_CMAKE_ARGS: >
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'Debug' || 'Release'}}
