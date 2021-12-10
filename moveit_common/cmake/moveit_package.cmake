@@ -47,15 +47,14 @@ macro(moveit_package)
       -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual
       -Wno-unused-parameter -Wno-unused-function)
 
-    # Use gold linker if it is installed
-    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=gold -Wl,--version OUTPUT_VARIABLE gold_test ERROR_QUIET)
-    if("${gold_test}" MATCHES "GNU gold")
-      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold")
-      set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} -fuse-ld=gold")
-      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold")
-      set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=gold")
+    # Use lld linker if it is installed
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=lld -Wl,--version OUTPUT_VARIABLE lld_test ERROR_QUIET)
+    if("${lld_test}" MATCHES "LLD")
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
+      set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=lld")
+      set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=lld")
     else()
-      message(WARNING "GNU gold linker is not available, using the default system linker.")
+      message(WARNING "LLD linker is not available, using the default system linker.")
     endif()
   else()
     # Defaults for Microsoft C++ compiler
@@ -74,11 +73,6 @@ macro(moveit_package)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # This too often has false-positives
     add_compile_options(-Wno-maybe-uninitialized)
-  endif()
-
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    # Quet the unused arguments warning
-    add_compile_options(-Qunused-arguments)
   endif()
 
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
