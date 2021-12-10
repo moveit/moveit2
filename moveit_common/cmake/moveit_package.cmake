@@ -52,7 +52,7 @@ macro(moveit_package)
     if("${gold_test}" MATCHES "GNU gold")
       add_compile_options(-fuse-ld=gold)
     else()
-      message(WARNING "GNU gold or LLD linkers are not available, using the default system linker.")
+      message(WARNING "GNU gold linker is not available, using the default system linker.")
     endif()
   else()
     # Defaults for Microsoft C++ compiler
