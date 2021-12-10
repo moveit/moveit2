@@ -51,9 +51,9 @@ macro(moveit_package)
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=lld -Wl,--version OUTPUT_VARIABLE lld_test ERROR_QUIET)
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -fuse-ld=gold -Wl,--version OUTPUT_VARIABLE gold_test ERROR_QUIET)
     if("${lld_test}" MATCHES "LLD")
-      add_compile_options(-Qunused-arguments -fuse-ld=lld)
+      add_compile_options(-fuse-ld=lld)
     elseif("${gold_test}" MATCHES "GNU gold")
-      add_compile_options(-Qunused-arguments -fuse-ld=gold)
+      add_compile_options(-fuse-ld=gold)
     else()
       message(WARNING "GNU gold or LLD linkers are not available, using the default system linker.")
     endif()
@@ -74,6 +74,11 @@ macro(moveit_package)
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # This too often has false-positives
     add_compile_options(-Wno-maybe-uninitialized)
+  endif()
+
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # Quet the unused arguments warning
+    add_compile_options(-Qunused-arguments)
   endif()
 
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
