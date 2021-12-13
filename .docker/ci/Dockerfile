@@ -27,17 +27,16 @@ RUN \
         # Preferred build tools
         clang clang-format-10 clang-tidy clang-tools \
         ccache && \
-    #
+    # TODO(#885): Fix circular test dependency with moveit_resources and remove it from the target workspace
+    git clone https://github.com/ros-planning/moveit_resources -b ros2 src/moveit_resources && \
     # Fetch all dependencies from moveit2.repos
     vcs import src < src/moveit2/moveit2.repos && \
     if [ -r src/moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import src < src/moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
-    #
     # Download all dependencies of MoveIt
     rosdep update && \
     DEBIAN_FRONTEND=noninteractive \
     rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
     # Remove the source code from this container
     rm -rf src && \
-    #
     # Clear apt-cache to reduce image size
     rm -rf /var/lib/apt/lists/*
