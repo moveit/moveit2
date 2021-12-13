@@ -52,6 +52,7 @@ set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_V
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
+target_link_libraries(${MOVEIT_LIB_NAME} Boost::thread)
 
 add_executable(moveit_ros_occupancy_map_server src/occupancy_map_server.cpp)
 ament_target_dependencies(moveit_ros_occupancy_map_server
