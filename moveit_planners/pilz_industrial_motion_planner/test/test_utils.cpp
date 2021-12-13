@@ -1336,27 +1336,27 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr& robot_mo
   }
 
   std::stringstream debug_stream;
-  for (auto it = accelerations.begin(); it != it_last_acc + 1; it++)
+  for (auto it = accelerations.begin(); it != it_last_acc + 1; ++it)
   {
     debug_stream << *it << "(Acc)" << std::endl;
   }
 
-  for (auto it = it_last_acc + 1; it != it_last_intermediate + 1; it++)
+  for (auto it = it_last_acc + 1; it != it_last_intermediate + 1; ++it)
   {
     debug_stream << *it << "(Inter1)" << std::endl;
   }
 
-  for (auto it = it_first_const; it != it_last_const + 1; it++)
+  for (auto it = it_first_const; it != it_last_const + 1; ++it)
   {
     debug_stream << *it << "(Const)" << std::endl;
   }
 
-  for (auto it = it_last_const + 1; it != it_first_dec; it++)
+  for (auto it = it_last_const + 1; it != it_first_dec; ++it)
   {
     debug_stream << *it << "(Inter2)" << std::endl;
   }
 
-  for (auto it = it_first_dec; it != accelerations.end(); it++)
+  for (auto it = it_first_dec; it != accelerations.end(); ++it)
   {
     debug_stream << *it << "(Dec)" << std::endl;
   }

@@ -68,7 +68,7 @@ int initRepeatedPointTrajectory(robot_trajectory::RobotTrajectory& trajectory)
   moveit::core::RobotState state(trajectory.getRobotModel());
 
   trajectory.clear();
-  for (i = 0; i < num; i++)
+  for (i = 0; i < num; ++i)
   {
     state.setVariablePosition(idx[0], 1.0);
     trajectory.addSuffixWayPoint(state, 0.0);
@@ -98,7 +98,7 @@ int initStraightTrajectory(robot_trajectory::RobotTrajectory& trajectory, double
   moveit::core::RobotState state(trajectory.getRobotModel());
 
   trajectory.clear();
-  for (i = 0; i < num; i++)
+  for (i = 0; i < num; ++i)
   {
     state.setVariablePosition(idx[0], i * max / num);
     trajectory.addSuffixWayPoint(state, 0.0);

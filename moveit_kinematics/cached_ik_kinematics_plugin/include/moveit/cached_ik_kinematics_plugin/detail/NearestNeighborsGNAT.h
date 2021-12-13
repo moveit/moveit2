@@ -262,7 +262,7 @@ public:
       {
         out << "Elements marked for removal:\n";
         for (typename std::unordered_set<const _T*>::const_iterator it = gnat.removed_.begin();
-             it != gnat.removed_.end(); it++)
+             it != gnat.removed_.end(); ++it)
           out << **it << '\t';
         out << std::endl;
       }
@@ -279,7 +279,7 @@ public:
     removed_.swap(tmp);
     list(lst);
     // check if every element marked for removal is also in the tree
-    for (typename std::unordered_set<const _T*>::iterator it = tmp.begin(); it != tmp.end(); it++)
+    for (typename std::unordered_set<const _T*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
     {
       unsigned int i;
       for (i = 0; i < lst.size(); ++i)

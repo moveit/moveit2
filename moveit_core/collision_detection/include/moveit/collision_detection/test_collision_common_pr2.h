@@ -234,7 +234,7 @@ TYPED_TEST_P(CollisionDetectorTest, ContactPositions)
   ASSERT_EQ(res.contacts.begin()->second.size(), 1u);
 
   for (collision_detection::CollisionResult::ContactMap::const_iterator it = res.contacts.begin();
-       it != res.contacts.end(); it++)
+       it != res.contacts.end(); ++it)
   {
     EXPECT_NEAR(it->second[0].pos.x(), 5.0, .33);
   }
@@ -255,7 +255,7 @@ TYPED_TEST_P(CollisionDetectorTest, ContactPositions)
   ASSERT_EQ(res2.contacts.begin()->second.size(), 1u);
 
   for (collision_detection::CollisionResult::ContactMap::const_iterator it = res2.contacts.begin();
-       it != res2.contacts.end(); it++)
+       it != res2.contacts.end(); ++it)
   {
     EXPECT_NEAR(it->second[0].pos.x(), 3.0, 0.33);
   }
@@ -469,7 +469,7 @@ TYPED_TEST_P(CollisionDetectorTest, TestCollisionMapAdditionSpeed)
 {
   EigenSTL::vector_Isometry3d poses;
   std::vector<shapes::ShapeConstPtr> shapes;
-  for (unsigned int i = 0; i < 10000; i++)
+  for (unsigned int i = 0; i < 10000; ++i)
   {
     poses.push_back(Eigen::Isometry3d::Identity());
     shapes.push_back(shapes::ShapeConstPtr(new shapes::Box(.01, .01, .01)));
@@ -498,7 +498,7 @@ TYPED_TEST_P(CollisionDetectorTest, MoveMesh)
   this->cenv_->getWorld()->addToObject("kinect", kinect_shape, kinect_pose);
 
   Eigen::Isometry3d np;
-  for (unsigned int i = 0; i < 5; i++)
+  for (unsigned int i = 0; i < 5; ++i)
   {
     np = Eigen::Translation3d(i * .001, i * .001, i * .001) * Eigen::Quaterniond::Identity();
     this->cenv_->getWorld()->moveShapeInObject("kinect", kinect_shape, np);
@@ -521,7 +521,7 @@ TYPED_TEST_P(CollisionDetectorTest, TestChangingShapeSize)
 
   EigenSTL::vector_Isometry3d poses;
   std::vector<shapes::ShapeConstPtr> shapes;
-  for (unsigned int i = 0; i < 5; i++)
+  for (unsigned int i = 0; i < 5; ++i)
   {
     this->cenv_->getWorld()->removeObject("shape");
     shapes.clear();
@@ -543,7 +543,7 @@ TYPED_TEST_P(CollisionDetectorTest, TestChangingShapeSize)
   collision_detection::CollisionResult res2;
   this->cenv_->checkCollision(req2, res2, robot_state1, *this->acm_);
   ASSERT_TRUE(res2.collision);
-  for (unsigned int i = 0; i < 5; i++)
+  for (unsigned int i = 0; i < 5; ++i)
   {
     this->cenv_->getWorld()->removeObject("shape");
     shapes.clear();

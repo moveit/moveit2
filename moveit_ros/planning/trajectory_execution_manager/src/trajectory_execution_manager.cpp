@@ -1163,12 +1163,12 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
 
   std::stringstream ss2;
   std::map<std::string, ControllerInformation>::const_iterator mi;
-  for (mi = known_controllers_.begin(); mi != known_controllers_.end(); mi++)
+  for (mi = known_controllers_.begin(); mi != known_controllers_.end(); ++mi)
   {
     ss2 << "controller '" << mi->second.name_ << "' controls joints:\n";
 
     std::set<std::string>::const_iterator ji;
-    for (ji = mi->second.joints_.begin(); ji != mi->second.joints_.end(); ji++)
+    for (ji = mi->second.joints_.begin(); ji != mi->second.joints_.end(); ++ji)
     {
       ss2 << "  " << *ji << std::endl;
     }

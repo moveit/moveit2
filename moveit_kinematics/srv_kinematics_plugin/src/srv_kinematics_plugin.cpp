@@ -158,7 +158,7 @@ bool SrvKinematicsPlugin::isRedundantJoint(unsigned int index) const
 
 int SrvKinematicsPlugin::getJointIndex(const std::string& name) const
 {
-  for (unsigned int i = 0; i < ik_group_info_.joint_names.size(); i++)
+  for (unsigned int i = 0; i < ik_group_info_.joint_names.size(); ++i)
   {
     if (ik_group_info_.joint_names[i] == name)
       return i;

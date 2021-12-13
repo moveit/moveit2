@@ -388,7 +388,7 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
         //            theta6[3] = M_PI + theta6[0];
         //            theta6[4] = M_PI + theta6[1];
 
-        for (int mm = 0; mm < 2; mm++)
+        for (int mm = 0; mm < 2; ++mm)
         {
           t6 = theta6[mm];
           if (!checkJointLimits(angles::normalize_angle(t6), 5))
@@ -424,7 +424,7 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
           std::cout << "theta6: " << t6 << std::endl;
           std::cout << "theta7: " << t7 << std::endl << std::endl << std::endl;
 #endif
-          for (int lll = 0; lll < 2; lll++)
+          for (int lll = 0; lll < 2; ++lll)
           {
             t5 = theta5[lll];
             t7 = theta7[lll];
@@ -470,7 +470,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
   //  ROS_INFO(" ");
   // solution_ik_.clear();
   //  ROS_INFO("Solution IK size: %d",solution_ik_.size());
-  //  for(unsigned int i=0; i < solution_ik_.size(); i++)
+  //  for(unsigned int i=0; i < solution_ik_.size(); ++i)
   //  {
   //    solution_ik_[i].clear();
   //  }
@@ -686,7 +686,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
         theta6[0] = atan2(val1, val2);
         theta6[1] = atan2(-val1, val2);
 
-        for (int mm = 0; mm < 2; mm++)
+        for (int mm = 0; mm < 2; ++mm)
         {
           t6 = theta6[mm];
 #ifdef DEBUG
@@ -715,7 +715,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
             //            theta7[1] = M_PI+theta7[0];
             //            theta5[1] = M_PI+theta5[0];
           }
-          for (int lll = 0; lll < 1; lll++)
+          for (int lll = 0; lll < 1; ++lll)
           {
             t5 = theta5[lll];
             t7 = theta7[lll];
@@ -769,7 +769,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
 
 bool PR2ArmIK::checkJointLimits(const std::vector<double>& joint_values) const
 {
-  for (int i = 0; i < NUM_JOINTS_ARM7DOF; i++)
+  for (int i = 0; i < NUM_JOINTS_ARM7DOF; ++i)
   {
     if (!checkJointLimits(angles::normalize_angle(joint_values[i] * angle_multipliers_[i]), i))
     {

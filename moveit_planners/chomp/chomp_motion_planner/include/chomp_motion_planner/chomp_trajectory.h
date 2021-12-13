@@ -295,7 +295,7 @@ void ChompTrajectory::getJointVelocities(size_t traj_point, Eigen::MatrixBase<De
   velocities.setZero();
   double inv_time = 1.0 / discretization_;
 
-  for (int k = -DIFF_RULE_LENGTH / 2; k <= DIFF_RULE_LENGTH / 2; k++)
+  for (int k = -DIFF_RULE_LENGTH / 2; k <= DIFF_RULE_LENGTH / 2; ++k)
   {
     velocities += (inv_time * DIFF_RULES[0][k + DIFF_RULE_LENGTH / 2]) * trajectory_.row(traj_point + k).transpose();
   }

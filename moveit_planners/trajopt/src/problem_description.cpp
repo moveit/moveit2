@@ -448,7 +448,7 @@ void JointVelTermInfo::addObjectiveTerms(TrajOptProblem& prob)
     unsigned num_vels = last_step - first_step;
 
     // Apply seperate cost to each joint b/c that is how the error function is currently written
-    for (size_t j = 0; j < n_dof; j++)
+    for (size_t j = 0; j < n_dof; ++j)
     {
       // Get a vector of a single column of vars
       sco::VarVector joint_vars_vec = joint_vars.cblock(first_step, j, last_step - first_step + 1);
@@ -479,7 +479,7 @@ void JointVelTermInfo::addObjectiveTerms(TrajOptProblem& prob)
     unsigned num_vels = last_step - first_step;
 
     // Apply seperate cnt to each joint b/c that is how the error function is currently written
-    for (size_t j = 0; j < n_dof; j++)
+    for (size_t j = 0; j < n_dof; ++j)
     {
       // Get a vector of a single column of vars
       sco::VarVector joint_vars_vec = joint_vars.cblock(first_step, j, last_step - first_step + 1);
