@@ -32,19 +32,79 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#pragma once
-
-#include <rclcpp/rclcpp.hpp>
 #include <moveit/collision_detection/collision_plugin_cache.h>
+#include <pluginlib/class_loader.hpp>
+#include <memory>
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_detection");
 
 namespace collision_detection
 {
-/** Augment CollisionPluginLoader with a method to fetch the plugin name from the ROS parameter server */
-class CollisionPluginLoader : public CollisionPluginCache
+class CollisionPluginCache::CollisionPluginCacheImpl
 {
 public:
-  /** @brief Fetch plugin name from parameter server and activate the plugin for the given scene */
-  void setupScene(const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene);
+  CollisionPluginCacheImpl()
+  {
+    try
+    {
+      cache_ = std::make_shared<pluginlib::ClassLoader<CollisionPlugin>>("moveit_core",
+                                                                         "collision_detection::CollisionPlugin");
+    }
+    catch (pluginlib::PluginlibException& e)
+    {
+      RCLCPP_ERROR(LOGGER, "Unable to construct collision plugin loader. Error: %s", e.what());
+    }
+  }
+
+  CollisionPluginPtr load(const std::string& name)
+  {
+    CollisionPluginPtr plugin;
+    try
+    {
+      plugin = cache_->createUniqueInstance(name);
+      plugins_[name] = plugin;
+    }
+    catch (pluginlib::PluginlibException& ex)
+    {
+      RCLCPP_ERROR_STREAM(LOGGER, "Exception while loading " << name << ": " << ex.what());
+    }
+    return plugin;
+  }
+
+  bool activate(const std::string& name, const planning_scene::PlanningScenePtr& scene)
+  {
+    std::map<std::string, CollisionPluginPtr>::iterator it = plugins_.find(name);
+    if (it == plugins_.end())
+    {
+      CollisionPluginPtr plugin = load(name);
+      if (plugin)
+      {
+        return plugin->initialize(scene);
+      }
+      return false;
+    }
+    if (it->second)
+    {
+      return it->second->initialize(scene);
+    }
+    return false;
+  }
+
+private:
+  std::shared_ptr<pluginlib::ClassLoader<CollisionPlugin>> cache_;
+  std::map<std::string, CollisionPluginPtr> plugins_;
 };
+
+CollisionPluginCache::CollisionPluginCache()
+{
+  cache_ = std::make_shared<CollisionPluginCacheImpl>();
+}
+
+CollisionPluginCache::~CollisionPluginCache() = default;
+
+bool CollisionPluginCache::activate(const std::string& name, const planning_scene::PlanningScenePtr& scene)
+{
+  return cache_->activate(name, scene);
+}
 
 }  // namespace collision_detection

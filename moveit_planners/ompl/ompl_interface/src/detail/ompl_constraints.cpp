@@ -65,7 +65,7 @@ Eigen::VectorXd Bounds::penalty(const Eigen::Ref<const Eigen::VectorXd>& x) cons
   assert((long)lower_.size() == x.size());
   Eigen::VectorXd penalty(x.size());
 
-  for (unsigned int i = 0; i < x.size(); i++)
+  for (unsigned int i = 0; i < x.size(); ++i)
   {
     if (x[i] < lower_.at(i))
     {
@@ -88,7 +88,7 @@ Eigen::VectorXd Bounds::derivative(const Eigen::Ref<const Eigen::VectorXd>& x) c
   assert((long)lower_.size() == x.size());
   Eigen::VectorXd derivative(x.size());
 
-  for (unsigned int i = 0; i < x.size(); i++)
+  for (unsigned int i = 0; i < x.size(); ++i)
   {
     if (x[i] < lower_.at(i))
     {
@@ -151,7 +151,7 @@ void BaseConstraint::jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_val
   const Eigen::VectorXd constraint_error = calcError(joint_values);
   const Eigen::VectorXd constraint_derivative = bounds_.derivative(constraint_error);
   const Eigen::MatrixXd robot_jacobian = calcErrorJacobian(joint_values);
-  for (std::size_t i = 0; i < bounds_.size(); i++)
+  for (std::size_t i = 0; i < bounds_.size(); ++i)
   {
     out.row(i) = constraint_derivative[i] * robot_jacobian.row(i);
   }
@@ -243,7 +243,7 @@ void EqualityPositionConstraint::parseConstraintMsg(const moveit_msgs::msg::Cons
   const auto dims = constraints.position_constraints.at(0).constraint_region.primitives.at(0).dimensions;
 
   is_dim_constrained_ = { false, false, false };
-  for (std::size_t i = 0; i < dims.size(); i++)
+  for (std::size_t i = 0; i < dims.size(); ++i)
   {
     if (dims.at(i) < EQUALITY_CONSTRAINT_THRESHOLD)
     {
@@ -283,7 +283,7 @@ void EqualityPositionConstraint::function(const Eigen::Ref<const Eigen::VectorXd
 {
   Eigen::Vector3d error =
       target_orientation_.matrix().transpose() * (forwardKinematics(joint_values).translation() - target_position_);
-  for (std::size_t dim = 0; dim < 3; dim++)
+  for (std::size_t dim = 0; dim < 3; ++dim)
   {
     if (is_dim_constrained_.at(dim))
     {
@@ -301,7 +301,7 @@ void EqualityPositionConstraint::jacobian(const Eigen::Ref<const Eigen::VectorXd
 {
   out.setZero();
   Eigen::MatrixXd jac = target_orientation_.matrix().transpose() * robotGeometricJacobian(joint_values).topRows(3);
-  for (std::size_t dim = 0; dim < 3; dim++)
+  for (std::size_t dim = 0; dim < 3; ++dim)
   {
     if (is_dim_constrained_.at(dim))
     {

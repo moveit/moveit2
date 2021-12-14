@@ -130,7 +130,7 @@ protected:
   {
     Eigen::VectorXd state(num_dofs_);
     double value = 0.1;
-    for (std::size_t i = 0; i < num_dofs_; i++)
+    for (std::size_t i = 0; i < num_dofs_; ++i)
     {
       state[i] = value;
       value += 0.1;

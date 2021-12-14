@@ -79,7 +79,7 @@ ChompTrajectory::ChompTrajectory(const ChompTrajectory& source_traj, const std::
   full_trajectory_index_.resize(num_points_);
 
   // now copy the trajectories over:
-  for (size_t i = 0; i < num_points_; i++)
+  for (size_t i = 0; i < num_points_; ++i)
   {
     int source_traj_point = i - start_extra;
     if (source_traj_point < 0)
@@ -107,10 +107,10 @@ void ChompTrajectory::fillInLinearInterpolation()
 {
   double start_index = start_index_ - 1;
   double end_index = end_index_ + 1;
-  for (size_t i = 0; i < num_joints_; i++)
+  for (size_t i = 0; i < num_joints_; ++i)
   {
     double theta = ((*this)(end_index, i) - (*this)(start_index, i)) / (end_index - 1);
-    for (size_t j = start_index + 1; j < end_index; j++)
+    for (size_t j = start_index + 1; j < end_index; ++j)
     {
       (*this)(j, i) = (*this)(start_index, i) + j * theta;
     }
@@ -124,14 +124,14 @@ void ChompTrajectory::fillInCubicInterpolation()
   double dt = 0.001;
   std::vector<double> coeffs(4, 0);
   double total_time = (end_index - 1) * dt;
-  for (size_t i = 0; i < num_joints_; i++)
+  for (size_t i = 0; i < num_joints_; ++i)
   {
     coeffs[0] = (*this)(start_index, i);
     coeffs[2] = (3 / (pow(total_time, 2))) * ((*this)(end_index, i) - (*this)(start_index, i));
     coeffs[3] = (-2 / (pow(total_time, 3))) * ((*this)(end_index, i) - (*this)(start_index, i));
 
     double t;
-    for (size_t j = start_index + 1; j < end_index; j++)
+    for (size_t j = start_index + 1; j < end_index; ++j)
     {
       t = j * dt;
       (*this)(j, i) = coeffs[0] + coeffs[2] * pow(t, 2) + coeffs[3] * pow(t, 3);
@@ -147,13 +147,13 @@ void ChompTrajectory::fillInMinJerk()
   td[0] = 1.0;
   td[1] = (end_index - start_index) * discretization_;
 
-  for (unsigned int i = 2; i <= 5; i++)
+  for (unsigned int i = 2; i <= 5; ++i)
     td[i] = td[i - 1] * td[1];
 
   // calculate the spline coefficients for each joint:
   // (these are for the special case of zero start and end vel and acc)
   std::vector<double[6]> coeff(num_joints_);
-  for (size_t i = 0; i < num_joints_; i++)
+  for (size_t i = 0; i < num_joints_; ++i)
   {
     double x0 = (*this)(start_index, i);
     double x1 = (*this)(end_index, i);
@@ -166,18 +166,18 @@ void ChompTrajectory::fillInMinJerk()
   }
 
   // now fill in the joint positions at each time step
-  for (size_t i = start_index + 1; i < end_index; i++)
+  for (size_t i = start_index + 1; i < end_index; ++i)
   {
     double ti[6];  // powers of the time index point
     ti[0] = 1.0;
     ti[1] = (i - start_index) * discretization_;
-    for (unsigned int k = 2; k <= 5; k++)
+    for (unsigned int k = 2; k <= 5; ++k)
       ti[k] = ti[k - 1] * ti[1];
 
-    for (size_t j = 0; j < num_joints_; j++)
+    for (size_t j = 0; j < num_joints_; ++j)
     {
       (*this)(i, j) = 0.0;
-      for (unsigned int k = 0; k <= 5; k++)
+      for (unsigned int k = 0; k <= 5; ++k)
       {
         (*this)(i, j) += ti[k] * coeff[j][k];
       }
@@ -196,7 +196,7 @@ bool ChompTrajectory::fillInFromTrajectory(const robot_trajectory::RobotTrajecto
 
   const moveit::core::JointModelGroup* group = trajectory.getGroup();
   moveit::core::RobotState interpolated(trajectory.getRobotModel());
-  for (size_t i = 0; i <= max_output_index; i++)
+  for (size_t i = 0; i <= max_output_index; ++i)
   {
     double fraction = static_cast<double>(i * max_input_index) / max_output_index;
     const size_t prev_idx = std::trunc(fraction);  // integer part

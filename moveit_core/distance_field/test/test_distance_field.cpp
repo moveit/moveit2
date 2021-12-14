@@ -70,11 +70,11 @@ int dist_sq(int x, int y, int z)
 
 void print(PropagationDistanceField& pdf, int numX, int numY, int numZ)
 {
-  for (int z = 0; z < numZ; z++)
+  for (int z = 0; z < numZ; ++z)
   {
-    for (int y = 0; y < numY; y++)
+    for (int y = 0; y < numY; ++y)
     {
-      for (int x = 0; x < numX; x++)
+      for (int x = 0; x < numX; ++x)
       {
         std::cout << pdf.getCell(x, y, z).distance_square_ << " ";
       }
@@ -82,11 +82,11 @@ void print(PropagationDistanceField& pdf, int numX, int numY, int numZ)
     }
     std::cout << '\n';
   }
-  for (int z = 0; z < numZ; z++)
+  for (int z = 0; z < numZ; ++z)
   {
-    for (int y = 0; y < numY; y++)
+    for (int y = 0; y < numY; ++y)
     {
-      for (int x = 0; x < numX; x++)
+      for (int x = 0; x < numX; ++x)
       {
         if (pdf.getCell(x, y, z).distance_square_ == 0)
         {
@@ -99,11 +99,11 @@ void print(PropagationDistanceField& pdf, int numX, int numY, int numZ)
 
 void printNeg(PropagationDistanceField& pdf, int numX, int numY, int numZ)
 {
-  for (int z = 0; z < numZ; z++)
+  for (int z = 0; z < numZ; ++z)
   {
-    for (int y = 0; y < numY; y++)
+    for (int y = 0; y < numY; ++y)
     {
-      for (int x = 0; x < numX; x++)
+      for (int x = 0; x < numX; ++x)
       {
         std::cout << pdf.getCell(x, y, z).negative_distance_square_ << " ";
       }
@@ -135,28 +135,28 @@ void printPointCoords(const Eigen::Vector3i& p)
 
 void printBoth(PropagationDistanceField& pdf, int numX, int numY, int numZ)
 {
-  std::cout << "Positive distance square ... negative distance square" << '\n';
-  for (int z = 0; z < numZ; z++)
+  std::cout << "Positive distance square ... negative distance square\n";
+  for (int z = 0; z < numZ; ++z)
   {
     std::cout << "Z=" << z << '\n';
-    for (int y = 0; y < numY; y++)
+    for (int y = 0; y < numY; ++y)
     {
-      for (int x = 0; x < numX; x++)
+      for (int x = 0; x < numX; ++x)
       {
         std::cout << pdf.getCell(x, y, z).distance_square_ << " ";
       }
       std::cout << "   ";
-      for (int x = 0; x < numX; x++)
+      for (int x = 0; x < numX; ++x)
       {
         std::cout << pdf.getCell(x, y, z).negative_distance_square_ << " ";
       }
       std::cout << "     ";
-      for (int x = 0; x < numX; x++)
+      for (int x = 0; x < numX; ++x)
       {
         printPointCoords(pdf.getCell(x, y, z).closest_point_);
       }
       std::cout << "   ";
-      for (int x = 0; x < numX; x++)
+      for (int x = 0; x < numX; ++x)
       {
         printPointCoords(pdf.getCell(x, y, z).closest_negative_point_);
       }
@@ -174,11 +174,11 @@ bool areDistanceFieldsDistancesEqual(const PropagationDistanceField& df1, const 
     return false;
   if (df1.getZNumCells() != df2.getZNumCells())
     return false;
-  for (int z = 0; z < df1.getZNumCells(); z++)
+  for (int z = 0; z < df1.getZNumCells(); ++z)
   {
-    for (int x = 0; x < df1.getXNumCells(); x++)
+    for (int x = 0; x < df1.getXNumCells(); ++x)
     {
-      for (int y = 0; y < df1.getYNumCells(); y++)
+      for (int y = 0; y < df1.getYNumCells(); ++y)
       {
         if (df1.getCell(x, y, z).distance_square_ != df2.getCell(x, y, z).distance_square_)
         {
@@ -201,11 +201,11 @@ bool areDistanceFieldsDistancesEqual(const PropagationDistanceField& df1, const 
 bool checkOctomapVersusDistanceField(const PropagationDistanceField& df, const octomap::OcTree& octree)
 {
   // just one way for now
-  for (int z = 0; z < df.getZNumCells(); z++)
+  for (int z = 0; z < df.getZNumCells(); ++z)
   {
-    for (int x = 0; x < df.getXNumCells(); x++)
+    for (int x = 0; x < df.getXNumCells(); ++x)
     {
-      for (int y = 0; y < df.getYNumCells(); y++)
+      for (int y = 0; y < df.getYNumCells(); ++y)
       {
         if (df.getCell(x, y, z).distance_square_ == 0)
         {
@@ -256,11 +256,11 @@ bool checkOctomapVersusDistanceField(const PropagationDistanceField& df, const o
 unsigned int countOccupiedCells(const PropagationDistanceField& df)
 {
   unsigned int count = 0;
-  for (int z = 0; z < df.getZNumCells(); z++)
+  for (int z = 0; z < df.getZNumCells(); ++z)
   {
-    for (int x = 0; x < df.getXNumCells(); x++)
+    for (int x = 0; x < df.getXNumCells(); ++x)
     {
-      for (int y = 0; y < df.getYNumCells(); y++)
+      for (int y = 0; y < df.getYNumCells(); ++y)
       {
         if (df.getCell(x, y, z).distance_square_ == 0)
         {
@@ -291,18 +291,18 @@ void check_distance_field(const PropagationDistanceField& df, const EigenSTL::ve
                           int numY, int numZ, bool do_negs)
 {
   EigenSTL::vector_Vector3i points_ind(points.size());
-  for (unsigned int i = 0; i < points.size(); i++)
+  for (unsigned int i = 0; i < points.size(); ++i)
   {
     Eigen::Vector3i loc;
     df.worldToGrid(points[i].x(), points[i].y(), points[i].z(), loc.x(), loc.y(), loc.z());
     points_ind[i] = loc;
   }
 
-  for (int x = 0; x < numX; x++)
+  for (int x = 0; x < numX; ++x)
   {
-    for (int y = 0; y < numY; y++)
+    for (int y = 0; y < numY; ++y)
     {
-      for (int z = 0; z < numZ; z++)
+      for (int z = 0; z < numZ; ++z)
       {
         double dsq = df.getCell(x, y, z).distance_square_;
         double ndsq = df.getCell(x, y, z).negative_distance_square_;
@@ -382,11 +382,11 @@ TEST(TestPropagationDistanceField, TestAddRemovePoints)
   points.push_back(POINT1);
   df.addPointsToField(points);
   bool first = true;
-  for (int z = 1; z < df.getZNumCells() - 1; z++)
+  for (int z = 1; z < df.getZNumCells() - 1; ++z)
   {
-    for (int x = 1; x < df.getXNumCells() - 1; x++)
+    for (int x = 1; x < df.getXNumCells() - 1; ++x)
     {
-      for (int y = 1; y < df.getYNumCells() - 1; y++)
+      for (int y = 1; y < df.getYNumCells() - 1; ++y)
       {
         double dist = df.getDistance(x, y, z);
         double wx, wy, wz;
@@ -516,11 +516,11 @@ TEST(TestSignedPropagationDistanceField, TestSignedAddRemovePoints)
   // printBoth(gradient_df, numX, numY, numZ);
   EXPECT_GT(gradient_df.getCell(5, 5, 5).negative_distance_square_, 1);
   // all negative cells should have gradients that point towards cells with distance 1
-  for (int z = 1; z < df.getZNumCells() - 1; z++)
+  for (int z = 1; z < df.getZNumCells() - 1; ++z)
   {
-    for (int x = 1; x < df.getXNumCells() - 1; x++)
+    for (int x = 1; x < df.getXNumCells() - 1; ++x)
     {
-      for (int y = 1; y < df.getYNumCells() - 1; y++)
+      for (int y = 1; y < df.getYNumCells() - 1; ++y)
       {
         double dist = gradient_df.getDistance(x, y, z);
         double ncell_dist;
@@ -844,7 +844,7 @@ TEST(TestSignedPropagationDistanceField, TestOcTree)
   {
     for (float y = 1.01; y < 1.5; y += .02)
     {
-      for (float z = 1.01; z < 1.5; z += .02, count++)
+      for (float z = 1.01; z < 1.5; z += .02, ++count)
       {
         octomap::point3d point(x, y, z);
         tree.updateNode(point, true);
@@ -857,7 +857,7 @@ TEST(TestSignedPropagationDistanceField, TestOcTree)
   {
     for (float y = 1.01; y < 3.5; y += .02)
     {
-      for (float z = 1.01; z < 3.5; z += .02, count++)
+      for (float z = 1.01; z < 3.5; z += .02, ++count)
       {
         octomap::point3d point(x, y, z);
         tree.updateNode(point, true);
@@ -875,7 +875,7 @@ TEST(TestSignedPropagationDistanceField, TestOcTree)
   {
     for (float y = .01; y < .50; y += .02)
     {
-      for (float z = .01; z < .50; z += .02, count++)
+      for (float z = .01; z < .50; z += .02, ++count)
       {
         octomap::point3d point(x, y, z);
         tree.updateNode(point, true);

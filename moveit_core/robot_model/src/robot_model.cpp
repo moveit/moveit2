@@ -365,7 +365,7 @@ void RobotModel::buildGroupStates(const srdf::Model& srdf_model)
       {
         std::stringstream missing;
         missing << (*remaining_joints.begin())->getName();
-        for (auto j = ++remaining_joints.begin(); j != remaining_joints.end(); j++)
+        for (auto j = ++remaining_joints.begin(); j != remaining_joints.end(); ++j)
         {
           missing << ", " << (*j)->getName();
         }

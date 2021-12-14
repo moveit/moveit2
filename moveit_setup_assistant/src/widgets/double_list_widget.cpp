@@ -254,7 +254,7 @@ void DoubleListWidget::selectDataButtonClicked()
     int row_to_add = 0;
 
     // Check if this selected joint is already in the selected joint table
-    for (int r = 0; r < selected_data_table_->rowCount(); r++)
+    for (int r = 0; r < selected_data_table_->rowCount(); ++r)
     {
       QTableWidgetItem* item = selected_data_table_->item(r, 0);
 

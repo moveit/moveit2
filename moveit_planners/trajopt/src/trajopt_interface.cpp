@@ -287,10 +287,10 @@ bool TrajOptInterface::solve(const planning_scene::PlanningSceneConstPtr& planni
 
   // fill in the entire trajectory
   res.trajectory[0].joint_trajectory.points.resize(opt_solution.rows());
-  for (int i = 0; i < opt_solution.rows(); i++)
+  for (int i = 0; i < opt_solution.rows(); ++i)
   {
     res.trajectory[0].joint_trajectory.points[i].positions.resize(opt_solution.cols());
-    for (size_t j = 0; j < opt_solution.cols(); j++)
+    for (size_t j = 0; j < opt_solution.cols(); ++j)
     {
       res.trajectory[0].joint_trajectory.points[i].positions[j] = opt_solution(i, j);
     }

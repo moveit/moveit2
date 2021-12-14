@@ -423,7 +423,7 @@ public:
       return;
     }
     decomp_vector_[ind]->updatePose(pose);
-    for (unsigned int i = 0; i < decomp_vector_[ind]->getSphereCenters().size(); i++)
+    for (unsigned int i = 0; i < decomp_vector_[ind]->getSphereCenters().size(); ++i)
     {
       posed_collision_spheres_[sphere_index_map_[ind] + i] = decomp_vector_[ind]->getSphereCenters()[i];
     }

@@ -218,7 +218,7 @@ bool KinematicsCache::getSolutions(const geometry_msgs::Pose& pose, std::vector<
     return false;
   if (solution.size() != num_solutions_vector_[grid_index])
     return false;
-  for (unsigned int i = 0; i < solution.size(); i++)
+  for (unsigned int i = 0; i < solution.size(); ++i)
   {
     if (solution[i].size() != solution_dimension_)
       return false;
