@@ -112,7 +112,7 @@ protected:
     ee_link_name_ = joint_model_group_->getLinkModelNames().back();
     base_link_name_ = robot_model_->getRootLinkName();
 
-    std::cout << "Loading robot: " << robot_name << " for planning group: " << group_name << std::endl;
+    std::cout << "Loading robot: " << robot_name << " for planning group: " << group_name << '\n';
   }
 
   Eigen::VectorXd getRandomState() const

@@ -242,7 +242,7 @@ public:
                                const Eigen::Isometry3d& new_relative_cylinder_pose)
   {
     // std::cerr << "Replacing " << collision_spheres_.size() << " with " <<
-    // new_collision_spheres.size() << std::endl;
+    // new_collision_spheres.size() << '\n';
     collision_spheres_ = new_collision_spheres;
     relative_cylinder_pose_ = new_relative_cylinder_pose;
   }

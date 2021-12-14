@@ -96,7 +96,7 @@ inline bool solveCosineEqn(const double& a, const double& b, const double& c, do
   if (fabs(denom) < IK_EPS)  // should never happen, wouldn't make sense but make sure it is checked nonetheless
   {
 #ifdef DEBUG
-    std::cout << "denom: " << denom << std::endl;
+    std::cout << "denom: " << denom << '\n';
 #endif
     return false;
   }
@@ -104,7 +104,7 @@ inline bool solveCosineEqn(const double& a, const double& b, const double& c, do
   if (rhs_ratio < -1 || rhs_ratio > 1)
   {
 #ifdef DEBUG
-    std::cout << "rhs_ratio: " << rhs_ratio << std::endl;
+    std::cout << "rhs_ratio: " << rhs_ratio << '\n';
 #endif
     return false;
   }

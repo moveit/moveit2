@@ -2056,7 +2056,7 @@ void RobotState::printStatePositions(std::ostream& out) const
 {
   const std::vector<std::string>& nm = robot_model_->getVariableNames();
   for (std::size_t i = 0; i < nm.size(); ++i)
-    out << nm[i] << "=" << position_[i] << std::endl;
+    out << nm[i] << "=" << position_[i] << '\n';
 }
 
 void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointModelGroup* jmg, std::ostream& out) const
@@ -2104,7 +2104,7 @@ void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointMod
 
     // show max position
     out << " \t" << std::fixed << std::setprecision(5) << bound.max_position_ << "  \t" << joint->getName()
-        << " current: " << std::fixed << std::setprecision(5) << current_value << std::endl;
+        << " current: " << std::fixed << std::setprecision(5) << current_value << '\n';
 
     if (out_of_bounds)
       out << MOVEIT_CONSOLE_COLOR_RESET;
@@ -2113,20 +2113,19 @@ void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointMod
 
 void RobotState::printDirtyInfo(std::ostream& out) const
 {
-  out << "  * Dirty Joint Transforms: " << std::endl;
+  out << "  * Dirty Joint Transforms: \n";
   const std::vector<const JointModel*>& jm = robot_model_->getJointModels();
   for (const JointModel* joint : jm)
     if (joint->getVariableCount() > 0 && dirtyJointTransform(joint))
-      out << "    " << joint->getName() << std::endl;
-  out << "  * Dirty Link Transforms: " << (dirty_link_transforms_ ? dirty_link_transforms_->getName() : "NULL")
-      << std::endl;
+      out << "    " << joint->getName() << '\n';
+  out << "  * Dirty Link Transforms: " << (dirty_link_transforms_ ? dirty_link_transforms_->getName() : "NULL") << '\n';
   out << "  * Dirty Collision Body Transforms: "
-      << (dirty_collision_body_transforms_ ? dirty_collision_body_transforms_->getName() : "NULL") << std::endl;
+      << (dirty_collision_body_transforms_ ? dirty_collision_body_transforms_->getName() : "NULL\n");
 }
 
 void RobotState::printStateInfo(std::ostream& out) const
 {
-  out << "Robot State @" << this << std::endl;
+  out << "Robot State @" << this << '\n';
 
   std::size_t n = robot_model_->getVariableCount();
   if (position_)
@@ -2134,35 +2133,34 @@ void RobotState::printStateInfo(std::ostream& out) const
     out << "  * Position: ";
     for (std::size_t i = 0; i < n; ++i)
       out << position_[i] << " ";
-    out << std::endl;
+    out << '\n';
   }
   else
-    out << "  * Position: NULL" << std::endl;
+    out << "  * Position: NULL\n";
 
   if (velocity_)
   {
     out << "  * Velocity: ";
     for (std::size_t i = 0; i < n; ++i)
       out << velocity_[i] << " ";
-    out << std::endl;
+    out << '\n';
   }
   else
-    out << "  * Velocity: NULL" << std::endl;
+    out << "  * Velocity: NULL\n";
 
   if (acceleration_)
   {
     out << "  * Acceleration: ";
     for (std::size_t i = 0; i < n; ++i)
       out << acceleration_[i] << " ";
-    out << std::endl;
+    out << '\n';
   }
   else
-    out << "  * Acceleration: NULL" << std::endl;
+    out << "  * Acceleration: NULL\n";
 
-  out << "  * Dirty Link Transforms: " << (dirty_link_transforms_ ? dirty_link_transforms_->getName() : "NULL")
-      << std::endl;
+  out << "  * Dirty Link Transforms: " << (dirty_link_transforms_ ? dirty_link_transforms_->getName() : "NULL\n");
   out << "  * Dirty Collision Body Transforms: "
-      << (dirty_collision_body_transforms_ ? dirty_collision_body_transforms_->getName() : "NULL") << std::endl;
+      << (dirty_collision_body_transforms_ ? dirty_collision_body_transforms_->getName() : "NULL\n");
 
   printTransforms(out);
 }
@@ -2173,18 +2171,18 @@ void RobotState::printTransform(const Eigen::Isometry3d& transform, std::ostream
   Eigen::Quaterniond q(transform.linear());
   out << "T.xyz = [" << transform.translation().x() << ", " << transform.translation().y() << ", "
       << transform.translation().z() << "], Q.xyzw = [" << q.x() << ", " << q.y() << ", " << q.z() << ", " << q.w()
-      << "]" << std::endl;
+      << "]\n";
 }
 
 void RobotState::printTransforms(std::ostream& out) const
 {
   if (!variable_joint_transforms_)
   {
-    out << "No transforms computed" << std::endl;
+    out << "No transforms computed\n";
     return;
   }
 
-  out << "Joint transforms:" << std::endl;
+  out << "Joint transforms:\n";
   const std::vector<const JointModel*>& jm = robot_model_->getJointModels();
   for (const JointModel* joint : jm)
   {
@@ -2196,7 +2194,7 @@ void RobotState::printTransforms(std::ostream& out) const
     printTransform(variable_joint_transforms_[idx], out);
   }
 
-  out << "Link poses:" << std::endl;
+  out << "Link poses:\n";
   const std::vector<const LinkModel*>& link_model = robot_model_->getLinkModels();
   for (const LinkModel* link : link_model)
   {
@@ -2208,7 +2206,7 @@ void RobotState::printTransforms(std::ostream& out) const
 std::string RobotState::getStateTreeString(const std::string& prefix) const
 {
   std::stringstream ss;
-  ss << "ROBOT: " << robot_model_->getName() << std::endl;
+  ss << "ROBOT: " << robot_model_->getName() << '\n';
   getStateTreeJointString(ss, robot_model_->getRootJoint(), "   ", true);
   return ss.str();
 }
@@ -2225,7 +2223,7 @@ void getPoseString(std::ostream& ss, const Eigen::Isometry3d& pose, const std::s
     {
       ss << std::setw(8) << pose(y, x) << " ";
     }
-    ss << std::endl;
+    ss << '\n';
   }
 }
 }  // namespace
@@ -2235,19 +2233,19 @@ void RobotState::getStateTreeJointString(std::ostream& ss, const JointModel* jm,
 {
   std::string pfx = pfx0 + "+--";
 
-  ss << pfx << "Joint: " << jm->getName() << std::endl;
+  ss << pfx << "Joint: " << jm->getName() << '\n';
 
   pfx = pfx0 + (last ? "   " : "|  ");
 
   for (std::size_t i = 0; i < jm->getVariableCount(); ++i)
   {
     ss.precision(3);
-    ss << pfx << jm->getVariableNames()[i] << std::setw(12) << position_[jm->getFirstVariableIndex() + i] << std::endl;
+    ss << pfx << jm->getVariableNames()[i] << std::setw(12) << position_[jm->getFirstVariableIndex() + i] << '\n';
   }
 
   const LinkModel* link_model = jm->getChildLinkModel();
 
-  ss << pfx << "Link: " << link_model->getName() << std::endl;
+  ss << pfx << "Link: " << link_model->getName() << '\n';
   getPoseString(ss, link_model->getJointOriginTransform(), pfx + "joint_origin:");
   if (variable_joint_transforms_)
   {
