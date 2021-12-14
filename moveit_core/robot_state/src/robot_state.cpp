@@ -2120,8 +2120,7 @@ void RobotState::printDirtyInfo(std::ostream& out) const
   for (const JointModel* joint : jm)
     if (joint->getVariableCount() > 0 && dirtyJointTransform(joint))
       out << "    " << joint->getName() << '\n';
-  out << "  * Dirty Link Transforms: " << (dirty_link_transforms_ ? dirty_link_transforms_->getName() : "NULL")
-      << '\n';
+  out << "  * Dirty Link Transforms: " << (dirty_link_transforms_ ? dirty_link_transforms_->getName() : "NULL") << '\n';
   out << "  * Dirty Collision Body Transforms: "
       << (dirty_collision_body_transforms_ ? dirty_collision_body_transforms_->getName() : "NULL\n");
 }

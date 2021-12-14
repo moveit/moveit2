@@ -878,7 +878,7 @@ void PlanningScene::saveGeometryToStream(std::ostream& out) const
         out << obj->subframe_poses_.size() << '\n';  // Number of subframes
         for (auto& pose_pair : obj->subframe_poses_)
         {
-          out << pose_pair.first << '\n';     // Subframe name
+          out << pose_pair.first << '\n';          // Subframe name
           writePoseToText(out, pose_pair.second);  // Subframe pose
         }
       }

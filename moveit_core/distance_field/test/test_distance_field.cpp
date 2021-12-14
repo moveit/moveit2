@@ -562,8 +562,7 @@ TEST(TestSignedPropagationDistanceField, TestSignedAddRemovePoints)
 
           EXPECT_GE(gradient_df.getCell(ncell_pos.x(), ncell_pos.y(), ncell_pos.z()).distance_square_, 1)
               << "dist=" << dist << " xyz=" << x << " " << y << " " << z << " grad=" << grad.x() << " " << grad.y()
-              << " " << grad.z() << " ncell=" << ncell_pos.x() << " " << ncell_pos.y() << " " << ncell_pos.z()
-              << '\n';
+              << " " << grad.z() << " ncell=" << ncell_pos.x() << " " << ncell_pos.y() << " " << ncell_pos.z() << '\n';
 
           double grad_size_sq = grad.squaredNorm();
           if (grad_size_sq < std::numeric_limits<double>::epsilon())

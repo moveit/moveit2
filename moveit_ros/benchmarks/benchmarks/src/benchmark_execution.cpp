@@ -768,8 +768,7 @@ bool moveit_benchmarks::BenchmarkExecution::readOptions(const std::string& filen
 
 void moveit_benchmarks::BenchmarkExecution::printOptions(std::ostream& out)
 {
-  out << "Benchmark for scene '" << options_.scene << "' to be saved at location '" << options_.output << "'"
-      << '\n';
+  out << "Benchmark for scene '" << options_.scene << "' to be saved at location '" << options_.output << "'" << '\n';
   if (!options_.query_regex.empty())
     out << "Planning requests associated to the scene that match '" << options_.query_regex << "' will be evaluated"
         << '\n';

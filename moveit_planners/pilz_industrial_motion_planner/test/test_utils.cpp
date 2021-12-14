@@ -371,8 +371,7 @@ bool testutils::isVelocityBounded(const trajectory_msgs::msg::JointTrajectory& t
                   << " Joint Name: " << trajectory.joint_names.at(i) << "; Position: " << point.positions.at(i)
                   << "; Velocity: " << point.velocities.at(i) << "; Acceleration: " << point.accelerations.at(i)
                   << "; Time from start: " << rclcpp::Duration(point.time_from_start).seconds()
-                  << "; Velocity Limit: " << joint_limits.getLimit(trajectory.joint_names.at(i)).max_velocity
-                  << '\n';
+                  << "; Velocity Limit: " << joint_limits.getLimit(trajectory.joint_names.at(i)).max_velocity << '\n';
 
         return false;
       }
@@ -456,8 +455,7 @@ bool testutils::isPositionBounded(const trajectory_msgs::msg::JointTrajectory& t
                   << "; Velocity: " << point.velocities.at(i) << "; Acceleration: " << point.accelerations.at(i)
                   << "; Time from start: " << rclcpp::Duration(point.time_from_start).seconds()
                   << "; Max Position: " << joint_limits.getLimit(trajectory.joint_names.at(i)).max_position
-                  << "; Min Position: " << joint_limits.getLimit(trajectory.joint_names.at(i)).min_position
-                  << '\n';
+                  << "; Min Position: " << joint_limits.getLimit(trajectory.joint_names.at(i)).min_position << '\n';
 
         return false;
       }
