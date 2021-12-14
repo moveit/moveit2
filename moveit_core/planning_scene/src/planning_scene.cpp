@@ -855,7 +855,7 @@ void PlanningScene::getPlanningSceneMsg(moveit_msgs::msg::PlanningScene& scene_m
 
 void PlanningScene::saveGeometryToStream(std::ostream& out) const
 {
-  out << name_ << std::endl;
+  out << name_ << '\n';
   const std::vector<std::string>& ids = world_->getObjectIds();
   for (const std::string& id : ids)
     if (id != OCTOMAP_NS)
@@ -863,12 +863,12 @@ void PlanningScene::saveGeometryToStream(std::ostream& out) const
       collision_detection::CollisionEnv::ObjectConstPtr obj = world_->getObject(id);
       if (obj)
       {
-        out << "* " << id << std::endl;  // New object start
+        out << "* " << id << '\n';  // New object start
         // Write object pose
         writePoseToText(out, obj->pose_);
 
         // Write shapes and shape poses
-        out << obj->shapes_.size() << std::endl;  // Number of shapes
+        out << obj->shapes_.size() << '\n';  // Number of shapes
         for (std::size_t j = 0; j < obj->shapes_.size(); ++j)
         {
           shapes::saveAsText(obj->shapes_[j].get(), out);
@@ -877,22 +877,22 @@ void PlanningScene::saveGeometryToStream(std::ostream& out) const
           if (hasObjectColor(id))
           {
             const std_msgs::msg::ColorRGBA& c = getObjectColor(id);
-            out << c.r << " " << c.g << " " << c.b << " " << c.a << std::endl;
+            out << c.r << " " << c.g << " " << c.b << " " << c.a << '\n';
           }
           else
-            out << "0 0 0 0" << std::endl;
+            out << "0 0 0 0" << '\n';
         }
 
         // Write subframes
-        out << obj->subframe_poses_.size() << std::endl;  // Number of subframes
+        out << obj->subframe_poses_.size() << '\n';  // Number of subframes
         for (auto& pose_pair : obj->subframe_poses_)
         {
-          out << pose_pair.first << std::endl;     // Subframe name
+          out << pose_pair.first << '\n';          // Subframe name
           writePoseToText(out, pose_pair.second);  // Subframe pose
         }
       }
     }
-  out << "." << std::endl;
+  out << "." << '\n';
 }
 
 bool PlanningScene::loadGeometryFromStream(std::istream& in)
@@ -1024,9 +1024,9 @@ bool PlanningScene::readPoseFromText(std::istream& in, Eigen::Isometry3d& pose) 
 
 void PlanningScene::writePoseToText(std::ostream& out, const Eigen::Isometry3d& pose) const
 {
-  out << pose.translation().x() << " " << pose.translation().y() << " " << pose.translation().z() << std::endl;
+  out << pose.translation().x() << " " << pose.translation().y() << " " << pose.translation().z() << '\n';
   Eigen::Quaterniond r(pose.linear());
-  out << r.x() << " " << r.y() << " " << r.z() << " " << r.w() << std::endl;
+  out << r.x() << " " << r.y() << " " << r.z() << " " << r.w() << '\n';
 }
 
 void PlanningScene::setCurrentState(const moveit_msgs::msg::RobotState& state)

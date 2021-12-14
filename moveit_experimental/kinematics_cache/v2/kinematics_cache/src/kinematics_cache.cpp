@@ -344,24 +344,24 @@ bool KinematicsCache::writeToFile(const std::string& filename)
   if (file.good())
   {
     std::string group_name = kinematics_solver_->getGroupName();
-    file << group_name << std::endl;
+    file << group_name << '\n';
 
-    file << options_.origin.x << " " << options_.origin.y << " " << options_.origin.z << std::endl;
+    file << options_.origin.x << " " << options_.origin.y << " " << options_.origin.z << '\n';
     file << options_.workspace_size[0] << " " << options_.workspace_size[1] << " " << options_.workspace_size[2]
-         << std::endl;
-    file << options_.resolution[0] << " " << options_.resolution[1] << " " << options_.resolution[2] << std::endl;
-    file << options_.max_solutions_per_grid_location << std::endl;
-    file << min_squared_distance_ << std::endl;
-    file << max_squared_distance_ << std::endl;
-    file << kinematics_cache_vector_.size() << std::endl;
+         << '\n';
+    file << options_.resolution[0] << " " << options_.resolution[1] << " " << options_.resolution[2] << '\n';
+    file << options_.max_solutions_per_grid_location << '\n';
+    file << min_squared_distance_ << '\n';
+    file << max_squared_distance_ << '\n';
+    file << kinematics_cache_vector_.size() << '\n';
     std::copy(kinematics_cache_vector_.begin(), kinematics_cache_vector_.end(),
               std::ostream_iterator<double>(file, " "));
-    file << std::endl;
+    file << '\n';
 
-    file << num_solutions_vector_.size() << std::endl;
+    file << num_solutions_vector_.size() << '\n';
     std::copy(num_solutions_vector_.begin(), num_solutions_vector_.end(),
               std::ostream_iterator<unsigned int>(file, " "));
-    file << std::endl;
+    file << '\n';
   }
 
   file.close();

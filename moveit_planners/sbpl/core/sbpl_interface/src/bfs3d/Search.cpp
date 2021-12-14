@@ -80,7 +80,7 @@ void BFS_3D::search(int width, int planeSize, int volatile* distance_grid, int* 
     EXPAND_NEIGHBOR(width + 1 - planeSize);
     EXPAND_NEIGHBOR(width - 1 - planeSize);
   }
-  // std::cerr << "Search thread done" << std::endl;
+  // std::cerr << "Search thread done" << '\n';
   running = false;
 }
 }  // namespace sbpl_interface

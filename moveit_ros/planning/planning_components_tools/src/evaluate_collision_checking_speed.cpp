@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 
   if (vm.count("help"))
   {
-    std::cout << desc << std::endl;
+    std::cout << desc << '\n';
     return 0;
   }
 
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
     {
       psm.startWorldGeometryMonitor();
       psm.startSceneMonitor();
-      std::cout << "Listening to planning scene updates. Press Enter to continue ..." << std::endl;
+      std::cout << "Listening to planning scene updates. Press Enter to continue ..." << '\n';
       std::cin.get();
     }
     else
