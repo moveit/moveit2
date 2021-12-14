@@ -315,10 +315,10 @@ bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& t
       ss << "Pushed trajectory for execution using controllers [ ";
       for (const std::string& controller : context->controllers_)
         ss << controller << " ";
-      ss << "]:" << std::endl;
+      ss << "]:" << '\n';
       // TODO: Provide message serialization
       // for (const moveit_msgs::msg::RobotTrajectory& trajectory_part : context->trajectory_parts_)
-      // ss << trajectory_part << std::endl;
+      // ss << trajectory_part << '\n';
       RCLCPP_INFO_STREAM(LOGGER, ss.str());
     }
     trajectories_.push_back(context);
@@ -1170,7 +1170,7 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
     std::set<std::string>::const_iterator ji;
     for (ji = mi->second.joints_.begin(); ji != mi->second.joints_.end(); ji++)
     {
-      ss2 << "  " << *ji << std::endl;
+      ss2 << "  " << *ji << '\n';
     }
   }
   RCLCPP_ERROR(LOGGER, "Known controllers and their joints:\n%s", ss2.str().c_str());

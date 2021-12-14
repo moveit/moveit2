@@ -130,8 +130,8 @@ void Profiler::status(std::ostream& out, bool merge)
   lock_.lock();
   printOnDestroy_ = false;
 
-  out << std::endl;
-  out << " *** Profiling statistics. Total counted time : " << to_seconds(tinfo_.total) << " seconds" << std::endl;
+  out << '\n';
+  out << " *** Profiling statistics. Total counted time : " << to_seconds(tinfo_.total) << " seconds\n";
 
   if (merge)
   {
@@ -162,7 +162,7 @@ void Profiler::status(std::ostream& out, bool merge)
   else
     for (std::map<boost::thread::id, PerThread>::const_iterator it = data_.begin(); it != data_.end(); ++it)
     {
-      out << "Thread " << it->first << ":" << std::endl;
+      out << "Thread " << it->first << ":\n";
       printThreadInfo(out, it->second);
     }
   lock_.unlock();
@@ -171,7 +171,7 @@ void Profiler::status(std::ostream& out, bool merge)
 void Profiler::console()
 {
   std::stringstream ss;
-  ss << std::endl;
+  ss << '\n';
   status(ss, true);
   RCLCPP_INFO(LOGGER, "%s", ss.str().c_str());
 }
@@ -221,9 +221,9 @@ void Profiler::printThreadInfo(std::ostream& out, const PerThread& data)
   }
   std::sort(events.begin(), events.end(), SortIntByValue());
   if (!events.empty())
-    out << "Events:" << std::endl;
+    out << "Events:\n";
   for (const DataIntVal& event : events)
-    out << event.name_ << ": " << event.value_ << std::endl;
+    out << event.name_ << ": " << event.value_ << '\n';
 
   std::vector<DataDoubleVal> avg;
   for (const std::pair<const std::string, AvgInfo>& ia : data.avg)
@@ -233,13 +233,12 @@ void Profiler::printThreadInfo(std::ostream& out, const PerThread& data)
   }
   std::sort(avg.begin(), avg.end(), SortDoubleByValue());
   if (!avg.empty())
-    out << "Averages:" << std::endl;
+    out << "Averages:\n";
   for (const DataDoubleVal& average : avg)
   {
     const AvgInfo& a = data.avg.find(average.name_)->second;
     out << average.name_ << ": " << average.value_ << " (stddev = "
-        << sqrt(fabs(a.totalSqr - (double)a.parts * average.value_ * average.value_) / ((double)a.parts - 1.)) << ")"
-        << std::endl;
+        << sqrt(fabs(a.totalSqr - (double)a.parts * average.value_ * average.value_) / ((double)a.parts - 1.)) << ")\n";
   }
 
   std::vector<DataDoubleVal> time;
@@ -252,7 +251,7 @@ void Profiler::printThreadInfo(std::ostream& out, const PerThread& data)
 
   std::sort(time.begin(), time.end(), SortDoubleByValue());
   if (!time.empty())
-    out << "Blocks of time:" << std::endl;
+    out << "Blocks of time:\n";
 
   double unaccounted = total;
   for (DataDoubleVal& time_block : time)
@@ -270,7 +269,7 @@ void Profiler::printThreadInfo(std::ostream& out, const PerThread& data)
       if (pavg < 1.0)
         out << " (" << 1.0 / pavg << " /s)";
     }
-    out << std::endl;
+    out << '\n';
     unaccounted -= time_block.value_;
   }
   // if we do not appear to have counted time multiple times, print the unaccounted time too
@@ -279,10 +278,10 @@ void Profiler::printThreadInfo(std::ostream& out, const PerThread& data)
     out << "Unaccounted time : " << unaccounted;
     if (total > 0.0)
       out << " (" << (100.0 * unaccounted / total) << " %)";
-    out << std::endl;
+    out << '\n';
   }
 
-  out << std::endl;
+  out << '\n';
 }
 
 }  // end of namespace tools

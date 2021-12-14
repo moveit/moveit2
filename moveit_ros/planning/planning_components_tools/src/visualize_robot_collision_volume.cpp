@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     psm.startStateMonitor();
     auto pub_markers = node->create_publisher<visualization_msgs::msg::MarkerArray>("visualization_marker_array", 10);
     std::cout << "\nListening for planning scene...\nType the number of spheres to generate and press Enter: "
-              << std::endl;
+              << '\n';
     int num_spheres;
     std::cin >> num_spheres;
 

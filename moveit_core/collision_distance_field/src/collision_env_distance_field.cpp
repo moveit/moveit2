@@ -504,7 +504,7 @@ bool CollisionEnvDistanceField::getIntraGroupCollisions(const collision_detectio
         }
         // std::cerr << "Bounding spheres for " << gsr->dfce_->link_names_[i] <<
         // " and " << gsr->dfce_->link_names_[j]
-        //           << " intersect" << std::endl;
+        //           << " intersect" << '\n';
       }
       int num_pair = -1;
       std::string name_1;
@@ -572,7 +572,7 @@ bool CollisionEnvDistanceField::getIntraGroupCollisions(const collision_detectio
           double dist = gradient.norm();
           // std::cerr << "Dist is " << dist << " rad " <<
           // (*collision_spheres_1)[k].radius_+(*collision_spheres_2)[l].radius_
-          // << std::endl;
+          // << '\n';
 
           if (dist < (*collision_spheres_1)[k].radius_ + (*collision_spheres_2)[l].radius_)
           {
@@ -805,14 +805,14 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
           // std::cerr << "Checking touch links for " << link_name << " and " <<
           // attached_bodies[j]->getName()
           //           << " num " << attached_bodies[j]->getTouchLinks().size()
-          //           << std::endl;
+          //           << '\n';
           // touch links take priority
           if (link_attached_bodies[j]->getTouchLinks().find(link_name) != link_attached_bodies[j]->getTouchLinks().end())
           {
             dfce->intra_group_collision_enabled_[i][att_count + dfce->link_names_.size()] = false;
             // std::cerr << "Setting intra group for " << link_name << " and
             // attached body " << link_attached_bodies[j]->getName() << " to
-            // false" << std::endl;
+            // false" << '\n';
           }
         }
       }
@@ -852,7 +852,7 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
         // TODO - allow for touch links to be attached bodies?
         // else {
         // std::cerr << "Setting not allowed for " << link_name << " and " <<
-        // dfce->link_names_[j] << std::endl;
+        // dfce->link_names_[j] << '\n';
         //}
       }
     }
@@ -1226,7 +1226,7 @@ void CollisionEnvDistanceField::getGroupStateRepresentation(const DistanceFieldC
     // const moveit::core::LinkModel* ls =
     // state.getLinkStateVector()[dfce->attached_body_link_state_indices_[i]];
     /// std::cerr << "Attached " << dfce->attached_body_names_[i] << " index "
-    /// << dfce->attached_body_link_state_indices_[i] << std::endl;
+    /// << dfce->attached_body_link_state_indices_[i] << '\n';
     gsr->attached_body_decompositions_.push_back(
         getAttachedBodySphereDecomposition(state.getAttachedBody(dfce->attached_body_names_[i]), resolution_));
     gsr->gradients_[i + dfce->link_names_.size()].types.resize(
@@ -1351,7 +1351,7 @@ bool CollisionEnvDistanceField::compareCacheEntryToAllowedCollisionMatrix(
             // " << dfce->link_names_[j]
             //           << " went from " <<
             //           dfce->intra_group_collision_enabled_[i][j] << " to " <<
-            //           intra_collision_enabled << std::endl;
+            //           intra_collision_enabled << '\n';
             return false;
           }
         }
