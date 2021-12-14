@@ -11,7 +11,7 @@ pull_request_rules:
   - name: ask to resolve conflict
     conditions:
       - conflict
-      - author!=mergify
+      - author!=mergify[bot]
     actions:
         comment:
           message: This pull request is in conflict. Could you fix it @{{author}}?
@@ -19,7 +19,7 @@ pull_request_rules:
   - name: development targets main branch
     conditions:
       - base!=main
-      - author!=mergify
+      - author!=mergify[bot]
     actions:
         comment:
           message: |
