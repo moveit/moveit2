@@ -174,7 +174,7 @@ void SetupAssistantWidget::navigationClicked(const QModelIndex& index)
 
 void SetupAssistantWidget::onDataUpdate()
 {
-  for (size_t index = 0; index < steps_.size(); index++)
+  for (size_t index = 0; index < steps_.size(); ++index)
   {
     bool ready = steps_[index]->isReady();
     navs_view_->setEnabled(index, ready);

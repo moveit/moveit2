@@ -496,7 +496,7 @@ void robotStateToStream(const RobotState& state, std::ostream& out, bool include
       if (i < state.getVariableCount() - 1)
         out << separator;
     }
-    out << std::endl;
+    out << '\n';
   }
 
   // Output values of joints
@@ -508,7 +508,7 @@ void robotStateToStream(const RobotState& state, std::ostream& out, bool include
     if (i < state.getVariableCount() - 1)
       out << separator;
   }
-  out << std::endl;
+  out << '\n';
 }
 
 void robotStateToStream(const RobotState& state, std::ostream& out,
@@ -544,8 +544,8 @@ void robotStateToStream(const RobotState& state, std::ostream& out,
 
   // Push all headers and joints to our output stream
   if (include_header)
-    out << headers.str() << std::endl;
-  out << joints.str() << std::endl;
+    out << headers.str() << '\n';
+  out << joints.str() << '\n';
 }
 
 void streamToRobotState(RobotState& state, const std::string& line, const std::string& separator)

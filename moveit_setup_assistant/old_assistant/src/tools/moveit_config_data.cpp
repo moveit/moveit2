@@ -149,7 +149,7 @@ bool MoveItConfigData::outputOMPLPlanningYAML(const std::string& file_path)
     return false;
   }
 
-  output_stream << emitter.c_str() << std::endl;
+  output_stream << emitter.c_str() << '\n';
   output_stream.close();
 
   return true;  // file created successfully

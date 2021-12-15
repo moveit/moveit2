@@ -129,13 +129,13 @@ int PR2ArmIKSolver::CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_i
   double min_distance = 1e6;
   int min_index = -1;
 
-  for (int i = 0; i < (int)solution_ik.size(); i++)
+  for (int i = 0; i < (int)solution_ik.size(); ++i)
   {
     if (verbose)
     {
       RCLCPP_WARN(LOGGER, "Solution : %d", (int)solution_ik.size());
 
-      for (int j = 0; j < (int)solution_ik[i].size(); j++)
+      for (int j = 0; j < (int)solution_ik[i].size(); ++j)
       {
         RCLCPP_WARN(LOGGER, "%d: %f", j, solution_ik[i][j]);
       }
@@ -153,7 +153,7 @@ int PR2ArmIKSolver::CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_i
   if (min_index > -1)
   {
     q_out.resize((int)solution_ik[min_index].size());
-    for (int i = 0; i < (int)solution_ik[min_index].size(); i++)
+    for (int i = 0; i < (int)solution_ik[min_index].size(); ++i)
     {
       q_out(i) = solution_ik[min_index][i];
     }
@@ -227,9 +227,9 @@ bool getKDLChain(const urdf::ModelInterface& model, const std::string& root_name
 Eigen::Isometry3f KDLToEigenMatrix(const KDL::Frame& p)
 {
   Eigen::Isometry3f b = Eigen::Isometry3f::Identity();
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; ++i)
   {
-    for (int j = 0; j < 3; j++)
+    for (int j = 0; j < 3; ++j)
     {
       b(i, j) = p.M(i, j);
     }
@@ -241,7 +241,7 @@ Eigen::Isometry3f KDLToEigenMatrix(const KDL::Frame& p)
 double computeEuclideanDistance(const std::vector<double>& array_1, const KDL::JntArray& array_2)
 {
   double distance = 0.0;
-  for (int i = 0; i < (int)array_1.size(); i++)
+  for (int i = 0; i < (int)array_1.size(); ++i)
   {
     distance += (array_1[i] - array_2(i)) * (array_1[i] - array_2(i));
   }
@@ -353,7 +353,7 @@ bool PR2ArmKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
   KDL::JntArray jnt_pos_in;
   KDL::JntArray jnt_pos_out;
   jnt_pos_in.resize(dimension_);
-  for (int i = 0; i < dimension_; i++)
+  for (int i = 0; i < dimension_; ++i)
   {
     jnt_pos_in(i) = ik_seed_state[i];
   }
@@ -368,7 +368,7 @@ bool PR2ArmKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
   if (ik_valid >= 0)
   {
     solution.resize(dimension_);
-    for (int i = 0; i < dimension_; i++)
+    for (int i = 0; i < dimension_; ++i)
     {
       solution[i] = jnt_pos_out(i);
     }

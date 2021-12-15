@@ -49,7 +49,7 @@ static void siginthandler(int /*param*/)
 
 void usage(boost::program_options::options_description& desc, int exit_code)
 {
-  std::cout << desc << std::endl;
+  std::cout << desc << '\n';
   exit(exit_code);
 }
 
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
   }
   catch (const std::exception& e)
   {
-    std::cerr << e.what() << std::endl;
+    std::cerr << e.what() << '\n';
     usage(desc, 1);
   }
   // Start ROS Node

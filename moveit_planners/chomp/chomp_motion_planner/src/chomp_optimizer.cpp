@@ -116,7 +116,7 @@ void ChompOptimizer::initialize()
   joint_model_group_ = planning_scene_->getRobotModel()->getJointModelGroup(planning_group_);
 
   const std::vector<const moveit::core::JointModel*> joint_models = joint_model_group_->getActiveJointModels();
-  for (size_t i = 0; i < joint_models.size(); i++)
+  for (size_t i = 0; i < joint_models.size(); ++i)
   {
     double joint_cost = 1.0;
     // nh.param("joint_costs/" + joint_models[i]->getName(), joint_cost, 1.0);
@@ -131,7 +131,7 @@ void ChompOptimizer::initialize()
   }
 
   // scale the smoothness costs
-  for (int i = 0; i < num_joints_; i++)
+  for (int i = 0; i < num_joints_; ++i)
   {
     joint_costs_[i].scale(max_cost_scale);
   }
@@ -177,14 +177,14 @@ void ChompOptimizer::initialize()
   // random_joint_momentum_ = Eigen::VectorXd::Zero(num_vars_free_);
   multivariate_gaussian_.clear();
   stochasticity_factor_ = 1.0;
-  for (int i = 0; i < num_joints_; i++)
+  for (int i = 0; i < num_joints_; ++i)
   {
     multivariate_gaussian_.push_back(
         MultivariateGaussian(Eigen::VectorXd::Zero(num_vars_free_), joint_costs_[i].getQuadraticCostInverse()));
   }
 
   std::map<std::string, std::string> fixed_link_resolution_map;
-  for (int i = 0; i < num_joints_; i++)
+  for (int i = 0; i < num_joints_; ++i)
   {
     joint_names_.push_back(joint_model_group_->getActiveJointModels()[i]->getName());
     // RCLCPP_INFO(LOGGER,"Got joint %s", joint_names_[i].c_str());
@@ -237,7 +237,7 @@ void ChompOptimizer::initialize()
     size_t j = 0;
     for (const collision_detection::GradientInfo& info : gsr_->gradients_)
     {
-      for (size_t k = 0; k < info.sphere_locations.size(); k++)
+      for (size_t k = 0; k < info.sphere_locations.size(); ++k)
       {
         if (fixed_link_resolution_map.find(info.joint_name) != fixed_link_resolution_map.end())
         {
@@ -311,7 +311,7 @@ bool ChompOptimizer::optimize()
   bool should_break_out = false;
 
   // iterate
-  for (iteration_ = 0; iteration_ < parameters_->max_iterations_; iteration_++)
+  for (iteration_ = 0; iteration_ < parameters_->max_iterations_; ++iteration_)
   {
     performForwardKinematics();
     double c_cost = getCollisionCost();
@@ -330,7 +330,7 @@ bool ChompOptimizer::optimize()
 
     //   if(currentCostIter >= costWindow)
     //   {
-    //     for(int i = 1; i < costWindow; i++)
+    //     for(int i = 1; i < costWindow; ++i)
     //     {
     //       averageCostVelocity += (costs.at(i) - costs.at(i - 1));
     //     }
@@ -533,10 +533,10 @@ bool ChompOptimizer::isCurrentTrajectoryMeshToMeshCollisionFree() const
   moveit_msgs::msg::RobotTrajectory traj;
   traj.joint_trajectory.joint_names = joint_names_;
 
-  for (size_t i = 0; i < group_trajectory_.getNumPoints(); i++)
+  for (size_t i = 0; i < group_trajectory_.getNumPoints(); ++i)
   {
     trajectory_msgs::msg::JointTrajectoryPoint point;
-    for (size_t j = 0; j < group_trajectory_.getNumJoints(); j++)
+    for (size_t j = 0; j < group_trajectory_.getNumJoints(); ++j)
     {
       point.positions.push_back(best_group_trajectory_(i, j));
     }
@@ -560,10 +560,10 @@ bool ChompOptimizer::isCurrentTrajectoryMeshToMeshCollisionFree() const
 //   Constraints pathConstraints;
 //   ArmNavigationErrorCodes errorCode;
 //   vector<ArmNavigationErrorCodes> trajectoryErrorCodes;
-//   for(int i = 0; i < group_trajectory_.getNumPoints(); i++)
+//   for(int i = 0; i < group_trajectory_.getNumPoints(); ++i)
 //   {
 //     JointTrajectoryPoint point;
-//     for(int j = 0; j < group_trajectory_.getNumJoints(); j++)
+//     for(int j = 0; j < group_trajectory_.getNumJoints(); ++j)
 //     {
 //       point.positions.push_back(best_group_trajectory_(i, j));
 //     }
@@ -583,7 +583,7 @@ bool ChompOptimizer::isCurrentTrajectoryMeshToMeshCollisionFree() const
 
 void ChompOptimizer::calculateSmoothnessIncrements()
 {
-  for (int i = 0; i < num_joints_; i++)
+  for (int i = 0; i < num_joints_; ++i)
   {
     joint_costs_[i].getDerivative(group_trajectory_.getJointTrajectory(i), smoothness_derivative_);
     smoothness_increments_.col(i) = -smoothness_derivative_.segment(group_trajectory_.getStartIndex(), num_vars_free_);
@@ -622,9 +622,9 @@ void ChompOptimizer::calculateCollisionIncrements()
     start_point = free_vars_start_;
   }
 
-  for (int i = start_point; i <= end_point; i++)
+  for (int i = start_point; i <= end_point; ++i)
   {
-    for (int j = 0; j < num_collision_points_; j++)
+    for (int j = 0; j < num_collision_points_; ++j)
     {
       potential = collision_point_potential_[i][j];
 
@@ -676,7 +676,7 @@ void ChompOptimizer::calculatePseudoInverse()
 
 void ChompOptimizer::calculateTotalIncrements()
 {
-  for (int i = 0; i < num_joints_; i++)
+  for (int i = 0; i < num_joints_; ++i)
   {
     final_increments_.col(i) =
         parameters_->learning_rate_ * (joint_costs_[i].getQuadraticCostInverse() *
@@ -688,7 +688,7 @@ void ChompOptimizer::calculateTotalIncrements()
 void ChompOptimizer::addIncrementsToTrajectory()
 {
   const std::vector<const moveit::core::JointModel*>& joint_models = joint_model_group_->getActiveJointModels();
-  for (size_t i = 0; i < joint_models.size(); i++)
+  for (size_t i = 0; i < joint_models.size(); ++i)
   {
     double scale = 1.0;
     double max = final_increments_.col(i).maxCoeff();
@@ -713,9 +713,9 @@ void ChompOptimizer::updateFullTrajectory()
 void ChompOptimizer::debugCost()
 {
   double cost = 0.0;
-  for (int i = 0; i < num_joints_; i++)
+  for (int i = 0; i < num_joints_; ++i)
     cost += joint_costs_[i].getCost(group_trajectory_.getJointTrajectory(i));
-  std::cout << "Cost = " << cost << std::endl;
+  std::cout << "Cost = " << cost << '\n';
 }
 
 double ChompOptimizer::getTrajectoryCost()
@@ -727,7 +727,7 @@ double ChompOptimizer::getSmoothnessCost()
 {
   double smoothness_cost = 0.0;
   // joint costs:
-  for (int i = 0; i < num_joints_; i++)
+  for (int i = 0; i < num_joints_; ++i)
     smoothness_cost += joint_costs_[i].getCost(group_trajectory_.getJointTrajectory(i));
 
   return parameters_->smoothness_cost_weight_ * smoothness_cost;
@@ -741,10 +741,10 @@ double ChompOptimizer::getCollisionCost()
   worst_collision_cost_state_ = -1;
 
   // collision costs:
-  for (int i = free_vars_start_; i <= free_vars_end_; i++)
+  for (int i = free_vars_start_; i <= free_vars_end_; ++i)
   {
     double state_collision_cost = 0.0;
-    for (int j = 0; j < num_collision_points_; j++)
+    for (int j = 0; j < num_collision_points_; ++j)
     {
       state_collision_cost += collision_point_potential_[i][j] * collision_point_vel_mag_[i][j];
     }
@@ -761,7 +761,7 @@ double ChompOptimizer::getCollisionCost()
 
 void ChompOptimizer::computeJointProperties(int trajectory_point)
 {
-  for (int j = 0; j < num_joints_; j++)
+  for (int j = 0; j < num_joints_; ++j)
   {
     const moveit::core::JointModel* joint_model = state_.getJointModel(joint_names_[j]);
     const moveit::core::RevoluteJointModel* revolute_joint =
@@ -802,7 +802,7 @@ template <typename Derived>
 void ChompOptimizer::getJacobian(int trajectory_point, Eigen::Vector3d& collision_point_pos, std::string& joint_name,
                                  Eigen::MatrixBase<Derived>& jacobian) const
 {
-  for (int j = 0; j < num_joints_; j++)
+  for (int j = 0; j < num_joints_; ++j)
   {
     if (isParent(joint_name, joint_names_[j]))
     {
@@ -826,7 +826,7 @@ void ChompOptimizer::getJacobian(int trajectory_point, Eigen::Vector3d& collisio
 void ChompOptimizer::handleJointLimits()
 {
   const std::vector<const moveit::core::JointModel*> joint_models = joint_model_group_->getActiveJointModels();
-  for (size_t joint_i = 0; joint_i < joint_models.size(); joint_i++)
+  for (size_t joint_i = 0; joint_i < joint_models.size(); ++joint_i)
   {
     const moveit::core::JointModel* joint_model = joint_models[joint_i];
 
@@ -867,7 +867,7 @@ void ChompOptimizer::handleJointLimits()
       double max_violation = 0.0;
       int max_violation_index = 0;
       violation = false;
-      for (int i = free_vars_start_; i <= free_vars_end_; i++)
+      for (int i = free_vars_start_; i <= free_vars_end_; ++i)
       {
         double amount = 0.0;
         double absolute_amount = 0.0;
@@ -942,7 +942,7 @@ void ChompOptimizer::performForwardKinematics()
       size_t j = 0;
       for (const collision_detection::GradientInfo& info : gsr_->gradients_)
       {
-        for (size_t k = 0; k < info.sphere_locations.size(); k++)
+        for (size_t k = 0; k < info.sphere_locations.size(); ++k)
         {
           collision_point_pos_eigen_[i][j][0] = info.sphere_locations[k].x();
           collision_point_pos_eigen_[i][j][1] = info.sphere_locations[k].y();
@@ -980,13 +980,13 @@ void ChompOptimizer::performForwardKinematics()
   // RCLCPP_INFO(LOGGER,"Total dur " << total_dur << " total checks " << end-start+1);
 
   // now, get the vel and acc for each collision point (using finite differencing)
-  for (int i = free_vars_start_; i <= free_vars_end_; i++)
+  for (int i = free_vars_start_; i <= free_vars_end_; ++i)
   {
-    for (int j = 0; j < num_collision_points_; j++)
+    for (int j = 0; j < num_collision_points_; ++j)
     {
       collision_point_vel_eigen_[i][j] = Eigen::Vector3d(0, 0, 0);
       collision_point_acc_eigen_[i][j] = Eigen::Vector3d(0, 0, 0);
-      for (int k = -DIFF_RULE_LENGTH / 2; k <= DIFF_RULE_LENGTH / 2; k++)
+      for (int k = -DIFF_RULE_LENGTH / 2; k <= DIFF_RULE_LENGTH / 2; ++k)
       {
         collision_point_vel_eigen_[i][j] +=
             (inv_time * DIFF_RULES[0][k + DIFF_RULE_LENGTH / 2]) * collision_point_pos_eigen_[i + k][j];
@@ -1006,7 +1006,7 @@ void ChompOptimizer::setRobotStateFromPoint(ChompTrajectory& group_trajectory, i
 
   std::vector<double> joint_states;
   joint_states.reserve(group_trajectory.getNumJoints());
-  for (size_t j = 0; j < group_trajectory.getNumJoints(); j++)
+  for (size_t j = 0; j < group_trajectory.getNumJoints(); ++j)
     joint_states.emplace_back(point(0, j));
 
   state_.setJointGroupPositions(planning_group_, joint_states);
@@ -1039,7 +1039,7 @@ void ChompOptimizer::perturbTrajectory()
                   random_matrix;
 
   int mp_free_vars_index = mid_point - free_vars_start_;
-  for (int i = 0; i < num_joints_; i++)
+  for (int i = 0; i < num_joints_; ++i)
   {
     group_trajectory_.getFreeJointTrajectoryBlock(i) +=
         joint_costs_[i].getQuadraticCostInverse().col(mp_free_vars_index) * random_state_(i);
@@ -1053,7 +1053,7 @@ void ChompOptimizer::perturbTrajectory()
 // {
 //   const vector<RobotState *::JointState*>& jointStates =
 //     currentState->getJointStateGroup(groupName)->getJointStateVector();
-//   for(size_t i = 0; i < jointStates.size(); i++)
+//   for(size_t i = 0; i < jointStates.size(); ++i)
 //   {
 
 //     bool continuous = false;
@@ -1067,7 +1067,7 @@ void ChompOptimizer::perturbTrajectory()
 
 //     map<string, pair<double, double> > bounds = jointState->getJointModel()->getAllVariableBounds();
 //     int j = 0;
-//     for(map<string, pair<double, double> >::iterator it = bounds.begin(); it != bounds.end(); it++)
+//     for(map<string, pair<double, double> >::iterator it = bounds.begin(); it != bounds.end(); ++it)
 //     {
 //       double randVal = jointState->getJointStateValues()[j] + (getRandomDouble()
 //                                                                * (parameters_->getRandomJumpAmount()) -

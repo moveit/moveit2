@@ -92,7 +92,7 @@ bool EnvironmentChain3D::InitializeEnv(const char* sEnvFile)
 
 int EnvironmentChain3D::GetFromToHeuristic(int FromStateID, int ToStateID)
 {
-  // std::cerr << "Getting heuristic" << std::endl;
+  // std::cerr << "Getting heuristic" << '\n';
   return getEndEffectorHeuristic(FromStateID, ToStateID);
 }
 
@@ -101,7 +101,7 @@ int EnvironmentChain3D::GetGoalHeuristic(int stateID)
   if (planning_data_.state_ID_to_coord_table_.size() < DEBUG_OVER)
   {
     std::cerr << "Getting heur distance from " << stateID << " to " << planning_data_.goal_hash_entry_->stateID << " "
-              << GetFromToHeuristic(stateID, planning_data_.goal_hash_entry_->stateID) << std::endl;
+              << GetFromToHeuristic(stateID, planning_data_.goal_hash_entry_->stateID) << '\n';
   }
   return GetFromToHeuristic(stateID, planning_data_.goal_hash_entry_->stateID);
 }
@@ -145,7 +145,7 @@ void EnvironmentChain3D::PrintEnv_Config(FILE* fOut)
 void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_idv, std::vector<int>* cost_v)
 {
   boost::this_thread::interruption_point();
-  // std::cerr << "Calling get succ state " << source_state_ID << std::endl;
+  // std::cerr << "Calling get succ state " << source_state_ID << '\n';
 
   ros::WallTime expansion_start_time = ros::WallTime::now();
 
@@ -155,20 +155,20 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
   // From environment_robarm3d.cpp -- //goal state should be absorbing
   if (source_state_ID == planning_data_.goal_hash_entry_->stateID)
   {
-    std::cerr << "Think we have goal" << std::endl;
+    std::cerr << "Think we have goal" << '\n';
     return;
   }
 
   if (source_state_ID > (int)planning_data_.state_ID_to_coord_table_.size() - 1)
   {
     ROS_WARN_STREAM("source id too large");
-    std::cerr << "Source id too large" << std::endl;
+    std::cerr << "Source id too large" << '\n';
     return;
   }
 
   if (planning_data_.state_ID_to_coord_table_.size() < DEBUG_OVER)
   {
-    std::cerr << "Expanding " << source_state_ID << std::endl;
+    std::cerr << "Expanding " << source_state_ID << '\n';
   }
 
   EnvChain3DHashEntry* hash_entry = planning_data_.state_ID_to_coord_table_[source_state_ID];
@@ -179,20 +179,20 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
   std::vector<int> succ_coord;
   std::vector<double> succ_joint_angles;
 
-  // for(unsigned int i = 0; i < source_joint_angles.size(); i++) {
-  //   std::cerr << "Source " << i << " " << source_joint_angles[i] << std::endl;
+  // for(unsigned int i = 0; i < source_joint_angles.size(); ++i) {
+  //   std::cerr << "Source " << i << " " << source_joint_angles[i] << '\n';
   // }
 
   planning_statistics_.total_expansions_++;
 
-  for (unsigned int i = 0; i < possible_actions_.size(); i++)
+  for (unsigned int i = 0; i < possible_actions_.size(); ++i)
   {
     if (!possible_actions_[i]->generateSuccessorState(source_joint_angles, succ_joint_angles))
     {
       continue;
     }
 
-    // for(unsigned int j = 0; j < planning_data_.goal_hash_entry_->angles.size(); j++) {
+    // for(unsigned int j = 0; j < planning_data_.goal_hash_entry_->angles.size(); ++j) {
     //   if(joint_is_continuous_[j]) {
     //     if(source_joint_angles[j] < M_PI && succ_joint_angles[j] > M_PI) {
     //       succ_joint_angles[j] -= 2*M_PI;
@@ -202,21 +202,21 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
     //   }
     // }
     // double dist = 0.0;
-    // for(unsigned int j = 0; j < planning_data_.goal_hash_entry_->angles.size(); j++) {
+    // for(unsigned int j = 0; j < planning_data_.goal_hash_entry_->angles.size(); ++j) {
     //   dist += fabs(planning_data_.goal_hash_entry_->angles[j]-succ_joint_angles[j]);
-    //   //std::cerr << "Succ " << i << " " << j << " " << succ_joint_angles[j] << std::endl;
+    //   //std::cerr << "Succ " << i << " " << j << " " << succ_joint_angles[j] << '\n';
     // }
     // if(dist < closest_to_goal_) {
-    //   //std::cerr << "Got dist " << dist << std::endl;
+    //   //std::cerr << "Got dist " << dist << '\n';
     //   closest_to_goal_ = dist;
     // }
 
     // int max_dist = getJointDistanceIntegerMax(succ_joint_angles,
     //                                           planning_data_.goal_hash_entry_->angles);
     // if(max_dist*1.0 < closest_to_goal_) {
-    //   std::cerr << "Max integer distance is " << max_dist << std::endl;
+    //   std::cerr << "Max integer distance is " << max_dist << '\n';
     //   closest_to_goal_ = max_dist*1.0;
-    //   // for(unsigned int j = 0; j < joint_motion_wrappers_.size(); j++) {
+    //   // for(unsigned int j = 0; j < joint_motion_wrappers_.size(); ++j) {
     //   //   if(joint_motion_wrappers_[j]->canGetCloser(succ_joint_angles[j],
     //   //                                              planning_data_.goal_hash_entry_->angles[j],
     //   //                                              LONG_RANGE_JOINT_DIFF)) {
@@ -237,8 +237,8 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
     }
 
     // if(!joint_state_group_->satisfiesBounds()) {
-    //   std::cerr << "ERROR - successor doesn't satisfy bounds" << std::endl;
-    //   //std::cerr << "Successor doesn't satisfy bounds" << std::endl;
+    //   std::cerr << "ERROR - successor doesn't satisfy bounds" << '\n';
+    //   //std::cerr << "Successor doesn't satisfy bounds" << '\n';
     //   continue;
     // }
     ros::WallTime before_coll = ros::WallTime::now();
@@ -254,14 +254,14 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
       planning_scene_->checkCollision(req, res, state_);
     }
     planning_statistics_.coll_checks_++;
-    // std::cerr << "Elapsed " << t.elapsed() << std::endl;
+    // std::cerr << "Elapsed " << t.elapsed() << '\n';
     ros::WallDuration dur(ros::WallTime::now() - before_coll);
-    // std::cerr << dur.toSec() << std::endl;
+    // std::cerr << dur.toSec() << '\n';
     // ROS_DEBUG_STREAM("Time " << ros::WallTime::now()-before_coll);
     planning_statistics_.total_coll_check_time_ += dur;
     if (res.collision)
     {
-      // std::cerr << "Successor in collision" << std::endl;
+      // std::cerr << "Successor in collision" << '\n';
       continue;
     }
 
@@ -272,7 +272,7 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
     {
       if (!getGridXYZInt(pose, xyz))
       {
-        std::cerr << "Can't get successor x y z" << std::endl;
+        std::cerr << "Can't get successor x y z" << '\n';
         continue;
       }
     }
@@ -289,7 +289,7 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
 
     EnvChain3DHashEntry* succ_hash_entry = NULL;
     // bool can_get_closer = false;
-    // for(unsigned int j = 0; j < joint_motion_wrappers_.size(); j++) {
+    // for(unsigned int j = 0; j < joint_motion_wrappers_.size(); ++j) {
     //   if(joint_motion_wrappers_[j]->canGetCloser(succ_joint_angles[j],
     //                                              planning_data_.goal_hash_entry_->angles[j],
     //                                              LONG_RANGE_JOINT_DIFF)) {
@@ -304,7 +304,7 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
     if ((planning_parameters_.use_bfs_ && dist == 0) || (!planning_parameters_.use_bfs_ && dist == 1))
     {
       // std::cerr << "Joint distance for goal move " <<
-      // getJointDistanceDoubleSum(planning_data_.goal_hash_entry_->angles, succ_joint_angles) << std::endl;
+      // getJointDistanceDoubleSum(planning_data_.goal_hash_entry_->angles, succ_joint_angles) << '\n';
       std::vector<std::vector<double> > interpolated_values;
       if (interpolateAndCollisionCheck(source_joint_angles, planning_data_.goal_hash_entry_->angles,
                                        interpolated_values))
@@ -327,7 +327,7 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
       {
         if (!interpolateAndCollisionCheck(source_joint_angles, succ_joint_angles, interpolated_values))
         {
-          // std::cerr << "Interpolation failed" << std::endl;
+          // std::cerr << "Interpolation failed" << '\n';
           continue;
         }
       }
@@ -338,14 +338,14 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
     //   std::cerr << "State " << source_state_ID << " sum dist " <<
     //   getJointDistanceSum(planning_data_.goal_hash_entry_->angles, succ_joint_angles) << " max "
     //             << " " << getJointDistanceMax(planning_data_.goal_hash_entry_->angles, succ_joint_angles) <<
-    //             std::endl;
-    //   for(unsigned int i = 0; i < planning_data_.goal_hash_entry_->angles.size(); i++) {
+    //             '\n';
+    //   for(unsigned int i = 0; i < planning_data_.goal_hash_entry_->angles.size(); ++i) {
     //     std::cerr << "Joint " << i << " " << planning_data_.goal_hash_entry_->angles[i] << " " <<
-    //     succ_joint_angles[i] << std::endl;
+    //     succ_joint_angles[i] << '\n';
     //   }
     //   closest_to_goal_ = max_dist;
     // }
-    // std::cerr << "Dist " << dist << " source state id " << source_state_ID << std::endl;
+    // std::cerr << "Dist " << dist << " source state id " << source_state_ID << '\n';
     // if(max_dist <= LONG_RANGE_JOINT_DIFF/2.0+.001) {
     //   succ_hash_entry = planning_data_.goal_hash_entry_;
     // } else {
@@ -354,7 +354,7 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
 
     // kinematic_constraints::ConstraintEvaluationResult con_res = goal_constraint_set_.decide(state_);
     // if(con_res.satisfied) {
-    //   std::cerr << "Constraints satisfied, dist is " << dist << std::endl;
+    //   std::cerr << "Constraints satisfied, dist is " << dist << '\n';
     //   succ_hash_entry = planning_data_.goal_hash_entry_;
     // } else {
     //   succ_hash_entry = planning_data_.getHashEntry(succ_coord, i);
@@ -367,25 +367,25 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
     {
       if (planning_data_.state_ID_to_coord_table_.size() < DEBUG_OVER)
       {
-        std::cerr << "Already have hash entry " << succ_hash_entry->stateID << std::endl;
+        std::cerr << "Already have hash entry " << succ_hash_entry->stateID << '\n';
       }
     }
 
     if (planning_parameters_.interpolation_distance_ < planning_parameters_.joint_motion_primitive_distance_ &&
         !succ_is_goal_state)
     {
-      // std::cerr << "Adding segment from " << source_state_ID << " to " << succ_hash_entry->stateID << std::endl;
+      // std::cerr << "Adding segment from " << source_state_ID << " to " << succ_hash_entry->stateID << '\n';
       generated_interpolations_map_[source_state_ID][succ_hash_entry->stateID] = interpolated_values;
     }
 
-    // std::cerr << "Adding hash entry" << std::endl;
+    // std::cerr << "Adding hash entry" << '\n';
     if (planning_data_.state_ID_to_coord_table_.size() < DEBUG_OVER)
     {
-      std::cerr << std::endl;
-      std::cerr << "Adding " << succ_hash_entry->stateID << std::endl;
-      for (unsigned int j = 0; j < planning_data_.goal_hash_entry_->angles.size(); j++)
+      std::cerr << '\n';
+      std::cerr << "Adding " << succ_hash_entry->stateID << '\n';
+      for (unsigned int j = 0; j < planning_data_.goal_hash_entry_->angles.size(); ++j)
       {
-        std::cerr << "Succ " << j << " " << succ_joint_angles[j] << std::endl;
+        std::cerr << "Succ " << j << " " << succ_joint_angles[j] << '\n';
       }
     }
     succ_idv->push_back(succ_hash_entry->stateID);
@@ -427,7 +427,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
                                             moveit_msgs::srv::GetMotionPlan::Response& mres,
                                             const PlanningParameters& params)
 {
-  std::cerr << "really here " << std::endl;
+  std::cerr << "really here " << '\n';
   planning_scene_ = planning_scene;
 
   planning_group_ = mreq.motion_plan_request.group_name;
@@ -510,20 +510,20 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
         world_distance_field->getZNumCells() != gsr_->dfce_->distance_field_->getZNumCells())
     {
       ROS_WARN_STREAM("Size mismatch between world and self distance fields");
-      std::cerr << "Size mismatch between world and self distance fields" << std::endl;
+      std::cerr << "Size mismatch between world and self distance fields" << '\n';
       mres.error_code.val = moveit_msgs::msg::MoveItErrorCodes::COLLISION_CHECKING_UNAVAILABLE;
       return false;
     }
     // std::cerr << "BFS dimensions are "
     //           << world_distance_field->getXNumCells() << " "
     //           << world_distance_field->getYNumCells() << " "
-    //           << world_distance_field->getZNumCells() << std::endl;
+    //           << world_distance_field->getZNumCells() << '\n';
     unsigned int wall_count = 0;
-    for (int i = 0; i < gsr_->dfce_->distance_field_->getXNumCells() - 2; i++)
+    for (int i = 0; i < gsr_->dfce_->distance_field_->getXNumCells() - 2; ++i)
     {
-      for (int j = 0; j < gsr_->dfce_->distance_field_->getYNumCells() - 2; j++)
+      for (int j = 0; j < gsr_->dfce_->distance_field_->getYNumCells() - 2; ++j)
       {
-        for (int k = 0; k < gsr_->dfce_->distance_field_->getZNumCells() - 2; k++)
+        for (int k = 0; k < gsr_->dfce_->distance_field_->getZNumCells() - 2; ++k)
         {
           boost::this_thread::interruption_point();
           if (gsr_->dfce_->distance_field_->getDistanceFromCell(i + 1, j + 1, k + 1) == 0.0 ||
@@ -538,7 +538,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
   }
   // std::cerr << "Wall cells are " << wall_count << " of " <<
   //   world_distance_field->getXNumCells()*world_distance_field->getYNumCells()*world_distance_field->getZNumCells() <<
-  //   std::endl;
+  //   '\n';
 
   // setting start position
   std::vector<double> start_joint_values;
@@ -552,7 +552,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
   {
     if (!getGridXYZInt(start_pose, start_xyz))
     {
-      std::cerr << "Bad start pose" << std::endl;
+      std::cerr << "Bad start pose" << '\n';
       mres.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE;
       return false;
     }
@@ -568,7 +568,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
   // setting goal position
   planning_models::RobotState* goal_state(state_);
   std::map<std::string, double> goal_vals;
-  for (unsigned int i = 0; i < mreq.motion_plan_request.goal_constraints[0].joint_constraints.size(); i++)
+  for (unsigned int i = 0; i < mreq.motion_plan_request.goal_constraints[0].joint_constraints.size(); ++i)
   {
     goal_vals[mreq.motion_plan_request.goal_constraints[0].joint_constraints[i].joint_name] =
         mreq.motion_plan_request.goal_constraints[0].joint_constraints[i].position;
@@ -601,7 +601,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
   {
     if (!getGridXYZInt(goal_pose_, goal_xyz))
     {
-      std::cerr << "Bad goal pose" << std::endl;
+      std::cerr << "Bad goal pose" << '\n';
       mres.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
       return false;
     }
@@ -613,20 +613,20 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
     goal_xyz[2] = 0.0;
   }
   std::vector<std::string> goal_dofs = goal_joint_state_group->getJointModelGroup()->getActiveDOFNames();
-  for (unsigned int i = 0; i < goal_dofs.size(); i++)
+  for (unsigned int i = 0; i < goal_dofs.size(); ++i)
   {
     ROS_DEBUG_STREAM("Start " << goal_dofs[i] << " pos " << start_joint_values[i]);
   }
-  for (unsigned int i = 0; i < goal_dofs.size(); i++)
+  for (unsigned int i = 0; i < goal_dofs.size(); ++i)
   {
     ROS_DEBUG_STREAM("Goal " << goal_dofs[i] << " pos " << goal_joint_values[i]);
   }
-  // std::cerr << "Running bfs with goal " << goal_xyz[0] << " " <<  goal_xyz[1] << " " << goal_xyz[2] << std::endl;
+  // std::cerr << "Running bfs with goal " << goal_xyz[0] << " " <<  goal_xyz[1] << " " << goal_xyz[2] << '\n';
   if (planning_parameters_.use_bfs_)
   {
     bfs_->run(goal_xyz[0], goal_xyz[1], goal_xyz[2]);
     // std::cerr << "Got start " << start_xyz[0] << " " <<  start_xyz[1] << " " << start_xyz[2] << " cost "
-    //           << getBFSCostToGoal(start_xyz[0], start_xyz[1], start_xyz[2]) << std::endl;
+    //           << getBFSCostToGoal(start_xyz[0], start_xyz[1], start_xyz[2]) << '\n';
   }
   goal_constraint_set_.clear();
   goal_constraint_set_.add(mreq.motion_plan_request.goal_constraints[0]);
@@ -644,7 +644,7 @@ void EnvironmentChain3D::setMotionPrimitives(const std::string& group_name)
     ROS_ERROR_STREAM("Can't set motion primitives as joint state group not set");
   }
   const planning_models::RobotModel::JointModelGroup* jmg = joint_state_group_->getJointModelGroup();
-  for (unsigned int i = 0; i < jmg->getActiveDOFNames().size(); i++)
+  for (unsigned int i = 0; i < jmg->getActiveDOFNames().size(); ++i)
   {
     const planning_models::RobotModel::JointModel* joint = jmg->getJointModel(jmg->getActiveDOFNames()[i]);
     boost::shared_ptr<JointMotionWrapper> jmw(new JointMotionWrapper(joint));
@@ -677,7 +677,7 @@ void EnvironmentChain3D::determineMaximumEndEffectorTravel()
   double default_y = default_pose.translation().y();
   double default_z = default_pose.translation().z();
   double max_dist = 0.0;
-  for (unsigned int i = 0; i < possible_actions_.size(); i++)
+  for (unsigned int i = 0; i < possible_actions_.size(); ++i)
   {
     std::vector<double> succ_joint_angles;
     if (!possible_actions_[i]->generateSuccessorState(default_values, succ_joint_angles))
@@ -691,14 +691,14 @@ void EnvironmentChain3D::determineMaximumEndEffectorTravel()
     double motion_y = motion_pose.translation().y();
     double motion_z = motion_pose.translation().z();
     double dist = getEuclideanDistance(default_x, default_y, default_z, motion_x, motion_y, motion_z);
-    // std::cerr << "Motion " << i << " dist " << dist << std::endl;
+    // std::cerr << "Motion " << i << " dist " << dist << '\n';
     if (dist > max_dist)
     {
       max_dist = dist;
     }
   }
   maximum_distance_for_motion_ = ceil(max_dist / angle_discretization_);
-  // std::cerr << "Maximum distance is " << maximum_distance_for_motion_ << std::endl;
+  // std::cerr << "Maximum distance is " << maximum_distance_for_motion_ << '\n';
 }
 
 int EnvironmentChain3D::calculateCost(EnvChain3DHashEntry* HashEntry1, EnvChain3DHashEntry* HashEntry2)
@@ -756,10 +756,10 @@ int EnvironmentChain3D::calculateCost(EnvChain3DHashEntry* HashEntry1, EnvChain3
 
 int EnvironmentChain3D::getBFSCostToGoal(int x, int y, int z) const
 {
-  // std::cerr << "Getting cost for " << x << " " << y << " " << z << std::endl;
+  // std::cerr << "Getting cost for " << x << " " << y << " " << z << '\n';
   // TODO - deal with cost_per_cell
   int cost = (floor(bfs_->getDistance(x, y, z) / (maximum_distance_for_motion_))) * JOINT_DIST_MULT;
-  // std::cerr << "Cost is " << cost << std::endl;
+  // std::cerr << "Cost is " << cost << '\n';
   return cost;
   //* .05;//prms_.cost_per_cell_;
 }
@@ -769,11 +769,11 @@ int EnvironmentChain3D::getJointDistanceIntegerSum(const std::vector<double>& an
 {
   if (angles1.size() != angles2.size())
   {
-    std::cerr << "Angles aren't the same size!!!" << std::endl;
+    std::cerr << "Angles aren't the same size!!!" << '\n';
     return INT_MAX;
   }
   int dist = 0;
-  for (unsigned int i = 0; i < angles1.size(); i++)
+  for (unsigned int i = 0; i < angles1.size(); ++i)
   {
     dist += joint_motion_wrappers_[i]->getIntegerDistance(angles1[i], angles2[i], delta);
   }
@@ -785,11 +785,11 @@ int EnvironmentChain3D::getJointDistanceIntegerMax(const std::vector<double>& an
 {
   if (angles1.size() != angles2.size())
   {
-    std::cerr << "Angles aren't the same size!!!" << std::endl;
+    std::cerr << "Angles aren't the same size!!!" << '\n';
     return INT_MAX;
   }
   int max_dist = 0;
-  for (unsigned int i = 0; i < angles1.size(); i++)
+  for (unsigned int i = 0; i < angles1.size(); ++i)
   {
     int dist = joint_motion_wrappers_[i]->getIntegerDistance(angles1[i], angles2[i], delta);
     if (dist > max_dist)
@@ -808,11 +808,11 @@ double EnvironmentChain3D::getJointDistanceDoubleSum(const std::vector<double>& 
     return DBL_MAX;
   }
   double dist = 0.0;
-  for (unsigned int i = 0; i < angles1.size(); i++)
+  for (unsigned int i = 0; i < angles1.size(); ++i)
   {
     double jdist = joint_motion_wrappers_[i]->getDoubleDistance(angles1[i], angles2[i]);
     // std::cerr << "Joint " << i << " angle1 " << angles1[i] << " " << angles2[i] << " distance " << jdist <<
-    // std::endl;
+    // '\n';
     dist += jdist;
   }
   return dist;
@@ -825,7 +825,7 @@ double EnvironmentChain3D::getJointDistanceDoubleSum(const std::vector<double>& 
 //     return DBL_MAX;
 //   }
 //   double max_dist = 0.0;
-//   for(unsigned int i = 0; i < angles1.size(); i++) {
+//   for(unsigned int i = 0; i < angles1.size(); ++i) {
 //     double dist;
 //     if(joint_is_continuous_[i]) {
 //       if(planning_data_.state_ID_to_coord_table_.size() < PRINT_HEURISTIC_UNDER) {
@@ -854,7 +854,7 @@ int EnvironmentChain3D::getEndEffectorHeuristic(int from_stateID, int to_stateID
   EnvChain3DHashEntry* to_hash_entry = planning_data_.state_ID_to_coord_table_[to_stateID];
   // if(planning_data_.state_ID_to_coord_table_.size() < PRINT_HEURISTIC_UNDER) {
   // std::cerr << " Dist " << dist << " heur " << getBFSCostToGoal(from_hash_entry->xyz[0], from_hash_entry->xyz[1],
-  // from_hash_entry->xyz[2]) << std::endl;
+  // from_hash_entry->xyz[2]) << '\n';
   if (planning_parameters_.use_bfs_)
   {
     return getBFSCostToGoal(from_hash_entry->xyz[0], from_hash_entry->xyz[1], from_hash_entry->xyz[2]);
@@ -873,7 +873,7 @@ int EnvironmentChain3D::getEndEffectorHeuristic(int from_stateID, int to_stateID
   //                                               from_hash_entry->xyz[1],
   //                                               from_hash_entry->xyz[2],
   //                                               x,y,z)) {
-  //   std::cerr << "problem" << std::endl;
+  //   std::cerr << "problem" << '\n';
   //   return 1000000;
   // }
   // return getEuclideanDistance(x, y, z, goal_pose_.translation().x(), goal_pose_.translation().y(),
@@ -919,7 +919,7 @@ bool EnvironmentChain3D::populateTrajectoryFromStateIDSequence(const std::vector
       if (it2 == it->second.end())
       {
         std::cerr << "No interpolated segment connecting state id " << (*state_ids.end() - 2) << " and goal "
-                  << state_ids.back() << std::endl;
+                  << state_ids.back() << '\n';
       }
       else
       {
@@ -929,28 +929,28 @@ bool EnvironmentChain3D::populateTrajectoryFromStateIDSequence(const std::vector
     else
     {
       std::cerr << "No interpolated segment connecting state id " << (*state_ids.end() - 2) << " and goal "
-                << state_ids.back() << std::endl;
+                << state_ids.back() << '\n';
     }
     traj.points.resize(end_points.size() + angle_vector.size());
-    for (unsigned int i = 0; i < angle_vector.size() - 1; i++)
+    for (unsigned int i = 0; i < angle_vector.size() - 1; ++i)
     {
       traj.points[i].positions = angle_vector[i];
     }
-    for (unsigned int i = 0; i < end_points.size(); i++)
+    for (unsigned int i = 0; i < end_points.size(); ++i)
     {
       traj.points[i + angle_vector.size() - 1].positions = end_points[i];
     }
     traj.points.back().positions = angle_vector.back();
-    for (unsigned int i = 0; i < traj.points.back().positions.size(); i++)
+    for (unsigned int i = 0; i < traj.points.back().positions.size(); ++i)
     {
       ROS_DEBUG_STREAM("Last " << i << " " << traj.points.back().positions[i]);
     }
-    std::cerr << "Original path " << angle_vector.size() << " end path " << end_points.size() << std::endl;
+    std::cerr << "Original path " << angle_vector.size() << " end path " << end_points.size() << '\n';
   }
   else
   {
-    std::cerr << "Num states " << state_ids.size() << std::endl;
-    for (unsigned int i = 0; i < state_ids.size() - 1; i++)
+    std::cerr << "Num states " << state_ids.size() << '\n';
+    for (unsigned int i = 0; i < state_ids.size() - 1; ++i)
     {
       trajectory_msgs::JointTrajectoryPoint statep;
       statep.positions = angle_vector[i];
@@ -959,7 +959,7 @@ bool EnvironmentChain3D::populateTrajectoryFromStateIDSequence(const std::vector
       // std::cerr << "State " << i << " id " << state_ids[i] << " dist "
       //           <<  getJointDistanceIntegerMax(traj.points.back().positions,
       //                                          statep.positions,
-      //                                          INTERPOLATION_DISTANCE) << std::endl;
+      //                                          INTERPOLATION_DISTANCE) << '\n';
       //}
       traj.points.push_back(statep);
       std::map<int, std::map<int, std::vector<std::vector<double> > > >::const_iterator it =
@@ -970,18 +970,18 @@ bool EnvironmentChain3D::populateTrajectoryFromStateIDSequence(const std::vector
         if (it2 == it->second.end())
         {
           std::cerr << "No interpolated segment connecting state id " << state_ids[i] << " and state "
-                    << state_ids[i + 1] << std::endl;
+                    << state_ids[i + 1] << '\n';
           continue;
         }
         else
         {
-          for (unsigned int j = 0; j < it2->second.size(); j++)
+          for (unsigned int j = 0; j < it2->second.size(); ++j)
           {
             trajectory_msgs::JointTrajectoryPoint p;
             p.positions = it2->second[j];
             // std::cerr << "Interp " << getJointDistanceIntegerMax(traj.points.back().positions,
             //                                                      p.positions,
-            //                                                      INTERPOLATION_DISTANCE) << std::endl;
+            //                                                      INTERPOLATION_DISTANCE) << '\n';
             traj.points.push_back(p);
           }
         }
@@ -989,7 +989,7 @@ bool EnvironmentChain3D::populateTrajectoryFromStateIDSequence(const std::vector
       else
       {
         std::cerr << "No interpolated segment connecting state id " << state_ids[i] << " and state " << state_ids[i + 1]
-                  << std::endl;
+                  << '\n';
         continue;
       }
     }
@@ -998,11 +998,11 @@ bool EnvironmentChain3D::populateTrajectoryFromStateIDSequence(const std::vector
     statep.positions = angle_vector.back();
     // std::cerr << "Last " << getJointDistanceIntegerMax(traj.points.back().positions,
     //                                                    statep.positions,
-    //                                                    INTERPOLATION_DISTANCE) << std::endl;
+    //                                                    INTERPOLATION_DISTANCE) << '\n';
 
     traj.points.push_back(statep);
   }
-  std::cerr << "Resulting path is " << traj.points.size() << std::endl;
+  std::cerr << "Resulting path is " << traj.points.size() << '\n';
   return true;
 }
 
@@ -1038,9 +1038,9 @@ bool EnvironmentChain3D::getPlaneBFSMarker(visualization_msgs::Marker& plane_mar
   std_msgs::ColorRGBA dist_color;
   dist_color.g = dist_color.a = 1.0;
   unsigned int count = 0;
-  for (int i = 0; i < gsr_->dfce_->distance_field_->getXNumCells() - 2; i++)
+  for (int i = 0; i < gsr_->dfce_->distance_field_->getXNumCells() - 2; ++i)
   {
-    for (int j = 0; j < gsr_->dfce_->distance_field_->getYNumCells() - 2; j++, count++)
+    for (int j = 0; j < gsr_->dfce_->distance_field_->getYNumCells() - 2; ++j, ++count)
     {
       gsr_->dfce_->distance_field_->gridToWorld(i, j, z_val_int, plane_marker.points[count].x,
                                                 plane_marker.points[count].y, plane_marker.points[count].z);
@@ -1080,17 +1080,17 @@ bool EnvironmentChain3D::interpolateAndCollisionCheck(const std::vector<double> 
   int maximum_moves = getJointDistanceIntegerMax(angles1, angles2, planning_parameters_.interpolation_distance_);
   if (print_first)
   {
-    std::cerr << "Maximum moves " << maximum_moves << std::endl;
-    for (unsigned int i = 0; i < angles1.size(); i++)
+    std::cerr << "Maximum moves " << maximum_moves << '\n';
+    for (unsigned int i = 0; i < angles1.size(); ++i)
     {
-      std::cerr << "Start " << i << " " << angles1[i] << std::endl;
+      std::cerr << "Start " << i << " " << angles1[i] << '\n';
     }
-    for (unsigned int i = 0; i < angles2.size(); i++)
+    for (unsigned int i = 0; i < angles2.size(); ++i)
     {
-      std::cerr << "End " << i << " " << angles2[i] << std::endl;
+      std::cerr << "End " << i << " " << angles2[i] << '\n';
     }
   }
-  for (int i = 1; i < maximum_moves; i++)
+  for (int i = 1; i < maximum_moves; ++i)
   {
     interpolation_joint_state_group_1_->interpolate(
         interpolation_joint_state_group_2_, (1.0 / (maximum_moves * 1.0)) * i, interpolation_joint_state_group_temp_);
@@ -1116,9 +1116,9 @@ bool EnvironmentChain3D::interpolateAndCollisionCheck(const std::vector<double> 
     interpolation_joint_state_group_temp_->getGroupStateValues(state_values.back());
     if (print_first)
     {
-      for (unsigned int j = 0; j < state_values.back().size(); j++)
+      for (unsigned int j = 0; j < state_values.back().size(); ++j)
       {
-        std::cerr << "Interp " << i << " " << j << " " << state_values.back()[j] << std::endl;
+        std::cerr << "Interp " << i << " " << j << " " << state_values.back()[j] << '\n';
       }
     }
   }
@@ -1145,25 +1145,25 @@ void EnvironmentChain3D::attemptShortcut(const trajectory_msgs::JointTrajectory&
   if (planning_parameters_.attempt_full_shortcut_)
   {
     std::vector<std::vector<double> > full_shortcut;
-    // std::cerr << "Checking" << std::endl;
+    // std::cerr << "Checking" << '\n';
     if (interpolateAndCollisionCheck(traj_in.points.front().positions, traj_in.points.back().positions, full_shortcut))
     {
-      std::cerr << "Full shortcut has " << full_shortcut.size() << " points " << std::endl;
-      for (unsigned int i = 0; i < full_shortcut.size(); i++)
+      std::cerr << "Full shortcut has " << full_shortcut.size() << " points " << '\n';
+      for (unsigned int i = 0; i < full_shortcut.size(); ++i)
       {
         trajectory_msgs::JointTrajectoryPoint jtp;
         jtp.positions = full_shortcut[i];
         traj_out.points.push_back(jtp);
       }
       traj_out.points.push_back(traj_in.points.back());
-      std::cerr << "Full shortcut worked" << std::endl;
+      std::cerr << "Full shortcut worked" << '\n';
       return;
     }
   }
 
   while (1)
   {
-    // std::cerr << "Checking from " << last_point_ind << " to " << current_point_ind << std::endl;
+    // std::cerr << "Checking from " << last_point_ind << " to " << current_point_ind << '\n';
     const trajectory_msgs::JointTrajectoryPoint& start_point = traj_in.points[last_point_ind];
     const trajectory_msgs::JointTrajectoryPoint& end_point = traj_in.points[current_point_ind];
     std::vector<std::vector<double> > segment_values;
@@ -1174,7 +1174,7 @@ void EnvironmentChain3D::attemptShortcut(const trajectory_msgs::JointTrajectory&
       last_good_end_ind = current_point_ind;
       last_good_segment_values = segment_values;
       current_point_ind++;
-      // std::cerr << "Interpolation ok" << std::endl;
+      // std::cerr << "Interpolation ok" << '\n';
     }
     else
     {
@@ -1185,7 +1185,7 @@ void EnvironmentChain3D::attemptShortcut(const trajectory_msgs::JointTrajectory&
       }
       else
       {
-        for (unsigned int i = 0; i < last_good_segment_values.size(); i++)
+        for (unsigned int i = 0; i < last_good_segment_values.size(); ++i)
         {
           trajectory_msgs::JointTrajectoryPoint jtp;
           jtp.positions = last_good_segment_values[i];
@@ -1196,13 +1196,13 @@ void EnvironmentChain3D::attemptShortcut(const trajectory_msgs::JointTrajectory&
       last_point_ind = last_good_end_ind;
       current_point_ind = last_good_end_ind + 1;
       last_good_segment_values.clear();
-      // std::cerr << "Interpolation not ok" << std::endl;
+      // std::cerr << "Interpolation not ok" << '\n';
     }
     if (current_point_ind >= traj_in.points.size())
     {
       if (last_good_segment_values.size() > 0)
       {
-        for (unsigned int i = 0; i < last_good_segment_values.size(); i++)
+        for (unsigned int i = 0; i < last_good_segment_values.size(); ++i)
         {
           trajectory_msgs::JointTrajectoryPoint jtp;
           jtp.positions = last_good_segment_values[i];

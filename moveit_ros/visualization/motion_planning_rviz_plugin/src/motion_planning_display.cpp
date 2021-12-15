@@ -449,7 +449,7 @@ void MotionPlanningDisplay::displayTable(const std::map<std::string, double>& va
   // the line we want to render
   std::stringstream ss;
   for (const std::pair<const std::string, double>& value : values)
-    ss << boost::format("%-10s %-4.2f") % value.first % value.second << std::endl;
+    ss << boost::format("%-10s %-4.2f") % value.first % value.second << '\n';
 
   if (ss.str().empty())
   {

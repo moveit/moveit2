@@ -132,8 +132,8 @@ double ompl_interface::GoalSampleableRegionMux::distanceGoal(const ompl::base::S
 
 void ompl_interface::GoalSampleableRegionMux::print(std::ostream& out) const
 {
-  out << "MultiGoal [" << std::endl;
+  out << "MultiGoal [\n";
   for (const ompl::base::GoalPtr& goal : goals_)
     goal->print(out);
-  out << "]" << std::endl;
+  out << "]\n";
 }

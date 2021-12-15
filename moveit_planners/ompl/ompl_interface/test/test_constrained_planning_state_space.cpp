@@ -118,7 +118,7 @@ protected:
     double* out_joint_positions = dynamic_cast<ompl_interface::ModelBasedStateSpace::StateType*>(state_ptr)->values;
     EXPECT_FALSE(out_joint_positions == nullptr);
 
-    for (std::size_t i = 0; i < num_dofs_; i++)
+    for (std::size_t i = 0; i < num_dofs_; ++i)
     {
       *(out_joint_positions + i) = joint_positions[i];
     }
@@ -127,7 +127,7 @@ protected:
     // it can only be called with an already unwrapped state,
     // this unwrapping is either done in the constrained_state_space_ (see WrapperStateSpace in OMPL),
     // or in copyJointToOMPLState in the implementation of ConstrainedPlanningStateSpace in MoveIt.
-    for (std::size_t i = 0; i < num_dofs_; i++)
+    for (std::size_t i = 0; i < num_dofs_; ++i)
     {
       EXPECT_EQ(joint_positions[i], *(constrained_state_space_->getValueAddressAtIndex(ompl_state.get(), i)));
     }
@@ -147,7 +147,7 @@ protected:
     double* out_joint_positions = dynamic_cast<ompl_interface::ModelBasedStateSpace::StateType*>(state_ptr)->values;
     EXPECT_FALSE(out_joint_positions == nullptr);
 
-    for (std::size_t i = 0; i < num_dofs_; i++)
+    for (std::size_t i = 0; i < num_dofs_; ++i)
     {
       *(out_joint_positions + i) = joint_positions[i];
     }
@@ -163,7 +163,7 @@ protected:
 
     EXPECT_EQ(joint_positions.size(), out_joint_position.size());
 
-    for (std::size_t i = 0; i < num_dofs_; i++)
+    for (std::size_t i = 0; i < num_dofs_; ++i)
     {
       EXPECT_EQ(joint_positions[i], out_joint_position[i]);
     }
@@ -189,7 +189,7 @@ protected:
     double* out_joint_positions = dynamic_cast<ompl_interface::ModelBasedStateSpace::StateType*>(state_ptr)->values;
     EXPECT_FALSE(out_joint_positions == nullptr);
 
-    for (std::size_t i = 0; i < num_dofs_; i++)
+    for (std::size_t i = 0; i < num_dofs_; ++i)
     {
       EXPECT_EQ(joint_positions[i], *(out_joint_positions + i));
     }
@@ -210,7 +210,7 @@ protected:
     ompl::base::ScopedState<> ompl_state(constrained_state_space_);
     auto joint_model_names = joint_model_group_->getActiveJointModelNames();
 
-    for (std::size_t joint_index = 0; joint_index < num_dofs_; joint_index++)
+    for (std::size_t joint_index = 0; joint_index < num_dofs_; ++joint_index)
     {
       const moveit::core::JointModel* joint_model = joint_model_group_->getJointModel(joint_model_names[joint_index]);
       EXPECT_FALSE(joint_model == nullptr);
@@ -227,7 +227,7 @@ protected:
     double* out_joint_positions = dynamic_cast<ompl_interface::ModelBasedStateSpace::StateType*>(state_ptr)->values;
     EXPECT_FALSE(out_joint_positions == nullptr);
 
-    for (std::size_t i = 0; i < num_dofs_; i++)
+    for (std::size_t i = 0; i < num_dofs_; ++i)
     {
       EXPECT_EQ(joint_positions[i], *(out_joint_positions + i));
     }

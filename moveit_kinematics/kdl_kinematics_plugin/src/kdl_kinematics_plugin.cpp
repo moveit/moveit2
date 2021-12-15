@@ -194,7 +194,7 @@ bool KDLKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
   joint_min_.resize(solver_info_.limits.size());
   joint_max_.resize(solver_info_.limits.size());
 
-  for (unsigned int i = 0; i < solver_info_.limits.size(); i++)
+  for (unsigned int i = 0; i < solver_info_.limits.size(); ++i)
   {
     joint_min_(i) = solver_info_.limits[i].min_position;
     joint_max_(i) = solver_info_.limits[i].max_position;
@@ -547,7 +547,7 @@ bool KDLKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_nam
   jnt_pos_in.data = Eigen::Map<const Eigen::VectorXd>(joint_angles.data(), joint_angles.size());
 
   bool valid = true;
-  for (unsigned int i = 0; i < poses.size(); i++)
+  for (unsigned int i = 0; i < poses.size(); ++i)
   {
     if (fk_solver_->JntToCart(jnt_pos_in, p_out) >= 0)
     {

@@ -118,7 +118,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   const moveit::core::JointModelGroup* model_group =
       planning_scene->getRobotModel()->getJointModelGroup(req.group_name);
   // fix the goal to move the shortest angular distance for wrap-around joints:
-  for (size_t i = 0; i < model_group->getActiveJointModels().size(); i++)
+  for (size_t i = 0; i < model_group->getActiveJointModels().size(); ++i)
   {
     const moveit::core::JointModel* model = model_group->getActiveJointModels()[i];
     const moveit::core::RevoluteJointModel* revolute_joint =
@@ -244,7 +244,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
 
   auto result = std::make_shared<robot_trajectory::RobotTrajectory>(planning_scene->getRobotModel(), req.group_name);
   // fill in the entire trajectory
-  for (size_t i = 0; i < trajectory.getNumPoints(); i++)
+  for (size_t i = 0; i < trajectory.getNumPoints(); ++i)
   {
     const Eigen::MatrixXd::RowXpr source = trajectory.getTrajectoryPoint(i);
     auto state = std::make_shared<moveit::core::RobotState>(start_state);

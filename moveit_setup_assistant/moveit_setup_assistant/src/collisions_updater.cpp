@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 
   if (vm.count("help"))
   {
-    std::cout << desc << std::endl;
+    std::cout << desc << '\n';
     return 1;
   }
 
