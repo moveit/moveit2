@@ -135,12 +135,12 @@ void ServoParameters::declare(const std::string& ns,
           .type(PARAMETER_DOUBLE)
           .description("Max joint angular/linear velocity. Rads or Meters per publish period. Only used for joint "
                        "commands on joint_command_in_topic."));
-  node_parameters->declare_parameter(ns + ".system_latency_compensation",
-                                     ParameterValue{ parameters.system_latency_compensation },
-                                     ParameterDescriptorBuilder{}
-                                         .type(PARAMETER_DOUBLE)
-                                         .description("A fudge factor to account for any latency in the system, e.g. "
-                                                      "network latency or poor low-level controller performance"));
+  node_parameters->declare_parameter(
+      ns + ".target_pose_lookahead_time", ParameterValue{ parameters.target_pose_lookahead_time },
+      ParameterDescriptorBuilder{}
+          .type(PARAMETER_DOUBLE)
+          .description("An optional parameter to smooth jitter due to latency in the system "
+                       "or low-level controller ramp up / ramp down"));
 
   // Properties of outgoing commands
   node_parameters->declare_parameter(
@@ -271,8 +271,8 @@ ServoParameters ServoParameters::get(const std::string& ns,
   parameters.linear_scale = node_parameters->get_parameter(ns + ".scale.linear").as_double();
   parameters.rotational_scale = node_parameters->get_parameter(ns + ".scale.rotational").as_double();
   parameters.joint_scale = node_parameters->get_parameter(ns + ".scale.joint").as_double();
-  parameters.system_latency_compensation =
-      node_parameters->get_parameter(ns + ".system_latency_compensation").as_double();
+  parameters.target_pose_lookahead_time =
+      node_parameters->get_parameter(ns + ".target_pose_lookahead_time").as_double();
 
   // Properties of outgoing commands
   parameters.command_out_topic = node_parameters->get_parameter(ns + ".command_out_topic").as_string();

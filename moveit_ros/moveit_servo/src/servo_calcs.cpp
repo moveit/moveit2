@@ -1002,9 +1002,9 @@ Eigen::VectorXd ServoCalcs::scaleCartesianTwistToCartesianPositionDelta(const ge
   result.setZero();  // Or the else case below leads to misery
 
   // Add a user-defined, constant delay to the timestep.
-  // This can help if the robot's low-level controllers are not very responsive, or to account for network latency.
-  // Effectively it moves the carrot farther ahead.
-  double timestep = parameters_->publish_period + parameters_->system_latency_compensation;
+  // This can help if ramp-up / ramp-down of the low-level controllers cause jitter, or to account for network latency.
+  // Effectively it moves the target pose farther ahead.
+  double timestep = parameters_->publish_period + parameters_->target_pose_lookahead_time;
 
   // Apply user-defined scaling if inputs are unitless [-1:1]
   if (parameters_->command_in_type == "unitless")
@@ -1041,9 +1041,9 @@ Eigen::VectorXd ServoCalcs::scaleJointCommandToJointPositionDelta(const control_
   result.setZero();
 
   // Add a user-defined, constant delay to the timestep.
-  // This can help if the robot's low-level controllers are not very responsive, or to account for network latency.
-  // Effectively it moves the carrot farther ahead.
-  double timestep = parameters_->publish_period + parameters_->system_latency_compensation;
+  // This can help if ramp-up / ramp-down of the low-level controllers cause jitter, or to account for network latency.
+  // Effectively it moves the target pose farther ahead.
+  double timestep = parameters_->publish_period + parameters_->target_pose_lookahead_time;
 
   std::size_t c;
   for (std::size_t m = 0; m < command.joint_names.size(); ++m)
