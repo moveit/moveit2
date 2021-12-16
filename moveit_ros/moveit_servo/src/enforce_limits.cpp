@@ -47,7 +47,7 @@ namespace moveit_servo
 {
 namespace
 {
-double getVelocityScalingFactor(const moveit::core::JointModelGroup* joint_model_group, const Eigen::ArrayXd& velocity)
+double getVelocityScalingFactor(const moveit::core::JointModelGroup* joint_model_group, const Eigen::VectorXd& velocity)
 {
   std::size_t joint_delta_index{ 0 };
   double velocity_scaling_factor{ 1.0 };
@@ -73,16 +73,16 @@ void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_grou
                            sensor_msgs::msg::JointState& joint_state)
 {
   // Get the velocity scaling factor
-  Eigen::ArrayXd velocity =
-      Eigen::Map<Eigen::ArrayXd, Eigen::Unaligned>(joint_state.velocity.data(), joint_state.velocity.size());
+  Eigen::VectorXd velocity =
+      Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(joint_state.velocity.data(), joint_state.velocity.size());
   double velocity_scaling_factor = getVelocityScalingFactor(joint_model_group, velocity);
 
   // Take a smaller step if the velocity scaling factor is less than 1
   if (velocity_scaling_factor < 1)
   {
-    Eigen::ArrayXd velocity_residuals = (1 - velocity_scaling_factor) * velocity;
-    Eigen::ArrayXd positions =
-        Eigen::Map<Eigen::ArrayXd, Eigen::Unaligned>(joint_state.position.data(), joint_state.position.size());
+    Eigen::VectorXd velocity_residuals = (1 - velocity_scaling_factor) * velocity;
+    Eigen::VectorXd positions =
+        Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(joint_state.position.data(), joint_state.position.size());
     positions -= velocity_residuals * publish_period;
 
     velocity *= velocity_scaling_factor;
