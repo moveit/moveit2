@@ -1486,21 +1486,19 @@ void RobotModel::setKinematicsAllocators(const std::map<std::string, SolverAlloc
 
 void RobotModel::printModelInfo(std::ostream& out) const
 {
-  out << "Model " << model_name_ << " in frame " << model_frame_ << ", using " << getVariableCount() << " variables"
-      << std::endl;
+  out << "Model " << model_name_ << " in frame " << model_frame_ << ", using " << getVariableCount() << " variables\n";
 
   std::ios_base::fmtflags old_flags = out.flags();
   out.setf(std::ios::fixed, std::ios::floatfield);
   std::streamsize old_prec = out.precision();
   out.precision(5);
-  out << "Joints: " << std::endl;
+  out << "Joints: \n";
   for (JointModel* joint_model : joint_model_vector_)
   {
-    out << " '" << joint_model->getName() << "' (" << joint_model->getTypeName() << ")" << std::endl;
-    out << "  * Joint Index: " << joint_model->getJointIndex() << std::endl;
+    out << " '" << joint_model->getName() << "' (" << joint_model->getTypeName() << ")\n";
+    out << "  * Joint Index: " << joint_model->getJointIndex() << '\n';
     const std::vector<std::string>& vn = joint_model->getVariableNames();
-    out << "  * " << vn.size() << (vn.size() > 1 ? " variables:" : (vn.empty() ? " variables" : " variable:"))
-        << std::endl;
+    out << "  * " << vn.size() << (vn.size() > 1 ? " variables:" : (vn.empty() ? " variables" : " variable:\n"));
     int idx = joint_model->getFirstVariableIndex();
     for (const std::string& it : vn)
     {
@@ -1509,26 +1507,26 @@ void RobotModel::printModelInfo(std::ostream& out) const
         out << ", mimic '" << joint_model->getMimic()->getName() << "'";
       if (joint_model->isPassive())
         out << ", passive";
-      out << std::endl;
-      out << "        " << joint_model->getVariableBounds(it) << std::endl;
+      out << '\n';
+      out << "        " << joint_model->getVariableBounds(it) << '\n';
     }
   }
-  out << std::endl;
+  out << '\n';
   out.precision(old_prec);
   out.flags(old_flags);
-  out << "Links: " << std::endl;
+  out << "Links: \n";
   for (LinkModel* link_model : link_model_vector_)
   {
-    out << " '" << link_model->getName() << "' with " << link_model->getShapes().size() << " geoms" << std::endl;
+    out << " '" << link_model->getName() << "' with " << link_model->getShapes().size() << " geoms\n";
     if (link_model->parentJointIsFixed())
       out << "   * "
-          << "parent joint is fixed" << std::endl;
+          << "parent joint is fixed" << '\n';
     if (link_model->jointOriginTransformIsIdentity())
       out << "   * "
-          << "joint origin transform is identity" << std::endl;
+          << "joint origin transform is identity\n";
   }
 
-  out << "Available groups: " << std::endl;
+  out << "Available groups: \n";
   for (JointModelGroup* joint_model_group : joint_model_groups_)
     joint_model_group->printGroupInfo(out);
 }

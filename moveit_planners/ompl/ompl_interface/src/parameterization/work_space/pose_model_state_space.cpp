@@ -227,7 +227,7 @@ bool ompl_interface::PoseModelStateSpace::PoseComponent::computeStateIK(StateTyp
   std::cout << "seed: ";
   for (std::size_t i = 0 ; i < seed_values.size() ; ++i)
     std::cout << seed_values[i] << " ";
-  std::cout << std::endl;
+  std::cout << '\n';
   */
 
   // construct the pose

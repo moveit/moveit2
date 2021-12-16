@@ -324,17 +324,17 @@ void JointConstraint::print(std::ostream& out) const
 {
   if (joint_model_)
   {
-    out << "Joint constraint for joint " << joint_variable_name_ << ": " << std::endl;
+    out << "Joint constraint for joint " << joint_variable_name_ << ": \n";
     out << "  value = ";
     out << joint_position_ << "; ";
     out << "  tolerance below = ";
     out << joint_tolerance_below_ << "; ";
     out << "  tolerance above = ";
     out << joint_tolerance_above_ << "; ";
-    out << std::endl;
+    out << '\n';
   }
   else
-    out << "No constraint" << std::endl;
+    out << "No constraint" << '\n';
 }
 
 bool PositionConstraint::configure(const moveit_msgs::msg::PositionConstraint& pc, const moveit::core::Transforms& tf)
@@ -536,9 +536,9 @@ ConstraintEvaluationResult PositionConstraint::decide(const moveit::core::RobotS
 void PositionConstraint::print(std::ostream& out) const
 {
   if (enabled())
-    out << "Position constraint on link '" << link_model_->getName() << "'" << std::endl;
+    out << "Position constraint on link '" << link_model_->getName() << "'" << '\n';
   else
-    out << "No constraint" << std::endl;
+    out << "No constraint" << '\n';
 }
 
 void PositionConstraint::clear()
@@ -749,12 +749,12 @@ void OrientationConstraint::print(std::ostream& out) const
 {
   if (link_model_)
   {
-    out << "Orientation constraint on link '" << link_model_->getName() << "'" << std::endl;
+    out << "Orientation constraint on link '" << link_model_->getName() << "'" << '\n';
     Eigen::Quaterniond q_des(desired_rotation_matrix_);
-    out << "Desired orientation:" << q_des.x() << "," << q_des.y() << "," << q_des.z() << "," << q_des.w() << std::endl;
+    out << "Desired orientation:" << q_des.x() << "," << q_des.y() << "," << q_des.z() << "," << q_des.w() << '\n';
   }
   else
-    out << "No constraint" << std::endl;
+    out << "No constraint" << '\n';
 }
 
 VisibilityConstraint::VisibilityConstraint(const moveit::core::RobotModelConstPtr& model)
@@ -1168,11 +1168,11 @@ void VisibilityConstraint::print(std::ostream& out) const
   if (enabled())
   {
     out << "Visibility constraint for sensor in frame '" << sensor_frame_id_ << "' using target in frame '"
-        << target_frame_id_ << "'" << std::endl;
-    out << "Target radius: " << target_radius_ << ", using " << cone_sides_ << " sides." << std::endl;
+        << target_frame_id_ << "'" << '\n';
+    out << "Target radius: " << target_radius_ << ", using " << cone_sides_ << " sides." << '\n';
   }
   else
-    out << "No constraint" << std::endl;
+    out << "No constraint" << '\n';
 }
 
 void KinematicConstraintSet::clear()
@@ -1288,7 +1288,7 @@ ConstraintEvaluationResult KinematicConstraintSet::decide(const moveit::core::Ro
 
 void KinematicConstraintSet::print(std::ostream& out) const
 {
-  out << kinematic_constraints_.size() << " kinematic constraints" << std::endl;
+  out << kinematic_constraints_.size() << " kinematic constraints" << '\n';
   for (const KinematicConstraintPtr& kinematic_constraint : kinematic_constraints_)
     kinematic_constraint->print(out);
 }

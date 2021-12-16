@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 
   if (vm.count("help") || (!vm.count("scene") && !vm.count("constraint") && !vm.count("state")))
   {
-    std::cout << desc << std::endl;
+    std::cout << desc << '\n';
     return 1;
   }
   try
@@ -96,7 +96,7 @@ int main(int argc, char** argv)
   }
   catch (...)
   {
-    std::cout << desc << std::endl;
+    std::cout << desc << '\n';
     return 2;
   }
   // Set up db

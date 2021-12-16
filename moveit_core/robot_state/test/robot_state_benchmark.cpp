@@ -65,7 +65,7 @@ public:
         *gold_standard_ = elapsed.count();
       std::cerr << 100 * elapsed.count() / *gold_standard_ << "%";
     }
-    std::cerr << std::endl;
+    std::cerr << '\n';
   }
 };
 

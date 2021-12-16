@@ -668,11 +668,11 @@ bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
 
 void JointModelGroup::printGroupInfo(std::ostream& out) const
 {
-  out << "Group '" << name_ << "' using " << variable_count_ << " variables" << std::endl;
-  out << "  * Joints:" << std::endl;
+  out << "Group '" << name_ << "' using " << variable_count_ << " variables\n";
+  out << "  * Joints:\n";
   for (const JointModel* joint_model : joint_model_vector_)
-    out << "    '" << joint_model->getName() << "' (" << joint_model->getTypeName() << ")" << std::endl;
-  out << "  * Variables:" << std::endl;
+    out << "    '" << joint_model->getName() << "' (" << joint_model->getTypeName() << ")\n";
+  out << "  * Variables:\n";
   for (const std::string& variable_name : variable_names_)
   {
     int local_idx = joint_variables_index_map_.find(variable_name)->second;
@@ -682,10 +682,10 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
         << local_idx << " in group state";
     if (jm->getMimic())
       out << ", mimic '" << jm->getMimic()->getName() << "'";
-    out << std::endl;
-    out << "        " << parent_model_->getVariableBounds(variable_name) << std::endl;
+    out << '\n';
+    out << "        " << parent_model_->getVariableBounds(variable_name) << '\n';
   }
-  out << "  * Variables Index List:" << std::endl;
+  out << "  * Variables Index List:\n";
   out << "    ";
   for (int variable_index : variable_index_list_)
     out << variable_index << " ";
@@ -693,35 +693,35 @@ void JointModelGroup::printGroupInfo(std::ostream& out) const
     out << "(contiguous)";
   else
     out << "(non-contiguous)";
-  out << std::endl;
+  out << '\n';
   if (group_kinematics_.first)
   {
-    out << "  * Kinematics solver bijection:" << std::endl;
+    out << "  * Kinematics solver bijection:\n";
     out << "    ";
     for (unsigned int index : group_kinematics_.first.bijection_)
       out << index << " ";
-    out << std::endl;
+    out << '\n';
   }
   if (!group_kinematics_.second.empty())
   {
-    out << "  * Compound kinematics solver:" << std::endl;
+    out << "  * Compound kinematics solver:\n";
     for (const std::pair<const JointModelGroup* const, KinematicsSolver>& it : group_kinematics_.second)
     {
       out << "    " << it.first->getName() << ":";
       for (unsigned int index : it.second.bijection_)
         out << " " << index;
-      out << std::endl;
+      out << '\n';
     }
   }
 
   if (!group_mimic_update_.empty())
   {
-    out << "  * Local Mimic Updates:" << std::endl;
+    out << "  * Local Mimic Updates:\n";
     for (const GroupMimicUpdate& mimic_update : group_mimic_update_)
       out << "    [" << mimic_update.dest << "] = " << mimic_update.factor << " * [" << mimic_update.src << "] + "
-          << mimic_update.offset << std::endl;
+          << mimic_update.offset << '\n';
   }
-  out << std::endl;
+  out << '\n';
 }
 
 bool JointModelGroup::isValidVelocityMove(const std::vector<double>& from_joint_pose,

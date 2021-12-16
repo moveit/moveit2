@@ -715,7 +715,7 @@ void ChompOptimizer::debugCost()
   double cost = 0.0;
   for (int i = 0; i < num_joints_; ++i)
     cost += joint_costs_[i].getCost(group_trajectory_.getJointTrajectory(i));
-  std::cout << "Cost = " << cost << std::endl;
+  std::cout << "Cost = " << cost << '\n';
 }
 
 double ChompOptimizer::getTrajectoryCost()
