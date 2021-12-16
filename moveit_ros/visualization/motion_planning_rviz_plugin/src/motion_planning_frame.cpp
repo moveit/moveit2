@@ -541,7 +541,7 @@ shapes::ShapePtr MotionPlanningFrame::loadMeshResource(const std::string& url)
   {
     // If the object is very large, ask the user if the scale should be reduced.
     bool object_is_very_large = false;
-    for (unsigned int i = 0; i < mesh->vertex_count; i++)
+    for (unsigned int i = 0; i < mesh->vertex_count; ++i)
     {
       if ((abs(mesh->vertices[i * 3 + 0]) > LARGE_MESH_THRESHOLD) ||
           (abs(mesh->vertices[i * 3 + 1]) > LARGE_MESH_THRESHOLD) ||

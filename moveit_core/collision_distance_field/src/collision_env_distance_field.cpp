@@ -271,7 +271,7 @@ bool CollisionEnvDistanceField::getSelfCollisions(const collision_detection::Col
                                                   collision_detection::CollisionResult& res,
                                                   GroupStateRepresentationPtr& gsr) const
 {
-  for (unsigned int i = 0; i < gsr->dfce_->link_names_.size() + gsr->dfce_->attached_body_names_.size(); i++)
+  for (unsigned int i = 0; i < gsr->dfce_->link_names_.size() + gsr->dfce_->attached_body_names_.size(); ++i)
   {
     bool is_link = i < gsr->dfce_->link_names_.size();
     if ((is_link && !gsr->dfce_->link_has_geometry_[i]) || !gsr->dfce_->self_collision_enabled_[i])
@@ -352,7 +352,7 @@ bool CollisionEnvDistanceField::getSelfProximityGradients(GroupStateRepresentati
 {
   bool in_collision = false;
 
-  for (unsigned int i = 0; i < gsr->dfce_->link_names_.size(); i++)
+  for (unsigned int i = 0; i < gsr->dfce_->link_names_.size(); ++i)
   {
     const std::string& link_name = gsr->dfce_->link_names_[i];
     bool is_link = i < gsr->dfce_->link_names_.size();
@@ -381,7 +381,7 @@ bool CollisionEnvDistanceField::getSelfProximityGradients(GroupStateRepresentati
     if (gsr->dfce_->acm_.getSize() > 0)
     {
       AllowedCollision::Type col_type;
-      for (unsigned int j = 0; j < gsr->dfce_->link_names_.size(); j++)
+      for (unsigned int j = 0; j < gsr->dfce_->link_names_.size(); ++j)
       {
         // on self collisions skip
         if (link_name == gsr->dfce_->link_names_[j])
@@ -430,9 +430,9 @@ bool CollisionEnvDistanceField::getIntraGroupCollisions(const collision_detectio
   unsigned int num_links = gsr->dfce_->link_names_.size();
   unsigned int num_attached_bodies = gsr->dfce_->attached_body_names_.size();
 
-  for (unsigned int i = 0; i < num_links + num_attached_bodies; i++)
+  for (unsigned int i = 0; i < num_links + num_attached_bodies; ++i)
   {
-    for (unsigned int j = i + 1; j < num_links + num_attached_bodies; j++)
+    for (unsigned int j = i + 1; j < num_links + num_attached_bodies; ++j)
     {
       if (i == j)
         continue;
@@ -458,7 +458,7 @@ bool CollisionEnvDistanceField::getIntraGroupCollisions(const collision_detectio
         bool all_ok = true;
         if (!i_is_link && j_is_link)
         {
-          for (unsigned int k = 0; k < gsr->attached_body_decompositions_[i - num_links]->getSize(); k++)
+          for (unsigned int k = 0; k < gsr->attached_body_decompositions_[i - num_links]->getSize(); ++k)
           {
             if (doBoundingSpheresIntersect(
                     gsr->link_body_decompositions_[j],
@@ -471,7 +471,7 @@ bool CollisionEnvDistanceField::getIntraGroupCollisions(const collision_detectio
         }
         else if (i_is_link && !j_is_link)
         {
-          for (unsigned int k = 0; k < gsr->attached_body_decompositions_[j - num_links]->getSize(); k++)
+          for (unsigned int k = 0; k < gsr->attached_body_decompositions_[j - num_links]->getSize(); ++k)
           {
             if (doBoundingSpheresIntersect(
                     gsr->link_body_decompositions_[i],
@@ -484,9 +484,9 @@ bool CollisionEnvDistanceField::getIntraGroupCollisions(const collision_detectio
         }
         else
         {
-          for (unsigned int k = 0; k < gsr->attached_body_decompositions_[i - num_links]->getSize() && all_ok; k++)
+          for (unsigned int k = 0; k < gsr->attached_body_decompositions_[i - num_links]->getSize() && all_ok; ++k)
           {
-            for (unsigned int l = 0; l < gsr->attached_body_decompositions_[j - num_links]->getSize(); l++)
+            for (unsigned int l = 0; l < gsr->attached_body_decompositions_[j - num_links]->getSize(); ++l)
             {
               if (doBoundingSpheresIntersect(
                       gsr->attached_body_decompositions_[i - num_links]->getPosedBodySphereDecomposition(k),
@@ -504,7 +504,7 @@ bool CollisionEnvDistanceField::getIntraGroupCollisions(const collision_detectio
         }
         // std::cerr << "Bounding spheres for " << gsr->dfce_->link_names_[i] <<
         // " and " << gsr->dfce_->link_names_[j]
-        //           << " intersect" << std::endl;
+        //           << " intersect" << '\n';
       }
       int num_pair = -1;
       std::string name_1;
@@ -564,15 +564,15 @@ bool CollisionEnvDistanceField::getIntraGroupCollisions(const collision_detectio
         sphere_centers_2 = &(gsr->attached_body_decompositions_[j - num_links]->getSphereCenters());
       }
 
-      for (unsigned int k = 0; k < collision_spheres_1->size() && num_pair < (int)req.max_contacts_per_pair; k++)
+      for (unsigned int k = 0; k < collision_spheres_1->size() && num_pair < (int)req.max_contacts_per_pair; ++k)
       {
-        for (unsigned int l = 0; l < collision_spheres_2->size() && num_pair < (int)req.max_contacts_per_pair; l++)
+        for (unsigned int l = 0; l < collision_spheres_2->size() && num_pair < (int)req.max_contacts_per_pair; ++l)
         {
           Eigen::Vector3d gradient = (*sphere_centers_1)[k] - (*sphere_centers_2)[l];
           double dist = gradient.norm();
           // std::cerr << "Dist is " << dist << " rad " <<
           // (*collision_spheres_1)[k].radius_+(*collision_spheres_2)[l].radius_
-          // << std::endl;
+          // << '\n';
 
           if (dist < (*collision_spheres_1)[k].radius_ + (*collision_spheres_2)[l].radius_)
           {
@@ -641,9 +641,9 @@ bool CollisionEnvDistanceField::getIntraGroupProximityGradients(GroupStateRepres
   unsigned int num_links = gsr->dfce_->link_names_.size();
   unsigned int num_attached_bodies = gsr->dfce_->attached_body_names_.size();
   // TODO - deal with attached bodies
-  for (unsigned int i = 0; i < num_links + num_attached_bodies; i++)
+  for (unsigned int i = 0; i < num_links + num_attached_bodies; ++i)
   {
-    for (unsigned int j = i + 1; j < num_links + num_attached_bodies; j++)
+    for (unsigned int j = i + 1; j < num_links + num_attached_bodies; ++j)
     {
       if (i == j)
         continue;
@@ -677,9 +677,9 @@ bool CollisionEnvDistanceField::getIntraGroupProximityGradients(GroupStateRepres
         collision_spheres_2 = &(gsr->attached_body_decompositions_[j - num_links]->getCollisionSpheres());
         sphere_centers_2 = &(gsr->attached_body_decompositions_[j - num_links]->getSphereCenters());
       }
-      for (unsigned int k = 0; k < collision_spheres_1->size(); k++)
+      for (unsigned int k = 0; k < collision_spheres_1->size(); ++k)
       {
-        for (unsigned int l = 0; l < collision_spheres_2->size(); l++)
+        for (unsigned int l = 0; l < collision_spheres_2->size(); ++l)
         {
           Eigen::Vector3d gradient = (*sphere_centers_1)[k] - (*sphere_centers_2)[l];
           double dist = gradient.norm();
@@ -739,13 +739,13 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
   dfce->self_collision_enabled_.resize(dfce->link_names_.size() + all_attached_bodies.size(), true);
   dfce->intra_group_collision_enabled_.resize(dfce->link_names_.size() + all_attached_bodies.size());
 
-  for (unsigned int i = 0; i < dfce->link_names_.size(); i++)
+  for (unsigned int i = 0; i < dfce->link_names_.size(); ++i)
   {
     std::string link_name = dfce->link_names_[i];
     const moveit::core::LinkModel* link_state = dfce->state_->getLinkModel(link_name);
     bool found = false;
 
-    for (unsigned int j = 0; j < lsv.size(); j++)
+    for (unsigned int j = 0; j < lsv.size(); ++j)
     {
       if (lsv[j]->getName() == link_name)
       {
@@ -775,7 +775,7 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
         }
 
         dfce->intra_group_collision_enabled_[i] = all_true;
-        for (unsigned int j = i + 1; j < dfce->link_names_.size(); j++)
+        for (unsigned int j = i + 1; j < dfce->link_names_.size(); ++j)
         {
           if (link_name == dfce->link_names_[j])
           {
@@ -790,7 +790,7 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
 
         std::vector<const moveit::core::AttachedBody*> link_attached_bodies;
         state.getAttachedBodies(link_attached_bodies, link_state);
-        for (unsigned int j = 0; j < link_attached_bodies.size(); j++, att_count++)
+        for (unsigned int j = 0; j < link_attached_bodies.size(); ++j, ++att_count)
         {
           dfce->attached_body_names_.push_back(link_attached_bodies[j]->getName());
           dfce->attached_body_link_state_indices_.push_back(dfce->link_state_indices_[i]);
@@ -805,14 +805,14 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
           // std::cerr << "Checking touch links for " << link_name << " and " <<
           // attached_bodies[j]->getName()
           //           << " num " << attached_bodies[j]->getTouchLinks().size()
-          //           << std::endl;
+          //           << '\n';
           // touch links take priority
           if (link_attached_bodies[j]->getTouchLinks().find(link_name) != link_attached_bodies[j]->getTouchLinks().end())
           {
             dfce->intra_group_collision_enabled_[i][att_count + dfce->link_names_.size()] = false;
             // std::cerr << "Setting intra group for " << link_name << " and
             // attached body " << link_attached_bodies[j]->getName() << " to
-            // false" << std::endl;
+            // false" << '\n';
           }
         }
       }
@@ -831,7 +831,7 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
     }
   }
 
-  for (unsigned int i = 0; i < dfce->attached_body_names_.size(); i++)
+  for (unsigned int i = 0; i < dfce->attached_body_names_.size(); ++i)
   {
     dfce->intra_group_collision_enabled_[i + dfce->link_names_.size()] = all_true;
     if (acm)
@@ -842,7 +842,7 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
       {
         dfce->self_collision_enabled_[i + dfce->link_names_.size()] = false;
       }
-      for (unsigned int j = i + 1; j < dfce->attached_body_names_.size(); j++)
+      for (unsigned int j = i + 1; j < dfce->attached_body_names_.size(); ++j)
       {
         if (acm->getEntry(dfce->attached_body_names_[i], dfce->attached_body_names_[j], t) &&
             t == collision_detection::AllowedCollision::ALWAYS)
@@ -852,7 +852,7 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
         // TODO - allow for touch links to be attached bodies?
         // else {
         // std::cerr << "Setting not allowed for " << link_name << " and " <<
-        // dfce->link_names_[j] << std::endl;
+        // dfce->link_names_[j] << '\n';
         //}
       }
     }
@@ -1009,7 +1009,7 @@ void CollisionEnvDistanceField::createCollisionModelMarker(const moveit::core::R
 
   std::map<std::string, unsigned int>::const_iterator map_iter;
   for (map_iter = link_body_decomposition_index_map_.begin(); map_iter != link_body_decomposition_index_map_.end();
-       map_iter++)
+       ++map_iter)
   {
     const std::string& link_name = map_iter->first;
     unsigned int link_index = map_iter->second;
@@ -1027,7 +1027,7 @@ void CollisionEnvDistanceField::createCollisionModelMarker(const moveit::core::R
     collision_detection::PosedBodySphereDecompositionPtr sphere_representation(
         new PosedBodySphereDecomposition(link_body_decomposition_vector_[link_index]));
     sphere_representation->updatePose(state.getGlobalLinkTransform(link_name));
-    for (unsigned int j = 0; j < sphere_representation->getCollisionSpheres().size(); j++)
+    for (unsigned int j = 0; j < sphere_representation->getCollisionSpheres().size(); ++j)
     {
       sphere_marker.pose.position = tf2::toMsg(sphere_representation->getSphereCenters()[j]);
       sphere_marker.scale.x = sphere_marker.scale.y = sphere_marker.scale.z =
@@ -1095,7 +1095,7 @@ CollisionEnvDistanceField::getPosedLinkBodyPointDecomposition(const moveit::core
 void CollisionEnvDistanceField::updateGroupStateRepresentationState(const moveit::core::RobotState& state,
                                                                     GroupStateRepresentationPtr& gsr) const
 {
-  for (unsigned int i = 0; i < gsr->dfce_->link_names_.size(); i++)
+  for (unsigned int i = 0; i < gsr->dfce_->link_names_.size(); ++i)
   {
     const moveit::core::LinkModel* ls = state.getLinkModel(gsr->dfce_->link_names_[i]);
     if (gsr->dfce_->link_has_geometry_[i])
@@ -1112,7 +1112,7 @@ void CollisionEnvDistanceField::updateGroupStateRepresentationState(const moveit
     }
   }
 
-  for (unsigned int i = 0; i < gsr->dfce_->attached_body_names_.size(); i++)
+  for (unsigned int i = 0; i < gsr->dfce_->attached_body_names_.size(); ++i)
   {
     const moveit::core::AttachedBody* att = state.getAttachedBody(gsr->dfce_->attached_body_names_[i]);
     if (!att)
@@ -1128,7 +1128,7 @@ void CollisionEnvDistanceField::updateGroupStateRepresentationState(const moveit
       continue;
     }
 
-    for (unsigned int j = 0; j < att->getShapes().size(); j++)
+    for (unsigned int j = 0; j < att->getShapes().size(); ++j)
     {
       gsr->attached_body_decompositions_[i]->updatePose(j, att->getGlobalCollisionBodyTransforms()[j]);
     }
@@ -1161,7 +1161,7 @@ void CollisionEnvDistanceField::getGroupStateRepresentation(const DistanceFieldC
 
     Eigen::Vector3d link_size;
     Eigen::Vector3d link_origin;
-    for (unsigned int i = 0; i < dfce->link_names_.size(); i++)
+    for (unsigned int i = 0; i < dfce->link_names_.size(); ++i)
     {
       const moveit::core::LinkModel* ls = state.getLinkModel(dfce->link_names_[i]);
       if (dfce->link_has_geometry_[i])
@@ -1206,7 +1206,7 @@ void CollisionEnvDistanceField::getGroupStateRepresentation(const DistanceFieldC
     gsr = std::make_shared<GroupStateRepresentation>(*(dfce->pregenerated_group_state_representation_));
     gsr->dfce_ = dfce;
     gsr->gradients_.resize(dfce->link_names_.size() + dfce->attached_body_names_.size());
-    for (unsigned int i = 0; i < dfce->link_names_.size(); i++)
+    for (unsigned int i = 0; i < dfce->link_names_.size(); ++i)
     {
       const moveit::core::LinkModel* ls = state.getLinkModel(dfce->link_names_[i]);
       if (dfce->link_has_geometry_[i])
@@ -1218,7 +1218,7 @@ void CollisionEnvDistanceField::getGroupStateRepresentation(const DistanceFieldC
     }
   }
 
-  for (unsigned int i = 0; i < dfce->attached_body_names_.size(); i++)
+  for (unsigned int i = 0; i < dfce->attached_body_names_.size(); ++i)
   {
     int link_index = dfce->attached_body_link_state_indices_[i];
     const moveit::core::LinkModel* ls =
@@ -1226,7 +1226,7 @@ void CollisionEnvDistanceField::getGroupStateRepresentation(const DistanceFieldC
     // const moveit::core::LinkModel* ls =
     // state.getLinkStateVector()[dfce->attached_body_link_state_indices_[i]];
     /// std::cerr << "Attached " << dfce->attached_body_names_[i] << " index "
-    /// << dfce->attached_body_link_state_indices_[i] << std::endl;
+    /// << dfce->attached_body_link_state_indices_[i] << '\n';
     gsr->attached_body_decompositions_.push_back(
         getAttachedBodySphereDecomposition(state.getAttachedBody(dfce->attached_body_names_[i]), resolution_));
     gsr->gradients_[i + dfce->link_names_.size()].types.resize(
@@ -1247,7 +1247,7 @@ bool CollisionEnvDistanceField::compareCacheEntryToState(const DistanceFieldCach
                                                          const moveit::core::RobotState& state) const
 {
   std::vector<double> new_state_values(state.getVariableCount());
-  for (unsigned int i = 0; i < new_state_values.size(); i++)
+  for (unsigned int i = 0; i < new_state_values.size(); ++i)
   {
     new_state_values[i] = state.getVariablePosition(i);
   }
@@ -1258,7 +1258,7 @@ bool CollisionEnvDistanceField::compareCacheEntryToState(const DistanceFieldCach
     return false;
   }
 
-  for (unsigned int i = 0; i < dfce->state_check_indices_.size(); i++)
+  for (unsigned int i = 0; i < dfce->state_check_indices_.size(); ++i)
   {
     double diff =
         fabs(dfce->state_values_[dfce->state_check_indices_[i]] - new_state_values[dfce->state_check_indices_[i]]);
@@ -1278,7 +1278,7 @@ bool CollisionEnvDistanceField::compareCacheEntryToState(const DistanceFieldCach
     return false;
   }
   // TODO - figure all the things that can change
-  for (unsigned int i = 0; i < attached_bodies_dfce.size(); i++)
+  for (unsigned int i = 0; i < attached_bodies_dfce.size(); ++i)
   {
     if (attached_bodies_dfce[i]->getName() != attached_bodies_state[i]->getName())
     {
@@ -1292,7 +1292,7 @@ bool CollisionEnvDistanceField::compareCacheEntryToState(const DistanceFieldCach
     {
       return false;
     }
-    for (unsigned int j = 0; j < attached_bodies_dfce[i]->getShapes().size(); j++)
+    for (unsigned int j = 0; j < attached_bodies_dfce[i]->getShapes().size(); ++j)
     {
       if (attached_bodies_dfce[i]->getShapes()[j] != attached_bodies_state[i]->getShapes()[j])
       {
@@ -1313,7 +1313,7 @@ bool CollisionEnvDistanceField::compareCacheEntryToAllowedCollisionMatrix(
   }
   std::vector<const moveit::core::AttachedBody*> attached_bodies;
   dfce->state_->getAttachedBodies(attached_bodies);
-  for (unsigned int i = 0; i < dfce->link_names_.size(); i++)
+  for (unsigned int i = 0; i < dfce->link_names_.size(); ++i)
   {
     std::string link_name = dfce->link_names_[i];
     if (dfce->link_has_geometry_[i])
@@ -1331,7 +1331,7 @@ bool CollisionEnvDistanceField::compareCacheEntryToAllowedCollisionMatrix(
       {
         return false;
       }
-      for (unsigned int j = i; j < dfce->link_names_.size(); j++)
+      for (unsigned int j = i; j < dfce->link_names_.size(); ++j)
       {
         if (i == j)
           continue;
@@ -1351,7 +1351,7 @@ bool CollisionEnvDistanceField::compareCacheEntryToAllowedCollisionMatrix(
             // " << dfce->link_names_[j]
             //           << " went from " <<
             //           dfce->intra_group_collision_enabled_[i][j] << " to " <<
-            //           intra_collision_enabled << std::endl;
+            //           intra_collision_enabled << '\n';
             return false;
           }
         }
@@ -1365,7 +1365,7 @@ bool CollisionEnvDistanceField::compareCacheEntryToAllowedCollisionMatrix(
 // CollisionEnvDistanceField::generateAllowedCollisionInformation(CollisionEnvDistanceField::DistanceFieldCacheEntryPtr&
 // dfce)
 // {
-//   for(unsigned int i = 0; i < dfce.link_names_.size(); i++) {
+//   for(unsigned int i = 0; i < dfce.link_names_.size(); ++i) {
 //     for(unsigned int j = 0; j <
 //     if(dfce->acm.find
 //   }
@@ -1554,7 +1554,7 @@ bool CollisionEnvDistanceField::getEnvironmentCollisions(const CollisionRequest&
                                                          const distance_field::DistanceFieldConstPtr& env_distance_field,
                                                          GroupStateRepresentationPtr& gsr) const
 {
-  for (unsigned int i = 0; i < gsr->dfce_->link_names_.size() + gsr->dfce_->attached_body_names_.size(); i++)
+  for (unsigned int i = 0; i < gsr->dfce_->link_names_.size() + gsr->dfce_->attached_body_names_.size(); ++i)
   {
     bool is_link = i < gsr->dfce_->link_names_.size();
     std::string link_name = i < gsr->dfce_->link_names_.size() ? gsr->dfce_->link_names_[i] : "attached";
@@ -1638,7 +1638,7 @@ bool CollisionEnvDistanceField::getEnvironmentProximityGradients(
     const distance_field::DistanceFieldConstPtr& env_distance_field, GroupStateRepresentationPtr& gsr) const
 {
   bool in_collision = false;
-  for (unsigned int i = 0; i < gsr->dfce_->link_names_.size(); i++)
+  for (unsigned int i = 0; i < gsr->dfce_->link_names_.size(); ++i)
   {
     bool is_link = i < gsr->dfce_->link_names_.size();
 
@@ -1740,7 +1740,7 @@ void CollisionEnvDistanceField::updateDistanceObject(const std::string& id, Dist
     RCLCPP_DEBUG(LOGGER, "Updating/Adding Object '%s' with %lu shapes to CollisionEnvDistanceField",
                  object->id_.c_str(), object->shapes_.size());
     std::vector<PosedBodyPointDecompositionPtr> shape_points;
-    for (unsigned int i = 0; i < object->shapes_.size(); i++)
+    for (unsigned int i = 0; i < object->shapes_.size(); ++i)
     {
       shapes::ShapeConstPtr shape = object->shapes_[i];
       if (shape->type == shapes::OCTREE)

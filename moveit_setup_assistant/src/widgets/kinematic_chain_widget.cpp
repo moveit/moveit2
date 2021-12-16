@@ -173,7 +173,7 @@ void KinematicChainWidget::addLinktoTreeRecursive(const moveit::core::LinkModel*
   }
   else
   {
-    for (int i = 0; i < link_tree_->topLevelItemCount(); i++)
+    for (int i = 0; i < link_tree_->topLevelItemCount(); ++i)
     {
       if (addLinkChildRecursive(link_tree_->topLevelItem(i), link, parent->getName()))
       {
@@ -181,7 +181,7 @@ void KinematicChainWidget::addLinktoTreeRecursive(const moveit::core::LinkModel*
       }
     }
   }
-  for (std::size_t i = 0; i < link->getChildJointModels().size(); i++)
+  for (std::size_t i = 0; i < link->getChildJointModels().size(); ++i)
   {
     addLinktoTreeRecursive(link->getChildJointModels()[i]->getChildLinkModel(), link);
   }
@@ -203,7 +203,7 @@ bool KinematicChainWidget::addLinkChildRecursive(QTreeWidgetItem* parent, const 
   }
   else
   {
-    for (int i = 0; i < parent->childCount(); i++)
+    for (int i = 0; i < parent->childCount(); ++i)
     {
       if (addLinkChildRecursive(parent->child(i), link, parent_name))
       {

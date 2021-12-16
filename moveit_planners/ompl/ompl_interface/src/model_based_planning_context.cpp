@@ -441,7 +441,7 @@ void ompl_interface::ModelBasedPlanningContext::interpolateSolution()
     // This is what interpolate() does internally.
     unsigned int eventual_states = 1;
     std::vector<ompl::base::State*> states = pg.getStates();
-    for (size_t i = 0; i < states.size() - 1; i++)
+    for (size_t i = 0; i < states.size() - 1; ++i)
     {
       eventual_states += ompl_simple_setup_->getStateSpace()->validSegmentCount(states[i], states[i + 1]);
     }

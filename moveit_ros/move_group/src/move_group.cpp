@@ -187,13 +187,13 @@ private:
     }
 
     std::stringstream ss;
-    ss << std::endl;
-    ss << std::endl;
-    ss << "********************************************************" << std::endl;
-    ss << "* MoveGroup using: " << std::endl;
+    ss << '\n';
+    ss << '\n';
+    ss << "********************************************************" << '\n';
+    ss << "* MoveGroup using: " << '\n';
     for (const MoveGroupCapabilityPtr& cap : capabilities_)
-      ss << "*     - " << cap->getName() << std::endl;
-    ss << "********************************************************" << std::endl;
+      ss << "*     - " << cap->getName() << '\n';
+    ss << "********************************************************" << '\n';
     RCLCPP_INFO(LOGGER, "%s", ss.str().c_str());
   }
 

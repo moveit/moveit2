@@ -242,7 +242,7 @@ public:
                                const Eigen::Isometry3d& new_relative_cylinder_pose)
   {
     // std::cerr << "Replacing " << collision_spheres_.size() << " with " <<
-    // new_collision_spheres.size() << std::endl;
+    // new_collision_spheres.size() << '\n';
     collision_spheres_ = new_collision_spheres;
     relative_cylinder_pose_ = new_relative_cylinder_pose;
   }
@@ -423,7 +423,7 @@ public:
       return;
     }
     decomp_vector_[ind]->updatePose(pose);
-    for (unsigned int i = 0; i < decomp_vector_[ind]->getSphereCenters().size(); i++)
+    for (unsigned int i = 0; i < decomp_vector_[ind]->getSphereCenters().size(); ++i)
     {
       posed_collision_spheres_[sphere_index_map_[ind] + i] = decomp_vector_[ind]->getSphereCenters()[i];
     }

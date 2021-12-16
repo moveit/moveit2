@@ -54,7 +54,7 @@ ChompCost::ChompCost(const ChompTrajectory& trajectory, int /* joint_number */,
 
   // construct the quad cost for all variables, as a sum of squared differentiation matrices
   double multiplier = 1.0;
-  for (unsigned int i = 0; i < derivative_costs.size(); i++)
+  for (unsigned int i = 0; i < derivative_costs.size(); ++i)
   {
     multiplier *= trajectory.getDiscretization();
     diff_matrix = getDiffMatrix(num_vars_all, &DIFF_RULES[i][0]);
@@ -74,9 +74,9 @@ ChompCost::ChompCost(const ChompTrajectory& trajectory, int /* joint_number */,
 Eigen::MatrixXd ChompCost::getDiffMatrix(int size, const double* diff_rule) const
 {
   MatrixXd matrix = MatrixXd::Zero(size, size);
-  for (int i = 0; i < size; i++)
+  for (int i = 0; i < size; ++i)
   {
-    for (int j = -DIFF_RULE_LENGTH / 2; j <= DIFF_RULE_LENGTH / 2; j++)
+    for (int j = -DIFF_RULE_LENGTH / 2; j <= DIFF_RULE_LENGTH / 2; ++j)
     {
       int index = i + j;
       if (index < 0)

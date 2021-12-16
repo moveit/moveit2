@@ -253,7 +253,7 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryIterator)
 
   double start_pos = 0.0;
 
-  for (size_t i = 0; i < trajectory->size(); i++)
+  for (size_t i = 0; i < trajectory->size(); ++i)
   {
     auto waypoint = trajectory->getWayPointPtr(i);
     // modify joint values

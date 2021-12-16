@@ -71,10 +71,10 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
 
   if (debug)
   {
-    std::cout << std::endl << "Joint Model Variable Names: ------------------------------------------- " << std::endl;
+    std::cout << "Joint Model Variable Names: ------------------------------------------- \n ";
     const std::vector<std::string> jm_names = joint_model_group_->getVariableNames();
     std::copy(jm_names.begin(), jm_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 
   // Get the dimension of the planning group
@@ -158,7 +158,7 @@ bool SrvKinematicsPlugin::isRedundantJoint(unsigned int index) const
 
 int SrvKinematicsPlugin::getJointIndex(const std::string& name) const
 {
-  for (unsigned int i = 0; i < ik_group_info_.joint_names.size(); i++)
+  for (unsigned int i = 0; i < ik_group_info_.joint_names.size(); ++i)
   {
     if (ik_group_info_.joint_names[i] == name)
       return i;
