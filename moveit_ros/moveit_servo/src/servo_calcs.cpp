@@ -195,25 +195,6 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
     std::exit(EXIT_FAILURE);
   }
 
-  // Load the smoothing plugin
-  try
-  {
-    smoother_ = smoothing_loader_.createSharedInstance(parameters_->smoothing_filter_plugin_name);
-  }
-  catch (pluginlib::PluginlibException& ex)
-  {
-    RCLCPP_ERROR(LOGGER, "Exception while loading the smoothing plugin '%s': '%s'",
-                 parameters_->smoothing_filter_plugin_name.c_str(), ex.what());
-    std::exit(EXIT_FAILURE);
-  }
-
-  // Initialize the smoothing plugin
-  if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints_))
-  {
-    RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
-    std::exit(EXIT_FAILURE);
-  }
-
   // A matrix of all zeros is used to check whether matrices have been initialized
   Eigen::Matrix3d empty_matrix;
   empty_matrix.setZero();
