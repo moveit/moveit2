@@ -417,6 +417,12 @@ std::optional<ServoParameters> ServoParameters::validate(ServoParameters paramet
                         "greater than zero. Check yaml file.");
     return std::nullopt;
   }
+  if (parameters.target_pose_lookahead_time < 0 || parameters.target_pose_lookahead_time > 0.1)
+  {
+    RCLCPP_WARN(LOGGER,
+                "Parameter 'target_pose_lookahead_time' should be greater than zero and typically less than 0.1s.");
+    return std::nullopt;
+  }
   return parameters;
 }
 

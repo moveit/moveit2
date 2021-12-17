@@ -12,6 +12,10 @@ scale:
   # Max joint angular/linear velocity. Rads or Meters per publish period. Only used for joint commands on joint_command_in_topic.
   joint: 0.01
 
+# This is an optional factor to account for any latency or low-level controller ramp up/ramp down in the system.
+# It increases the timestep when calculating the target pose, to move the target pose farther away. [seconds]
+target_pose_lookahead_time: 0.0
+
 ## Properties of outgoing commands
 low_latency_mode: false  # Set this to true to tie the output rate to the input rate
 publish_period: 0.01  # 1/Nominal publish rate [seconds]
