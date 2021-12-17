@@ -53,9 +53,9 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, ServoParameters::SharedConstPt
              planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor)
   : planning_scene_monitor_{ planning_scene_monitor }
   , parameters_{ parameters }
-  , servo_calcs_{ node, parameters, planning_scene_monitor_ }
+  , servo_calcs_{ std::make_shared<ServoCalcs>(node, parameters, planning_scene_monitor_) }
   , collision_checker_{ node, parameters, planning_scene_monitor_ }
-  , servo_pipeline_{ node, parameters, [&]() { servo_calcs_.halt(); }, &servo_calcs_ }
+  , servo_pipeline_{ node, parameters, [&]() { servo_calcs_->halt(); }, servo_calcs_ }
 {
   // Check collisions in this timer
   if (parameters_->check_collisions)
@@ -65,28 +65,28 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, ServoParameters::SharedConstPt
 
 void Servo::setPaused(bool paused)
 {
-  servo_calcs_.setPaused(paused);
+  servo_calcs_->setPaused(paused);
   collision_checker_.setPaused(paused);
 }
 
 bool Servo::getCommandFrameTransform(Eigen::Isometry3d& transform)
 {
-  return servo_calcs_.getCommandFrameTransform(transform);
+  return servo_calcs_->getCommandFrameTransform(transform);
 }
 
 bool Servo::getCommandFrameTransform(geometry_msgs::msg::TransformStamped& transform)
 {
-  return servo_calcs_.getCommandFrameTransform(transform);
+  return servo_calcs_->getCommandFrameTransform(transform);
 }
 
 bool Servo::getEEFrameTransform(Eigen::Isometry3d& transform)
 {
-  return servo_calcs_.getEEFrameTransform(transform);
+  return servo_calcs_->getEEFrameTransform(transform);
 }
 
 bool Servo::getEEFrameTransform(geometry_msgs::msg::TransformStamped& transform)
 {
-  return servo_calcs_.getEEFrameTransform(transform);
+  return servo_calcs_->getEEFrameTransform(transform);
 }
 
 const ServoParameters::SharedConstPtr& Servo::getParameters() const

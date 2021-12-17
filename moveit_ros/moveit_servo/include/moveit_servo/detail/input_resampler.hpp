@@ -59,7 +59,7 @@ class InputResampler : public InputVisitor
 {
   rclcpp::Node::SharedPtr node_ = nullptr;
   rclcpp::Duration period_ = rclcpp::Duration::from_seconds(1);
-  InputVisitor* next_ = nullptr;
+  std::shared_ptr<InputVisitor> next_ = nullptr;
   rclcpp::TimerBase::SharedPtr timer_ = nullptr;
   std::mutex mutex_;
   InputCommand command_;
@@ -72,7 +72,8 @@ class InputResampler : public InputVisitor
   }
 
 public:
-  InputResampler(rclcpp::Node::SharedPtr node, const rclcpp::Duration& period, InputVisitor* next)
+  InputResampler(const rclcpp::Node::SharedPtr& node, const rclcpp::Duration& period,
+                 const std::shared_ptr<InputVisitor>& next)
     : node_{ node }, period_{ period }, next_{ next }
   {
     assert(node_ != nullptr);

@@ -36,6 +36,7 @@
    Desc:   Input Subscriber Tests
 */
 
+#include <memory>
 #include <variant>
 #include <control_msgs/msg/joint_jog.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
@@ -55,23 +56,23 @@ using detail::InputSubscriber;
 TEST(InputSubscriberTests, NoPublish)
 {
   // GIVEN a InputSubscriber with with a Visitor that counts calls
-  auto visitor = CountingVisitor{};
+  auto visitor = std::make_shared<CountingVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_0");
-  auto input_subscriber = InputSubscriber(node, "a", "b", &visitor);
+  auto input_subscriber = InputSubscriber(node, "a", "b", visitor);
 
   // WHEN we spin (without ever publishing a message to either topic)
   rclcpp::spin_some(node);
 
   // THEN we expect the count to still be 0
-  EXPECT_EQ(visitor.count, 0U) << "Visitor should not have been visited";
+  EXPECT_EQ(visitor->count, 0U) << "Visitor should not have been visited";
 }
 
 TEST(InputSubscriberTests, TwistStampedVisit)
 {
   // GIVEN a InputSubscriber with with a Visitor that counts calls to each type of topic
-  auto visitor = TypeCountingVisitor{};
+  auto visitor = std::make_shared<TypeCountingVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_1");
-  auto input_subscriber = InputSubscriber(node, "twist_stamped_topic", "joint_jog_topic", &visitor);
+  auto input_subscriber = InputSubscriber(node, "twist_stamped_topic", "joint_jog_topic", visitor);
   auto pub = node->create_publisher<TwistStamped>("twist_stamped_topic", rclcpp::SystemDefaultsQoS());
 
   // WHEN we publish a single message to it and spin
@@ -79,16 +80,16 @@ TEST(InputSubscriberTests, TwistStampedVisit)
   rclcpp::spin_some(node);
 
   // THEN we expect the count of twist stamped to be 1 and the joint jog count to be 0
-  EXPECT_EQ(visitor.twist_stamped_count, 1U) << "Visitor count for twist stamped type should be 1";
-  EXPECT_EQ(visitor.joint_jog_count, 0U) << "Visitor count for joint jog type should be 0";
+  EXPECT_EQ(visitor->twist_stamped_count, 1U) << "Visitor count for twist stamped type should be 1";
+  EXPECT_EQ(visitor->joint_jog_count, 0U) << "Visitor count for joint jog type should be 0";
 }
 
 TEST(InputSubscriberTests, JointJogVisit)
 {
   // GIVEN a InputSubscriber with with a Visitor that counts calls to each type of topic
-  auto visitor = TypeCountingVisitor{};
+  auto visitor = std::make_shared<TypeCountingVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_2");
-  auto input_subscriber = InputSubscriber(node, "twist_stamped_topic", "joint_jog_topic", &visitor);
+  auto input_subscriber = InputSubscriber(node, "twist_stamped_topic", "joint_jog_topic", visitor);
   auto pub = node->create_publisher<JointJog>("joint_jog_topic", rclcpp::SystemDefaultsQoS());
 
   // WHEN we publish a single message to it and spin
@@ -96,16 +97,16 @@ TEST(InputSubscriberTests, JointJogVisit)
   rclcpp::spin_some(node);
 
   // THEN we expect the count of twist stamped to be 0 and the joint jog count to be 1
-  EXPECT_EQ(visitor.twist_stamped_count, 0U) << "Visitor count for twist stamped type should be 0";
-  EXPECT_EQ(visitor.joint_jog_count, 1U) << "Visitor count for joint jog type should be 1";
+  EXPECT_EQ(visitor->twist_stamped_count, 0U) << "Visitor count for twist stamped type should be 0";
+  EXPECT_EQ(visitor->joint_jog_count, 1U) << "Visitor count for joint jog type should be 1";
 }
 
 TEST(InputSubscriberTests, ReceivedEqualsSent)
 {
   // GIVEN a InputSubscriber with with a Visitor that copies the received message into a local variant
-  auto visitor = ReceivedCommandVisitor{};
+  auto visitor = std::make_shared<ReceivedCommandVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_3");
-  auto input_subscriber = InputSubscriber(node, "twist_stamped_topic", "joint_jog_topic", &visitor);
+  auto input_subscriber = InputSubscriber(node, "twist_stamped_topic", "joint_jog_topic", visitor);
   auto pub = node->create_publisher<JointJog>("joint_jog_topic", rclcpp::SystemDefaultsQoS());
 
   // WHEN we publish a single message to it and spin
@@ -114,11 +115,11 @@ TEST(InputSubscriberTests, ReceivedEqualsSent)
   rclcpp::spin_some(node);
 
   // THEN we expect the received command to be the same as the sent message
-  ASSERT_TRUE(std::holds_alternative<decltype(sent_msg)>(visitor.received_command))
+  ASSERT_TRUE(std::holds_alternative<decltype(sent_msg)>(visitor->received_command))
       << "Received command variant should be of the same type as sent message";
-  ASSERT_NO_THROW(std::get<JointJog>(visitor.received_command))
+  ASSERT_NO_THROW(std::get<JointJog>(visitor->received_command))
       << "Received command variant should be of type JointJog";
-  EXPECT_EQ(std::get<JointJog>(visitor.received_command), sent_msg)
+  EXPECT_EQ(std::get<JointJog>(visitor->received_command), sent_msg)
       << "Received command variant should be equal to sent message";
 }
 

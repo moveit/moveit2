@@ -63,7 +63,7 @@ class InputSubscriber
 
 public:
   InputSubscriber(const rclcpp::Node::SharedPtr& node, const std::string& twist_stamped_topic,
-                  const std::string& joint_jog_topic, InputVisitor* next)
+                  const std::string& joint_jog_topic, const std::shared_ptr<InputVisitor>& next)
   {
     assert(node != nullptr);
     assert(next != nullptr);

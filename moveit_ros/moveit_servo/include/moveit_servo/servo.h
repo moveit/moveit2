@@ -94,7 +94,7 @@ private:
   // The stored servo parameters
   ServoParameters::SharedConstPtr parameters_;
 
-  ServoCalcs servo_calcs_;
+  std::shared_ptr<ServoCalcs> servo_calcs_;
   CollisionCheck collision_checker_;
   detail::ServoPipeline servo_pipeline_;
 };

@@ -37,6 +37,7 @@
 */
 
 #include <iostream>
+#include <memory>
 #include <variant>
 #include <control_msgs/msg/joint_jog.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
@@ -62,18 +63,18 @@ using detail::TimestampNow;
 TEST(InputStaleCommandTests, TimeStampIsNearNowJointJog)
 {
   // GIVEN a TimestampNow with with a Visitor that saves modified message locally
-  auto visitor = ReceivedCommandVisitor{};
+  auto visitor = std::make_shared<ReceivedCommandVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_0");
-  auto timestamp_now = TimestampNow(node, &visitor);
+  auto timestamp_now = TimestampNow(node, visitor);
 
   // WHEN we visit the timestamp_now with one message
   auto sent_msg = JointJog{};
   std::visit(timestamp_now, InputCommand{ sent_msg });
 
   // THEN we expect the stamp to have changed
-  ASSERT_TRUE(std::holds_alternative<decltype(sent_msg)>(visitor.received_command))
+  ASSERT_TRUE(std::holds_alternative<decltype(sent_msg)>(visitor->received_command))
       << "Received command should be of the same type as sent message";
-  auto received_msg = std::get<JointJog>(visitor.received_command);
+  auto received_msg = std::get<JointJog>(visitor->received_command);
   EXPECT_NE(received_msg.header.stamp, sent_msg.header.stamp)
       << "Received message should have a different timestamp than sent one";
   EXPECT_NEAR((node->now() - received_msg.header.stamp).seconds(), 0, TIME_EPSILON)
@@ -83,18 +84,18 @@ TEST(InputStaleCommandTests, TimeStampIsNearNowJointJog)
 TEST(InputStaleCommandTests, TimeStampIsNearNowTwistStamped)
 {
   // GIVEN a TimestampNow with with a Visitor that saves modified message locally
-  auto visitor = ReceivedCommandVisitor{};
+  auto visitor = std::make_shared<ReceivedCommandVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_1");
-  auto timestamp_now = TimestampNow(node, &visitor);
+  auto timestamp_now = TimestampNow(node, visitor);
 
   // WHEN we visit the timestamp_now with one message
   auto sent_msg = TwistStamped{};
   std::visit(timestamp_now, InputCommand{ sent_msg });
 
   // THEN we expect the stamp to have changed
-  ASSERT_TRUE(std::holds_alternative<decltype(sent_msg)>(visitor.received_command))
+  ASSERT_TRUE(std::holds_alternative<decltype(sent_msg)>(visitor->received_command))
       << "Received command should be of the same type as sent message";
-  auto received_msg = std::get<TwistStamped>(visitor.received_command);
+  auto received_msg = std::get<TwistStamped>(visitor->received_command);
   EXPECT_NE(received_msg.header.stamp, sent_msg.header.stamp)
       << "Received message should have a different timestamp than sent one";
   EXPECT_NEAR((node->now() - received_msg.header.stamp).seconds(), 0, TIME_EPSILON)
@@ -104,45 +105,45 @@ TEST(InputStaleCommandTests, TimeStampIsNearNowTwistStamped)
 TEST(InputStaleCommandTests, HaltTwistStamped)
 {
   // GIVEN a StaleCommandHalt with with a Visitor and halt function that counts calls
-  auto visitor = CountingVisitor{};
+  auto visitor = std::make_shared<CountingVisitor>();
   unsigned int halt_count{ 0 };
   auto stale_command_halt = StaleCommandHalt(
       std::make_shared<rclcpp::Node>("test_node_2"), rclcpp::Duration::from_seconds(1), [&]() { halt_count++; },
-      &visitor);
+      visitor);
 
   // WHEN we visit the stale_command_halt with one message that is default constructed
   std::visit(stale_command_halt, InputCommand{ TwistStamped{} });
 
   // THEN we expect the visitor count to still be 0 and the halt count should be 1
-  EXPECT_EQ(visitor.count, 0U) << "Visitor should not have been visited";
+  EXPECT_EQ(visitor->count, 0U) << "Visitor should not have been visited";
   EXPECT_EQ(halt_count, 1U) << "Halt should have been called once";
 }
 
 TEST(InputStaleCommandTests, HaltJointJog)
 {
   // GIVEN a StaleCommandHalt with with a Visitor and halt function that counts calls
-  auto visitor = CountingVisitor{};
+  auto visitor = std::make_shared<CountingVisitor>();
   unsigned int halt_count{ 0 };
   auto stale_command_halt = StaleCommandHalt(
       std::make_shared<rclcpp::Node>("test_node_3"), rclcpp::Duration::from_seconds(1), [&]() { halt_count++; },
-      &visitor);
+      visitor);
 
   // WHEN we visit the stale_command_halt with one message that is default constructed
   std::visit(stale_command_halt, InputCommand{ JointJog{} });
 
   // THEN we expect the visitor count to still be 0 and the halt count should be 1
-  EXPECT_EQ(visitor.count, 0U) << "Visitor should not have been visited";
+  EXPECT_EQ(visitor->count, 0U) << "Visitor should not have been visited";
   EXPECT_EQ(halt_count, 1U) << "Halt should have been called once";
 }
 
 TEST(InputStaleCommandTests, NotStaleVisitTwistStamped)
 {
   // GIVEN a StaleCommandHalt with with a Visitor and halt function that counts calls
-  auto visitor = CountingVisitor{};
+  auto visitor = std::make_shared<CountingVisitor>();
   unsigned int halt_count{ 0 };
   auto node = std::make_shared<rclcpp::Node>("test_node_4");
   auto stale_command_halt = StaleCommandHalt(
-      node, rclcpp::Duration::from_seconds(1), [&]() { halt_count++; }, &visitor);
+      node, rclcpp::Duration::from_seconds(1), [&]() { halt_count++; }, visitor);
 
   // WHEN we visit the stale_command_halt with one message that has a current timestamp
   auto sent_msg = TwistStamped{};
@@ -150,18 +151,18 @@ TEST(InputStaleCommandTests, NotStaleVisitTwistStamped)
   std::visit(stale_command_halt, InputCommand{ sent_msg });
 
   // THEN we expect the visitor count to be 1 and the halt count should be 0
-  EXPECT_EQ(visitor.count, 1U) << "Visitor should have been visited";
+  EXPECT_EQ(visitor->count, 1U) << "Visitor should have been visited";
   EXPECT_EQ(halt_count, 0U) << "Halt should not have been called once";
 }
 
 TEST(InputStaleCommandTests, NotStaleVisitJointJog)
 {
   // GIVEN a StaleCommandHalt with with a Visitor and halt function that counts calls
-  auto visitor = CountingVisitor{};
+  auto visitor = std::make_shared<CountingVisitor>();
   unsigned int halt_count{ 0 };
   auto node = std::make_shared<rclcpp::Node>("test_node_5");
   auto stale_command_halt = StaleCommandHalt(
-      node, rclcpp::Duration::from_seconds(1), [&]() { halt_count++; }, &visitor);
+      node, rclcpp::Duration::from_seconds(1), [&]() { halt_count++; }, visitor);
 
   // WHEN we visit the stale_command_halt with one message that has a current timestamp
   auto sent_msg = JointJog{};
@@ -169,7 +170,7 @@ TEST(InputStaleCommandTests, NotStaleVisitJointJog)
   std::visit(stale_command_halt, InputCommand{ sent_msg });
 
   // THEN we expect the visitor count to be 1 and the halt count should be 0
-  EXPECT_EQ(visitor.count, 1U) << "Visitor should have been visited";
+  EXPECT_EQ(visitor->count, 1U) << "Visitor should have been visited";
   EXPECT_EQ(halt_count, 0U) << "Halt should not have been called once";
 }
 

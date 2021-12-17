@@ -59,10 +59,11 @@ class InputCheckValid : public InputVisitor
 {
   rclcpp::Node::SharedPtr node_ = nullptr;
   std::string command_in_type_ = "unitless";
-  InputVisitor* next_ = nullptr;
+  std::shared_ptr<InputVisitor> next_ = nullptr;
 
 public:
-  InputCheckValid(rclcpp::Node::SharedPtr node, std::string_view command_in_type, InputVisitor* next)
+  InputCheckValid(const rclcpp::Node::SharedPtr& node, std::string_view command_in_type,
+                  const std::shared_ptr<InputVisitor>& next)
     : node_{ node }, command_in_type_{ command_in_type }, next_{ next }
   {
     assert(node_ != nullptr);

@@ -38,6 +38,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <memory>
 #include <variant>
 #include <control_msgs/msg/joint_jog.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
@@ -58,34 +59,34 @@ using detail::InputCommand;
 TEST(InputCheckValidTests, DefaultTwistStamp)
 {
   // GIVEN a InputCheckValid with with a Visitor that counts
-  auto visitor = CountingVisitor{};
-  auto input_check_valid = InputCheckValid(std::make_shared<rclcpp::Node>("test_node"), "unitless", &visitor);
+  auto visitor = std::make_shared<CountingVisitor>();
+  auto input_check_valid = InputCheckValid(std::make_shared<rclcpp::Node>("test_node"), "unitless", visitor);
 
   // WHEN we visit with a default constructed TwistStamped
   std::visit(input_check_valid, InputCommand{ TwistStamped{} });
 
   // THEN we expect the visitor to have been called
-  ASSERT_EQ(visitor.count, 1U) << "The visitor should have been called.";
+  ASSERT_EQ(visitor->count, 1U) << "The visitor should have been called.";
 }
 
 TEST(InputCheckValidTests, DefaultJointJog)
 {
   // GIVEN a InputCheckValid with with a Visitor that counts
-  auto visitor = CountingVisitor{};
-  auto input_check_valid = InputCheckValid(std::make_shared<rclcpp::Node>("test_node"), "unitless", &visitor);
+  auto visitor = std::make_shared<CountingVisitor>();
+  auto input_check_valid = InputCheckValid(std::make_shared<rclcpp::Node>("test_node"), "unitless", visitor);
 
   // WHEN we visit with a default constructed JointJog
   std::visit(input_check_valid, InputCommand{ JointJog{} });
 
   // THEN we expect the visitor to have been called
-  ASSERT_EQ(visitor.count, 1U) << "The visitor should have been called.";
+  ASSERT_EQ(visitor->count, 1U) << "The visitor should have been called.";
 }
 
 TEST(InputCheckValidTests, InvalidUnitlessTwistStamp)
 {
   // GIVEN a InputCheckValid with with a Visitor that counts
-  auto visitor = CountingVisitor{};
-  auto input_check_valid = InputCheckValid(std::make_shared<rclcpp::Node>("test_node"), "unitless", &visitor);
+  auto visitor = std::make_shared<CountingVisitor>();
+  auto input_check_valid = InputCheckValid(std::make_shared<rclcpp::Node>("test_node"), "unitless", visitor);
 
   // WHEN we visit with a TwistStamped that is invlid in "unitless mode"
   auto command = TwistStamped{};
@@ -93,14 +94,14 @@ TEST(InputCheckValidTests, InvalidUnitlessTwistStamp)
   std::visit(input_check_valid, InputCommand{ command });
 
   // THEN we expect the visitor was not called
-  ASSERT_EQ(visitor.count, 0U) << "The visitor should NOT have been called.";
+  ASSERT_EQ(visitor->count, 0U) << "The visitor should NOT have been called.";
 }
 
 TEST(InputCheckValidTests, ValidNotUnitlessTwistStamp)
 {
   // GIVEN a InputCheckValid with with a Visitor that counts
-  auto visitor = CountingVisitor{};
-  auto input_check_valid = InputCheckValid(std::make_shared<rclcpp::Node>("test_node"), "", &visitor);
+  auto visitor = std::make_shared<CountingVisitor>();
+  auto input_check_valid = InputCheckValid(std::make_shared<rclcpp::Node>("test_node"), "", visitor);
 
   // WHEN we visit with a TwistStamped that is invlid in "unitless mode"
   auto command = TwistStamped{};
@@ -108,14 +109,14 @@ TEST(InputCheckValidTests, ValidNotUnitlessTwistStamp)
   std::visit(input_check_valid, InputCommand{ command });
 
   // THEN we expect the visitor was called
-  ASSERT_EQ(visitor.count, 1U) << "The visitor should have been called.";
+  ASSERT_EQ(visitor->count, 1U) << "The visitor should have been called.";
 }
 
 TEST(InputCheckValidTests, NanTwistStamp)
 {
   // GIVEN a InputCheckValid with with a Visitor that counts
-  auto visitor = CountingVisitor{};
-  auto input_check_valid = InputCheckValid(std::make_shared<rclcpp::Node>("test_node"), "unitless", &visitor);
+  auto visitor = std::make_shared<CountingVisitor>();
+  auto input_check_valid = InputCheckValid(std::make_shared<rclcpp::Node>("test_node"), "unitless", visitor);
 
   // WHEN we visit with a TwistStamped containing a NaN
   auto command = TwistStamped{};
@@ -123,14 +124,14 @@ TEST(InputCheckValidTests, NanTwistStamp)
   std::visit(input_check_valid, InputCommand{ command });
 
   // THEN we expect the visitor was not called
-  ASSERT_EQ(visitor.count, 0U) << "The visitor should NOT have been called.";
+  ASSERT_EQ(visitor->count, 0U) << "The visitor should NOT have been called.";
 }
 
 TEST(InputCheckValidTests, NanJointJog)
 {
   // GIVEN a InputCheckValid with with a Visitor that counts
-  auto visitor = CountingVisitor{};
-  auto input_check_valid = InputCheckValid(std::make_shared<rclcpp::Node>("test_node"), "unitless", &visitor);
+  auto visitor = std::make_shared<CountingVisitor>();
+  auto input_check_valid = InputCheckValid(std::make_shared<rclcpp::Node>("test_node"), "unitless", visitor);
 
   // WHEN we visit with a JointJog containing a NaN
   auto command = JointJog{};
@@ -138,7 +139,7 @@ TEST(InputCheckValidTests, NanJointJog)
   std::visit(input_check_valid, InputCommand{ command });
 
   // THEN we expect the visitor was not called
-  ASSERT_EQ(visitor.count, 0U) << "The visitor should NOT have been called.";
+  ASSERT_EQ(visitor->count, 0U) << "The visitor should NOT have been called.";
 }
 
 }  // namespace moveit_servo

@@ -58,10 +58,11 @@ namespace detail
 class TimestampNow : public InputVisitor
 {
   rclcpp::Node::SharedPtr node_ = nullptr;
-  InputVisitor* next_ = nullptr;
+  std::shared_ptr<InputVisitor> next_ = nullptr;
 
 public:
-  TimestampNow(rclcpp::Node::SharedPtr node, InputVisitor* next) : node_{ node }, next_{ next }
+  TimestampNow(const rclcpp::Node::SharedPtr& node, const std::shared_ptr<InputVisitor>& next)
+    : node_{ node }, next_{ next }
   {
     assert(node_ != nullptr);
     assert(next_ != nullptr);
@@ -97,11 +98,11 @@ class StaleCommandHalt : public InputVisitor
   rclcpp::Node::SharedPtr node_ = nullptr;
   rclcpp::Duration timeout_;
   std::function<void()> halt_;
-  InputVisitor* next_ = nullptr;
+  std::shared_ptr<InputVisitor> next_ = nullptr;
 
 public:
-  StaleCommandHalt(rclcpp::Node::SharedPtr node, const rclcpp::Duration& timeout, std::function<void()> halt,
-                   InputVisitor* next)
+  StaleCommandHalt(const rclcpp::Node::SharedPtr& node, const rclcpp::Duration& timeout, std::function<void()> halt,
+                   const std::shared_ptr<InputVisitor>& next)
     : node_{ node }, timeout_{ timeout }, halt_{ halt }, next_{ next }
   {
     assert(node_ != nullptr);

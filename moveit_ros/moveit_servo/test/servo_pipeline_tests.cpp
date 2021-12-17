@@ -36,6 +36,7 @@
    Desc:   Input Pipeline Tests
 */
 
+#include <memory>
 #include <variant>
 #include <control_msgs/msg/joint_jog.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
@@ -56,7 +57,7 @@ TEST(ServoPipelineTests, makeResampling)
 {
   // GIVEN a ServoPipeline
   auto node = std::make_shared<rclcpp::Node>("test_node_0");
-  auto next = DoNothingVisitor{};
+  auto visitor = std::make_shared<DoNothingVisitor>();
   auto parameters = std::make_shared<ServoParameters>();
 
   // WHEN low_latency_mode set to false
@@ -64,14 +65,14 @@ TEST(ServoPipelineTests, makeResampling)
 
   // THEN we expect ServoPipeline constructor to not throw
   EXPECT_NO_THROW(auto servo_pipeline = ServoPipeline(
-                      node, parameters, []() {}, &next));
+                      node, parameters, []() {}, visitor));
 }
 
 TEST(ServoPipelineTests, makeReactive)
 {
   // GIVEN a ServoPipeline
   auto node = std::make_shared<rclcpp::Node>("test_node_0");
-  auto next = DoNothingVisitor{};
+  auto visitor = std::make_shared<DoNothingVisitor>();
   auto parameters = std::make_shared<ServoParameters>();
 
   // WHEN low_latency_mode set to true
@@ -79,7 +80,7 @@ TEST(ServoPipelineTests, makeReactive)
 
   // THEN we expect ServoPipeline constructor to not throw
   EXPECT_NO_THROW(auto servo_pipeline = ServoPipeline(
-                      node, parameters, []() {}, &next));
+                      node, parameters, []() {}, visitor));
 }
 
 }  // namespace moveit_servo

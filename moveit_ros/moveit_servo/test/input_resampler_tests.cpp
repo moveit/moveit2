@@ -60,38 +60,38 @@ using detail::InputResampler;
 TEST(InputReamplerTests, NoOutputVisit)
 {
   // GIVEN a InputResampler with with a Visitor that counts output calls
-  auto visitor = CountingVisitor{};
+  auto visitor = std::make_shared<CountingVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_0");
-  auto resampler = InputResampler(node, rclcpp::Duration::from_seconds(10), &visitor);
+  auto resampler = InputResampler(node, rclcpp::Duration::from_seconds(10), visitor);
 
   // WHEN we spin (without ever visiting the resampler)
   rclcpp::spin_some(node);
 
   // THEN we expect the count to still be 0
-  EXPECT_EQ(visitor.count, 0U) << "Visitor should not have been called";
+  EXPECT_EQ(visitor->count, 0U) << "Visitor should not have been called";
 }
 
 TEST(InputReamplerTests, OneVisit)
 {
   // GIVEN a InputResampler with with a Visitor that counts output calls
-  auto visitor = CountingVisitor{};
+  auto visitor = std::make_shared<CountingVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_1");
-  auto resampler = InputResampler(node, rclcpp::Duration::from_seconds(10), &visitor);
+  auto resampler = InputResampler(node, rclcpp::Duration::from_seconds(10), visitor);
 
   // WHEN we visit the resampler with one message and spin
   std::visit(resampler, InputCommand{ TwistStamped{} });
   rclcpp::spin_some(node);
 
   // THEN we expect the count to be one
-  EXPECT_EQ(visitor.count, 1U) << "Visitor should have only been called once";
+  EXPECT_EQ(visitor->count, 1U) << "Visitor should have only been called once";
 }
 
 TEST(InputReamplerTests, WaitForSomeOutput)
 {
   // GIVEN a InputResampler with with a Visitor that counts output calls
-  auto visitor = CountingVisitor{};
+  auto visitor = std::make_shared<CountingVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_2");
-  auto resampler = InputResampler(node, rclcpp::Duration::from_seconds(0.01), &visitor);
+  auto resampler = InputResampler(node, rclcpp::Duration::from_seconds(0.01), visitor);
 
   // WHEN we visit the resampler with one message and spin for some time
   std::visit(resampler, InputCommand{ TwistStamped{} });
@@ -102,15 +102,15 @@ TEST(InputReamplerTests, WaitForSomeOutput)
   }
 
   // THEN we expect the callable count to be called about 10
-  EXPECT_NEAR(visitor.count, 10U, MESSAGE_RECEIVED_EPSILON) << "Count should have been called about 10 times";
+  EXPECT_NEAR(visitor->count, 10U, MESSAGE_RECEIVED_EPSILON) << "Count should have been called about 10 times";
 }
 
 TEST(InputReamplerTests, ReceivedEqualsSent)
 {
   // GIVEN a InputResampler with Visitor that copies the received command into a local variant
-  auto visitor = ReceivedCommandVisitor{};
+  auto visitor = std::make_shared<ReceivedCommandVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_3");
-  auto resampler = InputResampler(node, rclcpp::Duration::from_seconds(10), &visitor);
+  auto resampler = InputResampler(node, rclcpp::Duration::from_seconds(10), visitor);
 
   // WHEN we visit the resampler with one message and spin
   auto sent_msg = JointJog{};
@@ -118,11 +118,11 @@ TEST(InputReamplerTests, ReceivedEqualsSent)
   rclcpp::spin_some(node);
 
   // THEN we expect the received command to be the same as the sent message
-  ASSERT_TRUE(std::holds_alternative<decltype(sent_msg)>(visitor.received_command))
+  ASSERT_TRUE(std::holds_alternative<decltype(sent_msg)>(visitor->received_command))
       << "Received command should be of the same type as sent message";
-  ASSERT_NO_THROW(std::get<JointJog>(visitor.received_command))
+  ASSERT_NO_THROW(std::get<JointJog>(visitor->received_command))
       << "Received command variant should be of type JointJog";
-  EXPECT_EQ(std::get<JointJog>(visitor.received_command), sent_msg)
+  EXPECT_EQ(std::get<JointJog>(visitor->received_command), sent_msg)
       << "Received command variant should be equal to sent message";
 }
 

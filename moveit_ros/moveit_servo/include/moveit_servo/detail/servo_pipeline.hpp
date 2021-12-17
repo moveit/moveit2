@@ -52,7 +52,7 @@ namespace detail
 {
 class ServoPipeline
 {
-  std::vector<std::unique_ptr<InputVisitor>> input_visitors_;
+  std::vector<std::shared_ptr<InputVisitor>> input_visitors_;
   std::unique_ptr<InputSubscriber> input_subscriber_;
 
 public:
@@ -64,8 +64,9 @@ public:
    * @param halt function for sending a message that will stop the robot
    * @param next the next visitor to execute after the pipeline, normally ServoCalcs
    */
-  ServoPipeline(rclcpp::Node::SharedPtr node, std::shared_ptr<const moveit_servo::ServoParameters> parameters,
-                std::function<void()> halt, InputVisitor* next);
+  ServoPipeline(const rclcpp::Node::SharedPtr& node,
+                const std::shared_ptr<const moveit_servo::ServoParameters>& parameters, std::function<void()> halt,
+                const std::shared_ptr<InputVisitor>& next);
 };
 
 }  // namespace detail

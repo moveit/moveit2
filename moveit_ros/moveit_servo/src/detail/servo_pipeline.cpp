@@ -53,9 +53,9 @@ namespace moveit_servo
 {
 namespace detail
 {
-ServoPipeline::ServoPipeline(rclcpp::Node::SharedPtr node,
-                             std::shared_ptr<const moveit_servo::ServoParameters> parameters,
-                             std::function<void()> halt, InputVisitor* next)
+ServoPipeline::ServoPipeline(const rclcpp::Node::SharedPtr& node,
+                             const std::shared_ptr<const moveit_servo::ServoParameters>& parameters,
+                             std::function<void()> halt, const std::shared_ptr<InputVisitor>& next)
 {
   assert(node != nullptr);
   assert(parameters != nullptr);
@@ -65,9 +65,10 @@ ServoPipeline::ServoPipeline(rclcpp::Node::SharedPtr node,
   // Starting with the last object and working in reverse.
   // This is done because each step needs a pointer to the next step to be able to call it.
 
-  // The initial value of next is the visitor step after the last step in the servo pipeline.
+  // The initial value of next_step is the visitor step after the last step in the servo pipeline.
   // In the default, the happy path each step calls the next step in the chain after it does its thing.
   // Note that after we construct each step we get a pointer to it in order to construct the next step.
+  std::shared_ptr<InputVisitor> next_step = next;
 
   // The reason these are unique_ptr inside of a vector is we hand a non-owning pointer to each one
   //  to the step that precedes it.
@@ -83,29 +84,26 @@ ServoPipeline::ServoPipeline(rclcpp::Node::SharedPtr node,
   // TimestampNow
   //   descritption: sets the timestamp in header to now(), then calls InputResampler
   //
-  // next is set to TimestampNow
+  // next_step is set to TimestampNow
   if (!parameters->low_latency_mode)
   {
-    next = input_visitors_
-               .emplace_back(std::make_unique<StaleCommandHalt>(
-                   node, rclcpp::Duration::from_seconds(parameters->incoming_command_timeout), halt, next))
-               .get();
-    next = input_visitors_
-               .emplace_back(std::make_unique<InputResampler>(
-                   node, rclcpp::Duration::from_seconds(parameters->publish_period), next))
-               .get();
-    next = input_visitors_.emplace_back(std::make_unique<TimestampNow>(node, next)).get();
+    next_step = input_visitors_.emplace_back(std::make_shared<StaleCommandHalt>(
+        node, rclcpp::Duration::from_seconds(parameters->incoming_command_timeout), halt, next_step));
+    next_step = input_visitors_.emplace_back(
+        std::make_shared<InputResampler>(node, rclcpp::Duration::from_seconds(parameters->publish_period), next_step));
+    next_step = input_visitors_.emplace_back(std::make_shared<TimestampNow>(node, next_step));
   }
 
   // InputCheckValid
-  //   description: checks if the intput message is valid then calls next
-  //   failure: logs warning and does not call next
-  next = input_visitors_.emplace_back(std::make_unique<InputCheckValid>(node, parameters->command_in_type, next)).get();
+  //   description: checks if the intput message is valid then calls next_step
+  //   failure: logs warning and does not call next_step
+  next_step =
+      input_visitors_.emplace_back(std::make_shared<InputCheckValid>(node, parameters->command_in_type, next_step));
 
   // InputSubscriber
   //   description: calls InputCheckValid with commands from ros subscribers
   input_subscriber_ = std::make_unique<InputSubscriber>(node, parameters->cartesian_command_in_topic,
-                                                        parameters->joint_command_in_topic, next);
+                                                        parameters->joint_command_in_topic, next_step);
 }
 
 }  // namespace detail
