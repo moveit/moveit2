@@ -70,8 +70,8 @@ public:
   }
   ~InputCheckValid() override = default;
 
-  void operator()(geometry_msgs::msg::TwistStamped command) override;
-  void operator()(control_msgs::msg::JointJog command) override;
+  void operator()(const geometry_msgs::msg::TwistStamped& command) override;
+  void operator()(const control_msgs::msg::JointJog& command) override;
 };
 
 }  // namespace detail

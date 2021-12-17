@@ -58,8 +58,8 @@ using InputCommand = std::variant<geometry_msgs::msg::TwistStamped, control_msgs
 class InputVisitor
 {
 public:
-  virtual void operator()(geometry_msgs::msg::TwistStamped) = 0;
-  virtual void operator()(control_msgs::msg::JointJog) = 0;
+  virtual void operator()(const geometry_msgs::msg::TwistStamped&) = 0;
+  virtual void operator()(const control_msgs::msg::JointJog&) = 0;
   virtual ~InputVisitor()
   {
   }

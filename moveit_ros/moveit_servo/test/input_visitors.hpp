@@ -50,8 +50,8 @@ namespace moveit_servo
 class DoNothingVisitor : public detail::InputVisitor
 {
 public:
-  void operator()(TwistStamped /*unused*/) override{};
-  void operator()(JointJog /*unused*/) override{};
+  void operator()(const TwistStamped& /*unused*/) override{};
+  void operator()(const JointJog& /*unused*/) override{};
   ~DoNothingVisitor() override = default;
 };
 
@@ -59,11 +59,11 @@ class CountingVisitor : public detail::InputVisitor
 {
 public:
   unsigned int count = 0;
-  void operator()(TwistStamped /*unused*/) override
+  void operator()(const TwistStamped& /*unused*/) override
   {
     count++;
   };
-  void operator()(JointJog /*unused*/) override
+  void operator()(const JointJog& /*unused*/) override
   {
     count++;
   };
@@ -75,11 +75,11 @@ class TypeCountingVisitor : public detail::InputVisitor
 public:
   unsigned int twist_stamped_count = 0;
   unsigned int joint_jog_count = 0;
-  void operator()(TwistStamped /*unused*/) override
+  void operator()(const TwistStamped& /*unused*/) override
   {
     twist_stamped_count++;
   };
-  void operator()(JointJog /*unused*/) override
+  void operator()(const JointJog& /*unused*/) override
   {
     joint_jog_count++;
   };
@@ -90,11 +90,11 @@ class ReceivedCommandVisitor : public detail::InputVisitor
 {
 public:
   detail::InputCommand received_command;
-  void operator()(TwistStamped command) override
+  void operator()(const TwistStamped& command) override
   {
     received_command = command;
   };
-  void operator()(JointJog command) override
+  void operator()(const JointJog& command) override
   {
     received_command = command;
   };

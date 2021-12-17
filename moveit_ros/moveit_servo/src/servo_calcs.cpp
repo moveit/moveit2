@@ -347,7 +347,7 @@ bool ServoCalcs::pausedEarlyExit()
   return false;
 }
 
-void ServoCalcs::operator()(geometry_msgs::msg::TwistStamped input_command)
+void ServoCalcs::operator()(const geometry_msgs::msg::TwistStamped& input_command)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   updateState();
@@ -389,7 +389,7 @@ void ServoCalcs::operator()(geometry_msgs::msg::TwistStamped input_command)
   }
 }
 
-void ServoCalcs::operator()(control_msgs::msg::JointJog input_command)
+void ServoCalcs::operator()(const control_msgs::msg::JointJog& input_command)
 {
   const std::lock_guard<std::mutex> lock(main_loop_mutex_);
   updateState();
@@ -465,7 +465,7 @@ rcl_interfaces::msg::SetParametersResult ServoCalcs::robotLinkCommandFrameCallba
 };
 
 // Perform the servoing calculations
-bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
+bool ServoCalcs::cartesianServoCalcs(geometry_msgs::msg::TwistStamped cmd,
                                      trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // Set uncontrolled dimensions to 0 in command frame

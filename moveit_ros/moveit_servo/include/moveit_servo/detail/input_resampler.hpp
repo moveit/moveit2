@@ -88,19 +88,19 @@ public:
   }
   ~InputResampler() override = default;
 
-  void operator()(geometry_msgs::msg::TwistStamped command) override
+  void operator()(const geometry_msgs::msg::TwistStamped& command) override
   {
     operatorImpl(command);
   }
 
-  void operator()(control_msgs::msg::JointJog command) override
+  void operator()(const control_msgs::msg::JointJog& command) override
   {
     operatorImpl(command);
   }
 
 private:
   template <typename T>
-  void operatorImpl(T command)
+  void operatorImpl(const T& command)
   {
     {
       const std::lock_guard<std::mutex> lock(mutex_);

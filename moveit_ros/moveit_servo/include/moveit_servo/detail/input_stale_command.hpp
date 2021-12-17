@@ -68,19 +68,21 @@ public:
   }
   ~TimestampNow() override = default;
 
-  void operator()(geometry_msgs::msg::TwistStamped command) override
+  void operator()(const geometry_msgs::msg::TwistStamped& command) override
   {
     operatorImpl(command);
   }
 
-  void operator()(control_msgs::msg::JointJog command) override
+  void operator()(const control_msgs::msg::JointJog& command) override
   {
     operatorImpl(command);
   }
 
 private:
+  // Note that this implementation template takes the input command by value
+  // because it mutates it before visiting the next step.
   template <typename T>
-  void operatorImpl(T& command)
+  void operatorImpl(T command)
   {
     command.header.stamp = node_->now();
     std::visit(*next_, InputCommand{ command });
@@ -107,19 +109,19 @@ public:
   }
   ~StaleCommandHalt() override = default;
 
-  void operator()(geometry_msgs::msg::TwistStamped command) override
+  void operator()(const geometry_msgs::msg::TwistStamped& command) override
   {
     operatorImpl(command);
   }
 
-  void operator()(control_msgs::msg::JointJog command) override
+  void operator()(const control_msgs::msg::JointJog& command) override
   {
     operatorImpl(command);
   }
 
 private:
   template <typename T>
-  void operatorImpl(T& command)
+  void operatorImpl(const T& command)
   {
     if (node_->now() - command.header.stamp > timeout_)
     {

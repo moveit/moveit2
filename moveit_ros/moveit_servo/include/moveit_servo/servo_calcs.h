@@ -115,14 +115,14 @@ public:
    *
    * @param[in]  input_command  The input command
    */
-  void operator()(geometry_msgs::msg::TwistStamped input_command) override;
+  void operator()(const geometry_msgs::msg::TwistStamped& input_command) override;
 
   /**
    * @brief      Function call operator for input visitor.
    *
    * @param[in]  input_command  The input command
    */
-  void operator()(control_msgs::msg::JointJog input_command) override;
+  void operator()(const control_msgs::msg::JointJog& input_command) override;
 
   /**
    * @brief      Halt the robot arm
@@ -131,7 +131,7 @@ public:
 
 protected:
   /** \brief Do servoing calculations for Cartesian twist commands. */
-  bool cartesianServoCalcs(geometry_msgs::msg::TwistStamped& cmd,
+  bool cartesianServoCalcs(geometry_msgs::msg::TwistStamped cmd,
                            trajectory_msgs::msg::JointTrajectory& joint_trajectory);
 
   /** \brief Do servoing calculations for direct commands to a joint. */

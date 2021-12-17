@@ -62,7 +62,7 @@ constexpr auto ROS_LOG_THROTTLE_PERIOD = std::chrono::milliseconds(1000).count()
 using std::fabs;
 using std::isnan;
 
-void InputCheckValid::operator()(geometry_msgs::msg::TwistStamped command)
+void InputCheckValid::operator()(const geometry_msgs::msg::TwistStamped& command)
 {
   if (isnan(command.twist.linear.x) || isnan(command.twist.linear.y) || isnan(command.twist.linear.z) ||
       isnan(command.twist.angular.x) || isnan(command.twist.angular.y) || isnan(command.twist.angular.z))
@@ -91,7 +91,7 @@ void InputCheckValid::operator()(geometry_msgs::msg::TwistStamped command)
   std::visit(*next_, InputCommand{ command });
 }
 
-void InputCheckValid::operator()(control_msgs::msg::JointJog command)
+void InputCheckValid::operator()(const control_msgs::msg::JointJog& command)
 {
   for (double velocity : command.velocities)
   {
