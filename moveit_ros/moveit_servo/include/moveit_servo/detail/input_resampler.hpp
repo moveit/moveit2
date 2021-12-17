@@ -39,9 +39,12 @@
 
 #pragma once
 
+#include <atomic>
+#include <chrono>
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <thread>
 #include <variant>
 #include <control_msgs/msg/joint_jog.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
@@ -58,36 +61,58 @@ namespace detail
 class InputResampler : public InputVisitor
 {
   rclcpp::Node::SharedPtr node_ = nullptr;
-  rclcpp::Duration period_ = rclcpp::Duration::from_seconds(1);
+  rclcpp::Rate rate_;
   std::shared_ptr<InputVisitor> next_ = nullptr;
-  rclcpp::TimerBase::SharedPtr timer_ = nullptr;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   InputCommand command_;
+  std::thread thread_;
+  std::atomic<bool> running_ = false;
 
   // Create a copy of the message so we don't have to lock durring the call to visit
-  InputCommand getCommandCopy()
+  InputCommand getCommandCopy() const
   {
     const std::lock_guard<std::mutex> lock(mutex_);
     return command_;
   }
 
+  // TODO(tylerjw): convert this back to a ROS timer after the performance of ros timers has been profiled
+  void threadMain()
+  {
+    while (running_ and rclcpp::ok())
+    {
+      std::visit(*next_, getCommandCopy());
+      rate_.sleep();
+    }
+  }
+
+  void startThread()
+  {
+    running_ = true;
+    thread_ = std::thread([&]() { threadMain(); });
+  }
+
+  void stopThread()
+  {
+    if (running_)
+    {
+      running_ = false;
+      thread_.join();
+    }
+  }
+
 public:
-  InputResampler(const rclcpp::Node::SharedPtr& node, const rclcpp::Duration& period,
+  InputResampler(const rclcpp::Node::SharedPtr& node, std::chrono::nanoseconds period,
                  const std::shared_ptr<InputVisitor>& next)
-    : node_{ node }, period_{ period }, next_{ next }
+    : node_{ node }, rate_{ period }, next_{ next }, running_{ false }
   {
     assert(node_ != nullptr);
     assert(next_ != nullptr);
   }
-  InputResampler(InputResampler&& other) noexcept
-    : node_{ std::move(other.node_) }
-    , period_{ other.period_ }
-    , next_{ other.next_ }
-    , timer_{ other.timer_ }
-    , command_{ other.command_ }
+
+  ~InputResampler() override
   {
+    stopThread();
   }
-  ~InputResampler() override = default;
 
   void operator()(const geometry_msgs::msg::TwistStamped& command) override
   {
@@ -107,11 +132,9 @@ private:
       const std::lock_guard<std::mutex> lock(mutex_);
       command_ = command;
     }
-    if (timer_ == nullptr)
+    if (!running_)
     {
-      std::visit(*next_, getCommandCopy());
-      timer_ = node_->create_wall_timer(period_.to_chrono<std::chrono::milliseconds>(),
-                                        [&]() { std::visit(*next_, getCommandCopy()); });
+      startThread();
     }
   }
 };

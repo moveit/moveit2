@@ -36,6 +36,8 @@
    Desc:   Input Resampler Tests
 */
 
+#include <chrono>
+#include <functional>
 #include <variant>
 #include <control_msgs/msg/joint_jog.hpp>
 #include <geometry_msgs/msg/twist_stamped.hpp>
@@ -51,7 +53,20 @@ namespace moveit_servo
 {
 namespace
 {
-const auto MESSAGE_RECEIVED_EPSILON = 2U;
+bool waitFor(const rclcpp::Node::SharedPtr& node, std::function<bool()> condition, rclcpp::Duration timeout,
+             rclcpp::Duration poll_period = rclcpp::Duration::from_seconds(0.01f))
+{
+  auto start = node->now();
+  do
+  {
+    if (condition())
+    {
+      return true;
+    }
+    rclcpp::sleep_for(poll_period.to_chrono<std::chrono::milliseconds>());
+  } while (start - node->now() < timeout);
+  return false;
+}
 }  // namespace
 
 using detail::InputCommand;
@@ -62,10 +77,10 @@ TEST(InputReamplerTests, NoOutputVisit)
   // GIVEN a InputResampler with with a Visitor that counts output calls
   auto visitor = std::make_shared<CountingVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_0");
-  auto resampler = InputResampler(node, rclcpp::Duration::from_seconds(10), visitor);
+  auto resampler = InputResampler(node, std::chrono::nanoseconds(100000000), visitor);
 
-  // WHEN we spin (without ever visiting the resampler)
-  rclcpp::spin_some(node);
+  // WHEN we sleep for twice the period (without ever visiting the resampler)
+  rclcpp::sleep_for(std::chrono::nanoseconds(200000000));
 
   // THEN we expect the count to still be 0
   EXPECT_EQ(visitor->count, 0U) << "Visitor should not have been called";
@@ -76,14 +91,16 @@ TEST(InputReamplerTests, OneVisit)
   // GIVEN a InputResampler with with a Visitor that counts output calls
   auto visitor = std::make_shared<CountingVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_1");
-  auto resampler = InputResampler(node, rclcpp::Duration::from_seconds(10), visitor);
+  auto resampler = InputResampler(node, std::chrono::nanoseconds(100000000), visitor);
 
-  // WHEN we visit the resampler with one message and spin
+  // WHEN we visit the resampler with one message and wait
   std::visit(resampler, InputCommand{ TwistStamped{} });
-  rclcpp::spin_some(node);
+  ASSERT_TRUE(waitFor(
+      node, [&]() { return visitor->count >= 1; }, rclcpp::Duration::from_seconds(10.f)))
+      << "Timeout waiting for message to be received by visitor";
 
   // THEN we expect the count to be one
-  EXPECT_EQ(visitor->count, 1U) << "Visitor should have only been called once";
+  EXPECT_GT(visitor->count, 0U) << "Visitor should have only been atleast once";
 }
 
 TEST(InputReamplerTests, WaitForSomeOutput)
@@ -91,18 +108,16 @@ TEST(InputReamplerTests, WaitForSomeOutput)
   // GIVEN a InputResampler with with a Visitor that counts output calls
   auto visitor = std::make_shared<CountingVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_2");
-  auto resampler = InputResampler(node, rclcpp::Duration::from_seconds(0.01), visitor);
+  auto resampler = InputResampler(node, std::chrono::nanoseconds(10000000), visitor);
 
-  // WHEN we visit the resampler with one message and spin for some time
+  // WHEN we visit the resampler with one message and wait for some time
   std::visit(resampler, InputCommand{ TwistStamped{} });
-  auto start = std::chrono::steady_clock::now();
-  while ((std::chrono::steady_clock::now() - start) < std::chrono::milliseconds(100))
-  {
-    rclcpp::spin_some(node);
-  }
+  ASSERT_TRUE(waitFor(
+      node, [&]() { return visitor->count >= 10; }, rclcpp::Duration::from_seconds(10.f)))
+      << "Timeout waiting for messages to be received by visitor";
 
   // THEN we expect the callable count to be called about 10
-  EXPECT_NEAR(visitor->count, 10U, MESSAGE_RECEIVED_EPSILON) << "Count should have been called about 10 times";
+  EXPECT_GT(visitor->count, 9U) << "Count should have been called atleast 10 times";
 }
 
 TEST(InputReamplerTests, ReceivedEqualsSent)
@@ -110,12 +125,15 @@ TEST(InputReamplerTests, ReceivedEqualsSent)
   // GIVEN a InputResampler with Visitor that copies the received command into a local variant
   auto visitor = std::make_shared<ReceivedCommandVisitor>();
   auto node = std::make_shared<rclcpp::Node>("test_node_3");
-  auto resampler = InputResampler(node, rclcpp::Duration::from_seconds(10), visitor);
+  auto resampler = InputResampler(node, std::chrono::nanoseconds(10000000), visitor);
 
-  // WHEN we visit the resampler with one message and spin
+  // WHEN we visit the resampler with one message and wait
   auto sent_msg = JointJog{};
   std::visit(resampler, InputCommand{ sent_msg });
-  rclcpp::spin_some(node);
+  ASSERT_TRUE(waitFor(
+      node, [&]() { return std::holds_alternative<decltype(sent_msg)>(visitor->received_command); },
+      rclcpp::Duration::from_seconds(10.f)))
+      << "Timeout waiting for message to be received by visitor";
 
   // THEN we expect the received command to be the same as the sent message
   ASSERT_TRUE(std::holds_alternative<decltype(sent_msg)>(visitor->received_command))

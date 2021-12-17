@@ -37,6 +37,7 @@
  *      Author    : Tyler Weaver
  */
 
+#include <chrono>
 #include <functional>
 #include <memory>
 #include <moveit_servo/detail/input_check_valid.hpp>
@@ -89,8 +90,10 @@ ServoPipeline::ServoPipeline(const rclcpp::Node::SharedPtr& node,
   {
     next_step = input_visitors_.emplace_back(std::make_shared<StaleCommandHalt>(
         node, rclcpp::Duration::from_seconds(parameters->incoming_command_timeout), halt, next_step));
-    next_step = input_visitors_.emplace_back(
-        std::make_shared<InputResampler>(node, rclcpp::Duration::from_seconds(parameters->publish_period), next_step));
+    next_step = input_visitors_.emplace_back(std::make_shared<InputResampler>(
+        node,
+        std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double>(parameters->publish_period)),
+        next_step));
     next_step = input_visitors_.emplace_back(std::make_shared<TimestampNow>(node, next_step));
   }
 
