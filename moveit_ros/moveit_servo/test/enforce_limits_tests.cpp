@@ -78,8 +78,10 @@ protected:
 TEST_F(EnforceLimitsTests, VelocityScalingTest)
 {
   // Request velocities that are too fast
+  std::vector<double> joint_position{ 0, 0, 0, 0, 0, 0, 0 };
   std::vector<double> joint_velocity{ 0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
   sensor_msgs::msg::JointState joint_state;
+  joint_state.position = joint_position;
   joint_state.velocity = joint_velocity;
 
   moveit_servo::enforceVelocityLimits(joint_model_group_, PUBLISH_PERIOD, joint_state);
@@ -92,8 +94,10 @@ TEST_F(EnforceLimitsTests, VelocityScalingTest)
 TEST_F(EnforceLimitsTests, NegativeJointAngleDeltasTest)
 {
   // Negative velocities exceeding the limit
+  std::vector<double> joint_position{ 0, 0, 0, 0, 0, 0, 0 };
   std::vector<double> joint_velocity{ 0, -1.0, -2.0, -3.0, -4.0, -5.0, -6.0 };
   sensor_msgs::msg::JointState joint_state;
+  joint_state.position = joint_position;
   joint_state.velocity = joint_velocity;
 
   moveit_servo::enforceVelocityLimits(joint_model_group_, PUBLISH_PERIOD, joint_state);
@@ -106,8 +110,10 @@ TEST_F(EnforceLimitsTests, NegativeJointAngleDeltasTest)
 TEST_F(EnforceLimitsTests, LowJointVelocityDeltaTest)
 {
   // Final test with joint velocities that are acceptable
+  std::vector<double> joint_position{ 0, 0, 0, 0, 0, 0, 0 };
   std::vector<double> joint_velocity{ 0, 0.001, 0.001, -0.001, 0.001, 0.001, 0.001 };
   sensor_msgs::msg::JointState joint_state;
+  joint_state.position = joint_position;
   joint_state.velocity = joint_velocity;
 
   moveit_servo::enforceVelocityLimits(joint_model_group_, PUBLISH_PERIOD, joint_state);
