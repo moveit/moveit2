@@ -150,9 +150,12 @@ class MoveItConfigsBuilder(ParameterBuilder):
     __moveit_configs = MoveItConfigs()
     __robot_name: str
     __urdf_package: Path
-    __urdf_filename: str
-    __srdf_filename: str
+    # Relative path of the URDF file
+    __urdf_file_path: Path
+    # Relative path of the SRDF file
+    __srdf_file_path: Path
     __robot_description: str
+    __config_dir_path = Path("config")
 
     # Look-up for robot_name_moveit_config package
     def __init__(self, robot_name: str, robot_description="robot_description"):
@@ -165,8 +168,12 @@ class MoveItConfigsBuilder(ParameterBuilder):
                 f"-- using config/{robot_name}.urdf and config/{robot_name}.srdf\x1b[0m"
             )
             self.__urdf_package = self._package_path
-            self.__urdf_filename = "config/" + self.__robot_name + ".urdf"
-            self.__srdf_filename = "config/" + self.__robot_name + ".srdf"
+            self.__urdf_file_path = self.__config_dir_path / (
+                self.__robot_name + ".urdf"
+            )
+            self.__srdf_filename = self.__config_dir_path / (
+                self.__robot_name + ".srdf"
+            )
         else:
             setup_assistant_yaml = load_yaml(setup_assistant_file)
             self.__urdf_package = Path(
@@ -176,17 +183,21 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     ]
                 )
             )
-            self.__urdf_filename = setup_assistant_yaml[
-                "moveit_setup_assistant_config"
-            ]["URDF"]["relative_path"]
-            self.__srdf_filename = setup_assistant_yaml[
-                "moveit_setup_assistant_config"
-            ]["SRDF"]["relative_path"]
+            self.__urdf_file_path = Path(
+                setup_assistant_yaml["moveit_setup_assistant_config"]["URDF"][
+                    "relative_path"
+                ]
+            )
+            self.__srdf_filename = Path(
+                setup_assistant_yaml["moveit_setup_assistant_config"]["SRDF"][
+                    "relative_path"
+                ]
+            )
         self.__robot_description = robot_description
 
     def robot_description(self, file_path: Optional[str] = None, mappings: dict = None):
         if file_path is None:
-            robot_description_file_path = self.__urdf_package / self.__urdf_filename
+            robot_description_file_path = self.__urdf_package / self.__urdf_file_path
         else:
             robot_description_file_path = self._package_path / file_path
         self.__moveit_configs.robot_description = {
@@ -212,7 +223,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.robot_description_kinematics = {
             self.__robot_description
             + "_kinematics": load_yaml(
-                self._package_path / (file_path or "config/kinematics.yaml")
+                self._package_path
+                / (file_path or self.__config_dir_path / "kinematics.yaml")
             )
         }
         return self
@@ -221,14 +233,16 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.joint_limits = {
             self.__robot_description
             + "_planning": load_yaml(
-                self._package_path / (file_path or "config/joint_limits.yaml")
+                self._package_path
+                / (file_path or self.__config_dir_path / "joint_limits.yaml")
             )
         }
         return self
 
     def moveit_cpp(self, file_path: Optional[str] = None):
         self.__moveit_configs.moveit_cpp = load_yaml(
-            self._package_path / (file_path or "config/moveit_cpp.yaml")
+            self._package_path
+            / (file_path or self.__config_dir_path / "moveit_cpp.yaml")
         )
         return self
 
@@ -243,7 +257,10 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.trajectory_execution.update(
             load_yaml(
                 self._package_path
-                / (file_path or f"config/{self.__robot_name}_controllers.yaml")
+                / (
+                    file_path
+                    or self.__config_dir_path / f"{self.__robot_name}_controllers.yaml"
+                )
             )
         )
         return self
@@ -283,7 +300,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
         }
         for pipeline in pipelines:
             self.__moveit_configs.planning_pipelines[pipeline] = load_yaml(
-                self._package_path / "config" / (pipeline + "_planning.yaml")
+                self._package_path
+                / self.__config_dir_path
+                / (pipeline + "_planning.yaml")
             )
         return self
 
@@ -291,7 +310,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.cartesian_limits = {
             self.__robot_description
             + "_planning": load_yaml(
-                self._package_path / (file_path or "config/cartesian_limits.yaml")
+                self._package_path
+                / (file_path or self.__config_dir_path / "cartesian_limits.yaml")
             )
         }
         return self
