@@ -43,7 +43,8 @@
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
-}
+constexpr char GLOBAL_PLANNING_ACTION_NAME[] = "hybrid_planning/global_planning_action";
+}  // namespace
 
 namespace moveit::hybrid_planning
 {
@@ -63,7 +64,7 @@ bool GlobalPlannerComponent::initializeGlobalPlanner()
 {
   // Initialize global planning request action server
   global_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::GlobalPlanner>(
-      node_, "global_planning_action",
+      node_, GLOBAL_PLANNING_ACTION_NAME,
       [](const rclcpp_action::GoalUUID& /*unused*/,
          std::shared_ptr<const moveit_msgs::action::GlobalPlanner::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received global planning goal request");

@@ -56,7 +56,8 @@ using namespace std::chrono_literals;
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
-}
+constexpr char RUN_HYBRID_PLANNING_ACTION_NAME[] = "hybrid_planning/run_hybrid_planning";
+}  // namespace
 
 class HybridPlanningDemo
 {
@@ -64,7 +65,8 @@ public:
   HybridPlanningDemo(const rclcpp::Node::SharedPtr& node)
   {
     node_ = node;
-    hp_action_client_ = rclcpp_action::create_client<moveit_msgs::action::HybridPlanner>(node_, "run_hybrid_planning"),
+    hp_action_client_ =
+        rclcpp_action::create_client<moveit_msgs::action::HybridPlanner>(node_, RUN_HYBRID_PLANNING_ACTION_NAME),
     robot_state_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state", 1);
 
     collision_object_1_.header.frame_id = "panda_link0";
