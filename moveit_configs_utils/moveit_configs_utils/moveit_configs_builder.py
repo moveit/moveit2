@@ -10,7 +10,6 @@ class MoveItConfigs(object):
     __slots__ = [
         "__robot_description",
         "__robot_description_semantic",
-        "__robot_description_planning",
         "__robot_description_kinematics",
         "__planning_pipelines",
         "__trajectory_execution",
@@ -25,7 +24,6 @@ class MoveItConfigs(object):
     def __init__(self):
         self.robot_description = {}
         self.robot_description_semantic = {}
-        self.robot_description_planning = {}
         self.robot_description_kinematics = {}
         self.planning_pipelines = {}
         self.trajectory_execution = {}
@@ -51,14 +49,6 @@ class MoveItConfigs(object):
     @robot_description_semantic.setter
     def robot_description_semantic(self, value):
         self.__robot_description_semantic = value
-
-    @property
-    def robot_description_planning(self):
-        return self.__robot_description_planning
-
-    @robot_description_planning.setter
-    def robot_description_planning(self, value):
-        self.__robot_description_planning = value
 
     @property
     def robot_description_kinematics(self):
