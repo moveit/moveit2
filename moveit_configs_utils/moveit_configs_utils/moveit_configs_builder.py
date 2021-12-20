@@ -288,9 +288,12 @@ class MoveItConfigsBuilder(ParameterBuilder):
         return self
 
     def cartesian_limits(self, file_path: Optional[str] = None):
-        self.__moveit_configs.cartesian_limits = load_yaml(
-            self._package_path / (file_path or "config/cartesian_limits.yaml")
-        )
+        self.__moveit_configs.cartesian_limits = {
+            self.__robot_description
+            + "_planning": load_yaml(
+                self._package_path / (file_path or "config/cartesian_limits.yaml")
+            )
+        }
         return self
 
     def to_moveit_configs(self):
