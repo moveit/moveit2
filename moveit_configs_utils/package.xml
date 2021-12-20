@@ -4,6 +4,7 @@
   <name>moveit_configs_utils</name>
   <version>2.3.0</version>
   <description>Python library for loading moveit config parameters in launch files</description>
+  <author email="jafar@picknik.ai">Jafar Abdi</author>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
   <license>BSD</license>
 
