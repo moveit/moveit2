@@ -297,10 +297,30 @@ class MoveItConfigsBuilder(ParameterBuilder):
         return self
 
     def to_moveit_configs(self):
+        if not self.__moveit_configs.robot_description:
+            self.robot_description()
+        if not self.__moveit_configs.robot_description_semantic:
+            self.robot_description_semantic()
+        if not self.__moveit_configs.robot_description_kinematics:
+            self.robot_description_kinematics()
+        if not self.__moveit_configs.planning_pipelines:
+            self.planning_pipelines()
+        # TODO(JafarAbdi): Not sure if the default value for file_path makes sense
+        # if not self.__moveit_configs.trajectory_execution:
+        #     self.trajectory_execution()
+        if not self.__moveit_configs.planning_scene_monitor:
+            self.planning_scene_monitor()
+        if not self.__moveit_configs.joint_limits:
+            self.joint_limits()
+        # TODO(JafarAbdi): We should have a default moveit_cpp.yaml as port of a moveit config package
+        # if not self.__moveit_configs.moveit_cpp:
+        #     self.moveit_cpp()
+        if not self.__moveit_configs.cartesian_limits:
+            self.cartesian_limits()
         return self.__moveit_configs
 
     def to_dict(self, include_moveit_configs: bool = True):
         parameters = self._parameters
         if include_moveit_configs:
-            parameters.update(self.__moveit_configs.to_dict())
+            parameters.update(self.to_moveit_configs().to_dict())
         return parameters
