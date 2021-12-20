@@ -15,15 +15,7 @@ def generate_launch_description():
         .to_dict()
     )
 
-    moveit_configs = (
-        MoveItConfigsBuilder("moveit_resources_panda")
-        .robot_description()
-        .robot_description_semantic()
-        .robot_description_kinematics()
-        .joint_limits()
-        .planning_pipelines()
-        .to_dict()
-    )
+    moveit_configs = MoveItConfigsBuilder("moveit_resources_panda").to_dict()
 
     # moveit_ros_benchmark demo executable
     moveit_ros_benchmarks_node = Node(

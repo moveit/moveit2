@@ -11,14 +11,7 @@ from parameter_builder import ParameterBuilder
 @pytest.mark.rostest
 def generate_test_description():
 
-    moveit_configs = (
-        MoveItConfigsBuilder("moveit_resources_fanuc")
-        .robot_description()
-        .robot_description_semantic()
-        .robot_description_kinematics()
-        .joint_limits()
-        .to_dict()
-    )
+    moveit_configs = MoveItConfigsBuilder("moveit_resources_fanuc").to_dict()
     test_param = (
         ParameterBuilder("moveit_kinematics")
         .yaml("config/fanuc-kdl-singular-test.yaml")

@@ -11,14 +11,7 @@ from parameter_builder import ParameterBuilder
 @pytest.mark.rostest
 def generate_test_description():
 
-    moveit_configs = (
-        MoveItConfigsBuilder("moveit_resources_panda")
-        .robot_description()
-        .robot_description_semantic()
-        .robot_description_kinematics()
-        .joint_limits()
-        .to_dict()
-    )
+    moveit_configs = MoveItConfigsBuilder("moveit_resources_panda").to_dict()
     test_param = (
         ParameterBuilder("moveit_kinematics")
         .yaml("config/panda-lma-test.yaml")

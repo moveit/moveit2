@@ -11,9 +11,6 @@ def generate_launch_description():
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(file_path="config/panda.urdf.xacro")
-        .robot_description_semantic()
-        .robot_description_kinematics()
-        .joint_limits()
         .to_moveit_configs()
     )
 

@@ -40,9 +40,6 @@ def generate_servo_test_description(
         .robot_description(
             file_path="config/panda.urdf.xacro", mappings=robot_description_mappings
         )
-        .robot_description_semantic()
-        .robot_description_kinematics()
-        .joint_limits()
         .to_moveit_configs()
     )
 

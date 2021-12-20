@@ -14,12 +14,7 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(file_path="config/panda.urdf.xacro")
-        .robot_description_semantic()
-        .robot_description_kinematics()
-        .joint_limits()
         .trajectory_execution(file_path="config/panda_gripper_controllers.yaml")
-        .planning_scene_monitor()
-        .planning_pipelines()
         .to_moveit_configs()
     )
 
