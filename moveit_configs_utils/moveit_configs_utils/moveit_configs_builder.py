@@ -15,7 +15,6 @@ class MoveItConfigs(object):
         "__trajectory_execution",
         "__planning_scene_monitor",
         "__move_group_capabilities",
-        "__move_group",
         "__joint_limits",
         "__moveit_cpp",
         "__cartesian_limits",
@@ -29,7 +28,6 @@ class MoveItConfigs(object):
         self.trajectory_execution = {}
         self.planning_scene_monitor = {}
         self.move_group_capabilities = {}
-        self.move_group = {}
         self.joint_limits = {}
         self.moveit_cpp = {}
         self.cartesian_limits = {}
@@ -89,14 +87,6 @@ class MoveItConfigs(object):
     @move_group_capabilities.setter
     def move_group_capabilities(self, value):
         self.__move_group_capabilities = value
-
-    @property
-    def move_group(self):
-        return self.__move_group
-
-    @move_group.setter
-    def move_group(self, value):
-        self.__move_group = value
 
     @property
     def joint_limits(self):
