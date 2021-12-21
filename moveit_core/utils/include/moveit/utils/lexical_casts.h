@@ -39,7 +39,7 @@
 /** \file lexical_casts.h
  *  \brief locale-agnostic conversion functions from floating point numbers to strings
  *
- *  Depending on the system locale, a different decimal seperator might be used
+ *  Depending on the system locale, a different decimal separator might be used
  *  for floating point numbers. This is often not wanted for internal (ie non-user
  *  facing) purposes. This module provides conversion functions that use std::locale::classic()
  *  (i.e. the default if no locale is set on the system).

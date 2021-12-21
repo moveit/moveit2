@@ -608,7 +608,7 @@ bool ServoCalcs::jointServoCalcs(const control_msgs::msg::JointJog& cmd,
   // Apply user-defined scaling
   delta_theta_ = scaleJointCommand(cmd);
 
-  // Perform interal servo with the command
+  // Perform internal servo with the command
   return internalServoUpdate(delta_theta_, joint_trajectory, ServoType::JOINT_SPACE);
 }
 
@@ -638,7 +638,7 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   }
   delta_theta *= collision_scale;
 
-  // Loop thru joints and update them, calculate velocities, and filter
+  // Loop through joints and update them, calculate velocities, and filter
   if (!applyJointUpdate(delta_theta, internal_joint_state_, prev_joint_velocity_))
     return false;
 

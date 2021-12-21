@@ -71,7 +71,7 @@ public:
 
   /**
    * Load and initialized planner logic plugin and ROS 2 action and topic interfaces
-   * @return Initialization successfull yes/no
+   * @return Initialization successful yes/no
    */
   bool initialize();
 

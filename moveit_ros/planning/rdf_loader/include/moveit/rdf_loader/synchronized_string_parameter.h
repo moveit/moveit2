@@ -53,7 +53,7 @@ using StringCallback = std::function<void(const std::string&)>;
  *
  * You can specify how long to wait for a subscribed message with NAME_timeout (double in seconds)
  *
- * By default, the subscription will be killed after the first message is recieved.
+ * By default, the subscription will be killed after the first message is received.
  * If the parameter NAME_continuous is true, then the parent_callback will be called on every subsequent message.
  */
 class SynchronizedStringParameter

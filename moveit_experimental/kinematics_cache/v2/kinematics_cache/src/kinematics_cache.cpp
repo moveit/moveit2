@@ -141,7 +141,7 @@ bool KinematicsCache::addToCache(const geometry_msgs::Pose& pose, const std::vec
   unsigned int start_index = getSolutionLocation(grid_index, num_solutions);
   for (unsigned int i = 0; i < joint_values.size(); ++i)
   {
-    //    ROS_INFO("Joint value[%d]: %f, localtion: %d",i,joint_values[i],start_index+i);
+    //    ROS_INFO("Joint value[%d]: %f, location: %d",i,joint_values[i],start_index+i);
     kinematics_cache_vector_[start_index + i] = joint_values[i];
   }
   if (num_solutions_vector_[grid_index] < max_solutions_per_grid_location_)

@@ -315,7 +315,7 @@ void HybridPlanningManager::hybridPlanningRequestCallback(
 
 void HybridPlanningManager::sendHybridPlanningResponse(bool success)
 {
-  // Return hybrid planning action result dependend on the function's argument
+  // Return hybrid planning action result dependent on the function's argument
   auto result = std::make_shared<moveit_msgs::action::HybridPlanner::Result>();
   if (success)
   {

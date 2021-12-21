@@ -94,7 +94,7 @@ public:
   /**
    * @brief Will terminate solve()
    * @return
-   * @note Currently will not stop a runnning solve but not start future solves.
+   * @note Currently will not stop a running solve but not start future solves.
    */
   bool terminate() override;
 

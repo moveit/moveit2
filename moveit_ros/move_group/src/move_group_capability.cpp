@@ -131,7 +131,7 @@ std::string move_group::MoveGroupCapability::getActionResultString(const moveit_
     else
     {
       if (plan_only)
-        return "Motion plan was computed succesfully.";
+        return "Motion plan was computed successfully.";
       else
         return "Solution was found and executed.";
     }

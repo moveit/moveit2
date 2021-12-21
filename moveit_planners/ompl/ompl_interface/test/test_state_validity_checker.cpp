@@ -154,7 +154,7 @@ public:
 
     ASSERT_NE(planning_context_, nullptr) << "Initialize planning context before adding path constraints.";
 
-    // set the robot to a known position that is withing the joint limits and collision free
+    // set the robot to a known position that is within the joint limits and collision free
     robot_state_->setJointGroupPositions(joint_model_group_, position_in_joint_limits);
 
     // create position constraints around the given robot state
@@ -179,7 +179,7 @@ public:
 
     EXPECT_TRUE(checker->isValid(ompl_state.get()));
 
-    // move the position constraints away from the curren end-effector position to make it fail
+    // move the position constraints away from the current end-effector position to make it fail
     moveit_msgs::msg::Constraints path_constraints_2(path_constraints);
     path_constraints_2.position_constraints.at(0).constraint_region.primitive_poses.at(0).position.z += 0.2;
 

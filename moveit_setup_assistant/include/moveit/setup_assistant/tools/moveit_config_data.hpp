@@ -218,7 +218,7 @@ public:
   /// Full file-system path to urdf
   std::string urdf_path_;
 
-  /// Name of package containig urdf (note: this may be empty b/c user may not have urdf in pkg)
+  /// Name of package containing urdf (note: this may be empty b/c user may not have urdf in pkg)
   std::string urdf_pkg_name_;
 
   /// Path relative to urdf package (note: this may be same as urdf_path_)
@@ -490,7 +490,7 @@ public:
   bool deleteROSController(const std::string& controller_name);
 
   /**
-   * \brief Used for adding a sensor plugin configuation prameter to the sensor plugin configuration parameter list
+   * \brief Used for adding a sensor plugin configuration parameter to the sensor plugin configuration parameter list
    */
   void addGenericParameterToSensorPluginConfig(const std::string& name, const std::string& value = "",
                                                const std::string& comment = "");
@@ -501,7 +501,7 @@ public:
   void clearSensorPluginConfig();
 
   /**
-   * \brief Used for adding a sensor plugin configuation parameter to the sensor plugin configuration parameter list
+   * \brief Used for adding a sensor plugin configuration parameter to the sensor plugin configuration parameter list
    */
   std::vector<std::map<std::string, GenericParameter> > getSensorPluginConfig();
 

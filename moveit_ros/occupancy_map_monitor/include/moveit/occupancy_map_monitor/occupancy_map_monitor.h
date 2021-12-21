@@ -166,7 +166,7 @@ public:
   void stopMonitor();
 
   /** @brief Get a pointer to the underlying octree for this monitor. Lock the tree before reading or writing using this
-   *  pointer. The value of this pointer stays the same throughout the existance of the monitor instance. */
+   *  pointer. The value of this pointer stays the same throughout the existence of the monitor instance. */
   const collision_detection::OccMapTreePtr& getOcTreePtr()
   {
     return tree_;

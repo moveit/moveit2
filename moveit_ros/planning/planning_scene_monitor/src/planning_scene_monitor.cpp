@@ -839,7 +839,7 @@ void PlanningSceneMonitor::includeAttachedBodiesInOctree()
 
   boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
 
-  // clear information about any attached body, without refering to the AttachedBody* ptr (could be invalid)
+  // clear information about any attached body, without referring to the AttachedBody* ptr (could be invalid)
   for (std::pair<const moveit::core::AttachedBody* const,
                  std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& attached_body_shape_handle :
        attached_body_shape_handles_)

@@ -290,7 +290,7 @@ public:
   RobotTrajectory& unwind();
   RobotTrajectory& unwind(const moveit::core::RobotState& state);
 
-  /** @brief Finds the waypoint indicies before and after a duration from start.
+  /** @brief Finds the waypoint indices before and after a duration from start.
    *  @param The duration from start.
    *  @param The waypoint index before the supplied duration.
    *  @param The waypoint index after (or equal to) the supplied duration.
