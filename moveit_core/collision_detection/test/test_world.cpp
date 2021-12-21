@@ -178,7 +178,7 @@ TEST(World, AddRemoveShape)
     EXPECT_FALSE(world.hasObject("mix1"));
     EXPECT_TRUE(world.hasObject("ball2"));
 
-    // ask for nonexistant object
+    // ask for nonexistent object
     collision_detection::World::ObjectConstPtr obj3 = world.getObject("abc");
     EXPECT_FALSE(obj3);
   }

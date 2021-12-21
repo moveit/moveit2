@@ -72,7 +72,7 @@ public:
    * assume that the units are meters.  The size of the the volume is
    * given along each of the X, Y, and Z axes.  The volume begins at
    * the minimum point in each dimension, as specified by the origin
-   * parameters.  The data structure will remain unintialized until
+   * parameters.  The data structure will remain uninitialized until
    * the \ref VoxelGrid::reset function is called.
    *
    * @param [in] size_x Size of the X axis in meters
@@ -206,7 +206,7 @@ public:
   double getResolution(Dimension dim) const;
 
   /**
-   * \brief Gets the origin (miniumum point) of the indicated dimension
+   * \brief Gets the origin (minimum point) of the indicated dimension
    *
    * @param [in] dim The dimension for the query
    *
@@ -292,7 +292,7 @@ protected:
   double size_[3];         /**< \brief The size of each dimension in meters (in Dimension order) */
   double resolution_;      /**< \brief The resolution of each dimension in meters (in Dimension order) */
   double oo_resolution_;   /**< \brief 1.0/resolution_ */
-  double origin_[3];       /**< \brief The origin (minumum point) of each dimension in meters (in Dimension order) */
+  double origin_[3];       /**< \brief The origin (minimum point) of each dimension in meters (in Dimension order) */
   double origin_minus_[3]; /**< \brief origin - 0.5/resolution */
   int num_cells_[3];       /**< \brief The number of cells in each dimension (in Dimension order) */
   int num_cells_total_;    /**< \brief The total number of voxels in the grid */

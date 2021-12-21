@@ -299,7 +299,7 @@ bool PlanningComponent::execute(bool blocking)
 {
   if (!last_plan_solution_)
   {
-    RCLCPP_ERROR(LOGGER, "There is no successfull plan to execute");
+    RCLCPP_ERROR(LOGGER, "There is no successful plan to execute");
     return false;
   }
 

@@ -78,7 +78,7 @@ void BulletCastBVHManager::setCastCollisionObjectsTransform(const std::string& n
     cow->setWorldTransform(tf1);
     link2cow_[name]->setWorldTransform(tf1);
 
-    // If collision object is disabled dont proceed
+    // If collision object is disabled don't proceed
     if (cow->m_enabled)
     {
       if (btBroadphaseProxy::isConvex(cow->getCollisionShape()->getShapeType()))

@@ -53,12 +53,12 @@ bool MoveItPlanningPipeline::initialize(const rclcpp::Node::SharedPtr& node)
   // TODO(andyz): how to standardize this for planning pipelines other than ompl?
   // Maybe use loadPlanningPipelines() from moveit_cpp.cpp
 
-  // Declare planning pipeline paramter
+  // Declare planning pipeline parameter
   node->declare_parameter<std::vector<std::string>>(PLANNING_PIPELINES_NS + "pipeline_names",
                                                     std::vector<std::string>({ UNDEFINED }));
   node->declare_parameter<std::string>(PLANNING_PIPELINES_NS + "namespace", UNDEFINED);
 
-  // Default PlanRequestParameters. These can be overriden when plan() is called
+  // Default PlanRequestParameters. These can be overridden when plan() is called
   node->declare_parameter<std::string>(PLAN_REQUEST_PARAM_NS + "planner_id", UNDEFINED);
   node->declare_parameter<std::string>(PLAN_REQUEST_PARAM_NS + "planning_pipeline", UNDEFINED);
   node->declare_parameter<int>(PLAN_REQUEST_PARAM_NS + "planning_attempts", 5);

@@ -49,7 +49,7 @@ namespace
 /**
  * @brief Create a string by adding a provided separator character between each of a variable number of input arguments.
  * @param separator Char to use as the separator.
- * @param content Variable number of input arguments to concatentate.
+ * @param content Variable number of input arguments to concatenate.
  * @return Concatenated result string.
  */
 template <typename... T>

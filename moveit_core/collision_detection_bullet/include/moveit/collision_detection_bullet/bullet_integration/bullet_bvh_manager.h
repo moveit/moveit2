@@ -78,7 +78,7 @@ public:
 
   /**@brief Set a single static collision object's tansform
    * @param name The name of the object
-   * @param pose The tranformation in world */
+   * @param pose The transformation in world */
   void setCollisionObjectsTransform(const std::string& name, const Eigen::Isometry3d& pose);
 
   /**@brief Set which collision objects are active
@@ -139,7 +139,7 @@ protected:
   /** @brief The contact distance threshold */
   double contact_distance_;
 
-  /** @brief The bullet collision dispatcher used for getting object to object collison algorithm */
+  /** @brief The bullet collision dispatcher used for getting object to object collision algorithm */
   std::unique_ptr<btCollisionDispatcher> dispatcher_;
 
   /** @brief The bullet collision dispatcher configuration information */

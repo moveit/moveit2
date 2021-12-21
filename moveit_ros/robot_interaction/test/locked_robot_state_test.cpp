@@ -470,7 +470,7 @@ void MyInfo::waitThreadFunc(robot_interaction::LockedRobotState* locked_state, i
   cnt_lock_.unlock();
 }
 
-// Run several threads and ensure they modify the state consistantly
+// Run several threads and ensure they modify the state consistently
 //   ncheck - # of checkThreadFunc threads to run
 //   nset   - # of setThreadFunc threads to run
 //   nmod   - # of modifyThreadFunc threads to run

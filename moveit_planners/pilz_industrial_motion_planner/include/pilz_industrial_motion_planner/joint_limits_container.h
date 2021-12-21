@@ -75,7 +75,7 @@ public:
   size_t getCount() const;
 
   /**
-   * @brief Returns wether the container is empty
+   * @brief Returns whether the container is empty
    * @return true if empty, false otherwise
    */
   bool empty() const;

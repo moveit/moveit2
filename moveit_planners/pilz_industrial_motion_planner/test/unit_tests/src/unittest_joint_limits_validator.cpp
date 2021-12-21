@@ -45,7 +45,7 @@ class JointLimitsValidatorTest : public ::testing::Test
 };
 
 /**
- * @brief Check postion equality
+ * @brief Check position equality
  */
 TEST_F(JointLimitsValidatorTest, CheckPositionEquality)
 {
@@ -66,7 +66,7 @@ TEST_F(JointLimitsValidatorTest, CheckPositionEquality)
 }
 
 /**
- * @brief Check postion inequality in min_position detection
+ * @brief Check position inequality in min_position detection
  */
 TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMinPosition)
 {
@@ -92,7 +92,7 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMinPosition)
 }
 
 /**
- * @brief Check postion inequality in max_position detection
+ * @brief Check position inequality in max_position detection
  */
 TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMaxPosition1)
 {
@@ -118,7 +118,7 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMaxPosition1)
 }
 
 /**
- * @brief Check postion inequality in max_position detection (using 3 limits)
+ * @brief Check position inequality in max_position detection (using 3 limits)
  */
 TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMaxPosition2)
 {
@@ -150,7 +150,7 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMaxPosition2)
 }
 
 /**
- * @brief Check postion inequality in has_position_limits false detection
+ * @brief Check position inequality in has_position_limits false detection
  */
 TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityHasPositionLimits)
 {
@@ -255,7 +255,7 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMaxVelocity2)
 }
 
 /**
- * @brief Check postion inequality in has_position_limits false detection
+ * @brief Check position inequality in has_position_limits false detection
  */
 TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityHasVelocityLimits)
 {

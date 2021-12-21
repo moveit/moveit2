@@ -89,7 +89,7 @@ public:
                  const std::string& render_vertex_shader = "", const std::string& render_fragment_shader = "",
                  const std::string& filter_vertex_shader = "", const std::string& filter_fragment_shader = "");
 
-  /** \brief Desctructor */
+  /** \brief Destructor */
   ~MeshFilterBase();
 
   /**

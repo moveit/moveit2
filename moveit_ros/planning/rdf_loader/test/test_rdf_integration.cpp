@@ -51,7 +51,7 @@ TEST(RDFIntegration, default_arguments)
 TEST(RDFIntegration, non_existent)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("non_existent");
-  rdf_loader::RDFLoader loader(node, "DNE");
+  rdf_loader::RDFLoader loader(node, "does_not_exist");
   ASSERT_EQ(nullptr, loader.getURDF());
   ASSERT_EQ(nullptr, loader.getSRDF());
 }

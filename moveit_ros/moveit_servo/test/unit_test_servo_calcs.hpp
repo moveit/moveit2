@@ -48,7 +48,7 @@ const std::vector<std::string> PANDA_JOINT_NAMES{ "panda_finger_joint1", "panda_
                                                   "panda_joint2",        "panda_joint3",        "panda_joint4",
                                                   "panda_joint5",        "panda_joint6",        "panda_joint7" };
 
-// subclassing and friending so we can access member varibles
+// subclassing and friending so we can access member variables
 class FriendServoCalcs : public moveit_servo::ServoCalcs
 {
   FRIEND_TEST(ServoCalcsTestFixture, TestRemoveSingleDimension);

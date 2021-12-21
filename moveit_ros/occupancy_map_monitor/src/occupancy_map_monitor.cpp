@@ -125,7 +125,7 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
       continue;
     }
 
-    // Add the succesfully initialized updater
+    // Add the successfully initialized updater
     addUpdater(occupancy_map_updater);
   }
 
@@ -155,7 +155,7 @@ void OccupancyMapMonitor::addUpdater(const OccupancyMapUpdaterPtr& updater)
     if (map_updaters_.size() > 1)
     {
       mesh_handles_.resize(map_updaters_.size());
-      // when we had one updater only, we passed direcly the transform cache callback to that updater
+      // when we had one updater only, we passed directly the transform cache callback to that updater
       if (map_updaters_.size() == 2)
       {
         map_updaters_[0]->setTransformCacheCallback(
