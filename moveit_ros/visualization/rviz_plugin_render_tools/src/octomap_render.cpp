@@ -169,7 +169,7 @@ void OcTreeRender::octreeDecoding(const std::shared_ptr<const octomap::OcTree>& 
       bool display_voxel = false;
 
       // the left part evaluates to 1 for free voxels and 2 for occupied voxels
-      if ((static_cast<int>(octree->isNodeOccupied(*it) + 1)) & render_mode_mask)
+      if ((static_cast<int>(octree->isNodeOccupied(*it)) + 1) & render_mode_mask)
       {
         // check if current voxel has neighbors on all sides -> no need to be displayed
         bool all_neighbors_found = true;
