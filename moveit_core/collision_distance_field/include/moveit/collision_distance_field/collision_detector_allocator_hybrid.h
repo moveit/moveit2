@@ -39,10 +39,12 @@
 #include <moveit/collision_detection/collision_detector_allocator.h>
 #include <moveit/collision_distance_field/collision_env_hybrid.h>
 
+#include "moveit_collision_distance_field_export.h"
+
 namespace collision_detection
 {
 /** \brief An allocator for Hybrid collision detectors */
-class CollisionDetectorAllocatorHybrid
+class MOVEIT_COLLISION_DISTANCE_FIELD_EXPORT CollisionDetectorAllocatorHybrid
   : public CollisionDetectorAllocatorTemplate<CollisionEnvHybrid, CollisionDetectorAllocatorHybrid>
 {
 public:
