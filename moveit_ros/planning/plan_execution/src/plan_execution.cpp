@@ -113,7 +113,7 @@ std::string plan_execution::PlanExecution::getErrorCodeString(const moveit_msgs:
   else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN)
     return "Invalid motion plan";
   else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA)
-    return "Unable to aquire sensor data";
+    return "Unable to acquire sensor data";
   else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE)
     return "Motion plan invalidated by environment change";
   else if (error_code.val == moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED)
@@ -355,7 +355,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
   for (std::size_t i = 0; i < plan.plan_components_.size(); ++i)
   {
     // \todo should this be in trajectory_execution ? Maybe. Then that will have to use kinematic_trajectory too;
-    // spliting trajectories for controllers becomes interesting: tied to groups instead of joints. this could cause
+    // splitting trajectories for controllers becomes interesting: tied to groups instead of joints. this could cause
     // some problems
     // in the meantime we do a hack:
 

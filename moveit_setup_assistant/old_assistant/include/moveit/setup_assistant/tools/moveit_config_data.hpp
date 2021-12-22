@@ -37,7 +37,7 @@
 #pragma once
 
 #include <moveit/setup_assistant/tools/compute_default_collisions.h>  // for LinkPairMap
-#include <yaml-cpp/yaml.h>                                            // outputing yaml config files
+#include <yaml-cpp/yaml.h>                                            // outputting yaml config files
 
 #include <utility>
 

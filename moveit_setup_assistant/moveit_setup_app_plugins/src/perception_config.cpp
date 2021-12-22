@@ -107,7 +107,7 @@ bool PerceptionConfig::input3DSensorsYAML(const std::string& file_path)
     RCLCPP_ERROR_STREAM((*logger_), "Error parsing sensors yaml: " << e.what());
   }
 
-  return false;  // if it gets to this point an error has occured
+  return false;  // if it gets to this point an error has occurred
 }
 
 // ******************************************************************************************
@@ -124,7 +124,7 @@ void PerceptionConfig::clearSensorPluginConfig()
 }
 
 // ******************************************************************************************
-// Used to add a sensor plugin configuation parameter to the sensor plugin configuration parameter list
+// Used to add a sensor plugin configuration parameter to the sensor plugin configuration parameter list
 // ******************************************************************************************
 void PerceptionConfig::setConfig(const SensorParameters& parameters)
 {

@@ -279,7 +279,7 @@ void VirtualJointsWidget::edit(const std::string& name)
   // Check if vjoint was found
   if (vjoint == nullptr)  // not found
   {
-    QMessageBox::critical(this, "Error Saving", "An internal error has occured while saving. Quitting.");
+    QMessageBox::critical(this, "Error Saving", "An internal error has occurred while saving. Quitting.");
     QApplication::quit();
   }
 
@@ -488,7 +488,7 @@ void VirtualJointsWidget::loadDataTable()
     ++row;
   }
 
-  // Reenable
+  // Re-enable
   data_table_->setUpdatesEnabled(true);  // prevent table from updating until we are completely done
   data_table_->setDisabled(false);       // make sure we disable it so that the cellChanged event is not called
 

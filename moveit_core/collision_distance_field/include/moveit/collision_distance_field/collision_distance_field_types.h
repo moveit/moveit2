@@ -182,7 +182,7 @@ public:
    * calculation
    * @param tolerance
    * @param subtract_radii distance to the sphere centers will be computed by
-   * substracting the sphere radius from the nearest point
+   * subtracting the sphere radius from the nearest point
    * @param maximum_value
    * @param stop_at_first_collision when true the computation is terminated when
    * the first collision is found
@@ -197,7 +197,7 @@ protected:
 };
 
 // determines set of collision spheres given a posed body; this is BAD!
-// Allocation erorrs will happen; change this function so it does not return
+// Allocation errors will happen; change this function so it does not return
 // that vector by value
 std::vector<CollisionSphere> determineCollisionSpheres(const bodies::Body* body, Eigen::Isometry3d& relativeTransform);
 

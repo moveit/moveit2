@@ -267,7 +267,7 @@ void PropagationDistanceField::addNewObstacleVoxels(const EigenSTL::vector_Vecto
           // our closest non-obstacle cell has become an obstacle
           if (closest_point_voxel.negative_distance_square_ != 0)
           {
-            // find all neigbors inside pre-existing obstacles whose
+            // find all neighbors inside pre-existing obstacles whose
             // closest_negative_point_ is now an obstacle.  These must all be
             // set to max_distance_sq_ so they will be re-propogated with a new
             // closest_negative_point_ that is outside the obstacle.
@@ -282,7 +282,7 @@ void PropagationDistanceField::addNewObstacleVoxels(const EigenSTL::vector_Vecto
           }
           else
           {
-            // this cell still has a valid non-obstacle cell, so we need to propogate from it
+            // this cell still has a valid non-obstacle cell, so we need to propagate from it
             nvoxel.negative_update_direction_ = initial_update_direction;
             negative_bucket_queue_[0].push_back(nloc);
           }

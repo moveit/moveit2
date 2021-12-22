@@ -179,7 +179,7 @@ void StartScreenWidget::onInit()
   hlayout->addLayout(right_layout);
   layout->addLayout(hlayout);
 
-  // Verticle Spacer
+  // Vertical Spacer
   layout->addItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
   // Attach bottom layout
@@ -340,7 +340,7 @@ bool StartScreenWidget::loadPackageSettings(bool show_warnings)
 }
 
 // ******************************************************************************************
-// Load exisiting package files
+// Load existing package files
 // ******************************************************************************************
 bool StartScreenWidget::loadExistingFiles()
 {
@@ -491,7 +491,7 @@ SelectModeWidget::SelectModeWidget(QWidget* parent) : QFrame(parent)
   btn_exist_->setCheckable(true);
   hlayout->addWidget(btn_exist_);
 
-  // Add horizontal layer to verticle layer
+  // Add horizontal layer to vertical layer
   layout->addLayout(hlayout);
   setLayout(layout);
   btn_new_->setCheckable(true);

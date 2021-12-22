@@ -560,7 +560,7 @@ std::vector<OMPLPlannerDescription> MoveItConfigData::getOMPLPlanners()
                     "dist new state to nearest neighbor to disqualify as frontier. "
                     "default: 0.0 set in setup()");
   trrt.addParameter("frountierNodeRatio", "0.1", "1/10, or 1 nonfrontier for every 10 frontier. default: 0.1");
-  trrt.addParameter("k_constant", "0.0", "value used to normalize expresssion. default: 0.0 set in setup()");
+  trrt.addParameter("k_constant", "0.0", "value used to normalize expression. default: 0.0 set in setup()");
   planner_des.push_back(trrt);
 
   OMPLPlannerDescription prm("PRM", "geometric");

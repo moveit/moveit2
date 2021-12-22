@@ -130,7 +130,7 @@ private:
   /// Load chosen files for creating new package
   bool loadNewFiles();
 
-  /// Load exisiting package files
+  /// Load existing package files
   bool loadExistingFiles();
 
   /// Loads sensors_3d yaml file

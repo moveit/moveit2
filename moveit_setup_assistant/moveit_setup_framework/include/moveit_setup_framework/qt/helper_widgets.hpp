@@ -53,7 +53,7 @@ class HeaderWidget : public QWidget
   Q_OBJECT
 
 public:
-  /// Contructor
+  /// Constructor
   HeaderWidget(const std::string& title, const std::string& instructions, QWidget* parent);
 };
 

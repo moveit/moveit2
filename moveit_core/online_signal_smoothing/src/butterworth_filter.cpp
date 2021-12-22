@@ -51,7 +51,7 @@ ButterworthFilter::ButterworthFilter(double low_pass_filter_coeff)
   , scale_term_(1. / (1. + low_pass_filter_coeff))
   , feedback_term_(1. - low_pass_filter_coeff)
 {
-  // guarantee this doesn't change because the logic below depends on this length implicity
+  // guarantee this doesn't change because the logic below depends on this length implicitly
   static_assert(ButterworthFilter::FILTER_LENGTH == 2,
                 "online_signal_smoothing::ButterworthFilter::FILTER_LENGTH should be 2");
 

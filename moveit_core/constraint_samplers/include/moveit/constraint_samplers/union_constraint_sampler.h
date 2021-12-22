@@ -147,7 +147,7 @@ public:
    * @param [in] reference_state Reference kinematic state that will be passed through to samplers
    * @param [in] max_attempts Max attempts, which will be passed through to samplers
    *
-   * @return True if all invidual samplers return true
+   * @return True if all individual samplers return true
    */
   bool sample(moveit::core::RobotState& state, const moveit::core::RobotState& reference_state,
               unsigned int max_attempts) override;

@@ -115,7 +115,7 @@ private:
   // ******************************************************************************************
   // Variables
   // ******************************************************************************************
-  /// Orignal name of vjoint currently being edited. This is used to find the element in the vector
+  /// Original name of vjoint currently being edited. This is used to find the element in the vector
   std::string current_edit_vjoint_;
 
   // ******************************************************************************************

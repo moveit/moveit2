@@ -176,7 +176,7 @@ protected:
   {
     moveit_msgs::msg::PositionConstraint pos_con_msg = createPositionConstraint(base_link_name_, ee_link_name_);
 
-    // Make the tolerance on the x dimension smaller than the treshold used to recognize equality constraints.
+    // Make the tolerance on the x dimension smaller than the threshold used to recognize equality constraints.
     // (see docstring EqualityPositionConstraint::equality_constraint_threshold).
     pos_con_msg.constraint_region.primitives.at(0).dimensions[0] = 0.0005;
 

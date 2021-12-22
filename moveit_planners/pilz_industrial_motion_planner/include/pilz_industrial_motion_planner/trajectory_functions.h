@@ -77,7 +77,7 @@ bool computePoseIK(const planning_scene::PlanningSceneConstPtr& scene, const std
  * @brief compute the pose of a link at give robot state
  * @param robot_model: kinematic model of the robot
  * @param link_name: target link name
- * @param joint_state: joint positons of this group
+ * @param joint_state: joint positions of this group
  * @param pose: pose of the link in base frame of robot model
  * @return true if succeed
  */

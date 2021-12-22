@@ -50,7 +50,7 @@ TEST(CommandPlannerTestDirect, ExceptionCoverage)
 
 /**
  *  This test uses pilz_industrial_motion_planner::CommandPlanner directly and
- * is thus seperated from
+ * is thus separated from
  * unittest_pilz_industrial_motion_planner.cpp since plugin loading via
  * pluginlib does not allow loading of classes
  * already
@@ -66,7 +66,7 @@ TEST(CommandPlannerTestDirect, ExceptionCoverage)
  */
 TEST(CommandPlannerTestDirect, CheckDoubleLoadingException)
 {
-  /// Registed a found loader
+  /// Registered a found loader
   pilz_industrial_motion_planner::CommandPlanner planner;
   pilz_industrial_motion_planner::PlanningContextLoaderPtr planning_context_loader(
       new pilz_industrial_motion_planner::PlanningContextLoaderPTP());
@@ -102,7 +102,7 @@ TEST(CommandPlannerTestDirect, FailOnLoadContext)
     }
   };
 
-  /// Registed a found loader
+  /// Registered a found loader
   pilz_industrial_motion_planner::PlanningContextLoaderPtr planning_context_loader(new TestPlanningContextLoader());
   planner.registerContextLoader(planning_context_loader);
 

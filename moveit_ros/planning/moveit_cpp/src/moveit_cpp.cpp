@@ -95,7 +95,7 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opti
 {
   planning_scene_monitor_ =
       std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, options.robot_description, options.name);
-  // Allows us to sycronize to Rviz and also publish collision objects to ourselves
+  // Allows us to synchronize to Rviz and also publish collision objects to ourselves
   RCLCPP_DEBUG(LOGGER, "Configuring Planning Scene Monitor");
   if (planning_scene_monitor_->getPlanningScene())
   {
@@ -117,7 +117,7 @@ bool MoveItCpp::loadPlanningSceneMonitor(const PlanningSceneMonitorOptions& opti
     return false;
   }
 
-  // Wait for complete state to be recieved
+  // Wait for complete state to be received
   // TODO(henningkayser): Fix segfault in waitForCurrentState()
   // if (options.wait_for_initial_state_timeout > 0.0)
   // {

@@ -218,7 +218,7 @@ void ROSControllersWidget::loadControllersTree()
     loadToControllersTree(controller);
   }
 
-  // Reenable Tree
+  // Re-enable Tree
   controllers_tree_->setUpdatesEnabled(true);  // prevent table from updating until we are completely done
   controllers_tree_->setDisabled(false);       // make sure we disable it so that the cellChanged event is not called
   current_edit_controller_.clear();            // no controller is being edited
@@ -408,7 +408,7 @@ void ROSControllersWidget::addController()
 void ROSControllersWidget::addDefaultControllers()
 {
   if (!config_data_->addDefaultControllers())
-    QMessageBox::warning(this, "Error adding contollers", "No Planning Groups configured!");
+    QMessageBox::warning(this, "Error adding controllers", "No Planning Groups configured!");
   loadControllersTree();
 }
 
@@ -572,7 +572,7 @@ void ROSControllersWidget::saveControllerScreenGroups()
 }
 
 // ******************************************************************************************
-// Call when joints edit sceen is done and needs to be saved
+// Call when joints edit screen is done and needs to be saved
 // ******************************************************************************************
 void ROSControllersWidget::saveJointsScreen()
 {
@@ -597,7 +597,7 @@ void ROSControllersWidget::saveJointsScreen()
 }
 
 // ******************************************************************************************
-// Call when joints edit sceen is done and needs to be saved
+// Call when joints edit screen is done and needs to be saved
 // ******************************************************************************************
 void ROSControllersWidget::saveJointsGroupsScreen()
 {
@@ -633,7 +633,7 @@ void ROSControllersWidget::saveJointsGroupsScreen()
 }
 
 // ******************************************************************************************
-// Call when joints edit sceen is done and needs to be saved
+// Call when joints edit screen is done and needs to be saved
 // ******************************************************************************************
 void ROSControllersWidget::saveControllerScreenEdit()
 {
@@ -646,7 +646,7 @@ void ROSControllersWidget::saveControllerScreenEdit()
 }
 
 // ******************************************************************************************
-// Call when controller edit sceen is done and needs to be saved
+// Call when controller edit screen is done and needs to be saved
 // ******************************************************************************************
 bool ROSControllersWidget::saveControllerScreen()
 {
@@ -776,7 +776,7 @@ void ROSControllersWidget::editSelected()
   }
   else
   {
-    QMessageBox::critical(this, "Error Loading", "An internal error has occured while loading.");
+    QMessageBox::critical(this, "Error Loading", "An internal error has occurred while loading.");
   }
 }
 

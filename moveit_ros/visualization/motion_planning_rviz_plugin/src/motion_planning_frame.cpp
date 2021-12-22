@@ -100,7 +100,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   node_->get_parameter(planning_display_->getMoveGroupNS() + "/move_group/default_planning_pipeline",
                        default_planning_pipeline_);
 
-  // connect bottons to actions; each action usually registers the function pointer for the actual computation,
+  // connect buttons to actions; each action usually registers the function pointer for the actual computation,
   // to keep the GUI more responsive (using the background job processing)
   connect(ui_->plan_button, SIGNAL(clicked()), this, SLOT(planButtonClicked()));
   connect(ui_->execute_button, SIGNAL(clicked()), this, SLOT(executeButtonClicked()));

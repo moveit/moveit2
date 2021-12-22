@@ -91,7 +91,7 @@ protected:
   /// Full file-system path to urdf
   std::string urdf_path_;
 
-  /// Name of package containig urdf (note: this may be empty b/c user may not have urdf in pkg)
+  /// Name of package containing urdf (note: this may be empty b/c user may not have urdf in pkg)
   std::string urdf_pkg_name_;
 
   /// Path relative to urdf package (note: this may be same as urdf_path_)

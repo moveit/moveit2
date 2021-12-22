@@ -146,7 +146,7 @@ public:
    * position does not overlap with the new object position, then it
    * may be more efficient to call \ref removePointsFromField on the
    * old points and \ref addPointsToField on the new points.  If the
-   * object has moved only slighly, however, this function may offer a
+   * object has moved only slightly, however, this function may offer a
    * speed improvement.  All points in the old_points set should have
    * been previously added to the field in order for this function to
    * act as intended - points that are in both the old_points set and
@@ -473,7 +473,7 @@ public:
    * @param [in] height The height of the plane to show.  If the type
    * is XY, it's interpreted along the Z axis.  If the type is XZ,
    * it's interpreted along the Y axis.  If the type is YZ, it's
-   * interpeted along the X axis.
+   * interpreted along the X axis.
 
    * @param [in] origin The minimum point along each axis to display
    * @param [in] frame_id The frame to use as the header in the marker
@@ -583,7 +583,7 @@ public:
    * \brief Gets a distance value for an invalid cell.
    *
    *
-   * @return The distance associated with an unitialized cell
+   * @return The distance associated with an uninitialized cell
    */
   virtual double getUninitializedDistance() const = 0;
 

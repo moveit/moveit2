@@ -3,10 +3,10 @@
   <!-- TrajOpt Plugin for MoveIt -->
   <arg name="planning_plugin" value="trajopt_interface/TrajOptPlanner" />
 
-  <!-- define capabilites that are loaded on start (space seperated) -->
+  <!-- define capabilities that are loaded on start (space separated) -->
   <arg name="capabilities" default=""/>
 
-  <!-- inhibit capabilites (space seperated) -->
+  <!-- inhibit capabilities (space separated) -->
   <arg name="disable_capabilities" default=""/>
 
   <!-- The request adapters (plugins) used when planning with TrajOpt.
