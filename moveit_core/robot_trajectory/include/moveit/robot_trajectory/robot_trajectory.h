@@ -324,7 +324,7 @@ public:
       duration_iterator++;
       return *this;
     }
-    Iterator (operator++)static_cast<int>
+    Iterator operator++(int)
     {
       Iterator retval = *this;
       ++(*this);
