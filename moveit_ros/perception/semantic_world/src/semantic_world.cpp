@@ -374,7 +374,7 @@ SemanticWorld::generatePlacePoses(const object_recognition_msgs::msg::Table& tab
         int point_y = k * resolution * scale_factor;
         cv::Point2f point2f(point_x, point_y);
         double result = cv::pointPolygonTest(contours[0], point2f, true);
-        if (static_cast<int>(result) >= static_cast<int>(min_distance_from_edge) * scale_factor))
+        if (static_cast<int>(result) >= static_cast<int>(min_distance_from_edge * scale_factor))
         {
           Eigen::Vector3d point((double)(point_x) / scale_factor + x_min, (double)(point_y) / scale_factor + y_min,
                                 height_above_table + mm * delta_height);
