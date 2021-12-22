@@ -327,8 +327,8 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
             checkHeader(req.motion_plan_request.goal_constraints[j], options_.planning_frame);
         }
 
-        ROS_INFO("Benchmarking query '%s' (%d of %d)", planning_queries_names[i].c_str(), (int)i + 1,
-                 (int)planning_queries_names.size());
+        ROS_INFO("Benchmarking query '%s' (%d of %d)", planning_queries_names[i].c_str(), static_cast<int>(i) + 1,
+                 static_cast<int>(planning_queries_names.size());
         runBenchmark(req);
       }
     }
@@ -406,7 +406,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
             checkHeader(req.motion_plan_request.goal_constraints[0], options_.planning_frame);
           req.filename = options_.output + "." + boost::lexical_cast<std::string>(++n_call) + ".log";
 
-          ROS_INFO("Benchmarking goal '%s' (%d of %d)", cnames[i].c_str(), (int)i + 1, (int)cnames.size());
+          ROS_INFO("Benchmarking goal '%s' (%d of %d)", cnames[i].c_str(), static_cast<int>(i) + 1, static_cast<int>(cnames.size()));
           runBenchmark(req);
         }
       }
@@ -494,7 +494,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
             req.motion_plan_request.allowed_planning_time = options_.timeout;
           req.filename = options_.output + ".trajectory." + boost::lexical_cast<std::string>(i + 1) + ".log";
 
-          ROS_INFO("Benchmarking trajectory '%s' (%d of %d)", cnames[i].c_str(), (int)i + 1, (int)cnames.size());
+          ROS_INFO("Benchmarking trajectory '%s' (%d of %d)", cnames[i].c_str(), static_cast<int>(i) + 1, static_cast<int>(cnames.size()));
           runBenchmark(req);
         }
       }

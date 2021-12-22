@@ -125,19 +125,19 @@ void ompl_interface::ModelBasedStateSpace::copyState(ompl::base::State* destinat
 
 unsigned int ompl_interface::ModelBasedStateSpace::getSerializationLength() const
 {
-  return state_values_size_ + sizeof(int);
+  return state_values_size_ + sizeof(static_cast<int>);
 }
 
 void ompl_interface::ModelBasedStateSpace::serialize(void* serialization, const ompl::base::State* state) const
 {
   *reinterpret_cast<int*>(serialization) = state->as<StateType>()->tag;
-  memcpy(reinterpret_cast<char*>(serialization) + sizeof(int), state->as<StateType>()->values, state_values_size_);
+  memcpy(reinterpret_cast<char*>(serialization) + sizeof(static_cast<int>), state->as<StateType>()->values, state_values_size_);
 }
 
 void ompl_interface::ModelBasedStateSpace::deserialize(ompl::base::State* state, const void* serialization) const
 {
   state->as<StateType>()->tag = *reinterpret_cast<const int*>(serialization);
-  memcpy(state->as<StateType>()->values, reinterpret_cast<const char*>(serialization) + sizeof(int), state_values_size_);
+  memcpy(state->as<StateType>()->values, reinterpret_cast<const char*>(serialization) + sizeof(static_cast<int>), state_values_size_);
 }
 
 unsigned int ompl_interface::ModelBasedStateSpace::getDimension() const

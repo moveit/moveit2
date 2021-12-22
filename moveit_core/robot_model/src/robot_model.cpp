@@ -352,7 +352,7 @@ void RobotModel::buildGroupStates(const srdf::Model& srdf_model)
             RCLCPP_ERROR(LOGGER,
                          "The model for joint '%s' requires %d variable values, "
                          "but only %d variable values were supplied in default state '%s' for group '%s'",
-                         jt->first.c_str(), (int)vn.size(), (int)jt->second.size(), group_state.name_.c_str(),
+                         jt->first.c_str(), static_cast<int>(vn.size()), static_cast<int>(jt->second.size()), group_state.name_.c_str(),
                          jmg->getName().c_str());
         }
         else
@@ -917,7 +917,7 @@ JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const
         new_joint_model = new FixedJointModel(urdf_joint->name);
         break;
       default:
-        RCLCPP_ERROR(LOGGER, "Unknown joint type: %d", (int)urdf_joint->type);
+        RCLCPP_ERROR(LOGGER, "Unknown joint type: %d", static_cast<int>(urdf_joint->type));
         break;
     }
   }
@@ -1202,7 +1202,7 @@ shapes::ShapePtr RobotModel::constructShape(const urdf::Geometry* geom)
     }
     break;
     default:
-      RCLCPP_ERROR(LOGGER, "Unknown geometry type: %d", (int)geom->type);
+      RCLCPP_ERROR(LOGGER, "Unknown geometry type: %d", static_cast<int>(geom->type));
       break;
   }
 

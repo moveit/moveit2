@@ -610,7 +610,7 @@ void ChompOptimizer::calculateCollisionIncrements()
   // This is faster and guaranteed to converge, but it may take more iterations in the worst case.
   if (parameters_->use_stochastic_descent_)
   {
-    start_point = (int)(getRandomDouble() * (free_vars_end_ - free_vars_start_) + free_vars_start_);
+    start_point = static_cast<int>(getRandomDouble() * (free_vars_end_ - free_vars_start_) + free_vars_start_);
     if (start_point < free_vars_start_)
       start_point = free_vars_start_;
     if (start_point > free_vars_end_)

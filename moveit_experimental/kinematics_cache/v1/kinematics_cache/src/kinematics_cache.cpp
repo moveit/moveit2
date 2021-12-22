@@ -80,8 +80,8 @@ void KinematicsCache::setup(const KinematicsCache::Options& opt)
   ROS_DEBUG("Origin: %f %f %f", cache_origin_.x, cache_origin_.y, cache_origin_.z);
   ROS_DEBUG("Cache size (num points x,y,z): %d %d %d", cache_size_x_, cache_size_y_, cache_size_z_);
   ROS_DEBUG("Cache resolution: %f %f %f", cache_resolution_x_, cache_resolution_y_, cache_resolution_z_);
-  ROS_DEBUG("Solutions per grid location: %d", (int)max_solutions_per_grid_location_);
-  ROS_DEBUG("Solution dimension: %d", (int)solution_dimension_);
+  ROS_DEBUG("Solutions per grid location: %d", static_cast<int>max_solutions_per_grid_location_);
+  ROS_DEBUG("Solution dimension: %d", static_cast<int>solution_dimension_);
 }
 
 bool KinematicsCache::generateCacheMap(double timeout)
@@ -148,21 +148,21 @@ bool KinematicsCache::addToCache(const geometry_msgs::Pose& pose, const std::vec
 
 bool KinematicsCache::getGridIndex(const geometry_msgs::Pose& pose, unsigned int& grid_index) const
 {
-  int x_index = (int)((pose.position.x - cache_origin_.x) / cache_resolution_x_);
-  int y_index = (int)((pose.position.y - cache_origin_.y) / cache_resolution_y_);
-  int z_index = (int)((pose.position.z - cache_origin_.z) / cache_resolution_z_);
+  int x_index = static_cast<int>((pose.position.x - cache_origin_.x) / cache_resolution_x_);
+  int y_index = static_cast<int>((pose.position.y - cache_origin_.y) / cache_resolution_y_);
+  int z_index = static_cast<int>((pose.position.z - cache_origin_.z) / cache_resolution_z_);
 
-  if (x_index >= (int)cache_size_x_ || x_index < 0)
+  if (x_index >= static_cast<int>(cache_size_x_ || x_index < 0))
   {
     ROS_DEBUG("X position %f,%d lies outside grid: %d %d", pose.position.x, x_index, 0, cache_size_x_);
     return false;
   }
-  if (y_index >= (int)cache_size_y_ || y_index < 0)
+  if (y_index >= static_cast<int>(cache_size_y_ || y_index < 0))
   {
     ROS_DEBUG("Y position %f,%d lies outside grid: %d %d", pose.position.y, y_index, 0, cache_size_y_);
     return false;
   }
-  if (z_index >= (int)cache_size_z_ || z_index < 0)
+  if (z_index >= static_cast<int>(cache_size_z_ || z_index < 0))
   {
     ROS_DEBUG("Z position %f,%d lies outside grid: %d %d", pose.position.z, z_index, 0, cache_size_z_);
     return false;
@@ -318,13 +318,13 @@ bool KinematicsCache::readFromFile(const std::string& filename)
 
   kinematics_cache_vector_ = kinematics_cache_vector;
   num_solutions_vector_ = num_solutions_vector;
-  ROS_DEBUG("Read %d total points from file: %s", (int)num_solutions_vector_.size(), filename.c_str());
+  ROS_DEBUG("Read %d total points from file: %s", static_cast<int>num_solutions_vector_.size(), filename.c_str());
   return true;
 }
 
 bool KinematicsCache::writeToFile(const std::string& filename)
 {
-  ROS_DEBUG("Writing %d total points to file: %s", (int)num_solutions_vector_.size(), filename.c_str());
+  ROS_DEBUG("Writing %d total points to file: %s", static_cast<int>num_solutions_vector_.size(), filename.c_str());
   std::ofstream file;
   file.open(filename.c_str());
   if (!file.is_open())
