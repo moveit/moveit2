@@ -162,13 +162,13 @@ bool KinematicsCache::getGridIndex(const geometry_msgs::Pose& pose, unsigned int
                     cache_size_x_);
     return false;
   }
-  if (y_index >= static_cast<int>(cache_size_y_ || y_index < 0))
+  if (y_index >= static_cast<int>(cache_size_y_) || y_index < 0)
   {
     ROS_DEBUG_NAMED("kinematics_cache", "Y position %f,%d lies outside grid: %d %d", pose.position.y, y_index, 0,
                     cache_size_y_);
     return false;
   }
-  if (z_index >= static_cast<int>(cache_size_z_ || z_index < 0))
+  if (z_index >= static_cast<int>(cache_size_z_) || z_index < 0)
   {
     ROS_DEBUG_NAMED("kinematics_cache", "Z position %f,%d lies outside grid: %d %d", pose.position.z, z_index, 0,
                     cache_size_z_);
@@ -325,14 +325,14 @@ bool KinematicsCache::readFromFile(const std::string& filename)
 
   kinematics_cache_vector_ = kinematics_cache_vector;
   num_solutions_vector_ = num_solutions_vector;
-  ROS_DEBUG_NAMED("kinematics_cache", "Read %d total points from file: %s", static_cast<int>num_solutions_vector_.size(),
+  ROS_DEBUG_NAMED("kinematics_cache", "Read %d total points from file: %s", static_cast<int>(num_solutions_vector_.size()),
                   filename.c_str());
   return true;
 }
 
 bool KinematicsCache::writeToFile(const std::string& filename)
 {
-  ROS_DEBUG_NAMED("kinematics_cache", "Writing %d total points to file: %s", static_cast<int>num_solutions_vector_.size(),
+  ROS_DEBUG_NAMED("kinematics_cache", "Writing %d total points to file: %s", static_cast<int>(num_solutions_vector_.size()),
                   filename.c_str());
   std::ofstream file;
   file.open(filename.c_str());
