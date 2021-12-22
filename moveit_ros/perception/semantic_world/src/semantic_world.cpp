@@ -421,9 +421,9 @@ bool SemanticWorld::isInsideTableContour(const geometry_msgs::msg::Pose& pose,
 
   double x_range = fabs(x_max - x_min);
   double y_range = fabs(y_max - y_min);
-  int max_range = static_cast<int>(x_range + 1);
-  if (max_range < static_cast<int>(y_range + 1))
-    max_range = static_cast<int>(y_range + 1);
+  int max_range = static_cast<int>(x_range) + 1;
+  if (max_range < static_cast<int>(y_range) + 1)
+    max_range = static_cast<int>(y_range) + 1;
 
   int image_scale = std::max<int>(max_range, 4);
   cv::Mat src = cv::Mat::zeros(image_scale * scale_factor, image_scale * scale_factor, CV_8UC1);
