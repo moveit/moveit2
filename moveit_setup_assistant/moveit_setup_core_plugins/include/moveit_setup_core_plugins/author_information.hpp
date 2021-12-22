@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2012, Willow Garage, Inc.
+ *  Copyright (c) 2021, PickNik Robotics
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of PickNik Robotics nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,54 +32,36 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Dave Coleman, Michael 'v4hn' Goerner */
-
+/* Author: David V. Lu!! */
 #pragma once
 
-class QLineEdit;
-
-#include <moveit_setup_framework/qt/setup_step_widget.hpp>
-#include <moveit_setup_core_plugins/author_information.hpp>
+#include <moveit_setup_framework/setup_step.hpp>
+#include <moveit_setup_framework/data/package_settings_config.hpp>
 
 namespace moveit_setup_core_plugins
 {
-class AuthorInformationWidget : public moveit_setup_framework::SetupStepWidget
+class AuthorInformation : public moveit_setup_framework::SetupStep
 {
-  Q_OBJECT
-
 public:
-  // ******************************************************************************************
-  // Public Functions
-  // ******************************************************************************************
+  std::string getName() const override
+  {
+    return "Author Information";
+  }
 
   void onInit() override;
 
-  /// Received when this widget is chosen from the navigation menu
-  void focusGiven() override;
-
-  moveit_setup_framework::SetupStep& getSetupStep() override
+  bool isReady() const override
   {
-    return setup_step_;
+    return true;  // always ready, no dependencies
   }
 
-  // ******************************************************************************************
-  // Qt Components
-  // ******************************************************************************************
+  // Note, we use getAuthorName instead of getName because getName is defined above
+  std::string getAuthorName() const;
+  std::string getAuthorEmail() const;
+  void setAuthorName(const std::string& name);
+  void setAuthorEmail(const std::string& email);
 
-  QLineEdit* name_edit_;
-
-  QLineEdit* email_edit_;
-
-private Q_SLOTS:
-
-  // ******************************************************************************************
-  // Slot Event Functions
-  // ******************************************************************************************
-  void editedName();
-  void editedEmail();
-
-private:
-  AuthorInformation setup_step_;
+protected:
+  std::shared_ptr<moveit_setup_framework::PackageSettingsConfig> package_settings_;
 };
-
 }  // namespace moveit_setup_core_plugins

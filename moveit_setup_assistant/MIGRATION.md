@@ -5,7 +5,7 @@ This file should be deleted once all tasks are complete. Also delete `SETUP_STEP
 ## Steps to Migrate
  * `moveit_setup_core_plugins`
    * [x] Start Screen
-   * [ ] Author Information
+   * [x] Author Information
    * [x] Configuration Files
  * `moveit_setup_srdf_plugins`
    * [x] Self-Collisions
