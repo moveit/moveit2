@@ -159,7 +159,7 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
     return;
   }
 
-  if (source_state_ID > static_cast<int>(planning_data_.state_ID_to_coord_table_.size() - 1))
+  if (source_state_ID > static_cast<int>(planning_data_.state_ID_to_coord_table_.size()) - 1)
   {
     ROS_WARN_STREAM("source id too large");
     std::cerr << "Source id too large" << '\n';
