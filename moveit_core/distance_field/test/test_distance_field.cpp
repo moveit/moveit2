@@ -337,9 +337,9 @@ TEST(TestPropagationDistanceField, TestAddRemovePoints)
   int num_y = df.getYNumCells();
   int num_z = df.getZNumCells();
 
-  EXPECT_EQ(num_x, (int)(WIDTH / RESOLUTION + 0.5));
-  EXPECT_EQ(num_y, (int)(HEIGHT / RESOLUTION + 0.5));
-  EXPECT_EQ(num_z, (int)(DEPTH / RESOLUTION + 0.5));
+  EXPECT_EQ(num_x, static_cast<int>(WIDTH / RESOLUTION + 0.5));
+  EXPECT_EQ(num_y, static_cast<int>(HEIGHT / RESOLUTION + 0.5));
+  EXPECT_EQ(num_z, static_cast<int>(DEPTH / RESOLUTION + 0.5));
 
   // getting a bad point
   double tgx, tgy, tgz;
@@ -439,9 +439,9 @@ TEST(TestSignedPropagationDistanceField, TestSignedAddRemovePoints)
   int num_y = df.getYNumCells();
   int num_z = df.getZNumCells();
 
-  EXPECT_EQ(num_x, (int)(WIDTH / RESOLUTION + 0.5));
-  EXPECT_EQ(num_y, (int)(HEIGHT / RESOLUTION + 0.5));
-  EXPECT_EQ(num_z, (int)(DEPTH / RESOLUTION + 0.5));
+  EXPECT_EQ(num_x, static_cast<int>(WIDTH / RESOLUTION + 0.5));
+  EXPECT_EQ(num_y, static_cast<int>(HEIGHT / RESOLUTION + 0.5));
+  EXPECT_EQ(num_z, static_cast<int>(DEPTH / RESOLUTION + 0.5));
 
   // Error checking
   // print(df, numX, numY, numZ);

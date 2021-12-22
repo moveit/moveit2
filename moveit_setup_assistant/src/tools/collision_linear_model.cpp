@@ -73,7 +73,7 @@ QModelIndex CollisionLinearModel::mapToSource(const QModelIndex& proxyIndex) con
   // http://stackoverflow.com/questions/27086195/linear-index-upper-triangular-matrix
   int n = sourceModel()->columnCount();
   int k = proxyIndex.row();  // linear (row) index
-  int r = n - 2 - (int)(sqrt(-8 * k + 4 * n * (n - 1) - 7) / 2.0 - 0.5);
+  int r = n - 2 - static_cast<int>(sqrt(-8 * k + 4 * n * (n - 1) - 7) / 2.0 - 0.5);
   int c = k + r + 1 - n * (n - 1) / 2 + (n - r) * ((n - r) - 1) / 2;
   return sourceModel()->index(r, c);
 }

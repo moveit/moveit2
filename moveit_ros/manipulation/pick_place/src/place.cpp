@@ -357,7 +357,7 @@ bool PlacePlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene
       p->retreat_posture_ = attached_body->getDetachPosture();
     pipeline_.push(p);
   }
-  ROS_INFO_NAMED("manipulation", "Added %d place locations", (int)goal.place_locations.size());
+  ROS_INFO_NAMED("manipulation", "Added %d place locations", static_cast<int>(goal.place_locations.size()));
 
   // wait till we're done
   waitForPipeline(endtime);
