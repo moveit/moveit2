@@ -203,7 +203,7 @@ void OcTreeRender::octreeDecoding(const std::shared_ptr<const octomap::OcTree>& 
                 octomap::OcTreeNode* node = octree->search(key, octree_depth_);
 
                 // the left part evaluates to 1 for free voxels and 2 for occupied voxels
-                if (!(node && (((static_cast<int>(octree->isNodeOccupied(node)) + 1)) & render_mode_mask)))
+                if (!(node && (((static_cast<int>(octree->isNodeOccupied(node))) + 1) & render_mode_mask)))
                 {
                   // we do not have a neighbor => break!
                   all_neighbors_found = false;
