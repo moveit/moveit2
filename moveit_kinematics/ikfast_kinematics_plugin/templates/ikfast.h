@@ -32,11 +32,15 @@
    - IKFAST_NAMESPACE - Enclose all functions and classes in this namespace, the ``main`` function is excluded.
 
  */
+
+#pragma once
+
 #include <vector>
 #include <list>
 #include <stdexcept>
 
-#pragma once
+#ifndef IKFAST_HEADER_COMMON
+#define IKFAST_HEADER_COMMON
 
 /// should be the same as ikfast.__version__
 #define IKFAST_VERSION 61
@@ -373,3 +377,5 @@ IKFAST_API const char* GetKinematicsHash();
 #ifdef IKFAST_NAMESPACE
 }
 #endif
+
+#endif  // IKFAST_HAS_LIBRARY
