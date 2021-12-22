@@ -7,11 +7,10 @@ repositories:
     type: git
     url: https://github.com/ros-planning/moveit_msgs
     version: ros2
-  # TODO(#885): Re-enable when circular dependency is fixed
-  # moveit_resources:
-  #   type: git
-  #   url: https://github.com/ros-planning/moveit_resources
-  #   version: ros2
+  moveit_resources:
+    type: git
+    url: https://github.com/ros-planning/moveit_resources
+    version: ros2
   warehouse_ros:
     type: git
     url: https://github.com/ros-planning/warehouse_ros
@@ -20,11 +19,3 @@ repositories:
     type: git
     url: https://github.com/ros-planning/warehouse_ros_mongo
     version: ros2
-  ros2_control:
-    type: git
-    url: https://github.com/ros-controls/ros2_control
-    version: 1.1.0
-  ros2_controllers:
-    type: git
-    url: https://github.com/ros-controls/ros2_controllers
-    version: 1.1.0

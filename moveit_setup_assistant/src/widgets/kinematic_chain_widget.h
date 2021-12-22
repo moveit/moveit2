@@ -63,7 +63,7 @@ public:
   /// Constructor
   KinematicChainWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
 
-  /// Loads the availble data list
+  /// Loads the available data list
   void setAvailable();
 
   /// Set the link field with previous value

@@ -343,7 +343,7 @@ protected:
   // True -> allow drift in this dimension. In the command frame. [x, y, z, roll, pitch, yaw]
   std::array<bool, 6> drift_dimensions_ = { { false, false, false, false, false, false } };
 
-  // The dimesions to control. In the command frame. [x, y, z, roll, pitch, yaw]
+  // The dimensions to control. In the command frame. [x, y, z, roll, pitch, yaw]
   std::array<bool, 6> control_dimensions_ = { { true, true, true, true, true, true } };
 
   // main_loop_mutex_ is used to protect the input state and dynamic parameters

@@ -90,7 +90,7 @@ public:
   void setFrame(const std::string& frame);
 
   /**
-   * \brief starts the updating process. Done in a seperate thread
+   * \brief starts the updating process. Done in a separate thread
    * \author Suat Gedikli (gedikli@willowgarage.com)
    */
   void start();

@@ -150,7 +150,7 @@ TEST(CurrentStateMonitorTests, DestructStopTest)
 
 TEST(CurrentStateMonitorTests, NoModelTest)
 {
-  // GIVEN an unitialized robot model
+  // GIVEN an uninitialized robot model
   moveit::core::RobotModelPtr robot_model = nullptr;
 
   // WHEN the CurrentStateMonitor is constructed with it

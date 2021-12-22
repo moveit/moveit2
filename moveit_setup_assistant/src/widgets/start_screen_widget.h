@@ -139,7 +139,7 @@ private:
   /// Load chosen files for creating new package
   bool loadNewFiles();
 
-  /// Load exisiting package files
+  /// Load existing package files
   bool loadExistingFiles();
 
   /// Load URDF File to Parameter Server

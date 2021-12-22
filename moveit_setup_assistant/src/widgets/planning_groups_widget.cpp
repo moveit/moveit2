@@ -258,7 +258,7 @@ void PlanningGroupsWidget::loadGroupsTree()
     loadGroupsTreeRecursive(group, nullptr);
   }
 
-  // Reenable Tree
+  // Re-enable Tree
   groups_tree_->setUpdatesEnabled(true);  // prevent table from updating until we are completely done
   groups_tree_->setDisabled(false);       // make sure we disable it so that the cellChanged event is not called
 
@@ -483,7 +483,7 @@ void PlanningGroupsWidget::editSelected()
       loadGroupScreen(plan_group.group_);
       break;
     default:
-      QMessageBox::critical(this, "Error Loading", "An internal error has occured while loading.");
+      QMessageBox::critical(this, "Error Loading", "An internal error has occurred while loading.");
       return;
   }
   return_screen_ = 0;  // return to main screen directly
@@ -702,7 +702,7 @@ void PlanningGroupsWidget::deleteGroup()
           if (QMessageBox::question(
                   this, "Confirm Group State Deletion",
                   QString("The group that is about to be deleted has robot poses (robot states) that depend on this "
-                          "group. Are you sure you want to delete this group as well as all dependend robot poses?"),
+                          "group. Are you sure you want to delete this group as well as all dependent robot poses?"),
                   QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Cancel)
           {
             return;
@@ -738,7 +738,7 @@ void PlanningGroupsWidget::deleteGroup()
           if (QMessageBox::question(
                   this, "Confirm End Effector Deletion",
                   QString("The group that is about to be deleted has end effectors (grippers) that depend on this "
-                          "group. Are you sure you want to delete this group as well as all dependend end effectors?"),
+                          "group. Are you sure you want to delete this group as well as all dependent end effectors?"),
                   QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Cancel)
           {
             return;
@@ -817,7 +817,7 @@ void PlanningGroupsWidget::addGroup()
 }
 
 // ******************************************************************************************
-// Call when joints edit sceen is done and needs to be saved
+// Call when joints edit screen is done and needs to be saved
 // ******************************************************************************************
 void PlanningGroupsWidget::saveJointsScreen()
 {
@@ -845,7 +845,7 @@ void PlanningGroupsWidget::saveJointsScreen()
 }
 
 // ******************************************************************************************
-// Call when links edit sceen is done and needs to be saved
+// Call when links edit screen is done and needs to be saved
 // ******************************************************************************************
 void PlanningGroupsWidget::saveLinksScreen()
 {
@@ -874,7 +874,7 @@ void PlanningGroupsWidget::saveLinksScreen()
 }
 
 // ******************************************************************************************
-// Call when chains edit sceen is done and needs to be saved
+// Call when chains edit screen is done and needs to be saved
 // ******************************************************************************************
 void PlanningGroupsWidget::saveChainScreen()
 {
@@ -950,7 +950,7 @@ void PlanningGroupsWidget::saveChainScreen()
 }
 
 // ******************************************************************************************
-// Call when subgroups edit sceen is done and needs to be saved
+// Call when subgroups edit screen is done and needs to be saved
 // ******************************************************************************************
 void PlanningGroupsWidget::saveSubgroupsScreen()
 {
@@ -1045,7 +1045,7 @@ void PlanningGroupsWidget::saveSubgroupsScreen()
 }
 
 // ******************************************************************************************
-// Call when groups edit sceen is done and needs to be saved
+// Call when groups edit screen is done and needs to be saved
 // ******************************************************************************************
 bool PlanningGroupsWidget::saveGroupScreen()
 {

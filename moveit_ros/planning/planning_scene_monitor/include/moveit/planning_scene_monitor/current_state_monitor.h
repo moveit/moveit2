@@ -303,7 +303,7 @@ public:
     return error_;
   }
 
-  /** @brief Allow the joint_state arrrays velocity and effort to be copied into the robot state
+  /** @brief Allow the joint_state arrays velocity and effort to be copied into the robot state
    *  this is useful in some but not all applications
    */
   void enableCopyDynamics(bool enabled)

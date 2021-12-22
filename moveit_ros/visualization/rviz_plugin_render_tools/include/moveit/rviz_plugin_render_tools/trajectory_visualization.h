@@ -155,7 +155,7 @@ protected:
   moveit::core::RobotModelConstPtr robot_model_;
   moveit::core::RobotStatePtr robot_state_;
 
-  // Pointers from parent display taht we save
+  // Pointers from parent display that we save
   rviz_common::Display* display_;  // the parent display that this class populates
   rviz_common::properties::Property* widget_;
   Ogre::SceneNode* scene_node_;

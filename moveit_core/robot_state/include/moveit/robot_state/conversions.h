@@ -113,7 +113,7 @@ bool jointTrajPointToRobotState(const trajectory_msgs::msg::JointTrajectory& tra
  * @param state - The input MoveIt robot state object
  * @param out - a file stream, or any other stream
  * @param include_header - flag to prefix the output with a line of joint names.
- * @param separator - allows to override the comma seperator with any symbol, such as a white space
+ * @param separator - allows to override the comma separator with any symbol, such as a white space
  */
 void robotStateToStream(const RobotState& state, std::ostream& out, bool include_header = true,
                         const std::string& separator = ",");
@@ -125,7 +125,7 @@ void robotStateToStream(const RobotState& state, std::ostream& out, bool include
  * @param out - a file stream, or any other stream
  * @param joint_group_ordering - output joints based on ordering of joint groups
  * @param include_header - flag to prefix the output with a line of joint names.
- * @param separator - allows to override the comma seperator with any symbol, such as a white space
+ * @param separator - allows to override the comma separator with any symbol, such as a white space
  */
 void robotStateToStream(const RobotState& state, std::ostream& out,
                         const std::vector<std::string>& joint_groups_ordering, bool include_header = true,
@@ -135,7 +135,7 @@ void robotStateToStream(const RobotState& state, std::ostream& out,
  * \brief Convert a string of joint values from a file (CSV) or input source into a RobotState
  * @param state - the output MoveIt robot state object
  * @param line - the input string of joint values
- * @param separator - allows to override the comma seperator with any symbol, such as a white space
+ * @param separator - allows to override the comma separator with any symbol, such as a white space
  * \return true on success
  */
 void streamToRobotState(RobotState& state, const std::string& line, const std::string& separator = ",");

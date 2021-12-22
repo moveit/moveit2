@@ -105,7 +105,7 @@ struct PropDistanceFieldVoxel
   int negative_update_direction_; /**< \brief Direction from which this voxel was updated  for negative distance
                                      propagation*/
 
-  static const int UNINITIALIZED = -1; /**< \brief Value that represents an unitialized voxel */
+  static const int UNINITIALIZED = -1; /**< \brief Value that represents an uninitialized voxel */
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
 
@@ -121,7 +121,7 @@ struct PropDistanceFieldVoxel
  * This class uses a \ref VoxelGrid to hold all data.  One important
  * decision that must be made on construction is whether or not to
  * create a signed version of the distance field.  If the distance
- * field is unsigned, it means that the minumum obstacle distance is
+ * field is unsigned, it means that the minimum obstacle distance is
  * 0, a value that will be assigned to all obstacle cells.  Gradient
  * queries for obstacle cells will not give useful information, as the
  * gradient at an obstacle cell will point to the cell itself.  If

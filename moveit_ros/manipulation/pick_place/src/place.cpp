@@ -155,7 +155,7 @@ bool PlacePlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene
           if (!attached_bodies.empty())
           {
             // if the user specified the name of the attached object to place, we check that indeed
-            // the group contains this attachd body
+            // the group contains this attached body
             if (!attached_object_name.empty())
             {
               bool found = false;
@@ -357,7 +357,7 @@ bool PlacePlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene
       p->retreat_posture_ = attached_body->getDetachPosture();
     pipeline_.push(p);
   }
-  ROS_INFO_NAMED("manipulation", "Added %d place locations", (int)goal.place_locations.size());
+  ROS_INFO_NAMED("manipulation", "Added %d place locations", static_cast<int>(goal.place_locations.size()));
 
   // wait till we're done
   waitForPipeline(endtime);

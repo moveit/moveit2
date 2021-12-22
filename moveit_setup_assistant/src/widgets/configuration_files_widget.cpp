@@ -224,7 +224,7 @@ bool ConfigurationFilesWidget::loadGenFiles()
   gen_files_.push_back(file);
 
   // -------------------------------------------------------------------------------------------------------------------
-  // CONIG FILES -------------------------------------------------------------------------------------------------------
+  // CONFIG FILES -------------------------------------------------------------------------------------------------------
   // -------------------------------------------------------------------------------------------------------------------
   std::string config_path = "config";
 
@@ -779,7 +779,7 @@ bool ConfigurationFilesWidget::checkGenFiles()
   if (config_data_->config_pkg_path_.empty())
     return false;  // this is a new package
 
-  // Check if we have the previous modification timestamp to compare agains
+  // Check if we have the previous modification timestamp to compare against
   if (config_data_->config_pkg_generated_timestamp_ == 0)
     return false;  // this package has not been generated with a timestamp, backwards compatible.
 
@@ -999,7 +999,7 @@ bool ConfigurationFilesWidget::generatePackage()
     // Run the generate function
     if (!file->gen_func_(absolute_path))
     {
-      // Error occured
+      // Error occurred
       QMessageBox::critical(this, "Error Generating File",
                             QString("Failed to generate folder or file: '")
                                 .append(file->rel_path_.c_str())

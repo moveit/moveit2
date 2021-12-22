@@ -98,7 +98,7 @@ public:
    * @param acc_duration: time of acceleration phase
    * @param const_duration: time of constant phase
    * @param dec_duration: time of deceleration phase
-   * @return ture if the combination of three durations is valid
+   * @return true if the combination of three durations is valid
    */
   bool setProfileAllDurations(double pos1, double pos2, double duration1, double duration2, double duration3);
 

@@ -181,15 +181,15 @@ private:
    * failure
    *    - req.start_state.joint_state is all zero,
    * moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE on failure
-   *    - req.goal_constraints must have exactly 1 defined cartesian oder joint
+   *    - req.goal_constraints must have exactly 1 defined cartesian order joint
    * constraint
    *      moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS on failure
    * A joint goal is checked for:
    *    - StartState joint-names matching goal joint-names,
    * moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS on
    * failure
-   *    - Beeing defined in the req.group_name JointModelGroup
-   *    - Beeing with the defined limits
+   *    - Being defined in the req.group_name JointModelGroup
+   *    - Being with the defined limits
    * A cartesian goal is checked for:
    *    - A defined link_name for the constraint,
    * moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS on failure
@@ -223,7 +223,7 @@ private:
    * These requirements are:
    *     - Names of the joints and given joint position match in size and are
    * non-zero
-   *     - The start state is withing the position limits
+   *     - The start state is within the position limits
    *     - The start state velocity is below
    * TrajectoryGenerator::VELOCITY_TOLERANCE
    */

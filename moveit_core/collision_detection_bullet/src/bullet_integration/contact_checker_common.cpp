@@ -62,7 +62,7 @@ collision_detection::Contact* processResult(ContactTestData& cdata, collision_de
 
     std::vector<collision_detection::Contact> data;
 
-    // if we dont want contacts we are done here
+    // if we don't want contacts we are done here
     if (!cdata.req.contacts)
     {
       if (!cdata.req.distance)

@@ -71,7 +71,7 @@ class AsyncTest
 {
 public:
   /**
-   * @brief Triggeres a clear event. If a call to barricade is currently pending it will unblock as soon as all clear
+   * @brief Triggers a clear event. If a call to barricade is currently pending it will unblock as soon as all clear
    * events are triggered. Else the event is put on the waitlist. This waitlist is emptied upon a call to barricade.
    *
    * @param event The event that is triggered

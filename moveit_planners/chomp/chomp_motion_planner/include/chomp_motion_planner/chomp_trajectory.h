@@ -207,7 +207,7 @@ private:
   Eigen::MatrixXd trajectory_;       //< Storage for the actual trajectory
   size_t start_index_;  // Start index (inclusive) of trajectory to be optimized (everything before will be ignored)
   size_t end_index_;    //< End index (inclusive) of trajectory to be optimized (everything after will be ignored)
-  std::vector<size_t> full_trajectory_index_;  //< If this is a "group" trajectory, the indeces from the original traj
+  std::vector<size_t> full_trajectory_index_;  //< If this is a "group" trajectory, the indices from the original traj
 };
 
 ///////////////////////// inline functions follow //////////////////////

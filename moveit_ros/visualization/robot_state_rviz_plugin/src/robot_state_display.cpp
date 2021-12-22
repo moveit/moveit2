@@ -59,7 +59,7 @@
 namespace moveit_rviz_plugin
 {
 // ******************************************************************************************
-// Base class contructor
+// Base class constructor
 // ******************************************************************************************
 RobotStateDisplay::RobotStateDisplay() : Display(), update_state_(false)
 {

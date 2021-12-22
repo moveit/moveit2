@@ -176,7 +176,7 @@ public:
     aabb_max += contact_threshold;
   }
 
-  /** @brief Clones the collision objects but not the collision shape wich is const.
+  /** @brief Clones the collision objects but not the collision shape which is const.
    *  @return Shared Pointer to the cloned collision object */
   std::shared_ptr<CollisionObjectWrapper> clone()
   {
@@ -220,7 +220,7 @@ protected:
 
   collision_detection::BodyType m_type_id;
 
-  /** @brief The shapes that define the collison object */
+  /** @brief The shapes that define the collision object */
   std::vector<shapes::ShapeConstPtr> m_shapes;
 
   /** @brief The poses of the shapes, must be same length as m_shapes */
@@ -235,7 +235,7 @@ protected:
 
 /** @brief Casted collision shape used for checking if an object is collision free between two discrete poses
  *
- *  The cast is not explicitely computed but implicitely represented through the single shape and the transformation
+ *  The cast is not explicitly computed but implicitly represented through the single shape and the transformation
  *  between the first and second pose. */
 struct CastHullShape : public btConvexShape
 {

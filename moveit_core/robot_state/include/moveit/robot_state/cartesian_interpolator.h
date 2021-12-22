@@ -153,7 +153,7 @@ public:
 
      In contrast to the previous functions, the Cartesian path is specified as a set of \e waypoints to be sequentially
      reached for the origin of a robot link (\e link). The waypoints are transforms given either in a global reference
-     frame or in the local reference frame of the link at the immediately preceeding waypoint. The link needs to move
+     frame or in the local reference frame of the link at the immediately preceding waypoint. The link needs to move
      in a straight line between two consecutive waypoints. All other comments apply. */
   static double
   computeCartesianPath(RobotState* start_state, const JointModelGroup* group,

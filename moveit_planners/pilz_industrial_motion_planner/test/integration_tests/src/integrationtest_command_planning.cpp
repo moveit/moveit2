@@ -241,7 +241,7 @@ TEST_F(IntegrationTestCommandPlanning, PtpJointCart)
  *
  * Expected Results:
  *  1. Planning request is successful.
- *  2. Goal position correponds with the given goal position.
+ *  2. Goal position corresponds with the given goal position.
  *  3. Trajectory is a straight line.
  */
 TEST_F(IntegrationTestCommandPlanning, LinJoint)
@@ -292,7 +292,7 @@ TEST_F(IntegrationTestCommandPlanning, LinJoint)
  *
  * Expected Results:
  *  1. Planning request is successful.
- *  2. Goal position correponds with the given goal position.
+ *  2. Goal position corresponds with the given goal position.
  *  3. Trajectory is a straight line.
  */
 TEST_F(IntegrationTestCommandPlanning, LinJointCart)

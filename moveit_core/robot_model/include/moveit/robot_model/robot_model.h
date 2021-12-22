@@ -545,7 +545,7 @@ protected:
 
   std::vector<const JointModel*> multi_dof_joints_;
 
-  /** \brief For every two joints, the index of the common root for thw joints is stored.
+  /** \brief For every two joints, the index of the common root for the joints is stored.
 
       for jointA, jointB
       the index of the common root is located in the array at location
@@ -565,7 +565,7 @@ protected:
 
   /** \brief The state includes all the joint variables that make up the joints the state consists of.
       This map gives the position in the state vector of the group for each of these variables.
-      Additionaly, it includes the names of the joints and the index for the first variable of that joint. */
+      Additionally, it includes the names of the joints and the index for the first variable of that joint. */
   VariableIndexMap joint_variables_index_map_;
 
   std::vector<int> active_joint_model_start_index_;

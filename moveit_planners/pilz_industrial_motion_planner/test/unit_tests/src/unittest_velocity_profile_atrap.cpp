@@ -370,7 +370,7 @@ TEST(ATrapTest, Test_setProfileStartVelocity1)
   pilz_industrial_motion_planner::VelocityProfileATrap vp =
       pilz_industrial_motion_planner::VelocityProfileATrap(4, 2, 1);
 
-  // invalide cases
+  // invalid cases
   EXPECT_FALSE(vp.setProfileStartVelocity(3.0, 5.0, -1.0));
 
   // only deceleration

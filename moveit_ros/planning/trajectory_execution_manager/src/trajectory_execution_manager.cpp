@@ -1652,11 +1652,11 @@ std::pair<int, int> TrajectoryExecutionManager::getCurrentExpectedTrajectoryInde
   if (current_context_ < 0)
     return std::make_pair(-1, -1);
   if (time_index_.empty())
-    return std::make_pair((int)current_context_, -1);
+    return std::make_pair(static_cast<int>(current_context_), -1);
   std::vector<rclcpp::Time>::const_iterator time_index_it =
       std::lower_bound(time_index_.begin(), time_index_.end(), node_->now());
   int pos = time_index_it - time_index_.begin();
-  return std::make_pair((int)current_context_, pos);
+  return std::make_pair(static_cast<int>(current_context_), pos);
 }
 
 const std::vector<TrajectoryExecutionManager::TrajectoryExecutionContext*>&
