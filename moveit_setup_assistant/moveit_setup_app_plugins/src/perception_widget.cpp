@@ -283,7 +283,7 @@ void PerceptionWidget::loadSensorPluginsComboBox()
   sensor_plugin_field_->addItem("Point Cloud");
   sensor_plugin_field_->addItem("Depth Map");
 
-  // Load deafult config, or use the one in the config package if exists
+  // Load default config, or use the one in the config package if exists
   auto sensors_vec_map = setup_step_.getSensorPluginConfig();
   for (auto& sensor_plugin_config : sensors_vec_map)
   {

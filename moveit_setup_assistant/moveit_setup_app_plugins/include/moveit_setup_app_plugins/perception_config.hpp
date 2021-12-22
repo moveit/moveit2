@@ -53,7 +53,7 @@ public:
   }
 
   /**
-   * \brief Used for adding a sensor plugin configuation parameter to the sensor plugin configuration parameter list
+   * \brief Used for adding a sensor plugin configuration parameter to the sensor plugin configuration parameter list
    */
   std::vector<SensorParameters>& getSensorPluginConfig()
   {

@@ -178,9 +178,9 @@ void PackageSettingsConfig::collectVariables(std::vector<TemplateVariable>& vari
   variables.push_back(TemplateVariable("AUTHOR_EMAIL", author_email_));
 
   std::stringstream deps;
-  for (const auto& depenency : package_dependencies_)
+  for (const auto& dependency : package_dependencies_)
   {
-    deps << "  <run_depend>" << depenency << "</run_depend>\n";
+    deps << "  <run_depend>" << dependency << "</run_depend>\n";
   }
   variables.push_back(TemplateVariable("OTHER_DEPENDENCIES", deps.str()));
 }

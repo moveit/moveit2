@@ -279,7 +279,7 @@ void VirtualJointsWidget::edit(const std::string& name)
   // Check if vjoint was found
   if (vjoint == nullptr)  // not found
   {
-    QMessageBox::critical(this, "Error Saving", "An internal error has occured while saving. Quitting.");
+    QMessageBox::critical(this, "Error Saving", "An internal error has occurred while saving. Quitting.");
     QApplication::quit();
   }
 
