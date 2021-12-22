@@ -530,7 +530,7 @@ void PlanningSceneMonitor::triggerSceneUpdateEvent(SceneUpdateType update_type)
 
   for (boost::function<void(SceneUpdateType)>& update_callback : update_callbacks_)
     update_callback(update_type);
-  new_scene_update_ = (SceneUpdateType)(static_cast<int>(new)_scene_update_ | static_cast<int>(upd)ate_type);
+  new_scene_update_ = (SceneUpdateType)(static_cast<int>(new_scene_update_) | static_cast<int>(update_type));
   new_scene_update_condition_.notify_all();
 }
 
