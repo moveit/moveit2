@@ -305,6 +305,8 @@ protected:
 };
 }  // namespace ikfast
 
+#endif  // OPENRAVE_IKFAST_HEADER
+
 // The following code is dependent on the C++ library linking with.
 #ifdef IKFAST_HAS_LIBRARY
 
@@ -371,5 +373,3 @@ IKFAST_API const char* GetKinematicsHash();
 #ifdef IKFAST_NAMESPACE
 }
 #endif
-
-#endif  // IKFAST_HAS_LIBRARY
