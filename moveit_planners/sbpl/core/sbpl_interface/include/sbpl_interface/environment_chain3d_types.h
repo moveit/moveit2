@@ -158,7 +158,7 @@ struct EnvChain3DPlanningData
     angle_vector.resize(state_ids.size());
     for (unsigned int i = 0; i < state_ids.size(); ++i)
     {
-      if (state_ids[i] > static_cast<int>(state_ID_to_coord_table_.size() - 1))
+      if (state_ids[i] > static_cast<int>(state_ID_to_coord_table_.size()) - 1)
       {
         return false;
       }
