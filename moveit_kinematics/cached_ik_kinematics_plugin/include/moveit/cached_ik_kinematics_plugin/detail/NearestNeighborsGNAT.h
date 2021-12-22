@@ -262,9 +262,9 @@ public:
       {
         out << "Elements marked for removal:\n";
         for (typename std::unordered_set<const _T*>::const_iterator it = gnat.removed_.begin();
-             it != gnat.removed_.end(); it++)
+             it != gnat.removed_.end(); ++it)
           out << **it << '\t';
-        out << std::endl;
+        out << '\n';
       }
     }
     return out;
@@ -279,7 +279,7 @@ public:
     removed_.swap(tmp);
     list(lst);
     // check if every element marked for removal is also in the tree
-    for (typename std::unordered_set<const _T*>::iterator it = tmp.begin(); it != tmp.end(); it++)
+    for (typename std::unordered_set<const _T*>::iterator it = tmp.begin(); it != tmp.end(); ++it)
     {
       unsigned int i;
       for (i = 0; i < lst.size(); ++i)
@@ -291,7 +291,7 @@ public:
         std::cout << "***** FAIL!! ******\n" << *this << '\n';
         for (unsigned int j = 0; j < lst.size(); ++j)
           std::cout << lst[j] << '\t';
-        std::cout << std::endl;
+        std::cout << '\n';
       }
       assert(i != lst.size());
     }
@@ -300,7 +300,7 @@ public:
     // get elements in the tree with elements marked for removal purged from the list
     list(lst);
     if (lst.size() != size_)
-      std::cout << "#########################################\n" << *this << std::endl;
+      std::cout << "#########################################\n" << *this << '\n';
     assert(lst.size() == size_);
   }
 

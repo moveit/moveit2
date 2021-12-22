@@ -207,7 +207,7 @@ private:
   Eigen::MatrixXd trajectory_;       //< Storage for the actual trajectory
   size_t start_index_;  // Start index (inclusive) of trajectory to be optimized (everything before will be ignored)
   size_t end_index_;    //< End index (inclusive) of trajectory to be optimized (everything after will be ignored)
-  std::vector<size_t> full_trajectory_index_;  //< If this is a "group" trajectory, the indeces from the original traj
+  std::vector<size_t> full_trajectory_index_;  //< If this is a "group" trajectory, the indices from the original traj
 };
 
 ///////////////////////// inline functions follow //////////////////////
@@ -295,7 +295,7 @@ void ChompTrajectory::getJointVelocities(size_t traj_point, Eigen::MatrixBase<De
   velocities.setZero();
   double inv_time = 1.0 / discretization_;
 
-  for (int k = -DIFF_RULE_LENGTH / 2; k <= DIFF_RULE_LENGTH / 2; k++)
+  for (int k = -DIFF_RULE_LENGTH / 2; k <= DIFF_RULE_LENGTH / 2; ++k)
   {
     velocities += (inv_time * DIFF_RULES[0][k + DIFF_RULE_LENGTH / 2]) * trajectory_.row(traj_point + k).transpose();
   }

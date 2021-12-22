@@ -178,7 +178,7 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::validate
           req.first_trajectory->getLastWayPoint(), req.second_trajectory->getFirstWayPoint(), req.group_name, EPSILON))
   {
     RCLCPP_ERROR_STREAM(
-        LOGGER, "During blending the last point of the preceding and the first point of the succeding trajectory");
+        LOGGER, "During blending the last point of the preceding and the first point of the succeeding trajectory");
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }

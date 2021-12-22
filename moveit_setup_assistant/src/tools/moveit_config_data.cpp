@@ -274,7 +274,7 @@ bool MoveItConfigData::outputOMPLPlanningYAML(const std::string& file_path)
     return false;
   }
 
-  output_stream << emitter.c_str() << std::endl;
+  output_stream << emitter.c_str() << '\n';
   output_stream.close();
 
   return true;  // file created successfully
@@ -685,7 +685,7 @@ std::vector<OMPLPlannerDescription> MoveItConfigData::getOMPLPlanners()
                     "dist new state to nearest neighbor to disqualify as frontier. "
                     "default: 0.0 set in setup()");
   trrt.addParameter("frountierNodeRatio", "0.1", "1/10, or 1 nonfrontier for every 10 frontier. default: 0.1");
-  trrt.addParameter("k_constant", "0.0", "value used to normalize expresssion. default: 0.0 set in setup()");
+  trrt.addParameter("k_constant", "0.0", "value used to normalize expression. default: 0.0 set in setup()");
   planner_des.push_back(trrt);
 
   OMPLPlannerDescription prm("PRM", "geometric");
@@ -1771,7 +1771,7 @@ bool MoveItConfigData::inputSetupAssistantYAML(const std::string& file_path)
     RCLCPP_ERROR_STREAM(LOGGER, e.what());
   }
 
-  return false;  // if it gets to this point an error has occured
+  return false;  // if it gets to this point an error has occurred
 }
 
 // ******************************************************************************************
@@ -1880,7 +1880,7 @@ bool MoveItConfigData::input3DSensorsYAML(const std::string& default_file_path, 
     RCLCPP_ERROR_STREAM(LOGGER, "Error parsing sensors yaml: " << e.what());
   }
 
-  return false;  // if it gets to this point an error has occured
+  return false;  // if it gets to this point an error has occurred
 }
 
 // ******************************************************************************************
@@ -1983,7 +1983,7 @@ std::vector<ROSControlConfig>& MoveItConfigData::getROSControllers()
 }
 
 // ******************************************************************************************
-// Used to add a sensor plugin configuation parameter to the sensor plugin configuration parameter list
+// Used to add a sensor plugin configuration parameter to the sensor plugin configuration parameter list
 // ******************************************************************************************
 void MoveItConfigData::addGenericParameterToSensorPluginConfig(const std::string& name, const std::string& value,
                                                                const std::string& /*comment*/)

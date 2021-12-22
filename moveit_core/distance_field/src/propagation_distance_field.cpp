@@ -248,7 +248,7 @@ void PropagationDistanceField::addNewObstacleVoxels(const EigenSTL::vector_Vecto
       Eigen::Vector3i loc = negative_stack.back();
       negative_stack.pop_back();
 
-      for (int neighbor = 0; neighbor < 27; neighbor++)
+      for (int neighbor = 0; neighbor < 27; ++neighbor)
       {
         Eigen::Vector3i diff = getLocationDifference(neighbor);
         Eigen::Vector3i nloc(loc.x() + diff.x(), loc.y() + diff.y(), loc.z() + diff.z());
@@ -267,7 +267,7 @@ void PropagationDistanceField::addNewObstacleVoxels(const EigenSTL::vector_Vecto
           // our closest non-obstacle cell has become an obstacle
           if (closest_point_voxel.negative_distance_square_ != 0)
           {
-            // find all neigbors inside pre-existing obstacles whose
+            // find all neighbors inside pre-existing obstacles whose
             // closest_negative_point_ is now an obstacle.  These must all be
             // set to max_distance_sq_ so they will be re-propogated with a new
             // closest_negative_point_ that is outside the obstacle.
@@ -282,7 +282,7 @@ void PropagationDistanceField::addNewObstacleVoxels(const EigenSTL::vector_Vecto
           }
           else
           {
-            // this cell still has a valid non-obstacle cell, so we need to propogate from it
+            // this cell still has a valid non-obstacle cell, so we need to propagate from it
             nvoxel.negative_update_direction_ = initial_update_direction;
             negative_bucket_queue_[0].push_back(nloc);
           }
@@ -338,7 +338,7 @@ void PropagationDistanceField::removeObstacleVoxels(const EigenSTL::vector_Vecto
     Eigen::Vector3i loc = stack.back();
     stack.pop_back();
 
-    for (int neighbor = 0; neighbor < 27; neighbor++)
+    for (int neighbor = 0; neighbor < 27; ++neighbor)
     {
       Eigen::Vector3i diff = getLocationDifference(neighbor);
       Eigen::Vector3i nloc(loc.x() + diff.x(), loc.y() + diff.y(), loc.z() + diff.z());
@@ -477,11 +477,11 @@ void PropagationDistanceField::propagateNegative()
         if (new_distance_sq > max_distance_sq_)
           continue;
         // std::cout << "Looking at " << nloc.x() << " " << nloc.y() << " " << nloc.z() << " " << new_distance_sq << " "
-        // << neighbor->negative_distance_square_ << std::endl;
+        // << neighbor->negative_distance_square_ << '\n';
         if (new_distance_sq < neighbor->negative_distance_square_)
         {
           // std::cout << "Updating " << nloc.x() << " " << nloc.y() << " " << nloc.z() << " " << new_distance_sq <<
-          // std::endl;
+          // '\n';
           // update the neighboring voxel
           neighbor->negative_distance_square_ = new_distance_sq;
           neighbor->closest_negative_point_ = vptr->closest_negative_point_;
@@ -499,11 +499,11 @@ void PropagationDistanceField::propagateNegative()
 void PropagationDistanceField::reset()
 {
   voxel_grid_->reset(PropDistanceFieldVoxel(max_distance_sq_, 0));
-  for (int x = 0; x < getXNumCells(); x++)
+  for (int x = 0; x < getXNumCells(); ++x)
   {
-    for (int y = 0; y < getYNumCells(); y++)
+    for (int y = 0; y < getYNumCells(); ++y)
     {
-      for (int z = 0; z < getZNumCells(); z++)
+      for (int z = 0; z < getZNumCells(); ++z)
       {
         PropDistanceFieldVoxel& voxel = voxel_grid_->getCell(x, y, z);
         voxel.closest_negative_point_.x() = x;
@@ -534,7 +534,7 @@ void PropagationDistanceField::initNeighborhoods()
   }
 
   neighborhoods_.resize(2);
-  for (int n = 0; n < 2; n++)
+  for (int n = 0; n < 2; ++n)
   {
     neighborhoods_[n].resize(27);
     // source directions
@@ -627,13 +627,13 @@ bool PropagationDistanceField::worldToGrid(double world_x, double world_y, doubl
 
 bool PropagationDistanceField::writeToStream(std::ostream& os) const
 {
-  os << "resolution: " << resolution_ << std::endl;
-  os << "size_x: " << size_x_ << std::endl;
-  os << "size_y: " << size_y_ << std::endl;
-  os << "size_z: " << size_z_ << std::endl;
-  os << "origin_x: " << origin_x_ << std::endl;
-  os << "origin_y: " << origin_y_ << std::endl;
-  os << "origin_z: " << origin_z_ << std::endl;
+  os << "resolution: " << resolution_ << '\n';
+  os << "size_x: " << size_x_ << '\n';
+  os << "size_y: " << size_y_ << '\n';
+  os << "size_z: " << size_z_ << '\n';
+  os << "origin_x: " << origin_x_ << '\n';
+  os << "origin_y: " << origin_y_ << '\n';
+  os << "origin_z: " << origin_z_ << '\n';
   // now the binary stuff
 
   // first writing to zlib compressed buffer
@@ -641,19 +641,19 @@ bool PropagationDistanceField::writeToStream(std::ostream& os) const
   out.push(boost::iostreams::zlib_compressor());
   out.push(os);
 
-  for (unsigned int x = 0; x < static_cast<unsigned int>(getXNumCells()); x++)
+  for (unsigned int x = 0; x < static_cast<unsigned int>(getXNumCells()); ++x)
   {
-    for (unsigned int y = 0; y < static_cast<unsigned int>(getYNumCells()); y++)
+    for (unsigned int y = 0; y < static_cast<unsigned int>(getYNumCells()); ++y)
     {
       for (unsigned int z = 0; z < static_cast<unsigned int>(getZNumCells()); z += 8)
       {
         std::bitset<8> bs(0);
         unsigned int zv = std::min((unsigned int)8, getZNumCells() - z);
-        for (unsigned int zi = 0; zi < zv; zi++)
+        for (unsigned int zi = 0; zi < zv; ++zi)
         {
           if (getCell(x, y, z + zi).distance_square_ == 0)
           {
-            // std::cout << "Marking obs cell " << x << " " << y << " " << z+zi << std::endl;
+            // std::cout << "Marking obs cell " << x << " " << y << " " << z+zi << '\n';
             bs[zi] = 1;
           }
         }
@@ -720,12 +720,12 @@ bool PropagationDistanceField::readFromStream(std::istream& is)
   in.push(boost::iostreams::zlib_decompressor());
   in.push(is);
 
-  // std::cout << "Nums " << getXNumCells() << " " << getYNumCells() << " " << getZNumCells() << std::endl;
+  // std::cout << "Nums " << getXNumCells() << " " << getYNumCells() << " " << getZNumCells() << '\n';
 
   EigenSTL::vector_Vector3i obs_points;
-  for (unsigned int x = 0; x < static_cast<unsigned int>(getXNumCells()); x++)
+  for (unsigned int x = 0; x < static_cast<unsigned int>(getXNumCells()); ++x)
   {
-    for (unsigned int y = 0; y < static_cast<unsigned int>(getYNumCells()); y++)
+    for (unsigned int y = 0; y < static_cast<unsigned int>(getYNumCells()); ++y)
     {
       for (unsigned int z = 0; z < static_cast<unsigned int>(getZNumCells()); z += 8)
       {
@@ -737,11 +737,11 @@ bool PropagationDistanceField::readFromStream(std::istream& is)
         in.get(inchar);
         std::bitset<8> inbit((unsigned long long)inchar);
         unsigned int zv = std::min((unsigned int)8, getZNumCells() - z);
-        for (unsigned int zi = 0; zi < zv; zi++)
+        for (unsigned int zi = 0; zi < zv; ++zi)
         {
           if (inbit[zi] == 1)
           {
-            // std::cout << "Adding obs cell " << x << " " << y << " " << z+zi << std::endl;
+            // std::cout << "Adding obs cell " << x << " " << y << " " << z+zi << '\n';
             obs_points.push_back(Eigen::Vector3i(x, y, z + zi));
           }
         }

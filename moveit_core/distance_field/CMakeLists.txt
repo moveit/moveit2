@@ -16,6 +16,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   tf2_eigen
   OCTOMAP
 )
+target_link_libraries(${MOVEIT_LIB_NAME} Boost::iostreams)
 
 install(DIRECTORY include/ DESTINATION include)
 

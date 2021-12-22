@@ -168,7 +168,7 @@ class RobotCommander(object):
         """Get a MarkerArray of the markers that make up this robot
 
         Usage:
-            (): get's all markers for current state
+            (): gets all markers for current state
             state (RobotState): gets markers for a particular state
             values (dict): get markers with given values
             values, links (dict, list): get markers with given values and these links

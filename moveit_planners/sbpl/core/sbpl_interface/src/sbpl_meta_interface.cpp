@@ -67,10 +67,10 @@ bool SBPLMetaInterface::solve(const planning_scene::PlanningSceneConstPtr& plann
 
   if (first_done_)
   {
-    std::cerr << "FIRST DONE" << std::endl;
+    std::cerr << "FIRST DONE" << '\n';
     if (first_ok_)
     {
-      std::cerr << "First ok, interrupting second" << std::endl;
+      std::cerr << "First ok, interrupting second" << '\n';
       if (!second_done_)
       {
         thread2.interrupt();
@@ -87,10 +87,10 @@ bool SBPLMetaInterface::solve(const planning_scene::PlanningSceneConstPtr& plann
   }
   if (second_done_)
   {
-    std::cerr << "Second done" << std::endl;
+    std::cerr << "Second done" << '\n';
     if (second_ok_)
     {
-      std::cerr << "Second ok, interrupting first" << std::endl;
+      std::cerr << "Second ok, interrupting first" << '\n';
       if (!first_done_)
       {
         thread1.interrupt();
@@ -108,14 +108,14 @@ bool SBPLMetaInterface::solve(const planning_scene::PlanningSceneConstPtr& plann
 
   if (!first_ok_ && !second_ok_)
   {
-    std::cerr << "Both planners failed" << std::endl;
+    std::cerr << "Both planners failed" << '\n';
     res = res1;
     return false;
   }
   if (!first_ok_ && second_ok_)
   {
     std::cerr << "Sbpl interface no bfs reports time "
-              << sbpl_interface_second_->getLastPlanningStatistics().total_planning_time_ << std::endl;
+              << sbpl_interface_second_->getLastPlanningStatistics().total_planning_time_ << '\n';
     last_planning_statistics_ = sbpl_interface_second_->getLastPlanningStatistics();
     res = res2;
     return true;
@@ -123,15 +123,15 @@ bool SBPLMetaInterface::solve(const planning_scene::PlanningSceneConstPtr& plann
   else if (first_ok_ && !second_ok_)
   {
     std::cerr << "Sbpl interface bfs reports time "
-              << sbpl_interface_first_->getLastPlanningStatistics().total_planning_time_ << std::endl;
+              << sbpl_interface_first_->getLastPlanningStatistics().total_planning_time_ << '\n';
     last_planning_statistics_ = sbpl_interface_first_->getLastPlanningStatistics();
     res = res1;
     return true;
   }
   std::cerr << "Sbpl interface bfs reports time "
-            << sbpl_interface_first_->getLastPlanningStatistics().total_planning_time_ << std::endl;
+            << sbpl_interface_first_->getLastPlanningStatistics().total_planning_time_ << '\n';
   std::cerr << "Sbpl interface no bfs reports time "
-            << sbpl_interface_second_->getLastPlanningStatistics().total_planning_time_ << std::endl;
+            << sbpl_interface_second_->getLastPlanningStatistics().total_planning_time_ << '\n';
   if (sbpl_interface_first_->getLastPlanningStatistics().total_planning_time_ <
       sbpl_interface_second_->getLastPlanningStatistics().total_planning_time_)
   {
@@ -154,13 +154,13 @@ void SBPLMetaInterface::runSolver(bool use_first, const planning_scene::Planning
   {
     if (use_first)
     {
-      std::cerr << "Running first planner" << std::endl;
+      std::cerr << "Running first planner" << '\n';
       first_ok_ = sbpl_interface_first_->solve(planning_scene, req, res, params);
       first_done_ = true;
     }
     else
     {
-      std::cerr << "Running second planner" << std::endl;
+      std::cerr << "Running second planner" << '\n';
       second_ok_ = sbpl_interface_second_->solve(planning_scene, req, res, params);
       second_done_ = true;
     }

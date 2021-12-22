@@ -456,7 +456,7 @@ TEST_F(FloatingJointRobot, OrientationConstraintsParameterization)
     EXPECT_TRUE(oc_rotvec.decide(robot_state).satisfied);
   }
 
-  // and now some simple test cases where whe change the nominal orientation of the constraints,
+  // and now some simple test cases where we change the nominal orientation of the constraints,
   // instead of changing the orientation of the robot
   robot_state.setToDefaultValues();
   robot_state.update();

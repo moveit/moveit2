@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik Robotics
+ *  Copyright (c) 2014 Fetch Robotics Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik Robotics nor the names of its
+ *   * Neither the name of Fetch Robotics nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,46 +32,32 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: David V. Lu!! */
+#pragma once
 
-#include <moveit/rdf_loader/rdf_loader.h>
-#include <rclcpp/rclcpp.hpp>
-#include <gtest/gtest.h>
+#include <moveit/macros/class_forward.h>
+#include <moveit/collision_detection/collision_plugin.h>
 
-TEST(RDFIntegration, default_arguments)
+namespace collision_detection
 {
-  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("default_arguments");
-  rdf_loader::RDFLoader loader(node);
-  ASSERT_NE(nullptr, loader.getURDF());
-  EXPECT_EQ("kermit", loader.getURDF()->name_);
-  ASSERT_NE(nullptr, loader.getSRDF());
-  EXPECT_EQ("kermit", loader.getSRDF()->getName());
-}
-
-TEST(RDFIntegration, non_existent)
+/** Helper class to activate a specific collision plugin for a PlanningScene */
+class CollisionPluginCache
 {
-  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("non_existent");
-  rdf_loader::RDFLoader loader(node, "does_not_exist");
-  ASSERT_EQ(nullptr, loader.getURDF());
-  ASSERT_EQ(nullptr, loader.getSRDF());
-}
+public:
+  CollisionPluginCache();
+  ~CollisionPluginCache();
 
-TEST(RDFIntegration, topic_based)
-{
-  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("topic_based");
-  rdf_loader::RDFLoader loader(node, "topic_description");
-  ASSERT_NE(nullptr, loader.getURDF());
-  EXPECT_EQ("gonzo", loader.getURDF()->name_);
-  ASSERT_NE(nullptr, loader.getSRDF());
-  EXPECT_EQ("gonzo", loader.getSRDF()->getName());
-}
+  /**
+   * @brief Activate a specific collision plugin for the given planning scene instance.
+   * @param name The plugin name.
+   * @param scene The planning scene instance.
+   * @param exclusive If true, sets the new plugin to be the only one.
+   * @return success / failure
+   */
+  bool activate(const std::string& name, const planning_scene::PlanningScenePtr& scene);
 
-int main(int argc, char** argv)
-{
-  rclcpp::init(argc, argv);
-  ::testing::InitGoogleTest(&argc, argv);
+private:
+  MOVEIT_CLASS_FORWARD(CollisionPluginCacheImpl);
+  CollisionPluginCacheImplPtr cache_;
+};
 
-  int ret = RUN_ALL_TESTS();
-  rclcpp::shutdown();
-  return ret;
-}
+}  // namespace collision_detection

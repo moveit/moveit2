@@ -78,7 +78,7 @@ namespace moveit_rviz_plugin
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_display");
 
 // ******************************************************************************************
-// Base class contructor
+// Base class constructor
 // ******************************************************************************************
 MotionPlanningDisplay::MotionPlanningDisplay()
   : PlanningSceneDisplay()
@@ -143,7 +143,7 @@ MotionPlanningDisplay::MotionPlanningDisplay()
                                                 SLOT(changedQueryGoalState()), this);
   query_marker_scale_property_ = new rviz_common::properties::FloatProperty(
       "Interactive Marker Size", 0.0f,
-      "Specifies scale of the interactive marker overlayed on the robot. 0 is auto scale.", plan_category_,
+      "Specifies scale of the interactive marker overlaid on the robot. 0 is auto scale.", plan_category_,
       SLOT(changedQueryMarkerScale()), this);
   query_marker_scale_property_->setMin(0.0f);
 
@@ -449,7 +449,7 @@ void MotionPlanningDisplay::displayTable(const std::map<std::string, double>& va
   // the line we want to render
   std::stringstream ss;
   for (const std::pair<const std::string, double>& value : values)
-    ss << boost::format("%-10s %-4.2f") % value.first % value.second << std::endl;
+    ss << boost::format("%-10s %-4.2f") % value.first % value.second << '\n';
 
   if (ss.str().empty())
   {

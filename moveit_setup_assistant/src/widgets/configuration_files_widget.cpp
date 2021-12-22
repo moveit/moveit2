@@ -224,7 +224,7 @@ bool ConfigurationFilesWidget::loadGenFiles()
   gen_files_.push_back(file);
 
   // -------------------------------------------------------------------------------------------------------------------
-  // CONIG FILES -------------------------------------------------------------------------------------------------------
+  // CONFIG FILES -------------------------------------------------------------------------------------------------------
   // -------------------------------------------------------------------------------------------------------------------
   std::string config_path = "config";
 
@@ -779,7 +779,7 @@ bool ConfigurationFilesWidget::checkGenFiles()
   if (config_data_->config_pkg_path_.empty())
     return false;  // this is a new package
 
-  // Check if we have the previous modification timestamp to compare agains
+  // Check if we have the previous modification timestamp to compare against
   if (config_data_->config_pkg_generated_timestamp_ == 0)
     return false;  // this package has not been generated with a timestamp, backwards compatible.
 
@@ -999,7 +999,7 @@ bool ConfigurationFilesWidget::generatePackage()
     // Run the generate function
     if (!file->gen_func_(absolute_path))
     {
-      // Error occured
+      // Error occurred
       QMessageBox::critical(this, "Error Generating File",
                             QString("Failed to generate folder or file: '")
                                 .append(file->rel_path_.c_str())
@@ -1117,7 +1117,7 @@ void ConfigurationFilesWidget::loadTemplateStrings()
   {
     const srdf::Model::VirtualJoint& vj = config_data_->srdf_->virtual_joints_[i];
     vjb << "  <node pkg=\"tf2_ros\" type=\"static_transform_publisher\" name=\"virtual_joint_broadcaster_" << i
-        << "\" args=\"0 0 0 0 0 0 " << vj.parent_frame_ << " " << vj.child_link_ << "\" />" << std::endl;
+        << "\" args=\"0 0 0 0 0 0 " << vj.parent_frame_ << " " << vj.child_link_ << "\" />" << '\n';
   }
   addTemplateString("[VIRTUAL_JOINT_BROADCASTER]", vjb.str());
 

@@ -141,7 +141,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
       // 2nd point is 90% of p0, and 10% of p1
       p0 = trajectory.getWayPointPtr(0);
       p1 = trajectory.getWayPointPtr(1);
-      for (unsigned int j = 0; j < num_joints; j++)
+      for (unsigned int j = 0; j < num_joints; ++j)
       {
         point.setVariablePosition(idx[j],
                                   (9 * p0->getVariablePosition(idx[j]) + 1 * p1->getVariablePosition(idx[j])) / 10);
@@ -152,7 +152,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
       // 2nd-last point is 10% of p0, and 90% of p1
       p0 = trajectory.getWayPointPtr(num_points - 2);
       p1 = trajectory.getWayPointPtr(num_points - 1);
-      for (unsigned int j = 0; j < num_joints; j++)
+      for (unsigned int j = 0; j < num_joints; ++j)
       {
         point.setVariablePosition(idx[j],
                                   (1 * p0->getVariablePosition(idx[j]) + 9 * p1->getVariablePosition(idx[j])) / 10);
@@ -168,11 +168,11 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
 
   std::vector<SingleJointTrajectory> t2(num_joints);
 
-  for (unsigned int j = 0; j < num_joints; j++)
+  for (unsigned int j = 0; j < num_joints; ++j)
   {
     // Copy positions
     t2[j].positions_.resize(num_points, 0.0);
-    for (unsigned int i = 0; i < num_points; i++)
+    for (unsigned int i = 0; i < num_points; ++i)
     {
       t2[j].positions_[i] = trajectory.getWayPointPtr(i)->getVariablePosition(idx[j]);
     }
@@ -248,7 +248,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
     RCLCPP_ERROR(LOGGER, "number of waypoints %d, needs to be greater than 3.\n", num_points);
     return false;
   }
-  for (unsigned int j = 0; j < num_joints; j++)
+  for (unsigned int j = 0; j < num_joints; ++j)
   {
     if (t2[j].velocities_[0] > t2[j].max_velocity_ || t2[j].velocities_[0] < t2[j].min_velocity_)
     {
@@ -278,7 +278,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   // start with valid velocities, then expand intervals
   // epsilon to prevent divide-by-zero
   std::vector<double> time_diff(trajectory.getWayPointCount() - 1, std::numeric_limits<double>::epsilon());
-  for (unsigned int j = 0; j < num_joints; j++)
+  for (unsigned int j = 0; j < num_joints; ++j)
     init_times(num_points, &time_diff[0], &t2[j].positions_[0], t2[j].max_velocity_, t2[j].min_velocity_);
 
   // Stretch intervals until close to the bounds
@@ -288,7 +288,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
 
     // Calculate the interval stretches due to acceleration
     std::vector<double> time_factor(num_points - 1, 1.00);
-    for (unsigned j = 0; j < num_joints; j++)
+    for (unsigned j = 0; j < num_joints; ++j)
     {
       // Move points to satisfy initial/final acceleration
       if (add_points_)
@@ -298,7 +298,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
       }
 
       fit_cubic_spline(num_points, &time_diff[0], &t2[j].positions_[0], &t2[j].velocities_[0], &t2[j].accelerations_[0]);
-      for (unsigned i = 0; i < num_points; i++)
+      for (unsigned i = 0; i < num_points; ++i)
       {
         const double acc = t2[j].accelerations_[i];
         double atfactor = 1.0;
@@ -320,7 +320,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
       break;  // finished
 
     // Stretch
-    for (unsigned i = 0; i < num_points - 1; i++)
+    for (unsigned i = 0; i < num_points - 1; ++i)
       time_diff[i] *= time_factor[i];
   }
 
@@ -328,11 +328,11 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   globalAdjustment(t2, num_joints, num_points, time_diff);
 
   // Convert back to JointTrajectory form
-  for (unsigned int i = 1; i < num_points; i++)
+  for (unsigned int i = 1; i < num_points; ++i)
     trajectory.setWayPointDurationFromPrevious(i, time_diff[i - 1]);
-  for (unsigned int i = 0; i < num_points; i++)
+  for (unsigned int i = 0; i < num_points; ++i)
   {
-    for (unsigned int j = 0; j < num_joints; j++)
+    for (unsigned int j = 0; j < num_joints; ++j)
     {
       trajectory.getWayPointPtr(i)->setVariableVelocity(idx[j], t2[j].velocities_[i]);
       trajectory.getWayPointPtr(i)->setVariableAcceleration(idx[j], t2[j].accelerations_[i]);
@@ -341,7 +341,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
     // Only update position of additionally inserted points (at second and next-to-last position)
     if (add_points_ && (i == 1 || i == num_points - 2))
     {
-      for (unsigned int j = 0; j < num_joints; j++)
+      for (unsigned int j = 0; j < num_joints; ++j)
         trajectory.getWayPointPtr(i)->setVariablePosition(idx[j], t2[j].positions_[i]);
       trajectory.getWayPointPtr(i)->update();
     }
@@ -373,7 +373,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
 
   This matrix is tridiagonal, which can be solved solved in O(N) time
   using the tridiagonal algorithm.
-  There is a forward propogation pass followed by a backsubstitution pass.
+  There is a forward propagation pass followed by a backsubstitution pass.
 
   n is the number of points
   dt contains the time difference between each point (size=n-1)
@@ -395,7 +395,7 @@ static void fit_cubic_spline(const int n, const double dt[], const double x[], d
   double *c = x1, *d = x2;
   c[0] = 0.5;
   d[0] = 3.0 * ((x[1] - x[0]) / dt[0] - x1_i) / dt[0];
-  for (i = 1; i <= n - 2; i++)
+  for (i = 1; i <= n - 2; ++i)
   {
     const double dt2 = dt[i - 1] + dt[i];
     const double a = dt[i - 1] / dt2;
@@ -416,7 +416,7 @@ static void fit_cubic_spline(const int n, const double dt[], const double x[], d
 
   // 1st derivative
   x1[0] = x1_i;
-  for (i = 1; i < n - 1; i++)
+  for (i = 1; i < n - 1; ++i)
     x1[i] = (x[i + 1] - x[i]) / dt[i] - (2 * x2[i] + x2[i + 1]) * dt[i] / 6.0;
   x1[n - 1] = x1_f;
 }
@@ -460,7 +460,7 @@ static void adjust_two_positions(const int n, const double dt[], double x[], dou
 static void init_times(const int n, double dt[], const double x[], const double max_velocity, const double min_velocity)
 {
   int i;
-  for (i = 0; i < n - 1; i++)
+  for (i = 0; i < n - 1; ++i)
   {
     double time;
     double dx = x[i + 1] - x[i];
@@ -505,7 +505,7 @@ static int fit_spline_and_adjust_times(const int n, double dt[], const double x[
   fit_cubic_spline(n, dt, x, x1, x2);
 
   // Instantaneous velocity is calculated at each point
-  for (i = 0; i < n - 1; i++)
+  for (i = 0; i < n - 1; ++i)
   {
     const double vel = x1[i];
     const double vel2 = x1[i + 1];
@@ -518,7 +518,7 @@ static int fit_spline_and_adjust_times(const int n, double dt[], const double x[
   // Instantaneous acceleration is calculated at each point
   if (ret == 0)
   {
-    for (i = 0; i < n - 1; i++)
+    for (i = 0; i < n - 1; ++i)
     {
       const double acc = x2[i];
       const double acc2 = x2[i + 1];
@@ -546,7 +546,7 @@ static double global_adjustment_factor(const int n, double dt[], const double x[
 
   // fit_cubic_spline(n, dt, x, x1, x2);
 
-  for (i = 0; i < n; i++)
+  for (i = 0; i < n; ++i)
   {
     double tfactor;
     tfactor = x1[i] / max_velocity;
@@ -578,7 +578,7 @@ void globalAdjustment(std::vector<SingleJointTrajectory>& t2, int num_joints, co
                       std::vector<double>& time_diff)
 {
   double gtfactor = 1.0;
-  for (int j = 0; j < num_joints; j++)
+  for (int j = 0; j < num_joints; ++j)
   {
     double tfactor;
     tfactor = global_adjustment_factor(num_points, &time_diff[0], &t2[j].positions_[0], &t2[j].velocities_[0],
@@ -589,10 +589,10 @@ void globalAdjustment(std::vector<SingleJointTrajectory>& t2, int num_joints, co
   }
 
   // printf("# Global adjustment: %0.4f%%\n", 100.0 * (gtfactor - 1.0));
-  for (int i = 0; i < num_points - 1; i++)
+  for (int i = 0; i < num_points - 1; ++i)
     time_diff[i] *= gtfactor;
 
-  for (int j = 0; j < num_joints; j++)
+  for (int j = 0; j < num_joints; ++j)
   {
     fit_cubic_spline(num_points, &time_diff[0], &t2[j].positions_[0], &t2[j].velocities_[0], &t2[j].accelerations_[0]);
   }

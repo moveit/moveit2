@@ -135,7 +135,7 @@ bool testutils::isGoalReached(const trajectory_msgs::msg::JointTrajectory& traje
     {
       std::cerr << "[ Fail     ] goal has non zero velocity."
                 << " Joint Name: " << trajectory.joint_names.at(i) << "; Velocity: " << last_point.velocities.at(i)
-                << std::endl;
+                << '\n';
       return false;
     }
 
@@ -148,7 +148,7 @@ bool testutils::isGoalReached(const trajectory_msgs::msg::JointTrajectory& traje
           std::cerr << "[ Fail     ] goal position not reached."
                     << " Joint Name: " << trajectory.joint_names.at(i)
                     << "; Actual Position: " << last_point.positions.at(i)
-                    << "; Expected Position: " << joint_goal.position << std::endl;
+                    << "; Expected Position: " << joint_goal.position << '\n';
           return false;
         }
       }
@@ -188,7 +188,7 @@ bool testutils::isGoalReached(const moveit::core::RobotModelConstPtr& robot_mode
 
   if (!computeLinkFK(robot_model, link_name, joint_state, goal_pose_actual))
   {
-    std::cerr << "[ Fail     ] forward kinematics computation failed for link: " << link_name << std::endl;
+    std::cerr << "[ Fail     ] forward kinematics computation failed for link: " << link_name << '\n';
   }
 
   auto actual_rotation{ goal_pose_actual.rotation() };
@@ -198,9 +198,9 @@ bool testutils::isGoalReached(const moveit::core::RobotModelConstPtr& robot_mode
   {
     std::cout << "\nOrientation difference = " << rot_diff.norm() << " (eps=" << orientation_tolerance << ")"
               << "\n### Expected goal orientation: ### \n"
-              << expected_rotation << std::endl
+              << expected_rotation << '\n'
               << "### Actual goal orientation ### \n"
-              << actual_rotation << std::endl;
+              << actual_rotation << '\n';
     return false;
   }
 
@@ -211,9 +211,9 @@ bool testutils::isGoalReached(const moveit::core::RobotModelConstPtr& robot_mode
   {
     std::cout << "\nPosition difference = " << pos_diff.norm() << " (eps=" << pos_tolerance << ")"
               << "\n### Expected goal position: ### \n"
-              << expected_position << std::endl
+              << expected_position << '\n'
               << "### Actual goal position ### \n"
-              << actual_position << std::endl;
+              << actual_position << '\n';
     return false;
   }
 
@@ -282,9 +282,9 @@ bool testutils::checkCartesianLinearity(const moveit::core::RobotModelConstPtr& 
                  .norm()) > fabs(translation_norm_tolerance))
     {
       std::cout << "Translational linearity is violated. \n"
-                << "goal tanslation: " << goal_pose_expect.translation() << std::endl
-                << "start translation: " << start_pose.translation() << std::endl
-                << "acutual translation " << way_point_pose.translation() << std::endl;
+                << "goal translation: " << goal_pose_expect.translation() << '\n'
+                << "start translation: " << start_pose.translation() << '\n'
+                << "actual translation " << way_point_pose.translation() << '\n';
       return false;
     }
 
@@ -314,11 +314,11 @@ bool testutils::checkSLERP(const Eigen::Isometry3d& start_pose, const Eigen::Iso
         (fabs(start_wp_aa.angle()) < fabs(rot_angle_tolerance))))
   {
     std::cout << "Rotational linearity is violated. \n"
-              << std::endl
-              << "start goal angle: " << start_goal_aa.angle() << "; axis: " << std::endl
-              << start_goal_aa.axis() << std::endl
-              << "start waypoint angle: " << start_wp_aa.angle() << "; axis: " << std::endl
-              << start_wp_aa.axis() << std::endl;
+              << '\n'
+              << "start goal angle: " << start_goal_aa.angle() << "; axis: " << '\n'
+              << start_goal_aa.axis() << '\n'
+              << "start waypoint angle: " << start_wp_aa.angle() << "; axis: " << '\n'
+              << start_wp_aa.axis() << '\n';
 
     return false;
   }
@@ -371,8 +371,7 @@ bool testutils::isVelocityBounded(const trajectory_msgs::msg::JointTrajectory& t
                   << " Joint Name: " << trajectory.joint_names.at(i) << "; Position: " << point.positions.at(i)
                   << "; Velocity: " << point.velocities.at(i) << "; Acceleration: " << point.accelerations.at(i)
                   << "; Time from start: " << rclcpp::Duration(point.time_from_start).seconds()
-                  << "; Velocity Limit: " << joint_limits.getLimit(trajectory.joint_names.at(i)).max_velocity
-                  << std::endl;
+                  << "; Velocity Limit: " << joint_limits.getLimit(trajectory.joint_names.at(i)).max_velocity << '\n';
 
         return false;
       }
@@ -394,7 +393,7 @@ bool testutils::isTrajectoryConsistent(const trajectory_msgs::msg::JointTrajecto
     }
   }
 
-  // TODO check value is consistant (time, position, velocity, acceleration)
+  // TODO check value is consistent (time, position, velocity, acceleration)
 
   return true;
 }
@@ -416,7 +415,7 @@ bool testutils::isAccelerationBounded(const trajectory_msgs::msg::JointTrajector
                     << "; Acceleration: " << point.accelerations.at(i)
                     << "; Time from start: " << rclcpp::Duration(point.time_from_start).seconds()
                     << ". Deceleration Limit: " << joint_limits.getLimit(trajectory.joint_names.at(i)).max_deceleration
-                    << std::endl;
+                    << '\n';
           return false;
         }
       }
@@ -430,7 +429,7 @@ bool testutils::isAccelerationBounded(const trajectory_msgs::msg::JointTrajector
                     << "; Acceleration: " << point.accelerations.at(i)
                     << "; Time from start: " << rclcpp::Duration(point.time_from_start).seconds()
                     << ". Acceleration Limit: " << joint_limits.getLimit(trajectory.joint_names.at(i)).max_acceleration
-                    << std::endl;
+                    << '\n';
 
           return false;
         }
@@ -456,8 +455,7 @@ bool testutils::isPositionBounded(const trajectory_msgs::msg::JointTrajectory& t
                   << "; Velocity: " << point.velocities.at(i) << "; Acceleration: " << point.accelerations.at(i)
                   << "; Time from start: " << rclcpp::Duration(point.time_from_start).seconds()
                   << "; Max Position: " << joint_limits.getLimit(trajectory.joint_names.at(i)).max_position
-                  << "; Min Position: " << joint_limits.getLimit(trajectory.joint_names.at(i)).min_position
-                  << std::endl;
+                  << "; Min Position: " << joint_limits.getLimit(trajectory.joint_names.at(i)).min_position << '\n';
 
         return false;
       }
@@ -472,22 +470,22 @@ bool testutils::checkJointTrajectory(const trajectory_msgs::msg::JointTrajectory
 {
   if (!testutils::isTrajectoryConsistent(trajectory))
   {
-    std::cout << "Joint trajectory is not consistent." << std::endl;
+    std::cout << "Joint trajectory is not consistent." << '\n';
     return false;
   }
   if (!testutils::isPositionBounded(trajectory, joint_limits))
   {
-    std::cout << "Joint poisiton violated the limits." << std::endl;
+    std::cout << "Joint poisiton violated the limits." << '\n';
     return false;
   }
   if (!testutils::isVelocityBounded(trajectory, joint_limits))
   {
-    std::cout << "Joint velocity violated the limits." << std::endl;
+    std::cout << "Joint velocity violated the limits." << '\n';
     return false;
   }
   if (!testutils::isAccelerationBounded(trajectory, joint_limits))
   {
-    std::cout << "Joint acceleration violated the limits." << std::endl;
+    std::cout << "Joint acceleration violated the limits." << '\n';
     return false;
   }
 
@@ -581,7 +579,7 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
       if (res.first_trajectory->getWayPoint(i).getVariablePosition(joint_name) !=
           req.first_trajectory->getWayPoint(i).getVariablePosition(joint_name))
       {
-        std::cout << i << "th position of the first trajectory is not same." << std::endl;
+        std::cout << i << "th position of the first trajectory is not same." << '\n';
         return false;
       }
 
@@ -589,7 +587,7 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
       if (res.first_trajectory->getWayPoint(i).getVariableVelocity(joint_name) !=
           req.first_trajectory->getWayPoint(i).getVariableVelocity(joint_name))
       {
-        std::cout << i << "th velocity of the first trajectory is not same." << std::endl;
+        std::cout << i << "th velocity of the first trajectory is not same." << '\n';
         return false;
       }
 
@@ -597,7 +595,7 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
       if (res.first_trajectory->getWayPoint(i).getVariableAcceleration(joint_name) !=
           req.first_trajectory->getWayPoint(i).getVariableAcceleration(joint_name))
       {
-        std::cout << i << "th acceleration of the first trajectory is not same." << std::endl;
+        std::cout << i << "th acceleration of the first trajectory is not same." << '\n';
         return false;
       }
     }
@@ -605,7 +603,7 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
     // check time from start
     if (res.first_trajectory->getWayPointDurationFromStart(i) != req.first_trajectory->getWayPointDurationFromStart(i))
     {
-      std::cout << i << "th time_from_start of the first trajectory is not same." << std::endl;
+      std::cout << i << "th time_from_start of the first trajectory is not same." << '\n';
       return false;
     }
   }
@@ -622,7 +620,7 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
       if (res.second_trajectory->getWayPoint(size_second - i - 1).getVariablePosition(joint_name) !=
           req.second_trajectory->getWayPoint(size_second_original - i - 1).getVariablePosition(joint_name))
       {
-        std::cout << i - 1 << "th position of the second trajectory is not same." << std::endl;
+        std::cout << i - 1 << "th position of the second trajectory is not same." << '\n';
         return false;
       }
 
@@ -630,7 +628,7 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
       if (res.second_trajectory->getWayPoint(size_second - i - 1).getVariableVelocity(joint_name) !=
           req.second_trajectory->getWayPoint(size_second_original - i - 1).getVariableVelocity(joint_name))
       {
-        std::cout << i - 1 << "th position of the second trajectory is not same." << std::endl;
+        std::cout << i - 1 << "th position of the second trajectory is not same." << '\n';
         return false;
       }
 
@@ -638,7 +636,7 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
       if (res.second_trajectory->getWayPoint(size_second - i - 1).getVariableAcceleration(joint_name) !=
           req.second_trajectory->getWayPoint(size_second_original - i - 1).getVariableAcceleration(joint_name))
       {
-        std::cout << i - 1 << "th position of the second trajectory is not same." << std::endl;
+        std::cout << i - 1 << "th position of the second trajectory is not same." << '\n';
         return false;
       }
     }
@@ -655,7 +653,7 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
                   << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) << ", "
                   << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 2) << ", "
                   << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) << ", "
-                  << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2) << std::endl;
+                  << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2) << '\n';
         return false;
       }
     }
@@ -669,7 +667,7 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
                   << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) << ", "
                   << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) -
                          req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2)
-                  << std::endl;
+                  << '\n';
         return false;
       }
     }
@@ -699,7 +697,7 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
   {
     std::cout << "Different sizes of the position/velocity/acceleration "
                  "between first trajectory and blend trajectory."
-              << std::endl;
+              << '\n';
     return false;
   }
 
@@ -712,10 +710,10 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
     {
       std::cout << "Velocity computed from positions are different from the "
                    "value in trajectory."
-                << std::endl
+                << '\n'
                 << "position: " << blend_start.positions.at(i) << "; " << first_end.positions.at(i)
                 << "computed: " << blend_start_velo << "; "
-                << "in trajectory: " << blend_start.velocities.at(i) << std::endl;
+                << "in trajectory: " << blend_start.velocities.at(i) << '\n';
       return false;
     }
 
@@ -725,9 +723,9 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
     {
       std::cout << "Acceleration computed from positions/velocities are "
                    "different from the value in trajectory."
-                << std::endl
+                << '\n'
                 << "computed: " << blend_start_acc << "; "
-                << "in trajectory: " << blend_start.accelerations.at(i) << std::endl;
+                << "in trajectory: " << blend_start.accelerations.at(i) << '\n';
       return false;
     }
   }
@@ -744,10 +742,10 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
   {
     std::cout << "Different sizes of the position/velocity/acceleration "
                  "between first trajectory and blend trajectory."
-              << std::endl
-              << blend_end.positions.size() << ", " << second_start.positions.size() << std::endl
-              << blend_end.velocities.size() << ", " << second_start.positions.size() << std::endl
-              << blend_end.accelerations.size() << ", " << second_start.accelerations.size() << std::endl;
+              << '\n'
+              << blend_end.positions.size() << ", " << second_start.positions.size() << '\n'
+              << blend_end.velocities.size() << ", " << second_start.positions.size() << '\n'
+              << blend_end.accelerations.size() << ", " << second_start.accelerations.size() << '\n';
     return false;
   }
 
@@ -760,9 +758,9 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
     {
       std::cout << "Velocity computed from positions are different from the "
                    "value in trajectory."
-                << std::endl
+                << '\n'
                 << "computed: " << second_start_velo << "; "
-                << "in trajectory: " << second_start.velocities.at(i) << std::endl;
+                << "in trajectory: " << second_start.velocities.at(i) << '\n';
       return false;
     }
 
@@ -772,9 +770,9 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
     {
       std::cout << "Acceleration computed from positions/velocities are "
                    "different from the value in trajectory."
-                << std::endl
+                << '\n'
                 << "computed: " << second_start_acc << "; "
-                << "in trajectory: " << second_start.accelerations.at(i) << std::endl;
+                << "in trajectory: " << second_start.accelerations.at(i) << '\n';
       return false;
     }
   }
@@ -792,7 +790,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
   {
     std::cout << "Cannot perform check of cartesian space continuity with "
                  "sampling time 0.0"
-              << std::endl;
+              << '\n';
     return false;
   }
 
@@ -828,28 +826,28 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
   // second point of second trajectory
   pose_second_start_1 = res.second_trajectory->getWayPointPtr(1)->getFrameTransform(req.link_name);
 
-  //  std::cout << "### sample duration: " << duration << " ###" << std::endl;
-  //  std::cout << "### end pose of first trajectory ###" << std::endl;
-  //  std::cout << pose_first_end.matrix() << std::endl;
-  //  std::cout << "### start pose of blend trajectory ###" << std::endl;
-  //  std::cout << pose_blend_start.matrix() << std::endl;
-  //  std::cout << "### end pose of blend trajectory ###" << std::endl;
-  //  std::cout << pose_blend_end.matrix() << std::endl;
-  //  std::cout << "### start pose of second trajectory ###" << std::endl;
-  //  std::cout << pose_second_start.matrix() << std::endl;
+  //  std::cout << "### sample duration: " << duration << " ###" << '\n';
+  //  std::cout << "### end pose of first trajectory ###" << '\n';
+  //  std::cout << pose_first_end.matrix() << '\n';
+  //  std::cout << "### start pose of blend trajectory ###" << '\n';
+  //  std::cout << pose_blend_start.matrix() << '\n';
+  //  std::cout << "### end pose of blend trajectory ###" << '\n';
+  //  std::cout << pose_blend_end.matrix() << '\n';
+  //  std::cout << "### start pose of second trajectory ###" << '\n';
+  //  std::cout << pose_second_start.matrix() << '\n';
 
-  //  std::cout << "### v_1 ###" << std::endl;
-  //  std::cout << v_1 << std::endl;
-  //  std::cout << "### w_1 ###" << std::endl;
-  //  std::cout << w_1 << std::endl;
-  //  std::cout << "### v_2 ###" << std::endl;
-  //  std::cout << v_2 << std::endl;
-  //  std::cout << "### w_2 ###" << std::endl;
-  //  std::cout << w_2 << std::endl;
-  //  std::cout << "### v_3 ###" << std::endl;
-  //  std::cout << v_3 << std::endl;
-  //  std::cout << "### w_3 ###" << std::endl;
-  //  std::cout << w_3 << std::endl;
+  //  std::cout << "### v_1 ###" << '\n';
+  //  std::cout << v_1 << '\n';
+  //  std::cout << "### w_1 ###" << '\n';
+  //  std::cout << w_1 << '\n';
+  //  std::cout << "### v_2 ###" << '\n';
+  //  std::cout << v_2 << '\n';
+  //  std::cout << "### w_2 ###" << '\n';
+  //  std::cout << w_2 << '\n';
+  //  std::cout << "### v_3 ###" << '\n';
+  //  std::cout << v_3 << '\n';
+  //  std::cout << "### w_3 ###" << '\n';
+  //  std::cout << w_3 << '\n';
 
   // check the connection points between first trajectory and blend trajectory
   Eigen::Vector3d v_1, w_1, v_2, w_2, v_3, w_3;
@@ -863,7 +861,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
     std::cout << "Translational velocity between first trajectory and blend "
                  "trajectory exceeds the limit."
               << "Actual velocity (norm): " << v_2.norm() << "; "
-              << "Limits: " << max_trans_velo << std::endl;
+              << "Limits: " << max_trans_velo << '\n';
   }
   // rotational velocity
   if (w_2.norm() > max_rot_velo)
@@ -871,7 +869,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
     std::cout << "Rotational velocity between first trajectory and blend "
                  "trajectory exceeds the limit."
               << "Actual velocity (norm): " << w_2.norm() << "; "
-              << "Limits: " << max_rot_velo << std::endl;
+              << "Limits: " << max_rot_velo << '\n';
   }
   // translational acceleration
   Eigen::Vector3d a_1 = (v_2 - v_1) / duration;
@@ -881,7 +879,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
     std::cout << "Translational acceleration between first trajectory and "
                  "blend trajectory exceeds the limit."
               << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
-              << "Limits: " << max_trans_acc << std::endl;
+              << "Limits: " << max_trans_acc << '\n';
   }
 
   // rotational acceleration
@@ -892,7 +890,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
     std::cout << "Rotational acceleration between first trajectory and blend "
                  "trajectory exceeds the limit."
               << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
-              << "Limits: " << max_rot_acc << std::endl;
+              << "Limits: " << max_rot_acc << '\n';
   }
 
   computeCartVelocity(pose_blend_end_1, pose_blend_end, duration, v_1, w_1);
@@ -904,14 +902,14 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
     std::cout << "Translational velocity between blend trajectory and second "
                  "trajectory exceeds the limit."
               << "Actual velocity (norm): " << v_2.norm() << "; "
-              << "Limits: " << max_trans_velo << std::endl;
+              << "Limits: " << max_trans_velo << '\n';
   }
   if (w_2.norm() > max_rot_velo)
   {
     std::cout << "Rotational velocity between blend trajectory and second "
                  "trajectory exceeds the limit."
               << "Actual velocity (norm): " << w_2.norm() << "; "
-              << "Limits: " << max_rot_velo << std::endl;
+              << "Limits: " << max_rot_velo << '\n';
   }
   a_1 = (v_2 - v_1) / duration;
   a_2 = (v_3 - v_2) / duration;
@@ -920,7 +918,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
     std::cout << "Translational acceleration between blend trajectory and "
                  "second trajectory exceeds the limit."
               << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
-              << "Limits: " << max_trans_acc << std::endl;
+              << "Limits: " << max_trans_acc << '\n';
   }
   // check rotational acceleration
   a_1 = (w_2 - w_1) / duration;
@@ -930,7 +928,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
     std::cout << "Rotational acceleration between blend trajectory and second "
                  "trajectory exceeds the limit."
               << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
-              << "Limits: " << max_rot_acc << std::endl;
+              << "Limits: " << max_rot_acc << '\n';
   }
 
   return true;
@@ -946,7 +944,7 @@ bool testutils::checkThatPointsInRadius(const std::string& link_name, const doub
     if ((curr_pos.translation() - circ_pose.translation()).norm() > r)
     {
       std::cout << "Point " << i << " does not lie within blending radius (dist: "
-                << ((curr_pos.translation() - circ_pose.translation()).norm() - r) << ")." << std::endl;
+                << ((curr_pos.translation() - circ_pose.translation()).norm() - r) << ")." << '\n';
       result = false;
     }
   }
@@ -1088,7 +1086,7 @@ bool testutils::generateTrajFromBlendTestData(
   // trajectory generation
   if (!tg->generate(scene, req_1, res_1, sampling_time_1))
   {
-    std::cout << "Failed to generate first trajectory." << std::endl;
+    std::cout << "Failed to generate first trajectory." << '\n';
     return false;
   }
 
@@ -1108,7 +1106,7 @@ bool testutils::generateTrajFromBlendTestData(
   // trajectory generation
   if (!tg->generate(scene, req_2, res_2, sampling_time_2))
   {
-    std::cout << "Failed to generate second trajectory." << std::endl;
+    std::cout << "Failed to generate second trajectory." << '\n';
     return false;
   }
 
@@ -1313,7 +1311,7 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr& robot_mo
   // that the trapezoid is not degenerated.
   if (std::distance(it_first_const, it_last_const) < 3)
   {
-    return ::testing::AssertionFailure() << "Exptected the have at least 3 points during the phase of "
+    return ::testing::AssertionFailure() << "Expected the have at least 3 points during the phase of "
                                             "constant "
                                             "velocity.";
   }
@@ -1336,29 +1334,29 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr& robot_mo
   }
 
   std::stringstream debug_stream;
-  for (auto it = accelerations.begin(); it != it_last_acc + 1; it++)
+  for (auto it = accelerations.begin(); it != it_last_acc + 1; ++it)
   {
-    debug_stream << *it << "(Acc)" << std::endl;
+    debug_stream << *it << "(Acc)" << '\n';
   }
 
-  for (auto it = it_last_acc + 1; it != it_last_intermediate + 1; it++)
+  for (auto it = it_last_acc + 1; it != it_last_intermediate + 1; ++it)
   {
-    debug_stream << *it << "(Inter1)" << std::endl;
+    debug_stream << *it << "(Inter1)" << '\n';
   }
 
-  for (auto it = it_first_const; it != it_last_const + 1; it++)
+  for (auto it = it_first_const; it != it_last_const + 1; ++it)
   {
-    debug_stream << *it << "(Const)" << std::endl;
+    debug_stream << *it << "(Const)" << '\n';
   }
 
-  for (auto it = it_last_const + 1; it != it_first_dec; it++)
+  for (auto it = it_last_const + 1; it != it_first_dec; ++it)
   {
-    debug_stream << *it << "(Inter2)" << std::endl;
+    debug_stream << *it << "(Inter2)" << '\n';
   }
 
-  for (auto it = it_first_dec; it != accelerations.end(); it++)
+  for (auto it = it_first_dec; it != accelerations.end(); ++it)
   {
-    debug_stream << *it << "(Dec)" << std::endl;
+    debug_stream << *it << "(Dec)" << '\n';
   }
 
   RCLCPP_DEBUG_STREAM(LOGGER, debug_stream.str());

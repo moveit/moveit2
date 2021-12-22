@@ -100,7 +100,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   node_->get_parameter(planning_display_->getMoveGroupNS() + "/move_group/default_planning_pipeline",
                        default_planning_pipeline_);
 
-  // connect bottons to actions; each action usually registers the function pointer for the actual computation,
+  // connect buttons to actions; each action usually registers the function pointer for the actual computation,
   // to keep the GUI more responsive (using the background job processing)
   connect(ui_->plan_button, SIGNAL(clicked()), this, SLOT(planButtonClicked()));
   connect(ui_->execute_button, SIGNAL(clicked()), this, SLOT(executeButtonClicked()));
@@ -541,7 +541,7 @@ shapes::ShapePtr MotionPlanningFrame::loadMeshResource(const std::string& url)
   {
     // If the object is very large, ask the user if the scale should be reduced.
     bool object_is_very_large = false;
-    for (unsigned int i = 0; i < mesh->vertex_count; i++)
+    for (unsigned int i = 0; i < mesh->vertex_count; ++i)
     {
       if ((abs(mesh->vertices[i * 3 + 0]) > LARGE_MESH_THRESHOLD) ||
           (abs(mesh->vertices[i * 3 + 1]) > LARGE_MESH_THRESHOLD) ||

@@ -155,7 +155,7 @@ bool PlacePlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene
           if (!attached_bodies.empty())
           {
             // if the user specified the name of the attached object to place, we check that indeed
-            // the group contains this attachd body
+            // the group contains this attached body
             if (!attached_object_name.empty())
             {
               bool found = false;

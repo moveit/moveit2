@@ -66,7 +66,7 @@ std::string JointModel::getTypeName() const
   switch (type_)
   {
     case UNKNOWN:
-      return "Unkown";
+      return "Unknown";
     case REVOLUTE:
       return "Revolute";
     case PRISMATIC:
@@ -78,7 +78,7 @@ std::string JointModel::getTypeName() const
     case FIXED:
       return "Fixed";
     default:
-      return "[Unkown]";
+      return "[Unknown]";
   }
 }
 

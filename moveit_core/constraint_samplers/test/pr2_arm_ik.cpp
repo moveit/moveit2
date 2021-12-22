@@ -262,7 +262,7 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
   theta4[1] = -acos_angle;
 
 #ifdef DEBUG
-  std::cout << "ComputeIK::theta3:" << numerator << "," << denominator << "," << std::endl << theta4[0] << std::endl;
+  std::cout << "ComputeIK::theta3:" << numerator << "," << denominator << ",\n" << theta4[0] << '\n';
 #endif
 
   for (double theta : theta4)
@@ -272,7 +272,7 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
     sint4 = sin(t4);
 
 #ifdef DEBUG
-    std::cout << "t4 " << t4 << std::endl;
+    std::cout << "t4 " << t4 << '\n';
 #endif
     if (std::isnan(t4))
       continue;
@@ -295,7 +295,7 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
         continue;
 
 #ifdef DEBUG
-      std::cout << "t2 " << t2 << std::endl;
+      std::cout << "t2 " << t2 << '\n';
 #endif
       sint2 = sin(t2);
       cost2 = cos(t2);
@@ -318,7 +318,7 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
         sint3 = sin(t3);
         cost3 = cos(t3);
 #ifdef DEBUG
-        std::cout << "t3 " << t3 << std::endl;
+        std::cout << "t3 " << t3 << '\n';
 #endif
         if (fabs((shoulder_upperarm_offset_ - shoulder_elbow_offset_ +
                   (shoulder_elbow_offset_ - shoulder_wrist_offset_) * cost4) *
@@ -388,21 +388,21 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
         //            theta6[3] = M_PI + theta6[0];
         //            theta6[4] = M_PI + theta6[1];
 
-        for (int mm = 0; mm < 2; mm++)
+        for (int mm = 0; mm < 2; ++mm)
         {
           t6 = theta6[mm];
           if (!checkJointLimits(angles::normalize_angle(t6), 5))
             continue;
 
 #ifdef DEBUG
-          std::cout << "t6 " << t6 << std::endl;
+          std::cout << "t6 " << t6 << '\n';
 #endif
           if (fabs(cos(t6) - grhs_local(0, 0)) > IK_EPS)
             continue;
 
           if (fabs(sin(t6)) < IK_EPS)
           {
-            //                std::cout << "Singularity" << std::endl;
+            //                std::cout << "Singularity" << '\n';
             theta5[0] = acos(grhs_local(1, 1)) / 2.0;
             theta7[0] = theta7[0];
             theta7[1] = M_PI + theta7[0];
@@ -416,15 +416,15 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
             theta5[1] = M_PI + theta5[0];
           }
 #ifdef DEBUG
-          std::cout << "theta1: " << t1 << std::endl;
-          std::cout << "theta2: " << t2 << std::endl;
-          std::cout << "theta3: " << t3 << std::endl;
-          std::cout << "theta4: " << t4 << std::endl;
-          std::cout << "theta5: " << t5 << std::endl;
-          std::cout << "theta6: " << t6 << std::endl;
-          std::cout << "theta7: " << t7 << std::endl << std::endl << std::endl;
+          std::cout << "theta1: " << t1 << '\n';
+          std::cout << "theta2: " << t2 << '\n';
+          std::cout << "theta3: " << t3 << '\n';
+          std::cout << "theta4: " << t4 << '\n';
+          std::cout << "theta5: " << t5 << '\n';
+          std::cout << "theta6: " << t6 << '\n';
+          std::cout << "theta7: " << t7 << '\n' << '\n' << '\n';
 #endif
-          for (int lll = 0; lll < 2; lll++)
+          for (int lll = 0; lll < 2; ++lll)
           {
             t5 = theta5[lll];
             t7 = theta7[lll];
@@ -434,8 +434,8 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
               continue;
 
 #ifdef DEBUG
-            std::cout << "t5" << t5 << std::endl;
-            std::cout << "t7" << t7 << std::endl;
+            std::cout << "t5" << t5 << '\n';
+            std::cout << "t7" << t7 << '\n';
 #endif
             if (fabs(sin(t6) * sin(t7) - grhs_local(0, 1)) > IK_EPS ||
                 fabs(cos(t7) * sin(t6) - grhs_local(0, 2)) > IK_EPS)
@@ -453,8 +453,8 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
 #ifdef DEBUG
             std::cout << "SOLN " << solution_ik[0] << " " << solution_ik[1] << " " << solution_ik[2] << " "
                       << solution_ik[3] << " " << solution_ik[4] << " " << solution_ik[5] << " " << solution_ik[6]
-                      << std::endl
-                      << std::endl;
+                      << '\n'
+                      << '\n';
 #endif
           }
         }
@@ -470,7 +470,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
   //  ROS_INFO(" ");
   // solution_ik_.clear();
   //  ROS_INFO("Solution IK size: %d",solution_ik_.size());
-  //  for(unsigned int i=0; i < solution_ik_.size(); i++)
+  //  for(unsigned int i=0; i < solution_ik_.size(); ++i)
   //  {
   //    solution_ik_[i].clear();
   //  }
@@ -542,7 +542,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
     cost4 = cos(t4);
     sint4 = sin(t4);
 #ifdef DEBUG
-    std::cout << "t4 " << t4 << std::endl;
+    std::cout << "t4 " << t4 << '\n';
 #endif
     if (std::isnan(t4))
       continue;
@@ -558,7 +558,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
     {
       t2 = theta;
 #ifdef DEBUG
-      std::cout << "t2 " << t2 << std::endl;
+      std::cout << "t2 " << t2 << '\n';
 #endif
       if (!checkJointLimits(t2, 1))
       {
@@ -574,7 +574,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
       if (!solveCosineEqn(at, bt, ct, theta1[0], theta1[1]))
       {
 #ifdef DEBUG
-        std::cout << "could not solve cosine equation for t1" << std::endl;
+        std::cout << "could not solve cosine equation for t1" << '\n';
 #endif
         continue;
       }
@@ -583,7 +583,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
       {
         t1 = theta;
 #ifdef DEBUG
-        std::cout << "t1 " << t1 << std::endl;
+        std::cout << "t1 " << t1 << '\n';
 #endif
         if (!checkJointLimits(t1, 0))
         {
@@ -686,11 +686,11 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
         theta6[0] = atan2(val1, val2);
         theta6[1] = atan2(-val1, val2);
 
-        for (int mm = 0; mm < 2; mm++)
+        for (int mm = 0; mm < 2; ++mm)
         {
           t6 = theta6[mm];
 #ifdef DEBUG
-          std::cout << "t6 " << t6 << std::endl;
+          std::cout << "t6 " << t6 << '\n';
 #endif
           if (!checkJointLimits(t6, 5))
           {
@@ -702,7 +702,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
 
           if (fabs(sin(t6)) < IK_EPS)
           {
-            //                std::cout << "Singularity" << std::endl;
+            //                std::cout << "Singularity" << '\n';
             theta5[0] = acos(grhs_local(1, 1)) / 2.0;
             theta7[0] = theta5[0];
             //            theta7[1] = M_PI+theta7[0];
@@ -715,7 +715,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
             //            theta7[1] = M_PI+theta7[0];
             //            theta5[1] = M_PI+theta5[0];
           }
-          for (int lll = 0; lll < 1; lll++)
+          for (int lll = 0; lll < 1; ++lll)
           {
             t5 = theta5[lll];
             t7 = theta7[lll];
@@ -730,20 +730,20 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
             }
 
 #ifdef DEBUG
-            std::cout << "t5 " << t5 << std::endl;
-            std::cout << "t7 " << t7 << std::endl;
+            std::cout << "t5 " << t5 << '\n';
+            std::cout << "t7 " << t7 << '\n';
 #endif
             //           if(fabs(sin(t6)*sin(t7)-grhs_local(0,1)) > IK_EPS || fabs(cos(t7)*sin(t6)-grhs_local(0,2)) > IK_EPS)
             //  continue;
 
 #ifdef DEBUG
-            std::cout << "theta1: " << t1 << std::endl;
-            std::cout << "theta2: " << t2 << std::endl;
-            std::cout << "theta3: " << t3 << std::endl;
-            std::cout << "theta4: " << t4 << std::endl;
-            std::cout << "theta5: " << t5 << std::endl;
-            std::cout << "theta6: " << t6 << std::endl;
-            std::cout << "theta7: " << t7 << std::endl << std::endl << std::endl;
+            std::cout << "theta1: " << t1 << '\n';
+            std::cout << "theta2: " << t2 << '\n';
+            std::cout << "theta3: " << t3 << '\n';
+            std::cout << "theta4: " << t4 << '\n';
+            std::cout << "theta5: " << t5 << '\n';
+            std::cout << "theta6: " << t6 << '\n';
+            std::cout << "theta7: " << t7 << '\n' << '\n' << '\n';
 #endif
 
             solution_ik[0] = normalize_angle(t1 * angle_multipliers_[0]);
@@ -757,8 +757,8 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
 #ifdef DEBUG
             std::cout << "SOLN " << solution_ik[0] << " " << solution_ik[1] << " " << solution_ik[2] << " "
                       << solution_ik[3] << " " << solution_ik[4] << " " << solution_ik[5] << " " << solution_ik[6]
-                      << std::endl
-                      << std::endl;
+                      << '\n'
+                      << '\n';
 #endif
           }
         }
@@ -769,7 +769,7 @@ void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double
 
 bool PR2ArmIK::checkJointLimits(const std::vector<double>& joint_values) const
 {
-  for (int i = 0; i < NUM_JOINTS_ARM7DOF; i++)
+  for (int i = 0; i < NUM_JOINTS_ARM7DOF; ++i)
   {
     if (!checkJointLimits(angles::normalize_angle(joint_values[i] * angle_multipliers_[i]), i))
     {

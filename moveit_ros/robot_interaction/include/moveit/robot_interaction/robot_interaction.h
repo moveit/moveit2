@@ -214,7 +214,7 @@ private:
   // This mutex is locked every time markers are read or updated;
   // This includes the active_* arrays and shown_markers_
   // Please note that this mutex *MUST NOT* be locked while operations
-  // on the interative marker server are called because the server
+  // on the interactive marker server are called because the server
   // also locks internally and we could othewrise end up with a problem
   // of Thread 1: Lock A,         Lock B, Unlock B, Unloack A
   //    Thread 2:         Lock B, Lock A

@@ -137,7 +137,7 @@ void SimulationWidget::generateURDFClick()
     std::regex start_reg_ex("<inertial");
     std::regex end_reg_ex("</inertial");
 
-    // Search for inertial elemnts using regex
+    // Search for inertial elements using regex
     std::regex_search(gazebo_compatible_urdf_string, start_match, start_reg_ex);
     std::regex_search(gazebo_compatible_urdf_string, end_match, end_reg_ex);
 
@@ -165,7 +165,7 @@ void SimulationWidget::generateURDFClick()
       inertial_closing_matches.push_back(it->position());
     }
 
-    for (std::size_t match_number = 0; match_number < inertial_opening_matches.size() - 1; match_number++)
+    for (std::size_t match_number = 0; match_number < inertial_opening_matches.size() - 1; ++match_number)
     {
       // Show the unmodified elements in black
       simulation_text_->setTextColor(QColor("black"));
