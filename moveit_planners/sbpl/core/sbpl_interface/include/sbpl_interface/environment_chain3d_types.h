@@ -131,7 +131,7 @@ struct EnvChain3DPlanningData
     int* entry = new int[NUMOFINDICES_STATEID2IND];
     memset(entry, -1, NUMOFINDICES_STATEID2IND * sizeof(int));
     state_ID_to_index_mapping_.push_back(entry);
-    if (new_hash_entry->stateID != static_cast<int>(state_ID_to_index_mapping_.size() - 1))
+    if (new_hash_entry->stateID != static_cast<int>(state_ID_to_index_mapping_.size()) - 1)
     {
       ROS_ERROR_STREAM("Size mismatch between state mappings " << new_hash_entry->stateID << " "
                                                                << state_ID_to_index_mapping_.size());
