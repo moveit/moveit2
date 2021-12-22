@@ -142,7 +142,8 @@ int main(int argc, char** argv)
           std::vector<moveit_warehouse::MotionPlanRequestWithMetadata> planning_queries;
           std::vector<std::string> query_names;
           pss.getPlanningQueries(planning_queries, query_names, pswm->name);
-          RCLCPP_INFO(LOGGER, "There are %d planning queries associated to the scene", (int)planning_queries.size());
+          RCLCPP_INFO(LOGGER, "There are %d planning queries associated to the scene",
+                      static_cast<int>(planning_queries.size()));
           rclcpp::sleep_for(500ms);
           for (std::size_t i = 0; i < planning_queries.size(); ++i)
           {

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!--
+Copyright (c) 2018 Pilz GmbH & Co. KG
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<robot name="prbt" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Definition of robot name -->
+  <xacro:arg name="robot_prefix" default="prbt_"/>
+
+  <!-- macro definition of pilz lwa -->
+  <xacro:include filename="$(find moveit_resources_prbt_support)/urdf/prbt_macro.xacro" />
+
+  <!-- gripper -->
+  <xacro:arg name="gripper" default=""/>
+  <xacro:property name="gripper" value="$(arg gripper)"/>
+
+  <!-- TCP Offset -->
+  <xacro:if value="${not gripper}">
+    <xacro:arg name="tcp_offset_xyz" default="0 0 0"/>
+    <xacro:arg name="tcp_offset_rpy" default="0 0 0"/>
+  </xacro:if>
+
+  <xacro:if value="${gripper != ''}">
+    <xacro:include filename="$(find moveit_resources_prbt_${gripper}_support)/config/${gripper}_tcp_offset.xacro" />
+  </xacro:if>
+
+  <!-- instantiate the robot -->
+  <xacro:prbt prefix="$(arg robot_prefix)" />
+
+  <link name="world"/>
+  <joint name="world-base_link-fixed" type="fixed">
+    <parent link="world"/>
+    <child link="$(arg robot_prefix)base_link"/>
+  </joint>
+
+  <!-- TCP -->
+  <joint name="$(arg robot_prefix)fixed_joint_tcp" type="fixed">
+    <origin xyz="$(arg tcp_offset_xyz)" rpy="$(arg tcp_offset_rpy)" />  <!-- tcp offset from last link -->
+    <parent link="$(arg robot_prefix)flange"/>
+    <child link="$(arg robot_prefix)tcp"/>
+  </joint>
+  <link name="$(arg robot_prefix)tcp" />
+
+  <!-- If gripper given then... -->
+  <xacro:if value="${gripper != ''}">
+    <!-- name of the gripper -->
+    <xacro:property name="gripper_name" value="$(arg robot_prefix)gripper"/>
+
+    <!-- load gripper macro -->
+    <xacro:include filename="$(find moveit_resources_prbt_${gripper}_support)/urdf/${gripper}.urdf.xacro" />
+
+    <!-- instantiate gripper -->
+    <xacro:prbt_gripper parent="$(arg robot_prefix)flange" />
+
+    <!-- Add gripper brackets -->
+    <xacro:include filename="$(find moveit_resources_prbt_support)/urdf/simple_gripper_brackets.urdf.xacro" />
+    <xacro:simple_gripper_brackets />
+  </xacro:if>
+
+</robot>

@@ -320,7 +320,7 @@ inline void EnvironmentChain3D::convertJointAnglesToCoord(const std::vector<doub
     if (pos_angle < 0.0)
       pos_angle += 2 * M_PI;
 
-    coord[i] = (int)((pos_angle + angle_discretization_ * 0.5) / angle_discretization_);
+    coord[i] = static_cast<int>((pos_angle + angle_discretization_ * 0.5) / angle_discretization_);
   }
 }
 
