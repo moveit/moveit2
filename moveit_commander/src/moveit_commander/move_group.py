@@ -474,7 +474,7 @@ class MoveGroupCommander(object):
         return self._g.get_known_constraints()
 
     def get_path_constraints(self):
-        """ Get the acutal path constraints in form of a moveit_msgs.msgs.Constraints """
+        """ Get the actual path constraints in form of a moveit_msgs.msgs.Constraints """
         c = Constraints()
         c_str = self._g.get_path_constraints()
         conversions.msg_from_string(c, c_str)
@@ -687,7 +687,7 @@ class MoveGroupCommander(object):
             return self._g.async_execute(conversions.msg_to_string(plan_msg))
 
     def attach_object(self, object_name, link_name="", touch_links=[]):
-        """ Given the name of an object existing in the planning scene, attach it to a link. The link used is specified by the second argument. If left unspecified, the end-effector link is used, if one is known. If there is no end-effector link, the first link in the group is used. If no link is identified, failure is reported. True is returned if an attach request was succesfully sent to the move_group node. This does not verify that the attach request also was successfuly applied by move_group."""
+        """ Given the name of an object existing in the planning scene, attach it to a link. The link used is specified by the second argument. If left unspecified, the end-effector link is used, if one is known. If there is no end-effector link, the first link in the group is used. If no link is identified, failure is reported. True is returned if an attach request was successfully sent to the move_group node. This does not verify that the attach request also was successfully applied by move_group."""
         return self._g.attach_object(object_name, link_name, touch_links)
 
     def detach_object(self, name=""):

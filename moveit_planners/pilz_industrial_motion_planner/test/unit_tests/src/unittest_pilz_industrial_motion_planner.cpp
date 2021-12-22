@@ -93,7 +93,8 @@ protected:
     try
     {
       planner_instance_.reset(planner_plugin_loader_->createUnmanagedInstance(planner_plugin_name_));
-      ASSERT_TRUE(planner_instance_->initialize(robot_model_, node_, "")) << "Initialzing the planner instance failed.";
+      ASSERT_TRUE(planner_instance_->initialize(robot_model_, node_, ""))
+          << "Initializing the planner instance failed.";
     }
     catch (pluginlib::PluginlibException& ex)
     {
@@ -183,7 +184,7 @@ TEST_F(CommandPlannerTest, CheckEmptyPlannerIdForServiceRequest)
 }
 
 /**
- * @brief Check integrety against empty input
+ * @brief Check integrity against empty input
  */
 TEST_F(CommandPlannerTest, CheckPlanningContextRequestNull)
 {
@@ -193,7 +194,7 @@ TEST_F(CommandPlannerTest, CheckPlanningContextRequestNull)
 }
 
 /**
- * @brief Check that for the announced algorithmns getPlanningContext does not
+ * @brief Check that for the announced algorithms getPlanningContext does not
  * return nullptr
  */
 TEST_F(CommandPlannerTest, CheckPlanningContextRequest)

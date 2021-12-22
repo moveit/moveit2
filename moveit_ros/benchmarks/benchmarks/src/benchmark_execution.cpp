@@ -327,7 +327,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
             checkHeader(req.motion_plan_request.goal_constraints[j], options_.planning_frame);
         }
 
-        ROS_INFO("Benckmarking query '%s' (%d of %d)", planning_queries_names[i].c_str(), (int)i + 1,
+        ROS_INFO("Benchmarking query '%s' (%d of %d)", planning_queries_names[i].c_str(), (int)i + 1,
                  (int)planning_queries_names.size());
         runBenchmark(req);
       }
@@ -406,7 +406,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
             checkHeader(req.motion_plan_request.goal_constraints[0], options_.planning_frame);
           req.filename = options_.output + "." + boost::lexical_cast<std::string>(++n_call) + ".log";
 
-          ROS_INFO("Benckmarking goal '%s' (%d of %d)", cnames[i].c_str(), (int)i + 1, (int)cnames.size());
+          ROS_INFO("Benchmarking goal '%s' (%d of %d)", cnames[i].c_str(), (int)i + 1, (int)cnames.size());
           runBenchmark(req);
         }
       }
@@ -494,7 +494,7 @@ void moveit_benchmarks::BenchmarkExecution::runAllBenchmarks(BenchmarkType type)
             req.motion_plan_request.allowed_planning_time = options_.timeout;
           req.filename = options_.output + ".trajectory." + boost::lexical_cast<std::string>(i + 1) + ".log";
 
-          ROS_INFO("Benckmarking trajectory '%s' (%d of %d)", cnames[i].c_str(), (int)i + 1, (int)cnames.size());
+          ROS_INFO("Benchmarking trajectory '%s' (%d of %d)", cnames[i].c_str(), (int)i + 1, (int)cnames.size());
           runBenchmark(req);
         }
       }
@@ -1117,7 +1117,7 @@ void moveit_benchmarks::BenchmarkExecution::runPlanningBenchmark(BenchmarkReques
 
           // collect data
           start = ros::WallTime::now();
-          runs[run_id].insert(parameter_data.begin(), parameter_data.end());  // initalize this run's data with the
+          runs[run_id].insert(parameter_data.begin(), parameter_data.end());  // initialize this run's data with the
                                                                               // chosen parameters, if we have any
 
           collectMetrics(runs[run_id], mp_res, solved, total_time);
@@ -1134,7 +1134,7 @@ void moveit_benchmarks::BenchmarkExecution::runPlanningBenchmark(BenchmarkReques
       // this vector of runs represents all the runs*parameters
       data.push_back(runs);
 
-    }  // end j - planning algoritms
+    }  // end j - planning algorithms
   }    // end i - planning plugins
 
   double duration = (ros::WallTime::now() - startTime).toSec();
@@ -1452,7 +1452,7 @@ std::size_t moveit_benchmarks::BenchmarkExecution::generateParamCombinations()
     param_instance[param_options_[i].key] = param_options_[i].start;
   }
 
-  // call recusive function for every param option available
+  // call recursive function for every param option available
   int initial_options_id = 0;
   recursiveParamCombinations(initial_options_id, param_instance);
 

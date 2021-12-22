@@ -145,7 +145,7 @@ TEST_F(ServoFixture, ExternalCollision)
 int main(int argc, char** argv)
 {
   // It is important we init ros before google test because we are going to
-  // create a node durring the google test init.
+  // create a node during the google test init.
   rclcpp::init(argc, argv);
   ::testing::InitGoogleTest(&argc, argv);
 

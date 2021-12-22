@@ -333,7 +333,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
   // Convert the robot state message to our robot_state representation
   if (!moveit::core::robotStateMsgToRobotState(response->solution, *robot_state_))
   {
-    RCLCPP_ERROR(LOGGER, "An error occured converting received robot state message into internal robot state.");
+    RCLCPP_ERROR(LOGGER, "An error occurred converting received robot state message into internal robot state.");
     error_code.val = error_code.FAILURE;
     return false;
   }

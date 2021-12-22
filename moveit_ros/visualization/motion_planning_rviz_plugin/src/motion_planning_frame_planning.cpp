@@ -160,7 +160,7 @@ bool MotionPlanningFrame::computeCartesianPlan()
     trajectory_processing::IterativeParabolicTimeParameterization iptp;
     bool success =
         iptp.computeTimeStamps(rt, ui_->velocity_scaling_factor->value(), ui_->acceleration_scaling_factor->value());
-    RCLCPP_INFO(LOGGER, "Computing time stamps %s", success ? "SUCCEDED" : "FAILED");
+    RCLCPP_INFO(LOGGER, "Computing time stamps %s", success ? "SUCCEEDED" : "FAILED");
 
     // Store trajectory in current_plan_
     current_plan_ = std::make_shared<moveit::planning_interface::MoveGroupInterface::Plan>();
@@ -255,7 +255,7 @@ void MotionPlanningFrame::onFinishedExecution(bool success)
   // disable stop button
   ui_->stop_button->setEnabled(false);
 
-  // update query start state to current if neccessary
+  // update query start state to current if necessary
   if (ui_->start_state_combo_box->currentText() == "<current>")
     startStateTextChanged(ui_->start_state_combo_box->currentText());
 

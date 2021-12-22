@@ -493,7 +493,7 @@ bool EnvironmentChain3D::setupForMotionPlan(const planning_scene::PlanningSceneC
   }
   setMotionPrimitives(planning_group_);
 
-  // can only do bfs if not using standard collison checking
+  // can only do bfs if not using standard collision checking
   if (planning_parameters_.use_standard_collision_checking_)
   {
     planning_parameters_.use_bfs_ = false;

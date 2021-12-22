@@ -455,7 +455,7 @@ void RobotTrajectory::findWayPointIndicesForDurationAfterStart(const double& dur
     return;
   }
 
-  // Find indicies
+  // Find indices
   std::size_t index = 0, num_points = waypoints_.size();
   double running_duration = 0.0;
   for (; index < num_points; ++index)

@@ -608,11 +608,11 @@ TEST_F(IntegrationTestCommandListManager, TestGripperCmdBlending)
 
 /**
  * @brief Tests the execution of a sequence in which each group states a start
- * state only consisting of joints of the corresonding group.
+ * state only consisting of joints of the corresponding group.
  *
  * Test Sequence:
  *    1. Create sequence request for which each start state only consists of
- *        joints of the corresonding group
+ *        joints of the corresponding group
  *
  * Expected Results:
  *    1. Trajectory generation is successful, result trajectory is not empty.

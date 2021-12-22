@@ -100,7 +100,7 @@ public:
   /** \brief A method for a different thread to stop motion and return early from control loop */
   void stopMotion();
 
-  /** \brief Change PID parameters. Motion is stopped before the udpate */
+  /** \brief Change PID parameters. Motion is stopped before the update */
   void updatePIDConfig(const double x_proportional_gain, const double x_integral_gain, const double x_derivative_gain,
                        const double y_proportional_gain, const double y_integral_gain, const double y_derivative_gain,
                        const double z_proportional_gain, const double z_integral_gain, const double z_derivative_gain,

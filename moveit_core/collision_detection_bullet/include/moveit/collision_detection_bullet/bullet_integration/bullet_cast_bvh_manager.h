@@ -62,8 +62,8 @@ public:
    * This should only be used for moving objects.
    *
    * @param name The name of the object
-   * @param pose1 The start tranformation in world
-   * @param pose2 The end tranformation in world */
+   * @param pose1 The start transformation in world
+   * @param pose2 The end transformation in world */
   void setCastCollisionObjectsTransform(const std::string& name, const Eigen::Isometry3d& pose1,
                                         const Eigen::Isometry3d& pose2);
 

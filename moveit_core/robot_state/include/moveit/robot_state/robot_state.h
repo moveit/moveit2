@@ -1120,7 +1120,7 @@ public:
 
      In contrast to the previous functions, the Cartesian path is specified as a set of \e waypoints to be sequentially
      reached for the origin of a robot link (\e link). The waypoints are transforms given either in a global reference
-     frame or in the local reference frame of the link at the immediately preceeding waypoint. The link needs to move
+     frame or in the local reference frame of the link at the immediately preceding waypoint. The link needs to move
      in a straight line between two consecutive waypoints. All other comments apply.
 
      NOTE: As of ROS-Melodic these are deprecated and should not be used
@@ -1286,7 +1286,7 @@ public:
    */
 
   /** \brief Update the transforms for the collision bodies. This call is needed before calling collision checking.
-      If updating link transforms or joint transorms is needed, the corresponding updates are also triggered. */
+      If updating link transforms or joint transforms is needed, the corresponding updates are also triggered. */
   void updateCollisionBodyTransforms();
 
   /** \brief Update the reference frame transforms for links. This call is needed before using the transforms of links
