@@ -606,11 +606,14 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
 {
   PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
   if (publish_geom_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) | static_cast<int>(PlanningSceneMonitor::UPDATE_GEOMETRY));
+    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
+                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_GEOMETRY));
   if (publish_state_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) | static_cast<int>(PlanningSceneMonitor::UPDATE_STATE));
+    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
+                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_STATE));
   if (publish_transform_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) | static_cast<int>(PlanningSceneMonitor::UPDATE_TRANSFORMS));
+    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
+                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_TRANSFORMS));
   if (publish_planning_scene)
   {
     setPlanningScenePublishingFrequency(publish_planning_scene_hz);

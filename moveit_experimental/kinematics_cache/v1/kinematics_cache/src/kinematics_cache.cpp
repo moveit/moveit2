@@ -80,8 +80,8 @@ void KinematicsCache::setup(const KinematicsCache::Options& opt)
   ROS_DEBUG("Origin: %f %f %f", cache_origin_.x, cache_origin_.y, cache_origin_.z);
   ROS_DEBUG("Cache size (num points x,y,z): %d %d %d", cache_size_x_, cache_size_y_, cache_size_z_);
   ROS_DEBUG("Cache resolution: %f %f %f", cache_resolution_x_, cache_resolution_y_, cache_resolution_z_);
-  ROS_DEBUG("Solutions per grid location: %d", static_cast<int>max_solutions_per_grid_location_);
-  ROS_DEBUG("Solution dimension: %d", static_cast<int>solution_dimension_);
+  ROS_DEBUG("Solutions per grid location: %d", static_cast<int> max_solutions_per_grid_location_);
+  ROS_DEBUG("Solution dimension: %d", static_cast<int> solution_dimension_);
 }
 
 bool KinematicsCache::generateCacheMap(double timeout)
@@ -318,13 +318,13 @@ bool KinematicsCache::readFromFile(const std::string& filename)
 
   kinematics_cache_vector_ = kinematics_cache_vector;
   num_solutions_vector_ = num_solutions_vector;
-  ROS_DEBUG("Read %d total points from file: %s", static_cast<int>num_solutions_vector_.size(), filename.c_str());
+  ROS_DEBUG("Read %d total points from file: %s", static_cast<int> num_solutions_vector_.size(), filename.c_str());
   return true;
 }
 
 bool KinematicsCache::writeToFile(const std::string& filename)
 {
-  ROS_DEBUG("Writing %d total points to file: %s", static_cast<int>num_solutions_vector_.size(), filename.c_str());
+  ROS_DEBUG("Writing %d total points to file: %s", static_cast<int> num_solutions_vector_.size(), filename.c_str());
   std::ofstream file;
   file.open(filename.c_str());
   if (!file.is_open())

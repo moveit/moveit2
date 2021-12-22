@@ -352,8 +352,8 @@ void RobotModel::buildGroupStates(const srdf::Model& srdf_model)
             RCLCPP_ERROR(LOGGER,
                          "The model for joint '%s' requires %d variable values, "
                          "but only %d variable values were supplied in default state '%s' for group '%s'",
-                         jt->first.c_str(), static_cast<int>(vn.size()), static_cast<int>(jt->second.size()), group_state.name_.c_str(),
-                         jmg->getName().c_str());
+                         jt->first.c_str(), static_cast<int>(vn.size()), static_cast<int>(jt->second.size()),
+                         group_state.name_.c_str(), jmg->getName().c_str());
         }
         else
           RCLCPP_ERROR(LOGGER,

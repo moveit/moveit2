@@ -263,7 +263,8 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     {
       // wait at most 50ms
       static const double TEST_DT = 0.005;
-      const int nt = static_cast<int>((0.5 + average_callback_dt_ / TEST_DT) * std::max(1, (static_cast<int>(queue_size_) / 2)));
+      const int nt =
+          static_cast<int>((0.5 + average_callback_dt_ / TEST_DT) * std::max(1, (static_cast<int>(queue_size_) / 2)));
       bool found = false;
       std::string err;
       for (int t = 0; t < nt; ++t)

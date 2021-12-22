@@ -966,8 +966,8 @@ void MotionPlanningFrame::populateCollisionObjectsList()
           continue;
         }
 
-        QListWidgetItem* item =
-            new QListWidgetItem(QString::fromStdString(collision_object_names[i]), ui_->collision_objects_list, static_cast<int>(i));
+        QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(collision_object_names[i]),
+                                                    ui_->collision_objects_list, static_cast<int>(i));
         item->setFlags(item->flags() | Qt::ItemIsEditable);
         item->setToolTip(item->text());
         item->setCheckState(Qt::Unchecked);
