@@ -32,6 +32,9 @@
    - IKFAST_NAMESPACE - Enclose all functions and classes in this namespace, the ``main`` function is excluded.
 
  */
+
+#pragma once
+
 #include <vector>
 #include <list>
 #include <stdexcept>

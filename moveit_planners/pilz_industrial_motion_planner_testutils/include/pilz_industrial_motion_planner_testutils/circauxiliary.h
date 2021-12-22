@@ -32,8 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef CIRCAUXILIARY_H
-#define CIRCAUXILIARY_H
+#pragma once
 
 #include <string>
 
@@ -87,5 +86,3 @@ inline moveit_msgs::msg::Constraints CircAuxiliary<ConfigType, BuilderType>::toP
   return BuilderType().setConstraintName(getConstraintName()).setConfiguration(getConfiguration()).toPathConstraints();
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-#endif  // CIRCAUXILIARY_H
