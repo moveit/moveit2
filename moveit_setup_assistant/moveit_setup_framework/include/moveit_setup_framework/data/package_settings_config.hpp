@@ -178,6 +178,23 @@ public:
     package_dependencies_.insert(package);
   }
 
+  std::string getAuthorName() const
+  {
+    return author_name_;
+  }
+  std::string getAuthorEmail() const
+  {
+    return author_email_;
+  }
+  void setAuthorName(const std::string& name)
+  {
+    author_name_ = name;
+  }
+  void setAuthorEmail(const std::string& email)
+  {
+    author_email_ = email;
+  }
+
 protected:
   /// Loaded configuration package path - if an existing package was loaded, holds that path
   std::string config_pkg_path_;
