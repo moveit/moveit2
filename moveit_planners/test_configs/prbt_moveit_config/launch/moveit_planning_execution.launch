@@ -42,8 +42,8 @@ limitations under the License.
 
   <!-- configuration for moveit -->
   <arg name="pipeline" default="ompl" /><!-- Choose planning pipeline -->
-  <arg name="capabilities" default=""/> <!-- define capabilites that are loaded on start (space seperated) -->
-  <arg name="disable_capabilities" default=""/> <!-- inhibit capabilites (space seperated) -->
+  <arg name="capabilities" default=""/> <!-- define capabilities that are loaded on start (space separated) -->
+  <arg name="disable_capabilities" default=""/> <!-- inhibit capabilities (space separated) -->
 
   <!-- load the robot_description parameter before launching ROS-I nodes -->
   <include file="$(find moveit_resources_prbt_moveit_config)/launch/planning_context.launch" >

@@ -22,8 +22,8 @@
   <arg name="jiggle_fraction" default="0.05" />
   <arg name="publish_monitored_planning_scene" default="true"/>
   <arg name="moveit_manage_controllers" default="true"/>
-  <arg name="capabilities" default=""/> <!-- define capabilites that are loaded on start (space seperated) -->
-  <arg name="disable_capabilities" default=""/> <!-- inhibit capabilites (space seperated) -->
+  <arg name="capabilities" default=""/> <!-- define capabilities that are loaded on start (space separated) -->
+  <arg name="disable_capabilities" default=""/> <!-- inhibit capabilities (space separated) -->
 
   <!-- Enable/Disable gripper -->
   <arg name="gripper" default="" />

@@ -46,7 +46,7 @@ planner_configs:
     init_temperature: 10e-6  # initial temperature. default: 10e-6
     frountier_threshold: 0.0  # dist new state to nearest neighbor to disqualify as frontier. default: 0.0 set in setup()
     frountierNodeRatio: 0.1  # 1/10, or 1 nonfrontier for every 10 frontier. default: 0.1
-    k_constant: 0.0  # value used to normalize expresssion. default: 0.0 set in setup()
+    k_constant: 0.0  # value used to normalize expression. default: 0.0 set in setup()
   PRMkConfigDefault:
     type: geometric::PRM
     max_nearest_neighbors: 10  # use k nearest neighbors. default: 10

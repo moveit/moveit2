@@ -320,7 +320,7 @@ limitations under the License.
       </collision>
     </link>
 
-    <!-- ROS-Industrial 'base' frame: base_link to robot world coordinate sytem transform -->
+    <!-- ROS-Industrial 'base' frame: base_link to robot world coordinate system transform -->
     <link name="${prefix}base" />
     <joint name="${prefix}base_link-base" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0"/>
