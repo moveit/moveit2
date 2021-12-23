@@ -32,8 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef CIRC_H
-#define CIRC_H
+#pragma once
 
 #include <memory>
 
@@ -102,5 +101,3 @@ inline const AuxiliaryType& Circ<StartType, AuxiliaryType, GoalType>::getAuxilia
   return auxiliary_;
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-#endif  // CIRC_H

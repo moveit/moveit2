@@ -32,8 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef DEFAULT_VALUES_H
-#define DEFAULT_VALUES_H
+#pragma once
 
 /*
  * @brief This file contains all default values needed for testing.
@@ -47,5 +46,3 @@ static constexpr double DEFAULT_BLEND_RADIUS{ 0.01 };
 static constexpr double DEFAULT_VEL_GRIPPER{ 0.5 };
 static constexpr double DEFAULT_ACC_GRIPPER{ 0.8 };
 }  // namespace pilz_industrial_motion_planner_testutils
-
-#endif  // DEFAULT_VALUES_H

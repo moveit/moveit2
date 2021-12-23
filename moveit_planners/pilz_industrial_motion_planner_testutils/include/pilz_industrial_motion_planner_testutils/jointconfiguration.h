@@ -32,8 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JOINTCONFIGURATION_H
-#define JOINTCONFIGURATION_H
+#pragma once
 
 #include <string>
 #include <utility>
@@ -141,5 +140,3 @@ inline void JointConfiguration::setCreateJointNameFunc(CreateJointNameFunc creat
   create_joint_name_func_ = std::move(create_joint_name_func);
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-#endif  // JOINTCONFIGURATION_H

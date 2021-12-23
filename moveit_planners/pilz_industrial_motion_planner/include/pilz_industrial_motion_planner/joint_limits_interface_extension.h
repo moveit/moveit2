@@ -32,8 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JOINT_LIMITS_INTERFACE_EXTENSION_H
-#define JOINT_LIMITS_INTERFACE_EXTENSION_H
+#pragma once
 
 #include "pilz_industrial_motion_planner/joint_limits_extension.h"
 #include <limits>
@@ -86,5 +85,3 @@ inline bool getJointLimits(const std::string& joint_name, const std::string& par
 }
 }  // namespace joint_limits_interface
 }  // namespace pilz_industrial_motion_planner
-
-#endif  // JOINT_LIMITS_INTERFACE_EXTENSION_H
