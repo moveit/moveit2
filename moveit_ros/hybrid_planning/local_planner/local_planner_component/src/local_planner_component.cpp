@@ -48,7 +48,7 @@ using namespace std::chrono_literals;
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
-constexpr char LOCAL_PLANNING_ACTION_NAME[] = "hybrid_planning/local_planning_action";
+constexpr char LOCAL_PLANNING_ACTION_NAME[] = "~/hybrid_planning/local_planning_action";
 
 // If the trajectory progress reaches more than 0.X the global goal state is considered as reached
 constexpr float PROGRESS_THRESHOLD = 0.995;

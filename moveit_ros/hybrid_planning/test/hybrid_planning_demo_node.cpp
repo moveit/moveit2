@@ -56,7 +56,7 @@ using namespace std::chrono_literals;
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("test_hybrid_planning_client");
-constexpr char RUN_HYBRID_PLANNING_ACTION_NAME[] = "hybrid_planning/run_hybrid_planning";
+constexpr char RUN_HYBRID_PLANNING_ACTION_NAME[] = "~/hybrid_planning/run_hybrid_planning";
 }  // namespace
 
 class HybridPlanningDemo

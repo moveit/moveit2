@@ -43,7 +43,7 @@
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
-constexpr char GLOBAL_PLANNING_ACTION_NAME[] = "hybrid_planning/global_planning_action";
+constexpr char GLOBAL_PLANNING_ACTION_NAME[] = "~/hybrid_planning/global_planning_action";
 }  // namespace
 
 namespace moveit::hybrid_planning
