@@ -2,6 +2,15 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.1 (2021-12-23)
+------------------
+* Fix installation of moveit_ros_control_interface header files (`#789 <https://github.com/ros-planning/moveit2/issues/789>`_)
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* Update controller_manager_plugin to fix MoveIt-managed controller switching (`#785 <https://github.com/ros-planning/moveit2/issues/785>`_)
+* moveit_ros_control_interface: Small comment cleanup (`#754 <https://github.com/ros-planning/moveit2/issues/754>`_)
+* Contributors: AndyZe, Dave Coleman, Henning Kayser, Joseph Schornak, Robert Haschke
+
 2.3.0 (2021-10-08)
 ------------------
 * moveit_ros_control_interface: Fix dangling reference (`#710 <https://github.com/ros-planning/moveit2/issues/710>`_)
