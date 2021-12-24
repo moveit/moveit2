@@ -456,7 +456,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKInvalidFrameId)
 //   tf2::fromMsg(pose, pose_expect);
 //
 //   // compute the ik without self collision check and expect the resulting pose
-//   // to be in self collission.
+//   // to be in self collision.
 //   std::map<std::string, double> ik_actual1;
 //   EXPECT_TRUE(pilz_industrial_motion_planner::computePoseIK(planning_scene_, planning_group_, tcp_link_, pose_expect,
 //                                                             frame_id, ik_seed, ik_actual1, false));

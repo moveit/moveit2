@@ -130,7 +130,7 @@ protected:
    *   state and specifying a broadphase collision manager of FCL where the constructed object is registered to. */
   void allocSelfCollisionBroadPhase(const moveit::core::RobotState& state, FCLManager& manager) const;
 
-  /** \brief Converts all shapes which make up an atttached body into a vector of FCLGeometryConstPtr.
+  /** \brief Converts all shapes which make up an attached body into a vector of FCLGeometryConstPtr.
    *
    *   When they are converted, they can be added to the FCL representation of the robot for collision checking.
    *

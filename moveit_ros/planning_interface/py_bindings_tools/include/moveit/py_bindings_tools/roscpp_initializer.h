@@ -46,7 +46,7 @@ namespace py_bindings_tools
 {
 /** \brief The constructor of this class ensures that ros::init() has
     been called.  Thread safety and multiple initialization is
-    properly handled. When the process terminates, ros::shotdown() is
+    properly handled. When the process terminates, ros::shutdown() is
     also called, if needed. */
 class ROScppInitializer
 {

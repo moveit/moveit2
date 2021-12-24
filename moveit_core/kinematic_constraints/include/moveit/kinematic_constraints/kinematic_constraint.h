@@ -185,7 +185,7 @@ MOVEIT_CLASS_FORWARD(JointConstraint);  // Defines JointConstraintPtr, ConstPtr,
  *
  * This class handles single DOF constraints expressed as a tolerance
  * above and below a target position.  Multi-DOF joints can be
- * accomodated by using local name formulations - i.e. for a planar
+ * accommodated by using local name formulations - i.e. for a planar
  * joint specifying a constraint in terms of "planar_joint_name"/x.
  *
  * Continuous revolute single DOF joints will be evaluated based on
@@ -729,7 +729,7 @@ MOVEIT_CLASS_FORWARD(VisibilityConstraint);  // Defines VisibilityConstraintPtr,
  * and the target along its Z axis to be pointing at each other.
  * Practically speaking, this ensures that the sensor has sufficient
  * visibility to the front of the target - if the target is pointing
- * the opposite direction, or is too steeply perpindicular to the
+ * the opposite direction, or is too steeply perpendicular to the
  * target, then the max_view_angle part of the constraint will be
  * violated.  The getMarkers function can again help explain this -
  * the view angle is the angular difference between the blue arrow
@@ -738,7 +738,7 @@ MOVEIT_CLASS_FORWARD(VisibilityConstraint);  // Defines VisibilityConstraintPtr,
 
  * \image html exact_opposites.png "Max view angle is evaluated at 0.0"
  * \image html fourty_five.png "Max view angle evaluates around pi/4"
- * \image html perpindicular.png "Max view angle evaluates at pi/2, the maximum"
+ * \image html perpendicular.png "Max view angle evaluates at pi/2, the maximum"
  * \image html other_side.png "Sensor pointed at wrong side of target, will violate constraint as long as max_view_angle
  > 0.0"
  *

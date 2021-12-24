@@ -46,3 +46,9 @@ repos:
         language: system
         files: \.(c|cc|cxx|cpp|frag|glsl|h|hpp|hxx|ih|ispc|ipp|java|js|m|proto|vert)$
         args: ['-fallback-style=none', '-i']
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.0.0
+    hooks:
+      - id: codespell
+        args: ['--write-changes', '--ignore-words=.codespell_words']
+        exclude: CHANGELOG.rst

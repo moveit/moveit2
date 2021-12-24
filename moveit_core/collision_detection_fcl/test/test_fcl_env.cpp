@@ -262,7 +262,7 @@ TEST_F(CollisionDetectionEnvTest, DISABLED_ContinuousCollisionSelf)
   res.clear();
 
   // c_env_->checkSelfCollision(req, res, state1, state2, *acm_);
-  RCLCPP_INFO(LOGGER, "Continous to continous collisions are not supported yet, therefore fail here.");
+  RCLCPP_INFO(LOGGER, "Continuous to continuous collisions are not supported yet, therefore fail here.");
   ASSERT_TRUE(res.collision);
   res.clear();
 }

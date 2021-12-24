@@ -69,7 +69,7 @@
 #include <tf2_eigen/tf2_eigen.h>
 #endif
 
-// 10um acuracy tested for position and orientation
+// 10um accuracy tested for position and orientation
 constexpr double EPSILON = 1e-5;
 
 static const std::string PLANNING_GROUP = "panda_arm";
@@ -194,7 +194,7 @@ TEST_F(MoveGroupTestFixture, PathConstraintCollisionTest)
 
   ////////////////////////////////////////////////////////////////////
   // set a custom start state
-  // this simplifies planning for the orientation constraint bellow
+  // this simplifies planning for the orientation constraint below
   geometry_msgs::Pose start_pose;
   start_pose.orientation.w = 1.0;
   start_pose.position.x = 0.3;

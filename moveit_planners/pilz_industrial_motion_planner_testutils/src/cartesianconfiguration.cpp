@@ -67,7 +67,7 @@ CartesianConfiguration::CartesianConfiguration(const std::string& group_name, co
 
   if (robot_model && (!moveit::core::RobotState(robot_model_).knowsFrameTransform(link_name_)))
   {
-    std::string msg{ "Tranform of \"" };
+    std::string msg{ "Transform of \"" };
     msg.append(link_name).append("\" is unknown");
     throw std::invalid_argument(msg);
   }

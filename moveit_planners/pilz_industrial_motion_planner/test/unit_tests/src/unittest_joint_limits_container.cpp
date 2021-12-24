@@ -99,7 +99,7 @@ protected:
 };
 
 /**
- * @brief Check postion
+ * @brief Check position
  */
 TEST_F(JointLimitsContainerTest, CheckPositionUnification)
 {

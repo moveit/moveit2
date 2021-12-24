@@ -263,7 +263,8 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     {
       // wait at most 50ms
       static const double TEST_DT = 0.005;
-      const int nt = (int)(0.5 + average_callback_dt_ / TEST_DT) * std::max(1, ((int)queue_size_ / 2));
+      const int nt =
+          static_cast<int>((0.5 + average_callback_dt_ / TEST_DT) * std::max(1, (static_cast<int>(queue_size_) / 2)));
       bool found = false;
       std::string err;
       for (int t = 0; t < nt; ++t)
@@ -298,7 +299,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
         failed_tf_++;
         if (failed_tf_ > good_tf_)
           RCLCPP_WARN_THROTTLE(LOGGER, *node_->get_clock(), 1000,
-                               "More than half of the image messages discared due to TF being unavailable (%u%%). "
+                               "More than half of the image messages discarded due to TF being unavailable (%u%%). "
                                "Transform error of sensor data: %s; quitting callback.",
                                (100 * failed_tf_) / (good_tf_ + failed_tf_), err.c_str());
         else

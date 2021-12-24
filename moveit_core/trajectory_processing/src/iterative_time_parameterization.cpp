@@ -342,7 +342,7 @@ void IterativeParabolicTimeParameterization::applyAccelerationConstraints(
     iteration++;
 
     // In this case we iterate through the joints on the outer loop.
-    // This is so that any time interval increases have a chance to get propogated through the trajectory
+    // This is so that any time interval increases have a chance to get propagated through the trajectory
     for (unsigned int j = 0; j < num_joints; ++j)
     {
       // Loop forwards, then backwards

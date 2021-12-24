@@ -21,7 +21,7 @@
 
   <arg name="capabilities" default=""/>
   <arg name="disable_capabilities" default=""/>
-  <!-- load these non-default MoveGroup capabilities (space seperated) -->
+  <!-- load these non-default MoveGroup capabilities (space separated) -->
   <!--
   <arg name="capabilities" value="
                 a_package/AwsomeMotionPlanningCapability
@@ -29,7 +29,7 @@
                 " />
   -->
 
-  <!-- inhibit these default MoveGroup capabilities (space seperated) -->
+  <!-- inhibit these default MoveGroup capabilities (space separated) -->
   <!--
   <arg name="disable_capabilities" value="
                 move_group/MoveGroupKinematicsService

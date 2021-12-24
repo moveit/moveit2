@@ -376,7 +376,7 @@ private:
    * @brief  Transforms the input pose to the correct frame for the solver. This assumes that the group includes the
    * entire solver chain and that any joints outside of the solver chain within the group are are fixed.
    * @param  ik_pose             The pose to be transformed which should be in the correct frame for the group.
-   * @param  ik_pose_chain       The ik_pose to be populated with the apropriate pose for the solver
+   * @param  ik_pose_chain       The ik_pose to be populated with the appropriate pose for the solver
    */
   void transformToChainFrame(const geometry_msgs::msg::Pose& ik_pose, KDL::Frame& ik_pose_chain) const;
 };  // end class
@@ -964,7 +964,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
   vfree[0] = initial_guess;
 
   // -------------------------------------------------------------------------------------------------
-  // Handle consitency limits if needed
+  // Handle consistency limits if needed
   int num_positive_increments;
   int num_negative_increments;
   double search_discretization = redundant_joint_discretization_.at(free_params_[0]);

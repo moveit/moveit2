@@ -81,7 +81,7 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
   if (!waitForMessage(timeout))
   {
     RCLCPP_ERROR_ONCE(node_->get_logger(),
-                      "Could not find parameter %s and did not recieve %s via std_msgs::msg::String subscription "
+                      "Could not find parameter %s and did not receive %s via std_msgs::msg::String subscription "
                       "within %f seconds.",
                       name_.c_str(), name_.c_str(), d_timeout);
   }

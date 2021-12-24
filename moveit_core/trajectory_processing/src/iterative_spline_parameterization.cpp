@@ -373,7 +373,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
 
   This matrix is tridiagonal, which can be solved solved in O(N) time
   using the tridiagonal algorithm.
-  There is a forward propogation pass followed by a backsubstitution pass.
+  There is a forward propagation pass followed by a backsubstitution pass.
 
   n is the number of points
   dt contains the time difference between each point (size=n-1)

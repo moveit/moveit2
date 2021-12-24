@@ -850,7 +850,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
     }
     break;
     default:
-      RCLCPP_ERROR(LOGGER, "This shape type (%d) is not supported using FCL yet", (int)shape->type);
+      RCLCPP_ERROR(LOGGER, "This shape type (%d) is not supported using FCL yet", static_cast<int>(shape->type));
       cg_g = nullptr;
   }
 

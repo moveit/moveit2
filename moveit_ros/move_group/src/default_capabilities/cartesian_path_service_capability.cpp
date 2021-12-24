@@ -134,7 +134,7 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
     {
       if (req->max_step < std::numeric_limits<double>::epsilon())
       {
-        RCLCPP_ERROR(LOGGER, "Maximum step to take between consecutive configrations along Cartesian path"
+        RCLCPP_ERROR(LOGGER, "Maximum step to take between consecutive configurations along Cartesian path"
                              "was not specified (this value needs to be > 0)");
         res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       }

@@ -173,7 +173,7 @@ TEST_F(TrajectoryTest, goalTolerance)
                                                                           << "Available plugins: " << ss.str());
   }
 
-  // Creat planning context
+  // Create planning context
   // ========================================================================================
   planning_interface::PlanningContextPtr context =
       planner_instance->getPlanningContext(planning_scene, req, res.error_code_);

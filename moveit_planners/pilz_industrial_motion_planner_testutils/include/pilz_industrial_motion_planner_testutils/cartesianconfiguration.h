@@ -32,8 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef CARTESIANCONFIGURATION_H
-#define CARTESIANCONFIGURATION_H
+#pragma once
 
 #include <vector>
 #include <sstream>
@@ -182,5 +181,3 @@ inline const boost::optional<double> CartesianConfiguration::getAngleTolerance()
   return tolerance_angle_;
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-#endif  // CARTESIANCONFIGURATION_H

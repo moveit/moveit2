@@ -530,7 +530,7 @@ void PlanningSceneMonitor::triggerSceneUpdateEvent(SceneUpdateType update_type)
 
   for (boost::function<void(SceneUpdateType)>& update_callback : update_callbacks_)
     update_callback(update_type);
-  new_scene_update_ = (SceneUpdateType)((int)new_scene_update_ | (int)update_type);
+  new_scene_update_ = (SceneUpdateType)(static_cast<int>(new_scene_update_) | static_cast<int>(update_type));
   new_scene_update_condition_.notify_all();
 }
 
@@ -606,11 +606,14 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
 {
   PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
   if (publish_geom_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_GEOMETRY);
+    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
+                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_GEOMETRY));
   if (publish_state_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_STATE);
+    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
+                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_STATE));
   if (publish_transform_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
+    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
+                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_TRANSFORMS));
   if (publish_planning_scene)
   {
     setPlanningScenePublishingFrequency(publish_planning_scene_hz);
@@ -710,16 +713,16 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
     {
       upd = UPDATE_NONE;
       if (!moveit::core::isEmpty(scene.world))
-        upd = (SceneUpdateType)((int)upd | (int)UPDATE_GEOMETRY);
+        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
 
       if (!scene.fixed_frame_transforms.empty())
-        upd = (SceneUpdateType)((int)upd | (int)UPDATE_TRANSFORMS);
+        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_TRANSFORMS));
 
       if (!moveit::core::isEmpty(scene.robot_state))
       {
-        upd = (SceneUpdateType)((int)upd | (int)UPDATE_STATE);
+        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_STATE));
         if (!scene.robot_state.attached_collision_objects.empty() || !scene.robot_state.is_diff)
-          upd = (SceneUpdateType)((int)upd | (int)UPDATE_GEOMETRY);
+          upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
       }
     }
   }
@@ -839,7 +842,7 @@ void PlanningSceneMonitor::includeAttachedBodiesInOctree()
 
   boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
 
-  // clear information about any attached body, without refering to the AttachedBody* ptr (could be invalid)
+  // clear information about any attached body, without referring to the AttachedBody* ptr (could be invalid)
   for (std::pair<const moveit::core::AttachedBody* const,
                  std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& attached_body_shape_handle :
        attached_body_shape_handles_)

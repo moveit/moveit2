@@ -727,7 +727,7 @@ void RobotPosesWidget::loadDataTable()
     ++row;
   }
 
-  // Reenable
+  // Re-enable
   data_table_->setUpdatesEnabled(true);  // prevent table from updating until we are completely done
   data_table_->setDisabled(false);       // make sure we disable it so that the cellChanged event is not called
 
@@ -830,7 +830,7 @@ SliderWidget::SliderWidget(QWidget* parent, const moveit::core::JointModel* join
   const std::vector<moveit_msgs::msg::JointLimits>& limits = joint_model_->getVariableBoundsMsg();
   if (limits.empty())
   {
-    QMessageBox::critical(this, "Error Loading", "An internal error has occured while loading the joints");
+    QMessageBox::critical(this, "Error Loading", "An internal error has occurred while loading the joints");
     return;
   }
 

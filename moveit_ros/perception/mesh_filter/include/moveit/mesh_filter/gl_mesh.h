@@ -59,7 +59,7 @@ class GLMesh
 {
 public:
   /**
-   * \brief Constucts a GLMesh object for given mesh and label
+   * \brief Constructs a GLMesh object for given mesh and label
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \param[in] mesh
    * \param[in] mesh_label

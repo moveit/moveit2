@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: moveit_resources_prbt_support
+    relative_path: urdf/prbt.xacro
+  SRDF:
+    relative_path: config/prbt.srdf.xacro
+  CONFIG:
+    author_name: Pilz GmbH and Co. KG
+    author_email: ros@pilz.de
+    generated_timestamp: 1495550770

@@ -1,0 +1,6 @@
+<launch>
+    <param name="moveit_controller_manager" value="moveit_simple_controller_manager/MoveItSimpleControllerManager" />
+    <arg name="gripper" default="" />
+    <rosparam unless="$(eval not arg('gripper'))" file="$(eval find('moveit_resources_prbt_'+ gripper + '_support') + '/config/controllers_manipulator_gripper.yaml')"/>
+    <rosparam if="$(eval not arg('gripper'))" file="$(find moveit_resources_prbt_moveit_config)/config/controllers_manipulator.yaml"/>
+</launch>

@@ -47,7 +47,7 @@ namespace pilz_industrial_motion_planner
  * @brief Trajectory blender implementing transition window algorithm
  *
  * See doc/MotionBlendAlgorithmDescription.pdf for a mathematical description of
- * the algorithmn.
+ * the algorithm.
  */
 class TrajectoryBlenderTransitionWindow : public TrajectoryBlender
 {

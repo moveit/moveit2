@@ -282,9 +282,9 @@ bool testutils::checkCartesianLinearity(const moveit::core::RobotModelConstPtr& 
                  .norm()) > fabs(translation_norm_tolerance))
     {
       std::cout << "Translational linearity is violated. \n"
-                << "goal tanslation: " << goal_pose_expect.translation() << '\n'
+                << "goal translation: " << goal_pose_expect.translation() << '\n'
                 << "start translation: " << start_pose.translation() << '\n'
-                << "acutual translation " << way_point_pose.translation() << '\n';
+                << "actual translation " << way_point_pose.translation() << '\n';
       return false;
     }
 
@@ -393,7 +393,7 @@ bool testutils::isTrajectoryConsistent(const trajectory_msgs::msg::JointTrajecto
     }
   }
 
-  // TODO check value is consistant (time, position, velocity, acceleration)
+  // TODO check value is consistent (time, position, velocity, acceleration)
 
   return true;
 }
@@ -1311,7 +1311,7 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr& robot_mo
   // that the trapezoid is not degenerated.
   if (std::distance(it_first_const, it_last_const) < 3)
   {
-    return ::testing::AssertionFailure() << "Exptected the have at least 3 points during the phase of "
+    return ::testing::AssertionFailure() << "Expected the have at least 3 points during the phase of "
                                             "constant "
                                             "velocity.";
   }
