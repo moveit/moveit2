@@ -148,7 +148,16 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
     addTrackJointOutpointToRobotTrajectory(reference_trajectory, num_dof, joint_group_indices, trackjoint_output,
                                            outgoing_trajectory);
 
-    current_joint_states = goal_joint_states;
+    // Update current_joint_states from the previous output of TrackJoint
+    trackjoint::KinematicState joint_state;
+    size_t last_trackjoint_index = trackjoint_output.at(0).positions.size() - 1;
+    for (size_t joint = 0; joint < num_dof; ++joint)
+    {
+      joint_state.position = trackjoint_output.at(joint).positions(last_trackjoint_index);
+      joint_state.velocity = trackjoint_output.at(joint).velocities(last_trackjoint_index);
+      joint_state.acceleration = trackjoint_output.at(joint).accelerations(last_trackjoint_index);
+      current_joint_states[joint] = joint_state;
+    }
   }
 
   // Iteratively smooth the trackjoint output with a low-pass filter to ensure smoothness between waypoints.
