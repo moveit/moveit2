@@ -172,6 +172,7 @@ bool TrackJointSmoothing::doIterativeLowPassFilter(const size_t num_dof, const s
                                                    const std::vector<trackjoint::Limits>& limits,
                                                    robot_trajectory::RobotTrajectory& trajectory)
 {
+  size_t num_failures = 0;
   // For each joint
   for (size_t joint_idx = 0; joint_idx < num_dof; ++joint_idx)
   {
@@ -180,20 +181,42 @@ bool TrackJointSmoothing::doIterativeLowPassFilter(const size_t num_dof, const s
     // Initialize joint position
     joint_filter.reset(trajectory.getFirstWayPointPtr()->getVariablePosition(joint_group_indices.at(joint_idx)));
 
+    double max_position_discontinuity =
+        limits.at(joint_idx).velocity_limit * DEFAULT_TRACKJOINT_TIMESTEP +
+        0.5 * limits.at(joint_idx).acceleration_limit * DEFAULT_TRACKJOINT_TIMESTEP * DEFAULT_TRACKJOINT_TIMESTEP +
+        0.16667 * limits.at(joint_idx).jerk_limit * pow(DEFAULT_TRACKJOINT_TIMESTEP, 3);
+
     // Step through and filter each waypoint
     for (size_t waypoint_idx = 1; waypoint_idx < trajectory.getWayPointCount(); ++waypoint_idx)
     {
-      auto next_waypoint = trajectory.getWayPointPtr(waypoint_idx);
+      auto current_waypoint = trajectory.getWayPointPtr(waypoint_idx);
       auto prev_waypoint = trajectory.getWayPointPtr(waypoint_idx - 1);
       double filtered_position =
-          joint_filter.filter(next_waypoint->getVariablePosition(joint_group_indices.at(joint_idx)));
+          joint_filter.filter(current_waypoint->getVariablePosition(joint_group_indices.at(joint_idx)));
       // Overwrite the previous value with the filtered value
-      next_waypoint->setVariablePosition(joint_group_indices.at(joint_idx), filtered_position);
+      current_waypoint->setVariablePosition(joint_group_indices.at(joint_idx), filtered_position);
 
-      // TODO(andyz): Check if jerk limit is satisfied, i.e. check for discontinuities. Increase filter coefficient if
-      // not. This probably should involve conversion to splines to calculate the derivatives.
+      // Check for a position discontinuity. Increase filter coefficient if needed.
+      double prev_velocity = prev_waypoint->getVariableVelocity(joint_group_indices.at(joint_idx));
+      double prev_acceleration = prev_waypoint->getVariableAcceleration(joint_group_indices.at(joint_idx));
+      double timestep = trajectory.getWayPointDurationFromPrevious(waypoint_idx);
+      double present_discontinuity =
+          filtered_position - prev_waypoint->getVariablePosition(joint_group_indices.at(joint_idx));
+      if (std::fabs(present_discontinuity) > std::fabs(max_position_discontinuity))
+      {
+        RCLCPP_ERROR_STREAM(LOGGER, "Unacceptable discontinuity detected!");
+        RCLCPP_ERROR_STREAM(LOGGER, "Max discontinuity: " << max_position_discontinuity);
+        RCLCPP_ERROR_STREAM(LOGGER, "present_discontinuity: " << present_discontinuity);
+        RCLCPP_WARN_STREAM(LOGGER, "timestep: " << timestep);
+        RCLCPP_WARN_STREAM(LOGGER, "prev velocity: " << prev_velocity);
+        RCLCPP_WARN_STREAM(LOGGER, "prev acceleration: " << prev_acceleration);
+        // TODO(andyz): increase filter coefficient and try again
+        ++num_failures;
+      }
     }
+    // TODO(andyz): update velocity and acceleration data after updating positions
   }
+  RCLCPP_ERROR_STREAM(LOGGER, "Num failures: " << num_failures);
 
   return true;
 }
@@ -228,12 +251,8 @@ void TrackJointSmoothing::addTrackJointOutpointToRobotTrajectory(
   // We will overwrite this waypoint
   moveit::core::RobotState waypoint = reference_trajectory.getWayPoint(0);
 
-  double timestep;
-
   for (size_t waypoint_idx = 1; waypoint_idx < trackjoint_output.size(); ++waypoint_idx)
   {
-    timestep = trackjoint_output.at(0).elapsed_times(waypoint_idx);
-
     for (size_t joint = 0; joint < num_dof; ++joint)
     {
       waypoint.setVariablePosition(joint_group_indices.at(joint), trackjoint_output.at(joint).positions(waypoint_idx));
@@ -241,7 +260,7 @@ void TrackJointSmoothing::addTrackJointOutpointToRobotTrajectory(
       waypoint.setVariableAcceleration(joint_group_indices.at(joint),
                                        trackjoint_output.at(joint).accelerations(waypoint_idx));
     }
-    new_trajectory.addSuffixWayPoint(waypoint, timestep);
+    new_trajectory.addSuffixWayPoint(waypoint, DEFAULT_TRACKJOINT_TIMESTEP);
   }
 }
 
