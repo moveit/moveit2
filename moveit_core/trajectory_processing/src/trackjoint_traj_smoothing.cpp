@@ -37,7 +37,6 @@
 #include <cmath>
 #include <Eigen/Geometry>
 #include <limits>
-#include <moveit/online_signal_smoothing/butterworth_filter.h>
 #include <moveit/trajectory_processing/trackjoint_traj_smoothing.h>
 #include <rclcpp/rclcpp.hpp>
 #include <trackjoint/error_codes.h>
@@ -54,7 +53,6 @@ constexpr double DEFAULT_MAX_VELOCITY = 5;                    // rad/s
 constexpr double DEFAULT_MAX_ACCELERATION = 10;               // rad/s^2
 constexpr double DEFAULT_MAX_JERK = 20;                       // rad/s^3
 constexpr double DEFAULT_WAYPOINT_POSITION_TOLERANCE = 1e-5;  // rad
-constexpr double LOWPASS_FILTER_COEFFICIENT = 20.0;           // The minimum feasible filter coefficient is 1.0
 }  // namespace
 
 bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& reference_trajectory,
@@ -160,73 +158,9 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
     }
   }
 
-  // Iteratively smooth the trackjoint output with a low-pass filter to ensure smoothness between waypoints.
-  // A very small numerical mismatch between waypoint positions (like 1e-4) can cause a large jerk spike.
-  // This increases the filter coefficient for each joint until jerk limits are satisfied.
-  // TODO(andyz): as of now, it only applies one filter coefficient
-  if (!doIterativeLowPassFilter(num_dof, joint_group_indices, limits, outgoing_trajectory))
-  {
-    // This should never happen
-    RCLCPP_ERROR_STREAM(LOGGER, "Iterative smoothing with a lowpass filter failed.");
-    return false;
-  }
-
   RCLCPP_INFO_STREAM(LOGGER, "TrackJoint input waypoint count: " << reference_trajectory.getWayPointCount());
   reference_trajectory = outgoing_trajectory;
   RCLCPP_INFO_STREAM(LOGGER, "TrackJoint smoothed waypoint count: " << outgoing_trajectory.getWayPointCount());
-  return true;
-}
-
-bool TrackJointSmoothing::doIterativeLowPassFilter(const size_t num_dof, const std::vector<int>& joint_group_indices,
-                                                   const std::vector<trackjoint::Limits>& limits,
-                                                   robot_trajectory::RobotTrajectory& trajectory)
-{
-  size_t num_failures = 0;
-  // For each joint
-  for (size_t joint_idx = 0; joint_idx < num_dof; ++joint_idx)
-  {
-    online_signal_smoothing::ButterworthFilter joint_filter(LOWPASS_FILTER_COEFFICIENT);
-
-    // Initialize joint position
-    joint_filter.reset(trajectory.getFirstWayPointPtr()->getVariablePosition(joint_group_indices.at(joint_idx)));
-
-    double max_position_discontinuity =
-        limits.at(joint_idx).velocity_limit * DEFAULT_TRACKJOINT_TIMESTEP +
-        0.5 * limits.at(joint_idx).acceleration_limit * DEFAULT_TRACKJOINT_TIMESTEP * DEFAULT_TRACKJOINT_TIMESTEP +
-        0.16667 * limits.at(joint_idx).jerk_limit * pow(DEFAULT_TRACKJOINT_TIMESTEP, 3);
-
-    // Step through and filter each waypoint
-    for (size_t waypoint_idx = 1; waypoint_idx < trajectory.getWayPointCount(); ++waypoint_idx)
-    {
-      auto current_waypoint = trajectory.getWayPointPtr(waypoint_idx);
-      auto prev_waypoint = trajectory.getWayPointPtr(waypoint_idx - 1);
-      double filtered_position =
-          joint_filter.filter(current_waypoint->getVariablePosition(joint_group_indices.at(joint_idx)));
-      // Overwrite the previous value with the filtered value
-      current_waypoint->setVariablePosition(joint_group_indices.at(joint_idx), filtered_position);
-
-      // Check for a position discontinuity. Increase filter coefficient if needed.
-      double prev_velocity = prev_waypoint->getVariableVelocity(joint_group_indices.at(joint_idx));
-      double prev_acceleration = prev_waypoint->getVariableAcceleration(joint_group_indices.at(joint_idx));
-      double timestep = trajectory.getWayPointDurationFromPrevious(waypoint_idx);
-      double present_discontinuity =
-          filtered_position - prev_waypoint->getVariablePosition(joint_group_indices.at(joint_idx));
-      if (std::fabs(present_discontinuity) > std::fabs(max_position_discontinuity))
-      {
-        RCLCPP_ERROR_STREAM(LOGGER, "Unacceptable discontinuity detected!");
-        RCLCPP_ERROR_STREAM(LOGGER, "Max discontinuity: " << max_position_discontinuity);
-        RCLCPP_ERROR_STREAM(LOGGER, "present_discontinuity: " << present_discontinuity);
-        RCLCPP_WARN_STREAM(LOGGER, "timestep: " << timestep);
-        RCLCPP_WARN_STREAM(LOGGER, "prev velocity: " << prev_velocity);
-        RCLCPP_WARN_STREAM(LOGGER, "prev acceleration: " << prev_acceleration);
-        // TODO(andyz): increase filter coefficient and try again
-        ++num_failures;
-      }
-    }
-    // TODO(andyz): update velocity and acceleration data after updating positions
-  }
-  RCLCPP_ERROR_STREAM(LOGGER, "Num failures: " << num_failures);
-
   return true;
 }
 
@@ -326,13 +260,7 @@ void TrackJointSmoothing::setTrackJointLimits(const moveit::core::JointModelGrou
     {
       single_joint_limits.acceleration_limit = max_acceleration_scaling_factor * DEFAULT_MAX_ACCELERATION;
     }
-
-    RCLCPP_WARN_STREAM(LOGGER, "jerk  limit: " << single_joint_limits.jerk_limit);
-    RCLCPP_WARN_STREAM(LOGGER, "accel limit: " << single_joint_limits.acceleration_limit);
-    RCLCPP_WARN_STREAM(LOGGER, "vel   limit: " << single_joint_limits.velocity_limit);
-
     limits.at(joint) = single_joint_limits;
   }
-  RCLCPP_WARN_STREAM(LOGGER, "Done retrieving kinematic limits.");
 }
 }  // namespace trajectory_processing
