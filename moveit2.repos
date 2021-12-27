@@ -11,6 +11,10 @@ repositories:
     type: git
     url: https://github.com/ros-planning/moveit_resources
     version: ros2
+  trackjoint:
+    type: git
+    url: https://github.com/PickNikRobotics/trackjoint
+    version: rolling
   warehouse_ros:
     type: git
     url: https://github.com/ros-planning/warehouse_ros
