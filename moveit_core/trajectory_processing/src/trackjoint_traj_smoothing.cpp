@@ -88,10 +88,6 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
   // This lib does not work properly when angles wrap around, so we need to unwind the path first
   reference_trajectory.unwind();
 
-  // Save the reference trajectory to datafile, for analysis
-  // TODO(andyz): delete when done testing
-  saveRobotTrajectoryToCSV("/home/andy/Downloads/TrackJoint/input_", reference_trajectory, num_dof, joint_group_indices);
-
   // Current state
   std::vector<trackjoint::KinematicState> current_joint_states(num_dof);
   // Goal state
@@ -138,10 +134,6 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
                                       << trackjoint::ERROR_CODE_MAP.at(error_code));
       return false;
     }
-
-    // Save final output to data file, for analysis
-    // TODO(andyz): delete when done testing
-    traj_gen.saveTrajectoriesToFile(trackjoint_output, "/home/andy/Downloads/TrackJoint/", true /* append */);
 
     addTrackJointOutpointToRobotTrajectory(reference_trajectory, num_dof, joint_group_indices, trackjoint_output,
                                            outgoing_trajectory);
