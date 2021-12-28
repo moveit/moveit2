@@ -424,7 +424,7 @@ void MotionPlanningFrame::updateCollisionObjectPose(bool update_marker_position)
 
 void MotionPlanningFrame::collisionObjectChanged(QListWidgetItem* item)
 {
-  if (item->type() < (int)known_collision_objects_.size() && planning_display_->getPlanningSceneMonitor())
+  if (item->type() < static_cast<int>(known_collision_objects_.size()) && planning_display_->getPlanningSceneMonitor())
   {
     // if we have a name change
     if (known_collision_objects_[item->type()].first != item->text().toStdString())
@@ -966,8 +966,8 @@ void MotionPlanningFrame::populateCollisionObjectsList()
           continue;
         }
 
-        QListWidgetItem* item =
-            new QListWidgetItem(QString::fromStdString(collision_object_names[i]), ui_->collision_objects_list, (int)i);
+        QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(collision_object_names[i]),
+                                                    ui_->collision_objects_list, static_cast<int>(i));
         item->setFlags(item->flags() | Qt::ItemIsEditable);
         item->setToolTip(item->text());
         item->setCheckState(Qt::Unchecked);
@@ -984,7 +984,7 @@ void MotionPlanningFrame::populateCollisionObjectsList()
       {
         QListWidgetItem* item =
             new QListWidgetItem(QString::fromStdString(attached_bodies[i]->getName()), ui_->collision_objects_list,
-                                (int)(i + collision_object_names.size()));
+                                static_cast<int>(i + collision_object_names.size()));
         item->setFlags(item->flags() | Qt::ItemIsEditable);
         item->setToolTip(item->text());
         item->setCheckState(Qt::Checked);

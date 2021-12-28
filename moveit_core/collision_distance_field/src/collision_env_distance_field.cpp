@@ -564,9 +564,11 @@ bool CollisionEnvDistanceField::getIntraGroupCollisions(const collision_detectio
         sphere_centers_2 = &(gsr->attached_body_decompositions_[j - num_links]->getSphereCenters());
       }
 
-      for (unsigned int k = 0; k < collision_spheres_1->size() && num_pair < (int)req.max_contacts_per_pair; ++k)
+      for (unsigned int k = 0;
+           k < collision_spheres_1->size() && num_pair < static_cast<int>(req.max_contacts_per_pair); ++k)
       {
-        for (unsigned int l = 0; l < collision_spheres_2->size() && num_pair < (int)req.max_contacts_per_pair; ++l)
+        for (unsigned int l = 0;
+             l < collision_spheres_2->size() && num_pair < static_cast<int>(req.max_contacts_per_pair); ++l)
         {
           Eigen::Vector3d gradient = (*sphere_centers_1)[k] - (*sphere_centers_2)[l];
           double dist = gradient.norm();

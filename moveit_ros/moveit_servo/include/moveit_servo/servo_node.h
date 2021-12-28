@@ -83,7 +83,5 @@ private:
   void unpauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                  std::shared_ptr<std_srvs::srv::Trigger::Response> response);
   rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr unpause_servo_service_;
-
-  bool is_initialized_;
 };
 }  // namespace moveit_servo

@@ -32,8 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef SEQUENCE_H
-#define SEQUENCE_H
+#pragma once
 
 #include <stdexcept>
 #include <vector>
@@ -143,5 +142,3 @@ inline bool Sequence::cmdIsOfType(const size_t index_cmd) const
   return cmds_.at(index_cmd).first.type() == typeid(T);
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-#endif  // SEQUENCE_H

@@ -129,13 +129,13 @@ int PR2ArmIKSolver::CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_i
   double min_distance = 1e6;
   int min_index = -1;
 
-  for (int i = 0; i < (int)solution_ik.size(); ++i)
+  for (int i = 0; i < static_cast<int>(solution_ik.size()); ++i)
   {
     if (verbose)
     {
-      RCLCPP_WARN(LOGGER, "Solution : %d", (int)solution_ik.size());
+      RCLCPP_WARN(LOGGER, "Solution : %d", static_cast<int>(solution_ik.size()));
 
-      for (int j = 0; j < (int)solution_ik[i].size(); ++j)
+      for (int j = 0; j < static_cast<int>(solution_ik[i].size()); ++j)
       {
         RCLCPP_WARN(LOGGER, "%d: %f", j, solution_ik[i][j]);
       }
@@ -152,8 +152,8 @@ int PR2ArmIKSolver::CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_i
 
   if (min_index > -1)
   {
-    q_out.resize((int)solution_ik[min_index].size());
-    for (int i = 0; i < (int)solution_ik[min_index].size(); ++i)
+    q_out.resize(static_cast<int>(solution_ik[min_index].size()));
+    for (int i = 0; i < static_cast<int>(solution_ik[min_index].size()); ++i)
     {
       q_out(i) = solution_ik[min_index][i];
     }
@@ -174,10 +174,10 @@ int PR2ArmIKSolver::cartToJntSearch(const KDL::JntArray& q_in, const KDL::Frame&
   double loop_time = 0;
   int count = 0;
 
-  int num_positive_increments =
-      (int)((pr2_arm_ik_.solver_info_.limits[free_angle_].max_position - initial_guess) / search_discretization_angle_);
-  int num_negative_increments =
-      (int)((initial_guess - pr2_arm_ik_.solver_info_.limits[free_angle_].min_position) / search_discretization_angle_);
+  int num_positive_increments = static_cast<int>(
+      (pr2_arm_ik_.solver_info_.limits[free_angle_].max_position - initial_guess) / search_discretization_angle_);
+  int num_negative_increments = static_cast<int>(
+      (initial_guess - pr2_arm_ik_.solver_info_.limits[free_angle_].min_position) / search_discretization_angle_);
   if (verbose)
     RCLCPP_WARN(LOGGER, "%f %f %f %d %d \n\n", initial_guess, pr2_arm_ik_.solver_info_.limits[free_angle_].max_position,
                 pr2_arm_ik_.solver_info_.limits[free_angle_].min_position, num_positive_increments,
@@ -241,7 +241,7 @@ Eigen::Isometry3f KDLToEigenMatrix(const KDL::Frame& p)
 double computeEuclideanDistance(const std::vector<double>& array_1, const KDL::JntArray& array_2)
 {
   double distance = 0.0;
-  for (int i = 0; i < (int)array_1.size(); ++i)
+  for (int i = 0; i < static_cast<int>(array_1.size()); ++i)
   {
     distance += (array_1[i] - array_2(i)) * (array_1[i] - array_2(i));
   }
@@ -251,7 +251,7 @@ double computeEuclideanDistance(const std::vector<double>& array_1, const KDL::J
 void getKDLChainInfo(const KDL::Chain& chain, moveit_msgs::msg::KinematicSolverInfo& chain_info)
 {
   int i = 0;  // segment number
-  while (i < (int)chain.getNrOfSegments())
+  while (i < static_cast<int>(chain.getNrOfSegments()))
   {
     chain_info.link_names.push_back(chain.getSegment(i).getName());
     i++;
