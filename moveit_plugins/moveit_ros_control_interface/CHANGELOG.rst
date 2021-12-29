@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.2 (2021-12-29)
+------------------
+
 2.3.1 (2021-12-23)
 ------------------
 * Fix installation of moveit_ros_control_interface header files (`#789 <https://github.com/ros-planning/moveit2/issues/789>`_)
