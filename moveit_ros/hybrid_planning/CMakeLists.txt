@@ -51,6 +51,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 set(THIS_PACKAGE_INCLUDE_DIRS
   global_planner/global_planner_component/include/
   global_planner/global_planner_plugins/include/
+  hybrid_planning_common/include/
   hybrid_planning_manager/hybrid_planning_manager_component/include/
   hybrid_planning_manager/planner_logic_plugins/include/
   local_planner/local_planner_component/include/

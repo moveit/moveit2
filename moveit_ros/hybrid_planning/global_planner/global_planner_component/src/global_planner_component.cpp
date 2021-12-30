@@ -33,6 +33,7 @@
  *********************************************************************/
 
 #include <moveit/global_planner/global_planner_component.h>
+#include <moveit/hybrid_planning_common/hybrid_planning_common.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit_msgs/msg/move_it_error_codes.h>
@@ -43,7 +44,6 @@
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
-constexpr char GLOBAL_PLANNING_ACTION_NAME[] = "~/hybrid_planning/global_planning_action";
 }  // namespace
 
 namespace moveit::hybrid_planning

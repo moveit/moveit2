@@ -32,15 +32,13 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <moveit/hybrid_planning_common/hybrid_planning_common.h>
 #include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
 #include <moveit/hybrid_planning_manager/hybrid_planning_events.h>
 
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
-constexpr char GLOBAL_PLANNING_ACTION_NAME[] = "~/hybrid_planning/global_planning_action";
-constexpr char LOCAL_PLANNING_ACTION_NAME[] = "~/hybrid_planning/local_planning_action";
-constexpr char RUN_HYBRID_PLANNING_ACTION_NAME[] = "~/hybrid_planning/run_hybrid_planning";
 }  // namespace
 
 namespace moveit::hybrid_planning
