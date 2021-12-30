@@ -1349,7 +1349,7 @@ void RobotModel::getMissingVariableNames(const std::vector<std::string>& variabl
         missing_variables.push_back(variable_name);
 }
 
-int RobotModel::getVariableIndex(const std::string& variable) const
+size_t RobotModel::getVariableIndex(const std::string& variable) const
 {
   VariableIndexMap::const_iterator it = joint_variables_index_map_.find(variable);
   if (it == joint_variables_index_map_.end())

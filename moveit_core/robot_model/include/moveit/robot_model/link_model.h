@@ -83,12 +83,12 @@ public:
   }
 
   /** \brief The index of this joint when traversing the kinematic tree in depth first fashion */
-  int getLinkIndex() const
+  size_t getLinkIndex() const
   {
     return link_index_;
   }
 
-  void setLinkIndex(int index)
+  void setLinkIndex(size_t index)
   {
     link_index_ = index;
   }
@@ -282,7 +282,7 @@ private:
   int first_collision_body_transform_index_;
 
   /** \brief Index of the transform for this link in the full robot frame */
-  int link_index_;
+  size_t link_index_;
 };
 }  // namespace core
 }  // namespace moveit

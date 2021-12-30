@@ -444,7 +444,7 @@ public:
                                std::vector<std::string>& missing_variables) const;
 
   /** \brief Get the index of a variable in the robot state */
-  int getVariableIndex(const std::string& variable) const;
+  size_t getVariableIndex(const std::string& variable) const;
 
   /** \brief Get the deepest joint in the kinematic tree that is a common parent of both joints passed as argument */
   const JointModel* getCommonRoot(const JointModel* a, const JointModel* b) const

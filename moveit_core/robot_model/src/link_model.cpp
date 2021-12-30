@@ -51,7 +51,7 @@ LinkModel::LinkModel(const std::string& name)
   , is_parent_joint_fixed_(false)
   , joint_origin_transform_is_identity_(true)
   , first_collision_body_transform_index_(-1)
-  , link_index_(-1)
+  , link_index_(0)
 {
   joint_origin_transform_.setIdentity();
 }

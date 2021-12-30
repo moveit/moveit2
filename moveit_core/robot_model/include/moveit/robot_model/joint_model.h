@@ -83,7 +83,7 @@ class LinkModel;
 class JointModel;
 
 /** \brief Data type for holding mappings from variable names to their position in a state vector */
-typedef std::map<std::string, int> VariableIndexMap;
+typedef std::map<std::string, size_t> VariableIndexMap;
 
 /** \brief Data type for holding mappings from variable names to their bounds */
 using VariableBoundsMap = std::map<std::string, VariableBounds>;
@@ -200,31 +200,31 @@ public:
   }
 
   /** \brief Get the index of this joint's first variable within the full robot state */
-  int getFirstVariableIndex() const
+  size_t getFirstVariableIndex() const
   {
     return first_variable_index_;
   }
 
   /** \brief Set the index of this joint's first variable within the full robot state */
-  void setFirstVariableIndex(int index)
+  void setFirstVariableIndex(size_t index)
   {
     first_variable_index_ = index;
   }
 
   /** \brief Get the index of this joint within the robot model */
-  int getJointIndex() const
+  size_t getJointIndex() const
   {
     return joint_index_;
   }
 
   /** \brief Set the index of this joint within the robot model */
-  void setJointIndex(int index)
+  void setJointIndex(size_t index)
   {
     joint_index_ = index;
   }
 
   /** \brief Get the index of the variable within this joint */
-  int getLocalVariableIndex(const std::string& variable) const;
+  size_t getLocalVariableIndex(const std::string& variable) const;
 
   /** @} */
 
@@ -514,10 +514,10 @@ protected:
   double distance_factor_;
 
   /** \brief The index of this joint's first variable, in the complete robot state */
-  int first_variable_index_;
+  size_t first_variable_index_;
 
   /** \brief Index for this joint in the array of joints of the complete model */
-  int joint_index_;
+  size_t joint_index_;
 };
 
 /** \brief Operator overload for printing variable bounds to a stream */
