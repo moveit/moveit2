@@ -261,7 +261,6 @@ void RobotModel::buildJointInfo()
 
   for (std::size_t i = 0; i < joint_model_vector_.size(); ++i)
   {
-    joint_model_vector_[i]->setJointIndex(i);
     const std::vector<std::string>& name_order = joint_model_vector_[i]->getVariableNames();
 
     // compute index map
@@ -286,7 +285,6 @@ void RobotModel::buildJointInfo()
           static_cast<const RevoluteJointModel*>(joint_model_vector_[i])->isContinuous())
         continuous_joint_model_vector_.push_back(joint_model_vector_[i]);
 
-      joint_model_vector_[i]->setFirstVariableIndex(variable_count_);
       joint_variables_index_map_[joint_model_vector_[i]->getName()] = variable_count_;
 
       // compute variable count
@@ -789,16 +787,14 @@ bool RobotModel::addJointModelGroup(const srdf::Model::Group& gc)
 JointModel* RobotModel::buildRecursive(LinkModel* parent, const urdf::Link* urdf_link, const srdf::Model& srdf_model)
 {
   // construct the joint
-  JointModel* joint = urdf_link->parent_joint ?
-                          constructJointModel(urdf_link->parent_joint.get(), urdf_link, srdf_model) :
-                          constructJointModel(nullptr, urdf_link, srdf_model);
+  JointModel* joint = constructJointModel(urdf_link, srdf_model);
+
   if (joint == nullptr)
     return nullptr;
 
   // bookkeeping for the joint
-  joint_model_map_[joint->getName()] = joint;
-  joint->setJointIndex(joint_model_vector_.size());
   joint_model_vector_.push_back(joint);
+  joint_model_map_[joint->getName()] = joint;
   joint_model_vector_const_.push_back(joint);
   joint_model_names_vector_.push_back(joint->getName());
   joint->setParentLinkModel(parent);
@@ -810,7 +806,6 @@ JointModel* RobotModel::buildRecursive(LinkModel* parent, const urdf::Link* urdf
 
   // bookkeeping for the link
   link_model_map_[joint->getChildLinkModel()->getName()] = link;
-  link->setLinkIndex(link_model_vector_.size());
   link_model_vector_.push_back(link);
   link_model_vector_const_.push_back(link);
   link_model_names_vector_.push_back(link->getName());
@@ -871,57 +866,61 @@ static inline VariableBounds jointBoundsFromURDF(const urdf::Joint* urdf_joint)
 }
 }  // namespace
 
-JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const urdf::Link* child_link,
-                                            const srdf::Model& srdf_model)
+JointModel* RobotModel::constructJointModel(const urdf::Link* child_link, const srdf::Model& srdf_model)
 {
   JointModel* new_joint_model = nullptr;
+  auto parent_joint = child_link->parent_joint ? child_link->parent_joint.get() : nullptr;
+  auto joint_index = joint_model_vector_.size();
+  auto first_variable_index = joint_model_vector_.empty() ? 0 :
+                                                            joint_model_vector_.back()->getFirstVariableIndex() +
+                                                                joint_model_vector_.back()->getVariableCount();
 
-  // if urdf_joint exists, must be the root link transform
-  if (urdf_joint)
+  // if parent_joint exists, must be the root link transform
+  if (parent_joint)
   {
-    switch (urdf_joint->type)
+    switch (parent_joint->type)
     {
       case urdf::Joint::REVOLUTE:
       {
-        RevoluteJointModel* j = new RevoluteJointModel(urdf_joint->name);
-        j->setVariableBounds(j->getName(), jointBoundsFromURDF(urdf_joint));
+        RevoluteJointModel* j = new RevoluteJointModel(parent_joint->name, joint_index, first_variable_index);
+        j->setVariableBounds(j->getName(), jointBoundsFromURDF(parent_joint));
         j->setContinuous(false);
-        j->setAxis(Eigen::Vector3d(urdf_joint->axis.x, urdf_joint->axis.y, urdf_joint->axis.z));
+        j->setAxis(Eigen::Vector3d(parent_joint->axis.x, parent_joint->axis.y, parent_joint->axis.z));
         new_joint_model = j;
       }
       break;
       case urdf::Joint::CONTINUOUS:
       {
-        RevoluteJointModel* j = new RevoluteJointModel(urdf_joint->name);
-        j->setVariableBounds(j->getName(), jointBoundsFromURDF(urdf_joint));
+        RevoluteJointModel* j = new RevoluteJointModel(parent_joint->name, joint_index, first_variable_index);
+        j->setVariableBounds(j->getName(), jointBoundsFromURDF(parent_joint));
         j->setContinuous(true);
-        j->setAxis(Eigen::Vector3d(urdf_joint->axis.x, urdf_joint->axis.y, urdf_joint->axis.z));
+        j->setAxis(Eigen::Vector3d(parent_joint->axis.x, parent_joint->axis.y, parent_joint->axis.z));
         new_joint_model = j;
       }
       break;
       case urdf::Joint::PRISMATIC:
       {
-        PrismaticJointModel* j = new PrismaticJointModel(urdf_joint->name);
-        j->setVariableBounds(j->getName(), jointBoundsFromURDF(urdf_joint));
-        j->setAxis(Eigen::Vector3d(urdf_joint->axis.x, urdf_joint->axis.y, urdf_joint->axis.z));
+        PrismaticJointModel* j = new PrismaticJointModel(parent_joint->name, joint_index, first_variable_index);
+        j->setVariableBounds(j->getName(), jointBoundsFromURDF(parent_joint));
+        j->setAxis(Eigen::Vector3d(parent_joint->axis.x, parent_joint->axis.y, parent_joint->axis.z));
         new_joint_model = j;
       }
       break;
       case urdf::Joint::FLOATING:
-        new_joint_model = new FloatingJointModel(urdf_joint->name);
+        new_joint_model = new FloatingJointModel(parent_joint->name, joint_index, first_variable_index);
         break;
       case urdf::Joint::PLANAR:
-        new_joint_model = new PlanarJointModel(urdf_joint->name);
+        new_joint_model = new PlanarJointModel(parent_joint->name, joint_index, first_variable_index);
         break;
       case urdf::Joint::FIXED:
-        new_joint_model = new FixedJointModel(urdf_joint->name);
+        new_joint_model = new FixedJointModel(parent_joint->name, joint_index, first_variable_index);
         break;
       default:
-        RCLCPP_ERROR(LOGGER, "Unknown joint type: %d", static_cast<int>(urdf_joint->type));
+        RCLCPP_ERROR(LOGGER, "Unknown joint type: %d", static_cast<int>(parent_joint->type));
         break;
     }
   }
-  else  // if urdf_joint passed in as null, then we're at root of URDF model
+  else  // if parent_joint passed in as null, then we're at root of URDF model
   {
     const std::vector<srdf::Model::VirtualJoint>& virtual_joints = srdf_model.getVirtualJoints();
     for (const srdf::Model::VirtualJoint& virtual_joint : virtual_joints)
@@ -941,11 +940,11 @@ JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const
       else
       {
         if (virtual_joint.type_ == "fixed")
-          new_joint_model = new FixedJointModel(virtual_joint.name_);
+          new_joint_model = new FixedJointModel(virtual_joint.name_, joint_index, first_variable_index);
         else if (virtual_joint.type_ == "planar")
-          new_joint_model = new PlanarJointModel(virtual_joint.name_);
+          new_joint_model = new PlanarJointModel(virtual_joint.name_, joint_index, first_variable_index);
         else if (virtual_joint.type_ == "floating")
-          new_joint_model = new FloatingJointModel(virtual_joint.name_);
+          new_joint_model = new FloatingJointModel(virtual_joint.name_, joint_index, first_variable_index);
         if (new_joint_model)
         {
           // for fixed frames we still use the robot root link
@@ -960,7 +959,7 @@ JointModel* RobotModel::constructJointModel(const urdf::Joint* urdf_joint, const
     if (!new_joint_model)
     {
       RCLCPP_INFO(LOGGER, "No root/virtual joint specified in SRDF. Assuming fixed joint");
-      new_joint_model = new FixedJointModel("ASSUMED_FIXED_ROOT_JOINT");
+      new_joint_model = new FixedJointModel("ASSUMED_FIXED_ROOT_JOINT", joint_index, first_variable_index);
     }
   }
 
@@ -1096,7 +1095,8 @@ static inline Eigen::Isometry3d urdfPose2Isometry3d(const urdf::Pose& pose)
 
 LinkModel* RobotModel::constructLinkModel(const urdf::Link* urdf_link)
 {
-  LinkModel* new_link_model = new LinkModel(urdf_link->name);
+  auto link_index = link_model_vector_.size();
+  LinkModel* new_link_model = new LinkModel(urdf_link->name, link_index);
 
   const std::vector<urdf::CollisionSharedPtr>& col_array =
       urdf_link->collision_array.empty() ? std::vector<urdf::CollisionSharedPtr>(1, urdf_link->collision) :
@@ -1228,11 +1228,11 @@ const JointModel* RobotModel::getJointModel(const std::string& name) const
   return nullptr;
 }
 
-const JointModel* RobotModel::getJointModel(int index) const
+const JointModel* RobotModel::getJointModel(size_t index) const
 {
-  if (index < 0 || index >= static_cast<int>(joint_model_vector_.size()))
+  if (index >= joint_model_vector_.size())
   {
-    RCLCPP_ERROR(LOGGER, "Joint index '%i' out of bounds of joints in model '%s'", index, model_name_.c_str());
+    RCLCPP_ERROR(LOGGER, "Joint index '%li' out of bounds of joints in model '%s'", index, model_name_.c_str());
     return nullptr;
   }
   assert(joint_model_vector_[index]->getJointIndex() == index);
@@ -1253,11 +1253,11 @@ const LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_lin
   return const_cast<RobotModel*>(this)->getLinkModel(name, has_link);
 }
 
-const LinkModel* RobotModel::getLinkModel(int index) const
+const LinkModel* RobotModel::getLinkModel(size_t index) const
 {
-  if (index < 0 || index >= static_cast<int>(link_model_vector_.size()))
+  if (index >= link_model_vector_.size())
   {
-    RCLCPP_ERROR(LOGGER, "Link index '%i' out of bounds of links in model '%s'", index, model_name_.c_str());
+    RCLCPP_ERROR(LOGGER, "Link index '%li' out of bounds of links in model '%s'", index, model_name_.c_str());
     return nullptr;
   }
   assert(link_model_vector_[index]->getLinkIndex() == index);

@@ -40,7 +40,8 @@ namespace moveit
 {
 namespace core
 {
-FixedJointModel::FixedJointModel(const std::string& name) : JointModel(name)
+FixedJointModel::FixedJointModel(const std::string& name, size_t joint_index, size_t first_variable_index)
+  : JointModel(name, joint_index, first_variable_index)
 {
   type_ = FIXED;
 }

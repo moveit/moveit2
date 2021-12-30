@@ -139,7 +139,7 @@ public:
   const JointModel* getJointModel(const std::string& joint) const;
 
   /** \brief Get a joint by its index. Output error and return NULL when the link is missing. */
-  const JointModel* getJointModel(int index) const;
+  const JointModel* getJointModel(size_t index) const;
 
   /** \brief Get a joint by its name. Output error and return NULL when the joint is missing. */
   JointModel* getJointModel(const std::string& joint);
@@ -248,7 +248,7 @@ public:
   const LinkModel* getLinkModel(const std::string& link, bool* has_link = nullptr) const;
 
   /** \brief Get a link by its index. Output error and return NULL when the link is missing. */
-  const LinkModel* getLinkModel(int index) const;
+  const LinkModel* getLinkModel(size_t index) const;
 
   /** \brief Get a link by its name. Output error and return NULL when the link is missing. */
   LinkModel* getLinkModel(const std::string& link, bool* has_link = nullptr);
@@ -630,16 +630,16 @@ protected:
   /** \brief Construct a JointModelGroup given a SRDF description \e group */
   bool addJointModelGroup(const srdf::Model::Group& group);
 
-  /** \brief Given a urdf joint model, a child link and a set of virtual joints,
-      build up the corresponding JointModel object*/
-  JointModel* constructJointModel(const urdf::Joint* urdf_joint_model, const urdf::Link* child_link,
-                                  const srdf::Model& srdf_model);
-
   /** \brief Given a urdf link, build the corresponding LinkModel object*/
   LinkModel* constructLinkModel(const urdf::Link* urdf_link);
 
   /** \brief Given a geometry spec from the URDF and a filename (for a mesh), construct the corresponding shape object*/
   shapes::ShapePtr constructShape(const urdf::Geometry* geom);
+
+private:
+  /** \brief Given a child link and a srdf model,
+      build up the corresponding JointModel object*/
+  JointModel* constructJointModel(const urdf::Link* child_link, const srdf::Model& srdf_model);
 };
 }  // namespace core
 }  // namespace moveit

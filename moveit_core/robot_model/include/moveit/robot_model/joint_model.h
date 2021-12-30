@@ -123,8 +123,14 @@ public:
   /** \brief The datatype for the joint bounds */
   using Bounds = std::vector<VariableBounds>;
 
-  /** \brief Construct a joint named \e name */
-  JointModel(const std::string& name);
+  /**
+   * @brief      Constructs a joint named \e name
+   *
+   * @param[in]  name                   The joint name
+   * @param[in]  index                  The index of the joint in the RobotModel
+   * @param[in]  first_variable_index   The index of the first variable in the RobotModel
+   */
+  JointModel(const std::string& name, size_t joint_index, size_t first_variable_index);
 
   virtual ~JointModel();
 
@@ -205,22 +211,10 @@ public:
     return first_variable_index_;
   }
 
-  /** \brief Set the index of this joint's first variable within the full robot state */
-  void setFirstVariableIndex(size_t index)
-  {
-    first_variable_index_ = index;
-  }
-
   /** \brief Get the index of this joint within the robot model */
   size_t getJointIndex() const
   {
     return joint_index_;
-  }
-
-  /** \brief Set the index of this joint within the robot model */
-  void setJointIndex(size_t index)
-  {
-    joint_index_ = index;
   }
 
   /** \brief Get the index of the variable within this joint */
@@ -455,11 +449,18 @@ public:
 
   /** @} */
 
-protected:
-  void computeVariableBoundsMsg();
-
+private:
   /** \brief Name of the joint */
   std::string name_;
+
+  /** \brief Index for this joint in the array of joints of the complete model */
+  size_t joint_index_;
+
+  /** \brief The index of this joint's first variable, in the complete robot state */
+  size_t first_variable_index_;
+
+protected:
+  void computeVariableBoundsMsg();
 
   /** \brief The type of joint */
   JointType type_;
@@ -512,12 +513,6 @@ protected:
 
   /** \brief The factor applied to the distance between two joint states */
   double distance_factor_;
-
-  /** \brief The index of this joint's first variable, in the complete robot state */
-  size_t first_variable_index_;
-
-  /** \brief Index for this joint in the array of joints of the complete model */
-  size_t joint_index_;
 };
 
 /** \brief Operator overload for printing variable bounds to a stream */
