@@ -2,6 +2,9 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.2 (2021-12-29)
+------------------
+
 2.3.1 (2021-12-23)
 ------------------
 * Servo: fix -Wunused-private-field (`#937 <https://github.com/ros-planning/moveit2/issues/937>`_)

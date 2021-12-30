@@ -2,6 +2,9 @@
 Changelog for package moveit_planners
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.2 (2021-12-29)
+------------------
+
 2.3.1 (2021-12-23)
 ------------------
 * PILZ: Migrate and Restructure test directory
