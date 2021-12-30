@@ -259,9 +259,9 @@ void RobotModel::buildJointInfo()
   variable_names_.reserve(joint_model_vector_.size());
   joints_of_variable_.reserve(joint_model_vector_.size());
 
-  for (std::size_t i = 0; i < joint_model_vector_.size(); ++i)
+  for (const auto& joint : joint_model_vector_)
   {
-    const std::vector<std::string>& name_order = joint_model_vector_[i]->getVariableNames();
+    const std::vector<std::string>& name_order = joint->getVariableNames();
 
     // compute index map
     if (!name_order.empty())
@@ -270,30 +270,29 @@ void RobotModel::buildJointInfo()
       {
         joint_variables_index_map_[name_order[j]] = variable_count_ + j;
         variable_names_.push_back(name_order[j]);
-        joints_of_variable_.push_back(joint_model_vector_[i]);
+        joints_of_variable_.push_back(joint);
       }
-      if (joint_model_vector_[i]->getMimic() == nullptr)
+      if (joint->getMimic() == nullptr)
       {
         active_joint_model_start_index_.push_back(variable_count_);
-        active_joint_model_vector_.push_back(joint_model_vector_[i]);
-        active_joint_model_names_vector_.push_back(joint_model_vector_[i]->getName());
-        active_joint_model_vector_const_.push_back(joint_model_vector_[i]);
-        active_joint_models_bounds_.push_back(&joint_model_vector_[i]->getVariableBounds());
+        active_joint_model_vector_.push_back(joint);
+        active_joint_model_names_vector_.push_back(joint->getName());
+        active_joint_model_vector_const_.push_back(joint);
+        active_joint_models_bounds_.push_back(&joint->getVariableBounds());
       }
 
-      if (joint_model_vector_[i]->getType() == JointModel::REVOLUTE &&
-          static_cast<const RevoluteJointModel*>(joint_model_vector_[i])->isContinuous())
-        continuous_joint_model_vector_.push_back(joint_model_vector_[i]);
+      if (joint->getType() == JointModel::REVOLUTE && static_cast<const RevoluteJointModel*>(joint)->isContinuous())
+        continuous_joint_model_vector_.push_back(joint);
 
-      joint_variables_index_map_[joint_model_vector_[i]->getName()] = variable_count_;
+      joint_variables_index_map_[joint->getName()] = variable_count_;
 
       // compute variable count
-      std::size_t vc = joint_model_vector_[i]->getVariableCount();
+      std::size_t vc = joint->getVariableCount();
       variable_count_ += vc;
       if (vc == 1)
-        single_dof_joints_.push_back(joint_model_vector_[i]);
+        single_dof_joints_.push_back(joint);
       else
-        multi_dof_joints_.push_back(joint_model_vector_[i]);
+        multi_dof_joints_.push_back(joint);
     }
   }
 

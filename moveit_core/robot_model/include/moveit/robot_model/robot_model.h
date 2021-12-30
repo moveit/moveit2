@@ -596,6 +596,7 @@ protected:
   /** \brief The array of end-effectors, in alphabetical order */
   std::vector<const JointModelGroup*> end_effectors_;
 
+private:
   /** \brief Given an URDF model and a SRDF model, build a full kinematic model */
   void buildModel(const urdf::ModelInterface& urdf_model, const srdf::Model& srdf_model);
 
@@ -630,16 +631,15 @@ protected:
   /** \brief Construct a JointModelGroup given a SRDF description \e group */
   bool addJointModelGroup(const srdf::Model::Group& group);
 
+  /** \brief Given a child link and a srdf model,
+      build up the corresponding JointModel object*/
+  JointModel* constructJointModel(const urdf::Link* child_link, const srdf::Model& srdf_model);
+
   /** \brief Given a urdf link, build the corresponding LinkModel object*/
   LinkModel* constructLinkModel(const urdf::Link* urdf_link);
 
   /** \brief Given a geometry spec from the URDF and a filename (for a mesh), construct the corresponding shape object*/
   shapes::ShapePtr constructShape(const urdf::Geometry* geom);
-
-private:
-  /** \brief Given a child link and a srdf model,
-      build up the corresponding JointModel object*/
-  JointModel* constructJointModel(const urdf::Link* child_link, const srdf::Model& srdf_model);
 };
 }  // namespace core
 }  // namespace moveit
