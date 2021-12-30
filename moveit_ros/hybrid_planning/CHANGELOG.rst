@@ -2,6 +2,12 @@
 Changelog for package moveit_hybrid_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.2 (2021-12-29)
+------------------
+* Fix syntax (`#939 <https://github.com/ros-planning/moveit2/issues/939>`_)
+  Co-authored-by: AndyZe <zelenak@picknik.ai>
+* Contributors: Sebastian Jahr
+
 2.3.1 (2021-12-23)
 ------------------
 * Bump new packages to 2.3.0
