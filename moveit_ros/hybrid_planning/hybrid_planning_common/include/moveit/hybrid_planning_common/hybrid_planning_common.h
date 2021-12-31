@@ -40,10 +40,7 @@
 
 namespace moveit::hybrid_planning
 {
-namespace
-{
-constexpr char GLOBAL_PLANNING_ACTION_NAME[] = "~/hybrid_planning/global_planning_action";
-constexpr char LOCAL_PLANNING_ACTION_NAME[] = "~/hybrid_planning/local_planning_action";
-constexpr char RUN_HYBRID_PLANNING_ACTION_NAME[] = "~/hybrid_planning/run_hybrid_planning";
-}  // namespace
+inline constexpr char GLOBAL_PLANNING_ACTION_NAME[] = "~/hybrid_planning/global_planning_action";
+inline constexpr char LOCAL_PLANNING_ACTION_NAME[] = "~/hybrid_planning/local_planning_action";
+inline constexpr char RUN_HYBRID_PLANNING_ACTION_NAME[] = "~/hybrid_planning/run_hybrid_planning";
 }  // namespace moveit::hybrid_planning
