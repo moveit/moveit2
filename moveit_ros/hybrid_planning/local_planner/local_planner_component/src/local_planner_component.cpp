@@ -48,7 +48,6 @@ using namespace std::chrono_literals;
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
-constexpr char LOCAL_PLANNING_ACTION_NAME[] = "~/hybrid_planning/local_planning_action";
 
 // If the trajectory progress reaches more than 0.X the global goal state is considered as reached
 constexpr float PROGRESS_THRESHOLD = 0.995;
@@ -154,7 +153,7 @@ bool LocalPlannerComponent::initialize()
   // Initialize local planning request action server
   using namespace std::placeholders;
   local_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::LocalPlanner>(
-      node_, LOCAL_PLANNING_ACTION_NAME,
+      node_, config_.local_planning_action_name,
       [](const rclcpp_action::GoalUUID& /*unused*/,
          std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received local planning goal request");

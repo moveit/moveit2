@@ -38,9 +38,6 @@
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
-constexpr char GLOBAL_PLANNING_ACTION_NAME[] = "~/hybrid_planning/global_planning_action";
-constexpr char LOCAL_PLANNING_ACTION_NAME[] = "~/hybrid_planning/local_planning_action";
-constexpr char RUN_HYBRID_PLANNING_ACTION_NAME[] = "~/hybrid_planning/run_hybrid_planning";
 }  // namespace
 
 namespace moveit::hybrid_planning
@@ -108,8 +105,15 @@ bool HybridPlanningManager::initialize()
   }
 
   // Initialize local planning action client
+  std::string local_planning_action_name = this->declare_parameter<std::string>("local_planning_action_name", "");
+  this->get_parameter<std::string>("local_planning_action_name", local_planning_action_name);
+  if (local_planning_action_name.empty())
+  {
+    RCLCPP_ERROR(LOGGER, "local_planning_action_name parameter was not defined");
+    return false;
+  }
   local_planner_action_client_ =
-      rclcpp_action::create_client<moveit_msgs::action::LocalPlanner>(this, LOCAL_PLANNING_ACTION_NAME);
+      rclcpp_action::create_client<moveit_msgs::action::LocalPlanner>(this, local_planning_action_name);
   if (!local_planner_action_client_->wait_for_action_server(2s))
   {
     RCLCPP_ERROR(LOGGER, "Local planner action server not available after waiting");
@@ -117,8 +121,15 @@ bool HybridPlanningManager::initialize()
   }
 
   // Initialize global planning action client
-  global_planner_action_client_ =
-      rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(this, GLOBAL_PLANNING_ACTION_NAME);
+  std::string global_planning_action_name = this->declare_parameter<std::string>("global_planning_action_name", "");
+  this->get_parameter<std::string>("global_planning_action_name", global_planning_action_name);
+  if (global_planning_action_name.empty())
+  {
+    RCLCPP_ERROR(LOGGER, "global_planning_action_name parameter was not defined");
+    return false;
+  }
+  global_planner_action_client_ = rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(
+      this, "/test/hybrid_planning/global_planning_action" /*global_planning_action_name*/);
   if (!global_planner_action_client_->wait_for_action_server(2s))
   {
     RCLCPP_ERROR(LOGGER, "Global planner action server not available after waiting");
@@ -126,9 +137,16 @@ bool HybridPlanningManager::initialize()
   }
 
   // Initialize hybrid planning action server
+  std::string hybrid_planning_action_name = this->declare_parameter<std::string>("hybrid_planning_action_name", "");
+  this->get_parameter<std::string>("hybrid_planning_action_name", hybrid_planning_action_name);
+  if (hybrid_planning_action_name.empty())
+  {
+    RCLCPP_ERROR(LOGGER, "hybrid_planning_action_name parameter was not defined");
+    return false;
+  }
   hybrid_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::HybridPlanner>(
       this->get_node_base_interface(), this->get_node_clock_interface(), this->get_node_logging_interface(),
-      this->get_node_waitables_interface(), RUN_HYBRID_PLANNING_ACTION_NAME,
+      this->get_node_waitables_interface(), hybrid_planning_action_name,
       [](const rclcpp_action::GoalUUID& /*unused*/,
          std::shared_ptr<const moveit_msgs::action::HybridPlanner::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received goal request");
