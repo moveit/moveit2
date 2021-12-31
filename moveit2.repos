@@ -1,4 +1,8 @@
 repositories:
+  common_interfaces:
+    type: git
+    url: https://github.com/ros2/common_interfaces
+    version: ba1c0526b905c4d4a29f31dcdb769e6e485f1b50
   geometric_shapes:
     type: git
     url: https://github.com/ros-planning/geometric_shapes
