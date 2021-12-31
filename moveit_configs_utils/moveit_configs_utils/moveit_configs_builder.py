@@ -90,7 +90,7 @@ class MoveItConfigs(object):
         self.move_group_capabilities = {}
         # A dictionary containing the overridden position/velocity/acceleration limits.
         self.joint_limits = {}
-        # A dictionary MoveItCpp related parameters.
+        # A dictionary containing MoveItCpp related parameters.
         self.moveit_cpp = {}
         # A dictionary containing the cartesian limits for the Pilz planner.
         self.cartesian_limits = {}
