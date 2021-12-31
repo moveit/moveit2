@@ -74,9 +74,9 @@ class MoveItConfigs(object):
     ]
 
     def __init__(self):
-        # A dictionary that have the content of the URDF file.
+        # A dictionary that has the contents of the URDF file.
         self.robot_description = {}
-        # A dictionary that have the content of the SRDF file.
+        # A dictionary that has the contents of the SRDF file.
         self.robot_description_semantic = {}
         # A dictionary IK solver specific parameters.
         self.robot_description_kinematics = {}
