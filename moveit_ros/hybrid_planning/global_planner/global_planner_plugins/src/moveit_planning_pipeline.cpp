@@ -97,45 +97,87 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
     return response;
   }
 
-  // Process goal
-  if ((global_goal_handle->get_goal())->motion_sequence.items.size() > 1)
+  // If multiple waypoints were requested, assume we have a fully planned trajectory already.
+  // Just forward to the local planner.
+  // This works only for a JointConstraint type.
+  size_t num_waypoints = global_goal_handle->get_goal()->motion_sequence.items.size();
+  if (num_waypoints > 1)
   {
-    RCLCPP_WARN(LOGGER, "Global planner received motion sequence request with more than one item but the "
-                        "'moveit_planning_pipeline' plugin only accepts one item. Just using the first item as global "
-                        "planning goal!");
-  }
-  auto motion_plan_req = (global_goal_handle->get_goal())->motion_sequence.items[0].req;
+    auto motion_plan_req = global_goal_handle->get_goal()->motion_sequence.items[0].req;
+    // Start state is the current state of the robot, by default
+    // Assume these parameters don't change for any waypoint, aka sequence item
+    response.group_name = motion_plan_req.group_name;
+    response.planning_time = motion_plan_req.allowed_planning_time;
+    response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
 
-  // Set parameters required by the planning component
-  moveit_cpp::PlanningComponent::PlanRequestParameters plan_params;
-  plan_params.planner_id = motion_plan_req.planner_id;
-  plan_params.planning_pipeline = motion_plan_req.pipeline_id;
-  plan_params.planning_attempts = motion_plan_req.num_planning_attempts;
-  plan_params.planning_time = motion_plan_req.allowed_planning_time;
-  plan_params.max_velocity_scaling_factor = motion_plan_req.max_velocity_scaling_factor;
-  plan_params.max_acceleration_scaling_factor = motion_plan_req.max_acceleration_scaling_factor;
+    moveit_msgs::msg::Constraints goal_constraints =
+        global_goal_handle->get_goal()->motion_sequence.items.at(0).req.goal_constraints.at(0);
+    if (goal_constraints.joint_constraints.empty())
+    {
+      RCLCPP_ERROR(LOGGER, "Constraints of the motion plan request were empty or not of JointConstraint type.");
+      std::exit(EXIT_FAILURE);
+    }
 
-  // Create planning component
-  auto planning_components = std::make_shared<moveit_cpp::PlanningComponent>(motion_plan_req.group_name, moveit_cpp_);
+    // Get joint names
+    for (auto constraint : goal_constraints.joint_constraints)
+    {
+      response.trajectory.joint_trajectory.joint_names.push_back(constraint.joint_name);
+    }
 
-  // Copy goal constraint into planning component
-  planning_components->setGoal(motion_plan_req.goal_constraints);
+    // Get joint positions
+    trajectory_msgs::msg::JointTrajectoryPoint waypoint;
+    for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints; ++waypoint_idx)
+    {
+      moveit_msgs::msg::MotionPlanRequest waypoint_req =
+          global_goal_handle->get_goal()->motion_sequence.items.at(waypoint_idx).req;
 
-  // Plan motion
-  auto plan_solution = planning_components->plan(plan_params);
-  if (plan_solution.error_code != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
-  {
-    response.error_code = plan_solution.error_code;
+      trajectory_msgs::msg::JointTrajectoryPoint traj_point;
+      for (const moveit_msgs::msg::JointConstraint& joint_constraint :
+           waypoint_req.goal_constraints.at(0).joint_constraints)
+      {
+        traj_point.positions.push_back(joint_constraint.position);
+      }
+
+      response.trajectory.joint_trajectory.points.push_back(traj_point);
+    }
     return response;
   }
 
-  // Transform solution into MotionPlanResponse and publish it
-  response.trajectory_start = plan_solution.start_state;
-  response.group_name = motion_plan_req.group_name;
-  plan_solution.trajectory->getRobotTrajectoryMsg(response.trajectory);
-  response.error_code = plan_solution.error_code;
+  // Else, there is only one waypoint.
+  else
+  {
+    auto motion_plan_req = global_goal_handle->get_goal()->motion_sequence.items[0].req;
 
-  return response;
+    // Set parameters required by the planning component
+    moveit_cpp::PlanningComponent::PlanRequestParameters plan_params;
+    plan_params.planner_id = motion_plan_req.planner_id;
+    plan_params.planning_pipeline = motion_plan_req.pipeline_id;
+    plan_params.planning_attempts = motion_plan_req.num_planning_attempts;
+    plan_params.planning_time = motion_plan_req.allowed_planning_time;
+    plan_params.max_velocity_scaling_factor = motion_plan_req.max_velocity_scaling_factor;
+    plan_params.max_acceleration_scaling_factor = motion_plan_req.max_acceleration_scaling_factor;
+
+    // Create planning component
+    auto planning_components = std::make_shared<moveit_cpp::PlanningComponent>(motion_plan_req.group_name, moveit_cpp_);
+
+    // Copy goal constraint into planning component
+    planning_components->setGoal(motion_plan_req.goal_constraints);
+
+    // Plan motion
+    auto plan_solution = planning_components->plan(plan_params);
+    if (plan_solution.error_code != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+    {
+      response.error_code = plan_solution.error_code;
+      return response;
+    }
+
+    // Transform solution into MotionPlanResponse and publish it
+    response.trajectory_start = plan_solution.start_state;
+    response.group_name = motion_plan_req.group_name;
+    plan_solution.trajectory->getRobotTrajectoryMsg(response.trajectory);
+    response.error_code = plan_solution.error_code;
+    return response;
+  }
 }
 }  // namespace moveit::hybrid_planning
 
