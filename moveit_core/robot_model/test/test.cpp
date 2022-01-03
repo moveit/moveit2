@@ -80,6 +80,18 @@ TEST_F(LoadPlanningModelsPr2, Model)
     ASSERT_EQ(links[i]->getLinkIndex(), static_cast<int>(i));
   }
   moveit::tools::Profiler::Status();
+
+  // This joint has effort and velocity limits defined in the URDF. Nothing else.
+  const std::string joint_name = "fl_caster_rotation_joint";
+  const auto& joint = robot_model_->getJointModel(joint_name);
+  const auto& bounds = joint->getVariableBounds(joint->getName());
+
+  EXPECT_TRUE(bounds.velocity_bounded_);
+  EXPECT_EQ(bounds.max_velocity_, 10.0);
+
+  EXPECT_FALSE(bounds.position_bounded_);
+  EXPECT_FALSE(bounds.acceleration_bounded_);
+  EXPECT_FALSE(bounds.jerk_bounded_);
 }
 
 TEST(SiblingAssociateLinks, SimpleYRobot)
