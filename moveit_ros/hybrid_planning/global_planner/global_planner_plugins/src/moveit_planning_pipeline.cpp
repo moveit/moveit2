@@ -109,6 +109,15 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
     response.group_name = motion_plan_req.group_name;
     response.planning_time = motion_plan_req.allowed_planning_time;
     response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+    moveit::core::RobotStatePtr current_state;
+    if (!moveit_cpp_->getCurrentState(current_state, 0.5))
+    {
+      RCLCPP_ERROR(LOGGER, "Could not retrieve the current robot state.");
+      std::exit(EXIT_FAILURE);
+    }
+    moveit_msgs::msg::RobotState current_state_msg;
+    moveit::core::robotStateToRobotStateMsg(*current_state, current_state_msg);
+    response.trajectory_start = current_state_msg;
 
     moveit_msgs::msg::Constraints goal_constraints =
         global_goal_handle->get_goal()->motion_sequence.items.at(0).req.goal_constraints.at(0);
