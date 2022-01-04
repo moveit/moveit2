@@ -60,5 +60,6 @@ public:
 private:
   rclcpp::Node::SharedPtr node_ptr_;
   std::shared_ptr<moveit_cpp::MoveItCpp> moveit_cpp_;
+  bool global_traj_pass_through_;
 };
 }  // namespace moveit::hybrid_planning

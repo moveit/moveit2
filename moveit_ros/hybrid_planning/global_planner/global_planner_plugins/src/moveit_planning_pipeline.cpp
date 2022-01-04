@@ -53,6 +53,9 @@ bool MoveItPlanningPipeline::initialize(const rclcpp::Node::SharedPtr& node)
   // TODO(andyz): how to standardize this for planning pipelines other than ompl?
   // Maybe use loadPlanningPipelines() from moveit_cpp.cpp
 
+  // Allow incoming trajectories to pass straight to the local planner without a global re-plan?
+  global_traj_pass_through_ = node->declare_parameter<bool>("allow_traj_pass_through", false);
+
   // Declare planning pipeline parameter
   node->declare_parameter<std::vector<std::string>>(PLANNING_PIPELINES_NS + "pipeline_names",
                                                     std::vector<std::string>({ UNDEFINED }));
@@ -101,7 +104,7 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
   // Just forward to the local planner.
   // This works only for a JointConstraint type.
   size_t num_waypoints = global_goal_handle->get_goal()->motion_sequence.items.size();
-  if (num_waypoints > 1)
+  if (global_traj_pass_through_ && num_waypoints > 1)
   {
     auto motion_plan_req = global_goal_handle->get_goal()->motion_sequence.items[0].req;
     // Start state is the current state of the robot, by default
@@ -155,6 +158,12 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
   // Else, there is only one waypoint.
   else
   {
+    if ((global_goal_handle->get_goal())->motion_sequence.items.size() > 1)
+    {
+      RCLCPP_WARN(LOGGER, "Global planner received motion sequence request with more than one item but the "
+                          "'global_traj_pass_through' parameter is false. Just using the first item as global "
+                          "planning goal!");
+    }
     auto motion_plan_req = global_goal_handle->get_goal()->motion_sequence.items[0].req;
 
     // Set parameters required by the planning component
