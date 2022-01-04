@@ -611,8 +611,6 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   }
   delta_theta *= collision_scale;
 
-  // Loop through joints and update them, calculate velocities, and filter
-  if (!applyJointUpdate(delta_theta, internal_joint_state_, prev_joint_velocity_))
   // Loop thru joints and update them, calculate velocities, and filter
   if (!applyJointUpdate(delta_theta, internal_joint_state_))
     return false;
