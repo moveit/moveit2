@@ -88,8 +88,8 @@ struct EnvChain3DPlanningData
 {
   EnvChain3DPlanningData(std::vector<int*>& state_ID_to_index_mapping)
     : state_ID_to_index_mapping_(state_ID_to_index_mapping)
-    , goal_hash_entry_(NULL)
-    , start_hash_entry_(NULL)
+    , goal_hash_entry_(nullptr)
+    , start_hash_entry_(nullptr)
     , hash_table_size_(HASH_TABLE_SIZE)
   {
     coord_to_state_ID_table_.resize(hash_table_size_);
@@ -149,7 +149,7 @@ struct EnvChain3DPlanningData
         return coord_to_state_ID_table_[bin][i];
       }
     }
-    return NULL;
+    return nullptr;
   }
 
   bool convertFromStateIDsToAngles(const std::vector<int>& state_ids,

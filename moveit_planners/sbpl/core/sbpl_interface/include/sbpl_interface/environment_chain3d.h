@@ -181,7 +181,7 @@ public:
    * @param prints out a little extra information
    * @param the file pointer to print to (stdout by default)
    */
-  virtual void PrintState(int stateID, bool bVerbose, FILE* fOut = NULL);
+  virtual void PrintState(int stateID, bool bVerbose, FILE* fOut = nullptr);
 
   /** @brief Not defined. */
   virtual void PrintEnv_Config(FILE* fOut);
