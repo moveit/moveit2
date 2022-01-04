@@ -68,11 +68,19 @@ SimpleSampler::addTrajectorySegment(const robot_trajectory::RobotTrajectory& new
   // Reset trajectory operator to delete old reference trajectory
   reset();
 
+  std::cout << "Num waypoints in new_trajectory: " << new_trajectory.getWayPointCount() << std::endl;
+
   // Throw away old reference trajectory and use trajectory update
   reference_trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(new_trajectory);
 
-  // Parametrize trajectory and calculate velocity and accelerations
-  time_parametrization_.computeTimeStamps(*reference_trajectory_);
+  // If there are very few waypoitns, time-parameterize the trajectory (calculate velocity and accelerations)
+  if (reference_trajectory_->getWayPointCount() <= 2 && !time_parametrization_.computeTimeStamps(*reference_trajectory_))
+  {
+    std::cout << "Time parameterization failed!" << std::endl;
+    feedback_.feedback = "Time parameterization failed.";
+  }
+
+  std::cout << "Num waypoints after addTrajectorySegment(): " << reference_trajectory_->getWayPointCount() << std::endl;
 
   // Return empty feedback
   return feedback_;
@@ -121,7 +129,8 @@ SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
 
 double SimpleSampler::getTrajectoryProgress(const moveit::core::RobotState& current_state)
 {
-  // Check if trajectory is unwinded
+  // Check if trajectory is unwound
+  std::cout << "Waypoint count: " << reference_trajectory_->getWayPointCount() << "  Next waypt index: " << next_waypoint_index_ << std::endl;
   if (next_waypoint_index_ >= reference_trajectory_->getWayPointCount() - 1)
   {
     return 1.0;
