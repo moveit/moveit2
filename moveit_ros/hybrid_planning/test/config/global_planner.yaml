@@ -1,5 +1,9 @@
 global_planner_name: "moveit_hybrid_planning/MoveItPlanningPipeline"
 
+# Allow an incoming trajectory with multiple waypoints to pass straight to the local planner
+# without a global replan
+global_traj_pass_through: false
+
 # The rest of these parameters are typical for moveit_cpp
 planning_scene_monitor_options:
   name: "planning_scene_monitor"

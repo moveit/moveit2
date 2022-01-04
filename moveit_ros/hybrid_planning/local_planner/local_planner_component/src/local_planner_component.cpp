@@ -247,7 +247,6 @@ void LocalPlannerComponent::executeIteration()
       // Check if the global goal is reached
       if (trajectory_operator_instance_->getTrajectoryProgress(current_robot_state) > PROGRESS_THRESHOLD)
       {
-        RCLCPP_ERROR(LOGGER, "Global goal is reached.");
         local_planning_goal_handle_->succeed(result);
         reset();
         break;
@@ -271,7 +270,6 @@ void LocalPlannerComponent::executeIteration()
 
       // Feedback is only sent when the hybrid planning architecture should react to a discrete event that occurred
       // while computing a local solution
-      RCLCPP_ERROR(LOGGER, "Calling solve() for the local planner");
       *local_planner_feedback_ = local_constraint_solver_instance_->solve(
           local_trajectory, local_planning_goal_handle_->get_goal(), local_solution);
 

@@ -54,7 +54,7 @@ bool MoveItPlanningPipeline::initialize(const rclcpp::Node::SharedPtr& node)
   // Maybe use loadPlanningPipelines() from moveit_cpp.cpp
 
   // Allow incoming trajectories to pass straight to the local planner without a global re-plan?
-  global_traj_pass_through_ = node->declare_parameter<bool>("allow_traj_pass_through", false);
+  global_traj_pass_through_ = node->declare_parameter<bool>("global_traj_pass_through", false);
 
   // Declare planning pipeline parameter
   node->declare_parameter<std::vector<std::string>>(PLANNING_PIPELINES_NS + "pipeline_names",
@@ -100,9 +100,8 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
     return response;
   }
 
-  // If multiple waypoints were requested, assume we have a fully planned trajectory already.
-  // Just forward to the local planner.
-  // This works only for a JointConstraint type.
+  // If global_traj_pass_through_ and multiple waypoints were requested, assume we have a fully planned trajectory
+  // already. Just forward it to the local planner. This works only for a JointConstraint type.
   size_t num_waypoints = global_goal_handle->get_goal()->motion_sequence.items.size();
   if (global_traj_pass_through_ && num_waypoints > 1)
   {
@@ -131,7 +130,7 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
     }
 
     // Get joint names
-    for (auto constraint : goal_constraints.joint_constraints)
+    for (const auto& constraint : goal_constraints.joint_constraints)
     {
       response.trajectory.joint_trajectory.joint_names.push_back(constraint.joint_name);
     }
