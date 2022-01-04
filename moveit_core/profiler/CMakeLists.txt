@@ -10,5 +10,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   Boost
   random_numbers
 )
+target_link_libraries(${MOVEIT_LIB_NAME} Boost::thread)
 
 install(DIRECTORY include/ DESTINATION include)

@@ -8,5 +8,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdfdom
   urdfdom_headers
 )
+target_link_libraries(${MOVEIT_LIB_NAME} Boost::thread)
 
 install(DIRECTORY include/ DESTINATION include)
