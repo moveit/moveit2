@@ -46,15 +46,11 @@
 namespace moveit_servo
 {
 /**
- * @brief      Scale the delta theta to match joint velocity/acceleration limits
- *
- * @param[in]  joint_model_group   The joint model group
- * @param[in]  publish_period      The publish period of servo (used for calculating joint velocity)
- * @param[in]  delta_theta         The delta theta input
- *
- * @return     The delta theta output
+ * @brief Decrease robot position change and velocity, if needed, to satisfy joint velocity limits
+ * @param joint_model_group Active joint group. Used to retrieve limits.
+ * @param joint_state The command that will go to the robot.
  */
-Eigen::ArrayXd enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_group, double publish_period,
-                                     const Eigen::ArrayXd& delta_theta);
+void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_group, const double publish_period,
+                           sensor_msgs::msg::JointState& joint_state);
 
 }  // namespace moveit_servo
