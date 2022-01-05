@@ -1652,8 +1652,10 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
       for (std::size_t i = 0; i < shape_vector.size(); ++i)
       {
         if (i >= shape_poses_vector.size())
+        {
           append(shapes::constructShapeFromMsg(shape_vector[i]),
                  geometry_msgs::msg::Pose());  // Empty shape pose => Identity
+        }
         else
           append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]);
       }
