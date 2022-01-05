@@ -171,7 +171,7 @@ void OccupancyMapMonitor::addUpdater(const OccupancyMapUpdaterPtr& updater)
       updater->setTransformCacheCallback(transform_cache_callback_);
   }
   else
-    RCLCPP_ERROR(LOGGER, "NULL updater was specified");
+    RCLCPP_ERROR(LOGGER, "nullptr updater was specified");
 }
 
 void OccupancyMapMonitor::publishDebugInformation(bool flag)

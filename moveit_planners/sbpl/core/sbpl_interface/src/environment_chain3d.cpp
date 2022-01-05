@@ -116,9 +116,9 @@ int EnvironmentChain3D::SizeofCreatedEnv()
   return planning_data_.state_ID_to_coord_table_.size();
 }
 
-void EnvironmentChain3D::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NULL*/)
+void EnvironmentChain3D::PrintState(int stateID, bool bVerbose, FILE* fOut /*=nullptr*/)
 {
-  // if(fOut == NULL)
+  // if(fOut == nullptr)
   //   fOut = stdout;
 
   // EnvChain3DHashEntry* HashEntry = EnvChain.StateID2CoordTable[stateID];

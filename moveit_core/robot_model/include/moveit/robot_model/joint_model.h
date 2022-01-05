@@ -152,7 +152,7 @@ public:
 
   /** \brief Get the link that this joint connects to. The
       robot is assumed to start with a joint, so the root
-      joint will return a NULL pointer here. */
+      joint will return nullptr here. */
   const LinkModel* getParentLinkModel() const
   {
     return parent_link_model_;
@@ -492,7 +492,7 @@ protected:
   /** \brief The link after this joint */
   const LinkModel* child_link_model_;
 
-  /** \brief The joint this one mimics (NULL for joints that do not mimic) */
+  /** \brief The joint this one mimics (nullptr for joints that do not mimic) */
   const JointModel* mimic_;
 
   /** \brief The offset to the mimic joint */
