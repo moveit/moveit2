@@ -76,10 +76,6 @@ SimpleSampler::addTrajectorySegment(const robot_trajectory::RobotTrajectory& new
     RCLCPP_ERROR(LOGGER, "Time parameterization failed.");
     feedback_.feedback = "Time parameterization failed.";
   }
-  else
-  {
-    RCLCPP_ERROR(LOGGER, "Time parameterization was successful!");
-  }
 
   // If no errors, return empty feedback
   return feedback_;
