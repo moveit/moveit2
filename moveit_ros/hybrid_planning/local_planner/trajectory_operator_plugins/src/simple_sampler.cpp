@@ -71,8 +71,7 @@ SimpleSampler::addTrajectorySegment(const robot_trajectory::RobotTrajectory& new
   // Throw away old reference trajectory and use trajectory update
   reference_trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(new_trajectory);
 
-  // If there are very few waypoints, time-parameterize the trajectory (calculate velocity and accelerations)
-  if (reference_trajectory_->getWayPointCount() <= 2 && !time_parametrization_.computeTimeStamps(*reference_trajectory_))
+  if (!time_parametrization_.computeTimeStamps(*reference_trajectory_))
   {
     feedback_.feedback = "Time parameterization failed.";
   }
