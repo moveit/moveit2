@@ -40,8 +40,8 @@ namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 // If stuck for this many iterations or more, abort the local planning action
-constexpr size_t STUCK_ITERATIONS_THRESHOLD = 10;
-constexpr double STUCK_THRESHOLD_RAD = 1e-4;  // L1-norm sum across all joints
+constexpr size_t STUCK_ITERATIONS_THRESHOLD = 100;
+constexpr double STUCK_THRESHOLD_RAD = 1e-6;  // L1-norm sum across all joints
 }  // namespace
 
 namespace moveit::hybrid_planning
