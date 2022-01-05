@@ -128,8 +128,8 @@ bool HybridPlanningManager::initialize()
     RCLCPP_ERROR(LOGGER, "global_planning_action_name parameter was not defined");
     return false;
   }
-  global_planner_action_client_ = rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(
-      this, "/test/hybrid_planning/global_planning_action" /*global_planning_action_name*/);
+  global_planner_action_client_ =
+      rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(this, global_planning_action_name);
   if (!global_planner_action_client_->wait_for_action_server(2s))
   {
     RCLCPP_ERROR(LOGGER, "Global planner action server not available after waiting");
