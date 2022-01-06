@@ -398,7 +398,7 @@ void ROSControllersWidget::addController()
   adding_new_controller_ = true;
 
   // Load the data
-  loadControllerScreen(nullptr);  // NULL indicates this is a new controller, not an existing one
+  loadControllerScreen(nullptr);  // nullptr indicates this is a new controller, not an existing one
   changeScreen(2);                // 1 is index of controller edit
 }
 

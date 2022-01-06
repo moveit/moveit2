@@ -253,7 +253,7 @@ public:
   /**
    * \brief Get the joint model for which this constraint operates
    *
-   * @return The relevant joint model if enabled, and otherwise NULL
+   * @return The relevant joint model if enabled, and otherwise nullptr
    */
   const moveit::core::JointModel* getJointModel() const
   {
@@ -576,7 +576,7 @@ public:
   void print(std::ostream& out = std::cout) const override;
 
   /**
-   * \brief Returns the associated link model, or NULL if not enabled
+   * \brief Returns the associated link model, or nullptr if not enabled
    *
    *
    * @return The link model

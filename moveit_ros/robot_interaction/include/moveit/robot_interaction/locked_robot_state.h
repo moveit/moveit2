@@ -103,7 +103,7 @@ protected:
 
 private:
   // The state maintained by this class.
-  // When a modify function is being called this is NULL.
+  // When a modify function is being called this is nullptr.
   // PROTECTED BY state_lock_
   moveit::core::RobotStatePtr state_;
 };
