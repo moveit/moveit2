@@ -179,6 +179,7 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
 
     // Copy goal constraint into planning component
     planning_components->setGoal(motion_plan_req.goal_constraints);
+    planning_components->setPathConstraints(motion_plan_req.path_constraints);
 
     // Plan motion
     auto plan_solution = planning_components->plan(plan_params);
