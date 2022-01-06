@@ -11,6 +11,8 @@ group_name: "panda_arm"
 
 # SimpleSampler param
 pass_through: false
+# When this close to the target waypoint, move on to the next. An L1 norm across all joints
+waypoint_radian_tolerance: 0.4
 
 # ForwardTrajectory param
 stop_before_collision: true

@@ -41,21 +41,26 @@ namespace moveit::hybrid_planning
 namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
-constexpr double WAYPOINT_RADIAN_TOLERANCE = 0.2;  // rad: L1-norm sum for all joints
 }  // namespace
 
 bool SimpleSampler::initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                                const std::string& group_name)
 {
   // Load parameter & initialize member variables
-  if (node->has_parameter("pass_through"))
+  node->declare_parameter("pass_through");
+  if (!node->get_parameter<bool>("pass_through", pass_through_))
   {
-    node->get_parameter<bool>("pass_through", pass_through_);
+    RCLCPP_ERROR(LOGGER, "pass_through parameter was not defined.");
+    return false;
   }
-  else
+
+  node->declare_parameter("waypoint_radian_tolerance");
+  if (!node->get_parameter<double>("waypoint_radian_tolerance", waypoint_radian_tolerance_))
   {
-    pass_through_ = node->declare_parameter<bool>("pass_through", false);
+    RCLCPP_ERROR(LOGGER, "waypoint_radian_tolerance parameter was not defined.");
+    return false;
   }
+
   reference_trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, group_name);
   next_waypoint_index_ = 0;
   joint_group_ = robot_model->getJointModelGroup(group_name);
@@ -107,7 +112,7 @@ SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
     moveit::core::RobotState next_desired_goal_state = reference_trajectory_->getWayPoint(next_waypoint_index_);
 
     // Check if state is reached
-    if (next_desired_goal_state.distance(current_state, joint_group_) <= WAYPOINT_RADIAN_TOLERANCE)
+    if (next_desired_goal_state.distance(current_state, joint_group_) <= waypoint_radian_tolerance_)
     {
       // Update index (and thus desired robot state)
       next_waypoint_index_ = std::min(next_waypoint_index_ + 1, reference_trajectory_->getWayPointCount() - 1);
