@@ -155,7 +155,10 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
           RCLCPP_INFO(LOGGER, "The local planner has been stuck for several iterations. Aborting.");
         }
       }
-      prev_waypoint_target_ = robot_command.getFirstWayPointPtr();
+      else
+      {
+        prev_waypoint_target_ = robot_command.getFirstWayPointPtr();
+      }
     }
   }
 
