@@ -135,13 +135,13 @@ public:
   /** \brief Check if a joint exists. Return true if it does. */
   bool hasJointModel(const std::string& name) const;
 
-  /** \brief Get a joint by its name. Output error and return NULL when the joint is missing. */
+  /** \brief Get a joint by its name. Output error and return nullptr when the joint is missing. */
   const JointModel* getJointModel(const std::string& joint) const;
 
-  /** \brief Get a joint by its index. Output error and return NULL when the link is missing. */
+  /** \brief Get a joint by its index. Output error and return nullptr when the link is missing. */
   const JointModel* getJointModel(size_t index) const;
 
-  /** \brief Get a joint by its name. Output error and return NULL when the joint is missing. */
+  /** \brief Get a joint by its name. Output error and return nullptr when the joint is missing. */
   JointModel* getJointModel(const std::string& joint);
 
   /** \brief Get the array of joints, in the order they appear
@@ -244,13 +244,13 @@ public:
    * If this is followed by a call to getLinkModel(), better use the latter with the has_link argument */
   bool hasLinkModel(const std::string& name) const;
 
-  /** \brief Get a link by its name. Output error and return NULL when the link is missing. */
+  /** \brief Get a link by its name. Output error and return nullptr when the link is missing. */
   const LinkModel* getLinkModel(const std::string& link, bool* has_link = nullptr) const;
 
-  /** \brief Get a link by its index. Output error and return NULL when the link is missing. */
+  /** \brief Get a link by its index. Output error and return nullptr when the link is missing. */
   const LinkModel* getLinkModel(size_t index) const;
 
-  /** \brief Get a link by its name. Output error and return NULL when the link is missing. */
+  /** \brief Get a link by its name. Output error and return nullptr when the link is missing. */
   LinkModel* getLinkModel(const std::string& link, bool* has_link = nullptr);
 
   /** \brief Get the latest link upwards the kinematic tree, which is only connected via fixed joints

@@ -267,7 +267,7 @@ void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_scene::Plannin
   }
 }
 
-void TrajectoryGeneratorPTP::plan(const planning_scene::PlanningSceneConstPtr& scene,
+void TrajectoryGeneratorPTP::plan(const planning_scene::PlanningSceneConstPtr& /*scene*/,
                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
                                   const double& sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {

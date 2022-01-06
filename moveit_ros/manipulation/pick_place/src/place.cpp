@@ -181,7 +181,7 @@ bool PlacePlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene
               error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
               return false;
             }
-            // set the end effector (this was initialized to NULL above)
+            // set the end effector (this was initialized to nullptr above)
             eef = planning_scene->getRobotModel()->getEndEffector(eef_name);
           }
         }

@@ -245,6 +245,19 @@ void MotionPlanningDisplay::onInitialize()
 
   rviz_common::WindowManagerInterface* window_context = context_->getWindowManager();
   frame_ = new MotionPlanningFrame(this, context_, window_context ? window_context->getParentWindow() : nullptr);
+
+  std::string host_param;
+  if (node_->get_parameter("warehouse_host", host_param))
+  {
+    frame_->ui_->database_host->setText(QString::fromStdString(host_param));
+  }
+
+  int port;
+  if (node_->get_parameter("warehouse_port", port))
+  {
+    frame_->ui_->database_port->setValue(port);
+  }
+
   connect(frame_, SIGNAL(configChanged()), this->getModel(), SIGNAL(configChanged()));
   resetStatusTextColor();
   addStatusText("Initialized.");
@@ -1323,18 +1336,6 @@ void MotionPlanningDisplay::load(const rviz_common::Config& config)
   PlanningSceneDisplay::load(config);
   if (frame_)
   {
-    QString host;
-    std::string host_param;
-    if (config.mapGetString("MoveIt_Warehouse_Host", &host))
-      frame_->ui_->database_host->setText(host);
-    else if (node_->get_parameter("warehouse_host", host_param))
-    {
-      host = QString::fromStdString(host_param);
-      frame_->ui_->database_host->setText(host);
-    }
-    int port;
-    if (config.mapGetInt("MoveIt_Warehouse_Port", &port) || node_->get_parameter("warehouse_port", port))
-      frame_->ui_->database_port->setValue(port);
     float d;
     if (config.mapGetFloat("MoveIt_Planning_Time", &d))
       frame_->ui_->planning_time->setValue(d);
@@ -1382,7 +1383,6 @@ void MotionPlanningDisplay::load(const rviz_common::Config& config)
     }
     else
     {
-      std::string node_name = rclcpp::names::append(getMoveGroupNS(), "move_group");
       double val;
       if (node_->get_parameter("default_workspace_bounds", val))
       {
@@ -1399,9 +1399,6 @@ void MotionPlanningDisplay::save(rviz_common::Config config) const
   PlanningSceneDisplay::save(config);
   if (frame_)
   {
-    config.mapSetValue("MoveIt_Warehouse_Host", frame_->ui_->database_host->text());
-    config.mapSetValue("MoveIt_Warehouse_Port", frame_->ui_->database_port->value());
-
     // "Options" Section
     config.mapSetValue("MoveIt_Planning_Time", frame_->ui_->planning_time->value());
     config.mapSetValue("MoveIt_Planning_Attempts", frame_->ui_->planning_attempts->value());

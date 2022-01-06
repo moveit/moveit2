@@ -148,7 +148,7 @@ public:
     }
     if (!jmg)
     {
-      RCLCPP_ERROR(LOGGER, "Specified group is NULL. Cannot allocate kinematics solver.");
+      RCLCPP_ERROR(LOGGER, "Specified group is nullptr. Cannot allocate kinematics solver.");
       return result;
     }
     const std::vector<const moveit::core::LinkModel*>& links = jmg->getLinkModels();

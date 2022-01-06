@@ -163,8 +163,8 @@ void MoveGroupSequenceAction::executeSequenceCallbackPlanAndExecute(
   opt.replan_delay_ = goal->planning_options.replan_delay;
   opt.before_execution_callback_ = boost::bind(&MoveGroupSequenceAction::startMoveExecutionCallback, this);
 
-  opt.plan_callback_ =
-      boost::bind(&MoveGroupSequenceAction::planUsingSequenceManager, this, boost::cref(goal->request), _1);
+  opt.plan_callback_ = boost::bind(&MoveGroupSequenceAction::planUsingSequenceManager, this, boost::cref(goal->request),
+                                   boost::placeholders::_1);
 
   if (goal->planning_options.look_around && context_->plan_with_sensing_)
   {
