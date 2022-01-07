@@ -79,7 +79,7 @@ public:
   virtual int SizeofCreatedEnv(){};
   /** \brief prints the state variables for a state with stateID
    */
-  virtual void PrintState(int stateID, bool bVerbose, FILE* fOut = NULL){};
+  virtual void PrintState(int stateID, bool bVerbose, FILE* fOut = nullptr){};
   /** \brief prints environment config file
    */
   virtual void PrintEnv_Config(FILE* fOut){};

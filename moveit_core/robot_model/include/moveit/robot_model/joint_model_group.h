@@ -510,7 +510,7 @@ public:
   /**
    * \brief Get one end effector tip, throwing an error if there ends up being more in the joint model group
    *  This is a useful helper function because most planning groups (almost all) only have one tip
-   * \return pointer to LinkModel, or NULL on failure
+   * \return pointer to LinkModel, or nullptr on failure
    */
   const moveit::core::LinkModel* getOnlyOneEndEffectorTip() const;
 

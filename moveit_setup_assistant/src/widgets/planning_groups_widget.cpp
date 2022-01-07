@@ -810,7 +810,7 @@ void PlanningGroupsWidget::addGroup()
   adding_new_group_ = true;
 
   // Load the data
-  loadGroupScreen(nullptr);  // NULL indicates this is a new group, not an existing one
+  loadGroupScreen(nullptr);  // nullptr indicates this is a new group, not an existing one
 
   // Switch to screen
   changeScreen(GROUP);

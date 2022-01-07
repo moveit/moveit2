@@ -49,7 +49,7 @@ namespace sbpl_interface
 {
 EnvironmentChain3D::EnvironmentChain3D(const planning_scene::PlanningSceneConstPtr& planning_scene)
   : planning_scene_(planning_scene)
-  , bfs_(NULL)
+  , bfs_(nullptr)
   , state_(planning_scene->getCurrentState())
   , planning_data_(StateID2IndexMapping)
   , goal_constraint_set_(planning_scene->getRobotModel(), planning_scene->getTransforms())
@@ -63,7 +63,7 @@ EnvironmentChain3D::EnvironmentChain3D(const planning_scene::PlanningSceneConstP
 
 EnvironmentChain3D::~EnvironmentChain3D()
 {
-  if (bfs_ != NULL)
+  if (bfs_ != nullptr)
   {
     delete bfs_;
   }
@@ -116,9 +116,9 @@ int EnvironmentChain3D::SizeofCreatedEnv()
   return planning_data_.state_ID_to_coord_table_.size();
 }
 
-void EnvironmentChain3D::PrintState(int stateID, bool bVerbose, FILE* fOut /*=NULL*/)
+void EnvironmentChain3D::PrintState(int stateID, bool bVerbose, FILE* fOut /*=nullptr*/)
 {
-  // if(fOut == NULL)
+  // if(fOut == nullptr)
   //   fOut = stdout;
 
   // EnvChain3DHashEntry* HashEntry = EnvChain.StateID2CoordTable[stateID];
@@ -287,7 +287,7 @@ void EnvironmentChain3D::GetSuccs(int source_state_ID, std::vector<int>* succ_id
                                         planning_parameters_.joint_motion_primitive_distance_);
     }
 
-    EnvChain3DHashEntry* succ_hash_entry = NULL;
+    EnvChain3DHashEntry* succ_hash_entry = nullptr;
     // bool can_get_closer = false;
     // for(unsigned int j = 0; j < joint_motion_wrappers_.size(); ++j) {
     //   if(joint_motion_wrappers_[j]->canGetCloser(succ_joint_angles[j],

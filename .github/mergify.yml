@@ -8,6 +8,15 @@ pull_request_rules:
         branches:
           - foxy
 
+  - name: backport to galactic at reviewers discretion
+    conditions:
+      - base=main
+      - "label=backport-galactic"
+    actions:
+      backport:
+        branches:
+          - galactic
+
   - name: ask to resolve conflict
     conditions:
       - conflict
