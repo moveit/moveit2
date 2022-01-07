@@ -6,9 +6,9 @@ The MoveIt Motion Planning Framework for **ROS 2**. For ROS 1, see [MoveIt 1](ht
 
 ## Continuous Integration Status
 
-[![Formatting (pre-commit)](https://github.com/ros-planning/moveit2/actions/workflows/format.yaml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/format.yaml?query=branch%3Amain)
-[![CI (Rolling and Galactic)](https://github.com/ros-planning/moveit2/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/ros-planning/moveit2/actions/workflows/ci.yaml?query=branch%3Amain)
-[![Code Coverage](https://codecov.io/gh/ros-planning/moveit2/branch/main/graph/badge.svg?token=W7uHKcY0ly)](https://codecov.io/gh/ros-planning/moveit2)
+[![Formatting (pre-commit)](https://github.com/ros-planning/moveit2/actions/workflows/format.yaml/badge.svg?branch=galactic)](https://github.com/ros-planning/moveit2/actions/workflows/format.yaml?query=branch%3Agalactic)
+[![CI (Rolling and Galactic)](https://github.com/ros-planning/moveit2/actions/workflows/ci.yaml/badge.svg?branch=galactic)](https://github.com/ros-planning/moveit2/actions/workflows/ci.yaml?query=branch%3Agalactic)
+[![Code Coverage](https://codecov.io/gh/ros-planning/moveit2/branch/galactic/graph/badge.svg?token=W7uHKcY0ly)](https://codecov.io/gh/ros-planning/moveit2)
 
 ## General MoveIt Documentation
 
