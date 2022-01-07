@@ -8,7 +8,7 @@ on:
   pull_request:
   push:
     branches:
-      - main
+      - galactic
 
 jobs:
   default:
@@ -16,13 +16,10 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - IMAGE: rolling-ci
-            CCOV: true
-          - IMAGE: rolling-ci-testing
-            IKFAST_TEST: true
           - IMAGE: galactic-ci
             CLANG_TIDY: pedantic
           - IMAGE: galactic-ci-testing
+            IKFAST_TEST: true
     env:
       CXXFLAGS: "-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-deprecated-copy"
       DOCKER_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.env.IMAGE }}
