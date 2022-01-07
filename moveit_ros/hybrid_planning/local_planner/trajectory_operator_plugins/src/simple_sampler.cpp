@@ -47,14 +47,14 @@ bool SimpleSampler::initialize(const rclcpp::Node::SharedPtr& node, const moveit
                                const std::string& group_name)
 {
   // Load parameter & initialize member variables
-  node->declare_parameter("pass_through");
+  node->declare_parameter("pass_through", false);
   if (!node->get_parameter<bool>("pass_through", pass_through_))
   {
     RCLCPP_ERROR(LOGGER, "pass_through parameter was not defined.");
     return false;
   }
 
-  node->declare_parameter("waypoint_radian_tolerance");
+  node->declare_parameter("waypoint_radian_tolerance", 0.0);
   if (!node->get_parameter<double>("waypoint_radian_tolerance", waypoint_radian_tolerance_))
   {
     RCLCPP_ERROR(LOGGER, "waypoint_radian_tolerance parameter was not defined.");

@@ -206,5 +206,7 @@ private:
 
   // Trajectory_operator instance handle trajectory matching and blending
   std::shared_ptr<TrajectoryOperatorInterface> trajectory_operator_instance_;
+
+  std::shared_ptr<rclcpp::Rate> prev_waypoint_duration_;
 };
 }  // namespace moveit::hybrid_planning

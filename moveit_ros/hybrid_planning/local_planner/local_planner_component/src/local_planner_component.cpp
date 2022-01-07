@@ -56,6 +56,7 @@ constexpr float PROGRESS_THRESHOLD = 0.995;
 LocalPlannerComponent::LocalPlannerComponent(const rclcpp::NodeOptions& options)
   : node_{ std::make_shared<rclcpp::Node>("local_planner_component", options) }
 {
+  prev_waypoint_duration_ = nullptr;
   state_ = LocalPlannerState::UNCONFIGURED;
   local_planner_feedback_ = std::make_shared<moveit_msgs::action::LocalPlanner::Feedback>();
 
@@ -168,6 +169,7 @@ bool LocalPlannerComponent::initialize()
         // Start local planning loop when an action request is received
         timer_ = node_->create_wall_timer(1s / config_.local_planning_frequency,
                                           std::bind(&LocalPlannerComponent::executeIteration, this));
+        prev_waypoint_duration_ = nullptr;
       });
 
   // Initialize global trajectory listener
@@ -267,6 +269,7 @@ void LocalPlannerComponent::executeIteration()
 
       // Solve local planning problem
       trajectory_msgs::msg::JointTrajectory local_solution;
+      local_solution.header.stamp = node_->now();
 
       // Feedback is only sent when the hybrid planning architecture should react to a discrete event that occurred
       // while computing a local solution
@@ -278,6 +281,15 @@ void LocalPlannerComponent::executeIteration()
       {
         local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
       }
+
+      // Publish at the period given in the previous waypoint
+      // If initialized. Else, publish immediately.
+      if (prev_waypoint_duration_)
+      {
+        prev_waypoint_duration_->sleep();
+      }
+      rclcpp::Duration waypoint_duration = rclcpp::Duration(local_solution.points.at(0).time_from_start);
+      prev_waypoint_duration_ = std::make_shared<rclcpp::Rate>(1 / waypoint_duration.seconds());
 
       // Use a configurable message interface like MoveIt servo
       // (See https://github.com/ros-planning/moveit2/blob/main/moveit_ros/moveit_servo/src/servo_calcs.cpp)
