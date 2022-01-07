@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_occupancy_map_monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.3 (2022-01-07)
+------------------
+* Fix boost linking errors (`#900 <https://github.com/ros-planning/moveit2/issues/900>`_) (`#920 <https://github.com/ros-planning/moveit2/issues/920>`_)
+* Contributors: Vatan Aksoy Tezer
+
 2.2.2 (2021-11-16)
 ------------------
 
