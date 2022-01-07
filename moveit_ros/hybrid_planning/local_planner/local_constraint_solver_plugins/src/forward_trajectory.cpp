@@ -87,7 +87,8 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
   // If this flag is set, ignore collisions
   if (!stop_before_collision_)
   {
-    robot_command.addSuffixWayPoint(local_trajectory.getWayPoint(0), local_trajectory.getWayPointDurationFromPrevious(0));
+    robot_command.addSuffixWayPoint(local_trajectory.getWayPoint(0),
+                                    local_trajectory.getWayPointDurationFromPrevious(0));
   }
   else
   {
@@ -111,7 +112,8 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
         path_invalidation_event_send_ = false;  // Reset flag
       }
       // Forward next waypoint to the robot controller
-      robot_command.addSuffixWayPoint(local_trajectory.getWayPoint(0), local_trajectory.getWayPointDurationFromPrevious(0));
+      robot_command.addSuffixWayPoint(local_trajectory.getWayPoint(0),
+                                      local_trajectory.getWayPointDurationFromPrevious(0));
     }
     else
     {
