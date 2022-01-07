@@ -592,6 +592,13 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
                                      trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                                      const ServoType servo_type)
 {
+  // The order of operations here is:
+  // 1. apply velocity scaling for collisions (in the position domain)
+  // 2. low-pass filter the position command in applyJointUpdate()
+  // 3. calculate velocities in applyJointUpdate()
+  // 4. apply velocity limits
+  // 5. apply position limits. This is a higher priority than velocity limits, so check it last.
+
   // Set internal joint state from original
   internal_joint_state_ = original_joint_state_;
 
