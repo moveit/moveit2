@@ -159,8 +159,9 @@ bool LocalPlannerComponent::initialize()
         RCLCPP_INFO(LOGGER, "Received local planning goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>>& /*unused*/) {
+      [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel local planning goal");
+        state_ = LocalPlannerState::ABORT;
         return rclcpp_action::CancelResponse::ACCEPT;
       },
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>> goal_handle) {

@@ -45,7 +45,7 @@ namespace moveit::hybrid_planning
 using namespace std::chrono_literals;
 
 HybridPlanningManager::HybridPlanningManager(const rclcpp::NodeOptions& options)
-  : Node("hybrid_planning_manager", options), initialized_(false)
+  : Node("hybrid_planning_manager", options), initialized_(false), stop_hybrid_planning_(false)
 {
   // Initialize hybrid planning component after after construction
   // TODO(sjahr) Remove once life cycle component nodes are available
@@ -152,10 +152,7 @@ bool HybridPlanningManager::initialize()
         RCLCPP_INFO(LOGGER, "Received goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>>& /*unused*/) {
-        RCLCPP_INFO(LOGGER, "Received request to cancel goal");
-        return rclcpp_action::CancelResponse::ACCEPT;
-      },
+      std::bind(&HybridPlanningManager::hybridPlanningCancelCallback, this, std::placeholders::_1),
       std::bind(&HybridPlanningManager::hybridPlanningRequestCallback, this, std::placeholders::_1));
 
   // Initialize global solution subscriber
@@ -233,6 +230,12 @@ bool HybridPlanningManager::sendGlobalPlannerAction()
   global_goal_msg.motion_sequence =
       (hybrid_planning_goal_handle_->get_goal())->motion_sequence;  // latest desired motion sequence;
   global_goal_msg.planning_group = (hybrid_planning_goal_handle_->get_goal())->planning_group;  // planning_group_;
+
+  if (stop_hybrid_planning_)
+  {
+    return false;
+  }
+
   // Send global planning goal and wait until it's accepted
   auto goal_handle_future = global_planner_action_client_->async_send_goal(global_goal_msg, global_goal_options);
   return true;  // return always success TODO(sjahr) add more error checking
@@ -310,14 +313,38 @@ bool HybridPlanningManager::sendLocalPlannerAction()
         }
       };
 
+  if (stop_hybrid_planning_)
+  {
+    return false;
+  }
+
   // Send global planning goal
   auto goal_handle_future = local_planner_action_client_->async_send_goal(local_goal_msg, local_goal_options);
   return true;  // return always success TODO(sjahr) add more error checking
 }
 
+rclcpp_action::CancelResponse HybridPlanningManager::hybridPlanningCancelCallback(
+    std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> goal_handle)
+{
+  // Prevent any new global or local requests from going out
+  stop_hybrid_planning_ = true;
+
+  // Cancel local action
+  local_planner_action_client_->async_cancel_all_goals();
+
+  // Cancel global action
+  global_planner_action_client_->async_cancel_all_goals();
+
+  RCLCPP_INFO(LOGGER, "Received request to cancel goal");
+  return rclcpp_action::CancelResponse::ACCEPT;
+}
+
 void HybridPlanningManager::hybridPlanningRequestCallback(
     std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> goal_handle)
 {
+  // Reset the "stop" flag if it was set previously
+  stop_hybrid_planning_ = false;
+
   // Pass goal handle to class member
   hybrid_planning_goal_handle_ = std::move(goal_handle);
 
