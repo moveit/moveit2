@@ -19,6 +19,7 @@ jobs:
         env:
           - IMAGE: foxy-ci
             CCOV: true
+            ABICHECK_URL: github:ros-planning/moveit2#foxy
           - IMAGE: foxy-ci-testing
             IKFAST_TEST: true
             CLANG_TIDY: true
