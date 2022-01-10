@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.3 (2022-01-07)
+------------------
+
 2.2.2 (2021-11-16)
 ------------------
 * Add getSharedRobotModelLoader to fix race condition when having multiple displays for the same node (`#525 <https://github.com/ros-planning/moveit2/issues/525>`_)

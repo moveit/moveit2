@@ -2,6 +2,12 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.3 (2022-01-07)
+------------------
+* Fix CHOMP motion planner build on Windows (`#890 <https://github.com/ros-planning/moveit2/issues/890>`_) (`#936 <https://github.com/ros-planning/moveit2/issues/936>`_)
+* Fix boost linking errors (`#900 <https://github.com/ros-planning/moveit2/issues/900>`_) (`#920 <https://github.com/ros-planning/moveit2/issues/920>`_)
+* Contributors: Vatan Aksoy Tezer, Akash
+
 2.2.2 (2021-11-16)
 ------------------
 * collision_detection_bullet: Fix target installation (`#658 <https://github.com/ros-planning/moveit2/issues/658>`_)
