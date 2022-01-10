@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_warehouse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.3 (2022-01-07)
+------------------
+
 2.2.2 (2021-11-16)
 ------------------
 * Fixes for Windows (`#530 <https://github.com/ros-planning/moveit2/issues/530>`_)
