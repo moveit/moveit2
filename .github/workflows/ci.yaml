@@ -19,6 +19,7 @@ jobs:
         env:
           - IMAGE: foxy-ci
             CCOV: true
+            ROS_DISTRO: foxy
           - IMAGE: foxy-ci-testing
             IKFAST_TEST: true
             CLANG_TIDY: true
