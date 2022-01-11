@@ -2,6 +2,29 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Convert to modern include guard `#882 <https://github.com/ros-planning/moveit2/issues/882>`_ (`#891 <https://github.com/ros-planning/moveit2/issues/891>`_)
+* Replaced C-Style Cast with C++ Style Cast. (`#935 <https://github.com/ros-planning/moveit2/issues/935>`_)
+* Add codespell to precommit, fix A LOT of spelling mistakes (`#934 <https://github.com/ros-planning/moveit2/issues/934>`_)
+* Get rid of "std::endl" (`#918 <https://github.com/ros-planning/moveit2/issues/918>`_)
+* changed post-increments in loops to preincrements (`#888 <https://github.com/ros-planning/moveit2/issues/888>`_)
+* Latched Strings for URDF and SRDF (`#765 <https://github.com/ros-planning/moveit2/issues/765>`_)
+* Consider simulated time (`#883 <https://github.com/ros-planning/moveit2/issues/883>`_)
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* Reduce log verbosity, improved info message (`#714 <https://github.com/ros-planning/moveit2/issues/714>`_)
+* Fix Python2: convert keys() into list (`#2862 <https://github.com/ros-planning/moveit/issues/2862>`_)
+* MP panel: fix order of input widgets for shape size (`#2847 <https://github.com/ros-planning/moveit/issues/2847>`_)
+* Makes rviz trajectory visualization topic relative (`#2835 <https://github.com/ros-planning/moveit/issues/2835>`_)
+* MotionPlanningFrame: Gracefully handle undefined parent widget (`#2833 <https://github.com/ros-planning/moveit/issues/2833>`_)
+* more fixes for the clang-tidy job (`#2813 <https://github.com/ros-planning/moveit/issues/2813>`_)
+* clang-tidy: modernize-make-shared, modernize-make-unique (`#2762 <https://github.com/ros-planning/moveit/issues/2762>`_)
+* Contributors: Dave Coleman, David V. Lu!!, Felix von Drigalski, Gaël Écorchard, Henning Kayser, Kaustubh, Michael Görner, Parthasarathy Bana, Rick Staa, Robert Haschke, Sencer Yazıcı, Yuri Rocha, lorepieri8, predystopic-dev, pvanlaar
+
 2.3.0 (2021-10-08)
 ------------------
 * Support passing MoveGroup's namespace to MoveGroupInterface (`#533 <https://github.com/ros-planning/moveit2/issues/533>`_)

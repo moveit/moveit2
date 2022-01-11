@@ -100,6 +100,8 @@ enum ActiveTargetType
 
 class MoveGroupInterface::MoveGroupInterfaceImpl
 {
+  friend MoveGroupInterface;
+
 public:
   MoveGroupInterfaceImpl(const rclcpp::Node::SharedPtr& node, const Options& opt,
                          const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const rclcpp::Duration& wait_for_servers)
@@ -124,12 +126,14 @@ public:
 
     joint_model_group_ = getRobotModel()->getJointModelGroup(opt.group_name_);
 
-    joint_state_target_.reset(new moveit::core::RobotState(getRobotModel()));
+    joint_state_target_ = std::make_shared<moveit::core::RobotState>(getRobotModel());
     joint_state_target_->setToDefaultValues();
     active_target_ = JOINT;
     can_look_ = false;
+    look_around_attempts_ = 0;
     can_replan_ = false;
     replan_delay_ = 2.0;
+    replan_attempts_ = 1;
     goal_joint_tolerance_ = 1e-4;
     goal_position_tolerance_ = 1e-4;     // 0.1 mm
     goal_orientation_tolerance_ = 1e-3;  // ~0.1 deg
@@ -388,7 +392,7 @@ public:
 
   void setStartState(const moveit::core::RobotState& start_state)
   {
-    considered_start_state_.reset(new moveit::core::RobotState(start_state));
+    considered_start_state_ = std::make_shared<moveit::core::RobotState>(start_state);
   }
 
   void setStartStateToCurrentState()
@@ -742,6 +746,7 @@ public:
       RCLCPP_INFO_STREAM(LOGGER, "MoveGroup action client/server not ready");
       return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
     }
+    RCLCPP_INFO_STREAM(LOGGER, "MoveGroup action client/server ready");
 
     moveit_msgs::action::MoveGroup::Goal goal;
     constructGoal(goal);
@@ -1107,29 +1112,6 @@ public:
     return allowed_planning_time_;
   }
 
-  void allowLooking(bool flag)
-  {
-    can_look_ = flag;
-    RCLCPP_INFO(LOGGER, "Looking around: %s", can_look_ ? "yes" : "no");
-  }
-
-  void allowReplanning(bool flag)
-  {
-    can_replan_ = flag;
-    RCLCPP_INFO(LOGGER, "Replanning: %s", can_replan_ ? "yes" : "no");
-  }
-
-  void setReplanningDelay(double delay)
-  {
-    if (delay >= 0.0)
-      replan_delay_ = delay;
-  }
-
-  double getReplanningDelay() const
-  {
-    return replan_delay_;
-  }
-
   void constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& request) const
   {
     request.group_name = opt_.group_name_;
@@ -1250,7 +1232,7 @@ public:
 
   void setPathConstraints(const moveit_msgs::msg::Constraints& constraint)
   {
-    path_constraints_.reset(new moveit_msgs::msg::Constraints(constraint));
+    path_constraints_ = std::make_unique<moveit_msgs::msg::Constraints>(constraint);
   }
 
   bool setPathConstraints(const std::string& constraint)
@@ -1260,7 +1242,8 @@ public:
       moveit_warehouse::ConstraintsWithMetadata msg_m;
       if (constraints_storage_->getConstraints(msg_m, constraint, robot_model_->getName(), opt_.group_name_))
       {
-        path_constraints_.reset(new moveit_msgs::msg::Constraints(static_cast<moveit_msgs::msg::Constraints>(*msg_m)));
+        path_constraints_ =
+            std::make_unique<moveit_msgs::msg::Constraints>(static_cast<moveit_msgs::msg::Constraints>(*msg_m));
         return true;
       }
       else
@@ -1277,7 +1260,7 @@ public:
 
   void setTrajectoryConstraints(const moveit_msgs::msg::TrajectoryConstraints& constraint)
   {
-    trajectory_constraints_.reset(new moveit_msgs::msg::TrajectoryConstraints(constraint));
+    trajectory_constraints_ = std::make_unique<moveit_msgs::msg::TrajectoryConstraints>(constraint);
   }
 
   void clearTrajectoryConstraints()
@@ -1321,8 +1304,8 @@ public:
     initializing_constraints_ = true;
     if (constraints_init_thread_)
       constraints_init_thread_->join();
-    constraints_init_thread_.reset(
-        new boost::thread(boost::bind(&MoveGroupInterfaceImpl::initializeConstraintsStorageThread, this, host, port)));
+    constraints_init_thread_ = std::make_unique<boost::thread>(
+        boost::bind(&MoveGroupInterfaceImpl::initializeConstraintsStorageThread, this, host, port));
   }
 
   void setWorkspace(double minx, double miny, double minz, double maxx, double maxy, double maxz)
@@ -1352,7 +1335,7 @@ private:
       conn->setParams(host, port);
       if (conn->connect())
       {
-        constraints_storage_.reset(new moveit_warehouse::ConstraintsStorage(conn));
+        constraints_storage_ = std::make_unique<moveit_warehouse::ConstraintsStorage>(conn);
       }
     }
     catch (std::exception& ex)
@@ -1387,7 +1370,9 @@ private:
   double goal_position_tolerance_;
   double goal_orientation_tolerance_;
   bool can_look_;
+  int32_t look_around_attempts_;
   bool can_replan_;
+  int32_t replan_attempts_;
   double replan_delay_;
 
   // joint state goal
@@ -1659,7 +1644,10 @@ void MoveGroupInterface::stop()
 void MoveGroupInterface::setStartState(const moveit_msgs::msg::RobotState& start_state)
 {
   moveit::core::RobotStatePtr rs;
-  impl_->getCurrentState(rs);
+  if (start_state.is_diff)
+    impl_->getCurrentState(rs);
+  else
+    rs = std::make_shared<moveit::core::RobotState>(getRobotModel());
   moveit::core::robotStateMsgToRobotState(start_state, *rs);
   setStartState(*rs);
 }
@@ -2255,12 +2243,53 @@ void MoveGroupInterface::forgetJointValues(const std::string& name)
 
 void MoveGroupInterface::allowLooking(bool flag)
 {
-  impl_->allowLooking(flag);
+  impl_->can_look_ = flag;
+  RCLCPP_DEBUG(LOGGER, "Looking around: %s", flag ? "yes" : "no");
+}
+
+void MoveGroupInterface::setLookAroundAttempts(int32_t attempts)
+{
+  if (attempts < 0)
+  {
+    RCLCPP_ERROR(LOGGER, "Tried to set negative number of look-around attempts");
+  }
+  else
+  {
+    RCLCPP_DEBUG_STREAM(LOGGER, "Look around attempts: " << attempts);
+    impl_->look_around_attempts_ = attempts;
+  }
 }
 
 void MoveGroupInterface::allowReplanning(bool flag)
 {
-  impl_->allowReplanning(flag);
+  impl_->can_replan_ = flag;
+  RCLCPP_DEBUG(LOGGER, "Replanning: %s", flag ? "yes" : "no");
+}
+
+void MoveGroupInterface::setReplanAttempts(int32_t attempts)
+{
+  if (attempts < 0)
+  {
+    RCLCPP_ERROR(LOGGER, "Tried to set negative number of replan attempts");
+  }
+  else
+  {
+    RCLCPP_DEBUG_STREAM(LOGGER, "Replan Attempts: " << attempts);
+    impl_->replan_attempts_ = attempts;
+  }
+}
+
+void MoveGroupInterface::setReplanDelay(double delay)
+{
+  if (delay < 0.0)
+  {
+    RCLCPP_ERROR(LOGGER, "Tried to set negative replan delay");
+  }
+  else
+  {
+    RCLCPP_DEBUG_STREAM(LOGGER, "Replan Delay: " << delay);
+    impl_->replan_delay_ = delay;
+  }
 }
 
 std::vector<std::string> MoveGroupInterface::getKnownConstraints() const

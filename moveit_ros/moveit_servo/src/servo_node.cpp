@@ -44,7 +44,8 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_servo.servo_node
 
 namespace moveit_servo
 {
-ServoNode::ServoNode(const rclcpp::NodeOptions& options) : Node("servo_node", options), is_initialized_(false)
+ServoNode::ServoNode(const rclcpp::NodeOptions& options)
+  : node_{ std::make_shared<rclcpp::Node>("servo_node", options) }
 {
   if (!options.use_intra_process_comms())
   {
@@ -57,106 +58,73 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options) : Node("servo_node", op
   using std::placeholders::_1;
   using std::placeholders::_2;
   start_servo_service_ =
-      this->create_service<std_srvs::srv::Trigger>("~/start_servo", std::bind(&ServoNode::startCB, this, _1, _2));
+      node_->create_service<std_srvs::srv::Trigger>("~/start_servo", std::bind(&ServoNode::startCB, this, _1, _2));
   stop_servo_service_ =
-      this->create_service<std_srvs::srv::Trigger>("~/stop_servo", std::bind(&ServoNode::stopCB, this, _1, _2));
+      node_->create_service<std_srvs::srv::Trigger>("~/stop_servo", std::bind(&ServoNode::stopCB, this, _1, _2));
   pause_servo_service_ =
-      this->create_service<std_srvs::srv::Trigger>("~/pause_servo", std::bind(&ServoNode::pauseCB, this, _1, _2));
+      node_->create_service<std_srvs::srv::Trigger>("~/pause_servo", std::bind(&ServoNode::pauseCB, this, _1, _2));
   unpause_servo_service_ =
-      this->create_service<std_srvs::srv::Trigger>("~/unpause_servo", std::bind(&ServoNode::unpauseCB, this, _1, _2));
-}
-
-bool ServoNode::init()
-{
-  bool performed_initialization = true;
+      node_->create_service<std_srvs::srv::Trigger>("~/unpause_servo", std::bind(&ServoNode::unpauseCB, this, _1, _2));
 
   // Can set robot_description name from parameters
   std::string robot_description_name = "robot_description";
-  this->get_parameter_or("robot_description_name", robot_description_name, robot_description_name);
-
-  // Set up planning_scene_monitor
-  auto node_ptr = shared_from_this();
-  planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
-      node_ptr, robot_description_name, "planning_scene_monitor");
+  node_->get_parameter_or("robot_description_name", robot_description_name, robot_description_name);
 
   // Get the servo parameters
-  auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node_ptr, LOGGER);
+  auto servo_parameters = moveit_servo::ServoParameters::makeServoParameters(node_);
   if (servo_parameters == nullptr)
   {
-    RCLCPP_FATAL(LOGGER, "Failed to load the servo parameters");
-    performed_initialization = false;
+    RCLCPP_ERROR(LOGGER, "Failed to load the servo parameters");
+    throw std::runtime_error("Failed to load the servo parameters");
   }
 
-  // Start the planning scene monitor
-  performed_initialization &= (planning_scene_monitor_->getPlanningScene() != nullptr);
-  if (performed_initialization)
-  {
-    planning_scene_monitor_->startStateMonitor(servo_parameters->joint_topic);
-    planning_scene_monitor_->setPlanningScenePublishingFrequency(25);
-    planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
-                                                          "/moveit_servo/publish_planning_scene");
-    planning_scene_monitor_->startSceneMonitor();
-  }
+  // Set up planning_scene_monitor
+  planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
+      node_, robot_description_name, "planning_scene_monitor");
+  planning_scene_monitor_->startStateMonitor(servo_parameters->joint_topic);
+  planning_scene_monitor_->startSceneMonitor(servo_parameters->monitored_planning_scene_topic);
+  planning_scene_monitor_->setPlanningScenePublishingFrequency(25);
+  planning_scene_monitor_->getStateMonitor()->enableCopyDynamics(true);
+  planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
+                                                        std::string(node_->get_fully_qualified_name()) +
+                                                            "/publish_planning_scene");
+  // If the planning scene monitor in servo is the primary one we provide /get_planning_scene service so RViz displays
+  // or secondary planning scene monitors can fetch the scene, otherwise we request the planning scene from the
+  // primary planning scene monitor (e.g. move_group)
+  if (servo_parameters->is_primary_planning_scene_monitor)
+    planning_scene_monitor_->providePlanningSceneService();
   else
-  {
-    RCLCPP_FATAL(LOGGER, "Planning scene not configured");
-  }
+    planning_scene_monitor_->requestPlanningSceneState();
 
-  // If we initialized properly, go ahead and start everything up
-  if (performed_initialization)
-  {
-    // Create Servo
-    servo_ = std::make_unique<moveit_servo::Servo>(node_ptr, servo_parameters, planning_scene_monitor_);
-    is_initialized_ = true;
-    servo_->start();
-    return true;
-  }
-  else
-  {
-    RCLCPP_FATAL(LOGGER, "Servo Service failed to initialize properly, not starting servoing");
-    return false;
-  }
-}
-
-void ServoNode::reset()
-{
-  servo_.reset();
-  planning_scene_monitor_.reset();
-  is_initialized_ = false;
+  // Create Servo
+  servo_ = std::make_unique<moveit_servo::Servo>(node_, servo_parameters, planning_scene_monitor_);
 }
 
 void ServoNode::startCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                         std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  // If we already initialized, reset servo before initializing again
-  if (is_initialized_)
-    reset();
-
-  response->success = init();
+  servo_->start();
+  response->success = true;
 }
 
 void ServoNode::stopCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                        std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  reset();
+  servo_->setPaused(true);
   response->success = true;
 }
 
 void ServoNode::pauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                         std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  if (servo_)
-    servo_->setPaused(true);
-
+  servo_->setPaused(true);
   response->success = true;
 }
 
 void ServoNode::unpauseCB(const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
                           std::shared_ptr<std_srvs::srv::Trigger::Response> response)
 {
-  if (servo_)
-    servo_->setPaused(false);
-
+  servo_->setPaused(false);
   response->success = true;
 }
 

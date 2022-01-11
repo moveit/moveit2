@@ -81,8 +81,9 @@ public:
   {
     try
     {
-      kinematics_loader_.reset(new pluginlib::ClassLoader<kinematics::KinematicsBase>("moveit_core", "kinematics::"
-                                                                                                     "KinematicsBase"));
+      kinematics_loader_ =
+          std::make_shared<pluginlib::ClassLoader<kinematics::KinematicsBase>>("moveit_core", "kinematics::"
+                                                                                              "KinematicsBase");
     }
     catch (pluginlib::PluginlibException& e)
     {
@@ -147,7 +148,7 @@ public:
     }
     if (!jmg)
     {
-      RCLCPP_ERROR(LOGGER, "Specified group is NULL. Cannot allocate kinematics solver.");
+      RCLCPP_ERROR(LOGGER, "Specified group is nullptr. Cannot allocate kinematics solver.");
       return result;
     }
     const std::vector<const moveit::core::LinkModel*>& links = jmg->getLinkModels();
@@ -423,8 +424,8 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
       }
     }
 
-    loader_.reset(new KinematicsLoaderImpl(node_, robot_description_, possible_kinematics_solvers, search_res,
-                                           iksolver_to_tip_links));
+    loader_ = std::make_shared<KinematicsLoaderImpl>(node_, robot_description_, possible_kinematics_solvers, search_res,
+                                                     iksolver_to_tip_links);
   }
 
   return boost::bind(&KinematicsPluginLoader::KinematicsLoaderImpl::allocKinematicsSolverWithCache, loader_.get(),

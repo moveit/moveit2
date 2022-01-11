@@ -64,7 +64,7 @@ public:
   DoubleListWidget(QWidget* parent, const MoveItConfigDataPtr& config_data, const QString& long_name,
                    const QString& short_name, bool add_ok_cancel = true);
 
-  /// Loads the availble data list
+  /// Loads the available data list
   void setAvailable(const std::vector<std::string>& items);
 
   /// Set the right box
@@ -120,7 +120,7 @@ Q_SIGNALS:
   void cancelEditing();
 
   /// Signal to highlight parts of robot
-  void previewSelected(std::vector<std::string>);
+  void previewSelected(std::vector<std::string> /*_t1*/);
 
   /// When the set of selected items has changed
   void selectionUpdated();

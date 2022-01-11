@@ -105,14 +105,14 @@ void RobotModelLoader::configure(const Options& opt)
   rclcpp::Clock clock;
   rclcpp::Time start = clock.now();
   if (!opt.urdf_string_.empty() && !opt.srdf_string_.empty())
-    rdf_loader_.reset(new rdf_loader::RDFLoader(opt.urdf_string_, opt.srdf_string_));
+    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(opt.urdf_string_, opt.srdf_string_);
   else
-    rdf_loader_.reset(new rdf_loader::RDFLoader(node_, opt.robot_description_));
+    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_, opt.robot_description_);
   if (rdf_loader_->getURDF())
   {
     const srdf::ModelSharedPtr& srdf =
-        rdf_loader_->getSRDF() ? rdf_loader_->getSRDF() : srdf::ModelSharedPtr(new srdf::Model());
-    model_.reset(new moveit::core::RobotModel(rdf_loader_->getURDF(), srdf));
+        rdf_loader_->getSRDF() ? rdf_loader_->getSRDF() : std::make_shared<srdf::Model>();
+    model_ = std::make_shared<moveit::core::RobotModel>(rdf_loader_->getURDF(), srdf);
   }
 
   if (model_ && !rdf_loader_->getRobotDescription().empty())
@@ -180,6 +180,15 @@ void RobotModelLoader::configure(const Options& opt)
           if (node_->get_parameter(param_name, has_acc_limits))
             joint_limit[joint_id].has_acceleration_limits = has_acc_limits;
 
+          param_name = prefix + "has_jerk_limits";
+          if (!node_->has_parameter(param_name))
+          {
+            node_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_BOOL);
+          }
+          bool has_jerk_limits = false;
+          if (node_->get_parameter(param_name, has_jerk_limits))
+            joint_limit[joint_id].has_jerk_limits = has_jerk_limits;
+
           if (has_vel_limits)
           {
             param_name = prefix + "max_velocity";
@@ -206,6 +215,21 @@ void RobotModelLoader::configure(const Options& opt)
             if (!node_->get_parameter(param_name, joint_limit[joint_id].max_acceleration))
             {
               RCLCPP_ERROR(LOGGER, "Specified an acceleration limit for joint: %s but did not set a max acceleration",
+                           joint_limit[joint_id].joint_name.c_str());
+            }
+          }
+
+          if (has_jerk_limits)
+          {
+            param_name = prefix + "max_jerk";
+            if (!node_->has_parameter(param_name))
+            {
+              node_->declare_parameter(param_name, rclcpp::ParameterType::PARAMETER_DOUBLE);
+            }
+
+            if (!node_->get_parameter(param_name, joint_limit[joint_id].max_jerk))
+            {
+              RCLCPP_ERROR(LOGGER, "Specified a jerk limit for joint: %s but did not set a max jerk",
                            joint_limit[joint_id].joint_name.c_str());
             }
           }
@@ -236,8 +260,8 @@ void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::Kin
     if (kloader)
       kinematics_loader_ = kloader;
     else
-      kinematics_loader_.reset(
-          new kinematics_plugin_loader::KinematicsPluginLoader(node_, rdf_loader_->getRobotDescription()));
+      kinematics_loader_ =
+          std::make_shared<kinematics_plugin_loader::KinematicsPluginLoader>(node_, rdf_loader_->getRobotDescription());
     moveit::core::SolverAllocatorFn kinematics_allocator =
         kinematics_loader_->getLoaderFunction(rdf_loader_->getSRDF());
     const std::vector<std::string>& groups = kinematics_loader_->getKnownGroups();

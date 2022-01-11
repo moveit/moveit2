@@ -373,7 +373,7 @@ protected:
     urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(MODEL2);
     srdf::ModelSharedPtr srdf_model(new srdf::Model());
     srdf_model->initString(*urdf_model, SMODEL2);
-    robot_model_.reset(new moveit::core::RobotModel(urdf_model, srdf_model));
+    robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
   }
 
   void TearDown() override
@@ -556,21 +556,21 @@ TEST_F(OneRobot, testPrintCurrentPositionWithJointLimits)
 
   state.setToDefaultValues();
 
-  std::cout << "\nVisual inspection should show NO joints out of bounds:" << std::endl;
+  std::cout << "\nVisual inspection should show NO joints out of bounds:\n";
   state.printStatePositionsWithJointLimits(joint_model_group);
 
-  std::cout << "\nVisual inspection should show ONE joint out of bounds:" << std::endl;
+  std::cout << "\nVisual inspection should show ONE joint out of bounds:\n";
   std::vector<double> single_joint(1);
   single_joint[0] = -1.0;
   state.setJointPositions("joint_c", single_joint);
   state.printStatePositionsWithJointLimits(joint_model_group);
 
-  std::cout << "\nVisual inspection should show TWO joint out of bounds:" << std::endl;
+  std::cout << "\nVisual inspection should show TWO joint out of bounds:\n";
   single_joint[0] = 1.0;
   state.setJointPositions("joint_f", single_joint);
   state.printStatePositionsWithJointLimits(joint_model_group);
 
-  std::cout << "\nVisual inspection should show ONE joint out of bounds:" << std::endl;
+  std::cout << "\nVisual inspection should show ONE joint out of bounds:\n";
   single_joint[0] = 0.19;
   state.setJointPositions("joint_f", single_joint);
   state.printStatePositionsWithJointLimits(joint_model_group);
@@ -676,7 +676,7 @@ TEST_F(OneRobot, testInterpolation)
   }
   catch (std::exception& e)
   {
-    std::cout << "Caught expected exception: " << e.what() << std::endl;
+    std::cout << "Caught expected exception: " << e.what() << '\n';
     nan_exception = true;
   }
   EXPECT_TRUE(nan_exception) << "NaN interpolation parameter did not create expected exception.";

@@ -121,8 +121,8 @@ private:
   {
     try
     {
-      capability_plugin_loader_.reset(
-          new pluginlib::ClassLoader<MoveGroupCapability>("moveit_ros_move_group", "move_group::MoveGroupCapability"));
+      capability_plugin_loader_ = std::make_shared<pluginlib::ClassLoader<MoveGroupCapability>>(
+          "moveit_ros_move_group", "move_group::MoveGroupCapability");
     }
     catch (pluginlib::PluginlibException& ex)
     {
@@ -141,7 +141,7 @@ private:
     if (context_->moveit_cpp_->getNode()->get_parameter("capabilities", capability_plugins))
     {
       boost::char_separator<char> sep(" ");
-      boost::tokenizer<boost::char_separator<char> > tok(capability_plugins, sep);
+      boost::tokenizer<boost::char_separator<char>> tok(capability_plugins, sep);
       capabilities.insert(tok.begin(), tok.end());
     }
 
@@ -154,7 +154,7 @@ private:
                                                           pipeline_capabilities))
       {
         boost::char_separator<char> sep(" ");
-        boost::tokenizer<boost::char_separator<char> > tok(pipeline_capabilities, sep);
+        boost::tokenizer<boost::char_separator<char>> tok(pipeline_capabilities, sep);
         capabilities.insert(tok.begin(), tok.end());
       }
     }
@@ -163,8 +163,8 @@ private:
     if (context_->moveit_cpp_->getNode()->get_parameter("disable_capabilities", capability_plugins))
     {
       boost::char_separator<char> sep(" ");
-      boost::tokenizer<boost::char_separator<char> > tok(capability_plugins, sep);
-      for (boost::tokenizer<boost::char_separator<char> >::iterator cap_name = tok.begin(); cap_name != tok.end();
+      boost::tokenizer<boost::char_separator<char>> tok(capability_plugins, sep);
+      for (boost::tokenizer<boost::char_separator<char>>::iterator cap_name = tok.begin(); cap_name != tok.end();
            ++cap_name)
         capabilities.erase(*cap_name);
     }
@@ -187,18 +187,18 @@ private:
     }
 
     std::stringstream ss;
-    ss << std::endl;
-    ss << std::endl;
-    ss << "********************************************************" << std::endl;
-    ss << "* MoveGroup using: " << std::endl;
+    ss << '\n';
+    ss << '\n';
+    ss << "********************************************************" << '\n';
+    ss << "* MoveGroup using: " << '\n';
     for (const MoveGroupCapabilityPtr& cap : capabilities_)
-      ss << "*     - " << cap->getName() << std::endl;
-    ss << "********************************************************" << std::endl;
+      ss << "*     - " << cap->getName() << '\n';
+    ss << "********************************************************" << '\n';
     RCLCPP_INFO(LOGGER, "%s", ss.str().c_str());
   }
 
   MoveGroupContextPtr context_;
-  std::shared_ptr<pluginlib::ClassLoader<MoveGroupCapability> > capability_plugin_loader_;
+  std::shared_ptr<pluginlib::ClassLoader<MoveGroupCapability>> capability_plugin_loader_;
   std::vector<MoveGroupCapabilityPtr> capabilities_;
 };
 }  // namespace move_group

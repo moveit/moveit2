@@ -176,7 +176,7 @@ MultiQueryPlannerAllocator::allocatePlannerImpl(const ob::SpaceInformationPtr& s
     RCLCPP_INFO(LOGGER, "Loading planner data");
     ob::PlannerData data(si);
     storage_.load(file_path.c_str(), data);
-    planner.reset(allocatePersistentPlanner<T>(data));
+    planner = std::shared_ptr<ob::Planner>{ allocatePersistentPlanner<T>(data) };
     if (!planner)
     {
       RCLCPP_ERROR(LOGGER,
@@ -187,7 +187,7 @@ MultiQueryPlannerAllocator::allocatePlannerImpl(const ob::SpaceInformationPtr& s
 
   if (!planner)
   {
-    planner.reset(new T(si));
+    planner = std::make_shared<T>(si);
   }
 
   if (!new_name.empty())
@@ -247,7 +247,7 @@ PlanningContextManager::PlanningContextManager(moveit::core::RobotModelConstPtr 
   , max_solution_segment_length_(0.0)
   , minimum_waypoint_count_(2)
 {
-  cached_contexts_.reset(new CachedContexts());
+  cached_contexts_ = std::make_shared<CachedContexts>();
   registerDefaultPlanners();
   registerDefaultStateSpaces();
 }
@@ -380,11 +380,11 @@ PlanningContextManager::getPlanningContext(const planning_interface::PlannerConf
     else
     {
       // Choose the correct simple setup type to load
-      context_spec.ompl_simple_setup_.reset(new ompl::geometric::SimpleSetup(context_spec.state_space_));
+      context_spec.ompl_simple_setup_ = std::make_shared<ompl::geometric::SimpleSetup>(context_spec.state_space_);
     }
 
     RCLCPP_DEBUG(LOGGER, "Creating new planning context");
-    context.reset(new ModelBasedPlanningContext(config.name, context_spec));
+    context = std::make_shared<ModelBasedPlanningContext>(config.name, context_spec);
 
     // Do not cache a constrained planning context, as the constraints could be changed
     // and need to be parsed again.
@@ -522,7 +522,7 @@ ModelBasedPlanningContextPtr PlanningContextManager::getPlanningContext(
   // Check if the user wants to use an OMPL ConstrainedStateSpace for planning.
   // This is done by setting 'enforce_constrained_state_space' to 'true' for the desired group in ompl_planing.yaml.
   // If there are no path constraints in the planning request, this option is ignored, as the constrained state space is
-  // only usefull for paths constraints. (And at the moment only a single position constraint is supported, hence:
+  // only useful for paths constraints. (And at the moment only a single position constraint is supported, hence:
   //     req.path_constraints.position_constraints.size() == 1
   // is used in the selection process below.)
   //

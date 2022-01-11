@@ -42,6 +42,7 @@
 #include <thread>
 #include <vector>
 
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <rclcpp/rclcpp.hpp>
 
 namespace moveit_servo
@@ -59,45 +60,49 @@ struct ServoParameters
   // ROS Parameters
   // Note that all of these are effectively const because the only way to create one of these
   //  is as a shared_ptr to a constant struct.
-  bool use_gazebo;
-  std::string status_topic;
+  bool use_gazebo{ false };
+  std::string status_topic{ "~/status" };
   // Properties of incoming commands
-  std::string cartesian_command_in_topic;
-  std::string joint_command_in_topic;
-  std::string robot_link_command_frame;
-  std::string command_in_type;
-  double linear_scale;
-  double rotational_scale;
-  double joint_scale;
+  std::string cartesian_command_in_topic{ "~/delta_twist_cmds" };
+  std::string joint_command_in_topic{ "~/delta_joint_cmds" };
+  std::string robot_link_command_frame{ "panda_link0" };
+  std::string command_in_type{ "unitless" };
+  double linear_scale{ 0.4 };
+  double rotational_scale{ 0.8 };
+  double joint_scale{ 0.5 };
   // Properties of outgoing commands
-  std::string command_out_topic;
-  double publish_period;
-  std::string command_out_type;
-  bool publish_joint_positions;
-  bool publish_joint_velocities;
-  bool publish_joint_accelerations;
-  // Incoming Joint State properties
-  std::string joint_topic;
-  double low_pass_filter_coeff;
+  std::string command_out_topic{ "/panda_arm_controller/joint_trajectory" };
+  double publish_period{ 0.034 };
+  std::string command_out_type{ "trajectory_msgs/JointTrajectory" };
+  bool publish_joint_positions{ true };
+  bool publish_joint_velocities{ true };
+  bool publish_joint_accelerations{ false };
+  // Plugins for smoothing outgoing commands
+  std::string joint_topic{ "/joint_states" };
+  std::string smoothing_filter_plugin_name{ "online_signal_smoothing::ButterworthFilterPlugin" };
   // MoveIt properties
-  std::string move_group_name;
-  std::string planning_frame;
-  std::string ee_frame_name;
+  std::string move_group_name{ "panda_arm" };
+  std::string planning_frame{ "panda_link0" };
+  std::string ee_frame_name{ "panda_link8" };
+  bool is_primary_planning_scene_monitor = { true };
+  std::string monitored_planning_scene_topic{
+    planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_TOPIC
+  };
   // Stopping behaviour
-  double incoming_command_timeout;
-  int num_outgoing_halt_msgs_to_publish;
-  bool halt_all_joints_in_joint_mode;
-  bool halt_all_joints_in_cartesian_mode;
+  double incoming_command_timeout{ 0.1 };
+  int num_outgoing_halt_msgs_to_publish{ 4 };
+  bool halt_all_joints_in_joint_mode{ true };
+  bool halt_all_joints_in_cartesian_mode{ true };
   // Configure handling of singularities and joint limits
-  double lower_singularity_threshold;
-  double hard_stop_singularity_threshold;
-  double joint_limit_margin;
-  bool low_latency_mode;
+  double lower_singularity_threshold{ 17.0 };
+  double hard_stop_singularity_threshold{ 30.0 };
+  double joint_limit_margin{ 0.1 };
+  bool low_latency_mode{ false };
   // Collision checking
-  bool check_collisions;
-  double collision_check_rate;
-  double self_collision_proximity_threshold;
-  double scene_collision_proximity_threshold;
+  bool check_collisions{ true };
+  double collision_check_rate{ 10.0 };
+  double self_collision_proximity_threshold{ 0.01 };
+  double scene_collision_proximity_threshold{ 0.02 };
 
   /**
    * Declares, reads, and validates parameters used for moveit_servo
@@ -111,8 +116,8 @@ struct ServoParameters
    * @param dynamic_parameters Enable dynamic parameter handling. (default: true)
    * @return std::shared_ptr<ServoParameters> if all parameters were loaded and verified successfully, nullptr otherwise
    */
-  static SharedConstPtr makeServoParameters(const rclcpp::Node::SharedPtr& node, const rclcpp::Logger& logger,
-                                            std::string ns = "moveit_servo", bool dynamic_parameters = true);
+  static SharedConstPtr makeServoParameters(const rclcpp::Node::SharedPtr& node, std::string ns = "moveit_servo",
+                                            bool dynamic_parameters = true);
 
   /**
    * Register a callback for a parameter set event.
@@ -121,56 +126,43 @@ struct ServoParameters
    * @param name Name of parameter (key used for callback in map)
    * @param callback function to call when parameter is changed
    */
-  void registerSetParameterCallback(const std::string name, SetParameterCallbackType callback) const
+  [[nodiscard]] bool registerSetParameterCallback(const std::string name, SetParameterCallbackType callback) const
   {
-    const std::lock_guard<std::mutex> guard(callback_mutex_);
-    set_parameter_callbacks_[name].push_back(callback);
+    if (callback_handler_)
+    {
+      const std::lock_guard<std::mutex> guard{ callback_handler_->mutex_ };
+      callback_handler_->set_parameter_callbacks_[name].push_back(callback);
+      return true;
+    }
+    return false;
   }
+  static ServoParameters get(const std::string& ns,
+                             const rclcpp::node_interfaces::NodeParametersInterface::SharedPtr& node_parameters);
+  static std::optional<ServoParameters> validate(ServoParameters parameters);
 
 private:
   // Private constructor because we only want this object to be created through the builder method makeServoParameters
-  ServoParameters(const rclcpp::Logger& logger, std::string ns) : ns(ns), logger_(logger)
+  ServoParameters()
   {
   }
-  const rclcpp::Logger& logger_;
 
-  // callback handler for the on set parameters callback
-  rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr on_set_parameters_callback_handler_;
+  struct CallbackHandler
+  {
+    // callback handler for the on set parameters callback
+    rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr on_set_parameters_callback_handler_;
 
-  // mutable so the callback can be registered objects that have const versions of this struct
-  mutable std::mutex callback_mutex_;
-  mutable std::map<std::string, std::vector<SetParameterCallbackType>> set_parameter_callbacks_;
+    // mutable so the callback can be registered objects that have const versions of this struct
+    mutable std::mutex mutex_;
+    mutable std::map<std::string, std::vector<SetParameterCallbackType>> set_parameter_callbacks_;
 
-  // For registering with add_on_set_parameters_callback after initializing data
-  rcl_interfaces::msg::SetParametersResult setParametersCallback(std::vector<rclcpp::Parameter> parameters);
+    // For registering with add_on_set_parameters_callback after initializing data
+    rcl_interfaces::msg::SetParametersResult setParametersCallback(const std::vector<rclcpp::Parameter>& parameters);
+  };
+
+  std::shared_ptr<CallbackHandler> callback_handler_;
+
+  static void declare(const std::string& ns,
+                      const rclcpp::node_interfaces::NodeParametersInterface::SharedPtr& node_parameters);
 };
-
-// Helper template for declaring and getting ros param
-// Must be declared here to ensure template class is built for required templates when included.
-// (The CPP file can't just be included because not everything there is templated, so you'd get duplicate symbols)
-template <typename T>
-void declareOrGetParam(T& output_value, const std::string& param_name, const rclcpp::Node::SharedPtr& node,
-                       const rclcpp::Logger& logger, const T default_value = T{})
-{
-  try
-  {
-    if (node->has_parameter(param_name))
-    {
-      node->get_parameter<T>(param_name, output_value);
-    }
-    else
-    {
-      output_value = node->declare_parameter<T>(param_name, default_value);
-    }
-  }
-  catch (const rclcpp::exceptions::InvalidParameterTypeException& e)
-  {
-    RCLCPP_WARN_STREAM(logger, "InvalidParameterTypeException(" << param_name << "): " << e.what());
-    RCLCPP_ERROR_STREAM(logger, "Error getting parameter \'" << param_name << "\', check parameter type in YAML file");
-    throw e;
-  }
-
-  RCLCPP_INFO_STREAM(logger, "Found parameter - " << param_name << ": " << output_value);
-}
 
 }  // namespace moveit_servo

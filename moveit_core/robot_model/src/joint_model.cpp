@@ -66,7 +66,7 @@ std::string JointModel::getTypeName() const
   switch (type_)
   {
     case UNKNOWN:
-      return "Unkown";
+      return "Unknown";
     case REVOLUTE:
       return "Revolute";
     case PRISMATIC:
@@ -78,7 +78,7 @@ std::string JointModel::getTypeName() const
     case FIXED:
       return "Fixed";
     default:
-      return "[Unkown]";
+      return "[Unknown]";
   }
 }
 
@@ -157,6 +157,12 @@ void JointModel::setVariableBounds(const std::vector<moveit_msgs::msg::JointLimi
           variable_bounds_[j].min_acceleration_ = -joint_limit.max_acceleration;
           variable_bounds_[j].max_acceleration_ = joint_limit.max_acceleration;
         }
+        variable_bounds_[j].jerk_bounded_ = joint_limit.has_jerk_limits;
+        if (joint_limit.has_jerk_limits)
+        {
+          variable_bounds_[j].min_jerk_ = -joint_limit.max_jerk;
+          variable_bounds_[j].max_jerk_ = joint_limit.max_jerk;
+        }
         break;
       }
   computeVariableBoundsMsg();
@@ -177,6 +183,8 @@ void JointModel::computeVariableBoundsMsg()
     lim.has_acceleration_limits = variable_bounds_[i].acceleration_bounded_;
     lim.max_acceleration =
         std::min(fabs(variable_bounds_[i].min_acceleration_), fabs(variable_bounds_[i].max_acceleration_));
+    lim.has_jerk_limits = variable_bounds_[i].jerk_bounded_;
+    lim.max_jerk = std::min(fabs(variable_bounds_[i].min_jerk_), fabs(variable_bounds_[i].max_jerk_));
     variable_bounds_msg_.push_back(lim);
   }
 }
@@ -234,6 +242,11 @@ std::ostream& operator<<(std::ostream& out, const VariableBounds& b)
   printBoundHelper(out, b.min_acceleration_);
   out << ", ";
   printBoundHelper(out, b.max_acceleration_);
+  out << "]; "
+      << "J." << (b.jerk_bounded_ ? "bounded" : "unbounded") << " [";
+  printBoundHelper(out, b.min_jerk_);
+  out << ", ";
+  printBoundHelper(out, b.max_jerk_);
   out << "];";
   return out;
 }

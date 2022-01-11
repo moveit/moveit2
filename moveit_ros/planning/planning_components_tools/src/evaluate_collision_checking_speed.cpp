@@ -75,7 +75,7 @@ int main(int argc, char** argv)
       "trials", boost::program_options::value<unsigned int>(&trials)->default_value(trials),
       "Number of collision checks to perform with each thread")("wait",
                                                                 "Wait for a user command (so the planning scene can be "
-                                                                "updated in thre background)")("help", "this screen");
+                                                                "updated in the background)")("help", "this screen");
   boost::program_options::variables_map vm;
   boost::program_options::parsed_options po = boost::program_options::parse_command_line(argc, argv, desc);
   boost::program_options::store(po, vm);
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 
   if (vm.count("help"))
   {
-    std::cout << desc << std::endl;
+    std::cout << desc << '\n';
     return 0;
   }
 
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
     {
       psm.startWorldGeometryMonitor();
       psm.startSceneMonitor();
-      std::cout << "Listening to planning scene updates. Press Enter to continue ..." << std::endl;
+      std::cout << "Listening to planning scene updates. Press Enter to continue ..." << '\n';
       std::cin.get();
     }
     else

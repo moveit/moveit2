@@ -34,22 +34,23 @@
 
 #include "pilz_industrial_motion_planner/joint_limits_container.h"
 
-#include "ros/ros.h"
+#include "rclcpp/rclcpp.hpp"
 #include <stdexcept>
 
 namespace pilz_industrial_motion_planner
 {
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.joint_limits_container");
 bool JointLimitsContainer::addLimit(const std::string& joint_name, JointLimit joint_limit)
 {
   if (joint_limit.has_deceleration_limits && joint_limit.max_deceleration >= 0)
   {
-    ROS_ERROR_STREAM("joint_limit.max_deceleration MUST be negative!");
+    RCLCPP_ERROR_STREAM(LOGGER, "joint_limit.max_deceleration MUST be negative!");
     return false;
   }
   const auto& insertion_result{ container_.insert(std::pair<std::string, JointLimit>(joint_name, joint_limit)) };
   if (!insertion_result.second)
   {
-    ROS_ERROR_STREAM("joint_limit for joint " << joint_name << " already contained.");
+    RCLCPP_ERROR_STREAM(LOGGER, "joint_limit for joint " << joint_name << " already contained.");
     return false;
   }
   return true;

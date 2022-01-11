@@ -7,9 +7,9 @@ use_gazebo: false # Whether the robot is started in a Gazebo simulation environm
 command_in_type: "speed_units" # "unitless"> in the range [-1:1], as if from joystick. "speed_units"> cmds are in m/s and rad/s
 scale:
   # Scale parameters are only used if command_in_type=="unitless"
-  linear:  0.6  # Max linear velocity. Meters per publish_period. Unit is [m/s]. Only used for Cartesian commands.
-  rotational:  0.3 # Max angular velocity. Rads per publish_period. Unit is [rad/s]. Only used for Cartesian commands.
-  # Max joint angular/linear velocity. Rads or Meters per publish period. Only used for joint commands on joint_command_in_topic.
+  linear:  0.6  # Max linear velocity. Unit is [m/s]. Only used for Cartesian commands.
+  rotational:  0.3 # Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands.
+  # Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic.
   joint: 0.01
 
 ## Properties of outgoing commands
@@ -24,8 +24,8 @@ publish_joint_positions: true
 publish_joint_velocities: true
 publish_joint_accelerations: false
 
-## Incoming Joint State properties
-low_pass_filter_coeff: 2.0  # Larger --> trust the filtered data more, trust the measurements less.
+## Plugins for smoothing outgoing commands
+smoothing_filter_plugin_name: "online_signal_smoothing::ButterworthFilterPlugin"
 
 ## MoveIt properties
 move_group_name:  panda_arm  # Often 'manipulator' or 'arm'

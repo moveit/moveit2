@@ -39,22 +39,33 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
 #include <vector>
+namespace
+{
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.joint_limits_aggregator");
+}
 
 pilz_industrial_motion_planner::JointLimitsContainer
 pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
-    const ros::NodeHandle& nh, const std::vector<const moveit::core::JointModel*>& joint_models)
+    const rclcpp::Node::SharedPtr& node, const std::string& param_namespace,
+    const std::vector<const moveit::core::JointModel*>& joint_models)
 {
   JointLimitsContainer container;
 
-  ROS_INFO_STREAM("Reading limits from namespace " << nh.getNamespace());
+  RCLCPP_INFO_STREAM(LOGGER, "Reading limits from namespace " << param_namespace);
 
   // Iterate over all joint models and generate the map
   for (auto joint_model : joint_models)
   {
     JointLimit joint_limit;
 
-    // If there is something defined for the joint on the parameter server
-    if (joint_limits_interface::getJointLimits(joint_model->getName(), nh, joint_limit))
+    // NOTE: declareParameters fails (=returns false) if the parameters have already been declared.
+    // The function should be checked in the if condition below when we disable
+    // 'NodeOptions::automatically_declare_parameters_from_overrides(true)'
+    joint_limits_interface::declareParameters(joint_model->getName(), param_namespace, node);
+
+    // If there is something defined for the joint in the node parameters
+    if (joint_limits_interface::getJointLimits(joint_model->getName(), param_namespace, node, joint_limit))
     {
       if (joint_limit.has_position_limits)
       {
@@ -76,7 +87,7 @@ pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
     }
     else
     {
-      // If there is nothing defined for this joint on the parameter server just
+      // If there is nothing defined for this joint in the node parameters just
       // update the values by the values of
       // the urdf
 
@@ -105,7 +116,7 @@ void pilz_industrial_motion_planner::JointLimitsAggregator::updatePositionLimitF
   {
     // LCOV_EXCL_START
     case 0:
-      ROS_ERROR_STREAM("no bounds set for joint " << joint_model->getName());
+      RCLCPP_ERROR_STREAM(LOGGER, "no bounds set for joint " << joint_model->getName());
       break;
     // LCOV_EXCL_STOP
     case 1:
@@ -115,7 +126,7 @@ void pilz_industrial_motion_planner::JointLimitsAggregator::updatePositionLimitF
       break;
     // LCOV_EXCL_START
     default:
-      ROS_ERROR_STREAM("Multi-DOF-Joints not supported. The robot won't move. " << joint_model->getName());
+      RCLCPP_ERROR_STREAM(LOGGER, "Multi-DOF-Joints not supported. The robot won't move. " << joint_model->getName());
       joint_limit.has_position_limits = true;
       joint_limit.min_position = 0;
       joint_limit.max_position = 0;
@@ -123,8 +134,8 @@ void pilz_industrial_motion_planner::JointLimitsAggregator::updatePositionLimitF
       // LCOV_EXCL_STOP
   }
 
-  ROS_DEBUG_STREAM("Limit(" << joint_model->getName() << " min:" << joint_limit.min_position
-                            << " max:" << joint_limit.max_position);
+  RCLCPP_DEBUG_STREAM(LOGGER, "Limit(" << joint_model->getName() << " min:" << joint_limit.min_position
+                                       << " max:" << joint_limit.max_position);
 }
 
 void pilz_industrial_motion_planner::JointLimitsAggregator::updateVelocityLimitFromJointModel(
@@ -134,7 +145,7 @@ void pilz_industrial_motion_planner::JointLimitsAggregator::updateVelocityLimitF
   {
     // LCOV_EXCL_START
     case 0:
-      ROS_ERROR_STREAM("no bounds set for joint " << joint_model->getName());
+      RCLCPP_ERROR_STREAM(LOGGER, "no bounds set for joint " << joint_model->getName());
       break;
     // LCOV_EXCL_STOP
     case 1:
@@ -143,7 +154,7 @@ void pilz_industrial_motion_planner::JointLimitsAggregator::updateVelocityLimitF
       break;
     // LCOV_EXCL_START
     default:
-      ROS_ERROR_STREAM("Multi-DOF-Joints not supported. The robot won't move.");
+      RCLCPP_ERROR_STREAM(LOGGER, "Multi-DOF-Joints not supported. The robot won't move.");
       joint_limit.has_velocity_limits = true;
       joint_limit.max_velocity = 0;
       break;

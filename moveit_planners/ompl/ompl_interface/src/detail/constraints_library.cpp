@@ -378,14 +378,14 @@ void ompl_interface::ConstraintsLibrary::saveConstraintApproximations(const std:
     for (std::map<std::string, ConstraintApproximationPtr>::const_iterator it = constraint_approximations_.begin();
          it != constraint_approximations_.end(); ++it)
     {
-      fout << it->second->getGroup() << std::endl;
-      fout << it->second->getStateSpaceParameterization() << std::endl;
-      fout << it->second->hasExplicitMotions() << std::endl;
-      fout << it->second->getMilestoneCount() << std::endl;
+      fout << it->second->getGroup() << '\n';
+      fout << it->second->getStateSpaceParameterization() << '\n';
+      fout << it->second->hasExplicitMotions() << '\n';
+      fout << it->second->getMilestoneCount() << '\n';
       std::string serialization;
       msgToHex(it->second->getConstraintsMsg(), serialization);
-      fout << serialization << std::endl;
-      fout << it->second->getFilename() << std::endl;
+      fout << serialization << '\n';
+      fout << it->second->getFilename() << '\n';
       if (it->second->getStateStorage())
         it->second->getStateStorage()->store((path + "/" + it->second->getFilename()).c_str());
     }
@@ -404,13 +404,13 @@ void ompl_interface::ConstraintsLibrary::printConstraintApproximations(std::ostr
   for (const std::pair<const std::string, ConstraintApproximationPtr>& constraint_approximation :
        constraint_approximations_)
   {
-    out << constraint_approximation.second->getGroup() << std::endl;
-    out << constraint_approximation.second->getStateSpaceParameterization() << std::endl;
-    out << constraint_approximation.second->hasExplicitMotions() << std::endl;
-    out << constraint_approximation.second->getMilestoneCount() << std::endl;
-    out << constraint_approximation.second->getFilename() << std::endl;
+    out << constraint_approximation.second->getGroup() << '\n';
+    out << constraint_approximation.second->getStateSpaceParameterization() << '\n';
+    out << constraint_approximation.second->hasExplicitMotions() << '\n';
+    out << constraint_approximation.second->getMilestoneCount() << '\n';
+    out << constraint_approximation.second->getFilename() << '\n';
     // TODO(henningkayser): format print constraint message
-    // out << constraint_approximation.second->getConstraintsMsg() << std::endl;
+    // out << constraint_approximation.second->getConstraintsMsg() << '\n';
   }
 }
 

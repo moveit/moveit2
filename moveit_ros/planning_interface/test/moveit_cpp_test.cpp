@@ -153,7 +153,7 @@ TEST_F(MoveItCppTest, TestSetStartStateFromRobotState)
   ASSERT_TRUE(static_cast<bool>(planning_component_ptr->plan()));
 }
 
-// Test settting the goal of the plan using a moveit::core::RobotState
+// Test setting the goal of the plan using a moveit::core::RobotState
 TEST_F(MoveItCppTest, TestSetGoalFromRobotState)
 {
   auto target_state = *(moveit_cpp_ptr->getCurrentState());

@@ -148,18 +148,20 @@ public:
    *  @param middleware_handle   The ros middleware handle
    *  @param robot_model         The current kinematic model to build on
    *  @param tf_buffer           A pointer to the tf2_ros Buffer to use
+   *  @param use_sim_time        True when the time is abstracted
    */
   CurrentStateMonitor(std::unique_ptr<MiddlewareHandle> middleware_handle,
                       const moveit::core::RobotModelConstPtr& robot_model,
-                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
+                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, bool use_sim_time);
 
   /** @brief Constructor.
    *  @param node          A shared_ptr to a node used for subscription to joint_states_topic
    *  @param robot_model   The current kinematic model to build on
    *  @param tf_buffer     A pointer to the tf2_ros Buffer to use
+   *  @param use_sim_time        True when the time is abstracted
    */
   CurrentStateMonitor(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
-                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer);
+                      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, bool use_sim_time);
 
   ~CurrentStateMonitor();
 
@@ -301,7 +303,7 @@ public:
     return error_;
   }
 
-  /** @brief Allow the joint_state arrrays velocity and effort to be copied into the robot state
+  /** @brief Allow the joint_state arrays velocity and effort to be copied into the robot state
    *  this is useful in some but not all applications
    */
   void enableCopyDynamics(bool enabled)
@@ -331,6 +333,8 @@ private:
   mutable std::mutex state_update_lock_;
   mutable std::condition_variable state_update_condition_;
   std::vector<JointStateUpdateCallback> update_callbacks_;
+
+  bool use_sim_time_;
 };
 
 MOVEIT_CLASS_FORWARD(CurrentStateMonitor);  // Defines CurrentStateMonitorPtr, ConstPtr, WeakPtr... etc

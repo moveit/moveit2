@@ -61,8 +61,8 @@ namespace fs = boost::filesystem;
 MoveItConfigData::MoveItConfigData() : config_pkg_generated_timestamp_(0)
 {
   // Create an instance of SRDF writer and URDF model for all widgets to share
-  srdf_.reset(new srdf::SRDFWriter());
-  urdf_model_.reset(new urdf::Model());
+  srdf_ = std::make_shared<srdf::SRDFWriter>();
+  urdf_model_ = std::make_shared<urdf::Model>();
 
   // Not in debug mode
   debug_ = false;
@@ -96,7 +96,7 @@ moveit::core::RobotModelConstPtr MoveItConfigData::getRobotModel()
   if (!robot_model_)
   {
     // Initialize with a URDF Model Interface and a SRDF Model
-    robot_model_.reset(new moveit::core::RobotModel(urdf_model_, srdf_->srdf_model_));
+    robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_->srdf_model_);
   }
 
   return robot_model_;
@@ -113,7 +113,7 @@ void MoveItConfigData::updateRobotModel()
   srdf_->updateSRDFModel(*urdf_model_);
 
   // Create new kin model
-  robot_model_.reset(new moveit::core::RobotModel(urdf_model_, srdf_->srdf_model_));
+  robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_->srdf_model_);
 
   // Reset the planning scene
   planning_scene_.reset();
@@ -130,7 +130,7 @@ planning_scene::PlanningScenePtr MoveItConfigData::getPlanningScene()
     getRobotModel();
 
     // Allocate an empty planning scene
-    planning_scene_.reset(new planning_scene::PlanningScene(robot_model_));
+    planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
   }
   return planning_scene_;
 }
@@ -274,7 +274,7 @@ bool MoveItConfigData::outputOMPLPlanningYAML(const std::string& file_path)
     return false;
   }
 
-  output_stream << emitter.c_str() << std::endl;
+  output_stream << emitter.c_str() << '\n';
   output_stream.close();
 
   return true;  // file created successfully
@@ -685,7 +685,7 @@ std::vector<OMPLPlannerDescription> MoveItConfigData::getOMPLPlanners()
                     "dist new state to nearest neighbor to disqualify as frontier. "
                     "default: 0.0 set in setup()");
   trrt.addParameter("frountierNodeRatio", "0.1", "1/10, or 1 nonfrontier for every 10 frontier. default: 0.1");
-  trrt.addParameter("k_constant", "0.0", "value used to normalize expresssion. default: 0.0 set in setup()");
+  trrt.addParameter("k_constant", "0.0", "value used to normalize expression. default: 0.0 set in setup()");
   planner_des.push_back(trrt);
 
   OMPLPlannerDescription prm("PRM", "geometric");
@@ -1771,7 +1771,7 @@ bool MoveItConfigData::inputSetupAssistantYAML(const std::string& file_path)
     RCLCPP_ERROR_STREAM(LOGGER, e.what());
   }
 
-  return false;  // if it gets to this point an error has occured
+  return false;  // if it gets to this point an error has occurred
 }
 
 // ******************************************************************************************
@@ -1880,7 +1880,7 @@ bool MoveItConfigData::input3DSensorsYAML(const std::string& default_file_path, 
     RCLCPP_ERROR_STREAM(LOGGER, "Error parsing sensors yaml: " << e.what());
   }
 
-  return false;  // if it gets to this point an error has occured
+  return false;  // if it gets to this point an error has occurred
 }
 
 // ******************************************************************************************
@@ -1983,7 +1983,7 @@ std::vector<ROSControlConfig>& MoveItConfigData::getROSControllers()
 }
 
 // ******************************************************************************************
-// Used to add a sensor plugin configuation parameter to the sensor plugin configuration parameter list
+// Used to add a sensor plugin configuration parameter to the sensor plugin configuration parameter list
 // ******************************************************************************************
 void MoveItConfigData::addGenericParameterToSensorPluginConfig(const std::string& name, const std::string& value,
                                                                const std::string& /*comment*/)

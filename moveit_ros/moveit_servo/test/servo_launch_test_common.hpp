@@ -84,7 +84,7 @@ public:
     , executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
   {
     // read parameters and store them in shared pointer to constant
-    servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_, LOGGER, "moveit_servo", false);
+    servo_parameters_ = moveit_servo::ServoParameters::makeServoParameters(node_, "moveit_servo", false);
     if (servo_parameters_ == nullptr)
     {
       RCLCPP_FATAL(LOGGER, "Failed to load the servo parameters");
@@ -440,28 +440,6 @@ public:
       RCLCPP_ERROR(LOGGER, "Error returned form service call to stop servo");
       return false;
     }
-    RCLCPP_INFO_STREAM(LOGGER, "Wait for stop servo service: " << (node_->now() - time_start).seconds());
-
-    // Test that status messages stop
-    rclcpp::Rate publish_loop_rate(test_parameters_->publish_hz);
-    time_start = node_->now();
-    size_t num_statuses_start = 0;
-    size_t iterations = 0;
-    do
-    {
-      num_statuses_start = getNumStatus();
-      // Wait 4x the loop rate
-      for (size_t i = 0; i < 4; ++i)
-        publish_loop_rate.sleep();
-    } while (getNumStatus() != num_statuses_start && ++iterations < test_parameters_->timeout_iterations);
-    RCLCPP_INFO_STREAM(LOGGER, "Wait for status to stop: " << (node_->now() - time_start).seconds());
-
-    if (iterations >= test_parameters_->timeout_iterations)
-    {
-      RCLCPP_ERROR(LOGGER, "Timeout waiting for status num increasing");
-      return false;
-    }
-
     return true;
   }
 

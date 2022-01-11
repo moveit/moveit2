@@ -1,14 +1,12 @@
 <?xml version="1.0"?>
-<package>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>pilz_industrial_motion_planner_testutils</name>
-  <version>1.1.5</version>
+  <version>2.3.2</version>
   <description>Helper scripts and functionality to test industrial motion generation</description>
 
-  <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
   <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
   <maintainer email="i.martini@pilz.de">Immanuel Martini</maintainer>
-  <maintainer email="j.schleicher@pilz.de">Joachim Schleicher</maintainer>
-  <maintainer email="h.slusarek@pilz.de">Hagen Slusarek</maintainer>
 
   <license>BSD</license>
 
@@ -16,14 +14,26 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
 
-  <build_depend>moveit_core</build_depend>
-  <build_depend>moveit_msgs</build_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>eigen3_cmake_module</buildtool_depend>
+  <buildtool_export_depend>eigen3_cmake_module</buildtool_export_depend>
+  <build_depend>moveit_common</build_depend>
+
+  <depend>rclcpp</depend>
+  <depend>moveit_core</depend>
+  <depend>moveit_msgs</depend>
+
   <build_depend>tf2_eigen</build_depend>
 
-  <run_depend>moveit_core</run_depend>
-  <run_depend>moveit_msgs</run_depend>
-  <run_depend>moveit_commander</run_depend>
+  <!--
+  <exec_depend>moveit_commander</exec_depend>
+  -->
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 
 </package>

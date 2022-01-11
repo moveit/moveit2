@@ -32,15 +32,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef SEQUENCE_H
-#define SEQUENCE_H
+#pragma once
 
 #include <stdexcept>
 #include <vector>
 #include <utility>
 #include <typeinfo>
 
-#include <moveit_msgs/MotionSequenceRequest.h>
+#include <moveit_msgs/msg/motion_sequence_request.hpp>
 
 #include "command_types_typedef.h"
 #include "motioncmd.h"
@@ -93,7 +92,7 @@ public:
    */
   void erase(const size_t start, const size_t end);
 
-  moveit_msgs::MotionSequenceRequest toRequest() const;
+  moveit_msgs::msg::MotionSequenceRequest toRequest() const;
 
 private:
   using TCmdRadiiPair = std::pair<CmdVariant, double>;
@@ -143,5 +142,3 @@ inline bool Sequence::cmdIsOfType(const size_t index_cmd) const
   return cmds_.at(index_cmd).first.type() == typeid(T);
 }
 }  // namespace pilz_industrial_motion_planner_testutils
-
-#endif  // SEQUENCE_H

@@ -85,12 +85,12 @@ bool PointCloudOctomapUpdater::setParams(const std::string& name_space)
 bool PointCloudOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
 {
   node_ = node;
-  tf_buffer_.reset(new tf2_ros::Buffer(node_->get_clock()));
+  tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
   auto create_timer_interface =
       std::make_shared<tf2_ros::CreateTimerROS>(node->get_node_base_interface(), node->get_node_timers_interface());
   tf_buffer_->setCreateTimerInterface(create_timer_interface);
-  tf_listener_.reset(new tf2_ros::TransformListener(*tf_buffer_));
-  shape_mask_.reset(new point_containment_filter::ShapeMask());
+  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
+  shape_mask_ = std::make_unique<point_containment_filter::ShapeMask>();
   shape_mask_->setTransformCallback(boost::bind(&PointCloudOctomapUpdater::getShapeTransform, this,
                                                 boost::placeholders::_1, boost::placeholders::_2));
   last_update_time_ = node_->now();
@@ -226,22 +226,22 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
   // We only use these iterators if we are creating a filtered_cloud for
   // publishing. We cannot default construct these, so we use unique_ptr's
   // to defer construction
-  std::unique_ptr<sensor_msgs::PointCloud2Iterator<float> > iter_filtered_x;
-  std::unique_ptr<sensor_msgs::PointCloud2Iterator<float> > iter_filtered_y;
-  std::unique_ptr<sensor_msgs::PointCloud2Iterator<float> > iter_filtered_z;
+  std::unique_ptr<sensor_msgs::PointCloud2Iterator<float>> iter_filtered_x;
+  std::unique_ptr<sensor_msgs::PointCloud2Iterator<float>> iter_filtered_y;
+  std::unique_ptr<sensor_msgs::PointCloud2Iterator<float>> iter_filtered_z;
 
   if (!filtered_cloud_topic_.empty())
   {
-    filtered_cloud.reset(new sensor_msgs::msg::PointCloud2());
+    filtered_cloud = std::make_unique<sensor_msgs::msg::PointCloud2>();
     filtered_cloud->header = cloud_msg->header;
     sensor_msgs::PointCloud2Modifier pcd_modifier(*filtered_cloud);
     pcd_modifier.setPointCloud2FieldsByString(1, "xyz");
     pcd_modifier.resize(cloud_msg->width * cloud_msg->height);
 
     // we have created a filtered_out, so we can create the iterators now
-    iter_filtered_x.reset(new sensor_msgs::PointCloud2Iterator<float>(*filtered_cloud, "x"));
-    iter_filtered_y.reset(new sensor_msgs::PointCloud2Iterator<float>(*filtered_cloud, "y"));
-    iter_filtered_z.reset(new sensor_msgs::PointCloud2Iterator<float>(*filtered_cloud, "z"));
+    iter_filtered_x = std::make_unique<sensor_msgs::PointCloud2Iterator<float>>(*filtered_cloud, "x");
+    iter_filtered_y = std::make_unique<sensor_msgs::PointCloud2Iterator<float>>(*filtered_cloud, "y");
+    iter_filtered_z = std::make_unique<sensor_msgs::PointCloud2Iterator<float>>(*filtered_cloud, "z");
   }
   size_t filtered_cloud_size = 0;
 
@@ -266,17 +266,24 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
         /* check for NaN */
         if (!std::isnan(pt_iter[0]) && !std::isnan(pt_iter[1]) && !std::isnan(pt_iter[2]))
         {
-          /* transform to map frame */
-          tf2::Vector3 point_tf = map_h_sensor * tf2::Vector3(pt_iter[0], pt_iter[1], pt_iter[2]);
-
           /* occupied cell at ray endpoint if ray is shorter than max range and this point
              isn't on a part of the robot*/
           if (mask_[row_c + col] == point_containment_filter::ShapeMask::INSIDE)
+          {
+            // transform to map frame
+            tf2::Vector3 point_tf = map_h_sensor * tf2::Vector3(pt_iter[0], pt_iter[1], pt_iter[2]);
             model_cells.insert(tree_->coordToKey(point_tf.getX(), point_tf.getY(), point_tf.getZ()));
+          }
           else if (mask_[row_c + col] == point_containment_filter::ShapeMask::CLIP)
-            clip_cells.insert(tree_->coordToKey(point_tf.getX(), point_tf.getY(), point_tf.getZ()));
+          {
+            tf2::Vector3 clipped_point_tf =
+                map_h_sensor * (tf2::Vector3(pt_iter[0], pt_iter[1], pt_iter[2]).normalize() * max_range_);
+            clip_cells.insert(
+                tree_->coordToKey(clipped_point_tf.getX(), clipped_point_tf.getY(), clipped_point_tf.getZ()));
+          }
           else
           {
+            tf2::Vector3 point_tf = map_h_sensor * tf2::Vector3(pt_iter[0], pt_iter[1], pt_iter[2]);
             occupied_cells.insert(tree_->coordToKey(point_tf.getX(), point_tf.getY(), point_tf.getZ()));
             // build list of valid points if we want to publish them
             if (filtered_cloud)

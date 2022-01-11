@@ -96,14 +96,11 @@ void MotionPlanningFrame::processDetectedObjects()
       object_ids.clear();
       for (const auto& object : *world)
       {
-        if (!object.second->shape_poses_.empty())
+        const auto& position = object.second->pose_.translation();
+        if (position.x() >= min_x && position.x() <= max_x && position.y() >= min_y && position.y() <= max_y &&
+            position.z() >= min_z && position.z() <= max_z)
         {
-          const auto& position = object.second->shape_poses_[0].translation();
-          if (position.x() >= min_x && position.x() <= max_x && position.y() >= min_y && position.y() <= max_y &&
-              position.z() >= min_z && position.z() <= max_z)
-          {
-            object_ids.push_back(object.first);
-          }
+          object_ids.push_back(object.first);
         }
       }
       if (!object_ids.empty())
@@ -112,7 +109,7 @@ void MotionPlanningFrame::processDetectedObjects()
     rclcpp::sleep_for(std::chrono::milliseconds(500));
   }
 
-  RCLCPP_DEBUG(LOGGER, "Found %d objects", (int)object_ids.size());
+  RCLCPP_DEBUG(LOGGER, "Found %d objects", static_cast<int>(object_ids.size()));
   updateDetectedObjectsList(object_ids);
 }
 
@@ -183,7 +180,7 @@ void MotionPlanningFrame::updateDetectedObjectsList(const std::vector<std::strin
     for (std::size_t i = 0; i < object_ids.size(); ++i)
     {
       QListWidgetItem* item =
-          new QListWidgetItem(QString::fromStdString(object_ids[i]), ui_->detected_objects_list, (int)i);
+          new QListWidgetItem(QString::fromStdString(object_ids[i]), ui_->detected_objects_list, static_cast<int>(i));
       item->setToolTip(item->text());
       Qt::ItemFlags flags = item->flags();
       flags &= ~(Qt::ItemIsUserCheckable);
@@ -249,7 +246,7 @@ void MotionPlanningFrame::updateSupportSurfacesList()
   // std::vector<std::string> support_ids = semantic_world_->getTableNamesInROI(min_x, min_y, min_z, max_x, max_y,
   // max_z);
   std::vector<std::string> support_ids;
-  RCLCPP_INFO(LOGGER, "%d Tables in collision world", (int)support_ids.size());
+  RCLCPP_INFO(LOGGER, "%d Tables in collision world", static_cast<int>(support_ids.size()));
 
   ui_->support_surfaces_list->setUpdatesEnabled(false);
   bool old_state = ui_->support_surfaces_list->blockSignals(true);
@@ -258,7 +255,7 @@ void MotionPlanningFrame::updateSupportSurfacesList()
     for (std::size_t i = 0; i < support_ids.size(); ++i)
     {
       QListWidgetItem* item =
-          new QListWidgetItem(QString::fromStdString(support_ids[i]), ui_->support_surfaces_list, (int)i);
+          new QListWidgetItem(QString::fromStdString(support_ids[i]), ui_->support_surfaces_list, static_cast<int>(i));
       item->setToolTip(item->text());
       Qt::ItemFlags flags = item->flags();
       flags &= ~(Qt::ItemIsUserCheckable);

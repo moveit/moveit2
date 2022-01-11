@@ -31,34 +31,39 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(std_srvs REQUIRED)
-find_package(sensor_msgs REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(control_toolbox REQUIRED)
-find_package(moveit_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(moveit_core REQUIRED)
+find_package(moveit_msgs REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(trajectory_msgs REQUIRED)
-find_package(moveit_ros_planning REQUIRED)
+
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-  rclcpp
-  rclcpp_components
-  std_msgs
-  std_srvs
-  sensor_msgs
   control_msgs
   control_toolbox
-  moveit_msgs
   geometry_msgs
+  moveit_core
+  moveit_msgs
+  moveit_ros_planning
+  pluginlib
+  rclcpp
+  rclcpp_components
+  sensor_msgs
+  std_msgs
+  std_srvs
   tf2_eigen
   trajectory_msgs
-  moveit_ros_planning
 )
 
 include_directories(
@@ -70,7 +75,10 @@ include_directories(
 ###################
 
 # This library provides a way of loading parameters for servo
-add_library(${SERVO_PARAM_LIB_NAME} SHARED src/servo_parameters.cpp)
+add_library(${SERVO_PARAM_LIB_NAME} SHARED
+  src/servo_parameters.cpp
+  src/parameter_descriptor_builder.cpp
+)
 set_target_properties(${SERVO_PARAM_LIB_NAME} PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(${SERVO_PARAM_LIB_NAME} ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
@@ -79,7 +87,6 @@ add_library(${SERVO_LIB_NAME} SHARED
   # These files are used to produce differential motion
   src/collision_check.cpp
   src/enforce_limits.cpp
-  src/low_pass_filter.cpp
   src/servo.cpp
   src/servo_calcs.cpp
 )
@@ -186,10 +193,6 @@ if(BUILD_TESTING)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
-
-  # Lowpass filter unit test
-  ament_add_gtest(test_low_pass_filter test/test_low_pass_filter.cpp)
-  target_link_libraries(test_low_pass_filter ${SERVO_LIB_NAME})
 
   # Unit test for ServoCalcs
   # TODO (vatanaksoytezer): Rewrite this similar to enforce limits test

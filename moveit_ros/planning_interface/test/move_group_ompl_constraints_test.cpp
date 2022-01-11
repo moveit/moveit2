@@ -33,7 +33,7 @@
  *********************************************************************/
 
 /* Author: Boston Cleek
-   Desc: move group interace ompl constrained planning capabilities for planning and execution
+   Desc: move group interface ompl constrained planning capabilities for planning and execution
 */
 
 // Testing
@@ -54,7 +54,7 @@
 #include <moveit/macros/console_colors.h>
 #include <moveit_msgs/msg/constraints.hpp>
 
-// acuracy tested for position and orientation
+// accuracy tested for position and orientation
 static const double EPSILON = 1e-2;
 
 static const std::string PLANNING_GROUP = "panda_arm";

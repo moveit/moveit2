@@ -45,11 +45,11 @@ int main(int /*argc*/, char** /*argv*/)
     pluginlib::ClassLoader<move_group::MoveGroupCapability> capability_plugin_loader("moveit_ros_move_group",
                                                                                      "move_group::MoveGroupCapability");
     std::cout << "Available capabilities:\n"
-              << boost::algorithm::join(capability_plugin_loader.getDeclaredClasses(), "\n") << std::endl;
+              << boost::algorithm::join(capability_plugin_loader.getDeclaredClasses(), "\n") << '\n';
   }
   catch (pluginlib::PluginlibException& ex)
   {
-    std::cerr << "Exception while creating plugin loader for move_group capabilities: " << ex.what() << std::endl;
+    std::cerr << "Exception while creating plugin loader for move_group capabilities: " << ex.what() << '\n';
   }
 
   return 0;

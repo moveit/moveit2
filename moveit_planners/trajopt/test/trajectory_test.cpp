@@ -138,7 +138,7 @@ TEST_F(TrajectoryTest, goalTolerance)
   // ======================================================================================
   // We will now construct a loader to load a planner, by name.
   // Note that we are using the ROS pluginlib library here.
-  boost::scoped_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager>> planner_plugin_loader;
+  std::unique_ptr<pluginlib::ClassLoader<planning_interface::PlannerManager>> planner_plugin_loader;
   planning_interface::PlannerManagerPtr planner_instance;
 
   std::string planner_plugin_name = "trajopt_interface/TrajOptPlanner";
@@ -148,8 +148,8 @@ TEST_F(TrajectoryTest, goalTolerance)
   EXPECT_TRUE(node_handle_.getParam("planning_plugin", planner_plugin_name));
   try
   {
-    planner_plugin_loader.reset(new pluginlib::ClassLoader<planning_interface::PlannerManager>(
-        "moveit_core", "planning_interface::PlannerManager"));
+    planner_plugin_loader = std::make_shared<pluginlib::ClassLoader<planning_interface::PlannerManager>>(
+        "moveit_core", "planning_interface::PlannerManager");
   }
   catch (pluginlib::PluginlibException& ex)
   {
@@ -169,11 +169,11 @@ TEST_F(TrajectoryTest, goalTolerance)
     for (std::size_t i = 0; i < classes.size(); ++i)
       ss << classes[i] << " ";
     ROS_ERROR_STREAM_NAMED(NODE_NAME, "Exception while loading planner '" << planner_plugin_name << "': " << ex.what()
-                                                                          << std::endl
+                                                                          << '\n'
                                                                           << "Available plugins: " << ss.str());
   }
 
-  // Creat planning context
+  // Create planning context
   // ========================================================================================
   planning_interface::PlanningContextPtr context =
       planner_instance->getPlanningContext(planning_scene, req, res.error_code_);
@@ -192,7 +192,7 @@ TEST_F(TrajectoryTest, goalTolerance)
   {
     double goal_error =
         abs(joints_values_last_step[joint_index] - req.goal_constraints[0].joint_constraints[joint_index].position);
-    std::cerr << "goal_error: " << goal_error << std::endl;
+    std::cerr << "goal_error: " << goal_error << '\n';
     EXPECT_LT(goal_error, GOAL_TOLERANCE);
   }
 }

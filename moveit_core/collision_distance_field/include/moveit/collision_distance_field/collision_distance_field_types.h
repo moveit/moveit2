@@ -182,7 +182,7 @@ public:
    * calculation
    * @param tolerance
    * @param subtract_radii distance to the sphere centers will be computed by
-   * substracting the sphere radius from the nearest point
+   * subtracting the sphere radius from the nearest point
    * @param maximum_value
    * @param stop_at_first_collision when true the computation is terminated when
    * the first collision is found
@@ -197,7 +197,7 @@ protected:
 };
 
 // determines set of collision spheres given a posed body; this is BAD!
-// Allocation erorrs will happen; change this function so it does not return
+// Allocation errors will happen; change this function so it does not return
 // that vector by value
 std::vector<CollisionSphere> determineCollisionSpheres(const bodies::Body* body, Eigen::Isometry3d& relativeTransform);
 
@@ -242,7 +242,7 @@ public:
                                const Eigen::Isometry3d& new_relative_cylinder_pose)
   {
     // std::cerr << "Replacing " << collision_spheres_.size() << " with " <<
-    // new_collision_spheres.size() << std::endl;
+    // new_collision_spheres.size() << '\n';
     collision_spheres_ = new_collision_spheres;
     relative_cylinder_pose_ = new_relative_cylinder_pose;
   }
@@ -423,7 +423,7 @@ public:
       return;
     }
     decomp_vector_[ind]->updatePose(pose);
-    for (unsigned int i = 0; i < decomp_vector_[ind]->getSphereCenters().size(); i++)
+    for (unsigned int i = 0; i < decomp_vector_[ind]->getSphereCenters().size(); ++i)
     {
       posed_collision_spheres_[sphere_index_map_[ind] + i] = decomp_vector_[ind]->getSphereCenters()[i];
     }

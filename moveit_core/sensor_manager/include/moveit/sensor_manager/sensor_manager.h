@@ -57,7 +57,7 @@ struct SensorInfo
 
   /* Define the frustum (or approximation of the frustum) */
 
-  /// The minumum distance along the Z axis at which observations start
+  /// The minimum distance along the Z axis at which observations start
   double min_dist;
 
   /// The maximum distance along the Z axis at which observations can be
@@ -99,7 +99,7 @@ public:
   /// it may or may not execute that trajectory.
   /// If it does not, it returns it as part of \e sensor_trajectory. This is the recommended behaviour, since the caller
   /// of this function can perform checks on the safety of the trajectory.
-  /// The function returns true on success (either completing execution succesfully or computing a trajecotory
+  /// The function returns true on success (either completing execution successfully or computing a trajecotory
   /// successufully)
   virtual bool pointSensorTo(const std::string& name, const geometry_msgs::msg::PointStamped& target,
                              moveit_msgs::msg::RobotTrajectory& sensor_trajectory) = 0;

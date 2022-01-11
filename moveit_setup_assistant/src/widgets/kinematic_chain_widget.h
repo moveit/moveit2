@@ -63,7 +63,7 @@ public:
   /// Constructor
   KinematicChainWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
 
-  /// Loads the availble data list
+  /// Loads the available data list
   void setAvailable();
 
   /// Set the link field with previous value
@@ -114,7 +114,7 @@ Q_SIGNALS:
   void cancelEditing();
 
   /// Event for telling rviz to highlight a link of the robot
-  void highlightLink(const std::string& name, const QColor&);
+  void highlightLink(const std::string& name, const QColor& /*_t2*/);
 
   /// Event for telling rviz to unhighlight all links of the robot
   void unhighlightAll();

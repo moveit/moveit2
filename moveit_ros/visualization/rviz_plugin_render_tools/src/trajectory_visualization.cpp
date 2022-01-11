@@ -161,7 +161,7 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
   trajectory_topic_property_->initialize(ros_node_abstraction);
 
   // Load trajectory robot
-  display_path_robot_.reset(new RobotStateVisualization(scene_node_, context_, "Planned Path", widget_));
+  display_path_robot_ = std::make_shared<RobotStateVisualization>(scene_node_, context_, "Planned Path", widget_);
   display_path_robot_->setVisualVisible(display_path_visual_enabled_property_->getBool());
   display_path_robot_->setCollisionVisible(display_path_collision_enabled_property_->getBool());
   display_path_robot_->setVisible(false);
@@ -201,7 +201,7 @@ void TrajectoryVisualization::onRobotModelLoaded(const moveit::core::RobotModelC
   }
 
   // Load robot state
-  robot_state_.reset(new moveit::core::RobotState(robot_model_));
+  robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
   robot_state_->setToDefaultValues();
 
   // Load rviz robot
@@ -251,8 +251,8 @@ void TrajectoryVisualization::changedShowTrail()
 
   int stepsize = trail_step_size_property_->getInt();
   // always include last trajectory point
-  trajectory_trail_.resize((int)std::ceil((t->getWayPointCount() + stepsize - 1) / (float)stepsize));
-  for (std::size_t i = 0; i < trajectory_trail_.size(); i++)
+  trajectory_trail_.resize(static_cast<int>(std::ceil((t->getWayPointCount() + stepsize - 1) / (float)stepsize)));
+  for (std::size_t i = 0; i < trajectory_trail_.size(); ++i)
   {
     int waypoint_i = std::min(i * stepsize, t->getWayPointCount() - 1);  // limit to last trajectory point
     auto r = std::make_unique<RobotStateVisualization>(scene_node_, context_,

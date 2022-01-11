@@ -140,7 +140,8 @@ CurrentStateMonitorPtr getSharedStateMonitor(const rclcpp::Node::SharedPtr& node
   if (!monitor)
   {
     // if there was no valid entry, create one
-    monitor.reset(new CurrentStateMonitor(node, robot_model, tf_buffer));
+    const bool use_sim_time = node->get_parameter("use_sim_time").as_bool();
+    monitor = std::make_shared<CurrentStateMonitor>(node, robot_model, tf_buffer, use_sim_time);
     it->second = monitor;
   }
   return monitor;

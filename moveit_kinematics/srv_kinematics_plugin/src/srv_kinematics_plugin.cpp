@@ -71,10 +71,10 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
 
   if (debug)
   {
-    std::cout << std::endl << "Joint Model Variable Names: ------------------------------------------- " << std::endl;
+    std::cout << "Joint Model Variable Names: ------------------------------------------- \n ";
     const std::vector<std::string> jm_names = joint_model_group_->getVariableNames();
     std::copy(jm_names.begin(), jm_names.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 
   // Get the dimension of the planning group
@@ -114,7 +114,7 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
   lookupParam(node_, "kinematics_solver_service_name", ik_service_name, std::string("solve_ik"));
 
   // Setup the joint state groups that we need
-  robot_state_.reset(new moveit::core::RobotState(robot_model_));
+  robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
   robot_state_->setToDefaultValues();
 
   // Create the ROS2 service client
@@ -158,7 +158,7 @@ bool SrvKinematicsPlugin::isRedundantJoint(unsigned int index) const
 
 int SrvKinematicsPlugin::getJointIndex(const std::string& name) const
 {
-  for (unsigned int i = 0; i < ik_group_info_.joint_names.size(); i++)
+  for (unsigned int i = 0; i < ik_group_info_.joint_names.size(); ++i)
   {
     if (ik_group_info_.joint_names[i] == name)
       return i;
@@ -333,7 +333,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
   // Convert the robot state message to our robot_state representation
   if (!moveit::core::robotStateMsgToRobotState(response->solution, *robot_state_))
   {
-    RCLCPP_ERROR(LOGGER, "An error occured converting received robot state message into internal robot state.");
+    RCLCPP_ERROR(LOGGER, "An error occurred converting received robot state message into internal robot state.");
     error_code.val = error_code.FAILURE;
     return false;
   }

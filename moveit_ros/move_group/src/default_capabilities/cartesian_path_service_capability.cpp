@@ -134,7 +134,7 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
     {
       if (req->max_step < std::numeric_limits<double>::epsilon())
       {
-        RCLCPP_ERROR(LOGGER, "Maximum step to take between consecutive configrations along Cartesian path"
+        RCLCPP_ERROR(LOGGER, "Maximum step to take between consecutive configurations along Cartesian path"
                              "was not specified (this value needs to be > 0)");
         res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       }
@@ -147,8 +147,8 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
           std::unique_ptr<kinematic_constraints::KinematicConstraintSet> kset;
           if (req->avoid_collisions || !moveit::core::isEmpty(req->path_constraints))
           {
-            ls.reset(new planning_scene_monitor::LockedPlanningSceneRO(context_->planning_scene_monitor_));
-            kset.reset(new kinematic_constraints::KinematicConstraintSet((*ls)->getRobotModel()));
+            ls = std::make_unique<planning_scene_monitor::LockedPlanningSceneRO>(context_->planning_scene_monitor_);
+            kset = std::make_unique<kinematic_constraints::KinematicConstraintSet>((*ls)->getRobotModel());
             kset->add(req->path_constraints, (*ls)->getTransforms());
             constraint_fn = boost::bind(
                 &isStateValid,

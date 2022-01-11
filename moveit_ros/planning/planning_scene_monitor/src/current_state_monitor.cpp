@@ -48,11 +48,14 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #endif
 
-#include <memory>
+#include <chrono>
 #include <limits>
+#include <memory>
 
 namespace planning_scene_monitor
 {
+using namespace std::chrono_literals;
+
 namespace
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.current_state_monitor");
@@ -60,7 +63,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.current_stat
 
 CurrentStateMonitor::CurrentStateMonitor(std::unique_ptr<CurrentStateMonitor::MiddlewareHandle> middleware_handle,
                                          const moveit::core::RobotModelConstPtr& robot_model,
-                                         const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
+                                         const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, bool use_sim_time)
   : middleware_handle_(std::move(middleware_handle))
   , tf_buffer_(tf_buffer)
   , robot_model_(robot_model)
@@ -68,14 +71,16 @@ CurrentStateMonitor::CurrentStateMonitor(std::unique_ptr<CurrentStateMonitor::Mi
   , state_monitor_started_(false)
   , copy_dynamics_(false)
   , error_(std::numeric_limits<double>::epsilon())
+  , use_sim_time_(use_sim_time)
 {
   robot_state_.setToDefaultValues();
 }
 
 CurrentStateMonitor::CurrentStateMonitor(const rclcpp::Node::SharedPtr& node,
                                          const moveit::core::RobotModelConstPtr& robot_model,
-                                         const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
-  : CurrentStateMonitor(std::make_unique<CurrentStateMonitorMiddlewareHandle>(node), robot_model, tf_buffer)
+                                         const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, bool use_sim_time)
+  : CurrentStateMonitor(std::make_unique<CurrentStateMonitorMiddlewareHandle>(node), robot_model, tf_buffer,
+                        use_sim_time)
 {
 }
 
@@ -240,8 +245,26 @@ bool CurrentStateMonitor::waitForCurrentState(const rclcpp::Time& t, double wait
   std::unique_lock<std::mutex> lock(state_update_lock_);
   while (current_state_time_ < t)
   {
-    state_update_condition_.wait_for(lock, (timeout - elapsed).to_chrono<std::chrono::duration<double>>());
-    elapsed = middleware_handle_->now() - start;
+    if (use_sim_time_)
+    {
+      if (state_update_condition_.wait_for(lock, 100ms) == std::cv_status::timeout)
+      {
+        /* We cannot know if the reason of timeout is slow time or absence of
+         * state messages, warn the user. */
+        rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+        RCLCPP_WARN_SKIPFIRST_THROTTLE(LOGGER, steady_clock, 1000,
+                                       "No state update received within 100ms of system clock");
+      }
+      else
+      {
+        elapsed = middleware_handle_->now() - start;
+      }
+    }
+    else
+    {
+      state_update_condition_.wait_for(lock, (timeout - elapsed).to_chrono<std::chrono::duration<double>>());
+      elapsed = middleware_handle_->now() - start;
+    }
     if (elapsed > timeout)
     {
       RCLCPP_INFO(LOGGER,
@@ -465,7 +488,7 @@ void CurrentStateMonitor::transformCallback(const tf2_msgs::msg::TFMessage::Cons
     catch (tf2::TransformException& ex)
     {
       std::string temp = ex.what();
-      RCLCPP_ERROR(LOGGER, "Failure to set recieved transform from %s to %s with error: %s\n",
+      RCLCPP_ERROR(LOGGER, "Failure to set received transform from %s to %s with error: %s\n",
                    transform.child_frame_id.c_str(), transform.header.frame_id.c_str(), temp.c_str());
     }
   }

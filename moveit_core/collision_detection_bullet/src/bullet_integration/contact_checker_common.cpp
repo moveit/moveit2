@@ -62,7 +62,7 @@ collision_detection::Contact* processResult(ContactTestData& cdata, collision_de
 
     std::vector<collision_detection::Contact> data;
 
-    // if we dont want contacts we are done here
+    // if we don't want contacts we are done here
     if (!cdata.req.contacts)
     {
       if (!cdata.req.distance)
@@ -142,7 +142,7 @@ int createConvexHull(AlignedVector<Eigen::Vector3d>& vertices, std::vector<int>&
 
   int num_verts = conv.vertices.size();
   vertices.reserve(static_cast<size_t>(num_verts));
-  for (int i = 0; i < num_verts; i++)
+  for (int i = 0; i < num_verts; ++i)
   {
     btVector3& v = conv.vertices[i];
     vertices.push_back(Eigen::Vector3d(v.getX(), v.getY(), v.getZ()));
@@ -150,7 +150,7 @@ int createConvexHull(AlignedVector<Eigen::Vector3d>& vertices, std::vector<int>&
 
   int num_faces = conv.faces.size();
   faces.reserve(static_cast<size_t>(3 * num_faces));
-  for (int i = 0; i < num_faces; i++)
+  for (int i = 0; i < num_faces; ++i)
   {
     std::vector<int> face;
     face.reserve(3);

@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find moveit_resources_prbt_pg70_support)/urdf/common.xacro" />
+  <xacro:include filename="$(find moveit_resources_prbt_pg70_support)/urdf/pg70/pg70.gazebo.xacro" />
+  <xacro:include filename="$(find moveit_resources_prbt_pg70_support)/urdf/pg70/pg70.transmission.xacro" />
+
+  <xacro:macro name="schunk_pg70" params="parent name *origin has_podest">
+
+    <xacro:if value="${has_podest}">
+      <joint name="${name}_podest_joint" type="fixed">
+        <xacro:insert_block name="origin" />
+        <parent link="${parent}"/>
+        <child link="${name}_podest_link"/>
+      </joint>
+      <link name="${name}_podest_link">
+        <xacro:default_inertial/>
+      </link>
+
+      <joint name="${name}_palm_joint" type="fixed">
+        <origin xyz="0 0 0.10" rpy="0 0 0" />
+        <parent link="${name}_podest_link"/>
+        <child link="${name}_palm_link"/>
+      </joint>
+    </xacro:if>
+
+    <xacro:unless value="${has_podest}">
+      <joint name="${name}_palm_joint" type="fixed">
+        <xacro:insert_block name="origin" />
+        <parent link="${parent}"/>
+        <child link="${name}_palm_link" />
+      </joint>
+    </xacro:unless>
+
+    <link name="${name}_palm_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="1"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+      <visual>
+        <geometry>
+          <mesh filename="package://moveit_resources_prbt_pg70_support/meshes/pg70/pg70.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0 ${0.040-0.5*0.0171}" rpy="0 0 0" />
+        <geometry>
+          <box size="0.082 0.114 0.080" />
+        </geometry>
+      </collision>
+    </link>
+
+
+    <joint name="${name}_finger_left_joint" type="prismatic" >
+      <origin xyz="0 0.0055 0.0789" rpy="0 0 0"/>
+      <parent link="${name}_palm_link" />
+      <child link="${name}_finger_left_link" />
+      <axis xyz="0 1 0" />
+      <limit effort="10" lower="-0.001" upper="0.0301" velocity="0.041"/>
+    </joint>
+
+    <link name="${name}_finger_left_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="1"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+      <visual>
+        <geometry>
+          <box size="0.03 0.01 0.01"/>
+        </geometry>
+        <material name="black">
+          <color rgba="0 0 0 1"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="0.03 0.01 0.01"/>
+        </geometry>
+        <material name="black">
+          <color rgba="0 0 0 1"/>
+        </material>
+      </collision>
+    </link>
+
+
+    <joint name="${name}_finger_right_joint" type="prismatic" >
+      <origin xyz="0 -0.0055 0.0789" rpy="-0 0 0"/>
+      <parent link="${name}_palm_link" />
+      <child link="${name}_finger_right_link" />
+      <axis xyz="0 -1 0" />
+      <mimic joint="${name}_finger_left_joint" multiplier="1" offset="0"/>
+      <limit effort="10" lower="-0.001" upper="0.0301" velocity="0.041"/>
+    </joint>
+
+    <link name="${name}_finger_right_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="1"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+      </inertial>
+      <visual>
+        <geometry>
+          <box size="0.03 0.01 0.01"/>
+        </geometry>
+        <material name="black">
+          <color rgba="0 0 0 1"/>
+        </material>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="0.03 0.01 0.01"/>
+        </geometry>
+        <material name="black">
+          <color rgba="0 0 0 1"/>
+        </material>
+      </collision>
+    </link>
+
+    <!-- extensions -->
+    <xacro:schunk_pg70_gazebo name="${name}" />
+    <xacro:schunk_pg70_transmission name="${name}" />
+
+    <!-- ros_control plugin -->
+    <gazebo>
+      <plugin name="ros_control" filename="libhwi_switch_gazebo_ros_control.so">
+        <robotNamespace>${name}</robotNamespace>
+        <filterJointsParam>joint_names</filterJointsParam>
+      </plugin>
+    </gazebo>
+
+  </xacro:macro>
+</robot>

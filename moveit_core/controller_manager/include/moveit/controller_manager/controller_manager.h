@@ -194,7 +194,7 @@ public:
   /** \brief Get the list of active controllers.
    *
    * If there is only one controller in the system, this will be active.  When multiple controllers exist,
-   * and they operate on overlaping sets of joints, not all controllers should be active at the same time. */
+   * and they operate on overlapping sets of joints, not all controllers should be active at the same time. */
   virtual void getActiveControllers(std::vector<std::string>& names) = 0;
 
   /** \brief Report the joints a controller operates on, given the controller name.

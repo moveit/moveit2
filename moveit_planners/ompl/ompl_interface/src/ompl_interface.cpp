@@ -126,8 +126,9 @@ void OMPLInterface::configureContext(const ModelBasedPlanningContextPtr& context
 
 void OMPLInterface::loadConstraintSamplers()
 {
-  constraint_sampler_manager_loader_.reset(
-      new constraint_sampler_manager_loader::ConstraintSamplerManagerLoader(node_, constraint_sampler_manager_));
+  constraint_sampler_manager_loader_ =
+      std::make_shared<constraint_sampler_manager_loader::ConstraintSamplerManagerLoader>(node_,
+                                                                                          constraint_sampler_manager_);
 }
 
 bool OMPLInterface::loadPlannerConfiguration(const std::string& group_name, const std::string& planner_id,

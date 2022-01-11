@@ -32,10 +32,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#ifndef JOINT_LIMITS_EXTENSION_H
-#define JOINT_LIMITS_EXTENSION_H
+#pragma once
 
-#include <joint_limits_interface/joint_limits.h>
+#include <limits>
+
+#include <joint_limits/joint_limits.hpp>
+
 #include <map>
 #include <string>
 
@@ -47,7 +49,7 @@ namespace joint_limits_interface
  * @brief Extends joint_limits_interface::JointLimits with a deceleration
  * parameter
  */
-struct JointLimits : ::joint_limits_interface::JointLimits
+struct JointLimits : joint_limits::JointLimits
 {
   JointLimits() : max_deceleration(0.0), has_deceleration_limits(false)
   {
@@ -63,5 +65,3 @@ struct JointLimits : ::joint_limits_interface::JointLimits
 typedef joint_limits_interface::JointLimits JointLimit;
 typedef std::map<std::string, JointLimit> JointLimitsMap;
 }  // namespace pilz_industrial_motion_planner
-
-#endif  // JOINT_LIMITS_EXTENSION_H

@@ -92,15 +92,13 @@ class MOVEIT_PLANNING_SCENE_EXPORT PlanningScene : private boost::noncopyable,
 {
 public:
   /** \brief construct using an existing RobotModel */
-  PlanningScene(
-      const moveit::core::RobotModelConstPtr& robot_model,
-      const collision_detection::WorldPtr& world = collision_detection::WorldPtr(new collision_detection::World()));
+  PlanningScene(const moveit::core::RobotModelConstPtr& robot_model,
+                const collision_detection::WorldPtr& world = std::make_shared<collision_detection::World>());
 
   /** \brief construct using a urdf and srdf.
    * A RobotModel for the PlanningScene will be created using the urdf and srdf. */
-  PlanningScene(
-      const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model,
-      const collision_detection::WorldPtr& world = collision_detection::WorldPtr(new collision_detection::World()));
+  PlanningScene(const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model,
+                const collision_detection::WorldPtr& world = std::make_shared<collision_detection::World>());
 
   static const std::string OCTOMAP_NS;
   static const std::string DEFAULT_SCENE_NAME;
@@ -135,7 +133,7 @@ public:
    * has the diffs specified by \e msg applied. */
   PlanningScenePtr diff(const moveit_msgs::msg::PlanningScene& msg) const;
 
-  /** \brief Get the parent scene (whith respect to which the diffs are maintained). This may be empty */
+  /** \brief Get the parent scene (with respect to which the diffs are maintained). This may be empty */
   const PlanningSceneConstPtr& getParent() const
   {
     return parent_;
@@ -690,6 +688,15 @@ public:
    * is set */
   bool usePlanningSceneMsg(const moveit_msgs::msg::PlanningScene& scene);
 
+  /** \brief Takes the object message and returns the object pose, shapes and shape poses.
+   * If the object pose is empty (identity) but the shape pose is set, this uses the shape
+   * pose as the object pose. The shape pose becomes the identity instead.
+   */
+  bool shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::msg::CollisionObject& object,
+                                                Eigen::Isometry3d& object_pose_in_header_frame,
+                                                std::vector<shapes::ShapeConstPtr>& shapes,
+                                                EigenSTL::vector_Isometry3d& shape_poses);
+
   bool processCollisionObjectMsg(const moveit_msgs::msg::CollisionObject& object);
   bool processAttachedCollisionObjectMsg(const moveit_msgs::msg::AttachedCollisionObject& object);
 
@@ -952,12 +959,16 @@ private:
   bool processCollisionObjectRemove(const moveit_msgs::msg::CollisionObject& object);
   bool processCollisionObjectMove(const moveit_msgs::msg::CollisionObject& object);
 
+  /* For exporting and importing the planning scene */
+  bool readPoseFromText(std::istream& in, Eigen::Isometry3d& pose) const;
+  void writePoseToText(std::ostream& out, const Eigen::Isometry3d& pose) const;
+
   /** convert Pose msg to Eigen::Isometry, normalizing the quaternion part if necessary. */
   static void poseMsgToEigen(const geometry_msgs::msg::Pose& msg, Eigen::Isometry3d& out);
 
   MOVEIT_STRUCT_FORWARD(CollisionDetector);
 
-  /* Construct a new CollisionDector from allocator, copy-construct environments from parent_detector if not null */
+  /* Construct a new CollisionDector from allocator, copy-construct environments from parent_detector if not nullptr */
   void allocateCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator,
                                  const CollisionDetectorPtr& parent_detector);
 
@@ -965,7 +976,7 @@ private:
   struct CollisionDetector
   {
     collision_detection::CollisionDetectorAllocatorPtr alloc_;
-    collision_detection::CollisionEnvPtr cenv_;  // never NULL
+    collision_detection::CollisionEnvPtr cenv_;  // never nullptr
     collision_detection::CollisionEnvConstPtr cenv_const_;
 
     collision_detection::CollisionEnvPtr cenv_unpadded_;
@@ -989,24 +1000,24 @@ private:
 
   moveit::core::RobotModelConstPtr robot_model_;  // Never null (may point to same model as parent)
 
-  moveit::core::RobotStatePtr robot_state_;  // if NULL use parent's
+  moveit::core::RobotStatePtr robot_state_;  // if nullptr use parent's
 
   // Called when changes are made to attached bodies
   moveit::core::AttachedBodyCallback current_state_attached_body_callback_;
 
   // This variable is not necessarily used by child planning scenes
   // This Transforms class is actually a SceneTransforms class
-  moveit::core::TransformsPtr scene_transforms_;  // if NULL use parent's
+  moveit::core::TransformsPtr scene_transforms_;  // if nullptr use parent's
 
-  collision_detection::WorldPtr world_;             // never NULL, never shared with parent/child
+  collision_detection::WorldPtr world_;             // never nullptr, never shared with parent/child
   collision_detection::WorldConstPtr world_const_;  // copy of world_
-  collision_detection::WorldDiffPtr world_diff_;    // NULL unless this is a diff scene
+  collision_detection::WorldDiffPtr world_diff_;    // nullptr unless this is a diff scene
   collision_detection::World::ObserverCallbackFn current_world_object_update_callback_;
   collision_detection::World::ObserverHandle current_world_object_update_observer_handle_;
 
-  CollisionDetectorPtr collision_detector_;  // Never NULL.
+  CollisionDetectorPtr collision_detector_;  // Never nullptr.
 
-  collision_detection::AllowedCollisionMatrixPtr acm_;  // if NULL use parent's
+  collision_detection::AllowedCollisionMatrixPtr acm_;  // if nullptr use parent's
 
   StateFeasibilityFn state_feasibility_;
   MotionFeasibilityFn motion_feasibility_;

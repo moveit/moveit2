@@ -61,7 +61,7 @@ namespace moveit_rviz_plugin
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.planning_scene_display");
 // ******************************************************************************************
-// Base class contructor
+// Base class constructor
 // ******************************************************************************************
 PlanningSceneDisplay::PlanningSceneDisplay(bool listen_to_planning_scene, bool show_scene_robot)
   : Display(), planning_scene_needs_render_(true), current_scene_time_(0.0f)
@@ -200,7 +200,7 @@ void PlanningSceneDisplay::onInitialize()
   node_ = ros_node_abstraction->get_raw_node();
   planning_scene_topic_property_->initialize(ros_node_abstraction);
 
-  // the scene node that contains everything
+  // the scene node that contains everything and is located at the planning frame
   planning_scene_node_ = scene_node_->createChildSceneNode();
 
   if (robot_category_)
@@ -563,7 +563,7 @@ void PlanningSceneDisplay::loadRobotModel()
 void PlanningSceneDisplay::onRobotModelLoaded()
 {
   changedPlanningSceneTopic();
-  planning_scene_render_.reset(new PlanningSceneRender(planning_scene_node_, context_, planning_scene_robot_));
+  planning_scene_render_ = std::make_shared<PlanningSceneRender>(planning_scene_node_, context_, planning_scene_robot_);
   planning_scene_render_->getGeometryNode()->setVisible(scene_enabled_property_->getBool());
 
   const planning_scene_monitor::LockedPlanningSceneRO& ps = getPlanningSceneRO();
@@ -652,6 +652,8 @@ void PlanningSceneDisplay::update(float wall_dt, float ros_dt)
 
   executeMainLoopJobs();
 
+  calculateOffsetPosition();
+
   if (planning_scene_monitor_)
     updateInternal(wall_dt, ros_dt);
 }
@@ -664,7 +666,6 @@ void PlanningSceneDisplay::updateInternal(float wall_dt, float /*ros_dt*/)
        planning_scene_needs_render_))
   {
     renderPlanningScene();
-    calculateOffsetPosition();
     current_scene_time_ = 0.0f;
     robot_state_needs_render_ = false;
     planning_scene_needs_render_ = false;

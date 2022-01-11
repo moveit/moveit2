@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ASYNC_TEST_H
-#define ASYNC_TEST_H
+#pragma once
 
 #include <mutex>
 #include <condition_variable>
@@ -25,10 +24,11 @@
 
 #include <gmock/gmock.h>
 
-#include <ros/ros.h>
+#include <rclcpp/logging.hpp>
 
 namespace testing
 {
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.async_test");
 /**
  * @brief Test class that allows the handling of asynchronous test objects
  *
@@ -70,7 +70,7 @@ class AsyncTest
 {
 public:
   /**
-   * @brief Triggeres a clear event. If a call to barricade is currently pending it will unblock as soon as all clear
+   * @brief Triggers a clear event. If a call to barricade is currently pending it will unblock as soon as all clear
    * events are triggered. Else the event is put on the waitlist. This waitlist is emptied upon a call to barricade.
    *
    * @param event The event that is triggered
@@ -113,7 +113,7 @@ protected:
     this->triggerClearEvent(str);                                                                                      \
     return true;                                                                                                       \
   })
-#define ACTION_OPEN_BARRIER_VOID(str) ::testing::InvokeWithoutArgs([this](void) { this->triggerClearEvent(str); })
+#define ACTION_OPEN_BARRIER_VOID(str) ::testing::InvokeWithoutArgs([this]() { this->triggerClearEvent(str); })
 
 inline void AsyncTest::triggerClearEvent(const std::string& event)
 {
@@ -121,12 +121,12 @@ inline void AsyncTest::triggerClearEvent(const std::string& event)
 
   if (clear_events_.empty())
   {
-    ROS_DEBUG_NAMED("Test", "Clearing Barricade[%s]", event.c_str());
+    RCLCPP_DEBUG(LOGGER, "Clearing Barricade[%s]", event.c_str());
     waitlist_.insert(event);
   }
   else if (clear_events_.erase(event) < 1)
   {
-    ROS_WARN_STREAM("Triggered event " << event << " despite not waiting for it.");
+    RCLCPP_WARN(LOGGER, "Triggered event " << event << " despite not waiting for it.");
   }
   cv_.notify_one();
 }
@@ -145,10 +145,10 @@ inline bool AsyncTest::barricade(std::initializer_list<std::string> clear_events
   {
     events_stringstream << event << ", ";
   }
-  ROS_DEBUG_NAMED("Test", "Adding Barricade[%s]", events_stringstream.str().c_str());
+  RCLCPP_DEBUG(LOGGER, "Adding Barricade[%s]", events_stringstream.str().c_str());
 
   std::copy_if(clear_events.begin(), clear_events.end(), std::inserter(clear_events_, clear_events_.end()),
-               [this](std::string event) { return this->waitlist_.count(event) == 0; });
+               [this](const std::string& event) { return this->waitlist_.count(event) == 0; });
   waitlist_.clear();
 
   auto end_time_point = std::chrono::system_clock::now() + std::chrono::milliseconds(timeout_ms);
@@ -172,5 +172,3 @@ inline bool AsyncTest::barricade(std::initializer_list<std::string> clear_events
 }
 
 }  // namespace testing
-
-#endif  // ASYNC_TEST_H

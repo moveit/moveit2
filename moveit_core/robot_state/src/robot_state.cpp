@@ -180,9 +180,7 @@ void RobotState::copyFrom(const RobotState& other)
   // copy attached bodies
   clearAttachedBodies();
   for (const std::pair<const std::string, AttachedBody*>& it : other.attached_body_map_)
-    attachBody(it.second->getName(), it.second->getShapes(), it.second->getFixedTransforms(),
-               it.second->getTouchLinks(), it.second->getAttachedLinkName(), it.second->getDetachPosture(),
-               it.second->getSubframeTransforms());
+    attachBody(new AttachedBody(*it.second));
 }
 
 bool RobotState::checkJointTransforms(const JointModel* joint) const
@@ -308,33 +306,46 @@ void RobotState::setToRandomPositions(const JointModelGroup* group, random_numbe
   updateMimicJoints(group);
 }
 
-void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& near,
+void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
                                             const std::vector<double>& distances)
 {
   // we do not make calls to RobotModel for random number generation because mimic joints
   // could trigger updates outside the state of the group itself
   random_numbers::RandomNumberGenerator& rng = getRandomNumberGenerator();
+  setToRandomPositionsNearBy(group, seed, distances, rng);
+}
+
+void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
+                                            const std::vector<double>& distances,
+                                            random_numbers::RandomNumberGenerator& rng)
+{
   const std::vector<const JointModel*>& joints = group->getActiveJointModels();
   assert(distances.size() == joints.size());
   for (std::size_t i = 0; i < joints.size(); ++i)
   {
     const int idx = joints[i]->getFirstVariableIndex();
     joints[i]->getVariableRandomPositionsNearBy(rng, position_ + joints[i]->getFirstVariableIndex(),
-                                                near.position_ + idx, distances[i]);
+                                                seed.position_ + idx, distances[i]);
   }
   updateMimicJoints(group);
 }
 
-void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& near, double distance)
+void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance)
 {
   // we do not make calls to RobotModel for random number generation because mimic joints
   // could trigger updates outside the state of the group itself
   random_numbers::RandomNumberGenerator& rng = getRandomNumberGenerator();
+  setToRandomPositionsNearBy(group, seed, distance, rng);
+}
+
+void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance,
+                                            random_numbers::RandomNumberGenerator& rng)
+{
   const std::vector<const JointModel*>& joints = group->getActiveJointModels();
   for (const JointModel* joint : joints)
   {
     const int idx = joint->getFirstVariableIndex();
-    joint->getVariableRandomPositionsNearBy(rng, position_ + joint->getFirstVariableIndex(), near.position_ + idx,
+    joint->getVariableRandomPositionsNearBy(rng, position_ + joint->getFirstVariableIndex(), seed.position_ + idx,
                                             distance);
   }
   updateMimicJoints(group);
@@ -462,7 +473,7 @@ void RobotState::setVariableEffort(const std::map<std::string, double>& variable
 {
   markEffort();
   for (const std::pair<const std::string, double>& it : variable_map)
-    acceleration_[robot_model_->getVariableIndex(it.first)] = it.second;
+    effort_[robot_model_->getVariableIndex(it.first)] = it.second;
 }
 
 void RobotState::setVariableEffort(const std::map<std::string, double>& variable_map,
@@ -966,13 +977,14 @@ void RobotState::attachBody(AttachedBody* attached_body)
     attached_body_update_callback_(attached_body, true);
 }
 
-void RobotState::attachBody(const std::string& id, const std::vector<shapes::ShapeConstPtr>& shapes,
+void RobotState::attachBody(const std::string& id, const Eigen::Isometry3d& pose,
+                            const std::vector<shapes::ShapeConstPtr>& shapes,
                             const EigenSTL::vector_Isometry3d& shape_poses, const std::set<std::string>& touch_links,
                             const std::string& link, const trajectory_msgs::msg::JointTrajectory& detach_posture,
                             const moveit::core::FixedTransformsMap& subframe_poses)
 {
   const LinkModel* l = robot_model_->getLinkModel(link);
-  attachBody(new AttachedBody(l, id, shapes, shape_poses, touch_links, detach_posture, subframe_poses));
+  attachBody(new AttachedBody(l, id, pose, shapes, shape_poses, touch_links, detach_posture, subframe_poses));
 }
 
 void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies) const
@@ -1106,30 +1118,17 @@ const Eigen::Isometry3d& RobotState::getFrameInfo(const std::string& frame_id, c
   std::map<std::string, AttachedBody*>::const_iterator jt = attached_body_map_.find(frame_id);
   if (jt != attached_body_map_.end())
   {
-    const EigenSTL::vector_Isometry3d& tf = jt->second->getGlobalCollisionBodyTransforms();
-    if (tf.empty())
-    {
-      RCLCPP_ERROR(LOGGER, "Attached body '%s' has no geometry associated to it. No transform to return.",
-                   frame_id.c_str());
-      robot_link = nullptr;
-      frame_found = false;
-      return IDENTITY_TRANSFORM;
-    }
-    if (tf.size() > 1)
-      RCLCPP_DEBUG(LOGGER,
-                   "There are multiple geometries associated to attached body '%s'. "
-                   "Returning the transform for the first one.",
-                   frame_id.c_str());
+    const Eigen::Isometry3d& transform = jt->second->getGlobalPose();
     robot_link = jt->second->getAttachedLink();
     frame_found = true;
     BOOST_VERIFY(checkLinkTransforms());
-    return tf[0];
+    return transform;
   }
 
   // Check if an AttachedBody has a subframe with name frame_id
   for (const std::pair<const std::string, AttachedBody*>& body : attached_body_map_)
   {
-    const auto& transform = body.second->getGlobalSubframeTransform(frame_id, &frame_found);
+    const Eigen::Isometry3d& transform = body.second->getGlobalSubframeTransform(frame_id, &frame_found);
     if (frame_found)
     {
       robot_link = body.second->getAttachedLink();
@@ -1603,7 +1602,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
     }
   }
 
-  // Check that no, or only one set of consistency limits have been passed in, and choose that one
+  // Check that no, or only one set of consistency limits has been passed in, and choose that one
   std::vector<double> consistency_limits;
   if (consistency_limit_sets.size() > 1)
   {
@@ -1662,15 +1661,8 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
         if (hasAttachedBody(pose_frame))
         {
           const AttachedBody* body = getAttachedBody(pose_frame);
-          const EigenSTL::vector_Isometry3d& ab_trans = body->getFixedTransforms();
-          if (ab_trans.size() != 1)
-          {
-            RCLCPP_ERROR(LOGGER, "Cannot use an attached body "
-                                 "with multiple geometries as a reference frame.");
-            return false;
-          }
           pose_frame = body->getAttachedLinkName();
-          pose = pose * ab_trans[0].inverse();
+          pose = pose * body->getPose().inverse();
         }
         if (pose_frame != solver_tip_frame)
         {
@@ -1875,14 +1867,8 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
       if (hasAttachedBody(pose_frame))
       {
         const AttachedBody* body = getAttachedBody(pose_frame);
-        const EigenSTL::vector_Isometry3d& ab_trans = body->getFixedTransforms();  // valid isometries by contract
-        if (ab_trans.size() != 1)
-        {
-          RCLCPP_ERROR(LOGGER, "Cannot use an attached body with multiple geometries as a reference frame.");
-          return false;
-        }
         pose_frame = body->getAttachedLinkName();
-        pose = pose * ab_trans[0].inverse();  // valid isometry
+        pose = pose * body->getPose().inverse();  // valid isometry
       }
       if (pose_frame != solver_tip_frame)
       {
@@ -2070,7 +2056,7 @@ void RobotState::printStatePositions(std::ostream& out) const
 {
   const std::vector<std::string>& nm = robot_model_->getVariableNames();
   for (std::size_t i = 0; i < nm.size(); ++i)
-    out << nm[i] << "=" << position_[i] << std::endl;
+    out << nm[i] << "=" << position_[i] << '\n';
 }
 
 void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointModelGroup* jmg, std::ostream& out) const
@@ -2118,7 +2104,7 @@ void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointMod
 
     // show max position
     out << " \t" << std::fixed << std::setprecision(5) << bound.max_position_ << "  \t" << joint->getName()
-        << " current: " << std::fixed << std::setprecision(5) << current_value << std::endl;
+        << " current: " << std::fixed << std::setprecision(5) << current_value << '\n';
 
     if (out_of_bounds)
       out << MOVEIT_CONSOLE_COLOR_RESET;
@@ -2127,20 +2113,19 @@ void RobotState::printStatePositionsWithJointLimits(const moveit::core::JointMod
 
 void RobotState::printDirtyInfo(std::ostream& out) const
 {
-  out << "  * Dirty Joint Transforms: " << std::endl;
+  out << "  * Dirty Joint Transforms: \n";
   const std::vector<const JointModel*>& jm = robot_model_->getJointModels();
   for (const JointModel* joint : jm)
     if (joint->getVariableCount() > 0 && dirtyJointTransform(joint))
-      out << "    " << joint->getName() << std::endl;
-  out << "  * Dirty Link Transforms: " << (dirty_link_transforms_ ? dirty_link_transforms_->getName() : "NULL")
-      << std::endl;
+      out << "    " << joint->getName() << '\n';
+  out << "  * Dirty Link Transforms: " << (dirty_link_transforms_ ? dirty_link_transforms_->getName() : "NULL") << '\n';
   out << "  * Dirty Collision Body Transforms: "
-      << (dirty_collision_body_transforms_ ? dirty_collision_body_transforms_->getName() : "NULL") << std::endl;
+      << (dirty_collision_body_transforms_ ? dirty_collision_body_transforms_->getName() : "NULL\n");
 }
 
 void RobotState::printStateInfo(std::ostream& out) const
 {
-  out << "Robot State @" << this << std::endl;
+  out << "Robot State @" << this << '\n';
 
   std::size_t n = robot_model_->getVariableCount();
   if (position_)
@@ -2148,35 +2133,34 @@ void RobotState::printStateInfo(std::ostream& out) const
     out << "  * Position: ";
     for (std::size_t i = 0; i < n; ++i)
       out << position_[i] << " ";
-    out << std::endl;
+    out << '\n';
   }
   else
-    out << "  * Position: NULL" << std::endl;
+    out << "  * Position: NULL\n";
 
   if (velocity_)
   {
     out << "  * Velocity: ";
     for (std::size_t i = 0; i < n; ++i)
       out << velocity_[i] << " ";
-    out << std::endl;
+    out << '\n';
   }
   else
-    out << "  * Velocity: NULL" << std::endl;
+    out << "  * Velocity: NULL\n";
 
   if (acceleration_)
   {
     out << "  * Acceleration: ";
     for (std::size_t i = 0; i < n; ++i)
       out << acceleration_[i] << " ";
-    out << std::endl;
+    out << '\n';
   }
   else
-    out << "  * Acceleration: NULL" << std::endl;
+    out << "  * Acceleration: NULL\n";
 
-  out << "  * Dirty Link Transforms: " << (dirty_link_transforms_ ? dirty_link_transforms_->getName() : "NULL")
-      << std::endl;
+  out << "  * Dirty Link Transforms: " << (dirty_link_transforms_ ? dirty_link_transforms_->getName() : "NULL\n");
   out << "  * Dirty Collision Body Transforms: "
-      << (dirty_collision_body_transforms_ ? dirty_collision_body_transforms_->getName() : "NULL") << std::endl;
+      << (dirty_collision_body_transforms_ ? dirty_collision_body_transforms_->getName() : "NULL\n");
 
   printTransforms(out);
 }
@@ -2187,18 +2171,18 @@ void RobotState::printTransform(const Eigen::Isometry3d& transform, std::ostream
   Eigen::Quaterniond q(transform.linear());
   out << "T.xyz = [" << transform.translation().x() << ", " << transform.translation().y() << ", "
       << transform.translation().z() << "], Q.xyzw = [" << q.x() << ", " << q.y() << ", " << q.z() << ", " << q.w()
-      << "]" << std::endl;
+      << "]\n";
 }
 
 void RobotState::printTransforms(std::ostream& out) const
 {
   if (!variable_joint_transforms_)
   {
-    out << "No transforms computed" << std::endl;
+    out << "No transforms computed\n";
     return;
   }
 
-  out << "Joint transforms:" << std::endl;
+  out << "Joint transforms:\n";
   const std::vector<const JointModel*>& jm = robot_model_->getJointModels();
   for (const JointModel* joint : jm)
   {
@@ -2210,7 +2194,7 @@ void RobotState::printTransforms(std::ostream& out) const
     printTransform(variable_joint_transforms_[idx], out);
   }
 
-  out << "Link poses:" << std::endl;
+  out << "Link poses:\n";
   const std::vector<const LinkModel*>& link_model = robot_model_->getLinkModels();
   for (const LinkModel* link : link_model)
   {
@@ -2222,7 +2206,7 @@ void RobotState::printTransforms(std::ostream& out) const
 std::string RobotState::getStateTreeString(const std::string& prefix) const
 {
   std::stringstream ss;
-  ss << "ROBOT: " << robot_model_->getName() << std::endl;
+  ss << "ROBOT: " << robot_model_->getName() << '\n';
   getStateTreeJointString(ss, robot_model_->getRootJoint(), "   ", true);
   return ss.str();
 }
@@ -2239,7 +2223,7 @@ void getPoseString(std::ostream& ss, const Eigen::Isometry3d& pose, const std::s
     {
       ss << std::setw(8) << pose(y, x) << " ";
     }
-    ss << std::endl;
+    ss << '\n';
   }
 }
 }  // namespace
@@ -2249,19 +2233,19 @@ void RobotState::getStateTreeJointString(std::ostream& ss, const JointModel* jm,
 {
   std::string pfx = pfx0 + "+--";
 
-  ss << pfx << "Joint: " << jm->getName() << std::endl;
+  ss << pfx << "Joint: " << jm->getName() << '\n';
 
   pfx = pfx0 + (last ? "   " : "|  ");
 
   for (std::size_t i = 0; i < jm->getVariableCount(); ++i)
   {
     ss.precision(3);
-    ss << pfx << jm->getVariableNames()[i] << std::setw(12) << position_[jm->getFirstVariableIndex() + i] << std::endl;
+    ss << pfx << jm->getVariableNames()[i] << std::setw(12) << position_[jm->getFirstVariableIndex() + i] << '\n';
   }
 
   const LinkModel* link_model = jm->getChildLinkModel();
 
-  ss << pfx << "Link: " << link_model->getName() << std::endl;
+  ss << pfx << "Link: " << link_model->getName() << '\n';
   getPoseString(ss, link_model->getJointOriginTransform(), pfx + "joint_origin:");
   if (variable_joint_transforms_)
   {

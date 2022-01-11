@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 
   if (vm.count("help") || (!vm.count("scene") && !vm.count("constraint") && !vm.count("state")))
   {
-    std::cout << desc << std::endl;
+    std::cout << desc << '\n';
     return 1;
   }
   try
@@ -96,7 +96,7 @@ int main(int argc, char** argv)
   }
   catch (...)
   {
-    std::cout << desc << std::endl;
+    std::cout << desc << '\n';
     return 2;
   }
   // Set up db
@@ -142,7 +142,8 @@ int main(int argc, char** argv)
           std::vector<moveit_warehouse::MotionPlanRequestWithMetadata> planning_queries;
           std::vector<std::string> query_names;
           pss.getPlanningQueries(planning_queries, query_names, pswm->name);
-          RCLCPP_INFO(LOGGER, "There are %d planning queries associated to the scene", (int)planning_queries.size());
+          RCLCPP_INFO(LOGGER, "There are %d planning queries associated to the scene",
+                      static_cast<int>(planning_queries.size()));
           rclcpp::sleep_for(500ms);
           for (std::size_t i = 0; i < planning_queries.size(); ++i)
           {

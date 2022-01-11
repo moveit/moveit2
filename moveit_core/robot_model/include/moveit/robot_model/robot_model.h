@@ -135,13 +135,13 @@ public:
   /** \brief Check if a joint exists. Return true if it does. */
   bool hasJointModel(const std::string& name) const;
 
-  /** \brief Get a joint by its name. Output error and return NULL when the joint is missing. */
+  /** \brief Get a joint by its name. Output error and return nullptr when the joint is missing. */
   const JointModel* getJointModel(const std::string& joint) const;
 
-  /** \brief Get a joint by its index. Output error and return NULL when the link is missing. */
+  /** \brief Get a joint by its index. Output error and return nullptr when the link is missing. */
   const JointModel* getJointModel(int index) const;
 
-  /** \brief Get a joint by its name. Output error and return NULL when the joint is missing. */
+  /** \brief Get a joint by its name. Output error and return nullptr when the joint is missing. */
   JointModel* getJointModel(const std::string& joint);
 
   /** \brief Get the array of joints, in the order they appear
@@ -244,13 +244,13 @@ public:
    * If this is followed by a call to getLinkModel(), better use the latter with the has_link argument */
   bool hasLinkModel(const std::string& name) const;
 
-  /** \brief Get a link by its name. Output error and return NULL when the link is missing. */
+  /** \brief Get a link by its name. Output error and return nullptr when the link is missing. */
   const LinkModel* getLinkModel(const std::string& link, bool* has_link = nullptr) const;
 
-  /** \brief Get a link by its index. Output error and return NULL when the link is missing. */
+  /** \brief Get a link by its index. Output error and return nullptr when the link is missing. */
   const LinkModel* getLinkModel(int index) const;
 
-  /** \brief Get a link by its name. Output error and return NULL when the link is missing. */
+  /** \brief Get a link by its name. Output error and return nullptr when the link is missing. */
   LinkModel* getLinkModel(const std::string& link, bool* has_link = nullptr);
 
   /** \brief Get the latest link upwards the kinematic tree, which is only connected via fixed joints
@@ -545,7 +545,7 @@ protected:
 
   std::vector<const JointModel*> multi_dof_joints_;
 
-  /** \brief For every two joints, the index of the common root for thw joints is stored.
+  /** \brief For every two joints, the index of the common root for the joints is stored.
 
       for jointA, jointB
       the index of the common root is located in the array at location
@@ -565,7 +565,7 @@ protected:
 
   /** \brief The state includes all the joint variables that make up the joints the state consists of.
       This map gives the position in the state vector of the group for each of these variables.
-      Additionaly, it includes the names of the joints and the index for the first variable of that joint. */
+      Additionally, it includes the names of the joints and the index for the first variable of that joint. */
   VariableIndexMap joint_variables_index_map_;
 
   std::vector<int> active_joint_model_start_index_;

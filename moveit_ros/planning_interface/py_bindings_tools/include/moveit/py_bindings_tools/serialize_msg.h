@@ -87,7 +87,7 @@ public:
   {
     static_assert(sizeof(uint8_t) == sizeof(char), "ros/python buffer layout mismatch");
     char* buf = PyBytes_AsString(ptr());
-    // buf == NULL on error
+    // buf == nullptr on error
     if (!buf)
     {
       throw std::runtime_error("Underlying python object is not a Bytes/String instance");

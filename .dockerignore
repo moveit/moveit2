@@ -14,9 +14,6 @@
 !moveit_setup_assistant/package.xml
 !moveit_core/package.xml
 !moveit_commander/package.xml
-!moveit_demo_nodes/run_move_group/package.xml
-!moveit_demo_nodes/run_ompl_constrained_planning/package.xml
-!moveit_demo_nodes/run_moveit_cpp/package.xml
 !moveit_planners/ompl/package.xml
 !moveit_planners/chomp/chomp_motion_planner/package.xml
 !moveit_planners/chomp/chomp_interface/package.xml

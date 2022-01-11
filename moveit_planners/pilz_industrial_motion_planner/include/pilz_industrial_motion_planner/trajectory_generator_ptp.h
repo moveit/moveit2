@@ -34,6 +34,8 @@
 
 #pragma once
 
+#include <moveit/planning_scene/planning_scene.h>
+
 #include "eigen3/Eigen/Eigen"
 #include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
 #include "pilz_industrial_motion_planner/trajectory_generator.h"
@@ -45,8 +47,8 @@ namespace pilz_industrial_motion_planner
 {
 // TODO date type of units
 
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PtpVelocityProfileSyncFailed, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PtpNoIkSolutionForGoalPose, moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PtpVelocityProfileSyncFailed, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PtpNoIkSolutionForGoalPose, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
 
 /**
  * @brief This class implements a point-to-point trajectory generator based on
@@ -60,11 +62,12 @@ public:
    * @throw TrajectoryGeneratorInvalidLimitsException
    * @param model: a map of joint limits information
    */
-  TrajectoryGeneratorPTP(const robot_model::RobotModelConstPtr& robot_model,
+  TrajectoryGeneratorPTP(const moveit::core::RobotModelConstPtr& robot_model,
                          const pilz_industrial_motion_planner::LimitsContainer& planner_limits);
 
 private:
-  void extractMotionPlanInfo(const planning_interface::MotionPlanRequest& req, MotionPlanInfo& info) const override;
+  void extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,
+                             const planning_interface::MotionPlanRequest& req, MotionPlanInfo& info) const override;
 
   /**
    * @brief plan ptp joint trajectory with zero start velocity
@@ -77,12 +80,13 @@ private:
    * @param sampling_time
    */
   void planPTP(const std::map<std::string, double>& start_pos, const std::map<std::string, double>& goal_pos,
-               trajectory_msgs::JointTrajectory& joint_trajectory, const std::string& group_name,
+               trajectory_msgs::msg::JointTrajectory& joint_trajectory, const std::string& group_name,
                const double& velocity_scaling_factor, const double& acceleration_scaling_factor,
                const double& sampling_time);
 
-  void plan(const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-            const double& sampling_time, trajectory_msgs::JointTrajectory& joint_trajectory) override;
+  void plan(const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
+            const MotionPlanInfo& plan_info, const double& sampling_time,
+            trajectory_msgs::msg::JointTrajectory& joint_trajectory) override;
 
 private:
   const double MIN_MOVEMENT = 0.001;

@@ -1,0 +1,3 @@
+add_subdirectory(local_planner_component)
+add_subdirectory(trajectory_operator_plugins)
+add_subdirectory(local_constraint_solver_plugins)

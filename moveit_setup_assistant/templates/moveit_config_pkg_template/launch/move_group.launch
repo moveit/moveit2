@@ -21,7 +21,7 @@
 
   <arg name="capabilities" default=""/>
   <arg name="disable_capabilities" default=""/>
-  <!-- load these non-default MoveGroup capabilities (space seperated) -->
+  <!-- load these non-default MoveGroup capabilities (space separated) -->
   <!--
   <arg name="capabilities" value="
                 a_package/AwsomeMotionPlanningCapability
@@ -29,7 +29,7 @@
                 " />
   -->
 
-  <!-- inhibit these default MoveGroup capabilities (space seperated) -->
+  <!-- inhibit these default MoveGroup capabilities (space separated) -->
   <!--
   <arg name="disable_capabilities" value="
                 move_group/MoveGroupKinematicsService
@@ -47,23 +47,22 @@
   <group ns="move_group/planning_pipelines">
 
     <!-- OMPL -->
-    <include ns="ompl" file="$(dirname)/planning_pipeline.launch.xml">
+    <include file="$(dirname)/planning_pipeline.launch.xml">
       <arg name="pipeline" value="ompl" />
     </include>
 
     <!-- CHOMP -->
-    <include ns="chomp" file="$(dirname)/planning_pipeline.launch.xml">
+    <include file="$(dirname)/planning_pipeline.launch.xml">
       <arg name="pipeline" value="chomp" />
     </include>
 
-    <!-- Pilz Industrial Motion-->
-    <include ns="pilz_industrial_motion_planner" file="$(dirname)/planning_pipeline.launch.xml">
+    <!-- Pilz Industrial Motion -->
+    <include file="$(dirname)/planning_pipeline.launch.xml">
       <arg name="pipeline" value="pilz_industrial_motion_planner" />
     </include>
 
     <!-- Support custom planning pipeline -->
-    <include if="$(eval arg('pipeline') not in ['ompl', 'chomp', 'pilz_industrial_motion_planner'])"
-	     file="$(dirname)/planning_pipeline.launch.xml">
+    <include if="$(eval arg('pipeline') not in ['ompl', 'chomp', 'pilz_industrial_motion_planner'])" file="$(dirname)/planning_pipeline.launch.xml">
       <arg name="pipeline" value="$(arg pipeline)" />
     </include>
   </group>

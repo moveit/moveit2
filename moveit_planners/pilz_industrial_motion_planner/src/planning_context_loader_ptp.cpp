@@ -38,6 +38,12 @@
 
 #include <pluginlib/class_list_macros.hpp>
 
+namespace
+{
+static const rclcpp::Logger LOGGER =
+    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.planning_context_loader_ptp");
+}
+
 pilz_industrial_motion_planner::PlanningContextLoaderPTP::PlanningContextLoaderPTP()
 {
   alg_ = "PTP";
@@ -52,19 +58,19 @@ bool pilz_industrial_motion_planner::PlanningContextLoaderPTP::loadContext(
 {
   if (limits_set_ && model_set_)
   {
-    planning_context.reset(new PlanningContextPTP(name, group, model_, limits_));
+    planning_context = std::make_shared<PlanningContextPTP>(name, group, model_, limits_);
     return true;
   }
   else
   {
     if (!limits_set_)
     {
-      ROS_ERROR_STREAM("Joint Limits are not defined. Cannot load planning "
-                       "context. Call setLimits loadContext");
+      RCLCPP_ERROR_STREAM(LOGGER,
+                          "Joint Limits are not defined. Cannot load planning context. Call setLimits loadContext");
     }
     if (!model_set_)
     {
-      ROS_ERROR_STREAM("Robot model was not set");
+      RCLCPP_ERROR_STREAM(LOGGER, "Robot model was not set");
     }
     return false;
   }

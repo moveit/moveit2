@@ -57,7 +57,7 @@ std::vector<CollisionSphere> determineCollisionSpheres(const bodies::Body* body,
   double spacing = cyl.length / ((num_points * 1.0) - 1.0);
   relative_transform = body->getPose().inverse() * cyl.pose;
 
-  for (unsigned int i = 1; i < num_points - 1; i++)
+  for (unsigned int i = 1; i < num_points - 1; ++i)
   {
     CollisionSphere cs(relative_transform * Eigen::Vector3d(0, 0, (-cyl.length / 2.0) + i * spacing), cyl.radius);
     css.push_back(cs);
@@ -75,7 +75,7 @@ bool PosedDistanceField::getCollisionSphereGradients(const std::vector<Collision
   // assumes gradient is properly initialized
 
   bool in_collision = false;
-  for (unsigned int i = 0; i < sphere_list.size(); i++)
+  for (unsigned int i = 0; i < sphere_list.size(); ++i)
   {
     Eigen::Vector3d p = sphere_centers[i];
     Eigen::Vector3d grad(0, 0, 0);
@@ -138,7 +138,7 @@ bool getCollisionSphereGradients(const distance_field::DistanceField* distance_f
   // assumes gradient is properly initialized
 
   bool in_collision = false;
-  for (unsigned int i = 0; i < sphere_list.size(); i++)
+  for (unsigned int i = 0; i < sphere_list.size(); ++i)
   {
     Eigen::Vector3d p = sphere_centers[i];
     Eigen::Vector3d grad;
@@ -195,7 +195,7 @@ bool getCollisionSphereCollision(const distance_field::DistanceField* distance_f
                                  const EigenSTL::vector_Vector3d& sphere_centers, double maximum_value,
                                  double tolerance)
 {
-  for (unsigned int i = 0; i < sphere_list.size(); i++)
+  for (unsigned int i = 0; i < sphere_list.size(); ++i)
   {
     Eigen::Vector3d p = sphere_centers[i];
     Eigen::Vector3d grad;
@@ -223,7 +223,7 @@ bool getCollisionSphereCollision(const distance_field::DistanceField* distance_f
                                  double tolerance, unsigned int num_coll, std::vector<unsigned int>& colls)
 {
   colls.clear();
-  for (unsigned int i = 0; i < sphere_list.size(); i++)
+  for (unsigned int i = 0; i < sphere_list.size(); ++i)
   {
     Eigen::Vector3d p = sphere_centers[i];
     Eigen::Vector3d grad;
@@ -275,7 +275,7 @@ void BodyDecomposition::init(const std::vector<shapes::ShapeConstPtr>& shapes, c
                              double resolution, double padding)
 {
   bodies_.clear();
-  for (unsigned int i = 0; i < shapes.size(); i++)
+  for (unsigned int i = 0; i < shapes.size(); ++i)
   {
     bodies_.addBody(shapes[i].get(), poses[i], padding);
   }
@@ -285,7 +285,7 @@ void BodyDecomposition::init(const std::vector<shapes::ShapeConstPtr>& shapes, c
   relative_collision_points_.clear();
   std::vector<CollisionSphere> body_spheres;
   EigenSTL::vector_Vector3d body_collision_points;
-  for (unsigned int i = 0; i < bodies_.getCount(); i++)
+  for (unsigned int i = 0; i < bodies_.getCount(); ++i)
   {
     body_spheres.clear();
     body_collision_points.clear();
@@ -299,14 +299,14 @@ void BodyDecomposition::init(const std::vector<shapes::ShapeConstPtr>& shapes, c
   }
 
   sphere_radii_.resize(collision_spheres_.size());
-  for (unsigned int i = 0; i < collision_spheres_.size(); i++)
+  for (unsigned int i = 0; i < collision_spheres_.size(); ++i)
   {
     sphere_radii_[i] = collision_spheres_[i].radius_;
   }
 
   // computing bounding sphere
   std::vector<bodies::BoundingSphere> bounding_spheres(bodies_.getCount());
-  for (unsigned int i = 0; i < bodies_.getCount(); i++)
+  for (unsigned int i = 0; i < bodies_.getCount(); ++i)
   {
     bodies_.getBody(i)->computeBoundingSphere(bounding_spheres[i]);
   }
@@ -352,7 +352,7 @@ void PosedBodyPointDecomposition::updatePose(const Eigen::Isometry3d& trans)
   {
     posed_collision_points_.resize(body_decomposition_->getCollisionPoints().size());
 
-    for (unsigned int i = 0; i < body_decomposition_->getCollisionPoints().size(); i++)
+    for (unsigned int i = 0; i < body_decomposition_->getCollisionPoints().size(); ++i)
     {
       posed_collision_points_[i] = trans * body_decomposition_->getCollisionPoints()[i];
     }
@@ -371,7 +371,7 @@ void PosedBodySphereDecomposition::updatePose(const Eigen::Isometry3d& trans)
 {
   // updating sphere centers
   posed_bounding_sphere_center_ = trans * body_decomposition_->getRelativeBoundingSphere().center;
-  for (unsigned int i = 0; i < body_decomposition_->getCollisionSpheres().size(); i++)
+  for (unsigned int i = 0; i < body_decomposition_->getCollisionSpheres().size(); ++i)
   {
     sphere_centers_[i] = trans * body_decomposition_->getCollisionSpheres()[i].relative_vec_;
   }
@@ -380,7 +380,7 @@ void PosedBodySphereDecomposition::updatePose(const Eigen::Isometry3d& trans)
   if (!body_decomposition_->getCollisionPoints().empty())
   {
     posed_collision_points_.resize(body_decomposition_->getCollisionPoints().size());
-    for (unsigned int i = 0; i < body_decomposition_->getCollisionPoints().size(); i++)
+    for (unsigned int i = 0; i < body_decomposition_->getCollisionPoints().size(); ++i)
     {
       posed_collision_points_[i] = trans * body_decomposition_->getCollisionPoints()[i];
     }
@@ -410,7 +410,7 @@ void getCollisionSphereMarkers(const std_msgs::msg::ColorRGBA& color, const std:
   {
     if (posed_decomposition)
     {
-      for (unsigned int j = 0; j < posed_decomposition->getCollisionSpheres().size(); j++)
+      for (unsigned int j = 0; j < posed_decomposition->getCollisionSpheres().size(); ++j)
       {
         visualization_msgs::msg::Marker sphere;
         sphere.type = visualization_msgs::msg::Marker::SPHERE;
@@ -442,9 +442,9 @@ void getProximityGradientMarkers(const std::string& frame_id, const std::string&
                 (unsigned int)(posed_decompositions.size() + posed_vector_decompositions.size()));
     return;
   }
-  for (unsigned int i = 0; i < gradients.size(); i++)
+  for (unsigned int i = 0; i < gradients.size(); ++i)
   {
-    for (unsigned int j = 0; j < gradients[i].distances.size(); j++)
+    for (unsigned int j = 0; j < gradients[i].distances.size(); ++j)
     {
       visualization_msgs::msg::Marker arrow_mark;
       arrow_mark.header.frame_id = frame_id;
@@ -542,9 +542,9 @@ void getCollisionMarkers(const std::string& frame_id, const std::string& ns, con
                 posed_decompositions.size() + posed_vector_decompositions.size());
     return;
   }
-  for (unsigned int i = 0; i < gradients.size(); i++)
+  for (unsigned int i = 0; i < gradients.size(); ++i)
   {
-    for (unsigned int j = 0; j < gradients[i].types.size(); j++)
+    for (unsigned int j = 0; j < gradients[i].types.size(); ++j)
     {
       visualization_msgs::msg::Marker sphere_mark;
       sphere_mark.type = visualization_msgs::msg::Marker::SPHERE;

@@ -37,6 +37,7 @@
 #pragma once
 
 #include <moveit/macros/class_forward.h>
+#include <moveit/rdf_loader/synchronized_string_parameter.h>
 #include <urdf/model.h>
 #include <srdfdom/model.h>
 #include <rclcpp/rclcpp.hpp>
@@ -45,24 +46,39 @@ namespace rdf_loader
 {
 MOVEIT_CLASS_FORWARD(RDFLoader);  // Defines RDFLoaderPtr, ConstPtr, WeakPtr... etc
 
+using NewModelCallback = std::function<void()>;
+
 /** @class RDFLoader
- *  @brief Default constructor
- *  @param robot_description The string name corresponding to the ROS param where the URDF is loaded*/
+ */
 class RDFLoader
 {
 public:
   /** @brief Default constructor
-   *  @param robot_description The string name corresponding to the ROS param where the URDF is loaded; the SRDF is
-   * assumed to be at the same param name + the "_semantic" suffix */
-  RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& robot_description = "robot_description");
+   *
+   *  Loads the URDF from a parameter given by the string argument,
+   *  and the SRDF that has the same name + the "_semantic" suffix
+   *
+   *  If the parameter does not exist, attempt to subscribe to topics
+   *  with the same name and type std_msgs::msg::String.
+   *
+   *  (specifying default_continuous_value/default_timeout allows users
+   *   to specify values without setting ros parameters)
+   *
+   *  @param node ROS interface for parameters / topics
+   *  @param ros_name The string name corresponding to the URDF
+   *  @param default_continuous_value Default value for parameter with "_continuous" suffix.
+   *  @param default_timeout Default value for parameter with "_timeout" suffix.
+   */
+  RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name = "robot_description",
+            bool default_continuous_value = false, double default_timeout = 10.0);
 
-  /** \brief Initialize the robot model from a string representation of the URDF and SRDF documents */
+  /** @brief Initialize the robot model from a string representation of the URDF and SRDF documents */
   RDFLoader(const std::string& urdf_string, const std::string& srdf_string);
 
   /** @brief Get the resolved parameter name for the robot description */
   const std::string& getRobotDescription() const
   {
-    return robot_description_;
+    return ros_name_;
   }
 
   /** @brief Get the parsed URDF model*/
@@ -75,6 +91,11 @@ public:
   const srdf::ModelSharedPtr& getSRDF() const
   {
     return srdf_;
+  }
+
+  void setNewModelCallback(NewModelCallback cb)
+  {
+    new_model_cb_ = cb;
   }
 
   /** @brief determine if given path points to a xacro file */
@@ -97,7 +118,19 @@ public:
                                   const std::string& relative_path, const std::vector<std::string>& xacro_args);
 
 private:
-  std::string robot_description_;
+  bool loadFromStrings();
+
+  void urdfUpdateCallback(const std::string& new_urdf_string);
+  void srdfUpdateCallback(const std::string& new_srdf_string);
+
+  NewModelCallback new_model_cb_;
+
+  std::string ros_name_;
+  std::string urdf_string_, srdf_string_;
+
+  SynchronizedStringParameter urdf_ssp_;
+  SynchronizedStringParameter srdf_ssp_;
+
   srdf::ModelSharedPtr srdf_;
   urdf::ModelInterfaceSharedPtr urdf_;
 };

@@ -81,7 +81,7 @@ RobotInteraction::RobotInteraction(const moveit::core::RobotModelConstPtr& robot
 
   // spin a thread that will process feedback events
   run_processing_thread_ = true;
-  processing_thread_.reset(new boost::thread(boost::bind(&RobotInteraction::processingThread, this)));
+  processing_thread_ = std::make_unique<boost::thread>(boost::bind(&RobotInteraction::processingThread, this));
 }
 
 RobotInteraction::~RobotInteraction()
@@ -576,7 +576,7 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
     boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
     if (int_marker_move_subscribers_.empty())
     {
-      for (size_t i = 0; i < int_marker_move_topics_.size(); i++)
+      for (size_t i = 0; i < int_marker_move_topics_.size(); ++i)
       {
         std::string topic_name = int_marker_move_topics_[i];
         std::string marker_name = int_marker_names_[i];

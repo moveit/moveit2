@@ -123,6 +123,8 @@ PlanningSceneMonitor::PlanningSceneMonitor(const rclcpp::Node::SharedPtr& node,
   // spinner_.reset(new ros::AsyncSpinner(1, &queue_));
   // spinner_->start();
   initialize(scene);
+
+  use_sim_time_ = node->get_parameter("use_sim_time").as_bool();
 }
 
 PlanningSceneMonitor::~PlanningSceneMonitor()
@@ -165,7 +167,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     {
       try
       {
-        scene_.reset(new planning_scene::PlanningScene(rm_loader_->getModel()));
+        scene_ = std::make_shared<planning_scene::PlanningScene>(rm_loader_->getModel());
         configureCollisionMatrix(scene_);
         configureDefaultPadding();
 
@@ -385,7 +387,8 @@ void PlanningSceneMonitor::startPublishingPlanningScene(SceneUpdateType update_t
     planning_scene_publisher_ = pnode_->create_publisher<moveit_msgs::msg::PlanningScene>(planning_scene_topic, 100);
     RCLCPP_INFO(LOGGER, "Publishing maintained planning scene on '%s'", planning_scene_topic.c_str());
     monitorDiffs(true);
-    publish_planning_scene_.reset(new boost::thread(boost::bind(&PlanningSceneMonitor::scenePublishingThread, this)));
+    publish_planning_scene_ =
+        std::make_unique<boost::thread>(boost::bind(&PlanningSceneMonitor::scenePublishingThread, this));
   }
 }
 
@@ -527,7 +530,7 @@ void PlanningSceneMonitor::triggerSceneUpdateEvent(SceneUpdateType update_type)
 
   for (boost::function<void(SceneUpdateType)>& update_callback : update_callbacks_)
     update_callback(update_type);
-  new_scene_update_ = (SceneUpdateType)((int)new_scene_update_ | (int)update_type);
+  new_scene_update_ = (SceneUpdateType)(static_cast<int>(new_scene_update_) | static_cast<int>(update_type));
   new_scene_update_condition_.notify_all();
 }
 
@@ -603,11 +606,14 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
 {
   PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
   if (publish_geom_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_GEOMETRY);
+    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
+                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_GEOMETRY));
   if (publish_state_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_STATE);
+    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
+                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_STATE));
   if (publish_transform_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
+    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
+                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_TRANSFORMS));
   if (publish_planning_scene)
   {
     setPlanningScenePublishingFrequency(publish_planning_scene_hz);
@@ -697,7 +703,7 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
     }
   }
 
-  // if we have a diff, try to more accuratelly determine the update type
+  // if we have a diff, try to more accurately determine the update type
   if (scene.is_diff)
   {
     bool no_other_scene_upd = (scene.name.empty() || scene.name == old_scene_name) &&
@@ -707,16 +713,16 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
     {
       upd = UPDATE_NONE;
       if (!moveit::core::isEmpty(scene.world))
-        upd = (SceneUpdateType)((int)upd | (int)UPDATE_GEOMETRY);
+        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
 
       if (!scene.fixed_frame_transforms.empty())
-        upd = (SceneUpdateType)((int)upd | (int)UPDATE_TRANSFORMS);
+        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_TRANSFORMS));
 
       if (!moveit::core::isEmpty(scene.robot_state))
       {
-        upd = (SceneUpdateType)((int)upd | (int)UPDATE_STATE);
+        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_STATE));
         if (!scene.robot_state.attached_collision_objects.empty() || !scene.robot_state.is_diff)
-          upd = (SceneUpdateType)((int)upd | (int)UPDATE_GEOMETRY);
+          upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
       }
     }
   }
@@ -836,7 +842,7 @@ void PlanningSceneMonitor::includeAttachedBodiesInOctree()
 
   boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
 
-  // clear information about any attached body, without refering to the AttachedBody* ptr (could be invalid)
+  // clear information about any attached body, without referring to the AttachedBody* ptr (could be invalid)
   for (std::pair<const moveit::core::AttachedBody* const,
                  std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& attached_body_shape_handle :
        attached_body_shape_handles_)
@@ -936,7 +942,7 @@ void PlanningSceneMonitor::excludeWorldObjectFromOctree(const collision_detectio
     occupancy_map_monitor::ShapeHandle h = octomap_monitor_->excludeShape(obj->shapes_[i]);
     if (h)
     {
-      collision_body_shape_handles_[obj->id_].push_back(std::make_pair(h, &obj->shape_poses_[i]));
+      collision_body_shape_handles_[obj->id_].push_back(std::make_pair(h, &obj->global_shape_poses_[i]));
       found = true;
     }
   }
@@ -996,8 +1002,6 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
 {
   if (t.nanoseconds() == 0)
     return false;
-  auto start = std::chrono::system_clock::now();
-  auto timeout = std::chrono::duration<double>(wait_time);
   RCLCPP_DEBUG(LOGGER, "sync robot state to: %.3fs", fmod(t.seconds(), 10.));
 
   if (current_state_monitor_)
@@ -1028,14 +1032,16 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
   // Sometimes there is no state monitor. In this case state updates are received as part of scene updates only.
   // However, scene updates are only published if the robot actually moves. Hence we need a timeout!
   // As publishing planning scene updates is throttled (2Hz by default), a 1s timeout is a suitable default.
+  auto start = node_->get_clock()->now();
+  auto timeout = rclcpp::Duration::from_seconds(wait_time);
   boost::shared_lock<boost::shared_mutex> lock(scene_update_mutex_);
   rclcpp::Time prev_robot_motion_time = last_robot_motion_time_;
   while (last_robot_motion_time_ < t &&  // Wait until the state update actually reaches the scene.
-         timeout > std::chrono::seconds())
+         timeout > rclcpp::Duration(0, 0))
   {
     RCLCPP_DEBUG(LOGGER, "last robot motion: %f ago", (t - last_robot_motion_time_).seconds());
-    new_scene_update_condition_.wait_for(lock, boost::chrono::nanoseconds((int)timeout.count()));
-    timeout -= std::chrono::system_clock::now() - start;  // compute remaining wait_time
+    new_scene_update_condition_.wait_for(lock, boost::chrono::nanoseconds(timeout.nanoseconds()));
+    timeout = timeout - (node_->get_clock()->now() - start);  // compute remaining wait_time
   }
   bool success = last_robot_motion_time_ >= t;
   // suppress warning if we received an update at all
@@ -1128,7 +1134,7 @@ bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_fram
       for (std::size_t k = 0; k < attached_body_shape_handle.second.size(); ++k)
         cache[attached_body_shape_handle.second[k].first] =
             transform *
-            attached_body_shape_handle.first->getFixedTransforms()[attached_body_shape_handle.second[k].second];
+            attached_body_shape_handle.first->getShapePosesInLinkFrame()[attached_body_shape_handle.second[k].second];
     }
     {
       tf_buffer_->canTransform(target_frame, scene_->getPlanningFrame(), target_time,
@@ -1182,8 +1188,8 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
   {
     if (!octomap_monitor_)
     {
-      octomap_monitor_.reset(
-          new occupancy_map_monitor::OccupancyMapMonitor(node_, tf_buffer_, scene_->getPlanningFrame()));
+      octomap_monitor_ =
+          std::make_unique<occupancy_map_monitor::OccupancyMapMonitor>(node_, tf_buffer_, scene_->getPlanningFrame());
       excludeRobotLinksFromOctree();
       excludeAttachedBodiesFromOctree();
       excludeWorldObjectsFromOctree();
@@ -1221,7 +1227,8 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
   {
     if (!current_state_monitor_)
     {
-      current_state_monitor_.reset(new CurrentStateMonitor(pnode_, getRobotModel(), tf_buffer_));
+      current_state_monitor_ =
+          std::make_shared<CurrentStateMonitor>(pnode_, getRobotModel(), tf_buffer_, use_sim_time_);
     }
     current_state_monitor_->addUpdateCallback(
         boost::bind(&PlanningSceneMonitor::onStateUpdate, this, boost::placeholders::_1));

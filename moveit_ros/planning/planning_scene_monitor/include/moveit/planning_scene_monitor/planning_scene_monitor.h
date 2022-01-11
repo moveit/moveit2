@@ -604,6 +604,8 @@ private:
   collision_detection::CollisionPluginLoader collision_loader_;
 
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr callback_handler_;
+
+  bool use_sim_time_;
 };
 
 /** \brief This is a convenience class for obtaining access to an
@@ -666,7 +668,7 @@ protected:
   void initialize(bool read_only)
   {
     if (planning_scene_monitor_)
-      lock_.reset(new SingleUnlock(planning_scene_monitor_.get(), read_only));
+      lock_ = std::make_shared<SingleUnlock>(planning_scene_monitor_.get(), read_only);
   }
 
   MOVEIT_STRUCT_FORWARD(SingleUnlock);

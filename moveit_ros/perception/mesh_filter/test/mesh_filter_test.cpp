@@ -132,7 +132,7 @@ MeshFilterTest<Type>::MeshFilterTest(unsigned width, unsigned height, double nea
   shapes::Mesh mesh = createMesh(0);
   handle_ = filter_.addMesh(mesh);
 
-  // make it random but reproducable
+  // make it random but reproducible
   srand(0);
   Type t_near = near_ / FilterTraits<Type>::ToMetricScale;
   Type t_far = far_ / FilterTraits<Type>::ToMetricScale;

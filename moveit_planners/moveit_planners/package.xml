@@ -1,12 +1,11 @@
 <?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_planners</name>
-  <version>2.3.0</version>
+  <version>2.3.2</version>
   <description>Meta package that installs all available planners for MoveIt</description>
-  <author email="isucan@google.com">Ioan Sucan</author>
-  <author email="sachinc@willowgarage.com">Sachin Chitta</author>
-
-  <maintainer email="dave@picknik.ai">Dave Coleman</maintainer>
+  <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
+  <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 
   <license>BSD</license>
@@ -15,6 +14,9 @@
   <url type="bugtracker">https://github.com/ros-planning/moveit2/issues</url>
   <url type="repository">https://github.com/ros-planning/moveit2</url>
 
+  <author email="isucan@google.com">Ioan Sucan</author>
+  <author email="sachinc@willowgarage.com">Sachin Chitta</author>
+
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <!--
@@ -22,10 +24,7 @@
   <exec_depend>moveit_planners_chomp</exec_depend>
   -->
   <exec_depend>moveit_planners_ompl</exec_depend>
-  <!--
-  TODO(#315): Enable after Pilz motion planner has been ported
   <exec_depend>pilz_industrial_motion_planner</exec_depend>
-  -->
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
