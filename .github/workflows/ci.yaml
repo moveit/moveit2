@@ -51,6 +51,7 @@ jobs:
       CC: ${{ matrix.env.CLANG_TIDY && 'clang' }}
       CXX: ${{ matrix.env.CLANG_TIDY && 'clang++' }}
       ADDITIONAL_DEBS: lld
+      MAKEFLAGS: '-j 2 -l 2'
 
     name: ${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && ' + ccov' || ''}}${{ matrix.env.IKFAST_TEST && ' + ikfast' || ''}}${{ matrix.env.CLANG_TIDY && (github.event_name != 'workflow_dispatch' && ' + clang-tidy (delta)' || ' + clang-tidy (all)') || '' }}
     runs-on: ubuntu-latest
