@@ -93,7 +93,7 @@ SetupAssistantWidget::SetupAssistantWidget(rviz_common::ros_integration::RosNode
   setup_steps.push_back("moveit_setup_srdf_plugins::DefaultCollisionsWidget");
   setup_steps.push_back("moveit_setup_srdf_plugins::VirtualJointsWidget");
   setup_steps.push_back("moveit_setup_app_plugins::PerceptionWidget");
-  setup_steps.push_back("moveit_setup_core_plugins::AuthorInformation");
+  setup_steps.push_back("moveit_setup_core_plugins::AuthorInformationWidget");
   setup_steps.push_back("moveit_setup_core_plugins::ConfigurationFilesWidget");
   node_->declare_parameter("setup_steps", setup_steps);
   setup_steps = node_->get_parameter("setup_steps").as_string_array();
