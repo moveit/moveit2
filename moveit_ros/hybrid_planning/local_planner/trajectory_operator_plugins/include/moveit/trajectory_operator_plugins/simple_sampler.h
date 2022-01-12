@@ -62,7 +62,6 @@ public:
 private:
   std::size_t
       next_waypoint_index_;  // Indicates which reference trajectory waypoint is the current local goal constrained
-  bool pass_through_;  // If true, the reference_trajectory is simply forwarded each time the getLocalTrajectory() function is called
   moveit_msgs::action::LocalPlanner::Feedback feedback_;  // Empty feedback
   trajectory_processing::TimeOptimalTrajectoryGeneration time_parametrization_;
   const moveit::core::JointModelGroup* joint_group_;

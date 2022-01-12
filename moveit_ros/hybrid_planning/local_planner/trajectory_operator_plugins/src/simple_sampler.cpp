@@ -47,15 +47,6 @@ constexpr double WAYPOINT_RADIAN_TOLERANCE = 0.2;  // rad: L1-norm sum for all j
 bool SimpleSampler::initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
                                const std::string& group_name)
 {
-  // Load parameter & initialize member variables
-  if (node->has_parameter("pass_through"))
-  {
-    node->get_parameter<bool>("pass_through", pass_through_);
-  }
-  else
-  {
-    pass_through_ = node->declare_parameter<bool>("pass_through", false);
-  }
   reference_trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, group_name);
   next_waypoint_index_ = 0;
   joint_group_ = robot_model->getJointModelGroup(group_name);
@@ -92,28 +83,19 @@ SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
   // Delete previous local trajectory
   local_trajectory.clear();
 
-  // Determine current local trajectory based on configured behavior
-  if (pass_through_)
-  {
-    // Use reference_trajectory as local trajectory
-    local_trajectory.append(*reference_trajectory_, 0.0, 0, reference_trajectory_->getWayPointCount());
-  }
-  else
-  {
-    // Get next desired robot state
-    moveit::core::RobotState next_desired_goal_state = reference_trajectory_->getWayPoint(next_waypoint_index_);
+  // Get next desired robot state
+  moveit::core::RobotState next_desired_goal_state = reference_trajectory_->getWayPoint(next_waypoint_index_);
 
-    // Check if state is reached
-    if (next_desired_goal_state.distance(current_state, joint_group_) <= WAYPOINT_RADIAN_TOLERANCE)
-    {
-      // Update index (and thus desired robot state)
-      next_waypoint_index_ = std::min(next_waypoint_index_ + 1, reference_trajectory_->getWayPointCount() - 1);
-    }
-
-    // Construct local trajectory containing the next global trajectory waypoint
-    local_trajectory.addSuffixWayPoint(reference_trajectory_->getWayPoint(next_waypoint_index_),
-                                       reference_trajectory_->getWayPointDurationFromPrevious(next_waypoint_index_));
+  // Check if state is reached
+  if (next_desired_goal_state.distance(current_state, joint_group_) <= WAYPOINT_RADIAN_TOLERANCE)
+  {
+    // Update index (and thus desired robot state)
+    next_waypoint_index_ = std::min(next_waypoint_index_ + 1, reference_trajectory_->getWayPointCount() - 1);
   }
+
+  // Construct local trajectory containing the next global trajectory waypoint
+  local_trajectory.addSuffixWayPoint(reference_trajectory_->getWayPoint(next_waypoint_index_),
+                                     reference_trajectory_->getWayPointDurationFromPrevious(next_waypoint_index_));
 
   // Return empty feedback
   return feedback_;
