@@ -282,7 +282,7 @@ void StartScreenWidget::loadFilesClick()
   {
     result = loadNewFiles();
     // Load 3d_sensors config file
-    load3DSensorsFile();
+    // load3DSensorsFile();
   }
   else
   {
