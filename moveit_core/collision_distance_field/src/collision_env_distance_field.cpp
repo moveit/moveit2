@@ -60,7 +60,7 @@ CollisionEnvDistanceField::CollisionEnvDistanceField(
     const moveit::core::RobotModelConstPtr& robot_model,
     const std::map<std::string, std::vector<CollisionSphere>>& link_body_decompositions, double size_x, double size_y,
     double size_z, const Eigen::Vector3d& origin, bool use_signed_distance_field, double resolution,
-    double collision_tolerance, double max_propogation_distance, double padding, double scale)
+    double collision_tolerance, double max_propogation_distance, double /*padding*/, double /*scale*/)
   : CollisionEnv(robot_model)
 {
   initialize(link_body_decompositions, Eigen::Vector3d(size_x, size_y, size_z), origin, use_signed_distance_field,
@@ -1073,7 +1073,8 @@ void CollisionEnvDistanceField::addLinkBodyDecompositions(
 }
 
 PosedBodySphereDecompositionPtr
-CollisionEnvDistanceField::getPosedLinkBodySphereDecomposition(const moveit::core::LinkModel* ls, unsigned int ind) const
+CollisionEnvDistanceField::getPosedLinkBodySphereDecomposition(const moveit::core::LinkModel* /*ls*/,
+                                                               unsigned int ind) const
 {
   PosedBodySphereDecompositionPtr ret;
   ret = std::make_shared<PosedBodySphereDecomposition>(link_body_decomposition_vector_.at(ind));
@@ -1493,22 +1494,22 @@ void CollisionEnvDistanceField::checkRobotCollision(const CollisionRequest& req,
   // checkRobotCollisionHelper(req, res, robot, state, &acm);
 }
 
-void CollisionEnvDistanceField::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                    const moveit::core::RobotState& state1,
-                                                    const moveit::core::RobotState& state2,
-                                                    const AllowedCollisionMatrix& acm) const
+void CollisionEnvDistanceField::checkRobotCollision(const CollisionRequest& /*req*/, CollisionResult& /*res*/,
+                                                    const moveit::core::RobotState& /*state1*/,
+                                                    const moveit::core::RobotState& /*state2*/,
+                                                    const AllowedCollisionMatrix& /*acm*/) const
 {
   RCLCPP_ERROR(LOGGER, "Continuous collision checking not implemented");
 }
 
-void CollisionEnvDistanceField::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                    const moveit::core::RobotState& state1,
-                                                    const moveit::core::RobotState& state2) const
+void CollisionEnvDistanceField::checkRobotCollision(const CollisionRequest& /*req*/, CollisionResult& /*res*/,
+                                                    const moveit::core::RobotState& /*state1*/,
+                                                    const moveit::core::RobotState& /*state2*/) const
 {
   RCLCPP_ERROR(LOGGER, "Continuous collision checking not implemented");
 }
 
-void CollisionEnvDistanceField::getCollisionGradients(const CollisionRequest& req, CollisionResult& res,
+void CollisionEnvDistanceField::getCollisionGradients(const CollisionRequest& req, CollisionResult& /*res*/,
                                                       const moveit::core::RobotState& state,
                                                       const AllowedCollisionMatrix* acm,
                                                       GroupStateRepresentationPtr& gsr) const

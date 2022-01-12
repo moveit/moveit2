@@ -133,7 +133,7 @@ void BulletCastBVHManager::setCastCollisionObjectsTransform(const std::string& n
 
 void BulletCastBVHManager::contactTest(collision_detection::CollisionResult& collisions,
                                        const collision_detection::CollisionRequest& req,
-                                       const collision_detection::AllowedCollisionMatrix* acm, bool self = false)
+                                       const collision_detection::AllowedCollisionMatrix* acm, bool /*self*/ = false)
 {
   ContactTestData cdata(active_, contact_distance_, collisions, req);
   broadphase_->calculateOverlappingPairs(dispatcher_.get());

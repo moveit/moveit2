@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   actionlib
 )
+
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED thread system filesystem date_time program_options)
 
