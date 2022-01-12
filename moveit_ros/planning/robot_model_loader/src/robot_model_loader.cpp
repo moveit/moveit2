@@ -290,8 +290,9 @@ void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::Kin
         }
         else
         {
-          RCLCPP_ERROR(LOGGER, "Kinematics solver %s does not support joint group %s.  Error: %s",
-                       typeid(*solver).name(), group.c_str(), error_msg.c_str());
+          const auto& s = *solver;  // avoid clang-tidy's -Wpotentially-evaluated-expression
+          RCLCPP_ERROR(LOGGER, "Kinematics solver %s does not support joint group %s.  Error: %s", typeid(s).name(),
+                       group.c_str(), error_msg.c_str());
         }
       }
       else

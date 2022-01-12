@@ -148,11 +148,13 @@ protected:
 
   /** \brief If incoming velocity commands are from a unitless joystick, scale them to physical units.
    * Also, multiply by timestep to calculate a position change.
+   * @return a vector of position deltas
    */
   Eigen::VectorXd scaleCartesianCommand(const geometry_msgs::msg::TwistStamped& command);
 
   /** \brief If incoming velocity commands are from a unitless joystick, scale them to physical units.
    * Also, multiply by timestep to calculate a position change.
+   * @return a vector of position deltas
    */
   Eigen::VectorXd scaleJointCommand(const control_msgs::msg::JointJog& command);
 
@@ -201,8 +203,7 @@ protected:
    * @param previous_vel Eigen vector of previous velocities being updated
    * @return Returns false if there is a problem, true otherwise
    */
-  bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state,
-                        Eigen::ArrayXd& previous_vel);
+  bool applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state);
 
   /** \brief Gazebo simulations have very strict message timestamp requirements.
    * Satisfy Gazebo by stuffing multiple messages into one.
@@ -334,7 +335,6 @@ protected:
 
   // Use ArrayXd type to enable more coefficient-wise operations
   Eigen::ArrayXd delta_theta_;
-  Eigen::ArrayXd prev_joint_velocity_;
 
   const int gazebo_redundant_message_count_ = 30;
 

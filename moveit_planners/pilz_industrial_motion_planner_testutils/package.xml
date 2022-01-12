@@ -5,11 +5,8 @@
   <version>2.3.2</version>
   <description>Helper scripts and functionality to test industrial motion generation</description>
 
-  <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
   <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
   <maintainer email="i.martini@pilz.de">Immanuel Martini</maintainer>
-  <maintainer email="j.schleicher@pilz.de">Joachim Schleicher</maintainer>
-  <maintainer email="h.slusarek@pilz.de">Hagen Slusarek</maintainer>
 
   <license>BSD</license>
 

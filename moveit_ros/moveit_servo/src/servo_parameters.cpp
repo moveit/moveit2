@@ -122,19 +122,18 @@ void ServoParameters::declare(const std::string& ns,
   node_parameters->declare_parameter(ns + ".scale.linear", ParameterValue{ parameters.linear_scale },
                                      ParameterDescriptorBuilder{}
                                          .type(PARAMETER_DOUBLE)
-                                         .description("Max linear velocity. Meters per publish_period. Unit is [m/s]. "
+                                         .description("Max linear velocity. Unit is [m/s]. "
                                                       "Only used for Cartesian commands."));
   node_parameters->declare_parameter(ns + ".scale.rotational", ParameterValue{ parameters.rotational_scale },
                                      ParameterDescriptorBuilder{}
                                          .type(PARAMETER_DOUBLE)
-                                         .description("Max angular velocity. Rads per publish_period. Unit is [rad/s]. "
+                                         .description("Max angular velocity. Unit is [rad/s]. "
                                                       "Only used for Cartesian commands."));
-  node_parameters->declare_parameter(
-      ns + ".scale.joint", ParameterValue{ parameters.joint_scale },
-      ParameterDescriptorBuilder{}
-          .type(PARAMETER_DOUBLE)
-          .description("Max joint angular/linear velocity. Rads or Meters per publish period. Only used for joint "
-                       "commands on joint_command_in_topic."));
+  node_parameters->declare_parameter(ns + ".scale.joint", ParameterValue{ parameters.joint_scale },
+                                     ParameterDescriptorBuilder{}
+                                         .type(PARAMETER_DOUBLE)
+                                         .description("Max joint angular/linear velocity. Only used for joint "
+                                                      "commands on joint_command_in_topic."));
 
   // Properties of outgoing commands
   node_parameters->declare_parameter(

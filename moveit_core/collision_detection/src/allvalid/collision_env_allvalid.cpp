@@ -61,7 +61,7 @@ collision_detection::CollisionEnvAllValid::CollisionEnvAllValid(const CollisionE
 }
 
 void collision_detection::CollisionEnvAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                    const moveit::core::RobotState& state) const
+                                                                    const moveit::core::RobotState& /*state*/) const
 {
   res.collision = false;
   if (req.verbose)
@@ -69,8 +69,8 @@ void collision_detection::CollisionEnvAllValid::checkRobotCollision(const Collis
 }
 
 void collision_detection::CollisionEnvAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                    const moveit::core::RobotState& state,
-                                                                    const AllowedCollisionMatrix& acm) const
+                                                                    const moveit::core::RobotState& /*state*/,
+                                                                    const AllowedCollisionMatrix& /*acm*/) const
 {
   res.collision = false;
   if (req.verbose)
@@ -78,8 +78,8 @@ void collision_detection::CollisionEnvAllValid::checkRobotCollision(const Collis
 }
 
 void collision_detection::CollisionEnvAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                    const moveit::core::RobotState& state1,
-                                                                    const moveit::core::RobotState& state2) const
+                                                                    const moveit::core::RobotState& /*state1*/,
+                                                                    const moveit::core::RobotState& /*state2*/) const
 {
   res.collision = false;
   if (req.verbose)
@@ -87,35 +87,35 @@ void collision_detection::CollisionEnvAllValid::checkRobotCollision(const Collis
 }
 
 void collision_detection::CollisionEnvAllValid::checkRobotCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                    const moveit::core::RobotState& state1,
-                                                                    const moveit::core::RobotState& state2,
-                                                                    const AllowedCollisionMatrix& acm) const
+                                                                    const moveit::core::RobotState& /*state1*/,
+                                                                    const moveit::core::RobotState& /*state2*/,
+                                                                    const AllowedCollisionMatrix& /*acm*/) const
 {
   res.collision = false;
   if (req.verbose)
     RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionEnvAllValid::distanceRobot(const collision_detection::DistanceRequest& req,
+void collision_detection::CollisionEnvAllValid::distanceRobot(const collision_detection::DistanceRequest& /*req*/,
                                                               collision_detection::DistanceResult& res,
-                                                              const moveit::core::RobotState& state) const
+                                                              const moveit::core::RobotState& /*state*/) const
 {
   res.collision = false;
 }
 
-double collision_detection::CollisionEnvAllValid::distanceRobot(const moveit::core::RobotState& state) const
+double collision_detection::CollisionEnvAllValid::distanceRobot(const moveit::core::RobotState& /*state*/) const
 {
   return 0.0;
 }
 
-double collision_detection::CollisionEnvAllValid::distanceRobot(const moveit::core::RobotState& state,
-                                                                const AllowedCollisionMatrix& acm) const
+double collision_detection::CollisionEnvAllValid::distanceRobot(const moveit::core::RobotState& /*state*/,
+                                                                const AllowedCollisionMatrix& /*acm*/) const
 {
   return 0.0;
 }
 
 void collision_detection::CollisionEnvAllValid::checkSelfCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                   const moveit::core::RobotState& state) const
+                                                                   const moveit::core::RobotState& /*state*/) const
 {
   res.collision = false;
   if (req.verbose)
@@ -123,17 +123,17 @@ void collision_detection::CollisionEnvAllValid::checkSelfCollision(const Collisi
 }
 
 void collision_detection::CollisionEnvAllValid::checkSelfCollision(const CollisionRequest& req, CollisionResult& res,
-                                                                   const moveit::core::RobotState& state,
-                                                                   const AllowedCollisionMatrix& acm) const
+                                                                   const moveit::core::RobotState& /*state*/,
+                                                                   const AllowedCollisionMatrix& /*acm*/) const
 {
   res.collision = false;
   if (req.verbose)
     RCLCPP_INFO(LOGGER, "Using AllValid collision detection. No collision checking is performed.");
 }
 
-void collision_detection::CollisionEnvAllValid::distanceSelf(const collision_detection::DistanceRequest& req,
+void collision_detection::CollisionEnvAllValid::distanceSelf(const collision_detection::DistanceRequest& /*req*/,
                                                              collision_detection::DistanceResult& res,
-                                                             const moveit::core::RobotState& state) const
+                                                             const moveit::core::RobotState& /*state*/) const
 {
   res.collision = false;
 }
