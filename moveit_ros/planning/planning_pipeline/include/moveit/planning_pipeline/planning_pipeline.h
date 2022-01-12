@@ -52,8 +52,20 @@
 /** \brief Planning pipeline */
 namespace planning_pipeline
 {
-constexpr char PLANNING_PLUGIN_PARAM_NAME[] = "planning_plugin";
-constexpr char ADAPTER_PLUGINS_PARAM_NAME[] = "request_adapters";
+/** \brief When motion plans are computed and they are supposed to be automatically displayed, they are sent to this
+ * topic (moveit_msgs::msg::DisplayTrajectory) */
+inline constexpr auto DISPLAY_PATH_TOPIC{ "display_planned_path" };
+
+/** \brief When motion planning requests are received and they are supposed to be automatically published, they are
+ * sent to this topic (moveit_msgs::msg::MotionPlanRequest) */
+inline constexpr auto MOTION_PLAN_REQUEST_TOPIC{ "motion_plan_request" };
+
+/** \brief When contacts are found in the solution path reported by a planner, they can be published as markers on
+ * this topic (visualization_msgs::MarkerArray) */
+inline constexpr auto MOTION_CONTACTS_TOPIC{ "display_contacts" };
+
+inline constexpr auto PLANNING_PLUGIN_PARAM_NAME{ "planning_plugin" };
+inline constexpr auto ADAPTER_PLUGINS_PARAM_NAME{ "request_adapters" };
 
 /** \brief This class facilitates loading planning plugins and
     planning request adapted plugins.  and allows calling
@@ -75,17 +87,14 @@ public:
      */
     virtual ~MiddlewareHandle() = default;
 
-    /**
-     * @brief     Check if parameter exists
-     */
     virtual bool has_parameter(const std::string& name) const = 0;
 
     /**
      * @brief     Get parameter of specific plugin
      * @param[in] pluginName name of plugin that has parameter
-     * @param[in] parameters container for parameters
+     * @param[in] parameter name of parameter to be retrieved
      */
-    virtual void get_parameters(const std::string& pluginName, std::string& parameters) const = 0;
+    virtual void get_parameter(const std::string& pluginName, std::string& parameter) const = 0;
     /**
      * @brief     Create a display path publisher
      * @param[in] topic the topic
@@ -100,7 +109,7 @@ public:
 
     /**
      * @brief     Create a contacts publisher
-     * @param[in] topic the topic
+     * @param[in] topic the topic to publish to
      */
     virtual void createContactsPublisher(const std::string& topic) = 0;
 
@@ -129,11 +138,8 @@ public:
      * @brief     Create a planner plugin
      * @param[in] name plugin name
      */
-    virtual void createPlannerPlugin(const std::string& name, const moveit::core::RobotModelConstPtr& robot_model) = 0;]
+    virtual void createPlannerPlugin(const std::string& name, const moveit::core::RobotModelConstPtr& robot_model) = 0;
 
-    /**
-     * @brief Retrieves a pointer to a planner manager
-     */
     virtual const planning_interface::PlannerManagerPtr& getPlannerManager() const = 0;
 
     /**
@@ -142,48 +148,16 @@ public:
      */
     virtual void createAdapterPlugins(const std::vector<std::string>& name) = 0;
 
-    /**
-     * @brief
-     */
     virtual bool plan(const planning_scene::PlanningSceneConstPtr& planning_scene,
                       const planning_interface::MotionPlanRequest& req, planning_interface::MotionPlanResponse& res,
                       std::vector<std::size_t>& adapter_added_state_index) = 0;
 
-    /**
-     * @brief     Terminate planner instance
-     */
     virtual void terminatePlannerPlugin() = 0;
 
-    /**
-     * @brief     Publish received motion plan request
-     * @param[in] req Received Motion Plan to be published
-     */
     virtual void publishReceivedRequest(const planning_interface::MotionPlanRequest& req) = 0;
-
-    /**
-     * @brief     Publish contact markers
-     * @param[in] markerArray Contact Marker Array to be published
-     */
     virtual void publishContactsMarkerArray(const visualization_msgs::msg::MarkerArray& markerArray) = 0;
-
-    /**
-     * @brief     Publish Display Trejectory Path
-     * @param[in] displayTrajectory Display Trajectory to be published
-     */
     virtual void publishDisplayPathTrejectory(const moveit_msgs::msg::DisplayTrajectory& displayTrajectory) = 0;
   };
-
-  /** \brief When motion plans are computed and they are supposed to be automatically displayed, they are sent to this
-   * topic (moveit_msgs::msg::DisplayTrajectory) */
-  static const std::string DISPLAY_PATH_TOPIC;
-
-  /** \brief When motion planning requests are received and they are supposed to be automatically published, they are
-   * sent to this topic (moveit_msgs::msg::MotionPlanRequest) */
-  static const std::string MOTION_PLAN_REQUEST_TOPIC;
-
-  /** \brief When contacts are found in the solution path reported by a planner, they can be published as markers on
-   * this topic (visualization_msgs::MarkerArray) */
-  static const std::string MOTION_CONTACTS_TOPIC;
 
   /** @brief Constructor.
    *  \param model The robot model for which this pipeline is initialized.
@@ -196,8 +170,8 @@ public:
    */
   PlanningPipeline(const moveit::core::RobotModelConstPtr& model, std::unique_ptr<MiddlewareHandle> middleware_handle,
                    const std::string& parameter_namespace,
-                   const std::string& planning_plugin_param_name = PLANNING_PLUGIN_PARAM_NAME,
-                   const std::string& adapter_plugins_param_name = ADAPTER_PLUGINS_PARAM_NAME);
+                   const std::string& planning_plugin_param_name = "planning_plugin",
+                   const std::string& adapter_plugins_param_name = "request_adapters");
 
   /** \brief Given a robot model (\e model), a node handle (\e pipeline_nh), initialize the planning pipeline.
       \param model The robot model for which this pipeline is initialized.
@@ -211,8 +185,8 @@ public:
 
   PlanningPipeline(const moveit::core::RobotModelConstPtr& model, const std::shared_ptr<rclcpp::Node>& node,
                    const std::string& parameter_namespace,
-                   const std::string& planning_plugin_param_name = PLANNING_PLUGIN_PARAM_NAME,
-                   const std::string& adapter_plugins_param_name = ADAPTER_PLUGINS_PARAM_NAME);
+                   const std::string& planning_plugin_param_name = "planning_plugin",
+                   const std::string& adapter_plugins_param_name = "request_adapters");
 
   /** @brief Constructor.
    *  \param model The robot model for which this pipeline is initialized.
@@ -249,22 +223,13 @@ public:
   void checkSolutionPaths(bool flag);
 
   /** \brief Get the flag set by displayComputedMotionPlans() */
-  bool getDisplayComputedMotionPlans() const
-  {
-    return is_displaying_computed_motion_plans_;
-  }
+  bool getDisplayComputedMotionPlans() const;
 
   /** \brief Get the flag set by publishReceivedRequests() */
-  bool getPublishReceivedRequests() const
-  {
-    return is_publishing_received_requests_;
-  }
+  bool getPublishReceivedRequests() const;
 
   /** \brief Get the flag set by checkSolutionPaths() */
-  bool getCheckSolutionPaths() const
-  {
-    return is_checking_solution_paths_;
-  }
+  bool getCheckSolutionPaths() const;
 
   /** \brief Call the motion planner plugin and the sequence of planning request adapters (if any).
       \param planning_scene The planning scene where motion planning is to be done
@@ -290,28 +255,19 @@ public:
   void terminate() const;
 
   /** \brief Get the name of the planning plugin used */
-  const std::string& getPlannerPluginName() const
-  {
-    return planner_plugin_name_;
-  }
+  const std::string& getPlannerPluginName() const;
 
   /** \brief Get the names of the planning request adapter plugins used */
   const std::vector<std::string>& getAdapterPluginNames() const
   {
-    return adapter_plugin_names_
+    return adapter_plugin_names_;
   }
 
   /** \brief Get the planner manager for the loaded planning plugin */
-  const planning_interface::PlannerManagerPtr& getPlannerManager()
-  {
-    return middleware_handle_->getPlannerManager();
-  }
+  const planning_interface::PlannerManagerPtr& getPlannerManager();
 
   /** \brief Get the robot model that this pipeline is using */
-  const moveit::core::RobotModelConstPtr& getRobotModel() const
-  {
-    return robot_model_;
-  }
+  const moveit::core::RobotModelConstPtr& getRobotModel() const;
 
   /** \brief Get current status of the planning pipeline */
   [[nodiscard]] bool isActive() const

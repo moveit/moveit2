@@ -149,8 +149,9 @@ void PlanningPipelineMiddlewareHandle::createAdapterPlugins(const std::vector<st
     std::vector<planning_request_adapter::PlanningRequestAdapterConstPtr> ads;
     try
     {
-      adapter_plugin_loader_.reset(new pluginlib::ClassLoader<planning_request_adapter::PlanningRequestAdapter>(
-          "moveit_core", "planning_request_adapter::PlanningRequestAdapter"));
+      adapter_plugin_loader_ =
+            std::make_unique<pluginlib::ClassLoader<planning_request_adapter::PlanningRequestAdapter>>(
+                "moveit_core", "planning_request_adapter::PlanningRequestAdapter");
     }
     catch (pluginlib::PluginlibException& ex)
     {
@@ -159,22 +160,18 @@ void PlanningPipelineMiddlewareHandle::createAdapterPlugins(const std::vector<st
 
     if (adapter_plugin_loader_)
     {
-      for (const std::string& adapter_plugin_name : adapter_plugin_names_)
+      for (const auto& adapter_plugin_name : adapter_plugin_names_)
       {
-        planning_request_adapter::PlanningRequestAdapterPtr ad;
         try
         {
-          ad = adapter_plugin_loader_->createUniqueInstance(adapter_plugin_name);
+          auto adapter = adapter_plugin_loader_->createUniqueInstance(adapter_plugin_name);
+          ad->initialize(node_, parameter_namespace_);
+          ads.push_back(std::move(ad));
         }
         catch (pluginlib::PluginlibException& ex)
         {
           RCLCPP_ERROR(LOGGER, "Exception while loading planning adapter plugin '%s': %s", adapter_plugin_name.c_str(),
                        ex.what());
-        }
-        if (ad)
-        {
-          ad->initialize(node_, parameter_namespace_);
-          ads.push_back(std::move(ad));
         }
       }
     }

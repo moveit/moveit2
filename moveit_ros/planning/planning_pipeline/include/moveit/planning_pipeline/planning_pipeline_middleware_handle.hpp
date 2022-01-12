@@ -97,7 +97,7 @@ public:
    * @brief     Create a planner plugin
    * @param[in] name plugin name
    */
-  void createPlannerPlugin(const std::string& name, const moveit::core::RobotModelConstPtr& robot_model) override;
+  void createPlannerPlugin(const moveit::core::RobotModelConstPtr& robot_model) override;
 
   /**
    * @brief Retrieves a pointer to a planner manager
