@@ -2,6 +2,11 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.3 (2022-01-07)
+------------------
+* Link boost serializaiton (`#925 <https://github.com/ros-planning/moveit2/issues/925>`_)
+* Contributors: Vatan Aksoy Tezer
+
 2.2.2 (2021-11-16)
 ------------------
 * Fix linking issues for ODE on macOS (`#549 <https://github.com/ros-planning/moveit2/issues/549>`_)

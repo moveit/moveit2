@@ -2,6 +2,14 @@
 Changelog for package chomp_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.3 (2022-01-07)
+------------------
+* Port CHOMP Motion Planner to ROS 2 (backport `#809 <https://github.com/ros-planning/moveit2/issues/809>`_) (`#836 <https://github.com/ros-planning/moveit2/issues/836>`_)
+* Contributors: Henning Kayser, Jafar Abdi, andreas-botbuilt
+
+2.0.0 (2020-02-17)
+------------------
+
 1.1.1 (2020-10-13)
 ------------------
 * [maint] Add comment to MOVEIT_CLASS_FORWARD (`#2315 <https://github.com/ros-planning/moveit/issues/2315>`_)

@@ -2,6 +2,9 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.2.3 (2022-01-07)
+------------------
+
 2.2.2 (2021-11-16)
 ------------------
 * Migrate to joint_state_broadcaster (`#656 <https://github.com/ros-planning/moveit2/issues/656>`_)
