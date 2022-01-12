@@ -12,7 +12,6 @@ find_package(catkin REQUIRED
       rosparam_shortcuts
       trajopt
 )
-moveit_build_options()
 
 catkin_package(
     INCLUDE_DIRS include
