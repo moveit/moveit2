@@ -39,6 +39,7 @@
 #include <boost/filesystem/path.hpp>        // for creating folders/files
 #include <boost/filesystem/operations.hpp>  // is_regular_file, is_directory, etc.
 #include <string>
+#include <tinyxml2.h>
 #include <yaml-cpp/yaml.h>
 
 namespace moveit_setup_framework
@@ -91,7 +92,21 @@ inline bool extractPackageNameFromPath(const std::string& path, std::string& pac
     if (boost::filesystem::is_regular_file(sub_path / "package.xml"))
     {
       relative_filepath = relative_path.string();
+      // Search the <name> </name> string in the package.xml file
+      // This works assuming the package name is entered as <name>PACKAGE_NAME</name>
+      // Default package name to folder name
       package_name = sub_path.leaf().string();
+      tinyxml2::XMLDocument package_xml_file;
+      auto is_open = package_xml_file.LoadFile((sub_path / "package.xml").c_str());
+      if(is_open == tinyxml2::XML_SUCCESS)
+      {
+        auto name_potential = package_xml_file.FirstChildElement("package")->FirstChildElement("name")->FirstChild()->ToText()->Value();
+        if(name_potential)
+        {
+          // Change package name if we have non-empty potential, else it defaults
+          package_name = name_potential;
+        }
+      }
       return true;
     }
     relative_path = sub_path.leaf() / relative_path;
