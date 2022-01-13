@@ -38,9 +38,7 @@
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/utils/message_checks.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2_eigen/tf2_eigen.hpp>
-#endif
 
 using namespace moveit::core;
 
