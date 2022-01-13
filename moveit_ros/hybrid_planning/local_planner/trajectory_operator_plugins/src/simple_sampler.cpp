@@ -44,8 +44,8 @@ const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 constexpr double WAYPOINT_RADIAN_TOLERANCE = 0.2;  // rad: L1-norm sum for all joints
 }  // namespace
 
-bool SimpleSampler::initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModelConstPtr& robot_model,
-                               const std::string& group_name)
+bool SimpleSampler::initialize([[maybe_unused]] const rclcpp::Node::SharedPtr& node,
+                               const moveit::core::RobotModelConstPtr& robot_model, const std::string& group_name)
 {
   reference_trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, group_name);
   next_waypoint_index_ = 0;
@@ -101,7 +101,7 @@ SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
   return feedback_;
 }
 
-double SimpleSampler::getTrajectoryProgress(const moveit::core::RobotState& current_state)
+double SimpleSampler::getTrajectoryProgress([[maybe_unused]] const moveit::core::RobotState& current_state)
 {
   // Check if trajectory is unwinded
   if (next_waypoint_index_ >= reference_trajectory_->getWayPointCount() - 1)
