@@ -45,16 +45,8 @@
 #include <moveit/kinematics_base/kinematics_base.h>
 #include <moveit/robot_state/robot_state.h>
 #include <Eigen/Geometry>
-#if __has_include(<tf2_kdl/tf2_kdl.hpp>)
 #include <tf2_kdl/tf2_kdl.hpp>
-#else
-#include <tf2_kdl/tf2_kdl.h>
-#endif
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 using namespace moveit::core;
 

@@ -36,11 +36,7 @@
 
 #include <moveit/depth_image_octomap_updater/depth_image_octomap_updater.h>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
 #include <tf2/LinearMath/Vector3.h>
 #include <tf2/LinearMath/Transform.h>
 #include <geometric_shapes/shape_operations.h>

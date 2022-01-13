@@ -40,11 +40,7 @@
 #include <moveit/transforms/transforms.h>
 #include <geometric_shapes/check_isometry.h>
 #include <geometric_shapes/shape_operations.h>
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 #include <moveit/backtrace/backtrace.h>
 #include <moveit/profiler/profiler.h>
 #include <moveit/macros/console_colors.h>

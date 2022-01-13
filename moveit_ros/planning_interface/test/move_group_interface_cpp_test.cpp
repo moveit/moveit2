@@ -58,16 +58,8 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 // TF2
-#if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#else
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#endif
-#if __has_include(<tf2_eigen/tf2_eigen.hpp>)
 #include <tf2_eigen/tf2_eigen.hpp>
-#else
-#include <tf2_eigen/tf2_eigen.h>
-#endif
 
 // 10um accuracy tested for position and orientation
 constexpr double EPSILON = 1e-5;
