@@ -46,8 +46,11 @@ namespace moveit
 {
 namespace core
 {
-PlanarJointModel::PlanarJointModel(const std::string& name)
-  : JointModel(name), angular_distance_weight_(1.0), motion_model_(HOLONOMIC), min_translational_distance_(1e-5)
+PlanarJointModel::PlanarJointModel(const std::string& name, size_t joint_index, size_t first_variable_index)
+  : JointModel(name, joint_index, first_variable_index)
+  , angular_distance_weight_(1.0)
+  , motion_model_(HOLONOMIC)
+  , min_translational_distance_(1e-5)
 {
   type_ = PLANAR;
 
@@ -56,7 +59,7 @@ PlanarJointModel::PlanarJointModel(const std::string& name)
   local_variable_names_.push_back("theta");
   for (int i = 0; i < 3; ++i)
   {
-    variable_names_.push_back(name_ + "/" + local_variable_names_[i]);
+    variable_names_.push_back(getName() + "/" + local_variable_names_[i]);
     variable_index_map_[variable_names_.back()] = i;
   }
 
