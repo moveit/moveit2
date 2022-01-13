@@ -134,6 +134,12 @@ void ServoParameters::declare(const std::string& ns,
                                          .type(PARAMETER_DOUBLE)
                                          .description("Max joint angular/linear velocity. Only used for joint "
                                                       "commands on joint_command_in_topic."));
+  node_parameters->declare_parameter(
+      ns + ".target_pose_lookahead_time", ParameterValue{ parameters.target_pose_lookahead_time },
+      ParameterDescriptorBuilder{}
+          .type(PARAMETER_DOUBLE)
+          .description("An optional parameter to smooth jitter due to latency in the system "
+                       "or low-level controller ramp up / ramp down"));
 
   // Properties of outgoing commands
   node_parameters->declare_parameter(
@@ -264,6 +270,8 @@ ServoParameters ServoParameters::get(const std::string& ns,
   parameters.linear_scale = node_parameters->get_parameter(ns + ".scale.linear").as_double();
   parameters.rotational_scale = node_parameters->get_parameter(ns + ".scale.rotational").as_double();
   parameters.joint_scale = node_parameters->get_parameter(ns + ".scale.joint").as_double();
+  parameters.target_pose_lookahead_time =
+      node_parameters->get_parameter(ns + ".target_pose_lookahead_time").as_double();
 
   // Properties of outgoing commands
   parameters.command_out_topic = node_parameters->get_parameter(ns + ".command_out_topic").as_string();
@@ -407,6 +415,12 @@ std::optional<ServoParameters> ServoParameters::validate(ServoParameters paramet
   {
     RCLCPP_WARN(LOGGER, "Parameter 'collision_check_rate' should be "
                         "greater than zero. Check yaml file.");
+    return std::nullopt;
+  }
+  if (parameters.target_pose_lookahead_time < 0 || parameters.target_pose_lookahead_time > 0.1)
+  {
+    RCLCPP_WARN(LOGGER,
+                "Parameter 'target_pose_lookahead_time' should be greater than zero and typically less than 0.1s.");
     return std::nullopt;
   }
   return parameters;

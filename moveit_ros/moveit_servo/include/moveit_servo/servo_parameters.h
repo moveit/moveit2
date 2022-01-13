@@ -70,6 +70,7 @@ struct ServoParameters
   double linear_scale{ 0.4 };
   double rotational_scale{ 0.8 };
   double joint_scale{ 0.5 };
+  double target_pose_lookahead_time{ 0.0 };
   // Properties of outgoing commands
   std::string command_out_topic{ "/panda_arm_controller/joint_trajectory" };
   double publish_period{ 0.034 };

@@ -11,6 +11,9 @@ scale:
   rotational:  0.3 # Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands.
   # Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic.
   joint: 0.01
+# This is an optional factor to account for any latency or low-level controller ramp up/ramp down in the system.
+# It increases the timestep when calculating the target pose, to move the target pose farther away. [seconds]
+target_pose_lookahead_time: 0.0
 
 ## Properties of outgoing commands
 publish_period: 0.034  # 1/Nominal publish rate [seconds]
