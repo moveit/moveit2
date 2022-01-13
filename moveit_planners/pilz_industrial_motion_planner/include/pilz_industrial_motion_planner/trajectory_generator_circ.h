@@ -41,8 +41,6 @@
 
 #include "pilz_industrial_motion_planner/trajectory_generator.h"
 
-using namespace pilz_industrial_motion_planner;
-
 namespace pilz_industrial_motion_planner
 {
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircleNoPlane, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);

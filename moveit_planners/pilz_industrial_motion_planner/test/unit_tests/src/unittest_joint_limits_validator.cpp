@@ -51,7 +51,7 @@ TEST_F(JointLimitsValidatorTest, CheckPositionEquality)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_position_limits = true;
   lim1.min_position = -1;
   lim1.max_position = 1;
@@ -72,12 +72,12 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMinPosition)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_position_limits = true;
   lim1.min_position = -1;
   lim1.max_position = 1;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_position_limits = true;
   lim2.min_position = -2;
   lim2.max_position = 1;
@@ -98,12 +98,12 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMaxPosition1)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_position_limits = true;
   lim1.min_position = -1;
   lim1.max_position = 2;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_position_limits = true;
   lim2.min_position = -1;
   lim2.max_position = 1;
@@ -124,17 +124,17 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMaxPosition2)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_position_limits = true;
   lim1.min_position = -1;
   lim1.max_position = 2;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_position_limits = true;
   lim2.min_position = -1;
   lim2.max_position = 1;
 
-  JointLimit lim3;
+  pilz_industrial_motion_planner::JointLimit lim3;
   lim3.has_position_limits = true;
   lim3.min_position = -1;
   lim3.max_position = 1;
@@ -156,12 +156,12 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityHasPositionLimits)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_position_limits = true;
   lim1.min_position = -1;
   lim1.max_position = 1;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_position_limits = false;
   lim2.min_position = -1;
   lim2.max_position = 1;
@@ -188,7 +188,7 @@ TEST_F(JointLimitsValidatorTest, CheckVelocityEquality)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_velocity_limits = true;
   lim1.max_velocity = 1;
 
@@ -208,11 +208,11 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMaxVelocity1)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_velocity_limits = true;
   lim1.max_velocity = 1;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_velocity_limits = true;
   lim2.max_velocity = 2;
 
@@ -232,15 +232,15 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMaxVelocity2)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_velocity_limits = true;
   lim1.max_velocity = 1;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_velocity_limits = true;
   lim2.max_velocity = 2;
 
-  JointLimit lim3;
+  pilz_industrial_motion_planner::JointLimit lim3;
   lim3.has_velocity_limits = true;
   lim3.max_velocity = 2;
 
@@ -261,10 +261,10 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityHasVelocityLimits)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_velocity_limits = true;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_velocity_limits = false;
 
   container.addLimit("joint1", lim1);
@@ -289,7 +289,7 @@ TEST_F(JointLimitsValidatorTest, CheckAccelerationEquality)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_acceleration_limits = true;
   lim1.max_acceleration = 1;
 
@@ -309,11 +309,11 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMaxAcceleration1)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_acceleration_limits = true;
   lim1.max_acceleration = 1;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_acceleration_limits = true;
   lim2.max_acceleration = 2;
 
@@ -333,15 +333,15 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityMaxAcceleration2)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_acceleration_limits = true;
   lim1.max_acceleration = 1;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_acceleration_limits = true;
   lim2.max_acceleration = 2;
 
-  JointLimit lim3;
+  pilz_industrial_motion_planner::JointLimit lim3;
   lim3.has_acceleration_limits = true;
   lim3.max_acceleration = 2;
 
@@ -363,10 +363,10 @@ TEST_F(JointLimitsValidatorTest, CheckPositionInEqualityHasAccelerationLimits)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_acceleration_limits = true;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_acceleration_limits = false;
 
   container.addLimit("joint1", lim1);
@@ -391,7 +391,7 @@ TEST_F(JointLimitsValidatorTest, CheckDecelerationEquality)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_deceleration_limits = true;
   lim1.max_deceleration = 1;
 
@@ -411,11 +411,11 @@ TEST_F(JointLimitsValidatorTest, CheckInEqualityMaxDeceleration1)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_deceleration_limits = true;
   lim1.max_deceleration = -1;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_deceleration_limits = true;
   lim2.max_deceleration = -2;
 
@@ -435,15 +435,15 @@ TEST_F(JointLimitsValidatorTest, CheckInEqualityMaxDeceleration2)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_deceleration_limits = true;
   lim1.max_deceleration = -1;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_deceleration_limits = true;
   lim2.max_deceleration = -2;
 
-  JointLimit lim3;
+  pilz_industrial_motion_planner::JointLimit lim3;
   lim3.has_deceleration_limits = true;
   lim3.max_deceleration = -2;
 
@@ -465,11 +465,11 @@ TEST_F(JointLimitsValidatorTest, CheckInEqualityHasDecelerationLimits)
 {
   JointLimitsContainer container;
 
-  JointLimit lim1;
+  pilz_industrial_motion_planner::JointLimit lim1;
   lim1.has_deceleration_limits = true;
   lim1.max_deceleration = -1;
 
-  JointLimit lim2;
+  pilz_industrial_motion_planner::JointLimit lim2;
   lim2.has_deceleration_limits = false;
 
   container.addLimit("joint1", lim1);
