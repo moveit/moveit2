@@ -20,7 +20,6 @@ jobs:
             CCOV: true
             ROS_DISTRO: rolling
           - IMAGE: rolling-ci-testing
-            IKFAST_TEST: true
             ROS_DISTRO: rolling
           - IMAGE: galactic-ci
             CLANG_TIDY: pedantic
