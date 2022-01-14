@@ -53,7 +53,8 @@ constexpr size_t STATE_SPACE_DIMENSION = 7;
 
 }  // namespace
 
-FloatingJointModel::FloatingJointModel(const std::string& name) : JointModel(name), angular_distance_weight_(1.0)
+FloatingJointModel::FloatingJointModel(const std::string& name, size_t joint_index, size_t first_variable_index)
+  : JointModel(name, joint_index, first_variable_index), angular_distance_weight_(1.0)
 {
   type_ = FLOATING;
   local_variable_names_.push_back("trans_x");
@@ -65,7 +66,7 @@ FloatingJointModel::FloatingJointModel(const std::string& name) : JointModel(nam
   local_variable_names_.push_back("rot_w");
   for (size_t i = 0; i < STATE_SPACE_DIMENSION; ++i)
   {
-    variable_names_.push_back(name_ + "/" + local_variable_names_[i]);
+    variable_names_.push_back(getName() + "/" + local_variable_names_[i]);
     variable_index_map_[variable_names_.back()] = i;
   }
 

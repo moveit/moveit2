@@ -356,7 +356,7 @@ eetrans[2]=((0.2604)+(((0.35)*x1))+((x29*(((((-0.084)*x24))+((x15*x2))))))+((x11
 }
 
 IKFAST_API int GetNumFreeParameters() { return 0; }
-IKFAST_API int* GetFreeParameters() { return NULL; }
+IKFAST_API int* GetFreeParameters() { return nullptr; }
 IKFAST_API int GetNumJoints() { return 6; }
 
 IKFAST_API int GetIkRealSize() { return sizeof(IkReal); }
@@ -20093,7 +20093,7 @@ int main(int argc, char** argv)
     eerot[6] = atof(argv[9]); eerot[7] = atof(argv[10]); eerot[8] = atof(argv[11]); eetrans[2] = atof(argv[12]);
     for(std::size_t i = 0; i < vfree.size(); ++i)
         vfree[i] = atof(argv[13+i]);
-    bool bSuccess = ComputeIk(eetrans, eerot, vfree.size() > 0 ? &vfree[0] : NULL, solutions);
+    bool bSuccess = ComputeIk(eetrans, eerot, vfree.size() > 0 ? &vfree[0] : nullptr, solutions);
 
     if( !bSuccess ) {
         fprintf(stderr,"Failed to get ik solution\n");
@@ -20106,7 +20106,7 @@ int main(int argc, char** argv)
         const IkSolutionBase<IkReal>& sol = solutions.GetSolution(i);
         printf("sol%d (free=%d): ", (int)i, (int)sol.GetFree().size());
         std::vector<IkReal> vsolfree(sol.GetFree().size());
-        sol.GetSolution(&solvalues[0],vsolfree.size()>0?&vsolfree[0]:NULL);
+        sol.GetSolution(&solvalues[0],vsolfree.size()>0?&vsolfree[0]:nullptr);
         for( std::size_t j = 0; j < solvalues.size(); ++j)
             printf("%.15f, ", solvalues[j]);
         printf("\n");

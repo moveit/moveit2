@@ -117,7 +117,7 @@ public:
    *
    * @return Always true
    */
-  bool configure(const moveit_msgs::msg::Constraints& constr) override
+  bool configure(const moveit_msgs::msg::Constraints& /*constr*/) override
   {
     return true;
   }
@@ -129,7 +129,7 @@ public:
    *
    * @return Always true
    */
-  virtual bool canService(const moveit_msgs::msg::Constraints& constr) const
+  virtual bool canService(const moveit_msgs::msg::Constraints& /*constr*/) const
   {
     return true;
   }

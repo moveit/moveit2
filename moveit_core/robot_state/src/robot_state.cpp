@@ -473,7 +473,7 @@ void RobotState::setVariableEffort(const std::map<std::string, double>& variable
 {
   markEffort();
   for (const std::pair<const std::string, double>& it : variable_map)
-    acceleration_[robot_model_->getVariableIndex(it.first)] = it.second;
+    effort_[robot_model_->getVariableIndex(it.first)] = it.second;
 }
 
 void RobotState::setVariableEffort(const std::map<std::string, double>& variable_map,
@@ -1787,7 +1787,7 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
                                     const std::vector<std::string>& tips_in,
                                     const std::vector<std::vector<double> >& consistency_limits, double timeout,
                                     const GroupStateValidityCallbackFn& constraint,
-                                    const kinematics::KinematicsQueryOptions& options)
+                                    const kinematics::KinematicsQueryOptions& /*options*/)
 {
   // Assume we have already ran setFromIK() and those checks
 
@@ -2203,7 +2203,7 @@ void RobotState::printTransforms(std::ostream& out) const
   }
 }
 
-std::string RobotState::getStateTreeString(const std::string& prefix) const
+std::string RobotState::getStateTreeString() const
 {
   std::stringstream ss;
   ss << "ROBOT: " << robot_model_->getName() << '\n';

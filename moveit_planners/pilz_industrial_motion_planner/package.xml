@@ -5,11 +5,8 @@
   <version>2.3.2</version>
   <description>MoveIt plugin to generate industrial trajectories PTP, LIN, CIRC and sequences thereof.</description>
 
-  <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
   <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
   <maintainer email="i.martini@pilz.de">Immanuel Martini</maintainer>
-  <maintainer email="j.schleicher@pilz.de">Joachim Schleicher</maintainer>
-  <maintainer email="h.slusarek@pilz.de">Hagen Slusarek</maintainer>
 
   <license>BSD</license>
 
@@ -54,6 +51,7 @@
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

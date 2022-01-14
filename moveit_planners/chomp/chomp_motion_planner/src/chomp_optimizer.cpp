@@ -273,12 +273,12 @@ void ChompOptimizer::registerParents(const moveit::core::JointModel* model)
     {
       if (model->getParentLinkModel() == nullptr)
       {
-        RCLCPP_ERROR(LOGGER, "Model %s not root but has NULL link model parent", model->getName().c_str());
+        RCLCPP_ERROR(LOGGER, "Model %s not root but has nullptr link model parent", model->getName().c_str());
         return;
       }
       else if (model->getParentLinkModel()->getParentJointModel() == nullptr)
       {
-        RCLCPP_ERROR(LOGGER, "Model %s not root but has NULL joint model parent", model->getName().c_str());
+        RCLCPP_ERROR(LOGGER, "Model %s not root but has nullptr joint model parent", model->getName().c_str());
         return;
       }
       parent_model = model->getParentLinkModel()->getParentJointModel();

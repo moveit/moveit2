@@ -135,13 +135,13 @@ public:
   /** \brief Check if a joint exists. Return true if it does. */
   bool hasJointModel(const std::string& name) const;
 
-  /** \brief Get a joint by its name. Output error and return NULL when the joint is missing. */
+  /** \brief Get a joint by its name. Output error and return nullptr when the joint is missing. */
   const JointModel* getJointModel(const std::string& joint) const;
 
-  /** \brief Get a joint by its index. Output error and return NULL when the link is missing. */
-  const JointModel* getJointModel(int index) const;
+  /** \brief Get a joint by its index. Output error and return nullptr when the link is missing. */
+  const JointModel* getJointModel(size_t index) const;
 
-  /** \brief Get a joint by its name. Output error and return NULL when the joint is missing. */
+  /** \brief Get a joint by its name. Output error and return nullptr when the joint is missing. */
   JointModel* getJointModel(const std::string& joint);
 
   /** \brief Get the array of joints, in the order they appear
@@ -244,13 +244,13 @@ public:
    * If this is followed by a call to getLinkModel(), better use the latter with the has_link argument */
   bool hasLinkModel(const std::string& name) const;
 
-  /** \brief Get a link by its name. Output error and return NULL when the link is missing. */
+  /** \brief Get a link by its name. Output error and return nullptr when the link is missing. */
   const LinkModel* getLinkModel(const std::string& link, bool* has_link = nullptr) const;
 
-  /** \brief Get a link by its index. Output error and return NULL when the link is missing. */
-  const LinkModel* getLinkModel(int index) const;
+  /** \brief Get a link by its index. Output error and return nullptr when the link is missing. */
+  const LinkModel* getLinkModel(size_t index) const;
 
-  /** \brief Get a link by its name. Output error and return NULL when the link is missing. */
+  /** \brief Get a link by its name. Output error and return nullptr when the link is missing. */
   LinkModel* getLinkModel(const std::string& link, bool* has_link = nullptr);
 
   /** \brief Get the latest link upwards the kinematic tree, which is only connected via fixed joints
@@ -444,7 +444,7 @@ public:
                                std::vector<std::string>& missing_variables) const;
 
   /** \brief Get the index of a variable in the robot state */
-  int getVariableIndex(const std::string& variable) const;
+  size_t getVariableIndex(const std::string& variable) const;
 
   /** \brief Get the deepest joint in the kinematic tree that is a common parent of both joints passed as argument */
   const JointModel* getCommonRoot(const JointModel* a, const JointModel* b) const
@@ -596,6 +596,7 @@ protected:
   /** \brief The array of end-effectors, in alphabetical order */
   std::vector<const JointModelGroup*> end_effectors_;
 
+private:
   /** \brief Given an URDF model and a SRDF model, build a full kinematic model */
   void buildModel(const urdf::ModelInterface& urdf_model, const srdf::Model& srdf_model);
 
@@ -603,7 +604,7 @@ protected:
   void buildGroups(const srdf::Model& srdf_model);
 
   /** \brief Compute helpful information about groups (that can be queried later) */
-  void buildGroupsInfoSubgroups(const srdf::Model& srdf_model);
+  void buildGroupsInfoSubgroups();
 
   /** \brief Compute helpful information about groups (that can be queried later) */
   void buildGroupsInfoEndEffectors(const srdf::Model& srdf_model);
@@ -630,10 +631,9 @@ protected:
   /** \brief Construct a JointModelGroup given a SRDF description \e group */
   bool addJointModelGroup(const srdf::Model::Group& group);
 
-  /** \brief Given a urdf joint model, a child link and a set of virtual joints,
+  /** \brief Given a child link and a srdf model,
       build up the corresponding JointModel object*/
-  JointModel* constructJointModel(const urdf::Joint* urdf_joint_model, const urdf::Link* child_link,
-                                  const srdf::Model& srdf_model);
+  JointModel* constructJointModel(const urdf::Link* child_link, const srdf::Model& srdf_model);
 
   /** \brief Given a urdf link, build the corresponding LinkModel object*/
   LinkModel* constructLinkModel(const urdf::Link* urdf_link);
