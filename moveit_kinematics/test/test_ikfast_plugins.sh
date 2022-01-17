@@ -7,16 +7,13 @@
 
 set -e # fail script on error
 
+sudo apt-get -qq update
 sudo apt-get -qq install python3-lxml python3-yaml
 
 # Clone moveit_resources for URDFs. They are not available before running docker.
 git clone -q --depth=1 -b ros2 https://github.com/ros-planning/moveit_resources /tmp/resources
 fanuc=/tmp/resources/fanuc_description/urdf/fanuc.urdf
 panda=/tmp/resources/panda_description/urdf/panda.urdf
-
-# Install lxml required for create_ikfast_moveit_plugin.py
-sudo apt-get -qq update
-sudo apt-get -qq install -y python-lxml
 
 export QUIET=${QUIET:=1}
 
