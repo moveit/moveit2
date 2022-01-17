@@ -36,7 +36,6 @@
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit/profiler/profiler.h>
 #include <rclcpp/rclcpp.hpp>
 
 using namespace std::chrono_literals;
@@ -63,42 +62,31 @@ int main(int argc, char** argv)
 
     printf("Evaluating model '%s' using %d trials for each test\n", robot_model->getName().c_str(), N);
 
-    moveit::tools::Profiler::Clear();
-    moveit::tools::Profiler::Start();
-
     printf("Evaluating FK Default ...\n");
     for (int i = 0; i < N; ++i)
     {
-      moveit::tools::Profiler::Begin("FK Default");
       state.setToDefaultValues();
       state.update();
-      moveit::tools::Profiler::End("FK Default");
     }
 
     printf("Evaluating FK Random ...\n");
     for (int i = 0; i < N; ++i)
     {
-      moveit::tools::Profiler::Begin("FK Random");
       state.setToRandomPositions();
       state.update();
-      moveit::tools::Profiler::End("FK Random");
     }
 
     std::vector<moveit::core::RobotState*> copies(N, (moveit::core::RobotState*)nullptr);
     printf("Evaluating Copy State ...\n");
     for (int i = 0; i < N; ++i)
     {
-      moveit::tools::Profiler::Begin("Copy State");
       copies[i] = new moveit::core::RobotState(state);
-      moveit::tools::Profiler::End("Copy State");
     }
 
     printf("Evaluating Free State ...\n");
     for (int i = 0; i < N; ++i)
     {
-      moveit::tools::Profiler::Begin("Free State");
       delete copies[i];
-      moveit::tools::Profiler::End("Free State");
     }
 
     const std::vector<std::string>& groups = robot_model->getJointModelGroupNames();
@@ -111,15 +99,10 @@ int main(int argc, char** argv)
       std::string pname = group + ":FK Random";
       for (int i = 0; i < N; ++i)
       {
-        moveit::tools::Profiler::Begin(pname);
         state.setToRandomPositions(jmg);
         state.update();
-        moveit::tools::Profiler::End(pname);
       }
     }
-
-    moveit::tools::Profiler::Stop();
-    moveit::tools::Profiler::Status();
   }
   else
     RCLCPP_ERROR(LOGGER, "Unable to initialize robot model.");

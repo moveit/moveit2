@@ -36,8 +36,8 @@
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit/profiler/profiler.h>
 #include <rclcpp/rclcpp.hpp>
+#include <boost/lexical_cast.hpp>
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("inverse_kinematics_test");
 static const std::string ROBOT_DESCRIPTION = "robot_description";
@@ -85,36 +85,21 @@ int main(int argc, char** argv)
 
         RCLCPP_INFO(LOGGER, "Running %u tests", test_count);
 
-        moveit::tools::Profiler::Start();
         for (unsigned int i = 0; i < test_count; ++i)
         {
           state.setToRandomPositions(jmg);
           // getGlobalLinkTransform() returns a valid isometry by contract
           Eigen::Isometry3d pose = state.getGlobalLinkTransform(tip);
           state.setToRandomPositions(jmg);
-          moveit::tools::Profiler::Begin("IK");
+
           state.setFromIK(jmg, pose);
-          moveit::tools::Profiler::End("IK");
+
           // getGlobalLinkTransform() returns a valid isometry by contract
           const Eigen::Isometry3d& pose_upd = state.getGlobalLinkTransform(tip);
           Eigen::Isometry3d diff = pose_upd * pose.inverse();  // valid isometry
-          double rot_err = (diff.linear() - Eigen::Matrix3d::Identity()).norm();
-          double trans_err = diff.translation().norm();
-          moveit::tools::Profiler::Average("Rotation error", rot_err);
-          moveit::tools::Profiler::Average("Translation error", trans_err);
-          if (rot_err < 1e-3 && trans_err < 1e-3)
-          {
-            moveit::tools::Profiler::Event("Valid IK");
-            moveit::tools::Profiler::Average("Success Rate", 100);
-          }
-          else
-          {
-            moveit::tools::Profiler::Event("Invalid IK");
-            moveit::tools::Profiler::Average("Success Rate", 0);
-          }
+          [[maybe_unused]] double rot_err = (diff.linear() - Eigen::Matrix3d::Identity()).norm();
+          [[maybe_unused]] double trans_err = diff.translation().norm();
         }
-        moveit::tools::Profiler::Stop();
-        moveit::tools::Profiler::Status();
       }
       else
         RCLCPP_ERROR(LOGGER, "No kinematics solver specified for group %s", group.c_str());

@@ -42,7 +42,7 @@
 #include <gtest/gtest.h>
 #include <boost/filesystem/path.hpp>
 #include <geometric_shapes/shapes.h>
-#include <moveit/profiler/profiler.h>
+
 #include <moveit/utils/robot_model_test_utils.h>
 
 constexpr double EPSILON = 1e-2;
