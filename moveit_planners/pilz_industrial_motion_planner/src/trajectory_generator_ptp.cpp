@@ -76,7 +76,7 @@ TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelCon
       continue;
     }
 
-    JointLimit most_strict_limit = joint_limits_.getCommonLimit(active_joints);
+    pilz_industrial_motion_planner::JointLimit most_strict_limit = joint_limits_.getCommonLimit(active_joints);
 
     if (!most_strict_limit.has_velocity_limits)
     {
