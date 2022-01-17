@@ -50,13 +50,11 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.trajectory_e
 const std::string TrajectoryExecutionManager::EXECUTION_EVENT_TOPIC = "trajectory_execution_event";
 
 static const auto DEFAULT_CONTROLLER_INFORMATION_VALIDITY_AGE = rclcpp::Duration::from_seconds(1);
-constexpr double DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN = 0.5;  // allow 0.5s more than the expected execution time
-                                                                 // before triggering a trajectory cancel (applied
-                                                                 // after scaling)
-// allow the execution of a trajectory to take more time than expected (scaled by a value > 1)
-constexpr double DEFAULT_CONTROLLER_GOAL_DURATION_SCALING = 1.1;
-
-constexpr double DEFAULT_ALLOWED_START_TOLERANCE = 0.01;
+static const double DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN = 0.5;  // allow 0.5s more than the expected execution time
+                                                                    // before triggering a trajectory cancel (applied
+                                                                    // after scaling)
+static const double DEFAULT_CONTROLLER_GOAL_DURATION_SCALING =
+    1.1;  // allow the execution of a trajectory to take more time than expected (scaled by a value > 1)
 
 TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node,
                                                        const moveit::core::RobotModelConstPtr& robot_model,
@@ -95,8 +93,13 @@ void TrajectoryExecutionManager::initialize()
   current_context_ = -1;
   last_execution_status_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
   run_continuous_execution_thread_ = true;
+  execution_duration_monitoring_ = true;
   execution_velocity_scaling_ = 1.0;
+  allowed_start_tolerance_ = 0.01;
   wait_for_trajectory_completion_ = true;
+
+  allowed_execution_duration_scaling_ = DEFAULT_CONTROLLER_GOAL_DURATION_SCALING;
+  allowed_goal_duration_margin_ = DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN;
 
   // load controller-specific values for allowed_execution_duration_scaling and allowed_goal_duration_margin
   loadControllerParams();
@@ -178,19 +181,12 @@ void TrajectoryExecutionManager::initialize()
       EXECUTION_EVENT_TOPIC, 100, std::bind(&TrajectoryExecutionManager::receiveEvent, this, std::placeholders::_1),
       options);
 
-  execution_duration_monitoring_ = true;
   controller_mgr_node_->get_parameter("trajectory_execution.execution_duration_monitoring",
                                       execution_duration_monitoring_);
-
-  allowed_execution_duration_scaling_ = DEFAULT_CONTROLLER_GOAL_DURATION_SCALING;
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_execution_duration_scaling",
                                       allowed_execution_duration_scaling_);
-
-  allowed_goal_duration_margin_ = DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN;
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_goal_duration_margin",
                                       allowed_goal_duration_margin_);
-
-  allowed_start_tolerance_ = DEFAULT_ALLOWED_START_TOLERANCE;
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_start_tolerance", allowed_start_tolerance_);
 
   if (manage_controllers_)
