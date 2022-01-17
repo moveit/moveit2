@@ -44,8 +44,10 @@ namespace moveit
 {
 namespace core
 {
-JointModel::JointModel(const std::string& name)
+JointModel::JointModel(const std::string& name, size_t joint_index, size_t first_variable_index)
   : name_(name)
+  , joint_index_(joint_index)
+  , first_variable_index_(first_variable_index)
   , type_(UNKNOWN)
   , parent_link_model_(nullptr)
   , child_link_model_(nullptr)
@@ -54,8 +56,6 @@ JointModel::JointModel(const std::string& name)
   , mimic_offset_(0.0)
   , passive_(false)
   , distance_factor_(1.0)
-  , first_variable_index_(-1)
-  , joint_index_(-1)
 {
 }
 
@@ -82,7 +82,7 @@ std::string JointModel::getTypeName() const
   }
 }
 
-int JointModel::getLocalVariableIndex(const std::string& variable) const
+size_t JointModel::getLocalVariableIndex(const std::string& variable) const
 {
   VariableIndexMap::const_iterator it = variable_index_map_.find(variable);
   if (it == variable_index_map_.end())
@@ -90,7 +90,7 @@ int JointModel::getLocalVariableIndex(const std::string& variable) const
   return it->second;
 }
 
-bool JointModel::harmonizePosition(double* values, const Bounds& other_bounds) const
+bool JointModel::harmonizePosition(double* /*values*/, const Bounds& /*other_bounds*/) const
 {
   return false;
 }
