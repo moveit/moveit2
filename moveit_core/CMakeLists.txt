@@ -58,7 +58,6 @@ set(VERSION_FILE_PATH ${CMAKE_BINARY_DIR}/include)
 set(THIS_PACKAGE_INCLUDE_DIRS
     background_processing/include
     exceptions/include
-    backtrace/include
     collision_detection/include
     collision_detection_fcl/include
     collision_detection_bullet/include
@@ -159,7 +158,6 @@ configure_file("version/version.h.in" "${VERSION_FILE_PATH}/moveit/version.h")
 install(FILES "${VERSION_FILE_PATH}/moveit/version.h" DESTINATION include/moveit)
 
 add_subdirectory(background_processing)
-add_subdirectory(backtrace)
 add_subdirectory(collision_distance_field)
 add_subdirectory(constraint_samplers)
 add_subdirectory(controller_manager)
