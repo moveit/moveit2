@@ -79,6 +79,7 @@ private:
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
+  // Initialize clock type to RCL_ROS_TIME to prevent exception about time sources mismatch
   rclcpp::Time last_update_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
   /* params */
