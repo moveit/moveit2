@@ -74,7 +74,7 @@ bool pilz_industrial_motion_planner::JointLimitsValidator::validateWithEqualFunc
     return true;
   }
 
-  JointLimit reference = joint_limits.begin()->second;
+  pilz_industrial_motion_planner::JointLimit reference = joint_limits.begin()->second;
 
   for (auto it = std::next(joint_limits.begin()); it != joint_limits.end(); ++it)
   {

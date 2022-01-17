@@ -45,7 +45,6 @@
 #else
 #include <tf2_eigen/tf2_eigen.h>
 #endif
-#include <moveit/backtrace/backtrace.h>
 #include <moveit/profiler/profiler.h>
 #include <moveit/macros/console_colors.h>
 #include <boost/bind.hpp>
