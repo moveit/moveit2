@@ -281,6 +281,7 @@ void LocalPlannerComponent::executeIteration()
       if (!local_planner_feedback_->feedback.empty())
       {
         local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
+        return;
       }
 
       // Use a configurable message interface like MoveIt servo
