@@ -49,8 +49,6 @@
 #include "pilz_industrial_motion_planner/trajectory_functions.h"
 #include "pilz_industrial_motion_planner/trajectory_generation_exceptions.h"
 
-using namespace pilz_industrial_motion_planner;
-
 namespace pilz_industrial_motion_planner
 {
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(TrajectoryGeneratorInvalidLimitsException,
