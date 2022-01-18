@@ -337,12 +337,14 @@ bool HybridPlanningManager::sendLocalPlannerAction()
         // Abort hybrid planning if reaction fails
         if (reaction_result.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
         {
-          auto result = std::make_shared<moveit_msgs::action::HybridPlanner::Result>();
-          result->error_code.val = reaction_result.error_code.val;
-          result->error_message = reaction_result.error_message;
-
-          hybrid_planning_goal_handle_->abort(result);
-          RCLCPP_ERROR(LOGGER, "Hybrid Planning Manager failed to react to  '%s'", reaction_result.event.c_str());
+          const moveit_msgs::action::HybridPlanner::Result result([reaction_result]() {
+            moveit_msgs::action::HybridPlanner::Result result;
+            result.error_code.val = reaction_result.error_code.val;
+            result.error_message = reaction_result.error_message;
+            return result;
+          }());
+          hybrid_planning_goal_handle_->abort(std::make_shared<moveit_msgs::action::HybridPlanner::Result>(result));
+          RCLCPP_ERROR_STREAM(LOGGER, "Hybrid Planning Manager failed to react to " << reaction_result.event);
         }
       };
 

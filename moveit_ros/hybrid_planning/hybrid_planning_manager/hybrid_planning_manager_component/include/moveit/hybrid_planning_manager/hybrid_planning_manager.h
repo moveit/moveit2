@@ -107,7 +107,7 @@ private:
   bool initialized_;
 
   // Flag that indicates hybrid planning has been canceled
-  bool stop_hybrid_planning_;
+  std::atomic<bool> stop_hybrid_planning_;
 
   // Shared hybrid planning goal handle
   std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> hybrid_planning_goal_handle_;
