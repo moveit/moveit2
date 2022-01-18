@@ -48,7 +48,7 @@ class PrismaticJointModel : public JointModel
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  PrismaticJointModel(const std::string& name);
+  PrismaticJointModel(const std::string& name, size_t joint_index, size_t first_variable_index);
 
   void getVariableDefaultPositions(double* values, const Bounds& other_bounds) const override;
   void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values,
