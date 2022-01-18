@@ -55,10 +55,6 @@ using namespace std::chrono_literals;
 class HybridPlanningFixture : public ::testing::Test
 {
 public:
-  void SetUp() override
-  {
-  }
-
   HybridPlanningFixture() : node_(std::make_shared<rclcpp::Node>("hybrid_planning_testing"))
   {
     action_successful_ = false;
@@ -81,7 +77,8 @@ public:
 
     hp_action_client_ =
         rclcpp_action::create_client<moveit_msgs::action::HybridPlanner>(node_, hybrid_planning_action_name);
-    robot_state_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state", 1);
+    robot_state_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state",
+                                                                                          rclcpp::SystemDefaultsQoS());
 
     // Add new collision object as soon as global trajectory is available.
     global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
@@ -91,8 +88,8 @@ public:
     RCLCPP_INFO(node_->get_logger(), "Initialize Planning Scene Monitor");
     tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
 
-    planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(
-        node_, "robot_description", tf_buffer_, "planning_scene_monitor");
+    planning_scene_monitor_ = std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, "robot_description",
+                                                                                             "planning_scene_monitor");
     if (!planning_scene_monitor_->getPlanningScene())
     {
       RCLCPP_ERROR(node_->get_logger(), "The planning scene was not retrieved!");
@@ -101,7 +98,6 @@ public:
     else
     {
       planning_scene_monitor_->startStateMonitor();
-      planning_scene_monitor_->providePlanningSceneService();  // let RViz display query PlanningScene
       planning_scene_monitor_->setPlanningScenePublishingFrequency(100);
       planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,
                                                             "/planning_scene");
@@ -132,25 +128,30 @@ public:
     // Configure a valid robot state
     robot_state->setToDefaultValues(joint_model_group, "ready");
 
+    const moveit::core::RobotState goal_state([robot_model, joint_model_group]() {
+      moveit::core::RobotState goal_state(robot_model);
+      std::vector<double> joint_values = { 0.0, 0.0, 0.0, 0.0, 0.0, 1.571, 0.785 };
+      goal_state.setJointGroupPositions(joint_model_group, joint_values);
+      return goal_state;
+    }());
+
     // Create desired motion goal
-    moveit_msgs::msg::MotionPlanRequest goal_motion_request;
-
-    moveit::core::robotStateToRobotStateMsg(*robot_state, goal_motion_request.start_state);
-    goal_motion_request.group_name = planning_group;
-    goal_motion_request.num_planning_attempts = 10;
-    goal_motion_request.max_velocity_scaling_factor = 0.1;
-    goal_motion_request.max_acceleration_scaling_factor = 0.1;
-    goal_motion_request.allowed_planning_time = 2.0;
-    goal_motion_request.planner_id = "ompl";
-    goal_motion_request.pipeline_id = "ompl";
-
-    moveit::core::RobotState goal_state(robot_model);
-    std::vector<double> joint_values = { 0.0, 0.0, 0.0, 0.0, 0.0, 1.571, 0.785 };
-    goal_state.setJointGroupPositions(joint_model_group, joint_values);
-
-    goal_motion_request.goal_constraints.resize(1);
-    goal_motion_request.goal_constraints[0] =
-        kinematic_constraints::constructGoalConstraints(goal_state, joint_model_group);
+    const moveit_msgs::msg::MotionPlanRequest goal_motion_request(
+        [robot_state, planning_group, goal_state, joint_model_group]() {
+          moveit_msgs::msg::MotionPlanRequest goal_motion_request;
+          moveit::core::robotStateToRobotStateMsg(*robot_state, goal_motion_request.start_state);
+          goal_motion_request.group_name = planning_group;
+          goal_motion_request.num_planning_attempts = 10;
+          goal_motion_request.max_velocity_scaling_factor = 0.1;
+          goal_motion_request.max_acceleration_scaling_factor = 0.1;
+          goal_motion_request.allowed_planning_time = 2.0;
+          goal_motion_request.planner_id = "ompl";
+          goal_motion_request.pipeline_id = "ompl";
+          goal_motion_request.goal_constraints.resize(1);
+          goal_motion_request.goal_constraints[0] =
+              kinematic_constraints::constructGoalConstraints(goal_state, joint_model_group);
+          return goal_motion_request;
+        }());
 
     // Create Hybrid Planning action request
     moveit_msgs::msg::MotionSequenceItem sequence_item;
@@ -192,10 +193,6 @@ public:
                const std::shared_ptr<const moveit_msgs::action::HybridPlanner::Feedback> feedback) {
           RCLCPP_INFO(node_->get_logger(), feedback->feedback.c_str());
         };
-  }
-
-  void TearDown() override
-  {
   }
 
   rclcpp::executors::MultiThreadedExecutor executor_;
