@@ -35,6 +35,9 @@ See the [MoveItCpp Tutorial](https://moveit.picknik.ai/foxy/doc/moveit_cpp/movei
 The [Move Group C++ Interface](https://moveit.picknik.ai/foxy/doc/move_group_interface/move_group_interface_tutorial.html) provides a simple launch file for running a MoveGroup setup.
 You can test it using the MotionPlanning display in RViz or by implementing your own MoveGroupInterface application.
 
+## Having Doxygen Reference Locally
+See [How To Generate API Doxygen Reference Locally](https://moveit.picknik.ai/main/doc/how_to_guides/how_to_generate_api_doxygen_locally.html)
+
 ## Supporters
 
 This open source project is maintained by supporters from around the world — see [MoveIt maintainers](https://moveit.ros.org/about/). Special thanks to contributor from Intel and Open Robotics.
