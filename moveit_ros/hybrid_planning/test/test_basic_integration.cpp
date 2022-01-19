@@ -77,8 +77,6 @@ public:
 
     hp_action_client_ =
         rclcpp_action::create_client<moveit_msgs::action::HybridPlanner>(node_, hybrid_planning_action_name);
-    robot_state_publisher_ = node_->create_publisher<moveit_msgs::msg::DisplayRobotState>("display_robot_state",
-                                                                                          rclcpp::SystemDefaultsQoS());
 
     // Add new collision object as soon as global trajectory is available.
     global_solution_subscriber_ = node_->create_subscription<moveit_msgs::msg::MotionPlanResponse>(
@@ -127,6 +125,12 @@ public:
 
     // Configure a valid robot state
     robot_state->setToDefaultValues(joint_model_group, "ready");
+    robot_state->update();
+    // Lock the planning scene as briefly as possible
+    {
+      planning_scene_monitor::LockedPlanningSceneRW locked_planning_scene(planning_scene_monitor_);
+      locked_planning_scene->setCurrentState(*robot_state);
+    }
 
     const moveit::core::RobotState goal_state([robot_model, joint_model_group]() {
       moveit::core::RobotState goal_state(robot_model);
@@ -200,7 +204,6 @@ public:
 protected:
   rclcpp::Node::SharedPtr node_;
   rclcpp_action::Client<moveit_msgs::action::HybridPlanner>::SharedPtr hp_action_client_;
-  rclcpp::Publisher<moveit_msgs::msg::DisplayRobotState>::SharedPtr robot_state_publisher_;
   rclcpp::Subscription<moveit_msgs::msg::MotionPlanResponse>::SharedPtr global_solution_subscriber_;
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
@@ -217,8 +220,6 @@ protected:
 TEST_F(HybridPlanningFixture, ActionCompletion)
 {
   std::thread run_thread([this]() {
-    rclcpp::sleep_for(5s);
-
     // Send the goal
     auto goal_handle_future = hp_action_client_->async_send_goal(goal_action_request_, send_goal_options_);
   });
@@ -237,8 +238,6 @@ TEST_F(HybridPlanningFixture, ActionCompletion)
 TEST_F(HybridPlanningFixture, ActionAbortion)
 {
   std::thread run_thread([this]() {
-    rclcpp::sleep_for(5s);
-
     // Send the goal
     auto goal_handle_future = hp_action_client_->async_send_goal(goal_action_request_, send_goal_options_);
 
