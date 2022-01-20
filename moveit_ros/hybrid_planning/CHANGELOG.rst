@@ -2,6 +2,9 @@
 Changelog for package moveit_hybrid_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.3 (2022-01-20)
+------------------
+
 2.3.2 (2021-12-29)
 ------------------
 * Fix syntax (`#939 <https://github.com/ros-planning/moveit2/issues/939>`_)
