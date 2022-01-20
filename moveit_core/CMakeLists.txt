@@ -10,9 +10,6 @@ find_package(rclcpp REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
 
-# Finds Boost Components
-include(ConfigExtras.cmake)
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
 # replace LIBFCL_LIBRARIES with full paths to the libraries
@@ -52,13 +49,14 @@ find_package(pluginlib REQUIRED)
 # TODO: Port python bindings
 # find_package(pybind11 REQUIRED)
 
+# Finds Boost Components
+include(ConfigExtras.cmake)
+
 # Set target file path for version.h
 set(VERSION_FILE_PATH ${CMAKE_BINARY_DIR}/include)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
-    background_processing/include
     exceptions/include
-    backtrace/include
     collision_detection/include
     collision_detection_fcl/include
     collision_detection_bullet/include
@@ -88,7 +86,6 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 )
 
 set(THIS_PACKAGE_LIBRARIES
-    moveit_background_processing
     moveit_butterworth_filter
     moveit_collision_distance_field
     moveit_collision_detection
@@ -158,8 +155,6 @@ message(STATUS " *** Building MoveIt ${MOVEIT_VERSION} ***")
 configure_file("version/version.h.in" "${VERSION_FILE_PATH}/moveit/version.h")
 install(FILES "${VERSION_FILE_PATH}/moveit/version.h" DESTINATION include/moveit)
 
-add_subdirectory(background_processing)
-add_subdirectory(backtrace)
 add_subdirectory(collision_distance_field)
 add_subdirectory(constraint_samplers)
 add_subdirectory(controller_manager)
