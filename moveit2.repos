@@ -11,7 +11,7 @@ repositories:
     type: git
     url: https://github.com/JafarAbdi/moveit_resources
     version: pr-moveit_configs_utils
-  parameter_tools:
+  launch_param_builder:
     type: git
-    url: https://github.com/PickNikRobotics/parameter_tools
+    url: https://github.com/PickNikRobotics/launch_param_builder
     version: main
