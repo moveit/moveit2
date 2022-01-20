@@ -2,6 +2,17 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.3 (2022-01-20)
+------------------
+* Fix missing ament_cmake_gtest dependency (`#981 <https://github.com/ros-planning/moveit2/issues/981>`_) (`#987 <https://github.com/ros-planning/moveit2/issues/987>`_)
+* Remove some Maintainers from Pilz Planner (`#971 <https://github.com/ros-planning/moveit2/issues/971>`_) (`#974 <https://github.com/ros-planning/moveit2/issues/974>`_)
+  (cherry picked from commit 79addb30a703f566f3d81b01dc4d34c0f8cce209)
+  Co-authored-by: jschleicher <j.schleicher@pilz.de>
+* Fix usage of boost placeholder (`#958 <https://github.com/ros-planning/moveit2/issues/958>`_) (`#967 <https://github.com/ros-planning/moveit2/issues/967>`_)
+  (cherry picked from commit 53f9affaeb10cd077f9e5444f884d1c9b3ef6871)
+  Co-authored-by: Wolf Vollprecht <w.vollprecht@gmail.com>
+* Contributors: mergify[bot]
+
 2.3.2 (2021-12-29)
 ------------------
 

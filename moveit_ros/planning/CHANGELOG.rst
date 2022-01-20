@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.3 (2022-01-20)
+------------------
+
 2.3.2 (2021-12-29)
 ------------------
 * Add ros_testsing to moveit_ros_planning for rdf_loader (`#943 <https://github.com/ros-planning/moveit2/issues/943>`_)

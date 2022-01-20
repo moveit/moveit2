@@ -2,6 +2,11 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.3 (2022-01-20)
+------------------
+* Fix boost linking errors for Windows (`#957 <https://github.com/ros-planning/moveit2/issues/957>`_) (`#1001 <https://github.com/ros-planning/moveit2/issues/1001>`_)
+* Contributors: mergify[bot]
+
 2.3.2 (2021-12-29)
 ------------------
 
