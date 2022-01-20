@@ -2,6 +2,16 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2022-01-20)
+------------------
+* Remove 'using namespace' from header files. (`#994 <https://github.com/ros-planning/moveit2/issues/994>`_)
+* Servo: re-order velocity limit check & minor cleanup (`#956 <https://github.com/ros-planning/moveit2/issues/956>`_)
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Contributors: AndyZe, Cory Crean, Robert Haschke
+
 2.3.2 (2021-12-29)
 ------------------
 

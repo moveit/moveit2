@@ -2,6 +2,23 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2022-01-20)
+------------------
+* Merge https://github.com/ros-planning/moveit/commit/f3ac6070497da90da33551fc1dc3a68938340413
+* Replace NULL with nullptr (`#961 <https://github.com/ros-planning/moveit2/issues/961>`_)
+  * Fixes `#841 <https://github.com/ros-planning/moveit2/issues/841>`_
+* Add jerk to the robot model (`#683 <https://github.com/ros-planning/moveit2/issues/683>`_)
+  * Add jerk to the robot model
+  * Add joint limit parsing to a unit test
+  * Add jerk to computeVariableBoundsMsg and <<, too
+* Silent clang-tidy's -Wpotentially-evaluated-expression
+  https://stackoverflow.com/questions/46494928/clang-warning-on-expression-side-effects
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Contributors: Abishalini, AndyZe, Robert Haschke, Stephanie Eng
+
 2.3.2 (2021-12-29)
 ------------------
 * Add ros_testsing to moveit_ros_planning for rdf_loader (`#943 <https://github.com/ros-planning/moveit2/issues/943>`_)
