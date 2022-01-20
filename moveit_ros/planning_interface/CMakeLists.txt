@@ -79,7 +79,6 @@ add_subdirectory(move_group_interface)
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ros_testing REQUIRED)
-  find_package(Boost REQUIRED COMPONENTS filesystem)
 
   # TODO (vatanaksoytezer): Enable once this test is not flaky
   # Move group interface cpp ompl constrained planning integration test
