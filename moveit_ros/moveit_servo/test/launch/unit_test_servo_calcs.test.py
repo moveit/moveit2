@@ -4,15 +4,18 @@ import launch_testing
 import os
 import sys
 import unittest
+from launch_param_builder import ParameterBuilder
 
 sys.path.append(os.path.dirname(__file__))
-from servo_launch_test_common import load_yaml
 
 
 def generate_test_description():
     # Get parameters using the demo config file
-    servo_yaml = load_yaml("moveit_servo", "config/panda_simulated_config.yaml")
-    servo_params = {"moveit_servo": servo_yaml}
+    servo_params = (
+        ParameterBuilder("moveit_servo")
+        .yaml("config/panda_simulated_config.yaml", parameter_namespace="moveit_servo")
+        .to_dict()
+    )
 
     test_binary_dir_arg = launch.actions.DeclareLaunchArgument(
         name="test_binary_dir",

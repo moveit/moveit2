@@ -5,7 +5,7 @@ import os
 
 # TODO(henningkayser): Switch to ParameterBuilder once #591 is merged
 # from moveit_configs_utils import MoveItConfigsBuilder
-# from parameter_builder import ParameterBuilder
+# from launch_param_builder import ParameterBuilder
 
 
 def _load_file(package_name, file_path):
