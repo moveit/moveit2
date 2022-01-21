@@ -58,7 +58,7 @@ void MoveGroupStateValidationService::initialize()
 }
 
 bool MoveGroupStateValidationService::computeService(
-    const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<rmw_request_id_t> /* unused */,
     const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request> req,
     std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response> res)
 {

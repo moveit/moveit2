@@ -48,7 +48,7 @@ namespace moveit::hybrid_planning
 {
 bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
                                    const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-                                   const std::string& group_name)
+                                   const std::string& /* unused */)
 {
   // Load parameter & initialize member variables
   if (node->has_parameter("stop_before_collision"))
@@ -72,7 +72,7 @@ bool ForwardTrajectory::reset()
 
 moveit_msgs::action::LocalPlanner::Feedback
 ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajectory,
-                         const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> local_goal,
+                         const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> /* unused */,
                          trajectory_msgs::msg::JointTrajectory& local_solution)
 {
   // A message every once in awhile is useful in case the local planner gets stuck
