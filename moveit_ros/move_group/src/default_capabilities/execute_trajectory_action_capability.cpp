@@ -65,7 +65,7 @@ void MoveGroupExecuteTrajectoryAction::initialize()
         RCLCPP_INFO(LOGGER, "Received goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [](const std::shared_ptr<ExecTrajectoryGoal>& g) {
+      [](const std::shared_ptr<ExecTrajectoryGoal>& /* unused */) {
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
