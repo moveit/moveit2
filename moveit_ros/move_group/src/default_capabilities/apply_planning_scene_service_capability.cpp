@@ -57,7 +57,7 @@ void ApplyPlanningSceneService::initialize()
       APPLY_PLANNING_SCENE_SERVICE_NAME, std::bind(&ApplyPlanningSceneService::applyScene, this, _1, _2, _3));
 }
 
-bool ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_t> request_header,
+bool ApplyPlanningSceneService::applyScene(const std::shared_ptr<rmw_request_id_t> /* unused */,
                                            const std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Request> req,
                                            std::shared_ptr<moveit_msgs::srv::ApplyPlanningScene::Response> res)
 {
