@@ -1,5 +1,9 @@
-<img src="https://moveit.ros.org/assets/logo/moveit2/moveit_logo-black.png#gh-light-mode-only" alt="MoveIt 2 Logo" width="200" id="moveit-logo-black"/>
-<img src="https://moveit.ros.org/assets/logo/moveit2/moveit_logo-white.png#gh-dark-mode-only" alt="MoveIt 2 Logo" width="200" id="moveit-logo-white"/>
+<div id="moveit-logo-black" style="width: 200px">
+<img src="https://moveit.ros.org/assets/logo/moveit2/moveit_logo-black.png#gh-light-mode-only" alt="MoveIt 2 Logo"/>
+</div>
+<div id="moveit-logo-white" style="width: 200px">
+<img src="https://moveit.ros.org/assets/logo/moveit2/moveit_logo-white.png#gh-dark-mode-only" alt="MoveIt 2 Logo"/>
+</div>
 
 The MoveIt Motion Planning Framework for **ROS 2**. For ROS 1, see [MoveIt 1](https://github.com/ros-planning/moveit).
 
