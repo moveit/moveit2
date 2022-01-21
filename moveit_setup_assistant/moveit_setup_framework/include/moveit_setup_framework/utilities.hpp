@@ -98,10 +98,11 @@ inline bool extractPackageNameFromPath(const std::string& path, std::string& pac
       package_name = sub_path.leaf().string();
       tinyxml2::XMLDocument package_xml_file;
       auto is_open = package_xml_file.LoadFile((sub_path / "package.xml").c_str());
-      if(is_open == tinyxml2::XML_SUCCESS)
+      if (is_open == tinyxml2::XML_SUCCESS)
       {
-        auto name_potential = package_xml_file.FirstChildElement("package")->FirstChildElement("name")->FirstChild()->ToText()->Value();
-        if(name_potential)
+        auto name_potential =
+            package_xml_file.FirstChildElement("package")->FirstChildElement("name")->FirstChild()->ToText()->Value();
+        if (name_potential)
         {
           // Change package name if we have non-empty potential, else it defaults
           package_name = name_potential;
