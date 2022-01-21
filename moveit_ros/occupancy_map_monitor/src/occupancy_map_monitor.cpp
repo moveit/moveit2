@@ -263,7 +263,7 @@ bool OccupancyMapMonitor::getShapeTransformCache(std::size_t index, const std::s
     return false;
 }
 
-bool OccupancyMapMonitor::saveMapCallback(const std::shared_ptr<rmw_request_id_t> request_header,
+bool OccupancyMapMonitor::saveMapCallback(const std::shared_ptr<rmw_request_id_t> /* unused */,
                                           const std::shared_ptr<moveit_msgs::srv::SaveMap::Request> request,
                                           std::shared_ptr<moveit_msgs::srv::SaveMap::Response> response)
 {
@@ -281,7 +281,7 @@ bool OccupancyMapMonitor::saveMapCallback(const std::shared_ptr<rmw_request_id_t
   return true;
 }
 
-bool OccupancyMapMonitor::loadMapCallback(const std::shared_ptr<rmw_request_id_t> request_header,
+bool OccupancyMapMonitor::loadMapCallback(const std::shared_ptr<rmw_request_id_t> /* unused */,
                                           const std::shared_ptr<moveit_msgs::srv::LoadMap::Request> request,
                                           std::shared_ptr<moveit_msgs::srv::LoadMap::Response> response)
 {

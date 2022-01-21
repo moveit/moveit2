@@ -87,7 +87,7 @@ void MoveGroupCartesianPathService::initialize()
       CARTESIAN_PATH_SERVICE_NAME, std::bind(&MoveGroupCartesianPathService::computeService, this, _1, _2, _3));
 }
 
-bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_request_id_t> request_header,
+bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_request_id_t> /* unused */,
                                                    const std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Request> req,
                                                    std::shared_ptr<moveit_msgs::srv::GetCartesianPath::Response> res)
 {

@@ -114,7 +114,7 @@ public:
    */
   [[deprecated("Passing tf2_ros::Buffer to PlanningSceneMonitor's constructor is deprecated")]] PlanningSceneMonitor(
       const rclcpp::Node::SharedPtr& node, const std::string& robot_description,
-      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name = "")
+      const std::shared_ptr<tf2_ros::Buffer>& /* unused */, const std::string& name = "")
     : PlanningSceneMonitor(node, robot_description, name)
   {
   }
@@ -128,7 +128,7 @@ public:
    */
   [[deprecated("Passing tf2_ros::Buffer to PlanningSceneMonitor's constructor is deprecated")]] PlanningSceneMonitor(
       const rclcpp::Node::SharedPtr& node, const robot_model_loader::RobotModelLoaderPtr& rml,
-      const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const std::string& name = "")
+      const std::shared_ptr<tf2_ros::Buffer>& /* unused */, const std::string& name = "")
     : PlanningSceneMonitor(node, rml, name)
   {
   }
@@ -143,7 +143,7 @@ public:
    */
   [[deprecated("Passing tf2_ros::Buffer to PlanningSceneMonitor's constructor is deprecated")]] PlanningSceneMonitor(
       const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene,
-      const std::string& robot_description, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
+      const std::string& robot_description, const std::shared_ptr<tf2_ros::Buffer>& /* unused */,
       const std::string& name = "")
     : PlanningSceneMonitor(node, scene, robot_description, name)
   {
@@ -159,7 +159,7 @@ public:
    */
   [[deprecated("Passing tf2_ros::Buffer to PlanningSceneMonitor's constructor is deprecated")]] PlanningSceneMonitor(
       const rclcpp::Node::SharedPtr& node, const planning_scene::PlanningScenePtr& scene,
-      const robot_model_loader::RobotModelLoaderPtr& rml, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer,
+      const robot_model_loader::RobotModelLoaderPtr& rml, const std::shared_ptr<tf2_ros::Buffer>& /* unused */,
       const std::string& name = "")
     : PlanningSceneMonitor(node, scene, rml, name)
   {

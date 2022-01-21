@@ -275,18 +275,19 @@ void BenchmarkOptions::readPlannerConfigs(const rclcpp::Node::SharedPtr& node)
   for (const std::string& pipeline : pipelines)
   {
     std::string pipeline_name;
-    if (!node->get_parameter(np + "." + pipeline + ".name", pipeline_name))
+    const std::string pipeline_parameter_name = std::string(np).append(".").append(pipeline).append(".name");
+    if (!node->get_parameter(pipeline_parameter_name, pipeline_name))
     {
-      RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", (np + "." + pipeline + ".name").c_str());
+      RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", pipeline_parameter_name.c_str());
       return;
     }
 
     RCLCPP_INFO(LOGGER, "Reading in planner names for planning pipeline '%s'", pipeline_name.c_str());
 
     std::vector<std::string> planners;
-    if (!node->get_parameter(np + "." + pipeline + ".planners", planners))
+    if (!node->get_parameter(pipeline_parameter_name, planners))
     {
-      RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", (np + "." + pipeline + ".planners").c_str());
+      RCLCPP_ERROR(LOGGER, "Fail to get the parameter in `%s` namespace.", pipeline_parameter_name.c_str());
       return;
     }
 
