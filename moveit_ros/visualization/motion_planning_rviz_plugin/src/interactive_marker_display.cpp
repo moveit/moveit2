@@ -109,8 +109,8 @@ void InteractiveMarkerDisplay::onInitialize()
   private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
   auto frame_transformer = context_->getFrameManager()->getTransformer();
   //  rclcpp::Node::SharedPtr node = ros_node_abstraction->get_raw_node();
-  interactive_marker_client_.reset(
-      new interactive_markers::InteractiveMarkerClient(pnode_, frame_transformer, fixed_frame_.toStdString()));
+  interactive_marker_client_ = std::make_unique<interactive_markers::InteractiveMarkerClient>(
+      pnode_, frame_transformer, fixed_frame_.toStdString());
 
   interactive_marker_client_->setInitializeCallback(
       std::bind(&InteractiveMarkerDisplay::initializeCallback, this, std::placeholders::_1));
