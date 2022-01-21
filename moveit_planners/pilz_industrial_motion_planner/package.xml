@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>pilz_industrial_motion_planner</name>
-  <version>2.3.2</version>
+  <version>2.4.0</version>
   <description>MoveIt plugin to generate industrial trajectories PTP, LIN, CIRC and sequences thereof.</description>
 
   <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
@@ -45,7 +45,7 @@
   <test_depend>moveit_resources_prbt_pg70_support</test_depend>
   <!--
   <test_depend>moveit_configs_utils</test_depend>
-  <test_depend>parameter_builder</test_depend>
+  <test_depend>launch_param_builder</test_depend>
   -->
   <test_depend>boost</test_depend>
 
