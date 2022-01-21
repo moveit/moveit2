@@ -1,6 +1,5 @@
 # Extras module needed for dependencies to find boost components
 
-find_package(Boost REQUIRED)
 #if(Boost_VERSION LESS 106700)
 #  set(BOOST_PYTHON_COMPONENT python)
 #else()

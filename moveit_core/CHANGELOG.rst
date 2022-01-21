@@ -2,6 +2,53 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2022-01-20)
+------------------
+* Move background_processing (`#997 <https://github.com/ros-planning/moveit2/issues/997>`_)
+* Fix boost linking errors for Windows (`#957 <https://github.com/ros-planning/moveit2/issues/957>`_)
+* Delete backtrace hack (`#995 <https://github.com/ros-planning/moveit2/issues/995>`_)
+* Use size_t for index variables (`#946 <https://github.com/ros-planning/moveit2/issues/946>`_)
+* Remove moveit_build_options
+* Merge https://github.com/ros-planning/moveit/commit/f3ac6070497da90da33551fc1dc3a68938340413
+* Replace NULL with nullptr (`#961 <https://github.com/ros-planning/moveit2/issues/961>`_)
+  * Fixes `#841 <https://github.com/ros-planning/moveit2/issues/841>`_
+* Merge https://github.com/ros-planning/moveit/commit/a0ee2020c4a40d03a48044d71753ed23853a665d
+* Add jerk to the robot model (`#683 <https://github.com/ros-planning/moveit2/issues/683>`_)
+  * Add jerk to the robot model
+  * Add joint limit parsing to a unit test
+  * Add jerk to computeVariableBoundsMsg and <<, too
+* collision_distance_field: Fix undefined behavior vector insertion (`#942 <https://github.com/ros-planning/moveit2/issues/942>`_)
+* Normalize incoming transforms (`#2920 <https://github.com/ros-planning/moveit2/issues/2920>`_)
+  * Normalize incoming transforms
+  * fixup: adapt comment according to review suggestion
+  Co-authored-by: Michael Görner <me@v4hn.de>
+* Completely silent -Wmaybe-uninitialized
+* Don't fail on -Wmaybe-uninitialized. Needs more analysis!
+* Fix unused-variable warning
+* Silent unused-function warnings
+* Remove unused arguments from global_adjustment_factor()
+  Looks like, dt and x were passed originally to call fit_cubic_spline()
+  inside that function. However, later it was assumed that fit_cubic_spline()
+  was already called, rendering these parameters superfluous.
+* Simplify API: Remove obviously unused arguments
+* clang-tidy: fix unused parameter (critical cases)
+  This warnings should be considered in more detail (TODO).
+  Not using these arguments might be an actual bug.
+* clang-tidy: fix unused parameter (uncritical cases)
+  These parameters aren't used for an obvious reason.
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* RobotState: write to correct array (`#2909 <https://github.com/ros-planning/moveit2/issues/2909>`_)
+  Not an actual bug because both arrays share the same memory.
+  As mentioned in https://github.com/ros-planning/moveit2/pull/683#pullrequestreview-780447848
+* fix uninitialized orientation in default shape pose (`#2896 <https://github.com/ros-planning/moveit2/issues/2896>`_)
+* Readability and consistency improvements in TOTG (`#2882 <https://github.com/ros-planning/moveit2/issues/2882>`_)
+  * Use std::fabs() everywhere
+  * Better comments
+* Contributors: Abishalini, Akash, AndyZe, Michael Görner, Robert Haschke, Stephanie Eng, Tyler Weaver, andreas-botbuilt
+
 2.3.2 (2021-12-29)
 ------------------
 

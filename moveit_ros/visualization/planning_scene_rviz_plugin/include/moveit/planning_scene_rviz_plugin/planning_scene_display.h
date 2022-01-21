@@ -43,7 +43,7 @@
 #ifndef Q_MOC_RUN
 #include <moveit/rviz_plugin_render_tools/planning_scene_render.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/background_processing/background_processing.h>
+#include <moveit/planning_scene_rviz_plugin/background_processing.hpp>
 #include <rclcpp/rclcpp.hpp>
 #endif
 
