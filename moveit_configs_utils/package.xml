@@ -12,7 +12,7 @@
   <test_depend>ament_lint_common</test_depend>
 
   <exec_depend>ament_index_python</exec_depend>
-  <exec_depend>parameter_builder</exec_depend>
+  <exec_depend>launch_param_builder</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>

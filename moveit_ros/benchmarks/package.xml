@@ -32,7 +32,7 @@
   <exec_depend>libboost-date-time</exec_depend>
   <exec_depend>libboost-filesystem</exec_depend>
   <exec_depend>moveit_configs_utils</exec_depend>
-  <exec_depend>parameter_builder</exec_depend>
+  <exec_depend>launch_param_builder</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -4,7 +4,7 @@ import launch_testing
 import os
 import sys
 import unittest
-from parameter_builder import ParameterBuilder
+from launch_param_builder import ParameterBuilder
 
 sys.path.append(os.path.dirname(__file__))
 

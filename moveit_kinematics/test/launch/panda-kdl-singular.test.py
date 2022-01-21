@@ -5,7 +5,7 @@ from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch_testing.util import KeepAliveProc
 from moveit_configs_utils import MoveItConfigsBuilder
-from parameter_builder import ParameterBuilder
+from launch_param_builder import ParameterBuilder
 
 
 @pytest.mark.rostest

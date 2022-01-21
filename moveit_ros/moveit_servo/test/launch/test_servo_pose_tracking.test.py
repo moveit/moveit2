@@ -12,7 +12,7 @@ from launch.actions import ExecuteProcess, TimerAction
 from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from moveit_configs_utils import MoveItConfigsBuilder
-from parameter_builder import ParameterBuilder
+from launch_param_builder import ParameterBuilder
 
 
 def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):

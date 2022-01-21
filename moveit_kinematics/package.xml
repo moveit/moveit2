@@ -48,7 +48,7 @@
   <test_depend>ament_lint_common</test_depend>
   <test_depend>ros_testing</test_depend>
   <test_depend>moveit_configs_utils</test_depend>
-  <test_depend>parameter_builder</test_depend>
+  <test_depend>launch_param_builder</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

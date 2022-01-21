@@ -54,7 +54,7 @@ from typing import Optional, List
 import logging
 from ament_index_python.packages import get_package_share_directory
 
-from parameter_builder import ParameterBuilder, load_yaml, load_xacro
+from launch_param_builder import ParameterBuilder, load_yaml, load_xacro
 
 
 class MoveItConfigs(object):
