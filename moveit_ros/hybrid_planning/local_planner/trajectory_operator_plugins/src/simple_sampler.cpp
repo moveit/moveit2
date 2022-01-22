@@ -80,11 +80,17 @@ moveit_msgs::action::LocalPlanner::Feedback
 SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
                                   robot_trajectory::RobotTrajectory& local_trajectory)
 {
+  if (reference_trajectory_->getWayPointCount() == 0)
+  {
+    feedback_.feedback = "unhandled_exception";
+    return feedback_;
+  }
+
   // Delete previous local trajectory
   local_trajectory.clear();
 
   // Get next desired robot state
-  moveit::core::RobotState next_desired_goal_state = reference_trajectory_->getWayPoint(next_waypoint_index_);
+  const moveit::core::RobotState next_desired_goal_state = reference_trajectory_->getWayPoint(next_waypoint_index_);
 
   // Check if state is reached
   if (next_desired_goal_state.distance(current_state, joint_group_) <= WAYPOINT_RADIAN_TOLERANCE)
