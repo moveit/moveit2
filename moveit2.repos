@@ -9,8 +9,8 @@ repositories:
     version: 2.2.0
   moveit_resources:
     type: git
-    url: https://github.com/ros-planning/moveit_resources
-    version: ros2
+    url: https://github.com/AndyZe/moveit_resources
+    version: andyz/no_initial_velocities
   launch_param_builder:
     type: git
     url: https://github.com/PickNikRobotics/launch_param_builder
