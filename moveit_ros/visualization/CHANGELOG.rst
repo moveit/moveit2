@@ -2,6 +2,25 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2022-01-20)
+------------------
+* Move background_processing (`#997 <https://github.com/ros-planning/moveit2/issues/997>`_)
+* Merge https://github.com/ros-planning/moveit/commit/f3ac6070497da90da33551fc1dc3a68938340413
+* Merge https://github.com/ros-planning/moveit/commit/a0ee2020c4a40d03a48044d71753ed23853a665d
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* MPD: do not save/restore warehouse parameters (`#2865 <https://github.com/ros-planning/moveit2/issues/2865>`_)
+  If we reload these values from the config, setting the ROS parameters is much less useful.
+  At least the *type* of warehouse_ros plugin (mongo or sqlite) cannot be selected
+  in the display, so you will probably need to meddle with the parameters anyway if you want
+  to connect to a different db.
+  search for parameters warehouse_host/port because they are usually set at the top level, but
+  you might want to set them differently for different move_groups.
+* PlanningSceneDisplay: always update the main scene node's pose (`#2876 <https://github.com/ros-planning/moveit2/issues/2876>`_)
+* Contributors: Abishalini, Michael Görner, Robert Haschke, Tyler Weaver
+
 2.3.2 (2021-12-29)
 ------------------
 

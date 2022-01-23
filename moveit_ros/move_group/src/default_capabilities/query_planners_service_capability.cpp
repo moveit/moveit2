@@ -61,7 +61,7 @@ void MoveGroupQueryPlannersService::initialize()
 }
 
 bool MoveGroupQueryPlannersService::queryInterface(
-    const std::shared_ptr<rmw_request_id_t> request_header,
+    const std::shared_ptr<rmw_request_id_t> /* unused */,
     const std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Request> /*req*/,
     std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Response> res)
 {
@@ -84,7 +84,7 @@ bool MoveGroupQueryPlannersService::queryInterface(
   return true;
 }
 
-bool MoveGroupQueryPlannersService::getParams(const std::shared_ptr<rmw_request_id_t> request_header,
+bool MoveGroupQueryPlannersService::getParams(const std::shared_ptr<rmw_request_id_t> /* unused */,
                                               const std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Request> req,
                                               std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Response> res)
 {
@@ -120,7 +120,7 @@ bool MoveGroupQueryPlannersService::getParams(const std::shared_ptr<rmw_request_
   return true;
 }
 
-bool MoveGroupQueryPlannersService::setParams(const std::shared_ptr<rmw_request_id_t> request_header,
+bool MoveGroupQueryPlannersService::setParams(const std::shared_ptr<rmw_request_id_t> /* unused */,
                                               const std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Request> req,
                                               std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Response> /*res*/)
 {
