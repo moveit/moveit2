@@ -222,7 +222,7 @@ void LocalPlannerComponent::executeIteration()
     // Wait for global solution to be published
     case LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY:
       // Do nothing
-      return;
+      break;
     // Notify action client that local planning failed
     case LocalPlannerState::ABORT:
     {
@@ -230,7 +230,7 @@ void LocalPlannerComponent::executeIteration()
       result->error_message = "Local planner is in an aborted state. Resetting.";
       local_planning_goal_handle_->abort(result);
       reset();
-      return;
+      break;
     }
     // If the planner received an action request and a global solution it starts to plan locally
     case LocalPlannerState::LOCAL_PLANNING_ACTIVE:
@@ -249,7 +249,7 @@ void LocalPlannerComponent::executeIteration()
       {
         local_planning_goal_handle_->succeed(result);
         reset();
-        return;
+        break;
       }
 
       // Get local goal trajectory to follow
@@ -263,9 +263,6 @@ void LocalPlannerComponent::executeIteration()
       if (!local_planner_feedback_->feedback.empty())
       {
         local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
-        RCLCPP_ERROR(LOGGER, "Local planner somehow failed");
-        reset();
-        return;
       }
 
       // Solve local planning problem
@@ -311,7 +308,7 @@ void LocalPlannerComponent::executeIteration()
       {
         // Local solution publisher is defined by the local constraint solver plugin
       }
-      return;
+      break;
     }
     default:
     {
@@ -320,7 +317,7 @@ void LocalPlannerComponent::executeIteration()
       local_planning_goal_handle_->abort(result);
       RCLCPP_ERROR(LOGGER, "Local planner somehow failed");  // TODO(sjahr) Add more detailed failure information
       reset();
-      return;
+      break;
     }
   }
 };
