@@ -15,3 +15,7 @@ repositories:
     type: git
     url: https://github.com/PickNikRobotics/launch_param_builder
     version: main
+  ros2_control:
+    type: git
+    url: https://github.com/ros-controls/ros2_control.git
+    version: a362e2bfbe2308291f20cfc0109c4e1fbf11fb50
