@@ -93,7 +93,8 @@ void PlanningContext::setMotionPlanRequest(const MotionPlanRequest& request)
 }
 
 bool PlannerManager::initialize(const moveit::core::RobotModelConstPtr& /*unused*/,
-                                const rclcpp::Node::SharedPtr& /* unused */, const std::string& /* unused */)
+                                const rclcpp::Node::SharedPtr& node /* unused */,
+                                const std::string& parameter_namespace /* unused */)
 {
   return true;
 }

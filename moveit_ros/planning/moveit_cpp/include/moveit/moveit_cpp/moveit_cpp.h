@@ -108,13 +108,13 @@ public:
 
   /** \brief Constructor */
   [[deprecated("Passing tf2_ros::Buffer to MoveItCpp's constructor is deprecated")]] MoveItCpp(
-      const rclcpp::Node::SharedPtr& node, const std::shared_ptr<tf2_ros::Buffer>& /* unused */)
+      const rclcpp::Node::SharedPtr& node, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
     : MoveItCpp(node)
   {
   }
   MoveItCpp(const rclcpp::Node::SharedPtr& node);
   [[deprecated("Passing tf2_ros::Buffer to MoveItCpp's constructor is deprecated")]] MoveItCpp(
-      const rclcpp::Node::SharedPtr& node, const Options& options, const std::shared_ptr<tf2_ros::Buffer>& /* unused */)
+      const rclcpp::Node::SharedPtr& node, const Options& options, const std::shared_ptr<tf2_ros::Buffer>& tf_buffer)
     : MoveItCpp(node, options)
   {
   }

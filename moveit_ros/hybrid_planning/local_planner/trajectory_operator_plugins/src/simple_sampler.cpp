@@ -119,7 +119,7 @@ SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
   return feedback_;
 }
 
-double SimpleSampler::getTrajectoryProgress(const moveit::core::RobotState& /* unused */)
+double SimpleSampler::getTrajectoryProgress(const moveit::core::RobotState& current_state)
 {
   // Check if trajectory is unwinded
   if (next_waypoint_index_ >= reference_trajectory_->getWayPointCount() - 1)
