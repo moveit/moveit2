@@ -60,7 +60,7 @@ public:
   {
   }
 
-  void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
+  void initialize(const rclcpp::Node::SharedPtr& node, const std::string& /* unused */) override
   {
     if (!node->get_parameter("chomp.planning_time_limit", params_.planning_time_limit_))
     {

@@ -59,7 +59,7 @@ void MoveGroupPlanService::initialize()
       PLANNER_SERVICE_NAME, std::bind(&MoveGroupPlanService::computePlanService, this, _1, _2, _3));
 }
 
-bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_id_t> request_header,
+bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_id_t> /* unused */,
                                               const std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Request> req,
                                               std::shared_ptr<moveit_msgs::srv::GetMotionPlan::Response> res)
 {

@@ -51,7 +51,7 @@ public:
   {
   }
 
-  void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
+  void initialize(const rclcpp::Node::SharedPtr& /* unused */, const std::string& /* unused */) override
   {
   }
 
