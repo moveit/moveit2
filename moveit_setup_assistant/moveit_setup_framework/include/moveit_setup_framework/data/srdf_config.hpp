@@ -56,6 +56,9 @@ public:
   void loadPrevious(const std::string& package_path, const YAML::Node& node) override;
   YAML::Node saveToYaml() const override;
 
+  /// Load SRDF String
+  void loadSRDFString(const std::string& srdf_string);
+
   /// Load SRDF File
   void loadSRDFFile(const std::string& package_path, const std::string& relative_path);
   void loadSRDFFile(const std::string& srdf_file_path);

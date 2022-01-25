@@ -413,6 +413,24 @@ bool StartScreenWidget::loadNewFiles()
   }
 
   // Progress Indicator
+  progress_bar_->setValue(50);
+  QApplication::processEvents();
+
+  // Create blank SRDF file
+  const std::string blank_srdf = "<?xml version='1.0'?><robot name='" + setup_step_.getURDFName() +
+                                 "'></"
+                                 "robot>";
+  try
+  {
+    setup_step_.setSRDFFile(blank_srdf);
+  }
+  catch (const std::runtime_error& e)
+  {
+    QMessageBox::warning(this, "Error Loading SRDF to parameter server", QString(e.what()));
+    return false;
+  }
+
+  // Progress Indicator
   progress_bar_->setValue(60);
   QApplication::processEvents();
 

@@ -71,6 +71,24 @@ void SRDFConfig::loadURDFModel()
   urdf_model_ = urdf_config->getModelPtr();
 }
 
+void SRDFConfig::loadSRDFString(const std::string& srdf_string)
+{
+  loadURDFModel();
+
+  // Verify that file is in correct format / not an XACRO by loading into robot model
+  if (!srdf_.initString(*urdf_model_, srdf_string))
+  {
+    throw std::runtime_error("SRDF file not a valid semantic robot description model.");
+  }
+
+  // Set parameter
+  parent_node_->set_parameter(rclcpp::Parameter("robot_description_semantic", srdf_string));
+
+  updateRobotModel();
+
+  RCLCPP_INFO_STREAM((*logger_), "Robot semantic model successfully loaded.");
+}
+
 void SRDFConfig::loadSRDFFile(const std::string& package_path, const std::string& relative_path)
 {
   srdf_pkg_relative_path_ = relative_path;

@@ -53,12 +53,15 @@ public:
   std::string getURDFPath();
   std::string getXacroArgs();
   std::string getPackagePath();
+  std::string getURDFName();
 
   bool isXacroFile();
 
   void loadURDFFile(const std::string& urdf_file_path, const std::string& xacro_args);
 
   void loadExisting(const std::string& package_path);
+
+  void setSRDFFile(const std::string& srdf_string);
 
 protected:
   std::shared_ptr<moveit_setup_framework::PackageSettingsConfig> package_settings_;
