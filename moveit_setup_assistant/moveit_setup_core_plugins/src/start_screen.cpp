@@ -53,7 +53,6 @@ void StartScreen::loadURDFFile(const std::string& urdf_file_path, const std::str
 void StartScreen::setSRDFFile(const std::string& srdf_string)
 {
   srdf_config_->loadSRDFString(srdf_string);
-  // srdf_config_->updateRobotModel();
 }
 
 std::string StartScreen::getURDFName()
