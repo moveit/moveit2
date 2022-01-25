@@ -282,7 +282,7 @@ public:
   }
 
   /** \brief Get the index locations in the complete robot state for all the variables in this group */
-  const std::vector<int>& getVariableIndexList() const
+  const std::vector<size_t>& getVariableIndexList() const
   {
     return variable_index_list_;
   }
@@ -644,11 +644,11 @@ protected:
 
   /** \brief The list of index values this group includes, with respect to a full robot state; this includes mimic
    * joints. */
-  std::vector<int> variable_index_list_;
+  std::vector<size_t> variable_index_list_;
 
   /** \brief For each active joint model in this group, hold the index at which the corresponding joint state starts in
       the group state */
-  std::vector<int> active_joint_model_start_index_;
+  std::vector<size_t> active_joint_model_start_index_;
 
   /** \brief The links that are on the direct lineage between joints
       and joint_roots_, as well as the children of the joint leafs.

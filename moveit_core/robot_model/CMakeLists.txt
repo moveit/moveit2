@@ -27,6 +27,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 target_link_libraries(${MOVEIT_LIB_NAME}
   moveit_exceptions
   moveit_kinematics_base
+  range-v3::range-v3
 )
 
 if(BUILD_TESTING)

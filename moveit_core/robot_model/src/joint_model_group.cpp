@@ -35,14 +35,17 @@
 
 /* Author: Ioan Sucan, Dave Coleman */
 
-#include <moveit/robot_model/robot_model.h>
+#include <algorithm>
+#include <boost/lexical_cast.hpp>
+#include <moveit/exceptions/exceptions.h>
 #include <moveit/robot_model/joint_model_group.h>
 #include <moveit/robot_model/revolute_joint_model.h>
-#include <moveit/exceptions/exceptions.h>
-#include <boost/lexical_cast.hpp>
-#include <algorithm>
+#include <moveit/robot_model/robot_model.h>
+#include <range/v3/all.hpp>
 #include "order_robot_model_items.inc"
 #include "rclcpp/rclcpp.hpp"
+
+using namespace ranges;
 
 namespace moveit
 {
@@ -102,20 +105,17 @@ bool jointPrecedes(const JointModel* a, const JointModel* b)
 JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Model::Group& config,
                                  const std::vector<const JointModel*>& unsorted_group_joints,
                                  const RobotModel* parent_model)
-  : parent_model_(parent_model)
-  , name_(group_name)
-  , common_root_(nullptr)
-  , variable_count_(0)
-  , active_variable_count_(0)
-  , is_contiguous_index_list_(true)
-  , is_chain_(false)
-  , is_single_dof_(true)
-  , config_(config)
+  : parent_model_{ parent_model }
+  , name_{ group_name }
+  , common_root_{ nullptr }
+  , variable_count_{ 0 }
+  , active_variable_count_{ 0 }
+  , is_contiguous_index_list_{ true }
+  , is_chain_{ false }
+  , is_single_dof_{ true }
+  , config_{ config }
 {
-  // sort joints in Depth-First order
-  joint_model_vector_ = unsorted_group_joints;
-  std::sort(joint_model_vector_.begin(), joint_model_vector_.end(), OrderJointsByIndex());
-  joint_model_name_vector_.reserve(joint_model_vector_.size());
+  joint_model_vector_ = unsorted_group_joints | to<std::vector>() | actions::sort(OrderJointsByIndex());
 
   // figure out active joints, mimic joints, fixed joints
   // construct index maps, list of variables

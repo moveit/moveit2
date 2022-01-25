@@ -513,7 +513,7 @@ void RobotState::setJointEfforts(const JointModel* joint, const double* effort)
 
 void RobotState::setJointGroupPositions(const JointModelGroup* group, const double* gstate)
 {
-  const std::vector<int>& il = group->getVariableIndexList();
+  const std::vector<size_t>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
     memcpy(position_ + il[0], gstate, group->getVariableCount() * sizeof(double));
   else
@@ -526,7 +526,7 @@ void RobotState::setJointGroupPositions(const JointModelGroup* group, const doub
 
 void RobotState::setJointGroupPositions(const JointModelGroup* group, const Eigen::VectorXd& values)
 {
-  const std::vector<int>& il = group->getVariableIndexList();
+  const std::vector<size_t>& il = group->getVariableIndexList();
   for (std::size_t i = 0; i < il.size(); ++i)
     position_[il[i]] = values(i);
   updateMimicJoints(group);
@@ -558,7 +558,7 @@ void RobotState::setJointGroupActivePositions(const JointModelGroup* group, cons
 
 void RobotState::copyJointGroupPositions(const JointModelGroup* group, double* gstate) const
 {
-  const std::vector<int>& il = group->getVariableIndexList();
+  const std::vector<size_t>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
     memcpy(gstate, position_ + il[0], group->getVariableCount() * sizeof(double));
   else
@@ -568,7 +568,7 @@ void RobotState::copyJointGroupPositions(const JointModelGroup* group, double* g
 
 void RobotState::copyJointGroupPositions(const JointModelGroup* group, Eigen::VectorXd& values) const
 {
-  const std::vector<int>& il = group->getVariableIndexList();
+  const std::vector<size_t>& il = group->getVariableIndexList();
   values.resize(il.size());
   for (std::size_t i = 0; i < il.size(); ++i)
     values(i) = position_[il[i]];
@@ -577,7 +577,7 @@ void RobotState::copyJointGroupPositions(const JointModelGroup* group, Eigen::Ve
 void RobotState::setJointGroupVelocities(const JointModelGroup* group, const double* gstate)
 {
   markVelocity();
-  const std::vector<int>& il = group->getVariableIndexList();
+  const std::vector<size_t>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
     memcpy(velocity_ + il[0], gstate, group->getVariableCount() * sizeof(double));
   else
@@ -590,14 +590,14 @@ void RobotState::setJointGroupVelocities(const JointModelGroup* group, const dou
 void RobotState::setJointGroupVelocities(const JointModelGroup* group, const Eigen::VectorXd& values)
 {
   markVelocity();
-  const std::vector<int>& il = group->getVariableIndexList();
+  const std::vector<size_t>& il = group->getVariableIndexList();
   for (std::size_t i = 0; i < il.size(); ++i)
     velocity_[il[i]] = values(i);
 }
 
 void RobotState::copyJointGroupVelocities(const JointModelGroup* group, double* gstate) const
 {
-  const std::vector<int>& il = group->getVariableIndexList();
+  const std::vector<size_t>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
     memcpy(gstate, velocity_ + il[0], group->getVariableCount() * sizeof(double));
   else
@@ -607,7 +607,7 @@ void RobotState::copyJointGroupVelocities(const JointModelGroup* group, double* 
 
 void RobotState::copyJointGroupVelocities(const JointModelGroup* group, Eigen::VectorXd& values) const
 {
-  const std::vector<int>& il = group->getVariableIndexList();
+  const std::vector<size_t>& il = group->getVariableIndexList();
   values.resize(il.size());
   for (std::size_t i = 0; i < il.size(); ++i)
     values(i) = velocity_[il[i]];
@@ -616,7 +616,7 @@ void RobotState::copyJointGroupVelocities(const JointModelGroup* group, Eigen::V
 void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const double* gstate)
 {
   markAcceleration();
-  const std::vector<int>& il = group->getVariableIndexList();
+  const std::vector<size_t>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
     memcpy(acceleration_ + il[0], gstate, group->getVariableCount() * sizeof(double));
   else
@@ -629,14 +629,14 @@ void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const 
 void RobotState::setJointGroupAccelerations(const JointModelGroup* group, const Eigen::VectorXd& values)
 {
   markAcceleration();
-  const std::vector<int>& il = group->getVariableIndexList();
+  const std::vector<size_t>& il = group->getVariableIndexList();
   for (std::size_t i = 0; i < il.size(); ++i)
     acceleration_[il[i]] = values(i);
 }
 
 void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, double* gstate) const
 {
-  const std::vector<int>& il = group->getVariableIndexList();
+  const std::vector<size_t>& il = group->getVariableIndexList();
   if (group->isContiguousWithinState())
     memcpy(gstate, acceleration_ + il[0], group->getVariableCount() * sizeof(double));
   else
@@ -646,7 +646,7 @@ void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, doubl
 
 void RobotState::copyJointGroupAccelerations(const JointModelGroup* group, Eigen::VectorXd& values) const
 {
-  const std::vector<int>& il = group->getVariableIndexList();
+  const std::vector<size_t>& il = group->getVariableIndexList();
   values.resize(il.size());
   for (std::size_t i = 0; i < il.size(); ++i)
     values(i) = acceleration_[il[i]];

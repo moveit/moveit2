@@ -509,7 +509,7 @@ bool RobotTrajectory::getStateAtDurationFromStart(const double request_duration,
   return true;
 }
 
-void RobotTrajectory::print(std::ostream& out, std::vector<int> variable_indexes) const
+void RobotTrajectory::print(std::ostream& out, std::vector<size_t> variable_indexes) const
 {
   size_t num_points = getWayPointCount();
   if (num_points == 0)

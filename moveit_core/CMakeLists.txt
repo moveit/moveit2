@@ -20,32 +20,33 @@ foreach(LIBFCL_LIBRARY ${LIBFCL_LIBRARIES})
 endforeach()
 set(LIBFCL_LIBRARIES "${LIBFCL_LIBRARIES_FULL}")
 
-find_package(Bullet 2.87 REQUIRED)
-find_package(angles REQUIRED)
-find_package(OCTOMAP REQUIRED)
-find_package(urdfdom REQUIRED)
-find_package(urdf REQUIRED)
-find_package(urdfdom_headers REQUIRED)
 find_package(ament_cmake REQUIRED)
-find_package(tf2_eigen REQUIRED)
-find_package(tf2_kdl REQUIRED)
-find_package(tf2_geometry_msgs REQUIRED)
+find_package(angles REQUIRED)
+find_package(Bullet 2.87 REQUIRED)
+find_package(common_interfaces REQUIRED)
 find_package(eigen_stl_containers REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(moveit_msgs REQUIRED)
+find_package(OCTOMAP REQUIRED)
 find_package(octomap_msgs REQUIRED)
+find_package(pluginlib REQUIRED)
 find_package(random_numbers REQUIRED)
+find_package(range-v3 REQUIRED)
 find_package(ruckig REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
 find_package(srdfdom REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(tf2_eigen REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_kdl REQUIRED)
 find_package(trajectory_msgs REQUIRED)
+find_package(urdf REQUIRED)
+find_package(urdfdom REQUIRED)
+find_package(urdfdom_headers REQUIRED)
 find_package(visualization_msgs REQUIRED)
-find_package(common_interfaces REQUIRED)
-find_package(pluginlib REQUIRED)
 # TODO: Port python bindings
 # find_package(pybind11 REQUIRED)
 
@@ -114,13 +115,19 @@ set(THIS_PACKAGE_LIBRARIES
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   angles
+  Bullet
+  Eigen3
+  eigen3_cmake_module
   eigen_stl_containers
   geometric_shapes
   geometry_msgs
   kdl_parser
   moveit_msgs
+  OCTOMAP
   octomap_msgs
   random_numbers
+  range-v3
+  ruckig
   sensor_msgs
   shape_msgs
   srdfdom
@@ -129,11 +136,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   tf2_geometry_msgs
   trajectory_msgs
   visualization_msgs
-  Eigen3
-  eigen3_cmake_module
-  OCTOMAP
-  Bullet
-  ruckig
 )
 
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS}

@@ -90,7 +90,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
     return false;
   }
   const moveit::core::RobotModel& rmodel = group->getParentModel();
-  const std::vector<int>& idx = group->getVariableIndexList();
+  const std::vector<size_t>& idx = group->getVariableIndexList();
   const std::vector<std::string>& vars = group->getVariableNames();
   double velocity_scaling_factor = 1.0;
   double acceleration_scaling_factor = 1.0;

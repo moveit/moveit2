@@ -28,26 +28,25 @@
   <build_depend>moveit_common</build_depend>
 
   <depend>angles</depend>
-  <depend>rclcpp</depend>
-  <depend>common_interfaces</depend>
   <depend>assimp</depend>
   <depend>boost</depend>
-  <depend>eigen</depend>
   <depend>bullet</depend>
+  <depend>common_interfaces</depend>
+  <depend>eigen</depend>
   <depend>eigen_stl_containers</depend>
-  <depend>libfcl-dev</depend>
   <depend>geometric_shapes</depend>
   <depend>geometry_msgs</depend>
   <depend>kdl_parser</depend>
-  <depend>urdf</depend>
-  <depend>urdfdom</depend>
-  <depend>urdfdom_headers</depend>
+  <depend>libfcl-dev</depend>
   <depend>moveit_msgs</depend>
   <depend>octomap</depend>
   <depend>octomap_msgs</depend>
   <depend>pluginlib</depend>
   <depend>pybind11_vendor</depend>
   <depend>random_numbers</depend>
+  <depend>range-v3</depend>
+  <depend>rclcpp</depend>
+  <depend>ruckig</depend>
   <depend>sensor_msgs</depend>
   <depend>shape_msgs</depend>
   <depend>srdfdom</depend>
@@ -56,8 +55,10 @@
   <depend>tf2_eigen</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>trajectory_msgs</depend>
+  <depend>urdf</depend>
+  <depend>urdfdom</depend>
+  <depend>urdfdom_headers</depend>
   <depend>visualization_msgs</depend>
-  <depend>ruckig</depend>
 
   <doc_depend>python3-sphinx-rtd-theme</doc_depend>
 

@@ -64,7 +64,7 @@ int initRepeatedPointTrajectory(robot_trajectory::RobotTrajectory& trajectory)
     return -1;
   }
   // leave initial velocity/acceleration unset
-  const std::vector<int>& idx = group->getVariableIndexList();
+  const std::vector<size_t>& idx = group->getVariableIndexList();
   moveit::core::RobotState state(trajectory.getRobotModel());
 
   trajectory.clear();
@@ -91,7 +91,7 @@ int initStraightTrajectory(robot_trajectory::RobotTrajectory& trajectory)
     return -1;
   }
   // leave initial velocity/acceleration unset
-  const std::vector<int>& idx = group->getVariableIndexList();
+  const std::vector<size_t>& idx = group->getVariableIndexList();
   moveit::core::RobotState state(trajectory.getRobotModel());
 
   trajectory.clear();
@@ -111,7 +111,7 @@ int initStraightTrajectory(robot_trajectory::RobotTrajectory& trajectory)
 void printTrajectory(robot_trajectory::RobotTrajectory& trajectory)
 {
   const moveit::core::JointModelGroup* group = trajectory.getGroup();
-  const std::vector<int>& idx = group->getVariableIndexList();
+  const std::vector<size_t>& idx = group->getVariableIndexList();
   trajectory.print(std::cout, { idx[0] });
 }
 

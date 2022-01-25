@@ -103,7 +103,7 @@ void IterativeParabolicTimeParameterization::applyVelocityConstraints(robot_traj
 {
   const moveit::core::JointModelGroup* group = rob_trajectory.getGroup();
   const std::vector<std::string>& vars = group->getVariableNames();
-  const std::vector<int>& idx = group->getVariableIndexList();
+  const std::vector<size_t>& idx = group->getVariableIndexList();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
   const int num_points = rob_trajectory.getWayPointCount();
 
@@ -201,7 +201,7 @@ void updateTrajectory(robot_trajectory::RobotTrajectory& rob_trajectory, const s
 
   const moveit::core::JointModelGroup* group = rob_trajectory.getGroup();
   const std::vector<std::string>& vars = group->getVariableNames();
-  const std::vector<int>& idx = group->getVariableIndexList();
+  const std::vector<size_t>& idx = group->getVariableIndexList();
 
   int num_points = rob_trajectory.getWayPointCount();
 
@@ -307,7 +307,7 @@ void IterativeParabolicTimeParameterization::applyAccelerationConstraints(
 
   const moveit::core::JointModelGroup* group = rob_trajectory.getGroup();
   const std::vector<std::string>& vars = group->getVariableNames();
-  const std::vector<int>& idx = group->getVariableIndexList();
+  const std::vector<size_t>& idx = group->getVariableIndexList();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
 
   const int num_points = rob_trajectory.getWayPointCount();

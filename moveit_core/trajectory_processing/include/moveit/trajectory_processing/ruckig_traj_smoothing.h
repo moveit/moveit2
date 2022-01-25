@@ -60,7 +60,7 @@ private:
    */
   static void getNextRuckigInput(const ruckig::OutputParameter<0>& ruckig_output,
                                  const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
-                                 const std::vector<int>& idx, ruckig::InputParameter<0>& ruckig_input);
+                                 const std::vector<size_t>& idx, ruckig::InputParameter<0>& ruckig_input);
 
   /**
    * \brief Check for lagging motion of any joint at a waypoint.
@@ -99,6 +99,6 @@ private:
    */
   static void initializeRuckigState(ruckig::InputParameter<0>& ruckig_input, ruckig::OutputParameter<0>& ruckig_output,
                                     const moveit::core::RobotState& first_waypoint, size_t num_dof,
-                                    const std::vector<int>& joint_idx);
+                                    const std::vector<size_t>& joint_idx);
 };
 }  // namespace trajectory_processing

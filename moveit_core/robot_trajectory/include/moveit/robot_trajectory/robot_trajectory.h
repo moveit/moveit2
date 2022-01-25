@@ -374,7 +374,7 @@ public:
    *   waypoint   2 time 0.665 pos  0.200 vel  0.632 acc  1.000
    *   ...
    */
-  void print(std::ostream& out, std::vector<int> variable_indexes = std::vector<int>()) const;
+  void print(std::ostream& out, std::vector<size_t> variable_indexes = std::vector<size_t>()) const;
 
 private:
   moveit::core::RobotModelConstPtr robot_model_;

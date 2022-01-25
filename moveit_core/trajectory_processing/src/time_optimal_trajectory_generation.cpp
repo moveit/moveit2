@@ -919,7 +919,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
 
   // This is pretty much copied from IterativeParabolicTimeParameterization::applyVelocityConstraints
   const std::vector<std::string>& vars = group->getVariableNames();
-  const std::vector<int>& idx = group->getVariableIndexList();
+  const std::vector<size_t>& idx = group->getVariableIndexList();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
   const unsigned num_joints = group->getVariableCount();
   const unsigned num_points = trajectory.getWayPointCount();

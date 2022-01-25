@@ -86,7 +86,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   ruckig::OutputParameter<0> ruckig_output{ num_dof };
 
   // Initialize the smoother
-  const std::vector<int>& idx = group->getVariableIndexList();
+  const std::vector<size_t>& idx = group->getVariableIndexList();
   initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), num_dof, idx);
 
   // Kinematic limits (vel/accel/jerk)
@@ -213,7 +213,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 void RuckigSmoothing::initializeRuckigState(ruckig::InputParameter<0>& ruckig_input,
                                             ruckig::OutputParameter<0>& ruckig_output,
                                             const moveit::core::RobotState& first_waypoint, size_t num_dof,
-                                            const std::vector<int>& idx)
+                                            const std::vector<size_t>& idx)
 {
   std::vector<double> current_positions_vector(num_dof);
   std::vector<double> current_velocities_vector(num_dof);
@@ -270,7 +270,7 @@ bool RuckigSmoothing::checkForLaggingMotion(const size_t num_dof, const ruckig::
 
 void RuckigSmoothing::getNextRuckigInput(const ruckig::OutputParameter<0>& ruckig_output,
                                          const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
-                                         const std::vector<int>& idx, ruckig::InputParameter<0>& ruckig_input)
+                                         const std::vector<size_t>& idx, ruckig::InputParameter<0>& ruckig_input)
 {
   // TODO(andyz): https://github.com/ros-planning/moveit2/issues/766
   // ruckig_output.pass_to_input(ruckig_input);
