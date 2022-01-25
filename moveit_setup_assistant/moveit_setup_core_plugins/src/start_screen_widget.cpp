@@ -361,7 +361,7 @@ bool StartScreenWidget::loadExistingFiles()
   }
 
   // Progress Indicator
-  progress_bar_->setValue(60);
+  progress_bar_->setValue(100);
   QApplication::processEvents();
 
   next_label_->show();  // only show once the files have been loaded
