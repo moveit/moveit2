@@ -100,6 +100,18 @@ bool jointPrecedes(const JointModel* a, const JointModel* b)
 
   return false;
 }
+
+const auto is_fixed_joint = [](const auto& jm) { return jm->getVariableCount() == 0; };
+const auto is_mimic_joint = [](const auto& jm) { return jm->getMimic() != nullptr; };
+const auto get_name = [](const auto& element) { return element->getName(); };
+const auto get_variable_count = [](const auto& jm) { return jm->getVariableCount(); };
+const auto get_variable_bounds_addr = [](const auto& jm) { return &jm->getVariableBounds(); };
+const auto get_first_variable_index = [](const auto& jm) { return jm->getFirstVariableIndex(); };
+const auto get_variable_names_view = [](const auto& jm) { return views::all(jm->getVariableNames()); };
+const auto get_variable_names_size = [](const auto& jm) { return jm->getVariableNames().size(); };
+const auto tuple_to_pair = [](const auto& element) {
+  return std::make_pair(std::get<0>(element), std::get<1>(element));
+};
 }  // namespace
 
 JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Model::Group& config,
@@ -115,53 +127,91 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
   , is_single_dof_{ true }
   , config_{ config }
 {
-  joint_model_vector_ = unsorted_group_joints | to<std::vector>() | actions::sort(OrderJointsByIndex());
+  // Disable clang-format to keep nicer formatting of ranges
+  // clang-format off
+  joint_model_vector_ = unsorted_group_joints
+    | to<std::vector>()
+    | actions::sort(OrderJointsByIndex());
+  joint_model_name_vector_ = joint_model_vector_
+    | views::transform(get_name)
+    | to<std::vector>();
 
   // figure out active joints, mimic joints, fixed joints
   // construct index maps, list of variables
-  for (const JointModel* joint_model : joint_model_vector_)
-  {
-    joint_model_name_vector_.push_back(joint_model->getName());
-    joint_model_map_[joint_model->getName()] = joint_model;
-    unsigned int vc = joint_model->getVariableCount();
-    if (vc > 0)
-    {
-      if (vc > 1)
-        is_single_dof_ = false;
-      const std::vector<std::string>& name_order = joint_model->getVariableNames();
-      if (joint_model->getMimic() == nullptr)
-      {
-        active_joint_model_vector_.push_back(joint_model);
-        active_joint_model_name_vector_.push_back(joint_model->getName());
-        active_joint_model_start_index_.push_back(variable_count_);
-        active_joint_models_bounds_.push_back(&joint_model->getVariableBounds());
-        active_variable_count_ += vc;
-      }
-      else
-        mimic_joints_.push_back(joint_model);
-      for (const std::string& name : name_order)
-      {
-        variable_names_.push_back(name);
-        variable_names_set_.insert(name);
-      }
+  auto not_fixed_view = joint_model_vector_
+    | views::remove_if(is_fixed_joint);
+  auto start_index_view =
+    views::concat(views::single(0),
+      not_fixed_view
+        | views::transform(get_variable_count)
+        | views::partial_sum
+      )
+    | views::drop_last(1);
 
-      int first_index = joint_model->getFirstVariableIndex();
-      for (std::size_t j = 0; j < name_order.size(); ++j)
-      {
-        variable_index_list_.push_back(first_index + j);
-        joint_variables_index_map_[name_order[j]] = variable_count_ + j;
-      }
-      joint_variables_index_map_[joint_model->getName()] = variable_count_;
-
-      if (joint_model->getType() == JointModel::REVOLUTE &&
-          static_cast<const RevoluteJointModel*>(joint_model)->isContinuous())
-        continuous_joint_model_vector_.push_back(joint_model);
-
-      variable_count_ += vc;
-    }
-    else
-      fixed_joints_.push_back(joint_model);
-  }
+  active_joint_model_vector_ = not_fixed_view
+    | views::remove_if(is_mimic_joint)
+    | to<std::vector>();
+  active_joint_model_name_vector_ = active_joint_model_vector_
+    | views::transform(get_name)
+    | to<std::vector>();
+  fixed_joints_ = joint_model_vector_
+    | views::filter(is_fixed_joint)
+    | to<std::vector>();
+  mimic_joints_ = not_fixed_view
+    | views::filter(is_mimic_joint)
+    | to<std::vector>();
+  continuous_joint_model_vector_ = not_fixed_view
+    | views::filter([](const auto& jm) {
+        return jm->getType() == JointModel::REVOLUTE && static_cast<const RevoluteJointModel*>(jm)->isContinuous();
+    })
+    | to<std::vector>();
+  variable_names_ = not_fixed_view
+    | views::transform(get_variable_names_view)
+    | views::join
+    | to<std::vector>();
+  variable_names_set_ = variable_names_
+    | to<std::set>();
+  joint_model_map_ = joint_model_vector_
+    | views::transform([](const auto& jm) { return std::make_pair(jm->getName(), jm); })
+    | to<std::map>();
+  joint_variables_index_map_ =
+    views::concat(
+      views::zip(not_fixed_view | views::transform(get_variable_names_view),
+                 start_index_view)
+        | views::transform([](const auto& e) {
+          const auto& [names, start_index] = e;
+          return views::zip(names,
+                            views::iota(start_index, start_index + names.size()));
+        })
+        | views::join
+        | views::transform(tuple_to_pair)
+      ,
+      views::zip(not_fixed_view | views::transform(get_name),
+                 start_index_view)
+        | views::transform(tuple_to_pair)
+    )
+    | to<std::map>();
+  active_joint_models_bounds_ = active_joint_model_vector_
+    | views::transform(get_variable_bounds_addr)
+    | to<std::vector>();
+  variable_index_list_ =
+    views::zip(not_fixed_view | views::transform(get_first_variable_index),
+               not_fixed_view | views::transform(get_variable_names_size))
+    | views::transform([](const auto& e) {
+     const auto& [first_index, names_size] = e;
+     return views::iota(first_index, first_index + names_size);
+    })
+    | views::join
+    | to<std::vector>();
+  active_joint_model_start_index_ =
+    views::zip(start_index_view, not_fixed_view)
+    | views::remove_if([](const auto& e) { return is_mimic_joint(std::get<1>(e)); })
+    | views::transform([](const auto& e) { return std::get<0>(e); })
+    | to<std::vector>();
+  variable_count_ = accumulate(not_fixed_view | views::transform(get_variable_count), 0U);
+  active_variable_count_ = accumulate(not_fixed_view | views::transform(get_variable_count), 0U);
+  is_single_dof_ = none_of(not_fixed_view | views::transform(get_variable_count), [](const auto& e) { return e > 1; });
+  // clang-format on
 
   // now we need to find all the set of joints within this group
   // that root distinct subtrees
@@ -262,7 +312,7 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     if (chain)
       is_chain_ = true;
   }
-}
+}  // namespace core
 
 JointModelGroup::~JointModelGroup() = default;
 
@@ -767,5 +817,5 @@ bool JointModelGroup::isValidVelocityMove(const double* from_joint_pose, const d
 
   return true;
 }
-}  // end of namespace core
+}  // namespace core
 }  // end of namespace moveit

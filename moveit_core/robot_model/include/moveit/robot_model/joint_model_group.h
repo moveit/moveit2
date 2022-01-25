@@ -699,10 +699,10 @@ protected:
   std::set<std::string> updated_link_model_with_geometry_name_set_;
 
   /** \brief The number of variables necessary to describe this group of joints */
-  unsigned int variable_count_;
+  size_t variable_count_;
 
   /** \brief The number of variables necessary to describe the active joints in this group of joints */
-  unsigned int active_variable_count_;
+  size_t active_variable_count_;
 
   /** \brief True if the state of this group is contiguous within the full robot state; this also means that
       the index values in variable_index_list_ are consecutive integers */
