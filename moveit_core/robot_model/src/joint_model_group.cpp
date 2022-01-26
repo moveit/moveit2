@@ -103,6 +103,7 @@ bool jointPrecedes(const JointModel* a, const JointModel* b)
 
 const auto is_fixed_joint = [](const auto& jm) { return jm->getVariableCount() == 0; };
 const auto is_mimic_joint = [](const auto& jm) { return jm->getMimic() != nullptr; };
+const auto has_geometry = [](const auto& lm) { return !lm->getShapes().empty(); };
 const auto get_name = [](const auto& element) { return element->getName(); };
 const auto get_variable_count = [](const auto& jm) { return jm->getVariableCount(); };
 const auto get_variable_bounds_addr = [](const auto& jm) { return &jm->getVariableBounds(); };
@@ -240,26 +241,26 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     })
     | to<std::vector>();
 
-  // clang-format on
-
   // now we need to make another pass for group links (we include the fixed joints here)
-  std::set<const LinkModel*> group_links_set;
-  for (const JointModel* joint_model : joint_model_vector_)
-    group_links_set.insert(joint_model->getChildLinkModel());
-  for (const LinkModel* group_link : group_links_set)
-    link_model_vector_.push_back(group_link);
-  std::sort(link_model_vector_.begin(), link_model_vector_.end(), OrderLinksByIndex());
+  link_model_vector_ = joint_model_vector_
+    | views::transform([](const auto& jm) { return jm->getChildLinkModel(); })
+    | views::unique
+    | to<std::vector>()
+    | actions::sort(OrderLinksByIndex());
+  link_model_map_ = link_model_vector_
+    | views::transform([](const auto& lm) { return std::make_pair(lm->getName(), lm); })
+    | to<std::map>();
+  link_model_name_vector_ = link_model_vector_
+    | views::transform(get_name)
+    | to<std::vector>();
+  link_model_with_geometry_vector_ = link_model_vector_
+    | views::filter(has_geometry)
+    | to<std::vector>();
+  link_model_with_geometry_name_vector_ = link_model_with_geometry_vector_
+    | views::transform(get_name)
+    | to<std::vector>();
 
-  for (const LinkModel* link_model : link_model_vector_)
-  {
-    link_model_map_[link_model->getName()] = link_model;
-    link_model_name_vector_.push_back(link_model->getName());
-    if (!link_model->getShapes().empty())
-    {
-      link_model_with_geometry_vector_.push_back(link_model);
-      link_model_with_geometry_name_vector_.push_back(link_model->getName());
-    }
-  }
+  // clang-format on
 
   // compute the common root of this group
   if (!joint_roots_.empty())
