@@ -260,15 +260,17 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     | views::transform(get_name)
     | to<std::vector>();
 
-  // clang-format on
-
   // compute the common root of this group
   if (!joint_roots_.empty())
   {
-    common_root_ = joint_roots_[0];
-    for (std::size_t i = 1; i < joint_roots_.size(); ++i)
-      common_root_ = parent_model->getCommonRoot(joint_roots_[i], common_root_);
+    common_root_ = accumulate(joint_roots_, joint_roots_[0],
+      [this](const auto& left, const auto& right) {
+        return parent_model_->getCommonRoot(left, right);
+      }
+    );
   }
+
+  // clang-format on
 
   // compute updated links
   for (const JointModel* joint_root : joint_roots_)
