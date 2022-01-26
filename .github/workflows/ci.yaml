@@ -22,11 +22,7 @@ jobs:
           - IMAGE: rolling-ci-testing
             IKFAST_TEST: true
             ROS_DISTRO: rolling
-          - IMAGE: galactic-ci
             CLANG_TIDY: pedantic
-            ROS_DISTRO: galactic
-          - IMAGE: galactic-ci-testing
-            ROS_DISTRO: galactic
     env:
       CXXFLAGS: "-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-deprecated-copy"
       CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
