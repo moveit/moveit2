@@ -270,32 +270,34 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     );
   }
 
-  // clang-format on
-
   // compute updated links
-  for (const JointModel* joint_root : joint_roots_)
-  {
-    const std::vector<const LinkModel*>& links = joint_root->getDescendantLinkModels();
-    updated_link_model_set_.insert(links.begin(), links.end());
-  }
-  for (const LinkModel* updated_link_model : updated_link_model_set_)
-  {
-    updated_link_model_name_set_.insert(updated_link_model->getName());
-    updated_link_model_vector_.push_back(updated_link_model);
-    if (!updated_link_model->getShapes().empty())
-    {
-      updated_link_model_with_geometry_vector_.push_back(updated_link_model);
-      updated_link_model_with_geometry_set_.insert(updated_link_model);
-      updated_link_model_with_geometry_name_set_.insert(updated_link_model->getName());
-    }
-  }
-  std::sort(updated_link_model_vector_.begin(), updated_link_model_vector_.end(), OrderLinksByIndex());
-  std::sort(updated_link_model_with_geometry_vector_.begin(), updated_link_model_with_geometry_vector_.end(),
-            OrderLinksByIndex());
-  for (const LinkModel* updated_link_model : updated_link_model_vector_)
-    updated_link_model_name_vector_.push_back(updated_link_model->getName());
-  for (const LinkModel* updated_link_model_with_geometry : updated_link_model_with_geometry_vector_)
-    updated_link_model_with_geometry_name_vector_.push_back(updated_link_model_with_geometry->getName());
+  updated_link_model_set_ = joint_roots_
+    | views::transform([](const auto& jr) { return views::all(jr->getDescendantLinkModels()); })
+    | views::join
+    | to<std::set>();
+  updated_link_model_name_set_ = updated_link_model_set_
+    | views::transform(get_name)
+    | to<std::set>();
+  updated_link_model_vector_ = updated_link_model_set_
+    | to<std::vector>()
+    | actions::sort(OrderLinksByIndex());
+  updated_link_model_with_geometry_vector_ = updated_link_model_set_
+    | views::filter(has_geometry)
+    | to<std::vector>()
+    | actions::sort(OrderLinksByIndex());
+  updated_link_model_with_geometry_set_ = updated_link_model_with_geometry_vector_
+    | to<std::set>();
+  updated_link_model_with_geometry_name_set_ = updated_link_model_with_geometry_vector_
+    | views::transform(get_name)
+    | to<std::set>();
+  updated_link_model_name_vector_ = updated_link_model_vector_
+    | views::transform(get_name)
+    | to<std::vector>();
+  updated_link_model_with_geometry_name_vector_ = updated_link_model_with_geometry_vector_
+    | views::transform(get_name)
+    | to<std::vector>();
+
+  // clang-format on
 
   // check if this group should actually be a chain
   if (joint_roots_.size() == 1 && !active_joint_model_vector_.empty())
