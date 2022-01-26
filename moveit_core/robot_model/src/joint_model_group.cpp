@@ -102,15 +102,21 @@ bool jointPrecedes(const JointModel* a, const JointModel* b)
   return false;
 }
 
+// These are used as filter functions
 const auto is_fixed_joint = [](const auto& jm) { return jm->getVariableCount() == 0; };
 const auto is_mimic_joint = [](const auto& jm) { return jm->getMimic() != nullptr; };
 const auto has_geometry = [](const auto& lm) { return !lm->getShapes().empty(); };
+
+// These are transform functions
 const auto get_name = [](const auto& element) { return element->getName(); };
 const auto get_variable_count = [](const auto& jm) { return jm->getVariableCount(); };
 const auto get_variable_bounds_addr = [](const auto& jm) { return &jm->getVariableBounds(); };
 const auto get_first_variable_index = [](const auto& jm) { return jm->getFirstVariableIndex(); };
 const auto get_variable_names_view = [](const auto& jm) { return views::all(jm->getVariableNames()); };
 const auto get_variable_names_size = [](const auto& jm) { return jm->getVariableNames().size(); };
+
+// Helper to convert a tuple to a pair.  This is useful as a transform after
+// zipping two views inorder to initialize a map.
 const auto tuple_to_pair = [](const auto& element) {
   return std::make_pair(std::get<0>(element), std::get<1>(element));
 };
@@ -138,8 +144,9 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     | views::transform(get_name)
     | ranges::to<std::vector>();
 
-  // figure out active joints, mimic joints, fixed joints
-  // construct index maps, list of variables
+  // These views that are re-used for several calculations.  These are not const because
+  // views that are const cause compilation issues.  Rational:
+  // https://ericniebler.github.io/range-v3/index.html#autotoc_md6
   auto not_fixed_view = joint_model_vector_
     | views::remove_if(is_fixed_joint);
   auto start_index_view =
@@ -150,6 +157,8 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
       )
     | views::drop_last(1);
 
+  // figure out active joints, mimic joints, fixed joints
+  // construct index maps, list of variables
   active_joint_model_vector_ = not_fixed_view
     | views::remove_if(is_mimic_joint)
     | ranges::to<std::vector>();
@@ -420,11 +429,12 @@ void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNum
     throw Exception("When sampling random values nearby for group '" + name_ + "', distances vector should be of size " +
                     boost::lexical_cast<std::string>(active_joint_model_vector_.size()) + ", but it is of size " +
                     boost::lexical_cast<std::string>(distances.size()));
-  for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
-    active_joint_model_vector_[i]->getVariableRandomPositionsNearBy(rng, values + active_joint_model_start_index_[i],
-                                                                    *active_joint_bounds[i],
-                                                                    near + active_joint_model_start_index_[i],
-                                                                    distances[i]);
+  for (const auto& [i, joint_model] : active_joint_model_vector_ | views::enumerate)
+  {
+    joint_model->getVariableRandomPositionsNearBy(rng, values + active_joint_model_start_index_[i],
+                                                  *active_joint_bounds[i], near + active_joint_model_start_index_[i],
+                                                  distances[i]);
+  }
   updateMimicJoints(values);
 }
 
@@ -433,9 +443,12 @@ bool JointModelGroup::satisfiesPositionBounds(const double* state, const JointBo
 {
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
-    if (!active_joint_model_vector_[i]->satisfiesPositionBounds(state + active_joint_model_start_index_[i],
-                                                                *active_joint_bounds[i], margin))
-      return false;
+    for (const auto& [i, joint_model] : active_joint_model_vector_ | views::enumerate)
+    {
+      if (!joint_model->satisfiesPositionBounds(state + active_joint_model_start_index_[i], *active_joint_bounds[i],
+                                                margin))
+        return false;
+    }
   return true;
 }
 
@@ -443,10 +456,11 @@ bool JointModelGroup::enforcePositionBounds(double* state, const JointBoundsVect
 {
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   bool change = false;
-  for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
-    if (active_joint_model_vector_[i]->enforcePositionBounds(state + active_joint_model_start_index_[i],
-                                                             *active_joint_bounds[i]))
+  for (const auto& [i, joint_model] : active_joint_model_vector_ | views::enumerate)
+  {
+    if (joint_model->enforcePositionBounds(state + active_joint_model_start_index_[i], *active_joint_bounds[i]))
       change = true;
+  }
   if (change)
     updateMimicJoints(state);
   return change;
@@ -455,29 +469,32 @@ bool JointModelGroup::enforcePositionBounds(double* state, const JointBoundsVect
 double JointModelGroup::getMaximumExtent(const JointBoundsVector& active_joint_bounds) const
 {
   double max_distance = 0.0;
-  for (std::size_t j = 0; j < active_joint_model_vector_.size(); ++j)
-    max_distance += active_joint_model_vector_[j]->getMaximumExtent(*active_joint_bounds[j]) *
-                    active_joint_model_vector_[j]->getDistanceFactor();
+  for (const auto& [i, joint_model] : active_joint_model_vector_ | views::enumerate)
+  {
+    max_distance += joint_model->getMaximumExtent(*active_joint_bounds[i]) * joint_model->getDistanceFactor();
+  }
   return max_distance;
 }
 
 double JointModelGroup::distance(const double* state1, const double* state2) const
 {
   double d = 0.0;
-  for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
-    d += active_joint_model_vector_[i]->getDistanceFactor() *
-         active_joint_model_vector_[i]->distance(state1 + active_joint_model_start_index_[i],
-                                                 state2 + active_joint_model_start_index_[i]);
+  for (const auto& [i, joint_model] : active_joint_model_vector_ | views::enumerate)
+  {
+    d += joint_model->getDistanceFactor() * joint_model->distance(state1 + active_joint_model_start_index_[i],
+                                                                  state2 + active_joint_model_start_index_[i]);
+  }
   return d;
 }
 
 void JointModelGroup::interpolate(const double* from, const double* to, double t, double* state) const
 {
   // we interpolate values only for active joint models (non-mimic)
-  for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
-    active_joint_model_vector_[i]->interpolate(from + active_joint_model_start_index_[i],
-                                               to + active_joint_model_start_index_[i], t,
-                                               state + active_joint_model_start_index_[i]);
+  for (const auto& [i, joint_model] : active_joint_model_vector_ | views::enumerate)
+  {
+    joint_model->interpolate(from + active_joint_model_start_index_[i], to + active_joint_model_start_index_[i], t,
+                             state + active_joint_model_start_index_[i]);
+  }
 
   // now we update mimic as needed
   updateMimicJoints(state);
@@ -507,17 +524,24 @@ bool JointModelGroup::getVariableDefaultPositions(const std::string& name, std::
 
 void JointModelGroup::getVariableDefaultPositions(double* values) const
 {
-  for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
-    active_joint_model_vector_[i]->getVariableDefaultPositions(values + active_joint_model_start_index_[i]);
+  for (const auto& [i, joint_model] : active_joint_model_vector_ | views::enumerate)
+  {
+    joint_model->getVariableDefaultPositions(values + active_joint_model_start_index_[i]);
+  }
   updateMimicJoints(values);
 }
 
 void JointModelGroup::getVariableDefaultPositions(std::map<std::string, double>& values) const
 {
-  std::vector<double> tmp(variable_count_);
-  getVariableDefaultPositions(&tmp[0]);
-  for (std::size_t i = 0; i < variable_names_.size(); ++i)
-    values[variable_names_[i]] = tmp[i];
+  const auto default_positions = [=]() {
+    auto tmp = std::vector<double>(variable_count_);
+    getVariableDefaultPositions(&tmp[0]);
+    return tmp;
+  }();
+  for (const auto& [name, default_position] : views::zip(variable_names_, default_positions))
+  {
+    values[name] = default_position;
+  }
 }
 
 void JointModelGroup::setEndEffectorName(const std::string& name)
@@ -544,9 +568,7 @@ bool JointModelGroup::getEndEffectorTips(std::vector<std::string>& tips) const
     return false;
 
   // Convert to string names
-  tips.clear();
-  for (const LinkModel* link_model : tip_links)
-    tips.push_back(link_model->getName());
+  tips = tip_links | views::transform(get_name) | ranges::to<std::vector>();
   return true;
 }
 
