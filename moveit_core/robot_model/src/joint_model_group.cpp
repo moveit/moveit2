@@ -229,18 +229,18 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
   is_contiguous_index_list_ = !variable_index_list_.empty()
     && all_of(variable_index_list_ | views::sliding(2), is_ascending);
 
-  // clang-format on
+  // when updating/sampling a group state only,
+  // only mimic joints that have their parent within the group get updated.
+  group_mimic_update_ = mimic_joints_
+    | views::filter([this](const auto& jm) { return hasJointModel(jm->getMimic()->getName()); })
+    | views::transform([this](const auto& jm) {
+      int src = joint_variables_index_map_[jm->getMimic()->getName()];
+      int dest = joint_variables_index_map_[jm->getName()];
+      return GroupMimicUpdate(src, dest, jm->getMimicFactor(), jm->getMimicOffset());
+    })
+    | to<std::vector>();
 
-  // when updating/sampling a group state only, only mimic joints that have their parent within the group get updated.
-  for (const JointModel* mimic_joint : mimic_joints_)
-    // if the joint we mimic is also in this group, we will need to do updates when sampling
-    if (hasJointModel(mimic_joint->getMimic()->getName()))
-    {
-      int src = joint_variables_index_map_[mimic_joint->getMimic()->getName()];
-      int dest = joint_variables_index_map_[mimic_joint->getName()];
-      GroupMimicUpdate mu(src, dest, mimic_joint->getMimicFactor(), mimic_joint->getMimicOffset());
-      group_mimic_update_.push_back(mu);
-    }
+  // clang-format on
 
   // now we need to make another pass for group links (we include the fixed joints here)
   std::set<const LinkModel*> group_links_set;
