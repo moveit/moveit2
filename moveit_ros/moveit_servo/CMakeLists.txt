@@ -45,6 +45,7 @@ find_package(std_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(trajectory_msgs REQUIRED)
+find_package(teleop_tools REQUIRED)
 
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -64,6 +65,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   std_srvs
   tf2_eigen
   trajectory_msgs
+  teleop_tools
 )
 
 include_directories(

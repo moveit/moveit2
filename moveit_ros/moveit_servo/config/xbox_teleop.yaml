@@ -1,0 +1,35 @@
+joy_teleop:
+  ros__parameters:
+
+    endpoint_control:
+      type: topic
+      interface_type: geometry_msgs/msg/TwistStamped
+      topic_name: /servo_node/delta_twist_cmds
+      deadman_buttons: [5]
+      axis_mappings:
+        twist-angular-x:
+          axis: 4
+          scale: 1
+          offset: 0.0
+        twist-angular-y:
+          axis: 3
+          scale: 1
+          offset: 0.0
+        twist-angular-z:
+          axis: 5
+          scale: 0.5
+          offset: -1.0
+        twist-linear-x:
+          axis: 1
+          scale: 1
+          offset: 0.0
+        twist-linear-y:
+          axis: 0
+          scale: 1
+          offset: 0.0
+        twist-linear-z:
+          axis: 2
+          scale: 0.5
+          offset: -1.0
+        header-frame_id:
+          value: 'panda_link0'
