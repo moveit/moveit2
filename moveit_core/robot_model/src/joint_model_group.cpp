@@ -297,24 +297,18 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     | views::transform(get_name)
     | to<std::vector>();
 
-  // clang-format on
-
   // check if this group should actually be a chain
   if (joint_roots_.size() == 1 && !active_joint_model_vector_.empty())
   {
-    bool chain = true;
-    // due to our sorting, the joints are sorted in a DF fashion, so looking at them in reverse,
-    // we should always get to the parent.
-    for (std::size_t k = joint_model_vector_.size() - 1; k > 0; --k)
-      if (!jointPrecedes(joint_model_vector_[k], joint_model_vector_[k - 1]))
-      {
-        chain = false;
-        break;
-      }
-    if (chain)
-      is_chain_ = true;
+    const auto joint_precedes = [](const auto& sub_view) {
+      const auto& values = sub_view | to<std::vector>();
+      return jointPrecedes(values[1], values[0]);
+    };
+    is_chain_ = all_of(joint_model_vector_ | views::sliding(2), joint_precedes);
   }
-}  // namespace core
+
+  // clang-format on
+}
 
 JointModelGroup::~JointModelGroup() = default;
 
