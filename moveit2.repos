@@ -1,12 +1,4 @@
 repositories:
-  geometric_shapes:
-    type: git
-    url: https://github.com/ros-planning/geometric_shapes
-    version: 2.1.2
-  moveit_msgs:
-    type: git
-    url: https://github.com/ros-planning/moveit_msgs
-    version: 2.2.0
   moveit_resources:
     type: git
     url: https://github.com/ros-planning/moveit_resources
@@ -14,7 +6,7 @@ repositories:
   launch_param_builder:
     type: git
     url: https://github.com/PickNikRobotics/launch_param_builder
-    version: main
+    version: 0.1.0
   ros2_control:
     type: git
     url: https://github.com/ros-controls/ros2_control.git
