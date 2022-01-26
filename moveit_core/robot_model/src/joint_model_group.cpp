@@ -211,28 +211,25 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
   variable_count_ = accumulate(not_fixed_view | views::transform(get_variable_count), 0U);
   active_variable_count_ = accumulate(not_fixed_view | views::transform(get_variable_count), 0U);
   is_single_dof_ = none_of(not_fixed_view | views::transform(get_variable_count), [](const auto& e) { return e > 1; });
-  // clang-format on
 
   // now we need to find all the set of joints within this group
   // that root distinct subtrees
-  for (const JointModel* active_joint_model : active_joint_model_vector_)
-  {
-    // if we find that an ancestor is also in the group, then the joint is not a root
-    if (!includesParent(active_joint_model, this))
-      joint_roots_.push_back(active_joint_model);
-  }
+  joint_roots_ = active_joint_model_vector_
+    | views::filter([this](const auto& jm) {
+      return !includesParent(jm, this);
+    })
+    | to<std::vector>();
 
   // when updating this group within a state, it is useful to know
   // if the full state of a group is contiguous within the full state of the robot
-  if (variable_index_list_.empty())
-    is_contiguous_index_list_ = false;
-  else
-    for (std::size_t i = 1; i < variable_index_list_.size(); ++i)
-      if (variable_index_list_[i] != variable_index_list_[i - 1] + 1)
-      {
-        is_contiguous_index_list_ = false;
-        break;
-      }
+  const auto is_ascending = [](const auto& sub_view) {
+    const auto& values = sub_view | to<std::vector>();
+    return values[0] + 1 == values[1];
+  };
+  is_contiguous_index_list_ = !variable_index_list_.empty()
+    && all_of(variable_index_list_ | views::sliding(2), is_ascending);
+
+  // clang-format on
 
   // when updating/sampling a group state only, only mimic joints that have their parent within the group get updated.
   for (const JointModel* mimic_joint : mimic_joints_)
