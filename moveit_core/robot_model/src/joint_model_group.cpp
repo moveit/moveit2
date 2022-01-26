@@ -315,16 +315,14 @@ JointModelGroup::~JointModelGroup() = default;
 void JointModelGroup::setSubgroupNames(const std::vector<std::string>& subgroups)
 {
   subgroup_names_ = subgroups;
-  subgroup_names_set_.clear();
-  for (const std::string& subgroup_name : subgroup_names_)
-    subgroup_names_set_.insert(subgroup_name);
+  subgroup_names_set_ = subgroup_names_ | to<std::set>();
 }
 
 void JointModelGroup::getSubgroups(std::vector<const JointModelGroup*>& sub_groups) const
 {
-  sub_groups.resize(subgroup_names_.size());
-  for (std::size_t i = 0; i < subgroup_names_.size(); ++i)
-    sub_groups[i] = parent_model_->getJointModelGroup(subgroup_names_[i]);
+  sub_groups = subgroup_names_ |
+               views::transform([this](const auto& name) { return parent_model_->getJointModelGroup(name); }) |
+               to<std::vector>();
 }
 
 bool JointModelGroup::hasJointModel(const std::string& joint) const
