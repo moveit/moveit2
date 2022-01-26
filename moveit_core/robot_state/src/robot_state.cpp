@@ -1815,8 +1815,7 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
   // Assume we have already ran setFromIK() and those checks
 
   // Get containing subgroups
-  std::vector<const JointModelGroup*> sub_groups;
-  jmg->getSubgroups(sub_groups);
+  const auto sub_groups = jmg->getSubgroups();
 
   // Error check
   if (poses_in.size() != sub_groups.size())
