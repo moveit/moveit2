@@ -11,9 +11,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wpedantic)
 endif()
 
-# Finds Boost Components
-include(ConfigExtras.cmake)
-
 if(WITH_OPENGL)
   # Prefer newer vendor-specific OpenGL library
   if(POLICY CMP0072)
@@ -61,6 +58,9 @@ find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(OpenCV)
+
+# Finds Boost Components
+include(ConfigExtras.cmake)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
   depth_image_octomap_updater/include
