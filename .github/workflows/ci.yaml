@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - main
+      - feature/msa
 
 jobs:
   default:
