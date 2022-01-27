@@ -36,6 +36,9 @@
 
 #include <moveit/rdf_loader/synchronized_string_parameter.h>
 
+// Fraction of timeout used for period of polling loop.
+constexpr auto POLL_RATE = 0.01;
+
 namespace rdf_loader
 {
 SynchronizedStringParameter::SynchronizedStringParameter() : queue_(2)
@@ -136,7 +139,7 @@ bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
     {
       return true;
     }
-    std::this_thread::sleep_for(0.01 * timeout_ns);
+    std::this_thread::sleep_for(POLL_RATE * timeout_ns);
   }
   return false;
 }
