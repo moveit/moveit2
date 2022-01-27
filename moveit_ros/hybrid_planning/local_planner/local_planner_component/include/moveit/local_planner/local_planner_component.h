@@ -167,8 +167,8 @@ private:
   // Planner configuration
   LocalPlannerConfig config_;
 
-  // Current planner state
-  LocalPlannerState state_;
+  // Current planner state. Must be thread-safe
+  std::atomic<LocalPlannerState> state_;
 
   // Timer to periodically call executeIteration()
   rclcpp::TimerBase::SharedPtr timer_;

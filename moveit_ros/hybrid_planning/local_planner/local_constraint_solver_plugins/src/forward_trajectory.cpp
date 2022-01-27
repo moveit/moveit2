@@ -40,7 +40,7 @@ namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 // If stuck for this many iterations or more, abort the local planning action
-constexpr size_t STUCK_ITERATIONS_THRESHOLD = 10;
+constexpr size_t STUCK_ITERATIONS_THRESHOLD = 5;
 constexpr double STUCK_THRESHOLD_RAD = 1e-4;  // L1-norm sum across all joints
 }  // namespace
 
@@ -132,7 +132,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
         current_state_command.zeroAccelerations();
       }
       robot_command.empty();
-      robot_command.addSuffixWayPoint(*current_state, 0.0);
+      robot_command.addSuffixWayPoint(*current_state, local_trajectory.getWayPointDurationFromPrevious(0));
     }
 
     // Detect if the local solver is stuck
