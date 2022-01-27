@@ -99,9 +99,6 @@ bool jointPrecedes(const JointModel* a, const JointModel* b)
   return false;
 }
 
-// Transform function for calling getName on a Joint or Link Model
-constexpr auto getElementName = [](const auto& element) { return element->getName(); };
-
 }  // namespace
 
 JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Model::Group& config,
@@ -117,6 +114,9 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
   , is_single_dof_{ true }
   , config_{ config }
 {
+  // Transform function for calling getName on a Joint or Link Model
+  constexpr auto get_name = [](const auto& element) { return element->getName(); };
+
   // Filter functions
   constexpr auto is_fixed_joint = [](const auto& jm) { return jm->getVariableCount() == 0; };
   constexpr auto is_mimic_joint = [](const auto& jm) { return jm->getMimic() != nullptr; };
@@ -132,7 +132,7 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     | ranges::to<std::vector>()
     | actions::sort(OrderJointsByIndex{});
   joint_model_name_vector_ = joint_model_vector_
-    | views::transform(getElementName)
+    | views::transform(get_name)
     | ranges::to<std::vector>();
 
   // These views that are re-used for several calculations.  These are not const because
@@ -154,7 +154,7 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     | views::remove_if(is_mimic_joint)
     | ranges::to<std::vector>();
   active_joint_model_name_vector_ = active_joint_model_vector_
-    | views::transform(getElementName)
+    | views::transform(get_name)
     | ranges::to<std::vector>();
   fixed_joints_ = joint_model_vector_
     | views::filter(is_fixed_joint)
@@ -191,7 +191,7 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
   // This helper view is a view of tuples of the names of joint models and
   // their index values
   auto joint_model_names_to_index_view =
-    views::zip(not_fixed_view | views::transform(getElementName),
+    views::zip(not_fixed_view | views::transform(get_name),
                start_index_view);
 
   // The joint_variables_index_map is a map of the variable names to their indexes
@@ -289,13 +289,13 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     | views::transform([](const auto& lm) { return std::make_pair(lm->getName(), lm); })
     | ranges::to<std::map>();
   link_model_name_vector_ = link_model_vector_
-    | views::transform(getElementName)
+    | views::transform(get_name)
     | ranges::to<std::vector>();
   link_model_with_geometry_vector_ = link_model_vector_
     | views::filter(has_geometry)
     | ranges::to<std::vector>();
   link_model_with_geometry_name_vector_ = link_model_with_geometry_vector_
-    | views::transform(getElementName)
+    | views::transform(get_name)
     | ranges::to<std::vector>();
 
   // compute updated links
@@ -304,7 +304,7 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     | views::join
     | ranges::to<std::set>();
   updated_link_model_name_set_ = updated_link_model_set_
-    | views::transform(getElementName)
+    | views::transform(get_name)
     | ranges::to<std::set>();
   updated_link_model_vector_ = updated_link_model_set_
     | ranges::to<std::vector>()
@@ -316,13 +316,13 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
   updated_link_model_with_geometry_set_ = updated_link_model_with_geometry_vector_
     | ranges::to<std::set>();
   updated_link_model_with_geometry_name_set_ = updated_link_model_with_geometry_vector_
-    | views::transform(getElementName)
+    | views::transform(get_name)
     | ranges::to<std::set>();
   updated_link_model_name_vector_ = updated_link_model_vector_
-    | views::transform(getElementName)
+    | views::transform(get_name)
     | ranges::to<std::vector>();
   updated_link_model_with_geometry_name_vector_ = updated_link_model_with_geometry_vector_
-    | views::transform(getElementName)
+    | views::transform(get_name)
     | ranges::to<std::vector>();
 
   // Helper function for calculating if the group is a chain
@@ -580,7 +580,8 @@ bool JointModelGroup::getEndEffectorTips(std::vector<std::string>& tips) const
     return false;
 
   // Convert to string names
-  tips = tip_links | views::transform(getElementName) | ranges::to<std::vector>();
+  constexpr auto get_name = [](const auto& element) { return element->getName(); };
+  tips = tip_links | views::transform(get_name) | ranges::to<std::vector>();
   return true;
 }
 
