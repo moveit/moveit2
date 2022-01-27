@@ -59,28 +59,25 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.join
 // check if a parent or ancestor of joint is included in this group
 bool includesParent(const JointModel* joint, const JointModelGroup* group)
 {
-  bool found = false;
+  const auto test = [group](const auto& jm) {
+    return group->hasJointModel(jm->getName()) && jm->getVariableCount() > 0 && jm->getMimic() == nullptr;
+  };
   // if we find that an ancestor is also in the group, then the joint is not a root
   while (joint->getParentLinkModel() != nullptr)
   {
     joint = joint->getParentLinkModel()->getParentJointModel();
-    if (group->hasJointModel(joint->getName()) && joint->getVariableCount() > 0 && joint->getMimic() == nullptr)
+
+    if (test(joint))
+      return true;
+    else if (const auto& mimic_joint = joint->getMimic(); mimic_joint != nullptr)
     {
-      found = true;
-      break;
-    }
-    else if (joint->getMimic() != nullptr)
-    {
-      const JointModel* mjoint = joint->getMimic();
-      if (group->hasJointModel(mjoint->getName()) && mjoint->getVariableCount() > 0 && mjoint->getMimic() == nullptr)
-        found = true;
-      else if (includesParent(mjoint, group))
-        found = true;
-      if (found)
-        break;
+      if (test(mimic_joint))
+        return true;
+      else if (includesParent(mimic_joint, group))
+        return true;
     }
   }
-  return found;
+  return false;
 }
 
 // check if joint a is right below b, in the kinematic chain, with no active DOF missing
@@ -102,24 +99,9 @@ bool jointPrecedes(const JointModel* a, const JointModel* b)
   return false;
 }
 
-// These are used as filter functions
-const auto is_fixed_joint = [](const auto& jm) { return jm->getVariableCount() == 0; };
-const auto is_mimic_joint = [](const auto& jm) { return jm->getMimic() != nullptr; };
-const auto has_geometry = [](const auto& lm) { return !lm->getShapes().empty(); };
+// Transform function for calling getName on a Joint or Link Model
+constexpr auto getElementName = [](const auto& element) { return element->getName(); };
 
-// These are transform functions
-const auto get_name = [](const auto& element) { return element->getName(); };
-const auto get_variable_count = [](const auto& jm) { return jm->getVariableCount(); };
-const auto get_variable_bounds_addr = [](const auto& jm) { return &jm->getVariableBounds(); };
-const auto get_first_variable_index = [](const auto& jm) { return jm->getFirstVariableIndex(); };
-const auto get_variable_names_view = [](const auto& jm) { return views::all(jm->getVariableNames()); };
-const auto get_variable_names_size = [](const auto& jm) { return jm->getVariableNames().size(); };
-
-// Helper to convert a tuple to a pair.  This is useful as a transform after
-// zipping two views inorder to initialize a map.
-const auto tuple_to_pair = [](const auto& element) {
-  return std::make_pair(std::get<0>(element), std::get<1>(element));
-};
 }  // namespace
 
 JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Model::Group& config,
@@ -135,13 +117,22 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
   , is_single_dof_{ true }
   , config_{ config }
 {
+  // Filter functions
+  constexpr auto is_fixed_joint = [](const auto& jm) { return jm->getVariableCount() == 0; };
+  constexpr auto is_mimic_joint = [](const auto& jm) { return jm->getMimic() != nullptr; };
+  constexpr auto has_geometry = [](const auto& lm) { return !lm->getShapes().empty(); };
+
+  // Transform functions
+  constexpr auto get_variable_count = [](const auto& jm) { return jm->getVariableCount(); };
+  constexpr auto get_variable_names_view = [](const auto& jm) { return views::all(jm->getVariableNames()); };
+
   // Disable clang-format to keep nicer formatting of ranges
   // clang-format off
   joint_model_vector_ = unsorted_group_joints
     | ranges::to<std::vector>()
-    | actions::sort(OrderJointsByIndex());
+    | actions::sort(OrderJointsByIndex{});
   joint_model_name_vector_ = joint_model_vector_
-    | views::transform(get_name)
+    | views::transform(getElementName)
     | ranges::to<std::vector>();
 
   // These views that are re-used for several calculations.  These are not const because
@@ -163,7 +154,7 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     | views::remove_if(is_mimic_joint)
     | ranges::to<std::vector>();
   active_joint_model_name_vector_ = active_joint_model_vector_
-    | views::transform(get_name)
+    | views::transform(getElementName)
     | ranges::to<std::vector>();
   fixed_joints_ = joint_model_vector_
     | views::filter(is_fixed_joint)
@@ -182,93 +173,80 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     | ranges::to<std::vector>();
   variable_names_set_ = variable_names_
     | ranges::to<std::set>();
-  joint_model_map_ = joint_model_vector_
-    | views::transform([](const auto& jm) { return std::make_pair(jm->getName(), jm); })
+  joint_model_map_ = views::zip(joint_model_name_vector_, joint_model_vector_)
     | ranges::to<std::map>();
-  joint_variables_index_map_ =
-    views::concat(
-      views::zip(not_fixed_view | views::transform(get_variable_names_view),
-                 start_index_view)
+
+  // This helper view is a view of tuples of variable names and
+  // their index values
+  auto variable_names_to_index_view =
+    views::zip(not_fixed_view | views::transform(get_variable_names_view),
+               start_index_view)
         | views::transform([](const auto& e) {
           const auto& [names, start_index] = e;
           return views::zip(names,
                             views::iota(start_index, start_index + names.size()));
         })
-        | views::join
-        | views::transform(tuple_to_pair)
-      ,
-      views::zip(not_fixed_view | views::transform(get_name),
-                 start_index_view)
-        | views::transform(tuple_to_pair)
-    )
+        | views::join;
+
+  // This helper view is a view of tuples of the names of joint models and
+  // their index values
+  auto joint_model_names_to_index_view =
+    views::zip(not_fixed_view | views::transform(getElementName),
+               start_index_view);
+
+  // The joint_variables_index_map is a map of the variable names to their indexes
+  // combined with the joint model names and their indexes
+  joint_variables_index_map_ =
+    views::concat(variable_names_to_index_view, joint_model_names_to_index_view)
     | ranges::to<std::map>();
+
   active_joint_models_bounds_ = active_joint_model_vector_
-    | views::transform(get_variable_bounds_addr)
+    | views::transform([](const auto& jm) { return &jm->getVariableBounds(); })
     | ranges::to<std::vector>();
+
+  // Vector of variable indexes of not fixed joints.
+  // To calculate this we zip the first index of each joint model with the
+  //   number of variables in that joint model.
+  // Then we transform that to a view of the indexes by using iota to create a
+  //   incrementing view of indexes starting with the first index up to the
+  //   number of variables in that joint model.
+  // Lastly this view of views is flattened into a single view and turned into
+  //   a vector.
   variable_index_list_ =
-    views::zip(not_fixed_view | views::transform(get_first_variable_index),
-               not_fixed_view | views::transform(get_variable_names_size))
+    views::zip(not_fixed_view | views::transform([](const auto& jm) { return jm->getFirstVariableIndex(); }),
+               not_fixed_view | views::transform([](const auto& jm) { return jm->getVariableNames().size(); }))
     | views::transform([](const auto& e) {
      const auto& [first_index, names_size] = e;
      return views::iota(first_index, first_index + names_size);
     })
     | views::join
     | ranges::to<std::vector>();
+
+  // Vector of start indexes for the joint models that are not fixed
+  //   and also not mimic joints.
+  // Note the [=] capture for the is_mimic_joint lambda.
   active_joint_model_start_index_ =
     views::zip(start_index_view, not_fixed_view)
-    | views::remove_if([](const auto& e) { return is_mimic_joint(std::get<1>(e)); })
+    | views::remove_if([=](const auto& e) { return is_mimic_joint(std::get<1>(e)); })
     | views::transform([](const auto& e) { return std::get<0>(e); })
     | ranges::to<std::vector>();
+
+  // Count of variables of not fixed joints
   variable_count_ = ranges::accumulate(not_fixed_view | views::transform(get_variable_count), 0U);
-  active_variable_count_ = ranges::accumulate(not_fixed_view | views::transform(get_variable_count), 0U);
+
+  // Count of variables of not fixed and not mimic joints
+  active_variable_count_ =
+    ranges::accumulate(not_fixed_view | views::remove_if(is_mimic_joint) | views::transform(get_variable_count), 0U);
+
+  // Do we have any joints with more than 1 variable
   is_single_dof_ = ranges::none_of(not_fixed_view | views::transform(get_variable_count),
     [](const auto& e) { return e > 1; });
 
-  // now we need to find all the set of joints within this group
-  // that root distinct subtrees
+  // Find the joints within this group that root distinct subtrees
   joint_roots_ = active_joint_model_vector_
-    | views::filter([this](const auto& jm) {
-      return !includesParent(jm, this);
+    | views::remove_if([this](const auto& jm) {
+      return includesParent(jm, this);
     })
-    | ranges::to<std::vector>();
-
-  // when updating this group within a state, it is useful to know
-  // if the full state of a group is contiguous within the full state of the robot
-  const auto is_ascending = [](const auto& sub_view) {
-    const auto& values = sub_view | ranges::to<std::vector>();
-    return values[0] + 1 == values[1];
-  };
-  is_contiguous_index_list_ = !variable_index_list_.empty()
-    && ranges::all_of(variable_index_list_ | views::sliding(2), is_ascending);
-
-  // when updating/sampling a group state only,
-  // only mimic joints that have their parent within the group get updated.
-  group_mimic_update_ = mimic_joints_
-    | views::filter([this](const auto& jm) { return hasJointModel(jm->getMimic()->getName()); })
-    | views::transform([this](const auto& jm) {
-      int src = joint_variables_index_map_[jm->getMimic()->getName()];
-      int dest = joint_variables_index_map_[jm->getName()];
-      return GroupMimicUpdate(src, dest, jm->getMimicFactor(), jm->getMimicOffset());
-    })
-    | ranges::to<std::vector>();
-
-  // now we need to make another pass for group links (we include the fixed joints here)
-  link_model_vector_ = joint_model_vector_
-    | views::transform([](const auto& jm) { return jm->getChildLinkModel(); })
-    | views::unique
-    | ranges::to<std::vector>()
-    | actions::sort(OrderLinksByIndex());
-  link_model_map_ = link_model_vector_
-    | views::transform([](const auto& lm) { return std::make_pair(lm->getName(), lm); })
-    | ranges::to<std::map>();
-  link_model_name_vector_ = link_model_vector_
-    | views::transform(get_name)
-    | ranges::to<std::vector>();
-  link_model_with_geometry_vector_ = link_model_vector_
-    | views::filter(has_geometry)
-    | ranges::to<std::vector>();
-  link_model_with_geometry_name_vector_ = link_model_with_geometry_vector_
-    | views::transform(get_name)
     | ranges::to<std::vector>();
 
   // compute the common root of this group
@@ -281,42 +259,81 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
     );
   }
 
+  // when updating this group within a state, it is useful to know
+  // if the full state of a group is contiguous within the full state of the robot
+  constexpr auto is_contiguous = [](const auto& sub_view) {
+    const auto& values = sub_view | ranges::to<std::vector>();
+    return values[0] + 1 == values[1];
+  };
+  is_contiguous_index_list_ = !variable_index_list_.empty()
+    && ranges::all_of(variable_index_list_ | views::sliding(2), is_contiguous);
+
+  // when updating/sampling a group state only,
+  // only mimic joints that have their parent within the group get updated.
+  group_mimic_update_ = mimic_joints_
+    | views::filter([this](const auto& jm) { return hasJointModel(jm->getMimic()->getName()); })
+    | views::transform([this](const auto& jm) {
+      const int src = joint_variables_index_map_[jm->getMimic()->getName()];
+      const int dest = joint_variables_index_map_[jm->getName()];
+      return GroupMimicUpdate{src, dest, jm->getMimicFactor(), jm->getMimicOffset()};
+    })
+    | ranges::to<std::vector>();
+
+  // now we need to make another pass for group links (we include the fixed joints here)
+  link_model_vector_ = joint_model_vector_
+    | views::transform([](const auto& jm) { return jm->getChildLinkModel(); })
+    | views::unique
+    | ranges::to<std::vector>()
+    | actions::sort(OrderLinksByIndex{});
+  link_model_map_ = link_model_vector_
+    | views::transform([](const auto& lm) { return std::make_pair(lm->getName(), lm); })
+    | ranges::to<std::map>();
+  link_model_name_vector_ = link_model_vector_
+    | views::transform(getElementName)
+    | ranges::to<std::vector>();
+  link_model_with_geometry_vector_ = link_model_vector_
+    | views::filter(has_geometry)
+    | ranges::to<std::vector>();
+  link_model_with_geometry_name_vector_ = link_model_with_geometry_vector_
+    | views::transform(getElementName)
+    | ranges::to<std::vector>();
+
   // compute updated links
   updated_link_model_set_ = joint_roots_
     | views::transform([](const auto& jr) { return views::all(jr->getDescendantLinkModels()); })
     | views::join
     | ranges::to<std::set>();
   updated_link_model_name_set_ = updated_link_model_set_
-    | views::transform(get_name)
+    | views::transform(getElementName)
     | ranges::to<std::set>();
   updated_link_model_vector_ = updated_link_model_set_
     | ranges::to<std::vector>()
-    | actions::sort(OrderLinksByIndex());
+    | actions::sort(OrderLinksByIndex{});
   updated_link_model_with_geometry_vector_ = updated_link_model_set_
     | views::filter(has_geometry)
     | ranges::to<std::vector>()
-    | actions::sort(OrderLinksByIndex());
+    | actions::sort(OrderLinksByIndex{});
   updated_link_model_with_geometry_set_ = updated_link_model_with_geometry_vector_
     | ranges::to<std::set>();
   updated_link_model_with_geometry_name_set_ = updated_link_model_with_geometry_vector_
-    | views::transform(get_name)
+    | views::transform(getElementName)
     | ranges::to<std::set>();
   updated_link_model_name_vector_ = updated_link_model_vector_
-    | views::transform(get_name)
+    | views::transform(getElementName)
     | ranges::to<std::vector>();
   updated_link_model_with_geometry_name_vector_ = updated_link_model_with_geometry_vector_
-    | views::transform(get_name)
+    | views::transform(getElementName)
     | ranges::to<std::vector>();
 
-  // check if this group should actually be a chain
-  if (joint_roots_.size() == 1 && !active_joint_model_vector_.empty())
-  {
-    const auto joint_precedes = [](const auto& sub_view) {
-      const auto& values = sub_view | ranges::to<std::vector>();
-      return jointPrecedes(values[1], values[0]);
-    };
-    is_chain_ = ranges::all_of(joint_model_vector_ | views::sliding(2), joint_precedes);
-  }
+  // Helper function for calculating if the group is a chain
+  constexpr auto joint_precedes = [](const auto& sub_view) {
+    const auto& values = sub_view | ranges::to<std::vector>();
+    return jointPrecedes(values[1], values[0]);
+  };
+
+  // Check if this group should actually be a chain
+  is_chain_ = joint_roots_.size() == 1 && !active_joint_model_vector_.empty()
+    && ranges::all_of(joint_model_vector_ | views::sliding(2), joint_precedes);
 
   // clang-format on
 }
@@ -402,17 +419,12 @@ void JointModelGroup::getVariableRandomPositionsNearBy(random_numbers::RandomNum
   assert(active_joint_bounds.size() == active_joint_model_vector_.size());
   for (const auto& [i, joint_model] : active_joint_model_vector_ | views::enumerate)
   {
-    const double distance = [&]() {
-      if (const auto iter = distance_map.find(joint_model->getType()); iter != distance_map.end())
-      {
-        return iter->second;
-      }
-      else
-      {
-        RCLCPP_WARN(LOGGER, "Did not pass in distance for '%s'", joint_model->getName().c_str());
-        return 0.0;
-      }
-    }();
+    const auto iter = distance_map.find(joint_model->getType());
+    const double distance = (iter != distance_map.end()) ? iter->second : 0.0;
+    if (iter != distance_map.end())
+    {
+      RCLCPP_WARN(LOGGER, "Did not pass in distance for '%s'", joint_model->getName().c_str());
+    }
     joint_model->getVariableRandomPositionsNearBy(rng, values + active_joint_model_start_index_[i],
                                                   *active_joint_bounds[i], near + active_joint_model_start_index_[i],
                                                   distance);
@@ -568,7 +580,7 @@ bool JointModelGroup::getEndEffectorTips(std::vector<std::string>& tips) const
     return false;
 
   // Convert to string names
-  tips = tip_links | views::transform(get_name) | ranges::to<std::vector>();
+  tips = tip_links | views::transform(getElementName) | ranges::to<std::vector>();
   return true;
 }
 
@@ -676,8 +688,10 @@ void JointModelGroup::setSolverAllocators(const std::pair<SolverAllocatorFn, Sol
     }
   }
   else
+  {
     // we now compute a joint bijection only if we have a solver map
     for (const std::pair<const JointModelGroup* const, SolverAllocatorFn>& it : solvers.second)
+    {
       if (it.first->getSolverInstance())
       {
         KinematicsSolver& ks = group_kinematics_.second[it.first];
@@ -690,6 +704,8 @@ void JointModelGroup::setSolverAllocators(const std::pair<SolverAllocatorFn, Sol
           break;
         }
       }
+    }
+  }
 }
 
 bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
