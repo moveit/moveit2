@@ -1,12 +1,8 @@
 repositories:
-  moveit_msgs:
-    type: git
-    url: https://github.com/ros-planning/moveit_msgs
-    version: 2.2.0
   moveit_resources:
     type: git
     url: https://github.com/ros-planning/moveit_resources
-    version: ros2
+    version: galactic
   launch_param_builder:
     type: git
     url: https://github.com/PickNikRobotics/launch_param_builder
