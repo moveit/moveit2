@@ -69,6 +69,7 @@ TEST_F(RuckigTests, empty_trajectory)
 TEST_F(RuckigTests, not_enough_waypoints)
 {
   moveit::core::RobotState robot_state(robot_model_);
+  robot_state.setToDefaultValues();
   // First waypoint is default joint positions
   trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
 
@@ -82,6 +83,7 @@ TEST_F(RuckigTests, not_enough_waypoints)
 TEST_F(RuckigTests, basic_trajectory)
 {
   moveit::core::RobotState robot_state(robot_model_);
+  robot_state.setToDefaultValues();
   // First waypoint is default joint positions
   trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
 
