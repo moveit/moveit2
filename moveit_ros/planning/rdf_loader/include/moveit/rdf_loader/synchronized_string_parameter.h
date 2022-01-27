@@ -39,6 +39,8 @@
 #include <std_msgs/msg/string.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+#include <boost/lockfree/spsc_queue.hpp>
+
 namespace rdf_loader
 {
 using StringCallback = std::function<void(const std::string&)>;
@@ -59,6 +61,8 @@ using StringCallback = std::function<void(const std::string&)>;
 class SynchronizedStringParameter
 {
 public:
+  SynchronizedStringParameter();
+
   std::string loadInitialValue(const std::shared_ptr<rclcpp::Node>& node, const std::string& name,
                                StringCallback parent_callback = {}, bool default_continuous_value = false,
                                double default_timeout = 10.0);
@@ -80,5 +84,7 @@ protected:
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr string_publisher_;
 
   std::string content_;
+  boost::lockfree::spsc_queue<std::string> queue_;
+  std::mutex queue_mutex_;
 };
 }  // namespace rdf_loader

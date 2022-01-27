@@ -38,6 +38,10 @@
 
 namespace rdf_loader
 {
+SynchronizedStringParameter::SynchronizedStringParameter() : queue_(2)
+{
+}
+
 std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<rclcpp::Node>& node,
                                                           const std::string& name, StringCallback parent_callback,
                                                           bool default_continuous_value, double default_timeout)
@@ -123,19 +127,17 @@ bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
       name_, rclcpp::QoS(1).transient_local().reliable(),
       std::bind(&SynchronizedStringParameter::stringCallback, this, std::placeholders::_1));
 
-  rclcpp::WaitSet wait_set;
-  wait_set.add_subscription(string_subscriber_);
+  auto timeout_ns =
+      std::chrono::duration_cast<std::chrono::nanoseconds>(timeout.to_chrono<std::chrono::duration<double>>());
+  auto end = std::chrono::steady_clock::now() + timeout_ns;
 
-  auto ret = wait_set.wait(timeout.to_chrono<std::chrono::duration<double>>());
-  if (ret.kind() == rclcpp::WaitResultKind::Ready)
+  while (std::chrono::steady_clock::now() < end)
   {
-    std_msgs::msg::String msg;
-    rclcpp::MessageInfo info;
-    if (string_subscriber_->take(msg, info))
+    if (queue_.pop(content_))
     {
-      content_ = msg.data;
       return true;
     }
+    std::this_thread::sleep_for(0.01 * timeout_ns);
   }
   return false;
 }
@@ -150,6 +152,8 @@ void SynchronizedStringParameter::stringCallback(const std_msgs::msg::String::Sh
   {
     parent_callback_(msg->data);
   }
-  content_ = msg->data;
+  queue_mutex_.lock();
+  queue_.push(msg->data);
+  queue_mutex_.unlock();
 }
 }  // namespace rdf_loader
