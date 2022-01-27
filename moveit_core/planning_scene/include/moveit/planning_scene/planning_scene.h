@@ -968,7 +968,7 @@ private:
 
   MOVEIT_STRUCT_FORWARD(CollisionDetector);
 
-  /* Construct a new CollisionDector from allocator, copy-construct environments from parent_detector if not null */
+  /* Construct a new CollisionDector from allocator, copy-construct environments from parent_detector if not nullptr */
   void allocateCollisionDetector(const collision_detection::CollisionDetectorAllocatorPtr& allocator,
                                  const CollisionDetectorPtr& parent_detector);
 
@@ -976,7 +976,7 @@ private:
   struct CollisionDetector
   {
     collision_detection::CollisionDetectorAllocatorPtr alloc_;
-    collision_detection::CollisionEnvPtr cenv_;  // never NULL
+    collision_detection::CollisionEnvPtr cenv_;  // never nullptr
     collision_detection::CollisionEnvConstPtr cenv_const_;
 
     collision_detection::CollisionEnvPtr cenv_unpadded_;
@@ -1000,24 +1000,24 @@ private:
 
   moveit::core::RobotModelConstPtr robot_model_;  // Never null (may point to same model as parent)
 
-  moveit::core::RobotStatePtr robot_state_;  // if NULL use parent's
+  moveit::core::RobotStatePtr robot_state_;  // if nullptr use parent's
 
   // Called when changes are made to attached bodies
   moveit::core::AttachedBodyCallback current_state_attached_body_callback_;
 
   // This variable is not necessarily used by child planning scenes
   // This Transforms class is actually a SceneTransforms class
-  moveit::core::TransformsPtr scene_transforms_;  // if NULL use parent's
+  moveit::core::TransformsPtr scene_transforms_;  // if nullptr use parent's
 
-  collision_detection::WorldPtr world_;             // never NULL, never shared with parent/child
+  collision_detection::WorldPtr world_;             // never nullptr, never shared with parent/child
   collision_detection::WorldConstPtr world_const_;  // copy of world_
-  collision_detection::WorldDiffPtr world_diff_;    // NULL unless this is a diff scene
+  collision_detection::WorldDiffPtr world_diff_;    // nullptr unless this is a diff scene
   collision_detection::World::ObserverCallbackFn current_world_object_update_callback_;
   collision_detection::World::ObserverHandle current_world_object_update_observer_handle_;
 
-  CollisionDetectorPtr collision_detector_;  // Never NULL.
+  CollisionDetectorPtr collision_detector_;  // Never nullptr.
 
-  collision_detection::AllowedCollisionMatrixPtr acm_;  // if NULL use parent's
+  collision_detection::AllowedCollisionMatrixPtr acm_;  // if nullptr use parent's
 
   StateFeasibilityFn state_feasibility_;
   MotionFeasibilityFn motion_feasibility_;

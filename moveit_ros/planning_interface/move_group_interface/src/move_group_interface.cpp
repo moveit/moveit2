@@ -100,6 +100,8 @@ enum ActiveTargetType
 
 class MoveGroupInterface::MoveGroupInterfaceImpl
 {
+  friend MoveGroupInterface;
+
 public:
   MoveGroupInterfaceImpl(const rclcpp::Node::SharedPtr& node, const Options& opt,
                          const std::shared_ptr<tf2_ros::Buffer>& tf_buffer, const rclcpp::Duration& wait_for_servers)
@@ -128,8 +130,10 @@ public:
     joint_state_target_->setToDefaultValues();
     active_target_ = JOINT;
     can_look_ = false;
+    look_around_attempts_ = 0;
     can_replan_ = false;
     replan_delay_ = 2.0;
+    replan_attempts_ = 1;
     goal_joint_tolerance_ = 1e-4;
     goal_position_tolerance_ = 1e-4;     // 0.1 mm
     goal_orientation_tolerance_ = 1e-3;  // ~0.1 deg
@@ -1108,29 +1112,6 @@ public:
     return allowed_planning_time_;
   }
 
-  void allowLooking(bool flag)
-  {
-    can_look_ = flag;
-    RCLCPP_INFO(LOGGER, "Looking around: %s", can_look_ ? "yes" : "no");
-  }
-
-  void allowReplanning(bool flag)
-  {
-    can_replan_ = flag;
-    RCLCPP_INFO(LOGGER, "Replanning: %s", can_replan_ ? "yes" : "no");
-  }
-
-  void setReplanningDelay(double delay)
-  {
-    if (delay >= 0.0)
-      replan_delay_ = delay;
-  }
-
-  double getReplanningDelay() const
-  {
-    return replan_delay_;
-  }
-
   void constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& request) const
   {
     request.group_name = opt_.group_name_;
@@ -1389,7 +1370,9 @@ private:
   double goal_position_tolerance_;
   double goal_orientation_tolerance_;
   bool can_look_;
+  int32_t look_around_attempts_;
   bool can_replan_;
+  int32_t replan_attempts_;
   double replan_delay_;
 
   // joint state goal
@@ -2260,12 +2243,53 @@ void MoveGroupInterface::forgetJointValues(const std::string& name)
 
 void MoveGroupInterface::allowLooking(bool flag)
 {
-  impl_->allowLooking(flag);
+  impl_->can_look_ = flag;
+  RCLCPP_DEBUG(LOGGER, "Looking around: %s", flag ? "yes" : "no");
+}
+
+void MoveGroupInterface::setLookAroundAttempts(int32_t attempts)
+{
+  if (attempts < 0)
+  {
+    RCLCPP_ERROR(LOGGER, "Tried to set negative number of look-around attempts");
+  }
+  else
+  {
+    RCLCPP_DEBUG_STREAM(LOGGER, "Look around attempts: " << attempts);
+    impl_->look_around_attempts_ = attempts;
+  }
 }
 
 void MoveGroupInterface::allowReplanning(bool flag)
 {
-  impl_->allowReplanning(flag);
+  impl_->can_replan_ = flag;
+  RCLCPP_DEBUG(LOGGER, "Replanning: %s", flag ? "yes" : "no");
+}
+
+void MoveGroupInterface::setReplanAttempts(int32_t attempts)
+{
+  if (attempts < 0)
+  {
+    RCLCPP_ERROR(LOGGER, "Tried to set negative number of replan attempts");
+  }
+  else
+  {
+    RCLCPP_DEBUG_STREAM(LOGGER, "Replan Attempts: " << attempts);
+    impl_->replan_attempts_ = attempts;
+  }
+}
+
+void MoveGroupInterface::setReplanDelay(double delay)
+{
+  if (delay < 0.0)
+  {
+    RCLCPP_ERROR(LOGGER, "Tried to set negative replan delay");
+  }
+  else
+  {
+    RCLCPP_DEBUG_STREAM(LOGGER, "Replan Delay: " << delay);
+    impl_->replan_delay_ = delay;
+  }
 }
 
 std::vector<std::string> MoveGroupInterface::getKnownConstraints() const

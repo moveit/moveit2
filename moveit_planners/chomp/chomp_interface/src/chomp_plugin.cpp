@@ -53,7 +53,7 @@ public:
   }
 
   bool initialize(const moveit::core::RobotModelConstPtr& model, const rclcpp::Node::SharedPtr& node,
-                  const std::string& parameter_namespace) override
+                  const std::string& /* unused */) override
   {
     for (const std::string& group : model->getJointModelGroupNames())
     {

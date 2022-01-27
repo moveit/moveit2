@@ -128,10 +128,10 @@ PlanningScene::PlanningScene(const urdf::ModelInterfaceSharedPtr& urdf_model,
   : world_(world), world_const_(world)
 {
   if (!urdf_model)
-    throw moveit::ConstructException("The URDF model cannot be NULL");
+    throw moveit::ConstructException("The URDF model cannot be nullptr");
 
   if (!srdf_model)
-    throw moveit::ConstructException("The SRDF model cannot be NULL");
+    throw moveit::ConstructException("The SRDF model cannot be nullptr");
 
   robot_model_ = createRobotModel(urdf_model, srdf_model);
   if (!robot_model_)
@@ -169,7 +169,7 @@ void PlanningScene::initialize()
   allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
 }
 
-/* return NULL on failure */
+/* return nullptr on failure */
 moveit::core::RobotModelPtr PlanningScene::createRobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model,
                                                             const srdf::ModelConstSharedPtr& srdf_model)
 {
@@ -183,7 +183,7 @@ moveit::core::RobotModelPtr PlanningScene::createRobotModel(const urdf::ModelInt
 PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(parent)
 {
   if (!parent_)
-    throw moveit::ConstructException("NULL parent pointer for planning scene");
+    throw moveit::ConstructException("nullptr parent pointer for planning scene");
 
   if (!parent_->getName().empty())
     name_ = parent_->getName() + "+";
@@ -1652,8 +1652,10 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
       for (std::size_t i = 0; i < shape_vector.size(); ++i)
       {
         if (i >= shape_poses_vector.size())
+        {
           append(shapes::constructShapeFromMsg(shape_vector[i]),
                  geometry_msgs::msg::Pose());  // Empty shape pose => Identity
+        }
         else
           append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]);
       }

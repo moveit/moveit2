@@ -128,8 +128,8 @@ bool HybridPlanningManager::initialize()
     RCLCPP_ERROR(LOGGER, "global_planning_action_name parameter was not defined");
     return false;
   }
-  global_planner_action_client_ = rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(
-      this, "/test/hybrid_planning/global_planning_action" /*global_planning_action_name*/);
+  global_planner_action_client_ =
+      rclcpp_action::create_client<moveit_msgs::action::GlobalPlanner>(this, global_planning_action_name);
   if (!global_planner_action_client_->wait_for_action_server(2s))
   {
     RCLCPP_ERROR(LOGGER, "Global planner action server not available after waiting");
@@ -161,7 +161,7 @@ bool HybridPlanningManager::initialize()
   // Initialize global solution subscriber
   global_solution_sub_ = create_subscription<moveit_msgs::msg::MotionPlanResponse>(
       "global_trajectory", rclcpp::SystemDefaultsQoS(),
-      [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr msg) {
+      [this](const moveit_msgs::msg::MotionPlanResponse::SharedPtr /* unused */) {
         // react is defined in a hybrid_planning_manager plugin
         ReactionResult reaction_result = planner_logic_instance_->react(HybridPlanningEvent::GLOBAL_SOLUTION_AVAILABLE);
         if (reaction_result.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)

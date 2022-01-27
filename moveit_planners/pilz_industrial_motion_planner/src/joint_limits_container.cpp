@@ -40,7 +40,8 @@
 namespace pilz_industrial_motion_planner
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.joint_limits_container");
-bool JointLimitsContainer::addLimit(const std::string& joint_name, JointLimit joint_limit)
+bool JointLimitsContainer::addLimit(const std::string& joint_name,
+                                    pilz_industrial_motion_planner::JointLimit joint_limit)
 {
   if (joint_limit.has_deceleration_limits && joint_limit.max_deceleration >= 0)
   {
@@ -73,7 +74,7 @@ bool JointLimitsContainer::empty() const
 
 JointLimit JointLimitsContainer::getCommonLimit() const
 {
-  JointLimit common_limit;
+  pilz_industrial_motion_planner::JointLimit common_limit;
   for (const auto& limit : container_)
   {
     updateCommonLimit(limit.second, common_limit);
@@ -83,7 +84,7 @@ JointLimit JointLimitsContainer::getCommonLimit() const
 
 JointLimit JointLimitsContainer::getCommonLimit(const std::vector<std::string>& joint_names) const
 {
-  JointLimit common_limit;
+  pilz_industrial_motion_planner::JointLimit common_limit;
   for (const auto& joint_name : joint_names)
   {
     updateCommonLimit(container_.at(joint_name), common_limit);

@@ -22,13 +22,10 @@ jobs:
           - IMAGE: rolling-ci-testing
             IKFAST_TEST: true
             ROS_DISTRO: rolling
-          - IMAGE: galactic-ci
             CLANG_TIDY: pedantic
-            ROS_DISTRO: galactic
-          - IMAGE: galactic-ci-testing
-            ROS_DISTRO: galactic
     env:
       CXXFLAGS: "-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-deprecated-copy"
+      CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
       DOCKER_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.env.IMAGE }}
       UPSTREAM_WORKSPACE: moveit2.repos $(f="moveit2_$(sed 's/-.*$//' <<< "${{ matrix.env.IMAGE }}").repos"; test -r $f && echo $f)
       # Pull any updates to the upstream workspace (after restoring it from cache)
@@ -47,7 +44,11 @@ jobs:
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       BASEDIR: ${{ github.workspace }}/.work
       CLANG_TIDY_BASE_REF: ${{ github.event_name != 'workflow_dispatch' && (github.base_ref || github.ref) || '' }}
-      BEFORE_CLANG_TIDY_CHECKS: (cd $TARGET_REPO_PATH; clang-tidy --list-checks)
+      BEFORE_CLANG_TIDY_CHECKS: |
+        # Show list of applied checks
+        (cd $TARGET_REPO_PATH; clang-tidy --list-checks)
+        # Disable clang-tidy for ikfast plugins as we cannot fix the generated code
+        find $BASEDIR/target_ws/build -iwholename "*_ikfast_plugin/compile_commands.json" -exec rm {} \;
       CC: ${{ matrix.env.CLANG_TIDY && 'clang' }}
       CXX: ${{ matrix.env.CLANG_TIDY && 'clang++' }}
       ADDITIONAL_DEBS: lld
@@ -137,17 +138,17 @@ jobs:
           ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
       - name: Upload codecov report
         uses: codecov/codecov-action@v2
-        if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
           files: ${{ env.BASEDIR }}/target_ws/coverage.info
       - name: Upload clang-tidy changes
         uses: rhaschke/upload-git-patch-action@main
-        if: matrix.env.CLANG_TIDY
+        if: always() && matrix.env.CLANG_TIDY
         with:
           name: clang-tidy
           path: ${{ env.BASEDIR }}/target_ws/src/$(basename $(pwd))
       - name: Prepare target_ws for cache
-        if: "!matrix.env.CCOV"
+        if: always() && ! matrix.env.CCOV
         run: |
           du -sh ${{ env.BASEDIR }}/target_ws
           sudo find ${{ env.BASEDIR }}/target_ws -wholename '*/test_results/*' -delete

@@ -2,6 +2,22 @@
 Changelog for package moveit_setup_assistant
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2022-01-20)
+------------------
+* Replace NULL with nullptr (`#961 <https://github.com/ros-planning/moveit2/issues/961>`_)
+  * Fixes `#841 <https://github.com/ros-planning/moveit2/issues/841>`_
+* Merge https://github.com/ros-planning/moveit/commit/a0ee2020c4a40d03a48044d71753ed23853a665d
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Load all planning pipelines into their own namespace (`#2888 <https://github.com/ros-planning/moveit2/issues/2888>`_)
+  Reduce code redundancy, specifying the namespace once in planning_pipeline.launch.
+* MSA: Correctly state not-found package name
+  The warning message was accessing the config_data\_ variable, which
+  was assigned just a few lines later.
+* Contributors: Abishalini, Robert Haschke, Stephanie Eng
+
 2.3.2 (2021-12-29)
 ------------------
 

@@ -119,7 +119,6 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
     RCLCPP_ERROR_STREAM(LOGGER, "Invalid move group name: `" << parameters_->move_group_name << "`");
     throw std::runtime_error("Invalid move group name");
   }
-  prev_joint_velocity_ = Eigen::ArrayXd::Zero(joint_model_group_->getActiveJointModels().size());
 
   // Subscribe to command topics
   using std::placeholders::_1;
@@ -149,10 +148,6 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
       node_->create_subscription<std_msgs::msg::Float64>("~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
                                                          std::bind(&ServoCalcs::collisionVelocityScaleCB, this, _1));
 
-  // Publish to collision_check for worst stop time
-  worst_case_stop_time_pub_ =
-      node_->create_publisher<std_msgs::msg::Float64>("~/worst_case_stop_time", rclcpp::SystemDefaultsQoS());
-
   // Publish freshly-calculated joints to the robot.
   // Put the outgoing msg in the right format (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
   if (parameters_->command_out_type == "trajectory_msgs/JointTrajectory")
@@ -179,25 +174,6 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   {
     // A map for the indices of incoming joint commands
     joint_state_name_map_[internal_joint_state_.name[i]] = i;
-  }
-
-  // Load the smoothing plugin
-  try
-  {
-    smoother_ = smoothing_loader_.createSharedInstance(parameters_->smoothing_filter_plugin_name);
-  }
-  catch (pluginlib::PluginlibException& ex)
-  {
-    RCLCPP_ERROR(LOGGER, "Exception while loading the smoothing plugin '%s': '%s'",
-                 parameters_->smoothing_filter_plugin_name.c_str(), ex.what());
-    std::exit(EXIT_FAILURE);
-  }
-
-  // Initialize the smoothing plugin
-  if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints_))
-  {
-    RCLCPP_ERROR(LOGGER, "Smoothing plugin could not be initialized");
-    std::exit(EXIT_FAILURE);
   }
 
   // Load the smoothing plugin
@@ -616,11 +592,15 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
                                      trajectory_msgs::msg::JointTrajectory& joint_trajectory,
                                      const ServoType servo_type)
 {
+  // The order of operations here is:
+  // 1. apply velocity scaling for collisions (in the position domain)
+  // 2. low-pass filter the position command in applyJointUpdate()
+  // 3. calculate velocities in applyJointUpdate()
+  // 4. apply velocity limits
+  // 5. apply position limits. This is a higher priority than velocity limits, so check it last.
+
   // Set internal joint state from original
   internal_joint_state_ = original_joint_state_;
-
-  // Enforce SRDF Velocity, Acceleration limits
-  delta_theta = enforceVelocityLimits(joint_model_group_, parameters_->publish_period, delta_theta);
 
   // Apply collision scaling
   double collision_scale = collision_velocity_scale_;
@@ -638,12 +618,15 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   }
   delta_theta *= collision_scale;
 
-  // Loop through joints and update them, calculate velocities, and filter
-  if (!applyJointUpdate(delta_theta, internal_joint_state_, prev_joint_velocity_))
+  // Loop thru joints and update them, calculate velocities, and filter
+  if (!applyJointUpdate(delta_theta, internal_joint_state_))
     return false;
 
   // Mark the lowpass filters as updated for this cycle
   updated_filters_ = true;
+
+  // Enforce SRDF velocity limits
+  enforceVelocityLimits(joint_model_group_, parameters_->publish_period, internal_joint_state_);
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
   const auto joints_to_halt = enforcePositionLimits(internal_joint_state_);
@@ -654,13 +637,10 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
         (servo_type == ServoType::CARTESIAN_SPACE && !parameters_->halt_all_joints_in_cartesian_mode))
     {
       suddenHalt(internal_joint_state_, joints_to_halt);
-      prev_joint_velocity_ =
-          Eigen::ArrayXd::Map(internal_joint_state_.velocity.data(), internal_joint_state_.velocity.size());
     }
     else
     {
       suddenHalt(internal_joint_state_, joint_model_group_->getActiveJointModels());
-      prev_joint_velocity_.setZero();
     }
   }
 
@@ -676,13 +656,11 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   return true;
 }
 
-bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state,
-                                  Eigen::ArrayXd& previous_vel)
+bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs::msg::JointState& joint_state)
 {
   // All the sizes must match
   if (joint_state.position.size() != static_cast<std::size_t>(delta_theta.size()) ||
-      joint_state.velocity.size() != joint_state.position.size() ||
-      static_cast<std::size_t>(previous_vel.size()) != joint_state.position.size())
+      joint_state.velocity.size() != joint_state.position.size())
   {
     rclcpp::Clock& clock = *node_->get_clock();
     RCLCPP_ERROR_STREAM_THROTTLE(LOGGER, clock, ROS_LOG_THROTTLE_PERIOD,
@@ -703,9 +681,6 @@ bool ServoCalcs::applyJointUpdate(const Eigen::ArrayXd& delta_theta, sensor_msgs
     // Calculate joint velocity
     joint_state.velocity[i] =
         (joint_state.position.at(i) - original_joint_state_.position.at(i)) / parameters_->publish_period;
-
-    // Save this velocity for future accel calculations
-    previous_vel[i] = joint_state.velocity[i];
   }
 
   return true;
@@ -1008,7 +983,7 @@ bool ServoCalcs::checkValidCommand(const geometry_msgs::msg::TwistStamped& cmd)
   return true;
 }
 
-// Scale the incoming jog command
+// Scale the incoming jog command. Returns a vector of position deltas
 Eigen::VectorXd ServoCalcs::scaleCartesianCommand(const geometry_msgs::msg::TwistStamped& command)
 {
   Eigen::VectorXd result(6);

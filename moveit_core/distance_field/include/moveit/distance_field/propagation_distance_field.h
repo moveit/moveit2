@@ -407,7 +407,7 @@ public:
    *
    * @return If starting cell is inside, the nearest outside cell
    *         If starting cell is outside, the nearst inside cell
-   *         If nearest cell is unknown, return NULL
+   *         If nearest cell is unknown, return nullptr
    */
   const PropDistanceFieldVoxel* getNearestCell(int x, int y, int z, double& dist, Eigen::Vector3i& pos) const
   {
