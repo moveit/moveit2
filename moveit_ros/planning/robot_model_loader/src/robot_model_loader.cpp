@@ -35,7 +35,7 @@
 /* Author: Ioan Sucan, E. Gil Jones */
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/profiler/profiler.h>
+
 #include "rclcpp/rclcpp.hpp"
 #include <typeinfo>
 
@@ -99,9 +99,6 @@ bool canSpecifyPosition(const moveit::core::JointModel* jmodel, const unsigned i
 
 void RobotModelLoader::configure(const Options& opt)
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("RobotModelLoader::configure");
-
   rclcpp::Clock clock;
   rclcpp::Time start = clock.now();
   if (!opt.urdf_string_.empty() && !opt.srdf_string_.empty())
@@ -117,8 +114,6 @@ void RobotModelLoader::configure(const Options& opt)
 
   if (model_ && !rdf_loader_->getRobotDescription().empty())
   {
-    moveit::tools::Profiler::ScopedBlock prof_block2("RobotModelLoader::configure joint limits");
-
     // if there are additional joint limits specified in some .yaml file, read those in
     for (moveit::core::JointModel* joint_model : model_->getJointModels())
     {
@@ -251,9 +246,6 @@ void RobotModelLoader::configure(const Options& opt)
 
 void RobotModelLoader::loadKinematicsSolvers(const kinematics_plugin_loader::KinematicsPluginLoaderPtr& kloader)
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("RobotModelLoader::loadKinematicsSolvers");
-
   if (rdf_loader_ && model_)
   {
     // load the kinematics solvers

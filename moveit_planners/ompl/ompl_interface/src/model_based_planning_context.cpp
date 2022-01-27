@@ -36,6 +36,8 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <moveit/ompl_interface/model_based_planning_context.h>
 #include <moveit/ompl_interface/detail/state_validity_checker.h>
@@ -46,7 +48,7 @@
 #include <moveit/ompl_interface/detail/constraints_library.h>
 
 #include <moveit/kinematic_constraints/utils.h>
-#include <moveit/profiler/profiler.h>
+
 #include <moveit/utils/lexical_casts.h>
 
 #include <ompl/config.h>
@@ -830,7 +832,6 @@ bool ompl_interface::ModelBasedPlanningContext::solve(planning_interface::Motion
 
 bool ompl_interface::ModelBasedPlanningContext::solve(double timeout, unsigned int count)
 {
-  moveit::tools::Profiler::ScopedBlock sblock("PlanningContext:Solve");
   ompl::time::point start = ompl::time::now();
   preSolve();
 
