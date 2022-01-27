@@ -146,10 +146,6 @@ bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
 
 void SynchronizedStringParameter::stringCallback(const std_msgs::msg::String::SharedPtr msg)
 {
-  if (msg->data == content_)
-  {
-    return;
-  }
   if (parent_callback_)
   {
     parent_callback_(msg->data);
