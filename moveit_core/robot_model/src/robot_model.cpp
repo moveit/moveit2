@@ -38,7 +38,6 @@
 #include <moveit/robot_model/robot_model.h>
 #include <geometric_shapes/shape_operations.h>
 #include <boost/math/constants/constants.hpp>
-#include <moveit/profiler/profiler.h>
 #include <algorithm>
 #include <limits>
 #include <cmath>
@@ -82,9 +81,6 @@ const LinkModel* RobotModel::getRootLink() const
 
 void RobotModel::buildModel(const urdf::ModelInterface& urdf_model, const srdf::Model& srdf_model)
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("RobotModel::buildModel");
-
   root_joint_ = nullptr;
   root_link_ = nullptr;
   link_geometry_count_ = 0;
@@ -250,9 +246,6 @@ void RobotModel::computeDescendants()
 
 void RobotModel::buildJointInfo()
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("RobotModel::buildJointInfo");
-
   // construct additional maps for easy access by name
   variable_count_ = 0;
   active_joint_model_start_index_.reserve(joint_model_vector_.size());
@@ -1171,8 +1164,6 @@ LinkModel* RobotModel::constructLinkModel(const urdf::Link* urdf_link)
 
 shapes::ShapePtr RobotModel::constructShape(const urdf::Geometry* geom)
 {
-  moveit::tools::Profiler::ScopedBlock prof_block("RobotModel::constructShape");
-
   shapes::Shape* new_shape = nullptr;
   switch (geom->type)
   {

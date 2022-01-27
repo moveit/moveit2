@@ -36,8 +36,6 @@
 /moveit_plugins/moveit_simple_controller_manager/           @mikeferguson @v4hn
 /moveit_plugins/moveit_controller_manager_example/          @v4hn
 
-/moveit_core/background_processing/                         @tylerjw
-/moveit_core/backtrace/                                     @tylerjw
 /moveit_core/collision_detection/                           @j-petit
 /moveit_core/collision_detection_fcl/                       @j-petit
 /moveit_core/collision_distance_field/                      @j-petit
@@ -53,7 +51,6 @@
 /moveit_core/planning_interface/                            @rhaschke @felixvd
 /moveit_core/planning_request_adapter/                      @rhaschke
 /moveit_core/planning_scene/                                @rhaschke @felixvd
-/moveit_core/profiler/                                      @tylerjw
 /moveit_core/robot_model/                                   @tylerjw
 /moveit_core/robot_state/                                   @rhaschke @mlautman @felixvd
 /moveit_core/robot_trajectory/                              @mlautman

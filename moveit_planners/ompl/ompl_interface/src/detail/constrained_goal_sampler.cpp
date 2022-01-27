@@ -37,7 +37,6 @@
 #include <moveit/ompl_interface/detail/constrained_goal_sampler.h>
 #include <moveit/ompl_interface/model_based_planning_context.h>
 #include <moveit/ompl_interface/detail/state_validity_checker.h>
-#include <moveit/profiler/profiler.h>
 
 #include <utility>
 
@@ -90,8 +89,6 @@ bool ompl_interface::ConstrainedGoalSampler::stateValidityCallback(ob::State* ne
 bool ompl_interface::ConstrainedGoalSampler::sampleUsingConstraintSampler(const ob::GoalLazySamples* gls,
                                                                           ob::State* new_goal)
 {
-  //  moveit::Profiler::ScopedBlock sblock("ConstrainedGoalSampler::sampleUsingConstraintSampler");
-
   unsigned int max_attempts = planning_context_->getMaximumGoalSamplingAttempts();
   unsigned int attempts_so_far = gls->samplingAttemptsCount();
 
