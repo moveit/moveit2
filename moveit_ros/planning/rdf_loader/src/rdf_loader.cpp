@@ -36,7 +36,6 @@
 
 // MoveIt
 #include <moveit/rdf_loader/rdf_loader.h>
-#include <moveit/profiler/profiler.h>
 
 // ROS 2
 #include <rclcpp/rclcpp.hpp>
@@ -61,9 +60,6 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
                      bool default_continuous_value, double default_timeout)
   : ros_name_(ros_name)
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("RDFLoader(robot_description)");
-
   auto start = node->now();
 
   urdf_string_ =
@@ -86,9 +82,6 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
 RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_string)
   : urdf_string_(urdf_string), srdf_string_(srdf_string)
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("RDFLoader(string)");
-
   if (!loadFromStrings())
   {
     return;

@@ -37,13 +37,13 @@
 #include <moveit/kinematics_plugin_loader/kinematics_plugin_loader.h>
 #include <moveit/rdf_loader/rdf_loader.h>
 #include <pluginlib/class_loader.hpp>
+#include <boost/bind.hpp>
 #include <boost/thread/mutex.hpp>
 #include <sstream>
 #include <vector>
 #include <map>
 #include <memory>
 #include "rclcpp/rclcpp.hpp"
-#include <moveit/profiler/profiler.h>
 
 namespace kinematics_plugin_loader
 {
@@ -270,9 +270,6 @@ void KinematicsPluginLoader::status() const
 
 moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction()
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("KinematicsPluginLoader::getLoaderFunction");
-
   if (loader_)
     return boost::bind(&KinematicsLoaderImpl::allocKinematicsSolverWithCache, loader_.get(), boost::placeholders::_1);
 
@@ -283,9 +280,6 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction()
 
 moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const srdf::ModelSharedPtr& srdf_model)
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("KinematicsPluginLoader::getLoaderFunction(SRDF)");
-
   if (!loader_)
   {
     RCLCPP_DEBUG(LOGGER, "Configuring kinematics solvers");

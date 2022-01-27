@@ -39,7 +39,7 @@
 #include <fstream>
 #include <gtest/gtest.h>
 #include <boost/filesystem/path.hpp>
-#include <moveit/profiler/profiler.h>
+
 #include <moveit/utils/robot_model_test_utils.h>
 
 class LoadPlanningModelsPr2 : public testing::Test
@@ -79,7 +79,6 @@ TEST_F(LoadPlanningModelsPr2, Model)
   {
     ASSERT_EQ(links[i]->getLinkIndex(), i);
   }
-  moveit::tools::Profiler::Status();
 
   // This joint has effort and velocity limits defined in the URDF. Nothing else.
   const std::string joint_name = "fl_caster_rotation_joint";
