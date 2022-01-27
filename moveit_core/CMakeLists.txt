@@ -10,9 +10,6 @@ find_package(rclcpp REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
 
-# Finds Boost Components
-include(ConfigExtras.cmake)
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBFCL REQUIRED "fcl>=0.5.0")
 # replace LIBFCL_LIBRARIES with full paths to the libraries
@@ -50,6 +47,9 @@ find_package(common_interfaces REQUIRED)
 find_package(pluginlib REQUIRED)
 # TODO: Port python bindings
 # find_package(pybind11 REQUIRED)
+
+# Finds Boost Components
+include(ConfigExtras.cmake)
 
 # Set target file path for version.h
 set(VERSION_FILE_PATH ${CMAKE_BINARY_DIR}/include)
