@@ -127,8 +127,7 @@ bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
       name_, rclcpp::QoS(1).transient_local().reliable(),
       std::bind(&SynchronizedStringParameter::stringCallback, this, std::placeholders::_1));
 
-  auto timeout_ns =
-      std::chrono::duration_cast<std::chrono::nanoseconds>(timeout.to_chrono<std::chrono::duration<double>>());
+  auto timeout_ns = timeout.to_chrono<std::chrono::nanoseconds>();
   auto end = std::chrono::steady_clock::now() + timeout_ns;
 
   while (std::chrono::steady_clock::now() < end)
