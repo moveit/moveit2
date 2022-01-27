@@ -41,7 +41,7 @@ namespace moveit_setup_app_plugins
 // ******************************************************************************************
 // Loads sensors_3d yaml file
 // ******************************************************************************************
-void PerceptionConfig::loadPrevious(const std::string& package_path, const YAML::Node& node)
+void PerceptionConfig::loadPrevious(const std::string& package_path, const YAML::Node& /*node*/)
 {
   // Loads parameters values from sensors_3d yaml file if available
   std::string sensors_3d_yaml_path = moveit_setup_framework::appendPaths(package_path, "config/sensors_3d.yaml");

@@ -106,7 +106,7 @@ public:
    *
    * @param package_path The path to the root folder of the configuration.
    */
-  virtual void loadPrevious(const std::string& config_package_path, const YAML::Node& node)
+  virtual void loadPrevious(const std::string& /*config_package_path*/, const YAML::Node& /*node*/)
   {
   }
 
@@ -125,8 +125,8 @@ public:
    * @param[in] last_gen_time The time (if any) when the config package was last generated
    * @parma[out] files Where to put the new generated files
    */
-  virtual void collectFiles(const std::string& package_path, const std::time_t& last_gen_time,
-                            std::vector<GeneratedFilePtr>& files)
+  virtual void collectFiles(const std::string& /*package_path*/, const std::time_t& /*last_gen_time*/,
+                            std::vector<GeneratedFilePtr>& /*files*/)
   {
   }
 
@@ -135,7 +135,7 @@ public:
    *
    * @param[out] variables Where to put the new Variables
    */
-  virtual void collectVariables(std::vector<TemplateVariable>& variables)
+  virtual void collectVariables(std::vector<TemplateVariable>& /*variables*/)
   {
   }
 

@@ -74,14 +74,15 @@ public:
     return parent_;
   }
 
-  rviz_common::PanelDockWidget* addPane(const QString& name, QWidget* pane,
-                                        Qt::DockWidgetArea area = Qt::LeftDockWidgetArea, bool floating = true) override
+  rviz_common::PanelDockWidget* addPane(const QString& /*name*/, QWidget* /*pane*/,
+                                        Qt::DockWidgetArea /*area*/ = Qt::LeftDockWidgetArea,
+                                        bool /*floating*/ = true) override
   {
     // Stub for now...just to define the WindowManagerInterface methods
     return nullptr;
   }
 
-  void setStatus(const QString& message) override
+  void setStatus(const QString& /*message*/) override
   {
     // Stub for now...just to define the WindowManagerInterface methods
   }
