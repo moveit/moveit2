@@ -154,8 +154,7 @@ void SynchronizedStringParameter::stringCallback(const std_msgs::msg::String::Sh
   {
     parent_callback_(msg->data);
   }
-  queue_mutex_.lock();
+  std::lock_guard<std::mutex> lock(queue_mutex_);
   queue_.push(msg->data);
-  queue_mutex_.unlock();
 }
 }  // namespace rdf_loader
