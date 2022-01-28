@@ -22,11 +22,7 @@ jobs:
           - IMAGE: rolling-ci-testing
             IKFAST_TEST: true
             ROS_DISTRO: rolling
-          - IMAGE: galactic-ci
             CLANG_TIDY: pedantic
-            ROS_DISTRO: galactic
-          - IMAGE: galactic-ci-testing
-            ROS_DISTRO: galactic
     env:
       CXXFLAGS: "-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-deprecated-copy"
       CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
@@ -75,6 +71,9 @@ jobs:
           sudo rm -rf /usr/local
           df -h
       - uses: actions/checkout@v2
+      - uses: testspace-com/setup-testspace@v1
+        with:
+          domain: ros-planning
       - name: Get latest release date for rosdistro
         id: rosdistro_release_date
         uses: JafarAbdi/latest-rosdistro-release-date-action@main
@@ -120,6 +119,10 @@ jobs:
         name: Run industrial_ci
         uses: ros-industrial/industrial_ci@master
         env: ${{ matrix.env }}
+      - name: Push result to Testspace
+        if: always()
+        run: |
+          testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
       - name: Upload test artifacts (on failure)
         uses: actions/upload-artifact@v2
         if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
