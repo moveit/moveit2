@@ -77,7 +77,6 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     planning_interface/include
     planning_request_adapter/include
     planning_scene/include
-    profiler/include
     # TODO: Port python bindings
     # python/tools/include
     sensor_manager/include
@@ -101,7 +100,6 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_planning_interface
     moveit_planning_scene
     moveit_planning_request_adapter
-    moveit_profiler
     # TODO: Port python bindings
     # moveit_python_tools
     moveit_robot_model
@@ -169,7 +167,6 @@ add_subdirectory(online_signal_smoothing)
 add_subdirectory(planning_interface)
 add_subdirectory(planning_request_adapter)
 add_subdirectory(planning_scene)
-add_subdirectory(profiler)
 add_subdirectory(robot_model)
 add_subdirectory(robot_state)
 add_subdirectory(robot_trajectory)

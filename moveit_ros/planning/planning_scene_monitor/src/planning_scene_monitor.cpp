@@ -52,7 +52,6 @@
 #else
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #endif
-#include <moveit/profiler/profiler.h>
 
 #include <boost/algorithm/string/join.hpp>
 #include <memory>
@@ -154,8 +153,6 @@ PlanningSceneMonitor::~PlanningSceneMonitor()
 
 void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& scene)
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("PlanningSceneMonitor::initialize");
   if (monitor_name_.empty())
     monitor_name_ = "planning_scene_monitor";
   robot_description_ = rm_loader_->getRobotDescription();
