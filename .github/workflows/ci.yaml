@@ -19,9 +19,11 @@ jobs:
         env:
           - IMAGE: foxy-ci
             CCOV: true
+            ROS_DISTRO: foxy
           - IMAGE: foxy-ci-testing
             IKFAST_TEST: true
             CLANG_TIDY: true
+            ROS_DISTRO: foxy
     env:
       CXXFLAGS: "-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-deprecated-copy"
       DOCKER_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.env.IMAGE }}
@@ -59,14 +61,19 @@ jobs:
           sudo rm -rf /usr/local/*
           df -h
       - uses: actions/checkout@v2
-      # The released versions of all upstream repos are current
-      # - name: cache upstream_ws
-      #   uses: pat-s/always-upload-cache@v2.1.5
-      #   with:
-      #     path: ${{ env.BASEDIR }}/upstream_ws
-      #     key: upstream_ws-${{ env.CACHE_PREFIX }}-${{ hashFiles('moveit2.repos') }}-${{ github.run_id }}
-      #     restore-keys: |
-      #       upstream_ws-${{ env.CACHE_PREFIX }}-${{ hashFiles('moveit2.repos') }}
+      - name: Get latest release date for rosdistro
+        id: rosdistro_release_date
+        uses: JafarAbdi/latest-rosdistro-release-date-action@main
+        with:
+          rosdistro: ${{ matrix.env.ROS_DISTRO }}
+      - name: Cache upstream workspace
+        uses: pat-s/always-upload-cache@v2.1.5
+        with:
+          path: ${{ env.BASEDIR }}/upstream_ws
+          key: ${{ env.CACHE_PREFIX }}-${{ github.run_id }}
+          restore-keys: ${{ env.CACHE_PREFIX }}
+        env:
+          CACHE_PREFIX: ${{ steps.rosdistro_release_date.outputs.date }}-upstream_ws-${{ matrix.env.IMAGE }}-${{ hashFiles('moveit2*.repos', '.github/workflows/ci.yaml') }}
       # The target directory cache doesn't include the source directory because
       # that comes from the checkout.  See "prepare target_ws for cache" task below
       - name: cache target_ws
