@@ -55,7 +55,7 @@ jobs:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: true
-          no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
+          no-cache: true
           cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
           tags: |
@@ -107,7 +107,7 @@ jobs:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: true
-          no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
+          no-cache: true
           cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
           tags: |
@@ -160,7 +160,7 @@ jobs:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: true
-          no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
+          no-cache: true
           cache-from: type=registry,ref=${{ env.GH_IMAGE }}
           cache-to: type=inline
           tags: |
