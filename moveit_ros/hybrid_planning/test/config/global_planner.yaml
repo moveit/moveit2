@@ -6,7 +6,9 @@ planning_scene_monitor_options:
   robot_description: "robot_description"
   joint_state_topic: "/joint_states"
   attached_collision_object_topic: "/moveit_cpp/planning_scene_monitor"
+  # Subscribe to this topic (The name comes from the perspective of moveit_cpp)
   publish_planning_scene_topic: "/moveit_cpp/publish_planning_scene"
+  # Publish this topic, e.g. to visualize with RViz
   monitored_planning_scene_topic: "/moveit_cpp/monitored_planning_scene"
   wait_for_initial_state_timeout: 10.0
 planning_pipelines:
