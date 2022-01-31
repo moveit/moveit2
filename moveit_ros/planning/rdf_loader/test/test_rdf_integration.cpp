@@ -66,6 +66,29 @@ TEST(RDFIntegration, topic_based)
   EXPECT_EQ("gonzo", loader.getSRDF()->getName());
 }
 
+TEST(RDFIntegration, executor)
+{
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("executor");
+
+  // Create a thread to spin an Executor.
+  std::promise<void> promise;
+  auto shared_future = promise.get_future().share();
+  auto thread = std::thread([node, shared_future]() {
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node);
+    executor.spin_until_future_complete(shared_future, std::chrono::seconds(10));
+  });
+
+  rdf_loader::RDFLoader loader(node, "topic_description");
+  promise.set_value();
+  thread.join();
+
+  ASSERT_NE(nullptr, loader.getURDF());
+  EXPECT_EQ("gonzo", loader.getURDF()->name_);
+  ASSERT_NE(nullptr, loader.getSRDF());
+  EXPECT_EQ("gonzo", loader.getSRDF()->getName());
+}
+
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
