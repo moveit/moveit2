@@ -79,6 +79,9 @@ jobs:
         uses: JafarAbdi/latest-rosdistro-release-date-action@main
         with:
           rosdistro: ${{ matrix.env.ROS_DISTRO }}
+      - name: Check directory
+        run: |
+          ls -la
       - name: Get latest timestamp repos file has been edited
         id: repos_timestamp
         uses: vatanaksoytezer/latest-file-edit-timestamp-action@main
