@@ -169,7 +169,7 @@ void PlanningScene::initialize()
   allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
 }
 
-/* return nullptr on failure */
+// return nullptr on failure 
 moveit::core::RobotModelPtr PlanningScene::createRobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model,
                                                             const srdf::ModelConstSharedPtr& srdf_model)
 {
