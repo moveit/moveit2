@@ -26,10 +26,12 @@ qt5_wrap_cpp(MOC_FILES
     include/moveit_setup_framework/qt/helper_widgets.hpp
     include/moveit_setup_framework/qt/setup_step_widget.hpp
     include/moveit_setup_framework/qt/rviz_panel.hpp
+    include/moveit_setup_framework/qt/double_list_widget.hpp
 )
 
 add_library(${PROJECT_NAME}
     src/helper_widgets.cpp
+    src/double_list_widget.cpp
     src/urdf_config.cpp
     src/package_settings_config.cpp
     src/srdf_config.cpp
