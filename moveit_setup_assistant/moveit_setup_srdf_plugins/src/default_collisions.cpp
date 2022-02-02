@@ -66,9 +66,6 @@ void DefaultCollisions::linkPairsToSRDF()
       disabled_list.push_back(dc);
     }
   }
-
-  // Update collision_matrix for robot pose's use
-  loadAllowedCollisionMatrix();
 }
 
 // ******************************************************************************************
@@ -158,21 +155,6 @@ void DefaultCollisions::linkPairsFromSRDF()
 
     // Insert into map
     link_pairs_[link_pair] = link_pair_data;
-  }
-}
-
-// ******************************************************************************************
-// Load the allowed collision matrix from the SRDF's list of link pairs
-// ******************************************************************************************
-void DefaultCollisions::loadAllowedCollisionMatrix()
-{
-  // Clear the allowed collision matrix
-  allowed_collision_matrix_.clear();
-
-  // Update the allowed collision matrix, in case there has been a change
-  for (const auto& disabled_collision : srdf_config_->getDisabledCollisions())
-  {
-    allowed_collision_matrix_.setEntry(disabled_collision.link1_, disabled_collision.link2_, true);
   }
 }
 
