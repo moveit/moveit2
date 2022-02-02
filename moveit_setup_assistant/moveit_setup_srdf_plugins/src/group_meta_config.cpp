@@ -48,7 +48,7 @@ bool GroupMetaConfig::isConfigured() const
 // ******************************************************************************************
 // Input kinematics.yaml file
 // ******************************************************************************************
-void GroupMetaConfig::loadPrevious(const std::string& package_path, const YAML::Node&)
+void GroupMetaConfig::loadPrevious(const std::string& package_path, const YAML::Node& /* node */)
 {
   std::string file_path = package_path + "/" + KINEMATICS_FILE;
   if (!inputKinematicsYAML(file_path))

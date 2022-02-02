@@ -336,7 +336,7 @@ void DoubleListWidget::previewSelected(const QList<QTableWidgetItem*>& selected)
 
 std::vector<std::string> DoubleListWidget::getSelectedValues() const
 {
-  std::vector<std::string> values;
+  std::vector<std::string> values(selected_data_table_->rowCount());
   for (int i = 0; i < selected_data_table_->rowCount(); ++i)
   {
     values.push_back(selected_data_table_->item(i, 0)->text().toStdString());
