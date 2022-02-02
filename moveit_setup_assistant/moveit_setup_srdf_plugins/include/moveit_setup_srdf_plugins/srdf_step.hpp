@@ -64,4 +64,107 @@ public:
 protected:
   std::shared_ptr<moveit_setup_framework::SRDFConfig> srdf_config_;
 };
+
+/**
+ * @brief This class provides a number of standard operations based on srdf's vector members
+ */
+template <typename T>
+class SuperSRDFStep : public SRDFStep
+{
+public:
+  /**
+   * @brief Returns the reference to the vector in the SRDF
+   */
+  virtual std::vector<T>& getContainer() = 0;
+
+  /**
+   * @brief Returns the info field associated with this part of the SRDF
+   */
+  virtual moveit_setup_framework::InformationFields getInfoField() const = 0;
+
+  /**
+   * @brief Return a pointer to an item with the given name if it exists, otherwise null
+   */
+  T* find(const std::string& name)
+  {
+    // Note: method is not const because otherwise we cannot return a non-const pointer
+    for (T& item : getContainer())
+    {
+      if (item.name_ == name)
+      {
+        return &item;
+      }
+    }
+    return nullptr;
+  }
+
+  /**
+   * @brief Create an item with the given name and return the pointer
+   * @note: Does not check if an item with the given name exists
+   */
+  T* create(const std::string& name)
+  {
+    T new_item;
+    new_item.name_ = name;
+    getContainer().push_back(new_item);
+    srdf_config_->updateRobotModel(getInfoField());
+    return &getContainer().back();
+  }
+
+  /**
+   * @brief Renames an item and returns a pointer to the item
+   * @throws runtime_error If an item exists with the new name
+   */
+  T* rename(const std::string& old_name, const std::string& new_name)
+  {
+    T* item = find(old_name);
+    T* existing_item = find(new_name);
+    if (existing_item)
+    {
+      throw std::runtime_error("An item already exists with that name!");
+    }
+    item->name_ = new_name;
+    srdf_config_->updateRobotModel(getInfoField());
+    return item;
+  }
+
+  /**
+   * @brief Delete an item with the given name from the list
+   * @return true if item was found
+   */
+  bool remove(const std::string& name)
+  {
+    auto container = getContainer();
+    for (auto it = container.begin(); it != container.end(); ++it)
+    {
+      if (it->name_ == name)  // string match
+      {
+        container.erase(it);
+        srdf_config_->updateRobotModel(getInfoField());
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @brief Get a pointer to an item with the given name, creating if necessary.
+   *        If old_name is provided (and is different) will rename the given item.
+   */
+  T* get(const std::string& name, const std::string& old_name = "")
+  {
+    if (name == old_name)
+    {
+      return find(name);
+    }
+    else if (old_name.empty())
+    {
+      return create(name);
+    }
+    else
+    {
+      return rename(old_name, name);
+    }
+  }
+};
 }  // namespace moveit_setup_srdf_plugins
