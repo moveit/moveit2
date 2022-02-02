@@ -41,7 +41,7 @@ namespace moveit_setup_framework
 void SRDFConfig::onInit()
 {
   parent_node_->declare_parameter("robot_description_semantic", rclcpp::ParameterType::PARAMETER_STRING);
-  has_changes_ = false;
+  changes_ = 0L;
 }
 
 void SRDFConfig::loadPrevious(const std::string& package_path, const YAML::Node& node)
@@ -135,7 +135,7 @@ void SRDFConfig::getRelativePath()
   srdf_pkg_relative_path_ = appendPaths("config", urdf_model_->getName() + ".srdf");
 }
 
-void SRDFConfig::updateRobotModel(bool mark_as_changed)
+void SRDFConfig::updateRobotModel(long changed_information)
 {
   // Initialize with a URDF Model Interface and a SRDF Model
   loadURDFModel();
@@ -145,9 +145,9 @@ void SRDFConfig::updateRobotModel(bool mark_as_changed)
   {
     srdf_pkg_relative_path_ = appendPaths("config", urdf_model_->getName() + ".srdf");
     srdf_.robot_name_ = urdf_model_->getName();
-    has_changes_ = true;
+    changes_ |= OTHER;
   }
-  has_changes_ |= mark_as_changed;
+  changes_ |= changed_information;
 
   // Reset the planning scene
   planning_scene_.reset();

@@ -43,6 +43,20 @@
 
 namespace moveit_setup_framework
 {
+// bits of information that can be changed in the SRDF
+enum InformationFields
+{
+  NONE = 0,
+  COLLISIONS = 1 << 1,
+  VIRTUAL_JOINTS = 1 << 2,
+  GROUPS = 1 << 3,
+  GROUP_CONTENTS = 1 << 4,
+  POSES = 1 << 5,
+  END_EFFECTORS = 1 << 6,
+  PASSIVE_JOINTS = 1 << 7,
+  OTHER = 1 << 8,
+};
+
 class SRDFConfig : public SetupConfig
 {
 public:
@@ -71,7 +85,9 @@ public:
   /// Provide a shared planning scene
   planning_scene::PlanningScenePtr getPlanningScene();
 
-  void updateRobotModel(bool mark_as_changed = false);
+  /// Update the robot model with the new SRDF, AND mark the changes that have been made to the model
+  /// changed_information should be composed of InformationFields
+  void updateRobotModel(long changed_information = 0L);
 
   std::vector<std::string> getLinkNames() const;
 
@@ -118,7 +134,7 @@ public:
 
     bool hasChanges() const override
     {
-      return parent_.has_changes_;
+      return parent_.changes_ > 0;
     }
 
     bool write() override
@@ -173,6 +189,7 @@ protected:
   /// Shared planning scene
   planning_scene::PlanningScenePtr planning_scene_;
 
-  bool has_changes_;
+  // bitfield of changes (composed of InformationFields)
+  unsigned long changes_;
 };
 }  // namespace moveit_setup_framework

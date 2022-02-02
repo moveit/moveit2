@@ -211,7 +211,7 @@ void DefaultCollisions::cancelGenerationThread()
 
 void DefaultCollisions::joinGenerationThread()
 {
-  srdf_config_->updateRobotModel(true);  // mark as changed
+  srdf_config_->updateRobotModel(moveit_setup_framework::COLLISIONS);  // mark as changed
   worker_.join();
 }
 

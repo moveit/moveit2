@@ -106,6 +106,6 @@ void VirtualJoints::create(const std::string& old_name, const std::string& joint
   vj->parent_frame_ = parent_name;
   vj->child_link_ = child_name;
   vj->type_ = joint_type;
-  srdf_config_->updateRobotModel(true);
+  srdf_config_->updateRobotModel(moveit_setup_framework::VIRTUAL_JOINTS);
 }
 }  // namespace moveit_setup_srdf_plugins

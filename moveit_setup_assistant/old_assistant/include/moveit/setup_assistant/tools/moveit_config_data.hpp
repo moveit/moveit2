@@ -132,26 +132,6 @@ public:
   MoveItConfigData();
   ~MoveItConfigData();
 
-  // bits of information that can be entered in Setup Assistant
-  enum InformationFields
-  {
-    COLLISIONS = 1 << 1,
-    VIRTUAL_JOINTS = 1 << 2,
-    GROUPS = 1 << 3,
-    GROUP_CONTENTS = 1 << 4,
-    GROUP_KINEMATICS = 1 << 5,
-    POSES = 1 << 6,
-    END_EFFECTORS = 1 << 7,
-    PASSIVE_JOINTS = 1 << 8,
-    AUTHOR_INFO = 1 << 9,
-    SENSORS_CONFIG = 1 << 10,
-    SRDF = COLLISIONS | VIRTUAL_JOINTS | GROUPS | GROUP_CONTENTS | POSES | END_EFFECTORS | PASSIVE_JOINTS
-  };
-  unsigned long changes;  // bitfield of changes (composed of InformationFields)
-
-  /// Planning groups extra data not found in srdf but used in config files
-  std::map<std::string, GroupMetaData> group_meta_data_;
-
   /// Setup Assistants package's path for when we use its templates
   std::string setup_assistant_path_;
 
