@@ -126,6 +126,11 @@ public:
     return srdf_.virtual_joints_;
   }
 
+  std::vector<srdf::Model::PassiveJoint>& getPassiveJoints()
+  {
+    return srdf_.passive_joints_;
+  }
+
   /**
    * @brief Return the name of the child link of a joint
    * @return empty string if joint is not found
