@@ -488,7 +488,7 @@ TEST_F(KinematicsTest, unitIK)
   //     pose:   [0.1, 0.2, 0.3, 0, 0, 0, 0] // xyzwxyz (position + quaternion)
   //     joints: [1, 2, 3, 4, 5, 6]  // pose applied absolute in planning frame
   //     type: absolute
-  
+
   for (size_t i = 0; i < expected_test_poses; ++i)  // NOLINT(modernize-loop-convert)
   {
     const std::string pose_name = "pose_" + std::to_string(i);
