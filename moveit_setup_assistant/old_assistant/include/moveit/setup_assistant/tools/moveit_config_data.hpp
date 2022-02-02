@@ -43,25 +43,9 @@
 
 namespace moveit_setup_assistant
 {
-// Default kin solver values
-static const double DEFAULT_KIN_SOLVER_SEARCH_RESOLUTION = 0.005;
-static const double DEFAULT_KIN_SOLVER_TIMEOUT = 0.005;
-
 // ******************************************************************************************
 // Structs
 // ******************************************************************************************
-
-/**
- * Planning groups extra data not found in srdf but used in config files
- */
-struct GroupMetaData
-{
-  std::string kinematics_solver_;               // Name of kinematics plugin to use
-  double kinematics_solver_search_resolution_;  // resolution to use with solver
-  double kinematics_solver_timeout_;            // solver timeout
-  std::string kinematics_parameters_file_;      // file for additional kinematics parameters
-  std::string default_planner_;                 // Name of the default planner to use
-};
 
 /**
  * ROS Controllers settings which may be set in the config files

@@ -197,55 +197,6 @@ bool MoveItConfigData::outputCHOMPPlanningYAML(const std::string& file_path)
 }
 
 // ******************************************************************************************
-// Output kinematic config files
-// ******************************************************************************************
-bool MoveItConfigData::outputKinematicsYAML(const std::string& file_path)
-{
-  YAML::Emitter emitter;
-  emitter << YAML::BeginMap;
-
-  // Output every group and the kinematic solver it can use ----------------------------------
-  for (srdf::Model::Group& group : srdf_->groups_)
-  {
-    // Only save kinematic data if the solver is not "None"
-    if (group_meta_data_[group.name_].kinematics_solver_.empty() ||
-        group_meta_data_[group.name_].kinematics_solver_ == "None")
-      continue;
-
-    emitter << YAML::Key << group.name_;
-    emitter << YAML::Value << YAML::BeginMap;
-
-    // Kinematic Solver
-    emitter << YAML::Key << "kinematics_solver";
-    emitter << YAML::Value << group_meta_data_[group.name_].kinematics_solver_;
-
-    // Search Resolution
-    emitter << YAML::Key << "kinematics_solver_search_resolution";
-    emitter << YAML::Value << group_meta_data_[group.name_].kinematics_solver_search_resolution_;
-
-    // Solver Timeout
-    emitter << YAML::Key << "kinematics_solver_timeout";
-    emitter << YAML::Value << group_meta_data_[group.name_].kinematics_solver_timeout_;
-
-    emitter << YAML::EndMap;
-  }
-
-  emitter << YAML::EndMap;
-
-  std::ofstream output_stream(file_path.c_str(), std::ios_base::trunc);
-  if (!output_stream.good())
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for writing " << file_path);
-    return false;
-  }
-
-  output_stream << emitter.c_str();
-  output_stream.close();
-
-  return true;  // file created successfully
-}
-
-// ******************************************************************************************
 // Helper function to get the controller that is controlling the joint
 // ******************************************************************************************
 std::string MoveItConfigData::getJointHardwareInterface(const std::string& joint_name)
@@ -1127,51 +1078,6 @@ bool MoveItConfigData::inputOMPLYAML(const std::string& file_path)
     return false;
   }
   return true;
-}
-
-// ******************************************************************************************
-// Input kinematics.yaml file
-// ******************************************************************************************
-bool MoveItConfigData::inputKinematicsYAML(const std::string& file_path)
-{
-  // Load file
-  std::ifstream input_stream(file_path.c_str());
-  if (!input_stream.good())
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for reading " << file_path);
-    return false;
-  }
-
-  // Begin parsing
-  try
-  {
-    YAML::Node doc = YAML::Load(input_stream);
-
-    // Loop through all groups
-    for (YAML::const_iterator group_it = doc.begin(); group_it != doc.end(); ++group_it)
-    {
-      const std::string& group_name = group_it->first.as<std::string>();
-      const YAML::Node& group = group_it->second;
-
-      // Create new meta data
-      GroupMetaData meta_data;
-
-      parse(group, "kinematics_solver", meta_data.kinematics_solver_);
-      parse(group, "kinematics_solver_search_resolution", meta_data.kinematics_solver_search_resolution_,
-            DEFAULT_KIN_SOLVER_SEARCH_RESOLUTION);
-      parse(group, "kinematics_solver_timeout", meta_data.kinematics_solver_timeout_, DEFAULT_KIN_SOLVER_TIMEOUT);
-
-      // Assign meta data to vector
-      group_meta_data_[group_name] = meta_data;
-    }
-  }
-  catch (YAML::ParserException& e)  // Catch errors
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, e.what());
-    return false;
-  }
-
-  return true;  // file created successfully
 }
 
 // ******************************************************************************************

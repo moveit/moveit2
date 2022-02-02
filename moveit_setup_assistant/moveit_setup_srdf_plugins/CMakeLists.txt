@@ -24,6 +24,7 @@ add_library(${PROJECT_NAME}
     src/compute_default_collisions.cpp
     src/default_collisions.cpp
     src/default_collisions_widget.cpp
+    src/group_meta_config.cpp
     src/rotated_header_view.cpp
     src/virtual_joints.cpp
     src/virtual_joints_widget.cpp
