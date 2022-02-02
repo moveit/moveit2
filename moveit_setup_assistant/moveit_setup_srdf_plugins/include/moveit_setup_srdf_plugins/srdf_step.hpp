@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik Robotics
+ *  Copyright (c) 2022, Metro Robots
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik Robotics nor the names of its
+ *   * Neither the name of Metro Robots nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -35,65 +35,33 @@
 /* Author: David V. Lu!! */
 #pragma once
 
-#include <moveit_setup_srdf_plugins/srdf_step.hpp>
-#include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
-#include <boost/thread/thread.hpp>
+#include <moveit_setup_framework/setup_step.hpp>
+#include <moveit_setup_framework/data/srdf_config.hpp>
 
 namespace moveit_setup_srdf_plugins
 {
-class DefaultCollisions : public SRDFStep
+/**
+ * @brief Setup Step that contains the SRDFConfig
+ */
+class SRDFStep : public moveit_setup_framework::SetupStep
 {
 public:
-  std::string getName() const override
+  void onInit() override
   {
-    return "Self-Collisions";
+    srdf_config_ = config_data_->get<moveit_setup_framework::SRDFConfig>("srdf");
   }
 
-  std::vector<std::string> getCollidingLinks();
-
-  /**
-   * @brief Output Link Pairs to SRDF Format
-   */
-  void linkPairsToSRDF();
-
-  /**
-   * @brief Output Link Pairs to SRDF Format; sorted; with optional filter
-   * @param skip_mask mask of shifted DisabledReason values that will be skipped
-   */
-  void linkPairsToSRDFSorted(size_t skip_mask = 0);
-
-  /**
-   * @brief Load Link Pairs from SRDF Format
-   */
-  void linkPairsFromSRDF();
-
-  /// Load the allowed collision matrix from the SRDF's list of link pairs
-  void loadAllowedCollisionMatrix();
-
-  LinkPairMap& getLinkPairs()
+  bool isReady() const override
   {
-    return link_pairs_;
+    return srdf_config_->isConfigured();
   }
 
-  // For Threaded Operations
-  void startGenerationThread(unsigned int num_trials, double min_frac, bool verbose = true);
-  void cancelGenerationThread();
-  void joinGenerationThread();
-  int getThreadProgress() const;
+  bool hasGroups() const
+  {
+    return !srdf_config_->getGroups().empty();
+  }
 
 protected:
-  void generateCollisionTable(unsigned int num_trials, double min_frac, bool verbose);
-
   std::shared_ptr<moveit_setup_framework::SRDFConfig> srdf_config_;
-
-  /// main storage of link pair data
-  LinkPairMap link_pairs_;
-
-  /// Allowed collision matrix for robot poses
-  collision_detection::AllowedCollisionMatrix allowed_collision_matrix_;
-
-  // For threaded operations
-  boost::thread worker_;
-  unsigned int progress_;
 };
 }  // namespace moveit_setup_srdf_plugins
