@@ -59,6 +59,8 @@ public:
   void setEnabled(const int& index, bool enabled);
   void setSelected(const int& index);
 
+  bool isEnabled(const int& index) const;
+
 private:
   QStandardItemModel* model_;
 };
