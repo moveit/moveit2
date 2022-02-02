@@ -11,6 +11,9 @@
   <class type="moveit_setup_srdf_plugins::RobotPosesWidget" base_class_type="moveit_setup_framework::SetupStepWidget">
     <description>Step to configure robot poses</description>
   </class>
+  <class type="moveit_setup_srdf_plugins::EndEffectorsWidget" base_class_type="moveit_setup_framework::SetupStepWidget">
+    <description>Step to configure end effectors</description>
+  </class>
   <class type="moveit_setup_srdf_plugins::GroupMetaConfig" base_class_type="moveit_setup_framework::SetupConfig">
     <description>Extra data associated with planning groups not found in srdf but used in config files</description>
   </class>
