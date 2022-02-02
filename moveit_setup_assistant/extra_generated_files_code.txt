@@ -19,14 +19,6 @@
   file.gen_func_ = boost::bind(&MoveItConfigData::outputCHOMPPlanningYAML, config_data_, _1);
   file.write_on_changes = MoveItConfigData::GROUPS;  // need to double check if this is actually correct!
 
-  // kinematics.yaml  --------------------------------------------------------------------------------------
-  file.file_name_ = "kinematics.yaml";
-  file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);
-  file.description_ = "Specifies which kinematic solver plugin to use for each planning group in the SRDF, as well as "
-                      "the kinematic solver search resolution.";
-  file.gen_func_ = boost::bind(&MoveItConfigData::outputKinematicsYAML, config_data_, _1);
-  file.write_on_changes = MoveItConfigData::GROUPS | MoveItConfigData::GROUP_KINEMATICS;
-
   // joint_limits.yaml --------------------------------------------------------------------------------------
   file.file_name_ = "joint_limits.yaml";
   file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);

@@ -179,6 +179,31 @@ std::vector<std::string> SRDFConfig::getLinkNames() const
   return names;
 }
 
+std::string SRDFConfig::getChildOfJoint(const std::string& joint_name) const
+{
+  const moveit::core::JointModel* joint_model = getRobotModel()->getJointModel(joint_name);
+  // Check that a joint model was found
+  if (!joint_model)
+  {
+    return "";
+  }
+  return joint_model->getChildLinkModel()->getName();
+}
+
+void SRDFConfig::removePoseByName(const std::string& pose_name, const std::string& group_name)
+{
+  for (std::vector<srdf::Model::GroupState>::iterator pose_it = srdf_.group_states_.begin();
+       pose_it != srdf_.group_states_.end(); ++pose_it)
+  {
+    if (pose_it->name_ == pose_name && pose_it->group_ == group_name)
+    {
+      srdf_.group_states_.erase(pose_it);
+      updateRobotModel(moveit_setup_framework::POSES);
+      return;
+    }
+  }
+}
+
 void SRDFConfig::collectVariables(std::vector<TemplateVariable>& variables)
 {
   variables.push_back(TemplateVariable("ROBOT_NAME", srdf_.robot_name_));

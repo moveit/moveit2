@@ -123,18 +123,6 @@ public:
   std::string template_package_path_;
 
   // ******************************************************************************************
-  // Public Functions
-  // ******************************************************************************************
-
-  /**
-   * Find the associated group by name
-   *
-   * @param name - name of data to find in datastructure
-   * @return pointer to data in datastructure
-   */
-  srdf::Model::Group* findGroupByName(const std::string& name);
-
-  // ******************************************************************************************
   // Public Functions for outputting configuration and setting files
   // ******************************************************************************************
   std::vector<OMPLPlannerDescription> getOMPLPlanners();

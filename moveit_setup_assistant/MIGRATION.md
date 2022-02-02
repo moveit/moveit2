@@ -10,10 +10,12 @@ This file should be deleted once all tasks are complete. Also delete `SETUP_STEP
  * `moveit_setup_srdf_plugins`
    * [x] Self-Collisions
    * [x] Virtual Joints
-   * [ ] Planning Groups
    * [ ] Robot Poses
    * [ ] End Effectors
    * [ ] Passive Joints
+   * [x] Planning Groups
+     * BUG: Creating a new group does not properly create a new JointModelGroup
+     * TODO: Need method for getting a list of OMPL Planners
  * `moveit_setup_app_plugins`
    * [ ] ROS Control
    * [ ] Simulation

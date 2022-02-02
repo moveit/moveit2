@@ -5,4 +5,10 @@
   <class type="moveit_setup_srdf_plugins::DefaultCollisionsWidget" base_class_type="moveit_setup_framework::SetupStepWidget">
     <description>Step to ignore self-colisions</description>
   </class>
+  <class type="moveit_setup_srdf_plugins::PlanningGroupsWidget" base_class_type="moveit_setup_framework::SetupStepWidget">
+    <description>Step to configure planning groups</description>
+  </class>
+  <class type="moveit_setup_srdf_plugins::GroupMetaConfig" base_class_type="moveit_setup_framework::SetupConfig">
+    <description>Extra data associated with planning groups not found in srdf but used in config files</description>
+  </class>
 </library>

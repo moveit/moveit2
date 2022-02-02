@@ -106,10 +106,33 @@ public:
     return srdf_.groups_;
   }
 
+  std::vector<std::string> getGroupNames() const
+  {
+    std::vector<std::string> group_names;
+    for (const srdf::Model::Group& group : srdf_.groups_)
+    {
+      group_names.push_back(group.name_);
+    }
+    return group_names;
+  }
+
+  std::vector<srdf::Model::GroupState>& getGroupStates()
+  {
+    return srdf_.group_states_;
+  }
+
   std::vector<srdf::Model::VirtualJoint>& getVirtualJoints()
   {
     return srdf_.virtual_joints_;
   }
+
+  /**
+   * @brief Return the name of the child link of a joint
+   * @return empty string if joint is not found
+   */
+  std::string getChildOfJoint(const std::string& joint_name) const;
+
+  void removePoseByName(const std::string& pose_name, const std::string& group_name);
 
   class GeneratedSRDF : public GeneratedFile
   {

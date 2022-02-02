@@ -1314,31 +1314,6 @@ bool MoveItConfigData::createFullURDFPath()
   return fs::is_regular_file(urdf_path_);
 }
 
-srdf::Model::Group* MoveItConfigData::findGroupByName(const std::string& name)
-{
-  // Find the group we are editing based on the goup name string
-  srdf::Model::Group* searched_group = nullptr;  // used for holding our search results
-
-  for (srdf::Model::Group& group : srdf_->groups_)
-  {
-    if (group.name_ == name)  // string match
-    {
-      searched_group = &group;  // convert to pointer from iterator
-      break;                    // we are done searching
-    }
-  }
-
-  // Check if subgroup was found
-  if (searched_group == nullptr)  // not found
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "An internal error has occurred while searching for groups. Group '"
-                                    << name << "' was not found  in the SRDF.");
-    throw std::runtime_error(name + " was not found in the SRDF");
-  }
-
-  return searched_group;
-}
-
 // ******************************************************************************************
 // Find ROS controller by name
 // ******************************************************************************************
