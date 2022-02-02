@@ -76,8 +76,5 @@ PLUGINLIB_EXPORT_CLASS(PACKAGE_NAME::SETUP_STEPWidget, moveit_setup_framework::S
  * Lots of additional useful code can be found in the `old_planner` folder.
  * Additional code removed from other classes can be found in `extra_*.txt` in this folder.
 
-## Bugs
- * [ ] If you click on disabled steps in the navigation widget, the whole thing crashes
-
 ## Possible Enhancements
  * There's a common pattern in `GeneratedFile` subclasses which passes a reference to the parent object. This could be templated for reducing code duplication.
