@@ -111,6 +111,11 @@ void NavigationWidget::setSelected(const int& index)
   selectionModel()->select(selection, QItemSelectionModel::Select);
 }
 
+bool NavigationWidget::isEnabled(const int& index) const
+{
+  return model_->item(index)->flags() > Qt::NoItemFlags;
+}
+
 // ******************************************************************************************
 // CLASS
 // ******************************************************************************************
