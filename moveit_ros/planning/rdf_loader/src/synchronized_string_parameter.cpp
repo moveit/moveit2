@@ -119,7 +119,7 @@ bool SynchronizedStringParameter::shouldPublish()
 
 bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
 {
-  std::string const nd_name = std::string(node_->get_name()).append("_ssp_").append(name_);
+  auto const nd_name = std::string(node_->get_name()).append("_ssp_").append(name_);
   auto const temp_node = std::make_shared<rclcpp::Node>(nd_name);
   string_subscriber_ = temp_node->create_subscription<std_msgs::msg::String>(
       name_, rclcpp::QoS(1).transient_local().reliable(),
