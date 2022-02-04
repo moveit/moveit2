@@ -60,10 +60,12 @@ public:
   /** \brief Construct an attached body for a specified \e link.
    *
    * The name of this body is \e id and it consists of \e shapes that attach to the link by the transforms
-   * \e shape_poses. The set of links that are allowed to be touched by this object is specified by \e touch_links. */
-  AttachedBody(const LinkModel* link, const std::string& id, const Eigen::Isometry3d& pose,
+   * \e shape_poses. The set of links that are allowed to be touched by this object is specified by \e touch_links.
+   * detach_posture may describe a detach motion for the gripper when placing the object.
+   * The shape and subframe poses are relative to the \e pose, and \e pose is relative to the parent link. */
+  AttachedBody(const LinkModel* parent, const std::string& id, const Eigen::Isometry3d& pose,
                const std::vector<shapes::ShapeConstPtr>& shapes, const EigenSTL::vector_Isometry3d& shape_poses,
-               const std::set<std::string>& touch_links, const trajectory_msgs::msg::JointTrajectory& attach_posture,
+               const std::set<std::string>& touch_links, const trajectory_msgs::msg::JointTrajectory& detach_posture,
                const moveit::core::FixedTransformsMap& subframe_poses = moveit::core::FixedTransformsMap());
 
   ~AttachedBody();
