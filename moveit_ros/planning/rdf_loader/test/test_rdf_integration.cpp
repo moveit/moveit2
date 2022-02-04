@@ -68,7 +68,7 @@ TEST(RDFIntegration, topic_based)
 
 TEST(RDFIntegration, executor)
 {
-  // RDFLoader should successfully load URDF and SRDF strings from a ROS topic when the node that is 
+  // RDFLoader should successfully load URDF and SRDF strings from a ROS topic when the node that is
   // passed to it is spinning.
   // GIVEN a node that has been added to an executor that is spinning on another thread
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("executor");
