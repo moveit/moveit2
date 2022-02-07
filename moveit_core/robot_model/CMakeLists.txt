@@ -25,7 +25,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   visualization_msgs
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
-  moveit_profiler
   moveit_exceptions
   moveit_kinematics_base
 )

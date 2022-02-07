@@ -219,7 +219,7 @@ private:
   // double goal_joint_tolerance_;
   // double goal_position_tolerance_;
   // double goal_orientation_tolerance_;
-  // TODO(henningkayser): implment path/trajectory constraints
+  // TODO(henningkayser): implement path/trajectory constraints
   // std::unique_ptr<moveit_msgs::msg::Constraints> path_constraints_;
   // std::unique_ptr<moveit_msgs::msg::TrajectoryConstraints> trajectory_constraints_;
 

@@ -45,16 +45,24 @@ namespace moveit
 {
 namespace core
 {
-RevoluteJointModel::RevoluteJointModel(const std::string& name)
-  : JointModel(name), axis_(0.0, 0.0, 0.0), continuous_(false), x2_(0.0), y2_(0.0), z2_(0.0), xy_(0.0), xz_(0.0), yz_(0.0)
+RevoluteJointModel::RevoluteJointModel(const std::string& name, size_t joint_index, size_t first_variable_index)
+  : JointModel(name, joint_index, first_variable_index)
+  , axis_(0.0, 0.0, 0.0)
+  , continuous_(false)
+  , x2_(0.0)
+  , y2_(0.0)
+  , z2_(0.0)
+  , xy_(0.0)
+  , xz_(0.0)
+  , yz_(0.0)
 {
   type_ = REVOLUTE;
-  variable_names_.push_back(name_);
+  variable_names_.push_back(getName());
   variable_bounds_.resize(1);
   variable_bounds_[0].position_bounded_ = true;
   variable_bounds_[0].min_position_ = -boost::math::constants::pi<double>();
   variable_bounds_[0].max_position_ = boost::math::constants::pi<double>();
-  variable_index_map_[name_] = 0;
+  variable_index_map_[getName()] = 0;
   computeVariableBoundsMsg();
 }
 
@@ -88,7 +96,7 @@ void RevoluteJointModel::setContinuous(bool flag)
   computeVariableBoundsMsg();
 }
 
-double RevoluteJointModel::getMaximumExtent(const Bounds& other_bounds) const
+double RevoluteJointModel::getMaximumExtent(const Bounds& /*other_bounds*/) const
 {
   return variable_bounds_[0].max_position_ - variable_bounds_[0].min_position_;
 }

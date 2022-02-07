@@ -51,7 +51,7 @@ TEST(RDFIntegration, default_arguments)
 TEST(RDFIntegration, non_existent)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("non_existent");
-  rdf_loader::RDFLoader loader(node, "DNE");
+  rdf_loader::RDFLoader loader(node, "does_not_exist");
   ASSERT_EQ(nullptr, loader.getURDF());
   ASSERT_EQ(nullptr, loader.getSRDF());
 }
@@ -60,6 +60,30 @@ TEST(RDFIntegration, topic_based)
 {
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("topic_based");
   rdf_loader::RDFLoader loader(node, "topic_description");
+  ASSERT_NE(nullptr, loader.getURDF());
+  EXPECT_EQ("gonzo", loader.getURDF()->name_);
+  ASSERT_NE(nullptr, loader.getSRDF());
+  EXPECT_EQ("gonzo", loader.getSRDF()->getName());
+}
+
+TEST(RDFIntegration, executor)
+{
+  // RDFLoader should successfully load URDF and SRDF strings from a ROS topic when the node that is
+  // passed to it is spinning.
+  // GIVEN a node that has been added to an executor that is spinning on another thread
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("executor");
+
+  // Create a thread to spin an Executor.
+  std::thread([node]() {
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node);
+    executor.spin();
+  }).detach();
+
+  // WHEN the RDFLoader is created
+  rdf_loader::RDFLoader loader(node, "topic_description");
+
+  // THEN the RDFLoader should return non-null values for the URDF and SRDF model.
   ASSERT_NE(nullptr, loader.getURDF());
   EXPECT_EQ("gonzo", loader.getURDF()->name_);
   ASSERT_NE(nullptr, loader.getSRDF());

@@ -225,7 +225,7 @@ TEST_F(DistanceFieldCollisionDetectionTester, ContactPositions)
   ASSERT_EQ(res.contacts.begin()->second.size(), 1u);
 
   for (collision_detection::CollisionResult::ContactMap::const_iterator it = res.contacts.begin();
-       it != res.contacts.end(); it++)
+       it != res.contacts.end(); ++it)
   {
     EXPECT_NEAR(it->second[0].pos.x(), 5.0, .33);
   }
@@ -243,7 +243,7 @@ TEST_F(DistanceFieldCollisionDetectionTester, ContactPositions)
   ASSERT_EQ(res2.contacts.begin()->second.size(), 1u);
 
   for (collision_detection::CollisionResult::ContactMap::const_iterator it = res2.contacts.begin();
-       it != res2.contacts.end(); it++)
+       it != res2.contacts.end(); ++it)
   {
     EXPECT_NEAR(it->second[0].pos.x(), 3.0, 0.33);
   }

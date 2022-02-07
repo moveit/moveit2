@@ -251,8 +251,8 @@ void TrajectoryVisualization::changedShowTrail()
 
   int stepsize = trail_step_size_property_->getInt();
   // always include last trajectory point
-  trajectory_trail_.resize((int)std::ceil((t->getWayPointCount() + stepsize - 1) / (float)stepsize));
-  for (std::size_t i = 0; i < trajectory_trail_.size(); i++)
+  trajectory_trail_.resize(static_cast<int>(std::ceil((t->getWayPointCount() + stepsize - 1) / (float)stepsize)));
+  for (std::size_t i = 0; i < trajectory_trail_.size(); ++i)
   {
     int waypoint_i = std::min(i * stepsize, t->getWayPointCount() - 1);  // limit to last trajectory point
     auto r = std::make_unique<RobotStateVisualization>(scene_node_, context_,

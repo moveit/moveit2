@@ -2,6 +2,39 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2022-01-20)
+------------------
+* Remove 'using namespace' from header files. (`#994 <https://github.com/ros-planning/moveit2/issues/994>`_)
+* Servo: re-order velocity limit check & minor cleanup (`#956 <https://github.com/ros-planning/moveit2/issues/956>`_)
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Contributors: AndyZe, Cory Crean, Robert Haschke
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Servo: fix -Wunused-private-field (`#937 <https://github.com/ros-planning/moveit2/issues/937>`_)
+* Add codespell to precommit, fix A LOT of spelling mistakes (`#934 <https://github.com/ros-planning/moveit2/issues/934>`_)
+* Add descriptions and default values to servo parameters (`#799 <https://github.com/ros-planning/moveit2/issues/799>`_)
+* Update README (`#812 <https://github.com/ros-planning/moveit2/issues/812>`_)
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* moveit_servo: Fix ACM for collision checking & PSM's scene monitor topic (`#673 <https://github.com/ros-planning/moveit2/issues/673>`_)
+* Fix initialization of PSM publisher in servo (`#771 <https://github.com/ros-planning/moveit2/issues/771>`_)
+* Move initialization of ServoNode into constructor (`#761 <https://github.com/ros-planning/moveit2/issues/761>`_)
+* Fix missing test depend in servo (`#759 <https://github.com/ros-planning/moveit2/issues/759>`_)
+* Find/replace deprecated spawner.py (`#737 <https://github.com/ros-planning/moveit2/issues/737>`_)
+* Fix the servo executable name (`#746 <https://github.com/ros-planning/moveit2/issues/746>`_)
+* Use rclcpp::SystemDefaultsQoS in Servo (`#721 <https://github.com/ros-planning/moveit2/issues/721>`_)
+* Use multi-threaded component container, do not use intraprocess comms in Servo (`#723 <https://github.com/ros-planning/moveit2/issues/723>`_)
+* Disable use_intra_process_comms in servo launch files (`#722 <https://github.com/ros-planning/moveit2/issues/722>`_)
+* Servo: minor fixups (`#2759 <https://github.com/ros-planning/moveit/issues/2759>`_)
+* Contributors: AndyZe, Dave Coleman, David V. Lu!!, Henning Kayser, Jafar Abdi, Robert Haschke, Stephanie Eng, Tyler Weaver, toru-kuga
+
 2.3.0 (2021-10-08)
 ------------------
 * Make TF buffer & listener in PSM private (`#654 <https://github.com/ros-planning/moveit2/issues/654>`_)

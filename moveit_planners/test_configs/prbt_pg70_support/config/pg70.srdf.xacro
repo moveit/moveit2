@@ -1,0 +1,72 @@
+<?xml version="1.0" ?>
+
+<!--
+Copyright (c) 2018 Pilz GmbH & Co. KG
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!--
+  This does not replace URDF, and is not an extension of URDF.
+  This is a format for representing semantic information about the robot structure.
+  A URDF file must exist for this robot as well, where the joints and the links that are referenced are defined
+  -->
+  <!--
+  GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms,
+          end effectors, etc
+  LINKS:  When a link is specified, the parent joint of that link (if it exists) is automatically included
+  JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included
+  CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group.
+          Additionally, all the joints that are parents to included links are also included. This means that joints
+          along the chain and the parent joint of the base link are included in the group
+  SUBGROUPS: Groups can also be formed by referencing to already defined group names
+  -->
+  <xacro:macro name="prbt_pg70" params="prefix">
+    <group name="gripper">
+      <joint name="${prefix}gripper_finger_left_joint" />
+    </group>
+    <end_effector group="gripper" name="pg70_end_effector" parent_link="${prefix}flange">
+    </end_effector>
+
+    <!--
+    DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with
+    any other link in the robot. This tag disables collision checking between a specified pair of links.
+    -->
+    <disable_collisions link1="${prefix}flange" link2="${prefix}gripper_finger_left_link" reason="Never" />
+    <disable_collisions link1="${prefix}flange" link2="${prefix}gripper_finger_left_link_bracket" reason="Never" />
+    <disable_collisions link1="${prefix}flange" link2="${prefix}gripper_finger_right_link" reason="Never" />
+    <disable_collisions link1="${prefix}flange" link2="${prefix}gripper_finger_right_link_bracket" reason="Never" />
+    <disable_collisions link1="${prefix}flange" link2="${prefix}gripper_palm_link" reason="Adjacent" />
+    <disable_collisions link1="${prefix}gripper_finger_left_link" link2="${prefix}gripper_finger_left_link_bracket" reason="Adjacent" />
+    <disable_collisions link1="${prefix}gripper_finger_left_link" link2="${prefix}gripper_finger_right_link" reason="Default" />
+    <disable_collisions link1="${prefix}gripper_finger_left_link" link2="${prefix}gripper_finger_right_link_bracket" reason="Default" />
+    <disable_collisions link1="${prefix}gripper_finger_left_link" link2="${prefix}gripper_palm_link" reason="Adjacent" />
+    <disable_collisions link1="${prefix}gripper_finger_left_link" link2="${prefix}link_5" reason="Never" />
+    <disable_collisions link1="${prefix}gripper_finger_left_link_bracket" link2="${prefix}gripper_finger_right_link" reason="Default" />
+    <disable_collisions link1="${prefix}gripper_finger_left_link_bracket" link2="${prefix}gripper_finger_right_link_bracket" reason="Default" />
+    <disable_collisions link1="${prefix}gripper_finger_left_link_bracket" link2="${prefix}gripper_palm_link" reason="Never" />
+    <disable_collisions link1="${prefix}gripper_finger_left_link_bracket" link2="${prefix}link_5" reason="Never" />
+    <disable_collisions link1="${prefix}gripper_finger_right_link" link2="${prefix}gripper_finger_right_link_bracket" reason="Adjacent" />
+    <disable_collisions link1="${prefix}gripper_finger_right_link" link2="${prefix}gripper_palm_link" reason="Adjacent" />
+    <disable_collisions link1="${prefix}gripper_finger_right_link" link2="${prefix}link_5" reason="Never" />
+    <disable_collisions link1="${prefix}gripper_finger_right_link_bracket" link2="${prefix}gripper_palm_link" reason="Never" />
+    <disable_collisions link1="${prefix}gripper_finger_right_link_bracket" link2="${prefix}link_5" reason="Never" />
+    <disable_collisions link1="${prefix}gripper_palm_link" link2="${prefix}link_2" reason="Never" />
+    <disable_collisions link1="${prefix}gripper_palm_link" link2="${prefix}link_5" reason="Never" />
+  </xacro:macro>
+
+  <!-- instantiate gripper -->
+  <xacro:prbt_pg70 prefix="$(arg prefix)"/>
+
+</robot>

@@ -139,7 +139,7 @@ protected:
     // helper matrix for differentiation.
     Eigen::MatrixXd m_helper = h * Eigen::MatrixXd::Identity(num_dofs_, num_dofs_);
 
-    for (std::size_t dim = 0; dim < num_dofs_; dim++)
+    for (std::size_t dim = 0; dim < num_dofs_; ++dim)
     {
       Eigen::Vector3d pos = fk(q, link_name).translation();
       Eigen::Vector3d pos_plus_h = fk(q + m_helper.col(dim), link_name).translation();
@@ -176,7 +176,7 @@ protected:
   {
     moveit_msgs::msg::PositionConstraint pos_con_msg = createPositionConstraint(base_link_name_, ee_link_name_);
 
-    // Make the tolerance on the x dimension smaller than the treshold used to recognize equality constraints.
+    // Make the tolerance on the x dimension smaller than the threshold used to recognize equality constraints.
     // (see docstring EqualityPositionConstraint::equality_constraint_threshold).
     pos_con_msg.constraint_region.primitives.at(0).dimensions[0] = 0.0005;
 
@@ -200,7 +200,7 @@ protected:
 
     double total_error = 999.9;
 
-    for (int i = 0; i < NUM_RANDOM_TESTS; i++)
+    for (int i = 0; i < NUM_RANDOM_TESTS; ++i)
     {
       auto q = getRandomState();
       auto jac_exact = constraint_->calcErrorJacobian(q);
@@ -228,7 +228,7 @@ protected:
     auto joint_limits = joint_model_group_->getActiveJointModelsBounds();
     EXPECT_EQ(joint_limits.size(), num_dofs_);
 
-    for (std::size_t i = 0; i < num_dofs_; i++)
+    for (std::size_t i = 0; i < num_dofs_; ++i)
     {
       EXPECT_EQ(joint_limits[i]->size(), (unsigned int)1);
       bounds.setLow(i, joint_limits[i]->at(0).min_position_);
@@ -281,7 +281,7 @@ protected:
     jac.setOnes();  // fill in known but wrong values that should all be overwritten
     constraint_->jacobian(joint_values, jac);
 
-    for (std::size_t i = 0; i < num_dofs_; i++)
+    for (std::size_t i = 0; i < num_dofs_; ++i)
     {
       // rows for unconstrained dimensions should always be zero
       EXPECT_DOUBLE_EQ(jac(1, i), 0.0);

@@ -129,7 +129,7 @@ TrajOptProblem::TrajOptProblem(const ProblemInfo& problem_info)
 
   sco::VarVector trajvarvec = createVariables(names, vlower, vupper);
   matrix_traj_vars = trajopt::VarArray(n_steps, dof_ + (problem_info.basic_info.use_time ? 1 : 0), trajvarvec.data());
-  // matrix_traj_vars is essentialy a matrix of elements like:
+  // matrix_traj_vars is essentially a matrix of elements like:
   // j_0_0, j_0_1 ...
   // j_1_0, j_1_1 ...
   // its size is n_steps by n_dof
@@ -447,8 +447,8 @@ void JointVelTermInfo::addObjectiveTerms(TrajOptProblem& prob)
   {
     unsigned num_vels = last_step - first_step;
 
-    // Apply seperate cost to each joint b/c that is how the error function is currently written
-    for (size_t j = 0; j < n_dof; j++)
+    // Apply separate cost to each joint b/c that is how the error function is currently written
+    for (size_t j = 0; j < n_dof; ++j)
     {
       // Get a vector of a single column of vars
       sco::VarVector joint_vars_vec = joint_vars.cblock(first_step, j, last_step - first_step + 1);
@@ -478,8 +478,8 @@ void JointVelTermInfo::addObjectiveTerms(TrajOptProblem& prob)
   {
     unsigned num_vels = last_step - first_step;
 
-    // Apply seperate cnt to each joint b/c that is how the error function is currently written
-    for (size_t j = 0; j < n_dof; j++)
+    // Apply separate cnt to each joint b/c that is how the error function is currently written
+    for (size_t j = 0; j < n_dof; ++j)
     {
       // Get a vector of a single column of vars
       sco::VarVector joint_vars_vec = joint_vars.cblock(first_step, j, last_step - first_step + 1);

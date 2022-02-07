@@ -40,7 +40,7 @@ namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 // If stuck for this many iterations or more, abort the local planning action
-constexpr size_t STUCK_ITERATIONS_THRESHOLD = 10;
+constexpr size_t STUCK_ITERATIONS_THRESHOLD = 5;
 constexpr double STUCK_THRESHOLD_RAD = 1e-4;  // L1-norm sum across all joints
 }  // namespace
 
@@ -48,7 +48,7 @@ namespace moveit::hybrid_planning
 {
 bool ForwardTrajectory::initialize(const rclcpp::Node::SharedPtr& node,
                                    const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-                                   const std::string& group_name)
+                                   const std::string& /* unused */)
 {
   // Load parameter & initialize member variables
   if (node->has_parameter("stop_before_collision"))
@@ -72,7 +72,7 @@ bool ForwardTrajectory::reset()
 
 moveit_msgs::action::LocalPlanner::Feedback
 ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajectory,
-                         const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> local_goal,
+                         const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> /* unused */,
                          trajectory_msgs::msg::JointTrajectory& local_solution)
 {
   // A message every once in awhile is useful in case the local planner gets stuck
@@ -132,7 +132,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
         current_state_command.zeroAccelerations();
       }
       robot_command.empty();
-      robot_command.addSuffixWayPoint(*current_state, 0.0);
+      robot_command.addSuffixWayPoint(*current_state, local_trajectory.getWayPointDurationFromPrevious(0));
     }
 
     // Detect if the local solver is stuck

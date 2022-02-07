@@ -33,8 +33,7 @@ def load_yaml(package_name, file_path):
         return None
 
 
-def generate_common_hybrid_launch_description():
-    # Component yaml files are grouped in separate namespaces
+def get_robot_description():
     robot_description_config = xacro.process_file(
         os.path.join(
             get_package_share_directory("moveit_resources_panda_moveit_config"),
@@ -43,13 +42,23 @@ def generate_common_hybrid_launch_description():
         )
     )
     robot_description = {"robot_description": robot_description_config.toxml()}
+    return robot_description
 
+
+def get_robot_description_semantic():
     robot_description_semantic_config = load_file(
         "moveit_resources_panda_moveit_config", "config/panda.srdf"
     )
     robot_description_semantic = {
         "robot_description_semantic": robot_description_semantic_config
     }
+    return robot_description_semantic
+
+
+def generate_common_hybrid_launch_description():
+    robot_description = get_robot_description()
+
+    robot_description_semantic = get_robot_description_semantic()
 
     kinematics_yaml = load_yaml(
         "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
@@ -77,6 +86,9 @@ def generate_common_hybrid_launch_description():
     }
 
     # Any parameters that are unique to your plugins go here
+    common_hybrid_planning_param = load_yaml(
+        "moveit_hybrid_planning", "config/common_hybrid_planning_params.yaml"
+    )
     global_planner_param = load_yaml(
         "moveit_hybrid_planning", "config/global_planner.yaml"
     )
@@ -99,6 +111,7 @@ def generate_common_hybrid_launch_description():
                 plugin="moveit::hybrid_planning::GlobalPlannerComponent",
                 name="global_planner",
                 parameters=[
+                    common_hybrid_planning_param,
                     global_planner_param,
                     robot_description,
                     robot_description_semantic,
@@ -112,6 +125,7 @@ def generate_common_hybrid_launch_description():
                 plugin="moveit::hybrid_planning::LocalPlannerComponent",
                 name="local_planner",
                 parameters=[
+                    common_hybrid_planning_param,
                     local_planner_param,
                     robot_description,
                     robot_description_semantic,
@@ -122,7 +136,10 @@ def generate_common_hybrid_launch_description():
                 package="moveit_hybrid_planning",
                 plugin="moveit::hybrid_planning::HybridPlanningManager",
                 name="hybrid_planning_manager",
-                parameters=[hybrid_planning_manager_param],
+                parameters=[
+                    common_hybrid_planning_param,
+                    hybrid_planning_manager_param,
+                ],
             ),
         ],
         output="screen",
@@ -190,21 +207,11 @@ def generate_common_hybrid_launch_description():
             )
         ]
 
-    # Demo node
-    demo_node = Node(
-        package="moveit_hybrid_planning",
-        executable="hybrid_planning_demo_node",
-        name="hybrid_planning_demo_node",
-        output="screen",
-        parameters=[robot_description, robot_description_semantic],
-    )
-
     launched_nodes = [
         container,
         static_tf,
         rviz_node,
         robot_state_publisher,
-        demo_node,
         ros2_control_node,
     ] + load_controllers
 

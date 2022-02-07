@@ -36,7 +36,6 @@
 
 #include <moveit/ompl_interface/parameterization/work_space/pose_model_state_space.h>
 #include <ompl/base/spaces/SE3StateSpace.h>
-#include <moveit/profiler/profiler.h>
 
 #include <utility>
 
@@ -128,8 +127,6 @@ void ompl_interface::PoseModelStateSpace::sanityChecks() const
 void ompl_interface::PoseModelStateSpace::interpolate(const ompl::base::State* from, const ompl::base::State* to,
                                                       const double t, ompl::base::State* state) const
 {
-  //  moveit::Profiler::ScopedBlock sblock("interpolate");
-
   // we want to interpolate in Cartesian space; we do not have a guarantee that from and to
   // have their poses computed, but this is very unlikely to happen (depends how the planner gets its input states)
 
@@ -227,7 +224,7 @@ bool ompl_interface::PoseModelStateSpace::PoseComponent::computeStateIK(StateTyp
   std::cout << "seed: ";
   for (std::size_t i = 0 ; i < seed_values.size() ; ++i)
     std::cout << seed_values[i] << " ";
-  std::cout << std::endl;
+  std::cout << '\n';
   */
 
   // construct the pose

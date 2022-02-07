@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef ASYNC_TEST_H
-#define ASYNC_TEST_H
+#pragma once
 
 #include <mutex>
 #include <condition_variable>
@@ -71,7 +70,7 @@ class AsyncTest
 {
 public:
   /**
-   * @brief Triggeres a clear event. If a call to barricade is currently pending it will unblock as soon as all clear
+   * @brief Triggers a clear event. If a call to barricade is currently pending it will unblock as soon as all clear
    * events are triggered. Else the event is put on the waitlist. This waitlist is emptied upon a call to barricade.
    *
    * @param event The event that is triggered
@@ -173,5 +172,3 @@ inline bool AsyncTest::barricade(std::initializer_list<std::string> clear_events
 }
 
 }  // namespace testing
-
-#endif  // ASYNC_TEST_H

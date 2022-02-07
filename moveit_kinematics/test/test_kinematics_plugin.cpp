@@ -470,8 +470,8 @@ TEST_F(KinematicsTest, unitIK)
       ASSERT_EQ(truth.size(), sol.size()) << "Invalid size of ground truth joints vector";
       Eigen::Map<Eigen::ArrayXd> solution(sol.data(), sol.size());
       Eigen::Map<Eigen::ArrayXd> ground_truth(truth.data(), truth.size());
-      EXPECT_TRUE(solution.isApprox(ground_truth, 10 * tolerance_)) << solution.transpose() << std::endl
-                                                                    << ground_truth.transpose() << std::endl;
+      EXPECT_TRUE(solution.isApprox(ground_truth, 10 * tolerance_)) << solution.transpose() << '\n'
+                                                                    << ground_truth.transpose() << '\n';
     }
   };
 
@@ -631,7 +631,7 @@ TEST_F(KinematicsTest, getIK)
 
     Eigen::Map<Eigen::ArrayXd> sol(solution.data(), solution.size());
     Eigen::Map<Eigen::ArrayXd> truth(fk_values.data(), fk_values.size());
-    EXPECT_TRUE(sol.isApprox(truth, tolerance_)) << sol.transpose() << std::endl << truth.transpose() << std::endl;
+    EXPECT_TRUE(sol.isApprox(truth, tolerance_)) << sol.transpose() << '\n' << truth.transpose() << '\n';
   }
 }
 

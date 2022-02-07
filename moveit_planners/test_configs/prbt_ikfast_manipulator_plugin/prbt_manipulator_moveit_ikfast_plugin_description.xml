@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<library path="prbt_manipulator_moveit_ikfast_plugin">
+  <class base_class_type="kinematics::KinematicsBase" name="prbt_manipulator/IKFastKinematicsPlugin" type="prbt_manipulator::IKFastKinematicsPlugin">
+    <description>IKFast61 plugin for closed-form kinematics of prbt manipulator</description>
+  </class>
+</library>

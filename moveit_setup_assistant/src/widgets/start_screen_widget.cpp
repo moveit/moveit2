@@ -191,7 +191,7 @@ StartScreenWidget::StartScreenWidget(QWidget* parent, const MoveItConfigDataPtr&
   hlayout->addLayout(right_layout);
   layout->addLayout(hlayout);
 
-  // Verticle Spacer
+  // Vertical Spacer
   layout->addItem(new QSpacerItem(20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
   // Attach bottom layout
@@ -329,7 +329,7 @@ bool StartScreenWidget::loadPackageSettings(bool show_warnings)
   if (!config_data_->setPackagePath(package_path_input))
   {
     if (show_warnings)
-      QMessageBox::critical(this, "Error Loading Files", "The specified path is not a directory or is not accessable");
+      QMessageBox::critical(this, "Error Loading Files", "The specified path is not a directory or is not accessible");
     return false;
   }
 
@@ -360,7 +360,7 @@ bool StartScreenWidget::loadPackageSettings(bool show_warnings)
 }
 
 // ******************************************************************************************
-// Load exisiting package files
+// Load existing package files
 // ******************************************************************************************
 bool StartScreenWidget::loadExistingFiles()
 {
@@ -377,18 +377,18 @@ bool StartScreenWidget::loadExistingFiles()
 
   // Get the URDF path using the loaded .setup_assistant data and check it
   if (!createFullURDFPath())
-    return false;  // error occured
+    return false;  // error occurred
 
   // use xacro args from GUI
   config_data_->xacro_args_ = stack_path_->getArgs().toStdString();
 
   // Load the URDF
   if (!loadURDFFile(config_data_->urdf_path_, config_data_->xacro_args_))
-    return false;  // error occured
+    return false;  // error occurred
 
   // Get the SRDF path using the loaded .setup_assistant data and check it
   if (!createFullSRDFPath(config_data_->config_pkg_path_))
-    return false;  // error occured
+    return false;  // error occurred
 
   // Progress Indicator
   progress_bar_->setValue(50);
@@ -396,7 +396,7 @@ bool StartScreenWidget::loadExistingFiles()
 
   // Load the SRDF
   if (!loadSRDFFile(config_data_->srdf_path_))
-    return false;  // error occured
+    return false;  // error occurred
 
   // Progress Indicator
   progress_bar_->setValue(60);
@@ -428,7 +428,7 @@ bool StartScreenWidget::loadExistingFiles()
   // Load 3d_sensors config file
   load3DSensorsFile();
 
-  // Load ros controllers yaml file if available-----------------------------------------------
+  // Load ros_controllers.yaml file if available-----------------------------------------------
   fs::path ros_controllers_yaml_path = config_data_->config_pkg_path_;
   ros_controllers_yaml_path /= "config/ros_controllers.yaml";
   config_data_->inputROSControllersYAML(ros_controllers_yaml_path.make_preferred().string());
@@ -666,7 +666,7 @@ bool StartScreenWidget::extractPackageNameFromPath()
     {
       QMessageBox::warning(this, "Package Not Found In ROS Workspace",
                            QString("ROS was unable to find the package name '")
-                               .append(config_data_->urdf_pkg_name_.c_str())
+                               .append(package_name.c_str())
                                .append("' within the ROS workspace. This may cause issues later."));
     }
 
@@ -738,18 +738,9 @@ bool StartScreenWidget::load3DSensorsFile()
   fs::path sensors_3d_yaml_path = config_data_->config_pkg_path_;
   sensors_3d_yaml_path /= "config/sensors_3d.yaml";
 
-  // Default parameters values are always loaded but overridden by values existing in sensors_3d
-  fs::path default_sensors_3d_yaml_path = "templates/moveit_config_pkg_template/config/sensors_3d.yaml";
-
-  if (!fs::is_regular_file(sensors_3d_yaml_path))
-  {
-    return config_data_->input3DSensorsYAML(default_sensors_3d_yaml_path.make_preferred().string());
-  }
-  else
-  {
-    return config_data_->input3DSensorsYAML(default_sensors_3d_yaml_path.make_preferred().string(),
-                                            sensors_3d_yaml_path.make_preferred().string());
-  }
+  if (fs::is_regular_file(sensors_3d_yaml_path))
+    config_data_->input3DSensorsYAML(sensors_3d_yaml_path.make_preferred().string());
+  return true;
 }
 
 // ******************************************************************************************
@@ -808,7 +799,7 @@ SelectModeWidget::SelectModeWidget(QWidget* parent) : QFrame(parent)
   btn_exist_->setCheckable(true);
   hlayout->addWidget(btn_exist_);
 
-  // Add horizontal layer to verticle layer
+  // Add horizontal layer to vertical layer
   layout->addLayout(hlayout);
   setLayout(layout);
   btn_new_->setCheckable(true);

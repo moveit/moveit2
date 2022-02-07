@@ -65,10 +65,11 @@ VirtualJointsWidget::VirtualJointsWidget(QWidget* parent, const MoveItConfigData
 
   // Top Header Area ------------------------------------------------
 
-  HeaderWidget* header = new HeaderWidget("Define Virtual Joints",
-                                          "Create a virtual joint between a robot link and an external frame of "
-                                          "reference (considered fixed with respect to the robot).",
-                                          this);
+  HeaderWidget* header =
+      new HeaderWidget("Define Virtual Joints",
+                       "Create a virtual joint between the base robot link and an external frame of reference. "
+                       "This allows to place the robot in the world or on a mobile platform.",
+                       this);
   layout->addWidget(header);
 
   // Create contents screens ---------------------------------------
@@ -368,7 +369,7 @@ srdf::Model::VirtualJoint* VirtualJointsWidget::findVJointByName(const std::stri
   // Check if vjoint was found
   if (searched_group == nullptr)  // not found
   {
-    QMessageBox::critical(this, "Error Saving", "An internal error has occured while saving. Quitting.");
+    QMessageBox::critical(this, "Error Saving", "An internal error has occurred while saving. Quitting.");
     QApplication::quit();
   }
 
@@ -575,7 +576,7 @@ void VirtualJointsWidget::loadDataTable()
     ++row;
   }
 
-  // Reenable
+  // Re-enable
   data_table_->setUpdatesEnabled(true);  // prevent table from updating until we are completely done
   data_table_->setDisabled(false);       // make sure we disable it so that the cellChanged event is not called
 

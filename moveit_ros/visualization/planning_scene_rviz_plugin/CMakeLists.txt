@@ -2,6 +2,7 @@ set(MOVEIT_LIB_NAME moveit_planning_scene_rviz_plugin)
 
 add_library(${MOVEIT_LIB_NAME}_core SHARED
   src/planning_scene_display.cpp
+  src/background_processing.cpp
   include/moveit/planning_scene_rviz_plugin/planning_scene_display.h)
 include(GenerateExportHeader)
 generate_export_header(${MOVEIT_LIB_NAME}_core)

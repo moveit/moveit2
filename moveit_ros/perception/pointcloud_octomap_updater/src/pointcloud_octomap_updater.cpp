@@ -93,7 +93,6 @@ bool PointCloudOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   shape_mask_ = std::make_unique<point_containment_filter::ShapeMask>();
   shape_mask_->setTransformCallback(boost::bind(&PointCloudOctomapUpdater::getShapeTransform, this,
                                                 boost::placeholders::_1, boost::placeholders::_2));
-  last_update_time_ = node_->now();
   return true;
 }
 
@@ -175,10 +174,9 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
   if (max_update_rate_ > 0)
   {
     // ensure we are not updating the octomap representation too often
-    if ((rclcpp::Clock(RCL_ROS_TIME).now() - last_update_time_) <=
-        rclcpp::Duration(std::chrono::duration<double>(1.0 / max_update_rate_)))
+    if ((node_->now() - last_update_time_) <= rclcpp::Duration::from_seconds(1.0 / max_update_rate_))
       return;
-    last_update_time_ = rclcpp::Clock(RCL_ROS_TIME).now();
+    last_update_time_ = node_->now();
   }
 
   if (monitor_->getMapFrame().empty())
@@ -266,17 +264,24 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
         /* check for NaN */
         if (!std::isnan(pt_iter[0]) && !std::isnan(pt_iter[1]) && !std::isnan(pt_iter[2]))
         {
-          /* transform to map frame */
-          tf2::Vector3 point_tf = map_h_sensor * tf2::Vector3(pt_iter[0], pt_iter[1], pt_iter[2]);
-
           /* occupied cell at ray endpoint if ray is shorter than max range and this point
              isn't on a part of the robot*/
           if (mask_[row_c + col] == point_containment_filter::ShapeMask::INSIDE)
+          {
+            // transform to map frame
+            tf2::Vector3 point_tf = map_h_sensor * tf2::Vector3(pt_iter[0], pt_iter[1], pt_iter[2]);
             model_cells.insert(tree_->coordToKey(point_tf.getX(), point_tf.getY(), point_tf.getZ()));
+          }
           else if (mask_[row_c + col] == point_containment_filter::ShapeMask::CLIP)
-            clip_cells.insert(tree_->coordToKey(point_tf.getX(), point_tf.getY(), point_tf.getZ()));
+          {
+            tf2::Vector3 clipped_point_tf =
+                map_h_sensor * (tf2::Vector3(pt_iter[0], pt_iter[1], pt_iter[2]).normalize() * max_range_);
+            clip_cells.insert(
+                tree_->coordToKey(clipped_point_tf.getX(), clipped_point_tf.getY(), clipped_point_tf.getZ()));
+          }
           else
           {
+            tf2::Vector3 point_tf = map_h_sensor * tf2::Vector3(pt_iter[0], pt_iter[1], pt_iter[2]);
             occupied_cells.insert(tree_->coordToKey(point_tf.getX(), point_tf.getY(), point_tf.getZ()));
             // build list of valid points if we want to publish them
             if (filtered_cloud)

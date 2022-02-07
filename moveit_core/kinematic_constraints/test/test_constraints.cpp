@@ -217,7 +217,7 @@ TEST_F(LoadPlanningModelsPr2, JointConstraintsCont)
   robot_state.setVariablePositions(jvals);
   EXPECT_TRUE(jc.decide(robot_state).satisfied);
 
-  // ouside the below tolerance
+  // outside the below tolerance
   jvals[jcm.joint_name] = -.03;
   robot_state.setVariablePositions(jvals);
   EXPECT_FALSE(jc.decide(robot_state).satisfied);
@@ -850,7 +850,7 @@ TEST_F(LoadPlanningModelsPr2, TestKinematicConstraintSet)
   jcv.back().joint_name = "no_joint";
   EXPECT_FALSE(kcs.add(jcv));
 
-  // but we can still evaluate it succesfully for the remaining constraint
+  // but we can still evaluate it successfully for the remaining constraint
   EXPECT_TRUE(kcs.decide(robot_state).satisfied);
 
   // violating the remaining good constraint changes this

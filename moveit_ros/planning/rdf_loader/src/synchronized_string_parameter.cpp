@@ -81,7 +81,7 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
   if (!waitForMessage(timeout))
   {
     RCLCPP_ERROR_ONCE(node_->get_logger(),
-                      "Could not find parameter %s and did not recieve %s via std_msgs::msg::String subscription "
+                      "Could not find parameter %s and did not receive %s via std_msgs::msg::String subscription "
                       "within %f seconds.",
                       name_.c_str(), name_.c_str(), d_timeout);
   }
@@ -119,7 +119,9 @@ bool SynchronizedStringParameter::shouldPublish()
 
 bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
 {
-  string_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
+  auto const nd_name = std::string(node_->get_name()).append("_ssp_").append(name_);
+  auto const temp_node = std::make_shared<rclcpp::Node>(nd_name);
+  string_subscriber_ = temp_node->create_subscription<std_msgs::msg::String>(
       name_, rclcpp::QoS(1).transient_local().reliable(),
       std::bind(&SynchronizedStringParameter::stringCallback, this, std::placeholders::_1));
 

@@ -64,13 +64,13 @@ public:
       most searches do not require this, so it is not necessary to support this
   */
   virtual void GetSuccs(int SourceStateID, std::vector<int>* SuccIDV, std::vector<int>* CostV){};
-  /** \brief see comments for GetSuccs functon
+  /** \brief see comments for GetSuccs function
    */
   virtual void GetPreds(int TargetStateID, std::vector<int>* PredIDV, std::vector<int>* CostV){};
-  /** \brief see comments for GetSuccs functon
+  /** \brief see comments for GetSuccs function
    */
   virtual void SetAllActionsandAllOutcomes(CMDPSTATE* state){};
-  /** \brief see comments for GetSuccs functon
+  /** \brief see comments for GetSuccs function
    */
   virtual void SetAllPreds(CMDPSTATE* state){};
 
@@ -79,7 +79,7 @@ public:
   virtual int SizeofCreatedEnv(){};
   /** \brief prints the state variables for a state with stateID
    */
-  virtual void PrintState(int stateID, bool bVerbose, FILE* fOut = NULL){};
+  virtual void PrintState(int stateID, bool bVerbose, FILE* fOut = nullptr){};
   /** \brief prints environment config file
    */
   virtual void PrintEnv_Config(FILE* fOut){};

@@ -32,6 +32,9 @@
    - IKFAST_NAMESPACE - Enclose all functions and classes in this namespace, the ``main`` function is excluded.
 
  */
+
+#pragma once
+
 #include <vector>
 #include <list>
 #include <stdexcept>
@@ -83,7 +86,7 @@ public:
   virtual void GetSolution(std::vector<T>& solution, const std::vector<T>& freevalues) const
   {
     solution.resize(GetDOF());
-    GetSolution(&solution.at(0), freevalues.size() > 0 ? &freevalues.at(0) : NULL);
+    GetSolution(&solution.at(0), freevalues.size() > 0 ? &freevalues.at(0) : nullptr);
   }
 
   /// \brief Gets the indices of the configuration space that have to be preset before a full solution can be returned
@@ -128,15 +131,15 @@ class IkFastFunctions
 {
 public:
   IkFastFunctions()
-    : _ComputeIk(NULL)
-    , _ComputeFk(NULL)
-    , _GetNumFreeParameters(NULL)
-    , _GetFreeParameters(NULL)
-    , _GetNumJoints(NULL)
-    , _GetIkRealSize(NULL)
-    , _GetIkFastVersion(NULL)
-    , _GetIkType(NULL)
-    , _GetKinematicsHash(NULL)
+    : _ComputeIk(nullptr)
+    , _ComputeFk(nullptr)
+    , _GetNumFreeParameters(nullptr)
+    , _GetFreeParameters(nullptr)
+    , _GetNumJoints(nullptr)
+    , _GetIkRealSize(nullptr)
+    , _GetIkFastVersion(nullptr)
+    , _GetIkType(nullptr)
+    , _GetKinematicsHash(nullptr)
   {
   }
   virtual ~IkFastFunctions()
@@ -199,7 +202,7 @@ public:
   virtual void GetSolution(std::vector<T>& solution, const std::vector<T>& freevalues) const
   {
     solution.resize(GetDOF());
-    GetSolution(&solution.at(0), freevalues.size() > 0 ? &freevalues.at(0) : NULL);
+    GetSolution(&solution.at(0), freevalues.size() > 0 ? &freevalues.at(0) : nullptr);
   }
 
   virtual const std::vector<int>& GetFree() const
@@ -237,7 +240,7 @@ public:
   {
     v.resize(0);
     v.push_back(0);
-    for (int i = (int)_vbasesol.size() - 1; i >= 0; --i)
+    for (int i = static_cast<int>(_vbasesol.size()) - 1; i >= 0; --i)
     {
       if (_vbasesol[i].maxsolutions != (unsigned char)-1 && _vbasesol[i].maxsolutions > 1)
       {

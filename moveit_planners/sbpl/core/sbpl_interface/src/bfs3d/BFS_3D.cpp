@@ -64,7 +64,7 @@ BFS_3D::BFS_3D(int width, int height, int length)
   distance_grid = new int[dim_xyz];
   queue = new int[width * height * length];
 
-  for (int node = 0; node < dim_xyz; node++)
+  for (int node = 0; node < dim_xyz; ++node)
   {
     int x = node % dim_x, y = node / dim_x % dim_y, z = node / dim_xy;
     if (x == 0 || x == dim_x - 1 || y == 0 || y == dim_y - 1 || z == 0 || z == dim_z - 1)
@@ -121,7 +121,7 @@ void BFS_3D::run(int x, int y, int z)
     return;
   }
 
-  for (int i = 0; i < dim_xyz; i++)
+  for (int i = 0; i < dim_xyz; ++i)
     if (distance_grid[i] != WALL)
       distance_grid[i] = UNDISCOVERED;
 

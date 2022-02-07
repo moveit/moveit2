@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find moveit_resources_prbt_pg70_support)/urdf/common.xacro" />
+
+  <xacro:macro name="schunk_pg70_transmission" params="name">
+
+    <xacro:default_transmission jname="${name}_finger_left"/>
+    <xacro:default_transmission jname="${name}_finger_right"/>
+
+  </xacro:macro>
+
+</robot>

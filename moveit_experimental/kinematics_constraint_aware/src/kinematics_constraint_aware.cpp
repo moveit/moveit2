@@ -55,7 +55,7 @@ KinematicsConstraintAware::KinematicsConstraintAware(const moveit::core::RobotMo
   if (!kinematic_model->hasJointModelGroup(group_name))
   {
     ROS_ERROR_NAMED("kinematics_constraint_aware", "The group %s does not exist", group_name.c_str());
-    joint_model_group_ = NULL;
+    joint_model_group_ = nullptr;
     return;
   }
   kinematic_model_ = kinematic_model;
@@ -90,13 +90,13 @@ KinematicsConstraintAware::KinematicsConstraintAware(const moveit::core::RobotMo
       }
       else
       {
-        joint_model_group_ = NULL;
+        joint_model_group_ = nullptr;
         return;
       }
     }
     else
     {
-      joint_model_group_ = NULL;
+      joint_model_group_ = nullptr;
       ROS_INFO_NAMED("kinematics_constraint_aware", "No solver allocated for group %s", group_name.c_str());
     }
     has_sub_groups_ = true;

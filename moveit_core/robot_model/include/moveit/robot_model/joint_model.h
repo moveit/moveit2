@@ -63,6 +63,9 @@ struct VariableBounds
     , min_acceleration_(0.0)
     , max_acceleration_(0.0)
     , acceleration_bounded_(false)
+    , min_jerk_(0.0)
+    , max_jerk_(0.0)
+    , jerk_bounded_(false)
   {
   }
 
@@ -77,13 +80,17 @@ struct VariableBounds
   double min_acceleration_;
   double max_acceleration_;
   bool acceleration_bounded_;
+
+  double min_jerk_;
+  double max_jerk_;
+  bool jerk_bounded_;
 };
 
 class LinkModel;
 class JointModel;
 
 /** \brief Data type for holding mappings from variable names to their position in a state vector */
-typedef std::map<std::string, int> VariableIndexMap;
+typedef std::map<std::string, size_t> VariableIndexMap;
 
 /** \brief Data type for holding mappings from variable names to their bounds */
 using VariableBoundsMap = std::map<std::string, VariableBounds>;
@@ -123,8 +130,14 @@ public:
   /** \brief The datatype for the joint bounds */
   using Bounds = std::vector<VariableBounds>;
 
-  /** \brief Construct a joint named \e name */
-  JointModel(const std::string& name);
+  /**
+   * @brief      Constructs a joint named \e name
+   *
+   * @param[in]  name                   The joint name
+   * @param[in]  index                  The index of the joint in the RobotModel
+   * @param[in]  first_variable_index   The index of the first variable in the RobotModel
+   */
+  JointModel(const std::string& name, size_t joint_index, size_t first_variable_index);
 
   virtual ~JointModel();
 
@@ -145,7 +158,7 @@ public:
 
   /** \brief Get the link that this joint connects to. The
       robot is assumed to start with a joint, so the root
-      joint will return a NULL pointer here. */
+      joint will return nullptr here. */
   const LinkModel* getParentLinkModel() const
   {
     return parent_link_model_;
@@ -200,31 +213,19 @@ public:
   }
 
   /** \brief Get the index of this joint's first variable within the full robot state */
-  int getFirstVariableIndex() const
+  size_t getFirstVariableIndex() const
   {
     return first_variable_index_;
   }
 
-  /** \brief Set the index of this joint's first variable within the full robot state */
-  void setFirstVariableIndex(int index)
-  {
-    first_variable_index_ = index;
-  }
-
   /** \brief Get the index of this joint within the robot model */
-  int getJointIndex() const
+  size_t getJointIndex() const
   {
     return joint_index_;
   }
 
-  /** \brief Set the index of this joint within the robot model */
-  void setJointIndex(int index)
-  {
-    joint_index_ = index;
-  }
-
   /** \brief Get the index of the variable within this joint */
-  int getLocalVariableIndex(const std::string& variable) const;
+  size_t getLocalVariableIndex(const std::string& variable) const;
 
   /** @} */
 
@@ -455,11 +456,18 @@ public:
 
   /** @} */
 
-protected:
-  void computeVariableBoundsMsg();
-
+private:
   /** \brief Name of the joint */
   std::string name_;
+
+  /** \brief Index for this joint in the array of joints of the complete model */
+  size_t joint_index_;
+
+  /** \brief The index of this joint's first variable, in the complete robot state */
+  size_t first_variable_index_;
+
+protected:
+  void computeVariableBoundsMsg();
 
   /** \brief The type of joint */
   JointType type_;
@@ -485,7 +493,7 @@ protected:
   /** \brief The link after this joint */
   const LinkModel* child_link_model_;
 
-  /** \brief The joint this one mimics (NULL for joints that do not mimic) */
+  /** \brief The joint this one mimics (nullptr for joints that do not mimic) */
   const JointModel* mimic_;
 
   /** \brief The offset to the mimic joint */
@@ -512,12 +520,6 @@ protected:
 
   /** \brief The factor applied to the distance between two joint states */
   double distance_factor_;
-
-  /** \brief The index of this joint's first variable, in the complete robot state */
-  int first_variable_index_;
-
-  /** \brief Index for this joint in the array of joints of the complete model */
-  int joint_index_;
 };
 
 /** \brief Operator overload for printing variable bounds to a stream */

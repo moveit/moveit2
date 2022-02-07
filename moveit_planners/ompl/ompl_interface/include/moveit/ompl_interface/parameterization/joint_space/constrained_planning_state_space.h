@@ -57,7 +57,7 @@ MOVEIT_CLASS_FORWARD(ConstrainedPlanningStateSpace);
  *
  *    ompl_state->as<ompl::base::ConstrainedStateSpace::StateType>()->getState()->as<StateType>()
  *
- * where `getState()` is used to acces the underlying state space, which should be an instance of this class.
+ * where `getState()` is used to access the underlying state space, which should be an instance of this class.
  **/
 class ConstrainedPlanningStateSpace : public ModelBasedStateSpace
 {

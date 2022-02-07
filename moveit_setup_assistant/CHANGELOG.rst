@@ -2,6 +2,51 @@
 Changelog for package moveit_setup_assistant
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2022-01-20)
+------------------
+* Replace NULL with nullptr (`#961 <https://github.com/ros-planning/moveit2/issues/961>`_)
+  * Fixes `#841 <https://github.com/ros-planning/moveit2/issues/841>`_
+* Merge https://github.com/ros-planning/moveit/commit/a0ee2020c4a40d03a48044d71753ed23853a665d
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Load all planning pipelines into their own namespace (`#2888 <https://github.com/ros-planning/moveit2/issues/2888>`_)
+  Reduce code redundancy, specifying the namespace once in planning_pipeline.launch.
+* MSA: Correctly state not-found package name
+  The warning message was accessing the config_data\_ variable, which
+  was assigned just a few lines later.
+* Contributors: Abishalini, Robert Haschke, Stephanie Eng
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Replaced C-Style Cast with C++ Style Cast. (`#935 <https://github.com/ros-planning/moveit2/issues/935>`_)
+* Add codespell to precommit, fix A LOT of spelling mistakes (`#934 <https://github.com/ros-planning/moveit2/issues/934>`_)
+* Get rid of "std::endl" (`#918 <https://github.com/ros-planning/moveit2/issues/918>`_)
+* changed post-increments in loops to preincrements (`#888 <https://github.com/ros-planning/moveit2/issues/888>`_)
+* Update README (`#812 <https://github.com/ros-planning/moveit2/issues/812>`_)
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* Ported the collision updater from ros1 to ros2 in the moveit_setup_assistant (`#732 <https://github.com/ros-planning/moveit2/issues/732>`_)
+* Adds jiggle fraction arg to trajopt template (`#2858 <https://github.com/ros-planning/moveit/issues/2858>`_)
+* Fixes _planning_pipeline.launch template input args defaults (`#2849 <https://github.com/ros-planning/moveit/issues/2849>`_)
+* Fixes setup_assistant custom planner ns problem (`#2842 <https://github.com/ros-planning/moveit/issues/2842>`_)
+* MSA: Mention optional Gazebo deps in package.xml templates (`#2839 <https://github.com/ros-planning/moveit/issues/2839>`_)
+* clang-tidy: modernize-make-shared, modernize-make-unique (`#2762 <https://github.com/ros-planning/moveit/issues/2762>`_)
+  Co-authored-by: Robert Haschke <rhaschke@techfak.uni-bielefeld.de>
+* Revert $(dirname) use for rviz config file
+  ... due to this bug: https://github.com/ros/ros_comm/issues/1487
+  This partially reverts 442c3202a4124877afbb6e2bdee682c537f25553
+* Fix MSA templates (`#2769 <https://github.com/ros-planning/moveit/issues/2769>`_)
+  * create static_transform_publisher for each virtual joint type
+  * another $(dirname)
+  augmenting `#2748 <https://github.com/ros-planning/moveit/issues/2748>`_
+  * formatting
+* Contributors: Brennand Pierce, Dave Coleman, David V. Lu!!, Henning Kayser, Kaustubh, Parthasarathy Bana, Rick Staa, Robert Haschke, Sencer Yazıcı, Stephanie Eng, pvanlaar
+
 1.1.1 (2020-10-13)
 ------------------
 * [feature] Allow showing both, visual and collision geometry (`#2352 <https://github.com/ros-planning/moveit/issues/2352>`_)

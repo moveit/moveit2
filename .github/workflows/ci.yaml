@@ -18,29 +18,40 @@ jobs:
         env:
           - IMAGE: rolling-ci
             CCOV: true
+            ROS_DISTRO: rolling
           - IMAGE: rolling-ci-testing
             IKFAST_TEST: true
-          - IMAGE: galactic-ci
+            ROS_DISTRO: rolling
             CLANG_TIDY: pedantic
-          - IMAGE: galactic-ci-testing
     env:
       CXXFLAGS: "-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-deprecated-copy"
+      CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
       DOCKER_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.env.IMAGE }}
       UPSTREAM_WORKSPACE: moveit2.repos $(f="moveit2_$(sed 's/-.*$//' <<< "${{ matrix.env.IMAGE }}").repos"; test -r $f && echo $f)
-      # TODO(#885): Fix circular test dependency with moveit_resources and remove it from the target workspace
-      TARGET_WORKSPACE: $TARGET_REPO_PATH github:ros-planning/moveit_resources#ros2
       # Pull any updates to the upstream workspace (after restoring it from cache)
       AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
+      # Clear the ccache stats before and log the stats after the build
+      BEFORE_BUILD_UPSTREAM_WORKSPACE: ccache -z
+      AFTER_BUILD_TARGET_WORKSPACE: ccache -s
+      # Changing linker to lld as ld has a behavior where it takes a long time to finish
       TARGET_CMAKE_ARGS: >
+        -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld
+        -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld
+        -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'Debug' || 'Release'}}
         -DCMAKE_CXX_FLAGS="${{ matrix.env.CLANG_TIDY != 'pedantic' && '-Werror ' || '' }}${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer'}}"
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       BASEDIR: ${{ github.workspace }}/.work
       CLANG_TIDY_BASE_REF: ${{ github.event_name != 'workflow_dispatch' && (github.base_ref || github.ref) || '' }}
-      BEFORE_CLANG_TIDY_CHECKS: (cd $TARGET_REPO_PATH; clang-tidy --list-checks)
+      BEFORE_CLANG_TIDY_CHECKS: |
+        # Show list of applied checks
+        (cd $TARGET_REPO_PATH; clang-tidy --list-checks)
+        # Disable clang-tidy for ikfast plugins as we cannot fix the generated code
+        find $BASEDIR/target_ws/build -iwholename "*_ikfast_plugin/compile_commands.json" -exec rm {} \;
       CC: ${{ matrix.env.CLANG_TIDY && 'clang' }}
       CXX: ${{ matrix.env.CLANG_TIDY && 'clang++' }}
+      ADDITIONAL_DEBS: lld
 
     name: ${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && ' + ccov' || ''}}${{ matrix.env.IKFAST_TEST && ' + ikfast' || ''}}${{ matrix.env.CLANG_TIDY && (github.event_name != 'workflow_dispatch' && ' + clang-tidy (delta)' || ' + clang-tidy (all)') || '' }}
     runs-on: ubuntu-latest
@@ -60,6 +71,19 @@ jobs:
           sudo rm -rf /usr/local
           df -h
       - uses: actions/checkout@v2
+      - uses: testspace-com/setup-testspace@v1
+        with:
+          domain: ros-planning
+      - name: Get latest release date for rosdistro
+        id: rosdistro_release_date
+        uses: JafarAbdi/latest-rosdistro-release-date-action@main
+        with:
+          rosdistro: ${{ matrix.env.ROS_DISTRO }}
+      - name: Get latest timestamp repos file has been edited
+        id: repos_edit_timestamp
+        uses: vatanaksoytezer/latest-file-edit-timestamp-action@main
+        with:
+          file: moveit2.repos
       - name: Cache upstream workspace
         uses: pat-s/always-upload-cache@v2.1.5
         with:
@@ -67,7 +91,7 @@ jobs:
           key: ${{ env.CACHE_PREFIX }}-${{ github.run_id }}
           restore-keys: ${{ env.CACHE_PREFIX }}
         env:
-          CACHE_PREFIX: upstream_ws-${{ matrix.env.IMAGE }}-${{ hashFiles('moveit2*.repos', '.github/workflows/ci.yaml') }}
+          CACHE_PREFIX: ${{ steps.rosdistro_release_date.outputs.date }}-upstream_ws-${{ steps.repos_edit_timestamp.outputs.timestamp }}-${{ matrix.env.IMAGE }}-${{ hashFiles('moveit2*.repos', '.github/workflows/ci.yaml') }}
       # The target directory cache doesn't include the source directory because
       # that comes from the checkout.  See "prepare target_ws for cache" task below
       - name: Cache target workspace
@@ -89,7 +113,10 @@ jobs:
             ${{ env.CACHE_PREFIX }}
         env:
           CACHE_PREFIX: ccache-${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && '-ccov' || '' }}
-
+      - name: Configure ccache
+        run: |
+          mkdir -p ${{ env.CCACHE_DIR }}
+          cp .github/ccache.conf ${{ env.CCACHE_DIR }}/ccache.conf
       - name: Generate ikfast packages
         if: matrix.env.IKFAST_TEST
         run: moveit_kinematics/test/test_ikfast_plugins.sh
@@ -97,7 +124,10 @@ jobs:
         name: Run industrial_ci
         uses: ros-industrial/industrial_ci@master
         env: ${{ matrix.env }}
-
+      - name: Push result to Testspace
+        if: always()
+        run: |
+          testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
       - name: Upload test artifacts (on failure)
         uses: actions/upload-artifact@v2
         if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
@@ -106,24 +136,24 @@ jobs:
           path: ${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml
       - name: Generate codecov report
         uses: rhaschke/lcov-action@main
-        if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
           docker: $DOCKER_IMAGE
           workdir: ${{ env.BASEDIR }}/target_ws
           ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
       - name: Upload codecov report
         uses: codecov/codecov-action@v2
-        if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
           files: ${{ env.BASEDIR }}/target_ws/coverage.info
       - name: Upload clang-tidy changes
         uses: rhaschke/upload-git-patch-action@main
-        if: matrix.env.CLANG_TIDY
+        if: always() && matrix.env.CLANG_TIDY
         with:
           name: clang-tidy
           path: ${{ env.BASEDIR }}/target_ws/src/$(basename $(pwd))
       - name: Prepare target_ws for cache
-        if: "!matrix.env.CCOV"
+        if: always() && !matrix.env.CCOV
         run: |
           du -sh ${{ env.BASEDIR }}/target_ws
           sudo find ${{ env.BASEDIR }}/target_ws -wholename '*/test_results/*' -delete

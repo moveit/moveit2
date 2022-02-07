@@ -52,12 +52,12 @@ public:
   ~ForwardTrajectory() = default;
   bool initialize(const rclcpp::Node::SharedPtr& node,
                   const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-                  const std::string& group_name) override;
+                  const std::string& /* unused */) override;
   bool reset() override;
 
   moveit_msgs::action::LocalPlanner::Feedback
   solve(const robot_trajectory::RobotTrajectory& local_trajectory,
-        const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> local_goal,
+        const std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> /* unused */,
         trajectory_msgs::msg::JointTrajectory& local_solution) override;
 
 private:

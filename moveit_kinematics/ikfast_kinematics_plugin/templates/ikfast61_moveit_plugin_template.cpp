@@ -376,7 +376,7 @@ private:
    * @brief  Transforms the input pose to the correct frame for the solver. This assumes that the group includes the
    * entire solver chain and that any joints outside of the solver chain within the group are are fixed.
    * @param  ik_pose             The pose to be transformed which should be in the correct frame for the group.
-   * @param  ik_pose_chain       The ik_pose to be populated with the apropriate pose for the solver
+   * @param  ik_pose_chain       The ik_pose to be populated with the appropriate pose for the solver
    */
   void transformToChainFrame(const geometry_msgs::msg::Pose& ik_pose, KDL::Frame& ik_pose_chain) const;
 };  // end class
@@ -809,7 +809,7 @@ bool IKFastKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_
   }
 
   IkReal angles[num_joints_];
-  for (unsigned char i = 0; i < num_joints_; i++)
+  for (unsigned char i = 0; i < num_joints_; ++i)
     angles[i] = joint_angles[i];
 
   // IKFast56/61
@@ -964,7 +964,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
   vfree[0] = initial_guess;
 
   // -------------------------------------------------------------------------------------------------
-  // Handle consitency limits if needed
+  // Handle consistency limits if needed
   int num_positive_increments;
   int num_negative_increments;
   double search_discretization = redundant_joint_discretization_.at(free_params_[0]);
@@ -1014,7 +1014,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
         getSolution(solutions, ik_seed_state, s, sol);
 
         bool obeys_limits = true;
-        for (size_t i = 0; i < sol.size(); i++)
+        for (size_t i = 0; i < sol.size(); ++i)
         {
           if (joint_has_limits_vector_[i] && (sol[i] < joint_min_vector_[i] || sol[i] > joint_max_vector_[i]))
           {
@@ -1045,7 +1045,7 @@ bool IKFastKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik
             {
               // Costs for solution: Largest joint motion
               double costs = 0.0;
-              for (unsigned int i = 0; i < solution.size(); i++)
+              for (unsigned int i = 0; i < solution.size(); ++i)
               {
                 double d = fabs(ik_seed_state[i] - solution[i]);
                 if (d > costs)
@@ -1112,7 +1112,7 @@ bool IKFastKinematicsPlugin::getPositionIK(const geometry_msgs::msg::Pose& ik_po
   }
 
   // Check if seed is in bound
-  for (std::size_t i = 0; i < ik_seed_state.size(); i++)
+  for (std::size_t i = 0; i < ik_seed_state.size(); ++i)
   {
     // Add tolerance to limit check
     if (joint_has_limits_vector_[i] && ((ik_seed_state[i] < (joint_min_vector_[i] - LIMIT_TOLERANCE)) ||
@@ -1154,7 +1154,7 @@ bool IKFastKinematicsPlugin::getPositionIK(const geometry_msgs::msg::Pose& ik_po
                    sol[4], sol[5]);
 
       bool obeys_limits = true;
-      for (std::size_t i = 0; i < sol.size(); i++)
+      for (std::size_t i = 0; i < sol.size(); ++i)
       {
         // Add tolerance to limit check
         if (joint_has_limits_vector_[i] && ((sol[i] < (joint_min_vector_[i] - LIMIT_TOLERANCE)) ||
@@ -1273,7 +1273,7 @@ bool IKFastKinematicsPlugin::getPositionIK(const std::vector<geometry_msgs::msg:
       return false;
     }
 
-    for (unsigned int i = 0; i < sampled_joint_vals.size(); i++)
+    for (unsigned int i = 0; i < sampled_joint_vals.size(); ++i)
     {
       vfree.clear();
       vfree.push_back(sampled_joint_vals[i]);
@@ -1295,7 +1295,7 @@ bool IKFastKinematicsPlugin::getPositionIK(const std::vector<geometry_msgs::msg:
     /*
       Iterating through all solution sets and storing those that do not exceed joint limits.
     */
-    for (unsigned int r = 0; r < solution_set.size(); r++)
+    for (unsigned int r = 0; r < solution_set.size(); ++r)
     {
       ik_solutions = solution_set[r];
       numsol = ik_solutions.GetNumSolutions();
@@ -1305,7 +1305,7 @@ bool IKFastKinematicsPlugin::getPositionIK(const std::vector<geometry_msgs::msg:
         getSolution(ik_solutions, ik_seed_state, s, sol);
 
         bool obeys_limits = true;
-        for (unsigned int i = 0; i < sol.size(); i++)
+        for (unsigned int i = 0; i < sol.size(); ++i)
         {
           // Add tolerance to limit check
           if (joint_has_limits_vector_[i] && ((sol[i] < (joint_min_vector_[i] - LIMIT_TOLERANCE)) ||
@@ -1356,7 +1356,7 @@ bool IKFastKinematicsPlugin::sampleRedundantJoint(kinematics::DiscretizationMeth
     case kinematics::DiscretizationMethods::ALL_DISCRETIZED:
     {
       size_t steps = std::ceil((joint_max - joint_min) / joint_dscrt);
-      for (size_t i = 0; i < steps; i++)
+      for (size_t i = 0; i < steps; ++i)
       {
         sampled_joint_vals.push_back(joint_min + joint_dscrt * i);
       }
@@ -1368,7 +1368,7 @@ bool IKFastKinematicsPlugin::sampleRedundantJoint(kinematics::DiscretizationMeth
       int steps = std::ceil((joint_max - joint_min) / joint_dscrt);
       steps = steps > 0 ? steps : 1;
       double diff = joint_max - joint_min;
-      for (int i = 0; i < steps; i++)
+      for (int i = 0; i < steps; ++i)
       {
         sampled_joint_vals.push_back(((diff * std::rand()) / (static_cast<double>(RAND_MAX))) + joint_min);
       }

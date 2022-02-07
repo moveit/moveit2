@@ -61,7 +61,7 @@ bool JointConstraintSampler::configure(const std::vector<kinematic_constraints::
 
   if (!jmg_)
   {
-    RCLCPP_ERROR(LOGGER, "NULL group specified for constraint sampler");
+    RCLCPP_ERROR(LOGGER, "nullptr group specified for constraint sampler");
     return false;
   }
 

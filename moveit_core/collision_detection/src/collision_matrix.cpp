@@ -400,7 +400,7 @@ void AllowedCollisionMatrix::print(std::ostream& out) const
       ss << std::setw(number_digits) << i;
       out << std::setw(3) << ss.str().c_str()[j];
     }
-    out << std::endl;
+    out << '\n';
   }
 
   for (std::size_t i = 0; i < names.size(); ++i)
@@ -417,7 +417,7 @@ void AllowedCollisionMatrix::print(std::ostream& out) const
       else
         out << std::setw(3) << '-';
     }
-    out << std::endl;
+    out << '\n';
   }
 }
 
