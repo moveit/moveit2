@@ -2,6 +2,11 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.4 (2022-02-07)
+------------------
+* Add moveit_configs_utils package to simplify loading paramters (backport `#591 <https://github.com/ros-planning/moveit2/issues/591>`_) (`#1019 <https://github.com/ros-planning/moveit2/issues/1019>`_)
+* Contributors: AndyZe, Stephanie Eng, Tyler Weaver
+
 2.3.3 (2022-01-20)
 ------------------
 * Fix IKFast test dependency (`#993 <https://github.com/ros-planning/moveit2/issues/993>`_) (`#1002 <https://github.com/ros-planning/moveit2/issues/1002>`_)

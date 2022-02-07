@@ -2,6 +2,12 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.4 (2022-02-07)
+------------------
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_) (`#1023 <https://github.com/ros-planning/moveit2/issues/1023>`_)
+* Add moveit_configs_utils package to simplify loading paramters (backport `#591 <https://github.com/ros-planning/moveit2/issues/591>`_) (`#1019 <https://github.com/ros-planning/moveit2/issues/1019>`_)
+* Contributors: AndyZe, Cory Crean, Stephanie Eng, Tyler Weaver, Vatan Aksoy Tezer
+
 2.3.3 (2022-01-20)
 ------------------
 
