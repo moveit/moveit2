@@ -1409,6 +1409,9 @@ void MotionPlanningDisplay::fixedFrameChanged()
   PlanningSceneDisplay::fixedFrameChanged();
   if (int_marker_display_)
     int_marker_display_->setFixedFrame(fixed_frame_);
+  // When the fixed frame changes we need to tell RViz to update the rendered interactive marker display
+  frame_->scene_marker_->requestPoseUpdate(frame_->scene_marker_->getPosition(),
+                                           frame_->scene_marker_->getOrientation());
   changedPlanningGroup();
 }
 
