@@ -51,13 +51,21 @@ public:
 
   bool initialize([[maybe_unused]] const rclcpp::Node::SharedPtr& node,
                   const moveit::core::RobotModelConstPtr& robot_model, const std::string& group_name) override;
+
   moveit_msgs::action::LocalPlanner::Feedback
   addTrajectorySegment(const robot_trajectory::RobotTrajectory& new_trajectory) override;
+
   moveit_msgs::action::LocalPlanner::Feedback
   getLocalTrajectory(const moveit::core::RobotState& current_state,
                      robot_trajectory::RobotTrajectory& local_trajectory) override;
+
   double getTrajectoryProgress([[maybe_unused]] const moveit::core::RobotState& current_state) override;
+
   bool reset() override;
+
+  void preventForwardProgress() override;
+
+  void allowForwardProgress() override;
 
 private:
   std::size_t
@@ -65,5 +73,6 @@ private:
   moveit_msgs::action::LocalPlanner::Feedback feedback_;  // Empty feedback
   trajectory_processing::TimeOptimalTrajectoryGeneration time_parametrization_;
   const moveit::core::JointModelGroup* joint_group_;
+  std::atomic<bool> prevent_forward_progress_;  // Flag to prevent moving to the next waypoint
 };
 }  // namespace moveit::hybrid_planning

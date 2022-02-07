@@ -49,6 +49,7 @@ bool SimpleSampler::initialize([[maybe_unused]] const rclcpp::Node::SharedPtr& n
 {
   reference_trajectory_ = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, group_name);
   next_waypoint_index_ = 0;
+  prevent_forward_progress_ = false;
   joint_group_ = robot_model->getJointModelGroup(group_name);
   return true;
 }
@@ -73,6 +74,7 @@ bool SimpleSampler::reset()
 {
   // Reset index
   next_waypoint_index_ = 0;
+  prevent_forward_progress_ = false;
   reference_trajectory_->clear();
   return true;
 }
@@ -83,6 +85,13 @@ SimpleSampler::getLocalTrajectory(const moveit::core::RobotState& current_state,
   if (reference_trajectory_->getWayPointCount() == 0)
   {
     feedback_.feedback = "unhandled_exception";
+    return feedback_;
+  }
+
+  // Some other component has flagged not to move to the next waypoint.
+  // Stay put, keep the same local_trajectory.
+  if (prevent_forward_progress_)
+  {
     return feedback_;
   }
 
@@ -115,6 +124,16 @@ double SimpleSampler::getTrajectoryProgress([[maybe_unused]] const moveit::core:
     return 1.0;
   }
   return 0.0;
+}
+
+void SimpleSampler::preventForwardProgress()
+{
+  prevent_forward_progress_ = true;
+}
+
+void SimpleSampler::allowForwardProgress()
+{
+  prevent_forward_progress_ = false;
 }
 }  // namespace moveit::hybrid_planning
 

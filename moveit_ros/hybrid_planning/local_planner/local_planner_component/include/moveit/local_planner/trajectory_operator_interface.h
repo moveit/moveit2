@@ -101,6 +101,12 @@ public:
    */
   virtual bool reset() = 0;
 
+  /** \brief Set a flag that prevents SimpleSampler from moving to the next waypoint */
+  virtual void preventForwardProgress() = 0;
+
+  /** \brief Set a flag that allows SimpleSampler to move to the next waypoint */
+  virtual void allowForwardProgress() = 0;
+
 protected:
   // Reference trajectory to be precessed
   robot_trajectory::RobotTrajectoryPtr reference_trajectory_;
