@@ -40,6 +40,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
 namespace moveit::hybrid_planning
@@ -53,9 +54,16 @@ enum LocalFeedbackEnum
   LOCAL_PLANNER_STUCK = 2
 };
 
-/**
- * \brief Use this map to look up human-readable strings for each feedback code
- */
-const std::unordered_map<uint, std::string> LOCAL_FEEDBACK_MAP({ { COLLISION_AHEAD, "Collision ahead" },
-                                                                 { LOCAL_PLANNER_STUCK, "Local planner is stuck" } });
+[[nodiscard]] constexpr std::string_view FeedbackEnumToString(const LocalFeedbackEnum& code)
+{
+  switch (code)
+  {
+    case COLLISION_AHEAD:
+      return "Collision ahead";
+    case LOCAL_PLANNER_STUCK:
+      return "Local planner is stuck";
+    default:
+      __builtin_unreachable();
+  }
+}
 }  // namespace moveit::hybrid_planning

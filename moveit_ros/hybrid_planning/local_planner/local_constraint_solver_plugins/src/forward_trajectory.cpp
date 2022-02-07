@@ -118,10 +118,10 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
     {
       if (!path_invalidation_event_send_)
       {  // Send feedback only once
-        feedback_result.feedback = LOCAL_FEEDBACK_MAP.at(LocalFeedbackEnum::COLLISION_AHEAD);
+        feedback_result.feedback = FeedbackEnumToString(LocalFeedbackEnum::COLLISION_AHEAD);
         path_invalidation_event_send_ = true;  // Set feedback flag
       }
-      RCLCPP_INFO(LOGGER, "Collision ahead, hold current position");
+      RCLCPP_INFO(LOGGER, "Collision ahead, holding current position");
       // Keep current position
       moveit::core::RobotState current_state_command(*current_state);
       if (current_state_command.hasVelocities())
@@ -151,7 +151,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
         {
           num_iterations_stuck_ = 0;
           prev_waypoint_target_ = nullptr;
-          feedback_result.feedback = LOCAL_FEEDBACK_MAP.at(LocalFeedbackEnum::LOCAL_PLANNER_STUCK);
+          feedback_result.feedback = FeedbackEnumToString(LocalFeedbackEnum::LOCAL_PLANNER_STUCK);
           path_invalidation_event_send_ = true;  // Set feedback flag
           RCLCPP_INFO(LOGGER, "The local planner has been stuck for several iterations. Aborting.");
         }
