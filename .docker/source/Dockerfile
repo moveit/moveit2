@@ -22,7 +22,7 @@ RUN --mount=type=cache,target=/root/.ccache/ \
     # Enable ccache
     PATH=/usr/lib/ccache:$PATH && \
     # Fetch required upstream sources for building
-    vcs import src < src/moveit2/moveit2.repos && \
+    if [ -r src/moveit2/moveit2.repos ] ; vcs import src < src/moveit2/moveit2.repos && \
     if [ -r src/moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import src < src/moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
     #
     . /opt/ros/${ROS_DISTRO}/setup.sh &&\
