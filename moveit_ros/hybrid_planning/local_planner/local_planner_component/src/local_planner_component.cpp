@@ -32,7 +32,6 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/local_planner/feedback_types.h>
 #include <moveit/local_planner/local_planner_component.h>
 
 #include <moveit/planning_scene/planning_scene.h>
