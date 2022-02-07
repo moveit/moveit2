@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, PickNik Inc.
+ *  Copyright (c) 2022, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,36 +32,30 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/local_planner/feedback_types.h>
-#include <moveit/planner_logic_plugins/replan_invalidated_trajectory.h>
+/* Author: Andy Zelenak
+   Description: Define the expected local planner feedback types (usually equivalent to failure
+   modes).
+ */
 
-namespace
-{
-const rclcpp::Logger LOGGER = rclcpp::get_logger("hybrid_planning_manager");
-}
+#pragma once
+
+#include <string>
+#include <unordered_map>
 
 namespace moveit::hybrid_planning
 {
-ReactionResult ReplanInvalidatedTrajectory::react(const std::string& event)
+/**
+ * \brief Expected feedback types
+ */
+enum LocalFeedbackEnum
 {
-  if ((event == LOCAL_FEEDBACK_MAP.at(LocalFeedbackEnum::COLLISION_AHEAD)) ||
-      (event == LOCAL_FEEDBACK_MAP.at(LocalFeedbackEnum::LOCAL_PLANNER_STUCK)))
-  {
-    if (!hybrid_planning_manager_->sendGlobalPlannerAction())  // Start global planning
-    {
-      hybrid_planning_manager_->sendHybridPlanningResponse(false);
-    }
-    return ReactionResult(event, "", moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
-  }
-  else
-  {
-    return ReactionResult(event, "'ReplanInvalidatedTrajectory' plugin cannot handle this event.",
-                          moveit_msgs::msg::MoveItErrorCodes::FAILURE);
-  }
+  COLLISION_AHEAD = 1,
+  LOCAL_PLANNER_STUCK = 2
 };
+
+/**
+ * \brief Use this map to look up human-readable strings for each feedback code
+ */
+const std::unordered_map<uint, std::string> LOCAL_FEEDBACK_MAP({ { COLLISION_AHEAD, "Collision ahead" },
+                                                                 { LOCAL_PLANNER_STUCK, "Local planner is stuck" } });
 }  // namespace moveit::hybrid_planning
-
-#include <pluginlib/class_list_macros.hpp>
-
-PLUGINLIB_EXPORT_CLASS(moveit::hybrid_planning::ReplanInvalidatedTrajectory,
-                       moveit::hybrid_planning::PlannerLogicInterface)
