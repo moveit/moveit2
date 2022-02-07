@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.4 (2022-02-07)
+------------------
+* Fix race condition in SynchronizedStringParameter::waitForMessage (`#1050 <https://github.com/ros-planning/moveit2/issues/1050>`_) (`#1062 <https://github.com/ros-planning/moveit2/issues/1062>`_)
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_) (`#1023 <https://github.com/ros-planning/moveit2/issues/1023>`_)
+* Contributors: Tyler Weaver, Cory Crean, Tyler Weaver, Vatan Aksoy Tezer
+
 2.3.3 (2022-01-20)
 ------------------
 

@@ -2,6 +2,11 @@
 Changelog for package moveit_resources_prbt_ikfast_manipulator_plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.4 (2022-02-07)
+------------------
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_) (`#1023 <https://github.com/ros-planning/moveit2/issues/1023>`_)
+* Contributors: Tyler Weaver, Vatan Aksoy Tezer, Cory Crean
+
 2.3.3 (2022-01-20)
 ------------------
 

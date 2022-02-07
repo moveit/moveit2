@@ -2,6 +2,11 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.3.4 (2022-02-07)
+------------------
+* Remove unused parameters. (`#1018 <https://github.com/ros-planning/moveit2/issues/1018>`_) (`#1023 <https://github.com/ros-planning/moveit2/issues/1023>`_)
+* Contributors: Tyler Weaver, Vatan Aksoy Tezer, Cory Crean
+
 2.3.3 (2022-01-20)
 ------------------
 * Fix boost linking errors for Windows (`#957 <https://github.com/ros-planning/moveit2/issues/957>`_) (`#1001 <https://github.com/ros-planning/moveit2/issues/1001>`_)
