@@ -54,7 +54,7 @@ enum LocalFeedbackEnum
   LOCAL_PLANNER_STUCK = 2
 };
 
-[[nodiscard]] constexpr std::string_view FeedbackEnumToString(const LocalFeedbackEnum& code)
+[[nodiscard]] constexpr std::string_view toString(const LocalFeedbackEnum& code)
 {
   switch (code)
   {

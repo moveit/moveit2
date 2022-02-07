@@ -44,8 +44,8 @@ namespace moveit::hybrid_planning
 {
 ReactionResult ReplanInvalidatedTrajectory::react(const std::string& event)
 {
-  if ((event == FeedbackEnumToString(LocalFeedbackEnum::COLLISION_AHEAD)) ||
-      (event == FeedbackEnumToString(LocalFeedbackEnum::LOCAL_PLANNER_STUCK)))
+  if ((event == toString(LocalFeedbackEnum::COLLISION_AHEAD)) ||
+      (event == toString(LocalFeedbackEnum::LOCAL_PLANNER_STUCK)))
   {
     if (!hybrid_planning_manager_->sendGlobalPlannerAction())  // Start global planning
     {
