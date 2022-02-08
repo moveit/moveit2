@@ -81,8 +81,6 @@ public:
 protected:
   void generateCollisionTable(unsigned int num_trials, double min_frac, bool verbose);
 
-  std::shared_ptr<moveit_setup_framework::SRDFConfig> srdf_config_;
-
   /// main storage of link pair data
   LinkPairMap link_pairs_;
 

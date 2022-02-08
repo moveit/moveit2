@@ -63,8 +63,5 @@ public:
   }
 
   void setPassiveJoints(const std::vector<std::string>& passive_joints);
-
-protected:
-  std::shared_ptr<moveit_setup_framework::SRDFConfig> srdf_config_;
 };
 }  // namespace moveit_setup_srdf_plugins

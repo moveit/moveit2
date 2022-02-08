@@ -85,7 +85,6 @@ public:
                      const std::string& parent_group);
 
 protected:
-  std::shared_ptr<moveit_setup_framework::SRDFConfig> srdf_config_;
   std::shared_ptr<moveit_setup_framework::URDFConfig> urdf_config_;
 };
 }  // namespace moveit_setup_srdf_plugins
