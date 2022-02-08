@@ -112,9 +112,6 @@ void PlanningGroupsWidget::onInit()
   chain_widget_ = new KinematicChainWidget(this, rviz_panel_);
   connect(chain_widget_, SIGNAL(cancelEditing()), this, SLOT(cancelEditing()));
   connect(chain_widget_, SIGNAL(doneEditing()), this, SLOT(saveChainScreen()));
-  connect(chain_widget_, SIGNAL(unhighlightAll()), this, SIGNAL(unhighlightAll()));
-  connect(chain_widget_, SIGNAL(highlightLink(const std::string&, const QColor&)), this,
-          SIGNAL(highlightLink(const std::string&, const QColor&)));
 
   // Subgroups Widget
   subgroups_widget_ = new moveit_setup_framework::DoubleListWidget(this, "Subgroup", "Subgroup");
