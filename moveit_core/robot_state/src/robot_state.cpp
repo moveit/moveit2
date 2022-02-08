@@ -45,7 +45,6 @@
 #else
 #include <tf2_eigen/tf2_eigen.h>
 #endif
-
 #include <moveit/macros/console_colors.h>
 #include <boost/bind.hpp>
 #include <moveit/robot_model/aabb.h>
@@ -797,6 +796,31 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
   for (std::map<std::string, AttachedBody*>::const_iterator it = attached_body_map_.begin();
        it != attached_body_map_.end(); ++it)
     it->second->computeTransform(global_link_transforms_[it->second->getAttachedLink()->getLinkIndex()]);
+}
+
+const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame) const
+{
+  const moveit::core::LinkModel* link{ nullptr };
+
+  size_t idx = 0;
+  if ((idx = frame.find('/')) != std::string::npos)
+  {  // resolve sub frame
+    std::string object{ frame.substr(0, idx) };
+    if (!hasAttachedBody(object))
+      return nullptr;
+    auto body{ getAttachedBody(object) };
+    if (!body->hasSubframeTransform(frame))
+      return nullptr;
+    link = body->getAttachedLink();
+  }
+  else if (hasAttachedBody(frame))
+  {
+    link = getAttachedBody(frame)->getAttachedLink();
+  }
+  else if (getRobotModel()->hasLinkModel(frame))
+    link = getLinkModel(frame);
+
+  return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
 }
 
 bool RobotState::satisfiesBounds(double margin) const

@@ -206,14 +206,6 @@ void MotionPlanningDisplay::onInitialize()
 {
   PlanningSceneDisplay::onInitialize();
 
-  // Prepare database parameters
-  if (!node_->has_parameter("warehouse_host"))
-    node_->declare_parameter<std::string>("warehouse_host", "127.0.0.1");
-  if (!node_->has_parameter("warehouse_plugin"))
-    node_->declare_parameter<std::string>("warehouse_plugin", "warehouse_ros_mongo::MongoDatabaseConnection");
-  if (!node_->has_parameter("warehouse_port"))
-    node_->declare_parameter<int>("warehouse_port", 33829);
-
   // Planned Path Display
   trajectory_visual_->onInitialize(node_, planning_scene_node_, context_);
   QColor qcolor = attached_body_color_property_->getColor();
@@ -245,18 +237,6 @@ void MotionPlanningDisplay::onInitialize()
 
   rviz_common::WindowManagerInterface* window_context = context_->getWindowManager();
   frame_ = new MotionPlanningFrame(this, context_, window_context ? window_context->getParentWindow() : nullptr);
-
-  std::string host_param;
-  if (node_->get_parameter("warehouse_host", host_param))
-  {
-    frame_->ui_->database_host->setText(QString::fromStdString(host_param));
-  }
-
-  int port;
-  if (node_->get_parameter("warehouse_port", port))
-  {
-    frame_->ui_->database_port->setValue(port);
-  }
 
   connect(frame_, SIGNAL(configChanged()), this->getModel(), SIGNAL(configChanged()));
   resetStatusTextColor();
@@ -1429,6 +1409,9 @@ void MotionPlanningDisplay::fixedFrameChanged()
   PlanningSceneDisplay::fixedFrameChanged();
   if (int_marker_display_)
     int_marker_display_->setFixedFrame(fixed_frame_);
+  // When the fixed frame changes we need to tell RViz to update the rendered interactive marker display
+  frame_->scene_marker_->requestPoseUpdate(frame_->scene_marker_->getPosition(),
+                                           frame_->scene_marker_->getOrientation());
   changedPlanningGroup();
 }
 

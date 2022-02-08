@@ -441,21 +441,29 @@ void MotionPlanningFrame::collisionObjectChanged(QListWidgetItem* item)
 /* Receives feedback from the interactive marker and updates the shape pose in the world accordingly */
 void MotionPlanningFrame::imProcessFeedback(visualization_msgs::msg::InteractiveMarkerFeedback& feedback)
 {
+  if (!planning_display_->getPlanningSceneRO()->knowsFrameTransform(feedback.header.frame_id))
+  {
+    RCLCPP_ERROR_STREAM(LOGGER,
+                        "Frame `" << feedback.header.frame_id << "` unknown doesn't exists in the planning scene");
+  }
+  Eigen::Isometry3d fixed_frame_t_scene_marker;
+  tf2::fromMsg(feedback.pose, fixed_frame_t_scene_marker);
+  Eigen::Isometry3d model_frame_t_scene_marker =
+      planning_display_->getPlanningSceneRO()->getFrameTransform(feedback.header.frame_id) * fixed_frame_t_scene_marker;
+
   bool old_state = ui_->object_x->blockSignals(true);
-  ui_->object_x->setValue(feedback.pose.position.x);
+  ui_->object_x->setValue(model_frame_t_scene_marker.translation().x());
   ui_->object_x->blockSignals(old_state);
 
   old_state = ui_->object_y->blockSignals(true);
-  ui_->object_y->setValue(feedback.pose.position.y);
+  ui_->object_y->setValue(model_frame_t_scene_marker.translation().y());
   ui_->object_y->blockSignals(old_state);
 
   old_state = ui_->object_z->blockSignals(true);
-  ui_->object_z->setValue(feedback.pose.position.z);
+  ui_->object_z->setValue(model_frame_t_scene_marker.translation().z());
   ui_->object_z->blockSignals(old_state);
 
-  Eigen::Quaterniond q;
-  tf2::fromMsg(feedback.pose.orientation, q);
-  Eigen::Vector3d xyz = q.matrix().eulerAngles(0, 1, 2);
+  Eigen::Vector3d xyz = model_frame_t_scene_marker.linear().eulerAngles(0, 1, 2);
 
   old_state = ui_->object_rx->blockSignals(true);
   ui_->object_rx->setValue(xyz[0]);
