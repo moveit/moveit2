@@ -92,10 +92,6 @@ def generate_common_hybrid_launch_description():
     global_planner_param = load_yaml(
         "moveit_hybrid_planning", "config/global_planner.yaml"
     )
-    # The global planner uses moveit_cpp
-    global_planner_moveit_cpp_param = load_yaml(
-        "moveit_hybrid_planning", "config/global_planner_moveit_cpp.yaml"
-    )
     local_planner_param = load_yaml(
         "moveit_hybrid_planning", "config/local_planner.yaml"
     )
@@ -117,7 +113,6 @@ def generate_common_hybrid_launch_description():
                 parameters=[
                     common_hybrid_planning_param,
                     global_planner_param,
-                    global_planner_moveit_cpp_param,
                     robot_description,
                     robot_description_semantic,
                     kinematics_yaml,
