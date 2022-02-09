@@ -139,6 +139,11 @@ void SRDFConfig::updateRobotModel(long changed_information)
 {
   // Initialize with a URDF Model Interface and a SRDF Model
   loadURDFModel();
+  if (changed_information > 0)
+  {
+    srdf_.updateSRDFModel(*urdf_model_);
+  }
+
   robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_.srdf_model_);
 
   if (srdf_pkg_relative_path_.empty())
