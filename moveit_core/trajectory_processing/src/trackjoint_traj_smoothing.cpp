@@ -76,7 +76,7 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
   robot_trajectory::RobotTrajectory outgoing_trajectory = reference_trajectory;
   // Clear the waypoints
   outgoing_trajectory.clear();
-  // ... but keep the first wayopint
+  // ... but keep the first waypoint
   outgoing_trajectory.addSuffixWayPoint(reference_trajectory.getWayPoint(0),
                                         reference_trajectory.getWayPointDurationFromPrevious(0));
 
@@ -186,7 +186,7 @@ void TrackJointSmoothing::addTrackJointOutpointToRobotTrajectory(
   // We will overwrite this waypoint
   moveit::core::RobotState waypoint = reference_trajectory.getWayPoint(0);
 
-  for (size_t waypoint_idx = 1; waypoint_idx < trackjoint_output.size(); ++waypoint_idx)
+  for (size_t waypoint_idx = 1; waypoint_idx < trackjoint_output.at(0).positions.size(); ++waypoint_idx)
   {
     for (size_t joint = 0; joint < num_dof; ++joint)
     {
