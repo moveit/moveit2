@@ -92,10 +92,9 @@ bool LocalPlannerComponent::initialize()
   }
 
   // Start state and scene monitors
-  RCLCPP_INFO(LOGGER, "Starting planning scene monitors");
-  planning_scene_monitor_->startSceneMonitor();
-  planning_scene_monitor_->startWorldGeometryMonitor();
-  planning_scene_monitor_->startStateMonitor();
+  planning_scene_monitor_->startSceneMonitor(config_.monitored_planning_scene_topic);
+  planning_scene_monitor_->startWorldGeometryMonitor(config_.collision_object_topic);
+  planning_scene_monitor_->startStateMonitor(config_.joint_states_topic);
 
   // Load trajectory operator plugin
   try
