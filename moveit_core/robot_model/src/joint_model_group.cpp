@@ -59,7 +59,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.join
 // check if a parent or ancestor of joint is included in this group
 bool includesParent(const JointModel* joint, const JointModelGroup* group)
 {
-  const auto test = [group](const auto& jm) {
+  const auto is_parent = [group](const auto& jm) {
     return group->hasJointModel(jm->getName()) && jm->getVariableCount() > 0 && jm->getMimic() == nullptr;
   };
   // if we find that an ancestor is also in the group, then the joint is not a root
@@ -67,11 +67,11 @@ bool includesParent(const JointModel* joint, const JointModelGroup* group)
   {
     joint = joint->getParentLinkModel()->getParentJointModel();
 
-    if (test(joint))
+    if (is_parent(joint))
       return true;
     else if (const auto& mimic_joint = joint->getMimic(); mimic_joint != nullptr)
     {
-      if (test(mimic_joint))
+      if (is_parent(mimic_joint))
         return true;
       else if (includesParent(mimic_joint, group))
         return true;
