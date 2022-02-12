@@ -73,6 +73,9 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
     return false;
   }
 
+  // This lib does not work properly when angles wrap around, so we need to unwind the path first
+  reference_trajectory.unwind();
+
   robot_trajectory::RobotTrajectory outgoing_trajectory = reference_trajectory;
   // Clear the waypoints
   outgoing_trajectory.clear();
@@ -84,9 +87,6 @@ bool TrackJointSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& refe
 
   // Look up JointGroup variables
   const std::vector<int>& joint_group_indices = group->getVariableIndexList();
-
-  // This lib does not work properly when angles wrap around, so we need to unwind the path first
-  reference_trajectory.unwind();
 
   // Current state
   std::vector<trackjoint::KinematicState> current_joint_states(num_dof);
