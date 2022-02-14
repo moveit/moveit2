@@ -378,23 +378,19 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
           // This may change depending on param search success
           // NOTE: this is a messy pattern
 
-          // 1. Try to get param directly
+          const std::vector<std::string> base_param_names = {
+              // 1. Try to get param directly
+              known_group.name_,
+              // 2. Try to get param with alternate base name
+              robot_description_ + "_kinematics." + known_group.name_
+          };
+
+          for(const std::string &base_param_name : base_param_names)
           {
-              std::string base_param_name = known_group.name_;
-              std::string ksolver_param_name = base_param_name + ksolver_param_suffix;
+              if(ksolver_param.get_type() != rclcpp::ParameterType::PARAMETER_NOT_SET) {
+                  break;
+              }
 
-              RCLCPP_DEBUG(LOGGER, "Looking for param %s ", ksolver_param_name.c_str());
-
-              ksolver_param          = declare_parameter<rclcpp::ParameterType::PARAMETER_STRING>(node_, ksolver_param_name);
-              ksolver_timeout_param  = declare_parameter<rclcpp::ParameterType::PARAMETER_DOUBLE>(node_, base_param_name + ksolver_timeout_param_suffix);
-              ksolver_res_param      = declare_parameter<rclcpp::ParameterType::PARAMETER_DOUBLE>(node_, base_param_name + ksolver_res_param_suffix);
-              ksolver_ik_links_param = declare_parameter<rclcpp::ParameterType::PARAMETER_STRING_ARRAY>(node_, base_param_name + ksolver_ik_links_param_suffix);
-          }
-
-          // 2. Try to get param with alternate base name
-          if (ksolver_param.get_type() == rclcpp::ParameterType::PARAMETER_NOT_SET)
-          {
-              std::string base_param_name = robot_description_ + "_kinematics." + known_group.name_;
               std::string ksolver_param_name = base_param_name + ksolver_param_suffix;
 
               RCLCPP_DEBUG(LOGGER, "Looking for param %s ", ksolver_param_name.c_str());
@@ -419,14 +415,12 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
                       base_param_name + ksolver_ik_links_param_suffix
                       });
 
-              RCLCPP_DEBUG(LOGGER, "Waiting for future...");
+              RCLCPP_DEBUG(LOGGER, "Waiting for param request future...");
 
               std::future_status status;
               do {
                   status = future.wait_for(1s);
               } while (status != std::future_status::ready);
-
-              //rclcpp::spin_until_future_complete(node_, future);
 
               ksolver_param          = future.get()[0];
               ksolver_timeout_param  = future.get()[1];
