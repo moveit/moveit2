@@ -42,6 +42,11 @@
 
 namespace trajectory_processing
 {
+namespace
+{
+constexpr size_t RUCKIG_DYNAMIC_DOF = 0;  // Put Ruckig in "dynamic DOF" mode
+}
+
 class RuckigSmoothing
 {
 public:
@@ -58,9 +63,9 @@ private:
    * \param idx             MoveIt list of joint group indices
    * \param ruckig_input    Output. The Rucking parameters for the next iteration
    */
-  static void getNextRuckigInput(const ruckig::OutputParameter<0>& ruckig_output,
+  static void getNextRuckigInput(const ruckig::OutputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_output,
                                  const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
-                                 const std::vector<int>& idx, ruckig::InputParameter<0>& ruckig_input);
+                                 const std::vector<int>& idx, ruckig::InputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_input);
 
   /**
    * \brief Check for lagging motion of any joint at a waypoint.
@@ -69,25 +74,48 @@ private:
    * \param ruckig_output Output parameters from Ruckig
    * \return              true if lagging motion is detected on any joint
    */
-  static bool checkForLaggingMotion(const size_t num_dof, const ruckig::InputParameter<0>& ruckig_input,
-                                    const ruckig::OutputParameter<0>& ruckig_output);
+  static bool checkForLaggingMotion(const size_t num_dof,
+                                    const ruckig::InputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_input,
+                                    const ruckig::OutputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_output);
 
   /**
    * \brief Return L2-norm of velocity, taking all joints into account.
    * \param ruckig_input  Input parameters to Ruckig
    * \param num_dof       Number  of actuated joints
    */
-  static double getTargetVelocityMagnitude(const ruckig::InputParameter<0>& ruckig_input, size_t num_dof);
+  static double getTargetVelocityMagnitude(const ruckig::InputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_input,
+                                           size_t num_dof);
 
   /**
    * \brief Check if the joint positions of two waypoints are very similar.
    * \param prev_waypoint State at waypoint i-1
    * \param prev_waypoint State at waypoint i
-   * \joint_group         The MoveIt JointModelGroup of interest
+   * \param joint_group   The MoveIt JointModelGroup of interest
    */
   static bool checkForIdenticalWaypoints(const moveit::core::RobotState& prev_waypoint,
                                          const moveit::core::RobotState& next_waypoint,
                                          const moveit::core::JointModelGroup* joint_group);
+
+  /**
+   * \brief Set position, velocity, and acceleration of a RobotState from a Ruckig output state
+   * \param ruckig_output Output from Ruckig
+   * \param num_dof       Degrees of freedom of the robot
+   * \param state         State to be updated
+   */
+  static void setRobotStateFromRuckigOutput(const ruckig::OutputParameter<RUCKIG_DYNAMIC_DOF> ruckig_output,
+                                            const size_t num_dof, const std::vector<int>& joint_idx,
+                                            moveit::core::RobotStatePtr state);
+
+  /**
+   * \brief Decrease ruckig_input.target_velocity and ruckig_input.target_acceleration
+   * \param num_dof       Degrees of freedom of the robot
+   * \param timestep      Ruckig timestep (sec)
+   * \param ruckig_output Output state from Ruckig. Used to update acceleration after the velocity change is made
+   * \param rucking_input Target state to be adjusted
+   */
+  static void decreaseTargetStateVelocity(const size_t num_dof, const double timestep,
+                                          const ruckig::OutputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_output,
+                                          ruckig::InputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_input);
 
   /**
    * \brief Initialize Ruckig position/vel/accel. This initializes ruckig_input and ruckig_output to the same values
@@ -97,7 +125,8 @@ private:
    * \param num_dof         Number  of actuated joints
    * \param joint_idx       MoveIt list of joint group indices
    */
-  static void initializeRuckigState(ruckig::InputParameter<0>& ruckig_input, ruckig::OutputParameter<0>& ruckig_output,
+  static void initializeRuckigState(ruckig::InputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_input,
+                                    ruckig::OutputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_output,
                                     const moveit::core::RobotState& first_waypoint, size_t num_dof,
                                     const std::vector<int>& joint_idx);
 };
