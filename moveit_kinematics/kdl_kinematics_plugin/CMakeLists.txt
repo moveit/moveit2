@@ -1,8 +1,15 @@
 set(MOVEIT_LIB_NAME moveit_kdl_kinematics_plugin)
 
+find_package(orocos_kdl REQUIRED)
+
+include_directories(${orocos_kdl_INCLUDE_DIRS})
+link_directories(${orocos_kdl_LIBRARY_DIRS})
+
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/kdl_kinematics_plugin.cpp
   src/chainiksolver_vel_mimic_svd.cpp)
+
+target_link_libraries(${MOVEIT_LIB_NAME} orocos-kdl)
 
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
