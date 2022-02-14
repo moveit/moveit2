@@ -52,7 +52,7 @@ constexpr double DEFAULT_MAX_JERK = 20;              // rad/s^3
 constexpr double IDENTICAL_POSITION_EPSILON = 1e-3;  // rad
 constexpr double MAX_DURATION_EXTENSION_FACTOR = 5.0;
 constexpr double DURATION_EXTENSION_FRACTION = 1.1;
-constexpr double MINIMUM_VELOCITY_SEARCH_MAGNITUDE = 0.01;  // rad/s. Stop searching when velocity drops below this
+constexpr double MINIMUM_VELOCITY_SEARCH_MAGNITUDE = 0.001;  // rad/s. Stop searching when velocity drops below this
 }  // namespace
 
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
@@ -123,6 +123,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   for (size_t waypoint_idx = 0; waypoint_idx < num_waypoints - 2 /* Don't modify the last waypoint */; ++waypoint_idx)
   {
     ruckig_result = ruckig::Result::Error;
+    bool backward_motion_detected = false;
     RCLCPP_ERROR_STREAM(LOGGER, "Processing waypoint: " << waypoint_idx << " / " << num_waypoints);
     moveit::core::RobotStatePtr next_waypoint = trajectory.getWayPointPtr(waypoint_idx + 1);
 
@@ -146,9 +147,30 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       continue;
     }
 
-    while ((ruckig_result != ruckig::Result::Finished) && rclcpp::ok())
+    while ((backward_motion_detected || (ruckig_result != ruckig::Result::Finished)) && rclcpp::ok())
     {
       RCLCPP_ERROR_STREAM(LOGGER, "Iterating, Ruckig result: " << ruckig_result);
+
+      // If the requested velocity is too great, a joint can actually "move backward" to give itself more time to
+      // accelerate to the target velocity. Iterate and decrease velocities until that behavior is gone.
+      bool backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
+      if (backward_motion_detected &&
+          (getTargetVelocityMagnitude(ruckig_input, num_dof) > MINIMUM_VELOCITY_SEARCH_MAGNITUDE))
+      {
+        for (size_t joint = 0; joint < num_dof; ++joint)
+        {
+          RCLCPP_INFO_STREAM(LOGGER, "Decreasing target velocity to prevent backward motion.");
+          ruckig_input.target_velocity.at(joint) *= 0.9;
+          // Propagate the change in velocity to acceleration, too.
+          // We don't change the position to ensure the exact target position is achieved.
+          ruckig_input.target_acceleration.at(joint) =
+              (ruckig_input.target_velocity.at(joint) - ruckig_output.new_velocity.at(joint)) / timestep;
+        }
+        // Run Ruckig on this waypoint again
+        ruckig_result = ruckig_ptr->update(ruckig_input, ruckig_output);
+        continue;
+      }
+
       // If ruckig_result == Working, smoothing was working but it needs more time to reach the target.
       // Add another waypoint with the same target state.
       if (ruckig_result == ruckig::Result::Working)
@@ -170,20 +192,13 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
         break;
       }
 
-      //        // Skip repeated waypoints with no change in position. Ruckig does not handle this well and there's really no
-      //        // need to smooth it.
-      //        // Simply set it equal to the previous (identical) waypoint.
-      //        if (checkForIdenticalWaypoints(*trajectory.getWayPointPtr(waypoint_idx), *next_waypoint, trajectory.getGroup()))
-      //        {
-      //          RCLCPP_WARN_STREAM(LOGGER, "Identical waypoint");
-      //          *next_waypoint = trajectory.getWayPoint(waypoint_idx);
-      //          break;
-      //        }
+      // TODO(andyz): Drop consecutive waypoints with repeated positions.
+      // They can cause "loopy motions".
 
-      // Ruckig failed completely.
-      // So decrease target velocity
+      // If Ruckig failed completely, decrease target velocity
       for (size_t joint = 0; joint < num_dof; ++joint)
       {
+        RCLCPP_INFO_STREAM(LOGGER, "Decreasing target velocity because Ruckig failed.");
         ruckig_input.target_velocity.at(joint) *= 0.9;
         // Propagate the change in velocity to acceleration, too.
         // We don't change the position to ensure the exact target position is achieved.
