@@ -406,7 +406,7 @@ moveit::core::SolverAllocatorFn KinematicsPluginLoader::getLoaderFunction(const 
           {
               std::string base_param_name = known_group.name_;
 
-              RCLCPP_DEBUG(LOGGER, "Looking for param %s in move_greoup node", (base_param_name + ksolver_param_suffix).c_str());
+              RCLCPP_DEBUG(LOGGER, "Looking for param %s in move_group node", (base_param_name + ksolver_param_suffix).c_str());
 
               auto future = parameters_client->get_parameters({
                       base_param_name + ksolver_param_suffix,
