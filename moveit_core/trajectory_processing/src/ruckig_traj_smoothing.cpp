@@ -155,7 +155,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       {
         RCLCPP_WARN_STREAM(LOGGER, "Inserting a new waypoint");
         // Insert a new waypoint after waypoint_idx+1
-        trajectory.insertWayPoint(waypoint_idx + 1, *next_waypoint, timestep);
+        trajectory.insertWayPoint(waypoint_idx + 2, *next_waypoint, timestep);
         ++num_waypoints;
 
         // Overwrite pos/vel/acc of waypoint_idx from previous Ruckig output
