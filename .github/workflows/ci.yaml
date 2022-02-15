@@ -21,14 +21,12 @@ jobs:
             ROS_DISTRO: rolling
             OS_NAME: ubuntu
             OS_CODE_NAME: focal
-            ROSDISTRO_INDEX_URL: https://raw.githubusercontent.com/ros/rosdistro/rolling/2022-01-28/index-v4.yaml
           - IMAGE: rolling-ci-testing
             IKFAST_TEST: true
             ROS_DISTRO: rolling
             CLANG_TIDY: pedantic
             OS_NAME: ubuntu
             OS_CODE_NAME: focal
-            ROSDISTRO_INDEX_URL: https://raw.githubusercontent.com/ros/rosdistro/rolling/2022-01-28/index-v4.yaml
     env:
       CXXFLAGS: "-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-deprecated-copy"
       CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
@@ -39,6 +37,8 @@ jobs:
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
       # Clear the ccache stats before and log the stats after the build
       BEFORE_BUILD_UPSTREAM_WORKSPACE: ccache -z
+      BEFORE_INSTALL_UPSTREAM_DEPENDENCIES: export ROSDISTRO_INDEX_URL=https://raw.githubusercontent.com/ros/rosdistro/rolling/2022-01-28/index-v4.yaml
+      BEFORE_INSTALL_TARGET_DEPENDENCIES: export ROSDISTRO_INDEX_URL=https://raw.githubusercontent.com/ros/rosdistro/rolling/2022-01-28/index-v4.yaml
       AFTER_BUILD_TARGET_WORKSPACE: ccache -s
       # Changing linker to lld as ld has a behavior where it takes a long time to finish
       TARGET_CMAKE_ARGS: >
