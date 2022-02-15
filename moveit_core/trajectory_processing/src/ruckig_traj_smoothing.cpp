@@ -53,6 +53,7 @@ constexpr double IDENTICAL_POSITION_EPSILON = 1e-3;  // rad
 constexpr double MAX_DURATION_EXTENSION_FACTOR = 5.0;
 constexpr double DURATION_EXTENSION_FRACTION = 1.1;
 constexpr double MINIMUM_VELOCITY_SEARCH_MAGNITUDE = 1e-5;  // rad/s. Stop searching when velocity drops below this
+constexpr size_t MAX_ITERATIONS_PER_WAYPOINT = 1000;  // Return failure if more than this many adjustments are needed
 }  // namespace
 
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
@@ -139,8 +140,12 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       continue;
     }
 
-    while ((backward_motion_detected || (ruckig_result != ruckig::Result::Finished)) && rclcpp::ok())
+    size_t num_iterations = 0;
+    while ((backward_motion_detected || (ruckig_result != ruckig::Result::Finished)) &&
+           (num_iterations < MAX_ITERATIONS_PER_WAYPOINT))
     {
+      ++num_iterations;
+
       // If the requested velocity is too great, a joint can actually "move backward" to give itself more time to
       // accelerate to the target velocity. Iterate and decrease velocities until that behavior is gone.
 
