@@ -122,7 +122,8 @@ jobs:
         run: moveit_kinematics/test/test_ikfast_plugins.sh
       - id: ici
         name: Run industrial_ci
-        uses: ros-industrial/industrial_ci@master
+        # https://github.com/ros-industrial/industrial_ci/commit/25481e5f15476812bde1a223765f602eb07eaa2d moves Rolling to Jammy, we are using a commit behind this to make CI passing until Jammy and ROS Rolling is good.
+        uses: ros-industrial/industrial_ci@008159b3948669bf3583c72c054e1c4f231d1c14
         env: ${{ matrix.env }}
       - name: Push result to Testspace
         if: always()
