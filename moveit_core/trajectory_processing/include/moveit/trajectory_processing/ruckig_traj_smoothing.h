@@ -110,11 +110,9 @@ private:
    * \brief Decrease ruckig_input.target_velocity and ruckig_input.target_acceleration
    * \param num_dof       Degrees of freedom of the robot
    * \param timestep      Ruckig timestep (sec)
-   * \param ruckig_output Output state from Ruckig. Used to update acceleration after the velocity change is made
    * \param rucking_input Target state to be adjusted
    */
   static void decreaseTargetStateVelocity(const size_t num_dof, const double timestep,
-                                          const ruckig::OutputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_output,
                                           ruckig::InputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_input);
 
   /**

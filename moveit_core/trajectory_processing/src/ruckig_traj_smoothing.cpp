@@ -52,7 +52,7 @@ constexpr double DEFAULT_MAX_JERK = 20;              // rad/s^3
 constexpr double IDENTICAL_POSITION_EPSILON = 1e-3;  // rad
 constexpr double MAX_DURATION_EXTENSION_FACTOR = 5.0;
 constexpr double DURATION_EXTENSION_FRACTION = 1.1;
-constexpr double MINIMUM_VELOCITY_SEARCH_MAGNITUDE = 0.001;  // rad/s. Stop searching when velocity drops below this
+constexpr double MINIMUM_VELOCITY_SEARCH_MAGNITUDE = 1e-5;  // rad/s. Stop searching when velocity drops below this
 }  // namespace
 
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
@@ -124,7 +124,6 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   {
     ruckig_result = ruckig::Result::Error;
     bool backward_motion_detected = false;
-    RCLCPP_INFO_STREAM(LOGGER, "Processing waypoint: " << waypoint_idx << " / " << num_waypoints);
     moveit::core::RobotStatePtr next_waypoint = trajectory.getWayPointPtr(waypoint_idx + 1);
 
     getNextRuckigInput(ruckig_output, next_waypoint, num_dof, idx, ruckig_input);
@@ -147,18 +146,11 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
       // TODO(andyz): Sometimes this doesn't completely prevent backward motion.
       // Might need to increase the waypoint duration instead or in addition to this.
-      bool backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
+      backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
       if (backward_motion_detected &&
           (getTargetVelocityMagnitude(ruckig_input, num_dof) > MINIMUM_VELOCITY_SEARCH_MAGNITUDE))
       {
-        for (size_t joint = 0; joint < num_dof; ++joint)
-        {
-          ruckig_input.target_velocity.at(joint) *= 0.9;
-          // Propagate the change in velocity to acceleration, too.
-          // We don't change the position to ensure the exact target position is achieved.
-          ruckig_input.target_acceleration.at(joint) =
-              (ruckig_input.target_velocity.at(joint) - ruckig_output.new_velocity.at(joint)) / timestep;
-        }
+        decreaseTargetStateVelocity(num_dof, timestep, ruckig_input);
         // Run Ruckig on this waypoint again
         ruckig_result = ruckig_ptr->update(ruckig_input, ruckig_output);
         continue;
@@ -183,7 +175,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
       // They can cause "loopy motions".
 
       // If Ruckig failed completely, decrease target velocity
-      decreaseTargetStateVelocity(num_dof, timestep, ruckig_output, ruckig_input);
+      decreaseTargetStateVelocity(num_dof, timestep, ruckig_input);
 
       // Run Ruckig
       ruckig_result = ruckig_ptr->update(ruckig_input, ruckig_output);
@@ -213,7 +205,6 @@ void RuckigSmoothing::setRobotStateFromRuckigOutput(const ruckig::OutputParamete
 }
 
 void RuckigSmoothing::decreaseTargetStateVelocity(const size_t num_dof, const double timestep,
-                                                  const ruckig::OutputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_output,
                                                   ruckig::InputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_input)
 {
   for (size_t joint = 0; joint < num_dof; ++joint)
@@ -222,7 +213,7 @@ void RuckigSmoothing::decreaseTargetStateVelocity(const size_t num_dof, const do
     // Propagate the change in velocity to acceleration, too.
     // We don't change the position to ensure the exact target position is achieved.
     ruckig_input.target_acceleration.at(joint) =
-        (ruckig_input.target_velocity.at(joint) - ruckig_output.new_velocity.at(joint)) / timestep;
+        (ruckig_input.target_velocity.at(joint) - ruckig_input.current_velocity.at(joint)) / timestep;
   }
 }
 
