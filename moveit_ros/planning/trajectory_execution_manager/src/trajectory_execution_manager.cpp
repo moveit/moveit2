@@ -571,9 +571,10 @@ void TrajectoryExecutionManager::reloadControllerInformation()
 
     names.clear();
     controller_manager_->getActiveControllers(names);
-    for (const auto & active_name : names)
+    for (const auto& active_name : names)
     {
-      auto found_it  = std::find_if(known_controllers_.begin(), known_controllers_.end(), [&](const auto & known_controller) { return known_controller.first == active_name; } );
+      auto found_it = std::find_if(known_controllers_.begin(), known_controllers_.end(),
+                                   [&](const auto& known_controller) { return known_controller.first == active_name; });
       if (found_it != known_controllers_.end())
       {
         found_it->second.state_.active_ = true;
