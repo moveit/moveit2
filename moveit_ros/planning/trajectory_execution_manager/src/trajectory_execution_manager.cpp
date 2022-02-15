@@ -571,12 +571,12 @@ void TrajectoryExecutionManager::reloadControllerInformation()
 
     names.clear();
     controller_manager_->getActiveControllers(names);
-    for (std::map<std::string, ControllerInformation>::iterator it = known_controllers_.begin();
-         it != known_controllers_.end(); ++it)
+    for (const auto & active_name : names)
     {
-      if (std::find(names.begin(), names.end(), it->first) != names.end())
+      auto found_it  = std::find_if(known_controllers_.begin(), known_controllers_.end(), [&](const auto & known_controller) { return known_controller.first == active_name; } );
+      if (found_it != known_controllers_.end())
       {
-        it->second.state_.active_ = true;
+        found_it->second.state_.active_ = true;
       }
     }
 
