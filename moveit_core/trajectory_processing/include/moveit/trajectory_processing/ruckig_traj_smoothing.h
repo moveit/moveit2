@@ -74,9 +74,9 @@ private:
    * \param ruckig_output Output parameters from Ruckig
    * \return              true if lagging motion is detected on any joint
    */
-  static bool checkForLaggingMotion(const size_t num_dof,
-                                    const ruckig::InputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_input,
-                                    const ruckig::OutputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_output);
+  static bool checkForBackwardMotion(const size_t num_dof,
+                                     const ruckig::InputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_input,
+                                     const ruckig::OutputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_output);
 
   /**
    * \brief Return L2-norm of velocity, taking all joints into account.

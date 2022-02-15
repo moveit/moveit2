@@ -52,8 +52,8 @@ constexpr double DEFAULT_MAX_JERK = 20;              // rad/s^3
 constexpr double IDENTICAL_POSITION_EPSILON = 1e-3;  // rad
 constexpr double MAX_DURATION_EXTENSION_FACTOR = 5.0;
 constexpr double DURATION_EXTENSION_FRACTION = 1.1;
-constexpr double MINIMUM_VELOCITY_SEARCH_MAGNITUDE = 1e-5;  // rad/s. Stop searching when velocity drops below this
-constexpr size_t MAX_ITERATIONS_PER_WAYPOINT = 1000;  // Return failure if more than this many adjustments are needed
+constexpr size_t MAX_WAYPOINT_ADJUSTMENT_ATTEMPTS = 100;
+constexpr double BACKWARD_VELOCITY_THRESHOLD = 0.01;  // rad/s. Used in detection of backward motion
 }  // namespace
 
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
@@ -142,22 +142,34 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
     size_t num_iterations = 0;
     while ((backward_motion_detected || (ruckig_result != ruckig::Result::Finished)) &&
-           (num_iterations < MAX_ITERATIONS_PER_WAYPOINT))
+           (num_iterations < MAX_WAYPOINT_ADJUSTMENT_ATTEMPTS))
     {
       ++num_iterations;
 
       // If the requested velocity is too great, a joint can actually "move backward" to give itself more time to
-      // accelerate to the target velocity. Iterate and decrease velocities until that behavior is gone.
-
-      // TODO(andyz): Sometimes this doesn't completely prevent backward motion.
-      // Might need to increase the waypoint duration instead or in addition to this.
-      backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
-      if (backward_motion_detected &&
-          (getTargetVelocityMagnitude(ruckig_input, num_dof) > MINIMUM_VELOCITY_SEARCH_MAGNITUDE))
+      // accelerate to the target velocity. Stretch the duration of this waypoint to mitigate that.
+      double duration_extension_factor = 1;
+      if ((backward_motion_detected = checkForBackwardMotion(num_dof, ruckig_input, ruckig_output)) &&
+          (duration_extension_factor < MAX_DURATION_EXTENSION_FACTOR))
       {
-        decreaseTargetStateVelocity(num_dof, timestep, ruckig_input);
+        // initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), num_dof, idx);
+        duration_extension_factor *= DURATION_EXTENSION_FRACTION;
+        double new_timestep = DURATION_EXTENSION_FRACTION * trajectory.getWayPointDurationFromPrevious(waypoint_idx);
+        trajectory.setWayPointDurationFromPrevious(waypoint_idx + 1, new_timestep);
+        // Re-calculate waypoint accel since the timestep increased. Decrease velocity to help prevent overshoot.
+        for (size_t joint = 0; joint < num_dof; ++joint)
+        {
+          ruckig_input.target_velocity.at(joint) *= 0.9;
+          ruckig_input.target_acceleration.at(joint) =
+              (ruckig_input.target_velocity.at(joint) - ruckig_input.current_velocity.at(joint)) / new_timestep;
+        }
+
+        ruckig_ptr = std::make_unique<ruckig::Ruckig<RUCKIG_DYNAMIC_DOF>>(num_dof, new_timestep);
+
         // Run Ruckig on this waypoint again
         ruckig_result = ruckig_ptr->update(ruckig_input, ruckig_output);
+        // Reset Ruckig to the original timestep for the following waypoints
+        ruckig_ptr = std::make_unique<ruckig::Ruckig<RUCKIG_DYNAMIC_DOF>>(num_dof, timestep);
         continue;
       }
 
@@ -266,15 +278,16 @@ double RuckigSmoothing::getTargetVelocityMagnitude(const ruckig::InputParameter<
   return sqrt(vel_magnitude);
 }
 
-bool RuckigSmoothing::checkForLaggingMotion(const size_t num_dof,
-                                            const ruckig::InputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_input,
-                                            const ruckig::OutputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_output)
+bool RuckigSmoothing::checkForBackwardMotion(const size_t num_dof,
+                                             const ruckig::InputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_input,
+                                             const ruckig::OutputParameter<RUCKIG_DYNAMIC_DOF>& ruckig_output)
 {
   // Check for backward motion of any joint
   for (size_t joint = 0; joint < num_dof; ++joint)
   {
-    // This indicates the jerk-limited output lags the target output
-    if ((ruckig_output.new_velocity.at(joint) / ruckig_input.target_velocity.at(joint)) < 1)
+    // Check for opposite velocity sign and significant magnitude
+    if (((ruckig_output.new_velocity.at(joint) / ruckig_input.target_velocity.at(joint)) < 0) &&
+        (fabs(ruckig_output.new_velocity.at(joint)) > BACKWARD_VELOCITY_THRESHOLD))
     {
       return true;
     }
