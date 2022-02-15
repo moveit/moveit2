@@ -19,10 +19,16 @@ jobs:
           - IMAGE: rolling-ci
             CCOV: true
             ROS_DISTRO: rolling
+            OS_NAME: ubuntu
+            OS_CODE_NAME: focal
+            ROSDISTRO_INDEX_URL: https://raw.githubusercontent.com/ros/rosdistro/rolling/2022-01-28/index-v4.yaml
           - IMAGE: rolling-ci-testing
             IKFAST_TEST: true
             ROS_DISTRO: rolling
             CLANG_TIDY: pedantic
+            OS_NAME: ubuntu
+            OS_CODE_NAME: focal
+            ROSDISTRO_INDEX_URL: https://raw.githubusercontent.com/ros/rosdistro/rolling/2022-01-28/index-v4.yaml
     env:
       CXXFLAGS: "-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-deprecated-copy"
       CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
@@ -122,8 +128,7 @@ jobs:
         run: moveit_kinematics/test/test_ikfast_plugins.sh
       - id: ici
         name: Run industrial_ci
-        # https://github.com/ros-industrial/industrial_ci/commit/25481e5f15476812bde1a223765f602eb07eaa2d moves Rolling to Jammy, we are using a commit behind this to make CI passing until Jammy and ROS Rolling is good.
-        uses: ros-industrial/industrial_ci@008159b3948669bf3583c72c054e1c4f231d1c14
+        uses: ros-industrial/industrial_ci@master
         env: ${{ matrix.env }}
       - name: Push result to Testspace
         if: always()
