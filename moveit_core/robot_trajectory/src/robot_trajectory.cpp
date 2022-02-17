@@ -94,7 +94,7 @@ double RobotTrajectory::getAverageSegmentDuration() const
   if (duration_from_previous_.empty())
     return 0.0;
   else
-    return getDuration() / static_cast<double>(duration_from_previous_.size());
+    return getDuration() / static_cast<double>(duration_from_previous_.size() - 1);
 }
 
 void RobotTrajectory::swap(RobotTrajectory& other)
