@@ -91,8 +91,10 @@ double RobotTrajectory::getDuration() const
 
 double RobotTrajectory::getAverageSegmentDuration() const
 {
-  if (duration_from_previous_.empty())
+  if (duration_from_previous_.size() <= 1)
+  {
     return 0.0;
+  }
   else
     return getDuration() / static_cast<double>(duration_from_previous_.size() - 1);
 }
