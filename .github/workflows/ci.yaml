@@ -37,7 +37,7 @@ jobs:
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
       # Clear the ccache stats before and log the stats after the build
       BEFORE_BUILD_UPSTREAM_WORKSPACE: ccache -z
-      BEFORE_SETUP_ROSDEP: export ROSDISTRO_INDEX_URL=https://raw.githubusercontent.com/ros/rosdistro/rolling/2022-01-28/index-v4.yaml
+      BEFORE_SETUP_ROSDEP: export ROSDISTRO_INDEX_URL=https://raw.githubusercontent.com/ros/rosdistro/rolling/2022-01-28/index-v4.yaml; rm ~/.ros/rosdep/sources.cache/* ~/.ros/rosdep/meta.cache/*
       AFTER_BUILD_TARGET_WORKSPACE: ccache -s
       # Changing linker to lld as ld has a behavior where it takes a long time to finish
       TARGET_CMAKE_ARGS: >
