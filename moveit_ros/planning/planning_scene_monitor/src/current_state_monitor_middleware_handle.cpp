@@ -88,15 +88,15 @@ bool CurrentStateMonitorMiddlewareHandle::sleepFor(const std::chrono::nanosecond
   return rclcpp::sleep_for(nanoseconds);
 }
 
-void CurrentStateMonitorMiddlewareHandle::createStaticTfSubscription(TfCallback callback)
-{
-  static_transform_subscriber_ =
-      node_->create_subscription<tf2_msgs::msg::TFMessage>("/tf", tf2_ros::DynamicListenerQoS(), callback);
-}
-
 void CurrentStateMonitorMiddlewareHandle::createDynamicTfSubscription(TfCallback callback)
 {
   transform_subscriber_ =
+      node_->create_subscription<tf2_msgs::msg::TFMessage>("/tf", tf2_ros::DynamicListenerQoS(), callback);
+}
+
+void CurrentStateMonitorMiddlewareHandle::createStaticTfSubscription(TfCallback callback)
+{
+  static_transform_subscriber_ =
       node_->create_subscription<tf2_msgs::msg::TFMessage>("/tf_static", tf2_ros::StaticListenerQoS(), callback);
 }
 
