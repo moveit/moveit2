@@ -39,7 +39,7 @@
 #include <fstream>
 #include <gtest/gtest.h>
 #include <boost/filesystem/path.hpp>
-#include <moveit/profiler/profiler.h>
+
 #include <moveit/utils/robot_model_test_utils.h>
 
 class LoadPlanningModelsPr2 : public testing::Test
@@ -71,15 +71,26 @@ TEST_F(LoadPlanningModelsPr2, Model)
   const std::vector<const moveit::core::JointModel*>& joints = robot_model_->getJointModels();
   for (std::size_t i = 0; i < joints.size(); ++i)
   {
-    ASSERT_EQ(joints[i]->getJointIndex(), static_cast<int>(i));
+    ASSERT_EQ(joints[i]->getJointIndex(), i);
     ASSERT_EQ(robot_model_->getJointModel(joints[i]->getName()), joints[i]);
   }
   const std::vector<const moveit::core::LinkModel*>& links = robot_model_->getLinkModels();
   for (std::size_t i = 0; i < links.size(); ++i)
   {
-    ASSERT_EQ(links[i]->getLinkIndex(), static_cast<int>(i));
+    ASSERT_EQ(links[i]->getLinkIndex(), i);
   }
-  moveit::tools::Profiler::Status();
+
+  // This joint has effort and velocity limits defined in the URDF. Nothing else.
+  const std::string joint_name = "fl_caster_rotation_joint";
+  const auto& joint = robot_model_->getJointModel(joint_name);
+  const auto& bounds = joint->getVariableBounds(joint->getName());
+
+  EXPECT_TRUE(bounds.velocity_bounded_);
+  EXPECT_EQ(bounds.max_velocity_, 10.0);
+
+  EXPECT_FALSE(bounds.position_bounded_);
+  EXPECT_FALSE(bounds.acceleration_bounded_);
+  EXPECT_FALSE(bounds.jerk_bounded_);
 }
 
 TEST(SiblingAssociateLinks, SimpleYRobot)

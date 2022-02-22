@@ -2,6 +2,48 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2022-01-20)
+------------------
+* Merge https://github.com/ros-planning/moveit/commit/f3ac6070497da90da33551fc1dc3a68938340413
+* Replace NULL with nullptr (`#961 <https://github.com/ros-planning/moveit2/issues/961>`_)
+  * Fixes `#841 <https://github.com/ros-planning/moveit2/issues/841>`_
+* Add jerk to the robot model (`#683 <https://github.com/ros-planning/moveit2/issues/683>`_)
+  * Add jerk to the robot model
+  * Add joint limit parsing to a unit test
+  * Add jerk to computeVariableBoundsMsg and <<, too
+* Silent clang-tidy's -Wpotentially-evaluated-expression
+  https://stackoverflow.com/questions/46494928/clang-warning-on-expression-side-effects
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Contributors: Abishalini, AndyZe, Robert Haschke, Stephanie Eng
+
+2.3.2 (2021-12-29)
+------------------
+* Add ros_testsing to moveit_ros_planning for rdf_loader (`#943 <https://github.com/ros-planning/moveit2/issues/943>`_)
+* Contributors: Tyler Weaver
+
+2.3.1 (2021-12-23)
+------------------
+* Replaced C-Style Cast with C++ Style Cast. (`#935 <https://github.com/ros-planning/moveit2/issues/935>`_)
+* Add codespell to precommit, fix A LOT of spelling mistakes (`#934 <https://github.com/ros-planning/moveit2/issues/934>`_)
+* Get rid of "std::endl" (`#918 <https://github.com/ros-planning/moveit2/issues/918>`_)
+* changed post-increments in loops to preincrements (`#888 <https://github.com/ros-planning/moveit2/issues/888>`_)
+* Latched Strings for URDF and SRDF (`#765 <https://github.com/ros-planning/moveit2/issues/765>`_)
+* Consider simulated time (`#883 <https://github.com/ros-planning/moveit2/issues/883>`_)
+* Make controller management logic more tolerant of missing or late ros2_control nodes (`#792 <https://github.com/ros-planning/moveit2/issues/792>`_)
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* Tests for TrajectoryMonitor using dependency injection (`#570 <https://github.com/ros-planning/moveit2/issues/570>`_)
+* Update controller_manager_plugin to fix MoveIt-managed controller switching (`#785 <https://github.com/ros-planning/moveit2/issues/785>`_)
+* MoveitCpp - path constraints added from PlanningComponent (backport `#752 <https://github.com/ros-planning/moveit2/issues/752>`_) (`#781 <https://github.com/ros-planning/moveit2/issues/781>`_)
+* Split CollisionPluginLoader (`#2834 <https://github.com/ros-planning/moveit/issues/2834>`_)
+* Bugfix in RDFLoader (`#2806 <https://github.com/ros-planning/moveit/issues/2806>`_)
+* Fix obvious typo (`#2787 <https://github.com/ros-planning/moveit/issues/2787>`_)
+* clang-tidy: modernize-make-shared, modernize-make-unique (`#2762 <https://github.com/ros-planning/moveit/issues/2762>`_)
+* Contributors: Abishalini Sivaraman, Dave Coleman, David V. Lu!!, Felix von Drigalski, Gaël Écorchard, Henning Kayser, Joseph Schornak, Kaustubh, Mathias Lüdtke, Michael Görner, Parthasarathy Bana, Robert Haschke, Sencer Yazıcı, pvanlaar, werner291
+
 2.3.0 (2021-10-08)
 ------------------
 * Make TF buffer & listener in PSM private (`#654 <https://github.com/ros-planning/moveit2/issues/654>`_)

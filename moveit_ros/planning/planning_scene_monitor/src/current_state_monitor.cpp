@@ -488,7 +488,7 @@ void CurrentStateMonitor::transformCallback(const tf2_msgs::msg::TFMessage::Cons
     catch (tf2::TransformException& ex)
     {
       std::string temp = ex.what();
-      RCLCPP_ERROR(LOGGER, "Failure to set recieved transform from %s to %s with error: %s\n",
+      RCLCPP_ERROR(LOGGER, "Failure to set received transform from %s to %s with error: %s\n",
                    transform.child_frame_id.c_str(), transform.header.frame_id.c_str(), temp.c_str());
     }
   }

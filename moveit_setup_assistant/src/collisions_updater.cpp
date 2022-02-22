@@ -108,7 +108,7 @@ bool setup(moveit_setup_assistant::MoveItConfigData& config_data, bool keep_old,
 moveit_setup_assistant::LinkPairMap compute(moveit_setup_assistant::MoveItConfigData& config_data, uint32_t trials,
                                             double min_collision_fraction, bool verbose)
 {
-  // TODO: spin thread and print progess if verbose
+  // TODO: spin thread and print progress if verbose
   unsigned int collision_progress;
   return moveit_setup_assistant::computeDefaultCollisions(config_data.getPlanningScene(), &collision_progress,
                                                           trials > 0, trials, min_collision_fraction, verbose);
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 
   if (vm.count("help"))
   {
-    std::cout << desc << std::endl;
+    std::cout << desc << '\n';
     return 1;
   }
 

@@ -142,13 +142,13 @@ TEST_F(TestAABB, TestPR2)
   EXPECT_NEAR(aabb.sizes()[2], 0.2901, 1e-4);
 
 #if VISUALIZE_PR2_RVIZ
-  std::cout << "Overall bounding box of PR2:" << std::endl;
+  std::cout << "Overall bounding box of PR2:" << '\n';
   std::string dims[] = { "x", "y", "z" };
   for (std::size_t i = 0; i < 3; ++i)
   {
     double dim = pr2_aabb[2 * i + 1] - pr2_aabb[2 * i];
     double center = dim / 2;
-    std::cout << dims[i] << ": size=" << dim << ", offset=" << (pr2_aabb[2 * i + 1] - center) << std::endl;
+    std::cout << dims[i] << ": size=" << dim << ", offset=" << (pr2_aabb[2 * i + 1] - center) << '\n';
   }
 
   // Initialize a ROS publisher

@@ -41,8 +41,6 @@
 
 #include "pilz_industrial_motion_planner/trajectory_generator.h"
 
-using namespace pilz_industrial_motion_planner;
-
 namespace pilz_industrial_motion_planner
 {
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircleNoPlane, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
@@ -83,7 +81,8 @@ public:
    *
    */
   TrajectoryGeneratorCIRC(const moveit::core::RobotModelConstPtr& robot_model,
-                          const pilz_industrial_motion_planner::LimitsContainer& planner_limits);
+                          const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
+                          const std::string& group_name);
 
 private:
   void cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const override;

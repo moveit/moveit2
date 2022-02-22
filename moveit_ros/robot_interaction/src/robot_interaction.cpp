@@ -576,7 +576,7 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
     boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
     if (int_marker_move_subscribers_.empty())
     {
-      for (size_t i = 0; i < int_marker_move_topics_.size(); i++)
+      for (size_t i = 0; i < int_marker_move_topics_.size(); ++i)
       {
         std::string topic_name = int_marker_move_topics_[i];
         std::string marker_name = int_marker_names_[i];

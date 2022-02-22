@@ -77,8 +77,6 @@ CollisionEnvBullet::CollisionEnvBullet(const moveit::core::RobotModelConstPtr& m
 CollisionEnvBullet::CollisionEnvBullet(const CollisionEnvBullet& other, const WorldPtr& world)
   : CollisionEnv(other, world)
 {
-  // TODO(j-petit): Verify this constructor
-
   // request notifications about changes to new world
   observer_handle_ = getWorld()->addObserver(boost::bind(&CollisionEnvBullet::notifyObjectChange, this, _1, _2));
 
@@ -86,6 +84,9 @@ CollisionEnvBullet::CollisionEnvBullet(const CollisionEnvBullet& other, const Wo
   {
     addLinkAsCollisionObject(link.second);
   }
+
+  // get notifications any objects already in the new world
+  getWorld()->notifyObserverAllObjects(observer_handle_, World::CREATE);
 }
 
 CollisionEnvBullet::~CollisionEnvBullet()
@@ -231,14 +232,14 @@ void CollisionEnvBullet::checkRobotCollisionHelperCCD(const CollisionRequest& re
   }
 }
 
-void CollisionEnvBullet::distanceSelf(const DistanceRequest& req, DistanceResult& res,
-                                      const moveit::core::RobotState& state) const
+void CollisionEnvBullet::distanceSelf(const DistanceRequest& /*req*/, DistanceResult& /*res*/,
+                                      const moveit::core::RobotState& /*state*/) const
 {
   RCLCPP_INFO(LOGGER, "distanceSelf is not implemented for Bullet.");
 }
 
-void CollisionEnvBullet::distanceRobot(const DistanceRequest& req, DistanceResult& res,
-                                       const moveit::core::RobotState& state) const
+void CollisionEnvBullet::distanceRobot(const DistanceRequest& /*req*/, DistanceResult& /*res*/,
+                                       const moveit::core::RobotState& /*state*/) const
 {
   RCLCPP_INFO(LOGGER, "distanceRobot is not implemented for Bullet.");
 }

@@ -80,8 +80,8 @@ void KinematicsCache::setup(const KinematicsCache::Options& opt)
   ROS_DEBUG("Origin: %f %f %f", cache_origin_.x, cache_origin_.y, cache_origin_.z);
   ROS_DEBUG("Cache size (num points x,y,z): %d %d %d", cache_size_x_, cache_size_y_, cache_size_z_);
   ROS_DEBUG("Cache resolution: %f %f %f", cache_resolution_x_, cache_resolution_y_, cache_resolution_z_);
-  ROS_DEBUG("Solutions per grid location: %d", (int)max_solutions_per_grid_location_);
-  ROS_DEBUG("Solution dimension: %d", (int)solution_dimension_);
+  ROS_DEBUG("Solutions per grid location: %d", static_cast<int> max_solutions_per_grid_location_);
+  ROS_DEBUG("Solution dimension: %d", static_cast<int> solution_dimension_);
 }
 
 bool KinematicsCache::generateCacheMap(double timeout)
@@ -137,7 +137,7 @@ bool KinematicsCache::addToCache(const geometry_msgs::Pose& pose, const std::vec
   unsigned int start_index = getSolutionLocation(grid_index, num_solutions);
   for (unsigned int i = 0; i < joint_values.size(); ++i)
   {
-    //    ROS_INFO("Joint value[%d]: %f, localtion: %d",i,joint_values[i],start_index+i);
+    //    ROS_INFO("Joint value[%d]: %f, location: %d",i,joint_values[i],start_index+i);
     kinematics_cache_vector_[start_index + i] = joint_values[i];
   }
   if (num_solutions_vector_[grid_index] < max_solutions_per_grid_location_)
@@ -148,21 +148,21 @@ bool KinematicsCache::addToCache(const geometry_msgs::Pose& pose, const std::vec
 
 bool KinematicsCache::getGridIndex(const geometry_msgs::Pose& pose, unsigned int& grid_index) const
 {
-  int x_index = (int)((pose.position.x - cache_origin_.x) / cache_resolution_x_);
-  int y_index = (int)((pose.position.y - cache_origin_.y) / cache_resolution_y_);
-  int z_index = (int)((pose.position.z - cache_origin_.z) / cache_resolution_z_);
+  int x_index = static_cast<int>((pose.position.x - cache_origin_.x) / cache_resolution_x_);
+  int y_index = static_cast<int>((pose.position.y - cache_origin_.y) / cache_resolution_y_);
+  int z_index = static_cast<int>((pose.position.z - cache_origin_.z) / cache_resolution_z_);
 
-  if (x_index >= (int)cache_size_x_ || x_index < 0)
+  if (x_index >= static_cast<int>(cache_size_x_ || x_index < 0))
   {
     ROS_DEBUG("X position %f,%d lies outside grid: %d %d", pose.position.x, x_index, 0, cache_size_x_);
     return false;
   }
-  if (y_index >= (int)cache_size_y_ || y_index < 0)
+  if (y_index >= static_cast<int>(cache_size_y_ || y_index < 0))
   {
     ROS_DEBUG("Y position %f,%d lies outside grid: %d %d", pose.position.y, y_index, 0, cache_size_y_);
     return false;
   }
-  if (z_index >= (int)cache_size_z_ || z_index < 0)
+  if (z_index >= static_cast<int>(cache_size_z_ || z_index < 0))
   {
     ROS_DEBUG("Z position %f,%d lies outside grid: %d %d", pose.position.z, z_index, 0, cache_size_z_);
     return false;
@@ -211,7 +211,7 @@ bool KinematicsCache::getSolutions(const geometry_msgs::Pose& pose, std::vector<
     return false;
   if (solution.size() != num_solutions_vector_[grid_index])
     return false;
-  for (unsigned int i = 0; i < solution.size(); i++)
+  for (unsigned int i = 0; i < solution.size(); ++i)
   {
     if (solution[i].size() != solution_dimension_)
       return false;
@@ -318,13 +318,13 @@ bool KinematicsCache::readFromFile(const std::string& filename)
 
   kinematics_cache_vector_ = kinematics_cache_vector;
   num_solutions_vector_ = num_solutions_vector;
-  ROS_DEBUG("Read %d total points from file: %s", (int)num_solutions_vector_.size(), filename.c_str());
+  ROS_DEBUG("Read %d total points from file: %s", static_cast<int> num_solutions_vector_.size(), filename.c_str());
   return true;
 }
 
 bool KinematicsCache::writeToFile(const std::string& filename)
 {
-  ROS_DEBUG("Writing %d total points to file: %s", (int)num_solutions_vector_.size(), filename.c_str());
+  ROS_DEBUG("Writing %d total points to file: %s", static_cast<int> num_solutions_vector_.size(), filename.c_str());
   std::ofstream file;
   file.open(filename.c_str());
   if (!file.is_open())
@@ -335,24 +335,24 @@ bool KinematicsCache::writeToFile(const std::string& filename)
   if (file.good())
   {
     std::string group_name = kinematics_solver_->getGroupName();
-    file << group_name << std::endl;
+    file << group_name << '\n';
 
-    file << options_.origin.x << " " << options_.origin.y << " " << options_.origin.z << std::endl;
+    file << options_.origin.x << " " << options_.origin.y << " " << options_.origin.z << '\n';
     file << options_.workspace_size[0] << " " << options_.workspace_size[1] << " " << options_.workspace_size[2]
-         << std::endl;
-    file << options_.resolution[0] << " " << options_.resolution[1] << " " << options_.resolution[2] << std::endl;
-    file << options_.max_solutions_per_grid_location << std::endl;
-    file << min_squared_distance_ << std::endl;
-    file << max_squared_distance_ << std::endl;
-    file << kinematics_cache_vector_.size() << std::endl;
+         << '\n';
+    file << options_.resolution[0] << " " << options_.resolution[1] << " " << options_.resolution[2] << '\n';
+    file << options_.max_solutions_per_grid_location << '\n';
+    file << min_squared_distance_ << '\n';
+    file << max_squared_distance_ << '\n';
+    file << kinematics_cache_vector_.size() << '\n';
     std::copy(kinematics_cache_vector_.begin(), kinematics_cache_vector_.end(),
               std::ostream_iterator<double>(file, " "));
-    file << std::endl;
+    file << '\n';
 
-    file << num_solutions_vector_.size() << std::endl;
+    file << num_solutions_vector_.size() << '\n';
     std::copy(num_solutions_vector_.begin(), num_solutions_vector_.end(),
               std::ostream_iterator<unsigned int>(file, " "));
-    file << std::endl;
+    file << '\n';
   }
 
   file.close();

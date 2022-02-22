@@ -2,6 +2,33 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2022-01-20)
+------------------
+* Fix IKFast test dependency (`#993 <https://github.com/ros-planning/moveit2/issues/993>`_)
+* Replace NULL with nullptr (`#961 <https://github.com/ros-planning/moveit2/issues/961>`_)
+  * Fixes `#841 <https://github.com/ros-planning/moveit2/issues/841>`_
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Contributors: Henning Kayser, Robert Haschke, Stephanie Eng
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Convert to modern include guard `#882 <https://github.com/ros-planning/moveit2/issues/882>`_ (`#891 <https://github.com/ros-planning/moveit2/issues/891>`_)
+* Replaced C-Style Cast with C++ Style Cast. (`#935 <https://github.com/ros-planning/moveit2/issues/935>`_)
+* Add codespell to precommit, fix A LOT of spelling mistakes (`#934 <https://github.com/ros-planning/moveit2/issues/934>`_)
+* Get rid of "std::endl" (`#918 <https://github.com/ros-planning/moveit2/issues/918>`_)
+* changed post-increments in loops to preincrements (`#888 <https://github.com/ros-planning/moveit2/issues/888>`_)
+* Update README (`#812 <https://github.com/ros-planning/moveit2/issues/812>`_)
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* clang-tidy: modernize-make-shared, modernize-make-unique (`#2762 <https://github.com/ros-planning/moveit/issues/2762>`_)
+* Contributors: Dave Coleman, David V. Lu!!, Henning Kayser, Kaustubh, Parthasarathy Bana, Robert Haschke, Sencer Yazıcı, Stephanie Eng, predystopic-dev, pvanlaar
+
 2.3.0 (2021-10-08)
 ------------------
 * Fix cmake warnings (`#690 <https://github.com/ros-planning/moveit2/issues/690>`_)

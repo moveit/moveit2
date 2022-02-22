@@ -1120,7 +1120,7 @@ public:
 
      In contrast to the previous functions, the Cartesian path is specified as a set of \e waypoints to be sequentially
      reached for the origin of a robot link (\e link). The waypoints are transforms given either in a global reference
-     frame or in the local reference frame of the link at the immediately preceeding waypoint. The link needs to move
+     frame or in the local reference frame of the link at the immediately preceding waypoint. The link needs to move
      in a straight line between two consecutive waypoints. All other comments apply.
 
      NOTE: As of ROS-Melodic these are deprecated and should not be used
@@ -1286,7 +1286,7 @@ public:
    */
 
   /** \brief Update the transforms for the collision bodies. This call is needed before calling collision checking.
-      If updating link transforms or joint transorms is needed, the corresponding updates are also triggered. */
+      If updating link transforms or joint transforms is needed, the corresponding updates are also triggered. */
   void updateCollisionBodyTransforms();
 
   /** \brief Update the reference frame transforms for links. This call is needed before using the transforms of links
@@ -1311,6 +1311,13 @@ public:
 
   /** \brief Update the state after setting a particular link to the input global transform pose.*/
   void updateStateWithLinkAt(const LinkModel* link, const Eigen::Isometry3d& transform, bool backward = false);
+
+  /** \brief Get the latest link upwards the kinematic tree which is only connected via fixed joints.
+   *
+   * This behaves the same as RobotModel::getRigidlyConnectedParentLinkModel,
+   * but can additionally resolve parents for attached objects / subframes.
+   */
+  const moveit::core::LinkModel* getRigidlyConnectedParentLinkModel(const std::string& frame) const;
 
   /** \brief Get the link transform w.r.t. the root link (model frame) of the RobotModel.
    *   This is typically the root link of the URDF unless a virtual joint is present.
@@ -1660,7 +1667,7 @@ public:
   /** \brief Clear all attached bodies. This calls delete on the AttachedBody instances, if needed. */
   void clearAttachedBodies();
 
-  /** \brief Get the attached body named \e name. Return NULL if not found. */
+  /** \brief Get the attached body named \e name. Return nullptr if not found. */
   const AttachedBody* getAttachedBody(const std::string& name) const;
 
   /** \brief Check if an attached body named \e id exists in this state */
@@ -1772,7 +1779,7 @@ public:
 
   void printDirtyInfo(std::ostream& out = std::cout) const;
 
-  std::string getStateTreeString(const std::string& prefix = "") const;
+  std::string getStateTreeString() const;
 
   /**
    * \brief Transform pose from the robot model's base frame to the reference frame of the IK solver

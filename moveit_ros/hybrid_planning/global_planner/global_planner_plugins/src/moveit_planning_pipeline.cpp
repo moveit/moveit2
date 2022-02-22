@@ -53,12 +53,12 @@ bool MoveItPlanningPipeline::initialize(const rclcpp::Node::SharedPtr& node)
   // TODO(andyz): how to standardize this for planning pipelines other than ompl?
   // Maybe use loadPlanningPipelines() from moveit_cpp.cpp
 
-  // Declare planning pipeline paramter
+  // Declare planning pipeline parameter
   node->declare_parameter<std::vector<std::string>>(PLANNING_PIPELINES_NS + "pipeline_names",
                                                     std::vector<std::string>({ UNDEFINED }));
   node->declare_parameter<std::string>(PLANNING_PIPELINES_NS + "namespace", UNDEFINED);
 
-  // Default PlanRequestParameters. These can be overriden when plan() is called
+  // Default PlanRequestParameters. These can be overridden when plan() is called
   node->declare_parameter<std::string>(PLAN_REQUEST_PARAM_NS + "planner_id", UNDEFINED);
   node->declare_parameter<std::string>(PLAN_REQUEST_PARAM_NS + "planning_pipeline", UNDEFINED);
   node->declare_parameter<int>(PLAN_REQUEST_PARAM_NS + "planning_attempts", 5);
@@ -66,6 +66,15 @@ bool MoveItPlanningPipeline::initialize(const rclcpp::Node::SharedPtr& node)
   node->declare_parameter<double>(PLAN_REQUEST_PARAM_NS + "max_velocity_scaling_factor", 1.0);
   node->declare_parameter<double>(PLAN_REQUEST_PARAM_NS + "max_acceleration_scaling_factor", 1.0);
   node->declare_parameter<std::string>("ompl.planning_plugin", "ompl_interface/OMPLPlanner");
+
+  // Planning Scene options
+  node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "name", UNDEFINED);
+  node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "robot_description", UNDEFINED);
+  node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "joint_state_topic", UNDEFINED);
+  node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "attached_collision_object_topic", UNDEFINED);
+  node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "publish_planning_scene_topic", UNDEFINED);
+  node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "monitored_planning_scene_topic", UNDEFINED);
+  node->declare_parameter<double>(PLANNING_SCENE_MONITOR_NS + "wait_for_initial_state_timeout", 10.0);
 
   // Trajectory Execution Functionality (required by the MoveItPlanningPipeline but not used within hybrid planning)
   node->declare_parameter<std::string>("moveit_controller_manager", UNDEFINED);

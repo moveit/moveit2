@@ -111,12 +111,17 @@ public:
                                      node);
       declareOrGetParam<std::string>("local_constraint_solver_plugin_name", local_constraint_solver_plugin_name,
                                      undefined, node);
+      declareOrGetParam<std::string>("local_planning_action_name", local_planning_action_name, undefined, node);
       declareOrGetParam<double>("local_planning_frequency", local_planning_frequency, 1.0, node);
       declareOrGetParam<std::string>("global_solution_topic", global_solution_topic, undefined, node);
       declareOrGetParam<std::string>("local_solution_topic", local_solution_topic, undefined, node);
       declareOrGetParam<std::string>("local_solution_topic_type", local_solution_topic_type, undefined, node);
       declareOrGetParam<bool>("publish_joint_positions", publish_joint_positions, false, node);
       declareOrGetParam<bool>("publish_joint_velocities", publish_joint_velocities, false, node);
+      // Planning scene monitor options
+      declareOrGetParam<std::string>("monitored_planning_scene", monitored_planning_scene_topic, undefined, node);
+      declareOrGetParam<std::string>("collision_object_topic", collision_object_topic, undefined, node);
+      declareOrGetParam<std::string>("joint_states_topic", joint_states_topic, undefined, node);
     }
 
     std::string group_name;
@@ -125,12 +130,16 @@ public:
     std::string publish_planning_scene_topic;
     std::string trajectory_operator_plugin_name;
     std::string local_constraint_solver_plugin_name;
+    std::string local_planning_action_name;
     std::string global_solution_topic;
     std::string local_solution_topic;
     std::string local_solution_topic_type;
     bool publish_joint_positions;
     bool publish_joint_velocities;
     double local_planning_frequency;
+    std::string monitored_planning_scene_topic;
+    std::string collision_object_topic;
+    std::string joint_states_topic;
   };
 
   /** \brief Constructor */
@@ -165,8 +174,8 @@ private:
   // Planner configuration
   LocalPlannerConfig config_;
 
-  // Current planner state
-  LocalPlannerState state_;
+  // Current planner state. Must be thread-safe
+  std::atomic<LocalPlannerState> state_;
 
   // Timer to periodically call executeIteration()
   rclcpp::TimerBase::SharedPtr timer_;

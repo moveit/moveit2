@@ -36,7 +36,7 @@
 
 #include <moveit/ompl_interface/planning_context_manager.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit/profiler/profiler.h>
+
 #include <utility>
 
 #include <ompl/geometric/planners/AnytimePathShortening.h>
@@ -522,7 +522,7 @@ ModelBasedPlanningContextPtr PlanningContextManager::getPlanningContext(
   // Check if the user wants to use an OMPL ConstrainedStateSpace for planning.
   // This is done by setting 'enforce_constrained_state_space' to 'true' for the desired group in ompl_planing.yaml.
   // If there are no path constraints in the planning request, this option is ignored, as the constrained state space is
-  // only usefull for paths constraints. (And at the moment only a single position constraint is supported, hence:
+  // only useful for paths constraints. (And at the moment only a single position constraint is supported, hence:
   //     req.path_constraints.position_constraints.size() == 1
   // is used in the selection process below.)
   //

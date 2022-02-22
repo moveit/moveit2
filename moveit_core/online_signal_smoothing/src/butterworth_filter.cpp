@@ -51,7 +51,7 @@ ButterworthFilter::ButterworthFilter(double low_pass_filter_coeff)
   , scale_term_(1. / (1. + low_pass_filter_coeff))
   , feedback_term_(1. - low_pass_filter_coeff)
 {
-  // guarantee this doesn't change because the logic below depends on this length implicity
+  // guarantee this doesn't change because the logic below depends on this length implicitly
   static_assert(ButterworthFilter::FILTER_LENGTH == 2,
                 "online_signal_smoothing::ButterworthFilter::FILTER_LENGTH should be 2");
 
@@ -89,7 +89,7 @@ void ButterworthFilter::reset(const double data)
   previous_filtered_measurement_ = data;
 }
 
-bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
+bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr /* unused */,
                                          size_t num_joints)
 {
   node_ = node;

@@ -60,9 +60,16 @@ macro(moveit_package)
     )
   endif()
 
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # This too often has false-positives
-    add_compile_options(-Wno-maybe-uninitialized)
+  option(MOVEIT_CI_WARNINGS "Enable all warnings used by CI" ON)
+  if(MOVEIT_CI_WARNINGS)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      add_compile_options(-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual)
+      # This too often has false-positives
+      add_compile_options(-Wno-maybe-uninitialized)
+    endif()
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      add_compile_options(-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wcast-qual)
+    endif()
   endif()
 
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

@@ -2,6 +2,31 @@
 Changelog for package moveit_ros_occupancy_map_monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2022-01-20)
+------------------
+* Fix boost linking errors for Windows (`#957 <https://github.com/ros-planning/moveit2/issues/957>`_)
+* Replace NULL with nullptr (`#961 <https://github.com/ros-planning/moveit2/issues/961>`_)
+  * Fixes `#841 <https://github.com/ros-planning/moveit2/issues/841>`_
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Contributors: Akash, Robert Haschke, Stephanie Eng
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Replaced C-Style Cast with C++ Style Cast. (`#935 <https://github.com/ros-planning/moveit2/issues/935>`_)
+* Add codespell to precommit, fix A LOT of spelling mistakes (`#934 <https://github.com/ros-planning/moveit2/issues/934>`_)
+* Get rid of "std::endl" (`#918 <https://github.com/ros-planning/moveit2/issues/918>`_)
+* Fix boost linking errors (`#900 <https://github.com/ros-planning/moveit2/issues/900>`_)
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* Prefer std::make_shared over new operator (`#2756 <https://github.com/ros-planning/moveit/issues/2756>`_)
+* Contributors: Dave Coleman, David V. Lu!!, Henning Kayser, Kaustubh, Michael Görner, Parthasarathy Bana, Robert Haschke, Vatan Aksoy Tezer
+
 2.3.0 (2021-10-08)
 ------------------
 * Error if Octomap 'map_frame' is not provided (`#667 <https://github.com/ros-planning/moveit2/issues/667>`_)

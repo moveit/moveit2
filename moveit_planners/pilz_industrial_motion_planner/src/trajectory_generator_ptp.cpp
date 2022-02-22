@@ -55,7 +55,7 @@ namespace pilz_industrial_motion_planner
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_ptp");
 TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelConstPtr& robot_model,
-                                               const LimitsContainer& planner_limits)
+                                               const LimitsContainer& planner_limits, const std::string& group_name)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
 {
   if (!planner_limits_.hasJointLimits())
@@ -66,35 +66,29 @@ TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelCon
   joint_limits_ = planner_limits_.getJointLimitContainer();
 
   // collect most strict joint limits for each group in robot model
-  for (const auto& jmg : robot_model->getJointModelGroups())
+  const auto* jmg = robot_model->getJointModelGroup(group_name);
+  if (!jmg)
+    throw TrajectoryGeneratorInvalidLimitsException("invalid group: " + group_name);
+
+  const auto& active_joints = jmg->getActiveJointModelNames();
+
+  // no active joints
+  if (!active_joints.empty())
   {
-    const auto& active_joints = jmg->getActiveJointModelNames();
+    most_strict_limit_ = joint_limits_.getCommonLimit(active_joints);
 
-    // no active joints
-    if (active_joints.empty())
+    if (!most_strict_limit_.has_velocity_limits)
     {
-      continue;
+      throw TrajectoryGeneratorInvalidLimitsException("velocity limit not set for group " + group_name);
     }
-
-    JointLimit most_strict_limit = joint_limits_.getCommonLimit(active_joints);
-
-    if (!most_strict_limit.has_velocity_limits)
+    if (!most_strict_limit_.has_acceleration_limits)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "velocity limit not set for group " << jmg->getName());
-      throw TrajectoryGeneratorInvalidLimitsException("velocity limit not set for group " + jmg->getName());
+      throw TrajectoryGeneratorInvalidLimitsException("acceleration limit not set for group " + group_name);
     }
-    if (!most_strict_limit.has_acceleration_limits)
+    if (!most_strict_limit_.has_deceleration_limits)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "acceleration limit not set for group " << jmg->getName());
-      throw TrajectoryGeneratorInvalidLimitsException("acceleration limit not set for group " + jmg->getName());
+      throw TrajectoryGeneratorInvalidLimitsException("deceleration limit not set for group " + group_name);
     }
-    if (!most_strict_limit.has_deceleration_limits)
-    {
-      RCLCPP_ERROR_STREAM(LOGGER, "deceleration limit not set for group " << jmg->getName());
-      throw TrajectoryGeneratorInvalidLimitsException("deceleration limit not set for group " + jmg->getName());
-    }
-
-    most_strict_limits_.insert(std::pair<std::string, JointLimit>(jmg->getName(), most_strict_limit));
   }
 
   RCLCPP_INFO(LOGGER, "Initialized Point-to-Point Trajectory Generator.");
@@ -103,8 +97,8 @@ TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelCon
 void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_pos,
                                      const std::map<std::string, double>& goal_pos,
                                      trajectory_msgs::msg::JointTrajectory& joint_trajectory,
-                                     const std::string& group_name, const double& velocity_scaling_factor,
-                                     const double& acceleration_scaling_factor, const double& sampling_time)
+                                     const double& velocity_scaling_factor, const double& acceleration_scaling_factor,
+                                     const double& sampling_time)
 {
   // initialize joint names
   for (const auto& item : goal_pos)
@@ -149,10 +143,9 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
   {
     // create vecocity profile if necessary
     velocity_profile.insert(std::make_pair(
-        joint_name,
-        VelocityProfileATrap(velocity_scaling_factor * most_strict_limits_.at(group_name).max_velocity,
-                             acceleration_scaling_factor * most_strict_limits_.at(group_name).max_acceleration,
-                             acceleration_scaling_factor * most_strict_limits_.at(group_name).max_deceleration)));
+        joint_name, VelocityProfileATrap(velocity_scaling_factor * most_strict_limit_.max_velocity,
+                                         acceleration_scaling_factor * most_strict_limit_.max_acceleration,
+                                         acceleration_scaling_factor * most_strict_limit_.max_deceleration)));
 
     velocity_profile.at(joint_name).SetProfile(start_pos.at(joint_name), goal_pos.at(joint_name));
     if (velocity_profile.at(joint_name).Duration() > max_duration)
@@ -267,12 +260,12 @@ void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_scene::Plannin
   }
 }
 
-void TrajectoryGeneratorPTP::plan(const planning_scene::PlanningSceneConstPtr& scene,
+void TrajectoryGeneratorPTP::plan(const planning_scene::PlanningSceneConstPtr& /*scene*/,
                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
                                   const double& sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // plan the ptp trajectory
-  planPTP(plan_info.start_joint_position, plan_info.goal_joint_position, joint_trajectory, plan_info.group_name,
+  planPTP(plan_info.start_joint_position, plan_info.goal_joint_position, joint_trajectory,
           req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, sampling_time);
 }
 

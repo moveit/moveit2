@@ -241,16 +241,16 @@ TEST_F(IntegrationTestCommandPlanning, PtpJointCart)
  *
  * Expected Results:
  *  1. Planning request is successful.
- *  2. Goal position correponds with the given goal position.
+ *  2. Goal position corresponds with the given goal position.
  *  3. Trajectory is a straight line.
  */
 TEST_F(IntegrationTestCommandPlanning, LinJoint)
 {
   planning_interface::MotionPlanRequest req{ test_data_->getLinJoint("lin2").toRequest() };
 
-  std::cout << "++++++++++" << std::endl;
-  std::cout << "+ Step 1 +" << std::endl;
-  std::cout << "++++++++++" << std::endl;
+  std::cout << "++++++++++" << '\n';
+  std::cout << "+ Step 1 +" << '\n';
+  std::cout << "++++++++++" << '\n';
 
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
@@ -263,17 +263,17 @@ TEST_F(IntegrationTestCommandPlanning, LinJoint)
 
   ASSERT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, response.error_code.val) << "Planning failed!";
 
-  std::cout << "++++++++++" << std::endl;
-  std::cout << "+ Step 2 +" << std::endl;
-  std::cout << "++++++++++" << std::endl;
+  std::cout << "++++++++++" << '\n';
+  std::cout << "+ Step 2 +" << '\n';
+  std::cout << "++++++++++" << '\n';
 
   ASSERT_TRUE(testutils::isGoalReached(robot_model_, response.trajectory.joint_trajectory, req, pose_norm_tolerance_,
                                        orientation_norm_tolerance_))
       << "Goal not reached.";
 
-  std::cout << "++++++++++" << std::endl;
-  std::cout << "+ Step 3 +" << std::endl;
-  std::cout << "++++++++++" << std::endl;
+  std::cout << "++++++++++" << '\n';
+  std::cout << "+ Step 3 +" << '\n';
+  std::cout << "++++++++++" << '\n';
 
   ASSERT_TRUE(testutils::checkCartesianLinearity(robot_model_, response.trajectory.joint_trajectory, req,
                                                  pose_norm_tolerance_, orientation_norm_tolerance_))
@@ -292,7 +292,7 @@ TEST_F(IntegrationTestCommandPlanning, LinJoint)
  *
  * Expected Results:
  *  1. Planning request is successful.
- *  2. Goal position correponds with the given goal position.
+ *  2. Goal position corresponds with the given goal position.
  *  3. Trajectory is a straight line.
  */
 TEST_F(IntegrationTestCommandPlanning, LinJointCart)
@@ -300,9 +300,9 @@ TEST_F(IntegrationTestCommandPlanning, LinJointCart)
   ros::NodeHandle node_handle("~");
   planning_interface::MotionPlanRequest req{ test_data_->getLinJointCart("lin2").toRequest() };
 
-  std::cout << "++++++++++" << std::endl;
-  std::cout << "+ Step 1 +" << std::endl;
-  std::cout << "++++++++++" << std::endl;
+  std::cout << "++++++++++" << '\n';
+  std::cout << "+ Step 1 +" << '\n';
+  std::cout << "++++++++++" << '\n';
 
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
@@ -314,17 +314,17 @@ TEST_F(IntegrationTestCommandPlanning, LinJointCart)
 
   ASSERT_EQ(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, response.error_code.val) << "Planning failed!";
 
-  std::cout << "++++++++++" << std::endl;
-  std::cout << "+ Step 2 +" << std::endl;
-  std::cout << "++++++++++" << std::endl;
+  std::cout << "++++++++++" << '\n';
+  std::cout << "+ Step 2 +" << '\n';
+  std::cout << "++++++++++" << '\n';
 
   ASSERT_TRUE(testutils::isGoalReached(robot_model_, response.trajectory.joint_trajectory, req, pose_norm_tolerance_,
                                        orientation_norm_tolerance_))
       << "Goal not reached.";
 
-  std::cout << "++++++++++" << std::endl;
-  std::cout << "+ Step 3 +" << std::endl;
-  std::cout << "++++++++++" << std::endl;
+  std::cout << "++++++++++" << '\n';
+  std::cout << "+ Step 3 +" << '\n';
+  std::cout << "++++++++++" << '\n';
 
   ASSERT_TRUE(testutils::checkCartesianLinearity(robot_model_, response.trajectory.joint_trajectory, req,
                                                  pose_norm_tolerance_, orientation_norm_tolerance_))

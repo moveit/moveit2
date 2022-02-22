@@ -33,8 +33,7 @@
 // pnode_, private_executor_, and private_executor_thread_ to fix the lag in the motion planning display interactive
 // marker cause by Rviz having only a single thread executor
 
-#ifndef RVIZ_DEFAULT_PLUGINS__DISPLAYS__INTERACTIVE_MARKERS__INTERACTIVE_MARKER_DISPLAY_HPP_
-#define RVIZ_DEFAULT_PLUGINS__DISPLAYS__INTERACTIVE_MARKERS__INTERACTIVE_MARKER_DISPLAY_HPP_
+#pragma once
 
 #include <map>
 #include <memory>
@@ -157,5 +156,3 @@ private:
 
 }  // namespace displays
 }  // namespace rviz_default_plugins
-
-#endif  // RVIZ_DEFAULT_PLUGINS__DISPLAYS__INTERACTIVE_MARKERS__INTERACTIVE_MARKER_DISPLAY_HPP_

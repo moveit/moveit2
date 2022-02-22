@@ -66,7 +66,7 @@ bool TrajOptPlanningContext::solve(planning_interface::MotionPlanResponse& res)
 
 bool TrajOptPlanningContext::terminate()
 {
-  ROS_ERROR_STREAM_NAMED("trajopt_planning_context", "TrajOpt is not interruptable yet");
+  ROS_ERROR_STREAM_NAMED("trajopt_planning_context", "TrajOpt is not interruptible yet");
   return false;
 }
 void TrajOptPlanningContext::clear()

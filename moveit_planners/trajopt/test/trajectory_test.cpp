@@ -169,11 +169,11 @@ TEST_F(TrajectoryTest, goalTolerance)
     for (std::size_t i = 0; i < classes.size(); ++i)
       ss << classes[i] << " ";
     ROS_ERROR_STREAM_NAMED(NODE_NAME, "Exception while loading planner '" << planner_plugin_name << "': " << ex.what()
-                                                                          << std::endl
+                                                                          << '\n'
                                                                           << "Available plugins: " << ss.str());
   }
 
-  // Creat planning context
+  // Create planning context
   // ========================================================================================
   planning_interface::PlanningContextPtr context =
       planner_instance->getPlanningContext(planning_scene, req, res.error_code_);
@@ -192,7 +192,7 @@ TEST_F(TrajectoryTest, goalTolerance)
   {
     double goal_error =
         abs(joints_values_last_step[joint_index] - req.goal_constraints[0].joint_constraints[joint_index].position);
-    std::cerr << "goal_error: " << goal_error << std::endl;
+    std::cerr << "goal_error: " << goal_error << '\n';
     EXPECT_LT(goal_error, GOAL_TOLERANCE);
   }
 }

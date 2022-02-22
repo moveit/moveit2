@@ -181,6 +181,8 @@ void TrajectoryExecutionManager::initialize()
       EXECUTION_EVENT_TOPIC, 100, std::bind(&TrajectoryExecutionManager::receiveEvent, this, std::placeholders::_1),
       options);
 
+  controller_mgr_node_->get_parameter("trajectory_execution.execution_duration_monitoring",
+                                      execution_duration_monitoring_);
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_execution_duration_scaling",
                                       allowed_execution_duration_scaling_);
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_goal_duration_margin",
@@ -315,10 +317,10 @@ bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& t
       ss << "Pushed trajectory for execution using controllers [ ";
       for (const std::string& controller : context->controllers_)
         ss << controller << " ";
-      ss << "]:" << std::endl;
+      ss << "]:" << '\n';
       // TODO: Provide message serialization
       // for (const moveit_msgs::msg::RobotTrajectory& trajectory_part : context->trajectory_parts_)
-      // ss << trajectory_part << std::endl;
+      // ss << trajectory_part << '\n';
       RCLCPP_INFO_STREAM(LOGGER, ss.str());
     }
     trajectories_.push_back(context);
@@ -1163,14 +1165,14 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
 
   std::stringstream ss2;
   std::map<std::string, ControllerInformation>::const_iterator mi;
-  for (mi = known_controllers_.begin(); mi != known_controllers_.end(); mi++)
+  for (mi = known_controllers_.begin(); mi != known_controllers_.end(); ++mi)
   {
     ss2 << "controller '" << mi->second.name_ << "' controls joints:\n";
 
     std::set<std::string>::const_iterator ji;
-    for (ji = mi->second.joints_.begin(); ji != mi->second.joints_.end(); ji++)
+    for (ji = mi->second.joints_.begin(); ji != mi->second.joints_.end(); ++ji)
     {
-      ss2 << "  " << *ji << std::endl;
+      ss2 << "  " << *ji << '\n';
     }
   }
   RCLCPP_ERROR(LOGGER, "Known controllers and their joints:\n%s", ss2.str().c_str());
@@ -1646,11 +1648,11 @@ std::pair<int, int> TrajectoryExecutionManager::getCurrentExpectedTrajectoryInde
   if (current_context_ < 0)
     return std::make_pair(-1, -1);
   if (time_index_.empty())
-    return std::make_pair((int)current_context_, -1);
+    return std::make_pair(static_cast<int>(current_context_), -1);
   std::vector<rclcpp::Time>::const_iterator time_index_it =
       std::lower_bound(time_index_.begin(), time_index_.end(), node_->now());
   int pos = time_index_it - time_index_.begin();
-  return std::make_pair((int)current_context_, pos);
+  return std::make_pair(static_cast<int>(current_context_), pos);
 }
 
 const std::vector<TrajectoryExecutionManager::TrajectoryExecutionContext*>&

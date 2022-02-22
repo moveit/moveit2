@@ -151,7 +151,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
         for (size_t joint = 0; joint < num_dof; ++joint)
         {
           ruckig_input.target_velocity.at(joint) *= 0.9;
-          // Propogate the change in velocity to acceleration, too.
+          // Propagate the change in velocity to acceleration, too.
           // We don't change the position to ensure the exact target position is achieved.
           ruckig_input.target_acceleration.at(joint) =
               (ruckig_input.target_velocity.at(joint) - ruckig_output.new_velocity.at(joint)) / timestep;

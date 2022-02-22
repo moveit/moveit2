@@ -334,7 +334,7 @@ def readBenchmarkLog(dbname, filenames):
                 c.execute("PRAGMA table_info(progress)")
                 columnNames = [col[1] for col in c.fetchall()]
 
-                # read progress properties and add columns as necesary
+                # read progress properties and add columns as necessary
                 numProgressProperties = int(nextLine.split()[0])
                 progressPropertyNames = ["runid"]
                 for i in range(numProgressProperties):

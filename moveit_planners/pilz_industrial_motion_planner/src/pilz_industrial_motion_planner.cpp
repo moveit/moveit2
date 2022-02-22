@@ -133,8 +133,8 @@ CommandPlanner::getPlanningContext(const planning_scene::PlanningSceneConstPtr& 
   // Check that a loaded for this request exists
   if (!canServiceRequest(req))
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "No ContextLoader for planner_id " << req.planner_id.c_str()
-                                                                   << " found. Planning not possible.");
+    RCLCPP_ERROR_STREAM(LOGGER, "No ContextLoader for planner_id '" << req.planner_id.c_str()
+                                                                    << "' found. Planning not possible.");
     return nullptr;
   }
 

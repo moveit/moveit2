@@ -78,7 +78,7 @@ namespace moveit_rviz_plugin
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_display");
 
 // ******************************************************************************************
-// Base class contructor
+// Base class constructor
 // ******************************************************************************************
 MotionPlanningDisplay::MotionPlanningDisplay()
   : PlanningSceneDisplay()
@@ -143,7 +143,7 @@ MotionPlanningDisplay::MotionPlanningDisplay()
                                                 SLOT(changedQueryGoalState()), this);
   query_marker_scale_property_ = new rviz_common::properties::FloatProperty(
       "Interactive Marker Size", 0.0f,
-      "Specifies scale of the interactive marker overlayed on the robot. 0 is auto scale.", plan_category_,
+      "Specifies scale of the interactive marker overlaid on the robot. 0 is auto scale.", plan_category_,
       SLOT(changedQueryMarkerScale()), this);
   query_marker_scale_property_->setMin(0.0f);
 
@@ -206,14 +206,6 @@ void MotionPlanningDisplay::onInitialize()
 {
   PlanningSceneDisplay::onInitialize();
 
-  // Prepare database parameters
-  if (!node_->has_parameter("warehouse_host"))
-    node_->declare_parameter<std::string>("warehouse_host", "127.0.0.1");
-  if (!node_->has_parameter("warehouse_plugin"))
-    node_->declare_parameter<std::string>("warehouse_plugin", "warehouse_ros_mongo::MongoDatabaseConnection");
-  if (!node_->has_parameter("warehouse_port"))
-    node_->declare_parameter<int>("warehouse_port", 33829);
-
   // Planned Path Display
   trajectory_visual_->onInitialize(node_, planning_scene_node_, context_);
   QColor qcolor = attached_body_color_property_->getColor();
@@ -245,6 +237,7 @@ void MotionPlanningDisplay::onInitialize()
 
   rviz_common::WindowManagerInterface* window_context = context_->getWindowManager();
   frame_ = new MotionPlanningFrame(this, context_, window_context ? window_context->getParentWindow() : nullptr);
+
   connect(frame_, SIGNAL(configChanged()), this->getModel(), SIGNAL(configChanged()));
   resetStatusTextColor();
   addStatusText("Initialized.");
@@ -449,7 +442,7 @@ void MotionPlanningDisplay::displayTable(const std::map<std::string, double>& va
   // the line we want to render
   std::stringstream ss;
   for (const std::pair<const std::string, double>& value : values)
-    ss << boost::format("%-10s %-4.2f") % value.first % value.second << std::endl;
+    ss << boost::format("%-10s %-4.2f") % value.first % value.second << '\n';
 
   if (ss.str().empty())
   {
@@ -1323,18 +1316,6 @@ void MotionPlanningDisplay::load(const rviz_common::Config& config)
   PlanningSceneDisplay::load(config);
   if (frame_)
   {
-    QString host;
-    std::string host_param;
-    if (config.mapGetString("MoveIt_Warehouse_Host", &host))
-      frame_->ui_->database_host->setText(host);
-    else if (node_->get_parameter("warehouse_host", host_param))
-    {
-      host = QString::fromStdString(host_param);
-      frame_->ui_->database_host->setText(host);
-    }
-    int port;
-    if (config.mapGetInt("MoveIt_Warehouse_Port", &port) || node_->get_parameter("warehouse_port", port))
-      frame_->ui_->database_port->setValue(port);
     float d;
     if (config.mapGetFloat("MoveIt_Planning_Time", &d))
       frame_->ui_->planning_time->setValue(d);
@@ -1382,7 +1363,6 @@ void MotionPlanningDisplay::load(const rviz_common::Config& config)
     }
     else
     {
-      std::string node_name = rclcpp::names::append(getMoveGroupNS(), "move_group");
       double val;
       if (node_->get_parameter("default_workspace_bounds", val))
       {
@@ -1399,9 +1379,6 @@ void MotionPlanningDisplay::save(rviz_common::Config config) const
   PlanningSceneDisplay::save(config);
   if (frame_)
   {
-    config.mapSetValue("MoveIt_Warehouse_Host", frame_->ui_->database_host->text());
-    config.mapSetValue("MoveIt_Warehouse_Port", frame_->ui_->database_port->value());
-
     // "Options" Section
     config.mapSetValue("MoveIt_Planning_Time", frame_->ui_->planning_time->value());
     config.mapSetValue("MoveIt_Planning_Attempts", frame_->ui_->planning_attempts->value());
@@ -1432,6 +1409,9 @@ void MotionPlanningDisplay::fixedFrameChanged()
   PlanningSceneDisplay::fixedFrameChanged();
   if (int_marker_display_)
     int_marker_display_->setFixedFrame(fixed_frame_);
+  // When the fixed frame changes we need to tell RViz to update the rendered interactive marker display
+  frame_->scene_marker_->requestPoseUpdate(frame_->scene_marker_->getPosition(),
+                                           frame_->scene_marker_->getOrientation());
   changedPlanningGroup();
 }
 

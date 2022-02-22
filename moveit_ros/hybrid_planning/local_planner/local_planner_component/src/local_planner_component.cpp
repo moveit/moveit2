@@ -92,10 +92,9 @@ bool LocalPlannerComponent::initialize()
   }
 
   // Start state and scene monitors
-  RCLCPP_INFO(LOGGER, "Starting planning scene monitors");
-  planning_scene_monitor_->startSceneMonitor();
-  planning_scene_monitor_->startWorldGeometryMonitor();
-  planning_scene_monitor_->startStateMonitor();
+  planning_scene_monitor_->startSceneMonitor(config_.monitored_planning_scene_topic);
+  planning_scene_monitor_->startWorldGeometryMonitor(config_.collision_object_topic);
+  planning_scene_monitor_->startStateMonitor(config_.joint_states_topic);
 
   // Load trajectory operator plugin
   try
@@ -153,14 +152,15 @@ bool LocalPlannerComponent::initialize()
   // Initialize local planning request action server
   using namespace std::placeholders;
   local_planning_request_server_ = rclcpp_action::create_server<moveit_msgs::action::LocalPlanner>(
-      node_, "local_planning_action",
+      node_, config_.local_planning_action_name,
       [](const rclcpp_action::GoalUUID& /*unused*/,
          std::shared_ptr<const moveit_msgs::action::LocalPlanner::Goal> /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received local planning goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>>& /*unused*/) {
+      [this](const std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>>& /*unused*/) {
         RCLCPP_INFO(LOGGER, "Received request to cancel local planning goal");
+        state_ = LocalPlannerState::ABORT;
         return rclcpp_action::CancelResponse::ACCEPT;
       },
       [this](std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::LocalPlanner>> goal_handle) {
@@ -222,7 +222,7 @@ void LocalPlannerComponent::executeIteration()
     // Wait for global solution to be published
     case LocalPlannerState::AWAIT_GLOBAL_TRAJECTORY:
       // Do nothing
-      break;
+      return;
     // Notify action client that local planning failed
     case LocalPlannerState::ABORT:
     {
@@ -230,7 +230,7 @@ void LocalPlannerComponent::executeIteration()
       result->error_message = "Local planner is in an aborted state. Resetting.";
       local_planning_goal_handle_->abort(result);
       reset();
-      break;
+      return;
     }
     // If the planner received an action request and a global solution it starts to plan locally
     case LocalPlannerState::LOCAL_PLANNING_ACTIVE:
@@ -249,7 +249,7 @@ void LocalPlannerComponent::executeIteration()
       {
         local_planning_goal_handle_->succeed(result);
         reset();
-        break;
+        return;
       }
 
       // Get local goal trajectory to follow
@@ -263,6 +263,9 @@ void LocalPlannerComponent::executeIteration()
       if (!local_planner_feedback_->feedback.empty())
       {
         local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
+        RCLCPP_ERROR(LOGGER, "Local planner somehow failed");
+        reset();
+        return;
       }
 
       // Solve local planning problem
@@ -277,6 +280,7 @@ void LocalPlannerComponent::executeIteration()
       if (!local_planner_feedback_->feedback.empty())
       {
         local_planning_goal_handle_->publish_feedback(local_planner_feedback_);
+        return;
       }
 
       // Use a configurable message interface like MoveIt servo
@@ -308,7 +312,7 @@ void LocalPlannerComponent::executeIteration()
       {
         // Local solution publisher is defined by the local constraint solver plugin
       }
-      break;
+      return;
     }
     default:
     {
@@ -317,7 +321,7 @@ void LocalPlannerComponent::executeIteration()
       local_planning_goal_handle_->abort(result);
       RCLCPP_ERROR(LOGGER, "Local planner somehow failed");  // TODO(sjahr) Add more detailed failure information
       reset();
-      break;
+      return;
     }
   }
 };

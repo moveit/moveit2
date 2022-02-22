@@ -578,9 +578,9 @@ bool BenchmarkExecutor::plannerConfigurationsExist(
       {
         RCLCPP_ERROR(LOGGER, "Planner '%s' does NOT exist for group '%s' in pipeline '%s'", entry.second[i].c_str(),
                      group_name.c_str(), entry.first.c_str());
-        std::cout << "There are " << config_map.size() << " planner entries: " << std::endl;
+        std::cout << "There are " << config_map.size() << " planner entries: " << '\n';
         for (const auto& config_map_entry : config_map)
-          std::cout << config_map_entry.second.name << std::endl;
+          std::cout << config_map_entry.second.name << '\n';
         return false;
       }
     }
@@ -1111,42 +1111,42 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
     return;
   }
 
-  out << "MoveIt version " << MOVEIT_VERSION << std::endl;
-  out << "Experiment " << brequest.name << std::endl;
-  out << "Running on " << hostname << std::endl;
-  out << "Starting at " << start_time << std::endl;
+  out << "MoveIt version " << MOVEIT_VERSION << '\n';
+  out << "Experiment " << brequest.name << '\n';
+  out << "Running on " << hostname << '\n';
+  out << "Starting at " << start_time << '\n';
 
   // Experiment setup
   moveit_msgs::msg::PlanningScene scene_msg;
   planning_scene_->getPlanningSceneMsg(scene_msg);
-  out << "<<<|" << std::endl;
+  out << "<<<|" << '\n';
   // TODO(YuYan): implement stream print for the message formats
-  // out << "Motion plan request:" << std::endl << brequest.request << std::endl;
-  // out << "Planning scene: " << std::endl << scene_msg << std::endl << "|>>>" << std::endl;
-  out << "Motion plan request:" << std::endl
-      << "  planner_id: " << brequest.request.planner_id << std::endl
-      << "  group_name: " << brequest.request.group_name << std::endl
-      << "  num_planning_attempts: " << brequest.request.num_planning_attempts << std::endl
-      << "  allowed_planning_time: " << brequest.request.allowed_planning_time << std::endl;
-  out << "Planning scene:" << std::endl
-      << "  scene_name: " << scene_msg.name << std::endl
-      << "  robot_model_name: " << scene_msg.robot_model_name << std::endl
-      << "|>>>" << std::endl;
+  // out << "Motion plan request:" << '\n' << brequest.request << '\n';
+  // out << "Planning scene: " << '\n' << scene_msg << '\n' << "|>>>" << '\n';
+  out << "Motion plan request:" << '\n'
+      << "  planner_id: " << brequest.request.planner_id << '\n'
+      << "  group_name: " << brequest.request.group_name << '\n'
+      << "  num_planning_attempts: " << brequest.request.num_planning_attempts << '\n'
+      << "  allowed_planning_time: " << brequest.request.allowed_planning_time << '\n';
+  out << "Planning scene:" << '\n'
+      << "  scene_name: " << scene_msg.name << '\n'
+      << "  robot_model_name: " << scene_msg.robot_model_name << '\n'
+      << "|>>>" << '\n';
 
   // Not writing optional cpu information
 
   // The real random seed is unknown.  Writing a fake value
-  out << "0 is the random seed" << std::endl;
-  out << brequest.request.allowed_planning_time << " seconds per run" << std::endl;
+  out << "0 is the random seed" << '\n';
+  out << brequest.request.allowed_planning_time << " seconds per run" << '\n';
   // There is no memory cap
-  out << "-1 MB per run" << std::endl;
-  out << options_.getNumRuns() << " runs per planner" << std::endl;
-  out << benchmark_duration << " seconds spent to collect the data" << std::endl;
+  out << "-1 MB per run" << '\n';
+  out << options_.getNumRuns() << " runs per planner" << '\n';
+  out << benchmark_duration << " seconds spent to collect the data" << '\n';
 
   // No enum types
-  out << "0 enum types" << std::endl;
+  out << "0 enum types" << '\n';
 
-  out << num_planners << " planners" << std::endl;
+  out << num_planners << " planners" << '\n';
 
   size_t run_id = 0;
   for (const std::pair<const std::string, std::vector<std::string>>& pipeline : pipelines)
@@ -1154,11 +1154,11 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
     for (std::size_t i = 0; i < pipeline.second.size(); ++i, ++run_id)
     {
       // Write the name of the planner and the used pipeline
-      out << pipeline.second[i] << " (" << pipeline.first << ")" << std::endl;
+      out << pipeline.second[i] << " (" << pipeline.first << ")" << '\n';
 
       // in general, we could have properties specific for a planner;
       // right now, we do not include such properties
-      out << "0 common properties" << std::endl;
+      out << "0 common properties" << '\n';
 
       // Create a list of the benchmark properties for this planner
       std::set<std::string> properties_set;
@@ -1168,12 +1168,12 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
           properties_set.insert(pit->first);
 
       // Writing property list
-      out << properties_set.size() << " properties for each run" << std::endl;
+      out << properties_set.size() << " properties for each run" << '\n';
       for (const std::string& property : properties_set)
-        out << property << std::endl;
+        out << property << '\n';
 
       // Number of runs
-      out << benchmark_data_[run_id].size() << " runs" << std::endl;
+      out << benchmark_data_[run_id].size() << " runs" << '\n';
 
       // And the benchmark properties
       for (PlannerRunData& planner_run_data : benchmark_data_[run_id])  // each run of this planner
@@ -1187,9 +1187,9 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
             out << runit->second;
           out << "; ";
         }
-        out << std::endl;  // end of the run
+        out << '\n';  // end of the run
       }
-      out << "." << std::endl;  // end the planner
+      out << "." << '\n';  // end the planner
     }
   }
 

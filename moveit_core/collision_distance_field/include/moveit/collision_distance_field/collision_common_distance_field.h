@@ -61,7 +61,7 @@ struct GroupStateRepresentation
   GroupStateRepresentation(const GroupStateRepresentation& gsr)
   {
     link_body_decompositions_.resize(gsr.link_body_decompositions_.size());
-    for (unsigned int i = 0; i < gsr.link_body_decompositions_.size(); i++)
+    for (unsigned int i = 0; i < gsr.link_body_decompositions_.size(); ++i)
     {
       if (gsr.link_body_decompositions_[i])
       {
@@ -73,7 +73,7 @@ struct GroupStateRepresentation
     link_distance_fields_.assign(gsr.link_distance_fields_.begin(), gsr.link_distance_fields_.end());
 
     attached_body_decompositions_.resize(gsr.attached_body_decompositions_.size());
-    for (unsigned int i = 0; i < gsr.attached_body_decompositions_.size(); i++)
+    for (unsigned int i = 0; i < gsr.attached_body_decompositions_.size(); ++i)
     {
       (*attached_body_decompositions_[i]) = (*gsr.attached_body_decompositions_[i]);
     }

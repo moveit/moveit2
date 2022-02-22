@@ -65,7 +65,7 @@ static inline bool loadLinkBodySphereDecompositions(
     ROS_WARN_STREAM("Link spheres has no entries");
     return false;
   }
-  for (int i = 0; i < link_spheres.size(); i++)
+  for (int i = 0; i < link_spheres.size(); ++i)
   {
     if (!link_spheres[i].hasMember("link"))
     {
@@ -90,7 +90,7 @@ static inline bool loadLinkBodySphereDecompositions(
       }
     }
     std::vector<collision_detection::CollisionSphere> coll_spheres;
-    for (int j = 0; j < spheres.size(); j++)
+    for (int j = 0; j < spheres.size(); ++j)
     {
       if (!spheres[j].hasMember("x"))
       {

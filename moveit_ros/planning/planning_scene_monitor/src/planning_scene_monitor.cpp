@@ -52,7 +52,6 @@
 #else
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #endif
-#include <moveit/profiler/profiler.h>
 
 #include <boost/algorithm/string/join.hpp>
 #include <memory>
@@ -154,8 +153,6 @@ PlanningSceneMonitor::~PlanningSceneMonitor()
 
 void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& scene)
 {
-  moveit::tools::Profiler::ScopedStart prof_start;
-  moveit::tools::Profiler::ScopedBlock prof_block("PlanningSceneMonitor::initialize");
   if (monitor_name_.empty())
     monitor_name_ = "planning_scene_monitor";
   robot_description_ = rm_loader_->getRobotDescription();
@@ -218,7 +215,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     node_->get_parameter_or(robot_description_ + "_planning.shape_transform_cache_lookup_wait_time", temp_wait_time,
                             temp_wait_time);
 
-  shape_transform_cache_lookup_wait_time_ = rclcpp::Duration(std::chrono::nanoseconds((int64_t)temp_wait_time));
+  shape_transform_cache_lookup_wait_time_ = rclcpp::Duration::from_seconds(temp_wait_time);
 
   state_update_pending_ = false;
   // Period for 0.1 sec
@@ -530,7 +527,7 @@ void PlanningSceneMonitor::triggerSceneUpdateEvent(SceneUpdateType update_type)
 
   for (boost::function<void(SceneUpdateType)>& update_callback : update_callbacks_)
     update_callback(update_type);
-  new_scene_update_ = (SceneUpdateType)((int)new_scene_update_ | (int)update_type);
+  new_scene_update_ = (SceneUpdateType)(static_cast<int>(new_scene_update_) | static_cast<int>(update_type));
   new_scene_update_condition_.notify_all();
 }
 
@@ -606,11 +603,14 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
 {
   PlanningSceneMonitor::SceneUpdateType event = PlanningSceneMonitor::UPDATE_NONE;
   if (publish_geom_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_GEOMETRY);
+    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
+                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_GEOMETRY));
   if (publish_state_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_STATE);
+    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
+                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_STATE));
   if (publish_transform_updates)
-    event = (PlanningSceneMonitor::SceneUpdateType)((int)event | (int)PlanningSceneMonitor::UPDATE_TRANSFORMS);
+    event = (PlanningSceneMonitor::SceneUpdateType)(static_cast<int>(event) |
+                                                    static_cast<int>(PlanningSceneMonitor::UPDATE_TRANSFORMS));
   if (publish_planning_scene)
   {
     setPlanningScenePublishingFrequency(publish_planning_scene_hz);
@@ -710,16 +710,16 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
     {
       upd = UPDATE_NONE;
       if (!moveit::core::isEmpty(scene.world))
-        upd = (SceneUpdateType)((int)upd | (int)UPDATE_GEOMETRY);
+        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
 
       if (!scene.fixed_frame_transforms.empty())
-        upd = (SceneUpdateType)((int)upd | (int)UPDATE_TRANSFORMS);
+        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_TRANSFORMS));
 
       if (!moveit::core::isEmpty(scene.robot_state))
       {
-        upd = (SceneUpdateType)((int)upd | (int)UPDATE_STATE);
+        upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_STATE));
         if (!scene.robot_state.attached_collision_objects.empty() || !scene.robot_state.is_diff)
-          upd = (SceneUpdateType)((int)upd | (int)UPDATE_GEOMETRY);
+          upd = (SceneUpdateType)(static_cast<int>(upd) | static_cast<int>(UPDATE_GEOMETRY));
       }
     }
   }
@@ -839,7 +839,7 @@ void PlanningSceneMonitor::includeAttachedBodiesInOctree()
 
   boost::recursive_mutex::scoped_lock _(shape_handles_lock_);
 
-  // clear information about any attached body, without refering to the AttachedBody* ptr (could be invalid)
+  // clear information about any attached body, without referring to the AttachedBody* ptr (could be invalid)
   for (std::pair<const moveit::core::AttachedBody* const,
                  std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& attached_body_shape_handle :
        attached_body_shape_handles_)
@@ -1112,38 +1112,44 @@ bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_fram
                          std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& link_shape_handle :
          link_shape_handles_)
     {
-      tf_buffer_->canTransform(target_frame, link_shape_handle.first->getName(), target_time,
-                               shape_transform_cache_lookup_wait_time_);
-      Eigen::Isometry3d ttr = tf2::transformToEigen(
-          tf_buffer_->lookupTransform(target_frame, link_shape_handle.first->getName(), target_time));
-      for (std::size_t j = 0; j < link_shape_handle.second.size(); ++j)
-        cache[link_shape_handle.second[j].first] =
-            ttr * link_shape_handle.first->getCollisionOriginTransforms()[link_shape_handle.second[j].second];
+      if (tf_buffer_->canTransform(target_frame, link_shape_handle.first->getName(), target_time,
+                                   shape_transform_cache_lookup_wait_time_))
+      {
+        Eigen::Isometry3d ttr = tf2::transformToEigen(
+            tf_buffer_->lookupTransform(target_frame, link_shape_handle.first->getName(), target_time));
+        for (std::size_t j = 0; j < link_shape_handle.second.size(); ++j)
+          cache[link_shape_handle.second[j].first] =
+              ttr * link_shape_handle.first->getCollisionOriginTransforms()[link_shape_handle.second[j].second];
+      }
     }
     for (const std::pair<const moveit::core::AttachedBody* const,
                          std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>&
              attached_body_shape_handle : attached_body_shape_handles_)
     {
-      tf_buffer_->canTransform(target_frame, attached_body_shape_handle.first->getAttachedLinkName(), target_time,
-                               shape_transform_cache_lookup_wait_time_);
-      Eigen::Isometry3d transform = tf2::transformToEigen(tf_buffer_->lookupTransform(
-          target_frame, attached_body_shape_handle.first->getAttachedLinkName(), target_time));
-      for (std::size_t k = 0; k < attached_body_shape_handle.second.size(); ++k)
-        cache[attached_body_shape_handle.second[k].first] =
-            transform *
-            attached_body_shape_handle.first->getShapePosesInLinkFrame()[attached_body_shape_handle.second[k].second];
+      if (tf_buffer_->canTransform(target_frame, attached_body_shape_handle.first->getAttachedLinkName(), target_time,
+                                   shape_transform_cache_lookup_wait_time_))
+      {
+        Eigen::Isometry3d transform = tf2::transformToEigen(tf_buffer_->lookupTransform(
+            target_frame, attached_body_shape_handle.first->getAttachedLinkName(), target_time));
+        for (std::size_t k = 0; k < attached_body_shape_handle.second.size(); ++k)
+          cache[attached_body_shape_handle.second[k].first] =
+              transform *
+              attached_body_shape_handle.first->getShapePosesInLinkFrame()[attached_body_shape_handle.second[k].second];
+      }
     }
     {
-      tf_buffer_->canTransform(target_frame, scene_->getPlanningFrame(), target_time,
-                               shape_transform_cache_lookup_wait_time_);
-      Eigen::Isometry3d transform =
-          tf2::transformToEigen(tf_buffer_->lookupTransform(target_frame, scene_->getPlanningFrame(), target_time));
-      for (const std::pair<const std::string,
-                           std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>>>&
-               collision_body_shape_handle : collision_body_shape_handles_)
-        for (const std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>& it :
-             collision_body_shape_handle.second)
-          cache[it.first] = transform * (*it.second);
+      if (tf_buffer_->canTransform(target_frame, scene_->getPlanningFrame(), target_time,
+                                   shape_transform_cache_lookup_wait_time_))
+      {
+        Eigen::Isometry3d transform =
+            tf2::transformToEigen(tf_buffer_->lookupTransform(target_frame, scene_->getPlanningFrame(), target_time));
+        for (const std::pair<const std::string,
+                             std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>>>&
+                 collision_body_shape_handle : collision_body_shape_handles_)
+          for (const std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>& it :
+               collision_body_shape_handle.second)
+            cache[it.first] = transform * (*it.second);
+      }
     }
   }
   catch (tf2::TransformException& ex)

@@ -312,11 +312,6 @@ std::list<std::pair<double, bool>> Path::getSwitchingPoints() const
   return switching_points_;
 }
 
-static double squared(double d)
-{
-  return d * d;
-}
-
 Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, const Eigen::VectorXd& max_acceleration,
                        double time_step)
   : path_(path)
@@ -940,16 +935,27 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     max_velocity[j] = 1.0;
     if (bounds.velocity_bounded_)
     {
-      max_velocity[j] = std::min(fabs(bounds.max_velocity_), fabs(bounds.min_velocity_)) * velocity_scaling_factor;
-      max_velocity[j] = std::max(0.01, max_velocity[j]);
+      if (bounds.max_velocity_ < std::numeric_limits<double>::epsilon())
+      {
+        RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
+                     bounds.max_velocity_, vars[j].c_str());
+        return false;
+      }
+      max_velocity[j] =
+          std::min(std::fabs(bounds.max_velocity_), std::fabs(bounds.min_velocity_)) * velocity_scaling_factor;
     }
 
     max_acceleration[j] = 1.0;
     if (bounds.acceleration_bounded_)
     {
-      max_acceleration[j] =
-          std::min(fabs(bounds.max_acceleration_), fabs(bounds.min_acceleration_)) * acceleration_scaling_factor;
-      max_acceleration[j] = std::max(0.01, max_acceleration[j]);
+      if (bounds.max_acceleration_ < std::numeric_limits<double>::epsilon())
+      {
+        RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
+                     bounds.max_acceleration_, vars[j].c_str());
+        return false;
+      }
+      max_acceleration[j] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_)) *
+                            acceleration_scaling_factor;
     }
   }
 
@@ -960,13 +966,17 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   {
     moveit::core::RobotStatePtr waypoint = trajectory.getWayPointPtr(p);
     Eigen::VectorXd new_point(num_joints);
+    // The first point should always be kept
     bool diverse_point = (p == 0);
 
-    for (size_t j = 0; j < num_joints; j++)
+    for (size_t j = 0; j < num_joints; ++j)
     {
       new_point[j] = waypoint->getVariablePosition(idx[j]);
-      if (p > 0 && std::abs(new_point[j] - points.back()[j]) > min_angle_change_)
+      // If any joint angle is different, it's a unique waypoint
+      if (p > 0 && std::fabs(new_point[j] - points.back()[j]) > min_angle_change_)
+      {
         diverse_point = true;
+      }
     }
 
     if (diverse_point)

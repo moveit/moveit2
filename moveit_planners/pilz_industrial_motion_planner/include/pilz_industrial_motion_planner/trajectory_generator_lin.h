@@ -41,8 +41,6 @@
 #include "pilz_industrial_motion_planner/trajectory_generator.h"
 #include "pilz_industrial_motion_planner/velocity_profile_atrap.h"
 
-using namespace pilz_industrial_motion_planner;
-
 namespace pilz_industrial_motion_planner
 {
 // TODO date type of units
@@ -68,7 +66,8 @@ public:
    * @param planner_limits: limits in joint and Cartesian spaces
    */
   TrajectoryGeneratorLIN(const moveit::core::RobotModelConstPtr& robot_model,
-                         const pilz_industrial_motion_planner::LimitsContainer& planner_limits);
+                         const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
+                         const std::string& group_name);
 
 private:
   void extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,

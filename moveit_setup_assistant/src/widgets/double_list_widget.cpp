@@ -233,7 +233,7 @@ void DoubleListWidget::setTable(const std::vector<std::string>& items, QTableWid
 
   table->setRowCount(row);
 
-  // Reenable
+  // Re-enable
   table->setUpdatesEnabled(true);  // prevent table from updating until we are completely done
   table->setDisabled(false);       // make sure we disable it so that the cellChanged event is not called
 }
@@ -254,7 +254,7 @@ void DoubleListWidget::selectDataButtonClicked()
     int row_to_add = 0;
 
     // Check if this selected joint is already in the selected joint table
-    for (int r = 0; r < selected_data_table_->rowCount(); r++)
+    for (int r = 0; r < selected_data_table_->rowCount(); ++r)
     {
       QTableWidgetItem* item = selected_data_table_->item(r, 0);
 

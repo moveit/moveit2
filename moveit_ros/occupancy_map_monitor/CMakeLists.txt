@@ -12,9 +12,6 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wno-pedantic)
 endif()
 
-# Finds Boost Components
-include(ConfigExtras.cmake)
-
 if(APPLE)
   find_package(X11 REQUIRED)
 endif()
@@ -26,6 +23,9 @@ find_package(Eigen3 REQUIRED)
 find_package(octomap REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(tf2_ros REQUIRED)
+
+# Finds Boost Components
+include(ConfigExtras.cmake)
 
 include_directories(include)
 include_directories(SYSTEM

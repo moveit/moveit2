@@ -131,7 +131,7 @@ OccupancyMapUpdaterPtr OccupancyMapMonitorMiddlewareHandle::loadOccupancyMapUpda
   catch (pluginlib::PluginlibException& exception)
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Exception while loading octomap updater '" << sensor_plugin
-                                                                            << "': " << exception.what() << std::endl);
+                                                                            << "': " << exception.what() << '\n');
   }
   return nullptr;
 }

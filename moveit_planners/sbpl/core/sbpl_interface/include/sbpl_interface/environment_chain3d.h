@@ -181,7 +181,7 @@ public:
    * @param prints out a little extra information
    * @param the file pointer to print to (stdout by default)
    */
-  virtual void PrintState(int stateID, bool bVerbose, FILE* fOut = NULL);
+  virtual void PrintState(int stateID, bool bVerbose, FILE* fOut = nullptr);
 
   /** @brief Not defined. */
   virtual void PrintEnv_Config(FILE* fOut);
@@ -306,21 +306,21 @@ protected:
 inline void EnvironmentChain3D::convertCoordToJointAngles(const std::vector<int>& coord, std::vector<double>& angles)
 {
   angles.resize(coord.size());
-  for (size_t i = 0; i < coord.size(); i++)
+  for (size_t i = 0; i < coord.size(); ++i)
     angles[i] = coord[i] * angle_discretization_;
 }
 
 inline void EnvironmentChain3D::convertJointAnglesToCoord(const std::vector<double>& angle, std::vector<int>& coord)
 {
   coord.resize(angle.size());
-  for (unsigned int i = 0; i < angle.size(); i++)
+  for (unsigned int i = 0; i < angle.size(); ++i)
   {
     // NOTE: Added 3/1/09
     double pos_angle = angle[i];
     if (pos_angle < 0.0)
       pos_angle += 2 * M_PI;
 
-    coord[i] = (int)((pos_angle + angle_discretization_ * 0.5) / angle_discretization_);
+    coord[i] = static_cast<int>((pos_angle + angle_discretization_ * 0.5) / angle_discretization_);
   }
 }
 

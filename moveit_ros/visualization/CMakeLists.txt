@@ -5,11 +5,6 @@ project(moveit_ros_visualization)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  # suppress warning in Ogre
-  add_compile_options(-Wno-deprecated-register)
-endif()
-
 # definition needed for boost/math/constants/constants.hpp included by Ogre to compile
 add_definitions(-DBOOST_MATH_DISABLE_FLOAT128)
 

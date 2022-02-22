@@ -60,9 +60,9 @@ TEST(TestVoxelGrid, TestReadWrite)
   vg.reset(0);
 
   i = 0;
-  for (int x = 0; x < num_x; x++)
-    for (int y = 0; y < num_y; y++)
-      for (int z = 0; z < num_z; z++)
+  for (int x = 0; x < num_x; ++x)
+    for (int y = 0; y < num_y; ++y)
+      for (int z = 0; z < num_z; ++z)
       {
         EXPECT_EQ(vg.getCell(x, y, z), 0);
         i++;
@@ -76,9 +76,9 @@ TEST(TestVoxelGrid, TestReadWrite)
 
   // Set values
   i = 0;
-  for (int x = 0; x < num_x; x++)
-    for (int y = 0; y < num_y; y++)
-      for (int z = 0; z < num_z; z++)
+  for (int x = 0; x < num_x; ++x)
+    for (int y = 0; y < num_y; ++y)
+      for (int z = 0; z < num_z; ++z)
       {
         vg.getCell(x, y, z) = i;
         i++;
@@ -86,9 +86,9 @@ TEST(TestVoxelGrid, TestReadWrite)
 
   // check reset values
   i = 0;
-  for (int x = 0; x < num_x; x++)
-    for (int y = 0; y < num_y; y++)
-      for (int z = 0; z < num_z; z++)
+  for (int x = 0; x < num_x; ++x)
+    for (int y = 0; y < num_y; ++y)
+      for (int z = 0; z < num_z; ++z)
       {
         EXPECT_EQ(i, vg.getCell(x, y, z));
         i++;

@@ -98,7 +98,7 @@ bool TrajOptInterface::solve(const planning_scene::PlanningSceneConstPtr& planni
   current_state->copyJointGroupPositions(joint_model_group, current_joint_values);
 
   // Current state is different from star state in general
-  ROS_INFO(" ======================================= Extract start state infromation");
+  ROS_INFO(" ======================================= Extract start state information");
   trajopt::DblVec start_joint_values = extractStartJointValues(req, group_joint_names);
 
   // check the start state for being empty or joint limit violiation
@@ -199,7 +199,7 @@ bool TrajOptInterface::solve(const planning_scene::PlanningSceneConstPtr& planni
   problem_info.cnt_infos.push_back(joint_start_pos);
 
   ROS_INFO(" ======================================= Velocity Constraints, hard-coded");
-  // TODO: should be defined by user, its parametes should be added to setup.yaml
+  // TODO: should be defined by user, its parameters should be added to setup.yaml
   JointVelTermInfoPtr joint_vel(new JointVelTermInfo);
 
   joint_vel->coeffs = std::vector<double>(dof, 5.0);
@@ -287,10 +287,10 @@ bool TrajOptInterface::solve(const planning_scene::PlanningSceneConstPtr& planni
 
   // fill in the entire trajectory
   res.trajectory[0].joint_trajectory.points.resize(opt_solution.rows());
-  for (int i = 0; i < opt_solution.rows(); i++)
+  for (int i = 0; i < opt_solution.rows(); ++i)
   {
     res.trajectory[0].joint_trajectory.points[i].positions.resize(opt_solution.cols());
-    for (size_t j = 0; j < opt_solution.cols(); j++)
+    for (size_t j = 0; j < opt_solution.cols(); ++j)
     {
       res.trajectory[0].joint_trajectory.points[i].positions[j] = opt_solution(i, j);
     }
@@ -457,7 +457,7 @@ trajopt::DblVec TrajOptInterface::extractStartJointValues(const planning_interfa
 
 void callBackFunc(sco::OptProb* opt_prob, sco::OptResults& opt_res)
 {
-  // TODO: Create the actuall implementation
+  // TODO: Create the actual implementation
 }
 
 }  // namespace trajopt_interface

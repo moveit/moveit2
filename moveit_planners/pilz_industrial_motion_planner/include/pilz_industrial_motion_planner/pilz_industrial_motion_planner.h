@@ -55,7 +55,7 @@ namespace pilz_industrial_motion_planner
  * corresponds to the requested motion command
  * set as planner_id in the MotionPlanRequest).
  * It can be easily extended with additional commands by creating a class
- * inherting from PlanningContextLoader.
+ * inheriting from PlanningContextLoader.
  */
 class CommandPlanner : public planning_interface::PlannerManager
 {

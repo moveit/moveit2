@@ -52,6 +52,7 @@ namespace
 constexpr double EPSILON{ 1.e-9 };
 }
 
+#if 0  // unused function
 static bool sameStringIgnoringWS(const std::string& s1, const std::string& s2)
 {
   unsigned int i1 = 0;
@@ -76,6 +77,8 @@ static bool sameStringIgnoringWS(const std::string& s1, const std::string& s2)
   }
   return i1 == s1.size() && i2 == s2.size();
 }
+#endif
+
 static void expect_near(const Eigen::MatrixXd& x, const Eigen::MatrixXd& y,
                         double eps = std::numeric_limits<double>::epsilon())
 {
@@ -556,21 +559,21 @@ TEST_F(OneRobot, testPrintCurrentPositionWithJointLimits)
 
   state.setToDefaultValues();
 
-  std::cout << "\nVisual inspection should show NO joints out of bounds:" << std::endl;
+  std::cout << "\nVisual inspection should show NO joints out of bounds:\n";
   state.printStatePositionsWithJointLimits(joint_model_group);
 
-  std::cout << "\nVisual inspection should show ONE joint out of bounds:" << std::endl;
+  std::cout << "\nVisual inspection should show ONE joint out of bounds:\n";
   std::vector<double> single_joint(1);
   single_joint[0] = -1.0;
   state.setJointPositions("joint_c", single_joint);
   state.printStatePositionsWithJointLimits(joint_model_group);
 
-  std::cout << "\nVisual inspection should show TWO joint out of bounds:" << std::endl;
+  std::cout << "\nVisual inspection should show TWO joint out of bounds:\n";
   single_joint[0] = 1.0;
   state.setJointPositions("joint_f", single_joint);
   state.printStatePositionsWithJointLimits(joint_model_group);
 
-  std::cout << "\nVisual inspection should show ONE joint out of bounds:" << std::endl;
+  std::cout << "\nVisual inspection should show ONE joint out of bounds:\n";
   single_joint[0] = 0.19;
   state.setJointPositions("joint_f", single_joint);
   state.printStatePositionsWithJointLimits(joint_model_group);
@@ -676,10 +679,43 @@ TEST_F(OneRobot, testInterpolation)
   }
   catch (std::exception& e)
   {
-    std::cout << "Caught expected exception: " << e.what() << std::endl;
+    std::cout << "Caught expected exception: " << e.what() << '\n';
     nan_exception = true;
   }
   EXPECT_TRUE(nan_exception) << "NaN interpolation parameter did not create expected exception.";
+}
+
+TEST_F(OneRobot, rigidlyConnectedParent)
+{
+  // link_e is its own rigidly-connected parent
+  const moveit::core::LinkModel* link_e{ robot_model_->getLinkModel("link_e") };
+  EXPECT_EQ(robot_model_->getRigidlyConnectedParentLinkModel(link_e), link_e);
+
+  // link_b is rigidly connected to its parent link_a
+  const moveit::core::LinkModel* link_a{ robot_model_->getLinkModel("link_a") };
+  const moveit::core::LinkModel* link_b{ robot_model_->getLinkModel("link_b") };
+  EXPECT_EQ(robot_model_->getRigidlyConnectedParentLinkModel(link_b), link_a);
+
+  moveit::core::RobotState state(robot_model_);
+
+  EXPECT_EQ(state.getRigidlyConnectedParentLinkModel("link_b"), link_a);
+
+  // attach "object" with "subframe" to link_b
+  state.attachBody(new moveit::core::AttachedBody(
+      link_b, "object", Eigen::Isometry3d::Identity(), std::vector<shapes::ShapeConstPtr>{},
+      EigenSTL::vector_Isometry3d{}, std::set<std::string>{}, trajectory_msgs::msg::JointTrajectory{},
+      moveit::core::FixedTransformsMap{ { "subframe", Eigen::Isometry3d::Identity() } }));
+
+  // RobotState's version should resolve these too
+  EXPECT_EQ(link_a, state.getRigidlyConnectedParentLinkModel("object"));
+  EXPECT_EQ(link_a, state.getRigidlyConnectedParentLinkModel("object/subframe"));
+
+  // test failure cases
+  EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("no_object"));
+  EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("object/no_subframe"));
+  EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel(""));
+  EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("object/"));
+  EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("/"));
 }
 
 int main(int argc, char** argv)

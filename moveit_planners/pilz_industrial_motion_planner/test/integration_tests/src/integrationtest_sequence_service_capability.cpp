@@ -325,7 +325,7 @@ TEST_F(IntegrationTestSequenceService, TestInvalidLinkName)
  * @brief Tests the execution of a sequence with more than two commands.
  *
  * Test Sequence:
- *    1. Call service with serveral requests.
+ *    1. Call service with several requests.
  *    2. Evaluate the result.
  *
  * Expected Results:

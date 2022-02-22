@@ -2,6 +2,28 @@
 Changelog for package moveit_simple_controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.4.0 (2022-01-20)
+------------------
+* moveit_build_options()
+  Declare common build options like CMAKE_CXX_STANDARD, CMAKE_BUILD_TYPE,
+  and compiler options (namely warning flags) once.
+  Each package depending on moveit_core can use these via moveit_build_options().
+* Contributors: Robert Haschke
+
+2.3.2 (2021-12-29)
+------------------
+
+2.3.1 (2021-12-23)
+------------------
+* Add codespell to precommit, fix A LOT of spelling mistakes (`#934 <https://github.com/ros-planning/moveit2/issues/934>`_)
+* Make controller management logic more tolerant of missing or late ros2_control nodes (`#792 <https://github.com/ros-planning/moveit2/issues/792>`_)
+* Clang-tidy fixes (`#596 <https://github.com/ros-planning/moveit2/issues/596>`_)
+* Enforce package.xml format 3 Schema (`#779 <https://github.com/ros-planning/moveit2/issues/779>`_)
+* Update Maintainers of MoveIt package (`#697 <https://github.com/ros-planning/moveit2/issues/697>`_)
+* clang-tidy: modernize-make-shared, modernize-make-unique (`#2762 <https://github.com/ros-planning/moveit/issues/2762>`_)
+* controller manager: enclose name in quotes (`#2761 <https://github.com/ros-planning/moveit/issues/2761>`_)
+* Contributors: Dave Coleman, David V. Lu!!, G.A. vd. Hoorn, Henning Kayser, Joseph Schornak, Robert Haschke, pvanlaar
+
 2.3.0 (2021-10-08)
 ------------------
 * Fix cmake warnings (`#690 <https://github.com/ros-planning/moveit2/issues/690>`_)
