@@ -235,14 +235,17 @@ void LocalPlannerComponent::executeIteration()
     // If the planner received an action request and a global solution it starts to plan locally
     case LocalPlannerState::LOCAL_PLANNING_ACTIVE:
     {
-      // Read current robot state
       planning_scene_monitor_->updateSceneWithCurrentState();
-      planning_scene_monitor_->lockSceneRead();  // LOCK planning scene
-      const auto current_robot_state = planning_scene_monitor_->getPlanningScene()->getCurrentState();
-      planning_scene_monitor_->unlockSceneRead();  // UNLOCK planning scene
+
+      // Read current robot state
+      moveit::core::RobotStatePtr current_robot_state;
+      {
+        planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor_);
+        current_robot_state = std::make_shared<moveit::core::RobotState>(ls->getCurrentState());
+      }
 
       // Check if the global goal is reached
-      if (trajectory_operator_instance_->getTrajectoryProgress(current_robot_state) > PROGRESS_THRESHOLD)
+      if (trajectory_operator_instance_->getTrajectoryProgress(*current_robot_state) > PROGRESS_THRESHOLD)
       {
         local_planning_goal_handle_->succeed(result);
         reset();
@@ -253,7 +256,7 @@ void LocalPlannerComponent::executeIteration()
       robot_trajectory::RobotTrajectory local_trajectory =
           robot_trajectory::RobotTrajectory(planning_scene_monitor_->getRobotModel(), config_.group_name);
       *local_planner_feedback_ =
-          trajectory_operator_instance_->getLocalTrajectory(current_robot_state, local_trajectory);
+          trajectory_operator_instance_->getLocalTrajectory(*current_robot_state, local_trajectory);
 
       // Feedback is only sent when the hybrid planning architecture should react to a discrete event that occurred
       // during the identification of the local planning problem
