@@ -96,12 +96,6 @@ bool LocalPlannerComponent::initialize()
   planning_scene_monitor_->startWorldGeometryMonitor(config_.collision_object_topic);
   planning_scene_monitor_->startStateMonitor(config_.joint_states_topic);
 
-  // Create a copy of the planning scene
-  planning_scene_monitor_->lockSceneRead();  // LOCK planning scene
-  planning_scene::PlanningScenePtr planning_scene = planning_scene_monitor_->getPlanningScene();
-  planning_scene->decoupleParent();
-  planning_scene_monitor_->unlockSceneRead();  // UNLOCK planning scene
-
   // Load trajectory operator plugin
   try
   {
