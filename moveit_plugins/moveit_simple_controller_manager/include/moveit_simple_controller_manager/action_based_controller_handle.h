@@ -185,7 +185,6 @@ public:
   }
 
 protected:
-
   /**
    * @brief A pointer to the node, required to read parameters and get the time.
    */
