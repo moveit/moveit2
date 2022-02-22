@@ -81,7 +81,7 @@ class ActionBasedControllerHandle : public ActionBasedControllerHandleBase
 public:
   ActionBasedControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::string& ns,
                               const std::string& logger_name)
-    : ActionBasedControllerHandleBase(name, logger_name), done_(true), namespace_(ns)
+    : ActionBasedControllerHandleBase(name, logger_name), node_(node), done_(true), namespace_(ns)
   {
     // Creating the action client does not ensure that the action server is actually running. Executing trajectories
     // through the controller handle will fail if the server is not running when an action goal message is sent.
@@ -185,6 +185,12 @@ public:
   }
 
 protected:
+
+  /**
+   * @brief A pointer to the node, required to read parameters and get the time.
+   */
+  const rclcpp::Node::SharedPtr node_;
+
   /**
    * @brief Check if the controller's action server is ready to receive action goals.
    * @return True if the action server is ready, false if it is not ready or does not exist.
