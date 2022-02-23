@@ -95,7 +95,9 @@ bool LocalPlannerComponent::initialize()
   // Start state and scene monitors
   planning_scene_monitor_->startSceneMonitor(config_.monitored_planning_scene_topic);
   planning_scene_monitor_->startWorldGeometryMonitor(config_.collision_object_topic);
-  planning_scene_monitor_->startStateMonitor(config_.joint_states_topic);
+  planning_scene_monitor_->startStateMonitor(config_.joint_states_topic, "/attached_collision_object");
+  planning_scene_monitor_->monitorDiffs(true);
+  planning_scene_monitor_->stopPublishingPlanningScene();
 
   // Load trajectory operator plugin
   try
