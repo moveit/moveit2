@@ -124,7 +124,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
       collision_request_.group_name = local_trajectory.getGroupName();
       locked_planning_scene->getCollisionEnv()->checkRobotCollision(collision_request_, collision_result_,
                                                                     *current_state);
-      is_path_valid = (!collision_result_.collision || (collision_result_.distance < COLLISION_THRESHOLD));
+      is_path_valid = (!(collision_result_.collision || (collision_result_.distance < COLLISION_THRESHOLD)));
     }
 
     // Check if path is valid
