@@ -460,7 +460,7 @@ void VirtualJointsWidget::loadDataTable()
   data_table_->setDisabled(true);         // make sure we disable it so that the cellChanged event is not called
   data_table_->clearContents();
 
-  auto virtual_joints = setup_step_.getContainer();
+  const auto& virtual_joints = setup_step_.getContainer();
 
   // Set size of datatable
   data_table_->setRowCount(virtual_joints.size());

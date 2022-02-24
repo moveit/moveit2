@@ -134,7 +134,7 @@ public:
    */
   bool remove(const std::string& name)
   {
-    auto container = getContainer();
+    auto& container = getContainer();
     for (auto it = container.begin(); it != container.end(); ++it)
     {
       if (it->name_ == name)  // string match

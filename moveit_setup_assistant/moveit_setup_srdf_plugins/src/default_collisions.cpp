@@ -48,7 +48,7 @@ std::vector<std::string> DefaultCollisions::getCollidingLinks()
 void DefaultCollisions::linkPairsToSRDF()
 {
   // reset the data in the SRDF Writer class
-  auto disabled_list = srdf_config_->getDisabledCollisions();
+  auto& disabled_list = srdf_config_->getDisabledCollisions();
   disabled_list.clear();
 
   // Create temp disabled collision
@@ -66,6 +66,7 @@ void DefaultCollisions::linkPairsToSRDF()
       disabled_list.push_back(dc);
     }
   }
+  srdf_config_->updateRobotModel(moveit_setup_framework::COLLISIONS);  // mark as changed
 }
 
 // ******************************************************************************************
@@ -95,7 +96,7 @@ private:
 
 void DefaultCollisions::linkPairsToSRDFSorted(size_t skip_mask)
 {
-  auto disabled_list = srdf_config_->getDisabledCollisions();
+  auto& disabled_list = srdf_config_->getDisabledCollisions();
   // Create temp disabled collision
   srdf::Model::DisabledCollision dc;
 
@@ -193,7 +194,6 @@ void DefaultCollisions::cancelGenerationThread()
 
 void DefaultCollisions::joinGenerationThread()
 {
-  srdf_config_->updateRobotModel(moveit_setup_framework::COLLISIONS);  // mark as changed
   worker_.join();
 }
 
