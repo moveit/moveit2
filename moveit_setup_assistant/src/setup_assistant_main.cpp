@@ -59,10 +59,12 @@ int main(int argc, char** argv)
   namespace po = boost::program_options;
 
   // Declare the supported options
+  // clang-format off
   po::options_description desc("Allowed options");
   desc.add_options()("help,h", "Show help message")("debug,g", "Run in debug/test mode")(
       "urdf_path,u", po::value<std::string>(), "Optional, path to URDF file in ROS package")(
       "config_pkg,c", po::value<std::string>(), "Optional, pass in existing config package to load");
+  // clang-format on
 
   // Process options
   po::variables_map vm;
