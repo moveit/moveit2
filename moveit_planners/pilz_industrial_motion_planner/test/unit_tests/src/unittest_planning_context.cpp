@@ -149,7 +149,8 @@ protected:
     // work at zero positions
     rstate.setJointGroupPositions(this->planning_group_,
                                   std::vector<double>{ 4.430233957464225e-12, 0.007881892504574495, -1.8157263253868452,
-                                    1.1801525390026025e-11, 1.8236082178909834, 8.591793942969161e-12 });
+                                                       1.1801525390026025e-11, 1.8236082178909834,
+                                                       8.591793942969161e-12 });
     Eigen::Isometry3d start_pose(Eigen::Isometry3d::Identity());
     start_pose.translation() = Eigen::Vector3d(0.3, 0, 0.65);
     rstate.setFromIK(this->robot_model_->getJointModelGroup(this->planning_group_), start_pose);
