@@ -102,7 +102,7 @@ double RobotTrajectory::getAverageSegmentDuration() const
   {
     if (duration_from_previous_.size() <= 1)
     {
-      RCLCPP_WARN(rclcpp::get_logger("RobotTrajectory"), "Too few waypoints to calculate a duration. Returning 0.");
+      RCLCPP_WARN(rclcpp::get_logger("RobotTrajectory"), "First and only waypoint has a duration of 0.");
       return 0.0;
     }
     else
