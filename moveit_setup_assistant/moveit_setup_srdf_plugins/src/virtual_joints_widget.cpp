@@ -274,7 +274,7 @@ void VirtualJointsWidget::edit(const std::string& name)
   current_edit_vjoint_ = name;
 
   // Find the selected in datastruture
-  srdf::Model::VirtualJoint* vjoint = setup_step_.findVJointByName(name);
+  srdf::Model::VirtualJoint* vjoint = setup_step_.find(name);
 
   // Check if vjoint was found
   if (vjoint == nullptr)  // not found
@@ -367,7 +367,7 @@ void VirtualJointsWidget::deleteSelected()
   }
 
   // Delete vjoint from vector
-  setup_step_.deleteByName(current_edit_vjoint_);
+  setup_step_.remove(current_edit_vjoint_);
 
   // Reload main screen table
   loadDataTable();
@@ -415,7 +415,8 @@ void VirtualJointsWidget::doneEditing()
 
   try
   {
-    setup_step_.create(current_edit_vjoint_, vjoint_name, parent_name, child_link, joint_type);
+    srdf::Model::VirtualJoint* vj = setup_step_.get(vjoint_name, current_edit_vjoint_);
+    setup_step_.setProperties(vj, parent_name, child_link, joint_type);
   }
   catch (const std::runtime_error& e)
   {
@@ -459,7 +460,7 @@ void VirtualJointsWidget::loadDataTable()
   data_table_->setDisabled(true);         // make sure we disable it so that the cellChanged event is not called
   data_table_->clearContents();
 
-  auto virtual_joints = setup_step_.getVirtualJoints();
+  const auto& virtual_joints = setup_step_.getContainer();
 
   // Set size of datatable
   data_table_->setRowCount(virtual_joints.size());

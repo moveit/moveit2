@@ -37,16 +37,13 @@
 #pragma once
 
 // SA
-#ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
-#endif
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_framework/qt/double_list_widget.hpp>
+#include <moveit_setup_srdf_plugins/passive_joints.hpp>
 
-#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
-
-namespace moveit_setup_assistant
+namespace moveit_setup_srdf_plugins
 {
-class DoubleListWidget;
-class PassiveJointsWidget : public SetupScreenWidget
+class PassiveJointsWidget : public moveit_setup_framework::SetupStepWidget
 {
   Q_OBJECT
 
@@ -55,16 +52,21 @@ public:
   // Public Functions
   // ******************************************************************************************
 
-  PassiveJointsWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
+  void onInit() override;
 
   /// Received when this widget is chosen from the navigation menu
   void focusGiven() override;
+
+  moveit_setup_framework::SetupStep& getSetupStep() override
+  {
+    return setup_step_;
+  }
 
   // ******************************************************************************************
   // Qt Components
   // ******************************************************************************************
 
-  DoubleListWidget* joints_widget_;
+  moveit_setup_framework::DoubleListWidget* joints_widget_;
 
 private Q_SLOTS:
 
@@ -81,11 +83,10 @@ private:
   // Variables
   // ******************************************************************************************
 
-  /// Contains all the configuration data for the setup assistant
-  moveit_setup_assistant::MoveItConfigDataPtr config_data_;
+  PassiveJoints setup_step_;
 
   /// Original name of vjoint currently being edited. This is used to find the element in the vector
   std::string current_edit_vjoint_;
 };
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_srdf_plugins

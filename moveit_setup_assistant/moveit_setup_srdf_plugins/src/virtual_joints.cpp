@@ -40,72 +40,16 @@ namespace moveit_setup_srdf_plugins
 {
 void VirtualJoints::onInit()
 {
-  srdf_config_ = config_data_->get<moveit_setup_framework::SRDFConfig>("srdf");
+  SuperSRDFStep::onInit();
   urdf_config_ = config_data_->get<moveit_setup_framework::URDFConfig>("urdf");
 }
 
-// ******************************************************************************************
-// Find the associated data by name
-// ******************************************************************************************
-srdf::Model::VirtualJoint* VirtualJoints::findVJointByName(const std::string& name)
+void VirtualJoints::setProperties(srdf::Model::VirtualJoint* vj, const std::string& parent_name,
+                                  const std::string& child_name, const std::string& joint_type)
 {
-  // Find the group state we are editing based on the vjoint name
-  srdf::Model::VirtualJoint* searched_group = nullptr;  // used for holding our search results
-
-  for (srdf::Model::VirtualJoint& virtual_joint : srdf_config_->getVirtualJoints())
-  {
-    if (virtual_joint.name_ == name)  // string match
-    {
-      searched_group = &virtual_joint;  // convert to pointer from iterator
-      break;                            // we are done searching
-    }
-  }
-
-  return searched_group;
-}
-
-bool VirtualJoints::deleteByName(const std::string& name)
-{
-  auto vjs = srdf_config_->getVirtualJoints();
-
-  for (std::vector<srdf::Model::VirtualJoint>::iterator vjoint_it = vjs.begin(); vjoint_it != vjs.end(); ++vjoint_it)
-  {
-    // check if this is the group we want to delete
-    if (vjoint_it->name_ == name)  // string match
-    {
-      vjs.erase(vjoint_it);
-      srdf_config_->updateRobotModel(true);
-      return true;
-    }
-  }
-  return false;
-}
-
-void VirtualJoints::create(const std::string& old_name, const std::string& joint_name, const std::string& parent_name,
-                           const std::string& child_name, const std::string& joint_type)
-{
-  srdf::Model::VirtualJoint* vj = nullptr;
-  std::vector<srdf::Model::VirtualJoint>& vjs = srdf_config_->getVirtualJoints();
-  if (old_name.empty())
-  {
-    // Create new
-    vjs.push_back(srdf::Model::VirtualJoint());
-    vj = &vjs.back();
-  }
-  else
-  {
-    // Find the group we are editing based on the old name string
-    vj = findVJointByName(old_name);
-    if (old_name != joint_name && findVJointByName(joint_name))
-    {
-      throw std::runtime_error("A virtual joint already exists with that name!");
-    }
-  }
-  // Copy name data ----------------------------------------------------
-  vj->name_ = joint_name;
   vj->parent_frame_ = parent_name;
   vj->child_link_ = child_name;
   vj->type_ = joint_type;
-  srdf_config_->updateRobotModel(true);
+  srdf_config_->updateRobotModel(moveit_setup_framework::VIRTUAL_JOINTS);
 }
 }  // namespace moveit_setup_srdf_plugins

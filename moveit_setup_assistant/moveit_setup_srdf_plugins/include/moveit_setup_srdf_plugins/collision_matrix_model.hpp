@@ -42,7 +42,7 @@
 #include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
 #endif
 
-class QItemSelection;
+#include <QItemSelection>
 
 class CollisionMatrixModel : public QAbstractTableModel
 {

@@ -43,25 +43,9 @@
 
 namespace moveit_setup_assistant
 {
-// Default kin solver values
-static const double DEFAULT_KIN_SOLVER_SEARCH_RESOLUTION = 0.005;
-static const double DEFAULT_KIN_SOLVER_TIMEOUT = 0.005;
-
 // ******************************************************************************************
 // Structs
 // ******************************************************************************************
-
-/**
- * Planning groups extra data not found in srdf but used in config files
- */
-struct GroupMetaData
-{
-  std::string kinematics_solver_;               // Name of kinematics plugin to use
-  double kinematics_solver_search_resolution_;  // resolution to use with solver
-  double kinematics_solver_timeout_;            // solver timeout
-  std::string kinematics_parameters_file_;      // file for additional kinematics parameters
-  std::string default_planner_;                 // Name of the default planner to use
-};
 
 /**
  * ROS Controllers settings which may be set in the config files
@@ -132,43 +116,11 @@ public:
   MoveItConfigData();
   ~MoveItConfigData();
 
-  // bits of information that can be entered in Setup Assistant
-  enum InformationFields
-  {
-    COLLISIONS = 1 << 1,
-    VIRTUAL_JOINTS = 1 << 2,
-    GROUPS = 1 << 3,
-    GROUP_CONTENTS = 1 << 4,
-    GROUP_KINEMATICS = 1 << 5,
-    POSES = 1 << 6,
-    END_EFFECTORS = 1 << 7,
-    PASSIVE_JOINTS = 1 << 8,
-    AUTHOR_INFO = 1 << 9,
-    SENSORS_CONFIG = 1 << 10,
-    SRDF = COLLISIONS | VIRTUAL_JOINTS | GROUPS | GROUP_CONTENTS | POSES | END_EFFECTORS | PASSIVE_JOINTS
-  };
-  unsigned long changes;  // bitfield of changes (composed of InformationFields)
-
-  /// Planning groups extra data not found in srdf but used in config files
-  std::map<std::string, GroupMetaData> group_meta_data_;
-
   /// Setup Assistants package's path for when we use its templates
   std::string setup_assistant_path_;
 
   /// Location that moveit_setup_assistant stores its templates
   std::string template_package_path_;
-
-  // ******************************************************************************************
-  // Public Functions
-  // ******************************************************************************************
-
-  /**
-   * Find the associated group by name
-   *
-   * @param name - name of data to find in datastructure
-   * @return pointer to data in datastructure
-   */
-  srdf::Model::Group* findGroupByName(const std::string& name);
 
   // ******************************************************************************************
   // Public Functions for outputting configuration and setting files
