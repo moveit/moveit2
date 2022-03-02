@@ -37,16 +37,14 @@
 #pragma once
 
 #include <QWidget>
-class QComboBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
+#include <QComboBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 
-#ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
-#endif
+#include <moveit_setup_srdf_plugins/planning_groups.hpp>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_srdf_plugins
 {
 class GroupEditWidget : public QWidget
 {
@@ -58,10 +56,10 @@ public:
   // ******************************************************************************************
 
   /// Constructor
-  GroupEditWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
+  GroupEditWidget(QWidget* parent, PlanningGroups& setup_step);
 
   /// Set the previous data
-  void setSelected(const std::string& group_name);
+  void setSelected(const std::string& group_name, const GroupMetaData& meta_data);
 
   /// Populate the combo dropdown box with kinematic planners
   void loadKinematicPlannersComboBox();
@@ -121,12 +119,10 @@ private:
   // ******************************************************************************************
   // Variables
   // ******************************************************************************************
-
-  /// Contains all the configuration data for the setup assistant
-  moveit_setup_assistant::MoveItConfigDataPtr config_data_;
+  PlanningGroups& setup_step_;
 
   // ******************************************************************************************
   // Private Functions
   // ******************************************************************************************
 };
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_srdf_plugins

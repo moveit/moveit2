@@ -38,11 +38,6 @@
 
 namespace moveit_setup_srdf_plugins
 {
-void DefaultCollisions::onInit()
-{
-  srdf_config_ = config_data_->get<moveit_setup_framework::SRDFConfig>("srdf");
-}
-
 std::vector<std::string> DefaultCollisions::getCollidingLinks()
 {
   return srdf_config_->getPlanningScene()->getRobotModel()->getLinkModelNamesWithCollisionGeometry();
@@ -53,7 +48,7 @@ std::vector<std::string> DefaultCollisions::getCollidingLinks()
 void DefaultCollisions::linkPairsToSRDF()
 {
   // reset the data in the SRDF Writer class
-  auto disabled_list = srdf_config_->getDisabledCollisions();
+  auto& disabled_list = srdf_config_->getDisabledCollisions();
   disabled_list.clear();
 
   // Create temp disabled collision
@@ -71,9 +66,7 @@ void DefaultCollisions::linkPairsToSRDF()
       disabled_list.push_back(dc);
     }
   }
-
-  // Update collision_matrix for robot pose's use
-  loadAllowedCollisionMatrix();
+  srdf_config_->updateRobotModel(moveit_setup_framework::COLLISIONS);  // mark as changed
 }
 
 // ******************************************************************************************
@@ -103,7 +96,7 @@ private:
 
 void DefaultCollisions::linkPairsToSRDFSorted(size_t skip_mask)
 {
-  auto disabled_list = srdf_config_->getDisabledCollisions();
+  auto& disabled_list = srdf_config_->getDisabledCollisions();
   // Create temp disabled collision
   srdf::Model::DisabledCollision dc;
 
@@ -166,21 +159,6 @@ void DefaultCollisions::linkPairsFromSRDF()
   }
 }
 
-// ******************************************************************************************
-// Load the allowed collision matrix from the SRDF's list of link pairs
-// ******************************************************************************************
-void DefaultCollisions::loadAllowedCollisionMatrix()
-{
-  // Clear the allowed collision matrix
-  allowed_collision_matrix_.clear();
-
-  // Update the allowed collision matrix, in case there has been a change
-  for (const auto& disabled_collision : srdf_config_->getDisabledCollisions())
-  {
-    allowed_collision_matrix_.setEntry(disabled_collision.link1_, disabled_collision.link2_, true);
-  }
-}
-
 void DefaultCollisions::startGenerationThread(unsigned int num_trials, double min_frac, bool verbose)
 {
   progress_ = 0;
@@ -216,7 +194,6 @@ void DefaultCollisions::cancelGenerationThread()
 
 void DefaultCollisions::joinGenerationThread()
 {
-  srdf_config_->updateRobotModel(true);  // mark as changed
   worker_.join();
 }
 

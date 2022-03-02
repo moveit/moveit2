@@ -43,6 +43,20 @@
 
 namespace moveit_setup_framework
 {
+// bits of information that can be changed in the SRDF
+enum InformationFields
+{
+  NONE = 0,
+  COLLISIONS = 1 << 1,
+  VIRTUAL_JOINTS = 1 << 2,
+  GROUPS = 1 << 3,
+  GROUP_CONTENTS = 1 << 4,
+  POSES = 1 << 5,
+  END_EFFECTORS = 1 << 6,
+  PASSIVE_JOINTS = 1 << 7,
+  OTHER = 1 << 8,
+};
+
 class SRDFConfig : public SetupConfig
 {
 public:
@@ -71,7 +85,9 @@ public:
   /// Provide a shared planning scene
   planning_scene::PlanningScenePtr getPlanningScene();
 
-  void updateRobotModel(bool mark_as_changed = false);
+  /// Update the robot model with the new SRDF, AND mark the changes that have been made to the model
+  /// changed_information should be composed of InformationFields
+  void updateRobotModel(long changed_information = 0L);
 
   std::vector<std::string> getLinkNames() const;
 
@@ -90,10 +106,38 @@ public:
     return srdf_.groups_;
   }
 
+  std::vector<std::string> getGroupNames() const
+  {
+    std::vector<std::string> group_names;
+    for (const srdf::Model::Group& group : srdf_.groups_)
+    {
+      group_names.push_back(group.name_);
+    }
+    return group_names;
+  }
+
+  std::vector<srdf::Model::GroupState>& getGroupStates()
+  {
+    return srdf_.group_states_;
+  }
+
   std::vector<srdf::Model::VirtualJoint>& getVirtualJoints()
   {
     return srdf_.virtual_joints_;
   }
+
+  std::vector<srdf::Model::PassiveJoint>& getPassiveJoints()
+  {
+    return srdf_.passive_joints_;
+  }
+
+  /**
+   * @brief Return the name of the child link of a joint
+   * @return empty string if joint is not found
+   */
+  std::string getChildOfJoint(const std::string& joint_name) const;
+
+  void removePoseByName(const std::string& pose_name, const std::string& group_name);
 
   class GeneratedSRDF : public GeneratedFile
   {
@@ -118,7 +162,7 @@ public:
 
     bool hasChanges() const override
     {
-      return parent_.has_changes_;
+      return parent_.changes_ > 0;
     }
 
     bool write() override
@@ -173,6 +217,7 @@ protected:
   /// Shared planning scene
   planning_scene::PlanningScenePtr planning_scene_;
 
-  bool has_changes_;
+  // bitfield of changes (composed of InformationFields)
+  unsigned long changes_;
 };
 }  // namespace moveit_setup_framework

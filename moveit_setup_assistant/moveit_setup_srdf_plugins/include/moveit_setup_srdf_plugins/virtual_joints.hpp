@@ -35,13 +35,12 @@
 /* Author: David V. Lu!! */
 #pragma once
 
-#include <moveit_setup_framework/setup_step.hpp>
+#include <moveit_setup_srdf_plugins/srdf_step.hpp>
 #include <moveit_setup_framework/data/urdf_config.hpp>
-#include <moveit_setup_framework/data/srdf_config.hpp>
 
 namespace moveit_setup_srdf_plugins
 {
-class VirtualJoints : public moveit_setup_framework::SetupStep
+class VirtualJoints : public SuperSRDFStep<srdf::Model::VirtualJoint>
 {
 public:
   std::string getName() const override
@@ -49,38 +48,27 @@ public:
     return "Virtual Joints";
   }
 
-  void onInit() override;
-
-  bool isReady() const override
+  std::vector<srdf::Model::VirtualJoint>& getContainer() override
   {
-    return urdf_config_->isConfigured();
+    return srdf_config_->getVirtualJoints();
   }
 
-  /**
-   * Find the associated data by name
-   *
-   * @param name - name of data to find in datastructure
-   * @return pointer to data in datastructure
-   */
-  srdf::Model::VirtualJoint* findVJointByName(const std::string& name);
+  moveit_setup_framework::InformationFields getInfoField() const override
+  {
+    return moveit_setup_framework::VIRTUAL_JOINTS;
+  }
 
-  bool deleteByName(const std::string& name);
+  void onInit() override;
 
-  void create(const std::string& old_name, const std::string& joint_name, const std::string& parent_name,
-              const std::string& child_name, const std::string& joint_type);
+  void setProperties(srdf::Model::VirtualJoint* vj, const std::string& parent_name, const std::string& child_name,
+                     const std::string& joint_type);
 
   std::vector<std::string> getLinkNames() const
   {
     return srdf_config_->getLinkNames();
   }
 
-  std::vector<srdf::Model::VirtualJoint>& getVirtualJoints()
-  {
-    return srdf_config_->getVirtualJoints();
-  }
-
 protected:
-  std::shared_ptr<moveit_setup_framework::SRDFConfig> srdf_config_;
   std::shared_ptr<moveit_setup_framework::URDFConfig> urdf_config_;
 };
 }  // namespace moveit_setup_srdf_plugins

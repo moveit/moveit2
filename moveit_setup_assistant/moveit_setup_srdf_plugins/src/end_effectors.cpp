@@ -33,59 +33,31 @@
  *********************************************************************/
 
 /* Author: David V. Lu!! */
-#pragma once
 
-#include <moveit_setup_srdf_plugins/srdf_step.hpp>
-#include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
-#include <boost/thread/thread.hpp>
+#include <moveit_setup_srdf_plugins/end_effectors.hpp>
 
 namespace moveit_setup_srdf_plugins
 {
-class DefaultCollisions : public SRDFStep
+void EndEffectors::onInit()
 {
-public:
-  std::string getName() const override
-  {
-    return "Self-Collisions";
-  }
+  SuperSRDFStep::onInit();
+  urdf_config_ = config_data_->get<moveit_setup_framework::URDFConfig>("urdf");
+}
 
-  std::vector<std::string> getCollidingLinks();
+bool EndEffectors::isLinkInGroup(const std::string& link, const std::string& group) const
+{
+  const auto rm = srdf_config_->getRobotModel();
+  const moveit::core::JointModelGroup* jmg = rm->getJointModelGroup(group);
+  return jmg->hasLinkModel(link);
+}
 
-  /**
-   * @brief Output Link Pairs to SRDF Format
-   */
-  void linkPairsToSRDF();
+void EndEffectors::setProperties(srdf::Model::EndEffector* eef, const std::string& parent_link,
+                                 const std::string& component_group, const std::string& parent_group)
+{
+  eef->parent_link_ = parent_link;
+  eef->component_group_ = component_group;
+  eef->parent_group_ = parent_group;
+  srdf_config_->updateRobotModel(moveit_setup_framework::END_EFFECTORS);
+}
 
-  /**
-   * @brief Output Link Pairs to SRDF Format; sorted; with optional filter
-   * @param skip_mask mask of shifted DisabledReason values that will be skipped
-   */
-  void linkPairsToSRDFSorted(size_t skip_mask = 0);
-
-  /**
-   * @brief Load Link Pairs from SRDF Format
-   */
-  void linkPairsFromSRDF();
-
-  LinkPairMap& getLinkPairs()
-  {
-    return link_pairs_;
-  }
-
-  // For Threaded Operations
-  void startGenerationThread(unsigned int num_trials, double min_frac, bool verbose = true);
-  void cancelGenerationThread();
-  void joinGenerationThread();
-  int getThreadProgress() const;
-
-protected:
-  void generateCollisionTable(unsigned int num_trials, double min_frac, bool verbose);
-
-  /// main storage of link pair data
-  LinkPairMap link_pairs_;
-
-  // For threaded operations
-  boost::thread worker_;
-  unsigned int progress_;
-};
 }  // namespace moveit_setup_srdf_plugins
