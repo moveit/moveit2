@@ -36,56 +36,32 @@
 #pragma once
 
 #include <moveit_setup_srdf_plugins/srdf_step.hpp>
-#include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
-#include <boost/thread/thread.hpp>
 
 namespace moveit_setup_srdf_plugins
 {
-class DefaultCollisions : public SRDFStep
+class PassiveJoints : public SRDFStep
 {
 public:
   std::string getName() const override
   {
-    return "Self-Collisions";
+    return "Passive Joints";
   }
 
-  std::vector<std::string> getCollidingLinks();
+  /**
+   * @brief Return all active (non-fixed) joint names
+   */
+  std::vector<std::string> getActiveJoints() const;
 
   /**
-   * @brief Output Link Pairs to SRDF Format
+   * @brief Return all passive joint names (according to srdf)
    */
-  void linkPairsToSRDF();
+  std::vector<std::string> getPassiveJoints() const;
 
-  /**
-   * @brief Output Link Pairs to SRDF Format; sorted; with optional filter
-   * @param skip_mask mask of shifted DisabledReason values that will be skipped
-   */
-  void linkPairsToSRDFSorted(size_t skip_mask = 0);
-
-  /**
-   * @brief Load Link Pairs from SRDF Format
-   */
-  void linkPairsFromSRDF();
-
-  LinkPairMap& getLinkPairs()
+  std::string getChildOfJoint(const std::string& joint_name) const
   {
-    return link_pairs_;
+    return srdf_config_->getChildOfJoint(joint_name);
   }
 
-  // For Threaded Operations
-  void startGenerationThread(unsigned int num_trials, double min_frac, bool verbose = true);
-  void cancelGenerationThread();
-  void joinGenerationThread();
-  int getThreadProgress() const;
-
-protected:
-  void generateCollisionTable(unsigned int num_trials, double min_frac, bool verbose);
-
-  /// main storage of link pair data
-  LinkPairMap link_pairs_;
-
-  // For threaded operations
-  boost::thread worker_;
-  unsigned int progress_;
+  void setPassiveJoints(const std::vector<std::string>& passive_joints);
 };
 }  // namespace moveit_setup_srdf_plugins

@@ -713,7 +713,7 @@ bool DefaultCollisionsWidget::focusLost()
     worker_->wait();
   }
 
-  // Copy changes to srdf_writer object and config_data_->allowed_collision_matrix_
+  // Copy changes to srdf_writer object
   setup_step_.linkPairsToSRDF();
   return true;
 }
