@@ -37,22 +37,19 @@
 #pragma once
 
 // Qt
-class QComboBox;
-class QLineEdit;
-class QPushButton;
-class QStackedWidget;
-class QTableWidget;
+#include <QComboBox>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QStackedWidget>
+#include <QTableWidget>
 
 // SA
-#ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
-#endif
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_srdf_plugins/end_effectors.hpp>
 
-#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
-
-namespace moveit_setup_assistant
+namespace moveit_setup_srdf_plugins
 {
-class EndEffectorsWidget : public SetupScreenWidget
+class EndEffectorsWidget : public moveit_setup_framework::SetupStepWidget
 {
   Q_OBJECT
 
@@ -61,10 +58,15 @@ public:
   // Public Functions
   // ******************************************************************************************
 
-  EndEffectorsWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
+  void onInit() override;
 
   /// Received when this widget is chosen from the navigation menu
   void focusGiven() override;
+
+  moveit_setup_framework::SetupStep& getSetupStep() override
+  {
+    return setup_step_;
+  }
 
   // ******************************************************************************************
   // Qt Components
@@ -116,9 +118,7 @@ private:
   // ******************************************************************************************
   // Variables
   // ******************************************************************************************
-
-  /// Contains all the configuration data for the setup assistant
-  moveit_setup_assistant::MoveItConfigDataPtr config_data_;
+  EndEffectors setup_step_;
 
   /// Original name of effector currently being edited. This is used to find the element in the vector
   std::string current_edit_effector_;
@@ -133,7 +133,7 @@ private:
    * @param name - name of data to find in datastructure
    * @return pointer to data in datastructure
    */
-  srdf::Model::EndEffector* findEffectorByName(const std::string& name);
+  srdf::Model::EndEffector* getEndEffector(const std::string& name);
 
   /**
    * Create the main list view of effectors for robot
@@ -175,4 +175,4 @@ private:
   void edit(const std::string& name);
 };
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_srdf_plugins

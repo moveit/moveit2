@@ -41,7 +41,7 @@ namespace moveit_setup_framework
 void SRDFConfig::onInit()
 {
   parent_node_->declare_parameter("robot_description_semantic", rclcpp::ParameterType::PARAMETER_STRING);
-  has_changes_ = false;
+  changes_ = 0L;
 }
 
 void SRDFConfig::loadPrevious(const std::string& package_path, const YAML::Node& node)
@@ -135,19 +135,24 @@ void SRDFConfig::getRelativePath()
   srdf_pkg_relative_path_ = appendPaths("config", urdf_model_->getName() + ".srdf");
 }
 
-void SRDFConfig::updateRobotModel(bool mark_as_changed)
+void SRDFConfig::updateRobotModel(long changed_information)
 {
   // Initialize with a URDF Model Interface and a SRDF Model
   loadURDFModel();
+  if (changed_information > 0)
+  {
+    srdf_.updateSRDFModel(*urdf_model_);
+  }
+
   robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_.srdf_model_);
 
   if (srdf_pkg_relative_path_.empty())
   {
     srdf_pkg_relative_path_ = appendPaths("config", urdf_model_->getName() + ".srdf");
     srdf_.robot_name_ = urdf_model_->getName();
-    has_changes_ = true;
+    changes_ |= OTHER;
   }
-  has_changes_ |= mark_as_changed;
+  changes_ |= changed_information;
 
   // Reset the planning scene
   planning_scene_.reset();
@@ -177,6 +182,31 @@ std::vector<std::string> SRDFConfig::getLinkNames() const
     names.push_back(link_model->getName());
   }
   return names;
+}
+
+std::string SRDFConfig::getChildOfJoint(const std::string& joint_name) const
+{
+  const moveit::core::JointModel* joint_model = getRobotModel()->getJointModel(joint_name);
+  // Check that a joint model was found
+  if (!joint_model)
+  {
+    return "";
+  }
+  return joint_model->getChildLinkModel()->getName();
+}
+
+void SRDFConfig::removePoseByName(const std::string& pose_name, const std::string& group_name)
+{
+  for (std::vector<srdf::Model::GroupState>::iterator pose_it = srdf_.group_states_.begin();
+       pose_it != srdf_.group_states_.end(); ++pose_it)
+  {
+    if (pose_it->name_ == pose_name && pose_it->group_ == group_name)
+    {
+      srdf_.group_states_.erase(pose_it);
+      updateRobotModel(moveit_setup_framework::POSES);
+      return;
+    }
+  }
 }
 
 void SRDFConfig::collectVariables(std::vector<TemplateVariable>& variables)

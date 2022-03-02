@@ -33,59 +33,50 @@
  *********************************************************************/
 
 /* Author: David V. Lu!! */
-#pragma once
 
-#include <moveit_setup_srdf_plugins/srdf_step.hpp>
-#include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
-#include <boost/thread/thread.hpp>
+#include <moveit_setup_srdf_plugins/passive_joints.hpp>
 
 namespace moveit_setup_srdf_plugins
 {
-class DefaultCollisions : public SRDFStep
+std::vector<std::string> PassiveJoints::getActiveJoints() const
 {
-public:
-  std::string getName() const override
+  std::vector<std::string> active_joints;
+
+  // Retrieve pointer to the shared kinematic model
+  const moveit::core::RobotModelConstPtr& model = srdf_config_->getRobotModel();
+
+  // Get the names of the all joints
+  for (const std::string& joint : model->getJointModelNames())
   {
-    return "Self-Collisions";
+    if (model->getJointModel(joint)->getVariableCount() > 0)
+    {
+      active_joints.push_back(joint);
+    }
   }
+  return active_joints;
+}
 
-  std::vector<std::string> getCollidingLinks();
-
-  /**
-   * @brief Output Link Pairs to SRDF Format
-   */
-  void linkPairsToSRDF();
-
-  /**
-   * @brief Output Link Pairs to SRDF Format; sorted; with optional filter
-   * @param skip_mask mask of shifted DisabledReason values that will be skipped
-   */
-  void linkPairsToSRDFSorted(size_t skip_mask = 0);
-
-  /**
-   * @brief Load Link Pairs from SRDF Format
-   */
-  void linkPairsFromSRDF();
-
-  LinkPairMap& getLinkPairs()
+std::vector<std::string> PassiveJoints::getPassiveJoints() const
+{
+  std::vector<std::string> passive_joints;
+  for (const srdf::Model::PassiveJoint& passive_joint : srdf_config_->getPassiveJoints())
   {
-    return link_pairs_;
+    passive_joints.push_back(passive_joint.name_);
   }
+  return passive_joints;
+}
 
-  // For Threaded Operations
-  void startGenerationThread(unsigned int num_trials, double min_frac, bool verbose = true);
-  void cancelGenerationThread();
-  void joinGenerationThread();
-  int getThreadProgress() const;
+void PassiveJoints::setPassiveJoints(const std::vector<std::string>& passive_joint_names)
+{
+  std::vector<srdf::Model::PassiveJoint>& passive_joints = srdf_config_->getPassiveJoints();
+  passive_joints.clear();
+  for (const std::string& passive_joint : passive_joint_names)
+  {
+    srdf::Model::PassiveJoint pj;
+    pj.name_ = passive_joint;
+    passive_joints.push_back(pj);
+  }
+  srdf_config_->updateRobotModel(moveit_setup_framework::PASSIVE_JOINTS);
+}
 
-protected:
-  void generateCollisionTable(unsigned int num_trials, double min_frac, bool verbose);
-
-  /// main storage of link pair data
-  LinkPairMap link_pairs_;
-
-  // For threaded operations
-  boost::thread worker_;
-  unsigned int progress_;
-};
 }  // namespace moveit_setup_srdf_plugins
