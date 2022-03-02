@@ -36,56 +36,55 @@
 #pragma once
 
 #include <moveit_setup_srdf_plugins/srdf_step.hpp>
-#include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
-#include <boost/thread/thread.hpp>
+#include <moveit_setup_framework/data/urdf_config.hpp>
 
 namespace moveit_setup_srdf_plugins
 {
-class DefaultCollisions : public SRDFStep
+class EndEffectors : public SuperSRDFStep<srdf::Model::EndEffector>
 {
 public:
   std::string getName() const override
   {
-    return "Self-Collisions";
+    return "End Effectors";
   }
 
-  std::vector<std::string> getCollidingLinks();
-
-  /**
-   * @brief Output Link Pairs to SRDF Format
-   */
-  void linkPairsToSRDF();
-
-  /**
-   * @brief Output Link Pairs to SRDF Format; sorted; with optional filter
-   * @param skip_mask mask of shifted DisabledReason values that will be skipped
-   */
-  void linkPairsToSRDFSorted(size_t skip_mask = 0);
-
-  /**
-   * @brief Load Link Pairs from SRDF Format
-   */
-  void linkPairsFromSRDF();
-
-  LinkPairMap& getLinkPairs()
+  std::vector<srdf::Model::EndEffector>& getContainer() override
   {
-    return link_pairs_;
+    return srdf_config_->getEndEffectors();
   }
 
-  // For Threaded Operations
-  void startGenerationThread(unsigned int num_trials, double min_frac, bool verbose = true);
-  void cancelGenerationThread();
-  void joinGenerationThread();
-  int getThreadProgress() const;
+  moveit_setup_framework::InformationFields getInfoField() const override
+  {
+    return moveit_setup_framework::END_EFFECTORS;
+  }
+
+  void onInit() override;
+
+  bool isReady() const override
+  {
+    return hasGroups();
+  }
+
+  std::vector<std::string> getGroupNames() const
+  {
+    return srdf_config_->getGroupNames();
+  }
+
+  std::vector<srdf::Model::EndEffector>& getEndEffectors()
+  {
+    return srdf_config_->getEndEffectors();
+  }
+
+  std::vector<std::string> getLinkNames() const
+  {
+    return srdf_config_->getLinkNames();
+  }
+
+  bool isLinkInGroup(const std::string& link, const std::string& group) const;
+  void setProperties(srdf::Model::EndEffector* eef, const std::string& parent_link, const std::string& component_group,
+                     const std::string& parent_group);
 
 protected:
-  void generateCollisionTable(unsigned int num_trials, double min_frac, bool verbose);
-
-  /// main storage of link pair data
-  LinkPairMap link_pairs_;
-
-  // For threaded operations
-  boost::thread worker_;
-  unsigned int progress_;
+  std::shared_ptr<moveit_setup_framework::URDFConfig> urdf_config_;
 };
 }  // namespace moveit_setup_srdf_plugins

@@ -37,26 +37,23 @@
 #pragma once
 
 // Qt
-class QComboBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QScrollArea;
-class QSlider;
-class QStackedWidget;
-class QTableWidget;
-class QVBoxLayout;
+#include <QComboBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QScrollArea>
+#include <QSlider>
+#include <QStackedWidget>
+#include <QTableWidget>
+#include <QVBoxLayout>
 
 // SA
-#ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
-#endif
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_srdf_plugins/robot_poses.hpp>
 
-#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
-
-namespace moveit_setup_assistant
+namespace moveit_setup_srdf_plugins
 {
-class RobotPosesWidget : public SetupScreenWidget
+class RobotPosesWidget : public moveit_setup_framework::SetupStepWidget
 {
   Q_OBJECT
 
@@ -65,10 +62,15 @@ public:
   // Public Functions
   // ******************************************************************************************
 
-  RobotPosesWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
+  void onInit() override;
 
   /// Received when this widget is chosen from the navigation menu
   void focusGiven() override;
+
+  moveit_setup_framework::SetupStep& getSetupStep() override
+  {
+    return setup_step_;
+  }
 
   // ******************************************************************************************
   // Qt Components
@@ -133,39 +135,19 @@ private Q_SLOTS:
    */
   void updateRobotModel(const std::string& name, double value);
 
-  /// Publishes a joint state message based on all the slider locations in a planning group, to rviz
-  void publishJoints();
-
 private:
   // ******************************************************************************************
   // Variables
   // ******************************************************************************************
 
-  /// Contains all the configuration data for the setup assistant
-  moveit_setup_assistant::MoveItConfigDataPtr config_data_;
+  RobotPoses setup_step_;
 
   /// Pointer to currently edited group state
   srdf::Model::GroupState* current_edit_pose_;
 
-  /// Remember the publisher for quick publishing later
-  ros::Publisher pub_robot_state_;
-
-  // ******************************************************************************************
-  // Collision Variables
-  // ******************************************************************************************
-  collision_detection::CollisionRequest request;
-
   // ******************************************************************************************
   // Private Functions
   // ******************************************************************************************
-
-  /**
-   * Find the associated data by name
-   *
-   * @param name - name of data to find in datastructure
-   * @return pointer to data in datastructure
-   */
-  srdf::Model::GroupState* findPoseByName(const std::string& name, const std::string& group);
 
   /**
    * Create the main list view of poses for robot
@@ -203,7 +185,7 @@ private:
   /**
    * Show the robot in the current pose
    */
-  void showPose(srdf::Model::GroupState* pose);
+  void showPose(const srdf::Model::GroupState& pose);
 };
 
 // ******************************************************************************************
@@ -279,7 +261,7 @@ private:
   // ******************************************************************************************
 };
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_srdf_plugins
 
 // Declare std::string as metatype so we can use it in a signal
 Q_DECLARE_METATYPE(std::string)

@@ -46,16 +46,14 @@
 #include <QString>
 #include <QVBoxLayout>
 
-#include "group_edit_widget.h"
-#include <pluginlib/class_loader.hpp>  // for loading all avail kinematic planners
+#include <moveit_setup_srdf_plugins/group_edit_widget.hpp>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_srdf_plugins
 {
 // ******************************************************************************************
 //
 // ******************************************************************************************
-GroupEditWidget::GroupEditWidget(QWidget* parent, const MoveItConfigDataPtr& config_data)
-  : QWidget(parent), config_data_(config_data)
+GroupEditWidget::GroupEditWidget(QWidget* parent, PlanningGroups& setup_step) : QWidget(parent), setup_step_(setup_step)
 {
   // Basic widget container
   QVBoxLayout* layout = new QVBoxLayout();
@@ -225,32 +223,20 @@ GroupEditWidget::GroupEditWidget(QWidget* parent, const MoveItConfigDataPtr& con
 // ******************************************************************************************
 // Set the link field with previous value
 // ******************************************************************************************
-void GroupEditWidget::setSelected(const std::string& group_name)
+void GroupEditWidget::setSelected(const std::string& group_name, const GroupMetaData& meta_data)
 {
   group_name_field_->setText(QString(group_name.c_str()));
 
   // Load properties from moveit_config_data.cpp ----------------------------------------------
 
   // Load resolution
-  double* resolution = &config_data_->group_meta_data_[group_name].kinematics_solver_search_resolution_;
-  if (*resolution == 0)
-  {
-    // Set default value
-    *resolution = DEFAULT_KIN_SOLVER_SEARCH_RESOLUTION;
-  }
-  kinematics_resolution_field_->setText(QString::number(*resolution));
+  kinematics_resolution_field_->setText(QString::number(meta_data.kinematics_solver_search_resolution_));
 
   // Load timeout
-  double* timeout = &config_data_->group_meta_data_[group_name].kinematics_solver_timeout_;
-  if (*timeout == 0)
-  {
-    // Set default value
-    *timeout = DEFAULT_KIN_SOLVER_TIMEOUT;
-  }
-  kinematics_timeout_field_->setText(QString::number(*timeout));
+  kinematics_timeout_field_->setText(QString::number(meta_data.kinematics_solver_timeout_));
 
   // Set kin solver
-  std::string kin_solver = config_data_->group_meta_data_[group_name].kinematics_solver_;
+  std::string kin_solver = meta_data.kinematics_solver_;
 
   // If this group doesn't have a solver, reset it to 'None'
   if (kin_solver.empty())
@@ -274,11 +260,10 @@ void GroupEditWidget::setSelected(const std::string& group_name)
     kinematics_solver_field_->setCurrentIndex(index);
   }
 
-  kinematics_parameters_file_field_->setText(
-      config_data_->group_meta_data_[group_name].kinematics_parameters_file_.c_str());
+  kinematics_parameters_file_field_->setText(meta_data.kinematics_parameters_file_.c_str());
 
   // Set default planner
-  std::string default_planner = config_data_->group_meta_data_[group_name].default_planner_;
+  std::string default_planner = meta_data.default_planner_;
 
   // If this group doesn't have a solver, reset it to 'None'
   if (default_planner.empty())
@@ -317,32 +302,15 @@ void GroupEditWidget::loadKinematicPlannersComboBox()
   kinematics_solver_field_->addItem("None");
   default_planner_field_->addItem("None");
 
-  // load all avail kin planners
-  std::unique_ptr<pluginlib::ClassLoader<kinematics::KinematicsBase>> loader;
+  std::vector<std::string> classes;
   try
   {
-    loader = std::make_unique<pluginlib::ClassLoader<kinematics::KinematicsBase>>("moveit_core",
-                                                                                  "kinematics::KinematicsBase");
+    classes = setup_step_.getKinematicPlanners();
   }
-  catch (pluginlib::PluginlibException& ex)
+  catch (const std::runtime_error& ex)
   {
-    QMessageBox::warning(this, "Missing Kinematic Solvers",
-                         "Exception while creating class loader for kinematic "
-                         "solver plugins");
-    ROS_ERROR_STREAM(ex.what());
-    return;
-  }
-
-  // Get classes
-  const std::vector<std::string>& classes = loader->getDeclaredClasses();
-
-  // Warn if no plugins are found
-  if (classes.empty())
-  {
-    QMessageBox::warning(this, "Missing Kinematic Solvers",
-                         "No MoveIt-compatible kinematics solvers found. Try "
-                         "installing moveit_kinematics (sudo apt-get install "
-                         "ros-${ROS_DISTRO}-moveit-kinematics)");
+    QMessageBox::warning(this, "Missing Kinematic Solvers", QString(ex.what()));
+    RCLCPP_ERROR_STREAM(setup_step_.getLogger(), ex.what());
     return;
   }
 
@@ -352,10 +320,8 @@ void GroupEditWidget::loadKinematicPlannersComboBox()
     kinematics_solver_field_->addItem(kinematics_plugin_name.c_str());
   }
 
-  std::vector<OMPLPlannerDescription> planners = config_data_->getOMPLPlanners();
-  for (OMPLPlannerDescription& planner : planners)
+  for (const std::string& planner_name : setup_step_.getOMPLPlanners())
   {
-    std::string planner_name = planner.name_;
     default_planner_field_->addItem(planner_name.c_str());
   }
 }
@@ -372,7 +338,7 @@ void GroupEditWidget::selectKinematicsFile()
   std::string package_name;
   std::string relative_filename;
   bool package_found =
-      config_data_->extractPackageNameFromPath(filename.toStdString(), package_name, relative_filename);
+      moveit_setup_framework::extractPackageNameFromPath(filename.toStdString(), package_name, relative_filename);
 
   QString lookup_path = filename;
   if (package_found)
@@ -382,4 +348,4 @@ void GroupEditWidget::selectKinematicsFile()
   kinematics_parameters_file_field_->setText(lookup_path);
 }
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_srdf_plugins

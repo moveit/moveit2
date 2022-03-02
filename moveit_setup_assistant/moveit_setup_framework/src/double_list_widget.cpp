@@ -45,16 +45,16 @@
 #include <QString>
 #include <QTableWidget>
 #include <QVBoxLayout>
-#include "double_list_widget.h"
+#include <moveit_setup_framework/qt/double_list_widget.hpp>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_framework
 {
 // ******************************************************************************************
 //
 // ******************************************************************************************
-DoubleListWidget::DoubleListWidget(QWidget* parent, const MoveItConfigDataPtr& config_data, const QString& long_name,
-                                   const QString& short_name, bool add_ok_cancel)
-  : QWidget(parent), long_name_(long_name), short_name_(short_name), config_data_(config_data)
+DoubleListWidget::DoubleListWidget(QWidget* parent, const QString& long_name, const QString& short_name,
+                                   bool add_ok_cancel)
+  : QWidget(parent), long_name_(long_name), short_name_(short_name)
 {
   // Basic widget container
   QVBoxLayout* layout = new QVBoxLayout();
@@ -334,4 +334,14 @@ void DoubleListWidget::previewSelected(const QList<QTableWidgetItem*>& selected)
   Q_EMIT(previewSelected(selected_vector));
 }
 
-}  // namespace moveit_setup_assistant
+std::vector<std::string> DoubleListWidget::getSelectedValues() const
+{
+  std::vector<std::string> values(selected_data_table_->rowCount());
+  for (int i = 0; i < selected_data_table_->rowCount(); ++i)
+  {
+    values.push_back(selected_data_table_->item(i, 0)->text().toStdString());
+  }
+  return values;
+}
+
+}  // namespace moveit_setup_framework

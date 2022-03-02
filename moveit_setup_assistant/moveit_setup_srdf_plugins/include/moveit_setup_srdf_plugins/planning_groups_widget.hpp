@@ -37,27 +37,23 @@
 #pragma once
 
 // Qt
-class QPushButton;
-class QStackedWidget;
-class QTreeWidget;
-class QTreeWidgetItem;
+#include <QPushButton>
+#include <QStackedWidget>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
-// Setup Asst
-#ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
-#endif
-
-#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
+// SA
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_framework/qt/double_list_widget.hpp>
+#include <moveit_setup_srdf_plugins/planning_groups.hpp>
+#include <moveit_setup_srdf_plugins/kinematic_chain_widget.hpp>  // for kinematic chain page
+#include <moveit_setup_srdf_plugins/group_edit_widget.hpp>       // for group rename page
 
 // Forward Declaration (outside of namespace for Qt)
 class PlanGroupType;
 
-namespace moveit_setup_assistant
+namespace moveit_setup_srdf_plugins
 {
-class DoubleListWidget;
-class KinematicChainWidget;
-class GroupEditWidget;
-
 // Custom Type
 enum GroupType
 {
@@ -73,7 +69,7 @@ enum GroupType
 // CLASS
 // ******************************************************************************************
 // ******************************************************************************************
-class PlanningGroupsWidget : public SetupScreenWidget
+class PlanningGroupsWidget : public moveit_setup_framework::SetupStepWidget
 {
   Q_OBJECT
 
@@ -82,12 +78,17 @@ public:
   // Public Functions
   // ******************************************************************************************
 
-  PlanningGroupsWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
+  void onInit() override;
 
   void changeScreen(int index);
 
   /// Received when this widget is chosen from the navigation menu
   void focusGiven() override;
+
+  moveit_setup_framework::SetupStep& getSetupStep() override
+  {
+    return setup_step_;
+  }
 
 private Q_SLOTS:
 
@@ -156,9 +157,9 @@ private:
   // Stacked Layout SUBPAGES -------------------------------------------
 
   QWidget* groups_tree_widget_;
-  DoubleListWidget* joints_widget_;
-  DoubleListWidget* links_widget_;
-  DoubleListWidget* subgroups_widget_;
+  moveit_setup_framework::DoubleListWidget* joints_widget_;
+  moveit_setup_framework::DoubleListWidget* links_widget_;
+  moveit_setup_framework::DoubleListWidget* subgroups_widget_;
   KinematicChainWidget* chain_widget_;
   GroupEditWidget* group_edit_widget_;
 
@@ -166,8 +167,7 @@ private:
   // Variables
   // ******************************************************************************************
 
-  /// Contains all the configuration data for the setup assistant
-  moveit_setup_assistant::MoveItConfigDataPtr config_data_;
+  PlanningGroups setup_step_;
 
   /// Remember what group we are editing when an edit screen is being shown
   std::string current_edit_group_;
@@ -188,9 +188,6 @@ private:
   /// Recursively build the SRDF tree
   void loadGroupsTreeRecursive(srdf::Model::Group& group_it, QTreeWidgetItem* parent);
 
-  // Convenience function for getting a group pointer
-  srdf::Model::Group* findGroupByName(const std::string& name);
-
   // Load edit screen
   void loadJointsScreen(srdf::Model::Group* this_group);
   void loadLinksScreen(srdf::Model::Group* this_group);
@@ -204,7 +201,7 @@ private:
   /// Switch to current groups view
   void showMainScreen();
 };
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_srdf_plugins
 
 // ******************************************************************************************
 // ******************************************************************************************
@@ -219,7 +216,7 @@ public:
   PlanGroupType()
   {
   }
-  PlanGroupType(srdf::Model::Group* group, const moveit_setup_assistant::GroupType type);
+  PlanGroupType(srdf::Model::Group* group, const moveit_setup_srdf_plugins::GroupType type);
   virtual ~PlanGroupType()
   {
     ;
@@ -227,7 +224,7 @@ public:
 
   srdf::Model::Group* group_;
 
-  moveit_setup_assistant::GroupType type_;
+  moveit_setup_srdf_plugins::GroupType type_;
 };
 
 Q_DECLARE_METATYPE(PlanGroupType);
