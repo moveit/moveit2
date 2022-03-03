@@ -113,7 +113,7 @@ public:
     // Otherwise the Servo is still running when another test starts...
     if (!client_servo_stop_)
     {
-      client_servo_stop_->async_send_request(std::make_shared<std_srvs::srv::Trigger::Request>());
+      stop();
     }
     executor_->cancel();
     if (executor_thread_.joinable())
