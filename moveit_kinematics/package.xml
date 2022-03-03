@@ -35,7 +35,7 @@
 
   <!-- some requirements of ikfast scripts -->
   <exec_depend>urdfdom</exec_depend> <!-- provides check_urdf -->
-  <exec_depend>python-lxml</exec_depend>
+  <exec_depend>python3-lxml</exec_depend>
 
   <test_depend>moveit_ros_planning</test_depend>
   <test_depend>moveit_resources_fanuc_description</test_depend>
