@@ -177,9 +177,8 @@ private:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   // Planning
-  std::map<std::string, planning_pipeline::PlanningPipelinePtr> planning_pipelines_;
-  std::map<std::string, std::set<std::string>> groups_pipelines_map_;
-  std::map<std::string, std::set<std::string>> groups_algorithms_map_;
+  std::map<std::string, planning_pipeline::PlanningPipelinePtr> planning_pipelines_;  // pipeline name: pipeline pointer.
+  std::map<std::string, std::set<std::string>> groups_pipelines_map_;                 // group name: set{pipeline name}.
 
   // Execution
   trajectory_execution_manager::TrajectoryExecutionManagerPtr trajectory_execution_manager_;
@@ -193,6 +192,7 @@ private:
   /** \brief Initialize and setup the planning pipelines */
   bool loadPlanningPipelines(const PlanningPipelineOptions& options);
 };
+
 }  // namespace moveit_cpp
 
 namespace moveit

@@ -192,8 +192,14 @@ public:
    * after the execution is complete. The execution can be run in background by setting blocking to false. */
   bool execute(bool blocking = true);
 
-  /** \brief Return the last plan solution*/
+  /** \brief Return the last plan solution */
   const PlanSolutionPtr getLastPlanSolution();
+
+  /** \brief Set the last plan solution, which is then used by execute() */
+  void setLastPlanSolution(const PlanSolution& plan_solution)
+  {
+    last_plan_solution_ = std::make_shared<PlanSolution>(plan_solution);
+  }
 
 private:
   // Core properties and instances
