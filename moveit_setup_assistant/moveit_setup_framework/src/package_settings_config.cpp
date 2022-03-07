@@ -180,7 +180,7 @@ void PackageSettingsConfig::collectVariables(std::vector<TemplateVariable>& vari
   std::stringstream deps;
   for (const auto& dependency : package_dependencies_)
   {
-    deps << "  <run_depend>" << dependency << "</run_depend>\n";
+    deps << "  <exec_depend>" << dependency << "</exec_depend>\n";
   }
   variables.push_back(TemplateVariable("OTHER_DEPENDENCIES", deps.str()));
 }
