@@ -281,8 +281,6 @@ void StartScreenWidget::loadFilesClick()
   if (create_new_package_)
   {
     result = loadNewFiles();
-    // Load 3d_sensors config file
-    // load3DSensorsFile();
   }
   else
   {
