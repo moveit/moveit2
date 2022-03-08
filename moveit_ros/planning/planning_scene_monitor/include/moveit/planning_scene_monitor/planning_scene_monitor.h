@@ -405,18 +405,18 @@ public:
   bool waitForCurrentRobotState(const rclcpp::Time& t, double wait_time = 1.);
 
   /** \brief Lock the scene for reading (multiple threads can lock for reading at the same time) */
-  void lockSceneRead();
+  [[deprecated]] void lockSceneRead();
 
   /** \brief Unlock the scene from reading (multiple threads can lock for reading at the same time) */
-  void unlockSceneRead();
+  [[deprecated]] void unlockSceneRead();
 
   /** \brief Lock the scene for writing (only one thread can lock for writing and no other thread can lock for reading)
    */
-  void lockSceneWrite();
+  [[deprecated]] void lockSceneWrite();
 
   /** \brief Lock the scene from writing (only one thread can lock for writing and no other thread can lock for reading)
    */
-  void unlockSceneWrite();
+  [[deprecated]] void unlockSceneWrite();
 
   void clearOctomap();
 
