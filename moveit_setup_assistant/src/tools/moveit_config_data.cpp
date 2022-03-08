@@ -1207,7 +1207,7 @@ public:
     : dc_(dc), key_(dc.link1_ < dc.link2_ ? (dc.link1_ + "|" + dc.link2_) : (dc.link2_ + "|" + dc.link1_))
   {
   }
-  operator const srdf::Model::DisabledCollision &() const
+  operator const srdf::Model::DisabledCollision&() const
   {
     return dc_;
   }
@@ -1287,7 +1287,7 @@ template <typename T>
 bool parse(const YAML::Node& node, const std::string& key, T& storage, const T& default_value = T())
 {
   const YAML::Node& n = node[key];
-  bool valid = n;
+  bool valid = n.IsDefined();
   storage = valid ? n.as<T>() : default_value;
   return valid;
 }
