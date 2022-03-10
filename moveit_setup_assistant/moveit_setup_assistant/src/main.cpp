@@ -55,6 +55,14 @@ void usage(boost::program_options::options_description& desc, int exit_code)
 
 int main(int argc, char** argv)
 {
+  std::vector<std::string> remaining_args = rclcpp::remove_ros_arguments(argc, argv);
+  std::vector<char*> clean_argv;
+  clean_argv.reserve(remaining_args.size());
+  for (const std::string& arg : remaining_args)
+  {
+    clean_argv.push_back(const_cast<char*>(arg.c_str()));
+  }
+
   // Parse parameters
   namespace po = boost::program_options;
 
@@ -70,7 +78,7 @@ int main(int argc, char** argv)
   po::variables_map vm;
   try
   {
-    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::store(po::parse_command_line(clean_argv.size(), &clean_argv[0], desc), vm);
     po::notify(vm);
 
     if (vm.count("help"))
