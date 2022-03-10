@@ -3,6 +3,11 @@
 API changes in MoveIt releases
 
 ## ROS Rolling
+- `lockSceneRead()` and `lockSceneWrite()` are now protected member functions, for internal use only. To lock the planning scene, use LockedPlanningSceneRO or LockedPlanningSceneRW:
+```
+      planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor);
+      moveit::core::RobotModelConstPtr model = ls->getRobotModel();
+```
 - ServoServer was renamed to ServoNode
 - `CollisionObject` messages are now defined with a `Pose`, and shapes and subframes are defined relative to the object's pose. This makes it easier to place objects with subframes and multiple shapes in the scene. This causes several changes:
     - `getFrameTransform()` now returns this pose instead of the first shape's pose.
