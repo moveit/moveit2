@@ -55,6 +55,7 @@
 #include <boost/function.hpp>
 #include <boost/concept_check.hpp>
 #include <memory>
+#include <optional>
 #include "rclcpp/rclcpp.hpp"
 
 #include "moveit_planning_scene_export.h"
@@ -87,23 +88,35 @@ using ObjectTypeMap = std::map<std::string, object_recognition_msgs::msg::Object
 /** \brief This class maintains the representation of the
     environment as seen by a planning instance. The environment
     geometry, the robot geometry and state are maintained. */
-class MOVEIT_PLANNING_SCENE_EXPORT PlanningScene : private boost::noncopyable,
-                                                   public std::enable_shared_from_this<PlanningScene>
+class MOVEIT_PLANNING_SCENE_EXPORT PlanningScene : public std::enable_shared_from_this<PlanningScene>
 {
 public:
-  /** \brief construct using an existing RobotModel */
-  PlanningScene(const moveit::core::RobotModelConstPtr& robot_model,
-                const collision_detection::WorldPtr& world = std::make_shared<collision_detection::World>());
-
-  /** \brief construct using a urdf and srdf.
-   * A RobotModel for the PlanningScene will be created using the urdf and srdf. */
-  PlanningScene(const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model,
-                const collision_detection::WorldPtr& world = std::make_shared<collision_detection::World>());
-
   static const std::string OCTOMAP_NS;
   static const std::string DEFAULT_SCENE_NAME;
 
+  // Constructor needs at least a RobotModel, use create() instead
+  PlanningScene() = delete;
+  // PlanningScene is non-copyable
+  PlanningScene(const PlanningScene&) = delete;
+  PlanningScene& operator=(const PlanningScene&) = delete;
+
+  // Moving is allowed
+  PlanningScene(PlanningScene&&) = default;
+  PlanningScene& operator=(const PlanningScene&&) = default;
+
+  // Custom destructor
   ~PlanningScene();
+
+  /** \brief construct using a urdf and srdf.
+   * A RobotModel for the PlanningScene will be created using the urdf and srdf. */
+  [[deprecated("Use PlanningScene::create() instead.")]] PlanningScene(
+      const urdf::ModelInterfaceSharedPtr& urdf_model, const srdf::ModelConstSharedPtr& srdf_model,
+      const collision_detection::WorldPtr& world = std::make_shared<collision_detection::World>());
+
+  /** \brief Static planningScene factory. */
+  static std::optional<PlanningScene>
+  create(const moveit::core::RobotModelConstPtr& robot_model,
+         const collision_detection::WorldPtr& world = std::make_shared<collision_detection::World>());
 
   /** \brief Get the name of the planning scene. This is empty by default */
   const std::string& getName() const
@@ -946,13 +959,13 @@ private:
   /* Private constructor used by the diff() methods. */
   PlanningScene(const PlanningSceneConstPtr& parent);
 
+  /** Private constructor used by create() */
+  PlanningScene(const moveit::core::RobotModelConstPtr& robot_model,
+                const collision_detection::WorldPtr& world = std::make_shared<collision_detection::World>());
+
   /* Initialize the scene.  This should only be called by the constructors.
    * Requires a valid robot_model_ */
   void initialize();
-
-  /* helper function to create a RobotModel from a urdf/srdf. */
-  static moveit::core::RobotModelPtr createRobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model,
-                                                      const srdf::ModelConstSharedPtr& srdf_model);
 
   /* Helper functions for processing collision objects */
   bool processCollisionObjectAdd(const moveit_msgs::msg::CollisionObject& object);

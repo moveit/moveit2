@@ -37,7 +37,6 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/utils/message_checks.h>
-#include <moveit/exceptions/exceptions.h>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
 
 #include <tf2/exceptions.h>
@@ -162,9 +161,10 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     scene_ = scene;
     if (!scene_)
     {
-      try
+      auto scene_opt = planning_scene::PlanningScene::create(rm_loader_->getModel());
+      if (scene_opt)
       {
-        scene_ = std::make_shared<planning_scene::PlanningScene>(rm_loader_->getModel());
+        scene_ = std::make_shared<planning_scene::PlanningScene>(std::move(scene_opt.value()));
         configureCollisionMatrix(scene_);
         configureDefaultPadding();
 
@@ -179,7 +179,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
           scene_->getCollisionEnvNonConst()->setLinkScale(it.first, it.second);
         }
       }
-      catch (moveit::ConstructException& e)
+      else
       {
         RCLCPP_ERROR(LOGGER, "Configuration of planning scene failed");
         scene_.reset();

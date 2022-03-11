@@ -42,7 +42,6 @@
 #include <moveit/collision_detection/collision_tools.h>
 #include <moveit/trajectory_processing/trajectory_tools.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit/exceptions/exceptions.h>
 #include <moveit/robot_state/attached_body.h>
 #include <moveit/utils/message_checks.h>
 #include <octomap_msgs/conversions.h>
@@ -123,23 +122,6 @@ PlanningScene::PlanningScene(const moveit::core::RobotModelConstPtr& robot_model
   initialize();
 }
 
-PlanningScene::PlanningScene(const urdf::ModelInterfaceSharedPtr& urdf_model,
-                             const srdf::ModelConstSharedPtr& srdf_model, const collision_detection::WorldPtr& world)
-  : world_(world), world_const_(world)
-{
-  if (!urdf_model)
-    throw moveit::ConstructException("The URDF model cannot be nullptr");
-
-  if (!srdf_model)
-    throw moveit::ConstructException("The SRDF model cannot be nullptr");
-
-  robot_model_ = createRobotModel(urdf_model, srdf_model);
-  if (!robot_model_)
-    throw moveit::ConstructException("Could not create RobotModel");
-
-  initialize();
-}
-
 PlanningScene::~PlanningScene()
 {
   if (current_world_object_update_callback_)
@@ -169,21 +151,24 @@ void PlanningScene::initialize()
   allocateCollisionDetector(collision_detection::CollisionDetectorAllocatorFCL::create());
 }
 
-/* return nullptr on failure */
-moveit::core::RobotModelPtr PlanningScene::createRobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model,
-                                                            const srdf::ModelConstSharedPtr& srdf_model)
+std::optional<PlanningScene> create(const moveit::core::RobotModelConstPtr& robot_model,
+                                    const collision_detection::WorldPtr& world)
 {
-  moveit::core::RobotModelPtr robot_model(new moveit::core::RobotModel(urdf_model, srdf_model));
   if (!robot_model || !robot_model->getRootJoint())
-    return moveit::core::RobotModelPtr();
+  {
+    RCLCPP_ERROR(LOGGER, "Cannot create PlanningScene with invalid RobotModel");
+    return {};
+  }
 
-  return robot_model;
+  std::optional<PlanningScene> scene_opt(std::in_place, robot_model, world);
+  return scene_opt;
 }
 
 PlanningScene::PlanningScene(const PlanningSceneConstPtr& parent) : parent_(parent)
 {
-  if (!parent_)
-    throw moveit::ConstructException("nullptr parent pointer for planning scene");
+  // This constructor is only called and accessible by the diff() functions which always pass a valid planning scene.
+  // The assert is really to catch invalid changes.
+  ROS_ASSERT_MSG(parent, "Private PlanningScene() constructor called with nullptr parent");
 
   if (!parent_->getName().empty())
     name_ = parent_->getName() + "+";
