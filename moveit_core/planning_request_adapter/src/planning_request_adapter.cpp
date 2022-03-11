@@ -151,10 +151,10 @@ bool PlanningRequestAdapterChain::adaptAndPlan(const planning_interface::Planner
     // so that in the end we have a nested sequence of function pointers that call the adapters in the correct order.
     PlanningRequestAdapter::PlannerFn fn =
         std::bind(&callAdapter1, adapters_.back().get(), planner, std::placeholders::_1, std::placeholders::_2,
-                  std::placeholders::_3, boost::ref(added_path_index_each.back()));
+                  std::placeholders::_3, std::ref(added_path_index_each.back()));
     for (int i = adapters_.size() - 2; i >= 0; --i)
       fn = std::bind(&callAdapter2, adapters_[i].get(), fn, std::placeholders::_1, std::placeholders::_2,
-                     std::placeholders::_3, boost::ref(added_path_index_each[i]));
+                     std::placeholders::_3, std::ref(added_path_index_each[i]));
     bool result = fn(planning_scene, req, res);
     added_path_index.clear();
 
