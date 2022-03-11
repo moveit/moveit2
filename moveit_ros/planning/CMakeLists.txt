@@ -110,6 +110,7 @@ if(BUILD_TESTING)
   set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
+  set(ament_cmake_flake8_FOUND TRUE)
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()

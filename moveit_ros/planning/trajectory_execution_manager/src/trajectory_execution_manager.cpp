@@ -400,7 +400,7 @@ bool TrajectoryExecutionManager::pushAndExecute(const moveit_msgs::msg::RobotTra
       continuous_execution_queue_.push_back(context);
       if (!continuous_execution_thread_)
         continuous_execution_thread_ =
-            std::make_unique<boost::thread>(boost::bind(&TrajectoryExecutionManager::continuousExecutionThread, this));
+            std::make_unique<boost::thread>(std::bind(&TrajectoryExecutionManager::continuousExecutionThread, this));
     }
     last_execution_status_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
     continuous_execution_condition_.notify_all();

@@ -90,6 +90,7 @@ private:
   unsigned int point_subsample_;
   double max_update_rate_;
   std::string filtered_cloud_topic_;
+  std::string ns_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr filtered_cloud_publisher_;
 
   message_filters::Subscriber<sensor_msgs::msg::PointCloud2>* point_cloud_subscriber_;

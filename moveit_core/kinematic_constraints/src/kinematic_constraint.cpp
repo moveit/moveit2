@@ -46,7 +46,7 @@
 #else
 #include <tf2_eigen/tf2_eigen.h>
 #endif
-#include <boost/bind.hpp>
+#include <functional>
 #include <limits>
 #include <memory>
 #include <typeinfo>
