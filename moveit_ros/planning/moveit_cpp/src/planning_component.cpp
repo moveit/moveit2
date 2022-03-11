@@ -161,6 +161,7 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   }
   req.goal_constraints = current_goal_constraints_;
 
+  // Set path constraints
   req.path_constraints = current_path_constraints_;
 
   // Run planning attempt
