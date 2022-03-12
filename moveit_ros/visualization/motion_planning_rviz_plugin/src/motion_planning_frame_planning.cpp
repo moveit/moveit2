@@ -59,15 +59,14 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualizatio
 void MotionPlanningFrame::planButtonClicked()
 {
   publishSceneIfNeeded();
-  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::computePlanButtonClicked, this),
-                                      "compute plan");
+  planning_display_->addBackgroundJob(std::bind(&MotionPlanningFrame::computePlanButtonClicked, this), "compute plan");
 }
 
 void MotionPlanningFrame::executeButtonClicked()
 {
   ui_->execute_button->setEnabled(false);
   // execution is done in a separate thread, to not block other background jobs by blocking for synchronous execution
-  planning_display_->spawnBackgroundJob(boost::bind(&MotionPlanningFrame::computeExecuteButtonClicked, this));
+  planning_display_->spawnBackgroundJob(std::bind(&MotionPlanningFrame::computeExecuteButtonClicked, this));
 }
 
 void MotionPlanningFrame::planAndExecuteButtonClicked()
@@ -76,13 +75,13 @@ void MotionPlanningFrame::planAndExecuteButtonClicked()
   ui_->plan_and_execute_button->setEnabled(false);
   ui_->execute_button->setEnabled(false);
   // execution is done in a separate thread, to not block other background jobs by blocking for synchronous execution
-  planning_display_->spawnBackgroundJob(boost::bind(&MotionPlanningFrame::computePlanAndExecuteButtonClicked, this));
+  planning_display_->spawnBackgroundJob(std::bind(&MotionPlanningFrame::computePlanAndExecuteButtonClicked, this));
 }
 
 void MotionPlanningFrame::stopButtonClicked()
 {
   ui_->stop_button->setEnabled(false);  // avoid clicking again
-  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::computeStopButtonClicked, this), "stop");
+  planning_display_->addBackgroundJob(std::bind(&MotionPlanningFrame::computeStopButtonClicked, this), "stop");
 }
 
 void MotionPlanningFrame::allowReplanningToggled(bool checked)
@@ -280,8 +279,8 @@ void MotionPlanningFrame::onNewPlanningSceneState()
 void MotionPlanningFrame::startStateTextChanged(const QString& start_state)
 {
   // use background job: fetching the current state might take up to a second
-  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::startStateTextChangedExec, this,
-                                                  start_state.toStdString()),
+  planning_display_->addBackgroundJob(std::bind(&MotionPlanningFrame::startStateTextChangedExec, this,
+                                                start_state.toStdString()),
                                       "update start state");
 }
 
@@ -296,7 +295,7 @@ void MotionPlanningFrame::goalStateTextChanged(const QString& goal_state)
 {
   // use background job: fetching the current state might take up to a second
   planning_display_->addBackgroundJob(
-      boost::bind(&MotionPlanningFrame::goalStateTextChangedExec, this, goal_state.toStdString()), "update goal state");
+      std::bind(&MotionPlanningFrame::goalStateTextChangedExec, this, goal_state.toStdString()), "update goal state");
 }
 
 void MotionPlanningFrame::goalStateTextChangedExec(const std::string& goal_state)
@@ -471,8 +470,7 @@ void MotionPlanningFrame::populatePlannerDescription(const moveit_msgs::msg::Pla
 void MotionPlanningFrame::populateConstraintsList()
 {
   if (move_group_)
-    planning_display_->addMainLoopJob(
-        boost::bind(&MotionPlanningFrame::populateConstraintsList, this, move_group_->getKnownConstraints()));
+    planning_display_->addMainLoopJob([this]() { populateConstraintsList(move_group_->getKnownConstraints()); });
 }
 
 void MotionPlanningFrame::populateConstraintsList(const std::vector<std::string>& constr)
