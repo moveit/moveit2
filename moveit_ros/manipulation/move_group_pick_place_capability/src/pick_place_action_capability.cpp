@@ -263,7 +263,7 @@ void move_group::MoveGroupPickPlaceAction::executePickupCallbackPlanAndExecute(
   opt.replan_delay_ = goal->planning_options.replan_delay;
   opt.before_execution_callback_ = std::bind(&MoveGroupPickPlaceAction::startPickupExecutionCallback, this);
 
-  opt.plan_callback_ = std::bind(&MoveGroupPickPlaceAction::planUsingPickPlacePickup, this, boost::cref(*goal),
+  opt.plan_callback_ = std::bind(&MoveGroupPickPlaceAction::planUsingPickPlacePickup, this, std::cref(*goal),
                                  &action_res, std::placeholders::_1);
   if (goal->planning_options.look_around && context_->plan_with_sensing_)
   {
@@ -294,7 +294,7 @@ void move_group::MoveGroupPickPlaceAction::executePlaceCallbackPlanAndExecute(
   opt.replan_attempts_ = goal->planning_options.replan_attempts;
   opt.replan_delay_ = goal->planning_options.replan_delay;
   opt.before_execution_callback_ = std::bind(&MoveGroupPickPlaceAction::startPlaceExecutionCallback, this);
-  opt.plan_callback_ = std::bind(&MoveGroupPickPlaceAction::planUsingPickPlacePlace, this, boost::cref(*goal),
+  opt.plan_callback_ = std::bind(&MoveGroupPickPlaceAction::planUsingPickPlacePlace, this, std::cref(*goal),
                                  &action_res, std::placeholders::_1);
   if (goal->planning_options.look_around && context_->plan_with_sensing_)
   {

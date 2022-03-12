@@ -55,14 +55,14 @@ robot_interaction::LockedRobotState::~LockedRobotState() = default;
 
 moveit::core::RobotStateConstPtr robot_interaction::LockedRobotState::getState() const
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   return state_;
 }
 
 void robot_interaction::LockedRobotState::setState(const moveit::core::RobotState& state)
 {
   {
-    boost::mutex::scoped_lock lock(state_lock_);
+    std::scoped_lock lock(state_lock_);
 
     // If someone else has a reference to the state, then make a new copy.
     // The old state is orphaned (does not change, but is now out of date).
@@ -79,7 +79,7 @@ void robot_interaction::LockedRobotState::setState(const moveit::core::RobotStat
 void robot_interaction::LockedRobotState::modifyState(const ModifyStateFunction& modify)
 {
   {
-    boost::mutex::scoped_lock lock(state_lock_);
+    std::scoped_lock lock(state_lock_);
 
     // If someone else has a reference to the state, then make a copy.
     // The old state is orphaned (does not change, but is now out of date).

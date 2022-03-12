@@ -42,7 +42,7 @@
 #include <moveit/robot_model/robot_model.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Vector3.h>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <mutex>
 #include <unordered_map>
 #include <utility>
@@ -131,7 +131,7 @@ protected:
   /** maximum size of the cache */
   unsigned int max_cache_size_;
   /** file name for loading / saving cache */
-  boost::filesystem::path cache_file_name_;
+  std::filesystem::path cache_file_name_;
 
   /**
     the IK methods are declared const in the base class, but the

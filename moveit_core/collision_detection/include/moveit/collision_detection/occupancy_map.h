@@ -39,11 +39,11 @@
 #include <octomap/octomap.h>
 
 #include <boost/thread/locks.hpp>
-#include <boost/thread/shared_mutex.hpp>
-#include <boost/function.hpp>
 
 #include <memory>
 #include <string>
+#include <functional>
+#include <shared_mutex>
 
 namespace collision_detection
 {
@@ -86,8 +86,8 @@ public:
     tree_mutex_.unlock();
   }
 
-  using ReadLock = boost::shared_lock<boost::shared_mutex>;
-  using WriteLock = boost::unique_lock<boost::shared_mutex>;
+  using ReadLock = std::shared_lock<std::shared_mutex>;
+  using WriteLock = std::unique_lock<std::shared_mutex>;
 
   ReadLock reading()
   {
@@ -106,14 +106,14 @@ public:
   }
 
   /** @brief Set the callback to trigger when updates are received */
-  void setUpdateCallback(const boost::function<void()>& update_callback)
+  void setUpdateCallback(const std::function<void()>& update_callback)
   {
     update_callback_ = update_callback;
   }
 
 private:
-  boost::shared_mutex tree_mutex_;
-  boost::function<void()> update_callback_;
+  std::shared_mutex tree_mutex_;
+  std::function<void()> update_callback_;
 };
 
 using OccMapTreePtr = std::shared_ptr<OccMapTree>;

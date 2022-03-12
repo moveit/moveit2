@@ -35,7 +35,6 @@
 #pragma once
 
 #include <string>
-
 #include <boost/optional.hpp>
 
 #include <moveit/planning_interface/planning_interface.h>

@@ -146,8 +146,8 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_pt
   opt.replan_delay_ = goal->get_goal()->planning_options.replan_delay;
   opt.before_execution_callback_ = std::bind(&MoveGroupMoveAction::startMoveExecutionCallback, this);
 
-  opt.plan_callback_ = std::bind(&MoveGroupMoveAction::planUsingPlanningPipeline, this,
-                                 boost::cref(motion_plan_request), std::placeholders::_1);
+  opt.plan_callback_ = std::bind(&MoveGroupMoveAction::planUsingPlanningPipeline, this, std::cref(motion_plan_request),
+                                 std::placeholders::_1);
   if (goal->get_goal()->planning_options.look_around && context_->plan_with_sensing_)
   {
     opt.plan_callback_ =

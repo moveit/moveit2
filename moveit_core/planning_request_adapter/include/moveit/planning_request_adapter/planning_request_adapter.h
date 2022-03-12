@@ -50,8 +50,8 @@ class PlanningRequestAdapter
 {
 public:
   using PlannerFn =
-      boost::function<bool(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
-                           planning_interface::MotionPlanResponse&)>;
+      std::function<bool(const planning_scene::PlanningSceneConstPtr&, const planning_interface::MotionPlanRequest&,
+                         planning_interface::MotionPlanResponse&)>;
 
   PlanningRequestAdapter()
   {

@@ -40,8 +40,7 @@
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
 #include <string>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <moveit/setup_assistant/tools/moveit_config_data.h>
 #include <moveit/utils/robot_model_test_utils.h>
 #include <ros/package.h>
@@ -104,7 +103,7 @@ TEST_F(MoveItConfigData, ReadingControllers)
   EXPECT_EQ(config_data->getControllers().size(), group_count);
 
   // Remove ros_controllers.yaml temp file which was used in testing
-  boost::filesystem::remove(test_file);
+  std::filesystem::remove(test_file);
 }
 
 // This tests parsing of sensors_3d.yaml
@@ -114,7 +113,7 @@ TEST_F(MoveItConfigData, ReadingSensorsConfig)
   moveit_setup_assistant::MoveItConfigDataPtr config_data;
   config_data = std::make_shared<moveit_setup_assistant::MoveItConfigData>();
 
-  boost::filesystem::path setup_assistant_path(config_data->setup_assistant_path_);
+  std::filesystem::path setup_assistant_path(config_data->setup_assistant_path_);
 
   // Before parsing, no config available
   EXPECT_EQ(config_data->getSensorPluginConfig().size(), 0u);

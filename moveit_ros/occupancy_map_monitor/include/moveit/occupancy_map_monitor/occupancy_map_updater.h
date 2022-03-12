@@ -54,7 +54,7 @@ namespace occupancy_map_monitor
 using ShapeHandle = unsigned int;
 using ShapeTransformCache = std::map<ShapeHandle, Eigen::Isometry3d, std::less<ShapeHandle>,
                                      Eigen::aligned_allocator<std::pair<const ShapeHandle, Eigen::Isometry3d> > >;
-using TransformCacheProvider = boost::function<bool(const std::string&, const rclcpp::Time&, ShapeTransformCache&)>;
+using TransformCacheProvider = std::function<bool(const std::string&, const rclcpp::Time&, ShapeTransformCache&)>;
 
 class OccupancyMapMonitor;
 

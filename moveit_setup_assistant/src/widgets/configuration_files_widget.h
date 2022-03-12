@@ -65,7 +65,7 @@ struct GenerateFile
   unsigned long write_on_changes;  // bitfield indicating required rewrite
   bool generate_;                  // "generate" checkbox ticked?
   bool modified_;                  // file externally modified?
-  boost::function<bool(std::string)> gen_func_;
+  std::function<bool(std::string)> gen_func_;
 };
 
 // Typedef for storing template string replacement pairs

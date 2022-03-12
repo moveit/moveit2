@@ -36,12 +36,14 @@
 
 #pragma once
 
+#include <condition_variable>
 #include <deque>
 #include <string>
-#include <boost/thread.hpp>
+#include <thread>
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>
 #include <memory>
+#include <mutex>
 
 namespace moveit
 {
@@ -69,10 +71,10 @@ public:
 
   /** \brief The signature for callback triggered when job events take place: the event that took place and the name of
    * the job */
-  typedef boost::function<void(JobEvent, const std::string&)> JobUpdateCallback;
+  typedef std::function<void(JobEvent, const std::string&)> JobUpdateCallback;
 
   /** \brief The signature for job callbacks */
-  typedef boost::function<void()> JobCallback;
+  typedef std::function<void()> JobCallback;
 
   /** \brief Constructor. The background thread is activated automatically. */
   BackgroundProcessing();
@@ -96,11 +98,11 @@ public:
   void clearJobUpdateEvent();
 
 private:
-  std::unique_ptr<boost::thread> processing_thread_;
+  std::unique_ptr<std::thread> processing_thread_;
   bool run_processing_thread_;
 
-  mutable boost::mutex action_lock_;
-  boost::condition_variable new_action_condition_;
+  mutable std::mutex action_lock_;
+  std::condition_variable new_action_condition_;
   std::deque<JobCallback> actions_;
   std::deque<std::string> action_names_;
 

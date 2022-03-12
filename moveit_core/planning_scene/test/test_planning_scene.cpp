@@ -43,7 +43,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit/collision_detection/collision_plugin_cache.h>

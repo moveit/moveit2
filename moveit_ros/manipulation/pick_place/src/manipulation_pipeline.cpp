@@ -96,11 +96,11 @@ void ManipulationPipeline::clear()
 {
   stop();
   {
-    boost::mutex::scoped_lock slock(queue_access_lock_);
+    std::scoped_lock slock(queue_access_lock_);
     queue_.clear();
   }
   {
-    boost::mutex::scoped_lock slock(result_lock_);
+    std::scoped_lock slock(result_lock_);
     success_.clear();
     failed_.clear();
   }
@@ -114,7 +114,7 @@ void ManipulationPipeline::start()
     stage->resetStopSignal();
   for (std::size_t i = 0; i < processing_threads_.size(); ++i)
     if (!processing_threads_[i])
-      processing_threads_[i] = new boost::thread(std::bind(&ManipulationPipeline::processingThread, this, i));
+      processing_threads_[i] = new std::thread(std::bind(&ManipulationPipeline::processingThread, this, i));
 }
 
 void ManipulationPipeline::signalStop()
@@ -128,7 +128,7 @@ void ManipulationPipeline::signalStop()
 void ManipulationPipeline::stop()
 {
   signalStop();
-  for (boost::thread*& processing_thread : processing_threads_)
+  for (std::thread*& processing_thread : processing_threads_)
     if (processing_thread)
     {
       processing_thread->join();
@@ -144,7 +144,7 @@ void ManipulationPipeline::processingThread(unsigned int index)
   while (!stop_processing_)
   {
     bool inc_queue = false;
-    boost::unique_lock<boost::mutex> ulock(queue_access_lock_);
+    std::unique_lock<std::mutex> ulock(queue_access_lock_);
     // if the queue is empty, we trigger the corresponding event
     if (queue_.empty() && !stop_processing_ && empty_queue_callback_)
     {
@@ -175,7 +175,7 @@ void ManipulationPipeline::processingThread(unsigned int index)
           g->processing_stage_ = i + 1;
           if (!res)
           {
-            boost::mutex::scoped_lock slock(result_lock_);
+            std::scoped_lock slock(result_lock_);
             failed_.push_back(g);
             ROS_INFO_STREAM_NAMED("manipulation", "Manipulation plan " << g->id_ << " failed at stage '"
                                                                        << stages_[i]->getName() << "' on thread "
@@ -187,7 +187,7 @@ void ManipulationPipeline::processingThread(unsigned int index)
         {
           g->processing_stage_++;
           {
-            boost::mutex::scoped_lock slock(result_lock_);
+            std::scoped_lock slock(result_lock_);
             success_.push_back(g);
           }
           signalStop();
@@ -207,7 +207,7 @@ void ManipulationPipeline::processingThread(unsigned int index)
 
 void ManipulationPipeline::push(const ManipulationPlanPtr& plan)
 {
-  boost::mutex::scoped_lock slock(queue_access_lock_);
+  std::scoped_lock slock(queue_access_lock_);
   queue_.push_back(plan);
   ROS_INFO_STREAM_NAMED("manipulation",
                         "Added plan for pipeline '" << name_ << "'. Queue is now of size " << queue_.size());
@@ -216,7 +216,7 @@ void ManipulationPipeline::push(const ManipulationPlanPtr& plan)
 
 void ManipulationPipeline::reprocessLastFailure()
 {
-  boost::mutex::scoped_lock slock(queue_access_lock_);
+  std::scoped_lock slock(queue_access_lock_);
   if (failed_.empty())
     return;
   ManipulationPlanPtr plan = failed_.back();

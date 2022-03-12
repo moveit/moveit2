@@ -38,7 +38,7 @@
 #include <planning_scene/planning_scene.h>
 #include <moveit_msgs/GetMotionPlan.h>
 #include <sbpl_interface/sbpl_interface.h>
-#include <boost/thread.hpp>
+#include <thread>
 
 namespace sbpl_interface
 {
@@ -63,8 +63,8 @@ protected:
                  const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res,
                  const PlanningParameters& params);
 
-  boost::mutex planner_done_mutex_;
-  boost::condition_variable planner_done_condition_;
+  std::mutex planner_done_mutex_;
+  std::condition_variable planner_done_condition_;
   bool first_ok_;
   bool first_done_;
   bool second_ok_;

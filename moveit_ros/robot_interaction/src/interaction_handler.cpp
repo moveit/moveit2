@@ -98,37 +98,37 @@ std::string InteractionHandler::fixName(std::string name)
 
 void InteractionHandler::setPoseOffset(const EndEffectorInteraction& eef, const geometry_msgs::msg::Pose& m)
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   offset_map_[eef.eef_group] = m;
 }
 
 void InteractionHandler::setPoseOffset(const JointInteraction& vj, const geometry_msgs::msg::Pose& m)
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   offset_map_[vj.joint_name] = m;
 }
 
 void InteractionHandler::clearPoseOffset(const EndEffectorInteraction& eef)
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   offset_map_.erase(eef.eef_group);
 }
 
 void InteractionHandler::clearPoseOffset(const JointInteraction& vj)
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   offset_map_.erase(vj.joint_name);
 }
 
 void InteractionHandler::clearPoseOffsets()
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   offset_map_.clear();
 }
 
 bool InteractionHandler::getPoseOffset(const EndEffectorInteraction& eef, geometry_msgs::msg::Pose& m)
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   std::map<std::string, geometry_msgs::msg::Pose>::iterator it = offset_map_.find(eef.eef_group);
   if (it != offset_map_.end())
   {
@@ -140,7 +140,7 @@ bool InteractionHandler::getPoseOffset(const EndEffectorInteraction& eef, geomet
 
 bool InteractionHandler::getPoseOffset(const JointInteraction& vj, geometry_msgs::msg::Pose& m)
 {
-  boost::mutex::scoped_lock slock(offset_map_lock_);
+  std::scoped_lock slock(offset_map_lock_);
   std::map<std::string, geometry_msgs::msg::Pose>::iterator it = offset_map_.find(vj.joint_name);
   if (it != offset_map_.end())
   {
@@ -153,7 +153,7 @@ bool InteractionHandler::getPoseOffset(const JointInteraction& vj, geometry_msgs
 bool InteractionHandler::getLastEndEffectorMarkerPose(const EndEffectorInteraction& eef,
                                                       geometry_msgs::msg::PoseStamped& ps)
 {
-  boost::mutex::scoped_lock slock(pose_map_lock_);
+  std::scoped_lock slock(pose_map_lock_);
   std::map<std::string, geometry_msgs::msg::PoseStamped>::iterator it = pose_map_.find(eef.eef_group);
   if (it != pose_map_.end())
   {
@@ -165,7 +165,7 @@ bool InteractionHandler::getLastEndEffectorMarkerPose(const EndEffectorInteracti
 
 bool InteractionHandler::getLastJointMarkerPose(const JointInteraction& vj, geometry_msgs::msg::PoseStamped& ps)
 {
-  boost::mutex::scoped_lock slock(pose_map_lock_);
+  std::scoped_lock slock(pose_map_lock_);
   std::map<std::string, geometry_msgs::msg::PoseStamped>::iterator it = pose_map_.find(vj.joint_name);
   if (it != pose_map_.end())
   {
@@ -177,37 +177,37 @@ bool InteractionHandler::getLastJointMarkerPose(const JointInteraction& vj, geom
 
 void InteractionHandler::clearLastEndEffectorMarkerPose(const EndEffectorInteraction& eef)
 {
-  boost::mutex::scoped_lock slock(pose_map_lock_);
+  std::scoped_lock slock(pose_map_lock_);
   pose_map_.erase(eef.eef_group);
 }
 
 void InteractionHandler::clearLastJointMarkerPose(const JointInteraction& vj)
 {
-  boost::mutex::scoped_lock slock(pose_map_lock_);
+  std::scoped_lock slock(pose_map_lock_);
   pose_map_.erase(vj.joint_name);
 }
 
 void InteractionHandler::clearLastMarkerPoses()
 {
-  boost::mutex::scoped_lock slock(pose_map_lock_);
+  std::scoped_lock slock(pose_map_lock_);
   pose_map_.clear();
 }
 
 void InteractionHandler::setMenuHandler(const std::shared_ptr<interactive_markers::MenuHandler>& mh)
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   menu_handler_ = mh;
 }
 
 const std::shared_ptr<interactive_markers::MenuHandler>& InteractionHandler::getMenuHandler()
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   return menu_handler_;
 }
 
 void InteractionHandler::clearMenuHandler()
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   menu_handler_.reset();
 }
 
@@ -350,7 +350,7 @@ bool InteractionHandler::inError(const JointInteraction& /*unused*/) const
 
 void InteractionHandler::clearError()
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   error_state_.clear();
 }
 
@@ -373,7 +373,7 @@ bool InteractionHandler::setErrorState(const std::string& name, bool new_error_s
 
 bool InteractionHandler::getErrorState(const std::string& name) const
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   return error_state_.find(name) != error_state_.end();
 }
 
@@ -415,37 +415,37 @@ bool InteractionHandler::transformFeedbackPose(
 
 void InteractionHandler::setUpdateCallback(const InteractionHandlerCallbackFn& callback)
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   update_callback_ = callback;
 }
 
 const InteractionHandlerCallbackFn& InteractionHandler::getUpdateCallback() const
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   return update_callback_;
 }
 
 void InteractionHandler::setMeshesVisible(bool visible)
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   display_meshes_ = visible;
 }
 
 bool InteractionHandler::getMeshesVisible() const
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   return display_meshes_;
 }
 
 void InteractionHandler::setControlsVisible(bool visible)
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   display_controls_ = visible;
 }
 
 bool InteractionHandler::getControlsVisible() const
 {
-  boost::mutex::scoped_lock lock(state_lock_);
+  std::scoped_lock lock(state_lock_);
   return display_controls_;
 }
 }  // namespace robot_interaction

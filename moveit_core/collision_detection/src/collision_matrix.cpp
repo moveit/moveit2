@@ -129,7 +129,7 @@ void AllowedCollisionMatrix::setEntry(const std::string& name1, const std::strin
   const AllowedCollision::Type v = allowed ? AllowedCollision::ALWAYS : AllowedCollision::NEVER;
   entries_[name1][name2] = entries_[name2][name1] = v;
 
-  // remove boost::function pointers, if any
+  // remove std::function pointers, if any
   auto it = allowed_contacts_.find(name1);
   if (it != allowed_contacts_.end())
   {

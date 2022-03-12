@@ -38,7 +38,7 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/thread.hpp>
+#include <thread>
 
 using namespace std::chrono_literals;
 
@@ -122,11 +122,11 @@ int main(int argc, char** argv)
       states.push_back(moveit::core::RobotStatePtr(state));
     }
 
-    std::vector<boost::thread*> threads;
+    std::vector<std::thread*> threads;
     runCollisionDetection(10, trials, psm.getPlanningScene().get(), states[0].get());
     for (unsigned int i = 0; i < states.size(); ++i)
-      threads.push_back(new boost::thread(
-          std::bind(&runCollisionDetection, i, trials, psm.getPlanningScene().get(), states[i].get())));
+      threads.push_back(
+          new std::thread(std::bind(&runCollisionDetection, i, trials, psm.getPlanningScene().get(), states[i].get())));
 
     for (unsigned int i = 0; i < states.size(); ++i)
     {

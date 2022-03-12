@@ -40,7 +40,7 @@
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
 #include <gtest/gtest.h>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <geometric_shapes/shapes.h>
 
 #include <moveit/utils/robot_model_test_utils.h>

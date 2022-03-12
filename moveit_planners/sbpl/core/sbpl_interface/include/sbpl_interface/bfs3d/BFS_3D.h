@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <boost/thread.hpp>
+#include <thread>
 
 namespace sbpl_interface
 {
@@ -55,7 +55,7 @@ private:
   int* queue;
   int queue_head, queue_tail;
 
-  std::shared_ptr<boost::thread> search_thread_;
+  std::shared_ptr<std::thread> search_thread_;
 
   volatile bool running;
 

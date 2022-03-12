@@ -150,7 +150,7 @@ protected:
   bool drop_displaying_trajectory_;
   int current_state_;
   float current_state_time_;
-  boost::mutex update_trajectory_message_;
+  std::mutex update_trajectory_message_;
 
   moveit::core::RobotModelConstPtr robot_model_;
   moveit::core::RobotStatePtr robot_state_;

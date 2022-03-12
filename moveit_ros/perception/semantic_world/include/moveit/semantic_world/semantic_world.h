@@ -61,7 +61,7 @@ class SemanticWorld
 {
 public:
   /** @brief The signature for a callback on receiving table messages*/
-  typedef boost::function<void()> TableCallbackFn;
+  typedef std::function<void()> TableCallbackFn;
 
   /**
    * @brief A (simple) semantic world representation for pick and place and other tasks.
@@ -150,7 +150,7 @@ private:
 
   std::map<std::string, object_recognition_msgs::msg::Table> current_tables_in_collision_world_;
 
-  //  boost::mutex table_lock_;
+  //  std::mutex table_lock_;
 
   rclcpp::Subscription<object_recognition_msgs::msg::TableArray>::SharedPtr table_subscriber_;
 

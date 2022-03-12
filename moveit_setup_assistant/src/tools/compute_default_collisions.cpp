@@ -37,7 +37,8 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/setup_assistant/tools/compute_default_collisions.hpp>
 #include <boost/math/special_functions/binomial.hpp>  // for statistics at end
-#include <boost/thread.hpp>
+#include <thread>
+#include <boost/thread/thread.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/assign.hpp>
 
@@ -65,7 +66,7 @@ typedef std::set<std::pair<std::string, std::string> > StringPairSet;
 struct ThreadComputation
 {
   ThreadComputation(planning_scene::PlanningScene& scene, const collision_detection::CollisionRequest& req,
-                    int thread_id, int num_trials, StringPairSet* links_seen_colliding, boost::mutex* lock,
+                    int thread_id, int num_trials, StringPairSet* links_seen_colliding, std::mutex* lock,
                     unsigned int* progress)
     : scene_(scene)
     , req_(req)
@@ -81,7 +82,7 @@ struct ThreadComputation
   int thread_id_;
   unsigned int num_trials_;
   StringPairSet* links_seen_colliding_;
-  boost::mutex* lock_;
+  std::mutex* lock_;
   unsigned int* progress_;  // only to be updated by thread 0
 };
 
@@ -557,9 +558,9 @@ unsigned int disableNeverInCollision(const unsigned int num_trials, planning_sce
   unsigned int num_disabled = 0;
 
   boost::thread_group bgroup;  // create a group of threads
-  boost::mutex lock;           // used for sharing the same data structures
+  std::mutex lock;             // used for sharing the same data structures
 
-  int num_threads = boost::thread::hardware_concurrency();  // how many cores does this computer have?
+  int num_threads = std::thread::hardware_concurrency();  // how many cores does this computer have?
   // RCLCPP_INFO_STREAM_STREAM(LOGGER, "Performing " << num_trials << " trials for 'always in collision' checking on " <<
   //   num_threads << " threads...");
 
@@ -641,7 +642,7 @@ void disableNeverInCollisionThread(ThreadComputation tc)
       {
         // Collision Matrix and links_seen_colliding is modified only if needed, based on above if statement
 
-        boost::mutex::scoped_lock slock(*tc.lock_);
+        std::scoped_lock slock(*tc.lock_);
         tc.links_seen_colliding_->insert(it->first);
 
         tc.scene_.getAllowedCollisionMatrixNonConst().setEntry(it->first.first, it->first.second,

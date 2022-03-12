@@ -38,8 +38,7 @@
 // Reading/Writing Files
 #include <iostream>  // For writing yaml and launch files
 #include <fstream>
-#include <boost/filesystem/path.hpp>        // for creating folders/files
-#include <boost/filesystem/operations.hpp>  // is_regular_file, is_directory, etc.
+#include <filesystem>
 #include <boost/algorithm/string/trim.hpp>
 #include <tinyxml.h>
 #include <boost/algorithm/string/predicate.hpp>
@@ -54,7 +53,7 @@
 namespace moveit_setup_assistant
 {
 // File system
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 // ******************************************************************************************
 // Constructor
@@ -1640,11 +1639,11 @@ bool MoveItConfigData::extractPackageNameFromPath(const std::string& path, std::
       RCLCPP_DEBUG_STREAM(LOGGER, "Found package.xml in " << sub_path.make_preferred().string());
       package_found = true;
       relative_filepath = relative_path.string();
-      package_name = sub_path.leaf().string();
+      package_name = sub_path.filename();
       break;
     }
-    relative_path = sub_path.leaf() / relative_path;
-    sub_path.remove_leaf();
+    relative_path = sub_path.filename() / relative_path;
+    sub_path.remove_filename();
   }
 
   // Assign data to moveit_config_data

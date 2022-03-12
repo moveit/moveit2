@@ -39,6 +39,7 @@
 #include <planning_models/conversions.h>
 #include <boost/timer.hpp>
 #include <planning_models/angle_utils.h>
+#include <boost/thread/thread.hpp>
 
 static const unsigned int DEBUG_OVER = 1;
 static const unsigned int PRINT_HEURISTIC_UNDER = 1;

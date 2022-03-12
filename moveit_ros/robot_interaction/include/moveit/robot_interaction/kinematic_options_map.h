@@ -37,7 +37,7 @@
 #pragma once
 
 #include <moveit/robot_interaction/kinematic_options.h>
-#include <boost/thread.hpp>
+#include <thread>
 #include <boost/function.hpp>
 
 #include "moveit_robot_interaction_export.h"
@@ -91,7 +91,7 @@ public:
 
 private:
   // this protects all members.
-  mutable boost::mutex lock_;
+  mutable std::mutex lock_;
 
   // default kinematic options.
   // PROTECTED BY lock_

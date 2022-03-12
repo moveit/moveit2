@@ -35,8 +35,8 @@
 /* Author: Bryce Willey */
 
 #include "rclcpp/rclcpp.hpp"
+#include <filesystem>
 #include <boost/algorithm/string_regex.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <geometry_msgs/msg/pose.hpp>
 
@@ -61,7 +61,7 @@ moveit::core::RobotModelPtr loadTestingRobotModel(const std::string& robot_name)
 urdf::ModelInterfaceSharedPtr loadModelInterface(const std::string& robot_name)
 {
   const std::string package_name = "moveit_resources_" + robot_name + "_description";
-  boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
+  std::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
   std::string urdf_path;
   if (robot_name == "pr2")
   {
@@ -88,13 +88,13 @@ srdf::ModelSharedPtr loadSRDFModel(const std::string& robot_name)
   if (robot_name == "pr2")
   {
     const std::string package_name = "moveit_resources_" + robot_name + "_description";
-    boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
+    std::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
     srdf_path = (res_path / "srdf/robot.xml").string();
   }
   else
   {
     const std::string package_name = "moveit_resources_" + robot_name + "_moveit_config";
-    boost::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
+    std::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
     srdf_path = (res_path / "config" / (robot_name + ".srdf")).string();
   }
   srdf_model->initFile(*urdf_model, srdf_path);

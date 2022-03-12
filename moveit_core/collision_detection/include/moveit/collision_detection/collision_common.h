@@ -220,7 +220,7 @@ struct CollisionRequest
   std::size_t max_cost_sources;
 
   /** \brief Function call that decides whether collision detection should stop. */
-  boost::function<bool(const CollisionResult&)> is_done;
+  std::function<bool(const CollisionResult&)> is_done;
 
   /** \brief Flag indicating whether information about detected collisions should be reported */
   bool verbose;

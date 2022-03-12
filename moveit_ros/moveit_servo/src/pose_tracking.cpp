@@ -81,7 +81,7 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParam
   , transform_buffer_(node_->get_clock())
   , transform_listener_(transform_buffer_)
   , stop_requested_(false)
-  , angular_error_(boost::none)
+  , angular_error_(std::nullopt)
 {
   readROSParams();
 
@@ -347,7 +347,7 @@ void PoseTracking::doPostMotionReset()
 {
   stopMotion();
   stop_requested_ = false;
-  angular_error_ = boost::none;
+  angular_error_ = std::nullopt;
 
   // Reset error integrals and previous errors of PID controllers
   cartesian_position_pids_[0].reset();

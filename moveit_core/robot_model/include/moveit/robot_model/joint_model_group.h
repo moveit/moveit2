@@ -52,7 +52,7 @@ class RobotModel;
 class JointModelGroup;
 
 /** \brief Function type that allocates a kinematics solver for a particular group */
-typedef boost::function<kinematics::KinematicsBasePtr(const JointModelGroup*)> SolverAllocatorFn;
+typedef std::function<kinematics::KinematicsBasePtr(const JointModelGroup*)> SolverAllocatorFn;
 
 /** \brief Map from group instances to allocator functions & bijections */
 using SolverAllocatorMapFn = std::map<const JointModelGroup*, SolverAllocatorFn>;

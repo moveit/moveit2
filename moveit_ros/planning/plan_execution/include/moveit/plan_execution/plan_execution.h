@@ -82,12 +82,12 @@ public:
     /// one is the index of the last trajectory being executed (from the sequence of trajectories specified in the
     /// ExecutableMotionPlan) and the second
     /// one is the index of the closest waypoint along that trajectory.
-    boost::function<bool(ExecutableMotionPlan& plan_to_update, const std::pair<int, int>& trajectory_index)>
+    std::function<bool(ExecutableMotionPlan& plan_to_update, const std::pair<int, int>& trajectory_index)>
         repair_plan_callback_;
 
-    boost::function<void()> before_plan_callback_;
-    boost::function<void()> before_execution_callback_;
-    boost::function<void()> done_callback_;
+    std::function<void()> before_plan_callback_;
+    std::function<void()> before_execution_callback_;
+    std::function<void()> done_callback_;
   };
 
   PlanExecution(const rclcpp::Node::SharedPtr& node,

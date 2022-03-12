@@ -52,9 +52,8 @@
 #include "header_widget.h"
 
 // Boost
-#include <boost/algorithm/string.hpp>       // for string find and replace in templates
-#include <boost/filesystem/path.hpp>        // for creating folders/files
-#include <boost/filesystem/operations.hpp>  // is_regular_file, is_directory, etc.
+#include <boost/algorithm/string.hpp>  // for string find and replace in templates
+#include <filesystem>
 // Read write files
 #include <iostream>  // For writing yaml and launch files
 #include <fstream>
@@ -62,7 +61,7 @@
 namespace moveit_setup_assistant
 {
 // Boost file system
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 const std::string SETUP_ASSISTANT_FILE = ".setup_assistant";
 
