@@ -116,7 +116,7 @@ void pilz_industrial_motion_planner::JointLimitsAggregator::updatePositionLimitF
   {
     // LCOV_EXCL_START
     case 0:
-      RCLCPP_ERROR_STREAM(LOGGER, "no bounds set for joint " << joint_model->getName());
+      RCLCPP_WARN_STREAM(LOGGER, "no bounds set for joint " << joint_model->getName());
       break;
     // LCOV_EXCL_STOP
     case 1:
@@ -126,7 +126,7 @@ void pilz_industrial_motion_planner::JointLimitsAggregator::updatePositionLimitF
       break;
     // LCOV_EXCL_START
     default:
-      RCLCPP_ERROR_STREAM(LOGGER, "Multi-DOF-Joints not supported. The robot won't move. " << joint_model->getName());
+      RCLCPP_WARN_STREAM(LOGGER, "Multi-DOF-Joint '" << joint_model->getName() << "' not supported.");
       joint_limit.has_position_limits = true;
       joint_limit.min_position = 0;
       joint_limit.max_position = 0;
@@ -145,7 +145,7 @@ void pilz_industrial_motion_planner::JointLimitsAggregator::updateVelocityLimitF
   {
     // LCOV_EXCL_START
     case 0:
-      RCLCPP_ERROR_STREAM(LOGGER, "no bounds set for joint " << joint_model->getName());
+      RCLCPP_WARN_STREAM(LOGGER, "no bounds set for joint " << joint_model->getName());
       break;
     // LCOV_EXCL_STOP
     case 1:
@@ -154,7 +154,7 @@ void pilz_industrial_motion_planner::JointLimitsAggregator::updateVelocityLimitF
       break;
     // LCOV_EXCL_START
     default:
-      RCLCPP_ERROR_STREAM(LOGGER, "Multi-DOF-Joints not supported. The robot won't move.");
+      RCLCPP_WARN_STREAM(LOGGER, "Multi-DOF-Joint '" << joint_model->getName() << "' not supported.");
       joint_limit.has_velocity_limits = true;
       joint_limit.max_velocity = 0;
       break;

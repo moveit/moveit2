@@ -218,3 +218,21 @@ bool isStateColliding(const bool test_for_self_collision, const planning_scene::
 }  // namespace pilz_industrial_motion_planner
 
 void normalizeQuaternion(geometry_msgs::msg::Quaternion& quat);
+
+/**
+ * @brief Adapt goal pose, defined by position+orientation, to consider offset
+ * @param constraint to apply offset to
+ * @param offset to apply to the constraint
+ * @param orientation to apply to the offset
+ * @return final goal pose
+ */
+Eigen::Isometry3d getConstraintPose(const geometry_msgs::msg::Point& position,
+                                    const geometry_msgs::msg::Quaternion& orientation,
+                                    const geometry_msgs::msg::Vector3& offset);
+
+/**
+ * @brief Conviencency method, passing args from a goal constraint
+ * @param goal goal constraint
+ * @return final goal pose
+ */
+Eigen::Isometry3d getConstraintPose(const moveit_msgs::msg::Constraints& goal);

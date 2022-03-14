@@ -41,6 +41,7 @@
 #include <boost/filesystem/path.hpp>        // for creating folders/files
 #include <boost/filesystem/operations.hpp>  // is_regular_file, is_directory, etc.
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 // ROS
 #include <rclcpp/rclcpp.hpp>
@@ -201,7 +202,7 @@ bool MoveItConfigData::outputCHOMPPlanningYAML(const std::string& file_path)
 // ******************************************************************************************
 std::string MoveItConfigData::getJointHardwareInterface(const std::string& joint_name)
 {
-  for (ROSControlConfig& ros_control_config : ros_controllers_config_)
+  for (ControllerConfig& ros_control_config : controller_configs_)
   {
     std::vector<std::string>::iterator joint_it =
         std::find(ros_control_config.joints_.begin(), ros_control_config.joints_.end(), joint_name);
@@ -344,7 +345,7 @@ bool MoveItConfigData::outputFakeControllersYAML(const std::string& file_path)
     emitter << YAML::Key << "name";
     emitter << YAML::Value << "fake_" + group.name_ + "_controller";
     emitter << YAML::Key << "type";
-    emitter << YAML::Value << "$(arg execution_type)";
+    emitter << YAML::Value << "$(arg fake_execution_type)";
     emitter << YAML::Key << "joints";
     emitter << YAML::Value << YAML::BeginSeq;
 
@@ -362,7 +363,7 @@ bool MoveItConfigData::outputFakeControllersYAML(const std::string& file_path)
   emitter << YAML::EndSeq;
 
   // Add an initial pose for each group
-  emitter << YAML::Key << "initial" << YAML::Comment("Define initial robot poses.");
+  emitter << YAML::Key << "initial" << YAML::Comment("Define initial robot poses per group");
 
   bool poses_found = false;
   std::string default_group_name;
@@ -420,7 +421,29 @@ bool MoveItConfigData::outputFakeControllersYAML(const std::string& file_path)
   return true;  // file created successfully
 }
 
-std::vector<OMPLPlannerDescription> MoveItConfigData::getOMPLPlanners()
+std::map<std::string, double> MoveItConfigData::getInitialJoints() const
+{
+  std::map<std::string, double> joints;
+  for (const srdf::Model::Group& group : srdf_->groups_)
+  {
+    // use first pose of each group as initial pose
+    for (const srdf::Model::GroupState& group_state : srdf_->group_states_)
+    {
+      if (group.name_ != group_state.group_)
+        continue;
+      for (const auto& pair : group_state.joint_values_)
+      {
+        if (pair.second.size() != 1)
+          continue;  // only handle simple joints here
+        joints[pair.first] = pair.second.front();
+      }
+      break;
+    }
+  }
+  return joints;
+}
+
+std::vector<OMPLPlannerDescription> MoveItConfigData::getOMPLPlanners() const
 {
   std::vector<OMPLPlannerDescription> planner_des;
 
@@ -648,63 +671,56 @@ std::vector<OMPLPlannerDescription> MoveItConfigData::getOMPLPlanners()
 }
 
 // ******************************************************************************************
-// Helper function to write the FollowJointTrajectory for each planning group to ros_controller.yaml,
-// and erases the controller that have been written, to avoid mixing between FollowJointTrajectory
-// which are published under the namespace of 'controller_list' and other types of controllers.
+// Generate simple_moveit_controllers.yaml config file
 // ******************************************************************************************
-void MoveItConfigData::outputFollowJointTrajectoryYAML(YAML::Emitter& emitter,
-                                                       std::vector<ROSControlConfig>& ros_controllers_config_output)
+bool MoveItConfigData::outputSimpleControllersYAML(const std::string& file_path)
 {
-  // Write default controllers
+  YAML::Emitter emitter;
+  emitter << YAML::BeginMap;
   emitter << YAML::Key << "controller_list";
   emitter << YAML::Value << YAML::BeginSeq;
+  for (const auto& controller : controller_configs_)
   {
-    for (std::vector<ROSControlConfig>::iterator controller_it = ros_controllers_config_output.begin();
-         controller_it != ros_controllers_config_output.end();)
+    // Only process FollowJointTrajectory types
+    std::string type = controller.type_;
+    if (boost::ends_with(type, "/JointTrajectoryController"))
+      type = "FollowJointTrajectory";
+    if (type == "FollowJointTrajectory" || type == "GripperCommand")
     {
-      // Depending on the controller type, fill the required data
-      if (controller_it->type_ == "FollowJointTrajectory")
-      {
-        emitter << YAML::BeginMap;
-        emitter << YAML::Key << "name";
-        emitter << YAML::Value << controller_it->name_;
-        emitter << YAML::Key << "action_ns";
-        emitter << YAML::Value << "follow_joint_trajectory";
-        emitter << YAML::Key << "default";
-        emitter << YAML::Value << "True";
-        emitter << YAML::Key << "type";
-        emitter << YAML::Value << controller_it->type_;
-        // Write joints
-        emitter << YAML::Key << "joints";
-        {
-          if (controller_it->joints_.size() != 1)
-          {
-            emitter << YAML::Value << YAML::BeginSeq;
+      emitter << YAML::BeginMap;
+      emitter << YAML::Key << "name";
+      emitter << YAML::Value << controller.name_;
+      emitter << YAML::Key << "action_ns";
+      emitter << YAML::Value << (type == "FollowJointTrajectory" ? "follow_joint_trajectory" : "gripper_action");
+      emitter << YAML::Key << "type";
+      emitter << YAML::Value << type;
+      emitter << YAML::Key << "default";
+      emitter << YAML::Value << "True";
 
-            // Iterate through the joints
-            for (std::string& joint : controller_it->joints_)
-            {
-              emitter << joint;
-            }
-            emitter << YAML::EndSeq;
-          }
-          else
-          {
-            emitter << YAML::Value << YAML::BeginMap;
-            emitter << controller_it->joints_[0];
-            emitter << YAML::EndMap;
-          }
-        }
-        controller_it = ros_controllers_config_output.erase(controller_it);
-        emitter << YAML::EndMap;
-      }
-      else
-      {
-        controller_it++;
-      }
+      // Write joints
+      emitter << YAML::Key << "joints";
+      emitter << YAML::Value << YAML::BeginSeq;
+      // Iterate through the joints
+      for (const std::string& joint : controller.joints_)
+        emitter << joint;
+      emitter << YAML::EndSeq;
+
+      emitter << YAML::EndMap;
     }
-    emitter << YAML::EndSeq;
   }
+  emitter << YAML::EndSeq;
+  emitter << YAML::EndMap;
+
+  std::ofstream output_stream(file_path.c_str(), std::ios_base::trunc);
+  if (!output_stream.good())
+  {
+    RCLCPP_ERROR_STREAM(LOGGER, "Unable to open file for writing " << file_path);
+    return false;
+  }
+  output_stream << emitter.c_str();
+  output_stream.close();
+
+  return true;  // file created successfully
 }
 
 // ******************************************************************************************
@@ -719,21 +735,18 @@ srdf::Model::GroupState MoveItConfigData::getDefaultStartPose()
 }
 
 // ******************************************************************************************
-// Output controllers config files
+// Generate ros_controllers.yaml config file
 // ******************************************************************************************
 bool MoveItConfigData::outputROSControllersYAML(const std::string& file_path)
 {
-  // Copy ros_control_config_ to a new vector to avoid modifying it
-  std::vector<ROSControlConfig> ros_controllers_config_output(ros_controllers_config_);
-
   // Cache the joints' names.
   std::vector<std::vector<std::string>> planning_groups;
-  std::vector<std::string> group_joints;
 
   // We are going to write the joints names many times.
   // Loop through groups to store the joints names in group_joints vector and reuse is.
   for (srdf::Model::Group& group : srdf_->groups_)
   {
+    std::vector<std::string> group_joints;
     // Get list of associated joints
     const moveit::core::JointModelGroup* joint_model_group = getRobotModel()->getJointModelGroup(group.name_);
     const std::vector<const moveit::core::JointModel*>& joint_models = joint_model_group->getActiveJointModels();
@@ -747,13 +760,14 @@ bool MoveItConfigData::outputROSControllersYAML(const std::string& file_path)
     }
     // Push all the group joints into planning_groups vector.
     planning_groups.push_back(group_joints);
-    group_joints.clear();
   }
 
   YAML::Emitter emitter;
   emitter << YAML::BeginMap;
 
   {
+#if 0  // TODO: This is only for fake ROS controllers, which should go into a separate file
+    // Also replace moveit_sim_controllers with http://wiki.ros.org/fake_joint
     emitter << YAML::Comment("Simulation settings for using moveit_sim_controllers");
     emitter << YAML::Key << "moveit_sim_hw_interface" << YAML::Value << YAML::BeginMap;
     // MoveIt Simulation Controller settings for setting initial pose
@@ -817,23 +831,12 @@ bool MoveItConfigData::outputROSControllersYAML(const std::string& file_path)
       emitter << YAML::Newline;
       emitter << YAML::EndMap;
     }
-    // Joint State Controller
-    emitter << YAML::Comment("Publish all joint states");
-    emitter << YAML::Newline << YAML::Comment("Creates the /joint_states topic necessary in ROS");
-    emitter << YAML::Key << "joint_state_broadcaster" << YAML::Value << YAML::BeginMap;
+#endif
+    for (const auto& controller : controller_configs_)
     {
-      emitter << YAML::Key << "type";
-      emitter << YAML::Value << "joint_state_broadcaster/JointStateBroadcaster";
-      emitter << YAML::Key << "publish_rate";
-      emitter << YAML::Value << "50";
-      emitter << YAML::EndMap;
-    }
+      if (controller.type_ == "FollowJointTrajectory" || controller.type_ == "GripperCommand")
+        continue;  // these are handled by outputSimpleControllersYAML()
 
-    // Writes Follow Joint Trajectory ROS controllers to ros_controller.yaml
-    outputFollowJointTrajectoryYAML(emitter, ros_controllers_config_output);
-
-    for (const auto& controller : ros_controllers_config_output)
-    {
       emitter << YAML::Key << controller.name_;
       emitter << YAML::Value << YAML::BeginMap;
       emitter << YAML::Key << "type";
@@ -841,25 +844,12 @@ bool MoveItConfigData::outputROSControllersYAML(const std::string& file_path)
 
       // Write joints
       emitter << YAML::Key << "joints";
-      {
-        if (controller.joints_.size() != 1)
-        {
-          emitter << YAML::Value << YAML::BeginSeq;
+      emitter << YAML::Value << YAML::BeginSeq;
+      // Iterate through the joints
+      for (const std::string& joint : controller.joints_)
+        emitter << joint;
+      emitter << YAML::EndSeq;
 
-          // Iterate through the joints
-          for (const std::string& joint : controller.joints_)
-          {
-            emitter << joint;
-          }
-          emitter << YAML::EndSeq;
-        }
-        else
-        {
-          emitter << YAML::Value << YAML::BeginMap;
-          emitter << controller.joints_[0];
-          emitter << YAML::EndMap;
-        }
-      }
       // Write gains as they are required for vel and effort controllers
       emitter << YAML::Key << "gains";
       emitter << YAML::Value << YAML::BeginMap;
@@ -1030,7 +1020,7 @@ template <typename T>
 bool parse(const YAML::Node& node, const std::string& key, T& storage, const T& default_value = T())
 {
   const YAML::Node& n = node[key];
-  bool valid = n;
+  bool valid = n.IsDefined();
   storage = valid ? n.as<T>() : default_value;
   return valid;
 }
@@ -1127,7 +1117,7 @@ bool MoveItConfigData::inputPlanningContextLaunch(const std::string& file_path)
 bool MoveItConfigData::parseROSController(const YAML::Node& controller)
 {
   // Used in parsing ROS controllers
-  ROSControlConfig control_setting;
+  ControllerConfig control_setting;
 
   if (const YAML::Node& trajectory_controllers = controller)
   {
@@ -1154,7 +1144,7 @@ bool MoveItConfigData::parseROSController(const YAML::Node& controller)
             return false;
           }
           // All required fields were parsed correctly
-          ros_controllers_config_.push_back(control_setting);
+          controller_configs_.push_back(control_setting);
         }
         else
         {
@@ -1173,7 +1163,7 @@ bool MoveItConfigData::parseROSController(const YAML::Node& controller)
 bool MoveItConfigData::processROSControllers(std::ifstream& input_stream)
 {
   // Used in parsing ROS controllers
-  ROSControlConfig control_setting;
+  ControllerConfig control_setting;
   YAML::Node controllers = YAML::Load(input_stream);
 
   // Loop through all controllers
@@ -1214,7 +1204,7 @@ bool MoveItConfigData::processROSControllers(std::ifstream& input_stream)
         {
           control_setting.type_ = controller_it->second["type"].as<std::string>();
           control_setting.name_ = controller_name;
-          ros_controllers_config_.push_back(control_setting);
+          controller_configs_.push_back(control_setting);
           control_setting.joints_.clear();
         }
       }
@@ -1253,14 +1243,14 @@ bool MoveItConfigData::inputROSControllersYAML(const std::string& file_path)
 // ******************************************************************************************
 // Add a Follow Joint Trajectory action Controller for each Planning Group
 // ******************************************************************************************
-bool MoveItConfigData::addDefaultControllers()
+bool MoveItConfigData::addDefaultControllers(const std::string& controller_type)
 {
   if (srdf_->srdf_model_->getGroups().empty())
     return false;
   // Loop through groups
   for (const srdf::Model::Group& group_it : srdf_->srdf_model_->getGroups())
   {
-    ROSControlConfig group_controller;
+    ControllerConfig group_controller;
     // Get list of associated joints
     const moveit::core::JointModelGroup* joint_model_group = getRobotModel()->getJointModelGroup(group_it.name_);
     const std::vector<const moveit::core::JointModel*>& joint_models = joint_model_group->getActiveJointModels();
@@ -1275,8 +1265,8 @@ bool MoveItConfigData::addDefaultControllers()
     if (!group_controller.joints_.empty())
     {
       group_controller.name_ = group_it.name_ + "_controller";
-      group_controller.type_ = "FollowJointTrajectory";
-      addROSController(group_controller);
+      group_controller.type_ = controller_type;
+      addController(group_controller);
     }
   }
   return true;
@@ -1315,36 +1305,31 @@ bool MoveItConfigData::createFullURDFPath()
 }
 
 // ******************************************************************************************
-// Find ROS controller by name
+// Find a controller by name
 // ******************************************************************************************
-ROSControlConfig* MoveItConfigData::findROSControllerByName(const std::string& controller_name)
+ControllerConfig* MoveItConfigData::findControllerByName(const std::string& controller_name)
 {
-  // Find the ROSController we are editing based on the ROSController name string
-  ROSControlConfig* searched_ros_controller = nullptr;  // used for holding our search results
-
-  for (ROSControlConfig& ros_control_config : ros_controllers_config_)
+  // Find the controller we are editing based on its name
+  for (ControllerConfig& controller : controller_configs_)
   {
-    if (ros_control_config.name_ == controller_name)  // string match
-    {
-      searched_ros_controller = &ros_control_config;  // convert to pointer from iterator
-      break;                                          // we are done searching
-    }
+    if (controller.name_ == controller_name)  // string match
+      return &controller;                     // convert to pointer from iterator
   }
 
-  return searched_ros_controller;
+  return nullptr;  // not found
 }
 
 // ******************************************************************************************
-// Deletes a ROS controller by name
+// Deletes a controller by name
 // ******************************************************************************************
-bool MoveItConfigData::deleteROSController(const std::string& controller_name)
+bool MoveItConfigData::deleteController(const std::string& controller_name)
 {
-  for (std::vector<ROSControlConfig>::iterator controller_it = ros_controllers_config_.begin();
-       controller_it != ros_controllers_config_.end(); ++controller_it)
+  for (std::vector<ControllerConfig>::iterator controller_it = controller_configs_.begin();
+       controller_it != controller_configs_.end(); ++controller_it)
   {
     if (controller_it->name_ == controller_name)  // string match
     {
-      ros_controllers_config_.erase(controller_it);
+      controller_configs_.erase(controller_it);
       // we are done searching
       return true;
     }
@@ -1353,29 +1338,20 @@ bool MoveItConfigData::deleteROSController(const std::string& controller_name)
 }
 
 // ******************************************************************************************
-// Adds a ROS controller to ros_controllers_config_ vector
+// Adds a controller to controller_configs_ vector
 // ******************************************************************************************
-bool MoveItConfigData::addROSController(const ROSControlConfig& new_controller)
+bool MoveItConfigData::addController(const ControllerConfig& new_controller)
 {
-  // Used for holding our search results
-  ROSControlConfig* searched_ros_controller = nullptr;
-
   // Find if there is an existing controller with the same name
-  searched_ros_controller = findROSControllerByName(new_controller.name_);
+  ControllerConfig* controller = findControllerByName(new_controller.name_);
 
-  if (searched_ros_controller && searched_ros_controller->type_ == new_controller.type_)
+  if (controller && controller->type_ == new_controller.type_)
     return false;
 
-  ros_controllers_config_.push_back(new_controller);
+  controller_configs_.push_back(new_controller);
   return true;
 }
 
 // ******************************************************************************************
-// Gets ros_controllers_config_ vector
-// ******************************************************************************************
-std::vector<ROSControlConfig>& MoveItConfigData::getROSControllers()
-{
-  return ros_controllers_config_;
-}
 
 }  // namespace moveit_setup_assistant

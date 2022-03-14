@@ -68,6 +68,7 @@ int main(int argc, char** argv)
   // time to wait in between publishing messages
   double delay = 0.001;
 
+  // clang-format off
   boost::program_options::options_description desc;
   desc.add_options()("help", "Show help message")("host", boost::program_options::value<std::string>(),
                                                   "Host for the "
@@ -80,7 +81,7 @@ int main(int argc, char** argv)
       "state", boost::program_options::value<std::string>(),
       "Name of the robot state to publish.")("delay", boost::program_options::value<double>()->default_value(delay),
                                              "Time to wait in between publishing messages (s)");
-
+  // clang-format on
   boost::program_options::variables_map vm;
   boost::program_options::store(boost::program_options::parse_command_line(argc, argv, desc), vm);
   boost::program_options::notify(vm);

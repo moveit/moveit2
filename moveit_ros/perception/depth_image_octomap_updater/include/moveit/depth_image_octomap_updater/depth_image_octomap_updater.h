@@ -78,9 +78,11 @@ private:
   image_transport::CameraPublisher pub_filtered_depth_image_;
   image_transport::CameraPublisher pub_filtered_label_image_;
 
-  rclcpp::Time last_update_time_;
+  // Initialize clock type to RCL_ROS_TIME to prevent exception about time sources mismatch
+  rclcpp::Time last_update_time_ = rclcpp::Time(0, 0, RCL_ROS_TIME);
 
   std::string filtered_cloud_topic_;
+  std::string ns_;
   std::string sensor_type_;
   std::string image_topic_;
   std::size_t queue_size_;

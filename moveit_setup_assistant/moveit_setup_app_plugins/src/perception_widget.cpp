@@ -91,7 +91,6 @@ void PerceptionWidget::onInit()
   // Point Cloud Topic
   point_cloud_topic_field_ = new QLineEdit(this);
   point_cloud_topic_field_->setMaximumWidth(400);
-  // point_cloud_topic_field_->setText(QString("/clud topic"));
   point_cloud_form_layout->addRow("Point Cloud Topic:", point_cloud_topic_field_);
 
   // Max Range
@@ -273,50 +272,41 @@ void PerceptionWidget::loadSensorPluginsComboBox()
     return;
   has_loaded = true;
 
-  // Remove all old items
-  sensor_plugin_field_->clear();
-
   // Add None option, the default
   sensor_plugin_field_->addItem("None");
+  sensor_plugin_field_->setCurrentIndex(0);
 
   // Add the two available plugins to combo box
   sensor_plugin_field_->addItem("Point Cloud");
   sensor_plugin_field_->addItem("Depth Map");
 
-  // Load default config, or use the one in the config package if exists
-  auto& sensors_vec_map = setup_step_.getSensorPluginConfig();
+  const auto& sensors_vec_map = setup_step_.getSensorPluginConfig();
   for (auto& sensor_plugin_config : sensors_vec_map)
   {
-    if (sensor_plugin_config["sensor_plugin"] == std::string("occupancy_map_monitor/PointCloudOctomapUpdater"))
+    if (sensor_plugin_config.at("sensor_plugin") == std::string("occupancy_map_monitor/PointCloudOctomapUpdater"))
     {
       sensor_plugin_field_->setCurrentIndex(1);
-      point_cloud_topic_field_->setText(QString(sensor_plugin_config["point_cloud_topic"].c_str()));
-      max_range_field_->setText(QString(sensor_plugin_config["max_range"].c_str()));
-      point_subsample_field_->setText(QString(sensor_plugin_config["point_subsample"].c_str()));
-      padding_offset_field_->setText(QString(sensor_plugin_config["padding_offset"].c_str()));
-      padding_scale_field_->setText(QString(sensor_plugin_config["padding_scale"].c_str()));
-      max_update_rate_field_->setText(QString(sensor_plugin_config["max_update_rate"].c_str()));
-      filtered_cloud_topic_field_->setText(QString(sensor_plugin_config["filtered_cloud_topic"].c_str()));
+      point_cloud_topic_field_->setText(QString(sensor_plugin_config.at("point_cloud_topic").c_str()));
+      max_range_field_->setText(QString(sensor_plugin_config.at("max_range").c_str()));
+      point_subsample_field_->setText(QString(sensor_plugin_config.at("point_subsample").c_str()));
+      padding_offset_field_->setText(QString(sensor_plugin_config.at("padding_offset").c_str()));
+      padding_scale_field_->setText(QString(sensor_plugin_config.at("padding_scale").c_str()));
+      max_update_rate_field_->setText(QString(sensor_plugin_config.at("max_update_rate").c_str()));
+      filtered_cloud_topic_field_->setText(QString(sensor_plugin_config.at("filtered_cloud_topic").c_str()));
     }
-    else if (sensor_plugin_config["sensor_plugin"] == std::string("occupancy_map_monitor/DepthImageOctomapUpdater"))
+    else if (sensor_plugin_config.at("sensor_plugin") == std::string("occupancy_map_monitor/DepthImageOctomapUpdater"))
     {
       sensor_plugin_field_->setCurrentIndex(2);
-      image_topic_field_->setText(QString(sensor_plugin_config["image_topic"].c_str()));
-      queue_size_field_->setText(QString(sensor_plugin_config["queue_size"].c_str()));
-      near_clipping_field_->setText(QString(sensor_plugin_config["near_clipping_plane_distance"].c_str()));
-      far_clipping_field_->setText(QString(sensor_plugin_config["far_clipping_plane_distance"].c_str()));
-      shadow_threshold_field_->setText(QString(sensor_plugin_config["shadow_threshold"].c_str()));
-      depth_padding_scale_field_->setText(QString(sensor_plugin_config["padding_scale"].c_str()));
-      depth_padding_offset_field_->setText(QString(sensor_plugin_config["padding_offset"].c_str()));
-      depth_filtered_cloud_topic_field_->setText(QString(sensor_plugin_config["filtered_cloud_topic"].c_str()));
-      depth_max_update_rate_field_->setText(QString(sensor_plugin_config["max_update_rate"].c_str()));
+      image_topic_field_->setText(QString(sensor_plugin_config.at("image_topic").c_str()));
+      queue_size_field_->setText(QString(sensor_plugin_config.at("queue_size").c_str()));
+      near_clipping_field_->setText(QString(sensor_plugin_config.at("near_clipping_plane_distance").c_str()));
+      far_clipping_field_->setText(QString(sensor_plugin_config.at("far_clipping_plane_distance").c_str()));
+      shadow_threshold_field_->setText(QString(sensor_plugin_config.at("shadow_threshold").c_str()));
+      depth_padding_scale_field_->setText(QString(sensor_plugin_config.at("padding_scale").c_str()));
+      depth_padding_offset_field_->setText(QString(sensor_plugin_config.at("padding_offset").c_str()));
+      depth_filtered_cloud_topic_field_->setText(QString(sensor_plugin_config.at("filtered_cloud_topic").c_str()));
+      depth_max_update_rate_field_->setText(QString(sensor_plugin_config.at("max_update_rate").c_str()));
     }
-  }
-
-  // If no sensor config exists, default to None
-  if (sensors_vec_map.size() == 2)
-  {
-    sensor_plugin_field_->setCurrentIndex(0);
   }
 }
 

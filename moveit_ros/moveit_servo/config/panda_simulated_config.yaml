@@ -28,6 +28,12 @@ publish_joint_accelerations: false
 ## Plugins for smoothing outgoing commands
 smoothing_filter_plugin_name: "online_signal_smoothing::ButterworthFilterPlugin"
 
+# If is_primary_planning_scene_monitor is set to true, the Servo server's PlanningScene advertises the /get_planning_scene service,
+# which other nodes can use as a source for information about the planning environment.
+# NOTE: If a different node in your system is responsible for the "primary" planning scene instance (e.g. the MoveGroup node),
+# then is_primary_planning_scene_monitor needs to be set to false.
+is_primary_planning_scene_monitor: true
+
 ## MoveIt properties
 move_group_name:  panda_arm  # Often 'manipulator' or 'arm'
 planning_frame: panda_link0  # The MoveIt planning frame. Often 'base_link' or 'world'

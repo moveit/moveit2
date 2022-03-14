@@ -55,7 +55,7 @@ public:
     return true;  // no dependencies
   }
 
-  std::vector<SensorParameters>& getSensorPluginConfig()
+  const std::vector<SensorParameters>& getSensorPluginConfig()
   {
     return perception_config_->getSensorPluginConfig();
   }

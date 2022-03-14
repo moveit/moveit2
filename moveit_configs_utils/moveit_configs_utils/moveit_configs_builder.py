@@ -34,7 +34,7 @@ Example:
     # Or to get all the parameters as a dictionary
     moveit_configs.to_dict()
 
-Each function in MoveItConfigsBuilder have a file_path as an argument which is used to override the default
+Each function in MoveItConfigsBuilder has a file_path as an argument which is used to override the default
 path for the file
 
 Example:

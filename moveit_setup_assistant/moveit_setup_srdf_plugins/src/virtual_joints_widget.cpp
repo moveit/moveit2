@@ -54,11 +54,11 @@ void VirtualJointsWidget::onInit()
 
   // Top Header Area ------------------------------------------------
 
-  auto header =
-      new moveit_setup_framework::HeaderWidget("Define Virtual Joints",
-                                               "Create a virtual joint between a robot link and an external frame of "
-                                               "reference (considered fixed with respect to the robot).",
-                                               this);
+  auto header = new moveit_setup_framework::HeaderWidget(
+      "Define Virtual Joints",
+      "Create a virtual joint between the base robot link and an external frame of reference. "
+      "This allows to place the robot in the world or on a mobile platform.",
+      this);
   layout->addWidget(header);
 
   // Create contents screens ---------------------------------------

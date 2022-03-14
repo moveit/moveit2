@@ -35,6 +35,7 @@
 /* Author: Dave Coleman */
 
 // Qt
+#include <QAction>
 #include <QApplication>
 #include <QLabel>
 #include <QList>
@@ -101,7 +102,16 @@ void ConfigurationFilesWidget::onInit()
   // List Box
   action_list_ = new QListWidget(this);
   action_list_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  action_list_->setSelectionMode(QAbstractItemView::ExtendedSelection);
   connect(action_list_, SIGNAL(currentRowChanged(int)), this, SLOT(changeActionDesc(int)));
+  // Allow checking / unchecking of multiple items
+  action_list_->setContextMenuPolicy(Qt::ActionsContextMenu);
+  QAction* action = new QAction("Check all selected files", this);
+  connect(action, &QAction::triggered, [this]() { setCheckSelected(true); });
+  action_list_->addAction(action);
+  action = new QAction("Uncheck all selected files", this);
+  connect(action, &QAction::triggered, [this]() { setCheckSelected(false); });
+  action_list_->addAction(action);
 
   // Description
   action_label_ = new QLabel(this);
@@ -166,6 +176,12 @@ void ConfigurationFilesWidget::onInit()
 
   // Finish Layout --------------------------------------------------
   this->setLayout(layout);
+}
+
+void ConfigurationFilesWidget::setCheckSelected(bool checked)
+{
+  for (const QModelIndex& row : action_list_->selectionModel()->selectedRows())
+    action_list_->model()->setData(row, checked ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
 }
 
 void ConfigurationFilesWidget::onPackagePathChanged(const QString& path)
@@ -432,6 +448,8 @@ bool ConfigurationFilesWidget::generatePackage()
       return false;  // abort
     }
   }
+
+  setup_step_.setGenerationTime();
 
   // Begin to create files and folders ----------------------------------------------------------------------
   std::string absolute_path;

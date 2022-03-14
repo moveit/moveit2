@@ -55,7 +55,7 @@ YAML::Node PackageSettingsConfig::saveToYaml() const
   YAML::Node node;
   node["author_name"] = author_name_;
   node["author_email"] = author_email_;
-  node["generated_timestamp"] = std::time(nullptr);  // TODO: is this cross-platform?
+  node["generated_timestamp"] = config_pkg_generated_timestamp_;
   return node;
 }
 
@@ -195,6 +195,12 @@ bool PackageSettingsConfig::hasValidEmail() const
 {
   return std::regex_match(author_email_, MAIL_REGEX);
 }
+
+void PackageSettingsConfig::setGenerationTime()
+{
+  config_pkg_generated_timestamp_ = std::time(nullptr);  // TODO: is this cross-platform?
+}
+
 }  // namespace moveit_setup_framework
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT

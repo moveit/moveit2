@@ -76,13 +76,6 @@ public:
   bool initialize();
 
   /**
-   * Hybrid planning goal callback for hybrid planning request server
-   * @param goal_handle Hybrid planning goal handle to access feedback and response
-   */
-  void hybridPlanningRequestCallback(
-      std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> goal_handle);
-
-  /**
    * Send global planning request to global planner component
    * @return Global planner successfully started yes/no
    */
@@ -112,6 +105,9 @@ private:
 
   // Flag that indicates whether the manager is initialized
   bool initialized_;
+
+  // Flag that indicates hybrid planning has been canceled
+  std::atomic<bool> stop_hybrid_planning_;
 
   // Shared hybrid planning goal handle
   std::shared_ptr<rclcpp_action::ServerGoalHandle<moveit_msgs::action::HybridPlanner>> hybrid_planning_goal_handle_;
