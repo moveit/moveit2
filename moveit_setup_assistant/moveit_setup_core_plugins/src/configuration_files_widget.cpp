@@ -178,6 +178,12 @@ void ConfigurationFilesWidget::onInit()
   this->setLayout(layout);
 }
 
+void ConfigurationFilesWidget::setCheckSelected(bool checked)
+{
+  for (const QModelIndex& row : action_list_->selectionModel()->selectedRows())
+    action_list_->model()->setData(row, checked ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
+}
+
 void ConfigurationFilesWidget::onPackagePathChanged(const QString& path)
 {
   setup_step_.setPackagePath(path.toStdString());
@@ -442,6 +448,8 @@ bool ConfigurationFilesWidget::generatePackage()
       return false;  // abort
     }
   }
+
+  setup_step_.setGenerationTime();
 
   // Begin to create files and folders ----------------------------------------------------------------------
   std::string absolute_path;

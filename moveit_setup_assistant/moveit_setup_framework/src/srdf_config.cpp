@@ -219,10 +219,6 @@ void SRDFConfig::collectVariables(std::vector<TemplateVariable>& variables)
   unsigned int counter = 0;
   for (const auto& vj : srdf_.virtual_joints_)
   {
-    if (vj.type_ == "fixed")
-    {
-      continue;
-    }
     vjb << "  <node pkg=\"tf2_ros\" type=\"static_transform_publisher\" name=\"virtual_joint_broadcaster_" << counter
         << "\" args=\"0 0 0 0 0 0 " << vj.parent_frame_ << " " << vj.child_link_ << "\" />" << std::endl;
     counter++;
