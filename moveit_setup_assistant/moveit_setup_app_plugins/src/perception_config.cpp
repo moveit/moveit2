@@ -45,30 +45,37 @@ void PerceptionConfig::loadPrevious(const std::string& package_path, const YAML:
 {
   // Loads parameters values from sensors_3d yaml file if available
   std::string sensors_3d_yaml_path = moveit_setup_framework::appendPaths(package_path, "config/sensors_3d.yaml");
-  if (boost::filesystem::is_regular_file(sensors_3d_yaml_path))
+  if (!boost::filesystem::is_regular_file(sensors_3d_yaml_path))
   {
-    input3DSensorsYAML(sensors_3d_yaml_path);
+    std::string pkg_path = ament_index_cpp::get_package_share_directory("moveit_setup_app_plugins");
+    std::string templates_folder = moveit_setup_framework::appendPaths(pkg_path, "templates");
+    sensors_3d_yaml_path = moveit_setup_framework::appendPaths(templates_folder, "config/sensors_3d.yaml");
   }
-  else
+  try
   {
-    // TODO: Handle defaults
-    // fs::path default_sensors_3d_yaml_path = "templates/moveit_config_pkg_template/config/sensors_3d.yaml";
-    // Load from default
-    // input3DSensorsYAML(default_sensors_3d_yaml_path.make_preferred().string());
+    sensors_plugin_config_parameter_list_ = load3DSensorsYAML(sensors_3d_yaml_path);
+  }
+  catch (const std::runtime_error& e)
+  {
+    RCLCPP_ERROR_STREAM((*logger_), e.what());
   }
 }
 
 // ******************************************************************************************
 // Input sensors_3d yaml file
 // ******************************************************************************************
-bool PerceptionConfig::input3DSensorsYAML(const std::string& file_path)
+std::vector<SensorParameters> PerceptionConfig::load3DSensorsYAML(const std::string& file_path)
 {
+  std::vector<SensorParameters> config;
+  // Is there a sensors config in the package?
+  if (file_path.empty())
+    return config;
+
   // Load file
   std::ifstream input_stream(file_path.c_str());
   if (!input_stream.good())
   {
-    RCLCPP_ERROR_STREAM((*logger_), "Unable to open file for reading " << file_path);
-    return false;
+    throw std::runtime_error("Unable to open file for reading " + file_path);
   }
 
   // Begin parsing
@@ -81,33 +88,28 @@ bool PerceptionConfig::input3DSensorsYAML(const std::string& file_path)
     // Make sure that the sensors are written as a sequence
     if (sensors_node && sensors_node.IsSequence())
     {
-      SensorParameters sensor_map;
-      bool empty_node = true;
-
       // Loop over the sensors available in the file
       for (const YAML::Node& sensor : sensors_node)
       {
-        if (const YAML::Node& sensor_node = sensor)
+        SensorParameters sensor_map;
+        bool empty_node = true;
+
+        for (YAML::const_iterator sensor_it = sensor.begin(); sensor_it != sensor.end(); ++sensor_it)
         {
-          for (YAML::const_iterator sensor_it = sensor_node.begin(); sensor_it != sensor_node.end(); ++sensor_it)
-          {
-            empty_node = false;
-            sensor_map[sensor_it->first.as<std::string>()] = sensor_it->second.as<std::string>();
-          }
-          // Don't push empty nodes
-          if (!empty_node)
-            sensors_plugin_config_parameter_list_.push_back(sensor_map);
+          empty_node = false;
+          sensor_map[sensor_it->first.as<std::string>()] = sensor_it->second.as<std::string>();
         }
+        // Don't push empty nodes
+        if (!empty_node)
+          config.push_back(sensor_map);
       }
     }
-    return true;
+    return config;
   }
-  catch (YAML::ParserException& e)  // Catch errors
+  catch (YAML::ParserException& e)  // Catch errors, rethrow as runtime_error
   {
-    RCLCPP_ERROR_STREAM((*logger_), "Error parsing sensors yaml: " << e.what());
+    throw std::runtime_error(std::string("Error parsing sensors yaml: ") + e.what());
   }
-
-  return false;  // if it gets to this point an error has occurred
 }
 
 // ******************************************************************************************
@@ -146,7 +148,6 @@ void PerceptionConfig::setConfig(const SensorParameters& parameters)
 bool PerceptionConfig::GeneratedSensorConfig::writeYaml(YAML::Emitter& emitter)
 {
   emitter << YAML::BeginMap;
-  emitter << YAML::Comment("The name of this file shouldn't be changed, or else the Setup Assistant won't detect it");
   emitter << YAML::Key << "sensors";
   emitter << YAML::Value << YAML::BeginSeq;
   for (auto& sensor_config : parent_.sensors_plugin_config_parameter_list_)

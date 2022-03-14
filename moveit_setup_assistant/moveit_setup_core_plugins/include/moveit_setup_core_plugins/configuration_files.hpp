@@ -105,6 +105,11 @@ public:
 
   std::string getInvalidGroupName() const;
 
+  void setGenerationTime()
+  {
+    package_settings_->setGenerationTime();
+  }
+
 protected:
   bool hasMatchingFileStatus(FileStatus status) const;
 
