@@ -41,7 +41,6 @@
 #include <octomap/octomap.h>
 #include <rviz_default_plugins/displays/pointcloud/point_cloud_helpers.hpp>
 #include <rviz_common/properties/color_property.hpp>
-#include <moveit/rviz_plugin_render_tools/octomap_render.h>
 
 namespace octomap
 {
