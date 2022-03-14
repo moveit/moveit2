@@ -195,6 +195,8 @@ public:
     author_email_ = email;
   }
 
+  void setGenerationTime();
+
 protected:
   /// Loaded configuration package path - if an existing package was loaded, holds that path
   std::string config_pkg_path_;

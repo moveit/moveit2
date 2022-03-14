@@ -203,7 +203,7 @@ public:
    * \brief Add a Follow Joint Trajectory action Controller for each Planning Group
    * \return true if controllers were added to the controller_configs_ data structure
    */
-  bool addDefaultControllers();
+  bool addDefaultControllers(const std::string& controller_type = "effort_controllers/JointTrajectoryController");
 
   /**
    * Helper Function for joining a file path and a file name, or two file paths, etc,
@@ -271,8 +271,8 @@ private:
   // Private Vars
   // ******************************************************************************************
 
-  /// ROS Controllers config data
-  std::vector<ROSControlConfig> ros_controllers_config_;
+  /// Controllers config data
+  std::vector<ControllerConfig> controller_configs_;
 };
 
 }  // namespace moveit_setup_assistant

@@ -47,6 +47,9 @@ class PerceptionConfig : public moveit_setup_framework::SetupConfig
 public:
   void loadPrevious(const std::string& package_path, const YAML::Node& node) override;
 
+  /// Load perception sensor config
+  static std::vector<SensorParameters> load3DSensorsYAML(const std::string& file_path);
+
   bool isConfigured() const override
   {
     return !sensors_plugin_config_parameter_list_.empty();
@@ -55,7 +58,7 @@ public:
   /**
    * \brief Used for adding a sensor plugin configuration parameter to the sensor plugin configuration parameter list
    */
-  std::vector<SensorParameters>& getSensorPluginConfig()
+  const std::vector<SensorParameters>& getSensorPluginConfig()
   {
     return sensors_plugin_config_parameter_list_;
   }
@@ -103,14 +106,6 @@ public:
   }
 
 protected:
-  /**
-   * Input sensors_3d file - contains 3d sensors config data
-   *
-   * @param file_path path to sensors_3d yaml file in the config package
-   * @return true if the file was read correctly
-   */
-  bool input3DSensorsYAML(const std::string& file_path);
-
   /// Sensor plugin configuration parameter list, each sensor plugin type is a map of string pairs
   std::vector<SensorParameters> sensors_plugin_config_parameter_list_;
   bool changed_{ false };
