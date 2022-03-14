@@ -202,6 +202,7 @@ TEST_F(CommandPlannerTest, CheckPlanningContextRequest)
   moveit_msgs::msg::MotionPlanRequest req;
   moveit_msgs::msg::MoveItErrorCodes error_code;
 
+  req.group_name = "manipulator";
   // Check for the algorithms
   std::vector<std::string> algs;
   planner_instance_->getPlanningAlgorithms(algs);

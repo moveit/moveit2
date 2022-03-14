@@ -40,6 +40,7 @@
 #include <rcl_interfaces/msg/integer_range.hpp>
 #include <rcl_interfaces/msg/parameter_descriptor.hpp>
 #include <rcl_interfaces/msg/parameter_type.hpp>
+#include <limits>
 #include <string>
 
 namespace moveit_servo

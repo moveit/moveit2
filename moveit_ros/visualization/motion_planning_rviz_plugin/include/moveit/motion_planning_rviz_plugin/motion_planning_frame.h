@@ -117,6 +117,7 @@ protected:
   static const int ITEM_TYPE_SCENE = 1;
   static const int ITEM_TYPE_QUERY = 2;
 
+  void initFromMoveGroupNS();
   void constructPlanningRequest(moveit_msgs::msg::MotionPlanRequest& mreq);
 
   void updateSceneMarkers(float wall_dt, float ros_dt);

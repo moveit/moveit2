@@ -80,7 +80,7 @@ public:
     : dc_(dc), key_(dc.link1_ < dc.link2_ ? (dc.link1_ + "|" + dc.link2_) : (dc.link2_ + "|" + dc.link1_))
   {
   }
-  operator const srdf::Model::DisabledCollision &() const
+  operator const srdf::Model::DisabledCollision&() const
   {
     return dc_;
   }
@@ -164,7 +164,7 @@ void DefaultCollisions::startGenerationThread(unsigned int num_trials, double mi
   progress_ = 0;
 
   // start worker thread
-  worker_ = boost::thread(boost::bind(&DefaultCollisions::generateCollisionTable, this, num_trials, min_frac, verbose));
+  worker_ = boost::thread(std::bind(&DefaultCollisions::generateCollisionTable, this, num_trials, min_frac, verbose));
 }
 
 // ******************************************************************************************

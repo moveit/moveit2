@@ -33,6 +33,7 @@
  *********************************************************************/
 
 #include <moveit/local_constraint_solver_plugins/forward_trajectory.h>
+#include <moveit/local_planner/feedback_types.h>
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_state/conversions.h>
 
@@ -40,7 +41,7 @@ namespace
 {
 const rclcpp::Logger LOGGER = rclcpp::get_logger("local_planner_component");
 // If stuck for this many iterations or more, abort the local planning action
-constexpr size_t STUCK_ITERATIONS_THRESHOLD = 10;
+constexpr size_t STUCK_ITERATIONS_THRESHOLD = 5;
 constexpr double STUCK_THRESHOLD_RAD = 1e-4;  // L1-norm sum across all joints
 }  // namespace
 
@@ -117,10 +118,10 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
     {
       if (!path_invalidation_event_send_)
       {  // Send feedback only once
-        feedback_result.feedback = "collision_ahead";
+        feedback_result.feedback = toString(LocalFeedbackEnum::COLLISION_AHEAD);
         path_invalidation_event_send_ = true;  // Set feedback flag
       }
-      RCLCPP_INFO(LOGGER, "Collision ahead, hold current position");
+      RCLCPP_INFO(LOGGER, "Collision ahead, holding current position");
       // Keep current position
       moveit::core::RobotState current_state_command(*current_state);
       if (current_state_command.hasVelocities())
@@ -132,7 +133,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
         current_state_command.zeroAccelerations();
       }
       robot_command.empty();
-      robot_command.addSuffixWayPoint(*current_state, 0.0);
+      robot_command.addSuffixWayPoint(*current_state, local_trajectory.getWayPointDurationFromPrevious(0));
     }
 
     // Detect if the local solver is stuck
@@ -150,7 +151,7 @@ ForwardTrajectory::solve(const robot_trajectory::RobotTrajectory& local_trajecto
         {
           num_iterations_stuck_ = 0;
           prev_waypoint_target_ = nullptr;
-          feedback_result.feedback = "local_planner_stuck";
+          feedback_result.feedback = toString(LocalFeedbackEnum::LOCAL_PLANNER_STUCK);
           path_invalidation_event_send_ = true;  // Set feedback flag
           RCLCPP_INFO(LOGGER, "The local planner has been stuck for several iterations. Aborting.");
         }

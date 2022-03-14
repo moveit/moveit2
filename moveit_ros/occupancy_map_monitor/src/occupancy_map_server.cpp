@@ -81,7 +81,7 @@ int main(int argc, char** argv)
   std::shared_ptr<tf2_ros::Buffer> buffer = std::make_shared<tf2_ros::Buffer>(clock_ptr, tf2::durationFromSec(5.0));
   std::shared_ptr<tf2_ros::TransformListener> listener = std::make_shared<tf2_ros::TransformListener>(*buffer, node);
   occupancy_map_monitor::OccupancyMapMonitor server(node, buffer);
-  server.setUpdateCallback(boost::bind(&publishOctomap, octree_binary_pub, &server));
+  server.setUpdateCallback(std::bind(&publishOctomap, octree_binary_pub, &server));
   server.startMonitor();
 
   rclcpp::spin(node);

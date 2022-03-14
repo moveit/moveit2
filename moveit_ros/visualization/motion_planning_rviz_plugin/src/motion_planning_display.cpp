@@ -183,7 +183,7 @@ MotionPlanningDisplay::MotionPlanningDisplay()
 
   // Start background jobs
   background_process_.setJobUpdateEvent(
-      boost::bind(&MotionPlanningDisplay::backgroundJobUpdate, this, boost::placeholders::_1, boost::placeholders::_2));
+      std::bind(&MotionPlanningDisplay::backgroundJobUpdate, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 // ******************************************************************************************
@@ -205,14 +205,6 @@ MotionPlanningDisplay::~MotionPlanningDisplay()
 void MotionPlanningDisplay::onInitialize()
 {
   PlanningSceneDisplay::onInitialize();
-
-  // Prepare database parameters
-  if (!node_->has_parameter("warehouse_host"))
-    node_->declare_parameter<std::string>("warehouse_host", "127.0.0.1");
-  if (!node_->has_parameter("warehouse_plugin"))
-    node_->declare_parameter<std::string>("warehouse_plugin", "warehouse_ros_mongo::MongoDatabaseConnection");
-  if (!node_->has_parameter("warehouse_port"))
-    node_->declare_parameter<int>("warehouse_port", 33829);
 
   // Planned Path Display
   trajectory_visual_->onInitialize(node_, planning_scene_node_, context_);
@@ -245,18 +237,6 @@ void MotionPlanningDisplay::onInitialize()
 
   rviz_common::WindowManagerInterface* window_context = context_->getWindowManager();
   frame_ = new MotionPlanningFrame(this, context_, window_context ? window_context->getParentWindow() : nullptr);
-
-  std::string host_param;
-  if (node_->get_parameter("warehouse_host", host_param))
-  {
-    frame_->ui_->database_host->setText(QString::fromStdString(host_param));
-  }
-
-  int port;
-  if (node_->get_parameter("warehouse_port", port))
-  {
-    frame_->ui_->database_port->setValue(port);
-  }
 
   connect(frame_, SIGNAL(configChanged()), this->getModel(), SIGNAL(configChanged()));
   resetStatusTextColor();
@@ -315,7 +295,7 @@ void MotionPlanningDisplay::toggleSelectPlanningGroupSubscription(bool enable)
 void MotionPlanningDisplay::selectPlanningGroupCallback(const std_msgs::msg::String::ConstSharedPtr msg)
 {
   // synchronize ROS callback with main loop
-  addMainLoopJob(boost::bind(&MotionPlanningDisplay::changePlanningGroup, this, msg->data));
+  addMainLoopJob(std::bind(&MotionPlanningDisplay::changePlanningGroup, this, msg->data));
 }
 
 void MotionPlanningDisplay::reset()
@@ -343,7 +323,7 @@ void MotionPlanningDisplay::reset()
 void MotionPlanningDisplay::backgroundJobUpdate(moveit::tools::BackgroundProcessing::JobEvent /*unused*/,
                                                 const std::string& /*unused*/)
 {
-  addMainLoopJob(boost::bind(&MotionPlanningDisplay::updateBackgroundJobProgressBar, this));
+  addMainLoopJob(std::bind(&MotionPlanningDisplay::updateBackgroundJobProgressBar, this));
 }
 
 void MotionPlanningDisplay::updateBackgroundJobProgressBar()
@@ -741,7 +721,7 @@ void MotionPlanningDisplay::changedQueryStartState()
   setStatusTextColor(query_start_color_property_->getColor());
   addStatusText("Changed start state");
   drawQueryStartState();
-  addBackgroundJob(boost::bind(&MotionPlanningDisplay::publishInteractiveMarkers, this, true),
+  addBackgroundJob(std::bind(&MotionPlanningDisplay::publishInteractiveMarkers, this, true),
                    "publishInteractiveMarkers");
 }
 
@@ -752,7 +732,7 @@ void MotionPlanningDisplay::changedQueryGoalState()
   setStatusTextColor(query_goal_color_property_->getColor());
   addStatusText("Changed goal state");
   drawQueryGoalState();
-  addBackgroundJob(boost::bind(&MotionPlanningDisplay::publishInteractiveMarkers, this, true),
+  addBackgroundJob(std::bind(&MotionPlanningDisplay::publishInteractiveMarkers, this, true),
                    "publishInteractiveMarkers");
 }
 
@@ -825,7 +805,7 @@ void MotionPlanningDisplay::resetInteractiveMarkers()
 {
   query_start_state_->clearError();
   query_goal_state_->clearError();
-  addBackgroundJob(boost::bind(&MotionPlanningDisplay::publishInteractiveMarkers, this, false),
+  addBackgroundJob(std::bind(&MotionPlanningDisplay::publishInteractiveMarkers, this, false),
                    "publishInteractiveMarkers");
 }
 
@@ -931,7 +911,7 @@ void MotionPlanningDisplay::scheduleDrawQueryStartState(robot_interaction::Inter
 {
   if (!planning_scene_monitor_)
     return;
-  addBackgroundJob(boost::bind(&MotionPlanningDisplay::publishInteractiveMarkers, this, !error_state_changed),
+  addBackgroundJob(std::bind(&MotionPlanningDisplay::publishInteractiveMarkers, this, !error_state_changed),
                    "publishInteractiveMarkers");
   updateQueryStartState();
 }
@@ -941,7 +921,7 @@ void MotionPlanningDisplay::scheduleDrawQueryGoalState(robot_interaction::Intera
 {
   if (!planning_scene_monitor_)
     return;
-  addBackgroundJob(boost::bind(&MotionPlanningDisplay::publishInteractiveMarkers, this, !error_state_changed),
+  addBackgroundJob(std::bind(&MotionPlanningDisplay::publishInteractiveMarkers, this, !error_state_changed),
                    "publishInteractiveMarkers");
   updateQueryGoalState();
 }
@@ -950,7 +930,7 @@ void MotionPlanningDisplay::updateQueryStartState()
 {
   queryStartStateChanged();
   recomputeQueryStartStateMetrics();
-  addMainLoopJob(boost::bind(&MotionPlanningDisplay::changedQueryStartState, this));
+  addMainLoopJob(std::bind(&MotionPlanningDisplay::changedQueryStartState, this));
   context_->queueRender();
 }
 
@@ -958,7 +938,7 @@ void MotionPlanningDisplay::updateQueryGoalState()
 {
   queryGoalStateChanged();
   recomputeQueryGoalStateMetrics();
-  addMainLoopJob(boost::bind(&MotionPlanningDisplay::changedQueryGoalState, this));
+  addMainLoopJob(std::bind(&MotionPlanningDisplay::changedQueryGoalState, this));
   context_->queueRender();
 }
 
@@ -1068,7 +1048,7 @@ void MotionPlanningDisplay::changedPlanningGroup()
 
   if (frame_)
     frame_->changePlanningGroup();
-  addBackgroundJob(boost::bind(&MotionPlanningDisplay::publishInteractiveMarkers, this, false),
+  addBackgroundJob(std::bind(&MotionPlanningDisplay::publishInteractiveMarkers, this, false),
                    "publishInteractiveMarkers");
 }
 
@@ -1138,7 +1118,7 @@ void MotionPlanningDisplay::populateMenuHandler(std::shared_ptr<interactive_mark
     if ((state_name == "same as start" && is_start) || (state_name == "same as goal" && !is_start))
       continue;
     mh->insert(menu_states, state_name,
-               boost::bind(&MotionPlanningDisplay::setQueryStateHelper, this, is_start, state_name));
+               std::bind(&MotionPlanningDisplay::setQueryStateHelper, this, is_start, state_name));
   }
 
   //  // Group commands, which end up being the same for both interaction handlers
@@ -1146,7 +1126,7 @@ void MotionPlanningDisplay::populateMenuHandler(std::shared_ptr<interactive_mark
   //  immh::EntryHandle menu_groups = mh->insert("Planning Group", immh::FeedbackCallback());
   //  for (int i = 0; i < group_names.size(); ++i)
   //    mh->insert(menu_groups, group_names[i],
-  //               boost::bind(&MotionPlanningDisplay::changePlanningGroup, this, group_names[i]));
+  //               std::bind(&MotionPlanningDisplay::changePlanningGroup, this, group_names[i]));
 }
 
 void MotionPlanningDisplay::onRobotModelLoaded()
@@ -1157,8 +1137,8 @@ void MotionPlanningDisplay::onRobotModelLoaded()
   robot_interaction_ = std::make_shared<robot_interaction::RobotInteraction>(
       getRobotModel(), node_, rclcpp::names::append(getMoveGroupNS(), "rviz_moveit_motion_planning_display"));
   robot_interaction::KinematicOptions o;
-  o.state_validity_callback_ = boost::bind(&MotionPlanningDisplay::isIKSolutionCollisionFree, this,
-                                           boost::placeholders::_1, boost::placeholders::_2, boost::placeholders::_3);
+  o.state_validity_callback_ = std::bind(&MotionPlanningDisplay::isIKSolutionCollisionFree, this, std::placeholders::_1,
+                                         std::placeholders::_2, std::placeholders::_3);
   robot_interaction_->getKinematicOptionsMap()->setOptions(
       robot_interaction::KinematicOptionsMap::ALL, o, robot_interaction::KinematicOptions::STATE_VALIDITY_CALLBACK);
 
@@ -1173,10 +1153,10 @@ void MotionPlanningDisplay::onRobotModelLoaded()
       robot_interaction_, "start", *previous_state_, planning_scene_monitor_->getTFClient());
   query_goal_state_ = std::make_shared<robot_interaction::InteractionHandler>(
       robot_interaction_, "goal", *previous_state_, planning_scene_monitor_->getTFClient());
-  query_start_state_->setUpdateCallback(boost::bind(&MotionPlanningDisplay::scheduleDrawQueryStartState, this,
-                                                    boost::placeholders::_1, boost::placeholders::_2));
-  query_goal_state_->setUpdateCallback(boost::bind(&MotionPlanningDisplay::scheduleDrawQueryGoalState, this,
-                                                   boost::placeholders::_1, boost::placeholders::_2));
+  query_start_state_->setUpdateCallback(std::bind(&MotionPlanningDisplay::scheduleDrawQueryStartState, this,
+                                                  std::placeholders::_1, std::placeholders::_2));
+  query_goal_state_->setUpdateCallback(std::bind(&MotionPlanningDisplay::scheduleDrawQueryGoalState, this,
+                                                 std::placeholders::_1, std::placeholders::_2));
 
   // Interactive marker menus
   populateMenuHandler(menu_handler_start_);
@@ -1429,6 +1409,9 @@ void MotionPlanningDisplay::fixedFrameChanged()
   PlanningSceneDisplay::fixedFrameChanged();
   if (int_marker_display_)
     int_marker_display_->setFixedFrame(fixed_frame_);
+  // When the fixed frame changes we need to tell RViz to update the rendered interactive marker display
+  frame_->scene_marker_->requestPoseUpdate(frame_->scene_marker_->getPosition(),
+                                           frame_->scene_marker_->getOrientation());
   changedPlanningGroup();
 }
 

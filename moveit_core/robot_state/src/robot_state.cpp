@@ -45,9 +45,8 @@
 #else
 #include <tf2_eigen/tf2_eigen.h>
 #endif
-
 #include <moveit/macros/console_colors.h>
-#include <boost/bind.hpp>
+#include <functional>
 #include <moveit/robot_model/aabb.h>
 #include "rclcpp/rclcpp.hpp"
 
@@ -797,6 +796,31 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
   for (std::map<std::string, AttachedBody*>::const_iterator it = attached_body_map_.begin();
        it != attached_body_map_.end(); ++it)
     it->second->computeTransform(global_link_transforms_[it->second->getAttachedLink()->getLinkIndex()]);
+}
+
+const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame) const
+{
+  const moveit::core::LinkModel* link{ nullptr };
+
+  size_t idx = 0;
+  if ((idx = frame.find('/')) != std::string::npos)
+  {  // resolve sub frame
+    std::string object{ frame.substr(0, idx) };
+    if (!hasAttachedBody(object))
+      return nullptr;
+    auto body{ getAttachedBody(object) };
+    if (!body->hasSubframeTransform(frame))
+      return nullptr;
+    link = body->getAttachedLink();
+  }
+  else if (hasAttachedBody(frame))
+  {
+    link = getAttachedBody(frame)->getAttachedLink();
+  }
+  else if (getRobotModel()->hasLinkModel(frame))
+    link = getLinkModel(frame);
+
+  return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
 }
 
 bool RobotState::satisfiesBounds(double margin) const
@@ -1755,7 +1779,8 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
   // set callback function
   kinematics::KinematicsBase::IKCallbackFn ik_callback_fn;
   if (constraint)
-    ik_callback_fn = boost::bind(&ikCallbackFnAdapter, this, jmg, constraint, _1, _2, _3);
+    ik_callback_fn = std::bind(&ikCallbackFnAdapter, this, jmg, constraint, std::placeholders::_1,
+                               std::placeholders::_2, std::placeholders::_3);
 
   // Bijection
   const std::vector<unsigned int>& bij = jmg->getKinematicsSolverJointBijection();
@@ -1898,7 +1923,8 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
   std::vector<geometry_msgs::msg::Pose> ik_queries(poses_in.size());
   kinematics::KinematicsBase::IKCallbackFn ik_callback_fn;
   if (constraint)
-    ik_callback_fn = boost::bind(&ikCallbackFnAdapter, this, jmg, constraint, _1, _2, _3);
+    ik_callback_fn = std::bind(&ikCallbackFnAdapter, this, jmg, constraint, std::placeholders::_1,
+                               std::placeholders::_2, std::placeholders::_3);
 
   for (std::size_t i = 0; i < transformed_poses.size(); ++i)
   {
