@@ -164,7 +164,7 @@ void DefaultCollisions::startGenerationThread(unsigned int num_trials, double mi
   progress_ = 0;
 
   // start worker thread
-  worker_ = boost::thread(boost::bind(&DefaultCollisions::generateCollisionTable, this, num_trials, min_frac, verbose));
+  worker_ = boost::thread(std::bind(&DefaultCollisions::generateCollisionTable, this, num_trials, min_frac, verbose));
 }
 
 // ******************************************************************************************

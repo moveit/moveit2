@@ -102,6 +102,9 @@ private Q_SLOTS:
   /// Disable or enable item in gen_files_ array
   void changeCheckedState(QListWidgetItem* item);
 
+  /// Set checked state of all selected items
+  void setCheckSelected(bool checked);
+
   // When the configuration path changes
   void onPackagePathChanged(const QString& path);
 

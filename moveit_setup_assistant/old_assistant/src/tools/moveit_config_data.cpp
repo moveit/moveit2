@@ -41,6 +41,7 @@
 #include <boost/filesystem/path.hpp>        // for creating folders/files
 #include <boost/filesystem/operations.hpp>  // is_regular_file, is_directory, etc.
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 // ROS
 #include <rclcpp/rclcpp.hpp>
@@ -1348,16 +1349,5 @@ bool MoveItConfigData::addController(const ControllerConfig& new_controller)
 }
 
 // ******************************************************************************************
-// Gets ros_controllers_config_ vector
-// ******************************************************************************************
-void MoveItConfigData::addGenericParameterToSensorPluginConfig(const std::string& name, const std::string& value,
-                                                               const std::string& /*comment*/)
-{
-  // Use index 0 since we only write one plugin
-  GenericParameter new_parameter;
-  new_parameter.setName(name);
-  new_parameter.setValue(value);
-  sensors_plugin_config_parameter_list_[0][name] = new_parameter;
-}
 
 }  // namespace moveit_setup_assistant
