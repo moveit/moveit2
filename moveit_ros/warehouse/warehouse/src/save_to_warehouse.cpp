@@ -186,7 +186,7 @@ int main(int argc, char** argv)
       RCLCPP_INFO(LOGGER, " * %s", name.c_str());
   }
 
-  psm.addUpdateCallback(boost::bind(&onSceneUpdate, &psm, &pss));
+  psm.addUpdateCallback(std::bind(&onSceneUpdate, &psm, &pss));
 
   auto callback1 = [&](moveit_msgs::msg::MotionPlanRequest::ConstSharedPtr msg) -> void {
     return onMotionPlanRequest(msg, &psm, &pss);

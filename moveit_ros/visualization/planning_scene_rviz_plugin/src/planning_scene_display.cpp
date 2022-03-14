@@ -222,7 +222,7 @@ void PlanningSceneDisplay::reset()
   Display::reset();
 
   if (isEnabled())
-    addBackgroundJob(boost::bind(&PlanningSceneDisplay::loadRobotModel, this), "loadRobotModel");
+    addBackgroundJob(std::bind(&PlanningSceneDisplay::loadRobotModel, this), "loadRobotModel");
 
   if (planning_scene_robot_)
   {
@@ -398,7 +398,7 @@ void PlanningSceneDisplay::changedPlanningSceneTopic()
       service_name = rclcpp::names::append(getMoveGroupNS(), service_name);
     auto bg_func = [=]() {
       if (planning_scene_monitor_->requestPlanningSceneState(service_name))
-        addMainLoopJob(boost::bind(&PlanningSceneDisplay::onNewPlanningSceneState, this));
+        addMainLoopJob(std::bind(&PlanningSceneDisplay::onNewPlanningSceneState, this));
       else
         setStatus(rviz_common::properties::StatusProperty::Warn, "PlanningScene", "Requesting initial scene failed");
     };
@@ -538,7 +538,7 @@ void PlanningSceneDisplay::loadRobotModel()
   // we need to make sure the clearing of the robot model is in the main thread,
   // so that rendering operations do not have data removed from underneath,
   // so the next function is executed in the main loop
-  addMainLoopJob(boost::bind(&PlanningSceneDisplay::clearRobotModel, this));
+  addMainLoopJob(std::bind(&PlanningSceneDisplay::clearRobotModel, this));
 
   waitForAllMainLoopJobs();
 
@@ -547,8 +547,8 @@ void PlanningSceneDisplay::loadRobotModel()
   {
     planning_scene_monitor_.swap(psm);
     planning_scene_monitor_->addUpdateCallback(
-        boost::bind(&PlanningSceneDisplay::sceneMonitorReceivedUpdate, this, boost::placeholders::_1));
-    addMainLoopJob(boost::bind(&PlanningSceneDisplay::onRobotModelLoaded, this));
+        std::bind(&PlanningSceneDisplay::sceneMonitorReceivedUpdate, this, std::placeholders::_1));
+    addMainLoopJob(std::bind(&PlanningSceneDisplay::onRobotModelLoaded, this));
     waitForAllMainLoopJobs();
   }
   else
@@ -610,7 +610,7 @@ void PlanningSceneDisplay::onEnable()
 {
   Display::onEnable();
 
-  addBackgroundJob(boost::bind(&PlanningSceneDisplay::loadRobotModel, this), "loadRobotModel");
+  addBackgroundJob(std::bind(&PlanningSceneDisplay::loadRobotModel, this), "loadRobotModel");
 
   if (planning_scene_robot_)
   {
