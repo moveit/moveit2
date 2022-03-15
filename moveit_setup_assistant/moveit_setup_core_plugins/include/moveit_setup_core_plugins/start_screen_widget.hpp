@@ -132,9 +132,6 @@ private:
 
   /// Load existing package files
   bool loadExistingFiles();
-
-  /// Loads sensors_3d yaml file
-  bool load3DSensorsFile();
 };
 
 // ******************************************************************************************
