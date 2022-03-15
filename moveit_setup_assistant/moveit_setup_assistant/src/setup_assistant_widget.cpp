@@ -243,7 +243,7 @@ void SetupAssistantWidget::moveToScreen(const int index)
 }
 
 // ******************************************************************************************
-// Ping ROS on internval
+// Ping ROS on interval
 // ******************************************************************************************
 void SetupAssistantWidget::updateTimer()
 {
