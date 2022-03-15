@@ -144,7 +144,7 @@ void PackageSettingsConfig::loadExisting(const std::string& package_path)
       config_data_->get(name)->loadPrevious(config_pkg_path_, title_node[yaml_key]);
     }
   }
-  catch (YAML::ParserException& e)  // Catch errors
+  catch (YAML::ParserException& e)  // Catch errors, translate to runtime_error
   {
     throw std::runtime_error("Error parsing " + config_path + ": " + e.what());
   }
