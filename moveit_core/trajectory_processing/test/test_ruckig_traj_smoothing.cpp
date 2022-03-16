@@ -71,15 +71,41 @@ TEST_F(RuckigTests, basic_trajectory)
   robot_state.copyJointGroupPositions(JOINT_GROUP, joint_positions);
   joint_positions.at(0) += 0.05;
   robot_state.setJointGroupPositions(JOINT_GROUP, joint_positions);
+  robot_state.update();
   trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
 
   joint_positions.at(0) += 0.05;
   robot_state.setJointGroupPositions(JOINT_GROUP, joint_positions);
+  robot_state.update();
   trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
 
-  robot_state.update();
   EXPECT_TRUE(
       smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
+}
+
+TEST_F(RuckigTests, trajectory_duration)
+{
+  // Ideal duration is calculated from:
+  // x1 = x0 + v0*t + 0.5*a0*t^2
+  // Where x0 and v0 are zero
+  const double IDEAL_DURATION = 0.231;
+
+  moveit::core::RobotState robot_state(robot_model_);
+  robot_state.setToDefaultValues();
+  // Special attention to Joint 0. It is the only joint to move in this test.
+  // Zero velocities and accelerations at the endpoints
+  robot_state.setVariablePosition("panda_joint1", 0.0);
+  robot_state.update();
+  trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
+
+  robot_state.setVariablePosition("panda_joint1", 0.1);
+  robot_state.update();
+  trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
+
+  EXPECT_TRUE(
+      smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
+  EXPECT_GT(trajectory_->getWayPointDurationFromStart(trajectory_->getWayPointCount() - 1), 0.9999 * IDEAL_DURATION);
+  EXPECT_LT(trajectory_->getWayPointDurationFromStart(trajectory_->getWayPointCount() - 1), 1.2 * IDEAL_DURATION);
 }
 
 TEST_F(RuckigTests, single_waypoint)
@@ -97,7 +123,7 @@ TEST_F(RuckigTests, single_waypoint)
   // Trajectory should not change
   auto first_waypoint_input = robot_state;
 
-  // Only one waypoint is OK, it does not fail
+  // Only one waypoint is acceptable. True is returned.
   EXPECT_TRUE(
       smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
   // And the waypoint did not change
