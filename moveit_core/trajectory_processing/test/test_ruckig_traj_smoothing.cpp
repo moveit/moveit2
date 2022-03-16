@@ -59,27 +59,6 @@ protected:
 
 }  // namespace
 
-TEST_F(RuckigTests, empty_trajectory)
-{
-  // This should fail because the trajectory is empty
-  EXPECT_FALSE(
-      smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
-}
-
-TEST_F(RuckigTests, not_enough_waypoints)
-{
-  moveit::core::RobotState robot_state(robot_model_);
-  robot_state.setToDefaultValues();
-  // First waypoint is default joint positions
-  trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
-
-  robot_state.update();
-
-  // Fails due to not enough waypoints
-  EXPECT_FALSE(
-      smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
-}
-
 TEST_F(RuckigTests, basic_trajectory)
 {
   moveit::core::RobotState robot_state(robot_model_);
