@@ -82,6 +82,34 @@ TEST_F(RuckigTests, basic_trajectory)
       smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
 }
 
+TEST_F(RuckigTests, single_waypoint)
+{
+  // With only one waypoint, Ruckig cannot smooth the trajectory.
+  // It should simply pass the trajectory through unmodified and return true.
+
+  moveit::core::RobotState robot_state(robot_model_);
+  robot_state.setToDefaultValues();
+  // First waypoint is default joint positions
+  trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
+
+  robot_state.update();
+
+  // Trajectory should not change
+  auto first_waypoint_input = robot_state;
+
+  // Only one waypoint is OK, it does not fail
+  EXPECT_TRUE(
+      smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
+  // And the waypoint did not change
+  auto const new_first_waypoint = trajectory_->getFirstWayPointPtr();
+  auto const& variable_names = new_first_waypoint->getVariableNames();
+  for (std::string const& variable_name : variable_names)
+  {
+    EXPECT_EQ(first_waypoint_input.getVariablePosition(variable_name),
+              new_first_waypoint->getVariablePosition(variable_name));
+  }
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
