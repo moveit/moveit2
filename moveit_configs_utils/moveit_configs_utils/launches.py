@@ -35,7 +35,7 @@ def generate_rsp_launch(moveit_config):
     return ld
 
 
-def generate_rviz_launch(moveit_config):
+def generate_moveit_rviz_launch(moveit_config):
     """Launch file for rviz"""
     ld = LaunchDescription()
 
@@ -65,7 +65,7 @@ def generate_rviz_launch(moveit_config):
     return ld
 
 
-def generate_assistant_launch(moveit_config):
+def generate_setup_assistant_launch(moveit_config):
     """Launch file for MoveIt Setup Assistant"""
     ld = LaunchDescription()
 
@@ -80,7 +80,7 @@ def generate_assistant_launch(moveit_config):
     return ld
 
 
-def generate_warehouse_launch(moveit_config):
+def generate_warehouse_db_launch(moveit_config):
     """Launch file for warehouse database"""
     ld = LaunchDescription()
     ld.add_action(
