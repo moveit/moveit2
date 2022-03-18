@@ -97,9 +97,6 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   moveit::core::RobotModel const& rmodel = group->getParentModel();
   for (size_t i = 0; i < num_dof; ++i)
   {
-    // TODO(andyz): read this from the joint group if/when jerk limits are added to the JointModel
-    ruckig_input.max_jerk.at(i) = DEFAULT_MAX_JERK;
-
     moveit::core::VariableBounds const& bounds = rmodel.getVariableBounds(vars.at(i));
 
     // This assumes min/max bounds are symmetric
@@ -118,6 +115,14 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     else
     {
       ruckig_input.max_acceleration.at(i) = max_acceleration_scaling_factor * DEFAULT_MAX_ACCELERATION;
+    }
+    if (bounds.jerk_bounded_)
+    {
+      ruckig_input.max_jerk.at(i) = bounds.max_jerk_;
+    }
+    else
+    {
+      ruckig_input.max_jerk.at(i) = DEFAULT_MAX_JERK;
     }
   }
 
