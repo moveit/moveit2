@@ -79,7 +79,7 @@ int main(int argc, char** argv)
       node->create_publisher<octomap_msgs::msg::Octomap>("octomap_binary", RMW_QOS_POLICY_HISTORY_KEEP_LAST);
   auto clock_ptr = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
   std::shared_ptr<tf2_ros::Buffer> buffer = std::make_shared<tf2_ros::Buffer>(clock_ptr, tf2::durationFromSec(5.0));
-  std::shared_ptr<tf2_ros::TransformListener> listener = std::make_shared<tf2_ros::TransformListener>(*buffer, node);
+  tf2_ros::TransformListener listener(*buffer, node, false /* spin_thread - disables executor */);
   occupancy_map_monitor::OccupancyMapMonitor server(node, buffer);
   server.setUpdateCallback(std::bind(&publishOctomap, octree_binary_pub, &server));
   server.startMonitor();
