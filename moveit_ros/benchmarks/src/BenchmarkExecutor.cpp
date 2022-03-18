@@ -1111,7 +1111,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& brequest, const std:
     return;
   }
 
-  out << "MoveIt version " << MOVEIT_VERSION << '\n';
+  out << "MoveIt version " << MOVEIT_VERSION_STR << '\n';
   out << "Experiment " << brequest.name << '\n';
   out << "Running on " << hostname << '\n';
   out << "Starting at " << start_time << '\n';

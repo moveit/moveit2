@@ -37,6 +37,7 @@ jobs:
       AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
       # Clear the ccache stats before and log the stats after the build
+      AFTER_SETUP_CCACHE: ccache --zero-stats --max-size=10.0G
       BEFORE_BUILD_UPSTREAM_WORKSPACE: ccache -z
       AFTER_BUILD_TARGET_WORKSPACE: ccache -s
       # Changing linker to lld as ld has a behavior where it takes a long time to finish
