@@ -82,6 +82,8 @@ public:
 
   bool isXacroFile() const;
 
+  void collectDependencies(std::set<std::string>& packages) const override;
+
   void collectVariables(std::vector<TemplateVariable>& variables) override;
 
 protected:
