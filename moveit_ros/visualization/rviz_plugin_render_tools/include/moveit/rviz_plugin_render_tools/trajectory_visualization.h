@@ -92,6 +92,7 @@ public:
 
   void onInitialize(const rclcpp::Node::SharedPtr& node, Ogre::SceneNode* scene_node,
                     rviz_common::DisplayContext* context);
+  void clearRobotModel();
   void onRobotModelLoaded(const moveit::core::RobotModelConstPtr& robot_model);
   void onEnable();
   void onDisable();

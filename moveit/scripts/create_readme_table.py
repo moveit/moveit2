@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Usage: python moveit/moveit/scripts/create_readme_table.py > /tmp/table.md
-# First update supported_distro_ubuntu_dict below!
 
 # Copyright 2021 PickNik Inc.
 #
@@ -30,6 +28,9 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
+# Usage: python moveit/moveit/scripts/create_readme_table.py > /tmp/table.md
+# First update supported_distro_ubuntu_dict below!
 
 
 from __future__ import print_function
