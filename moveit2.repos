@@ -11,10 +11,6 @@ repositories:
     type: git
     url: https://github.com/ros-planning/moveit_resources
     version: ros2
-  launch_param_builder:
-    type: git
-    url: https://github.com/PickNikRobotics/launch_param_builder
-    version: main
   ros2_control:
     type: git
     url: https://github.com/ros-controls/ros2_control.git
