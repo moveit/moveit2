@@ -68,6 +68,8 @@ def get_pattern_matches(folder, pattern):
     If there are groups defined, the groups are returned. Otherwise the path to the matches are returned.
     """
     matches = []
+    if not folder.exists():
+        return matches
     for child in folder.iterdir():
         if not child.is_file():
             continue
@@ -437,7 +439,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         :return: Instance of MoveItConfigsBuilder with planning_pipelines loaded.
         """
         config_folder = self._package_path / self.__config_dir_path
-        default_folder = moveit_configs_utils_path / "configs"
+        default_folder = moveit_configs_utils_path / "default_configs"
 
         # If no pipelines are specified, search by filename
         if pipelines is None:
