@@ -209,6 +209,7 @@ protected:
     OUTSIDE_BOUNDS_LINK
   };
 
+  void clearRobotModel() override;
   void onRobotModelLoaded() override;
   void onNewPlanningSceneState() override;
   void onSceneMonitorReceivedUpdate(planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type) override;

@@ -1305,7 +1305,7 @@ public:
     if (constraints_init_thread_)
       constraints_init_thread_->join();
     constraints_init_thread_ = std::make_unique<boost::thread>(
-        boost::bind(&MoveGroupInterfaceImpl::initializeConstraintsStorageThread, this, host, port));
+        std::bind(&MoveGroupInterfaceImpl::initializeConstraintsStorageThread, this, host, port));
   }
 
   void setWorkspace(double minx, double miny, double minz, double maxx, double maxy, double maxz)
@@ -1647,7 +1647,10 @@ void MoveGroupInterface::setStartState(const moveit_msgs::msg::RobotState& start
   if (start_state.is_diff)
     impl_->getCurrentState(rs);
   else
+  {
     rs = std::make_shared<moveit::core::RobotState>(getRobotModel());
+    rs->setToDefaultValues();  // initialize robot state values for conversion
+  }
   moveit::core::robotStateMsgToRobotState(start_state, *rs);
   setStartState(*rs);
 }

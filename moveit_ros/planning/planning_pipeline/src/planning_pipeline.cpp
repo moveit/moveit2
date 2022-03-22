@@ -287,6 +287,11 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
     RCLCPP_DEBUG(LOGGER, "Motion planner reported a solution path with %ld states", state_count);
     if (check_solution_paths_)
     {
+      visualization_msgs::msg::MarkerArray arr;
+      visualization_msgs::msg::Marker m;
+      m.action = visualization_msgs::msg::Marker::DELETEALL;
+      arr.markers.push_back(m);
+
       std::vector<std::size_t> index;
       if (!planning_scene->isPathValid(*res.trajectory_, req.path_constraints, req.group_name, false, &index))
       {
@@ -327,7 +332,6 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
                                             << contacts_publisher_->get_topic_name());
 
             // call validity checks in verbose mode for the problematic states
-            visualization_msgs::msg::MarkerArray arr;
             for (std::size_t it : index)
             {
               // check validity with verbose on
@@ -351,10 +355,6 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
               }
             }
             RCLCPP_ERROR(LOGGER, "Completed listing of explanations for invalid states.");
-            if (!arr.markers.empty())
-            {
-              contacts_publisher_->publish(arr);
-            }
           }
         }
         else
@@ -366,6 +366,7 @@ bool planning_pipeline::PlanningPipeline::generatePlan(const planning_scene::Pla
       }
       else
         RCLCPP_DEBUG(LOGGER, "Planned path was found to be valid when rechecked");
+      contacts_publisher_->publish(arr);
     }
   }
 

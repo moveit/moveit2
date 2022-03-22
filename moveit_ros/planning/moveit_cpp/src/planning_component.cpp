@@ -127,11 +127,11 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor =
       moveit_cpp_->getPlanningSceneMonitorNonConst();
   planning_scene_monitor->updateFrameTransforms();
-  planning_scene_monitor->lockSceneRead();  // LOCK planning scene
-  planning_scene::PlanningScenePtr planning_scene =
-      planning_scene::PlanningScene::clone(planning_scene_monitor->getPlanningScene());
-  planning_scene_monitor->unlockSceneRead();  // UNLOCK planning scene
-  planning_scene_monitor.reset();             // release this pointer
+  const planning_scene::PlanningScenePtr planning_scene = [planning_scene_monitor] {
+    planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor);
+    return planning_scene::PlanningScene::clone(ls);
+  }();
+  planning_scene_monitor.reset();  // release this pointer
 
   // Init MotionPlanRequest
   ::planning_interface::MotionPlanRequest req;
@@ -161,6 +161,7 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   }
   req.goal_constraints = current_goal_constraints_;
 
+  // Set path constraints
   req.path_constraints = current_path_constraints_;
 
   // Run planning attempt

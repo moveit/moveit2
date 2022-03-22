@@ -34,6 +34,8 @@
 
 /* Author: Ioan Sucan */
 
+#include <functional>
+
 #include <moveit/common_planning_interface_objects/common_objects.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h>
@@ -226,7 +228,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   //      semantic_world_.reset();
   //    if (semantic_world_)
   //    {
-  //      semantic_world_->addTableCallback(boost::bind(&MotionPlanningFrame::updateTables, this));
+  //      semantic_world_->addTableCallback(std::bind(&MotionPlanningFrame::updateTables, this));
   //    }
   //  }
   //  catch (std::exception& ex)
@@ -354,14 +356,13 @@ void MotionPlanningFrame::changePlanningGroupHelper()
   if (!planning_display_->getPlanningSceneMonitor())
     return;
 
-  planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::fillStateSelectionOptions, this));
-  planning_display_->addMainLoopJob(
-      boost::bind(&MotionPlanningFrame::populateConstraintsList, this, std::vector<std::string>()));
+  planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::fillStateSelectionOptions, this));
+  planning_display_->addMainLoopJob([this]() { populateConstraintsList(std::vector<std::string>()); });
 
   const moveit::core::RobotModelConstPtr& robot_model = planning_display_->getRobotModel();
   std::string group = planning_display_->getCurrentPlanningGroup();
   planning_display_->addMainLoopJob(
-      boost::bind(&MotionPlanningParamWidget::setGroupName, ui_->planner_param_treeview, group));
+      std::bind(&MotionPlanningParamWidget::setGroupName, ui_->planner_param_treeview, group));
   planning_display_->addMainLoopJob(
       [=]() { ui_->planning_group_combo_box->setCurrentText(QString::fromStdString(group)); });
 
@@ -395,7 +396,7 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       RCLCPP_ERROR(LOGGER, "%s", ex.what());
     }
     planning_display_->addMainLoopJob(
-        boost::bind(&MotionPlanningParamWidget::setMoveGroup, ui_->planner_param_treeview, move_group_));
+        std::bind(&MotionPlanningParamWidget::setMoveGroup, ui_->planner_param_treeview, move_group_));
     if (move_group_)
     {
       move_group_->allowLooking(ui_->allow_looking->isChecked());
@@ -404,9 +405,8 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       planning_display_->addMainLoopJob([=]() { ui_->use_cartesian_path->setEnabled(has_unique_endeffector); });
       std::vector<moveit_msgs::msg::PlannerInterfaceDescription> desc;
       if (move_group_->getInterfaceDescriptions(desc))
-        planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlannersList, this, desc));
-      planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::populateConstraintsList, this),
-                                          "populateConstraintsList");
+        planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::populatePlannersList, this, desc));
+      planning_display_->addBackgroundJob([this]() { populateConstraintsList(); }, "populateConstraintsList");
 
       if (first_time_)
       {
@@ -421,15 +421,22 @@ void MotionPlanningFrame::changePlanningGroupHelper()
         planning_display_->useApproximateIK(ui_->approximate_ik->isChecked());
         if (ui_->allow_external_program->isChecked())
           planning_display_->addMainLoopJob(
-              boost::bind(&MotionPlanningFrame::allowExternalProgramCommunication, this, true));
+              std::bind(&MotionPlanningFrame::allowExternalProgramCommunication, this, true));
       }
     }
   }
 }
 
+void MotionPlanningFrame::clearRobotModel()
+{
+  ui_->planner_param_treeview->setMoveGroup(moveit::planning_interface::MoveGroupInterfacePtr());
+  joints_tab_->clearRobotModel();
+  move_group_.reset();
+}
+
 void MotionPlanningFrame::changePlanningGroup()
 {
-  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::changePlanningGroupHelper, this),
+  planning_display_->addBackgroundJob(std::bind(&MotionPlanningFrame::changePlanningGroupHelper, this),
                                       "Frame::changePlanningGroup");
   joints_tab_->changePlanningGroup(planning_display_->getCurrentPlanningGroup(),
                                    planning_display_->getQueryStartStateHandler(),
@@ -439,7 +446,7 @@ void MotionPlanningFrame::changePlanningGroup()
 void MotionPlanningFrame::sceneUpdate(planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type)
 {
   if (update_type & planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY)
-    planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populateCollisionObjectsList, this));
+    planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::populateCollisionObjectsList, this));
 }
 
 void MotionPlanningFrame::addSceneObject()
@@ -516,11 +523,11 @@ void MotionPlanningFrame::addSceneObject()
   }
   setLocalSceneEdited();
 
-  planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populateCollisionObjectsList, this));
+  planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::populateCollisionObjectsList, this));
 
   // Automatically select the inserted object so that its IM is displayed
   planning_display_->addMainLoopJob(
-      boost::bind(&MotionPlanningFrame::setItemSelectionInList, this, shape_name, true, ui_->collision_objects_list));
+      std::bind(&MotionPlanningFrame::setItemSelectionInList, this, shape_name, true, ui_->collision_objects_list));
 
   planning_display_->queueRenderSceneGeometry();
 }

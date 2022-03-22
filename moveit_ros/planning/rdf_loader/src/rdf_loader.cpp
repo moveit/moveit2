@@ -151,6 +151,7 @@ bool RDFLoader::loadFileToString(std::string& buffer, const std::string& path)
 bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& path,
                                       const std::vector<std::string>& xacro_args)
 {
+  buffer.clear();
   if (path.empty())
   {
     RCLCPP_ERROR(LOGGER, "Path is empty");

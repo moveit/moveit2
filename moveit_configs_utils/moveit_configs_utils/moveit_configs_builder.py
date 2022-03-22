@@ -21,6 +21,7 @@ robot_name_moveit_config/
 Example:
     moveit_configs = MoveItConfigsBuilder("robot_name").to_moveit_configs()
     ...
+    moveit_configs.package_path
     moveit_configs.robot_description
     moveit_configs.robot_description_semantic
     moveit_configs.robot_description_kinematics
@@ -34,7 +35,7 @@ Example:
     # Or to get all the parameters as a dictionary
     moveit_configs.to_dict()
 
-Each function in MoveItConfigsBuilder have a file_path as an argument which is used to override the default
+Each function in MoveItConfigsBuilder has a file_path as an argument which is used to override the default
 path for the file
 
 Example:
@@ -61,6 +62,7 @@ class MoveItConfigs(object):
     """Class containing MoveIt related parameters."""
 
     __slots__ = [
+        "__package_path",
         "__robot_description",
         "__robot_description_semantic",
         "__robot_description_kinematics",
@@ -74,6 +76,8 @@ class MoveItConfigs(object):
     ]
 
     def __init__(self):
+        # A pathlib Path to the moveit config package
+        self.package_path = None
         # A dictionary that has the contents of the URDF file.
         self.robot_description = {}
         # A dictionary that has the contents of the SRDF file.
@@ -94,6 +98,14 @@ class MoveItConfigs(object):
         self.moveit_cpp = {}
         # A dictionary containing the cartesian limits for the Pilz planner.
         self.cartesian_limits = {}
+
+    @property
+    def package_path(self):
+        return self.__package_path
+
+    @package_path.setter
+    def package_path(self, value):
+        self.__package_path = value
 
     @property
     def robot_description(self):
@@ -205,6 +217,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
     # Look-up for robot_name_moveit_config package
     def __init__(self, robot_name: str, robot_description="robot_description"):
         super().__init__(robot_name + "_moveit_config")
+        self.__moveit_configs.package_path = self._package_path
         self.__robot_name = robot_name
         setup_assistant_file = self._package_path / ".setup_assistant"
         if not setup_assistant_file.exists():

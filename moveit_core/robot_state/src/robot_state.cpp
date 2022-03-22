@@ -46,7 +46,7 @@
 #include <tf2_eigen/tf2_eigen.h>
 #endif
 #include <moveit/macros/console_colors.h>
-#include <boost/bind.hpp>
+#include <functional>
 #include <moveit/robot_model/aabb.h>
 #include "rclcpp/rclcpp.hpp"
 
@@ -1779,7 +1779,8 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
   // set callback function
   kinematics::KinematicsBase::IKCallbackFn ik_callback_fn;
   if (constraint)
-    ik_callback_fn = boost::bind(&ikCallbackFnAdapter, this, jmg, constraint, _1, _2, _3);
+    ik_callback_fn = std::bind(&ikCallbackFnAdapter, this, jmg, constraint, std::placeholders::_1,
+                               std::placeholders::_2, std::placeholders::_3);
 
   // Bijection
   const std::vector<unsigned int>& bij = jmg->getKinematicsSolverJointBijection();
@@ -1922,7 +1923,8 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
   std::vector<geometry_msgs::msg::Pose> ik_queries(poses_in.size());
   kinematics::KinematicsBase::IKCallbackFn ik_callback_fn;
   if (constraint)
-    ik_callback_fn = boost::bind(&ikCallbackFnAdapter, this, jmg, constraint, _1, _2, _3);
+    ik_callback_fn = std::bind(&ikCallbackFnAdapter, this, jmg, constraint, std::placeholders::_1,
+                               std::placeholders::_2, std::placeholders::_3);
 
   for (std::size_t i = 0; i < transformed_poses.size(); ++i)
   {
@@ -2190,11 +2192,20 @@ void RobotState::printStateInfo(std::ostream& out) const
 
 void RobotState::printTransform(const Eigen::Isometry3d& transform, std::ostream& out) const
 {
-  ASSERT_ISOMETRY(transform)  // unsanitized input, could contain a non-isometry
-  Eigen::Quaterniond q(transform.linear());
-  out << "T.xyz = [" << transform.translation().x() << ", " << transform.translation().y() << ", "
-      << transform.translation().z() << "], Q.xyzw = [" << q.x() << ", " << q.y() << ", " << q.z() << ", " << q.w()
-      << "]\n";
+  if (checkIsometry(transform, CHECK_ISOMETRY_PRECISION, false))
+  {
+    Eigen::Quaterniond q(transform.linear());
+    out << "T.xyz = [" << transform.translation().x() << ", " << transform.translation().y() << ", "
+        << transform.translation().z() << "], Q.xyzw = [" << q.x() << ", " << q.y() << ", " << q.z() << ", " << q.w()
+        << "]";
+  }
+  else
+  {
+    out << "[NON-ISOMETRY] "
+        << transform.matrix().format(
+               Eigen::IOFormat(Eigen::StreamPrecision, Eigen::DontAlignCols, ", ", "; ", "", "", "[", "]"));
+  }
+  out << "\n";
 }
 
 void RobotState::printTransforms(std::ostream& out) const

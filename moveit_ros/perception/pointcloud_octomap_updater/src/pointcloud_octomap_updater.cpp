@@ -79,7 +79,8 @@ bool PointCloudOctomapUpdater::setParams(const std::string& name_space)
          node_->get_parameter(name_space + ".padding_scale", scale_) &&
          node_->get_parameter(name_space + ".point_subsample", point_subsample_) &&
          node_->get_parameter(name_space + ".max_update_rate", max_update_rate_) &&
-         node_->get_parameter(name_space + ".filtered_cloud_topic", filtered_cloud_topic_);
+         node_->get_parameter(name_space + ".filtered_cloud_topic", filtered_cloud_topic_) &&
+         node_->get_parameter(name_space + ".ns", ns_);
 }
 
 bool PointCloudOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
@@ -91,15 +92,21 @@ bool PointCloudOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   tf_buffer_->setCreateTimerInterface(create_timer_interface);
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
   shape_mask_ = std::make_unique<point_containment_filter::ShapeMask>();
-  shape_mask_->setTransformCallback(boost::bind(&PointCloudOctomapUpdater::getShapeTransform, this,
-                                                boost::placeholders::_1, boost::placeholders::_2));
+  shape_mask_->setTransformCallback(
+      std::bind(&PointCloudOctomapUpdater::getShapeTransform, this, std::placeholders::_1, std::placeholders::_2));
+
   return true;
 }
 
 void PointCloudOctomapUpdater::start()
 {
+  std::string prefix = "";
+  if (!ns_.empty())
+    prefix = ns_ + "/";
+
   if (!filtered_cloud_topic_.empty())
-    filtered_cloud_publisher_ = node_->create_publisher<sensor_msgs::msg::PointCloud2>(filtered_cloud_topic_, 10);
+    filtered_cloud_publisher_ =
+        node_->create_publisher<sensor_msgs::msg::PointCloud2>(prefix + filtered_cloud_topic_, 10);
 
   if (point_cloud_subscriber_)
     return;
@@ -110,14 +117,14 @@ void PointCloudOctomapUpdater::start()
     point_cloud_filter_ = new tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>(
         *point_cloud_subscriber_, *tf_buffer_, monitor_->getMapFrame(), 5, node_);
     point_cloud_filter_->registerCallback(
-        boost::bind(&PointCloudOctomapUpdater::cloudMsgCallback, this, boost::placeholders::_1));
+        std::bind(&PointCloudOctomapUpdater::cloudMsgCallback, this, std::placeholders::_1));
     RCLCPP_INFO(LOGGER, "Listening to '%s' using message filter with target frame '%s'", point_cloud_topic_.c_str(),
                 point_cloud_filter_->getTargetFramesString().c_str());
   }
   else
   {
     point_cloud_subscriber_->registerCallback(
-        boost::bind(&PointCloudOctomapUpdater::cloudMsgCallback, this, boost::placeholders::_1));
+        std::bind(&PointCloudOctomapUpdater::cloudMsgCallback, this, std::placeholders::_1));
     RCLCPP_INFO(LOGGER, "Listening to '%s'", point_cloud_topic_.c_str());
   }
 }

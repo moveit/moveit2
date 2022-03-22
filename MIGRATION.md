@@ -3,11 +3,16 @@
 API changes in MoveIt releases
 
 ## ROS Rolling
+- `lockSceneRead()` and `lockSceneWrite()` are now protected member functions, for internal use only. To lock the planning scene, use LockedPlanningSceneRO or LockedPlanningSceneRW:
+```
+      planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor);
+      moveit::core::RobotModelConstPtr model = ls->getRobotModel();
+```
 - ServoServer was renamed to ServoNode
 - `CollisionObject` messages are now defined with a `Pose`, and shapes and subframes are defined relative to the object's pose. This makes it easier to place objects with subframes and multiple shapes in the scene. This causes several changes:
     - `getFrameTransform()` now returns this pose instead of the first shape's pose.
     - The Rviz plugin's manipulation tab now uses the object's pose instead of the shape pose to evaluate if object's are in the region of interest.
-    - Planning scene geometry text files (`.scene`) have changed format. Add a line `0 0 0 0 0 0 1` under each line with an asterisk to upgrade old files if required.
+    - Planning scene geometry text files (`.scene`) have changed format. Loading old files is still supported. You can add a line `0 0 0 0 0 0 1` under each line with an asterisk to upgrade old files.
 - add API for passing RNG to setToRandomPositionsNearBy
 - Static member variable interface of the CollisionDetectorAllocatorTemplate for the string NAME was replaced with a virtual method `getName`.
 - Enhance `RDFLoader` to load from string parameter OR string topic (and add the ability to publish a string topic).

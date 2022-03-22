@@ -27,32 +27,46 @@
 #include "joint_limits/joint_limits.hpp"
 #include "rclcpp/rclcpp.hpp"
 
+namespace
+{
+/** declare a parameter if not already declared. */
+template <typename T>
+void declare_parameter(const rclcpp::Node::SharedPtr& node, const std::string& name, T default_value)
+{
+  if (not node->has_parameter(name))
+  {
+    node->declare_parameter<T>(name, default_value);
+  }
+}
+}  // namespace
+
 namespace joint_limits
 {
 inline bool declare_parameters(const std::string& joint_name, const rclcpp::Node::SharedPtr& node,
                                const std::string& param_ns)
 {
   const std::string param_base_name = (param_ns.empty() ? "" : param_ns + ".") + "joint_limits." + joint_name;
+
   try
   {
-    node->declare_parameter<bool>(param_base_name + ".has_position_limits", false);
-    node->declare_parameter<double>(param_base_name + ".min_position", std::numeric_limits<double>::quiet_NaN());
-    node->declare_parameter<double>(param_base_name + ".max_position", std::numeric_limits<double>::quiet_NaN());
-    node->declare_parameter<bool>(param_base_name + ".has_velocity_limits", false);
-    node->declare_parameter<double>(param_base_name + ".min_velocity", std::numeric_limits<double>::quiet_NaN());
-    node->declare_parameter<double>(param_base_name + ".max_velocity", std::numeric_limits<double>::quiet_NaN());
-    node->declare_parameter<bool>(param_base_name + ".has_acceleration_limits", false);
-    node->declare_parameter<double>(param_base_name + ".max_acceleration", std::numeric_limits<double>::quiet_NaN());
-    node->declare_parameter<bool>(param_base_name + ".has_jerk_limits", false);
-    node->declare_parameter<double>(param_base_name + ".max_jerk", std::numeric_limits<double>::quiet_NaN());
-    node->declare_parameter<bool>(param_base_name + ".has_effort_limits", false);
-    node->declare_parameter<double>(param_base_name + ".max_effort", std::numeric_limits<double>::quiet_NaN());
-    node->declare_parameter<bool>(param_base_name + ".angle_wraparound", false);
-    node->declare_parameter<bool>(param_base_name + ".has_soft_limits", false);
-    node->declare_parameter<double>(param_base_name + ".k_position", std::numeric_limits<double>::quiet_NaN());
-    node->declare_parameter<double>(param_base_name + ".k_velocity", std::numeric_limits<double>::quiet_NaN());
-    node->declare_parameter<double>(param_base_name + ".soft_lower_limit", std::numeric_limits<double>::quiet_NaN());
-    node->declare_parameter<double>(param_base_name + ".soft_upper_limit", std::numeric_limits<double>::quiet_NaN());
+    declare_parameter(node, param_base_name + ".has_position_limits", false);
+    declare_parameter(node, param_base_name + ".min_position", std::numeric_limits<double>::quiet_NaN());
+    declare_parameter(node, param_base_name + ".max_position", std::numeric_limits<double>::quiet_NaN());
+    declare_parameter(node, param_base_name + ".has_velocity_limits", false);
+    declare_parameter(node, param_base_name + ".min_velocity", std::numeric_limits<double>::quiet_NaN());
+    declare_parameter(node, param_base_name + ".max_velocity", std::numeric_limits<double>::quiet_NaN());
+    declare_parameter(node, param_base_name + ".has_acceleration_limits", false);
+    declare_parameter(node, param_base_name + ".max_acceleration", std::numeric_limits<double>::quiet_NaN());
+    declare_parameter(node, param_base_name + ".has_jerk_limits", false);
+    declare_parameter(node, param_base_name + ".max_jerk", std::numeric_limits<double>::quiet_NaN());
+    declare_parameter(node, param_base_name + ".has_effort_limits", false);
+    declare_parameter(node, param_base_name + ".max_effort", std::numeric_limits<double>::quiet_NaN());
+    declare_parameter(node, param_base_name + ".angle_wraparound", false);
+    declare_parameter(node, param_base_name + ".has_soft_limits", false);
+    declare_parameter(node, param_base_name + ".k_position", std::numeric_limits<double>::quiet_NaN());
+    declare_parameter(node, param_base_name + ".k_velocity", std::numeric_limits<double>::quiet_NaN());
+    declare_parameter(node, param_base_name + ".soft_lower_limit", std::numeric_limits<double>::quiet_NaN());
+    declare_parameter(node, param_base_name + ".soft_upper_limit", std::numeric_limits<double>::quiet_NaN());
   }
   catch (const std::exception& ex)
   {
