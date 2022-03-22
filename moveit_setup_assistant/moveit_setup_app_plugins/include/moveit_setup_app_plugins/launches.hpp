@@ -40,6 +40,9 @@
 
 namespace moveit_setup_app_plugins
 {
+/**
+ * @brief Setup step for generating launch files that are not otherwise associated with a specific step.
+ */
 class Launches : public moveit_setup_framework::SetupStep
 {
 public:
@@ -54,21 +57,34 @@ public:
     return true;  // no generic dependencies
   }
 
-  const std::vector<LaunchBundle>& getLaunchBundles() const
+  /**
+   * @brief Get all available launch bundles
+   */
+  const std::vector<LaunchBundle>& getAvailableLaunchBundles() const
   {
-    return launch_bundles_;
+    return available_launch_bundles_;
   }
 
-  const std::string& getDescription(unsigned int id) const
-  {
-    return launch_bundles_[id].getDescription();
-  }
-
+  /**
+   * @returns True if the LaunchBundle with the given id is currently included
+   */
   bool getState(unsigned int id) const;
+
+  /**
+   * @brief Sets whether the LaunchBundle with the given id is included (true) or not (false)
+   */
   void setState(unsigned int id, bool state);
 
+  /**
+   * @returns The description for the LaunchBundle with the given id
+   */
+  const std::string& getDescription(unsigned int id) const
+  {
+    return available_launch_bundles_[id].getDescription();
+  }
+
 protected:
-  std::vector<LaunchBundle> launch_bundles_;
+  std::vector<LaunchBundle> available_launch_bundles_;
   std::shared_ptr<LaunchesConfig> launches_config_;
 };
 }  // namespace moveit_setup_app_plugins

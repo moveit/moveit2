@@ -43,6 +43,11 @@
 
 namespace moveit_setup_app_plugins
 {
+/**
+ * @brief Stores which LaunchBundles are configured to be generated.
+ *
+ * Saved as a set in which the bundles to be generated are included in the set.
+ */
 class LaunchesConfig : public moveit_setup_framework::SetupConfig
 {
 public:
@@ -50,12 +55,30 @@ public:
   {
     return !bundles_.empty();
   }
+
+  /**
+   * @returns True if bundle is currently included
+   */
   bool isIncluded(const LaunchBundle& bundle) const;
+
+  /**
+   * @brief Add the given launch bundle to the set
+   */
   void include(const LaunchBundle& bundle);
+
+  /**
+   * @brief Remove the given launch bundle from the set
+   */
   void remove(const LaunchBundle& bundle);
 
+  /**
+   * @brief Add the dependencies from the launch bundles to the moveit config's dependencies
+   */
   void collectDependencies(std::set<std::string>& packages) const override;
 
+  /**
+   * @brief Provide the files to be generated
+   */
   void collectFiles(const std::string& package_path, const std::time_t& last_gen_time,
                     std::vector<moveit_setup_framework::GeneratedFilePtr>& files) override;
 

@@ -62,7 +62,7 @@ void LaunchesWidget::onInit()
 
   splitter->addWidget(list_widget_);
 
-  for (const LaunchBundle& lb : setup_step_.getLaunchBundles())
+  for (const LaunchBundle& lb : setup_step_.getAvailableLaunchBundles())
   {
     QListWidgetItem* item = new QListWidgetItem(QString(lb.getTitle().c_str()), list_widget_);
     item->setData(Qt::UserRole, QVariant(lb.getID()));

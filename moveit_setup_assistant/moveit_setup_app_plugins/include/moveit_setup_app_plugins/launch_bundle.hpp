@@ -43,12 +43,24 @@ namespace moveit_setup_app_plugins
 {
 using moveit_setup_framework::appendPaths;
 
+/**
+ * @brief One launch file and any other bonus files that get bundled with it, i.e. the RViz launch file and its config.
+ *
+ * Each launch bundle is presented to the user as option to generate. They are bundled because it would not (generally)
+ * make sense to generate the RViz config without the launch file.
+ */
 class LaunchBundle
 {
 public:
+  /**
+   * @param title The display name for this LaunchBundle
+   * @param description An English description of the files contained within
+   * @param launch_name The identifier that signifies the name of the generated launch file (launch_name.launch.py)
+   * @param dependencies Each string is the name of a package that should be added as a dependency if this bundle is generated
+   */
   LaunchBundle(const std::string& title, const std::string& description, const std::string& launch_name,
                const std::set<std::string>& dependencies = {})
-    : title_(title), description_(description), launch_name_(launch_name), dependencies_(dependencies)
+    : title_(title), description_(description), launch_name_(launch_name), dependencies_(dependencies), id_(-1)
   {
   }
 
@@ -62,6 +74,9 @@ public:
     return description_;
   }
 
+  /**
+   * @brief The ID is an index in a list, used for quick identification and argument passing
+   */
   unsigned int getID() const
   {
     return id_;
@@ -82,6 +97,9 @@ public:
     return dependencies_;
   }
 
+  /**
+   * @brief Defined so that LaunchBundles can be added to sets
+   */
   bool operator<(const LaunchBundle& other) const
   {
     return title_ < other.title_;
@@ -191,8 +209,8 @@ public:
 
 protected:
   std::string title_, description_, launch_name_;
-  unsigned int id_;
   std::set<std::string> dependencies_;
+  unsigned int id_;
 
   std::vector<BonusFile> bonus_files_;
 };
