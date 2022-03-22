@@ -42,9 +42,13 @@ def add_debuggable_node(
         dash_x_arg = ""
     prefix = [f"gdb {dash_x_arg}--ex run --args"]
 
-    arguments = kwargs.get("arguments", [])
-    if extra_debug_args:
-        arguments += extra_debug_args
+    if "arguments" in kwargs:
+        arguments = kwargs["arguments"]
+        if extra_debug_args:
+            arguments += extra_debug_args
+        del kwargs["arguments"]
+    else:
+        arguments = None
 
     debug_node = Node(
         package=package,
