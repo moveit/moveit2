@@ -608,7 +608,7 @@ void MotionPlanningFrame::remoteUpdateCustomStartStateCallback(const moveit_msgs
     const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
     {
-      moveit::core::RobotStatePtr state(new moveit::core::RobotState(ps->getCurrentState()));
+      auto state = std::make_shared<moveit::core::RobotState>(ps->getCurrentState());
       moveit::core::robotStateMsgToRobotState(ps->getTransforms(), msg_no_attached, *state);
       planning_display_->setQueryStartState(*state);
     }
@@ -626,7 +626,7 @@ void MotionPlanningFrame::remoteUpdateCustomGoalStateCallback(const moveit_msgs:
     const planning_scene_monitor::LockedPlanningSceneRO& ps = planning_display_->getPlanningSceneRO();
     if (ps)
     {
-      moveit::core::RobotStatePtr state(new moveit::core::RobotState(ps->getCurrentState()));
+      auto state = std::make_shared<moveit::core::RobotState>(ps->getCurrentState());
       moveit::core::robotStateMsgToRobotState(ps->getTransforms(), msg_no_attached, *state);
       planning_display_->setQueryGoalState(*state);
     }

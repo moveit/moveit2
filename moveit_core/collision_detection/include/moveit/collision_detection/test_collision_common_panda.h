@@ -280,7 +280,7 @@ TYPED_TEST_P(DistanceCheckPandaTest, DistanceSingle)
   {
     collision_detection::DistanceResult res;
 
-    shapes::ShapeConstPtr shape(new shapes::Cylinder(rng.uniform01(), rng.uniform01()));
+    shapes::ShapeConstPtr shape = std::make_shared<const shapes::Cylinder>(rng.uniform01(), rng.uniform01());
     Eigen::Isometry3d pose{ Eigen::Isometry3d::Identity() };
     pose.translation() =
         Eigen::Vector3d(rng.uniformReal(0.1, 2.0), rng.uniformReal(0.1, 2.0), rng.uniformReal(1.2, 1.7));

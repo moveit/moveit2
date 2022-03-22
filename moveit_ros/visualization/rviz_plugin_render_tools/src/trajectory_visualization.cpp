@@ -537,7 +537,7 @@ void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::
 
   trajectory_message_to_display_.reset();
 
-  robot_trajectory::RobotTrajectoryPtr t(new robot_trajectory::RobotTrajectory(robot_model_, ""));
+  auto t = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, "");
   try
   {
     for (std::size_t i = 0; i < msg->trajectory.size(); ++i)
