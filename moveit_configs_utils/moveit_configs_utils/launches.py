@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import AppendEnvironmentVariable, DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
 
@@ -174,9 +174,6 @@ def generate_move_group_launch(moveit_config):
         moveit_config.to_dict(),
     ]
 
-    # Set the display variable, in case OpenGL code is used internally
-    ld.add_action(AppendEnvironmentVariable("DISPLAY", ":0"))
-
     add_debuggable_node(
         ld,
         package="moveit_ros_move_group",
@@ -185,5 +182,7 @@ def generate_move_group_launch(moveit_config):
         output="screen",
         parameters=move_group_params,
         extra_debug_args=["--debug"],
+        # Set the display variable, in case OpenGL code is used internally
+        additional_env={"DISPLAY": ":0"},
     )
     return ld
