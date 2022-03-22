@@ -77,7 +77,7 @@ def get_pattern_matches(folder, pattern):
         if m:
             groups = m.groups()
             if groups:
-                matches.append(groups)
+                matches.append(groups[0])
             else:
                 matches.append(child)
     return matches
@@ -390,12 +390,14 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     for name in [self.__robot_name, "ros", "ros2"]:
                         if name in possible_names:
                             chosen_name = name
+                            break
                     else:
+                        option_str = "\n - ".join(
+                            name + "_controllers.yaml" for name in possible_names
+                        )
                         raise RuntimeError(
-                            "trajectory_execution: `Unable to guess which parameter file to load. Options:\n - "
-                            "\n - ".join(
-                                name + "_controllers.yaml" for name in possible_names
-                            )
+                            "trajectory_execution: "
+                            f"Unable to guess which parameter file to load. Options:\n - {option_str}"
                         )
                 file_path = config_folder / (chosen_name + "_controllers.yaml")
 
