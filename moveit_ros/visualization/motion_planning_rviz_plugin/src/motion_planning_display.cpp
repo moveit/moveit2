@@ -86,8 +86,8 @@ MotionPlanningDisplay::MotionPlanningDisplay()
   , text_to_display_(nullptr)
   , frame_(nullptr)
   , frame_dock_(nullptr)
-  , menu_handler_start_(new interactive_markers::MenuHandler)
-  , menu_handler_goal_(new interactive_markers::MenuHandler)
+  , menu_handler_start_(std::make_shared<interactive_markers::MenuHandler>())
+  , menu_handler_goal_(std::make_shared<interactive_markers::MenuHandler>())
   , int_marker_display_(nullptr)
 {
   // Category Groups

@@ -91,7 +91,7 @@ private:
 ConstraintSamplerManagerLoader::ConstraintSamplerManagerLoader(
     const rclcpp::Node::SharedPtr& node, const constraint_samplers::ConstraintSamplerManagerPtr& csm)
   : constraint_sampler_manager_(csm ? csm : std::make_shared<constraint_samplers::ConstraintSamplerManager>())
-  , impl_(new Helper(node, constraint_sampler_manager_))
+  , impl_(std::make_shared<Helper>(node, constraint_sampler_manager_))
 {
 }
 }  // namespace constraint_sampler_manager_loader

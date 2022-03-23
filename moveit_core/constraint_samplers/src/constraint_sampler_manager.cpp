@@ -258,7 +258,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
       else
       {
         samplers.push_back(used_l.begin()->second);
-        return ConstraintSamplerPtr(std::make_shared<UnionConstraintSampler>(scene, jmg->getName(), samplers));
+        return std::make_shared<UnionConstraintSampler>(scene, jmg->getName(), samplers);
       }
     }
     else if (used_l.size() > 1)
@@ -284,7 +284,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
       else
       {
         samplers.push_back(iks);
-        return ConstraintSamplerPtr(std::make_shared<UnionConstraintSampler>(scene, jmg->getName(), samplers));
+        return std::make_shared<UnionConstraintSampler>(scene, jmg->getName(), samplers);
       }
     }
   }
@@ -343,7 +343,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
     {
       RCLCPP_DEBUG(LOGGER, "Constructing sampler for group '%s' as a union of %zu samplers", jmg->getName().c_str(),
                    samplers.size());
-      return ConstraintSamplerPtr(std::make_shared<UnionConstraintSampler>(scene, jmg->getName(), samplers));
+      return std::make_shared<UnionConstraintSampler>(scene, jmg->getName(), samplers);
     }
   }
 
