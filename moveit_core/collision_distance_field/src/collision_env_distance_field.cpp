@@ -710,7 +710,7 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
     const std::string& group_name, const moveit::core::RobotState& state,
     const collision_detection::AllowedCollisionMatrix* acm, bool generate_distance_field) const
 {
-  DistanceFieldCacheEntryPtr dfce(new DistanceFieldCacheEntry());
+  DistanceFieldCacheEntryPtr dfce = std::make_shared<DistanceFieldCacheEntry>();
 
   if (robot_model_->getJointModelGroup(group_name) == nullptr)
   {
@@ -969,9 +969,9 @@ void CollisionEnvDistanceField::addLinkBodyDecompositions(double resolution)
     }
 
     RCLCPP_DEBUG(LOGGER, "Generating model for %s", link_model->getName().c_str());
-    BodyDecompositionConstPtr bd(new BodyDecomposition(link_model->getShapes(),
-                                                       link_model->getCollisionOriginTransforms(), resolution,
-                                                       getLinkPadding(link_model->getName())));
+    BodyDecompositionConstPtr bd =
+        std::make_shared<const BodyDecomposition>(link_model->getShapes(), link_model->getCollisionOriginTransforms(),
+                                                  resolution, getLinkPadding(link_model->getName()));
     link_body_decomposition_vector_.push_back(bd);
     link_body_decomposition_index_map_[link_model->getName()] = link_body_decomposition_vector_.size() - 1;
   }
@@ -1060,8 +1060,9 @@ void CollisionEnvDistanceField::addLinkBodyDecompositions(
       continue;
     }
 
-    BodyDecompositionPtr bd(new BodyDecomposition(link_model->getShapes(), link_model->getCollisionOriginTransforms(),
-                                                  resolution, getLinkPadding(link_model->getName())));
+    BodyDecompositionPtr bd =
+        std::make_shared<BodyDecomposition>(link_model->getShapes(), link_model->getCollisionOriginTransforms(),
+                                            resolution, getLinkPadding(link_model->getName()));
 
     RCLCPP_DEBUG(LOGGER, "Generated model for %s", link_model->getName().c_str());
 
@@ -1780,7 +1781,7 @@ void CollisionEnvDistanceField::updateDistanceObject(const std::string& id, Dist
 CollisionEnvDistanceField::DistanceFieldCacheEntryWorldPtr
 CollisionEnvDistanceField::generateDistanceFieldCacheEntryWorld()
 {
-  DistanceFieldCacheEntryWorldPtr dfce(new DistanceFieldCacheEntryWorld());
+  DistanceFieldCacheEntryWorldPtr dfce = std::make_shared<DistanceFieldCacheEntryWorld>();
   dfce->distance_field_ = std::make_shared<distance_field::PropagationDistanceField>(
       size_.x(), size_.y(), size_.z(), resolution_, origin_.x() - 0.5 * size_.x(), origin_.y() - 0.5 * size_.y(),
       origin_.z() - 0.5 * size_.z(), max_propogation_distance_, use_signed_distance_field_);

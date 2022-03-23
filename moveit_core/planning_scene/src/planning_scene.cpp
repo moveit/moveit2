@@ -173,7 +173,7 @@ void PlanningScene::initialize()
 moveit::core::RobotModelPtr PlanningScene::createRobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model,
                                                             const srdf::ModelConstSharedPtr& srdf_model)
 {
-  moveit::core::RobotModelPtr robot_model(new moveit::core::RobotModel(urdf_model, srdf_model));
+  auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
   if (!robot_model || !robot_model->getRootJoint())
     return moveit::core::RobotModelPtr();
 
@@ -495,7 +495,7 @@ moveit::core::RobotState& PlanningScene::getCurrentStateNonConst()
 
 moveit::core::RobotStatePtr PlanningScene::getCurrentStateUpdated(const moveit_msgs::msg::RobotState& update) const
 {
-  moveit::core::RobotStatePtr state(new moveit::core::RobotState(getCurrentState()));
+  auto state = std::make_shared<moveit::core::RobotState>(getCurrentState());
   moveit::core::robotStateMsgToRobotState(getTransforms(), update, *state);
   return state;
 }
@@ -1276,11 +1276,11 @@ void PlanningScene::processOctomapMsg(const octomap_msgs::msg::Octomap& map)
   if (!map.header.frame_id.empty())
   {
     const Eigen::Isometry3d& t = getFrameTransform(map.header.frame_id);
-    world_->addToObject(OCTOMAP_NS, shapes::ShapeConstPtr(new shapes::OcTree(om)), t);
+    world_->addToObject(OCTOMAP_NS, std::make_shared<const shapes::OcTree>(om), t);
   }
   else
   {
-    world_->addToObject(OCTOMAP_NS, shapes::ShapeConstPtr(new shapes::OcTree(om)), Eigen::Isometry3d::Identity());
+    world_->addToObject(OCTOMAP_NS, std::make_shared<const shapes::OcTree>(om), Eigen::Isometry3d::Identity());
   }
 }
 
@@ -1316,7 +1316,7 @@ void PlanningScene::processOctomapMsg(const octomap_msgs::msg::OctomapWithPose& 
   Eigen::Isometry3d p;
   PlanningScene::poseMsgToEigen(map.origin, p);
   p = t * p;
-  world_->addToObject(OCTOMAP_NS, shapes::ShapeConstPtr(new shapes::OcTree(om)), p);
+  world_->addToObject(OCTOMAP_NS, std::make_shared<const shapes::OcTree>(om), p);
 }
 
 void PlanningScene::processOctomapPtr(const std::shared_ptr<const octomap::OcTree>& octree, const Eigen::Isometry3d& t)
@@ -1349,7 +1349,7 @@ void PlanningScene::processOctomapPtr(const std::shared_ptr<const octomap::OcTre
   }
   // if the octree pointer changed, update the structure
   world_->removeObject(OCTOMAP_NS);
-  world_->addToObject(OCTOMAP_NS, shapes::ShapeConstPtr(new shapes::OcTree(octree)), t);
+  world_->addToObject(OCTOMAP_NS, std::make_shared<const shapes::OcTree>(octree), t);
 }
 
 bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::AttachedCollisionObject& object)

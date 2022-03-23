@@ -374,7 +374,7 @@ protected:
         "</robot>";
 
     urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(MODEL2);
-    srdf::ModelSharedPtr srdf_model(new srdf::Model());
+    auto srdf_model = std::make_shared<srdf::Model>();
     srdf_model->initString(*urdf_model, SMODEL2);
     robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
   }
