@@ -164,7 +164,7 @@ bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& pa
     return false;
   }
 
-  std::string cmd = "ros2 run xacro xacro";
+  std::string cmd = "ros2 run xacro xacro ";
   for (const std::string& xacro_arg : xacro_args)
     cmd += xacro_arg + " ";
   cmd += path;
