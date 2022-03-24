@@ -18,10 +18,14 @@ set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
 qt5_wrap_cpp(MOC_FILES
+    include/moveit_setup_app_plugins/launches_widget.hpp
     include/moveit_setup_app_plugins/perception_widget.hpp
 )
 
 add_library(${PROJECT_NAME}
+    src/launches.cpp
+    src/launches_widget.cpp
+    src/launches_config.cpp
     src/perception_config.cpp
     src/perception.cpp
     src/perception_widget.cpp
@@ -43,6 +47,8 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+install(DIRECTORY templates DESTINATION share/${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}
         EXPORT export_${PROJECT_NAME}
