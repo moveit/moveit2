@@ -171,6 +171,15 @@ bool PackageSettingsConfig::GeneratedSettings::writeYaml(YAML::Emitter& emitter)
   return true;
 }
 
+void PackageSettingsConfig::loadDependencies()
+{
+  package_dependencies_.clear();
+  for (const auto& config : config_data_->getConfigured())
+  {
+    config->collectDependencies(package_dependencies_);
+  }
+}
+
 void PackageSettingsConfig::collectVariables(std::vector<TemplateVariable>& variables)
 {
   variables.push_back(TemplateVariable("GENERATED_PACKAGE_NAME", new_package_name_));
