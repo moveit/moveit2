@@ -97,8 +97,8 @@ CollisionEnvFCL::CollisionEnvFCL(const moveit::core::RobotModelConstPtr& model, 
         // Every time this object is created, g->computeLocalAABB() is called  which is
         // very expensive and should only be calculated once. To update the AABB, use the
         // collObj->setTransform and then call collObj->computeAABB() to transform the AABB.
-        robot_fcl_objs_[index] =
-            FCLCollisionObjectConstPtr(new fcl::CollisionObjectd(link_geometry->collision_geometry_));
+        robot_fcl_objs_[index] = FCLCollisionObjectConstPtr(
+            std::make_shared<const fcl::CollisionObjectd>(link_geometry->collision_geometry_));
       }
       else
         RCLCPP_ERROR(LOGGER, "Unable to construct collision geometry for link '%s'", link->getName().c_str());
@@ -134,7 +134,7 @@ CollisionEnvFCL::CollisionEnvFCL(const moveit::core::RobotModelConstPtr& model, 
         // Every time this object is created, g->computeLocalAABB() is called  which is
         // very expensive and should only be calculated once. To update the AABB, use the
         // collObj->setTransform and then call collObj->computeAABB() to transform the AABB.
-        robot_fcl_objs_[index] = FCLCollisionObjectConstPtr(new fcl::CollisionObjectd(g->collision_geometry_));
+        robot_fcl_objs_[index] = std::make_shared<const fcl::CollisionObjectd>(g->collision_geometry_);
       }
       else
         RCLCPP_ERROR(LOGGER, "Unable to construct collision geometry for link '%s'", link->getName().c_str());
@@ -452,7 +452,7 @@ void CollisionEnvFCL::updatedPaddingOrScaling(const std::vector<std::string>& li
         {
           index = lmodel->getFirstCollisionBodyTransformIndex() + j;
           robot_geoms_[index] = g;
-          robot_fcl_objs_[index] = FCLCollisionObjectConstPtr(new fcl::CollisionObjectd(g->collision_geometry_));
+          robot_fcl_objs_[index] = std::make_shared<const fcl::CollisionObjectd>(g->collision_geometry_);
         }
       }
     }

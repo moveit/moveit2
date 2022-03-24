@@ -76,7 +76,8 @@ int main(int argc, char** argv)
     robot_model_loader::RobotModelLoader::Options opt;
     opt.robot_description_ = "robot_description";
     opt.load_kinematics_solvers_ = false;
-    robot_model_loader::RobotModelLoaderPtr rml(new robot_model_loader::RobotModelLoader(node, opt));
+
+    auto rml = std::make_shared<robot_model_loader::RobotModelLoader>(node, opt);
     planning_scene::PlanningScene ps(rml->getModel());
 
     std::ifstream f(argv[filename_index]);

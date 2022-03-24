@@ -387,7 +387,7 @@ RobotTrajectory& RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::Robo
   for (std::size_t i = 0; i < state_count; ++i)
   {
     this_time_stamp = rclcpp::Time(trajectory.header.stamp) + trajectory.points[i].time_from_start;
-    moveit::core::RobotStatePtr st(new moveit::core::RobotState(copy));
+    auto st = std::make_shared<moveit::core::RobotState>(copy);
     st->setVariablePositions(trajectory.joint_names, trajectory.points[i].positions);
     if (!trajectory.points[i].velocities.empty())
       st->setVariableVelocities(trajectory.joint_names, trajectory.points[i].velocities);
@@ -418,7 +418,7 @@ RobotTrajectory& RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::Robo
 
   for (std::size_t i = 0; i < state_count; ++i)
   {
-    moveit::core::RobotStatePtr st(new moveit::core::RobotState(copy));
+    auto st = std::make_shared<moveit::core::RobotState>(copy);
     if (trajectory.joint_trajectory.points.size() > i)
     {
       st->setVariablePositions(trajectory.joint_trajectory.joint_names, trajectory.joint_trajectory.points[i].positions);

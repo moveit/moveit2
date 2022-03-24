@@ -111,7 +111,7 @@ bool pick_place::ReachableAndValidPoseFilter::isEndEffectorFree(const Manipulati
 bool pick_place::ReachableAndValidPoseFilter::evaluate(const ManipulationPlanPtr& plan) const
 {
   // initialize with scene state
-  moveit::core::RobotStatePtr token_state(new moveit::core::RobotState(planning_scene_->getCurrentState()));
+  auto token_state = std::make_shared<moveit::core::RobotState>(planning_scene_->getCurrentState());
   if (isEndEffectorFree(plan, *token_state))
   {
     // update the goal pose message if anything has changed; this is because the name of the frame in the input goal

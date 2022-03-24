@@ -77,7 +77,7 @@ TEST_F(LoadPlanningModelsPr2, InitOK)
 
 TEST_F(LoadPlanningModelsPr2, ModelInit)
 {
-  srdf::ModelSharedPtr srdf_model(new srdf::Model());
+  auto srdf_model = std::make_shared<srdf::Model>();
 
   // with no world multidof we should get a fixed joint
   moveit::core::RobotModel robot_model0(urdf_model_, srdf_model);
@@ -121,7 +121,7 @@ TEST_F(LoadPlanningModelsPr2, GroupInit)
                                      "</group>"
                                      "</robot>";
 
-  srdf::ModelSharedPtr srdf_model(new srdf::Model());
+  auto srdf_model = std::make_shared<srdf::Model>();
   srdf_model->initString(*urdf_model_, SMODEL1);
   moveit::core::RobotModel robot_model1(urdf_model_, srdf_model);
 
@@ -150,7 +150,7 @@ TEST_F(LoadPlanningModelsPr2, GroupInit)
                                      "</robot>";
   srdf_model->initString(*urdf_model_, SMODEL2);
 
-  moveit::core::RobotModelPtr robot_model2(new moveit::core::RobotModel(urdf_model_, srdf_model));
+  auto robot_model2 = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_model);
 
   left_arm_base_tip_group = robot_model2->getJointModelGroup("left_arm_base_tip");
   ASSERT_TRUE(left_arm_base_tip_group != nullptr);
@@ -219,13 +219,13 @@ TEST_F(LoadPlanningModelsPr2, SubgroupInit)
 
 TEST_F(LoadPlanningModelsPr2, AssociatedFixedLinks)
 {
-  moveit::core::RobotModelPtr model(new moveit::core::RobotModel(urdf_model_, srdf_model_));
+  auto model = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_model_);
   EXPECT_TRUE(model->getLinkModel("r_gripper_palm_link")->getAssociatedFixedTransforms().size() > 1);
 }
 
 TEST_F(LoadPlanningModelsPr2, FullTest)
 {
-  moveit::core::RobotModelPtr robot_model(new moveit::core::RobotModel(urdf_model_, srdf_model_));
+  auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_model_);
 
   moveit::core::RobotState ks(robot_model);
   ks.setToDefaultValues();
@@ -268,7 +268,7 @@ TEST_F(LoadPlanningModelsPr2, FullTest)
 
 TEST_F(LoadPlanningModelsPr2, ObjectPoseAndSubframes)
 {
-  moveit::core::RobotModelPtr robot_model(new moveit::core::RobotModel(urdf_model_, srdf_model_));
+  auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model_, srdf_model_);
 
   moveit::core::RobotState ks(robot_model);
   ks.setToDefaultValues();

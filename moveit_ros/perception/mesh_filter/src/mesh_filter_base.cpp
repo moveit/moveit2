@@ -171,7 +171,7 @@ mesh_filter::MeshHandle mesh_filter::MeshFilterBase::addMesh(const shapes::Mesh&
 {
   std::unique_lock<std::mutex> _(meshes_mutex_);
 
-  JobPtr job(new FilterJob<void>(std::bind(&MeshFilterBase::addMeshHelper, this, next_handle_, &mesh)));
+  JobPtr job = std::make_shared<FilterJob<void>>(std::bind(&MeshFilterBase::addMeshHelper, this, next_handle_, &mesh));
   addJob(job);
   job->wait();
   mesh_filter::MeshHandle ret = next_handle_;
@@ -217,16 +217,17 @@ void mesh_filter::MeshFilterBase::setShadowThreshold(float threshold)
 
 void mesh_filter::MeshFilterBase::getModelLabels(LabelType* labels) const
 {
-  JobPtr job(new FilterJob<void>(std::bind(&GLRenderer::getColorBuffer, mesh_renderer_.get(), (unsigned char*)labels)));
+  JobPtr job = std::make_shared<FilterJob<void>>(
+      std::bind(&GLRenderer::getColorBuffer, mesh_renderer_.get(), (unsigned char*)labels));
   addJob(job);
   job->wait();
 }
 
 void mesh_filter::MeshFilterBase::getModelDepth(float* depth) const
 {
-  JobPtr job1(new FilterJob<void>(std::bind(&GLRenderer::getDepthBuffer, mesh_renderer_.get(), depth)));
-  JobPtr job2(new FilterJob<void>(
-      std::bind(&SensorModel::Parameters::transformModelDepthToMetricDepth, sensor_parameters_.get(), depth)));
+  JobPtr job1 = std::make_shared<FilterJob<void>>(std::bind(&GLRenderer::getDepthBuffer, mesh_renderer_.get(), depth));
+  JobPtr job2 = std::make_shared<FilterJob<void>>(
+      std::bind(&SensorModel::Parameters::transformModelDepthToMetricDepth, sensor_parameters_.get(), depth));
   {
     std::unique_lock<std::mutex> lock(jobs_mutex_);
     jobs_queue_.push(job1);
@@ -239,9 +240,9 @@ void mesh_filter::MeshFilterBase::getModelDepth(float* depth) const
 
 void mesh_filter::MeshFilterBase::getFilteredDepth(float* depth) const
 {
-  JobPtr job1(new FilterJob<void>(std::bind(&GLRenderer::getDepthBuffer, depth_filter_.get(), depth)));
-  JobPtr job2(new FilterJob<void>(
-      std::bind(&SensorModel::Parameters::transformFilteredDepthToMetricDepth, sensor_parameters_.get(), depth)));
+  JobPtr job1 = std::make_shared<FilterJob<void>>(std::bind(&GLRenderer::getDepthBuffer, depth_filter_.get(), depth));
+  JobPtr job2 = std::make_shared<FilterJob<void>>(
+      std::bind(&SensorModel::Parameters::transformFilteredDepthToMetricDepth, sensor_parameters_.get(), depth));
   {
     std::unique_lock<std::mutex> lock(jobs_mutex_);
     jobs_queue_.push(job1);
@@ -254,7 +255,8 @@ void mesh_filter::MeshFilterBase::getFilteredDepth(float* depth) const
 
 void mesh_filter::MeshFilterBase::getFilteredLabels(LabelType* labels) const
 {
-  JobPtr job(new FilterJob<void>(std::bind(&GLRenderer::getColorBuffer, depth_filter_.get(), (unsigned char*)labels)));
+  JobPtr job = std::make_shared<FilterJob<void>>(
+      std::bind(&GLRenderer::getColorBuffer, depth_filter_.get(), (unsigned char*)labels));
   addJob(job);
   job->wait();
 }
@@ -294,7 +296,7 @@ void mesh_filter::MeshFilterBase::filter(const void* sensor_data, GLushort type,
     throw std::runtime_error(msg.str());
   }
 
-  JobPtr job(new FilterJob<void>(std::bind(&MeshFilterBase::doFilter, this, sensor_data, type)));
+  JobPtr job = std::make_shared<FilterJob<void>>(std::bind(&MeshFilterBase::doFilter, this, sensor_data, type));
   addJob(job);
   if (wait)
     job->wait();

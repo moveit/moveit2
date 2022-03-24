@@ -123,7 +123,7 @@ bool PickPlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene,
   ros::WallTime start_time = ros::WallTime::now();
 
   // construct common data for possible manipulation plans
-  ManipulationPlanSharedDataPtr plan_data(new ManipulationPlanSharedData());
+  auto plan_data = std::make_shared<ManipulationPlanSharedData>();
   ManipulationPlanSharedDataConstPtr const_plan_data = plan_data;
   plan_data->planning_group_ = planning_scene->getRobotModel()->getJointModelGroup(planning_group);
   plan_data->end_effector_group_ = eef;
@@ -162,8 +162,8 @@ bool PickPlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene,
   pipeline_.reset();
   ManipulationStagePtr stage1(
       new ReachableAndValidPoseFilter(planning_scene, approach_grasp_acm, pick_place_->getConstraintsSamplerManager()));
-  ManipulationStagePtr stage2(new ApproachAndTranslateStage(planning_scene, approach_grasp_acm));
-  ManipulationStagePtr stage3(new PlanStage(planning_scene, pick_place_->getPlanningPipeline()));
+  ManipulationStagePtr stage2 = std::make_shared<ApproachAndTranslateStage>(planning_scene, approach_grasp_acm);
+  ManipulationStagePtr stage3 = std::make_shared<PlanStage>(planning_scene, pick_place_->getPlanningPipeline());
   pipeline_.addStage(stage1).addStage(stage2).addStage(stage3);
 
   initialize();
@@ -180,7 +180,7 @@ bool PickPlan::plan(const planning_scene::PlanningSceneConstPtr& planning_scene,
   // feed the available grasps to the stages we set up
   for (std::size_t i = 0; i < goal.possible_grasps.size(); ++i)
   {
-    ManipulationPlanPtr p(new ManipulationPlan(const_plan_data));
+    auto p = std::make_shared<ManipulationPlan>(const_plan_data);
     const moveit_msgs::msg::Grasp& g = goal.possible_grasps[grasp_order[i]];
     p->approach_ = g.pre_grasp_approach;
     p->retreat_ = g.post_grasp_retreat;

@@ -91,7 +91,7 @@ TEST_F(TrajectoryTest, goalTolerance)
   const std::string NODE_NAME = "trajectory_test";
 
   // Create a RobotState and JointModelGroup to keep track of the current robot pose and planning group
-  moveit::core::RobotStatePtr current_state(new moveit::core::RobotState(robot_model_));
+  auto current_state = std::make_shared<moveit::core::RobotState>(robot_model_);
   current_state->setToDefaultValues();
 
   const moveit::core::JointModelGroup* joint_model_group = current_state->getJointModelGroup(PLANNING_GROUP);
@@ -99,7 +99,7 @@ TEST_F(TrajectoryTest, goalTolerance)
   const std::vector<std::string>& joint_names = joint_model_group->getActiveJointModelNames();
   EXPECT_EQ(joint_names.size(), 7);
 
-  planning_scene::PlanningScenePtr planning_scene(new planning_scene::PlanningScene(robot_model_));
+  auto planning_scene = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
   // Create response and request
   planning_interface::MotionPlanRequest req;
@@ -108,7 +108,7 @@ TEST_F(TrajectoryTest, goalTolerance)
   // Set start state
   // ======================================================================================
   std::vector<double> start_joint_values = { 0.4, 0.3, 0.5, -0.55, 0.88, 1.0, -0.075 };
-  moveit::core::RobotStatePtr start_state(new moveit::core::RobotState(robot_model_));
+  auto start_state = std::make_shared<moveit::core::RobotState>(robot_model_);
   start_state->setJointGroupPositions(joint_model_group, start_joint_values);
   start_state->update();
 
@@ -119,7 +119,7 @@ TEST_F(TrajectoryTest, goalTolerance)
 
   // Set the goal state and joints tolerance
   // ========================================================================================
-  moveit::core::RobotStatePtr goal_state(new moveit::core::RobotState(robot_model_));
+  auto goal_state = std::make_shared<moveit::core::RobotState>(robot_model_);
   std::vector<double> goal_joint_values = { 0.8, 0.7, 1, -1.3, 1.9, 2.2, -0.1 };
   goal_state->setJointGroupPositions(joint_model_group, goal_joint_values);
   goal_state->update();

@@ -206,21 +206,24 @@ struct FCLGeometry
 
   /** \brief Constructor for a robot link. */
   FCLGeometry(fcl::CollisionGeometryd* collision_geometry, const moveit::core::LinkModel* link, int shape_index)
-    : collision_geometry_(collision_geometry), collision_geometry_data_(new CollisionGeometryData(link, shape_index))
+    : collision_geometry_(collision_geometry)
+    , collision_geometry_data_(std::make_shared<CollisionGeometryData>(link, shape_index))
   {
     collision_geometry_->setUserData(collision_geometry_data_.get());
   }
 
   /** \brief Constructor for an attached body. */
   FCLGeometry(fcl::CollisionGeometryd* collision_geometry, const moveit::core::AttachedBody* ab, int shape_index)
-    : collision_geometry_(collision_geometry), collision_geometry_data_(new CollisionGeometryData(ab, shape_index))
+    : collision_geometry_(collision_geometry)
+    , collision_geometry_data_(std::make_shared<CollisionGeometryData>(ab, shape_index))
   {
     collision_geometry_->setUserData(collision_geometry_data_.get());
   }
 
   /** \brief Constructor for a world object. */
   FCLGeometry(fcl::CollisionGeometryd* collision_geometry, const World::Object* obj, int shape_index)
-    : collision_geometry_(collision_geometry), collision_geometry_data_(new CollisionGeometryData(obj, shape_index))
+    : collision_geometry_(collision_geometry)
+    , collision_geometry_data_(std::make_shared<CollisionGeometryData>(obj, shape_index))
   {
     collision_geometry_->setUserData(collision_geometry_data_.get());
   }

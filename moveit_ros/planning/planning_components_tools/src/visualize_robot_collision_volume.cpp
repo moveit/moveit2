@@ -107,7 +107,7 @@ int main(int argc, char** argv)
       t.translation() = Eigen::Vector3d(rng.uniformReal(aabb[0], aabb[1]), rng.uniformReal(aabb[2], aabb[3]),
                                         rng.uniformReal(aabb[4], aabb[5]));
       scene->getWorldNonConst()->clearObjects();
-      scene->getWorldNonConst()->addToObject("test", shapes::ShapeConstPtr(new shapes::Sphere(radius)), t);
+      scene->getWorldNonConst()->addToObject("test", std::make_shared<shapes::Sphere>(radius), t);
       collision_detection::CollisionResult res;
       scene->checkCollision(req, res);
       if (res.collision)

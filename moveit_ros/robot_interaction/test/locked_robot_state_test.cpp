@@ -222,7 +222,7 @@ static moveit::core::RobotModelPtr getModel()
   if (!model)
   {
     urdf::ModelInterfaceSharedPtr urdf(urdf::parseURDF(URDF_STR));
-    srdf::ModelSharedPtr srdf(new srdf::Model());
+    auto srdf = std::make_shared<srdf::Model>();
     srdf->initString(*urdf, SRDF_STR);
     model = std::make_shared<moveit::core::RobotModel>(urdf, srdf);
   }
@@ -240,7 +240,7 @@ TEST(LockedRobotState, load)
   state2.setToDefaultValues();
   robot_interaction::LockedRobotState ls2(state2);
 
-  robot_interaction::LockedRobotStatePtr ls4(new robot_interaction::LockedRobotState(model));
+  auto ls4 = std::make_shared<robot_interaction::LockedRobotState>(model);
 }
 
 // sanity test the URDF and enum
