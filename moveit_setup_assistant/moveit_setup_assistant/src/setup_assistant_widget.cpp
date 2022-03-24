@@ -97,6 +97,7 @@ SetupAssistantWidget::SetupAssistantWidget(rviz_common::ros_integration::RosNode
   setup_steps.push_back("moveit_setup_srdf_plugins::EndEffectorsWidget");
   setup_steps.push_back("moveit_setup_srdf_plugins::PassiveJointsWidget");
   setup_steps.push_back("moveit_setup_app_plugins::PerceptionWidget");
+  setup_steps.push_back("moveit_setup_app_plugins::LaunchesWidget");
   setup_steps.push_back("moveit_setup_core_plugins::AuthorInformationWidget");
   setup_steps.push_back("moveit_setup_core_plugins::ConfigurationFilesWidget");
   node_->declare_parameter("setup_steps", setup_steps);

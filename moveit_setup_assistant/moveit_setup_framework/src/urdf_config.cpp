@@ -33,7 +33,6 @@
  *********************************************************************/
 
 #include <moveit_setup_framework/data/urdf_config.hpp>
-#include <moveit_setup_framework/data/package_settings_config.hpp>
 #include <moveit_setup_framework/utilities.hpp>
 #include <moveit/rdf_loader/rdf_loader.h>
 #include <ament_index_cpp/get_package_share_directory.hpp>
@@ -119,7 +118,6 @@ void URDFConfig::loadFromPackage(const std::string& package_name, const std::str
                                  const std::string& xacro_args)
 {
   urdf_pkg_name_ = package_name;
-  config_data_->get<PackageSettingsConfig>("package_settings")->addDependency(urdf_pkg_name_);
   urdf_pkg_relative_path_ = relative_path;
   xacro_args_ = xacro_args;
 
@@ -164,6 +162,11 @@ bool URDFConfig::isXacroFile() const
 bool URDFConfig::isConfigured() const
 {
   return urdf_model_->getRoot() != nullptr;
+}
+
+void URDFConfig::collectDependencies(std::set<std::string>& packages) const
+{
+  packages.insert(urdf_pkg_name_);
 }
 
 void URDFConfig::collectVariables(std::vector<TemplateVariable>& variables)
