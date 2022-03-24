@@ -55,6 +55,7 @@ void ConfigurationFiles::loadTemplateVariables()
 
 void ConfigurationFiles::loadFiles()
 {
+  package_settings_->loadDependencies();
   loadTemplateVariables();
   std::string package_path = package_settings_->getPackagePath();
   auto gen_time = package_settings_->getGenerationTime();

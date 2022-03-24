@@ -173,10 +173,7 @@ public:
 
   void collectVariables(std::vector<TemplateVariable>& variables) override;
 
-  void addDependency(const std::string& package)
-  {
-    package_dependencies_.insert(package);
-  }
+  void loadDependencies();
 
   std::string getAuthorName() const
   {
