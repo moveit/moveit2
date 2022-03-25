@@ -50,6 +50,8 @@
 
 #include <pluginlib/class_loader.hpp>
 
+#include <utility>
+
 namespace pilz_industrial_motion_planner
 {
 static const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
@@ -61,17 +63,12 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
   // Call parent class initialize
   planning_interface::PlannerManager::initialize(model, node, ns);
 
-  // Store the model and the namespace
+  // Store the model, node, and namespace
   model_ = model;
+  node_ = node;
   namespace_ = ns;
 
-  // Obtain the aggregated joint limits
-  aggregated_limit_active_joints_ = pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
-      node, PARAM_NAMESPACE_LIMITS, model->getActiveJointModels());
-
-  // Obtain cartesian limits
-  cartesian_limit_ =
-      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node, PARAM_NAMESPACE_LIMITS);
+  loadPlannerConfigurations();
 
   // Load the planning context loader
   planner_context_loader = std::make_unique<pluginlib::ClassLoader<PlanningContextLoader>>(
@@ -104,6 +101,127 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
   }
 
   return true;
+}
+
+bool CommandPlanner::loadPlannerConfiguration(const std::string& group_name, const std::string& planner_id,
+                                              const std::map<std::string, std::string>& group_params,
+                                              planning_interface::PlannerConfigurationSettings& planner_config) const
+{
+  const rcl_interfaces::msg::ListParametersResult planner_params_result =
+      node_->list_parameters({ namespace_ + ".planner_configs." + planner_id }, 2);
+
+  if (planner_params_result.names.empty())
+  {
+    RCLCPP_DEBUG_STREAM(LOGGER, "Could not find parameters for the planner configuration '" << planner_id << "'");
+    return false;
+  }
+
+  planner_config.name = group_name + "[" + planner_id + "]";
+  planner_config.group = group_name;
+
+  // Default to specified parameters of the group (overridden by configuration
+  // specific parameters)
+  planner_config.config = group_params;
+
+  // Read parameters specific for this configuration
+  for (const auto& planner_param : planner_params_result.names)
+  {
+    const rclcpp::Parameter param = node_->get_parameter(planner_param);
+    const auto param_name = planner_param.substr(planner_param.find(planner_id) + planner_id.size() + 1);
+    planner_config.config[param_name] = param.value_to_string();
+  }
+
+  return true;
+}
+
+void CommandPlanner::loadPlannerConfigurations()
+{
+  // Obtain the aggregated joint limits
+  aggregated_limit_active_joints_ = pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
+      node_, PARAM_NAMESPACE_LIMITS, model_->getActiveJointModels());
+
+  // Obtain cartesian limits
+  cartesian_limit_ =
+      pilz_industrial_motion_planner::CartesianLimitsAggregator::getAggregatedLimits(node_, PARAM_NAMESPACE_LIMITS);
+
+  // Read the planning configuration for each group
+  planning_interface::PlannerConfigurationMap config;
+
+  for (const std::string& group_name : model_->getJointModelGroupNames())
+  {
+    // the set of planning parameters that can be specific for the group (inherited by configurations of that group)
+    // with their expected parameter type
+    static const std::pair<std::string, rclcpp::ParameterType> KNOWN_GROUP_PARAMS[] = {};
+
+    // The set of planning parameters that can be specific for the group
+    // (inherited by configurations of that group) with their expected parameter type
+    const std::string group_name_param = namespace_ + "." + group_name;
+
+    // get parameters specific for the robot planning group
+    std::map<std::string, std::string> specific_group_params;
+    for (const auto& k : KNOWN_GROUP_PARAMS)
+    {
+      const std::string param_name{ group_name_param + "." + k.first };
+      if (node_->has_parameter(param_name))
+      {
+        const rclcpp::Parameter parameter = node_->get_parameter(param_name);
+        if (parameter.get_type() != k.second)
+        {
+          RCLCPP_ERROR_STREAM(LOGGER, "Invalid type for parameter '" << k.first << "' expected ["
+                                                                     << rclcpp::to_string(k.second) << "] got ["
+                                                                     << rclcpp::to_string(parameter.get_type()) << "]");
+          continue;
+        }
+        specific_group_params[k.first] = parameter.value_to_string();
+      }
+    }
+
+    // Add default planner configuration
+    planning_interface::PlannerConfigurationSettings default_pc;
+    std::string default_planner_id;
+    if (node_->get_parameter(group_name_param + ".default_planner_config", default_planner_id))
+    {
+      if (not loadPlannerConfiguration(group_name, default_planner_id, specific_group_params, default_pc))
+      {
+        default_planner_id = "";
+      }
+    }
+
+    if (default_planner_id.empty())
+    {
+      default_pc.group = group_name;
+      default_pc.config = specific_group_params;
+    }
+
+    default_pc.name = group_name;  // this is the name of the default config
+    config[default_pc.name] = default_pc;
+
+    // Get parameters specific to each planner type
+    std::vector<std::string> config_names;
+    if (node_->get_parameter(group_name_param + ".planner_configs", config_names))
+    {
+      for (const auto& planner_id : config_names)
+      {
+        planning_interface::PlannerConfigurationSettings pc;
+        if (loadPlannerConfiguration(group_name, planner_id, specific_group_params, pc))
+        {
+          config[pc.name] = pc;
+        }
+      }
+    }
+  }
+
+  for (const auto& [name, config_settings] : config)
+  {
+    RCLCPP_DEBUG_STREAM(LOGGER, "Parameters for configuration '" << name << "'");
+
+    for (const auto& [param_name, param_value] : config_settings.config)
+    {
+      RCLCPP_DEBUG_STREAM(LOGGER, " - " << param_name << " = " << param_value);
+    }
+  }
+
+  setPlannerConfigurations(config);
 }
 
 std::string CommandPlanner::getDescription() const
