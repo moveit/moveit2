@@ -401,8 +401,10 @@ class MoveItConfigsBuilder(ParameterBuilder):
                         )
                 file_path = config_folder / (chosen_name + "_controllers.yaml")
 
-        elif not file_path.is_absolute():
-            file_path = self._package_path / file_path
+        else:
+            file_path = Path(file_path)
+            if not file_path.is_absolute():
+                file_path = self._package_path / file_path
 
         self.__moveit_configs.trajectory_execution.update(load_yaml(file_path))
         return self
