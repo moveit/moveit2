@@ -50,6 +50,13 @@
 
 #include <pluginlib/class_loader.hpp>
 
+// STL includes
+#include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
+
 namespace pilz_industrial_motion_planner
 {
 static const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";

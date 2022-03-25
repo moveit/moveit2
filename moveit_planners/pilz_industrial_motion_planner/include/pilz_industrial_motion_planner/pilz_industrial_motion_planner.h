@@ -47,6 +47,12 @@
 // Boost includes
 #include <boost/scoped_ptr.hpp>
 
+// STL includes
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
 namespace pilz_industrial_motion_planner
 {
 /**
