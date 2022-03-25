@@ -57,8 +57,7 @@ MOVEIT_CLASS_FORWARD(PlanningPipeline);  // Defines PlanningPipelinePtr, ConstPt
 
 namespace plan_execution
 {
-MOVEIT_CLASS_FORWARD(PlanExecution);    // Defines PlanExecutionPtr, ConstPtr, WeakPtr... etc
-MOVEIT_CLASS_FORWARD(PlanWithSensing);  // Defines PlanWithSensingPtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(PlanExecution);  // Defines PlanExecutionPtr, ConstPtr, WeakPtr... etc
 }  // namespace plan_execution
 
 namespace trajectory_execution_manager
@@ -83,7 +82,6 @@ struct MoveGroupContext
   trajectory_execution_manager::TrajectoryExecutionManagerPtr trajectory_execution_manager_;
   planning_pipeline::PlanningPipelinePtr planning_pipeline_;
   plan_execution::PlanExecutionPtr plan_execution_;
-  plan_execution::PlanWithSensingPtr plan_with_sensing_;
   bool allow_trajectory_execution_;
   bool debug_;
 };
