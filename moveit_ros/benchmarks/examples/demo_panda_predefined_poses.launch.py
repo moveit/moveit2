@@ -15,7 +15,11 @@ def generate_launch_description():
         .to_dict()
     )
 
-    moveit_configs = MoveItConfigsBuilder("moveit_resources_panda").to_dict()
+    moveit_configs = (
+        MoveItConfigsBuilder("moveit_resources_panda")
+        .trajectory_execution("config/panda_moveit_controllers.yaml")
+        .to_dict()
+    )
 
     # moveit_ros_benchmark demo executable
     moveit_ros_benchmarks_node = Node(
