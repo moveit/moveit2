@@ -79,13 +79,19 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
 
   // List available plugins
   const std::vector<std::string>& factories = planner_context_loader->getDeclaredClasses();
-  std::stringstream ss;
-  for (const auto& factory : factories)
+  if (factories.empty())
   {
-    ss << factory << " ";
+    RCLCPP_WARN(LOGGER, "No available plugins");
   }
-
-  RCLCPP_INFO_STREAM(LOGGER, "Available plugins: " << ss.str());
+  else
+  {
+    std::ostringstream ss;
+    for (const auto& factory : factories)
+    {
+      ss << factory << " ";
+    }
+    RCLCPP_INFO(LOGGER, "Available plugins: %s", ss.str().c_str());
+  }
 
   // Load each factory
   for (const auto& factory : factories)
