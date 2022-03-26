@@ -197,19 +197,19 @@ IKSamplingPose::IKSamplingPose()
 }
 
 IKSamplingPose::IKSamplingPose(const kinematic_constraints::PositionConstraint& pc)
-  : position_constraint_(new kinematic_constraints::PositionConstraint(pc))
+  : position_constraint_(std::make_shared<kinematic_constraints::PositionConstraint>(pc))
 {
 }
 
 IKSamplingPose::IKSamplingPose(const kinematic_constraints::OrientationConstraint& oc)
-  : orientation_constraint_(new kinematic_constraints::OrientationConstraint(oc))
+  : orientation_constraint_(std::make_shared<kinematic_constraints::OrientationConstraint>(oc))
 {
 }
 
 IKSamplingPose::IKSamplingPose(const kinematic_constraints::PositionConstraint& pc,
                                const kinematic_constraints::OrientationConstraint& oc)
-  : position_constraint_(new kinematic_constraints::PositionConstraint(pc))
-  , orientation_constraint_(new kinematic_constraints::OrientationConstraint(oc))
+  : position_constraint_(std::make_shared<kinematic_constraints::PositionConstraint>(pc))
+  , orientation_constraint_(std::make_shared<kinematic_constraints::OrientationConstraint>(oc))
 {
 }
 

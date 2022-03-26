@@ -340,9 +340,10 @@ void CollisionEnvBullet::addAttachedOjects(const moveit::core::RobotState& state
 
     try
     {
-      collision_detection_bullet::CollisionObjectWrapperPtr cow(new collision_detection_bullet::CollisionObjectWrapper(
-          body->getName(), collision_detection::BodyType::ROBOT_ATTACHED, body->getShapes(), attached_body_transform,
-          collision_object_types, body->getTouchLinks()));
+      collision_detection_bullet::CollisionObjectWrapperPtr cow =
+          std::make_shared<collision_detection_bullet::CollisionObjectWrapper>(
+              body->getName(), collision_detection::BodyType::ROBOT_ATTACHED, body->getShapes(),
+              attached_body_transform, collision_object_types, body->getTouchLinks());
       cows.push_back(cow);
     }
     catch (std::exception&)
@@ -427,8 +428,9 @@ void CollisionEnvBullet::addLinkAsCollisionObject(const urdf::LinkSharedPtr& lin
 
     try
     {
-      collision_detection_bullet::CollisionObjectWrapperPtr cow(new collision_detection_bullet::CollisionObjectWrapper(
-          link->name, collision_detection::BodyType::ROBOT_LINK, shapes, shape_poses, collision_object_types, true));
+      collision_detection_bullet::CollisionObjectWrapperPtr cow =
+          std::make_shared<collision_detection_bullet::CollisionObjectWrapper>(
+              link->name, collision_detection::BodyType::ROBOT_LINK, shapes, shape_poses, collision_object_types, true);
       manager_->addCollisionObject(cow);
       manager_CCD_->addCollisionObject(cow->clone());
       active_.push_back(cow->getName());

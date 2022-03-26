@@ -530,7 +530,8 @@ TEST_F(LoadPlanningModelsPr2, UnionConstraintSampler)
   std::vector<kinematic_constraints::JointConstraint> js2;
   js2.push_back(jc2);
 
-  constraint_samplers::JointConstraintSamplerPtr jcsp2(new constraint_samplers::JointConstraintSampler(ps_, "arms"));
+  constraint_samplers::JointConstraintSamplerPtr jcsp2 =
+      std::make_shared<constraint_samplers::JointConstraintSampler>(ps_, "arms");
   EXPECT_TRUE(jcsp2->configure(js2));
 
   kinematic_constraints::PositionConstraint pc(robot_model_);
@@ -539,7 +540,8 @@ TEST_F(LoadPlanningModelsPr2, UnionConstraintSampler)
   kinematic_constraints::OrientationConstraint oc(robot_model_);
   EXPECT_TRUE(oc.configure(ocm, tf));
 
-  constraint_samplers::IKConstraintSamplerPtr iksp(new constraint_samplers::IKConstraintSampler(ps_, "left_arm"));
+  constraint_samplers::IKConstraintSamplerPtr iksp =
+      std::make_shared<constraint_samplers::IKConstraintSampler>(ps_, "left_arm");
   EXPECT_TRUE(iksp->configure(constraint_samplers::IKSamplingPose(pc, oc)));
   EXPECT_TRUE(iksp->isValid());
 
@@ -583,7 +585,8 @@ TEST_F(LoadPlanningModelsPr2, UnionConstraintSampler)
   kinematic_constraints::OrientationConstraint oc2(robot_model_);
   EXPECT_TRUE(oc2.configure(ocm, tf));
 
-  constraint_samplers::IKConstraintSamplerPtr iksp2(new constraint_samplers::IKConstraintSampler(ps_, "right_arm"));
+  constraint_samplers::IKConstraintSamplerPtr iksp2 =
+      std::make_shared<constraint_samplers::IKConstraintSampler>(ps_, "right_arm");
   EXPECT_TRUE(iksp2->configure(constraint_samplers::IKSamplingPose(pc2, oc2)));
   EXPECT_TRUE(iksp2->isValid());
 

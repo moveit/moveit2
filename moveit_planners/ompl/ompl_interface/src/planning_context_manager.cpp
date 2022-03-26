@@ -308,9 +308,9 @@ void PlanningContextManager::registerDefaultPlanners()
 
 void PlanningContextManager::registerDefaultStateSpaces()
 {
-  registerStateSpaceFactory(ModelBasedStateSpaceFactoryPtr(new JointModelStateSpaceFactory()));
-  registerStateSpaceFactory(ModelBasedStateSpaceFactoryPtr(new PoseModelStateSpaceFactory()));
-  registerStateSpaceFactory(ModelBasedStateSpaceFactoryPtr(new ConstrainedPlanningStateSpaceFactory()));
+  registerStateSpaceFactory(std::make_shared<JointModelStateSpaceFactory>());
+  registerStateSpaceFactory(std::make_shared<PoseModelStateSpaceFactory>());
+  registerStateSpaceFactory(std::make_shared<ConstrainedPlanningStateSpaceFactory>());
 }
 
 ConfiguredPlannerSelector PlanningContextManager::getPlannerSelector() const

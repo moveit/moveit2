@@ -82,7 +82,7 @@ BodyDecompositionConstPtr getBodyDecompositionCacheEntry(const shapes::ShapeCons
     }
   }
 
-  BodyDecompositionConstPtr bdcp(new BodyDecomposition(shape, resolution));
+  BodyDecompositionConstPtr bdcp = std::make_shared<const BodyDecomposition>(shape, resolution);
   {
     boost::mutex::scoped_lock slock(cache.lock_);
     cache.map_[wptr] = bdcp;
@@ -95,7 +95,7 @@ BodyDecompositionConstPtr getBodyDecompositionCacheEntry(const shapes::ShapeCons
 PosedBodyPointDecompositionVectorPtr getCollisionObjectPointDecomposition(const collision_detection::World::Object& obj,
                                                                           double resolution)
 {
-  PosedBodyPointDecompositionVectorPtr ret(new PosedBodyPointDecompositionVector());
+  PosedBodyPointDecompositionVectorPtr ret = std::make_shared<PosedBodyPointDecompositionVector>();
   for (unsigned int i = 0; i < obj.shapes_.size(); ++i)
   {
     PosedBodyPointDecompositionPtr pbd(
@@ -109,7 +109,7 @@ PosedBodyPointDecompositionVectorPtr getCollisionObjectPointDecomposition(const 
 PosedBodySphereDecompositionVectorPtr getAttachedBodySphereDecomposition(const moveit::core::AttachedBody* att,
                                                                          double resolution)
 {
-  PosedBodySphereDecompositionVectorPtr ret(new PosedBodySphereDecompositionVector());
+  PosedBodySphereDecompositionVectorPtr ret = std::make_shared<PosedBodySphereDecompositionVector>();
   for (unsigned int i = 0; i < att->getShapes().size(); ++i)
   {
     PosedBodySphereDecompositionPtr pbd(
@@ -123,11 +123,11 @@ PosedBodySphereDecompositionVectorPtr getAttachedBodySphereDecomposition(const m
 PosedBodyPointDecompositionVectorPtr getAttachedBodyPointDecomposition(const moveit::core::AttachedBody* att,
                                                                        double resolution)
 {
-  PosedBodyPointDecompositionVectorPtr ret(new PosedBodyPointDecompositionVector());
+  PosedBodyPointDecompositionVectorPtr ret = std::make_shared<PosedBodyPointDecompositionVector>();
   for (unsigned int i = 0; i < att->getShapes().size(); ++i)
   {
-    PosedBodyPointDecompositionPtr pbd(
-        new PosedBodyPointDecomposition(getBodyDecompositionCacheEntry(att->getShapes()[i], resolution)));
+    PosedBodyPointDecompositionPtr pbd =
+        std::make_shared<PosedBodyPointDecomposition>(getBodyDecompositionCacheEntry(att->getShapes()[i], resolution));
     ret->addToVector(pbd);
     ret->updatePose(ret->getSize() - 1, att->getGlobalCollisionBodyTransforms()[i]);
   }
