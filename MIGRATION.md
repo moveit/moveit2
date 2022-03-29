@@ -16,6 +16,7 @@ API changes in MoveIt releases
 - add API for passing RNG to setToRandomPositionsNearBy
 - Static member variable interface of the CollisionDetectorAllocatorTemplate for the string NAME was replaced with a virtual method `getName`.
 - Enhance `RDFLoader` to load from string parameter OR string topic (and add the ability to publish a string topic).
+- `MoveItCpp::execute` now returns a `moveit_controller_manager::ExecutionStatus` rather than a `bool`. A `moveit_controller_manager::ExecutionStatus` is automatically casted to a `bool`, so that no changes in the user's code should be required.
 
 ## ROS Noetic
 - RobotModel no longer overrides empty URDF collision geometry by matching the visual geometry of the link.
