@@ -90,6 +90,15 @@ TEST(RDFIntegration, executor)
   EXPECT_EQ("gonzo", loader.getSRDF()->getName());
 }
 
+TEST(RDFIntegration, xacro_test)
+{
+  std::string output;
+  std::vector<std::string> xacro_args;
+  ASSERT_TRUE(rdf_loader::RDFLoader::loadPkgFileToString(output, "moveit_ros_planning",
+                                                         "rdf_loader/test/data/robin.srdf.xacro", xacro_args));
+  EXPECT_GT(output.size(), 0u);
+}
+
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);

@@ -305,7 +305,7 @@ int main(int argc, char** argv)
 
   robot_model = moveit::core::loadTestingRobotModel("panda");
 
-  planning_scene::PlanningScenePtr planning_scene(new planning_scene::PlanningScene(robot_model));
+  auto scene = std::make_shared<planning_scene::PlanningScene>(robot_model);
   planning_scene_monitor::PlanningSceneMonitor psm(planning_scene, ROBOT_DESCRIPTION);
   psm.startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE);
   psm.startSceneMonitor();

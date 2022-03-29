@@ -49,7 +49,7 @@ bool SBPLInterface::solve(const planning_scene::PlanningSceneConstPtr& planning_
                                              start_state);
 
   ros::WallTime wt = ros::WallTime::now();
-  boost::shared_ptr<EnvironmentChain3D> env_chain(new EnvironmentChain3D(planning_scene));
+  auto env_chain = boost::make_shared<EnvironmentChain3D>(planning_scene);
   if (!env_chain->setupForMotionPlan(planning_scene, req, res, params))
   {
     // std::cerr << "Env chain setup failing" << '\n';
@@ -60,7 +60,7 @@ bool SBPLInterface::solve(const planning_scene::PlanningSceneConstPtr& planning_
   boost::this_thread::interruption_point();
 
   // DummyEnvironment* dummy_env = new DummyEnvironment();
-  boost::shared_ptr<ARAPlanner> planner(new ARAPlanner(env_chain.get(), true));
+  auto planner = boost::make_shared<ARAPlanner>(env_chain.get(), true);
   planner->set_initialsolution_eps(100.0);
   planner->set_search_mode(true);
   planner->force_planning_from_scratch();

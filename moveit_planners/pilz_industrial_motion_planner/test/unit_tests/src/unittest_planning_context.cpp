@@ -121,7 +121,7 @@ protected:
         new typename T::Type_("TestPlanningContext", planning_group_, robot_model_, limits));
 
     // Define and set the current scene
-    planning_scene::PlanningScenePtr scene(new planning_scene::PlanningScene(robot_model_));
+    auto scene = std::make_shared<planning_scene::PlanningScene>(robot_model_);
     moveit::core::RobotState current_state(robot_model_);
     current_state.setToDefaultValues();
     current_state.setJointGroupPositions(planning_group_, std::vector<double>{ 0, 1.57, 1.57, 0, 0.2, 0 });

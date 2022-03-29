@@ -119,8 +119,7 @@ void ompl_interface::ModelBasedPlanningContext::configure(const rclcpp::Node::Sh
     ompl::base::ScopedState<> ompl_start_state(spec_.constrained_state_space_);
     spec_.state_space_->copyToOMPLState(ompl_start_state.get(), getCompleteInitialRobotState());
     ompl_simple_setup_->setStartState(ompl_start_state);
-    ompl_simple_setup_->setStateValidityChecker(
-        ob::StateValidityCheckerPtr(std::make_shared<ConstrainedPlanningStateValidityChecker>(this)));
+    ompl_simple_setup_->setStateValidityChecker(std::make_shared<ConstrainedPlanningStateValidityChecker>(this));
   }
   else
   {
@@ -166,7 +165,7 @@ ompl_interface::ModelBasedPlanningContext::getProjectionEvaluator(const std::str
   {
     std::string link_name = peval.substr(5, peval.length() - 6);
     if (getRobotModel()->hasLinkModel(link_name))
-      return ob::ProjectionEvaluatorPtr(new ProjectionEvaluatorLinkPose(this, link_name));
+      return std::make_shared<ProjectionEvaluatorLinkPose>(this, link_name);
     else
       RCLCPP_ERROR(LOGGER,
                    "Attempted to set projection evaluator with respect to position of link '%s', "
@@ -213,7 +212,7 @@ ompl_interface::ModelBasedPlanningContext::getProjectionEvaluator(const std::str
     }
     else
     {
-      return ob::ProjectionEvaluatorPtr(new ProjectionEvaluatorJointValue(this, j));
+      return std::make_shared<ProjectionEvaluatorJointValue>(this, j);
     }
   }
   else
@@ -266,7 +265,7 @@ ompl_interface::ModelBasedPlanningContext::allocPathConstrainedSampler(const omp
     if (constraint_sampler)
     {
       RCLCPP_INFO(LOGGER, "%s: Allocating specialized state sampler for state space", name_.c_str());
-      return ob::StateSamplerPtr(new ConstrainedSampler(this, constraint_sampler));
+      return std::make_shared<ConstrainedSampler>(this, constraint_sampler);
     }
   }
   RCLCPP_DEBUG(LOGGER, "%s: Allocating default state sampler for state space", name_.c_str());
@@ -429,8 +428,12 @@ void ompl_interface::ModelBasedPlanningContext::setPlanningVolume(const moveit_m
 
 void ompl_interface::ModelBasedPlanningContext::simplifySolution(double timeout)
 {
-  ompl_simple_setup_->simplifySolution(timeout);
+  ompl::time::point start = ompl::time::now();
+  ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
+  registerTerminationCondition(ptc);
+  ompl_simple_setup_->simplifySolution(ptc);
   last_simplify_time_ = ompl_simple_setup_->getLastSimplificationTime();
+  unregisterTerminationCondition();
 }
 
 void ompl_interface::ModelBasedPlanningContext::interpolateSolution()
@@ -506,14 +509,14 @@ ompl::base::GoalPtr ompl_interface::ModelBasedPlanningContext::constructGoal()
 
     if (constraint_sampler)
     {
-      ob::GoalPtr goal = ob::GoalPtr(new ConstrainedGoalSampler(this, goal_constraint, constraint_sampler));
+      ob::GoalPtr goal = std::make_shared<ConstrainedGoalSampler>(this, goal_constraint, constraint_sampler);
       goals.push_back(goal);
     }
   }
 
   if (!goals.empty())
   {
-    return goals.size() == 1 ? goals[0] : ompl::base::GoalPtr(new GoalSampleableRegionMux(goals));
+    return goals.size() == 1 ? goals[0] : std::make_shared<GoalSampleableRegionMux>(goals);
   }
   else
   {

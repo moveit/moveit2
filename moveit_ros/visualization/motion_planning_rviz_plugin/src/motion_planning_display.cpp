@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan, Dave Coleman, Adam Leeper, Sachin Chitta */
 
 #include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h>
 #include <moveit/robot_interaction/kinematic_options_map.h>
 #include <moveit/rviz_plugin_render_tools/planning_link_updater.h>
 #include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
@@ -85,8 +86,8 @@ MotionPlanningDisplay::MotionPlanningDisplay()
   , text_to_display_(nullptr)
   , frame_(nullptr)
   , frame_dock_(nullptr)
-  , menu_handler_start_(new interactive_markers::MenuHandler)
-  , menu_handler_goal_(new interactive_markers::MenuHandler)
+  , menu_handler_start_(std::make_shared<interactive_markers::MenuHandler>())
+  , menu_handler_goal_(std::make_shared<interactive_markers::MenuHandler>())
   , int_marker_display_(nullptr)
 {
   // Category Groups
@@ -335,28 +336,20 @@ void MotionPlanningDisplay::updateBackgroundJobProgressBar()
 
   if (n == 0)
   {
-    p->setValue(p->maximum());
-    p->update();
     p->hide();
     p->setMaximum(0);
+    p->setValue(0);
   }
   else
   {
-    if (n == 1)
+    if (p->maximum() < n)  // increase max
     {
-      if (p->maximum() == 0)
-        p->setValue(0);
-      else
-        p->setValue(p->maximum() - 1);
+      p->setMaximum(n);
+      if (n > 1)  // only show bar if there will be a progress to show
+        p->show();
     }
-    else
-    {
-      if (p->maximum() < n)
-        p->setMaximum(n);
-      else
-        p->setValue(p->maximum() - n);
-    }
-    p->show();
+    else  // progress
+      p->setValue(p->maximum() - n);
     p->update();
   }
 }
@@ -1127,6 +1120,23 @@ void MotionPlanningDisplay::populateMenuHandler(std::shared_ptr<interactive_mark
   //  for (int i = 0; i < group_names.size(); ++i)
   //    mh->insert(menu_groups, group_names[i],
   //               std::bind(&MotionPlanningDisplay::changePlanningGroup, this, group_names[i]));
+}
+
+void MotionPlanningDisplay::clearRobotModel()
+{
+  // Invalidate all references to the RobotModel ...
+  if (frame_)
+    frame_->clearRobotModel();
+  if (trajectory_visual_)
+    trajectory_visual_->clearRobotModel();
+  previous_state_.reset();
+  query_start_state_.reset();
+  query_goal_state_.reset();
+  kinematics_metrics_.reset();
+  robot_interaction_.reset();
+  dynamics_solver_.clear();
+  // ... before calling the parent's method, which finally destroys the creating RobotModelLoader.
+  PlanningSceneDisplay::clearRobotModel();
 }
 
 void MotionPlanningDisplay::onRobotModelLoaded()

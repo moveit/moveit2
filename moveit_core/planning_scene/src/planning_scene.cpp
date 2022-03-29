@@ -173,7 +173,7 @@ void PlanningScene::initialize()
 moveit::core::RobotModelPtr PlanningScene::createRobotModel(const urdf::ModelInterfaceSharedPtr& urdf_model,
                                                             const srdf::ModelConstSharedPtr& srdf_model)
 {
-  moveit::core::RobotModelPtr robot_model(new moveit::core::RobotModel(urdf_model, srdf_model));
+  auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
   if (!robot_model || !robot_model->getRootJoint())
     return moveit::core::RobotModelPtr();
 
@@ -439,12 +439,14 @@ void PlanningScene::getCollidingPairs(collision_detection::CollisionResult::Cont
 
 void PlanningScene::getCollidingPairs(collision_detection::CollisionResult::ContactMap& contacts,
                                       const moveit::core::RobotState& robot_state,
-                                      const collision_detection::AllowedCollisionMatrix& acm) const
+                                      const collision_detection::AllowedCollisionMatrix& acm,
+                                      const std::string& group_name) const
 {
   collision_detection::CollisionRequest req;
   req.contacts = true;
   req.max_contacts = getRobotModel()->getLinkModelsWithCollisionGeometry().size() + 1;
   req.max_contacts_per_pair = 1;
+  req.group_name = group_name;
   collision_detection::CollisionResult res;
   checkCollision(req, res, robot_state, acm);
   res.contacts.swap(contacts);
@@ -493,7 +495,7 @@ moveit::core::RobotState& PlanningScene::getCurrentStateNonConst()
 
 moveit::core::RobotStatePtr PlanningScene::getCurrentStateUpdated(const moveit_msgs::msg::RobotState& update) const
 {
-  moveit::core::RobotStatePtr state(new moveit::core::RobotState(getCurrentState()));
+  auto state = std::make_shared<moveit::core::RobotState>(getCurrentState());
   moveit::core::robotStateMsgToRobotState(getTransforms(), update, *state);
   return state;
 }
@@ -907,7 +909,23 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
     RCLCPP_ERROR(LOGGER, "Bad input stream when loading scene geometry");
     return false;
   }
+  // Read scene name
   std::getline(in, name_);
+
+  // Identify scene format version for backwards compatibility of parser
+  auto pos = in.tellg();  // remember current stream position
+  std::string line;
+  do
+  {
+    std::getline(in, line);
+  } while (in.good() && !in.eof() && (line.empty() || line[0] != '*'));  // read * marker
+  std::getline(in, line);                                                // next line determines format
+  boost::algorithm::trim(line);
+  // new format: line specifies position of object, with spaces as delimiter -> spaces indicate new format
+  // old format: line specifies number of shapes
+  bool uses_new_scene_format = line.find(' ') != std::string::npos;
+  in.seekg(pos);
+
   Eigen::Isometry3d pose;  // Transient
   do
   {
@@ -929,8 +947,9 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
       }
       boost::algorithm::trim(object_id);
 
-      // Read in object pose
-      if (!readPoseFromText(in, pose))
+      // Read in object pose (added in the new scene format)
+      pose.setIdentity();
+      if (uses_new_scene_format && !readPoseFromText(in, pose))
       {
         RCLCPP_ERROR(LOGGER, "Failed to read object pose from scene file");
         return false;
@@ -975,22 +994,25 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
         }
       }
 
-      // Read in subframes
-      moveit::core::FixedTransformsMap subframes;
-      unsigned int subframe_count;
-      in >> subframe_count;
-      for (std::size_t i = 0; i < subframe_count && in.good() && !in.eof(); ++i)
+      // Read in subframes (added in the new scene format)
+      if (uses_new_scene_format)
       {
-        std::string subframe_name;
-        in >> subframe_name;
-        if (!readPoseFromText(in, pose))
+        moveit::core::FixedTransformsMap subframes;
+        unsigned int subframe_count;
+        in >> subframe_count;
+        for (std::size_t i = 0; i < subframe_count && in.good() && !in.eof(); ++i)
         {
-          RCLCPP_ERROR(LOGGER, "Failed to read subframe pose from scene file");
-          return false;
+          std::string subframe_name;
+          in >> subframe_name;
+          if (!readPoseFromText(in, pose))
+          {
+            RCLCPP_ERROR(LOGGER, "Failed to read subframe pose from scene file");
+            return false;
+          }
+          subframes[subframe_name] = pose;
         }
-        subframes[subframe_name] = pose;
+        world_->setSubframesOfObject(object_id, subframes);
       }
-      world_->setSubframesOfObject(object_id, subframes);
     }
     else if (marker == ".")
     {
@@ -1254,11 +1276,11 @@ void PlanningScene::processOctomapMsg(const octomap_msgs::msg::Octomap& map)
   if (!map.header.frame_id.empty())
   {
     const Eigen::Isometry3d& t = getFrameTransform(map.header.frame_id);
-    world_->addToObject(OCTOMAP_NS, shapes::ShapeConstPtr(new shapes::OcTree(om)), t);
+    world_->addToObject(OCTOMAP_NS, std::make_shared<const shapes::OcTree>(om), t);
   }
   else
   {
-    world_->addToObject(OCTOMAP_NS, shapes::ShapeConstPtr(new shapes::OcTree(om)), Eigen::Isometry3d::Identity());
+    world_->addToObject(OCTOMAP_NS, std::make_shared<const shapes::OcTree>(om), Eigen::Isometry3d::Identity());
   }
 }
 
@@ -1294,7 +1316,7 @@ void PlanningScene::processOctomapMsg(const octomap_msgs::msg::OctomapWithPose& 
   Eigen::Isometry3d p;
   PlanningScene::poseMsgToEigen(map.origin, p);
   p = t * p;
-  world_->addToObject(OCTOMAP_NS, shapes::ShapeConstPtr(new shapes::OcTree(om)), p);
+  world_->addToObject(OCTOMAP_NS, std::make_shared<const shapes::OcTree>(om), p);
 }
 
 void PlanningScene::processOctomapPtr(const std::shared_ptr<const octomap::OcTree>& octree, const Eigen::Isometry3d& t)
@@ -1327,7 +1349,7 @@ void PlanningScene::processOctomapPtr(const std::shared_ptr<const octomap::OcTre
   }
   // if the octree pointer changed, update the structure
   world_->removeObject(OCTOMAP_NS);
-  world_->addToObject(OCTOMAP_NS, shapes::ShapeConstPtr(new shapes::OcTree(octree)), t);
+  world_->addToObject(OCTOMAP_NS, std::make_shared<const shapes::OcTree>(octree), t);
 }
 
 bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::AttachedCollisionObject& object)

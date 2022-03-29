@@ -84,7 +84,7 @@ public:
 
   moveit_controller_manager::MoveItControllerHandlePtr getControllerHandle(const std::string& name) override
   {
-    return moveit_controller_manager::MoveItControllerHandlePtr(new ExampleControllerHandle(name));
+    return std::make_shared<ExampleControllerHandle>(name);
   }
 
   /*
