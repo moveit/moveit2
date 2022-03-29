@@ -472,7 +472,7 @@ TYPED_TEST_P(CollisionDetectorTest, TestCollisionMapAdditionSpeed)
   for (unsigned int i = 0; i < 10000; ++i)
   {
     poses.push_back(Eigen::Isometry3d::Identity());
-    shapes.push_back(shapes::ShapeConstPtr(new shapes::Box(.01, .01, .01)));
+    shapes.push_back(std::make_shared<shapes::Box>(.01, .01, .01));
   }
   auto start = std::chrono::system_clock::now();
   this->cenv_->getWorld()->addToObject("map", shapes, poses);
@@ -526,7 +526,7 @@ TYPED_TEST_P(CollisionDetectorTest, TestChangingShapeSize)
     this->cenv_->getWorld()->removeObject("shape");
     shapes.clear();
     poses.clear();
-    shapes.push_back(shapes::ShapeConstPtr(new shapes::Box(1 + i * .0001, 1 + i * .0001, 1 + i * .0001)));
+    shapes.push_back(std::make_shared<const shapes::Box>(1 + i * .0001, 1 + i * .0001, 1 + i * .0001));
     poses.push_back(Eigen::Isometry3d::Identity());
     this->cenv_->getWorld()->addToObject("shape", shapes, poses);
     collision_detection::CollisionRequest req;
@@ -548,7 +548,7 @@ TYPED_TEST_P(CollisionDetectorTest, TestChangingShapeSize)
     this->cenv_->getWorld()->removeObject("shape");
     shapes.clear();
     poses.clear();
-    shapes.push_back(shapes::ShapeConstPtr(new shapes::Box(1 + i * .0001, 1 + i * .0001, 1 + i * .0001)));
+    shapes.push_back(std::make_shared<shapes::Box>(1 + i * .0001, 1 + i * .0001, 1 + i * .0001));
     poses.push_back(Eigen::Isometry3d::Identity());
     this->cenv_->getWorld()->addToObject("shape", shapes, poses);
     collision_detection::CollisionRequest req;

@@ -267,7 +267,7 @@ void TrajectoryGenerator::setSuccessResponse(const moveit::core::RobotState& sta
                                              const rclcpp::Time& planning_start,
                                              planning_interface::MotionPlanResponse& res) const
 {
-  robot_trajectory::RobotTrajectoryPtr rt(new robot_trajectory::RobotTrajectory(robot_model_, group_name));
+  auto rt = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, group_name);
   rt->setRobotTrajectoryMsg(start_state, joint_trajectory);
 
   res.trajectory_ = rt;
@@ -290,9 +290,9 @@ TrajectoryGenerator::cartesianTrapVelocityProfile(const double& max_velocity_sca
                                                   const double& max_acceleration_scaling_factor,
                                                   const std::unique_ptr<KDL::Path>& path) const
 {
-  std::unique_ptr<KDL::VelocityProfile> vp_trans(new KDL::VelocityProfile_Trap(
+  std::unique_ptr<KDL::VelocityProfile> vp_trans = std::make_unique<KDL::VelocityProfile_Trap>(
       max_velocity_scaling_factor * planner_limits_.getCartesianLimits().getMaxTranslationalVelocity(),
-      max_acceleration_scaling_factor * planner_limits_.getCartesianLimits().getMaxTranslationalAcceleration()));
+      max_acceleration_scaling_factor * planner_limits_.getCartesianLimits().getMaxTranslationalAcceleration());
 
   if (path->PathLength() > std::numeric_limits<double>::epsilon())  // avoid division by zero
   {

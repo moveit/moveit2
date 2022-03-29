@@ -219,7 +219,7 @@ allocConstraintApproximationStateSampler(const ob::StateSpace* space, const std:
   if (sig != expected_signature)
     return ompl::base::StateSamplerPtr();
   else
-    return ompl::base::StateSamplerPtr(new ConstraintApproximationStateSampler(space, state_storage, milestones));
+    return std::make_shared<ConstraintApproximationStateSampler>(space, state_storage, milestones);
 }
 }  // namespace ompl_interface
 
@@ -343,9 +343,8 @@ void ompl_interface::ConstraintsLibrary::loadConstraintApproximations(const std:
     hexToMsg(serialization, msg);
     auto* cass = new ConstraintApproximationStateStorage(context_->getOMPLSimpleSetup()->getStateSpace());
     cass->load((std::string{ path }.append("/").append(filename)).c_str());
-    ConstraintApproximationPtr cap(new ConstraintApproximation(group, state_space_parameterization, explicit_motions,
-                                                               msg, filename, ompl::base::StateStoragePtr(cass),
-                                                               milestones));
+    auto cap = std::make_shared<ConstraintApproximation>(group, state_space_parameterization, explicit_motions, msg,
+                                                         filename, ompl::base::StateStoragePtr(cass), milestones);
     if (constraint_approximations_.find(cap->getName()) != constraint_approximations_.end())
       RCLCPP_WARN(LOGGER, "Overwriting constraint approximation named '%s'", cap->getName().c_str());
     constraint_approximations_[cap->getName()] = cap;
@@ -461,11 +460,11 @@ ompl_interface::ConstraintsLibrary::addConstraintApproximation(const moveit_msgs
   RCLCPP_INFO(LOGGER, "Spent %lf seconds constructing the database", (clock.now() - start).seconds());
   if (state_storage)
   {
-    ConstraintApproximationPtr constraint_approx(new ConstraintApproximation(
+    auto constraint_approx = std::make_shared<ConstraintApproximation>(
         group, options.state_space_parameterization, options.explicit_motions, constr_hard,
         group + "_" + boost::posix_time::to_iso_extended_string(boost::posix_time::microsec_clock::universal_time()) +
             ".ompldb",
-        state_storage, res.milestones));
+        state_storage, res.milestones);
     if (constraint_approximations_.find(constraint_approx->getName()) != constraint_approximations_.end())
       RCLCPP_WARN(LOGGER, "Overwriting constraint approximation named '%s'", constraint_approx->getName().c_str());
     constraint_approximations_[constraint_approx->getName()] = constraint_approx;

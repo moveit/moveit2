@@ -647,15 +647,15 @@ void EnvironmentChain3D::setMotionPrimitives(const std::string& group_name)
   for (unsigned int i = 0; i < jmg->getActiveDOFNames().size(); ++i)
   {
     const planning_models::RobotModel::JointModel* joint = jmg->getJointModel(jmg->getActiveDOFNames()[i]);
-    boost::shared_ptr<JointMotionWrapper> jmw(new JointMotionWrapper(joint));
+    auto jmw = boost::make_shared<JointMotionWrapper>(joint);
     joint_motion_wrappers_.push_back(jmw);
     // TODO - figure out which DOFs have something to do with end effector position
     if (!planning_parameters_.use_bfs_ || i < 4)
     {
-      boost::shared_ptr<SingleJointMotionPrimitive> sing_pos(
-          new SingleJointMotionPrimitive(jmw, i, planning_parameters_.joint_motion_primitive_distance_));
-      boost::shared_ptr<SingleJointMotionPrimitive> sing_neg(
-          new SingleJointMotionPrimitive(jmw, i, -planning_parameters_.joint_motion_primitive_distance_));
+      auto sing_pos =
+          boost::make_shared<SingleJointMotionPrimitive>(jmw, i, planning_parameters_.joint_motion_primitive_distance_);
+      auto sing_neg = boost::make_shared<SingleJointMotionPrimitive>(
+          jmw, i, -planning_parameters_.joint_motion_primitive_distance_);
       possible_actions_.push_back(sing_pos);
       possible_actions_.push_back(sing_neg);
     }

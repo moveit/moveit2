@@ -751,7 +751,7 @@ void MotionPlanningFrame::computeLoadQueryButtonClicked()
                                                   mp->start_state, *start_state);
           planning_display_->setQueryStartState(*start_state);
 
-          moveit::core::RobotStatePtr goal_state(new moveit::core::RobotState(*planning_display_->getQueryGoalState()));
+          auto goal_state = std::make_shared<moveit::core::RobotState>(*planning_display_->getQueryGoalState());
           for (const moveit_msgs::msg::Constraints& goal_constraint : mp->goal_constraints)
             if (!goal_constraint.joint_constraints.empty())
             {

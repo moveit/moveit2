@@ -79,23 +79,23 @@ public:
 
   CollisionEnvPtr allocateEnv(const WorldPtr& world, const moveit::core::RobotModelConstPtr& robot_model) const override
   {
-    return CollisionEnvPtr(new CollisionEnvType(robot_model, world));
+    return std::make_shared<CollisionEnvType>(robot_model, world);
   }
 
   CollisionEnvPtr allocateEnv(const CollisionEnvConstPtr& orig, const WorldPtr& world) const override
   {
-    return CollisionEnvPtr(new CollisionEnvType(dynamic_cast<const CollisionEnvType&>(*orig), world));
+    return std::make_shared<CollisionEnvType>(dynamic_cast<const CollisionEnvType&>(*orig), world);
   }
 
   CollisionEnvPtr allocateEnv(const moveit::core::RobotModelConstPtr& robot_model) const override
   {
-    return CollisionEnvPtr(new CollisionEnvType(robot_model));
+    return std::make_shared<CollisionEnvType>(robot_model);
   }
 
   /** Create an allocator for collision detectors. */
   static CollisionDetectorAllocatorPtr create()
   {
-    return CollisionDetectorAllocatorPtr(new CollisionDetectorAllocatorType());
+    return std::make_shared<CollisionDetectorAllocatorType>();
   }
 };
 }  // namespace collision_detection
