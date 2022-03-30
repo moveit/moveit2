@@ -87,7 +87,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
   // Initialize the smoother
   const std::vector<int>& idx = group->getVariableIndexList();
-  initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), num_dof, idx);
+  initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), group);
 
   // Kinematic limits (vel/accel/jerk)
   const std::vector<std::string>& vars = group->getVariableNames();
@@ -127,16 +127,16 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     {
       moveit::core::RobotStatePtr next_waypoint = trajectory.getWayPointPtr(waypoint_idx + 1);
 
-      getNextRuckigInput(ruckig_output, next_waypoint, num_dof, idx, ruckig_input);
+      getNextRuckigInput(ruckig_output, next_waypoint, group, ruckig_input);
 
       // Run Ruckig
       ruckig_result = ruckig_ptr->update(ruckig_input, ruckig_output);
 
       // If the requested velocity is too great, a joint can actually "move backward" to give itself more time to
       // accelerate to the target velocity. Iterate and decrease velocities until that behavior is gone.
-      bool backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
+      bool backward_motion_detected = checkForLaggingMotion(group, ruckig_input, ruckig_output);
 
-      double velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, num_dof);
+      double velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, group);
       while (backward_motion_detected && (velocity_magnitude > MINIMUM_VELOCITY_SEARCH_MAGNITUDE))
       {
         // Skip repeated waypoints with no change in position. Ruckig does not handle this well and there's really no
@@ -156,12 +156,12 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
           ruckig_input.target_acceleration.at(joint) =
               (ruckig_input.target_velocity.at(joint) - ruckig_output.new_velocity.at(joint)) / timestep;
         }
-        velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, num_dof);
+        velocity_magnitude = getTargetVelocityMagnitude(ruckig_input, group);
         // Run Ruckig
         ruckig_result = ruckig_ptr->update(ruckig_input, ruckig_output);
 
         // check for backward motion
-        backward_motion_detected = checkForLaggingMotion(num_dof, ruckig_input, ruckig_output);
+        backward_motion_detected = checkForLaggingMotion(group, ruckig_input, ruckig_output);
       }
 
       // Overwrite pos/vel/accel of the target waypoint
@@ -185,7 +185,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     {
       // If Ruckig failed, it's likely because the original seed trajectory did not have a long enough duration when
       // jerk is taken into account. Extend the duration and try again.
-      initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), num_dof, idx);
+      initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), group);
       duration_extension_factor *= DURATION_EXTENSION_FRACTION;
       for (size_t waypoint_idx = 1; waypoint_idx < num_waypoints; ++waypoint_idx)
       {
@@ -212,9 +212,12 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
 
 void RuckigSmoothing::initializeRuckigState(ruckig::InputParameter<0>& ruckig_input,
                                             ruckig::OutputParameter<0>& ruckig_output,
-                                            const moveit::core::RobotState& first_waypoint, size_t num_dof,
-                                            const std::vector<int>& idx)
+                                            const moveit::core::RobotState& first_waypoint,
+                                            const moveit::core::JointModelGroup* joint_group)
 {
+  const size_t num_dof = joint_group->getVariableCount();
+  const std::vector<int>& idx = joint_group->getVariableIndexList();
+
   std::vector<double> current_positions_vector(num_dof);
   std::vector<double> current_velocities_vector(num_dof);
   std::vector<double> current_accelerations_vector(num_dof);
@@ -243,8 +246,10 @@ bool RuckigSmoothing::checkForIdenticalWaypoints(const moveit::core::RobotState&
   return (magnitude_position_difference <= IDENTICAL_POSITION_EPSILON);
 }
 
-double RuckigSmoothing::getTargetVelocityMagnitude(const ruckig::InputParameter<0>& ruckig_input, size_t num_dof)
+double RuckigSmoothing::getTargetVelocityMagnitude(const ruckig::InputParameter<0>& ruckig_input,
+                                                   const moveit::core::JointModelGroup* joint_group)
 {
+  const size_t num_dof = joint_group->getVariableCount();
   double vel_magnitude = 0;
   for (size_t joint = 0; joint < num_dof; ++joint)
   {
@@ -253,9 +258,11 @@ double RuckigSmoothing::getTargetVelocityMagnitude(const ruckig::InputParameter<
   return sqrt(vel_magnitude);
 }
 
-bool RuckigSmoothing::checkForLaggingMotion(const size_t num_dof, const ruckig::InputParameter<0>& ruckig_input,
+bool RuckigSmoothing::checkForLaggingMotion(const moveit::core::JointModelGroup* joint_group,
+                                            const ruckig::InputParameter<0>& ruckig_input,
                                             const ruckig::OutputParameter<0>& ruckig_output)
 {
+  const size_t num_dof = joint_group->getVariableCount();
   // Check for backward motion of any joint
   for (size_t joint = 0; joint < num_dof; ++joint)
   {
@@ -269,11 +276,15 @@ bool RuckigSmoothing::checkForLaggingMotion(const size_t num_dof, const ruckig::
 }
 
 void RuckigSmoothing::getNextRuckigInput(const ruckig::OutputParameter<0>& ruckig_output,
-                                         const moveit::core::RobotStatePtr& next_waypoint, size_t num_dof,
-                                         const std::vector<int>& idx, ruckig::InputParameter<0>& ruckig_input)
+                                         const moveit::core::RobotStatePtr& next_waypoint,
+                                         const moveit::core::JointModelGroup* joint_group,
+                                         ruckig::InputParameter<0>& ruckig_input)
 {
   // TODO(andyz): https://github.com/ros-planning/moveit2/issues/766
   // ruckig_output.pass_to_input(ruckig_input);
+
+  const size_t num_dof = joint_group->getVariableCount();
+  const std::vector<int>& idx = joint_group->getVariableIndexList();
 
   for (size_t joint = 0; joint < num_dof; ++joint)
   {
