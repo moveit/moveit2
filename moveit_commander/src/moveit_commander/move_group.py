@@ -474,11 +474,7 @@ class MoveGroupCommander(object):
         return self._g.get_known_constraints()
 
     def get_path_constraints(self):
-<<<<<<< HEAD
-        """ Get the acutal path constraints in form of a moveit_msgs.msgs.Constraints """
-=======
         """Get the actual path constraints in form of a moveit_msgs.msgs.Constraints"""
->>>>>>> b6c0e0e72 (Update black version, formatting changes (#1148))
         c = Constraints()
         c_str = self._g.get_path_constraints()
         conversions.msg_from_string(c, c_str)
@@ -501,23 +497,14 @@ class MoveGroupCommander(object):
         self._g.clear_path_constraints()
 
     def get_trajectory_constraints(self):
-<<<<<<< HEAD
-        """ Get the actual trajectory constraints in form of a moveit_msgs.msgs.Constraints """
+        """Get the actual trajectory constraints in form of a moveit_msgs.msgs.Constraints"""
         c = Constraints()
-=======
-        """Get the actual trajectory constraints in form of a moveit_msgs.msgs.TrajectoryConstraints"""
-        c = TrajectoryConstraints()
->>>>>>> b6c0e0e72 (Update black version, formatting changes (#1148))
         c_str = self._g.get_trajectory_constraints()
         conversions.msg_from_string(c, c_str)
         return c
 
     def set_trajectory_constraints(self, value):
-<<<<<<< HEAD
-        """ Specify the trajectory constraints to be used """
-=======
         """Specify the trajectory constraints to be used (setting from database is not implemented yet)"""
->>>>>>> b6c0e0e72 (Update black version, formatting changes (#1148))
         if value is None:
             self.clear_trajectory_constraints()
         else:
@@ -550,15 +537,9 @@ class MoveGroupCommander(object):
         """Specify which planning pipeline to use when motion planning (e.g. ompl, pilz_industrial_motion_planner)"""
         self._g.set_planning_pipeline_id(planning_pipeline)
 
-<<<<<<< HEAD
-    def get_planning_pipeline_id(self, planning_pipeline):
-        """ Get the current planning_pipeline_id (e.g. ompl, pilz_industrial_motion_planner) """
-        self._g.get_planning_pipeline_id(planning_pipeline)
-=======
     def get_planning_pipeline_id(self):
         """Get the current planning_pipeline_id (e.g. ompl, pilz_industrial_motion_planner)"""
         return self._g.get_planning_pipeline_id()
->>>>>>> b6c0e0e72 (Update black version, formatting changes (#1148))
 
     def set_planner_id(self, planner_id):
         """Specify which planner of the currently selected pipeline to use when motion planning (e.g. RRTConnect, LIN)"""
@@ -706,11 +687,7 @@ class MoveGroupCommander(object):
             return self._g.async_execute(conversions.msg_to_string(plan_msg))
 
     def attach_object(self, object_name, link_name="", touch_links=[]):
-<<<<<<< HEAD
-        """ Given the name of an object existing in the planning scene, attach it to a link. The link used is specified by the second argument. If left unspecified, the end-effector link is used, if one is known. If there is no end-effector link, the first link in the group is used. If no link is identified, failure is reported. True is returned if an attach request was succesfully sent to the move_group node. This does not verify that the attach request also was successfuly applied by move_group."""
-=======
         """Given the name of an object existing in the planning scene, attach it to a link. The link used is specified by the second argument. If left unspecified, the end-effector link is used, if one is known. If there is no end-effector link, the first link in the group is used. If no link is identified, failure is reported. True is returned if an attach request was successfully sent to the move_group node. This does not verify that the attach request also was successfully applied by move_group."""
->>>>>>> b6c0e0e72 (Update black version, formatting changes (#1148))
         return self._g.attach_object(object_name, link_name, touch_links)
 
     def detach_object(self, name=""):
