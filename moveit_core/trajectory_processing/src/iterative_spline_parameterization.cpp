@@ -579,7 +579,7 @@ void globalAdjustment(std::vector<SingleJointTrajectory>& t2, robot_trajectory::
   const unsigned int num_joints = group->getVariableCount();
 
   double gtfactor = 1.0;
-  for (int j = 0; j < num_joints; ++j)
+  for (unsigned int j = 0; j < num_joints; ++j)
   {
     double tfactor;
     tfactor = global_adjustment_factor(num_points, &t2[j].velocities_[0], &t2[j].accelerations_[0], t2[j].max_velocity_,
@@ -589,10 +589,10 @@ void globalAdjustment(std::vector<SingleJointTrajectory>& t2, robot_trajectory::
   }
 
   // printf("# Global adjustment: %0.4f%%\n", 100.0 * (gtfactor - 1.0));
-  for (int i = 0; i < num_points - 1; ++i)
+  for (unsigned int i = 0; i < num_points - 1; ++i)
     time_diff[i] *= gtfactor;
 
-  for (int j = 0; j < num_joints; ++j)
+  for (unsigned int j = 0; j < num_joints; ++j)
   {
     fit_cubic_spline(num_points, &time_diff[0], &t2[j].positions_[0], &t2[j].velocities_[0], &t2[j].accelerations_[0]);
   }
