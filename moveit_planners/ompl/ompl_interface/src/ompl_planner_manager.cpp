@@ -86,7 +86,7 @@ public:
                   const std::string& parameter_namespace) override
   {
     ompl_interface_ = std::make_unique<OMPLInterface>(model, node, parameter_namespace);
-    config_settings_ = ompl_interface_->getPlannerConfigurations();
+    setPlannerConfigurations(ompl_interface_->getPlannerConfigurations());
     return true;
   }
 

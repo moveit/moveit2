@@ -182,29 +182,22 @@ void OMPLInterface::loadPlannerConfigurations()
 
     // get parameters specific for the robot planning group
     std::map<std::string, std::string> specific_group_params;
-    for (const auto& k : KNOWN_GROUP_PARAMS)
+    for (const auto& [name, type] : KNOWN_GROUP_PARAMS)
     {
       std::string param_name{ group_name_param };
       param_name += ".";
-      param_name += k.first;
+      param_name += name;
       if (node_->has_parameter(param_name))
       {
         const rclcpp::Parameter parameter = node_->get_parameter(param_name);
-        if (parameter.get_type() != k.second)
+        if (parameter.get_type() != type)
         {
-          RCLCPP_ERROR_STREAM(LOGGER, "Invalid type for parameter '" << k.first << "' expected ["
-                                                                     << rclcpp::to_string(k.second) << "] got ["
+          RCLCPP_ERROR_STREAM(LOGGER, "Invalid type for parameter '" << name << "' expected ["
+                                                                     << rclcpp::to_string(type) << "] got ["
                                                                      << rclcpp::to_string(parameter.get_type()) << "]");
           continue;
         }
-        if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
-          specific_group_params[k.first] = parameter.as_string();
-        else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE)
-          specific_group_params[k.first] = moveit::core::toString(parameter.as_double());
-        else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER)
-          specific_group_params[k.first] = std::to_string(parameter.as_int());
-        else if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_BOOL)
-          specific_group_params[k.first] = std::to_string(parameter.as_bool());
+        specific_group_params[name] = parameter.value_to_string();
       }
     }
 
@@ -244,13 +237,13 @@ void OMPLInterface::loadPlannerConfigurations()
     }
   }
 
-  for (const std::pair<const std::string, planning_interface::PlannerConfigurationSettings>& config : pconfig)
+  for (const auto& [name, config_settings] : pconfig)
   {
-    RCLCPP_DEBUG(LOGGER, "Parameters for configuration '%s'", config.first.c_str());
+    RCLCPP_DEBUG(LOGGER, "Parameters for configuration '%s'", name.c_str());
 
-    for (const std::pair<const std::string, std::string>& parameters : config.second.config)
+    for (const auto& [param_name, param_value] : config_settings.config)
     {
-      RCLCPP_DEBUG(LOGGER, " - %s = %s", parameters.first.c_str(), parameters.second.c_str());
+      RCLCPP_DEBUG_STREAM(LOGGER, " - " << param_name << " = " << param_value);
     }
   }
 
