@@ -40,10 +40,7 @@ def generate_servo_test_description(*args, gtest_name: SomeSubstitutionsType):
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[moveit_config.robot_description, ros2_controllers_path],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        output="screen",
     )
 
     # Load controllers
