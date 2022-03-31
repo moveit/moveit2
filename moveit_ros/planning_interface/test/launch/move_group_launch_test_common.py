@@ -61,10 +61,7 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[moveit_config.robot_description, ros2_controllers_path],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        output="screen",
     )
 
     # Load controllers

@@ -16,15 +16,11 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          # - IMAGE: rolling-ci
-          #   ROS_DISTRO: rolling
-          # - IMAGE: rolling-ci-testing
-          #   ROS_DISTRO: rolling
-          - IMAGE: galactic-ci
+          - IMAGE: rolling-ci
             CCOV: true
-            ROS_DISTRO: galactic
-          - IMAGE: galactic-ci-testing
-            ROS_DISTRO: galactic
+            ROS_DISTRO: rolling
+          - IMAGE: rolling-ci-testing
+            ROS_DISTRO: rolling
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
     env:
