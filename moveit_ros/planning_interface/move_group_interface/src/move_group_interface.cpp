@@ -1012,7 +1012,7 @@ public:
       std_msgs::msg::String event;
       event.data = "stop";
       trajectory_event_publisher_->publish(event);
-      rclcpp::spin_some(pnode_);
+      // rclcpp::spin_some(pnode_);
     }
   }
 
