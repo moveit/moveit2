@@ -76,10 +76,7 @@ def generate_launch_description():
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[robot_description, ros2_controllers_path],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        output="screen",
     )
 
     # Load controllers
@@ -147,10 +144,7 @@ def generate_launch_description():
             robot_description,
             robot_description_semantic,
         ],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        output="screen",
     )
 
     return LaunchDescription(
