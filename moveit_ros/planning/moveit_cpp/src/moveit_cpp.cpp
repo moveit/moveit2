@@ -35,6 +35,8 @@
 /* Author: Henning Kayser */
 
 #include <stdexcept>
+
+#include <moveit/controller_manager/controller_manager.h>
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -247,20 +249,21 @@ trajectory_execution_manager::TrajectoryExecutionManagerPtr MoveItCpp::getTrajec
   return trajectory_execution_manager_;
 }
 
-bool MoveItCpp::execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
-                        bool blocking)
+moveit_controller_manager::ExecutionStatus
+MoveItCpp::execute(const std::string& group_name, const robot_trajectory::RobotTrajectoryPtr& robot_trajectory,
+                   bool blocking)
 {
   if (!robot_trajectory)
   {
     RCLCPP_ERROR(LOGGER, "Robot trajectory is undefined");
-    return false;
+    return moveit_controller_manager::ExecutionStatus::ABORTED;
   }
 
   // Check if there are controllers that can handle the execution
   if (!trajectory_execution_manager_->ensureActiveControllersForGroup(group_name))
   {
     RCLCPP_ERROR(LOGGER, "Execution failed! No active controllers configured for group '%s'", group_name.c_str());
-    return false;
+    return moveit_controller_manager::ExecutionStatus::ABORTED;
   }
 
   // Execute trajectory
@@ -273,7 +276,7 @@ bool MoveItCpp::execute(const std::string& group_name, const robot_trajectory::R
     return trajectory_execution_manager_->waitForExecution();
   }
   trajectory_execution_manager_->pushAndExecute(robot_trajectory_msg);
-  return true;
+  return moveit_controller_manager::ExecutionStatus::RUNNING;
 }
 
 const std::shared_ptr<tf2_ros::Buffer>& MoveItCpp::getTFBuffer() const
