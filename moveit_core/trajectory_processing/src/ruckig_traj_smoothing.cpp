@@ -45,12 +45,12 @@ namespace trajectory_processing
 {
 namespace
 {
-rclcpp::Logger const LOGGER = rclcpp::get_logger("moveit_trajectory_processing.ruckig_traj_smoothing");
-double constexpr DEFAULT_MAX_VELOCITY = 5;       // rad/s
-double constexpr DEFAULT_MAX_ACCELERATION = 10;  // rad/s^2
-double constexpr DEFAULT_MAX_JERK = 200;         // rad/s^3
-double constexpr MAX_DURATION_EXTENSION_FACTOR = 10.0;
-double constexpr DURATION_EXTENSION_FRACTION = 1.1;
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_trajectory_processing.ruckig_traj_smoothing");
+constexpr double DEFAULT_MAX_VELOCITY = 5;       // rad/s
+constexpr double DEFAULT_MAX_ACCELERATION = 10;  // rad/s^2
+constexpr double DEFAULT_MAX_JERK = 200;         // rad/s^3
+constexpr double MAX_DURATION_EXTENSION_FACTOR = 10.0;
+constexpr double DURATION_EXTENSION_FRACTION = 1.1;
 }  // namespace
 
 bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
@@ -64,7 +64,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     return false;
   }
 
-  size_t const num_waypoints = trajectory.getWayPointCount();
+  const size_t num_waypoints = trajectory.getWayPointCount();
   if (num_waypoints < 2)
   {
     RCLCPP_WARN(LOGGER,
@@ -76,7 +76,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   robot_trajectory::RobotTrajectory original_trajectory =
       robot_trajectory::RobotTrajectory(trajectory, true /* deep copy */);
 
-  size_t const num_dof = group->getVariableCount();
+  const size_t num_dof = group->getVariableCount();
 
   // This lib does not actually work properly when angles wrap around, so we need to unwind the path first
   trajectory.unwind();
@@ -89,15 +89,14 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   ruckig::OutputParameter<ruckig::DynamicDOFs> ruckig_output{ num_dof };
 
   // Initialize the smoother
-  const std::vector<int>& idx = group->getVariableIndexList();
   initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), group);
 
   // Kinematic limits (vel/accel/jerk)
-  std::vector<std::string> const& vars = group->getVariableNames();
-  moveit::core::RobotModel const& rmodel = group->getParentModel();
+  const std::vector<std::string>& vars = group->getVariableNames();
+  const moveit::core::RobotModel& rmodel = group->getParentModel();
   for (size_t i = 0; i < num_dof; ++i)
   {
-    moveit::core::VariableBounds const& bounds = rmodel.getVariableBounds(vars.at(i));
+    const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars.at(i));
 
     // This assumes min/max bounds are symmetric
     if (bounds.velocity_bounded_)
@@ -159,7 +158,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
               duration_extension_factor * original_trajectory.getWayPointDurationFromPrevious(time_stretch_idx));
           // re-calculate waypoint velocity and acceleration
           auto target_state = trajectory.getWayPointPtr(time_stretch_idx);
-          auto const prev_state = trajectory.getWayPointPtr(time_stretch_idx - 1);
+          const auto prev_state = trajectory.getWayPointPtr(time_stretch_idx - 1);
           timestep = trajectory.getAverageSegmentDuration();
           for (size_t joint = 0; joint < num_dof; ++joint)
           {
