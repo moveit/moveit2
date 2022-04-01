@@ -36,6 +36,8 @@ RUN \
     rosdep update && \
     DEBIAN_FRONTEND=noninteractive \
     rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
+    # Remove srdfdom binaries
+    apt-get -q remove ros-rolling-srdfdom && \
     # Remove the source code from this container
     rm -rf src && \
     #
