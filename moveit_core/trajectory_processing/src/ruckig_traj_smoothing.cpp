@@ -115,14 +115,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     {
       ruckig_input.max_acceleration.at(i) = max_acceleration_scaling_factor * DEFAULT_MAX_ACCELERATION;
     }
-    if (bounds.jerk_bounded_)
-    {
-      ruckig_input.max_jerk.at(i) = bounds.max_jerk_;
-    }
-    else
-    {
-      ruckig_input.max_jerk.at(i) = DEFAULT_MAX_JERK;
-    }
+    ruckig_input.max_jerk.at(i) = bounds.jerk_bounded_ ? bounds.max_jerk_ : DEFAULT_MAX_JERK;
   }
 
   ruckig::Result ruckig_result;
