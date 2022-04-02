@@ -4,10 +4,12 @@ project(moveit_resources_prbt_ikfast_manipulator_plugin)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_compile_options(-Wall)
-add_compile_options(-Wextra)
-add_compile_options(-Wno-unused-parameter)
-add_compile_options(-Wno-unused-variable)
+if(NOT WIN32)
+  add_compile_options(-Wall)
+  add_compile_options(-Wextra)
+  add_compile_options(-Wno-unused-parameter)
+  add_compile_options(-Wno-unused-variable)
+endif()
 
 # enable aligned new in gcc7+
 if(CMAKE_COMPILER_IS_GNUCXX)
