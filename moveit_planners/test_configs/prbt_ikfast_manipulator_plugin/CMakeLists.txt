@@ -35,7 +35,7 @@ add_library(prbt_manipulator_moveit_ikfast_plugin SHARED
 if(NOT WIN32)
   # suppress warnings about unused variables in OpenRave's solver code
   target_compile_options(prbt_manipulator_moveit_ikfast_plugin PRIVATE -Wno-unused-variable)
-ending()
+endif()
 ament_target_dependencies(prbt_manipulator_moveit_ikfast_plugin
   moveit_core
   pluginlib
