@@ -48,7 +48,7 @@ namespace
 const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_trajectory_processing.ruckig_traj_smoothing");
 constexpr double DEFAULT_MAX_VELOCITY = 5;       // rad/s
 constexpr double DEFAULT_MAX_ACCELERATION = 10;  // rad/s^2
-constexpr double DEFAULT_MAX_JERK = 200;         // rad/s^3
+constexpr double DEFAULT_MAX_JERK = 1000;        // rad/s^3
 constexpr double MAX_DURATION_EXTENSION_FACTOR = 10.0;
 constexpr double DURATION_EXTENSION_FRACTION = 1.1;
 }  // namespace
@@ -105,6 +105,10 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     }
     else
     {
+      RCLCPP_WARN_STREAM_ONCE(LOGGER,
+                              "Joint velocity limits are not defined. Using the default "
+                                  << DEFAULT_MAX_VELOCITY
+                                  << " rad/s. You can define velocity limits in the URDF or joint_limits.yaml.");
       ruckig_input.max_velocity.at(i) = max_velocity_scaling_factor * DEFAULT_MAX_VELOCITY;
     }
     if (bounds.acceleration_bounded_)
@@ -113,9 +117,24 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     }
     else
     {
+      RCLCPP_WARN_STREAM_ONCE(LOGGER,
+                              "Joint acceleration limits are not defined. Using the default "
+                                  << DEFAULT_MAX_ACCELERATION
+                                  << " rad/s^2. You can define acceleration limits in the URDF or joint_limits.yaml.");
       ruckig_input.max_acceleration.at(i) = max_acceleration_scaling_factor * DEFAULT_MAX_ACCELERATION;
     }
     ruckig_input.max_jerk.at(i) = bounds.jerk_bounded_ ? bounds.max_jerk_ : DEFAULT_MAX_JERK;
+    if (bounds.jerk_bounded_)
+    {
+      ruckig_input.max_jerk.at(i) = bounds.max_jerk_;
+    }
+    else
+    {
+      RCLCPP_WARN_STREAM_ONCE(LOGGER, "Joint jerk limits are not defined. Using the default "
+                                          << DEFAULT_MAX_JERK
+                                          << " rad/s^3. You can define jerk limits in joint_limits.yaml.");
+      ruckig_input.max_jerk.at(i) = DEFAULT_MAX_JERK;
+    }
   }
 
   ruckig::Result ruckig_result;
