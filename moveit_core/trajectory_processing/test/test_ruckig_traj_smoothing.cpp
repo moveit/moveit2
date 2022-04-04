@@ -74,21 +74,14 @@ TEST_F(RuckigTests, basic_trajectory)
   robot_state.update();
   trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
 
-  joint_positions.at(0) += 0.05;
-  robot_state.setJointGroupPositions(JOINT_GROUP, joint_positions);
-  robot_state.update();
-  trajectory_->addSuffixWayPoint(robot_state, DEFAULT_TIMESTEP);
-
   EXPECT_TRUE(
       smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
 }
 
 TEST_F(RuckigTests, trajectory_duration)
 {
-  // Ideal duration is calculated from:
-  // x1 = x0 + v0*t + 0.5*a0*t^2
-  // Where x0 and v0 are zero
-  const double ideal_duration = 0.231;
+  // Compare against the OJET online trajectory generator: https://www.trajectorygenerator.com/ojet-online/
+  const double ideal_duration = 0.21025;
 
   moveit::core::RobotState robot_state(robot_model_);
   robot_state.setToDefaultValues();
