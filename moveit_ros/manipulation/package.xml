@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_ros_manipulation</name>
-  <version>1.1.6</version>
+  <version>1.1.7</version>
   <description>Components of MoveIt used for manipulation</description>
   <maintainer email="me@v4hn.de">Michael Görner</maintainer>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
