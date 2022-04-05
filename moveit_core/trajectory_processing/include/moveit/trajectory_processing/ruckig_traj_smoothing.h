@@ -76,7 +76,7 @@ private:
   /**
    * \brief Return L2-norm of velocity, taking all joints into account.
    * \param ruckig_input  Input parameters to Ruckig
-   * \param joint_group     The MoveIt JointModelGroup of interest
+   * \param joint_group   The MoveIt JointModelGroup of interest
    */
   static double getTargetVelocityMagnitude(const ruckig::InputParameter<0>& ruckig_input,
                                            const moveit::core::JointModelGroup* joint_group);
