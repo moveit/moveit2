@@ -124,9 +124,6 @@ private:
   /// Mapping from command to loader
   std::map<std::string, pilz_industrial_motion_planner::PlanningContextLoaderPtr> context_loader_map_;
 
-  /// The ROS node
-  rclcpp::Node::SharedPtr node_;
-
   /// Robot model obtained at initialize
   moveit::core::RobotModelConstPtr model_;
 
@@ -138,11 +135,6 @@ private:
 
   /// cartesian limit
   pilz_industrial_motion_planner::CartesianLimit cartesian_limit_;
-
-  /** @brief Load planner configurations for specified group into planner_config */
-  bool loadPlannerConfiguration(const std::string& group_name, const std::string& planner_id,
-                                const std::map<std::string, std::string>& group_params,
-                                planning_interface::PlannerConfigurationSettings& planner_config) const;
 
   /** @brief Configure the planners */
   void loadPlannerConfigurations();
