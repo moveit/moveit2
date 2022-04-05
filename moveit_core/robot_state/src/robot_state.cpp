@@ -109,6 +109,7 @@ void RobotState::allocMemory()
 
   // make the memory for transforms align at EIGEN_MAX_ALIGN_BYTES
   // https://eigen.tuxfamily.org/dox/classEigen_1_1aligned__allocator.html
+  // NOLINTNEXTLINE(performance-no-int-to-ptr)
   variable_joint_transforms_ = reinterpret_cast<Eigen::Isometry3d*>(((uintptr_t)memory_ + extra_alignment_bytes) &
                                                                     ~(uintptr_t)extra_alignment_bytes);
   global_link_transforms_ = variable_joint_transforms_ + robot_model_->getJointModelCount();
