@@ -42,7 +42,7 @@
 #include <moveit/robot_state/robot_state.h>
 #include <geometry_msgs/msg/pose_stamped.h>
 #include <moveit/robot_state/conversions.h>
-#include <moveit_msgs/msg/move_it_error_codes.h>
+#include <moveit/utils/moveit_error_code.h>
 
 namespace moveit_cpp
 {
@@ -53,34 +53,7 @@ class PlanningComponent
 public:
   MOVEIT_STRUCT_FORWARD(PlanSolution);
 
-  class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
-  {
-  public:
-    MoveItErrorCode()
-    {
-      val = 0;
-    }
-    MoveItErrorCode(int code)
-    {
-      val = code;
-    }
-    MoveItErrorCode(const moveit_msgs::msg::MoveItErrorCodes& code)
-    {
-      val = code.val;
-    }
-    explicit operator bool() const
-    {
-      return val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
-    }
-    bool operator==(const int code) const
-    {
-      return val == code;
-    }
-    bool operator!=(const int code) const
-    {
-      return val != code;
-    }
-  };
+  using MoveItErrorCode [[deprecated("Use moveit::core::MoveItErrorCode")]] = moveit::core::MoveItErrorCode;
 
   /// The representation of a plan solution
   struct PlanSolution
@@ -92,7 +65,7 @@ public:
     robot_trajectory::RobotTrajectoryPtr trajectory;
 
     /// Reason why the plan failed
-    MoveItErrorCode error_code;
+    moveit::core::MoveItErrorCode error_code;
 
     explicit operator bool() const
     {
