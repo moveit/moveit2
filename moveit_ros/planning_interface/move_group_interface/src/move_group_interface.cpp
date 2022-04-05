@@ -644,12 +644,12 @@ public:
   //    return locations;
   //  }
 
-  //  MoveItErrorCode place(const moveit_msgs::action::Place::Goal& goal)
+  //  moveit::core::MoveItErrorCode place(const moveit_msgs::action::Place::Goal& goal)
   //  {
   //    if (!place_action_client_ || !place_action_client_->action_server_is_ready())
   //    {
   //      RCLCPP_ERROR_STREAM(LOGGER, "Place action client not found/not ready");
-  //      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+  //      return moveit::core::MoveItErrorCode::FAILURE;
   //    }
   //
   //    int64_t timeout = 3.0;
@@ -658,17 +658,17 @@ public:
   //      rclcpp::FutureReturnCode::SUCCESS)
   //    {
   //      RCLCPP_ERROR_STREAM(LOGGER, "Place action timeout reached");
-  //      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+  //      return moveit::core::MoveItErrorCode::FAILURE;
   //    }
-  //    return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  //    return moveit::core::MoveItErrorCode::SUCCESS;
   //  }
 
-  //  MoveItErrorCode pick(const moveit_msgs::action::Pickup::Goal& goal)
+  //  moveit::core::MoveItErrorCode pick(const moveit_msgs::action::Pickup::Goal& goal)
   //  {
   //    if (!pick_action_client_ || !pick_action_client_->action_server_is_ready())
   //    {
   //      RCLCPP_ERROR_STREAM(LOGGER, "Pick action client not found/not ready");
-  //      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+  //      return moveit::core::MoveItErrorCode::FAILURE;
   //    }
   //
   //    int64_t timeout = 3.0;
@@ -677,12 +677,12 @@ public:
   //      rclcpp::FutureReturnCode::SUCCESS)
   //    {
   //      RCLCPP_ERROR_STREAM(LOGGER, "Pick action timeout reached");
-  //      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+  //      return moveit::core::MoveItErrorCode::FAILURE;
   //    }
-  //    return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  //    return moveit::core::MoveItErrorCode::SUCCESS;
   //  }
 
-  //  MoveItErrorCode planGraspsAndPick(const std::string& object, bool plan_only = false)
+  //  moveit::core::MoveItErrorCode planGraspsAndPick(const std::string& object, bool plan_only = false)
   //  {
   //    if (object.empty())
   //    {
@@ -697,13 +697,13 @@ public:
   //    {
   //      RCLCPP_ERROR_STREAM(LOGGER, "Asked for grasps for the object '"
   //                                                         << object << "', but the object could not be found");
-  //      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::INVALID_OBJECT_NAME);
+  //      return moveit::core::MoveItErrorCode::INVALID_OBJECT_NAME;
   //    }
   //
   //    return planGraspsAndPick(objects[object], plan_only);
   //  }
 
-  //  MoveItErrorCode planGraspsAndPick(const moveit_msgs::msg::CollisionObject& object, bool plan_only = false)
+  //  moveit::core::MoveItErrorCode planGraspsAndPick(const moveit_msgs::msg::CollisionObject& object, bool plan_only = false)
   //  {
   //    if (!plan_grasps_service_)
   //    {
@@ -711,7 +711,7 @@ public:
   //                                                         << GRASP_PLANNING_SERVICE_NAME
   //                                                         << "' is not available."
   //                                                            " This has to be implemented and started separately.");
-  //      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+  //      return moveit::core::MoveItErrorCode::FAILURE;
   //    }
   //
   //    auto request = std::make_shared<moveit_msgs::srv::GraspPlanning::Request>();
@@ -728,23 +728,23 @@ public:
   //          rclcpp::FutureReturnCode::SUCCESS)
   //    {
   //      RCLCPP_ERROR(LOGGER, "Grasp planning failed. Unable to pick.");
-  //      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+  //      return moveit::core::MoveItErrorCode::FAILURE;
   //    }
   //    response = res.get();
   //    if (response->error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   //    {
   //      RCLCPP_ERROR(LOGGER, "Grasp planning failed. Unable to pick.");
-  //      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+  //      return moveit::core::MoveItErrorCode::FAILURE;
   //    }
   //    return pick(constructPickupGoal(object.id, std::move(response->grasps), plan_only));
   //  }
 
-  MoveItErrorCode plan(Plan& plan)
+  moveit::core::MoveItErrorCode plan(Plan& plan)
   {
     if (!move_action_client_ || !move_action_client_->action_server_is_ready())
     {
       RCLCPP_INFO_STREAM(LOGGER, "MoveGroup action client/server not ready");
-      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+      return moveit::core::MoveItErrorCode::FAILURE;
     }
     RCLCPP_INFO_STREAM(LOGGER, "MoveGroup action client/server ready");
 
@@ -818,12 +818,12 @@ public:
     return res->error_code;
   }
 
-  MoveItErrorCode move(bool wait)
+  moveit::core::MoveItErrorCode move(bool wait)
   {
     if (!move_action_client_ || !move_action_client_->action_server_is_ready())
     {
       RCLCPP_INFO_STREAM(LOGGER, "MoveGroup action client/server not ready");
-      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+      return moveit::core::MoveItErrorCode::FAILURE;
     }
 
     moveit_msgs::action::MoveGroup::Goal goal;
@@ -875,7 +875,7 @@ public:
         };
     auto goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
     if (!wait)
-      return MoveItErrorCode::SUCCESS;
+      return moveit::core::MoveItErrorCode::SUCCESS;
 
     // wait until send_goal_opts.result_callback is called
     while (!done)
@@ -892,12 +892,12 @@ public:
     return res->error_code;
   }
 
-  MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory, bool wait)
+  moveit::core::MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory, bool wait)
   {
     if (!execute_action_client_ || !execute_action_client_->action_server_is_ready())
     {
       RCLCPP_INFO_STREAM(LOGGER, "execute_action_client_ client/server not ready");
-      return MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+      return moveit::core::MoveItErrorCode::FAILURE;
     }
 
     bool done = false;
@@ -945,7 +945,7 @@ public:
 
     auto goal_handle_future = execute_action_client_->async_send_goal(goal, send_goal_opts);
     if (!wait)
-      return MoveItErrorCode::SUCCESS;
+      return moveit::core::MoveItErrorCode::SUCCESS;
 
     // wait until send_goal_opts.result_callback is called
     while (!done)
@@ -1529,7 +1529,7 @@ void MoveGroupInterface::setMaxAccelerationScalingFactor(double max_acceleration
   impl_->setMaxAccelerationScalingFactor(max_acceleration_scaling_factor);
 }
 
-MoveItErrorCode MoveGroupInterface::asyncMove()
+moveit::core::MoveItErrorCode MoveGroupInterface::asyncMove()
 {
   return impl_->move(false);
 }
@@ -1539,32 +1539,32 @@ rclcpp_action::Client<moveit_msgs::action::MoveGroup>& MoveGroupInterface::getMo
   return impl_->getMoveGroupClient();
 }
 
-MoveItErrorCode MoveGroupInterface::move()
+moveit::core::MoveItErrorCode MoveGroupInterface::move()
 {
   return impl_->move(true);
 }
 
-MoveItErrorCode MoveGroupInterface::asyncExecute(const Plan& plan)
+moveit::core::MoveItErrorCode MoveGroupInterface::asyncExecute(const Plan& plan)
 {
   return impl_->execute(plan.trajectory_, false);
 }
 
-MoveItErrorCode MoveGroupInterface::asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory)
+moveit::core::MoveItErrorCode MoveGroupInterface::asyncExecute(const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
   return impl_->execute(trajectory, false);
 }
 
-MoveItErrorCode MoveGroupInterface::execute(const Plan& plan)
+moveit::core::MoveItErrorCode MoveGroupInterface::execute(const Plan& plan)
 {
   return impl_->execute(plan.trajectory_, true);
 }
 
-MoveItErrorCode MoveGroupInterface::execute(const moveit_msgs::msg::RobotTrajectory& trajectory)
+moveit::core::MoveItErrorCode MoveGroupInterface::execute(const moveit_msgs::msg::RobotTrajectory& trajectory)
 {
   return impl_->execute(trajectory, true);
 }
 
-MoveItErrorCode MoveGroupInterface::plan(Plan& plan)
+moveit::core::MoveItErrorCode MoveGroupInterface::plan(Plan& plan)
 {
   return impl_->plan(plan);
 }
@@ -1588,23 +1588,23 @@ MoveItErrorCode MoveGroupInterface::plan(Plan& plan)
 //  return impl_->posesToPlaceLocations(poses);
 //}
 //
-// MoveItErrorCode MoveGroupInterface::pick(const moveit_msgs::action::Pickup::Goal& goal)
+// moveit::core::MoveItErrorCode MoveGroupInterface::pick(const moveit_msgs::action::Pickup::Goal& goal)
 //{
 //  return impl_->pick(goal);
 //}
 //
-// MoveItErrorCode MoveGroupInterface::planGraspsAndPick(const std::string& object, bool plan_only)
+// moveit::core::MoveItErrorCode MoveGroupInterface::planGraspsAndPick(const std::string& object, bool plan_only)
 //{
 //  return impl_->planGraspsAndPick(object, plan_only);
 //}
 //
-// MoveItErrorCode MoveGroupInterface::planGraspsAndPick(const moveit_msgs::msg::CollisionObject& object, bool
-// plan_only)
+// moveit::core::MoveItErrorCode MoveGroupInterface::planGraspsAndPick(const moveit_msgs::msg::CollisionObject& object,
+// bool plan_only)
 //{
 //  return impl_->planGraspsAndPick(object, plan_only);
 //}
 //
-// MoveItErrorCode MoveGroupInterface::place(const moveit_msgs::action::Place::Goal& goal)
+// moveit::core::MoveItErrorCode MoveGroupInterface::place(const moveit_msgs::action::Place::Goal& goal)
 //{
 //  return impl_->place(goal);
 //}
