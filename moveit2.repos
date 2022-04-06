@@ -10,7 +10,7 @@ repositories:
   moveit_resources:
     type: git
     url: https://github.com/ros-planning/moveit_resources
-    version: ros2
+    version: 71a82c613cbbef2003eb4956acaee66f3087e9db
   ompl:
     type: git
     url: https://github.com/ompl/ompl.git
