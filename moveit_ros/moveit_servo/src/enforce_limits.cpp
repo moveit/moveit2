@@ -77,7 +77,7 @@ void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_grou
       Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(joint_state.velocity.data(), joint_state.velocity.size());
   double velocity_scaling_factor = override_velocity_scaling_factor;
   // if the override velocity scaling factor is approximately zero then the user is not overriding the value.
-  if(override_velocity_scaling_factor < 0.01)
+  if (override_velocity_scaling_factor < 0.01)
     velocity_scaling_factor = getVelocityScalingFactor(joint_model_group, velocity);
 
   // Take a smaller step if the velocity scaling factor is less than 1
