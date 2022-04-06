@@ -50,9 +50,9 @@ namespace moveit_servo
  * @param joint_model_group Active joint group. Used to retrieve limits.
  * @param joint_state The command that will go to the robot.
  * @param override_velocity_scaling_factor Option if the user wants a constant override of the velocity scaling.
- *        a value greater than 0 will override the internal calculations done by getVelocityScalingFactor
+ *        a value greater than 0 will override the internal calculations done by getVelocityScalingFactor.
  */
 void enforceVelocityLimits(const moveit::core::JointModelGroup* joint_model_group, const double publish_period,
-                           sensor_msgs::msg::JointState& joint_state, const double override_velocity_scaling_factor);
+                           sensor_msgs::msg::JointState& joint_state, const double override_velocity_scaling_factor=0.0);
 
 }  // namespace moveit_servo
