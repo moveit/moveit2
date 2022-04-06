@@ -569,6 +569,18 @@ void TrajectoryExecutionManager::reloadControllerInformation()
       known_controllers_[ci.name_] = ci;
     }
 
+    names.clear();
+    controller_manager_->getActiveControllers(names);
+    for (const auto& active_name : names)
+    {
+      auto found_it = std::find_if(known_controllers_.begin(), known_controllers_.end(),
+                                   [&](const auto& known_controller) { return known_controller.first == active_name; });
+      if (found_it != known_controllers_.end())
+      {
+        found_it->second.state_.active_ = true;
+      }
+    }
+
     for (std::map<std::string, ControllerInformation>::iterator it = known_controllers_.begin();
          it != known_controllers_.end(); ++it)
       for (std::map<std::string, ControllerInformation>::iterator jt = known_controllers_.begin();
@@ -1577,6 +1589,7 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
   }
   else
   {
+    RCLCPP_ERROR(LOGGER, "Active status of required controllers can not be assured.");
     last_execution_status_ = moveit_controller_manager::ExecutionStatus::ABORTED;
     return false;
   }
@@ -1804,8 +1817,12 @@ bool TrajectoryExecutionManager::ensureActiveControllers(const std::vector<std::
     std::set<std::string> originally_active;
     for (std::map<std::string, ControllerInformation>::const_iterator it = known_controllers_.begin();
          it != known_controllers_.end(); ++it)
+    {
       if (it->second.state_.active_)
+      {
         originally_active.insert(it->first);
+      }
+    }
     return std::includes(originally_active.begin(), originally_active.end(), controllers.begin(), controllers.end());
   }
 }

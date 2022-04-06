@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2011, Willow Garage, Inc.
+ *  Copyright (c) 2021, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of the copyright holder nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,37 +32,45 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ken Anderson */
-
 #pragma once
 
-#include <moveit/robot_trajectory/robot_trajectory.h>
-#include "rclcpp/rclcpp.hpp"
-#include <moveit/trajectory_processing/time_parameterization.h>
+#include <moveit_msgs/msg/move_it_error_codes.h>
 
-namespace trajectory_processing
+namespace moveit
 {
-/// \brief This class  modifies the timestamps of a trajectory to respect
-/// velocity and acceleration constraints.
-class IterativeParabolicTimeParameterization : public TimeParameterization
+namespace core
+{
+/**
+ * @brief a wrapper around moveit_msgs::MoveItErrorCodes to make it easier to return an error code message from a function
+ */
+class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
 {
 public:
-  IterativeParabolicTimeParameterization(unsigned int max_iterations = 100, double max_time_change_per_it = .01);
-
-  bool computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory, const double max_velocity_scaling_factor = 1.0,
-                         const double max_acceleration_scaling_factor = 1.0) const override;
-
-private:
-  unsigned int max_iterations_;    /// @brief maximum number of iterations to find solution
-  double max_time_change_per_it_;  /// @brief maximum allowed time change per iteration in seconds
-
-  void applyVelocityConstraints(robot_trajectory::RobotTrajectory& rob_trajectory, std::vector<double>& time_diff,
-                                const double max_velocity_scaling_factor) const;
-
-  void applyAccelerationConstraints(robot_trajectory::RobotTrajectory& rob_trajectory, std::vector<double>& time_diff,
-                                    const double max_acceleration_scaling_factor) const;
-
-  double findT1(const double d1, const double d2, double t1, const double t2, const double a_max) const;
-  double findT2(const double d1, const double d2, const double t1, double t2, const double a_max) const;
+  MoveItErrorCode()
+  {
+    val = 0;
+  }
+  MoveItErrorCode(int code)
+  {
+    val = code;
+  }
+  MoveItErrorCode(const moveit_msgs::msg::MoveItErrorCodes& code)
+  {
+    val = code.val;
+  }
+  explicit operator bool() const
+  {
+    return val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  }
+  bool operator==(const int c) const
+  {
+    return val == c;
+  }
+  bool operator!=(const int c) const
+  {
+    return val != c;
+  }
 };
-}  // namespace trajectory_processing
+
+}  // namespace core
+}  // namespace moveit
