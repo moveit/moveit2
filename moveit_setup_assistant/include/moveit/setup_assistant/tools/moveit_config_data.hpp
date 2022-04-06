@@ -313,7 +313,7 @@ public:
   std::map<std::string, double> getInitialJoints() const;
   bool outputSetupAssistantFile(const std::string& file_path);
   bool outputOMPLPlanningYAML(const std::string& file_path);
-  bool outputCHOMPPlanningYAML(const std::string& file_path);
+  bool outputSTOMPPlanningYAML(const std::string& file_path);
   bool outputKinematicsYAML(const std::string& file_path);
   bool outputJointLimitsYAML(const std::string& file_path);
   bool outputFakeControllersYAML(const std::string& file_path);
@@ -333,13 +333,6 @@ public:
    * \return gazebo compatible urdf or empty if error encountered
    */
   std::string getGazeboCompatibleURDF();
-
-  /**
-   * \brief Set list of collision link pairs in SRDF; sorted; with optional filter
-   * \param link_pairs list of collision link pairs
-   * \param skip_mask mask of shifted moveit_setup_assistant::DisabledReason values that will be skipped
-   */
-  void setCollisionLinkPairs(const moveit_setup_assistant::LinkPairMap& link_pairs, size_t skip_mask = 0);
 
   /**
    * \brief Decide the best two joints to be used for the projection evaluator
