@@ -14,7 +14,7 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(file_path="config/panda.urdf.xacro")
-        .trajectory_execution(file_path="config/panda_gripper_controllers.yaml")
+        .trajectory_execution(file_path="config/gripper_moveit_controllers.yaml")
         .to_moveit_configs()
     )
 
@@ -55,7 +55,7 @@ def generate_move_group_test_description(*args, gtest_name: SomeSubstitutionsTyp
     ros2_controllers_path = os.path.join(
         get_package_share_directory("moveit_resources_panda_moveit_config"),
         "config",
-        "panda_ros2_controllers.yaml",
+        "ros2_controllers.yaml",
     )
     ros2_control_node = Node(
         package="controller_manager",

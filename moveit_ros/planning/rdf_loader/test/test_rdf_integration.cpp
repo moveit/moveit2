@@ -74,11 +74,9 @@ TEST(RDFIntegration, executor)
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("executor");
 
   // Create a thread to spin an Executor.
-  std::thread([node]() {
-    rclcpp::executors::SingleThreadedExecutor executor;
-    executor.add_node(node);
-    executor.spin();
-  }).detach();
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node);
+  std::thread spinning_thread([&executor] { executor.spin(); });
 
   // WHEN the RDFLoader is created
   rdf_loader::RDFLoader loader(node, "topic_description");
@@ -88,6 +86,8 @@ TEST(RDFIntegration, executor)
   EXPECT_EQ("gonzo", loader.getURDF()->name_);
   ASSERT_NE(nullptr, loader.getSRDF());
   EXPECT_EQ("gonzo", loader.getSRDF()->getName());
+  executor.cancel();
+  spinning_thread.join();
 }
 
 TEST(RDFIntegration, xacro_test)
