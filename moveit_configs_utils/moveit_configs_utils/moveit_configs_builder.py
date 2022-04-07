@@ -387,7 +387,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     chosen_name = possible_names[0]
                 else:
                     # Try a couple other common names, in order of precedence
-                    for name in [self.__robot_name, "moveit"]:
+                    for name in ["moveit", "moveit2", self.__robot_name]:
                         if name in possible_names:
                             chosen_name = name
                             break
