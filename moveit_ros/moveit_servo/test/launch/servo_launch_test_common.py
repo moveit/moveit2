@@ -40,7 +40,6 @@ def generate_servo_test_description(
         .robot_description(
             file_path="config/panda.urdf.xacro", mappings=robot_description_mappings
         )
-        .trajectory_execution("config/panda_moveit_controllers.yaml")
         .to_moveit_configs()
     )
 

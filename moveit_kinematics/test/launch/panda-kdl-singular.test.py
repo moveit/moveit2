@@ -10,11 +10,9 @@ from launch_param_builder import ParameterBuilder
 
 @pytest.mark.rostest
 def generate_test_description():
-    moveit_configs = (
-        MoveItConfigsBuilder("moveit_resources_panda")
-        .trajectory_execution("config/panda_moveit_controllers.yaml")
-        .to_dict()
-    )
+
+    moveit_configs = MoveItConfigsBuilder("moveit_resources_panda").to_dict()
+
     test_param = (
         ParameterBuilder("moveit_kinematics")
         .yaml("config/panda-kdl-singular-test.yaml")

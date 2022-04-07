@@ -11,7 +11,6 @@ def generate_launch_description():
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(file_path="config/panda.urdf.xacro")
-        .trajectory_execution("config/panda_moveit_controllers.yaml")
         .to_moveit_configs()
     )
 
