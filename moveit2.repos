@@ -11,11 +11,11 @@ repositories:
     type: git
     url: https://github.com/ros-planning/moveit_resources
     version: ros2
-  ros2_control:
-    type: git
-    url: https://github.com/ros-controls/ros2_control.git
-    version: 2.1.0
   ompl:
     type: git
     url: https://github.com/ompl/ompl.git
     version: main
+  srdfdom:
+    type: git
+    url: https://github.com/ros-planning/srdfdom.git
+    version: ros2
