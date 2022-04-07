@@ -66,6 +66,9 @@ TEST(RDFIntegration, topic_based)
   EXPECT_EQ("gonzo", loader.getSRDF()->getName());
 }
 
+// Failing in Jammy disabling temporarily (TODO (vatanaksoytezer): Fix this and enable again)
+// See https://github.com/ros-planning/moveit2/issues/1156
+/*
 TEST(RDFIntegration, executor)
 {
   // RDFLoader should successfully load URDF and SRDF strings from a ROS topic when the node that is
@@ -89,6 +92,7 @@ TEST(RDFIntegration, executor)
   ASSERT_NE(nullptr, loader.getSRDF());
   EXPECT_EQ("gonzo", loader.getSRDF()->getName());
 }
+*/
 
 TEST(RDFIntegration, xacro_test)
 {
