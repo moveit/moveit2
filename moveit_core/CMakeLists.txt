@@ -79,7 +79,6 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     planning_scene/include
     # TODO: Port python bindings
     # python/tools/include
-    sensor_manager/include
     trajectory_processing/include
     utils/include
 )
@@ -170,7 +169,6 @@ add_subdirectory(planning_scene)
 add_subdirectory(robot_model)
 add_subdirectory(robot_state)
 add_subdirectory(robot_trajectory)
-add_subdirectory(sensor_manager)
 add_subdirectory(trajectory_processing)
 add_subdirectory(transforms)
 add_subdirectory(utils)
