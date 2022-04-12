@@ -94,6 +94,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   // Kinematic limits (vel/accel/jerk)
   const std::vector<std::string>& vars = group->getVariableNames();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
+  const std::vector<int>& move_group_idx = group->getVariableIndexList();
   for (size_t i = 0; i < num_dof; ++i)
   {
     const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars.at(i));
@@ -185,7 +186,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
           target_state->update();
         }
         ruckig_ptr = std::make_unique<ruckig::Ruckig<ruckig::DynamicDOFs>>(num_dof, timestep);
-        initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), num_dof, move_group_idx);
+        initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), group);
         // Begin the while() loop again
         break;
       }
