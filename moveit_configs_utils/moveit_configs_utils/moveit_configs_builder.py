@@ -254,7 +254,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
             self.__urdf_file_path = self.__config_dir_path / (
                 self.__robot_name + ".urdf"
             )
-            self.__srdf_filename = self.__config_dir_path / (
+            self.__srdf_file_path = self.__config_dir_path / (
                 self.__robot_name + ".srdf"
             )
         else:
@@ -271,7 +271,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     "relative_path"
                 ]
             )
-            self.__srdf_filename = Path(
+            self.__srdf_file_path = Path(
                 setup_assistant_yaml["moveit_setup_assistant_config"]["SRDF"][
                     "relative_path"
                 ]
@@ -308,7 +308,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.robot_description_semantic = {
             self.__robot_description
             + "_semantic": load_xacro(
-                self._package_path / (file_path or self.__srdf_filename),
+                self._package_path / (file_path or self.__srdf_file_path),
                 mappings=mappings,
             )
         }

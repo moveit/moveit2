@@ -762,8 +762,7 @@ public:
     auto send_goal_opts = rclcpp_action::Client<moveit_msgs::action::MoveGroup>::SendGoalOptions();
 
     send_goal_opts.goal_response_callback =
-        [&](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr> future) {
-          const auto& goal_handle = future.get();
+        [&](rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr goal_handle) {
           if (!goal_handle)
           {
             done = true;
@@ -841,8 +840,7 @@ public:
     auto send_goal_opts = rclcpp_action::Client<moveit_msgs::action::MoveGroup>::SendGoalOptions();
 
     send_goal_opts.goal_response_callback =
-        [&](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr> future) {
-          const auto& goal_handle = future.get();
+        [&](rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr goal_handle) {
           if (!goal_handle)
           {
             done = true;
@@ -906,9 +904,7 @@ public:
     auto send_goal_opts = rclcpp_action::Client<moveit_msgs::action::ExecuteTrajectory>::SendGoalOptions();
 
     send_goal_opts.goal_response_callback =
-        [&](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr>
-                future) {
-          const auto& goal_handle = future.get();
+        [&](rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr goal_handle) {
           if (!goal_handle)
           {
             done = true;

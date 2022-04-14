@@ -135,6 +135,14 @@ void ServoParameters::declare(const std::string& ns,
                                          .description("Max joint angular/linear velocity. Only used for joint "
                                                       "commands on joint_command_in_topic."));
 
+  // Properties of Servo calculations
+  node_parameters->declare_parameter(ns + ".override_velocity_scaling_factor",
+                                     ParameterValue{ parameters.override_velocity_scaling_factor },
+                                     ParameterDescriptorBuilder{}
+                                         .type(PARAMETER_DOUBLE)
+                                         .description("Override constant scalar of how fast the robot should jog."
+                                                      "Valid values are between 0-1.0"));
+
   // Properties of outgoing commands
   node_parameters->declare_parameter(
       ns + ".command_out_topic", ParameterValue{ parameters.command_out_topic },
@@ -264,6 +272,10 @@ ServoParameters ServoParameters::get(const std::string& ns,
   parameters.linear_scale = node_parameters->get_parameter(ns + ".scale.linear").as_double();
   parameters.rotational_scale = node_parameters->get_parameter(ns + ".scale.rotational").as_double();
   parameters.joint_scale = node_parameters->get_parameter(ns + ".scale.joint").as_double();
+
+  // Properties of Servo calculations
+  parameters.override_velocity_scaling_factor =
+      node_parameters->get_parameter(ns + ".override_velocity_scaling_factor").as_double();
 
   // Properties of outgoing commands
   parameters.command_out_topic = node_parameters->get_parameter(ns + ".command_out_topic").as_string();
