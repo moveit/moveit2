@@ -5,6 +5,8 @@ from launch.substitutions import LaunchConfiguration
 
 from launch_ros.actions import Node
 
+from srdfdom.srdf import SRDF
+
 from moveit_configs_utils.launch_utils import (
     add_debuggable_node,
     DeclareBooleanLaunchArg,
@@ -77,6 +79,49 @@ def generate_assistant_launch(moveit_config):
         arguments=[["--config_pkg=", str(moveit_config.package_path)]],
     )
 
+    return ld
+
+
+def generate_static_virtual_joint_tfs_launch(moveit_config):
+    ld = LaunchDescription()
+
+    name_counter = 0
+
+    for key, xml_contents in moveit_config.robot_description_semantic.items():
+        srdf = SRDF.from_xml_string(xml_contents)
+        for vj in srdf.virtual_joints:
+            ld.add_action(
+                Node(
+                    package="tf2_ros",
+                    executable="static_transform_publisher",
+                    name=f"static_transform_publisher{name_counter}",
+                    output="log",
+                    arguments=[
+                        "--frame-id",
+                        vj.parent_frame,
+                        "--child-frame-id",
+                        vj.child_link,
+                    ],
+                )
+            )
+            name_counter += 1
+    return ld
+
+
+def generate_spawn_controllers_launch(moveit_config):
+    controller_names = moveit_config.trajectory_execution.get(
+        "moveit_simple_controller_manager", {}
+    ).get("controller_names", [])
+    ld = LaunchDescription()
+    for controller in controller_names + ["joint_state_broadcaster"]:
+        ld.add_action(
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=[controller],
+                output="screen",
+            )
+        )
     return ld
 
 
