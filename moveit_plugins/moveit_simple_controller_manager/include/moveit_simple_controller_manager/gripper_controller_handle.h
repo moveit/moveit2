@@ -150,7 +150,7 @@ public:
     rclcpp_action::Client<control_msgs::action::GripperCommand>::SendGoalOptions send_goal_options;
     // Active callback
     send_goal_options.goal_response_callback =
-        [this](std::shared_future<rclcpp_action::Client<control_msgs::action::GripperCommand>::GoalHandle::SharedPtr>
+        [this](rclcpp_action::Client<control_msgs::action::GripperCommand>::GoalHandle::SharedPtr
                /* unused-arg */) { RCLCPP_DEBUG_STREAM(LOGGER, name_ << " started execution"); };
     // Send goal
     auto current_goal_future = controller_action_client_->async_send_goal(goal, send_goal_options);

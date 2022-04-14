@@ -212,8 +212,7 @@ bool HybridPlanningManager::sendGlobalPlannerAction()
 
   // Add goal response callback
   global_goal_options.goal_response_callback =
-      [this](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::GlobalPlanner>::SharedPtr> future) {
-        auto const& goal_handle = future.get();
+      [this](rclcpp_action::ClientGoalHandle<moveit_msgs::action::GlobalPlanner>::SharedPtr goal_handle) {
         auto planning_progress = std::make_shared<moveit_msgs::action::HybridPlanner::Feedback>();
         auto& feedback = planning_progress->feedback;
         if (!goal_handle)
@@ -283,8 +282,7 @@ bool HybridPlanningManager::sendLocalPlannerAction()
 
   // Add goal response callback
   local_goal_options.goal_response_callback =
-      [this](std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::LocalPlanner>::SharedPtr> future) {
-        auto const& goal_handle = future.get();
+      [this](rclcpp_action::ClientGoalHandle<moveit_msgs::action::LocalPlanner>::SharedPtr goal_handle) {
         auto planning_progress = std::make_shared<moveit_msgs::action::HybridPlanner::Feedback>();
         auto& feedback = planning_progress->feedback;
         if (!goal_handle)
