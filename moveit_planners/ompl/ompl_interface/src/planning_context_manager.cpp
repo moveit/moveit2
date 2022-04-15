@@ -98,6 +98,11 @@ struct PlanningContextManager::CachedContexts
 
 MultiQueryPlannerAllocator::~MultiQueryPlannerAllocator()
 {
+  storePlannerData();
+}
+
+void MultiQueryPlannerAllocator::storePlannerData()
+{
   // Store all planner data
   for (const auto& entry : planner_data_storage_paths_)
   {
@@ -268,6 +273,11 @@ PlanningContextManager::PlanningContextManager(moveit::core::RobotModelConstPtr 
 }
 
 PlanningContextManager::~PlanningContextManager() = default;
+
+void PlanningContextManager::storePlannerData()
+{
+  planner_allocator_.storePlannerData();
+}
 
 ConfiguredPlannerAllocator PlanningContextManager::plannerSelector(const std::string& planner) const
 {

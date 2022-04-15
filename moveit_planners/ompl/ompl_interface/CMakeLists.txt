@@ -22,6 +22,7 @@ add_library(moveit_ompl_interface SHARED
 set_target_properties(moveit_ompl_interface PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
 find_package(OpenMP REQUIRED)
+find_package(std_srvs)
 
 # Used to link in ODE, an OMPL dependency, on macOS
 if(APPLE)
@@ -34,6 +35,7 @@ ament_target_dependencies(moveit_ompl_interface
   moveit_ros_planning
   rclcpp
   pluginlib
+  std_srvs
   tf2_eigen
   tf2_ros
   OMPL
