@@ -54,6 +54,8 @@ public:
   MultiQueryPlannerAllocator() = default;
   ~MultiQueryPlannerAllocator();
 
+  void storePlannerData();
+
   template <typename T>
   ob::PlannerPtr allocatePlanner(const ob::SpaceInformationPtr& si, const std::string& new_name,
                                  const ModelBasedPlanningContextSpecification& spec);
@@ -82,6 +84,8 @@ public:
   PlanningContextManager(moveit::core::RobotModelConstPtr robot_model,
                          constraint_samplers::ConstraintSamplerManagerPtr csm);
   ~PlanningContextManager();
+
+  void storePlannerData();
 
   /** @brief Specify configurations for the planners.
       @param pconfig Configurations for the different planners */
