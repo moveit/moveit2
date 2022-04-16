@@ -73,17 +73,17 @@ struct VariableBounds
   double max_position_;
   bool position_bounded_;
 
-  double min_velocity_;
-  double max_velocity_;
-  bool velocity_bounded_;
+  mutable double min_velocity_;
+  mutable double max_velocity_;
+  mutable bool velocity_bounded_;
 
-  double min_acceleration_;
-  double max_acceleration_;
-  bool acceleration_bounded_;
+  mutable double min_acceleration_;
+  mutable double max_acceleration_;
+  mutable bool acceleration_bounded_;
 
-  double min_jerk_;
-  double max_jerk_;
-  bool jerk_bounded_;
+  mutable double min_jerk_;
+  mutable double max_jerk_;
+  mutable bool jerk_bounded_;
 };
 
 class LinkModel;

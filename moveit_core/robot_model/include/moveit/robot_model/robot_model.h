@@ -456,8 +456,17 @@ public:
     return joint_model_vector_[common_joint_roots_[a->getJointIndex() * joint_model_vector_.size() + b->getJointIndex()]];
   }
 
-  /// A map of known kinematics solvers (associated to their group name)
+  /** \brief A map of known kinematics solvers (associated to their group name) */
   void setKinematicsAllocators(const std::map<std::string, SolverAllocatorFn>& allocators);
+
+  /** \brief Update velocity bounds */
+  void updateVelocityBounds(const std::vector<double>& new_velocity_bounds) const;
+
+  /** \brief Update acceleration bounds */
+  void updateAccelerationBounds(const std::vector<double>& new_acceleration_bounds) const;
+
+  /** \brief Update jerk bounds */
+  void updateJerkBounds(const std::vector<double>& new_jerk_bounds) const;
 
 protected:
   /** \brief Get the transforms between link and all its rigidly attached descendants */
@@ -570,8 +579,9 @@ protected:
 
   std::vector<int> active_joint_model_start_index_;
 
-  /** \brief The bounds for all the active joint models */
-  JointBoundsVector active_joint_models_bounds_;
+  /** \brief The bounds for all the active joint models
+   * Mutable so bounds can be modified at runtime */
+  mutable JointBoundsVector active_joint_models_bounds_;
 
   /** \brief The joints that correspond to each variable index */
   std::vector<const JointModel*> joints_of_variable_;

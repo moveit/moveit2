@@ -921,6 +921,14 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   const unsigned num_joints = group->getVariableCount();
   const unsigned num_points = trajectory.getWayPointCount();
 
+  // TODO(andyz): remove when done testing
+  std::vector<double> new_velocity_bounds{ 11, 11, 11, 11, 11, 11, 11 };
+  rmodel.updateVelocityBounds(new_velocity_bounds);
+  std::vector<double> new_acceleration_bounds{ 100, 100, 100, 100, 100, 100, 100 };
+  rmodel.updateAccelerationBounds(new_acceleration_bounds);
+  std::vector<double> new_jerk_bounds{ 1e4, 1e4, 1e4, 1e4, 1e4, 1e4, 1e4 };
+  rmodel.updateJerkBounds(new_jerk_bounds);
+
   // Get the limits (we do this at same time, unlike IterativeParabolicTimeParameterization)
   Eigen::VectorXd max_velocity(num_joints);
   Eigen::VectorXd max_acceleration(num_joints);
@@ -940,6 +948,8 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
       }
       max_velocity[j] =
           std::min(std::fabs(bounds.max_velocity_), std::fabs(bounds.min_velocity_)) * velocity_scaling_factor;
+      // TODO(andyz): remove when done testing
+      RCLCPP_ERROR_STREAM(LOGGER, "New vel bounds: " << max_velocity[j]);
     }
 
     max_acceleration[j] = 1.0;

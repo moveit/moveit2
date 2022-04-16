@@ -1480,6 +1480,51 @@ void RobotModel::setKinematicsAllocators(const std::map<std::string, SolverAlloc
   }
 }
 
+void RobotModel::updateVelocityBounds(const std::vector<double>& new_velocity_bounds) const
+{
+  assert(active_joint_models_bounds_.size() == new_velocity_bounds.size());
+  assert(joints_of_variable_.size() == new_velocity_bounds.size());
+
+  //    using JointBoundsVector = std::vector<const JointModel::Bounds*>;
+  for (size_t joint_idx = 0; joint_idx < new_velocity_bounds.size(); ++joint_idx)
+  {
+    assert(new_velocity_bounds.at(joint_idx) > 0);
+    // Update bounds of active joint models
+    auto active_joint_bounds = active_joint_models_bounds_.at(joint_idx);
+    active_joint_bounds->at(0).velocity_bounded_ = true;
+    active_joint_bounds->at(0).min_velocity_ = -new_velocity_bounds.at(joint_idx);
+    active_joint_bounds->at(0).max_velocity_ = new_velocity_bounds.at(joint_idx);
+  }
+}
+
+void RobotModel::updateAccelerationBounds(const std::vector<double>& new_acceleration_bounds) const
+{
+  assert(active_joint_models_bounds_.size() == new_acceleration_bounds.size());
+
+  for (size_t joint_idx = 0; joint_idx < new_acceleration_bounds.size(); ++joint_idx)
+  {
+    assert(new_acceleration_bounds.at(joint_idx) > 0);
+    // Update bounds of active joint models
+    auto joint_bounds = active_joint_models_bounds_.at(joint_idx);
+    joint_bounds->at(0).min_acceleration_ = -new_acceleration_bounds.at(joint_idx);
+    joint_bounds->at(0).max_acceleration_ = new_acceleration_bounds.at(joint_idx);
+  }
+}
+
+void RobotModel::updateJerkBounds(const std::vector<double>& new_jerk_bounds) const
+{
+  assert(active_joint_models_bounds_.size() == new_jerk_bounds.size());
+
+  for (size_t joint_idx = 0; joint_idx < new_jerk_bounds.size(); ++joint_idx)
+  {
+    assert(new_jerk_bounds.at(joint_idx) > 0);
+    // Update bounds of active joint models
+    auto joint_bounds = active_joint_models_bounds_.at(joint_idx);
+    joint_bounds->at(0).min_jerk_ = -new_jerk_bounds.at(joint_idx);
+    joint_bounds->at(0).max_jerk_ = new_jerk_bounds.at(joint_idx);
+  }
+}
+
 void RobotModel::printModelInfo(std::ostream& out) const
 {
   out << "Model " << model_name_ << " in frame " << model_frame_ << ", using " << getVariableCount() << " variables\n";
