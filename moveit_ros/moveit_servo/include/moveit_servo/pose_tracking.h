@@ -160,7 +160,6 @@ private:
 
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   moveit::core::RobotModelConstPtr robot_model_;
-  const moveit::core::JointModelGroup* joint_model_group_;
   // Joint group used for controlling the motions
   std::string move_group_name_;
 

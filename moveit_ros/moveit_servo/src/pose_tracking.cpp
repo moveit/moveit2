@@ -86,7 +86,6 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParam
   readROSParams();
 
   robot_model_ = planning_scene_monitor_->getRobotModel();
-  joint_model_group_ = robot_model_->getJointModelGroup(move_group_name_);
 
   // Initialize PID controllers
   initializePID(x_pid_config_, cartesian_position_pids_);
