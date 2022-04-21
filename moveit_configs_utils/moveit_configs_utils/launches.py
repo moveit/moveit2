@@ -64,7 +64,7 @@ def generate_moveit_rviz_launch(moveit_config):
         package="rviz2",
         executable="rviz2",
         output="log",
-        respawn=True,
+        respawn=False,
         arguments=["-d", LaunchConfiguration("rviz_config")],
         parameters=rviz_parameters,
     )
