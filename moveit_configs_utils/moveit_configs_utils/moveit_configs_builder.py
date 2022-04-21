@@ -53,9 +53,34 @@ Example:
 from pathlib import Path
 from typing import Optional, List
 import logging
+import re
 from ament_index_python.packages import get_package_share_directory
 
 from launch_param_builder import ParameterBuilder, load_yaml, load_xacro
+
+
+moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_utils"))
+
+
+def get_pattern_matches(folder, pattern):
+    """Given all the files in the folder, find those that match the pattern.
+
+    If there are groups defined, the groups are returned. Otherwise the path to the matches are returned.
+    """
+    matches = []
+    if not folder.exists():
+        return matches
+    for child in folder.iterdir():
+        if not child.is_file():
+            continue
+        m = pattern.search(child.name)
+        if m:
+            groups = m.groups()
+            if groups:
+                matches.append(groups[0])
+            else:
+                matches.append(child)
+    return matches
 
 
 class MoveItConfigs(object):
@@ -229,7 +254,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
             self.__urdf_file_path = self.__config_dir_path / (
                 self.__robot_name + ".urdf"
             )
-            self.__srdf_filename = self.__config_dir_path / (
+            self.__srdf_file_path = self.__config_dir_path / (
                 self.__robot_name + ".srdf"
             )
         else:
@@ -246,7 +271,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     "relative_path"
                 ]
             )
-            self.__srdf_filename = Path(
+            self.__srdf_file_path = Path(
                 setup_assistant_yaml["moveit_setup_assistant_config"]["SRDF"][
                     "relative_path"
                 ]
@@ -283,7 +308,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.robot_description_semantic = {
             self.__robot_description
             + "_semantic": load_xacro(
-                self._package_path / (file_path or self.__srdf_filename),
+                self._package_path / (file_path or self.__srdf_file_path),
                 mappings=mappings,
             )
         }
@@ -345,15 +370,41 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self.__moveit_configs.trajectory_execution = {
             "moveit_manage_controllers": moveit_manage_controllers,
         }
-        self.__moveit_configs.trajectory_execution.update(
-            load_yaml(
-                self._package_path
-                / (
-                    file_path
-                    or self.__config_dir_path / f"{self.__robot_name}_controllers.yaml"
+
+        # Find the most likely controller params as needed
+        if file_path is None:
+            config_folder = self._package_path / self.__config_dir_path
+            controller_pattern = re.compile("^(.*)_controllers.yaml$")
+            possible_names = get_pattern_matches(config_folder, controller_pattern)
+            if not possible_names:
+                raise RuntimeError(
+                    "trajectory_execution: `Parameter file_path is undefined "
+                    f"and no matches for {config_folder}/*_controllers.yaml"
                 )
-            )
-        )
+            else:
+                chosen_name = None
+                if len(possible_names) == 1:
+                    chosen_name = possible_names[0]
+                else:
+                    # Try a couple other common names, in order of precedence
+                    for name in ["moveit", "moveit2", self.__robot_name]:
+                        if name in possible_names:
+                            chosen_name = name
+                            break
+                    else:
+                        option_str = "\n - ".join(
+                            name + "_controllers.yaml" for name in possible_names
+                        )
+                        raise RuntimeError(
+                            "trajectory_execution: "
+                            f"Unable to guess which parameter file to load. Options:\n - {option_str}"
+                        )
+                file_path = config_folder / (chosen_name + "_controllers.yaml")
+
+        else:
+            file_path = self._package_path / file_path
+
+        self.__moveit_configs.trajectory_execution.update(load_yaml(file_path))
         return self
 
     def planning_scene_monitor(
@@ -375,17 +426,39 @@ class MoveItConfigsBuilder(ParameterBuilder):
         return self
 
     def planning_pipelines(
-        self, default_planning_pipeline: str = None, pipelines: List[str] = None
+        self,
+        default_planning_pipeline: str = None,
+        pipelines: List[str] = None,
+        load_all: bool = True,
     ):
         """Load planning pipelines parameters.
 
         :param default_planning_pipeline: Name of the default planning pipeline.
         :param pipelines: List of the planning pipelines to be loaded.
+        :param load_all: Only used if pipelines is None.
+                         If true, loads all pipelines defined in config package AND this package.
+                         If false, only loads the pipelines defined in config package.
         :return: Instance of MoveItConfigsBuilder with planning_pipelines loaded.
         """
+        config_folder = self._package_path / self.__config_dir_path
+        default_folder = moveit_configs_utils_path / "default_configs"
+
+        # If no pipelines are specified, search by filename
         if pipelines is None:
-            pipelines = ["ompl"]
-            default_planning_pipeline = pipelines[0]
+            planning_pattern = re.compile("^(.*)_planning.yaml$")
+            pipelines = get_pattern_matches(config_folder, planning_pattern)
+            if load_all:
+                for pipeline in get_pattern_matches(default_folder, planning_pattern):
+                    if pipeline not in pipelines:
+                        pipelines.append(pipeline)
+
+        # Define default pipeline as needed
+        if not default_planning_pipeline:
+            if "ompl" in pipelines:
+                default_planning_pipeline = "ompl"
+            else:
+                default_planning_pipeline = pipelines[0]
+
         if default_planning_pipeline not in pipelines:
             raise RuntimeError(
                 f"default_planning_pipeline: `{default_planning_pipeline}` doesn't name any of the input pipelines "
@@ -396,11 +469,19 @@ class MoveItConfigsBuilder(ParameterBuilder):
             "default_planning_pipeline": default_planning_pipeline,
         }
         for pipeline in pipelines:
+            parameter_file = config_folder / (pipeline + "_planning.yaml")
+            if not parameter_file.exists():
+                parameter_file = default_folder / (pipeline + "_planning.yaml")
             self.__moveit_configs.planning_pipelines[pipeline] = load_yaml(
-                self._package_path
-                / self.__config_dir_path
-                / (pipeline + "_planning.yaml")
+                parameter_file
             )
+
+        # Special rule to add ompl planner_configs
+        if "ompl" in self.__moveit_configs.planning_pipelines:
+            ompl_config = self.__moveit_configs.planning_pipelines["ompl"]
+            if "planner_configs" not in ompl_config.get("move_group", {}):
+                ompl_config.update(load_yaml(default_folder / "ompl_defaults.yaml"))
+
         return self
 
     def cartesian_limits(self, file_path: Optional[str] = None):
@@ -431,9 +512,8 @@ class MoveItConfigsBuilder(ParameterBuilder):
             self.robot_description_kinematics()
         if not self.__moveit_configs.planning_pipelines:
             self.planning_pipelines()
-        # TODO(JafarAbdi): Not sure if the default value for file_path makes sense
-        # if not self.__moveit_configs.trajectory_execution:
-        #     self.trajectory_execution()
+        if not self.__moveit_configs.trajectory_execution:
+            self.trajectory_execution()
         if not self.__moveit_configs.planning_scene_monitor:
             self.planning_scene_monitor()
         if not self.__moveit_configs.joint_limits:
