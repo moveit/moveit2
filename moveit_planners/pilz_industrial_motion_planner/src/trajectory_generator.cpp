@@ -43,6 +43,8 @@
 #include <tf2_eigen/tf2_eigen.h>
 #include <tf2_kdl/tf2_kdl.h>
 #endif
+#include <boost/range/combine.hpp>
+
 #include <kdl/velocityprofile_trap.hpp>
 #include <moveit/robot_state/conversions.h>
 
@@ -51,6 +53,31 @@
 namespace pilz_industrial_motion_planner
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator");
+
+sensor_msgs::msg::JointState TrajectoryGenerator::filterGroupValues(const sensor_msgs::msg::JointState& robot_state,
+                                                                    const std::string& group) const
+{
+  const std::vector<std::string>& group_joints{ robot_model_->getJointModelGroup(group)->getActiveJointModelNames() };
+  sensor_msgs::msg::JointState group_state;
+  group_state.name.reserve(group_joints.size());
+  group_state.position.reserve(group_joints.size());
+  group_state.velocity.reserve(group_joints.size());
+
+  for (size_t i = 0; i < robot_state.name.size(); ++i)
+  {
+    if (std::find(group_joints.begin(), group_joints.end(), robot_state.name.at(i)) != group_joints.end())
+    {
+      group_state.name.push_back(robot_state.name.at(i));
+      group_state.position.push_back(robot_state.position.at(i));
+      if (i < robot_state.velocity.size())
+      {
+        group_state.velocity.push_back(robot_state.velocity.at(i));
+      }
+    }
+  }
+  return group_state;
+}
+
 void TrajectoryGenerator::cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& /*req*/) const
 {
   // Empty implementation, in case the derived class does not want
@@ -89,7 +116,8 @@ void TrajectoryGenerator::checkForValidGroupName(const std::string& group_name) 
   }
 }
 
-void TrajectoryGenerator::checkStartState(const moveit_msgs::msg::RobotState& start_state) const
+void TrajectoryGenerator::checkStartState(const moveit_msgs::msg::RobotState& start_state,
+                                          const std::string& group) const
 {
   if (start_state.joint_state.name.empty())
   {
@@ -101,14 +129,26 @@ void TrajectoryGenerator::checkStartState(const moveit_msgs::msg::RobotState& st
     throw SizeMismatchInStartState("Joint state name and position do not match in start state");
   }
 
-  if (!planner_limits_.getJointLimitContainer().verifyPositionLimits(start_state.joint_state.name,
-                                                                     start_state.joint_state.position))
+  sensor_msgs::msg::JointState group_start_state{ filterGroupValues(start_state.joint_state, group) };
+
+  // verify joint position limits
+  const JointLimitsContainer& limits{ planner_limits_.getJointLimitContainer() };
+  std::string error_msg;
+  for (auto joint : boost::combine(group_start_state.name, group_start_state.position))
   {
-    throw JointsOfStartStateOutOfRange("Joint state out of range in start state");
+    if (!limits.verifyPositionLimit(joint.get<0>(), joint.get<1>()))
+    {
+      error_msg.append(error_msg.empty() ? "start state joints outside their position limits: " : ", ");
+      error_msg.append(joint.get<0>());
+    }
+  }
+  if (!error_msg.empty())
+  {
+    throw JointsOfStartStateOutOfRange(error_msg);
   }
 
   // does not allow start velocity
-  if (!std::all_of(start_state.joint_state.velocity.begin(), start_state.joint_state.velocity.end(),
+  if (!std::all_of(group_start_state.velocity.begin(), group_start_state.velocity.end(),
                    [this](double v) { return std::fabs(v) < this->VELOCITY_TOLERANCE; }))
   {
     throw NonZeroVelocityInStartState("Trajectory Generator does not allow non-zero start velocity");
@@ -218,7 +258,7 @@ void TrajectoryGenerator::validateRequest(const planning_interface::MotionPlanRe
   checkVelocityScaling(req.max_velocity_scaling_factor);
   checkAccelerationScaling(req.max_acceleration_scaling_factor);
   checkForValidGroupName(req.group_name);
-  checkStartState(req.start_state);
+  checkStartState(req.start_state, req.group_name);
   checkGoalConstraints(req.goal_constraints, req.start_state.joint_state.name, req.group_name);
 }
 
@@ -227,7 +267,7 @@ void TrajectoryGenerator::setSuccessResponse(const moveit::core::RobotState& sta
                                              const rclcpp::Time& planning_start,
                                              planning_interface::MotionPlanResponse& res) const
 {
-  robot_trajectory::RobotTrajectoryPtr rt(new robot_trajectory::RobotTrajectory(robot_model_, group_name));
+  auto rt = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, group_name);
   rt->setRobotTrajectoryMsg(start_state, joint_trajectory);
 
   res.trajectory_ = rt;
@@ -250,9 +290,9 @@ TrajectoryGenerator::cartesianTrapVelocityProfile(const double& max_velocity_sca
                                                   const double& max_acceleration_scaling_factor,
                                                   const std::unique_ptr<KDL::Path>& path) const
 {
-  std::unique_ptr<KDL::VelocityProfile> vp_trans(new KDL::VelocityProfile_Trap(
+  std::unique_ptr<KDL::VelocityProfile> vp_trans = std::make_unique<KDL::VelocityProfile_Trap>(
       max_velocity_scaling_factor * planner_limits_.getCartesianLimits().getMaxTranslationalVelocity(),
-      max_acceleration_scaling_factor * planner_limits_.getCartesianLimits().getMaxTranslationalAcceleration()));
+      max_acceleration_scaling_factor * planner_limits_.getCartesianLimits().getMaxTranslationalAcceleration());
 
   if (path->PathLength() > std::numeric_limits<double>::epsilon())  // avoid division by zero
   {

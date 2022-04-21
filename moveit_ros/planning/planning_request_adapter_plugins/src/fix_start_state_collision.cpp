@@ -96,7 +96,7 @@ public:
       else
         RCLCPP_INFO(LOGGER, "Start state appears to be in collision with respect to group %s", creq.group_name.c_str());
 
-      moveit::core::RobotStatePtr prefix_state(new moveit::core::RobotState(start_state));
+      auto prefix_state = std::make_shared<moveit::core::RobotState>(start_state);
       random_numbers::RandomNumberGenerator& rng = prefix_state->getRandomNumberGenerator();
 
       const std::vector<const moveit::core::JointModel*>& jmodels =

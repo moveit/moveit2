@@ -37,16 +37,16 @@
 #include <gtest/gtest.h>
 #include <moveit/collision_detection/world.h>
 #include <geometric_shapes/shapes.h>
-#include <boost/bind.hpp>
+#include <functional>
 
 TEST(World, AddRemoveShape)
 {
   collision_detection::World world;
 
   // Create some shapes
-  shapes::ShapePtr ball(new shapes::Sphere(1.0));
-  shapes::ShapePtr box(new shapes::Box(1, 2, 3));
-  shapes::ShapePtr cyl(new shapes::Cylinder(4, 5));
+  shapes::ShapePtr ball = std::make_shared<shapes::Sphere>(1.0);
+  shapes::ShapePtr box = std::make_shared<shapes::Box>(1, 2, 3);
+  shapes::ShapePtr cyl = std::make_shared<shapes::Cylinder>(4, 5);
 
   EXPECT_EQ(1, ball.use_count());
 
@@ -236,12 +236,12 @@ TEST(World, TrackChanges)
 
   TestAction ta;
   collision_detection::World::ObserverHandle observer_ta;
-  observer_ta = world.addObserver(boost::bind(TrackChangesNotify, &ta, _1, _2));
+  observer_ta = world.addObserver(std::bind(TrackChangesNotify, &ta, std::placeholders::_1, std::placeholders::_2));
 
   // Create some shapes
-  shapes::ShapePtr ball(new shapes::Sphere(1.0));
-  shapes::ShapePtr box(new shapes::Box(1, 2, 3));
-  shapes::ShapePtr cyl(new shapes::Cylinder(4, 5));
+  shapes::ShapePtr ball = std::make_shared<shapes::Sphere>(1.0);
+  shapes::ShapePtr box = std::make_shared<shapes::Box>(1, 2, 3);
+  shapes::ShapePtr cyl = std::make_shared<shapes::Cylinder>(4, 5);
 
   world.addToObject("obj1", ball, Eigen::Isometry3d::Identity());
 
@@ -267,7 +267,7 @@ TEST(World, TrackChanges)
 
   TestAction ta2;
   collision_detection::World::ObserverHandle observer_ta2;
-  observer_ta2 = world.addObserver(boost::bind(TrackChangesNotify, &ta2, _1, _2));
+  observer_ta2 = world.addObserver(std::bind(TrackChangesNotify, &ta2, std::placeholders::_1, std::placeholders::_2));
 
   world.addToObject("obj2", cyl, Eigen::Isometry3d::Identity());
 
@@ -305,7 +305,7 @@ TEST(World, TrackChanges)
 
   TestAction ta3;
   collision_detection::World::ObserverHandle observer_ta3;
-  observer_ta3 = world.addObserver(boost::bind(TrackChangesNotify, &ta3, _1, _2));
+  observer_ta3 = world.addObserver(std::bind(TrackChangesNotify, &ta3, std::placeholders::_1, std::placeholders::_2));
 
   bool rm_good = world.removeShapeFromObject("obj2", cyl);
   EXPECT_TRUE(rm_good);
@@ -371,12 +371,12 @@ TEST(World, ObjectPoseAndSubframes)
 
   TestAction ta;
   collision_detection::World::ObserverHandle observer_ta;
-  observer_ta = world.addObserver(boost::bind(TrackChangesNotify, &ta, _1, _2));
+  observer_ta = world.addObserver(std::bind(TrackChangesNotify, &ta, std::placeholders::_1, std::placeholders::_2));
 
   // Create shapes
-  shapes::ShapePtr ball(new shapes::Sphere(1.0));
-  shapes::ShapePtr box(new shapes::Box(1, 1, 1));
-  shapes::ShapePtr cyl(new shapes::Cylinder(0.5, 3));  // radius, length
+  shapes::ShapePtr ball = std::make_shared<shapes::Sphere>(1.0);
+  shapes::ShapePtr box = std::make_shared<shapes::Box>(1, 1, 1);
+  shapes::ShapePtr cyl = std::make_shared<shapes::Cylinder>(0.5, 3);  // radius, length
 
   // Confirm that setting object pose creates an object
   world.setObjectPose("mix1", Eigen::Isometry3d::Identity());

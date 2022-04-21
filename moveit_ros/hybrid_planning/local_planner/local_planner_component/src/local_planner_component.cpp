@@ -92,10 +92,9 @@ bool LocalPlannerComponent::initialize()
   }
 
   // Start state and scene monitors
-  RCLCPP_INFO(LOGGER, "Starting planning scene monitors");
-  planning_scene_monitor_->startSceneMonitor();
-  planning_scene_monitor_->startWorldGeometryMonitor();
-  planning_scene_monitor_->startStateMonitor();
+  planning_scene_monitor_->startSceneMonitor(config_.monitored_planning_scene_topic);
+  planning_scene_monitor_->startWorldGeometryMonitor(config_.collision_object_topic);
+  planning_scene_monitor_->startStateMonitor(config_.joint_states_topic);
 
   // Load trajectory operator plugin
   try
@@ -236,14 +235,13 @@ void LocalPlannerComponent::executeIteration()
     // If the planner received an action request and a global solution it starts to plan locally
     case LocalPlannerState::LOCAL_PLANNING_ACTIVE:
     {
-      // Read current planning scene
       planning_scene_monitor_->updateSceneWithCurrentState();
-      planning_scene_monitor_->lockSceneRead();  // LOCK planning scene
-      planning_scene::PlanningScenePtr planning_scene = planning_scene_monitor_->getPlanningScene();
-      planning_scene_monitor_->unlockSceneRead();  // UNLOCK planning scene
 
-      // Get current state
-      auto current_robot_state = planning_scene->getCurrentStateNonConst();
+      // Read current robot state
+      const moveit::core::RobotState current_robot_state = [this] {
+        planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor_);
+        return ls->getCurrentState();
+      }();
 
       // Check if the global goal is reached
       if (trajectory_operator_instance_->getTrajectoryProgress(current_robot_state) > PROGRESS_THRESHOLD)

@@ -34,6 +34,8 @@
 
 /* Author: Ioan Sucan */
 
+#include <functional>
+
 #include <moveit/common_planning_interface_objects/common_objects.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h>
@@ -71,7 +73,14 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
     return;
   }
   node_ = ros_node_abstraction->get_raw_node();
-  clear_octomap_service_client_ = node_->create_client<std_srvs::srv::Empty>(move_group::CLEAR_OCTOMAP_SERVICE_NAME);
+
+  // Prepare database parameters
+  if (!node_->has_parameter("warehouse_host"))
+    node_->declare_parameter<std::string>("warehouse_host", "127.0.0.1");
+  if (!node_->has_parameter("warehouse_plugin"))
+    node_->declare_parameter<std::string>("warehouse_plugin", "warehouse_ros_mongo::MongoDatabaseConnection");
+  if (!node_->has_parameter("warehouse_port"))
+    node_->declare_parameter<int>("warehouse_port", 33829);
 
   // set up the GUI
   ui_->setupUi(this);
@@ -88,17 +97,6 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   ui_->tabWidget->insertTab(2, joints_tab_, "Joints");
   connect(planning_display_, SIGNAL(queryStartStateChanged()), joints_tab_, SLOT(queryStartStateChanged()));
   connect(planning_display_, SIGNAL(queryGoalStateChanged()), joints_tab_, SLOT(queryGoalStateChanged()));
-
-  // Set initial velocity and acceleration scaling factors from ROS parameters
-  double factor;
-  node_->get_parameter_or("robot_description_planning.default_velocity_scaling_factor", factor, 0.1);
-  ui_->velocity_scaling_factor->setValue(factor);
-  node_->get_parameter_or("robot_description_planning.default_acceleration_scaling_factor", factor, 0.1);
-  ui_->acceleration_scaling_factor->setValue(factor);
-
-  // Query default planning pipeline id
-  node_->get_parameter(planning_display_->getMoveGroupNS() + "/move_group/default_planning_pipeline",
-                       default_planning_pipeline_);
 
   // connect buttons to actions; each action usually registers the function pointer for the actual computation,
   // to keep the GUI more responsive (using the background job processing)
@@ -204,15 +202,10 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
 
   known_collision_objects_version_ = 0;
 
-  planning_scene_publisher_ = node_->create_publisher<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
-  planning_scene_world_publisher_ =
-      node_->create_publisher<moveit_msgs::msg::PlanningSceneWorld>("planning_scene_world", 1);
+  initFromMoveGroupNS();
 
   object_recognition_client_ = rclcpp_action::create_client<object_recognition_msgs::action::ObjectRecognition>(
       node_, OBJECT_RECOGNITION_ACTION);
-
-  object_recognition_subscriber_ = node_->create_subscription<object_recognition_msgs::msg::RecognizedObjectArray>(
-      "recognized_object_array", 1, std::bind(&MotionPlanningFrame::listenDetectedObjects, this, std::placeholders::_1));
 
   if (object_recognition_client_)
   {
@@ -235,7 +228,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   //      semantic_world_.reset();
   //    if (semantic_world_)
   //    {
-  //      semantic_world_->addTableCallback(boost::bind(&MotionPlanningFrame::updateTables, this));
+  //      semantic_world_->addTableCallback(std::bind(&MotionPlanningFrame::updateTables, this));
   //    }
   //  }
   //  catch (std::exception& ex)
@@ -363,14 +356,13 @@ void MotionPlanningFrame::changePlanningGroupHelper()
   if (!planning_display_->getPlanningSceneMonitor())
     return;
 
-  planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::fillStateSelectionOptions, this));
-  planning_display_->addMainLoopJob(
-      boost::bind(&MotionPlanningFrame::populateConstraintsList, this, std::vector<std::string>()));
+  planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::fillStateSelectionOptions, this));
+  planning_display_->addMainLoopJob([this]() { populateConstraintsList(std::vector<std::string>()); });
 
   const moveit::core::RobotModelConstPtr& robot_model = planning_display_->getRobotModel();
   std::string group = planning_display_->getCurrentPlanningGroup();
   planning_display_->addMainLoopJob(
-      boost::bind(&MotionPlanningParamWidget::setGroupName, ui_->planner_param_treeview, group));
+      std::bind(&MotionPlanningParamWidget::setGroupName, ui_->planner_param_treeview, group));
   planning_display_->addMainLoopJob(
       [=]() { ui_->planning_group_combo_box->setCurrentText(QString::fromStdString(group)); });
 
@@ -404,7 +396,7 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       RCLCPP_ERROR(LOGGER, "%s", ex.what());
     }
     planning_display_->addMainLoopJob(
-        boost::bind(&MotionPlanningParamWidget::setMoveGroup, ui_->planner_param_treeview, move_group_));
+        std::bind(&MotionPlanningParamWidget::setMoveGroup, ui_->planner_param_treeview, move_group_));
     if (move_group_)
     {
       move_group_->allowLooking(ui_->allow_looking->isChecked());
@@ -413,9 +405,8 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       planning_display_->addMainLoopJob([=]() { ui_->use_cartesian_path->setEnabled(has_unique_endeffector); });
       std::vector<moveit_msgs::msg::PlannerInterfaceDescription> desc;
       if (move_group_->getInterfaceDescriptions(desc))
-        planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populatePlannersList, this, desc));
-      planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::populateConstraintsList, this),
-                                          "populateConstraintsList");
+        planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::populatePlannersList, this, desc));
+      planning_display_->addBackgroundJob([this]() { populateConstraintsList(); }, "populateConstraintsList");
 
       if (first_time_)
       {
@@ -430,15 +421,22 @@ void MotionPlanningFrame::changePlanningGroupHelper()
         planning_display_->useApproximateIK(ui_->approximate_ik->isChecked());
         if (ui_->allow_external_program->isChecked())
           planning_display_->addMainLoopJob(
-              boost::bind(&MotionPlanningFrame::allowExternalProgramCommunication, this, true));
+              std::bind(&MotionPlanningFrame::allowExternalProgramCommunication, this, true));
       }
     }
   }
 }
 
+void MotionPlanningFrame::clearRobotModel()
+{
+  ui_->planner_param_treeview->setMoveGroup(moveit::planning_interface::MoveGroupInterfacePtr());
+  joints_tab_->clearRobotModel();
+  move_group_.reset();
+}
+
 void MotionPlanningFrame::changePlanningGroup()
 {
-  planning_display_->addBackgroundJob(boost::bind(&MotionPlanningFrame::changePlanningGroupHelper, this),
+  planning_display_->addBackgroundJob(std::bind(&MotionPlanningFrame::changePlanningGroupHelper, this),
                                       "Frame::changePlanningGroup");
   joints_tab_->changePlanningGroup(planning_display_->getCurrentPlanningGroup(),
                                    planning_display_->getQueryStartStateHandler(),
@@ -448,7 +446,7 @@ void MotionPlanningFrame::changePlanningGroup()
 void MotionPlanningFrame::sceneUpdate(planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type)
 {
   if (update_type & planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY)
-    planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populateCollisionObjectsList, this));
+    planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::populateCollisionObjectsList, this));
 }
 
 void MotionPlanningFrame::addSceneObject()
@@ -525,11 +523,11 @@ void MotionPlanningFrame::addSceneObject()
   }
   setLocalSceneEdited();
 
-  planning_display_->addMainLoopJob(boost::bind(&MotionPlanningFrame::populateCollisionObjectsList, this));
+  planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::populateCollisionObjectsList, this));
 
   // Automatically select the inserted object so that its IM is displayed
   planning_display_->addMainLoopJob(
-      boost::bind(&MotionPlanningFrame::setItemSelectionInList, this, shape_name, true, ui_->collision_objects_list));
+      std::bind(&MotionPlanningFrame::setItemSelectionInList, this, shape_name, true, ui_->collision_objects_list));
 
   planning_display_->queueRenderSceneGeometry();
 }
@@ -587,9 +585,56 @@ void MotionPlanningFrame::enable()
   ui_->library_label->setStyleSheet("QLabel { color : red; font: bold }");
   ui_->object_status->setText("");
 
+  const std::string new_ns = planning_display_->getMoveGroupNS();
+  if (node_->get_namespace() != new_ns)
+  {
+    RCLCPP_INFO(LOGGER, "MoveGroup namespace changed: %s -> %s. Reloading params.", node_->get_namespace(),
+                new_ns.c_str());
+    initFromMoveGroupNS();
+  }
+
   // activate the frame
   if (parentWidget())
     parentWidget()->show();
+}
+
+// (re)initialize after MotionPlanningDisplay::changedMoveGroupNS()
+// Should be called from constructor and enable() only
+void MotionPlanningFrame::initFromMoveGroupNS()
+{
+  // Create namespace-dependent services, topics, and subscribers
+  clear_octomap_service_client_ = node_->create_client<std_srvs::srv::Empty>(move_group::CLEAR_OCTOMAP_SERVICE_NAME);
+
+  object_recognition_subscriber_ = node_->create_subscription<object_recognition_msgs::msg::RecognizedObjectArray>(
+      "recognized_object_array", 1, std::bind(&MotionPlanningFrame::listenDetectedObjects, this, std::placeholders::_1));
+
+  planning_scene_publisher_ = node_->create_publisher<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
+  planning_scene_world_publisher_ =
+      node_->create_publisher<moveit_msgs::msg::PlanningSceneWorld>("planning_scene_world", 1);
+
+  // Set initial velocity and acceleration scaling factors from ROS parameters
+  double factor;
+  node_->get_parameter_or("robot_description_planning.default_velocity_scaling_factor", factor, 0.1);
+  ui_->velocity_scaling_factor->setValue(factor);
+  node_->get_parameter_or("robot_description_planning.default_acceleration_scaling_factor", factor, 0.1);
+  ui_->acceleration_scaling_factor->setValue(factor);
+
+  // Fetch parameters from private move_group sub space
+  std::string host_param;
+  if (node_->get_parameter("warehouse_host", host_param))
+  {
+    ui_->database_host->setText(QString::fromStdString(host_param));
+  }
+
+  int port;
+  if (node_->get_parameter("warehouse_port", port))
+  {
+    ui_->database_port->setValue(port);
+  }
+
+  // Query default planning pipeline id
+  node_->get_parameter(planning_display_->getMoveGroupNS() + "/move_group/default_planning_pipeline",
+                       default_planning_pipeline_);
 }
 
 void MotionPlanningFrame::disable()

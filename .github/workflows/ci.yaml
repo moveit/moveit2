@@ -20,11 +20,12 @@ jobs:
             CCOV: true
             ROS_DISTRO: rolling
           - IMAGE: rolling-ci-testing
-            IKFAST_TEST: true
             ROS_DISTRO: rolling
+            IKFAST_TEST: true
             CLANG_TIDY: pedantic
     env:
-      CXXFLAGS: "-Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-deprecated-copy"
+      CXXFLAGS: >-
+        -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls
       CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
       DOCKER_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.env.IMAGE }}
       UPSTREAM_WORKSPACE: moveit2.repos $(f="moveit2_$(sed 's/-.*$//' <<< "${{ matrix.env.IMAGE }}").repos"; test -r $f && echo $f)
@@ -32,15 +33,19 @@ jobs:
       AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
       # Clear the ccache stats before and log the stats after the build
+      AFTER_SETUP_CCACHE: ccache --zero-stats --max-size=10.0G
       BEFORE_BUILD_UPSTREAM_WORKSPACE: ccache -z
       AFTER_BUILD_TARGET_WORKSPACE: ccache -s
       # Changing linker to lld as ld has a behavior where it takes a long time to finish
+      # Compile CCOV with Debug. Enable -Werror (except CLANG_TIDY=pedantic, which makes the clang-tidy step fail on warnings)
       TARGET_CMAKE_ARGS: >
         -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'Debug' || 'Release'}}
-        -DCMAKE_CXX_FLAGS="${{ matrix.env.CLANG_TIDY != 'pedantic' && '-Werror ' || '' }}${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer'}}"
+        -DCMAKE_CXX_FLAGS="${{ matrix.env.CLANG_TIDY != 'pedantic' && '-Werror ' || '' }}$CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer'}}"
+      UPSTREAM_CMAKE_ARGS: "-DCMAKE_CXX_FLAGS=''"
+      DOWNSTREAM_CMAKE_ARGS: -DCMAKE_CXX_FLAGS="-Wall -Wextra"
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       BASEDIR: ${{ github.workspace }}/.work
       CLANG_TIDY_BASE_REF: ${{ github.event_name != 'workflow_dispatch' && (github.base_ref || github.ref) || '' }}
@@ -136,7 +141,7 @@ jobs:
           path: ${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml
       - name: Generate codecov report
         uses: rhaschke/lcov-action@main
-        if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
           docker: $DOCKER_IMAGE
           workdir: ${{ env.BASEDIR }}/target_ws
@@ -153,7 +158,7 @@ jobs:
           name: clang-tidy
           path: ${{ env.BASEDIR }}/target_ws/src/$(basename $(pwd))
       - name: Prepare target_ws for cache
-        if: always() && ! matrix.env.CCOV
+        if: always() && !matrix.env.CCOV
         run: |
           du -sh ${{ env.BASEDIR }}/target_ws
           sudo find ${{ env.BASEDIR }}/target_ws -wholename '*/test_results/*' -delete

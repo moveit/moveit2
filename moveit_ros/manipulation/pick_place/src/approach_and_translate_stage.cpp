@@ -98,7 +98,7 @@ bool samplePossibleGoalStates(const ManipulationPlanPtr& plan, const moveit::cor
                               double min_distance, unsigned int attempts)
 {
   // initialize with scene state
-  moveit::core::RobotStatePtr token_state(new moveit::core::RobotState(reference_state));
+  auto token_state = std::make_shared<moveit::core::RobotState>(reference_state);
   for (unsigned int j = 0; j < attempts; ++j)
   {
     double min_d = std::numeric_limits<double>::infinity();
@@ -147,9 +147,9 @@ bool executeAttachObject(const ManipulationPlanSharedDataConstPtr& shared_plan_d
     ok = ps->processAttachedCollisionObjectMsg(msg);
   }
   motion_plan->planning_scene_monitor_->triggerSceneUpdateEvent(
-      (planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType)(
-          planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY +
-          planning_scene_monitor::PlanningSceneMonitor::UPDATE_STATE));
+      (planning_scene_monitor::PlanningSceneMonitor::
+           SceneUpdateType)(planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY +
+                            planning_scene_monitor::PlanningSceneMonitor::UPDATE_STATE));
   return ok;
 }
 
@@ -164,7 +164,7 @@ void addGripperTrajectory(const ManipulationPlanPtr& plan,
     moveit::core::RobotStatePtr ee_closed_state(
         new moveit::core::RobotState(plan->trajectories_.back().trajectory_->getLastWayPoint()));
 
-    robot_trajectory::RobotTrajectoryPtr ee_closed_traj(new robot_trajectory::RobotTrajectory(
+    auto ee_closed_traj = std::make_shared<robot_trajectory::RobotTrajectory>(
         ee_closed_state->getRobotModel(), plan->shared_data_->end_effector_group_->getName()));
     ee_closed_traj->setRobotTrajectoryMsg(*ee_closed_state, plan->retreat_posture_);
     // If user has defined a time for it's gripper movement time, don't add the
@@ -185,7 +185,8 @@ void addGripperTrajectory(const ManipulationPlanPtr& plan,
     plan_execution::ExecutableTrajectory et(ee_closed_traj, name);
 
     // Add a callback to attach the object to the EE after closing the gripper
-    et.effect_on_success_ = boost::bind(&executeAttachObject, plan->shared_data_, plan->approach_posture_, _1);
+    et.effect_on_success_ =
+        std::bind(&executeAttachObject, plan->shared_data_, plan->approach_posture_, std::placeholders::_1);
     et.allowed_collision_matrix_ = collision_matrix;
     plan->trajectories_.push_back(et);
   }
@@ -229,8 +230,8 @@ bool ApproachAndTranslateStage::evaluate(const ManipulationPlanPtr& plan) const
 
   // state validity checking during the approach must ensure that the gripper posture is that for pre-grasping
   moveit::core::GroupStateValidityCallbackFn approach_valid_callback =
-      boost::bind(&isStateCollisionFree, planning_scene_.get(), collision_matrix_.get(), verbose_,
-                  &plan->approach_posture_, _1, _2, _3);
+      std::bind(&isStateCollisionFree, planning_scene_.get(), collision_matrix_.get(), verbose_,
+                &plan->approach_posture_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
   plan->goal_sampler_->setVerbose(verbose_);
   std::size_t attempted_possible_goal_states = 0;
   do  // continuously sample possible goal states
@@ -242,7 +243,7 @@ bool ApproachAndTranslateStage::evaluate(const ManipulationPlanPtr& plan) const
       if (plan->shared_data_->minimize_object_distance_)
       {
         static const double MAX_CLOSE_UP_DIST = 1.0;
-        moveit::core::RobotStatePtr close_up_state(new moveit::core::RobotState(*plan->possible_goal_states_[i]));
+        auto close_up_state = std::make_shared<moveit::core::RobotState>(*plan->possible_goal_states_[i]);
         std::vector<moveit::core::RobotStatePtr> close_up_states;
         double d_close_up = moveit::core::CartesianInterpolator::computeCartesianPath(
             close_up_state.get(), plan->shared_data_->planning_group_, close_up_states, plan->shared_data_->ik_link_,
@@ -254,7 +255,7 @@ bool ApproachAndTranslateStage::evaluate(const ManipulationPlanPtr& plan) const
       }
 
       // try to compute a straight line path that arrives at the goal using the specified approach direction
-      moveit::core::RobotStatePtr first_approach_state(new moveit::core::RobotState(*plan->possible_goal_states_[i]));
+      auto first_approach_state = std::make_shared<moveit::core::RobotState>(*plan->possible_goal_states_[i]);
 
       std::vector<moveit::core::RobotStatePtr> approach_states;
       double d_approach = moveit::core::CartesianInterpolator::computeCartesianPath(
@@ -280,8 +281,8 @@ bool ApproachAndTranslateStage::evaluate(const ManipulationPlanPtr& plan) const
           // state validity checking during the retreat after the grasp must ensure the gripper posture is that of the
           // actual grasp
           moveit::core::GroupStateValidityCallbackFn retreat_valid_callback =
-              boost::bind(&isStateCollisionFree, planning_scene_after_approach.get(), collision_matrix_.get(), verbose_,
-                          &plan->retreat_posture_, _1, _2, _3);
+              std::bind(&isStateCollisionFree, planning_scene_after_approach.get(), collision_matrix_.get(), verbose_,
+                        &plan->retreat_posture_, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
           // try to compute a straight line path that moves from the goal in a desired direction
           moveit::core::RobotStatePtr last_retreat_state(
@@ -299,13 +300,13 @@ bool ApproachAndTranslateStage::evaluate(const ManipulationPlanPtr& plan) const
           {
             // Create approach trajectory
             std::reverse(approach_states.begin(), approach_states.end());
-            robot_trajectory::RobotTrajectoryPtr approach_traj(new robot_trajectory::RobotTrajectory(
+            auto approach_traj = std::make_shared<robot_trajectory::RobotTrajectory>(
                 planning_scene_->getRobotModel(), plan->shared_data_->planning_group_->getName()));
             for (const moveit::core::RobotStatePtr& approach_state : approach_states)
               approach_traj->addSuffixWayPoint(approach_state, 0.0);
 
             // Create retreat trajectory
-            robot_trajectory::RobotTrajectoryPtr retreat_traj(new robot_trajectory::RobotTrajectory(
+            auto retreat_traj = std::make_shared<robot_trajectory::RobotTrajectory>(
                 planning_scene_->getRobotModel(), plan->shared_data_->planning_group_->getName()));
             for (const moveit::core::RobotStatePtr& retreat_state : retreat_states)
               retreat_traj->addSuffixWayPoint(retreat_state, 0.0);
@@ -338,7 +339,7 @@ bool ApproachAndTranslateStage::evaluate(const ManipulationPlanPtr& plan) const
 
           // Create approach trajectory
           std::reverse(approach_states.begin(), approach_states.end());
-          robot_trajectory::RobotTrajectoryPtr approach_traj(new robot_trajectory::RobotTrajectory(
+          auto approach_traj = std::make_shared<robot_trajectory::RobotTrajectory>(
               planning_scene_->getRobotModel(), plan->shared_data_->planning_group_->getName()));
           for (const moveit::core::RobotStatePtr& approach_state : approach_states)
             approach_traj->addSuffixWayPoint(approach_state, 0.0);

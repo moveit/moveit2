@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2010, Maxim Likhachev
+ *  Copyright (c) 2021, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Maxim Likhachev nor the names of its
+ *   * Neither the name of the copyright holder nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -34,24 +34,43 @@
 
 #pragma once
 
-#include <vector>
-#include <iostream>
-#include <math.h>
+#include <moveit_msgs/msg/move_it_error_codes.h>
 
-typedef struct
+namespace moveit
 {
-  int X1, Y1, Z1;
-  int X2, Y2, Z2;
-  int XIndex, YIndex, ZIndex;
-  int UsingXYZIndex;
-  int IncX, IncY, IncZ;
-  int dx, dy, dz;
-  int dx2, dy2, dz2;
-  int err1, err2;
-} bresenham3d_param_t;
+namespace core
+{
+/**
+ * @brief a wrapper around moveit_msgs::MoveItErrorCodes to make it easier to return an error code message from a function
+ */
+class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
+{
+public:
+  MoveItErrorCode()
+  {
+    val = 0;
+  }
+  MoveItErrorCode(int code)
+  {
+    val = code;
+  }
+  MoveItErrorCode(const moveit_msgs::msg::MoveItErrorCodes& code)
+  {
+    val = code.val;
+  }
+  explicit operator bool() const
+  {
+    return val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  }
+  bool operator==(const int c) const
+  {
+    return val == c;
+  }
+  bool operator!=(const int c) const
+  {
+    return val != c;
+  }
+};
 
-void get_bresenham3d_parameters(int p1x, int p1y, int p1z, int p2x, int p2y, int p2z, bresenham3d_param_t* params);
-
-void get_current_point3d(bresenham3d_param_t* params, int* x, int* y, int* z);
-
-int get_next_point3d(bresenham3d_param_t* params);
+}  // namespace core
+}  // namespace moveit

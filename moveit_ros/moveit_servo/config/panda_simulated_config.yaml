@@ -12,6 +12,9 @@ scale:
   # Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic.
   joint: 0.5
 
+# Optionally override Servo's internal velocity scaling when near singularity or collision (0.0 = use internal velocity scaling)
+# override_velocity_scaling_factor = 0.0 # valid range [0.0:1.0]
+
 ## Properties of outgoing commands
 publish_period: 0.034  # 1/Nominal publish rate [seconds]
 low_latency_mode: false  # Set this to true to publish as soon as an incoming Twist command is received (publish_period is ignored)
@@ -27,6 +30,12 @@ publish_joint_accelerations: false
 
 ## Plugins for smoothing outgoing commands
 smoothing_filter_plugin_name: "online_signal_smoothing::ButterworthFilterPlugin"
+
+# If is_primary_planning_scene_monitor is set to true, the Servo server's PlanningScene advertises the /get_planning_scene service,
+# which other nodes can use as a source for information about the planning environment.
+# NOTE: If a different node in your system is responsible for the "primary" planning scene instance (e.g. the MoveGroup node),
+# then is_primary_planning_scene_monitor needs to be set to false.
+is_primary_planning_scene_monitor: true
 
 ## MoveIt properties
 move_group_name:  panda_arm  # Often 'manipulator' or 'arm'

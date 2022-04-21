@@ -4,10 +4,12 @@ project(moveit_resources_prbt_ikfast_manipulator_plugin)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_compile_options(-Wall)
-add_compile_options(-Wextra)
-add_compile_options(-Wno-unused-parameter)
-add_compile_options(-Wno-unused-variable)
+if(NOT WIN32)
+  add_compile_options(-Wall)
+  add_compile_options(-Wextra)
+  add_compile_options(-Wno-unused-parameter)
+  add_compile_options(-Wno-unused-variable)
+endif()
 
 # enable aligned new in gcc7+
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -29,8 +31,11 @@ include_directories(include)
 
 add_library(prbt_manipulator_moveit_ikfast_plugin SHARED
   src/prbt_manipulator_ikfast_moveit_plugin.cpp)
-# suppress warnings about unused variables in OpenRave's solver code
-target_compile_options(prbt_manipulator_moveit_ikfast_plugin PRIVATE -Wno-unused-variable)
+
+if(NOT WIN32)
+  # suppress warnings about unused variables in OpenRave's solver code
+  target_compile_options(prbt_manipulator_moveit_ikfast_plugin PRIVATE -Wno-unused-variable)
+endif()
 ament_target_dependencies(prbt_manipulator_moveit_ikfast_plugin
   moveit_core
   pluginlib

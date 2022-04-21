@@ -92,7 +92,22 @@ double RobotTrajectory::getDuration() const
 double RobotTrajectory::getAverageSegmentDuration() const
 {
   if (duration_from_previous_.empty())
+  {
+    RCLCPP_WARN(rclcpp::get_logger("RobotTrajectory"), "Too few waypoints to calculate a duration. Returning 0.");
     return 0.0;
+  }
+
+  // If the initial segment has a duration of 0, exclude it from the average calculation
+  if (duration_from_previous_[0] == 0)
+  {
+    if (duration_from_previous_.size() <= 1)
+    {
+      RCLCPP_WARN(rclcpp::get_logger("RobotTrajectory"), "First and only waypoint has a duration of 0.");
+      return 0.0;
+    }
+    else
+      return getDuration() / static_cast<double>(duration_from_previous_.size() - 1);
+  }
   else
     return getDuration() / static_cast<double>(duration_from_previous_.size());
 }
@@ -372,7 +387,7 @@ RobotTrajectory& RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::Robo
   for (std::size_t i = 0; i < state_count; ++i)
   {
     this_time_stamp = rclcpp::Time(trajectory.header.stamp) + trajectory.points[i].time_from_start;
-    moveit::core::RobotStatePtr st(new moveit::core::RobotState(copy));
+    auto st = std::make_shared<moveit::core::RobotState>(copy);
     st->setVariablePositions(trajectory.joint_names, trajectory.points[i].positions);
     if (!trajectory.points[i].velocities.empty())
       st->setVariableVelocities(trajectory.joint_names, trajectory.points[i].velocities);
@@ -403,7 +418,7 @@ RobotTrajectory& RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::Robo
 
   for (std::size_t i = 0; i < state_count; ++i)
   {
-    moveit::core::RobotStatePtr st(new moveit::core::RobotState(copy));
+    auto st = std::make_shared<moveit::core::RobotState>(copy);
     if (trajectory.joint_trajectory.points.size() > i)
     {
       st->setVariablePositions(trajectory.joint_trajectory.joint_names, trajectory.joint_trajectory.points[i].positions);

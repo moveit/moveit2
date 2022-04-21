@@ -919,10 +919,16 @@ JointModel* RobotModel::constructJointModel(const urdf::Link* child_link, const 
     {
       if (virtual_joint.child_link_ != child_link->name)
       {
-        RCLCPP_WARN(LOGGER,
-                    "Skipping virtual joint '%s' because its child frame '%s' "
-                    "does not match the URDF frame '%s'",
-                    virtual_joint.name_.c_str(), virtual_joint.child_link_.c_str(), child_link->name.c_str());
+        if (child_link->name == "world" && virtual_joint.type_ == "fixed" && child_link->collision_array.empty() &&
+            !child_link->collision && child_link->visual_array.empty() && !child_link->visual)
+          // Gazebo requires a fixed link from a dummy world link to the first robot's link
+          // Skip warning in this case and create a fixed joint with given name
+          new_joint_model = new FixedJointModel(virtual_joint.name_, joint_index, first_variable_index);
+        else
+          RCLCPP_WARN(LOGGER,
+                      "Skipping virtual joint '%s' because its child frame '%s' "
+                      "does not match the URDF frame '%s'",
+                      virtual_joint.name_.c_str(), virtual_joint.child_link_.c_str(), child_link->name.c_str());
       }
       else if (virtual_joint.parent_frame_.empty())
       {

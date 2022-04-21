@@ -60,7 +60,7 @@ namespace pilz_industrial_motion_planner
 static const rclcpp::Logger LOGGER =
     rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_lin");
 TrajectoryGeneratorLIN::TrajectoryGeneratorLIN(const moveit::core::RobotModelConstPtr& robot_model,
-                                               const LimitsContainer& planner_limits)
+                                               const LimitsContainer& planner_limits, const std::string& /*group_name*/)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
 {
   if (!planner_limits_.hasFullCartesianLimits())
@@ -124,12 +124,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
     {
       frame_id = req.goal_constraints.front().position_constraints.front().header.frame_id;
     }
-    geometry_msgs::msg::Pose goal_pose_msg;
-    goal_pose_msg.position =
-        req.goal_constraints.front().position_constraints.front().constraint_region.primitive_poses.front().position;
-    goal_pose_msg.orientation = req.goal_constraints.front().orientation_constraints.front().orientation;
-    normalizeQuaternion(goal_pose_msg.orientation);
-    tf2::convert<geometry_msgs::msg::Pose, Eigen::Isometry3d>(goal_pose_msg, info.goal_pose);
+    info.goal_pose = getConstraintPose(req.goal_constraints.front());
   }
 
   assert(req.start_state.joint_state.name.size() == req.start_state.joint_state.position.size());
@@ -204,7 +199,8 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorLIN::setPathLIN(const Eigen::Affin
                     planner_limits_.getCartesianLimits().getMaxRotationalVelocity();
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
 
-  return std::unique_ptr<KDL::Path>(new KDL::Path_Line(kdl_start_pose, kdl_goal_pose, rot_interpo, eqradius, true));
+  return std::unique_ptr<KDL::Path>(
+      std::make_unique<KDL::Path_Line>(kdl_start_pose, kdl_goal_pose, rot_interpo, eqradius, true));
 }
 
 }  // namespace pilz_industrial_motion_planner

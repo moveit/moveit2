@@ -151,6 +151,7 @@ bool RDFLoader::loadFileToString(std::string& buffer, const std::string& path)
 bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& path,
                                       const std::vector<std::string>& xacro_args)
 {
+  buffer.clear();
   if (path.empty())
   {
     RCLCPP_ERROR(LOGGER, "Path is empty");
@@ -163,7 +164,7 @@ bool RDFLoader::loadXacroFileToString(std::string& buffer, const std::string& pa
     return false;
   }
 
-  std::string cmd = "ros2 run xacro xacro";
+  std::string cmd = "ros2 run xacro xacro ";
   for (const std::string& xacro_arg : xacro_args)
     cmd += xacro_arg + " ";
   cmd += path;

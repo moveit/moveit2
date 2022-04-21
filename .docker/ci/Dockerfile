@@ -2,7 +2,7 @@
 # ROS base image augmented with all MoveIt dependencies to use for CI
 
 ARG ROS_DISTRO=rolling
-FROM ros:${ROS_DISTRO}-ros-base-focal
+FROM ros:${ROS_DISTRO}-ros-base
 MAINTAINER Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 ENV TERM xterm
@@ -25,7 +25,7 @@ RUN \
         # Some basic requirements
         wget git sudo curl \
         # Preferred build tools
-        clang clang-format-10 clang-tidy clang-tools \
+        clang clang-format-12 clang-tidy clang-tools \
         ccache && \
     #
     # Fetch all dependencies from moveit2.repos

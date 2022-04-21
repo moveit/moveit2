@@ -167,3 +167,29 @@ jobs:
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
+
+  delete_untagged:
+    runs-on: ubuntu-latest
+    needs:
+      - release
+      - source
+    steps:
+      - name: Delete Untagged Images
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
+          script: |
+            const response = await github.request("GET /orgs/${{ env.OWNER }}/packages/container/${{ env.PACKAGE_NAME }}/versions", {
+                per_page: ${{ env.PER_PAGE }}
+              });
+            for(version of response.data) {
+                if (version.metadata.container.tags.length == 0) {
+                    console.log("delete " + version.id)
+                    const deleteResponse = await github.request("DELETE /orgs/${{ env.OWNER }}/packages/container/${{ env.PACKAGE_NAME }}/versions/" + version.id, { });
+                    console.log("status " + deleteResponse.status)
+                }
+            }
+        env:
+          OWNER: ros-planning
+          PACKAGE_NAME: moveit2
+          PER_PAGE: 100

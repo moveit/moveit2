@@ -44,7 +44,7 @@
 #include <moveit/collision_distance_field/collision_common_distance_field.h>
 #include <moveit/distance_field/propagation_distance_field.h>
 #include <moveit/collision_distance_field/collision_detector_allocator_distance_field.h>
-#include <boost/bind.hpp>
+#include <functional>
 #include <memory>
 #include <utility>
 
@@ -71,7 +71,8 @@ CollisionEnvDistanceField::CollisionEnvDistanceField(
   distance_field_cache_entry_world_ = generateDistanceFieldCacheEntryWorld();
 
   // request notifications about changes to world
-  observer_handle_ = getWorld()->addObserver(boost::bind(&CollisionEnvDistanceField::notifyObjectChange, this, _1, _2));
+  observer_handle_ = getWorld()->addObserver(
+      std::bind(&CollisionEnvDistanceField::notifyObjectChange, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 CollisionEnvDistanceField::CollisionEnvDistanceField(
@@ -87,7 +88,8 @@ CollisionEnvDistanceField::CollisionEnvDistanceField(
   distance_field_cache_entry_world_ = generateDistanceFieldCacheEntryWorld();
 
   // request notifications about changes to world
-  observer_handle_ = getWorld()->addObserver(boost::bind(&CollisionEnvDistanceField::notifyObjectChange, this, _1, _2));
+  observer_handle_ = getWorld()->addObserver(
+      std::bind(&CollisionEnvDistanceField::notifyObjectChange, this, std::placeholders::_1, std::placeholders::_2));
 
   getWorld()->notifyObserverAllObjects(observer_handle_, World::CREATE);
 }
@@ -110,7 +112,8 @@ CollisionEnvDistanceField::CollisionEnvDistanceField(const CollisionEnvDistanceF
   planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
   // request notifications about changes to world
-  observer_handle_ = getWorld()->addObserver(boost::bind(&CollisionEnvDistanceField::notifyObjectChange, this, _1, _2));
+  observer_handle_ = getWorld()->addObserver(
+      std::bind(&CollisionEnvDistanceField::notifyObjectChange, this, std::placeholders::_1, std::placeholders::_2));
   getWorld()->notifyObserverAllObjects(observer_handle_, World::CREATE);
 }
 
@@ -707,7 +710,7 @@ DistanceFieldCacheEntryPtr CollisionEnvDistanceField::generateDistanceFieldCache
     const std::string& group_name, const moveit::core::RobotState& state,
     const collision_detection::AllowedCollisionMatrix* acm, bool generate_distance_field) const
 {
-  DistanceFieldCacheEntryPtr dfce(new DistanceFieldCacheEntry());
+  DistanceFieldCacheEntryPtr dfce = std::make_shared<DistanceFieldCacheEntry>();
 
   if (robot_model_->getJointModelGroup(group_name) == nullptr)
   {
@@ -966,9 +969,9 @@ void CollisionEnvDistanceField::addLinkBodyDecompositions(double resolution)
     }
 
     RCLCPP_DEBUG(LOGGER, "Generating model for %s", link_model->getName().c_str());
-    BodyDecompositionConstPtr bd(new BodyDecomposition(link_model->getShapes(),
-                                                       link_model->getCollisionOriginTransforms(), resolution,
-                                                       getLinkPadding(link_model->getName())));
+    BodyDecompositionConstPtr bd =
+        std::make_shared<const BodyDecomposition>(link_model->getShapes(), link_model->getCollisionOriginTransforms(),
+                                                  resolution, getLinkPadding(link_model->getName()));
     link_body_decomposition_vector_.push_back(bd);
     link_body_decomposition_index_map_[link_model->getName()] = link_body_decomposition_vector_.size() - 1;
   }
@@ -1057,8 +1060,9 @@ void CollisionEnvDistanceField::addLinkBodyDecompositions(
       continue;
     }
 
-    BodyDecompositionPtr bd(new BodyDecomposition(link_model->getShapes(), link_model->getCollisionOriginTransforms(),
-                                                  resolution, getLinkPadding(link_model->getName())));
+    BodyDecompositionPtr bd =
+        std::make_shared<BodyDecomposition>(link_model->getShapes(), link_model->getCollisionOriginTransforms(),
+                                            resolution, getLinkPadding(link_model->getName()));
 
     RCLCPP_DEBUG(LOGGER, "Generated model for %s", link_model->getName().c_str());
 
@@ -1689,7 +1693,8 @@ void CollisionEnvDistanceField::setWorld(const WorldPtr& world)
   CollisionEnv::setWorld(world);
 
   // request notifications about changes to new world
-  observer_handle_ = getWorld()->addObserver(boost::bind(&CollisionEnvDistanceField::notifyObjectChange, this, _1, _2));
+  observer_handle_ = getWorld()->addObserver(
+      std::bind(&CollisionEnvDistanceField::notifyObjectChange, this, std::placeholders::_1, std::placeholders::_2));
 
   // get notifications any objects already in the new world
   getWorld()->notifyObserverAllObjects(observer_handle_, World::CREATE);
@@ -1776,7 +1781,7 @@ void CollisionEnvDistanceField::updateDistanceObject(const std::string& id, Dist
 CollisionEnvDistanceField::DistanceFieldCacheEntryWorldPtr
 CollisionEnvDistanceField::generateDistanceFieldCacheEntryWorld()
 {
-  DistanceFieldCacheEntryWorldPtr dfce(new DistanceFieldCacheEntryWorld());
+  DistanceFieldCacheEntryWorldPtr dfce = std::make_shared<DistanceFieldCacheEntryWorld>();
   dfce->distance_field_ = std::make_shared<distance_field::PropagationDistanceField>(
       size_.x(), size_.y(), size_.z(), resolution_, origin_.x() - 0.5 * size_.x(), origin_.y() - 0.5 * size_.y(),
       origin_.z() - 0.5 * size_.z(), max_propogation_distance_, use_signed_distance_field_);

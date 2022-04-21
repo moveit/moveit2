@@ -112,8 +112,10 @@ public:
 
     const Eigen::VectorXd start_direction = (intersection - start).normalized();
     const Eigen::VectorXd end_direction = (end - intersection).normalized();
+    const double start_dot_end = start_direction.dot(end_direction);
 
-    if ((start_direction - end_direction).norm() < 0.000001)
+    // catch division by 0 in computations below
+    if (start_dot_end > 0.999999 || start_dot_end < -0.999999)
     {
       length_ = 0.0;
       radius = 1.0;
@@ -123,8 +125,7 @@ public:
       return;
     }
 
-    // directions must be different at this point so angle is always non-zero
-    const double angle = acos(std::max(-1.0, start_direction.dot(end_direction)));
+    const double angle = acos(start_dot_end);
     const double start_distance = (start - intersection).norm();
     const double end_distance = (end - intersection).norm();
 
@@ -863,10 +864,6 @@ TimeOptimalTrajectoryGeneration::TimeOptimalTrajectoryGeneration(const double pa
 {
 }
 
-TimeOptimalTrajectoryGeneration::~TimeOptimalTrajectoryGeneration()
-{
-}
-
 bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
                                                         const double max_velocity_scaling_factor,
                                                         const double max_acceleration_scaling_factor) const
@@ -935,17 +932,40 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     max_velocity[j] = 1.0;
     if (bounds.velocity_bounded_)
     {
+      if (bounds.max_velocity_ < std::numeric_limits<double>::epsilon())
+      {
+        RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
+                     bounds.max_velocity_, vars[j].c_str());
+        return false;
+      }
       max_velocity[j] =
           std::min(std::fabs(bounds.max_velocity_), std::fabs(bounds.min_velocity_)) * velocity_scaling_factor;
-      max_velocity[j] = std::max(0.01, max_velocity[j]);
+    }
+    else
+    {
+      RCLCPP_WARN_STREAM_ONCE(
+          LOGGER, "Joint velocity limits are not defined. Using the default "
+                      << max_velocity[j] << " rad/s. You can define velocity limits in the URDF or joint_limits.yaml.");
     }
 
     max_acceleration[j] = 1.0;
     if (bounds.acceleration_bounded_)
     {
+      if (bounds.max_acceleration_ < std::numeric_limits<double>::epsilon())
+      {
+        RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
+                     bounds.max_acceleration_, vars[j].c_str());
+        return false;
+      }
       max_acceleration[j] = std::min(std::fabs(bounds.max_acceleration_), std::fabs(bounds.min_acceleration_)) *
                             acceleration_scaling_factor;
-      max_acceleration[j] = std::max(0.01, max_acceleration[j]);
+    }
+    else
+    {
+      RCLCPP_WARN_STREAM_ONCE(LOGGER,
+                              "Joint acceleration limits are not defined. Using the default "
+                                  << max_acceleration[j]
+                                  << " rad/s^2. You can define acceleration limits in the URDF or joint_limits.yaml.");
     }
   }
 

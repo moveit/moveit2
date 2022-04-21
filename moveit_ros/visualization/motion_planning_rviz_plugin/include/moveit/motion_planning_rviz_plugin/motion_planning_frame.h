@@ -108,6 +108,7 @@ public:
   MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_common::DisplayContext* context, QWidget* parent = nullptr);
   ~MotionPlanningFrame() override;
 
+  void clearRobotModel();
   void changePlanningGroup();
   void enable();
   void disable();
@@ -117,6 +118,7 @@ protected:
   static const int ITEM_TYPE_SCENE = 1;
   static const int ITEM_TYPE_QUERY = 2;
 
+  void initFromMoveGroupNS();
   void constructPlanningRequest(moveit_msgs::msg::MotionPlanRequest& mreq);
 
   void updateSceneMarkers(float wall_dt, float ros_dt);

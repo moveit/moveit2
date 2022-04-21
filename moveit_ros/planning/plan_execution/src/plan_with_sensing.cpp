@@ -56,7 +56,8 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.plan_with_se
 //     : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle("~/sense_for_plan"))*/
 //   {
 //     // dynamic_reconfigure_server_.setCallback(
-//     //     boost::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, _1, _2));
+//     //     std::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, std::placeholders::_1,
+//     std::placeholders::_2));
 //   }
 //
 // private:

@@ -119,7 +119,7 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   if (!joint_model_group_)
   {
     RCLCPP_ERROR(LOGGER, "Failed to retrieve joint model group for name '%s'.", group_name_.c_str());
-    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME);
+    last_plan_solution_->error_code = moveit::core::MoveItErrorCode::INVALID_GROUP_NAME;
     return *last_plan_solution_;
   }
 
@@ -127,11 +127,11 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor =
       moveit_cpp_->getPlanningSceneMonitorNonConst();
   planning_scene_monitor->updateFrameTransforms();
-  planning_scene_monitor->lockSceneRead();  // LOCK planning scene
-  planning_scene::PlanningScenePtr planning_scene =
-      planning_scene::PlanningScene::clone(planning_scene_monitor->getPlanningScene());
-  planning_scene_monitor->unlockSceneRead();  // UNLOCK planning scene
-  planning_scene_monitor.reset();             // release this pointer
+  const planning_scene::PlanningScenePtr planning_scene = [planning_scene_monitor] {
+    planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor);
+    return planning_scene::PlanningScene::clone(ls);
+  }();
+  planning_scene_monitor.reset();  // release this pointer
 
   // Init MotionPlanRequest
   ::planning_interface::MotionPlanRequest req;
@@ -156,11 +156,12 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   if (current_goal_constraints_.empty())
   {
     RCLCPP_ERROR(LOGGER, "No goal constraints set for planning request");
-    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+    last_plan_solution_->error_code = moveit::core::MoveItErrorCode::INVALID_GOAL_CONSTRAINTS;
     return *last_plan_solution_;
   }
   req.goal_constraints = current_goal_constraints_;
 
+  // Set path constraints
   req.path_constraints = current_path_constraints_;
 
   // Run planning attempt
@@ -168,7 +169,7 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   if (planning_pipeline_names_.find(parameters.planning_pipeline) == planning_pipeline_names_.end())
   {
     RCLCPP_ERROR(LOGGER, "No planning pipeline available for name '%s'", parameters.planning_pipeline.c_str());
-    last_plan_solution_->error_code = MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FAILURE);
+    last_plan_solution_->error_code = moveit::core::MoveItErrorCode::FAILURE;
     return *last_plan_solution_;
   }
   const planning_pipeline::PlanningPipelinePtr pipeline =

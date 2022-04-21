@@ -37,7 +37,7 @@
 
 #include <gtest/gtest.h>
 #include <memory>
-#include <boost/bind.hpp>
+#include <functional>
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
 #if __has_include(<tf2_eigen/tf2_eigen.hpp>)
@@ -590,7 +590,9 @@ TEST_F(KinematicsTest, searchIKWithCallback)
     }
 
     kinematics_solver_->searchPositionIK(poses[0], fk_values, timeout_, solution,
-                                         boost::bind(&KinematicsTest::searchIKCallback, this, _1, _2, _3), error_code);
+                                         std::bind(&KinematicsTest::searchIKCallback, this, std::placeholders::_1,
+                                                   std::placeholders::_2, std::placeholders::_3),
+                                         error_code);
     if (error_code.val == error_code.SUCCESS)
       success++;
     else

@@ -74,7 +74,7 @@ static inline bool validatePadding(double padding)
 namespace collision_detection
 {
 CollisionEnv::CollisionEnv(const moveit::core::RobotModelConstPtr& model, double padding, double scale)
-  : robot_model_(model), world_(new World()), world_const_(world_)
+  : robot_model_(model), world_(std::make_shared<World>()), world_const_(world_)
 {
   if (!validateScale(scale))
     scale = 1.0;

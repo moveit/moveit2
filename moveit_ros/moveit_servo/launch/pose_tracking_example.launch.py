@@ -69,16 +69,13 @@ def generate_launch_description():
     ros2_controllers_path = os.path.join(
         get_package_share_directory("moveit_resources_panda_moveit_config"),
         "config",
-        "panda_ros_controllers.yaml",
+        "ros2_controllers.yaml",
     )
     ros2_control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[moveit_config.robot_description, ros2_controllers_path],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
+        output="screen",
     )
 
     # Load controllers

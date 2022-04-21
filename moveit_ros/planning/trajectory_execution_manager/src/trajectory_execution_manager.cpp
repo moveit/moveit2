@@ -181,6 +181,8 @@ void TrajectoryExecutionManager::initialize()
       EXECUTION_EVENT_TOPIC, 100, std::bind(&TrajectoryExecutionManager::receiveEvent, this, std::placeholders::_1),
       options);
 
+  controller_mgr_node_->get_parameter("trajectory_execution.execution_duration_monitoring",
+                                      execution_duration_monitoring_);
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_execution_duration_scaling",
                                       allowed_execution_duration_scaling_);
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_goal_duration_margin",
@@ -398,7 +400,7 @@ bool TrajectoryExecutionManager::pushAndExecute(const moveit_msgs::msg::RobotTra
       continuous_execution_queue_.push_back(context);
       if (!continuous_execution_thread_)
         continuous_execution_thread_ =
-            std::make_unique<boost::thread>(boost::bind(&TrajectoryExecutionManager::continuousExecutionThread, this));
+            std::make_unique<boost::thread>(std::bind(&TrajectoryExecutionManager::continuousExecutionThread, this));
     }
     last_execution_status_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
     continuous_execution_condition_.notify_all();
@@ -565,6 +567,18 @@ void TrajectoryExecutionManager::reloadControllerInformation()
       ci.name_ = name;
       ci.joints_.insert(joints.begin(), joints.end());
       known_controllers_[ci.name_] = ci;
+    }
+
+    names.clear();
+    controller_manager_->getActiveControllers(names);
+    for (const auto& active_name : names)
+    {
+      auto found_it = std::find_if(known_controllers_.begin(), known_controllers_.end(),
+                                   [&](const auto& known_controller) { return known_controller.first == active_name; });
+      if (found_it != known_controllers_.end())
+      {
+        found_it->second.state_.active_ = true;
+      }
     }
 
     for (std::map<std::string, ControllerInformation>::iterator it = known_controllers_.begin();
@@ -1575,6 +1589,7 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
   }
   else
   {
+    RCLCPP_ERROR(LOGGER, "Active status of required controllers can not be assured.");
     last_execution_status_ = moveit_controller_manager::ExecutionStatus::ABORTED;
     return false;
   }
@@ -1802,8 +1817,12 @@ bool TrajectoryExecutionManager::ensureActiveControllers(const std::vector<std::
     std::set<std::string> originally_active;
     for (std::map<std::string, ControllerInformation>::const_iterator it = known_controllers_.begin();
          it != known_controllers_.end(); ++it)
+    {
       if (it->second.state_.active_)
+      {
         originally_active.insert(it->first);
+      }
+    }
     return std::includes(originally_active.begin(), originally_active.end(), controllers.begin(), controllers.end());
   }
 }
