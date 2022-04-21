@@ -108,6 +108,33 @@ int initStraightTrajectory(robot_trajectory::RobotTrajectory& trajectory)
   return 0;
 }
 
+// Initialize one-joint, 2-point trajectory with nonzero initial & final vel/accel
+int initNonzeroInitialFinalTrajectory(robot_trajectory::RobotTrajectory& trajectory)
+{
+  const int num_points = 2;
+
+  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  if (!group)
+  {
+    RCLCPP_ERROR(LOGGER, "Need to set the group");
+    return -1;
+  }
+
+  const std::vector<int>& idx = group->getVariableIndexList();
+  moveit::core::RobotState state(trajectory.getRobotModel());
+
+  trajectory.clear();
+  for (unsigned i = 0; i < num_points; ++i)
+  {
+    state.setVariablePosition(idx[0], 0.0);
+    state.setVariableVelocity(idx[0], 0.1);
+    state.setVariableAcceleration(idx[0], 0.2);
+    trajectory.addSuffixWayPoint(state, 0.0);
+  }
+
+  return 0;
+}
+
 void printTrajectory(robot_trajectory::RobotTrajectory& trajectory)
 {
   const moveit::core::JointModelGroup* group = trajectory.getGroup();
@@ -162,6 +189,14 @@ TEST(TestTimeParameterization, TestRepeatedPoint)
   EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
   printTrajectory(TRAJECTORY);
   ASSERT_LT(TRAJECTORY.getWayPointDurationFromStart(TRAJECTORY.getWayPointCount() - 1), 0.001);
+}
+
+TEST(TestTimeParameterization, NonzeroInitialVelAccel)
+{
+  trajectory_processing::IterativeParabolicTimeParameterization time_parameterization;
+  EXPECT_EQ(initNonzeroInitialFinalTrajectory(TRAJECTORY), 0);
+  EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
+  printTrajectory(TRAJECTORY);
 }
 
 int main(int argc, char** argv)
