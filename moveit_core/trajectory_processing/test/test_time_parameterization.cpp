@@ -126,9 +126,9 @@ int initNonzeroInitialFinalTrajectory(robot_trajectory::RobotTrajectory& traject
   trajectory.clear();
   for (unsigned i = 0; i < num_points; ++i)
   {
-    state.setVariablePosition(idx[0], 0.0);
-    state.setVariableVelocity(idx[0], 0.1);
-    state.setVariableAcceleration(idx[0], 0.2);
+    state.setVariablePosition(idx[0], 0.01 * i);
+    state.setVariableVelocity(idx[0], 0.1 * i);
+    state.setVariableAcceleration(idx[0], 0.2 * i);
     trajectory.addSuffixWayPoint(state, 0.0);
   }
 
@@ -193,7 +193,7 @@ TEST(TestTimeParameterization, TestRepeatedPoint)
 
 TEST(TestTimeParameterization, NonzeroInitialVelAccel)
 {
-  trajectory_processing::IterativeParabolicTimeParameterization time_parameterization;
+  trajectory_processing::IterativeSplineParameterization time_parameterization(true);
   EXPECT_EQ(initNonzeroInitialFinalTrajectory(TRAJECTORY), 0);
   EXPECT_TRUE(time_parameterization.computeTimeStamps(TRAJECTORY));
   printTrajectory(TRAJECTORY);
