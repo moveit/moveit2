@@ -325,7 +325,7 @@ public:
   /** \brief Force the specified velocities to be inside bounds. Return true if changes were made. */
   virtual bool enforceVelocityBounds(double* values, const Bounds& other_bounds) const;
 
-  /** \brief Get the bounds for a variable. Throw an exception if the variable was not found */
+  /** \brief Get the bounds for a variable. */
   const VariableBounds& getVariableBounds(const std::string& variable) const;
 
   /** \brief Get the variable bounds for this joint, in the same order as the names returned by getVariableNames() */

@@ -171,8 +171,7 @@ public:
 
   bool computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
                          const std::map<std::string, double>& velocity_limits,
-                         const std::map<std::string, double>& acceleration_limits,
-                         const std::map<std::string, double>& jerk_limits) const;
+                         const std::map<std::string, double>& acceleration_limits) const;
 
 private:
   bool doTimeParameterizationCalculations(robot_trajectory::RobotTrajectory& trajectory,
