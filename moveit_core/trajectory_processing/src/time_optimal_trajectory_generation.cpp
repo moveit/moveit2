@@ -911,15 +911,10 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
                 max_acceleration_scaling_factor, acceleration_scaling_factor);
   }
 
-  // This lib does not actually work properly when angles wrap around, so we need to unwind the path first
-  trajectory.unwind();
-
   // This is pretty much copied from IterativeParabolicTimeParameterization::applyVelocityConstraints
   const std::vector<std::string>& vars = group->getVariableNames();
-  const std::vector<int>& idx = group->getVariableIndexList();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
   const unsigned num_joints = group->getVariableCount();
-  const unsigned num_points = trajectory.getWayPointCount();
 
   // Get the limits (we do this at same time, unlike IterativeParabolicTimeParameterization)
   Eigen::VectorXd max_velocity(num_joints);
@@ -968,6 +963,35 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
                                   << " rad/s^2. You can define acceleration limits in the URDF or joint_limits.yaml.");
     }
   }
+
+  return doTimeParameterizationCalculations(trajectory, max_velocity, max_acceleration);
+}
+
+bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
+                                                        const std::map<std::string, double>& velocity_limits,
+                                                        const std::map<std::string, double>& acceleration_limits,
+                                                        const std::map<std::string, double>& jerk_limits) const
+{
+  return true;
+}
+
+bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_trajectory::RobotTrajectory& trajectory,
+                                                                         const Eigen::VectorXd& max_velocity,
+                                                                         const Eigen::VectorXd& max_acceleration) const
+{
+  // This lib does not actually work properly when angles wrap around, so we need to unwind the path first
+  trajectory.unwind();
+
+  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+  if (!group)
+  {
+    RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
+    return false;
+  }
+
+  const unsigned num_points = trajectory.getWayPointCount();
+  const std::vector<int>& idx = group->getVariableIndexList();
+  const unsigned num_joints = group->getVariableCount();
 
   // Have to convert into Eigen data structs and remove repeated points
   //  (https://github.com/tobiaskunz/trajectories/issues/3)
