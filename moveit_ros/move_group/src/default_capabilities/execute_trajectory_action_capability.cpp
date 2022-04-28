@@ -69,7 +69,7 @@ void MoveGroupExecuteTrajectoryAction::initialize()
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      std::bind(&MoveGroupExecuteTrajectoryAction::executePathCallback, this, _1));
+      [this](const auto& goal) { executePathCallback(goal); });
 }
 
 void MoveGroupExecuteTrajectoryAction::executePathCallback(std::shared_ptr<ExecTrajectoryGoal> goal)

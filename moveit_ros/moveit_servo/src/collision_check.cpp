@@ -76,7 +76,7 @@ CollisionCheck::CollisionCheck(rclcpp::Node::SharedPtr node, const ServoParamete
 
   worst_case_stop_time_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
       "~/worst_case_stop_time", rclcpp::SystemDefaultsQoS(),
-      std::bind(&CollisionCheck::worstCaseStopTimeCB, this, std::placeholders::_1));
+      [this](const std_msgs::msg::Float64::SharedPtr msg) { return worstCaseStopTimeCB(msg); });
 
   current_state_ = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 }
@@ -88,7 +88,7 @@ planning_scene_monitor::LockedPlanningSceneRO CollisionCheck::getLockedPlanningS
 
 void CollisionCheck::start()
 {
-  timer_ = node_->create_wall_timer(std::chrono::duration<double>(period_), std::bind(&CollisionCheck::run, this));
+  timer_ = node_->create_wall_timer(std::chrono::duration<double>(period_), [this]() { return run(); });
 }
 
 void CollisionCheck::run()

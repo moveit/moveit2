@@ -56,12 +56,11 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.plan_executi
 //     : owner_(owner)  //, dynamic_reconfigure_server_(ros::NodeHandle("~/plan_execution"))
 //   {
 //     // dynamic_reconfigure_server_.setCallback(
-//     //     std::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, std::placeholders::_1,
-//     std::placeholders::_2));
+//     //     [this](const auto& config, uint32_t level) { dynamicReconfigureCallback(config, level); });
 //   }
 //
 // private:
-//   // void dynamicReconfigureCallback(PlanExecutionDynamicReconfigureConfig& config, uint32_t level)
+//   // void dynamicReconfigureCallback(const PlanExecutionDynamicReconfigureConfig& config, uint32_t level)
 //   // {
 //   //   owner_->setMaxReplanAttempts(config.max_replan_attempts);
 //   //   owner_->setTrajectoryStateRecordingFrequency(config.record_trajectory_state_frequency);
@@ -90,7 +89,6 @@ plan_execution::PlanExecution::PlanExecution(
       [this](const planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type) {
         planningSceneUpdatedCallback(update_type);
       });
-  // std::bind(&PlanExecution::planningSceneUpdatedCallback, this, std::placeholders::_1));
 
   // start the dynamic-reconfigure server
   // reconfigure_impl_ = new DynamicReconfigureImpl(this);

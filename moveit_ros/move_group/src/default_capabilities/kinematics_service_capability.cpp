@@ -56,14 +56,18 @@ MoveGroupKinematicsService::MoveGroupKinematicsService() : MoveGroupCapability("
 
 void MoveGroupKinematicsService::initialize()
 {
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-  using std::placeholders::_3;
-
   fk_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPositionFK>(
-      FK_SERVICE_NAME, std::bind(&MoveGroupKinematicsService::computeFKService, this, _1, _2, _3));
+      FK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> req_header,
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionFK::Request> req,
+                              std::shared_ptr<moveit_msgs::srv::GetPositionFK::Response> res) {
+        return computeFKService(req_header, req, res);
+      });
   ik_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPositionIK>(
-      IK_SERVICE_NAME, std::bind(&MoveGroupKinematicsService::computeIKService, this, _1, _2, _3));
+      IK_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> req_header,
+                              const std::shared_ptr<moveit_msgs::srv::GetPositionIK::Request> req,
+                              std::shared_ptr<moveit_msgs::srv::GetPositionIK::Response> res) {
+        return computeIKService(req_header, req, res);
+      });
 }
 
 namespace
@@ -172,12 +176,14 @@ bool MoveGroupKinematicsService::computeIKService(const std::shared_ptr<rmw_requ
     moveit::core::RobotState rs = ls->getCurrentState();
     kset.add(req->ik_request.constraints, ls->getTransforms());
     computeIK(req->ik_request, res->solution, res->error_code, rs,
-              std::bind(&isIKSolutionValid,
-                        req->ik_request.avoid_collisions ?
-                            static_cast<const planning_scene::PlanningSceneConstPtr&>(ls).get() :
-                            nullptr,
-                        kset.empty() ? nullptr : &kset, std::placeholders::_1, std::placeholders::_2,
-                        std::placeholders::_3));
+              [scene = req->ik_request.avoid_collisions ?
+                           static_cast<const planning_scene::PlanningSceneConstPtr&>(ls).get() :
+                           nullptr,
+               kset_ptr = kset.empty() ? nullptr : &kset](moveit::core::RobotState* robot_state,
+                                                          const moveit::core::JointModelGroup* joint_group,
+                                                          const double* joint_group_variable_values) {
+                return isIKSolutionValid(scene, kset_ptr, robot_state, joint_group, joint_group_variable_values);
+              });
   }
   else
   {

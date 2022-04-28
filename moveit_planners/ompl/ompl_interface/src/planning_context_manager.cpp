@@ -315,7 +315,7 @@ void PlanningContextManager::registerDefaultStateSpaces()
 
 ConfiguredPlannerSelector PlanningContextManager::getPlannerSelector() const
 {
-  return std::bind(&PlanningContextManager::plannerSelector, this, std::placeholders::_1);
+  return [this](const std::string& planner) { return plannerSelector(planner); };
 }
 
 void PlanningContextManager::setPlannerConfigurations(const planning_interface::PlannerConfigurationMap& pconfig)

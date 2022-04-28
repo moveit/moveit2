@@ -157,8 +157,10 @@ public:
     : Node("joy_to_twist_publisher", options), frame_to_publish_(BASE_FRAME_ID)
   {
     // Setup pub/sub
-    joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
-        JOY_TOPIC, rclcpp::SystemDefaultsQoS(), std::bind(&JoyToServoPub::joyCB, this, std::placeholders::_1));
+    joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(JOY_TOPIC, rclcpp::SystemDefaultsQoS(),
+                                                                [this](const sensor_msgs::msg::Joy::SharedPtr msg) {
+                                                                  return joyCB(msg);
+                                                                });
 
     twist_pub_ = this->create_publisher<geometry_msgs::msg::TwistStamped>(TWIST_TOPIC, rclcpp::SystemDefaultsQoS());
     joint_pub_ = this->create_publisher<control_msgs::msg::JointJog>(JOINT_TOPIC, rclcpp::SystemDefaultsQoS());

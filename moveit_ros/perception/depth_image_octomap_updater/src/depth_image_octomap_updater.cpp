@@ -127,7 +127,7 @@ bool DepthImageOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   mesh_filter_->setPaddingOffset(padding_offset_);
   mesh_filter_->setPaddingScale(padding_scale_);
   mesh_filter_->setTransformCallback(
-      std::bind(&DepthImageOctomapUpdater::getShapeTransform, this, std::placeholders::_1, std::placeholders::_2));
+      [this](mesh_filter::MeshHandle mesh, Eigen::Isometry3d& tf) { return getShapeTransform(mesh, tf); });
 
   return true;
 }
@@ -151,7 +151,10 @@ void DepthImageOctomapUpdater::start()
 
   sub_depth_image_ = image_transport::create_camera_subscription(
       node_.get(), image_topic_,
-      std::bind(&DepthImageOctomapUpdater::depthImageCallback, this, std::placeholders::_1, std::placeholders::_2),
+      [this](const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
+             const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg) {
+        return depthImageCallback(depth_msg, info_msg);
+      },
       "raw", custom_qos);
 }
 

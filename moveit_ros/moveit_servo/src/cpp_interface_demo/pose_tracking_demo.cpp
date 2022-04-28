@@ -55,8 +55,10 @@ class StatusMonitor
 public:
   StatusMonitor(const rclcpp::Node::SharedPtr& node, const std::string& topic)
   {
-    sub_ = node->create_subscription<std_msgs::msg::Int8>(
-        topic, rclcpp::SystemDefaultsQoS(), std::bind(&StatusMonitor::statusCB, this, std::placeholders::_1));
+    sub_ = node->create_subscription<std_msgs::msg::Int8>(topic, rclcpp::SystemDefaultsQoS(),
+                                                          [this](const std_msgs::msg::Int8::ConstSharedPtr msg) {
+                                                            return statusCB(msg);
+                                                          });
   }
 
 private:
