@@ -700,7 +700,7 @@ bool ConfigurationFilesWidget::checkDependencies()
   }
 
   // Check that email information is filled
-  QRegExp mail_regex("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b");
+  QRegExp mail_regex("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]+\\b");
   mail_regex.setCaseSensitivity(Qt::CaseInsensitive);
   mail_regex.setPatternSyntax(QRegExp::RegExp);
   QString test_email = QString::fromStdString(config_data_->author_email_);
