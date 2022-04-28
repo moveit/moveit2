@@ -34,6 +34,7 @@ find_package(ament_cmake REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(control_toolbox REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(moveit_configs_utils REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
@@ -53,6 +54,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   control_msgs
   control_toolbox
   geometry_msgs
+  moveit_configs_utils
   moveit_core
   moveit_msgs
   moveit_ros_planning

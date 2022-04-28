@@ -6,17 +6,18 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
-find_package(Eigen3 REQUIRED)
-find_package(orocos_kdl REQUIRED)
-find_package(tf2_kdl REQUIRED)
-find_package(kdl_parser REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(random_numbers REQUIRED)
 find_package(class_loader REQUIRED)
-find_package(pluginlib REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(kdl_parser REQUIRED)
+find_package(moveit_configs_utils REQUIRED)
 find_package(moveit_core REQUIRED)
-find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_msgs REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+find_package(orocos_kdl REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(random_numbers REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(tf2_kdl REQUIRED)
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
@@ -38,6 +39,7 @@ set(THIS_PACKAGE_LIBRARIES
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   pluginlib
+  moveit_configs_utils
   moveit_core
   moveit_ros_planning
   Boost

@@ -26,8 +26,9 @@
   <depend>control_msgs</depend>
   <depend>control_toolbox</depend>
   <depend>geometry_msgs</depend>
-  <depend>moveit_msgs</depend>
+  <depend>moveit_configs_utils</depend>
   <depend>moveit_core</depend>
+  <depend>moveit_msgs</depend>
   <depend>moveit_ros_planning_interface</depend>
   <depend>pluginlib</depend>
   <depend>sensor_msgs</depend>
