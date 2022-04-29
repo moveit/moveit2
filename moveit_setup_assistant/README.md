@@ -106,4 +106,4 @@ The format for the templates is custom to MSA. Let's assume you have a `Template
 
 becomes
 
-   <name>r2d2_moveit_config</name>
+    <name>r2d2_moveit_config</name>
