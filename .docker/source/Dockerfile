@@ -20,7 +20,7 @@ RUN --mount=type=cache,target=/root/.ccache/ \
     # Enable ccache
     PATH=/usr/lib/ccache:$PATH && \
     #
-    # Fetch required upstream sources for building
+    # Fetch all dependencies from moveit2.repos
     # As of 5/2/2022, permissions need to be set explicitly.
     # See https://github.com/actions/checkout/issues/760.
     git config --global --add safe.directory /home/runner/work/moveit2/moveit2/.work/upstream_ws/src/geometric_shapes && \
