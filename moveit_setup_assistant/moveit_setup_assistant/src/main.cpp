@@ -93,12 +93,6 @@ int main(int argc, char** argv)
   auto client = std::make_unique<rviz_common::ros_integration::RosClientAbstraction>();
   auto node = client->init(argc, argv, "moveit_setup_assistant", false);
 
-  /* TODO:
-   * Migration Notes:
-   *   ROS 1 MSA had an explicit SIGINT handler (ros::init_options::NoSigintHandler) not replicated here
-   *   ROS 1 MSA also started an ASyncSpinner
-   */
-
   // Create Qt Application
   QApplication qt_app(argc, argv);
   // numeric values should always be POSIX
