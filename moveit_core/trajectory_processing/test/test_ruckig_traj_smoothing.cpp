@@ -98,7 +98,7 @@ TEST_F(RuckigTests, trajectory_duration)
   EXPECT_TRUE(
       smoother_.applySmoothing(*trajectory_, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
   EXPECT_GT(trajectory_->getWayPointDurationFromStart(trajectory_->getWayPointCount() - 1), 0.9999 * ideal_duration);
-  EXPECT_LT(trajectory_->getWayPointDurationFromStart(trajectory_->getWayPointCount() - 1), 1.3 * ideal_duration);
+  EXPECT_LT(trajectory_->getWayPointDurationFromStart(trajectory_->getWayPointCount() - 1), 1.5 * ideal_duration);
 }
 
 TEST_F(RuckigTests, single_waypoint)
