@@ -43,7 +43,6 @@
 #include <QList>
 #include <QLabel>
 #include <QListWidget>
-#include <QListWidget>
 #include <QListWidgetItem>
 #include <QProgressBar>
 #include <QPushButton>
