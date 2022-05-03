@@ -428,7 +428,7 @@ public:
     return variable_names_;
   }
 
-  /** \brief Get the bounds for a specific variable. */
+  /** \brief Get the bounds for a specific variable. Throw an exception of variable is not found. */
   const VariableBounds& getVariableBounds(const std::string& variable) const
   {
     return getJointOfVariable(variable)->getVariableBounds(variable);
