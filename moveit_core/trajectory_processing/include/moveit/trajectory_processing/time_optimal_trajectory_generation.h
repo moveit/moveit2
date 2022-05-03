@@ -170,8 +170,8 @@ public:
                          const double max_acceleration_scaling_factor = 1.0) const override;
 
   bool computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
-                         const std::map<std::string, double>& velocity_limits,
-                         const std::map<std::string, double>& acceleration_limits) const;
+                         const std::unordered_map<std::string, double>& velocity_limits,
+                         const std::unordered_map<std::string, double>& acceleration_limits) const;
 
 private:
   bool doTimeParameterizationCalculations(robot_trajectory::RobotTrajectory& trajectory,

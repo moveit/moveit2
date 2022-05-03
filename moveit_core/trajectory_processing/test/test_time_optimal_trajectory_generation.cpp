@@ -174,8 +174,8 @@ TEST(time_optimal_trajectory_generation, test_custom_limits)
 
   TimeOptimalTrajectoryGeneration totg;
   // Custom velocity & acceleration limits for some joints
-  std::map<std::string, double> vel_limits{ { "panda_joint1", 1.3 } };
-  std::map<std::string, double> accel_limits{ { "panda_joint2", 2.3 }, { "panda_joint3", 3.3 } };
+  std::unordered_map<std::string, double> vel_limits{ { "panda_joint1", 1.3 } };
+  std::unordered_map<std::string, double> accel_limits{ { "panda_joint2", 2.3 }, { "panda_joint3", 3.3 } };
   ASSERT_TRUE(totg.computeTimeStamps(trajectory, vel_limits, accel_limits)) << "Failed to compute time stamps";
 }
 

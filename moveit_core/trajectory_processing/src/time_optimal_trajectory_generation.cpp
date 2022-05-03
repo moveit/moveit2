@@ -926,7 +926,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     max_velocity[j] = 1.0;
     if (bounds.velocity_bounded_)
     {
-      if (bounds.max_velocity_ < std::numeric_limits<double>::epsilon())
+      if (bounds.max_velocity_ <= 0.0)
       {
         RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
                      bounds.max_velocity_, vars[j].c_str());
@@ -945,7 +945,7 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     max_acceleration[j] = 1.0;
     if (bounds.acceleration_bounded_)
     {
-      if (bounds.max_acceleration_ < std::numeric_limits<double>::epsilon())
+      if (bounds.max_acceleration_ < 0.0)
       {
         RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
                      bounds.max_acceleration_, vars[j].c_str());
@@ -966,9 +966,9 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
   return doTimeParameterizationCalculations(trajectory, max_velocity, max_acceleration);
 }
 
-bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
-                                                        const std::map<std::string, double>& velocity_limits,
-                                                        const std::map<std::string, double>& acceleration_limits) const
+bool TimeOptimalTrajectoryGeneration::computeTimeStamps(
+    robot_trajectory::RobotTrajectory& trajectory, const std::unordered_map<std::string, double>& velocity_limits,
+    const std::unordered_map<std::string, double>& acceleration_limits) const
 {
   if (trajectory.empty())
     return true;
@@ -993,20 +993,17 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     // VELOCITY LIMIT
     // Check if a custom limit was specified as an argument
     bool set_velocity_limit = false;
-    for (const auto& [joint_name, velocity_limit] : velocity_limits)
+    auto it = velocity_limits.find(vars[j]);
+    if (it != velocity_limits.end())
     {
-      if (joint_name.compare(vars[j]))
-      {
-        max_velocity[j] = velocity_limit;
-        set_velocity_limit = true;
-        break;
-      }
+      max_velocity[j] = it->second;
+      set_velocity_limit = true;
     }
 
     if (bounds.velocity_bounded_ && !set_velocity_limit)
     {
       // Set the default velocity limit, from robot model
-      if (bounds.max_velocity_ < std::numeric_limits<double>::epsilon())
+      if (bounds.max_velocity_ < 0.0)
       {
         RCLCPP_ERROR(LOGGER, "Invalid max_velocity %f specified for '%s', must be greater than 0.0",
                      bounds.max_velocity_, vars[j].c_str());
@@ -1027,19 +1024,17 @@ bool TimeOptimalTrajectoryGeneration::computeTimeStamps(robot_trajectory::RobotT
     // ACCELERATION LIMIT
     // Check if a custom limit was specified as an argument
     bool set_acceleration_limit = false;
-    for (const auto& [joint_name, acceleration_limit] : acceleration_limits)
+    it = acceleration_limits.find(vars[j]);
+    if (it != acceleration_limits.end())
     {
-      if (joint_name.compare(vars[j]))
-      {
-        max_acceleration[j] = acceleration_limit;
-        set_acceleration_limit = true;
-        break;
-      }
+      max_acceleration[j] = it->second;
+      set_acceleration_limit = true;
     }
 
     if (bounds.acceleration_bounded_ && !set_acceleration_limit)
     {
-      if (bounds.max_acceleration_ < std::numeric_limits<double>::epsilon())
+      // Set the default acceleration limit, from robot model
+      if (bounds.max_acceleration_ < 0.0)
       {
         RCLCPP_ERROR(LOGGER, "Invalid max_acceleration %f specified for '%s', must be greater than 0.0",
                      bounds.max_acceleration_, vars[j].c_str());
