@@ -88,9 +88,6 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
   ruckig::InputParameter<ruckig::DynamicDOFs> ruckig_input{ num_dof };
   ruckig::OutputParameter<ruckig::DynamicDOFs> ruckig_output{ num_dof };
 
-  // Initialize the smoother
-  initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), group);
-
   // Kinematic limits (vel/accel/jerk)
   const std::vector<std::string>& vars = group->getVariableNames();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
@@ -138,6 +135,9 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     }
   }
 
+  // Initialize the smoother
+  initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), group);
+
   ruckig::Result ruckig_result;
   double duration_extension_factor = 1;
   bool smoothing_complete = false;
@@ -147,7 +147,7 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     {
       moveit::core::RobotStatePtr next_waypoint = trajectory.getWayPointPtr(waypoint_idx + 1);
 
-      getNextRuckigInput(ruckig_output, next_waypoint, group, ruckig_input);
+      getNextRuckigInput(trajectory.getWayPointPtr(waypoint_idx), next_waypoint, group, ruckig_input);
 
       // Run Ruckig
       ruckig_result = ruckig_ptr->update(ruckig_input, ruckig_output);
@@ -219,6 +219,11 @@ void RuckigSmoothing::initializeRuckigState(ruckig::InputParameter<0>& ruckig_in
     current_positions_vector.at(i) = first_waypoint.getVariablePosition(idx.at(i));
     current_velocities_vector.at(i) = first_waypoint.getVariableVelocity(idx.at(i));
     current_accelerations_vector.at(i) = first_waypoint.getVariableAcceleration(idx.at(i));
+    // Clamp velocities/accelerations in case they exceed the limit due to small numerical errors
+    current_velocities_vector.at(i) =
+        std::clamp(current_velocities_vector.at(i), -ruckig_input.max_velocity.at(i), ruckig_input.max_velocity.at(i));
+    current_accelerations_vector.at(i) = std::clamp(
+        current_accelerations_vector.at(i), -ruckig_input.max_acceleration.at(i), ruckig_input.max_acceleration.at(i));
   }
   std::copy_n(current_positions_vector.begin(), num_dof, ruckig_input.current_position.begin());
   std::copy_n(current_velocities_vector.begin(), num_dof, ruckig_input.current_velocity.begin());
@@ -229,28 +234,38 @@ void RuckigSmoothing::initializeRuckigState(ruckig::InputParameter<0>& ruckig_in
   ruckig_output.new_acceleration = ruckig_input.current_acceleration;
 }
 
-void RuckigSmoothing::getNextRuckigInput(const ruckig::OutputParameter<0>& ruckig_output,
+void RuckigSmoothing::getNextRuckigInput(const moveit::core::RobotStatePtr& current_waypoint,
                                          const moveit::core::RobotStatePtr& next_waypoint,
                                          const moveit::core::JointModelGroup* joint_group,
                                          ruckig::InputParameter<0>& ruckig_input)
 {
-  // TODO(andyz): https://github.com/ros-planning/moveit2/issues/766
-  // ruckig_output.pass_to_input(ruckig_input);
-
   const size_t num_dof = joint_group->getVariableCount();
   const std::vector<int>& idx = joint_group->getVariableIndexList();
 
   for (size_t joint = 0; joint < num_dof; ++joint)
   {
-    // Feed output from the previous timestep back as input
-    ruckig_input.current_position.at(joint) = ruckig_output.new_position.at(joint);
-    ruckig_input.current_velocity.at(joint) = ruckig_output.new_velocity.at(joint);
-    ruckig_input.current_acceleration.at(joint) = ruckig_output.new_acceleration.at(joint);
+    ruckig_input.current_position.at(joint) = current_waypoint->getVariablePosition(idx.at(joint));
+    ruckig_input.current_velocity.at(joint) = current_waypoint->getVariableVelocity(idx.at(joint));
+    ruckig_input.current_acceleration.at(joint) = current_waypoint->getVariableAcceleration(idx.at(joint));
 
     // Target state is the next waypoint
     ruckig_input.target_position.at(joint) = next_waypoint->getVariablePosition(idx.at(joint));
     ruckig_input.target_velocity.at(joint) = next_waypoint->getVariableVelocity(idx.at(joint));
     ruckig_input.target_acceleration.at(joint) = next_waypoint->getVariableAcceleration(idx.at(joint));
+
+    // Clamp velocities/accelerations in case they exceed the limit due to small numerical errors
+    ruckig_input.current_velocity.at(joint) =
+        std::clamp(ruckig_input.current_velocity.at(joint), -ruckig_input.max_velocity.at(joint),
+                   ruckig_input.max_velocity.at(joint));
+    ruckig_input.current_acceleration.at(joint) =
+        std::clamp(ruckig_input.current_acceleration.at(joint), -ruckig_input.max_acceleration.at(joint),
+                   ruckig_input.max_acceleration.at(joint));
+    ruckig_input.target_velocity.at(joint) =
+        std::clamp(ruckig_input.target_velocity.at(joint), -ruckig_input.max_velocity.at(joint),
+                   ruckig_input.max_velocity.at(joint));
+    ruckig_input.target_acceleration.at(joint) =
+        std::clamp(ruckig_input.target_acceleration.at(joint), -ruckig_input.max_acceleration.at(joint),
+                   ruckig_input.max_acceleration.at(joint));
   }
 }
 }  // namespace trajectory_processing

@@ -52,12 +52,12 @@ public:
 private:
   /**
    * \brief Feed previous output back as input for next iteration. Get next target state from the next waypoint.
-   * \param ruckig_output   The previous output from Ruckig
-   * \param next_waypoint   The nominal, desired state at the next waypoint
-   * \param joint_group     The MoveIt JointModelGroup of interest
-   * \param ruckig_input    Output. The Rucking parameters for the next iteration
+   * \param current_waypoint    The nominal current state
+   * \param next_waypoint       The nominal, desired state at the next waypoint
+   * \param joint_group         The MoveIt JointModelGroup of interest
+   * \param ruckig_input        Output. The Rucking parameters for the next iteration
    */
-  static void getNextRuckigInput(const ruckig::OutputParameter<0>& ruckig_output,
+  static void getNextRuckigInput(const moveit::core::RobotStatePtr& current_waypoint,
                                  const moveit::core::RobotStatePtr& next_waypoint,
                                  const moveit::core::JointModelGroup* joint_group,
                                  ruckig::InputParameter<0>& ruckig_input);
