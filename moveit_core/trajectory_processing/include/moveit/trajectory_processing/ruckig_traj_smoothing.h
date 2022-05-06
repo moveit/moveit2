@@ -59,7 +59,17 @@ private:
    * \brief A utility function to check if the group is defined.
    * \param trajectory      Trajectory to smooth.
    */
-  static [[nodiscard]] bool validateGroup(const robot_trajectory::RobotTrajectory& trajectory);
+  [[nodiscard]] static bool validateGroup(const robot_trajectory::RobotTrajectory& trajectory);
+
+  /**
+   * \brief A utility function to get bounds from a JointModelGroup and save them for Ruckig.
+   * \param group       Retrieve bounds from this JointModelGroup
+   * \param ruckig_input      Bounds are stored in this Ruckig input data structure
+   */
+  [[nodiscard]] static bool getRobotModelBounds(const double max_velocity_scaling_factor,
+                                                const double max_acceleration_scaling_factor,
+                                                moveit::core::JointModelGroup const* const group,
+                                                ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
 
   /**
    * \brief Feed previous output back as input for next iteration. Get next target state from the next waypoint.
@@ -89,7 +99,7 @@ private:
    * \param trajectory      Trajectory to smooth.
    * \param ruckig_input    Necessary input for Ruckig smoothing. Contains kinematic limits (vel, accel, jerk)
    */
-  static [[nodiscard]] bool runRuckig(robot_trajectory::RobotTrajectory& trajectory,
+  [[nodiscard]] static bool runRuckig(robot_trajectory::RobotTrajectory& trajectory,
                                       ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
 };
 }  // namespace trajectory_processing
