@@ -53,6 +53,19 @@ void Launches::onInit()
                    "moveit_rviz", { "rviz2", "rviz_common", "rviz_default_plugins", "moveit_ros_visualization" }));
   available_launch_bundles_.back().addFile(
       "config/moveit.rviz", "Configuration file for Rviz with the Motion Planning Plugin already setup.");
+  available_launch_bundles_.push_back(LaunchBundle(
+      "MoveGroup Launch", "Launch file to run the main MoveIt executable that provides the MoveGroup action",
+      "move_group", { "moveit_ros_move_group" }));
+  available_launch_bundles_.push_back(LaunchBundle("Static TF Launch",
+                                                   "Launch file to broadcast static TF for the robot's virtual joints.",
+                                                   "static_virtual_joint_tfs", { "tf2_ros" }));
+  available_launch_bundles_.push_back(LaunchBundle("Spawn Controllers Launch",
+                                                   "Launch file to spawn the necessary controllers",
+                                                   "spawn_controllers", { "controller_manager" }));
+  available_launch_bundles_.push_back(LaunchBundle("Demo Launch",
+                                                   "Launch file to run a demo of MoveGroup. Warning that it requires "
+                                                   "the above launch files to all be generated as well.",
+                                                   "demo"));
 
   available_launch_bundles_.push_back(LaunchBundle("Setup Assistant Launch",
                                                    "Launch file for easily re-starting the MoveIt "
