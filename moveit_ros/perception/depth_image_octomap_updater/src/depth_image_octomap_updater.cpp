@@ -48,7 +48,6 @@
 #include <stdint.h>
 
 #include <memory>
-#include <boost/bind.hpp>
 
 namespace occupancy_map_monitor
 {

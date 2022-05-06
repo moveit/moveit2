@@ -39,7 +39,6 @@
 #include <moveit/collision_detection_fcl/collision_common.h>
 
 #include <moveit/collision_detection_fcl/fcl_compat.h>
-#include <boost/bind.hpp>
 
 #if (MOVEIT_FCL_VERSION >= FCL_VERSION_CHECK(0, 6, 0))
 #include <fcl/broadphase/broadphase_dynamic_AABB_tree.h>

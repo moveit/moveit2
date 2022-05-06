@@ -40,8 +40,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/transform_listener.h>
 
-#include <boost/bind.hpp>
-
 #include <memory>
 #include <sstream>
 

@@ -49,7 +49,6 @@
 #include <tf2_ros/create_timer_ros.h>
 
 #include <memory>
-#include <boost/bind.hpp>
 
 namespace occupancy_map_monitor
 {
