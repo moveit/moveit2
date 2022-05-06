@@ -48,7 +48,7 @@
 #else
 #include <tf2_eigen/tf2_eigen.h>
 #endif
-#include <moveit/trajectory_processing/iterative_time_parameterization.h>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
 
@@ -156,9 +156,9 @@ bool MotionPlanningFrame::computeCartesianPlan()
     // https://groups.google.com/forum/#!topic/moveit-users/MOoFxy2exT4
     robot_trajectory::RobotTrajectory rt(move_group_->getRobotModel(), move_group_->getName());
     rt.setRobotTrajectoryMsg(*move_group_->getCurrentState(), trajectory);
-    trajectory_processing::IterativeParabolicTimeParameterization iptp;
-    bool success =
-        iptp.computeTimeStamps(rt, ui_->velocity_scaling_factor->value(), ui_->acceleration_scaling_factor->value());
+    trajectory_processing::TimeOptimalTrajectoryGeneration time_parameterization;
+    bool success = time_parameterization.computeTimeStamps(rt, ui_->velocity_scaling_factor->value(),
+                                                           ui_->acceleration_scaling_factor->value());
     RCLCPP_INFO(LOGGER, "Computing time stamps %s", success ? "SUCCEEDED" : "FAILED");
 
     // Store trajectory in current_plan_
