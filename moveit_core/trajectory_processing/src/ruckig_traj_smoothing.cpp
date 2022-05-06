@@ -57,10 +57,8 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
                                      const double max_velocity_scaling_factor,
                                      const double max_acceleration_scaling_factor)
 {
-  moveit::core::JointModelGroup const* const group = trajectory.getGroup();
-  if (!group)
+  if (!validateGroup(trajectory))
   {
-    RCLCPP_ERROR(LOGGER, "It looks like the planner did not set the group the plan was computed for");
     return false;
   }
 
@@ -72,26 +70,13 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     return true;
   }
 
-  // Cache the trajectory in case we need to reset it
-  robot_trajectory::RobotTrajectory original_trajectory =
-      robot_trajectory::RobotTrajectory(trajectory, true /* deep copy */);
-
+  moveit::core::JointModelGroup const* const group = trajectory.getGroup();
   const size_t num_dof = group->getVariableCount();
 
-  // This lib does not actually work properly when angles wrap around, so we need to unwind the path first
-  trajectory.unwind();
-
-  // Instantiate the smoother
-  double timestep = trajectory.getAverageSegmentDuration();
-  std::unique_ptr<ruckig::Ruckig<ruckig::DynamicDOFs>> ruckig_ptr;
-  ruckig_ptr = std::make_unique<ruckig::Ruckig<ruckig::DynamicDOFs>>(num_dof, timestep);
+  // Kinematic limits (vels/accels/jerks)
   ruckig::InputParameter<ruckig::DynamicDOFs> ruckig_input{ num_dof };
-  ruckig::OutputParameter<ruckig::DynamicDOFs> ruckig_output{ num_dof };
-
-  // Kinematic limits (vel/accel/jerk)
   const std::vector<std::string>& vars = group->getVariableNames();
   const moveit::core::RobotModel& rmodel = group->getParentModel();
-  const std::vector<int>& move_group_idx = group->getVariableIndexList();
   for (size_t i = 0; i < num_dof; ++i)
   {
     const moveit::core::VariableBounds& bounds = rmodel.getVariableBounds(vars.at(i));
@@ -135,8 +120,67 @@ bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajecto
     }
   }
 
+  return runRuckig(trajectory, ruckig_input);
+}
+
+bool RuckigSmoothing::applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
+                                     const std::map<std::string, double>& velocity_limits,
+                                     const std::map<std::string, double>& acceleration_limits,
+                                     const std::map<std::string, double>& jerk_limits)
+{
+  if (!validateGroup(trajectory))
+  {
+    return false;
+  }
+
+  const size_t num_waypoints = trajectory.getWayPointCount();
+  if (num_waypoints < 2)
+  {
+    RCLCPP_WARN(LOGGER,
+                "Trajectory does not have enough points to smooth with Ruckig. Returning an unmodified trajectory.");
+    return true;
+  }
+
+  moveit::core::JointModelGroup const* const group = trajectory.getGroup();
+  const size_t num_dof = group->getVariableCount();
+
+  // Kinematic limits (vels/accels/jerks)
+  ruckig::InputParameter<ruckig::DynamicDOFs> ruckig_input{ num_dof };
+
+  return true;
+}
+
+bool RuckigSmoothing::validateGroup(const robot_trajectory::RobotTrajectory& trajectory)
+{
+  moveit::core::JointModelGroup const* const group = trajectory.getGroup();
+  if (!group)
+  {
+    RCLCPP_ERROR(LOGGER, "The planner did not set the group the plan was computed for");
+    return false;
+  }
+}
+
+bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
+                                ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input)
+{
+  const size_t num_waypoints = trajectory.getWayPointCount();
+  moveit::core::JointModelGroup const* const group = trajectory.getGroup();
+  const size_t num_dof = group->getVariableCount();
+  ruckig::OutputParameter<ruckig::DynamicDOFs> ruckig_output{ num_dof };
+  const std::vector<int>& move_group_idx = group->getVariableIndexList();
+
+  // This lib does not work properly when angles wrap, so we need to unwind the path first
+  trajectory.unwind();
+
   // Initialize the smoother
+  double timestep = trajectory.getAverageSegmentDuration();
+  std::unique_ptr<ruckig::Ruckig<ruckig::DynamicDOFs>> ruckig_ptr;
+  ruckig_ptr = std::make_unique<ruckig::Ruckig<ruckig::DynamicDOFs>>(num_dof, timestep);
   initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), group);
+
+  // Cache the trajectory in case we need to reset it
+  robot_trajectory::RobotTrajectory original_trajectory =
+      robot_trajectory::RobotTrajectory(trajectory, true /* deep copy */);
 
   ruckig::Result ruckig_result;
   double duration_extension_factor = 1;

@@ -49,7 +49,18 @@ public:
                              const double max_velocity_scaling_factor = 1.0,
                              const double max_acceleration_scaling_factor = 1.0);
 
+  static bool applySmoothing(robot_trajectory::RobotTrajectory& trajectory,
+                             const std::map<std::string, double>& velocity_limits,
+                             const std::map<std::string, double>& acceleration_limits,
+                             const std::map<std::string, double>& jerk_limits);
+
 private:
+  /**
+   * \brief A utility function to check if the group is defined.
+   * \param trajectory      Trajectory to smooth.
+   */
+  static [[nodiscard]] bool validateGroup(const robot_trajectory::RobotTrajectory& trajectory);
+
   /**
    * \brief Feed previous output back as input for next iteration. Get next target state from the next waypoint.
    * \param current_waypoint    The nominal current state
@@ -72,5 +83,13 @@ private:
   static void initializeRuckigState(ruckig::InputParameter<0>& ruckig_input, ruckig::OutputParameter<0>& ruckig_output,
                                     const moveit::core::RobotState& first_waypoint,
                                     const moveit::core::JointModelGroup* joint_group);
+
+  /**
+   * \brief A utility function to instantiate and run Ruckig for a series of waypoints.
+   * \param trajectory      Trajectory to smooth.
+   * \param ruckig_input    Necessary input for Ruckig smoothing. Contains kinematic limits (vel, accel, jerk)
+   */
+  static [[nodiscard]] bool runRuckig(robot_trajectory::RobotTrajectory& trajectory,
+                                      ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
 };
 }  // namespace trajectory_processing
