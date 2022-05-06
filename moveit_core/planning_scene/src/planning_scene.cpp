@@ -1508,7 +1508,10 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
       RCLCPP_ERROR(LOGGER, "Robot state is not compatible with robot model. This could be fatal.");
     }
   }
-  else if (object.object.operation == moveit_msgs::msg::CollisionObject::REMOVE)  // == DETACH
+  else if (object.object.operation == moveit_msgs::msg::CollisionObject::REMOVE ||
+           object.object.operation == moveit_msgs::msg::CollisionObject::MOVE)  // REMOVE now actually removes the object
+                                                                                  // MOVE moves the object from attached to the robot to the collision world
+                                                                                  // as ADD can "move" the object instead.
   {
     // STEP 1: Get info about the object from the RobotState
     std::vector<const moveit::core::AttachedBody*> attached_bodies;
@@ -1542,30 +1545,28 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
     for (const moveit::core::AttachedBody* attached_body : attached_bodies)
     {
       const std::string& name = attached_body->getName();
-      if (world_->hasObject(name))
-      {
-        RCLCPP_WARN(LOGGER,
-                    "The collision world already has an object with the same name as the body about to be detached. "
-                    "NOT adding the detached body '%s' to the collision world.",
-                    object.object.id.c_str());
-      }
-      else
-      {
-        const Eigen::Isometry3d& pose = attached_body->getGlobalPose();
-        world_->addToObject(name, pose, attached_body->getShapes(), attached_body->getShapePoses());
-        world_->setSubframesOfObject(name, attached_body->getSubframes());
-        RCLCPP_DEBUG(LOGGER, "Detached object '%s' from link '%s' and added it back in the collision world",
-                     name.c_str(), object.link_name.c_str());
-      }
+      if (object.object.operation == moveit_msgs::msg::CollisionObject::MOVE){ //if MOVE, we put the object(s) back into the world
+        if (world_->hasObject(name))
+        {
+          RCLCPP_WARN(LOGGER,
+                      "The collision world already has an object with the same name as the body about to be detached. "
+                      "NOT adding the detached body '%s' to the collision world.",
+                      object.object.id.c_str());
+        }
+        else
+        {
+          const Eigen::Isometry3d& pose = attached_body->getGlobalPose();
+          world_->addToObject(name, pose, attached_body->getShapes(), attached_body->getShapePoses());
+          world_->setSubframesOfObject(name, attached_body->getSubframes());
+          RCLCPP_DEBUG(LOGGER, "Detached object '%s' from link '%s' and added it back in the collision world",
+                      name.c_str(), object.link_name.c_str());
+        }
+      }      
 
       robot_state_->clearAttachedBody(name);
     }
     if (!attached_bodies.empty() || object.object.id.empty())
       return true;
-  }
-  else if (object.object.operation == moveit_msgs::msg::CollisionObject::MOVE)
-  {
-    RCLCPP_ERROR(LOGGER, "Move for attached objects not yet implemented");
   }
   else
   {
