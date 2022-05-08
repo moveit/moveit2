@@ -65,7 +65,7 @@
   <test_depend>moveit_resources_pr2_description</test_depend>
   <test_depend>angles</test_depend>
   <test_depend>tf2_kdl</test_depend>
-  <test_depend>orocos_kdl_vendor</test_depend>
+  <test_depend>orocos_kdl</test_depend>
   <test_depend>ament_cmake_gtest</test_depend>
   <test_depend>ament_index_cpp</test_depend>
 

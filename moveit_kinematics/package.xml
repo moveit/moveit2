@@ -30,7 +30,7 @@
   <depend>eigen</depend>
   <depend>tf2</depend>
   <depend>tf2_kdl</depend>
-  <depend>orocos_kdl_vendor</depend>
+  <depend>orocos_kdl</depend>
   <depend>moveit_msgs</depend>
 
   <!-- some requirements of ikfast scripts -->
