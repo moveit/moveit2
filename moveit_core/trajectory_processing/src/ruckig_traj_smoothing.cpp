@@ -222,7 +222,7 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
   double timestep = trajectory.getAverageSegmentDuration();
   std::unique_ptr<ruckig::Ruckig<ruckig::DynamicDOFs>> ruckig_ptr;
   ruckig_ptr = std::make_unique<ruckig::Ruckig<ruckig::DynamicDOFs>>(num_dof, timestep);
-  initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), group);
+  initializeRuckigState(*trajectory.getFirstWayPointPtr(), group, ruckig_input, ruckig_output);
 
   // Cache the trajectory in case we need to reset it
   robot_trajectory::RobotTrajectory original_trajectory =
@@ -276,7 +276,7 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
           target_state->update();
         }
         ruckig_ptr = std::make_unique<ruckig::Ruckig<ruckig::DynamicDOFs>>(num_dof, timestep);
-        initializeRuckigState(ruckig_input, ruckig_output, *trajectory.getFirstWayPointPtr(), group);
+        initializeRuckigState(*trajectory.getFirstWayPointPtr(), group, ruckig_input, ruckig_output);
         // Begin the while() loop again
         break;
       }
@@ -292,10 +292,10 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
   return true;
 }
 
-void RuckigSmoothing::initializeRuckigState(ruckig::InputParameter<0>& ruckig_input,
-                                            ruckig::OutputParameter<0>& ruckig_output,
-                                            const moveit::core::RobotState& first_waypoint,
-                                            const moveit::core::JointModelGroup* joint_group)
+void RuckigSmoothing::initializeRuckigState(const moveit::core::RobotState& first_waypoint,
+                                            const moveit::core::JointModelGroup* joint_group,
+                                            ruckig::InputParameter<0>& ruckig_input,
+                                            ruckig::OutputParameter<0>& ruckig_output)
 {
   const size_t num_dof = joint_group->getVariableCount();
   const std::vector<int>& idx = joint_group->getVariableIndexList();

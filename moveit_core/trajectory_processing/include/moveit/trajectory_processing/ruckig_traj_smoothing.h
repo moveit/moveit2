@@ -63,8 +63,10 @@ private:
 
   /**
    * \brief A utility function to get bounds from a JointModelGroup and save them for Ruckig.
-   * \param group       Retrieve bounds from this JointModelGroup
-   * \param ruckig_input      Bounds are stored in this Ruckig input data structure
+   * \param max_velocity_scaling_factor       Scale all joint velocity limits by this factor. Usually 1.0.
+   * \param max_acceleration_scaling_factor      Scale all joint acceleration limits by this factor. Usually 1.0.
+   * \param group      The RobotModel and the limits are retrieved from this group.
+   * \param[out] ruckig_input     The limits are stored in this ruckig::InputParameter, for use in Ruckig.
    */
   [[nodiscard]] static bool getRobotModelBounds(const double max_velocity_scaling_factor,
                                                 const double max_acceleration_scaling_factor,
@@ -76,7 +78,7 @@ private:
    * \param current_waypoint    The nominal current state
    * \param next_waypoint       The nominal, desired state at the next waypoint
    * \param joint_group         The MoveIt JointModelGroup of interest
-   * \param ruckig_input        Output. The Rucking parameters for the next iteration
+   * \param[out] ruckig_input   The Rucking parameters for the next iteration
    */
   static void getNextRuckigInput(const moveit::core::RobotStatePtr& current_waypoint,
                                  const moveit::core::RobotStatePtr& next_waypoint,
@@ -85,19 +87,19 @@ private:
 
   /**
    * \brief Initialize Ruckig position/vel/accel. This initializes ruckig_input and ruckig_output to the same values
-   * \param rucking_input   Input parameters to Ruckig. Initialized here.
-   * \param ruckig_output   Output from the Ruckig algorithm. Initialized here.
    * \param first_waypoint  The Ruckig input/output parameters are initialized to the values at this waypoint
    * \param joint_group     The MoveIt JointModelGroup of interest
+   * \param[out] rucking_input   Input parameters to Ruckig. Initialized here.
+   * \param[out] ruckig_output   Output from the Ruckig algorithm. Initialized here.
    */
-  static void initializeRuckigState(ruckig::InputParameter<0>& ruckig_input, ruckig::OutputParameter<0>& ruckig_output,
-                                    const moveit::core::RobotState& first_waypoint,
-                                    const moveit::core::JointModelGroup* joint_group);
+  static void initializeRuckigState(const moveit::core::RobotState& first_waypoint,
+                                    const moveit::core::JointModelGroup* joint_group,
+                                    ruckig::InputParameter<0>& ruckig_input, ruckig::OutputParameter<0>& ruckig_output);
 
   /**
    * \brief A utility function to instantiate and run Ruckig for a series of waypoints.
-   * \param trajectory      Trajectory to smooth.
-   * \param ruckig_input    Necessary input for Ruckig smoothing. Contains kinematic limits (vel, accel, jerk)
+   * \param[in, out] trajectory      Trajectory to smooth.
+   * \param[in, out] ruckig_input    Necessary input for Ruckig smoothing. Contains kinematic limits (vel, accel, jerk)
    */
   [[nodiscard]] static bool runRuckig(robot_trajectory::RobotTrajectory& trajectory,
                                       ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
