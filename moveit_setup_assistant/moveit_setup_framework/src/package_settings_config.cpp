@@ -41,7 +41,7 @@ namespace moveit_setup_framework
 const std::unordered_map<std::string, std::string>
     BACKWARDS_KEY_LOOKUP({ { "urdf", "URDF" }, { "srdf", "SRDF" }, { "package_settings", "CONFIG" } });
 
-const std::regex MAIL_REGEX("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b", std::regex::icase);
+const std::regex MAIL_REGEX("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,63}\\b", std::regex::icase);
 
 void PackageSettingsConfig::loadPrevious(const std::string& /*config_package_path*/, const YAML::Node& node)
 {
