@@ -62,43 +62,37 @@ YAML::Node PackageSettingsConfig::saveToYaml() const
 void PackageSettingsConfig::setPackagePath(const std::string& package_path)
 {
   config_pkg_path_ = package_path;
-
-  // Determine new package name
-  boost::filesystem::path fs_package_path;
-  // Remove end slash if there is one
-  if (!package_path.compare(package_path.size() - 1, 1, "/"))
-  {
-    fs_package_path = boost::filesystem::path(package_path.substr(0, package_path.size() - 1));
-  }
-  else
-  {
-    fs_package_path = boost::filesystem::path(package_path);
-  }
-
-  // Get the last directory name
-  new_package_name_ = fs_package_path.filename().string();
-
-  // check for empty
-  if (new_package_name_.empty())
-    new_package_name_ = "unknown";
 }
 
-void PackageSettingsConfig::loadExisting(const std::string& package_path)
+void PackageSettingsConfig::setPackageName(const std::string& package_name)
 {
-  if (package_path.empty())
+  new_package_name_ = package_name;
+}
+
+void PackageSettingsConfig::loadExisting(const std::string& package_path_or_name)
+{
+  if (package_path_or_name.empty())
   {
     throw std::runtime_error("Please specify a configuration package path to load.");
   }
-  // check that the folder exists
-  if (boost::filesystem::is_directory(package_path))
+  // Check if it is a path that exists
+  if (boost::filesystem::is_directory(package_path_or_name))
   {
     // they inputted a full path
-    setPackagePath(package_path);
+    setPackagePath(package_path_or_name);
   }
   else
   {
-    // does not exist, check if its a package
-    std::string share_dir = ament_index_cpp::get_package_share_directory(package_path);
+    // Determine the path from a name
+    /* TODO(dlu): Ideally, the package path is in source so that when we write back to it,
+     *            the changes will be reflected and then we can check them into git.
+     *            However, there's no easy way to determine the source folder from C++.
+     *            You could run colcon list -p --packages-select $PACKAGE_NAME but the
+     *            results are dependent on what folder you are in and opening an external
+     *            process is messy. For now, we just use the share path and rely on the user
+     *            to write back to the proper directory in the ConfigurationFiles step
+     */
+    std::string share_dir = ament_index_cpp::get_package_share_directory(package_path_or_name);
 
     // check that the folder exists
     if (!boost::filesystem::is_directory(share_dir))
@@ -108,6 +102,10 @@ void PackageSettingsConfig::loadExisting(const std::string& package_path)
 
     setPackagePath(share_dir);
   }
+
+  // Load the package name from the package.xml
+  std::string relative_path;  // we don't use this output value
+  extractPackageNameFromPath(config_pkg_path_, new_package_name_, relative_path);
 
   // Load Config Yaml
   std::string config_path = appendPaths(config_pkg_path_, ".setup_assistant");
@@ -141,7 +139,10 @@ void PackageSettingsConfig::loadExisting(const std::string& package_path)
         yaml_key = backwards_match->second;
       }
 
-      config_data_->get(name)->loadPrevious(config_pkg_path_, title_node[yaml_key]);
+      if (title_node[yaml_key].IsDefined())
+      {
+        config_data_->get(name)->loadPrevious(config_pkg_path_, title_node[yaml_key]);
+      }
     }
   }
   catch (YAML::ParserException& e)  // Catch errors, translate to runtime_error
@@ -183,6 +184,9 @@ void PackageSettingsConfig::loadDependencies()
 void PackageSettingsConfig::collectVariables(std::vector<TemplateVariable>& variables)
 {
   variables.push_back(TemplateVariable("GENERATED_PACKAGE_NAME", new_package_name_));
+
+  // TODO: Add new variables for other fields existing in the package.xml
+  //       i.e. read the version so that the version is not overwritten
   variables.push_back(TemplateVariable("AUTHOR_NAME", author_name_));
   variables.push_back(TemplateVariable("AUTHOR_EMAIL", author_email_));
 
