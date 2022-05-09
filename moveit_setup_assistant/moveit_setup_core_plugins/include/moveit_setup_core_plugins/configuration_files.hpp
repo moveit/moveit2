@@ -60,6 +60,11 @@ public:
     package_settings_->setPackagePath(package_path);
   }
 
+  void setPackageName(const std::string& package_name)
+  {
+    package_settings_->setPackageName(package_name);
+  }
+
   /// Populate the 'Files to be generated' list
   void loadFiles();
 
