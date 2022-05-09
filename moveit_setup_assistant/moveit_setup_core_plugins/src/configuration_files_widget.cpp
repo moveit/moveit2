@@ -186,7 +186,28 @@ void ConfigurationFilesWidget::setCheckSelected(bool checked)
 
 void ConfigurationFilesWidget::onPackagePathChanged(const QString& path)
 {
-  setup_step_.setPackagePath(path.toStdString());
+  std::string package_path = path.toStdString();
+  if (package_path == setup_step_.getPackagePath())
+  {
+    return;
+  }
+  setup_step_.setPackagePath(package_path);
+
+  // Determine new potential package name
+  boost::filesystem::path fs_package_path;
+
+  // Remove end slash if there is one
+  if (!package_path.compare(package_path.size() - 1, 1, "/"))
+  {
+    fs_package_path = boost::filesystem::path(package_path.substr(0, package_path.size() - 1));
+  }
+  else
+  {
+    fs_package_path = boost::filesystem::path(package_path);
+  }
+
+  setup_step_.setPackageName(fs_package_path.filename().string());
+
   focusGiven();
 }
 
