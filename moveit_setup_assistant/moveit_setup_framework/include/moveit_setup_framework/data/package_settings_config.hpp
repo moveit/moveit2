@@ -44,17 +44,35 @@ const std::string SETUP_ASSISTANT_FILE = ".setup_assistant";
 class PackageSettingsConfig : public SetupConfig
 {
 public:
+  /**
+   * @brief Overridden method to load THIS config's data variables.
+   *
+   * Not to be confused with loadExisting which is a PackageSettingsConfig-specific
+   * method for loading ALL configs and their data.
+   */
   void loadPrevious(const std::string& package_path, const YAML::Node& node) override;
   YAML::Node saveToYaml() const override;
 
-  void loadExisting(const std::string& package_path);
+  /**
+   * @brief Method for loading the contents of the .setup_assistant file into all the configs
+   *
+   * @param package_path_or_name Either the path to the MoveIt config package folder OR the name of the package.
+   */
+  void loadExisting(const std::string& package_path_or_name);
 
   const std::string& getPackagePath() const
   {
     return config_pkg_path_;
   }
 
+  const std::string& getPackageName() const
+  {
+    return new_package_name_;
+  }
+
   void setPackagePath(const std::string& package_path);
+
+  void setPackageName(const std::string& package_name);
 
   const std::time_t& getGenerationTime() const
   {
@@ -199,7 +217,7 @@ protected:
   std::string config_pkg_path_;
 
   /// Name of the new package that is being (or going) to be generated, based on user specified save path
-  std::string new_package_name_;
+  std::string new_package_name_{ "unnamed_moveit_config" };
 
   /// Name of the author of this config
   std::string author_name_;
