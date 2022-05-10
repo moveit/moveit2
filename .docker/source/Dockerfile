@@ -22,11 +22,7 @@ RUN --mount=type=cache,target=/root/.ccache/ \
     # Enable ccache
     PATH=/usr/lib/ccache:$PATH && \
     # Fetch required upstream sources for building
-<<<<<<< HEAD
     if [ -r src/moveit2/moveit2.repos ] ; vcs import src < src/moveit2/moveit2.repos && \
-=======
-    vcs import src < src/moveit2/moveit2.repos && \
->>>>>>> 806cce470 (CI: More generically fix permission errors (#1215))
     if [ -r src/moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import src < src/moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
     #
     . /opt/ros/${ROS_DISTRO}/setup.sh &&\
