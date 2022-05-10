@@ -123,7 +123,7 @@ bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration timeout)
   auto const temp_node = std::make_shared<rclcpp::Node>(nd_name);
   string_subscriber_ = temp_node->create_subscription<std_msgs::msg::String>(
       name_, rclcpp::QoS(1).transient_local().reliable(),
-      std::bind(&SynchronizedStringParameter::stringCallback, this, std::placeholders::_1));
+      [this](const std_msgs::msg::String::SharedPtr msg) { return stringCallback(msg); });
 
   rclcpp::WaitSet wait_set;
   wait_set.add_subscription(string_subscriber_);
