@@ -49,7 +49,7 @@
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_state/cartesian_interpolator.h>
 #include <moveit_msgs/msg/display_trajectory.hpp>
-#include <moveit/trajectory_processing/iterative_time_parameterization.h>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
 
 namespace
 {
@@ -179,7 +179,7 @@ bool MoveGroupCartesianPathService::computeService(const std::shared_ptr<rmw_req
 
           // time trajectory
           // \todo optionally compute timing to move the eef with constant speed
-          trajectory_processing::IterativeParabolicTimeParameterization time_param;
+          trajectory_processing::TimeOptimalTrajectoryGeneration time_param;
           time_param.computeTimeStamps(rt, 1.0);
 
           rt.getRobotTrajectoryMsg(res->solution);
