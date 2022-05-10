@@ -107,8 +107,8 @@ public:
     move_group_->setPathConstraints(path_constraint);
 
     moveit::planning_interface::MoveGroupInterface::Plan plan;
-    ASSERT_EQ(move_group_->plan(plan), moveit::planning_interface::MoveItErrorCode::SUCCESS);
-    ASSERT_EQ(move_group_->move(), moveit::planning_interface::MoveItErrorCode::SUCCESS);
+    ASSERT_EQ(move_group_->plan(plan), moveit::core::MoveItErrorCode::SUCCESS);
+    ASSERT_EQ(move_group_->move(), moveit::core::MoveItErrorCode::SUCCESS);
   }
 
   void testPose(const geometry_msgs::msg::PoseStamped& pose_goal_stamped)

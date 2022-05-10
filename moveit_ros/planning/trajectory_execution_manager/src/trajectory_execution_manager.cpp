@@ -178,7 +178,7 @@ void TrajectoryExecutionManager::initialize()
   auto options = rclcpp::SubscriptionOptions();
   options.callback_group = callback_group;
   event_topic_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
-      EXECUTION_EVENT_TOPIC, 100, std::bind(&TrajectoryExecutionManager::receiveEvent, this, std::placeholders::_1),
+      EXECUTION_EVENT_TOPIC, 100, [this](const std_msgs::msg::String::SharedPtr event) { return receiveEvent(event); },
       options);
 
   controller_mgr_node_->get_parameter("trajectory_execution.execution_duration_monitoring",
@@ -399,8 +399,7 @@ bool TrajectoryExecutionManager::pushAndExecute(const moveit_msgs::msg::RobotTra
       boost::mutex::scoped_lock slock(continuous_execution_mutex_);
       continuous_execution_queue_.push_back(context);
       if (!continuous_execution_thread_)
-        continuous_execution_thread_ =
-            std::make_unique<boost::thread>(std::bind(&TrajectoryExecutionManager::continuousExecutionThread, this));
+        continuous_execution_thread_ = std::make_unique<boost::thread>([this] { continuousExecutionThread(); });
     }
     last_execution_status_ = moveit_controller_manager::ExecutionStatus::SUCCEEDED;
     continuous_execution_condition_.notify_all();

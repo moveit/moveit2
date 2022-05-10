@@ -304,7 +304,8 @@ void RobotStateDisplay::changedRobotStateTopic()
   setStatus(rviz_common::properties::StatusProperty::Warn, "RobotState", "No msg received");
 
   robot_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::DisplayRobotState>(
-      robot_state_topic_property_->getStdString(), 10, std::bind(&RobotStateDisplay::newRobotStateCallback, this, _1));
+      robot_state_topic_property_->getStdString(), 10,
+      [this](const moveit_msgs::msg::DisplayRobotState::ConstSharedPtr state) { return newRobotStateCallback(state); });
 }
 
 void RobotStateDisplay::newRobotStateCallback(const moveit_msgs::msg::DisplayRobotState::ConstSharedPtr state_msg)
@@ -388,7 +389,7 @@ void RobotStateDisplay::initializeLoader()
 
   rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_, robot_description_property_->getStdString(), true);
   loadRobotModel();
-  rdf_loader_->setNewModelCallback(std::bind(&RobotStateDisplay::loadRobotModel, this));
+  rdf_loader_->setNewModelCallback([this]() { return loadRobotModel(); });
 }
 
 void RobotStateDisplay::loadRobotModel()
