@@ -55,11 +55,15 @@
 
 #include <moveit/utils/robot_model_test_utils.h>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_kinematics_plugin");
-const std::string ROBOT_DESCRIPTION_PARAM = "robot_description";
-const double DEFAULT_SEARCH_DISCRETIZATION = 0.01f;
-const double EXPECTED_SUCCESS_RATE = 0.8;
-static const std::string UNDEFINED = "<undefined>";
+namespace
+{
+auto& RNG = moveit::core::RandomNumberGenerator::getInstance();
+constexpr std::string ROBOT_DESCRIPTION_PARAM = "robot_description";
+constexpr double DEFAULT_SEARCH_DISCRETIZATION = 0.01f;
+constexpr double EXPECTED_SUCCESS_RATE = 0.8;
+const rclcpp::Logger LOGGER = rclcpp::get_logger("test_kinematics_plugin");
+constexpr std::string UNDEFINED = "<undefined>";
+}  // namespace
 
 // As loading of parameters is quite slow, we share them across all tests
 class SharedData
@@ -283,7 +287,7 @@ public:
   moveit::core::RobotModelPtr robot_model_;
   moveit::core::JointModelGroup* jmg_;
   kinematics::KinematicsBasePtr kinematics_solver_;
-  random_numbers::RandomNumberGenerator rng_{ 42 };
+  RandomNumberGenerator rng_{ 42 };
   std::string root_link_;
   std::string tip_link_;
   std::string group_name_;

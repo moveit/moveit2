@@ -39,6 +39,7 @@
 #include <moveit/planning_scene/planning_scene.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/conversions.h>
+#include <moveit/utils/random_number_utils.hpp>  // for RandomNumberGenerator
 
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -49,13 +50,15 @@
 
 namespace chomp
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_optimizer");
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_optimizer");
+auto& RNG = moveit::core::RandomNumberGenerator::getInstance();
+}  // namespace
 
 double getRandomDouble()
 {
-  std::default_random_engine seed;
-  std::uniform_real_distribution<> uniform(0.0, 1.0);
-  return uniform(seed);
+  return RNG.uniform_real<double>(0.0, 1.0);
 }
 
 ChompOptimizer::ChompOptimizer(ChompTrajectory* trajectory, const planning_scene::PlanningSceneConstPtr& planning_scene,

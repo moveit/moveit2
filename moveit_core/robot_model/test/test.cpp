@@ -147,16 +147,15 @@ TEST(FloatingJointTest, interpolation_test)
   double jv1[7];
   double jv2[7];
   double intp[7];
-  random_numbers::RandomNumberGenerator rng;
 
   for (size_t i = 0; i < 1000; ++i)
   {
     // Randomize the joint settings.
-    fjm.getVariableRandomPositions(rng, jv1, bounds);
-    fjm.getVariableRandomPositions(rng, jv2, bounds);
+    fjm.getVariableRandomPositions(jv1, bounds);
+    fjm.getVariableRandomPositions(jv2, bounds);
 
     // Pick a random interpolation value
-    double t = rng.uniformReal(0.0, 1.0);
+    double t = moveit::core::RandomNumberGenerator::getInstance(seed_).uniform_real<double>(0.0, 1.0);
 
     // Apply the interpolation
     fjm.interpolate(jv1, jv2, t, intp);

@@ -75,6 +75,11 @@ const std::string ROBOT_TCP_LINK_NAME("tcp_link");
 const std::string IK_FAST_LINK_NAME("ik_fast_link");
 const std::string RANDOM_TEST_NUMBER("random_test_number");
 
+namespace
+{
+auto& RNG = moveit::core::RandomNumberGenerator::getInstance();
+}  // namespace
+
 /**
  * @brief test fixtures base class
  */
@@ -140,10 +145,6 @@ protected:
   int random_test_number_;
   std::vector<std::string> joint_names_;
   std::map<std::string, double> zero_state_;
-
-  // random seed
-  uint32_t random_seed_{ 100 };
-  random_numbers::RandomNumberGenerator rng_{ random_seed_ };
 };
 
 bool TrajectoryFunctionsTestBase::tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2,
@@ -220,7 +221,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKSolver)
   while (random_test_number_ > 0)
   {
     // sample random robot state
-    rstate.setToRandomPositions(jmg, rng_);
+    rstate.setToRandomPositions(jmg, RNG);
     rstate.update();
     geometry_msgs::msg::Pose pose_expect = tf2::toMsg(rstate.getFrameTransform(ik_fast_link_));
 
@@ -272,7 +273,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotState)
   while (random_test_number_ > 0)
   {
     // sample random robot state
-    rstate.setToRandomPositions(jmg, rng_);
+    rstate.setToRandomPositions(jmg, RNG);
 
     Eigen::Isometry3d pose_expect = rstate.getFrameTransform(tcp_link_);
 
@@ -332,7 +333,7 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIK)
   while (random_test_number_ > 0)
   {
     // sample random robot state
-    rstate.setToRandomPositions(jmg, rng_);
+    rstate.setToRandomPositions(jmg, RNG);
 
     Eigen::Isometry3d pose_expect = rstate.getFrameTransform(tcp_link_);
 

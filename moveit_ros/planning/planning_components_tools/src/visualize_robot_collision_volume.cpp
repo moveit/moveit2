@@ -43,6 +43,12 @@
 #include <rclcpp/time.hpp>
 #include <rclcpp/utilities.hpp>
 #include <memory>
+#include <moveit/utils/random_number_utils.hpp>
+
+namespace
+{
+auto& RNG = moveit::core::RandomNumberGenerator::getInstance();
+}  // namespace
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
@@ -99,7 +105,6 @@ int main(int argc, char** argv)
     t.setIdentity();
     std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> points;
     std::size_t published = 0;
-    random_numbers::RandomNumberGenerator rng;
     collision_detection::CollisionRequest req;
 
     std_msgs::msg::ColorRGBA color;
@@ -110,8 +115,9 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < num_spheres; ++i)
     {
-      t.translation() = Eigen::Vector3d(rng.uniformReal(aabb[0], aabb[1]), rng.uniformReal(aabb[2], aabb[3]),
-                                        rng.uniformReal(aabb[4], aabb[5]));
+      t.translation() =
+          Eigen::Vector3d(RNG.uniform_real<double>(aabb[0], aabb[1]), RNG.uniform_real<double>(aabb[2], aabb[3]),
+                          RNG.uniform_real<double>(aabb[4], aabb[5]));
       scene->getWorldNonConst()->clearObjects();
       scene->getWorldNonConst()->addToObject("test", std::make_shared<shapes::Sphere>(radius), t);
       collision_detection::CollisionResult res;

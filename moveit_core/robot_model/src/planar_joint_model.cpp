@@ -40,6 +40,7 @@
 #include <geometric_shapes/check_isometry.h>
 #include <limits>
 #include <moveit/robot_model/planar_joint_model.h>
+#include <boost/math/constants/constants.hpp>
 
 namespace moveit
 {
@@ -102,23 +103,22 @@ void PlanarJointModel::getVariableDefaultPositions(double* values, const Bounds&
   values[2] = 0.0;
 }
 
-void PlanarJointModel::getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values,
-                                                  const Bounds& bounds) const
+void PlanarJointModel::getVariableRandomPositions(double* values, const Bounds& bounds) const
 {
   if (bounds[0].max_position_ >= std::numeric_limits<double>::infinity() ||
       bounds[0].min_position_ <= -std::numeric_limits<double>::infinity())
     values[0] = 0.0;
   else
-    values[0] = rng.uniformReal(bounds[0].min_position_, bounds[0].max_position_);
+    values[0] = rng.uniform_real<double>(bounds[0].min_position_, bounds[0].max_position_);
   if (bounds[1].max_position_ >= std::numeric_limits<double>::infinity() ||
       bounds[1].min_position_ <= -std::numeric_limits<double>::infinity())
     values[1] = 0.0;
   else
-    values[1] = rng.uniformReal(bounds[1].min_position_, bounds[1].max_position_);
-  values[2] = rng.uniformReal(bounds[2].min_position_, bounds[2].max_position_);
+    values[1] = rng.uniform_real<double>(bounds[1].min_position_, bounds[1].max_position_);
+  values[2] = rng.uniform_real<double>(bounds[2].min_position_, bounds[2].max_position_);
 }
 
-void PlanarJointModel::getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values,
+void PlanarJointModel::getVariableRandomPositionsNearBy(double* values,
                                                         const Bounds& bounds, const double* near,
                                                         const double distance) const
 {
@@ -126,20 +126,20 @@ void PlanarJointModel::getVariableRandomPositionsNearBy(random_numbers::RandomNu
       bounds[0].min_position_ <= -std::numeric_limits<double>::infinity())
     values[0] = 0.0;
   else
-    values[0] = rng.uniformReal(std::max(bounds[0].min_position_, near[0] - distance),
-                                std::min(bounds[0].max_position_, near[0] + distance));
+    values[0] = rng.uniform_real<double>(std::max(bounds[0].min_position_, near[0] - distance),
+                                         std::min(bounds[0].max_position_, near[0] + distance));
   if (bounds[1].max_position_ >= std::numeric_limits<double>::infinity() ||
       bounds[1].min_position_ <= -std::numeric_limits<double>::infinity())
     values[1] = 0.0;
   else
-    values[1] = rng.uniformReal(std::max(bounds[1].min_position_, near[1] - distance),
-                                std::min(bounds[1].max_position_, near[1] + distance));
+    values[1] = rng.uniform_real<double>(std::max(bounds[1].min_position_, near[1] - distance),
+                                         std::min(bounds[1].max_position_, near[1] + distance));
 
   double da = angular_distance_weight_ * distance;
   // limit the sampling range to 2pi to work correctly even if the distance is very large
-  if (da > M_PI)
-    da = M_PI;
-  values[2] = rng.uniformReal(near[2] - da, near[2] + da);
+  if (da > boost::math::constants::pi<double>())
+    da = boost::math::constants::pi<double>();
+  values[2] = rng.uniform_real<double>(near[2] - da, near[2] + da);
   normalizeRotation(values);
 }
 

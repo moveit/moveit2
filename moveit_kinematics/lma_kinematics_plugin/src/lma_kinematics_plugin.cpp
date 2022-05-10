@@ -35,6 +35,7 @@
 /* Author: Francisco Suarez-Ruiz */
 
 #include <moveit/lma_kinematics_plugin/lma_kinematics_plugin.h>
+#include <moveit/utils/random_number_utils.hpp>  // for RandomNumberGenerator
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainiksolverpos_lma.hpp>
 
@@ -65,8 +66,8 @@ void LMAKinematicsPlugin::getRandomConfiguration(const Eigen::VectorXd& seed_sta
                                                  const std::vector<double>& consistency_limits,
                                                  Eigen::VectorXd& jnt_array) const
 {
-  joint_model_group_->getVariableRandomPositionsNearBy(state_->getRandomNumberGenerator(), &jnt_array[0],
-                                                       &seed_state[0], consistency_limits);
+  joint_model_group_->getVariableRandomPositionsNearBy(moveit::core::RandomNumberGenerator::getInstance(),
+                                                       &jnt_array[0], &seed_state[0], consistency_limits);
 }
 
 bool LMAKinematicsPlugin::checkConsistency(const Eigen::VectorXd& seed_state,

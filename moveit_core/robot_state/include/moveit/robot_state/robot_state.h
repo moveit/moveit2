@@ -1249,7 +1249,7 @@ public:
 
   /** \brief Set all joints in \e group to random values using a specified random number generator.
       Values will be within default bounds. */
-  void setToRandomPositions(const JointModelGroup* group, random_numbers::RandomNumberGenerator& rng);
+  void setToRandomPositions(const JointModelGroup* group, RandomNumberGenerator& rng);
 
   /** \brief Set all joints in \e group to random values near the value in \e seed.
    *  \e distance is the maximum amount each joint value will vary from the
@@ -1264,7 +1264,7 @@ public:
    *  prismatic/postitional joints and radians for revolute/orientation joints.
    *  Resulting values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance,
-                                  random_numbers::RandomNumberGenerator& rng);
+                                  RandomNumberGenerator& rng);
 
   /** \brief Set all joints in \e group to random values near the value in \e seed.
    *  \e distances \b MUST have the same size as \c
@@ -1284,7 +1284,7 @@ public:
    *  prismatic/postitional joints and radians for revolute/orientation joints.
    *  Resulting values are clamped within default bounds. */
   void setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
-                                  const std::vector<double>& distances, random_numbers::RandomNumberGenerator& rng);
+                                  const std::vector<double>& distances, RandomNumberGenerator& rng);
 
   /** @} */
 
@@ -1707,14 +1707,6 @@ public:
     static_cast<const RobotState*>(this)->computeAABB(aabb);
   }
 
-  /** \brief Return the instance of a random number generator */
-  random_numbers::RandomNumberGenerator& getRandomNumberGenerator()
-  {
-    if (!rng_)
-      rng_ = new random_numbers::RandomNumberGenerator();
-    return *rng_;
-  }
-
   /** \brief Get the transformation matrix from the model frame (root of model) to the frame identified by \e frame_id
    *
    * If frame_id was not found, \e frame_found is set to false and an identity transform is returned.
@@ -1921,13 +1913,6 @@ private:
   /** \brief This event is called when there is a change in the attached bodies for this state;
       The event specifies the body that changed and whether it was just attached or about to be detached. */
   AttachedBodyCallback attached_body_update_callback_;
-
-  /** \brief For certain operations a state needs a random number generator. However, it may be slightly expensive
-      to allocate the random number generator if many state instances are generated. For this reason, the generator
-      is allocated on a need basis, by the getRandomNumberGenerator() function. Never use the rng_ member directly, but
-     call
-      getRandomNumberGenerator() instead. */
-  random_numbers::RandomNumberGenerator* rng_;
 };
 
 /** \brief Operator overload for printing variable bounds to a stream */

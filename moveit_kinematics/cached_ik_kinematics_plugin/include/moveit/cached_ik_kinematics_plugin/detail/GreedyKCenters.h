@@ -42,8 +42,15 @@
 #include <random>
 #include <eigen3/Eigen/Core>
 
+#include <moveit/utils/random_number_utils.hpp>  // for RandomNumberGenerator
+
 namespace cached_ik_kinematics_plugin
 {
+namespace
+{
+auto& RNG = moveit::core::RandomNumberGenerator::getInstance();
+}  // namespace
+
 /** \brief An instance of this class can be used to greedily select a given
     number of representatives from a set of data points that are all far
     apart from each other. */
@@ -91,7 +98,7 @@ public:
     if (((long unsigned int)dists.rows()) < data.size() || ((long unsigned int)dists.cols()) < k)
       dists.resize(std::max(2 * ((long unsigned int)dists.rows()) + 1, data.size()), k);
     // first center is picked randomly
-    centers.push_back(std::uniform_int_distribution<size_t>{ 0, data.size() - 1 }(generator_));
+    centers.push_back(RNG.uniform_int<size_t>(0, data.size() - 1));
     for (unsigned i = 1; i < k; ++i)
     {
       unsigned ind = 0;
@@ -123,8 +130,5 @@ public:
 protected:
   /** \brief The used distance function */
   DistanceFunction distFun_;
-
-  /** Random number generator used to select first center */
-  std::mt19937 generator_{ std::random_device{}() };
 };
 }  // namespace cached_ik_kinematics_plugin

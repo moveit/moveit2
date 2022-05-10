@@ -56,11 +56,9 @@ public:
   PlanarJointModel(const std::string& name, size_t joint_index, size_t first_variable_index);
 
   void getVariableDefaultPositions(double* values, const Bounds& other_bounds) const override;
-  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values,
-                                  const Bounds& other_bounds) const override;
-  void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values,
-                                        const Bounds& other_bounds, const double* near,
-                                        const double distance) const override;
+  void getVariableRandomPositions(double* values, const Bounds& other_bounds) const override;
+  void getVariableRandomPositionsNearBy(double* values, const Bounds& other_bounds,
+                                        const double* near, const double distance) const override;
   bool enforcePositionBounds(double* values, const Bounds& other_bounds) const override;
   bool satisfiesPositionBounds(const double* values, const Bounds& other_bounds, double margin) const override;
 

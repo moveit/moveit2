@@ -265,5 +265,7 @@ protected:
   /// Holds the callback for state validity
   moveit::core::GroupStateValidityCallbackFn group_state_validity_callback_;
   bool verbose_;  ///< True if verbosity is on
+  /// optional seed for random number generator
+  std::optional<double> seed_ = std::nullopt;
 };
 }  // namespace constraint_samplers

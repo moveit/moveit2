@@ -39,6 +39,7 @@
 #include <fstream>
 #include <moveit/ompl_interface/detail/constrained_sampler.h>
 #include <moveit/ompl_interface/detail/constraints_library.h>
+#include <moveit/utils/random_number_utils.hpp>
 
 #include <ompl/tools/config/SelfConfig.h>
 #include <utility>
@@ -47,6 +48,10 @@ namespace ompl_interface
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.constraints_library");
 
+namespace
+{
+auto& RNG = moveit::core::RandomNumberGenerator::getInstance();
+}  // namespace
 namespace
 {
 template <typename T>
@@ -114,7 +119,7 @@ public:
 
   void sampleUniform(ob::State* state) override
   {
-    space_->copyState(state, state_storage_->getState(rng_.uniformInt(0, max_index_)));
+    space_->copyState(state, state_storage_->getState(RNG.uniform_int<int>(0, max_index_)));
   }
 
   void sampleUniformNear(ob::State* state, const ob::State* near, const double distance) override
@@ -131,7 +136,7 @@ public:
         std::size_t att = 0;
         do
         {
-          index = md.first[rng_.uniformInt(0, md.first.size() - 1)];
+          index = md.first[RNG.uniform_int<int>(0, md.first.size() - 1)];
         } while (dirty_.find(index) != dirty_.end() && ++att < matt);
         if (att >= matt)
           index = -1;
@@ -140,13 +145,13 @@ public:
       }
     }
     if (index < 0)
-      index = rng_.uniformInt(0, max_index_);
+      index = RNG.uniform_int<int>(0, max_index_);
 
     double dist = space_->distance(near, state_storage_->getState(index));
 
     if (dist > distance)
     {
-      double d = pow(rng_.uniform01(), inv_dim_) * distance;
+      double d = pow(RNG.uniform_int<int>(0.0, 1.0), inv_dim_) * distance;
       space_->interpolate(near, state_storage_->getState(index), d / dist, state);
     }
     else
@@ -272,7 +277,7 @@ visualization_msgs::MarkerArray &arr) const
   for (std::size_t i = 0 ; i < count ; ++i)
   {
     state_storage_->getStateSpace()->as<ModelBasedStateSpace>()->copyToRobotState(robot_state,
-state_storage_->getState(rng.uniformInt(0, state_storage_->size() - 1)));
+state_storage_->getState(rng.uniform( 0, state_storage_->size() - 1)));
     const Eigen::Vector3d &pos =
 robot_state.getLinkState(link_name)->getGlobalLinkTransform().translation();
 

@@ -36,13 +36,16 @@
 
 #include <moveit/constraint_samplers/default_constraint_samplers.h>
 #include <rclcpp/logger.hpp>
-#include <rclcpp/logging.hpp>
+#include <moveit/utils/random_number_utils.hpp>
 #include <cassert>
 #include <functional>
 
 namespace constraint_samplers
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.default_constraint_samplers");
+namespace
+{
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.default_constraint_samplers");
+}  // namespace
 
 bool JointConstraintSampler::configure(const moveit_msgs::msg::Constraints& constr)
 {
@@ -166,15 +169,21 @@ bool JointConstraintSampler::sample(moveit::core::RobotState& state,
   for (std::size_t i = 0; i < unbounded_.size(); ++i)
   {
     v.resize(unbounded_[i]->getVariableCount());
-    unbounded_[i]->getVariableRandomPositions(random_number_generator_, &v[0]);
+    unbounded_[i]->getVariableRandomPositions(RNG, &v[0]);
     for (std::size_t j = 0; j < v.size(); ++j)
       values_[uindex_[i] + j] = v[j];
   }
 
   // enforce the constraints for the constrained components (could be all of them)
   for (const JointInfo& bound : bounds_)
-    values_[bound.index_] = random_number_generator_.uniformReal(bound.min_bound_, bound.max_bound_);
-
+    values_[bound.index_] =[&](){
+        if(seed_.has_value()){
+          return moveit::core::RandomNumberGenerator::getInstance(seed_).uniform_real<double>(bound.min_bound_, bound.max_bound_);
+        }
+        else {
+          return moveit::core::RandomNumberGenerator::getInstance().uniform_real<double>(bound.min_bound_, bound.max_bound_);
+        }
+}
   state.setJointGroupPositions(jmg_, values_);
 
   // we are always successful
@@ -426,9 +435,25 @@ bool IKConstraintSampler::samplePose(Eigen::Vector3d& pos, Eigen::Quaterniond& q
     if (!b.empty())
     {
       bool found = false;
-      std::size_t k = random_number_generator_.uniformInteger(0, b.size() - 1);
+      
+      std::size_t k = if(seed_.has_value()){
+          return moveit::core::RandomNumberGenerator::getInstance(seed_).uniform_int<int>(0, b.size() - 1);
+        }
+        else {
+          return moveit::core::RandomNumberGenerator::getInstance().uniform_int<int>(0, b.size() - 1);
+        }
+
       for (std::size_t i = 0; i < b.size(); ++i)
-        if (b[(i + k) % b.size()]->samplePointInside(random_number_generator_, max_attempts, pos))
+        if (b[(i + k) % b.size()]->samplePointInside(
+                [&](double lower_bound, double upper_bound) {
+                  if(seed_.has_value()){
+                      return moveit::core::RandomNumberGenerator::getInstance(seed_).uniform_real<double>(lower_bound, upper_bound);
+                    }
+                    else {
+                      return moveit::core::RandomNumberGenerator::getInstance().uniform_real<double>(lower_bound, upper_bound);
+                    }
+                },
+                max_attempts, pos))
         {
           found = true;
           break;
@@ -463,13 +488,13 @@ bool IKConstraintSampler::samplePose(Eigen::Vector3d& pos, Eigen::Quaterniond& q
   {
     // sample a rotation matrix within the allowed bounds
     double angle_x =
-        2.0 * (random_number_generator_.uniform01() - 0.5) *
+        2.0 * (moveit::core::RandomNumberGenerator::getInstance().uniform_real<double>(0.0, 1.0) - 0.5) *
         (sampling_pose_.orientation_constraint_->getXAxisTolerance() - std::numeric_limits<double>::epsilon());
     double angle_y =
-        2.0 * (random_number_generator_.uniform01() - 0.5) *
+        2.0 * (moveit::core::RandomNumberGenerator::getInstance().uniform_real<double>(0.0, 1.0) - 0.5) *
         (sampling_pose_.orientation_constraint_->getYAxisTolerance() - std::numeric_limits<double>::epsilon());
     double angle_z =
-        2.0 * (random_number_generator_.uniform01() - 0.5) *
+        2.0 * (moveit::core::RandomNumberGenerator::getInstance().uniform_real<double>(0.0, 1.0) - 0.5) *
         (sampling_pose_.orientation_constraint_->getZAxisTolerance() - std::numeric_limits<double>::epsilon());
 
     Eigen::Isometry3d diff;
@@ -511,9 +536,13 @@ bool IKConstraintSampler::samplePose(Eigen::Vector3d& pos, Eigen::Quaterniond& q
   else
   {
     // sample a random orientation
-    double q[4];
-    random_number_generator_.quaternion(q);
-    quat = Eigen::Quaterniond(q[3], q[0], q[1], q[2]);  // quat is normalized by contract
+    quat = [](){
+        if(seed_.has_value()){
+          return RNG.getRandomQuaternion(seed_);}
+        else {
+          return RNG.getRandomQuaternion();
+        }
+    }();
   }
 
   // if there is an offset, we need to undo the induced rotation in the sampled transform origin (point)
@@ -633,7 +662,7 @@ bool IKConstraintSampler::callIK(const geometry_msgs::msg::Pose& ik_query,
     state.copyJointGroupPositions(jmg_, vals);
   else
     // sample a seed value
-    jmg_->getVariableRandomPositions(random_number_generator_, vals);
+    jmg_->getVariableRandomPositions(RNG, vals);
 
   assert(vals.size() == ik_joint_bijection.size());
   for (std::size_t i = 0; i < ik_joint_bijection.size(); ++i)

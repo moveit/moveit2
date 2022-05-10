@@ -36,6 +36,7 @@
 
 #include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
 #include <moveit/kdl_kinematics_plugin/chainiksolver_vel_mimic_svd.hpp>
+#include <moveit/utils/random_number_utils.hpp>  // for RandomNumberGenerator
 
 #include <tf2_kdl/tf2_kdl.hpp>
 #include <tf2/transform_datatypes.h>
@@ -65,8 +66,8 @@ void KDLKinematicsPlugin::getRandomConfiguration(const Eigen::VectorXd& seed_sta
                                                  const std::vector<double>& consistency_limits,
                                                  Eigen::VectorXd& jnt_array) const
 {
-  joint_model_group_->getVariableRandomPositionsNearBy(state_->getRandomNumberGenerator(), &jnt_array[0],
-                                                       &seed_state[0], consistency_limits);
+  joint_model_group_->getVariableRandomPositionsNearBy(moveit::core::RandomNumberGenerator::getInstance(),
+                                                       &jnt_array[0], &seed_state[0], consistency_limits);
 }
 
 bool KDLKinematicsPlugin::checkConsistency(const Eigen::VectorXd& seed_state,

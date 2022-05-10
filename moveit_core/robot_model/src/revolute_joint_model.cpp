@@ -109,24 +109,24 @@ void RevoluteJointModel::getVariableDefaultPositions(double* values, const Bound
     values[0] = (bounds[0].min_position_ + bounds[0].max_position_) / 2.0;
 }
 
-void RevoluteJointModel::getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values,
+void RevoluteJointModel::getVariableRandomPositions(double* values,
                                                     const Bounds& bounds) const
 {
-  values[0] = rng.uniformReal(bounds[0].min_position_, bounds[0].max_position_);
+  values[0] = rng.uniform_real<double>(bounds[0].min_position_, bounds[0].max_position_);
 }
 
-void RevoluteJointModel::getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values,
+void RevoluteJointModel::getVariableRandomPositionsNearBy(double* values,
                                                           const Bounds& bounds, const double* near,
                                                           const double distance) const
 {
   if (continuous_)
   {
-    values[0] = rng.uniformReal(near[0] - distance, near[0] + distance);
+    values[0] = rng.uniform_real<double>(near[0] - distance, near[0] + distance);
     enforcePositionBounds(values, bounds);
   }
   else
-    values[0] = rng.uniformReal(std::max(bounds[0].min_position_, near[0] - distance),
-                                std::min(bounds[0].max_position_, near[0] + distance));
+    values[0] = rng.uniform_real<double>(std::max(bounds[0].min_position_, near[0] - distance),
+                                         std::min(bounds[0].max_position_, near[0] + distance));
 }
 
 void RevoluteJointModel::interpolate(const double* from, const double* to, const double t, double* state) const

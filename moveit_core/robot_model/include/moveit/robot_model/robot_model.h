@@ -310,16 +310,16 @@ public:
   /** @} */
 
   /** \brief Compute the random values for a RobotState */
-  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values) const;
+  void getVariableRandomPositions(double* values) const;
 
   /** \brief Compute the default values for a RobotState */
   void getVariableDefaultPositions(double* values) const;
 
   /** \brief Compute the random values for a RobotState */
-  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values) const
+  void getVariableRandomPositions(std::vector<double>& values) const
   {
     values.resize(variable_count_);
-    getVariableRandomPositions(rng, &values[0]);
+    getVariableRandomPositions(&values[0]);
   }
 
   /** \brief Compute the default values for a RobotState */
@@ -330,8 +330,7 @@ public:
   }
 
   /** \brief Compute the random values for a RobotState */
-  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng,
-                                  std::map<std::string, double>& values) const;
+  void getVariableRandomPositions(std::map<std::string, double>& values) const;
 
   /** \brief Compute the default values for a RobotState */
   void getVariableDefaultPositions(std::map<std::string, double>& values) const;

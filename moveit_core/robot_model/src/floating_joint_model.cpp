@@ -50,7 +50,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_model.floa
 namespace
 {
 constexpr size_t STATE_SPACE_DIMENSION = 7;
-
+auto& RNG = moveit::core::RandomNumberGenerator::getInstance();
 }  // namespace
 
 FloatingJointModel::FloatingJointModel(const std::string& name, size_t joint_index, size_t first_variable_index)
@@ -261,34 +261,33 @@ void FloatingJointModel::getVariableDefaultPositions(double* values, const Bound
   values[6] = 1.0;
 }
 
-void FloatingJointModel::getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values,
+void FloatingJointModel::getVariableRandomPositions(double* values,
                                                     const Bounds& bounds) const
 {
   if (bounds[0].max_position_ >= std::numeric_limits<double>::infinity() ||
       bounds[0].min_position_ <= -std::numeric_limits<double>::infinity())
     values[0] = 0.0;
   else
-    values[0] = rng.uniformReal(bounds[0].min_position_, bounds[0].max_position_);
+    values[0] = RNG.uniform_real<double>(bounds[0].min_position_, bounds[0].max_position_);
   if (bounds[1].max_position_ >= std::numeric_limits<double>::infinity() ||
       bounds[1].min_position_ <= -std::numeric_limits<double>::infinity())
     values[1] = 0.0;
   else
-    values[1] = rng.uniformReal(bounds[1].min_position_, bounds[1].max_position_);
+    values[1] = RNG.uniform_real<double>(bounds[1].min_position_, bounds[1].max_position_);
   if (bounds[2].max_position_ >= std::numeric_limits<double>::infinity() ||
       bounds[2].min_position_ <= -std::numeric_limits<double>::infinity())
     values[2] = 0.0;
   else
-    values[2] = rng.uniformReal(bounds[2].min_position_, bounds[2].max_position_);
+    values[2] = RNG.uniform_real<double>(bounds[2].min_position_, bounds[2].max_position_);
 
-  double q[4];
-  rng.quaternion(q);
-  values[3] = q[0];
-  values[4] = q[1];
-  values[5] = q[2];
-  values[6] = q[3];
+  const auto rand_quaternion = RNG.getRandomQuaternion();
+  values[3] = rand_quaternion.x();
+  values[4] = rand_quaternion.y();
+  values[5] = rand_quaternion.z();
+  values[6] = rand_quaternion.w();
 }
 
-void FloatingJointModel::getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values,
+void FloatingJointModel::getVariableRandomPositionsNearBy(double* values,
                                                           const Bounds& bounds, const double* near,
                                                           const double distance) const
 {
@@ -296,39 +295,38 @@ void FloatingJointModel::getVariableRandomPositionsNearBy(random_numbers::Random
       bounds[0].min_position_ <= -std::numeric_limits<double>::infinity())
     values[0] = 0.0;
   else
-    values[0] = rng.uniformReal(std::max(bounds[0].min_position_, near[0] - distance),
-                                std::min(bounds[0].max_position_, near[0] + distance));
+    values[0] = RNG.uniform_real<double>(std::max(bounds[0].min_position_, near[0] - distance),
+                                         std::min(bounds[0].max_position_, near[0] + distance));
   if (bounds[1].max_position_ >= std::numeric_limits<double>::infinity() ||
       bounds[1].min_position_ <= -std::numeric_limits<double>::infinity())
     values[1] = 0.0;
   else
-    values[1] = rng.uniformReal(std::max(bounds[1].min_position_, near[1] - distance),
-                                std::min(bounds[1].max_position_, near[1] + distance));
+    values[1] = RNG.uniform_real<double>(std::max(bounds[1].min_position_, near[1] - distance),
+                                         std::min(bounds[1].max_position_, near[1] + distance));
   if (bounds[2].max_position_ >= std::numeric_limits<double>::infinity() ||
       bounds[2].min_position_ <= -std::numeric_limits<double>::infinity())
     values[2] = 0.0;
   else
-    values[2] = rng.uniformReal(std::max(bounds[2].min_position_, near[2] - distance),
-                                std::min(bounds[2].max_position_, near[2] + distance));
+    values[2] = RNG.uniform_real<double>(std::max(bounds[2].min_position_, near[2] - distance),
+                                         std::min(bounds[2].max_position_, near[2] + distance));
 
   double da = angular_distance_weight_ * distance;
   if (da >= .25 * M_PI)
   {
-    double q[4];
-    rng.quaternion(q);
-    values[3] = q[0];
-    values[4] = q[1];
-    values[5] = q[2];
-    values[6] = q[3];
+    const auto rand_quaternion = RNG.getRandomQuaternion();
+    values[3] = rand_quaternion.x();
+    values[4] = rand_quaternion.y();
+    values[5] = rand_quaternion.z();
+    values[6] = rand_quaternion.w();
   }
   else
   {
     // taken from OMPL
     // sample angle & axis
-    double ax = rng.gaussian01();
-    double ay = rng.gaussian01();
-    double az = rng.gaussian01();
-    double angle = 2.0 * pow(rng.uniform01(), 1.0 / 3.0) * da;
+    double ax = RNG.normal(0.0, 1.0);
+    double ay = RNG.normal(0.0, 1.0);
+    double az = RNG.normal(0.0, 1.0);
+    double angle = 2.0 * pow(RNG.uniform_real<double>(0.0, 1.0), 1.0 / 3.0) * da;
     // convert to quaternion
     double q[4];
     double norm = sqrt(ax * ax + ay * ay + az * az);

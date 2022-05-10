@@ -38,7 +38,7 @@
 
 // ROS2
 #include <rclcpp/rclcpp.hpp>
-#include <random_numbers/random_numbers.h>
+#include <moveit/utils/random_number_utils.hpp>
 
 // ROS msgs
 #include <geometry_msgs/msg/pose.hpp>

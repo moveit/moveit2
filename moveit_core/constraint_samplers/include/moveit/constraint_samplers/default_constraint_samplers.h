@@ -38,13 +38,15 @@
 
 #include <moveit/constraint_samplers/constraint_sampler.h>
 #include <moveit/macros/class_forward.h>
-#include <random_numbers/random_numbers.h>
 #include "rclcpp/rclcpp.hpp"
 #include <string>
 #include <Eigen/Geometry>
 
 namespace constraint_samplers
 {
+{
+auto& RNG = moveit::core::RandomNumberGenerator::getInstance();
+}
 MOVEIT_CLASS_FORWARD(JointConstraintSampler);  // Defines JointConstraintSamplerPtr, ConstPtr, WeakPtr... etc
 
 /**
@@ -70,7 +72,7 @@ public:
    *
    */
   JointConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name)
-    : ConstraintSampler(scene, group_name), random_number_generator_(random_numbers::RandomNumberGenerator())
+    : ConstraintSampler(scene, group_name)
   {
   }
 
@@ -88,7 +90,7 @@ public:
    */
   JointConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name,
                          unsigned int seed)
-    : ConstraintSampler(scene, group_name), random_number_generator_(random_numbers::RandomNumberGenerator(seed))
+    : ConstraintSampler(scene, group_name), seed_(seed)
   {
   }
 
@@ -211,7 +213,6 @@ protected:
 
   void clear() override;
 
-  random_numbers::RandomNumberGenerator random_number_generator_; /**< \brief Random number generator used to sample */
   std::vector<JointInfo> bounds_; /**< \brief The bounds for any joint with bounds that are more restrictive than the
                                      joint limits */
 
@@ -323,7 +324,7 @@ public:
    *
    */
   IKConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name)
-    : ConstraintSampler(scene, group_name), random_number_generator_(random_numbers::RandomNumberGenerator())
+    : ConstraintSampler(scene, group_name)
   {
   }
 
@@ -341,7 +342,7 @@ public:
    */
   IKConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene, const std::string& group_name,
                       unsigned int seed)
-    : ConstraintSampler(scene, group_name), random_number_generator_(random_numbers::RandomNumberGenerator(seed))
+    : ConstraintSampler(scene, group_name), seed_(seed)
   {
   }
 
@@ -550,11 +551,10 @@ protected:
                     unsigned int max_attempts);
   bool validate(moveit::core::RobotState& state) const;
 
-  random_numbers::RandomNumberGenerator random_number_generator_; /**< \brief Random generator used by the sampler */
-  IKSamplingPose sampling_pose_;                                  /**< \brief Holder for the pose used for sampling */
-  kinematics::KinematicsBaseConstPtr kb_;                         /**< \brief Holds the kinematics solver */
-  double ik_timeout_;                                             /**< \brief Holds the timeout associated with IK */
-  std::string ik_frame_;                                          /**< \brief Holds the base from of the IK solver */
+  IKSamplingPose sampling_pose_;          /**< \brief Holder for the pose used for sampling */
+  kinematics::KinematicsBaseConstPtr kb_; /**< \brief Holds the kinematics solver */
+  double ik_timeout_;                     /**< \brief Holds the timeout associated with IK */
+  std::string ik_frame_;                  /**< \brief Holds the base from of the IK solver */
   bool transform_ik_; /**< \brief True if the frame associated with the kinematic model is different than the base frame
                          of the IK solver */
   bool need_eef_to_ik_tip_transform_; /**< \brief True if the tip frame of the inverse kinematic is different than the

@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include <moveit/ompl_interface/parameterization/model_based_state_space.h>
+#include <moveit/utils/random_number_utils.hpp>
 #include <utility>
 
 namespace ompl_interface
@@ -255,7 +256,10 @@ ompl::base::StateSamplerPtr ompl_interface::ModelBasedStateSpace::allocDefaultSt
   public:
     DefaultStateSampler(const ompl::base::StateSpace* space, const moveit::core::JointModelGroup* group,
                         const moveit::core::JointBoundsVector* joint_bounds)
-      : ompl::base::StateSampler(space), joint_model_group_(group), joint_bounds_(joint_bounds)
+      : ompl::base::StateSampler(space)
+      , joint_model_group_(group)
+      , moveit_rng_{ moveit::core::RandomNumberGenerator::getInstance() }
+      , joint_bounds_(joint_bounds)
     {
     }
 
@@ -278,7 +282,6 @@ ompl::base::StateSamplerPtr ompl_interface::ModelBasedStateSpace::allocDefaultSt
     }
 
   protected:
-    random_numbers::RandomNumberGenerator moveit_rng_;
     const moveit::core::JointModelGroup* joint_model_group_;
     const moveit::core::JointBoundsVector* joint_bounds_;
   };

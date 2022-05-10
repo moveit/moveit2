@@ -42,7 +42,7 @@
 #include <map>
 #include <iostream>
 #include <moveit_msgs/msg/joint_limits.hpp>
-#include <random_numbers/random_numbers.h>
+#include <moveit/utils/random_number_utils.hpp>
 #include <Eigen/Geometry>
 
 #undef near
@@ -247,29 +247,28 @@ public:
 
   /** \brief Provide random values for the joint variables (within default bounds). Enough memory is assumed to be
    * allocated. */
-  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values) const
+  void getVariableRandomPositions(double* values) const
   {
-    getVariableRandomPositions(rng, values, variable_bounds_);
+    getVariableRandomPositions(values, variable_bounds_);
   }
 
   /** \brief Provide random values for the joint variables (within specified bounds). Enough memory is assumed to be
    * allocated. */
-  virtual void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values,
+  virtual void getVariableRandomPositions(double* values,
                                           const Bounds& other_bounds) const = 0;
 
   /** \brief Provide random values for the joint variables (within default bounds). Enough memory is assumed to be
    * allocated. */
-  void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values, const double* near,
+  void getVariableRandomPositionsNearBy(double* values, const double* near,
                                         const double distance) const
   {
-    getVariableRandomPositionsNearBy(rng, values, variable_bounds_, near, distance);
+    getVariableRandomPositionsNearBy(values, variable_bounds_, near, distance);
   }
 
   /** \brief Provide random values for the joint variables (within specified bounds). Enough memory is assumed to be
    * allocated. */
-  virtual void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values,
-                                                const Bounds& other_bounds, const double* near,
-                                                const double distance) const = 0;
+  virtual void getVariableRandomPositionsNearBy(double* values, const Bounds& other_bounds,
+                                                const double* near, const double distance) const = 0;
 
   /** @} */
 

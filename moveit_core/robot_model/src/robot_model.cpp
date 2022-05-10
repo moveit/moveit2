@@ -1301,18 +1301,17 @@ void RobotModel::updateMimicJoints(double* values) const
   }
 }
 
-void RobotModel::getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values) const
+void RobotModel::getVariableRandomPositions(double* values) const
 {
   for (std::size_t i = 0; i < active_joint_model_vector_.size(); ++i)
-    active_joint_model_vector_[i]->getVariableRandomPositions(rng, values + active_joint_model_start_index_[i]);
+    active_joint_model_vector_[i]->getVariableRandomPositions(values + active_joint_model_start_index_[i]);
   updateMimicJoints(values);
 }
 
-void RobotModel::getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng,
-                                            std::map<std::string, double>& values) const
+void RobotModel::getVariableRandomPositions(std::map<std::string, double>& values) const
 {
   std::vector<double> tmp(variable_count_);
-  getVariableRandomPositions(rng, &tmp[0]);
+  getVariableRandomPositions(&tmp[0]);
   values.clear();
   for (std::size_t i = 0; i < variable_names_.size(); ++i)
     values[variable_names_[i]] = tmp[i];

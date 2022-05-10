@@ -49,6 +49,8 @@
 #include <functional>
 #include <moveit/macros/console_colors.h>
 #include <moveit/robot_model/aabb.h>
+#include "rclcpp/rclcpp.hpp"
+#include <moveit/utils/random_number_utils.hpp>  // for RandomNumberGenerator
 
 namespace moveit
 {
@@ -56,6 +58,10 @@ namespace core
 {
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_robot_state.robot_state");
+namespace
+{
+auto& RNG = moveit::core::RandomNumberGenerator::getInstance();
+}
 
 RobotState::RobotState(const RobotModelConstPtr& robot_model)
   : robot_model_(robot_model)
@@ -64,7 +70,6 @@ RobotState::RobotState(const RobotModelConstPtr& robot_model)
   , has_effort_(false)
   , dirty_link_transforms_(nullptr)
   , dirty_collision_body_transforms_(nullptr)
-  , rng_(nullptr)
 {
   if (robot_model == nullptr)
   {
@@ -76,7 +81,7 @@ RobotState::RobotState(const RobotModelConstPtr& robot_model)
   initTransforms();
 }
 
-RobotState::RobotState(const RobotState& other) : rng_(nullptr)
+RobotState::RobotState(const RobotState& other)
 {
   robot_model_ = other.robot_model_;
   allocMemory();
@@ -87,8 +92,6 @@ RobotState::~RobotState()
 {
   clearAttachedBodies();
   free(memory_);
-  if (rng_)
-    delete rng_;
 }
 
 void RobotState::allocMemory()
@@ -283,8 +286,7 @@ void RobotState::dropDynamics()
 
 void RobotState::setToRandomPositions()
 {
-  random_numbers::RandomNumberGenerator& rng = getRandomNumberGenerator();
-  robot_model_->getVariableRandomPositions(rng, position_);
+  robot_model_->getVariableRandomPositions(RNG, position_);
   memset(dirty_joint_transforms_, 1, robot_model_->getJointModelCount() * sizeof(unsigned char));
   dirty_link_transforms_ = robot_model_->getRootJoint();
   // mimic values are correctly set in RobotModel
@@ -294,14 +296,13 @@ void RobotState::setToRandomPositions(const JointModelGroup* group)
 {
   // we do not make calls to RobotModel for random number generation because mimic joints
   // could trigger updates outside the state of the group itself
-  random_numbers::RandomNumberGenerator& rng = getRandomNumberGenerator();
-  setToRandomPositions(group, rng);
+  setToRandomPositions(group, RNG);
 }
-void RobotState::setToRandomPositions(const JointModelGroup* group, random_numbers::RandomNumberGenerator& rng)
+void RobotState::setToRandomPositions(const JointModelGroup* group, RandomNumberGenerator& rng)
 {
   const std::vector<const JointModel*>& joints = group->getActiveJointModels();
   for (const JointModel* joint : joints)
-    joint->getVariableRandomPositions(rng, position_ + joint->getFirstVariableIndex());
+    joint->getVariableRandomPositions(position_ + joint->getFirstVariableIndex());
   updateMimicJoints(group);
 }
 
@@ -310,20 +311,18 @@ void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const 
 {
   // we do not make calls to RobotModel for random number generation because mimic joints
   // could trigger updates outside the state of the group itself
-  random_numbers::RandomNumberGenerator& rng = getRandomNumberGenerator();
-  setToRandomPositionsNearBy(group, seed, distances, rng);
+  setToRandomPositionsNearBy(group, seed, distances, RNG);
 }
 
 void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed,
-                                            const std::vector<double>& distances,
-                                            random_numbers::RandomNumberGenerator& rng)
+                                            const std::vector<double>& distances, RandomNumberGenerator& rng)
 {
   const std::vector<const JointModel*>& joints = group->getActiveJointModels();
   assert(distances.size() == joints.size());
   for (std::size_t i = 0; i < joints.size(); ++i)
   {
     const int idx = joints[i]->getFirstVariableIndex();
-    joints[i]->getVariableRandomPositionsNearBy(rng, position_ + joints[i]->getFirstVariableIndex(),
+    joints[i]->getVariableRandomPositionsNearBy(position_ + joints[i]->getFirstVariableIndex(),
                                                 seed.position_ + idx, distances[i]);
   }
   updateMimicJoints(group);
@@ -333,18 +332,17 @@ void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const 
 {
   // we do not make calls to RobotModel for random number generation because mimic joints
   // could trigger updates outside the state of the group itself
-  random_numbers::RandomNumberGenerator& rng = getRandomNumberGenerator();
-  setToRandomPositionsNearBy(group, seed, distance, rng);
+  setToRandomPositionsNearBy(group, seed, distance, RNG);
 }
 
 void RobotState::setToRandomPositionsNearBy(const JointModelGroup* group, const RobotState& seed, double distance,
-                                            random_numbers::RandomNumberGenerator& rng)
+                                            RandomNumberGenerator& rng)
 {
   const std::vector<const JointModel*>& joints = group->getActiveJointModels();
   for (const JointModel* joint : joints)
   {
     const int idx = joint->getFirstVariableIndex();
-    joint->getVariableRandomPositionsNearBy(rng, position_ + joint->getFirstVariableIndex(), seed.position_ + idx,
+    joint->getVariableRandomPositionsNearBy(position_ + joint->getFirstVariableIndex(), seed.position_ + idx,
                                             distance);
   }
   updateMimicJoints(group);
@@ -1974,9 +1972,8 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
       else
       {
         // sample a random seed
-        random_numbers::RandomNumberGenerator& rng = getRandomNumberGenerator();
         std::vector<double> random_values;
-        sub_groups[sg]->getVariableRandomPositions(rng, random_values);
+        sub_groups[sg]->getVariableRandomPositions(RNG, random_values);
         for (std::size_t i = 0; i < bij.size(); ++i)
           seed[i] = random_values[bij[i]];
       }

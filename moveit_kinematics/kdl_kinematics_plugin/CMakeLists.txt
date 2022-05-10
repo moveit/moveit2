@@ -6,7 +6,6 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   rclcpp
-  random_numbers
   pluginlib
   moveit_core
   moveit_msgs

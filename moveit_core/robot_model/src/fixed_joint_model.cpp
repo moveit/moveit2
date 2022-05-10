@@ -55,14 +55,14 @@ void FixedJointModel::getVariableDefaultPositions(double* /*values*/, const Boun
 {
 }
 
-void FixedJointModel::getVariableRandomPositions(random_numbers::RandomNumberGenerator& /*rng*/, double* /*values*/,
+void FixedJointModel::getVariableRandomPositions(RandomNumberGenerator& /*rng*/, double* /*values*/,
                                                  const Bounds& /*bounds*/) const
 {
 }
 
-void FixedJointModel::getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& /*rng*/,
-                                                       double* /*values*/, const Bounds& /*bounds*/,
-                                                       const double* /*near*/, const double /*distance*/) const
+void FixedJointModel::getVariableRandomPositionsNearBy(RandomNumberGenerator& /*rng*/, double* /*values*/,
+                                                       const Bounds& /*bounds*/, const double* /*near*/,
+                                                       const double /*distance*/) const
 {
 }
 

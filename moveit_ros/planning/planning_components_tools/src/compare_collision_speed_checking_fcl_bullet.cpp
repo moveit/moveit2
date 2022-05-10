@@ -39,7 +39,7 @@
 #include <moveit/collision_detection_bullet/collision_detector_allocator_bullet.h>
 #include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
 #include <geometric_shapes/shape_operations.h>
-#include <random_numbers/random_numbers.h>
+#include <moveit/utils/random_number_utils.hpp>
 
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/utils/robot_model_test_utils.h>
@@ -85,7 +85,7 @@ void clutterWorld(const planning_scene::PlanningScenePtr& planning_scene, const 
 {
   ROS_INFO("Cluttering scene...");
 
-  random_numbers::RandomNumberGenerator num_generator = random_numbers::RandomNumberGenerator(123);
+  RandomNumberGenerator num_generator = RandomNumberGenerator(123);
 
   // allow all robot links to be in collision for world check
   collision_detection::AllowedCollisionMatrix acm{ collision_detection::AllowedCollisionMatrix(
@@ -111,14 +111,14 @@ void clutterWorld(const planning_scene::PlanningScenePtr& planning_scene, const 
   while (added_objects < num_objects && i < num_objects * MAX_SEARCH_FACTOR_CLUTTER)
   {
     // add with random size and random position
-    pos.translation().x() = num_generator.uniformReal(-1.0, 1.0);
-    pos.translation().y() = num_generator.uniformReal(-1.0, 1.0);
-    pos.translation().z() = num_generator.uniformReal(0.0, 1.0);
+    pos.translation().x() = uniform(num_generator, -1.0, 1.0);
+    pos.translation().y() = uniform(num_generator, -1.0, 1.0);
+    pos.translation().z() = uniform(num_generator, 0.0, 1.0);
 
-    quat.x() = num_generator.uniformReal(-1.0, 1.0);
-    quat.y() = num_generator.uniformReal(-1.0, 1.0);
-    quat.z() = num_generator.uniformReal(-1.0, 1.0);
-    quat.w() = num_generator.uniformReal(-1.0, 1.0);
+    quat.x() = uniform(num_generator, -1.0, 1.0);
+    quat.y() = uniform(num_generator, -1.0, 1.0);
+    quat.z() = uniform(num_generator, -1.0, 1.0);
+    quat.w() = uniform(num_generator, -1.0, 1.0);
     quat.normalize();
     pos.rotate(quat);
 
@@ -127,16 +127,15 @@ void clutterWorld(const planning_scene::PlanningScenePtr& planning_scene, const 
       case CollisionObjectType::MESH:
       {
         shapes::Mesh* mesh = shapes::createMeshFromResource(kinect);
-        mesh->scale(num_generator.uniformReal(0.3, 1.0));
+        mesh->scale(uniform(num_generator, 0.3, 1.0));
         shape.reset(mesh);
         name = "mesh";
         break;
       }
       case CollisionObjectType::BOX:
       {
-        shape =
-            std::make_shared<shapes::Box>(num_generator.uniformReal(0.05, 0.2), num_generator.uniformReal(0.05, 0.2),
-                                          num_generator.uniformReal(0.05, 0.2));
+        shape = std::make_shared<shapes::Box>(uniform(num_generator, 0.05, 0.2), uniform(num_generator, 0.05, 0.2),
+                                              uniform(num_generator, 0.05, 0.2));
         name = "box";
         break;
       }

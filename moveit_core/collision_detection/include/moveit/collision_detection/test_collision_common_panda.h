@@ -37,6 +37,7 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/utils/random_number_utils.hpp>  // for RandomNumberGenerator
 #include <moveit/collision_detection/collision_common.h>
 #include <moveit/collision_detection/collision_env.h>
 #include <moveit/collision_detection/collision_detector_allocator.h>
@@ -49,7 +50,12 @@
 #include <algorithm>
 #include <ctype.h>
 #include <fstream>
+#include <Eigen/Geometry>  // for Quaterniond
 
+namespace
+{
+auto& RNG = moveit::core::RandomNumberGenerator::getInstance();
+}
 /** \brief Brings the panda robot in user defined home position */
 inline void setToHome(moveit::core::RobotState& panda_state)
 {
@@ -266,19 +272,18 @@ TYPED_TEST_P(DistanceCheckPandaTest, DistanceSingle)
   req.active_components_only = &active_components;
   req.enable_signed_distance = true;
 
-  random_numbers::RandomNumberGenerator rng(0x47110815);
   double min_distance = std::numeric_limits<double>::max();
   for (int i = 0; i < 10; ++i)
   {
     collision_detection::DistanceResult res;
 
-    shapes::ShapeConstPtr shape = std::make_shared<const shapes::Cylinder>(rng.uniform01(), rng.uniform01());
+    shapes::ShapeConstPtr shape = std::make_shared<const shapes::Cylinder>(RNG.uniform_real<double>(0.0, 1.0),
+                                                                           RNG.uniform_real<double>(0.0, 1.0));
     Eigen::Isometry3d pose{ Eigen::Isometry3d::Identity() };
-    pose.translation() =
-        Eigen::Vector3d(rng.uniformReal(0.1, 2.0), rng.uniformReal(0.1, 2.0), rng.uniformReal(1.2, 1.7));
-    double quat[4];
-    rng.quaternion(quat);
-    pose.linear() = Eigen::Quaterniond(quat[0], quat[1], quat[2], quat[3]).toRotationMatrix();
+    pose.translation() = Eigen::Vector3d(RNG.uniform_real<double>(0.1, 0.1), RNG.uniform_real<double>(0.1, 2.0),
+                                         RNG.uniform_real<double>(1.2, 1.7));
+    Eigen::Quaterniond rand_quaternion = RNG.getRandomQuaternion();
+    pose.linear() = rand_quaternion.toRotationMatrix();
 
     this->cenv_->getWorld()->addToObject("collection", Eigen::Isometry3d::Identity(), shape, pose);
     this->cenv_->getWorld()->removeObject("object");

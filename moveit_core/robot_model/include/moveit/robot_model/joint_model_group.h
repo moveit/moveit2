@@ -316,70 +316,70 @@ public:
   void getVariableDefaultPositions(double* values) const;
 
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values) const
+  void getVariableRandomPositions(double* values) const
   {
-    getVariableRandomPositions(rng, values, active_joint_models_bounds_);
+    getVariableRandomPositions(values, active_joint_models_bounds_);
   }
 
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values) const
+  void getVariableRandomPositions(std::vector<double>& values) const
   {
     values.resize(variable_count_);
-    getVariableRandomPositions(rng, &values[0], active_joint_models_bounds_);
+    getVariableRandomPositions(&values[0], active_joint_models_bounds_);
   }
 
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values, const double* near,
+  void getVariableRandomPositionsNearBy(double* values, const double* near,
                                         const double distance) const
   {
-    getVariableRandomPositionsNearBy(rng, values, active_joint_models_bounds_, near, distance);
+    getVariableRandomPositionsNearBy(values, active_joint_models_bounds_, near, distance);
   }
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,
+  void getVariableRandomPositionsNearBy(std::vector<double>& values,
                                         const std::vector<double>& near, double distance) const
   {
     values.resize(variable_count_);
-    getVariableRandomPositionsNearBy(rng, &values[0], active_joint_models_bounds_, &near[0], distance);
+    getVariableRandomPositionsNearBy(&values[0], active_joint_models_bounds_, &near[0], distance);
   }
 
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,
+  void getVariableRandomPositionsNearBy(std::vector<double>& values,
                                         const std::vector<double>& near,
                                         const std::map<JointModel::JointType, double>& distance_map) const
   {
     values.resize(variable_count_);
-    getVariableRandomPositionsNearBy(rng, &values[0], active_joint_models_bounds_, &near[0], distance_map);
+    getVariableRandomPositionsNearBy(&values[0], active_joint_models_bounds_, &near[0], distance_map);
   }
 
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values, const double* near,
+  void getVariableRandomPositionsNearBy(double* values, const double* near,
                                         const std::vector<double>& distances) const
   {
-    getVariableRandomPositionsNearBy(rng, values, active_joint_models_bounds_, near, distances);
+    getVariableRandomPositionsNearBy(values, active_joint_models_bounds_, near, distances);
   }
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, std::vector<double>& values,
+  void getVariableRandomPositionsNearBy(std::vector<double>& values,
                                         const std::vector<double>& near, const std::vector<double>& distances) const
   {
     values.resize(variable_count_);
-    getVariableRandomPositionsNearBy(rng, &values[0], active_joint_models_bounds_, &near[0], distances);
+    getVariableRandomPositionsNearBy(&values[0], active_joint_models_bounds_, &near[0], distances);
   }
 
-  void getVariableRandomPositions(random_numbers::RandomNumberGenerator& rng, double* values,
+  void getVariableRandomPositions(double* values,
                                   const JointBoundsVector& active_joint_bounds) const;
 
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values,
+  void getVariableRandomPositionsNearBy(double* values,
                                         const JointBoundsVector& active_joint_bounds, const double* near,
                                         const double distance) const;
 
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values,
+  void getVariableRandomPositionsNearBy(double* values,
                                         const JointBoundsVector& active_joint_bounds, const double* near,
                                         const std::map<JointModel::JointType, double>& distance_map) const;
 
   /** \brief Compute random values for the state of the joint group */
-  void getVariableRandomPositionsNearBy(random_numbers::RandomNumberGenerator& rng, double* values,
+  void getVariableRandomPositionsNearBy(double* values,
                                         const JointBoundsVector& active_joint_bounds, const double* near,
                                         const std::vector<double>& distances) const;
 

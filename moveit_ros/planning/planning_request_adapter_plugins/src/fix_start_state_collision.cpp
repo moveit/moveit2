@@ -45,7 +45,11 @@
 
 namespace default_planner_request_adapters
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_collision");
+namespace
+{
+auto& RNG = moveit::core::RandomNumberGenerator::getInstance();
+const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.fix_start_state_collision");
+}  // namespace
 
 class FixStartStateCollision : public planning_request_adapter::PlanningRequestAdapter
 {
@@ -100,7 +104,6 @@ public:
         RCLCPP_INFO(LOGGER, "Start state appears to be in collision with respect to group %s", creq.group_name.c_str());
 
       auto prefix_state = std::make_shared<moveit::core::RobotState>(start_state);
-      random_numbers::RandomNumberGenerator& rng = prefix_state->getRandomNumberGenerator();
 
       const std::vector<const moveit::core::JointModel*>& jmodels =
           planning_scene->getRobotModel()->hasJointModelGroup(req.group_name) ?
@@ -114,7 +117,7 @@ public:
         {
           std::vector<double> sampled_variable_values(jmodels[i]->getVariableCount());
           const double* original_values = prefix_state->getJointPositions(jmodels[i]);
-          jmodels[i]->getVariableRandomPositionsNearBy(rng, &sampled_variable_values[0], original_values,
+          jmodels[i]->getVariableRandomPositionsNearBy(RNG, &sampled_variable_values[0], original_values,
                                                        jmodels[i]->getMaximumExtent() * jiggle_fraction_);
           start_state.setJointPositions(jmodels[i], sampled_variable_values);
           collision_detection::CollisionResult cres;

@@ -2116,7 +2116,7 @@ std::vector<double> MoveGroupInterface::getCurrentJointValues() const
 std::vector<double> MoveGroupInterface::getRandomJointValues() const
 {
   std::vector<double> r;
-  impl_->getJointModelGroup()->getVariableRandomPositions(impl_->getTargetRobotState().getRandomNumberGenerator(), r);
+  impl_->getJointModelGroup()->getVariableRandomPositions(moveit::core::RandomNumberGenerator::getInstance(), r);
   return r;
 }
 

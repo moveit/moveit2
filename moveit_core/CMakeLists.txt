@@ -36,7 +36,6 @@ find_package(geometry_msgs REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(octomap_msgs REQUIRED)
-find_package(random_numbers REQUIRED)
 find_package(ruckig REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
@@ -119,7 +118,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   kdl_parser
   moveit_msgs
   octomap_msgs
-  random_numbers
   sensor_msgs
   shape_msgs
   srdfdom

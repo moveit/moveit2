@@ -39,6 +39,11 @@
 
 #include <utility>
 
+namespace
+{
+auto& RNG = moveit::core::RandomNumberGenerator::getInstance();
+}  // namespace
+
 ompl_interface::ConstrainedSampler::ConstrainedSampler(const ModelBasedPlanningContext* pc,
                                                        constraint_samplers::ConstraintSamplerPtr cs)
   : ob::StateSampler(pc->getOMPLStateSpace().get())
@@ -90,7 +95,7 @@ void ompl_interface::ConstrainedSampler::sampleUniformNear(ob::State* state, con
     double total_d = space_->distance(state, near);
     if (total_d > distance)
     {
-      double dist = pow(rng_.uniform01(), inv_dim_) * distance;
+      double dist = pow(RNG.uniform_real<double>(0.0, 1.0), inv_dim_) * distance;
       space_->interpolate(near, state, dist / total_d, state);
     }
   }
@@ -106,7 +111,7 @@ void ompl_interface::ConstrainedSampler::sampleGaussian(ob::State* state, const 
     double distance = rng_.gaussian(0.0, stdDev);
     if (total_d > distance)
     {
-      double dist = pow(rng_.uniform01(), inv_dim_) * distance;
+      double dist = pow(RNG.uniform_real<double>(0.0, 1.0), inv_dim_) * distance;
       space_->interpolate(mean, state, dist / total_d, state);
     }
   }
