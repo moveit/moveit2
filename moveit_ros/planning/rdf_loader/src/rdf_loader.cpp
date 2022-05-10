@@ -62,14 +62,14 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
 {
   auto start = node->now();
 
-  urdf_string_ =
-      urdf_ssp_.loadInitialValue(node, ros_name, std::bind(&RDFLoader::urdfUpdateCallback, this, std::placeholders::_1),
-                                 default_continuous_value, default_timeout);
+  urdf_string_ = urdf_ssp_.loadInitialValue(
+      node, ros_name, [this](const std::string& new_urdf_string) { return urdfUpdateCallback(new_urdf_string); },
+      default_continuous_value, default_timeout);
 
   const std::string srdf_name = ros_name + "_semantic";
-  srdf_string_ = srdf_ssp_.loadInitialValue(node, srdf_name,
-                                            std::bind(&RDFLoader::srdfUpdateCallback, this, std::placeholders::_1),
-                                            default_continuous_value, default_timeout);
+  srdf_string_ = srdf_ssp_.loadInitialValue(
+      node, srdf_name, [this](const std::string& new_srdf_string) { return srdfUpdateCallback(new_srdf_string); },
+      default_continuous_value, default_timeout);
 
   if (!loadFromStrings())
   {

@@ -81,7 +81,7 @@ RobotInteraction::RobotInteraction(const moveit::core::RobotModelConstPtr& robot
 
   // spin a thread that will process feedback events
   run_processing_thread_ = true;
-  processing_thread_ = std::make_unique<boost::thread>(std::bind(&RobotInteraction::processingThread, this));
+  processing_thread_ = std::make_unique<boost::thread>([this] { processingThread(); });
 }
 
 RobotInteraction::~RobotInteraction()
@@ -548,8 +548,8 @@ void RobotInteraction::addInteractiveMarkers(const InteractionHandlerPtr& handle
   for (const visualization_msgs::msg::InteractiveMarker& im : ims)
   {
     int_marker_server_->insert(im);
-    int_marker_server_->setCallback(im.name, std::bind(&RobotInteraction::processInteractiveMarkerFeedback, this,
-                                                       std::placeholders::_1));
+    int_marker_server_->setCallback(im.name,
+                                    [this](const auto& feedback) { processInteractiveMarkerFeedback(feedback); });
 
     // Add menu handler to all markers that this interaction handler creates.
     if (std::shared_ptr<interactive_markers::MenuHandler> mh = handler->getMenuHandler())
@@ -579,7 +579,7 @@ void RobotInteraction::toggleMoveInteractiveMarkerTopic(bool enable)
         std::string marker_name = int_marker_names_[i];
         std::function<void(const geometry_msgs::msg::PoseStamped::SharedPtr)> subscription_callback =
             [this, marker_name](const geometry_msgs::msg::PoseStamped::SharedPtr msg) {
-              moveInteractiveMarker(marker_name, msg);
+              moveInteractiveMarker(marker_name, *msg);
             };
         auto subscription =
             node_->create_subscription<geometry_msgs::msg::PoseStamped>(topic_name, 1, subscription_callback);
@@ -685,21 +685,20 @@ bool RobotInteraction::showingMarkers(const InteractionHandlerPtr& handler)
   return true;
 }
 
-void RobotInteraction::moveInteractiveMarker(const std::string& name,
-                                             const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg)
+void RobotInteraction::moveInteractiveMarker(const std::string& name, const geometry_msgs::msg::PoseStamped& msg)
 {
   std::map<std::string, std::size_t>::const_iterator it = shown_markers_.find(name);
   if (it != shown_markers_.end())
   {
     auto feedback = std::make_shared<visualization_msgs::msg::InteractiveMarkerFeedback>();
-    feedback->header = msg->header;
+    feedback->header = msg.header;
     feedback->marker_name = name;
-    feedback->pose = msg->pose;
+    feedback->pose = msg.pose;
     feedback->event_type = visualization_msgs::msg::InteractiveMarkerFeedback::POSE_UPDATE;
     processInteractiveMarkerFeedback(feedback);
     {
       boost::unique_lock<boost::mutex> ulock(marker_access_lock_);
-      int_marker_server_->setPose(name, msg->pose, msg->header);  // move the interactive marker
+      int_marker_server_->setPose(name, msg.pose, msg.header);  // move the interactive marker
       int_marker_server_->applyChanges();
     }
   }

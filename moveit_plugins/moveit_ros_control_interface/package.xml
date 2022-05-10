@@ -13,7 +13,7 @@
   <author email="mathias.luedtke@ipa.fraunhofer.de">Mathias Lüdtke</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <build_depend>moveit_common</build_depend>
+  <depend>moveit_common</depend>
   <depend>rclcpp_action</depend>
   <depend>controller_manager_msgs</depend>
   <depend>moveit_core</depend>

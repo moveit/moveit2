@@ -161,11 +161,11 @@ void MoveGroupSequenceAction::executeSequenceCallbackPlanAndExecute(
   opt.replan_ = goal->planning_options.replan;
   opt.replan_attempts_ = goal->planning_options.replan_attempts;
   opt.replan_delay_ = goal->planning_options.replan_delay;
-  opt.before_execution_callback_ = std::bind(&MoveGroupSequenceAction::startMoveExecutionCallback, this);
+  opt.before_execution_callback_ = [this] { startMoveExecutionCallback(); };
 
-  opt.plan_callback_ = std::bind(&MoveGroupSequenceAction::planUsingSequenceManager, this, std::cref(goal->request),
-                                 std::placeholders::_1);
-
+  [this, &request = goal->request](plan_execution::ExecutableMotionPlan& plan) {
+    return planUsingSequenceManager(request, plan);
+  };
   if (goal->planning_options.look_around && context_->plan_with_sensing_)
   {
     RCLCPP_WARN(LOGGER, "Plan with sensing not yet implemented/tested. This option is ignored.");  // LCOV_EXCL_LINE

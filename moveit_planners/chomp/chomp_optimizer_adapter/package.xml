@@ -11,7 +11,7 @@
   <author email="raghavendersahdev@gmail.com">Raghavender Sahdev</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <build_depend>moveit_common</build_depend>
+  <depend>moveit_common</depend>
 
   <depend>moveit_core</depend>
   <depend>chomp_motion_planner</depend>

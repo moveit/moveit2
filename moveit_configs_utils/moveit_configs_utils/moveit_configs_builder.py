@@ -479,7 +479,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         # Special rule to add ompl planner_configs
         if "ompl" in self.__moveit_configs.planning_pipelines:
             ompl_config = self.__moveit_configs.planning_pipelines["ompl"]
-            if "planner_configs" not in ompl_config.get("move_group", {}):
+            if "planner_configs" not in ompl_config:
                 ompl_config.update(load_yaml(default_folder / "ompl_defaults.yaml"))
 
         return self

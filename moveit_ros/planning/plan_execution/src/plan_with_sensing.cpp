@@ -56,13 +56,12 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.plan_with_se
 //     : owner_(owner) /*, dynamic_reconfigure_server_(ros::NodeHandle("~/sense_for_plan"))*/
 //   {
 //     // dynamic_reconfigure_server_.setCallback(
-//     //     std::bind(&DynamicReconfigureImpl::dynamicReconfigureCallback, this, std::placeholders::_1,
-//     std::placeholders::_2));
+//     //     [this](const auto& config, uint32_t level) { dynamicReconfigureCallback(config, level); });
 //   }
 //
 // private:
 //   // TODO(anasarrak): Adapt the dynamic parameters for ros2
-//   // void dynamicReconfigureCallback(SenseForPlanDynamicReconfigureConfig& config, uint32_t level)
+//   // void dynamicReconfigureCallback(const SenseForPlanDynamicReconfigureConfig& config, uint32_t level)
 //   // {
 //   //   owner_->setMaxSafePathCost(config.max_safe_path_cost);
 //   //   owner_->setMaxCostSources(config.max_cost_sources);
