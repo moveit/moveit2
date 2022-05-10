@@ -198,16 +198,6 @@ void SRDFConfig::collectVariables(std::vector<TemplateVariable>& variables)
   variables.push_back(TemplateVariable("ROBOT_NAME", srdf_.robot_name_));
   variables.push_back(TemplateVariable("ROBOT_ROOT_LINK", robot_model_->getRootLinkName()));
   variables.push_back(TemplateVariable("PLANNING_FRAME", robot_model_->getModelFrame()));
-
-  std::stringstream vjb;
-  unsigned int counter = 0;
-  for (const auto& vj : srdf_.virtual_joints_)
-  {
-    vjb << "  <node pkg=\"tf2_ros\" type=\"static_transform_publisher\" name=\"virtual_joint_broadcaster_" << counter
-        << "\" args=\"0 0 0 0 0 0 " << vj.parent_frame_ << " " << vj.child_link_ << "\" />" << std::endl;
-    counter++;
-  }
-  variables.push_back(TemplateVariable("VIRTUAL_JOINT_BROADCASTER", vjb.str()));
 }
 
 }  // namespace moveit_setup_framework
