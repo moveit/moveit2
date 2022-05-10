@@ -47,17 +47,26 @@ MoveGroupQueryPlannersService::MoveGroupQueryPlannersService() : MoveGroupCapabi
 
 void MoveGroupQueryPlannersService::initialize()
 {
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-  using std::placeholders::_3;
   query_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::QueryPlannerInterfaces>(
-      QUERY_PLANNERS_SERVICE_NAME, std::bind(&MoveGroupQueryPlannersService::queryInterface, this, _1, _2, _3));
+      QUERY_PLANNERS_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> request_header,
+                                          const std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Request> req,
+                                          std::shared_ptr<moveit_msgs::srv::QueryPlannerInterfaces::Response> res) {
+        return queryInterface(request_header, req, res);
+      });
 
   get_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetPlannerParams>(
-      GET_PLANNER_PARAMS_SERVICE_NAME, std::bind(&MoveGroupQueryPlannersService::getParams, this, _1, _2, _3));
+      GET_PLANNER_PARAMS_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> request_header,
+                                              const std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Request> req,
+                                              std::shared_ptr<moveit_msgs::srv::GetPlannerParams::Response> res) {
+        return getParams(request_header, req, res);
+      });
 
   set_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::SetPlannerParams>(
-      SET_PLANNER_PARAMS_SERVICE_NAME, std::bind(&MoveGroupQueryPlannersService::setParams, this, _1, _2, _3));
+      SET_PLANNER_PARAMS_SERVICE_NAME, [this](const std::shared_ptr<rmw_request_id_t> request_header,
+                                              const std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Request> req,
+                                              std::shared_ptr<moveit_msgs::srv::SetPlannerParams::Response> res) {
+        return setParams(request_header, req, res);
+      });
 }
 
 bool MoveGroupQueryPlannersService::queryInterface(

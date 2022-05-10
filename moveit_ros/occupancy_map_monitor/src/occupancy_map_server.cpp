@@ -46,25 +46,25 @@
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.occupancy_map_server");
 
 static void publishOctomap(const rclcpp::Publisher<octomap_msgs::msg::Octomap>::SharedPtr& octree_binary_pub,
-                           occupancy_map_monitor::OccupancyMapMonitor* server)
+                           occupancy_map_monitor::OccupancyMapMonitor& server)
 {
   octomap_msgs::msg::Octomap map;
 
-  map.header.frame_id = server->getMapFrame();
+  map.header.frame_id = server.getMapFrame();
   map.header.stamp = rclcpp::Clock().now();
 
-  server->getOcTreePtr()->lockRead();
+  server.getOcTreePtr()->lockRead();
   rclcpp::Clock steady_clock(RCL_STEADY_TIME);
   try
   {
-    if (!octomap_msgs::binaryMapToMsgData(*server->getOcTreePtr(), map.data))
+    if (!octomap_msgs::binaryMapToMsgData(*server.getOcTreePtr(), map.data))
       RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Could not generate OctoMap message");
   }
   catch (...)
   {
     RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 1000, "Exception thrown while generating OctoMap message");
   }
-  server->getOcTreePtr()->unlockRead();
+  server.getOcTreePtr()->unlockRead();
 
   octree_binary_pub->publish(map);
 }
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
   std::shared_ptr<tf2_ros::Buffer> buffer = std::make_shared<tf2_ros::Buffer>(clock_ptr, tf2::durationFromSec(5.0));
   tf2_ros::TransformListener listener(*buffer, node, false /* spin_thread - disables executor */);
   occupancy_map_monitor::OccupancyMapMonitor server(node, buffer);
-  server.setUpdateCallback(std::bind(&publishOctomap, octree_binary_pub, &server));
+  server.setUpdateCallback([&octree_binary_pub, &server] { return publishOctomap(octree_binary_pub, server); });
   server.startMonitor();
 
   rclcpp::spin(node);

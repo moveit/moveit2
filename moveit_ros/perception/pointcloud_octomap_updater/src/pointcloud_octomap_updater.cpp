@@ -92,7 +92,7 @@ bool PointCloudOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
   shape_mask_ = std::make_unique<point_containment_filter::ShapeMask>();
   shape_mask_->setTransformCallback(
-      std::bind(&PointCloudOctomapUpdater::getShapeTransform, this, std::placeholders::_1, std::placeholders::_2));
+      [this](ShapeHandle shape, Eigen::Isometry3d& tf) { return getShapeTransform(shape, tf); });
 
   return true;
 }
@@ -116,14 +116,14 @@ void PointCloudOctomapUpdater::start()
     point_cloud_filter_ = new tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>(
         *point_cloud_subscriber_, *tf_buffer_, monitor_->getMapFrame(), 5, node_);
     point_cloud_filter_->registerCallback(
-        std::bind(&PointCloudOctomapUpdater::cloudMsgCallback, this, std::placeholders::_1));
+        [this](const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud) { cloudMsgCallback(cloud); });
     RCLCPP_INFO(LOGGER, "Listening to '%s' using message filter with target frame '%s'", point_cloud_topic_.c_str(),
                 point_cloud_filter_->getTargetFramesString().c_str());
   }
   else
   {
     point_cloud_subscriber_->registerCallback(
-        std::bind(&PointCloudOctomapUpdater::cloudMsgCallback, this, std::placeholders::_1));
+        [this](const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud) { cloudMsgCallback(cloud); });
     RCLCPP_INFO(LOGGER, "Listening to '%s'", point_cloud_topic_.c_str());
   }
 }
