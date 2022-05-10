@@ -28,13 +28,10 @@ RUN \
         clang clang-format-10 clang-tidy clang-tools \
         ccache && \
     #
-<<<<<<< HEAD
-=======
     # Globally disable git security
     # https://github.blog/2022-04-12-git-security-vulnerability-announced
     git config --global --add safe.directory "*" && \
     #
->>>>>>> 806cce470 (CI: More generically fix permission errors (#1215))
     # Fetch all dependencies from moveit2.repos
     vcs import src < src/moveit2/moveit2.repos && \
     if [ -r src/moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import src < src/moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
