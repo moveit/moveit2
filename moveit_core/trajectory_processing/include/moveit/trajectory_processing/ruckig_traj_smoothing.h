@@ -83,7 +83,7 @@ private:
   static void getNextRuckigInput(const moveit::core::RobotStatePtr& current_waypoint,
                                  const moveit::core::RobotStatePtr& next_waypoint,
                                  const moveit::core::JointModelGroup* joint_group,
-                                 ruckig::InputParameter<0>& ruckig_input);
+                                 ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input);
 
   /**
    * \brief Initialize Ruckig position/vel/accel. This initializes ruckig_input and ruckig_output to the same values
@@ -94,7 +94,8 @@ private:
    */
   static void initializeRuckigState(const moveit::core::RobotState& first_waypoint,
                                     const moveit::core::JointModelGroup* joint_group,
-                                    ruckig::InputParameter<0>& ruckig_input, ruckig::OutputParameter<0>& ruckig_output);
+                                    ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input,
+                                    ruckig::OutputParameter<ruckig::DynamicDOFs>& ruckig_output);
 
   /**
    * \brief A utility function to instantiate and run Ruckig for a series of waypoints.

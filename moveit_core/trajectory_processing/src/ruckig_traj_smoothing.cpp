@@ -294,8 +294,8 @@ bool RuckigSmoothing::runRuckig(robot_trajectory::RobotTrajectory& trajectory,
 
 void RuckigSmoothing::initializeRuckigState(const moveit::core::RobotState& first_waypoint,
                                             const moveit::core::JointModelGroup* joint_group,
-                                            ruckig::InputParameter<0>& ruckig_input,
-                                            ruckig::OutputParameter<0>& ruckig_output)
+                                            ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input,
+                                            ruckig::OutputParameter<ruckig::DynamicDOFs>& ruckig_output)
 {
   const size_t num_dof = joint_group->getVariableCount();
   const std::vector<int>& idx = joint_group->getVariableIndexList();
@@ -327,7 +327,7 @@ void RuckigSmoothing::initializeRuckigState(const moveit::core::RobotState& firs
 void RuckigSmoothing::getNextRuckigInput(const moveit::core::RobotStatePtr& current_waypoint,
                                          const moveit::core::RobotStatePtr& next_waypoint,
                                          const moveit::core::JointModelGroup* joint_group,
-                                         ruckig::InputParameter<0>& ruckig_input)
+                                         ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input)
 {
   const size_t num_dof = joint_group->getVariableCount();
   const std::vector<int>& idx = joint_group->getVariableIndexList();
