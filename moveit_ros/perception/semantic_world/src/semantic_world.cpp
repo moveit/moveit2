@@ -66,7 +66,8 @@ SemanticWorld::SemanticWorld(const rclcpp::Node::SharedPtr node,
 
 {
   table_subscriber_ = node_handle_->create_subscription<object_recognition_msgs::msg::TableArray>(
-      "table_array", 1, std::bind(&SemanticWorld::tableCallback, this, std::placeholders::_1));
+      "table_array", 1,
+      [this](const object_recognition_msgs::msg::TableArray::SharedPtr msg) { return tableCallback(msg); });
   visualization_publisher_ =
       node_handle_->create_publisher<visualization_msgs::msg::MarkerArray>("visualize_place", 20);
   collision_object_publisher_ =
