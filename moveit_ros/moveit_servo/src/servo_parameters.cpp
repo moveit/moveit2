@@ -442,10 +442,10 @@ ServoParameters::SharedConstPtr ServoParameters::makeServoParameters(const rclcp
     // register parameter change callback
     if (dynamic_parameters)
     {
-      using std::placeholders::_1;
-      parameters_ptr->callback_handler_->on_set_parameters_callback_handler_ =
-          node->add_on_set_parameters_callback(std::bind(&ServoParameters::CallbackHandler::setParametersCallback,
-                                                         parameters_ptr->callback_handler_.get(), _1));
+      parameters_ptr->callback_handler_->on_set_parameters_callback_handler_ = node->add_on_set_parameters_callback(
+          [ptr = parameters_ptr->callback_handler_.get()](const std::vector<rclcpp::Parameter>& parameters) {
+            return ptr->setParametersCallback(parameters);
+          });
     }
 
     return parameters_ptr;

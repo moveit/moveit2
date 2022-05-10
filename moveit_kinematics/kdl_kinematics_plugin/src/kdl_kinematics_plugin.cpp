@@ -88,11 +88,11 @@ void KDLKinematicsPlugin::getJointWeights()
   const std::vector<std::string>& active_names = joint_model_group_->getActiveJointModelNames();
   std::vector<std::string> names;
   std::vector<double> weights;
-  if (lookupParam(node_, "joint_weights/weights", weights, weights))
+  if (lookupParam(node_, "joint_weights.weights", weights, weights))
   {
-    if (!lookupParam(node_, "joint_weights/names", names, names) || names.size() != weights.size())
+    if (!lookupParam(node_, "joint_weights.names", names, names) || (names.size() != weights.size()))
     {
-      RCLCPP_ERROR(LOGGER, "Expecting list parameter joint_weights/names of same size as list joint_weights/weights");
+      RCLCPP_ERROR(LOGGER, "Expecting list parameter joint_weights.names of same size as list joint_weights.weights");
       // fall back to default weights
       weights.clear();
     }

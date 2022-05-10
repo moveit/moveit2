@@ -55,16 +55,22 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
   }
 
   // Set up services for interacting with Servo
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-  start_servo_service_ =
-      node_->create_service<std_srvs::srv::Trigger>("~/start_servo", std::bind(&ServoNode::startCB, this, _1, _2));
-  stop_servo_service_ =
-      node_->create_service<std_srvs::srv::Trigger>("~/stop_servo", std::bind(&ServoNode::stopCB, this, _1, _2));
-  pause_servo_service_ =
-      node_->create_service<std_srvs::srv::Trigger>("~/pause_servo", std::bind(&ServoNode::pauseCB, this, _1, _2));
-  unpause_servo_service_ =
-      node_->create_service<std_srvs::srv::Trigger>("~/unpause_servo", std::bind(&ServoNode::unpauseCB, this, _1, _2));
+  start_servo_service_ = node_->create_service<std_srvs::srv::Trigger>(
+      "~/start_servo",
+      [this](const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+             std::shared_ptr<std_srvs::srv::Trigger::Response> response) { return startCB(request, response); });
+  stop_servo_service_ = node_->create_service<std_srvs::srv::Trigger>(
+      "~/stop_servo",
+      [this](const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+             std::shared_ptr<std_srvs::srv::Trigger::Response> response) { return stopCB(request, response); });
+  pause_servo_service_ = node_->create_service<std_srvs::srv::Trigger>(
+      "~/pause_servo",
+      [this](const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+             std::shared_ptr<std_srvs::srv::Trigger::Response> response) { return pauseCB(request, response); });
+  unpause_servo_service_ = node_->create_service<std_srvs::srv::Trigger>(
+      "~/unpause_servo",
+      [this](const std::shared_ptr<std_srvs::srv::Trigger::Request> request,
+             std::shared_ptr<std_srvs::srv::Trigger::Response> response) { return unpauseCB(request, response); });
 
   // Can set robot_description name from parameters
   std::string robot_description_name = "robot_description";
