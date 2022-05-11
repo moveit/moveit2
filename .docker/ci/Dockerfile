@@ -33,7 +33,7 @@ RUN \
     git config --global --add safe.directory "*" && \
     #
     # Fetch all dependencies from moveit2.repos
-    if [ -r src/moveit2/moveit2.repos ] ; vcs import src < src/moveit2/moveit2.repos && \
+    if [ -r src/moveit2/moveit2.repos ] ; then vcs import src < src/moveit2/moveit2.repos ; fi && \
     if [ -r src/moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import src < src/moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
     #
     # Download all dependencies of MoveIt
