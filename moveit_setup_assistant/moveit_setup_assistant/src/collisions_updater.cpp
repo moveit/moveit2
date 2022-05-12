@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 
   rclcpp::init(argc, argv);
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("collision_updater");
-  rclcpp::Logger logger = node->get_logger();
+  static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_updater");
   moveit_setup_framework::DataWarehousePtr config_data = std::make_shared<moveit_setup_framework::DataWarehouse>(node);
 
   moveit_setup_srdf_plugins::DefaultCollisions setup_step;
@@ -105,18 +105,18 @@ int main(int argc, char* argv[])
     }
     catch (const std::runtime_error& e)
     {
-      RCLCPP_ERROR_STREAM(logger, "Could not load config at '" << config_pkg_path << "'. " << e.what());
+      RCLCPP_ERROR_STREAM(LOGGER, "Could not load config at '" << config_pkg_path << "'. " << e.what());
       return 1;
     }
   }
   else if (urdf_path.empty() || srdf_path.empty())
   {
-    RCLCPP_ERROR_STREAM(logger, "Please provide config package or URDF and SRDF path");
+    RCLCPP_ERROR_STREAM(LOGGER, "Please provide config package or URDF and SRDF path");
     return 1;
   }
   else if (rdf_loader::RDFLoader::isXacroFile(srdf_path) && output_path.empty())
   {
-    RCLCPP_ERROR_STREAM(logger, "Please provide a different output file for SRDF xacro input file");
+    RCLCPP_ERROR_STREAM(LOGGER, "Please provide a different output file for SRDF xacro input file");
     return 1;
   }
 
@@ -139,7 +139,9 @@ int main(int argc, char* argv[])
   }
 
   if (!keep_old)
-    srdf_config->getDisabledCollisions().clear();
+  {
+    srdf_config->clearCollisionData();
+  }
 
   setup_step.startGenerationThread(never_trials, min_collision_fraction, verbose);
   int thread_progress;
@@ -148,12 +150,12 @@ int main(int argc, char* argv[])
   {
     if (thread_progress - last_progress > 10)
     {
-      RCLCPP_INFO(logger, "%d%% complete...", thread_progress);
+      RCLCPP_INFO(LOGGER, "%d%% complete...", thread_progress);
       last_progress = thread_progress;
     }
   }
   setup_step.joinGenerationThread();
-  RCLCPP_INFO(logger, "100%% complete...");
+  RCLCPP_INFO(LOGGER, "100%% complete...");
 
   size_t skip_mask = 0;
   if (!include_default)

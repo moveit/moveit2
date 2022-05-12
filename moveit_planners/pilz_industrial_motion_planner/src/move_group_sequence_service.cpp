@@ -62,7 +62,8 @@ void MoveGroupSequenceService::initialize()
 
   sequence_service_ = context_->moveit_cpp_->getNode()->create_service<moveit_msgs::srv::GetMotionSequence>(
       SEQUENCE_SERVICE_NAME,
-      std::bind(&MoveGroupSequenceService::plan, this, std::placeholders::_1, std::placeholders::_2));
+      [this](const moveit_msgs::srv::GetMotionSequence::Request::SharedPtr req,
+             moveit_msgs::srv::GetMotionSequence::Response::SharedPtr res) { return plan(req, res); });
 }
 
 bool MoveGroupSequenceService::plan(const moveit_msgs::srv::GetMotionSequence::Request::SharedPtr req,

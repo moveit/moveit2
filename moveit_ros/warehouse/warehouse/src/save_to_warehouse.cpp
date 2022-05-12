@@ -50,69 +50,69 @@ static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.save_to_warehouse");
 
-void onSceneUpdate(planning_scene_monitor::PlanningSceneMonitor* psm, moveit_warehouse::PlanningSceneStorage* pss)
+void onSceneUpdate(planning_scene_monitor::PlanningSceneMonitor& psm, moveit_warehouse::PlanningSceneStorage& pss)
 {
   RCLCPP_INFO(LOGGER, "Received an update to the planning scene...");
 
-  if (!psm->getPlanningScene()->getName().empty())
+  if (!psm.getPlanningScene()->getName().empty())
   {
-    if (!pss->hasPlanningScene(psm->getPlanningScene()->getName()))
+    if (!pss.hasPlanningScene(psm.getPlanningScene()->getName()))
     {
       moveit_msgs::msg::PlanningScene psmsg;
-      psm->getPlanningScene()->getPlanningSceneMsg(psmsg);
-      pss->addPlanningScene(psmsg);
+      psm.getPlanningScene()->getPlanningSceneMsg(psmsg);
+      pss.addPlanningScene(psmsg);
     }
     else
       RCLCPP_INFO(LOGGER, "Scene '%s' was previously added. Not adding again.",
-                  psm->getPlanningScene()->getName().c_str());
+                  psm.getPlanningScene()->getName().c_str());
   }
   else
     RCLCPP_INFO(LOGGER, "Scene name is empty. Not saving.");
 }
 
-void onMotionPlanRequest(const moveit_msgs::msg::MotionPlanRequest::ConstSharedPtr req,
-                         planning_scene_monitor::PlanningSceneMonitor* psm, moveit_warehouse::PlanningSceneStorage* pss)
+void onMotionPlanRequest(const moveit_msgs::msg::MotionPlanRequest& req,
+                         planning_scene_monitor::PlanningSceneMonitor& psm, moveit_warehouse::PlanningSceneStorage& pss)
 {
-  if (psm->getPlanningScene()->getName().empty())
+  if (psm.getPlanningScene()->getName().empty())
   {
     RCLCPP_INFO(LOGGER, "Scene name is empty. Not saving planning request.");
     return;
   }
-  pss->addPlanningQuery(*req, psm->getPlanningScene()->getName());
+  pss.addPlanningQuery(req, psm.getPlanningScene()->getName());
 }
 
-void onConstraints(const moveit_msgs::msg::Constraints::ConstSharedPtr msg, moveit_warehouse::ConstraintsStorage* cs)
+void onConstraints(const moveit_msgs::msg::Constraints& msg, moveit_warehouse::ConstraintsStorage& cs)
 {
-  if (msg->name.empty())
+  if (msg.name.empty())
   {
     RCLCPP_INFO(LOGGER, "No name specified for constraints. Not saving.");
     return;
   }
 
-  if (cs->hasConstraints(msg->name))
+  if (cs.hasConstraints(msg.name))
   {
-    RCLCPP_INFO(LOGGER, "Replacing constraints '%s'", msg->name.c_str());
-    cs->removeConstraints(msg->name);
-    cs->addConstraints(*msg);
+    RCLCPP_INFO(LOGGER, "Replacing constraints '%s'", msg.name.c_str());
+    cs.removeConstraints(msg.name);
+    cs.addConstraints(msg);
   }
   else
   {
-    RCLCPP_INFO(LOGGER, "Adding constraints '%s'", msg->name.c_str());
-    cs->addConstraints(*msg);
+    RCLCPP_INFO(LOGGER, "Adding constraints '%s'", msg.name.c_str());
+    cs.addConstraints(msg);
   }
 }
 
-void onRobotState(const moveit_msgs::msg::RobotState::ConstSharedPtr msg, moveit_warehouse::RobotStateStorage* rs)
+void onRobotState(const moveit_msgs::msg::RobotState& msg, moveit_warehouse::RobotStateStorage& rs)
 {
   std::vector<std::string> names;
-  rs->getKnownRobotStates(names);
+  rs.getKnownRobotStates(names);
   std::set<std::string> names_set(names.begin(), names.end());
   std::size_t n = names.size();
   while (names_set.find("S" + boost::lexical_cast<std::string>(n)) != names_set.end())
     n++;
   std::string name = "S" + boost::lexical_cast<std::string>(n);
   RCLCPP_INFO(LOGGER, "Adding robot state '%s'", name.c_str());
-  rs->addRobotState(*msg, name);
+  rs.addRobotState(msg, name);
 }
 
 int main(int argc, char** argv)
@@ -186,16 +186,14 @@ int main(int argc, char** argv)
       RCLCPP_INFO(LOGGER, " * %s", name.c_str());
   }
 
-  psm.addUpdateCallback(std::bind(&onSceneUpdate, &psm, &pss));
+  psm.addUpdateCallback([&](auto&&) { return onSceneUpdate(psm, pss); });
 
-  auto callback1 = [&](moveit_msgs::msg::MotionPlanRequest::ConstSharedPtr msg) -> void {
-    return onMotionPlanRequest(msg, &psm, &pss);
-  };
+  auto callback1 = [&](moveit_msgs::msg::MotionPlanRequest msg) -> void { return onMotionPlanRequest(msg, psm, pss); };
   auto mplan_req_sub =
       node->create_subscription<moveit_msgs::msg::MotionPlanRequest>("motion_plan_request", 100, callback1);
-  auto callback2 = [&](moveit_msgs::msg::Constraints::ConstSharedPtr msg) -> void { return onConstraints(msg, &cs); };
+  auto callback2 = [&](moveit_msgs::msg::Constraints msg) -> void { return onConstraints(msg, cs); };
   auto constr_sub = node->create_subscription<moveit_msgs::msg::Constraints>("constraints", 100, callback2);
-  auto callback3 = [&](moveit_msgs::msg::RobotState::ConstSharedPtr msg) -> void { return onRobotState(msg, &rs); };
+  auto callback3 = [&](moveit_msgs::msg::RobotState msg) -> void { return onRobotState(msg, rs); };
   auto state_sub = node->create_subscription<moveit_msgs::msg::RobotState>("robot_state", 100, callback3);
 
   std::vector<std::string> topics;

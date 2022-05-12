@@ -51,7 +51,7 @@
 TEST(PlanningScene, LoadRestore)
 {
   urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
-  srdf::ModelSharedPtr srdf_model(new srdf::Model());
+  srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
   planning_scene::PlanningScene ps(urdf_model, srdf_model);
   moveit_msgs::msg::PlanningScene ps_msg;
   ps.getPlanningSceneMsg(ps_msg);
@@ -65,14 +65,14 @@ TEST(PlanningScene, LoadRestore)
 TEST(PlanningScene, LoadRestoreDiff)
 {
   urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
-  srdf::ModelSharedPtr srdf_model(new srdf::Model());
+  srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
   auto ps = std::make_shared<planning_scene::PlanningScene>(urdf_model, srdf_model);
 
   collision_detection::World& world = *ps->getWorldNonConst();
 
   /* add one object to ps's world */
   Eigen::Isometry3d id = Eigen::Isometry3d::Identity();
-  world.addToObject("sphere", shapes::ShapeConstPtr(new shapes::Sphere(0.4)), id);
+  world.addToObject("sphere", std::make_shared<const shapes::Sphere>(0.4), id);
 
   /* ps can be written to and set from message */
   moveit_msgs::msg::PlanningScene ps_msg;
@@ -90,7 +90,7 @@ TEST(PlanningScene, LoadRestoreDiff)
   EXPECT_TRUE(next->getWorld()->hasObject("sphere"));
 
   /* object in overlay is only added in overlay */
-  next->getWorldNonConst()->addToObject("sphere_in_next_only", shapes::ShapeConstPtr(new shapes::Sphere(0.5)), id);
+  next->getWorldNonConst()->addToObject("sphere_in_next_only", std::make_shared<const shapes::Sphere>(0.5), id);
   EXPECT_EQ(next->getWorld()->size(), 2u);
   EXPECT_EQ(ps->getWorld()->size(), 1u);
 
@@ -125,13 +125,13 @@ TEST(PlanningScene, LoadRestoreDiff)
 TEST(PlanningScene, MakeAttachedDiff)
 {
   urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
-  srdf::ModelSharedPtr srdf_model(new srdf::Model());
+  srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
   auto ps = std::make_shared<planning_scene::PlanningScene>(urdf_model, srdf_model);
 
   /* add a single object to ps's world */
   collision_detection::World& world = *ps->getWorldNonConst();
   Eigen::Isometry3d id = Eigen::Isometry3d::Identity();
-  world.addToObject("sphere", shapes::ShapeConstPtr(new shapes::Sphere(0.4)), id);
+  world.addToObject("sphere", std::make_shared<const shapes::Sphere>(0.4), id);
 
   /* attach object in diff */
   planning_scene::PlanningScenePtr attached_object_diff_scene = ps->diff();
@@ -164,7 +164,7 @@ TEST(PlanningScene, isStateValid)
   }
 }
 
-TEST(PlanningScene, loadGoodSceneGeometry)
+TEST(PlanningScene, loadGoodSceneGeometryNewFormat)
 {
   moveit::core::RobotModelPtr robot_model = moveit::core::loadTestingRobotModel("pr2");
   auto ps = std::make_shared<planning_scene::PlanningScene>(robot_model->getURDF(), robot_model->getSRDF());
@@ -199,6 +199,32 @@ TEST(PlanningScene, loadGoodSceneGeometry)
   EXPECT_FALSE(ps->getWorld()->hasObject("baz"));  // Sanity check.
 }
 
+TEST(PlanningScene, loadGoodSceneGeometryOldFormat)
+{
+  moveit::core::RobotModelPtr robot_model = moveit::core::loadTestingRobotModel("pr2");
+  auto ps = std::make_shared<planning_scene::PlanningScene>(robot_model->getURDF(), robot_model->getSRDF());
+
+  std::istringstream good_scene_geometry;
+  good_scene_geometry.str("foobar_scene\n"
+                          "* foo\n"
+                          "2\n"
+                          "box\n"
+                          ".77 0.39 0.05\n"
+                          "0 0 0.025\n"
+                          "0 0 0 1\n"
+                          "0.82 0.75 0.60 1\n"
+                          "box\n"
+                          ".77 0.39 0.05\n"
+                          "0 0 1.445\n"
+                          "0 0 0 1\n"
+                          "0.82 0.75 0.60 1\n"
+                          ".\n");
+  EXPECT_TRUE(ps->loadGeometryFromStream(good_scene_geometry));
+  EXPECT_EQ(ps->getName(), "foobar_scene");
+  EXPECT_TRUE(ps->getWorld()->hasObject("foo"));
+  EXPECT_FALSE(ps->getWorld()->hasObject("baz"));  // Sanity check.
+}
+
 TEST(PlanningScene, loadBadSceneGeometry)
 {
   moveit::core::RobotModelPtr robot_model = moveit::core::loadTestingRobotModel("pr2");
@@ -211,6 +237,8 @@ TEST(PlanningScene, loadBadSceneGeometry)
   std::istringstream malformed_scene_geometry;
   malformed_scene_geometry.str("malformed_scene_geometry\n"
                                "* foo\n"
+                               "0 0 0\n"
+                               "0 0 0 1\n"
                                "1\n"
                                "box\n"
                                "2.58 1.36\n" /* Only two tokens; should be 3 */
@@ -249,7 +277,7 @@ TEST_P(CollisionDetectorTests, ClearDiff)
   SCOPED_TRACE(plugin_name);
 
   urdf::ModelInterfaceSharedPtr urdf_model = moveit::core::loadModelInterface("pr2");
-  srdf::ModelSharedPtr srdf_model(new srdf::Model());
+  srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
   // create parent scene
   planning_scene::PlanningScenePtr parent = std::make_shared<planning_scene::PlanningScene>(urdf_model, srdf_model);
 

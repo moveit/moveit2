@@ -758,7 +758,7 @@ void OrientationConstraint::print(std::ostream& out) const
 }
 
 VisibilityConstraint::VisibilityConstraint(const moveit::core::RobotModelConstPtr& model)
-  : KinematicConstraint(model), collision_env_(new collision_detection::CollisionEnvFCL(model))
+  : KinematicConstraint(model), collision_env_(std::make_shared<collision_detection::CollisionEnvFCL>(model))
 {
   type_ = VISIBILITY_CONSTRAINT;
 }
@@ -1117,8 +1117,9 @@ ConstraintEvaluationResult VisibilityConstraint::decide(const moveit::core::Robo
   collision_detection::CollisionRequest req;
   collision_detection::CollisionResult res;
   collision_detection::AllowedCollisionMatrix acm;
-  collision_detection::DecideContactFn fn =
-      std::bind(&VisibilityConstraint::decideContact, this, std::placeholders::_1);
+  collision_detection::DecideContactFn fn = [this](collision_detection::Contact& contact) {
+    return decideContact(contact);
+  };
   acm.setDefaultEntry(std::string("cone"), fn);
 
   req.contacts = true;

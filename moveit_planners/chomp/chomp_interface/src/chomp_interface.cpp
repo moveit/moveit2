@@ -55,14 +55,9 @@ void CHOMPInterface::loadParams()
   node_->get_parameter_or("chomp.obstacle_cost_weight", params_.obstacle_cost_weight_, 1.0);
   node_->get_parameter_or("chomp.learning_rate", params_.learning_rate_, 0.01);
 
-  // node_->param("add_randomness", params_.add_randomness_, false);
   node_->get_parameter_or("chomp.smoothness_cost_velocity", params_.smoothness_cost_velocity_, 0.0);
   node_->get_parameter_or("chomp.smoothness_cost_acceleration", params_.smoothness_cost_acceleration_, 1.0);
   node_->get_parameter_or("chomp.smoothness_cost_jerk", params_.smoothness_cost_jerk_, 0.0);
-  // node_->param("hmc_discretization", params_.hmc_discretization_, 0.01);
-  // node_->param("hmc_stochasticity", params_.hmc_stochasticity_, 0.01);
-  // node_->param("hmc_annealing_factor", params_.hmc_annealing_factor_, 0.99);
-  // node_->param("use_hamiltonian_monte_carlo", params_.use_hamiltonian_monte_carlo_, false);
   node_->get_parameter_or("chomp.ridge_factor", params_.ridge_factor_, 0.0);
   node_->get_parameter_or("chomp.use_pseudo_inverse", params_.use_pseudo_inverse_, false);
   node_->get_parameter_or("chomp.pseudo_inverse_ridge_factor", params_.pseudo_inverse_ridge_factor_, 1e-4);
@@ -70,7 +65,6 @@ void CHOMPInterface::loadParams()
   node_->get_parameter_or("chomp.joint_update_limit", params_.joint_update_limit_, 0.1);
   node_->get_parameter_or("chomp.collision_clearance", params_.min_clearance_, 0.2);
   node_->get_parameter_or("chomp.collision_threshold", params_.collision_threshold_, 0.07);
-  // node_->param("random_jump_amount", params_.random_jump_amount_, 1.0);
   node_->get_parameter_or("chomp.use_stochastic_descent", params_.use_stochastic_descent_, true);
   params_.trajectory_initialization_method_ = "quintic-spline";
   std::string method;

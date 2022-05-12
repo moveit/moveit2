@@ -40,7 +40,7 @@
 
 TEST(WorldDiff, TrackChanges)
 {
-  collision_detection::WorldPtr world(new collision_detection::World);
+  collision_detection::WorldPtr world = std::make_shared<collision_detection::World>();
   collision_detection::WorldDiff diff1(world);
   collision_detection::WorldDiff diff2;
   collision_detection::WorldDiff::const_iterator it;
@@ -49,9 +49,9 @@ TEST(WorldDiff, TrackChanges)
   EXPECT_EQ(diff2.getChanges().size(), 0u);
 
   // Create some shapes
-  shapes::ShapePtr ball(new shapes::Sphere(1.0));
-  shapes::ShapePtr box(new shapes::Box(1, 2, 3));
-  shapes::ShapePtr cyl(new shapes::Cylinder(4, 5));
+  shapes::ShapePtr ball = std::make_shared<shapes::Sphere>(1.0);
+  shapes::ShapePtr box = std::make_shared<shapes::Box>(1, 2, 3);
+  shapes::ShapePtr cyl = std::make_shared<shapes::Cylinder>(4, 5);
 
   world->addToObject("obj1", ball, Eigen::Isometry3d::Identity());
 
@@ -190,16 +190,16 @@ TEST(WorldDiff, TrackChanges)
 
 TEST(WorldDiff, SetWorld)
 {
-  collision_detection::WorldPtr world1(new collision_detection::World);
-  collision_detection::WorldPtr world2(new collision_detection::World);
+  collision_detection::WorldPtr world1 = std::make_shared<collision_detection::World>();
+  collision_detection::WorldPtr world2 = std::make_shared<collision_detection::World>();
   collision_detection::WorldDiff diff1(world1);
   collision_detection::WorldDiff diff1b(world1);
   collision_detection::WorldDiff diff2(world2);
   collision_detection::WorldDiff::const_iterator it;
 
-  shapes::ShapePtr ball(new shapes::Sphere(1.0));
-  shapes::ShapePtr box(new shapes::Box(1, 2, 3));
-  shapes::ShapePtr cyl(new shapes::Cylinder(4, 5));
+  shapes::ShapePtr ball = std::make_shared<shapes::Sphere>(1.0);
+  shapes::ShapePtr box = std::make_shared<shapes::Box>(1, 2, 3);
+  shapes::ShapePtr cyl = std::make_shared<shapes::Cylinder>(4, 5);
 
   world1->addToObject("objA1", ball, Eigen::Isometry3d::Identity());
 

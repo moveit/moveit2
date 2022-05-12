@@ -52,9 +52,9 @@ void DefaultCollisions::linkPairsToSRDF()
   disabled_list.clear();
 
   // Create temp disabled collision
-  srdf::Model::DisabledCollision dc;
+  srdf::Model::CollisionPair dc;
 
-  // copy the data in this class's LinkPairMap datastructure to srdf::Model::DisabledCollision format
+  // copy the data in this class's LinkPairMap datastructure to srdf::Model::CollisionPair format
   for (LinkPairMap::const_iterator pair_it = link_pairs_.begin(); pair_it != link_pairs_.end(); ++pair_it)
   {
     // Only copy those that are actually disabled
@@ -69,41 +69,21 @@ void DefaultCollisions::linkPairsToSRDF()
   srdf_config_->updateRobotModel(moveit_setup_framework::COLLISIONS);  // mark as changed
 }
 
-// ******************************************************************************************
-// Set list of collision link pairs in SRDF; sorted; with optional filter
-// ******************************************************************************************
-
-class SortableDisabledCollision
-{
-public:
-  SortableDisabledCollision(const srdf::Model::DisabledCollision& dc)
-    : dc_(dc), key_(dc.link1_ < dc.link2_ ? (dc.link1_ + "|" + dc.link2_) : (dc.link2_ + "|" + dc.link1_))
-  {
-  }
-  operator const srdf::Model::DisabledCollision&() const
-  {
-    return dc_;
-  }
-  bool operator<(const SortableDisabledCollision& other) const
-  {
-    return key_ < other.key_;
-  }
-
-private:
-  const srdf::Model::DisabledCollision dc_;
-  const std::string key_;
-};
-
 void DefaultCollisions::linkPairsToSRDFSorted(size_t skip_mask)
 {
   auto& disabled_list = srdf_config_->getDisabledCollisions();
   // Create temp disabled collision
-  srdf::Model::DisabledCollision dc;
+  srdf::Model::CollisionPair dc;
 
-  std::set<SortableDisabledCollision> disabled_collisions;
-  disabled_collisions.insert(disabled_list.begin(), disabled_list.end());
+  std::set<srdf::Model::CollisionPair, CollisionPairLess> disabled_collisions;
+  for (auto& p : disabled_list)
+  {
+    if (p.link1_ >= p.link2_)
+      std::swap(p.link1_, p.link2_);  // unify link1, link2 sorting
+    disabled_collisions.insert(p);
+  }
 
-  // copy the data in this class's LinkPairMap datastructure to srdf::Model::DisabledCollision format
+  // copy the data in this class's LinkPairMap datastructure to srdf::Model::CollisionPair format
   for (const std::pair<const std::pair<std::string, std::string>, LinkPairData>& link_pair : link_pairs_)
   {
     // Only copy those that are actually disabled
@@ -114,9 +94,11 @@ void DefaultCollisions::linkPairsToSRDFSorted(size_t skip_mask)
 
       dc.link1_ = link_pair.first.first;
       dc.link2_ = link_pair.first.second;
+      if (dc.link1_ >= dc.link2_)
+        std::swap(dc.link1_, dc.link2_);
       dc.reason_ = moveit_setup_srdf_plugins::disabledReasonToString(link_pair.second.reason);
 
-      disabled_collisions.insert(SortableDisabledCollision(dc));
+      disabled_collisions.insert(dc);
     }
   }
 
@@ -164,7 +146,8 @@ void DefaultCollisions::startGenerationThread(unsigned int num_trials, double mi
   progress_ = 0;
 
   // start worker thread
-  worker_ = boost::thread(std::bind(&DefaultCollisions::generateCollisionTable, this, num_trials, min_frac, verbose));
+  worker_ =
+      boost::thread([this, num_trials, min_frac, verbose] { generateCollisionTable(num_trials, min_frac, verbose); });
 }
 
 // ******************************************************************************************

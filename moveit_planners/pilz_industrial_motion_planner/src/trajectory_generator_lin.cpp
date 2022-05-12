@@ -199,7 +199,8 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorLIN::setPathLIN(const Eigen::Affin
                     planner_limits_.getCartesianLimits().getMaxRotationalVelocity();
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
 
-  return std::unique_ptr<KDL::Path>(new KDL::Path_Line(kdl_start_pose, kdl_goal_pose, rot_interpo, eqradius, true));
+  return std::unique_ptr<KDL::Path>(
+      std::make_unique<KDL::Path_Line>(kdl_start_pose, kdl_goal_pose, rot_interpo, eqradius, true));
 }
 
 }  // namespace pilz_industrial_motion_planner

@@ -160,7 +160,7 @@ public:
     // Status sub (we need this to check that we've started / stopped)
     sub_servo_status_ = node_->create_subscription<std_msgs::msg::Int8>(
         resolveServoTopicName(servo_parameters_->status_topic), rclcpp::SystemDefaultsQoS(),
-        std::bind(&ServoFixture::statusCB, this, std::placeholders::_1));
+        [this](const std_msgs::msg::Int8::SharedPtr msg) { return statusCB(msg); });
     return true;
   }
 
@@ -234,7 +234,7 @@ public:
   {
     sub_collision_scale_ = node_->create_subscription<std_msgs::msg::Float64>(
         resolveServoTopicName("~/collision_velocity_scale"), rclcpp::SystemDefaultsQoS(),
-        std::bind(&ServoFixture::collisionScaleCB, this, std::placeholders::_1));
+        [this](const std_msgs::msg::Float64::SharedPtr msg) { return collisionScaleCB(msg); });
     return true;
   }
 
@@ -244,14 +244,14 @@ public:
     {
       sub_trajectory_cmd_output_ = node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
           resolveServoTopicName(servo_parameters_->command_out_topic), rclcpp::SystemDefaultsQoS(),
-          std::bind(&ServoFixture::trajectoryCommandCB, this, std::placeholders::_1));
+          [this](const trajectory_msgs::msg::JointTrajectory::SharedPtr msg) { return trajectoryCommandCB(msg); });
       return true;
     }
     else if (command_type == "std_msgs/Float64MultiArray")
     {
       sub_array_cmd_output_ = node_->create_subscription<std_msgs::msg::Float64MultiArray>(
           resolveServoTopicName(servo_parameters_->command_out_topic), rclcpp::SystemDefaultsQoS(),
-          std::bind(&ServoFixture::arrayCommandCB, this, std::placeholders::_1));
+          [this](const std_msgs::msg::Float64MultiArray::SharedPtr msg) { return arrayCommandCB(msg); });
       return true;
     }
     else
@@ -265,7 +265,7 @@ public:
   {
     sub_joint_state_ = node_->create_subscription<sensor_msgs::msg::JointState>(
         resolveServoTopicName(servo_parameters_->joint_topic), rclcpp::SystemDefaultsQoS(),
-        std::bind(&ServoFixture::jointStateCB, this, std::placeholders::_1));
+        [this](const sensor_msgs::msg::JointState::SharedPtr msg) { return jointStateCB(msg); });
     return true;
   }
 

@@ -41,7 +41,7 @@ namespace collision_detection_bullet
 {
 BulletCastBVHManagerPtr BulletCastBVHManager::clone() const
 {
-  BulletCastBVHManagerPtr manager(new BulletCastBVHManager());
+  BulletCastBVHManagerPtr manager = std::make_shared<BulletCastBVHManager>();
 
   for (const std::pair<const std::string, collision_detection_bullet::CollisionObjectWrapperPtr>& cow : link2cow_)
   {

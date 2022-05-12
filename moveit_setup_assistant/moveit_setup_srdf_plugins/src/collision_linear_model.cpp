@@ -252,18 +252,13 @@ bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& s
 }
 
 // define a fallback comparison operator for QVariants
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-namespace
-{
-bool operator<(const QVariant& left, const QVariant& right)
+bool compareVariants(const QVariant& left, const QVariant& right)
 {
   if (left.userType() == QVariant::Type::Int)
     return left.toInt() < right.toInt();
   else
     return left.toString() < right.toString();
 }
-}  // namespace
-#endif
 
 bool SortFilterProxyModel::lessThan(const QModelIndex& src_left, const QModelIndex& src_right) const
 {
@@ -281,7 +276,7 @@ bool SortFilterProxyModel::lessThan(const QModelIndex& src_left, const QModelInd
     if (value_left == value_right)
       continue;
 
-    bool smaller = (value_left < value_right);
+    bool smaller = compareVariants(value_left, value_right);
     if (sort_orders_[i] == Qt::DescendingOrder)
       smaller = !smaller;
     return smaller;

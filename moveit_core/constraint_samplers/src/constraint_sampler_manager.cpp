@@ -107,7 +107,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
     // if we have constrained every joint, then we just use a sampler using these constraints
     if (full_coverage)
     {
-      JointConstraintSamplerPtr sampler(new JointConstraintSampler(scene, jmg->getName()));
+      JointConstraintSamplerPtr sampler = std::make_shared<JointConstraintSampler>(scene, jmg->getName());
       if (sampler->configure(jc))
       {
         RCLCPP_DEBUG(LOGGER, "Allocated a sampler satisfying joint constraints for group '%s'", jmg->getName().c_str());
@@ -119,7 +119,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
         // sampler has been specified.
         if (!jc.empty())
     {
-      JointConstraintSamplerPtr sampler(new JointConstraintSampler(scene, jmg->getName()));
+      JointConstraintSamplerPtr sampler = std::make_shared<JointConstraintSampler>(scene, jmg->getName());
       if (sampler->configure(jc))
       {
         RCLCPP_DEBUG(LOGGER,
@@ -166,7 +166,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
           if (pc->configure(constr.position_constraints[p], scene->getTransforms()) &&
               oc->configure(constr.orientation_constraints[o], scene->getTransforms()))
           {
-            IKConstraintSamplerPtr iks(new IKConstraintSampler(scene, jmg->getName()));
+            IKConstraintSamplerPtr iks = std::make_shared<IKConstraintSampler>(scene, jmg->getName());
             if (iks->configure(IKSamplingPose(pc, oc)))
             {
               bool use = true;
@@ -202,7 +202,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
           new kinematic_constraints::PositionConstraint(scene->getRobotModel()));
       if (pc->configure(position_constraint, scene->getTransforms()))
       {
-        IKConstraintSamplerPtr iks(new IKConstraintSampler(scene, jmg->getName()));
+        IKConstraintSamplerPtr iks = std::make_shared<IKConstraintSampler>(scene, jmg->getName());
         if (iks->configure(IKSamplingPose(pc)))
         {
           bool use = true;
@@ -232,7 +232,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
           new kinematic_constraints::OrientationConstraint(scene->getRobotModel()));
       if (oc->configure(orientation_constraint, scene->getTransforms()))
       {
-        IKConstraintSamplerPtr iks(new IKConstraintSampler(scene, jmg->getName()));
+        IKConstraintSamplerPtr iks = std::make_shared<IKConstraintSampler>(scene, jmg->getName());
         if (iks->configure(IKSamplingPose(oc)))
         {
           bool use = true;
@@ -258,7 +258,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
       else
       {
         samplers.push_back(used_l.begin()->second);
-        return ConstraintSamplerPtr(new UnionConstraintSampler(scene, jmg->getName(), samplers));
+        return std::make_shared<UnionConstraintSampler>(scene, jmg->getName(), samplers);
       }
     }
     else if (used_l.size() > 1)
@@ -284,7 +284,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
       else
       {
         samplers.push_back(iks);
-        return ConstraintSamplerPtr(new UnionConstraintSampler(scene, jmg->getName(), samplers));
+        return std::make_shared<UnionConstraintSampler>(scene, jmg->getName(), samplers);
       }
     }
   }
@@ -343,7 +343,7 @@ ConstraintSamplerPtr ConstraintSamplerManager::selectDefaultSampler(const planni
     {
       RCLCPP_DEBUG(LOGGER, "Constructing sampler for group '%s' as a union of %zu samplers", jmg->getName().c_str(),
                    samplers.size());
-      return ConstraintSamplerPtr(new UnionConstraintSampler(scene, jmg->getName(), samplers));
+      return std::make_shared<UnionConstraintSampler>(scene, jmg->getName(), samplers);
     }
   }
 

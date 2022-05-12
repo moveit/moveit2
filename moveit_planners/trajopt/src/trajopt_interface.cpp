@@ -60,7 +60,7 @@ namespace trajopt_interface
 {
 TrajOptInterface::TrajOptInterface(const ros::NodeHandle& nh) : nh_(nh), name_("TrajOptInterface")
 {
-  trajopt_problem_ = TrajOptProblemPtr(new TrajOptProblem);
+  trajopt_problem_ = std::make_shared<TrajOptProblem>();
   setDefaultTrajOPtParams();
 
   // TODO: callbacks should be defined by the user
@@ -87,7 +87,7 @@ bool TrajOptInterface::solve(const planning_scene::PlanningSceneConstPtr& planni
   bool robot_model_ok = static_cast<bool>(robot_model);
   if (!robot_model_ok)
     ROS_ERROR_STREAM_NAMED(name_, "robot model is not loaded properly");
-  moveit::core::RobotStatePtr current_state(new moveit::core::RobotState(robot_model));
+  auto current_state = std::make_shared<moveit::core::RobotState>(robot_model);
   *current_state = planning_scene->getCurrentState();
   const moveit::core::JointModelGroup* joint_model_group = current_state->getJointModelGroup(req.group_name);
   if (joint_model_group == nullptr)
@@ -151,7 +151,7 @@ bool TrajOptInterface::solve(const planning_scene::PlanningSceneConstPtr& planni
   ROS_INFO(" ======================================= Cartesian Constraints");
   if (!req.goal_constraints[0].position_constraints.empty() && !req.goal_constraints[0].orientation_constraints.empty())
   {
-    CartPoseTermInfoPtr cart_goal_pos(new CartPoseTermInfo);
+    CartPoseTermInfoPtr cart_goal_pos = std::make_shared<CartPoseTermInfo>();
 
     // TODO: Feed cart_goal_pos with request information and the needed param to the setup.yaml file
     // TODO: Multiple Cartesian constraints
@@ -177,7 +177,7 @@ bool TrajOptInterface::solve(const planning_scene::PlanningSceneConstPtr& planni
   ROS_INFO(" ======================================= Constraints from request goal_constraints");
   for (auto goal_cnt : req.goal_constraints)
   {
-    JointPoseTermInfoPtr joint_pos_term(new JointPoseTermInfo);
+    JointPoseTermInfoPtr joint_pos_term = std::make_shared<JointPoseTermInfo>();
     // When using MotionPlanning Display in RViz, the created request has no name for the constriant
     setJointPoseTermInfoParams(joint_pos_term, (goal_cnt.name != "") ? goal_cnt.name : "goal_tmp");
 
@@ -192,7 +192,7 @@ bool TrajOptInterface::solve(const planning_scene::PlanningSceneConstPtr& planni
 
   ROS_INFO(" ======================================= Constraints from request start_state");
   // add the start pos from request as a constraint
-  JointPoseTermInfoPtr joint_start_pos(new JointPoseTermInfo);
+  auto joint_start_pos = std::make_shared<JointPoseTermInfo>();
 
   joint_start_pos->targets = start_joint_values;
   setJointPoseTermInfoParams(joint_start_pos, "start_pos");
@@ -200,7 +200,7 @@ bool TrajOptInterface::solve(const planning_scene::PlanningSceneConstPtr& planni
 
   ROS_INFO(" ======================================= Velocity Constraints, hard-coded");
   // TODO: should be defined by user, its parameters should be added to setup.yaml
-  JointVelTermInfoPtr joint_vel(new JointVelTermInfo);
+  auto joint_vel = std::make_shared<JointVelTermInfo>();
 
   joint_vel->coeffs = std::vector<double>(dof, 5.0);
   joint_vel->targets = std::vector<double>(dof, 0.0);

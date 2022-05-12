@@ -229,7 +229,7 @@ protected:
         "</robot>";
 
     urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(MODEL2);
-    srdf::ModelSharedPtr srdf_model(new srdf::Model());
+    srdf::ModelSharedPtr srdf_model = std::make_shared<srdf::Model>();
     srdf_model->initString(*urdf_model, SMODEL2);
     robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
   }
@@ -247,7 +247,7 @@ std::size_t generateTestTraj(std::vector<std::shared_ptr<moveit::core::RobotStat
 {
   traj.clear();
 
-  std::shared_ptr<moveit::core::RobotState> robot_state(new moveit::core::RobotState(robot_model_));
+  auto robot_state = std::make_shared<moveit::core::RobotState>(robot_model_);
   robot_state->setToDefaultValues();
   double ja, jc;
 
