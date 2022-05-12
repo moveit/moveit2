@@ -72,7 +72,8 @@ public:
 
   /// Load SRDF File
   void loadSRDFFile(const std::string& package_path, const std::string& relative_path);
-  void loadSRDFFile(const std::string& srdf_file_path);
+  void loadSRDFFile(const std::string& srdf_file_path,
+                    const std::vector<std::string>& xacro_args = std::vector<std::string>());
 
   moveit::core::RobotModelPtr getRobotModel() const
   {
@@ -88,9 +89,16 @@ public:
 
   std::vector<std::string> getLinkNames() const;
 
-  std::vector<srdf::Model::DisabledCollision>& getDisabledCollisions()
+  void clearCollisionData()
   {
-    return srdf_.disabled_collisions_;
+    srdf_.no_default_collision_links_.clear();
+    srdf_.enabled_collision_pairs_.clear();
+    srdf_.disabled_collision_pairs_.clear();
+  }
+
+  std::vector<srdf::Model::CollisionPair>& getDisabledCollisions()
+  {
+    return srdf_.disabled_collision_pairs_;
   }
 
   std::vector<srdf::Model::EndEffector>& getEndEffectors()

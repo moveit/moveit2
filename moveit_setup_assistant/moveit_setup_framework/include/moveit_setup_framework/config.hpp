@@ -137,7 +137,7 @@ public:
    *
    * @param[out] packages Names of ROS packages
    */
-  virtual void collectDependencies(std::set<std::string>& packages) const
+  virtual void collectDependencies(std::set<std::string>& /*packages*/) const
   {
   }
 

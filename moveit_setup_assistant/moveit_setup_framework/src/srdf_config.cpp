@@ -81,14 +81,11 @@ void SRDFConfig::loadSRDFFile(const std::string& package_path, const std::string
 // ******************************************************************************************
 // Load SRDF File to Parameter Server
 // ******************************************************************************************
-void SRDFConfig::loadSRDFFile(const std::string& srdf_file_path)
+void SRDFConfig::loadSRDFFile(const std::string& srdf_file_path, const std::vector<std::string>& xacro_args)
 {
   srdf_path_ = srdf_file_path;
 
   loadURDFModel();
-
-  // empty
-  const std::vector<std::string> xacro_args;
 
   std::string srdf_string;
   if (!rdf_loader::RDFLoader::loadXmlFileToString(srdf_string, srdf_path_, xacro_args))
