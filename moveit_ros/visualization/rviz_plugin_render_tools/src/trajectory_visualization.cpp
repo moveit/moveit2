@@ -180,7 +180,7 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
 
   trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
       trajectory_topic_property_->getStdString(), 2,
-      std::bind(&TrajectoryVisualization::incomingDisplayTrajectory, this, _1));
+      [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg) { return incomingDisplayTrajectory(msg); });
 }
 
 void TrajectoryVisualization::setName(const QString& name)
@@ -289,7 +289,9 @@ void TrajectoryVisualization::changedTrajectoryTopic()
   {
     trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
         trajectory_topic_property_->getStdString(), 2,
-        std::bind(&TrajectoryVisualization::incomingDisplayTrajectory, this, _1));
+        [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg) {
+          return incomingDisplayTrajectory(msg);
+        });
   }
 }
 
@@ -537,7 +539,7 @@ void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::
 
   trajectory_message_to_display_.reset();
 
-  robot_trajectory::RobotTrajectoryPtr t(new robot_trajectory::RobotTrajectory(robot_model_, ""));
+  auto t = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, "");
   try
   {
     for (std::size_t i = 0; i < msg->trajectory.size(); ++i)
@@ -621,6 +623,12 @@ void TrajectoryVisualization::trajectorySliderPanelVisibilityChange(bool enable)
     trajectory_slider_panel_->onEnable();
   else
     trajectory_slider_panel_->onDisable();
+}
+
+void TrajectoryVisualization::clearRobotModel()
+{
+  robot_model_.reset();
+  robot_state_.reset();
 }
 
 }  // namespace moveit_rviz_plugin

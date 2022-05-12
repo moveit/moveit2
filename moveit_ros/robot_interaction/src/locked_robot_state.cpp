@@ -39,13 +39,13 @@
 #include <moveit/robot_interaction/locked_robot_state.h>
 
 robot_interaction::LockedRobotState::LockedRobotState(const moveit::core::RobotState& state)
-  : state_(new moveit::core::RobotState(state))
+  : state_(std::make_shared<moveit::core::RobotState>(state))
 {
   state_->update();
 }
 
 robot_interaction::LockedRobotState::LockedRobotState(const moveit::core::RobotModelPtr& model)
-  : state_(new moveit::core::RobotState(model))
+  : state_(std::make_shared<moveit::core::RobotState>(model))
 {
   state_->setToDefaultValues();
   state_->update();

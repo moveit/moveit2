@@ -39,6 +39,15 @@
 #include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
 #include <boost/thread/thread.hpp>
 
+// less operation for two CollisionPairs
+struct CollisionPairLess
+{
+  bool operator()(const srdf::Model::CollisionPair& left, const srdf::Model::CollisionPair& right) const
+  {
+    return left.link1_ < right.link1_ && left.link2_ < right.link2_;
+  }
+};
+
 namespace moveit_setup_srdf_plugins
 {
 class DefaultCollisions : public SRDFStep

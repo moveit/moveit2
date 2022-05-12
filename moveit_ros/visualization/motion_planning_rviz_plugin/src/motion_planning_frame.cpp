@@ -228,7 +228,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   //      semantic_world_.reset();
   //    if (semantic_world_)
   //    {
-  //      semantic_world_->addTableCallback(std::bind(&MotionPlanningFrame::updateTables, this));
+  //      semantic_world_->addTableCallback([this] { updateTables(); });
   //    }
   //  }
   //  catch (std::exception& ex)
@@ -267,21 +267,28 @@ void MotionPlanningFrame::allowExternalProgramCommunication(bool enable)
   {
     using std::placeholders::_1;
     plan_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/plan", 1, std::bind(&MotionPlanningFrame::remotePlanCallback, this, _1));
+        "/rviz/moveit/plan", 1,
+        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remotePlanCallback(msg); });
     execute_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/execute", 1, std::bind(&MotionPlanningFrame::remoteExecuteCallback, this, _1));
+        "/rviz/moveit/execute", 1,
+        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remoteExecuteCallback(msg); });
     stop_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/stop", 1, std::bind(&MotionPlanningFrame::remoteStopCallback, this, _1));
+        "/rviz/moveit/stop", 1,
+        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remoteStopCallback(msg); });
     update_start_state_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/update_start_state", 1, std::bind(&MotionPlanningFrame::remoteUpdateStartStateCallback, this, _1));
+        "/rviz/moveit/update_start_state", 1,
+        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remoteUpdateStartStateCallback(msg); });
     update_goal_state_subscriber_ = node_->create_subscription<std_msgs::msg::Empty>(
-        "/rviz/moveit/update_goal_state", 1, std::bind(&MotionPlanningFrame::remoteUpdateGoalStateCallback, this, _1));
+        "/rviz/moveit/update_goal_state", 1,
+        [this](const std_msgs::msg::Empty::ConstSharedPtr msg) { return remoteUpdateGoalStateCallback(msg); });
     update_custom_start_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::RobotState>(
-        "/rviz/moveit/update_custom_start_state", 1,
-        std::bind(&MotionPlanningFrame::remoteUpdateCustomStartStateCallback, this, _1));
+        "/rviz/moveit/update_custom_start_state", 1, [this](const moveit_msgs::msg::RobotState::ConstSharedPtr msg) {
+          return remoteUpdateCustomStartStateCallback(msg);
+        });
     update_custom_goal_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::RobotState>(
-        "/rviz/moveit/update_custom_goal_state", 1,
-        std::bind(&MotionPlanningFrame::remoteUpdateCustomGoalStateCallback, this, _1));
+        "/rviz/moveit/update_custom_goal_state", 1, [this](const moveit_msgs::msg::RobotState::ConstSharedPtr msg) {
+          return remoteUpdateCustomGoalStateCallback(msg);
+        });
   }
   else
   {  // disable
@@ -356,13 +363,12 @@ void MotionPlanningFrame::changePlanningGroupHelper()
   if (!planning_display_->getPlanningSceneMonitor())
     return;
 
-  planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::fillStateSelectionOptions, this));
+  planning_display_->addMainLoopJob([this] { fillStateSelectionOptions(); });
   planning_display_->addMainLoopJob([this]() { populateConstraintsList(std::vector<std::string>()); });
 
   const moveit::core::RobotModelConstPtr& robot_model = planning_display_->getRobotModel();
   std::string group = planning_display_->getCurrentPlanningGroup();
-  planning_display_->addMainLoopJob(
-      std::bind(&MotionPlanningParamWidget::setGroupName, ui_->planner_param_treeview, group));
+  planning_display_->addMainLoopJob([&view = *ui_->planner_param_treeview, group] { view.setGroupName(group); });
   planning_display_->addMainLoopJob(
       [=]() { ui_->planning_group_combo_box->setCurrentText(QString::fromStdString(group)); });
 
@@ -395,8 +401,7 @@ void MotionPlanningFrame::changePlanningGroupHelper()
     {
       RCLCPP_ERROR(LOGGER, "%s", ex.what());
     }
-    planning_display_->addMainLoopJob(
-        std::bind(&MotionPlanningParamWidget::setMoveGroup, ui_->planner_param_treeview, move_group_));
+    planning_display_->addMainLoopJob([&view = *ui_->planner_param_treeview, this] { view.setMoveGroup(move_group_); });
     if (move_group_)
     {
       move_group_->allowLooking(ui_->allow_looking->isChecked());
@@ -405,7 +410,7 @@ void MotionPlanningFrame::changePlanningGroupHelper()
       planning_display_->addMainLoopJob([=]() { ui_->use_cartesian_path->setEnabled(has_unique_endeffector); });
       std::vector<moveit_msgs::msg::PlannerInterfaceDescription> desc;
       if (move_group_->getInterfaceDescriptions(desc))
-        planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::populatePlannersList, this, desc));
+        planning_display_->addMainLoopJob([this, desc] { populatePlannersList(desc); });
       planning_display_->addBackgroundJob([this]() { populateConstraintsList(); }, "populateConstraintsList");
 
       if (first_time_)
@@ -420,17 +425,22 @@ void MotionPlanningFrame::changePlanningGroupHelper()
         // This ensures saved UI settings applied after planning_display_ is ready
         planning_display_->useApproximateIK(ui_->approximate_ik->isChecked());
         if (ui_->allow_external_program->isChecked())
-          planning_display_->addMainLoopJob(
-              std::bind(&MotionPlanningFrame::allowExternalProgramCommunication, this, true));
+          planning_display_->addMainLoopJob([this] { allowExternalProgramCommunication(true); });
       }
     }
   }
 }
 
+void MotionPlanningFrame::clearRobotModel()
+{
+  ui_->planner_param_treeview->setMoveGroup(moveit::planning_interface::MoveGroupInterfacePtr());
+  joints_tab_->clearRobotModel();
+  move_group_.reset();
+}
+
 void MotionPlanningFrame::changePlanningGroup()
 {
-  planning_display_->addBackgroundJob(std::bind(&MotionPlanningFrame::changePlanningGroupHelper, this),
-                                      "Frame::changePlanningGroup");
+  planning_display_->addBackgroundJob([this] { changePlanningGroupHelper(); }, "Frame::changePlanningGroup");
   joints_tab_->changePlanningGroup(planning_display_->getCurrentPlanningGroup(),
                                    planning_display_->getQueryStartStateHandler(),
                                    planning_display_->getQueryGoalStateHandler());
@@ -439,7 +449,7 @@ void MotionPlanningFrame::changePlanningGroup()
 void MotionPlanningFrame::sceneUpdate(planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type)
 {
   if (update_type & planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY)
-    planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::populateCollisionObjectsList, this));
+    planning_display_->addMainLoopJob([this] { populateCollisionObjectsList(); });
 }
 
 void MotionPlanningFrame::addSceneObject()
@@ -516,11 +526,12 @@ void MotionPlanningFrame::addSceneObject()
   }
   setLocalSceneEdited();
 
-  planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::populateCollisionObjectsList, this));
+  planning_display_->addMainLoopJob([this] { populateCollisionObjectsList(); });
 
   // Automatically select the inserted object so that its IM is displayed
-  planning_display_->addMainLoopJob(
-      std::bind(&MotionPlanningFrame::setItemSelectionInList, this, shape_name, true, ui_->collision_objects_list));
+  planning_display_->addMainLoopJob([this, shape_name, list_widget = ui_->collision_objects_list] {
+    setItemSelectionInList(shape_name, true, list_widget);
+  });
 
   planning_display_->queueRenderSceneGeometry();
 }
@@ -599,7 +610,10 @@ void MotionPlanningFrame::initFromMoveGroupNS()
   clear_octomap_service_client_ = node_->create_client<std_srvs::srv::Empty>(move_group::CLEAR_OCTOMAP_SERVICE_NAME);
 
   object_recognition_subscriber_ = node_->create_subscription<object_recognition_msgs::msg::RecognizedObjectArray>(
-      "recognized_object_array", 1, std::bind(&MotionPlanningFrame::listenDetectedObjects, this, std::placeholders::_1));
+      "recognized_object_array", 1,
+      [this](const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr msg) {
+        return listenDetectedObjects(msg);
+      });
 
   planning_scene_publisher_ = node_->create_publisher<moveit_msgs::msg::PlanningScene>("planning_scene", 1);
   planning_scene_world_publisher_ =

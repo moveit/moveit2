@@ -281,7 +281,7 @@ protected:
   bool getEnvironmentProximityGradients(const distance_field::DistanceFieldConstPtr& env_distance_field,
                                         GroupStateRepresentationPtr& gsr) const;
 
-  static void notifyObjectChange(CollisionEnvDistanceField* self, const ObjectConstPtr& obj, World::Action action);
+  void notifyObjectChange(const ObjectConstPtr& obj, World::Action action);
 
   // Logger
   static const rclcpp::Logger LOGGER;

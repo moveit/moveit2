@@ -111,7 +111,7 @@ void PlanComponentsBuilder::append(const planning_scene::PlanningSceneConstPtr& 
   {
     traj_tail_ = other;
     // Reserve space in container for new trajectory
-    traj_cont_.emplace_back(new robot_trajectory::RobotTrajectory(model_, other->getGroupName()));
+    traj_cont_.emplace_back(std::make_shared<robot_trajectory::RobotTrajectory>(model_, other->getGroupName()));
     return;
   }
 
@@ -121,7 +121,7 @@ void PlanComponentsBuilder::append(const planning_scene::PlanningSceneConstPtr& 
     appendWithStrictTimeIncrease(*(traj_cont_.back()), *traj_tail_);
     traj_tail_ = other;
     // Create new container element
-    traj_cont_.emplace_back(new robot_trajectory::RobotTrajectory(model_, other->getGroupName()));
+    traj_cont_.emplace_back(std::make_shared<robot_trajectory::RobotTrajectory>(model_, other->getGroupName()));
     return;
   }
 

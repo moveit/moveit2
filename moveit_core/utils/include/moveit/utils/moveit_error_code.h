@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2012, Willow Garage, Inc.
+ *  Copyright (c) 2021, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of the copyright holder nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -34,36 +34,43 @@
 
 #pragma once
 
-#include <sbpl/headers.h>
-#include <planning_scene/planning_scene.h>
-#include <moveit_msgs/GetMotionPlan.h>
-#include <sbpl_interface/environment_chain3d.h>
+#include <moveit_msgs/msg/move_it_error_codes.h>
 
-namespace sbpl_interface
+namespace moveit
 {
-class SBPLInterface
+namespace core
+{
+/**
+ * @brief a wrapper around moveit_msgs::MoveItErrorCodes to make it easier to return an error code message from a function
+ */
+class MoveItErrorCode : public moveit_msgs::msg::MoveItErrorCodes
 {
 public:
-  SBPLInterface(const planning_models::RobotModelConstPtr& robot_model)
+  MoveItErrorCode()
   {
+    val = 0;
   }
-  virtual ~SBPLInterface()
+  MoveItErrorCode(int code)
   {
+    val = code;
   }
-
-  bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const moveit_msgs::srv::GetMotionPlan::Request& req, moveit_msgs::srv::GetMotionPlan::Response& res,
-             const PlanningParameters& params) const;
-
-  const PlanningStatistics& getLastPlanningStatistics() const
+  MoveItErrorCode(const moveit_msgs::msg::MoveItErrorCodes& code)
   {
-    return last_planning_statistics_;
+    val = code.val;
   }
-
-protected:
-  PlanningStatistics last_planning_statistics_;
-
-  // DummyEnvironment* dummy_env_;
-  // SBPLPlanner *planner_;
+  explicit operator bool() const
+  {
+    return val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  }
+  bool operator==(const int c) const
+  {
+    return val == c;
+  }
+  bool operator!=(const int c) const
+  {
+    return val != c;
+  }
 };
-}  // namespace sbpl_interface
+
+}  // namespace core
+}  // namespace moveit

@@ -103,9 +103,10 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   , smoothing_loader_("moveit_core", "online_signal_smoothing::SmoothingBaseClass")
 {
   // Register callback for changes in robot_link_command_frame
-  bool callback_success = parameters_->registerSetParameterCallback(
-      parameters->ns + ".robot_link_command_frame",
-      std::bind(&ServoCalcs::robotLinkCommandFrameCallback, this, std::placeholders::_1));
+  bool callback_success = parameters_->registerSetParameterCallback(parameters->ns + ".robot_link_command_frame",
+                                                                    [this](const rclcpp::Parameter& parameter) {
+                                                                      return robotLinkCommandFrameCallback(parameter);
+                                                                    });
   if (!callback_success)
   {
     throw std::runtime_error("Failed to register setParameterCallback");
@@ -121,32 +122,39 @@ ServoCalcs::ServoCalcs(rclcpp::Node::SharedPtr node,
   }
 
   // Subscribe to command topics
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-  twist_stamped_sub_ =
-      node_->create_subscription<geometry_msgs::msg::TwistStamped>(parameters_->cartesian_command_in_topic,
-                                                                   rclcpp::SystemDefaultsQoS(),
-                                                                   std::bind(&ServoCalcs::twistStampedCB, this, _1));
+  twist_stamped_sub_ = node_->create_subscription<geometry_msgs::msg::TwistStamped>(
+      parameters_->cartesian_command_in_topic, rclcpp::SystemDefaultsQoS(),
+      [this](const geometry_msgs::msg::TwistStamped::SharedPtr msg) { return twistStampedCB(msg); });
 
   joint_cmd_sub_ = node_->create_subscription<control_msgs::msg::JointJog>(
-      parameters_->joint_command_in_topic, rclcpp::SystemDefaultsQoS(), std::bind(&ServoCalcs::jointCmdCB, this, _1));
+      parameters_->joint_command_in_topic, rclcpp::SystemDefaultsQoS(),
+      [this](const control_msgs::msg::JointJog::SharedPtr msg) { return jointCmdCB(msg); });
 
   // ROS Server for allowing drift in some dimensions
   drift_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeDriftDimensions>(
-      "~/change_drift_dimensions", std::bind(&ServoCalcs::changeDriftDimensions, this, _1, _2));
+      "~/change_drift_dimensions", [this](const std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Request> req,
+                                          std::shared_ptr<moveit_msgs::srv::ChangeDriftDimensions::Response> res) {
+        return changeDriftDimensions(req, res);
+      });
 
   // ROS Server for changing the control dimensions
   control_dimensions_server_ = node_->create_service<moveit_msgs::srv::ChangeControlDimensions>(
-      "~/change_control_dimensions", std::bind(&ServoCalcs::changeControlDimensions, this, _1, _2));
+      "~/change_control_dimensions",
+      [this](const std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Request> req,
+             std::shared_ptr<moveit_msgs::srv::ChangeControlDimensions::Response> res) {
+        return changeControlDimensions(req, res);
+      });
 
   // ROS Server to reset the status, e.g. so the arm can move again after a collision
   reset_servo_status_ = node_->create_service<std_srvs::srv::Empty>(
-      "~/reset_servo_status", std::bind(&ServoCalcs::resetServoStatus, this, _1, _2));
+      "~/reset_servo_status",
+      [this](const std::shared_ptr<std_srvs::srv::Empty::Request> req,
+             std::shared_ptr<std_srvs::srv::Empty::Response> res) { return resetServoStatus(req, res); });
 
   // Subscribe to the collision_check topic
-  collision_velocity_scale_sub_ =
-      node_->create_subscription<std_msgs::msg::Float64>("~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
-                                                         std::bind(&ServoCalcs::collisionVelocityScaleCB, this, _1));
+  collision_velocity_scale_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
+      "~/collision_velocity_scale", rclcpp::SystemDefaultsQoS(),
+      [this](const std_msgs::msg::Float64::SharedPtr msg) { return collisionVelocityScaleCB(msg); });
 
   // Publish freshly-calculated joints to the robot.
   // Put the outgoing msg in the right format (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
@@ -626,7 +634,8 @@ bool ServoCalcs::internalServoUpdate(Eigen::ArrayXd& delta_theta,
   updated_filters_ = true;
 
   // Enforce SRDF velocity limits
-  enforceVelocityLimits(joint_model_group_, parameters_->publish_period, internal_joint_state_);
+  enforceVelocityLimits(joint_model_group_, parameters_->publish_period, internal_joint_state_,
+                        parameters_->override_velocity_scaling_factor);
 
   // Enforce SRDF position limits, might halt if needed, set prev_vel to 0
   const auto joints_to_halt = enforcePositionLimits(internal_joint_state_);

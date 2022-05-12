@@ -115,7 +115,7 @@ public:
 
   moveit_controller_manager::MoveItControllerHandlePtr getControllerHandle(const std::string& name) override
   {
-    return moveit_controller_manager::MoveItControllerHandlePtr(new TestMoveItControllerHandle(name));
+    return std::make_shared<TestMoveItControllerHandle>(name);
   }
 
   void getControllersList(std::vector<std::string>& names) override

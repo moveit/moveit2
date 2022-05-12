@@ -44,9 +44,9 @@ TEST(World, AddRemoveShape)
   collision_detection::World world;
 
   // Create some shapes
-  shapes::ShapePtr ball(new shapes::Sphere(1.0));
-  shapes::ShapePtr box(new shapes::Box(1, 2, 3));
-  shapes::ShapePtr cyl(new shapes::Cylinder(4, 5));
+  shapes::ShapePtr ball = std::make_shared<shapes::Sphere>(1.0);
+  shapes::ShapePtr box = std::make_shared<shapes::Box>(1, 2, 3);
+  shapes::ShapePtr cyl = std::make_shared<shapes::Cylinder>(4, 5);
 
   EXPECT_EQ(1, ball.use_count());
 
@@ -222,12 +222,12 @@ struct TestAction
 };
 
 /* notification callback */
-static void TrackChangesNotify(TestAction* ta, const collision_detection::World::ObjectConstPtr& obj,
+static void TrackChangesNotify(TestAction& ta, const collision_detection::World::ObjectConstPtr& obj,
                                collision_detection::World::Action action)
 {
-  ta->obj_ = *obj;
-  ta->action_ = action;
-  ta->cnt_++;
+  ta.obj_ = *obj;
+  ta.action_ = action;
+  ta.cnt_++;
 }
 
 TEST(World, TrackChanges)
@@ -236,12 +236,15 @@ TEST(World, TrackChanges)
 
   TestAction ta;
   collision_detection::World::ObserverHandle observer_ta;
-  observer_ta = world.addObserver(std::bind(TrackChangesNotify, &ta, std::placeholders::_1, std::placeholders::_2));
+  observer_ta = world.addObserver(
+      [&ta](const collision_detection::World::ObjectConstPtr& object, collision_detection::World::Action action) {
+        return TrackChangesNotify(ta, object, action);
+      });
 
   // Create some shapes
-  shapes::ShapePtr ball(new shapes::Sphere(1.0));
-  shapes::ShapePtr box(new shapes::Box(1, 2, 3));
-  shapes::ShapePtr cyl(new shapes::Cylinder(4, 5));
+  shapes::ShapePtr ball = std::make_shared<shapes::Sphere>(1.0);
+  shapes::ShapePtr box = std::make_shared<shapes::Box>(1, 2, 3);
+  shapes::ShapePtr cyl = std::make_shared<shapes::Cylinder>(4, 5);
 
   world.addToObject("obj1", ball, Eigen::Isometry3d::Identity());
 
@@ -267,7 +270,10 @@ TEST(World, TrackChanges)
 
   TestAction ta2;
   collision_detection::World::ObserverHandle observer_ta2;
-  observer_ta2 = world.addObserver(std::bind(TrackChangesNotify, &ta2, std::placeholders::_1, std::placeholders::_2));
+  observer_ta2 = world.addObserver(
+      [&ta2](const collision_detection::World::ObjectConstPtr& object, collision_detection::World::Action action) {
+        return TrackChangesNotify(ta2, object, action);
+      });
 
   world.addToObject("obj2", cyl, Eigen::Isometry3d::Identity());
 
@@ -305,7 +311,10 @@ TEST(World, TrackChanges)
 
   TestAction ta3;
   collision_detection::World::ObserverHandle observer_ta3;
-  observer_ta3 = world.addObserver(std::bind(TrackChangesNotify, &ta3, std::placeholders::_1, std::placeholders::_2));
+  observer_ta3 = world.addObserver(
+      [&ta3](const collision_detection::World::ObjectConstPtr& object, collision_detection::World::Action action) {
+        return TrackChangesNotify(ta3, object, action);
+      });
 
   bool rm_good = world.removeShapeFromObject("obj2", cyl);
   EXPECT_TRUE(rm_good);
@@ -371,12 +380,15 @@ TEST(World, ObjectPoseAndSubframes)
 
   TestAction ta;
   collision_detection::World::ObserverHandle observer_ta;
-  observer_ta = world.addObserver(std::bind(TrackChangesNotify, &ta, std::placeholders::_1, std::placeholders::_2));
+  observer_ta = world.addObserver(
+      [&ta](const collision_detection::World::ObjectConstPtr& object, collision_detection::World::Action action) {
+        return TrackChangesNotify(ta, object, action);
+      });
 
   // Create shapes
-  shapes::ShapePtr ball(new shapes::Sphere(1.0));
-  shapes::ShapePtr box(new shapes::Box(1, 1, 1));
-  shapes::ShapePtr cyl(new shapes::Cylinder(0.5, 3));  // radius, length
+  shapes::ShapePtr ball = std::make_shared<shapes::Sphere>(1.0);
+  shapes::ShapePtr box = std::make_shared<shapes::Box>(1, 1, 1);
+  shapes::ShapePtr cyl = std::make_shared<shapes::Cylinder>(0.5, 3);  // radius, length
 
   // Confirm that setting object pose creates an object
   world.setObjectPose("mix1", Eigen::Isometry3d::Identity());

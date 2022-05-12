@@ -138,7 +138,7 @@ public:
    * Return true if the execution is complete (whether successful or not).
    * Return false if timeout was reached.
    * If timeout is -1 (default argument), wait until the execution is complete (no timeout). */
-  virtual bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(-1)) = 0;
+  virtual bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration::from_nanoseconds(-1)) = 0;
 
   /** \brief Return the execution status of the last trajectory sent to the controller. */
   virtual ExecutionStatus getLastExecutionStatus() = 0;

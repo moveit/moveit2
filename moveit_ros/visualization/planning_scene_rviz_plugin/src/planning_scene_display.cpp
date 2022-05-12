@@ -174,8 +174,7 @@ PlanningSceneDisplay::~PlanningSceneDisplay()
   planning_scene_render_.reset();
   if (context_ && context_->getSceneManager() && planning_scene_node_)
     context_->getSceneManager()->destroySceneNode(planning_scene_node_);
-  if (planning_scene_robot_)
-    planning_scene_robot_.reset();
+  planning_scene_robot_.reset();
   planning_scene_monitor_.reset();
 }
 
@@ -205,8 +204,8 @@ void PlanningSceneDisplay::onInitialize()
 
   if (robot_category_)
   {
-    planning_scene_robot_.reset(
-        new RobotStateVisualization(planning_scene_node_, context_, "Planning Scene", robot_category_));
+    planning_scene_robot_ =
+        std::make_shared<RobotStateVisualization>(planning_scene_node_, context_, "Planning Scene", robot_category_);
     planning_scene_robot_->setVisible(true);
     planning_scene_robot_->setVisualVisible(scene_robot_visual_enabled_property_->getBool());
     planning_scene_robot_->setCollisionVisible(scene_robot_collision_enabled_property_->getBool());
@@ -222,7 +221,7 @@ void PlanningSceneDisplay::reset()
   Display::reset();
 
   if (isEnabled())
-    addBackgroundJob(std::bind(&PlanningSceneDisplay::loadRobotModel, this), "loadRobotModel");
+    addBackgroundJob([this] { loadRobotModel(); }, "loadRobotModel");
 
   if (planning_scene_robot_)
   {
@@ -398,7 +397,7 @@ void PlanningSceneDisplay::changedPlanningSceneTopic()
       service_name = rclcpp::names::append(getMoveGroupNS(), service_name);
     auto bg_func = [=]() {
       if (planning_scene_monitor_->requestPlanningSceneState(service_name))
-        addMainLoopJob(std::bind(&PlanningSceneDisplay::onNewPlanningSceneState, this));
+        addMainLoopJob([this] { onNewPlanningSceneState(); });
       else
         setStatus(rviz_common::properties::StatusProperty::Warn, "PlanningScene", "Requesting initial scene failed");
     };
@@ -526,8 +525,8 @@ planning_scene_monitor::PlanningSceneMonitorPtr PlanningSceneDisplay::createPlan
 void PlanningSceneDisplay::clearRobotModel()
 {
   planning_scene_render_.reset();
-  planning_scene_monitor_.reset();  // this so that the destructor of the PlanningSceneMonitor gets called before a new
-                                    // instance of a scene monitor is constructed
+  // Ensure old PSM is destroyed before we attempt to create a new one
+  planning_scene_monitor_.reset();
 }
 
 void PlanningSceneDisplay::loadRobotModel()
@@ -538,7 +537,7 @@ void PlanningSceneDisplay::loadRobotModel()
   // we need to make sure the clearing of the robot model is in the main thread,
   // so that rendering operations do not have data removed from underneath,
   // so the next function is executed in the main loop
-  addMainLoopJob(std::bind(&PlanningSceneDisplay::clearRobotModel, this));
+  addMainLoopJob([this] { clearRobotModel(); });
 
   waitForAllMainLoopJobs();
 
@@ -547,8 +546,10 @@ void PlanningSceneDisplay::loadRobotModel()
   {
     planning_scene_monitor_.swap(psm);
     planning_scene_monitor_->addUpdateCallback(
-        std::bind(&PlanningSceneDisplay::sceneMonitorReceivedUpdate, this, std::placeholders::_1));
-    addMainLoopJob(std::bind(&PlanningSceneDisplay::onRobotModelLoaded, this));
+        [this](planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType type) {
+          sceneMonitorReceivedUpdate(type);
+        });
+    addMainLoopJob([this] { onRobotModelLoaded(); });
     waitForAllMainLoopJobs();
   }
   else
@@ -610,7 +611,7 @@ void PlanningSceneDisplay::onEnable()
 {
   Display::onEnable();
 
-  addBackgroundJob(std::bind(&PlanningSceneDisplay::loadRobotModel, this), "loadRobotModel");
+  addBackgroundJob([this] { loadRobotModel(); }, "loadRobotModel");
 
   if (planning_scene_robot_)
   {

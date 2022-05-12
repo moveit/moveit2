@@ -286,8 +286,7 @@ struct CartPoseTermInfo : public TermInfo
 
   static TermInfoPtr create()
   {
-    TermInfoPtr out(new CartPoseTermInfo());
-    return out;
+    return std::make_shared<CartPoseTermInfo>();
   }
 };
 
@@ -326,8 +325,7 @@ struct JointPoseTermInfo : public TermInfo
 
   static TermInfoPtr create()
   {
-    TermInfoPtr out(new JointPoseTermInfo());
-    return out;
+    return std::make_shared<JointPoseTermInfo>();
   }
 };
 
@@ -356,8 +354,7 @@ struct JointVelTermInfo : public TermInfo
 
   static TermInfoPtr create()
   {
-    TermInfoPtr out(new JointVelTermInfo());
-    return out;
+    return std::make_shared<JointVelTermInfo>();
   }
 };
 

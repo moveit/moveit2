@@ -78,15 +78,7 @@ protected:
     robot_model_ = moveit::core::loadTestingRobotModel("panda");
     robot_model_ok_ = static_cast<bool>(robot_model_);
 
-    acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>();
-    // Use default collision operations in the SRDF to setup the acm
-    const std::vector<std::string>& collision_links = robot_model_->getLinkModelNamesWithCollisionGeometry();
-    acm_->setEntry(collision_links, collision_links, false);
-
-    // allow collisions for pairs that have been disabled
-    const std::vector<srdf::Model::DisabledCollision>& dc = robot_model_->getSRDF()->getDisabledCollisionPairs();
-    for (const srdf::Model::DisabledCollision& it : dc)
-      acm_->setEntry(it.link1_, it.link2_, true);
+    acm_ = std::make_shared<collision_detection::AllowedCollisionMatrix>(*robot_model_->getSRDF());
 
     cenv_ = std::make_shared<collision_detection::CollisionEnvBullet>(robot_model_);
 
@@ -116,7 +108,7 @@ void addCollisionObjects(cb::BulletCastBVHManager& checker)
   ////////////////////////////
   // Add static box to checker
   ////////////////////////////
-  shapes::ShapePtr static_box(new shapes::Box(1, 1, 1));
+  shapes::ShapePtr static_box = std::make_shared<shapes::Box>(1, 1, 1);
   Eigen::Isometry3d static_box_pose;
   static_box_pose.setIdentity();
 
@@ -127,14 +119,14 @@ void addCollisionObjects(cb::BulletCastBVHManager& checker)
   obj1_poses.push_back(static_box_pose);
   obj1_types.push_back(cb::CollisionObjectType::USE_SHAPE_TYPE);
 
-  cb::CollisionObjectWrapperPtr cow_1(new cb::CollisionObjectWrapper(
-      "static_box_link", collision_detection::BodyType::WORLD_OBJECT, obj1_shapes, obj1_poses, obj1_types));
+  cb::CollisionObjectWrapperPtr cow_1 = std::make_shared<cb::CollisionObjectWrapper>(
+      "static_box_link", collision_detection::BodyType::WORLD_OBJECT, obj1_shapes, obj1_poses, obj1_types);
   checker.addCollisionObject(cow_1);
 
   ////////////////////////////
   // Add moving box to checker
   ////////////////////////////
-  shapes::ShapePtr moving_box(new shapes::Box(0.2, 0.2, 0.2));
+  shapes::ShapePtr moving_box = std::make_shared<shapes::Box>(0.2, 0.2, 0.2);
   Eigen::Isometry3d moving_box_pose;
 
   moving_box_pose.setIdentity();
@@ -147,8 +139,8 @@ void addCollisionObjects(cb::BulletCastBVHManager& checker)
   obj2_poses.push_back(moving_box_pose);
   obj2_types.push_back(cb::CollisionObjectType::USE_SHAPE_TYPE);
 
-  cb::CollisionObjectWrapperPtr cow_2(new cb::CollisionObjectWrapper(
-      "moving_box_link", collision_detection::BodyType::WORLD_OBJECT, obj2_shapes, obj2_poses, obj2_types));
+  cb::CollisionObjectWrapperPtr cow_2 = std::make_shared<cb::CollisionObjectWrapper>(
+      "moving_box_link", collision_detection::BodyType::WORLD_OBJECT, obj2_shapes, obj2_poses, obj2_types);
   checker.addCollisionObject(cow_2);
 }
 
@@ -157,7 +149,7 @@ void addCollisionObjectsMesh(cb::BulletCastBVHManager& checker)
   ////////////////////////////
   // Add static box to checker
   ////////////////////////////
-  shapes::ShapePtr static_box(new shapes::Box(0.3, 0.3, 0.3));
+  shapes::ShapePtr static_box = std::make_shared<shapes::Box>(0.3, 0.3, 0.3);
   Eigen::Isometry3d static_box_pose;
   static_box_pose.setIdentity();
 
@@ -168,8 +160,8 @@ void addCollisionObjectsMesh(cb::BulletCastBVHManager& checker)
   obj1_poses.push_back(static_box_pose);
   obj1_types.push_back(cb::CollisionObjectType::USE_SHAPE_TYPE);
 
-  cb::CollisionObjectWrapperPtr cow_1(new cb::CollisionObjectWrapper(
-      "static_box_link", collision_detection::BodyType::WORLD_OBJECT, obj1_shapes, obj1_poses, obj1_types));
+  cb::CollisionObjectWrapperPtr cow_1 = std::make_shared<cb::CollisionObjectWrapper>(
+      "static_box_link", collision_detection::BodyType::WORLD_OBJECT, obj1_shapes, obj1_poses, obj1_types);
   checker.addCollisionObject(cow_1);
   ////////////////////////////
   // Add moving mesh to checker
@@ -191,8 +183,8 @@ void addCollisionObjectsMesh(cb::BulletCastBVHManager& checker)
   obj2_types.push_back(cb::CollisionObjectType::CONVEX_HULL);
   obj2_poses.push_back(s_pose);
 
-  cb::CollisionObjectWrapperPtr cow_2(new cb::CollisionObjectWrapper(
-      "moving_box_link", collision_detection::BodyType::WORLD_OBJECT, obj2_shapes, obj2_poses, obj2_types));
+  cb::CollisionObjectWrapperPtr cow_2 = std::make_shared<cb::CollisionObjectWrapper>(
+      "moving_box_link", collision_detection::BodyType::WORLD_OBJECT, obj2_shapes, obj2_poses, obj2_types);
   checker.addCollisionObject(cow_2);
 }
 

@@ -39,7 +39,7 @@ if(BUILD_TESTING)
   target_link_libraries(test_time_parameterization moveit_test_utils ${MOVEIT_LIB_NAME})
 
   ament_add_gtest(test_time_optimal_trajectory_generation test/test_time_optimal_trajectory_generation.cpp)
-  target_link_libraries(test_time_optimal_trajectory_generation ${MOVEIT_LIB_NAME})
+  target_link_libraries(test_time_optimal_trajectory_generation moveit_test_utils ${MOVEIT_LIB_NAME})
 
   ament_add_gtest(test_ruckig_traj_smoothing test/test_ruckig_traj_smoothing.cpp)
   target_link_libraries(test_ruckig_traj_smoothing

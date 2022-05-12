@@ -17,7 +17,8 @@
   <author email="rluna@rice.edu">Ryan Luna</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <build_depend>moveit_common</build_depend>
+  <depend>moveit_common</depend>
+  <build_depend>moveit_core</build_depend>
 
   <build_depend>libboost-dev</build_depend>
   <build_depend>libboost-date-time-dev</build_depend>

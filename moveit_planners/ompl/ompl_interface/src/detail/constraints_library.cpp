@@ -204,8 +204,10 @@ bool interpolateUsingStoredStates(const ConstraintApproximationStateStorage* sta
 ompl_interface::InterpolationFunction ompl_interface::ConstraintApproximation::getInterpolationFunction() const
 {
   if (explicit_motions_ && milestones_ > 0 && milestones_ < state_storage_->size())
-    return std::bind(&interpolateUsingStoredStates, state_storage_, std::placeholders::_1, std::placeholders::_2,
-                     std::placeholders::_3, std::placeholders::_4);
+    return
+        [this](const ompl::base::State* from, const ompl::base::State* to, const double t, ompl::base::State* state) {
+          return interpolateUsingStoredStates(state_storage_, from, to, t, state);
+        };
   return InterpolationFunction();
 }
 
@@ -219,7 +221,7 @@ allocConstraintApproximationStateSampler(const ob::StateSpace* space, const std:
   if (sig != expected_signature)
     return ompl::base::StateSamplerPtr();
   else
-    return ompl::base::StateSamplerPtr(new ConstraintApproximationStateSampler(space, state_storage, milestones));
+    return std::make_shared<ConstraintApproximationStateSampler>(space, state_storage, milestones);
 }
 }  // namespace ompl_interface
 
@@ -246,8 +248,9 @@ ompl_interface::ConstraintApproximation::getStateSamplerAllocator(const moveit_m
 {
   if (state_storage_->size() == 0)
     return ompl::base::StateSamplerAllocator();
-  return std::bind(&allocConstraintApproximationStateSampler, std::placeholders::_1, space_signature_, state_storage_,
-                   milestones_);
+  return [this](const ompl::base::StateSpace* ss) {
+    return allocConstraintApproximationStateSampler(ss, space_signature_, state_storage_, milestones_);
+  };
 }
 /*
 void ompl_interface::ConstraintApproximation::visualizeDistribution(const
@@ -343,9 +346,8 @@ void ompl_interface::ConstraintsLibrary::loadConstraintApproximations(const std:
     hexToMsg(serialization, msg);
     auto* cass = new ConstraintApproximationStateStorage(context_->getOMPLSimpleSetup()->getStateSpace());
     cass->load((std::string{ path }.append("/").append(filename)).c_str());
-    ConstraintApproximationPtr cap(new ConstraintApproximation(group, state_space_parameterization, explicit_motions,
-                                                               msg, filename, ompl::base::StateStoragePtr(cass),
-                                                               milestones));
+    auto cap = std::make_shared<ConstraintApproximation>(group, state_space_parameterization, explicit_motions, msg,
+                                                         filename, ompl::base::StateStoragePtr(cass), milestones);
     if (constraint_approximations_.find(cap->getName()) != constraint_approximations_.end())
       RCLCPP_WARN(LOGGER, "Overwriting constraint approximation named '%s'", cap->getName().c_str());
     constraint_approximations_[cap->getName()] = cap;
@@ -461,11 +463,11 @@ ompl_interface::ConstraintsLibrary::addConstraintApproximation(const moveit_msgs
   RCLCPP_INFO(LOGGER, "Spent %lf seconds constructing the database", (clock.now() - start).seconds());
   if (state_storage)
   {
-    ConstraintApproximationPtr constraint_approx(new ConstraintApproximation(
+    auto constraint_approx = std::make_shared<ConstraintApproximation>(
         group, options.state_space_parameterization, options.explicit_motions, constr_hard,
         group + "_" + boost::posix_time::to_iso_extended_string(boost::posix_time::microsec_clock::universal_time()) +
             ".ompldb",
-        state_storage, res.milestones));
+        state_storage, res.milestones);
     if (constraint_approximations_.find(constraint_approx->getName()) != constraint_approximations_.end())
       RCLCPP_WARN(LOGGER, "Overwriting constraint approximation named '%s'", constraint_approx->getName().c_str());
     constraint_approximations_[constraint_approx->getName()] = constraint_approx;

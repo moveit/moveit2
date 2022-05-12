@@ -68,7 +68,7 @@ struct SingleJointTrajectory
   double max_acceleration_;
 };
 
-void globalAdjustment(std::vector<SingleJointTrajectory>& t2, int num_joints, const int num_points,
+void globalAdjustment(std::vector<SingleJointTrajectory>& t2, robot_trajectory::RobotTrajectory& trajectory,
                       std::vector<double>& time_diff);
 
 IterativeSplineParameterization::IterativeSplineParameterization(bool add_points) : add_points_(add_points)
@@ -321,7 +321,7 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   }
 
   // Final adjustment forces the trajectory within bounds
-  globalAdjustment(t2, num_joints, num_points, time_diff);
+  globalAdjustment(t2, trajectory, time_diff);
 
   // Convert back to JointTrajectory form
   for (unsigned int i = 1; i < num_points; ++i)
@@ -344,6 +344,15 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
   }
 
   return true;
+}
+
+bool IterativeSplineParameterization::computeTimeStamps(
+    robot_trajectory::RobotTrajectory& /*trajectory*/,
+    const std::unordered_map<std::string, double>& /*velocity_limits*/,
+    const std::unordered_map<std::string, double>& /*acceleration_limits*/) const
+{
+  RCLCPP_ERROR(LOGGER, "ISTP does not support this version of computeTimeStamps. Try TOTG instead?");
+  return false;
 }
 
 //////// Internal functions //////////////
@@ -570,11 +579,16 @@ static double global_adjustment_factor(const int n, double x1[], double x2[], co
 }
 
 // Expands the entire trajectory to fit exactly within bounds
-void globalAdjustment(std::vector<SingleJointTrajectory>& t2, int num_joints, const int num_points,
+void globalAdjustment(std::vector<SingleJointTrajectory>& t2, robot_trajectory::RobotTrajectory& trajectory,
                       std::vector<double>& time_diff)
 {
+  const moveit::core::JointModelGroup* group = trajectory.getGroup();
+
+  const unsigned int num_points = trajectory.getWayPointCount();
+  const unsigned int num_joints = group->getVariableCount();
+
   double gtfactor = 1.0;
-  for (int j = 0; j < num_joints; ++j)
+  for (unsigned int j = 0; j < num_joints; ++j)
   {
     double tfactor;
     tfactor = global_adjustment_factor(num_points, &t2[j].velocities_[0], &t2[j].accelerations_[0], t2[j].max_velocity_,
@@ -584,10 +598,10 @@ void globalAdjustment(std::vector<SingleJointTrajectory>& t2, int num_joints, co
   }
 
   // printf("# Global adjustment: %0.4f%%\n", 100.0 * (gtfactor - 1.0));
-  for (int i = 0; i < num_points - 1; ++i)
+  for (unsigned int i = 0; i < num_points - 1; ++i)
     time_diff[i] *= gtfactor;
 
-  for (int j = 0; j < num_joints; ++j)
+  for (unsigned int j = 0; j < num_joints; ++j)
   {
     fit_cubic_spline(num_points, &time_diff[0], &t2[j].positions_[0], &t2[j].velocities_[0], &t2[j].accelerations_[0]);
   }

@@ -53,6 +53,8 @@ namespace kdl_kinematics_plugin
 {
 static rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kdl_kinematics_plugin.kdl_kinematics_plugin");
 
+rclcpp::Clock KDLKinematicsPlugin::steady_clock_{ RCL_STEADY_TIME };
+
 KDLKinematicsPlugin::KDLKinematicsPlugin() : initialized_(false)
 {
 }
@@ -86,11 +88,11 @@ void KDLKinematicsPlugin::getJointWeights()
   const std::vector<std::string>& active_names = joint_model_group_->getActiveJointModelNames();
   std::vector<std::string> names;
   std::vector<double> weights;
-  if (lookupParam(node_, "joint_weights/weights", weights, weights))
+  if (lookupParam(node_, "joint_weights.weights", weights, weights))
   {
-    if (!lookupParam(node_, "joint_weights/names", names, names) || names.size() != weights.size())
+    if (!lookupParam(node_, "joint_weights.names", names, names) || (names.size() != weights.size()))
     {
-      RCLCPP_ERROR(LOGGER, "Expecting list parameter joint_weights/names of same size as list joint_weights/weights");
+      RCLCPP_ERROR(LOGGER, "Expecting list parameter joint_weights.names of same size as list joint_weights.weights");
       // fall back to default weights
       weights.clear();
     }
@@ -272,7 +274,7 @@ bool KDLKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
 
 bool KDLKinematicsPlugin::timedOut(const rclcpp::Time& start_time, double duration) const
 {
-  return ((node_->now() - start_time).seconds() >= duration);
+  return ((steady_clock_.now() - start_time).seconds() >= duration);
 }
 
 bool KDLKinematicsPlugin::getPositionIK(const geometry_msgs::msg::Pose& ik_pose,
@@ -327,7 +329,7 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
                                            moveit_msgs::msg::MoveItErrorCodes& error_code,
                                            const kinematics::KinematicsQueryOptions& options) const
 {
-  rclcpp::Time start_time = node_->now();
+  const rclcpp::Time start_time = steady_clock_.now();
   if (!initialized_)
   {
     RCLCPP_ERROR(LOGGER, "kinematics solver not initialized");
@@ -413,13 +415,13 @@ bool KDLKinematicsPlugin::searchPositionIK(const geometry_msgs::msg::Pose& ik_po
 
       // solution passed consistency check and solution callback
       error_code.val = error_code.SUCCESS;
-      RCLCPP_DEBUG_STREAM(LOGGER, "Solved after " << (node_->now() - start_time).seconds() << " < " << timeout
+      RCLCPP_DEBUG_STREAM(LOGGER, "Solved after " << (steady_clock_.now() - start_time).seconds() << " < " << timeout
                                                   << "s and " << attempt << " attempts");
       return true;
     }
   } while (!timedOut(start_time, timeout));
 
-  RCLCPP_DEBUG_STREAM(LOGGER, "IK timed out after " << (node_->now() - start_time).seconds() << " > " << timeout
+  RCLCPP_DEBUG_STREAM(LOGGER, "IK timed out after " << (steady_clock_.now() - start_time).seconds() << " > " << timeout
                                                     << "s and " << attempt << " attempts");
   error_code.val = error_code.TIMED_OUT;
   return false;
