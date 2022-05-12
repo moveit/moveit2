@@ -244,7 +244,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         self,
         robot_name: str,
         robot_description="robot_description",
-        package_name: Optional(str) = None,
+        package_name: Optional[str] = None,
     ):
         super().__init__(package_name or (robot_name + "_moveit_config"))
         self.__moveit_configs.package_path = self._package_path
