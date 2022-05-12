@@ -171,7 +171,7 @@ public:
 
   bool computeTimeStamps(robot_trajectory::RobotTrajectory& trajectory,
                          const std::unordered_map<std::string, double>& velocity_limits,
-                         const std::unordered_map<std::string, double>& acceleration_limits) const;
+                         const std::unordered_map<std::string, double>& acceleration_limits) const override;
 
 private:
   bool doTimeParameterizationCalculations(robot_trajectory::RobotTrajectory& trajectory,

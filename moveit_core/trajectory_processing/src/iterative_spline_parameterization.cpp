@@ -347,8 +347,9 @@ bool IterativeSplineParameterization::computeTimeStamps(robot_trajectory::RobotT
 }
 
 bool IterativeSplineParameterization::computeTimeStamps(
-    robot_trajectory::RobotTrajectory& trajectory, const std::unordered_map<std::string, double>& velocity_limits,
-    const std::unordered_map<std::string, double>& acceleration_limits) const
+    robot_trajectory::RobotTrajectory& /*trajectory*/,
+    const std::unordered_map<std::string, double>& /*velocity_limits*/,
+    const std::unordered_map<std::string, double>& /*acceleration_limits*/) const
 {
   RCLCPP_ERROR(LOGGER, "ISTP does not support this version of computeTimeStamps. Try TOTG instead?");
   return false;
