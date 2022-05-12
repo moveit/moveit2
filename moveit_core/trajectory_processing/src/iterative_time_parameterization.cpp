@@ -487,8 +487,9 @@ bool IterativeParabolicTimeParameterization::computeTimeStamps(robot_trajectory:
 }
 
 bool IterativeParabolicTimeParameterization::computeTimeStamps(
-    robot_trajectory::RobotTrajectory& trajectory, const std::unordered_map<std::string, double>& velocity_limits,
-    const std::unordered_map<std::string, double>& acceleration_limits) const
+    robot_trajectory::RobotTrajectory& /*trajectory*/,
+    const std::unordered_map<std::string, double>& /*velocity_limits*/,
+    const std::unordered_map<std::string, double>& /*acceleration_limits*/) const
 {
   RCLCPP_ERROR(LOGGER, "IPTP does not support this version of computeTimeStamps. Try TOTG instead?");
   return false;
