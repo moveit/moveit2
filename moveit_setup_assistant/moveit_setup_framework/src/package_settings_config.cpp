@@ -131,18 +131,21 @@ void PackageSettingsConfig::loadExisting(const std::string& package_path_or_name
 
     for (const std::string& name : config_data_->getRegisteredNames())
     {
-      // Replace old keys with new ones
       std::string yaml_key = name;
+      /* Generally speaking, we use each config's name as the key to read the yaml from
+       *
+       * However, for backwards compatibility, we also allow for the three legacy keys, which we translate here.
+       * If the name is found in BACKWARDS_KEY_LOOKUP and the legacy key is present in the yaml dictionary,
+       * we load using the legacy key instead.
+       */
       auto backwards_match = BACKWARDS_KEY_LOOKUP.find(name);
-      if (backwards_match != BACKWARDS_KEY_LOOKUP.end())
+      if (backwards_match != BACKWARDS_KEY_LOOKUP.end() && title_node[backwards_match->second].IsDefined())
       {
         yaml_key = backwards_match->second;
       }
 
-      if (title_node[yaml_key].IsDefined())
-      {
-        config_data_->get(name)->loadPrevious(config_pkg_path_, title_node[yaml_key]);
-      }
+      // We load the previous regardless of whether the title_node[yaml_key] is actually defined
+      config_data_->get(name)->loadPrevious(config_pkg_path_, title_node[yaml_key]);
     }
   }
   catch (YAML::ParserException& e)  // Catch errors, translate to runtime_error
