@@ -19,27 +19,6 @@
   file.gen_func_ = std::bind(&MoveItConfigData::outputCHOMPPlanningYAML, config_data_, std::placeholders::_1);
   file.write_on_changes = MoveItConfigData::GROUPS;  // need to double check if this is actually correct!
 
-  // joint_limits.yaml --------------------------------------------------------------------------------------
-  file.file_name_ = "joint_limits.yaml";
-  file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);
-  file.description_ = "Contains additional information about joints that appear in your planning groups that is not "
-                      "contained in the URDF, as well as allowing you to set maximum and minimum limits for velocity "
-                      "and acceleration than those contained in your URDF. This information is used by our trajectory "
-                      "filtering system to assign reasonable velocities and timing for the trajectory before it is "
-                      "passed to the robots controllers.";
-  file.gen_func_ = std::bind(&MoveItConfigData::outputJointLimitsYAML, config_data_, std::placeholders::_1);
-  file.write_on_changes = 0;  // Can they be changed?
-
-  // cartesian_limits.yaml --------------------------------------------------------------------------------------
-  file.file_name_ = "cartesian_limits.yaml";
-  file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);
-  template_path = config_data_->appendPaths(config_data_->template_package_path_, file.rel_path_);
-  file.description_ = "Cartesian velocity for planning in the workspace."
-                      "The velocity is used by pilz industrial motion planner as maximum velocity for cartesian "
-                      "planning requests scaled by the velocity scaling factor of an individual planning request.";
-  file.gen_func_ = std::bind(&ConfigurationFilesWidget::copyTemplate, this, template_path, std::placeholders::_1);
-  file.write_on_changes = 0;  // Can they be changed?
-
   // fake_controllers.yaml --------------------------------------------------------------------------------------
   file.file_name_ = "fake_controllers.yaml";
   file.rel_path_ = config_data_->appendPaths(config_path, file.file_name_);
