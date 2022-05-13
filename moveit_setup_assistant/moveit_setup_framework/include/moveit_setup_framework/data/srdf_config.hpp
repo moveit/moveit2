@@ -36,7 +36,9 @@
 #pragma once
 
 #include <moveit_setup_framework/config.hpp>
+#include <moveit_setup_framework/templates.hpp>
 #include <moveit_setup_framework/data/urdf_config.hpp>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/planning_scene/planning_scene.h>  // for getting kinematic model
 #include <srdfdom/srdf_writer.h>                   // for writing srdf data
@@ -56,6 +58,9 @@ enum InformationFields
   PASSIVE_JOINTS = 1 << 7,
   OTHER = 1 << 8,
 };
+
+static const std::string JOINT_LIMITS_FILE = "config/joint_limits.yaml";
+static const std::string CARTESIAN_LIMITS_FILE = "config/cartesian_limits.yaml";
 
 class SRDFConfig : public SetupConfig
 {
@@ -181,10 +186,74 @@ public:
     SRDFConfig& parent_;
   };
 
+  class GeneratedJointLimits : public YamlGeneratedFile
+  {
+  public:
+    GeneratedJointLimits(const std::string& package_path, const std::time_t& last_gen_time, SRDFConfig& parent)
+      : YamlGeneratedFile(package_path, last_gen_time), parent_(parent)
+    {
+    }
+
+    std::string getRelativePath() const override
+    {
+      return JOINT_LIMITS_FILE;
+    }
+
+    std::string getDescription() const override
+    {
+      return "Contains additional information about joints that appear in your planning groups that is not "
+             "contained in the URDF, as well as allowing you to set maximum and minimum limits for velocity "
+             "and acceleration than those contained in your URDF. This information is used by our trajectory "
+             "filtering system to assign reasonable velocities and timing for the trajectory before it is "
+             "passed to the robot's controllers.";
+    }
+
+    bool hasChanges() const override
+    {
+      return false;  // Can't be changed just yet
+    }
+
+    bool writeYaml(YAML::Emitter& emitter) override;
+
+  protected:
+    SRDFConfig& parent_;
+  };
+
+  class GeneratedCartesianLimits : public TemplatedGeneratedFile
+  {
+  public:
+    using TemplatedGeneratedFile::TemplatedGeneratedFile;
+
+    std::string getRelativePath() const override
+    {
+      return CARTESIAN_LIMITS_FILE;
+    }
+
+    std::string getTemplatePath() const override
+    {
+      return appendPaths(ament_index_cpp::get_package_share_directory("moveit_setup_framework"),
+                         appendPaths("templates", CARTESIAN_LIMITS_FILE));
+    }
+
+    std::string getDescription() const override
+    {
+      return "Cartesian velocity for planning in the workspace."
+             "The velocity is used by pilz industrial motion planner as maximum velocity for cartesian "
+             "planning requests scaled by the velocity scaling factor of an individual planning request.";
+    }
+
+    bool hasChanges() const override
+    {
+      return false;
+    }
+  };
+
   void collectFiles(const std::string& package_path, const std::time_t& last_gen_time,
                     std::vector<GeneratedFilePtr>& files) override
   {
     files.push_back(std::make_shared<GeneratedSRDF>(package_path, last_gen_time, *this));
+    files.push_back(std::make_shared<GeneratedJointLimits>(package_path, last_gen_time, *this));
+    files.push_back(std::make_shared<GeneratedCartesianLimits>(package_path, last_gen_time));
   }
 
   void collectVariables(std::vector<TemplateVariable>& variables) override;

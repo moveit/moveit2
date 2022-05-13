@@ -197,6 +197,103 @@ void SRDFConfig::collectVariables(std::vector<TemplateVariable>& variables)
   variables.push_back(TemplateVariable("PLANNING_FRAME", robot_model_->getModelFrame()));
 }
 
+/**
+ * \brief Custom std::set comparator, used for sorting the joint_limits.yaml file into alphabetical order
+ * \param jm1 - a pointer to the first joint model to compare
+ * \param jm2 - a pointer to the second joint model to compare
+ * \return bool of alphabetical sorting comparison
+ */
+struct JointModelCompare
+{
+  bool operator()(const moveit::core::JointModel* jm1, const moveit::core::JointModel* jm2) const
+  {
+    return jm1->getName() < jm2->getName();
+  }
+};
+
+bool SRDFConfig::GeneratedJointLimits::writeYaml(YAML::Emitter& emitter)
+{
+  emitter << YAML::Comment("joint_limits.yaml allows the dynamics properties specified in the URDF "
+                           "to be overwritten or augmented as needed");
+  emitter << YAML::Newline;
+
+  emitter << YAML::BeginMap;
+
+  emitter << YAML::Comment("For beginners, we downscale velocity and acceleration limits.") << YAML::Newline;
+  emitter << YAML::Comment("You can always specify higher scaling factors (<= 1.0) in your motion requests.");
+  emitter << YAML::Comment("Increase the values below to 1.0 to always move at maximum speed.");
+  emitter << YAML::Key << "default_velocity_scaling_factor";
+  emitter << YAML::Value << "0.1";
+
+  emitter << YAML::Key << "default_acceleration_scaling_factor";
+  emitter << YAML::Value << "0.1";
+
+  emitter << YAML::Newline << YAML::Newline;
+  emitter << YAML::Comment("Specific joint properties can be changed with the keys "
+                           "[max_position, min_position, max_velocity, max_acceleration]")
+          << YAML::Newline;
+  emitter << YAML::Comment("Joint limits can be turned off with [has_velocity_limits, has_acceleration_limits]");
+
+  emitter << YAML::Key << "joint_limits";
+  emitter << YAML::Value << YAML::BeginMap;
+
+  // Union all the joints in groups. Uses a custom comparator to allow the joints to be sorted by name
+  std::set<const moveit::core::JointModel*, JointModelCompare> joints;
+
+  // Loop through groups
+  for (srdf::Model::Group& group : parent_.srdf_.groups_)
+  {
+    // Get list of associated joints
+    const moveit::core::JointModelGroup* joint_model_group = parent_.getRobotModel()->getJointModelGroup(group.name_);
+
+    const std::vector<const moveit::core::JointModel*>& joint_models = joint_model_group->getJointModels();
+
+    // Iterate through the joints
+    for (const moveit::core::JointModel* joint_model : joint_models)
+    {
+      // Check that this joint only represents 1 variable.
+      if (joint_model->getVariableCount() == 1)
+        joints.insert(joint_model);
+    }
+  }
+
+  // Add joints to yaml file, if no more than 1 dof
+  for (const moveit::core::JointModel* joint : joints)
+  {
+    emitter << YAML::Key << joint->getName();
+    emitter << YAML::Value << YAML::BeginMap;
+
+    const moveit::core::VariableBounds& b = joint->getVariableBounds()[0];
+
+    // Output property
+    emitter << YAML::Key << "has_velocity_limits";
+    if (b.velocity_bounded_)
+      emitter << YAML::Value << "true";
+    else
+      emitter << YAML::Value << "false";
+
+    // Output property
+    emitter << YAML::Key << "max_velocity";
+    emitter << YAML::Value << std::min(fabs(b.max_velocity_), fabs(b.min_velocity_));
+
+    // Output property
+    emitter << YAML::Key << "has_acceleration_limits";
+    if (b.acceleration_bounded_)
+      emitter << YAML::Value << "true";
+    else
+      emitter << YAML::Value << "false";
+
+    // Output property
+    emitter << YAML::Key << "max_acceleration";
+    emitter << YAML::Value << std::min(fabs(b.max_acceleration_), fabs(b.min_acceleration_));
+
+    emitter << YAML::EndMap;
+  }
+
+  emitter << YAML::EndMap;
+  return true;  // file created successfully
+}
+
 }  // namespace moveit_setup_framework
 
 #include <pluginlib/class_list_macros.hpp>  // NOLINT
