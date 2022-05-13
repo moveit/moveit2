@@ -240,8 +240,13 @@ class MoveItConfigsBuilder(ParameterBuilder):
     __config_dir_path = Path("config")
 
     # Look-up for robot_name_moveit_config package
-    def __init__(self, robot_name: str, robot_description="robot_description"):
-        super().__init__(robot_name + "_moveit_config")
+    def __init__(
+        self,
+        robot_name: str,
+        robot_description="robot_description",
+        package_name: Optional[str] = None,
+    ):
+        super().__init__(package_name or (robot_name + "_moveit_config"))
         self.__moveit_configs.package_path = self._package_path
         self.__robot_name = robot_name
         setup_assistant_file = self._package_path / ".setup_assistant"
@@ -479,7 +484,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         # Special rule to add ompl planner_configs
         if "ompl" in self.__moveit_configs.planning_pipelines:
             ompl_config = self.__moveit_configs.planning_pipelines["ompl"]
-            if "planner_configs" not in ompl_config.get("move_group", {}):
+            if "planner_configs" not in ompl_config:
                 ompl_config.update(load_yaml(default_folder / "ompl_defaults.yaml"))
 
         return self
