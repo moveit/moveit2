@@ -132,7 +132,6 @@ public:
   bool outputOMPLPlanningYAML(const std::string& file_path);
   bool outputSTOMPPlanningYAML(const std::string& file_path);
   bool outputKinematicsYAML(const std::string& file_path);
-  bool outputJointLimitsYAML(const std::string& file_path);
   bool outputFakeControllersYAML(const std::string& file_path);
   bool outputSimpleControllersYAML(const std::string& file_path);
   bool outputROSControllersYAML(const std::string& file_path);
@@ -251,20 +250,6 @@ public:
    * \brief Helper function to get the default start pose for moveit_sim_hw_interface
    */
   srdf::Model::GroupState getDefaultStartPose();
-
-  /**
-   * \brief Custom std::set comparator, used for sorting the joint_limits.yaml file into alphabetical order
-   * \param jm1 - a pointer to the first joint model to compare
-   * \param jm2 - a pointer to the second joint model to compare
-   * \return bool of alphabetical sorting comparison
-   */
-  struct JointModelCompare
-  {
-    bool operator()(const moveit::core::JointModel* jm1, const moveit::core::JointModel* jm2) const
-    {
-      return jm1->getName() < jm2->getName();
-    }
-  };
 
 private:
   // ******************************************************************************************
