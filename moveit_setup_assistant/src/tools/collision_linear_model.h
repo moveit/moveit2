@@ -41,7 +41,7 @@
 #include <QVector>
 
 #ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/compute_default_collisions.h>
+#include <moveit/setup_assistant/tools/compute_default_collisions.hpp>
 #endif
 
 #include "collision_matrix_model.h"
