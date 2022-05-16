@@ -552,8 +552,8 @@ void PlanningScene::getPlanningSceneDiffMsg(moveit_msgs::msg::PlanningScene& sce
   else
   {
     scene_msg.robot_state = moveit_msgs::msg::RobotState();
-    scene_msg.robot_state.is_diff = true;
   }
+  scene_msg.robot_state.is_diff = true;
 
   if (acm_)
     acm_->getMessage(scene_msg.allowed_collision_matrix);
@@ -610,6 +610,18 @@ void PlanningScene::getPlanningSceneDiffMsg(moveit_msgs::msg::PlanningScene& sce
     }
     if (do_omap)
       getOctomapMsg(scene_msg.world.octomap);
+  }
+
+  // Ensure any detached collision objects get detached from the parent planning scene, too
+  for (const auto& collision_object : scene_msg.world.collision_objects)
+  {
+    if (parent_ && parent_->getCurrentState().hasAttachedBody(collision_object.id))
+    {
+      moveit_msgs::msg::AttachedCollisionObject aco;
+      aco.object.id = collision_object.id;
+      aco.object.operation = moveit_msgs::msg::CollisionObject::REMOVE;
+      scene_msg.robot_state.attached_collision_objects.push_back(aco);
+    }
   }
 }
 
