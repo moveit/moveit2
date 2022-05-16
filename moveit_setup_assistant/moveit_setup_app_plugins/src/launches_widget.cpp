@@ -106,7 +106,7 @@ void LaunchesWidget::focusGiven()
   connect(list_widget_, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(changeCheckedState(QListWidgetItem*)));
 }
 
-void LaunchesWidget::onNewSelectedItem(QListWidgetItem* current, QListWidgetItem* previous)
+void LaunchesWidget::onNewSelectedItem(QListWidgetItem* current, QListWidgetItem* /*previous*/)
 {
   unsigned int id = getID(current);
   text_widget_->setText(setup_step_.getDescription(id).c_str());
