@@ -35,17 +35,14 @@
 
 #pragma once
 
+#include <moveit_setup_controllers/controllers.hpp>
 #include <QWidget>
-class QComboBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
+#include <QComboBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
 
-#ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
-#endif
-
-namespace moveit_setup_assistant
+namespace moveit_setup_controllers
 {
 class ControllerEditWidget : public QWidget
 {
@@ -57,7 +54,7 @@ public:
   // ******************************************************************************************
 
   /// Constructor
-  ControllerEditWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
+  ControllerEditWidget(QWidget* parent, Controllers& setup_step);
 
   /// Set the previous data
   void setSelected(const std::string& controller_name);
@@ -137,7 +134,7 @@ private:
 
   // For loading default types combo box just once
   bool has_loaded_ = false;
-  /// Contains all the configuration data for the setup assistant
-  moveit_setup_assistant::MoveItConfigDataPtr config_data_;
+
+  Controllers& setup_step_;
 };
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_controllers

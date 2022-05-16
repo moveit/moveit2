@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10.2)
-project(moveit_setup_app_plugins)
+project(moveit_setup_simulation)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -8,7 +8,6 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
-find_package(moveit_ros_visualization REQUIRED)
 find_package(moveit_setup_framework REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -18,17 +17,13 @@ set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
 qt5_wrap_cpp(MOC_FILES
-    include/moveit_setup_app_plugins/launches_widget.hpp
-    include/moveit_setup_app_plugins/perception_widget.hpp
+   include/moveit_setup_simulation/simulation_widget.hpp
 )
 
 add_library(${PROJECT_NAME}
-    src/launches.cpp
-    src/launches_widget.cpp
-    src/launches_config.cpp
-    src/perception_config.cpp
-    src/perception.cpp
-    src/perception_widget.cpp
+    src/simulation.cpp
+    src/simulation_widget.cpp
+    src/xml_manipulation.cpp
     ${MOC_FILES}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -37,7 +32,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
-  moveit_ros_visualization
   moveit_setup_framework
   pluginlib
   rclcpp

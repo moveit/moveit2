@@ -42,7 +42,7 @@
 #include <tinyxml.h>
 #include <vector>
 
-namespace moveit_setup_app_plugins
+namespace moveit_setup_simulation
 {
 struct Attribute
 {
@@ -60,4 +60,4 @@ struct Attribute
 TiXmlElement* uniqueInsert(TiXmlElement& element, const char* tag, const std::vector<Attribute>& attributes = {},
                            const char* text = nullptr);
 
-}  // namespace moveit_setup_app_plugins
+}  // namespace moveit_setup_simulation

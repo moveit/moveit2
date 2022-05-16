@@ -149,6 +149,9 @@ public:
 
   void removePoseByName(const std::string& pose_name, const std::string& group_name);
 
+  std::vector<std::string> getJointNames(const std::string& group_name, bool include_multi_dof = true,
+                                         bool include_passive = true);
+
   class GeneratedSRDF : public GeneratedFile
   {
   public:
