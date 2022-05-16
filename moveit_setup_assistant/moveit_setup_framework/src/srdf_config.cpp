@@ -190,6 +190,28 @@ void SRDFConfig::removePoseByName(const std::string& pose_name, const std::strin
   }
 }
 
+std::vector<std::string> SRDFConfig::getJointNames(const std::string& group_name, bool include_multi_dof,
+                                                   bool include_passive)
+{
+  std::vector<std::string> names;
+  const moveit::core::JointModelGroup* joint_model_group = robot_model_->getJointModelGroup(group_name);
+
+  // Iterate through the joints
+  for (const moveit::core::JointModel* joint : joint_model_group->getActiveJointModels())
+  {
+    if (!include_multi_dof && joint->getVariableCount() > 1)
+    {
+      continue;
+    }
+    else if (!include_passive && joint->isPassive())
+    {
+      continue;
+    }
+    names.push_back(joint->getName());
+  }
+  return names;
+}
+
 void SRDFConfig::collectVariables(std::vector<TemplateVariable>& variables)
 {
   variables.push_back(TemplateVariable("ROBOT_NAME", srdf_.robot_name_));

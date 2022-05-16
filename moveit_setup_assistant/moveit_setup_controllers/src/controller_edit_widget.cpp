@@ -43,15 +43,15 @@
 #include <QPushButton>
 #include <QString>
 #include <QVBoxLayout>
-#include "controller_edit_widget.h"
+#include <moveit_setup_controllers/controller_edit_widget.hpp>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_controllers
 {
 // ******************************************************************************************
 //  ControllerEditWidget constructor, create controller edit screen GUI
 // ******************************************************************************************
-ControllerEditWidget::ControllerEditWidget(QWidget* parent, const MoveItConfigDataPtr& config_data)
-  : QWidget(parent), config_data_(config_data)
+ControllerEditWidget::ControllerEditWidget(QWidget* parent, Controllers& setup_step)
+  : QWidget(parent), setup_step_(setup_step)
 {
   // Basic widget container
   QVBoxLayout* layout = new QVBoxLayout();
@@ -161,7 +161,7 @@ ControllerEditWidget::ControllerEditWidget(QWidget* parent, const MoveItConfigDa
 void ControllerEditWidget::setSelected(const std::string& controller_name)
 {
   controller_name_field_->setText(QString(controller_name.c_str()));
-  moveit_setup_assistant::ControllerConfig* searched_controller = config_data_->findControllerByName(controller_name);
+  ControllerInfo* searched_controller = setup_step_.findControllerByName(controller_name);
   if (searched_controller != nullptr)
   {
     const std::string controller_type = searched_controller->type_;
@@ -252,4 +252,4 @@ std::string ControllerEditWidget::getControllerType()
   return controller_type_field_->currentText().toStdString();
 }
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_controllers

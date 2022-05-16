@@ -34,10 +34,9 @@
 /* Author: Mohamad Ayman */
 
 // SA
-#include "simulation_widget.h"
-#include "header_widget.h"
+#include <moveit_setup_simulation/simulation_widget.hpp>
+#include <moveit_setup_framework/qt/helper_widgets.hpp>
 #include <moveit_setup_framework/qt/xml_syntax_highlighter.hpp>
-#include <moveit_setup_app_plugins/xml_manipulation.hpp>
 
 // Qt
 #include <QColor>
@@ -53,13 +52,12 @@
 
 #include <regex>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_simulation
 {
 // ******************************************************************************************
 // Constructor
 // ******************************************************************************************
-SimulationWidget::SimulationWidget(QWidget* parent, const MoveItConfigDataPtr& config_data)
-  : SetupScreenWidget(parent), config_data_(config_data)
+void SimulationWidget::onInit()
 {
   // Basic widget container
   QVBoxLayout* layout = new QVBoxLayout();
@@ -67,11 +65,12 @@ SimulationWidget::SimulationWidget(QWidget* parent, const MoveItConfigDataPtr& c
 
   // Top Header Area ------------------------------------------------
 
-  HeaderWidget* header = new HeaderWidget("Simulate With Gazebo",
-                                          "The following tool will auto-generate the URDF changes needed "
-                                          "for Gazebo compatibility with ROSControl and MoveIt. The "
-                                          "needed changes are shown in green.",
-                                          this);
+  auto header =
+      new moveit_setup_framework::HeaderWidget("Simulate With Gazebo",
+                                               "The following tool will auto-generate the URDF changes needed "
+                                               "for Gazebo compatibility with ROSControl and MoveIt. The "
+                                               "needed changes are shown in green.",
+                                               this);
   layout->addWidget(header);
   layout->addSpacerItem(new QSpacerItem(1, 8, QSizePolicy::Fixed, QSizePolicy::Fixed));
 
@@ -109,7 +108,7 @@ SimulationWidget::SimulationWidget(QWidget* parent, const MoveItConfigDataPtr& c
   simulation_text_->setLineWrapMode(QTextEdit::NoWrap);
   layout->addWidget(simulation_text_);
   // Configure highlighter
-  auto highlighter = new XmlSyntaxHighlighter(simulation_text_->document());
+  auto highlighter = new moveit_setup_framework::XmlSyntaxHighlighter(simulation_text_->document());
   QTextCharFormat format;
   format.setForeground(Qt::darkGreen);
   highlighter->addTag("inertial", format);
@@ -132,8 +131,7 @@ void SimulationWidget::focusGiven()
     return;  // nothing to do
 
   simulation_text_->setVisible(true);
-  std::string text = generateGazeboCompatibleURDF();
-  config_data_->gazebo_urdf_string_ = text;
+  std::string text = setup_step_.getGazeboCompatibleURDF();
 
   simulation_text_->document()->setPlainText(QString::fromStdString(text));
 
@@ -152,7 +150,7 @@ void SimulationWidget::focusGiven()
   btn_overwrite_->setDisabled(config_data_->urdf_from_xacro_);
   QString tooltip;
   if (btn_overwrite_->isEnabled())
-    tooltip = tr("Overwrite URDF in original location:\n").append(config_data_->urdf_path_.c_str());
+    tooltip = tr("Overwrite URDF in original location:\n").append(setup_step_.getURDFPath().c_str());
   else
     tooltip = tr("Cannot overwrite original, <i>xacro-based</i> URDF");
   btn_overwrite_->setToolTip(tooltip);
@@ -169,23 +167,26 @@ bool SimulationWidget::focusLost()
     return true;  // saving is disabled anyway
 
   // validate XML
-  TiXmlDocument doc;
-  auto urdf = simulation_text_->document()->toPlainText().toStdString();
-  doc.Parse(urdf.c_str(), nullptr, TIXML_ENCODING_UTF8);
-  if (doc.Error())
+  std::string urdf = simulation_text_->document()->toPlainText().toStdString();
+  int error_row, error_col;
+  std::string error_description;
+
+  if (setup_step_.isValidXML(urdf, error_row, error_col, error_description))
+  {
+    config_data_->gazebo_urdf_string_ = std::move(urdf);
+    return true;
+  }
+  else
   {
     QTextCursor cursor = simulation_text_->textCursor();
     cursor.movePosition(QTextCursor::Start);
-    cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, doc.ErrorRow());
-    cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, doc.ErrorCol());
+    cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, error_row);
+    cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, error_col);
     simulation_text_->setTextCursor(cursor);
-    QMessageBox::warning(this, tr("Gazebo URDF"), tr("Error parsing XML:\n").append(doc.ErrorDesc()));
+    QMessageBox::warning(this, tr("Gazebo URDF"), tr("Error parsing XML:\n").append(error_description.c_str()));
     simulation_text_->setFocus(Qt::OtherFocusReason);
     return false;  // reject switching
   }
-  else
-    config_data_->gazebo_urdf_string_ = std::move(urdf);
-  return true;
 }
 
 // ******************************************************************************************
@@ -196,7 +197,7 @@ void SimulationWidget::overwriteURDF()
   if (!focusLost())  // validate XML
     return;
 
-  if (!config_data_->outputGazeboURDFFile(config_data_->urdf_path_))
+  if (!setup_step_.outputGazeboURDFFile(config_data_->urdf_path_))
     QMessageBox::warning(this, "Gazebo URDF", tr("Failed to save to ").append(config_data_->urdf_path_.c_str()));
   else  // Display success message
     QMessageBox::information(this, "Overwriting Successful",
@@ -209,7 +210,7 @@ void SimulationWidget::overwriteURDF()
 
 void SimulationWidget::openURDF()
 {
-  QProcess::startDetached(qgetenv("EDITOR"), { config_data_->urdf_path_.c_str() });
+  QProcess::startDetached(qgetenv("EDITOR"), { setup_step_.getURDFPath().c_str() });
 }
 
 // ******************************************************************************************
@@ -220,89 +221,7 @@ void SimulationWidget::copyURDF()
   simulation_text_->selectAll();
   simulation_text_->copy();
 }
+}  // namespace moveit_setup_simulation
 
-// Generate a Gazebo-compatible robot URDF
-std::string SimulationWidget::generateGazeboCompatibleURDF() const
-{
-  TiXmlDocument doc;
-  doc.Parse(config_data_->urdf_string_.c_str(), nullptr, TIXML_ENCODING_UTF8);
-  auto root = doc.RootElement();
-
-  // Normalize original urdf_string_
-  TiXmlPrinter orig_urdf;
-  doc.Accept(&orig_urdf);
-
-  // Map existing SimpleTransmission elements to their joint name
-  std::map<std::string, TiXmlElement*> transmission_elements;
-  for (TiXmlElement* element = root->FirstChildElement("transmission"); element != nullptr;
-       element = element->NextSiblingElement(element->Value()))
-  {
-    auto type_tag = element->FirstChildElement("type");
-    auto joint_tag = element->FirstChildElement("joint");
-    if (!type_tag || !type_tag->GetText() || !joint_tag || !joint_tag->Attribute("name"))
-      continue;  // ignore invalid tags
-    if (std::string(type_tag->GetText()) == "transmission_interface/SimpleTransmission")
-      transmission_elements[element->FirstChildElement("joint")->Attribute("name")] = element;
-  }
-
-  // Loop through Link and Joint elements and add Gazebo tags if not present
-  for (TiXmlElement* element = root->FirstChildElement(); element != nullptr; element = element->NextSiblingElement())
-  {
-    const std::string tag_name(element->Value());
-    if (tag_name == "link" && element->FirstChildElement("collision"))
-    {
-      TiXmlElement* inertial = uniqueInsert(*element, "inertial");
-      uniqueInsert(*inertial, "mass", { { "value", "0.1" } });
-      uniqueInsert(*inertial, "origin", { { "xyz", "0 0 0" }, { "rpy", "0 0 0" } });
-      uniqueInsert(*inertial, "inertia",
-                   { { "ixx", "0.03" },
-                     { "iyy", "0.03" },
-                     { "izz", "0.03" },
-                     { "ixy", "0.0" },
-                     { "ixz", "0.0" },
-                     { "iyz", "0.0" } });
-    }
-    else if (tag_name == "joint")
-    {
-      const char* joint_type = element->Attribute("type");
-      const char* joint_name = element->Attribute("name");
-      if (!joint_type || !joint_name || strcmp(joint_type, "fixed") == 0)
-        continue;  // skip invalid or fixed joints
-
-      // find existing or create new transmission element for this joint
-      TiXmlElement* transmission;
-      auto it = transmission_elements.find(joint_name);
-      if (it != transmission_elements.end())
-        transmission = it->second;
-      else
-      {
-        transmission = root->InsertEndChild(TiXmlElement("transmission"))->ToElement();
-        transmission->SetAttribute("name", std::string("trans_") + joint_name);
-      }
-
-      uniqueInsert(*transmission, "type", {}, "transmission_interface/SimpleTransmission");
-
-      std::string hw_interface = config_data_->getJointHardwareInterface(joint_name);
-      auto* joint = uniqueInsert(*transmission, "joint", { { "name", joint_name } });
-      uniqueInsert(*joint, "hardwareInterface", {}, hw_interface.c_str());
-
-      auto actuator_name = joint_name + std::string("_motor");
-      auto* actuator = uniqueInsert(*transmission, "actuator", { { "name", actuator_name.c_str() } });
-      uniqueInsert(*actuator, "hardwareInterface", {}, hw_interface.c_str());
-      uniqueInsert(*actuator, "mechanicalReduction", {}, "1");
-    }
-  }
-
-  // Add gazebo_ros_control plugin which reads the transmission tags
-  TiXmlElement* gazebo = uniqueInsert(*root, "gazebo");
-  TiXmlElement* plugin = uniqueInsert(*gazebo, "plugin", { { "name", "gazebo_ros_control", true } });
-  uniqueInsert(*plugin, "robotNamespace", {}, "/");
-
-  // generate new URDF
-  TiXmlPrinter new_urdf;
-  doc.Accept(&new_urdf);
-  // and return it when there are changes
-  return orig_urdf.Str() == new_urdf.Str() ? std::string() : new_urdf.Str();
-}
-
-}  // namespace moveit_setup_assistant
+#include <pluginlib/class_list_macros.hpp>  // NOLINT
+PLUGINLIB_EXPORT_CLASS(moveit_setup_simulation::SimulationWidget, moveit_setup_framework::SetupStepWidget)
