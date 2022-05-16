@@ -34,9 +34,9 @@
 
 /* Author: Robert Haschke */
 
-#include <moveit/setup_assistant/tools/xml_manipulation.h>
+#include <moveit_setup_app_plugins/xml_manipulation.hpp>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_app_plugins
 {
 namespace
 {
@@ -81,4 +81,4 @@ TiXmlElement* uniqueInsert(TiXmlElement& element, const char* tag, const std::ve
   return result;
 }
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_app_plugins
