@@ -40,6 +40,8 @@
 #include <QRegularExpression>
 #include <map>
 
+namespace moveit_setup_framework
+{
 /** XML SyntaxHighlighter allowing nested highlighting of XML tags */
 class XmlSyntaxHighlighter : public QSyntaxHighlighter
 {
@@ -63,3 +65,5 @@ private:
 
   Rules::const_iterator highlight(Rules::const_iterator active, QStringRef text, int start, bool search_end, int& end);
 };
+
+}  // namespace moveit_setup_framework
