@@ -39,7 +39,7 @@
 
 namespace moveit_setup_framework
 {
-const std::string SETUP_ASSISTANT_FILE = ".setup_assistant";
+static const std::string SETUP_ASSISTANT_FILE = ".setup_assistant";
 
 class PackageSettingsConfig : public SetupConfig
 {

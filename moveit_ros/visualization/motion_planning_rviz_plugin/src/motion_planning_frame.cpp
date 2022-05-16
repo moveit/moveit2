@@ -619,6 +619,13 @@ void MotionPlanningFrame::initFromMoveGroupNS()
   planning_scene_world_publisher_ =
       node_->create_publisher<moveit_msgs::msg::PlanningSceneWorld>("planning_scene_world", 1);
 
+  // Declare parameter for default planning pipeline
+  if (!node_->has_parameter(planning_display_->getMoveGroupNS() + "default_planning_pipeline"))
+    node_->declare_parameter<std::string>(planning_display_->getMoveGroupNS() + "default_planning_pipeline", "");
+
+  // Query default planning pipeline id
+  node_->get_parameter(planning_display_->getMoveGroupNS() + "default_planning_pipeline", default_planning_pipeline_);
+
   // Set initial velocity and acceleration scaling factors from ROS parameters
   double factor;
   node_->get_parameter_or("robot_description_planning.default_velocity_scaling_factor", factor, 0.1);
@@ -638,10 +645,6 @@ void MotionPlanningFrame::initFromMoveGroupNS()
   {
     ui_->database_port->setValue(port);
   }
-
-  // Query default planning pipeline id
-  node_->get_parameter(planning_display_->getMoveGroupNS() + "/move_group/default_planning_pipeline",
-                       default_planning_pipeline_);
 }
 
 void MotionPlanningFrame::disable()

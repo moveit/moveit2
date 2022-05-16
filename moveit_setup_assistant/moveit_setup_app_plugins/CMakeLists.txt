@@ -29,6 +29,7 @@ add_library(${PROJECT_NAME}
     src/perception_config.cpp
     src/perception.cpp
     src/perception_widget.cpp
+    src/xml_manipulation.cpp
     ${MOC_FILES}
 )
 target_include_directories(${PROJECT_NAME} PUBLIC
