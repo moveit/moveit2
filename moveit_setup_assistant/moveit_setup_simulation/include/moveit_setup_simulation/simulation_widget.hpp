@@ -41,20 +41,17 @@ class QTextEdit;
 class QPushButton;
 
 // SA
-#ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
-#endif
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_simulation/simulation.hpp>
 
-#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
-
-namespace moveit_setup_assistant
+namespace moveit_setup_simulation
 {
 // ******************************************************************************************
 // ******************************************************************************************
 // Class for showing changes needed to help user bring his robot into gazebo simulation
 // ******************************************************************************************
 // ******************************************************************************************
-class SimulationWidget : public SetupScreenWidget
+class SimulationWidget : public moveit_setup_framework::SetupStepWidget
 {
   Q_OBJECT
 
@@ -63,13 +60,14 @@ public:
   // Public Functions
   // ******************************************************************************************
 
-  SimulationWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
+  void onInit() override;
   void focusGiven() override;
   bool focusLost() override;
 
-private:
-  /// Generate Gazebo-compatible URDF, starting from original URDF
-  std::string generateGazeboCompatibleURDF() const;
+  moveit_setup_framework::SetupStep& getSetupStep() override
+  {
+    return setup_step_;
+  }
 
 private Q_SLOTS:
   // ******************************************************************************************
@@ -94,8 +92,7 @@ private:
   QPushButton* btn_open_;
   QLabel* copy_urdf_;
 
-  /// Contains all the configuration data for the setup assistant
-  moveit_setup_assistant::MoveItConfigDataPtr config_data_;
+  Simulation setup_step_;
 };
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_simulation

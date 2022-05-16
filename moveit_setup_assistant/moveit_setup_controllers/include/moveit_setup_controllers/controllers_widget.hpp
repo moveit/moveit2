@@ -36,25 +36,21 @@
 #pragma once
 
 // Qt
-class QHBoxLayout;
-class QPushButton;
-class QStackedWidget;
-class QTreeWidget;
-class QTreeWidgetItem;
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QStackedWidget>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 // SA
-#ifndef Q_MOC_RUN
-#include <moveit/setup_assistant/tools/moveit_config_data.h>
-#endif
+#include <moveit_setup_framework/qt/setup_step_widget.hpp>
+#include <moveit_setup_framework/qt/double_list_widget.hpp>
+#include <moveit_setup_controllers/controllers.hpp>
+#include <moveit_setup_controllers/controller_edit_widget.hpp>
 
-#include "setup_screen_widget.h"  // a base class for screens in the setup assistant
-
-namespace moveit_setup_assistant
+namespace moveit_setup_controllers
 {
-class DoubleListWidget;
-class ControllerEditWidget;
-
-class ControllersWidget : public SetupScreenWidget
+class ControllersWidget : public moveit_setup_framework::SetupStepWidget
 {
   Q_OBJECT
 
@@ -63,12 +59,17 @@ public:
   // Public Functions
   // ******************************************************************************************
 
-  ControllersWidget(QWidget* parent, const MoveItConfigDataPtr& config_data);
+  void onInit() override;
 
   void changeScreen(int index);
 
   /// Received when this widget is chosen from the navigation menu
   void focusGiven() override;
+
+  moveit_setup_framework::SetupStep& getSetupStep() override
+  {
+    return setup_step_;
+  }
 
 private Q_SLOTS:
 
@@ -132,8 +133,8 @@ private:
   QPushButton* btn_add_;
   QPushButton* btn_edit_;
   QHBoxLayout* controls_layout_;
-  moveit_setup_assistant::DoubleListWidget* joints_widget_;
-  moveit_setup_assistant::DoubleListWidget* joint_groups_widget_;
+  moveit_setup_framework::DoubleListWidget* joints_widget_;
+  moveit_setup_framework::DoubleListWidget* joint_groups_widget_;
 
   /// Remember what controller we are editing when an edit screen is being shown
   std::string current_edit_controller_;
@@ -141,18 +142,17 @@ private:
   /// Remember whethere we're editing a controller or adding a new one
   bool adding_new_controller_;
 
-  /// Contains all the configuration data for the setup assistant
-  moveit_setup_assistant::MoveItConfigDataPtr config_data_;
+  Controllers setup_step_;
 
   /// Builds the main screen list widget
   QWidget* createContentsWidget();
 
   void loadControllersTree();
-  void loadToControllersTree(const moveit_setup_assistant::ControllerConfig& controller_it);
+  void loadToControllersTree(const ControllerInfo& controller_it);
   void showMainScreen();
-  void loadJointsScreen(moveit_setup_assistant::ControllerConfig* this_controller);
-  void loadGroupsScreen(moveit_setup_assistant::ControllerConfig* this_controller);
-  void loadControllerScreen(moveit_setup_assistant::ControllerConfig* this_controller);
+  void loadJointsScreen(ControllerInfo* this_controller);
+  void loadGroupsScreen(ControllerInfo* this_controller);
+  void loadControllerScreen(ControllerInfo* this_controller);
 };
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_controllers
