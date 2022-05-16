@@ -68,6 +68,16 @@ public:
     return urdf_model_;
   }
 
+  std::string getURDFPackageName() const
+  {
+    return urdf_pkg_name_;
+  }
+
+  std::string getURDFContents() const
+  {
+    return urdf_string_;
+  }
+
   std::string getURDFPath() const
   {
     return urdf_path_;

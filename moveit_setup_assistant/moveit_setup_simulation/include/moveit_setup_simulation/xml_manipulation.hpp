@@ -35,10 +35,14 @@
 /* Author: Robert Haschke */
 
 #pragma once
+
+// TODO: This header uses tinyxml.h whereas moveit_setup_framework/utilities.hpp uses tinyxml2.h
+//       One xml library should be selected and used throughout moveit_setup_assistant
+
 #include <tinyxml.h>
 #include <vector>
 
-namespace moveit_setup_assistant
+namespace moveit_setup_app_plugins
 {
 struct Attribute
 {
@@ -56,4 +60,4 @@ struct Attribute
 TiXmlElement* uniqueInsert(TiXmlElement& element, const char* tag, const std::vector<Attribute>& attributes = {},
                            const char* text = nullptr);
 
-}  // namespace moveit_setup_assistant
+}  // namespace moveit_setup_app_plugins

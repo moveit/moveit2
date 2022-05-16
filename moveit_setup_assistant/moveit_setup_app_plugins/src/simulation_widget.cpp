@@ -36,8 +36,8 @@
 // SA
 #include "simulation_widget.h"
 #include "header_widget.h"
-#include "../tools/xml_syntax_highlighter.h"
-#include <moveit/setup_assistant/tools/xml_manipulation.h>
+#include <moveit_setup_framework/qt/xml_syntax_highlighter.hpp>
+#include <moveit_setup_app_plugins/xml_manipulation.hpp>
 
 // Qt
 #include <QColor>
