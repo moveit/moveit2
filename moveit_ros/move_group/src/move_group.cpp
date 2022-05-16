@@ -236,16 +236,16 @@ int main(int argc, char** argv)
   std::string default_planning_pipeline;
   if (nh->get_parameter("default_planning_pipeline", default_planning_pipeline))
   {
-    // Ignore default_planning_pipeline if there is no known entry in pipeline_names
+    // Ignore default_planning_pipeline if there is no matching entry in pipeline_names
     if (std::find(pipeline_names.begin(), pipeline_names.end(), default_planning_pipeline) == pipeline_names.end())
     {
       RCLCPP_WARN(LOGGER,
-                  "MoveGroup launched with ~default_planning_pipeline '%s' not configured in ~/planning_pipelines",
+                  "MoveGroup launched with ~default_planning_pipeline '%s' not configured in ~planning_pipelines",
                   default_planning_pipeline.c_str());
       default_planning_pipeline = "";  // reset invalid pipeline id
     }
   }
-  else
+  else if (pipeline_names.size() > 1)  // only warn if there are multiple pipelines to choose from
   {
     // Handle deprecated move_group.launch
     RCLCPP_WARN(LOGGER,
