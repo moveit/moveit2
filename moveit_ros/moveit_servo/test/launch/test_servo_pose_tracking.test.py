@@ -1,6 +1,5 @@
 import os
 import pytest
-import launch
 import launch_ros
 import launch_testing.actions
 import launch_testing.asserts
