@@ -100,7 +100,7 @@ PoseTracking::PoseTracking(const rclcpp::Node::SharedPtr& node, const ServoParam
   // Connect to Servo ROS interfaces
   target_pose_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
       "target_pose", rclcpp::SystemDefaultsQoS(),
-      std::bind(&PoseTracking::targetPoseCallback, this, std::placeholders::_1));
+      [this](const geometry_msgs::msg::PoseStamped::ConstSharedPtr msg) { return targetPoseCallback(msg); });
 
   // Publish outgoing twist commands to the Servo object
   twist_stamped_pub_ = node_->create_publisher<geometry_msgs::msg::TwistStamped>(

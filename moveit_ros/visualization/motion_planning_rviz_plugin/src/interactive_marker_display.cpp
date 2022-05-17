@@ -113,12 +113,16 @@ void InteractiveMarkerDisplay::onInitialize()
       pnode_, frame_transformer, fixed_frame_.toStdString());
 
   interactive_marker_client_->setInitializeCallback(
-      std::bind(&InteractiveMarkerDisplay::initializeCallback, this, std::placeholders::_1));
+      [this](visualization_msgs::srv::GetInteractiveMarkers::Response::SharedPtr msg) {
+        return initializeCallback(msg);
+      });
   interactive_marker_client_->setUpdateCallback(
-      std::bind(&InteractiveMarkerDisplay::updateCallback, this, std::placeholders::_1));
-  interactive_marker_client_->setResetCallback(std::bind(&InteractiveMarkerDisplay::resetCallback, this));
+      [this](visualization_msgs::msg::InteractiveMarkerUpdate::ConstSharedPtr msg) { return updateCallback(msg); });
+  interactive_marker_client_->setResetCallback([this]() { return resetCallback(); });
   interactive_marker_client_->setStatusCallback(
-      std::bind(&InteractiveMarkerDisplay::statusCallback, this, std::placeholders::_1, std::placeholders::_2));
+      [this](interactive_markers::InteractiveMarkerClient::Status status, const std::string& message) {
+        return statusCallback(status, message);
+      });
 
   subscribe();
 }

@@ -77,6 +77,11 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 add_library(${PROJECT_NAME}_tools
   src/tools/compute_default_collisions.cpp
   src/tools/moveit_config_data.cpp
+  src/tools/xml_manipulation.cpp
+  src/tools/collision_linear_model.cpp
+  src/tools/collision_matrix_model.cpp
+  src/tools/rotated_header_view.cpp
+  src/tools/xml_syntax_highlighter.cpp
 )
 target_include_directories(${PROJECT_NAME}_tools PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -130,7 +135,6 @@ if(BUILD_TESTING)
 
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cppcheck_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
 

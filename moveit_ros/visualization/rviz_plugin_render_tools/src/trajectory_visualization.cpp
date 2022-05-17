@@ -108,6 +108,10 @@ TrajectoryVisualization::TrajectoryVisualization(rviz_common::properties::Proper
   state_display_time_property_->addOptionStd("0.1s");
   state_display_time_property_->addOptionStd("0.5s");
 
+  use_sim_time_property_ = new rviz_common::properties::BoolProperty(
+      "Use Sim Time", false, "Indicates whether simulation time or wall-time is used for state display timing.", widget,
+      nullptr, this);
+
   loop_display_property_ = new rviz_common::properties::BoolProperty("Loop Animation", false,
                                                                      "Indicates whether the last received path "
                                                                      "is to be animated in a loop",
@@ -180,7 +184,7 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
 
   trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
       trajectory_topic_property_->getStdString(), 2,
-      std::bind(&TrajectoryVisualization::incomingDisplayTrajectory, this, _1));
+      [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg) { return incomingDisplayTrajectory(msg); });
 }
 
 void TrajectoryVisualization::setName(const QString& name)
@@ -289,7 +293,9 @@ void TrajectoryVisualization::changedTrajectoryTopic()
   {
     trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
         trajectory_topic_property_->getStdString(), 2,
-        std::bind(&TrajectoryVisualization::incomingDisplayTrajectory, this, _1));
+        [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr msg) {
+          return incomingDisplayTrajectory(msg);
+        });
   }
 }
 
@@ -408,7 +414,7 @@ void TrajectoryVisualization::dropTrajectory()
   drop_displaying_trajectory_ = true;
 }
 
-void TrajectoryVisualization::update(float wall_dt, float /*ros_dt*/)
+void TrajectoryVisualization::update(float wall_dt, float sim_dt)
 {
   if (drop_displaying_trajectory_)
   {
@@ -458,7 +464,14 @@ void TrajectoryVisualization::update(float wall_dt, float /*ros_dt*/)
   {
     int previous_state = current_state_;
     int waypoint_count = displaying_trajectory_message_->getWayPointCount();
-    current_state_time_ += wall_dt;
+    if (use_sim_time_property_->getBool())
+    {
+      current_state_time_ += sim_dt;
+    }
+    else
+    {
+      current_state_time_ += wall_dt;
+    }
     float tm = getStateDisplayTime();
 
     if (trajectory_slider_panel_ && trajectory_slider_panel_->isVisible() && trajectory_slider_panel_->isPaused())

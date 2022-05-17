@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2012, Willow Garage, Inc.
+ *  Copyright (c) 2022, Bielefeld University, Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of Bielefeld University nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,51 +32,28 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Chittaranjan Srinivas Swaminathan */
+/* Author: Robert Haschke */
 
-#include <chomp_interface/chomp_planning_context.h>
-#include <moveit/robot_state/conversions.h>
+#pragma once
+#include <tinyxml.h>
+#include <vector>
 
-#include "rclcpp/rclcpp.hpp"
-
-namespace chomp_interface
+namespace moveit_setup_assistant
 {
-CHOMPPlanningContext::CHOMPPlanningContext(const std::string& name, const std::string& group,
-                                           const moveit::core::RobotModelConstPtr& model, rclcpp::Node::SharedPtr node)
-  : planning_interface::PlanningContext(name, group), robot_model_(model)
+struct Attribute
 {
-  chomp_interface_ = std::make_shared<CHOMPInterface>(node);
-}
+  const char* name;
+  const char* value;
+  bool required = false;
+};
 
-bool CHOMPPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
-{
-  return chomp_interface_->solve(planning_scene_, request_, chomp_interface_->getParams(), res);
-}
+/** Insert a new XML element with given tag, attributes and text value
+ *
+ *  If a corresponding element already exists (and has required attribute values), it is just reused.
+ *  All attributes are created or overwritten with given values.
+ *  A text value is created or overwritten with given value (if not NULL).
+ *  The element is returned */
+TiXmlElement* uniqueInsert(TiXmlElement& element, const char* tag, const std::vector<Attribute>& attributes = {},
+                           const char* text = nullptr);
 
-bool CHOMPPlanningContext::solve(planning_interface::MotionPlanResponse& res)
-{
-  planning_interface::MotionPlanDetailedResponse res_detailed;
-  bool planning_success = solve(res_detailed);
-
-  res.error_code_ = res_detailed.error_code_;
-
-  if (planning_success)
-  {
-    res.trajectory_ = res_detailed.trajectory_[0];
-    res.planning_time_ = res_detailed.processing_time_[0];
-  }
-
-  return planning_success;
-}
-
-bool CHOMPPlanningContext::terminate()
-{
-  // TODO - make interruptible
-  return true;
-}
-
-void CHOMPPlanningContext::clear()
-{
-}
-
-}  // namespace chomp_interface
+}  // namespace moveit_setup_assistant

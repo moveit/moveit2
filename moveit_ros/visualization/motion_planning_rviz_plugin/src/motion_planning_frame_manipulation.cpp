@@ -66,10 +66,10 @@ void MotionPlanningFrame::detectObjectsButtonClicked()
   //    }
   //    if (semantic_world_)
   //    {
-  //      semantic_world_->addTableCallback(std::bind(&MotionPlanningFrame::updateTables, this));
+  //      semantic_world_->addTableCallback([this] { updateTables(); });
   //    }
   //  }
-  planning_display_->addBackgroundJob(std::bind(&MotionPlanningFrame::triggerObjectDetection, this), "detect objects");
+  planning_display_->addBackgroundJob([this] { triggerObjectDetection(); }, "detect objects");
 }
 
 void MotionPlanningFrame::processDetectedObjects()
@@ -167,7 +167,7 @@ void MotionPlanningFrame::listenDetectedObjects(
     const object_recognition_msgs::msg::RecognizedObjectArray::ConstSharedPtr /*msg*/)
 {
   rclcpp::sleep_for(std::chrono::seconds(1));
-  planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::processDetectedObjects, this));
+  planning_display_->addMainLoopJob([this] { processDetectedObjects(); });
 }
 
 void MotionPlanningFrame::updateDetectedObjectsList(const std::vector<std::string>& object_ids)
@@ -197,7 +197,7 @@ void MotionPlanningFrame::updateDetectedObjectsList(const std::vector<std::strin
 void MotionPlanningFrame::updateTables()
 {
   RCLCPP_DEBUG(LOGGER, "Update table callback");
-  planning_display_->addBackgroundJob(std::bind(&MotionPlanningFrame::publishTables, this), "publish tables");
+  planning_display_->addBackgroundJob([this] { publishTables(); }, "publish tables");
 }
 
 void MotionPlanningFrame::publishTables()
@@ -205,7 +205,7 @@ void MotionPlanningFrame::publishTables()
   // TODO (ddengster): Enable when moveit_ros_perception is ported
   // semantic_world_->addTablesToCollisionWorld();
 
-  planning_display_->addMainLoopJob(std::bind(&MotionPlanningFrame::updateSupportSurfacesList, this));
+  planning_display_->addMainLoopJob([this] { updateSupportSurfacesList(); });
 }
 
 void MotionPlanningFrame::selectedSupportSurfaceChanged()
@@ -303,7 +303,7 @@ void MotionPlanningFrame::pickObjectButtonClicked()
   //  }
   //  RCLCPP_INFO(LOGGER, "Trying to pick up object %s from support surface %s", pick_object_name_[group_name].c_str(),
   //           support_surface_name_.c_str());
-  //  planning_display_->addBackgroundJob(std::bind(&MotionPlanningFrame::pickObject, this), "pick");
+  //  planning_display_->addBackgroundJob([this] { pickObject(); }, "pick");
 }
 
 void MotionPlanningFrame::placeObjectButtonClicked()
@@ -350,7 +350,7 @@ void MotionPlanningFrame::placeObjectButtonClicked()
   //                                                     upright_orientation, 0.1);
   //  planning_display_->visualizePlaceLocations(place_poses_);
   //  place_object_name_ = attached_bodies[0]->getName();
-  //  planning_display_->addBackgroundJob(std::bind(&MotionPlanningFrame::placeObject, this), "place");
+  //  planning_display_->addBackgroundJob([this] { placeObject(); }, "place");
 }
 
 // void MotionPlanningFrame::pickObject()

@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2012, Willow Garage, Inc.
+ *  Copyright (c) 2022, Bielefeld University, Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of Bielefeld University nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,51 +32,34 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Chittaranjan Srinivas Swaminathan */
+/* Author: Robert Haschke */
 
-#include <chomp_interface/chomp_planning_context.h>
-#include <moveit/robot_state/conversions.h>
+#pragma once
 
-#include "rclcpp/rclcpp.hpp"
+#include <QtGui/QSyntaxHighlighter>
+#include <QRegularExpression>
+#include <map>
 
-namespace chomp_interface
+/** XML SyntaxHighlighter allowing nested highlighting of XML tags */
+class XmlSyntaxHighlighter : public QSyntaxHighlighter
 {
-CHOMPPlanningContext::CHOMPPlanningContext(const std::string& name, const std::string& group,
-                                           const moveit::core::RobotModelConstPtr& model, rclcpp::Node::SharedPtr node)
-  : planning_interface::PlanningContext(name, group), robot_model_(model)
-{
-  chomp_interface_ = std::make_shared<CHOMPInterface>(node);
-}
+public:
+  XmlSyntaxHighlighter(QTextDocument* parent = nullptr);
+  void addTag(const QString& tag, const QTextCharFormat& format, const QString& parent = QString());
 
-bool CHOMPPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
-{
-  return chomp_interface_->solve(planning_scene_, request_, chomp_interface_->getParams(), res);
-}
+protected:
+  void highlightBlock(const QString& text) override;
 
-bool CHOMPPlanningContext::solve(planning_interface::MotionPlanResponse& res)
-{
-  planning_interface::MotionPlanDetailedResponse res_detailed;
-  bool planning_success = solve(res_detailed);
-
-  res.error_code_ = res_detailed.error_code_;
-
-  if (planning_success)
+private:
+  struct Rule
   {
-    res.trajectory_ = res_detailed.trajectory_[0];
-    res.planning_time_ = res_detailed.processing_time_[0];
-  }
+    QRegularExpression start;
+    QRegularExpression end;
+    QTextCharFormat format;
+    std::map<int, Rule>::const_iterator parent;
+  };
+  using Rules = std::map<int, Rule>;
+  Rules rules;
 
-  return planning_success;
-}
-
-bool CHOMPPlanningContext::terminate()
-{
-  // TODO - make interruptible
-  return true;
-}
-
-void CHOMPPlanningContext::clear()
-{
-}
-
-}  // namespace chomp_interface
+  Rules::const_iterator highlight(Rules::const_iterator active, QStringRef text, int start, bool search_end, int& end);
+};
